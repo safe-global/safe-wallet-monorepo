@@ -1,6 +1,6 @@
-import ExternalLink from '@/components/common/ExternalLink'
-import { AppRoutes } from '@/config/routes'
-import { Typography } from '@/components/ui/typography'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { TERMS_URL } from '@safe-global/utils/config/constants'
+import { Typography } from '@safe-global/views/components/ui/typography'
 
 import css from './styles.module.css'
 
@@ -19,14 +19,14 @@ const WidgetDisclaimer = ({ widgetName }: { widgetName: string }) => (
 
       <Typography className="mb-8">
         Our{' '}
-        <ExternalLink href={AppRoutes.terms} className={linkClassName}>
+        <ExternalLink href={TERMS_URL} className={linkClassName}>
           terms
         </ExternalLink>{' '}
         contain more detailed provisions binding on you relating to such third party content.
       </Typography>
       <Typography>
         By clicking &quot;continue&quot; you re-confirm to have read and understood our{' '}
-        <ExternalLink href={AppRoutes.terms} className={linkClassName}>
+        <ExternalLink href={TERMS_URL} className={linkClassName}>
           terms
         </ExternalLink>{' '}
         and this message, and agree to them.

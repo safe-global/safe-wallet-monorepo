@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { ChainSelectorBlock } from '@/features/spaces'
 import { CreateSafeOnNewChain } from '@/features/multichain'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'

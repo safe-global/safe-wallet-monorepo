@@ -10,10 +10,10 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/surveys'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
-import OnboardingFooter from '@/components/common/OnboardingFooter'
-import { Spinner } from '@/components/ui/spinner'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Typography } from '@/components/ui/typography'
+import OnboardingFooter from '@safe-global/views/components/common/OnboardingFooter'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import {
   OnboardingLayout,
   StepCounter,
@@ -23,7 +23,7 @@ import {
 } from '../OnboardingLayout'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import { flattenSafeItems } from '@/hooks/safes'
-import SurveyOptionCard from './SurveyOptionCard'
+import SurveyOptionCard from '@safe-global/views/features/spaces/components/SurveyOnboarding/SurveyOptionCard'
 
 const ONBOARDING_STEP = 4
 // This step only renders when SPACE_ONBOARDING_SURVEY is on (the survey page

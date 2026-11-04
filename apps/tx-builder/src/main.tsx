@@ -7,6 +7,9 @@ import App from './App'
 import StoreProvider from './store'
 import SafeThemeProvider from './theme/SafeThemeProvider'
 import { ThemeProvider } from 'styled-components'
+import { configureGateway } from './lib/gateway'
+
+configureGateway()
 
 const container = document.getElementById('root')
 

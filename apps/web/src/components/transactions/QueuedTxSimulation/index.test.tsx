@@ -1,7 +1,51 @@
 import { FETCH_STATUS, type NestedTxStatus } from '@safe-global/utils/components/tx/security/tenderly/types'
 import type { UseSimulationReturn } from '@safe-global/utils/components/tx/security/tenderly/useSimulation'
 import { getSimulationOutcome, type SimulationStatus } from '@safe-global/utils/components/tx/security/tenderly/utils'
-import { _getSimulationIcon, _getSimulationStatusText, _isSimulationSuccessful } from './index'
+import { render, screen } from '@/tests/test-utils'
+import { initialState as initialSettingsState } from '@/store/settingsSlice'
+import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { _getSimulationIcon, _getSimulationStatusText, _isSimulationSuccessful, QueuedTxSimulation } from './index'
+
+const mockUseSafeProAccess = jest.fn()
+const mockSimulateTransaction = jest.fn()
+let mockSimulationRequestStatus: FETCH_STATUS = FETCH_STATUS.NOT_ASKED
+jest.mock('@/features/spaces', () => ({ useSafeProAccess: () => mockUseSafeProAccess() }))
+jest.mock('@safe-global/utils/components/tx/security/tenderly/utils', () => ({
+  ...jest.requireActual('@safe-global/utils/components/tx/security/tenderly/utils'),
+  isTxSimulationEnabled: () => true,
+}))
+jest.mock('@/hooks/useChains', () => ({ useCurrentChain: () => ({ chainId: '1', features: ['TX_SIMULATION'] }) }))
+jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' }))
+jest.mock('@/hooks/useIsSafeOwner', () => ({ __esModule: true, default: () => true }))
+jest.mock('@/hooks/useIsNestedSafeOwner', () => ({ useIsNestedSafeOwner: () => false }))
+jest.mock('@/hooks/wallets/useWallet', () => ({
+  useSigner: () => ({ address: '0x1111111111111111111111111111111111111111' }),
+}))
+jest.mock('@/hooks/coreSDK/safeCoreSDK', () => ({ useSafeSDK: () => ({}) }))
+jest.mock('@/hooks/useSafeInfo', () => ({
+  __esModule: true,
+  default: () => ({
+    safe: {
+      address: { value: '0x1234567890123456789012345678901234567890' },
+      owners: [{ value: '0x1111111111111111111111111111111111111111' }],
+    },
+  }),
+}))
+jest.mock('@/services/tx/tx-sender', () => ({
+  createExistingTx: async () => ({
+    data: { to: '0x00000000000000000000000000000000000000aa', value: '0', data: '0xa9059cbb', operation: 0 },
+  }),
+}))
+jest.mock('@/components/tx/security/tenderly/useSimulation', () => ({
+  useSimulation: () => ({
+    simulateTransaction: mockSimulateTransaction,
+    simulationData: undefined,
+    _simulationRequestStatus: mockSimulationRequestStatus,
+    simulationLink: '',
+    requestError: undefined,
+    resetSimulation: () => {},
+  }),
+}))
 
 const finishedStatus = (overrides: Partial<SimulationStatus> = {}): SimulationStatus => ({
   isLoading: false,
@@ -71,5 +115,77 @@ describe('queued simulation display', () => {
 
     expect(_getSimulationStatusText(isSuccessful)).toBe('Simulation successful')
     expect(_getSimulationIcon(isSuccessful).color).toBe('var(--color-success-main)')
+  })
+})
+
+describe('QueuedTxSimulation gating', () => {
+  const transaction = { txId: 'multisig_0x1_0x2' } as TransactionDetails
+
+  const ownTenderlyState = {
+    settings: {
+      ...initialSettingsState,
+      env: {
+        ...initialSettingsState.env,
+        tenderly: { url: 'https://api.tenderly.co/api/v1/account/me/project/p', accessToken: 'secret' },
+      },
+    },
+  }
+
+  beforeEach(() => {
+    mockSimulationRequestStatus = FETCH_STATUS.NOT_ASKED
+  })
+
+  it('leads to Tenderly settings instead of simulating without Safe Pro nor an own Tenderly project', async () => {
+    mockUseSafeProAccess.mockReturnValue({ hasProFeatures: false, isLoading: false })
+    render(<QueuedTxSimulation transaction={transaction} />)
+
+    const link = await screen.findByTestId('queued-tx-simulation-setup')
+    expect(link.getAttribute('href')).toContain('/settings/environment-variables')
+    expect(link).toHaveTextContent('Set up simulation')
+    expect(screen.queryByRole('button', { name: /Simulate/ })).not.toBeInTheDocument()
+    expect(mockSimulateTransaction).not.toHaveBeenCalled()
+  })
+
+  it('simulates on the own Tenderly project without Safe Pro', async () => {
+    mockUseSafeProAccess.mockReturnValue({ hasProFeatures: false, isLoading: false })
+    render(<QueuedTxSimulation transaction={transaction} />, { initialReduxState: ownTenderlyState })
+
+    expect(await screen.findByRole('button', { name: /Simulate/ })).toBeInTheDocument()
+    expect(screen.queryByTestId('queued-tx-simulation-setup')).not.toBeInTheDocument()
+  })
+
+  it('renders nothing while the plan is still loading', () => {
+    mockUseSafeProAccess.mockReturnValue({ hasProFeatures: false, isLoading: true })
+    const { container } = render(<QueuedTxSimulation transaction={transaction} />)
+
+    expect(screen.queryByTestId('queued-tx-simulation-setup')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Simulate/ })).not.toBeInTheDocument()
+    expect(container).toBeEmptyDOMElement()
+  })
+
+  it('keeps the in-app simulation button with Safe Pro', async () => {
+    mockUseSafeProAccess.mockReturnValue({ hasProFeatures: true, isLoading: false })
+    render(<QueuedTxSimulation transaction={transaction} />)
+
+    expect(await screen.findByRole('button', { name: /Simulate/ })).toBeInTheDocument()
+    expect(screen.queryByTestId('queued-tx-simulation-setup')).not.toBeInTheDocument()
+  })
+
+  it('points to the Tenderly settings when a request to the own Tenderly project fails', async () => {
+    mockUseSafeProAccess.mockReturnValue({ hasProFeatures: false, isLoading: false })
+    mockSimulationRequestStatus = FETCH_STATUS.ERROR
+    render(<QueuedTxSimulation transaction={transaction} />, { initialReduxState: ownTenderlyState })
+
+    expect(
+      await screen.findByText('Simulation failed. Check your Tenderly API URL and access token.'),
+    ).toBeInTheDocument()
+  })
+
+  it('keeps the generic error when the built-in simulation request fails', async () => {
+    mockUseSafeProAccess.mockReturnValue({ hasProFeatures: true, isLoading: false })
+    mockSimulationRequestStatus = FETCH_STATUS.ERROR
+    render(<QueuedTxSimulation transaction={transaction} />)
+
+    expect(await screen.findByText('Error while simulating')).toBeInTheDocument()
   })
 })

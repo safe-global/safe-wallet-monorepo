@@ -38,7 +38,7 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 
 describe('useOidcLoginCallback', () => {
-  const originalLocation = window.location
+  const originalLocation = { href: window.location.href }
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -47,15 +47,12 @@ describe('useOidcLoginCallback', () => {
     mockUseHasFeature.mockReturnValue(true)
     mockReconcileAuth.mockResolvedValue('authenticated')
 
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: { ...originalLocation, search: '', pathname: '/welcome/spaces' },
-    })
+    window.history.replaceState(null, '', '/welcome/spaces')
   })
 
   afterEach(() => {
     jest.restoreAllMocks()
-    Object.defineProperty(window, 'location', { writable: true, value: originalLocation })
+    window.history.replaceState(null, '', originalLocation.href)
   })
 
   it('should call reconcileAuth when pending flag exists', async () => {
@@ -108,14 +105,7 @@ describe('useOidcLoginCallback', () => {
 
   it('should show error notification when error query param is present', async () => {
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: {
-        ...originalLocation,
-        search: '?error=access_denied',
-        pathname: '/welcome/spaces',
-      },
-    })
+    window.history.replaceState(null, '', '/welcome/spaces?error=access_denied')
 
     renderHook(() => useOidcLoginCallback())
 
@@ -133,14 +123,11 @@ describe('useOidcLoginCallback', () => {
 
   it('should show mapped error message when error_description is known', async () => {
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: {
-        ...originalLocation,
-        search: '?error=access_denied&error_description=method_conflict_otp_required',
-        pathname: '/welcome/spaces',
-      },
-    })
+    window.history.replaceState(
+      null,
+      '',
+      '/welcome/spaces?error=access_denied&error_description=method_conflict_otp_required',
+    )
 
     renderHook(() => useOidcLoginCallback())
 
@@ -157,14 +144,7 @@ describe('useOidcLoginCallback', () => {
 
   it('should show default error message when error_description is unknown', async () => {
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: {
-        ...originalLocation,
-        search: '?error=access_denied&error_description=some+unknown+error',
-        pathname: '/welcome/spaces',
-      },
-    })
+    window.history.replaceState(null, '', '/welcome/spaces?error=access_denied&error_description=some+unknown+error')
 
     renderHook(() => useOidcLoginCallback())
 
@@ -181,14 +161,7 @@ describe('useOidcLoginCallback', () => {
 
   it('should clean error and error_description params from URL via Next.js router', async () => {
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: {
-        ...originalLocation,
-        search: '?error=access_denied&error_description=method_conflict',
-        pathname: '/welcome/spaces',
-      },
-    })
+    window.history.replaceState(null, '', '/welcome/spaces?error=access_denied&error_description=method_conflict')
 
     renderHook(() => useOidcLoginCallback())
 
@@ -201,14 +174,11 @@ describe('useOidcLoginCallback', () => {
 
   it('should preserve other query params when cleaning error params', async () => {
     sessionStorage.setItem(OIDC_AUTH_PENDING_KEY, '1')
-    Object.defineProperty(window, 'location', {
-      writable: true,
-      value: {
-        ...originalLocation,
-        search: '?spaceId=42&error=access_denied&error_description=method_conflict',
-        pathname: '/welcome/spaces',
-      },
-    })
+    window.history.replaceState(
+      null,
+      '',
+      '/welcome/spaces?spaceId=42&error=access_denied&error_description=method_conflict',
+    )
 
     renderHook(() => useOidcLoginCallback())
 

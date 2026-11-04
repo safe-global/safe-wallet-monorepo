@@ -1,8 +1,7 @@
 /**
- * TanStack root route — mirrors apps/web/src/pages/_app.tsx as documented in
- * docs/migration/state/plan.md ("Provider tree to reproduce"). This file is
- * one of the few intentional copies in the migration; the rest of the
- * codebase is re-used from apps/web/src/** via path aliases.
+ * TanStack root route — mirrors the provider tree of apps/web/src/pages/_app.tsx.
+ * This file is one of the few intentional copies in the migration; the rest of
+ * the codebase is re-used from apps/web/src/** via path aliases.
  */
 import { Outlet, createRootRoute } from '@tanstack/react-router'
 import { HelmetProvider, Helmet } from 'react-helmet-async'
@@ -10,7 +9,7 @@ import { Provider } from 'react-redux'
 import { lazy, memo, Suspense, useMemo, type ReactElement } from 'react'
 
 // Reused verbatim from apps/web/src — the provider chain itself is exported.
-import { AppProviders } from '@/pages/_app'
+import { AppProviders, SafeScopedSubscriptions } from '@/pages/_app'
 import { BRAND_NAME } from '@/config/constants'
 import { GATEWAY_URL } from '@/config/gateway'
 import { makeStore, setStoreInstance, useHydrateStore, useInitChains } from '@/store'
@@ -19,26 +18,22 @@ import PageLayout from '@/components/common/PageLayout'
 import PwaReloadPrompt from '../components/PwaReloadPrompt'
 import Notifications from '@/components/common/Notifications'
 import CookieAndTermBanner from '@/components/common/CookieAndTermBanner'
+import WhatsNewTopBar from '@/components/common/WhatsNewTopBar'
+import WhatsNewUpdatesFrame from '@/components/common/WhatsNewUpdatesFrame'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import useChangedValue from '@/hooks/useChangedValue'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
 import useGtm from '@/services/analytics/useGtm'
 import useMixpanel from '@/services/analytics/useMixpanel'
-import useBeamer from '@/hooks/Beamer/useBeamer'
 import useLoadableStores from '@/hooks/useLoadableStores'
-import useTxNotifications from '@/hooks/useTxNotifications'
-import useSafeNotifications from '@/hooks/useSafeNotifications'
-import useTxPendingStatuses from '@/hooks/useTxPendingStatuses'
-import useSafeMessageNotifications from '@/hooks/messages/useSafeMessageNotifications'
-import useSafeMessagePendingStatuses from '@/hooks/messages/useSafeMessagePendingStatuses'
+import useUnlockBodyScroll from '@/hooks/useUnlockBodyScroll'
+import { useRememberSpace } from '@/hooks/useRememberSpace'
 import { useInitSession } from '@/hooks/useInitSession'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
-import { useTxTracking } from '@/hooks/useTxTracking'
-import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import { useVisitedSafes } from '@/features/myAccounts'
-import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
-import { useOidcLoginCallback } from '@/features/oidc-auth'
+import LaunchScreen from '@/components/common/LaunchScreen'
+import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import { initObservability } from '@/services/observability'
@@ -83,7 +78,13 @@ const TargetedOutreachPopupLoader = () => {
   return <OutreachPopup />
 }
 
-const InitApp = (): null => {
+const StepUpSplash = (): ReactElement | null => {
+  const stepUpCaption = useStepUpSplash()
+
+  return stepUpCaption ? <LaunchScreen stepUpCaption={stepUpCaption} /> : null
+}
+
+const InitApp = (): ReactElement => {
   useHydrateStore(reduxStore)
   useInitChains()
   useAdjustUrl()
@@ -93,20 +94,15 @@ const InitApp = (): null => {
   useInitSession()
   useLoadableStores()
   useInitWeb3()
-  useTxNotifications()
-  useSafeMessageNotifications()
-  useSafeNotifications()
-  useTxPendingStatuses()
-  useSafeMessagePendingStatuses()
-  useTxTracking()
-  useSafeMsgTracking()
-  useBeamer()
   useVisitedSafes()
-  usePortfolioRefetchOnTxHistory()
   useOidcLoginCallback()
+  useStepUpCallback()
   useLogoutCallback()
   useSessionExpiryGuard()
-  return null
+  useUnlockBodyScroll()
+  useRememberSpace()
+
+  return <SafeScopedSubscriptions />
 }
 
 // Memoized subtree — bails out of re-render when pathname and outlet are
@@ -119,12 +115,13 @@ const MemoizedTree = memo(function MemoizedTree({ pathname, outlet }: { pathname
     <>
       <PageLayout pathname={pathname}>{outlet}</PageLayout>
       <CookieAndTermBanner />
+      <WhatsNewTopBar />
+      <WhatsNewUpdatesFrame />
       <TargetedOutreachPopupLoader />
       <Notifications />
       <RecoveryLoader />
       <CounterfactualHooksLoader />
       <SpendingLimitsLoaderWrapper />
-      <Analytics />
       <PkModulePopup />
     </>
   )
@@ -147,7 +144,10 @@ function RootShell() {
         <MetaTags prefetchUrl={GATEWAY_URL} />
         <AppProviders>
           <CaptchaProvider>
+            {/* Before InitApp and the page, so GA exists before their mount effects send events */}
+            <Analytics />
             <InitApp />
+            <StepUpSplash />
             <PwaReloadPrompt />
             <Suspense fallback={null}>
               <LazyWeb3Init />

@@ -9,12 +9,20 @@ jest.mock('@/services/observability', () => ({
   },
 }))
 
+let mockIsDev = false
+jest.mock('@/config/constants', () => ({
+  get IS_DEV() {
+    return mockIsDev
+  },
+}))
+
 const { logger } = jest.requireMock('@/services/observability') as { logger: { info: jest.Mock; warn: jest.Mock } }
 
 describe('registerServiceWorker', () => {
   const originalServiceWorker = (navigator as unknown as { serviceWorker?: unknown }).serviceWorker
 
   afterEach(() => {
+    mockIsDev = false
     jest.clearAllMocks()
     __resetRegisterServiceWorkerForTests()
     delete (window as unknown as { workbox?: unknown }).workbox
@@ -56,6 +64,16 @@ describe('registerServiceWorker', () => {
     await registerServiceWorker()
 
     expect(register).not.toHaveBeenCalled()
+  })
+
+  it('skips registration without warning under next dev, where next-pwa is disabled', async () => {
+    mockIsDev = true
+    setServiceWorkerSupport(true)
+
+    await registerServiceWorker()
+
+    expect(logger.warn).not.toHaveBeenCalled()
+    expect(logger.info).not.toHaveBeenCalled()
   })
 
   it('logs a warning and does nothing when serviceWorker is supported but window.workbox is unavailable', async () => {

@@ -7,73 +7,55 @@ const pkInput = '[data-testid="private-key-input"]'
 const pkConnectBtn = '[data-testid="pk-connect-btn"]'
 const connectWalletBtn = '[data-testid="connect-wallet-btn"]'
 
+const connectedWalletChip = '[data-testid="open-account-center"]'
+
 const privateKeyStr = 'Private key'
 
-export function connectSigner(signer) {
-  let retryCount = 0
+const MODAL_OPEN_TIMEOUT_MS = 5000
+const MODAL_OPEN_ATTEMPTS = 4
 
-  const actions = {
-    privateKey: () => {
-      cy.wait(2000)
-      cy.get('body').then(($body) => {
-        if ($body.find(onboardv2).length > 0) {
-          cy.get(onboardv2)
-            .shadow()
-            .find('button')
-            .contains(privateKeyStr)
-            .click()
-            .then(() => handlePkConnect())
-        }
-      })
-    },
-    retry: () => {
-      retryCount++
-      if (retryCount > 20) {
-        throw new Error('Failed to connect after 20 retries')
-      }
-      cy.wait(1000).then(enterPrivateKey)
-    },
-  }
+const hasPrivateKeyInput = ($body) => $body.find(pkInput).length > 0
 
-  function handlePkConnect() {
-    cy.get('body').then(($body) => {
-      if ($body.find(pkInput).length > 0) {
-        cy.get(pkInput).then(($input) => {
-          $input.val(signer)
-          cy.wrap($input).trigger('input').trigger('change')
-        })
-        cy.get(pkConnectBtn).click()
-        cy.wait(2000)
-      }
-    })
-  }
+const hasPrivateKeyOption = ($body) => {
+  const buttons = $body.find(onboardv2)[0]?.shadowRoot?.querySelectorAll('button') ?? []
+  return [...buttons].some((button) => button.textContent.includes(privateKeyStr))
+}
 
-  function enterPrivateKey() {
-    cy.wait(3000)
-    return cy.get('body').then(($body) => {
-      if ($body.find(pkInput).length > 0) {
-        cy.get(pkInput).then(($input) => {
-          $input.val(signer)
-          cy.wrap($input).trigger('input').trigger('change')
-        })
+// The modal opens either on the wallet list or straight on the private-key input.
+const isWalletModalOpen = () => {
+  const $body = Cypress.$('body')
+  return hasPrivateKeyInput($body) || hasPrivateKeyOption($body)
+}
 
-        cy.get(pkConnectBtn).click()
-      } else if ($body.find(connectWalletBtn).length > 0) {
-        cy.get(connectWalletBtn)
-          .eq(0)
-          .should('be.enabled')
-          .click({ force: true })
-          .then(() => {
-            const actionKey = $body.find(onboardv2).length > 0 ? 'privateKey' : 'retry'
-            actions[actionKey]()
-          })
-      }
-    })
-  }
-
-  enterPrivateKey().then(() => {
-    main.closeOutreachPopup()
+// The app drops a "Connect wallet" click that comes right after a disconnect, so click again.
+function openWalletModal(attemptsLeft = MODAL_OPEN_ATTEMPTS) {
+  cy.get(connectWalletBtn).filter(':visible').first().should('be.enabled').click({ force: true })
+  main.pollUntil(isWalletModalOpen, MODAL_OPEN_TIMEOUT_MS).then((opened) => {
+    if (opened) return
+    if (attemptsLeft <= 1) throw new Error(`The connect-wallet modal did not open after ${MODAL_OPEN_ATTEMPTS} clicks`)
+    openWalletModal(attemptsLeft - 1)
   })
+}
+
+/** Connects the private-key signer through the connect-wallet modal and waits until the header shows it. */
+export function connectSigner(signer) {
+  cy.get(`${pkInput}, ${connectWalletBtn}`, { timeout: 30000 })
+    .filter(':visible')
+    .first()
+    .then(($element) => {
+      if ($element.is(pkInput)) return
+      openWalletModal()
+      cy.get('body').then(($body) => {
+        if (!hasPrivateKeyInput($body)) cy.get(onboardv2).shadow().find('button').contains(privateKeyStr).click()
+      })
+    })
+  cy.get(pkInput).then(($input) => {
+    $input.val(signer)
+    cy.wrap($input).trigger('input').trigger('change')
+  })
+  cy.get(pkConnectBtn).click()
+  cy.get(connectedWalletChip, { timeout: 30000 }).should('be.visible')
+  main.closeOutreachPopup()
 }
 
 /**
@@ -88,11 +70,11 @@ export function connectSigner(signer) {
  * Two modes:
  * - With `url`: seeds in onBeforeLoad and visits (single load, fastest). Use to replace an adjacent
  *   `cy.visit(url)` + `connectSigner(signer)`.
- * - Without `url`: seeds the already-loaded window and reloads. Use when the visit happened earlier
+ * - Without `url`: visits the current URL again, seeded the same way. Use when the visit happened earlier
  *   (e.g. in beforeEach) and only the connect is in the test body.
  *
  * @param {string} signer - Private key of the signer to connect.
- * @param {string} [url] - URL to visit; omit to seed the current window and reload.
+ * @param {string} [url] - URL to visit; omit to visit the current URL again.
  * @param {object} [options] - Extra cy.visit options; its onBeforeLoad runs after seeding.
  * @param {Record<string, unknown>} [options.extraStorage] - localStorage entries to seed in
  *   onBeforeLoad (values are JSON-stringified). Use to pre-seed persisted state (e.g. a batch)
@@ -115,17 +97,20 @@ export function connectSignerViaStorage(signer, url, { extraStorage, waitForConn
     }
   }
 
-  if (url) {
-    cy.visit(url, {
+  const visitSeeded = (target) =>
+    cy.visit(target, {
       ...visitOptions,
       onBeforeLoad(win) {
         seed(win)
         visitOptions.onBeforeLoad?.(win)
       },
     })
+
+  if (url) {
+    visitSeeded(url)
   } else {
-    cy.window().then(seed)
-    cy.reload()
+    // Not a seed and reload: the running app can overwrite the seeded key before the reload
+    cy.url().then(visitSeeded)
   }
 
   // The last wallet reconnects asynchronously after the page loads (useOnboard ->
@@ -134,6 +119,8 @@ export function connectSignerViaStorage(signer, url, { extraStorage, waitForConn
   // The reconnect can take well over the default 10s when the RPC is rate-limited (429s), so
   // wait longer before giving up.
   if (waitForConnection) {
-    cy.get('[data-testid="open-account-center"]', { timeout: 30000 }).should('be.visible')
+    cy.get(connectedWalletChip, { timeout: 30000 }).should('be.visible')
   }
+  // The launch screen covers the page, so clicks hit it until it unmounts
+  cy.get('[data-testid="launch-screen"]', { timeout: 30000 }).should('not.exist')
 }

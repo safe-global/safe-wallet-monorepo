@@ -35,9 +35,11 @@ export type DecodedCustomError = {
  */
 const STANDARD_ERROR_SELECTORS = new Set(['0x08c379a0', '0x4e487b71'])
 
+export const HYPERNATIVE_GUARD_SOURCE = 'Hypernative guard'
+
 const ABI_SOURCES: ReadonlyArray<{ source: string; abi: InterfaceAbi }> = [
-  { source: 'Hypernative guard', abi: HypernativeGuardAbi as InterfaceAbi },
-  { source: 'Hypernative guard', abi: HypernativeGuardV2Abi as InterfaceAbi },
+  { source: HYPERNATIVE_GUARD_SOURCE, abi: HypernativeGuardAbi as InterfaceAbi },
+  { source: HYPERNATIVE_GUARD_SOURCE, abi: HypernativeGuardV2Abi as InterfaceAbi },
   { source: 'Zodiac Roles module', abi: ContractAbis.roles_v2 as InterfaceAbi },
   { source: 'Zodiac Roles module', abi: ContractAbis.roles_v1 as InterfaceAbi },
   { source: 'Zodiac Roles module', abi: ContractAbis.permissions as InterfaceAbi },
@@ -98,8 +100,7 @@ export const extractRevertSelector = (error: unknown): string | undefined => {
   // viem wraps the revert bytes in a ContractFunctionRevertedError cause
   if (error instanceof ViemBaseError) {
     const reverted = error.walk((e) => e instanceof ContractFunctionRevertedError) as
-      | ContractFunctionRevertedError
-      | undefined
+      ContractFunctionRevertedError | undefined
     const raw = reverted?.raw
     if (typeof raw === 'string' && raw.length >= 10) {
       return raw.slice(0, 10).toLowerCase()

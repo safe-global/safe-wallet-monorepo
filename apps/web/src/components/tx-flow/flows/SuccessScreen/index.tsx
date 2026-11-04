@@ -1,7 +1,7 @@
 import StatusStepper from './StatusStepper'
 import classnames from 'classnames'
 import NextLink from 'next/link'
-import css from './styles.module.css'
+import css from '@safe-global/views/components/tx-flow/flows/SuccessScreen/styles.module.css'
 import { useAppSelector } from '@/store'
 import { PendingStatus, selectPendingTxById } from '@/store/pendingTxsSlice'
 import { useCallback, useContext, useEffect, useRef, useState } from 'react'
@@ -11,7 +11,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { TxModalContext } from '../..'
 import LoadingSpinner, { SpinnerStatus } from '@/components/new-safe/create/steps/StatusStep/LoadingSpinner'
 import { ProcessingStatus } from '@/components/tx-flow/flows/SuccessScreen/statuses/ProcessingStatus'
-import { IndexingStatus } from '@/components/tx-flow/flows/SuccessScreen/statuses/IndexingStatus'
+import { IndexingStatus } from '@safe-global/views/components/tx-flow/flows/SuccessScreen/statuses/IndexingStatus'
 import { DefaultStatus } from '@/components/tx-flow/flows/SuccessScreen/statuses/DefaultStatus'
 import { isSwapTransferOrderTxInfo } from '@/utils/transaction-guards'
 import { getTxLink } from '@/utils/tx-link'
@@ -20,27 +20,32 @@ import { usePredictSafeAddressFromTxDetails } from '@/hooks/usePredictSafeAddres
 import { AppRoutes } from '@/config/routes'
 import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/events/nested-safes'
 import Track from '@/components/common/Track'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import type { ReactElement } from 'react'
+import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
+import type { SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope'
+import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
-interface Props {
+interface ContentProps {
   /** The ID assigned to the transaction in the client-gateway */
   txId?: string
   /** For module transaction, pass the transaction hash while the `txId` is not yet available */
   txHash?: string
 }
 
-const SuccessScreen = ({ txId, txHash }: Props) => {
+const SuccessScreenContent = ({ txId, txHash }: ContentProps) => {
   const [localTxHash, setLocalTxHash] = useState<string | undefined>(txHash)
   const [error, setError] = useState<Error>()
   const hasSucceededRef = useRef(false)
   const { setTxFlow } = useContext(TxModalContext)
   const chain = useCurrentChain()
+  const spaceId = useUrlSpaceId()
   const pendingTx = useAppSelector((state) => (txId ? selectPendingTxById(state, txId) : undefined))
   const { safeAddress } = useSafeInfo()
   const status = !txId && txHash ? PendingStatus.INDEXING : pendingTx?.status
   const pendingTxHash = pendingTx && 'txHash' in pendingTx ? pendingTx.txHash : undefined
-  const txLink = chain && txId && getTxLink(txId, chain, safeAddress)
+  const txLink = chain && txId && getTxLink(txId, chain, safeAddress, spaceId)
   const [txDetails] = useTxDetails(txId)
   const isSwapOrder = txDetails && isSwapTransferOrderTxInfo(txDetails.txInfo)
   const [predictedSafeAddress] = usePredictSafeAddressFromTxDetails(txDetails)
@@ -153,7 +158,10 @@ const SuccessScreen = ({ txId, txHash }: Props) => {
                 disabled={!isSuccess}
                 render={
                   <NextLink
-                    href={{ pathname: AppRoutes.home, query: { safe: `${chain?.shortName}:${predictedSafeAddress}` } }}
+                    href={{
+                      pathname: AppRoutes.home,
+                      query: withSpaceId({ safe: `${chain?.shortName}:${predictedSafeAddress}` }, spaceId),
+                    }}
                   />
                 }
               >
@@ -169,5 +177,19 @@ const SuccessScreen = ({ txId, txHash }: Props) => {
     </div>
   )
 }
+
+type Props = ContentProps & {
+  /** Set by a Space-level flow: the flow's own SafeScope unmounts with it, so the screen re-mounts one. */
+  scope?: SafeScopeTarget
+}
+
+const SuccessScreen = ({ scope, ...props }: Props): ReactElement =>
+  scope ? (
+    <SafeScopeProvider initial={scope}>
+      <SuccessScreenContent {...props} />
+    </SafeScopeProvider>
+  ) : (
+    <SuccessScreenContent {...props} />
+  )
 
 export default SuccessScreen

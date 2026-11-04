@@ -1,8 +1,8 @@
 import {
   ARBITRATION_POLL_MS,
   ARBITRATION_WINDOW_MS,
+  DISPUTED_POLL_MS,
   LATE_WINDOW_BLOCKS,
-  PLAIN_DEADLINE_BLOCKS,
   POLL_INTERVAL_FAST_MS,
   POLL_INTERVAL_LATE_MS,
   UNAVAILABLE_GRACE_MS,
@@ -19,16 +19,16 @@ type PollingInput = {
   headBlock: string | null
   deadlineBlock: string | null
   /**
-   * Block of the check's earliest observed event; substitutes for the deadline
-   * on the plain path. Callers should pass anchors that persist across reads —
-   * null anchors fail open to the fast interval.
-   */
-  firstEventBlock: string | null
-  /**
    * Transaction submission time, the anchor of the UNAVAILABLE grace window.
    * `null` or absent disables the window.
    */
   submittedAtMs?: number | null
+  /**
+   * When this client last had a check request accepted. It opens its own
+   * UNAVAILABLE grace window, so a check requested long after submission still
+   * polls. `null` or absent adds no window.
+   */
+  requestedAtMs?: number | null
   /**
    * When the attestation landed, the anchor of the BENIGN arbitration window.
    * `null` or absent disables the window.
@@ -38,24 +38,36 @@ type PollingInput = {
   nowMs?: number
 }
 
+// A stamp in the future is clock skew, not a young check: without the lower
+// bound the window would stretch by the whole skew.
+const isWithinGrace = (anchorMs: number | null | undefined, nowMs: number): boolean => {
+  if (anchorMs == null) return false
+  const age = nowMs - anchorMs
+  return age >= 0 && age < UNAVAILABLE_GRACE_MS
+}
+
 /**
  * How often to re-poll a check, in ms; `0` = stop (RTK Query's convention).
- * Stops on a rejection; otherwise fast (6s) up to the effective deadline
- * (on-chain, or {@link PLAIN_DEADLINE_BLOCKS} past the first event), slow (30s)
- * through the ~1h late window, then stops. UNAVAILABLE polls slowly inside
- * {@link UNAVAILABLE_GRACE_MS} of submission and BENIGN inside
- * {@link ARBITRATION_WINDOW_MS} of the attestation, then both stop.
+ * Stops on a rejection; otherwise fast (6s) up to the on-chain deadline, slow
+ * (30s) through the ~1h late window, then stops. DISPUTED polls every
+ * {@link DISPUTED_POLL_MS} for as long as the dispute is open. UNAVAILABLE polls
+ * slowly inside {@link UNAVAILABLE_GRACE_MS} of submission or of the last
+ * accepted request, and BENIGN inside {@link ARBITRATION_WINDOW_MS} of the
+ * attestation, then both stop.
  */
 export const computePollingInterval = ({
   status,
   headBlock,
   deadlineBlock,
-  firstEventBlock,
   submittedAtMs,
+  requestedAtMs,
   attestedAtMs,
   nowMs,
 }: PollingInput): number => {
   if (status === CheckStatus.MALICIOUS || status === CheckStatus.VERIFICATION_FAILED) return 0
+
+  // The dispute deadline is ~28 days out, so the deadline cadence below would poll at 6s the whole time.
+  if (status === CheckStatus.DISPUTED) return DISPUTED_POLL_MS
 
   // ponytail: BENIGN keeps a slow poll for the arbitration window. The merge
   // permits BENIGN → MALICIOUS precisely because arbitration can still reject a
@@ -69,28 +81,21 @@ export const computePollingInterval = ({
   }
 
   // ponytail: UNAVAILABLE backs off only for the grace window, so a check
-  // requested around the first read still self-heals. Ceiling: past the window
-  // a later check is only picked up by a page reload, or by a fresh mount after
-  // the five-minute cache retention lapses — there is no re-check control in
-  // the UI. (Re-aiming the shared read is a third path in principle, but every
-  // shipped surface offers the same submission date, so it cannot fire today.)
-  // Polling on past the window would put every check-less transaction on a
-  // public RPC forever.
+  // requested around the first read, or by this client later, still self-heals.
+  // Ceiling: past the window a check requested elsewhere is only picked up by a
+  // page reload, or by a fresh mount after the five-minute cache retention
+  // lapses — there is no re-check control in the UI. (Re-aiming the shared read
+  // is a third path in principle, but every shipped surface offers the same
+  // submission date, so it cannot fire today.) Polling on past the window would
+  // put every check-less transaction on a public RPC forever.
   if (status === CheckStatus.UNAVAILABLE) {
-    if (submittedAtMs == null || nowMs === undefined) return 0
-    // A submission stamped in the future is clock skew, not a young check:
-    // without the lower bound the window would stretch by the whole skew.
-    const age = nowMs - submittedAtMs
-    return age >= 0 && age < UNAVAILABLE_GRACE_MS ? UNAVAILABLE_GRACE_POLL_MS : 0
+    if (nowMs === undefined) return 0
+    const isYoung = [submittedAtMs, requestedAtMs].some((anchorMs) => isWithinGrace(anchorMs, nowMs))
+    return isYoung ? UNAVAILABLE_GRACE_POLL_MS : 0
   }
 
   const head = headBlock !== null ? BigInt(headBlock) : null
-  const deadline =
-    deadlineBlock !== null
-      ? BigInt(deadlineBlock)
-      : firstEventBlock !== null
-        ? BigInt(firstEventBlock) + BigInt(PLAIN_DEADLINE_BLOCKS)
-        : null
+  const deadline = deadlineBlock !== null ? BigInt(deadlineBlock) : null
 
   if (deadline === null || head === null || head <= deadline) return POLL_INTERVAL_FAST_MS
   if (head <= deadline + BigInt(LATE_WINDOW_BLOCKS)) return POLL_INTERVAL_LATE_MS

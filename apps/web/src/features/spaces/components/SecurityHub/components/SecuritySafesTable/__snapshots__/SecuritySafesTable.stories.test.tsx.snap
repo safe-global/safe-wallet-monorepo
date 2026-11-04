@@ -41,3 +41,17 @@ exports[`./SecuritySafesTable.stories SingleChainSafes 1`] = `
   </div>
 </div>
 `;
+
+exports[`./SecuritySafesTable.stories UpdateAvailable 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="bg-card rounded-lg p-4"
+    />
+  </div>
+</div>
+`;

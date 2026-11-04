@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`./DataRow.stories StringValue 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="rounded-lg bg-card p-4"
+    >
+      <div
+        class="flex flex-wrap gap-2 xl:flex-nowrap"
+        data-testid=""
+      >
+        <div
+          class="break-words min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
+          data-testid="tx-row-title"
+        >
+          <span
+            class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)]"
+            data-slot="typography"
+            data-variant="paragraph-small"
+          >
+            Transaction Hash
+          </span>
+        </div>
+        <div
+          class="max-w-full flex-1 xl:min-w-0"
+          data-testid="tx-data-row"
+        >
+          <div
+            class="text-base leading-6 font-normal"
+          >
+            0x536e...94f9
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

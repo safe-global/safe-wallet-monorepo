@@ -2,8 +2,8 @@ import css from '../Dashboard/styles.module.css'
 import SignInOptions from '../SignInOptions'
 import { OidcAuthFeature } from '@/features/oidc-auth'
 import { useLoadFeature } from '@/features/__core__'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 
 interface SignedOutStateProps {
@@ -25,8 +25,8 @@ const SignedOutState = ({ afterSignIn, redirectLoading = false }: SignedOutState
             </Typography>
 
             <Typography color="muted" className="mb-4">
-              To view and interact with workspaces, you need to sign in with the wallet, that is a member of the
-              workspace
+              To view and interact with Workspaces, you need to sign in with the wallet, that is a member of the
+              Workspace
               {!$isDisabled && ', or sign in with email'}. Sign in to continue.
             </Typography>
 

@@ -1,4 +1,4 @@
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import type { ReactElement } from 'react'
 
 import ModalDialog from '@/components/common/ModalDialog'

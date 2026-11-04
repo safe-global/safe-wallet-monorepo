@@ -2,14 +2,19 @@ import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/t
 import type { Dispatch, ReactElement, SetStateAction } from 'react'
 import { X } from 'lucide-react'
 
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@safe-global/views/components/ui/accordion'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import useTxQueue from '@/hooks/useTxQueue'
 import PaginatedTxns from '@/components/common/PaginatedTxns'
 import styles from './styles.module.css'
 import { getQueuedTransactionCount } from '@/utils/transactions'
-import { BatchExecuteHoverProvider } from '@/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
+import { BatchExecuteHoverProvider } from '@safe-global/views/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
 import BatchExecuteButton from '@/components/transactions/BatchExecuteButton'
 
 type Props = {

@@ -1,9 +1,9 @@
-import { blo } from 'blo'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Typography } from '@/components/ui/typography'
+import { getIdenticonSrc } from '@safe-global/views/components/common/Identicon'
+import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeBalanceBlock from './SafeBalanceBlock'
-import { ThresholdBadge } from '@/components/common/AccountBadges'
+import { ThresholdBadge } from '@safe-global/views/components/common/AccountBadges'
 import {
   CopyAddressButton,
   ExplorerLinkButton,
@@ -12,8 +12,8 @@ import {
   getInitials,
   getSafeDisplayInfo,
 } from '@/components/common/AccountRow'
-import NotActivatedBadge from '@/components/common/NotActivatedBadge'
-import type { SafeItemData } from '../types'
+import NotActivatedBadge from '@safe-global/views/components/common/NotActivatedBadge'
+import type { SafeItemData } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
@@ -43,7 +43,7 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
     <div className="flex items-center gap-2 w-full" data-testid="safe-header-info">
       <div className="relative shrink-0">
         <Avatar size="sm" data-testid="safe-icon">
-          <AvatarImage src={blo(selectedItem.address as `0x${string}`)} alt={displayName} />
+          <AvatarImage src={getIdenticonSrc(selectedItem.address)} alt={displayName} />
           <AvatarFallback>{getInitials(displayName || '?')}</AvatarFallback>
         </Avatar>
       </div>

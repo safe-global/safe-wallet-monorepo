@@ -1,13 +1,14 @@
 import { useForm, FormProvider } from 'react-hook-form'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setRpc, setTenderly } from '@/store/settingsSlice'
 import useChainId from '@/hooks/useChainId'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import RpcProviderSection from './RpcProviderSection'
 import TenderlySection from './TenderlySection'
-import SettingsCard from '../SettingsCard'
+import SettingsCard from '@safe-global/views/components/settings/SettingsCard'
+import { reloadPage } from '@/utils/navigation'
 
 export enum EnvVariablesField {
   rpc = 'rpc',
@@ -35,7 +36,7 @@ const EnvironmentVariables = () => {
     },
   })
 
-  const { handleSubmit, setValue, watch } = formMethods
+  const { handleSubmit, setValue, trigger, watch } = formMethods
 
   const rpc = watch(EnvVariablesField.rpc)
   const tenderlyURL = watch(EnvVariablesField.tenderlyURL)
@@ -53,16 +54,19 @@ const EnvironmentVariables = () => {
 
     dispatch(
       setTenderly({
-        url: data[EnvVariablesField.tenderlyURL],
+        url: data[EnvVariablesField.tenderlyURL].replace(/\/$/, ''),
         accessToken: data[EnvVariablesField.tenderlyToken],
       }),
     )
 
-    location.reload()
+    reloadPage()
   })
 
   const onResetRpc = () => setValue(EnvVariablesField.rpc, '')
-  const onResetTenderlyUrl = () => setValue(EnvVariablesField.tenderlyURL, '')
+  const onResetTenderlyUrl = () => {
+    setValue(EnvVariablesField.tenderlyURL, '', { shouldValidate: true })
+    trigger(EnvVariablesField.tenderlyToken)
+  }
   const onResetTenderlyToken = () => setValue(EnvVariablesField.tenderlyToken, '')
 
   return (
@@ -82,7 +86,7 @@ const EnvironmentVariables = () => {
             showResetTokenButton={!!tenderlyToken}
           />
 
-          <Button type="submit" className="mt-4">
+          <Button type="submit" className="mt-8">
             Save
           </Button>
         </form>

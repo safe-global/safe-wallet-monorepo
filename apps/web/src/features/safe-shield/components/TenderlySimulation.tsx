@@ -1,9 +1,10 @@
-import { type ReactElement, useContext, useState, useEffect, useRef } from 'react'
-import { ChevronDown, ExternalLink as LaunchIcon } from 'lucide-react'
-import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import { type AnimationEvent, type ReactElement, useContext, useState, useEffect, useRef } from 'react'
+import { ChevronDown } from 'lucide-react'
+import { ExternalLinkIcon as LaunchIcon } from '@safe-global/views/components/common/ExternalLink/ExternalLinkIcon'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import UpdateIcon from '@/public/images/safe-shield/update.svg'
 import { SeverityIcon } from './SeverityIcon'
 import { TxInfoContext } from '@/components/tx-flow/TxInfoProvider'
@@ -13,7 +14,7 @@ import {
   isTxSimulationEnabled,
   type SimulationTxParams,
 } from '@safe-global/utils/components/tx/security/tenderly/utils'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
@@ -23,17 +24,21 @@ import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
 import { useNestedTransaction } from './useNestedTransaction'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { trackEvent, SAFE_SHIELD_EVENTS, MixpanelEventParams } from '@/services/analytics'
+import css from './reveal.module.css'
 
 interface TenderlySimulationProps {
   safeTx?: SafeTransaction
   highlightedSeverity?: Severity
   delay?: number
+  /** Safe Pro: the simulation starts on its own for every transaction, so there is no Run button. */
+  autoRun?: boolean
 }
 
 export const TenderlySimulation = ({
   safeTx,
   highlightedSeverity,
   delay = 0,
+  autoRun = false,
 }: TenderlySimulationProps): ReactElement | null => {
   const { simulation, status, nestedTx } = useContext(TxInfoContext)
   const chain = useCurrentChain()
@@ -44,7 +49,7 @@ export const TenderlySimulation = ({
   const showSimulation = chain && isTxSimulationEnabled(chain) && safeTx
 
   const [simulationExpanded, setSimulationExpanded] = useState(false)
-  const [isVisible, setIsVisible] = useState(false)
+  const [revealed, setRevealed] = useState(false)
 
   // Reset simulation state when transaction changes
   // Use useRef to track the previous transaction and only reset when it actually changes
@@ -63,16 +68,13 @@ export const TenderlySimulation = ({
     }
   }, [safeTx, simulation, nestedTx.simulation])
 
-  const { nestedSafeInfo, nestedSafeTx, isNested } = useNestedTransaction(safeTx, chain)
-
-  const handleToggleSimulation = () => {
-    setSimulationExpanded(!simulationExpanded)
-  }
+  const { nestedSafeInfo, nestedSafeTx, isNested, isNestedLoading } = useNestedTransaction(safeTx, chain)
 
   const handleRunSimulation = () => {
     if (!safeTx) return
 
-    const executionOwner = isSafeOwner && signer?.address ? signer.address : safe.owners[0].value
+    const executionOwner = isSafeOwner && signer?.address ? signer.address : safe.owners[0]?.value
+    if (!executionOwner) return
 
     const simulationParams = {
       safe,
@@ -96,6 +98,20 @@ export const TenderlySimulation = ({
 
     setSimulationExpanded(true)
   }
+
+  // Once per transaction: the reset effect above clears the previous result, this one starts the next run.
+  const autoRanKeyRef = useRef<string | null>(null)
+  useEffect(() => {
+    if (!autoRun || !showSimulation || !safeTx) return
+    // A nested Safe's data arrives later; running before it would skip the nested simulation for good.
+    if (isNestedLoading) return
+    if (!signer?.address && !safe.owners[0]?.value) return
+    const key = JSON.stringify(safeTx.data)
+    if (autoRanKeyRef.current === key) return
+    autoRanKeyRef.current = key
+    handleRunSimulation()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on the tx data; the handler reads live values
+  }, [autoRun, showSimulation, safeTx, signer?.address, safe.owners, isNestedLoading])
 
   const { mainIsSuccess, nestedIsSuccess, isSimulationSuccess, isSimulationFinished, isLoading } = getSimulationOutcome(
     status,
@@ -131,19 +147,15 @@ export const TenderlySimulation = ({
     }
   }, [mainSimulationResult, nestedSimulationResult])
 
-  useEffect(() => {
-    if (!showSimulation) return
-
-    setTimeout(() => {
-      setIsVisible(true)
-    }, delay)
-  }, [delay, showSimulation])
-
   if (!showSimulation) {
     return null
   }
 
   const showExpandable = isNested && isSimulationFinished
+
+  const handleRevealEnd = (e: AnimationEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) setRevealed(true)
+  }
 
   const getSimulationHeaderText = () => {
     if (!isSimulationFinished) return 'Transaction simulation'
@@ -165,78 +177,90 @@ export const TenderlySimulation = ({
     </Typography>
   )
 
+  const header = (
+    <>
+      <div className="flex flex-row items-center gap-2">
+        {isSimulationFinished ? (
+          <SeverityIcon
+            severity={isSimulationSuccess ? Severity.OK : Severity.WARN}
+            muted={isMuted}
+            width={16}
+            height={16}
+          />
+        ) : (
+          <UpdateIcon className="size-4" />
+        )}
+        <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
+          {getSimulationHeaderText()}
+        </Typography>
+        {!isSimulationFinished && !isLoading && !autoRun && (
+          <Tooltip>
+            <TooltipTrigger render={<span className="inline-flex" />}>
+              <InfoIcon className="size-4 text-[var(--color-border-main)]" />
+            </TooltipTrigger>
+            <TooltipContent className="text-center">
+              Run a simulation to see if the transaction will succeed and get a full report.
+            </TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+
+      {!isSimulationFinished && autoRun ? (
+        <Typography variant="paragraph-mini" className="text-[var(--color-text-secondary)] [letter-spacing:0.4px]">
+          {isLoading || isNestedLoading ? 'Running...' : ''}
+        </Typography>
+      ) : !isSimulationFinished ? (
+        <button
+          data-testid="run-simulation-btn"
+          onClick={handleRunSimulation}
+          disabled={isLoading}
+          className={`rounded-[4px] border-none bg-[var(--color-border-light)] px-2 py-0.5 hover:bg-[var(--color-border-main)] ${
+            isLoading ? 'cursor-default hover:bg-[var(--color-border-light)]' : 'cursor-pointer'
+          }`}
+        >
+          <Typography variant="paragraph-mini" className="text-[var(--color-text-primary)] [letter-spacing:0.4px]">
+            {isLoading ? 'Running...' : 'Run'}
+          </Typography>
+        </button>
+      ) : isNested ? (
+        <ChevronDown
+          className={`size-4 text-[var(--color-text-secondary)] transition-transform ${
+            simulationExpanded ? 'rotate-180' : ''
+          }`}
+        />
+      ) : (
+        simulation.simulationLink && (
+          <ExternalLink noIcon href={simulation.simulationLink}>
+            <span className="inline-flex items-center gap-1">
+              {viewLink}
+              <LaunchIcon className="size-4 text-[var(--color-text-secondary)]" />
+            </span>
+          </ExternalLink>
+        )
+      )}
+    </>
+  )
+
   return (
     <Collapsible
       open={simulationExpanded}
+      onOpenChange={setSimulationExpanded}
       data-testid="tenderly-simulation"
-      className="overflow-hidden"
-      style={{
-        opacity: isVisible ? 1 : 0,
-        maxHeight: isVisible ? 1000 : 0, // Replace 'fit-content' with a large px value for animatable maxHeight
-        transition: `opacity 0.3s ease-in-out, max-height 0.3s ease-in-out`,
-        transitionDelay: `${delay}ms`,
-      }}
+      className={revealed ? undefined : css.reveal}
+      style={revealed ? undefined : { animationDelay: `${delay}ms` }}
+      onAnimationEnd={handleRevealEnd}
     >
-      <div
-        className={`flex flex-row items-center justify-between p-3 ${showExpandable ? 'cursor-pointer' : 'cursor-default'}`}
-        onClick={showExpandable ? handleToggleSimulation : undefined}
-      >
-        <div className="flex flex-row items-center gap-2">
-          {isSimulationFinished ? (
-            <SeverityIcon
-              severity={isSimulationSuccess ? Severity.OK : Severity.WARN}
-              muted={isMuted}
-              width={16}
-              height={16}
-            />
-          ) : (
-            <UpdateIcon className="size-4" />
-          )}
-          <Typography variant="paragraph-small" className="text-[var(--color-primary-light)]">
-            {getSimulationHeaderText()}
-          </Typography>
-          {!isSimulationFinished && !isLoading && (
-            <Tooltip>
-              <TooltipTrigger render={<span className="inline-flex" />}>
-                <InfoIcon className="size-4 text-[var(--color-border-main)]" />
-              </TooltipTrigger>
-              <TooltipContent className="text-center">
-                Run a simulation to see if the transaction will succeed and get a full report.
-              </TooltipContent>
-            </Tooltip>
-          )}
-        </div>
-
-        {!isSimulationFinished ? (
-          <button
-            data-testid="run-simulation-btn"
-            onClick={handleRunSimulation}
-            disabled={isLoading}
-            className={`rounded-[4px] border-none bg-[var(--color-border-light)] px-2 py-0.5 hover:bg-[var(--color-border-main)] ${
-              isLoading ? 'cursor-default hover:bg-[var(--color-border-light)]' : 'cursor-pointer'
-            }`}
-          >
-            <Typography variant="paragraph-mini" className="text-[var(--color-text-primary)] [letter-spacing:0.4px]">
-              {isLoading ? 'Running...' : 'Run'}
-            </Typography>
-          </button>
-        ) : isNested ? (
-          <ChevronDown
-            className={`size-4 text-[var(--color-text-secondary)] transition-transform ${
-              simulationExpanded ? 'rotate-180' : ''
-            }`}
-          />
-        ) : (
-          simulation.simulationLink && (
-            <ExternalLink noIcon href={simulation.simulationLink}>
-              <span className="inline-flex items-center gap-1">
-                {viewLink}
-                <LaunchIcon className="size-4 text-[var(--color-text-secondary)]" />
-              </span>
-            </ExternalLink>
-          )
-        )}
-      </div>
+      {/* A trigger only when expandable: before the run finishes the header holds the Run button. */}
+      {showExpandable ? (
+        <CollapsibleTrigger
+          nativeButton={false}
+          render={<div className="flex cursor-pointer flex-row items-center justify-between p-3" />}
+        >
+          {header}
+        </CollapsibleTrigger>
+      ) : (
+        <div className="flex cursor-default flex-row items-center justify-between p-3">{header}</div>
+      )}
 
       {/* Show expandable content only for nested simulations */}
       <CollapsibleContent>

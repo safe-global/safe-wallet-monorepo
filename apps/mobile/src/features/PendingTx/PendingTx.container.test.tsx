@@ -1,5 +1,5 @@
 import React from 'react'
-import { render, screen, fireEvent, waitFor, act } from '@/src/tests/test-utils'
+import { render, screen, fireEvent, waitFor, waitForElementToBeRemoved, act } from '@/src/tests/test-utils'
 import { PendingTxContainer } from './PendingTx.container'
 import { server } from '@/src/tests/server'
 import { http, HttpResponse } from 'msw'
@@ -96,13 +96,8 @@ describe('PendingTxContainer', () => {
     expect(screen.getByTestId('pending-tx-initial-loader')).toBeTruthy()
 
     // Wait for transactions to load and loading skeleton to disappear
-    await waitFor(
-      () => {
-        expect(screen.queryByTestId('pending-tx-initial-loader')).toBeNull()
-        expect(screen.getByText('Next')).toBeTruthy()
-      },
-      { timeout: 3000 },
-    )
+    await waitForElementToBeRemoved(() => screen.queryByTestId('pending-tx-initial-loader'), { timeout: 3000 })
+    expect(screen.getByText('Next')).toBeTruthy()
   }, 10000)
 
   it('triggers refresh functionality when onRefresh is called', async () => {
@@ -170,12 +165,7 @@ describe('PendingTxContainer', () => {
     )
 
     // Wait for refresh to complete and progress indicator to disappear
-    await waitFor(
-      () => {
-        expect(screen.queryByTestId('pending-tx-progress-indicator')).toBeNull()
-      },
-      { timeout: 2000 },
-    )
+    await waitForElementToBeRemoved(() => screen.queryByTestId('pending-tx-progress-indicator'), { timeout: 2000 })
 
     // Verify the list is still functional after refresh
     expect(screen.getByText('Next')).toBeTruthy()
@@ -215,12 +205,7 @@ describe('PendingTxContainer', () => {
     render(<PendingTxContainer />)
 
     // Wait for loading to complete
-    await waitFor(
-      () => {
-        expect(screen.queryByTestId('pending-tx-initial-loader')).toBeNull()
-      },
-      { timeout: 3000 },
-    )
+    await waitForElementToBeRemoved(() => screen.queryByTestId('pending-tx-initial-loader'), { timeout: 3000 })
 
     // Should show empty state message
     expect(screen.getByTestId('pending-tx-empty-state')).toBeTruthy()

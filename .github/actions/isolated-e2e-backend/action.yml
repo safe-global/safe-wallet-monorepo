@@ -1,0 +1,68 @@
+name: Isolated E2E backend
+description: Start and validate the Anvil backend; the calling workflow owns cleanup
+inputs:
+  project:
+    description: Isolated Compose project name
+    required: true
+  fork-rpc-url:
+    description: Sepolia archive RPC secret
+    required: true
+  chains:
+    description: Space-separated optional forks to start (mainnet, polygon)
+    required: false
+    default: ''
+  mainnet-rpc-url:
+    description: Mainnet archive RPC secret, needed when chains includes mainnet
+    required: false
+    default: ''
+  polygon-rpc-url:
+    description: Polygon archive RPC secret, needed when chains includes polygon
+    required: false
+    default: ''
+runs:
+  using: composite
+  steps:
+    - name: Infrastructure unit checks
+      shell: bash
+      working-directory: apps/web/e2e/environment/infra
+      run: |
+        python3 -m unittest discover -s tests
+        bash -n scripts/run_test_env.sh
+
+    - name: Validate backend
+      id: backend
+      shell: bash
+      working-directory: apps/web/e2e/environment/infra
+      env:
+        SAFE_E2E_PROJECT: ${{ inputs.project }}
+        SEPOLIA_FORK_RPC_URL: ${{ inputs.fork-rpc-url }}
+        FORK_RPC_URL_MAINNET: ${{ inputs.mainnet-rpc-url }}
+        FORK_RPC_URL_POLYGON: ${{ inputs.polygon-rpc-url }}
+        CHAINS: ${{ inputs.chains }}
+        WALLET_REVISION: ${{ github.sha }}
+      run: |
+        set -euo pipefail
+        test -n "$SEPOLIA_FORK_RPC_URL" || { echo 'Configure the SEPOLIA_FORK_RPC_URL secret'; exit 1; }
+        python3 - <<'PY'
+        import os
+        from urllib.parse import parse_qsl, unquote, urlsplit
+        for name in ('SEPOLIA_FORK_RPC_URL', 'FORK_RPC_URL_MAINNET', 'FORK_RPC_URL_POLYGON'):
+            url = urlsplit(os.environ.get(name, ''))
+            values = [url.username, url.password, url.netloc, url.path, *url.path.split('/')]
+            values += [value for _, value in parse_qsl(url.query)]
+            for value in values:
+                if value:
+                    value = unquote(value).replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+                    print(f'::add-mask::{value}')
+        PY
+        mkdir -p "$RUNNER_TEMP/isolated-e2e-backend"
+        printf '%s\n' "$WALLET_REVISION" > "$RUNNER_TEMP/isolated-e2e-backend/wallet-ref.txt"
+        python3 scripts/test_env.py config > "$RUNNER_TEMP/isolated-e2e-backend/manifest.json"
+        python3 scripts/test_env.py up
+        python3 scripts/test_env.py test
+        python3 scripts/test_env.py smoke
+        for chain in $CHAINS; do
+          variable="FORK_RPC_URL_${chain^^}"
+          test -n "${!variable}" || { echo "Configure the $variable secret for the $chain fork"; exit 1; }
+          python3 scripts/test_env.py up --chain "$chain"
+        done

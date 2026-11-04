@@ -1,10 +1,10 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import TxSectionTitle from '@/components/tx-flow/common/TxSectionTitle'
+import TxSectionTitle from '@safe-global/views/components/tx-flow/common/TxSectionTitle'
 
 export default function TxNote({ txDetails }: { txDetails: TransactionDetails | undefined }) {
   const note = txDetails?.note

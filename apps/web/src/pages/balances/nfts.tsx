@@ -1,6 +1,5 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import AssetsHeader from '@/components/balances/AssetsHeader'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
@@ -8,7 +7,7 @@ import { useHasFeature } from '@/hooks/useChains'
 import { NftsPage } from '@/features/nfts'
 import { BRAND_NAME } from '@/config/constants'
 
-const NFTs: NextPage = () => {
+const NFTs = () => {
   const isFeatureEnabled = useHasFeature(FEATURES.ERC721)
 
   return (

@@ -2,9 +2,9 @@ import { FormProvider, useForm } from 'react-hook-form'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { debounce } from 'lodash'
 
-import { Alert } from '@/components/ui/alert'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { SearchInput } from '@/components/ui/search-input'
+import { Alert } from '@safe-global/views/components/ui/alert'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
+import { SearchInput } from '@safe-global/views/components/ui/search-input'
 import DialogActions from '@/components/common/DialogActions'
 
 import ContactsList from './ContactsList'
@@ -24,6 +24,7 @@ import type { SerializedError } from '@reduxjs/toolkit'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 export type ImportContactsFormValues = {
   contacts: Record<string, string | undefined>
@@ -93,6 +94,7 @@ const ImportAddressBookDialog = ({ handleClose }: { handleClose: () => void }) =
         upsertAddressBookItemsDto: { items: contactItems },
       })
 
+      if (isElevationRequiredError(result.error)) return
       if (result.error) {
         setError(getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError))
         return

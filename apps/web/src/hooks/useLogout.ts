@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { GATEWAY_URL } from '@/config/gateway'
+import { gatewayUrl } from '@/config/gateway'
 import { AppRoutes } from '@/config/routes'
 import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
 import useOnboard from '@/hooks/wallets/useOnboard'
@@ -32,7 +32,7 @@ const useLogout = () => {
     sessionStorage.setItem(LOGGING_OUT_KEY, '1')
 
     const redirectUrl = new URL(AppRoutes.welcome.spaces, window.location.origin).toString()
-    const url = new URL(LOGOUT_REDIRECT_PATH, GATEWAY_URL)
+    const url = gatewayUrl(LOGOUT_REDIRECT_PATH)
 
     const form = document.createElement('form')
     form.method = 'POST'

@@ -2,15 +2,16 @@ import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/tran
 import NextLink from 'next/link'
 import type { ReactElement } from 'react'
 import { useMemo } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import TxInfo from '@/components/transactions/TxInfo'
 import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
-import css from './styles.module.css'
+import css from '@safe-global/views/components/dashboard/PendingTxs/styles.module.css'
 import { AppRoutes } from '@/config/routes'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
-import TxConfirmations from '@/components/transactions/TxConfirmations'
-import { DateTime } from '@/components/common/DateTime/DateTime'
+import TxConfirmations from '@safe-global/views/components/transactions/TxConfirmations'
+import { DateTime } from '@safe-global/views/components/common/DateTime/DateTime'
+import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 type PendingTxType = {
   transaction: Transaction
@@ -19,16 +20,14 @@ type PendingTxType = {
 const PendingTx = ({ transaction }: PendingTxType): ReactElement => {
   const { id } = transaction
   const safeQueryParam = useSafeQueryParam()
+  const spaceId = useUrlSpaceId()
 
   const url = useMemo(
     () => ({
       pathname: AppRoutes.transactions.tx,
-      query: {
-        id,
-        safe: safeQueryParam,
-      },
+      query: withSpaceId({ id, safe: safeQueryParam }, spaceId),
     }),
-    [safeQueryParam, id],
+    [safeQueryParam, spaceId, id],
   )
 
   return (

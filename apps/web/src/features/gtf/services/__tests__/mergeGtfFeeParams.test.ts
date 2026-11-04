@@ -10,6 +10,7 @@ const RELAY_FEE_RELAYER = {
   safeCreationSponsored: false,
   safeTransactionSponsored: false,
   enableTenderlySimulationBeforeRelay: false,
+  gasPaymentOptions: ['SUBSCRIPTION'],
 }
 
 const buildChain = (features: string[], relayer: typeof RELAY_FEE_RELAYER | null = RELAY_FEE_RELAYER): Chain =>

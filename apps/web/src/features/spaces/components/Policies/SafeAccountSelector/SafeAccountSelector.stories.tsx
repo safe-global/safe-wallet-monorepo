@@ -6,7 +6,10 @@ import { createMockStory } from '@/stories/mocks'
 import SafeAccountSelector from './index'
 import { buildSafeAccountId, groupSafeAccounts } from './utils'
 import type { ChainInfo } from '@/features/spaces/types'
-import type { SafeAccountEntry, SafeAccountOption } from './types'
+import type {
+  SafeAccountEntry,
+  SafeAccountOption,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 
 // Ids the story fixtures serve, so the chain logos resolve.
 const ETHEREUM = '1'
@@ -74,6 +77,45 @@ const [unnamedGroup] = groupSafeAccounts([
 const longNamedTreasury = account(ETHEREUM, TREASURY, {
   name: 'Foundation treasury — long-term reserves and grant disbursements',
 })
+
+const notActivated = account(SEPOLIA, PAYROLL, {
+  name: 'New treasury',
+  threshold: 2,
+  owners: 3,
+  ineligibleReason: 'not-activated',
+})
+
+const [partlyActivatedGroup] = groupSafeAccounts([
+  account(ETHEREUM, UNNAMED_MULTI, { name: 'Grants', threshold: 2, owners: 4, fiatTotal: '910.5' }),
+  account(POLYGON, UNNAMED_MULTI, { name: 'Grants', threshold: 2, owners: 4, ineligibleReason: 'not-activated' }),
+])
+
+const unsupportedNetwork = account(POLYGON, PAYROLL, {
+  name: 'Grants',
+  threshold: 2,
+  owners: 3,
+  fiatTotal: '75.4',
+  ineligibleReason: 'unsupported-chain',
+})
+
+const noSpendingLimits = account(HOODI, UNNAMED, {
+  name: 'Testnet ops',
+  threshold: 1,
+  owners: 2,
+  fiatTotal: '0',
+  ineligibleReason: 'no-spending-limits',
+})
+
+const [partlySupportedGroup] = groupSafeAccounts([
+  account(ETHEREUM, UNNAMED_MULTI, { name: 'Ops', threshold: 2, owners: 4, fiatTotal: '910.5' }),
+  account(POLYGON, UNNAMED_MULTI, {
+    name: 'Ops',
+    threshold: 2,
+    owners: 4,
+    fiatTotal: '12.25',
+    ineligibleReason: 'unsupported-chain',
+  }),
+])
 
 const defaultAccounts: SafeAccountEntry[] = [treasury, opsGroup, payroll, unnamedSafe]
 
@@ -146,6 +188,10 @@ export const NoEligibleAccounts: Story = {
   args: { accounts: [] },
 }
 
+export const NoEligibleSignerAccounts: Story = {
+  args: { accounts: [], signersOnly: true },
+}
+
 /** No wallet connected: the prompt is to connect one, not to switch. */
 export const NoWallet: Story = {
   args: { accounts: [], hasWallet: false },
@@ -157,6 +203,18 @@ export const LongSafeName: Story = {
     accounts: [longNamedTreasury],
     value: longNamedTreasury.id,
   },
+}
+
+export const NotActivatedAccounts: Story = {
+  args: { accounts: [treasury, notActivated, partlyActivatedGroup] },
+}
+
+/**
+ * Safes on networks the Policy Indexer does not cover, and one with no spending limits at all: disabled,
+ * balance kept, each with its own tooltip on hover.
+ */
+export const UnsupportedNetworkAccounts: Story = {
+  args: { accounts: [treasury, unsupportedNetwork, noSpendingLimits, partlySupportedGroup] },
 }
 
 export const Disabled: Story = {

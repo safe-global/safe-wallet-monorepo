@@ -3,9 +3,10 @@ import SpaceAddressBookTable from '../SpaceAddressBookTable'
 import type { AddressBookEntry } from '../SpaceAddressBookTable'
 import { Builder } from '@/tests/Builder'
 import { faker } from '@faker-js/faker'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 
 const mockUseIsMobile = jest.fn(() => false)
-jest.mock('@/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
+jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 
 jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
 jest.mock('@/components/common/EthHashInfo', () => {
@@ -20,7 +21,7 @@ jest.mock('@/components/common/EmailInfo', () => {
   const EmailInfo = ({ email }: { email: string }) => <span data-testid="email-info">{email}</span>
   return EmailInfo
 })
-jest.mock('@/components/common/Identicon', () => {
+jest.mock('@safe-global/views/components/common/Identicon', () => {
   const Identicon = () => <span data-testid="identicon" />
   return Identicon
 })
@@ -67,6 +68,43 @@ describe('SpaceAddressBookTable', () => {
     mockResolveMemberName.mockReturnValue(undefined)
   })
 
+  it('tells the extra action whether the row is compact', () => {
+    const renderExtraAction = jest.fn(() => null)
+
+    const { unmount } = render(
+      <SpaceAddressBookTable entries={[entryBuilder().build()]} renderExtraAction={renderExtraAction} />,
+    )
+    expect(renderExtraAction).toHaveBeenLastCalledWith(expect.anything(), { isCompact: false })
+    unmount()
+
+    mockUseIsMobile.mockReturnValue(true)
+    render(<SpaceAddressBookTable entries={[entryBuilder().build()]} renderExtraAction={renderExtraAction} />)
+    expect(renderExtraAction).toHaveBeenLastCalledWith(expect.anything(), { isCompact: true })
+  })
+
+  // The extra action is a text button, so its column cannot live on the default narrow share
+  it('widens the actions column when an extra action is rendered', () => {
+    const lastHeader = (container: HTMLElement) => {
+      const headers = container.querySelectorAll('th')
+      return headers[headers.length - 1]
+    }
+
+    const { container, unmount } = render(<SpaceAddressBookTable entries={[entryBuilder().build()]} />)
+    expect(lastHeader(container).className).toContain('md:w-[15%]')
+    expect(lastHeader(container).style.getPropertyValue('--col-min-w')).toBe('80px')
+    unmount()
+
+    const withExtra = render(
+      <SpaceAddressBookTable
+        entries={[entryBuilder().build()]}
+        showAddedBy={false}
+        renderExtraAction={() => <button>Add to Workspace</button>}
+      />,
+    )
+    expect(lastHeader(withExtra.container).className).toContain('md:w-[35%]')
+    expect(lastHeader(withExtra.container).style.getPropertyValue('--col-min-w')).toBe('240px')
+  })
+
   it('resolves the "Added by" cell to the space member name by user id', () => {
     const memberName = 'My space creator'
     mockResolveMemberName.mockImplementation((userId: number | undefined) => (userId === 7 ? memberName : undefined))
@@ -80,6 +118,36 @@ describe('SpaceAddressBookTable', () => {
     expect(screen.getByText(memberName)).toBeInTheDocument()
     // Only the Address column renders EthHashInfo; the attribution shows the member name
     expect(screen.getAllByTestId('eth-hash-info')).toHaveLength(1)
+  })
+
+  it('truncates a long name in the "Added by" cell instead of overflowing the column', () => {
+    const memberName = 'A very long space member name that cannot fit the attribution column'
+    mockResolveMemberName.mockImplementation((userId: number | undefined) => (userId === 7 ? memberName : undefined))
+
+    render(
+      <SpaceAddressBookTable
+        entries={[entryBuilder().with({ createdBy: faker.finance.ethereumAddress(), createdByUserId: 7 }).build()]}
+      />,
+    )
+
+    const name = screen.getByText(memberName)
+    expect(name).toHaveClass('truncate')
+    expect(name).toHaveClass('min-w-0')
+    expect(name.parentElement).toHaveClass('min-w-0')
+  })
+
+  it('shortens an "Added by" member name that is a wallet address', () => {
+    const address = '0x1234567890abcdef1234567890abcdef12345678'
+    mockResolveMemberName.mockImplementation((userId: number | undefined) => (userId === 7 ? address : undefined))
+
+    render(
+      <SpaceAddressBookTable
+        entries={[entryBuilder().with({ createdBy: faker.finance.ethereumAddress(), createdByUserId: 7 }).build()]}
+      />,
+    )
+
+    expect(screen.getByText(shortenAddress(address))).toBeInTheDocument()
+    expect(screen.queryByText(address)).not.toBeInTheDocument()
   })
 
   it('renders actions for non-local entries', () => {
@@ -152,6 +220,32 @@ describe('SpaceAddressBookTable', () => {
     render(<SpaceAddressBookTable entries={[entryBuilder().with({ name }).build()]} />)
 
     expect(screen.getByRole('button', { name })).toBeInTheDocument()
+  })
+
+  it('truncates the name on desktop and wraps it on mobile, where the address column is gone', () => {
+    const name = 'A very long contact name that would overflow the Name column'
+    const entry = entryBuilder().with({ name, createdBy: faker.internet.email() }).build()
+
+    const { unmount } = render(<SpaceAddressBookTable entries={[entry]} />)
+    expect(screen.getByRole('button', { name })).toHaveClass('truncate')
+    expect(screen.getByText('Address')).toBeInTheDocument()
+    unmount()
+
+    mockUseIsMobile.mockReturnValue(true)
+    render(<SpaceAddressBookTable entries={[entry]} />)
+    expect(screen.getByRole('button', { name })).not.toHaveClass('truncate')
+    expect(screen.queryByText('Address')).not.toBeInTheDocument()
+  })
+
+  it('moves the address under the name on mobile', () => {
+    mockUseIsMobile.mockReturnValue(true)
+    const entry = entryBuilder().with({ createdBy: faker.internet.email() }).build()
+
+    render(<SpaceAddressBookTable entries={[entry]} />)
+
+    const nameCell = screen.getByRole('button', { name: entry.name }).closest('td')
+    expect(nameCell).toContainElement(screen.getByTestId('eth-hash-info'))
+    expect(screen.getByTestId('eth-hash-info')).toHaveAttribute('data-short-address', 'true')
   })
 
   it('shortens the address on mobile and shows it in full on desktop', () => {

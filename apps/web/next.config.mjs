@@ -40,8 +40,33 @@ if (!commitHash) {
 
 const withPWA = withPWAInit({
   dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
   workboxOptions: {
     mode: 'production',
+    runtimeCaching: [
+      {
+        urlPattern: /\.(js|css|png|jpg|jpeg|gif|webp|svg|ico|ttf|woff|woff2|eot)$/,
+        handler: 'CacheFirst',
+        options: {
+          cacheName: 'static-assets',
+          expiration: {
+            maxEntries: 1000,
+            maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+          },
+        },
+      },
+      {
+        urlPattern: ({ request }) => request.mode === 'navigate',
+        handler: 'NetworkFirst',
+        options: {
+          cacheName: 'pages',
+          expiration: {
+            maxEntries: 32,
+            maxAgeSeconds: 60 * 60 * 24,
+          },
+        },
+      },
+    ],
   },
   reloadOnOnline: false,
   // We register the SW ourselves in `useRegisterServiceWorker` so registration
@@ -52,20 +77,6 @@ const withPWA = withPWAInit({
   customWorkerSrc: SERVICE_WORKERS_PATH,
   // Prefer InjectManifest for Web Push
   swSrc: `${SERVICE_WORKERS_PATH}/index.ts`,
-
-  runtimeCaching: [
-    {
-      urlPattern: /\.(js|css|png|jpg|jpeg|gif|webp|svg|ico|ttf|woff|woff2|eot)$/,
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'static-assets',
-        expiration: {
-          maxEntries: 1000,
-          maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-        },
-      },
-    },
-  ],
 
   cacheId: pkg.version,
 })
@@ -100,8 +111,10 @@ const nextConfig = {
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
   reactStrictMode: false,
   productionBrowserSourceMaps: true,
-  eslint: {
-    dirs: ['src', 'cypress'],
+  agentRules: false,
+  logging: {
+    // Forwarding browser logs to the terminal makes the next-rspack dev server panic on client navigation.
+    browserToTerminal: false,
   },
   ...(isProd || enableExperimentalOptimizations
     ? {
@@ -110,7 +123,17 @@ const nextConfig = {
         },
       }
     : {}),
-  webpack(config, { dev }) {
+  webpack(config, { dev, isServer, webpack }) {
+    // The static export never uses the dev server render, so the dev server compiles every page as empty.
+    if (dev && isServer) {
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(
+          /[\\/]apps[\\/]web[\\/]src[\\/]pages[\\/](?!_document)/,
+          path.resolve(__dirname, 'scripts/dev-server-page-stub.js'),
+        ),
+      )
+    }
+
     config.module.rules.push({
       test: /\.svg$/i,
       issuer: { and: [/\.(js|ts|md)x?$/] },

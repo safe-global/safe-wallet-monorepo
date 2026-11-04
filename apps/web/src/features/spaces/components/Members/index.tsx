@@ -1,11 +1,11 @@
-import { Button as ShadcnButton } from '@/components/ui/button'
+import { Button as ShadcnButton } from '@safe-global/views/components/ui/button'
 import { Plus } from 'lucide-react'
-import { Typography } from '@/components/ui/typography'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import AddMemberModal from 'src/features/spaces/components/AddMemberModal'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@safe-global/views/components/ui/tabs'
+import AddMemberModal from '../AddMemberModal'
 import { useState } from 'react'
 import MembersList from '../MembersList'
-import TableCard from '@/components/common/TableCard'
+import TableCard from '@safe-global/views/components/common/TableCard'
 import { useIsInvited, useSpaceMembersByStatus, useIsAdmin } from '@/features/spaces'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_LABELS } from '@/services/analytics/events/spaces'
@@ -32,7 +32,7 @@ const SpaceMembers = () => {
               <ShadcnButton
                 data-testid="add-member-button"
                 size="lg"
-                className="px-4 py-0"
+                className="self-start px-4 py-0"
                 onClick={() => setOpenAddMembersModal(true)}
               >
                 <Plus className="size-4 mr-1 text-green-500" />
@@ -59,7 +59,7 @@ const SpaceMembers = () => {
 
             <TabsContent value="pending">
               {invitedMembers.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No pending members.</p>
+                <p className="text-muted-foreground p-4 text-sm">No pending members.</p>
               ) : (
                 <MembersList members={invitedMembers} variant="pending" />
               )}

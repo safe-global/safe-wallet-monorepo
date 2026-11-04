@@ -1,11 +1,12 @@
 import type { ReactElement } from 'react'
-import { SidebarMenuButton } from '@/components/ui/sidebar'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { SidebarMenuButton } from '@safe-global/views/components/ui/sidebar'
+import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
 import { getDeterministicColor } from '@/utils/colors'
 import { useSpaceBackLink } from '@/components/common/SpaceSafeBar/hooks/useSpaceBackLink'
 import { icons } from '../config'
+import { cn } from '@safe-global/views/utils/cn'
 import css from '../styles.module.css'
-import type { SafeWorkspaceHeaderBackToSpace } from '../types'
+import type { SafeWorkspaceHeaderBackToSpace } from '@safe-global/views/features/spaces/components/Sidebar/types'
 
 const getSpaceInitial = (name: string | undefined, initial: string | undefined): string =>
   initial ?? (name?.charAt(0) ?? '').toUpperCase()
@@ -18,7 +19,7 @@ export const BackToSpaceButton = ({ spaceName, spaceInitial }: SafeWorkspaceHead
   return (
     <SidebarMenuButton
       size="lg"
-      tooltip="Back to workspace"
+      tooltip="Back to Workspace"
       data-testid="back-to-space-button"
       className={css.spaceSelector}
       onClick={handleBackToSpace}
@@ -33,7 +34,7 @@ export const BackToSpaceButton = ({ spaceName, spaceInitial }: SafeWorkspaceHead
       </Avatar>
       <div className={css.spaceSelectorText}>
         <span className={css.spaceSelectorName}>{spaceName}</span>
-        <span className={css.spaceSelectorSubtitle}>Workspace</span>
+        <span className={cn(css.spaceSelectorSubtitle, 'text-muted-foreground')}>Workspace</span>
       </div>
       <icons.ChevronLeft className="ml-auto size-4 shrink-0 group-data-[collapsible=icon]:hidden" aria-hidden />
     </SidebarMenuButton>

@@ -24,6 +24,8 @@ export enum MixpanelEvent {
   EURCV_BOOST_EXPLORE_CLICKED = 'EURCV Boost Explore Clicked',
   EURCV_BOOST_BANNER_CLICKED = 'EURCV Boost Banner Clicked',
   EURCV_BOOST_BANNER_DISMISSED = 'EURCV Boost Banner Dismissed',
+  SAFE_PRO_BANNER_CLICKED = 'Safe Pro Banner Clicked',
+  SAFE_PRO_PLANS_CLICKED = 'Safe Pro Plans Clicked',
   TRANSACTION_STARTED = 'Transaction Started',
   TRANSACTION_RECIPIENT_DECODED = 'Transaction Recipient Decoded',
   TRANSACTION_CONTRACT_DECODED = 'Transaction Contract Decoded',
@@ -34,6 +36,8 @@ export enum MixpanelEvent {
   TRANSACTION_EXECUTED_IN_PARENT = 'Transaction Executed In Parent',
   TRANSACTION_EXECUTED_VIA_ROLE = 'Transaction Executed Via Role',
   TRANSACTION_SUBMITTED = 'Transaction Submitted',
+  TRANSACTION_SAFENET_SUBMITTED = 'Transaction Safenet Submitted',
+  TRANSACTION_SAFENET_CHECKED = 'Transaction Safenet Checked',
   TRUSTED_SAFE_ADDED = 'Trusted Safe Added',
   TRUSTED_SAFE_REMOVED = 'Trusted Safe Removed',
   HYPERNATIVE_LOGIN_CLICKED = 'Hypernative Login Clicked',
@@ -86,11 +90,123 @@ export enum MixpanelEvent {
   ACTIVITY_LOG_VIEWED = 'Activity Log Viewed',
   ACTIVITY_LOG_FILTERED = 'Activity Log Filtered',
   POLICY_CATALOGUE_TILE_CLICKED = 'Policy Catalogue Tile Clicked',
+  POLICY_UPSELL_UPGRADE_CLICKED = 'Policy Upsell Upgrade Clicked',
+  ADD_POLICY_DIALOG_CLOSED = 'Add Policy Dialog Closed',
+  PROPOSER_SUBMITTED = 'Proposer Submitted',
+  SPENDING_LIMIT_SET = 'Spending Limit Set',
+  SPENDING_LIMIT_TX_CONFIRMED = 'Spending Limit Tx Confirmed',
+  SPENDING_LIMIT_TX_SIGNED = 'Spending Limit Tx Signed',
+  SAFE_PRO_BANNER_VIEWED = 'Safe Pro Banner Viewed',
+  FREE_ACCESS_OFFER_VIEWED = 'Free Access Offer Viewed',
+  FREE_ACCESS_CLAIM_CLICKED = 'Free Access Claim Clicked',
+  FREE_ACCESS_OFFER_DISMISSED = 'Free Access Offer Dismissed',
+  SAFE_ACCOUNT_SELECTION_VIEWED = 'Safe Account Selection Viewed',
+  SAFE_ACCOUNT_SELECTION_SUBMITTED = 'Safe Account Selection Submitted',
+  WORKSPACE_CREATE_STEP_VIEWED = 'Workspace Create Step Viewed',
+  PLAN_SELECTION_STARTED = 'Plan Selection Started',
+  PLANS_PAGE_VIEWED = 'Plans Page Viewed',
+  PLAN_CTA_CLICKED = 'Plan CTA Clicked',
+  PLAN_CHANGE_CONFIRMED = 'Plan Change Confirmed',
+  CHECKOUT_STARTED = 'Checkout Started',
+  CHECKOUT_RETURNED = 'Checkout Returned',
+  FREE_ACCESS_REMINDER_VIEWED = 'Free Access Reminder Viewed',
+  WORKSPACE_LOCKED_VIEWED = 'Workspace Locked Viewed',
+  UPGRADE_PROMPT_VIEWED = 'Upgrade Prompt Viewed',
+  LOOKALIKE_ADDRESS_WARNING_SHOWN = 'Look-alike Address Warning Shown',
+  LOOKALIKE_ADDRESS_WARNING_CONTINUED = 'Look-alike Address Warning Continued',
+  LOOKALIKE_ADDRESS_WARNING_DISMISSED = 'Look-alike Address Warning Dismissed',
 }
 
 export enum WorkspaceCreateEntryPoint {
   WELCOME = 'welcome',
   SIDEBAR = 'sidebar',
+  EMPTY_STATE = 'empty_state',
+}
+
+export enum PlanSelectionEntryPoint {
+  SIDEBAR = 'sidebar',
+  REMINDER_MODAL = 'reminder_modal',
+  LOCKED_MODAL = 'locked_modal',
+  UPGRADE_PROMPT = 'upgrade_prompt',
+  DIRECT = 'direct',
+}
+
+export enum FreeAccessEntryPoint {
+  WORKSPACE_LOGIN = 'workspace_login',
+  CREATE_WORKSPACE = 'create_workspace',
+}
+
+export enum UpgradeFeature {
+  POLICIES = 'policies',
+  PROPOSERS = 'proposers',
+  SPENDING_LIMITS = 'spending_limits',
+  SAFE_SHIELD_CHECKS = 'safe_shield_checks',
+  SPONSORED_TX = 'sponsored_tx',
+  SAFE_ACCOUNTS_LIMIT = 'safe_accounts_limit',
+}
+
+/** Where a look-alike address warning was shown. */
+export enum LookalikeWarningLocation {
+  ADDRESS_BOOK_ENTRY = 'address_book_entry',
+  ADDRESS_BOOK_IMPORT = 'address_book_import',
+  ADD_SAFE = 'add_safe',
+}
+
+export enum UpgradeLocation {
+  POLICIES_PAGE = 'policies_page',
+  SETTINGS_SETUP = 'settings_setup',
+  TX_FLOW_SAFE_SHIELD = 'tx_flow_safe_shield',
+  TX_FLOW_GAS = 'tx_flow_gas',
+  SAFE_ACCOUNTS_PAGE = 'safe_accounts_page',
+}
+
+/** Where a plan can be chosen or compared. */
+export enum PlanLocation {
+  PLANS_PAGE = 'plans_page',
+  REMINDER_MODAL = 'reminder_modal',
+  LOCKED_MODAL = 'locked_modal',
+}
+
+export enum DismissAction {
+  GO_TO_MY_ACCOUNTS = 'go_to_my_accounts',
+  CANCEL = 'cancel',
+  SKIP = 'skip',
+}
+
+export enum PlanCtaKind {
+  ADD_PAYMENT_METHOD = 'add_payment_method',
+  SWITCH_PLAN = 'switch_plan',
+  CONTINUE_WITH_PLAN = 'continue_with_plan',
+}
+
+export enum BillingPeriod {
+  MONTHLY = 'monthly',
+  YEARLY = 'yearly',
+}
+
+export enum CheckoutOutcome {
+  SUCCESS = 'success',
+  CANCELLED = 'cancelled',
+}
+
+export enum SafenetCheckResult {
+  NO_ISSUES = 'no_issues',
+  RISK_DETECTED = 'risk_detected',
+  UNAVAILABLE = 'unavailable',
+  NO_RULING = 'no_ruling',
+}
+
+export enum SafenetSignerRole {
+  FIRST_SIGNER = 'first_signer',
+  CO_SIGNER = 'co_signer',
+  EXECUTOR = 'executor',
+}
+
+export enum WorkspaceCreateStep {
+  CREATE_WORKSPACE = 'create_workspace',
+  SELECT_SAFES = 'select_safes',
+  INVITE_MEMBERS = 'invite_members',
+  SURVEY = 'survey',
 }
 
 export enum MixpanelUserProperty {
@@ -140,6 +256,7 @@ export enum MixpanelEventParams {
   TX_ID = 'TX ID',
   SAFE_SELECTOR_DROPDOWN = 'Safe Selector Dropdown',
   GAS_PAYMENT_SOURCE = 'Gas Payment Source',
+  GAS_PAYMENT_OPTION = 'Gas Payment Option',
   ERROR_DOMAIN = 'Error Domain',
   ERROR_TYPE = 'Error Type',
   ERROR_LAYER = 'Error Layer',
@@ -150,11 +267,50 @@ export enum MixpanelEventParams {
   RPC_ENDPOINT_KIND = 'RPC Endpoint Kind',
   RPC_HOST = 'RPC Host',
   HTTP_STATUS = 'HTTP Status',
+  ERROR_ATTEMPT = 'Error Attempt',
+  IS_RETRY = 'Is Retry',
+  ERROR_OCCURRENCES = 'Error Occurrences',
   ACCOUNT_COUNT = 'Account Count',
   ENTRY_COUNT = 'Entry Count',
   MEMBER_ROLE = 'Member Role',
   POLICY_TYPE = 'Policy Type',
   IS_AVAILABLE = 'Is Available',
+  SPENDER_COUNT = 'Spender Count',
+  LIMIT_COUNT = 'Limit Count',
+  IS_EXECUTED = 'Is Executed',
+  PLAN_STATUS = 'Plan Status',
+  PLAN_TIER = 'Plan Tier',
+  FREE_ACCESS_DAYS_LEFT = 'Free Access Days Left',
+  FREE_ACCESS_LENGTH = 'Free Access Length',
+  USER_ROLE = 'User Role',
+  DESTINATION_URL = 'Destination URL',
+  DISMISS_ACTION = 'Dismiss Action',
+  ACCOUNTS_AVAILABLE = 'Accounts Available',
+  PLAN_LIMIT = 'Plan Limit',
+  SELECTED_COUNT = 'Selected Count',
+  DESELECTED_COUNT = 'Deselected Count',
+  STEP_NUMBER = 'Step Number',
+  STEP_NAME = 'Step Name',
+  BILLING_PERIOD = 'Billing Period',
+  TARGET_PLAN = 'Target Plan',
+  SEATS = 'Seats',
+  CTA = 'CTA',
+  PLAN_IS_CURRENT = 'Plan Is Current',
+  FROM_PLAN = 'From Plan',
+  FROM_SEATS = 'From Seats',
+  TO_SEATS = 'To Seats',
+  TO_PLAN = 'To Plan',
+  AMOUNT_DUE = 'Amount Due',
+  OUTCOME = 'Outcome',
+  FEATURE = 'Feature',
+  SPONSORED_REMAINING = 'Sponsored Remaining',
+  SPONSORED_QUOTA = 'Sponsored Quota',
+  DEFAULT_SEATS = 'Default Seats',
+  DEFAULT_BILLING_PERIOD = 'Default Billing Period',
+  RULES_FLAGGED = 'Rules Flagged',
+  SENTINELS_FLAGGED = 'Sentinels Flagged',
+  SIGNER_ROLE = 'Signer Role',
+  SAFE_TX_HASH = 'Safe Tx Hash',
 }
 
 export enum AuthLoginMethod {

@@ -1,3 +1,6 @@
+/**
+ * @jest-environment-options {"url": "http://localhost:3000/hypernative/oauth-callback"}
+ */
 import { waitFor, screen } from '@testing-library/react'
 import { render } from '@/tests/test-utils'
 import { useRouter } from 'next/router'
@@ -83,17 +86,6 @@ describe('HypernativeOAuthCallback', () => {
     Object.defineProperty(window, 'history', {
       value: {
         replaceState: mockReplaceState,
-      },
-      writable: true,
-      configurable: true,
-    })
-
-    // Setup window.location mock
-    Object.defineProperty(window, 'location', {
-      value: {
-        origin: 'http://localhost:3000',
-        pathname: '/hypernative/oauth-callback',
-        hash: '',
       },
       writable: true,
       configurable: true,

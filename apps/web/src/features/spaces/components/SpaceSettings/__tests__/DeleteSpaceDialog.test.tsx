@@ -27,10 +27,11 @@ const mockSpace: GetSpaceResponse = {
   members: [],
   safeCount: 0,
   memberCount: 0,
+  experimentalFeatures: [],
 }
 
 const renderDialog = (space = mockSpace, onClose = jest.fn()) => {
-  const store = makeStore(undefined, { skipBroadcast: true })
+  const store = makeStore()
   return {
     store,
     onClose,
@@ -51,6 +52,11 @@ describe('DeleteSpaceDialog', () => {
   it('renders the dialog with space name in the confirmation label', () => {
     renderDialog()
     expect(screen.getByText(/My Workspace/)).toBeInTheDocument()
+  })
+
+  it('should, when rendered, label the confirmation input with the prompt that contains the space name', () => {
+    renderDialog()
+    expect(screen.getByLabelText('Type My Workspace to confirm')).toBe(screen.getByTestId('space-confirm-name-input'))
   })
 
   it('confirm button is disabled when the input is empty', () => {
@@ -123,7 +129,7 @@ describe('DeleteSpaceDialog', () => {
       const notifications = store.getState().notifications
       expect(notifications.length).toBeGreaterThan(0)
       const last = notifications[notifications.length - 1]
-      expect(last.message).toBe('Deleted workspace My Workspace.')
+      expect(last.message).toBe('Deleted Workspace My Workspace.')
       expect(last.variant).toBe('success')
     })
   })
@@ -138,7 +144,7 @@ describe('DeleteSpaceDialog', () => {
     fireEvent.click(screen.getByTestId('space-confirm-delete-button'))
 
     await waitFor(() => {
-      expect(screen.getByText('Error deleting the workspace. Please try again.')).toBeInTheDocument()
+      expect(screen.getByText('Error deleting the Workspace. Please try again.')).toBeInTheDocument()
     })
   })
 
@@ -152,7 +158,7 @@ describe('DeleteSpaceDialog', () => {
     fireEvent.click(screen.getByTestId('space-confirm-delete-button'))
 
     await waitFor(() => {
-      expect(screen.getByText('Error deleting the workspace. Please try again.')).toBeInTheDocument()
+      expect(screen.getByText('Error deleting the Workspace. Please try again.')).toBeInTheDocument()
     })
     expect(mockRouterPush).not.toHaveBeenCalled()
   })

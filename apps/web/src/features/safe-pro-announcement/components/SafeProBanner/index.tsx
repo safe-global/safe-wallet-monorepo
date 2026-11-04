@@ -1,0 +1,54 @@
+import { ArrowUpRight, Sparkles } from 'lucide-react'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
+import { Card } from '@safe-global/views/components/ui/card'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
+import { SAFE_PRO_INTRO_URL } from '@/config/constants'
+import { MixpanelEventParams } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { trackSafeProBannerClick, type SafeProBannerLocation } from '../../utils/trackSafeProBannerClick'
+import css from './styles.module.css'
+import { SAFE_PRO_HEADLINE } from '../../utils/safeProHeadline'
+
+const SafeProBanner = ({
+  className,
+  location = 'workspaces_sign_in',
+}: {
+  className?: string
+  location?: SafeProBannerLocation
+}) => {
+  useTrackOnce(SAFE_PRO_EVENTS.SAFE_PRO_BANNER_VIEWED, { [MixpanelEventParams.LOCATION]: location })
+
+  return (
+    <Card
+      as="a"
+      href={SAFE_PRO_INTRO_URL}
+      onClick={() => trackSafeProBannerClick(location, SAFE_PRO_INTRO_URL)}
+      target="_blank"
+      rel="noopener noreferrer"
+      size="none"
+      radius="lg"
+      className={cn('min-h-[46px] w-full justify-center', css.banner, className)}
+    >
+      <div className="flex items-center gap-3">
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <Badge variant="subtle" shape="tag" className={css.tag}>
+            <Sparkles strokeWidth={ICON_STROKE} className="max-md:hidden" />
+            New
+          </Badge>
+          <Typography variant="paragraph-small-bold" className="truncate">
+            {SAFE_PRO_HEADLINE}
+          </Typography>
+        </div>
+
+        <span aria-hidden className={cn('hidden size-8 shrink-0 items-center justify-center md:flex', css.arrow)}>
+          <ArrowUpRight className="size-4" />
+        </span>
+      </div>
+    </Card>
+  )
+}
+
+export default SafeProBanner

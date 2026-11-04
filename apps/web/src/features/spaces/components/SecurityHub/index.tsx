@@ -1,14 +1,20 @@
 import { type ReactElement } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import SafeShieldLogoFull from '@/public/images/safe-shield/safe-shield-logo.svg'
 import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo-dark.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { useCurrentSpaceId } from '@/features/spaces'
 import SecurityHubContent from './SecurityHubContent'
 
-export type { BalanceMap, OverviewMap, SelectedSafe, SpaceSafeEntry, ChainEntry } from './types'
+export type {
+  BalanceMap,
+  OverviewMap,
+  SelectedSafe,
+  SpaceSafeEntry,
+  ChainEntry,
+} from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 // Hover treatment for the Safe Shield logo — recolours the SVG's named layers on hover,
 // mirroring the Safe Shield widget (SafeShieldDisplay).
@@ -34,12 +40,12 @@ const SecurityHub = (): ReactElement => {
     <div data-testid="security-hub">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <Typography variant="h1" className="mb-1 text-[32px] leading-9">
+          <Typography variant="h2" className="font-bold leading-none tracking-tight">
             Security hub
           </Typography>
         </div>
 
-        <ExternalLink href={HelpCenterArticle.SAFE_SHIELD} noIcon>
+        <ExternalLink href={HelpCenterArticle.SECURITY_HUB} noIcon>
           <SafeShieldLogo aria-label="Safe Shield" className={shieldLogoOnHover} />
         </ExternalLink>
       </div>

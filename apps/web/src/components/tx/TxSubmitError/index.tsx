@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getGs026Message } from '@safe-global/utils/services/exceptions/contractErrors'
 import {
+  getGasLimitTooLowMessage,
   isNonceTooLowError,
   isRateLimitError,
   isRevertError,
@@ -67,6 +68,18 @@ const TxSubmitError = ({
     return (
       <ErrorMessage error={error} level="error" context={context}>
         {getGs026Message('STALE_NONCE')}
+      </ErrorMessage>
+    )
+  }
+
+  // The gas limit set in Advanced parameters is below the transaction's intrinsic cost, so the
+  // node refused it pre-broadcast. Name the value to raise it to. Checked before the revert
+  // classification for the same reason as the nonce above: viem wraps this rejection as a revert.
+  const gasLimitTooLow = getGasLimitTooLowMessage(error)
+  if (gasLimitTooLow) {
+    return (
+      <ErrorMessage error={error} level="error" context={context}>
+        {gasLimitTooLow}
       </ErrorMessage>
     )
   }

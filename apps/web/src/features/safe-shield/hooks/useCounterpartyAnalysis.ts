@@ -14,7 +14,11 @@ import type {
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
 
-export function useCounterpartyAnalysis(overrideSafeTx?: SafeTransaction): {
+/** `enabled=false` keeps the CGW call off (Pro-only feature) while still returning idle results. */
+export function useCounterpartyAnalysis(
+  overrideSafeTx?: SafeTransaction,
+  enabled = true,
+): {
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
   deadlock: AsyncResult<DeadlockAnalysisResults>
@@ -31,7 +35,7 @@ export function useCounterpartyAnalysis(overrideSafeTx?: SafeTransaction): {
   return useCounterpartyAnalysisUtils({
     safeAddress,
     chainId,
-    safeTx: overrideSafeTx || safeTx,
+    safeTx: enabled ? overrideSafeTx || safeTx : undefined,
     isInAddressBook: mergedAddressBooks.has,
     ownedSafes,
     web3ReadOnly,

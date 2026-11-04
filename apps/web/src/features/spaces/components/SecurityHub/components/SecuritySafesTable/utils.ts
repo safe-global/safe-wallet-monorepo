@@ -2,8 +2,9 @@ import type { GradeSummary, SafeGrade, ScanResult } from '@/features/security/ty
 import type { SecurityGrade } from '@/features/security/types'
 import { SAFE_GRADE_RANK, SEVERITY_RANK, type SecurityContract } from '@/features/security'
 import { AppRoutes } from '@/config/routes'
-import { DASH } from './constants'
-import type { SpaceSafeEntry } from '../../types'
+import { buildSafeHref, type SafeHref } from '@/features/spaces/utils/safeHref'
+import { DASH } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
+import type { SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 /** Inverse of `SEVERITY_RANK` — rank index → SecurityGrade. Single source of truth for ordering. */
 const SEVERITY_BY_RANK = (Object.entries(SEVERITY_RANK) as Array<[SecurityGrade, number]>)
@@ -20,11 +21,8 @@ export type SecurityUtils = Pick<SecurityContract, 'scanKey' | 'computeSummary' 
 /** Superset used by row components: SecurityUtils + the formatters/grade helpers they render. */
 export type RowSecurity = SecurityUtils & Pick<SecurityContract, 'formatTimestamp' | 'getSafeGrade'>
 
-/** Builder returning a Safe's home URL for a given (address, chainId), or undefined if the chain has no short name. */
-export type GetSafeSecurityHref = (
-  address: string,
-  chainId: string,
-) => { pathname: string; query: { safe: string } } | undefined
+/** Builder returning a link to one of a Safe's pages for a given (address, chainId), or undefined if the chain has no short name. */
+export type GetSafeHref = (address: string, chainId: string) => SafeHref | undefined
 
 /**
  * Build the link target for a Safe's name in the Security Hub: that Safe's security settings page.
@@ -36,11 +34,19 @@ export const buildSafeSecurityHref = (
   chainShortNames: Record<string, string>,
   address: string,
   chainId: string,
-): { pathname: string; query: { safe: string } } | undefined => {
-  const shortName = chainShortNames[chainId]
-  if (!shortName) return undefined
-  return { pathname: AppRoutes.settings.security, query: { safe: `${shortName}:${address}` } }
-}
+  spaceId: string | null,
+): SafeHref | undefined => buildSafeHref(AppRoutes.settings.security, chainShortNames[chainId], address, spaceId)
+
+/** Link target for the Status cell's Update link: that Safe's Settings → Setup, where the version upgrade lives. */
+export const buildSafeUpdateHref = (
+  chainShortNames: Record<string, string>,
+  address: string,
+  chainId: string,
+  spaceId: string | null,
+): SafeHref | undefined => buildSafeHref(AppRoutes.settings.setup, chainShortNames[chainId], address, spaceId)
+
+export const hasUpgradeAvailable = (results: Record<string, ScanResult> | undefined): boolean =>
+  !!results?.['contract_version']?.upgradeAvailable
 
 /**
  * Total non-passing applicable checks for a single Safe's scan results — the same

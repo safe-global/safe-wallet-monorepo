@@ -1,10 +1,15 @@
 import groupBy from 'lodash/groupBy'
-import type { SafeAccountEntry, SafeAccountGroup, SafeAccountOption } from './types'
+import {
+  isSafeAccountGroup,
+  type SafeAccountEntry,
+  type SafeAccountGroup,
+  type SafeAccountOption,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 
 /** Same format as the topbar selector's row ids. */
 export const buildSafeAccountId = (chainId: string, address: string): string => `${chainId}:${address}`
 
-const chainLabel = (option: SafeAccountOption) => option.chain?.chainName ?? option.chainId
+export const chainLabel = (option: SafeAccountOption): string => option.chain?.chainName ?? option.chainId
 
 /** Undefined while nothing has resolved: an unknown balance must read empty, not a confident `0`. */
 const totalFiat = (options: SafeAccountOption[]): string | undefined => {
@@ -43,3 +48,9 @@ export const groupSafeAccounts = (options: SafeAccountOption[]): SafeAccountEntr
         },
   )
 }
+
+export const flattenSafeAccounts = (entries: SafeAccountEntry[]): SafeAccountOption[] =>
+  entries.flatMap((entry) => (isSafeAccountGroup(entry) ? entry.accounts : [entry]))
+
+export const findSafeAccount = (entries: SafeAccountEntry[], id: string | undefined): SafeAccountOption | undefined =>
+  id ? flattenSafeAccounts(entries).find((account) => account.id === id) : undefined

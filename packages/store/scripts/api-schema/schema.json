@@ -183,6 +183,15 @@
             "schema": {
               "type": "boolean"
             }
+          },
+          {
+            "name": "elevate",
+            "required": false,
+            "in": "query",
+            "description": "When true, requests step-up authentication: the provider re-challenges a second factor and the resulting session is elevated for sensitive actions.",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -489,6 +498,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Not an admin"
           }
         },
         "summary": "Get the billing portal session URL for a space",
@@ -575,9 +587,146 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Not an admin, or a payment link this workspace is not offered"
+          },
+          "409": {
+            "description": "This plan doesn't offer enough Safe seats for the workspace's current Safes"
           }
         },
         "summary": "Create a checkout session for a payment link",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/spaces/{spaceId}/subscriptions/{subscriptionId}/preview-update": {
+      "get": {
+        "operationId": "billingPreviewSubscriptionUpdateV1",
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "required": true,
+            "in": "path",
+            "description": "Subscription identifier",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "planId",
+            "required": true,
+            "in": "query",
+            "description": "The price id of the plan to preview",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubscriptionUpdatePreview"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not an admin, or a plan this workspace is not offered"
+          },
+          "404": {
+            "description": "Subscription not found"
+          },
+          "409": {
+            "description": "Already on this plan"
+          },
+          "422": {
+            "description": "Malformed subscriptionId or planId"
+          }
+        },
+        "summary": "Preview what moving a subscription to another plan would cost",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/billing/spaces/{spaceId}/subscriptions/{subscriptionId}": {
+      "patch": {
+        "description": "Safes in `removedSafes` are removed from the workspace first, then the plan changes. If the plan change fails after that, the answer is 502 and sending the same request again finishes it.",
+        "operationId": "billingUpdateSubscriptionV1",
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "required": true,
+            "in": "path",
+            "description": "Subscription identifier",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSubscriptionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateSubscriptionResult"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not an admin, a plan this workspace is not offered, or a named paymentLinkId this workspace is not offered"
+          },
+          "404": {
+            "description": "Subscription not found"
+          },
+          "409": {
+            "description": "One of:\n- Already on this plan\n- The subscription is not in an updatable state\n- Several offered links sell the plan and none was named\n- The target plan doesn't offer enough Safe seats for the workspace's current Safes"
+          },
+          "422": {
+            "description": "The named payment link does not offer this plan"
+          },
+          "502": {
+            "description": "The billing service reported the plan change as unsuccessful, or failed after `removedSafes` were removed"
+          }
+        },
+        "summary": "Move a subscription onto another plan",
         "tags": [
           "billing"
         ]
@@ -1844,6 +1993,9 @@
           },
           "404": {
             "description": "Message not found"
+          },
+          "422": {
+            "description": "Invalid chainId or messageHash"
           }
         },
         "summary": "Get message by hash",
@@ -1899,6 +2051,9 @@
           },
           "404": {
             "description": "Safe not found on the specified chain"
+          },
+          "422": {
+            "description": "Invalid chainId or safeAddress"
           }
         },
         "summary": "Get messages for Safe",
@@ -1947,6 +2102,9 @@
           },
           "400": {
             "description": "Invalid message format or signature"
+          },
+          "422": {
+            "description": "Invalid chainId, safeAddress or request body"
           }
         },
         "summary": "Create message",
@@ -2000,6 +2158,9 @@
           },
           "404": {
             "description": "Message not found"
+          },
+          "422": {
+            "description": "Invalid chainId, messageHash or request body"
           }
         },
         "summary": "Add message signature",
@@ -2049,6 +2210,9 @@
           },
           "404": {
             "description": "User not found - the authenticated wallet is not associated with any user"
+          },
+          "409": {
+            "description": "User is the last admin of at least one workspace - promote another admin or delete the workspace first"
           }
         },
         "summary": "Delete user",
@@ -2198,10 +2362,10 @@
             "description": "Authentication required - valid JWT token must be provided"
           },
           "403": {
-            "description": "Access forbidden - user is not a member of this space"
+            "description": "Access forbidden - user is not an active member of this space"
           },
           "404": {
-            "description": "User, member, or space not found"
+            "description": "Space not found"
           }
         },
         "summary": "Get space address book",
@@ -2253,10 +2417,10 @@
             "description": "Authentication required - valid JWT token must be provided"
           },
           "403": {
-            "description": "Access forbidden - user is not authorized to modify this address book"
+            "description": "Access forbidden - user is not an active admin of this space"
           },
           "404": {
-            "description": "User, member, or space not found"
+            "description": "Space not found"
           }
         },
         "summary": "Update space address book",
@@ -2298,10 +2462,10 @@
             "description": "Invalid space identifier"
           },
           "403": {
-            "description": "Access forbidden - user is not authorized to modify this address book"
+            "description": "Access forbidden - user is not an active admin of this space"
           },
           "404": {
-            "description": "User, member, space, or address book entry not found"
+            "description": "Space not found"
           }
         },
         "summary": "Delete address book entry",
@@ -2890,6 +3054,9 @@
           "401": {
             "description": "Authentication required or user unauthorized to modify this space"
           },
+          "402": {
+            "description": "The space is at its plan's Safe seat limit. The body carries `{ code: \"QUOTA_EXCEEDED\", feature, quota, used, resetsAt }`"
+          },
           "403": {
             "description": "Access forbidden - user lacks permission to add Safes to this space"
           },
@@ -2990,6 +3157,38 @@
           }
         },
         "summary": "Remove Safes from space",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/safes": {
+      "get": {
+        "description": "Retrieves the Safes of every space the user is an active member of, one entry per space with its Safes grouped by chain like the per-space endpoint. A space without Safes has an empty `safes` object.",
+        "operationId": "spaceSafesGetAllV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Safes of all spaces retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetSpacesSafesResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Access forbidden - missing or invalid authentication"
+          }
+        },
+        "summary": "Get Safes of all spaces",
         "tags": [
           "spaces"
         ]
@@ -3614,6 +3813,404 @@
         ]
       }
     },
+    "/v1/spaces/{spaceId}/chains/{chainId}/security/{safeAddress}/recipient/{recipientAddress}": {
+      "get": {
+        "description": "Performs real-time security analysis of a recipient address for a Safe registered to a Space, gated by the copilot_scans plan entitlement.",
+        "operationId": "spaceSafeShieldAnalyzeRecipientV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address, must be registered to the Space",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "recipientAddress",
+            "required": true,
+            "in": "path",
+            "description": "Recipient address to analyze",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recipient interaction analysis results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleRecipientAnalysisDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "402": {
+            "description": "The Space has no copilot_scans entitlement. The body carries `{ code: \"FEATURE_NOT_GRANTED\", feature }`"
+          },
+          "403": {
+            "description": "Not a member of this Space, or the Safe is not registered to it"
+          }
+        },
+        "summary": "Analyze recipient address on a Space",
+        "tags": [
+          "safe-shield"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/chains/{chainId}/security/{safeAddress}/counterparty-analysis": {
+      "post": {
+        "description": "Performs combined contract and recipient analysis for a Safe transaction on a Safe registered to a Space, gated by the copilot_scans plan entitlement.",
+        "operationId": "spaceSafeShieldAnalyzeCounterpartyV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address, must be registered to the Space",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Transaction data used to analyze all counterparties involved.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CounterpartyAnalysisRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Combined counterparty analysis including recipients and contracts grouped by status group and mapped to an address.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CounterpartyAnalysisDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "402": {
+            "description": "The Space has no copilot_scans entitlement. The body carries `{ code: \"FEATURE_NOT_GRANTED\", feature }`"
+          },
+          "403": {
+            "description": "Not a member of this Space, or the Safe is not registered to it"
+          }
+        },
+        "summary": "Analyze transaction counterparties on a Space",
+        "tags": [
+          "safe-shield"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/chains/{chainId}/safes/{safeAddress}/policies/requests": {
+      "post": {
+        "description": "Stores the `Configuration[]` behind a `requestConfiguration(root)`, which publishes only the hash on-chain, so that the configurations a later `applyConfiguration` needs survive the delay. Call it before requesting the configuration on-chain: the root is recomputed from the configurations and has to match, but it is not required to exist on-chain yet. Idempotent: storing the same root again is a no-op.",
+        "operationId": "policiesCreateConfigurationRequestV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID the Safe belongs to",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "11155111",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address, must be registered to the Space",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePolicyConfigurationRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePolicyConfigurationRequestResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier, or the Safe holds the maximum number of stored requests in this space"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Access forbidden - user is not a member of this space, or the Safe is not in it"
+          },
+          "422": {
+            "description": "Invalid chain ID, Safe address or body, or the configurations do not hash to the given root"
+          }
+        },
+        "summary": "Store the configurations of a delayed configuration request",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/policies/active": {
+      "get": {
+        "description": "Returns the policies of every Safe in the Space. A Safe whose enabled modules and guards could not be read is omitted from the spending-limit and guard-enforced policies; a Safe whose delegates could not be read is omitted from the proposer policies.",
+        "operationId": "spacePoliciesGetActivePoliciesV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "types",
+            "required": true,
+            "in": "query",
+            "description": "The policy types to report, comma-separated.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "safes",
+            "required": false,
+            "in": "query",
+            "description": "Narrow the read to a subset of the Space's Safes, comma-separated as `{chainId}:{safeAddress}`",
+            "schema": {
+              "example": "11155111:0x0000000000000000000000000000000000000000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ActivePolicyDto"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier"
+          },
+          "403": {
+            "description": "Access forbidden - authentication missing or invalid, or user is not a member of this space"
+          },
+          "422": {
+            "description": "Invalid CAIP-10 address, a Safe outside this space, or a missing or unknown policy type"
+          },
+          "503": {
+            "description": "The policy api is unavailable"
+          }
+        },
+        "summary": "Get the active policies on Safes in a Space",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/policies/pending": {
+      "get": {
+        "description": "Returns the pending policy changes of every Safe in the Space. Queued calls are detected only when made directly or one level inside a MultiSend batch, and only against known AllowanceModule and SafePolicyGuard deployments - a change made through a nested MultiSend, a custom batching contract, or a Safe module bypassing the owner queue is not detected.",
+        "operationId": "spacePoliciesGetPendingPoliciesV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "types",
+            "required": true,
+            "in": "query",
+            "description": "The policy types to report, comma-separated. `spending-limit` returns queued AllowanceModule changes. A guard type (`allow`, `deny`, `cosigner`, `erc20-transfer`, `multisend`, `native-transfer`) returns the delayed `SafePolicyGuard` configurations that may set a policy of that type. `proposer` and `recovery` return none.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "safes",
+            "required": false,
+            "in": "query",
+            "description": "Narrow the read to a subset of the Space's Safes, comma-separated as `{chainId}:{safeAddress}`",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "include_guard_installation",
+            "required": false,
+            "in": "query",
+            "description": "Also report the queued `setGuard` and `setModuleGuard` calls that install, replace or remove a `SafePolicyGuard` on each Safe, as `guard-installation` items.",
+            "schema": {
+              "default": false,
+              "example": true,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/PendingPolicyDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/PendingGuardInstallationDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/PendingImmediateGuardPoliciesDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/PendingDelayedGuardPoliciesDto"
+                      }
+                    ],
+                    "discriminator": {
+                      "propertyName": "kind",
+                      "mapping": {
+                        "queued-transaction": "#/components/schemas/PendingPolicyDto",
+                        "guard-installation": "#/components/schemas/PendingGuardInstallationDto",
+                        "immediate-guard-policies": "#/components/schemas/PendingImmediateGuardPoliciesDto",
+                        "delayed-guard-policies": "#/components/schemas/PendingDelayedGuardPoliciesDto"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier"
+          },
+          "403": {
+            "description": "Access forbidden - authentication missing or invalid, or user is not a member of this space"
+          },
+          "422": {
+            "description": "Invalid CAIP-10 address, a Safe outside this space, a missing or unknown policy type, or an `include_guard_installation` value other than `true` or `false`"
+          },
+          "503": {
+            "description": "The policy api is unavailable"
+          }
+        },
+        "summary": "Get the pending policy changes on Safes in a Space",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
     "/v1/spaces/{spaceId}/surveys/{slug}/state": {
       "get": {
         "description": "Returns the active survey definition and this space's response (if any) in a single round trip. Only active admins of the space can read survey state.",
@@ -3731,6 +4328,246 @@
         "summary": "Submit a survey response for a space",
         "tags": [
           "surveys"
+        ]
+      }
+    },
+    "/v1/spaces/entitlements": {
+      "get": {
+        "description": "The entitlements of every workspace the user is an active member of, keyed by workspace UUID. Each value is what the per-workspace endpoint returns.",
+        "operationId": "entitlementsGetAllEntitlementsV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/EntitlementsResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Access forbidden - missing or invalid authentication"
+          }
+        },
+        "summary": "Get entitlements of all spaces",
+        "tags": [
+          "entitlements"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/entitlements": {
+      "get": {
+        "description": "The single source of truth for what a workspace can do: the active plan and per-feature entitlements, with quotas and usage for metered ones. Free-tier workspaces get the same contract shape.",
+        "operationId": "entitlementsGetEntitlementsV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntitlementsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Access forbidden - user is not a member of this space"
+          },
+          "404": {
+            "description": "Space not found"
+          }
+        },
+        "summary": "Get space entitlements",
+        "tags": [
+          "entitlements"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/chains/{chainId}/relay": {
+      "post": {
+        "description": "Relays a Safe transaction against the workspace's sponsored-transaction allowance, which its plan grants and this spends one unit of per call — a batch included. The chain must list SUBSCRIPTION among its gas payment options; no other option applies here. A call acting on an existing Safe is admitted only for a Safe the workspace holds; a Safe creation or a passkey signer deployment, having no Safe yet, is admitted as it is there.",
+        "operationId": "spaceRelayRelayV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe transaction will be executed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpaceRelayDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Transaction relayed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Relay"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed workspace identifier"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "402": {
+            "description": "The workspace's sponsored-transaction allowance is spent. The body carries `quota`, `used` and `resetsAt` so a client can offer to pay for the transaction itself."
+          },
+          "403": {
+            "description": "Not a member of the workspace, or the transaction was denied"
+          },
+          "404": {
+            "description": "Workspace not found"
+          },
+          "409": {
+            "description": "SUBSCRIPTION cannot pay for this request: the chain does not list it or has no relayer, the Safe is not one the workspace holds, or the transaction refunds gas (`gasPrice` > 0).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GasPaymentOptionUnavailableResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request failed schema validation, or the transaction was simulated and would revert (SIMULATION_FAILED) or could not be simulated (INDETERMINATE_SIMULATION)"
+          }
+        },
+        "summary": "Relay a transaction at a workspace's expense",
+        "tags": [
+          "relay"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/chains/{chainId}/safes/{safeAddress}/safenet/checks": {
+      "post": {
+        "description": "Queues a Safenet check of a pending Safe transaction that an owner has signed. Safe Labs pays the fee and counts the check against the workspace in the path. The caller must be an active member of that workspace, the workspace must hold the Safe and its plan must grant policies (Business and Enterprise), and the chain must list SAFENET_CHECKS.",
+        "operationId": "safenetChecksRequestCheckV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSafenetCheckDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Queued, or already queued"
+          },
+          "400": {
+            "description": "Malformed workspace identifier"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "402": {
+            "description": "The workspace plan does not grant policies, which Safenet checks share. The body carries `{ code: \"FEATURE_NOT_GRANTED\", feature }`"
+          },
+          "403": {
+            "description": "Not a member of the workspace, or the workspace does not hold the Safe"
+          },
+          "404": {
+            "description": "Workspace not found, or no such transaction for this Safe"
+          },
+          "422": {
+            "description": "The Safe is older than 1.3.0, or the transaction is executed or stale, unsigned by an owner, or of another Safe"
+          },
+          "429": {
+            "description": "The workspace has used its daily limit of sponsored Safenet checks"
+          },
+          "501": {
+            "description": "Safenet checks are not available on this chain"
+          }
+        },
+        "summary": "Request a Safenet check at a workspace expense",
+        "tags": [
+          "safenet"
         ]
       }
     },
@@ -3915,6 +4752,16 @@
           "403": {
             "description": "Relay denied: safeTxHash missing, fee service rejected, or unofficial proxy factory"
           },
+          "409": {
+            "description": "A transaction that refunds gas (`gasPrice` > 0) needs PAY_FROM_SAFE, which the chain does not offer.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GasPaymentOptionUnavailableResponse"
+                }
+              }
+            }
+          },
           "422": {
             "description": "Relay rejected. The consumers MUST branch on the `code` field; `message` is informational. Possible cases: safeTxHash does not match the transaction data, unrecognised transaction type, SIMULATION_FAILED (Tenderly confirmed revert), or INDETERMINATE_SIMULATION (simulator unreachable; retry with `acceptUnverifiedSimulation=true` to proceed anyway).",
             "schema": {
@@ -4010,7 +4857,7 @@
     },
     "/v1/chains/{chainId}/relay/{safeAddress}": {
       "get": {
-        "description": "Retrieves the number of remaining relay transactions available for a specific Safe on the given chain. On relay-fee chains, safeTxHash is forwarded to the fee service to determine per-transaction eligibility (returns remaining=1 when eligible, 0 when not). On daily-limit and no-fee-campaign chains, a count-based quota is returned.",
+        "description": "Retrieves the free relays left for a specific Safe on the given chain: the no-fee campaign quota where the chain lists NO_FEE_CAMPAIGN, otherwise the daily limit where it lists FREE_DAILY_LIMIT.",
         "operationId": "relayGetRelaysRemainingV1",
         "parameters": [
           {
@@ -4036,7 +4883,7 @@
             "name": "safeTxHash",
             "required": false,
             "in": "query",
-            "description": "Safe transaction hash (0x prefixed hex string). Required on relay-fee chains to check per-transaction eligibility with the fee service. Optional on daily-limit and no-fee-campaign chains.",
+            "description": "Safe transaction hash (0x prefixed hex string). Ignored; kept so existing clients do not break.",
             "schema": {
               "type": "string"
             }
@@ -4052,6 +4899,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "The chain has no relayer or lists no free option, such as a chain that only lists PAY_FROM_SAFE"
           }
         },
         "summary": "Get remaining relays",
@@ -4393,6 +5243,9 @@
                 }
               }
             }
+          },
+          "402": {
+            "description": "Disabled on Core. The body carries `{ code: \"SAFE_SHIELD_DISABLED_ON_CORE\", message }`."
           }
         },
         "summary": "Analyze recipient address",
@@ -5054,7 +5907,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Transaction"
+                  "$ref": "#/components/schemas/TransactionDetails"
                 }
               }
             }
@@ -5583,7 +6436,7 @@
     "/v1/chains/{chainId}/delegates": {
       "get": {
         "deprecated": true,
-        "description": "Retrieves a paginated list of delegates for a specific chain. This endpoint is deprecated, please use the v2 version instead.",
+        "description": "Retrieves a paginated list of delegates for a specific chain. This endpoint is deprecated, please use the v3 version instead.",
         "operationId": "delegatesGetDelegatesV1",
         "parameters": [
           {
@@ -5661,7 +6514,7 @@
       },
       "post": {
         "deprecated": true,
-        "description": "Creates a new delegate for a specific chain. This endpoint is deprecated, please use the v2 version instead.",
+        "description": "Creates a new delegate for a specific chain. This endpoint is deprecated, please use the v3 version instead.",
         "operationId": "delegatesPostDelegateV1",
         "parameters": [
           {
@@ -5703,7 +6556,7 @@
     "/v1/chains/{chainId}/delegates/{delegateAddress}": {
       "delete": {
         "deprecated": true,
-        "description": "Deletes a delegate for a specific chain and address. This endpoint is deprecated, please use the v2 version instead.",
+        "description": "Deletes a delegate for a specific chain and address. This endpoint is deprecated, please use the v3 version instead.",
         "operationId": "delegatesDeleteDelegateV1",
         "parameters": [
           {
@@ -5754,7 +6607,7 @@
     "/v1/chains/{chainId}/safes/{safeAddress}/delegates/{delegateAddress}": {
       "delete": {
         "deprecated": true,
-        "description": "Removes a delegate from a specific Safe. This endpoint is deprecated, please use the v2 version instead.",
+        "description": "Removes a delegate from a specific Safe. This endpoint is deprecated, please use the v3 version instead.",
         "operationId": "delegatesDeleteSafeDelegateV1",
         "parameters": [
           {
@@ -5813,8 +6666,179 @@
     },
     "/v2/chains/{chainId}/delegates": {
       "get": {
-        "description": "Retrieves a paginated list of delegates for a specific chain with optional filtering by Safe, delegate, delegator, or label.",
+        "deprecated": true,
+        "description": "Retrieves a paginated list of delegates for a specific chain with optional filtering by Safe, delegate, delegator, or label. This endpoint is deprecated, please use the v3 version instead.",
         "operationId": "delegatesGetDelegatesV2",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where delegates are registered",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "label",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegate label or name",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegator",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegator address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegate",
+            "required": false,
+            "in": "query",
+            "description": "Filter by delegate address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "safe",
+            "required": false,
+            "in": "query",
+            "description": "Filter by Safe address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of delegates retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DelegatePage"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get delegates (deprecated)",
+        "tags": [
+          "delegates"
+        ]
+      },
+      "post": {
+        "deprecated": true,
+        "description": "Creates a new delegate relationship between a Safe and a delegate address. Requires proper authorization signature. This endpoint is deprecated, please use the v3 version instead.",
+        "operationId": "delegatesPostDelegateV2",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the delegate will be registered",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Delegate creation data including Safe address, delegate address, label, and authorization signature",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDelegateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Delegate created successfully"
+          },
+          "400": {
+            "description": "Invalid delegate data, signature, or unauthorized creation attempt"
+          }
+        },
+        "summary": "Create delegate (deprecated)",
+        "tags": [
+          "delegates"
+        ]
+      }
+    },
+    "/v2/chains/{chainId}/delegates/{delegateAddress}": {
+      "delete": {
+        "deprecated": true,
+        "description": "Removes a delegate relationship for a specific delegate address. Requires proper authorization signature. This endpoint is deprecated, please use the v3 version instead.",
+        "operationId": "delegatesDeleteDelegateV2",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the delegate is registered",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "delegateAddress",
+            "required": true,
+            "in": "path",
+            "description": "Delegate address to remove (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Signature and data proving authorization to delete the delegate",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteDelegateV2Dto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Delegate deleted successfully"
+          },
+          "400": {
+            "description": "Invalid signature or unauthorized deletion attempt"
+          }
+        },
+        "summary": "Delete delegate (deprecated)",
+        "tags": [
+          "delegates"
+        ]
+      }
+    },
+    "/v3/chains/{chainId}/delegates": {
+      "get": {
+        "description": "Retrieves a paginated list of delegates for a specific chain with optional filtering by Safe, delegate, delegator, or label.",
+        "operationId": "delegatesGetDelegatesV3",
         "parameters": [
           {
             "name": "chainId",
@@ -5891,7 +6915,7 @@
       },
       "post": {
         "description": "Creates a new delegate relationship between a Safe and a delegate address. Requires proper authorization signature.",
-        "operationId": "delegatesPostDelegateV2",
+        "operationId": "delegatesPostDelegateV3",
         "parameters": [
           {
             "name": "chainId",
@@ -5927,12 +6951,51 @@
         "tags": [
           "delegates"
         ]
+      },
+      "patch": {
+        "description": "Updates an existing delegate relationship (e.g. the delegate label). Requires proper authorization signature.",
+        "operationId": "delegatesUpdateDelegateV3",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the delegate is registered",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Delegate update data including Safe address, delegate address, delegator, label, and authorization signature",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDelegateV3Dto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Delegate updated successfully"
+          },
+          "400": {
+            "description": "Invalid delegate data, signature, or unauthorized update attempt"
+          }
+        },
+        "summary": "Update delegate",
+        "tags": [
+          "delegates"
+        ]
       }
     },
-    "/v2/chains/{chainId}/delegates/{delegateAddress}": {
+    "/v3/chains/{chainId}/delegates/{delegateAddress}": {
       "delete": {
         "description": "Removes a delegate relationship for a specific delegate address. Requires proper authorization signature.",
-        "operationId": "delegatesDeleteDelegateV2",
+        "operationId": "delegatesDeleteDelegateV3",
         "parameters": [
           {
             "name": "chainId",
@@ -5960,7 +7023,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DeleteDelegateV2Dto"
+                "$ref": "#/components/schemas/DeleteDelegateV3Dto"
               }
             }
           }
@@ -5976,6 +7039,131 @@
         "summary": "Delete delegate",
         "tags": [
           "delegates"
+        ]
+      }
+    },
+    "/v1/chains/{chainId}/tokens/{address}": {
+      "get": {
+        "description": "Symbol, name, decimals, logo and trust flag of a token on the given chain, as known by the Transaction Service.",
+        "operationId": "tokensGetTokenV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID the token is deployed on",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "address",
+            "required": true,
+            "in": "path",
+            "description": "Token contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/NativeTokenMetadata"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Erc20TokenMetadata"
+                    },
+                    {
+                      "$ref": "#/components/schemas/Erc721TokenMetadata"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The Transaction Service does not know this token"
+          },
+          "422": {
+            "description": "Invalid chain ID or address"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Get token metadata",
+        "tags": [
+          "tokens"
+        ]
+      }
+    },
+    "/v1/chains/{chainId}/tokens": {
+      "get": {
+        "description": "Metadata for up to 20 tokens of one chain, in request order. Addresses the Transaction Service does not know are omitted.",
+        "operationId": "tokensGetTokensV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID the token is deployed on",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "addresses",
+            "required": true,
+            "in": "query",
+            "description": "Comma-separated token contract addresses, at most 20",
+            "schema": {
+              "example": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48,0xdAC17F958D2ee523a2206206994597C13D831ec7",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token metadata for the known addresses, in request order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/NativeTokenMetadata"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Erc20TokenMetadata"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Erc721TokenMetadata"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid chain ID, malformed address, empty list or more than 20 addresses"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Get metadata for several tokens",
+        "tags": [
+          "tokens"
         ]
       }
     },
@@ -6321,7 +7509,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main",
+    "version": "main-97f5b80",
     "contact": {}
   },
   "tags": [],
@@ -6617,17 +7805,10 @@
             "nullable": true
           },
           "paymentMethod": {
-            "type": "string",
-            "enum": [
-              "fiat"
-            ]
+            "type": "string"
           },
           "currency": {
-            "type": "string",
-            "enum": [
-              "usd",
-              "eur"
-            ]
+            "type": "string"
           },
           "features": {
             "type": "array",
@@ -6637,19 +7818,10 @@
           },
           "billingCycle": {
             "type": "string",
-            "enum": [
-              "month",
-              "year"
-            ],
             "nullable": true
           },
           "type": {
-            "type": "string",
-            "enum": [
-              "standard",
-              "premium",
-              "enterprise"
-            ]
+            "type": "string"
           },
           "product": {
             "type": "string",
@@ -6709,13 +7881,21 @@
             "type": "number",
             "nullable": true
           },
-          "validUntil": {
+          "currentPeriodStart": {
+            "type": "number",
+            "nullable": true
+          },
+          "currentPeriodEnd": {
             "type": "number",
             "nullable": true
           },
           "metadata": {
             "type": "object",
             "nullable": true
+          },
+          "hasPaymentMethod": {
+            "type": "boolean",
+            "description": "Whether the subscription has a default payment method, or its customer does as a fallback"
           }
         },
         "required": [
@@ -6797,17 +7977,10 @@
             "nullable": true
           },
           "paymentMethod": {
-            "type": "string",
-            "enum": [
-              "fiat"
-            ]
+            "type": "string"
           },
           "currency": {
-            "type": "string",
-            "enum": [
-              "usd",
-              "eur"
-            ]
+            "type": "string"
           },
           "features": {
             "type": "array",
@@ -6817,19 +7990,10 @@
           },
           "billingCycle": {
             "type": "string",
-            "enum": [
-              "month",
-              "year"
-            ],
             "nullable": true
           },
           "type": {
-            "type": "string",
-            "enum": [
-              "standard",
-              "premium",
-              "enterprise"
-            ]
+            "type": "string"
           },
           "product": {
             "$ref": "#/components/schemas/Product"
@@ -6863,9 +8027,6 @@
           "id": {
             "type": "string"
           },
-          "url": {
-            "type": "string"
-          },
           "active": {
             "type": "boolean"
           },
@@ -6883,11 +8044,14 @@
             "items": {
               "type": "object"
             }
+          },
+          "trialPeriodDays": {
+            "type": "number",
+            "nullable": true
           }
         },
         "required": [
           "id",
-          "url",
           "active",
           "metadata"
         ]
@@ -6905,6 +8069,106 @@
         "required": [
           "sessionId",
           "url"
+        ]
+      },
+      "PreviewLineItem": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Signed amount in minor units; negative for credit on unused time"
+          },
+          "currency": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "amount",
+          "currency"
+        ]
+      },
+      "SubscriptionUpdatePreview": {
+        "type": "object",
+        "properties": {
+          "amountDue": {
+            "type": "number"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "nextBillingDate": {
+            "type": "number",
+            "description": "Unix timestamp in seconds"
+          },
+          "lineItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PreviewLineItem"
+            }
+          }
+        },
+        "required": [
+          "amountDue",
+          "currency",
+          "nextBillingDate",
+          "lineItems"
+        ]
+      },
+      "RemovedSafeDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId",
+          "address"
+        ]
+      },
+      "UpdateSubscriptionDto": {
+        "type": "object",
+        "properties": {
+          "planId": {
+            "type": "string",
+            "description": "The price id of the plan to move the subscription onto"
+          },
+          "paymentLinkId": {
+            "type": "string",
+            "description": "Which offered payment link sells that plan. Only needed to disambiguate when several do"
+          },
+          "removedSafes": {
+            "description": "Safes to remove from the workspace before the plan changes, so it fits the new plan. Safes the workspace does not hold are ignored",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RemovedSafeDto"
+            }
+          }
+        },
+        "required": [
+          "planId"
+        ]
+      },
+      "UpdateSubscriptionResult": {
+        "type": "object",
+        "properties": {
+          "subscriptionId": {
+            "type": "string"
+          },
+          "success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "subscriptionId",
+          "success"
         ]
       },
       "CheckoutSession": {
@@ -7651,17 +8915,33 @@
             "type": "boolean"
           },
           "safeTransactionSponsored": {
-            "type": "boolean"
+            "type": "boolean",
+            "deprecated": true,
+            "description": "Use gasPaymentOptions instead."
           },
           "enableTenderlySimulationBeforeRelay": {
             "type": "boolean"
+          },
+          "gasPaymentOptions": {
+            "type": "array",
+            "description": "Who may pay for a relayed transaction on this chain.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "FREE_DAILY_LIMIT",
+                "SUBSCRIPTION",
+                "PAY_FROM_SAFE",
+                "NO_FEE_CAMPAIGN"
+              ]
+            }
           }
         },
         "required": [
           "type",
           "safeCreationSponsored",
           "safeTransactionSponsored",
-          "enableTenderlySimulationBeforeRelay"
+          "enableTenderlySimulationBeforeRelay",
+          "gasPaymentOptions"
         ]
       },
       "Chain": {
@@ -9053,6 +10333,9 @@
           },
           "version": {
             "type": "string"
+          },
+          "safe": {
+            "type": "string"
           }
         }
       },
@@ -9120,6 +10403,29 @@
           "signature"
         ]
       },
+      "SafeAppInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "logoUri": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "url"
+        ]
+      },
       "Message": {
         "type": "object",
         "properties": {
@@ -9135,11 +10441,13 @@
           },
           "logoUri": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
           },
           "name": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
           },
           "message": {
             "oneOf": [
@@ -9164,7 +10472,13 @@
             "type": "number"
           },
           "proposedBy": {
-            "$ref": "#/components/schemas/AddressInfo"
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AddressInfo"
+              }
+            ]
           },
           "confirmations": {
             "type": "array",
@@ -9179,18 +10493,38 @@
           "origin": {
             "type": "string",
             "nullable": true
+          },
+          "safeAppInfo": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeAppInfo"
+              }
+            ]
+          },
+          "safeAppId": {
+            "type": "number",
+            "nullable": true,
+            "deprecated": true
           }
         },
         "required": [
           "messageHash",
           "status",
+          "logoUri",
+          "name",
           "message",
           "creationTimestamp",
           "modifiedTimestamp",
           "confirmationsSubmitted",
           "confirmationsRequired",
           "proposedBy",
-          "confirmations"
+          "confirmations",
+          "preparedSignature",
+          "origin",
+          "safeAppInfo",
+          "safeAppId"
         ]
       },
       "MessageItem": {
@@ -9208,11 +10542,13 @@
           },
           "logoUri": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
           },
           "name": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "deprecated": true
           },
           "message": {
             "oneOf": [
@@ -9237,7 +10573,13 @@
             "type": "number"
           },
           "proposedBy": {
-            "$ref": "#/components/schemas/AddressInfo"
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AddressInfo"
+              }
+            ]
           },
           "confirmations": {
             "type": "array",
@@ -9253,6 +10595,20 @@
             "type": "string",
             "nullable": true
           },
+          "safeAppInfo": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeAppInfo"
+              }
+            ]
+          },
+          "safeAppId": {
+            "type": "number",
+            "nullable": true,
+            "deprecated": true
+          },
           "type": {
             "type": "string",
             "enum": [
@@ -9263,6 +10619,8 @@
         "required": [
           "messageHash",
           "status",
+          "logoUri",
+          "name",
           "message",
           "creationTimestamp",
           "modifiedTimestamp",
@@ -9270,6 +10628,10 @@
           "confirmationsRequired",
           "proposedBy",
           "confirmations",
+          "preparedSignature",
+          "origin",
+          "safeAppInfo",
+          "safeAppId",
           "type"
         ]
       },
@@ -9758,6 +11120,16 @@
             "type": "number",
             "description": "Total count of Safes in the space",
             "example": 5
+          },
+          "experimentalFeatures": {
+            "type": "array",
+            "description": "Experimental features this Workspace has opted into.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "POLICY_RECIPIENT_ALLOWLIST"
+              ]
+            }
           }
         },
         "required": [
@@ -9765,7 +11137,8 @@
           "name",
           "members",
           "memberCount",
-          "safeCount"
+          "safeCount",
+          "experimentalFeatures"
         ]
       },
       "UpdateSpaceDto": {
@@ -9779,6 +11152,16 @@
             "enum": [
               "ACTIVE"
             ]
+          },
+          "experimentalFeatures": {
+            "type": "array",
+            "description": "Replaces the stored set; [] opts out of all. Omit to leave it unchanged.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "POLICY_RECIPIENT_ALLOWLIST"
+              ]
+            }
           }
         }
       },
@@ -9818,7 +11201,9 @@
               "SAFE_ADDED",
               "SAFE_REMOVED",
               "ADDRESS_BOOK_UPSERTED",
-              "ADDRESS_BOOK_DELETED"
+              "ADDRESS_BOOK_DELETED",
+              "ADDRESS_BOOK_REQUEST_CREATED",
+              "ADDRESS_BOOK_REQUEST_REJECTED"
             ]
           },
           "actorUserId": {
@@ -9917,10 +11302,44 @@
             "items": {
               "$ref": "#/components/schemas/SpaceSafeDto"
             }
+          },
+          "addressBookItems": {
+            "description": "Address book entries to upsert for the added Safes, in the same transaction: if either write fails, neither is kept.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressBookItem"
+            }
           }
         },
         "required": [
           "safes"
+        ]
+      },
+      "GetSpacesSafesResponse": {
+        "type": "object",
+        "properties": {
+          "safes": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "example": {
+              "{chainId}": [
+                "0x..."
+              ]
+            }
+          },
+          "spaceUuid": {
+            "type": "string",
+            "description": "Space UUID"
+          }
+        },
+        "required": [
+          "safes",
+          "spaceUuid"
         ]
       },
       "GetSpaceSafeResponse": {
@@ -10114,12 +11533,17 @@
           "email": {
             "type": "string",
             "nullable": true
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
           "id",
           "status",
-          "email"
+          "email",
+          "address"
         ]
       },
       "MemberDto": {
@@ -10435,645 +11859,6 @@
         },
         "required": [
           "safes"
-        ]
-      },
-      "SurveyOptionDto": {
-        "type": "object",
-        "properties": {
-          "key": {
-            "type": "string"
-          },
-          "label": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "icon": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "key",
-          "label"
-        ]
-      },
-      "SurveyPageDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "subtitle": {
-            "type": "string",
-            "nullable": true
-          },
-          "multiSelect": {
-            "type": "boolean"
-          },
-          "options": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SurveyOptionDto"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "title",
-          "subtitle",
-          "multiSelect",
-          "options"
-        ]
-      },
-      "SurveyContentDto": {
-        "type": "object",
-        "properties": {
-          "pages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SurveyPageDto"
-            }
-          }
-        },
-        "required": [
-          "pages"
-        ]
-      },
-      "SurveyDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "slug": {
-            "type": "string"
-          },
-          "version": {
-            "type": "number"
-          },
-          "title": {
-            "type": "string"
-          },
-          "subtitle": {
-            "type": "string",
-            "nullable": true
-          },
-          "surveyContent": {
-            "$ref": "#/components/schemas/SurveyContentDto"
-          }
-        },
-        "required": [
-          "id",
-          "slug",
-          "version",
-          "title",
-          "subtitle",
-          "surveyContent"
-        ]
-      },
-      "SpaceSurveyResponseDto": {
-        "type": "object",
-        "properties": {
-          "surveyVersion": {
-            "type": "number"
-          },
-          "selections": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "description": "Map from page id → selected option keys"
-          },
-          "submittedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "answeredByUserId": {
-            "type": "number",
-            "nullable": true
-          }
-        },
-        "required": [
-          "surveyVersion",
-          "selections",
-          "submittedAt",
-          "updatedAt",
-          "answeredByUserId"
-        ]
-      },
-      "SurveyStateDto": {
-        "type": "object",
-        "properties": {
-          "survey": {
-            "$ref": "#/components/schemas/SurveyDto"
-          },
-          "surveyResponse": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SpaceSurveyResponseDto"
-              }
-            ]
-          }
-        },
-        "required": [
-          "survey",
-          "surveyResponse"
-        ]
-      },
-      "SubmitSurveyResponseDto": {
-        "type": "object",
-        "properties": {
-          "selections": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "description": "Map from page id → selected option keys",
-            "example": {
-              "use_cases": [
-                "run_payments",
-                "hold_assets"
-              ]
-            }
-          }
-        },
-        "required": [
-          "selections"
-        ]
-      },
-      "SurveyResponseResultDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "spaceUuid": {
-            "type": "string",
-            "description": "Space UUID"
-          },
-          "surveySlug": {
-            "type": "string"
-          },
-          "surveyVersion": {
-            "type": "number"
-          },
-          "selections": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          "submittedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "answeredByUserId": {
-            "type": "number",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "spaceUuid",
-          "surveySlug",
-          "surveyVersion",
-          "selections",
-          "submittedAt",
-          "updatedAt",
-          "answeredByUserId"
-        ]
-      },
-      "SafeList": {
-        "type": "object",
-        "properties": {
-          "safes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "safes"
-        ]
-      },
-      "RelayDto": {
-        "type": "object",
-        "properties": {
-          "version": {
-            "type": "string"
-          },
-          "to": {
-            "type": "string"
-          },
-          "data": {
-            "type": "string"
-          },
-          "gasLimit": {
-            "type": "string",
-            "nullable": true,
-            "description": "Accepted for backward compatibility and validation; not forwarded to the relay provider (Gelato)."
-          },
-          "safeTxHash": {
-            "type": "string",
-            "description": "Safe transaction hash for relay-fee eligibility check"
-          },
-          "acceptUnverifiedSimulation": {
-            "type": "boolean",
-            "description": "Set to true to proceed with the relay when a previous attempt returned INDETERMINATE_SIMULATION. The user has acknowledged the simulation could not be completed and accepts the risk."
-          }
-        },
-        "required": [
-          "version",
-          "to",
-          "data"
-        ]
-      },
-      "Relay": {
-        "type": "object",
-        "properties": {
-          "taskId": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "taskId"
-        ]
-      },
-      "RelayErrorResponse": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string",
-            "enum": [
-              "SIMULATION_FAILED",
-              "INDETERMINATE_SIMULATION"
-            ],
-            "description": "Stable identifier of the error condition. The frontend MUST branch on this value (not on `message`, which is informational and may change)."
-          },
-          "message": {
-            "type": "string",
-            "description": "Human-readable description of the error. Informational only; do not parse."
-          },
-          "statusCode": {
-            "type": "number",
-            "example": 422
-          }
-        },
-        "required": [
-          "code",
-          "message",
-          "statusCode"
-        ]
-      },
-      "RelayTaskStatusReceipt": {
-        "type": "object",
-        "properties": {
-          "transactionHash": {
-            "type": "string",
-            "example": "0x4e4bb4493b2183061c3a0106ea96604edcc84f83313dbc0ab718abb1523d1042"
-          }
-        },
-        "required": [
-          "transactionHash"
-        ]
-      },
-      "RelayTaskStatus": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "number",
-            "description": "Relay task status code: 100=Pending, 110=Submitted, 200=Included, 400=Rejected, 500=Reverted",
-            "enum": [
-              100,
-              110,
-              200,
-              400,
-              500
-            ],
-            "example": 200
-          },
-          "receipt": {
-            "description": "On-chain receipt. Only present when status is 200 (Included) or 500 (Reverted)",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/RelayTaskStatusReceipt"
-              }
-            ]
-          }
-        },
-        "required": [
-          "status"
-        ]
-      },
-      "RelaysRemaining": {
-        "type": "object",
-        "properties": {
-          "remaining": {
-            "type": "number"
-          },
-          "limit": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "remaining",
-          "limit"
-        ]
-      },
-      "SafeAppProvider": {
-        "type": "object",
-        "properties": {
-          "url": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "url",
-          "name"
-        ]
-      },
-      "SafeAppAccessControl": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string"
-          },
-          "value": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "type"
-        ]
-      },
-      "SafeAppSocialProfile": {
-        "type": "object",
-        "properties": {
-          "platform": {
-            "type": "string",
-            "enum": [
-              "DISCORD",
-              "GITHUB",
-              "TWITTER",
-              "TELEGRAM",
-              "UNKNOWN"
-            ]
-          },
-          "url": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "platform",
-          "url"
-        ]
-      },
-      "SafeApp": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "url": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "iconUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string"
-          },
-          "chainIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "provider": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SafeAppProvider"
-              }
-            ]
-          },
-          "accessControl": {
-            "$ref": "#/components/schemas/SafeAppAccessControl"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "features": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "developerWebsite": {
-            "type": "string",
-            "nullable": true
-          },
-          "socialProfiles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SafeAppSocialProfile"
-            }
-          },
-          "featured": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "id",
-          "url",
-          "name",
-          "description",
-          "chainIds",
-          "accessControl",
-          "tags",
-          "features",
-          "socialProfiles",
-          "featured"
-        ]
-      },
-      "SafeState": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "chainId": {
-            "type": "string"
-          },
-          "nonce": {
-            "type": "number"
-          },
-          "threshold": {
-            "type": "number"
-          },
-          "owners": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AddressInfo"
-            }
-          },
-          "implementation": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "modules": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AddressInfo"
-            }
-          },
-          "fallbackHandler": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AddressInfo"
-              }
-            ]
-          },
-          "guard": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AddressInfo"
-              }
-            ]
-          },
-          "version": {
-            "type": "string",
-            "nullable": true
-          },
-          "implementationVersionState": {
-            "type": "string",
-            "enum": [
-              "UP_TO_DATE",
-              "OUTDATED",
-              "UNKNOWN"
-            ]
-          },
-          "collectiblesTag": {
-            "type": "string",
-            "nullable": true
-          },
-          "txQueuedTag": {
-            "type": "string",
-            "nullable": true
-          },
-          "txHistoryTag": {
-            "type": "string",
-            "nullable": true
-          },
-          "messagesTag": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "address",
-          "chainId",
-          "nonce",
-          "threshold",
-          "owners",
-          "implementation",
-          "implementationVersionState"
-        ]
-      },
-      "SafeNonces": {
-        "type": "object",
-        "properties": {
-          "currentNonce": {
-            "type": "number"
-          },
-          "recommendedNonce": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "currentNonce",
-          "recommendedNonce"
-        ]
-      },
-      "SafeOverview": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "chainId": {
-            "type": "string"
-          },
-          "threshold": {
-            "type": "number"
-          },
-          "owners": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AddressInfo"
-            }
-          },
-          "fiatTotal": {
-            "type": "string"
-          },
-          "queued": {
-            "type": "number"
-          },
-          "awaitingConfirmation": {
-            "type": "number",
-            "nullable": true
-          }
-        },
-        "required": [
-          "address",
-          "chainId",
-          "threshold",
-          "owners",
-          "fiatTotal",
-          "queued"
         ]
       },
       "SingleRecipientAnalysisResultDto": {
@@ -11633,6 +12418,2139 @@
           "recipient",
           "contract",
           "deadlock"
+        ]
+      },
+      "PolicyConfigurationDto": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Contract the guarded call targets"
+          },
+          "selector": {
+            "type": "string",
+            "description": "4-byte function selector",
+            "example": "0xa9059cbb"
+          },
+          "operation": {
+            "type": "number",
+            "enum": [
+              0,
+              1
+            ],
+            "description": "0 = CALL, 1 = DELEGATECALL"
+          },
+          "policy": {
+            "type": "string",
+            "description": "Policy contract to bind. The zero address removes the policy of this access."
+          },
+          "data": {
+            "type": "string",
+            "description": "Policy payload, abi-encoded as passed to the guard. At most 64 KiB (65,536 bytes)."
+          }
+        },
+        "required": [
+          "target",
+          "selector",
+          "operation",
+          "policy",
+          "data"
+        ]
+      },
+      "CreatePolicyConfigurationRequestDto": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "keccak256(abi.encode(Configuration[])), as requested on-chain"
+          },
+          "configurations": {
+            "minItems": 1,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyConfigurationDto"
+            }
+          }
+        },
+        "required": [
+          "root",
+          "configurations"
+        ]
+      },
+      "CreatePolicyConfigurationRequestResponse": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "The stored configuration root"
+          }
+        },
+        "required": [
+          "root"
+        ]
+      },
+      "ModuleEnforcementDto": {
+        "type": "object",
+        "properties": {
+          "via": {
+            "type": "string",
+            "enum": [
+              "module"
+            ]
+          },
+          "moduleAddress": {
+            "type": "string",
+            "description": "The module enforcing the policy"
+          }
+        },
+        "required": [
+          "via",
+          "moduleAddress"
+        ]
+      },
+      "PolicyContractsDto": {
+        "type": "object",
+        "properties": {
+          "policyContract": {
+            "type": "string",
+            "description": "The policy implementation the guard delegates to"
+          },
+          "safePolicyGuard": {
+            "type": "string",
+            "description": "The SafePolicyGuard deployment"
+          }
+        },
+        "required": [
+          "policyContract",
+          "safePolicyGuard"
+        ]
+      },
+      "GuardSlotsDto": {
+        "type": "object",
+        "properties": {
+          "transactionGuard": {
+            "$ref": "#/components/schemas/PolicyContractsDto"
+          },
+          "moduleGuard": {
+            "$ref": "#/components/schemas/PolicyContractsDto"
+          }
+        }
+      },
+      "PolicyAccessDto": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "The contract the governed calls target"
+          },
+          "selector": {
+            "type": "string",
+            "description": "The 4-byte function selector of the governed calls"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "CALL",
+              "DELEGATECALL"
+            ]
+          }
+        },
+        "required": [
+          "target",
+          "selector",
+          "operation"
+        ]
+      },
+      "GuardEnforcementDto": {
+        "type": "object",
+        "properties": {
+          "via": {
+            "type": "string",
+            "enum": [
+              "guard"
+            ]
+          },
+          "guards": {
+            "$ref": "#/components/schemas/GuardSlotsDto"
+          },
+          "access": {
+            "description": "The calls the guard applies the policy to",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PolicyAccessDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "via",
+          "guards",
+          "access"
+        ]
+      },
+      "OffChainEnforcementDto": {
+        "type": "object",
+        "properties": {
+          "via": {
+            "type": "string",
+            "enum": [
+              "offchain"
+            ],
+            "description": "Nothing on chain enforces the policy, so it is access rather than an audited restriction"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "delegates"
+            ],
+            "description": "Where the grant is held"
+          }
+        },
+        "required": [
+          "via",
+          "source"
+        ]
+      },
+      "NativeTokenMetadataDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "NATIVE_TOKEN"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "logoUri",
+          "name",
+          "symbol",
+          "trusted",
+          "type"
+        ]
+      },
+      "Erc20TokenMetadataDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ERC20"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "logoUri",
+          "name",
+          "symbol",
+          "trusted",
+          "type"
+        ]
+      },
+      "SpendingLimitAllowanceDto": {
+        "type": "object",
+        "properties": {
+          "tokenAddress": {
+            "type": "string",
+            "description": "The token the limit applies to; zero address for native"
+          },
+          "tokenMetadata": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeTokenMetadataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
+                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            },
+            "nullable": true,
+            "description": "Metadata of `tokenAddress`; null when it could not be resolved"
+          },
+          "amount": {
+            "type": "string",
+            "description": "Per-window ceiling, in base units"
+          },
+          "spent": {
+            "type": "string",
+            "description": "Spent in the current window, in base units"
+          },
+          "resetPeriodMinutes": {
+            "type": "number",
+            "description": "Window length in minutes; 0 never resets"
+          },
+          "resetsAtMinute": {
+            "type": "number",
+            "nullable": true,
+            "description": "Minutes since the epoch of the next reset, the unit the module counts windows in; null when it never resets"
+          },
+          "resetBoundaryIsExact": {
+            "type": "boolean",
+            "description": "False when the reset boundary could not be recovered exactly, so `resetsAtMinute` may be up to one period out. `amount` is unaffected."
+          },
+          "isDelegateActive": {
+            "type": "boolean",
+            "description": "False when the spender's delegate registration was removed: nothing is spendable now, but the allowance returns to effect if the delegate is re-added"
+          },
+          "createdAt": {
+            "type": "number",
+            "description": "Unix seconds this allowance was (re-)established"
+          },
+          "updatedAt": {
+            "type": "number",
+            "description": "Unix seconds of the last event that changed this allowance"
+          }
+        },
+        "required": [
+          "tokenAddress",
+          "tokenMetadata",
+          "amount",
+          "spent",
+          "resetPeriodMinutes",
+          "resetsAtMinute",
+          "resetBoundaryIsExact",
+          "isDelegateActive",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "SpendingLimitSpenderDto": {
+        "type": "object",
+        "properties": {
+          "spender": {
+            "type": "string",
+            "description": "Name resolved by the client, never carried here"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "False when the spender is deregistered: nothing is spendable now, but the allowances survive and return if it is re-added"
+          },
+          "allowances": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpendingLimitAllowanceDto"
+            }
+          }
+        },
+        "required": [
+          "spender",
+          "isActive",
+          "allowances"
+        ]
+      },
+      "SpendingLimitPolicyDataDto": {
+        "type": "object",
+        "properties": {
+          "module": {
+            "type": "string",
+            "description": "The allowance module holding this state"
+          },
+          "spenders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpendingLimitSpenderDto"
+            }
+          }
+        },
+        "required": [
+          "module",
+          "spenders"
+        ]
+      },
+      "ProposerGrantDto": {
+        "type": "object",
+        "properties": {
+          "delegator": {
+            "type": "string",
+            "description": "The owner that granted the proposer"
+          },
+          "label": {
+            "type": "string",
+            "description": "The label this owner gave the proposer; empty when unlabelled"
+          }
+        },
+        "required": [
+          "delegator",
+          "label"
+        ]
+      },
+      "ProposerDto": {
+        "type": "object",
+        "properties": {
+          "proposer": {
+            "type": "string",
+            "description": "The address allowed to propose transactions"
+          },
+          "delegatedBy": {
+            "description": "The owners that granted it, each with the label they gave. The label is stored per grant, so two owners can label the same proposer differently",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProposerGrantDto"
+            }
+          }
+        },
+        "required": [
+          "proposer",
+          "delegatedBy"
+        ]
+      },
+      "ProposerPolicyDataDto": {
+        "type": "object",
+        "properties": {
+          "proposers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProposerDto"
+            }
+          }
+        },
+        "required": [
+          "proposers"
+        ]
+      },
+      "Erc20TransferRecipientDto": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string",
+            "description": "An address the Safe can send this token to"
+          },
+          "permission": {
+            "type": "string",
+            "enum": [
+              "ONCE",
+              "ALWAYS"
+            ]
+          }
+        },
+        "required": [
+          "account",
+          "permission"
+        ]
+      },
+      "Erc20TransferPolicyDataDto": {
+        "type": "object",
+        "properties": {
+          "tokenAddress": {
+            "type": "string",
+            "description": "The ERC20 token the allowlist applies to"
+          },
+          "tokenMetadata": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeTokenMetadataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
+                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            },
+            "nullable": true,
+            "description": "Metadata of `tokenAddress`; null when it could not be resolved"
+          },
+          "recipients": {
+            "description": "The recipients of the token transfers the policy permits",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Erc20TransferRecipientDto"
+            }
+          }
+        },
+        "required": [
+          "tokenAddress",
+          "tokenMetadata",
+          "recipients"
+        ]
+      },
+      "CosignerPolicyDataDto": {
+        "type": "object",
+        "properties": {
+          "cosignerAddress": {
+            "type": "string",
+            "description": "The cosigner the policy enforces."
+          }
+        },
+        "required": [
+          "cosignerAddress"
+        ]
+      },
+      "StatelessPolicyDataDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "SafeRefDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId",
+          "address"
+        ]
+      },
+      "ActivePolicyDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "spending-limit",
+              "recovery",
+              "proposer",
+              "erc20-transfer",
+              "cosigner",
+              "allow",
+              "native-transfer",
+              "deny",
+              "multisend"
+            ]
+          },
+          "enforcement": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ModuleEnforcementDto"
+              },
+              {
+                "$ref": "#/components/schemas/GuardEnforcementDto"
+              },
+              {
+                "$ref": "#/components/schemas/OffChainEnforcementDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "via",
+              "mapping": {
+                "module": "#/components/schemas/ModuleEnforcementDto",
+                "guard": "#/components/schemas/GuardEnforcementDto",
+                "offchain": "#/components/schemas/OffChainEnforcementDto"
+              }
+            }
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "False when the policy is configured but not enforced"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SpendingLimitPolicyDataDto"
+              },
+              {
+                "$ref": "#/components/schemas/ProposerPolicyDataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TransferPolicyDataDto"
+              },
+              {
+                "$ref": "#/components/schemas/CosignerPolicyDataDto"
+              },
+              {
+                "$ref": "#/components/schemas/StatelessPolicyDataDto"
+              }
+            ]
+          },
+          "safe": {
+            "description": "The Safe the policy is in effect on",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "enforcement",
+          "enabled",
+          "data",
+          "safe"
+        ]
+      },
+      "EnableModuleChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "enable-module"
+            ]
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "AddDelegateChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "add-delegate"
+            ]
+          },
+          "delegate": {
+            "type": "string",
+            "description": "The address being added as a delegate in AllowanceModule contract"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate"
+        ]
+      },
+      "RemoveDelegateChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "remove-delegate"
+            ]
+          },
+          "delegate": {
+            "type": "string",
+            "description": "The delegate being removed"
+          },
+          "removeAllowances": {
+            "type": "boolean",
+            "description": "Whether the delegate's allowances are deleted along with it"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate",
+          "removeAllowances"
+        ]
+      },
+      "SetAllowanceChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "set-allowance"
+            ]
+          },
+          "delegate": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string",
+            "description": "The token the limit applies to; zero address for native"
+          },
+          "tokenMetadata": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeTokenMetadataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
+                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            },
+            "nullable": true,
+            "description": "Metadata of `token`; null when it could not be resolved"
+          },
+          "amount": {
+            "type": "string",
+            "description": "Per-window ceiling, in base units"
+          },
+          "resetPeriodMinutes": {
+            "type": "number",
+            "description": "Window length in minutes; 0 never resets"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate",
+          "token",
+          "tokenMetadata",
+          "amount",
+          "resetPeriodMinutes"
+        ]
+      },
+      "ResetAllowanceChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "reset-allowance"
+            ]
+          },
+          "delegate": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "tokenMetadata": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeTokenMetadataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
+                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            },
+            "nullable": true,
+            "description": "Metadata of `token`; null when it could not be resolved"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate",
+          "token",
+          "tokenMetadata"
+        ]
+      },
+      "DeleteAllowanceChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "delete-allowance"
+            ]
+          },
+          "delegate": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "tokenMetadata": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeTokenMetadataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
+                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            },
+            "nullable": true,
+            "description": "Metadata of `token`; null when it could not be resolved"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate",
+          "token",
+          "tokenMetadata"
+        ]
+      },
+      "PendingSpendingLimitDataDto": {
+        "type": "object",
+        "properties": {
+          "module": {
+            "type": "string",
+            "description": "The AllowanceModule deployment holding this state"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/EnableModuleChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/AddDelegateChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/RemoveDelegateChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/SetAllowanceChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ResetAllowanceChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/DeleteAllowanceChangeDto"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "kind",
+                "mapping": {
+                  "enable-module": "#/components/schemas/EnableModuleChangeDto",
+                  "add-delegate": "#/components/schemas/AddDelegateChangeDto",
+                  "remove-delegate": "#/components/schemas/RemoveDelegateChangeDto",
+                  "set-allowance": "#/components/schemas/SetAllowanceChangeDto",
+                  "reset-allowance": "#/components/schemas/ResetAllowanceChangeDto",
+                  "delete-allowance": "#/components/schemas/DeleteAllowanceChangeDto"
+                }
+              }
+            },
+            "description": "The AllowanceModule calls this transaction decodes to"
+          }
+        },
+        "required": [
+          "module",
+          "changes"
+        ]
+      },
+      "PendingPolicyDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "queued-transaction"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "spending-limit"
+            ]
+          },
+          "enforcement": {
+            "$ref": "#/components/schemas/ModuleEnforcementDto"
+          },
+          "safeTxHash": {
+            "type": "string",
+            "description": "The queued transaction this change was found in"
+          },
+          "nonce": {
+            "type": "number"
+          },
+          "confirmations": {
+            "type": "number"
+          },
+          "confirmationsRequired": {
+            "type": "number"
+          },
+          "proposedAt": {
+            "type": "number",
+            "description": "Unix seconds the transaction was proposed at"
+          },
+          "proposer": {
+            "type": "string",
+            "nullable": true,
+            "description": "The owner or delegate who proposed the transaction, if known"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PendingSpendingLimitDataDto"
+          },
+          "safe": {
+            "description": "The Safe the change is queued on",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "kind",
+          "type",
+          "enforcement",
+          "safeTxHash",
+          "nonce",
+          "confirmations",
+          "confirmationsRequired",
+          "proposedAt",
+          "proposer",
+          "data",
+          "safe"
+        ]
+      },
+      "SetGuardChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "set-guard"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "nullable": true,
+            "description": "The transaction guard before this call; null for none"
+          },
+          "to": {
+            "type": "string",
+            "nullable": true,
+            "description": "The transaction guard after this call; null removes it"
+          }
+        },
+        "required": [
+          "kind",
+          "from",
+          "to"
+        ]
+      },
+      "SetModuleGuardChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "set-module-guard"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "nullable": true,
+            "description": "The module guard before this call; null for none"
+          },
+          "to": {
+            "type": "string",
+            "nullable": true,
+            "description": "The module guard after this call; null removes it"
+          }
+        },
+        "required": [
+          "kind",
+          "from",
+          "to"
+        ]
+      },
+      "PendingTransactionDto": {
+        "type": "object",
+        "properties": {
+          "safeTxHash": {
+            "type": "string"
+          },
+          "nonce": {
+            "type": "number"
+          },
+          "confirmations": {
+            "type": "number"
+          },
+          "confirmationsRequired": {
+            "type": "number"
+          },
+          "proposedAt": {
+            "type": "number",
+            "description": "Unix seconds the transaction was proposed at"
+          },
+          "proposer": {
+            "type": "string",
+            "nullable": true,
+            "description": "The owner or delegate who proposed the transaction, if known"
+          }
+        },
+        "required": [
+          "safeTxHash",
+          "nonce",
+          "confirmations",
+          "confirmationsRequired",
+          "proposedAt",
+          "proposer"
+        ]
+      },
+      "PendingGuardInstallationDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "guard-installation"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "in-signing",
+              "ready"
+            ]
+          },
+          "safe": {
+            "description": "The Safe the transaction is queued on",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/SetGuardChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/SetModuleGuardChangeDto"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "kind",
+                "mapping": {
+                  "set-guard": "#/components/schemas/SetGuardChangeDto",
+                  "set-module-guard": "#/components/schemas/SetModuleGuardChangeDto"
+                }
+              }
+            },
+            "description": "The guard installation calls of the transaction, in calldata order"
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/PendingTransactionDto"
+          }
+        },
+        "required": [
+          "kind",
+          "status",
+          "safe",
+          "changes",
+          "transaction"
+        ]
+      },
+      "PendingImmediateGuardPoliciesDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "immediate-guard-policies"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "in-signing",
+              "ready"
+            ]
+          },
+          "safe": {
+            "description": "The Safe the transaction is queued on",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          },
+          "guard": {
+            "type": "string",
+            "description": "The SafePolicyGuard the policies are bound on"
+          },
+          "configurations": {
+            "description": "The configurations configureImmediately binds",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyConfigurationDto"
+            }
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/PendingTransactionDto"
+          }
+        },
+        "required": [
+          "kind",
+          "status",
+          "safe",
+          "guard",
+          "configurations",
+          "transaction"
+        ]
+      },
+      "PendingDelayedGuardPoliciesDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "delayed-guard-policies"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "configuration-in-signing",
+              "pending-application",
+              "application-in-signing",
+              "application-ready",
+              "expired"
+            ],
+            "description": "draft: stored in CGW, no transaction in signing yet. configuration-in-signing: requestConfiguration is queued. pending-application: requested, waiting for or past readyAt. application-in-signing: applyConfiguration is queued and collecting signatures. application-ready: applyConfiguration is signed and can execute. expired: the application window has closed."
+          },
+          "safe": {
+            "description": "The Safe the configuration belongs to",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          },
+          "guard": {
+            "type": "string",
+            "nullable": true,
+            "description": "The SafePolicyGuard of the root; null for a draft"
+          },
+          "root": {
+            "type": "string",
+            "description": "keccak256(abi.encode(Configuration[]))"
+          },
+          "configurations": {
+            "nullable": true,
+            "description": "The configurations behind the root; null when CGW does not know them",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyConfigurationDto"
+            }
+          },
+          "readyAt": {
+            "type": "number",
+            "nullable": true,
+            "description": "Unix seconds applyConfiguration is valid from; null until the root is requested on-chain"
+          },
+          "expiresAt": {
+            "type": "number",
+            "nullable": true,
+            "description": "Unix seconds the application window closes; null until the root is requested on-chain"
+          },
+          "transaction": {
+            "nullable": true,
+            "description": "The queued request or apply transaction, if any",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PendingTransactionDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "number",
+            "nullable": true,
+            "description": "Unix seconds the change was first seen: when CGW stored its configurations, else when its queued transaction was proposed. Null for a root requested outside the wallet."
+          }
+        },
+        "required": [
+          "kind",
+          "status",
+          "safe",
+          "guard",
+          "root",
+          "configurations",
+          "readyAt",
+          "expiresAt",
+          "transaction",
+          "createdAt"
+        ]
+      },
+      "SurveyOptionDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label"
+        ]
+      },
+      "SurveyPageDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "multiSelect": {
+            "type": "boolean"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SurveyOptionDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "subtitle",
+          "multiSelect",
+          "options"
+        ]
+      },
+      "SurveyContentDto": {
+        "type": "object",
+        "properties": {
+          "pages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SurveyPageDto"
+            }
+          }
+        },
+        "required": [
+          "pages"
+        ]
+      },
+      "SurveyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "version": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "surveyContent": {
+            "$ref": "#/components/schemas/SurveyContentDto"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "version",
+          "title",
+          "subtitle",
+          "surveyContent"
+        ]
+      },
+      "SpaceSurveyResponseDto": {
+        "type": "object",
+        "properties": {
+          "surveyVersion": {
+            "type": "number"
+          },
+          "selections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Map from page id → selected option keys"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "answeredByUserId": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "surveyVersion",
+          "selections",
+          "submittedAt",
+          "updatedAt",
+          "answeredByUserId"
+        ]
+      },
+      "SurveyStateDto": {
+        "type": "object",
+        "properties": {
+          "survey": {
+            "$ref": "#/components/schemas/SurveyDto"
+          },
+          "surveyResponse": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpaceSurveyResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "survey",
+          "surveyResponse"
+        ]
+      },
+      "SubmitSurveyResponseDto": {
+        "type": "object",
+        "properties": {
+          "selections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Map from page id → selected option keys",
+            "example": {
+              "use_cases": [
+                "run_payments",
+                "hold_assets"
+              ]
+            }
+          }
+        },
+        "required": [
+          "selections"
+        ]
+      },
+      "SurveyResponseResultDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "spaceUuid": {
+            "type": "string",
+            "description": "Space UUID"
+          },
+          "surveySlug": {
+            "type": "string"
+          },
+          "surveyVersion": {
+            "type": "number"
+          },
+          "selections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "answeredByUserId": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "spaceUuid",
+          "surveySlug",
+          "surveyVersion",
+          "selections",
+          "submittedAt",
+          "updatedAt",
+          "answeredByUserId"
+        ]
+      },
+      "FeatureKey": {
+        "type": "string",
+        "enum": [
+          "safe_seats",
+          "copilot_scans",
+          "sponsored_transactions",
+          "policies",
+          "safenet_checks"
+        ],
+        "description": "Feature key from the entitlements catalog."
+      },
+      "BinaryEntitlement": {
+        "type": "object",
+        "properties": {
+          "feature": {
+            "description": "Feature key from the entitlements catalog.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeatureKey"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the plan grants the feature at all. A metered feature reports its quota and usage even when this is false."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "binary"
+            ]
+          }
+        },
+        "required": [
+          "feature",
+          "enabled",
+          "type"
+        ]
+      },
+      "ValueEntitlement": {
+        "type": "object",
+        "properties": {
+          "feature": {
+            "description": "Feature key from the entitlements catalog.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeatureKey"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the plan grants the feature at all. A metered feature reports its quota and usage even when this is false."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "value"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "feature",
+          "enabled",
+          "type",
+          "value"
+        ]
+      },
+      "MeteredEntitlement": {
+        "type": "object",
+        "properties": {
+          "feature": {
+            "description": "Feature key from the entitlements catalog.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeatureKey"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the plan grants the feature at all. A metered feature reports its quota and usage even when this is false."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "metered"
+            ]
+          },
+          "quota": {
+            "type": "number",
+            "nullable": true,
+            "description": "The plan's quota, never inflated to match usage; null means unlimited."
+          },
+          "used": {
+            "type": "number",
+            "description": "May legally exceed `quota`."
+          },
+          "resetsAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "Null for stock-type features (seats) that have no reset window."
+          }
+        },
+        "required": [
+          "feature",
+          "enabled",
+          "type",
+          "quota",
+          "used",
+          "resetsAt"
+        ]
+      },
+      "EntitlementsPlanStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "trialing"
+        ],
+        "description": "Status of the subscription the plan comes from"
+      },
+      "EntitlementsPlan": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Plan identifier in the billing service"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "cycleEndsAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "End of the current billing cycle"
+          },
+          "status": {
+            "description": "Status of the subscription the plan comes from",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntitlementsPlanStatus"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "cycleEndsAt",
+          "status"
+        ]
+      },
+      "EntitlementsResponse": {
+        "type": "object",
+        "properties": {
+          "plan": {
+            "nullable": true,
+            "description": "Null when the workspace has no active subscription.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntitlementsPlan"
+              }
+            ]
+          },
+          "entitlements": {
+            "type": "array",
+            "description": "One entry per catalog feature. Which fields an entry carries is decided by `type`: a metered one always carries quota, usage and its reset window, and the others never do.",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/BinaryEntitlement"
+                },
+                {
+                  "$ref": "#/components/schemas/ValueEntitlement"
+                },
+                {
+                  "$ref": "#/components/schemas/MeteredEntitlement"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "type",
+                "mapping": {
+                  "binary": "#/components/schemas/BinaryEntitlement",
+                  "value": "#/components/schemas/ValueEntitlement",
+                  "metered": "#/components/schemas/MeteredEntitlement"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "plan",
+          "entitlements"
+        ]
+      },
+      "SpaceRelayDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string"
+          },
+          "safeTxHash": {
+            "type": "string",
+            "description": "Safe transaction hash, forwarded to the relay provider for traceability. Not verified against the calldata on this route."
+          },
+          "acceptUnverifiedSimulation": {
+            "type": "boolean",
+            "description": "Set to true to proceed with the relay when a previous attempt returned INDETERMINATE_SIMULATION. The user has acknowledged the simulation could not be completed and accepts the risk."
+          }
+        },
+        "required": [
+          "version",
+          "to",
+          "data"
+        ]
+      },
+      "Relay": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "taskId"
+        ]
+      },
+      "GasPaymentOptionUnavailableResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "GAS_PAYMENT_OPTION_UNAVAILABLE"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable description of the error. Informational only; do not parse."
+          },
+          "statusCode": {
+            "type": "number",
+            "example": 409
+          },
+          "requested": {
+            "type": "string",
+            "enum": [
+              "FREE_DAILY_LIMIT",
+              "SUBSCRIPTION",
+              "PAY_FROM_SAFE",
+              "NO_FEE_CAMPAIGN"
+            ],
+            "description": "The gas payment option the request needed."
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "NOT_LISTED",
+              "NO_RELAYER",
+              "NOT_A_WORKSPACE_SAFE",
+              "REFUNDING_TRANSACTION"
+            ],
+            "description": "NOT_LISTED: the chain does not list the option. NO_RELAYER: the chain has no relayer. NOT_A_WORKSPACE_SAFE: the Safe is not one the workspace holds. REFUNDING_TRANSACTION: the transaction would refund gas (`gasPrice` > 0)."
+          },
+          "available": {
+            "type": "array",
+            "description": "The options the chain lists; empty without a relayer.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "FREE_DAILY_LIMIT",
+                "SUBSCRIPTION",
+                "PAY_FROM_SAFE",
+                "NO_FEE_CAMPAIGN"
+              ]
+            }
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "statusCode",
+          "requested",
+          "reason",
+          "available"
+        ]
+      },
+      "CreateSafenetCheckDto": {
+        "type": "object",
+        "properties": {
+          "safeTxHash": {
+            "type": "string",
+            "description": "Safe transaction hash"
+          }
+        },
+        "required": [
+          "safeTxHash"
+        ]
+      },
+      "SafeList": {
+        "type": "object",
+        "properties": {
+          "safes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "safes"
+        ]
+      },
+      "RelayDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string"
+          },
+          "gasLimit": {
+            "type": "string",
+            "nullable": true,
+            "description": "Accepted for backward compatibility and validation; not forwarded to the relay provider."
+          },
+          "safeTxHash": {
+            "type": "string",
+            "description": "Safe transaction hash for relay-fee eligibility check"
+          },
+          "acceptUnverifiedSimulation": {
+            "type": "boolean",
+            "description": "Set to true to proceed with the relay when a previous attempt returned INDETERMINATE_SIMULATION. The user has acknowledged the simulation could not be completed and accepts the risk."
+          }
+        },
+        "required": [
+          "version",
+          "to",
+          "data"
+        ]
+      },
+      "RelayErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "SIMULATION_FAILED",
+              "INDETERMINATE_SIMULATION"
+            ],
+            "description": "Stable identifier of the error condition. The frontend MUST branch on this value (not on `message`, which is informational and may change)."
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable description of the error. Informational only; do not parse."
+          },
+          "statusCode": {
+            "type": "number",
+            "example": 422
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "statusCode"
+        ]
+      },
+      "RelayTaskStatusReceipt": {
+        "type": "object",
+        "properties": {
+          "transactionHash": {
+            "type": "string",
+            "example": "0x4e4bb4493b2183061c3a0106ea96604edcc84f83313dbc0ab718abb1523d1042"
+          }
+        },
+        "required": [
+          "transactionHash"
+        ]
+      },
+      "RelayTaskStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "number",
+            "description": "Relay task status code: 100=Pending, 110=Submitted, 200=Included, 400=Rejected, 500=Reverted",
+            "enum": [
+              100,
+              110,
+              200,
+              400,
+              500
+            ],
+            "example": 200
+          },
+          "receipt": {
+            "description": "On-chain receipt. Only present when status is 200 (Included) or 500 (Reverted)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RelayTaskStatusReceipt"
+              }
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "RelaysRemaining": {
+        "type": "object",
+        "properties": {
+          "remaining": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "remaining",
+          "limit"
+        ]
+      },
+      "SafeAppProvider": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "name"
+        ]
+      },
+      "SafeAppAccessControl": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "SafeAppSocialProfile": {
+        "type": "object",
+        "properties": {
+          "platform": {
+            "type": "string",
+            "enum": [
+              "DISCORD",
+              "GITHUB",
+              "TWITTER",
+              "TELEGRAM",
+              "UNKNOWN"
+            ]
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "platform",
+          "url"
+        ]
+      },
+      "SafeApp": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string"
+          },
+          "chainIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "provider": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeAppProvider"
+              }
+            ]
+          },
+          "accessControl": {
+            "$ref": "#/components/schemas/SafeAppAccessControl"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "developerWebsite": {
+            "type": "string",
+            "nullable": true
+          },
+          "socialProfiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafeAppSocialProfile"
+            }
+          },
+          "featured": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "name",
+          "description",
+          "chainIds",
+          "accessControl",
+          "tags",
+          "features",
+          "socialProfiles",
+          "featured"
+        ]
+      },
+      "SafeState": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "chainId": {
+            "type": "string"
+          },
+          "nonce": {
+            "type": "number"
+          },
+          "threshold": {
+            "type": "number"
+          },
+          "owners": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressInfo"
+            }
+          },
+          "implementation": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "modules": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressInfo"
+            }
+          },
+          "fallbackHandler": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AddressInfo"
+              }
+            ]
+          },
+          "guard": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AddressInfo"
+              }
+            ]
+          },
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "implementationVersionState": {
+            "type": "string",
+            "enum": [
+              "UP_TO_DATE",
+              "OUTDATED",
+              "UNKNOWN"
+            ]
+          },
+          "collectiblesTag": {
+            "type": "string",
+            "nullable": true
+          },
+          "txQueuedTag": {
+            "type": "string",
+            "nullable": true
+          },
+          "txHistoryTag": {
+            "type": "string",
+            "nullable": true
+          },
+          "messagesTag": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "address",
+          "chainId",
+          "nonce",
+          "threshold",
+          "owners",
+          "implementation",
+          "implementationVersionState"
+        ]
+      },
+      "SafeNonces": {
+        "type": "object",
+        "properties": {
+          "currentNonce": {
+            "type": "number"
+          },
+          "recommendedNonce": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "currentNonce",
+          "recommendedNonce"
+        ]
+      },
+      "SafeOverview": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "chainId": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "number"
+          },
+          "owners": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressInfo"
+            }
+          },
+          "fiatTotal": {
+            "type": "string"
+          },
+          "queued": {
+            "type": "number"
+          },
+          "awaitingConfirmation": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "address",
+          "chainId",
+          "threshold",
+          "owners",
+          "fiatTotal",
+          "queued"
         ]
       },
       "ThreatAnalysisRequestDto": {
@@ -12396,6 +15314,20 @@
           "type"
         ]
       },
+      "DeleteModuleGuard": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "DELETE_MODULE_GUARD"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
       "DisableModule": {
         "type": "object",
         "properties": {
@@ -12490,6 +15422,24 @@
           "guard"
         ]
       },
+      "SetModuleGuard": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "SET_MODULE_GUARD"
+            ]
+          },
+          "moduleGuard": {
+            "$ref": "#/components/schemas/AddressInfo"
+          }
+        },
+        "required": [
+          "type",
+          "moduleGuard"
+        ]
+      },
       "SettingsChange": {
         "type": "object",
         "properties": {
@@ -12500,11 +15450,13 @@
               "CHANGE_MASTER_COPY",
               "CHANGE_THRESHOLD",
               "DELETE_GUARD",
+              "DELETE_MODULE_GUARD",
               "DISABLE_MODULE",
               "ENABLE_MODULE",
               "REMOVE_OWNER",
               "SET_FALLBACK_HANDLER",
               "SET_GUARD",
+              "SET_MODULE_GUARD",
               "SWAP_OWNER"
             ]
           }
@@ -12566,6 +15518,9 @@
                 "$ref": "#/components/schemas/DeleteGuard"
               },
               {
+                "$ref": "#/components/schemas/DeleteModuleGuard"
+              },
+              {
                 "$ref": "#/components/schemas/DisableModule"
               },
               {
@@ -12579,6 +15534,9 @@
               },
               {
                 "$ref": "#/components/schemas/SetGuard"
+              },
+              {
+                "$ref": "#/components/schemas/SetModuleGuard"
               },
               {
                 "$ref": "#/components/schemas/SwapOwner"
@@ -13993,6 +16951,7 @@
             }
           },
           "rejectors": {
+            "deprecated": true,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AddressInfo"
@@ -14069,25 +17028,6 @@
         "required": [
           "type",
           "address"
-        ]
-      },
-      "SafeAppInfo": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "url": {
-            "type": "string"
-          },
-          "logoUri": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "name",
-          "url"
         ]
       },
       "TransactionDetails": {
@@ -14800,6 +17740,64 @@
           "results"
         ]
       },
+      "NestedTransactionDto": {
+        "type": "object",
+        "properties": {
+          "to": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string",
+            "nullable": true
+          },
+          "operation": {
+            "description": "Operation type: 0 for CALL, 1 for DELEGATE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Operation"
+              }
+            ]
+          },
+          "safeTxGas": {
+            "type": "string"
+          },
+          "baseGas": {
+            "type": "string"
+          },
+          "gasPrice": {
+            "type": "string"
+          },
+          "gasToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "refundReceiver": {
+            "type": "string",
+            "nullable": true
+          },
+          "nonce": {
+            "type": "string",
+            "description": "The nested Safe's nonce"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "value",
+          "operation",
+          "safeTxGas",
+          "baseGas",
+          "gasPrice",
+          "nonce"
+        ]
+      },
       "ProposeTransactionDto": {
         "type": "object",
         "properties": {
@@ -14853,6 +17851,16 @@
           "origin": {
             "type": "string",
             "nullable": true
+          },
+          "nestedTransaction": {
+            "nullable": true,
+            "description": "A child transaction for a second Safe, authorised by the parent transaction being an `approveHash` call committing to its hash. Unknown keys are rejected.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NestedTransactionDto"
+              }
+            ]
           }
         },
         "required": [
@@ -15149,6 +18157,169 @@
         },
         "required": [
           "signature"
+        ]
+      },
+      "UpdateDelegateV3Dto": {
+        "type": "object",
+        "properties": {
+          "safe": {
+            "type": "string",
+            "nullable": true
+          },
+          "delegate": {
+            "type": "string"
+          },
+          "delegator": {
+            "type": "string"
+          },
+          "signature": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "delegate",
+          "delegator",
+          "signature",
+          "label"
+        ]
+      },
+      "DeleteDelegateV3Dto": {
+        "type": "object",
+        "properties": {
+          "delegator": {
+            "type": "string",
+            "nullable": true
+          },
+          "safe": {
+            "type": "string",
+            "nullable": true
+          },
+          "signature": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "signature"
+        ]
+      },
+      "NativeTokenMetadata": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "NATIVE_TOKEN"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "logoUri",
+          "name",
+          "symbol",
+          "trusted",
+          "type"
+        ]
+      },
+      "Erc20TokenMetadata": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ERC20"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "logoUri",
+          "name",
+          "symbol",
+          "trusted",
+          "type"
+        ]
+      },
+      "Erc721TokenMetadata": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ERC721"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "logoUri",
+          "name",
+          "symbol",
+          "trusted",
+          "type"
         ]
       },
       "SafeRegistration": {

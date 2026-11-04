@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import { Share2 as ShareIcon } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
@@ -8,11 +8,13 @@ import { MESSAGE_EVENTS } from '@/services/analytics/events/txList'
 import React from 'react'
 import CopyTooltip from '@/components/common/CopyTooltip'
 import useOrigin from '@/hooks/useOrigin'
+import { withSpaceIdInUrl, useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 const MsgShareLink = ({ safeMessageHash, button }: { safeMessageHash: string; button?: boolean }): ReactElement => {
   const router = useRouter()
   const { safe = '' } = router.query
-  const href = `${AppRoutes.transactions.msg}?safe=${safe}&messageHash=${safeMessageHash}`
+  const spaceId = useUrlSpaceId()
+  const href = withSpaceIdInUrl(`${AppRoutes.transactions.msg}?safe=${safe}&messageHash=${safeMessageHash}`, spaceId)
   const txUrl = useOrigin() + href
 
   return (

@@ -22,11 +22,13 @@ type Flatten<T, Prefix extends string = '', Suffix extends string = '', Depth ex
   ? object
   : T extends object
     ? {
-        [K in keyof T as T[K] extends object
-          ? never
-          : Prefix extends ''
-            ? `${K & string}${Suffix}`
-            : `${Prefix}${Capitalize<K & string>}${Suffix}`]: T[K]
+        [
+          K in keyof T as T[K] extends object
+            ? never
+            : Prefix extends ''
+              ? `${K & string}${Suffix}`
+              : `${Prefix}${Capitalize<K & string>}${Suffix}`
+        ]: T[K]
       } & UnionToIntersection<
         {
           [K in keyof T]: T[K] extends object

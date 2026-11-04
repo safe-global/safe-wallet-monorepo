@@ -6,7 +6,7 @@ import GetStartedCard from './components/GetStartedCard'
 import TrustedAccountsActions from './components/TrustedAccountsActions'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import AddTrustedSafesCard from '@/components/common/AddTrustedSafesCard'
-import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
+import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import madProps from '@/utils/mad-props'
 import css from '../../styles.module.css'
@@ -18,6 +18,8 @@ import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrust
 import TrustedSafesModal from '@/components/common/TrustedSafesModal'
 import WelcomeContentCard from '@/components/common/WelcomeContentCard'
 import { DataWidget } from '../DataWidget'
+import { useLoadFeature } from '@/features/__core__'
+import { SafeProFeature, useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement'
 
 type MyAccountsProps = {
   safes: AllSafeItemsGrouped
@@ -27,6 +29,8 @@ type MyAccountsProps = {
 const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
   const wallet = useWallet()
   const isDarkMode = useDarkMode()
+  const { SafeProBanner, SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
+  const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
   const [searchQuery, setSearchQuery] = useState('')
   const modal = useTrustedSafesModal()
   const migration = useMigrationPrompt()
@@ -42,6 +46,13 @@ const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
         <div className="flex justify-center py-6">
           <AccountsNavigation />
         </div>
+
+        {isSafeProAnnouncementEnabled &&
+          (showList ? (
+            <SafeProWorkspacesBanner className="mb-4" location="my_accounts" />
+          ) : (
+            <SafeProBanner className="mx-auto -mb-6 w-full max-w-[440px]" location="my_accounts" />
+          ))}
 
         {showGetStarted && <GetStartedCard />}
 

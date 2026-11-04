@@ -12,9 +12,9 @@
 // Components used by external consumers
 import type Recovery from './components/Recovery'
 import type RecoveryList from './components/RecoveryList'
-import type RecoveryInfo from './components/RecoveryInfo'
+import type RecoveryInfo from '@safe-global/views/features/recovery/components/RecoveryInfo'
 import type RecoveryStatus from './components/RecoveryStatus'
-import type RecoveryType from './components/RecoveryType'
+import type RecoveryType from '@safe-global/views/features/recovery/components/RecoveryType'
 import type RecoveryValidationErrors from './components/RecoveryValidationErrors'
 import type RecoveryDescription from './components/RecoveryDescription'
 

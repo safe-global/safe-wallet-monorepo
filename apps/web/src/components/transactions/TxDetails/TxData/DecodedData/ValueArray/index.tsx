@@ -3,34 +3,22 @@ import type { ReactElement } from 'react'
 import { isAddress, isArrayParameter } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
+import { formatDecodedValue, isList, parseDecodedValue } from '../decodedValue'
 import css from './styles.module.css'
 
 type ValueArrayProps = {
   method: string
   type: string
-  value: string | string[]
+  value: unknown
   key?: string
-}
-
-// Sometime DApps return stringified arrays, e.g. "["hello","world"]"
-const parseValue = (value: ValueArrayProps['value']) => {
-  if (Array.isArray(value)) {
-    return value
-  }
-
-  try {
-    return JSON.parse(value)
-  } catch {
-    return value
-  }
 }
 
 export const Value = ({ type, value, ...props }: ValueArrayProps): ReactElement => {
   const parsedValue = useMemo(() => {
-    return parseValue(value)
+    return parseDecodedValue(value)
   }, [value])
 
-  if (isArrayParameter(type) && isAddress(type) && Array.isArray(parsedValue)) {
+  if (isArrayParameter(type) && isAddress(type) && isList(parsedValue)) {
     return (
       <div className="text-sm">
         [
@@ -38,7 +26,7 @@ export const Value = ({ type, value, ...props }: ValueArrayProps): ReactElement 
           <div className={css.nestedWrapper}>
             {parsedValue.map((address, index) => {
               const key = `${props.key || props.method}-${index}`
-              if (Array.isArray(address)) {
+              if (isList(address)) {
                 const newProps = {
                   type,
                   ...props,
@@ -48,7 +36,13 @@ export const Value = ({ type, value, ...props }: ValueArrayProps): ReactElement 
               }
               return (
                 <div key={`${address}_${key}`}>
-                  <EthHashInfo address={address} showAvatar={false} shortAddress={false} showCopyButton hasExplorer />
+                  <EthHashInfo
+                    address={formatDecodedValue(address)}
+                    showAvatar={false}
+                    shortAddress={false}
+                    showCopyButton
+                    hasExplorer
+                  />
                 </div>
               )
             })}
@@ -62,11 +56,11 @@ export const Value = ({ type, value, ...props }: ValueArrayProps): ReactElement 
   return <GenericValue value={parsedValue} {...props} />
 }
 
-const getTextValue = (value: string, key?: string) => {
-  return <HexEncodedData highlightFirstBytes={false} limit={60} hexData={value} key={key} />
+const getTextValue = (value: unknown, key?: string) => {
+  return <HexEncodedData highlightFirstBytes={false} limit={60} hexData={formatDecodedValue(value)} key={key} />
 }
 
-const getArrayValue = (parentId: string, value: string[], separator?: boolean) => (
+const getArrayValue = (parentId: string, value: unknown[], separator?: boolean) => (
   <div className="text-sm">
     [
     <div className={css.nestedWrapper}>
@@ -74,7 +68,7 @@ const getArrayValue = (parentId: string, value: string[], separator?: boolean) =
         const key = `${parentId}-value-${index}`
         const hasSeparator = index < values.length - 1
 
-        return Array.isArray(currentValue) ? (
+        return isList(currentValue) ? (
           <div key={key}>{getArrayValue(key, currentValue, hasSeparator)}</div>
         ) : (
           getTextValue(currentValue, key)
@@ -85,8 +79,8 @@ const getArrayValue = (parentId: string, value: string[], separator?: boolean) =
   </div>
 )
 
-const GenericValue = ({ method, value }: Omit<ValueArrayProps, 'type'>): React.ReactElement => {
-  if (Array.isArray(value)) {
+const GenericValue = ({ method, value }: { method: string; value: unknown }): React.ReactElement => {
+  if (isList(value)) {
     return getArrayValue(method, value)
   }
 

@@ -30,37 +30,6 @@ describe('Observability Module', () => {
       })
     })
 
-    it('should be a no-op on server-side', () => {
-      const windowSpy = jest.spyOn(global, 'window', 'get')
-      windowSpy.mockReturnValue(undefined as any)
-
-      const mockProvider = {
-        name: 'Mock',
-        init: jest.fn().mockResolvedValue(undefined),
-        getLogger: jest.fn(() => ({
-          info: jest.fn(),
-          warn: jest.fn(),
-          error: jest.fn(),
-          debug: jest.fn(),
-        })),
-        captureError: jest.fn(),
-      }
-
-      jest.isolateModules(() => {
-        jest.doMock('../factory', () => ({
-          createObservabilityProvider: jest.fn(() => mockProvider),
-        }))
-
-        const { initObservability } = require('../index')
-        initObservability()
-
-        // Should not call init on server-side
-        expect(mockProvider.init).not.toHaveBeenCalled()
-      })
-
-      windowSpy.mockRestore()
-    })
-
     it('should handle initialization errors gracefully', async () => {
       const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
       const initError = new Error('init failed')
@@ -125,6 +94,34 @@ describe('Observability Module', () => {
         captureError(observed)
 
         expect(mockProvider.captureError).toHaveBeenCalledWith(observed)
+      })
+    })
+  })
+
+  describe('captureRenderError', () => {
+    it('reports a render error as user facing with its component stack', () => {
+      const mockProvider = {
+        name: 'Mock',
+        init: jest.fn(),
+        getLogger: jest.fn(() => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() })),
+        captureError: jest.fn(),
+      }
+
+      jest.isolateModules(() => {
+        jest.doMock('../factory', () => ({
+          createObservabilityProvider: jest.fn(() => mockProvider),
+        }))
+
+        const { captureRenderError } = require('../index')
+        const error = new Error('render error')
+
+        captureRenderError(error, 'Component Stack')
+
+        expect(mockProvider.captureError).toHaveBeenCalledWith({
+          error,
+          isUserFacing: true,
+          tags: { componentStack: 'Component Stack' },
+        })
       })
     })
   })

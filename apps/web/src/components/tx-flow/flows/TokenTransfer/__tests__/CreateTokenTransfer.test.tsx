@@ -16,10 +16,44 @@ import * as useBalances from '@/hooks/useBalances'
 import * as useTrustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
 import * as chainHooks from '@/hooks/useChains'
 import * as gtfHooks from '@/features/gtf'
+import * as sharedTxHooks from '@/components/tx/shared/hooks'
 import * as remoteSafeAppsHooks from '@/hooks/safe-apps/useRemoteSafeApps'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { fireEvent, waitFor } from '@testing-library/react'
+import { act, fireEvent, waitFor, within } from '@testing-library/react'
+import userEvent, { type UserEvent } from '@testing-library/user-event'
+import type { ReactElement } from 'react'
+
+jest.mock('@/features/safe-shield/hooks', () => ({
+  __esModule: true,
+  ...jest.requireActual('@/features/safe-shield/hooks'),
+  useRecipientAnalysis: jest.fn(() => undefined),
+  useCounterpartyAnalysis: jest.fn(() => ({
+    recipient: [undefined, undefined, false],
+    contract: [undefined, undefined, false],
+    deadlock: [undefined, undefined, false],
+  })),
+  useThreatAnalysis: jest.fn(() => [undefined, undefined, false]),
+}))
+
+jest.mock('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks', () => ({
+  ...jest.requireActual('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'),
+  useRoles: jest.fn(() => []),
+}))
+
+jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible', () => ({
+  useIsHypernativeEligible: jest.fn(() => ({
+    isHypernativeEligible: false,
+    isHypernativeGuard: false,
+    isAllowlistedSafe: false,
+    loading: false,
+  })),
+}))
+
+jest.mock('@/features/ledger', () => {
+  const actual = jest.requireActual('@/features/ledger')
+  return { __esModule: true, ...actual, LedgerFeature: { ...actual.LedgerFeature, useIsEnabled: () => false } }
+})
 
 // Mock the SpendingLimitRowWrapper component with the same "Send as" label as the real component
 jest.mock('@/components/tx-flow/flows/TokenTransfer/SpendingLimitRow', () => ({
@@ -52,13 +86,20 @@ describe('CreateTokenTransfer', () => {
     jest.clearAllMocks()
     useHasPermissionSpy.mockReturnValue(true)
     useRecipientAnalysisSpy.mockReturnValue([undefined, undefined, false])
+    jest.spyOn(gtfHooks, 'useResolvedGasToken').mockReturnValue({ status: 'resolving' })
+    jest.spyOn(sharedTxHooks, 'useRecommendedNonce').mockReturnValue(undefined)
+  })
+
+  const renderWithUser = (ui: ReactElement, options: Parameters<typeof render>[1] = undefined) => ({
+    user: userEvent.setup(),
+    ...render(ui, options),
   })
 
   const renderCreateTokenTransfer = (
     props: CreateTokenTransferProps = {},
     options: Parameters<typeof render>[1] = undefined,
   ) => {
-    return render(
+    return renderWithUser(
       <SafeShieldProvider>
         <TxFlowProvider step={0} data={mockParams} prevStep={() => {}} nextStep={jest.fn()}>
           <CreateTokenTransfer {...props} />
@@ -80,12 +121,42 @@ describe('CreateTokenTransfer', () => {
     expect(getAllByText('Recipient address')[0]).toBeInTheDocument()
   })
 
-  it('should display a type selection if a spending limit token is selected', () => {
+  // With `delayError`, react-hook-form parked the "Invalid address format" from the typed search text
+  // in a form-wide timer that setValue never cancelled and that the blur of ANY field flushed.
+  it('does not bring back the search-text validation error when another field blurs', async () => {
+    jest.useFakeTimers()
+    try {
+      const contact = '0x1111111111111111111111111111111111111111'
+      const { getByLabelText, getByText, queryByText, getByTestId } = renderCreateTokenTransfer(
+        {},
+        { initialReduxState: { addressBook: { '4': { [contact]: 'E2E Contact' } } } },
+      )
+
+      // waitFor advances the fake timers, so the debounced labels settle deterministically.
+      fireEvent.input(getByLabelText('Recipient address', { exact: false }), { target: { value: 'E2E' } })
+      await waitFor(() => expect(getByText('Invalid address format')).toBeInTheDocument())
+
+      fireEvent.click(getByText('E2E Contact'))
+      await waitFor(() => expect(getByTestId('address-book-recipient')).toBeInTheDocument())
+      await waitFor(() => expect(queryByText('Invalid address format')).not.toBeInTheDocument())
+
+      // Real focus moves, not fireEvent.blur: React maps onBlur to focusout.
+      act(() => getByTestId('token-amount-field').focus())
+      act(() => getByTestId('max-btn').focus())
+      // A flushed stale error lands on the next tick; the label would show it after its 500ms
+      // display debounce, which is only scheduled once that first render has happened.
+      act(() => jest.advanceTimersByTime(100))
+      await act(async () => jest.advanceTimersByTime(1000))
+      expect(queryByText('Invalid address format')).not.toBeInTheDocument()
+    } finally {
+      jest.useRealTimers()
+    }
+  })
+
+  const mockSpendingLimitToken = () => {
     jest
       .spyOn(tokenUtils, 'useTokenAmount')
       .mockReturnValue({ totalAmount: BigInt(1000), spendingLimitAmount: BigInt(500) })
-
-    const tokenAddress = ZERO_ADDRESS
 
     jest.spyOn(useBalances, 'default').mockReturnValue({
       balances: {
@@ -94,7 +165,7 @@ describe('CreateTokenTransfer', () => {
           {
             balance: '10',
             tokenInfo: {
-              address: tokenAddress,
+              address: ZERO_ADDRESS,
               decimals: 18,
               logoUri: 'someurl',
               name: 'Test token',
@@ -110,6 +181,10 @@ describe('CreateTokenTransfer', () => {
       loading: false,
       error: undefined,
     })
+  }
+
+  it('should display a type selection if a spending limit token is selected', () => {
+    mockSpendingLimitToken()
 
     const { getByText } = renderCreateTokenTransfer()
 
@@ -127,6 +202,8 @@ describe('CreateTokenTransfer', () => {
   })
 
   it('should not display a type selection if there is a txNonce', () => {
+    mockSpendingLimitToken()
+
     const { queryByText } = renderCreateTokenTransfer({ txNonce: 1 })
 
     expect(queryByText('Send as')).not.toBeInTheDocument()
@@ -185,7 +262,7 @@ describe('CreateTokenTransfer', () => {
       type: TokenTransferType.multiSig,
     }
 
-    const { getByTestId, getByText } = render(
+    const { getByTestId, getByText } = renderWithUser(
       <SafeShieldProvider>
         <TxFlowProvider step={0} data={usdcParams} prevStep={() => {}} nextStep={jest.fn()}>
           <CreateTokenTransfer />
@@ -202,7 +279,7 @@ describe('CreateTokenTransfer', () => {
   })
 
   // Test WITHOUT mocking useTrustedTokenBalances - simulates real app where balances load async
-  it('should preselect USDC when balances are NOT immediately available', async () => {
+  it('should preselect USDC when balances are NOT immediately available', () => {
     // Only mock useBalances, NOT useTrustedTokenBalances
     // This simulates the real app where useTrustedTokenBalances returns empty initially
     jest.spyOn(useTrustedTokenBalances, 'useTrustedTokenBalances').mockReturnValue([undefined, undefined, true])
@@ -218,7 +295,7 @@ describe('CreateTokenTransfer', () => {
       type: TokenTransferType.multiSig,
     }
 
-    const { getByTestId } = render(
+    const { getByTestId } = renderWithUser(
       <SafeShieldProvider>
         <TxFlowProvider step={0} data={usdcParams} prevStep={() => {}} nextStep={jest.fn()}>
           <CreateTokenTransfer />
@@ -278,7 +355,7 @@ describe('CreateTokenTransfer', () => {
 
     // This is EXACTLY what SendButton passes - only tokenAddress, no recipient or amount
     // SendButton: setTxFlow(<TokenTransferFlow recipients={[{ tokenAddress: tokenInfo.address }]} />)
-    const { getByTestId, getByText } = render(
+    const { getByTestId, getByText } = renderWithUser(
       <SafeShieldProvider>
         <TokenTransferFlow recipients={[{ tokenAddress: USDC_ADDRESS }]} />
       </SafeShieldProvider>,
@@ -342,7 +419,7 @@ describe('CreateTokenTransfer', () => {
       return true
     })
 
-    const { getByTestId } = render(
+    const { getByTestId } = renderWithUser(
       <SafeShieldProvider>
         <TokenTransferFlow recipients={[{ tokenAddress: USDC_ADDRESS }]} />
       </SafeShieldProvider>,
@@ -398,29 +475,29 @@ describe('CreateTokenTransfer', () => {
       mockBalancesForGtf()
       mockResolvedToSentToken()
 
-      const { getByTestId, queryByTestId } = renderCreateTokenTransfer()
+      const { user, getByTestId, queryByTestId } = renderCreateTokenTransfer()
 
       expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
 
-      fireEvent.click(getByTestId('max-btn'))
+      await user.click(getByTestId('max-btn'))
 
       await waitFor(() => {
         expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
       })
     })
 
-    it('does not show fee banner when GTF is disabled', () => {
+    it('does not show fee banner when GTF is disabled', async () => {
       useHasFeatureSpy.mockImplementation(() => false)
       mockBalancesForGtf()
 
-      const { getByTestId, queryByTestId } = renderCreateTokenTransfer()
+      const { user, getByTestId, queryByTestId } = renderCreateTokenTransfer()
 
-      fireEvent.click(getByTestId('max-btn'))
+      await user.click(getByTestId('max-btn'))
 
       expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
     })
 
-    it('does not show fee banner when resolved gas token differs from sent token', () => {
+    it('does not show fee banner when resolved gas token differs from sent token', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
       mockBalancesForGtf()
       // Resolve to a different address → sent ≠ fee → banner should stay hidden even after MAX
@@ -429,9 +506,9 @@ describe('CreateTokenTransfer', () => {
         address: '0x1111111111111111111111111111111111111111',
       } as never)
 
-      const { getByTestId, queryByTestId } = renderCreateTokenTransfer()
+      const { user, getByTestId, queryByTestId } = renderCreateTokenTransfer()
 
-      fireEvent.click(getByTestId('max-btn'))
+      await user.click(getByTestId('max-btn'))
 
       expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
     })
@@ -441,15 +518,15 @@ describe('CreateTokenTransfer', () => {
       mockBalancesForGtf()
       mockResolvedToSentToken()
 
-      const { getByTestId, queryByTestId, getByLabelText } = renderCreateTokenTransfer()
+      const { user, getByTestId, queryByTestId, getByLabelText } = renderCreateTokenTransfer()
 
-      fireEvent.click(getByTestId('max-btn'))
+      await user.click(getByTestId('max-btn'))
 
       await waitFor(() => {
         expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
       })
 
-      fireEvent.click(getByLabelText('Dismiss fee banner'))
+      await user.click(getByLabelText('Dismiss fee banner'))
 
       expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
     })
@@ -460,9 +537,9 @@ describe('CreateTokenTransfer', () => {
       mockBalancesForGtf()
       mockResolvedToSentToken()
 
-      const { getByTestId } = renderCreateTokenTransfer()
+      const { user, getByTestId } = renderCreateTokenTransfer()
 
-      fireEvent.click(getByTestId('max-btn'))
+      await user.click(getByTestId('max-btn'))
 
       await waitFor(() => {
         expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
@@ -480,9 +557,9 @@ describe('CreateTokenTransfer', () => {
       mockBalancesForGtf()
       mockResolvedToSentToken()
 
-      const { getByTestId } = renderCreateTokenTransfer()
+      const { user, getByTestId } = renderCreateTokenTransfer()
 
-      fireEvent.click(getByTestId('max-btn'))
+      await user.click(getByTestId('max-btn'))
 
       await waitFor(() => {
         expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
@@ -515,41 +592,41 @@ describe('CreateTokenTransfer', () => {
       useRemoteSafeAppsSpy.mockReturnValue([[csvApp], undefined, false])
     })
 
-    it('shows the CSV hint as an info alert after adding a second recipient', () => {
-      const { getByTestId } = renderCreateTokenTransfer()
+    it('shows the CSV hint as an info alert after adding a second recipient', async () => {
+      const { user, getByTestId } = renderCreateTokenTransfer()
 
-      fireEvent.click(getByTestId('add-recipient-btn'))
+      await user.click(getByTestId('add-recipient-btn'))
 
       const csvHint = getByTestId('csv-airdrop-hint')
       expect(csvHint).toBeInTheDocument()
       expect(csvHint).toHaveClass('bg-[var(--color-info-background)]', 'text-foreground', 'border-transparent')
     })
 
-    it('renders the standard info icon inside the CSV hint', () => {
-      const { getByTestId } = renderCreateTokenTransfer()
+    it('renders the standard info icon inside the CSV hint', async () => {
+      const { user, getByTestId } = renderCreateTokenTransfer()
 
-      fireEvent.click(getByTestId('add-recipient-btn'))
+      await user.click(getByTestId('add-recipient-btn'))
 
       expect(getByTestId('csv-airdrop-hint').querySelector('svg.lucide-info')).toBeInTheDocument()
     })
 
-    it('dismisses the CSV hint on close button click', () => {
-      const { getByTestId, queryByTestId, getByLabelText } = renderCreateTokenTransfer()
+    it('dismisses the CSV hint on close button click', async () => {
+      const { user, getByTestId, queryByTestId, getByLabelText } = renderCreateTokenTransfer()
 
-      fireEvent.click(getByTestId('add-recipient-btn'))
+      await user.click(getByTestId('add-recipient-btn'))
       expect(getByTestId('csv-airdrop-hint')).toBeInTheDocument()
 
-      fireEvent.click(getByLabelText('close'))
+      await user.click(getByLabelText('close'))
 
       expect(queryByTestId('csv-airdrop-hint')).not.toBeInTheDocument()
     })
 
-    it('renders the standard warning icon on the max-recipients-reached alert', () => {
-      const { getByTestId } = renderCreateTokenTransfer()
+    it('renders the standard warning icon on the max-recipients-reached alert', async () => {
+      const { user, getByTestId } = renderCreateTokenTransfer()
 
       // MAX_RECIPIENTS is 5 — starting from 1 recipient, 4 more clicks fills the cap.
       for (let i = 0; i < 4; i++) {
-        fireEvent.click(getByTestId('add-recipient-btn'))
+        await user.click(getByTestId('add-recipient-btn'))
       }
 
       const maxReached = getByTestId('max-recipients-reached')
@@ -557,16 +634,69 @@ describe('CreateTokenTransfer', () => {
       expect(maxReached.querySelector('svg.lucide-triangle-alert')).toBeInTheDocument()
     })
 
-    it('renders the max-recipients-reached alert filled (tinted background, no border)', () => {
-      const { getByTestId } = renderCreateTokenTransfer()
+    it('renders the max-recipients-reached alert filled (tinted background, no border)', async () => {
+      const { user, getByTestId } = renderCreateTokenTransfer()
 
       for (let i = 0; i < 4; i++) {
-        fireEvent.click(getByTestId('add-recipient-btn'))
+        await user.click(getByTestId('add-recipient-btn'))
       }
 
       const maxReached = getByTestId('max-recipients-reached')
       expect(maxReached).toHaveClass('bg-warning-subtle', 'border-transparent', 'text-foreground')
       expect(maxReached).not.toHaveClass('bg-card')
+    })
+
+    const addRecipients = async (user: UserEvent, getByTestId: (id: string) => HTMLElement, count: number) => {
+      for (let i = 0; i < count; i++) {
+        await user.click(getByTestId('add-recipient-btn'))
+      }
+    }
+
+    it('recommends CSV Airdrop for more than 5 recipients once a second recipient is added', async () => {
+      const { user, getByTestId } = renderCreateTokenTransfer()
+
+      await addRecipients(user, getByTestId, 1)
+
+      expect(getByTestId('csv-airdrop-hint')).toHaveTextContent(
+        'If you want to add more than 5 recipients, use CSV Airdrop',
+      )
+    })
+
+    it('recommends CSV Airdrop when no more recipients can be added', async () => {
+      const { user, getByTestId } = renderCreateTokenTransfer()
+
+      await addRecipients(user, getByTestId, 4)
+
+      expect(getByTestId('max-recipients-reached')).toHaveTextContent(
+        /No more recipients can be added\.\s*Please use CSV Airdrop/,
+      )
+    })
+
+    it.each([
+      ['the hint', 1, 'csv-airdrop-hint'],
+      ['the max recipients alert', 4, 'max-recipients-reached'],
+    ])('opens the CSV Airdrop app from %s', async (_, added, alertTestId) => {
+      const { user, getByTestId } = renderCreateTokenTransfer()
+      await addRecipients(user, getByTestId, added)
+
+      await user.click(within(getByTestId(alertTestId)).getByRole('button', { name: 'CSV Airdrop' }))
+
+      expect(getByTestId('csvairdrop-dialog')).toHaveTextContent('Use CSV Airdrop')
+      expect(getByTestId('open-app-btn')).toHaveAttribute(
+        'href',
+        expect.stringContaining(encodeURIComponent(csvApp.url)),
+      )
+    })
+
+    it('does not recommend CSV Airdrop when the chain has no CSV Airdrop app', async () => {
+      useRemoteSafeAppsSpy.mockReturnValue([[], undefined, false])
+      const { user, getByTestId, queryByTestId, queryByText } = renderCreateTokenTransfer()
+
+      await addRecipients(user, getByTestId, 4)
+
+      expect(queryByTestId('csv-airdrop-hint')).not.toBeInTheDocument()
+      expect(getByTestId('max-recipients-reached')).toHaveTextContent('No more recipients can be added.')
+      expect(queryByText('CSV Airdrop')).not.toBeInTheDocument()
     })
   })
 
@@ -619,7 +749,7 @@ describe('CreateTokenTransfer', () => {
         type: TokenTransferType.multiSig,
       }
 
-      const { getByTestId, getAllByTestId } = render(
+      const { getByTestId, getAllByTestId } = renderWithUser(
         <SafeShieldProvider>
           <TxFlowProvider step={0} data={twoRecipientParams} prevStep={() => {}} nextStep={jest.fn()}>
             <CreateTokenTransfer />
@@ -648,7 +778,7 @@ describe('CreateTokenTransfer', () => {
         type: TokenTransferType.multiSig,
       }
 
-      const { getByTestId, getAllByTestId } = render(
+      const { getByTestId, getAllByTestId } = renderWithUser(
         <SafeShieldProvider>
           <TxFlowProvider step={0} data={twoRecipientParams} prevStep={() => {}} nextStep={jest.fn()}>
             <CreateTokenTransfer />
@@ -667,6 +797,191 @@ describe('CreateTokenTransfer', () => {
       const alert = getByTestId('insufficient-balance-error')
       expect(alert).toHaveClass('bg-error-subtle', 'border-transparent', 'text-foreground')
       expect(alert).not.toHaveClass('bg-card')
+    })
+  })
+
+  describe('Max with a spending limit', () => {
+    const TEN_USDC = '10000000'
+
+    const givenSpendingLimitLeft = (amount: bigint) => {
+      const balances = {
+        fiatTotal: '0',
+        items: [
+          {
+            balance: TEN_USDC,
+            tokenInfo: {
+              address: USDC_ADDRESS,
+              decimals: 6,
+              logoUri: '',
+              name: 'USD Coin',
+              symbol: 'USDC',
+              type: TokenType.ERC20,
+            },
+            fiatBalance: '10',
+            fiatConversion: '1',
+          },
+        ],
+      }
+
+      jest.spyOn(useTrustedTokenBalances, 'useTrustedTokenBalances').mockReturnValue([balances, undefined, false])
+      jest.spyOn(useBalances, 'default').mockReturnValue({ balances, loaded: true, loading: false, error: undefined })
+      jest.spyOn(tokenUtils, 'useTokenAmount').mockImplementation((selectedToken) => ({
+        totalAmount: BigInt(selectedToken?.balance || 0),
+        spendingLimitAmount: amount,
+      }))
+    }
+
+    const clickMax = async (type: TokenTransferType) => {
+      const data = { recipients: [{ recipient: '', tokenAddress: USDC_ADDRESS, amount: '' }], type }
+      const { user, getByTestId } = renderWithUser(
+        <SafeShieldProvider>
+          <TxFlowProvider step={0} data={data} prevStep={() => {}} nextStep={jest.fn()}>
+            <CreateTokenTransfer />
+          </TxFlowProvider>
+        </SafeShieldProvider>,
+      )
+
+      await user.click(getByTestId('max-btn'))
+      return getByTestId('token-amount-field')
+    }
+
+    it('fills in the amount left on the spending limit for a spending limit transaction', async () => {
+      givenSpendingLimitLeft(2_500_000n)
+
+      const amountField = await clickMax(TokenTransferType.spendingLimit)
+
+      await waitFor(() => expect(amountField).toHaveValue('2.5'))
+    })
+
+    it('fills in the whole balance for a standard transaction', async () => {
+      givenSpendingLimitLeft(2_500_000n)
+
+      const amountField = await clickMax(TokenTransferType.multiSig)
+
+      await waitFor(() => expect(amountField).toHaveValue('10'))
+    })
+
+    it('fills in the balance when the spending limit is larger than the balance', async () => {
+      givenSpendingLimitLeft(50_000_000n)
+
+      const amountField = await clickMax(TokenTransferType.spendingLimit)
+
+      await waitFor(() => expect(amountField).toHaveValue('10'))
+    })
+  })
+
+  describe('Mass payout recipients', () => {
+    const useHasFeatureSpy = jest.spyOn(chainHooks, 'useHasFeature')
+    const ONE_ETH = '1000000000000000000'
+
+    const givenMassPayouts = (enabled: boolean) => {
+      useHasFeatureSpy.mockImplementation((feature) => enabled && feature === FEATURES.MASS_PAYOUTS)
+    }
+
+    const renderForm = (type = TokenTransferType.multiSig) => {
+      const data = { recipients: [{ recipient: '', tokenAddress: ZERO_ADDRESS, amount: '' }], type }
+      return renderWithUser(
+        <SafeShieldProvider>
+          <TxFlowProvider step={0} data={data} prevStep={() => {}} nextStep={jest.fn()}>
+            <CreateTokenTransfer />
+          </TxFlowProvider>
+        </SafeShieldProvider>,
+      )
+    }
+
+    beforeEach(() => {
+      givenMassPayouts(true)
+
+      const balances = {
+        fiatTotal: '0',
+        items: [
+          {
+            balance: ONE_ETH,
+            tokenInfo: {
+              address: ZERO_ADDRESS,
+              decimals: 18,
+              logoUri: '',
+              name: 'Ether',
+              symbol: 'ETH',
+              type: TokenType.NATIVE_TOKEN,
+            },
+            fiatBalance: '1000',
+            fiatConversion: '1000',
+          },
+        ],
+      }
+
+      jest.spyOn(useTrustedTokenBalances, 'useTrustedTokenBalances').mockReturnValue([balances, undefined, false])
+      jest.spyOn(useBalances, 'default').mockReturnValue({ balances, loaded: true, loading: false, error: undefined })
+      jest.spyOn(tokenUtils, 'useTokenAmount').mockImplementation((selectedToken) => ({
+        totalAmount: BigInt(selectedToken?.balance || 0),
+        spendingLimitAmount: 0n,
+      }))
+    })
+
+    it('offers to add a recipient when mass payouts are enabled', () => {
+      const { getByTestId } = renderForm()
+
+      expect(getByTestId('add-recipient-btn')).toBeEnabled()
+      expect(getByTestId('recipients-count')).toHaveTextContent('1/5')
+    })
+
+    it('does not offer to add a recipient when mass payouts are disabled', () => {
+      givenMassPayouts(false)
+
+      const { queryByTestId } = renderForm()
+
+      expect(queryByTestId('add-recipient-btn')).not.toBeInTheDocument()
+    })
+
+    it('does not offer to add a recipient for a spending limit transaction', () => {
+      const { queryByTestId } = renderForm(TokenTransferType.spendingLimit)
+
+      expect(queryByTestId('add-recipient-btn')).not.toBeInTheDocument()
+    })
+
+    it('stops at 5 recipients', async () => {
+      const { user, getByTestId, getAllByTestId } = renderForm()
+
+      for (let i = 0; i < 4; i++) {
+        await user.click(getByTestId('add-recipient-btn'))
+      }
+
+      expect(getAllByTestId('token-amount-field')).toHaveLength(5)
+      expect(getByTestId('recipients-count')).toHaveTextContent('5/5')
+      expect(getByTestId('add-recipient-btn')).toBeDisabled()
+    })
+
+    it('removes a recipient', async () => {
+      const { user, getByTestId, getAllByTestId } = renderForm()
+
+      await user.click(getByTestId('add-recipient-btn'))
+      expect(getByTestId('recipients-count')).toHaveTextContent('2/5')
+
+      await user.click(getAllByTestId('remove-recipient-btn')[0])
+
+      expect(getAllByTestId('token-amount-field')).toHaveLength(1)
+      expect(getByTestId('recipients-count')).toHaveTextContent('1/5')
+    })
+
+    it('fills in the whole balance when Max is clicked for the second recipient', async () => {
+      const { user, getByTestId, getAllByTestId } = renderForm()
+
+      await user.click(getByTestId('add-recipient-btn'))
+      await user.click(getAllByTestId('max-btn')[1])
+
+      await waitFor(() => expect(getAllByTestId('token-amount-field')[1]).toHaveValue('1'))
+    })
+
+    it('marks every recipient and the form as insufficient when two recipients send the whole balance', async () => {
+      const { user, getByTestId, getAllByTestId, getAllByText } = renderForm()
+
+      await user.click(getByTestId('add-recipient-btn'))
+      await user.click(getAllByTestId('max-btn')[0])
+      await user.click(getAllByTestId('max-btn')[1])
+
+      await waitFor(() => expect(getByTestId('insufficient-balance-error')).toBeInTheDocument())
+      await waitFor(() => expect(getAllByText('Insufficient funds')).toHaveLength(2))
     })
   })
 })

@@ -1,23 +1,25 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import Track from '@/components/common/Track'
 import Link from 'next/link'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Spinner } from '@/components/ui/spinner'
-import { Separator } from '@/components/ui/separator'
-import { Typography } from '@/components/ui/typography'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
+import { SearchInput } from '@safe-global/views/components/ui/search-input'
 import partition from 'lodash/partition'
 import { ChevronDownIcon, InfoIcon } from 'lucide-react'
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import type { NextRouter } from 'next/router'
 import { useRouter } from 'next/router'
 import css from './styles.module.css'
-import { type ReactElement, useCallback, useMemo, useState } from 'react'
+import { type KeyboardEvent, type ReactElement, useCallback, useMemo, useRef, useState } from 'react'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
 import { useAllSafesGrouped } from '@/hooks/safes'
 import useSafeAddress from '@/hooks/useSafeAddress'
+import { withSpaceId } from '@/hooks/useUrlSpaceId'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import uniq from 'lodash/uniq'
 import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
@@ -26,43 +28,32 @@ import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import PlusIcon from '@/public/images/common/plus.svg'
 import useAddressBook from '@/hooks/useAddressBook'
 import useChainId from '@/hooks/useChainId'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 
-export const getNetworkLink = (
-  router: NextRouter,
+const KEPT_QUERY_PARAMS = ['safeViewRedirectURL', 'appUrl', 'next'] as const
+
+type KeptQuery = Partial<Record<(typeof KEPT_QUERY_PARAMS)[number], string>>
+
+const pickKeptQuery = (query: NextRouter['query']): KeptQuery =>
+  Object.fromEntries(
+    KEPT_QUERY_PARAMS.flatMap((key) => {
+      const value = query[key]
+      return typeof value === 'string' && value ? [[key, value]] : []
+    }),
+  )
+
+/** Links to the same page on the given chain; keeps only `spaceId` and KEPT_QUERY_PARAMS. */
+export const buildChainSwitchHref = (
+  router: Pick<NextRouter, 'pathname' | 'query'>,
   safeAddress: string,
-  chainInfo: Pick<Chain, 'chainId' | 'shortName'>,
+  { shortName }: Pick<Chain, 'shortName'>,
 ) => {
-  const { shortName } = chainInfo
-  const isSafeOpened = safeAddress !== ''
+  const target = safeAddress ? { safe: `${shortName}:${safeAddress}` } : { chain: shortName }
 
-  const query = (
-    isSafeOpened
-      ? {
-          safe: `${shortName}:${safeAddress}`,
-        }
-      : { chain: shortName }
-  ) as {
-    safe?: string
-    chain?: string
-    safeViewRedirectURL?: string
-    appUrl?: string
-  }
-
-  const route = {
+  return {
     pathname: router.pathname,
-    query,
+    query: withSpaceId({ ...target, ...pickKeptQuery(router.query) }, router.query.spaceId),
   }
-
-  const queryParams = ['safeViewRedirectURL', 'appUrl'] as const
-
-  for (const key of queryParams) {
-    if (router.query?.[key]) {
-      route.query[key] = router.query?.[key].toString()
-    }
-  }
-
-  return route
 }
 
 const UndeployedNetworkMenuItem = ({
@@ -270,6 +261,20 @@ const NetworkSelector = ({
   triggerClassName?: string
 }): ReactElement => {
   const [open, setOpen] = useState<boolean>(false)
+  const [search, setSearch] = useState('')
+  const searchRef = useRef<HTMLInputElement>(null)
+  const rowRefs = useRef(new Map<string, HTMLElement>())
+
+  const registerRow = useCallback(
+    (chainId: string) => (node: HTMLElement | null) => {
+      if (!node) return
+      rowRefs.current.set(chainId, node)
+      return () => {
+        rowRefs.current.delete(chainId)
+      }
+    },
+    [],
+  )
   const { configs } = useChains()
   const chainId = useChainId()
   const router = useRouter()
@@ -293,13 +298,18 @@ const NetworkSelector = ({
     ])
   }, [chainId, configs, isSafeOpened, safeAddress, safesGrouped.allMultiChainSafes])
 
+  const query = search.trim().toLowerCase()
+
   const [testNets, prodNets] = useMemo(
     () =>
       partition(
-        configs.filter((config) => availableChainIds.includes(config.chainId)),
+        configs.filter(
+          (config) =>
+            availableChainIds.includes(config.chainId) && (!query || config.chainName.toLowerCase().includes(query)),
+        ),
         (config) => config.isTestnet,
       ),
-    [availableChainIds, configs],
+    [availableChainIds, configs, query],
   )
 
   const renderMenuItem = useCallback(
@@ -312,9 +322,15 @@ const NetworkSelector = ({
       }
 
       return (
-        <SelectItem data-testid="network-selector-item" key={chainId} value={chainId} className={css.menuItem}>
+        <SelectItem
+          data-testid="network-selector-item"
+          key={chainId}
+          ref={registerRow(chainId)}
+          value={chainId}
+          className={css.menuItem}
+        >
           <Link
-            href={getNetworkLink(router, safeAddress, chain)}
+            href={buildChainSwitchHref(router, safeAddress, chain)}
             onClick={() => {
               onSwitchNetwork()
               onChainSelect?.()
@@ -331,18 +347,42 @@ const NetworkSelector = ({
         </SelectItem>
       )
     },
-    [configs, onChainSelect, router, safeAddress, compactButton],
+    [configs, onChainSelect, router, safeAddress, compactButton, registerRow],
   )
 
-  const handleClose = () => {
-    setOpen(false)
+  // base-ui's highlighted-row index goes stale when the list shrinks; focusing a row resets it via onFocus.
+  const focusRow = (edge: 'first' | 'last') => {
+    const rendered = [...prodNets, ...testNets]
+    const chain = edge === 'first' ? rendered[0] : rendered[rendered.length - 1]
+    if (!chain) return
+    rowRefs.current.get(chain.chainId)?.focus()
+  }
+
+  const handleSearchKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault()
+      event.stopPropagation()
+      focusRow(event.key === 'ArrowDown' ? 'first' : 'last')
+      return
+    }
+
+    // base-ui reads printable keys as list typeahead, which would take over the field; Escape must still reach it.
+    if (event.key !== 'Escape') {
+      event.stopPropagation()
+    }
   }
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen)
+    // This component stays mounted across close, so the next opening would start filtered.
+    setSearch('')
     if (nextOpen) {
       offerSafeCreation && trackEvent({ ...OVERVIEW_EVENTS.EXPAND_MULTI_SAFE, label: OVERVIEW_LABELS.top_bar })
     }
+  }
+
+  const handleClose = () => {
+    handleOpenChange(false)
   }
 
   const renderSelectedValue = () => {
@@ -364,14 +404,45 @@ const NetworkSelector = ({
       >
         <SelectValue>{renderSelectedValue}</SelectValue>
       </SelectTrigger>
-      <SelectContent className="min-w-[260px]" alignItemWithTrigger={false}>
+      {/* outline-hidden: base-ui focuses the popup on open, and typing makes that ring :focus-visible. */}
+      <SelectContent className="min-w-[260px] outline-hidden" alignItemWithTrigger={false}>
+        {/* Negative offsets bleed this header over the scrolling list's padding: keep in step with the `p-1.5` on SelectPrimitive.List. */}
+        <div className="sticky -top-1.5 z-10 -mx-1.5 -mt-1.5 bg-popover px-1.5 pt-1.5 pb-2">
+          {/* rounded-[6px] is the popup's 12px corner less this header's 6px inset, to stay concentric. */}
+          <SearchInput
+            variant="surface"
+            // eslint-disable-next-line no-restricted-syntax -- the radius has to be the popup's less this field's inset; no preset can know the container it is nested in
+            className="rounded-[6px] shadow-xs"
+            placeholder="Search networks"
+            aria-label="Search networks"
+            ref={searchRef}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onClear={() => setSearch('')}
+            onKeyDown={handleSearchKeyDown}
+            autoComplete="off"
+            data-testid="network-selector-search-input"
+          />
+        </div>
+
         {prodNets.map((chain) => renderMenuItem(chain.chainId, false))}
 
         {testNets.length > 0 && <TestnetDivider />}
 
         {testNets.map((chain) => renderMenuItem(chain.chainId, false))}
 
-        {offerSafeCreation && isSafeOpened && addNetworkFeatureEnabled && (
+        {/* role=status: the rows vanish without focus moving, so nothing else announces the empty list. */}
+        {query && prodNets.length === 0 && testNets.length === 0 && (
+          <p
+            role="status"
+            className="px-4 py-6 text-center text-sm text-muted-foreground"
+            data-testid="network-selector-empty"
+          >
+            No networks match your search
+          </p>
+        )}
+
+        {!query && offerSafeCreation && isSafeOpened && addNetworkFeatureEnabled && (
           <UndeployedNetworks
             chains={configs}
             deployedChains={availableChainIds}

@@ -1,0 +1,136 @@
+{
+  "safeAddress": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+  "txId": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0xb82070c01297392754b4b972c064f48f4ab944c5979813c01b871c8f8d57bc4a",
+  "executedAt": 1701416244000,
+  "txStatus": "SUCCESS",
+  "txInfo": {
+    "type": "SettingsChange",
+    "humanDescription": null,
+    "dataDecoded": {
+      "method": "disableModule",
+      "parameters": [
+        {
+          "name": "prevModule",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000001",
+          "valueDecoded": null
+        },
+        {
+          "name": "module",
+          "type": "address",
+          "value": "0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134",
+          "valueDecoded": null
+        }
+      ],
+      "accuracy": "ONLY_FUNCTION_MATCH"
+    },
+    "settingsInfo": {
+      "type": "DISABLE_MODULE",
+      "module": {
+        "value": "0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134",
+        "name": "AllowanceModule",
+        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134.png"
+      }
+    }
+  },
+  "txData": {
+    "hexData": "0xe009cfde0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000cfbfac74c26f8647cbdb8c5caf80bb5b32e43134",
+    "dataDecoded": {
+      "method": "disableModule",
+      "parameters": [
+        {
+          "name": "prevModule",
+          "type": "address",
+          "value": "0x0000000000000000000000000000000000000001",
+          "valueDecoded": null
+        },
+        {
+          "name": "module",
+          "type": "address",
+          "value": "0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134",
+          "valueDecoded": null
+        }
+      ],
+      "accuracy": "ONLY_FUNCTION_MATCH"
+    },
+    "to": {
+      "value": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+      "name": null,
+      "logoUri": null
+    },
+    "value": "0",
+    "operation": 0,
+    "trustedDelegateCallTarget": null,
+    "addressInfoIndex": {
+      "0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134": {
+        "value": "0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134",
+        "name": "AllowanceModule",
+        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134.png"
+      }
+    },
+    "tokenInfoIndex": null
+  },
+  "txHash": "0x8b3972a18cdba64348961ecd7d04f98fa155cd471e7a6fd981653177d049adeb",
+  "detailedExecutionInfo": {
+    "type": "MULTISIG",
+    "submittedAt": 1701416223522,
+    "nonce": 11,
+    "safeTxGas": "0",
+    "baseGas": "0",
+    "gasPrice": "0",
+    "gasToken": "0x0000000000000000000000000000000000000000",
+    "fee": "34199322353978",
+    "payment": "0",
+    "refundReceiver": {
+      "value": "0x0000000000000000000000000000000000000000",
+      "name": null,
+      "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x0000000000000000000000000000000000000000.png"
+    },
+    "safeTxHash": "0xb82070c01297392754b4b972c064f48f4ab944c5979813c01b871c8f8d57bc4a",
+    "executor": {
+      "value": "0xb3a1956Cff1ecc8054B81b0C83b9847CB71384b8",
+      "name": null,
+      "logoUri": null
+    },
+    "signers": [
+      {
+        "value": "0x4fe7164d7cA511Ab35520bb14065F1693240dC90",
+        "name": null,
+        "logoUri": null
+      },
+      {
+        "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
+        "name": null,
+        "logoUri": null
+      },
+      {
+        "value": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5",
+        "name": null,
+        "logoUri": null
+      }
+    ],
+    "confirmationsRequired": 1,
+    "confirmations": [
+      {
+        "signer": {
+          "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
+          "name": null,
+          "logoUri": null
+        },
+        "signature": "0xa35c6abf13515cffaf1f512305953c16f2ae1f558111eaaa03d799ff7023e568707968e28adafc5a126e39152b41c05653c12472104e03595ba91d99a83549d21b",
+        "submittedAt": 1701416223794
+      }
+    ],
+    "rejectors": [],
+    "gasTokenInfo": null,
+    "trusted": true,
+    "proposer": {
+      "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
+      "name": null,
+      "logoUri": null
+    },
+    "proposedByDelegate": null
+  },
+  "safeAppInfo": null,
+  "note": null
+}

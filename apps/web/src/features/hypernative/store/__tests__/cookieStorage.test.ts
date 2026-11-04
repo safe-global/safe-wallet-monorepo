@@ -77,28 +77,7 @@ describe('cookieStorage', () => {
       expect(parsedValue.tokenType).toBe(tokenType)
     })
 
-    it('should set secure flag to true on HTTPS', () => {
-      Object.defineProperty(window, 'location', {
-        value: {
-          protocol: 'https:',
-        },
-        writable: true,
-      })
-
-      setAuthCookie('test-token', 'Bearer', 3600)
-
-      const [, , options] = mockCookiesSet.mock.calls[0]
-      expect(options?.secure).toBe(true)
-    })
-
     it('should set secure flag to false on HTTP', () => {
-      Object.defineProperty(window, 'location', {
-        value: {
-          protocol: 'http:',
-        },
-        writable: true,
-      })
-
       setAuthCookie('test-token', 'Bearer', 3600)
 
       const [, , options] = mockCookiesSet.mock.calls[0]

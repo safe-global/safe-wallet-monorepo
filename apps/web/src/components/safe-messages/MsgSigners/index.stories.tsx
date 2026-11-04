@@ -19,6 +19,10 @@ const message = (overrides: Partial<MessageItem> = {}): MessageItem => ({
   confirmationsRequired: 3,
   proposedBy: { value: OWNERS[0] },
   confirmations: [{ owner: { value: OWNERS[0] }, signature: '' }],
+  preparedSignature: null,
+  origin: null,
+  safeAppInfo: null,
+  safeAppId: null,
   ...overrides,
 })
 

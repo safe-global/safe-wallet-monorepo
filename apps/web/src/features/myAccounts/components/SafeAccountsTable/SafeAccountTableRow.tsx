@@ -2,29 +2,30 @@ import { useCallback, useMemo, type MouseEvent, type ReactNode } from 'react'
 import type { DraggableProvidedDraggableProps, DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
 import type { LinkProps } from 'next/link'
 import { useRouter } from 'next/router'
-import { TableCell, TableRow } from '@/components/ui/table'
+import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import type { SafeItem } from '@/hooks/safes'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useRowOverviews } from './useRowOverviews'
 import { GripVertical } from 'lucide-react'
 import { SimilarityWarningIcon } from './SimilarityBand'
 import type { SimilarWarning } from '@/features/address-poisoning'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { SafeInfoDisplay } from '@/components/common/AccountRow'
 import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
 import FiatBalance from '@/components/common/FiatBalance'
-import NotActivatedBadge from '@/components/common/NotActivatedBadge'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Skeleton } from '@/components/ui/skeleton'
+import NotActivatedBadge from '@safe-global/views/components/common/NotActivatedBadge'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { useChain } from '@/hooks/useChains'
+import { useAddressBookWriteScope } from '@/features/spaces'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { AccountItem as BaseAccountItem } from '../AccountItem'
 import { NetworkLogosPill } from '@/features/multichain'
-import type { AccountLine } from './useSafeAccountRows'
-import type { SafeAccountColumn } from './columns'
-import { PendingBadge, ThresholdBadge, formatPendingLabel } from '@/components/common/AccountBadges'
-import { Checkbox } from '@/components/ui/checkbox'
+import { getContextMenuChainIds, type AccountLine } from './useSafeAccountRows'
+import type { SafeAccountColumn } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
+import { PendingBadge, ThresholdBadge, formatPendingLabel } from '@safe-global/views/components/common/AccountBadges'
+import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { WorkspaceAvatars } from './cells'
 
 /** Precomputed checkbox state for a selectable row (see SafeAccountsSelection). */
@@ -49,6 +50,8 @@ type SafeAccountTableRowProps = {
   highlighted?: boolean
   /** Replaces the default context-menu actions cell (e.g. an "Add to workspace" button). */
   renderActions?: (line: AccountLine) => ReactNode
+  /** Replaces the identity cell; the cell stops clipping so a field can overhang its padding. */
+  renderName?: (line: AccountLine) => ReactNode
   /** When set, adds the hover rename pencil to the identity cell (non-modal surfaces). */
   onRename?: (line: AccountLine) => void
   /** When set, a leading checkbox cell is rendered in selection mode. */
@@ -82,6 +85,7 @@ const NameCellContent = ({
   nameLink?: { href: LinkProps['href']; onClick?: () => void; testId?: string }
 }) => {
   const chainConfig = useChain(line.chainId)
+  const { canRename } = useAddressBookWriteScope(line.address, getContextMenuChainIds(line.contextMenu))
   // Explorer links are per-chain, so only single safes and per-chain child rows get one — never the
   // multi-chain parent, whose chainId is just the first network's. On child rows (address hidden) the
   // link rides next to the chain name; SafeInfoDisplay places it there.
@@ -99,8 +103,8 @@ const NameCellContent = ({
       leading={<span className="flex w-10 items-center">{leading}</span>}
       hideAddress={!line.showAddress}
       explorerLink={explorerLink}
-      onRename={onRename}
-      nameAdornment={warning ? <SimilarityWarningIcon warning={warning} /> : undefined}
+      onRename={canRename ? onRename : undefined}
+      nameAdornment={warning ? <SimilarityWarningIcon address={line.address} warning={warning} /> : undefined}
       nameVariant="paragraph-bold"
       className="min-w-0"
       nameLink={nameLink}
@@ -277,6 +281,7 @@ const RowCell = ({
   isFirstCell,
   reorderable,
   nameCell,
+  nameOverflows,
   checkbox,
   onSelectToggle,
   renderActions,
@@ -287,6 +292,7 @@ const RowCell = ({
   isFirstCell: boolean
   reorderable: boolean
   nameCell: ReactNode
+  nameOverflows: boolean
   checkbox?: RowCheckbox
   onSelectToggle?: (next: boolean) => void
   renderActions?: (line: AccountLine) => ReactNode
@@ -303,11 +309,14 @@ const RowCell = ({
       // The Name cell hosts the always-visible grip (w-7, anchored left-0), so it needs extra left
       // padding for the avatar to start after the grip rather than under it. The selection cell's
       // grip is the narrower `inline` one and fits the default padding. Widening happens in
-      // styles.module.css — the `td:first-of-type` rule there outranks a utility class.
+      // the panel variant — the `td:first-of-type` rule there outranks a utility class.
       data-hosts-handle={hostsHandle && column.id !== 'select' ? '' : undefined}
       // Slim 8px padding (ui default), 16px on the outer cells + the hover-pill inset borders live in
-      // styles.module.css (they need background-clip + specificity the primitive's classes can't beat).
-      className={cn(hostsHandle ? 'relative overflow-visible' : 'overflow-hidden')}
+      // the panel variant (they need background-clip + specificity the primitive's classes can't beat).
+      className={cn(
+        hostsHandle ? 'relative overflow-visible' : 'overflow-hidden',
+        nameOverflows && column.id === 'name' && 'overflow-visible',
+      )}
       style={{
         textAlign: column.align ?? 'left',
         ...(reorderable && column.width ? { width: column.width, minWidth: column.width, maxWidth: column.width } : {}),
@@ -341,6 +350,7 @@ const SafeAccountTableRow = ({
   warning,
   highlighted,
   renderActions,
+  renderName,
   onRename,
   checkbox,
   onSelectToggle,
@@ -379,7 +389,7 @@ const SafeAccountTableRow = ({
   // toggle their per-chain children. The name keeps its real <a> (for keyboard focus and modifier-clicks
   // that open a new tab) and the other affordances — copy, explorer, rename, the actions menu — keep
   // their own behaviour, so the row handler bails when the click lands on any of them.
-  const rowNavigable = !checkbox && (line.expandable || line.href != null)
+  const rowNavigable = !checkbox && !renderName && (line.expandable || line.href != null)
 
   const handleRowClick = (event: MouseEvent<HTMLElement>) => {
     if ((event.target as HTMLElement).closest('a, button, [role="button"]')) return
@@ -394,7 +404,9 @@ const SafeAccountTableRow = ({
   // fixed layout — pin each cell's width so the floating row keeps its column alignment.
   const reorderable = Boolean(rowDraggableProps)
 
-  const nameCell = (
+  const nameCell = renderName ? (
+    renderName(line)
+  ) : (
     <NameCell
       line={line}
       expanded={expanded}
@@ -415,13 +427,15 @@ const SafeAccountTableRow = ({
       data-variant={line.variant}
       // Locked rows opt out of the table's grey row hover (see the Table sx override).
       data-disabled={checkbox?.disabledReason ? '' : undefined}
-      // Draws the row separator (via the Table sx override); false only at the last row of a group/list.
-      data-divider={showDivider ? '' : undefined}
-      // Band membership marker — the card styling lives in the Table sx, keyed off this attribute.
+      // The variant draws a separator under every row but the last; suppress it inside a group and
+      // inside a band, both of which close themselves.
+      data-no-divider={!showDivider || highlighted ? '' : undefined}
+      // Band membership marker — the card styling is keyed off this attribute.
       data-highlighted={highlighted && !isDragging ? '' : undefined}
-      // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover.
-      // The row border + row-level hover are neutralised in styles.module.css (we paint the hover pill
-      // on the cells and draw our own data-divider separator); the lifted-while-dragging chrome is here.
+      // The band fill is the row's own; opt out of the shared hover pill so it isn't painted over.
+      data-no-hover={highlighted ? '' : undefined}
+      // group/row lets the shared identity cell reveal its copy/explorer/rename icons on row hover;
+      // the lifted-while-dragging chrome is here.
       className={cn(
         'group/row',
         checkbox?.disabledReason && 'opacity-[0.55]',
@@ -439,6 +453,7 @@ const SafeAccountTableRow = ({
           isFirstCell={index === 0}
           reorderable={reorderable}
           nameCell={nameCell}
+          nameOverflows={Boolean(renderName)}
           checkbox={checkbox}
           onSelectToggle={onSelectToggle}
           renderActions={renderActions}

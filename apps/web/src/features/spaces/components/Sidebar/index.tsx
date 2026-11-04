@@ -1,9 +1,9 @@
 import type { ReactElement } from 'react'
-import { Sidebar, SidebarHeader } from '@/components/ui/sidebar'
+import { Sidebar, SidebarHeader } from '@safe-global/views/components/ui/sidebar'
 import { SidebarTopBar } from './SidebarTopBar'
 import { getSidebarVariant } from './variants'
 import { SidebarCommonFooter } from './SidebarCommonFooter'
-import type { SpaceSelectorProps } from './types'
+import type { SpaceSelectorProps } from '@safe-global/views/features/spaces/components/Sidebar/types'
 import type { SidebarVariantType } from './variants'
 
 interface SidebarProps extends SpaceSelectorProps {
@@ -24,7 +24,6 @@ export const EnhancedSidebar = ({
   spaceInitial,
   selectedSpace,
   spaces,
-  onSpaceAdded,
   isLoading = false,
   contained = false,
 }: SidebarProps): ReactElement => {
@@ -42,13 +41,7 @@ export const EnhancedSidebar = ({
         <SidebarTopBar />
       </SidebarHeader>
 
-      <Variant
-        spaceInitial={spaceInitial}
-        selectedSpace={selectedSpace}
-        spaces={spaces}
-        onSpaceAdded={onSpaceAdded}
-        isLoading={isLoading}
-      />
+      <Variant spaceInitial={spaceInitial} selectedSpace={selectedSpace} spaces={spaces} isLoading={isLoading} />
       <SidebarCommonFooter isSafeSidebar={type === 'safe'} />
     </Sidebar>
   )

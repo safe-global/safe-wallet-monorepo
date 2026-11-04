@@ -1,14 +1,18 @@
 import FiatValue from '@/components/common/FiatValue'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { useChain } from '@/hooks/useChains'
+import { useAddressBookWriteScope } from '../../../hooks/useAddressBookWriteScope'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { SafeInfoDisplay } from '@/components/common/AccountRow'
-import BalanceDisplay from './BalanceDisplay'
-import RowEndColumn from './RowEndColumn'
+import BalanceDisplay from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay'
+import RowEndColumn from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/RowEndColumn'
 import SafeRowStats from './SafeRowStats'
-import NotActivatedBadge from '@/components/common/NotActivatedBadge'
-import type { SafeItemData, SafeRenameTarget } from '../types'
+import NotActivatedBadge from '@safe-global/views/components/common/NotActivatedBadge'
+import type {
+  SafeItemData,
+  SafeRenameTarget,
+} from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 const SafeItem = ({
   name,
@@ -28,9 +32,11 @@ const SafeItem = ({
   const pending = chains.reduce((sum, chain) => sum + (chain.queued ?? 0), 0)
   const awaitingConfirmation = chains.reduce((sum, chain) => sum + (chain.awaitingConfirmation ?? 0), 0)
 
+  const chainIds = chains.map((chain) => chain.chainId)
   const resolvedName = useSafeDisplayName(address, chainId, name)
   const chainConfig = useChain(chainId)
   const explorerLink = chainConfig ? getBlockExplorerLink(chainConfig, address) : undefined
+  const { canRename } = useAddressBookWriteScope(address, chainIds)
 
   return (
     <div className={cn('flex items-center gap-2 w-full', isNested && 'pl-8')} data-testid="multichain-item-summary">
@@ -39,9 +45,7 @@ const SafeItem = ({
         address={address}
         className="flex-1 min-w-0"
         explorerLink={explorerLink}
-        onRename={
-          onRename && (() => onRename({ address, name: resolvedName, chainIds: chains.map((chain) => chain.chainId) }))
-        }
+        onRename={onRename && canRename ? () => onRename({ address, name: resolvedName, chainIds }) : undefined}
       />
       <SafeRowStats
         threshold={threshold}

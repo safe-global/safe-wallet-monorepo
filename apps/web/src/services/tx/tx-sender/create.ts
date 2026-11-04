@@ -1,20 +1,26 @@
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContracts'
 import { SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
+import { toSafeSignature } from '@safe-global/utils/utils/safeTransaction'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { getTransactionDetails } from '@/utils/transactions'
 import type { AddOwnerTxParams, RemoveOwnerTxParams, SwapOwnerTxParams } from '@safe-global/protocol-kit'
 import type { MetaTransactionData, SafeTransaction, SafeTransactionDataPartial } from '@safe-global/types-kit'
 import extractTxInfo from '../extractTxInfo'
 import { getAndValidateSafeSDK } from './sdk'
+import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 
 /**
  * Create a transaction from raw params
  */
-export const createTx = async (txParams: SafeTransactionDataPartial, nonce?: number): Promise<SafeTransaction> => {
+export const createTx = async (
+  txParams: SafeTransactionDataPartial,
+  nonce?: number,
+  scope?: TxSenderScope,
+): Promise<SafeTransaction> => {
   if (nonce !== undefined) txParams = { ...txParams, nonce }
   if (Number.isNaN(txParams.safeTxGas) || txParams.safeTxGas === 'NaN') txParams = { ...txParams, safeTxGas: '0' }
-  const safeSDK = getAndValidateSafeSDK()
+  const safeSDK = getAndValidateSafeSDK(scope)
   return safeSDK.createTransaction({ transactions: [txParams] })
 }
 
@@ -22,8 +28,11 @@ export const createTx = async (txParams: SafeTransactionDataPartial, nonce?: num
  * Create a multiSendCallOnly transaction from an array of MetaTransactionData and options
  * If only one tx is passed it will be created without multiSend and without onlyCalls.
  */
-export const createMultiSendCallOnlyTx = async (txParams: MetaTransactionData[]): Promise<SafeTransaction> => {
-  const safeSDK = getAndValidateSafeSDK()
+export const createMultiSendCallOnlyTx = async (
+  txParams: MetaTransactionData[],
+  scope?: TxSenderScope,
+): Promise<SafeTransaction> => {
+  const safeSDK = getAndValidateSafeSDK(scope)
   return safeSDK.createTransaction({ transactions: txParams, onlyCalls: true })
 }
 
@@ -100,8 +109,8 @@ export const createRemoveGuardTx = async (): Promise<SafeTransaction> => {
 /**
  * Create a rejection tx
  */
-export const createRejectTx = async (nonce: number): Promise<SafeTransaction> => {
-  const safeSDK = getAndValidateSafeSDK()
+export const createRejectTx = async (nonce: number, scope?: TxSenderScope): Promise<SafeTransaction> => {
+  const safeSDK = getAndValidateSafeSDK(scope)
   return safeSDK.createRejectionTransaction(nonce)
 }
 
@@ -112,6 +121,7 @@ export const createExistingTx = async (
   chainId: string,
   txId: string,
   txDetails?: TransactionDetails,
+  scope?: TxSenderScope,
 ): Promise<SafeTransaction> => {
   // Get the tx details from the backend if not provided
   txDetails = txDetails || (await getTransactionDetails(chainId, txId))
@@ -120,15 +130,9 @@ export const createExistingTx = async (
   const { txParams, signatures } = extractTxInfo(txDetails)
 
   // Create a tx and add pre-approved signatures
-  const safeTx = await createTx(txParams, txParams.nonce)
+  const safeTx = await createTx(txParams, txParams.nonce, scope)
   Object.entries(signatures).forEach(([signer, data]) => {
-    safeTx.addSignature({
-      signer,
-      data,
-      staticPart: () => data,
-      dynamicPart: () => '',
-      isContractSignature: false,
-    })
+    safeTx.addSignature(toSafeSignature(signer, data))
   })
 
   return safeTx

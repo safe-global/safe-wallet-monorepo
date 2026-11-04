@@ -2,6 +2,8 @@ import { render, screen } from '@testing-library/react'
 import SafeLogo from '../index'
 import { AppRoutes } from '@/config/routes'
 
+jest.mock('@/public/images/safe-pro/pro-chip.svg', () => 'svg')
+
 jest.mock('next/link', () => {
   const MockLink = ({ href, children, ...props }: { href: string; children: React.ReactNode }) => (
     <a href={href} {...props}>
@@ -35,5 +37,12 @@ describe('SafeLogo', () => {
     expect(link).toHaveAttribute('href', AppRoutes.welcome.accounts)
     expect(link).toHaveTextContent('Home')
     expect(screen.getByTestId('logo-image')).toBeInTheDocument()
+  })
+
+  it('renders the logo with the PRO chip in the pill for Workspaces on a plan', () => {
+    render(<SafeLogo showHomeLabel showProLockup />)
+    expect(screen.getByRole('img', { name: 'Safe Pro' })).toBeInTheDocument()
+    expect(screen.getByTestId('logo-image')).toBeInTheDocument()
+    expect(screen.getByRole('link')).not.toHaveTextContent('Home')
   })
 })

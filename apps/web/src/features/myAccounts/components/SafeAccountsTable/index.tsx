@@ -1,13 +1,24 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { ChevronDown, ChevronUp } from 'lucide-react'
-import { TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableSortIcon,
+  tableVariants,
+} from '@safe-global/views/components/ui/table'
 import tableCss from './styles.module.css'
 import type { AllSafeItems } from '@/hooks/safes'
-import { cn } from '@/utils/cn'
-import { SAFE_ACCOUNT_COLUMNS, SELECT_COLUMN, type SafeAccountColumnId } from './columns'
+import { cn } from '@safe-global/views/utils/cn'
+import {
+  SAFE_ACCOUNT_COLUMNS,
+  SELECT_COLUMN,
+  type SafeAccountColumnId,
+} from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
 import {
   compareGroups,
+  getContextMenuChainIds,
   overviewKey,
   useSafeAccountRows,
   type AccountGroup,
@@ -17,10 +28,11 @@ import {
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
 import ReorderableBody, { toggleExpanded } from './ReorderableBody'
 import { bandHeaderAt } from './SimilarityBand'
-import { orderGroupsBySimilarity } from './orderGroupsBySimilarity'
+import { orderGroupsBySimilarity } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/orderGroupsBySimilarity'
 import { weaveReorderedKeys } from '@/utils/reorder'
 import type { SimilarWarning } from '@/features/address-poisoning'
 import EntryDialog from '@/components/address-book/EntryDialog'
+import { useAddressBookWriteScope } from '@/features/spaces'
 
 /** Renaming a safe = editing its address-book entry across every chain it lives on. */
 type RenameTarget = { name: string; address: string; chainIds: string[] }
@@ -28,7 +40,7 @@ type RenameTarget = { name: string; address: string; chainIds: string[] }
 const toRenameTarget = (line: AccountLine): RenameTarget => ({
   name: line.contextMenu.name,
   address: line.contextMenu.address,
-  chainIds: line.contextMenu.type === 'multi' ? line.contextMenu.chainIds : [line.contextMenu.chainId],
+  chainIds: getContextMenuChainIds(line.contextMenu),
 })
 
 type SortState = { orderBy: SafeSortColumn | null; order: 'asc' | 'desc' }
@@ -43,7 +55,7 @@ export type SafeAccountsSelection = {
   selectedKeys: Set<string>
   /** Fired on a checkbox toggle; `line` is the toggled row (leaf or group), `nextChecked` the desired state. */
   onToggle: (line: AccountLine, nextChecked: boolean) => void
-  /** Global cap reached — unselected leaves and empty groups render disabled. */
+  /** Seat cap reached — unselected leaves and empty groups render disabled, except another chain of a selected address (same seat). */
   isAtLimit?: boolean
   /** Leaf keys to disable (and dim) regardless of the cap — e.g. safes already in the workspace. */
   disabledKeys?: Set<string>
@@ -70,10 +82,11 @@ const getRowCheckbox = (group: AccountGroup, line: AccountLine, selection: SafeA
 
   const lockedByReason = Boolean(disabledKeys?.has(line.key))
   const checked = selectedKeys.has(line.key)
+  const holdsSeat = group.children.some((child) => child.key !== line.key && selectedKeys.has(child.key))
   return {
     checked,
     indeterminate: false,
-    disabled: lockedByReason || (Boolean(isAtLimit) && !checked),
+    disabled: lockedByReason || (Boolean(isAtLimit) && !checked && !holdsSeat),
     disabledReason: lockedByReason ? disabledReason : undefined,
     ariaLabel: line.displayName,
   }
@@ -93,6 +106,8 @@ export type SafeAccountsTableProps = {
   actionsWidth?: string
   /** Replaces the default context-menu actions cell for each row (e.g. an "Add to workspace" button). */
   renderActions?: (line: AccountLine) => ReactNode
+  /** Replaces the identity cell. Rows stop navigating so the cell can hold its own controls. */
+  renderName?: (line: AccountLine) => ReactNode
   /** Lowercased address → cross-list look-alike peers; drives the inline ⚠️ + tooltip. */
   similarWarnings?: Map<string, SimilarWarning>
   /** Lowercased address → cluster id; contiguous same-cluster rows render inside a warning band. */
@@ -146,6 +161,7 @@ export default function SafeAccountsTable({
   columns,
   actionsWidth,
   renderActions,
+  renderName,
   similarWarnings,
   similarityGroups,
   anchorAddresses,
@@ -178,7 +194,8 @@ export default function SafeAccountsTable({
     })
   }, [])
 
-  const { groups } = useSafeAccountRows(items, overviewsByKey)
+  const hasWorkspacesColumn = !columns || columns.includes('workspaces')
+  const { groups } = useSafeAccountRows(items, overviewsByKey, hasWorkspacesColumn)
   const [sort, setSort] = useState<SortState>({ orderBy: null, order: 'asc' })
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [renameTarget, setRenameTarget] = useState<RenameTarget | null>(null)
@@ -188,6 +205,7 @@ export default function SafeAccountsTable({
   // "Manage my account list" modal opts back in via `allowRenameInDialog`.
   const canRename = allowRenameInDialog || !selection
   const onRename = canRename ? (line: AccountLine) => setRenameTarget(toRenameTarget(line)) : undefined
+  const { scope: renameScope } = useAddressBookWriteScope(renameTarget?.address, renameTarget?.chainIds ?? [])
 
   const visibleColumns = useMemo(() => {
     const base = columns ? SAFE_ACCOUNT_COLUMNS.filter((c) => columns.includes(c.id)) : SAFE_ACCOUNT_COLUMNS
@@ -270,13 +288,8 @@ export default function SafeAccountsTable({
             above so `embedded` tables can opt out of it. The shadcn table sub-components are used
             throughout. */}
         <table
-          className={cn('w-full caption-bottom text-sm', tableCss.table)}
-          style={{
-            tableLayout: 'fixed',
-            minWidth: embedded ? undefined : minWidth,
-            borderCollapse: 'separate',
-            borderSpacing: 0,
-          }}
+          className={cn(tableVariants({ variant: 'panel' }), tableCss.accounts)}
+          style={{ tableLayout: 'fixed', minWidth: embedded ? undefined : minWidth }}
         >
           {/* Embedded (headerless) tables need a colgroup to keep fixed-layout column widths; the Name
               column is left unsized so it flexes to fill the card, while the stat columns stay fixed. */}
@@ -290,8 +303,8 @@ export default function SafeAccountsTable({
 
           {!embedded && (
             <TableHeader>
-              <TableRow className="border-0 hover:bg-transparent">
-                {visibleColumns.map((column, index) => {
+              <TableRow>
+                {visibleColumns.map((column) => {
                   const active = sort.orderBy === column.sortKey
                   const canSort = column.sortable && column.sortKey && sortableColumns
                   return (
@@ -299,14 +312,10 @@ export default function SafeAccountsTable({
                       key={column.id}
                       aria-sort={active ? (sort.order === 'asc' ? 'ascending' : 'descending') : undefined}
                       // Indents the NAME label so it sits above the account name text rather than the
-                      // avatar (see styles.module.css) — a leading checkbox column already offsets the
-                      // cell, so it needs less.
+                      // avatar (see styles.module.css) — a leading checkbox column already offsets
+                      // the cell, so it needs less.
                       data-name-head={column.id === 'name' ? (selection ? 'selection' : 'default') : undefined}
-                      className={cn(
-                        'bg-muted whitespace-nowrap px-2 py-2.5 text-xs font-semibold uppercase leading-4 tracking-normal text-muted-foreground',
-                        index === 0 && 'rounded-l-lg',
-                        index === visibleColumns.length - 1 && 'rounded-r-lg',
-                      )}
+                      className="px-2 py-2.5"
                       style={{ width: column.width, textAlign: column.align ?? 'left' }}
                     >
                       {canSort ? (
@@ -321,16 +330,10 @@ export default function SafeAccountsTable({
                             }
                           }}
                           data-testid={`account-sort-${column.id}`}
-                          className="inline-flex cursor-pointer items-center gap-0.5 select-none uppercase"
+                          className="hover:text-foreground group/sort inline-flex cursor-pointer items-center gap-1 uppercase select-none"
                         >
                           {column.label}
-                          {active ? (
-                            sort.order === 'desc' ? (
-                              <ChevronDown className="size-4" aria-hidden />
-                            ) : (
-                              <ChevronUp className="size-4" aria-hidden />
-                            )
-                          ) : null}
+                          <TableSortIcon direction={active ? sort.order : undefined} />
                         </span>
                       ) : (
                         column.label
@@ -377,6 +380,7 @@ export default function SafeAccountsTable({
                     warning={similarWarnings?.get(line.address.toLowerCase())}
                     highlighted={Boolean(clusterId)}
                     renderActions={renderActions}
+                    renderName={renderName}
                     onRename={onRename}
                     checkbox={selection ? getRowCheckbox(group, line, selection) : undefined}
                     onSelectToggle={selection ? (next) => selection.onToggle(line, next) : undefined}
@@ -399,6 +403,8 @@ export default function SafeAccountsTable({
           handleClose={() => setRenameTarget(null)}
           defaultValues={{ name: renameTarget.name, address: renameTarget.address }}
           chainIds={renameTarget.chainIds}
+          scope={renameScope}
+          disableAddressInput
           // In a modal surface, sit above the shadcn Dialog (--z-overlay) instead of behind it.
           className={allowRenameInDialog ? 'z-[var(--z-nested-overlay)]' : undefined}
           overlayClassName={allowRenameInDialog ? 'z-[var(--z-nested-overlay)]' : undefined}

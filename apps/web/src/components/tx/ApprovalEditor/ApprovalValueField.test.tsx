@@ -106,4 +106,56 @@ describe('ApprovalValueField', () => {
 
     await waitFor(() => expect(input).toHaveValue(PSEUDO_APPROVAL_VALUES.UNLIMITED))
   })
+
+  // Regression: the typed amount used to filter the preset out, leaving an expanded empty listbox.
+  it('keeps the preset listed after typing an amount that matches no preset', async () => {
+    const user = userEvent.setup()
+    render(<Harness approval={buildApproval()} />)
+
+    const input = getAmountInput()
+    await user.click(input)
+    await waitFor(() => expect(screen.getByRole('listbox')).toBeInTheDocument())
+
+    await user.clear(input)
+    await user.type(input, '250')
+    expect(input).toHaveValue('250')
+
+    expect(input).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getAllByRole('option')).toHaveLength(Object.values(PSEUDO_APPROVAL_VALUES).length)
+    expect(screen.getByRole('option', { name: PSEUDO_APPROVAL_VALUES.UNLIMITED })).toBeInTheDocument()
+  })
+
+  it('still applies the preset when it is selected after typing an amount', async () => {
+    const user = userEvent.setup()
+    render(<Harness approval={buildApproval()} />)
+
+    const input = getAmountInput()
+    await user.click(input)
+    await waitFor(() => expect(screen.getByRole('listbox')).toBeInTheDocument())
+
+    await user.clear(input)
+    await user.type(input, '250')
+
+    await user.click(await screen.findByRole('option', { name: PSEUDO_APPROVAL_VALUES.UNLIMITED }))
+
+    await waitFor(() => expect(input).toHaveValue(PSEUDO_APPROVAL_VALUES.UNLIMITED))
+  })
+
+  // Unreachable today: the editor is forced read-only for ERC-721, so relaxing that gate can't ship silently.
+  it('labels an ERC-721 approval as a transfer permission', () => {
+    render(
+      <Harness
+        approval={buildApproval({
+          tokenInfo: {
+            symbol: 'TST',
+            decimals: 0,
+            address: faker.finance.ethereumAddress(),
+            type: TokenType.ERC721,
+          },
+        })}
+      />,
+    )
+
+    expect(screen.getByText('Allow to transfer TST')).toBeInTheDocument()
+  })
 })

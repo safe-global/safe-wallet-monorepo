@@ -5,7 +5,9 @@ import CONTRACT_ERRORS, {
   getContractErrorMessage,
   getGs026Message,
   getGsCodeFromError,
+  getSpecificContractErrorMessage,
   isGsCode,
+  isRevertError,
   type GsCode,
 } from '../contractErrors'
 
@@ -132,6 +134,76 @@ describe('contractErrors', () => {
       expect(getGsCodeFromError({ message: 'GS999 is not a real code' })).toBeUndefined()
       expect(getGsCodeFromError(undefined)).toBeUndefined()
       expect(getGsCodeFromError(null)).toBeUndefined()
+    })
+  })
+
+  describe('getSpecificContractErrorMessage', () => {
+    it('resolves a code that has copy of its own', () => {
+      expect(getSpecificContractErrorMessage({ reason: 'GS025' })).toBe(
+        'This transaction needs more confirmations before it can be executed.',
+      )
+    })
+
+    it('interpolates the params it is given', () => {
+      expect(getSpecificContractErrorMessage({ reason: 'GS011' }, { nativeAsset: 'ETH' })).toBe(
+        'Not enough ETH in this Safe Account to cover the network fee.',
+      )
+      expect(getSpecificContractErrorMessage({ reason: 'GS012' }, { token: 'USDC', nativeAsset: 'ETH' })).toBe(
+        'Not enough USDC to cover the network fee. Pay with ETH instead.',
+      )
+    })
+
+    it('says nothing for a code whose only copy is the shared fallback', () => {
+      // The caller's own wording beats a generic sentence, so these must not resolve.
+      expect(getSpecificContractErrorMessage({ reason: 'GS013' })).toBeUndefined()
+      expect(getSpecificContractErrorMessage({ reason: 'GS026' })).toBeUndefined()
+      expect(getSpecificContractErrorMessage({ reason: 'GS100' })).toBeUndefined()
+    })
+
+    it('says nothing rather than leaking an unfilled placeholder', () => {
+      expect(getSpecificContractErrorMessage({ reason: 'GS011' })).toBeUndefined()
+      expect(getSpecificContractErrorMessage({ reason: 'GS012' }, { nativeAsset: 'ETH' })).toBeUndefined()
+    })
+
+    it('says nothing for an error carrying no GS code', () => {
+      expect(getSpecificContractErrorMessage({ message: 'HTTP request failed. Status: 500' })).toBeUndefined()
+      expect(getSpecificContractErrorMessage(undefined)).toBeUndefined()
+      expect(getSpecificContractErrorMessage(null)).toBeUndefined()
+    })
+  })
+
+  describe('isRevertError', () => {
+    it.each([
+      { label: 'a GS reason', error: { reason: 'GS013', message: 'execution reverted' } },
+      { label: 'an ethers CALL_EXCEPTION', error: { code: 'CALL_EXCEPTION', message: 'call failed' } },
+      { label: 'ethers revert text', error: { message: 'execution reverted: "GS026"' } },
+      {
+        label: 'viem revert text',
+        error: { message: 'The contract function "execTransaction" reverted with the following reason:\nGS013' },
+      },
+    ])('treats $label as a revert', ({ error }) => {
+      expect(isRevertError(error)).toBe(true)
+    })
+
+    it.each([
+      { label: 'an HTTP failure', error: { message: 'HTTP request failed. Status: 500' } },
+      { label: 'a timeout', error: { code: 'TIMEOUT', message: 'timeout' } },
+      { label: 'a server error', error: { code: 'SERVER_ERROR', message: 'network error' } },
+      // The word "reverted" can appear in an infra failure's own wording. Reading
+      // that as a revert would tell the user their transaction will fail when in
+      // fact we never reached a node.
+      {
+        label: 'an infra failure that merely says "reverted"',
+        error: { message: 'request reverted with a connection timeout' },
+      },
+      { label: 'a relayer wrapping the word', error: { message: 'Relay reverted with status UNKNOWN; retrying' } },
+    ])('treats $label as NOT a revert', ({ error }) => {
+      expect(isRevertError(error)).toBe(false)
+    })
+
+    it('returns false for no error', () => {
+      expect(isRevertError(null)).toBe(false)
+      expect(isRevertError(undefined)).toBe(false)
     })
   })
 

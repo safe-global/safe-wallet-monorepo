@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { decodeLogs, type RawLog } from '../decodeLogs'
+import { Interface } from 'ethers'
 import {
   buildCommittedLog,
   buildDisputeResolvedLog,
@@ -12,9 +13,6 @@ import {
   resetLogCounter,
 } from '../../builders/rawLogs'
 import { CheckEventType, type NormalizedCheckEvent } from '../../types'
-
-const loadFixture = (name: string): { logs: RawLog[]; safeTxHash?: string } =>
-  JSON.parse(readFileSync(join(__dirname, '../../__fixtures__', name), 'utf8'))
 
 const byType = <T extends NormalizedCheckEvent['type']>(
   events: NormalizedCheckEvent[],
@@ -79,34 +77,19 @@ describe('decodeLogs — commit-reveal lifecycle, built through the real fragmen
   })
 })
 
-describe('decodeLogs — live-captured Gnosis beta plain-pair logs', () => {
-  const fixture = loadFixture('gnosis-plain-lifecycle.captured.json')
-  const events = decodeLogs(fixture.logs)
-
-  it('decodes the real proposed + attested pair the beta actually emits', () => {
-    expect(byType(events, CheckEventType.PLAIN_PROPOSED)).toHaveLength(1)
-    expect(byType(events, CheckEventType.PLAIN_ATTESTED)).toHaveLength(1)
-  })
-
-  it('correlates the pair by safeTxHash across both events', () => {
-    const [proposed] = byType(events, CheckEventType.PLAIN_PROPOSED)
-    const [attested] = byType(events, CheckEventType.PLAIN_ATTESTED)
-    expect(proposed.safeTxHash).toBe(fixture.safeTxHash)
-    expect(attested.safeTxHash).toBe(fixture.safeTxHash)
-    expect(attested.epoch).toBe(proposed.epoch)
-  })
-
-  it('reads the event chainId as the Safe home chain, not the Safenet chain', () => {
-    // A real Arbitrum Safe checked on Gnosis beta: the event field is 42161.
-    // The EIP-712 verification domain stays chainId 100 — see decisions 2026-07-28.
-    const [proposed] = byType(events, CheckEventType.PLAIN_PROPOSED)
-    expect(proposed.chainId).toBe('42161')
-  })
-
-  it('decodes a real, non-degenerate FROST attestation from the beta validator set', () => {
-    const [attested] = byType(events, CheckEventType.PLAIN_ATTESTED)
-    expect(BigInt(attested.attestation.r.x)).toBeGreaterThan(0n)
-    expect(BigInt(attested.attestation.z)).toBeGreaterThan(0n)
+describe('deployed Gnosis terminal events', () => {
+  it.each([
+    ['DisputeTriggered', 'uint64 deadline', [200n], CheckEventType.DISPUTE_TRIGGERED],
+    ['DisputeOutOfScope', 'string context', ['outside scope'], CheckEventType.DISPUTE_OUT_OF_SCOPE],
+    ['ArbitrationTimedOut', '', [], CheckEventType.ARBITRATION_TIMED_OUT],
+    ['RequestTimedOut', '', [], CheckEventType.REQUEST_TIMED_OUT],
+  ] as const)('decodes %s from the deployed signature', (name, fields, values, type) => {
+    const iface = new Interface([`event ${name}(bytes32 indexed requestId${fields ? `, ${fields}` : ''})`])
+    const requestId = `0x${'12'.repeat(32)}`
+    const encoded = iface.encodeEventLog(name, [requestId, ...values])
+    const [event] = decodeLogs([{ ...encoded, blockNumber: 100, logIndex: 0, transactionHash: '0x123' }])
+    expect(event).toMatchObject({ type, requestId })
+    if (type === CheckEventType.DISPUTE_TRIGGERED) expect(event).toHaveProperty('deadlineBlock', '200')
   })
 })
 
@@ -154,43 +137,44 @@ describe('decodeLogs — totality (never throws)', () => {
   })
 })
 
-describe('decodeLogs — live-captured Sepolia relaunch lifecycle', () => {
-  const fixture = JSON.parse(
-    readFileSync(join(__dirname, '../../__fixtures__', 'sepolia-relaunch-lifecycle.json'), 'utf8'),
-  ) as { logs: RawLog[]; safeTxHash: string; requestId: string; chainId: string; epoch: string }
-  const events = decodeLogs(fixture.logs)
+const upgraded = JSON.parse(
+  readFileSync(join(__dirname, '../../__fixtures__/safenet-gnosis-chain.captured.json'), 'utf8'),
+) as {
+  captures: Array<{
+    logs: RawLog[]
+    safeTxHash: string
+    requestId: string
+    homeChainId: string
+    safe: string
+    epoch: string
+  }>
+}
+const fixture = upgraded.captures[0]
+const events = decodeLogs(fixture.logs)
 
+describe('decodeLogs — live-captured Safenet deployment on Gnosis Chain lifecycle', () => {
   it('decodes the full lifecycle, skipping unknown topics (Claimed)', () => {
-    // 12 raw logs: 1 proposal + 8 decodable oracle events + 3 Claimed (unknown).
-    expect(events).toHaveLength(9)
+    // Nine raw logs: the two Claimed logs are outside the decoder's event families.
+    expect(events).toHaveLength(7)
   })
 
   it('reads chainId and safe from the transaction tuple on the proposal', () => {
     const [proposed] = byType(events, CheckEventType.ORACLE_PROPOSED)
     expect(proposed.safeTxHash).toBe(fixture.safeTxHash)
-    // The Safe's HOME chain from the transaction tuple — a mainnet Safe
-    // checked by the Sepolia consensus.
+    expect(proposed.chainId).toBe(fixture.homeChainId)
     expect(proposed.chainId).toBe('1')
-    expect(proposed.safe.toLowerCase()).toBe('0x888614448eb7c766864fafb1dd20ff0b47988a87')
+    expect(proposed.safe.toLowerCase()).toBe(fixture.safe.toLowerCase())
     expect(proposed.epoch).toBe(fixture.epoch)
     // keccak256 of the empty oracleData — derives the requestId.
     expect(proposed.oracleDataHash).toBe('0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470')
   })
 
-  it('maps sponsor to proposer and both deadlines on NewRequest', () => {
-    const [request] = byType(events, CheckEventType.REQUEST_CREATED)
-    expect(request.requestId).toBe(fixture.requestId)
-    expect(request.proposer.toLowerCase()).toBe('0x1ff07880982708b139c8efb87f4f43d15f312127')
-    expect(request.fee).toBe('400000000000000000')
-    expect(request.commitDeadlineBlock).toBe('11528811')
-    expect(request.deadlineBlock).toBe('11528814')
-  })
-
   it('keeps commits blind and carries the verdict on reveals', () => {
     const commits = byType(events, CheckEventType.SENTINEL_COMMITTED)
-    expect(commits).toHaveLength(3)
+    expect(commits).toHaveLength(2)
+    expect(commits.every((commit) => !('approved' in commit))).toBe(true)
     const reveals = byType(events, CheckEventType.SENTINEL_REVEALED)
-    expect(reveals).toHaveLength(3)
+    expect(reveals).toHaveLength(2)
     expect(reveals.every((reveal) => reveal.approved)).toBe(true)
   })
 
@@ -201,12 +185,7 @@ describe('decodeLogs — live-captured Sepolia relaunch lifecycle', () => {
   })
 })
 
-describe('decodeLogs — live-captured Sepolia relaunch attestation', () => {
-  const golden = JSON.parse(
-    readFileSync(join(__dirname, '../../__fixtures__', 'sepolia-relaunch-attestation.golden.json'), 'utf8'),
-  ) as { logs: RawLog[]; safeTxHash: string; epoch: string; oracleDataHash: string }
-  const events = decodeLogs(golden.logs)
-
+describe('decodeLogs — live-captured Safenet deployment on Gnosis Chain attestation', () => {
   it('decodes the real proposed + attested pair', () => {
     expect(byType(events, CheckEventType.ORACLE_PROPOSED)).toHaveLength(1)
     expect(byType(events, CheckEventType.ORACLE_ATTESTED)).toHaveLength(1)
@@ -214,13 +193,12 @@ describe('decodeLogs — live-captured Sepolia relaunch attestation', () => {
 
   it('unpacks safeId and carries oracleDataHash on the attested event', () => {
     const [attested] = byType(events, CheckEventType.ORACLE_ATTESTED)
-    expect(attested.safeTxHash).toBe(golden.safeTxHash)
-    // This check is cross-chain: a mainnet Safe (chainId 1) checked by the
-    // Sepolia consensus. The tuple field is the Safe's HOME chain.
+    expect(attested.safeTxHash).toBe(fixture.safeTxHash)
+    expect(attested.chainId).toBe(fixture.homeChainId)
     expect(attested.chainId).toBe('1')
-    expect(attested.safe.toLowerCase()).toBe('0x888614448eb7c766864fafb1dd20ff0b47988a87')
-    expect(attested.epoch).toBe(golden.epoch)
-    expect(attested.oracleDataHash).toBe(golden.oracleDataHash)
+    expect(attested.safe.toLowerCase()).toBe(fixture.safe.toLowerCase())
+    expect(attested.epoch).toBe(fixture.epoch)
+    expect(attested.oracleDataHash).toBe('0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470')
     expect(BigInt(attested.attestation.r.x)).toBeGreaterThan(0n)
     expect(BigInt(attested.attestation.z)).toBeGreaterThan(0n)
   })

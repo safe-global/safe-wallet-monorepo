@@ -1,13 +1,17 @@
-import { useRouter } from 'next/router'
 import usePositionsFiatTotal from '../../hooks/usePositionsFiatTotal'
 import React, { useMemo, type ReactElement } from 'react'
 import { AppRoutes } from '@/config/routes'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Separator } from '@/components/ui/separator'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
-import { WidgetCard } from '@/components/dashboard/styled'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/views/components/ui/accordion'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
+import { WidgetCard } from '@safe-global/views/components/dashboard/styled'
 import css from './styles.module.css'
 import PositionsHeader from '../PositionsHeader'
 import { PositionGroup } from '../PositionGroup'
@@ -18,12 +22,12 @@ import { POSITIONS_EVENTS, POSITIONS_LABELS } from '@/services/analytics/events/
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 const MAX_PROTOCOLS = 4
 
 const PositionsWidget = () => {
-  const router = useRouter()
-  const { safe } = router.query
+  const safeLinkQuery = useSafeLinkQuery()
   const { data, error, isLoading } = usePositions()
   const positionsFiatTotal = usePositionsFiatTotal()
   const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
@@ -31,9 +35,9 @@ const PositionsWidget = () => {
   const viewAllUrl = useMemo(
     () => ({
       pathname: AppRoutes.balances.positions,
-      query: { safe },
+      query: safeLinkQuery,
     }),
-    [safe],
+    [safeLinkQuery],
   )
 
   const viewAllWrapper = (children: ReactElement) => (

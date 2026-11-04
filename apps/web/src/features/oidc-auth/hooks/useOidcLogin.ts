@@ -1,7 +1,8 @@
 import { useCallback } from 'react'
-import { GATEWAY_URL } from '@/config/gateway'
+import { gatewayUrl } from '@/config/gateway'
 import { OIDC_AUTH_PENDING_KEY, OIDC_AUTH_CONNECTION_KEY, OidcConnection } from '../constants'
 import { AuthLoginMethod } from '@/services/analytics/mixpanel-events'
+import { navigateTo } from '@/utils/navigation'
 
 const AUTHORIZE_PATH = '/v1/auth/oidc/authorize'
 
@@ -24,10 +25,10 @@ export const useOidcLogin = () => {
     const cleanRedirectUrl = new URL(redirectUrl ?? window.location.href)
     cleanRedirectUrl.searchParams.delete('error')
 
-    const url = new URL(AUTHORIZE_PATH, GATEWAY_URL)
+    const url = gatewayUrl(AUTHORIZE_PATH)
     url.searchParams.set('redirect_url', cleanRedirectUrl.toString())
     url.searchParams.set('connection', connection)
-    window.location.href = url.toString()
+    navigateTo(url.toString())
   }, [])
 
   return { loginWithRedirect }

@@ -16,6 +16,7 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import { MyAccountsFeature, useSpaceAccountsData } from '@/features/myAccounts'
+import { SafeProFeature, useSafeProAnnouncementModal } from '@/features/safe-pro-announcement'
 import { useLoadFeature } from '@/features/__core__'
 import AddAccountsChooser from '../AddAccountsChooser'
 import { useRouter } from 'next/router'
@@ -23,6 +24,9 @@ import AggregatedBalance from './AggregatedBalances'
 import SafeWidget from '../SafeWidget'
 import SetupWidget from '../SetupWidget'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import CheckoutReturnModals from '../Plans/CheckoutReturnModals'
+import { useWorkspaceLock } from '../../hooks/useWorkspaceLock'
+import { useSpacePlanState } from '../../hooks/useSpacePlanState'
 
 const EmptyStateAddAction = () => {
   return (
@@ -38,6 +42,7 @@ const PENDING_TX_DISPLAY_LIMIT = 4
 const SpaceDashboard = () => {
   const { AccountsWidget, $isReady } = useLoadFeature(MyAccountsFeature)
   const { PendingTxWidget } = useLoadFeature(SpacesFeature)
+  const { SafeProAnnouncementModal } = useLoadFeature(SafeProFeature)
   const { allSafes: safes, isLoading: isSafesLoading } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()
@@ -55,9 +60,16 @@ const SpaceDashboard = () => {
   const isSetupDismissedForSpace = spaceId ? (dismissedSpaces[spaceId] ?? 0) > Date.now() : false
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
+  // The lock modal is mounted by AuthState; the announcement must wait until the lock is known so both never stack.
+  const { isLocked, isResolving: isResolvingPlan } = useWorkspaceLock()
+  const { isOpen: isAnnouncementOpen, setIsOpen: setIsAnnouncementOpen } = useSafeProAnnouncementModal(
+    !isLocked && !isResolvingPlan && Boolean(spaceId) && !isInvited,
+  )
+
+  const planState = useSpacePlanState(spaceId)
 
   useEffect(() => {
-    if (!spaceId) return
+    if (!spaceId || !planState) return
     trackEvent(
       { ...SPACE_EVENTS.WORKSPACE_DASHBOARD_VIEWED, label: spaceId },
       {
@@ -65,9 +77,11 @@ const SpaceDashboard = () => {
         pending_tx_count: pendingTxCount,
         member_count: activeMembers.length,
         safe_count: safeItems.length,
+        [MixpanelEventParams.PLAN_STATUS]: planState.status,
+        [MixpanelEventParams.PLAN_TIER]: planState.tier,
       },
     )
-  }, [spaceId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [spaceId, Boolean(planState)]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const safesToDisplay = safes.slice(0, DASHBOARD_LIST_DISPLAY_LIMIT)
 
@@ -110,8 +124,13 @@ const SpaceDashboard = () => {
 
   const showSetupWidget = safeItems.length === 0 && !isSafesLoading && !setupDismissed && !isSetupDismissedForSpace
 
+  const checkoutModal = <CheckoutReturnModals />
+
   return (
     <>
+      <SafeProAnnouncementModal open={isAnnouncementOpen} onOpenChange={setIsAnnouncementOpen} />
+      {checkoutModal}
+
       {isInvited && <PreviewInvite />}
 
       <>

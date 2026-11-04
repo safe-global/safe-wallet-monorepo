@@ -2,8 +2,8 @@ import { type ReactElement } from 'react'
 import { type Severity } from '@safe-global/utils/features/safe-shield/types'
 import { SEVERITY_COLORS } from '../constants'
 import AlertIcon from '@/public/images/common/alert.svg'
-import CheckIcon from '@/public/images/common/check.svg'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import CheckIcon from '@safe-global/views/assets/images/common/check.svg'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import ErrorIcon from '@/public/images/common/error.svg'
 
 const IconComponent = { CRITICAL: ErrorIcon, WARN: AlertIcon, OK: CheckIcon, INFO: InfoIcon, ERROR: AlertIcon }

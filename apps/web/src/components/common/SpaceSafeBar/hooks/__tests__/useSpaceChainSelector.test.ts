@@ -157,8 +157,9 @@ describe('useSpaceChainSelector', () => {
     expect(result.current.deployedChainIds).toEqual([])
   })
 
-  it('navigates to the same safe on a different chain when handleChainChange is called', () => {
+  it('navigates to the same safe on a different chain, outside a Workspace', () => {
     setupDefaults({ allSafes: [multiChainSafe], safeAddress: '0xSafe2' })
+    ;(useCurrentSpaceId as jest.Mock).mockReturnValue(null)
 
     const { result } = renderHook(() => useSpaceChainSelector())
 
@@ -169,6 +170,23 @@ describe('useSpaceChainSelector', () => {
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/home',
       query: { safe: 'matic:0xSafe2' },
+    })
+  })
+
+  it('keeps the Workspace when it switches the chain', () => {
+    const spaceId = '11111111-1111-1111-1111-111111111111'
+    setupDefaults({ allSafes: [multiChainSafe], safeAddress: '0xSafe2' })
+    ;(useCurrentSpaceId as jest.Mock).mockReturnValue(spaceId)
+
+    const { result } = renderHook(() => useSpaceChainSelector())
+
+    act(() => {
+      result.current.handleChainChange('137')
+    })
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/home',
+      query: { safe: 'matic:0xSafe2', spaceId },
     })
   })
 
@@ -214,6 +232,7 @@ describe('useSpaceChainSelector', () => {
       currentChainId: '137',
     })
     ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('0xSafe2')
+    ;(useCurrentSpaceId as jest.Mock).mockReturnValue(null)
 
     const { result } = renderHook(() => useSpaceChainSelector())
 

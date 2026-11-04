@@ -4,7 +4,7 @@ import { useWatch } from 'react-hook-form'
 import { isAddress } from 'ethers'
 import type { ReactElement } from 'react'
 
-import InfoIcon from '@/public/images/notifications/info.svg'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import { isSmartContractWallet } from '@/utils/wallets'
 import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import useSafeInfo from '@/hooks/useSafeInfo'

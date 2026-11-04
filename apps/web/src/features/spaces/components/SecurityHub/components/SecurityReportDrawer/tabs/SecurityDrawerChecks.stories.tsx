@@ -35,7 +35,7 @@ const withIssues: Record<string, ScanResult> = {
     status: 'issue',
     severity: 'High',
     evidence: [
-      { label: 'Current version', value: '1.3.0' },
+      { label: 'Current version', value: '1.1.1' },
       { label: 'Latest version', value: '1.4.1' },
     ],
     remediation: 'Update to the latest version.',
@@ -44,6 +44,17 @@ const withIssues: Record<string, ScanResult> = {
     status: 'partial',
     severity: 'Medium',
     remediation: 'No transaction guard is configured.',
+  }),
+}
+
+const updateAvailable: Record<string, ScanResult> = {
+  ...allPassing,
+  contract_version: mkResult({
+    upgradeAvailable: true,
+    evidence: [
+      { label: 'Current version', value: '1.3.0' },
+      { label: 'Latest version', value: '1.4.1' },
+    ],
   }),
 }
 
@@ -76,6 +87,16 @@ export const AllPassing: Story = {
   args: {
     scanContext: createMockContext(),
     results: allPassing,
+    isComplete: true,
+    lastScannedAt: Date.now() - 3_600_000,
+    safeQueryParam: SAFE_QUERY,
+  },
+}
+
+export const UpdateAvailable: Story = {
+  args: {
+    scanContext: createMockContext(),
+    results: updateAvailable,
     isComplete: true,
     lastScannedAt: Date.now() - 3_600_000,
     safeQueryParam: SAFE_QUERY,

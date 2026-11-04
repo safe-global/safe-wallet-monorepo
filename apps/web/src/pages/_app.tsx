@@ -3,7 +3,8 @@ import type { ReactNode } from 'react'
 import { type ReactElement } from 'react'
 import { type AppProps } from 'next/app'
 import Head from 'next/head'
-import dynamic from 'next/dynamic'
+import dynamic from '@/utils/dynamic'
+import { useRememberSpace } from '@/hooks/useRememberSpace'
 
 // Lazy-load Web3 initialization to keep viem/protocol-kit out of the main _app chunk
 const LazyWeb3Init = dynamic(() => import('@/components/common/LazyWeb3Init'), { ssr: false })
@@ -22,12 +23,13 @@ import useTxPendingStatuses from '@/hooks/useTxPendingStatuses'
 import { useInitSession } from '@/hooks/useInitSession'
 import { useRegisterServiceWorker } from '@/hooks/useRegisterServiceWorker'
 import Notifications from '@/components/common/Notifications'
-import CookieAndTermBanner from 'src/components/common/CookieAndTermBanner'
+import CookieAndTermBanner from '@/components/common/CookieAndTermBanner'
+import WhatsNewTopBar from '@/components/common/WhatsNewTopBar'
+import WhatsNewUpdatesFrame from '@/components/common/WhatsNewUpdatesFrame'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useTxTracking } from '@/hooks/useTxTracking'
 import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import useGtm from '@/services/analytics/useGtm'
-import useBeamer from '@/hooks/Beamer/useBeamer'
 import MetaTags from '@/components/common/MetaTags'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
 import useSafeMessageNotifications from '@/hooks/messages/useSafeMessageNotifications'
@@ -38,7 +40,7 @@ import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
 import { CounterfactualFeature, useCounterfactualSafeSync } from '@/features/counterfactual'
-import { useInviteNotification } from '@/features/spaces'
+import { useInviteNotification, useSafeWorkspaceAttach, useSafeWorkspaceCheck } from '@/features/spaces'
 import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
@@ -55,7 +57,7 @@ const RecoveryLoader = () => {
 /**
  * Wrapper that lazy-loads CounterfactualHooks via the feature system.
  * This ensures the entire counterfactual feature loads as a single chunk
- * through handle.ts rather than scattered next/dynamic imports.
+ * through handle.ts rather than scattered dynamic() imports.
  */
 const CounterfactualHooksLoader = () => {
   const { CounterfactualHooks } = useLoadFeature(CounterfactualFeature)
@@ -84,18 +86,19 @@ import { useVisitedSafes } from '@/features/myAccounts'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
 import useInvalidateOverviewsOnTx from '@/hooks/useInvalidateOverviewsOnTx'
 import { GATEWAY_URL } from '@/config/gateway'
-import { captureError, initObservability } from '@/services/observability'
+import { captureRenderError, initObservability } from '@/services/observability'
 import { DatadogProvider } from '@/services/observability/providers/datadog'
 import { MixpanelTracingProvider } from '@/services/observability/providers/mixpanel'
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import { HnQueueAssessmentProvider } from '@/features/hypernative'
-import { useOidcLoginCallback } from '@/features/oidc-auth'
+import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
-import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
+import RenderAfterMount from '@/components/common/RenderAfterMount'
+import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
 
 // Initialize observability before React rendering starts
 // This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration
@@ -112,7 +115,7 @@ setStoreInstance(reduxStore)
 // be unmounted entirely while the require-login gate is keeping the user out
 // — otherwise they subscribe to tx/message events and surface pending-tx
 // toasts on the login page before the user has signed in.
-const SafeScopedSubscriptions = (): null => {
+export const SafeScopedSubscriptions = (): null => {
   useTxNotifications()
   useSafeMessageNotifications()
   useSafeNotifications()
@@ -124,6 +127,8 @@ const SafeScopedSubscriptions = (): null => {
   useInvalidateOverviewsOnTx()
   useCounterfactualSafeSync()
   useInviteNotification()
+  useSafeWorkspaceCheck()
+  useSafeWorkspaceAttach()
   return null
 }
 
@@ -137,23 +142,20 @@ const InitApp = (): ReactElement | null => {
   useInitSession()
   useLoadableStores()
   useInitWeb3()
-  useBeamer()
   useVisitedSafes()
   useOidcLoginCallback()
+  useStepUpCallback()
   useLogoutCallback()
   useSessionExpiryGuard()
   useUnlockBodyScroll()
   useRegisterServiceWorker()
+  useRememberSpace()
 
   return <SafeScopedSubscriptions />
 }
 
 export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }) => {
   const isDarkMode = useDarkMode()
-
-  const handleError = (error: Error, componentStack?: string) => {
-    captureError({ error, isUserFacing: true, tags: { componentStack } })
-  }
 
   const content = (
     <ShadcnProvider dark={isDarkMode}>
@@ -169,7 +171,14 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
     </ShadcnProvider>
   )
 
-  return <ObservabilityErrorBoundary onError={handleError}>{content}</ObservabilityErrorBoundary>
+  return <ObservabilityErrorBoundary onError={captureRenderError}>{content}</ObservabilityErrorBoundary>
+}
+
+// Must render inside the Redux provider to read the step-up phase.
+const AppLaunchScreen = (): ReactElement | null => {
+  const stepUpCaption = useStepUpSplash()
+
+  return <LaunchScreen stepUpCaption={stepUpCaption} />
 }
 
 const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement => {
@@ -184,17 +193,24 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
 
       <AppProviders>
         <CaptchaProvider>
+          {/* Before InitApp and the page, so GA exists before their mount effects send events */}
+          <Analytics />
+
           <InitApp />
 
           <LazyWeb3Init />
 
-          <LaunchScreen />
+          <AppLaunchScreen />
 
           <PageLayout pathname={router.pathname}>
             <Component {...pageProps} key={safeKey} />
           </PageLayout>
 
           <CookieAndTermBanner />
+
+          <WhatsNewTopBar />
+
+          <WhatsNewUpdatesFrame />
 
           <TargetedOutreachPopupLoader />
 
@@ -206,8 +222,6 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
 
           <SpendingLimitsLoaderWrapper />
 
-          <Analytics />
-
           <PkModulePopup />
         </CaptchaProvider>
       </AppProviders>
@@ -215,4 +229,11 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
   )
 }
 
-export default SafeWalletApp
+// In dev the server renders every page as empty (see next.config.mjs), so the first client render must be empty too.
+const DevClientOnlyApp = (props: AppProps): ReactElement => (
+  <RenderAfterMount>
+    <SafeWalletApp {...props} />
+  </RenderAfterMount>
+)
+
+export default process.env.NODE_ENV === 'development' ? DevClientOnlyApp : SafeWalletApp

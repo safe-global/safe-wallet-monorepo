@@ -3,11 +3,12 @@ import DialogActions from '@/components/common/DialogActions'
 import NameInput from '@/components/common/NameInput'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ErrorMessage from '@/components/tx/ErrorMessage'
+import { getProposerErrorText } from '@/features/proposers/utils/proposerErrors'
 import {
   addressIsNotSmartContract,
   encodeEIP1271Signature,
-  signProposerData,
-  signProposerTypedData,
+  usesV1DelegateEndpoint,
+  signProposerDelegation,
   signProposerTypedDataForSafe,
 } from '@/features/proposers/utils/utils'
 import {
@@ -18,6 +19,8 @@ import {
 import { useDelegatorSelection } from '../hooks/useDelegatorSelection'
 import { buildDelegationOrigin, createDelegationMessage } from '../services/delegationMessages'
 import useChainId from '@/hooks/useChainId'
+import { useCurrentChain } from '@/hooks/useChains'
+import { useDelegateMutations } from '@safe-global/utils/hooks/useDelegateMutations'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useWallet from '@/hooks/wallets/useWallet'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
@@ -29,17 +32,15 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 import { addressIsNotCurrentSafe, addressIsNotOwner, addressIsNotReserved } from '@safe-global/utils/utils/validation'
-import { isEthSignWallet } from '@/utils/wallets'
 import { XIcon } from 'lucide-react'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@safe-global/views/components/ui/dialog'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import {
   useDelegatesPostDelegateV1Mutation,
-  useDelegatesPostDelegateV2Mutation,
   type CreateDelegateDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
@@ -47,9 +48,8 @@ import { type BaseSyntheticEvent, useCallback, useMemo, useState } from 'react'
 import { FormProvider, useForm, type Validate } from 'react-hook-form'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import SignerSelector from '@/components/common/SignerSelector'
-import InfoIcon from '@/public/images/notifications/info.svg'
-import SignatureIcon from '@/public/images/transactions/signature.svg'
-import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
+import SignatureIcon from '@safe-global/views/assets/images/transactions/signature.svg'
 
 type AddProposerProps = {
   onClose: () => void
@@ -72,10 +72,11 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [multiSigInitiated, setMultiSigInitiated] = useState<boolean>(false)
   const [addDelegateV1] = useDelegatesPostDelegateV1Mutation()
-  const [addDelegateV2] = useDelegatesPostDelegateV2Mutation()
+  const { addDelegate } = useDelegateMutations()
   const dispatch = useAppDispatch()
 
   const chainId = useChainId()
+  const chain = useCurrentChain()
   const wallet = useWallet()
   const safeAddress = useSafeAddress()
   const { safe } = useSafeInfo()
@@ -119,7 +120,7 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
   const isSmartContractError = addressError === SMART_CONTRACT_PROPOSER_ERROR
 
   const onConfirm = handleSubmit(async (data: ProposerEntry) => {
-    if (!wallet) return
+    if (!wallet || !chain) return
 
     const name = sanitizeName(data.name)
 
@@ -139,7 +140,7 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
         return
       }
 
-      const shouldEthSign = isEthSignWallet(wallet)
+      const useV1Endpoint = usesV1DelegateEndpoint(chain, wallet)
       const signer = await getAssertedChainSigner(wallet.provider)
 
       let signature: string
@@ -148,8 +149,15 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
       if (parentSafeAddress) {
         if (isMultiSigRequired) {
           // Multi-sig flow: create off-chain message on parent Safe for signature collection
-          const eoaSignature = await signProposerTypedDataForSafe(chainId, data.address, parentSafeAddress, signer)
-          const delegateTypedData = getDelegateTypedData(chainId, data.address) as TypedData
+          const eoaSignature = await signProposerTypedDataForSafe(
+            chain,
+            data.address,
+            parentSafeAddress,
+            safeAddress,
+            'add',
+            signer,
+          )
+          const delegateTypedData = getDelegateTypedData(chain, data.address, safeAddress, 'add')
           const origin = buildDelegationOrigin('add', data.address, safeAddress)
 
           await createDelegationMessage(dispatch, chainId, parentSafeAddress, delegateTypedData, eoaSignature, origin)
@@ -162,15 +170,25 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
         }
 
         // Single-sig nested Safe owner: sign and submit immediately
-        const eoaSignature = await signProposerTypedDataForSafe(chainId, data.address, parentSafeAddress, signer)
+        const eoaSignature = await signProposerTypedDataForSafe(
+          chain,
+          data.address,
+          parentSafeAddress,
+          safeAddress,
+          'add',
+          signer,
+        )
         signature = await encodeEIP1271Signature(parentSafeAddress, eoaSignature)
         delegator = parentSafeAddress
       } else {
-        // Direct owner: sign delegate typed data directly
-        const eoaSignature = shouldEthSign
-          ? await signProposerData(data.address, signer)
-          : await signProposerTypedData(chainId, data.address, signer)
-        signature = eoaSignature
+        signature = await signProposerDelegation({
+          chain,
+          wallet,
+          proposerAddress: data.address,
+          safeAddress,
+          action: 'add',
+          signer,
+        })
         delegator = wallet.address
       }
 
@@ -182,10 +200,10 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
         safe: safeAddress,
       }
 
-      if (shouldEthSign && !parentSafeAddress) {
+      if (useV1Endpoint && !parentSafeAddress) {
         await addDelegateV1({ chainId, createDelegateDto }).unwrap()
       } else {
-        await addDelegateV2({ chainId, createDelegateDto }).unwrap()
+        await addDelegate({ chain, createDelegateDto })
       }
 
       saveNameLocally()
@@ -318,7 +336,7 @@ const AddProposer = ({ onClose, onSuccess }: AddProposerProps) => {
 
               {error && (
                 <div className="mt-4">
-                  <ErrorMessage error={error}>Error adding proposer</ErrorMessage>
+                  <ErrorMessage error={error}>{getProposerErrorText(error, 'Error adding proposer')}</ErrorMessage>
                 </div>
               )}
 

@@ -63,6 +63,7 @@ export { useHnAssessmentSeverity } from './hooks/useHnAssessmentSeverity'
 export { useHnQueueAssessment } from './hooks/useHnQueueAssessment'
 export { useHnQueueAssessmentResult } from './hooks/useHnQueueAssessmentResult'
 export { useShowHypernativeAssessment } from './hooks/useShowHypernativeAssessment'
+export { useSafeShieldAssessmentUrl } from './hooks/useSafeShieldAssessmentUrl'
 
 // Auth token hook (used by safe-shield context)
 export { useAuthToken } from './hooks/useAuthToken'

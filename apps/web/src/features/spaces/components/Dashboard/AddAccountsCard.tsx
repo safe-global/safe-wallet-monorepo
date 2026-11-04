@@ -1,8 +1,5 @@
 import AddAccountsChooser from '../AddAccountsChooser'
-import Image from 'next/image'
-import { Typography } from '@/components/ui/typography'
-import EmptyDashboard from '@/public/images/spaces/empty_dashboard.png'
-import EmptyDashboardDark from '@/public/images/spaces/empty_dashboard_dark.png'
+import { Typography } from '@safe-global/views/components/ui/typography'
 
 import css from './styles.module.css'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
@@ -21,8 +18,8 @@ const AddAccountsCard = () => {
           </Typography>
 
           <Typography variant="paragraph" color="muted" className="mb-4">
-            Start by adding Safe accounts to your workspace. Any accounts that are linked to your connected wallet can
-            be added to the workspace.
+            Start by adding Safe accounts to your Workspace. Any accounts that are linked to your connected wallet can
+            be added to the Workspace.
           </Typography>
 
           <Track {...SPACE_EVENTS.ADD_ACCOUNTS_MODAL} label={SPACE_LABELS.space_dashboard_card}>
@@ -31,9 +28,9 @@ const AddAccountsCard = () => {
         </div>
 
         <div>
-          <Image
+          <img
             className={css.image}
-            src={isDarkMode ? EmptyDashboardDark : EmptyDashboard}
+            src={isDarkMode ? '/images/spaces/empty_dashboard_dark.png' : '/images/spaces/empty_dashboard.png'}
             alt="Illustration of two safes with their thresholds"
             width={375}
             height={200}

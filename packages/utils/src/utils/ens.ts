@@ -1,0 +1,82 @@
+import type { JsonRpcProvider } from 'ethers'
+
+/** SLIP-44 coin type for Ethereum (ENSIP-9). */
+export const ETH_COIN_TYPE = 60
+
+// Spelled literally so this module stays free of `@safe-global/utils/utils/chains`
+// (and its `@safe-global/store` dependency) — tx-builder consumes it directly.
+const DOMAIN_LOOKUP_FEATURE = 'DOMAIN_LOOKUP'
+
+// Immutable network ids, spelled literally to keep this module dependency-free
+// (it is also consumed by apps that don't depend on @safe-global/protocol-kit)
+const MAINNET_CHAIN_ID = 1
+const SEPOLIA_CHAIN_ID = 11155111
+export const ENS_HUB_MAINNET = '1'
+export const ENS_HUB_SEPOLIA = '11155111'
+
+/**
+ * ENS resolution is hub-scoped: only Mainnet (production) and Sepolia (testnets) host the
+ * Universal Resolver. `DOMAIN_LOOKUP` on any other chain is ignored.
+ */
+export const isEnsHubChainId = (chainId: string): boolean => {
+  return chainId === ENS_HUB_MAINNET || chainId === ENS_HUB_SEPOLIA
+}
+
+/**
+ * Whether ENS is enabled for a hub chain config. Returns false for non-hub chains even if they
+ * list `DOMAIN_LOOKUP` in features — L2 flags must not control ENS.
+ */
+export const hasHubDomainLookup = (chain?: { chainId: string; features: readonly string[] }): boolean => {
+  if (!chain || !isEnsHubChainId(chain.chainId)) {
+    return false
+  }
+
+  return chain.features.includes(DOMAIN_LOOKUP_FEATURE)
+}
+
+// ENSIP-11 reserves the most significant bit as the EVM marker, so only chain ids
+// below 0x80000000 can be represented as a coin type
+const ENSIP11_MAX_CHAIN_ID = 0x80000000
+
+/**
+ * Converts an EVM chain id to an ENS coin type.
+ * Mainnet and Sepolia (L1 testnet) use SLIP-44 coin type 60 (ENSIP-19); other EVM chains use
+ * ENSIP-11 (`0x80000000 | chainId`). Returns undefined for chain ids ENSIP-11 cannot represent.
+ */
+export const convertChainIdToCoinType = (chainId: number): number | undefined => {
+  if (!Number.isInteger(chainId) || chainId <= 0 || chainId >= ENSIP11_MAX_CHAIN_ID) {
+    return undefined
+  }
+
+  // L1 hubs use coin type 60; L2s (and L2 testnets) use ENSIP-11
+  if (chainId === MAINNET_CHAIN_ID || chainId === SEPOLIA_CHAIN_ID) {
+    return ETH_COIN_TYPE
+  }
+
+  return (0x80000000 | chainId) >>> 0
+}
+
+/**
+ * ENS resolution always starts on a hub chain (Universal Resolver).
+ * Production names resolve on Ethereum Mainnet; testnet names on Sepolia.
+ */
+export const getEnsHubChainId = (isTestnet: boolean): string => {
+  return isTestnet ? ENS_HUB_SEPOLIA : ENS_HUB_MAINNET
+}
+
+/**
+ * Forward-resolve an ENS name for a target chain via a hub provider (Mainnet/Sepolia).
+ * Looks up only that chain's coin type — no fallback to the ETH (60) record.
+ */
+export const resolveNameForChain = async (
+  hubProvider: Pick<JsonRpcProvider, 'resolveName'>,
+  name: string,
+  targetChainId: number,
+): Promise<string | null> => {
+  const coinType = convertChainIdToCoinType(targetChainId)
+  if (coinType === undefined) {
+    return null
+  }
+
+  return hubProvider.resolveName(name, coinType)
+}

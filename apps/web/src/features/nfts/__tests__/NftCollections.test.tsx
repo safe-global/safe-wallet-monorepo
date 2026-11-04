@@ -1,9 +1,14 @@
-import { renderWithUserEvent, screen } from '@/tests/test-utils'
+import { renderWithUserEvent, screen, within } from '@/tests/test-utils'
 import type { ReactElement } from 'react'
 import NftCollections from '../components/NftCollections'
 import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import { trackEvent } from '@/services/analytics'
 import useCollectibles from '@/hooks/useCollectibles'
+import * as useChains from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { TxModalContext } from '@/components/tx-flow'
+import { NftTransferFlow } from '@/components/tx-flow/flows'
 
 jest.mock('@/services/observability', () => ({
   logger: {
@@ -53,6 +58,7 @@ const getCollectible = (overrides: Partial<Collectible> = {}): Collectible => ({
 describe('NftCollections', () => {
   beforeEach(() => {
     mockTrackEvent.mockClear()
+    jest.spyOn(useChains, 'useChain').mockReturnValue(chainBuilder().build())
   })
 
   const renderComponent = (nfts: Collectible[]) => {
@@ -90,5 +96,114 @@ describe('NftCollections', () => {
     await user.click(firstCheckbox)
 
     expect(await screen.findByRole('button', { name: 'Send 1 NFT' })).toBeInTheDocument()
+  })
+
+  it('opens the NFT transfer with only the NFTs that stay selected', async () => {
+    const nftItems = [
+      getCollectible({ id: '1', tokenName: 'Cat #1' }),
+      getCollectible({ id: '2', tokenName: 'Cat #2' }),
+      getCollectible({ id: '3', tokenName: 'Cat #3' }),
+    ]
+    mockUseCollectibles.mockReturnValue({
+      nfts: nftItems,
+      error: undefined,
+      isInitialLoading: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      loadMore: jest.fn(),
+    })
+    const setTxFlow = jest.fn()
+
+    const { user } = renderWithUserEvent(
+      <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+        <NftCollections />
+      </TxModalContext.Provider>,
+    )
+
+    await user.click(await screen.findByTestId('nft-checkbox-1'))
+    await user.click(screen.getByTestId('nft-checkbox-2'))
+    await user.click(screen.getByTestId('nft-checkbox-3'))
+    await user.click(screen.getByTestId('nft-checkbox-2'))
+    await user.click(screen.getByRole('button', { name: 'Send 2 NFTs' }))
+
+    expect(setTxFlow).toHaveBeenCalledWith(
+      expect.objectContaining({ type: NftTransferFlow, props: { tokens: [nftItems[0], nftItems[2]] } }),
+    )
+  })
+
+  it('selects every listed NFT with the header "Select all" checkbox', async () => {
+    const nftItems = [
+      getCollectible({ id: '1', tokenName: 'Cat #1' }),
+      getCollectible({ id: '2', tokenName: 'Cat #2' }),
+      getCollectible({ id: '3', tokenName: 'Cat #3' }),
+    ]
+
+    const { user } = renderComponent(nftItems)
+
+    expect(await screen.findByTestId('nft-checkbox-1')).toBeInTheDocument()
+    await user.click(screen.getByTitle('Select all'))
+
+    expect(await screen.findByRole('button', { name: 'Send 3 NFTs' })).toBeInTheDocument()
+    for (const index of [1, 2, 3]) {
+      expect(screen.getByTestId(`nft-checkbox-${index}`)).toHaveAttribute('aria-checked', 'true')
+    }
+  })
+
+  it('shows each collection address shortened with copy and explorer buttons', async () => {
+    const nftItems = [
+      getCollectible({ id: '1', address: '0x1111111111111111111111111111111111111111' }),
+      getCollectible({ id: '2', address: '0x2222222222222222222222222222222222222222' }),
+    ]
+
+    renderComponent(nftItems)
+
+    for (const [index, nft] of nftItems.entries()) {
+      const row = within(await screen.findByTestId(`nfts-table-row-${index + 1}`))
+      expect(row.getByText(shortenAddress(nft.address))).toBeInTheDocument()
+      expect(row.getAllByLabelText('Copy to clipboard').length).toBeGreaterThan(0)
+      expect(row.getByTestId('explorer-btn')).toHaveAttribute('href', expect.stringContaining('http'))
+    }
+  })
+
+  it('renders one row for each collectible', async () => {
+    const rowCount = 10
+    const nftItems = Array.from({ length: rowCount }, (_, id) => getCollectible({ id: `${id}` }))
+
+    renderComponent(nftItems)
+
+    expect(await screen.findAllByTestId(/^nfts-table-row-/)).toHaveLength(rowCount)
+  })
+
+  it('shows the collection name and the symbol with token ID for an unnamed NFT', async () => {
+    renderComponent([getCollectible({ tokenName: 'CatFactory', tokenSymbol: 'CF', id: '0' })])
+
+    const row = within(await screen.findByTestId('nfts-table-row-1'))
+    expect(row.getByText('CatFactory')).toBeInTheDocument()
+    expect(row.getByText('CF #0')).toBeInTheDocument()
+  })
+
+  it('shows the NFT name instead of the symbol and token ID for a named NFT', async () => {
+    renderComponent([getCollectible({ tokenSymbol: 'BAYC', id: '1', name: 'Bored Ape #1' })])
+
+    const row = within(await screen.findByTestId('nfts-table-row-1'))
+    expect(row.getByText('Bored Ape #1')).toBeInTheDocument()
+    expect(row.queryByText('BAYC #1')).not.toBeInTheDocument()
+  })
+
+  it('does not open the preview when an NFT without an image is clicked', async () => {
+    const { user } = renderComponent([getCollectible({ imageUri: null })])
+
+    await user.click(await screen.findByTestId('nft-icon-border'))
+
+    expect(screen.queryByTestId('modal-title')).not.toBeInTheDocument()
+  })
+
+  it('opens the preview with the NFT name when an NFT with an image is clicked', async () => {
+    const imageUri = 'https://example.com/cat.png'
+    const { user } = renderComponent([getCollectible({ imageUri, name: 'Cat #1' })])
+
+    await user.click(await screen.findByTestId('nft-icon-primary'))
+
+    expect(await screen.findByTestId('modal-title')).toHaveTextContent('Cat #1')
   })
 })

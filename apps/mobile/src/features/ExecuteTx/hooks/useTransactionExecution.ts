@@ -15,6 +15,7 @@ import { executeRelayTx } from '@/src/services/tx-execution/relayExecutor'
 import { executeLedgerTx } from '@/src/services/tx-execution/ledgerExecutor'
 import { executeWalletConnectTx } from '@/src/services/tx-execution/walletConnectExecutor'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { reportExecutionFailure } from '@/src/services/tx-execution/reportExecutionFailure'
 import type { Provider } from '@reown/appkit-common-react-native'
 
 export enum ExecutionStatus {
@@ -114,6 +115,7 @@ export function useTransactionExecution({
         setStatus(ExecutionStatus.PROCESSING)
       } catch (error) {
         logger.error('Error executing transaction:', error)
+        reportExecutionFailure(asError(error), executionMethod, activeChain.chainId)
         setStatus(ExecutionStatus.ERROR)
         dispatch(setExecutingError({ txId, error: asError(error).message }))
 

@@ -84,10 +84,14 @@ jest.mock('@/store', () => ({
   }),
 }))
 
+let urlSpaceId: string | null = null
+jest.mock('@/hooks/useUrlSpaceId', () => ({
+  useUrlSpaceId: () => urlSpaceId,
+}))
+
 jest.mock('@/store/authSlice', () => ({
   isAuthenticated: Symbol('isAuthenticated'),
   selectIsStoreHydrated: Symbol('selectIsStoreHydrated'),
-  lastUsedSpace: Symbol('lastUsedSpace'),
   setCfSafeSynced: (payload: boolean) => ({ type: 'setCfSafeSynced', payload }),
 }))
 
@@ -103,15 +107,15 @@ jest.mock('../../store/pendingCfDeletesSlice', () => ({
 
 import { useAppSelector } from '@/store'
 import useCounterfactualSafeSync from '../useCounterfactualSafeSync'
-import { isAuthenticated, selectIsStoreHydrated, lastUsedSpace } from '@/store/authSlice'
+import { isAuthenticated, selectIsStoreHydrated } from '@/store/authSlice'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 const MOCK_SPACE_UUID_ALT = '22222222-2222-2222-2222-222222222222'
 
 const mockSelectors = (authenticated: boolean, hydrated: boolean, spaceId: string | null) => {
+  urlSpaceId = spaceId
   ;(useAppSelector as jest.Mock).mockImplementation((selector: unknown) => {
     if (selector === isAuthenticated) return authenticated
     if (selector === selectIsStoreHydrated) return hydrated
-    if (selector === lastUsedSpace) return spaceId
     return undefined
   })
 }
@@ -183,15 +187,6 @@ describe('useCounterfactualSafeSync', () => {
 
     expect(spaceInitiate).toHaveBeenCalledWith({ spaceId: MOCK_SPACE_UUID_ALT })
     expect(spaceInitiate).toHaveBeenCalledTimes(2)
-  })
-
-  it('does not call the space endpoint when spaceId is empty (legacy persisted state)', async () => {
-    mockSelectors(true, true, '   ')
-    renderHook(() => useCounterfactualSafeSync())
-    await flush()
-
-    expect(userInitiate).toHaveBeenCalledTimes(1)
-    expect(spaceInitiate).not.toHaveBeenCalled()
   })
 
   it('does not re-fetch when the same spaceId is retained across rerenders', async () => {
@@ -471,6 +466,27 @@ describe('useCounterfactualSafeSync', () => {
         typeof d === 'object' && d !== null && (d as { type?: string }).type === 'setCfSafeSynced',
     )
     expect(syncedActions.some((a) => a.payload === true)).toBe(true)
+
+    jest.useRealTimers()
+  })
+
+  it('tags each failed sync attempt so the retry stays distinguishable from the first failure', async () => {
+    // Both attempts share the same error code 2s apart, so without the attempt
+    // facet they are indistinguishable duplicates in analytics.
+    jest.useFakeTimers()
+
+    userFailureCount = 2
+    mockSelectors(true, true, null)
+
+    renderHook(() => useCounterfactualSafeSync())
+    await act(async () => {})
+    await act(async () => {
+      jest.advanceTimersByTime(2000)
+    })
+    await act(async () => {})
+
+    expect(logErrorMock).toHaveBeenCalledWith('650', expect.any(Error), { attempt: 1 })
+    expect(logErrorMock).toHaveBeenCalledWith('650', expect.any(Error), { attempt: 2 })
 
     jest.useRealTimers()
   })

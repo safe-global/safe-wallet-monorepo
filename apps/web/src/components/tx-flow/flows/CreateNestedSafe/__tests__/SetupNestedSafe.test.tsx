@@ -93,6 +93,31 @@ describe('SetUpNestedSafe', () => {
     })
   })
 
+  it('fills the balance of the token chosen in that row when Max is clicked', async () => {
+    renderSetup([
+      { tokenAddress: ZERO_ADDRESS, amount: '' },
+      { tokenAddress: USDC_ADDRESS, amount: '' },
+    ])
+
+    await userEvent.click(screen.getAllByTestId('max-btn')[1])
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('token-amount-field')[1]).toHaveValue('1000')
+    })
+  })
+
+  it('does not offer a token that another row already uses', async () => {
+    renderSetup([
+      { tokenAddress: ZERO_ADDRESS, amount: '' },
+      { tokenAddress: USDC_ADDRESS, amount: '' },
+    ])
+
+    await userEvent.click(within(screen.getAllByTestId('token-selector')[1]).getByRole('combobox'))
+
+    expect(await screen.findByRole('option', { name: /USD Coin/ })).toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: /Ether/ })).not.toBeInTheDocument()
+  })
+
   it('rejects an amount above the token balance', async () => {
     renderSetup([{ tokenAddress: ZERO_ADDRESS, amount: '' }])
 
@@ -104,18 +129,17 @@ describe('SetUpNestedSafe', () => {
     })
   })
 
-  it('clears a prefilled amount when the row switches token', async () => {
-    // Back-navigation re-seeds defaultValues, so the old amount must not return with a new token.
-    renderSetup([{ tokenAddress: ZERO_ADDRESS, amount: '0.5' }])
+  it('keeps a prefilled amount when the row switches token and re-validates it', async () => {
+    // 7 decimals: fine for ETH, too many for USDC.
+    renderSetup([{ tokenAddress: ZERO_ADDRESS, amount: '0.0000001' }])
 
-    expect(screen.getByTestId('token-amount-field')).toHaveValue('0.5')
+    expect(screen.getByTestId('token-amount-field')).toHaveValue('0.0000001')
 
     await userEvent.click(within(screen.getByTestId('token-selector')).getByRole('combobox'))
     await userEvent.click(await screen.findByRole('option', { name: /USD Coin/ }))
 
-    await waitFor(() => {
-      expect(screen.getByTestId('token-amount-field')).toHaveValue('')
-    })
+    expect(screen.getByTestId('token-amount-field')).toHaveValue('0.0000001')
+    expect(await screen.findByText('Should have 1 to 6 decimals')).toBeInTheDocument()
   })
 
   it('keeps the amount when the row re-picks the token it already has', async () => {

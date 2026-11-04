@@ -4,14 +4,14 @@ import CurrentSafe from '../CurrentSafe'
 import ConnectWalletPrompt from '../ConnectWalletPrompt'
 import { type AllSafeItems, type AllSafeItemsGrouped, getComparator } from '@/hooks/safes'
 import TrustedSafesModal from '@/components/common/TrustedSafesModal'
-import MigrationPrompt from '../MigrationPrompt'
+import MigrationPrompt from '@safe-global/views/features/myAccounts/components/MigrationPrompt'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import useMigrationPrompt from '../../hooks/useMigrationPrompt'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useMemo, useCallback } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 
 const AccountsList = ({
   searchQuery,

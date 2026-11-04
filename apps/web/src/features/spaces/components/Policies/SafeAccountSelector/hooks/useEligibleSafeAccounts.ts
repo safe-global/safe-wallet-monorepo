@@ -7,11 +7,16 @@ import useChains from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
 import { useGetMultipleSafeOverviewsQuery, useGetProposerSafesQuery } from '@/store/api/gateway'
+import { selectUndeployedSafes } from '@/store/slices'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useSpaceSafes } from '../../../../hooks/useSpaceSafes'
 import { buildSafeAccountId, groupSafeAccounts } from '../utils'
 import type { ChainInfo } from '@/features/spaces/types'
-import type { SafeAccountEligibility, SafeAccountEntry, SafeAccountOption } from '../types'
+import type {
+  SafeAccountEligibility,
+  SafeAccountEntry,
+  SafeAccountOption,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 
 const overviewKey = (chainId: string, address: string) => `${chainId}:${address.toLowerCase()}`
 
@@ -20,11 +25,16 @@ const getEligibility = (isSigner: boolean, isProposer: boolean): SafeAccountElig
   return isSigner ? 'signer' : 'proposer'
 }
 
+export type EligibleSafeAccountsOptions = {
+  signersOnly?: boolean
+}
+
 /**
- * Safes in the current Space on which the connected wallet is a signer or a proposer, grouped by
- * address. Ineligible Safes are absent rather than disabled.
+ * Safes in the current Space the connected wallet is a signer or a proposer on (signers only with
+ * `signersOnly`), grouped by address. Safes the wallet has no such role on are absent; counterfactual
+ * ones are listed but disabled. Returns the flag so the selector's copy matches.
  */
-export const useEligibleSafeAccounts = () => {
+export const useEligibleSafeAccounts = ({ signersOnly = false }: EligibleSafeAccountsOptions = {}) => {
   const {
     allSafes,
     isLoading: isSafesLoading,
@@ -34,7 +44,8 @@ export const useEligibleSafeAccounts = () => {
   } = useSpaceSafes()
   const { address: wallet = '' } = useWallet() || {}
   const currency = useAppSelector(selectCurrency)
-  const { configs: chains } = useChains()
+  const undeployedSafes = useAppSelector(selectUndeployedSafes)
+  const { configs: chains, loading: isChainsLoading } = useChains()
 
   const safeItems = useMemo(() => flattenSafeItems(allSafes), [allSafes])
 
@@ -45,9 +56,12 @@ export const useEligibleSafeAccounts = () => {
   )
 
   // One delegates request per distinct chain the Space actually uses, not one per Safe.
-  const chainIds = useMemo(() => Array.from(new Set(safeItems.map((item) => item.chainId))), [safeItems])
+  const proposerChains = useMemo(() => {
+    const spaceChainIds = new Set(safeItems.map((item) => item.chainId))
+    return chains.filter((chain) => spaceChainIds.has(chain.chainId))
+  }, [chains, safeItems])
   const proposerSafesQuery = useGetProposerSafesQuery(
-    wallet && chainIds.length > 0 ? { chainIds, delegate: wallet } : skipToken,
+    wallet && !signersOnly && proposerChains.length > 0 ? { chains: proposerChains, delegate: wallet } : skipToken,
   )
 
   // A delegates failure only under-reports proposer access, so it degrades instead of failing the field.
@@ -58,11 +72,11 @@ export const useEligibleSafeAccounts = () => {
   const proposerSafes = proposerSafesQuery.currentData
 
   const isOverviewsResolved = overviewSafes.length === 0 || overviews !== undefined || overviewsQuery.isError
+  // A skipped query only means "no proposer Safes" once the chain configs it is built from have loaded.
   const isProposerStatusResolved =
-    chainIds.length === 0 ||
-    proposerSafesQuery.isUninitialized ||
     proposerSafes !== undefined ||
-    proposerSafesQuery.isError
+    proposerSafesQuery.isError ||
+    (proposerSafesQuery.isUninitialized && (signersOnly || !isChainsLoading))
 
   // `isReadOnly` is fail-closed until the overviews land, so stay loading rather than flash an empty list.
   const isLoading = !!wallet && (isSafesLoading || (!isError && (!isOverviewsResolved || !isProposerStatusResolved)))
@@ -90,7 +104,8 @@ export const useEligibleSafeAccounts = () => {
 
     const options = safeItems.flatMap<SafeAccountOption>((item) => {
       const isSigner = !item.isReadOnly
-      const isProposer = (proposerSafes?.[item.chainId] ?? []).some((safe) => sameAddress(safe, item.address))
+      const isProposer =
+        !signersOnly && (proposerSafes?.[item.chainId] ?? []).some((safe) => sameAddress(safe, item.address))
 
       if (!isSigner && !isProposer) return []
 
@@ -107,12 +122,13 @@ export const useEligibleSafeAccounts = () => {
           eligibility: getEligibility(isSigner, isProposer),
           chain: chainsById.get(item.chainId),
           fiatTotal: overview?.fiatTotal,
+          ineligibleReason: undeployedSafes[item.chainId]?.[item.address] ? 'not-activated' : undefined,
         },
       ]
     })
 
     return groupSafeAccounts(options)
-  }, [wallet, isLoading, safeItems, proposerSafes, overviewsByKey, chainsById])
+  }, [wallet, isLoading, safeItems, signersOnly, proposerSafes, overviewsByKey, chainsById, undeployedSafes])
 
   // Destructured for stable deps: the whole query objects would hand consumers a new `onRetry` per render.
   const { refetch: refetchOverviews, isUninitialized: isOverviewsUninitialized } = overviewsQuery
@@ -132,5 +148,5 @@ export const useEligibleSafeAccounts = () => {
     isProposerSafesUninitialized,
   ])
 
-  return { accounts, isLoading, isError, hasWallet: !!wallet, refetch }
+  return { accounts, isLoading, isError, hasWallet: !!wallet, signersOnly, refetch }
 }

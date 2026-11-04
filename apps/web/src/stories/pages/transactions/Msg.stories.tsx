@@ -32,6 +32,8 @@ const message: Message = {
   ],
   preparedSignature: sig('3'),
   origin: '{"url":"https://opensea.io","name":"OpenSea"}',
+  safeAppInfo: null,
+  safeAppId: null,
 }
 
 // The detail page resolves the message by hash. `useSafeMessage` reads it from the messages list

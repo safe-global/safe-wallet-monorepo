@@ -9,9 +9,7 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 
 type UseRemoteSafeAppsProps =
-  | { tag: SafeAppsTag; name?: never }
-  | { name: SafeAppsName; tag?: never }
-  | { name?: never; tag?: never }
+  { tag: SafeAppsTag; name?: never } | { name: SafeAppsName; tag?: never } | { name?: never; tag?: never }
 
 const useRemoteSafeApps = ({ tag, name }: UseRemoteSafeAppsProps = {}): AsyncResult<SafeAppsResponse> => {
   const chainId = useChainId()

@@ -18,9 +18,10 @@ import {
   Shield,
   History,
   Landmark,
+  ListChecks,
 } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
-import type { SidebarItemConfig, SidebarGroupConfig } from '../types'
+import type { SidebarItemConfig, SidebarGroupConfig } from '@safe-global/views/features/spaces/components/Sidebar/types'
 
 export const spacesMainNavigation: SidebarItemConfig[] = [
   {
@@ -28,12 +29,12 @@ export const spacesMainNavigation: SidebarItemConfig[] = [
     label: 'Dashboard',
     href: AppRoutes.spaces.index,
   },
-  // TODO: Activate when Spaces Transactions page is ready
-  // {
-  //   icon: ArrowRightLeft,
-  //   label: 'Transactions',
-  //   href: AppRoutes.spaces.transactions,
-  // },
+  {
+    icon: ArrowRightLeft,
+    label: 'Transactions',
+    href: AppRoutes.spaces.transactions,
+    activeMemberOnly: true,
+  },
   {
     icon: WalletCards,
     label: 'Safe accounts',
@@ -77,6 +78,11 @@ export const spacesSetupGroup: SidebarGroupConfig = {
       label: 'Settings',
       href: AppRoutes.spaces.settings,
       activeMemberOnly: true,
+    },
+    {
+      icon: ListChecks,
+      label: 'Plans',
+      href: AppRoutes.spaces.plans,
     },
   ],
 }

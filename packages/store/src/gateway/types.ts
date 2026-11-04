@@ -111,6 +111,10 @@ export enum LabelValue {
   Next = 'Next',
 }
 
+export enum SpaceExperimentalFeature {
+  POLICY_RECIPIENT_ALLOWLIST = 'POLICY_RECIPIENT_ALLOWLIST',
+}
+
 export enum DetailedExecutionInfoType {
   MULTISIG = 'MULTISIG',
   MODULE = 'MODULE',

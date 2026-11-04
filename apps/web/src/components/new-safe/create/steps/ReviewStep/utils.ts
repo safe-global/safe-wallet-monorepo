@@ -1,6 +1,7 @@
 import { ExecutionMethod } from '@/components/tx/ExecutionMethodSelector'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import type { TransactionOptions } from '@safe-global/types-kit'
+import { AppRoutes } from '@/config/routes'
 
 /**
  * Returns the pluralized network label based on the number of networks.
@@ -99,4 +100,10 @@ export function buildTransactionOptions(
  */
 export function getWillRelay(canRelay: boolean, executionMethod: ExecutionMethod): boolean {
   return canRelay && executionMethod === ExecutionMethod.RELAY
+}
+
+export function getNewSafeHomeUrl(shortName: string, safeAddress: string, spaceId: string | null): string {
+  const query = new URLSearchParams({ safe: `${shortName}:${safeAddress}` })
+  if (spaceId) query.set('spaceId', spaceId)
+  return `${AppRoutes.home}?${query}`
 }

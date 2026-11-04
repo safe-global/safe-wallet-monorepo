@@ -1,22 +1,14 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MemberRole } from '../../../hooks/useSpaceMembers'
 import useInviteForm, { toInviteName } from './useInviteForm'
 
 const mockSpaceId = '11111111-1111-1111-1111-111111111111'
 const mockInviteMembers = jest.fn()
 const mockOnSuccess = jest.fn()
+const mockDispatch = jest.fn()
 
-jest.mock('@/services/analytics', () => ({
-  trackEvent: jest.fn(),
-}))
-
-jest.mock('@/services/analytics/events/spaces', () => ({
-  SPACE_EVENTS: {
-    WORKSPACE_MEMBER_INVITE_SENT: { action: 'Workspace member invite sent', category: 'spaces' },
-  },
-  SPACE_LABELS: {},
+jest.mock('@/store', () => ({
+  useAppDispatch: () => mockDispatch,
 }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
@@ -27,8 +19,8 @@ jest.mock('../../../hooks/useSpaceMembers', () => ({
   MemberRole: { MEMBER: 'MEMBER', ADMIN: 'ADMIN' },
 }))
 
-const TestComponent = ({ spaceId }: { spaceId: string | undefined }) => {
-  const { onSubmit, register, fields, append, isSubmitting } = useInviteForm(spaceId, mockOnSuccess)
+const TestComponent = ({ spaceId, nextStepUrl }: { spaceId: string | undefined; nextStepUrl?: string }) => {
+  const { onSubmit, register, fields, append, isSubmitting } = useInviteForm(spaceId, mockOnSuccess, nextStepUrl)
   return (
     <form onSubmit={onSubmit}>
       {fields.map((field, index) => (
@@ -79,51 +71,9 @@ describe('toInviteName', () => {
   })
 })
 
-describe('useInviteForm tracking', () => {
+describe('useInviteForm payload', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-  })
-
-  it('tracks WORKSPACE_MEMBER_INVITE_SENT per member with workspace_id, user_id, role and batch_size on submit', async () => {
-    mockInviteMembers.mockResolvedValue({
-      data: [
-        {
-          userId: 7,
-          spaceId: mockSpaceId,
-          name: 'Alice',
-          role: 'MEMBER',
-          status: 'INVITED',
-        },
-      ],
-    })
-
-    render(<TestComponent spaceId={mockSpaceId} />)
-
-    fireEvent.change(screen.getByTestId('address-0'), {
-      target: { value: '0x1234567890123456789012345678901234567890' },
-    })
-    fireEvent.click(screen.getByTestId('submit'))
-
-    await waitFor(() => {
-      expect(mockInviteMembers).toHaveBeenCalledWith({
-        spaceId: mockSpaceId,
-        inviteUsersDto: {
-          users: [
-            {
-              type: 'wallet',
-              address: '0x1234567890123456789012345678901234567890',
-              name: '0x1234567890123456789012345678901234567890',
-              role: 'MEMBER',
-            },
-          ],
-        },
-      })
-      expect(trackEvent).toHaveBeenCalledTimes(1)
-      expect(trackEvent).toHaveBeenCalledWith(
-        { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_SENT, label: mockSpaceId },
-        { workspace_id: mockSpaceId, user_id: 7, role: 'member', batch_size: 1 },
-      )
-    })
   })
 
   it('builds an email invite payload with a lowercased email and a name derived from the local part', async () => {
@@ -224,7 +174,6 @@ describe('useInviteForm tracking', () => {
           ],
         },
       })
-      expect(trackEvent).toHaveBeenCalledTimes(2)
     })
   })
 })
@@ -276,5 +225,71 @@ describe('useInviteForm isSubmitting state', () => {
 
     await waitFor(() => expect(screen.getByTestId('is-submitting')).toHaveTextContent('false'))
     expect(mockOnSuccess).not.toHaveBeenCalled()
+  })
+})
+
+describe('useInviteForm step-up return', () => {
+  const NEXT_STEP_URL = `/welcome/survey?spaceId=${mockSpaceId}`
+  const setReturnUrl = { type: 'stepUp/stepUpReturnUrlSet', payload: NEXT_STEP_URL }
+  const clearReturnUrl = { type: 'stepUp/stepUpReturnUrlCleared', payload: NEXT_STEP_URL }
+
+  const submitInvite = () => {
+    render(<TestComponent spaceId={mockSpaceId} nextStepUrl={NEXT_STEP_URL} />)
+    fireEvent.change(screen.getByTestId('address-0'), {
+      target: { value: '0x1234567890123456789012345678901234567890' },
+    })
+    fireEvent.click(screen.getByTestId('submit'))
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('keeps the next step as the return URL when the invite needs a step-up', async () => {
+    mockInviteMembers.mockResolvedValue({ error: { status: 403, data: { message: 'elevation_required' } } })
+
+    submitInvite()
+
+    await waitFor(() => expect(screen.getByTestId('is-submitting')).toHaveTextContent('false'))
+    expect(mockDispatch).toHaveBeenCalledWith(setReturnUrl)
+    expect(mockDispatch).not.toHaveBeenCalledWith(clearReturnUrl)
+    expect(mockOnSuccess).not.toHaveBeenCalled()
+  })
+
+  it('drops the return URL once the invite needs no step-up', async () => {
+    mockInviteMembers.mockResolvedValue({
+      data: [{ userId: 7, spaceId: mockSpaceId, name: 'Alice', role: 'MEMBER', status: 'INVITED' }],
+    })
+
+    submitInvite()
+
+    await waitFor(() => expect(mockOnSuccess).toHaveBeenCalled())
+    expect(mockDispatch.mock.calls.map(([action]) => action)).toEqual([setReturnUrl, clearReturnUrl])
+  })
+
+  it('drops the return URL when the invite fails', async () => {
+    mockInviteMembers.mockResolvedValue({ error: { status: 500, data: 'boom' } })
+
+    submitInvite()
+
+    await waitFor(() => expect(mockDispatch).toHaveBeenCalledWith(clearReturnUrl))
+    expect(mockOnSuccess).not.toHaveBeenCalled()
+  })
+
+  it('drops the return URL when the invite throws', async () => {
+    mockInviteMembers.mockRejectedValue(new Error('network down'))
+
+    submitInvite()
+
+    await waitFor(() => expect(mockDispatch).toHaveBeenCalledWith(clearReturnUrl))
+  })
+
+  it('sets no return URL when there is nobody to invite', async () => {
+    render(<TestComponent spaceId={mockSpaceId} nextStepUrl={NEXT_STEP_URL} />)
+    fireEvent.click(screen.getByTestId('submit'))
+
+    await waitFor(() => expect(mockOnSuccess).toHaveBeenCalled())
+    expect(mockInviteMembers).not.toHaveBeenCalled()
+    expect(mockDispatch).not.toHaveBeenCalled()
   })
 })

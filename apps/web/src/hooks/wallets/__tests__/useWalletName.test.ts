@@ -4,9 +4,13 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useWalletName } from '@/hooks/wallets/useWalletName'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import * as useChains from '@/hooks/useChains'
 import * as ens from '@/services/ens'
-import * as web3 from '@/hooks/wallets/web3'
+import { useEnsHubProvider } from '@/hooks/useEnsHubProvider'
+import { ENS_HUB_MAINNET, ETH_COIN_TYPE } from '@safe-global/utils/utils/ens'
+
+jest.mock('@/hooks/useEnsHubProvider', () => ({
+  useEnsHubProvider: jest.fn(),
+}))
 
 const VITALIK = '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'
 
@@ -17,29 +21,43 @@ const createWallet = (chainId = '1'): ConnectedWallet => ({
   provider: { request: jest.fn() } as unknown as Eip1193Provider,
 })
 
-const createChain = (features: FEATURES[]): Chain => ({ chainId: '1', shortName: 'eth', features }) as unknown as Chain
+const createChain = (features: FEATURES[]): Chain =>
+  ({ chainId: ENS_HUB_MAINNET, shortName: 'eth', isTestnet: false, features }) as unknown as Chain
+
+const mockUseEnsHubProvider = useEnsHubProvider as jest.MockedFunction<typeof useEnsHubProvider>
 
 describe('useWalletName', () => {
   const mockProvider = { destroy: jest.fn() } as unknown as JsonRpcProvider
 
   beforeEach(() => {
     jest.resetAllMocks()
-    jest.spyOn(web3, 'createWeb3ReadOnly').mockReturnValue(mockProvider)
+    mockUseEnsHubProvider.mockReturnValue({
+      hubChain: createChain([FEATURES.DOMAIN_LOOKUP]),
+      provider: mockProvider,
+      isDomainLookupEnabled: true,
+    })
   })
 
-  it("resolves the wallet's ENS name on the wallet's chain", async () => {
-    jest.spyOn(useChains, 'useChain').mockReturnValue(createChain([FEATURES.DOMAIN_LOOKUP]))
+  it("resolves the wallet's ENS primary name on Ethereum mainnet", async () => {
     const lookup = jest.spyOn(ens, 'lookupAddress').mockResolvedValue('vitalik.eth')
 
-    const { result } = renderHook(() => useWalletName(createWallet('1')))
+    const { result } = renderHook(() => useWalletName(createWallet('8453')))
 
     await waitFor(() => expect(result.current).toBe('vitalik.eth'))
-    expect(lookup).toHaveBeenCalledWith(mockProvider, VITALIK)
-    expect(mockProvider.destroy).toHaveBeenCalled()
+    expect(mockUseEnsHubProvider).toHaveBeenCalledWith(
+      expect.objectContaining({ chainId: ENS_HUB_MAINNET, isTestnet: false }),
+    )
+    expect(lookup).toHaveBeenCalledWith(mockProvider, VITALIK, ETH_COIN_TYPE)
+    // Shared hub provider must not be destroyed by this hook
+    expect(mockProvider.destroy).not.toHaveBeenCalled()
   })
 
-  it('does not resolve when domain lookup is unsupported on the chain', async () => {
-    jest.spyOn(useChains, 'useChain').mockReturnValue(createChain([]))
+  it('does not resolve when domain lookup is unsupported on mainnet', async () => {
+    mockUseEnsHubProvider.mockReturnValue({
+      hubChain: createChain([]),
+      provider: mockProvider,
+      isDomainLookupEnabled: false,
+    })
     const lookup = jest.spyOn(ens, 'lookupAddress').mockResolvedValue('vitalik.eth')
 
     const { result } = renderHook(() => useWalletName(createWallet('1')))
@@ -48,8 +66,12 @@ describe('useWalletName', () => {
     expect(lookup).not.toHaveBeenCalled()
   })
 
-  it('returns undefined when the chain config is not found', async () => {
-    jest.spyOn(useChains, 'useChain').mockReturnValue(undefined)
+  it('returns undefined when the hub provider is unavailable', async () => {
+    mockUseEnsHubProvider.mockReturnValue({
+      hubChain: undefined,
+      provider: undefined,
+      isDomainLookupEnabled: false,
+    })
     const lookup = jest.spyOn(ens, 'lookupAddress').mockResolvedValue('vitalik.eth')
 
     const { result } = renderHook(() => useWalletName(createWallet('1')))
@@ -59,7 +81,6 @@ describe('useWalletName', () => {
   })
 
   it('returns undefined when no wallet is connected', async () => {
-    jest.spyOn(useChains, 'useChain').mockReturnValue(createChain([FEATURES.DOMAIN_LOOKUP]))
     const lookup = jest.spyOn(ens, 'lookupAddress').mockResolvedValue('vitalik.eth')
 
     const { result } = renderHook(() => useWalletName(null))

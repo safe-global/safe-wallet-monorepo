@@ -1,53 +1,92 @@
 import { useState, useCallback, type ReactElement } from 'react'
-import { Sparkles } from 'lucide-react'
-import { SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar'
-import { cn } from '@/utils/cn'
+import {
+  SidebarFooter,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from '@safe-global/views/components/ui/sidebar'
+import { cn } from '@safe-global/views/utils/cn'
 import { icons } from '../config'
 import css from '../styles.module.css'
 import { IS_PRODUCTION } from '@/config/constants'
-import { trackEvent, OVERVIEW_EVENTS, MixpanelEventParams } from '@/services/analytics'
-import { Switch } from '@/components/ui/switch'
-import { Field, FieldLabel } from '@/components/ui/field'
+import { OVERVIEW_EVENTS, MixpanelEventParams } from '@/services/analytics'
+import Track from '@/components/common/Track'
+import { Switch } from '@safe-global/views/components/ui/switch'
+import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
 import { setDarkMode } from '@/store/settingsSlice'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { useAppDispatch, useAppSelector } from '@/store'
-import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
-import { openCookieBanner } from '@/store/popupSlice'
-import { BEAMER_SELECTOR } from '@/services/beamer'
+import { useAppDispatch } from '@/store'
 import { ApiCtaSidebar } from '../ApiCtaSidebar'
+import { WhatsNewButton } from '../WhatsNewButton'
+import {
+  SafeProFeature,
+  useIsSafeProAnnouncementEnabled,
+  useSafeProSidebarBannerDismissed,
+} from '@/features/safe-pro-announcement'
+import { useLoadFeature } from '@/features/__core__'
 import { SidebarIndexingStatus } from '../SidebarIndexingStatus'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { LS_KEY } from '@/config/gateway'
 import HelpMenu from '@/components/common/HelpMenu'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { useRouter } from 'next/router'
+import { AppRoutes } from '@/config/routes'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
+import { OidcAuthFeature, useTwoFactorAwarenessDismissed } from '@/features/oidc-auth'
+import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
+import { reloadPage } from '@/utils/navigation'
 
 export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?: boolean }): ReactElement => {
   const dispatch = useAppDispatch()
-  const hasBeamerConsent = useAppSelector((state) => hasConsentFor(state, CookieAndTermType.UPDATES))
   const isDarkMode = useDarkMode()
   const [isProdGateway = false, setIsProdGateway] = useLocalStorage<boolean>(LS_KEY)
   const [helpMenuAnchor, setHelpMenuAnchor] = useState<HTMLElement | null>(null)
+  const { SafeProSidebarBanner, $isReady: isSafeProLoaded, $error: safeProError } = useLoadFeature(SafeProFeature)
+  const {
+    WorkspaceTwoFactorAwarenessCard,
+    $isReady: isTwoFactorCardLoaded,
+    $error: twoFactorCardError,
+  } = useLoadFeature(OidcAuthFeature)
+  const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
+  const isSafePro = useIsSafeProEnabled()
+  const { pathname } = useRouter()
+  const [isSafeProBannerDismissed, dismissSafeProBanner] = useSafeProSidebarBannerDismissed()
+  // A failed chunk counts as no banner: its stub then renders nothing for good.
+  // Its copy is pre-launch only, so it retires once Safe Pro is live.
+  const hasSafeProBanner =
+    isSafeProAnnouncementEnabled && !isSafePro && pathname !== AppRoutes.spaces.plans && !safeProError
+  const showSafeProBanner = hasSafeProBanner && !isSafeProBannerDismissed
+
+  const spaceId = useCurrentSpaceId()
+  // Own flag, separate from the 2FA feature itself, so the card can be switched off on its own.
+  const isTwoFactorCardEnabled = useHasFeature(FEATURES.TWO_FACTOR_AWARENESS_BANNER) === true
+  const [isTwoFactorCardDismissed, dismissTwoFactorCard] = useTwoFactorAwarenessDismissed()
+  // Continue needs a Workspace to link to, so the card waits until one is known.
+  const hasTwoFactorCard =
+    isTwoFactorCardEnabled &&
+    !isTwoFactorCardDismissed &&
+    !twoFactorCardError &&
+    spaceId !== null &&
+    pathname !== AppRoutes.spaces.settingsGeneral
+  // One slot, Safe Pro first: the 2FA card only takes it once the Safe Pro banner is gone.
+  const showTwoFactorCard = hasTwoFactorCard && !showSafeProBanner
+  // Both are lazy: their stubs render nothing, so opening the slot early leaves an empty box.
+  const isBannerPending = (showSafeProBanner && !isSafeProLoaded) || (showTwoFactorCard && !isTwoFactorCardLoaded)
 
   const onToggleGateway = (checked: boolean) => {
     setIsProdGateway(checked)
-    setTimeout(() => location.reload(), 300)
+    setTimeout(reloadPage, 300)
   }
 
   const handleHelpClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-    trackEvent({ ...OVERVIEW_EVENTS.HELP_CENTER }, { [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Help Center' })
     setHelpMenuAnchor(event.currentTarget)
   }, [])
 
   const handleHelpMenuClose = useCallback(() => {
     setHelpMenuAnchor(null)
   }, [])
-
-  const handleBeamerClick = useCallback(() => {
-    trackEvent({ ...OVERVIEW_EVENTS.WHATS_NEW }, { [MixpanelEventParams.SIDEBAR_ELEMENT]: "What's New" })
-    if (!hasBeamerConsent) {
-      dispatch(openCookieBanner({ warningKey: CookieAndTermType.UPDATES }))
-    }
-  }, [dispatch, hasBeamerConsent])
 
   return (
     <SidebarFooter data-testid="sidebar-common-footer">
@@ -72,6 +111,28 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
       )}
 
       <SidebarMenu className="gap-0.5">
+        {!isBannerPending && (showSafeProBanner || showTwoFactorCard) && (
+          <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
+            {/* One grid cell for both, so nothing below moves when one gives way to the other. */}
+            <div className="mb-2 grid">
+              {hasSafeProBanner && (
+                <SafeProSidebarBanner
+                  className={cn('col-start-1 row-start-1', !showSafeProBanner && 'invisible')}
+                  isShown={showSafeProBanner}
+                  onDismiss={dismissSafeProBanner}
+                />
+              )}
+              {hasTwoFactorCard && (
+                <WorkspaceTwoFactorAwarenessCard
+                  className={cn('col-start-1 row-start-1', !showTwoFactorCard && 'invisible')}
+                  spaceId={spaceId ?? undefined}
+                  onDismiss={dismissTwoFactorCard}
+                />
+              )}
+            </div>
+          </SidebarMenuItem>
+        )}
+
         <ApiCtaSidebar />
 
         <SidebarMenuItem
@@ -80,45 +141,29 @@ export const SidebarCommonFooter = ({ isSafeSidebar = false }: { isSafeSidebar?:
             'group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:gap-0.5',
           )}
         >
-          <SidebarMenuButton
-            className={cn(
-              'h-9 min-w-0 flex-1 gap-3 group-data-[collapsible=icon]:flex-none',
-              css.sidebarInteractive,
-              css.sidebarNavItem,
-            )}
-            data-testid="list-item-need-help"
-            onClick={handleHelpClick}
+          <Track
+            {...OVERVIEW_EVENTS.HELP_CENTER}
+            mixpanelParams={{ [MixpanelEventParams.SIDEBAR_ELEMENT]: 'Help Center' }}
           >
-            <Tooltip>
-              <TooltipTrigger render={<div />} className="flex min-w-0 cursor-pointer items-center gap-3">
-                <icons.CircleHelp />
-                <span className="truncate group-data-[collapsible=icon]:hidden">Help</span>
-              </TooltipTrigger>
-              <TooltipContent side="right">Help center</TooltipContent>
-            </Tooltip>
-          </SidebarMenuButton>
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <SidebarMenuButton
-                  type="button"
-                  id={BEAMER_SELECTOR}
-                  data-testid="list-item-whats-new"
-                  aria-label="What's new"
-                  className={cn(
-                    'h-9 w-9 min-w-9 shrink-0 gap-0 !px-0 !py-0 text-center !justify-center !overflow-visible',
-                    '[&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:stroke-[1.25]',
-                    css.sidebarInteractive,
-                    css.footerBeamerButton,
-                  )}
-                  onClick={handleBeamerClick}
-                />
-              }
+            <SidebarMenuButton
+              className={cn(
+                'h-9 min-w-0 flex-1 gap-3 group-data-[collapsible=icon]:flex-none',
+                css.sidebarInteractive,
+                css.sidebarNavItem,
+              )}
+              data-testid="list-item-need-help"
+              onClick={handleHelpClick}
             >
-              <Sparkles aria-hidden strokeWidth={1.25} />
-            </TooltipTrigger>
-            <TooltipContent side="top">What&apos;s new</TooltipContent>
-          </Tooltip>
+              <Tooltip>
+                <TooltipTrigger render={<div />} className="flex min-w-0 cursor-pointer items-center gap-3">
+                  <icons.CircleHelp />
+                  <span className="truncate group-data-[collapsible=icon]:hidden">Help</span>
+                </TooltipTrigger>
+                <TooltipContent side="right">Help center</TooltipContent>
+              </Tooltip>
+            </SidebarMenuButton>
+          </Track>
+          <WhatsNewButton />
           <div className={css.footerHelpStatus}>
             <SidebarIndexingStatus isSafeSidebar={isSafeSidebar} />
           </div>

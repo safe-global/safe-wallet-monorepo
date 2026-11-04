@@ -21,7 +21,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
 }))
 
 const renderWithStore = (ui: React.ReactElement) => {
-  const store = makeStore(undefined, { skipBroadcast: true })
+  const store = makeStore()
   const result = rtlRender(ui, {
     wrapper: ({ children }: { children: React.ReactNode }) => <Provider store={store}>{children}</Provider>,
   })

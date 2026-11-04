@@ -1,6 +1,6 @@
-import ExternalLink from '@/components/common/ExternalLink'
-import { AppRoutes } from '@/config/routes'
-import { Typography } from '@/components/ui/typography'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { TERMS_URL } from '@safe-global/utils/config/constants'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { type ReactElement } from 'react'
 import css from './styles.module.css'
 
@@ -32,7 +32,7 @@ const LegalDisclaimerContent = ({
       <Typography>
         I have read and understood the{' '}
         <ExternalLink
-          href={AppRoutes.terms}
+          href={TERMS_URL}
           className="font-bold no-underline hover:text-muted-foreground hover:no-underline"
         >
           Terms

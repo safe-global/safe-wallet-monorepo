@@ -1,16 +1,22 @@
 import Link from 'next/link'
 import { EllipsisVertical } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Button } from '@safe-global/views/components/ui/button'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
-import { Separator } from '@/components/ui/separator'
+import { Separator } from '@safe-global/views/components/ui/separator'
 import { AppRoutes } from '@/config/routes'
-import { trackEvent } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { SpaceSummary } from '../SpaceCard'
+import { SpaceSummary } from '@safe-global/views/features/spaces/components/SpaceCard'
 import SpaceContextMenu from '../SpaceCard/SpaceContextMenu'
-import { AdminOnlyWorkspaceTooltip } from '../AdminOnlyWorkspaceTooltip'
+import { AdminOnlyWorkspaceTooltip } from '@safe-global/views/features/spaces/components/AdminOnlyWorkspaceTooltip'
 import { isUserActiveAdmin } from '@/features/spaces/utils'
+import ProChip from '@/public/images/safe-pro/pro-chip.svg'
+import { skipToken } from '@reduxjs/toolkit/query'
+import { useEntitlementsGetAllEntitlementsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
+import { useBillingSpaceId } from '../../hooks/billing/useBillingSpaceId'
+import { SPACE_REFRESH_OPTIONS } from '../../hooks/refreshOptions'
 
 const MEMBER_NO_EDIT_MESSAGE = 'You need admin access to edit.'
 
@@ -30,18 +36,13 @@ const SpaceRow = ({
   showDivider?: boolean
 }) => {
   const isAdmin = isUserActiveAdmin(space.members, currentUserId)
-
-  const handleOpenWorkspace = () => {
-    trackEvent(
-      { ...SPACE_EVENTS.WORKSPACE_SWITCHED, label: space.uuid },
-      {
-        from_workspace_id: undefined,
-        to_workspace_id: space.uuid,
-        source: 'space_selector',
-        safe_count: space.safeCount,
-      },
-    )
-  }
+  const billingSpaceId = useBillingSpaceId(space.uuid)
+  // All rows share the one cached request of all Workspaces' entitlements
+  const { plan } = useEntitlementsGetAllEntitlementsV1Query(billingSpaceId ? undefined : skipToken, {
+    ...SPACE_REFRESH_OPTIONS,
+    selectFromResult: ({ currentData }) => ({ plan: currentData?.[space.uuid]?.plan }),
+  })
+  const badgeLabel = plan?.status === 'trialing' ? 'Free access' : (plan?.name ?? undefined)
 
   return (
     <>
@@ -49,21 +50,39 @@ const SpaceRow = ({
         data-testid="space-row"
         className="relative isolate before:absolute before:-inset-x-3 before:inset-y-1 before:-z-10 before:rounded-md hover:before:bg-muted"
       >
-        <Link
-          href={{ pathname: AppRoutes.spaces.index, query: { spaceId: space.uuid } }}
-          onClick={handleOpenWorkspace}
-          className="flex items-center gap-3 py-3 pr-10"
+        <Track
+          {...SPACE_EVENTS.WORKSPACE_SWITCHED}
+          label={space.uuid}
+          mixpanelParams={{
+            from_workspace_id: undefined,
+            to_workspace_id: space.uuid,
+            source: 'space_selector',
+            safe_count: space.safeCount,
+          }}
         >
-          <InitialsAvatar name={space.name} size="medium" rounded />
-          <div className="min-w-0 flex-1">
-            <SpaceSummary
-              name={space.name}
-              numberOfAccounts={space.safeCount}
-              numberOfMembers={space.memberCount}
-              isCompact
-            />
-          </div>
-        </Link>
+          <Link
+            href={{ pathname: AppRoutes.spaces.index, query: { spaceId: space.uuid } }}
+            className="flex items-center gap-3 py-3 pr-10"
+          >
+            <InitialsAvatar name={space.name} size="medium" rounded />
+            <div className="min-w-0 flex-1">
+              <SpaceSummary
+                name={space.name}
+                numberOfAccounts={space.safeCount}
+                numberOfMembers={space.memberCount}
+                isCompact
+              />
+            </div>
+            {plan && (
+              <Badge variant="subtle" size="status" shape="status" data-testid="space-row-pro-badge">
+                <span className="block h-4 w-6">
+                  <ProChip className="size-full" />
+                </span>
+                {badgeLabel && `· ${badgeLabel}`}
+              </Badge>
+            )}
+          </Link>
+        </Track>
 
         <div className="absolute right-0 top-1/2 -translate-y-1/2">
           <AdminOnlyWorkspaceTooltip isAdmin={isAdmin} side="left" message={MEMBER_NO_EDIT_MESSAGE}>

@@ -1,0 +1,140 @@
+{
+  "safeAddress": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+  "txId": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x85835820c4119ea7e44537dd4a447264cc08d80ea1467b545b500670573c3d2d",
+  "executedAt": 1720167780000,
+  "txStatus": "SUCCESS",
+  "txInfo": {
+    "type": "SettingsChange",
+    "humanDescription": "Add new owner 0x4fe7...dC90 with threshold 2",
+    "dataDecoded": {
+      "method": "addOwnerWithThreshold",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "address",
+          "value": "0x4fe7164d7cA511Ab35520bb14065F1693240dC90",
+          "valueDecoded": null
+        },
+        {
+          "name": "_threshold",
+          "type": "uint256",
+          "value": "2",
+          "valueDecoded": null
+        }
+      ],
+      "accuracy": "ONLY_FUNCTION_MATCH"
+    },
+    "settingsInfo": {
+      "type": "ADD_OWNER",
+      "owner": {
+        "value": "0x4fe7164d7cA511Ab35520bb14065F1693240dC90",
+        "name": null,
+        "logoUri": null
+      },
+      "threshold": 2
+    }
+  },
+  "txData": {
+    "hexData": "0x0d582f130000000000000000000000004fe7164d7ca511ab35520bb14065f1693240dc900000000000000000000000000000000000000000000000000000000000000002",
+    "dataDecoded": {
+      "method": "addOwnerWithThreshold",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "address",
+          "value": "0x4fe7164d7cA511Ab35520bb14065F1693240dC90",
+          "valueDecoded": null
+        },
+        {
+          "name": "_threshold",
+          "type": "uint256",
+          "value": "2",
+          "valueDecoded": null
+        }
+      ],
+      "accuracy": "ONLY_FUNCTION_MATCH"
+    },
+    "to": {
+      "value": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+      "name": null,
+      "logoUri": null
+    },
+    "value": "0",
+    "operation": 0,
+    "trustedDelegateCallTarget": null,
+    "addressInfoIndex": null,
+    "tokenInfoIndex": null
+  },
+  "txHash": "0xfcad9959d5f194c129d16f91f61a28719287e9beefb39cc5fe81a368f400ab35",
+  "detailedExecutionInfo": {
+    "type": "MULTISIG",
+    "submittedAt": 1720167700423,
+    "nonce": 14,
+    "safeTxGas": "0",
+    "baseGas": "0",
+    "gasPrice": "0",
+    "gasToken": "0x0000000000000000000000000000000000000000",
+    "fee": "1022790220915074",
+    "payment": "0",
+    "refundReceiver": {
+      "value": "0x0000000000000000000000000000000000000000",
+      "name": null,
+      "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x0000000000000000000000000000000000000000.png"
+    },
+    "safeTxHash": "0x85835820c4119ea7e44537dd4a447264cc08d80ea1467b545b500670573c3d2d",
+    "executor": {
+      "value": "0xb3a1956Cff1ecc8054B81b0C83b9847CB71384b8",
+      "name": null,
+      "logoUri": null
+    },
+    "signers": [
+      {
+        "value": "0x4fe7164d7cA511Ab35520bb14065F1693240dC90",
+        "name": null,
+        "logoUri": null
+      },
+      {
+        "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
+        "name": null,
+        "logoUri": null
+      },
+      {
+        "value": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5",
+        "name": null,
+        "logoUri": null
+      }
+    ],
+    "confirmationsRequired": 2,
+    "confirmations": [
+      {
+        "signer": {
+          "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
+          "name": null,
+          "logoUri": null
+        },
+        "signature": "0x51047b5673d5b32ea1d1808447eef1ac51c4c4e572adc741c0f72885017bc2e054fc6e64a6f78bcbefdf28e61675ebd60eecc7abd554b95a03b830b1c2dcc3301c",
+        "submittedAt": 1720167700517
+      },
+      {
+        "signer": {
+          "value": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5",
+          "name": null,
+          "logoUri": null
+        },
+        "signature": "0xd67e8021e67cc012d7913dc4e722b8d78e03887c83fab8b69b0a1a0987dbd3cc6ac79e2eec108274e109ec34e64f4676afb72e6c68259f2ad9313b6124224ed71c",
+        "submittedAt": 1720167753956
+      }
+    ],
+    "rejectors": [],
+    "gasTokenInfo": null,
+    "trusted": true,
+    "proposer": {
+      "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
+      "name": null,
+      "logoUri": null
+    },
+    "proposedByDelegate": null
+  },
+  "safeAppInfo": null,
+  "note": null
+}

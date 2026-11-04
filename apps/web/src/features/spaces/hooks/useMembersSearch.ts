@@ -6,7 +6,7 @@ const useMembersSearch = (members: MemberDto[], query: string): MemberDto[] => {
   const fuse = useMemo(
     () =>
       new Fuse(members, {
-        keys: [{ name: 'name' }, { name: 'user.email' }],
+        keys: [{ name: 'name' }, { name: 'user.email' }, { name: 'user.address' }],
         threshold: 0.2,
         findAllMatches: true,
         ignoreLocation: true,

@@ -1,6 +1,6 @@
-import { Alert, AlertAction, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Alert, AlertAction, AlertDescription, AlertTitle } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import SpeedUpModal from '../SpeedUpModal'
 import Rocket from '@/public/images/common/rocket.svg'
 import { useCounter } from '@/components/common/Notifications/useCounter'
@@ -69,7 +69,7 @@ const SpeedUpMonitor = ({ txId, pendingTx, modalTrigger = 'alertBox' }: SpeedUpM
             <Typography align="left">Taking too long?</Typography>
           </AlertTitle>
           <AlertDescription>Try to speed up with better gas parameters.</AlertDescription>
-          <AlertAction>
+          <AlertAction className="top-1/2">
             <Button variant="outline" className="text-foreground" onClick={onOpen}>{`Speed up >`}</Button>
           </AlertAction>
         </Alert>

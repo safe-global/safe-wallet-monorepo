@@ -1,5 +1,7 @@
-import type { CheckStatus, SecurityGrade } from '../securityTypes'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import type { ScanResult } from '@safe-global/views/features/security/types'
+
+export type { EvidenceItem, ScanResult, SafeGrade } from '@safe-global/views/features/security/types'
 
 export type ScanContext = {
   owners: { value: string; name?: string | null }[]
@@ -32,26 +34,6 @@ export type ScanContext = {
   } | null
 }
 
-export type EvidenceItem = { label: string; value: string } | string
-
-export type ScanResult = {
-  status: CheckStatus
-  severity: SecurityGrade
-  score: number
-  evidence: EvidenceItem[]
-  remediation: string
-  lastChecked: string
-  ctaLabelOverride?: string
-  partner?: 'hypernative'
-  /**
-   * Set by the modules scanner when the Safe is affected by a known Zodiac module
-   * vulnerability. Defined means "affected"; the array holds the installed module
-   * addresses we can offer to remove (empty when the Safe is only implicated via a
-   * related Safe and has no directly removable module).
-   */
-  vulnerableModules?: string[]
-}
-
 export type ScannerId =
   | 'account_setup'
   | 'multichain_setup'
@@ -68,6 +50,3 @@ export type SecurityScanner = {
   id: ScannerId
   scan: (ctx: ScanContext) => Promise<ScanResult>
 }
-
-/** Per-Safe grade based on its worst check result. */
-export type SafeGrade = 'critical' | 'at_risk' | 'needs_attention' | 'passing'

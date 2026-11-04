@@ -149,5 +149,31 @@ describe('transactions endpoints', () => {
 
       expect(capturedUrl).toContain('/v1/chains/137/transactions/tx-1')
     })
+
+    it('should never have more than 4 requests in flight at once', async () => {
+      let inFlight = 0
+      let peak = 0
+
+      server = setupServer(
+        http.get(`${GATEWAY_URL}/v1/chains/1/transactions/:id`, async ({ params }) => {
+          inFlight++
+          peak = Math.max(peak, inFlight)
+          await new Promise((resolve) => setTimeout(resolve, 5))
+          inFlight--
+          return HttpResponse.json(createMockTxDetails(String(params.id)))
+        }),
+      )
+      server.listen()
+
+      const txIds = Array.from({ length: 20 }, (_, i) => `tx-${i}`)
+
+      const result = await store.dispatch(
+        txHistoryApi.endpoints.transactionsGetMultipleTransactionDetails.initiate({ chainId: '1', txIds }),
+      )
+
+      expect(result.isSuccess).toBe(true)
+      expect(result.data).toHaveLength(20)
+      expect(peak).toBeLessThanOrEqual(4)
+    })
   })
 })

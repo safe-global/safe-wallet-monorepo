@@ -1,19 +1,19 @@
 import useWallet from '@/hooks/wallets/useWallet'
 import { useState } from 'react'
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Spinner } from '@/components/ui/spinner'
+import { Dialog, DialogContent, DialogTitle } from '@safe-global/views/components/ui/dialog'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { X as Close } from 'lucide-react'
 import madProps from '@/utils/mad-props'
-import useChainId from '@/hooks/useChainId'
+import { useCurrentChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { deleteTx } from '@/utils/gateway'
 import { getAssertedChainSigner } from '@/services/tx/tx-sender/sdk'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { REJECT_TX_EVENTS } from '@/services/analytics/events/reject-tx'
@@ -27,18 +27,11 @@ type DeleteTxModalProps = {
   onClose: () => void
   onSuccess: () => void
   wallet: ReturnType<typeof useWallet>
-  chainId: ReturnType<typeof useChainId>
+  chain: ReturnType<typeof useCurrentChain>
   safeAddress: ReturnType<typeof useSafeAddress>
 }
 
-const InternalDeleteTxModal = ({
-  safeTxHash,
-  onSuccess,
-  onClose,
-  wallet,
-  safeAddress,
-  chainId,
-}: DeleteTxModalProps) => {
+const InternalDeleteTxModal = ({ safeTxHash, onSuccess, onClose, wallet, safeAddress, chain }: DeleteTxModalProps) => {
   const [error, setError] = useState<Error>()
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
@@ -47,7 +40,7 @@ const InternalDeleteTxModal = ({
     setIsLoading(true)
     trackEvent(REJECT_TX_EVENTS.DELETE_CONFIRM)
 
-    if (!wallet?.provider || !safeAddress || !chainId || !safeTxHash) {
+    if (!wallet?.provider || !safeAddress || !chain || !safeTxHash) {
       setIsLoading(false)
       setError(new Error('Please connect your wallet first'))
       trackEvent(REJECT_TX_EVENTS.DELETE_FAIL)
@@ -60,7 +53,7 @@ const InternalDeleteTxModal = ({
       await deleteTx({
         safeTxHash,
         safeAddress,
-        chainId,
+        chain,
         signer,
       })
     } catch (error) {
@@ -93,7 +86,7 @@ const InternalDeleteTxModal = ({
 
             <div className="grow" />
 
-            <ChainIndicator chainId={chainId} />
+            <ChainIndicator chainId={chain?.chainId} />
 
             <Button aria-label="close" variant="ghost" size="icon-sm" onClick={onClose} className="ml-auto">
               <Close />
@@ -156,7 +149,7 @@ const InternalDeleteTxModal = ({
 
 const DeleteTxModal = madProps(InternalDeleteTxModal, {
   wallet: useWallet,
-  chainId: useChainId,
+  chain: useCurrentChain,
   safeAddress: useSafeAddress,
 })
 

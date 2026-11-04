@@ -1,8 +1,13 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { Link } from '@/components/ui/link'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Link } from '@safe-global/views/components/ui/link'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/views/components/ui/accordion'
 import { useContext, useEffect } from 'react'
 import type { ReactElement } from 'react'
 import type { RequestId } from '@safe-global/safe-apps-sdk'
@@ -13,6 +18,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import useWallet from '@/hooks/wallets/useWallet'
+import useSafeSignerAddress from '@/hooks/wallets/useSafeSignerAddress'
 import useSafeMessage from '@/hooks/messages/useSafeMessage'
 import useOnboard, { switchWallet } from '@/hooks/wallets/useOnboard'
 import { TxModalContext } from '@/components/tx-flow'
@@ -20,25 +26,30 @@ import CopyButton from '@/components/common/CopyButton'
 import MsgSigners from '@/components/safe-messages/MsgSigners'
 import useDecodedSafeMessage from '@/hooks/messages/useDecodedSafeMessage'
 import useSyncSafeMessageSigner from '@/hooks/messages/useSyncSafeMessageSigner'
-import SuccessMessage from '@/components/tx/SuccessMessage'
+import SuccessMessage from '@safe-global/views/components/tx/SuccessMessage'
 import useHighlightHiddenTab from '@/hooks/useHighlightHiddenTab'
-import InfoBox from '@/components/safe-messages/InfoBox'
+import InfoBox from '@safe-global/views/components/safe-messages/InfoBox'
 import { DecodedMsg } from '@/components/safe-messages/DecodedMsg'
-import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
+import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { dispatchPreparedSignature } from '@/services/safe-messages/safeMsgNotifications'
 import { trackEvent } from '@/services/analytics'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import { SafeTxContext } from '../../SafeTxProvider'
 import RiskConfirmationError from '@/components/tx/shared/errors/RiskConfirmationError'
-import { isBlindSigningPayload, isEIP712TypedData } from '@safe-global/utils/utils/safe-messages'
+import {
+  isBlindSigningPayload,
+  isEIP712TypedData,
+  isSafeSignerMessageSupported,
+} from '@safe-global/utils/utils/safe-messages'
 import ApprovalEditor from '@/components/tx/ApprovalEditor'
-import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
+import ParsingErrorBoundary from '@/components/common/ObservabilityErrorBoundary/ParsingErrorBoundary'
 import { isWalletRejection } from '@/utils/wallets'
+import { getCgwErrorInfo } from '@/utils/cgw-errors'
+import { getLedgerDeviceError, getLedgerUserMessage } from '@/services/onboard/ledger-errors'
 import { useAppSelector } from '@/store'
 import { selectBlindSigning } from '@/store/settingsSlice'
 import NextLink from 'next/link'
 import { AppRoutes } from '@/config/routes'
-import { useRouter } from 'next/router'
 import MsgShareLink from '@/components/safe-messages/MsgShareLink'
 import LinkIcon from '@/public/images/messages/link.svg'
 import CheckWallet from '@/components/common/CheckWallet'
@@ -47,6 +58,7 @@ import { getDomainHash, getSafeMessageMessageHash } from '@safe-global/utils/uti
 import type { SafeVersion } from '@safe-global/types-kit'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { RiskConfirmation } from '../../features/RiskConfirmation'
+import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 const createSkeletonMessage = (confirmationsRequired: number): MessageItem => {
   return {
@@ -62,6 +74,10 @@ const createSkeletonMessage = (confirmationsRequired: number): MessageItem => {
     proposedBy: {
       value: '',
     },
+    preparedSignature: null,
+    origin: null,
+    safeAppInfo: null,
+    safeAppId: null,
     status: 'NEEDS_CONFIRMATION',
     type: 'MESSAGE',
   }
@@ -94,25 +110,48 @@ const DialogHeader = ({ threshold }: { threshold: number }) => (
   </>
 )
 
+// The single place a message-signing failure is rendered: the toast for the
+// same failure was dropped so it is shown once, next to the CTA (WA-3502).
 const MessageDialogError = ({ isOwner, submitError }: { isOwner: boolean; submitError: Error | undefined }) => {
   const wallet = useWallet()
   const onboard = useOnboard()
 
-  const errorMessage =
-    !wallet || !onboard
-      ? 'No wallet is connected.'
-      : !isOwner
-        ? "You are currently not a signer of this Safe account and won't be able to confirm this message."
-        : submitError && isWalletRejection(submitError)
-          ? 'User rejected signing.'
-          : submitError
-            ? 'Error confirming the message. Please try again.'
-            : null
-
-  if (errorMessage) {
-    return <ErrorMessage>{errorMessage}</ErrorMessage>
+  if (!wallet || !onboard) {
+    return <ErrorMessage>No wallet is connected.</ErrorMessage>
   }
-  return null
+
+  if (!isOwner) {
+    return (
+      <ErrorMessage>
+        You are currently not a signer of this Safe account and won&apos;t be able to confirm this message.
+      </ErrorMessage>
+    )
+  }
+
+  if (!submitError) {
+    return null
+  }
+
+  if (isWalletRejection(submitError)) {
+    return <ErrorMessage>User rejected signing.</ErrorMessage>
+  }
+
+  // A Ledger device failure states its own reason; its raw error is a dump of
+  // DMK class names, ethers codes and the viem version (WA-3243).
+  const ledgerError = getLedgerDeviceError(submitError)
+  if (ledgerError) {
+    return <ErrorMessage error={submitError}>{getLedgerUserMessage(ledgerError)}</ErrorMessage>
+  }
+
+  // A known CGW response state replaces the copy and gets a code-only support
+  // reference — never the response body, which can be an HTML page (WA-3252).
+  const cgwError = getCgwErrorInfo(submitError)
+
+  return (
+    <ErrorMessage error={submitError}>
+      {cgwError ? cgwError.message : 'Error confirming the message. Try again.'}
+    </ErrorMessage>
+  )
 }
 
 const AlreadySignedByOwnerMessage = ({ hasSigned }: { hasSigned: boolean }) => {
@@ -147,8 +186,8 @@ const BlindSigningWarning = ({
   isBlindSigningEnabled: boolean
   isBlindSigningPayload: boolean
 }) => {
-  const router = useRouter()
-  const query = router.query.safe ? { safe: router.query.safe } : undefined
+  const safeLinkQuery = useSafeLinkQuery()
+  const query = safeLinkQuery.safe ? safeLinkQuery : undefined
 
   if (!isBlindSigningPayload) {
     return null
@@ -207,6 +246,7 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
   const { safe } = useSafeInfo()
   const isOwner = useIsSafeOwner()
   const wallet = useWallet()
+  const safeSignerAddress = useSafeSignerAddress()
   useHighlightHiddenTab()
 
   const { decodedMessage, safeMessageMessage, safeMessageHash } = useDecodedSafeMessage(message, safe)
@@ -226,8 +266,10 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
   const isEip712 = isEIP712TypedData(decodedMessage)
   const isBlindSigningRequest = isBlindSigningPayload(decodedMessage)
   const isBlindSigningEnabled = useAppSelector(selectBlindSigning)
+  const needsNewerSafeForSafeSigner = !!safeSignerAddress && !isSafeSignerMessageSupported(safe.version)
   const isDisabled =
     !isOwner ||
+    needsNewerSafeForSafeSigner ||
     signedByCurrentSafe ||
     !safe.deployed ||
     (!isBlindSigningEnabled && isBlindSigningRequest) ||
@@ -279,9 +321,9 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
           <DialogHeader threshold={safe.threshold} />
 
           {isEip712 && (
-            <ObservabilityErrorBoundary fallback={<div>Error parsing data</div>}>
+            <ParsingErrorBoundary>
               <ApprovalEditor safeMessage={decodedMessage} />
-            </ObservabilityErrorBoundary>
+            </ParsingErrorBoundary>
           )}
 
           <BlindSigningWarning
@@ -307,7 +349,7 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
           </Accordion>
 
           <div className="[&:not(:empty)]:mt-4">
-            <RiskConfirmation />
+            <RiskConfirmation subject="message" />
           </div>
         </div>
       </TxCard>
@@ -322,7 +364,7 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
               title="Collect all the confirmations"
               message={
                 requestId && !hasSignature
-                  ? 'Please keep this modal open until all signers confirm this message. Closing the modal will abort the signing request.'
+                  ? 'Keep this modal open until all signers confirm this message. Closing the modal will abort the signing request.'
                   : 'The signature will be submitted to the requesting app when the message is fully signed.'
               }
             >
@@ -351,6 +393,13 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
             )}
 
             <NetworkWarning />
+
+            {needsNewerSafeForSafeSigner && (
+              <ErrorMessage>
+                Signing messages with a Safe signer needs Safe version 1.5.0 or newer. Update this Safe account in
+                Settings first.
+              </ErrorMessage>
+            )}
 
             <MessageDialogError isOwner={isOwner} submitError={submitError} />
 

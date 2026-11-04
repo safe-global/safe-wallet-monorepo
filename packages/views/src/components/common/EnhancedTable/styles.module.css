@@ -1,0 +1,45 @@
+.tableBody tr:last-child td {
+  border-bottom: none;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.compactTable thead th {
+  font-size: 14px;
+  padding: var(--space-1) 0;
+}
+
+.compactTable thead th:first-child {
+  padding-left: 16px !important;
+}
+
+.compactTable thead th:last-child {
+  padding-right: 16px !important;
+}
+
+.compactTable tbody td {
+  padding: 12px 0 !important;
+}
+
+.compactTable tbody td:first-child {
+  padding-left: 16px !important;
+}
+
+.compactTable tbody td:last-child {
+  padding-right: 16px !important;
+}
+
+.compactTable tbody tr:hover {
+  background: none !important;
+}
+
+@media (max-width: 899.95px) {
+  .actions {
+    justify-content: flex-start;
+  }
+}

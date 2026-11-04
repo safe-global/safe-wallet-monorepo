@@ -205,7 +205,7 @@ describe('getTransactionType', () => {
     it('shows the Safe App name and logo when safeAppInfo is present', () => {
       const logoUri = 'https://apps.safe.global/tx-builder/logo.svg'
       const tx = makeTx({
-        safeAppInfo: { name: 'Transaction Builder', url: 'https://apps.safe.global/tx-builder', logoUri },
+        safeAppInfo: { id: 1, name: 'Transaction Builder', url: 'https://apps.safe.global/tx-builder', logoUri },
       })
 
       const result = getTransactionType(tx, {})
@@ -216,7 +216,7 @@ describe('getTransactionType', () => {
 
     it('falls back to the Code icon when safeAppInfo has no logo', () => {
       const tx = makeTx({
-        safeAppInfo: { name: 'Transaction Builder', url: 'https://apps.safe.global/tx-builder' },
+        safeAppInfo: { id: 1, name: 'Transaction Builder', url: 'https://apps.safe.global/tx-builder' },
       })
 
       const result = getTransactionType(tx, {})
@@ -286,7 +286,7 @@ describe('getTransactionType', () => {
       expect(result.icon).toBe(logoUri)
     })
 
-    it('renders Code for a module execution with no logo', () => {
+    it('labels a module execution of an unknown contract as a contract interaction with the Code icon', () => {
       const tx = makeTx({
         txInfo: customTxInfo({ methodName: 'someMethod' }),
         executionInfo: { type: 'MODULE', address: { value: faker.finance.ethereumAddress() } },
@@ -294,7 +294,22 @@ describe('getTransactionType', () => {
 
       const result = getTransactionType(tx, {})
 
+      expect(result.text).toBe('Contract interaction')
       expect(iconProps(result.icon).icon).toBe(Code)
+    })
+
+    it('labels a module execution with the name of the contract it calls', () => {
+      const tx = makeTx({
+        txInfo: customTxInfo({
+          methodName: 'someMethod',
+          to: { value: faker.finance.ethereumAddress(), name: 'Roles' },
+        }),
+        executionInfo: { type: 'MODULE', address: { value: faker.finance.ethereumAddress() } },
+      })
+
+      const result = getTransactionType(tx, {})
+
+      expect(result.text).toBe('Roles')
     })
   })
 })

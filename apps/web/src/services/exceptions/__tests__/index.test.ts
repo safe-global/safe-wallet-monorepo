@@ -1,4 +1,5 @@
-import { Errors, CodedException } from '..'
+import { Errors, CodedException, logError, __resetLogThrottleForTests } from '..'
+import type ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { ErrorDomain, ErrorLayer, ErrorType } from '@safe-global/utils/services/exceptions/errorTaxonomy'
 
 const defaultPublicIsProduction = process.env.NEXT_PUBLIC_IS_PRODUCTION
@@ -9,6 +10,7 @@ describe('CodedException', () => {
     jest.clearAllMocks()
     jest.spyOn(console, 'warn').mockImplementation(() => {})
     jest.spyOn(console, 'error').mockImplementation(() => {})
+    __resetLogThrottleForTests()
   })
 
   afterAll(() => {
@@ -127,6 +129,147 @@ describe('CodedException', () => {
 
       logError(Errors._601)
       expect(mockWarn).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('Throttling', () => {
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it('logs an identical failure once, however often it is reported inside the window', async () => {
+      const { logError, Errors } = await import('..')
+
+      logError(Errors._601, 'rpc down')
+      logError(Errors._601, 'rpc down')
+      logError(Errors._601, 'rpc down')
+
+      expect(console.warn).toHaveBeenCalledTimes(1)
+    })
+
+    it('throttles what goes out to observability, not only the console', async () => {
+      process.env.NEXT_PUBLIC_IS_PRODUCTION = 'true'
+      const mockWarn = jest.fn()
+      const captureError = jest.fn()
+      jest.doMock('@/services/observability', () => ({
+        __esModule: true,
+        ...jest.requireActual('@/services/observability'),
+        captureError,
+        logger: { info: jest.fn(), warn: mockWarn, error: jest.fn(), debug: jest.fn() },
+      }))
+      const { logError, Errors } = await import('..')
+
+      logError(Errors._601, 'rpc down')
+      logError(Errors._601, 'rpc down')
+
+      expect(mockWarn).toHaveBeenCalledTimes(1)
+      expect(captureError).toHaveBeenCalledTimes(1)
+    })
+
+    it('logs again once the window has passed', async () => {
+      jest.useFakeTimers()
+      const { logError, Errors } = await import('..')
+
+      logError(Errors._601, 'rpc down')
+      jest.advanceTimersByTime(60_000 - 1)
+      logError(Errors._601, 'rpc down')
+      expect(console.warn).toHaveBeenCalledTimes(1)
+
+      jest.advanceTimersByTime(1)
+      logError(Errors._601, 'rpc down')
+      expect(console.warn).toHaveBeenCalledTimes(2)
+    })
+
+    it('does not throttle a failure that differs in code, message or context', async () => {
+      const { logError, Errors } = await import('..')
+
+      logError(Errors._601, 'rpc down')
+      logError(Errors._602, 'rpc down')
+      logError(Errors._601, 'rpc unreachable')
+      logError(Errors._601, 'rpc down', { rpcHost: 'rpc.ankr.com' })
+
+      expect(console.warn).toHaveBeenCalledTimes(4)
+    })
+
+    it('keeps each attempt of a retry loop a distinct report', async () => {
+      const { logError, Errors } = await import('..')
+
+      logError(Errors._601, 'rpc down', { attempt: 1 })
+      logError(Errors._601, 'rpc down', { attempt: 2 })
+
+      expect(console.warn).toHaveBeenCalledTimes(2)
+    })
+
+    it('does not throttle tracked errors', async () => {
+      const { trackError, Errors } = await import('..')
+
+      trackError(Errors._804, 'execution failed')
+      trackError(Errors._804, 'execution failed')
+
+      expect(console.error).toHaveBeenCalledTimes(2)
+    })
+
+    describe('bounded tracking (MAX_THROTTLED_KEYS)', () => {
+      // Mirrors MAX_THROTTLED_KEYS, which is module-private on purpose.
+      const MAX_THROTTLED_KEYS = 500
+
+      const fillTracker = (code: ErrorCodes, count: number) => {
+        for (let i = 0; i < count; i++) {
+          logError(code, `rpc down #${i}`)
+        }
+      }
+
+      it('forgets the oldest failure once the tracker is full', () => {
+        fillTracker(Errors._601, MAX_THROTTLED_KEYS)
+        expect(console.warn).toHaveBeenCalledTimes(MAX_THROTTLED_KEYS)
+
+        // One distinct failure too many: the tracker makes room for it.
+        logError(Errors._601, 'rpc down #newest')
+        ;(console.warn as jest.Mock).mockClear()
+
+        // Everything but the oldest is still tracked, so still throttled.
+        logError(Errors._601, `rpc down #${MAX_THROTTLED_KEYS - 1}`)
+        logError(Errors._601, 'rpc down #newest')
+        expect(console.warn).not.toHaveBeenCalled()
+
+        // The oldest was the one dropped, so it reports again.
+        logError(Errors._601, 'rpc down #0')
+        expect(console.warn).toHaveBeenCalledTimes(1)
+      })
+
+      it('stops the tracker growing however many distinct failures come in', () => {
+        fillTracker(Errors._601, MAX_THROTTLED_KEYS * 3)
+        ;(console.warn as jest.Mock).mockClear()
+
+        // Everything but the last MAX_THROTTLED_KEYS has been dropped, so the
+        // earliest failures report again while the most recent stay throttled.
+        logError(Errors._601, 'rpc down #0')
+        logError(Errors._601, `rpc down #${MAX_THROTTLED_KEYS}`)
+        expect(console.warn).toHaveBeenCalledTimes(2)
+        ;(console.warn as jest.Mock).mockClear()
+
+        logError(Errors._601, `rpc down #${MAX_THROTTLED_KEYS * 3 - 1}`)
+        expect(console.warn).not.toHaveBeenCalled()
+      })
+
+      it('drops expired entries before evicting a live one', () => {
+        jest.useFakeTimers()
+
+        fillTracker(Errors._601, MAX_THROTTLED_KEYS - 1)
+
+        // One live entry, added a full window after the rest, fills the tracker.
+        jest.advanceTimersByTime(60_000)
+        logError(Errors._601, 'rpc down #live')
+        ;(console.warn as jest.Mock).mockClear()
+
+        // The next distinct failure finds the tracker full: the expired entries go,
+        // and the one that reported recently is kept — so it is still throttled.
+        logError(Errors._601, 'rpc down #newest')
+        expect(console.warn).toHaveBeenCalledTimes(1)
+
+        logError(Errors._601, 'rpc down #live')
+        expect(console.warn).toHaveBeenCalledTimes(1)
+      })
     })
   })
 

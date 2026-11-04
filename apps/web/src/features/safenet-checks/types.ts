@@ -1,18 +1,23 @@
 import type { FeatureImplementation } from '@/features/__core__'
 import type SafenetAuditRow from './components/SafenetAuditRow'
+import type SafenetBatchWarning from './components/SafenetBatchWarning'
 import type SafenetChecksSection from './components/SafenetChecksSection'
-import type SafenetQueueStatus from './components/SafenetQueueStatus'
+import type SafenetDetailsCard from './components/SafenetDetailsCard'
+import type SafenetRiskChip from './components/SafenetRiskChip'
 
 /**
  * Lazy-loaded surface of the Safenet checks feature. All are PascalCase
  * components (stubs render null until the feature is loaded and enabled):
  * `SafenetAuditRow` is the check's step in the transaction audit log,
- * `SafenetQueueStatus` is the compact per-row state in the queue,
  * `SafenetChecksSection` is the check's section in the Safe Shield widget
- * during confirm/execute flows.
+ * during confirm/execute flows, `SafenetDetailsCard` is the expandable card in
+ * a transaction's details. `SafenetRiskChip` marks a batch item whose check
+ * found a risk, and `SafenetBatchWarning` counts those items above a batch.
  */
 export interface SafenetChecksContract extends FeatureImplementation {
   SafenetAuditRow: typeof SafenetAuditRow
+  SafenetBatchWarning: typeof SafenetBatchWarning
   SafenetChecksSection: typeof SafenetChecksSection
-  SafenetQueueStatus: typeof SafenetQueueStatus
+  SafenetDetailsCard: typeof SafenetDetailsCard
+  SafenetRiskChip: typeof SafenetRiskChip
 }

@@ -1,3 +1,6 @@
+/**
+ * @jest-environment-options {"url": "https://app.safe.global/"}
+ */
 import * as firebase from 'firebase/messaging'
 import { BrowserProvider, type JsonRpcSigner, toBeHex } from 'ethers'
 
@@ -20,12 +23,6 @@ Object.defineProperty(globalThis, 'navigator', {
     serviceWorker: {
       getRegistrations: () => [],
     },
-  },
-})
-
-Object.defineProperty(globalThis, 'location', {
-  value: {
-    origin: 'https://app.safe.global',
   },
 })
 

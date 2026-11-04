@@ -9,13 +9,14 @@ import {
 import { useDispatch, useSelector, type TypedUseSelectorHook } from 'react-redux'
 import { useEffect } from 'react'
 import merge from 'lodash/merge'
-import { IS_PRODUCTION, CONFIG_SERVICE_KEY } from '@/config/constants'
+import { APP_ENV, IS_PRODUCTION, CONFIG_SERVICE_KEY } from '@/config/constants'
 import { getPreloadedState, persistState } from './persistStore'
 import { broadcastState, listenToBroadcast } from './broadcast'
 import {
   cookiesAndTermsSlice,
   cookiesAndTermsInitialState,
   safeMessagesListener,
+  safeInfoListener,
   swapOrderListener,
   swapOrderStatusListener,
   txHistoryListener,
@@ -23,11 +24,19 @@ import {
   authListener,
   counterfactualSyncListener,
   addressBookListener,
+  elevationListener,
+  spaceSafesEntitlementsListener,
+  planChangeSyncListener,
+  checkoutTrackingListener,
+  workspaceTrackingListener,
+  spaceSafesCacheListener,
+  trialReminderListener,
 } from './slices'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
 import { ofacApi } from '@/store/api/ofac'
 import { safePassApi } from './api/safePass'
+import { beamerApi } from './api/beamer'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { safenetCheckApi } from '@safe-global/store/safenet/safenetCheckApi'
 import { safenetCheckSlice } from '@safe-global/store/safenet/safenetCheckSlice'
@@ -38,6 +47,7 @@ import { setupListeners } from '@reduxjs/toolkit/query'
 import { migrateBatchTxs } from '@/services/ls-migration/batch'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway'
 import { cgwErrorAlert } from './middleware/cgwErrorAlert'
+import { forbiddenSessionListener } from '@/services/sessionExpiry/forbiddenSessionListener'
 
 const rootReducer = combineReducers({
   [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
@@ -69,8 +79,12 @@ const rootReducer = combineReducers({
   [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
   [slices.gtfPaymentSourcePreferenceSlice.name]: slices.gtfPaymentSourcePreferenceSlice.reducer,
   [slices.featureFlagOverridesSlice.name]: slices.featureFlagOverridesSlice.reducer,
+  // Deliberately absent from `persistedSlices`: a phase restored from a previous
+  // page load would leave the user on a splash screen with nothing in flight.
+  [slices.stepUpSlice.name]: slices.stepUpSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
+  [beamerApi.reducerPath]: beamerApi.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,
   [safenetCheckSlice.name]: safenetCheckSlice.reducer,
   [safenetCheckApi.reducerPath]: safenetCheckApi.reducer,
@@ -114,6 +128,7 @@ const middleware: Middleware<{}, RootState>[] = [
   listenerMiddlewareInstance.middleware,
   ofacApi.middleware,
   safePassApi.middleware,
+  beamerApi.middleware,
   hypernativeApi.middleware,
   safenetCheckApi.middleware,
   slices.gatewayApi.middleware,
@@ -121,6 +136,7 @@ const middleware: Middleware<{}, RootState>[] = [
 
 const listeners = [
   safeMessagesListener,
+  safeInfoListener,
   txHistoryListener,
   txQueueListener,
   swapOrderListener,
@@ -128,6 +144,14 @@ const listeners = [
   authListener,
   counterfactualSyncListener,
   addressBookListener,
+  elevationListener,
+  spaceSafesEntitlementsListener,
+  planChangeSyncListener,
+  checkoutTrackingListener,
+  workspaceTrackingListener,
+  spaceSafesCacheListener,
+  trialReminderListener,
+  forbiddenSessionListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {
@@ -175,6 +199,7 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
       isStoreHydrated: true,
       cfSafeSynced: false,
       isOidcLoginPending: false,
+      isSessionCheckPending: false,
     }
 
     return nextState
@@ -182,25 +207,24 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
   return rootReducer(state, action) as RootState
 }
 
-type MakeStoreOptions = {
-  skipBroadcast?: boolean
-}
-export const makeStore = (initialState?: Partial<RootState>, options?: MakeStoreOptions) => {
+export const makeStore = (initialState?: Partial<RootState>) => {
   setBaseUrl(GATEWAY_URL)
 
   const store = configureStore({
     reducer: _hydrationReducer,
     middleware: (getDefaultMiddleware) => {
       listeners.forEach((listener) => listener(listenerMiddlewareInstance))
-      return getDefaultMiddleware({ serializableCheck: false }).concat(cgwClient.middleware).concat(middleware)
+      // Parallel Jest workers push the check past its 32 ms timing warning; the mutation check itself stays on
+      const immutableCheck = APP_ENV === 'test' ? { warnAfter: 1000 } : true
+      return getDefaultMiddleware({ serializableCheck: false, immutableCheck })
+        .concat(cgwClient.middleware)
+        .concat(middleware)
     },
     devTools: !IS_PRODUCTION,
     preloadedState: initialState,
   })
 
-  if (!options?.skipBroadcast) {
-    listenToBroadcast(store)
-  }
+  listenToBroadcast(store)
 
   setupListeners(store.dispatch)
 

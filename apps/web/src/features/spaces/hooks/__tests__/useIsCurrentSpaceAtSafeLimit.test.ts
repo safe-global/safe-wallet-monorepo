@@ -15,6 +15,8 @@ jest.mock('@/store', () => ({
 jest.mock('@/store/authSlice', () => ({
   isAuthenticated: jest.fn(),
 }))
+const mockUseSpaceSafeLimit = jest.fn()
+jest.mock('../useSpaceSafeLimit', () => ({ useSpaceSafeLimit: (spaceId?: string) => mockUseSpaceSafeLimit(spaceId) }))
 
 import { useCurrentSpaceId } from '../useCurrentSpaceId'
 import { useAppSelector } from '@/store'
@@ -34,6 +36,7 @@ describe('useIsCurrentSpaceAtSafeLimit hooks', () => {
     jest.resetAllMocks()
     ;(useAppSelector as jest.Mock).mockReturnValue(true)
     ;(useCurrentSpaceId as jest.Mock).mockReturnValue(SPACE_A)
+    mockUseSpaceSafeLimit.mockReturnValue({ limit: 40, isLoading: false })
   })
 
   describe('useSpaceSafeCount', () => {
@@ -89,6 +92,19 @@ describe('useIsCurrentSpaceAtSafeLimit hooks', () => {
       mockSpaces([{ uuid: SPACE_A, safeCount: 39 }])
       const { result } = renderHook(() => useIsCurrentSpaceAtSafeLimit())
       expect(result.current).toBe(false)
+    })
+
+    it('follows the plan quota of the current space', () => {
+      mockUseSpaceSafeLimit.mockReturnValue({ limit: 10, isLoading: false })
+      mockSpaces([{ uuid: SPACE_A, safeCount: 10 }])
+      expect(renderHook(() => useIsCurrentSpaceAtSafeLimit()).result.current).toBe(true)
+      expect(mockUseSpaceSafeLimit).toHaveBeenCalledWith(SPACE_A)
+    })
+
+    it('is never at the limit on an unlimited plan', () => {
+      mockUseSpaceSafeLimit.mockReturnValue({ limit: null, isLoading: false })
+      mockSpaces([{ uuid: SPACE_A, safeCount: 400 }])
+      expect(renderHook(() => useIsCurrentSpaceAtSafeLimit()).result.current).toBe(false)
     })
 
     it('is not at the limit when the count is unknown', () => {

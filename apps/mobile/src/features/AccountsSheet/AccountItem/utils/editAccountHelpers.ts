@@ -4,7 +4,13 @@ import { removeSigner } from '@/src/store/signersSlice'
 import { setActiveSafe } from '@/src/store/activeSafeSlice'
 import { removeSafe, SafesSliceItem } from '@/src/store/safesSlice'
 import { setEditMode } from '@/src/store/myAccountsSlice'
-import { BiometryInvalidationError, keyStorageService } from '@/src/services/key-storage'
+import {
+  BiometryInvalidationError,
+  MissingWrappingKeyError,
+  MissingStoredKeyError,
+  KeyStorageError,
+  keyStorageService,
+} from '@/src/services/key-storage'
 import Logger from '@/src/utils/logger'
 import { CommonActions } from '@react-navigation/native'
 import { Alert } from 'react-native'
@@ -120,34 +126,35 @@ export const cleanupSinglePrivateKey = async (
     ownerPrivateKey: string,
   ) => Promise<StandardErrorResult<{ processedCount: number }>>,
   dispatch: AppDispatch,
-): Promise<StandardErrorResult<{ success: true }>> => {
+): Promise<StandardErrorResult<{ success: true; delegateCleanupSkipped?: boolean }>> => {
   try {
     let privateKey: string | undefined
-    let invalidated = false
+    let unavailable = false
     try {
-      privateKey = await keyStorageService.getPrivateKey(ownerAddress)
+      privateKey = await keyStorageService.getPrivateKey(ownerAddress, { throwIfMissing: true })
     } catch (err) {
-      if (err instanceof BiometryInvalidationError) {
-        Logger.warn('Skipping delegate cleanup: signer encryption key invalidated', { ownerAddress })
-        invalidated = true
+      if (
+        err instanceof BiometryInvalidationError ||
+        err instanceof MissingWrappingKeyError ||
+        err instanceof MissingStoredKeyError
+      ) {
+        Logger.warn('Skipping delegate cleanup: signer encryption key unavailable', { ownerAddress })
+        unavailable = true
       } else {
         throw err
       }
     }
 
     if (!privateKey) {
-      // Only force-wipe when we know the wrapping key is unusable. Without
-      // this gate, transient failures (user-cancel, lockout, unknown decrypt
-      // errors) would silently delete the signer despite the user not asking
-      // for it.
-      if (!invalidated) {
+      // An unknown read failure must never authorize deleting a signer.
+      if (!unavailable) {
         return createErrorResult(ErrorType.STORAGE_ERROR, 'Private key not found for the specified address', null, {
           ownerAddress,
         })
       }
-      await keyStorageService.removePrivateKey(ownerAddress, { requireAuthentication: false })
+      await keyStorageService.removePrivateKey(ownerAddress)
       dispatch(removeSigner(ownerAddress))
-      return createSuccessResult({ success: true as const })
+      return createSuccessResult({ success: true as const, delegateCleanupSkipped: true })
     }
 
     // Remove delegates (includes notification cleanup)
@@ -162,14 +169,17 @@ export const cleanupSinglePrivateKey = async (
       )
     }
 
-    // Remove private key from keychain
-    await keyStorageService.removePrivateKey(ownerAddress)
+    // Reuse the key read's authentication policy; do not prompt again after cleanup.
+    await keyStorageService.removePrivateKey(ownerAddress, { requireAuthentication: false })
 
     // Remove from Redux store
     dispatch(removeSigner(ownerAddress))
 
     return createSuccessResult({ success: true as const })
   } catch (error) {
+    if (error instanceof KeyStorageError) {
+      return createErrorResult(ErrorType.STORAGE_ERROR, error.message, error, { ownerAddress })
+    }
     return createErrorResult(ErrorType.SYSTEM_ERROR, 'An unexpected error occurred during private key cleanup', error, {
       ownerAddress,
     })
@@ -183,11 +193,19 @@ export const cleanupPrivateKeysForOwners = async (
     ownerPrivateKey: string,
   ) => Promise<StandardErrorResult<{ processedCount: number }>>,
   dispatch: AppDispatch,
-): Promise<StandardErrorResult<{ processedCount: number; failures: { address: Address; error: unknown }[] }>> => {
+): Promise<
+  StandardErrorResult<{
+    processedCount: number
+    failures: { address: Address; error: unknown }[]
+    delegateCleanupSkipped: boolean
+  }>
+> => {
   const failures: { address: Address; error: unknown }[] = []
+  let delegateCleanupSkipped = false
 
   for (const ownerAddress of ownerAddresses) {
     const result = await cleanupSinglePrivateKey(ownerAddress, removeAllDelegatesForOwner, dispatch)
+    delegateCleanupSkipped ||= result.data?.delegateCleanupSkipped === true
 
     if (!result.success) {
       Logger.error(`Failed to cleanup private key for ${ownerAddress}:`, result.error)
@@ -202,11 +220,11 @@ export const cleanupPrivateKeysForOwners = async (
       ErrorType.CLEANUP_ERROR,
       `Failed to clean up ${failures.length} out of ${ownerAddresses.length} private keys`,
       failures,
-      { processedCount, failures },
+      { processedCount, failures, delegateCleanupSkipped },
     )
   }
 
-  return createSuccessResult({ processedCount, failures })
+  return createSuccessResult({ processedCount, failures, delegateCleanupSkipped })
 }
 
 export const cleanupLedgerSigners = (
@@ -316,6 +334,20 @@ const handleConfirmedDeletion = async (params: HandleConfirmedDeletionParams) =>
         removeAllDelegatesForOwner,
         reduxDispatch,
       )
+
+      if (
+        privateKeyCleanupResult.data?.delegateCleanupSkipped ||
+        privateKeyCleanupResult.error?.details?.delegateCleanupSkipped
+      ) {
+        await new Promise<void>((acknowledge) => {
+          Alert.alert(
+            'Signer cleanup incomplete',
+            'Some signers were removed from this device, but their delegates, notification subscriptions, and local delegate keys could not be cleaned up because the private keys were unavailable.',
+            [{ text: 'OK', onPress: () => acknowledge() }],
+            { cancelable: false },
+          )
+        })
+      }
 
       if (!privateKeyCleanupResult.success) {
         Logger.error('Failed to clean up private keys during safe deletion:', privateKeyCleanupResult.error)

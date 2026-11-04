@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { createMockStory } from '@/stories/mocks'
 import local from '@/services/local-storage/local'
-import { FEATURES, PermissionStatus } from '@/components/safe-apps/types'
+import { FEATURES, PermissionStatus } from '@safe-global/views/components/safe-apps/types'
 import SafeAppsPermissions from './index'
 
 // Urls must match the safe-apps fixture exactly — the component resolves names by url.

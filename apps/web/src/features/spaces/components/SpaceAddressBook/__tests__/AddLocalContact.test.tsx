@@ -39,7 +39,7 @@ describe('AddLocalContact', () => {
     expect(lastProps?.triggerLabel).toBe('Add contact')
     expect(lastProps?.dialogTitle).toBe('Add contact')
     expect(lastProps?.intro).toBe(
-      'This contact is stored locally in this browser. You can propose adding it to the shared workspace address book later.',
+      'This contact is stored locally in this browser. You can propose adding it to the shared Workspace address book later.',
     )
     expect(lastProps?.successMessage).toBe('Contact added')
     expect(lastProps?.successGroupKey).toBe('add-local-contact-success')

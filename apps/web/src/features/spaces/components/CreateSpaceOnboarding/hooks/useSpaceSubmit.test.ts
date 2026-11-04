@@ -1,27 +1,22 @@
 import { renderHook, act } from '@testing-library/react'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import useSpaceSubmit from './useSpaceSubmit'
 
 const mockPush = jest.fn()
-const mockDispatch = jest.fn()
+const mockReplace = jest.fn()
 const mockCreateSpaceWithUser = jest.fn()
 const mockUpdateSpace = jest.fn()
 
 let mockRouterQuery: Record<string, string> = {}
-
-jest.mock('@/services/analytics', () => ({
-  trackEvent: jest.fn(),
-}))
-
-jest.mock('@/services/analytics/events/spaces', () => ({
-  SPACE_EVENTS: {
-    WORKSPACE_CREATED: { action: 'Workspace created', category: 'spaces' },
-  },
-}))
+let mockIsSafePro = false
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockIsSafePro }))
 
 jest.mock('next/router', () => ({
-  useRouter: () => ({ push: mockPush, query: mockRouterQuery }),
+  useRouter: () => ({
+    push: mockPush,
+    replace: mockReplace,
+    pathname: '/welcome/create-space',
+    query: mockRouterQuery,
+  }),
 }))
 
 jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
@@ -29,14 +24,6 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
     const safe = mockRouterQuery.safe
     return typeof safe === 'string' ? safe : ''
   },
-}))
-
-jest.mock('@/store', () => ({
-  useAppDispatch: () => mockDispatch,
-}))
-
-jest.mock('@/store/authSlice', () => ({
-  setLastUsedSpace: (id: string) => ({ type: 'auth/setLastUsedSpace', payload: id }),
 }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
@@ -52,49 +39,109 @@ jest.mock('@/config/routes', () => ({
   AppRoutes: { welcome: { selectSafes: '/welcome' } },
 }))
 
-describe('useSpaceSubmit tracking', () => {
+describe('useSpaceSubmit under Safe Pro', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockRouterQuery = {}
+    mockRouterQuery = { next: '/balances' }
+    mockIsSafePro = true
+  })
+  afterEach(() => {
+    mockIsSafePro = false
   })
 
-  const setupHook = (spaceId?: string, isEditMode = false) => {
-    const handleSubmit = (fn: (data: { name: string }) => Promise<void>) => () => fn({ name: 'My Space' })
-
-    const { result } = renderHook(() => useSpaceSubmit(handleSubmit as never, spaceId, isEditMode))
-    return result
-  }
-
-  it('tracks WORKSPACE_CREATED with spaceId sent to both GA (label) and Mixpanel (additionalParameters) after successful creation', async () => {
+  it('holds the wizard on the created Workspace for the trial offer, then moves on when asked', async () => {
     mockCreateSpaceWithUser.mockResolvedValue({
-      data: { id: 42, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
+      data: { id: 7, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
     })
-
-    const result = setupHook(undefined, false)
+    const handleSubmit = (fn: (data: { name: string }) => Promise<void>) => () => fn({ name: 'My Space' })
+    const { result } = renderHook(() => useSpaceSubmit(handleSubmit as never, undefined, false))
 
     await act(async () => {
       await result.current.onSubmit()
     })
 
-    expect(trackEvent).toHaveBeenCalledWith(
-      { ...SPACE_EVENTS.WORKSPACE_CREATED, label: '11111111-1111-1111-1111-111111111111' },
-      { workspace_id: '11111111-1111-1111-1111-111111111111' },
-    )
+    expect(mockPush).not.toHaveBeenCalled()
+    expect(result.current.createdSpaceId).toBe('11111111-1111-1111-1111-111111111111')
+    expect(result.current.isSubmitting).toBe(false)
+
+    act(() => result.current.goToSelectSafes('11111111-1111-1111-1111-111111111111'))
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/welcome',
+      query: { spaceId: '11111111-1111-1111-1111-111111111111', next: '/balances' },
+    })
   })
 
-  it('does not track WORKSPACE_CREATED when the API returns an error', async () => {
-    mockCreateSpaceWithUser.mockResolvedValue({ error: 'Something went wrong' })
+  it('gives the Safes step of the created Workspace as a URL, so a step-up can return there', async () => {
+    mockCreateSpaceWithUser.mockResolvedValue({
+      data: { id: 7, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
+    })
+    const handleSubmit = (fn: (data: { name: string }) => Promise<void>) => () => fn({ name: 'My Space' })
+    const { result } = renderHook(() => useSpaceSubmit(handleSubmit as never, undefined, false))
 
-    const result = setupHook(undefined, false)
+    expect(result.current.selectSafesUrl).toBeUndefined()
 
     await act(async () => {
       await result.current.onSubmit()
     })
 
-    expect(trackEvent).not.toHaveBeenCalledWith(
-      expect.objectContaining({ action: SPACE_EVENTS.WORKSPACE_CREATED.action }),
-      expect.anything(),
+    expect(result.current.selectSafesUrl).toBe('/welcome?spaceId=11111111-1111-1111-1111-111111111111&next=%2Fbalances')
+  })
+
+  it('names the created Workspace in the URL of the step while it waits on its trial offer', async () => {
+    mockCreateSpaceWithUser.mockResolvedValue({
+      data: { id: 7, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
+    })
+    const handleSubmit = (fn: (data: { name: string }) => Promise<void>) => () => fn({ name: 'My Space' })
+    const { result } = renderHook(() => useSpaceSubmit(handleSubmit as never, undefined, false))
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockReplace).toHaveBeenCalledWith(
+      {
+        pathname: '/welcome/create-space',
+        query: { next: '/balances', spaceId: '11111111-1111-1111-1111-111111111111' },
+      },
+      undefined,
+      { shallow: true },
     )
+    expect(result.current.error).toBeUndefined()
+  })
+
+  it('never creates a second Workspace while the first waits on its trial offer', async () => {
+    mockCreateSpaceWithUser.mockResolvedValue({
+      data: { id: 7, uuid: '11111111-1111-1111-1111-111111111111', name: 'My Space' },
+    })
+    const handleSubmit = (fn: (data: { name: string }) => Promise<void>) => () => fn({ name: 'My Space' })
+    const { result } = renderHook(() => useSpaceSubmit(handleSubmit as never, undefined, false))
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockCreateSpaceWithUser).toHaveBeenCalledTimes(1)
+  })
+
+  it('still moves straight on after editing an existing Workspace', async () => {
+    mockUpdateSpace.mockResolvedValue({ data: {} })
+    const handleSubmit = (fn: (data: { name: string }) => Promise<void>) => () => fn({ name: 'My Space' })
+    const { result } = renderHook(() =>
+      useSpaceSubmit(handleSubmit as never, '11111111-1111-1111-1111-111111111111', true),
+    )
+
+    await act(async () => {
+      await result.current.onSubmit()
+    })
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/welcome',
+      query: { spaceId: '11111111-1111-1111-1111-111111111111', next: '/balances' },
+    })
+    expect(result.current.createdSpaceId).toBeUndefined()
   })
 })
 

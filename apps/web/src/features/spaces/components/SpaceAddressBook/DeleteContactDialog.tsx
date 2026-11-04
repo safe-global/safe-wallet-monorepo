@@ -5,15 +5,16 @@ import { ChainIndicatorList } from '@/features/multichain'
 import { useAddressBooksDeleteByAddressV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId, useWorkspaceAddressBookLabel } from '@/features/spaces'
 import { useState } from 'react'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getContactRemovedMessage } from '@/utils/addressBookNotifications'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type DeleteContactDialogProps = {
   name: string
@@ -39,6 +40,7 @@ const DeleteContactDialog = ({ name, address, networks, onClose }: DeleteContact
       trackEvent({ ...SPACE_EVENTS.REMOVE_ADDRESS_SUBMIT })
       const response = await deleteEntry({ spaceId: spaceId ?? '', address })
 
+      if (isElevationRequiredError(response.error)) return
       if (response.error) {
         setError('Something went wrong deleting the contact. Please try again.')
         return

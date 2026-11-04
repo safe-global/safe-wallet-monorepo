@@ -34,19 +34,16 @@ export const useLoadSpendingLimits = () => {
     () => {
       if (!provider || !safeLoaded || !safe.modules || tokenInfoFromBalances.length === 0) return
 
-      return loadSpendingLimits(provider, safe.modules, safeAddress, chainId, tokenInfoFromBalances)
+      return loadSpendingLimits(provider, safe.modules, safeAddress, chainId, tokenInfoFromBalances).catch((e) => {
+        logError(Errors._609, e, getRpcErrorContext(provider))
+        throw e
+      })
     },
     // Need to check length of modules array to prevent new request every time Safe info polls
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [provider, safeLoaded, safe.modules?.length, tokenInfoFromBalances, safeAddress, chainId, safe.txHistoryTag],
     true,
   )
-
-  useEffect(() => {
-    if (error) {
-      logError(Errors._609, error.message, getRpcErrorContext(provider))
-    }
-  }, [error, provider])
 
   // Dispatch to store — mirrors the old useUpdateStore pattern.
   // During loading: data=undefined, so the reducer computes loaded=false.

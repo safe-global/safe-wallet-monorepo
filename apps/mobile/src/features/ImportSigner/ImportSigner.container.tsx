@@ -16,7 +16,8 @@ const CUSTOM_VERTICAL_OFFSET = 70
 export function ImportSigner() {
   const [isMasked, setIsMasked] = useState(true)
   const { top } = useSafeAreaInsets()
-  const { handleInputChange, handleImport, onInputPaste, input, inputType, wallet, error } = useImportPrivateKey()
+  const { handleInputChange, handleImport, onInputPaste, input, inputType, wallet, error, isInputValid } =
+    useImportPrivateKey()
   const { handleScroll } = useScrollableHeader({
     children: <NavBarTitle paddingRight={5}>Import a signer</NavBarTitle>,
   })
@@ -61,11 +62,7 @@ export function ImportSigner() {
         </YStack>
       </ScrollView>
 
-      <SafeButton
-        onPress={handleImport}
-        testID={'import-signer-button'}
-        disabled={!!error || !input || (inputType !== 'private-key' && inputType !== 'seed-phrase')}
-      >
+      <SafeButton onPress={handleImport} testID={'import-signer-button'} disabled={!isInputValid}>
         Import signer
       </SafeButton>
     </KeyboardAvoidingView>

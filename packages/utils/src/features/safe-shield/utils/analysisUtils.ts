@@ -1,5 +1,11 @@
 import { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { Severity, type GroupedAnalysisResults, type ThreatAnalysisResults, type ThreatIssue } from '../types'
+import {
+  type AnalysisResult,
+  Severity,
+  type GroupedAnalysisResults,
+  type ThreatAnalysisResults,
+  type ThreatIssue,
+} from '../types'
 import isEmpty from 'lodash/isEmpty'
 
 /**
@@ -67,4 +73,27 @@ export function sortByIssueSeverity(
   }))
 
   return sortBySeverity(issuesWithSeverity)
+}
+
+/** Filter out duplicate threat analysis results.
+ * For threat analysis we now show extended results for each severity (up to 3, check sliceTopBySeverity),
+ * but we want to avoid showing duplicate results with the same title and description.
+ */
+export function dedupeAnalysisResults<T extends AnalysisResult>(results: T[]): T[] {
+  const seen = new Set<string>()
+  return sortBySeverity(results).filter((r) => {
+    const { severity: _, addresses, ...rest } = r
+    const key = JSON.stringify({ ...rest, addresses: addresses?.map((a) => a.address).sort() })
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
+/** Filter out OK results when other severity levels are present,
+ * so we dont show contradictory information
+ */
+export function pruneOkResults<T extends { severity: Severity }>(results: T[]): T[] {
+  const hasIssues = results.some((r) => r.severity !== Severity.OK)
+  return hasIssues ? results.filter((r) => r.severity !== Severity.OK) : results
 }

@@ -1,10 +1,16 @@
 import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
+import { getStoreInstance } from '@/store'
+import * as useChains from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 import { CreateSafeOnSpecificChain } from './index'
 import { persistCounterfactualSafe } from '@/features/counterfactual/services'
+import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
+import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { predictAddressBasedOnReplayData } from '../../utils'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
-import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
+import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import type { NextRouter } from 'next/router'
 
 jest.mock('@/features/counterfactual/services', () => ({
   persistCounterfactualSafe: jest.fn(),
@@ -19,23 +25,65 @@ jest.mock('@/hooks/wallets/web3', () => ({
   createWeb3ReadOnly: jest.fn(),
 }))
 
+// The feature barrel cannot be spread (circular import at init), so the source hook modules are mocked instead.
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('@/features/spaces/hooks/useSpaceMembers'),
+  useIsAdmin: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit', () => ({
+  ...jest.requireActual('@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit'),
+  useSpaceSafeCount: jest.fn(),
+}))
+jest.mock('@/features/spaces/hooks/useSpaceSafeLimit', () => ({
+  useSpaceSafeLimit: jest.fn(),
+}))
+
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
+  ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/spaces'),
+  useSpaceSafesGetV1Query: jest.fn(),
+}))
+
 const mockPersist = persistCounterfactualSafe as jest.MockedFunction<typeof persistCounterfactualSafe>
+const mockUseIsAdmin = useIsAdmin as jest.Mock
+const mockUseSpaceSafeCount = useSpaceSafeCount as jest.Mock
+const mockUseSpaceSafeLimit = useSpaceSafeLimit as jest.Mock
+const mockUseSpaceSafes = useSpaceSafesGetV1Query as jest.Mock
+const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
+const signedInState = {
+  auth: {
+    sessionExpiresAt: Date.now() + 60000,
+    landingSpaceHint: null as string | null,
+    isStoreHydrated: true,
+    cfSafeSynced: false,
+    isOidcLoginPending: false,
+    isSessionCheckPending: false,
+  },
+}
 const mockPredict = predictAddressBasedOnReplayData as jest.MockedFunction<typeof predictAddressBasedOnReplayData>
 const mockCreateProvider = createWeb3ReadOnly as jest.MockedFunction<typeof createWeb3ReadOnly>
 
 const SAFE_ADDRESS = '0x0000000000000000000000000000000000001234'
 
-const chain = {
-  chainId: '100',
-  chainName: 'Gnosis Chain',
-  shortName: 'gno',
-} as Chain
+const chain = chainBuilder().with({ chainId: '100', chainName: 'Gnosis Chain', shortName: 'gno' }).build()
 
 const safeCreationData = {
   safeAccountConfig: { owners: ['0xabc'], threshold: 1 },
 } as unknown as ReplayedSafeProps
 
-const renderDialog = (onClose: () => void) =>
+type RenderOptions = {
+  initialReduxState?: typeof signedInState
+  urlSpaceId?: string
+  routerProps?: Partial<NextRouter>
+}
+
+const renderDialog = (
+  onClose: () => void,
+  {
+    initialReduxState,
+    urlSpaceId,
+    routerProps = urlSpaceId ? { query: { spaceId: urlSpaceId } } : {},
+  }: RenderOptions = {},
+) =>
   render(
     <CreateSafeOnSpecificChain
       safeAddress={SAFE_ADDRESS}
@@ -45,13 +93,41 @@ const renderDialog = (onClose: () => void) =>
       onClose={onClose}
       safeCreationResult={[safeCreationData, undefined, false]}
     />,
+    { initialReduxState, routerProps },
   )
+
+const renderInSpace = () => renderDialog(jest.fn(), { initialReduxState: signedInState, urlSpaceId: MOCK_SPACE_UUID })
 
 describe('CreateSafeOnSpecificChain', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.spyOn(useChains, 'default').mockReturnValue({ configs: [chain] })
+    jest.spyOn(useChains, 'useChain').mockReturnValue(chain)
     mockCreateProvider.mockReturnValue({} as ReturnType<typeof createWeb3ReadOnly>)
     mockPredict.mockResolvedValue(SAFE_ADDRESS)
+    mockUseIsAdmin.mockReturnValue(false)
+    mockUseSpaceSafeCount.mockReturnValue(undefined)
+    mockUseSpaceSafeLimit.mockReturnValue({ limit: 40, isLoading: false })
+    mockUseSpaceSafes.mockReturnValue({ currentData: undefined })
+  })
+
+  it('disables Add network while the Safe creation data is missing', async () => {
+    const dialog = (creationResult: AsyncResult<ReplayedSafeProps>) => (
+      <CreateSafeOnSpecificChain
+        safeAddress={SAFE_ADDRESS}
+        chain={chain}
+        currentName="My Safe"
+        open
+        onClose={jest.fn()}
+        safeCreationResult={creationResult}
+      />
+    )
+    const { rerender } = render(dialog([safeCreationData, undefined, false]))
+    await waitFor(() => expect(screen.getByTestId('modal-add-network-btn')).toBeEnabled())
+
+    rerender(dialog([undefined, undefined, false]))
+
+    expect(screen.getByTestId('modal-add-network-btn')).toBeDisabled()
   })
 
   it('keeps the dialog open and shows the inline backend error when persisting fails', async () => {
@@ -79,6 +155,33 @@ describe('CreateSafeOnSpecificChain', () => {
     await waitFor(() => expect(onClose).toHaveBeenCalled())
   })
 
+  it('shows the chosen network as fixed instead of a network picker', () => {
+    renderDialog(jest.fn())
+
+    expect(screen.getByTestId('added-network')).toHaveTextContent('Gnosis Chain')
+    expect(screen.queryByLabelText('Network')).not.toBeInTheDocument()
+  })
+
+  it('opens the Safe on the new network and gives it the same name there', async () => {
+    const push = jest.fn(() => Promise.resolve(true))
+    mockPersist.mockResolvedValue({ ok: true })
+
+    renderDialog(jest.fn(), { routerProps: { pathname: '/home', push } })
+
+    fireEvent.submit(screen.getByTestId('add-chain-dialog').closest('form')!)
+
+    await waitFor(() =>
+      expect(push).toHaveBeenCalledWith(
+        expect.objectContaining({ query: expect.objectContaining({ safe: `gno:${SAFE_ADDRESS}` }) }),
+      ),
+    )
+    const state = getStoreInstance().getState()
+    expect(state.addressBook['100'][SAFE_ADDRESS]).toBe('My Safe')
+    expect(Object.values(state.notifications).map((notification) => notification.message)).toContain(
+      'Successfully added your account on Gnosis Chain',
+    )
+  })
+
   it('keeps the dialog open and shows an inline error when the predicted address mismatches', async () => {
     const onClose = jest.fn()
     mockPredict.mockResolvedValue('0x0000000000000000000000000000000000009999')
@@ -90,5 +193,69 @@ describe('CreateSafeOnSpecificChain', () => {
     expect(await screen.findByText('The replayed Safe leads to an unexpected address')).toBeInTheDocument()
     expect(onClose).not.toHaveBeenCalled()
     expect(mockPersist).not.toHaveBeenCalled()
+  })
+
+  describe('at the Workspace seat limit', () => {
+    beforeEach(() => {
+      mockUseIsAdmin.mockReturnValue(true)
+      mockUseSpaceSafeCount.mockReturnValue(20)
+      mockUseSpaceSafeLimit.mockReturnValue({ limit: 20, isLoading: false })
+      mockPersist.mockResolvedValue({ ok: true })
+    })
+
+    it('warns upfront and skips the seat when the Safe is not in the Workspace yet', async () => {
+      mockUseSpaceSafes.mockReturnValue({
+        currentData: { safes: { '1': ['0x0000000000000000000000000000000000009999'] } },
+      })
+
+      renderInSpace()
+
+      expect(screen.getByTestId('space-seat-limit-notice')).toHaveTextContent(
+        'This Workspace is at its limit of 20 Safe accounts. The new network will be added in My accounts, outside the Workspace.',
+      )
+
+      fireEvent.submit(screen.getByTestId('add-chain-dialog').closest('form')!)
+
+      await waitFor(() => expect(mockPersist).toHaveBeenCalled())
+      expect(mockPersist).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceSafeCount: 20, spaceSafeLimit: 20, holdsSeatInSpace: false }),
+      )
+    })
+
+    it('adds the new network to the Workspace when the Safe already holds a seat there on another chain', async () => {
+      mockUseSpaceSafes.mockReturnValue({ currentData: { safes: { '1': [SAFE_ADDRESS.toLowerCase()] } } })
+
+      renderInSpace()
+
+      expect(screen.queryByTestId('space-seat-limit-notice')).not.toBeInTheDocument()
+
+      fireEvent.submit(screen.getByTestId('add-chain-dialog').closest('form')!)
+
+      await waitFor(() => expect(mockPersist).toHaveBeenCalled())
+      expect(mockPersist).toHaveBeenCalledWith(expect.objectContaining({ holdsSeatInSpace: true }))
+    })
+
+    it('shows no notice to a member, whose Safes are never auto-added', () => {
+      mockUseIsAdmin.mockReturnValue(false)
+
+      renderInSpace()
+
+      expect(screen.queryByTestId('space-seat-limit-notice')).not.toBeInTheDocument()
+    })
+  })
+
+  it('ignores a Workspace stored by another tab when the URL has none', async () => {
+    // Earlier renders persist `auth`; hydration would otherwise replace the stored Workspace.
+    window.localStorage.clear()
+    mockUseIsAdmin.mockReturnValue(true)
+    mockPersist.mockResolvedValue({ ok: true })
+
+    renderDialog(jest.fn(), {
+      initialReduxState: { auth: { ...signedInState.auth, landingSpaceHint: MOCK_SPACE_UUID } },
+    })
+
+    fireEvent.submit(screen.getByTestId('add-chain-dialog').closest('form')!)
+
+    await waitFor(() => expect(mockPersist).toHaveBeenCalledWith(expect.objectContaining({ spaceId: null })))
   })
 })

@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./TransactionQueueBar.stories Collapsed 1`] = `
 <div
@@ -99,7 +99,7 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                   aria-label="dismiss transaction queue bar"
                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm absolute right-2 -translate-y-1/2"
                   data-slot="button"
-                  style="top: calc(64px / 2);"
+                  style="top: calc(32px);"
                   tabindex="0"
                   type="button"
                 >
@@ -282,7 +282,7 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -290,6 +290,7 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                                         id="base-ui-_r_9_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -465,7 +466,7 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -473,6 +474,7 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                                         id="base-ui-_r_e_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -648,7 +650,7 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -656,6 +658,7 @@ exports[`./TransactionQueueBar.stories Collapsed 1`] = `
                                         id="base-ui-_r_j_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -828,7 +831,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                   aria-label="dismiss transaction queue bar"
                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm absolute right-2 -translate-y-1/2"
                   data-slot="button"
-                  style="top: calc(64px / 2);"
+                  style="top: calc(32px);"
                   tabindex="0"
                   type="button"
                 >
@@ -1010,7 +1013,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -1018,6 +1021,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                                         id="base-ui-_r_t_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -1193,7 +1197,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -1201,6 +1205,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                                         id="base-ui-_r_12_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -1376,7 +1381,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -1384,6 +1389,7 @@ exports[`./TransactionQueueBar.stories Expanded 1`] = `
                                         id="base-ui-_r_17_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -1560,7 +1566,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                   aria-label="dismiss transaction queue bar"
                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm absolute right-2 -translate-y-1/2"
                   data-slot="button"
-                  style="top: calc(64px / 2);"
+                  style="top: calc(32px);"
                   tabindex="0"
                   type="button"
                 >
@@ -1742,7 +1748,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -1750,6 +1756,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_1h_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -1925,7 +1932,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -1933,6 +1940,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_1m_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -2108,7 +2116,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -2116,6 +2124,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_1r_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -2291,7 +2300,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -2299,6 +2308,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_20_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -2474,7 +2484,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -2482,6 +2492,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_25_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -2657,7 +2668,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -2665,6 +2676,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_2a_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -2840,7 +2852,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -2848,6 +2860,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_2f_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -3023,7 +3036,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -3031,6 +3044,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_2k_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -3206,7 +3220,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -3214,6 +3228,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_2p_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -3389,7 +3404,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -3397,6 +3412,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_2u_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -3572,7 +3588,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -3580,6 +3596,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_33_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -3755,7 +3772,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -3763,6 +3780,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_38_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -3938,7 +3956,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -3946,6 +3964,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_3d_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -4121,7 +4140,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -4129,6 +4148,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_3i_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -4304,7 +4324,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -4312,6 +4332,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_3n_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -4487,7 +4508,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -4495,6 +4516,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_3s_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -4670,7 +4692,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -4678,6 +4700,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_41_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -4853,7 +4876,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -4861,6 +4884,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_46_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -5036,7 +5060,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -5044,6 +5068,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_4b_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -5219,7 +5244,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -5227,6 +5252,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_4g_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -5402,7 +5428,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -5410,6 +5436,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_4l_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -5585,7 +5612,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -5593,6 +5620,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_4q_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -5768,7 +5796,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -5776,6 +5804,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_4v_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -5951,7 +5980,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -5959,6 +5988,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_54_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -6134,7 +6164,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -6142,6 +6172,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_59_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -6317,7 +6348,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -6325,6 +6356,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_5e_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -6500,7 +6532,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -6508,6 +6540,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_5j_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -6683,7 +6716,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -6691,6 +6724,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_5o_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -6866,7 +6900,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -6874,6 +6908,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_5t_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button
@@ -7049,7 +7084,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                     style="grid-area: actions;"
                                   >
                                     <div
-                                      class="mr-4 flex justify-center"
+                                      class="flex items-center"
                                       data-testid="tx-actions"
                                     >
                                       <span
@@ -7057,6 +7092,7 @@ exports[`./TransactionQueueBar.stories LongQueue 1`] = `
                                         id="base-ui-_r_62_"
                                       >
                                         <span
+                                          class="contents"
                                           data-track="tx-list: Confirm transaction"
                                         >
                                           <button

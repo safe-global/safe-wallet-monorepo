@@ -1,10 +1,205 @@
-import { type ReactElement } from 'react'
-import { Typography } from '@/components/ui/typography'
-import ExternalLink from '@/components/common/ExternalLink'
+import { useCallback, useContext, useMemo, useState, type ReactElement } from 'react'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { TxModalContext } from '@/components/tx-flow'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { usePolicyIntro } from './hooks/usePolicyIntro'
+import { useNewAllowlistIds } from './hooks/useNewAllowlistIds'
+import AddPolicyDialog from './AddPolicyDialog'
+import {
+  ADD_POLICY_OPTIONS,
+  RECIPIENT_ALLOWLIST_POLICY_OPTION,
+  type AddPolicyId,
+} from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
+import { useIsAllowlistActiveInSpace } from '@/features/policy-guard'
+import PoliciesList from './PoliciesList'
+import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 import PolicyCatalogue from './PolicyCatalogue'
+import type { PolicyLock } from '@safe-global/views/features/spaces/components/Policies/policyLock'
+import PolicyUpsellBanner from './PolicyUpsellBanner'
+import ProposerIntroDialog from './ProposerIntroDialog'
+import RecipientAllowlistFlow from './RecipientAllowlistFlow'
+import RecipientAllowlistIntroDialog from './RecipientAllowlistIntroDialog'
+import { RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistIntroDialog/constants'
+import { PROPOSER_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/ProposerIntroDialog/constants'
+import AllowlistDetails from './AllowlistDetails'
+import ProposerDetails from './ProposerDetails'
+import ProposerRoleFlow from './ProposerRoleFlow'
+import SpendingLimitDetails from './SpendingLimitDetails'
+import SpendingLimitFlow from './SpendingLimitFlow'
+import EditSpendingLimitFlow from './SpendingLimitFlow/EditFlow'
+import EnableSpendingLimitModuleFlow from './SpendingLimitFlow/EnableModuleFlow'
+import SpendingLimitIntroDialog from './SpendingLimitIntroDialog'
+import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitIntroDialog/constants'
+import {
+  REQUEST_POLICY_FORM_HEIGHT,
+  REQUEST_POLICY_FORM_URL,
+  REQUEST_POLICY_FORM_WIDTH,
+} from '@safe-global/views/features/spaces/components/Policies/constants'
+import {
+  isActiveAllowlistPolicy,
+  isPendingPolicy,
+  isProposerPolicy,
+  isSpendingLimitPolicy,
+  type Policy,
+  type PolicySafe,
+  type SpendingLimitPolicy,
+} from '@safe-global/views/features/spaces/components/Policies/types'
 
-const Policies = (): ReactElement => {
+interface PoliciesProps {
+  /** Supplied by the caller. The page does not fetch. */
+  policies?: Policy[]
+  isLoading?: boolean
+  isError?: boolean
+  onRetry?: () => void
+  /** The populated mode's `Add policy` button. Without it the button opens the add policy dialog. */
+  onAddPolicy?: () => void
+  onSelectPolicy?: (policy: Policy) => void
+  /**
+   * Set when the plan does not include some policies: the banner shows, their tiles lead to the upgrade and the add
+   * policy dialog disables them.
+   */
+  locked?: PolicyLock
+}
+
+const openRequestPolicyForm = () => {
+  const left = window.screenX + Math.max(0, (window.outerWidth - REQUEST_POLICY_FORM_WIDTH) / 2)
+  const top = window.screenY + Math.max(0, (window.outerHeight - REQUEST_POLICY_FORM_HEIGHT) / 2)
+  const features = `popup=yes,width=${REQUEST_POLICY_FORM_WIDTH},height=${REQUEST_POLICY_FORM_HEIGHT},left=${Math.round(left)},top=${Math.round(top)},noopener,noreferrer`
+
+  window.open(REQUEST_POLICY_FORM_URL, '_blank', features)
+}
+
+/**
+ * The page has two modes. With no policies it shows the catalogue of policies that can be set up.
+ * With policies it shows the list of policies already set up. Revoking the last policy removes it
+ * from the CGW response, so the page returns to the catalogue. While the response is pending or
+ * failed, only the heading stays and the body is the load state. A plan without some policies shows the
+ * upgrade banner above either mode, and the catalogue loses its suggestion tile.
+ */
+const Policies = ({
+  policies = [],
+  isLoading = false,
+  isError = false,
+  onRetry,
+  onAddPolicy,
+  onSelectPolicy,
+  locked,
+}: PoliciesProps): ReactElement => {
+  const { setTxFlow } = useContext(TxModalContext)
+  // Existing allowlists stay listed with the experimental toggle off; only creating one needs it on.
+  const canCreateAllowlist = useIsAllowlistActiveInSpace() === true
+  const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false)
+  const [openPolicy, setOpenPolicy] = useState<Policy | null>(null)
+
+  const isSettled = !isLoading && !isError
+  const { newIds: newAllowlistIds, dismiss: dismissNewAllowlist } = useNewAllowlistIds(policies, isSettled)
+
+  const selectPolicy = useCallback((policy: Policy) => {
+    // Pending allowlists are not wired to CGW yet, so only an active one has a panel.
+    if (isProposerPolicy(policy) || isSpendingLimitPolicy(policy) || isActiveAllowlistPolicy(policy)) {
+      setOpenPolicy(policy)
+    }
+  }, [])
+
+  const closeDetails = useCallback(() => {
+    if (openPolicy) dismissNewAllowlist(openPolicy.id)
+    setOpenPolicy(null)
+  }, [openPolicy, dismissNewAllowlist])
+
+  // Read back from the list rather than freezing the row: a refetch reaches the open panel, and a
+  // policy that leaves the response takes its panel with it. A pending one stays to report why it left.
+  const listedPolicy = useMemo(
+    () => (openPolicy ? policies.find((policy) => policy.id === openPolicy.id) : undefined),
+    [policies, openPolicy],
+  )
+  const openedPolicy = listedPolicy ?? (openPolicy && isPendingPolicy(openPolicy) ? openPolicy : null)
+  const isSpendingLimitLocked = locked?.lockedPolicies.includes('spending-limit')
+
+  const startSpendingLimitFlow = useCallback(() => setTxFlow(<SpendingLimitFlow />), [setTxFlow])
+
+  // The panel is left open: it hides itself while the flow runs, so cancelling lands back on it.
+  const editSpendingLimit = useCallback(
+    (safe: PolicySafe) => setTxFlow(<EditSpendingLimitFlow safe={safe} />),
+    [setTxFlow],
+  )
+
+  const enableSpendingLimitModule = useCallback(
+    ({ safe, enforcement, data }: Pick<SpendingLimitPolicy, 'safe' | 'enforcement' | 'data'>) => {
+      if (enforcement.via !== 'module') return
+      setTxFlow(
+        <EnableSpendingLimitModuleFlow
+          safe={safe}
+          moduleAddress={enforcement.moduleAddress}
+          spenders={data.spenders}
+        />,
+      )
+    },
+    [setTxFlow],
+  )
+
+  const startProposerFlow = useCallback(() => {
+    setTxFlow(<ProposerRoleFlow />)
+  }, [setTxFlow])
+
+  const startAllowlistFlow = useCallback(() => setTxFlow(<RecipientAllowlistFlow />), [setTxFlow])
+
+  const spendingLimitIntro = usePolicyIntro(SPENDING_LIMIT_INTRO_SEEN_KEY, startSpendingLimitFlow)
+  const proposerIntro = usePolicyIntro(PROPOSER_INTRO_SEEN_KEY, startProposerFlow)
+  const allowlistIntro = usePolicyIntro(RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY, startAllowlistFlow)
+
+  const handleSelect = useCallback(
+    (id: AddPolicyId) => {
+      switch (id) {
+        case 'spending-limit':
+          spendingLimitIntro.request()
+          return
+
+        case 'proposer':
+          proposerIntro.request()
+          return
+
+        case 'suggestion':
+          openRequestPolicyForm()
+          return
+
+        case 'recipient-allowlist':
+          if (canCreateAllowlist) allowlistIntro.request()
+          return
+
+        // Not offered yet: ADD_POLICY_OPTIONS leaves it out.
+        case 'recovery':
+          return
+
+        // A new policy id must pick a branch above rather than silently doing nothing.
+        default: {
+          const _exhaustive: never = id
+          return _exhaustive
+        }
+      }
+    },
+    [spendingLimitIntro, proposerIntro, allowlistIntro, canCreateAllowlist],
+  )
+
+  const selectFromAddPolicyDialog = useCallback(
+    (id: AddPolicyId) => {
+      setIsAddPolicyOpen(false)
+      handleSelect(id)
+    },
+    [handleSelect],
+  )
+
+  const addPolicyOptions = useMemo(
+    () =>
+      (canCreateAllowlist ? [RECIPIENT_ALLOWLIST_POLICY_OPTION, ...ADD_POLICY_OPTIONS] : ADD_POLICY_OPTIONS).map(
+        (option) =>
+          locked?.lockedPolicies.some((lockedId) => lockedId === option.id)
+            ? { ...option, disabled: true, disabledTooltip: 'Upgrade to Business to set up policies.' }
+            : option,
+      ),
+    [locked, canCreateAllowlist],
+  )
+
   return (
     <div data-testid="policies">
       <div className="mb-6 flex flex-col gap-6">
@@ -12,17 +207,88 @@ const Policies = (): ReactElement => {
           Policies
         </Typography>
 
-        <Typography variant="paragraph-medium">
-          Policies are rules that help you manage your Safe accounts. Set them up once and they will run onchain,
-          automatically.{' '}
-          <ExternalLink className="font-bold hover:text-muted-foreground" href={HelpCenterArticle.POLICIES}>
-            Learn more
-          </ExternalLink>
-        </Typography>
+        {isSettled && (
+          <Typography variant="paragraph-medium">
+            Policies are rules that help you manage your Safe accounts. Set them up once and they will run onchain,
+            automatically.{' '}
+            <ExternalLink noIcon href={HelpCenterArticle.POLICIES}>
+              Learn more
+            </ExternalLink>
+          </Typography>
+        )}
       </div>
 
-      {/* TODO(WA-3138, WA-3160): pass onSelect to open the proposer form and the Suggest a policy dialog */}
-      <PolicyCatalogue />
+      {isLoading ? (
+        <SpaceLoading subject="policies" testId="policies-loading" />
+      ) : isError ? (
+        <SpaceLoadError onReload={onRetry} testId="policies-error" />
+      ) : (
+        <>
+          {locked && (
+            <div className="mb-4">
+              <PolicyUpsellBanner {...locked} />
+            </div>
+          )}
+
+          {policies.length > 0 ? (
+            <PoliciesList
+              policies={policies}
+              onAddPolicy={onAddPolicy ?? (() => setIsAddPolicyOpen(true))}
+              onSelectPolicy={onSelectPolicy ?? selectPolicy}
+            />
+          ) : (
+            <PolicyCatalogue onSelect={handleSelect} locked={locked} isAllowlistAvailable={canCreateAllowlist} />
+          )}
+        </>
+      )}
+
+      <AddPolicyDialog
+        open={isAddPolicyOpen}
+        onOpenChange={setIsAddPolicyOpen}
+        onSelect={selectFromAddPolicyDialog}
+        options={addPolicyOptions}
+      />
+
+      <SpendingLimitIntroDialog
+        open={spendingLimitIntro.isOpen}
+        onOpenChange={spendingLimitIntro.onOpenChange}
+        onProceed={spendingLimitIntro.proceed}
+      />
+
+      <ProposerIntroDialog
+        open={proposerIntro.isOpen}
+        onOpenChange={proposerIntro.onOpenChange}
+        onProceed={proposerIntro.proceed}
+      />
+
+      <RecipientAllowlistIntroDialog
+        open={allowlistIntro.isOpen}
+        onOpenChange={allowlistIntro.onOpenChange}
+        onProceed={allowlistIntro.proceed}
+      />
+
+      {openedPolicy && isProposerPolicy(openedPolicy) && openedPolicy.data.proposers[0] && (
+        <ProposerDetails policy={openedPolicy} proposer={openedPolicy.data.proposers[0]} onClose={closeDetails} />
+      )}
+
+      {openedPolicy && isActiveAllowlistPolicy(openedPolicy) && (
+        <AllowlistDetails
+          policy={openedPolicy}
+          policies={policies}
+          onClose={closeDetails}
+          justActivated={newAllowlistIds.has(openedPolicy.id)}
+        />
+      )}
+
+      {openedPolicy && isSpendingLimitPolicy(openedPolicy) && (
+        <SpendingLimitDetails
+          policy={openedPolicy}
+          isUnlisted={!listedPolicy}
+          onClose={closeDetails}
+          onEdit={isSpendingLimitLocked ? undefined : () => editSpendingLimit(openedPolicy.safe)}
+          onEnableModule={isSpendingLimitLocked ? undefined : () => enableSpendingLimitModule(openedPolicy)}
+        />
+      )}
     </div>
   )
 }

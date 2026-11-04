@@ -26,8 +26,6 @@ import { Route as Page403Route } from './routes/403'
 import { Route as Page404Route } from './routes/404'
 import { Route as CookieRoute } from './routes/cookie'
 import { Route as LicensesRoute } from './routes/licenses'
-import { Route as PrivacyRoute } from './routes/privacy'
-import { Route as TermsRoute } from './routes/terms'
 
 // Group B — /settings/*
 import { Route as SettingsAppearanceRoute } from './routes/settings/appearance'
@@ -49,9 +47,12 @@ import { Route as SpacesSafeAccountsRoute } from './routes/spaces/safe-accounts'
 import { Route as SpacesSecurityRoute } from './routes/spaces/security'
 import { Route as SpacesActivityRoute } from './routes/spaces/activity'
 import { Route as SpacesPoliciesRoute } from './routes/spaces/policies'
+import { Route as SpacesTransactionsRoute } from './routes/spaces/transactions'
+import { Route as SpacesPlansRoute } from './routes/spaces/plans'
 import { Route as SpacesSettingsRoute } from './routes/spaces/settings'
 import { Route as SpacesSettingsAboutRoute } from './routes/spaces/settings/about'
 import { Route as SpacesSettingsAccountRoute } from './routes/spaces/settings/account'
+import { Route as SpacesSettingsExperimentalRoute } from './routes/spaces/settings/experimental'
 import { Route as SpacesSettingsGeneralRoute } from './routes/spaces/settings/general'
 
 // Group D — /apps/*, /new-safe/*, /balances/*, /welcome/*
@@ -103,8 +104,6 @@ const routeTree = RootRoute.addChildren([
   Page404Route,
   CookieRoute,
   LicensesRoute,
-  PrivacyRoute,
-  TermsRoute,
   // Group B
   SettingsAppearanceRoute,
   SettingsCookiesRoute,
@@ -124,10 +123,13 @@ const routeTree = RootRoute.addChildren([
   SpacesSecurityRoute,
   SpacesActivityRoute,
   SpacesPoliciesRoute,
+  SpacesTransactionsRoute,
+  SpacesPlansRoute,
   SpacesSettingsRoute,
   SpacesSettingsGeneralRoute,
   SpacesSettingsAboutRoute,
   SpacesSettingsAccountRoute,
+  SpacesSettingsExperimentalRoute,
   // Group D
   AppsIndexRoute,
   AppsBookmarkedRoute,

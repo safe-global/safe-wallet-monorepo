@@ -1,20 +1,32 @@
 import { useId, useMemo, type ReactNode } from 'react'
-import { cn } from '@/utils/cn'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectGroup, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
+import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
+import { cn } from '@safe-global/views/utils/cn'
+import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
+import { Label } from '@safe-global/views/components/ui/label'
+import { Select, SelectContent, SelectGroup, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
-import LoadError from './components/LoadError'
-import NoEligibleAccounts from './components/NoEligibleAccounts'
+import LoadError from '@safe-global/views/features/spaces/components/Policies/components/LoadError'
+import { SKELETON_ROW_COUNT } from '@safe-global/views/features/spaces/components/Policies/constants'
+import NoEligibleAccounts from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/components/NoEligibleAccounts'
 import SafeAccountGroupHeader from './components/SafeAccountGroupHeader'
 import SafeAccountRow, {
   SafeAccountChainRow,
   SafeAccountRowSkeleton,
   SafeAccountSummary,
 } from './components/SafeAccountRow'
-import { ELIGIBILITY_HELPER_TEXT, SAFE_ACCOUNT_SELECTOR_LABEL, SAFE_ACCOUNT_SELECTOR_PLACEHOLDER } from './constants'
-import { isSafeAccountGroup, type SafeAccountEntry } from './types'
+import {
+  getEligibilityCopy,
+  INELIGIBILITY_TEXT,
+  SAFE_ACCOUNT_SELECTOR_LABEL,
+  SAFE_ACCOUNT_SELECTOR_PLACEHOLDER,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
+import {
+  isSafeAccountGroup,
+  type SafeAccountEntry,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+import { findSafeAccount } from './utils'
 
 export type SafeAccountSelectorProps = {
   /** Already filtered and grouped — see `useEligibleSafeAccounts`. */
@@ -26,7 +38,11 @@ export type SafeAccountSelectorProps = {
   isError?: boolean
   onRetry?: () => void
   disabled?: boolean
+  /** Dimmed, but not the `Select`'s `disabled`, which would swallow the pointer events the copy button needs. */
+  readOnly?: boolean
   label?: string
+  /** Must match the rule `accounts` was filtered by. */
+  signersOnly?: boolean
   helperText?: ReactNode
   /** Defaults to `useConnectWallet()`. Also serves the disconnected state's action. */
   onSwitchWallet?: () => void
@@ -34,11 +50,11 @@ export type SafeAccountSelectorProps = {
   hasWallet?: boolean
   /** Replaces the helper text when set. */
   errorMessage?: string
+  /** Pinned above the options, so it is read before a Safe is picked. */
+  notice?: { title: ReactNode; description: ReactNode }
   name?: string
   id?: string
 }
-
-const SKELETON_ROW_COUNT = 3
 
 /** Height of the picked state's two-line identity. Every state reserves it so the field never jumps. */
 const TRIGGER_CONTENT_HEIGHT = 'min-h-9'
@@ -55,11 +71,14 @@ const SafeAccountSelector = ({
   isError = false,
   onRetry,
   disabled = false,
+  readOnly = false,
   label = SAFE_ACCOUNT_SELECTOR_LABEL,
-  helperText = ELIGIBILITY_HELPER_TEXT,
+  signersOnly = false,
+  helperText = getEligibilityCopy(signersOnly).helperText,
   onSwitchWallet,
   hasWallet = true,
   errorMessage,
+  notice,
   name,
   id,
 }: SafeAccountSelectorProps) => {
@@ -69,12 +88,10 @@ const SafeAccountSelector = ({
 
   // The popup unmounts while closed, so the trigger cannot read a row's label. An unknown `value` falls
   // through to the placeholder rather than rendering a stale name.
-  const selectedAccount = useMemo(() => {
-    if (!value) return undefined
-    return accounts
-      .flatMap((entry) => (isSafeAccountGroup(entry) ? entry.accounts : [entry]))
-      .find((account) => account.id === value)
-  }, [accounts, value])
+  const selectedAccount = useMemo(() => findSafeAccount(accounts, value), [accounts, value])
+  const ineligibilityText =
+    !readOnly && selectedAccount?.ineligibleReason ? INELIGIBILITY_TEXT[selectedAccount.ineligibleReason] : undefined
+  const shownError = errorMessage ?? ineligibilityText
 
   const renderPopupContent = () => {
     if (isLoading) {
@@ -86,7 +103,13 @@ const SafeAccountSelector = ({
     }
 
     if (accounts.length === 0) {
-      return <NoEligibleAccounts hasWallet={hasWallet} onSwitchWallet={onSwitchWallet ?? connectWallet} />
+      return (
+        <NoEligibleAccounts
+          hasWallet={hasWallet}
+          signersOnly={signersOnly}
+          onSwitchWallet={onSwitchWallet ?? connectWallet}
+        />
+      )
     }
 
     return accounts.map((entry) =>
@@ -100,6 +123,41 @@ const SafeAccountSelector = ({
       ) : (
         <SafeAccountRow key={entry.id} account={entry} />
       ),
+    )
+  }
+
+  const helper = shownError ? (
+    <Typography variant="paragraph-mini" role="alert" className="text-destructive">
+      {shownError}
+    </Typography>
+  ) : (
+    <Typography variant="paragraph-mini" color="muted" data-testid="safe-account-helper-text">
+      {helperText}
+    </Typography>
+  )
+
+  if (readOnly && selectedAccount) {
+    return (
+      <div className="flex w-full flex-col gap-1.5">
+        <Label htmlFor={fieldId}>{label}</Label>
+
+        {/* The trigger's own skin, minus the hover and the chevron: it is a field, not a control — and so
+            carries no `aria-disabled`, which Chrome propagates onto the copy button and would kill it. */}
+        <div
+          id={fieldId}
+          data-testid="safe-account-readonly"
+          className="border-border bg-input flex min-h-9 w-full cursor-not-allowed items-center gap-2 rounded-md border px-3 py-1.5 shadow-xs"
+        >
+          {/* The summary brings its own tooltip with the whole address, which is what gets checked before signing. */}
+          <span className="flex min-w-0 flex-1 opacity-50">
+            <SafeAccountSummary account={selectedAccount} />
+          </span>
+
+          <CopyAddressIconButton address={selectedAccount.address} />
+        </div>
+
+        {helper}
+      </div>
     )
   }
 
@@ -119,7 +177,7 @@ const SafeAccountSelector = ({
         <SelectTrigger
           id={fieldId}
           aria-label={label}
-          aria-invalid={errorMessage ? true : undefined}
+          aria-invalid={shownError ? true : undefined}
           data-testid="safe-account-selector"
           className="w-full"
         >
@@ -151,19 +209,23 @@ const SafeAccountSelector = ({
         </SelectTrigger>
 
         <SelectContent className="max-h-80" alignItemWithTrigger={false}>
+          {notice && (
+            <Alert
+              variant="info"
+              className="mx-1 mb-1 w-auto px-4 py-3 *:data-[slot=alert-description]:text-muted-foreground"
+              data-testid="safe-account-selector-notice"
+            >
+              <AlertSeverityIcon variant="info" />
+              <AlertTitle className="text-sm font-normal">{notice.title}</AlertTitle>
+              <AlertDescription>{notice.description}</AlertDescription>
+            </Alert>
+          )}
+
           {renderPopupContent()}
         </SelectContent>
       </Select>
 
-      {errorMessage ? (
-        <Typography variant="paragraph-mini" role="alert" className="text-destructive">
-          {errorMessage}
-        </Typography>
-      ) : (
-        <Typography variant="paragraph-mini" color="muted" data-testid="safe-account-helper-text">
-          {helperText}
-        </Typography>
-      )}
+      {helper}
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useHiddenTokenCounts } from '@/hooks/useHiddenTokenCounts'
 
 interface HiddenTokensInfoProps {

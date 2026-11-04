@@ -24,10 +24,12 @@ module.exports = {
     '^next/link$': '<rootDir>/src/compat/next-link.tsx',
     '^next/head$': '<rootDir>/src/compat/next-head.tsx',
     '^next/dynamic$': '<rootDir>/src/compat/next-dynamic.tsx',
-    '^next/image$': '<rootDir>/src/compat/next-image.tsx',
     '^next/app$': '<rootDir>/src/compat/next-app.ts',
     '^next/navigation$': '<rootDir>/src/compat/next-navigation.tsx',
     '^next/dist/client/resolve-href$': '<rootDir>/src/compat/next-resolve-href.ts',
+    // Jest 30 adds the "node" export condition to require(), which picks TanStack's server build
+    '^@tanstack/router-core/isServer$':
+      '<rootDir>/../../node_modules/@tanstack/router-core/dist/cjs/isServer/client.cjs',
   },
   testMatch: ['<rootDir>/src/**/*.(spec|test).[jt]s?(x)'],
   // Coverage: collect from app source only (preset targets packages/**)

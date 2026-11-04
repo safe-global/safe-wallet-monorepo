@@ -5,12 +5,18 @@ import type { ApprovalInfo } from './hooks/useApprovalInfos'
 import css from './styles.module.css'
 import { PSEUDO_APPROVAL_VALUES } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { approvalMethodDescription } from './ApprovalItem'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import { TokenType } from '@safe-global/store/gateway/types'
-import { Combobox, ComboboxContent, ComboboxInput, ComboboxItem, ComboboxList } from '@/components/ui/combobox'
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { cn } from '@/utils/cn'
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from '@safe-global/views/components/ui/combobox'
+import { Field, FieldDescription, FieldLabel } from '@safe-global/views/components/ui/field'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { cn } from '@safe-global/views/utils/cn'
 
 export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: ApprovalInfo; readOnly: boolean }) => {
   const { control } = useFormContext()
@@ -37,7 +43,7 @@ export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: A
   const hasError = !!fieldState.error
 
   const symbol = tx.tokenInfo?.symbol ?? ''
-  const labelText = approvalMethodDescription[tx.method](symbol)
+  const labelText = approvalMethodDescription[tx.method](symbol, tx.tokenInfo?.type)
   const showAmountTooltip = tx.tokenInfo?.type === TokenType.ERC20
   const inputId = `${name}-approval-amount`
 
@@ -49,14 +55,13 @@ export const ApprovalValueField = ({ name, tx, readOnly }: { name: string; tx: A
   return (
     <Combobox
       items={selectValues}
-      // `value` must be bound alongside `inputValue`: Base UI resets the input to the selected
-      // value when the popup closes, so leaving selection uncontrolled wipes a typed amount. It
-      // also feeds the default single-selection filter, which otherwise treats the typed amount as
-      // a search query and hides every preset.
+      // Bound alongside `inputValue`: Base UI resets the input to the selected value on close.
       value={value ?? ''}
       onValueChange={(next) => handleInputChange(typeof next === 'string' ? next : '')}
       inputValue={value ?? ''}
       onInputValueChange={handleInputChange}
+      // Always surface the presets regardless of the typed value
+      filter={() => true}
       readOnly={readOnly}
       inputRef={ref}
     >

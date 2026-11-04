@@ -40,6 +40,7 @@ describe('store', () => {
           isStoreHydrated: true,
           cfSafeSynced: false,
           isOidcLoginPending: false,
+          isSessionCheckPending: false,
         },
       })
     })
@@ -110,6 +111,7 @@ describe('store', () => {
           isStoreHydrated: true,
           cfSafeSynced: false,
           isOidcLoginPending: false,
+          isSessionCheckPending: false,
         },
       })
     })
@@ -137,6 +139,7 @@ describe('store', () => {
           isStoreHydrated: true,
           cfSafeSynced: false,
           isOidcLoginPending: false,
+          isSessionCheckPending: false,
         },
       })
 

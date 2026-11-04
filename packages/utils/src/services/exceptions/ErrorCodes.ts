@@ -41,12 +41,17 @@ enum ErrorCodes {
   _620 = '620: Error loading chains',
   _621 = '621: Error checking modules for known vulnerabilities',
   _622 = '622: CGW rejected our request as unprocessable',
+  _623 = '623: Error fetching transaction receipt',
   _630 = '630: Error fetching remaining daily relays',
   _631 = '631: Transaction failed to be relayed',
   _632 = '632: Error fetching relay task status',
   _633 = '633: Notification (un-)registration failed',
   _640 = '640: Error signing in with Ethereum',
   _650 = '650: Error syncing counterfactual safes with backend',
+  _651 = '651: Error adding a Safe to a Workspace',
+  _652 = '652: Error requesting a Safenet check',
+  _653 = '653: Error reading the Safe module guard',
+  _654 = '654: Error loading the module guard reader',
 
   _700 = '700: Failed to read from local/session storage',
   _701 = '701: Failed to write to local/session storage',
@@ -62,8 +67,13 @@ enum ErrorCodes {
   _801 = '801: Failed to send a tx with a spending limit',
   _804 = '804: Error executing a transaction',
   _805 = '805: Error proposing or confirming a transaction',
-  _806 = '806: Failed to remove module',
-  _807 = '807: Failed to remove guard',
+  // Retired: both reported a failed `createRemoveModuleTx`/`createRemoveGuardTx`,
+  // which SafeTxProvider already reports as _103 — so one failure produced two
+  // events, and these two typed it as an off-chain action rather than the tx
+  // creation it was. Kept so the numbers are never reused, which would give
+  // historical 806/807 data a second, unrelated meaning.
+  _806 = '806: Failed to remove module (retired, see _103)',
+  _807 = '807: Failed to remove guard (retired, see _103)',
   _808 = '808: Failed to get transaction origin',
   _809 = '809: Failed decoding transaction',
   _810 = '810: Error executing a recovery proposal transaction',
@@ -78,6 +88,7 @@ enum ErrorCodes {
   _819 = '819: Error adding a transaction to the batch',
   _820 = '820: Error signing or submitting delegation',
   _821 = '821: Untrusted gas-fee refundReceiver returned by CGW',
+  _822 = '822: Safe SDK singleton used while a SafeScope is active',
 
   _900 = '900: Error loading Safe App',
   _901 = '901: Error processing Safe Apps SDK request',

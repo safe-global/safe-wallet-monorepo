@@ -1,7 +1,6 @@
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { logError, Errors } from '@/services/exceptions'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { isHypernativeGuard } from '../services/hypernativeGuardCheck'
@@ -17,11 +16,11 @@ export type HypernativeGuardCheckResult = {
  * @returns HypernativeGuardCheckResult with isHypernativeGuard flag and loading state
  */
 export const useIsHypernativeGuard = (): HypernativeGuardCheckResult => {
-  const { safe, safeLoaded } = useSafeInfo()
+  const { safe, safeLoaded, safeLoading } = useSafeInfo()
   const web3ReadOnly = useWeb3ReadOnly()
   const skipAbiCheck = useHasFeature(FEATURES.HYPERNATIVE_RELAX_GUARD_CHECK)
 
-  const [isHnGuard, error, loading] = useAsync<boolean>(
+  const [isHnGuard, , loading] = useAsync<boolean>(
     async () => {
       // Don't check if Safe is not loaded yet or if there's no provider
       // Return false instead of undefined to clear previous cached values
@@ -38,9 +37,11 @@ export const useIsHypernativeGuard = (): HypernativeGuardCheckResult => {
         // Check if the guard is a HypernativeGuard
         // Pass the skipAbiCheck flag from the feature flag
         return await isHypernativeGuard(safe.chainId, safe.guard.value, web3ReadOnly, skipAbiCheck)
-      } catch (error) {
-        // On error (e.g., RPC failure), return false but don't cache it
-        // The error will be logged in the service layer
+      } catch {
+        // On error (e.g. RPC failure), return false but don't cache it. The
+        // failure is reported once by the service layer; reporting it again
+        // here would double-count it, and once per render at that — this hook
+        // has several concurrent owners on a single page.
         return false
       }
     },
@@ -48,13 +49,8 @@ export const useIsHypernativeGuard = (): HypernativeGuardCheckResult => {
     false, // Don't clear data on re-fetch to avoid flickering
   )
 
-  // Log errors for monitoring
-  if (error) {
-    logError(Errors._809, error)
-  }
-
   return {
     isHypernativeGuard: isHnGuard ?? false,
-    loading: !safeLoaded || (safeLoaded && !web3ReadOnly) || loading,
+    loading: safeLoading || (safeLoaded && (!web3ReadOnly || loading)),
   }
 }

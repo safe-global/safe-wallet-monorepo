@@ -32,6 +32,7 @@ jest.mock('react-native-device-crypto', () => ({
   encrypt: jest.fn(),
   decrypt: jest.fn(),
   deleteKey: jest.fn(),
+  authenticateWithBiometry: jest.fn(),
 }))
 
 jest.mock('react-native-keychain', () => {

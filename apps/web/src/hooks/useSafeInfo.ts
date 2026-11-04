@@ -4,6 +4,7 @@ import { useAppSelector } from '@/store'
 import { selectSafeInfo } from '@/store/safeInfoSlice'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
+import { useSafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 
 const useSafeInfo = (): {
   safe: ExtendedSafeInfo
@@ -12,18 +13,32 @@ const useSafeInfo = (): {
   safeLoading: boolean
   safeError?: string
 } => {
+  // A Space-level flow supplies its Safe explicitly; every Safe-level route has no scope and reads Redux.
+  const scopeContext = useSafeScopeContext()
+  const scope = scopeContext?.scope
   const { data, error, loaded, loading } = useAppSelector(selectSafeInfo, isEqual)
 
-  return useMemo(
-    () => ({
+  return useMemo(() => {
+    if (scopeContext) {
+      if (!scope) {
+        return { safe: defaultSafeInfo, safeAddress: '', safeLoaded: false, safeLoading: false, safeError: undefined }
+      }
+      return {
+        safe: scope.safe || defaultSafeInfo,
+        safeAddress: scope.safeAddress,
+        safeLoaded: scope.safeLoaded,
+        safeError: scope.safeError,
+        safeLoading: scope.safeLoading,
+      }
+    }
+    return {
       safe: data || defaultSafeInfo,
       safeAddress: data?.address.value || '',
       safeLoaded: loaded,
       safeError: error,
       safeLoading: loading,
-    }),
-    [data, error, loaded, loading],
-  )
+    }
+  }, [scopeContext, scope, data, error, loaded, loading])
 }
 
 export default useSafeInfo

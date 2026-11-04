@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`./Chip.stories CustomLabel 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <span
+      class="inline-flex w-fit items-center gap-1 whitespace-nowrap font-medium [&>svg]:size-3 [&>svg]:pointer-events-none bg-secondary text-secondary-foreground px-2.5 py-0.5 text-xs rounded-4xl"
+      data-slot="chip"
+      style="margin-top: -2px; font-weight: bold;"
+    >
+      Testing VRT
+    </span>
+  </div>
+</div>
+`;
+
+exports[`./Chip.stories Default 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <span
+      class="inline-flex w-fit items-center gap-1 whitespace-nowrap font-medium [&>svg]:size-3 [&>svg]:pointer-events-none bg-secondary text-secondary-foreground px-2.5 py-0.5 text-xs rounded-4xl"
+      data-slot="chip"
+      style="margin-top: -2px; font-weight: bold;"
+    >
+      New
+    </span>
+  </div>
+</div>
+`;
+
+exports[`./Chip.stories NormalFontWeight 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <span
+      class="inline-flex w-fit items-center gap-1 whitespace-nowrap font-medium [&>svg]:size-3 [&>svg]:pointer-events-none bg-secondary text-secondary-foreground px-2.5 py-0.5 text-xs rounded-4xl"
+      data-slot="chip"
+      style="margin-top: -2px; font-weight: normal;"
+    >
+      New
+    </span>
+  </div>
+</div>
+`;
+
+exports[`./Chip.stories WithCustomStyling 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <span
+      class="inline-flex w-fit items-center gap-1 whitespace-nowrap font-medium [&>svg]:size-3 [&>svg]:pointer-events-none bg-secondary text-secondary-foreground px-2.5 py-0.5 text-xs rounded-4xl"
+      data-slot="chip"
+      style="margin-top: -2px; font-weight: bold; background-color: var(--color-secondary-main); color: white;"
+    >
+      Featured
+    </span>
+  </div>
+</div>
+`;

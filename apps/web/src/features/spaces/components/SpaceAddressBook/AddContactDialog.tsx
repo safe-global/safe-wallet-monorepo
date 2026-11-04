@@ -1,7 +1,7 @@
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
 import { Plus } from 'lucide-react'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { Controller, FormProvider, useForm } from 'react-hook-form'
 import ModalDialog from '@/components/common/ModalDialog'
@@ -20,6 +20,7 @@ import { useAppDispatch } from '@/store'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 export type ContactField = {
   name: string
@@ -110,6 +111,7 @@ const AddContactDialog = ({
 
       const result = await submit(item, spaceId ?? '')
 
+      if (isElevationRequiredError(result.error)) return
       if (result.error) {
         const message = getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError)
         setError(message)

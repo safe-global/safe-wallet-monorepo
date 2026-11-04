@@ -2,6 +2,7 @@ import * as web3 from '@/hooks/wallets/web3'
 import { getERC20TokenInfoOnChain } from '@/utils/tokens'
 import { faker } from '@faker-js/faker'
 import { mockWeb3Provider } from '@/tests/test-utils'
+import { createMockWeb3Provider } from '@safe-global/utils/tests/web3Provider'
 
 describe('tokens', () => {
   describe('getERC20TokenInfoOnChain', () => {
@@ -93,6 +94,24 @@ describe('tokens', () => {
 
       expect(result?.symbol).toEqual('MKR')
       expect(result?.decimals).toEqual(18)
+    })
+
+    it('uses the provider it is given instead of the global one', async () => {
+      const globalSpy = jest.spyOn(web3, 'getWeb3ReadOnly').mockReturnValue(undefined)
+      const provider = createMockWeb3Provider(
+        [
+          { signature: 'decimals()', returnType: 'uint256', returnValue: '6' },
+          { signature: 'symbol()', returnType: 'string', returnValue: 'USDC' },
+        ],
+        undefined,
+        '11155111',
+      )
+
+      const result = (await getERC20TokenInfoOnChain('0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984', provider))?.[0]
+
+      expect(result?.symbol).toBe('USDC')
+      expect(result?.decimals).toBe(6)
+      expect(globalSpy).not.toHaveBeenCalled()
     })
   })
 })

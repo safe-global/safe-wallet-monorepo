@@ -7,6 +7,13 @@ import { TokenType } from '@safe-global/store/gateway/types'
 import { mockWeb3Provider } from '@/tests/test-utils'
 import { createMockWeb3Provider } from '@safe-global/utils/tests/web3Provider'
 import { faker } from '@faker-js/faker'
+import { getAddress } from 'ethers'
+import * as tokens from '@/utils/tokens'
+
+jest.mock('@/utils/tokens', () => ({
+  ...jest.requireActual('@/utils/tokens'),
+  getERC20TokenInfoOnChain: jest.fn(),
+}))
 
 const spendingLimitInterface = AllowanceModule__factory.createInterface()
 const mockProvider = createMockWeb3Provider([], undefined, '4')
@@ -14,10 +21,16 @@ const mockModule = {
   value: '0x1',
 }
 
+beforeEach(() => {
+  jest.clearAllMocks()
+  jest.mocked(tokens.getERC20TokenInfoOnChain).mockResolvedValue([])
+})
+
 describe('loadSpendingLimits', () => {
   beforeEach(() => {
     jest.resetModules()
     jest.resetAllMocks()
+    jest.mocked(tokens.getERC20TokenInfoOnChain).mockResolvedValue([])
   })
 
   it('should return undefined if no spending limit module address was found', async () => {
@@ -101,6 +114,44 @@ describe('loadSpendingLimits', () => {
     expect(web3Provider.call).toHaveBeenCalledTimes(2)
   })
 
+  it('names unknown tokens through the provider it was given, not the global one', async () => {
+    const spendingLimitAddress = faker.finance.ethereumAddress()
+    const delegate = faker.finance.ethereumAddress()
+    const token = faker.finance.ethereumAddress()
+
+    const web3Provider = createMockWeb3Provider(
+      [
+        {
+          signature: spendingLimitInterface.getFunction('getTokens')?.selector!,
+          returnType: 'address[]',
+          returnValue: [token],
+        },
+        {
+          signature: spendingLimitInterface.getFunction('getTokenAllowance')?.selector!,
+          returnType: 'uint256[5]',
+          returnValue: [BigInt(1), BigInt(0), BigInt(0), BigInt(0), BigInt(0)],
+        },
+      ],
+      undefined,
+      '4',
+    )
+    jest.spyOn(spendingLimit, 'getDeployedSpendingLimitModuleAddress').mockReturnValue('0x1')
+    jest.spyOn(spendingLimit, 'getSpendingLimitContract').mockImplementation(
+      jest.fn(() => {
+        return {
+          getAddress: jest.fn().mockResolvedValue(spendingLimitAddress),
+          getDelegates: jest.fn(() => ({ results: [delegate] })),
+          interface: spendingLimitInterface,
+        } as unknown as AllowanceModule
+      }),
+    )
+
+    await loadSpendingLimits(web3Provider, [mockModule], ZERO_ADDRESS, '4', [])
+
+    // ethers checksums addresses when ABI-decoding them, so compare against the checksummed form
+    expect(tokens.getERC20TokenInfoOnChain).toHaveBeenCalledWith(getAddress(token), web3Provider)
+  })
+
   it('should filter out empty allowances', async () => {
     const spendingLimitAddress = faker.finance.ethereumAddress()
     const delegate1 = faker.finance.ethereumAddress()
@@ -171,6 +222,22 @@ describe('getTokensForDelegates', () => {
     )
     const spendingLimits = await getTokensForDelegates(mockContract, mockProvider, ZERO_ADDRESS, [delegate], [])
     expect(spendingLimits.length).toBe(2)
+  })
+
+  // A Safe whose limits were all removed still has the module enabled, and `getDelegates` decodes to an empty Result.
+  it('returns no limits for an empty decoded delegate list', async () => {
+    const mockContract = {
+      interface: spendingLimitInterface,
+      getAddress: jest.fn().mockResolvedValue(faker.finance.ethereumAddress()),
+    } as unknown as AllowanceModule
+    const emptyDelegates = spendingLimitInterface.decodeFunctionResult(
+      'getDelegates',
+      spendingLimitInterface.encodeFunctionResult('getDelegates', [[], 0]),
+    ).results
+
+    const spendingLimits = await getTokensForDelegates(mockContract, mockProvider, ZERO_ADDRESS, emptyDelegates, [])
+
+    expect(spendingLimits).toEqual([])
   })
 })
 
@@ -250,6 +317,12 @@ describe('getTokenAllowanceForDelegate', () => {
   })
 
   it('should return tokenInfo from on-chain if not in balance', async () => {
+    // This test exercises the real on-chain fallback, so restore it for this one call:
+    // the top-level `jest.mock('@/utils/tokens', ...)` stubs it for the `loadSpendingLimits` tests.
+    const { getERC20TokenInfoOnChain: realGetERC20TokenInfoOnChain } =
+      jest.requireActual<typeof tokens>('@/utils/tokens')
+    jest.mocked(tokens.getERC20TokenInfoOnChain).mockImplementationOnce(realGetERC20TokenInfoOnChain)
+
     const mockContract = {
       getAddress: jest.fn().mockResolvedValue(faker.finance.ethereumAddress()),
       interface: spendingLimitInterface,
@@ -261,7 +334,7 @@ describe('getTokenAllowanceForDelegate', () => {
         {
           signature: spendingLimitInterface.getFunction('getTokenAllowance')?.selector!,
           returnType: 'uint256[5]',
-          returnValue: [BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(0)],
+          returnValue: [BigInt(1), BigInt(0), BigInt(0), BigInt(0), BigInt(0)],
         },
         {
           signature: 'decimals()',
@@ -284,5 +357,122 @@ describe('getTokenAllowanceForDelegate', () => {
     expect(result.token.decimals).toBe(10)
     expect(result.token.symbol).toBe('TST')
     expect(result.token.logoUri).toBe(undefined)
+  })
+
+  it('should not look up the native token on-chain', async () => {
+    const mockContract = {
+      getAddress: jest.fn().mockResolvedValue(faker.finance.ethereumAddress()),
+      interface: spendingLimitInterface,
+    } as unknown as AllowanceModule
+    const mockProvider = mockWeb3Provider(
+      [
+        {
+          signature: spendingLimitInterface.getFunction('getTokenAllowance')?.selector!,
+          returnType: 'uint256[5]',
+          returnValue: [BigInt(1), BigInt(0), BigInt(1440), BigInt(0), BigInt(1)],
+        },
+      ],
+      undefined,
+      '5',
+    )
+
+    const [result] = await getTokenAllowances(
+      mockContract,
+      mockProvider,
+      ZERO_ADDRESS,
+      [{ delegate: faker.finance.ethereumAddress(), token: ZERO_ADDRESS }],
+      [],
+    )
+
+    expect(tokens.getERC20TokenInfoOnChain).not.toHaveBeenCalled()
+    expect(result.token).toEqual({ address: ZERO_ADDRESS, decimals: 18, symbol: '' })
+  })
+
+  it('should not fail on a removed allowance whose token is not a contract', async () => {
+    const { getERC20TokenInfoOnChain: realGetERC20TokenInfoOnChain } =
+      jest.requireActual<typeof tokens>('@/utils/tokens')
+    jest.mocked(tokens.getERC20TokenInfoOnChain).mockImplementationOnce(realGetERC20TokenInfoOnChain)
+
+    const mockContract = {
+      getAddress: jest.fn().mockResolvedValue(faker.finance.ethereumAddress()),
+      interface: spendingLimitInterface,
+    } as unknown as AllowanceModule
+    const mockProvider = mockWeb3Provider(
+      [
+        {
+          signature: spendingLimitInterface.getFunction('getTokenAllowance')?.selector!,
+          returnType: 'uint256[5]',
+          returnValue: [BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(1)],
+        },
+        {
+          signature: 'decimals()',
+          returnType: 'raw',
+          returnValue: '0x',
+        },
+        {
+          signature: 'symbol()',
+          returnType: 'raw',
+          returnValue: '0x',
+        },
+      ],
+      undefined,
+      '5',
+    )
+
+    await expect(
+      getTokenAllowances(
+        mockContract,
+        mockProvider,
+        ZERO_ADDRESS,
+        [{ delegate: faker.finance.ethereumAddress(), token: faker.finance.ethereumAddress() }],
+        [],
+      ),
+    ).resolves.toHaveLength(1)
+  })
+
+  it('should not fail other allowances when an active allowance token is not a contract', async () => {
+    const { getERC20TokenInfoOnChain: realGetERC20TokenInfoOnChain } =
+      jest.requireActual<typeof tokens>('@/utils/tokens')
+    jest
+      .mocked(tokens.getERC20TokenInfoOnChain)
+      .mockImplementationOnce(realGetERC20TokenInfoOnChain)
+      .mockImplementationOnce(realGetERC20TokenInfoOnChain)
+
+    const mockContract = {
+      getAddress: jest.fn().mockResolvedValue(faker.finance.ethereumAddress()),
+      interface: spendingLimitInterface,
+    } as unknown as AllowanceModule
+    const eoaToken = faker.finance.ethereumAddress()
+    const erc20Token = faker.finance.ethereumAddress()
+    const mockProvider = mockWeb3Provider(
+      [
+        {
+          signature: spendingLimitInterface.getFunction('getTokenAllowance')?.selector!,
+          returnType: 'uint256[5]',
+          returnValue: [BigInt(1), BigInt(0), BigInt(0), BigInt(0), BigInt(1)],
+        },
+        { signature: 'decimals()', returnType: 'raw', returnValue: '0x', to: eoaToken },
+        { signature: 'symbol()', returnType: 'raw', returnValue: '0x', to: eoaToken },
+        { signature: 'decimals()', returnType: 'uint8', returnValue: 6, to: erc20Token },
+        { signature: 'symbol()', returnType: 'string', returnValue: 'USDC', to: erc20Token },
+      ],
+      undefined,
+      '5',
+    )
+    const delegate = faker.finance.ethereumAddress()
+
+    const [eoaResult, erc20Result] = await getTokenAllowances(
+      mockContract,
+      mockProvider,
+      ZERO_ADDRESS,
+      [
+        { delegate, token: eoaToken },
+        { delegate, token: erc20Token },
+      ],
+      [],
+    )
+
+    expect(eoaResult.token).toEqual({ address: eoaToken, decimals: 18, symbol: '' })
+    expect(erc20Result.token).toMatchObject({ address: erc20Token, decimals: 6, symbol: 'USDC' })
   })
 })

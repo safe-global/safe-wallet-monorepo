@@ -37,6 +37,7 @@ describe('useTxTracking', () => {
             txId: '0x345',
             txStatus: 'AWAITING_CONFIRMATIONS' as const,
             safeAppInfo: {
+              id: 1,
               name: 'Google',
               url: 'google.com',
               logoUri: null,
@@ -79,7 +80,7 @@ describe('useTxTracking', () => {
       taskId: '0x123',
       groupKey: '0x234',
     })
-    expect(trackEvent).toBeCalledWith({ ...WALLET_EVENTS.ONCHAIN_INTERACTION, label: 'google.com' })
+    expect(trackEvent).toHaveBeenCalledWith({ ...WALLET_EVENTS.ONCHAIN_INTERACTION, label: 'google.com' })
   })
 
   it('should track tx signing', async () => {
@@ -90,7 +91,7 @@ describe('useTxTracking', () => {
     })
     await act(() => Promise.resolve())
 
-    expect(trackEvent).toBeCalledWith({ ...WALLET_EVENTS.OFFCHAIN_SIGNATURE, label: 'google.com' })
+    expect(trackEvent).toHaveBeenCalledWith({ ...WALLET_EVENTS.OFFCHAIN_SIGNATURE, label: 'google.com' })
   })
 
   it('should track tx execution', () => {
@@ -107,6 +108,6 @@ describe('useTxTracking', () => {
       gasLimit: 40_000,
       txType: 'SafeTx',
     })
-    expect(trackEvent).toBeCalledWith({ ...WALLET_EVENTS.ONCHAIN_INTERACTION, label: 'google.com' })
+    expect(trackEvent).toHaveBeenCalledWith({ ...WALLET_EVENTS.ONCHAIN_INTERACTION, label: 'google.com' })
   })
 })

@@ -9,12 +9,28 @@ updates:
     directory: '/'
     schedule:
       interval: 'weekly'
+    open-pull-requests-limit: 10
+    # Let a release age on the registry before proposing it
+    cooldown:
+      semver-patch-days: 7
+      semver-minor-days: 7
+      semver-major-days: 7
     groups:
       ledger:
         patterns:
           - '@ledgerhq/*'
+      # Catch-alls must stay last: a dependency joins the first group it matches.
+      # Majors are deliberately excluded so they arrive as individual PRs.
+      dev-minor-patch:
+        dependency-type: 'development'
+        update-types: ['minor', 'patch']
+      prod-minor-patch:
+        dependency-type: 'production'
+        update-types: ['minor', 'patch']
 
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
       interval: 'weekly'
+    cooldown:
+      default-days: 7

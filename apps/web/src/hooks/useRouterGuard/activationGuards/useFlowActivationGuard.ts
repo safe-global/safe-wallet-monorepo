@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { type UseGuard } from '..'
 import { AppRoutes } from '@/config/routes'
@@ -43,8 +43,12 @@ const guardRules: GuardRule[] = [
     },
     action: ({ isSpacesPath, query }) => {
       const target = isSpacesPath ? AppRoutes.welcome.spaces : getWelcomeRoute()
-      const safe = typeof query.safe === 'string' ? query.safe : undefined
-      return redirect(safe ? `${target}?safe=${encodeURIComponent(safe)}` : target)
+      // Keep the Workspace too, so that the welcome page opens it after sign-in
+      const params = new URLSearchParams()
+      if (typeof query.safe === 'string') params.set('safe', query.safe)
+      if (typeof query.spaceId === 'string') params.set('spaceId', query.spaceId)
+      const search = params.toString()
+      return redirect(search ? `${target}?${search}` : target)
     },
   },
 
@@ -90,6 +94,9 @@ const guardRules: GuardRule[] = [
 
 export const useFlowActivationGuard: UseGuard = () => {
   const { pathname, query, isReady } = useRouter()
+  // Next builds a new query object on every route render; the rules read only these values
+  const { safe, spaceId } = query
+  const guardQuery = useMemo(() => ({ safe, spaceId }), [safe, spaceId])
   const walletContext = useWalletContext()
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const isWalletReady = (walletContext?.isReady ?? false) && isStoreHydrated
@@ -113,8 +120,8 @@ export const useFlowActivationGuard: UseGuard = () => {
       // (possibly empty) or a 404 confirming the user has no spaces. On any
       // other error (401/403 from cleared cookies, network failure, 5xx),
       // assume the user has spaces so we don't bounce them into create-space.
-      // The auth listener / reconcileAuth flow will clean up the stale auth
-      // state and re-trigger the guard with a correct isSiweAuthenticated.
+      // forbiddenSessionListener confirms a 403 against /v1/auth/me, clears the
+      // stale auth state and re-triggers the guard with a correct isSiweAuthenticated.
       const isNotFound = !!error && (error as { status?: unknown }).status === 404
       const transientError = !!error && !isNotFound
       if (transientError) {
@@ -123,8 +130,8 @@ export const useFlowActivationGuard: UseGuard = () => {
         hasSpaces = !!spaces && spaces.length > 0
       }
 
-      if (query.spaceId) {
-        isPartOfSpaceUrl = hasSpaces && !!spaces && spaces.some((s) => s.uuid === query.spaceId)
+      if (spaceId) {
+        isPartOfSpaceUrl = hasSpaces && !!spaces && spaces.some((s) => s.uuid === spaceId)
       }
     }
 
@@ -134,7 +141,7 @@ export const useFlowActivationGuard: UseGuard = () => {
     return evaluateGuard(
       {
         pathname,
-        query,
+        query: guardQuery,
         isPublicRoute: !isOnboardingRoute && !isSpaceRoute && !isSpacesPath,
         isOnboardingRoute,
         isSpacesPath,
@@ -146,7 +153,17 @@ export const useFlowActivationGuard: UseGuard = () => {
       },
       guardRules,
     )
-  }, [pathname, query, isReady, isWalletReady, isSiweAuthenticated, isStoreHydrated, fetchSpaces, isSpaceRoute])
+  }, [
+    pathname,
+    guardQuery,
+    spaceId,
+    isReady,
+    isWalletReady,
+    isSiweAuthenticated,
+    isStoreHydrated,
+    fetchSpaces,
+    isSpaceRoute,
+  ])
 
   return {
     activationGuard,

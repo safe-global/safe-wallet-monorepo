@@ -80,10 +80,10 @@ jest.mock('@/store/slices', () => ({
 }))
 
 jest.mock('@/features/myAccounts', () => ({
-  SafeAccountsTable: ({ items }: { items: Array<{ name?: string; address: string }> }) => (
+  SafeAccountsTable: ({ items }: { items: Array<{ name?: string; address: string; chainId?: string }> }) => (
     <div data-testid="safe-accounts-table">
       {items.map((item) => (
-        <div key={item.address}>{item.name}</div>
+        <div key={`${item.chainId}:${item.address}`}>{item.name}</div>
       ))}
     </div>
   ),
@@ -94,12 +94,16 @@ jest.mock('../SpaceSafeContextMenu', () => ({
   default: () => null,
 }))
 
-jest.mock('../EmptySafeAccounts', () => ({
+jest.mock('@safe-global/views/features/spaces/components/SafeAccounts/EmptySafeAccounts', () => ({
   __esModule: true,
   default: () => <div data-testid="empty-safe-accounts" />,
 }))
 
 jest.mock('../../InviteBanner/PreviewInvite', () => ({ __esModule: true, default: () => null }))
+
+const mockUseSeatUpsell = jest.fn()
+jest.mock('../../../hooks/useSeatUpsell', () => ({ useSeatUpsell: () => mockUseSeatUpsell() }))
+jest.mock('../../Plans/PlanStatusCard', () => ({ seatsTooltip: (tier: string, limit: number) => `${tier}/${limit}` }))
 
 const spaceSafes = [
   { chainId: '1', address: '0xTreasury', name: 'Treasury' },
@@ -110,6 +114,47 @@ describe('SpaceSafeAccounts', () => {
   beforeEach(() => {
     mockUseSpaceSafes.mockReturnValue({ allSafes: spaceSafes, isError: false, error: null, refetch: jest.fn() })
     mockUseIsAdmin.mockReturnValue(true)
+    mockUseSeatUpsell.mockReturnValue({
+      isSafePro: false,
+      tierName: undefined,
+      limit: null,
+      plansHref: '/spaces/plans',
+    })
+  })
+
+  it('counts the seats in use under Safe Pro and flags the limit with the banner', () => {
+    mockUseSeatUpsell.mockReturnValue({ isSafePro: true, tierName: 'Business', limit: 20, plansHref: '/spaces/plans' })
+    const { rerender } = render(<SpaceSafeAccounts />)
+
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('2 of 20')
+    expect(screen.getByTestId('selected-count')).not.toHaveTextContent('selected')
+    expect(screen.queryByTestId('seat-limit-banner')).not.toBeInTheDocument()
+
+    mockUseSeatUpsell.mockReturnValue({ isSafePro: true, tierName: 'Business', limit: 2, plansHref: '/spaces/plans' })
+    rerender(<SpaceSafeAccounts />)
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('2 of 2')
+    expect(screen.getByTestId('seat-limit-banner')).toHaveTextContent('The Business plan includes 2 Safe accounts')
+  })
+
+  it('counts a Safe on several chains as one seat', () => {
+    mockUseSpaceSafes.mockReturnValue({
+      allSafes: [...spaceSafes, { chainId: '10', address: '0xTreasury', name: 'Treasury' }],
+      isError: false,
+      error: null,
+      refetch: jest.fn(),
+    })
+    mockUseSeatUpsell.mockReturnValue({ isSafePro: true, tierName: 'Business', limit: 2, plansHref: '/spaces/plans' })
+
+    render(<SpaceSafeAccounts />)
+
+    expect(screen.getByTestId('selected-count')).toHaveTextContent('2 of 2')
+  })
+
+  it('shows neither counter nor banner without Safe Pro', () => {
+    render(<SpaceSafeAccounts />)
+
+    expect(screen.queryByTestId('selected-count')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('seat-limit-banner')).not.toBeInTheDocument()
   })
 
   it('renders the AddAccountsChooser with the "Add accounts" label', () => {
@@ -135,7 +180,7 @@ describe('SpaceSafeAccounts', () => {
     expect(screen.getByText('Treasury')).toBeInTheDocument()
   })
 
-  it('does not render the Workspace/Trusted tabs', () => {
+  it('does not render the workspace/Trusted tabs', () => {
     render(<SpaceSafeAccounts />)
 
     expect(screen.queryByRole('tablist')).not.toBeInTheDocument()

@@ -164,7 +164,7 @@ describe('ActionCard', () => {
       const button = getByText('Click Me')
       fireEvent.click(button)
 
-      expect(trackEvent).toHaveBeenCalledWith(trackingEvent)
+      expect(trackEvent).toHaveBeenCalledWith(trackingEvent, undefined)
       expect(onClick).toHaveBeenCalledTimes(1)
     })
 
@@ -179,7 +179,7 @@ describe('ActionCard', () => {
       const link = getByText('Link')
       fireEvent.click(link)
 
-      expect(trackEvent).toHaveBeenCalledWith(trackingEvent)
+      expect(trackEvent).toHaveBeenCalledWith(trackingEvent, undefined)
     })
 
     it('should not track when trackingEvent is not provided', () => {

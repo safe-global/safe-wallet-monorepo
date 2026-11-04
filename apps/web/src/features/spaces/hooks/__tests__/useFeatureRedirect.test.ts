@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import useFeatureRedirect from '../useFeatureRedirect'
+import useFeatureRedirect, { useRedirectWhenOff } from '../useFeatureRedirect'
 import { AppRoutes } from '@/config/routes'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
@@ -52,6 +52,30 @@ describe('useFeatureRedirect', () => {
     mockUseHasFeature.mockReturnValue(true)
 
     renderHook(() => useFeatureRedirect(FEATURES.SPACE_AUDIT_LOG, AppRoutes.spaces.index))
+
+    expect(mockPush).not.toHaveBeenCalled()
+  })
+})
+
+describe('useRedirectWhenOff', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    mockQuery = {}
+  })
+
+  it('redirects when explicitly off, preserving the spaceId', () => {
+    mockQuery = { spaceId: 'space-uuid-1' }
+
+    renderHook(() => useRedirectWhenOff(false, AppRoutes.spaces.index))
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: AppRoutes.spaces.index,
+      query: { spaceId: 'space-uuid-1' },
+    })
+  })
+
+  it.each([undefined, true])('does not redirect when the value is %s', (isOn) => {
+    renderHook(() => useRedirectWhenOff(isOn, AppRoutes.spaces.index))
 
     expect(mockPush).not.toHaveBeenCalled()
   })

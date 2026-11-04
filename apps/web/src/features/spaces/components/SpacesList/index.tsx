@@ -1,74 +1,86 @@
 import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
+import { SafeProFeature, useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement'
 import SpaceRow from './SpaceRow'
 import SignInOptions from '../SignInOptions'
 import WorkspaceBanner from '../WorkspaceBanner'
-import SpacesIcon from '@/public/images/spaces/spaces.svg'
-import SafeMarkIcon from '@/public/images/logo-no-text.svg'
+import SafeMarkIcon from '@safe-global/views/assets/images/logo-no-text.svg'
+import SafeProLockup from '@/public/images/safe-pro/safe-pro-lockup.svg'
+import SafeProLockupDark from '@/public/images/safe-pro/safe-pro-lockup-dark.svg'
 import { useAppSelector } from '@/store'
 import { isAuthenticated, selectIsStoreHydrated } from '@/store/authSlice'
-import { Check } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Spinner } from '@/components/ui/spinner'
-import { Link } from '@/components/ui/link'
-import { Typography } from '@/components/ui/typography'
+import { ArrowRight, Check, ExternalLink as ExternalLinkIcon } from 'lucide-react'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Card } from '@safe-global/views/components/ui/card'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Link } from '@safe-global/views/components/ui/link'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { type GetSpaceResponse, useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import SpaceListInvite from '../InviteBanner'
 import { useCallback, useState } from 'react'
 import css from './styles.module.css'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { MemberStatus } from '@/features/spaces'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { trackEvent } from '@/services/analytics'
+import Track from '@/components/common/Track'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import SpaceInfoModal from '../SpaceInfoModal'
 import { filterSpacesByStatus, getInvitedByName } from '@/features/spaces/utils'
 import { AppRoutes } from '@/config/routes'
+import { SAFE_PRO_USER_TERMS_URL } from '@/config/constants'
+import { PRIVACY_URL, TERMS_URL } from '@safe-global/utils/config/constants'
+import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import NextLink from 'next/link'
 import { useSignInRedirect } from '@/components/welcome/WelcomeLogin/hooks/useSignInRedirect'
 import AddIcon from '@/public/images/common/add.svg'
 import { SPACES_LIMIT } from '@/features/spaces/constants'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import WelcomeContentCard from '@/components/common/WelcomeContentCard'
+import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 
 const AddSpaceButton = ({
   onClick,
   disabled,
   size = 'lg',
   variant = 'default',
-  label = 'Create workspace',
+  label = 'Create Workspace',
+  icon = 'add',
+  link = true,
 }: {
   onClick?: () => void
   disabled?: boolean
   size?: 'lg' | 'default'
   variant?: 'default' | 'outline'
   label?: string
+  icon?: 'add' | 'arrow'
+  /** Off when the click opens a dialog instead of navigating to the onboarding. */
+  link?: boolean
 }) => {
+  const iconSize = size === 'lg' ? 'size-5' : 'size-4'
+
   const button = (
     <Button
       data-testid="create-space-button"
       variant={variant}
       size={size}
+      accentIcon={icon === 'arrow' && variant === 'default'}
       className={cn(
         // eslint-disable-next-line no-restricted-syntax -- bespoke full-height create-workspace CTA sizing from dev's #8271 redesign
         size === 'lg' && 'h-full rounded-lg px-6 py-3 text-base',
         variant === 'outline' && 'hover:bg-muted',
         disabled && 'cursor-not-allowed opacity-50 grayscale',
       )}
-      render={disabled ? <span /> : <NextLink href={AppRoutes.welcome.createSpace} />}
+      render={disabled ? <span /> : link ? <NextLink href={AppRoutes.welcome.createSpace} /> : undefined}
       disabled={disabled}
       onClick={disabled ? undefined : onClick}
     >
-      <AddIcon
-        className={cn(
-          variant === 'default' ? 'fill-primary-foreground' : 'fill-foreground',
-          size === 'lg' ? 'size-5' : 'size-4',
-        )}
-      />
+      {icon === 'add' && (
+        <AddIcon className={cn(variant === 'default' ? 'fill-primary-foreground' : 'fill-foreground', iconSize)} />
+      )}
       {label}
+      {icon === 'arrow' && <ArrowRight className={iconSize} />}
     </Button>
   )
 
@@ -77,60 +89,113 @@ const AddSpaceButton = ({
   return (
     <Tooltip>
       <TooltipTrigger render={<div className="inline-flex" />}>{button}</TooltipTrigger>
-      <TooltipContent>Limit of {SPACES_LIMIT} workspaces reached</TooltipContent>
+      <TooltipContent>Limit of {SPACES_LIMIT} Workspaces reached</TooltipContent>
     </Tooltip>
   )
 }
 
+const termsLinkClassName = 'underline underline-offset-2'
+
 const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => void; redirectLoading: boolean }) => {
   const isDarkMode = useDarkMode()
+  const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
+  // The Safe Pro terms only apply once Safe Pro is live.
+  const isSafePro = useIsSafeProEnabled()
+  const { SafeProBanner } = useLoadFeature(SafeProFeature)
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
       {/* The page keeps its Topbar + Accounts/Workspaces tabs, so the sign-in
           card renders inline rather than as a full-screen takeover. */}
-      <div className="relative flex items-center justify-center p-6 py-10">
-        <div className="flex w-full max-w-[440px] flex-col items-center">
-          <WorkspaceBanner className="mb-3" />
+      <div
+        className={cn(
+          'relative flex items-center justify-center pb-10',
+          isSafeProAnnouncementEnabled ? 'pt-0' : 'pt-10',
+        )}
+      >
+        <div className={cn('flex w-full flex-col items-center', isSafePro ? 'max-w-116' : 'max-w-110')}>
+          {isSafeProAnnouncementEnabled ? <SafeProBanner className="mb-4" /> : <WorkspaceBanner className="mb-3" />}
 
           <div className="relative w-full">
             <div className="relative w-full rounded-lg bg-card p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]">
-              <div className="mx-auto mb-6 flex size-10 items-center justify-center text-foreground">
-                <SafeMarkIcon className="size-10" />
+              <div className="mx-auto mb-6 flex h-10 items-center justify-center text-foreground">
+                {/* The Pro brand stays once Safe Pro exists, banner or not. */}
+                {isSafeProAnnouncementEnabled || isSafePro ? (
+                  isDarkMode ? (
+                    <SafeProLockupDark className="h-10 w-auto" />
+                  ) : (
+                    <SafeProLockup className="h-10 w-auto" />
+                  )
+                ) : (
+                  <SafeMarkIcon className="size-10" />
+                )}
               </div>
 
-              <Typography variant="h3" className="mb-6 text-center">
-                Sign in to your workspace
+              <Typography variant="h3" className={cn('text-center', isSafePro ? 'mb-4' : 'mb-6')}>
+                Sign in to your Workspace
               </Typography>
+
+              {isSafePro && (
+                <p className="mb-6 text-center text-xs leading-[18px] text-muted-foreground">
+                  By continuing you accept the{' '}
+                  <Link
+                    variant="muted"
+                    href={SAFE_PRO_USER_TERMS_URL}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className={termsLinkClassName}
+                  >
+                    Safe Pro User Terms
+                  </Link>{' '}
+                  and{' '}
+                  <Link
+                    variant="muted"
+                    href={PRIVACY_URL}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className={cn(termsLinkClassName, 'whitespace-nowrap')}
+                  >
+                    Privacy Policy. <ExternalLinkIcon className="ml-0.5 inline size-4 align-text-bottom" />
+                  </Link>
+                </p>
+              )}
 
               <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
             </div>
           </div>
 
-          <p className="mt-4 text-center text-xs leading-[18px] text-muted-foreground">
-            By continuing, you agree to the{' '}
-            <NextLink
-              href={AppRoutes.terms}
-              className="text-muted-foreground underline underline-offset-2 hover:text-foreground"
-            >
-              Terms
-            </NextLink>{' '}
-            and{' '}
-            <NextLink
-              href={AppRoutes.privacy}
-              className="text-muted-foreground underline underline-offset-2 hover:text-foreground"
-            >
-              Privacy Policy
-            </NextLink>
-            .
-          </p>
+          {!isSafePro && (
+            <p className="mt-4 text-center text-xs leading-[18px] text-muted-foreground">
+              By continuing, you agree to the{' '}
+              <Link
+                variant="muted"
+                href={TERMS_URL}
+                target="_blank"
+                rel="noreferrer noopener"
+                className={termsLinkClassName}
+              >
+                Terms
+              </Link>{' '}
+              and{' '}
+              <Link
+                variant="muted"
+                href={PRIVACY_URL}
+                target="_blank"
+                rel="noreferrer noopener"
+                className={termsLinkClassName}
+              >
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          )}
         </div>
       </div>
     </div>
   )
 }
 
-export const WORKSPACE_BENEFITS = [
+const WORKSPACE_BENEFITS = [
   'Organize multiple Safe accounts in one place',
   'Invite members and manage their roles',
   'Share an address book across your team',
@@ -138,43 +203,57 @@ export const WORKSPACE_BENEFITS = [
 
 const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
+  const isDarkMode = useDarkMode()
+  const isSafePro = useIsSafeProEnabled()
 
   return (
     <>
-      <Card size="none" className="w-full">
-        <div className="flex flex-col p-10 text-center">
-          <div className="mb-4 flex justify-center">
-            <SpacesIcon />
-          </div>
-
-          <Typography variant="h4" className="mb-2 font-bold">
-            Create your first workspace
-          </Typography>
-          <Typography color="muted" className="mb-3">
-            Collaborate on your Safe accounts with your team.
-          </Typography>
-
-          <div className="mx-auto mt-2 mb-6 flex max-w-[360px] flex-col gap-3 text-left">
+      <Card
+        size="none"
+        // eslint-disable-next-line no-restricted-syntax -- Figma's 32px corner has no Card `radius` option
+        className="w-full rounded-4xl p-1 text-center"
+      >
+        <div className="relative flex flex-col items-center gap-8 overflow-hidden rounded-t-[calc(2rem-4px)] bg-muted p-8 text-left before:absolute before:top-[72%] before:-left-16 before:size-96 before:-translate-y-1/2 before:rounded-full before:bg-[var(--color-static-text-brand)] before:opacity-45 before:blur-3xl md:flex-row md:items-end md:gap-16">
+          <div className="relative flex shrink-0 flex-col gap-4 md:self-center">
             {WORKSPACE_BENEFITS.map((benefit) => (
-              <div key={benefit} className="flex flex-row items-center gap-1.5">
-                <Check className="size-4 shrink-0 text-primary" />
-                <Typography variant="paragraph-small">{benefit}</Typography>
+              <div key={benefit} className="flex flex-row items-center gap-2">
+                <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[var(--color-background-light-hover)]">
+                  <Check className="size-4 text-badge-dot-success" strokeWidth={1.5} />
+                </div>
+                <Typography variant="paragraph-large" className="font-medium whitespace-nowrap">
+                  {benefit}
+                </Typography>
               </div>
             ))}
           </div>
 
-          <div className="h-12">
-            <AddSpaceButton
-              disabled={isAtLimit}
-              onClick={() =>
-                trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
-              }
-            />
-          </div>
+          <img
+            src={isDarkMode ? '/images/spaces/workspaces_empty_dark.webp' : '/images/spaces/workspaces_empty.png'}
+            alt="Workspace dashboard showing accounts grouped by Workspace"
+            className="relative -my-8 h-auto w-full min-w-0 md:-mr-8 md:w-[60%]"
+          />
+        </div>
 
-          <div className="mt-2">
-            <Link onClick={() => setIsInfoOpen(true)} href="#">
-              What are workspaces?
+        <div className="flex flex-col items-center gap-6 p-8">
+          <Typography variant="h3">Collaborate on your Safe accounts with your team.</Typography>
+
+          <div className="flex flex-col items-center gap-4">
+            <div className="h-12">
+              <Track
+                {...SPACE_EVENTS.WORKSPACE_CREATE_STARTED}
+                mixpanelParams={{ entry_point: WorkspaceCreateEntryPoint.EMPTY_STATE }}
+              >
+                <AddSpaceButton
+                  label={isSafePro ? 'Get Safe Pro' : 'Create your first Workspace'}
+                  icon="arrow"
+                  disabled={isAtLimit}
+                  link
+                />
+              </Track>
+            </div>
+
+            <Link variant="muted" className="text-sm underline" onClick={() => setIsInfoOpen(true)} href="#">
+              What are Workspaces?
             </Link>
           </div>
         </div>
@@ -186,6 +265,9 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 
 const SpacesList = () => {
   const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
+  const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
+  const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
+  // The pre-launch heads-up only makes sense to a user without a Workspace while Safe Pro is not live yet.
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const { currentData: currentUser } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
@@ -201,6 +283,8 @@ const SpacesList = () => {
   const isAtSpacesLimit = activeSpaces.length >= SPACES_LIMIT
 
   const singleSpaceId = activeSpaces.length === 1 ? activeSpaces[0].uuid : null
+  const urlSpaceId = useUrlSpaceId()
+  const requestedSpaceId = activeSpaces.some((space) => space.uuid === urlSpaceId) ? urlSpaceId : null
 
   // Treat any indefinite state as loading. On the skip→unskip flip (re-login
   // after logout) RTK Query lags one render — isFetching/isUninitialized are
@@ -215,14 +299,12 @@ const SpacesList = () => {
     isSpacesLoading,
     error: error || undefined,
     singleSpaceId,
+    requestedSpaceId,
   })
 
   const afterSignIn = useCallback(() => {
     setHasSignedIn(true)
   }, [setHasSignedIn])
-
-  const onAddSpaceBtnClick = () =>
-    trackEvent(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, { entry_point: WorkspaceCreateEntryPoint.WELCOME })
 
   const pendingInviteBanners =
     isUserSignedIn && pendingInvites.length > 0
@@ -250,38 +332,41 @@ const SpacesList = () => {
           <SignedOutState afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
         ) : error && !spaces?.length ? (
           <div className="flex flex-col items-center gap-3 py-10 text-center">
-            <Typography color="muted">Couldn&apos;t load your workspaces. Try again, or contact support.</Typography>
+            <Typography color="muted">Couldn&apos;t load your Workspaces. Try again, or contact support.</Typography>
             <Button variant="outline" onClick={() => refetch()}>
               Try again
             </Button>
           </div>
         ) : activeSpaces.length > 0 ? (
-          <WelcomeContentCard className="flex flex-col gap-4">
-            <div className="flex justify-end">
-              <AddSpaceButton
-                size="default"
-                variant="outline"
-                label="Create"
-                disabled={isAtSpacesLimit}
-                onClick={onAddSpaceBtnClick}
-              />
-            </div>
+          <>
+            {isSafeProAnnouncementEnabled && <SafeProWorkspacesBanner className="mb-4" />}
+            <WelcomeContentCard className="flex flex-col gap-4">
+              <div className="flex justify-end">
+                <Track
+                  {...SPACE_EVENTS.WORKSPACE_CREATE_STARTED}
+                  mixpanelParams={{ entry_point: WorkspaceCreateEntryPoint.WELCOME }}
+                >
+                  <AddSpaceButton size="default" variant="outline" label="Create" disabled={isAtSpacesLimit} />
+                </Track>
+              </div>
 
-            {pendingInviteBanners}
+              {pendingInviteBanners}
 
-            <div className="rounded-lg border border-border bg-card px-4 py-1" data-testid="org-list">
-              {activeSpaces.map((space, index) => (
-                <SpaceRow
-                  key={space.uuid}
-                  space={space}
-                  currentUserId={currentUser?.id}
-                  showDivider={index < activeSpaces.length - 1}
-                />
-              ))}
-            </div>
-          </WelcomeContentCard>
+              <div className="rounded-lg border border-border bg-card px-4 py-1" data-testid="org-list">
+                {activeSpaces.map((space, index) => (
+                  <SpaceRow
+                    key={space.uuid}
+                    space={space}
+                    currentUserId={currentUser?.id}
+                    showDivider={index < activeSpaces.length - 1}
+                  />
+                ))}
+              </div>
+            </WelcomeContentCard>
+          </>
         ) : (
           <>
+            {isSafeProAnnouncementEnabled && <SafeProWorkspacesBanner className="mb-4" />}
             {pendingInviteBanners}
             <NoSpacesState isAtLimit={isAtSpacesLimit} />
           </>

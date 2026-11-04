@@ -1,12 +1,11 @@
 import { useEffect } from 'react'
-import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import useLastSafe from '@/hooks/useLastSafe'
 import { AppRoutes } from '@/config/routes'
 import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
 import { WC_URI_SEARCH_PARAM } from '@/features/walletconnect'
 
-const WcPage: NextPage = () => {
+const WcPage = () => {
   const router = useRouter()
   const lastSafe = useLastSafe()
 
@@ -21,6 +20,7 @@ const WcPage: NextPage = () => {
       lastSafe
         ? {
             pathname: AppRoutes.home,
+            // eslint-disable-next-line no-restricted-syntax -- A WalletConnect link has no Workspace; it opens the last Safe used
             query: {
               safe: lastSafe,
               [WC_URI_SEARCH_PARAM]: uri,

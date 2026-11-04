@@ -32,9 +32,7 @@ export type StatusGroupType<T extends StatusGroup> = {
   [StatusGroup.ADDRESS_BOOK]: RecipientStatus.KNOWN_RECIPIENT | RecipientStatus.UNKNOWN_RECIPIENT
   [StatusGroup.RECIPIENT_ACTIVITY]: RecipientStatus.LOW_ACTIVITY | CommonSharedStatus.FAILED
   [StatusGroup.RECIPIENT_INTERACTION]:
-    | RecipientStatus.NEW_RECIPIENT
-    | RecipientStatus.RECURRING_RECIPIENT
-    | CommonSharedStatus.FAILED
+    RecipientStatus.NEW_RECIPIENT | RecipientStatus.RECURRING_RECIPIENT | CommonSharedStatus.FAILED
   [StatusGroup.BRIDGE]:
     | BridgeStatus.INCOMPATIBLE_SAFE
     | BridgeStatus.MISSING_OWNERSHIP
@@ -48,9 +46,7 @@ export type StatusGroupType<T extends StatusGroup> = {
     | ContractStatus.VERIFICATION_UNAVAILABLE
     | CommonSharedStatus.FAILED
   [StatusGroup.CONTRACT_INTERACTION]:
-    | ContractStatus.KNOWN_CONTRACT
-    | ContractStatus.NEW_CONTRACT
-    | CommonSharedStatus.FAILED
+    ContractStatus.KNOWN_CONTRACT | ContractStatus.NEW_CONTRACT | CommonSharedStatus.FAILED
   [StatusGroup.DELEGATECALL]: ContractStatus.UNEXPECTED_DELEGATECALL | CommonSharedStatus.FAILED
   [StatusGroup.FALLBACK_HANDLER]: ContractStatus.UNOFFICIAL_FALLBACK_HANDLER | CommonSharedStatus.FAILED
   [StatusGroup.THREAT]:
@@ -65,9 +61,7 @@ export type StatusGroupType<T extends StatusGroup> = {
     | CommonSharedStatus.FAILED
   [StatusGroup.CUSTOM_CHECKS]: ThreatStatus.NO_THREAT | ThreatStatus.CUSTOM_CHECKS_FAILED
   [StatusGroup.DEADLOCK]:
-    | DeadlockStatus.DEADLOCK_DETECTED
-    | DeadlockStatus.NESTED_SAFE_WARNING
-    | CommonSharedStatus.FAILED
+    DeadlockStatus.DEADLOCK_DETECTED | DeadlockStatus.NESTED_SAFE_WARNING | CommonSharedStatus.FAILED
   [StatusGroup.ADDRESS_POISONING]: RecipientStatus.RESEMBLES_TRUSTED_ADDRESS
 }[T]
 
@@ -136,12 +130,7 @@ export type SafeAnalysisResult = {
 }
 
 export type AnyStatus =
-  | RecipientStatus
-  | BridgeStatus
-  | ContractStatus
-  | ThreatStatus
-  | DeadlockStatus
-  | CommonSharedStatus
+  RecipientStatus | BridgeStatus | ContractStatus | ThreatStatus | DeadlockStatus | CommonSharedStatus
 
 export type AnalysisResult<T extends AnyStatus = AnyStatus> = {
   severity: Severity
@@ -196,8 +185,7 @@ export type UnofficialFallbackHandlerAnalysisResult = AnalysisResult<ContractSta
 }
 
 export type FallbackHandlerAnalysisResult =
-  | UnofficialFallbackHandlerAnalysisResult
-  | AnalysisResult<CommonSharedStatus.FAILED>
+  UnofficialFallbackHandlerAnalysisResult | AnalysisResult<CommonSharedStatus.FAILED>
 
 export type GroupedAnalysisResults<G extends StatusGroup = StatusGroup> = {
   [K in Exclude<G, StatusGroup.THREAT | StatusGroup.FALLBACK_HANDLER | StatusGroup.CUSTOM_CHECKS>]?: AnalysisResult<

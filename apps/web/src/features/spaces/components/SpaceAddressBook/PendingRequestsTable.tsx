@@ -1,11 +1,11 @@
 import { useState, useMemo } from 'react'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Spinner } from '@/components/ui/spinner'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { NetworkLogosPill, NetworkLogosTooltip } from '@/features/multichain'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -14,13 +14,14 @@ import {
   useAddressBookRequestsRejectRequestV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId, useGetSpaceAddressBook, useIsAdmin } from '@/features/spaces'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'
 import { Check, X } from 'lucide-react'
-import PaginatedDataTable, { type DataTableColumn } from '../PaginatedDataTable'
+import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
+import { cn } from '@safe-global/views/utils/cn'
+import AddressCell from './AddressCell'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 type PendingRequestsTableProps = {
   requests: AddressBookRequestItemDto[]
@@ -87,6 +88,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     setLoadingId(requestId)
     try {
       const result = await approveRequest({ spaceId: spaceId ?? '', requestId })
+      if (isElevationRequiredError(result.error)) return
       if (result.error) {
         dispatch(
           showNotification({
@@ -97,10 +99,9 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
         )
         return
       }
-      trackEvent(SPACE_EVENTS.ADDRESS_REQUEST_APPROVED)
       dispatch(
         showNotification({
-          message: 'Contact added to workspace address book',
+          message: 'Contact added to Workspace address book',
           variant: 'success',
           groupKey: 'approve-success',
         }),
@@ -121,7 +122,6 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
         dispatch(showNotification({ message: 'Failed to reject request', variant: 'error', groupKey: 'reject-error' }))
         return
       }
-      trackEvent(SPACE_EVENTS.ADDRESS_REQUEST_REJECTED)
       dispatch(showNotification({ message: 'Request rejected', variant: 'success', groupKey: 'reject-success' }))
     } catch {
       dispatch(showNotification({ message: 'Something went wrong', variant: 'error', groupKey: 'reject-error' }))
@@ -150,16 +150,21 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
       sticky: true,
       minWidth: 120,
       emphasis: 'strong',
-      cell: (req) => (
-        <span className="inline-flex min-w-0 items-center gap-2 overflow-hidden">
-          <span className="min-w-0 truncate">{req.name}</span>
-          {spaceAddresses.has(req.address.toLowerCase()) && (
-            <Tooltip>
-              <TooltipTrigger render={<Badge variant="outline">Already in workspace</Badge>} />
-              <TooltipContent>Approving replaces the existing workspace entry for this address.</TooltipContent>
-            </Tooltip>
-          )}
-        </span>
+      // Compact drops the address column, so the address rides under the name and a long name
+      // wraps into the width that frees up instead of truncating.
+      cell: (req, { isCompact }) => (
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <span className="inline-flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 overflow-hidden">
+            <span className={cn('min-w-0', !isCompact && 'truncate')}>{req.name}</span>
+            {spaceAddresses.has(req.address.toLowerCase()) && (
+              <Tooltip>
+                <TooltipTrigger render={<Badge variant="outline">Already in Workspace</Badge>} />
+                <TooltipContent>Approving replaces the existing Workspace entry for this address.</TooltipContent>
+              </Tooltip>
+            )}
+          </span>
+          {isCompact && <AddressCell address={req.address} isCompact />}
+        </div>
       ),
     },
     {
@@ -167,25 +172,13 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
       header: 'Address',
       width: '30%',
       minWidth: 240,
-      cell: (req, { isCompact }) => (
-        <div className="text-[0.8em] font-mono">
-          <EthHashInfo
-            address={req.address}
-            shortAddress={isCompact}
-            showPrefix={false}
-            showName={false}
-            highlight4bytes
-            hasExplorer
-            showCopyButton
-            avatarSize={24}
-          />
-        </div>
-      ),
+      priority: 'secondary',
+      cell: (req) => <AddressCell address={req.address} />,
     },
     {
       id: 'chains',
       header: 'Chains',
-      width: '20%',
+      width: '15%',
       priority: 'secondary',
       minWidth: 90,
       cell: renderChains,
@@ -193,14 +186,14 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     {
       id: 'requestedBy',
       header: 'Requested by',
-      width: '20%',
+      width: '30%',
       priority: 'secondary',
       minWidth: 140,
       cell: (req) => (req.requestedBy ? <RequestedBy requestedBy={req.requestedBy} /> : null),
     },
     {
       id: 'actions',
-      width: '15%',
+      width: '10%',
       align: 'end',
       minWidth: 80,
       cell: (req) =>
@@ -266,7 +259,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
   )
 
   if (requests.length === 0) {
-    return <p className="text-muted-foreground text-sm">No pending requests.</p>
+    return <p className="text-muted-foreground p-4 text-sm">No pending requests.</p>
   }
 
   return (

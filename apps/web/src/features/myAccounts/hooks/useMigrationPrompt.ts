@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import useAllSafes from '@/hooks/safes/useAllSafes'
-import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 
 export interface UseMigrationPromptReturn {
   /** Whether to show the prompt (user has safes but none pinned) */
@@ -43,14 +44,7 @@ const useMigrationPrompt = (): UseMigrationPromptReturn => {
   // Show prompt if user has safes but none pinned
   const shouldShowPrompt = !isLoading && hasAssociatedSafes && !hasPinnedSafes
 
-  // Track when migration prompt is first shown
-  const hasTrackedPrompt = useRef(false)
-  useEffect(() => {
-    if (shouldShowPrompt && !hasTrackedPrompt.current) {
-      trackEvent(OVERVIEW_EVENTS.TRUSTED_SAFES_MIGRATION_PROMPT)
-      hasTrackedPrompt.current = true
-    }
-  }, [shouldShowPrompt])
+  useTrackOnce(OVERVIEW_EVENTS.TRUSTED_SAFES_MIGRATION_PROMPT, undefined, shouldShowPrompt)
 
   return {
     shouldShowPrompt,

@@ -1,11 +1,10 @@
 import Topbar, {
-  SAFE_BAR_ACTIONS_WRAP,
   SAFE_BAR_CONTEXT_HEIGHT,
   SAFE_BAR_CONTEXT_WRAP,
-  SEARCH_ACTIONS_WRAP,
   SEARCH_CONTEXT_HEIGHT,
   SEARCH_CONTEXT_WRAP,
 } from './index'
+import type { ReactNode } from 'react'
 import * as contracts from '@/features/__core__'
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
@@ -14,6 +13,9 @@ import type { RootState } from '@/store'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
+import walletConnectFeature from '@/features/walletconnect/feature'
+import { wcPopupStore } from '@/features/walletconnect/store'
+import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
 jest.mock('@/features/__core__', () => ({
   ...jest.requireActual('@/features/__core__'),
@@ -23,7 +25,7 @@ jest.mock('@/features/__core__', () => ({
 const mockWallet = { address: '0x1234567890abcdef1234567890abcdef12345678', balance: '0' }
 
 const mockUseIsMobile = jest.fn(() => false)
-jest.mock('@/hooks/use-mobile', () => ({
+jest.mock('@safe-global/views/hooks/use-mobile', () => ({
   useIsMobile: () => mockUseIsMobile(),
 }))
 
@@ -48,13 +50,23 @@ jest.mock('@/features/walletconnect', () => ({
   WalletConnectFeature: { name: 'walletconnect' },
 }))
 
-jest.mock('@/features/batching', () => ({
-  useDraftBatch: () => [],
+jest.mock('@walletconnect/core', () => ({ Core: jest.fn() }))
+jest.mock('@reown/walletkit', () => ({
+  WalletKit: {
+    init: () => Promise.resolve({ getActiveSessions: () => ({}), on: jest.fn(), off: jest.fn() }),
+  },
 }))
 
+const mockUseDraftBatch = jest.fn<unknown[], []>(() => [])
+jest.mock('@/features/batching', () => ({
+  useDraftBatch: () => mockUseDraftBatch(),
+  BatchTooltip: ({ children }: { children: ReactNode }) => children,
+}))
+
+const mockUseSafeAddress = jest.fn<string, []>(() => '')
 jest.mock('@/hooks/useSafeAddress', () => ({
   __esModule: true,
-  default: () => '',
+  default: () => mockUseSafeAddress(),
 }))
 
 const mockUseSafeAddressFromUrl = jest.fn<string, []>(() => '')
@@ -62,13 +74,15 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   useSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
 }))
 
+const mockUseIsSafeOwner = jest.fn(() => false)
 jest.mock('@/hooks/useIsSafeOwner', () => ({
   __esModule: true,
-  default: () => false,
+  default: () => mockUseIsSafeOwner(),
 }))
 
+const mockUseIsWalletProposer = jest.fn(() => false)
 jest.mock('@/hooks/useProposers', () => ({
-  useIsWalletProposer: () => false,
+  useIsWalletProposer: () => mockUseIsWalletProposer(),
 }))
 
 const mockIsSpaceRoute = jest.fn(() => true)
@@ -142,11 +156,15 @@ const mockUseLoadFeature = contracts.useLoadFeature as jest.Mock
 describe('Topbar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    mockUseDraftBatch.mockReturnValue([])
     mockUseIsMobile.mockReturnValue(false)
     mockUseIsBelowMd.mockReturnValue(false)
     mockIsSpaceRoute.mockReturnValue(true)
     mockUsePathname.mockReturnValue('/home')
     mockUseSafeAddressFromUrl.mockReturnValue('')
+    mockUseSafeAddress.mockReturnValue('')
+    mockUseIsSafeOwner.mockReturnValue(false)
+    mockUseIsWalletProposer.mockReturnValue(false)
     mockUseLoadFeature.mockReturnValue({
       WalletPopover: () => null,
       GlobalSearchModal: () => null,
@@ -158,6 +176,71 @@ describe('Topbar', () => {
   it('renders the wallet address in HeaderNavigation', () => {
     render(<Topbar />)
     expect(screen.getByText('0x1234...5678')).toBeInTheDocument()
+  })
+
+  describe('on a Safe page', () => {
+    const safeInfo = extendedSafeInfoBuilder().build()
+    const PAIRING_PROMPT = /paste the pairing code/i
+
+    const renderOnSafePage = () =>
+      render(<Topbar />, {
+        initialReduxState: { safeInfo: { data: safeInfo, loading: false, loaded: true } },
+      })
+
+    beforeEach(() => {
+      wcPopupStore.setStore(false)
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUseSafeAddress.mockReturnValue(safeInfo.address.value)
+      mockUseLoadFeature.mockReturnValue({
+        WalletPopover: () => null,
+        GlobalSearchModal: () => null,
+        GlobalSearchInput: () => null,
+        WalletConnectWidget: walletConnectFeature.WalletConnectWidget,
+      })
+    })
+
+    it('opens the notifications popover when the notifications button is clicked', async () => {
+      const user = userEvent.setup()
+      renderOnSafePage()
+      expect(screen.queryByTestId('notifications-title')).not.toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: 'Notifications' }))
+
+      expect(screen.getByTestId('notifications-title')).toBeInTheDocument()
+    })
+
+    it('shows the Batch button', () => {
+      renderOnSafePage()
+
+      expect(screen.getByLabelText('Batch transactions')).toBeInTheDocument()
+    })
+
+    it('counts the transactions in the draft batch on the Batch button', () => {
+      mockUseDraftBatch.mockReturnValue([{}])
+
+      renderOnSafePage()
+
+      expect(screen.getByLabelText('1 batched transactions')).toBeInTheDocument()
+    })
+
+    it('opens the WalletConnect pairing popup when the WalletConnect button is clicked', async () => {
+      const user = userEvent.setup()
+      renderOnSafePage()
+      expect(screen.queryByText(PAIRING_PROMPT)).not.toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: 'WalletConnect' }))
+
+      expect(await screen.findByText(PAIRING_PROMPT)).toBeInTheDocument()
+    })
+  })
+
+  it('hides the Batch button on a page without a Safe', () => {
+    mockIsSpaceRoute.mockReturnValue(false)
+    mockUseSafeAddress.mockReturnValue('')
+
+    render(<Topbar />)
+
+    expect(screen.queryByLabelText('Batch transactions')).not.toBeInTheDocument()
   })
 
   it('renders notification badge when there are unread notifications', () => {
@@ -173,6 +256,16 @@ describe('Topbar', () => {
   it('does not render notification badge when there are no unread notifications', () => {
     render(<Topbar />)
     expect(screen.queryByLabelText(/unread messages/)).not.toBeInTheDocument()
+  })
+
+  it('does not count errors in the badge', () => {
+    const initialReduxState: Partial<RootState> = {
+      notifications: [createNotification(), createNotification({ variant: 'error' })],
+    }
+
+    render(<Topbar />, { initialReduxState })
+
+    expect(screen.getByLabelText('1 unread messages')).toBeInTheDocument()
   })
 
   it('does not count read notifications in the badge', () => {
@@ -198,8 +291,9 @@ describe('Topbar', () => {
       expect(screen.getByTestId('space-safe-bar')).toBeInTheDocument()
     })
 
-    it('renders SpaceSafeBar on space routes when a transaction modal is open', () => {
+    it('renders SpaceSafeBar on space routes when a transaction modal is open for a Safe', () => {
       mockIsSpaceRoute.mockReturnValue(true)
+      mockUseSafeAddress.mockReturnValue('0x1234567890123456789012345678901234567890')
       const txModalValue: TxModalContextType = {
         txFlow: <div data-testid="mock-tx-flow" />,
         setTxFlow: jest.fn(),
@@ -211,6 +305,48 @@ describe('Topbar', () => {
         </TxModalContext.Provider>,
       )
       expect(screen.getByTestId('space-safe-bar')).toBeInTheDocument()
+    })
+
+    // The policy flows pick their Safe inside step 1 and never set the URL Safe, so the bar would
+    // render an empty Safe selector over the Space.
+    it('keeps the search input on space routes when the open flow has no Safe of its own', () => {
+      mockIsSpaceRoute.mockReturnValue(true)
+      mockUseSafeAddress.mockReturnValue('')
+      const txModalValue: TxModalContextType = {
+        txFlow: <div data-testid="mock-tx-flow" />,
+        setTxFlow: jest.fn(),
+        setFullWidth: jest.fn(),
+      }
+      render(
+        <TxModalContext.Provider value={txModalValue}>
+          <Topbar />
+        </TxModalContext.Provider>,
+      )
+      expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
+    })
+
+    it('renders SafeLogo on the policies route, with neither the safe bar nor the search input', () => {
+      mockIsSpaceRoute.mockReturnValue(true)
+      mockUsePathname.mockReturnValue('/spaces/policies')
+      mockUseLoadFeature.mockReturnValue({
+        WalletPopover: () => null,
+        GlobalSearchModal: () => null,
+        GlobalSearchInput: () => <div data-testid="global-search-input" />,
+        WalletConnectWidget: () => null,
+      })
+      const txModalValue: TxModalContextType = {
+        txFlow: <div data-testid="mock-tx-flow" />,
+        setTxFlow: jest.fn(),
+        setFullWidth: jest.fn(),
+      }
+      render(
+        <TxModalContext.Provider value={txModalValue}>
+          <Topbar />
+        </TxModalContext.Provider>,
+      )
+      expect(screen.getByTestId('logo-image')).toBeInTheDocument()
+      expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('global-search-input')).not.toBeInTheDocument()
     })
 
     it('renders SafeLogo on settings routes when no safe address is in the URL', () => {
@@ -295,8 +431,8 @@ describe('Topbar', () => {
       // The logo opts out of both variants' thresholds — it always fits beside the actions.
       expect(context.className).not.toMatch(/basis-full/)
       expect(actions.className).not.toMatch(/order-first/)
-      // Nothing left to push the actions off the right edge.
-      expect(actions.className).toContain('ml-auto')
+      // The context's auto margin is what parks the actions on the right edge.
+      expect(context.className).toContain('mr-auto')
     })
 
     it.each(LOGO_ROUTES)('centers the short logo row against the actions card on %s', (pathname) => {
@@ -313,11 +449,10 @@ describe('Topbar', () => {
       mockIsSpaceRoute.mockReturnValue(false)
       mockUsePathname.mockReturnValue('/home')
 
-      const { header, context, actions } = groups(render(<Topbar />).container)
+      const { header, context } = groups(render(<Topbar />).container)
 
       expect(context).toContainElement(screen.getByTestId('space-safe-bar'))
       expect(context.className).toContain(SAFE_BAR_CONTEXT_WRAP)
-      expect(actions.className).toContain(SAFE_BAR_ACTIONS_WRAP)
       expect(header.className).toMatch(/items-start/)
       // A floor, not a fixed height: the bar wraps internally at narrow widths, and against a fixed
       // h-14 the slot's items-center centred the overflow — half of it spilling up into the actions.
@@ -331,14 +466,14 @@ describe('Topbar', () => {
       mockIsSpaceRoute.mockReturnValue(true)
       mockUsePathname.mockReturnValue('/spaces')
 
-      const { context, actions } = groups(render(<Topbar />).container)
+      const { context } = groups(render(<Topbar />).container)
 
       // The search variant is the one the safe bar is NOT in (GlobalSearchInput is stubbed to null
       // by the feature mock, so there is no element of its own to assert on).
       expect(screen.queryByTestId('space-safe-bar')).not.toBeInTheDocument()
       expect(context.className).toContain(SEARCH_CONTEXT_WRAP)
-      expect(actions.className).toContain(SEARCH_ACTIONS_WRAP)
       expect(context.className).not.toContain(SAFE_BAR_CONTEXT_WRAP)
+      expect(context.className).not.toMatch(/order-last/)
       // This variant keeps the FIXED height: the search input sizes itself with `h-full`, which
       // needs a definite parent — a min-height would leave it collapsed to its content.
       expect(context.className).toContain(SEARCH_CONTEXT_HEIGHT)
@@ -360,6 +495,16 @@ describe('Topbar', () => {
       expect(actions.className).not.toContain('basis-full')
     })
 
+    it('leaves the search in DOM order so it does not flip sides as the row wraps', () => {
+      mockIsSpaceRoute.mockReturnValue(true)
+      mockUsePathname.mockReturnValue('/spaces')
+
+      const { context } = groups(render(<Topbar />).container)
+
+      expect(context.className).not.toMatch(/order-last/)
+      expect(context.className).toContain('basis-full')
+    })
+
     it('stacks the account card above the context with both rows on the left edge', () => {
       mockIsSpaceRoute.mockReturnValue(false)
       mockUsePathname.mockReturnValue('/home')
@@ -370,13 +515,28 @@ describe('Topbar', () => {
       // ahead of the burger and pushed it onto a row of its own.
       expect(context.className).toMatch(/order-last/)
       expect(actions.className).not.toMatch(/order-first/)
-      // `ml-0` drops the `ml-auto` that right-aligns the card while the two share a row, so both
-      // wrapped rows start on the page's left padding.
-      expect(actions.className).toMatch(/ml-0/)
+      // The card has no margin of its own, so a row it has to itself starts on the page's left padding.
+      expect(actions.className).not.toMatch(/ml-auto/)
       // And the search is not right-aligned inside its full-width slot, which would put the two
       // rows on a diagonal.
       expect(context.className).not.toMatch(/justify-end/)
     })
+
+    // Above the forced-wrap threshold the pair can still outgrow the row (the safe bar's width follows
+    // its content), and flexbox wraps on its own. The only thing deciding the alignment of a row a
+    // group has to itself is a margin on that group, so neither may right-align itself.
+    it.each([['/home'], ['/spaces']])(
+      'relies on the context margin alone to right-align the actions on %s',
+      (pathname) => {
+        mockIsSpaceRoute.mockReturnValue(pathname === '/spaces')
+        mockUsePathname.mockReturnValue(pathname)
+
+        const { context, actions } = groups(render(<Topbar />).container)
+
+        expect(context.className).toContain('mr-auto')
+        expect(actions.className).not.toMatch(/ml-auto|ml-0|justify-end/)
+      },
+    )
 
     it('leaves the sidebar burger first in the header so it holds the top row', () => {
       mockIsSpaceRoute.mockReturnValue(false)
@@ -422,6 +582,46 @@ describe('Topbar', () => {
       mockUsePathname.mockReturnValue('/welcome')
       render(<Topbar />)
       expect(screen.getByRole('button', { name: /search/i })).toBeInTheDocument()
+    })
+  })
+
+  describe('batch button role gating', () => {
+    const SAFE_ADDRESS = '0x1234567890123456789012345678901234567890'
+    const BATCH_BUTTON_LABEL = 'Batch transactions'
+
+    beforeEach(() => {
+      mockIsSpaceRoute.mockReturnValue(false)
+      mockUseSafeAddress.mockReturnValue(SAFE_ADDRESS)
+    })
+
+    it.each([
+      { role: 'an owner', isSafeOwner: true, isProposer: false },
+      { role: 'a proposer who is also an owner', isSafeOwner: true, isProposer: true },
+      { role: 'a connected non-owner who is not a proposer', isSafeOwner: false, isProposer: false },
+    ])('shows the batch button to $role', ({ isSafeOwner, isProposer }) => {
+      mockUseIsSafeOwner.mockReturnValue(isSafeOwner)
+      mockUseIsWalletProposer.mockReturnValue(isProposer)
+
+      render(<Topbar />)
+
+      expect(screen.getByLabelText(BATCH_BUTTON_LABEL)).toBeInTheDocument()
+    })
+
+    it('hides the batch button from a proposer who is not an owner', () => {
+      mockUseIsWalletProposer.mockReturnValue(true)
+
+      render(<Topbar />)
+
+      expect(screen.queryByLabelText(BATCH_BUTTON_LABEL)).not.toBeInTheDocument()
+    })
+
+    it('hides the batch button from an owner when there is no Safe address', () => {
+      mockUseSafeAddress.mockReturnValue('')
+      mockUseIsSafeOwner.mockReturnValue(true)
+
+      render(<Topbar />)
+
+      expect(screen.queryByLabelText(BATCH_BUTTON_LABEL)).not.toBeInTheDocument()
     })
   })
 

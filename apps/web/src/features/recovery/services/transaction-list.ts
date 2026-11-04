@@ -11,6 +11,7 @@ import { Interface } from 'ethers'
 import type { BaseTransaction } from '@safe-global/safe-apps-sdk'
 import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { decodeMultiSendData } from '@safe-global/protocol-kit'
+import { Errors, logError } from '@/services/exceptions'
 
 function decodeOwnerManagementTransaction(safe: SafeState, transaction: BaseTransaction): SafeState {
   const safeDeployment = getSafeSingletonDeployment({ version: safe.version ?? undefined })
@@ -53,10 +54,16 @@ function decodeOwnerManagementTransaction(safe: SafeState, transaction: BaseTran
   }
 }
 
-export function getRecoveredSafeInfo(safe: SafeState, transaction: BaseTransaction): SafeState {
+/** `undefined` when the proposal no longer applies to the Safe's current owner structure. */
+export function getRecoveredSafeInfo(safe: SafeState, transaction: BaseTransaction): SafeState | undefined {
   const transactions = isMultiSendCalldata(transaction.data) ? decodeMultiSendData(transaction.data) : [transaction]
 
-  return transactions.reduce((acc, cur) => {
-    return decodeOwnerManagementTransaction(acc, cur)
-  }, safe)
+  try {
+    return transactions.reduce((acc, cur) => {
+      return decodeOwnerManagementTransaction(acc, cur)
+    }, safe)
+  } catch (e) {
+    logError(Errors._811, e)
+    return undefined
+  }
 }

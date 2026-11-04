@@ -1,7 +1,7 @@
 import React from 'react'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Typography } from '@safe-global/views/components/ui/typography'
 
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { LoadSafeFormData } from '@/components/new-safe/load'
@@ -16,7 +16,7 @@ import { addOrUpdateSafe } from '@/store/addedSafesSlice'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { LOAD_SAFE_EVENTS, OPEN_SAFE_LABELS, OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { AppRoutes } from '@/config/routes'
-import ReviewRow from '@/components/new-safe/ReviewRow'
+import ReviewRow from '@safe-global/views/components/new-safe/ReviewRow'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 
@@ -83,6 +83,7 @@ const SafeReviewStep = ({ data, onBack }: StepRenderProps<LoadSafeFormData>) => 
 
     router.push({
       pathname: AppRoutes.home,
+      // eslint-disable-next-line no-restricted-syntax -- A loaded Safe goes to My accounts, not to a Workspace
       query: { safe: `${chain?.shortName}:${safeAddress}` },
     })
   }

@@ -14,11 +14,18 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   useSafeAddressFromUrl: () => mockUseSafeAddressFromUrl(),
 }))
 
+const mockUseIsSafeProEnabled = jest.fn()
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
+const mockPlans: { plan: { status: string } | null } = { plan: null }
+jest.mock('../../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockPlans }))
+const mockSponsored = { isPro: false }
+jest.mock('../../../../hooks/useSafeSponsoredTxs', () => ({ useSafeSponsoredTxs: () => mockSponsored }))
+
 jest.mock('@/hooks/useIsSpaceRoute', () => ({
   useIsSpaceRoute: () => mockUseIsSpaceRoute(),
 }))
 
-jest.mock('@/components/ui/sidebar', () => ({
+jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   SidebarTrigger: ({ className, 'data-testid': testId }: { className?: string; 'data-testid'?: string }) => (
     <button data-testid={testId} className={className}>
       Toggle
@@ -33,23 +40,35 @@ jest.mock('@/components/common/SafeLogo', () => {
   const MockSafeLogo = ({
     href,
     showHomeLabel,
+    showProLockup,
     'data-testid': testId,
   }: {
     href?: string
     showHomeLabel?: boolean
+    showProLockup?: boolean
     'data-testid'?: string
-  }) => <a data-testid={testId} href={href} data-home-label={String(Boolean(showHomeLabel))} />
+  }) => (
+    <a
+      data-testid={testId}
+      href={href}
+      data-home-label={String(Boolean(showHomeLabel))}
+      data-pro-lockup={String(Boolean(showProLockup))}
+    />
+  )
   MockSafeLogo.displayName = 'SafeLogo'
   return { __esModule: true, default: MockSafeLogo }
 })
 
 describe('SidebarTopBar', () => {
   beforeEach(() => {
+    mockPlans.plan = null
+    mockSponsored.isPro = false
     jest.clearAllMocks()
     mockUseRouter.mockReturnValue({ pathname: AppRoutes.welcome.accounts })
     mockUseSafeAddressFromUrl.mockReturnValue('')
     mockUseIsSpaceRoute.mockReturnValue(false)
-    const { useSidebar } = require('@/components/ui/sidebar')
+    mockUseIsSafeProEnabled.mockReturnValue(true)
+    const { useSidebar } = require('@safe-global/views/components/ui/sidebar')
     useSidebar.mockReturnValue({ state: 'expanded' })
   })
 
@@ -62,7 +81,7 @@ describe('SidebarTopBar', () => {
   })
 
   it('exposes the expanded sidebar state on the top bar', () => {
-    const { useSidebar } = require('@/components/ui/sidebar')
+    const { useSidebar } = require('@safe-global/views/components/ui/sidebar')
     useSidebar.mockReturnValue({ state: 'expanded' })
 
     render(<SidebarTopBar />)
@@ -71,7 +90,7 @@ describe('SidebarTopBar', () => {
   })
 
   it('exposes the collapsed sidebar state on the top bar', () => {
-    const { useSidebar } = require('@/components/ui/sidebar')
+    const { useSidebar } = require('@safe-global/views/components/ui/sidebar')
     useSidebar.mockReturnValue({ state: 'collapsed' })
 
     render(<SidebarTopBar />)
@@ -98,7 +117,20 @@ describe('SidebarTopBar', () => {
     expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
   })
 
-  it('shows the Home label pill inside a space route', () => {
+  it('keeps the dev logo and its link to My accounts until Safe Pro is live', () => {
+    mockUseIsSafeProEnabled.mockReturnValue(false)
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.spaces.index })
+    mockUseIsSpaceRoute.mockReturnValue(true)
+    mockPlans.plan = { status: 'active' }
+
+    render(<SidebarTopBar />)
+
+    const logo = screen.getByTestId('logo-container')
+    expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
+    expect(logo).toHaveAttribute('data-pro-lockup', 'false')
+  })
+
+  it('shows the Home label pill inside a space route, linking back to the Workspaces list', () => {
     mockUseRouter.mockReturnValue({ pathname: AppRoutes.spaces.index })
     mockUseIsSpaceRoute.mockReturnValue(true)
 
@@ -106,11 +138,51 @@ describe('SidebarTopBar', () => {
 
     const logo = screen.getByTestId('logo-container')
     expect(logo).toHaveAttribute('data-home-label', 'true')
+    expect(logo).toHaveAttribute('href', AppRoutes.welcome.spaces)
+  })
+
+  it('swaps the Home label for the PRO chip while the Workspace is on a plan, trial included', () => {
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.spaces.index })
+    mockUseIsSpaceRoute.mockReturnValue(true)
+    mockPlans.plan = { status: 'trialing' }
+
+    render(<SidebarTopBar />)
+
+    expect(screen.getByTestId('logo-container')).toHaveAttribute('data-pro-lockup', 'true')
+    expect(screen.getByTestId('logo-container')).toHaveAttribute('href', AppRoutes.welcome.spaces)
+
+    mockPlans.plan = null
+    render(<SidebarTopBar />)
+    expect(screen.getAllByTestId('logo-container')[1]).toHaveAttribute('data-pro-lockup', 'false')
+  })
+
+  it('keeps the PRO chip on the pages of a Safe whose own Workspace is on a plan', () => {
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.home })
+    mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
+    mockSponsored.isPro = true
+
+    render(<SidebarTopBar />)
+
+    const logo = screen.getByTestId('logo-container')
+    expect(logo).toHaveAttribute('data-home-label', 'true')
+    expect(logo).toHaveAttribute('data-pro-lockup', 'true')
+    expect(logo).toHaveAttribute('href', AppRoutes.welcome.spaces)
+  })
+
+  it('ignores the last-used Workspace on a Safe that belongs to none', () => {
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.home })
+    mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
+    mockPlans.plan = { status: 'active' }
+
+    render(<SidebarTopBar />)
+
+    const logo = screen.getByTestId('logo-container')
+    expect(logo).toHaveAttribute('data-pro-lockup', 'false')
     expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
   })
 
   it('does not show the Home label pill when the sidebar is collapsed', () => {
-    const { useSidebar } = require('@/components/ui/sidebar')
+    const { useSidebar } = require('@safe-global/views/components/ui/sidebar')
     useSidebar.mockReturnValue({ state: 'collapsed' })
     mockUseSafeAddressFromUrl.mockReturnValue('0x1234567890abcdef1234567890abcdef12345678')
 
@@ -120,6 +192,21 @@ describe('SidebarTopBar', () => {
     const logo = screen.getByTestId('logo-container')
     expect(logo).toHaveAttribute('data-home-label', 'false')
     expect(logo).toHaveAttribute('href', AppRoutes.welcome.accounts)
+    expect(screen.queryByTestId('collapsed-pro-chip')).not.toBeInTheDocument()
+  })
+
+  it('stacks the PRO chip under the logo when collapsed on a Workspace with a plan', () => {
+    const { useSidebar } = require('@safe-global/views/components/ui/sidebar')
+    useSidebar.mockReturnValue({ state: 'collapsed' })
+    mockUseRouter.mockReturnValue({ pathname: AppRoutes.spaces.index })
+    mockUseIsSpaceRoute.mockReturnValue(true)
+    mockPlans.plan = { status: 'active' }
+
+    render(<SidebarTopBar />)
+
+    expect(screen.getByTestId('logo-container')).toHaveAttribute('data-home-label', 'false')
+    expect(screen.getByTestId('logo-container')).toHaveAttribute('href', AppRoutes.welcome.spaces)
+    expect(screen.getByTestId('collapsed-pro-chip')).toBeInTheDocument()
   })
 
   it('keeps the plain logo on the welcome accounts view (no safe, no space)', () => {

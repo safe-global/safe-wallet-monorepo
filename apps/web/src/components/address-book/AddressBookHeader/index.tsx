@@ -4,9 +4,9 @@ import Link from 'next/link'
 
 import AddressBookSearchInput from '@/components/common/AddressBookSearchInput'
 import Track from '@/components/common/Track'
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
-import { Link as ShadcnLink } from '@/components/ui/link'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Link as ShadcnLink } from '@safe-global/views/components/ui/link'
 import { ADDRESS_BOOK_EVENTS } from '@/services/analytics/events/addressBook'
 import { ModalType } from '../AddressBookTable'
 import { useAppSelector } from '@/store'
@@ -30,7 +30,7 @@ const SpaceAddressBookCTA = () => {
 
   return (
     <Typography className="max-w-[500px] text-sm">
-      This data is stored in your local storage. Do you want to manage your <b>{space?.name}</b> workspace address book
+      This data is stored in your local storage. Do you want to manage your <b>{space?.name}</b> Workspace address book
       instead?{' '}
       <ShadcnLink render={<Link href={{ pathname: AppRoutes.spaces.addressBook, query: { spaceId } }} passHref />}>
         Click here

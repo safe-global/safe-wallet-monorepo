@@ -22,7 +22,10 @@ const useLoadTxQueue = (): AsyncResult<QueuedItemPage> => {
       // For undeployed safes, return empty once safe info confirms not deployed
       if (safeLoaded && !safe.deployed) return Promise.resolve({ results: [] })
 
-      return getTransactionQueue(effectiveChainId, effectiveAddress)
+      return getTransactionQueue(effectiveChainId, effectiveAddress).catch((e) => {
+        logError(Errors._603, e)
+        throw e
+      })
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [effectiveChainId, effectiveAddress, reloadTag, safeLoaded, safe.deployed],
@@ -42,12 +45,6 @@ const useLoadTxQueue = (): AsyncResult<QueuedItemPage> => {
       unsubscribeDeleted()
     }
   }, [])
-
-  // Log errors
-  useEffect(() => {
-    if (!error) return
-    logError(Errors._603, error.message)
-  }, [error])
 
   return [data, error, loadingQueueItems]
 }

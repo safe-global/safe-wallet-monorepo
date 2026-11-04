@@ -2,7 +2,7 @@ import * as addressBook from '@/hooks/useAddressBook'
 import * as allAddressBooks from '@/hooks/useAllAddressBooks'
 import * as urlChainId from '@/hooks/useChainId'
 import { act, fireEvent, waitFor } from '@testing-library/react'
-import { render } from '@/tests/test-utils'
+import { fakerChecksummedAddress, render } from '@/tests/test-utils'
 import { useForm, FormProvider } from 'react-hook-form'
 import AddressInput, { type AddressInputProps } from '.'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -13,19 +13,25 @@ import userEvent from '@testing-library/user-event'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 
 const mockChain = chainBuilder()
-  .with({ features: [FEATURES.DOMAIN_LOOKUP] })
+  .with({ features: [FEATURES.DOMAIN_LOOKUP], isTestnet: true })
   .with({ chainId: '11155111' })
   .build()
 
 const mockMainnetChain = chainBuilder()
-  .with({ features: [FEATURES.DOMAIN_LOOKUP] })
+  .with({ features: [FEATURES.DOMAIN_LOOKUP], isTestnet: false })
   .with({ chainId: '1', shortName: 'eth' })
   .build()
 
-// mock useCurrentChain
+const mockUseChain = jest.fn((chainId: string) => {
+  if (chainId === '1') return mockMainnetChain
+  if (chainId === '11155111') return mockChain
+  return undefined
+})
+
+// mock useCurrentChain / useChain
 jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: jest.fn(() => mockChain),
-  useChain: jest.fn(() => mockChain),
+  useChain: (chainId: string) => mockUseChain(chainId),
   useHasFeature: jest.fn(() => false),
 }))
 
@@ -116,16 +122,23 @@ describe('AddressInput tests', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     ;(useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
+    mockUseChain.mockImplementation((chainId: string) => {
+      if (chainId === '1') return mockMainnetChain
+      if (chainId === '11155111') return mockChain
+      return undefined
+    })
     jest.spyOn(addressBook, 'default').mockReturnValue({})
   })
 
-  it('should render with a default address value', () => {
-    const { input } = setup(TEST_ADDRESS_A)
+  it('should render with a default address value', async () => {
+    const utils = await act(async () => render(<TestForm address={TEST_ADDRESS_A} />))
+    const input = utils.getByLabelText('Recipient address', { exact: false }) as HTMLInputElement
     expect(input.value).toBe(TEST_ADDRESS_A)
   })
 
-  it('should render with a default prefixed address value', () => {
-    const { input } = setup(`eth:${TEST_ADDRESS_A}`)
+  it('should render with a default prefixed address value', async () => {
+    const utils = await act(async () => render(<TestForm address={`eth:${TEST_ADDRESS_A}`} />))
+    const input = utils.getByLabelText('Recipient address', { exact: false }) as HTMLInputElement
     expect(input.value).toBe(`eth:${TEST_ADDRESS_A}`)
   })
 
@@ -183,6 +196,28 @@ describe('AddressInput tests', () => {
     await waitFor(() => expect(utils.getByLabelText(`Invalid address format`, { exact: false })).toBeDefined())
   })
 
+  it('flags an address with a wrong checksum', async () => {
+    const { input, utils } = setup('')
+
+    act(() => {
+      fireEvent.change(input, { target: { value: '0X6D0B6F96F665BB4490F9DDB2E450DA2F7E546DC1' } })
+      jest.advanceTimersByTime(1000)
+    })
+
+    await waitFor(() => expect(utils.getByLabelText('Invalid address checksum', { exact: false })).toBeDefined())
+  })
+
+  it('shows the checksummed address for a lowercase address', async () => {
+    const { input } = setup('')
+    const address = fakerChecksummedAddress()
+
+    await act(async () => {
+      fireEvent.change(input, { target: { value: address.toLowerCase() } })
+    })
+
+    await waitFor(() => expect(input.value).toBe(address))
+  })
+
   it('should accept a custom validate function', async () => {
     const { input, utils } = setup('', (val) => `${val} is wrong`)
 
@@ -229,7 +264,7 @@ describe('AddressInput tests', () => {
   it('should resolve ENS names', async () => {
     const { input } = setup('')
 
-    act(() => {
+    await act(async () => {
       fireEvent.change(input, { target: { value: 'zero.eth' } })
     })
 
@@ -242,7 +277,7 @@ describe('AddressInput tests', () => {
   it('should label the field with the ENS name it resolved from', async () => {
     const { input, utils } = setup('')
 
-    act(() => {
+    await act(async () => {
       fireEvent.change(input, { target: { value: 'zero.eth' } })
     })
 
@@ -255,13 +290,13 @@ describe('AddressInput tests', () => {
   it('should revert the label when the resolved address is edited', async () => {
     const { input, utils } = setup('')
 
-    act(() => {
+    await act(async () => {
       fireEvent.change(input, { target: { value: 'zero.eth' } })
     })
 
     await waitFor(() => expect(utils.getByLabelText('Address resolved from zero.eth', { exact: false })).toBeDefined())
 
-    act(() => {
+    await act(async () => {
       fireEvent.change(input, { target: { value: TEST_ADDRESS_B } })
     })
 
@@ -272,17 +307,18 @@ describe('AddressInput tests', () => {
 
   it('should resolve ENS names against the given chain even if the current chain lacks the feature', async () => {
     // The Spaces address book is chain-agnostic, so it passes mainnet to resolve .eth names while
-    // the connected/current chain (here without DOMAIN_LOOKUP) would otherwise gate resolution off.
+    // the connected/current chain would otherwise not be the ENS hub.
     ;(useCurrentChain as jest.Mock).mockImplementation(() => ({
       shortName: 'gno',
       chainId: '100',
       chainName: 'Gnosis Chain',
+      isTestnet: false,
       features: [],
     }))
 
     const { input } = setup('', undefined, undefined, mockMainnetChain)
 
-    act(() => {
+    await act(async () => {
       fireEvent.change(input, { target: { value: 'zero.eth' } })
     })
 
@@ -295,7 +331,7 @@ describe('AddressInput tests', () => {
   it('should show an error if ENS resolution has failed', async () => {
     const { input, utils } = setup('')
 
-    act(() => {
+    await act(async () => {
       fireEvent.change(input, { target: { value: 'bogus.eth' } })
       jest.advanceTimersByTime(1000)
     })
@@ -304,13 +340,17 @@ describe('AddressInput tests', () => {
     await waitFor(() => expect(utils.getByLabelText(`Failed to resolve`, { exact: false })).toBeDefined())
   })
 
-  it('should not resolve ENS names if this feature is disabled', async () => {
+  it('should not resolve ENS names if hub domain lookup is disabled', async () => {
     ;(useCurrentChain as jest.Mock).mockImplementation(() => ({
-      shortName: 'gor',
-      chainId: '5',
-      chainName: 'Goerli',
+      shortName: 'base',
+      chainId: '8453',
+      chainName: 'Base',
+      isTestnet: false,
       features: [],
     }))
+    mockUseChain.mockImplementation((chainId: string) =>
+      chainId === '1' ? { ...mockMainnetChain, features: [] } : undefined,
+    )
 
     const { input, utils } = setup('')
 
@@ -321,9 +361,7 @@ describe('AddressInput tests', () => {
 
     expect(useNameResolver).toHaveBeenCalledWith('', undefined)
     await waitFor(() => expect(input.value).toBe('zero.eth'))
-    await waitFor(() =>
-      expect(utils.getByLabelText('ENS name not available on Goerli', { exact: false })).toBeDefined(),
-    )
+    await waitFor(() => expect(utils.getByLabelText('ENS name not available on Base', { exact: false })).toBeDefined())
   })
 
   it('shows a domain-specific error when an ENS name cannot be resolved on the chain', async () => {
@@ -347,7 +385,8 @@ describe('AddressInput tests', () => {
   })
 
   it('should show chain prefix in an adornment', async () => {
-    const { input } = setup(TEST_ADDRESS_A)
+    const utils = await act(async () => render(<TestForm address={TEST_ADDRESS_A} />))
+    const input = utils.getByLabelText('Recipient address', { exact: false }) as HTMLInputElement
 
     await waitFor(() => expect(input.value).toBe(TEST_ADDRESS_A))
 
@@ -380,7 +419,7 @@ describe('AddressInput tests', () => {
     const utils = render(<Form />)
     const input = utils.getByLabelText('Recipient', { exact: false }) as HTMLInputElement
 
-    act(() => {
+    await act(async () => {
       fireEvent.change(input, { target: { value: `${mockChain.shortName}:${TEST_ADDRESS_A}` } })
     })
 
@@ -397,7 +436,7 @@ describe('AddressInput tests', () => {
 
     const { input } = setup(``)
 
-    act(() => {
+    await act(async () => {
       fireEvent.change(input, { target: { value: `Here's my address: ${TEST_ADDRESS_A}` } })
     })
 
@@ -427,7 +466,7 @@ describe('AddressInput tests', () => {
 
     const { input, utils } = setup(TEST_ADDRESS_A)
 
-    act(() => {
+    await act(async () => {
       fireEvent.change(input, { target: { value: TEST_ADDRESS_A } })
     })
 
@@ -437,12 +476,12 @@ describe('AddressInput tests', () => {
   it('should render a readable read-only field when disabled even if the address is not in the address book', async () => {
     // Address book is empty (mocked in beforeEach), mirroring a contact shown under a source
     // (e.g. spaceOnly) that does not contain it. The disabled field must still be readable.
-    const { utils } = setup(TEST_ADDRESS_A, undefined, true)
+    const utils = await act(async () => render(<TestForm address={TEST_ADDRESS_A} disabled />))
 
     await waitFor(() => expect(utils.getByTestId('address-book-recipient')).toBeInTheDocument())
   })
 
-  it('should clear the input on click if the address is in the address book and not disabled', async () => {
+  it('should keep the address and switch to editing when the contact chip is clicked', async () => {
     const mockChainId = '11155111'
     const mockSafeName = 'Test Safe'
     const mockAB = { [TEST_ADDRESS_A]: mockSafeName }
@@ -465,7 +504,7 @@ describe('AddressInput tests', () => {
 
     const { input, utils } = setup(TEST_ADDRESS_A)
 
-    act(() => {
+    await act(async () => {
       fireEvent.change(input, { target: { value: TEST_ADDRESS_A } })
     })
 
@@ -474,11 +513,13 @@ describe('AddressInput tests', () => {
       expect(utils.getByRole('textbox')).toHaveValue(TEST_ADDRESS_A)
     })
 
-    act(() => {
-      userEvent.click(input)
+    await act(async () => {
+      fireEvent.click(utils.getByRole('button', { name: new RegExp(mockSafeName) }))
     })
 
-    await waitFor(() => expect(utils.getByRole('textbox')).toHaveValue(''))
+    expect(utils.queryByTestId('address-book-recipient')).not.toBeInTheDocument()
+    expect(utils.getByRole('textbox')).toHaveValue(TEST_ADDRESS_A)
+    expect(input).toHaveFocus()
   })
 
   it('should not clear the input on click if the address is in the address book and the input is disabled', async () => {
@@ -504,7 +545,7 @@ describe('AddressInput tests', () => {
 
     const { input, utils } = setup(TEST_ADDRESS_A, undefined, true)
 
-    act(() => {
+    await act(async () => {
       fireEvent.change(input, { target: { value: TEST_ADDRESS_A } })
     })
 
@@ -518,5 +559,99 @@ describe('AddressInput tests', () => {
     })
 
     await waitFor(() => expect(utils.getByRole('textbox')).toHaveValue(TEST_ADDRESS_A))
+  })
+
+  describe('keyboard focus on the read-only contact chip', () => {
+    const mockSafeName = 'Test Safe'
+
+    const mockSavedContact = () => {
+      const mockChainId = '11155111'
+      jest.spyOn(urlChainId, 'default').mockImplementation(() => mockChainId)
+      jest.spyOn(allAddressBooks, 'useAddressBookItem').mockReturnValue({
+        name: mockSafeName,
+        address: TEST_ADDRESS_A,
+        chainIds: [mockChainId],
+        createdBy: '',
+        createdByUserId: 0,
+        lastUpdatedBy: '',
+        lastUpdatedByUserId: 0,
+        createdAt: '',
+        updatedAt: '',
+        source: ContactSource.local,
+      })
+      jest.spyOn(addressBook, 'default').mockImplementation(() => ({ [TEST_ADDRESS_A]: mockSafeName }))
+    }
+
+    it('moves focus from the hidden input to the chip when the address becomes a saved contact', async () => {
+      mockSavedContact()
+      const { input, utils } = setup('')
+
+      // Assert synchronously: earlier tests leave un-awaited userEvent clicks whose fake-timer
+      // steps blur the active element as soon as a waitFor advances the clock.
+      await act(async () => {
+        input.focus()
+        fireEvent.change(input, { target: { value: TEST_ADDRESS_A } })
+      })
+
+      const chip = utils.getByRole('button', { name: new RegExp(mockSafeName) })
+      expect(chip).toHaveAttribute('tabindex', '0')
+      expect(chip).toHaveFocus()
+    })
+
+    it('opens the kept address for editing and refocuses the input on Enter', async () => {
+      mockSavedContact()
+      const { input, utils } = setup(TEST_ADDRESS_A)
+
+      const chip = utils.getByRole('button', { name: new RegExp(mockSafeName) })
+
+      await act(async () => {
+        chip.focus()
+        fireEvent.keyDown(chip, { key: 'Enter' })
+      })
+
+      expect(utils.queryByTestId('address-book-recipient')).not.toBeInTheDocument()
+      expect(utils.getByRole('textbox')).toHaveValue(TEST_ADDRESS_A)
+      expect(input).toHaveFocus()
+    })
+
+    it('clears the address and refocuses the input on Backspace', async () => {
+      mockSavedContact()
+      const { input, utils } = setup(TEST_ADDRESS_A)
+
+      const chip = utils.getByRole('button', { name: new RegExp(mockSafeName) })
+
+      await act(async () => {
+        chip.focus()
+        fireEvent.keyDown(chip, { key: 'Backspace' })
+      })
+
+      expect(utils.getByRole('textbox')).toHaveValue('')
+      expect(input).toHaveFocus()
+    })
+
+    it('shows the chip again when focus leaves the field while editing', async () => {
+      mockSavedContact()
+      const { input, utils } = setup(TEST_ADDRESS_A)
+
+      await act(async () => {
+        fireEvent.click(utils.getByRole('button', { name: new RegExp(mockSafeName) }))
+      })
+      expect(utils.queryByTestId('address-book-recipient')).not.toBeInTheDocument()
+
+      await act(async () => {
+        fireEvent.blur(input, { relatedTarget: utils.getByRole('button', { name: 'Submit' }) })
+      })
+
+      expect(utils.getByTestId('address-book-recipient')).toBeInTheDocument()
+      expect(utils.getByRole('textbox')).toHaveValue(TEST_ADDRESS_A)
+    })
+
+    it('does not add a tab stop for a disabled read-only address', async () => {
+      const utils = await act(async () => render(<TestForm address={TEST_ADDRESS_A} disabled />))
+
+      const chip = await utils.findByTestId('address-book-recipient')
+      expect(chip.parentElement).not.toHaveAttribute('tabindex')
+      expect(chip.parentElement).not.toHaveAttribute('role')
+    })
   })
 })

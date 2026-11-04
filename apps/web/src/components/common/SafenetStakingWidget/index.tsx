@@ -1,12 +1,12 @@
-import { SAFE_TOKEN_ADDRESSES } from '@/config/constants'
+import { isSafeToken } from '@/utils/safe-token'
 import useBalances from '@/hooks/useBalances'
 import useChainId from '@/hooks/useChainId'
 import { useOpenSafenetStakingApp } from '@/hooks/useOpenSafenetStakingApp'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Spinner } from '@/components/ui/spinner'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import SafeTokenIcon from '@/public/images/common/safe-token.svg'
 import css from './styles.module.css'
 
@@ -15,10 +15,7 @@ const SafenetStakingWidget = () => {
   const { balances, loading } = useBalances()
   const { openSafenetStakingApp, isNavigating } = useOpenSafenetStakingApp()
 
-  const safeTokenAddress = SAFE_TOKEN_ADDRESSES[chainId]
-  const safeTokenItem = balances.items.find(
-    (item) => item.tokenInfo.address.toLowerCase() === safeTokenAddress?.toLowerCase(),
-  )
+  const safeTokenItem = balances.items.find((item) => isSafeToken(chainId, item.tokenInfo.address))
   const safeBalance = safeTokenItem
     ? formatVisualAmount(safeTokenItem.balance, safeTokenItem.tokenInfo.decimals, 0)
     : '0'

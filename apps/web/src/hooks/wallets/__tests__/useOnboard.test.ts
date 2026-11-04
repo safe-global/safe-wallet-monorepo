@@ -143,7 +143,7 @@ describe('useOnboard', () => {
 
       await switchWallet(mockOnboard as unknown as OnboardAPI)
 
-      expect(mockOnboard.connectWallet).toBeCalled()
+      expect(mockOnboard.connectWallet).toHaveBeenCalled()
       expect(mockOnboard.disconnectWallet).not.toHaveBeenCalled()
     })
   })

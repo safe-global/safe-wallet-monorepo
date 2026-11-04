@@ -1,0 +1,133 @@
+{
+  "safeAddress": "0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb",
+  "txId": "multisig_0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb_0x4dd0916d9fea51b6b724ff8155c3e7cd616f2c54634c0769b9dc0edfd4f6b2b8",
+  "executedAt": 1701417276000,
+  "txStatus": "SUCCESS",
+  "txInfo": {
+    "type": "Custom",
+    "humanDescription": null,
+    "to": {
+      "value": "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
+      "name": "Safe: MultiSendCallOnly 1.3.0",
+      "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.png"
+    },
+    "dataSize": "260",
+    "value": "0",
+    "isCancellation": false,
+    "methodName": "multiSend",
+    "actionCount": 2
+  },
+  "txData": {
+    "hexData": "0x8d80ff0a000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000aa0006373d5e45ad31bd354cebfa8db4ed2c75b8708e000000000000000000000000000000000000000000000000002386f26fc1000000000000000000000000000000000000000000000000000000000000000000000006373d5e45ad31bd354cebfa8db4ed2c75b8708e00000000000000000000000000000000000000000000000000b1a2bc2ec50000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "dataDecoded": {
+      "method": "multiSend",
+      "parameters": [
+        {
+          "name": "transactions",
+          "type": "bytes",
+          "value": "0x0006373d5e45ad31bd354cebfa8db4ed2c75b8708e000000000000000000000000000000000000000000000000002386f26fc1000000000000000000000000000000000000000000000000000000000000000000000006373d5e45ad31bd354cebfa8db4ed2c75b8708e00000000000000000000000000000000000000000000000000b1a2bc2ec500000000000000000000000000000000000000000000000000000000000000000000",
+          "valueDecoded": [
+            {
+              "to": "0x06373d5e45AD31BD354CeBfA8dB4eD2c75B8708e",
+              "value": "10000000000000000",
+              "data": null,
+              "operation": 0,
+              "dataDecoded": null
+            },
+            {
+              "to": "0x06373d5e45AD31BD354CeBfA8dB4eD2c75B8708e",
+              "value": "50000000000000000",
+              "data": null,
+              "operation": 0,
+              "dataDecoded": null
+            }
+          ]
+        }
+      ],
+      "accuracy": "FULL_MATCH"
+    },
+    "to": {
+      "value": "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
+      "name": "Safe: MultiSendCallOnly 1.3.0",
+      "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.png"
+    },
+    "value": "0",
+    "operation": 1,
+    "trustedDelegateCallTarget": true,
+    "addressInfoIndex": null,
+    "tokenInfoIndex": {
+      "0x0000000000000000000000000000000000000000": {
+        "type": "NATIVE_TOKEN",
+        "address": "0x0000000000000000000000000000000000000000",
+        "decimals": 18,
+        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/11155111/currency_logo.png",
+        "name": "Sepolia Ether",
+        "symbol": "ETH",
+        "trusted": true
+      }
+    }
+  },
+  "txHash": "0xa5dd2ebff8c270268f218c70e3aaae29f9570cf2a29fb4bdb17638653852b064",
+  "detailedExecutionInfo": {
+    "type": "MULTISIG",
+    "submittedAt": 1701417260716,
+    "nonce": 12,
+    "safeTxGas": "0",
+    "baseGas": "0",
+    "gasPrice": "0",
+    "gasToken": "0x0000000000000000000000000000000000000000",
+    "fee": "38119948550600",
+    "payment": "0",
+    "refundReceiver": {
+      "value": "0x0000000000000000000000000000000000000000",
+      "name": null,
+      "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x0000000000000000000000000000000000000000.png"
+    },
+    "safeTxHash": "0x4dd0916d9fea51b6b724ff8155c3e7cd616f2c54634c0769b9dc0edfd4f6b2b8",
+    "executor": {
+      "value": "0x61d8838f9A00250C9AF13D622DA7c08c372ee587",
+      "name": null,
+      "logoUri": null
+    },
+    "signers": [
+      {
+        "value": "0x4fe7164d7cA511Ab35520bb14065F1693240dC90",
+        "name": null,
+        "logoUri": null
+      },
+      {
+        "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
+        "name": null,
+        "logoUri": null
+      },
+      {
+        "value": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5",
+        "name": null,
+        "logoUri": null
+      }
+    ],
+    "confirmationsRequired": 1,
+    "confirmations": [
+      {
+        "signer": {
+          "value": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5",
+          "name": null,
+          "logoUri": null
+        },
+        "signature": "0x1750a1e2617ec4803b0b20b2f499f2aca8aab8cdc44c3034527f04b073cb6fc10ee190d3d4fb4d57104dc38bc3ed3db5bda24b007189d62f3ad97ed127853d051c",
+        "submittedAt": 1701417260787
+      }
+    ],
+    "rejectors": [],
+    "gasTokenInfo": null,
+    "trusted": true,
+    "proposer": {
+      "value": "0x96D4c6fFC338912322813a77655fCC926b9A5aC5",
+      "name": null,
+      "logoUri": null
+    },
+    "proposedByDelegate": null
+  },
+  "safeAppInfo": null,
+  "note": null
+}

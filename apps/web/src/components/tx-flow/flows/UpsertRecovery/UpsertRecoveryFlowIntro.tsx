@@ -1,17 +1,17 @@
 import type { ReactElement } from 'react'
 
-import TxCard, { TxCardActions } from '../../common/TxCard'
-import RecoveryRecoverers from '@/public/images/settings/spending-limit/beneficiary.svg'
+import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
+import RecoveryRecoverers from '@safe-global/views/assets/images/settings/spending-limit/beneficiary.svg'
 import RecoveryRecoverer from '@/public/images/transactions/recovery-recoverer.svg'
-import RecoveryDelay from '@/public/images/settings/spending-limit/time.svg'
+import RecoveryDelay from '@safe-global/views/assets/images/settings/spending-limit/time.svg'
 import RecoveryExecution from '@/public/images/transactions/recovery-execution.svg'
 
 import css from './styles.module.css'
 import { useContext } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
-import { Typography } from '@/components/ui/typography'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Separator } from '@safe-global/views/components/ui/separator'
 
 const RecoverySteps = [
   {

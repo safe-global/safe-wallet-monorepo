@@ -28,6 +28,43 @@
   width: 100%;
 }
 
+.approvalRow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    '.    label  .'
+    'icon input  action'
+    '.    helper .';
+  column-gap: var(--space-4);
+  align-items: center;
+}
+
+.approvalIcon {
+  grid-area: icon;
+}
+
+.approvalAction {
+  grid-area: action;
+  margin-left: calc(-1 * var(--space-2));
+}
+
+.approvalRow [data-slot='field'] {
+  display: contents;
+}
+
+.approvalRow [data-slot='field-label'] {
+  grid-area: label;
+  margin-bottom: var(--space-2);
+}
+
+.approvalRow [data-slot='input-group'] {
+  grid-area: input;
+}
+
+.approvalRow [data-slot='field-description'] {
+  grid-area: helper;
+}
+
 .alert :global .MuiAlert-message {
   width: 100%;
 }

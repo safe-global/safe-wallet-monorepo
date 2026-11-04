@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
+import { userEvent, within } from 'storybook/test'
 import { createMockStory } from '@/stories/mocks'
 import AddressBook from '@/pages/address-book'
 
@@ -41,3 +42,11 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
+
+export const EditEntryEmptyName: Story = {
+  play: async ({ canvasElement }) => {
+    const [firstEditButton] = await within(canvasElement).findAllByRole('button', { name: 'Edit entry' })
+    await userEvent.click(firstEditButton)
+    await userEvent.clear(await within(document.body).findByRole('textbox', { name: /Name/ }))
+  },
+}

@@ -10,6 +10,7 @@ describe('gtm', () => {
   // Reset mocks before each test
   beforeEach(() => {
     jest.clearAllMocks()
+    window.gtag = jest.fn()
   })
 
   describe('gtmTrack', () => {
@@ -66,16 +67,19 @@ describe('gtm', () => {
         }),
       )
     })
+
+    it('should, when Google Analytics is not loaded, not send the event', () => {
+      window.gtag = undefined
+
+      gtm.gtmTrack({ event: EventType.CLICK, category: 'testCategory', action: 'testAction' })
+
+      expect(GA.sendGAEvent).not.toHaveBeenCalled()
+    })
   })
 
   describe('gtmTrackSafeApp', () => {
     it('should send correct data to the dataLayer for a Safe App event', () => {
-      Object.defineProperty(window, 'location', {
-        writable: true,
-        value: {
-          pathname: '/apps',
-        },
-      })
+      window.history.replaceState(null, '', '/apps')
 
       const mockEventData = {
         event: EventType.SAFE_APP,

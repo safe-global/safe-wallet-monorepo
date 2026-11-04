@@ -1,12 +1,12 @@
 import { useMemo, useState } from 'react'
-import { Typography } from '@/components/ui/typography'
-import TableCard from '@/components/common/TableCard'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import TableCard from '@safe-global/views/components/common/TableCard'
 import {
   useIsInvited,
   useIsAdmin,
   useAddressBookSearch,
-  useGetSpaceAddressBook,
-  useGetAddressBookRequests,
+  useSpaceAddressBookState,
+  useAddressBookRequestsState,
 } from '@/features/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
@@ -15,9 +15,10 @@ import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { AddressBookEntry } from './SpaceAddressBookTable'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
-import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@safe-global/views/components/ui/tabs'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Check } from 'lucide-react'
 import AddressBookSearchInput from '@/components/common/AddressBookSearchInput'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import Track from '@/components/common/Track'
@@ -27,8 +28,10 @@ import AddLocalContact from './AddLocalContact'
 import SpaceAddressBookTable from './SpaceAddressBookTable'
 import PendingRequestsTable from './PendingRequestsTable'
 import ImportAddressBook from './Import'
+import LocalContactsCsvActions from './LocalContactsCsvActions'
 import RequestToAddButton from './RequestToAddButton'
 import AddToWorkspaceButton from './AddToWorkspaceButton'
+import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 
 const SpaceAddressBook = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -38,8 +41,20 @@ const SpaceAddressBook = () => {
   const isPrivateAddressBookEnabled = useHasFeature(FEATURES.PRIVATE_ADDRESS_BOOK) ?? false
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const { currentData: user } = useUsersGetWithWalletsV1Query(undefined, { skip: !isUserSignedIn })
-  const addressBookItems = useGetSpaceAddressBook()
-  const pendingRequests = useGetAddressBookRequests()
+  const {
+    items: addressBookItems,
+    isLoading: isAddressBookLoading,
+    isError: isAddressBookError,
+    refetch: refetchAddressBook,
+  } = useSpaceAddressBookState()
+  const {
+    items: pendingRequests,
+    isLoading: isRequestsLoading,
+    isError: isRequestsError,
+    refetch: refetchRequests,
+  } = useAddressBookRequestsState()
+  const isAddressBookSettled = !isAddressBookLoading && !isAddressBookError
+  const isRequestsSettled = !isRequestsLoading && !isRequestsError
   const allLocalAddressBooks = useAllAddressBooks()
 
   const localContacts: AddressBookEntry[] = useMemo(() => {
@@ -115,8 +130,10 @@ const SpaceAddressBook = () => {
           <TabsList variant="underline" className="flex-wrap mb-4">
             <TabsTrigger value="workspace" className="cursor-pointer">
               <Tooltip>
-                <TooltipTrigger render={<span />}>Workspace contacts ({addressBookItems.length})</TooltipTrigger>
-                <TooltipContent>Shared contacts visible to everyone in this workspace</TooltipContent>
+                <TooltipTrigger render={<span />}>
+                  Workspace contacts{isAddressBookSettled ? ` (${addressBookItems.length})` : ''}
+                </TooltipTrigger>
+                <TooltipContent>Shared contacts visible to everyone in this Workspace</TooltipContent>
               </Tooltip>
             </TabsTrigger>
             {isPrivateAddressBookEnabled && (
@@ -129,23 +146,24 @@ const SpaceAddressBook = () => {
                 </TabsTrigger>
                 <TabsTrigger value="pending" className="cursor-pointer">
                   <Tooltip>
-                    <TooltipTrigger render={<span />}>Pending ({pendingRequests.length})</TooltipTrigger>
-                    <TooltipContent>Contacts you proposed to add to the workspace</TooltipContent>
+                    <TooltipTrigger render={<span />}>
+                      Pending{isRequestsSettled ? ` (${pendingRequests.length})` : ''}
+                    </TooltipTrigger>
+                    <TooltipContent>Contacts you proposed to add to the Workspace</TooltipContent>
                   </Tooltip>
                 </TabsTrigger>
               </>
             )}
           </TabsList>
 
-          {(activeTab === 'workspace' || activeTab === 'mine') && (
+          {(activeTab === 'mine' || (activeTab === 'workspace' && isAddressBookSettled)) && (
             // mb-4 on top of the Tabs root's own gap-2: 8px alone left the search almost touching
-            // the table card below it.
-            <div className="mt-6 mb-4 flex items-center gap-2">
+            <div className="mt-6 mb-4 flex flex-wrap items-center gap-2">
               {/* Only rendered when it holds an action. An always-present wrapper is still a flex
                   item when empty, so the row's gap-2 pushed the search 8px right of the table card
                   it sits above — three different left edges for viewers without admin rights. */}
               {(isAdmin && activeTab === 'workspace') || (isPrivateAddressBookEnabled && activeTab === 'mine') ? (
-                <div className="flex shrink-0 gap-2">
+                <div className="flex max-w-full shrink-0 flex-wrap gap-2">
                   {isAdmin && activeTab === 'workspace' && (
                     <>
                       <Track {...SPACE_EVENTS.ADD_ADDRESS}>
@@ -154,7 +172,12 @@ const SpaceAddressBook = () => {
                       <ImportAddressBook />
                     </>
                   )}
-                  {isPrivateAddressBookEnabled && activeTab === 'mine' && <AddLocalContact />}
+                  {isPrivateAddressBookEnabled && activeTab === 'mine' && (
+                    <>
+                      <AddLocalContact />
+                      <LocalContactsCsvActions hasContacts={sortedLocalContacts.length > 0} />
+                    </>
+                  )}
                 </div>
               ) : null}
               {(activeTab === 'workspace' ? addressBookItems.length > 0 : sortedLocalContacts.length > 0) && (
@@ -167,10 +190,14 @@ const SpaceAddressBook = () => {
 
           <TableCard>
             <TabsContent value="workspace">
-              {searchQuery && filteredAll.length === 0 ? (
-                <p className="text-muted-foreground mb-2 text-sm">Found 0 results</p>
+              {isAddressBookLoading ? (
+                <SpaceLoading subject="contacts" testId="address-book-loading" />
+              ) : isAddressBookError ? (
+                <SpaceLoadError onReload={refetchAddressBook} testId="address-book-error" />
+              ) : searchQuery && filteredAll.length === 0 ? (
+                <p className="text-muted-foreground mb-2 p-4 text-sm">Found 0 results</p>
               ) : addressBookItems.length === 0 ? (
-                <p className="text-muted-foreground text-sm">No contacts in this workspace yet.</p>
+                <p className="text-muted-foreground p-4 text-sm">No contacts in this Workspace yet.</p>
               ) : (
                 <SpaceAddressBookTable entries={filteredAll} />
               )}
@@ -180,31 +207,52 @@ const SpaceAddressBook = () => {
               <>
                 <TabsContent value="mine">
                   {searchQuery && filteredMine.length === 0 ? (
-                    <p className="text-muted-foreground mb-2 text-sm">Found 0 results</p>
+                    <p className="text-muted-foreground mb-2 p-4 text-sm">Found 0 results</p>
                   ) : filteredMine.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">You haven&apos;t added any contacts yet.</p>
+                    <p className="text-muted-foreground p-4 text-sm">You haven&apos;t added any contacts yet.</p>
                   ) : (
                     <SpaceAddressBookTable
                       entries={filteredMine}
                       showAddedBy={false}
-                      renderExtraAction={(entry) => {
+                      renderExtraAction={(entry, { isCompact }) => {
+                        // An unread Workspace book cannot tell "already shared" from "not shared yet"
+                        if (!isAddressBookSettled) {
+                          return null
+                        }
                         if (entry.isDuplicate) {
                           return (
                             <Tooltip>
-                              <TooltipTrigger render={<span className="inline-flex" />}>
-                                <Badge variant="secondary">Already shared</Badge>
+                              <TooltipTrigger
+                                render={
+                                  <span className="inline-flex" aria-label={isCompact ? 'Already shared' : undefined} />
+                                }
+                              >
+                                {isCompact ? (
+                                  <Check className="text-muted-foreground size-4" />
+                                ) : (
+                                  <Badge variant="secondary">Already shared</Badge>
+                                )}
                               </TooltipTrigger>
-                              <TooltipContent>Already saved in your workspace address book</TooltipContent>
+                              <TooltipContent>Already saved in your Workspace address book</TooltipContent>
                             </Tooltip>
                           )
                         }
                         if (isAdmin) {
                           return (
-                            <AddToWorkspaceButton address={entry.address} name={entry.name} chainIds={entry.chainIds} />
+                            <AddToWorkspaceButton
+                              address={entry.address}
+                              name={entry.name}
+                              chainIds={entry.chainIds}
+                              isCompact={isCompact}
+                            />
                           )
                         }
                         // Invitees can preview the space but cannot propose contacts
                         if (isInvited) {
+                          return null
+                        }
+                        // An unread request list would show "Request to add" for an open request
+                        if (!isRequestsSettled) {
                           return null
                         }
                         return (
@@ -213,6 +261,7 @@ const SpaceAddressBook = () => {
                             name={entry.name}
                             chainIds={entry.chainIds}
                             alreadyRequested={pendingAddresses.has(entry.address.toLowerCase())}
+                            isCompact={isCompact}
                           />
                         )
                       }}
@@ -221,7 +270,13 @@ const SpaceAddressBook = () => {
                 </TabsContent>
 
                 <TabsContent value="pending" className="mt-4 sm:mt-0">
-                  <PendingRequestsTable requests={pendingRequests} />
+                  {isRequestsLoading ? (
+                    <SpaceLoading subject="pending requests" testId="pending-requests-loading" />
+                  ) : isRequestsError ? (
+                    <SpaceLoadError onReload={refetchRequests} testId="pending-requests-error" />
+                  ) : (
+                    <PendingRequestsTable requests={pendingRequests} />
+                  )}
                 </TabsContent>
               </>
             )}

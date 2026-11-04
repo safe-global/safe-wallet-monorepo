@@ -1,23 +1,23 @@
 import {
+  buildArbitrationTimedOutLog,
   buildCommittedLog,
   buildDisputeResolvedLog,
+  buildDisputeTriggeredLog,
   buildNewRequestLog,
   buildOracleAttestedLog,
   buildOracleProposedLog,
   buildOracleResultLog,
-  buildPlainAttestedLog,
-  buildPlainProposedLog,
   buildRevealedLog,
 } from './rawLogs'
 import { decodeLogs, type RawLog } from '../utils/decodeLogs'
 import type {
   DisputeResolvedEvent,
+  DisputeTriggeredEvent,
+  InconclusiveEvent,
   NormalizedCheckEvent,
   OracleAttestedEvent,
   OracleProposedEvent,
   OracleResultEvent,
-  PlainAttestedEvent,
-  PlainProposedEvent,
   RequestCreatedEvent,
   SentinelCommittedEvent,
   SentinelRevealedEvent,
@@ -46,16 +46,6 @@ export const attestedEvent = (over: Partial<OracleAttestedEvent> = {}): OracleAt
   ...over,
 })
 
-export const plainProposedEvent = (over: Partial<PlainProposedEvent> = {}): PlainProposedEvent => ({
-  ...decodeOne<PlainProposedEvent>(buildPlainProposedLog()),
-  ...over,
-})
-
-export const plainAttestedEvent = (over: Partial<PlainAttestedEvent> = {}): PlainAttestedEvent => ({
-  ...decodeOne<PlainAttestedEvent>(buildPlainAttestedLog()),
-  ...over,
-})
-
 export const requestCreatedEvent = (over: Partial<RequestCreatedEvent> = {}): RequestCreatedEvent => ({
   ...decodeOne<RequestCreatedEvent>(buildNewRequestLog()),
   ...over,
@@ -78,5 +68,15 @@ export const oracleResultEvent = (over: Partial<OracleResultEvent> = {}): Oracle
 
 export const disputeResolvedEvent = (over: Partial<DisputeResolvedEvent> = {}): DisputeResolvedEvent => ({
   ...decodeOne<DisputeResolvedEvent>(buildDisputeResolvedLog()),
+  ...over,
+})
+
+export const disputeTriggeredEvent = (over: Partial<DisputeTriggeredEvent> = {}): DisputeTriggeredEvent => ({
+  ...decodeOne<DisputeTriggeredEvent>(buildDisputeTriggeredLog()),
+  ...over,
+})
+
+export const arbitrationTimedOutEvent = (over: Partial<InconclusiveEvent> = {}): InconclusiveEvent => ({
+  ...decodeOne<InconclusiveEvent>(buildArbitrationTimedOutLog()),
   ...over,
 })

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { formatUnits } from 'ethers'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -15,15 +15,11 @@ import { selectCurrency } from '@/store/settingsSlice'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import { Errors, logError } from '@/services/exceptions'
-import type { FeeRow } from './useFeesPreview'
+import { isRateLimitError } from '@/utils/transaction-errors'
+import type { FeeRow, HistoryFeesData } from '@safe-global/views/features/gtf/types'
 import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
 
-export type HistoryFeesData = {
-  totalFee: { amount: string; currency: string; fiatAmount?: string }
-  executionFee: FeeRow
-  gasFee: FeeRow
-  paidFrom: 'safe' | 'signer'
-}
+export type { HistoryFeesData } from '@safe-global/views/features/gtf/types'
 
 const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
 
@@ -112,16 +108,18 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
 
   // Signer-pays: fetch receipt once per txHash. Deps are primitives so polling balances
   // doesn't trigger a re-fetch.
-  const [receipt, receiptError] = useAsync(async () => {
+  const [receipt] = useAsync(async () => {
     if (!isGtfEnabled || !executedAt || !exec) return null
     if (isSafePaid) return null
     if (!txHash || !provider) return null
-    return provider.getTransactionReceipt(txHash)
+    try {
+      return await provider.getTransactionReceipt(txHash)
+    } catch (e) {
+      // A receipt fetch never reverts, so only a transient throttle is expected here.
+      if (!isRateLimitError(e)) logError(Errors._623, e, getRpcErrorContext(provider))
+      throw e
+    }
   }, [isGtfEnabled, executedAt, !!exec, isSafePaid, txHash, provider])
-
-  useEffect(() => {
-    if (receiptError) logError(Errors._612, receiptError.message, getRpcErrorContext(provider))
-  }, [receiptError, provider])
 
   const signerPaidData = useMemo<HistoryFeesData | null>(() => {
     if (!receipt) return null

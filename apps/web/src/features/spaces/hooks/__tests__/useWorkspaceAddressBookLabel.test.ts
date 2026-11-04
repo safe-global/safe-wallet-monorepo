@@ -34,6 +34,6 @@ describe('useWorkspaceAddressBookLabel', () => {
 
     const { result } = renderHook(() => useWorkspaceAddressBookLabel())
 
-    expect(result.current).toBe('the workspace address book')
+    expect(result.current).toBe('the Workspace address book')
   })
 })

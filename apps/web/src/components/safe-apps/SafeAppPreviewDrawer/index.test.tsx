@@ -1,8 +1,9 @@
+import { faker } from '@faker-js/faker'
 import { SafeAppFeatures, SafeAppAccessPolicyTypes } from '@safe-global/store/gateway/types'
 import { type SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 import SafeAppPreviewDrawer from '@/components/safe-apps/SafeAppPreviewDrawer'
-import { render, screen, waitFor } from '@/tests/test-utils'
+import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 
 jest.mock('@/features/multichain', () => ({
   NetworkLogosTooltip: ({ networks, maxVisible }: { networks: { chainId: string }[]; maxVisible?: number }) => (
@@ -56,6 +57,8 @@ const safeAppMock: SafeAppData = {
 }
 
 describe('SafeAppPreviewDrawer', () => {
+  afterEach(() => window.history.replaceState(null, '', '/'))
+
   it('renders the available networks section as a collapsed logo cluster', async () => {
     render(<SafeAppPreviewDrawer isOpen safeApp={safeAppMock} onClose={jest.fn()} />)
 
@@ -100,11 +103,40 @@ describe('SafeAppPreviewDrawer', () => {
     expect(logos).toHaveAttribute('data-networks', '1,10')
   })
 
+  it('links to the app with the Safe of the location while the router query is still empty', async () => {
+    const safe = `sep:${faker.finance.ethereumAddress()}`
+    window.history.replaceState(null, '', `/apps?safe=${safe}`)
+
+    render(<SafeAppPreviewDrawer isOpen safeApp={safeAppMock} onClose={jest.fn()} />, {
+      routerProps: { query: {} },
+    })
+
+    const href = (await screen.findByTestId('open-safe-app-btn')).getAttribute('href') ?? ''
+    const query = new URLSearchParams(href.split('?')[1])
+    expect(query.get('safe')).toBe(safe)
+    expect(query.get('appUrl')).toBe(safeAppMock.url)
+  })
+
   it('renders an empty cluster when none of the app chains are recognized', async () => {
     mockUseChains.mockReturnValue({ configs: [] })
     render(<SafeAppPreviewDrawer isOpen safeApp={safeAppMock} onClose={jest.fn()} />)
 
     const logos = await screen.findByTestId('network-logos-list')
     expect(logos).toHaveAttribute('data-networks', '')
+  })
+
+  it('describes the drawer with the app description', async () => {
+    render(<SafeAppPreviewDrawer isOpen safeApp={safeAppMock} onClose={jest.fn()} />)
+
+    expect(await screen.findByRole('dialog')).toHaveAccessibleDescription(safeAppMock.description)
+  })
+
+  it('calls onClose when the close button is clicked', async () => {
+    const onClose = jest.fn()
+    render(<SafeAppPreviewDrawer isOpen safeApp={safeAppMock} onClose={onClose} />)
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Close Transaction Builder preview' }))
+
+    expect(onClose).toHaveBeenCalledTimes(1)
   })
 })

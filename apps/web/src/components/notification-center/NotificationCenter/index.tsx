@@ -1,23 +1,24 @@
 import { useState, useMemo, type ReactElement, type MouseEvent } from 'react'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { Link } from '@/components/ui/link'
-import { Popover, PopoverContent } from '@/components/ui/popover'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Link } from '@safe-global/views/components/ui/link'
+import { Popover, PopoverContent } from '@safe-global/views/components/ui/popover'
 import BellIcon from '@/public/images/common/notifications.svg'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
+  selectCenterNotifications,
   selectNotifications,
   readNotification,
   closeNotification,
   deleteAllNotifications,
 } from '@/store/notificationsSlice'
 import NotificationCenterList from '@/components/notification-center/NotificationCenterList'
-import UnreadBadge from '@/components/common/UnreadBadge'
+import UnreadBadge from '@safe-global/views/components/common/UnreadBadge'
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import SettingsIcon from '@/public/images/sidebar/settings.svg'
+import SettingsIcon from '@safe-global/views/assets/images/sidebar/settings.svg'
 
 import css from './styles.module.css'
 import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
@@ -38,7 +39,10 @@ const NotificationCenter = (): ReactElement => {
   // This hook is used to show the notification renewal message when the app is opened
   useShowNotificationsRenewalMessage()
 
-  const notifications = useAppSelector(selectNotifications)
+  const notifications = useAppSelector(selectCenterNotifications)
+  // Opening the bell dismisses every visible toast, errors included — so that sweep needs the
+  // unfiltered list.
+  const allNotifications = useAppSelector(selectNotifications)
   const chronologicalNotifications = useMemo(() => {
     // Clone as Redux returns read-only array
     return notifications.slice().sort((a, b) => b.timestamp - a.timestamp)
@@ -65,7 +69,7 @@ const NotificationCenter = (): ReactElement => {
     if (!open) {
       trackEvent(OVERVIEW_EVENTS.NOTIFICATION_CENTER)
 
-      notifications.forEach(({ isDismissed, id }) => {
+      allNotifications.forEach(({ isDismissed, id }) => {
         if (!isDismissed) {
           dispatch(closeNotification({ id }))
         }

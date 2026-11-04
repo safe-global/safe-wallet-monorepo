@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`./PromoBanner.stories Default 1`] = `
 <div
@@ -9,6 +9,7 @@ exports[`./PromoBanner.stories Default 1`] = `
   >
     <div
       class="banner"
+      style="background: linear-gradient(90deg, #b0ffc9, #d7f6ff);"
     >
       <div
         class="flex flex-row gap-4 bannerStack"
@@ -16,13 +17,8 @@ exports[`./PromoBanner.stories Default 1`] = `
         <img
           alt="Promo image"
           class="bannerImage"
-          data-nimg="1"
-          decoding="async"
           height="95"
-          loading="lazy"
-          src="/_next/image?url=%2Fimg.jpg&w=256&q=75"
-          srcset="/_next/image?url=%2Fimg.jpg&w=96&q=75 1x, /_next/image?url=%2Fimg.jpg&w=256&q=75 2x"
-          style="color: transparent;"
+          src="/images/common/spaces-illustration.png"
           width="95"
         />
         <div
@@ -91,6 +87,7 @@ exports[`./PromoBanner.stories ShortText 1`] = `
   >
     <div
       class="banner"
+      style="background: linear-gradient(90deg, #b0ffc9, #d7f6ff);"
     >
       <div
         class="flex flex-row gap-4 bannerStack"
@@ -154,6 +151,7 @@ exports[`./PromoBanner.stories WithCustomColors 1`] = `
   >
     <div
       class="banner"
+      style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"
     >
       <div
         class="flex flex-row gap-4 bannerStack"
@@ -161,13 +159,8 @@ exports[`./PromoBanner.stories WithCustomColors 1`] = `
         <img
           alt="Special offer"
           class="bannerImage"
-          data-nimg="1"
-          decoding="async"
           height="95"
-          loading="lazy"
-          src="/_next/image?url=%2Fimg.jpg&w=256&q=75"
-          srcset="/_next/image?url=%2Fimg.jpg&w=96&q=75 1x, /_next/image?url=%2Fimg.jpg&w=256&q=75 2x"
-          style="color: transparent;"
+          src="/images/common/spaces-illustration.png"
           width="95"
         />
         <div
@@ -237,6 +230,7 @@ exports[`./PromoBanner.stories WithOnClick 1`] = `
   >
     <div
       class="banner"
+      style="background: linear-gradient(90deg, #b0ffc9, #d7f6ff);"
     >
       <div
         class="flex flex-row gap-4 bannerStack"
@@ -244,13 +238,8 @@ exports[`./PromoBanner.stories WithOnClick 1`] = `
         <img
           alt="Action required"
           class="bannerImage"
-          data-nimg="1"
-          decoding="async"
           height="95"
-          loading="lazy"
-          src="/_next/image?url=%2Fimg.jpg&w=256&q=75"
-          srcset="/_next/image?url=%2Fimg.jpg&w=96&q=75 1x, /_next/image?url=%2Fimg.jpg&w=256&q=75 2x"
-          style="color: transparent;"
+          src="/images/common/spaces-illustration.png"
           width="95"
         />
         <div
@@ -320,6 +309,7 @@ exports[`./PromoBanner.stories WithoutDismiss 1`] = `
   >
     <div
       class="banner"
+      style="background: linear-gradient(90deg, #b0ffc9, #d7f6ff);"
     >
       <div
         class="flex flex-row gap-4 bannerStack"
@@ -327,13 +317,8 @@ exports[`./PromoBanner.stories WithoutDismiss 1`] = `
         <img
           alt="Welcome"
           class="bannerImage"
-          data-nimg="1"
-          decoding="async"
           height="95"
-          loading="lazy"
-          src="/_next/image?url=%2Fimg.jpg&w=256&q=75"
-          srcset="/_next/image?url=%2Fimg.jpg&w=96&q=75 1x, /_next/image?url=%2Fimg.jpg&w=256&q=75 2x"
-          style="color: transparent;"
+          src="/images/common/spaces-illustration.png"
           width="95"
         />
         <div
@@ -376,6 +361,7 @@ exports[`./PromoBanner.stories WithoutImage 1`] = `
   >
     <div
       class="banner"
+      style="background: linear-gradient(90deg, #b0ffc9, #d7f6ff);"
     >
       <div
         class="flex flex-row gap-4 bannerStack"

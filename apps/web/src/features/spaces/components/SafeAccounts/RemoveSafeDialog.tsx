@@ -5,14 +5,15 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import DialogActions from '@/components/common/DialogActions'
-import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { cn } from '@/utils/cn'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { cn } from '@safe-global/views/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useSpaceSafesDeleteV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useState } from 'react'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
+import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 
 function getToBeDeletedSafeAccounts(safeItem: SafeItem | MultiChainSafeItem) {
   if (isMultiChainSafeItem(safeItem)) {
@@ -53,13 +54,6 @@ const RemoveSafeDialog = ({
         throw result.error
       }
 
-      safeAccounts.forEach(({ chainId, address }) => {
-        trackEvent(
-          { ...SPACE_EVENTS.WORKSPACE_SAFE_UNLINKED, label: spaceId },
-          { workspace_id: spaceId, safe_address: address, chain_id: chainId },
-        )
-      })
-
       dispatch(
         showNotification({
           message: `Removed safe account from space`,
@@ -68,6 +62,7 @@ const RemoveSafeDialog = ({
         }),
       )
     } catch (e) {
+      if (isElevationRequiredError(e)) return
       setError('Error removing safe account.')
     }
   }

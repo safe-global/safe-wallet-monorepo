@@ -2,7 +2,10 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useChain } from '@/hooks/useChains'
 import MultiChainSafeItemRow from '../MultiChainSafeItemRow'
-import type { SafeItemData, SafeItemDataChain } from '../../types'
+import type {
+  SafeItemData,
+  SafeItemDataChain,
+} from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: () => 'Test Safe',
@@ -15,17 +18,23 @@ jest.mock('@/hooks/useChains', () => ({
 
 // Surface the explorerLink the summary row is (or isn't) given — the multi-chain summary must never
 // receive one, since its chain would be arbitrary.
+const mockWriteScope: jest.Mock = jest.fn(() => ({ scope: 'local', canRename: true }))
+jest.mock('@/features/spaces/hooks/useAddressBookWriteScope', () => ({
+  useAddressBookWriteScope: (...args: unknown[]) => mockWriteScope(...args),
+}))
+
 jest.mock('@/components/common/AccountRow/SafeInfoDisplay', () => {
-  const Mock = ({ explorerLink }: { explorerLink?: { href: string } }) => (
+  const Mock = ({ explorerLink, onRename }: { explorerLink?: { href: string }; onRename?: () => void }) => (
     <div data-testid="safe-info-display">
       {explorerLink && <a data-testid="summary-explorer-link" href={explorerLink.href} />}
+      {onRename && <span role="button" data-testid="rename-btn" onClick={onRename} />}
     </div>
   )
   Mock.displayName = 'SafeInfoDisplay'
   return { __esModule: true, default: Mock }
 })
 
-jest.mock('../BalanceDisplay', () => {
+jest.mock('@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay', () => {
   const Mock = () => <div data-testid="balance-display" />
   Mock.displayName = 'BalanceDisplay'
   return { __esModule: true, default: Mock }
@@ -43,7 +52,7 @@ jest.mock('@/components/common/FiatValue', () => {
   return { __esModule: true, default: Mock }
 })
 
-jest.mock('@/components/ui/select', () => ({
+jest.mock('@safe-global/views/components/ui/select', () => ({
   SelectItem: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
 }))
 
@@ -64,6 +73,32 @@ const createItem = (chains: (string | SafeItemDataChain)[], overrides: Partial<S
   balance: '0',
   chains: chains.map((chain) => (typeof chain === 'string' ? makeChain(chain) : chain)),
   ...overrides,
+})
+
+describe('MultiChainSafeItemRow rename gate', () => {
+  beforeEach(() => mockWriteScope.mockReturnValue({ scope: 'local', canRename: true }))
+
+  it('offers rename when the viewer may rename this Safe', () => {
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} onRename={jest.fn()} />)
+
+    expect(screen.getByTestId('rename-btn')).toBeInTheDocument()
+  })
+
+  it('offers rename for every network of the group', () => {
+    const onRename = jest.fn()
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} onRename={onRename} />)
+
+    fireEvent.click(screen.getByTestId('rename-btn'))
+
+    expect(onRename).toHaveBeenCalledWith({ address: '0xaaa', name: 'Test Safe', chainIds: ['1', '137'] })
+  })
+
+  it('withholds rename from a member looking at a workspace Safe', () => {
+    mockWriteScope.mockReturnValue({ scope: 'local', canRename: false })
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} onRename={jest.fn()} />)
+
+    expect(screen.queryByTestId('rename-btn')).not.toBeInTheDocument()
+  })
 })
 
 describe('MultiChainSafeItemRow chain icon overflow badge', () => {
@@ -240,16 +275,20 @@ describe('MultiChainSafeItemRow undeployed status badge', () => {
   })
 })
 
-describe('MultiChainSafeItemRow hover highlight', () => {
-  it('takes focus when the summary is hovered so base-ui does not strand the highlight on the previous row', () => {
-    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} />)
+describe('MultiChainSafeItemRow hover', () => {
+  it('does not take focus on hover, so typing in the search input continues', () => {
+    render(
+      <>
+        <input data-testid="search" />
+        <MultiChainSafeItemRow item={createItem(['1', '137'])} />
+      </>,
+    )
+    const search = screen.getByTestId('search')
+    search.focus()
 
-    const trigger = screen.getByRole('button')
-    expect(trigger).not.toHaveFocus()
+    fireEvent.mouseEnter(screen.getByRole('button'))
 
-    fireEvent.mouseEnter(trigger)
-
-    expect(trigger).toHaveFocus()
+    expect(search).toHaveFocus()
   })
 })
 

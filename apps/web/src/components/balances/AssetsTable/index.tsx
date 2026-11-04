@@ -1,22 +1,22 @@
 import { CounterfactualFeature } from '@/features/counterfactual'
 import { useLoadFeature } from '@/features/__core__'
 import React, { type ReactElement } from 'react'
-import { Card } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
-import { useIsMobile } from '@/hooks/use-mobile'
+import { Card } from '@safe-global/views/components/ui/card'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { useIsMobile } from '@safe-global/views/hooks/use-mobile'
 import classNames from 'classnames'
 import css from './styles.module.css'
-import EnhancedTable, { type EnhancedTableProps } from '@/components/common/EnhancedTable'
+import EnhancedTable, { type EnhancedTableProps } from '@safe-global/views/components/common/EnhancedTable'
 import TokenMenu from '../TokenMenu'
 import useBalances from '@/hooks/useBalances'
 import { useHideAssets, useVisibleAssets } from './useHideAssets'
 import AddFundsCTA from '@/components/common/AddFunds'
 import { useIsSwapFeatureEnabled } from '@/features/swap'
 import { useIsEarnPromoEnabled } from '@/features/earn'
-import { useIsStakingBannerEnabled as useIsStakingPromoEnabled } from '@/features/stake'
-import { FiatChange } from './FiatChange'
+import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
+import { FiatChange } from '@safe-global/views/components/balances/AssetsTable/FiatChange'
 import { FiatBalance } from './FiatBalance'
 import useChainId from '@/hooks/useChainId'
 import FiatValue from '@/components/common/FiatValue'
@@ -73,7 +73,6 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
   },
   actions: {
     rawValue: '',
-    sticky: true,
     content: (
       <div className="flex flex-row justify-end gap-2">
         <Skeleton className="h-[28px] w-[28px] rounded-md" />
@@ -127,7 +126,7 @@ const AssetsTable = ({
 
   const chainId = useChainId()
   const isSwapFeatureEnabled = useIsSwapFeatureEnabled()
-  const isStakingPromoEnabled = useIsStakingPromoEnabled()
+  const isSafenetStakingEnabled = useSafeTokenEnabled()
   const isEarnPromoEnabled = useIsEarnPromoEnabled()
 
   const { isAssetSelected, toggleAsset, cancel, deselectAll, saveChanges } = useHideAssets(() =>
@@ -161,7 +160,7 @@ const AssetsTable = ({
                   <AssetRowContent
                     item={item}
                     chainId={chainId}
-                    isStakingPromoEnabled={isStakingPromoEnabled ?? false}
+                    isSafenetStakingEnabled={isSafenetStakingEnabled}
                     isEarnPromoEnabled={isEarnPromoEnabled ?? false}
                     showMobileValue
                     showMobileBalance
@@ -178,7 +177,7 @@ const AssetsTable = ({
               rawValue: rawPriceValue,
               content: (
                 <Typography className="text-right">
-                  <FiatValue value={item.fiatConversion == '0' ? null : item.fiatConversion} />
+                  <FiatValue value={item.fiatConversion == '0' ? null : item.fiatConversion} precise />
                 </Typography>
               ),
             },
@@ -215,7 +214,6 @@ const AssetsTable = ({
             },
             actions: {
               rawValue: '',
-              sticky: true,
               content: (
                 <ActionButtons
                   tokenInfo={item.tokenInfo}
@@ -270,7 +268,7 @@ const AssetsTable = ({
                     <AssetRowContent
                       item={item}
                       chainId={chainId}
-                      isStakingPromoEnabled={isStakingPromoEnabled ?? false}
+                      isSafenetStakingEnabled={isSafenetStakingEnabled}
                       isEarnPromoEnabled={isEarnPromoEnabled ?? false}
                       showMobileValue
                       showMobileBalance

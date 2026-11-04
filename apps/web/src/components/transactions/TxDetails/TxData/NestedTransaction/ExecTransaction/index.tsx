@@ -1,6 +1,6 @@
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 
 import Link from 'next/link'
@@ -8,10 +8,11 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { AppRoutes } from '@/config/routes'
 import { useMemo } from 'react'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { NestedTransaction } from '../NestedTransaction'
 import useTxPreview from '@/components/tx/confirmation-views/useTxPreview'
 import TxData from '../..'
+import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 const safeInterface = Safe__factory.createInterface()
 
@@ -49,6 +50,7 @@ export const ExecTransaction = ({
   isConfirmationView?: boolean
 }) => {
   const chain = useCurrentChain()
+  const spaceId = useUrlSpaceId()
 
   const childSafeTx = useMemo<SafeTransaction | undefined>(
     () => (data?.hexData ? extractTransactionData(data.hexData) : undefined),
@@ -88,7 +90,7 @@ export const ExecTransaction = ({
               <Link
                 href={{
                   pathname: AppRoutes.transactions.history,
-                  query: { safe: `${chain.shortName}:${data.to.value}` },
+                  query: withSpaceId({ safe: `${chain.shortName}:${data.to.value}` }, spaceId),
                 }}
                 passHref
                 legacyBehavior

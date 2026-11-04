@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { BookUser, Check, ChevronRight, Rocket, UsersRound, WalletCards } from 'lucide-react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import SafeWidget from '../SafeWidget'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook, useCurrentSpaceId } from '@/features/spaces'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -48,7 +48,7 @@ const SETUP_STEPS: SetupStep[] = [
     label: 'Invite team members',
     icon: UsersRound,
   },
-  { key: 'explore', label: 'Explore workspaces', icon: Rocket },
+  { key: 'explore', label: 'Explore Workspaces', icon: Rocket },
 ]
 
 const DISMISS_STORAGE_KEY = 'setupWidgetDismissed'
@@ -153,7 +153,7 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
         {!dismissed && (
           <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.3, ease: 'easeInOut' }}>
             <SafeWidget
-              title="Set up your workspace"
+              title="Set up your Workspace"
               testId="space-dashboard-setup-widget"
               action={
                 <Typography

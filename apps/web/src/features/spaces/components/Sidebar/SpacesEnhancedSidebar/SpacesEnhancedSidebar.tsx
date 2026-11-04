@@ -1,6 +1,6 @@
-import { useEffect, useState, type CSSProperties, type ReactElement } from 'react'
+import { useEffect, type CSSProperties, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
-import { SidebarProvider, useSidebar } from '@/components/ui/sidebar'
+import { SidebarProvider, useSidebar } from '@safe-global/views/components/ui/sidebar'
 import { EnhancedSidebar } from '../index'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -8,13 +8,12 @@ import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 import { useSpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { getNonDeclinedSpaces } from '@/features/spaces/utils'
-import type { SpaceItem } from '../types'
-import { getQuerySpaceId } from '../utils'
+import { parseSpaceId } from '@/hooks/useUrlSpaceId'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import useIsQualifiedSafe from '../../../hooks/useIsQualifiedSafe'
 import { SidebarSkeleton } from '../SidebarSkeleton'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 
 interface SpacesEnhancedSidebarProps {
@@ -76,7 +75,6 @@ const HydratedSidebar = ({ contained = false }: { contained?: boolean }): ReactE
   const isUserSignedIn = useAppSelector(isAuthenticated)
   const resolvedSpaceId = useCurrentSpaceId()
   const isSpaceRoute = useIsSpaceRoute()
-  const [addedToSpace, setAddedToSpace] = useState<SpaceItem | undefined>()
   const isQualifiedSafe = useIsQualifiedSafe()
 
   const { currentData: currentUser, isLoading: isUserLoading } = useUsersGetWithWalletsV1Query(undefined, {
@@ -88,7 +86,7 @@ const HydratedSidebar = ({ contained = false }: { contained?: boolean }): ReactE
 
   const isLoadingData = isUserSignedIn && (isUserLoading || isSpacesLoading)
 
-  const spaceIdForSidebarSelection = isSpaceRoute ? resolvedSpaceId : getQuerySpaceId(router.query)
+  const spaceIdForSidebarSelection = isSpaceRoute ? resolvedSpaceId : parseSpaceId(router.query.spaceId)
 
   const selectedSpace =
     spaceIdForSidebarSelection != null ? spaces?.find((space) => space.uuid === spaceIdForSidebarSelection) : undefined
@@ -98,7 +96,7 @@ const HydratedSidebar = ({ contained = false }: { contained?: boolean }): ReactE
   const qualifiedSpaceId = isQualifiedSafe ? resolvedSpaceId : null
   const qualifiedSpace = qualifiedSpaceId != null ? spaces?.find((space) => space.uuid === qualifiedSpaceId) : undefined
 
-  const effectiveSelectedSpace = selectedSpace ?? addedToSpace ?? qualifiedSpace
+  const effectiveSelectedSpace = selectedSpace ?? qualifiedSpace
 
   const sidebarType = isSpaceRoute ? 'spaces' : 'safe'
 
@@ -108,7 +106,6 @@ const HydratedSidebar = ({ contained = false }: { contained?: boolean }): ReactE
       type={sidebarType}
       selectedSpace={effectiveSelectedSpace}
       spaces={nonDeclinedSpaces}
-      onSpaceAdded={setAddedToSpace}
       isLoading={isLoadingData}
     />
   )

@@ -19,8 +19,22 @@ jest.mock('@/store/authSlice', () => ({
 const mockUseSpacesGetV1Query = useSpacesGetV1Query as jest.Mock
 const mockUseLazySpaceSafesGetV1Query = useLazySpaceSafesGetV1Query as jest.Mock
 
-const spaceAlpha = { uuid: 'alpha', name: 'Alpha', members: [], memberCount: 1, safeCount: 1 } as GetSpaceResponse
-const spaceBravo = { uuid: 'bravo', name: 'Bravo', members: [], memberCount: 1, safeCount: 1 } as GetSpaceResponse
+const spaceAlpha = {
+  uuid: 'alpha',
+  name: 'Alpha',
+  members: [],
+  memberCount: 1,
+  safeCount: 1,
+  experimentalFeatures: [],
+} as GetSpaceResponse
+const spaceBravo = {
+  uuid: 'bravo',
+  name: 'Bravo',
+  members: [],
+  memberCount: 1,
+  safeCount: 1,
+  experimentalFeatures: [],
+} as GetSpaceResponse
 
 const mockSafesResolver = (safesBySpace: Record<string, { safes: Record<string, string[]> }>) =>
   mockUseLazySpaceSafesGetV1Query.mockReturnValue([
@@ -70,5 +84,17 @@ describe('useSafeSpaces', () => {
     const { result } = renderHook(() => useSafeSpaces())
 
     await waitFor(() => expect(result.current.safeSpaces).toEqual({}))
+  })
+
+  it('does not fetch any Space safes while skipped', async () => {
+    const trigger = jest.fn()
+    mockUseLazySpaceSafesGetV1Query.mockReturnValue([trigger])
+    mockUseSpacesGetV1Query.mockReturnValue({ data: undefined, isLoading: false })
+
+    const { result } = renderHook(() => useSafeSpaces(true))
+
+    expect(mockUseSpacesGetV1Query).toHaveBeenCalledWith(undefined, { skip: true })
+    await waitFor(() => expect(result.current).toEqual({ safeSpaces: {}, isLoading: false }))
+    expect(trigger).not.toHaveBeenCalled()
   })
 })

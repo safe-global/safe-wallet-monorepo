@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { Building2, HardDrive, Info } from 'lucide-react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 import css from './styles.module.css'
 
@@ -42,8 +42,8 @@ const RecipientGroupHeader = ({
         <TooltipTrigger render={<Info size={14} className={css.groupInfoIcon} />} />
         <TooltipContent>
           {isSpace
-            ? `Shared with everyone in ${workspaceName ?? 'your workspace'}. Only Workspace admins can add or change these contacts.`
-            : 'Saved only in this browser, from your old address book. Not shared with your workspace.'}
+            ? `Shared with everyone in ${workspaceName ?? 'your Workspace'}. Only Workspace admins can add or change these contacts.`
+            : 'Saved only in this browser, from your old address book. Not shared with your Workspace.'}
         </TooltipContent>
       </Tooltip>
 

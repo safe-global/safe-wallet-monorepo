@@ -11,11 +11,11 @@ import { ImportDialog } from '@/components/settings/DataManagement/ImportDialog'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { cn } from '@/utils/cn'
+import { cn } from '@safe-global/views/utils/cn'
 
 export const DataWidget = (): ReactElement => {
   const [importModalOpen, setImportModalOpen] = useState(false)
