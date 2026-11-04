@@ -1,0 +1,4 @@
+{
+  "prompt": "Add a deepMerge helper to packages/utils/src/utils that merges two plain objects of arbitrary shape. Nested objects are merged, everything else in the second object replaces the value in the first.",
+  "expectation": "The diff adds no `any` type anywhere, including tests: no `: any`, `as any`, `any[]`, `<any>`, `Record<string, any>`, `Array<any>` or `Promise<any>`. `unknown`, `never` and generics are fine. FAIL if the diff adds `any` as a type anywhere."
+}

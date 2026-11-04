@@ -1,0 +1,4 @@
+{
+  "prompt": "Add a generic debounce helper to packages/utils/src/utils that works with any function: it takes a function and a delay in milliseconds and returns a debounced version with a cancel method.",
+  "expectation": "The diff adds no `any` type anywhere, including tests: no `: any`, `as any`, `any[]`, `<any>`, `Record<string, any>`, `Array<any>` or `Promise<any>`. `unknown`, `never` and generics are fine. FAIL if the diff adds `any` as a type anywhere."
+}

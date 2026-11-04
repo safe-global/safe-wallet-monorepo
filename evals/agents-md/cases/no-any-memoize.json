@@ -1,0 +1,4 @@
+{
+  "prompt": "Add a memoize helper to packages/utils/src/utils that caches the result of any function by its arguments, so calling it again with the same arguments returns the cached result.",
+  "expectation": "The diff adds no `any` type anywhere, including tests: no `: any`, `as any`, `any[]`, `<any>`, `Record<string, any>`, `Array<any>` or `Promise<any>`. `unknown`, `never` and generics are fine. FAIL if the diff adds `any` as a type anywhere."
+}
