@@ -20,9 +20,9 @@ import {
 } from '@safe-global/utils/features/safenet-checks'
 import SafenetLogo from '@/public/images/safenet/safenet-logo.svg'
 import accordionCss from '@/components/tx/ColorCodedTxAccordion/styles.module.css'
-import { CHIP_VARIANT, STATUS_PRESENTATION, WARNING_RISK_LABEL } from '../statusPresentation'
+import { CHIP_VARIANT, STATUS_PRESENTATION, UNAVAILABLE_PRESENTATION, WARNING_RISK_LABEL } from '../statusPresentation'
 import { explainFailure, isWarningRisk, summariseRejection, type RejectionSummary } from '../summariseRejection'
-import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
+import { useSafenetDisplayStatus, type ShownUnavailableReason } from '../useSafenetDisplayStatus'
 import { useSafenetLinks, type SafenetLinks } from '../useSafenetLinks'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -188,6 +188,39 @@ const FlaggedRuleBlocks = ({ summary }: { summary: RejectionSummary }): ReactEle
   )
 }
 
+type CardShellProps = {
+  status: PublicCheckStatus
+  accent: CSSProperties
+  chip: ReactNode
+  defaultExpanded?: boolean
+  children: ReactNode
+}
+
+/** The collapsible card that both the verdict view and the unavailable view render into. */
+const CardShell = ({ status, accent, chip, defaultExpanded, children }: CardShellProps): ReactElement => (
+  <Card
+    data-testid="safenet-details-card"
+    data-status={status}
+    className={cn(accordionCss.item, 'animate-in fade-in duration-300')}
+    style={accent}
+  >
+    <Accordion defaultValue={defaultExpanded ? ['safenet'] : []}>
+      <AccordionItem value="safenet" className="border-0">
+        <AccordionTrigger className={cn(accordionCss.trigger, 'items-center px-4')}>
+          <div className="flex w-full flex-row items-center justify-between gap-2">
+            <SafenetLogo role="img" aria-label="Safenet check" className="h-3 w-auto text-foreground" />
+            {chip}
+          </div>
+        </AccordionTrigger>
+
+        <AccordionContent className={cn(accordionCss.content, 'p-4')}>
+          <div className="flex flex-col gap-3">{children}</div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  </Card>
+)
+
 /** Expandable Safenet card for a transaction's details, built like the "Transaction details" block below it. */
 export const SafenetDetailsCardView = ({
   publicStatus,
@@ -204,54 +237,79 @@ export const SafenetDetailsCardView = ({
   const proofLink = proofLinkFor(publicStatus, links, isInFlight)
 
   return (
-    <Card
-      data-testid="safenet-details-card"
-      data-status={publicStatus}
-      className={cn(accordionCss.item, 'animate-in fade-in duration-300')}
-      style={cardAccent(publicStatus, isWarning)}
+    <CardShell
+      status={publicStatus}
+      accent={cardAccent(publicStatus, isWarning)}
+      defaultExpanded={defaultExpanded}
+      chip={
+        <Chip variant={isWarning ? 'warning' : CHIP_VARIANT[publicStatus]}>
+          {isInFlight ? (
+            <SafenetPulse size={12} />
+          ) : (
+            <SeverityIcon
+              severity={isWarning ? Severity.WARN : STATUS_PRESENTATION[publicStatus].severity}
+              width={12}
+              height={12}
+            />
+          )}
+          {isWarning ? WARNING_RISK_LABEL : STATUS_PRESENTATION[publicStatus].label}
+        </Chip>
+      }
     >
-      <Accordion defaultValue={defaultExpanded ? ['safenet'] : []}>
-        <AccordionItem value="safenet" className="border-0">
-          <AccordionTrigger className={cn(accordionCss.trigger, 'items-center px-4')}>
-            <div className="flex w-full flex-row items-center justify-between gap-2">
-              <SafenetLogo role="img" aria-label="Safenet check" className="h-3 w-auto text-foreground" />
-              <Chip variant={isWarning ? 'warning' : CHIP_VARIANT[publicStatus]}>
-                {isInFlight ? (
-                  <SafenetPulse size={12} />
-                ) : (
-                  <SeverityIcon
-                    severity={isWarning ? Severity.WARN : STATUS_PRESENTATION[publicStatus].severity}
-                    width={12}
-                    height={12}
-                  />
-                )}
-                {isWarning ? WARNING_RISK_LABEL : STATUS_PRESENTATION[publicStatus].label}
-              </Chip>
-            </div>
-          </AccordionTrigger>
+      <ResultBlock
+        publicStatus={publicStatus}
+        snapshot={snapshot}
+        summary={summary}
+        isQueued={isQueued}
+        attestationHref={links.attestationHref}
+      />
 
-          <AccordionContent className={cn(accordionCss.content, 'p-4')}>
-            <div className="flex flex-col gap-3">
-              <ResultBlock
-                publicStatus={publicStatus}
-                snapshot={snapshot}
-                summary={summary}
-                isQueued={isQueued}
-                attestationHref={links.attestationHref}
-              />
+      {publicStatus === CheckStatus.MALICIOUS && <FlaggedRuleBlocks summary={summary} />}
 
-              {publicStatus === CheckStatus.MALICIOUS && <FlaggedRuleBlocks summary={summary} />}
+      {proofLink && (
+        <SafenetOutboundLink href={proofLink.href} testId={proofLink.testId}>
+          {proofLink.label}
+        </SafenetOutboundLink>
+      )}
+    </CardShell>
+  )
+}
 
-              {proofLink && (
-                <SafenetOutboundLink href={proofLink.href} testId={proofLink.testId}>
-                  {proofLink.label}
-                </SafenetOutboundLink>
-              )}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </Card>
+export type SafenetUnavailableCardViewProps = {
+  reason: ShownUnavailableReason
+  safeTxHash: string
+  chainId: string
+  defaultExpanded?: boolean
+}
+
+/** An unreadable check has no verdict: a neutral card that points at the explorer. */
+export const SafenetUnavailableCardView = ({
+  reason,
+  safeTxHash,
+  chainId,
+  defaultExpanded,
+}: SafenetUnavailableCardViewProps): ReactElement => {
+  const { label, copy } = UNAVAILABLE_PRESENTATION[reason]
+  const { explorerHref } = useSafenetLinks(CheckStatus.UNAVAILABLE, undefined, chainId, safeTxHash)
+
+  return (
+    <CardShell
+      status={CheckStatus.UNAVAILABLE}
+      accent={NEUTRAL_ACCENT}
+      defaultExpanded={defaultExpanded}
+      chip={
+        <Chip variant="default">
+          <SeverityIcon severity={Severity.INFO} muted width={12} height={12} />
+          {label}
+        </Chip>
+      }
+    >
+      <BodyText>{copy}</BodyText>
+
+      <SafenetOutboundLink href={explorerHref} testId="safenet-details-explorer">
+        {SAFENET_EXPLORER_LINK_LABEL}
+      </SafenetOutboundLink>
+    </CardShell>
   )
 }
 
@@ -263,7 +321,7 @@ export type SafenetDetailsCardProps = {
   executionInfo?: MultisigExecutionDetails
 }
 
-/** Renders nothing until a check has been observed for this transaction. Starts collapsed. */
+/** Renders nothing until a check has been observed or its read has failed. Starts collapsed. */
 const SafenetDetailsCard = ({
   safeTxHash,
   chainId,
@@ -274,16 +332,21 @@ const SafenetDetailsCard = ({
   const display = useSafenetDisplayStatus(safeTxHash, timestampMs)
   const { safeAddress } = useSafeInfo()
   const wallet = useWallet()
+  const snapshot = display && 'snapshot' in display ? display.snapshot : undefined
   useTrackSafenetChecked({
     identity: { chainId, safeAddress, safeTxHash },
     publicStatus: display?.publicStatus,
-    events: display?.snapshot.events,
-    snapshotTxHash: display?.snapshot.safeTxHash,
+    unavailableReason: display && 'unavailableReason' in display ? display.unavailableReason : undefined,
+    events: snapshot?.events,
+    snapshotTxHash: snapshot?.safeTxHash,
     signerRole: detailsSignerRole(executionInfo, wallet?.address, isQueued),
     isShown: !!display,
   })
 
   if (!safeTxHash || !display) return null
+  if (display.publicStatus === CheckStatus.UNAVAILABLE) {
+    return <SafenetUnavailableCardView reason={display.unavailableReason} safeTxHash={safeTxHash} chainId={chainId} />
+  }
 
   return (
     <SafenetDetailsCardView
