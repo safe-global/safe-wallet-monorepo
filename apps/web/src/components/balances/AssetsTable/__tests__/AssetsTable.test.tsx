@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { fireEvent, screen, waitFor } from '@testing-library/react'
-import { render } from '@/tests/test-utils'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { fakerChecksummedAddress, render } from '@/tests/test-utils'
 import * as useBalancesModule from '@/hooks/useBalances'
 import * as useChainIdModule from '@/hooks/useChainId'
 import * as useChains from '@/hooks/useChains'
+import * as useSafeAddressModule from '@/hooks/useSafeAddress'
 import { chainBuilder } from '@/tests/builders/chains'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
 import { toBeHex } from 'ethers'
@@ -12,7 +14,23 @@ import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balance
 import { balancesFixtures } from '@safe-global/test/msw/fixtures'
 import { balancesBuilder, balanceBuilder, erc20TokenBuilder, nativeTokenBuilder } from '@/tests/builders/balances'
 import { SAFE_TOKEN_ADDRESSES } from '@/config/constants'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { mockHasFeature } from '@/tests/mocks/hooks'
 import AssetsTable from '../index'
+
+jest.mock('@/hooks/useChains', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ configs: [] })),
+  useChain: jest.fn(),
+  useCurrentChain: jest.fn(),
+  useHasFeature: jest.fn(),
+}))
+
+// jsdom has no canvas, so the QR code shows the value it encodes as an attribute
+jest.mock('qrcode.react', () => ({
+  __esModule: true,
+  QRCodeCanvas: ({ value }: { value: string }) => <canvas role="img" aria-label="QR code" data-value={value} />,
+}))
 
 const mockUseIsMobile = jest.fn(() => false)
 jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
@@ -71,7 +89,11 @@ describe('AssetsTable', () => {
     jest.spyOn(useChainIdModule, 'default').mockReturnValue('5')
     mockUseIsMobile.mockReturnValue(false)
     mockUseSafeTokenEnabled.mockReturnValue(false)
+    mockHasFeature(false)
+    jest.mocked(useChains.useCurrentChain).mockReturnValue(undefined)
   })
+
+  afterEach(() => jest.restoreAllMocks())
 
   describe('empty state', () => {
     it('shows AddFundsCTA when balances list is empty', () => {
@@ -102,6 +124,23 @@ describe('AssetsTable', () => {
 
       renderAssetsTable({ balances: zeroBalance })
       expect(screen.getByText(/Add funds to get started/i)).toBeInTheDocument()
+    })
+
+    it('shows the Safe address in a QR code and drops the chain prefix when the switch is turned off', async () => {
+      const safeAddress = fakerChecksummedAddress()
+      jest.spyOn(useSafeAddressModule, 'default').mockReturnValue(safeAddress)
+      jest.mocked(useChains.useCurrentChain).mockReturnValue(chainBuilder().with({ shortName: 'gor' }).build())
+
+      renderAssetsTable({ balances: balancesFixtures.empty })
+
+      const addFunds = screen.getByTestId('add-funds-section')
+      const qrCode = within(addFunds).getByRole('img', { name: 'QR code' })
+      expect(qrCode).toHaveAttribute('data-value', `gor:${safeAddress}`)
+      expect(addFunds).toHaveTextContent(safeAddress)
+
+      await userEvent.click(within(addFunds).getByRole('switch', { name: 'QR code with chain prefix' }))
+
+      expect(qrCode).toHaveAttribute('data-value', safeAddress)
     })
   })
 
@@ -153,6 +192,7 @@ describe('AssetsTable', () => {
       jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(
         chainBuilder()
           .with({
+            features: [],
             blockExplorerUriTemplate: {
               address: 'https://explorer.test/address/{{address}}',
               txHash: 'https://explorer.test/tx/{{txHash}}',
@@ -408,6 +448,39 @@ describe('AssetsTable', () => {
       })
       expect(screen.queryByTestId('safenet-stake-btn')).not.toBeInTheDocument()
       expect(screen.queryByTestId('stake-btn')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('swap entry point', () => {
+    const tokens = [nativeTokenBuilder().build(), erc20TokenBuilder().build(), erc20TokenBuilder().build()]
+
+    const nonZeroBalances = () =>
+      balancesBuilder()
+        .with({ items: tokens.map((tokenInfo) => balanceBuilder().with({ tokenInfo }).build()) })
+        .build()
+
+    const rowOf = (tokenName: string) =>
+      screen.getAllByRole('row').find((row) => within(row).queryAllByText(tokenName).length > 0)
+
+    it('shows a Swap button in the Actions cell of every asset row when swaps are available', async () => {
+      mockHasFeature({ [FEATURES.NATIVE_SWAPS]: true })
+      renderAssetsTable({ balances: nonZeroBalances() })
+
+      await screen.findAllByTestId('swap-btn')
+      for (const { name } of tokens) {
+        const actionsCell = within(rowOf(name)!).getByTestId('table-cell-actions')
+        expect(within(actionsCell).getByTestId('swap-btn')).toBeInTheDocument()
+      }
+    })
+
+    it('shows no Swap button when swaps are unavailable on the chain', async () => {
+      mockHasFeature(false)
+      renderAssetsTable({ balances: nonZeroBalances() })
+
+      for (const { name } of tokens) {
+        expect((await screen.findAllByText(name)).length).toBeGreaterThan(0)
+      }
+      expect(screen.queryByTestId('swap-btn')).not.toBeInTheDocument()
     })
   })
 })

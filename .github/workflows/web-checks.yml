@@ -1,15 +1,8 @@
 name: Web Checks
 
 on:
+  # No paths filter: the required result job must report on every pull request.
   pull_request:
-    paths:
-      - apps/web/**
-      - apps/web-tanstack/**
-      - packages/**
-      - yarn.lock
-      - package.json
-      - .yarnrc.yml
-      - .yarn/patches/**
   push:
     branches:
       - main
@@ -30,7 +23,40 @@ concurrency:
 permissions: {}
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      relevant: ${{ steps.changes.outputs.relevant }}
+    steps:
+      - id: changes
+        uses: $/.github/actions/pr-changes
+        with:
+          paths: |
+            apps/web/**
+            apps/web-tanstack/**
+            packages/**
+            yarn.lock
+            package.json
+            .yarnrc.yml
+            .yarn/patches/**
+            config/**
+            yarn.config.cjs
+            turbo.json
+            .prettierrc
+            .prettierignore
+            knip.json
+            .github/workflows/web-checks.yml
+            .github/actions/yarn/**
+            .github/actions/corepack/**
+            .github/actions/pr-changes/**
+            .github/actions/required-result/**
+
   lint:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     permissions:
       contents: read
       checks: write
@@ -60,6 +86,8 @@ jobs:
         run: yarn turbo run lint --filter=@safe-global/views
 
   prettier:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     permissions:
       contents: read
       checks: write
@@ -76,6 +104,8 @@ jobs:
         run: yarn workspace @safe-global/web prettier
 
   type-check:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     permissions:
       contents: read
       checks: write
@@ -92,6 +122,8 @@ jobs:
         run: yarn turbo run type-check --filter=@safe-global/web
 
   knip-exports:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     permissions:
       contents: read
       checks: write
@@ -131,3 +163,16 @@ jobs:
                 }
               ]
             }
+
+  result:
+    # The one check that branch protection requires for this workflow.
+    name: Web checks result
+    permissions: {}
+    if: always()
+    needs: [changes, lint, prettier, type-check, knip-exports]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: $/.github/actions/required-result
+        with:
+          needs: ${{ toJSON(needs) }}
+          relevant: ${{ needs.changes.outputs.relevant }}
