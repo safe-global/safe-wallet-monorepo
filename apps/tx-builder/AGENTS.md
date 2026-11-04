@@ -2,7 +2,7 @@
 
 `apps/tx-builder` is a **Safe App** (runs in an iframe inside Safe{Wallet}) for composing and batching custom contract interactions. Migrated from the separate safe-apps repo; it keeps its own stack.
 
-## Stack divergence — root/web UI rules do NOT apply here
+## Stack divergence — root/web UI rules don't apply here
 
 - **UI: MUI v6 + Emotion + styled-components.** The shadcn/Tailwind/vars.css rules from root and `apps/web` do not apply. Theme lives in `src/theme/` (MUI theme config).
 - **State: React Context providers in `src/store/`** — not Redux/RTK.
@@ -12,7 +12,7 @@
 
 `yarn workspace @safe-global/tx-builder dev` (Vite dev server, port 4000) — plus the standard `build` / `test` / `lint` scripts.
 
-Root `yarn verify:changed` does NOT cover this app; run `node scripts/verify.mjs --changed --workspace=tx-builder`.
+Root `yarn verify:changed` doesn't cover this app; run `node scripts/verify.mjs --changed --workspace=tx-builder`.
 
 ## Testing
 

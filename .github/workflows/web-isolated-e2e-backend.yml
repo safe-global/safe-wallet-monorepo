@@ -259,6 +259,116 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
 
+  merge-report:
+    # Runs repository code (yarn install) without an OIDC token; publish-report gets the token but runs no repository code.
+    name: Merge E2E report
+    needs: [plan, e2e]
+    if: always() && needs.plan.outputs.run == 'true' && vars.E2E_REPORTS_BUCKET != '' && (needs.e2e.result == 'success' || needs.e2e.result == 'failure')
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: $/.github/actions/yarn
+
+      - name: Download shard results
+        uses: actions/download-artifact@v8.0.2
+        with:
+          pattern: isolated-e2e-results-*
+          path: ${{ runner.temp }}/results
+
+      - name: Merge blob reports and collect shard logs
+        env:
+          RESULTS: ${{ runner.temp }}/results
+          REPORT: ${{ runner.temp }}/report
+          PLAYWRIGHT_HTML_OUTPUT_DIR: ${{ runner.temp }}/report
+          PLAYWRIGHT_HTML_OPEN: never
+        run: |
+          blobs="$RUNNER_TEMP/blob"
+          mkdir -p "$blobs" "$REPORT"
+          find "$RESULTS" -path '*/artifacts/playwright/blob/*.zip' -exec cp {} "$blobs/" \;
+          if ls "$blobs"/*.zip > /dev/null 2>&1; then
+            yarn workspace @safe-global/web exec playwright merge-reports --reporter html "$blobs"
+          else
+            echo '::warning::No blob reports found; publishing the shard logs only'
+          fi
+          # The merged report already holds the traces, videos and screenshots; the fork cache is not worth keeping.
+          for shard in "$RESULTS"/isolated-e2e-results-*; do
+            mkdir -p "$REPORT/shards/${shard##*-}"
+            rsync -a --prune-empty-dirs --exclude '.anvil-cache/' --exclude 'artifacts/playwright/' \
+              "$shard/" "$REPORT/shards/${shard##*-}/"
+          done
+          # The PR comment always links index.html, so a run without tests still opens the shard logs.
+          if [ ! -f "$REPORT/index.html" ]; then
+            {
+              echo '<!doctype html><meta charset="utf-8"><title>Isolated E2E logs</title>'
+              echo '<h1>Playwright did not run</h1>'
+              echo "<p>No test report was produced, usually because the backend did not start. See the <a href=\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\">workflow run</a> and the shard logs:</p><ul>"
+              (cd "$REPORT" && find shards -type f | sort | sed -E 's|.*|<li><a href="&">&</a></li>|')
+              echo '</ul>'
+            } > "$REPORT/index.html"
+          fi
+
+      - name: Upload merged report
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: isolated-e2e-report
+          path: ${{ runner.temp }}/report
+          retention-days: 1
+          include-hidden-files: true
+          if-no-files-found: error
+
+  publish-report:
+    name: Publish E2E report
+    needs: merge-report
+    if: always() && needs.merge-report.result == 'success'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
+    permissions:
+      id-token: write
+      pull-requests: write
+    env:
+      REPORT_PREFIX: safe-wallet-monorepo/runs/${{ github.run_id }}/${{ github.run_attempt }}
+    steps:
+      - name: Download merged report
+        uses: actions/download-artifact@v8.0.2
+        with:
+          name: isolated-e2e-report
+          path: report
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: ${{ secrets.AWS_E2E_REPORTS_ROLE }}
+          aws-region: eu-central-1
+
+      - name: Upload report to S3
+        env:
+          BUCKET: ${{ vars.E2E_REPORTS_BUCKET }}
+        run: aws s3 sync report "s3://$BUCKET/$REPORT_PREFIX/" --no-progress --only-show-errors
+
+      - name: Write report link
+        id: link
+        env:
+          REPORTS_URL: ${{ vars.E2E_REPORTS_URL }}
+        run: |
+          url="$REPORTS_URL/$REPORT_PREFIX/index.html"
+          body="**Isolated E2E report** (run attempt $GITHUB_RUN_ATTEMPT): $url"$'\n\n'"Sign in with your safe.global JumpCloud account to open it."
+          echo "$body" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo 'body<<EOF'
+            echo "$body"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Comment the report link on the pull request
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v3.0.5
+        with:
+          header: isolated-e2e-report
+          message: ${{ steps.link.outputs.body }}
+
   result:
     # The one stable check name for branch protection; the shard names change with the shard count.
     name: Isolated E2E result

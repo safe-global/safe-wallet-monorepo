@@ -34,7 +34,7 @@ Standard scripts (`test`, `test:watch`, `lint`, `type-check`, …) follow the us
 ## Mobile-specific common pitfalls
 
 - **Hardcoding values** – Use Tamagui tokens, not hard-coded values.
-- **Shared code** – Edits to `packages/**` affect both platforms and are NOT covered by app verify scripts — see [packages/AGENTS.md](../../packages/AGENTS.md).
+- **Shared code** – Edits to `packages/**` affect both platforms and aren't covered by app verify scripts — see [packages/AGENTS.md](../../packages/AGENTS.md).
 
 ## Code complexity
 

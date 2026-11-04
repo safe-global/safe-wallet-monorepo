@@ -33,13 +33,17 @@
     "@mui/material": "^6.5.0",
     "@safe-global/test": "workspace:^",
     "@types/jest": "^30.0.0",
-    "eslint": "^9.29.0",
+    "@types/react": "~19.2.10",
+    "eslint": "^9.39.4",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "jest": "^30.5.2",
-    "prettier": "^3.9.9",
+    "jest-environment-jsdom": "^30.5.2",
+    "prettier": "^3.9.10",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
     "typescript": "~5.9.2",
-    "typescript-eslint": "^8.70.1"
+    "typescript-eslint": "^8.72.0"
   },
   "dependencies": {
     "jest-fixed-jsdom": "^0.0.11"
