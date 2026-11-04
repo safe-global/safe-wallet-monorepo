@@ -21,8 +21,6 @@ const multiSendInterface = new Interface(['function multiSend(bytes)'])
 export const short = (address) => `${address.slice(0, 6)}...${address.slice(-4)}`
 
 /** The address of an EIP-3770 Safe reference such as `sep:0x…`. */
-export const addressOf = (prefixed) => prefixed.slice(prefixed.indexOf(':') + 1)
-
 /** Runs `action` with a signer for `address` on the fork, which needs no key for it. */
 export async function impersonated(provider, address, action) {
   await provider.send('anvil_setBalance', [address, FUNDED_BALANCE])
@@ -70,7 +68,7 @@ async function canTransfer(provider, token, holder, amount) {
 }
 
 /** Writes an ERC-20 balance on the fork by finding the slot of the token's balance mapping. */
-export async function dealToken(provider, token, holder, amount) {
+async function dealToken(provider, token, holder, amount) {
   const value = toBeHex(amount, 32)
   for (let slot = 0; slot < 20; slot++) {
     const key = keccak256(AbiCoder.defaultAbiCoder().encode(['address', 'uint256'], [holder, slot]))
