@@ -132,6 +132,7 @@ export default [
           paths: [
             { name: 'next', importNames: ['NextPage'], message: 'Type a page as a plain function component.' },
             { name: 'next/dynamic', message: 'Import dynamic from @/utils/dynamic, which does not depend on Next.' },
+            { name: 'next/app', message: 'Type the app props yourself, as pages/_app.tsx does.' },
             {
               name: 'next/dist/client/resolve-href',
               message: 'Build the URL with stringify from querystring; next/dist is internal to Next.',

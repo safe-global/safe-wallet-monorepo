@@ -359,6 +359,33 @@ services:
       interval: 5s
       timeout: 5s
       retries: 12
+  # An emulated Trezor Safe 5 behind Trezor Bridge, for the Trezor specs; the wallet reaches it through Trezor Connect.
+  trezor-emulator:
+    image: ${TREZOR_USER_ENV_IMAGE:?Load test-images.env}
+    command: [uv, run, python, /e2e/trezor_emulator.py]
+    environment:
+      PYTHONPATH: /trezor-user-env/src
+      TREZOR_MODEL: T3T1
+      TREZOR_FIRMWARE: 2.13.0
+      # Trezor's public test mnemonic: every address it derives is test-only. Its first address owns the Trezor Safes.
+      TREZOR_SEED: all all all all all all all all all all all all
+      TREZOR_LABEL: Safe E2E
+    volumes:
+      - ./scripts/trezor_emulator.py:/e2e/trezor_emulator.py:ro
+    ports:
+      - 127.0.0.1:${TREZOR_EMULATOR_PORT:-9556}:9001
+      # Trezor Connect looks for the Bridge on 21328 only; a stack on another port cannot run the Trezor specs.
+      - 127.0.0.1:${TREZOR_BRIDGE_PORT:-21328}:21328
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - import urllib.request;
+          urllib.request.urlopen('http://localhost:9001/screen')
+      interval: 5s
+      timeout: 5s
+      retries: 12
   fork-upstream:
     <<: *fork-upstream
     environment:

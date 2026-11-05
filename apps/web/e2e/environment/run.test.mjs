@@ -71,6 +71,13 @@ test('points the wallet at the local Ledger emulator when the stack has one', ()
   assert.throws(() => walletEnvironment({ ...manifest, ledgerEmulatorUrl: 'https://speculos.example' }), /local/)
 })
 
+test('gives the Trezor specs the local Trezor emulator when the stack has one', () => {
+  const emulator = 'http://localhost:9556'
+  assert.equal(walletEnvironment({ ...manifest, trezorEmulatorUrl: emulator }).TREZOR_EMULATOR_URL, emulator)
+  assert.equal(walletEnvironment(manifest, {}).TREZOR_EMULATOR_URL, undefined)
+  assert.throws(() => walletEnvironment({ ...manifest, trezorEmulatorUrl: 'https://trezor.example' }), /local/)
+})
+
 test('cleans a partially started stack and preserves the original failure', async () => {
   const calls = []
   const failure = new Error('startup failed')

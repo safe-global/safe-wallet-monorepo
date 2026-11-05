@@ -1,7 +1,6 @@
 import Analytics from '@/services/analytics/Analytics'
-import type { ReactNode } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import { type ReactElement } from 'react'
-import { type AppProps } from 'next/app'
 import Head from 'next/head'
 import dynamic from '@/utils/dynamic'
 import { useRememberSpace } from '@/hooks/useRememberSpace'
@@ -179,6 +178,12 @@ const AppLaunchScreen = (): ReactElement | null => {
   const stepUpCaption = useStepUpSplash()
 
   return <LaunchScreen stepUpCaption={stepUpCaption} />
+}
+
+type AppProps = {
+  Component: ComponentType<Record<string, unknown>>
+  pageProps: Record<string, unknown>
+  router: { pathname: string; query: Partial<Record<string, string | string[]>> }
 }
 
 const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement => {

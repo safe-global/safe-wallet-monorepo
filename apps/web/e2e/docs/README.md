@@ -33,7 +33,7 @@ e2e/
 │   ├── fixtures/                  # test.fixture.ts (every spec), journey.fixture.ts (journeys)
 │   ├── seed/                      # Seed a Safe and its state for a journey
 │   ├── chain/                     # Reads from the fork
-│   ├── api/                       # CGW client and helpers, WalletConnect dApp, Ledger emulator
+│   ├── api/                       # CGW client and helpers, WalletConnect dApp, Ledger and Trezor emulators
 │   ├── pages/                     # Page objects: locators and actions, no assertions
 │   └── data/                      # Constants and credentials
 ├── environment/                   # The isolated stack, the spec registry and scenarios
