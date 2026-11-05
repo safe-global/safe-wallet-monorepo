@@ -1,0 +1,62 @@
+{
+  "src/components/tx/security/tenderly/__tests__/utils.test.ts": {
+    "@typescript-eslint/no-explicit-any": {
+      "count": 10
+    }
+  },
+  "src/features/safe-shield/hooks/__tests__/useCounterpartyAnalysis.test.ts": {
+    "@typescript-eslint/no-explicit-any": {
+      "count": 40
+    }
+  },
+  "src/features/safe-shield/hooks/__tests__/useThreatAnalysis.test.ts": {
+    "@typescript-eslint/no-explicit-any": {
+      "count": 8
+    }
+  },
+  "src/features/safe-shield/hooks/__tests__/useThreatAnalysisHypernative.test.ts": {
+    "@typescript-eslint/no-explicit-any": {
+      "count": 2
+    }
+  },
+  "src/features/safe-shield/hooks/__tests__/useThreatAnalysisHypernativeBatch.test.ts": {
+    "@typescript-eslint/no-explicit-any": {
+      "count": 6
+    }
+  },
+  "src/features/safe-shield/hooks/__tests__/useThreatAnalysisHypernativeMessage.test.ts": {
+    "@typescript-eslint/no-explicit-any": {
+      "count": 7
+    }
+  },
+  "src/features/safe-shield/utils/__tests__/analysisUtils.test.ts": {
+    "@typescript-eslint/no-explicit-any": {
+      "count": 2
+    }
+  },
+  "src/features/safe-shield/utils/__tests__/getOverallStatus.test.ts": {
+    "@typescript-eslint/no-explicit-any": {
+      "count": 7
+    }
+  },
+  "src/features/safe-shield/utils/__tests__/mapConsolidatedAnalysisResults.test.ts": {
+    "@typescript-eslint/no-explicit-any": {
+      "count": 8
+    }
+  },
+  "src/features/safe-shield/utils/__tests__/mapHypernativeResponse.test.ts": {
+    "@typescript-eslint/no-explicit-any": {
+      "count": 1
+    }
+  },
+  "src/features/safe-shield/utils/__tests__/mapVisibleAnalysisResults.test.ts": {
+    "@typescript-eslint/no-explicit-any": {
+      "count": 7
+    }
+  },
+  "src/hooks/useAsync.ts": {
+    "@eslint-community/eslint-comments/no-restricted-disable": {
+      "count": 1
+    }
+  }
+}
