@@ -48,8 +48,8 @@ function Tabs({ className, orientation = 'horizontal', ...props }: TabsPrimitive
 }
 
 // Two public tab families:
-//  - `underline` — flush-underline tabs. `tone="brand"` is the bold, primary-coloured page nav
-//    (NavTabs: Assets/Settings/Transactions); add `size="lg"` for text-width, medium-weight tabs.
+//  - `underline` — flush-underline tabs. `tone="brand"` is the bold, primary-coloured nav; with
+//    `size="lg"` it is the text-width, medium-weight page nav (NavTabs: Assets/Settings/Transactions).
 //    `tone="neutral"` (default) is the lighter in-content look (Spaces address book, members).
 //  - `toggle` — pill-on-track switch. `size="default"` is the compact muted-track switch (SecurityHub
 //    drawer); `size="lg"` is the large muted-track welcome switch (Accounts/Workspaces).
