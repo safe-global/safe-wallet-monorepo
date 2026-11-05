@@ -1,18 +1,13 @@
-import { useCurrentChain } from '@/hooks/useChains'
+import * as useChains from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
 import { renderHook } from '@/tests/test-utils'
 import { useShareSafeAppUrl } from './useShareSafeAppUrl'
-
-jest.mock('@/hooks/useChains', () => ({
-  ...jest.requireActual('@/hooks/useChains'),
-  useCurrentChain: jest.fn(),
-}))
 
 const APP_URL = 'https://apps-portal.safe.global/tx-builder'
 
 describe('useShareSafeAppUrl', () => {
   it('links to the share page of the app on the current chain', () => {
-    jest.mocked(useCurrentChain).mockReturnValue(chainBuilder().with({ shortName: 'eth' }).build())
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(chainBuilder().with({ shortName: 'eth' }).build())
 
     const { result } = renderHook(() => useShareSafeAppUrl(APP_URL))
 
@@ -22,7 +17,7 @@ describe('useShareSafeAppUrl', () => {
   })
 
   it('leaves the chain empty while no chain is loaded', () => {
-    jest.mocked(useCurrentChain).mockReturnValue(undefined)
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(undefined)
 
     const { result } = renderHook(() => useShareSafeAppUrl(APP_URL))
 
