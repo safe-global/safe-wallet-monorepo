@@ -45,7 +45,7 @@ test.describe('Create a nested Safe', { tag: '@e2e' }, () => {
     await nestedSafes.openButton.click()
     await expect(nestedSafes.manageButton).toBeVisible()
     await expect(nestedSafes.rows).toHaveCount(1)
-    await nestedSafes.openSafeLink(name).click()
+    await nestedSafes.openSafe(name)
     await expect(safePage).toHaveURL((url) => openedSafe(url) === `sep:${nested}`)
 
     await nestedSafes.parentSafeLink.click()

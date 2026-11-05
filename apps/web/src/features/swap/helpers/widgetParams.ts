@@ -58,6 +58,7 @@ export const getSwapWidgetParams = ({
   disableToastMessages: true,
   disablePostedOrderConfirmationModal: true,
   disableCrossChainSwap: true,
+  disableInfiniteApprove: true,
   hideLogo: true,
   hideNetworkSelector: true,
   sounds: {
