@@ -4,6 +4,18 @@ import { cgwApi as usersApi } from '@safe-global/store/gateway/AUTO_GENERATED/us
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { sameTagName } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/tagRules'
+
+type TagChangeLocation = 'row_menu' | 'add_contact' | 'edit_contact'
+
+const countNotIn = (names: string[], others: string[]) =>
+  names.filter((name) => !others.some((other) => sameTagName(name, other))).length
+
+/** Tags added to and removed from a contact. */
+export const countTagChanges = (oldNames: string[], newNames: string[]) => ({
+  [MixpanelEventParams.TAGS_ADDED]: countNotIn(newNames, oldNames),
+  [MixpanelEventParams.TAGS_REMOVED]: countNotIn(oldNames, newNames),
+})
 
 export const workspaceTrackingListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
   const endpoints = spacesApi?.endpoints
@@ -145,6 +157,90 @@ export const workspaceTrackingListener = (listenerMiddleware: typeof listenerMid
           { ...SPACE_EVENTS.WORKSPACE_SAFE_UNLINKED, label: spaceId },
           { workspace_id: spaceId, safe_address: address, chain_id: chainId },
         )
+      })
+    },
+  })
+
+  // The address book and membership are refetched after a tag change, so read them from before it.
+  const addressBookBefore = (state: unknown, spaceId: string) => {
+    const select = endpoints.addressBooksGetAddressBookItemsV1.select({ spaceId })
+    return select(state as Parameters<typeof select>[0]).data
+  }
+  const memberRole = (state: unknown, spaceId: string) => {
+    const select = endpoints.membersGetMembershipV1.select({ spaceId })
+    return select(state as Parameters<typeof select>[0]).data?.role
+  }
+
+  const trackContactTags = (
+    state: unknown,
+    spaceId: string,
+    items: Array<{ address: string; tags?: string[] }>,
+    locationOf: (isNewContact: boolean) => TagChangeLocation,
+  ) => {
+    const book = addressBookBefore(state, spaceId)
+    const workspaceTags = book?.tags ?? []
+    items.forEach(({ address, tags }) => {
+      if (!tags) return
+      const contact = book?.data.find((item) => item.address.toLowerCase() === address.toLowerCase())
+      const oldNames = workspaceTags.filter((tag) => contact?.tagIds.includes(tag.id)).map((tag) => tag.name)
+      trackEvent(SPACE_EVENTS.CONTACT_TAGS_UPDATED, {
+        [MixpanelEventParams.LOCATION]: locationOf(!contact),
+        ...countTagChanges(oldNames, tags),
+        [MixpanelEventParams.MEMBER_ROLE]: memberRole(state, spaceId),
+      })
+    })
+  }
+
+  startListening({
+    matcher: endpoints.addressBooksSetContactTagsV1.matchFulfilled,
+    effect: ({ meta }, { getOriginalState }) => {
+      const { spaceId, setContactTagsDto } = meta.arg.originalArgs
+      trackContactTags(getOriginalState(), spaceId, setContactTagsDto.items, () => 'row_menu')
+    },
+  })
+
+  // Only the Add and Edit contact dialogs send tags; imports and Safe names leave them out.
+  startListening({
+    matcher: endpoints.addressBooksUpsertAddressBookItemsV1.matchFulfilled,
+    effect: ({ meta }, { getOriginalState }) => {
+      const { spaceId, upsertAddressBookItemsDto } = meta.arg.originalArgs
+      trackContactTags(getOriginalState(), spaceId, upsertAddressBookItemsDto.items, (isNewContact) =>
+        isNewContact ? 'add_contact' : 'edit_contact',
+      )
+    },
+  })
+
+  startListening({
+    matcher: endpoints.addressBooksCreateTagV1.matchFulfilled,
+    effect: ({ meta }, { getOriginalState }) => {
+      const { spaceId } = meta.arg.originalArgs
+      trackEvent(SPACE_EVENTS.TAG_CREATED, {
+        [MixpanelEventParams.MEMBER_ROLE]: memberRole(getOriginalState(), spaceId),
+      })
+    },
+  })
+
+  startListening({
+    matcher: endpoints.addressBooksRenameTagV1.matchFulfilled,
+    effect: ({ payload, meta }, { getOriginalState }) => {
+      const { spaceId, tagId } = meta.arg.originalArgs
+      trackEvent(SPACE_EVENTS.TAG_RENAMED, {
+        // A merge folds the renamed tag into the existing one, so its id is gone.
+        [MixpanelEventParams.MERGED]: !payload.tags.some((tag) => tag.id === tagId),
+        [MixpanelEventParams.MEMBER_ROLE]: memberRole(getOriginalState(), spaceId),
+      })
+    },
+  })
+
+  startListening({
+    matcher: endpoints.addressBooksDeleteTagV1.matchFulfilled,
+    effect: ({ meta }, { getOriginalState }) => {
+      const { spaceId, tagId } = meta.arg.originalArgs
+      const state = getOriginalState()
+      const tag = addressBookBefore(state, spaceId)?.tags.find((candidate) => candidate.id === tagId)
+      trackEvent(SPACE_EVENTS.TAG_DELETED, {
+        [MixpanelEventParams.CONTACT_COUNT]: tag?.contactCount,
+        [MixpanelEventParams.MEMBER_ROLE]: memberRole(state, spaceId),
       })
     },
   })
