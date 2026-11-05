@@ -12,8 +12,8 @@ from unittest.mock import Mock, patch
 
 from scripts.test_env import (
     chain_public_config, chain_step_commands, chain_storage_reset_commands, check_ports,
-    compose_command, fork_urls, parse_args, provider_urls, public_config, reset, run,
-    seed_fork_cache, show_logs, wait_ready, write_images,
+    compose_command, device_up, fork_urls, load_manifest, parse_args, provider_urls, public_config,
+    reset, run, seed_fork_cache, show_logs, wait_ready, write_images,
 )
 
 GATEWAY = "http://localhost:8000/cgw"
@@ -373,6 +373,77 @@ class EnvironmentTests(unittest.TestCase):
         self.assertFalse(any("FLUSHALL" in command or "down" in command for command in commands))
         with self.assertRaises(ValueError):
             chain_storage_reset_commands(["compose"], "sepolia")
+
+    def test_device_start_waits_for_the_healthcheck_and_records_the_device(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state = Path(directory) / "stack.json"
+            state.write_text(json.dumps({"devices": ["ledger"]}))
+            commands = []
+            with patch("scripts.test_env.run", side_effect=lambda command: commands.append(command)), \
+                    redirect_stdout(io.StringIO()):
+                device_up(["compose"], "trezor", state, 120)
+            self.assertEqual(commands, [[
+                "compose", "up", "--detach", "--no-deps", "--wait", "--wait-timeout", "120", "trezor-emulator",
+            ]])
+            self.assertEqual(json.loads(state.read_text())["devices"], ["ledger", "trezor"])
+
+    def test_unhealthy_device_fails_with_its_logs_command_and_stays_unrecorded(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state = Path(directory) / "stack.json"
+            state.write_text("{}")
+            failure = RuntimeError("`docker compose up` failed")
+            with patch("scripts.test_env.run", side_effect=failure), redirect_stdout(io.StringIO()):
+                with self.assertRaisesRegex(RuntimeError, "trezor emulator is not healthy.*logs trezor-emulator"):
+                    device_up(["compose"], "trezor", state, 120)
+            self.assertEqual(json.loads(state.read_text()), {})
+
+    def test_device_start_needs_a_running_stack(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with patch("scripts.test_env.run") as docker:
+                with self.assertRaisesRegex(RuntimeError, "Start the Sepolia stack"):
+                    device_up(["compose"], "ledger", Path(directory) / "missing.json", 120)
+            docker.assert_not_called()
+
+    def test_device_option_supports_only_up_without_a_chain(self):
+        self.assertEqual(parse_args(["up", "--device", "trezor"]).device, "trezor")
+        for argv in (["reset", "--device", "trezor"], ["up", "--device", "trezor", "--chain", "mainnet"]):
+            with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                parse_args(argv)
+
+    def test_manifest_has_the_device_urls_but_up_starts_no_device(self):
+        services = {
+            "fork-rpc": {"environment": {"FORK_BLOCK_NUMBER": "100"}},
+            "anvil": {"ports": [{"published": "8545"}]},
+            "nginx": {"ports": [{"published": "8000"}]},
+            "ledger-emulator": {"ports": [{"published": "9555"}]},
+            "trezor-emulator": {"ports": [{"published": "9556"}, {"published": "21328"}]},
+            "txs-init": {"environment": {"FORK_CHAIN_ID": "11155111"}},
+        }
+        for service in services.values():
+            service["image"] = "pinned-image"
+        configs = []
+
+        def docker(command):
+            configs.append(command)
+            return json.dumps({"services": services})
+
+        with patch("scripts.test_env.run", side_effect=docker):
+            compose, manifest = load_manifest(parse_args(["up", "--project", "safe-e2e-unit-test"]))
+        self.assertEqual(profiles(configs[0]), ["ledger", "trezor"])
+        self.assertEqual(profiles(compose), [])
+        self.assertEqual(manifest["trezorEmulatorUrl"], "http://localhost:9556")
+
+    def test_teardown_covers_every_optional_fork_and_device(self):
+        commands = []
+        args = parse_args(["reset", "--project", "safe-e2e-unit-test"])
+        with patch("scripts.test_env.run", side_effect=lambda command, env=None: commands.append(command)), \
+                redirect_stdout(io.StringIO()):
+            reset(args)
+        self.assertEqual(profiles(commands[0]), ["mainnet", "polygon", "ledger", "trezor"])
+
+
+def profiles(command):
+    return [command[index + 1] for index, part in enumerate(command) if part == "--profile"]
 
 
 if __name__ == "__main__":

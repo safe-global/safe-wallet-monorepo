@@ -6,12 +6,14 @@ import { join } from 'node:path'
 import {
   checkEnvironment,
   configuration,
-  missingChainCommands,
+  listedSpecs,
+  missingStackCommands,
   planMatrix,
   selectPlaywrightSpecs,
   playwrightRunArguments,
   readManifest,
   stackEnvironment,
+  stackNeeds,
   walletEnvironment,
 } from './run.mjs'
 import { fileURLToPath } from 'node:url'
@@ -104,31 +106,45 @@ test('runs both backend gates and fails if cleanup fails', async () => {
   assert.deepEqual(calls, ['up', 'test', 'smoke', 'logs', 'reset'])
 })
 
-test('names the fork start command for every selected spec whose chain is not running', () => {
-  const registry = {
-    'e2e/a.spec.ts': { chains: [1] },
-    'e2e/b.spec.ts': { chains: [1, 137] },
-    'e2e/sepolia.spec.ts': {},
-  }
-  assert.deepEqual(missingChainCommands(Object.keys(registry), { chains: { 1: {} } }, '/infra', registry), [
-    'python3 /infra/scripts/test_env.py up --chain polygon',
-  ])
-  assert.deepEqual(missingChainCommands(['e2e/sepolia.spec.ts'], {}, '/infra', registry), [])
+const needsRegistry = {
+  'e2e/a.spec.ts': { chains: [1] },
+  'e2e/b.spec.ts': { chains: [1, 137], devices: ['trezor'] },
+  'e2e/ledger.spec.ts': { devices: ['ledger'] },
+  'e2e/sepolia.spec.ts': {},
+}
+
+test('names the forks and device emulators that the given specs need, each once', () => {
+  assert.deepEqual(stackNeeds(['e2e/a.spec.ts', 'e2e/b.spec.ts'], needsRegistry), {
+    chains: ['mainnet', 'polygon'],
+    devices: ['trezor'],
+  })
+  assert.deepEqual(stackNeeds(['e2e/sepolia.spec.ts'], needsRegistry), { chains: [], devices: [] })
 })
 
-test('plans one matrix entry per Playwright shard, each with the forks that any spec needs', () => {
-  const registry = {
-    'e2e/sepolia.spec.ts': {},
-    'e2e/multichain.spec.ts': { chains: [1, 137] },
-    'e2e/mainnet.spec.ts': { chains: [1] },
-  }
-  assert.deepEqual(planMatrix(2, {}, registry), {
-    include: [
-      { shard: 1, chains: 'mainnet polygon' },
-      { shard: 2, chains: 'mainnet polygon' },
+test('names the start command for every fork and device emulator that selected specs need and the stack lacks', () => {
+  const stack = { chains: { 1: {} }, devices: ['ledger'] }
+  assert.deepEqual(missingStackCommands(Object.keys(needsRegistry), stack, '/infra', needsRegistry), [
+    'python3 /infra/scripts/test_env.py up --chain polygon',
+    'python3 /infra/scripts/test_env.py up --device trezor',
+  ])
+  assert.deepEqual(missingStackCommands(['e2e/sepolia.spec.ts'], {}, '/infra', needsRegistry), [])
+})
+
+test('reads the spec files of a Playwright --list report, including nested describe blocks', () => {
+  const report = {
+    suites: [
+      { file: 'e2e/a.spec.ts', specs: [{ title: 'a' }], suites: [] },
+      { file: 'e2e/b.spec.ts', specs: [], suites: [{ file: 'e2e/b.spec.ts', specs: [{ title: 'b' }] }] },
+      { file: 'e2e/empty.spec.ts', specs: [], suites: [] },
     ],
-  })
-  assert.deepEqual(planMatrix(1, {}, { 'e2e/sepolia.spec.ts': {} }), { include: [{ shard: 1, chains: '' }] })
+  }
+  assert.deepEqual(listedSpecs(report), ['e2e/a.spec.ts', 'e2e/b.spec.ts'])
+  assert.deepEqual(listedSpecs({}), [])
+})
+
+test('plans one matrix entry per Playwright shard', () => {
+  const registry = { 'e2e/sepolia.spec.ts': {} }
+  assert.deepEqual(planMatrix(2, {}, registry), { include: [{ shard: 1 }, { shard: 2 }] })
   for (const count of [0, -1, 1.5, NaN]) {
     assert.throws(() => planMatrix(count, {}, registry), /positive integer/)
   }

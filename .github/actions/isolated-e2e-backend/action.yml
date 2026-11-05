@@ -11,6 +11,10 @@ inputs:
     description: Space-separated optional forks to start (mainnet, polygon)
     required: false
     default: ''
+  devices:
+    description: Space-separated device emulators to start (ledger, trezor)
+    required: false
+    default: ''
   mainnet-rpc-url:
     description: Mainnet archive RPC secret, needed when chains includes mainnet
     required: false
@@ -39,6 +43,7 @@ runs:
         FORK_RPC_URL_MAINNET: ${{ inputs.mainnet-rpc-url }}
         FORK_RPC_URL_POLYGON: ${{ inputs.polygon-rpc-url }}
         CHAINS: ${{ inputs.chains }}
+        DEVICES: ${{ inputs.devices }}
         WALLET_REVISION: ${{ github.sha }}
       run: |
         set -euo pipefail
@@ -65,4 +70,7 @@ runs:
           variable="FORK_RPC_URL_${chain^^}"
           test -n "${!variable}" || { echo "Configure the $variable secret for the $chain fork"; exit 1; }
           python3 scripts/test_env.py up --chain "$chain"
+        done
+        for device in $DEVICES; do
+          python3 scripts/test_env.py up --device "$device"
         done
