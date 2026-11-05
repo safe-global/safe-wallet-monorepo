@@ -127,6 +127,7 @@ def public_config(config):
     rpc_port = services["anvil"]["ports"][0]["published"]
     api_port = services["nginx"]["ports"][0]["published"]
     ledger_port = services["ledger-emulator"]["ports"][0]["published"]
+    trezor_ports = [port["published"] for port in services["trezor-emulator"]["ports"]]
     init = services["txs-init"]["environment"]
     return {
         "forkBlock": block,
@@ -137,6 +138,8 @@ def public_config(config):
         "transactionServiceUrl": f"http://localhost:{api_port}/txs/api",
         "decoderUrl": f"http://localhost:{api_port}/decoder",
         "ledgerEmulatorUrl": f"http://localhost:{ledger_port}",
+        "trezorEmulatorUrl": f"http://localhost:{trezor_ports[0]}",
+        "trezorBridgeUrl": f"http://localhost:{trezor_ports[1]}",
         "images": {name: service["image"] for name, service in services.items()},
     }
 
@@ -206,7 +209,7 @@ def check_fork(manifest):
 
 
 def check_ports(manifest):
-    for key in ("rpcUrl", "gatewayUrl", "ledgerEmulatorUrl"):
+    for key in ("rpcUrl", "gatewayUrl", "ledgerEmulatorUrl", "trezorEmulatorUrl", "trezorBridgeUrl"):
         if key not in manifest:
             continue
         port = urllib.parse.urlparse(manifest[key]).port
@@ -216,7 +219,8 @@ def check_ports(manifest):
             except OSError as exc:
                 raise RuntimeError(
                     f"Local port {port} is already in use; "
-                    "choose distinct RPC_PORT, REVERSE_PROXY_PORT and LEDGER_EMULATOR_PORT"
+                    "choose distinct RPC_PORT, REVERSE_PROXY_PORT, LEDGER_EMULATOR_PORT, "
+                    "TREZOR_EMULATOR_PORT and TREZOR_BRIDGE_PORT; a running Trezor Suite holds 21328"
                 ) from exc
 
 

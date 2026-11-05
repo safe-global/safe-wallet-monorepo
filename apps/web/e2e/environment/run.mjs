@@ -40,9 +40,13 @@ export function walletEnvironment(manifest, env = process.env) {
   const ledger = manifest.ledgerEmulatorUrl
     ? { NEXT_PUBLIC_LEDGER_EMULATOR_URL: localUrl(manifest.ledgerEmulatorUrl, 'Ledger emulator') }
     : {}
+  const trezor = manifest.trezorEmulatorUrl
+    ? { TREZOR_EMULATOR_URL: localUrl(manifest.trezorEmulatorUrl, 'Trezor emulator') }
+    : {}
   return {
     ...filtered,
     ...ledger,
+    ...trezor,
     NEXT_PUBLIC_IS_PRODUCTION: 'false',
     NEXT_PUBLIC_IS_TEST_E2E: 'true',
     NEXT_PUBLIC_POLLING_INTERVAL: '2000',
