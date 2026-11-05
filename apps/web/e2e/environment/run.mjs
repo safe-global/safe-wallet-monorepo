@@ -139,6 +139,11 @@ export function missingStackCommands(specs, manifest, infrastructure, registry =
   ]
 }
 
+/** The commands that start what the specs of this shard need and the stack does not run */
+export async function missingShardCommands(env, manifest, infrastructure) {
+  return missingStackCommands(await shardSpecs(env), manifest, infrastructure)
+}
+
 /** The GitHub Actions matrix: one entry per Playwright shard, each on its own stack. */
 export function planMatrix(shardCount, env = process.env, registry = playwrightSpecs) {
   if (!Number.isInteger(shardCount) || shardCount < 1) throw new Error('Shard count must be a positive integer')
@@ -161,7 +166,7 @@ export function listedSpecs(report) {
 }
 
 /** The specs that this shard runs: Playwright assigns them to shards, so only its own list can tell */
-async function shardSpecs(env) {
+export async function shardSpecs(env) {
   const listEnv = { ...env, SAFE_E2E_ISOLATED: 'true', PLAYWRIGHT_BASE_URL: webUrl(env) }
   const args = [...playwrightRunArguments(env), '--list', '--reporter=json']
   const { stdout } = await promisify(execFile)('yarn', args, { cwd: webRoot, env: listEnv, maxBuffer: 64 << 20 })
@@ -266,7 +271,7 @@ function stackRunner(config, runner) {
 }
 
 async function runPlaywright(config, runner, manifest, walletEnv) {
-  const missing = missingStackCommands(selectPlaywrightSpecs(), manifest, config.infrastructure)
+  const missing = await missingShardCommands(process.env, manifest, config.infrastructure)
   if (missing.length) {
     throw new Error(
       `Selected specs need forks or device emulators that are not running. Start them with:\n${missing.join('\n')}`,

@@ -10,6 +10,8 @@ import {
   missingStackCommands,
   planMatrix,
   selectPlaywrightSpecs,
+  missingShardCommands,
+  shardSpecs,
   playwrightRunArguments,
   readManifest,
   stackEnvironment,
@@ -17,6 +19,7 @@ import {
   walletEnvironment,
 } from './run.mjs'
 import { fileURLToPath } from 'node:url'
+import { chainProfiles } from './local-stack.mjs'
 
 const manifest = { gatewayUrl: 'http://localhost:8000/cgw', chainId: 11155111, forkBlock: 10008682 }
 
@@ -203,4 +206,16 @@ test('gives the Playwright run the local service URLs and the running forks', ()
 test('explains a missing stack instead of failing on the manifest path', async () => {
   const infrastructure = await mkdtemp(join(tmpdir(), 'infra-'))
   await assert.rejects(readManifest(infrastructure, 'safe-e2e-absent'), /No running stack for safe-e2e-absent/)
+})
+
+test('accepts a stack that runs exactly the forks and emulators of its own shard', async () => {
+  const profileChains = Object.fromEntries(
+    Object.entries(chainProfiles).map(([chainId, profile]) => [profile, chainId]),
+  )
+  for (const shard of ['1/2', '2/2']) {
+    const env = { PATH: process.env.PATH, SAFE_E2E_SHARD: shard }
+    const { chains, devices } = stackNeeds(await shardSpecs(env))
+    const manifest = { chains: Object.fromEntries(chains.map((chain) => [profileChains[chain], {}])), devices }
+    assert.deepEqual(await missingShardCommands(env, manifest, '/infra'), [], `shard ${shard}`)
+  }
 })
