@@ -28,7 +28,7 @@ export default tseslint.config(
           ],
           patterns: [
             {
-              group: ['@/*', '@views/*'],
+              group: ['@/*', '@views/*', '**/apps/web*/**'],
               message:
                 'Views must not import from an app. Move what you need into @safe-global/views or pass it in as a prop.',
             },
