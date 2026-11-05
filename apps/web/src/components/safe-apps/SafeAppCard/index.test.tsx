@@ -1,7 +1,8 @@
+import { faker } from '@faker-js/faker'
 import userEvent from '@testing-library/user-event'
 
 import { render, screen } from '@/tests/test-utils'
-import { SafeAppCardContainer } from '.'
+import { getSafeAppUrl, SafeAppCardContainer } from '.'
 
 describe('SafeAppCardContainer', () => {
   it('keeps card actions outside the app navigation link', async () => {
@@ -32,5 +33,28 @@ describe('SafeAppCardContainer', () => {
     )
 
     expect(container.querySelector('[data-slot="card"]')).toHaveClass('isolate')
+  })
+})
+
+describe('getSafeAppUrl', () => {
+  const SAFE = 'eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6'
+  const APP_URL = 'https://apps-portal.safe.global/tx-builder'
+
+  it('links to the app opened in the Safe of the link query', () => {
+    const url = getSafeAppUrl({ safe: SAFE }, APP_URL)
+
+    expect(url).toBe(
+      '/apps/open?safe=eth%3A0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6&appUrl=https%3A%2F%2Fapps-portal.safe.global%2Ftx-builder',
+    )
+  })
+
+  it('keeps the Workspace id of the link query as the last param', () => {
+    const spaceId = faker.string.uuid()
+
+    const url = getSafeAppUrl({ safe: SAFE, spaceId }, APP_URL)
+
+    expect(url).toBe(
+      `/apps/open?safe=eth%3A0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6&appUrl=https%3A%2F%2Fapps-portal.safe.global%2Ftx-builder&spaceId=${spaceId}`,
+    )
   })
 })

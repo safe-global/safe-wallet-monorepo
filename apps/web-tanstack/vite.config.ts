@@ -125,10 +125,6 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: [
         // Next.js compatibility shims (decisions.md: cross-workspace next/* shimming)
-        {
-          find: 'next/dist/client/resolve-href',
-          replacement: path.resolve(__dirname, 'src/compat/next-resolve-href.ts'),
-        },
         { find: 'next/router', replacement: path.resolve(__dirname, 'src/compat/next-router.tsx') },
         { find: 'next/link', replacement: path.resolve(__dirname, 'src/compat/next-link.tsx') },
         { find: 'next/head', replacement: path.resolve(__dirname, 'src/compat/next-head.tsx') },

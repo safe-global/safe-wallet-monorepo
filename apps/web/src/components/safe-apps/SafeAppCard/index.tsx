@@ -1,12 +1,9 @@
 import Link from 'next/link'
-import { useRouter } from 'next/router'
-import { resolveHref } from 'next/dist/client/resolve-href'
+import { stringify } from 'querystring'
 import classNames from 'classnames'
 import type { ReactNode, SyntheticEvent } from 'react'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
-import type { NextRouter } from 'next/router'
 
-import type { UrlObject } from 'url'
 import SafeAppIconCard from '@safe-global/views/components/safe-apps/SafeAppIconCard'
 import SafeAppActionButtons from '@/components/safe-apps/SafeAppActionButtons'
 import SafeAppTags from '@/components/safe-apps/SafeAppTags'
@@ -38,10 +35,9 @@ const SafeAppCard = ({
   openPreviewDrawer,
   compact = false,
 }: SafeAppCardProps) => {
-  const router = useRouter()
   const safeLinkQuery = useSafeLinkQuery()
 
-  const safeAppUrl = getSafeAppUrl(router, safeLinkQuery, safeApp.url)
+  const safeAppUrl = getSafeAppUrl(safeLinkQuery, safeApp.url)
 
   return (
     <SafeAppCardGridView
@@ -59,14 +55,8 @@ const SafeAppCard = ({
 
 export default SafeAppCard
 
-export const getSafeAppUrl = (router: NextRouter, { safe, spaceId }: SafeLinkQuery, safeAppUrl: string) => {
-  const shareUrlObj: UrlObject = {
-    pathname: AppRoutes.apps.open,
-    query: withSpaceId({ safe, appUrl: safeAppUrl }, spaceId),
-  }
-
-  return resolveHref(router, shareUrlObj)
-}
+export const getSafeAppUrl = ({ safe, spaceId }: SafeLinkQuery, safeAppUrl: string) =>
+  `${AppRoutes.apps.open}?${stringify(withSpaceId({ safe, appUrl: safeAppUrl }, spaceId))}`
 
 type SafeAppCardViewProps = SafeAppCardProps & {
   safeAppUrl: string

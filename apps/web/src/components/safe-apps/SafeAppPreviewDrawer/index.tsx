@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { useRouter } from 'next/router'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from '@safe-global/views/components/ui/drawer'
@@ -29,9 +28,8 @@ type SafeAppPreviewDrawerProps = {
 
 const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookmark }: SafeAppPreviewDrawerProps) => {
   const { markSafeAppOpened } = useOpenedSafeApps()
-  const router = useRouter()
   const safeLinkQuery = useSafeLinkQuery()
-  const safeAppUrl = getSafeAppUrl(router, safeLinkQuery, safeApp?.url || '')
+  const safeAppUrl = getSafeAppUrl(safeLinkQuery, safeApp?.url || '')
   const { configs } = useChains()
   const knownChainIds = safeApp?.chainIds.filter((chainId) => configs.some((chain) => chain.chainId === chainId)) ?? []
 
