@@ -24,12 +24,24 @@ padding/height/border/hover on a primitive, a variant probably exists; if the pa
 add a variant or a preset instead of pasting the classes again. The **`UI/Button` → Guidelines and
 `UI/Input` stories are the canonical variant/size reference** — this section only states the rule.
 
+- **On `<Button>`, `className` is layout-only** (`w-full`, margins, grid placement); size/skin utilities are **ESLint-enforced errors** (`no-restricted-syntax` in `eslint.config.mjs`). The only sanctioned escape is a justified `// eslint-disable-next-line no-restricted-syntax -- <reason>` — when a pattern recurs, add a size/variant to `packages/views/src/components/ui/button.tsx` rather than disabling.
 - **Prefer the closed presets in `components/common/`** (`SubmitButton`, `ActionBar`+`ActionButton`, `DialogActions`, `OnboardingFooter`, `IconAction`) over the raw primitive — they take semantic props and reject styling `className` at the type level.
 - **Token gotcha (bit you):** `--input` is the field **fill** token, not a border colour — a visible field/button border must use `border-border`, never `border-input` or hard-coded `border-gray-*`. The field primitives already default correctly; don't re-declare borders/backgrounds on them.
 
 ## Feature Architecture Import Rules
 
-Features are lazy-loaded to keep the bundle small.
+Features are lazy-loaded to keep the bundle small. ESLint enforces the import boundaries as **errors** (CI-failing):
+
+```typescript
+// ✅ Allowed
+import { MyFeature, useMyHook } from '@/features/myfeature' // barrel: handle + hooks
+import { someSlice, selectSomething } from '@/features/myfeature/store' // Redux store
+import type { MyType } from '@/features/myfeature/types' // public types
+import { lightUtil } from '@/features/myfeature/services' // services barrel only — lightweight utils
+
+// ❌ Forbidden: any deep import (components, hooks/*, services/* files) — it defeats
+// lazy loading. Components and heavy services are reached via useLoadFeature() instead.
+```
 
 **Using a feature:**
 

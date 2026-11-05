@@ -38,7 +38,7 @@ Single source of truth for design tokens on both platforms. Edit `src/palettes/`
 
 ```bash
 yarn workspace @safe-global/theme type-check
-yarn workspace @safe-global/web css-vars   # regenerates apps/web/src/styles/vars.css
+yarn workspace @safe-global/web css-vars   # regenerates apps/web/src/styles/vars.css — never hand-edit that file
 ```
 
 No barrel export — import from sub-paths (`@safe-global/theme/palettes`, `/tokens/spacing`, `/tokens/typography`, `/generators/tamagui`).
