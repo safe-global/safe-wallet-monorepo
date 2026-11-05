@@ -17,3 +17,7 @@
 /.yarnrc.yml        @safe-global/infrasec @compojoom @PooyaRaki
 /.yarn/             @safe-global/infrasec @compojoom @PooyaRaki
 /.husky/            @safe-global/infrasec @compojoom @PooyaRaki
+
+# Agent guidance
+**/AGENTS.md        @TimDaub @compojoom
+**/CLAUDE.md        @TimDaub @compojoom
