@@ -23,7 +23,7 @@ const safeLinkWithoutSpaceIdRules = [
     'A Safe link must keep `spaceId`: use `useSafeLinkQuery()`, or wrap the query in `withSpaceId(query, spaceId)`. If the link must leave the Workspace, add `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
 }))
 
-export default [
+const config = [
   {
     ignores: [
       '**/node_modules/',
@@ -191,6 +191,17 @@ export default [
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules],
     },
   },
+  // The isolated-stack mocks run in Node with their own compiler settings, which the main tsconfig excludes.
+  {
+    files: ['e2e/environment/infra/mocks/*.ts'],
+    languageOptions: { parserOptions: { project: ['./e2e/environment/infra/mocks/tsconfig.json'] } },
+  },
+  // No tsconfig includes JavaScript, so these files get only the rules that need no type information.
+  {
+    files: ['**/*.{js,mjs,cjs}'],
+    languageOptions: { parserOptions: { project: null } },
+    rules: { '@typescript-eslint/await-thenable': 'off' },
+  },
   noExplicitAny,
   // Tests build router mocks with a bare `safe` query, so only the design-system guards apply there.
   {
@@ -208,3 +219,5 @@ export default [
     },
   },
 ]
+
+export default config
