@@ -19,7 +19,7 @@ export const addDocumentShellToExport = (outDir) => {
     if (!file.endsWith('.html')) continue
     const path = join(outDir, file)
     const html = readFileSync(path, 'utf8')
-    if (html.includes('<script id="__NEXT_DATA__"')) writeFileSync(path, addDocumentShell(html))
+    if (html.includes('<div id="__next">')) writeFileSync(path, addDocumentShell(html))
   }
 }
 

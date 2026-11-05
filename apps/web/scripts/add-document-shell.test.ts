@@ -18,4 +18,12 @@ describe('addDocumentShell', () => {
 
     expect(() => addDocumentShell(exported)).toThrow('Expected exactly one <html> in an exported page')
   })
+
+  it('throws when Next no longer renders the __NEXT_DATA__ script', () => {
+    const exported = '<!DOCTYPE html><html><head></head><body><div id="__next"></div></body></html>'
+
+    expect(() => addDocumentShell(exported)).toThrow(
+      'Expected exactly one <script id="__NEXT_DATA__" in an exported page',
+    )
+  })
 })
