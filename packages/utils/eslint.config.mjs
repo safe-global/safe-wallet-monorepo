@@ -20,12 +20,6 @@ export default [
     },
   },
   {
-    files: ['**/__tests__/**', '**/*.test.ts', '**/*.test.tsx'],
-    rules: {
-      '@typescript-eslint/no-explicit-any': 'off',
-    },
-  },
-  {
     ignores: ['**/node_modules/', '**/src/types/contracts/'],
   },
 ]

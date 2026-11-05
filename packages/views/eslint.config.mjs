@@ -3,6 +3,7 @@ import tseslint from 'typescript-eslint'
 import reactHooks from 'eslint-plugin-react-hooks'
 import { plugin as shadcn } from '@shadcn/lint'
 import { designSystemSyntaxRules } from './eslint-design-system.mjs'
+import noExplicitAny from '../../config/eslint/no-explicit-any.mjs'
 
 export default tseslint.config(
   { ignores: ['**/*.test.ts', '**/*.test.tsx', '**/*.stories.tsx', '**/__tests__/**', '**/__mocks__/**'] },
@@ -27,7 +28,7 @@ export default tseslint.config(
           ],
           patterns: [
             {
-              group: ['@/*', '@views/*'],
+              group: ['@/*', '@views/*', '**/apps/web*/**'],
               message:
                 'Views must not import from an app. Move what you need into @safe-global/views or pass it in as a prop.',
             },
@@ -36,4 +37,5 @@ export default tseslint.config(
       ],
     },
   },
+  noExplicitAny,
 )

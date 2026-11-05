@@ -1,3 +1,4 @@
+import http.client
 import io
 import json
 import os
@@ -5,14 +6,14 @@ import socket
 import tempfile
 import unittest
 import urllib.error
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest.mock import Mock, patch
 
 from scripts.test_env import (
     chain_public_config, chain_step_commands, chain_storage_reset_commands, check_ports,
     compose_command, fork_urls, parse_args, provider_urls, public_config, reset, run,
-    seed_fork_cache, show_logs, wait_ready,
+    seed_fork_cache, show_logs, wait_ready, write_images,
 )
 
 GATEWAY = "http://localhost:8000/cgw"
@@ -85,6 +86,21 @@ class EnvironmentTests(unittest.TestCase):
         self.assertEqual(ready["forkBlockHash"], "0xabc")
 
     @patch("scripts.test_env.run", return_value="")
+    def test_readiness_retries_resets_while_the_proxy_starts(self, _docker):
+        backend = fake_backend({
+            f"{GATEWAY}/health/ready": [
+                ConnectionResetError(104, "Connection reset by peer"),
+                http.client.RemoteDisconnected("Remote end closed connection without response"),
+            ],
+        })
+        clock = FakeClock()
+        ready = manifest()
+        with stack_reads(backend), patch("scripts.test_env.time", clock):
+            wait_ready([], ready, 10)
+        self.assertEqual(clock.now, 4)
+        self.assertEqual(ready["forkBlockHash"], "0xabc")
+
+    @patch("scripts.test_env.run", return_value="")
     def test_readiness_timeout_reports_the_last_error(self, _docker):
         refused = [urllib.error.URLError("connection refused")] * 10
         backend = fake_backend({f"{GATEWAY}/health/ready": refused})
@@ -142,6 +158,40 @@ class EnvironmentTests(unittest.TestCase):
         self.assertLess(command.index(str(path)), command.index("-f"))
         self.assertIn("safe-e2e-test", command)
 
+    def test_project_images_load_after_the_pins_and_before_the_local_env_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            images = Path(directory) / "safe-e2e-test.images.env"
+            images.write_text("CGW_IMAGE=ghcr.io/safe-global/safe-client-gateway:main-1@sha256:a\n")
+            local = Path(__file__)
+            with patch("scripts.test_env.images_path", return_value=images):
+                command = compose_command("safe-e2e-test", local)
+        env_files = [command[index + 1] for index, part in enumerate(command) if part == "--env-file"]
+        self.assertEqual(
+            [Path(path).name for path in env_files], ["test-images.env", images.name, local.name],
+        )
+
+    def test_up_pins_the_resolved_images_for_the_later_commands_of_the_project(self):
+        resolved = {"CGW_IMAGE": "ghcr.io/safe-global/safe-client-gateway:main-1@sha256:a"}
+        with tempfile.TemporaryDirectory() as directory:
+            images = Path(directory) / "safe-e2e-t.images.env"
+            errors = io.StringIO()
+            with patch("scripts.test_env.images_path", return_value=images), \
+                    patch("scripts.test_env.resolve_images", return_value=(resolved, ["TXS moved"])) as resolve, \
+                    patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}), \
+                    redirect_stdout(io.StringIO()), redirect_stderr(errors):
+                write_images("safe-e2e-t", "production")
+            self.assertEqual(images.read_text(), f'CGW_IMAGE={resolved["CGW_IMAGE"]}\n')
+        resolve.assert_called_once_with("production")
+        self.assertEqual(errors.getvalue(), "::warning::TXS moved\n")
+
+    def test_backend_comes_from_safe_e2e_backend_and_defaults_to_staging(self):
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertEqual(parse_args(["versions"]).backend, "staging")
+        with patch.dict(os.environ, {"SAFE_E2E_BACKEND": "production"}, clear=True):
+            self.assertEqual(parse_args(["up"]).backend, "production")
+        with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+            parse_args(["up", "--backend", "release"])
+
     def test_public_manifest_omits_upstream_provider_credentials(self):
         services = {
             "fork-rpc": {"environment": {"FORK_BLOCK_NUMBER": "100"}},
@@ -151,6 +201,7 @@ class EnvironmentTests(unittest.TestCase):
             },
             "nginx": {"ports": [{"published": "8000"}]},
             "ledger-emulator": {"ports": [{"published": "9555"}]},
+            "trezor-emulator": {"ports": [{"published": "9556"}, {"published": "21328"}]},
             "txs-init": {"environment": {"FORK_CHAIN_ID": "11155111"}},
         }
         for service in services.values():
@@ -159,6 +210,8 @@ class EnvironmentTests(unittest.TestCase):
         self.assertNotIn("secret", str(result))
         self.assertEqual(result["gatewayUrl"], GATEWAY)
         self.assertEqual(result["ledgerEmulatorUrl"], "http://localhost:9555")
+        self.assertEqual(result["trezorEmulatorUrl"], "http://localhost:9556")
+        self.assertEqual(result["trezorBridgeUrl"], "http://localhost:21328")
         self.assertEqual(result["forkBlock"], 100)
 
     @patch("scripts.test_env.subprocess.run")
@@ -274,6 +327,20 @@ class EnvironmentTests(unittest.TestCase):
         [(command, env)] = calls
         self.assertEqual(command[-2:], ["down", "--volumes"])
         self.assertTrue(env["SEPOLIA_FORK_RPC_URL"])
+        self.assertTrue(env["CGW_IMAGE"])
+
+    def test_reset_removes_the_pinned_images_of_the_project(self):
+        with tempfile.TemporaryDirectory() as directory:
+            images = Path(directory) / "safe-e2e-unit-test.images.env"
+            images.write_text("CGW_IMAGE=ghcr.io/safe-global/safe-client-gateway:main-1@sha256:a\n")
+            args = parse_args(["reset", "--project", "safe-e2e-unit-test"])
+            with patch("scripts.test_env.images_path", return_value=images), \
+                    patch("scripts.test_env.run", return_value="") as docker, \
+                    patch.dict(os.environ, {}, clear=True), redirect_stdout(io.StringIO()):
+                reset(args)
+            self.assertFalse(images.exists())
+        # Compose reads the pinned images from the file, so no placeholder may override them.
+        self.assertNotIn("CGW_IMAGE", docker.call_args.kwargs["env"])
 
     def test_seeds_the_committed_fork_cache_without_replacing_extended_files(self):
         with tempfile.TemporaryDirectory() as committed, tempfile.TemporaryDirectory() as cache:
