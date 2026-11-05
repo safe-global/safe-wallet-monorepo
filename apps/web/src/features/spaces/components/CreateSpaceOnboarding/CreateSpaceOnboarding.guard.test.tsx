@@ -32,14 +32,21 @@ const GuardedPage = (): ReactElement => {
 }
 
 const App = ({ initialPath }: { initialPath: string }): ReactElement => {
-  const [location, setLocation] = useState<Location>({ pathname: initialPath, query: {} })
+  const [location, setLocation] = useState<Location>(() => {
+    window.history.replaceState(null, '', initialPath)
+    return { pathname: initialPath, query: {} }
+  })
   const [isWalletReady, setIsWalletReady] = useState(false)
   currentLocation = location
   setWalletReady = setIsWalletReady
 
   const router = useMemo<NextRouter>(() => {
     const navigate = (url: Url) => {
-      setLocation((current) => toLocation(url, current))
+      setLocation((current) => {
+        const next = toLocation(url, current)
+        window.history.replaceState(null, '', `${next.pathname}?${new URLSearchParams(next.query)}`)
+        return next
+      })
       return Promise.resolve(true)
     }
     return {

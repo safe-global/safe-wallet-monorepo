@@ -59,6 +59,7 @@ const setupMocks = ({
   isSpaceRoute = false,
 }: SetupOptions = {}) => {
   ;(router.useRouter as jest.Mock).mockReturnValue({ pathname, query, isReady: true })
+  window.history.replaceState(null, '', `${pathname}?${new URLSearchParams(query)}`)
   ;(useIsSpaceRouteModule.useIsSpaceRoute as jest.Mock).mockReturnValue(isSpaceRoute)
 
   jest.spyOn(useWalletModule, 'default').mockReturnValue(wallet as ReturnType<typeof useWalletModule.default>)
@@ -451,6 +452,23 @@ describe('useFlowActivationGuard', () => {
       const guardResult = await result.current.activationGuard()
 
       expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.spaces.createSpace })
+    })
+
+    it('should allow instead of redirecting when the URL moved on while the Workspaces were loading', async () => {
+      setupMocks({
+        pathname: AppRoutes.welcome.createSpace,
+        query: {},
+        spaces: defaultSpaces,
+      })
+      mockFetchSpaces.mockImplementationOnce(async () => {
+        window.history.replaceState(null, '', `${AppRoutes.welcome.selectSafes}?spaceId=${MOCK_SPACE_UUID}`)
+        return { data: defaultSpaces }
+      })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: true })
     })
 
     it('should preserve ?safe= when redirecting to spaces create page', async () => {

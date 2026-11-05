@@ -88,6 +88,15 @@ const guardRules: GuardRule[] = [
   },
 ]
 
+type GuardQuery = { safe?: string | string[]; spaceId?: string | string[] }
+
+// Next commits a route change in a transition, so a check can settle after the browser URL moved on
+const isCheckedUrlCurrent = (pathname: string, query: GuardQuery): boolean => {
+  const params = new URLSearchParams(window.location.search)
+  const matches = (key: keyof GuardQuery) => params.getAll(key).join() === [query[key] ?? []].flat().join()
+  return window.location.pathname === pathname && matches('safe') && matches('spaceId')
+}
+
 // ---------------------------------------------------------------------------
 // Hook
 // ---------------------------------------------------------------------------
@@ -133,6 +142,9 @@ export const useFlowActivationGuard: UseGuard = () => {
       if (spaceId) {
         isPartOfSpaceUrl = hasSpaces && !!spaces && spaces.some((s) => s.uuid === spaceId)
       }
+
+      // The check of the new URL decides: a redirect from the old one would undo the navigation
+      if (!isCheckedUrlCurrent(pathname, guardQuery)) return { success: true }
     }
 
     const isSpacesPath = pathname.startsWith('/spaces')
