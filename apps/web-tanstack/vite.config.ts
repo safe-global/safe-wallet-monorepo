@@ -133,7 +133,6 @@ export default defineConfig(({ mode }) => {
         { find: 'next/link', replacement: path.resolve(__dirname, 'src/compat/next-link.tsx') },
         { find: 'next/head', replacement: path.resolve(__dirname, 'src/compat/next-head.tsx') },
         { find: 'next/dynamic', replacement: path.resolve(__dirname, 'src/compat/next-dynamic.tsx') },
-        { find: 'next/app', replacement: path.resolve(__dirname, 'src/compat/next-app.ts') },
         { find: 'next/navigation', replacement: path.resolve(__dirname, 'src/compat/next-navigation.tsx') },
 
         // Node builtins referenced by reused source. `querystring-es3` is the
