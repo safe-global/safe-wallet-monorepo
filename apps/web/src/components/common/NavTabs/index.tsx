@@ -16,7 +16,7 @@ const NavTabs = ({ tabs }: { tabs: NavItem[] }) => {
 
   return (
     <Tabs value={activeHref}>
-      <TabsList variant="underline" tone="brand">
+      <TabsList variant="underline" tone="brand" size="lg">
         {tabs.map((tab) => (
           <TabsTrigger
             key={tab.href}
