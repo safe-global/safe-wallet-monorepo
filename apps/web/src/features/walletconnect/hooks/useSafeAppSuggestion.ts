@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
+import { differenceInDays } from 'date-fns'
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -11,11 +12,20 @@ import { getProposalRisk, needsConnectionForm } from '../services/proposalRisk'
 import { useMatchingSafeApp } from './useMatchingSafeApp'
 
 const REMEMBERED_CHOICES_KEY = 'wcSafeAppSuggestionChoices'
+export const REMEMBER_CHOICE_DAYS = 30
 
 export type SafeAppSuggestionChoice = 'safeApp' | 'walletConnect'
 
+type RememberedChoice = { choice: SafeAppSuggestionChoice; savedAt: number }
+
 /** The remembered choice per verified dApp origin */
-type RememberedChoices = Record<string, SafeAppSuggestionChoice>
+type RememberedChoices = Record<string, RememberedChoice>
+
+// An entry without savedAt was stored by an earlier build and counts as no choice
+const getActiveChoice = (entry: RememberedChoice | undefined): SafeAppSuggestionChoice | undefined =>
+  entry?.savedAt !== undefined && differenceInDays(Date.now(), entry.savedAt) < REMEMBER_CHOICE_DAYS
+    ? entry.choice
+    : undefined
 
 /**
  * `off` (feature disabled or no proposal), `loading` (lookup in flight), `none` (the connection form applies),
@@ -29,7 +39,7 @@ export type SafeAppSuggestion = {
   safeApp: SafeAppData | undefined
   isShown: boolean
   blocksAutoApprove: boolean
-  /** "Remember my choice for this dApp", for the current proposal only */
+  /** "Remember my choice for this dApp": ticked for each new proposal, the user can opt out */
   remember: boolean
   setRemember: (remember: boolean) => void
   rememberChoice: (origin: string, choice: SafeAppSuggestionChoice) => void
@@ -59,15 +69,15 @@ export const useSafeAppSuggestion = (proposal: WalletKitTypes.SessionProposal | 
   )
   const sanctionedAddress = useSanctionedAddress(risk?.isSafePass ?? false)
 
-  const [rememberId, setRememberId] = useState<number>()
+  const [optedOutId, setOptedOutId] = useState<number>()
   const proposalId = activeProposal?.id
-  const remember = proposalId !== undefined && rememberId === proposalId
+  const remember = proposalId !== undefined && optedOutId !== proposalId
 
-  const setRemember = useCallback((value: boolean) => setRememberId(value ? proposalId : undefined), [proposalId])
+  const setRemember = useCallback((value: boolean) => setOptedOutId(value ? undefined : proposalId), [proposalId])
 
   const rememberChoice = useCallback(
     (choiceOrigin: string, choice: SafeAppSuggestionChoice) =>
-      setRememberedChoices((prev) => ({ ...prev, [choiceOrigin]: choice })),
+      setRememberedChoices((prev) => ({ ...prev, [choiceOrigin]: { choice, savedAt: Date.now() } })),
     [setRememberedChoices],
   )
 
@@ -75,7 +85,7 @@ export const useSafeAppSuggestion = (proposal: WalletKitTypes.SessionProposal | 
     if (!risk || !origin) return 'off'
     if (isLoading) return 'loading'
     const canSkipForm = safeLoaded && !isCounterfactualSafe && !needsConnectionForm(risk, sanctionedAddress)
-    return safeApp && canSkipForm ? statusForChoice(rememberedChoices?.[origin]) : 'none'
+    return safeApp && canSkipForm ? statusForChoice(getActiveChoice(rememberedChoices?.[origin])) : 'none'
   }
   const status = getStatus()
 

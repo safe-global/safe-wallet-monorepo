@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { act, renderHook } from '@/tests/test-utils'
 import { chainBuilder } from '@/tests/builders/chains'
 import { safeAppBuilder, sessionProposalBuilder } from '@/tests/builders/walletConnect'
-import { useSafeAppSuggestion } from '../useSafeAppSuggestion'
+import { REMEMBER_CHOICE_DAYS, useSafeAppSuggestion } from '../useSafeAppSuggestion'
 
 const safeApp = safeAppBuilder().build()
 
@@ -174,17 +174,53 @@ describe('useSafeAppSuggestion', () => {
 
       expect(renderForOrigin(origin, { validation: 'UNKNOWN' }).result.current.status).toBe('none')
     })
+
+    describe('over time', () => {
+      const savedAt = new Date('2026-01-01T00:00:00Z').getTime()
+      const daysLater = (days: number) => savedAt + days * 24 * 60 * 60 * 1000
+
+      afterEach(() => jest.restoreAllMocks())
+
+      it.each([
+        [REMEMBER_CHOICE_DAYS - 1, 'redirect'],
+        [REMEMBER_CHOICE_DAYS, 'shown'],
+      ])('after %s days the suggestion status is %s', (days, status) => {
+        const origin = faker.internet.url({ appendSlash: false })
+        const now = jest.spyOn(Date, 'now').mockReturnValue(savedAt)
+        rememberFor(origin, 'safeApp')
+
+        now.mockReturnValue(daysLater(days))
+
+        expect(renderForOrigin(origin).result.current.status).toBe(status)
+      })
+    })
   })
 
-  it('keeps "remember my choice" for the current proposal only', () => {
-    const { result, rerender } = renderHook(({ proposal }) => useSafeAppSuggestion(proposal), {
-      initialProps: { proposal: sessionProposalBuilder() },
+  describe('"Remember my choice for this dApp"', () => {
+    it('is ticked by default', () => {
+      const { result } = renderHook(() => useSafeAppSuggestion(sessionProposalBuilder()))
+
+      expect(result.current.remember).toBe(true)
     })
 
-    act(() => result.current.setRemember(true))
-    expect(result.current.remember).toBe(true)
+    it('can be unticked', () => {
+      const proposal = sessionProposalBuilder()
+      const { result } = renderHook(() => useSafeAppSuggestion(proposal))
 
-    rerender({ proposal: sessionProposalBuilder() })
-    expect(result.current.remember).toBe(false)
+      act(() => result.current.setRemember(false))
+
+      expect(result.current.remember).toBe(false)
+    })
+
+    it('is ticked again for the next proposal', () => {
+      const { result, rerender } = renderHook(({ proposal }) => useSafeAppSuggestion(proposal), {
+        initialProps: { proposal: sessionProposalBuilder() },
+      })
+      act(() => result.current.setRemember(false))
+
+      rerender({ proposal: sessionProposalBuilder() })
+
+      expect(result.current.remember).toBe(true)
+    })
   })
 })

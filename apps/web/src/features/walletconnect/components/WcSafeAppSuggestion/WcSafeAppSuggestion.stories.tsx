@@ -36,7 +36,7 @@ const meta = {
   args: {
     safeApp,
     origin: 'https://app.morpho.org',
-    remember: false,
+    remember: true,
     onRememberChange: () => {},
     onOpenSafeApp: () => {},
     onContinueWithWalletConnect: () => {},
