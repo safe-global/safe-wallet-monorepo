@@ -18,6 +18,8 @@ const createJestConfig = nextJest({
 // Add any custom config to be passed to Jest
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  // CI runners are several times slower than a laptop; the 5 s default fails tests that pass locally
+  testTimeout: process.env.CI ? 15_000 : 5_000,
   roots: ['<rootDir>', '<rootDir>/../../packages/views/src'],
 
   moduleNameMapper: {
