@@ -65,6 +65,10 @@ export const SAFES = {
   SEP_LEDGER_SIGN_SAFE: 'sep:0x0000000000000000000000000000000000000000',
   /** Isolated stack only (no staging Safe): 1/1 Safe of the emulated Ledger with a signed transfer to execute */
   SEP_LEDGER_EXECUTE_SAFE: 'sep:0x0000000000000000000000000000000000000000',
+  /** Isolated stack only (no staging Safe): 3/3 Safe of the emulated Trezor with a transfer that needs its signature */
+  SEP_TREZOR_SIGN_SAFE: 'sep:0x0000000000000000000000000000000000000000',
+  /** Isolated stack only (no staging Safe): 1/1 Safe of the emulated Trezor with a signed transfer to execute */
+  SEP_TREZOR_EXECUTE_SAFE: 'sep:0x0000000000000000000000000000000000000000',
 } as const
 
 /** The address of a prefixed Safe such as `sep:0x…` */
