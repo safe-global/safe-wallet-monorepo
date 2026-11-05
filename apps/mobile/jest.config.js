@@ -1,4 +1,5 @@
-const preset = require('../../config/test/presets/jest-preset')
+// jest-expo's babel transform must handle everything, not the shared preset's ts-jest
+const { transform: _tsJestTransform, ...preset } = require('../../config/test/presets/jest-preset')
 
 // Set timezone to UTC for consistent date formatting across environments
 process.env.TZ = 'UTC'
@@ -21,7 +22,7 @@ module.exports = {
       '<rootDir>/__mocks__/fileMock.js',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|native-base|react-native-svg|@notifee/react-native|react-redux|@ledgerhq/.*|uuid|@reduxjs/toolkit|immer|@datadog/.*|tamagui|@tamagui/.*)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|native-base|react-native-svg|@notifee/react-native|react-redux|@ledgerhq/.*|uuid|@reduxjs/toolkit|immer|@datadog/.*|tamagui|@tamagui/.*|@faker-js/faker)',
   ],
   testPathIgnorePatterns: ['/node_modules/', '/e2e/'],
 }
