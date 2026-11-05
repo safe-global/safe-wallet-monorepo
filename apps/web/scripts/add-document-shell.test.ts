@@ -1,4 +1,7 @@
-import { addDocumentShell } from './add-document-shell.mjs'
+import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import { join } from 'node:path'
+import { addDocumentShell, addDocumentShellToExport } from './add-document-shell.mjs'
 
 const NEXT_DATA = '<script id="__NEXT_DATA__" type="application/json">{"page":"/"}</script>'
 
@@ -25,5 +28,22 @@ describe('addDocumentShell', () => {
     expect(() => addDocumentShell(exported)).toThrow(
       'Expected exactly one <script id="__NEXT_DATA__" in an exported page',
     )
+  })
+})
+
+describe('addDocumentShellToExport', () => {
+  it('adds the shell to the exported Next pages and leaves other HTML files as they are', () => {
+    const outDir = mkdtempSync(join(tmpdir(), 'out-'))
+    mkdirSync(join(outDir, 'welcome'))
+    mkdirSync(join(outDir, 'storybook'))
+    const nextPage = `<html><head></head><body><div id="__next"></div>${NEXT_DATA}</body></html>`
+    const storybookPage = '<html><head></head><body><div id="storybook-root"></div></body></html>'
+    writeFileSync(join(outDir, 'welcome', 'accounts.html'), nextPage)
+    writeFileSync(join(outDir, 'storybook', 'index.html'), storybookPage)
+
+    addDocumentShellToExport(outDir)
+
+    expect(readFileSync(join(outDir, 'welcome', 'accounts.html'), 'utf8')).toBe(addDocumentShell(nextPage))
+    expect(readFileSync(join(outDir, 'storybook', 'index.html'), 'utf8')).toBe(storybookPage)
   })
 })
