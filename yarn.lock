@@ -14078,7 +14078,7 @@ __metadata:
     "@typescript-eslint/eslint-plugin": "npm:^8.31.1"
     "@typescript-eslint/parser": "npm:^8.72.0"
     "@vitejs/plugin-react": "npm:^6.1.2"
-    axios: "npm:^1.18.1"
+    axios: "npm:^1.20.0"
     eslint: "npm:^9.39.4"
     eslint-config-prettier: "npm:^9.1.0"
     eslint-plugin-react: "npm:^7.37.5"
@@ -22813,15 +22813,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:1.18.1":
-  version: 1.18.1
-  resolution: "axios@npm:1.18.1"
+"axios@npm:1.20.0":
+  version: 1.20.0
+  resolution: "axios@npm:1.20.0"
   dependencies:
     follow-redirects: "npm:^1.16.0"
-    form-data: "npm:^4.0.5"
+    form-data: "npm:^4.0.6"
     https-proxy-agent: "npm:^5.0.1"
     proxy-from-env: "npm:^2.1.0"
-  checksum: 10/c4cdced3ee0a9bf7dcae189fbc74a124aa079d4f04dbd995e602d39c1419476e8d021f87ee39ac8d8398e5a55e6d0b986238b3645f0d9177ac80de87c2a73f18
+  checksum: 10/0376b6178baecbe0f5d36088f5b5f6c21362ce301e0731f77172f9c89be740bdee20d8ae6ab186340d7cb752020c6a4f1381290e5a5cd10f6f9003941615ac77
   languageName: node
   linkType: hard
 
@@ -29750,7 +29750,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"form-data@npm:^4.0.0, form-data@npm:^4.0.5, form-data@npm:~4.0.4":
+"form-data@npm:^4.0.0, form-data@npm:^4.0.6, form-data@npm:~4.0.4":
   version: 4.0.6
   resolution: "form-data@npm:4.0.6"
   dependencies:
@@ -37681,9 +37681,9 @@ __metadata:
   linkType: hard
 
 "node-forge@npm:^1.3.1, node-forge@npm:^1.3.3":
-  version: 1.4.0
-  resolution: "node-forge@npm:1.4.0"
-  checksum: 10/d70fd769768e646eda73343d4d4105ccb6869315d975905a22117431c04ae5b6df6c488e34ed275b1a66b50195a09b84b5c8aeca3b8605c20605fcb8e9f109d9
+  version: 1.4.2
+  resolution: "node-forge@npm:1.4.2"
+  checksum: 10/e401ccd23d8933c4daa3e1a314e6781b53871509193c6b487cb96d8d596b4841090b57f53e15b734dee6a0c0c45bfc19304476927f4f17175f25d0031ecc6720
   languageName: node
   linkType: hard
 
