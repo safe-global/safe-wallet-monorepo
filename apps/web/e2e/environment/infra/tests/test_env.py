@@ -1,3 +1,4 @@
+import http.client
 import io
 import json
 import os
@@ -82,6 +83,21 @@ class EnvironmentTests(unittest.TestCase):
             wait_ready([], ready, 10)
         backend.assert_any_call(f"{DECODER}/health/ready")
         self.assertEqual(clock.now, 2)
+        self.assertEqual(ready["forkBlockHash"], "0xabc")
+
+    @patch("scripts.test_env.run", return_value="")
+    def test_readiness_retries_resets_while_the_proxy_starts(self, _docker):
+        backend = fake_backend({
+            f"{GATEWAY}/health/ready": [
+                ConnectionResetError(104, "Connection reset by peer"),
+                http.client.RemoteDisconnected("Remote end closed connection without response"),
+            ],
+        })
+        clock = FakeClock()
+        ready = manifest()
+        with stack_reads(backend), patch("scripts.test_env.time", clock):
+            wait_ready([], ready, 10)
+        self.assertEqual(clock.now, 4)
         self.assertEqual(ready["forkBlockHash"], "0xabc")
 
     @patch("scripts.test_env.run", return_value="")

@@ -271,7 +271,7 @@ jobs:
           mkdir -p "$output"
           docker ps --all --filter "label=com.docker.compose.project=$SAFE_E2E_PROJECT" \
             --format '{{.Names}}\t{{.State}}\t{{.Status}}' > "$output/containers.txt"
-          for service in cgw-web decoder-web txs-web txs-worker-indexer queue-web queue-worker; do
+          for service in cgw-web decoder-web txs-web txs-worker-indexer queue-web queue-worker events-web nginx; do
             python3 scripts/test_env.py logs "$service" --tail all > "$output/$service.log"
           done
 

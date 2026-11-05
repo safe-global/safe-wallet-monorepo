@@ -1,4 +1,5 @@
 import argparse
+import http.client
 import json
 import os
 import re
@@ -52,8 +53,10 @@ STDERR_LINES = 20
 # Compose interpolates the whole file, so commands that start no fork still need a provider URL.
 UNUSED_PROVIDER = {"SEPOLIA_FORK_RPC_URL": "https://unused.invalid"}
 UNUSED_IMAGES = {variable: "unused.invalid/image" for variable in SERVICES}
+# A published port resets connections until the container behind it listens.
 RETRYABLE = (
-    urllib.error.URLError, TimeoutError, socket.timeout, KeyError, TypeError, json.JSONDecodeError,
+    urllib.error.URLError, TimeoutError, socket.timeout, ConnectionError, http.client.HTTPException,
+    KeyError, TypeError, json.JSONDecodeError,
 )
 
 
