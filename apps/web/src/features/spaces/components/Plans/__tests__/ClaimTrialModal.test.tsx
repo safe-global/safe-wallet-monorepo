@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { SAFE_PRO_PRICING_URL } from '@/config/constants'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
-import ClaimTrialModal, { claimCopy, _freeLabel } from '../ClaimTrialModal'
+import ClaimTrialModal from '../ClaimTrialModal'
 
 const mockUseSpaceOffers = jest.fn()
 const mockStartCheckout = jest.fn()
@@ -81,57 +81,46 @@ describe('ClaimTrialModal', () => {
 
   afterEach(() => jest.restoreAllMocks())
 
-  it('adapts the headline to the migrated 60-day grace and to a regular trial', () => {
-    expect(claimCopy(60).title).toBe('Your Workspace moved to Safe Pro')
-    expect(claimCopy(30)).toMatchObject({
-      title: 'Start your 30-day free access to Safe Pro',
-      subtitle: 'All Pro features unlocked. No billing details needed upfront.',
-      note: "No payment method required. We'll remind you 7 days before your free access ends.",
-      back: 'Go to My accounts',
-      claim: 'Claim free access',
-    })
-    expect(claimCopy(null).title).toBe('Start your free access to Safe Pro')
-    expect(claimCopy(60, 'new')).toEqual({
-      title: 'Workspaces run on Safe Pro',
-      subtitle: 'Your first 60 days are free.',
-      note: "No payment method required. We'll remind you 7 days before your free access ends.",
-      back: 'Go to My accounts',
-      claim: 'Claim free access',
-    })
+  it('names the trial length and explains the longer trial of a migrated Workspace', () => {
+    const { rerender } = render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Safe Pro 60-day free trial')
+    expect(screen.getByText(/60 days instead of 30/)).toBeInTheDocument()
+
+    mockUseSpaceOffers.mockReturnValue({ trialPlans: [BUSINESS], trialPeriodDays: 30, isLoading: false })
+    rerender(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Safe Pro 30-day free trial')
+    expect(screen.queryByText(/60 days instead of 30/)).not.toBeInTheDocument()
   })
 
-  it('tags the price as free, with the length of the free period for a brand-new Workspace', () => {
-    expect(_freeLabel(60, 'existing')).toBe('Free')
-    expect(_freeLabel(30, 'new')).toBe('30-day free')
-    expect(_freeLabel(null, 'new')).toBe('Free')
-  })
-
-  it('links to the full feature comparison under the header', () => {
+  it('lists the trial features without a price and says when the trial ends', () => {
     render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
 
-    expect(screen.getByRole('link', { name: /Compare all features/ })).toHaveAttribute('href', SAFE_PRO_PRICING_URL)
+    expect(screen.getByTestId('trial-features')).toHaveTextContent('Policy engine')
+    expect(screen.queryByText(/€499/)).not.toBeInTheDocument()
+    expect(screen.getByText('No card. No charge. Trial ends on its own Dec 5, 2026.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /see all features/ })).toHaveAttribute('href', SAFE_PRO_PRICING_URL)
+    expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
   })
 
-  it('offers the Business trial and, when the Workspace fits the seats, goes straight to Stripe', () => {
+  it('goes straight to Stripe when the Workspace fits the seats, and goes back on request', () => {
     const onBack = jest.fn()
     render(<ClaimTrialModal spaceId={SPACE_ID} onBack={onBack} />)
-
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Your Workspace moved to Safe Pro')
-    expect(screen.getByText(/60 days instead of 30/)).toBeInTheDocument()
-    expect(screen.getByTestId('trial-offer-Business')).toHaveTextContent('€499')
-    expect(screen.getByTestId('trial-offer-Business')).toHaveTextContent('Free')
-    expect(screen.getByText('Available until Dec 5, 2026. You can subscribe any time after that.')).toBeInTheDocument()
-    expect(screen.getByText('20 Safe accounts')).toBeInTheDocument()
-    expect(screen.getByText('Policy engine')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: 'Go to My accounts' }))
     expect(onBack).toHaveBeenCalled()
 
-    fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Start free trial/ }))
     expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, undefined, 'pl_business')
     expect(mockRemoveSafes).not.toHaveBeenCalled()
     expect(screen.queryByTestId('select-accounts-step')).not.toBeInTheDocument()
+  })
+
+  it('starts the trial on Business when several plans are offered', () => {
+    mockUseSpaceOffers.mockReturnValue({ trialPlans: [STARTER, BUSINESS], trialPeriodDays: 60, isLoading: false })
+    render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
+
+    fireEvent.click(screen.getByRole('button', { name: /Start free trial/ }))
+    expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, undefined, 'pl_business')
   })
 
   it('tracks the offer, the claim and the dismissal with the entry point', () => {
@@ -141,7 +130,7 @@ describe('ClaimTrialModal', () => {
       'Free Access Length': 60,
     })
 
-    fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Start free trial/ }))
     expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.FREE_ACCESS_CLAIM_CLICKED, LOGIN_ENTRY)
 
     fireEvent.click(screen.getByRole('button', { name: 'Go to My accounts' }))
@@ -151,39 +140,33 @@ describe('ClaimTrialModal', () => {
     })
   })
 
-  it('greets a brand-new Workspace with the full feature list and sends it straight to Stripe', () => {
+  it('tracks a brand-new Workspace from the create flow and returns Stripe to the wizard', () => {
     mockSpaceSafes.mockReturnValue({ safes: {} })
-    const onBack = jest.fn()
-    render(<ClaimTrialModal spaceId={SPACE_ID} onBack={onBack} returnPathname="/welcome/select-safes" variant="new" />)
+    render(
+      <ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} returnPathname="/welcome/select-safes" variant="new" />,
+    )
 
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Workspaces run on Safe Pro')
-    expect(screen.getByText('Your first 60 days are free.')).toBeInTheDocument()
-    expect(screen.getByText(/No payment method required/)).toBeInTheDocument()
-    expect(screen.getByTestId('trial-end-tooltip')).toBeInTheDocument()
-    expect(screen.queryByText('Unlimited Workspace members')).not.toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Go to My accounts' }))
-    expect(onBack).toHaveBeenCalled()
-
-    fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Start free trial/ }))
+    expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.FREE_ACCESS_CLAIM_CLICKED, {
+      'Entry Point': 'create_workspace',
+    })
     expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, '/welcome/select-safes', 'pl_business')
-    expect(mockRemoveSafes).not.toHaveBeenCalled()
-    expect(screen.queryByTestId('select-accounts-step')).not.toBeInTheDocument()
   })
 
-  it('removes the Safes left out of the picked plan and then checks out', async () => {
+  it('removes the Safes left out of the trial plan and then checks out', async () => {
     mockUseSpaceOffers.mockReturnValue({ trialPlans: [STARTER], trialPeriodDays: 30, isLoading: false })
     mockSpaceSafes.mockReturnValue({ safes: { '1': ['0xA', '0xB', '0xC'] } })
     render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} returnPathname="/welcome/select-safes" />)
 
-    fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Start free trial/ }))
     expect(mockStartCheckout).not.toHaveBeenCalled()
     expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-limit', '2')
     expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-plan', 'Starter')
 
     fireEvent.click(screen.getByText('step-back'))
-    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Start your 30-day free access to Safe Pro')
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Safe Pro 30-day free trial')
 
-    fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Start free trial/ }))
     fireEvent.click(screen.getByText('step-continue'))
 
     await waitFor(() => expect(mockStartCheckout).toHaveBeenCalledWith(SPACE_ID, '/welcome/select-safes', 'pl_starter'))
@@ -200,25 +183,12 @@ describe('ClaimTrialModal', () => {
     mockRemoveState = { error: { status: 500, data: { message: 'Boom' } } }
     render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
 
-    fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
+    fireEvent.click(screen.getByRole('button', { name: /Start free trial/ }))
     fireEvent.click(screen.getByText('step-continue'))
 
     await waitFor(() => expect(mockRemoveSafes).toHaveBeenCalled())
     expect(mockStartCheckout).not.toHaveBeenCalled()
     expect(screen.getByTestId('select-accounts-step')).toHaveTextContent('Boom')
-  })
-
-  it('lets the admin pick between several trial offers and carries the pick into the accounts step', () => {
-    mockUseSpaceOffers.mockReturnValue({ trialPlans: [BUSINESS, STARTER], trialPeriodDays: 60, isLoading: false })
-    mockSpaceSafes.mockReturnValue({ safes: { '1': ['0xA', '0xB', '0xC'] } })
-    render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
-
-    expect(screen.getByRole('radio', { name: /Business/ })).toHaveAttribute('aria-checked', 'true')
-    fireEvent.click(screen.getByRole('radio', { name: /Starter/ }))
-    fireEvent.click(screen.getByRole('button', { name: /Claim free access/ }))
-
-    expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-plan', 'Starter')
-    expect(screen.getByTestId('select-accounts-step')).toHaveAttribute('data-limit', '2')
   })
 
   it('shows a skeleton while the offers load and an empty state without a trial', () => {
@@ -228,8 +198,10 @@ describe('ClaimTrialModal', () => {
 
     mockUseSpaceOffers.mockReturnValue({ trialPlans: [], trialPeriodDays: null, isLoading: false })
     rerender(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
-    expect(screen.getByText('There is no free access available for this Workspace.')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Claim free access/ })).toBeDisabled()
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Safe Pro free trial')
+    expect(screen.getByText('There is no trial available for this Workspace.')).toBeInTheDocument()
+    expect(screen.getByText('No card. No charge. Trial ends on its own.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Start free trial/ })).toBeDisabled()
   })
 
   it('surfaces a checkout failure', () => {

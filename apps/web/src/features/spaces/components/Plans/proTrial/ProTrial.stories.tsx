@@ -6,6 +6,8 @@ import SpaceDashboard from '@/pages/spaces'
 import SpacePlansPage from '@/pages/spaces/plans'
 import SpaceSafeAccounts from '@/pages/spaces/safe-accounts'
 import MyAccountsPage from '@/pages/welcome/accounts'
+import CreateSpacePage from '@/pages/spaces/create-space'
+import ClaimTrialModal from '../ClaimTrialModal'
 import { PLAN_STATES, SAFE_COUNTS, scenarioHandlers, type PlanState, type Region } from './scenario'
 
 type Page = 'home' | 'accounts' | 'plans'
@@ -82,4 +84,15 @@ export const MySafesAfterTrial: Story = {
   args: { plan: 'ended' },
   parameters: { nextjs: { router: { pathname: '/welcome/accounts', query: {} } } },
   render: () => <MyAccountsPage />,
+}
+
+/** Right after creating a Workspace: the same trial modal, opened by the create flow. */
+export const CreateWorkspace: Story = {
+  ...at('home', { plan: 'pre-trial' }),
+  render: () => (
+    <>
+      <CreateSpacePage />
+      <ClaimTrialModal spaceId={MOCK_SPACE_ID} variant="new" onBack={() => undefined} />
+    </>
+  ),
 }

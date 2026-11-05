@@ -156,7 +156,7 @@ describe('WorkspaceLockModal', () => {
     mockUseIsAdmin.mockReturnValue(false)
     render(<WorkspaceLockModal spaceId={SPACE_ID} />)
 
-    expect(screen.getByTestId('locked-member-modal')).toHaveTextContent('Your Workspace moved to Safe Pro')
+    expect(screen.getByTestId('locked-member-modal')).toHaveTextContent('Safe Pro 60-day free trial')
     expect(screen.getByTestId('locked-member-modal')).toHaveTextContent(
       'Acme Inc is locked until an admin claims free access.',
     )
@@ -180,6 +180,6 @@ describe('WorkspaceLockModal', () => {
       body: 'An admin needs to choose a plan to unlock your Workspace.\nYour Safe accounts remain available in My accounts.',
     })
     expect(_memberCopy('payment-failed', null, null, 'Acme Inc').title).toBe('Your Workspace’s last payment failed')
-    expect(_memberCopy('trial-offered', 30, null, 'Acme Inc').title).toBe('Start your 30-day free access to Safe Pro')
+    expect(_memberCopy('trial-offered', 30, null, 'Acme Inc').title).toBe('Safe Pro 30-day free trial')
   })
 })
