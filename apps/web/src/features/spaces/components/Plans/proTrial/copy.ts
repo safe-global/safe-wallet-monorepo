@@ -57,7 +57,7 @@ export const PRO_TRIAL_COPY = {
     noCharge: (endsOn: string | null) =>
       endsOn ? `No card. No charge. Trial ends on its own ${endsOn}.` : 'No card. No charge. Trial ends on its own.',
     start: 'Start free trial',
-    seePlans: 'see all features',
+    seeFeatures: 'see all features',
     back: 'Go to My accounts',
     unavailable: 'There is no trial available for this Workspace.',
   },

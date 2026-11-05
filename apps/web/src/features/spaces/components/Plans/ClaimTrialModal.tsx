@@ -29,45 +29,6 @@ const MIGRATED_TRIAL_DAYS = 60
 /** `existing` locks a Workspace that predates Safe Pro; `new` greets one the wizard just created. */
 export type ClaimTrialVariant = 'existing' | 'new'
 
-export type ClaimTrialCopy = { title: string; subtitle: string; note: string; back: string; claim: string }
-
-/** What happens when the trial runs out, behind the info icon next to the note. */
-export const TRIAL_END_TOOLTIP =
-  "Your paid subscription only starts once you add a payment method. If you don't add one or choose another plan before your free access ends, your Workspace will be locked. Its data is kept for 90 days and your Safe accounts remain available in My accounts."
-
-/** The price tag's green word: a new Workspace is told how long the free period lasts, an existing one just "Free". */
-export const _freeLabel = (trialPeriodDays: number | null, variant: ClaimTrialVariant): string =>
-  variant === 'new' && trialPeriodDays !== null ? `${trialPeriodDays}-day free` : 'Free'
-
-export const claimCopy = (trialPeriodDays: number | null, variant: ClaimTrialVariant = 'existing'): ClaimTrialCopy => {
-  if (variant === 'new') {
-    return {
-      title: PRO_TRIAL_COPY.trialStart.title(trialPeriodDays),
-      subtitle: trialPeriodDays === null ? 'Your first days are free.' : `Your first ${trialPeriodDays} days are free.`,
-      note: "No payment method required. We'll remind you 7 days before your free access ends.",
-      back: 'Go to My accounts',
-      claim: 'Claim free access',
-    }
-  }
-  const existing = {
-    note: "No payment method required. We'll remind you 7 days before your free access ends.",
-    back: 'Go to My accounts',
-    claim: 'Claim free access',
-  }
-  return trialPeriodDays === MIGRATED_TRIAL_DAYS
-    ? {
-        ...existing,
-        title: PRO_TRIAL_COPY.trialStart.title(trialPeriodDays),
-        subtitle:
-          'You’ve used Safe before, so your free access is 60 days instead of 30.\nYour Safe accounts remain available in My accounts.',
-      }
-    : {
-        ...existing,
-        title: PRO_TRIAL_COPY.trialStart.title(trialPeriodDays),
-        subtitle: 'All Pro features unlocked. No billing details needed upfront.',
-      }
-}
-
 /** The Safes left out are removed from the Workspace, not from the user's accounts. */
 export default function ClaimTrialModal({
   spaceId,
@@ -110,13 +71,13 @@ export default function ClaimTrialModal({
   )
 
   const claim = () => {
-    if (!tier || !option?.paymentLinkId) return
+    if (!option?.paymentLinkId) return
     if (needsTrim(seats)) setStep('accounts')
     else void checkout(option.paymentLinkId)
   }
 
   const continueToCheckout = (removed: SafeRef[]) => {
-    if (tier && option?.paymentLinkId) void checkout(option.paymentLinkId, removed)
+    if (option?.paymentLinkId) void checkout(option.paymentLinkId, removed)
   }
 
   return (
@@ -153,9 +114,9 @@ export default function ClaimTrialModal({
                     rel="noopener noreferrer"
                     variant="muted"
                     className="whitespace-nowrap"
-                    data-testid="trial-see-plans"
+                    data-testid="trial-see-features"
                   >
-                    {PRO_TRIAL_COPY.trialStart.seePlans} <ArrowUpRight />
+                    {PRO_TRIAL_COPY.trialStart.seeFeatures} <ArrowUpRight />
                   </Link>
                 </Typography>
                 {trialPeriodDays === MIGRATED_TRIAL_DAYS && (
