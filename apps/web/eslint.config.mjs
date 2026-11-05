@@ -134,7 +134,7 @@ export default [
             { name: 'next/dynamic', message: 'Import dynamic from @/utils/dynamic, which does not depend on Next.' },
             {
               name: 'next/document',
-              message: 'Next renders its default document; set document attributes in pages/_app.tsx.',
+              message: 'Next renders its default document; scripts/add-document-shell.mjs adds to it.',
             },
             {
               name: 'next/image',
