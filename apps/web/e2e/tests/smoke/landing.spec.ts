@@ -8,4 +8,10 @@ test.describe('Landing', { tag: ['@smoke', '@migration'] }, () => {
     await expect(safePage).toHaveURL(new RegExp(`(${ROUTES.welcomeSpaces}|${ROUTES.welcomeAccounts})$`))
     await expect(safePage).toHaveTitle(/Workspaces|My accounts/)
   })
+
+  test('should declare the page language as English', async ({ safePage }) => {
+    await safePage.goto('/')
+
+    await expect(safePage.locator('html')).toHaveAttribute('lang', 'en')
+  })
 })

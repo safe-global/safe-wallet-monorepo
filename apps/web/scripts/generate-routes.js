@@ -9,7 +9,7 @@ const iterate = (folderName, parentRoute, root) => {
     .sort((a, b) => (isFile(a) ? -1 : 1))
     .forEach((item) => {
       // Skip service files
-      if (/_app|_document/.test(item)) return
+      if (/_app/.test(item)) return
 
       // A folder, continue iterating
       if (!isFile(item)) {

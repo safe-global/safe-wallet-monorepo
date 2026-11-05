@@ -106,6 +106,7 @@ if (typeof window !== 'undefined') {
   // Datadog RUM + Mixpanel "Error Surfaced" tracking (WA-2775) behind one service.
   // DatadogProvider self-gates when its RUM tokens are absent.
   initObservability([new DatadogProvider(), new MixpanelTracingProvider()])
+  document.documentElement.lang = 'en'
 }
 
 const reduxStore = makeStore()

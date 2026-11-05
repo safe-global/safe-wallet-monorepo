@@ -128,7 +128,7 @@ const nextConfig = {
     if (dev && isServer) {
       config.plugins.push(
         new webpack.NormalModuleReplacementPlugin(
-          /[\\/]apps[\\/]web[\\/]src[\\/]pages[\\/](?!_document)/,
+          /[\\/]apps[\\/]web[\\/]src[\\/]pages[\\/]/,
           path.resolve(__dirname, 'scripts/dev-server-page-stub.js'),
         ),
       )

@@ -133,6 +133,10 @@ export default [
             { name: 'next', importNames: ['NextPage'], message: 'Type a page as a plain function component.' },
             { name: 'next/dynamic', message: 'Import dynamic from @/utils/dynamic, which does not depend on Next.' },
             {
+              name: 'next/document',
+              message: 'Next renders its default document; set document attributes in pages/_app.tsx.',
+            },
+            {
               name: 'next/image',
               message: 'Use a plain <img>. Images are served unoptimized, so next/image adds nothing.',
             },
