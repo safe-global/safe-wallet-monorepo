@@ -1,10 +1,9 @@
 import Head from 'next/head'
-import type { NextPage } from 'next'
 
 import Bridge from '@/features/bridge'
 import { BRAND_NAME } from '@/config/constants'
 
-const BridgePage: NextPage = () => {
+const BridgePage = () => {
   return (
     <>
       <Head>

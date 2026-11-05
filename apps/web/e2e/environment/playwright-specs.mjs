@@ -9,6 +9,10 @@ export const playwrightSpecs = {
     scenarios: ['prepareLedgerScenario'],
     safes: { SEP_LEDGER_SIGN_SAFE: 'SEP_STATIC_SAFE_48', SEP_LEDGER_EXECUTE_SAFE: 'SEP_STATIC_SAFE_49' },
   },
+  'e2e/trezor-sign-execute.spec.ts': {
+    scenarios: ['prepareTrezorScenario'],
+    safes: { SEP_TREZOR_SIGN_SAFE: 'SEP_STATIC_SAFE_50', SEP_TREZOR_EXECUTE_SAFE: 'SEP_STATIC_SAFE_51' },
+  },
   'e2e/batch.spec.ts': {},
   'e2e/bulk-execute.spec.ts': {},
   'e2e/connected-non-owner.spec.ts': {},
@@ -104,6 +108,7 @@ export const playwrightSpecs = {
   },
   'regression/auth0/step-up-workspace-rename.spec.ts': {},
   'regression/auth0/workspace-invite.spec.ts': {},
+  'regression/auth0/workspace-trial-checkout.spec.ts': {},
   'regression/step-up-auth.spec.ts': {},
   'smoke/balances.spec.ts': {
     scenarios: ['prepareAssetsScenario'],
