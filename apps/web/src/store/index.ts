@@ -24,7 +24,6 @@ import {
   authListener,
   counterfactualSyncListener,
   addressBookListener,
-  elevationListener,
   spaceSafesEntitlementsListener,
   planChangeSyncListener,
   checkoutTrackingListener,
@@ -36,6 +35,7 @@ import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
 import { ofacApi } from '@/store/api/ofac'
 import { safePassApi } from './api/safePass'
+import { beamerApi } from './api/beamer'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { safenetCheckApi } from '@safe-global/store/safenet/safenetCheckApi'
 import { safenetCheckSlice } from '@safe-global/store/safenet/safenetCheckSlice'
@@ -78,11 +78,11 @@ const rootReducer = combineReducers({
   [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
   [slices.gtfPaymentSourcePreferenceSlice.name]: slices.gtfPaymentSourcePreferenceSlice.reducer,
   [slices.featureFlagOverridesSlice.name]: slices.featureFlagOverridesSlice.reducer,
-  // Deliberately absent from `persistedSlices`: a phase restored from a previous
-  // page load would leave the user on a splash screen with nothing in flight.
+  // Deliberately absent from `persistedSlices`: a restored dialog would wait for a request that is gone.
   [slices.stepUpSlice.name]: slices.stepUpSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
+  [beamerApi.reducerPath]: beamerApi.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,
   [safenetCheckSlice.name]: safenetCheckSlice.reducer,
   [safenetCheckApi.reducerPath]: safenetCheckApi.reducer,
@@ -126,6 +126,7 @@ const middleware: Middleware<{}, RootState>[] = [
   listenerMiddlewareInstance.middleware,
   ofacApi.middleware,
   safePassApi.middleware,
+  beamerApi.middleware,
   hypernativeApi.middleware,
   safenetCheckApi.middleware,
   slices.gatewayApi.middleware,
@@ -141,7 +142,6 @@ const listeners = [
   authListener,
   counterfactualSyncListener,
   addressBookListener,
-  elevationListener,
   spaceSafesEntitlementsListener,
   planChangeSyncListener,
   checkoutTrackingListener,

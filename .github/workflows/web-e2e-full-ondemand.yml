@@ -3,8 +3,7 @@ run-name: ${{ inputs.spec != '' && format('E2E regression — safe-apps/{0}', in
 
 # Runs cypress/e2e/safe-apps/ against staging. A manual run can name specs to run only those:
 #   spec = spec file name(s) without path or .cy.js, comma-separated, e.g.
-#            apps_list               -> cypress/e2e/safe-apps/apps_list.cy.js
-#            apps_list, info_modal   -> both
+#            drain_account.spec      -> cypress/e2e/safe-apps/drain_account.spec.cy.js
 # Partial runs skip the TestRail upload and use one container per named spec (max 8; whole
 # directories keep 8).
 # A spec name that matches no file fails the small "plan" job in seconds; no e2e container is started.
@@ -14,7 +13,7 @@ on:
   workflow_dispatch:
     inputs:
       spec:
-        description: 'Spec names (optional), comma-separated, e.g. apps_list, info_modal (no path, no .cy.js).'
+        description: 'Spec names (optional), comma-separated, e.g. drain_account.spec (no path, no .cy.js).'
         type: string
         required: false
         default: ''
@@ -169,7 +168,7 @@ jobs:
 
       - name: Python setup
         if: always() && needs.plan.outputs.partial != 'true'
-        uses: actions/setup-python@v7.0.0
+        uses: actions/setup-python@v7.1.0
         with:
           python-version: '3.x'
 

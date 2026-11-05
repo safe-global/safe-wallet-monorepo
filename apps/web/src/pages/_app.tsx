@@ -1,7 +1,6 @@
 import Analytics from '@/services/analytics/Analytics'
-import type { ReactNode } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import { type ReactElement } from 'react'
-import { type AppProps } from 'next/app'
 import Head from 'next/head'
 import dynamic from '@/utils/dynamic'
 import { useRememberSpace } from '@/hooks/useRememberSpace'
@@ -24,11 +23,12 @@ import { useInitSession } from '@/hooks/useInitSession'
 import { useRegisterServiceWorker } from '@/hooks/useRegisterServiceWorker'
 import Notifications from '@/components/common/Notifications'
 import CookieAndTermBanner from '@/components/common/CookieAndTermBanner'
+import WhatsNewTopBar from '@/components/common/WhatsNewTopBar'
+import WhatsNewUpdatesFrame from '@/components/common/WhatsNewUpdatesFrame'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useTxTracking } from '@/hooks/useTxTracking'
 import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import useGtm from '@/services/analytics/useGtm'
-import useBeamer from '@/hooks/Beamer/useBeamer'
 import MetaTags from '@/components/common/MetaTags'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
 import useSafeMessageNotifications from '@/hooks/messages/useSafeMessageNotifications'
@@ -92,7 +92,7 @@ import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import { HnQueueAssessmentProvider } from '@/features/hypernative'
-import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
+import { StepUpDialog, useOidcLoginCallback, useStepUpRecovery } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
@@ -141,10 +141,9 @@ const InitApp = (): ReactElement | null => {
   useInitSession()
   useLoadableStores()
   useInitWeb3()
-  useBeamer()
   useVisitedSafes()
   useOidcLoginCallback()
-  useStepUpCallback()
+  useStepUpRecovery()
   useLogoutCallback()
   useSessionExpiryGuard()
   useUnlockBodyScroll()
@@ -174,11 +173,10 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
   return <ObservabilityErrorBoundary onError={captureRenderError}>{content}</ObservabilityErrorBoundary>
 }
 
-// Must render inside the Redux provider to read the step-up phase.
-const AppLaunchScreen = (): ReactElement | null => {
-  const stepUpCaption = useStepUpSplash()
-
-  return <LaunchScreen stepUpCaption={stepUpCaption} />
+type AppProps = {
+  Component: ComponentType<Record<string, unknown>>
+  pageProps: Record<string, unknown>
+  router: { pathname: string; query: Partial<Record<string, string | string[]>> }
 }
 
 const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement => {
@@ -200,7 +198,7 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
 
           <LazyWeb3Init />
 
-          <AppLaunchScreen />
+          <LaunchScreen />
 
           <PageLayout pathname={router.pathname}>
             <Component {...pageProps} key={safeKey} />
@@ -208,9 +206,15 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
 
           <CookieAndTermBanner />
 
+          <WhatsNewTopBar />
+
+          <WhatsNewUpdatesFrame />
+
           <TargetedOutreachPopupLoader />
 
           <Notifications />
+
+          <StepUpDialog />
 
           <RecoveryLoader />
 

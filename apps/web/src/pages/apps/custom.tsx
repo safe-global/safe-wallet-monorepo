@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import type { NextPage } from 'next'
 import Head from 'next/head'
 
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
@@ -10,7 +9,7 @@ import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GEN
 import { SAFE_APPS_LABELS } from '@/services/analytics'
 import { BRAND_NAME } from '@/config/constants'
 
-const CustomSafeApps: NextPage = () => {
+const CustomSafeApps = () => {
   // TODO: create a custom hook instead of use useSafeApps
   const { customSafeApps, addCustomApp, removeCustomApp } = useSafeApps()
 

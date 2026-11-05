@@ -7,9 +7,10 @@ import * as proposers from './proposers.mjs'
 import * as recovery from './recovery.mjs'
 import * as safeApps from './safe-apps.mjs'
 import * as transferForm from './transfer-form.mjs'
+import * as trezor from './trezor.mjs'
 import * as zerion from './zerion.mjs'
 
-const modules = [assets, basic, chains, dashboard, ledger, proposers, recovery, safeApps, transferForm, zerion]
+const modules = [assets, basic, chains, dashboard, ledger, proposers, recovery, safeApps, transferForm, trezor, zerion]
 
 /** The scenario functions by name; playwright-specs.mjs refers to them by these names. */
 export const scenarios = Object.fromEntries(
