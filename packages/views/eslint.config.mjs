@@ -6,11 +6,11 @@ import { designSystemSyntaxRules } from './eslint-design-system.mjs'
 import noExplicitAny from '../../config/eslint/no-explicit-any.mjs'
 
 export default tseslint.config(
-  { ignores: ['**/*.test.ts', '**/*.test.tsx', '**/*.stories.tsx', '**/__tests__/**', '**/__mocks__/**'] },
-  js.configs.recommended,
-  ...tseslint.configs.recommended,
+  { ignores: ['**/*.stories.tsx', '**/__mocks__/**'] },
   {
     files: ['src/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**'],
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
     plugins: { 'react-hooks': reactHooks, shadcn },
     rules: {
       ...reactHooks.configs.recommended.rules,
@@ -36,6 +36,10 @@ export default tseslint.config(
         },
       ],
     },
+  },
+  {
+    files: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**/*.{ts,tsx}'],
+    extends: [tseslint.configs.base],
   },
   noExplicitAny,
 )
