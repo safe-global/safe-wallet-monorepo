@@ -1,44 +1,44 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
 import type { RootState } from '@/store/index'
 
-export type StepUpPhase = 'idle' | 'leaving' | 'returning'
+/**
+ * `prompt`: the dialog asks the user to start the verification.
+ * `waiting`: the popup is open. `blocked`: the browser refused the popup.
+ * `failed`: the challenge ended with an error other than a cancellation.
+ */
+export type StepUpStatus = 'idle' | 'prompt' | 'waiting' | 'blocked' | 'failed'
 
 type StepUpState = {
-  phase: StepUpPhase
-  /** Where the challenge returns the user; the current page when unset. */
-  returnUrl?: string
+  status: StepUpStatus
 }
 
 const initialState: StepUpState = {
-  phase: 'idle',
+  status: 'idle',
 }
 
 export const stepUpSlice = createSlice({
   name: 'stepUp',
   initialState,
   reducers: {
-    stepUpLeaving: (state) => {
-      state.phase = 'leaving'
+    stepUpRequested: (state) => {
+      state.status = 'prompt'
     },
-    stepUpReturning: (state) => {
-      state.phase = 'returning'
+    stepUpPopupOpened: (state) => {
+      state.status = 'waiting'
+    },
+    stepUpPopupBlocked: (state) => {
+      state.status = 'blocked'
+    },
+    stepUpFailed: (state) => {
+      state.status = 'failed'
     },
     stepUpSettled: (state) => {
-      state.phase = 'idle'
-    },
-    stepUpReturnUrlSet: (state, action: PayloadAction<string>) => {
-      state.returnUrl = action.payload
-    },
-    // Only clears its own URL, so an unmounting page cannot drop the one the next page just set.
-    stepUpReturnUrlCleared: (state, action: PayloadAction<string>) => {
-      if (state.returnUrl === action.payload) state.returnUrl = undefined
+      state.status = 'idle'
     },
   },
 })
 
-export const { stepUpLeaving, stepUpReturning, stepUpSettled, stepUpReturnUrlSet, stepUpReturnUrlCleared } =
+export const { stepUpRequested, stepUpPopupOpened, stepUpPopupBlocked, stepUpFailed, stepUpSettled } =
   stepUpSlice.actions
 
-export const selectStepUpPhase = (state: RootState): StepUpPhase => state.stepUp.phase
-
-export const selectStepUpReturnUrl = (state: RootState): string | undefined => state.stepUp.returnUrl
+export const selectStepUpStatus = (state: RootState): StepUpStatus => state.stepUp.status

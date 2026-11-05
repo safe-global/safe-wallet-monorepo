@@ -97,8 +97,14 @@ function listener(handle: Handler): (message: IncomingMessage, response: ServerR
   }
 }
 
+// A client that reuses an idle connection while the server closes it gets a reset, so only clients close them
+function keepIdleConnections<T extends Server>(server: T): T {
+  server.keepAliveTimeout = 0
+  return server
+}
+
 export function serve(port: number, handle: Handler): Server {
-  return createHttpServer(listener(handle)).listen(port, listenHost())
+  return keepIdleConnections(createHttpServer(listener(handle))).listen(port, listenHost())
 }
 
 /** Serves over HTTPS with the shared mock certificate. */
@@ -108,7 +114,7 @@ export function serveTls(port: number, handle: Handler): Server {
     cert: readFileSync(`${KEYS_DIR}/tls-cert.pem`),
     key: readFileSync(`${KEYS_DIR}/tls-key.pem`),
   }
-  return createHttpsServer(options, listener(handle)).listen(port, listenHost())
+  return keepIdleConnections(createHttpsServer(options, listener(handle))).listen(port, listenHost())
 }
 
 /** Posts JSON and returns the parsed answer; throws on an HTTP error status, or UpstreamUnreachable. */
