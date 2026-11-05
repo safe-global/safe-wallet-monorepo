@@ -372,6 +372,7 @@ describe('ProposerRoleForm', () => {
       address: PROPOSER,
       chainIds: [CHAIN_ID],
       createdBy: '',
+      tagIds: [],
       createdByUserId: 0,
       lastUpdatedBy: '',
       lastUpdatedByUserId: 0,

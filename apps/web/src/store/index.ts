@@ -30,6 +30,7 @@ import {
   checkoutTrackingListener,
   workspaceTrackingListener,
   spaceSafesCacheListener,
+  addressBookTagsCacheListener,
   trialReminderListener,
 } from './slices'
 import * as slices from './slices'
@@ -150,6 +151,7 @@ const listeners = [
   checkoutTrackingListener,
   workspaceTrackingListener,
   spaceSafesCacheListener,
+  addressBookTagsCacheListener,
   trialReminderListener,
   forbiddenSessionListener,
 ]
