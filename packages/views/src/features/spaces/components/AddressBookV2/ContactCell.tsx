@@ -75,22 +75,21 @@ const ContactCell = ({ name, address, isLocal = false, isCompact = false, avatar
   const checksummed = checksumAddress(address)
 
   return (
-    <div className="flex min-w-0 items-start gap-2">
-      <span className="mt-0.5 shrink-0">{avatar ?? <AddressAvatar address={checksummed} />}</span>
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <div className="flex items-center gap-1.5 overflow-hidden font-bold">
-          {isLocal && <HardDrive className="text-muted-foreground size-4 shrink-0" aria-label="Local contact" />}
-          <Tooltip>
-            <TooltipTrigger className={cn('min-w-0 text-left', !isCompact && 'truncate')}>{name}</TooltipTrigger>
-            <TooltipContent>{name}</TooltipContent>
-          </Tooltip>
-        </div>
-        <div className={cn('flex items-center gap-1', isCompact && 'flex-wrap')}>
-          {/* Compact: the groups and buttons wrap in one row, so the pinned column never forces a scroll */}
-          <GroupedAddress address={checksummed} className={isCompact ? 'contents' : undefined} />
-          <CopyAddress address={checksummed} />
-          {explorerLink && <ExplorerButton {...explorerLink} className="text-muted-foreground hover:text-foreground" />}
-        </div>
+    // The avatar shares the name's row, so the two stay centred on each other
+    <div className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] items-center gap-x-2 gap-y-0.5">
+      <span className="shrink-0">{avatar ?? <AddressAvatar address={checksummed} />}</span>
+      <div className="flex min-w-0 items-center gap-1.5 overflow-hidden font-bold">
+        {isLocal && <HardDrive className="text-muted-foreground size-4 shrink-0" aria-label="Local contact" />}
+        <Tooltip>
+          <TooltipTrigger className={cn('min-w-0 text-left', !isCompact && 'truncate')}>{name}</TooltipTrigger>
+          <TooltipContent>{name}</TooltipContent>
+        </Tooltip>
+      </div>
+      <div className={cn('col-start-2 flex items-center gap-1', isCompact && 'flex-wrap')}>
+        {/* Compact: the groups and buttons wrap in one row, so the pinned column never forces a scroll */}
+        <GroupedAddress address={checksummed} className={isCompact ? 'contents' : undefined} />
+        <CopyAddress address={checksummed} />
+        {explorerLink && <ExplorerButton {...explorerLink} className="text-muted-foreground hover:text-foreground" />}
       </div>
     </div>
   )
