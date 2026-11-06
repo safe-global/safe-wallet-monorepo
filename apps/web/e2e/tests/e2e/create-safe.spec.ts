@@ -9,7 +9,7 @@ test.describe('Create a Safe', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const { owner4 } = journey.owners
+    const { alice } = journey.owners
     const create = new CreateSafePage(safePage)
 
     const address = getAddress(await create.createPayLaterSafe())
@@ -18,7 +18,7 @@ test.describe('Create a Safe', { tag: '@e2e' }, () => {
 
     await create.activate()
 
-    const expected = { owners: [owner4.address], threshold: 1 }
+    const expected = { owners: [alice.address], threshold: 1 }
     const onChain = await readSafeSetup(journey.env, address)
     expect({ owners: onChain.owners, threshold: onChain.threshold }).toEqual(expected)
     await expect

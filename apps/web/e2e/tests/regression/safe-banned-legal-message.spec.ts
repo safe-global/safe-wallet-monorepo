@@ -10,7 +10,7 @@
  * A 451 cannot be produced by the backend, so safe-info is stubbed —
  * the mock rule in apps/web/AGENTS.md, "Choose the test level".
  *
- * Run: yarn workspace @safe-global/web pw:test safe-banned-legal-message
+ * Run: SAFE_E2E_SPECS=safe-banned-legal-message yarn workspace @safe-global/web e2e:env playwright
  * Tag: @regression — runs under the chromium project, on demand.
  */
 import { test, expect } from '../../src/fixtures/test.fixture'
@@ -29,7 +29,7 @@ test.describe('Safe loading error — legal block', { tag: '@regression' }, () =
     const gatewayWording = 'Blocked in your region by provider edge-node-7'
     await errorScreen.stubSafeInfo(451, { code: 451, message: gatewayWording })
 
-    await errorScreen.goto(safes.SEP_STATIC_SAFE_2)
+    await errorScreen.goto(safes.basic)
 
     await expect(errorScreen.container).toContainText(SAFE_UNAVAILABLE_MESSAGE)
     await expect(errorScreen.container).not.toContainText(gatewayWording)
@@ -44,7 +44,7 @@ test.describe('Safe loading error — legal block', { tag: '@regression' }, () =
     const errorScreen = new SafeLoadingErrorPage(safePage)
     await errorScreen.stubSafeInfo(500, { code: 500, message: 'Internal server error' })
 
-    await errorScreen.goto(safes.SEP_STATIC_SAFE_2)
+    await errorScreen.goto(safes.basic)
 
     await expect(errorScreen.container).toContainText(GENERIC_LOADING_ERROR)
     // A raw backend string must never reach the screen for a non-451

@@ -8,12 +8,12 @@ test.describe('Assets table', { tag: ['@regression', '@migration'] }, () => {
     safeApiClient,
     safes,
   }, testInfo) => {
-    testInfo.annotations.push({ type: 'safe-address', description: safes.SEP_ASSETS_SAFE })
-    const balances = await safeApiClient.getBalances(safes.SEP_ASSETS_SAFE.split(':')[1])
+    testInfo.annotations.push({ type: 'safe-address', description: safes.assets })
+    const balances = await safeApiClient.getBalances(safes.assets.split(':')[1])
     expect(balances.items.length).toBeGreaterThan(1)
 
     const assets = new AssetsPage(safePage)
-    await assets.goto(safes.SEP_ASSETS_SAFE)
+    await assets.goto(safes.assets)
     await expect(assets.tokenRows.first()).toBeVisible()
 
     // Small balances are hidden by default and every test token here is worth $0, so unhide them to
@@ -38,14 +38,14 @@ test.describe('Assets table', { tag: ['@regression', '@migration'] }, () => {
   test('should open the send-tokens form with the row token preselected when an owner clicks Send', async ({
     safePage,
     walletPage,
-    credentials,
+    owners,
     safes,
   }, testInfo) => {
-    testInfo.annotations.push({ type: 'safe-address', description: safes.SEP_ASSETS_SAFE })
-    await seedConnectedWallet(safePage, credentials.OWNER_4_PRIVATE_KEY)
+    testInfo.annotations.push({ type: 'safe-address', description: safes.assets })
+    await seedConnectedWallet(safePage, owners.alice.privateKey)
 
     const assets = new AssetsPage(safePage)
-    await assets.goto(safes.SEP_ASSETS_SAFE)
+    await assets.goto(safes.assets)
     // The seeded wallet reconnects asynchronously after load; a rate-limited RPC can push it past 10s.
     await expect(walletPage.accountCenter).toBeVisible({ timeout: 30_000 })
 
