@@ -19,3 +19,10 @@ export function tokenBalanceOf(
     return balance
   })
 }
+
+/** Takes all ETH of `address` on the local fork, so that it can sign but not pay gas. */
+export function emptyBalance(env: JourneyEnvironment, address: string): Promise<void> {
+  return readChain(env, async (provider) => {
+    await provider.send('anvil_setBalance', [address, '0x0'])
+  })
+}

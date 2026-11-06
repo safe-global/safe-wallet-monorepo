@@ -19,6 +19,10 @@ export class TxReviewPage {
   readonly feePayerSelector: Locator
   readonly signerWalletOption: Locator
   readonly sponsoredOption: Locator
+  readonly safeAccountOption: Locator
+  /** The payer that the fee card shows without a choice, e.g. "Safe account" once the signed payload carries the fees */
+  readonly lockedFeePayer: Locator
+  readonly gasFeeRow: Locator
   /** "<n> free transactions left today" in the fee card */
   readonly remainingRelays: Locator
   /** The sponsored transactions left: the free daily ones, or "<left>/<quota>" of a Workspace plan */
@@ -63,6 +67,9 @@ export class TxReviewPage {
     this.feePayerSelector = page.getByTestId('fee-payer-selector')
     this.signerWalletOption = page.getByTestId('fee-payer-signer')
     this.sponsoredOption = page.getByTestId('fee-payer-sponsored')
+    this.safeAccountOption = page.getByTestId('fee-payer-safe')
+    this.lockedFeePayer = page.getByTestId('fee-payer-locked')
+    this.gasFeeRow = page.getByTestId('gas-fee-row')
     this.remainingRelays = page.getByText(/free transactions? left today/)
     this.sponsoredTxsCounter = page.getByTestId('sponsored-txs-counter')
     this.executeButton = page.getByTestId('combo-submit-execute')
@@ -101,6 +108,12 @@ export class TxReviewPage {
   async sign(): Promise<void> {
     await this.continueButton.click()
     await this.signButton.click()
+  }
+
+  /** Pick the Safe account as the payer of the fees in the fee card of the review */
+  async payFeesFromSafe(): Promise<void> {
+    await this.feePayerSelector.click()
+    await this.safeAccountOption.click()
   }
 
   /** Wait until the signer select shows `address`; it fills in once CGW returns the wallet's Safes */

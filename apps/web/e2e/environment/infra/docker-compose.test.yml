@@ -292,6 +292,20 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  # The fee service quotes Pay from Safe fees for the gateway and allows their relay.
+  fee-service:
+    <<: *mock
+    command:
+      - /mocks/fee-service.ts
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - /mocks/healthcheck.ts
+        - '8096'
+      interval: 5s
+      timeout: 5s
+      retries: 5
   # The gateway reads Workspace spending limits from a policy indexer; this one has no indexed state.
   policy-indexer:
     <<: *mock
@@ -651,6 +665,7 @@ services:
       RELAY_PROVIDER_API_BASE_URI: http://relay-api:8092
       # One sponsored transaction per Safe and day, as on staging.
       RELAY_THROTTLE_LIMIT: '1'
+      FEE_SERVICE_BASE_URI: http://fee-service:8096
       FF_BILLING_SERVICE: 'true'
       SAFE_BILLING_SERVICE_BASE_URI: http://billing-api:8093
       SAFE_BILLING_SERVICE_API_TOKEN: local-test-only-billing-token
@@ -680,6 +695,8 @@ services:
       auth0-mock:
         condition: service_healthy
       relay-api:
+        condition: service_healthy
+      fee-service:
         condition: service_healthy
       billing-api:
         condition: service_healthy

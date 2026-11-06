@@ -44,7 +44,7 @@ const FeeInfoBanner = ({ onDismiss }: { onDismiss: () => void }): ReactElement =
       <Button
         variant="ghost"
         size="icon"
-        aria-label="close"
+        aria-label="Dismiss fee info"
         onClick={onDismiss}
         className={cn(css.feeInfoClose, 'size-7')}
       >

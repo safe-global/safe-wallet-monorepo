@@ -35,12 +35,17 @@ function message(payload: unknown): string {
 }
 
 describe('relay API', () => {
-  it('relays from the impersonated relayer on the requested fork', async () => {
-    const rpc = fakeRpc({ [`${SEPOLIA} eth_sendTransaction`]: TASK })
+  it('relays from the impersonated relayer on the requested fork at its gas price', async () => {
+    const gasPrice = '0x3b9aca07'
+    const rpc = fakeRpc({ [`${SEPOLIA} eth_gasPrice`]: gasPrice, [`${SEPOLIA} eth_sendTransaction`]: TASK })
     const body = { chainId: 11155111, to: '0x1', data: '0x6a76' }
     assert.deepEqual(await call('POST', '/safe-transactions', rpc, body), [200, { taskId: TASK }])
     assert.deepEqual(rpc.calls[1], [SEPOLIA, 'anvil_impersonateAccount', [RELAYER]])
-    assert.deepEqual(rpc.calls[2], [SEPOLIA, 'eth_sendTransaction', [{ from: RELAYER, to: '0x1', data: '0x6a76' }]])
+    assert.deepEqual(rpc.calls[3], [
+      SEPOLIA,
+      'eth_sendTransaction',
+      [{ from: RELAYER, to: '0x1', data: '0x6a76', gasPrice }],
+    ])
   })
 
   it('rejects a chain without a local fork', async () => {
