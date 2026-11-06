@@ -158,14 +158,14 @@ _Status as of 2026-08 — re-verify against `src/stories/mocks/handlers.ts` befo
 
 ## Visual regression (Argos)
 
-`.github/workflows/web-argos-storybook.yml` builds the static Storybook, screenshots every story in **light and dark**, and uploads them to Argos as **sheets**: one image per title with every story as a row and light/dark side by side, and one image per fullscreen (page) story. A changed story shows up as a diff in its title's sheet. It runs every Monday on `dev` to refresh the baseline, and by hand (`workflow_dispatch`) before a release. **It does NOT run on PRs.** Verify UI changes yourself via the story (or live page), and run the sweep locally:
+`.github/workflows/web-argos-storybook.yml` builds the static Storybook, screenshots every story in **light and dark**, and uploads them to Argos as **sheets**: one image per title with every story as a row and light/dark side by side, and one image per fullscreen (page) story. A changed story shows up as a diff in its title's sheet. It runs on every merge to `dev` and uploads a new baseline only when a sheet's hash changed, every Monday as a safety net, and by hand (`workflow_dispatch`) before a release. **It does NOT run on PRs.** Verify UI changes yourself via the story (or live page), and run the sweep locally:
 
 ```bash
 yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>   # add --filter=<substr> to scope
 ```
 
 - CI splits the sweep into 4 shards (`--shard=k/n`, whole titles per shard). Locally, run it without `--shard`.
-- Screenshots are taken with animations disabled, once no request is open and two screenshots in a row match, with the GPU off and every external host unresolvable (remote logos render their local fallback), so a sheet is byte-identical across runs of the same commit. Pushes to `dev` only record each sheet's hash and report how many changed; a sheet that changes on a commit that did not touch it is flaky — fix the story.
+- Screenshots are taken with animations disabled, once no request is open and two screenshots in a row match, with the GPU off and every external host unresolvable (remote logos render their local fallback), so a sheet is byte-identical across runs of the same commit. A sheet that changes on a commit that did not touch it is flaky — fix the story, as it triggers a needless baseline upload.
 - Opt a story out of pixel snapshots with `tags: ['skip-visual-test']` (story- or meta-level) for flaky/animated stories. It is still render-checked — errors fail CI; only the snapshot is skipped.
 - Never ship a story that permanently renders skeletons/blank without a doc comment saying so — a broken story that "passes" is worse than no story.
 
