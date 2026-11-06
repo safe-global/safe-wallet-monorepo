@@ -5,6 +5,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { AppInfo } from '@/services/safe-wallet-provider'
 import type { SafeItem } from '@/hooks/safes'
 import type WalletConnectWallet from './services/WalletConnectWallet'
+import type { SafeAppSuggestion } from './hooks/useSafeAppSuggestion'
 
 export enum WCLoadingState {
   APPROVE = 'Approve',
@@ -25,6 +26,7 @@ export type WalletConnectContextType = {
   setLoading: Dispatch<SetStateAction<WCLoadingState | null>>
   approveSession: () => Promise<void>
   rejectSession: () => Promise<void>
+  safeAppSuggestion: SafeAppSuggestion
 }
 
 export type WcChainSwitchRequest = {
