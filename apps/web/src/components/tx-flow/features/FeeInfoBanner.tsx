@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { useLoadFeature } from '@/features/__core__'
-import { FeePaymentFeature, useIsFeeCardSlotVisible, IS_RELAYING_LIVE } from '@/features/fee-payment'
+import { FeePaymentFeature, useIsPayFromSafeEnabled, useIsFeeCardSlotVisible } from '@/features/fee-payment'
 import { SlotName, withSlot } from '../slots'
 
 const FeeInfoBanner = (): ReactElement => {
@@ -9,11 +9,17 @@ const FeeInfoBanner = (): ReactElement => {
   return <FeeInfoBannerComponent />
 }
 
+const useIsFeeInfoBannerVisible = (): boolean => {
+  const isSlotVisible = useIsFeeCardSlotVisible()
+  const isPayFromSafeEnabled = !!useIsPayFromSafeEnabled()
+  return isSlotVisible && isPayFromSafeEnabled
+}
+
 const FeeInfoBannerSlot = withSlot({
   Component: FeeInfoBanner,
   slotName: SlotName.Sidebar,
   id: 'feeInfoBanner',
-  useSlotCondition: () => useIsFeeCardSlotVisible() && IS_RELAYING_LIVE,
+  useSlotCondition: useIsFeeInfoBannerVisible,
 })
 
 export default FeeInfoBannerSlot

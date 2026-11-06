@@ -10,7 +10,7 @@ const RELAY_FEE_RELAYER = {
   safeCreationSponsored: false,
   safeTransactionSponsored: false,
   enableTenderlySimulationBeforeRelay: false,
-  gasPaymentOptions: ['SUBSCRIPTION'],
+  gasPaymentOptions: ['SUBSCRIPTION', 'PAY_FROM_SAFE'],
 }
 
 const buildChain = (features: string[], relayer: typeof RELAY_FEE_RELAYER | null = RELAY_FEE_RELAYER): Chain =>
@@ -25,7 +25,7 @@ const dispatch = jest.fn() as unknown as ReturnType<typeof jest.fn> & AppDispatc
 
 const baseArgs = (safeTx: SafeTransaction) => ({
   safeTx,
-  chain: buildChain(['GTF']),
+  chain: buildChain([]),
   feePaymentMode: 'safe' as const,
   feeGasToken: '0xtoken',
   chainId: '1',
@@ -42,25 +42,25 @@ describe('mergePayFromSafeFeeParams', () => {
 
     const result = await mergePayFromSafeFeeParams({ ...baseArgs(safeTx), feePaymentFeature: feature })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
   })
 
-  it('bails out when chain lacks the GTF feature', async () => {
+  it('bails out when the relayer does not offer Pay from Safe, whatever the flags', async () => {
     const safeTx = createSafeTx()
     const feature = buildFeature()
 
     const result = await mergePayFromSafeFeeParams({
       ...baseArgs(safeTx),
-      chain: buildChain([]),
+      chain: buildChain(['GTF', 'PAY_FROM_SAFE'], { ...RELAY_FEE_RELAYER, gasPaymentOptions: ['SUBSCRIPTION'] }),
       feePaymentFeature: feature,
     })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
   })
 
-  it('bails out when the chain has the GTF flag but no RELAY_FEE relayer', async () => {
+  it('bails out when the chain has no relayer', async () => {
     const safeTx = createSafeTx()
     const feature = buildFeature()
 
@@ -70,7 +70,7 @@ describe('mergePayFromSafeFeeParams', () => {
       feePaymentFeature: feature,
     })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
   })
 
@@ -84,7 +84,7 @@ describe('mergePayFromSafeFeeParams', () => {
       feePaymentFeature: feature,
     })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
   })
 
@@ -98,7 +98,7 @@ describe('mergePayFromSafeFeeParams', () => {
       feePaymentFeature: feature,
     })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
   })
 
@@ -108,7 +108,7 @@ describe('mergePayFromSafeFeeParams', () => {
 
     const result = await mergePayFromSafeFeeParams({ ...baseArgs(safeTx), feePaymentFeature: feature })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
   })
 
@@ -120,7 +120,7 @@ describe('mergePayFromSafeFeeParams', () => {
 
     const result = await mergePayFromSafeFeeParams({ ...baseArgs(safeTx), feePaymentFeature: feature })
 
-    expect(result).toBe(merged)
+    expect(result).toEqual({ safeTx: merged, feesMerged: true })
     expect(resolveFeeParams).toHaveBeenCalledWith({
       chainId: '1',
       safeAddress: '0xsafe',

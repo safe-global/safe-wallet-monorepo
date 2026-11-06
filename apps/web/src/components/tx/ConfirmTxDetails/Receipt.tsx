@@ -97,7 +97,7 @@ export const Receipt = ({
   const displayBaseGas = previewTxData?.baseGas ?? safeTxData.baseGas
   const displayGasPrice = previewTxData?.gasPrice ?? safeTxData.gasPrice
 
-  // The payload actually signed in Safe-pays carries the merged GTF fee fields. Build it once so the
+  // The payload actually signed in Safe-pays carries the merged Pay from Safe fee fields. Build it once so the
   // Data/JSON/Hashes tabs all reflect what the wallet will sign and not the bare pre-merge safeTx.
   const displaySafeTxData = useMemo(
     () => ({

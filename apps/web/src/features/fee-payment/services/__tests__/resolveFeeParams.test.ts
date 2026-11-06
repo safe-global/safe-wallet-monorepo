@@ -165,7 +165,7 @@ describe('resolveFeeParams', () => {
     expect(mockCreateTx).not.toHaveBeenCalled()
     expect(mockTrackError).toHaveBeenCalledWith(
       expect.stringContaining('821'),
-      expect.stringContaining('Untrusted GTF refundReceiver'),
+      expect.stringContaining('Untrusted Pay from Safe refundReceiver'),
     )
   })
 

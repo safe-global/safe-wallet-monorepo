@@ -19,7 +19,6 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { useGasTokenCandidates, type GasTokenCandidate } from './useGasTokenCandidates'
 import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 import { isPayFromSafeAvailable } from '../utils/isPayFromSafeAvailable'
-import { IS_RELAYING_LIVE } from '../constants'
 import {
   computeTotalOutgoing,
   getSendInGasToken,
@@ -58,7 +57,7 @@ export type FeesPreviewData = {
    */
   safeHasEnoughGas?: boolean
   /**
-   * SafeTx merged with the CGW resolved GTF fee fields (safeTxGas / baseGas / gasPrice /
+   * SafeTx merged with the CGW resolved Pay from Safe fee fields (safeTxGas / baseGas / gasPrice /
    * gasToken / refundReceiver). Only set in the first-signer Safe-pays happy path when this
    * is the version that will actually be signed and simulated. Consumers (e.g. threat analysis)
    * use it to run against the same payload the user will sign, so checks like "Safe holds
@@ -69,7 +68,8 @@ export type FeesPreviewData = {
 
 const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
 
-export const useFeesPreview = (): FeesPreviewData => {
+/** @param options.isExecution - the executor is known, so signer-pays is estimated even one signature short. */
+export const useFeesPreview = ({ isExecution = false }: { isExecution?: boolean } = {}): FeesPreviewData => {
   const { safeTx, feePaymentMode, feeGasToken, setFeeGasToken } = useContext(SafeTxContext)
   const { safe, safeAddress } = useSafeInfo()
   const chain = useCurrentChain()
@@ -89,7 +89,7 @@ export const useFeesPreview = (): FeesPreviewData => {
     : undefined
 
   // Once the first signer has signed, gas params are baked into the payload — later signers
-  // render what's locked in. The isPaidFromSafe guard excludes Signer-pays / pre-GTF queued txs.
+  // render what's locked in. The isPaidFromSafe guard excludes Signer-pays / pre-Pay-from-Safe queued txs.
   const lockedGasToken = safeTx && safeTx.signatures.size > 0 ? safeTx.data.gasToken : undefined
   const isConfirmation = lockedGasToken !== undefined && !!safeTx && isPaidFromSafe(safeTx.data)
 
@@ -142,13 +142,10 @@ export const useFeesPreview = (): FeesPreviewData => {
   const gasSymbol = selectedCandidate?.symbol ?? nativeSymbol
   const gasDecimals = selectedCandidate?.decimals ?? nativeDecimals
 
-  // Chains without a RELAY_FEE relayer can't quote Safe-pays fees at all
-  // — render the signer-pays variant: free execution fee, no
-  // gas-token selector, and no call to the preview endpoint.
+  // Without PAY_FROM_SAFE on the chain there is no quote: render signer-pays and skip the preview call.
   const feePreviewAvailable = isPayFromSafeAvailable(chain)
   const isSignerMode =
-    !isConfirmation &&
-    (!IS_RELAYING_LIVE || !feePreviewAvailable || feePaymentMode === 'signer' || candidates.length === 0)
+    !isConfirmation && (!feePreviewAvailable || feePaymentMode === 'signer' || candidates.length === 0)
 
   // Confirmers render the fee locked in the signed payload, not a fresh CGW quote.
   // Skip the query when the Safe holds no eligible gas token — without this the CGW endpoint
@@ -270,10 +267,9 @@ export const useFeesPreview = (): FeesPreviewData => {
     }
   }
 
-  // Signed payload without GTF fee setup. Locked confirmer-style UI: no selectors, gas fee
-  // shown as "Calculated at execution" (multi-sig — executor unknown) or local EOA estimate (1/1).
+  // Signed without Safe-pays fees: locked, "Calculated at execution" until the executor is known.
   if (isLegacySigned && safeTx) {
-    if (safe.threshold > 1) {
+    if (!isExecution && safeTx.signatures.size < safe.threshold) {
       return {
         ...base,
         isConfirmation: true,
@@ -312,11 +308,11 @@ export const useFeesPreview = (): FeesPreviewData => {
       }
     }
 
-    const localGasWei = gasLimit && gasPrice?.maxFeePerGas ? gasLimit * gasPrice.maxFeePerGas : 0n
+    const localGasFeeBaseUnits = gasLimit && gasPrice?.maxFeePerGas ? gasLimit * gasPrice.maxFeePerGas : 0n
     const totalOutgoing = safeTx
       ? computeTotalOutgoing({
           safeTx,
-          gasFeeBaseUnits: localGasWei,
+          gasFeeBaseUnits: localGasFeeBaseUnits,
           relayCostFiat: 0,
           relayCostFiatCode: currency,
           nativeSymbol,

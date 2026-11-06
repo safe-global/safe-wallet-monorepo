@@ -16,16 +16,7 @@ import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { SafeTransaction, SafeTransactionData } from '@safe-global/types-kit'
 
-// Keeps the Safe-pays suite below as live-relaying coverage; the last describe flips it off.
-let mockRelayingLive = true
-jest.mock('../../constants', () => ({
-  ...jest.requireActual('../../constants'),
-  get IS_RELAYING_LIVE() {
-    return mockRelayingLive
-  },
-}))
-
-// Safe-pays requires both the GTF flag and a RELAY_FEE relayer on the chain.
+// Safe-pays requires the chain's relayer to list PAY_FROM_SAFE.
 const mockChain = chainBuilder()
   .with({
     chainId: '1',
@@ -36,7 +27,7 @@ const mockChain = chainBuilder()
       safeCreationSponsored: false,
       safeTransactionSponsored: false,
       enableTenderlySimulationBeforeRelay: false,
-      gasPaymentOptions: ['SUBSCRIPTION'],
+      gasPaymentOptions: ['SUBSCRIPTION', 'PAY_FROM_SAFE'],
     },
   })
   .build()
@@ -204,7 +195,6 @@ const candidateWeth = {
 describe('useFeesPreview', () => {
   beforeEach(() => {
     jest.resetAllMocks()
-    mockRelayingLive = true
     jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(mockChain)
     jest.spyOn(useSafeInfoModule, 'default').mockReturnValue({
       safe: mockSafe,
@@ -293,13 +283,14 @@ describe('useFeesPreview', () => {
     expect(result.current.totalOutgoing?.fiatTotal).toBeDefined()
   })
 
-  it('omits totalOutgoing for non-transfer safeTx (e.g. contract call with no value and no transfer selector)', () => {
+  it('shows the fee alone as totalOutgoing for a contract call that moves no funds', () => {
     jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
     const contractCall = buildSafeTx({ to: mockSafe.address.value, value: '0', data: '0xdeadbeef' })
 
     const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(contractCall) })
 
-    expect(result.current.totalOutgoing).toBeUndefined()
+    expect(result.current.totalOutgoing?.primary).toEqual([])
+    expect(result.current.totalOutgoing?.fees?.currency).toBe('ETH')
   })
 
   it('renders totalOutgoing as gas-only for a reject-shape safeTx (value=0, data=0x)', () => {
@@ -309,10 +300,10 @@ describe('useFeesPreview', () => {
     const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(rejectTx) })
 
     expect(result.current.totalOutgoing).toBeDefined()
-    expect(result.current.totalOutgoing?.primary[0].currency).toBe('ETH')
+    expect(result.current.totalOutgoing?.primary).toEqual([])
+    expect(result.current.totalOutgoing?.fees?.currency).toBe('ETH')
     // gasFeeBaseUnits = (2409 + 68568) * 741064438 ≈ 5.26e13 → ~0.00005 ETH
-    expect(result.current.totalOutgoing?.primary[0].amount).toMatch(/^0\.00005/)
-    expect(result.current.totalOutgoing?.fees).toBeUndefined()
+    expect(result.current.totalOutgoing?.fees?.amount).toMatch(/^0\.00005/)
     expect(result.current.totalOutgoing?.fiatTotal).toBeDefined()
   })
 
@@ -531,7 +522,7 @@ describe('useFeesPreview', () => {
   })
 
   describe('confirmation flow (second signer)', () => {
-    // GTF Safe-pays fingerprint: baseGas/gasPrice non-zero AND refundReceiver != ZERO_ADDRESS.
+    // Pay from Safe fingerprint: baseGas/gasPrice non-zero AND refundReceiver != ZERO_ADDRESS.
     const SAFE_PAYS = {
       safeTxGas: '2409',
       baseGas: '68568',
@@ -629,9 +620,9 @@ describe('useFeesPreview', () => {
       const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(lockedReject) })
 
       expect(result.current.totalOutgoing).toBeDefined()
-      expect(result.current.totalOutgoing?.primary[0].currency).toBe('ETH')
-      expect(result.current.totalOutgoing?.primary[0].amount).toMatch(/^0\.00005/)
-      expect(result.current.totalOutgoing?.fees).toBeUndefined()
+      expect(result.current.totalOutgoing?.primary).toEqual([])
+      expect(result.current.totalOutgoing?.fees?.currency).toBe('ETH')
+      expect(result.current.totalOutgoing?.fees?.amount).toMatch(/^0\.00005/)
     })
 
     it('locks the UI as legacy-signed for a signed Signer-pays tx (gasToken=0x0, baseGas=0)', () => {
@@ -652,6 +643,38 @@ describe('useFeesPreview', () => {
       expect(result.current.gasFee.amount).toBeUndefined()
     })
 
+    it('estimates the gas fee for a fully signed Signer-pays tx (Execute step of a multi-sig)', () => {
+      jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+      const fullySignedSignerPaysTx = buildSafeTx(
+        { to: mockSafe.address.value, value: '100000000000000', data: '0x', gasToken: ETH_ADDRESS },
+        new Map([
+          ['0xSigner1', {}],
+          ['0xSigner2', {}],
+        ]),
+      )
+
+      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(fullySignedSignerPaysTx) })
+
+      expect(result.current.isLegacySigned).toBe(true)
+      expect(result.current.gasFee.note).toBeUndefined()
+      expect(result.current.gasFee.amount).toBeDefined()
+    })
+
+    it('estimates the gas fee at execution for the last signer of an m/n Safe, one signature short', () => {
+      jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
+      const oneShortSignerPaysTx = buildSafeTx(
+        { to: mockSafe.address.value, value: '100000000000000', data: '0x', gasToken: ETH_ADDRESS },
+        new Map([['0xSigner1', {}]]),
+      )
+
+      const { result } = renderHook(() => useFeesPreview({ isExecution: true }), {
+        wrapper: withSafeTx(oneShortSignerPaysTx),
+      })
+
+      expect(result.current.gasFee.note).toBeUndefined()
+      expect(result.current.gasFee.amount).toBeDefined()
+    })
+
     it('renders totalOutgoing in the locked ERC-20 gas token for a reject-shape signed safeTx', () => {
       jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(emptyPreview)
       const lockedRejectWeth = buildSafeTx(
@@ -668,57 +691,8 @@ describe('useFeesPreview', () => {
       const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(lockedRejectWeth) })
 
       expect(result.current.totalOutgoing).toBeDefined()
-      expect(result.current.totalOutgoing?.primary[0].currency).toBe('WETH')
-      expect(result.current.totalOutgoing?.fees).toBeUndefined()
-    })
-  })
-
-  describe('relaying hidden (PLA-1854)', () => {
-    const SAFE_PAYS = {
-      safeTxGas: '2409',
-      baseGas: '68568',
-      gasPrice: '741064438',
-      refundReceiver: '0xc918e75504D1B0c741Eb4236B72Dae7A52401E95',
-    }
-
-    beforeEach(() => {
-      mockRelayingLive = false
-    })
-
-    it('never queries the preview even with the Safe payment preference persisted', () => {
-      const spy = jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(mockSuccessfulPreview)
-
-      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx, 'safe') })
-
-      expect(spy.mock.calls.length).toBeGreaterThan(0)
-      spy.mock.calls.forEach(([arg]) => expect(arg).toBe(skipToken))
-      expect(result.current.gasFee).toEqual({ label: 'Max gas fee', note: 'Calculated at execution' })
-      expect(result.current.previewedSafeTx).toBeUndefined()
-    })
-
-    it('leaves the signed payload free of relay params (no gas token selected)', () => {
-      jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(emptyPreview)
-
-      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(erc20SafeTx, 'safe') })
-
-      // mergePayFromSafeFeeParams no-ops on a falsy selection, so the tx signs as pure signer-pays.
-      expect(result.current.selectedGasToken).toBe(ETH_ADDRESS)
-      expect(result.current.previewedSafeTx).toBeUndefined()
-    })
-
-    it('still renders the locked fee of a Safe-pays payload signed before the switch', () => {
-      jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(emptyPreview)
-      const signedWethGasSafeTx = buildSafeTx(
-        { to: mockSafe.address.value, value: '100000000000000', data: '0x', gasToken: WETH_ADDRESS, ...SAFE_PAYS },
-        new Map([['0xSigner', {}]]),
-      )
-
-      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(signedWethGasSafeTx) })
-
-      expect(result.current.isConfirmation).toBe(true)
-      expect(result.current.selectedGasToken).toBe(WETH_ADDRESS)
-      expect(result.current.gasFee.currency).toBe('WETH')
-      expect(result.current.gasFee.amount).toBeDefined()
+      expect(result.current.totalOutgoing?.primary).toEqual([])
+      expect(result.current.totalOutgoing?.fees?.currency).toBe('WETH')
     })
   })
 })

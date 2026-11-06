@@ -1,10 +1,16 @@
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+
 export const PAY_FROM_SAFE_FEES_BANNER_DISMISSED_KEY = 'gtfFeesBannerDismissed'
 
-// flip to `true` to restore the Safe-pays UI and signing once relaying ships.
-export const IS_RELAYING_LIVE = false
+/* TODO: Remove this constant once the fee payment feature is fully released. */
+/** Phase 1 pays fees in the native token only; `false` offers the ERC-20s of `GAS_TOKEN_ALLOWLIST`. */
+export const NATIVE_GAS_TOKEN_ONLY = true
 
-// Defense-in-depth: a compromised CGW could swap in an attacker `refundReceiver` and drain
-// Safes via `handlePayment()`. Validate against this list before signing. Extend as needed.
-export const FEE_COLLECTORS: ReadonlyArray<string> = ['0x0C51b4d70492D81f9f96B1EB1a826FBfb3fd27d8']
+export const FEE_COLLECTORS: ReadonlyArray<string> = [
+  // Rhinestone refund receiver (same address on every chain)
+  '0x53b3BDD8dB8352D9aB7bF39A527F9C24fC404DcD',
+]
+
+export const isFeeCollector = (address: string): boolean => FEE_COLLECTORS.some((addr) => sameAddress(addr, address))
 
 export * from './gasTokenAllowlist'

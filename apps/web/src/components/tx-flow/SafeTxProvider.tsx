@@ -8,8 +8,8 @@ import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/c
 import { useRecommendedNonce, useSafeTxGas } from '@/components/tx/shared/hooks'
 import { Errors, logError } from '@/services/exceptions'
 import { getTxOrigin } from '@/utils/transactions'
-import { useAppDispatch, useAppSelector } from '@/store'
-import { selectFeePaymentSourcePreference, setFeePaymentSourcePreference } from '@/features/fee-payment/store'
+import { useAppSelector } from '@/store'
+import { selectFeePaymentSourcePreference } from '@/features/fee-payment/store'
 import type { FeePaymentMode } from '@/features/fee-payment/types'
 import useWallet from '@/hooks/wallets/useWallet'
 
@@ -28,16 +28,9 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const [txOrigin, setTxOrigin] = useState<string | undefined>(() =>
     typeof window !== 'undefined' ? getTxOrigin({ url: window.location.origin, name: '' }) : undefined,
   )
-  const dispatch = useAppDispatch()
   const signerAddress = useWallet()?.address
-  const feePaymentMode = useAppSelector((state) => selectFeePaymentSourcePreference(state, signerAddress)) ?? 'safe'
-  const setFeePaymentMode = useCallback(
-    (source: FeePaymentMode) => {
-      if (!signerAddress) return
-      dispatch(setFeePaymentSourcePreference({ signerAddress, source }))
-    },
-    [dispatch, signerAddress],
-  )
+  const preferredFeePaymentMode = useAppSelector((state) => selectFeePaymentSourcePreference(state, signerAddress))
+  const [feePaymentMode, setFeePaymentMode] = useState<FeePaymentMode>(preferredFeePaymentMode ?? 'signer')
   const [feeGasToken, setFeeGasToken] = useState<string>()
 
   // Every flow routes a failed tx build here, so this is the one place it is reported.

@@ -72,6 +72,9 @@ export const getSendInGasToken = (safeTx: SafeTransaction, gasTokenAddress: stri
   return getOutflowInGasToken({ to, value, data }, gasTokenAddress)
 }
 
+export const withoutFees = (totalOutgoing: TotalOutgoing | undefined): TotalOutgoing | undefined =>
+  totalOutgoing && totalOutgoing.primary.length > 0 ? { ...totalOutgoing, fees: undefined } : undefined
+
 export const computeTotalOutgoing = ({
   safeTx,
   gasFeeBaseUnits,
@@ -87,6 +90,13 @@ export const computeTotalOutgoing = ({
   const { to, value, data } = safeTx.data
   const isEmptyData = !data || data === '0x'
   const gasIsNative = sameAddress(gasTokenAddress, ZERO_ADDRESS)
+
+  // Nothing leaves the Safe but the fee (owner changes, contract calls, a no-op): the fee is the total.
+  const feeOnly = (): TotalOutgoing => ({
+    primary: [],
+    fees: { amount: formatVisualAmount(gasFeeBaseUnits, gasDecimals), currency: gasSymbol },
+    fiatTotal: formatCurrencyMinimal(relayCostFiat, relayCostFiatCode),
+  })
 
   // Native transfer. Single currency when gas is paid in native; two when not.
   if (value !== '0' && isEmptyData) {
@@ -195,7 +205,7 @@ export const computeTotalOutgoing = ({
       }
     }
 
-    if (totals.size === 0) return undefined
+    if (totals.size === 0) return feeOnly()
 
     const sendsFiat = [...totals.values()].reduce(
       (sum, t) => sum + Number(formatUnits(t.wei, t.decimals)) * t.fiatPerUnit,
@@ -216,13 +226,7 @@ export const computeTotalOutgoing = ({
     }
   }
 
-  // No-op self-call: only outflow is gas. FeesPreview drops this row in Signer mode via its !isSafeWallet check.
-  if (isEmptyData) {
-    return {
-      primary: [{ amount: formatVisualAmount(gasFeeBaseUnits, gasDecimals), currency: gasSymbol }],
-      fiatTotal: formatCurrencyMinimal(relayCostFiat, relayCostFiatCode),
-    }
-  }
+  if (isEmptyData || value === '0') return feeOnly()
 
   return undefined
 }

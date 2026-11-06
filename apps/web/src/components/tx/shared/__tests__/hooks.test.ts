@@ -1423,7 +1423,7 @@ describe('SignOrExecute hooks', () => {
     })
   })
 
-  describe('useTxActions — GTF fee-params merge', () => {
+  describe('useTxActions — Pay from Safe fee-params merge', () => {
     const GAS_TOKEN = '0xa0b86991000000000000000000000000000000aa'
     const SAFE_ADDRESS = zeroPadValue('0x0000', 20)
 
@@ -1454,7 +1454,7 @@ describe('SignOrExecute hooks', () => {
     }
 
     const setupPayFromSafeChain = () => {
-      // Safe-pays requires both the GTF flag and a RELAY_FEE relayer on the chain.
+      // Safe-pays requires a relayer that lists PAY_FROM_SAFE.
       const payFromSafeChain = chainBuilder()
         .with({
           chainId: '1',
@@ -1464,7 +1464,7 @@ describe('SignOrExecute hooks', () => {
             safeCreationSponsored: false,
             safeTransactionSponsored: false,
             enableTenderlySimulationBeforeRelay: false,
-            gasPaymentOptions: ['SUBSCRIPTION'],
+            gasPaymentOptions: ['SUBSCRIPTION', 'PAY_FROM_SAFE'],
           },
         })
         .build()
@@ -1495,7 +1495,7 @@ describe('SignOrExecute hooks', () => {
       } as unknown as ReturnType<typeof loadFeature.useLoadFeature>)
     }
 
-    it('invokes resolveFeeParams on first-signer sign when GTF + Safe-pays guards pass', async () => {
+    it('invokes resolveFeeParams on first-signer sign when the Safe-pays guards pass', async () => {
       setupPayFromSafeChain()
       jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
 
@@ -1515,6 +1515,76 @@ describe('SignOrExecute hooks', () => {
         expect.objectContaining({ gasToken: GAS_TOKEN, numberSignatures: 2 }),
       )
       expect(signSpy).toHaveBeenCalledWith(mergedTx, expect.anything(), undefined, undefined)
+    })
+
+    it("proposes a new tx, instead of confirming the proposer's, when the first signer signs it with the Safe paying", async () => {
+      setupPayFromSafeChain()
+      jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
+
+      // The merged payload has fee params, so a different hash from the proposal known as 'proposal-id'
+      const mergedTx = createSafeTx()
+      mockFeatureResolve(jest.fn().mockResolvedValue(mergedTx))
+
+      const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockResolvedValue(mergedTx)
+      const proposeSpy = jest
+        .spyOn(txSender, 'dispatchTxProposal')
+        .mockImplementation((() =>
+          Promise.resolve({ txId: 'new-id' })) as unknown as typeof txSender.dispatchTxProposal)
+      const confirmSpy = jest
+        .spyOn(txSender, 'dispatchTxConfirmation')
+        .mockImplementation((() =>
+          Promise.resolve({ txId: 'proposal-id' })) as unknown as typeof txSender.dispatchTxConfirmation)
+
+      const ref = captureActions()
+      const { txId } = await ref.current!.signTx(createSafeTx(), 'proposal-id')
+
+      expect(signSpy).toHaveBeenCalledWith(mergedTx, expect.anything(), undefined, undefined)
+      expect(confirmSpy).not.toHaveBeenCalled()
+      expect(proposeSpy).toHaveBeenCalledWith(expect.objectContaining({ safeTx: mergedTx }))
+      expect(txId).toBe('new-id')
+    })
+
+    it('proposes a new tx when the fees are merged even if the merge hands back the same object', async () => {
+      setupPayFromSafeChain()
+      jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
+
+      const safeTx = createSafeTx()
+      mockFeatureResolve(jest.fn().mockResolvedValue(safeTx))
+
+      jest.spyOn(txSender, 'dispatchTxSigning').mockResolvedValue(safeTx)
+      const proposeSpy = jest
+        .spyOn(txSender, 'dispatchTxProposal')
+        .mockImplementation((() =>
+          Promise.resolve({ txId: 'new-id' })) as unknown as typeof txSender.dispatchTxProposal)
+      const confirmSpy = jest.spyOn(txSender, 'dispatchTxConfirmation')
+
+      const ref = captureActions()
+      const { txId } = await ref.current!.signTx(safeTx, 'proposal-id')
+
+      expect(confirmSpy).not.toHaveBeenCalled()
+      expect(proposeSpy).toHaveBeenCalled()
+      expect(txId).toBe('new-id')
+    })
+
+    it("confirms the proposer's tx when the first signer leaves the signer paying", async () => {
+      setupPayFromSafeChain()
+      jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
+      mockFeatureResolve(jest.fn())
+
+      const signedTx = createSafeTx()
+      jest.spyOn(txSender, 'dispatchTxSigning').mockResolvedValue(signedTx)
+      const proposeSpy = jest.spyOn(txSender, 'dispatchTxProposal')
+      const confirmSpy = jest
+        .spyOn(txSender, 'dispatchTxConfirmation')
+        .mockImplementation((() =>
+          Promise.resolve({ txId: 'proposal-id' })) as unknown as typeof txSender.dispatchTxConfirmation)
+
+      const ref = captureActions({ feePaymentMode: 'signer', feeGasToken: undefined })
+      const { txId } = await ref.current!.signTx(createSafeTx(), 'proposal-id')
+
+      expect(proposeSpy).not.toHaveBeenCalled()
+      expect(confirmSpy).toHaveBeenCalledWith(expect.objectContaining({ txId: 'proposal-id' }))
+      expect(txId).toBe('proposal-id')
     })
 
     it('skips the merge for confirmers (safeTx already has a signature)', async () => {

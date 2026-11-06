@@ -1,7 +1,7 @@
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 
-import { computeTotalOutgoing, getSendInGasToken, ERC20_INTERFACE } from '../totalOutgoing'
+import { withoutFees, computeTotalOutgoing, getSendInGasToken, ERC20_INTERFACE } from '../totalOutgoing'
 import { createSafeTx } from '@/tests/builders/safeTx'
 
 const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
@@ -83,13 +83,44 @@ describe('computeTotalOutgoing', () => {
     expect(result?.fees).toEqual({ amount: '1', currency: 'USDC' })
   })
 
-  it('returns gas-only line for empty self-call', () => {
+  it('returns the fee alone for empty self-call', () => {
     const safeTx = createSafeTx()
     safeTx.data.value = '0'
     safeTx.data.data = '0x'
 
     const result = computeTotalOutgoing({ ...baseInputs, safeTx, gasTokenAddress: USDC })
 
-    expect(result?.primary).toEqual([{ amount: '1', currency: 'USDC' }])
+    expect(result?.primary).toEqual([])
+    expect(result?.fees).toEqual({ amount: '1', currency: 'USDC' })
+  })
+
+  it('returns the fee alone for a contract call that moves no funds (e.g. adding an owner)', () => {
+    const safeTx = createSafeTx()
+    safeTx.data.value = '0'
+    // addOwnerWithThreshold(address,uint256)
+    safeTx.data.data =
+      '0x0d582f1300000000000000000000000006de3714a10f9af1c870aa7737a3eeb1b42649730000000000000000000000000000000000000000000000000000000000000001'
+
+    const result = computeTotalOutgoing({ ...baseInputs, safeTx, gasTokenAddress: USDC })
+
+    expect(result?.primary).toEqual([])
+    expect(result?.fees).toEqual({ amount: '1', currency: 'USDC' })
+  })
+
+  describe('withoutFees', () => {
+    it('drops the fee line and keeps what is sent', () => {
+      expect(
+        withoutFees({
+          primary: [{ amount: '1', currency: 'ETH' }],
+          fees: { amount: '1', currency: 'USDC' },
+          fiatTotal: '$2',
+        }),
+      ).toEqual({ primary: [{ amount: '1', currency: 'ETH' }], fees: undefined, fiatTotal: '$2' })
+    })
+
+    it('hides the row when the fee was all that left the Safe', () => {
+      expect(withoutFees({ primary: [], fees: { amount: '1', currency: 'ETH' }, fiatTotal: '$1' })).toBeUndefined()
+      expect(withoutFees(undefined)).toBeUndefined()
+    })
   })
 })

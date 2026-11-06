@@ -4,6 +4,7 @@ import type { OperationType } from '@safe-global/types-kit'
 
 import { GATEWAY_URL } from '@/config/gateway'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { isFeeCollector } from '@/features/fee-payment/constants'
 
 type GatewayEndpointBuilder = EndpointBuilder<
   ReturnType<typeof fakeBaseQuery<Error>>,
@@ -84,6 +85,10 @@ export const payFromSafeFeePreviewEndpoints = (builder: GatewayEndpointBuilder) 
         const body: unknown = await response.json()
         if (!isFeePreviewResponse(body)) {
           return { error: new Error('Fee preview response did not match expected shape') }
+        }
+
+        if (!isFeeCollector(body.txData.refundReceiver)) {
+          return { error: new Error(`Fee preview returned an untrusted refundReceiver ${body.txData.refundReceiver}`) }
         }
         return { data: body }
       } catch (error) {

@@ -64,6 +64,7 @@ export enum FEATURES {
   HIDE_NATIVE_TOKEN = 'HIDE_NATIVE_TOKEN',
   TEMPO_GAS_TOKEN = 'TEMPO_GAS_TOKEN',
   SUPPORT_CHAT = 'SUPPORT_CHAT',
+  /** @deprecated Mobile only; the web keys on `PAY_FROM_SAFE` in the relayer's `gasPaymentOptions`. */
   GTF = 'GTF',
   SAFE_STAKING = 'SAFE_STAKING',
   WELCOME_ACCOUNTS_REDESIGN = 'WELCOME_ACCOUNTS_REDESIGN',

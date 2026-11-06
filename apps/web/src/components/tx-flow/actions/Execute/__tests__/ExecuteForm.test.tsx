@@ -9,6 +9,7 @@ import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 import { QuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 import type { GasPaymentOptions } from '@/hooks/useGasPaymentOptions'
 import type { SponsoredOffer } from '@/utils/gasPayment'
+import type { FeePayerView } from '@/features/fee-payment'
 import * as useGasLimit from '@/hooks/useGasLimit'
 import * as useIsValidExecution from '@/hooks/useIsValidExecution'
 import * as walletCanPay from '@/hooks/useWalletCanPay'
@@ -41,20 +42,25 @@ jest.mock('@/hooks/useIsValidExecution', () => ({
 }))
 
 const mockUseGasPaymentOptions = jest.fn<GasPaymentOptions, []>()
+// The fee card feeds Safe Shield the payload it simulates; the form is tested without the provider.
+jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
+  ...jest.requireActual('@/features/safe-shield/SafeShieldContext'),
+  useSafeShieldForTxData: jest.fn(),
+}))
+
 jest.mock('@/hooks/useGasPaymentOptions', () => ({
   useGasPaymentOptions: () => mockUseGasPaymentOptions(),
 }))
 
-type SelectorStubProps = { offer: SponsoredOffer | null; showsProUpsell?: boolean }
-jest.mock('@/components/tx/ExecutionMethodSelector', () => ({
-  ExecutionMethod: { RELAY: 'RELAY', WALLET: 'WALLET' },
-  ExecutionMethodSelector: (props: SelectorStubProps) => (
-    <div
-      data-testid="execution-method-selector"
-      data-offer={JSON.stringify(props.offer)}
-      data-upsell={String(props.showsProUpsell)}
-    />
-  ),
+// The fee card stub exposes the view it was given, so tests can read who the form decided pays.
+jest.mock('@/features/__core__', () => ({
+  ...jest.requireActual('@/features/__core__'),
+  useLoadFeature: () => ({
+    $isReady: true,
+    GasPayerSelector: ({ selection }: { selection: { view: FeePayerView | null } }) =>
+      selection.view && <div data-testid="gas-payer-selector" data-payer={JSON.stringify(selection.view.payer)} />,
+    GasTooHighBanner: () => <div data-testid="gas-too-high-banner" />,
+  }),
 }))
 
 const SPACE_ID = faker.string.uuid()
@@ -230,7 +236,10 @@ describe('ExecuteForm', () => {
       />,
     )
 
-    expect(getByTestId('execution-method-selector')).toHaveAttribute('data-offer', JSON.stringify(dailyOffer))
+    expect(getByTestId('gas-payer-selector')).toHaveAttribute(
+      'data-payer',
+      JSON.stringify({ kind: 'choice', value: 'SPONSORED', options: ['SPONSORED', 'WALLET'] }),
+    )
     fireEvent.click(getByText('Execute'))
 
     await waitFor(() => {
@@ -273,7 +282,46 @@ describe('ExecuteForm', () => {
     })
   })
 
-  it('keeps the selector on screen and executes through the wallet when the subscription is exhausted', async () => {
+  it('relays a Safe-pays tx through the public route, never against the Workspace allowance', async () => {
+    // The CGW refuses refunding transactions on the Workspace route (REFUNDING_TRANSACTION).
+    mockUseGasPaymentOptions.mockReturnValue(gasPaymentOptions({ offer: subscriptionOffer }))
+    const mockExecuteTx = jest.fn()
+    const safePaysTx = createMockSafeTransaction({
+      to: safeTransaction.data.to,
+      data: safeTransaction.data.data,
+      value: safeTransaction.data.value,
+    })
+    Object.assign(safePaysTx.data, {
+      safeTxGas: '12983',
+      baseGas: '72094',
+      gasPrice: '1000000000',
+      refundReceiver: '0x53b3BDD8dB8352D9aB7bF39A527F9C24fC404DcD',
+    })
+
+    const { getByText } = render(
+      <ExecuteForm
+        {...defaultProps}
+        safeTx={safePaysTx}
+        txActions={{ ...defaultProps.txActions, executeTx: mockExecuteTx }}
+      />,
+    )
+
+    fireEvent.click(getByText('Execute'))
+
+    await waitFor(() => {
+      expect(mockExecuteTx).toHaveBeenCalledWith(
+        expect.anything(),
+        safePaysTx,
+        defaultProps.txId,
+        undefined,
+        true,
+        false,
+        null,
+      )
+    })
+  })
+
+  it('locks the wallet and executes through it when the subscription is exhausted', async () => {
     mockUseGasPaymentOptions.mockReturnValue(gasPaymentOptions({ offer: exhaustedSubscriptionOffer }))
     const mockExecuteTx = jest.fn()
 
@@ -285,9 +333,9 @@ describe('ExecuteForm', () => {
       />,
     )
 
-    expect(getByTestId('execution-method-selector')).toHaveAttribute(
-      'data-offer',
-      JSON.stringify(exhaustedSubscriptionOffer),
+    expect(getByTestId('gas-payer-selector')).toHaveAttribute(
+      'data-payer',
+      JSON.stringify({ kind: 'locked', value: 'WALLET' }),
     )
     expect(getByText('Execute')).toBeEnabled()
     fireEvent.click(getByText('Execute'))
@@ -305,20 +353,33 @@ describe('ExecuteForm', () => {
     })
   })
 
-  it('renders the selector for the Pro upsell when nothing is offered', () => {
-    mockUseGasPaymentOptions.mockReturnValue(gasPaymentOptions({ showsProUpsell: true }))
+  it('renders no fee card before the payload exists', () => {
+    const { queryByTestId } = render(<ExecuteForm {...defaultProps} />)
 
-    const { getByTestId } = render(<ExecuteForm {...defaultProps} />)
-
-    expect(getByTestId('execution-method-selector')).toHaveAttribute('data-offer', 'null')
-    expect(getByTestId('execution-method-selector')).toHaveAttribute('data-upsell', 'true')
+    expect(queryByTestId('gas-payer-selector')).not.toBeInTheDocument()
   })
 
-  it('hides the selector and executes through the wallet while no offer is on offer yet', async () => {
+  it('shows the gas-too-high banner when the campaign refuses the current gas price', () => {
+    mockUseGasPaymentOptions.mockReturnValue(
+      gasPaymentOptions({
+        offer: { option: 'NO_FEE_CAMPAIGN', disabledReason: 'GAS_TOO_HIGH', remaining: 3, limit: 5 },
+      }),
+    )
+
+    const { getByTestId } = render(<ExecuteForm {...defaultProps} safeTx={safeTransaction} />)
+
+    expect(getByTestId('gas-too-high-banner')).toBeInTheDocument()
+    expect(getByTestId('gas-payer-selector')).toHaveAttribute(
+      'data-payer',
+      JSON.stringify({ kind: 'locked', value: 'WALLET' }),
+    )
+  })
+
+  it('locks the wallet and executes through it while nothing is on offer', async () => {
     mockUseGasPaymentOptions.mockReturnValue(gasPaymentOptions({ offer: null, showsProUpsell: false }))
     const mockExecuteTx = jest.fn()
 
-    const { getByText, queryByTestId } = render(
+    const { getByText, getByTestId } = render(
       <ExecuteForm
         {...defaultProps}
         safeTx={safeTransaction}
@@ -326,7 +387,10 @@ describe('ExecuteForm', () => {
       />,
     )
 
-    expect(queryByTestId('execution-method-selector')).not.toBeInTheDocument()
+    expect(getByTestId('gas-payer-selector')).toHaveAttribute(
+      'data-payer',
+      JSON.stringify({ kind: 'locked', value: 'WALLET' }),
+    )
     expect(getByText('Execute')).toBeEnabled()
     fireEvent.click(getByText('Execute'))
 

@@ -432,8 +432,10 @@ describe('CreateTokenTransfer', () => {
     expect(input?.value).toBe(USDC_ADDRESS)
   })
 
-  describe('GTF fee banner', () => {
+  describe('Pay from Safe fee banner', () => {
     const useHasFeatureSpy = jest.spyOn(chainHooks, 'useHasFeature')
+    // Pay from Safe follows the chain's relayer, not a feature flag
+    const isPayFromSafeEnabledSpy = jest.spyOn(payFromSafeHooks, 'useIsPayFromSafeEnabled')
     const useResolvedGasTokenSpy = jest.spyOn(payFromSafeHooks, 'useResolvedGasToken')
 
     const mockResolvedToSentToken = () =>
@@ -472,33 +474,36 @@ describe('CreateTokenTransfer', () => {
 
     it('shows fee banner after MAX click when resolved gas token equals sent token', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
+      isPayFromSafeEnabledSpy.mockReturnValue(true)
       mockBalancesForPayFromSafe()
       mockResolvedToSentToken()
 
       const { user, getByTestId, queryByTestId } = renderCreateTokenTransfer()
 
-      expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
+      expect(queryByTestId('pay-from-safe-fee-banner')).not.toBeInTheDocument()
 
       await user.click(getByTestId('max-btn'))
 
       await waitFor(() => {
-        expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
+        expect(getByTestId('pay-from-safe-fee-banner')).toBeInTheDocument()
       })
     })
 
-    it('does not show fee banner when GTF is disabled', async () => {
+    it('does not show fee banner when Pay from Safe is disabled', async () => {
       useHasFeatureSpy.mockImplementation(() => false)
+      isPayFromSafeEnabledSpy.mockReturnValue(false)
       mockBalancesForPayFromSafe()
 
       const { user, getByTestId, queryByTestId } = renderCreateTokenTransfer()
 
       await user.click(getByTestId('max-btn'))
 
-      expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
+      expect(queryByTestId('pay-from-safe-fee-banner')).not.toBeInTheDocument()
     })
 
     it('does not show fee banner when resolved gas token differs from sent token', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
+      isPayFromSafeEnabledSpy.mockReturnValue(true)
       mockBalancesForPayFromSafe()
       // Resolve to a different address → sent ≠ fee → banner should stay hidden even after MAX
       useResolvedGasTokenSpy.mockReturnValue({
@@ -510,11 +515,12 @@ describe('CreateTokenTransfer', () => {
 
       await user.click(getByTestId('max-btn'))
 
-      expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
+      expect(queryByTestId('pay-from-safe-fee-banner')).not.toBeInTheDocument()
     })
 
     it('dismisses fee banner on close button click', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
+      isPayFromSafeEnabledSpy.mockReturnValue(true)
       mockBalancesForPayFromSafe()
       mockResolvedToSentToken()
 
@@ -523,17 +529,18 @@ describe('CreateTokenTransfer', () => {
       await user.click(getByTestId('max-btn'))
 
       await waitFor(() => {
-        expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
+        expect(getByTestId('pay-from-safe-fee-banner')).toBeInTheDocument()
       })
 
       await user.click(getByLabelText('Dismiss fee banner'))
 
-      expect(queryByTestId('gtf-fee-banner')).not.toBeInTheDocument()
+      expect(queryByTestId('pay-from-safe-fee-banner')).not.toBeInTheDocument()
     })
 
     // The fee banner renders as an info alert, not the plain default
     it('renders the fee banner with the info alert styling, not the plain default alert', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
+      isPayFromSafeEnabledSpy.mockReturnValue(true)
       mockBalancesForPayFromSafe()
       mockResolvedToSentToken()
 
@@ -542,10 +549,10 @@ describe('CreateTokenTransfer', () => {
       await user.click(getByTestId('max-btn'))
 
       await waitFor(() => {
-        expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
+        expect(getByTestId('pay-from-safe-fee-banner')).toBeInTheDocument()
       })
 
-      expect(getByTestId('gtf-fee-banner')).toHaveClass(
+      expect(getByTestId('pay-from-safe-fee-banner')).toHaveClass(
         'bg-[var(--color-info-background)]',
         'text-foreground',
         'border-transparent',
@@ -554,6 +561,7 @@ describe('CreateTokenTransfer', () => {
 
     it('renders the standard info icon inside the fee banner', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
+      isPayFromSafeEnabledSpy.mockReturnValue(true)
       mockBalancesForPayFromSafe()
       mockResolvedToSentToken()
 
@@ -562,10 +570,10 @@ describe('CreateTokenTransfer', () => {
       await user.click(getByTestId('max-btn'))
 
       await waitFor(() => {
-        expect(getByTestId('gtf-fee-banner')).toBeInTheDocument()
+        expect(getByTestId('pay-from-safe-fee-banner')).toBeInTheDocument()
       })
 
-      expect(getByTestId('gtf-fee-banner').querySelector('svg.lucide-info')).toBeInTheDocument()
+      expect(getByTestId('pay-from-safe-fee-banner').querySelector('svg.lucide-info')).toBeInTheDocument()
     })
   })
 

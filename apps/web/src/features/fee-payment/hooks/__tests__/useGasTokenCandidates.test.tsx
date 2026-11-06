@@ -9,6 +9,12 @@ import * as useTrustedTokenBalancesModule from '@/hooks/loadables/useTrustedToke
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
+// The allowlist cases below describe phase 2; phase 1 (native only) has its own case at the end.
+jest.mock('../../constants', () => ({
+  ...jest.requireActual('../../constants'),
+  NATIVE_GAS_TOKEN_ONLY: false,
+}))
+
 const ETH_ADDRESS = '0x0000000000000000000000000000000000000000'
 // Mainnet allowlisted addresses (per PLA-1412)
 const USDC_MAINNET = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
@@ -102,7 +108,7 @@ describe('useGasTokenCandidates', () => {
   it('returns empty candidates when Safe holds no tokens', () => {
     jest.spyOn(useTrustedTokenBalancesModule, 'useTrustedTokenBalances').mockReturnValue(mockBalances([]))
 
-    const { result } = renderHook(() => useGasTokenCandidates(tx))
+    const { result } = renderHook(() => useGasTokenCandidates(tx, { nativeOnly: true }))
 
     expect(result.current.candidates).toEqual([])
   })
@@ -236,6 +242,23 @@ describe('useGasTokenCandidates', () => {
     const { result } = renderHook(() => useGasTokenCandidates(tx))
 
     expect(result.current.candidates[0].logoUri).toBe('eth.logo') // from mainnetChain.nativeCurrency.logoUri
+  })
+
+  it('surfaces only the native gas token when nativeOnly is on (phase 1, NATIVE_GAS_TOKEN_ONLY)', () => {
+    jest
+      .spyOn(useTrustedTokenBalancesModule, 'useTrustedTokenBalances')
+      .mockReturnValue(
+        mockBalances([
+          tokenBalance({ address: USDC_MAINNET, symbol: 'USDC', decimals: 6 }),
+          tokenBalance({ address: ETH_ADDRESS, symbol: 'ETH', type: 'NATIVE_TOKEN' }),
+          tokenBalance({ address: DAI_MAINNET, symbol: 'DAI' }),
+        ]),
+      )
+
+    const { result } = renderHook(() => useGasTokenCandidates(tx, { nativeOnly: true }))
+
+    expect(result.current.candidates.map((c) => c.symbol)).toEqual(['ETH'])
+    expect(result.current.defaultAddress).toBe(ETH_ADDRESS)
   })
 
   it('resolves candidates synchronously (no /fees/preview probes)', () => {

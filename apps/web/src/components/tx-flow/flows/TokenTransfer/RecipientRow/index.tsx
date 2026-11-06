@@ -27,9 +27,7 @@ import { MODALS_EVENTS } from '@/services/analytics'
 import SpendingLimitRow from '../SpendingLimitRow'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { X } from 'lucide-react'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import { useResolvedGasToken, type FeePreviewTx } from '@/features/fee-payment'
+import { useResolvedGasToken, useIsPayFromSafeEnabled, type FeePreviewTx } from '@/features/fee-payment'
 import { createTokenTransferParams } from '@/services/tx/tokenTransferParams'
 import { OperationType } from '@safe-global/types-kit'
 
@@ -85,7 +83,7 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
 
   const maxAmount = isSpendingLimitType && totalAmount > spendingLimitAmount ? spendingLimitAmount : totalAmount
 
-  const isPayFromSafeEnabled = useHasFeature(FEATURES.GTF)
+  const isPayFromSafeEnabled = useIsPayFromSafeEnabled()
   const [maxPressed, setMaxPressed] = useState(false)
 
   // Probe only after Max click — eager probing on every edit wastes network for the common case.
@@ -134,7 +132,7 @@ const RecipientRow = ({ fieldArray, removable = true, remove, disableSpendingLim
         </div>
 
         {showFeeBanner && (
-          <Alert data-testid="gtf-fee-banner" variant="info" className="items-center">
+          <Alert data-testid="pay-from-safe-fee-banner" variant="info" className="items-center">
             <AlertSeverityIcon variant="info" />
             <AlertDescription className="flex w-full items-center justify-between gap-2">
               <span>
