@@ -94,6 +94,13 @@ node apps/web/e2e/environment/simulation.mjs
 
 Run the last two in separate terminals.
 
+The Drain Account spec needs a production build of `apps/drain-safe` on port 4001, which the local config service lists:
+
+```sh
+yarn workspace @safe-global/drain-safe exec vite build --config vite.config.ts
+yarn workspace @safe-global/drain-safe exec vite preview --config vite.config.ts --host localhost --strictPort
+```
+
 The adapter also serves the wallet's Tenderly card: `e2e:env build` and the CI build point `NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL` at it, with org `safe` and project `safe-apps` for the simulation link. It reads the fork RPCs from the stack manifest of `SAFE_E2E_PROJECT` (default `safe-e2e-local`) when it starts, so start it after any `--chain` fork, and routes each simulation to the fork of its `network_id`. It answers the origins `localhost:4000` (Transaction Builder), `localhost:3080` (local wallet) and `localhost:8080` (CI wallet) only.
 
 `VITE_GATEWAY_URL` makes the local CGW serve all of the builder's gateway requests and its only ABI source; scenarios register the ABIs the specs use. The specs open the builder at `http://localhost:4000`, the URL the local config service lists.

@@ -19,12 +19,11 @@ cypress/
 
 ## Test categories
 
-| Category  | Folder           | CI trigger                           | Naming                    |
-| --------- | ---------------- | ------------------------------------ | ------------------------- |
-| Visual    | `e2e/visual/`    | `workflow_dispatch` only             | `[VISUAL] Screenshot ...` |
-| Safe Apps | `e2e/safe-apps/` | On-demand + weekday cron (03:00 UTC) | `Verify ...`              |
+| Category | Folder        | CI trigger               | Naming                    |
+| -------- | ------------- | ------------------------ | ------------------------- |
+| Visual   | `e2e/visual/` | `workflow_dispatch` only | `[VISUAL] Screenshot ...` |
 
-The PR gate is Playwright on the isolated stack (`web-isolated-e2e-backend.yml`, see [../e2e/AGENTS.md](../e2e/AGENTS.md)). No Cypress spec runs on a PR or on the isolated stack; Cypress runs only against staging. The on-demand workflow (`web-e2e-full-ondemand.yml`) runs `safe-apps/`; its `workflow_dispatch` input can narrow it to named specs (comma-separated, no path/extension).
+The PR gate is Playwright on the isolated stack (`web-isolated-e2e-backend.yml`, see [../e2e/AGENTS.md](../e2e/AGENTS.md)). No Cypress spec runs on a PR or on the isolated stack; Cypress runs only against staging.
 
 CI does not record to Cypress Cloud. `.github/actions/cypress` splits the specs across the matrix containers (`container-index`/`container-total`) and uploads screenshots and JUnit reports as an artifact when a run fails.
 
