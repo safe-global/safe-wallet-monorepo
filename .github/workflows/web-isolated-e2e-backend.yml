@@ -87,7 +87,7 @@ jobs:
       # The Queue Service image is a private package.
       - name: Log in to GitHub Container Registry
         if: steps.changes.outputs.relevant == 'true'
-        uses: docker/login-action@v4.6.0
+        uses: docker/login-action@v4.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -201,13 +201,19 @@ jobs:
           IMAGES: ${{ needs.plan.outputs.images }}
         run: printf '%s\n' "$IMAGES" >> "$GITHUB_ENV"
 
+      # Playwright assigns the specs to shards, so the stack starts only the forks and emulators of this shard's specs.
+      - name: Find the forks and device emulators of this shard
+        id: needs
+        run: node apps/web/e2e/environment/run.mjs needs >> "$GITHUB_OUTPUT"
+
       - name: Start and validate backend
         id: backend
         uses: $/.github/actions/isolated-e2e-backend
         with:
           project: ${{ env.SAFE_E2E_PROJECT }}
           fork-rpc-url: ${{ secrets.SEPOLIA_FORK_RPC_URL }}
-          chains: ${{ matrix.chains }}
+          chains: ${{ steps.needs.outputs.chains }}
+          devices: ${{ steps.needs.outputs.devices }}
           mainnet-rpc-url: ${{ secrets.FORK_RPC_URL_MAINNET }}
           polygon-rpc-url: ${{ secrets.FORK_RPC_URL_POLYGON }}
 
@@ -271,7 +277,8 @@ jobs:
           mkdir -p "$output"
           docker ps --all --filter "label=com.docker.compose.project=$SAFE_E2E_PROJECT" \
             --format '{{.Names}}\t{{.State}}\t{{.Status}}' > "$output/containers.txt"
-          for service in cgw-web decoder-web txs-web txs-worker-indexer queue-web queue-worker events-web nginx; do
+          for service in cgw-web decoder-web txs-web txs-worker-indexer queue-web queue-worker events-web nginx \
+            ledger-emulator trezor-emulator; do
             python3 scripts/test_env.py logs "$service" --tail all > "$output/$service.log"
           done
 

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { playwrightSpecs } from './playwright-specs.mjs'
-import { chainProfiles } from './local-stack.mjs'
+import { chainProfiles, deviceProfiles } from './local-stack.mjs'
 import { scenarios } from './scenarios/index.mjs'
 
 const testsDir = new URL('../tests/', import.meta.url)
@@ -23,9 +23,10 @@ test('every scenario function serves at least one Playwright spec', () => {
   )
 })
 
-test('every fork that a Playwright spec names has a stack profile', () => {
-  for (const [spec, { chains = [] }] of Object.entries(playwrightSpecs)) {
+test('every fork and device emulator that a Playwright spec names has a stack profile', () => {
+  for (const [spec, { chains = [], devices = [] }] of Object.entries(playwrightSpecs)) {
     for (const chainId of chains) assert.ok(chainProfiles[chainId], `${spec} names unknown fork ${chainId}`)
+    for (const device of devices) assert.ok(deviceProfiles.includes(device), `${spec} names unknown device ${device}`)
   }
 })
 
