@@ -24,8 +24,12 @@ DEBUG_INTERFACE = "127.0.0.1:21325"
 
 def start_device():
     binaries.explore(argparse.Namespace(verbosity=0))
-    bridge.start(binaries.DEFAULT_BRIDGE)
-    emulator.start(os.environ["TREZOR_FIRMWARE"], os.environ["TREZOR_MODEL"], wipe=True, save_screenshots=True)
+    # Into the container log, which CI collects; the image's log files are gone after a reset
+    bridge.start(binaries.DEFAULT_BRIDGE, output_to_logfile=False)
+    emulator.start(
+        os.environ["TREZOR_FIRMWARE"], os.environ["TREZOR_MODEL"], wipe=True, output_to_logfile=False,
+        save_screenshots=True,
+    )
     emulator.setup_device(os.environ["TREZOR_SEED"], "", False, os.environ["TREZOR_LABEL"])
 
 

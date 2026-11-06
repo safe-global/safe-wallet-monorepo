@@ -2,15 +2,18 @@
  * Every Playwright spec that runs against the isolated backend, by path under e2e/tests. `scenarios` names the
  * functions in scenarios/index.mjs that prepare the spec's data, once per spec file; `safes` maps each key of SAFES
  * in e2e/src/data/constants.ts that the spec reads to a static Safe key the scenarios return. `chains` lists the forks
- * besides Sepolia that the spec needs; the stack of every Playwright shard in CI starts them.
+ * besides Sepolia that the spec needs, and `devices` the device emulators (deviceProfiles in local-stack.mjs). In CI,
+ * the stack of a Playwright shard starts the forks and emulators of the specs in that shard only.
  */
 export const playwrightSpecs = {
   'e2e/ledger-sign-execute.spec.ts': {
     scenarios: ['prepareLedgerScenario'],
+    devices: ['ledger'],
     safes: { SEP_LEDGER_SIGN_SAFE: 'SEP_STATIC_SAFE_48', SEP_LEDGER_EXECUTE_SAFE: 'SEP_STATIC_SAFE_49' },
   },
   'e2e/trezor-sign-execute.spec.ts': {
     scenarios: ['prepareTrezorScenario'],
+    devices: ['trezor'],
     safes: { SEP_TREZOR_SIGN_SAFE: 'SEP_STATIC_SAFE_50', SEP_TREZOR_EXECUTE_SAFE: 'SEP_STATIC_SAFE_51' },
   },
   'e2e/batch.spec.ts': {},
