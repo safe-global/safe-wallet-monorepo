@@ -1,8 +1,8 @@
 /**
  * Wallet credentials parsing for Playwright E2E tests.
  *
- * Reuses the existing `CYPRESS_WALLET_CREDENTIALS` env var (same secret used by
- * the Cypress suite). It is a JSON string holding raw hex private keys and
+ * Reads the `CYPRESS_WALLET_CREDENTIALS` env var, a name kept from the removed
+ * Cypress suite. It is a JSON string holding raw hex private keys and
  * addresses for the shared test owners.
  *
  * Rule: parsing is isolated here so it can be unit-tested by passing the raw
@@ -30,8 +30,7 @@ export function getWalletCredentials(
   if (!raw || raw.trim() === '') {
     throw new Error(
       'CYPRESS_WALLET_CREDENTIALS env var is not set. ' +
-        'Provide a JSON string with OWNER_*_PRIVATE_KEY / OWNER_*_WALLET_ADDRESS keys ' +
-        '(the same secret used by the Cypress suite).',
+        'Provide a JSON string with OWNER_*_PRIVATE_KEY / OWNER_*_WALLET_ADDRESS keys.',
     )
   }
 

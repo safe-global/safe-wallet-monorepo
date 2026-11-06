@@ -1,6 +1,6 @@
 # Isolated E2E
 
-Runs the Playwright specs registered in `e2e/environment/playwright-specs.mjs` against a local Anvil Sepolia fork and Safe backend services. Scenario setup creates test owners, funded Safes, token balances and transactions through the SDK and local APIs. Cypress does not run here; it runs only against staging. See `.github/workflows/web-isolated-e2e-backend.yml` for CI.
+Runs the Playwright specs registered in `e2e/environment/playwright-specs.mjs` against a local Anvil Sepolia fork and Safe backend services. Scenario setup creates test owners, funded Safes, token balances and transactions through the SDK and local APIs. See `.github/workflows/web-isolated-e2e-backend.yml` for CI.
 
 ## Setup
 
