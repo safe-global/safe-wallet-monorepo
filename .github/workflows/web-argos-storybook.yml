@@ -6,8 +6,13 @@ name: Web Argos Storybook
 #
 # Uploads to the Argos project of web-argos-e2e.yml; the build name keeps the
 # Storybook baseline apart from the Cypress one.
+#
+# Pushes to dev do not upload: they record the sha256 of every sheet and report how many
+# changed since the previous dev commit, to measure what per-merge baselines would cost.
 
 on:
+  push:
+    branches: [dev]
   # Weekly baseline on dev. Release checks are started by hand.
   schedule:
     - cron: '0 5 * * 1'
@@ -27,7 +32,8 @@ on:
         type: string
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # One group per dev commit, so each merge records its manifest instead of cancelling the last one
+  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.sha || github.ref }}
   cancel-in-progress: true
 
 permissions: {}
@@ -66,6 +72,19 @@ jobs:
           echo "Storybook static server did not come up" >&2
           exit 1
 
+      - name: Restore the previous dev manifest
+        id: base-manifest
+        uses: actions/cache/restore@v5.0.5
+        with:
+          path: apps/web/sheets-manifest.json
+          key: storybook-sheets-manifest-${{ github.event.before || github.sha }}
+          restore-keys: storybook-sheets-manifest-
+
+      - name: Keep it as the baseline
+        if: steps.base-manifest.outputs.cache-matched-key != ''
+        working-directory: apps/web
+        run: mv sheets-manifest.json base-manifest.json
+
       - name: Screenshot all stories (light + dark)
         id: sweep
         # Broken stories (SB_ERROR) exit 1 — still upload what rendered, then fail below.
@@ -75,11 +94,32 @@ jobs:
           yarn storybook:sweep \
             --base=http://localhost:4000 \
             --shots=argos-screenshots \
+            --manifest=sheets-manifest.json \
             --json=sweep-findings.json \
             --concurrency=6 \
             ${{ inputs.filter && format('--filter={0}', inputs.filter) || '' }}
 
+      - name: Report changed sheets
+        if: hashFiles('apps/web/sheets-manifest.json') != ''
+        working-directory: apps/web
+        env:
+          BASE_KEY: ${{ steps.base-manifest.outputs.cache-matched-key }}
+        run: |
+          {
+            npx tsx ../../scripts/storybook/diff-manifest.ts base-manifest.json sheets-manifest.json
+            echo
+            echo "Baseline: \`${BASE_KEY:-none}\`"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Save the manifest for the next dev commit
+        if: github.event_name == 'push' && hashFiles('apps/web/sheets-manifest.json') != ''
+        uses: actions/cache/save@v5.0.5
+        with:
+          path: apps/web/sheets-manifest.json
+          key: storybook-sheets-manifest-${{ github.sha }}
+
       - name: Upload to Argos
+        if: github.event_name != 'push'
         working-directory: apps/web
         run: npx --yes @argos-ci/cli upload argos-screenshots --build-name storybook
         env:
@@ -87,10 +127,13 @@ jobs:
           ARGOS_REFERENCE_BRANCH: ${{ inputs.reference_branch || 'dev' }}
           ARGOS_REFERENCE_COMMIT: ${{ inputs.reference_commit || '' }}
 
+      # Push runs only measure, so a story that is already broken on dev warns there instead of failing every merge
       - name: Report broken stories
         if: steps.sweep.outcome == 'failure'
         working-directory: apps/web
+        env:
+          LEVEL: ${{ github.event_name == 'push' && 'warning' || 'error' }}
         run: |
-          echo "::error::render sweep flagged broken stories (SB_ERROR) — see sweep-findings.json"
+          echo "::$LEVEL::render sweep flagged broken stories (SB_ERROR) — see sweep-findings.json"
           node -e "const d=require('./sweep-findings.json'); for (const f of d.findings.filter(x=>x.issues.some(i=>i.startsWith('SB_ERROR')))) console.log(f.id, f.mode, f.issues[0])"
-          exit 1
+          [ "$LEVEL" = warning ] || exit 1
