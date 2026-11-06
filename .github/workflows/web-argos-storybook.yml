@@ -8,8 +8,9 @@ name: Web Argos Storybook
 # Uploads to the Argos project of web-argos-e2e.yml; the build name keeps the
 # Storybook baseline apart from the Cypress one.
 #
-# Pushes to dev do not upload: they record the sha256 of every sheet and report how many
-# changed since the previous dev commit, to measure what per-merge baselines would cost.
+# Pushes to dev record the sha256 of every sheet and upload a new baseline only when a sheet
+# changed since the previous dev commit; unchanged merges keep the last baseline, which is
+# still correct because their images are identical.
 
 on:
   push:
@@ -153,26 +154,35 @@ jobs:
           fi
 
       - name: Report changed sheets
-        if: hashFiles('apps/web/sheets-manifest.json') != ''
+        id: diff
         working-directory: apps/web
         env:
           BASE_KEY: ${{ steps.base-manifest.outputs.cache-matched-key }}
+          EXACT_BASE: ${{ steps.base-manifest.outputs.cache-hit }}
         run: |
+          report=$(npx tsx ../../scripts/storybook/diff-manifest.ts base-manifest.json sheets-manifest.json)
           {
-            npx tsx ../../scripts/storybook/diff-manifest.ts base-manifest.json sheets-manifest.json
+            echo "$report"
             echo
             echo "Baseline: \`${BASE_KEY:-none}\`"
           } | tee -a "$GITHUB_STEP_SUMMARY"
+          # Without the previous commit's own manifest the diff is a guess, so count it as changed
+          if [ "$EXACT_BASE" = true ] && grep -q '^sheets changed: 0 of' <<< "$report"; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Save the manifest for the next dev commit
-        if: github.event_name == 'push' && hashFiles('apps/web/sheets-manifest.json') != ''
+        if: github.event_name == 'push'
         uses: actions/cache/save@v5.0.5
         with:
           path: apps/web/sheets-manifest.json
           key: storybook-sheets-manifest-${{ github.sha }}
 
+      # On dev, a merge that changed no sheet keeps the last baseline
       - name: Upload to Argos
-        if: github.event_name != 'push'
+        if: github.event_name != 'push' || steps.diff.outputs.changed == 'true'
         working-directory: apps/web
         run: npx --yes @argos-ci/cli upload argos-screenshots --build-name storybook
         env:
@@ -180,7 +190,7 @@ jobs:
           ARGOS_REFERENCE_BRANCH: ${{ inputs.reference_branch || 'dev' }}
           ARGOS_REFERENCE_COMMIT: ${{ inputs.reference_commit || '' }}
 
-      # Push runs only measure, so a story that is already broken on dev warns there instead of failing every merge
+      # A story broken on dev is already merged; warn on push runs instead of failing every later merge
       - name: Report broken stories
         working-directory: apps/web
         env:
