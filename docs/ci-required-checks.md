@@ -62,6 +62,7 @@ Set these job names as required status checks in branch protection for `dev`:
 | `Mobile checks result`       | `mobile-checks.yml` (lint, prettier, type-check)                   | `apps/mobile`, `packages`, `expo-plugins`, `config`, dependencies   |
 | `Mobile unit tests result`   | `mobile-unit-tests.yml`                                            | `apps/mobile`, `packages`, `expo-plugins`, `config`, dependencies   |
 | `tx-builder checks result`   | `tx-builder-checks.yml` (lint, prettier, type-check, tests, build) | `apps/tx-builder`, `packages`, `config`, dependencies               |
+| `drain-safe checks result`   | `drain-safe-checks.yml` (lint, prettier, type-check, tests, build) | `apps/drain-safe`, `packages`, `config`, dependencies               |
 | `Utils unit tests result`    | `package-utils-unit-tests.yml`                                     | `packages/utils`, `packages/store`, `config`, dependencies          |
 | `Isolated E2E result`        | `web-isolated-e2e-backend.yml`                                     | `apps/web`, `apps/tx-builder`, `packages`, `config`, dependencies   |
 
