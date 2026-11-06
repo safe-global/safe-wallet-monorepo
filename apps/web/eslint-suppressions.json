@@ -134,7 +134,7 @@
       "count": 1
     }
   },
-  "src/features/gtf/services/__tests__/mergeGtfFeeParams.test.ts": {
+  "src/features/fee-payment/services/__tests__/mergePayFromSafeFeeParams.test.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 1
     }

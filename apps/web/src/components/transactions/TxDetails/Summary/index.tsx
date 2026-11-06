@@ -14,7 +14,7 @@ import isEqual from 'lodash/isEqual'
 import Multisend from '../TxData/DecodedData/Multisend'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { useLoadFeature } from '@/features/__core__'
-import { GTFFeature, useHistoryFeesBreakdown } from '@/features/gtf'
+import { FeePaymentFeature, useHistoryFeesBreakdown } from '@/features/fee-payment'
 
 interface Props {
   safeTxData?: SafeTransactionData
@@ -29,7 +29,7 @@ interface Props {
 // GTF (gas-token) fee breakdown for executed txs; the hook returns null when the
 // GTF feature is off, so this renders nothing on non-GTF chains.
 const HistoryFees = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement | null => {
-  const { HistoryFeesAccordion } = useLoadFeature(GTFFeature)
+  const { HistoryFeesAccordion } = useLoadFeature(FeePaymentFeature)
   const feesData = useHistoryFeesBreakdown(txDetails)
 
   if (!feesData) return null
