@@ -8,7 +8,9 @@ import type { SafeScope } from '@safe-global/views/components/tx-flow/safe-scope
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { useSimulation } from '@/components/tx/security/tenderly/useSimulation'
 import * as utils from '@/components/tx/security/tenderly/utils'
+import * as tenderlyUtils from '@safe-global/utils/components/tx/security/tenderly/utils'
 import { FETCH_STATUS, type TenderlySimulation } from '@safe-global/utils/components/tx/security/tenderly/types'
+import { initialState as settingsInitialState } from '@/store/settingsSlice'
 
 const setupFetchStub = (data: any) => () => {
   return Promise.resolve({
@@ -230,6 +232,86 @@ describe('useSimulation()', () => {
     })
 
     expect(mockFetch).toHaveBeenCalledTimes(1)
+  })
+
+  describe('public sharing', () => {
+    const safeAddress = '0x57CB13cbef735FbDD65f5f2866638c546464E45F'
+    const simulationId = 'sim-123'
+    const customTenderly = {
+      url: 'https://api.tenderly.co/api/v1/account/my-org/project/my-project/simulate',
+      accessToken: 'token',
+    }
+    const simulationResult = { simulation: { status: true, id: simulationId } } as TenderlySimulation
+
+    const renderWithTenderly = (tenderly: typeof customTenderly & { publicSharing?: boolean }) =>
+      renderHook(() => useSimulation(), {
+        initialReduxState: { settings: { ...settingsInitialState, env: { rpc: {}, tenderly } } },
+      })
+
+    const simulate = (result: ReturnType<typeof renderWithTenderly>['result']) =>
+      act(async () =>
+        result.current.simulateTransaction({
+          transactions: [],
+          safe: { address: { value: safeAddress }, chainId: '4' } as SafeState,
+          executionOwner: safeAddress,
+        }),
+      )
+
+    beforeEach(() => {
+      jest.spyOn(utils, 'getSimulationPayload').mockResolvedValue({} as never)
+      jest.spyOn(tenderlyUtils, 'getSimulation').mockResolvedValue(simulationResult)
+    })
+
+    it('shares the simulation and links to the shared simulation when public sharing is enabled', async () => {
+      const shareSpy = jest.spyOn(tenderlyUtils, 'shareSimulation').mockResolvedValue()
+      const tenderly = { ...customTenderly, publicSharing: true }
+
+      const { result } = renderWithTenderly(tenderly)
+      await simulate(result)
+
+      await waitFor(() => expect(result.current._simulationRequestStatus).toEqual(FETCH_STATUS.SUCCESS))
+      expect(shareSpy).toHaveBeenCalledWith(simulationId, tenderly)
+      expect(result.current.simulationLink).toEqual(`https://dashboard.tenderly.co/shared/simulation/${simulationId}`)
+    })
+
+    it('falls back to the private link and keeps the simulation when sharing fails', async () => {
+      jest.spyOn(tenderlyUtils, 'shareSimulation').mockRejectedValue(new Error('403 - Forbidden'))
+
+      const { result } = renderWithTenderly({ ...customTenderly, publicSharing: true })
+      await simulate(result)
+
+      await waitFor(() => expect(result.current._simulationRequestStatus).toEqual(FETCH_STATUS.SUCCESS))
+      expect(result.current.simulationData).toEqual(simulationResult)
+      expect(result.current.requestError).toBeUndefined()
+      expect(result.current.simulationLink).toEqual(
+        `https://dashboard.tenderly.co/my-org/my-project/simulator/${simulationId}`,
+      )
+    })
+
+    it('does not share the simulation when public sharing is disabled', async () => {
+      const shareSpy = jest.spyOn(tenderlyUtils, 'shareSimulation')
+
+      const { result } = renderWithTenderly(customTenderly)
+      await simulate(result)
+
+      await waitFor(() => expect(result.current._simulationRequestStatus).toEqual(FETCH_STATUS.SUCCESS))
+      expect(shareSpy).not.toHaveBeenCalled()
+      expect(result.current.simulationLink).toEqual(
+        `https://dashboard.tenderly.co/my-org/my-project/simulator/${simulationId}`,
+      )
+    })
+
+    it('resets the shared link together with the simulation', async () => {
+      jest.spyOn(tenderlyUtils, 'shareSimulation').mockResolvedValue()
+
+      const { result } = renderWithTenderly({ ...customTenderly, publicSharing: true })
+      await simulate(result)
+      await waitFor(() => expect(result.current.simulationLink).toContain('/shared/simulation/'))
+
+      await act(async () => result.current.resetSimulation())
+
+      expect(result.current.simulationLink).not.toContain('/shared/simulation/')
+    })
   })
 
   it('builds the payload for the scoped Safe inside a Space-level flow', async () => {

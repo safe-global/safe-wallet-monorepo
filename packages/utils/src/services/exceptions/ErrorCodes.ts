@@ -20,6 +20,7 @@ enum ErrorCodes {
 
   _200 = '200: Tenderly simulation failed',
   _201 = '201: Blockaid scan failed',
+  _202 = '202: Tenderly simulation sharing failed',
 
   _400 = '400: Error requesting browser notification permissions',
   _401 = '401: Error tracking push notifications',
