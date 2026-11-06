@@ -164,7 +164,8 @@ _Status as of 2026-08 — re-verify against `src/stories/mocks/handlers.ts` befo
 yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>   # add --filter=<substr> to scope
 ```
 
-- Screenshots are taken with animations disabled, after fonts and images load, and with the GPU off, so a sheet is byte-identical across runs of the same commit. Pushes to `dev` only record each sheet's hash and report how many changed; a sheet that changes on a commit that did not touch it is flaky — fix the story.
+- CI splits the sweep into 4 shards (`--shard=k/n`, whole titles per shard). Locally, run it without `--shard`.
+- Screenshots are taken with animations disabled, once no request is open and two screenshots in a row match, with the GPU off and every external host unresolvable (remote logos render their local fallback), so a sheet is byte-identical across runs of the same commit. Pushes to `dev` only record each sheet's hash and report how many changed; a sheet that changes on a commit that did not touch it is flaky — fix the story.
 - Opt a story out of pixel snapshots with `tags: ['skip-visual-test']` (story- or meta-level) for flaky/animated stories. It is still render-checked — errors fail CI; only the snapshot is skipped.
 - Never ship a story that permanently renders skeletons/blank without a doc comment saying so — a broken story that "passes" is worse than no story.
 
