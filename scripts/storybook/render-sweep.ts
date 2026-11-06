@@ -70,12 +70,15 @@ function parseArgs(): Record<string, string | boolean> {
   )
 }
 
+// GPU rasterization varies a few colour levels between runs, which changes the sheet hashes
+const LAUNCH_ARGS = ['--disable-gpu']
+
 async function launch(): Promise<Browser> {
   try {
     // Prefer system Chrome — the repo does not ship playwright browser binaries
-    return await chromium.launch({ channel: 'chrome' })
+    return await chromium.launch({ channel: 'chrome', args: LAUNCH_ARGS })
   } catch {
-    return await chromium.launch()
+    return await chromium.launch({ args: LAUNCH_ARGS })
   }
 }
 
@@ -100,6 +103,27 @@ interface Clip {
   y: number
   width: number
   height: number
+}
+
+const ASSET_TIMEOUT_MS = 5000
+
+// Fonts and images that are still loading make the screenshot differ between runs.
+async function waitForAssets(page: Page): Promise<void> {
+  await page.evaluate(async (timeoutMs) => {
+    const pending = [...document.images]
+      .filter((img) => !img.complete)
+      .map(
+        (img) =>
+          new Promise((resolve) => {
+            img.addEventListener('load', resolve)
+            img.addEventListener('error', resolve)
+          }),
+      )
+    await Promise.race([
+      Promise.all([document.fonts.ready, ...pending]),
+      new Promise((resolve) => setTimeout(resolve, timeoutMs)),
+    ])
+  }, ASSET_TIMEOUT_MS)
 }
 
 // Padded/centered stories are clipped to their content, portals (dialogs, popovers) included.
@@ -207,9 +231,11 @@ async function checkStory(
     // never reached index.json). They are still render-checked — only the screenshot is skipped.
     const skipSnapshot = story.tags?.includes('skip-visual-test')
     if (cellsDir && !skipSnapshot) {
+      await waitForAssets(page)
       const { fullscreen, clip } = await contentClip(page)
       const file = path.join(cellsDir, `${story.id}--${mode}.png`)
-      await page.screenshot({ path: file, fullPage: true, clip })
+      // Spinners and transitions otherwise land on a different frame each run
+      await page.screenshot({ path: file, fullPage: true, clip, animations: 'disabled' })
       cell = { storyId: story.id, name: story.name, mode, file, fullscreen }
     }
   } catch (err) {
