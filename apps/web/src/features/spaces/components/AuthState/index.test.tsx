@@ -82,6 +82,10 @@ jest.mock('../Plans/WorkspaceLockModal', () => ({
   __esModule: true,
   default: ({ spaceId }: { spaceId: string }) => <div data-testid="workspace-lock-modal" data-space={spaceId} />,
 }))
+jest.mock('../ProTrialBanner', () => ({
+  __esModule: true,
+  default: ({ spaceId }: { spaceId: string }) => <div data-testid="pro-trial-banner" data-space={spaceId} />,
+}))
 
 describe('AuthState', () => {
   beforeEach(() => {
