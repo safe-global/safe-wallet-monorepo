@@ -19,6 +19,7 @@
  *                       webpack dev server does not)
  *   --shots=<dir>       Also save screenshots into <dir> as sheets (see sheets.ts): one image per
  *                       title with every story x mode, and one per fullscreen (page) story
+ *   --manifest=<file>   With --shots: also write { sheet file: sha256 } here (see diff-manifest.ts)
  *   --json=<file>       Write findings JSON here (default: stdout)
  *
  * Known noise under high concurrency: sporadic "Cannot read properties of undefined
@@ -32,6 +33,7 @@ import * as path from 'path'
 import { pathToFileURL } from 'url'
 import { chromium, type Browser, type BrowserContext, type Page } from 'playwright'
 import { STORY_FINISHED } from 'storybook/internal/core-events'
+import { hashImage, type Manifest } from './manifest'
 import { planSheets, sheetHtml, type Cell, type Sheet } from './sheets'
 
 declare global {
@@ -308,6 +310,13 @@ async function main(): Promise<void> {
     await writeSheets(browser, sheets, modes, cellsDir, shotsDir)
     fs.rmSync(cellsDir, { recursive: true, force: true })
     console.error(`Wrote ${sheets.length} sheets from ${cells.length} screenshots to ${shotsDir}`)
+    if (typeof args.manifest === 'string') {
+      const manifest: Manifest = Object.fromEntries(
+        sheets.map((s) => [s.file, hashImage(fs.readFileSync(path.join(shotsDir, s.file)))]),
+      )
+      fs.writeFileSync(args.manifest, JSON.stringify(manifest, null, 1))
+      console.error(`Wrote the hashes of ${sheets.length} sheets to ${args.manifest}`)
+    }
   }
   await browser.close()
 
