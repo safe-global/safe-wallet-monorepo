@@ -1,8 +1,8 @@
 name: Web Argos Storybook
 
 # Visual regression for the web Storybook: builds it statically, screenshots every
-# story in light + dark via scripts/storybook/render-sweep.ts, and uploads the
-# screenshots to Argos.
+# story in light + dark via scripts/storybook/render-sweep.ts, and uploads them to
+# Argos as sheets (one image per title, one per fullscreen story).
 #
 # Uploads to the Argos project of web-argos-e2e.yml; the build name keeps the
 # Storybook baseline apart from the Cypress one.

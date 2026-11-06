@@ -158,7 +158,7 @@ _Status as of 2026-08 — re-verify against `src/stories/mocks/handlers.ts` befo
 
 ## Visual regression (Argos)
 
-`.github/workflows/web-argos-storybook.yml` builds the static Storybook, screenshots every story in **light and dark**, and uploads to Argos. It runs every Monday on `dev` to refresh the baseline, and by hand (`workflow_dispatch`) before a release. **It does NOT run on PRs.** Verify UI changes yourself via the story (or live page), and run the sweep locally:
+`.github/workflows/web-argos-storybook.yml` builds the static Storybook, screenshots every story in **light and dark**, and uploads them to Argos as **sheets**: one image per title with every story as a row and light/dark side by side, and one image per fullscreen (page) story. A changed story shows up as a diff in its title's sheet. It runs every Monday on `dev` to refresh the baseline, and by hand (`workflow_dispatch`) before a release. **It does NOT run on PRs.** Verify UI changes yourself via the story (or live page), and run the sweep locally:
 
 ```bash
 yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>   # add --filter=<substr> to scope
