@@ -11,14 +11,14 @@ export const LockdownBanner = ({ isCopied, onCopyLink }: LockdownBannerProps) =>
   <div
     role="status"
     data-testid="lockdown-banner"
-    className="fixed bottom-4 left-4 z-50 flex max-w-[calc(100%-2rem)] flex-wrap items-center gap-3 rounded-lg bg-foreground px-4 py-2 text-background shadow-lg"
+    className="fixed top-4 left-1/2 z-50 flex max-w-[calc(100%-2rem)] -translate-x-1/2 flex-wrap items-center gap-3 rounded-lg bg-foreground px-4 py-1.5 text-background shadow-lg"
   >
     <Lock aria-hidden="true" className="size-4" />
     <Typography variant="paragraph-small">
-      Encrypted Workspace: names are encrypted in this browser and tracking is off.
+      Encrypted Workspace: only people with this link can read it. Tracking is off.
     </Typography>
     <Button size="sm" variant="secondary" onClick={onCopyLink}>
-      {isCopied ? 'Link copied' : 'Copy Workspace link'}
+      {isCopied ? 'Link copied' : 'Copy link'}
     </Button>
   </div>
 )

@@ -64,21 +64,30 @@ const fromLetters = (letters: string[]): Uint8Array | undefined => {
   return bytes
 }
 
+export const ENCRYPTED_ENTRY_MARKER = 'Ꙭ'
+
 export const isEncryptedName = (value: string): boolean => value.startsWith(ENCRYPTED_NAME_MARKER)
 
-/** The result is always `maxLength` code points long, so CGW cannot see how long the name is. */
-export const encryptName = async (name: string, key: CryptoKey, maxLength: number): Promise<string> => {
-  const letterCount = maxLength - ENCRYPTED_NAME_MARKER.length
-  const capacity = payloadBytesFor(letterCount) - OVERHEAD_BYTES
-  const plaintext = new TextEncoder().encode(name)
+export const isEncryptedEntry = (value: string): boolean => value.startsWith(ENCRYPTED_ENTRY_MARKER)
 
-  if (plaintext.length > capacity) {
+export const capacityFor = (maxLength: number): number => payloadBytesFor(maxLength - 1) - OVERHEAD_BYTES
+
+/** The result is always `maxLength` code points long, so CGW cannot see how long the content is. */
+export const encryptBytes = async (
+  bytes: Uint8Array,
+  key: CryptoKey,
+  maxLength: number,
+  marker: string,
+): Promise<string> => {
+  const letterCount = maxLength - marker.length
+  const capacity = capacityFor(maxLength)
+
+  if (bytes.length > capacity) {
     throw new Error(`Encrypted names can be at most ${capacity} bytes long`)
   }
 
-  // Names never contain NUL: CGW and the web app both strip control characters.
   const padded = new Uint8Array(capacity)
-  padded.set(plaintext)
+  padded.set(bytes)
 
   const iv = crypto.getRandomValues(new Uint8Array(IV_BYTES))
   const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv, tagLength: TAG_BITS }, key, padded)
@@ -87,25 +96,36 @@ export const encryptName = async (name: string, key: CryptoKey, maxLength: numbe
   payload.set(iv)
   payload.set(new Uint8Array(ciphertext), IV_BYTES)
 
-  return ENCRYPTED_NAME_MARKER + toLetters(payload, letterCount)
+  return marker + toLetters(payload, letterCount)
 }
 
-export const decryptName = async (value: string, key: CryptoKey): Promise<string | undefined> => {
-  const payload = fromLetters([...value.slice(ENCRYPTED_NAME_MARKER.length)])
+/** Returns the padded plaintext, or undefined when the value is not encrypted with this key. */
+export const decryptBytes = async (value: string, key: CryptoKey): Promise<Uint8Array | undefined> => {
+  const payload = fromLetters([...value].slice(1))
   if (!payload || payload.length <= OVERHEAD_BYTES) return undefined
 
   try {
-    const padded = new Uint8Array(
+    return new Uint8Array(
       await crypto.subtle.decrypt(
         { name: 'AES-GCM', iv: payload.slice(0, IV_BYTES), tagLength: TAG_BITS },
         key,
         payload.slice(IV_BYTES),
       ),
     )
-    let end = padded.length
-    while (end > 0 && padded[end - 1] === 0) end--
-    return new TextDecoder().decode(padded.slice(0, end))
   } catch {
     return undefined
   }
+}
+
+export const encryptName = (name: string, key: CryptoKey, maxLength: number): Promise<string> =>
+  encryptBytes(new TextEncoder().encode(name), key, maxLength, ENCRYPTED_NAME_MARKER)
+
+export const decryptName = async (value: string, key: CryptoKey): Promise<string | undefined> => {
+  const padded = await decryptBytes(value, key)
+  if (!padded) return undefined
+
+  // Names never contain NUL: CGW and the web app both strip control characters.
+  let end = padded.length
+  while (end > 0 && padded[end - 1] === 0) end--
+  return new TextDecoder().decode(padded.slice(0, end))
 }
