@@ -17,8 +17,11 @@ import {
   useThreatAnalysis,
 } from './hooks'
 import useUntrustedSafeAnalysis from './hooks/useUntrustedSafeAnalysis'
+import { useGuardPolicyChecks, type GuardPolicyCheck } from './hooks/useGuardPolicyChecks'
+import { toGuardCheckCalls } from './utils/toGuardCheckCalls'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { useEffectDeepCompare } from '@safe-global/utils/features/safe-shield/hooks/util-hooks/useEffectDeepCompare'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import {
   type ContractAnalysisResults,
@@ -38,6 +41,8 @@ type SafeShieldContextType = {
   setRecipientAddresses: Dispatch<SetStateAction<string[] | undefined>>
   setPoisoningAddresses: Dispatch<SetStateAction<string[] | undefined>>
   setSafeTx: Dispatch<SetStateAction<SafeTransaction | undefined>>
+  setDraftTx: Dispatch<SetStateAction<SafeTransaction | undefined>>
+  guardCheck: GuardPolicyCheck
   safeTx?: SafeTransaction
   recipient: AsyncResult<RecipientAnalysisResults>
   contract: AsyncResult<ContractAnalysisResults>
@@ -87,6 +92,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   // Addresses registered for the poisoning check only (flows without recipient analysis)
   const [poisoningAddresses, setPoisoningAddresses] = useState<string[] | undefined>(undefined)
   const [safeTx, setSafeTx] = useState<SafeTransaction | undefined>(undefined)
+  const [draftTx, setDraftTx] = useState<SafeTransaction | undefined>(undefined)
 
   const { hasProFeatures: hasProAccess, isSafePro } = useSafeProAccess()
   const scopeContext = useSafeScopeContext()
@@ -119,6 +125,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const contract = counterpartyAnalysis.contract
   const safeShieldTx = safeTx || safeTxContext.safeTx
   const isOffchainMessage = !safeShieldTx && !!safeTxContext.safeMessage
+  const guardCheck = useGuardPolicyChecks(toGuardCheckCalls(safeShieldTx ?? draftTx))
   const safeShieldTxKey = safeShieldTx ? JSON.stringify(safeShieldTx.data).toLowerCase() : undefined
 
   // Safe-level analysis: untrusted Safe check
@@ -150,6 +157,8 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
         setPoisoningAddresses,
         setSafeTx,
         safeTx: safeShieldTx,
+        setDraftTx,
+        guardCheck,
         recipient,
         contract,
         threat,
@@ -213,6 +222,13 @@ export const useSafeShieldForAddressPoisoning = (addresses: Array<string | undef
   }, [key, setPoisoningAddresses])
 
   return recipient
+}
+
+/** Register a transaction a flow is still composing, so the policy guard check runs before it is built. */
+export const useSafeShieldForDraftTx = (draftTx: SafeTransaction | undefined) => {
+  const { setDraftTx } = useSafeShield()
+
+  useEffectDeepCompare(() => setDraftTx(draftTx), [draftTx?.data, setDraftTx])
 }
 
 /**

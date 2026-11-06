@@ -36,6 +36,7 @@ jest.mock('../../hooks/useHeldTokenAddresses')
 jest.mock('@/hooks/useAllAddressBooks', () => ({
   ContactSource: { space: 'space', local: 'local' },
   useMergedAddressBooks: () => ({ has: () => false }),
+  useSafeNameResolver: () => () => '',
 }))
 jest.mock('../AddFromAddressBook', () => ({ __esModule: true, default: () => null }))
 jest.mock('../TokenDraftRow', () => ({ __esModule: true, default: () => null }))

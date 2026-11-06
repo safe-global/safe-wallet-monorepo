@@ -12,6 +12,7 @@ const SafeShieldWidget = (): ReactElement => {
     threat,
     deadlock,
     safeTx,
+    guardCheck,
     safeAnalysis,
     addToTrustedList,
     hasProFeatures,
@@ -33,6 +34,7 @@ const SafeShieldWidget = (): ReactElement => {
       threat={threat}
       deadlock={deadlock}
       safeTx={safeTx}
+      guardCheck={guardCheck}
       hypernativeAuth={!eligibilityLoading && isHypernativeEligible ? hypernativeAuth : undefined}
       showHypernativeInfo={showHnInfo}
       showHypernativeActiveStatus={showHnActiveStatus}

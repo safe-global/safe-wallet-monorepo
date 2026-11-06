@@ -132,6 +132,7 @@ export { SpacesEnhancedSidebar } from './components/Sidebar/SpacesEnhancedSideba
 export { default as ConnectWalletHint } from './components/ConnectWalletHint'
 export { default as ChainSelectorBlock } from './components/SafeSelectorDropdown/components/ChainSelectorBlock'
 export type { ChainSelectorBlockProps } from './components/SafeSelectorDropdown/components/ChainSelectorBlock'
+export type { AllowlistRule } from './components/Policies/RecipientAllowlistFlow/types'
 export type {
   SafeItemData,
   SafeItemDataChain,

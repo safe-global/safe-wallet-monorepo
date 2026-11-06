@@ -53,6 +53,7 @@ type ConfirmationViewProps = {
   isCreation?: boolean
   children?: ReactNode
   withDecodedData?: boolean
+  withMultisend?: boolean
 }
 
 const getConfirmationViewComponent = ({
@@ -106,6 +107,7 @@ const ConfirmationView = ({
   txPreview,
   txDetails,
   withDecodedData = true,
+  withMultisend = true,
   ...props
 }: ConfirmationViewProps) => {
   const { txFlow } = useContext(TxModalContext)
@@ -164,6 +166,7 @@ const ConfirmationView = ({
           txData={details?.txData}
           txInfo={details?.txInfo}
           showDecodedData={!isDecodedDataVisible}
+          showMultisend={withMultisend}
         />
       </ParsingErrorBoundary>
     </>

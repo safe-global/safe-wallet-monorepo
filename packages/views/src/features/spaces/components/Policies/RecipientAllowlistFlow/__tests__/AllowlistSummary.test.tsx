@@ -89,4 +89,18 @@ describe('AllowlistSummary', () => {
       'The Safe policy guard is already enabled, so these changes wait 24 hours after execution, then need an activation step before they apply.',
     )
   })
+
+  it('shows the given description instead of the default one', () => {
+    render(
+      <AllowlistSummary
+        accountLabel="Payments"
+        tokenSymbols={['A']}
+        recipientNames={['Alice']}
+        description="Check the details below before you sign."
+      />,
+    )
+
+    expect(screen.getByText('Check the details below before you sign.')).toBeInTheDocument()
+    expect(screen.queryByText('Anything you leave out will be blocked.')).not.toBeInTheDocument()
+  })
 })

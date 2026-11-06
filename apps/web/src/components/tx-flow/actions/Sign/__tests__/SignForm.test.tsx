@@ -55,6 +55,8 @@ describe('SignForm', () => {
       setRecipientAddresses: jest.fn(),
       setPoisoningAddresses: jest.fn(),
       setSafeTx: jest.fn(),
+      setDraftTx: jest.fn(),
+      guardCheck: { isAllowed: false },
       recipient: [undefined, undefined, false] as AsyncResult<RecipientAnalysisResults>,
       contract: [undefined, undefined, false] as AsyncResult<ContractAnalysisResults>,
       threat: [undefined, undefined, false] as AsyncResult<ThreatAnalysisResults>,
