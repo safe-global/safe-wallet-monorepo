@@ -11,8 +11,13 @@ name: Web Argos Storybook
 # Pushes to dev record the sha256 of every sheet and upload a new baseline only when a sheet
 # changed since the previous dev commit; unchanged merges keep the last baseline, which is
 # still correct because their images are identical.
+#
+# Pull requests upload only the sheets that differ from their merge base on dev, as an Argos
+# subset build, and a skipped build when none differ, so `argos/storybook` reports on every
+# PR and can be a required check (docs/ci-required-checks.md).
 
 on:
+  pull_request:
   push:
     branches: [dev]
   # Weekly baseline on dev. Release checks are started by hand.
@@ -41,8 +46,51 @@ concurrency:
 permissions: {}
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      relevant: ${{ steps.changes.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - id: changes
+        uses: $/.github/actions/pr-changes
+        with:
+          paths: |
+            apps/web/**
+            packages/**
+            yarn.lock
+            package.json
+            .yarnrc.yml
+            .yarn/patches/**
+            config/**
+            yarn.config.cjs
+            scripts/storybook/**
+            .github/workflows/web-argos-storybook.yml
+            .github/actions/yarn/**
+            .github/actions/corepack/**
+            .github/actions/pr-changes/**
+
+  # A PR that cannot change a story still needs a green argos/storybook to merge
+  skip:
+    needs: changes
+    if: needs.changes.outputs.relevant != 'true'
+    runs-on: ubuntu-latest
+    name: Storybook visual tests (Argos) skipped
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Report a skipped Argos build
+        run: npx --yes @argos-ci/cli skip --build-name storybook
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN_E2E }}
+
   # Each shard sweeps whole titles, so its sheets are complete; the visual job joins them.
   sweep:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     name: Storybook sweep (${{ matrix.shard }}/4)
@@ -54,7 +102,10 @@ jobs:
         shard: [1, 2, 3, 4]
 
     steps:
+      # The PR's own head, not GitHub's merge commit, so the sheets compare with its merge base
       - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - uses: $/.github/actions/yarn
         with:
@@ -119,13 +170,22 @@ jobs:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
 
-      - name: Restore the previous dev manifest
+      - name: Find the PR's merge base
+        id: merge-base
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: echo "sha=$(git merge-base "origin/$BASE_REF" "$HEAD_SHA")" >> "$GITHUB_OUTPUT"
+
+      # A PR compares with its merge base only; a guessed baseline would hide or invent diffs
+      - name: Restore the baseline manifest
         id: base-manifest
         uses: actions/cache/restore@v5.0.5
         with:
           path: apps/web/sheets-manifest.json
-          key: storybook-sheets-manifest-${{ github.event.before || github.sha }}
-          restore-keys: storybook-sheets-manifest-
+          key: storybook-sheets-manifest-${{ steps.merge-base.outputs.sha || github.event.before || github.sha }}
+          restore-keys: ${{ github.event_name != 'pull_request' && 'storybook-sheets-manifest-' || '' }}
 
       - name: Keep it as the baseline
         if: steps.base-manifest.outputs.cache-matched-key != ''
@@ -160,28 +220,49 @@ jobs:
           BASE_KEY: ${{ steps.base-manifest.outputs.cache-matched-key }}
           EXACT_BASE: ${{ steps.base-manifest.outputs.cache-hit }}
         run: |
-          report=$(npx tsx ../../scripts/storybook/diff-manifest.ts base-manifest.json sheets-manifest.json)
+          report=$(npx tsx ../../scripts/storybook/diff-manifest.ts base-manifest.json sheets-manifest.json upload-list.txt)
           {
             echo "$report"
             echo
             echo "Baseline: \`${BASE_KEY:-none}\`"
           } | tee -a "$GITHUB_STEP_SUMMARY"
-          # Without the previous commit's own manifest the diff is a guess, so count it as changed
+          # Without the baseline commit's own manifest the diff is a guess, so count it as changed
           if [ "$EXACT_BASE" = true ] && grep -q '^sheets changed: 0 of' <<< "$report"; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
+          # A subset build ignores removed sheets, so a PR only uploads changed and added ones
+          echo "to-upload=$(grep -c . upload-list.txt || true)" >> "$GITHUB_OUTPUT"
 
       # On dev, a merge that changed no sheet keeps the last baseline
       - name: Upload to Argos
-        if: github.event_name != 'push' || steps.diff.outputs.changed == 'true'
+        if: github.event_name != 'pull_request' && (github.event_name != 'push' || steps.diff.outputs.changed == 'true')
         working-directory: apps/web
         run: npx --yes @argos-ci/cli upload argos-screenshots --build-name storybook
         env:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN_E2E }}
           ARGOS_REFERENCE_BRANCH: ${{ inputs.reference_branch || 'dev' }}
           ARGOS_REFERENCE_COMMIT: ${{ inputs.reference_commit || '' }}
+
+      # Argos compares the subset with the dev baseline at the merge base and ignores the sheets left out
+      - name: Upload the changed sheets to Argos
+        if: github.event_name == 'pull_request' && steps.diff.outputs.to-upload != '0'
+        working-directory: apps/web
+        run: |
+          mkdir argos-upload
+          while read -r sheet; do cp "argos-screenshots/$sheet" argos-upload/; done < upload-list.txt
+          npx --yes @argos-ci/cli upload argos-upload --build-name storybook --subset
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN_E2E }}
+          ARGOS_REFERENCE_BRANCH: dev
+
+      - name: Report a skipped Argos build
+        if: github.event_name == 'pull_request' && steps.diff.outputs.to-upload == '0'
+        working-directory: apps/web
+        run: npx --yes @argos-ci/cli skip --build-name storybook
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN_E2E }}
 
       # After the upload: a failed upload skips this, so the next dev merge still sees the change
       - name: Save the manifest for the next dev commit
