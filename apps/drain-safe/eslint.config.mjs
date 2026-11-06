@@ -1,7 +1,7 @@
 import baseConfig from '../../config/eslint/base.mjs'
 import tsParser from '@typescript-eslint/parser'
 
-export default [
+const config = [
   {
     ignores: ['**/node_modules/', '**/build/', '**/vite.config.ts', '**/jest.config.cjs'],
   },
@@ -22,3 +22,5 @@ export default [
     },
   },
 ]
+
+export default config
