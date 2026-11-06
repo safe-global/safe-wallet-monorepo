@@ -60,6 +60,7 @@ export const playwrightSpecs = {
     chains: [1],
   },
   'e2e/tx-builder.spec.ts': {},
+  'e2e/drain-account.spec.ts': {},
   'regression/auth0/email-sign-in.spec.ts': {},
   'regression/address-book.spec.ts': {
     scenarios: ['prepareTransferFormScenario'],

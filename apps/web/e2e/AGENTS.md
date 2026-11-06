@@ -17,7 +17,7 @@ Cypress → Playwright migration: move each Cypress test to the lowest level tha
 
 `yarn workspace @safe-global/web e2e:env playwright` runs the registered specs against the isolated stack; `SAFE_E2E_SPECS=<file name>` selects some. Setup: [docs/ISOLATED_ENVIRONMENT.md](docs/ISOLATED_ENVIRONMENT.md).
 
-CI: every registered spec runs on the isolated stack on **every PR that changes the wallet, the Transaction Builder, shared packages, dependencies or the workflow** (`web-isolated-e2e-backend.yml`, see below). No CI job runs Playwright against staging. `playwright.config.ts` and the `pw:*` scripts still run the specs against staging locally; they are being removed, so do not write a spec that needs staging.
+CI: every registered spec runs on the isolated stack on **every PR that changes the wallet, the Transaction Builder, Drain Account, shared packages, dependencies or the workflow** (`web-isolated-e2e-backend.yml`, see below). No CI job runs Playwright against staging. `playwright.config.ts` and the `pw:*` scripts still run the specs against staging locally; they are being removed, so do not write a spec that needs staging.
 
 ## Isolated backend
 

@@ -56,6 +56,7 @@ jobs:
             .github/actions/cache-deps/**
             apps/web/**
             apps/tx-builder/**
+            apps/drain-safe/**
             packages/**
             config/**
             package.json
@@ -147,6 +148,9 @@ jobs:
           VITE_TENDERLY_SIMULATE_ENDPOINT_URL: http://localhost:4003/simulate
         run: yarn workspace @safe-global/tx-builder exec vite build --config vite.config.ts
 
+      - name: Build Drain Account
+        run: yarn workspace @safe-global/drain-safe exec vite build --config vite.config.ts
+
       - name: Upload builds
         uses: actions/upload-artifact@v7.0.2
         with:
@@ -154,6 +158,7 @@ jobs:
           path: |
             apps/web/out
             apps/tx-builder/build
+            apps/drain-safe/build
           retention-days: 1
           if-no-files-found: error
 
@@ -243,14 +248,18 @@ jobs:
           name: isolated-e2e-builds
           path: apps
 
-      - name: Serve Transaction Builder and simulation adapter
+      - name: Serve Safe Apps and simulation adapter
         run: |
           nohup yarn workspace @safe-global/tx-builder exec \
             vite preview --config vite.config.ts --host localhost --strictPort \
             > "$RUNNER_TEMP/tx-builder.log" 2>&1 &
+          nohup yarn workspace @safe-global/drain-safe exec \
+            vite preview --config vite.config.ts --host localhost --strictPort \
+            > "$RUNNER_TEMP/drain-safe.log" 2>&1 &
           nohup node apps/web/e2e/environment/simulation.mjs \
             > "$RUNNER_TEMP/simulation.log" 2>&1 &
           timeout 60 bash -c 'until curl -sf http://localhost:4000 > /dev/null; do sleep 2; done'
+          timeout 60 bash -c 'until curl -sf http://localhost:4001 > /dev/null; do sleep 2; done'
           timeout 30 bash -c 'until curl -sf -X OPTIONS http://localhost:4003/simulate > /dev/null; do sleep 1; done'
 
       - name: Run isolated Playwright shard
@@ -303,6 +312,7 @@ jobs:
             ${{ runner.temp }}/isolated-e2e-backend/*.log
             apps/web/e2e/environment/infra/.anvil-cache/**
             ${{ runner.temp }}/tx-builder.log
+            ${{ runner.temp }}/drain-safe.log
             ${{ runner.temp }}/simulation.log
           retention-days: 1
           if-no-files-found: ignore
