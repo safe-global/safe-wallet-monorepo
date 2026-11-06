@@ -16,6 +16,7 @@
  *                       (e.g. 4000) or host-gated pages (Imprint/Licenses) flag as blank.
  *   --filter=<substr>   Only story ids/titles containing this substring
  *   --modes=light,dark  Themes to sweep (default both)
+ *   --shard=k/n         Only sweep shard k of n; whole titles per shard (see shardStories)
  *   --concurrency=N     Parallel pages (default 8; static builds tolerate 10+, the
  *                       webpack dev server does not)
  *   --shots=<dir>       Also save screenshots into <dir> as sheets (see sheets.ts): one image per
@@ -35,7 +36,7 @@ import { pathToFileURL } from 'url'
 import { chromium, type Browser, type BrowserContext, type Page } from 'playwright'
 import { STORY_FINISHED } from 'storybook/internal/core-events'
 import { hashImage, type Manifest } from './manifest'
-import { planSheets, sheetHtml, type Cell, type Sheet } from './sheets'
+import { planSheets, shardStories, sheetHtml, type Cell, type Sheet } from './sheets'
 
 declare global {
   interface Window {
@@ -311,10 +312,14 @@ async function main(): Promise<void> {
   const cellsDir = shotsDir ? fs.mkdtempSync(path.join(os.tmpdir(), 'sb-cells-')) : undefined
 
   const index = (await (await fetch(`${base}/index.json`)).json()) as { entries: Record<string, StoryEntry> }
-  const stories = Object.values(index.entries).filter(
+  const matching = Object.values(index.entries).filter(
     (e) => e.type === 'story' && (!filter || e.id.includes(filter) || e.title.includes(filter)),
   )
-  console.error(`Sweeping ${stories.length} stories x ${modes.length} modes against ${base}...`)
+  const [shard, shardCount] = typeof args.shard === 'string' ? args.shard.split('/').map(Number) : [1, 1]
+  const stories = shardStories(matching, shard, shardCount)
+  console.error(
+    `Sweeping ${stories.length} stories x ${modes.length} modes (shard ${shard}/${shardCount}) against ${base}...`,
+  )
 
   const browser = await launch()
   const results: Finding[] = []

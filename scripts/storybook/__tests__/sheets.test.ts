@@ -1,4 +1,4 @@
-import { planSheets, sheetHtml, type Cell } from '../sheets'
+import { planSheets, shardStories, sheetHtml, type Cell } from '../sheets'
 
 const MODES = ['light', 'dark']
 
@@ -61,6 +61,43 @@ describe('planSheets', () => {
 
   it('returns no sheets when nothing was captured', () => {
     expect(planSheets([], ['ui-button--primary'], MODES)).toEqual([])
+  })
+})
+
+describe('shardStories', () => {
+  const stories = (title: string, count: number) =>
+    Array.from({ length: count }, (_, i) => ({ id: `${title}--story-${i}` }))
+  const all = [...stories('big', 6), ...stories('a', 2), ...stories('b', 2), ...stories('c', 3), ...stories('d', 1)]
+  const titlesOf = (picked: Array<{ id: string }>) => [...new Set(picked.map((s) => s.id.split('--')[0]))]
+
+  it('covers every story exactly once across all shards', () => {
+    const picked = [1, 2, 3].flatMap((shard) => shardStories(all, shard, 3))
+
+    expect(picked.map((s) => s.id).sort()).toEqual(all.map((s) => s.id).sort())
+  })
+
+  it('never splits a title across shards', () => {
+    const shards = [1, 2, 3].map((shard) => titlesOf(shardStories(all, shard, 3)))
+
+    expect(shards.flat()).toHaveLength(new Set(shards.flat()).size)
+  })
+
+  it('puts the next title on the shard with the fewest stories', () => {
+    // big(6) -> 1, a(2) -> 2, b(2) -> 3, c(3) -> 2 (2 vs 2: first wins), d(1) -> 3
+    expect([1, 2, 3].map((shard) => titlesOf(shardStories(all, shard, 3)))).toEqual([['big'], ['a', 'c'], ['b', 'd']])
+  })
+
+  it('returns everything for a single shard', () => {
+    expect(shardStories(all, 1, 1)).toEqual(all)
+  })
+
+  it.each([
+    [0, 4],
+    [5, 4],
+    [1, 0],
+    [1.5, 4],
+  ])('rejects shard %s of %s', (shard, total) => {
+    expect(() => shardStories(all, shard, total)).toThrow(`Invalid shard ${shard}/${total}`)
   })
 })
 

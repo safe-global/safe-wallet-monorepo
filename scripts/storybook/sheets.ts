@@ -51,6 +51,39 @@ export function planSheets(cells: Cell[], storyOrder: string[], modes: string[])
   return [...sheets.values()]
 }
 
+/**
+ * Picks the stories of one shard so parallel sweeps can split the work.
+ *
+ * A title is never split, so every sheet is complete within one shard. Titles go, in index
+ * order, to the shard with the fewest stories so far; the result is the same on every machine.
+ *
+ * Args:
+ *   stories: All stories to sweep, in index order.
+ *   shard: 1-based shard number.
+ *   total: Number of shards.
+ *
+ * Returns:
+ *   The stories of `shard`, in index order.
+ */
+export function shardStories<T extends { id: string }>(stories: T[], shard: number, total: number): T[] {
+  if (!Number.isInteger(total) || total < 1 || !Number.isInteger(shard) || shard < 1 || shard > total) {
+    throw new Error(`Invalid shard ${shard}/${total}: expected 1 <= shard <= total, e.g. --shard=2/4`)
+  }
+  const titles = new Map<string, T[]>()
+  for (const story of stories) {
+    const titleId = story.id.split('--')[0]
+    titles.set(titleId, [...(titles.get(titleId) ?? []), story])
+  }
+  const sizes = new Array<number>(total).fill(0)
+  const picked: T[] = []
+  for (const group of titles.values()) {
+    const target = sizes.indexOf(Math.min(...sizes))
+    sizes[target] += group.length
+    if (target === shard - 1) picked.push(...group)
+  }
+  return picked
+}
+
 const escapeHtml = (text: string): string =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
