@@ -36,7 +36,6 @@ import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 import { useLoadFeature } from '@/features/__core__'
 import { FeePaymentFeature, useGasPayerSelection } from '@/features/fee-payment'
 import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'
-import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 
 export const ExecuteForm = ({
   safeTx,
@@ -94,8 +93,6 @@ export const ExecuteForm = ({
   const gasPayer: GasPayer = isPayFromSafe ? 'PAY_FROM_SAFE' : isSponsored ? offer.option : 'WALLET'
   const sponsorSpaceId = isSponsored && offer.option === 'SUBSCRIPTION' ? offer.spaceId : null
   const willRelay = gasPayer !== 'WALLET'
-
-  useSafeShieldForTxData(isPayFromSafe ? selection.fees.previewedSafeTx : undefined)
 
   useEffect(() => {
     setGasPaymentOption(gasPayer)
@@ -227,13 +224,7 @@ export const ExecuteForm = ({
           />
         </div>
 
-        {isPayFromSafeReady && selection.view && (
-          <GasPayerSelector
-            view={selection.view}
-            onChoiceChange={selection.setChoice}
-            onGasTokenChange={selection.onGasTokenChange}
-          />
-        )}
+        {isPayFromSafeReady && <GasPayerSelector selection={selection} />}
 
         {offer?.option === 'NO_FEE_CAMPAIGN' && offer.disabledReason === 'GAS_TOO_HIGH' && <GasTooHighBanner />}
 

@@ -34,6 +34,10 @@ jest.mock('@/hooks/useSafeInfo', () => ({
   default: () => ({ safe: { threshold: 1 }, safeAddress: '0xSafe' }),
 }))
 
+jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
+  useSafeShieldForTxData: jest.fn(),
+}))
+
 const mockUseSafeSponsoredTxs = jest.fn()
 jest.mock('@/features/spaces', () => ({
   useSafeSponsoredTxs: () => mockUseSafeSponsoredTxs(),

@@ -10,6 +10,7 @@ import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { useSafeSponsoredTxs } from '@/features/spaces'
 import { useAppDispatch, useAppSelector } from '@/store'
 import useWallet from '@/hooks/wallets/useWallet'
+import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 import type { SponsoredOffer } from '@/utils/gasPayment'
 import type { GasTokenOption, FeePayerPlanState, FeePayerView, GasPayerChoice, NetworkFee } from '../types'
 import { isPayFromSafeAvailable } from '../utils/isPayFromSafeAvailable'
@@ -233,6 +234,9 @@ export const useGasPayerSelection = ({
   )
 
   const isPayFromSafe = isLocked || choice === 'PAY_FROM_SAFE'
+
+  // Safe Shield simulates the payload about to be signed, Safe-pays fee params included.
+  useSafeShieldForTxData(isPayFromSafe ? fees.previewedSafeTx : undefined)
 
   return {
     view,

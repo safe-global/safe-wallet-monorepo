@@ -1,7 +1,6 @@
 import { useContext, useEffect, type ReactElement } from 'react'
 import { useLoadFeature } from '@/features/__core__'
 import { FeePaymentFeature, useGasPayerSelection, useIsFeeCardSlotVisible } from '@/features/fee-payment'
-import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 import { SafeTxContext } from '../SafeTxProvider'
 import { TxFlowContext } from '../TxFlowProvider'
 import { SlotName, withSlot } from '../slots'
@@ -18,16 +17,8 @@ const FeeCard = (): ReactElement | null => {
     return () => setIsSubmitDisabled(false)
   }, [blocksSubmit, setIsSubmitDisabled])
 
-  useSafeShieldForTxData(selection.isPayFromSafe ? selection.fees.previewedSafeTx : undefined)
-
-  if (!$isReady || !selection.view) return null
-  return (
-    <GasPayerSelector
-      view={selection.view}
-      onChoiceChange={selection.setChoice}
-      onGasTokenChange={selection.onGasTokenChange}
-    />
-  )
+  if (!$isReady) return null
+  return <GasPayerSelector selection={selection} />
 }
 
 const FeeCardSlot = withSlot({

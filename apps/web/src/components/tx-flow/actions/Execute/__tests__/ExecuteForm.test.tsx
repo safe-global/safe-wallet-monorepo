@@ -57,9 +57,8 @@ jest.mock('@/features/__core__', () => ({
   ...jest.requireActual('@/features/__core__'),
   useLoadFeature: () => ({
     $isReady: true,
-    GasPayerSelector: ({ view }: { view: FeePayerView }) => (
-      <div data-testid="gas-payer-selector" data-payer={JSON.stringify(view.payer)} />
-    ),
+    GasPayerSelector: ({ selection }: { selection: { view: FeePayerView | null } }) =>
+      selection.view && <div data-testid="gas-payer-selector" data-payer={JSON.stringify(selection.view.payer)} />,
     GasTooHighBanner: () => <div data-testid="gas-too-high-banner" />,
   }),
 }))

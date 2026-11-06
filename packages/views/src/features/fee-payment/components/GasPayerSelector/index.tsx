@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
 import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import ProChip from '@safe-global/views/assets/images/safe-pro/pro-chip.svg'
 import {
   EXECUTION_FEE_TOOLTIP,
@@ -259,7 +260,7 @@ const GasPayerSelector = ({
 }: GasPayerSelectorProps): ReactElement => {
   const { payer, gasToken, executionFee, gasFee, sponsored, sponsorKind, totalOutgoing, safeHasEnoughGas } = view
   const singleToken = gasToken.tokens.length <= 1
-  const displayedToken = gasToken.tokens.find((t) => t.address.toLowerCase() === gasToken.selected.toLowerCase())
+  const displayedToken = gasToken.tokens.find((t) => sameAddress(t.address, gasToken.selected))
 
   return (
     <div className={css.container} data-testid="gas-payer-selector">
