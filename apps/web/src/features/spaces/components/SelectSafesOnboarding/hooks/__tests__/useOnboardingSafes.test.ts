@@ -2,9 +2,10 @@ import * as allOwnedSafes from '@/hooks/safes/useAllOwnedSafes'
 import * as useChains from '@/hooks/useChains'
 import * as useWallet from '@/hooks/wallets/useWallet'
 import * as useGetSpaceAddressBook from '../../../../hooks/useGetSpaceAddressBook'
-import { renderHook } from '@/tests/test-utils'
+import { act, renderHook } from '@/tests/test-utils'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
+import { flattenSafeItems } from '@/hooks/safes'
 import useOnboardingSafes from '../useOnboardingSafes'
 
 describe('useOnboardingSafes', () => {
@@ -140,6 +141,70 @@ describe('useOnboardingSafes', () => {
     expect(result.current.ownedSafes).toHaveLength(1)
     expect(result.current.ownedSafes[0].address).toBe('0xMulti')
     expect('safes' in result.current.ownedSafes[0]).toBe(true)
+  })
+
+  describe('search', () => {
+    const SAFE_A = '0xAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAa'
+    const SAFE_B = '0xBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBb'
+    const SAFE_C = '0xCcCcCcCcCcCcCcCcCcCcCcCcCcCcCcCcCcCcCcCc'
+    const trustedAAndB = {
+      addedSafes: { '1': { [SAFE_A]: { owners: [], threshold: 1 }, [SAFE_B]: { owners: [], threshold: 1 } } },
+    }
+
+    const search = (result: { current: { handleSearch: (query: string) => void } }, query: string) =>
+      act(() => {
+        result.current.handleSearch(query)
+        jest.advanceTimersByTime(300)
+      })
+
+    beforeEach(() => jest.useFakeTimers())
+    afterEach(() => jest.useRealTimers())
+
+    it('keeps the trusted and owned Safes a search hides in the unfiltered pool', () => {
+      jest.spyOn(allOwnedSafes, 'default').mockReturnValue([{ '1': [SAFE_C] }, undefined, false])
+      const { result } = renderHook(() => useOnboardingSafes(), { initialReduxState: trustedAAndB })
+
+      search(result, SAFE_B)
+
+      expect(result.current.trustedSafes.map((s) => s.address)).toEqual([SAFE_B])
+      expect(result.current.ownedSafes).toEqual([])
+      expect(result.current.allSafes.map((s) => s.address).sort()).toEqual([SAFE_A, SAFE_B, SAFE_C])
+    })
+
+    it('keeps every chain of a multichain Safe the search hides', () => {
+      jest.spyOn(useChains, 'default').mockImplementation(() => ({
+        configs: [{ chainId: '1' } as Chain, { chainId: '137' } as Chain],
+      }))
+      const { result } = renderHook(() => useOnboardingSafes(), {
+        initialReduxState: {
+          addedSafes: { ...trustedAAndB.addedSafes, '137': { [SAFE_A]: { owners: [], threshold: 1 } } },
+        },
+      })
+
+      search(result, SAFE_B)
+
+      expect(result.current.trustedSafes.map((s) => s.address)).toEqual([SAFE_B])
+      expect(result.current.allSafes).toHaveLength(2)
+      const chainsOfA = flattenSafeItems(result.current.allSafes)
+        .filter((s) => s.address === SAFE_A)
+        .map((s) => s.chainId)
+      expect(chainsOfA.sort()).toEqual(['1', '137'])
+    })
+
+    it('keeps the same pool through a search and restores the visible list when it is cleared', () => {
+      const configs = [{ chainId: '1' } as Chain]
+      jest.spyOn(useChains, 'default').mockImplementation(() => ({ configs }))
+      const { result } = renderHook(() => useOnboardingSafes(), { initialReduxState: trustedAAndB })
+      const pool = result.current.allSafes
+      expect(pool).toHaveLength(2)
+
+      search(result, SAFE_B)
+      expect(result.current.allSafes).toBe(pool)
+
+      search(result, '')
+      expect(result.current.trustedSafes).toHaveLength(2)
+      expect(result.current.allSafes).toBe(pool)
+    })
   })
 
   describe('similar address detection', () => {

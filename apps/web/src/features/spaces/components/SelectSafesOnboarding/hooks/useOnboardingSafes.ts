@@ -60,6 +60,7 @@ const useOnboardingSafes = () => {
     () => _groupAndSort(ownedSafeItems, sortComparator),
     [ownedSafeItems, sortComparator],
   )
+  const allGrouped = useMemo<AllSafeItems>(() => [...trustedGrouped, ...ownedGrouped], [trustedGrouped, ownedGrouped])
 
   // Search
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -74,6 +75,7 @@ const useOnboardingSafes = () => {
   return {
     trustedSafes: searchQuery ? filteredTrusted : trustedGrouped,
     ownedSafes: searchQuery ? filteredOwned : ownedGrouped,
+    allSafes: allGrouped,
     flaggedAddresses,
     trustedSimilarityGroups,
     ownedSimilarityGroups,
