@@ -196,7 +196,8 @@ const TxFlowProvider = <T extends unknown>({
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const [signedTxId, setSignedTxId] = useState<string>()
-  const txId = initialTxId ?? signedTxId
+  // Signing a proposal with the Safe paying proposes a new tx, so the signed id wins over the one the flow opened.
+  const txId = signedTxId ?? initialTxId
   const [txDetails, , txDetailsLoading] = useTxDetails(txId)
   const { needsRiskConfirmation, isRiskConfirmed } = useSafeShield()
   const isUntrustedSafeBlocked = needsRiskConfirmation && !isRiskConfirmed

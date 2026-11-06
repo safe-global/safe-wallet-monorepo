@@ -20,6 +20,11 @@ export type PayFromSafeMergeContext = {
   dispatch: AppDispatch
 }
 
+export type PayFromSafeMerge = {
+  safeTx: SafeTransaction
+  feesMerged: boolean
+}
+
 /** Merges the CGW quote into an unsigned SafeTx; signed payloads keep their fee params. */
 export const mergePayFromSafeFeeParams = async ({
   safeTx,
@@ -32,13 +37,14 @@ export const mergePayFromSafeFeeParams = async ({
   numberSignatures,
   currency,
   dispatch,
-}: PayFromSafeMergeContext): Promise<SafeTransaction> => {
-  if (safeTx.signatures.size > 0) return safeTx
-  if (!isPayFromSafeAvailable(chain)) return safeTx
-  if (feePaymentMode !== 'safe' || !feeGasToken) return safeTx
-  if (!feePaymentFeature.$isReady || !feePaymentFeature.resolveFeeParams) return safeTx
+}: PayFromSafeMergeContext): Promise<PayFromSafeMerge> => {
+  const unchanged = { safeTx, feesMerged: false }
+  if (safeTx.signatures.size > 0) return unchanged
+  if (!isPayFromSafeAvailable(chain)) return unchanged
+  if (feePaymentMode !== 'safe' || !feeGasToken) return unchanged
+  if (!feePaymentFeature.$isReady || !feePaymentFeature.resolveFeeParams) return unchanged
 
-  return feePaymentFeature.resolveFeeParams({
+  const merged = await feePaymentFeature.resolveFeeParams({
     chainId,
     safeAddress,
     safeTx,
@@ -47,4 +53,5 @@ export const mergePayFromSafeFeeParams = async ({
     currency,
     dispatch,
   })
+  return { safeTx: merged, feesMerged: true }
 }

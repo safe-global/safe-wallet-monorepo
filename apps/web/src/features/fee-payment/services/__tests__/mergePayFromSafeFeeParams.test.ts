@@ -42,7 +42,7 @@ describe('mergePayFromSafeFeeParams', () => {
 
     const result = await mergePayFromSafeFeeParams({ ...baseArgs(safeTx), feePaymentFeature: feature })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
   })
 
@@ -56,7 +56,7 @@ describe('mergePayFromSafeFeeParams', () => {
       feePaymentFeature: feature,
     })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
   })
 
@@ -70,7 +70,7 @@ describe('mergePayFromSafeFeeParams', () => {
       feePaymentFeature: feature,
     })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
   })
 
@@ -84,7 +84,7 @@ describe('mergePayFromSafeFeeParams', () => {
       feePaymentFeature: feature,
     })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
   })
 
@@ -98,7 +98,7 @@ describe('mergePayFromSafeFeeParams', () => {
       feePaymentFeature: feature,
     })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
   })
 
@@ -108,7 +108,7 @@ describe('mergePayFromSafeFeeParams', () => {
 
     const result = await mergePayFromSafeFeeParams({ ...baseArgs(safeTx), feePaymentFeature: feature })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
   })
 
@@ -120,7 +120,7 @@ describe('mergePayFromSafeFeeParams', () => {
 
     const result = await mergePayFromSafeFeeParams({ ...baseArgs(safeTx), feePaymentFeature: feature })
 
-    expect(result).toBe(merged)
+    expect(result).toEqual({ safeTx: merged, feesMerged: true })
     expect(resolveFeeParams).toHaveBeenCalledWith({
       chainId: '1',
       safeAddress: '0xsafe',

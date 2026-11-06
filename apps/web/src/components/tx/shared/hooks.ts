@@ -136,9 +136,8 @@ export const useTxActions = (): TxActions => {
       return _propose(wallet?.address || safe.owners[0].value, safeTx, origin)
     }
 
-    // Signing a proposal with the Safe paying changes its hash, so it is proposed as a new tx instead.
-    const confirmableTxId = (txId: string | undefined, original: SafeTransaction, merged: SafeTransaction) =>
-      merged === original ? txId : undefined
+    // Merging the Safe-pays fee changes the hash, so a proposal is proposed again as a new tx instead of confirmed.
+    const confirmableTxId = (txId: string | undefined, feesMerged: boolean) => (feesMerged ? undefined : txId)
 
     const signRelayedTx = async (
       safeTx: SafeTransaction,
@@ -146,13 +145,13 @@ export const useTxActions = (): TxActions => {
     ): Promise<{ signedTx: SafeTransaction; txId?: string }> => {
       assertProvider(signer?.provider)
 
-      const merged = await withPayFromSafeFeeParams(safeTx)
-      txId = confirmableTxId(txId, safeTx, merged)
+      const { safeTx: txToSign, feesMerged } = await withPayFromSafeFeeParams(safeTx)
+      const confirmTxId = confirmableTxId(txId, feesMerged)
 
       if (await isSmartContractWallet(signer.chainId, signer.address)) {
         throw new Error('Cannot relay an unsigned transaction from a smart contract wallet')
       }
-      return { signedTx: await dispatchTxSigning(merged, signer.provider, txId, scope), txId }
+      return { signedTx: await dispatchTxSigning(txToSign, signer.provider, confirmTxId, scope), txId: confirmTxId }
     }
 
     const signTx: TxActions['signTx'] = async (safeTx, txId, origin) => {
@@ -160,9 +159,8 @@ export const useTxActions = (): TxActions => {
       assertProvider(signer?.provider)
       assertOnboard(onboard)
 
-      const merged = await withPayFromSafeFeeParams(safeTx)
-      txId = confirmableTxId(txId, safeTx, merged)
-      safeTx = merged
+      const { safeTx: txToSign, feesMerged } = await withPayFromSafeFeeParams(safeTx)
+      const confirmTxId = confirmableTxId(txId, feesMerged)
 
       // Smart contract wallets can't sign off-chain
       const viaSafe = isSafeSigner(signer)
@@ -172,10 +170,10 @@ export const useTxActions = (): TxActions => {
         const carriesEnvelope = viaSafe && supportsNestedTxEnvelope(safe.version)
 
         // The queue rejects unsigned proposals, so the nested signer's EOA signs the child hash first
-        if (signer.isSafe && !txId && !carriesEnvelope) {
+        if (signer.isSafe && !confirmTxId && !carriesEnvelope) {
           assertWallet(wallet)
           const nestedTxId = await dispatchNestedTxCreation({
-            safeTx,
+            safeTx: txToSign,
             wallet,
             parentSafeAddress: signer.address,
             parentProvider: signer.provider,
@@ -189,9 +187,10 @@ export const useTxActions = (): TxActions => {
           return { txId: nestedTxId, isNestedSigning: true }
         }
 
-        const id = txId || (carriesEnvelope ? undefined : (await _propose(signer.address, safeTx, origin)).txId)
+        const id =
+          confirmTxId || (carriesEnvelope ? undefined : (await _propose(signer.address, txToSign, origin)).txId)
         const signedTxId = await dispatchOnChainSigning(
-          safeTx,
+          txToSign,
           id,
           signer.provider,
           chainId,
@@ -206,8 +205,8 @@ export const useTxActions = (): TxActions => {
       }
 
       // Otherwise, sign off-chain
-      const signedTx = await dispatchTxSigning(safeTx, signer.provider, txId, scope)
-      const signedTxId = await _proposeOrConfirm(signer.address, signedTx, txId, origin)
+      const signedTx = await dispatchTxSigning(txToSign, signer.provider, confirmTxId, scope)
+      const signedTxId = await _proposeOrConfirm(signer.address, signedTx, confirmTxId, origin)
       return { txId: signedTxId, isNestedSigning: false }
     }
 
@@ -244,25 +243,26 @@ export const useTxActions = (): TxActions => {
       if (isRelayed) {
         // The relayer has no implicit approval, so the last signer of an m/n Safe signs before relaying
         const needsSignature = safeTx.signatures.size < safe.threshold
-        if (needsSignature) {
-          ;({ signedTx: safeTx, txId } = await signRelayedTx(safeTx, txId))
-        }
+        const { signedTx, txId: knownTxId } = needsSignature
+          ? await signRelayedTx(safeTx, txId)
+          : { signedTx: safeTx, txId }
 
         // Relayed txs must be known to the service
-        if (!txId || needsSignature) {
-          txId = await _proposeOrConfirm(signer.address, safeTx, txId, origin)
-        }
+        const relayTxId =
+          !knownTxId || needsSignature
+            ? await _proposeOrConfirm(signer.address, signedTx, knownTxId, origin)
+            : knownTxId
         await dispatchTxRelay(
-          safeTx,
+          signedTx,
           safe,
-          txId,
+          relayTxId,
           chain,
           txOptions.gasLimit,
           acceptUnverifiedSimulation,
           scope,
           sponsorSpaceId,
         )
-        return { txId, isExecuted: true }
+        return { txId: relayTxId, isExecuted: true }
       }
 
       const viaSafe = isSafeSigner(signer)

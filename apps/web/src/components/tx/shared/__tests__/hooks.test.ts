@@ -1544,6 +1544,28 @@ describe('SignOrExecute hooks', () => {
       expect(txId).toBe('new-id')
     })
 
+    it('proposes a new tx when the fees are merged even if the merge hands back the same object', async () => {
+      setupPayFromSafeChain()
+      jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
+
+      const safeTx = createSafeTx()
+      mockFeatureResolve(jest.fn().mockResolvedValue(safeTx))
+
+      jest.spyOn(txSender, 'dispatchTxSigning').mockResolvedValue(safeTx)
+      const proposeSpy = jest
+        .spyOn(txSender, 'dispatchTxProposal')
+        .mockImplementation((() =>
+          Promise.resolve({ txId: 'new-id' })) as unknown as typeof txSender.dispatchTxProposal)
+      const confirmSpy = jest.spyOn(txSender, 'dispatchTxConfirmation')
+
+      const ref = captureActions()
+      const { txId } = await ref.current!.signTx(safeTx, 'proposal-id')
+
+      expect(confirmSpy).not.toHaveBeenCalled()
+      expect(proposeSpy).toHaveBeenCalled()
+      expect(txId).toBe('new-id')
+    })
+
     it("confirms the proposer's tx when the first signer leaves the signer paying", async () => {
       setupPayFromSafeChain()
       jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
