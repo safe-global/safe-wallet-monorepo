@@ -18,6 +18,8 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       'shadcn/no-raw-colors': 'error',
+      'shadcn/no-inline-styles': 'warn',
+      'shadcn/require-static-classes': 'warn',
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules],
       'no-restricted-imports': [
         'error',
