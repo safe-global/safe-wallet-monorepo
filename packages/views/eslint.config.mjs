@@ -5,16 +5,18 @@ import { plugin as shadcn } from '@shadcn/lint'
 import { designSystemSyntaxRules } from './eslint-design-system.mjs'
 import noExplicitAny from '../../config/eslint/no-explicit-any.mjs'
 
+const TEST_FILES = ['**/*.test.{ts,tsx}', '**/__tests__/**/*.{ts,tsx}']
+
 export default tseslint.config(
-  { ignores: ['**/*.test.ts', '**/*.test.tsx', '**/*.stories.tsx', '**/__tests__/**', '**/__mocks__/**'] },
-  js.configs.recommended,
-  ...tseslint.configs.recommended,
+  { ignores: ['**/*.stories.tsx', '**/__mocks__/**'] },
   {
+    name: 'views/production-code',
     files: ['src/**/*.{ts,tsx}'],
+    ignores: TEST_FILES,
+    extends: [js.configs.recommended, ...tseslint.configs.recommended, noExplicitAny],
     plugins: { 'react-hooks': reactHooks, shadcn },
     rules: {
       ...reactHooks.configs.recommended.rules,
-      '@typescript-eslint/no-explicit-any': 'error',
       'shadcn/no-raw-colors': 'error',
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules],
       'no-restricted-imports': [
@@ -37,5 +39,9 @@ export default tseslint.config(
       ],
     },
   },
-  noExplicitAny,
+  {
+    name: 'views/tests',
+    files: TEST_FILES,
+    extends: [tseslint.configs.base, noExplicitAny],
+  },
 )
