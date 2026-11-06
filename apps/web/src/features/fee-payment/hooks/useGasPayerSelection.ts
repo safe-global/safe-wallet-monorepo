@@ -107,15 +107,14 @@ export const useGasPayerSelection = ({
 
   const preferredChoice: GasPayerChoice | undefined = preferredMode === 'safe' ? 'PAY_FROM_SAFE' : undefined
 
-  const choice: GasPayerChoice = isLocked
-    ? 'PAY_FROM_SAFE'
-    : isChoiceAvailable(explicitChoice)
-      ? explicitChoice
-      : hasSponsoredOffer && step === 'execute'
-        ? 'SPONSORED'
-        : isChoiceAvailable(preferredChoice)
-          ? preferredChoice
-          : 'WALLET'
+  const resolveChoice = (): GasPayerChoice => {
+    if (isLocked) return 'PAY_FROM_SAFE'
+    if (isChoiceAvailable(explicitChoice)) return explicitChoice
+    if (hasSponsoredOffer && step === 'execute') return 'SPONSORED'
+    if (isChoiceAvailable(preferredChoice)) return preferredChoice
+    return 'WALLET'
+  }
+  const choice = resolveChoice()
 
   // Quoted only while Safe account is the choice; RTK Query dedupes it with `useFeesPreview`'s.
   const quote = usePayFromSafeFeePreview({
