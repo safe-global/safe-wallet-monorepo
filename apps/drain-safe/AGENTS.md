@@ -20,4 +20,4 @@ Tests are colocated. `src/App.test.tsx` renders the whole app with `renderApp()`
 
 ## Safe App constraints
 
-The app talks to the host only through `safe-apps-sdk` / `safe-apps-react-sdk`; the host Safe provides the signer. `public/manifest.json` and `public/logo.svg` are read by the wallet to list the app — keep both at the build root.
+The app talks to the host only through `safe-apps-sdk` / `safe-apps-react-sdk`; the host Safe provides the signer. `public/manifest.json` and `public/logo.svg` are read by the wallet to list the app — keep both at the build root. Releases: [docs/release-procedure.md](docs/release-procedure.md).
