@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen } from '@/tests/test-utils'
 import { DrawerSection } from '../DrawerSection'
 
 describe('DrawerSection', () => {
@@ -42,5 +42,56 @@ describe('DrawerSection', () => {
     render(<DrawerSection title={<span data-testid="title-node">Custom title</span>}>Section content</DrawerSection>)
 
     expect(screen.getByTestId('title-node')).toBeInTheDocument()
+  })
+
+  describe('collapsible', () => {
+    it('starts open and toggles from the title', () => {
+      render(
+        <DrawerSection collapsible title="Summary">
+          Section content
+        </DrawerSection>,
+      )
+
+      const toggle = screen.getByRole('button', { name: /Summary/ })
+      expect(toggle).toHaveAttribute('aria-expanded', 'true')
+      expect(screen.getByText('Section content')).toBeVisible()
+
+      fireEvent.click(toggle)
+      expect(toggle).toHaveAttribute('aria-expanded', 'false')
+      expect(screen.queryByText('Section content')).not.toBeInTheDocument()
+    })
+
+    it('can start collapsed', () => {
+      render(
+        <DrawerSection collapsible defaultOpen={false} title="Transaction data">
+          Section content
+        </DrawerSection>,
+      )
+
+      expect(screen.getByRole('button', { name: /Transaction data/ })).toHaveAttribute('aria-expanded', 'false')
+      expect(screen.queryByText('Section content')).not.toBeInTheDocument()
+    })
+
+    it('reports changes when controlled', () => {
+      const onOpenChange = jest.fn()
+      render(
+        <DrawerSection collapsible open={false} onOpenChange={onOpenChange} title="Security">
+          Section content
+        </DrawerSection>,
+      )
+
+      fireEvent.click(screen.getByRole('button', { name: /Security/ }))
+      expect(onOpenChange).toHaveBeenCalledWith(true, expect.anything())
+    })
+
+    it('keeps the trailing node outside the toggle', () => {
+      render(
+        <DrawerSection collapsible title="Runs after" rightNode="1 earlier">
+          Section content
+        </DrawerSection>,
+      )
+
+      expect(screen.getByRole('button', { name: /Runs after/ })).not.toContainElement(screen.getByText('1 earlier'))
+    })
   })
 })
