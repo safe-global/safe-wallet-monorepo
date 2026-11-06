@@ -6,7 +6,7 @@ interface RelayUnavailableSheetProps {
 }
 
 /**
- * Terminal sheet shown when a transaction must be relayed (GTF Safe-pays) but the chain does not
+ * Terminal sheet shown when a transaction must be relayed (Pay from Safe) but the chain does not
  * support relaying. There is no signer fallback, so the only action is to acknowledge and close.
  */
 export function RelayUnavailableSheet({ onDismiss }: RelayUnavailableSheetProps) {
