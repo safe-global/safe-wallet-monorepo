@@ -1,7 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { CssBaseline, GlobalStyles, ThemeProvider } from '@mui/material'
-import SafeProvider from '@safe-global/safe-apps-react-sdk'
+import { SafeProvider } from '@safe-global/safe-apps-react-sdk'
 import { generateMuiTheme } from '@safe-global/theme/generators/mui'
 import DMSansRegular from './assets/fonts/DMSansRegular.woff2'
 import DMSansBold from './assets/fonts/DMSans700.woff2'

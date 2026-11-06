@@ -83,7 +83,6 @@ export const resetFakeSdk = (): void => {
 }
 
 export const safeAppsReactSdkFake = {
-  __esModule: true,
-  default: ({ children }: PropsWithChildren) => children,
+  SafeProvider: ({ children }: PropsWithChildren) => children,
   useSafeAppsSDK: () => ({ sdk: fakeSdk as unknown as SafeAppsSDK, safe: SAFE_INFO, connected: true }),
 }
