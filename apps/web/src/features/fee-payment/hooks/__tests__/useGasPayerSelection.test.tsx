@@ -162,6 +162,32 @@ describe('useGasPayerSelection', () => {
     expect(persisted()).toEqual({ [SIGNER.toLowerCase()]: 'signer' })
   })
 
+  it("shows the Safe-pays fee priced in the gas token's decimals", () => {
+    const USDC = { address: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238', symbol: 'USDC', logoUri: '' }
+    mockUseFeesPreview.mockReturnValue(
+      buildFees({
+        availableGasTokens: [USDC],
+        selectedGasToken: USDC.address,
+        gasFee: { label: 'Gas fee', amount: '1.5', currency: 'USDC', fiatAmount: '$1.50' },
+      }),
+    )
+    mockUsePayFromSafeFeePreview.mockImplementation(({ enabled }: { enabled: boolean }) =>
+      enabled
+        ? {
+            ...QUOTE,
+            data: {
+              ...QUOTE.data,
+              txData: { safeTxGas: '0', baseGas: '1500000', gasPrice: '1', gasToken: USDC.address },
+            },
+          }
+        : { data: undefined, error: undefined, isLoading: false, isFetching: false },
+    )
+
+    const { result } = renderSelection(preference('safe'))
+
+    expect(result.current.view?.gasFee).toEqual({ amount: '1.5', currency: 'USDC', fiatAmount: '$1.50' })
+  })
+
   it('falls back to Signer wallet without forgetting Safe account while the Safe cannot pay', () => {
     mockUseFeesPreview.mockReturnValue(buildFees({ availableGasTokens: [] }))
 

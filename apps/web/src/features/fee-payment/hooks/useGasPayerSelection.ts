@@ -3,8 +3,6 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 import { getGasPaymentOptions } from '@safe-global/utils/utils/gasPaymentOptions'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-import { formatCurrencyMinimal } from '@safe-global/utils/utils/formatNumber'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
@@ -13,19 +11,12 @@ import { useSafeSponsoredTxs } from '@/features/spaces'
 import { useAppDispatch, useAppSelector } from '@/store'
 import useWallet from '@/hooks/wallets/useWallet'
 import type { SponsoredOffer } from '@/utils/gasPayment'
-import type {
-  GasTokenOption,
-  FeePayerControl,
-  FeePayerFooter,
-  FeePayerPlanState,
-  FeePayerView,
-  GasPayerChoice,
-  NetworkFee,
-} from '../types'
+import type { GasTokenOption, FeePayerPlanState, FeePayerView, GasPayerChoice, NetworkFee } from '../types'
 import { isPayFromSafeAvailable } from '../utils/isPayFromSafeAvailable'
 import { useFeesPreview, type FeesPreviewData } from './useFeesPreview'
 import { usePayFromSafeFeePreview } from './usePayFromSafeFeePreview'
 import { withoutFees } from '../services/totalOutgoing'
+import { buildFooter, buildPayerControl, resolveChoice } from '../services/feePayerView'
 import { selectFeePaymentSourcePreference, setFeePaymentSourcePreference } from '../store'
 
 export type GasPayerSelection = {
@@ -85,36 +76,34 @@ export const useGasPayerSelection = ({
     !isLocked && isChainReady && isUnsigned && !fees.isLegacySigned && (fees.availableGasTokens?.length ?? 0) > 0
 
   // `useFeesPreview` prices whichever mode is active: the signer estimate while `signer`, the quote while `safe`.
-  const currentFee: NetworkFee = {
-    amount: fees.gasFee.amount,
-    currency: fees.gasFee.currency,
-    fiatAmount: fees.gasFee.fiatAmount,
-    note: fees.gasFee.note,
-    loading: fees.loading,
-    error: fees.error,
-  }
-  const signerFee: NetworkFee =
-    feePaymentMode === 'safe' && !isLocked ? { note: 'Calculated at execution' } : currentFee
+  const currentFee = useMemo<NetworkFee>(
+    () => ({
+      amount: fees.gasFee.amount,
+      currency: fees.gasFee.currency,
+      fiatAmount: fees.gasFee.fiatAmount,
+      note: fees.gasFee.note,
+      loading: fees.loading,
+      error: fees.error,
+    }),
+    [fees.gasFee, fees.loading, fees.error],
+  )
+  const signerFee = useMemo<NetworkFee>(
+    () => (feePaymentMode === 'safe' && !isLocked ? { note: 'Calculated at execution' } : currentFee),
+    [feePaymentMode, isLocked, currentFee],
+  )
 
   // Pro with sponsored txs left decides at execution; a proposer leaves the pick to the first signer.
   const offersSafeToggle = canPayFromSafe && planState !== 'PRO_SPONSORED_LEFT' && !isProposing
   const isSafeOptionShown = offersSafeToggle && !(step === 'execute' && hasSponsoredOffer)
 
-  const isChoiceAvailable = (candidate: GasPayerChoice | undefined): candidate is GasPayerChoice =>
-    candidate === 'WALLET' ||
-    (candidate === 'SPONSORED' && hasSponsoredOffer && step === 'execute') ||
-    (candidate === 'PAY_FROM_SAFE' && isSafeOptionShown)
-
-  const preferredChoice: GasPayerChoice | undefined = preferredMode === 'safe' ? 'PAY_FROM_SAFE' : undefined
-
-  const resolveChoice = (): GasPayerChoice => {
-    if (isLocked) return 'PAY_FROM_SAFE'
-    if (isChoiceAvailable(explicitChoice)) return explicitChoice
-    if (hasSponsoredOffer && step === 'execute') return 'SPONSORED'
-    if (isChoiceAvailable(preferredChoice)) return preferredChoice
-    return 'WALLET'
-  }
-  const choice = resolveChoice()
+  const choice = resolveChoice({
+    isLocked,
+    explicitChoice,
+    preferredChoice: preferredMode === 'safe' ? 'PAY_FROM_SAFE' : undefined,
+    step,
+    hasSponsoredOffer,
+    isSafeOptionShown,
+  })
 
   // Quoted only while Safe account is the choice; RTK Query dedupes it with `useFeesPreview`'s.
   const quote = usePayFromSafeFeePreview({
@@ -128,15 +117,10 @@ export const useGasPayerSelection = ({
   const safeFee = useMemo<NetworkFee>(() => {
     if (quote.isLoading || quote.isFetching) return { loading: true }
     if (!quote.data) return { error: !!quote.error }
-    const { txData, relayCost } = quote.data
-    const gasFeeBaseUnits = (BigInt(txData.safeTxGas) + BigInt(txData.baseGas)) * BigInt(txData.gasPrice)
-    const token = fees.availableGasTokens?.find((t) => t.address.toLowerCase() === txData.gasToken.toLowerCase())
-    return {
-      amount: formatVisualAmount(gasFeeBaseUnits, chain?.nativeCurrency.decimals ?? 18),
-      currency: token?.symbol ?? chain?.nativeCurrency.symbol,
-      fiatAmount: formatCurrencyMinimal(Number(relayCost.fiatValue), relayCost.fiatCode),
-    }
-  }, [quote.isLoading, quote.isFetching, quote.data, quote.error, fees.availableGasTokens, chain])
+    // `useFeesPreview` prices the same quote in the gas token's decimals once the flow is in `safe` mode.
+    if (feePaymentMode !== 'safe' || fees.loading) return { loading: true }
+    return { amount: fees.gasFee.amount, currency: fees.gasFee.currency, fiatAmount: fees.gasFee.fiatAmount }
+  }, [quote.isLoading, quote.isFetching, quote.data, quote.error, feePaymentMode, fees.loading, fees.gasFee])
 
   // `safe` makes the signing path merge the quote into the payload; `signer` leaves it untouched.
   useEffect(() => {
@@ -148,38 +132,15 @@ export const useGasPayerSelection = ({
   const view = useMemo<FeePayerView | null>(() => {
     if (!safeTx) return null
 
-    const payer: FeePayerControl = (() => {
-      if (isLocked) return { kind: 'locked', value: 'PAY_FROM_SAFE' }
-      if (step === 'sign') {
-        if (planState === 'PRO_SPONSORED_LEFT') return { kind: 'locked', value: 'SPONSORED' }
-        if (offersSafeToggle) {
-          return {
-            kind: 'choice',
-            value: choice === 'PAY_FROM_SAFE' ? 'PAY_FROM_SAFE' : 'WALLET',
-            options: ['PAY_FROM_SAFE', 'WALLET'],
-          }
-        }
-        if (isProposing) {
-          return { kind: 'locked', value: 'WALLET', reason: 'Whoever signs first picks who pays the gas fee.' }
-        }
-        return { kind: 'locked', value: 'WALLET' }
-      }
-      if (hasSponsoredOffer) {
-        return {
-          kind: 'choice',
-          value: choice === 'SPONSORED' ? 'SPONSORED' : 'WALLET',
-          options: ['SPONSORED', 'WALLET'],
-        }
-      }
-      if (offersSafeToggle) {
-        return {
-          kind: 'choice',
-          value: choice === 'PAY_FROM_SAFE' ? 'PAY_FROM_SAFE' : 'WALLET',
-          options: ['PAY_FROM_SAFE', 'WALLET'],
-        }
-      }
-      return { kind: 'locked', value: 'WALLET' }
-    })()
+    const payer = buildPayerControl({
+      isLocked,
+      step,
+      planState,
+      offersSafeToggle,
+      isProposing,
+      hasSponsoredOffer,
+      choice,
+    })
 
     const paysFromSafe = payer.value === 'PAY_FROM_SAFE'
     const sponsored = payer.value === 'SPONSORED'
@@ -218,39 +179,13 @@ export const useGasPayerSelection = ({
         }
     const totalOutgoing = isLocked || paysFromSafe ? fees.totalOutgoing : withoutFees(fees.totalOutgoing)
 
-    // At execution the offer decides the strip; at signing the Workspace meter, where the chain sponsors plans.
-    const footer: FeePayerFooter = (() => {
-      if (offer?.option === 'SUBSCRIPTION') {
-        return {
-          kind: 'counter',
-          left: offer.left,
-          quota: offer.meter?.quota ?? null,
-          resetsAt: offer.meter?.resetsAt ?? null,
-          isSubscription: true,
-        }
-      }
-      if (offer?.option === 'FREE_DAILY_LIMIT') {
-        return {
-          kind: 'counter',
-          left: offer.relays?.remaining ?? null,
-          quota: offer.relays?.limit ?? null,
-          resetsAt: null,
-          isSubscription: false,
-        }
-      }
-      if (offer?.option === 'NO_FEE_CAMPAIGN') {
-        return { kind: 'counter', left: offer.remaining, quota: offer.limit, resetsAt: null, isSubscription: false }
-      }
-      if (!chainOptions.includes('SUBSCRIPTION')) return { kind: 'none' }
-      if (planState === 'FREE') return { kind: 'upsell' }
-      return {
-        kind: 'counter',
-        left,
-        quota: meter?.quota ?? null,
-        resetsAt: meter?.resetsAt ?? null,
-        isSubscription: true,
-      }
-    })()
+    const footer = buildFooter({
+      offer,
+      chainSponsorsPlans: chainOptions.includes('SUBSCRIPTION'),
+      planState,
+      left,
+      meter,
+    })
 
     return {
       payer,
@@ -264,31 +199,28 @@ export const useGasPayerSelection = ({
       footer,
       safeHasEnoughGas: paysFromSafe && !isLocked ? fees.safeHasEnoughGas : undefined,
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     safeTx,
-    chainOptions,
     isLocked,
     step,
     planState,
     offersSafeToggle,
     isProposing,
-    choice,
-    safeFee,
     hasSponsoredOffer,
-    offer,
-    left,
-    meter,
+    choice,
     chain,
-    fees.gasFee,
-    fees.executionFee,
-    fees.totalOutgoing,
-    fees.loading,
-    fees.error,
     fees.availableGasTokens,
     fees.selectedGasToken,
+    fees.executionFee,
+    fees.totalOutgoing,
     fees.safeHasEnoughGas,
-    feePaymentMode,
+    currentFee,
+    safeFee,
+    signerFee,
+    offer,
+    chainOptions,
+    left,
+    meter,
   ])
 
   // Only explicit Safe account / Signer wallet picks are remembered, so a fallback never overwrites them.
