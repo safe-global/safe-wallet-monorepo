@@ -134,7 +134,7 @@
   "devDependencies": {
     "@argos-ci/cypress": "7.4.0",
     "@cowprotocol/sdk-app-data": "5.3.2",
-    "@faker-js/faker": "^9.0.3",
+    "@faker-js/faker": "^10.5.0",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
     "@next/bundle-analyzer": "^16.4.3",
