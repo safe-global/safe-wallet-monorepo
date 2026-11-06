@@ -64,5 +64,8 @@ Set these job names as required status checks in branch protection for `dev`:
 | `tx-builder checks result`   | `tx-builder-checks.yml` (lint, prettier, type-check, tests, build) | `apps/tx-builder`, `packages`, `config`, dependencies               |
 | `Utils unit tests result`    | `package-utils-unit-tests.yml`                                     | `packages/utils`, `packages/store`, `config`, dependencies          |
 | `Isolated E2E result`        | `web-isolated-e2e-backend.yml`                                     | `apps/web`, `apps/tx-builder`, `packages`, `config`, dependencies   |
+| `argos/storybook`            | `web-argos-storybook.yml` (Storybook visual review in Argos)       | `apps/web`, `packages`, `config`, dependencies                      |
+
+`argos/storybook` is a commit status that Argos posts, not a job. The workflow uploads the PR's changed Storybook sheets, and the status stays failed until someone approves the changes in Argos. A PR that changes nothing relevant, or no sheet, gets a skipped Argos build, which reports success.
 
 "Dependencies" means `yarn.lock`, `package.json`, `.yarnrc.yml`, `yarn.config.cjs` and `.yarn/patches`. Workflows that run prettier, turbo, knip or `scripts/verify.mjs` also list their config files. Each workflow also runs when its own file or the shared actions it uses change. The `pr-changes` step of each workflow holds the exact list.
