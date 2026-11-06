@@ -1,10 +1,19 @@
 import Cookies from 'js-cookie'
+import type { HypernativeTokenExchangeResponseDto } from '@safe-global/store/hypernative/hypernativeApi.dto'
 
 /**
  * Cookie key for storing OAuth authentication data
  * Stores both token and expiry as JSON: { token: string, expiry: number }
  */
 const AUTH_COOKIE_KEY = 'hn_auth'
+
+/** Fired on the window whenever this tab writes or clears the auth cookie */
+export const AUTH_COOKIE_CHANGE_EVENT = 'hn-auth-cookie-change'
+
+export type AuthTokens = Pick<
+  HypernativeTokenExchangeResponseDto['data'],
+  'access_token' | 'token_type' | 'expires_in' | 'refresh_token' | 'refresh_expires_in'
+>
 
 /**
  * Authentication data structure stored in cookie
@@ -13,6 +22,9 @@ interface AuthTokenData {
   token: string
   tokenType: string
   expiry: number // timestamp in milliseconds
+  refreshToken?: string
+  refreshExpiry?: number // end of the absolute refresh window, timestamp in milliseconds
+  refreshAbandoned?: boolean
 }
 
 /**
@@ -38,9 +50,21 @@ const getCookieOptions = (maxAgeInSeconds?: number): Cookies.CookieAttributes =>
   }
 }
 
+const notifyAuthCookieChange = (): void => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(AUTH_COOKIE_CHANGE_EVENT))
+  }
+}
+
+const writeAuthCookie = (data: AuthTokenData, maxAgeInSeconds: number): void => {
+  Cookies.set(AUTH_COOKIE_KEY, JSON.stringify(data), getCookieOptions(maxAgeInSeconds))
+  notifyAuthCookieChange()
+}
+
 /**
  * Helper function to get and parse auth cookie data
- * Handles expiration checks and cleanup of expired/invalid cookies
+ * Handles expiration checks and cleanup of expired/invalid cookies.
+ * A cookie with a usable refresh token lives until the refresh window closes.
  * @returns Parsed auth token data or undefined if not found, expired, or invalid
  */
 export const getAuthCookieData = (): AuthTokenData | undefined => {
@@ -51,8 +75,8 @@ export const getAuthCookieData = (): AuthTokenData | undefined => {
 
   try {
     const data: AuthTokenData = JSON.parse(cookieValue)
-    if (Date.now() >= data.expiry) {
-      // Token expired, clean up cookie
+    const refreshExpiry = data.refreshToken && !data.refreshAbandoned ? data.refreshExpiry : undefined
+    if (Date.now() >= (refreshExpiry ?? data.expiry)) {
       clearAuthCookie()
       return undefined
     }
@@ -65,15 +89,39 @@ export const getAuthCookieData = (): AuthTokenData | undefined => {
 }
 
 /**
- * Set OAuth token in secure cookie
- * @param token - OAuth access token
- * @param tokenType - OAuth token type (e.g. 'Bearer')
- * @param expiresIn - Token lifetime in seconds
+ * Set OAuth tokens in secure cookie
+ * @param tokens - The token response from the OAuth server
  */
-export const setAuthCookie = (token: string, tokenType: string, expiresIn: number): void => {
-  const expiry = Date.now() + expiresIn * 1000
-  const data: AuthTokenData = { token, tokenType, expiry }
-  Cookies.set(AUTH_COOKIE_KEY, JSON.stringify(data), getCookieOptions(expiresIn))
+export const setAuthCookie = ({
+  access_token,
+  token_type,
+  expires_in,
+  refresh_token,
+  refresh_expires_in,
+}: AuthTokens): void => {
+  const now = Date.now()
+  const data: AuthTokenData = { token: access_token, tokenType: token_type, expiry: now + expires_in * 1000 }
+
+  if (refresh_token && refresh_expires_in !== undefined) {
+    data.refreshToken = refresh_token
+    data.refreshExpiry = now + refresh_expires_in * 1000
+    writeAuthCookie(data, refresh_expires_in)
+    return
+  }
+
+  writeAuthCookie(data, expires_in)
+}
+
+/**
+ * Stop the refresh token from ever being sent again. Does nothing if another tab already rotated it.
+ * @param refreshToken - The refresh token whose retries were spent
+ */
+export const markRefreshAbandoned = (refreshToken: string): void => {
+  const data = getAuthCookieData()
+  if (!data || data.refreshToken !== refreshToken || data.refreshExpiry === undefined) {
+    return
+  }
+  writeAuthCookie({ ...data, refreshAbandoned: true }, (data.refreshExpiry - Date.now()) / 1000)
 }
 
 /**
@@ -81,4 +129,5 @@ export const setAuthCookie = (token: string, tokenType: string, expiresIn: numbe
  */
 export const clearAuthCookie = (): void => {
   Cookies.remove(AUTH_COOKIE_KEY, { path: '/' })
+  notifyAuthCookieChange()
 }
