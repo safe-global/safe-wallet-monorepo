@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { clearAuthCookie, getAuthCookieData, markRefreshAbandoned, setAuthCookie } from '../store/cookieStorage'
-import { getStoreInstance } from '@/store'
-import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
-import { HYPERNATIVE_OAUTH_CONFIG } from '../config/oauth'
+import { useEffect, useState, useCallback } from 'react'
+import {
+  AUTH_COOKIE_CHANGE_EVENT,
+  clearAuthCookie,
+  getAuthCookieData,
+  setAuthCookie,
+  type AuthTokens,
+} from '../store/cookieStorage'
 
 type AuthTokenResult = {
   token: string | undefined
@@ -10,16 +13,8 @@ type AuthTokenResult = {
   isExpired: boolean
 }
 
-type SetTokenResult = (
-  token: string,
-  tokenType: string,
-  expiresIn: number,
-  refreshToken?: string,
-  refreshExpiresIn?: number,
-) => void
+type SetTokenResult = (tokens: AuthTokens) => void
 type ClearTokenResult = () => void
-
-type CookieAuthData = ReturnType<typeof getAuthCookieData>
 
 /**
  * Polling interval in milliseconds
@@ -28,132 +23,7 @@ type CookieAuthData = ReturnType<typeof getAuthCookieData>
 const AUTH_POLLING_INTERVAL = 5000
 
 /**
- * How long before the access token expires to refresh it, so no request ever rides an expired token
- */
-const REFRESH_MARGIN_MS = 60 * 1000
-
-/**
- * setTimeout's delay is a signed 32-bit int - anything above ~24.8 days wraps around and fires
- * immediately. Clamping to this and re-checking on fire converges to the real refresh time.
- */
-const MAX_TIMEOUT_DELAY_MS = 2 ** 31 - 1
-
-/**
- * Web Locks name used to serialise refreshes across tabs sharing the same auth cookie
- */
-const REFRESH_LOCK_NAME = 'hypernative-auth-refresh'
-
-/**
- * Upper bound for the jitter used when navigator.locks isn't available, to reduce (not eliminate)
- * the chance of two tabs refreshing at the same instant
- */
-const REFRESH_JITTER_MAX_MS = 250
-
-/**
- * OAuth error codes (RFC 6749 §5.2) that mean the refresh chain is gone and only a fresh login
- * recovers it. Anything else - a dropped connection, a 5xx, a proxy interposing a 403 - leaves the
- * chain intact, so it must not end the session.
- */
-const TERMINAL_OAUTH_ERRORS = ['invalid_grant', 'invalid_client', 'unsupported_grant_type', 'invalid_request']
-
-/**
- * Backoff for a refresh that failed without saying the chain is dead.
- *
- * The schedule deliberately stays inside the server's reuse grace window. Inside it, presenting
- * the same refresh token again is idempotent and returns the same successor, so a response lost in
- * transit costs nothing. Past it, that same request reads as a replay: it revokes the whole family
- * and reports a reuse. Since the user ends up logging in again either way, we stop retrying rather
- * than trade a quiet expiry for a false theft signal.
- */
-const REFRESH_RETRY_DELAYS_MS = [1_000, 2_000, 4_000, 8_000]
-
-// 'abandoned' - the token is marked as spent in the cookie, so it is never presented again
-type RefreshOutcome = 'refreshed' | 'terminal' | 'transient' | 'abandoned'
-
-/**
- * Reads the OAuth error code out of a failed refresh.
- *
- * The API wraps errors in an envelope. A 4xx OAuth error nests the RFC 6749 body, so the code sits
- * at `error.error`; a 500 carries it flat at `error`. Both are read. A free-text message there
- * (a validation 400) is not a known code, so it stays transient. A failure with no code at all -
- * a network error, a gateway page - resolves to undefined and is treated as transient.
- * @param rejection - The value `.unwrap()` rejected with
- */
-const readOAuthErrorCode = (rejection: unknown): string | undefined => {
-  const envelopeError = (rejection as { error?: unknown } | undefined)?.error
-  if (typeof envelopeError === 'string') {
-    return envelopeError
-  }
-  const code = (envelopeError as { error?: unknown } | undefined)?.error
-  return typeof code === 'string' ? code : undefined
-}
-
-/**
- * Refresh the access token using the given refresh token.
- *
- * Serialised via navigator.locks (falling back to a jittered cookie re-read) so a losing tab
- * re-reads the winner's rotated token instead of replaying one the server has already consumed -
- * doing so would revoke the whole refresh chain.
- * Reports what happened rather than acting on it, so the caller can tell a dead chain from a
- * failure worth retrying.
- * @param refreshToken - The refresh token this call was scheduled for
- */
-const refreshAuthToken = async (refreshToken: string): Promise<RefreshOutcome> => {
-  const runRefresh = async (): Promise<RefreshOutcome> => {
-    // Re-read inside the lock: another tab (or hook instance) may have already rotated this token,
-    // or spent its retries and abandoned it
-    const current = getAuthCookieData()
-    if (!current?.refreshToken || current.refreshToken !== refreshToken) {
-      return 'refreshed'
-    }
-    if (current.refreshAbandoned) {
-      return 'abandoned'
-    }
-
-    let store
-    try {
-      store = getStoreInstance()
-    } catch {
-      // Store not initialised yet; the next scheduled check will retry
-      return 'transient'
-    }
-
-    try {
-      const response = await store
-        .dispatch(
-          hypernativeApi.endpoints.exchangeToken.initiate({
-            grant_type: 'refresh_token',
-            client_id: HYPERNATIVE_OAUTH_CONFIG.clientId,
-            refresh_token: current.refreshToken,
-          }),
-        )
-        .unwrap()
-
-      setAuthCookie(
-        response.access_token,
-        response.token_type,
-        response.expires_in,
-        response.refresh_token,
-        response.refresh_expires_in,
-      )
-      return 'refreshed'
-    } catch (rejection) {
-      const code = readOAuthErrorCode(rejection)
-      return code !== undefined && TERMINAL_OAUTH_ERRORS.includes(code) ? 'terminal' : 'transient'
-    }
-  }
-
-  if (typeof navigator !== 'undefined' && navigator.locks) {
-    return (await navigator.locks.request(REFRESH_LOCK_NAME, runRefresh)) as RefreshOutcome
-  }
-
-  await new Promise((resolve) => setTimeout(resolve, Math.random() * REFRESH_JITTER_MAX_MS))
-  return await runRefresh()
-}
-
-/**
- * Hook to retrieve authentication token and status from cookie storage, and to silently keep the
- * access token fresh via the refresh token while the refresh window is open.
+ * Hook to retrieve authentication token and status from cookie storage
  * @returns Object containing token value, isAuthenticated flag, and isExpired flag
  */
 export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResult] => {
@@ -163,117 +33,15 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
     isExpired: false,
   })
 
-  const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const retryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const scheduledRefreshTokenRef = useRef<string | undefined>(undefined)
-  const isRefreshingRef = useRef(false)
-  const checkAuthStateRef = useRef<() => void>(() => {})
-  const attemptRefreshRef = useRef<(refreshToken: string, attempt?: number) => void>(() => {})
-
-  const clearScheduledRefresh = useCallback(() => {
-    if (refreshTimeoutRef.current) {
-      clearTimeout(refreshTimeoutRef.current)
-      refreshTimeoutRef.current = null
-    }
-    if (retryTimeoutRef.current) {
-      clearTimeout(retryTimeoutRef.current)
-      retryTimeoutRef.current = null
-    }
-    scheduledRefreshTokenRef.current = undefined
-  }, [])
-
-  const attemptRefresh = useCallback((refreshToken: string, attempt = 0) => {
-    if (isRefreshingRef.current) {
-      return
-    }
-    isRefreshingRef.current = true
-    void refreshAuthToken(refreshToken)
-      .then((outcome) => {
-        if (outcome === 'refreshed' || outcome === 'abandoned') {
-          return
-        }
-
-        if (outcome === 'terminal') {
-          // The server says this chain is gone. Only a fresh login recovers it.
-          clearAuthCookie()
-          return
-        }
-
-        const delay = REFRESH_RETRY_DELAYS_MS[attempt]
-        if (delay === undefined) {
-          if (typeof navigator !== 'undefined' && navigator.onLine === false) {
-            // Offline: the request never left the browser, so the token is untouched. Wait for the
-            // online event rather than burning the token or ending the session.
-            return
-          }
-
-          // Retries spent inside the grace window. Presenting this refresh token again later would
-          // look like theft rather than a retry, so it is marked in the cookie - where every hook
-          // instance, tab and reload sees it - and never presented again. The access token stays
-          // usable until its own expiry; after that the cookie clears itself.
-          markRefreshAbandoned(refreshToken)
-          return
-        }
-
-        retryTimeoutRef.current = setTimeout(() => {
-          // Drop the handle as it fires: leaving a spent one in place reads as "a retry is still
-          // pending" to scheduleRefresh, which then declines to start another attempt ever again.
-          retryTimeoutRef.current = null
-          attemptRefreshRef.current(refreshToken, attempt + 1)
-        }, delay)
-      })
-      .finally(() => {
-        isRefreshingRef.current = false
-        checkAuthStateRef.current()
-      })
-  }, [])
-
-  useEffect(() => {
-    attemptRefreshRef.current = attemptRefresh
-  }, [attemptRefresh])
-
-  // Schedules (or immediately triggers) the next refresh for the current cookie data.
-  // A cookie with no refreshToken degrades to "no refresh available" - the access token just
-  // runs out at its own expiry and the user has to log in again.
-  const scheduleRefresh = useCallback(
-    (data: CookieAuthData) => {
-      if (!data?.refreshToken || data.refreshAbandoned) {
-        clearScheduledRefresh()
-        return
-      }
-
-      const delay = data.expiry - REFRESH_MARGIN_MS - Date.now()
-      if (delay <= 0) {
-        if (retryTimeoutRef.current) {
-          return
-        }
-        clearScheduledRefresh()
-        attemptRefresh(data.refreshToken)
-        return
-      }
-
-      if (scheduledRefreshTokenRef.current === data.refreshToken && refreshTimeoutRef.current) {
-        return
-      }
-
-      clearScheduledRefresh()
-      scheduledRefreshTokenRef.current = data.refreshToken
-      refreshTimeoutRef.current = setTimeout(() => checkAuthStateRef.current(), Math.min(delay, MAX_TIMEOUT_DELAY_MS))
-    },
-    [clearScheduledRefresh, attemptRefresh],
-  )
-
   const checkAuthState = useCallback(() => {
-    const data = getAuthCookieData()
-    const { token, expiry, tokenType } = data || {}
+    const { token, expiry, tokenType } = getAuthCookieData() || {}
     // Default to 'Bearer' if tokenType is missing, undefined, or empty
     // This handles legacy cookies or corrupted data gracefully
     const normalizedTokenType = tokenType?.trim() || 'Bearer'
     // isExpired should only be true when a token exists AND it's expired
     // If no token exists, isExpired should be false (not expired, just not authenticated)
     const isExpired = !!token && (expiry === undefined || Date.now() >= expiry)
-    // The cookie outlives the access token while a refresh window is open. An expired token must
-    // look like no token to consumers, or they send it and get a 401 - so it is never exposed.
+    // The cookie outlives the access token while a refresh is possible, so hide an expired token
     const newToken = token && !isExpired ? `${normalizedTokenType} ${token}` : undefined
     const newIsAuthenticated = !!newToken
 
@@ -292,28 +60,15 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
         isExpired,
       }
     })
+  }, [])
 
-    scheduleRefresh(data)
-  }, [scheduleRefresh])
-
-  useEffect(() => {
-    checkAuthStateRef.current = checkAuthState
-  }, [checkAuthState])
-
-  const setToken = (
-    token: string,
-    tokenType: string,
-    expiresIn: number,
-    refreshToken?: string,
-    refreshExpiresIn?: number,
-  ) => {
-    setAuthCookie(token, tokenType, expiresIn, refreshToken, refreshExpiresIn)
+  const setToken = (tokens: AuthTokens) => {
+    setAuthCookie(tokens)
     checkAuthState()
   }
 
   const clearToken = () => {
     clearAuthCookie()
-    clearScheduledRefresh()
     setAuthState({
       token: undefined,
       isAuthenticated: false,
@@ -321,36 +76,23 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
     })
   }
 
-  // Update auth state when cookies change (e.g., from other tabs), when the app resumes from the
-  // background (sleep/wake can leave a scheduled refresh timer never firing), and periodically
+  // Update auth state when cookies change (e.g., from other tabs or the token refresh)
   useEffect(() => {
+    // Check auth state when storage event occurs
     const handleStorageEvent = () => checkAuthState()
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        checkAuthState()
-      }
-    }
-    // A token whose retries ran out while offline is parked, not abandoned - those requests never
-    // left the browser - so coming back online picks it up again. A token abandoned while online
-    // stays abandoned: a 5xx or a proxy error may have reached the server and consumed it, and an
-    // online event says nothing about that.
     window.addEventListener('storage', handleStorageEvent)
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('focus', checkAuthState)
-    window.addEventListener('online', checkAuthState)
+    window.addEventListener(AUTH_COOKIE_CHANGE_EVENT, checkAuthState)
 
+    // Additionally, check auth state periodically to catch cookie changes
     const interval = setInterval(checkAuthState, AUTH_POLLING_INTERVAL)
     checkAuthState() // Initial check
 
     return () => {
       window.removeEventListener('storage', handleStorageEvent)
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      window.removeEventListener('focus', checkAuthState)
-      window.removeEventListener('online', checkAuthState)
+      window.removeEventListener(AUTH_COOKIE_CHANGE_EVENT, checkAuthState)
       clearInterval(interval)
-      clearScheduledRefresh()
     }
-  }, [checkAuthState, clearScheduledRefresh])
+  }, [checkAuthState])
 
   return [authState, setToken, clearToken]
 }

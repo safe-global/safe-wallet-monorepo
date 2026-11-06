@@ -21,9 +21,6 @@ export const hypernativeApi = createApi({
   baseQuery: retry(fetchBaseQuery({ baseUrl: HYPERNATIVE_API_BASE_URL }), { maxRetries: 2 }),
   tagTypes: addTagTypes,
   endpoints: (build) => ({
-    /**
-     * POST /oauth/token for both grants: the authorization-code exchange and the refresh.
-     */
     exchangeToken: build.mutation<
       HypernativeTokenExchangeResponseDto['data'],
       HypernativeTokenExchangeRequestDto | HypernativeTokenRefreshRequestDto
@@ -39,9 +36,7 @@ export const hypernativeApi = createApi({
       }),
       transformResponse: (response: HypernativeTokenExchangeResponseDto) => response.data, // Extract data from the response wrapper
       transformErrorResponse: (response: HypernativeQueryErrorDto) => response.data,
-      // Both grants are single-use: a retried refresh token reads as a replay and revokes the whole
-      // chain, and a retried authorization code fails once the server has consumed it. The caller
-      // decides whether a failure is worth another attempt.
+      // Both grants are single-use, so a silent retry can revoke the whole refresh chain
       extraOptions: { maxRetries: 0 },
       invalidatesTags: ['hypernative-oauth'],
     }),

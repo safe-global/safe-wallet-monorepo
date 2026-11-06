@@ -36,6 +36,7 @@ import LaunchScreen from '@/components/common/LaunchScreen'
 import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
+import { useHypernativeTokenRefresh } from '@/features/hypernative'
 import { initObservability } from '@/services/observability'
 import Analytics from '@/services/analytics/Analytics'
 import PkModulePopup from '@/services/private-key-module/PkModulePopup'
@@ -99,6 +100,7 @@ const InitApp = (): ReactElement => {
   useStepUpCallback()
   useLogoutCallback()
   useSessionExpiryGuard()
+  useHypernativeTokenRefresh()
   useUnlockBodyScroll()
   useRememberSpace()
 

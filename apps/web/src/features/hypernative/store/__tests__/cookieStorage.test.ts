@@ -1,5 +1,11 @@
 import Cookies from 'js-cookie'
-import { setAuthCookie, getAuthCookieData, clearAuthCookie, markRefreshAbandoned } from '../cookieStorage'
+import {
+  setAuthCookie,
+  getAuthCookieData,
+  clearAuthCookie,
+  markRefreshAbandoned,
+  AUTH_COOKIE_CHANGE_EVENT,
+} from '../cookieStorage'
 
 // Mock js-cookie
 jest.mock('js-cookie', () => ({
@@ -40,7 +46,7 @@ describe('cookieStorage', () => {
       const tokenType = 'Bearer'
       const expiresIn = 3600 // 1 hour in seconds
 
-      setAuthCookie(token, tokenType, expiresIn)
+      setAuthCookie({ access_token: token, token_type: tokenType, expires_in: expiresIn })
 
       expect(mockCookiesSet).toHaveBeenCalledTimes(1)
       const [cookieKey, cookieValue, options] = mockCookiesSet.mock.calls[0]
@@ -69,7 +75,7 @@ describe('cookieStorage', () => {
       const now = 1000000000
       Date.now = jest.fn(() => now)
 
-      setAuthCookie(token, tokenType, expiresIn)
+      setAuthCookie({ access_token: token, token_type: tokenType, expires_in: expiresIn })
 
       const [, cookieValue] = mockCookiesSet.mock.calls[0]
       const parsedValue = JSON.parse(cookieValue as string)
@@ -78,7 +84,7 @@ describe('cookieStorage', () => {
     })
 
     it('should set secure flag to false on HTTP', () => {
-      setAuthCookie('test-token', 'Bearer', 3600)
+      setAuthCookie({ access_token: 'test-token', token_type: 'Bearer', expires_in: 3600 })
 
       const [, , options] = mockCookiesSet.mock.calls[0]
       expect(options?.secure).toBe(false)
@@ -87,7 +93,7 @@ describe('cookieStorage', () => {
     it('should calculate expires correctly from seconds to days', () => {
       const expiresIn = 86400 // 1 day in seconds
 
-      setAuthCookie('test-token', 'Bearer', expiresIn)
+      setAuthCookie({ access_token: 'test-token', token_type: 'Bearer', expires_in: expiresIn })
 
       const [, , options] = mockCookiesSet.mock.calls[0]
       expect(options?.expires).toBe(1) // 1 day
@@ -97,14 +103,14 @@ describe('cookieStorage', () => {
       // Remove window to simulate SSR
       delete (global as { window?: unknown }).window
 
-      setAuthCookie('test-token', 'Bearer', 3600)
+      setAuthCookie({ access_token: 'test-token', token_type: 'Bearer', expires_in: 3600 })
 
       const [, , options] = mockCookiesSet.mock.calls[0]
       expect(options?.secure).toBe(false) // Should default to false when window is undefined
     })
 
     it('should handle different token types', () => {
-      setAuthCookie('test-token', 'Custom', 3600)
+      setAuthCookie({ access_token: 'test-token', token_type: 'Custom', expires_in: 3600 })
 
       const [, cookieValue] = mockCookiesSet.mock.calls[0]
       const parsedValue = JSON.parse(cookieValue as string)
@@ -345,7 +351,13 @@ describe('cookieStorage', () => {
       const now = 1000000000
       Date.now = jest.fn(() => now)
 
-      setAuthCookie('access-token', 'Bearer', 300, 'refresh-token', 2592000)
+      setAuthCookie({
+        access_token: 'access-token',
+        token_type: 'Bearer',
+        expires_in: 300,
+        refresh_token: 'refresh-token',
+        refresh_expires_in: 2592000,
+      })
 
       const [, cookieValue, options] = mockCookiesSet.mock.calls[0]
       const parsedValue = JSON.parse(cookieValue as string)
@@ -410,7 +422,7 @@ describe('cookieStorage', () => {
     })
 
     it('should not set a refreshToken/refreshExpiry when no refresh args are given (legacy call sites)', () => {
-      setAuthCookie('access-token', 'Bearer', 300)
+      setAuthCookie({ access_token: 'access-token', token_type: 'Bearer', expires_in: 300 })
 
       const [, cookieValue] = mockCookiesSet.mock.calls[0]
       const parsedValue = JSON.parse(cookieValue as string)
@@ -420,11 +432,6 @@ describe('cookieStorage', () => {
     })
   })
 
-  /**
-   * The abandoned marker has to live in the cookie, not in hook state: every hook instance, every
-   * tab and every reload reads the cookie, and any one of them presenting an abandoned token past
-   * the server's grace window reads as a replay and revokes the family.
-   */
   describe('abandoned refresh token', () => {
     const now = 1000000000
 
@@ -482,10 +489,66 @@ describe('cookieStorage', () => {
     })
 
     it('should drop the abandoned flag when a new token pair is written', () => {
-      setAuthCookie('access-token', 'Bearer', 300, 'fresh-refresh-token', 2592000)
+      setAuthCookie({
+        access_token: 'access-token',
+        token_type: 'Bearer',
+        expires_in: 300,
+        refresh_token: 'fresh-refresh-token',
+        refresh_expires_in: 2592000,
+      })
 
       const [, cookieValue] = mockCookiesSet.mock.calls[0]
       expect(JSON.parse(cookieValue as string).refreshAbandoned).toBeUndefined()
+    })
+
+    it('should not write anything when there is no cookie', () => {
+      mockGetReturn(undefined)
+
+      markRefreshAbandoned('refresh-token')
+
+      expect(mockCookiesSet).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('change event', () => {
+    const listener = jest.fn()
+
+    beforeEach(() => {
+      window.addEventListener(AUTH_COOKIE_CHANGE_EVENT, listener)
+    })
+
+    afterEach(() => {
+      window.removeEventListener(AUTH_COOKIE_CHANGE_EVENT, listener)
+    })
+
+    it('should notify this tab when the cookie is written', () => {
+      setAuthCookie({ access_token: 'access-token', token_type: 'Bearer', expires_in: 300 })
+
+      expect(listener).toHaveBeenCalledTimes(1)
+    })
+
+    it('should notify this tab when the cookie is cleared', () => {
+      clearAuthCookie()
+
+      expect(listener).toHaveBeenCalledTimes(1)
+    })
+
+    it('should notify this tab when the refresh token is abandoned', () => {
+      const now = 1000000000
+      Date.now = jest.fn(() => now)
+      mockGetReturn(
+        JSON.stringify({
+          token: 'access-token',
+          tokenType: 'Bearer',
+          expiry: now + 30_000,
+          refreshToken: 'refresh-token',
+          refreshExpiry: now + 60_000,
+        }),
+      )
+
+      markRefreshAbandoned('refresh-token')
+
+      expect(listener).toHaveBeenCalledTimes(1)
     })
   })
 })

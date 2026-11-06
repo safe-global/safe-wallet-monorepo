@@ -92,7 +92,7 @@ import { MixpanelTracingProvider } from '@/services/observability/providers/mixp
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { CaptchaProvider } from '@/components/common/Captcha'
-import { HnQueueAssessmentProvider } from '@/features/hypernative'
+import { HnQueueAssessmentProvider, useHypernativeTokenRefresh } from '@/features/hypernative'
 import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
@@ -147,6 +147,7 @@ const InitApp = (): ReactElement | null => {
   useStepUpCallback()
   useLogoutCallback()
   useSessionExpiryGuard()
+  useHypernativeTokenRefresh()
   useUnlockBodyScroll()
   useRegisterServiceWorker()
   useRememberSpace()
