@@ -44,8 +44,7 @@
     "react-media": "^1.10.0",
     "react-router-dom": "^7.18.2",
     "react-virtuoso": "^4.12.3",
-    "styled-components": "^5.3.11",
-    "zod": "^3.24.1"
+    "styled-components": "^5.3.11"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
