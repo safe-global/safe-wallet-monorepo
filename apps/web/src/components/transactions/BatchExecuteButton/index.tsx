@@ -24,7 +24,7 @@ import { TxModalContext } from '@/components/tx-flow'
 import useChainId from '@/hooks/useChainId'
 import { useTransactionsGetMultipleTransactionDetailsQuery } from '@safe-global/store/gateway/transactions'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
-import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
+import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 
 const ALL_SAFE_PAID_TOOLTIP =
   "Bulk execution is not available when all ready transactions pay fees from the Safe. You'd pay gas twice, once from the Safe and once from your signer wallet."
@@ -60,7 +60,7 @@ const BatchExecuteButton = () => {
       const exec = isMultisigDetailedExecutionInfo(tx.detailedExecutionInfo) ? tx.detailedExecutionInfo : null
       return (
         exec &&
-        isGtfSafePaid({
+        isPaidFromSafe({
           gasPrice: exec.gasPrice,
           baseGas: exec.baseGas,
           refundReceiver: exec.refundReceiver?.value,

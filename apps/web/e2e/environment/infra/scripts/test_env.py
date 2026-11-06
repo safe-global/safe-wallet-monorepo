@@ -38,6 +38,9 @@ CHAIN_STEPS = (
     ("start", ("txs-scheduler-{}", "txs-web-{}")),
     ("run", ("cfg-chain-{}", "decoder-chain-{}")),
 )
+# Device emulators by Compose profile; a stack starts one only with `up --device`, for the specs that use it.
+DEVICES = {"ledger": "ledger-emulator", "trezor": "trezor-emulator"}
+OPTIONAL_PROFILES = (*CHAINS, *DEVICES)
 INIT_JOBS = ("mock-keys", "anvil-init", "txs-init", "cfg-init", "decoder-init")
 # The Queue Service reads the chain list once per 30 minutes and never on a miss.
 QUEUE_SERVICES = ("queue-web", "queue-worker")
@@ -428,8 +431,8 @@ def load_config(compose):
 
 
 def load_manifest(args):
-    compose = project_compose(args)
-    return compose, public_config(load_config(compose))
+    # The manifest names the URL of every device, so the device profiles must be on to read their ports
+    return project_compose(args), public_config(load_config(project_compose(args, DEVICES)))
 
 
 def teardown_env(project):
@@ -464,7 +467,7 @@ def show_config(args):
 
 
 def show_logs(args):
-    compose = project_compose(args, CHAINS)
+    compose = project_compose(args, OPTIONAL_PROFILES)
     secrets = fork_urls(load_config(compose))
     logs = run(compose + ["logs", "--no-color", "--tail", args.tail, *args.services])
     print(redact(logs, secrets))
@@ -476,16 +479,16 @@ def show_images(args):
 
 
 def show_status(args):
-    print(run(project_compose(args, CHAINS) + ["ps", "--all"], env=teardown_env(args.project)))
+    print(run(project_compose(args, OPTIONAL_PROFILES) + ["ps", "--all"], env=teardown_env(args.project)))
 
 
 def stop(args):
-    run(project_compose(args, CHAINS) + ["down"], env=teardown_env(args.project))
+    run(project_compose(args, OPTIONAL_PROFILES) + ["down"], env=teardown_env(args.project))
     print("Environment stopped; reset before starting a new fork")
 
 
 def reset(args):
-    run(project_compose(args, CHAINS) + ["down", "--volumes"], env=teardown_env(args.project))
+    run(project_compose(args, OPTIONAL_PROFILES) + ["down", "--volumes"], env=teardown_env(args.project))
     state_path(args.project).unlink(missing_ok=True)
     images_path(args.project).unlink(missing_ok=True)
     print("Environment stopped and owned volumes removed")
@@ -498,6 +501,25 @@ def start_chain(args):
 
 def reset_chain(args):
     chain_reset(project_compose(args, (args.chain,)), args.chain, state_path(args.project))
+
+
+def device_up(compose, name, state_file, timeout):
+    if not state_file.exists():
+        raise RuntimeError("Start the Sepolia stack with up before adding a device")
+    service = DEVICES[name]
+    print(f"Starting the {name} emulator", flush=True)
+    try:
+        run(compose + ["up", "--detach", "--no-deps", "--wait", "--wait-timeout", str(timeout), service])
+    except RuntimeError as error:
+        raise RuntimeError(f"The {name} emulator is not healthy; read its logs with: logs {service}") from error
+    manifest = json.loads(state_file.read_text())
+    manifest["devices"] = sorted({*manifest.get("devices", []), name})
+    write_state(state_file, manifest)
+    print(f"Ready: {name} emulator")
+
+
+def start_device(args):
+    device_up(project_compose(args, (args.device,)), args.device, state_path(args.project), args.timeout)
 
 
 ACTIONS = {
@@ -521,17 +543,23 @@ def parse_args(argv=None):
         "--backend", choices=BACKENDS, default=os.environ.get("SAFE_E2E_BACKEND", "staging"),
         help="Deployment whose service versions up and versions use; exported *_IMAGE variables win",
     )
+    parser.add_argument("--device", choices=tuple(DEVICES), help="Start a device emulator")
     args = parser.parse_intermixed_args(argv)
     if args.services and args.action != "logs":
         parser.error("Service names are supported only by logs")
     if args.chain and args.action not in CHAIN_ACTIONS:
         parser.error("--chain supports only up and reset")
+    if args.device and (args.action != "up" or args.chain):
+        parser.error("--device supports only up, without --chain")
     return args
 
 
 def main():
     args = parse_args()
-    (CHAIN_ACTIONS if args.chain else ACTIONS)[args.action](args)
+    if args.device:
+        start_device(args)
+    else:
+        (CHAIN_ACTIONS if args.chain else ACTIONS)[args.action](args)
 
 
 if __name__ == "__main__":
