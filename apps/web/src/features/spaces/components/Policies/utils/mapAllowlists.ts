@@ -13,8 +13,7 @@ import type {
   PolicyTokenInfo,
 } from '@safe-global/views/features/spaces/components/Policies/types'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { getPolicyGuardAddress } from '@/features/policy-guard/services'
+import { getPolicyGuardAddress, isFallbackAccess } from '@/features/policy-guard/services'
 import { toPolicyToken } from './toPolicyToken'
 
 export type NativeTokenResolver = (chainId: string) => PolicyTokenInfo | undefined
@@ -49,8 +48,7 @@ const isEnforced = (guards: GuardSlotsDto): boolean => !!guards.transactionGuard
 
 const toNativeRecipient = ({ target, selector, operation }: PolicyAccessDto): string | null => {
   if (operation !== 'CALL' || selector.toLowerCase() !== NATIVE_TRANSFER_SELECTOR) return null
-  // The zero target is the guard's catch-all rule, not a recipient.
-  if (sameAddress(target, ZERO_ADDRESS)) return null
+  if (isFallbackAccess({ target, selector })) return null
 
   return target
 }

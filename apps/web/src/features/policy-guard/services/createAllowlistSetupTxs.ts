@@ -1,5 +1,10 @@
-import { GUARD_NOT_SUPPORTED_ERROR } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
+import {
+  GUARD_NOT_SUPPORTED_ERROR,
+  TOO_MANY_CONFIGURATIONS_ERROR,
+} from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import type { AllowlistSetup, PolicyConfiguration, PolicyGuardState } from '../types'
+import { MAX_POLICY_CONFIGURATIONS } from './allowlistConfigurations'
+import { withFirstSetupDefaults } from './firstSetupDefaults'
 import {
   createFirstSetupTxs,
   createRequestConfigurationTx,
@@ -9,34 +14,36 @@ import {
 } from './policyGuardEncoders'
 
 export const createAllowlistSetupTxs = ({
+  chainId,
   safeAddress,
   guardAddress,
   guardState,
   configurations,
 }: {
+  chainId: string
   safeAddress: string
   guardAddress: string
   guardState: PolicyGuardState
   configurations: PolicyConfiguration[]
 }): AllowlistSetup => {
-  const root = getConfigurationRoot(configurations)
-  const withTxs = (txs: AllowlistSetup['txs']): AllowlistSetup => ({ txs, configurations, root })
-  const requestTx = () => createRequestConfigurationTx(guardAddress, root)
-
-  switch (guardState.status) {
-    case 'none':
-      return withTxs(createFirstSetupTxs({ safeAddress, guardAddress, configurations }))
-    case 'known':
-      return withTxs([requestTx()])
-    case 'partial':
-      return withTxs([
-        requestTx(),
-        guardState.missingSlot === 'transaction'
-          ? createSetGuardTx(safeAddress, guardAddress)
-          : createSetModuleGuardTx(safeAddress, guardAddress),
-      ])
-    case 'unknown':
-    case 'unsupported':
-      throw new Error(GUARD_NOT_SUPPORTED_ERROR)
+  if (guardState.status === 'unknown' || guardState.status === 'unsupported') {
+    throw new Error(GUARD_NOT_SUPPORTED_ERROR)
   }
+
+  const installed = guardState.status === 'none' ? withFirstSetupDefaults(chainId, configurations) : configurations
+  if (installed.length > MAX_POLICY_CONFIGURATIONS) throw new Error(TOO_MANY_CONFIGURATIONS_ERROR)
+  const setup = { configurations: installed, root: getConfigurationRoot(installed) }
+
+  if (guardState.status === 'none') {
+    return { ...setup, txs: createFirstSetupTxs({ safeAddress, guardAddress, configurations: installed }) }
+  }
+
+  const request = createRequestConfigurationTx(guardAddress, setup.root)
+  if (guardState.status === 'known') return { ...setup, txs: [request] }
+
+  const setMissingGuard =
+    guardState.missingSlot === 'transaction'
+      ? createSetGuardTx(safeAddress, guardAddress)
+      : createSetModuleGuardTx(safeAddress, guardAddress)
+  return { ...setup, txs: [request, setMissingGuard] }
 }

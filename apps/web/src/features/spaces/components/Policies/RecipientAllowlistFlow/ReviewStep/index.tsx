@@ -1,5 +1,6 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, type ReactElement } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -33,6 +34,7 @@ import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlis
 import { useSaveAllowlistConfiguration } from '../hooks/useSaveAllowlistConfiguration'
 import AllowlistPolicyDetails from './AllowlistPolicyDetails'
 import AllowlistSetupActions from './AllowlistSetupActions'
+import { getInstalledFallback } from './ruleKind'
 import { useBuildAllowlistTransaction } from './useBuildAllowlistTransaction'
 
 /** Step 2, "Confirm policy": the allowlist as the prototype's summary, then the setup calls rule by rule. */
@@ -149,7 +151,15 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
         />
       )}
 
-      {hasSummary && selected && <AllowlistPolicyDetails safe={selected} tokens={tokens} recipients={recipients} />}
+      {hasSummary && selected && (
+        <AllowlistPolicyDetails
+          safe={selected}
+          tokens={tokens}
+          recipients={recipients}
+          fallback={chainId && configurations ? getInstalledFallback(chainId, configurations) : undefined}
+          hasNativeRule={Boolean(rules?.some(({ tokenAddress }) => sameAddress(tokenAddress, ZERO_ADDRESS)))}
+        />
+      )}
 
       {hasSummary && otherSigners && safe.threshold > 1 && (
         <Typography variant="paragraph-small" color="muted" data-testid="allowlist-next-signers">
@@ -159,8 +169,9 @@ const ReviewRecipientAllowlist = ({ onSubmit, children, ...props }: ReviewTransa
 
       {children}
 
-      {txs && configurations && describeSetupCall && decodeErc20TransferPolicyData && (
+      {chainId && txs && configurations && describeSetupCall && decodeErc20TransferPolicyData && (
         <AllowlistSetupActions
+          chainId={chainId}
           calls={txs}
           configurations={configurations}
           describeCall={describeSetupCall}

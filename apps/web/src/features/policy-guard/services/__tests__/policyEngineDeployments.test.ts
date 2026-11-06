@@ -23,6 +23,12 @@ describe('policyEngineDeployments', () => {
     expect(getPolicyEngineAddress(chainId, 'NativeTransferPolicy')).toBeUndefined()
   })
 
+  it.each(['1', '137', '11155111'])('returns the fallback policies on chain %s', (chainId) => {
+    expect(getPolicyEngineAddress(chainId, 'AllowPolicy')).toBe('0x92e94Af03982C2486dffa8DcBc5d069D33996eF2')
+    expect(getPolicyEngineAddress(chainId, 'DenyPolicy')).toBe('0x348d9F0B2fECb0bF88655C74Ed3eFD5052A9E436')
+    expect(getPolicyEngineAddress(chainId, 'MultiSendPolicy')).toBe('0xF933Ec646F9cd6Dd27Ae2f808D133D3f5847210c')
+  })
+
   it('returns undefined for a chain without a deployment', () => {
     expect(getPolicyGuardAddress('999999')).toBeUndefined()
     expect(getPolicyEngineAddress('999999', 'ERC20TransferPolicy')).toBeUndefined()
