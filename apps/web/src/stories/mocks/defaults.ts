@@ -91,12 +91,14 @@ export function createAuthState(isAuthenticated: boolean) {
     return {
       sessionExpiresAt: null,
       lastUsedSpaceId: null,
+      isStoreHydrated: true,
     }
   }
   // Set session to expire 1 hour from now
   return {
     sessionExpiresAt: Date.now() + 60 * 60 * 1000,
     lastUsedSpaceId: null,
+    isStoreHydrated: true,
   }
 }
 
