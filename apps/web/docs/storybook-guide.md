@@ -165,7 +165,8 @@ yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>   # add --filte
 ```
 
 - CI splits the sweep into 4 shards (`--shard=k/n`, whole titles per shard). Locally, run it without `--shard`.
-- Screenshots are taken with animations disabled, once no request is open and two screenshots in a row match, with the GPU off and every external host unresolvable (remote logos render their local fallback), so a sheet is byte-identical across runs of the same commit. A sheet that changes on a commit that did not touch it is flaky — fix the story, as it triggers a needless baseline upload.
+- Screenshots are taken with animations disabled, once no request is open and two screenshots in a row match, with the GPU off and every external host unresolvable, so a sheet is byte-identical across runs of the same commit. A sheet that changes on a commit that did not touch it is flaky — fix the story, as it triggers a needless baseline upload.
+- Remote images in stories and `config/test` fixtures are served from a committed mirror (`.storybook/mock-assets/`, Storybook-only, never in the app build): MSW answers them for plain `<img>`, and a Storybook-only `IframeIcon` wrapper rewrites them to the mirror, as MSW cannot reach its sandboxed iframe. After adding a story or fixture with a new remote image, run `npx tsx scripts/storybook/mirror-assets.ts` and commit the new files; an unmirrored image renders its fallback in the sweep.
 - Opt a story out of pixel snapshots with `tags: ['skip-visual-test']` (story- or meta-level) for flaky/animated stories. It is still render-checked — errors fail CI; only the snapshot is skipped.
 - Never ship a story that permanently renders skeletons/blank without a doc comment saying so — a broken story that "passes" is worse than no story.
 
