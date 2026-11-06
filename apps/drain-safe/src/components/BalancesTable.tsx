@@ -1,5 +1,17 @@
 import { useMemo, useState } from 'react'
-import { Checkbox, Table, TableBody, TableCell, TableHead, TableRow, TableSortLabel } from '@mui/material'
+import {
+  Checkbox,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TableSortLabel,
+  Stack,
+  type SxProps,
+  type Theme,
+} from '@mui/material'
 import type { TokenBalance } from '@safe-global/safe-apps-sdk'
 import { formatTokenAmount } from '../utils/format'
 import FiatValue from './FiatValue'
@@ -13,6 +25,27 @@ const COLUMNS: { id: Column; label: string }[] = [
   { id: 'amount', label: 'Amount' },
   { id: 'value', label: 'Value' },
 ]
+
+const outlined: SxProps<Theme> = {
+  border: 1,
+  borderColor: 'divider',
+  borderRadius: 1,
+  '& .MuiTableBody-root .MuiTableCell-root': { borderBottom: 1, borderColor: 'divider', py: 1.5 },
+  '& .MuiTableBody-root .MuiTableRow-root:last-of-type .MuiTableCell-root': { borderBottom: 0 },
+}
+
+const columnSeparator: SxProps<Theme> = {
+  position: 'relative',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    left: 0,
+    top: '35%',
+    height: '30%',
+    borderLeft: 1,
+    borderColor: 'divider',
+  },
+}
 
 const amountOf = (item: TokenBalance) => Number(formatTokenAmount(item.balance, item.tokenInfo.decimals))
 
@@ -50,52 +83,56 @@ function BalancesTable({ assets, selected, onSelectionChange, gasPrice, nativeFi
     onSelectionChange(selected.includes(address) ? selected.filter((item) => item !== address) : [...selected, address])
 
   return (
-    <Table>
-      <TableHead>
-        <TableRow>
-          <TableCell padding="checkbox">
-            <Checkbox
-              checked={allSelected}
-              indeterminate={selected.length > 0 && !allSelected}
-              onChange={() => onSelectionChange(allSelected ? [] : assets.map((item) => item.tokenInfo.address))}
-              slotProps={{ input: { 'aria-label': 'Select all assets' } }}
-            />
-          </TableCell>
-          {COLUMNS.map(({ id, label }) => (
-            <TableCell key={id} sortDirection={sort?.column === id ? sort.direction : false}>
-              <TableSortLabel
-                active={sort?.column === id}
-                direction={sort?.column === id ? sort.direction : 'desc'}
-                onClick={() => setSort(nextSort(sort, id))}
-              >
-                {label}
-              </TableSortLabel>
-            </TableCell>
-          ))}
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {rows.map((item) => (
-          <TableRow key={item.tokenInfo.address}>
+    <TableContainer sx={outlined}>
+      <Table>
+        <TableHead>
+          <TableRow>
             <TableCell padding="checkbox">
               <Checkbox
-                checked={selected.includes(item.tokenInfo.address)}
-                onChange={() => toggle(item.tokenInfo.address)}
-                slotProps={{ input: { 'aria-label': `Select ${item.tokenInfo.name}` } }}
+                checked={allSelected}
+                indeterminate={selected.length > 0 && !allSelected}
+                onChange={() => onSelectionChange(allSelected ? [] : assets.map((item) => item.tokenInfo.address))}
+                slotProps={{ input: { 'aria-label': 'Select all assets' } }}
               />
             </TableCell>
-            <TableCell>
-              <TokenIcon logoUri={item.tokenInfo.logoUri} symbol={item.tokenInfo.symbol} />
-              {item.tokenInfo.name}
-            </TableCell>
-            <TableCell>{formatTokenAmount(item.balance, item.tokenInfo.decimals)}</TableCell>
-            <TableCell>
-              <FiatValue item={item} gasPrice={gasPrice} nativeFiatPrice={nativeFiatPrice} />
-            </TableCell>
+            {COLUMNS.map(({ id, label }) => (
+              <TableCell key={id} sortDirection={sort?.column === id ? sort.direction : false} sx={columnSeparator}>
+                <TableSortLabel
+                  active={sort?.column === id}
+                  direction={sort?.column === id ? sort.direction : 'desc'}
+                  onClick={() => setSort(nextSort(sort, id))}
+                >
+                  {label}
+                </TableSortLabel>
+              </TableCell>
+            ))}
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHead>
+        <TableBody>
+          {rows.map((item) => (
+            <TableRow key={item.tokenInfo.address}>
+              <TableCell padding="checkbox">
+                <Checkbox
+                  checked={selected.includes(item.tokenInfo.address)}
+                  onChange={() => toggle(item.tokenInfo.address)}
+                  slotProps={{ input: { 'aria-label': `Select ${item.tokenInfo.name}` } }}
+                />
+              </TableCell>
+              <TableCell>
+                <Stack direction="row" alignItems="center">
+                  <TokenIcon logoUri={item.tokenInfo.logoUri} symbol={item.tokenInfo.symbol} />
+                  {item.tokenInfo.name}
+                </Stack>
+              </TableCell>
+              <TableCell>{formatTokenAmount(item.balance, item.tokenInfo.decimals)}</TableCell>
+              <TableCell>
+                <FiatValue item={item} gasPrice={gasPrice} nativeFiatPrice={nativeFiatPrice} />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   )
 }
 
