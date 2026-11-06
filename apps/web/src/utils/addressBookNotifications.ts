@@ -10,17 +10,20 @@ export const getImportSuccessMessage = ({
   count,
   networkCount,
   bookLabel,
+  showsEveryNetwork = false,
 }: {
   count: number
   networkCount: number
   bookLabel: string
+  /** The book lists contacts of every network, as the Workspace address book does. */
+  showsEveryNetwork?: boolean
 }): string => {
   const contactLabel = count === 1 ? 'contact' : 'contacts'
   const base = `${count} ${contactLabel} imported to ${bookLabel}`
 
-  return networkCount > 1
-    ? `${base} across ${networkCount} networks. Only contacts on the current network are shown here`
-    : base
+  if (networkCount <= 1) return base
+  const acrossNetworks = `${base} across ${networkCount} networks`
+  return showsEveryNetwork ? acrossNetworks : `${acrossNetworks}. Only contacts on the current network are shown here`
 }
 
 export const PERSONAL_ADDRESS_BOOK_LABEL = 'your address book'
