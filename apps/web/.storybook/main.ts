@@ -71,6 +71,13 @@ const config: StorybookConfig = {
       'mocks/useBytecodeComparison.ts',
     )
 
+    // Point IframeIcon logos at the mock-assets mirror. Two keys: TokenIcon imports it by relative path
+    const iframeIconMock = path.resolve(__dirname, 'mocks/IframeIcon.tsx')
+    ;(config.resolve.alias as Record<string, string>)['@/components/common/IframeIcon$'] = iframeIconMock
+    ;(config.resolve.alias as Record<string, string>)[
+      `${path.resolve(__dirname, '../src/components/common/IframeIcon')}$`
+    ] = iframeIconMock
+
     // Replace the live CoW Swap iframe with a fixed placeholder so swap stories are deterministic
     ;(config.resolve.alias as Record<string, string>)['@cowprotocol/widget-react$'] = path.resolve(
       __dirname,
@@ -175,7 +182,8 @@ const config: StorybookConfig = {
     return config
   },
 
-  staticDirs: ['../public'],
+  // mock-assets lives outside public/ so the mirrored logos never ship with the app
+  staticDirs: ['../public', { from: './mock-assets', to: '/mock-assets' }],
 
   env: (config) => ({
     ...config,
