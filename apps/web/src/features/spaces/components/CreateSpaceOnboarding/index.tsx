@@ -26,6 +26,10 @@ import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
 import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
 import { NAME_MIN_LENGTH, sanitizeName, validateName } from '@safe-global/utils/validation/names'
+import { Dices } from 'lucide-react'
+import { Checkbox } from '@safe-global/views/components/ui/checkbox'
+import { Field, FieldContent, FieldDescription, FieldLabel } from '@safe-global/views/components/ui/field'
+import { createRandomWorkspaceName } from '@/features/encrypted-workspaces/services'
 
 const ONBOARDING_STEP = 1
 const FORM_ID = 'create-space-form'
@@ -46,10 +50,12 @@ const CreateSpaceOnboarding = (): ReactElement => {
 
   const { spaceId, isEditMode, isSpaceLoading, existingSpace } = useExistingSpace(setValue)
   const { onExit, hasNoSpaces } = useOnboardingExit(isEditMode)
+  const [isEncrypted, setIsEncrypted] = useState(false)
   const { error, isSubmitting, onSubmit, createdSpaceId, goToSelectSafes } = useSpaceSubmit(
     handleSubmit,
     spaceId,
     isEditMode,
+    isEncrypted,
   )
   // The new Workspace is offered its trial right here; without an offer the wizard moves on to the Safes step.
   const trialLock = useWorkspaceLock(createdSpaceId ?? null)
@@ -144,7 +150,42 @@ const CreateSpaceOnboarding = (): ReactElement => {
               <Spinner className="size-4" />
             </div>
           )}
+          {!isEditMode && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="mt-2"
+              disabled={isInputDisabled}
+              data-testid="random-space-name-button"
+              onClick={() => {
+                setHasUserEdited(true)
+                setValue('name', createRandomWorkspaceName(), { shouldValidate: true })
+              }}
+            >
+              <Dices aria-hidden="true" data-icon="inline-start" />
+              Use a random name
+            </Button>
+          )}
         </div>
+
+        {!isEditMode && (
+          <Field orientation="horizontal">
+            <Checkbox
+              id="encrypt-space"
+              data-testid="encrypt-space-checkbox"
+              checked={isEncrypted}
+              disabled={isInputDisabled}
+              onCheckedChange={(checked) => setIsEncrypted(checked === true)}
+            />
+            <FieldContent>
+              <FieldLabel htmlFor="encrypt-space">Encrypt member and contact names</FieldLabel>
+              <FieldDescription>
+                Only people with the Workspace link can read them. Tracking is off while the link is open.
+              </FieldDescription>
+            </FieldContent>
+          </Field>
+        )}
 
         {error && (
           <Alert variant="destructive">

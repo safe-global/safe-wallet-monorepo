@@ -9,11 +9,13 @@ import { sanitizeNextUrl } from '@/utils/nextUrl'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 import type { UseFormHandleSubmit } from 'react-hook-form'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { buildKeyFragment, createWorkspaceSecret } from '@/features/encrypted-workspaces/services'
 
 const useSpaceSubmit = (
   handleSubmit: UseFormHandleSubmit<{ name: string }>,
   spaceId: string | undefined,
   isEditMode: boolean,
+  isEncrypted = false,
 ) => {
   const [error, setError] = useState<string>()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -56,6 +58,14 @@ const useSpaceSubmit = (
 
     if (response.data) {
       const newSpaceId = response.data.uuid
+
+      if (isEncrypted) {
+        const query = new URLSearchParams(getSelectSafesQuery(newSpaceId))
+        const fragment = buildKeyFragment(newSpaceId, createWorkspaceSecret())
+        // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- a full page load, so tracking is off from the start
+        window.location.assign(`${AppRoutes.welcome.selectSafes}?${query}#${fragment}`)
+        return
+      }
 
       if (isSafePro) {
         setCreatedSpaceId(newSpaceId)

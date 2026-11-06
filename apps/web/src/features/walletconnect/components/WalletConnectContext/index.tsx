@@ -17,6 +17,7 @@ import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { useSafeAppSuggestion } from '../../hooks/useSafeAppSuggestion'
 import type { WalletConnectContextType, WcAutoApproveProps } from '../../types'
 import { WCLoadingState } from '../../types'
+import { isLockdown } from '@/features/encrypted-workspaces/services'
 
 enum Errors {
   WRONG_CHAIN = '%%dappName%% made a request on a different chain than the one you are connected to',
@@ -99,6 +100,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
 
   // Init WalletConnect
   useEffect(() => {
+    if (isLockdown()) return
     walletConnectInstance
       .init()
       .then(() => setWalletConnect(walletConnectInstance))

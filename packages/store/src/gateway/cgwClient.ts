@@ -62,6 +62,23 @@ export const setRecoverErrorHook = (hook: RecoverErrorHook) => {
   customRecoverError = hook
 }
 
+/** `url` is the request path without the base URL. A thrown error fails the request without sending it. */
+type TransformRequestHook = (args: FetchArgs, url: string) => Promise<FetchArgs>
+
+let customTransformRequest: TransformRequestHook = async (args) => args
+
+export const setTransformRequestHook = (hook: TransformRequestHook) => {
+  customTransformRequest = hook
+}
+
+type TransformResponseHook = (data: unknown, url: string) => Promise<unknown>
+
+let customTransformResponse: TransformResponseHook = async (data) => data
+
+export const setTransformResponseHook = (hook: TransformResponseHook) => {
+  customTransformResponse = hook
+}
+
 export const rawBaseQuery = fetchBaseQuery({
   baseUrl: '/',
   headers: {
@@ -129,10 +146,16 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 
   const shouldIncludeCredentials = !forceOmitCredentials && isCredentialRoute(urlEnd)
 
-  const adjustedArgs = {
+  let adjustedArgs: FetchArgs = {
     ...(typeof args === 'string' ? { method: 'GET' } : args),
     url: adjustedUrl,
     credentials: shouldIncludeCredentials ? ('include' as RequestCredentials) : ('omit' as RequestCredentials),
+  }
+
+  try {
+    adjustedArgs = await customTransformRequest(adjustedArgs, urlEnd)
+  } catch (error) {
+    return { error: { status: 'CUSTOM_ERROR', error: error instanceof Error ? error.message : String(error) } }
   }
 
   const send = async () => {
@@ -152,6 +175,10 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
 
   if (response.error?.status === 404 && SUBSCRIPTIONS_ROUTE.test(urlEnd)) {
     return { data: [], meta: response.meta }
+  }
+
+  if (response.data !== undefined) {
+    return { ...response, data: await customTransformResponse(response.data, urlEnd) }
   }
 
   return response

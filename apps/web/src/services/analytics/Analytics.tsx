@@ -9,12 +9,14 @@ import {
   type CookiesAndTermsState,
 } from '@/store/cookiesAndTermsSlice'
 import { datadogRum } from '@datadog/browser-rum'
+import { isLockdown } from '@/features/encrypted-workspaces/services'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { useEffect, useState } from 'react'
 
 const Analytics = () => {
   // The store loads persisted consent one effect after the first render, so mount-time events would fire before GA exists
   const [hasStoredConsent] = useState(() => {
+    if (isLockdown()) return false
     const storedCookies = local.getItem<CookiesAndTermsState>(cookiesAndTermsSlice.name)
     return storedCookies?.[CookieAndTermType.ANALYTICS] === true && storedCookies.termsVersion === version
   })

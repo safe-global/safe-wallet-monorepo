@@ -44,6 +44,8 @@ import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
 import { TargetedOutreachFeature } from '@/features/targeted-outreach'
+import { EncryptedWorkspacesFeature } from '@/features/encrypted-workspaces'
+import { initWorkspaceEncryption, isLockdown } from '@/features/encrypted-workspaces/services'
 
 /**
  * Wrapper that lazy-loads Recovery via the feature system.
@@ -79,6 +81,11 @@ const TargetedOutreachPopupLoader = () => {
   const { OutreachPopup } = useLoadFeature(TargetedOutreachFeature)
   return <OutreachPopup />
 }
+
+const LockdownBannerLoader = () => {
+  const { LockdownBanner } = useLoadFeature(EncryptedWorkspacesFeature)
+  return <LockdownBanner />
+}
 import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts'
@@ -102,6 +109,10 @@ import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
 // Initialize observability before React rendering starts
 // This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration
 if (typeof window !== 'undefined') {
+  initWorkspaceEncryption()
+}
+
+if (typeof window !== 'undefined' && !isLockdown()) {
   // Datadog RUM + Mixpanel "Error Surfaced" tracking (WA-2775) behind one service.
   // DatadogProvider self-gates when its RUM tokens are absent.
   initObservability([new DatadogProvider(), new MixpanelTracingProvider()])
@@ -211,6 +222,8 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
           <WhatsNewUpdatesFrame />
 
           <TargetedOutreachPopupLoader />
+
+          <LockdownBannerLoader />
 
           <Notifications />
 

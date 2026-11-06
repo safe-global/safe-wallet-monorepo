@@ -2,6 +2,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
 import type { RootState } from '.'
 import { version } from '@/markdown/terms/version'
+import { isLockdown } from '@/features/encrypted-workspaces/services'
 
 export enum CookieAndTermType {
   TERMS = 'terms',
@@ -42,6 +43,7 @@ export const hasAcceptedTerms = (state: RootState): boolean => {
 }
 
 export const hasConsentFor = (state: RootState, type: CookieAndTermType): boolean => {
+  if (isLockdown()) return false
   const cookies = selectCookies(state)
   return cookies[type] === true && cookies.termsVersion === version
 }

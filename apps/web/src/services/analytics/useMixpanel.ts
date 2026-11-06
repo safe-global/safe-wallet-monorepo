@@ -17,6 +17,7 @@ import {
 } from './mixpanel'
 import { useAppSelector } from '@/store'
 import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
+import { isLockdown } from '@/features/encrypted-workspaces/services'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { IS_PRODUCTION } from '@/config/constants'
@@ -53,13 +54,13 @@ const useMixpanel = () => {
   const planState = useSpacePlanState(isSpaceRoute && spaceId ? spaceId : null)
 
   useEffect(() => {
-    if (isMixpanelEnabled) {
+    if (isMixpanelEnabled && !isLockdown()) {
       mixpanelInit()
     }
   }, [isMixpanelEnabled])
 
   useEffect(() => {
-    if (!isMixpanelEnabled) return
+    if (!isMixpanelEnabled || isLockdown()) return
 
     if (isAnalyticsEnabled) {
       mixpanelOptInTracking()
