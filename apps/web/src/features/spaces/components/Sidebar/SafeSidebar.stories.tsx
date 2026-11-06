@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import type { CSSProperties, ReactNode } from 'react'
 import { Sidebar, SidebarHeader, SidebarInset, SidebarProvider } from '@safe-global/views/components/ui/sidebar'
 import { withMockProvider } from '@/storybook/decorators'
-import { MOCK_SPACE_ID, createChainData } from '@/stories/mocks'
+import { MOCK_SPACE_ID, createChainData, createHandlers } from '@/stories/mocks'
 import { EnhancedSidebar } from './index'
 import { SafeSidebarVariant } from './variants/SafeSidebarVariant'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
@@ -97,6 +97,7 @@ const meta = {
     spaceInitial: { control: 'text' },
   },
   parameters: {
+    msw: { handlers: createHandlers() },
     layout: 'fullscreen',
     nextjs: {
       appDirectory: false,
