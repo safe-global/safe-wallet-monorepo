@@ -39,12 +39,6 @@ module.exports = {
     '!<rootDir>/src/**/*.stories.tsx',
   ],
   coverageReporters: ['text-summary', 'json', 'lcov', 'html'],
-  // plugins/ has its own node:test suite; cypress + dist are not unit tests
-  testPathIgnorePatterns: [
-    '<rootDir>/node_modules',
-    '<rootDir>/dist',
-    '<rootDir>/e2e',
-    '<rootDir>/cypress',
-    '<rootDir>/plugins',
-  ],
+  // plugins/ has its own node:test suite; dist holds no unit tests
+  testPathIgnorePatterns: ['<rootDir>/node_modules', '<rootDir>/dist', '<rootDir>/e2e', '<rootDir>/plugins'],
 }

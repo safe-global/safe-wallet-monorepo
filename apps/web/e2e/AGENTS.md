@@ -4,8 +4,6 @@ All new web E2E tests are written here. A Playwright test is only for behaviour 
 
 **Before writing any test, answer the 4 questions in [docs/AI_TEST_OUTPUT_FORMAT.md](docs/AI_TEST_OUTPUT_FORMAT.md).** How to write a journey, page objects, waits and debugging: [docs/README.md](docs/README.md).
 
-Cypress → Playwright migration: move each Cypress test to the lowest level that covers it (unit or component test first, a Playwright journey only for a user flow), and delete what nothing needs. The specs still in `../cypress/e2e/` are the remaining work. In the PR description, list each migrated or deleted Cypress test with its replacement or the reason it goes.
-
 ## Layout
 
 - `tests/e2e/` — journeys: each test acts in the UI and checks the result in CGW and on chain (`src/chain/`). A test that changes an existing Safe seeds it with `seedSafe(journey, …)` from `src/seed/`
@@ -21,6 +19,6 @@ CI: every registered spec runs on the isolated stack on **every PR that changes 
 
 ## Isolated backend
 
-`environment/run.mjs` launches the checked-in Anvil backend and the registered Playwright specs (`e2e:env playwright`), with data from the scenarios in `environment/scenarios/`. Run helper tests with `yarn workspace @safe-global/web e2e:env:test`: Node's test runner runs `environment/*.test.mjs`, `src/**/*.test.mjs` (unit tests of the Playwright helpers, such as `src/data/credentials.test.mjs`) and the mock tests. Preserve the fork hash, TXS indexing floor and CGW-visible scenario preconditions. Provider credentials must never reach the wallet or Playwright processes. Cypress does not run on the local stack.
+`environment/run.mjs` launches the checked-in Anvil backend and the registered Playwright specs (`e2e:env playwright`), with data from the scenarios in `environment/scenarios/`. Run helper tests with `yarn workspace @safe-global/web e2e:env:test`: Node's test runner runs `environment/*.test.mjs`, `src/**/*.test.mjs` (unit tests of the Playwright helpers, such as `src/data/credentials.test.mjs`) and the mock tests. Preserve the fork hash, TXS indexing floor and CGW-visible scenario preconditions. Provider credentials must never reach the wallet or Playwright processes.
 
 `web-isolated-e2e-backend.yml` builds the wallet before backend startup and runs the Playwright specs in shards, each on its own backend, on the same ARM runner type. Pull requests and pushes to `dev` run against the service versions on staging, and release pull requests against production, so a red run can come from a backend deploy, not from the pull request; the run summary lists the images. Require the `Isolated E2E result` job, not a shard, in branch protection. The backend action leaves containers running; the workflow must always attempt cleanup after tests. Native dependency and build caches include runner architecture. Chromium comes from the installed Playwright version. See [local setup](docs/ISOLATED_ENVIRONMENT.md) and [backend guidance](environment/infra/AGENTS.md).

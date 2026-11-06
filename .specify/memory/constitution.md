@@ -113,14 +113,14 @@ to apply uniformly.
 
 The monorepo enforces specific technology choices to maintain consistency:
 
-| Layer           | Web (apps/web)       | Mobile (apps/mobile) | Shared (packages/) |
-| --------------- | -------------------- | -------------------- | ------------------ |
-| Framework       | Next.js              | Expo (React Native)  | Platform-agnostic  |
-| UI Library      | MUI                  | Tamagui              | N/A                |
-| State           | Redux + RTK Query    | Redux + RTK Query    | Redux slices       |
-| Styling         | CSS vars + MUI theme | Tamagui tokens       | @safe-global/theme |
-| Testing         | Jest + MSW + Cypress | Jest + MSW           | Jest + MSW         |
-| Package Manager | Yarn 4 workspaces    | Yarn 4 workspaces    | Yarn 4 workspaces  |
+| Layer           | Web (apps/web)          | Mobile (apps/mobile) | Shared (packages/) |
+| --------------- | ----------------------- | -------------------- | ------------------ |
+| Framework       | Next.js                 | Expo (React Native)  | Platform-agnostic  |
+| UI Library      | MUI                     | Tamagui              | N/A                |
+| State           | Redux + RTK Query       | Redux + RTK Query    | Redux slices       |
+| Styling         | CSS vars + MUI theme    | Tamagui tokens       | @safe-global/theme |
+| Testing         | Jest + MSW + Playwright | Jest + MSW           | Jest + MSW         |
+| Package Manager | Yarn 4 workspaces       | Yarn 4 workspaces    | Yarn 4 workspaces  |
 
 **Web3/Blockchain stack**:
 

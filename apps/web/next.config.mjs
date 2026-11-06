@@ -177,7 +177,7 @@ const nextConfig = {
       config.optimization.minimize = false
     }
 
-    // Add SRI manifest plugin (production only, skip for Cypress tests)
+    // Add SRI manifest plugin (production only, skip for E2E test builds)
     if (!dev && process.env.NODE_ENV !== 'cypress') {
       config.plugins.push(new SriManifestWebpackPlugin())
     }
