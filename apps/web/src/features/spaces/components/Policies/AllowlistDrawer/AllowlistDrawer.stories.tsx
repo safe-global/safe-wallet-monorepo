@@ -22,7 +22,7 @@ import AllowlistDrawer from './AllowlistDrawer'
 const PENDING_ARGS = {
   safe: { address: MOCK_SAFES.payroll.address, name: 'Payroll' },
   transactionLink: 'https://app.safe.global/transactions/tx?id=0x4b7e&safe=matic:0x1F25',
-  reviewTransactionHref: '/transactions/tx?id=0x4b7e',
+  onReviewTransaction: fn(),
 }
 
 const SIGNATURES = { threshold: 2, owners: 3 }

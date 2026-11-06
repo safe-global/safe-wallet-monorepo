@@ -24,6 +24,8 @@ jest.mock('@/components/common/ChainIndicator', () => {
   return { __esModule: true, default: Mock }
 })
 
+const mockReviewTransaction = jest.fn()
+
 const mockAllowlistPolicyWithChange = (scheduledChange: AllowlistScheduledChange) =>
   asActivePolicy(mockAllowlistPolicy({ scheduledChange }))
 
@@ -43,7 +45,7 @@ const setup = (policy: AllowlistDrawerPolicy, viewer: Viewer = MOCK_VIEWERS.sign
           policy={policy}
           viewer={viewer}
           transactionLink="https://app.safe.global/transactions/tx?id=0x4b7e"
-          reviewTransactionHref="/transactions/tx?id=0x4b7e"
+          onReviewTransaction={mockReviewTransaction}
         />,
       )
     : renderWithUserEvent(
@@ -110,15 +112,15 @@ describe('AllowlistDrawer', () => {
     expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
   })
 
-  it('shows the pending banner, the signature count and the review action while awaiting signatures', () => {
-    setup(mockPendingAllowlist())
+  it('shows the pending banner, the signature count and the review action while awaiting signatures', async () => {
+    const { user } = setup(mockPendingAllowlist())
 
     expect(screen.getByText('The allowlist is not active as the transaction is not yet executed.')).toBeInTheDocument()
     expect(screen.getByText('Pending signatures')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Review transaction' })).toHaveAttribute(
-      'href',
-      '/transactions/tx?id=0x4b7e',
-    )
+
+    await user.click(screen.getByRole('button', { name: 'Review transaction' }))
+
+    expect(mockReviewTransaction).toHaveBeenCalledTimes(1)
   })
 
   it('lists each token once expanded', async () => {
@@ -164,7 +166,7 @@ describe('AllowlistDrawer', () => {
     setup(mockPendingAllowlist(), MOCK_VIEWERS.signerWhoSigned)
 
     expect(screen.getByRole('button', { name: 'Copy transaction link' })).toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: 'Review transaction' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
 
   it('renders no footer when the transaction link is not known yet', () => {
@@ -199,7 +201,7 @@ describe('AllowlistDrawer', () => {
     expect(screen.getByText('The transaction was executed.')).toBeInTheDocument()
     expect(screen.getByText('The allowlist becomes active after a delay of 3 minutes.')).toBeInTheDocument()
     expect(screen.getByTestId('policy-status-pending')).toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: 'Review transaction' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
 
   it('reports a failed transaction in red and marks the policy as failed', () => {
@@ -224,7 +226,7 @@ describe('AllowlistDrawer', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(title)
     expect(screen.getByText('Close this panel to see the current policies.')).toBeInTheDocument()
     expect(screen.getByTestId('policy-status-failed')).toHaveTextContent('Failed')
-    expect(screen.queryByRole('link', { name: 'Review transaction' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
 
   it('closes an expired transaction with no chip and no action', () => {
@@ -234,7 +236,7 @@ describe('AllowlistDrawer', () => {
     expect(screen.getByText('It can no longer be signed. Set up the allowlist again to retry.')).toBeInTheDocument()
     expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
     expect(screen.queryByTestId(/^policy-status-/)).not.toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: 'Review transaction' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
 
   it('keeps the removed badges once a removal has executed', () => {
@@ -430,7 +432,7 @@ describe('AllowlistDrawer', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('The transaction failed and can no longer be executed.')
     expect(screen.getByTestId('policy-status-failed')).toHaveTextContent('Failed')
     expect(screen.queryByText('Pending signatures')).not.toBeInTheDocument()
-    expect(screen.queryByRole('link', { name: 'Review transaction' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Review transaction' })).not.toBeInTheDocument()
   })
 
   it('disables the Edit and Remove buttons until their flows are passed in', () => {

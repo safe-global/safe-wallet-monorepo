@@ -3,6 +3,8 @@ import { render } from '@/tests/test-utils'
 import { createExistingTx } from '@/services/tx/tx-sender'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
+import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
+import type { SafeScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import ConfirmProposedTx from './ConfirmProposedTx'
 
 jest.mock('@/services/tx/tx-sender', () => ({
@@ -18,8 +20,12 @@ const mockCreateExistingTx = createExistingTx as jest.MockedFunction<typeof crea
 
 const TX_ID = `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 8 })}`
 const TX_NONCE = faker.number.int({ min: 1, max: 100000 })
+const CHAIN_ID = faker.string.numeric(5)
 
-const renderWithContexts = (safeTxContext: Partial<SafeTxContextParams>) => {
+const renderWithContexts = (
+  safeTxContext: Partial<SafeTxContextParams>,
+  scope?: Pick<SafeScope, 'chainId' | 'safeAddress' | 'sdk'>,
+) => {
   const txFlowValue = { ...initialContext, txId: TX_ID, txNonce: TX_NONCE }
   const safeTxValue: SafeTxContextParams = {
     setSafeTx: jest.fn(),
@@ -38,11 +44,26 @@ const renderWithContexts = (safeTxContext: Partial<SafeTxContextParams>) => {
   }
 
   const result = render(
-    <TxFlowContext.Provider value={txFlowValue}>
-      <SafeTxContext.Provider value={safeTxValue}>
-        <ConfirmProposedTx onSubmit={jest.fn()} />
-      </SafeTxContext.Provider>
-    </TxFlowContext.Provider>,
+    <SafeScopeContext.Provider
+      value={
+        scope && {
+          scope: {
+            ...scope,
+            scopeKey: `${scope.chainId}:${scope.safeAddress}`,
+            safeLoaded: true,
+            safeLoading: false,
+          },
+          setScope: jest.fn(),
+          clearScope: jest.fn(),
+        }
+      }
+    >
+      <TxFlowContext.Provider value={txFlowValue}>
+        <SafeTxContext.Provider value={safeTxValue}>
+          <ConfirmProposedTx onSubmit={jest.fn()} />
+        </SafeTxContext.Provider>
+      </TxFlowContext.Provider>
+    </SafeScopeContext.Provider>,
   )
 
   return { ...result, safeTxValue, txFlowValue }
@@ -58,6 +79,24 @@ describe('ConfirmProposedTx', () => {
 
     expect(safeTxValue.setNonce).toHaveBeenCalledWith(TX_NONCE)
     expect(mockCreateExistingTx).toHaveBeenCalledTimes(1)
-    expect(mockCreateExistingTx).toHaveBeenCalledWith(expect.any(String), TX_ID)
+    expect(mockCreateExistingTx).toHaveBeenCalledWith(expect.any(String), TX_ID, undefined, undefined)
+  })
+
+  it('should load the transaction through the Safe scope, when the flow runs in one', () => {
+    const safeAddress = faker.finance.ethereumAddress()
+    const sdk = {} as SafeScope['sdk']
+    renderWithContexts({}, { chainId: CHAIN_ID, safeAddress, sdk })
+
+    expect(mockCreateExistingTx).toHaveBeenCalledWith(CHAIN_ID, TX_ID, undefined, {
+      chainId: CHAIN_ID,
+      safeAddress,
+      sdk,
+    })
+  })
+
+  it('should wait for the Safe SDK, when the flow runs in a Safe scope that has not loaded it yet', () => {
+    renderWithContexts({}, { chainId: CHAIN_ID, safeAddress: faker.finance.ethereumAddress() })
+
+    expect(mockCreateExistingTx).not.toHaveBeenCalled()
   })
 })
