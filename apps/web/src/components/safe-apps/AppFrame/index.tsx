@@ -158,7 +158,8 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
 
         <div
           style={{
-            height: '100%',
+            flex: 1,
+            minHeight: 0,
             display: appIsLoading ? 'none' : 'block',
             paddingBottom: queueBarVisible ? TRANSACTION_BAR_HEIGHT : 0,
           }}

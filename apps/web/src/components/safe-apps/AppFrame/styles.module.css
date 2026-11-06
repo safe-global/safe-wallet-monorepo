@@ -1,6 +1,9 @@
 .wrapper {
   width: 100%;
-  height: calc(100vh - var(--topbar-height) - var(--footer-height));
+  height: calc(100vh - var(--topbar-height) - var(--breadcrumbs-height));
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .iframe {
