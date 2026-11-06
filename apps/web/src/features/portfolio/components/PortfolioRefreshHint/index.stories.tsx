@@ -4,6 +4,7 @@ import PortfolioRefreshHint from './index'
 import { toBeHex } from 'ethers'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
+import { createHandlers } from '@/stories/mocks'
 
 const SAFE_ADDRESS = toBeHex('0x1234', 20)
 
@@ -43,6 +44,7 @@ const meta: Meta<typeof PortfolioRefreshHint> = {
   title: 'Features/Portfolio/PortfolioRefreshHint',
   component: PortfolioRefreshHint,
   parameters: {
+    msw: { handlers: createHandlers() },
     layout: 'centered',
     docs: {
       description: {
