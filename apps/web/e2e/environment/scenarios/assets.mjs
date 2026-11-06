@@ -4,7 +4,7 @@ import { waitUntil } from './indexing.mjs'
 import { erc20Artifact } from './chain.mjs'
 
 export async function prepareAssetsScenario(env, owners) {
-  const context = await createSafe(env, owners, { ownerAddresses: [owners.owner4.address], threshold: 1 })
+  const context = await createSafe(env, owners, { ownerAddresses: [owners.alice.address], threshold: 1 })
   try {
     const signer = new NonceManager(context.signer)
     const definitions = [
@@ -43,11 +43,7 @@ export async function prepareAssetsScenario(env, owners) {
           balances.items?.some((item) => item.tokenInfo.address === token.address && item.balance === token.amount),
         ),
     )
-    return {
-      safes: {
-        static: { SEP_STATIC_SAFE_2: `sep:${context.safeAddress}`, SEP_STATIC_SAFE_3: `sep:${context.safeAddress}` },
-      },
-    }
+    return { safes: { assets: `sep:${context.safeAddress}` } }
   } finally {
     context.provider.destroy()
   }

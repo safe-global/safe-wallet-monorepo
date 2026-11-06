@@ -24,7 +24,7 @@ test.describe('Bulk execute queued transactions', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const recipient = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1', 'owner2'], threshold: 2 })
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob', 'carol'], threshold: 2 })
     await seedSignedTransfer(journey, safe, { nonce: 0, recipient, amount: AMOUNT })
     await seedSignedTransfer(journey, safe, { nonce: 1, recipient, amount: AMOUNT })
     await seedQueuedTransfer(safe, { nonce: 2, recipient, amount: AMOUNT })

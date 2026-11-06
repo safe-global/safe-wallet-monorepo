@@ -33,7 +33,7 @@ test.describe('Transaction Builder', { tag: '@e2e' }, () => {
   }) => {
     const newValue = Wallet.createRandom().address
     await seedTransactionBuilderContracts(journey)
-    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
 
     const builder = new TxBuilderPage(safePage)
     const review = new TxReviewPage(safePage)
@@ -51,7 +51,7 @@ test.describe('Transaction Builder', { tag: '@e2e' }, () => {
     journey,
   }) => {
     await seedTransactionBuilderContracts(journey)
-    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
 
     const builder = new TxBuilderPage(safePage)
     const review = new TxReviewPage(safePage)

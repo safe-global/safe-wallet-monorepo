@@ -9,7 +9,7 @@ import type { SeededSafe } from './safe'
 
 const isMessage = (item: MessagePage['results'][number]): item is MessageItem => item.type === 'MESSAGE'
 
-/** Posts an off-chain message signed by OWNER_4, waits until CGW lists it, and returns its Safe message hash. */
+/** Posts an off-chain message signed by Alice, waits until CGW lists it, and returns its Safe message hash. */
 export async function seedOffchainMessage(safe: SeededSafe, message: string): Promise<string> {
   const { context } = safe
   const signed = await context.safe.signMessage(context.safe.createMessage(message))

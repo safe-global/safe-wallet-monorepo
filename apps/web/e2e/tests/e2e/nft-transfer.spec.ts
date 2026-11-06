@@ -32,8 +32,8 @@ test.describe('Send NFTs', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const [sender, recipient] = [
-      await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 }),
-      await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 }),
+      await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 }),
+      await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 }),
     ]
     const { contract, tokenIds } = await seedNfts(sender, { count: 2 })
     const [sent, kept] = tokenIds
@@ -59,8 +59,8 @@ test.describe('Send NFTs', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const [sender, recipient] = [
-      await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 }),
-      await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 }),
+      await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 }),
+      await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 }),
     ]
     const { contract, tokenIds } = await seedNfts(sender, { count: 2 })
 
