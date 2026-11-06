@@ -8,7 +8,8 @@ export type FeePaymentSourcePreferenceState = Record<string, FeePaymentMode>
 const initialState: FeePaymentSourcePreferenceState = {}
 
 export const feePaymentSourcePreferenceSlice = createSlice({
-  name: 'feePaymentSourcePreference',
+  // Persisted under the old module name so the signers' remembered picks survive the rename.
+  name: 'gtfPaymentSourcePreference',
   initialState,
   reducers: {
     setFeePaymentSourcePreference: (

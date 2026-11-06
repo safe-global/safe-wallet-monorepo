@@ -37,8 +37,7 @@ export type SafeTxContextParams = {
 
   isReadOnly: boolean
 
-  // GTF: proposer's payment choice. Meaningful only for the first signer; confirmers
-  // read the locked fee fields directly from safeTx.data.
+  // Who pays the fee, picked by the first signer; later signers read the locked fee fields from safeTx.data.
   feePaymentMode: FeePaymentMode
   setFeePaymentMode: (source: FeePaymentMode) => void
   feeGasToken?: string

@@ -1495,7 +1495,7 @@ describe('SignOrExecute hooks', () => {
       } as unknown as ReturnType<typeof loadFeature.useLoadFeature>)
     }
 
-    it('invokes resolveFeeParams on first-signer sign when GTF + Safe-pays guards pass', async () => {
+    it('invokes resolveFeeParams on first-signer sign when the Safe-pays guards pass', async () => {
       setupPayFromSafeChain()
       jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
 
