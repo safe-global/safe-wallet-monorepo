@@ -74,3 +74,5 @@ The Events Service `/about` is behind a login, so `up` reads the [GitHub deploym
 | `FORK_RPC_URL_POLYGON` | Archive RPC URL for the optional Polygon profile                                     |
 
 After starting Sepolia, add an optional chain with `python3 scripts/test_env.py up --chain mainnet` or `--chain polygon`. Remove it with `reset --chain <name>`; other chains remain running.
+
+The Ledger and Trezor emulators are optional too: start one with `python3 scripts/test_env.py up --device ledger` or `--device trezor`. It waits for the emulator's healthcheck. `reset` removes the emulators with the rest of the stack.

@@ -12,6 +12,8 @@ import { safeInfoSlice } from '@/store/safeInfoSlice'
 import { useAppDispatch } from '@/store'
 import * as useSafeWalletProvider from '@/services/safe-wallet-provider/useSafeWalletProvider'
 import * as useLocalStorageHook from '@/services/local-storage/useLocalStorage'
+import * as useSafeAppSuggestionHook from '../hooks/useSafeAppSuggestion'
+import { safeAppSuggestionBuilder } from '../hooks/safeAppSuggestion.fixtures'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 
 jest.mock('@reown/walletkit', () => jest.fn())
@@ -623,6 +625,42 @@ describe('WalletConnectProvider', () => {
 
         await waitFor(() => expect(getByText('Relay unavailable')).toBeInTheDocument())
         expect(getByText('Session proposal received')).toBeInTheDocument()
+      })
+    })
+
+    describe('auto-approve with a Safe App suggestion', () => {
+      const renderAutoApproved = (blocksAutoApprove: boolean) => {
+        jest.spyOn(useLocalStorageHook, 'default').mockReturnValue([{ '5': { [proposalOrigin]: true } }, jest.fn()])
+        jest
+          .spyOn(useSafeAppSuggestionHook, 'useSafeAppSuggestion')
+          .mockReturnValue(safeAppSuggestionBuilder().with({ blocksAutoApprove }).build())
+        jest.spyOn(WalletConnectWallet.prototype, 'approveSession').mockResolvedValue(mockSession)
+        jest.spyOn(WalletConnectWallet.prototype, 'init').mockImplementation(() => Promise.resolve())
+        jest.spyOn(WalletConnectWallet.prototype, 'updateSessions').mockImplementation(() => Promise.resolve())
+        jest.spyOn(WalletConnectWallet.prototype, 'onSessionPropose').mockImplementation((callback) => {
+          setTimeout(() => callback(mockSessionProposal), 100)
+          return jest.fn()
+        })
+
+        return render(
+          <WalletConnectProvider>
+            <TestComponent />
+          </WalletConnectProvider>,
+          { initialReduxState: { safeInfo: { loading: false, loaded: true, data: extendedSafeInfo } } },
+        )
+      }
+
+      it('waits for the user while the suggestion blocks auto-approve', async () => {
+        const { getByText } = renderAutoApproved(true)
+
+        await waitFor(() => expect(getByText('Session proposal received')).toBeInTheDocument())
+        expect(WalletConnectWallet.prototype.approveSession).not.toHaveBeenCalled()
+      })
+
+      it('auto-approves when the suggestion does not block it', async () => {
+        renderAutoApproved(false)
+
+        await waitFor(() => expect(WalletConnectWallet.prototype.approveSession).toHaveBeenCalled())
       })
     })
 
