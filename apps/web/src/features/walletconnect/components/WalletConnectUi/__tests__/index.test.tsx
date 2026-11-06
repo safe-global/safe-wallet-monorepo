@@ -8,8 +8,18 @@ import { WalletConnectContext } from '../../WalletConnectContext'
 import WalletConnectWallet from '../../../services/WalletConnectWallet'
 import { wcPopupStore } from '../../../store/wcPopupStore'
 import * as useLocalStorageHook from '@/services/local-storage/useLocalStorage'
+import { trackEvent } from '@/services/analytics'
+import { WALLETCONNECT_EVENTS, WcSafeAppSuggestionResult } from '@/services/analytics/events/walletconnect'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { safeAppBuilder } from '@/tests/builders/walletConnect'
+import * as useSafeAppSuggestionHook from '../../../hooks/useSafeAppSuggestion'
+import { safeAppSuggestionBuilder } from '../../../hooks/safeAppSuggestion.fixtures'
 
 jest.mock('@reown/walletkit', () => jest.fn())
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 jest.mock('@/services/safe-wallet-provider/useSafeWalletProvider')
 
 jest.mock('../../../store/wcPopupStore', () => ({
@@ -103,5 +113,53 @@ describe('WalletConnectUi', () => {
 
     expect(wcPopupStore.setStore).toHaveBeenCalledWith(false)
     expect(WalletConnectWallet.prototype.rejectSession).not.toHaveBeenCalled()
+  })
+
+  describe('with a Safe App suggestion', () => {
+    const safeApp = safeAppBuilder().build()
+    const mockRememberChoice = jest.fn()
+
+    beforeEach(() => jest.clearAllMocks())
+
+    const mockSuggestion = (isShown: boolean) =>
+      jest
+        .spyOn(useSafeAppSuggestionHook, 'useSafeAppSuggestion')
+        .mockReturnValue(
+          safeAppSuggestionBuilder()
+            .with({ isShown, safeApp, remember: true, rememberChoice: mockRememberChoice })
+            .build(),
+        )
+
+    it('records the dismissal without saving a choice when the popup is closed', async () => {
+      mockSuggestion(true)
+      await renderUi()
+      act(() => propose(proposal))
+
+      closePopup()
+
+      const origin = proposal.verifyContext.verified.origin
+      expect(trackEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ action: WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT.action, label: origin }),
+        {
+          [MixpanelEventParams.APP_URL]: origin,
+          [MixpanelEventParams.SAFE_APP_NAME]: safeApp.name,
+          [MixpanelEventParams.RESULT]: WcSafeAppSuggestionResult.DISMISSED,
+          [MixpanelEventParams.REMEMBER_CHOICE]: true,
+        },
+      )
+      expect(mockRememberChoice).not.toHaveBeenCalled()
+      await waitFor(() => expect(WalletConnectWallet.prototype.rejectSession).toHaveBeenCalledWith(proposal))
+    })
+
+    it('records no dismissal when the suggestion is not on screen', async () => {
+      mockSuggestion(false)
+      await renderUi()
+      act(() => propose(proposal))
+
+      closePopup()
+
+      await waitFor(() => expect(WalletConnectWallet.prototype.rejectSession).toHaveBeenCalled())
+      expect(trackEvent).not.toHaveBeenCalled()
+    })
   })
 })
