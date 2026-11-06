@@ -225,7 +225,7 @@ describe('useGasPayerSelection', () => {
 
     expect(result.current.choice).toBe('WALLET')
     expect(result.current.view?.payer).toEqual({ kind: 'locked', value: 'SPONSORED' })
-    expect(result.current.view?.gasToken.lockedReason).toBe('Covered by your sponsored transactions.')
+    expect(result.current.view?.gasToken.lockedReason).toBe('SPONSORED')
     expect(currentMode).toBe('signer')
   })
 
@@ -331,7 +331,7 @@ describe('useGasPayerSelection', () => {
       expect(result.current.view?.payer).toEqual({
         kind: 'locked',
         value: 'WALLET',
-        reason: 'Whoever signs first picks who pays the gas fee.',
+        reason: 'FIRST_SIGNER_PICKS',
       })
       expect(quoteRequested()).toBe(false)
       expect(currentMode).toBe('signer')

@@ -157,16 +157,14 @@ export const useGasPayerSelection = ({
           tokens,
           selected: fees.selectedGasToken ?? nativeToken?.address ?? ZERO_ADDRESS,
           locked: isLocked,
-          lockedReason: isLocked
-            ? "Set at signing and can't be changed."
-            : `Fees are paid in ${nativeToken?.symbol ?? chain?.nativeCurrency.symbol} for now. More tokens are coming soon.`,
+          lockedReason: isLocked ? 'SET_AT_SIGNING' : 'NATIVE_ONLY',
         }
       : {
           tokens: nativeToken ? [nativeToken] : [],
           selected: nativeToken?.address ?? ZERO_ADDRESS,
           locked: true,
           // Without a reason the selector explains the signer-pays case, which is wrong when Pro plan pays.
-          lockedReason: sponsored ? 'Covered by your sponsored transactions.' : undefined,
+          lockedReason: sponsored ? 'SPONSORED' : undefined,
         }
 
     const gasFee: NetworkFee = isLocked ? currentFee : paysFromSafe ? safeFee : signerFee

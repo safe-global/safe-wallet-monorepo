@@ -64,7 +64,7 @@ export const buildPayerControl = ({
     if (planState === 'PRO_SPONSORED_LEFT') return { kind: 'locked', value: 'SPONSORED' }
     if (offersSafeToggle) return safeOrWallet(choice)
     if (isProposing) {
-      return { kind: 'locked', value: 'WALLET', reason: 'Whoever signs first picks who pays the gas fee.' }
+      return { kind: 'locked', value: 'WALLET', reason: 'FIRST_SIGNER_PICKS' }
     }
     return { kind: 'locked', value: 'WALLET' }
   }

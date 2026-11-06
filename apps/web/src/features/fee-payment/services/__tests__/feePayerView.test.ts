@@ -65,7 +65,7 @@ describe('buildPayerControl', () => {
     expect(buildPayerControl({ ...base, offersSafeToggle: false, isProposing: true })).toEqual({
       kind: 'locked',
       value: 'WALLET',
-      reason: 'Whoever signs first picks who pays the gas fee.',
+      reason: 'FIRST_SIGNER_PICKS',
     })
   })
 

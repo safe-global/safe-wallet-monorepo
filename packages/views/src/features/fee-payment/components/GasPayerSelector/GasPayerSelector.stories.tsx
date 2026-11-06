@@ -38,11 +38,11 @@ const pro = (left: number): FeePayerView['footer'] => ({
   resetsAt: '2026-11-11T00:00:00Z',
   isSubscription: true,
 })
-const safeTokens = {
+const safeTokens: FeePayerView['gasToken'] = {
   tokens: [ETH, USDC_TOKEN],
   selected: ZERO,
   locked: false,
-  lockedReason: 'Fees are paid in ETH for now. More tokens are coming soon.',
+  lockedReason: 'NATIVE_ONLY',
 }
 const nativeLocked = { tokens: [ETH], selected: ZERO, locked: true }
 const base = { executionFee: {}, sponsored: false, sponsorKind: 'plan' as const }
@@ -177,7 +177,7 @@ export const SignLaterSignerSafe: Story = {
     view: {
       ...base,
       payer: locked('PAY_FROM_SAFE'),
-      gasToken: { tokens: [ETH], selected: ZERO, locked: true, lockedReason: "Set at signing and can't be changed." },
+      gasToken: { tokens: [ETH], selected: ZERO, locked: true, lockedReason: 'SET_AT_SIGNING' },
       gasFee: safeFee,
       totalOutgoing: outgoing(true),
       footer: free,
@@ -246,7 +246,7 @@ export const ExecuteLocked: Story = {
     view: {
       ...base,
       payer: locked('PAY_FROM_SAFE'),
-      gasToken: { tokens: [ETH], selected: ZERO, locked: true, lockedReason: "Set at signing and can't be changed." },
+      gasToken: { tokens: [ETH], selected: ZERO, locked: true, lockedReason: 'SET_AT_SIGNING' },
       gasFee: safeFee,
       totalOutgoing: outgoing(true),
       footer: pro(49),
@@ -347,7 +347,7 @@ export const SignAsProposer: Story = {
   args: {
     view: {
       ...base,
-      payer: { kind: 'locked', value: 'WALLET', reason: 'Whoever signs first picks who pays the gas fee.' },
+      payer: { kind: 'locked', value: 'WALLET', reason: 'FIRST_SIGNER_PICKS' },
       gasToken: nativeLocked,
       gasFee: { note: 'Calculated at execution' },
       totalOutgoing: outgoing(false),
