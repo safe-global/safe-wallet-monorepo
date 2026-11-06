@@ -94,7 +94,7 @@ const isNotFirstPartyStack = (stack: string | undefined): boolean => {
  * the block is the intended behaviour and nothing is broken for the user, so
  * it is dropped rather than counted as a real error (WA-2952).
  *
- * Trade-off this accepts: `'unsafe-eval'` **is** permitted in dev/Cypress
+ * Trade-off this accepts: `'unsafe-eval'` **is** permitted in dev
  * (`config/securityHeaders.ts`), so a first-party eval()/Function() call would
  * pass locally and only throw — as this same `EvalError` type — in
  * production, where this filter would otherwise hide it. Accepted because (a)

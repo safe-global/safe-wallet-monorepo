@@ -14,7 +14,7 @@ import noExplicitAny from '../../config/eslint/no-explicit-any.mjs'
 // @/* gets the same quality bar in both workspaces.
 export default [
   {
-    ignores: ['**/node_modules/', '**/dist/', '**/cypress/', '**/cypress.config.js'],
+    ignores: ['**/node_modules/', '**/dist/'],
   },
   js.configs.recommended,
   prettier,

@@ -8,8 +8,7 @@
  * recipient field to that entry's address — repeated across every entry so a
  * stale / wrong-value regression on re-selection is caught.
  *
- * Deterministic setup (ports Cypress `spaces_address_book_import.cy.js`'s
- * `setupSpacesAuth`): a SiWE session is faked via localStorage + a mocked
+ * Deterministic setup: a SiWE session is faked via localStorage + a mocked
  * `/v1/auth/me` (without that mock the session-expiry guard's probe 403s against
  * staging and clears the session — which is exactly why a plain seed fails). The
  * spaces endpoints are mocked to inject a workspace and its contacts; local
@@ -68,7 +67,7 @@ const WORKSPACE_ADDRESS_BOOK = {
 /**
  * Fakes an authenticated Spaces session and injects a deterministic workspace +
  * contacts by mocking the auth/users/spaces GET endpoints. Everything else
- * (chains, safe info) hits the real CGW. Mirrors Cypress `setupSpacesAuth`.
+ * (chains, safe info) hits the real CGW.
  */
 async function mockSpacesSession(page: Page, safe: string): Promise<void> {
   await page.addInitScript(

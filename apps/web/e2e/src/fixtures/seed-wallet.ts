@@ -1,7 +1,7 @@
 /**
  * Seeds the storage the app reads on start-up to reconnect the last wallet silently
  * (useOnboard → connectLastWallet), so a test starts connected as the private-key signer without
- * driving the onboard modal. Mirrors `connectSignerViaStorage` in cypress/support/utils/wallet.js.
+ * driving the onboard modal.
  *
  * Runs via `addInitScript`, i.e. before page scripts on every navigation. The reconnect is
  * asynchronous — wait for `walletPage.accountCenter` before acting as the connected wallet.
