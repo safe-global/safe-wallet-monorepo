@@ -17,4 +17,4 @@ A parallel config dir `.storybook-vite/` backs the `storybook:vite` / `build-sto
 
 ## Visual sweep harness
 
-The Argos render sweep lives at `scripts/storybook/render-sweep.ts` (repo root), run via `yarn workspace @safe-global/web storybook:sweep`. It handles the `skip-visual-test` tag: tagged stories are render-checked but not snapshotted. Workflow status and local usage: see the guide's "Visual regression (Argos)" section.
+The Argos render sweep lives at `scripts/storybook/render-sweep.ts` (repo root), run via `yarn workspace @safe-global/web storybook:sweep`. It handles the `skip-visual-test` tag: tagged stories are render-checked but not snapshotted. `--shots` writes sheets, grouped by `scripts/storybook/sheets.ts`. Workflow status and local usage: see the guide's "Visual regression (Argos)" section.
