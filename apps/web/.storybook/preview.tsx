@@ -7,6 +7,7 @@ import { initialize, mswLoader } from 'msw-storybook-addon'
 import '../src/styles/globals.css'
 import { ShadcnProvider } from './shadcn'
 import { mockAssetHandlers } from './mockAssets'
+import { mockChainHandlers } from './mockChains'
 
 // Initialize MSW for API mocking in Storybook. Initial handlers survive each story's own
 // handlers (msw-storybook-addon resets to them), and a story's handlers still take priority.
@@ -14,7 +15,7 @@ initialize(
   {
     onUnhandledRequest: 'bypass', // Don't warn about unhandled requests
   },
-  mockAssetHandlers,
+  [...mockAssetHandlers, ...mockChainHandlers],
 )
 
 // Canvas colors mirror the card/paper surface components actually sit on (--color-background-paper):
