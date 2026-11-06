@@ -24,7 +24,7 @@ export type TotalOutgoing = {
 
 export type TotalOutgoingInputs = {
   safeTx: SafeTransaction
-  gasWei: bigint
+  gasFeeBaseUnits: bigint
   relayCostFiat: number
   relayCostFiatCode: string
   nativeSymbol: string
@@ -77,7 +77,7 @@ export const withoutFees = (totalOutgoing: TotalOutgoing | undefined): TotalOutg
 
 export const computeTotalOutgoing = ({
   safeTx,
-  gasWei,
+  gasFeeBaseUnits,
   relayCostFiat,
   relayCostFiatCode,
   nativeSymbol,
@@ -94,7 +94,7 @@ export const computeTotalOutgoing = ({
   // Nothing leaves the Safe but the fee (owner changes, contract calls, a no-op): the fee is the total.
   const feeOnly = (): TotalOutgoing => ({
     primary: [],
-    fees: { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
+    fees: { amount: formatVisualAmount(gasFeeBaseUnits, gasDecimals), currency: gasSymbol },
     fiatTotal: formatCurrencyMinimal(relayCostFiat, relayCostFiatCode),
   })
 
@@ -106,13 +106,13 @@ export const computeTotalOutgoing = ({
 
     if (gasIsNative) {
       return {
-        primary: [{ amount: formatVisualAmount(sendWei + gasWei, nativeDecimals), currency: nativeSymbol }],
+        primary: [{ amount: formatVisualAmount(sendWei + gasFeeBaseUnits, nativeDecimals), currency: nativeSymbol }],
         fiatTotal: formatCurrencyMinimal(sendFiat + relayCostFiat, relayCostFiatCode),
       }
     }
     return {
       primary: [{ amount: formatVisualAmount(sendWei, nativeDecimals), currency: nativeSymbol }],
-      fees: { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
+      fees: { amount: formatVisualAmount(gasFeeBaseUnits, gasDecimals), currency: gasSymbol },
       fiatTotal: formatCurrencyMinimal(sendFiat + relayCostFiat, relayCostFiatCode),
     }
   }
@@ -134,7 +134,7 @@ export const computeTotalOutgoing = ({
         return {
           primary: [
             {
-              amount: formatVisualAmount(transferValue + gasWei, token.tokenInfo.decimals),
+              amount: formatVisualAmount(transferValue + gasFeeBaseUnits, token.tokenInfo.decimals),
               currency: token.tokenInfo.symbol,
             },
           ],
@@ -144,7 +144,7 @@ export const computeTotalOutgoing = ({
 
       return {
         primary: [{ amount: sendAmount, currency: token.tokenInfo.symbol }],
-        fees: { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
+        fees: { amount: formatVisualAmount(gasFeeBaseUnits, gasDecimals), currency: gasSymbol },
         fiatTotal: formatCurrencyMinimal(sendFiat + relayCostFiat, relayCostFiatCode),
       }
     } catch {
@@ -214,14 +214,14 @@ export const computeTotalOutgoing = ({
 
     const gasKey = gasTokenAddress.toLowerCase()
     const gasFolded = totals.has(gasKey)
-    if (gasFolded) totals.get(gasKey)!.wei += gasWei
+    if (gasFolded) totals.get(gasKey)!.wei += gasFeeBaseUnits
 
     return {
       primary: [...totals.values()].map((t) => ({
         amount: formatVisualAmount(t.wei, t.decimals),
         currency: t.symbol,
       })),
-      fees: gasFolded ? undefined : { amount: formatVisualAmount(gasWei, gasDecimals), currency: gasSymbol },
+      fees: gasFolded ? undefined : { amount: formatVisualAmount(gasFeeBaseUnits, gasDecimals), currency: gasSymbol },
       fiatTotal: formatCurrencyMinimal(sendsFiat + relayCostFiat, relayCostFiatCode),
     }
   }

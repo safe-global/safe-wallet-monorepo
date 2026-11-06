@@ -22,10 +22,10 @@ export type { HistoryFeesData } from '@safe-global/views/features/fee-payment/ty
 
 const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
 
-const formatFiat = (gasWei: bigint, decimals: number, fiatConversion: string | undefined, currency: string) =>
+const formatFiat = (gasFeeBaseUnits: bigint, decimals: number, fiatConversion: string | undefined, currency: string) =>
   fiatConversion === undefined
     ? undefined
-    : formatCurrencyMinimal(Number(formatUnits(gasWei, decimals)) * Number(fiatConversion), currency)
+    : formatCurrencyMinimal(Number(formatUnits(gasFeeBaseUnits, decimals)) * Number(fiatConversion), currency)
 
 const buildFees = (
   amount: string,
@@ -123,9 +123,9 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
     const decimals = chain?.nativeCurrency.decimals ?? 18
     const symbol = chain?.nativeCurrency.symbol ?? 'ETH'
     // Signer-pays: EOA paid the network in native gas — gasUsed × gasPrice from the tx receipt.
-    const gasWei = receipt.gasUsed * receipt.gasPrice
-    const amount = formatVisualAmount(gasWei, decimals)
-    const fiatAmount = formatFiat(gasWei, decimals, fiatConversion, currency)
+    const gasFeeBaseUnits = receipt.gasUsed * receipt.gasPrice
+    const amount = formatVisualAmount(gasFeeBaseUnits, decimals)
+    const fiatAmount = formatFiat(gasFeeBaseUnits, decimals, fiatConversion, currency)
 
     return buildFees(amount, symbol, fiatAmount, 'signer')
   }, [receipt, chain?.nativeCurrency.decimals, chain?.nativeCurrency.symbol, fiatConversion, currency])

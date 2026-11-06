@@ -302,7 +302,7 @@ describe('useFeesPreview', () => {
     expect(result.current.totalOutgoing).toBeDefined()
     expect(result.current.totalOutgoing?.primary).toEqual([])
     expect(result.current.totalOutgoing?.fees?.currency).toBe('ETH')
-    // gasWei = (2409 + 68568) * 741064438 ≈ 5.26e13 → ~0.00005 ETH
+    // gasFeeBaseUnits = (2409 + 68568) * 741064438 ≈ 5.26e13 → ~0.00005 ETH
     expect(result.current.totalOutgoing?.fees?.amount).toMatch(/^0\.00005/)
     expect(result.current.totalOutgoing?.fiatTotal).toBeDefined()
   })
@@ -595,10 +595,10 @@ describe('useFeesPreview', () => {
 
       const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(lockedSafeTx) })
 
-      // gasWei = (2409 + 68568) * 741064438 ≈ 5.26e13 → ~0.00005 ETH
+      // gasFeeBaseUnits = (2409 + 68568) * 741064438 ≈ 5.26e13 → ~0.00005 ETH
       expect(result.current.gasFee.currency).toBe('ETH')
       expect(result.current.gasFee.amount).toMatch(/^0\.00005/)
-      // fiat = gasWei in ETH * fiatConversion (2500) → ~$0.13
+      // fiat = gasFeeBaseUnits in ETH * fiatConversion (2500) → ~$0.13
       expect(result.current.gasFee.fiatAmount).toBeDefined()
       expect(result.current.loading).toBe(false)
       expect(result.current.canCoverFees).toBe(true)

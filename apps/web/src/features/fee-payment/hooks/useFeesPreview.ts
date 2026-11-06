@@ -227,20 +227,20 @@ export const useFeesPreview = ({ isExecution = false }: { isExecution?: boolean 
 
   if (isConfirmation && safeTx) {
     const { safeTxGas, baseGas, gasPrice: signedGasPrice } = safeTx.data
-    const gasWei = (BigInt(safeTxGas) + BigInt(baseGas)) * BigInt(signedGasPrice)
-    const gasAmount = formatVisualAmount(gasWei, gasDecimals)
+    const gasFeeBaseUnits = (BigInt(safeTxGas) + BigInt(baseGas)) * BigInt(signedGasPrice)
+    const gasAmount = formatVisualAmount(gasFeeBaseUnits, gasDecimals)
 
     const gasTokenBalance = balances.items.find((b) => sameAddress(b.tokenInfo.address, selectedAddress))
     const gasFiatUsd = gasTokenBalance
-      ? Number(formatUnits(gasWei, gasDecimals)) * Number(gasTokenBalance.fiatConversion)
+      ? Number(formatUnits(gasFeeBaseUnits, gasDecimals)) * Number(gasTokenBalance.fiatConversion)
       : 0
     const safeHasEnoughGas = gasTokenBalance
-      ? BigInt(gasTokenBalance.balance) >= gasWei + getSendInGasToken(safeTx, selectedAddress)
+      ? BigInt(gasTokenBalance.balance) >= gasFeeBaseUnits + getSendInGasToken(safeTx, selectedAddress)
       : false
 
     const totalOutgoing = computeTotalOutgoing({
       safeTx,
-      gasWei,
+      gasFeeBaseUnits,
       relayCostFiat: gasFiatUsd,
       relayCostFiatCode: currency,
       nativeSymbol,
@@ -308,11 +308,11 @@ export const useFeesPreview = ({ isExecution = false }: { isExecution?: boolean 
       }
     }
 
-    const localGasWei = gasLimit && gasPrice?.maxFeePerGas ? gasLimit * gasPrice.maxFeePerGas : 0n
+    const localGasFeeBaseUnits = gasLimit && gasPrice?.maxFeePerGas ? gasLimit * gasPrice.maxFeePerGas : 0n
     const totalOutgoing = safeTx
       ? computeTotalOutgoing({
           safeTx,
-          gasWei: localGasWei,
+          gasFeeBaseUnits: localGasFeeBaseUnits,
           relayCostFiat: 0,
           relayCostFiatCode: currency,
           nativeSymbol,
@@ -355,15 +355,15 @@ export const useFeesPreview = ({ isExecution = false }: { isExecution?: boolean 
     const { txData, relayCost } = preview.data
     const relayCostFiat = Number(relayCost.fiatValue)
     const relayCostFiatCode = relayCost.fiatCode
-    const gasWei = (BigInt(txData.safeTxGas) + BigInt(txData.baseGas)) * BigInt(txData.gasPrice)
-    const gasAmount = formatVisualAmount(gasWei, gasDecimals)
+    const gasFeeBaseUnits = (BigInt(txData.safeTxGas) + BigInt(txData.baseGas)) * BigInt(txData.gasPrice)
+    const gasAmount = formatVisualAmount(gasFeeBaseUnits, gasDecimals)
     const gasTokenBalance = balances.items.find((b) => sameAddress(b.tokenInfo.address, selectedAddress))
     const safeHasEnoughGas = gasTokenBalance
-      ? BigInt(gasTokenBalance.balance) >= gasWei + getSendInGasToken(safeTx, selectedAddress)
+      ? BigInt(gasTokenBalance.balance) >= gasFeeBaseUnits + getSendInGasToken(safeTx, selectedAddress)
       : false
     const totalOutgoing = computeTotalOutgoing({
       safeTx,
-      gasWei,
+      gasFeeBaseUnits,
       relayCostFiat,
       relayCostFiatCode,
       nativeSymbol,

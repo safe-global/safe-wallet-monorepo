@@ -130,10 +130,10 @@ export const useGasPayerSelection = ({
     if (quote.isLoading || quote.isFetching) return { loading: true }
     if (!quote.data) return { error: !!quote.error }
     const { txData, relayCost } = quote.data
-    const gasWei = (BigInt(txData.safeTxGas) + BigInt(txData.baseGas)) * BigInt(txData.gasPrice)
+    const gasFeeBaseUnits = (BigInt(txData.safeTxGas) + BigInt(txData.baseGas)) * BigInt(txData.gasPrice)
     const token = fees.availableGasTokens?.find((t) => t.address.toLowerCase() === txData.gasToken.toLowerCase())
     return {
-      amount: formatVisualAmount(gasWei, chain?.nativeCurrency.decimals ?? 18),
+      amount: formatVisualAmount(gasFeeBaseUnits, chain?.nativeCurrency.decimals ?? 18),
       currency: token?.symbol ?? chain?.nativeCurrency.symbol,
       fiatAmount: formatCurrencyMinimal(Number(relayCost.fiatValue), relayCost.fiatCode),
     }
