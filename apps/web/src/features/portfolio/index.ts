@@ -56,3 +56,6 @@ export type { PortfolioContract } from './contract'
 
 // Hooks exported directly (always loaded, not lazy) to avoid Rules of Hooks violations
 export { default as usePortfolioRefetchOnTxHistory } from './hooks/usePortfolioRefetchOnTxHistory'
+export { default as usePortfolioSummaries } from './hooks/usePortfolioSummaries'
+export { default as useClearPortfolioOnTx } from './hooks/useClearPortfolioOnTx'
+export { default as useSafePortfolioSummary } from './hooks/useSafePortfolioSummary'
