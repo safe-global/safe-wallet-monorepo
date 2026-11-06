@@ -21,7 +21,7 @@ test.describe('Send an ERC-20 token', { tag: '@e2e' }, () => {
   }) => {
     const { address: usdc, decimals, symbol } = SEPOLIA_USDC
     const recipient = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
     await seedTokenBalance(safe, { token: SEPOLIA_USDC, amount: parseUnits(BALANCE, decimals) })
 
     const sendTokens = new SendTokensPage(safePage)

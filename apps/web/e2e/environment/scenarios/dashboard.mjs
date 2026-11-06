@@ -8,19 +8,19 @@ const SAFE_MIGRATION_141 = '0x526643F69b81B008F46d95CD5ced5eC0edFFDaC6'
 const DELEGATE_CALL = 1
 
 export async function prepareDashboardScenario(env, owners) {
-  const context = await createSafe(env, owners, { ownerAddresses: [owners.owner4.address], threshold: 1 })
+  const context = await createSafe(env, owners, { ownerAddresses: [owners.alice.address], threshold: 1 })
   try {
     // Two proposals share nonce 0; the widget shows only the most recent one.
     const hashes = []
     for (const value of ['0.00001', '0.00002']) {
       const transaction = await context.safe.createTransaction({
-        transactions: [{ to: owners.owner1.address, value: parseEther(value).toString(), data: '0x' }],
+        transactions: [{ to: owners.bob.address, value: parseEther(value).toString(), data: '0x' }],
         options: { nonce: 0 },
       })
       hashes.push((await proposeTransaction(context, transaction)).hash)
     }
     await waitForQueued(env, context, hashes)
-    return { safes: { static: { SEP_STATIC_SAFE_2: `sep:${context.safeAddress}` } } }
+    return { safes: { queue: `sep:${context.safeAddress}` } }
   } finally {
     context.provider.destroy()
   }
@@ -54,7 +54,7 @@ async function switchSingleton(context, { to, data }, singleton) {
 }
 
 async function prepareMigratableSafe(env, owners) {
-  const context = await createSafe(env, owners, { ownerAddresses: [owners.owner4.address], threshold: 1 })
+  const context = await createSafe(env, owners, { ownerAddresses: [owners.alice.address], threshold: 1 })
   try {
     const data = new Interface(['function migrateSingleton()']).encodeFunctionData('migrateSingleton')
     await switchSingleton(context, { to: SAFE_MIGRATION_141, data }, SAFE_L1_SINGLETON_141)
@@ -65,7 +65,7 @@ async function prepareMigratableSafe(env, owners) {
 }
 
 async function prepareUnofficialSingletonSafe(env, owners) {
-  const context = await createSafe(env, owners, { ownerAddresses: [owners.owner4.address], threshold: 1 })
+  const context = await createSafe(env, owners, { ownerAddresses: [owners.alice.address], threshold: 1 })
   try {
     // A working singleton whose bytecode hash matches no official deployment.
     const singleton = await deployContract(context, `${await context.provider.getCode(SAFE_L2_SINGLETON_141)}00`)
@@ -80,11 +80,8 @@ async function prepareUnofficialSingletonSafe(env, owners) {
 export async function prepareMastercopyScenario(env, owners) {
   return {
     safes: {
-      static: {
-        // The hosted suite uses Polygon Safes; only their unsupported singletons matter here.
-        MATIC_STATIC_SAFE_31: `sep:${await prepareMigratableSafe(env, owners)}`,
-        MATIC_STATIC_SAFE_32: `sep:${await prepareUnofficialSingletonSafe(env, owners)}`,
-      },
+      migratable: `sep:${await prepareMigratableSafe(env, owners)}`,
+      unofficialSingleton: `sep:${await prepareUnofficialSingletonSafe(env, owners)}`,
     },
   }
 }
