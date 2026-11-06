@@ -121,16 +121,38 @@ interface Clip {
 
 const ASSET_TIMEOUT_MS = 5000
 
+const MAX_VIEWPORT_HEIGHT = 8000
+
+// Chrome leaves iframes below the viewport blank in a full-page screenshot, and TokenIcon renders
+// every logo in an iframe. Grow the viewport over them; other stories keep their layout.
+async function fitViewportToIframes(page: Page, openRequests: () => number): Promise<void> {
+  const bottom = await page.evaluate(() =>
+    Math.max(0, ...[...document.querySelectorAll('iframe')].map((f) => f.getBoundingClientRect().bottom + scrollY)),
+  )
+  const viewport = page.viewportSize()
+  if (!viewport || bottom <= viewport.height) return
+  await page.setViewportSize({ width: viewport.width, height: Math.min(Math.ceil(bottom), MAX_VIEWPORT_HEIGHT) })
+  // Lazy iframes that are now in view start loading
+  await waitForQuietNetwork(page, openRequests)
+}
+
 // Fonts and images that are still loading make the screenshot differ between runs.
 async function waitForAssets(page: Page): Promise<void> {
-  await page.evaluate(async (timeoutMs) => {
-    // decode() resolves once the image is loaded and ready to paint; broken images reject
-    const decoded = [...document.images].map((img) => img.decode().catch(() => undefined))
-    await Promise.race([
-      Promise.all([document.fonts.ready, ...decoded]),
-      new Promise((resolve) => setTimeout(resolve, timeoutMs)),
-    ])
-  }, ASSET_TIMEOUT_MS)
+  // Sandboxed iframes are out of the page's reach, so wait inside every frame
+  const frames = page.frames().map((frame) =>
+    frame
+      .evaluate(async (timeoutMs) => {
+        // decode() resolves once the image is loaded and ready to paint; broken images reject
+        const decoded = [...document.images].map((img) => img.decode().catch(() => undefined))
+        await Promise.race([
+          Promise.all([document.fonts.ready, ...decoded]),
+          new Promise((resolve) => setTimeout(resolve, timeoutMs)),
+        ])
+      }, ASSET_TIMEOUT_MS)
+      // A frame can detach while we wait; the stable-screenshot check still covers it
+      .catch(() => undefined),
+  )
+  await Promise.all(frames)
 }
 
 // Padded/centered stories are clipped to their content, portals (dialogs, popovers) included.
@@ -271,6 +293,7 @@ async function checkStory(
     // never reached index.json). They are still render-checked — only the screenshot is skipped.
     const skipSnapshot = story.tags?.includes('skip-visual-test')
     if (cellsDir && !skipSnapshot) {
+      await fitViewportToIframes(page, () => openRequests)
       await waitForAssets(page)
       const { fullscreen, png, stable } = await stableScreenshot(page)
       if (!stable) result.issues.push('UNSTABLE_SCREENSHOT')
