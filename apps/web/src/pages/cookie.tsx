@@ -1,5 +1,4 @@
 import type { ComponentProps } from 'react'
-import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { BRAND_NAME } from '@/config/constants'
@@ -35,7 +34,7 @@ const overrideComponents: MDXComponents = {
   td: Td,
 }
 
-const CookiePolicy: NextPage = () => {
+const CookiePolicy = () => {
   const isOfficialHost = useIsOfficialHost()
 
   return (

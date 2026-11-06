@@ -26,7 +26,7 @@
     "postinstall": "husky"
   },
   "resolutions": {
-    "axios": "1.18.1",
+    "axios": "1.20.0",
     "protobufjs": "7.6.5",
     "brace-expansion@^5.0.2": "^5.0.8",
     "postcss": "8.5.23",
@@ -47,6 +47,7 @@
     "@tamagui/image@npm:2.0.0-rc.26": "patch:@tamagui/image@npm%3A2.0.0-rc.26#~/.yarn/patches/@tamagui-image-npm-2.0.0-rc.26-04087a216c.patch"
   },
   "devDependencies": {
+    "@eslint-community/eslint-plugin-eslint-comments": "^4.8.1",
     "@storybook/builder-webpack5": "^10.6.4",
     "@storybook/react": "^10.6.4",
     "@types/node": "^22.13.1",
