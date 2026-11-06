@@ -8,6 +8,7 @@
  * - BLANK_RENDER: mounted but paints no text and no visible box (missing mock data)
  * - PAGE_ERROR / CONSOLE: uncaught errors while loading
  * - RENDER_TIMEOUT: the story (play function included) did not finish in time
+ * - UNSTABLE_SCREENSHOT: (with --shots) the pixels kept changing until the settle timeout
  *
  * Usage (from apps/web): yarn storybook:sweep [-- --filter=ui- --modes=light --concurrency=4]
  *   --base=<url>        Storybook to sweep (default http://localhost:6006 or $SB_BASE).
@@ -43,6 +44,10 @@ declare global {
 }
 
 const STORY_FINISHED_TIMEOUT_MS = 30000
+// Settling: no open request for QUIET_MS, then two identical screenshots QUIET_MS apart.
+// Loading-state stories hold a request open (MSW delay('infinite')), so both waits are capped.
+const QUIET_MS = 100
+const SETTLE_TIMEOUT_MS = 3000
 
 type Mode = string
 
@@ -72,8 +77,14 @@ function parseArgs(): Record<string, string | boolean> {
   )
 }
 
-// GPU rasterization varies a few colour levels between runs, which changes the sheet hashes
-const LAUNCH_ARGS = ['--disable-gpu']
+const LAUNCH_ARGS = [
+  // GPU rasterization varies a few colour levels between runs, which changes the sheet hashes
+  '--disable-gpu',
+  // Stories load token logos from live CDNs; MSW's service worker fetches them, out of Playwright's
+  // reach, so they arrive late or not at all. Failing every external host makes them render
+  // their local fallback in every run. MSW mocks are unaffected: the worker answers them first.
+  '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost',
+]
 
 async function launch(): Promise<Browser> {
   try {
@@ -112,17 +123,10 @@ const ASSET_TIMEOUT_MS = 5000
 // Fonts and images that are still loading make the screenshot differ between runs.
 async function waitForAssets(page: Page): Promise<void> {
   await page.evaluate(async (timeoutMs) => {
-    const pending = [...document.images]
-      .filter((img) => !img.complete)
-      .map(
-        (img) =>
-          new Promise((resolve) => {
-            img.addEventListener('load', resolve)
-            img.addEventListener('error', resolve)
-          }),
-      )
+    // decode() resolves once the image is loaded and ready to paint; broken images reject
+    const decoded = [...document.images].map((img) => img.decode().catch(() => undefined))
     await Promise.race([
-      Promise.all([document.fonts.ready, ...pending]),
+      Promise.all([document.fonts.ready, ...decoded]),
       new Promise((resolve) => setTimeout(resolve, timeoutMs)),
     ])
   }, ASSET_TIMEOUT_MS)
@@ -173,6 +177,31 @@ async function contentClip(page: Page): Promise<{ fullscreen: boolean; clip?: Cl
   })
 }
 
+async function waitForQuietNetwork(page: Page, openRequests: () => number): Promise<void> {
+  const deadline = Date.now() + SETTLE_TIMEOUT_MS
+  let quietSince = Date.now()
+  while (Date.now() < deadline) {
+    if (openRequests() > 0) quietSince = Date.now()
+    else if (Date.now() - quietSince >= QUIET_MS) return
+    await page.waitForTimeout(QUIET_MS / 4)
+  }
+}
+
+// Re-renders after data arrives (or timers in app code) would otherwise be caught half-way.
+async function stableScreenshot(page: Page): Promise<{ fullscreen: boolean; png: Buffer; stable: boolean }> {
+  const deadline = Date.now() + SETTLE_TIMEOUT_MS
+  let previous: Buffer | undefined
+  for (;;) {
+    const { fullscreen, clip } = await contentClip(page)
+    // Spinners and transitions otherwise land on a different frame each run
+    const png = await page.screenshot({ fullPage: true, clip, animations: 'disabled' })
+    const stable = previous !== undefined && png.equals(previous)
+    if (stable || Date.now() > deadline) return { fullscreen, png, stable }
+    previous = png
+    await page.waitForTimeout(QUIET_MS)
+  }
+}
+
 async function checkStory(
   context: BrowserContext,
   base: string,
@@ -184,9 +213,17 @@ async function checkStory(
   const consoleErrors: string[] = []
   const pageErrors: string[] = []
   page.on('console', (msg) => {
-    if (msg.type() === 'error') consoleErrors.push(msg.text().slice(0, 300))
+    if (msg.type() !== 'error') return
+    // External hosts are blocked on purpose (LAUNCH_ARGS)
+    const blockedExternal = msg.text().startsWith('Failed to load resource') && !msg.location().url.startsWith(base)
+    if (!blockedExternal) consoleErrors.push(msg.text().slice(0, 300))
   })
   page.on('pageerror', (err) => pageErrors.push(String(err).slice(0, 300)))
+  // MSW answers from a service worker, and Playwright still reports those requests
+  let openRequests = 0
+  page.on('request', () => openRequests++)
+  page.on('requestfinished', () => openRequests--)
+  page.on('requestfailed', () => openRequests--)
 
   const result: Finding = { id: story.id, title: story.title, name: story.name, mode, issues: [] }
   let cell: Cell | undefined
@@ -196,7 +233,7 @@ async function checkStory(
       timeout: 60000,
     })
     if (!(await waitForStoryFinished(page))) result.issues.push('RENDER_TIMEOUT')
-    await page.waitForTimeout(1500) // let MSW/RTK settle past skeletons
+    await waitForQuietNetwork(page, () => openRequests)
 
     const state = await page.evaluate(() => {
       const root = document.querySelector('#storybook-root')
@@ -234,10 +271,10 @@ async function checkStory(
     const skipSnapshot = story.tags?.includes('skip-visual-test')
     if (cellsDir && !skipSnapshot) {
       await waitForAssets(page)
-      const { fullscreen, clip } = await contentClip(page)
+      const { fullscreen, png, stable } = await stableScreenshot(page)
+      if (!stable) result.issues.push('UNSTABLE_SCREENSHOT')
       const file = path.join(cellsDir, `${story.id}--${mode}.png`)
-      // Spinners and transitions otherwise land on a different frame each run
-      await page.screenshot({ path: file, fullPage: true, clip, animations: 'disabled' })
+      fs.writeFileSync(file, png)
       cell = { storyId: story.id, name: story.name, mode, file, fullscreen }
     }
   } catch (err) {
