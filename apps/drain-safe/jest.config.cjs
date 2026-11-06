@@ -20,8 +20,10 @@ const config = {
         },
       },
     ],
+    // faker v10 is ESM-only
+    '/@faker-js/faker/.+\\.js$': ['ts-jest', { tsconfig: { allowJs: true }, isolatedModules: true }],
   },
-  transformIgnorePatterns: ['node_modules/(?!(@safe-global)/)'],
+  transformIgnorePatterns: ['node_modules/(?!(@safe-global|@faker-js/faker)/)'],
   testMatch: ['**/*.test.ts', '**/*.test.tsx'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
 }
