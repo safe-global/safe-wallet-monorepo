@@ -31,7 +31,7 @@ jest.mock('../features', () => ({
   SignerSelect: () => null,
   BalanceChanges: () => null,
   FeeInfoBanner: () => null,
-  FeesPreview: () => null,
+  FeeCard: () => null,
   RiskConfirmation: () => null,
 }))
 jest.mock('../actions', () => ({

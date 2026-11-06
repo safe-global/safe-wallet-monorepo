@@ -6,7 +6,7 @@ import { SafeTxContext } from '../SafeTxProvider'
 import { TxFlowContext } from '../TxFlowProvider'
 import { SlotName, withSlot } from '../slots'
 
-const FeePayerSignStep = (): ReactElement | null => {
+const FeeCard = (): ReactElement | null => {
   const { GasPayerSelector, $isReady } = useLoadFeature(FeePaymentFeature)
   const { safeTx } = useContext(SafeTxContext)
   const { setIsSubmitDisabled } = useContext(TxFlowContext)
@@ -30,11 +30,11 @@ const FeePayerSignStep = (): ReactElement | null => {
   )
 }
 
-const FeesPreviewSlot = withSlot({
-  Component: FeePayerSignStep,
+const FeeCardSlot = withSlot({
+  Component: FeeCard,
   slotName: SlotName.Main,
-  id: 'feesPreview',
+  id: 'feeCard',
   useSlotCondition: useIsFeeCardSlotVisible,
 })
 
-export default FeesPreviewSlot
+export default FeeCardSlot

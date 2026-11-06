@@ -7,7 +7,7 @@ import { TxFlowContent } from './common/TxFlowContent'
 import ReviewTransaction from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
 import { ExecuteTxStep } from '../tx/ExecuteTxStep'
-import { TxNote, SignerSelect, BalanceChanges, FeeInfoBanner, FeesPreview, RiskConfirmation } from './features'
+import { TxNote, SignerSelect, BalanceChanges, FeeInfoBanner, FeeCard, RiskConfirmation } from './features'
 import { Batching, ComboSubmit, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
 import { SlotProvider } from './slots'
 import { useTrackTimeSpent } from '@/components/tx/shared/tracking'
@@ -110,7 +110,7 @@ export const TxFlow = <T extends unknown>({
 
                 <ReviewTransactionComponent onSubmit={() => nextStep()}>
                   <BalanceChanges />
-                  <FeesPreview />
+                  <FeeCard />
                   <FeeInfoBanner />
                   <TxNote />
                   <SignerSelect />
