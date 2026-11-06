@@ -31,6 +31,7 @@ import {
   workspaceTrackingListener,
   spaceSafesCacheListener,
   trialReminderListener,
+  offlineModeListener,
 } from './slices'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
@@ -41,7 +42,8 @@ import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { safenetCheckApi } from '@safe-global/store/safenet/safenetCheckApi'
 import { safenetCheckSlice } from '@safe-global/store/safenet/safenetCheckSlice'
 import { version as termsVersion } from '@/markdown/terms/version'
-import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
+import { cgwClient, setBaseUrl, setLocalResponseHook } from '@safe-global/store/gateway/cgwClient'
+import { offlineResponder } from '@/features/offline-workspace/services'
 import { GATEWAY_URL } from '@/config/gateway'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { migrateBatchTxs } from '@/services/ls-migration/batch'
@@ -79,6 +81,7 @@ const rootReducer = combineReducers({
   [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
   [slices.gtfPaymentSourcePreferenceSlice.name]: slices.gtfPaymentSourcePreferenceSlice.reducer,
   [slices.featureFlagOverridesSlice.name]: slices.featureFlagOverridesSlice.reducer,
+  [slices.offlineWorkspaceSlice.name]: slices.offlineWorkspaceSlice.reducer,
   // Deliberately absent from `persistedSlices`: a phase restored from a previous
   // page load would leave the user on a splash screen with nothing in flight.
   [slices.stepUpSlice.name]: slices.stepUpSlice.reducer,
@@ -113,6 +116,7 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.hnStateSlice.name,
   slices.gtfPaymentSourcePreferenceSlice.name,
   slices.featureFlagOverridesSlice.name,
+  slices.offlineWorkspaceSlice.name,
 ]
 
 export const getPersistedState = () => {
@@ -152,6 +156,7 @@ const listeners = [
   spaceSafesCacheListener,
   trialReminderListener,
   forbiddenSessionListener,
+  offlineModeListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {
@@ -209,6 +214,7 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
 
 export const makeStore = (initialState?: Partial<RootState>) => {
   setBaseUrl(GATEWAY_URL)
+  setLocalResponseHook(offlineResponder)
 
   const store = configureStore({
     reducer: _hydrationReducer,

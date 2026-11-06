@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react'
+import type { BaseQueryApi, BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react'
 import { REHYDRATE } from 'redux-persist'
 import type { UnknownAction } from '@reduxjs/toolkit'
 import type { CombinedState } from '@reduxjs/toolkit/query'
@@ -51,6 +51,17 @@ let customHandleResponse: HandleResponseHook = () => {}
 // Setter for the custom hook
 export const setHandleResponseHook = (hook: HandleResponseHook) => {
   customHandleResponse = hook
+}
+
+export type LocalResponse = { data: unknown } | { error: FetchBaseQueryError }
+
+// Answers a request without the network; undefined lets it through to CGW
+type LocalResponseHook = (args: FetchArgs, api: BaseQueryApi) => LocalResponse | undefined
+
+let customLocalResponse: LocalResponseHook = () => undefined
+
+export const setLocalResponseHook = (hook: LocalResponseHook) => {
+  customLocalResponse = hook
 }
 
 export const rawBaseQuery = fetchBaseQuery({
@@ -108,6 +119,11 @@ export const dynamicBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBas
         error: `Refusing to request ${urlEnd}: a path parameter is empty`,
       },
     }
+  }
+
+  const localResponse = customLocalResponse(typeof args === 'string' ? { url: args } : args, api)
+  if (localResponse) {
+    return localResponse
   }
 
   const adjustedUrl = `${resolvedBaseUrl}${urlEnd}`
