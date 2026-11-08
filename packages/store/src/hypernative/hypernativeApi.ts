@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query/react'
 import type {
   HypernativeAssessmentResponseDto,
   HypernativeAssessmentRequestWithAuthDto,
@@ -13,10 +14,26 @@ import { HYPERNATIVE_API_BASE_URL } from '@safe-global/utils/config/constants'
 
 export const addTagTypes = ['hypernative-oauth', 'hypernative-threat-analysis']
 
+const TRANSIENT_CLIENT_ERROR_STATUSES = new Set([408, 429])
+
+const isNonRetryableClientError = (error: FetchBaseQueryError): boolean => {
+  const status = error.status === 'PARSING_ERROR' ? error.originalStatus : error.status
+  return typeof status === 'number' && status >= 400 && status < 500 && !TRANSIENT_CLIENT_ERROR_STATUSES.has(status)
+}
+
+const rawBaseQuery = fetchBaseQuery({ baseUrl: HYPERNATIVE_API_BASE_URL })
+
+const failFastOnClientError: typeof rawBaseQuery = async (args, api, extraOptions) => {
+  const result = await rawBaseQuery(args, api, extraOptions)
+  if (result.error && isNonRetryableClientError(result.error)) {
+    retry.fail(result.error, result.meta)
+  }
+  return result
+}
+
 export const hypernativeApi = createApi({
   reducerPath: 'hypernativeApi',
-  // Retry up to 5 times with a basic exponential backoff
-  baseQuery: retry(fetchBaseQuery({ baseUrl: HYPERNATIVE_API_BASE_URL }), { maxRetries: 2 }),
+  baseQuery: retry(failFastOnClientError, { maxRetries: 2 }),
   tagTypes: addTagTypes,
   endpoints: (build) => ({
     exchangeToken: build.mutation<HypernativeTokenExchangeResponseDto['data'], HypernativeTokenExchangeRequestDto>({
