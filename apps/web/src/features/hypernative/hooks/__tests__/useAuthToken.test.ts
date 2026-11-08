@@ -4,6 +4,7 @@ import * as cookieStorage from '../../store/cookieStorage'
 
 // Mock cookieStorage module
 jest.mock('../../store/cookieStorage', () => ({
+  ...jest.requireActual('../../store/cookieStorage'),
   getAuthCookieData: jest.fn(),
   setAuthCookie: jest.fn(),
   clearAuthCookie: jest.fn(),

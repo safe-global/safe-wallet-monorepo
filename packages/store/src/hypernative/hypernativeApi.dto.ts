@@ -37,6 +37,12 @@ export function isHypernativeAssessmentFailedResponse(error: unknown): error is 
   return typeof error === 'object' && error != null && 'error' in error && 'success' in error && error.success === false
 }
 
+const RECONNECT_REQUIRED_ERROR_CODE = 1038
+
+export function isHypernativeReconnectRequiredError(error: unknown): error is HypernativeAssessmentFailedResponseDto {
+  return isHypernativeAssessmentFailedResponse(error) && error.errorCode === RECONNECT_REQUIRED_ERROR_CODE
+}
+
 export type HypernativeAssessmentRequestWithAuthDto = HypernativeAssessmentRequestDto & {
   authToken: string
 }

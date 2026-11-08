@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { clearAuthCookie, getAuthCookieData, setAuthCookie } from '../store/cookieStorage'
+import { clearAuthCookie, getAuthCookieData, setAuthCookie, toAuthorizationValue } from '../store/cookieStorage'
 
 type AuthTokenResult = {
   token: string | undefined
@@ -28,14 +28,12 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
   })
 
   const checkAuthState = useCallback(() => {
-    const { token, expiry, tokenType } = getAuthCookieData() || {}
-    // Default to 'Bearer' if tokenType is missing, undefined, or empty
-    // This handles legacy cookies or corrupted data gracefully
-    const normalizedTokenType = tokenType?.trim() || 'Bearer'
+    const data = getAuthCookieData()
+    const { token, expiry } = data || {}
     // isExpired should only be true when a token exists AND it's expired
     // If no token exists, isExpired should be false (not expired, just not authenticated)
     const isExpired = !!token && (expiry === undefined || Date.now() >= expiry)
-    const newToken = token ? `${normalizedTokenType} ${token}` : undefined
+    const newToken = data?.token ? toAuthorizationValue(data) : undefined
     const newIsAuthenticated = !!token
 
     setAuthState((prevState) => {
