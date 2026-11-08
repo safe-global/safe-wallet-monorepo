@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { useAppDispatch } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { hnSessionRejectionCleared, selectRejectedHypernativeToken } from '../store/hnSessionSlice'
 import { HYPERNATIVE_OAUTH_CONFIG, MOCK_AUTH_ENABLED, getRedirectUri } from '../config/oauth'
 import { showNotification } from '@/store/notificationsSlice'
 import Cookies from 'js-cookie'
@@ -19,6 +20,8 @@ export type HypernativeAuthStatus = {
   initiateLogin: () => void
   /** Clears authentication token and logs out user */
   logout: () => void
+  /** Whether the API rejected the last token and the user has not signed in again */
+  isSessionRejected?: boolean
 }
 
 /**
@@ -208,8 +211,17 @@ async function buildAuthUrl(chainId?: string, safeAddress?: string): Promise<str
  */
 export const useHypernativeOAuth = (): HypernativeAuthStatus => {
   const dispatch = useAppDispatch()
-  const [{ isAuthenticated, isExpired }, setToken, clearToken] = useAuthToken()
+  const [{ token, isAuthenticated: hasToken, isExpired }, setToken, clearToken] = useAuthToken()
+  const rejectedToken = useAppSelector(selectRejectedHypernativeToken)
+  const isAuthenticated = hasToken && token !== rejectedToken
+  const isSessionRejected = rejectedToken !== undefined && !isAuthenticated
   const { safeAddress } = useSafeInfo()
+
+  useEffect(() => {
+    if (rejectedToken && token && token !== rejectedToken) {
+      dispatch(hnSessionRejectionCleared())
+    }
+  }, [rejectedToken, token, dispatch])
   const chainId = useChainId()
 
   // Reference to popup check interval
@@ -343,7 +355,12 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
   /**
    * Logout - clear authentication token
    */
-  const logout = useCallback(() => clearToken(), [clearToken])
+  const logout = useCallback(() => {
+    clearToken()
+    if (rejectedToken) {
+      dispatch(hnSessionRejectionCleared())
+    }
+  }, [clearToken, rejectedToken, dispatch])
 
   useEffect(() => {
     return () => clearAllTimers()
@@ -354,5 +371,6 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
     isTokenExpired: isExpired,
     initiateLogin,
     logout,
+    isSessionRejected,
   }
 }

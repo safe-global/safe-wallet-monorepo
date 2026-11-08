@@ -4,6 +4,7 @@ import {
   clearAuthCookie,
   getAuthCookieData,
   setAuthCookie,
+  toAuthorizationValue,
   type AuthTokens,
 } from '../store/cookieStorage'
 
@@ -34,15 +35,13 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
   })
 
   const checkAuthState = useCallback(() => {
-    const { token, expiry, tokenType } = getAuthCookieData() || {}
-    // Default to 'Bearer' if tokenType is missing, undefined, or empty
-    // This handles legacy cookies or corrupted data gracefully
-    const normalizedTokenType = tokenType?.trim() || 'Bearer'
+    const data = getAuthCookieData()
+    const { token, expiry } = data || {}
     // isExpired should only be true when a token exists AND it's expired
     // If no token exists, isExpired should be false (not expired, just not authenticated)
     const isExpired = !!token && (expiry === undefined || Date.now() >= expiry)
     // The cookie outlives the access token while a refresh is possible, so hide an expired token
-    const newToken = token && !isExpired ? `${normalizedTokenType} ${token}` : undefined
+    const newToken = data?.token && !isExpired ? toAuthorizationValue(data) : undefined
     const newIsAuthenticated = !!newToken
 
     setAuthState((prevState) => {

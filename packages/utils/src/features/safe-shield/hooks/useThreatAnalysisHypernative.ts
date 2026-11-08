@@ -145,5 +145,5 @@ export function useThreatAnalysisHypernative({
     return messageAnalysisResult
   }
 
-  return [threatAnalysisResult, fetchError, isLoading]
+  return [threatAnalysisResult, skip ? undefined : fetchError, isLoading]
 }

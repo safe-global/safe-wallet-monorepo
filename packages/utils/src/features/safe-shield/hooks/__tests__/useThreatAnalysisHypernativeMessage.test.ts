@@ -176,6 +176,31 @@ describe('useThreatAnalysisHypernativeMessage', () => {
       })
     })
 
+    it('assesses the same messageHash again after the auth token changes', async () => {
+      const typedData = createMockTypedData()
+      const newAuthToken = `Bearer ${faker.string.alphanumeric(32)}`
+      const { rerender } = renderHook(
+        ({ authToken }) =>
+          useThreatAnalysisHypernativeMessage({
+            safeAddress: mockSafeAddress,
+            chainId: mockChainId,
+            messageHash: mockMessageHash,
+            typedData,
+            authToken,
+          }),
+        { initialProps: { authToken: mockAuthToken as string | undefined } },
+      )
+      await waitFor(() => expect(mockTriggerAssessment).toHaveBeenCalledTimes(1))
+
+      rerender({ authToken: undefined })
+      rerender({ authToken: newAuthToken })
+
+      await waitFor(() => expect(mockTriggerAssessment).toHaveBeenCalledTimes(2))
+      expect(mockTriggerAssessment).toHaveBeenLastCalledWith(
+        expect.objectContaining({ messageHash: mockMessageHash, authToken: newAuthToken }),
+      )
+    })
+
     it('should include proposer when provided', async () => {
       const mockTypedData = createMockTypedData()
       const mockProposer = faker.finance.ethereumAddress() as `0x${string}`
@@ -478,6 +503,32 @@ describe('useThreatAnalysisHypernativeMessage', () => {
       expect(data).toBeUndefined()
       expect(error).toBeUndefined()
       expect(loading).toBe(false)
+    })
+
+    it('reports no error once skipped after the API rejected the token', () => {
+      mockUseAssessMessageMutation.mockReturnValue([
+        mockTriggerAssessment,
+        {
+          data: undefined,
+          error: { error: 'Please reconnect', errorCode: 1038, success: false, data: null },
+          isLoading: false,
+          reset: jest.fn(),
+        },
+      ] as unknown as ReturnType<typeof hypernativeApi.useAssessMessageMutation>)
+
+      const { result } = renderHook(() =>
+        useThreatAnalysisHypernativeMessage({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          messageHash: mockMessageHash,
+          typedData: createMockTypedData(),
+          authToken: undefined,
+          skip: true,
+        }),
+      )
+
+      const [, error] = result.current
+      expect(error).toBeUndefined()
     })
 
     it('should not throw error when skip is true and authToken is missing', () => {

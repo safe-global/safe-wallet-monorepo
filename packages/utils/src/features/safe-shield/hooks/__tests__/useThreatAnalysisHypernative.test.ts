@@ -766,6 +766,34 @@ describe('useThreatAnalysisHypernative', () => {
       expect(data).toBeUndefined()
     })
 
+    it('reports no error once skipped after the API rejected the token', () => {
+      mockIsSafeTransaction.mockReturnValue(true)
+      mockUseAssessTransactionMutation.mockReturnValue([
+        mockTriggerAssessment,
+        {
+          data: undefined,
+          error: { error: 'Please reconnect', errorCode: 1038, success: false, data: null },
+          isLoading: false,
+          reset: jest.fn(),
+        },
+      ])
+
+      const { result } = renderHook(() =>
+        useThreatAnalysisHypernative({
+          safeAddress: mockSafeAddress,
+          chainId: mockChainId,
+          data: createMockSafeTransaction(),
+          walletAddress: mockWalletAddress,
+          safeVersion: mockSafeVersion,
+          authToken: undefined,
+          skip: true,
+        }),
+      )
+
+      const [, error] = result.current
+      expect(error).toBeUndefined()
+    })
+
     it('should stop triggering mutation when skip changes from false to true', async () => {
       const mockSafeTx = createMockSafeTransaction()
       mockIsSafeTransaction.mockReturnValue(true)

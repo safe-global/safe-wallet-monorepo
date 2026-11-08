@@ -144,3 +144,12 @@ export const clearAuthCookie = (): void => {
   Cookies.remove(AUTH_COOKIE_KEY, { path: '/' })
   notifyAuthCookieChange()
 }
+
+// Legacy cookies may lack a tokenType
+export const toAuthorizationValue = ({ token, tokenType }: Pick<AuthTokenData, 'token' | 'tokenType'>): string =>
+  `${tokenType?.trim() || 'Bearer'} ${token}`
+
+export const getAuthCookieToken = (): string | undefined => {
+  const data = getAuthCookieData()
+  return data?.token ? toAuthorizationValue(data) : undefined
+}

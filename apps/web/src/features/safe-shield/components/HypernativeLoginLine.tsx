@@ -14,7 +14,7 @@ export const HypernativeLoginLine = ({
 }): ReactElement | null => {
   if (!hypernativeAuth) return null
 
-  const { isAuthenticated, isTokenExpired, initiateLogin } = hypernativeAuth
+  const { isAuthenticated, isTokenExpired, isSessionRejected, initiateLogin } = hypernativeAuth
   if (isAuthenticated && !isTokenExpired) return null
 
   const login = () => {
@@ -22,6 +22,27 @@ export const HypernativeLoginLine = ({
       [MixpanelEventParams.SOURCE]: HYPERNATIVE_SOURCE.Copilot,
     })
     initiateLogin()
+  }
+
+  if (isSessionRejected) {
+    return (
+      <Typography
+        variant="paragraph-mini"
+        align="center"
+        className="flex flex-col items-center gap-1 py-2 text-[var(--color-primary-light)]"
+        data-testid="hypernative-reconnect-line"
+      >
+        Please reconnect your Hypernative account to review this transaction&apos;s risks.
+        <button
+          type="button"
+          onClick={login}
+          className="flex cursor-pointer items-center gap-1 font-semibold underline"
+        >
+          Reconnect to Hypernative
+          <ExternalLinkIcon className="size-3.5" aria-hidden />
+        </button>
+      </Typography>
+    )
   }
 
   return (

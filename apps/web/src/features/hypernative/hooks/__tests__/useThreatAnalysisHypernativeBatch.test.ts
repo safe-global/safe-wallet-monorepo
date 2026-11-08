@@ -444,6 +444,35 @@ describe('useThreatAnalysisHypernativeBatch', () => {
         skip: false,
       })
     })
+
+    it('requests every cached assessment again once the auth token changes', () => {
+      const safeTxHash = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
+      const newAuthToken = `Bearer ${faker.string.alphanumeric(32)}`
+      const pages: QueuedItemPage[] = [
+        {
+          results: [createMockTransactionItem(`multisig_${mockSafeAddress}_${safeTxHash}`)],
+          next: undefined,
+          previous: undefined,
+        },
+      ]
+      const { rerender } = renderHook(() => useThreatAnalysisHypernativeBatch({ pages }), {
+        initialReduxState: createInitialState({ [safeTxHash]: null }),
+      })
+
+      mockUseAuthToken.mockReturnValue([
+        { token: newAuthToken, isAuthenticated: true, isExpired: false },
+        jest.fn(),
+        jest.fn(),
+      ])
+      rerender()
+
+      expect(mockUseThreatAnalysisHypernativeBatch).toHaveBeenLastCalledWith({
+        safeTxHashes: [safeTxHash],
+        safeAddress: mockSafeAddress,
+        authToken: newAuthToken,
+        skip: false,
+      })
+    })
   })
 
   describe('return value', () => {

@@ -44,7 +44,7 @@ export const HnQueueAssessmentBanner = ({
   assessment,
   isAuthenticated,
 }: HnQueueAssessmentBannerProps): ReactElement | null => {
-  const { initiateLogin } = useHypernativeOAuth()
+  const { initiateLogin, isSessionRejected } = useHypernativeOAuth()
   const severity = useHnAssessmentSeverity(assessment)
   const assessmentUrl = useAssessmentUrl(safeTxHash)
 
@@ -63,14 +63,18 @@ export const HnQueueAssessmentBanner = ({
         <LockIcon />
         <AlertDescription>
           <div className="flex flex-col gap-2">
-            <Typography variant="paragraph-small">Log in to Hypernative to view security scan result.</Typography>
+            <Typography variant="paragraph-small">
+              {isSessionRejected
+                ? "Please reconnect your Hypernative account to review this transaction's risks."
+                : 'Log in to Hypernative to view security scan result.'}
+            </Typography>
             <ExternalLink
               onClick={handleLogin}
               href="#"
               noIcon={false}
               className="inline-flex self-start hover:text-[var(--color-primary-light)]!"
             >
-              Log in
+              {isSessionRejected ? 'Reconnect to Hypernative' : 'Log in'}
             </ExternalLink>
           </div>
         </AlertDescription>
