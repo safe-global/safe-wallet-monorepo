@@ -214,7 +214,7 @@
     "vite": "8.3.5",
     "vite-plugin-svgr": "^5.2.0",
     "wait-on": "^9.5.1",
-    "webpack": "^5.112.2"
+    "webpack": "^5.97.1"
   },
   "nextBundleAnalysis": {
     "budget": null,
