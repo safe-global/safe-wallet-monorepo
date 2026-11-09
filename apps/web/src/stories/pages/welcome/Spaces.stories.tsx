@@ -27,7 +27,7 @@ const spacesStory = (config: MockStoryConfig): Story => {
     scenario: 'efSafe',
     pathname: '/welcome/spaces',
     features: { spaces: true },
-    shadcn: true,
+    layout: 'fullPage',
     ...config,
   })
   return { parameters: { ...setup.parameters }, decorators: [setup.decorator] }

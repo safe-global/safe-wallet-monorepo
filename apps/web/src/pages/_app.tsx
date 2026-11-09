@@ -21,10 +21,7 @@ import useSafeNotifications from '@/hooks/useSafeNotifications'
 import useTxPendingStatuses from '@/hooks/useTxPendingStatuses'
 import { useInitSession } from '@/hooks/useInitSession'
 import { useRegisterServiceWorker } from '@/hooks/useRegisterServiceWorker'
-import Notifications from '@/components/common/Notifications'
-import CookieAndTermBanner from '@/components/common/CookieAndTermBanner'
-import WhatsNewTopBar from '@/components/common/WhatsNewTopBar'
-import WhatsNewUpdatesFrame from '@/components/common/WhatsNewUpdatesFrame'
+import AppChrome from '@/components/common/AppChrome'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useTxTracking } from '@/hooks/useTxTracking'
 import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
@@ -43,7 +40,6 @@ import { useInviteNotification, useSafeWorkspaceAttach, useSafeWorkspaceCheck } 
 import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
-import { TargetedOutreachFeature } from '@/features/targeted-outreach'
 
 /**
  * Wrapper that lazy-loads Recovery via the feature system.
@@ -71,15 +67,6 @@ const SpendingLimitsLoaderWrapper = () => {
   return <SpendingLimitsLoader />
 }
 
-/**
- * Wrapper that lazy-loads OutreachPopup via the feature system.
- * This ensures the entire targeted-outreach feature loads as a single chunk.
- */
-const TargetedOutreachPopupLoader = () => {
-  const { OutreachPopup } = useLoadFeature(TargetedOutreachFeature)
-  return <OutreachPopup />
-}
-import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
@@ -92,7 +79,7 @@ import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import { HnQueueAssessmentProvider, useHypernativeTokenRefresh } from '@/features/hypernative'
-import { StepUpDialog, useOidcLoginCallback, useStepUpRecovery } from '@/features/oidc-auth'
+import { useOidcLoginCallback, useStepUpRecovery } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
@@ -205,25 +192,13 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
             <Component {...pageProps} key={safeKey} />
           </PageLayout>
 
-          <CookieAndTermBanner />
-
-          <WhatsNewTopBar />
-
-          <WhatsNewUpdatesFrame />
-
-          <TargetedOutreachPopupLoader />
-
-          <Notifications />
-
-          <StepUpDialog />
+          <AppChrome />
 
           <RecoveryLoader />
 
           <CounterfactualHooksLoader />
 
           <SpendingLimitsLoaderWrapper />
-
-          <PkModulePopup />
         </CaptchaProvider>
       </AppProviders>
     </Provider>

@@ -204,6 +204,8 @@ const config: StorybookConfig = {
     NEXT_PUBLIC_APP_HOMEPAGE: process.env.NEXT_PUBLIC_APP_HOMEPAGE || packageJson.homepage,
     // Enable official host features (logo, branding) in Storybook
     NEXT_PUBLIC_IS_OFFICIAL_HOST: 'true',
+    // Any non-empty ID mounts the What's new frame; the sweep blocks the Beamer host
+    NEXT_PUBLIC_BEAMER_ID: 'storybook',
   }),
 
   typescript: {

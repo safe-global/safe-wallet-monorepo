@@ -66,6 +66,7 @@ export const Default: Story = {}
 | `pathname`      | `string`                                                                                                                       | `'/home'`                                           | Router pathname                               |
 
 - **Do not override feature flags** unless testing a specific disabled state (e.g. `features: { swaps: false }`).
+- `fullPage` and `withSidebar` render `AppChrome` next to `PageLayout`, as the app shells do. The mock store accepts all cookies, so the banner stays closed; set `store: { cookies_terms: {...} }` to show it.
 - Escape hatch for custom composition — import the pieces the factory is built from: `MockContextProvider`, `createChainData`, `createInitialState`, `getFixtureData`, `resolveWallet`, `coreHandlers`, `balanceHandlers` (all from `@/stories/mocks`). `MockContextProvider` already covers the Wallet, SDK, and TxModal contexts.
 
 ## What preview.tsx already provides globally (don't re-add)
