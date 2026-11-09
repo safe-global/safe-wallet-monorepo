@@ -236,6 +236,16 @@ describe('SpaceTransactionQueue', () => {
       expect(screen.getByText('No proposals match these filters')).toBeInTheDocument()
       expect(screen.queryByText('Pending transactions of your Safe accounts will appear here')).not.toBeInTheDocument()
     })
+
+    it('tells that nothing matches the search, not a load error, when some Safes are unavailable', () => {
+      mockQueue({ currentData: queue([], { unavailableSafes: [{ chainId: '1', safeAddress: safeA }] }) })
+
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      typeSearch('no such safe')
+
+      expect(screen.getByText('No proposals match these filters')).toBeInTheDocument()
+      expect(screen.queryByText("Couldn't load the queue")).not.toBeInTheDocument()
+    })
   })
 
   it('keeps the last counts in the toolbar while a filtered queue loads', () => {
