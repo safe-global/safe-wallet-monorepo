@@ -146,6 +146,7 @@ export const ExecuteForm = ({
         willRelay,
         acceptUnverifiedSimulation,
         sponsorSpaceId,
+        isPayFromSafe,
       ))
     } catch (_err) {
       const err = asError(_err)

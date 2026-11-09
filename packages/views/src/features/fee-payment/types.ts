@@ -1,5 +1,3 @@
-export type FeePaymentMode = 'safe' | 'signer'
-
 export type FeeRow = {
   label: string
   amount?: string

@@ -88,8 +88,6 @@ describe('ReviewTokenTransfer', () => {
           setSafeTxGas: jest.fn(),
           setTxOrigin: jest.fn(),
           isReadOnly: false,
-          feePaymentMode: 'safe',
-          setFeePaymentMode: jest.fn(),
           setFeeGasToken: jest.fn(),
         }}
       >

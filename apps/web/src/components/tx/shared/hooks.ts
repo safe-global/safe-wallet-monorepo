@@ -33,6 +33,7 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useLoadFeature } from '@/features/__core__'
 import { FeePaymentFeature } from '@/features/fee-payment'
+import { FeePayerContext } from '@/components/tx-flow/FeePayerContext'
 import { mergePayFromSafeFeeParams } from '@/features/fee-payment/services'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
@@ -60,6 +61,7 @@ type TxActions = {
     acceptUnverifiedSimulation?: boolean,
     /** The Safe Pro Workspace paying for the relay, when the Safe is on a plan. */
     sponsorSpaceId?: string | null,
+    isPayFromSafe?: boolean,
   ) => Promise<ExecuteResult>
   signProposerTx: (safeTx?: SafeTransaction, origin?: string) => Promise<string>
   proposeTx: (safeTx: SafeTransaction, origin?: string) => Promise<TransactionDetails>
@@ -79,7 +81,8 @@ export const useTxActions = (): TxActions => {
   const chain = useCurrentChain()
   const dispatch = useAppDispatch()
   const feePaymentFeature = useLoadFeature(FeePaymentFeature)
-  const { feePaymentMode, feeGasToken } = useContext(SafeTxContext)
+  const { feeGasToken } = useContext(SafeTxContext)
+  const signStepPaysFromSafe = useContext(FeePayerContext)?.isPayFromSafe ?? false
   const currency = useAppSelector(selectCurrency)
   const { data: flowData } = useContext(TxFlowContext) as TxFlowContextType<{ nestedChildTx?: NestedTxEnvelope }>
   const nestedChildTx = flowData?.nestedChildTx
@@ -90,11 +93,11 @@ export const useTxActions = (): TxActions => {
     const safeAddress = scope?.safeAddress ?? safe.address.value
     const chainId = scope?.chainId ?? safe.chainId
 
-    const withPayFromSafeFeeParams = (safeTx: SafeTransaction) =>
+    const withPayFromSafeFeeParams = (safeTx: SafeTransaction, isPayFromSafe: boolean) =>
       mergePayFromSafeFeeParams({
         safeTx,
         chain,
-        feePaymentMode,
+        isPayFromSafe,
         feeGasToken,
         feePaymentFeature,
         chainId,
@@ -141,11 +144,12 @@ export const useTxActions = (): TxActions => {
 
     const signRelayedTx = async (
       safeTx: SafeTransaction,
-      txId?: string,
+      txId: string | undefined,
+      isPayFromSafe: boolean,
     ): Promise<{ signedTx: SafeTransaction; txId?: string }> => {
       assertProvider(signer?.provider)
 
-      const { safeTx: txToSign, feesMerged } = await withPayFromSafeFeeParams(safeTx)
+      const { safeTx: txToSign, feesMerged } = await withPayFromSafeFeeParams(safeTx, isPayFromSafe)
       const confirmTxId = confirmableTxId(txId, feesMerged)
 
       if (await isSmartContractWallet(signer.chainId, signer.address)) {
@@ -159,7 +163,7 @@ export const useTxActions = (): TxActions => {
       assertProvider(signer?.provider)
       assertOnboard(onboard)
 
-      const { safeTx: txToSign, feesMerged } = await withPayFromSafeFeeParams(safeTx)
+      const { safeTx: txToSign, feesMerged } = await withPayFromSafeFeeParams(safeTx, signStepPaysFromSafe)
       const confirmTxId = confirmableTxId(txId, feesMerged)
 
       // Smart contract wallets can't sign off-chain
@@ -229,6 +233,7 @@ export const useTxActions = (): TxActions => {
       isRelayed,
       acceptUnverifiedSimulation,
       sponsorSpaceId,
+      isPayFromSafe = false,
     ) => {
       assertTx(safeTx)
       assertProvider(signer?.provider)
@@ -244,7 +249,7 @@ export const useTxActions = (): TxActions => {
         // The relayer has no implicit approval, so the last signer of an m/n Safe signs before relaying
         const needsSignature = safeTx.signatures.size < safe.threshold
         const { signedTx, txId: knownTxId } = needsSignature
-          ? await signRelayedTx(safeTx, txId)
+          ? await signRelayedTx(safeTx, txId, isPayFromSafe)
           : { signedTx: safeTx, txId }
 
         // Relayed txs must be known to the service
@@ -303,7 +308,7 @@ export const useTxActions = (): TxActions => {
     chain,
     dispatch,
     feePaymentFeature,
-    feePaymentMode,
+    signStepPaysFromSafe,
     feeGasToken,
     currency,
     nestedChildTx,

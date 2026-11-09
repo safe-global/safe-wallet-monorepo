@@ -10,7 +10,7 @@ type FeePaymentFeatureSurface = Pick<FeePaymentContract, 'resolveFeeParams'> & {
 export type PayFromSafeMergeContext = {
   safeTx: SafeTransaction
   chain: Chain | undefined
-  feePaymentMode: 'safe' | 'signer' | undefined
+  isPayFromSafe: boolean
   feeGasToken: string | undefined
   feePaymentFeature: FeePaymentFeatureSurface
   chainId: string
@@ -29,7 +29,7 @@ export type PayFromSafeMerge = {
 export const mergePayFromSafeFeeParams = async ({
   safeTx,
   chain,
-  feePaymentMode,
+  isPayFromSafe,
   feeGasToken,
   feePaymentFeature,
   chainId,
@@ -41,7 +41,7 @@ export const mergePayFromSafeFeeParams = async ({
   const unchanged = { safeTx, feesMerged: false }
   if (safeTx.signatures.size > 0) return unchanged
   if (!isPayFromSafeAvailable(chain)) return unchanged
-  if (feePaymentMode !== 'safe' || !feeGasToken) return unchanged
+  if (!isPayFromSafe || !feeGasToken) return unchanged
   if (!feePaymentFeature.$isReady || !feePaymentFeature.resolveFeeParams) return unchanged
 
   const merged = await feePaymentFeature.resolveFeeParams({

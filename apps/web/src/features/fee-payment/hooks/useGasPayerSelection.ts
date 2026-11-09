@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { useCallback, useContext, useMemo, useState } from 'react'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 import { getGasPaymentOptions } from '@safe-global/utils/utils/gasPaymentOptions'
@@ -16,6 +16,7 @@ import type { GasTokenOption, FeePayerPlanState, FeePayerView, GasPayerChoice, N
 import { isPayFromSafeAvailable } from '../utils/isPayFromSafeAvailable'
 import { useFeesPreview, type FeesPreviewData } from './useFeesPreview'
 import { usePayFromSafeFeePreview } from './usePayFromSafeFeePreview'
+import { useGasTokenCandidates } from './useGasTokenCandidates'
 import { withoutFees } from '../services/totalOutgoing'
 import { buildFooter, buildPayerControl, resolveChoice } from '../services/feePayerView'
 import { selectFeePaymentSourcePreference, setFeePaymentSourcePreference } from '../store'
@@ -49,14 +50,13 @@ export const useGasPayerSelection = ({
 }): GasPayerSelection => {
   const chain = useCurrentChain()
   const { safe, safeAddress } = useSafeInfo()
-  const fees = useFeesPreview({ isExecution: step === 'execute' })
-  const { feePaymentMode, setFeePaymentMode, feeGasToken } = useContext(SafeTxContext)
+  const { feeGasToken } = useContext(SafeTxContext)
   const { isProposing } = useContext(TxFlowContext)
   const { isPro, left, meter } = useSafeSponsoredTxs()
   const [explicitChoice, setExplicitChoice] = useState<GasPayerChoice>()
   const dispatch = useAppDispatch()
   const signerAddress = useWallet()?.address
-  const preferredMode = useAppSelector((state) => selectFeePaymentSourcePreference(state, signerAddress))
+  const preferredChoice = useAppSelector((state) => selectFeePaymentSourcePreference(state, signerAddress))
 
   const signatures = safeTx?.signatures.size ?? 0
   const isUnsigned = !!safeTx && signatures === 0
@@ -72,11 +72,30 @@ export const useGasPayerSelection = ({
       ? 'PRO_NO_SPONSORED'
       : 'PRO_SPONSORED_LEFT'
 
-  // Not `fees.canCoverFees`: it flips on a failed quote and would refetch it in a loop (see `hasQuoteError`).
-  const canPayFromSafe =
-    !isLocked && isChainReady && isUnsigned && !fees.isLegacySigned && (fees.availableGasTokens?.length ?? 0) > 0
+  // The Safe can be asked to pay only on an unsigned payload, and only with a gas token it holds.
+  const { candidates } = useGasTokenCandidates(
+    isUnsigned
+      ? { to: safeTx.data.to, value: safeTx.data.value, data: safeTx.data.data, operation: safeTx.data.operation }
+      : undefined,
+  )
+  const canPayFromSafe = !isLocked && isChainReady && isUnsigned && candidates.length > 0
 
-  // `useFeesPreview` prices whichever mode is active: the signer estimate while `signer`, the quote while `safe`.
+  // Pro with sponsored txs left decides at execution; a proposer leaves the pick to the first signer.
+  const offersSafeToggle = canPayFromSafe && planState !== 'PRO_SPONSORED_LEFT' && !isProposing
+  const isSafeOptionShown = offersSafeToggle && !(step === 'execute' && hasSponsoredOffer)
+
+  const choice = resolveChoice({
+    isLocked,
+    explicitChoice,
+    preferredChoice,
+    step,
+    hasSponsoredOffer,
+    isSafeOptionShown,
+  })
+
+  // Prices the quote while Safe account is the choice, the signer estimate otherwise.
+  const fees = useFeesPreview({ isExecution: step === 'execute', isPayFromSafe: choice === 'PAY_FROM_SAFE' })
+
   const currentFee = useMemo<NetworkFee>(
     () => ({
       amount: fees.gasFee.amount,
@@ -88,23 +107,6 @@ export const useGasPayerSelection = ({
     }),
     [fees.gasFee, fees.loading, fees.error],
   )
-  const signerFee = useMemo<NetworkFee>(
-    () => (feePaymentMode === 'safe' && !isLocked ? { note: 'Calculated at execution' } : currentFee),
-    [feePaymentMode, isLocked, currentFee],
-  )
-
-  // Pro with sponsored txs left decides at execution; a proposer leaves the pick to the first signer.
-  const offersSafeToggle = canPayFromSafe && planState !== 'PRO_SPONSORED_LEFT' && !isProposing
-  const isSafeOptionShown = offersSafeToggle && !(step === 'execute' && hasSponsoredOffer)
-
-  const choice = resolveChoice({
-    isLocked,
-    explicitChoice,
-    preferredChoice: preferredMode === 'safe' ? 'PAY_FROM_SAFE' : undefined,
-    step,
-    hasSponsoredOffer,
-    isSafeOptionShown,
-  })
 
   // Quoted only while Safe account is the choice; RTK Query dedupes it with `useFeesPreview`'s.
   const quote = usePayFromSafeFeePreview({
@@ -118,17 +120,10 @@ export const useGasPayerSelection = ({
   const safeFee = useMemo<NetworkFee>(() => {
     if (quote.isLoading || quote.isFetching) return { loading: true }
     if (!quote.data) return { error: !!quote.error }
-    // `useFeesPreview` prices the same quote in the gas token's decimals once the flow is in `safe` mode.
-    if (feePaymentMode !== 'safe' || fees.loading) return { loading: true }
+    // `useFeesPreview` prices the same quote in the gas token's decimals.
+    if (fees.loading) return { loading: true }
     return { amount: fees.gasFee.amount, currency: fees.gasFee.currency, fiatAmount: fees.gasFee.fiatAmount }
-  }, [quote.isLoading, quote.isFetching, quote.data, quote.error, feePaymentMode, fees.loading, fees.gasFee])
-
-  // `safe` makes the signing path merge the quote into the payload; `signer` leaves it untouched.
-  useEffect(() => {
-    if (isLocked) return
-    const mode = choice === 'PAY_FROM_SAFE' ? 'safe' : 'signer'
-    if (feePaymentMode !== mode) setFeePaymentMode(mode)
-  }, [choice, isLocked, feePaymentMode, setFeePaymentMode])
+  }, [quote.isLoading, quote.isFetching, quote.data, quote.error, fees.loading, fees.gasFee])
 
   const view = useMemo<FeePayerView | null>(() => {
     if (!safeTx) return null
@@ -168,7 +163,7 @@ export const useGasPayerSelection = ({
           lockedReason: sponsored ? 'SPONSORED' : undefined,
         }
 
-    const gasFee: NetworkFee = isLocked ? currentFee : paysFromSafe ? safeFee : signerFee
+    const gasFee: NetworkFee = paysFromSafe && !isLocked ? safeFee : currentFee
     const executionFee: NetworkFee = fees.executionFee.isFree
       ? {}
       : {
@@ -215,7 +210,6 @@ export const useGasPayerSelection = ({
     fees.safeHasEnoughGas,
     currentFee,
     safeFee,
-    signerFee,
     offer,
     chainOptions,
     left,
@@ -227,8 +221,7 @@ export const useGasPayerSelection = ({
     (next: GasPayerChoice) => {
       setExplicitChoice(next)
       if (!signerAddress || !isSafeOptionShown || next === 'SPONSORED') return
-      const source = next === 'PAY_FROM_SAFE' ? 'safe' : 'signer'
-      dispatch(setFeePaymentSourcePreference({ signerAddress, source }))
+      dispatch(setFeePaymentSourcePreference({ signerAddress, source: next }))
     },
     [dispatch, signerAddress, isSafeOptionShown],
   )

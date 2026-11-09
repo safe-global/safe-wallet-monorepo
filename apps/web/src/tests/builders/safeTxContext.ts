@@ -12,7 +12,5 @@ export const safeTxContextBuilder = (): IBuilder<SafeTxContextParams> =>
     setSafeTxGas: jest.fn(),
     setTxOrigin: jest.fn(),
     isReadOnly: false,
-    feePaymentMode: 'signer',
-    setFeePaymentMode: jest.fn(),
     setFeeGasToken: jest.fn(),
   })

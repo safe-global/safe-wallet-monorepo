@@ -1,5 +1,4 @@
 export type {
-  FeePaymentMode,
   GasPayerChoice,
   GasTokenOption,
   NetworkFee,

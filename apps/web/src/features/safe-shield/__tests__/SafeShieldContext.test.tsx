@@ -57,8 +57,6 @@ const mockSafeTxContextValue = {
   setSafeTxGas: jest.fn(),
   setTxOrigin: jest.fn(),
   isReadOnly: false,
-  feePaymentMode: 'safe' as const,
-  setFeePaymentMode: jest.fn(),
   setFeeGasToken: jest.fn(),
 }
 
