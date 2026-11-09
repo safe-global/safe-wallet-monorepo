@@ -15,6 +15,7 @@ import { tryOffChainTxSigning } from '@/services/tx/tx-sender/sdk'
 import { verifyAndStripNestedTxCalldata, type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
 import type { TransactionResult } from '@safe-global/types-kit'
 import { withSpaceId } from '@/hooks/useUrlSpaceId'
+import { getNonces } from '@/utils/transactions'
 
 export type NestedWallet = {
   address: string
@@ -82,9 +83,12 @@ export const getNestedWallet = (
         }
       })
 
+      // The SDK defaults to the on-chain nonce, which collides with txs already queued in this Safe
+      const { recommendedNonce } = await getNonces(safeInfo.chainId, safeInfo.address.value)
       const safeTx = await connectedSDK.createTransaction({
         transactions,
         onlyCalls: true,
+        options: { nonce: recommendedNonce },
       })
 
       const safeTxHash = await connectedSDK.getTransactionHash(safeTx)

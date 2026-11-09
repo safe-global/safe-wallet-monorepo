@@ -17,7 +17,7 @@ export const AddToSpacePopupModal = (): ReactElement => {
   const router = useRouter()
   const safe = useSafeQueryParam()
   // eslint-disable-next-line no-restricted-syntax -- The Workspace to create does not exist yet
-  const createSpaceHref = { pathname: AppRoutes.spaces.createSpace, query: { safe } }
+  const createSpaceHref = { pathname: AppRoutes.welcome.createSpace, query: { safe } }
 
   return (
     <div className="flex flex-col w-full">

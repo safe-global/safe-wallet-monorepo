@@ -1,6 +1,6 @@
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 
-export const PAY_FROM_SAFE_FEES_BANNER_DISMISSED_KEY = 'gtfFeesBannerDismissed'
+export const PAY_FROM_SAFE_FEES_BANNER_DISMISSED_KEY = 'feeInfoBannerDismissed'
 
 /* TODO: Remove this constant once the fee payment feature is fully released. */
 /** Phase 1 pays fees in the native token only; `false` offers the ERC-20s of `GAS_TOKEN_ALLOWLIST`. */

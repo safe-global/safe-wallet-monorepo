@@ -13,6 +13,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
 import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import ProChip from '@safe-global/views/assets/images/safe-pro/pro-chip.svg'
 import {
   EXECUTION_FEE_TOOLTIP,
@@ -22,7 +23,10 @@ import type {
   FeePayerControl,
   FeePayerView,
   GasPayerChoice,
+  GasTokenLockReason,
+  GasTokenOption,
   NetworkFee,
+  PayerLockReason,
 } from '@safe-global/views/features/fee-payment/types'
 import { GasTokenSelector, type TokenIconRenderer } from './GasTokenSelector'
 import { TotalOutgoingSection } from './TotalOutgoingSection'
@@ -45,6 +49,17 @@ const LOCKED_TOOLTIP: Record<GasPayerChoice, string> = {
   PAY_FROM_SAFE: "Set at signing and can't be changed.",
   WALLET: 'Whoever executes pays the gas fee.',
   SPONSORED: 'Covered by your sponsored transactions.',
+}
+
+const PAYER_LOCK_REASON_TOOLTIP: Record<PayerLockReason, string> = {
+  FIRST_SIGNER_PICKS: 'Whoever signs first picks who pays the gas fee.',
+}
+
+const gasTokenLockTooltip = (reason: GasTokenLockReason | undefined, token?: GasTokenOption): string | undefined => {
+  if (reason === 'SET_AT_SIGNING') return LOCKED_TOOLTIP.PAY_FROM_SAFE
+  if (reason === 'SPONSORED') return LOCKED_TOOLTIP.SPONSORED
+  if (reason === 'NATIVE_ONLY') return `Fees are paid in ${token?.symbol} for now. More tokens are coming soon.`
+  return undefined
 }
 
 const PAYER_TEST_ID: Record<GasPayerChoice, string> = {
@@ -133,7 +148,7 @@ const PayerControl = ({
   control.kind === 'choice' ? (
     <PayerChoice value={control.value} options={control.options} sponsorKind={sponsorKind} onChange={onChange} />
   ) : (
-    <LockedPill tooltip={control.reason ?? LOCKED_TOOLTIP[control.value]}>
+    <LockedPill tooltip={control.reason ? PAYER_LOCK_REASON_TOOLTIP[control.reason] : LOCKED_TOOLTIP[control.value]}>
       <PillLabel>{payerLabel(control.value, sponsorKind)}</PillLabel>
     </LockedPill>
   )
@@ -245,7 +260,7 @@ const GasPayerSelector = ({
 }: GasPayerSelectorProps): ReactElement => {
   const { payer, gasToken, executionFee, gasFee, sponsored, sponsorKind, totalOutgoing, safeHasEnoughGas } = view
   const singleToken = gasToken.tokens.length <= 1
-  const displayedToken = gasToken.tokens.find((t) => t.address.toLowerCase() === gasToken.selected.toLowerCase())
+  const displayedToken = gasToken.tokens.find((t) => sameAddress(t.address, gasToken.selected))
 
   return (
     <div className={css.container} data-testid="gas-payer-selector">
@@ -265,7 +280,7 @@ const GasPayerSelector = ({
               onGasTokenChange={onGasTokenChange}
               locked={gasToken.locked || singleToken}
               forcedDisplay={displayedToken ?? gasToken.tokens[0]}
-              lockedTooltip={gasToken.lockedReason}
+              lockedTooltip={gasTokenLockTooltip(gasToken.lockedReason, displayedToken ?? gasToken.tokens[0])}
               currency={currency}
               renderTokenIcon={renderTokenIcon}
             />

@@ -52,7 +52,7 @@ describe('getSendInGasToken', () => {
 
 describe('computeTotalOutgoing', () => {
   const baseInputs = {
-    gasWei: 1000000n, // 1 USDC worth
+    gasFeeBaseUnits: 1000000n, // 1 USDC worth
     relayCostFiat: 0.5,
     relayCostFiatCode: 'USD',
     nativeSymbol: 'ETH',

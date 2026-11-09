@@ -55,7 +55,6 @@ Use the `LSP` tool (`findReferences`, `goToDefinition`) for "who uses this symbo
 
 ## General Principles
 
-- Don't use the `any` type.
 - **Comments are tech debt — default to writing none.** This codebase already carries too many long comments. Write a comment only for what the code cannot express (a non-obvious why, an invariant, a workaround and its reason) and keep it to one line — never narrate what the next line does, restate the diff, justify a change to the reviewer, or write multi-paragraph comment blocks.
 - **Use sentence case for UI text** – Buttons, headings, labels, warnings, and other UI copy should use sentence case (e.g., "Add new owner") not Title Case (e.g., "Add New Owner")
 - **Extract a function only for a reason** – reuse, a dedicated test, or isolating a responsibility; never just to name a single built-in call. Full rules: [docs/ai/when-to-extract-a-function.md](docs/ai/when-to-extract-a-function.md)
@@ -111,6 +110,5 @@ Safe is a smart contract wallet requiring M-of-N owner signatures (the **thresho
 Cross-cutting mistakes to avoid. Web-specific pitfalls live in [apps/web/AGENTS.md](apps/web/AGENTS.md#web-specific-common-pitfalls); mobile-specific ones in [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md#mobile-specific-common-pitfalls).
 
 1. **Breaking mobile when changing shared code** – `packages/**` affects both web and mobile, and app verify scripts don't cover it — see [packages/AGENTS.md](packages/AGENTS.md).
-2. **Modifying generated files** – never hand-edit generated files under `packages/` (contract types, `AUTO_GENERATED/`); regeneration commands in [packages/AGENTS.md](packages/AGENTS.md).
-3. **Not handling chain-specific logic** – Always consider multi-chain scenarios.
-4. **Incomplete error handling** – Always handle loading, error, and empty states in UI components.
+2. **Not handling chain-specific logic** – Always consider multi-chain scenarios.
+3. **Incomplete error handling** – Always handle loading, error, and empty states in UI components.

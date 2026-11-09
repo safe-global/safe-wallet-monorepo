@@ -2,6 +2,8 @@ import { render } from '@/tests/test-utils'
 import { Receipt } from './Receipt'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { FeePayerContext } from '@/components/tx-flow/FeePayerContext'
+import type { GasPayerSelection } from '@/features/fee-payment'
 
 const REFUND_RECEIVER = '0x0C51b4d70492D81f9f96B1EB1a826FBfb3fd27d8'
 const ZERO = '0x0000000000000000000000000000000000000000'
@@ -79,16 +81,17 @@ const baseSafeTxData = {
 
 const renderReceipt = (ctx: Partial<SafeTxContextParams>, safeTxData: SafeTransaction['data'] = baseSafeTxData) => {
   const value = {
-    feePaymentMode: 'safe',
     feeGasToken: GAS_TOKEN,
     safeTx: { data: baseSafeTxData, signatures: new Map() } as unknown as SafeTransaction,
     ...ctx,
   } as unknown as SafeTxContextParams
 
   return render(
-    <SafeTxContext.Provider value={value}>
-      <Receipt safeTxData={safeTxData} />
-    </SafeTxContext.Provider>,
+    <FeePayerContext.Provider value={{ isPayFromSafe: true } as GasPayerSelection}>
+      <SafeTxContext.Provider value={value}>
+        <Receipt safeTxData={safeTxData} />
+      </SafeTxContext.Provider>
+    </FeePayerContext.Provider>,
   )
 }
 

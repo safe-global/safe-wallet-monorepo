@@ -7,6 +7,8 @@ import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import ReviewTransactionContent from '../ReviewTransactionContent'
+import { FeePayerContext } from '@/components/tx-flow/FeePayerContext'
+import type { GasPayerSelection } from '@/features/fee-payment'
 
 const mockUseThreatAnalysis = jest.fn()
 
@@ -35,17 +37,19 @@ jest.mock('@/components/common/CheckWallet', () => ({
   default: ({ children }: { children: (ok: boolean) => ReactElement }) => children(true),
 }))
 
-const renderReview = () => {
+const renderReview = (feePayer: Partial<GasPayerSelection> | null = null) => {
   const onSubmit = jest.fn()
   const view = renderWithUserEvent(
-    <SlotProvider>
-      <SafeTxContext.Provider value={{ safeTx: createSafeTx() } as SafeTxContextParams}>
-        <SafeShieldProvider>
-          <RiskConfirmationSlot />
-          <ReviewTransactionContent onSubmit={onSubmit} />
-        </SafeShieldProvider>
-      </SafeTxContext.Provider>
-    </SlotProvider>,
+    <FeePayerContext.Provider value={feePayer as GasPayerSelection | null}>
+      <SlotProvider>
+        <SafeTxContext.Provider value={{ safeTx: createSafeTx() } as SafeTxContextParams}>
+          <SafeShieldProvider>
+            <RiskConfirmationSlot />
+            <ReviewTransactionContent onSubmit={onSubmit} />
+          </SafeShieldProvider>
+        </SafeTxContext.Provider>
+      </SlotProvider>
+    </FeePayerContext.Provider>,
   )
   return { ...view, onSubmit }
 }
@@ -82,5 +86,22 @@ describe('ReviewTransactionContent risk gate', () => {
 
     expect(await screen.findByTestId('continue-sign-btn')).toBeEnabled()
     expect(screen.queryByTestId('risk-confirmation-checkbox')).not.toBeInTheDocument()
+  })
+
+  it.each([
+    ['loading', { isQuoteLoading: true, hasQuoteError: false }],
+    ['failed', { isQuoteLoading: false, hasQuoteError: true }],
+  ])('keeps Continue disabled while the Safe account quote is %s', async (_, quote) => {
+    mockUseThreatAnalysis.mockReturnValue(ThreatAnalysisBuilder.noThreat())
+    renderReview(quote)
+
+    expect(await screen.findByTestId('continue-sign-btn')).toBeDisabled()
+  })
+
+  it('enables Continue once the Safe account quote is in', async () => {
+    mockUseThreatAnalysis.mockReturnValue(ThreatAnalysisBuilder.noThreat())
+    renderReview({ isQuoteLoading: false, hasQuoteError: false })
+
+    expect(await screen.findByTestId('continue-sign-btn')).toBeEnabled()
   })
 })

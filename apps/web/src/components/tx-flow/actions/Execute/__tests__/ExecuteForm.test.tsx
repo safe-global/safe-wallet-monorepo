@@ -57,9 +57,8 @@ jest.mock('@/features/__core__', () => ({
   ...jest.requireActual('@/features/__core__'),
   useLoadFeature: () => ({
     $isReady: true,
-    GasPayerSelector: ({ view }: { view: FeePayerView }) => (
-      <div data-testid="gas-payer-selector" data-payer={JSON.stringify(view.payer)} />
-    ),
+    GasPayerSelector: ({ selection }: { selection: { view: FeePayerView | null } }) =>
+      selection.view && <div data-testid="gas-payer-selector" data-payer={JSON.stringify(selection.view.payer)} />,
     GasTooHighBanner: () => <div data-testid="gas-too-high-banner" />,
   }),
 }))
@@ -252,6 +251,7 @@ describe('ExecuteForm', () => {
         true,
         false,
         null,
+        false,
       )
     })
   })
@@ -279,6 +279,7 @@ describe('ExecuteForm', () => {
         true,
         false,
         SPACE_ID,
+        false,
       )
     })
   })
@@ -318,6 +319,7 @@ describe('ExecuteForm', () => {
         true,
         false,
         null,
+        true,
       )
     })
   })
@@ -350,6 +352,7 @@ describe('ExecuteForm', () => {
         false,
         false,
         null,
+        false,
       )
     })
   })
@@ -404,6 +407,7 @@ describe('ExecuteForm', () => {
         false,
         false,
         null,
+        false,
       )
     })
   })
@@ -706,6 +710,7 @@ describe('ExecuteForm', () => {
       expect.anything(),
       false,
       null,
+      expect.anything(),
     )
 
     fireEvent.click(getByTestId('relay-accept-unverified-btn'))
@@ -720,6 +725,7 @@ describe('ExecuteForm', () => {
         expect.anything(),
         true,
         null,
+        expect.anything(),
       )
     })
   })

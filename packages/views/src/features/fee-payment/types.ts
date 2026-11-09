@@ -1,5 +1,3 @@
-export type FeePaymentMode = 'safe' | 'signer'
-
 export type FeeRow = {
   label: string
   amount?: string
@@ -34,9 +32,15 @@ export type OutgoingLine = { amount: string; currency: string }
 
 export type TotalOutgoingView = { primary: OutgoingLine[]; fees?: OutgoingLine; fiatTotal: string }
 
+/** Why the payer is locked, when it is not the default for its value. The view picks the copy. */
+export type PayerLockReason = 'FIRST_SIGNER_PICKS'
+
+/** Why the fee token is locked. Without one the view explains the signer-pays case. */
+export type GasTokenLockReason = 'SET_AT_SIGNING' | 'NATIVE_ONLY' | 'SPONSORED'
+
 export type FeePayerControl =
   | { kind: 'choice'; value: GasPayerChoice; options: GasPayerChoice[] }
-  | { kind: 'locked'; value: GasPayerChoice; reason?: string }
+  | { kind: 'locked'; value: GasPayerChoice; reason?: PayerLockReason }
 
 export type FeePayerFooter =
   | { kind: 'none' }
@@ -45,7 +49,7 @@ export type FeePayerFooter =
 
 export type FeePayerView = {
   payer: FeePayerControl
-  gasToken: { tokens: GasTokenOption[]; selected: string; locked: boolean; lockedReason?: string }
+  gasToken: { tokens: GasTokenOption[]; selected: string; locked: boolean; lockedReason?: GasTokenLockReason }
   executionFee: NetworkFee
   gasFee: NetworkFee
   sponsored: boolean

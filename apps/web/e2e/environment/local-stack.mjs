@@ -1,4 +1,6 @@
 export const chainProfiles = { 1: 'mainnet', 137: 'polygon' }
+// The Compose profiles of the device emulators, as test_env.py starts them with `up --device`
+export const deviceProfiles = ['ledger', 'trezor']
 
 /** Returns `value` without a trailing slash; throws unless it is a plain HTTP URL on this machine. */
 export function localUrl(value, label) {

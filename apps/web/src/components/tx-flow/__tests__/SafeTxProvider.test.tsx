@@ -4,8 +4,6 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { act, render, screen, waitFor } from '@/tests/test-utils'
 import SafeTxProvider, { SafeTxContext } from '../SafeTxProvider'
 import { getTxOrigin } from '@/utils/transactions'
-import { feePaymentSourcePreferenceSlice } from '@/features/fee-payment/store'
-import { getStoreInstance } from '@/store'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { Errors, logError } from '@/services/exceptions'
 import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
@@ -41,20 +39,9 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   useWalletContext: () => null,
 }))
 
-const SIGNER_A = '0xAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAa'
-const SIGNER_B = '0xBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBb'
-
-const buildWallet = (address: string): ConnectedWallet =>
-  ({ address, chainId: '1', label: 'mock', provider: {} as never }) as unknown as ConnectedWallet
-
 const TestConsumer = () => {
   const { txOrigin } = useContext(SafeTxContext)
   return <div data-testid="origin">{txOrigin ?? 'undefined'}</div>
-}
-
-const PaymentModeReader = () => {
-  const { feePaymentMode } = useContext(SafeTxContext)
-  return <div data-testid="payment-mode">{feePaymentMode}</div>
 }
 
 /** Stands in for any of the ~20 review components that do `.catch(setSafeTxError)`. */
@@ -235,84 +222,6 @@ describe('SafeTxProvider', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('origin')).toHaveTextContent(safeAppOrigin)
-    })
-  })
-
-  describe('feePaymentMode', () => {
-    it('defaults to "signer" when no preference is persisted', () => {
-      mockUseWallet.mockReturnValue(buildWallet(SIGNER_A))
-
-      render(
-        <SafeTxProvider>
-          <PaymentModeReader />
-        </SafeTxProvider>,
-      )
-
-      expect(screen.getByTestId('payment-mode')).toHaveTextContent('signer')
-    })
-
-    it('starts from the persisted preference of the connected signer', () => {
-      mockUseWallet.mockReturnValue(buildWallet(SIGNER_A))
-
-      render(
-        <SafeTxProvider>
-          <PaymentModeReader />
-        </SafeTxProvider>,
-        {
-          initialReduxState: {
-            [feePaymentSourcePreferenceSlice.name]: {
-              [SIGNER_A.toLowerCase()]: 'safe',
-              [SIGNER_B.toLowerCase()]: 'signer',
-            },
-          },
-        },
-      )
-
-      expect(screen.getByTestId('payment-mode')).toHaveTextContent('safe')
-    })
-
-    it('changes the mode for the flow without persisting it', async () => {
-      mockUseWallet.mockReturnValue(buildWallet(SIGNER_A))
-
-      const Toggle = () => {
-        const { feePaymentMode, setFeePaymentMode } = useContext(SafeTxContext)
-        return (
-          <>
-            <div data-testid="payment-mode">{feePaymentMode}</div>
-            <button onClick={() => setFeePaymentMode('safe')}>toggle</button>
-          </>
-        )
-      }
-
-      render(
-        <SafeTxProvider>
-          <Toggle />
-        </SafeTxProvider>,
-      )
-
-      act(() => {
-        screen.getByText('toggle').click()
-      })
-
-      await waitFor(() => {
-        expect(screen.getByTestId('payment-mode')).toHaveTextContent('safe')
-      })
-      expect(getStoreInstance().getState()[feePaymentSourcePreferenceSlice.name]).toEqual({})
-    })
-
-    it('does not throw when no wallet is connected and the setter is invoked', () => {
-      const Toggle = () => {
-        const { setFeePaymentMode } = useContext(SafeTxContext)
-        return <button onClick={() => setFeePaymentMode('signer')}>toggle</button>
-      }
-
-      render(
-        <SafeTxProvider>
-          <Toggle />
-        </SafeTxProvider>,
-      )
-
-      expect(() => screen.getByText('toggle').click()).not.toThrow()
     })
   })
 })

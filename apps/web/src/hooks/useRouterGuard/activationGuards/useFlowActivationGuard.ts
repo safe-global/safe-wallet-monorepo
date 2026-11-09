@@ -66,19 +66,6 @@ const guardRules: GuardRule[] = [
     },
   },
 
-  // Authenticated with spaces but navigating to onboarding without a spaceId → spaces create page
-  {
-    match: ({ hasSpaces, isOnboardingRoute, query }) => {
-      const shouldRedirect = hasSpaces && isOnboardingRoute && !query.spaceId
-      return shouldRedirect
-    },
-    action: ({ query }) => {
-      const safe = typeof query.safe === 'string' ? query.safe : undefined
-      const target = AppRoutes.spaces.createSpace
-      return redirect(safe ? `${target}?safe=${encodeURIComponent(safe)}` : target)
-    },
-  },
-
   {
     match: ({ isWalletReady, isPartOfSpaceUrl, isOnboardingRoute, isPublicRoute }) => {
       const shouldRedirect = isWalletReady && !isPartOfSpaceUrl && !isOnboardingRoute && !isPublicRoute

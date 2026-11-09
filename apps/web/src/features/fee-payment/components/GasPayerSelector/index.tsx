@@ -16,7 +16,8 @@ import { selectCurrency } from '@/store/settingsSlice'
 import { MixpanelEventParams, PlanSelectionEntryPoint, UpgradeFeature, UpgradeLocation } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
-import type { FeePayerFooter, FeePayerView, GasPayerChoice } from '../../types'
+import type { FeePayerFooter } from '../../types'
+import type { GasPayerSelection } from '../../hooks/useGasPayerSelection'
 
 const UPGRADE_PROMPT = {
   [MixpanelEventParams.FEATURE]: UpgradeFeature.SPONSORED_TX,
@@ -68,22 +69,17 @@ const FeeCardFooter = ({ footer }: { footer: FeePayerFooter }): ReactElement | n
   )
 }
 
-const GasPayerSelector = ({
-  view,
-  onChoiceChange,
-  onGasTokenChange,
-}: {
-  view: FeePayerView
-  onChoiceChange: (choice: GasPayerChoice) => void
-  onGasTokenChange?: (address: string) => void
-}): ReactElement => {
+/** The fee card for a `useGasPayerSelection` result, at signing and at execution. */
+const GasPayerSelector = ({ selection }: { selection: GasPayerSelection }): ReactElement | null => {
   const currency = useAppSelector(selectCurrency)
+  const { view } = selection
+  if (!view) return null
 
   return (
     <GasPayerSelectorView
       view={view}
-      onChoiceChange={onChoiceChange}
-      onGasTokenChange={onGasTokenChange}
+      onChoiceChange={selection.setChoice}
+      onGasTokenChange={selection.onGasTokenChange}
       currency={currency}
       renderTokenIcon={renderTokenIcon}
       footer={view.footer.kind === 'none' ? null : <FeeCardFooter footer={view.footer} />}

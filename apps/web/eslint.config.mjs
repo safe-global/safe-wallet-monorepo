@@ -6,6 +6,7 @@ import next from 'eslint-config-next'
 import prettier from 'eslint-config-prettier'
 import storybook from 'eslint-plugin-storybook'
 import { designSystemSyntaxRules } from '../../packages/views/eslint-design-system.mjs'
+import noExplicitAny from '../../config/eslint/no-explicit-any.mjs'
 
 // A Safe link without `spaceId` opens the Safe outside the Workspace of the current page. Matches a
 // `query` property or variable that holds such an object, directly or in a conditional.
@@ -22,7 +23,7 @@ const safeLinkWithoutSpaceIdRules = [
     'A Safe link must keep `spaceId`: use `useSafeLinkQuery()`, or wrap the query in `withSpaceId(query, spaceId)`. If the link must leave the Workspace, add `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
 }))
 
-export default [
+const config = [
   {
     ignores: [
       '**/node_modules/',
@@ -34,6 +35,7 @@ export default [
       '**/.storybook/test-runner.mjs',
       '**/.storybook/mocks/*.js',
       '**/public/mockServiceWorker.js',
+      '**/public/step-up-complete.js',
     ],
   },
   ...next,
@@ -129,7 +131,9 @@ export default [
         'error',
         {
           paths: [
+            { name: 'next', importNames: ['NextPage'], message: 'Type a page as a plain function component.' },
             { name: 'next/dynamic', message: 'Import dynamic from @/utils/dynamic, which does not depend on Next.' },
+            { name: 'next/app', message: 'Type the app props yourself, as pages/_app.tsx does.' },
             {
               name: 'next/image',
               message: 'Use a plain <img>. Images are served unoptimized, so next/image adds nothing.',
@@ -187,6 +191,18 @@ export default [
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules],
     },
   },
+  // The isolated-stack mocks run in Node with their own compiler settings, which the main tsconfig excludes.
+  {
+    files: ['e2e/environment/infra/mocks/*.ts'],
+    languageOptions: { parserOptions: { project: ['./e2e/environment/infra/mocks/tsconfig.json'] } },
+  },
+  // No tsconfig includes JavaScript, so these files get only the rules that need no type information.
+  {
+    files: ['**/*.{js,mjs,cjs}'],
+    languageOptions: { parserOptions: { project: null } },
+    rules: { '@typescript-eslint/await-thenable': 'off' },
+  },
+  noExplicitAny,
   // Tests build router mocks with a bare `safe` query, so only the design-system guards apply there.
   {
     files: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**', '**/*.stories.tsx', 'src/tests/**', 'src/stories/**'],
@@ -203,3 +219,5 @@ export default [
     },
   },
 ]
+
+export default config

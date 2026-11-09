@@ -40,10 +40,6 @@ const useSpaceSubmit = (
     [router, getSelectSafesQuery],
   )
 
-  const selectSafesUrl = createdSpaceId
-    ? `${AppRoutes.welcome.selectSafes}?${new URLSearchParams(getSelectSafesQuery(createdSpaceId))}`
-    : undefined
-
   const editSpace = async (name: string) => {
     const response = await updateSpace({ id: spaceId ?? '', updateSpaceDto: { name: sanitizeName(name) } })
 
@@ -64,6 +60,10 @@ const useSpaceSubmit = (
       if (isSafePro) {
         setCreatedSpaceId(newSpaceId)
         setIsSubmitting(false)
+        // The URL must name the Workspace: the router guard or Back from checkout can reload this step
+        void router.replace({ pathname: router.pathname, query: { ...router.query, spaceId: newSpaceId } }, undefined, {
+          shallow: true,
+        })
         return
       }
       goToSelectSafes(newSpaceId)
@@ -104,7 +104,6 @@ const useSpaceSubmit = (
     onSubmit,
     createdSpaceId,
     goToSelectSafes,
-    selectSafesUrl,
   }
 }
 

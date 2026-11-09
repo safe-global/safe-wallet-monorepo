@@ -46,7 +46,7 @@ describe('GasPayerSelector view', () => {
   it('shows a locked payer with the reason it is locked', async () => {
     renderCard({
       view: view({
-        payer: { kind: 'locked', value: 'WALLET', reason: 'Whoever signs first picks who pays the gas fee.' },
+        payer: { kind: 'locked', value: 'WALLET', reason: 'FIRST_SIGNER_PICKS' },
       }),
     })
 
@@ -54,6 +54,17 @@ describe('GasPayerSelector view', () => {
     await userEvent.hover(screen.getByTestId('fee-payer-locked'))
 
     expect(await screen.findByText('Whoever signs first picks who pays the gas fee.')).toBeInTheDocument()
+  })
+
+  it.each([
+    ['SET_AT_SIGNING', "Set at signing and can't be changed."],
+    ['SPONSORED', 'Covered by your sponsored transactions.'],
+    ['NATIVE_ONLY', 'Fees are paid in ETH for now. More tokens are coming soon.'],
+    [undefined, 'Fees will be paid from the connected signer wallet when executing this transaction.'],
+  ] as const)('explains a fee token locked for %s', (lockedReason, text) => {
+    renderCard({ view: view({ gasToken: { tokens: [ETH], selected: ZERO, locked: true, lockedReason } }) })
+
+    expect(screen.getByLabelText(text)).toBeInTheDocument()
   })
 
   it('labels a sponsor as "Free transaction" when the chain sponsors it', () => {

@@ -26,7 +26,7 @@ const dispatch = jest.fn() as unknown as ReturnType<typeof jest.fn> & AppDispatc
 const baseArgs = (safeTx: SafeTransaction) => ({
   safeTx,
   chain: buildChain([]),
-  feePaymentMode: 'safe' as const,
+  isPayFromSafe: true,
   feeGasToken: '0xtoken',
   chainId: '1',
   safeAddress: '0xsafe',
@@ -42,7 +42,7 @@ describe('mergePayFromSafeFeeParams', () => {
 
     const result = await mergePayFromSafeFeeParams({ ...baseArgs(safeTx), feePaymentFeature: feature })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
   })
 
@@ -56,7 +56,7 @@ describe('mergePayFromSafeFeeParams', () => {
       feePaymentFeature: feature,
     })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
   })
 
@@ -70,21 +70,21 @@ describe('mergePayFromSafeFeeParams', () => {
       feePaymentFeature: feature,
     })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
   })
 
-  it('bails out when payment mode is signer', async () => {
+  it('bails out when the signer pays', async () => {
     const safeTx = createSafeTx()
     const feature = buildFeature()
 
     const result = await mergePayFromSafeFeeParams({
       ...baseArgs(safeTx),
-      feePaymentMode: 'signer',
+      isPayFromSafe: false,
       feePaymentFeature: feature,
     })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
   })
 
@@ -98,7 +98,7 @@ describe('mergePayFromSafeFeeParams', () => {
       feePaymentFeature: feature,
     })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
   })
 
@@ -108,7 +108,7 @@ describe('mergePayFromSafeFeeParams', () => {
 
     const result = await mergePayFromSafeFeeParams({ ...baseArgs(safeTx), feePaymentFeature: feature })
 
-    expect(result).toBe(safeTx)
+    expect(result).toEqual({ safeTx, feesMerged: false })
     expect(feature.resolveFeeParams).not.toHaveBeenCalled()
   })
 
@@ -120,7 +120,7 @@ describe('mergePayFromSafeFeeParams', () => {
 
     const result = await mergePayFromSafeFeeParams({ ...baseArgs(safeTx), feePaymentFeature: feature })
 
-    expect(result).toBe(merged)
+    expect(result).toEqual({ safeTx: merged, feesMerged: true })
     expect(resolveFeeParams).toHaveBeenCalledWith({
       chainId: '1',
       safeAddress: '0xsafe',

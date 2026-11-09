@@ -68,9 +68,15 @@ export type FeesPreviewData = {
 
 const EXECUTION_FEE: FeeRow = { label: 'Execution fee', isFree: true }
 
-/** @param options.isExecution - the executor is known, so signer-pays is estimated even one signature short. */
-export const useFeesPreview = ({ isExecution = false }: { isExecution?: boolean } = {}): FeesPreviewData => {
-  const { safeTx, feePaymentMode, feeGasToken, setFeeGasToken } = useContext(SafeTxContext)
+/**
+ * @param options.isExecution - the executor is known, so signer-pays is estimated even one signature short.
+ * @param options.isPayFromSafe - the Safe pays the fee, so the CGW quote is priced instead of the signer estimate.
+ */
+export const useFeesPreview = ({
+  isExecution = false,
+  isPayFromSafe = false,
+}: { isExecution?: boolean; isPayFromSafe?: boolean } = {}): FeesPreviewData => {
+  const { safeTx, feeGasToken, setFeeGasToken } = useContext(SafeTxContext)
   const { safe, safeAddress } = useSafeInfo()
   const chain = useCurrentChain()
   const { balances } = useBalances()
@@ -144,8 +150,7 @@ export const useFeesPreview = ({ isExecution = false }: { isExecution?: boolean 
 
   // Without PAY_FROM_SAFE on the chain there is no quote: render signer-pays and skip the preview call.
   const feePreviewAvailable = isPayFromSafeAvailable(chain)
-  const isSignerMode =
-    !isConfirmation && (!feePreviewAvailable || feePaymentMode === 'signer' || candidates.length === 0)
+  const isSignerMode = !isConfirmation && (!feePreviewAvailable || !isPayFromSafe || candidates.length === 0)
 
   // Confirmers render the fee locked in the signed payload, not a fresh CGW quote.
   // Skip the query when the Safe holds no eligible gas token — without this the CGW endpoint
@@ -166,7 +171,7 @@ export const useFeesPreview = ({ isExecution = false }: { isExecution?: boolean 
   //  - preview succeeded and the user hasn't picked anything yet: persist the implicit
   //    default.
   useEffect(() => {
-    if (feePaymentMode !== 'safe') return
+    if (!isPayFromSafe) return
     if (isLegacySigned) return
     if (preview.isLoading || preview.isFetching) return
 
@@ -178,7 +183,7 @@ export const useFeesPreview = ({ isExecution = false }: { isExecution?: boolean 
       setFeeGasToken(defaultAddress)
     }
   }, [
-    feePaymentMode,
+    isPayFromSafe,
     isLegacySigned,
     preview.isLoading,
     preview.isFetching,
@@ -227,20 +232,20 @@ export const useFeesPreview = ({ isExecution = false }: { isExecution?: boolean 
 
   if (isConfirmation && safeTx) {
     const { safeTxGas, baseGas, gasPrice: signedGasPrice } = safeTx.data
-    const gasWei = (BigInt(safeTxGas) + BigInt(baseGas)) * BigInt(signedGasPrice)
-    const gasAmount = formatVisualAmount(gasWei, gasDecimals)
+    const gasFeeBaseUnits = (BigInt(safeTxGas) + BigInt(baseGas)) * BigInt(signedGasPrice)
+    const gasAmount = formatVisualAmount(gasFeeBaseUnits, gasDecimals)
 
     const gasTokenBalance = balances.items.find((b) => sameAddress(b.tokenInfo.address, selectedAddress))
     const gasFiatUsd = gasTokenBalance
-      ? Number(formatUnits(gasWei, gasDecimals)) * Number(gasTokenBalance.fiatConversion)
+      ? Number(formatUnits(gasFeeBaseUnits, gasDecimals)) * Number(gasTokenBalance.fiatConversion)
       : 0
     const safeHasEnoughGas = gasTokenBalance
-      ? BigInt(gasTokenBalance.balance) >= gasWei + getSendInGasToken(safeTx, selectedAddress)
+      ? BigInt(gasTokenBalance.balance) >= gasFeeBaseUnits + getSendInGasToken(safeTx, selectedAddress)
       : false
 
     const totalOutgoing = computeTotalOutgoing({
       safeTx,
-      gasWei,
+      gasFeeBaseUnits,
       relayCostFiat: gasFiatUsd,
       relayCostFiatCode: currency,
       nativeSymbol,
@@ -308,11 +313,11 @@ export const useFeesPreview = ({ isExecution = false }: { isExecution?: boolean 
       }
     }
 
-    const localGasWei = gasLimit && gasPrice?.maxFeePerGas ? gasLimit * gasPrice.maxFeePerGas : 0n
+    const localGasFeeBaseUnits = gasLimit && gasPrice?.maxFeePerGas ? gasLimit * gasPrice.maxFeePerGas : 0n
     const totalOutgoing = safeTx
       ? computeTotalOutgoing({
           safeTx,
-          gasWei: localGasWei,
+          gasFeeBaseUnits: localGasFeeBaseUnits,
           relayCostFiat: 0,
           relayCostFiatCode: currency,
           nativeSymbol,
@@ -355,15 +360,15 @@ export const useFeesPreview = ({ isExecution = false }: { isExecution?: boolean 
     const { txData, relayCost } = preview.data
     const relayCostFiat = Number(relayCost.fiatValue)
     const relayCostFiatCode = relayCost.fiatCode
-    const gasWei = (BigInt(txData.safeTxGas) + BigInt(txData.baseGas)) * BigInt(txData.gasPrice)
-    const gasAmount = formatVisualAmount(gasWei, gasDecimals)
+    const gasFeeBaseUnits = (BigInt(txData.safeTxGas) + BigInt(txData.baseGas)) * BigInt(txData.gasPrice)
+    const gasAmount = formatVisualAmount(gasFeeBaseUnits, gasDecimals)
     const gasTokenBalance = balances.items.find((b) => sameAddress(b.tokenInfo.address, selectedAddress))
     const safeHasEnoughGas = gasTokenBalance
-      ? BigInt(gasTokenBalance.balance) >= gasWei + getSendInGasToken(safeTx, selectedAddress)
+      ? BigInt(gasTokenBalance.balance) >= gasFeeBaseUnits + getSendInGasToken(safeTx, selectedAddress)
       : false
     const totalOutgoing = computeTotalOutgoing({
       safeTx,
-      gasWei,
+      gasFeeBaseUnits,
       relayCostFiat,
       relayCostFiatCode,
       nativeSymbol,

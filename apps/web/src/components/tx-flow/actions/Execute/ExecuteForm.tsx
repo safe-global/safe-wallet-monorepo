@@ -36,7 +36,6 @@ import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 import { useLoadFeature } from '@/features/__core__'
 import { FeePaymentFeature, useGasPayerSelection } from '@/features/fee-payment'
 import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'
-import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 
 export const ExecuteForm = ({
   safeTx,
@@ -95,8 +94,6 @@ export const ExecuteForm = ({
   const sponsorSpaceId = isSponsored && offer.option === 'SUBSCRIPTION' ? offer.spaceId : null
   const willRelay = gasPayer !== 'WALLET'
 
-  useSafeShieldForTxData(isPayFromSafe ? selection.fees.previewedSafeTx : undefined)
-
   useEffect(() => {
     setGasPaymentOption(gasPayer)
     return () => setGasPaymentOption(undefined)
@@ -133,7 +130,8 @@ export const ExecuteForm = ({
     setRefusalMessage(undefined)
     setIsRejectedByUser(false)
 
-    const txOptions = getTxOptions(advancedParams, currentChain)
+    // With the Safe paying, the relay always gets the estimated gas limit, never an older manual edit.
+    const txOptions = getTxOptions(isPayFromSafe ? { ...advancedParams, gasLimit } : advancedParams, currentChain)
 
     onSubmit?.()
 
@@ -148,6 +146,7 @@ export const ExecuteForm = ({
         willRelay,
         acceptUnverifiedSimulation,
         sponsorSpaceId,
+        isPayFromSafe,
       ))
     } catch (_err) {
       const err = asError(_err)
@@ -218,6 +217,7 @@ export const ExecuteForm = ({
             onFormSubmit={setAdvancedParams}
             gasLimitError={gasLimitError}
             willRelay={willRelay}
+            isReadOnly={isPayFromSafe}
             feeLabel={isPayFromSafe ? 'Paid from Safe' : undefined}
             noFeeCampaign={
               offer?.option === 'NO_FEE_CAMPAIGN' && gasPayer === 'NO_FEE_CAMPAIGN'
@@ -227,13 +227,7 @@ export const ExecuteForm = ({
           />
         </div>
 
-        {isPayFromSafeReady && selection.view && (
-          <GasPayerSelector
-            view={selection.view}
-            onChoiceChange={selection.setChoice}
-            onGasTokenChange={selection.onGasTokenChange}
-          />
-        )}
+        {isPayFromSafeReady && <GasPayerSelector selection={selection} />}
 
         {offer?.option === 'NO_FEE_CAMPAIGN' && offer.disabledReason === 'GAS_TOO_HIGH' && <GasTooHighBanner />}
 

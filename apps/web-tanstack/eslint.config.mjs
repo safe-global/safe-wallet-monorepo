@@ -6,6 +6,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import react from 'eslint-plugin-react'
 import prettier from 'eslint-config-prettier'
 import js from '@eslint/js'
+import noExplicitAny from '../../config/eslint/no-explicit-any.mjs'
 
 // Mirrors apps/web/eslint.config.mjs rule-by-rule, minus the framework
 // extends (`next`, `plugin:storybook/recommended`) which aren't applicable
@@ -102,4 +103,5 @@ export default [
       ],
     },
   },
+  noExplicitAny,
 ]

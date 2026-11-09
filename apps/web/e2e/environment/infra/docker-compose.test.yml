@@ -65,7 +65,7 @@ x-fork-rpc: &fork-rpc
     - /mocks/fork-rpc.ts
   healthcheck: *fork-proxy-healthcheck
 x-txs-init: &txs-init
-  image: ${TXS_IMAGE:?Load test-images.env}
+  image: ${TXS_IMAGE:?Run scripts/test_env.py up, or export TXS_IMAGE}
   env_file:
     - container_env_files/txs.test.env
   volumes:
@@ -87,7 +87,7 @@ x-celery-healthcheck: &celery-healthcheck
 x-txs-mainnet: &txs-mainnet
   profiles:
     - mainnet
-  image: ${TXS_IMAGE:?Load test-images.env}
+  image: ${TXS_IMAGE:?Run scripts/test_env.py up, or export TXS_IMAGE}
   env_file:
     - container_env_files/txs.test.env
   environment:
@@ -104,7 +104,7 @@ x-txs-mainnet: &txs-mainnet
 x-txs-polygon: &txs-polygon
   profiles:
     - polygon
-  image: ${TXS_IMAGE:?Load test-images.env}
+  image: ${TXS_IMAGE:?Run scripts/test_env.py up, or export TXS_IMAGE}
   env_file:
     - container_env_files/txs.test.env
   environment:
@@ -119,7 +119,7 @@ x-txs-polygon: &txs-polygon
     WORKER_QUEUES: default,indexing,processing,contracts,tokens,notifications,webhooks
     CELERYD_CONCURRENCY: '20'
 x-cfg-job: &cfg-job
-  image: ${CFG_IMAGE:?Load test-images.env}
+  image: ${CFG_IMAGE:?Run scripts/test_env.py up, or export CFG_IMAGE}
   entrypoint: []
   env_file:
     - container_env_files/cfg.env
@@ -137,7 +137,7 @@ x-decoder-env: &decoder-env
   REDIS_URL: redis://redis:6379/2
   RABBITMQ_AMQP_URL: amqp://guest:guest@general-rabbitmq:5672/
 x-decoder-chain: &decoder-chain
-  image: ${DECODER_IMAGE:?Load test-images.env}
+  image: ${DECODER_IMAGE:?Run scripts/test_env.py up, or export DECODER_IMAGE}
   volumes:
     - ./scripts/setup_decoder.py:/app/setup_decoder.py:ro
   depends_on:
@@ -149,7 +149,7 @@ x-auth0-client: &auth0-client
   AUTH0_CLIENT_ID: safe-e2e-local
   AUTH0_CLIENT_SECRET: local-test-only-auth0-secret
 x-queue: &queue
-  image: ${QUEUE_IMAGE:?Load test-images.env}
+  image: ${QUEUE_IMAGE:?Run scripts/test_env.py up, or export QUEUE_IMAGE}
   environment:
     DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/queue
     RABBITMQ_AMQP_URL: amqp://guest:guest@general-rabbitmq:5672/
@@ -180,7 +180,7 @@ services:
   # One self-signed certificate for the mocks that answer as HTTPS hosts, which the gateway trusts, and the
   # local Auth0's token signing key.
   mock-keys:
-    image: ${TXS_IMAGE:?Load test-images.env}
+    image: ${TXS_IMAGE:?Run scripts/test_env.py up, or export TXS_IMAGE}
     user: root
     entrypoint:
       - sh
@@ -336,6 +336,8 @@ services:
       retries: 5
   # An emulated Ledger Nano S Plus with the Ethereum app, for the Ledger specs; the wallet reaches it over HTTP.
   ledger-emulator:
+    profiles:
+      - ledger
     image: ${SPECULOS_IMAGE:?Load test-images.env}
     entrypoint:
       - sh
@@ -370,6 +372,35 @@ services:
         - -c
         - import urllib.request;
           urllib.request.urlopen('http://localhost:5000/events')
+      interval: 5s
+      timeout: 5s
+      retries: 12
+  # An emulated Trezor Safe 5 behind Trezor Bridge, for the Trezor specs; the wallet reaches it through Trezor Connect.
+  trezor-emulator:
+    profiles:
+      - trezor
+    image: ${TREZOR_USER_ENV_IMAGE:?Load test-images.env}
+    command: [uv, run, python, /e2e/trezor_emulator.py]
+    environment:
+      PYTHONPATH: /trezor-user-env/src
+      TREZOR_MODEL: T3T1
+      TREZOR_FIRMWARE: 2.13.0
+      # Trezor's public test mnemonic: every address it derives is test-only. Its first address owns the Trezor Safes.
+      TREZOR_SEED: all all all all all all all all all all all all
+      TREZOR_LABEL: Safe E2E
+    volumes:
+      - ./scripts/trezor_emulator.py:/e2e/trezor_emulator.py:ro
+    ports:
+      - 127.0.0.1:${TREZOR_EMULATOR_PORT:-9556}:9001
+      # Trezor Connect looks for the Bridge on 21328 only; a stack on another port cannot run the Trezor specs.
+      - 127.0.0.1:${TREZOR_BRIDGE_PORT:-21328}:21328
+    healthcheck:
+      test:
+        - CMD
+        - python3
+        - -c
+        - import urllib.request;
+          urllib.request.urlopen('http://localhost:9001/screen')
       interval: 5s
       timeout: 5s
       retries: 12
@@ -454,7 +485,7 @@ services:
       fork-rpc:
         condition: service_healthy
   txs-worker-indexer: &txs-worker
-    image: ${TXS_IMAGE:?Load test-images.env}
+    image: ${TXS_IMAGE:?Run scripts/test_env.py up, or export TXS_IMAGE}
     env_file:
       - container_env_files/txs.test.env
     environment:
@@ -476,7 +507,7 @@ services:
   txs-checks:
     profiles:
       - checks
-    image: ${TXS_IMAGE:?Load test-images.env}
+    image: ${TXS_IMAGE:?Run scripts/test_env.py up, or export TXS_IMAGE}
     entrypoint:
       - python
     command:
@@ -496,7 +527,7 @@ services:
       - ./tests/txs:/fork-tests:ro
       - *fork-indexing-mount
   txs-web:
-    image: ${TXS_IMAGE:?Load test-images.env}
+    image: ${TXS_IMAGE:?Run scripts/test_env.py up, or export TXS_IMAGE}
     env_file:
       - container_env_files/txs.test.env
     environment:
@@ -541,7 +572,7 @@ services:
         python src/manage.py migrate --noinput &&
         python src/manage.py setup_test_chain
   cfg-web:
-    image: ${CFG_IMAGE:?Load test-images.env}
+    image: ${CFG_IMAGE:?Run scripts/test_env.py up, or export CFG_IMAGE}
     tty: true
     volumes:
       - nginx-shared-cfg:/nginx
@@ -556,7 +587,7 @@ services:
       postgres:
         condition: service_healthy
   decoder-init:
-    image: ${DECODER_IMAGE:?Load test-images.env}
+    image: ${DECODER_IMAGE:?Run scripts/test_env.py up, or export DECODER_IMAGE}
     environment:
       <<: *decoder-env
       FORK_CHAIN_ID: ${FORK_CHAIN_ID:-11155111}
@@ -567,7 +598,7 @@ services:
         condition: service_healthy
     command: sh -c "alembic upgrade head && python setup_decoder.py"
   decoder-web:
-    image: ${DECODER_IMAGE:?Load test-images.env}
+    image: ${DECODER_IMAGE:?Run scripts/test_env.py up, or export DECODER_IMAGE}
     environment:
       <<: *decoder-env
       FORK_CHAIN_ID: ${FORK_CHAIN_ID:-11155111}
@@ -619,7 +650,7 @@ services:
         condition: service_healthy
     command: docker/workers/run_tx_service_sync.sh
   cgw-web:
-    image: ${CGW_IMAGE:?Load test-images.env}
+    image: ${CGW_IMAGE:?Run scripts/test_env.py up, or export CGW_IMAGE}
     env_file:
       - container_env_files/cgw.env
     environment:
@@ -628,6 +659,8 @@ services:
       FF_FILTER_VALUE_PARSING: 'true'
       FF_SAFE_QUEUE_SERVICE: 'true'
       SAFE_QUEUE_SERVICE_BASE_URI: http://queue-web:8888
+      # Below the 2 s idle timeout of the gunicorn upstreams: a socket they close as it is reused fails the request (503)
+      UNDICI_KEEP_ALIVE_TIMEOUT_MILLISECONDS: '1000'
       FF_AUTH: 'true'
       FF_USERS: 'true'
       FF_TRUSTED_DELEGATE_CALL: 'true'
@@ -728,7 +761,7 @@ services:
       - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
       - ./docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
   events-web:
-    image: ${EVENTS_IMAGE:?Load test-images.env}
+    image: ${EVENTS_IMAGE:?Run scripts/test_env.py up, or export EVENTS_IMAGE}
     env_file:
       - container_env_files/events.env
     depends_on:
