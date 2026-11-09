@@ -132,7 +132,7 @@ workflows:
         - 'aws-actions/configure-aws-credentials@v6.3.0'
         - 'crazy-max/ghaction-import-gpg@v7.0.0'
         - 'linear/linear-release-action@v0.18.2'
-        - 'shogo82148/actions-upload-release-asset@v1.10.6'
+        - 'shogo82148/actions-upload-release-asset@v1.10.7'
         - 'softprops/action-gh-release@v3.0.3'
     '.github/workflows/web-tanstack-checks.yml':
         - 'actions/cache@v5.0.5'
@@ -280,9 +280,9 @@ dependencies:
         commit: 'sha1-0c5077e51419868618aeaa5fe8019c62421857d6'
         owner_id: 108928776
         repo_id: 512644635
-    'shogo82148/actions-upload-release-asset@v1.10.6':
-        ref: 'v1.10.6'
-        commit: 'sha1-9ee13965a8a51926f330b424693f25fcff8f2ef6'
+    'shogo82148/actions-upload-release-asset@v1.10.7':
+        ref: 'v1.10.7'
+        commit: 'sha1-73f83b114970a3485e1423ecc1fb93d887c9b096'
         owner_id: 1157344
         repo_id: 235822784
     'slackapi/slack-github-action@v4.0.0':
