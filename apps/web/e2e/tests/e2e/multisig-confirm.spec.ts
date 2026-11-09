@@ -18,7 +18,7 @@ test.describe('Confirm a transaction with a second owner', { tag: '@e2e' }, () =
     journey,
   }) => {
     const recipient = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 2 })
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 2 })
 
     const sendTokens = new SendTokensPage(safePage)
     const queue = new TxQueuePage(safePage)
@@ -41,7 +41,7 @@ test.describe('Confirm a transaction with a second owner', { tag: '@e2e' }, () =
     await expect(safePage.getByText(NOTE)).toBeVisible()
     await expect(queue.transactions).toContainText(AMOUNT)
 
-    await journey.connectAs('owner1')
+    await journey.connectAs('bob')
     await queue.goto(safe.prefixedAddress)
     await expect(queue.transactionWithNonce(0)).toContainText('1/2')
     await queue.confirm(0)
@@ -57,7 +57,7 @@ test.describe('Confirm a transaction with a second owner', { tag: '@e2e' }, () =
     safeApiClient,
     journey,
   }) => {
-    const safe = await seedSafe(journey, { owners: ['owner1', 'owner4'], threshold: 2 })
+    const safe = await seedSafe(journey, { owners: ['bob', 'alice'], threshold: 2 })
     await seedQueuedTransfer(safe, { nonce: 0, recipient: Wallet.createRandom().address, amount: AMOUNT })
 
     const queue = new TxQueuePage(safePage)

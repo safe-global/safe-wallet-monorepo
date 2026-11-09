@@ -7,8 +7,8 @@ export const LEDGER_TEST_MNEMONIC = 'solution enroll ozone error hazard glory re
 /** The emulated Ledger's first Ledger Live account, which the Ledger specs select. */
 export const ledgerOwner = HDNodeWallet.fromPhrase(LEDGER_TEST_MNEMONIC, undefined, "m/44'/60'/0'/0/0")
 
-/** The Safes of `prepareDeviceSafes` for the Ledger: SEP_STATIC_SAFE_48 to sign, SEP_STATIC_SAFE_49 to execute. */
+/** The Safes of `prepareDeviceSafes` for the Ledger: `ledgerSign` to sign, `ledgerExecute` to execute. */
 export async function prepareLedgerScenario(env, owners) {
   const { signing, executing } = await prepareDeviceSafes(env, owners, ledgerOwner)
-  return { safes: { static: { SEP_STATIC_SAFE_48: `sep:${signing}`, SEP_STATIC_SAFE_49: `sep:${executing}` } } }
+  return { safes: { ledgerSign: `sep:${signing}`, ledgerExecute: `sep:${executing}` } }
 }

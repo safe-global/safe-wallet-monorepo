@@ -51,7 +51,7 @@ test.describe('Execute with the relay', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const recipient = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
 
     const review = await signTransfer(safePage, safe, recipient)
     await expect(review.remainingRelays).toBeVisible()
@@ -69,7 +69,7 @@ test.describe('Execute with the relay', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const recipient = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
     const workspace = await seedBusinessWorkspace(safePage, { Treasury: safe })
 
     const review = await signTransfer(safePage, safe, recipient, workspace.id)
@@ -91,7 +91,7 @@ test.describe('Execute with the relay', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const recipient = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['owner1', 'owner4'], threshold: 2 })
+    const safe = await seedSafe(journey, { owners: ['bob', 'alice'], threshold: 2 })
     await seedQueuedTransfer(safe, { nonce: 0, recipient, amount: AMOUNT })
 
     const queue = new TxQueuePage(safePage)
@@ -102,7 +102,7 @@ test.describe('Execute with the relay', { tag: '@e2e' }, () => {
     await review.continueAndExecuteWithRelay()
     await review.waitForExecution()
 
-    // The relayer is no owner, so the transfer executes only with the signature of OWNER_4
+    // The relayer is no owner, so the transfer executes only with the signature of Alice
     await expect.poll(() => safeApiClient.getNonce(safe.address)).toBe(1)
     expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
     await expect.poll(() => executorOfNonce(safeApiClient, safe.address, 0)).toBe(RELAYER)
