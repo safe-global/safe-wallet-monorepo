@@ -3,8 +3,9 @@
  * apps/web/.storybook/mock-assets/<host>/<path>, where Storybook serves them and the
  * handler in apps/web/.storybook/mockAssets.ts answers the original URLs from them.
  *
- * Only new images are downloaded; existing files are kept. Rerun after adding a story or
- * fixture with a new remote image, and commit the result.
+ * Only new images are downloaded; existing files are kept, and files that no story or fixture
+ * references any more are removed. Rerun after adding or removing a remote image in a story or
+ * fixture, and commit the result.
  *
  * Usage (repo root): npx tsx scripts/storybook/mirror-assets.ts
  */
@@ -42,6 +43,14 @@ async function main(): Promise<void> {
   const fileOf = (url: string) => path.join(MIRROR_DIR, mirrorPath(new URL(url)))
   const missing = urls.filter((url) => !fs.existsSync(fileOf(url)))
   console.error(`${urls.length} image URLs, ${missing.length} not mirrored yet`)
+
+  // Logos of tokens removed from a fixture would otherwise stay in the repo forever
+  const referenced = new Set(urls.map((url) => path.resolve(fileOf(url))))
+  const mirrored = fs.existsSync(MIRROR_DIR) ? fs.readdirSync(MIRROR_DIR, { recursive: true, encoding: 'utf8' }) : []
+  const orphans = mirrored.map((file) => path.resolve(MIRROR_DIR, file)).filter((file) => fs.statSync(file).isFile())
+  const unreferenced = orphans.filter((file) => !referenced.has(file))
+  for (const file of unreferenced) fs.rmSync(file)
+  if (unreferenced.length) console.error(`Removed ${unreferenced.length} images that nothing references any more`)
 
   const failures: string[] = []
   for (let i = 0; i < missing.length; i += 8) {
