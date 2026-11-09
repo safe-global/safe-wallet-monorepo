@@ -5,8 +5,8 @@ name: Web Argos Storybook
 # Argos as sheets (one image per title, one per fullscreen story). The sweep runs in 4
 # parallel shards; the visual job joins their sheets and does the rest.
 #
-# Uploads to the Argos project of web-argos-e2e.yml; the build name keeps the
-# Storybook baseline apart from the Cypress one.
+# Uploads to the Argos project that ARGOS_TOKEN_E2E names, under the build
+# name `storybook`.
 #
 # Pushes to dev record the sha256 of every sheet and upload a new baseline only when a sheet
 # changed since the previous dev commit; unchanged merges keep the last baseline, which is

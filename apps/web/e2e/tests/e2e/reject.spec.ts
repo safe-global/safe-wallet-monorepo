@@ -21,7 +21,7 @@ test.describe('Reject a queued transaction', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const recipient = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
     const transfer = await seedQueuedTransfer(safe, { nonce: 0, recipient, amount: '0.001' })
 
     const queue = new TxQueuePage(safePage)

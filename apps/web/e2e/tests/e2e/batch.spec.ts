@@ -25,7 +25,7 @@ test.describe('Execute a batch', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const [firstRecipient, secondRecipient] = [Wallet.createRandom().address, Wallet.createRandom().address]
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
 
     const batch = new BatchSidebarPage(safePage)
     const sendTokens = new SendTokensPage(safePage)

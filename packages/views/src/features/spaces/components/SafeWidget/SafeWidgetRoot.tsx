@@ -8,7 +8,7 @@ interface SafeWidgetProps {
   action?: ReactNode
   children: ReactNode
   className?: string
-  /** Optional — used by Cypress (`space-dashboard-*-widget`) like `dashboard.pendingTxWidget`. */
+  /** Optional — a test id such as `space-dashboard-*-widget`. */
   testId?: string
 }
 

@@ -16,3 +16,17 @@ const modules = [assets, basic, chains, dashboard, ledger, proposers, recovery, 
 export const scenarios = Object.fromEntries(
   modules.flatMap((module) => Object.entries(module)).filter(([name]) => /^prepare\w+Scenario$/.test(name)),
 )
+
+/** The names of the Safes that each scenario returns; specs read them as `safes.<name>`. */
+export const scenarioSafes = {
+  prepareAssetsScenario: ['assets'],
+  prepareBalancesEndpointsScenario: ['tokenLists'],
+  prepareBasicScenario: ['basic'],
+  prepareDashboardScenario: ['queue'],
+  prepareLedgerScenario: ['ledgerSign', 'ledgerExecute'],
+  prepareMastercopyScenario: ['migratable', 'unofficialSingleton'],
+  prepareTransferFormScenario: ['transferForm'],
+  prepareTrezorScenario: ['trezorSign', 'trezorExecute'],
+  prepareZerionPortfolioScenario: ['portfolio'],
+  prepareZerionPositionsScenario: ['positions'],
+}
