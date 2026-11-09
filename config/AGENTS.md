@@ -14,7 +14,14 @@ yarn turbo run test --filter=@safe-global/web --filter=@safe-global/mobile --for
 
 ## MSW fixtures are mostly generated (never edit those by hand)
 
-The JSON files under `test/msw/fixtures/` are downloaded from the staging CGW by `test/msw/scripts/fetch-fixtures.ts` — treat them like `AUTO_GENERATED/` output. Two are maintained by hand and the script never writes them: `safe-apps/mainnet.json` and `safes/sepolia.json`. Adding a key to `SAFES` writes a new `safes/<key>.json`: add an `Edit(...)` deny line for it in `.claude/settings.json`. To refresh or add a generated fixture:
+The JSON files under `test/msw/fixtures/` are downloaded from the staging CGW by `test/msw/scripts/fetch-fixtures.ts` — treat them like `AUTO_GENERATED/` output. Two are maintained by hand and the script never writes them: `safe-apps/mainnet.json` and `safes/sepolia.json`. Adding a key to `SAFES` writes a new `safes/<key>.json`: add an `Edit(...)` deny line for it in `.claude/settings.json`.
+
+Two changes are made by hand after a fetch, and a re-fetch undoes them:
+
+- Image URLs point at local files in `apps/web/.storybook/mock-assets/`. After a re-fetch, `storybook-local-images.test.ts` lists each remote URL to replace.
+- The `vitalik` balances and portfolio keep only their largest non-spam tokens (44 and 4) and the original totals.
+
+To refresh or add a generated fixture:
 
 ```bash
 node config/test/msw/scripts/fetch-fixtures.ts [--safe=ef-safe | --group=transactions | --group=swaps | --group=staking]
