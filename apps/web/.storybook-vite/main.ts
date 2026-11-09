@@ -15,6 +15,23 @@ const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'))
 process.env.NEXT_PUBLIC_APP_VERSION = process.env.NEXT_PUBLIC_APP_VERSION || packageJson.version
 process.env.NEXT_PUBLIC_APP_HOMEPAGE = process.env.NEXT_PUBLIC_APP_HOMEPAGE || packageJson.homepage
 
+// Point IframeIcon logos at the mock-assets mirror, as the webpack config does. A plugin, not an alias:
+// TokenIcon imports '../IframeIcon', which a string alias does not match.
+function iframeIconMockPlugin(): Plugin {
+  const real = path.resolve(__dirname, '../src/components/common/IframeIcon/index.tsx')
+  const mock = path.resolve(__dirname, '../.storybook/mocks/IframeIcon.tsx')
+  return {
+    name: 'iframe-icon-mock',
+    enforce: 'pre',
+    async resolveId(source, importer, options) {
+      // The mock imports '.../IframeIcon/index', which this skips, so it gets the real component
+      if (importer === mock || !source.endsWith('IframeIcon')) return null
+      const resolved = await this.resolve(source, importer, { ...options, skipSelf: true })
+      return resolved?.id === real ? mock : null
+    },
+  }
+}
+
 // Static image extensions that should be handled as URL exports (for next/image compatibility)
 const STATIC_IMAGE_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif', '.ico']
 
@@ -152,6 +169,7 @@ const config: StorybookConfig = {
     // Add custom plugin to handle @/public/* imports (must be first)
     // This handles SVGs via SVGR and other assets via direct path resolution
     config.plugins.unshift(publicAssetsPlugin())
+    config.plugins.unshift(iframeIconMockPlugin())
 
     // Add SVGR plugin for other SVG imports (src directory, etc.)
     config.plugins.unshift(
@@ -194,7 +212,8 @@ const config: StorybookConfig = {
     return config
   },
 
-  staticDirs: ['../public'],
+  // mock-assets lives outside public/ so the mirrored logos never ship with the app
+  staticDirs: ['../public', { from: '../.storybook/mock-assets', to: '/mock-assets' }],
 
   env: (config) => ({
     ...config,
