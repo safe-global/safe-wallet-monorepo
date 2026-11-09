@@ -21,9 +21,10 @@ on:
         type: boolean
         default: true
 
+# A release gets its own group and is never cancelled: a push to dev must not stop it after the tag is pushed.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && 'release' || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
 
 env:
   WORKING_DIRECTORY: apps/drain-safe
@@ -128,7 +129,7 @@ jobs:
   prepare-release:
     name: Prepare Release
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && inputs.release
+    if: github.event_name == 'workflow_dispatch' && inputs.release && github.ref == 'refs/heads/dev'
     permissions:
       attestations: write
       contents: write
