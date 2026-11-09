@@ -13709,6 +13709,48 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@safe-global/drain-safe@workspace:apps/drain-safe":
+  version: 0.0.0-use.local
+  resolution: "@safe-global/drain-safe@workspace:apps/drain-safe"
+  dependencies:
+    "@emotion/react": "npm:^11.14.0"
+    "@emotion/styled": "npm:^11.14.0"
+    "@eslint/js": "npm:^9.18.0"
+    "@faker-js/faker": "npm:^10.5.0"
+    "@mui/icons-material": "npm:^6.5.0"
+    "@mui/material": "npm:^6.5.0"
+    "@safe-global/safe-apps-react-sdk": "npm:^4.7.2"
+    "@safe-global/safe-apps-sdk": "npm:^9.1.0"
+    "@safe-global/theme": "workspace:^"
+    "@testing-library/dom": "npm:^10.4.2"
+    "@testing-library/jest-dom": "npm:^6.6.3"
+    "@testing-library/react": "npm:^16.2.0"
+    "@testing-library/user-event": "npm:^14.6.8"
+    "@types/jest": "npm:^30.0.0"
+    "@types/node": "npm:^22.10.7"
+    "@types/react": "npm:~19.2.10"
+    "@types/react-dom": "npm:~19.2.0"
+    "@typescript-eslint/eslint-plugin": "npm:^8.31.1"
+    "@typescript-eslint/parser": "npm:^8.72.0"
+    "@vitejs/plugin-react": "npm:^6.1.2"
+    eslint: "npm:^9.39.4"
+    eslint-config-prettier: "npm:^9.1.0"
+    eslint-plugin-react: "npm:^7.37.5"
+    eslint-plugin-react-hooks: "npm:^5.2.0"
+    jest: "npm:^30.5.2"
+    jest-environment-jsdom: "npm:^30.5.2"
+    jest-fixed-jsdom: "npm:^0.0.11"
+    prettier: "npm:^3.9.10"
+    react: "npm:19.2.0"
+    react-dom: "npm:19.2.0"
+    ts-jest: "npm:^29.4.6"
+    typescript: "npm:~5.9.2"
+    typescript-eslint: "npm:^8.72.0"
+    viem: "npm:^2.21.55"
+    vite: "npm:8.3.5"
+  languageName: unknown
+  linkType: soft
+
 "@safe-global/mobile@workspace:apps/mobile":
   version: 0.0.0-use.local
   resolution: "@safe-global/mobile@workspace:apps/mobile"

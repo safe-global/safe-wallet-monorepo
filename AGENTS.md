@@ -14,6 +14,7 @@ This monorepo uses nested AGENTS.md files. Agents working in a subtree automatic
 | `apps/web/.storybook/` | [apps/web/.storybook/AGENTS.md](apps/web/.storybook/AGENTS.md) | Storybook config; story authoring: [storybook-guide](apps/web/docs/storybook-guide.md)                                         |
 | `apps/web-tanstack/`   | [apps/web-tanstack/AGENTS.md](apps/web-tanstack/AGENTS.md)     | Second runtime (TanStack Router + Vite) for the same code — reuses `apps/web/src` via Vite aliases                             |
 | `apps/tx-builder/`     | [apps/tx-builder/AGENTS.md](apps/tx-builder/AGENTS.md)         | Safe App (iframe), **MUI v6 + Vite — web styling rules do not apply**                                                          |
+| `apps/drain-safe/`     | [apps/drain-safe/AGENTS.md](apps/drain-safe/AGENTS.md)         | Drain Account Safe App (iframe), **MUI v6 + Vite + viem — web styling rules do not apply**                                     |
 | `apps/mobile/`         | [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md)                 | Expo/React Native + Tamagui                                                                                                    |
 | `packages/`            | [packages/AGENTS.md](packages/AGENTS.md)                       | `store`, `theme`, `utils`, shared by web **and** mobile: verification, codegen, dual env vars, theme workflow                  |
 | `packages/views/`      | [packages/views/AGENTS.md](packages/views/AGENTS.md)           | Web-only presentation and shadcn/ui primitives, shared by `apps/web` and `apps/web-tanstack`; no app imports or business logic |
@@ -73,7 +74,7 @@ Every behavioral change must include tests — each platform defines its matrix 
 Run the repo's `verify` scripts before committing — they type-check, lint, prettier-check and test changed files:
 
 - **apps/web:** `yarn verify:changed` (scoped), then `yarn verify:web` (full) before committing. `verify:changed` defaults to web and silently skips files outside `apps/<workspace>/`, so other workspaces get a false green.
-- **Other apps:** `node scripts/verify.mjs --changed --workspace=mobile|web-tanstack|tx-builder`.
+- **Other apps:** `node scripts/verify.mjs --changed --workspace=mobile|web-tanstack|tx-builder|drain-safe`.
 - **packages/ and config/:** see [packages/AGENTS.md](packages/AGENTS.md) and [config/AGENTS.md](config/AGENTS.md).
 - **Test scaffolding:** `yarn workspace @safe-global/web test:scaffold <file>`.
 - `SKIP_VERIFY=1` skips verify entirely — only with the user's explicit say-so.
