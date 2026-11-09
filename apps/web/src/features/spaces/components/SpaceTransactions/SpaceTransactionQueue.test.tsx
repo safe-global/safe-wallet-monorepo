@@ -147,7 +147,7 @@ describe('SpaceTransactionQueue', () => {
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(screen.getByText('Error loading transactions')).toBeInTheDocument()
+    expect(screen.getByText("Couldn't load the queue")).toBeInTheDocument()
     expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
     expect(refetch).toHaveBeenCalled()
@@ -158,7 +158,7 @@ describe('SpaceTransactionQueue', () => {
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(screen.getByText('Error loading transactions')).toBeInTheDocument()
+    expect(screen.getByText("Couldn't load the queue")).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument()
     expect(screen.queryByText('Pending transactions of your Safe accounts will appear here')).not.toBeInTheDocument()
   })
@@ -181,8 +181,20 @@ describe('SpaceTransactionQueue', () => {
     render(<SpaceTransactionQueue spaceId={spaceId} />)
     fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
 
-    expect(screen.getByText('No pending transactions match these filters')).toBeInTheDocument()
+    expect(screen.getByText('No proposals match these filters')).toBeInTheDocument()
     expect(screen.queryByText('Pending transactions of your Safe accounts will appear here')).not.toBeInTheDocument()
+  })
+
+  it('clears the filters and the search from the no-match state', () => {
+    mockQueue({ currentData: queue([]) })
+
+    render(<SpaceTransactionQueue spaceId={spaceId} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value: 'treasury' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }))
+
+    expect(querySpy.mock.lastCall?.[0]).toEqual({ spaceId, filters: { statuses: [], safes: [] } })
+    expect(screen.getByRole('textbox', { name: 'Search' })).toHaveValue('')
   })
 
   describe('search', () => {
@@ -221,7 +233,7 @@ describe('SpaceTransactionQueue', () => {
       render(<SpaceTransactionQueue spaceId={spaceId} />)
       typeSearch('no such safe')
 
-      expect(screen.getByText('No pending transactions match your search')).toBeInTheDocument()
+      expect(screen.getByText('No proposals match these filters')).toBeInTheDocument()
       expect(screen.queryByText('Pending transactions of your Safe accounts will appear here')).not.toBeInTheDocument()
     })
   })
