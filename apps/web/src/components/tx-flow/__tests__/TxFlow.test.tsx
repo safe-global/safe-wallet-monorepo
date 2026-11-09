@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { PropsWithChildren } from 'react'
 import { render, screen } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
@@ -26,6 +27,10 @@ jest.mock('../useTxStepper', () => ({
 }))
 jest.mock('@/components/tx/shared/tracking', () => ({ useTrackTimeSpent: () => jest.fn() }))
 jest.mock('@/features/__core__', () => ({ useLoadFeature: () => ({ LedgerHashComparison: () => null }) }))
+jest.mock('../FeePayerProvider', () => ({
+  __esModule: true,
+  default: ({ children }: { children: ReactNode }) => children,
+}))
 jest.mock('../features', () => ({
   TxNote: () => null,
   SignerSelect: () => null,

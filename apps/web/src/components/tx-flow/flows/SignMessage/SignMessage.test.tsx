@@ -927,8 +927,6 @@ describe('SignMessage', () => {
         txOrigin: undefined,
         setTxOrigin: jest.fn(),
         isReadOnly: false,
-        feePaymentMode: 'safe',
-        setFeePaymentMode: jest.fn(),
         feeGasToken: undefined,
         setFeeGasToken: jest.fn(),
       }

@@ -1,13 +1,11 @@
-import { useContext, useState, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { act, renderHook } from '@/tests/test-utils'
 import { createMockSafeTransaction } from '@/tests/transactions'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
 import { getStoreInstance } from '@/store'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { feePaymentSourcePreferenceSlice } from '../../store'
-import type { FeePaymentMode } from '../../types'
 import { useGasPayerSelection } from '../useGasPayerSelection'
 import type { FeesPreviewData } from '../useFeesPreview'
 
@@ -44,9 +42,17 @@ jest.mock('@/features/spaces', () => ({
 }))
 
 const NATIVE = { address: ZERO_ADDRESS, symbol: 'ETH', logoUri: '' }
-const mockUseFeesPreview = jest.fn<FeesPreviewData, []>()
+const mockUseFeesPreview = jest.fn<FeesPreviewData, [unknown?]>()
 jest.mock('../useFeesPreview', () => ({
-  useFeesPreview: () => mockUseFeesPreview(),
+  useFeesPreview: (args: unknown) => mockUseFeesPreview(args),
+}))
+
+// The Safe's gas token candidates follow the tokens the fees mock offers.
+jest.mock('../useGasTokenCandidates', () => ({
+  useGasTokenCandidates: (tx: unknown) => ({
+    candidates: tx ? (mockUseFeesPreview().availableGasTokens ?? []) : [],
+    defaultAddress: undefined,
+  }),
 }))
 
 const mockUsePayFromSafeFeePreview = jest.fn()
@@ -73,28 +79,14 @@ const buildFees = (overrides: Partial<FeesPreviewData> = {}): FeesPreviewData =>
   ...overrides,
 })
 
-const preference = (mode: FeePaymentMode) => ({
-  initialReduxState: { [feePaymentSourcePreferenceSlice.name]: { [SIGNER.toLowerCase()]: mode } },
+const preference = (pick: 'PAY_FROM_SAFE' | 'WALLET') => ({
+  initialReduxState: { [feePaymentSourcePreferenceSlice.name]: { [SIGNER.toLowerCase()]: pick } },
 })
-
-/** Holds the flow's payment mode the way SafeTxProvider does, so the hook's sync is observable. */
-let currentMode: FeePaymentMode | undefined
-const ModeProvider = ({ children }: { children: ReactNode }) => {
-  const defaults = useContext(SafeTxContext)
-  const [feePaymentMode, setFeePaymentMode] = useState<FeePaymentMode>('signer')
-  currentMode = feePaymentMode
-  return (
-    <SafeTxContext.Provider value={{ ...defaults, feePaymentMode, setFeePaymentMode }}>
-      {children}
-    </SafeTxContext.Provider>
-  )
-}
 
 const unsignedTx = createMockSafeTransaction({ to: '0x1', data: '0x', value: '1' })
 
 const renderSelection = (options?: ReturnType<typeof preference>) =>
   renderHook(() => useGasPayerSelection({ safeTx: unsignedTx, offer: null, step: 'sign' }), {
-    wrapper: ModeProvider,
     ...options,
   })
 
@@ -105,7 +97,6 @@ describe('useGasPayerSelection', () => {
     jest.clearAllMocks()
     // The preference slice is persisted to localStorage, which would carry picks across tests
     localStorage.clear()
-    currentMode = undefined
     gasPaymentOptions = ['PAY_FROM_SAFE', 'SUBSCRIPTION', 'FREE_DAILY_LIMIT']
     mockUseWallet.mockReturnValue({ address: SIGNER } as unknown as ConnectedWallet)
     mockUseSafeSponsoredTxs.mockReturnValue({ isPro: false, left: undefined, meter: undefined })
@@ -127,23 +118,23 @@ describe('useGasPayerSelection', () => {
       value: 'WALLET',
       options: ['PAY_FROM_SAFE', 'WALLET'],
     })
-    expect(currentMode).toBe('signer')
+    expect(result.current.isPayFromSafe).toBe(false)
     // The selector falls back to its signer-pays explanation
     expect(result.current.view?.gasToken.lockedReason).toBeUndefined()
   })
 
   it('starts on Safe account when the signer picked it last time', () => {
-    const { result } = renderSelection(preference('safe'))
+    const { result } = renderSelection(preference('PAY_FROM_SAFE'))
 
     expect(result.current.choice).toBe('PAY_FROM_SAFE')
-    expect(currentMode).toBe('safe')
+    expect(result.current.isPayFromSafe).toBe(true)
   })
 
   it('starts on Signer wallet when the signer picked it last time', () => {
-    const { result } = renderSelection(preference('signer'))
+    const { result } = renderSelection(preference('WALLET'))
 
     expect(result.current.choice).toBe('WALLET')
-    expect(currentMode).toBe('signer')
+    expect(result.current.isPayFromSafe).toBe(false)
   })
 
   it('remembers a Safe account pick', () => {
@@ -152,18 +143,27 @@ describe('useGasPayerSelection', () => {
     act(() => result.current.setChoice('PAY_FROM_SAFE'))
 
     expect(result.current.choice).toBe('PAY_FROM_SAFE')
-    expect(currentMode).toBe('safe')
-    expect(persisted()).toEqual({ [SIGNER.toLowerCase()]: 'safe' })
+    expect(result.current.isPayFromSafe).toBe(true)
+    expect(persisted()).toEqual({ [SIGNER.toLowerCase()]: 'PAY_FROM_SAFE' })
+  })
+
+  it('prices the quote in the same render the signer picks Safe account', () => {
+    const { result } = renderSelection()
+
+    act(() => result.current.setChoice('PAY_FROM_SAFE'))
+
+    expect(result.current.isPayFromSafe).toBe(true)
+    expect(mockUseFeesPreview).toHaveBeenLastCalledWith({ isExecution: false, isPayFromSafe: true })
   })
 
   it('remembers a Signer wallet pick', () => {
-    const { result } = renderSelection(preference('safe'))
+    const { result } = renderSelection(preference('PAY_FROM_SAFE'))
 
     act(() => result.current.setChoice('WALLET'))
 
     expect(result.current.choice).toBe('WALLET')
-    expect(currentMode).toBe('signer')
-    expect(persisted()).toEqual({ [SIGNER.toLowerCase()]: 'signer' })
+    expect(result.current.isPayFromSafe).toBe(false)
+    expect(persisted()).toEqual({ [SIGNER.toLowerCase()]: 'WALLET' })
   })
 
   it("shows the Safe-pays fee priced in the gas token's decimals", () => {
@@ -187,7 +187,7 @@ describe('useGasPayerSelection', () => {
         : { data: undefined, error: undefined, isLoading: false, isFetching: false },
     )
 
-    const { result } = renderSelection(preference('safe'))
+    const { result } = renderSelection(preference('PAY_FROM_SAFE'))
 
     expect(result.current.view?.gasFee).toEqual({ amount: '1.5', currency: 'USDC', fiatAmount: '$1.50' })
   })
@@ -195,17 +195,17 @@ describe('useGasPayerSelection', () => {
   it('falls back to Signer wallet without forgetting Safe account while the Safe cannot pay', () => {
     mockUseFeesPreview.mockReturnValue(buildFees({ availableGasTokens: [] }))
 
-    const { result, rerender } = renderSelection(preference('safe'))
+    const { result, rerender } = renderSelection(preference('PAY_FROM_SAFE'))
 
     expect(result.current.choice).toBe('WALLET')
-    expect(currentMode).toBe('signer')
-    expect(persisted()).toEqual({ [SIGNER.toLowerCase()]: 'safe' })
+    expect(result.current.isPayFromSafe).toBe(false)
+    expect(persisted()).toEqual({ [SIGNER.toLowerCase()]: 'PAY_FROM_SAFE' })
 
     mockUseFeesPreview.mockReturnValue(buildFees())
     rerender()
 
     expect(result.current.choice).toBe('PAY_FROM_SAFE')
-    expect(currentMode).toBe('safe')
+    expect(result.current.isPayFromSafe).toBe(true)
   })
 
   it("shows the chain's native token when the Safe holds none", () => {
@@ -225,12 +225,12 @@ describe('useGasPayerSelection', () => {
   it('ignores a remembered Safe account pick for a Pro Workspace with sponsored transactions left', () => {
     mockUseSafeSponsoredTxs.mockReturnValue({ isPro: true, left: 10, meter: { quota: 50, resetsAt: null } })
 
-    const { result } = renderSelection(preference('safe'))
+    const { result } = renderSelection(preference('PAY_FROM_SAFE'))
 
     expect(result.current.choice).toBe('WALLET')
     expect(result.current.view?.payer).toEqual({ kind: 'locked', value: 'SPONSORED' })
     expect(result.current.view?.gasToken.lockedReason).toBe('SPONSORED')
-    expect(currentMode).toBe('signer')
+    expect(result.current.isPayFromSafe).toBe(false)
   })
 
   it('does not remember a pick when no wallet is connected', () => {
@@ -267,7 +267,7 @@ describe('useGasPayerSelection', () => {
       isFetching: enabled,
     }))
 
-    const { result } = renderSelection(preference('safe'))
+    const { result } = renderSelection(preference('PAY_FROM_SAFE'))
 
     expect(result.current.isQuoteLoading).toBe(true)
     expect(result.current.view?.gasFee).toEqual({ loading: true })
@@ -281,7 +281,7 @@ describe('useGasPayerSelection', () => {
       isFetching: false,
     }))
 
-    const { result } = renderSelection(preference('safe'))
+    const { result } = renderSelection(preference('PAY_FROM_SAFE'))
 
     expect(result.current.choice).toBe('PAY_FROM_SAFE')
     expect(result.current.hasQuoteError).toBe(true)
@@ -310,25 +310,25 @@ describe('useGasPayerSelection', () => {
     // `useFeesPreview` reports it cannot cover fees once its own preview fails
     mockUseFeesPreview.mockReturnValue(buildFees({ canCoverFees: false }))
 
-    const { result, rerender } = renderSelection(preference('safe'))
+    const { result, rerender } = renderSelection(preference('PAY_FROM_SAFE'))
     rerender()
 
     expect(result.current.choice).toBe('PAY_FROM_SAFE')
     expect(result.current.hasQuoteError).toBe(true)
-    expect(currentMode).toBe('safe')
+    expect(result.current.isPayFromSafe).toBe(true)
     expect(mockUsePayFromSafeFeePreview.mock.calls.every(([args]) => args.enabled)).toBe(true)
   })
   describe('as a proposer', () => {
     const ProposingWrapper = ({ children }: { children: ReactNode }) => (
       <TxFlowContext.Provider value={{ ...initialContext, isProposing: true }}>
-        <ModeProvider>{children}</ModeProvider>
+        <>{children}</>
       </TxFlowContext.Provider>
     )
 
     it('locks the Signer wallet and leaves the pick to the first signer', () => {
       const { result } = renderHook(() => useGasPayerSelection({ safeTx: unsignedTx, offer: null, step: 'sign' }), {
         wrapper: ProposingWrapper,
-        ...preference('safe'),
+        ...preference('PAY_FROM_SAFE'),
       })
 
       expect(result.current.choice).toBe('WALLET')
@@ -338,7 +338,7 @@ describe('useGasPayerSelection', () => {
         reason: 'FIRST_SIGNER_PICKS',
       })
       expect(quoteRequested()).toBe(false)
-      expect(currentMode).toBe('signer')
+      expect(result.current.isPayFromSafe).toBe(false)
     })
   })
 
@@ -394,10 +394,10 @@ describe('useGasPayerSelection', () => {
     })
 
     it('ignores a remembered Safe account pick', () => {
-      const { result } = renderSelection(preference('safe'))
+      const { result } = renderSelection(preference('PAY_FROM_SAFE'))
 
       expect(result.current.choice).toBe('WALLET')
-      expect(currentMode).toBe('signer')
+      expect(result.current.isPayFromSafe).toBe(false)
     })
 
     it('shows the Pro upsell where the chain sponsors plans', () => {
@@ -444,7 +444,7 @@ describe('useGasPayerSelection', () => {
     signedTx.addSignature({ signer: SIGNER, data: '0x1234', staticPart: () => '0x', dynamicPart: () => '' } as never)
 
     const renderExecution = (offer: Parameters<typeof useGasPayerSelection>[0]['offer']) =>
-      renderHook(() => useGasPayerSelection({ safeTx: signedTx, offer, step: 'execute' }), { wrapper: ModeProvider })
+      renderHook(() => useGasPayerSelection({ safeTx: signedTx, offer, step: 'execute' }))
 
     it('is the plan for a Pro Workspace', () => {
       mockUseSafeSponsoredTxs.mockReturnValue({ isPro: true, left: 49, meter: { quota: 50, resetsAt: null } })
