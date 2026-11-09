@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from 'react'
 import { ChevronDown, Lock } from 'lucide-react'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -248,7 +249,36 @@ export type GasPayerSelectorProps = {
   renderTokenIcon: TokenIconRenderer
   /** The strip under the fee rows (Pro upsell or sponsored counter); none when null. */
   footer: ReactNode
+  /** Gas limit and fee details, revealed by the Gas fee row; the row is static without it. */
+  gasFeeDetails?: ReactNode
 }
+
+const ExpandableGasFeeRow = ({
+  label,
+  value,
+  details,
+  defaultOpen,
+}: {
+  label: ReactNode
+  value: ReactNode
+  details: ReactNode
+  defaultOpen: boolean
+}): ReactElement => (
+  <Collapsible defaultOpen={defaultOpen}>
+    <FeeRow testId="gas-fee-row">
+      {label}
+      <CollapsibleTrigger
+        aria-label="Gas fee details"
+        data-testid="gas-fee-details-toggle"
+        className="group/gas-fee flex cursor-pointer items-center gap-2"
+      >
+        {value}
+        <ChevronDown className="size-4 text-muted-foreground transition-transform group-data-[panel-open]/gas-fee:rotate-180" />
+      </CollapsibleTrigger>
+    </FeeRow>
+    <CollapsibleContent>{details}</CollapsibleContent>
+  </Collapsible>
+)
 
 const GasPayerSelector = ({
   view,
@@ -257,6 +287,7 @@ const GasPayerSelector = ({
   currency,
   renderTokenIcon,
   footer,
+  gasFeeDetails,
 }: GasPayerSelectorProps): ReactElement => {
   const { payer, gasToken, executionFee, gasFee, sponsored, sponsorKind, totalOutgoing, safeHasEnoughGas } = view
   const singleToken = gasToken.tokens.length <= 1
@@ -301,10 +332,19 @@ const GasPayerSelector = ({
             )}
           </FeeRow>
 
-          <FeeRow testId="gas-fee-row">
-            <FeeLabel label="Gas fee" tooltip={GAS_FEE_TOOLTIP} />
-            <FeeValue fee={gasFee} sponsored={sponsored} sponsorKind={sponsorKind} />
-          </FeeRow>
+          {gasFeeDetails ? (
+            <ExpandableGasFeeRow
+              label={<FeeLabel label="Gas fee" tooltip={GAS_FEE_TOOLTIP} />}
+              value={<FeeValue fee={gasFee} sponsored={sponsored} sponsorKind={sponsorKind} />}
+              details={gasFeeDetails}
+              defaultOpen={!!gasFee.error}
+            />
+          ) : (
+            <FeeRow testId="gas-fee-row">
+              <FeeLabel label="Gas fee" tooltip={GAS_FEE_TOOLTIP} />
+              <FeeValue fee={gasFee} sponsored={sponsored} sponsorKind={sponsorKind} />
+            </FeeRow>
+          )}
 
           {totalOutgoing && (
             <div className={css.totalOutgoingWrap}>
