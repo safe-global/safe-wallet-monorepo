@@ -114,7 +114,7 @@ import { safeFixtures, chainFixtures, balancesFixtures, SAFE_ADDRESSES } from '@
 | Scenario          | Tokens | Positions           | Use case            |
 | ----------------- | ------ | ------------------- | ------------------- |
 | `efSafe`          | 32     | $142M (8 protocols) | DeFi heavy, default |
-| `vitalik`         | 49     | $19M                | Large, pagination   |
+| `vitalik`         | 44     | $19M                | Large, pagination   |
 | `spamTokens`      | 26     | $1.7M               | Spam filtering      |
 | `safeTokenHolder` | 25     | $707 (15 protocols) | Protocol diversity  |
 | `empty`           | 0      | $0                  | Empty states        |

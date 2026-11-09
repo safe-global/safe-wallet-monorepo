@@ -93,7 +93,7 @@ import stakingWithdrawal from './transactions/staking/withdrawal.json'
 export const portfolioFixtures = {
   /** EF Safe - DeFi heavy ($142M in positions, 8 apps) */
   efSafe: portfolioEfSafe as Portfolio,
-  /** Vitalik Safe - Large portfolio, reduced to valued tokens with known logos (49 tokens, $676M) */
+  /** Vitalik Safe - Totals of a large portfolio ($695M) with its top 4 tokens; the token rows come from balances */
   vitalik: portfolioVitalik as Portfolio,
   /** Safe with spam tokens */
   spamTokens: portfolioSpamTokens as Portfolio,
