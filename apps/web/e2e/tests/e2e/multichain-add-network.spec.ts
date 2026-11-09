@@ -16,8 +16,8 @@ test.describe('Add a Safe to another network', { tag: '@e2e' }, () => {
   }) => {
     // Each activation waits until the gateway indexes the deployment
     test.slow()
-    const { owner4 } = journey.owners
-    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1, safeVersion: '1.4.1', multichain: true })
+    const { alice } = journey.owners
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1, safeVersion: '1.4.1', multichain: true })
     await upgradeToSafe150(safe)
 
     const networkSelector = new NetworkSelector(safePage)
@@ -28,7 +28,7 @@ test.describe('Add a Safe to another network', { tag: '@e2e' }, () => {
 
     const ethereum = forkEnvironment(journey.env, ETHEREUM)
     const { owners, threshold } = await readSafeSetup(ethereum, safe.address)
-    expect({ owners, threshold }).toEqual({ owners: [owner4.address], threshold: 1 })
+    expect({ owners, threshold }).toEqual({ owners: [alice.address], threshold: 1 })
     expect(await readSingleton(ethereum, safe.address)).toEqual({
       version: '1.4.1',
       singleton: multichainSingleton(ETHEREUM, '1.4.1'),

@@ -18,13 +18,11 @@ SAFE_E2E_SPECS=multisig-confirm yarn workspace @safe-global/web e2e:env playwrig
 
 Setup, the spec registry, scenarios, mocks and CI: [ISOLATED_ENVIRONMENT.md](ISOLATED_ENVIRONMENT.md).
 
-`playwright.config.ts` and the `pw:*` scripts still run the specs against staging. They are being removed: do not write a spec that needs staging.
-
 ## Project structure
 
 ```
 e2e/
-├── playwright.isolated.config.ts  # The config of the isolated runs
+├── playwright.isolated.config.ts  # The Playwright config
 ├── tests/
 │   ├── e2e/                       # Journeys: act in the UI, check on chain and in CGW
 │   ├── regression/                # Feature checks; auth0/ runs against the Auth0 mock
@@ -35,7 +33,7 @@ e2e/
 │   ├── chain/                     # Reads from the fork
 │   ├── api/                       # CGW client and helpers, WalletConnect dApp, Ledger and Trezor emulators
 │   ├── pages/                     # Page objects: locators and actions, no assertions
-│   └── data/                      # Constants and credentials
+│   └── data/                      # Constants
 ├── environment/                   # The isolated stack, the spec registry and scenarios
 └── docs/
 ```
@@ -53,7 +51,7 @@ test('should execute a transfer when a second owner confirms the signature of th
   journey,
 }) => {
   const recipient = Wallet.createRandom().address
-  const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 2 })
+  const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 2 })
 
   const sendTokens = new SendTokensPage(safePage)
   const queue = new TxQueuePage(safePage)
@@ -65,7 +63,7 @@ test('should execute a transfer when a second owner confirms the signature of th
   await review.sign()
   await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(confirmationsOf)).toEqual([1])
 
-  await journey.connectAs('owner1')
+  await journey.connectAs('bob')
   await queue.goto(safe.prefixedAddress)
   await queue.confirm(0)
   await review.continueAndExecute()
@@ -79,7 +77,7 @@ test('should execute a transfer when a second owner confirms the signature of th
 Full spec: [multisig-confirm.spec.ts](../tests/e2e/multisig-confirm.spec.ts).
 
 - **Seed what the test needs.** `seedSafe(journey, { owners, threshold })` deploys a new Safe for this test, names its owners, and puts its address in the report. The other functions in `src/seed/` add tokens, NFTs, queued transactions, proposers and more. Seed through the SDK and the local APIs, never through the UI.
-- **Say who is connected.** The journey starts connected as `owner4`. `journey.connectAs(owner)` connects another owner, who stays connected on every later navigation.
+- **Say who is connected.** The journey starts connected as `alice`. `journey.connectAs(owner)` connects another owner, who stays connected on every later navigation.
 - **Check the outcome, not the screen only.** Poll CGW with `expect.poll` and `SafeApiClient` (`getNonce`, `getQueued`), and read the fork with `src/chain/`.
 - **Register the spec** in `environment/playwright-specs.mjs`. A journey that seeds all its data gets `{}`; add `scenarios` and `safes` for scenario data, and `chains` for a fork besides Sepolia (see [ISOLATED_ENVIRONMENT.md](ISOLATED_ENVIRONMENT.md#specs)). `e2e:env:test` fails for a spec that is not registered.
 

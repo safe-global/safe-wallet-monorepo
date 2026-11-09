@@ -147,7 +147,8 @@ export function createMockTransactionDetails(safeData: SafeState, txId: string) 
   const detailedExecutionInfo = {
     type: 'MULTISIG',
     submittedAt: now - 1000 * 60 * 5,
-    nonce: isSettings ? 44 : isERC20 ? 42 : 43,
+    // An executed transaction always has a nonce below the Safe's
+    nonce: isExecuted ? safeData.nonce - 1 : isSettings ? 44 : isERC20 ? 42 : 43,
     safeTxGas: '0',
     baseGas: '0',
     gasPrice: '0',

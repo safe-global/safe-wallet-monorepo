@@ -15,7 +15,7 @@ import * as useRecipientAnalysis from '@/features/safe-shield'
 import * as useBalances from '@/hooks/useBalances'
 import * as useTrustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
 import * as chainHooks from '@/hooks/useChains'
-import * as gtfHooks from '@/features/gtf'
+import * as payFromSafeHooks from '@/features/fee-payment'
 import * as sharedTxHooks from '@/components/tx/shared/hooks'
 import * as remoteSafeAppsHooks from '@/hooks/safe-apps/useRemoteSafeApps'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
@@ -86,7 +86,7 @@ describe('CreateTokenTransfer', () => {
     jest.clearAllMocks()
     useHasPermissionSpy.mockReturnValue(true)
     useRecipientAnalysisSpy.mockReturnValue([undefined, undefined, false])
-    jest.spyOn(gtfHooks, 'useResolvedGasToken').mockReturnValue({ status: 'resolving' })
+    jest.spyOn(payFromSafeHooks, 'useResolvedGasToken').mockReturnValue({ status: 'resolving' })
     jest.spyOn(sharedTxHooks, 'useRecommendedNonce').mockReturnValue(undefined)
   })
 
@@ -434,14 +434,14 @@ describe('CreateTokenTransfer', () => {
 
   describe('GTF fee banner', () => {
     const useHasFeatureSpy = jest.spyOn(chainHooks, 'useHasFeature')
-    const useResolvedGasTokenSpy = jest.spyOn(gtfHooks, 'useResolvedGasToken')
+    const useResolvedGasTokenSpy = jest.spyOn(payFromSafeHooks, 'useResolvedGasToken')
 
     const mockResolvedToSentToken = () =>
       useResolvedGasTokenSpy.mockImplementation(
         (sent?: string) => ({ status: 'resolved', address: sent ?? ZERO_ADDRESS }) as never,
       )
 
-    const mockBalancesForGtf = () => {
+    const mockBalancesForPayFromSafe = () => {
       const balances = {
         fiatTotal: '0',
         items: [
@@ -472,7 +472,7 @@ describe('CreateTokenTransfer', () => {
 
     it('shows fee banner after MAX click when resolved gas token equals sent token', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
-      mockBalancesForGtf()
+      mockBalancesForPayFromSafe()
       mockResolvedToSentToken()
 
       const { user, getByTestId, queryByTestId } = renderCreateTokenTransfer()
@@ -488,7 +488,7 @@ describe('CreateTokenTransfer', () => {
 
     it('does not show fee banner when GTF is disabled', async () => {
       useHasFeatureSpy.mockImplementation(() => false)
-      mockBalancesForGtf()
+      mockBalancesForPayFromSafe()
 
       const { user, getByTestId, queryByTestId } = renderCreateTokenTransfer()
 
@@ -499,7 +499,7 @@ describe('CreateTokenTransfer', () => {
 
     it('does not show fee banner when resolved gas token differs from sent token', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
-      mockBalancesForGtf()
+      mockBalancesForPayFromSafe()
       // Resolve to a different address → sent ≠ fee → banner should stay hidden even after MAX
       useResolvedGasTokenSpy.mockReturnValue({
         status: 'resolved',
@@ -515,7 +515,7 @@ describe('CreateTokenTransfer', () => {
 
     it('dismisses fee banner on close button click', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
-      mockBalancesForGtf()
+      mockBalancesForPayFromSafe()
       mockResolvedToSentToken()
 
       const { user, getByTestId, queryByTestId, getByLabelText } = renderCreateTokenTransfer()
@@ -534,7 +534,7 @@ describe('CreateTokenTransfer', () => {
     // The fee banner renders as an info alert, not the plain default
     it('renders the fee banner with the info alert styling, not the plain default alert', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
-      mockBalancesForGtf()
+      mockBalancesForPayFromSafe()
       mockResolvedToSentToken()
 
       const { user, getByTestId } = renderCreateTokenTransfer()
@@ -554,7 +554,7 @@ describe('CreateTokenTransfer', () => {
 
     it('renders the standard info icon inside the fee banner', async () => {
       useHasFeatureSpy.mockImplementation(() => true)
-      mockBalancesForGtf()
+      mockBalancesForPayFromSafe()
       mockResolvedToSentToken()
 
       const { user, getByTestId } = renderCreateTokenTransfer()

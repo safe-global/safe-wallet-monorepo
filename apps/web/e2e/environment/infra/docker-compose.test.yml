@@ -369,6 +369,8 @@ services:
     command: [uv, run, python, /e2e/trezor_emulator.py]
     environment:
       PYTHONPATH: /trezor-user-env/src
+      # The controller logs through print; unbuffered, its lines reach the container log even when it stops
+      PYTHONUNBUFFERED: '1'
       TREZOR_MODEL: T3T1
       TREZOR_FIRMWARE: 2.13.0
       # Trezor's public test mnemonic: every address it derives is test-only. Its first address owns the Trezor Safes.

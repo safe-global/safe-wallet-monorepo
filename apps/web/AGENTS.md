@@ -1,6 +1,6 @@
 # Web App AI Contributor Guidelines
 
-Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide rules, see the root [AGENTS.md](../../AGENTS.md). For E2E, see [e2e/AGENTS.md](e2e/AGENTS.md) (Playwright — all new tests) and [cypress/AGENTS.md](cypress/AGENTS.md) (legacy maintenance). For story authoring, see [docs/storybook-guide.md](docs/storybook-guide.md).
+Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide rules, see the root [AGENTS.md](../../AGENTS.md). For E2E, see [e2e/AGENTS.md](e2e/AGENTS.md) (Playwright). For story authoring, see [docs/storybook-guide.md](docs/storybook-guide.md).
 
 ## Web-specific principles
 
@@ -75,7 +75,7 @@ Report an error where it is caught, imperatively — never from the render layer
 
 Before writing or changing any test, read [docs/ai/testing-conventions.md](../../docs/ai/testing-conventions.md) (cross-cutting) and [docs/TESTING.md](docs/TESTING.md) (web): choosing the test level, the test decision matrix, what not to test, mock patterns and templates, including how to set or assert `window.location` (non-configurable in jsdom 26).
 
-- **E2E:** all new E2E tests are Playwright — `e2e/` ([e2e/AGENTS.md](e2e/AGENTS.md); canonical rules in [e2e/docs/README.md](e2e/docs/README.md); answer the 4 questions in [e2e/docs/AI_TEST_OUTPUT_FORMAT.md](e2e/docs/AI_TEST_OUTPUT_FORMAT.md) before writing any test). Cypress is legacy, no new tests: [cypress/AGENTS.md](cypress/AGENTS.md).
+- **E2E:** E2E tests are Playwright — `e2e/` ([e2e/AGENTS.md](e2e/AGENTS.md); canonical rules in [e2e/docs/README.md](e2e/docs/README.md); answer the 4 questions in [e2e/docs/AI_TEST_OUTPUT_FORMAT.md](e2e/docs/AI_TEST_OUTPUT_FORMAT.md) before writing any test).
 - **Write each test at the lowest level that can show the behaviour.** Playwright only for what needs a real browser or several real services together; everything else goes in Jest. A Playwright test does not make up for missing unit and component tests. Levels, examples and when to mock: [docs/TESTING.md](docs/TESTING.md#choose-the-test-level).
 
 ## Storybook
