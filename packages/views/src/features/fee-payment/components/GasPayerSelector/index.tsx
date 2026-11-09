@@ -167,7 +167,8 @@ const FeeLabel = ({ label, tooltip }: { label: string; tooltip: string }): React
   <Typography variant="paragraph-small" className={css.feeLabel}>
     {label}
     <Tooltip>
-      <TooltipTrigger render={<span className={css.tooltipIcon} />}>
+      {/* Keeps a tap on the icon from toggling a clickable row it sits in. */}
+      <TooltipTrigger render={<span className={css.tooltipIcon} onClick={(e) => e.stopPropagation()} />}>
         <InfoIcon className="size-4 text-[var(--color-border-main)]" />
       </TooltipTrigger>
       <TooltipContent>{tooltip}</TooltipContent>
@@ -265,18 +266,25 @@ const ExpandableGasFeeRow = ({
   defaultOpen: boolean
 }): ReactElement => (
   <Collapsible defaultOpen={defaultOpen}>
-    <FeeRow testId="gas-fee-row">
+    <CollapsibleTrigger
+      aria-label="Gas fee details"
+      data-testid="gas-fee-details-toggle"
+      nativeButton={false}
+      render={<div />}
+      className={cn(
+        css.feeRow,
+        'group/gas-fee -mx-2 cursor-pointer rounded-md px-2 outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring',
+      )}
+    >
       {label}
-      <CollapsibleTrigger
-        aria-label="Gas fee details"
-        data-testid="gas-fee-details-toggle"
-        className="group/gas-fee flex cursor-pointer items-center gap-2 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-      >
+      <span className="flex items-center gap-2">
         {value}
-        <ChevronDown className="size-4 text-muted-foreground transition-transform group-data-[panel-open]/gas-fee:rotate-180" />
-      </CollapsibleTrigger>
-    </FeeRow>
-    <CollapsibleContent>{details}</CollapsibleContent>
+        <ChevronDown className="size-4 text-muted-foreground transition-transform duration-[420ms] ease-soft group-data-[panel-open]/gas-fee:rotate-180 motion-reduce:transition-none" />
+      </span>
+    </CollapsibleTrigger>
+    <CollapsibleContent className="h-(--collapsible-panel-height) overflow-hidden transition-[height] duration-[420ms] ease-soft data-ending-style:h-0 data-ending-style:duration-[320ms] data-ending-style:ease-in-out data-starting-style:h-0 motion-reduce:transition-none">
+      {details}
+    </CollapsibleContent>
   </Collapsible>
 )
 
