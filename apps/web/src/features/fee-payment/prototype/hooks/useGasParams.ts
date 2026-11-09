@@ -3,8 +3,6 @@ import type { GasEstimate, Scenario } from '../sampleData'
 
 export type GasParamName = keyof GasEstimate
 
-const EMPTY: GasEstimate = { userNonce: '0', gasLimit: '', maxPriorityFeeGwei: '0.00553', maxFeeGwei: '0.07639' }
-
 const isPositiveNumber = (value: string) => value.trim() !== '' && Number(value) > 0
 
 const validate = (draft: GasEstimate): Partial<Record<GasParamName, string>> => {
@@ -21,8 +19,8 @@ const validate = (draft: GasEstimate): Partial<Record<GasParamName, string>> => 
 /** The signer-wallet gas settings: the estimate, the user's saved overrides and the open draft. */
 export const useGasParams = (scenario: Scenario) => {
   const estimate = scenario.estimate
-  const [saved, setSaved] = useState<GasEstimate | null>(estimate)
-  const [draft, setDraft] = useState<GasEstimate | null>(scenario.startEditing ? (estimate ?? EMPTY) : null)
+  const [saved, setSaved] = useState<GasEstimate>(estimate)
+  const [draft, setDraft] = useState<GasEstimate | null>(scenario.startEditing ? estimate : null)
   const errors = draft ? validate(draft) : {}
 
   return {
@@ -30,11 +28,11 @@ export const useGasParams = (scenario: Scenario) => {
     saved,
     draft,
     errors,
-    isEdited: !!saved && !!estimate && JSON.stringify(saved) !== JSON.stringify(estimate),
-    startEditing: () => setDraft(saved ?? estimate ?? EMPTY),
+    isEdited: JSON.stringify(saved) !== JSON.stringify(estimate),
+    startEditing: () => setDraft(saved),
     cancelEditing: () => setDraft(null),
     change: (name: GasParamName, value: string) => setDraft((d) => (d ? { ...d, [name]: value } : d)),
-    reset: () => estimate && setDraft(estimate),
+    reset: () => setDraft(estimate),
     save: () => {
       if (draft && Object.keys(validate(draft)).length === 0) {
         setSaved(draft)

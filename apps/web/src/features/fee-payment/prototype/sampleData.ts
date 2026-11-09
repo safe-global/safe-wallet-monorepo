@@ -8,8 +8,8 @@ export type Scenario = {
   payer: FeePayerView['payer']
   footer: FeePayerView['footer']
   sponsorKind: FeePayerView['sponsorKind']
-  /** null when the gas limit cannot be estimated. */
-  estimate: GasEstimate | null
+  /** gasLimit is empty when it cannot be estimated. */
+  estimate: GasEstimate
   safeQuote: SafeQuote
   startEditing?: boolean
 }
@@ -25,11 +25,11 @@ export const ETH_TOKEN = {
 const ESTIMATE: GasEstimate = {
   userNonce: '12',
   gasLimit: '79262',
-  maxPriorityFeeGwei: '0.00553',
-  maxFeeGwei: '0.07639',
+  maxPriorityFeeGwei: '0.05',
+  maxFeeGwei: '1.82',
 }
 
-const SAFE_QUOTE: SafeQuote = { gasLimit: '112400', gasPriceGwei: '0.0812' }
+const SAFE_QUOTE: SafeQuote = { gasLimit: '112400', gasPriceGwei: '1.9' }
 
 const UPSELL: FeePayerView['footer'] = { kind: 'upsell' }
 
@@ -44,7 +44,7 @@ const signerCanPickSafe = {
 export const SCENARIOS = {
   signerWallet: signerCanPickSafe,
   editing: { ...signerCanPickSafe, startEditing: true },
-  cannotEstimate: { ...signerCanPickSafe, estimate: null },
+  cannotEstimate: { ...signerCanPickSafe, estimate: { ...ESTIMATE, gasLimit: '' } },
   paidFromSafe: { ...signerCanPickSafe, payer: { kind: 'locked', value: 'PAY_FROM_SAFE' }, footer: { kind: 'none' } },
   proPlan: {
     ...signerCanPickSafe,

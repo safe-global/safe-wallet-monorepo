@@ -270,7 +270,7 @@ const ExpandableGasFeeRow = ({
       <CollapsibleTrigger
         aria-label="Gas fee details"
         data-testid="gas-fee-details-toggle"
-        className="group/gas-fee flex cursor-pointer items-center gap-2"
+        className="group/gas-fee flex cursor-pointer items-center gap-2 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         {value}
         <ChevronDown className="size-4 text-muted-foreground transition-transform group-data-[panel-open]/gas-fee:rotate-180" />

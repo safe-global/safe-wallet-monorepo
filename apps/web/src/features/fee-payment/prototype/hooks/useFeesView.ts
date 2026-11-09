@@ -33,7 +33,7 @@ export const useFeesView = (
   gas: GasParamsState,
 ): { view: FeePayerView; gasFeeDetails: GasFeeDetailsProps } => {
   const paysFromSafe = choice === 'PAY_FROM_SAFE'
-  const walletFee: NetworkFee = gas.saved ? toFee(gas.saved.gasLimit, gas.saved.maxFeeGwei) : { error: true }
+  const walletFee: NetworkFee = gas.saved.gasLimit ? toFee(gas.saved.gasLimit, gas.saved.maxFeeGwei) : { error: true }
   const gasFee = paysFromSafe ? toFee(scenario.safeQuote.gasLimit, scenario.safeQuote.gasPriceGwei) : walletFee
 
   const view: FeePayerView = {
@@ -55,8 +55,11 @@ export const useFeesView = (
     : (Object.keys(FIELD_LABELS) as GasParamName[])
         .filter((name) => choice === 'WALLET' || name !== 'userNonce')
         .map((name) => ({
-          label: gas.isEdited && name !== 'userNonce' ? `${FIELD_LABELS[name]} · edited` : FIELD_LABELS[name],
-          value: gas.saved?.[name] || 'Cannot estimate',
+          label:
+            gas.isEdited && gas.saved[name] !== gas.estimate[name]
+              ? `${FIELD_LABELS[name]} · edited`
+              : FIELD_LABELS[name],
+          value: gas.saved[name] || 'Cannot estimate',
         }))
 
   const editor =
@@ -72,7 +75,8 @@ export const useFeesView = (
           canSave: Object.keys(gas.errors).length === 0,
           onSave: gas.save,
           onCancel: gas.cancelEditing,
-          onReset: gas.estimate && JSON.stringify(gas.draft) !== JSON.stringify(gas.estimate) ? gas.reset : undefined,
+          onReset:
+            gas.estimate.gasLimit && JSON.stringify(gas.draft) !== JSON.stringify(gas.estimate) ? gas.reset : undefined,
         }
       : undefined
 

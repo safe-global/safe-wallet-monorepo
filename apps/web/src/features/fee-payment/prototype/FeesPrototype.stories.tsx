@@ -21,7 +21,9 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 const openDetails: Story['play'] = async ({ canvasElement }) => {
-  await userEvent.click(within(canvasElement).getByTestId('gas-fee-details-toggle'))
+  const toggle = within(canvasElement).getByTestId('gas-fee-details-toggle')
+  await userEvent.click(toggle)
+  toggle.blur()
 }
 
 export const SignerWallet: Story = {

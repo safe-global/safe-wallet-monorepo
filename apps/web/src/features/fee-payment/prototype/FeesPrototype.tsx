@@ -24,7 +24,7 @@ export const FeesPrototype = ({ scenario: id }: { scenario: ScenarioId }) => {
       onChoiceChange={onChoiceChange}
       currency="usd"
       renderTokenIcon={renderTokenIcon}
-      footer={<FeesFooter footer={view.footer} />}
+      footer={view.footer.kind === 'none' ? null : <FeesFooter footer={view.footer} />}
     />
   )
 }
