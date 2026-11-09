@@ -18,43 +18,18 @@ const mockClearAuthCookie = cookieStorage.clearAuthCookie as jest.MockedFunction
 
 describe('useAuthToken', () => {
   const originalDateNow = Date.now
-  const originalSetInterval = global.setInterval
-  const originalClearInterval = global.clearInterval
-  const originalAddEventListener = window.addEventListener
-  const originalRemoveEventListener = window.removeEventListener
 
   beforeEach(() => {
     jest.clearAllMocks()
     Date.now = originalDateNow
     mockGetAuthCookieData.mockReturnValue(undefined)
-
-    // Mock window event listeners
-    const listeners: Record<string, Array<() => void>> = {}
-    window.addEventListener = jest.fn((event: string, listener: () => void) => {
-      ;(listeners[event] ||= []).push(listener)
-    }) as unknown as typeof window.addEventListener
-
-    window.removeEventListener = jest.fn((event: string, listener: () => void) => {
-      listeners[event] = (listeners[event] || []).filter((registered) => registered !== listener)
-    }) as unknown as typeof window.removeEventListener
-
-    // Helper to trigger window events
-    ;(window as { triggerWindowEvent?: (event: string) => void }).triggerWindowEvent = (event: string) => {
-      ;(listeners[event] || []).forEach((listener) => listener())
-    }
-    ;(window as { triggerStorageEvent?: () => void }).triggerStorageEvent = () => {
-      ;(listeners.storage || []).forEach((listener) => listener())
-    }
+    jest.spyOn(window, 'addEventListener')
+    jest.spyOn(window, 'removeEventListener')
   })
 
   afterEach(() => {
     Date.now = originalDateNow
-    global.setInterval = originalSetInterval
-    global.clearInterval = originalClearInterval
-    window.addEventListener = originalAddEventListener
-    window.removeEventListener = originalRemoveEventListener
-    delete (window as { triggerStorageEvent?: () => void }).triggerStorageEvent
-    delete (window as { triggerWindowEvent?: (event: string) => void }).triggerWindowEvent
+    jest.restoreAllMocks()
   })
 
   describe('initial state', () => {
@@ -380,12 +355,8 @@ describe('useAuthToken', () => {
         expiry: Date.now() + 3600000,
       })
 
-      // Trigger storage event
       act(() => {
-        const triggerStorageEvent = (window as { triggerStorageEvent?: () => void }).triggerStorageEvent
-        if (triggerStorageEvent) {
-          triggerStorageEvent()
-        }
+        window.dispatchEvent(new Event('storage'))
       })
 
       await waitFor(() => {
@@ -411,9 +382,7 @@ describe('useAuthToken', () => {
         expiry: Date.now() + 300000,
       })
       act(() => {
-        ;(window as unknown as { triggerWindowEvent: (event: string) => void }).triggerWindowEvent(
-          cookieStorage.AUTH_COOKIE_CHANGE_EVENT,
-        )
+        window.dispatchEvent(new Event(cookieStorage.AUTH_COOKIE_CHANGE_EVENT))
       })
 
       expect(result.current[0].token).toBe('Bearer refreshed-token')
