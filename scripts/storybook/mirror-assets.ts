@@ -16,7 +16,8 @@ import * as path from 'path'
 import { imageFormat, imageUrls, mirrorPath } from '../../apps/web/.storybook/mockAssetUrls'
 import { upgradeCoinGeckoThumbToQuality } from '../../packages/utils/src/utils/image'
 
-const SOURCES = ['*.stories.tsx', 'config/test/**']
+// Only what the web Storybook renders: its stories and the shared MSW fixtures, not the mobile stories
+const SOURCES = ['apps/web/*.stories.tsx', 'packages/views/*.stories.tsx', 'config/test/']
 const MIRROR_DIR = 'apps/web/.storybook/mock-assets'
 const TIMEOUT_MS = 15000
 
@@ -38,8 +39,8 @@ async function main(): Promise<void> {
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
   })
-  // TokenIcon requests CoinGecko's 'small' variant of a /thumb/ URL, other components the URL as is
-  const urls = imageUrls(text.split('\n').flatMap((url) => [url, upgradeCoinGeckoThumbToQuality(url, 'small') ?? url]))
+  // TokenIcon, the only component that renders CoinGecko logos, loads the 'small' variant of a /thumb/ URL
+  const urls = imageUrls(text.split('\n').map((url) => upgradeCoinGeckoThumbToQuality(url, 'small') ?? url))
   const fileOf = (url: string) => path.join(MIRROR_DIR, mirrorPath(new URL(url)))
   const missing = urls.filter((url) => !fs.existsSync(fileOf(url)))
   console.error(`${urls.length} image URLs, ${missing.length} not mirrored yet`)
