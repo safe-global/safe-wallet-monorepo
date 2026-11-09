@@ -130,7 +130,8 @@ export const ExecuteForm = ({
     setRefusalMessage(undefined)
     setIsRejectedByUser(false)
 
-    const txOptions = getTxOptions(advancedParams, currentChain)
+    // With the Safe paying, the relay always gets the estimated gas limit, never an older manual edit.
+    const txOptions = getTxOptions(isPayFromSafe ? { ...advancedParams, gasLimit } : advancedParams, currentChain)
 
     onSubmit?.()
 
@@ -215,6 +216,7 @@ export const ExecuteForm = ({
             onFormSubmit={setAdvancedParams}
             gasLimitError={gasLimitError}
             willRelay={willRelay}
+            isReadOnly={isPayFromSafe}
             feeLabel={isPayFromSafe ? 'Paid from Safe' : undefined}
             noFeeCampaign={
               offer?.option === 'NO_FEE_CAMPAIGN' && gasPayer === 'NO_FEE_CAMPAIGN'

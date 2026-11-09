@@ -13,6 +13,7 @@ type Props = {
   onFormSubmit: (data: AdvancedParameters) => void
   gasLimitError?: Error
   willRelay?: boolean
+  isReadOnly?: boolean
   feeLabel?: ReactNode
   noFeeCampaign?: {
     isEligible: boolean
@@ -28,6 +29,7 @@ const AdvancedParams = ({
   onFormSubmit,
   gasLimitError,
   willRelay,
+  isReadOnly,
   feeLabel,
   noFeeCampaign,
 }: Props) => {
@@ -59,7 +61,7 @@ const AdvancedParams = ({
       isExecution={willExecute}
       isEIP1559={isEIP1559}
       gasLimitError={gasLimitError}
-      onEdit={onEditOpen}
+      onEdit={isReadOnly ? undefined : onEditOpen}
       willRelay={willRelay}
       feeLabel={feeLabel}
       noFeeCampaign={noFeeCampaign}
