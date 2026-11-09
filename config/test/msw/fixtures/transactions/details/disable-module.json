@@ -84,7 +84,7 @@
     "refundReceiver": {
       "value": "0x0000000000000000000000000000000000000000",
       "name": null,
-      "logoUri": ""
+      "logoUri": "images/common/token-placeholder.svg"
     },
     "safeTxHash": "0xb82070c01297392754b4b972c064f48f4ab944c5979813c01b871c8f8d57bc4a",
     "executor": {

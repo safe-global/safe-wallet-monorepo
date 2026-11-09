@@ -78,7 +78,7 @@
         "decimals": 6,
         "symbol": "USDC",
         "name": "USDC",
-        "logoUri": "mock-assets/assets.coingecko.com/coins/images/6319/small/USDC.webp"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/6319/small/usdc.webp"
       },
       "balance": "8547989985",
       "fiatBalance": "8545.468327954424",
@@ -274,7 +274,7 @@
         "decimals": 18,
         "symbol": "PCHS",
         "name": "Peaches.Finance",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "102852453000000000000",
       "fiatBalance": "0.19415766110168997",
@@ -316,7 +316,7 @@
         "decimals": 18,
         "symbol": "ONE",
         "name": "1",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "1000000000000000000000000",
       "fiatBalance": "0",
@@ -330,7 +330,7 @@
         "decimals": 18,
         "symbol": "variableDebtEthLidoGHO",
         "name": "Aave Ethereum Lido Variable Debt GHO",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "2066948010904963745127050",
       "fiatBalance": "0",
@@ -344,7 +344,7 @@
         "decimals": 18,
         "symbol": "aEthLidoWETH",
         "name": "Aave Ethereum Lido WETH",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "10195519708019469120532",
       "fiatBalance": "0",
@@ -358,7 +358,7 @@
         "decimals": 18,
         "symbol": "aEthUSDS",
         "name": "Aave Ethereum USDS",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "2039417959106534975939910",
       "fiatBalance": "0",
@@ -372,7 +372,7 @@
         "decimals": 9,
         "symbol": "MIYAGUCHI",
         "name": "Aya Miyaguchi",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "210345000000000000000",
       "fiatBalance": "0",
@@ -386,7 +386,7 @@
         "decimals": 18,
         "symbol": "Ayabuu",
         "name": "Aya Miyaguchi's Dog",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "50000000000000000000000000",
       "fiatBalance": "0",
@@ -400,7 +400,7 @@
         "decimals": 18,
         "symbol": "cWETHv3",
         "name": "Compound WETH",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "4286511607273938899845",
       "fiatBalance": "0",
@@ -414,7 +414,7 @@
         "decimals": 18,
         "symbol": "gtWETH",
         "name": "Gauntlet WETH Prime",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "1159497758489350757924",
       "fiatBalance": "0",
@@ -428,7 +428,7 @@
         "decimals": 18,
         "symbol": "GEL",
         "name": "Geltonas",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "30072015000000000000",
       "fiatBalance": "0",
@@ -442,7 +442,7 @@
         "decimals": 9,
         "symbol": "HELLO",
         "name": "hello world computer",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "10000000000",
       "fiatBalance": "0",
@@ -456,7 +456,7 @@
         "decimals": 18,
         "symbol": "KUNI",
         "name": "KUNI",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "10000000000000000000000000",
       "fiatBalance": "0",
@@ -470,7 +470,7 @@
         "decimals": 9,
         "symbol": "GROOT",
         "name": "Project Groot",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "69000000000",
       "fiatBalance": "0",
@@ -484,7 +484,7 @@
         "decimals": 9,
         "symbol": "SF",
         "name": "Second Foundation",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "18000000000000000",
       "fiatBalance": "0",
@@ -498,7 +498,7 @@
         "decimals": 18,
         "symbol": "spWETH",
         "name": "Spark WETH",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "10171248963604167830847",
       "fiatBalance": "0",
@@ -526,7 +526,7 @@
         "decimals": 18,
         "symbol": "stSPK",
         "name": "Staked Spark",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "372886544746895256000000",
       "fiatBalance": "0",
@@ -540,7 +540,7 @@
         "decimals": 9,
         "symbol": "ETHFNDN",
         "name": "The Ethereum Foundation",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "500000000000000000",
       "fiatBalance": "0",
@@ -554,7 +554,7 @@
         "decimals": 18,
         "symbol": "Visit website nanoether .org to claim rewards",
         "name": "Visit website nanoether .org to claim rewards",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "2700000000000000000",
       "fiatBalance": "0",
@@ -568,7 +568,7 @@
         "decimals": 6,
         "symbol": "Visit website yield-usd .com to claim rewards",
         "name": "Visit website yield-usd .com to claim rewards",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "3876230000",
       "fiatBalance": "0",

@@ -89,7 +89,7 @@
       "to": {
         "value": "0xC9db9bf0c9c8Fa30B09c45233E6A2D5eEfF9aBF3",
         "name": "StakingContract",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "value": "32000000000000000000",
       "operation": 0,
@@ -111,7 +111,7 @@
       "refundReceiver": {
         "value": "0x0000000000000000000000000000000000000000",
         "name": null,
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "safeTxHash": "0xd1699838071a472d26963f2b823a4c835e9acd449d0376ca1d468a666903130d",
       "executor": {

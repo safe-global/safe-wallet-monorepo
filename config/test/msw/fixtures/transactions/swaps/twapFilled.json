@@ -18,7 +18,7 @@
         "executedFeeToken": {
           "address": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
           "decimals": 18,
-          "logoUri": "",
+          "logoUri": "images/common/token-placeholder.svg",
           "name": "Wrapped Ether",
           "symbol": "WETH",
           "trusted": false
@@ -26,7 +26,7 @@
         "sellToken": {
           "address": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
           "decimals": 18,
-          "logoUri": "",
+          "logoUri": "images/common/token-placeholder.svg",
           "name": "Wrapped Ether",
           "symbol": "WETH",
           "trusted": false
@@ -34,7 +34,7 @@
         "buyToken": {
           "address": "0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D",
           "decimals": 18,
-          "logoUri": "",
+          "logoUri": "images/common/token-placeholder.svg",
           "name": "DAI (test)",
           "symbol": "DAI",
           "trusted": false
@@ -109,7 +109,7 @@
       "executedFeeToken": {
         "address": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
         "decimals": 18,
-        "logoUri": "",
+        "logoUri": "images/common/token-placeholder.svg",
         "name": "Wrapped Ether",
         "symbol": "WETH",
         "trusted": false
@@ -117,7 +117,7 @@
       "sellToken": {
         "address": "0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14",
         "decimals": 18,
-        "logoUri": "",
+        "logoUri": "images/common/token-placeholder.svg",
         "name": "Wrapped Ether",
         "symbol": "WETH",
         "trusted": false
@@ -125,7 +125,7 @@
       "buyToken": {
         "address": "0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D",
         "decimals": 18,
-        "logoUri": "",
+        "logoUri": "images/common/token-placeholder.svg",
         "name": "DAI (test)",
         "symbol": "DAI",
         "trusted": false
@@ -202,7 +202,7 @@
       "to": {
         "value": "0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74",
         "name": "ComposableCoW",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "value": "0",
       "operation": 0,
@@ -224,13 +224,13 @@
       "refundReceiver": {
         "value": "0x0000000000000000000000000000000000000000",
         "name": null,
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "safeTxHash": "0xc8a9399afbba45e82a0645770db38386cbe10bec77dd8b6395f7d24e19a45c9a",
       "executor": {
         "value": "0x8aEf2f5c3F17261F6F1C4dA058D022BE92776af8",
         "name": null,
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "signers": [
         {

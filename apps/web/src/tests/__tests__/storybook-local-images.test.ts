@@ -73,7 +73,9 @@ describe('Storybook images', () => {
     )
     const broken = [...references].filter((reference) => {
       const file = path.join(MOCK_ASSETS, reference.slice('mock-assets/'.length))
-      if (!file.startsWith(MOCK_ASSETS + path.sep) || !fs.existsSync(file)) return true
+      // Compare the exact name: macOS ignores case, so `USDC.webp` would find `usdc.webp` there but not in CI
+      const exists = fs.existsSync(file) && fs.readdirSync(path.dirname(file)).includes(path.basename(file))
+      if (!file.startsWith(MOCK_ASSETS + path.sep) || !exists) return true
       return !isRaster(fs.readFileSync(file))
     })
 

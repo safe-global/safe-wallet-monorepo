@@ -25,7 +25,7 @@
         "buyToken": {
           "address": "0xd3f3d46FeBCD4CdAa2B83799b7A5CdcB69d135De",
           "decimals": 18,
-          "logoUri": "",
+          "logoUri": "images/common/token-placeholder.svg",
           "name": "GNO (test)",
           "symbol": "GNO",
           "trusted": false
@@ -103,7 +103,7 @@
       "buyToken": {
         "address": "0xd3f3d46FeBCD4CdAa2B83799b7A5CdcB69d135De",
         "decimals": 18,
-        "logoUri": "",
+        "logoUri": "images/common/token-placeholder.svg",
         "name": "GNO (test)",
         "symbol": "GNO",
         "trusted": false
@@ -234,13 +234,13 @@
       "refundReceiver": {
         "value": "0x0000000000000000000000000000000000000000",
         "name": null,
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "safeTxHash": "0x135ff0282653d4c2a62c76cd247764b1abd4c0daa9201a72964feac2acaa7b44",
       "executor": {
         "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
         "name": null,
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "signers": [
         {

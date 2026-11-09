@@ -50,7 +50,7 @@
         "decimals": 18,
         "symbol": "COW",
         "name": "CoW Protocol Token",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "5094723562452327307059033",
       "fiatBalance": "907900.1177232545",
@@ -176,7 +176,7 @@
         "decimals": 18,
         "symbol": "OPT",
         "name": "ethopt.io",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "140000000000000000",
       "fiatBalance": "0.0058859024",
@@ -204,7 +204,7 @@
         "decimals": 18,
         "symbol": "YIELDX",
         "name": "yield-farming.io",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "199270500000000000000",
       "fiatBalance": "0.00178147827",
@@ -218,7 +218,7 @@
         "decimals": 18,
         "symbol": "UCAP",
         "name": "UniCap.finance",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "30000000000000000",
       "fiatBalance": "0.0008143194",
@@ -232,7 +232,7 @@
         "decimals": 18,
         "symbol": "BRX",
         "name": "BerryXToken",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "8000000000000000000",
       "fiatBalance": "0.00077224",
@@ -260,7 +260,7 @@
         "decimals": 18,
         "symbol": "DGMT",
         "name": "DigiMax",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "22000000000000000000",
       "fiatBalance": "0.00002244",
@@ -274,7 +274,7 @@
         "decimals": 8,
         "symbol": "XPT",
         "name": "XPToken.io",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "100000",
       "fiatBalance": "0.00000201423",
@@ -302,7 +302,7 @@
         "decimals": 18,
         "symbol": "$",
         "name": "+ $50 000 FOR FREE (ETH-AirdropsEvent.com)",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "50000000000000000000000",
       "fiatBalance": "0",
@@ -316,7 +316,7 @@
         "decimals": 18,
         "symbol": "BGBG",
         "name": "BigMouthFrog",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "491051000000000000000",
       "fiatBalance": "0",
@@ -330,7 +330,7 @@
         "decimals": 0,
         "symbol": "!$ Claim $200K at ETH200k.com",
         "name": "!$ Claim $200K at ETH200k.com",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "200",
       "fiatBalance": "0",
@@ -344,7 +344,7 @@
         "decimals": 18,
         "symbol": "maker.gift",
         "name": "Claim Rewards On maker.gift",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "1500000000000000000",
       "fiatBalance": "0",
@@ -358,7 +358,7 @@
         "decimals": 18,
         "symbol": "vCOW",
         "name": "CoW Protocol Virtual Token",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "9934880071000326987866136",
       "fiatBalance": "0",
@@ -386,7 +386,7 @@
         "decimals": 0,
         "symbol": "$ ETH35.com",
         "name": "$ ETH35.com - Visit to claim bonus rewards",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "9283",
       "fiatBalance": "0",
@@ -400,7 +400,7 @@
         "decimals": 0,
         "symbol": "$ EthAave.com",
         "name": "$ EthAave.com - Visit to claim staking rewards",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "100",
       "fiatBalance": "0",
@@ -414,7 +414,7 @@
         "decimals": 0,
         "symbol": "$ LidoV2LP.com",
         "name": "$ LidoV2LP.com - Visit to claim bonus rewards",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "329562",
       "fiatBalance": "0",
@@ -428,7 +428,7 @@
         "decimals": 0,
         "symbol": "$ LidoV2LR.com",
         "name": "$ LidoV2LR.com  - Visit to claim bonus rewards",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "9283",
       "fiatBalance": "0",
@@ -442,7 +442,7 @@
         "decimals": 18,
         "symbol": "OHBABY",
         "name": "OhBabyGames",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "297005030233563204177751673",
       "fiatBalance": "0",
@@ -456,7 +456,7 @@
         "decimals": 18,
         "symbol": "SAFE",
         "name": "Safe Token",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "250000000000000000000000",
       "fiatBalance": "0",
@@ -470,7 +470,7 @@
         "decimals": 2,
         "symbol": "# SPK Genesis Rewards",
         "name": "SPK Genesis Rewards (https://spkprotocol.com)",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "82500000",
       "fiatBalance": "0",
@@ -484,7 +484,7 @@
         "decimals": 18,
         "symbol": "ERC20",
         "name": "Token",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "2738359383999782968105292395626931112100006300200837056239134730020057566225",
       "fiatBalance": "0",
@@ -498,7 +498,7 @@
         "decimals": 0,
         "symbol": "# aBonusLP.com",
         "name": "Visit aBonusLP.com to claim $9283 in rewards",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "9283",
       "fiatBalance": "0",
@@ -512,7 +512,7 @@
         "decimals": 6,
         "symbol": "# aeth.network",
         "name": "Visit https://aeth.network to claim rewards",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "1400000",
       "fiatBalance": "0",
@@ -526,7 +526,7 @@
         "decimals": 6,
         "symbol": "# makertoken.net",
         "name": "Visit makertoken.net to claim rewards",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "1500000",
       "fiatBalance": "0",
@@ -540,7 +540,7 @@
         "decimals": 0,
         "symbol": "$ UrgentDT.com",
         "name": "$ Visit UrgentDT.com ASAP to secure your wallet. A hacker ha",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "100",
       "fiatBalance": "0",
@@ -554,7 +554,7 @@
         "decimals": 6,
         "symbol": "# LiquidETH.us",
         "name": "Visit website LiquidETH.us to claim rewards",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "1700000",
       "fiatBalance": "0",
@@ -568,7 +568,7 @@
         "decimals": 18,
         "symbol": "! stethLido.win",
         "name": "Visit website stethLido.win to claim rewards",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "5700000000000000000",
       "fiatBalance": "0",
@@ -582,7 +582,7 @@
         "decimals": 0,
         "symbol": "$ wBTCLP.com",
         "name": "$ wBTCLP.com - Visit to claim bonus rewards",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "98127",
       "fiatBalance": "0",
@@ -596,7 +596,7 @@
         "decimals": 6,
         "symbol": "HQG",
         "name": "环球股",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "1000000",
       "fiatBalance": "0",

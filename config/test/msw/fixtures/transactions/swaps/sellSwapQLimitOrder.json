@@ -25,7 +25,7 @@
         "buyToken": {
           "address": "0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D",
           "decimals": 18,
-          "logoUri": "",
+          "logoUri": "images/common/token-placeholder.svg",
           "name": "DAI (test)",
           "symbol": "DAI",
           "trusted": false
@@ -114,7 +114,7 @@
       "buyToken": {
         "address": "0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D",
         "decimals": 18,
-        "logoUri": "",
+        "logoUri": "images/common/token-placeholder.svg",
         "name": "DAI (test)",
         "symbol": "DAI",
         "trusted": false
@@ -250,7 +250,7 @@
       "refundReceiver": {
         "value": "0x0000000000000000000000000000000000000000",
         "name": null,
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "safeTxHash": "0xc2a59a93e1cbaeab5fde7a5d4cc63938e1b1e4597c7e203146a6e6e07b43a92f",
       "executor": null,

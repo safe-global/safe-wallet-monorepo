@@ -204,7 +204,7 @@
         "decimals": 6,
         "symbol": "USDC",
         "name": "USDC",
-        "logoUri": "mock-assets/assets.coingecko.com/coins/images/6319/small/USDC.webp"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/6319/small/usdc.webp"
       },
       "balance": "4018862",
       "fiatBalance": "4.017676435709999",
@@ -386,7 +386,7 @@
         "decimals": 18,
         "symbol": "UNDG",
         "name": "UniDexGas.com",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "277632000000000",
       "fiatBalance": "0.01864021248",
@@ -442,7 +442,7 @@
         "decimals": 8,
         "symbol": "YFED",
         "name": "YFED.FINANCE",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "10000",
       "fiatBalance": "0.000000074161",
@@ -456,7 +456,7 @@
         "decimals": 18,
         "symbol": "BPT",
         "name": "Balancer 20% DAI + 80% WETH Pool",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "109159655557",
       "fiatBalance": "0",
@@ -470,7 +470,7 @@
         "decimals": 18,
         "symbol": "BPT",
         "name": "Balancer 50% mUSD + 50% USDC pool",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "335005914846186",
       "fiatBalance": "0",
@@ -484,7 +484,7 @@
         "decimals": 18,
         "symbol": "BPT",
         "name": "Balancer 50% WETH + 50% WBTC pool",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "13062704686688",
       "fiatBalance": "0",
@@ -498,7 +498,7 @@
         "decimals": 18,
         "symbol": "BPT",
         "name": "Balancer 63% MKR + 37% WETH pool",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "504241762555",
       "fiatBalance": "0",
@@ -512,7 +512,7 @@
         "decimals": 18,
         "symbol": "BPT",
         "name": "Balancer 75% YFI + 25% USDC pool",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "617355358000",
       "fiatBalance": "0",
@@ -526,7 +526,7 @@
         "decimals": 0,
         "symbol": "$",
         "name": "BalancerLP.com",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "500",
       "fiatBalance": "0",
@@ -540,7 +540,7 @@
         "decimals": 18,
         "symbol": "STG/USDC",
         "name": "Balancer STG/USDC",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "1920560968986822695",
       "fiatBalance": "0",
@@ -554,7 +554,7 @@
         "decimals": 18,
         "symbol": "DHPT",
         "name": "Convex Strategies ",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "586092441393713",
       "fiatBalance": "0",
@@ -568,7 +568,7 @@
         "decimals": 0,
         "symbol": "$ ETH35.com",
         "name": "$ ETH35.com - Visit to claim bonus rewards",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "9283",
       "fiatBalance": "0",
@@ -582,7 +582,7 @@
         "decimals": 6,
         "symbol": "farmdUSDCV3",
         "name": "Farming of Trade USDC v3",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "3595587",
       "fiatBalance": "0",
@@ -596,7 +596,7 @@
         "decimals": 18,
         "symbol": "mDAI",
         "name": "mushrooming Dai Stablecoin",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "48102271370871295",
       "fiatBalance": "0",
@@ -610,7 +610,7 @@
         "decimals": 6,
         "symbol": "mUSDC",
         "name": "mushrooming USD Coin",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "972",
       "fiatBalance": "0",
@@ -624,7 +624,7 @@
         "decimals": 6,
         "symbol": "safesmmUSDT",
         "name": "Safe Smokehouse USDT",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "2473545",
       "fiatBalance": "0",
@@ -638,7 +638,7 @@
         "decimals": 8,
         "symbol": "safesmmWBTC",
         "name": "Safe Smokehouse WBTC",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "1883",
       "fiatBalance": "0",
@@ -652,7 +652,7 @@
         "decimals": 18,
         "symbol": "Visit website farmuni .org to claim rewards",
         "name": "Visit website farmuni .org to claim rewards",
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "balance": "427320000000000000000",
       "fiatBalance": "0",

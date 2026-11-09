@@ -91,13 +91,13 @@
     "refundReceiver": {
       "value": "0x0000000000000000000000000000000000000000",
       "name": null,
-      "logoUri": ""
+      "logoUri": "images/common/token-placeholder.svg"
     },
     "safeTxHash": "0xafd58598ec10f89395d57c4d914480e50a568416e3226bc4d1853fae06697929",
     "executor": {
       "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
       "name": null,
-      "logoUri": ""
+      "logoUri": "images/common/token-placeholder.svg"
     },
     "signers": [
       {

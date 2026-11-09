@@ -34,7 +34,7 @@
         "buyToken": {
           "address": "0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D",
           "decimals": 18,
-          "logoUri": "",
+          "logoUri": "images/common/token-placeholder.svg",
           "name": "DAI (test)",
           "symbol": "DAI",
           "trusted": false
@@ -131,7 +131,7 @@
       "buyToken": {
         "address": "0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D",
         "decimals": 18,
-        "logoUri": "",
+        "logoUri": "images/common/token-placeholder.svg",
         "name": "DAI (test)",
         "symbol": "DAI",
         "trusted": false
@@ -298,7 +298,7 @@
         "0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74": {
           "value": "0xfdaFc9d1902f4e0b84f65F49f244b32b31013b74",
           "name": "ComposableCoW",
-          "logoUri": ""
+          "logoUri": "images/common/token-placeholder.svg"
         },
         "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59": {
           "value": "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59",
@@ -322,7 +322,7 @@
       "refundReceiver": {
         "value": "0x0000000000000000000000000000000000000000",
         "name": null,
-        "logoUri": ""
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "safeTxHash": "0x0f9fb46e5d85bdb11f85bdf356078bb2caaf5508504b5ddb8aba2ce5e3aa58ae",
       "executor": null,
