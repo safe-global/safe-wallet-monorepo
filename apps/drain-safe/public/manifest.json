@@ -1,0 +1,12 @@
+{
+  "name": "Drain Account",
+  "description": "Transfer all your assets in batch",
+  "iconPath": "logo.svg",
+  "icons": [
+    {
+      "src": "logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

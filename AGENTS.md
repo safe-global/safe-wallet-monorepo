@@ -10,10 +10,10 @@ This monorepo uses nested AGENTS.md files. Agents working in a subtree automatic
 | ---------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `apps/web/`            | [apps/web/AGENTS.md](apps/web/AGENTS.md)                       | Main Next.js app: feature architecture, variants/styling, web testing, web pitfalls                                            |
 | `apps/web/e2e/`        | [apps/web/e2e/AGENTS.md](apps/web/e2e/AGENTS.md)               | **Playwright E2E — all new tests go here**                                                                                     |
-| `apps/web/cypress/`    | [apps/web/cypress/AGENTS.md](apps/web/cypress/AGENTS.md)       | Cypress E2E (legacy — maintenance only)                                                                                        |
 | `apps/web/.storybook/` | [apps/web/.storybook/AGENTS.md](apps/web/.storybook/AGENTS.md) | Storybook config; story authoring: [storybook-guide](apps/web/docs/storybook-guide.md)                                         |
 | `apps/web-tanstack/`   | [apps/web-tanstack/AGENTS.md](apps/web-tanstack/AGENTS.md)     | Second runtime (TanStack Router + Vite) for the same code — reuses `apps/web/src` via Vite aliases                             |
 | `apps/tx-builder/`     | [apps/tx-builder/AGENTS.md](apps/tx-builder/AGENTS.md)         | Safe App (iframe), **MUI v6 + Vite — web styling rules do not apply**                                                          |
+| `apps/drain-safe/`     | [apps/drain-safe/AGENTS.md](apps/drain-safe/AGENTS.md)         | Drain Account Safe App (iframe), **MUI v6 + Vite + viem — web styling rules do not apply**                                     |
 | `apps/mobile/`         | [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md)                 | Expo/React Native + Tamagui                                                                                                    |
 | `packages/`            | [packages/AGENTS.md](packages/AGENTS.md)                       | `store`, `theme`, `utils`, shared by web **and** mobile: verification, codegen, dual env vars, theme workflow                  |
 | `packages/views/`      | [packages/views/AGENTS.md](packages/views/AGENTS.md)           | Web-only presentation and shadcn/ui primitives, shared by `apps/web` and `apps/web-tanstack`; no app imports or business logic |
@@ -39,10 +39,10 @@ yarn turbo run test --filter=...@safe-global/utils     # package + dependents
 
 ### Two TypeScript compilers
 
-`type-check` scripts run the native TypeScript 7 compiler, installed at the root as `@typescript/native` because the pinned Yarn can't install it under its real name; workspaces keep `typescript@5.9` because typescript-eslint, ts-jest, ts-node, Next and Cypress need a compiler API that TS 7.0 lacks.
+`type-check` scripts run the native TypeScript 7 compiler, installed at the root as `@typescript/native` because the pinned Yarn can't install it under its real name; workspaces keep `typescript@5.9` because typescript-eslint, ts-jest, ts-node and Next need a compiler API that TS 7.0 lacks.
 
 - `yarn workspace <name> tsc` is 5.9; `yarn workspace <name> type-check` is 7. Use the script.
-- tsconfigs must satisfy both: no `baseUrl`, `moduleResolution: node` or `downlevelIteration`; list `types` explicitly (TS 7 doesn't auto-include `node_modules/@types`). Only `apps/web/cypress/tsconfig.json` keeps `baseUrl` (Cypress bundler).
+- tsconfigs must satisfy both: no `baseUrl`, `moduleResolution: node` or `downlevelIteration`; list `types` explicitly (TS 7 doesn't auto-include `node_modules/@types`).
 - The editor uses 5.9 unless repointed, so a TS 7-only error shows green until `type-check` runs.
 
 ## Code search
@@ -73,7 +73,7 @@ Every behavioral change must include tests — each platform defines its matrix 
 Run the repo's `verify` scripts before committing — they type-check, lint, prettier-check and test changed files:
 
 - **apps/web:** `yarn verify:changed` (scoped), then `yarn verify:web` (full) before committing. `verify:changed` defaults to web and silently skips files outside `apps/<workspace>/`, so other workspaces get a false green.
-- **Other apps:** `node scripts/verify.mjs --changed --workspace=mobile|web-tanstack|tx-builder`.
+- **Other apps:** `node scripts/verify.mjs --changed --workspace=mobile|web-tanstack|tx-builder|drain-safe`.
 - **packages/ and config/:** see [packages/AGENTS.md](packages/AGENTS.md) and [config/AGENTS.md](config/AGENTS.md).
 - **Test scaffolding:** `yarn workspace @safe-global/web test:scaffold <file>`.
 - `SKIP_VERIFY=1` skips verify entirely — only with the user's explicit say-so.

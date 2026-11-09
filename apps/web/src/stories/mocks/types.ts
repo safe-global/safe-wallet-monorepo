@@ -101,6 +101,12 @@ export interface MockStoryConfig {
   layout?: LayoutType
 
   /**
+   * Signs the user in to the gateway
+   * @default true when `features.spaces` is on, else false
+   */
+  authenticated?: boolean
+
+  /**
    * Redux store state overrides
    */
   store?: StoreOverrides
