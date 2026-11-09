@@ -265,16 +265,17 @@ const ExpandableGasFeeRow = ({
   details: ReactNode
   defaultOpen: boolean
 }): ReactElement => (
-  <Collapsible defaultOpen={defaultOpen}>
+  // One gray box for the row and its details: on hover, and while the panel is mounted (open or closing).
+  <Collapsible
+    defaultOpen={defaultOpen}
+    className="-mx-2 rounded-md px-2 transition-colors duration-200 hover:bg-muted has-[[data-slot=collapsible-content]]:bg-muted has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring motion-reduce:transition-none"
+  >
     <CollapsibleTrigger
       aria-label="Gas fee details"
       data-testid="gas-fee-details-toggle"
       nativeButton={false}
       render={<div />}
-      className={cn(
-        css.feeRow,
-        'group/gas-fee -mx-2 cursor-pointer rounded-md px-2 outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring',
-      )}
+      className={cn(css.feeRow, 'group/gas-fee cursor-pointer outline-none')}
     >
       {label}
       <span className="flex items-center gap-2">

@@ -85,7 +85,7 @@ const Editor = ({ fields, canSave, onSave, onCancel, onReset }: GasParamsEditor)
 )
 
 export const GasFeeDetails = ({ rows, readOnlyNote, onEdit, editor }: GasFeeDetailsProps): ReactElement => (
-  <div className="mb-2 flex flex-col gap-3 rounded-md bg-muted p-3" data-testid="gas-fee-details">
+  <div className="flex flex-col gap-3 pt-1 pb-3" data-testid="gas-fee-details">
     {editor ? <Editor {...editor} /> : <DetailRows rows={rows} />}
 
     {!editor && readOnlyNote && (
