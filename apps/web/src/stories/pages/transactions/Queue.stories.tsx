@@ -4,7 +4,7 @@ import { mswLoader } from 'msw-storybook-addon'
 import { userEvent, within } from 'storybook/test'
 import { createMockStory } from '@/stories/mocks'
 import Queue from '@/pages/transactions/queue'
-import { queueFixtures } from '../../../../../../config/test/msw/fixtures'
+import { queueFixtures } from '@safe-global/test/msw/fixtures'
 
 /**
  * Transaction Queue page - displays pending transactions awaiting signatures or execution.
