@@ -7,7 +7,7 @@ All new web E2E tests are written here. A Playwright test is only for behaviour 
 ## Layout
 
 - `tests/e2e/` — journeys: each test acts in the UI and checks the result in CGW and on chain (`src/chain/`). A test that changes an existing Safe seeds it with `seedSafe(journey, …)` from `src/seed/`
-- `tests/{regression,smoke}/` — specs that read the Safes their scenarios prepare, from the `safes` and `credentials` fixtures, never from `SAFES` directly
+- `tests/{regression,smoke}/` — specs that read the Safes their scenarios prepare as `safes.<name>`, and the owners `alice`, `bob`, `carol` and `dave` from the `owners` fixture
 - Every spec is registered in `environment/playwright-specs.mjs` and runs on the isolated stack
 - `src/pages/` — page objects · `src/fixtures/` — fixtures · `src/data/` — test data · `src/api/` — API helpers
 
@@ -15,7 +15,7 @@ All new web E2E tests are written here. A Playwright test is only for behaviour 
 
 `yarn workspace @safe-global/web e2e:env playwright` runs the registered specs against the isolated stack; `SAFE_E2E_SPECS=<file name>` selects some. Setup: [docs/ISOLATED_ENVIRONMENT.md](docs/ISOLATED_ENVIRONMENT.md).
 
-CI: every registered spec runs on the isolated stack on **every PR that changes the wallet, the Transaction Builder, Drain Account, shared packages, dependencies or the workflow** (`web-isolated-e2e-backend.yml`, see below). No CI job runs Playwright against staging. `playwright.config.ts` and the `pw:*` scripts still run the specs against staging locally; they are being removed, so do not write a spec that needs staging.
+CI: every registered spec runs on the isolated stack on **every PR that changes the wallet, the Transaction Builder, Drain Account, shared packages, dependencies or the workflow** (`web-isolated-e2e-backend.yml`, see below). Playwright runs only on the isolated stack.
 
 ## Isolated backend
 

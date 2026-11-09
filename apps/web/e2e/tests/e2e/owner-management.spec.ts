@@ -21,9 +21,9 @@ test.describe('Owner management', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const { owner4 } = journey.owners
+    const { alice } = journey.owners
     const newSigner = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
 
     const owners = new OwnersPage(safePage)
     const review = new TxReviewPage(safePage)
@@ -31,7 +31,7 @@ test.describe('Owner management', { tag: '@e2e' }, () => {
     await owners.addSigner({ newSigner, threshold: 2 })
     await review.signAndExecute()
 
-    const expected = { owners: sorted([owner4.address, newSigner]), threshold: 2 }
+    const expected = { owners: sorted([alice.address, newSigner]), threshold: 2 }
     await expect.poll(() => ownerSetupInCgw(safeApiClient, safe.address)).toEqual(expected)
     const onChain = await readSafeSetup(journey.env, safe.address)
     expect({ owners: sorted(onChain.owners), threshold: onChain.threshold }).toEqual(expected)
@@ -46,24 +46,24 @@ test.describe('Owner management', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const { owner4, owner1 } = journey.owners
+    const { alice, bob } = journey.owners
     const newSigner = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
 
     const owners = new OwnersPage(safePage)
     const review = new TxReviewPage(safePage)
     await owners.goto(safe.prefixedAddress)
-    await owners.replaceSigner({ oldSigner: owner1.address, newSigner })
+    await owners.replaceSigner({ oldSigner: bob.address, newSigner })
     await review.signAndExecute()
 
-    const expected = { owners: sorted([owner4.address, newSigner]), threshold: 1 }
+    const expected = { owners: sorted([alice.address, newSigner]), threshold: 1 }
     await expect.poll(() => ownerSetupInCgw(safeApiClient, safe.address)).toEqual(expected)
     const onChain = await readSafeSetup(journey.env, safe.address)
     expect({ owners: sorted(onChain.owners), threshold: onChain.threshold }).toEqual(expected)
 
     await owners.goto(safe.prefixedAddress)
     await expect(owners.signerList).toContainText(newSigner)
-    await expect(owners.signerList).not.toContainText(owner1.address)
+    await expect(owners.signerList).not.toContainText(bob.address)
     await expect(owners.requiredConfirmations).toHaveText('1 out of 2 signers.')
   })
 
@@ -72,22 +72,22 @@ test.describe('Owner management', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const { owner4, owner1 } = journey.owners
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
+    const { alice, bob } = journey.owners
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
 
     const owners = new OwnersPage(safePage)
     const review = new TxReviewPage(safePage)
     await owners.goto(safe.prefixedAddress)
-    await owners.removeSigner(owner1.address)
+    await owners.removeSigner(bob.address)
     await review.signAndExecute()
 
-    const expected = { owners: [owner4.address], threshold: 1 }
+    const expected = { owners: [alice.address], threshold: 1 }
     await expect.poll(() => ownerSetupInCgw(safeApiClient, safe.address)).toEqual(expected)
     const onChain = await readSafeSetup(journey.env, safe.address)
     expect({ owners: onChain.owners, threshold: onChain.threshold }).toEqual(expected)
 
     await owners.goto(safe.prefixedAddress)
-    await expect(owners.signerList).not.toContainText(owner1.address)
+    await expect(owners.signerList).not.toContainText(bob.address)
     await expect(owners.requiredConfirmations).toHaveText('1 out of 1 signer.')
   })
 })

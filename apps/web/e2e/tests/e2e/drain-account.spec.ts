@@ -15,7 +15,7 @@ test.describe('Drain Account', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const recipient = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
     await seedTokenBalance(safe, { token: SEPOLIA_USDC, amount: USDC_BALANCE })
 
     const drain = new DrainAccountPage(safePage)

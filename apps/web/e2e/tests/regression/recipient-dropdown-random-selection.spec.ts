@@ -12,14 +12,14 @@
  * `/v1/auth/me` (without that mock the session-expiry guard's probe 403s against
  * staging and clears the session — which is exactly why a plain seed fails). The
  * spaces endpoints are mocked to inject a workspace and its contacts; local
- * contacts are seeded via localStorage. The wallet (OWNER_4, owner of the Safe)
+ * contacts are seeded via localStorage. The wallet (Alice, owner of the Safe)
  * is connected so "New transaction" is enabled. No real sign-in, no real
  * workspace required.
  *
  * The per-contact assertion is data-driven: it reads each rendered option's
  * address from the dropdown and verifies the field matches after selection.
  *
- * Run: yarn workspace @safe-global/web pw:test recipient-dropdown-random-selection
+ * Run: SAFE_E2E_SPECS=recipient-dropdown-random-selection yarn workspace @safe-global/web e2e:env playwright
  * Tag: @regression — runs under the chromium project, on demand.
  */
 import { test, expect } from '../../src/fixtures/test.fixture'
@@ -109,18 +109,18 @@ test.describe('Recipient dropdown — selection updates the field', { tag: '@reg
   test('should set the recipient field to the chosen address for every workspace and local contact', async ({
     safePage,
     walletPage,
-    credentials,
+    owners,
     safes,
   }) => {
-    await mockSpacesSession(safePage, safes.SEP_OWNER_4_SAFE)
+    await mockSpacesSession(safePage, safes.transferForm)
 
     const home = new HomePage(safePage)
     const sendTokens = new SendTokensPage(safePage)
 
     // Open the Safe and connect the owner wallet (enables "New transaction").
-    await home.goto(safes.SEP_OWNER_4_SAFE, DROPDOWN_TEST_SPACE.id)
+    await home.goto(safes.transferForm, DROPDOWN_TEST_SPACE.id)
     await walletPage.acceptCookies()
-    await walletPage.connectWallet(credentials.OWNER_4_PRIVATE_KEY)
+    await walletPage.connectWallet(owners.alice.privateKey)
     await expect(walletPage.accountCenter).toBeVisible()
 
     // Open the Send-tokens flow.
