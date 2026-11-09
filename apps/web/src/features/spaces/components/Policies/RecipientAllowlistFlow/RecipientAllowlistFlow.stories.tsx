@@ -34,9 +34,9 @@ const SEPOLIA_LINK = '0x779877A7B0D9E8603169DdbD7836e478b4624789'
 const SEPOLIA_DAI = '0xFF34B3d4Aee8ddCd6F9AFFFB6Fe49bD371b8a357'
 const SEPOLIA_UNI = '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'
 
-const logo = (address: string) => `https://safe-transaction-assets.safe.global/tokens/logos/${address}.png`
+const logo = (address: string) => `mock-assets/safe-transaction-assets.safe.global/tokens/logos/${address}.webp`
 const USDC_LOGO = logo('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
-const USDT_LOGO = 'https://assets.coingecko.com/coins/images/325/large/Tether.png'
+const USDT_LOGO = 'mock-assets/assets.coingecko.com/coins/images/325/large/Tether.webp'
 
 const baseChain = createChainData({ spaces: true })
 const chain: Chain = {

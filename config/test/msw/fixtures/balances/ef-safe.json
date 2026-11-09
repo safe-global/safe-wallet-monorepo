@@ -8,7 +8,7 @@
         "decimals": 18,
         "symbol": "AWETH",
         "name": "Aave v3 WETH",
-        "logoUri": "https://assets.coingecko.com/coins/images/32882/thumb/WETH_%281%29.png?1699716492"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/32882/small/WETH_-1.webp"
       },
       "balance": "21171523664752906383300",
       "fiatBalance": "59526914.512002505",
@@ -22,7 +22,7 @@
         "decimals": 18,
         "symbol": "ETH",
         "name": "Ether",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png"
+        "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.webp"
       },
       "balance": "1600001300200000000000",
       "fiatBalance": "4505443.66123318",
@@ -36,7 +36,7 @@
         "decimals": 18,
         "symbol": "STEAKUSDC",
         "name": "Steakhouse USDC Morpho Vault",
-        "logoUri": "https://assets.coingecko.com/coins/images/51473/thumb/steakUSDC.png?1731396462"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/51473/small/steakUSDC.webp"
       },
       "balance": "3622286536796612324709701",
       "fiatBalance": "4056960.9212122057",
@@ -50,7 +50,7 @@
         "decimals": 18,
         "symbol": "STEAKETH",
         "name": "Steakhouse ETH Morpho Vault",
-        "logoUri": "https://assets.coingecko.com/coins/images/51382/thumb/ethereum.png?1730966831"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/51382/small/ethereum.webp"
       },
       "balance": "1161015746321368633438",
       "fiatBalance": "3396458.6846034587",
@@ -64,7 +64,7 @@
         "decimals": 18,
         "symbol": "GTUSDC",
         "name": "Gauntlet USDC Prime Morpho Vault",
-        "logoUri": "https://assets.coingecko.com/coins/images/51338/thumb/usdc.png?1730814917"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/51338/small/usdc.webp"
       },
       "balance": "1827547347035399503771275",
       "fiatBalance": "2028577.5552092937",
@@ -78,7 +78,7 @@
         "decimals": 6,
         "symbol": "USDC",
         "name": "USDC",
-        "logoUri": "https://assets.coingecko.com/coins/images/6319/thumb/USDC.png?1769615602"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/6319/small/USDC.webp"
       },
       "balance": "8547989985",
       "fiatBalance": "8545.468327954424",
@@ -92,7 +92,7 @@
         "decimals": 18,
         "symbol": "GHO",
         "name": "GHO",
-        "logoUri": "https://assets.coingecko.com/coins/images/30663/thumb/gho-token-logo.png?1720517092"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/30663/small/gho-token-logo.webp"
       },
       "balance": "5947530000000000000000",
       "fiatBalance": "5940.398911530001",
@@ -106,7 +106,7 @@
         "decimals": 18,
         "symbol": "Z",
         "name": "zkCLOB",
-        "logoUri": "https://assets.coingecko.com/coins/images/70652/thumb/200b.png?1762974567"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/70652/small/200b.webp"
       },
       "balance": "69420000000000000000000",
       "fiatBalance": "988.408902",
@@ -120,7 +120,7 @@
         "decimals": 9,
         "symbol": "PALM",
         "name": "PaLM AI",
-        "logoUri": "https://assets.coingecko.com/coins/images/33097/thumb/PALM_NEW_LOGO.png?1735243643"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/33097/small/PALM_NEW_LOGO.webp"
       },
       "balance": "10000000000000",
       "fiatBalance": "427.1134",
@@ -134,7 +134,7 @@
         "decimals": 18,
         "symbol": "BOLD",
         "name": "Legacy BOLD",
-        "logoUri": "https://assets.coingecko.com/coins/images/53755/thumb/BOLD_logo.png?1737183873"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/53755/small/BOLD_logo.webp"
       },
       "balance": "283272952934176521528",
       "fiatBalance": "283.18598813762577",
@@ -148,7 +148,7 @@
         "decimals": 18,
         "symbol": "SDOLA",
         "name": "sDOLA",
-        "logoUri": "https://assets.coingecko.com/coins/images/35495/thumb/sDOLAlogoFINAL.png?1708922289"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/35495/small/sDOLAlogoFINAL.webp"
       },
       "balance": "99396274771150154037",
       "fiatBalance": "117.2876042299572",
@@ -162,7 +162,7 @@
         "decimals": 18,
         "symbol": "DBR",
         "name": "DOLA Borrowing Right",
-        "logoUri": "https://assets.coingecko.com/coins/images/28530/thumb/DBR.png?1696527523"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/28530/small/DBR.webp"
       },
       "balance": "800000000000000000000",
       "fiatBalance": "41.0984",
@@ -176,7 +176,7 @@
         "decimals": 18,
         "symbol": "JESUS",
         "name": "Jesus Coin",
-        "logoUri": "https://assets.coingecko.com/coins/images/30036/thumb/JESUS_COIN_LOGO.png?1696528959"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/30036/small/JESUS_COIN_LOGO.webp"
       },
       "balance": "777000000000000000000000000",
       "fiatBalance": "15.511251000000001",
@@ -190,7 +190,7 @@
         "decimals": 18,
         "symbol": "TRIANGLE",
         "name": "dancing triangle",
-        "logoUri": "https://assets.coingecko.com/coins/images/50941/thumb/pfp-animated_copy.png?1729584483"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/50941/small/pfp-animated_copy.webp"
       },
       "balance": "420420696969000000000000",
       "fiatBalance": "14.819829568157251",
@@ -204,7 +204,7 @@
         "decimals": 18,
         "symbol": "APU",
         "name": "Apu Apustaja",
-        "logoUri": "https://assets.coingecko.com/coins/images/35986/thumb/200x200.png?1710308147"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/35986/small/200x200.webp"
       },
       "balance": "31000000000000000000000",
       "fiatBalance": "1.35129",
@@ -218,7 +218,7 @@
         "decimals": 9,
         "symbol": "HONK",
         "name": "Pepoclown",
-        "logoUri": "https://assets.coingecko.com/coins/images/38498/thumb/Pepoclown.png?1717709240"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/38498/small/Pepoclown.webp"
       },
       "balance": "696969420000000000",
       "fiatBalance": "0.46708520832372",
@@ -232,7 +232,7 @@
         "decimals": 18,
         "symbol": "DECT",
         "name": "DEC Token",
-        "logoUri": "https://assets.coingecko.com/coins/images/54986/thumb/dectoken_dect_logo_200_200.png?1743058530"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/54986/small/dectoken_dect_logo_200_200.webp"
       },
       "balance": "1071000000000000000000",
       "fiatBalance": "0.30226833",
@@ -246,7 +246,7 @@
         "decimals": 18,
         "symbol": "LNQ",
         "name": "LinqAI",
-        "logoUri": "https://assets.coingecko.com/coins/images/35645/thumb/cmc-cg-linq-logo_%282%29.png?1709368877"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/35645/small/cmc-cg-linq-logo_-2.webp"
       },
       "balance": "69000000000000000000",
       "fiatBalance": "0.24078654",
@@ -260,7 +260,7 @@
         "decimals": 18,
         "symbol": "CULT",
         "name": "Milady Cult Coin",
-        "logoUri": "https://assets.coingecko.com/coins/images/52583/thumb/cult.jpg?1733712273"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/52583/small/cult.webp"
       },
       "balance": "877739477067827364130",
       "fiatBalance": "0.2331100503196736",
@@ -274,7 +274,7 @@
         "decimals": 18,
         "symbol": "PCHS",
         "name": "Peaches.Finance",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xa4C6984E817c086Ddc3EBAEedBdcc01469586918.png"
+        "logoUri": ""
       },
       "balance": "102852453000000000000",
       "fiatBalance": "0.19415766110168997",
@@ -288,7 +288,7 @@
         "decimals": 18,
         "symbol": "XEN",
         "name": "XEN Crypto",
-        "logoUri": "https://assets.coingecko.com/coins/images/27713/thumb/Xen.jpeg?1696526739"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/27713/small/Xen.webp"
       },
       "balance": "1000000000000000000000000",
       "fiatBalance": "0.007105",
@@ -302,7 +302,7 @@
         "decimals": 18,
         "symbol": "DAI",
         "name": "Dai",
-        "logoUri": "https://assets.coingecko.com/coins/images/9956/thumb/Badge_Dai.png?1696509996"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/9956/small/Badge_Dai.webp"
       },
       "balance": "511458671904",
       "fiatBalance": "0.00000051122698112563",
@@ -316,7 +316,7 @@
         "decimals": 18,
         "symbol": "ONE",
         "name": "1",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x2c969d681003b1B2E85bBDFd505B63E699F226fD.png"
+        "logoUri": ""
       },
       "balance": "1000000000000000000000000",
       "fiatBalance": "0",
@@ -330,7 +330,7 @@
         "decimals": 18,
         "symbol": "variableDebtEthLidoGHO",
         "name": "Aave Ethereum Lido Variable Debt GHO",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x18577F0f4A0B2Ee6F4048dB51c7acd8699F97DB8.png"
+        "logoUri": ""
       },
       "balance": "2066948010904963745127050",
       "fiatBalance": "0",
@@ -344,7 +344,7 @@
         "decimals": 18,
         "symbol": "aEthLidoWETH",
         "name": "Aave Ethereum Lido WETH",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xfA1fDbBD71B0aA16162D76914d69cD8CB3Ef92da.png"
+        "logoUri": ""
       },
       "balance": "10195519708019469120532",
       "fiatBalance": "0",
@@ -358,7 +358,7 @@
         "decimals": 18,
         "symbol": "aEthUSDS",
         "name": "Aave Ethereum USDS",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x32a6268f9Ba3642Dda7892aDd74f1D34469A4259.png"
+        "logoUri": ""
       },
       "balance": "2039417959106534975939910",
       "fiatBalance": "0",
@@ -372,7 +372,7 @@
         "decimals": 9,
         "symbol": "MIYAGUCHI",
         "name": "Aya Miyaguchi",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x24E161B9B028156aEEaA0852833FA10eDd774EbE.png"
+        "logoUri": ""
       },
       "balance": "210345000000000000000",
       "fiatBalance": "0",
@@ -386,7 +386,7 @@
         "decimals": 18,
         "symbol": "Ayabuu",
         "name": "Aya Miyaguchi's Dog",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x83D8BA42B7F47FaBBb689cDB68800DF87Abf4eD0.png"
+        "logoUri": ""
       },
       "balance": "50000000000000000000000000",
       "fiatBalance": "0",
@@ -400,7 +400,7 @@
         "decimals": 18,
         "symbol": "cWETHv3",
         "name": "Compound WETH",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA17581A9E3356d9A858b789D68B4d866e593aE94.png"
+        "logoUri": ""
       },
       "balance": "4286511607273938899845",
       "fiatBalance": "0",
@@ -414,7 +414,7 @@
         "decimals": 18,
         "symbol": "gtWETH",
         "name": "Gauntlet WETH Prime",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x2371e134e3455e0593363cBF89d3b6cf53740618.png"
+        "logoUri": ""
       },
       "balance": "1159497758489350757924",
       "fiatBalance": "0",
@@ -428,7 +428,7 @@
         "decimals": 18,
         "symbol": "GEL",
         "name": "Geltonas",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xCCBb7110D5a6DCFf236c293c78F9f47b078f20DD.png"
+        "logoUri": ""
       },
       "balance": "30072015000000000000",
       "fiatBalance": "0",
@@ -442,7 +442,7 @@
         "decimals": 9,
         "symbol": "HELLO",
         "name": "hello world computer",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xE1ffdc4437992373809Fd7479F4B058E83A600a0.png"
+        "logoUri": ""
       },
       "balance": "10000000000",
       "fiatBalance": "0",
@@ -456,7 +456,7 @@
         "decimals": 18,
         "symbol": "KUNI",
         "name": "KUNI",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x01d27c7278017221e72C369128d289Caa82b4eCc.png"
+        "logoUri": ""
       },
       "balance": "10000000000000000000000000",
       "fiatBalance": "0",
@@ -470,7 +470,7 @@
         "decimals": 9,
         "symbol": "GROOT",
         "name": "Project Groot",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xE5e63d22D23aB678CbD11dA11cFBfE1Ad3163584.png"
+        "logoUri": ""
       },
       "balance": "69000000000",
       "fiatBalance": "0",
@@ -484,7 +484,7 @@
         "decimals": 9,
         "symbol": "SF",
         "name": "Second Foundation",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEA024703eA43cFa1A01838F8fDBC41919d62360C.png"
+        "logoUri": ""
       },
       "balance": "18000000000000000",
       "fiatBalance": "0",
@@ -498,7 +498,7 @@
         "decimals": 18,
         "symbol": "spWETH",
         "name": "Spark WETH",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x59cD1C87501baa753d0B5B5Ab5D8416A45cD71DB.png"
+        "logoUri": ""
       },
       "balance": "10171248963604167830847",
       "fiatBalance": "0",
@@ -512,7 +512,7 @@
         "decimals": 18,
         "symbol": "SINV",
         "name": "Staked INV",
-        "logoUri": "https://assets.coingecko.com/coins/images/53505/thumb/sINVx512.png?1736535779"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/53505/small/sINVx512.webp"
       },
       "balance": "2000000000000000000",
       "fiatBalance": "0",
@@ -526,7 +526,7 @@
         "decimals": 18,
         "symbol": "stSPK",
         "name": "Staked Spark",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xc6132FAF04627c8d05d6E759FAbB331Ef2D8F8fD.png"
+        "logoUri": ""
       },
       "balance": "372886544746895256000000",
       "fiatBalance": "0",
@@ -540,7 +540,7 @@
         "decimals": 9,
         "symbol": "ETHFNDN",
         "name": "The Ethereum Foundation",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x1F316e894307285B2C503c677B75FB0B19560Df2.png"
+        "logoUri": ""
       },
       "balance": "500000000000000000",
       "fiatBalance": "0",
@@ -554,7 +554,7 @@
         "decimals": 18,
         "symbol": "Visit website nanoether .org to claim rewards",
         "name": "Visit website nanoether .org to claim rewards",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xbeDa74fa9b87bbCe9BBcf870cBA3E3f7F877573B.png"
+        "logoUri": ""
       },
       "balance": "2700000000000000000",
       "fiatBalance": "0",
@@ -568,7 +568,7 @@
         "decimals": 6,
         "symbol": "Visit website yield-usd .com to claim rewards",
         "name": "Visit website yield-usd .com to claim rewards",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xcCD1A357916fE128319c01F90fAFda89418ffd0C.png"
+        "logoUri": ""
       },
       "balance": "3876230000",
       "fiatBalance": "0",

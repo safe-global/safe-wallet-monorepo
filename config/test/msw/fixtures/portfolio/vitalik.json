@@ -9,7 +9,7 @@
         "decimals": 18,
         "symbol": "ETH",
         "name": "Ethereum",
-        "logoUri": "https://cdn.zerion.io/eth.png",
+        "logoUri": "mock-assets/cdn.zerion.io/eth.webp",
         "chainId": "1",
         "trusted": true,
         "type": "NATIVE_TOKEN"
@@ -25,7 +25,7 @@
         "decimals": 8,
         "symbol": "0xBTC",
         "name": "0xBitcoin Token",
-        "logoUri": "https://cdn.zerion.io/0xb6ed7644c69416d67b522e20bc294a9a9b405b31.png",
+        "logoUri": "mock-assets/cdn.zerion.io/0xb6ed7644c69416d67b522e20bc294a9a9b405b31.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -41,7 +41,7 @@
         "decimals": 18,
         "symbol": "WOJAK",
         "name": "Wojak Coin",
-        "logoUri": "https://cdn.zerion.io/0x5026f006b85729a8b14553fae6af249ad16c9aab.png",
+        "logoUri": "mock-assets/cdn.zerion.io/0x5026f006b85729a8b14553fae6af249ad16c9aab.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -57,7 +57,7 @@
         "decimals": 18,
         "symbol": "BNB",
         "name": "BNB",
-        "logoUri": "https://cdn.zerion.io/0xb8c77482e45f1f44de1745f52c74426c631bdd52.png",
+        "logoUri": "mock-assets/cdn.zerion.io/0xb8c77482e45f1f44de1745f52c74426c631bdd52.webp",
         "chainId": "56",
         "trusted": true,
         "type": "NATIVE_TOKEN"
@@ -72,7 +72,7 @@
     {
       "appInfo": {
         "name": "Eth2",
-        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/eth2.jpg",
+        "logoUrl": "data:image/webp;base64,UklGRuACAABXRUJQVlA4INQCAADwDwCdASpAAEAAPm0wk0akIyGhLBVbMIANiWwAyijcOy/hHjHyodhs4DbAeYDzgPQ/6B39V6kD0APLc9lT9uf2I9qqKbGAdjWZesh7lXzjIJXDUkG6/goSm/kllZfJM78PKWcmfvG0957y+Sp/7J99qjCYXEBf+nfFRh1U4UwiXM+yYLLsC4aAAP7+FKhZ142mD4KlANhzNMiGi1at/5/Yu3JZ8A9FoVLMHKHMr2Pf8++ubDJ8jcBhgMTkgeERGDfSq4FnFmA0cWof9EkJDkFLQUhh3dZ6of2+O0qUXDeotm4e0qk633jFDTNxtP4mEwGmbl/ynHY6r4v7aluVhj6fdVdjmW9r+GFU/UbOiaJD6Bmr8+LWLxID52aIogumDMwENhnmSGsxhm372GSbY43ICKxxqPo6JXX/wnVD8zyGU8LJy+hmAn08Ql3IwzhDpURqqRrxY0ywRzKI6P/a3li8mm3NKBf8rugcGzYHTaqz2dHd6IxQgGR8Gfxj3sbVM44mImH3Ovn5ZvYZLa1Lr02Eiri/AY5zbe6AzeEA4uXUdi7ZzaxtDXzBvSmKkfSpkOS0E12saHcZm5l/ZW389rrUinN+8mZV3K9hw+da8pjjuPH1efNnoP67QGhBBKQ6aVELaPiTaqMvZvxJlzkpUu//eNwNFARD4kHG+FfDytpd1cE1U/LOe1e1jPn/0p1ILFza/f7o90Irq1hnY9mCTfHMjiDLwmDjXQj43UVRyyblZ4SmveNxltDKnkgLfqolz2oWvuophQouwPcxNo+LIuBbf6cWL+SWsb4pimdwt1tTesrP2Je3fs3lf6jtSQOJVmk7UEgsJF2ypys193NKcF8HWeYPF0xrnfAOZvaen7Gs8F3t1r01cbK+awJo1SAGVRCnsBl8J4SivtCairapZHzI7MOlgsfgXgO8swl8wQ4vW0Me6t2jNjjTwT6Zh73uK+oIjUAA",
         "url": "https://launchpad.ethereum.org"
       },
       "balanceFiat": "19642390.298695732",
@@ -90,7 +90,7 @@
                 "decimals": 18,
                 "symbol": "ETH",
                 "name": "Ethereum",
-                "logoUri": "https://cdn.zerion.io/eth.png",
+                "logoUri": "mock-assets/cdn.zerion.io/eth.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "NATIVE_TOKEN"

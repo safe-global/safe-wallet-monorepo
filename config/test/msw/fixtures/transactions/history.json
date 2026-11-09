@@ -162,7 +162,7 @@
             "value": "1000000000000000000000",
             "tokenName": "QATRUSTED",
             "tokenSymbol": "QTRUST",
-            "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x7CB180dE9BE0d8935EbAAc9b4fc533952Df128Ae.png",
+            "logoUri": "",
             "decimals": 18,
             "trusted": true,
             "imitation": false
@@ -248,7 +248,7 @@
             "value": "5000000000000000000",
             "tokenName": "test-token-type-one",
             "tokenSymbol": "TTONE",
-            "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x4463F6662be2fdb319Dc3C491A004DEAe39Dc70a.png",
+            "logoUri": "",
             "decimals": 18,
             "trusted": false,
             "imitation": false
@@ -287,7 +287,7 @@
             "value": "19000000000000000000",
             "tokenName": "test-token-type-one",
             "tokenSymbol": "TTONE",
-            "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x4463F6662be2fdb319Dc3C491A004DEAe39Dc70a.png",
+            "logoUri": "",
             "decimals": 18,
             "trusted": false,
             "imitation": false
@@ -326,7 +326,7 @@
             "value": "12000000000000000000",
             "tokenName": "test-token-type-one",
             "tokenSymbol": "TTONE",
-            "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x4463F6662be2fdb319Dc3C491A004DEAe39Dc70a.png",
+            "logoUri": "",
             "decimals": 18,
             "trusted": false,
             "imitation": false
@@ -365,7 +365,7 @@
             "value": "10000000000000000000",
             "tokenName": "test-token-type-one",
             "tokenSymbol": "TTONE",
-            "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x4463F6662be2fdb319Dc3C491A004DEAe39Dc70a.png",
+            "logoUri": "",
             "decimals": 18,
             "trusted": false,
             "imitation": false
@@ -454,7 +454,7 @@
           "to": {
             "value": "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
             "name": "Safe: MultiSendCallOnly 1.3.0",
-            "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.png"
+            "logoUri": "mock-assets/safe-transaction-assets.safe.global/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.webp"
           },
           "dataSize": "260",
           "value": "0",
@@ -539,7 +539,7 @@
             "module": {
               "value": "0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134",
               "name": "AllowanceModule",
-              "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134.png"
+              "logoUri": "mock-assets/safe-transaction-assets.safe.global/contracts/logos/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134.webp"
             }
           }
         },
@@ -798,7 +798,7 @@
           "to": {
             "value": "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
             "name": "Safe: MultiSendCallOnly 1.3.0",
-            "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.png"
+            "logoUri": "mock-assets/safe-transaction-assets.safe.global/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.webp"
           },
           "dataSize": "452",
           "value": "0",
@@ -881,7 +881,7 @@
           "to": {
             "value": "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
             "name": "Safe: MultiSendCallOnly 1.3.0",
-            "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.png"
+            "logoUri": "mock-assets/safe-transaction-assets.safe.global/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.webp"
           },
           "dataSize": "260",
           "value": "0",
@@ -946,7 +946,7 @@
           "to": {
             "value": "0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134",
             "name": "AllowanceModule",
-            "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134.png"
+            "logoUri": "mock-assets/safe-transaction-assets.safe.global/contracts/logos/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134.webp"
           },
           "dataSize": "68",
           "value": "0",

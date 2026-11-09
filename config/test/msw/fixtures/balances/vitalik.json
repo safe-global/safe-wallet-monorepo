@@ -8,7 +8,7 @@
         "decimals": 18,
         "symbol": "ETH",
         "name": "Ether",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png"
+        "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.webp"
       },
       "balance": "240484484080109475211588",
       "fiatBalance": "677180258.7211803",
@@ -22,7 +22,7 @@
         "decimals": 18,
         "symbol": "CITTY",
         "name": "Citty Meme Coin",
-        "logoUri": "https://assets.coingecko.com/coins/images/36878/thumb/200x200.jpg?1712646838"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/36878/small/200x200.webp"
       },
       "balance": "15000000000000000000000000",
       "fiatBalance": "49850.85",
@@ -36,7 +36,7 @@
         "decimals": 8,
         "symbol": "0XBTC",
         "name": "0xBitcoin",
-        "logoUri": "https://assets.coingecko.com/coins/images/4454/thumb/0xbtc.png?1696505045"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/4454/small/0xbtc.webp"
       },
       "balance": "21005000000000",
       "fiatBalance": "9036.540045",
@@ -50,7 +50,7 @@
         "decimals": 18,
         "symbol": "WOJAK",
         "name": "Wojak",
-        "logoUri": "https://assets.coingecko.com/coins/images/29856/thumb/wojak.png?1696528782"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/29856/small/wojak.webp"
       },
       "balance": "21691200342733476739540640",
       "fiatBalance": "2258.704691688837",
@@ -64,7 +64,7 @@
         "decimals": 9,
         "symbol": "CBDC",
         "name": "CBDC",
-        "logoUri": "https://assets.coingecko.com/coins/images/31665/thumb/MThOhXH1_400x400.jpg?1696530482"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/31665/small/MThOhXH1_400x400.webp"
       },
       "balance": "10000000000000000",
       "fiatBalance": "208.2",
@@ -78,7 +78,7 @@
         "decimals": 9,
         "symbol": "BLAST",
         "name": "SafeBlast",
-        "logoUri": "https://assets.coingecko.com/coins/images/15686/thumb/safeblast.png?1696515315"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/15686/small/safeblast.webp"
       },
       "balance": "25000000000000000000",
       "fiatBalance": "123.25",
@@ -92,7 +92,7 @@
         "decimals": 18,
         "symbol": "JET",
         "name": "Jetcoin",
-        "logoUri": "https://assets.coingecko.com/coins/images/2487/thumb/jetcoin.png?1696503306"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/2487/small/jetcoin.webp"
       },
       "balance": "100000000000000000000000",
       "fiatBalance": "99.507",
@@ -106,7 +106,7 @@
         "decimals": 6,
         "symbol": "INNBC",
         "name": "InnovativeBioresearchCoin",
-        "logoUri": "https://assets.coingecko.com/coins/images/4043/thumb/INNBC.png?1696504678"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/4043/small/INNBC.webp"
       },
       "balance": "10000000000000000",
       "fiatBalance": "95.97",
@@ -120,7 +120,7 @@
         "decimals": 18,
         "symbol": "MEMERICA",
         "name": "United States of Memerica",
-        "logoUri": "https://assets.coingecko.com/coins/images/69444/thumb/20250920_033749_0000.png?1758616281"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/69444/small/20250920_033749_0000.webp"
       },
       "balance": "965150030000000000000000000",
       "fiatBalance": "26.55417277539",
@@ -134,7 +134,7 @@
         "decimals": 18,
         "symbol": "AMERICA",
         "name": "America Party",
-        "logoUri": "https://assets.coingecko.com/coins/images/67195/thumb/1000280651.jpg?1752055373"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/67195/small/1000280651.webp"
       },
       "balance": "200000000000000000000000000",
       "fiatBalance": "18.4774",
@@ -148,7 +148,7 @@
         "decimals": 18,
         "symbol": "PIKA",
         "name": "Pikaboss",
-        "logoUri": "https://assets.coingecko.com/coins/images/32061/thumb/logocg.png?1696530858"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/32061/small/logocg.webp"
       },
       "balance": "420000000000000000000000000",
       "fiatBalance": "10.87128",
@@ -162,7 +162,7 @@
         "decimals": 18,
         "symbol": "XRGB",
         "name": "XRGB",
-        "logoUri": "https://assets.coingecko.com/coins/images/35447/thumb/log2.png?1708620430"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/35447/small/log2.webp"
       },
       "balance": "453402454125141728670",
       "fiatBalance": "6.8954533389241455",
@@ -176,7 +176,7 @@
         "decimals": 18,
         "symbol": "T6900",
         "name": "Token6900",
-        "logoUri": "https://assets.coingecko.com/coins/images/68913/thumb/Token6900_Logo_200x200.png?1756971732"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/68913/small/Token6900_Logo_200x200.webp"
       },
       "balance": "7246000000000000000000",
       "fiatBalance": "5.82426234",
@@ -190,7 +190,7 @@
         "decimals": 18,
         "symbol": "MOPS",
         "name": "Mops",
-        "logoUri": "https://assets.coingecko.com/coins/images/26900/thumb/mops.png?1696525958"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/26900/small/mops.webp"
       },
       "balance": "80000000000000000000000000",
       "fiatBalance": "4.500640000000001",
@@ -204,7 +204,7 @@
         "decimals": 18,
         "symbol": "ZEON",
         "name": "ZEON Network",
-        "logoUri": "https://assets.coingecko.com/coins/images/4247/thumb/XZqXYc2j_400x400.jpg?1696504861"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/4247/small/XZqXYc2j_400x400.webp"
       },
       "balance": "10000000000000000000000",
       "fiatBalance": "3.1176",
@@ -218,7 +218,7 @@
         "decimals": 6,
         "symbol": "USDT",
         "name": "Tether",
-        "logoUri": "https://assets.coingecko.com/coins/images/325/thumb/Tether.png?1696501661"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/325/small/Tether.webp"
       },
       "balance": "2079682",
       "fiatBalance": "2.076163178056",
@@ -232,7 +232,7 @@
         "decimals": 18,
         "symbol": "EDOGE",
         "name": "EtherDoge",
-        "logoUri": "https://assets.coingecko.com/coins/images/1013/thumb/etherdoge.png?1696502125"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/1013/small/etherdoge.webp"
       },
       "balance": "420690000000069000000000000000000",
       "fiatBalance": "1.8947877600003105",
@@ -246,7 +246,7 @@
         "decimals": 18,
         "symbol": "SHIDO",
         "name": "Shido Network",
-        "logoUri": "https://assets.coingecko.com/coins/images/32070/thumb/SHIDO.png?1696530867"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/32070/small/SHIDO.webp"
       },
       "balance": "5500000000000000000000",
       "fiatBalance": "1.39084",
@@ -260,7 +260,7 @@
         "decimals": 9,
         "symbol": "KLEE",
         "name": "KleeKai",
-        "logoUri": "https://assets.coingecko.com/coins/images/15548/thumb/Klee-Kai-Logo.png?1696515189"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/15548/small/Klee-Kai-Logo.webp"
       },
       "balance": "3698664341581886439315",
       "fiatBalance": "1.3329912313774288",
@@ -274,7 +274,7 @@
         "decimals": 18,
         "symbol": "THE",
         "name": "The Protocol",
-        "logoUri": "https://assets.coingecko.com/coins/images/27849/thumb/cSar5sDM_400x400.jpg?1696526868"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/27849/small/cSar5sDM_400x400.webp"
       },
       "balance": "10473228735850831000000",
       "fiatBalance": "0.9227961839158167",
@@ -288,7 +288,7 @@
         "decimals": 18,
         "symbol": "JOK",
         "name": "JokInTheBox",
-        "logoUri": "https://assets.coingecko.com/coins/images/37363/thumb/Logo_JOK_200_X_200.png?1730414580"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/37363/small/Logo_JOK_200_X_200.webp"
       },
       "balance": "1293483000000000000000000",
       "fiatBalance": "0.418775469114",
@@ -302,7 +302,7 @@
         "decimals": 18,
         "symbol": "CANA",
         "name": "CANA Holdings California Carbon Credits",
-        "logoUri": "https://assets.coingecko.com/coins/images/68403/thumb/CANA200x200Transparent.png?1755651936"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/68403/small/CANA200x200Transparent.webp"
       },
       "balance": "10000000000000000",
       "fiatBalance": "0.3069",
@@ -316,7 +316,7 @@
         "decimals": 18,
         "symbol": "DECT",
         "name": "DEC Token",
-        "logoUri": "https://assets.coingecko.com/coins/images/54986/thumb/dectoken_dect_logo_200_200.png?1743058530"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/54986/small/dectoken_dect_logo_200_200.webp"
       },
       "balance": "1071000000000000000000",
       "fiatBalance": "0.30226833",
@@ -330,7 +330,7 @@
         "decimals": 9,
         "symbol": "PEEZY",
         "name": "Peezy",
-        "logoUri": "https://assets.coingecko.com/coins/images/52757/thumb/peezyCircle_200px.png?1748542466"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/52757/small/peezyCircle_200px.webp"
       },
       "balance": "696969000000000",
       "fiatBalance": "0.29607800695200004",
@@ -344,7 +344,7 @@
         "decimals": 0,
         "symbol": "DCN",
         "name": "Dentacoin",
-        "logoUri": "https://assets.coingecko.com/coins/images/850/thumb/dentacoin.png?1696501986"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/850/small/dentacoin.webp"
       },
       "balance": "310194",
       "fiatBalance": "0.195179958486",
@@ -358,7 +358,7 @@
         "decimals": 18,
         "symbol": "METADOGE",
         "name": "Meta Doge",
-        "logoUri": "https://assets.coingecko.com/coins/images/19656/thumb/metadoge.png?1696519084"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/19656/small/metadoge.webp"
       },
       "balance": "20000000000000000000000000000",
       "fiatBalance": "0.18478",
@@ -372,7 +372,7 @@
         "decimals": 18,
         "symbol": "BEND",
         "name": "BendDAO",
-        "logoUri": "https://assets.coingecko.com/coins/images/22829/thumb/benddao.PNG?1696522130"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/22829/small/benddao.webp"
       },
       "balance": "1570000000000000000000",
       "fiatBalance": "0.1559952",
@@ -386,7 +386,7 @@
         "decimals": 9,
         "symbol": "TSUKA",
         "name": "Dejitaru Tsuka",
-        "logoUri": "https://assets.coingecko.com/coins/images/26405/thumb/Dejitaru_Tsuka_Logo.jpg?1696525481"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/26405/small/Dejitaru_Tsuka_Logo.webp"
       },
       "balance": "112000000000",
       "fiatBalance": "0.14602336",
@@ -400,7 +400,7 @@
         "decimals": 18,
         "symbol": "SHANG",
         "name": "Shanghai Inu",
-        "logoUri": "https://assets.coingecko.com/coins/images/29881/thumb/IMG_20230418_174523_393-removebg-preview.png?1696528806"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/29881/small/IMG_20230418_174523_393-removebg-preview.webp"
       },
       "balance": "1000000000000000000000000000",
       "fiatBalance": "0.083095",
@@ -414,7 +414,7 @@
         "decimals": 18,
         "symbol": "MM",
         "name": "MMToken",
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xa283aA7CfBB27EF0cfBcb2493dD9F4330E0fd304.png"
+        "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/tokens/logos/0xa283aA7CfBB27EF0cfBcb2493dD9F4330E0fd304.webp"
       },
       "balance": "2000000000000000000",
       "fiatBalance": "0.08276268",
@@ -428,7 +428,7 @@
         "decimals": 9,
         "symbol": "Q*",
         "name": "QSTAR",
-        "logoUri": "https://assets.coingecko.com/coins/images/33177/thumb/Icon.Color1.jpg?1732134044"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/33177/small/Icon.Color1.webp"
       },
       "balance": "900000000000",
       "fiatBalance": "0.050112",
@@ -442,7 +442,7 @@
         "decimals": 18,
         "symbol": "INUS",
         "name": "MultiPlanetary Inus",
-        "logoUri": "https://assets.coingecko.com/coins/images/22648/thumb/logo.png?1696521961"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/22648/small/logo.webp"
       },
       "balance": "100000000000000000000000000",
       "fiatBalance": "0.0362427",
@@ -456,7 +456,7 @@
         "decimals": 18,
         "symbol": "SHEESHA",
         "name": "Sheesha Finance (ERC20)",
-        "logoUri": "https://assets.coingecko.com/coins/images/23053/thumb/MLBmh4z0.png?1696522345"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/23053/small/MLBmh4z0.webp"
       },
       "balance": "10000000000000000",
       "fiatBalance": "0.0254",
@@ -470,7 +470,7 @@
         "decimals": 18,
         "symbol": "BRD",
         "name": "Bread",
-        "logoUri": "https://assets.coingecko.com/coins/images/1440/thumb/bread.png?1696502490"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/1440/small/bread.webp"
       },
       "balance": "1000000000000000000",
       "fiatBalance": "0.00985883",
@@ -484,7 +484,7 @@
         "decimals": 18,
         "symbol": "WUKONG",
         "name": "Wukong Musk",
-        "logoUri": "https://assets.coingecko.com/coins/images/40129/thumb/WUKONG.jpg?1725942422"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/40129/small/WUKONG.webp"
       },
       "balance": "1234000000000000000000",
       "fiatBalance": "0.00281352",
@@ -498,7 +498,7 @@
         "decimals": 18,
         "symbol": "GROYPER",
         "name": "Groyper",
-        "logoUri": "https://assets.coingecko.com/coins/images/38196/thumb/Groyper_Logo_New_200x200.png?1728269629"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/38196/small/Groyper_Logo_New_200x200.webp"
       },
       "balance": "718152516518000000",
       "fiatBalance": "0.0018819833032619054",
@@ -512,7 +512,7 @@
         "decimals": 18,
         "symbol": "TURBO",
         "name": "Turbo",
-        "logoUri": "https://assets.coingecko.com/coins/images/30117/thumb/TurboMark-QL_200.png?1708079597"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/30117/small/TurboMark-QL_200.webp"
       },
       "balance": "1000000000000000000",
       "fiatBalance": "0.0014094",
@@ -526,7 +526,7 @@
         "decimals": 18,
         "symbol": "HSF",
         "name": "Hillstone Finance",
-        "logoUri": "https://assets.coingecko.com/coins/images/22335/thumb/logo_-_2022-01-07T094430.368.png?1696521679"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/22335/small/logo_-_2022-01-07T094430.368.webp"
       },
       "balance": "1000000000000000000",
       "fiatBalance": "0.0006996",
@@ -540,7 +540,7 @@
         "decimals": 18,
         "symbol": "WETH",
         "name": "WETH",
-        "logoUri": "https://assets.coingecko.com/coins/images/2518/thumb/weth.png?1696503332"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/2518/small/weth.webp"
       },
       "balance": "200000000000",
       "fiatBalance": "0.000561926",
@@ -554,7 +554,7 @@
         "decimals": 18,
         "symbol": "GEN",
         "name": "Genesis",
-        "logoUri": "https://assets.coingecko.com/coins/images/39147/thumb/ZX.jpg?1720767239"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/39147/small/ZX.webp"
       },
       "balance": "10000000000000000000",
       "fiatBalance": "0.0001806",
@@ -568,7 +568,7 @@
         "decimals": 18,
         "symbol": "APU",
         "name": "Apu Apustaja",
-        "logoUri": "https://assets.coingecko.com/coins/images/35986/thumb/200x200.png?1710308147"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/35986/small/200x200.webp"
       },
       "balance": "1000000000000000000",
       "fiatBalance": "0.00004359",
@@ -582,7 +582,7 @@
         "decimals": 9,
         "symbol": "HOSHI",
         "name": "Dejitaru Hoshi",
-        "logoUri": "https://assets.coingecko.com/coins/images/31488/thumb/Hoshi_200x200_-_Copy.png?1696530299"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/31488/small/Hoshi_200x200_-_Copy.webp"
       },
       "balance": "196814237",
       "fiatBalance": "0.00000549702163941",
@@ -596,7 +596,7 @@
         "decimals": 18,
         "symbol": "SHI",
         "name": "Shina Inu",
-        "logoUri": "https://assets.coingecko.com/coins/images/25208/thumb/coingecko-shina-purple-bg.png?1696524352"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/25208/small/coingecko-shina-purple-bg.webp"
       },
       "balance": "10000000000000000000",
       "fiatBalance": "0.00000170484",
@@ -610,7 +610,7 @@
         "decimals": 18,
         "symbol": "PEOPLE",
         "name": "ConstitutionDAO",
-        "logoUri": "https://assets.coingecko.com/coins/images/20612/thumb/GN_UVm3d_400x400.jpg?1696520017"
+        "logoUri": "mock-assets/assets.coingecko.com/coins/images/20612/small/GN_UVm3d_400x400.webp"
       },
       "balance": "251",
       "fiatBalance": "0.00000000000000000211",

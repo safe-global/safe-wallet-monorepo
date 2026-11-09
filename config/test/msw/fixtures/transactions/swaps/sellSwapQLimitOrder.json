@@ -17,7 +17,7 @@
         "sellToken": {
           "address": "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59",
           "decimals": 18,
-          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.png",
+          "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.webp",
           "name": "CoW Protocol Token",
           "symbol": "COW",
           "trusted": true
@@ -25,7 +25,7 @@
         "buyToken": {
           "address": "0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D",
           "decimals": 18,
-          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D.png",
+          "logoUri": "",
           "name": "DAI (test)",
           "symbol": "DAI",
           "trusted": false
@@ -35,7 +35,7 @@
         "executedFeeToken": {
           "address": "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59",
           "decimals": 18,
-          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.png",
+          "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.webp",
           "name": "CoW Protocol Token",
           "symbol": "COW",
           "trusted": true
@@ -106,7 +106,7 @@
       "sellToken": {
         "address": "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59",
         "decimals": 18,
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.png",
+        "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.webp",
         "name": "CoW Protocol Token",
         "symbol": "COW",
         "trusted": true
@@ -114,7 +114,7 @@
       "buyToken": {
         "address": "0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D",
         "decimals": 18,
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xB4F1737Af37711e9A5890D9510c9bB60e170CB0D.png",
+        "logoUri": "",
         "name": "DAI (test)",
         "symbol": "DAI",
         "trusted": false
@@ -124,7 +124,7 @@
       "executedFeeToken": {
         "address": "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59",
         "decimals": 18,
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.png",
+        "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.webp",
         "name": "CoW Protocol Token",
         "symbol": "COW",
         "trusted": true
@@ -217,7 +217,7 @@
       "to": {
         "value": "0x9641d764fc13c8B624c04430C7356C1C7C8102e2",
         "name": "Safe: MultiSendCallOnly 1.4.1",
-        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x9641d764fc13c8B624c04430C7356C1C7C8102e2.png"
+        "logoUri": "mock-assets/safe-transaction-assets.safe.global/contracts/logos/0x9641d764fc13c8B624c04430C7356C1C7C8102e2.webp"
       },
       "value": "0",
       "operation": 1,
@@ -226,12 +226,12 @@
         "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59": {
           "value": "0x0625aFB445C3B6B7B929342a04A22599fd5dBB59",
           "name": "CoW Protocol Token",
-          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.png"
+          "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/tokens/logos/0x0625aFB445C3B6B7B929342a04A22599fd5dBB59.webp"
         },
         "0x9008D19f58AAbD9eD0D60971565AA8510560ab41": {
           "value": "0x9008D19f58AAbD9eD0D60971565AA8510560ab41",
           "name": "GPv2Settlement",
-          "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x9008D19f58AAbD9eD0D60971565AA8510560ab41.png"
+          "logoUri": "mock-assets/safe-transaction-assets.safe.global/contracts/logos/0x9008D19f58AAbD9eD0D60971565AA8510560ab41.webp"
         }
       },
       "tokenInfoIndex": null
@@ -250,7 +250,7 @@
       "refundReceiver": {
         "value": "0x0000000000000000000000000000000000000000",
         "name": null,
-        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x0000000000000000000000000000000000000000.png"
+        "logoUri": ""
       },
       "safeTxHash": "0xc2a59a93e1cbaeab5fde7a5d4cc63938e1b1e4597c7e203146a6e6e07b43a92f",
       "executor": null,
