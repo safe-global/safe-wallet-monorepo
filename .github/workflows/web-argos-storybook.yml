@@ -13,8 +13,9 @@ name: Web Argos Storybook
 # still correct because their images are identical.
 #
 # Pull requests upload only the sheets that differ from their merge base on dev, as an Argos
-# subset build, and a skipped build when none differ, so `argos/storybook` reports on every
-# PR and can be a required check (docs/ci-required-checks.md).
+# subset build, and a skipped build when none differ, so the Argos status
+# `argos/safe-wallet-monorepo/storybook` reports on every PR and can be a required check
+# (docs/ci-required-checks.md).
 
 on:
   pull_request:
@@ -72,7 +73,7 @@ jobs:
             .github/actions/corepack/**
             .github/actions/pr-changes/**
 
-  # A PR that cannot change a story still needs a green argos/storybook to merge
+  # A PR that cannot change a story still needs a green Argos status to merge
   skip:
     needs: changes
     if: needs.changes.outputs.relevant != 'true'
