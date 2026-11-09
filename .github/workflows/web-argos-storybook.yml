@@ -13,7 +13,8 @@ name: Web Argos Storybook
 # still correct because their images are identical.
 #
 # Pull requests upload only the sheets that differ from their merge base on dev, as an Argos
-# subset build, and a skipped build when none differ, so the Argos status
+# subset build, and a skipped build when none differ. A PR that removes a sheet uploads all
+# sheets as a full build, because a subset build ignores removals. Thus the Argos status
 # `argos/safe-wallet-monorepo/storybook` reports on every PR and can be a required check
 # (docs/ci-required-checks.md).
 
@@ -233,12 +234,19 @@ jobs:
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
-          # A subset build ignores removed sheets, so a PR only uploads changed and added ones
           echo "to-upload=$(grep -c . upload-list.txt || true)" >> "$GITHUB_OUTPUT"
+          # A subset build ignores removed sheets, so a PR that removes one needs a full build
+          if grep -q '^### Removed' <<< "$report"; then
+            echo "removed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "removed=false" >> "$GITHUB_OUTPUT"
+          fi
 
       # On dev, a merge that changed no sheet keeps the last baseline
       - name: Upload to Argos
-        if: github.event_name != 'pull_request' && (github.event_name != 'push' || steps.diff.outputs.changed == 'true')
+        if: >-
+          (github.event_name != 'pull_request' && (github.event_name != 'push' || steps.diff.outputs.changed == 'true'))
+          || (github.event_name == 'pull_request' && steps.diff.outputs.removed == 'true')
         working-directory: apps/web
         run: npx --yes @argos-ci/cli upload argos-screenshots --build-name storybook
         env:
@@ -248,7 +256,7 @@ jobs:
 
       # Argos compares the subset with the dev baseline at the merge base and ignores the sheets left out
       - name: Upload the changed sheets to Argos
-        if: github.event_name == 'pull_request' && steps.diff.outputs.to-upload != '0'
+        if: github.event_name == 'pull_request' && steps.diff.outputs.removed != 'true' && steps.diff.outputs.to-upload != '0'
         working-directory: apps/web
         run: |
           mkdir argos-upload
@@ -259,7 +267,7 @@ jobs:
           ARGOS_REFERENCE_BRANCH: dev
 
       - name: Report a skipped Argos build
-        if: github.event_name == 'pull_request' && steps.diff.outputs.to-upload == '0'
+        if: github.event_name == 'pull_request' && steps.diff.outputs.removed != 'true' && steps.diff.outputs.to-upload == '0'
         working-directory: apps/web
         run: npx --yes @argos-ci/cli skip --build-name storybook
         env:
