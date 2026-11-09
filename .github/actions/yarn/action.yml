@@ -56,7 +56,6 @@ runs:
       with:
         path: |
           **/node_modules
-          ~/.cache/Cypress
           .yarn/install-state.gz
         key: >-
           ${{ runner.os }}-${{ runner.arch }}-node-${{ steps.node.outputs.node-version }}-modules-${{
@@ -87,6 +86,5 @@ runs:
       with:
         path: |
           **/node_modules
-          ~/.cache/Cypress
           .yarn/install-state.gz
         key: ${{ steps.modules.outputs.cache-primary-key }}

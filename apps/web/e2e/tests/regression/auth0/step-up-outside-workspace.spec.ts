@@ -47,25 +47,25 @@ test.describe('Step-up for the Workspace actions outside a Workspace', { tag: '@
     safes,
   }) => {
     const workspaceId = await prepareWorkspace()
-    await safePage.goto(`/home?safe=${safes.SEP_STATIC_SAFE_1}`)
+    await safePage.goto(`/home?safe=${safes.basic}`)
 
     await safePage.getByRole('button', { name: 'Add Safe to Workspace' }).click()
     await safePage.getByRole('menuitem', { name: WORKSPACE_NAME }).click()
     await completeStepUp(safePage)
 
     // The Safe opens inside the Workspace it now belongs to.
-    const safeParam = safes.SEP_STATIC_SAFE_1.replace(':', '(:|%3A)')
+    const safeParam = safes.basic.replace(':', '(:|%3A)')
     const safePageUrl = new RegExp(`/home\\?safe=${safeParam}&spaceId=${workspaceId}$`)
     await expectActionCompleted(safePage, safePageUrl, 'Successfully added Safe to Workspace')
     await expect(safePage.getByRole('button', { name: 'Add Safe to Workspace' })).toBeHidden()
-    expect(await workspaceResource(user, workspaceId, 'safes')).toContain(safeAddress(safes.SEP_STATIC_SAFE_1))
+    expect(await workspaceResource(user, workspaceId, 'safes')).toContain(safeAddress(safes.basic))
   })
 
   test('should add the Safe and open the invite step when the step-up of a wizard from a Safe page succeeds', async ({
     safePage,
     safes,
   }) => {
-    await safePage.goto(`/home?safe=${safes.SEP_STATIC_SAFE_1}`)
+    await safePage.goto(`/home?safe=${safes.basic}`)
     await safePage.getByRole('button', { name: 'Add Safe to Workspace' }).click()
     // Without a Workspace, the user is offered to create one.
     await safePage.getByRole('button', { name: 'Create a Workspace' }).click()
@@ -79,20 +79,20 @@ test.describe('Step-up for the Workspace actions outside a Workspace', { tag: '@
 
     await expectActionCompleted(safePage, /\/welcome\/invite-members\?/)
     expect(urlSpaceId(safePage)).toBe(workspaceId)
-    expect(await workspaceResource(user, workspaceId, 'safes')).toContain(safeAddress(safes.SEP_STATIC_SAFE_1))
+    expect(await workspaceResource(user, workspaceId, 'safes')).toContain(safeAddress(safes.basic))
   })
 
   test('should add a new pay-later Safe to the Workspace when the step-up after its creation succeeds', async ({
     safePage,
     walletPage,
-    credentials,
+    owners,
   }) => {
     const workspaceId = await prepareWorkspace()
     await safePage.goto(`/spaces/safe-accounts?spaceId=${workspaceId}`)
 
     await safePage.getByRole('button', { name: 'Add accounts' }).click()
     await safePage.getByRole('button', { name: 'Create new Safe' }).click()
-    await walletPage.connectWallet(credentials.OWNER_4_PRIVATE_KEY)
+    await walletPage.connectWallet(owners.alice.privateKey)
     await safePage.getByRole('button', { name: 'Next' }).click()
     await safePage.getByRole('button', { name: 'Next' }).click()
     await expect(safePage.getByRole('radio', { name: 'Pay later' })).toBeChecked()

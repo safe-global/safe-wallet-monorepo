@@ -26,7 +26,7 @@ test.describe('Safe Shield recipient check', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const recipient = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
     await seedExecutedTransfer(safe, { recipient, amount: AMOUNT })
     await seedExecutedTransfer(safe, { recipient, amount: AMOUNT })
     await expect

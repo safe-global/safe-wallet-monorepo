@@ -58,8 +58,8 @@ test.describe('Trezor signing', { tag: '@e2e' }, () => {
   }, testInfo) => {
     const queue = new TxQueuePage(safePage)
     const transactionReview = new TxReviewPage(safePage)
-    await addSafeToAccounts(safePage, safes.SEP_TREZOR_SIGN_SAFE)
-    await queue.goto(safes.SEP_TREZOR_SIGN_SAFE)
+    await addSafeToAccounts(safePage, safes.trezorSign)
+    await queue.goto(safes.trezorSign)
     await expect(queue.transactionWithNonce(0)).toContainText('1/3')
     await walletPage.connectTrezor(trezorOwner.address, TREZOR_LABEL)
 
@@ -69,7 +69,7 @@ test.describe('Trezor signing', { tag: '@e2e' }, () => {
     await attachReview(testInfo, 'trezor-review-sign', review)
 
     expect(shownAddress(review, 'Signing address')).toBe(trezorOwner.address.toLowerCase())
-    expect(shownAddress(review, 'EIP712Domain')).toContain(safeAddress(safes.SEP_TREZOR_SIGN_SAFE).toLowerCase())
+    expect(shownAddress(review, 'EIP712Domain')).toContain(safeAddress(safes.trezorSign).toLowerCase())
     await expect(queue.transactionWithNonce(0)).toContainText('2/3')
   })
 
@@ -80,8 +80,8 @@ test.describe('Trezor signing', { tag: '@e2e' }, () => {
   }, testInfo) => {
     const queue = new TxQueuePage(safePage)
     const transactionReview = new TxReviewPage(safePage)
-    await addSafeToAccounts(safePage, safes.SEP_TREZOR_EXECUTE_SAFE)
-    await queue.goto(safes.SEP_TREZOR_EXECUTE_SAFE)
+    await addSafeToAccounts(safePage, safes.trezorExecute)
+    await queue.goto(safes.trezorExecute)
     await walletPage.connectTrezor(trezorOwner.address, TREZOR_LABEL)
 
     await queue.execute(0)
@@ -89,7 +89,7 @@ test.describe('Trezor signing', { tag: '@e2e' }, () => {
     const review = await device.approve()
     await attachReview(testInfo, 'trezor-review-execute', review)
 
-    expect(shownAddress(review, 'Contract address')).toBe(safeAddress(safes.SEP_TREZOR_EXECUTE_SAFE).toLowerCase())
+    expect(shownAddress(review, 'Contract address')).toBe(safeAddress(safes.trezorExecute).toLowerCase())
     await expect(transactionReview.status).toHaveText('Transaction was successful')
   })
 })

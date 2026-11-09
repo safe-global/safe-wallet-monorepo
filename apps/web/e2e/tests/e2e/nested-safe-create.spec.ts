@@ -26,7 +26,7 @@ test.describe('Create a nested Safe', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const name = 'Payroll'
-    const parent = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
+    const parent = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
 
     const home = new HomePage(safePage)
     const nestedSafes = new NestedSafesPage(safePage)
@@ -57,7 +57,7 @@ test.describe('Create a nested Safe', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const parent = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
+    const parent = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
 
     await new HomePage(safePage).goto(parent.prefixedAddress)
     await new NestedSafesPage(safePage).create('Funded', { fund: '0.01' })

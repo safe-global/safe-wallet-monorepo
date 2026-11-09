@@ -19,9 +19,7 @@
     "test:plugins": "node --test \"plugins/**/*.test.ts\"",
     "assert:sri": "node scripts/assert-sri.mjs dist",
     "verify": "node ../../scripts/verify.mjs --workspace=web-tanstack",
-    "verify:changed": "node ../../scripts/verify.mjs --changed --workspace=web-tanstack",
-    "cypress:open": "cross-env TZ=UTC cypress open --e2e",
-    "cypress:run": "cross-env TZ=UTC cypress run"
+    "verify:changed": "node ../../scripts/verify.mjs --changed --workspace=web-tanstack"
   },
   "dependencies": {
     "@safe-global/protocol-kit": "^8.0.11",
@@ -53,7 +51,6 @@
     "@types/react-dom": "~19.2.0",
     "@vitejs/plugin-react": "^6.2.0",
     "cross-env": "^7.0.3",
-    "cypress": "^16.2.1",
     "eslint": "^9.39.4",
     "jest": "^30.5.2",
     "jest-environment-jsdom": "^30.5.2",

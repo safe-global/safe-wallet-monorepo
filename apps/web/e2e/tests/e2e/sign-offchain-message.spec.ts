@@ -8,11 +8,11 @@ const MESSAGE = 'Second owner signs'
 
 test.describe('Sign an off-chain message with a second owner', { tag: '@e2e' }, () => {
   test('should confirm a message when the second owner signs it', async ({ safePage, safeApiClient, journey }) => {
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 2 })
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 2 })
     const messageHash = await seedOffchainMessage(safe, MESSAGE)
 
     const messages = new MessagesPage(safePage)
-    await journey.connectAs('owner1')
+    await journey.connectAs('bob')
     await messages.goto(safe.prefixedAddress)
     await expect(messages.message(MESSAGE)).toContainText('1/2')
     await messages.sign(MESSAGE)

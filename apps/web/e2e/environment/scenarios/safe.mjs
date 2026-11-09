@@ -7,23 +7,10 @@ import { proposeToQueue } from './gateway.mjs'
 import { waitUntil } from './indexing.mjs'
 import { localProvider, sendAndConfirm } from './provider.mjs'
 
-/** Fresh wallets for the specs' OWNER_1 to OWNER_4 credentials; OWNER_4 proposes and deploys. */
+/** Fresh wallets for the four test owners. Alice proposes and deploys, and the wallet starts connected as her. */
 export function createOwners() {
-  const [owner1, owner2, owner3] = Array.from({ length: 3 }, () => Wallet.createRandom())
-  // Like staging OWNER_4 (0xC16D…), it sorts after the specs' recipient 0x6a56… in address order.
-  let owner4 = Wallet.createRandom()
-  while (!/^0x[7-9a-f]/i.test(owner4.address)) owner4 = Wallet.createRandom()
-  const wallets = { owner1, owner2, owner3, owner4 }
-  const credentials = Object.fromEntries(
-    Object.entries(wallets).flatMap(([name, wallet]) => {
-      const key = name.replace('owner', 'OWNER_')
-      return [
-        [`${key}_PRIVATE_KEY`, wallet.privateKey],
-        [`${key}_WALLET_ADDRESS`, wallet.address],
-      ]
-    }),
-  )
-  return { ...wallets, credentials }
+  const [alice, bob, carol, dave] = Array.from({ length: 4 }, () => Wallet.createRandom())
+  return { alice, bob, carol, dave }
 }
 
 /** Scenario environment for a forked chain; Sepolia is the default stack itself. */
@@ -87,19 +74,19 @@ async function deploySafe(
 }
 
 /**
- * Deploys a Safe as `owners.owner4` and returns a context for SDK flows on it. Without `ownerAddresses` the
- * Safe belongs to OWNER_4 and OWNER_1; `waitForIndexing` waits until CGW serves it.
+ * Deploys a Safe as `owners.alice` and returns a context for SDK flows on it. Without `ownerAddresses` the
+ * Safe belongs to Alice and Bob; `waitForIndexing` waits until CGW serves it.
  */
 export async function createSafe(env, owners, options = {}) {
   const { ownerAddresses, threshold = 2, saltNonce, waitForIndexing = true, safeVersion, multichain } = options
   const provider = localProvider(env.SAFE_RPC_URL)
   try {
     const chainId = await assertForkChain(provider, env)
-    for (const owner of [owners.owner4, owners.owner1, owners.owner2, owners.owner3]) {
+    for (const owner of [owners.alice, owners.bob, owners.carol, owners.dave]) {
       await provider.send('anvil_setBalance', [owner.address, FUNDED_BALANCE])
     }
-    const signer = owners.owner4.connect(provider)
-    const safeOwners = ownerAddresses ?? [signer.address, owners.owner1.address]
+    const signer = owners.alice.connect(provider)
+    const safeOwners = ownerAddresses ?? [signer.address, owners.bob.address]
     const safeAddress = await deploySafe(env, signer, {
       owners: safeOwners,
       threshold,

@@ -14,7 +14,7 @@ outputs:
     description: 'Whether the cache was hit or not'
   computed-cache-key-nc:
     value: ${{ steps.restore-nc.outputs.cache-primary-key }}
-    description: 'The computed cache key for nextjs/cypress'
+    description: 'The computed cache key for the Next.js build cache'
 
 runs:
   using: 'composite'
