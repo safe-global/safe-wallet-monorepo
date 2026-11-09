@@ -44,5 +44,5 @@
     "../web/src/definitions.d.ts",
     "../web/src/components/theme/mui.d.ts"
   ],
-  "exclude": ["node_modules", "dist", "cypress"]
+  "exclude": ["node_modules", "dist"]
 }

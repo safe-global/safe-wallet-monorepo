@@ -124,7 +124,7 @@ test.describe('Step-up for the billing actions of a Workspace', { tag: '@regress
     test('should remove the deselected Safe and downgrade when the step-up succeeds', async ({ safePage, safes }) => {
       await storeSubscription(setup, workspaceId)
       await addWorkspaceSafes(setup, workspaceId, [
-        safeAddress(safes.SEP_STATIC_SAFE_1),
+        safeAddress(safes.basic),
         TEST_ADDRESSES.PLACEHOLDER_A,
         TEST_ADDRESSES.PLACEHOLDER_B,
       ])

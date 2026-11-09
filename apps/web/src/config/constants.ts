@@ -8,7 +8,7 @@ export const IS_PRODUCTION = process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true'
 export const IS_DEV = APP_ENV === 'development'
 // NOTE: `next build` rewrites process.env.NODE_ENV to 'production' in client
 // bundles, so the APP_ENV check below only works during `next dev`. For
-// production-built Cypress runs (where the workflow serves the static export)
+// production-built E2E runs (where the isolated stack serves the static export)
 // we also honour an explicit NEXT_PUBLIC_IS_TEST_E2E flag, which survives the
 // build because of its NEXT_PUBLIC_ prefix.
 export const IS_TEST_E2E = APP_ENV === 'cypress' || process.env.NEXT_PUBLIC_IS_TEST_E2E === 'true'

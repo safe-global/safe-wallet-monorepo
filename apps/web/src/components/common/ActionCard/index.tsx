@@ -33,7 +33,7 @@ export interface ActionCardProps {
   learnMore?: LearnMoreLink
   trackingEvent?: AnalyticsEvent
   testId?: string
-  /** Optional data-testid for the action button/link for Cypress and testing */
+  /** Optional data-testid for the action button/link, for tests */
   actionTestId?: string
 }
 

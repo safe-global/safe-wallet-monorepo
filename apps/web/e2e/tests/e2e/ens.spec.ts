@@ -28,7 +28,7 @@ test.describe('ENS names', { tag: '@e2e' }, () => {
     await setEnsName(journey.env, ENS_NAME, recipient)
     // setEnsName funds the recipient to sign its reverse record, so the transfer is measured from here
     const balanceBefore = await balanceOf(journey.env, recipient)
-    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
 
     const sendTokens = new SendTokensPage(safePage)
     const review = new TxReviewPage(safePage)
@@ -50,7 +50,7 @@ test.describe('ENS names', { tag: '@e2e' }, () => {
   }) => {
     const newSigner = Wallet.createRandom().address
     await setEnsName(journey.env, ENS_NAME, newSigner)
-    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
 
     const owners = new OwnersPage(safePage)
     await owners.goto(safe.prefixedAddress)
