@@ -1,4 +1,10 @@
-import { imageUrls, isMirroredImage, localMirrorUrl, mirrorPath } from '../../../apps/web/.storybook/mockAssetUrls'
+import {
+  imageFormat,
+  imageUrls,
+  isMirroredImage,
+  localMirrorUrl,
+  mirrorPath,
+} from '../../../apps/web/.storybook/mockAssetUrls'
 
 describe('isMirroredImage', () => {
   it.each([
@@ -15,6 +21,7 @@ describe('isMirroredImage', () => {
     ['plain http', 'http://cdn.zerion.io/logo.png'],
     ['a host stories use to show a broken image', 'https://example.com/logo.png'],
     ['a host that no longer exists', 'https://via.placeholder.com/26.png'],
+    ['an SVG, which could run script on the origin that serves it', 'https://cdn.zerion.io/logo.svg'],
   ])('skips %s', (_, url) => {
     expect(isMirroredImage(new URL(url))).toBe(false)
   })
@@ -60,5 +67,35 @@ describe('imageUrls', () => {
     ])
 
     expect(urls).toEqual(['https://cdn.zerion.io/a.png', 'https://cdn.zerion.io/b.png?v=2'])
+  })
+
+  it.each([
+    ['dot-dot segments behind encoded slashes', 'https://cdn.zerion.io/a%2F..%2F..%2F..%2Fscripts%2Fx.png'],
+    ['an encoded dot segment', 'https://cdn.zerion.io/a%2F.%2Fx.png'],
+    ['an encoded backslash', 'https://cdn.zerion.io/a%5C..%5Cx.png'],
+  ])('drops a URL whose decoded path could leave the mirror: %s', (_, url) => {
+    expect(imageUrls([url])).toEqual([])
+  })
+})
+
+describe('imageFormat', () => {
+  const bytes = (...values: Array<number | string>) =>
+    Uint8Array.from(values.flatMap((v) => (typeof v === 'string' ? [...v].map((c) => c.charCodeAt(0)) : [v])))
+
+  it.each([
+    ['png', bytes(0x89, 'PNG', 0x0d, 0x0a, 0x1a, 0x0a, 0)],
+    ['jpeg', bytes(0xff, 0xd8, 0xff, 0xe0)],
+    ['gif', bytes('GIF89a')],
+    ['webp', bytes('RIFF', 0, 0, 0, 0, 'WEBPVP8 ')],
+  ])('recognises %s by its first bytes', (format, data) => {
+    expect(imageFormat(data)).toBe(format)
+  })
+
+  it.each([
+    ['an SVG', bytes('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>')],
+    ['an HTML error page', bytes('<!doctype html><html>')],
+    ['an empty file', bytes()],
+  ])('rejects %s', (_, data) => {
+    expect(imageFormat(data)).toBeUndefined()
   })
 })

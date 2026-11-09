@@ -12,7 +12,7 @@
 import { execFileSync } from 'child_process'
 import * as fs from 'fs'
 import * as path from 'path'
-import { imageUrls, mirrorPath } from '../../apps/web/.storybook/mockAssetUrls'
+import { imageFormat, imageUrls, mirrorPath } from '../../apps/web/.storybook/mockAssetUrls'
 import { upgradeCoinGeckoThumbToQuality } from '../../packages/utils/src/utils/image'
 
 const SOURCES = ['*.stories.tsx', 'config/test/**']
@@ -20,14 +20,15 @@ const MIRROR_DIR = 'apps/web/.storybook/mock-assets'
 const TIMEOUT_MS = 15000
 
 async function download(url: string, file: string): Promise<string | undefined> {
+  if (!path.resolve(file).startsWith(path.resolve(MIRROR_DIR) + path.sep)) return 'path outside the mirror'
   const res = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) }).catch((err: unknown) => String(err))
   if (typeof res === 'string') return res
   if (!res.ok) return `HTTP ${res.status}`
-  const type = res.headers.get('content-type') ?? ''
-  // S3 buckets often serve images as octet-stream; an HTML error page is what must not get in
-  if (!type.startsWith('image/') && type !== 'application/octet-stream') return `not an image (${type})`
+  // Check the bytes, not the content type: S3 sends images as octet-stream, and SVG or HTML must not get in
+  const bytes = Buffer.from(await res.arrayBuffer())
+  if (!imageFormat(bytes)) return `not a PNG, JPEG, GIF or WebP (${res.headers.get('content-type')})`
   fs.mkdirSync(path.dirname(file), { recursive: true })
-  fs.writeFileSync(file, Buffer.from(await res.arrayBuffer()))
+  fs.writeFileSync(file, bytes)
   return undefined
 }
 
