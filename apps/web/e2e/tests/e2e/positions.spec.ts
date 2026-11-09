@@ -16,14 +16,12 @@ test.describe('DeFi positions', { tag: '@e2e' }, () => {
     safePage,
     safes,
   }) => {
-    const portfolio = await new SafeApiClient(CHAIN_IDS.ethereum).getPortfolio(
-      safeAddress(safes.ETH_ZERION_POSITIONS_SAFE),
-    )
+    const portfolio = await new SafeApiClient(CHAIN_IDS.ethereum).getPortfolio(safeAddress(safes.positions))
     const apps = portfolio.positionBalances.map(({ appInfo }) => appInfo.name)
     // Precondition: the scenario's positions reached the gateway.
-    expect(apps.length, `Zerion lists no position for ${safes.ETH_ZERION_POSITIONS_SAFE}`).toBeGreaterThan(0)
+    expect(apps.length, `Zerion lists no position for ${safes.positions}`).toBeGreaterThan(0)
 
-    await new AssetsPage(safePage).goto(safes.ETH_ZERION_POSITIONS_SAFE)
+    await new AssetsPage(safePage).goto(safes.positions)
     const positions = new PositionsPage(safePage)
     await positions.positionsTab.click()
 

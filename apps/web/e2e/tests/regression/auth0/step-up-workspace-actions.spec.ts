@@ -47,7 +47,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
   })
 
   test('should add the Safe to the Workspace when the step-up succeeds', async ({ safePage, safes }) => {
-    const address = safeAddress(safes.SEP_STATIC_SAFE_1)
+    const address = safeAddress(safes.basic)
     await safePage.goto(`/spaces/safe-accounts?spaceId=${workspaceId}`)
 
     await safePage.getByRole('button', { name: 'Add accounts' }).click()
@@ -69,7 +69,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
   })
 
   test('should rename the Workspace Safe when the step-up succeeds', async ({ safePage, safes }) => {
-    const address = safeAddress(safes.SEP_STATIC_SAFE_1)
+    const address = safeAddress(safes.basic)
     await addWorkspaceSafes(setup, workspaceId, [address])
     await safePage.goto(`/spaces/safe-accounts?spaceId=${workspaceId}`)
 
@@ -85,7 +85,7 @@ test.describe('Step-up for the actions inside a Workspace', { tag: '@regression'
   })
 
   test('should remove the Safe from the Workspace when the step-up succeeds', async ({ safePage, safes }) => {
-    const address = safeAddress(safes.SEP_STATIC_SAFE_1)
+    const address = safeAddress(safes.basic)
     await addWorkspaceSafes(setup, workspaceId, [address])
     await safePage.goto(`/spaces/safe-accounts?spaceId=${workspaceId}`)
 

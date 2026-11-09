@@ -6,6 +6,21 @@ workflows:
     '.github/workflows/claude-code-review.yml':
         - 'actions/checkout@v7.0.1'
         - 'anthropics/claude-code-action@v1.0.262'
+    '.github/workflows/drain-safe-checks.yml':
+        - 'actions/cache@v5.0.5'
+        - 'actions/checkout@v7.0.1'
+        - 'actions/setup-node@v6.4.0'
+        - 'actions/upload-artifact@v7.0.2'
+        - 'codecov/codecov-action@v7.1.1'
+    '.github/workflows/drain-safe-deploy.yml':
+        - 'actions/attest@v4.2.2'
+        - 'actions/cache@v5.0.5'
+        - 'actions/checkout@v7.0.1'
+        - 'actions/create-github-app-token@v3.3.0'
+        - 'actions/setup-node@v6.4.0'
+        - 'aws-actions/configure-aws-credentials@v6.3.0'
+        - 'mshick/add-pr-comment@v3.12.0'
+        - 'softprops/action-gh-release@v3.0.3'
     '.github/workflows/mobile-checks.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
@@ -57,13 +72,6 @@ workflows:
         - 'aws-actions/configure-aws-credentials@v6.3.0'
         - 'mshick/add-pr-comment@v3.12.0'
         - 'softprops/action-gh-release@v3.0.3'
-    '.github/workflows/web-argos-e2e.yml':
-        - 'actions/cache@v5.0.5'
-        - 'actions/checkout@v7.0.1'
-        - 'actions/setup-node@v6.4.0'
-        - 'actions/upload-artifact@v7.0.2'
-        - 'browser-actions/setup-chrome@v1.7.3'
-        - 'cypress-io/github-action@v7.4.6'
     '.github/workflows/web-argos-storybook.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
@@ -90,14 +98,6 @@ workflows:
         - 'docker/login-action@v4.7.0'
         - 'docker/setup-buildx-action@v4.4.1'
         - 'docker/setup-qemu-action@v4.4.0'
-    '.github/workflows/web-e2e-full-ondemand.yml':
-        - 'actions/cache@v5.0.5'
-        - 'actions/checkout@v7.0.1'
-        - 'actions/setup-node@v6.4.0'
-        - 'actions/setup-python@v7.1.0'
-        - 'actions/upload-artifact@v7.0.2'
-        - 'browser-actions/setup-chrome@v1.7.3'
-        - 'cypress-io/github-action@v7.4.6'
     '.github/workflows/web-isolated-e2e-backend.yml':
         - 'actions/cache@v5.0.5'
         - 'actions/checkout@v7.0.1'
@@ -193,11 +193,6 @@ dependencies:
         commit: 'sha1-48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e'
         owner_id: 44036562
         repo_id: 189476904
-    'actions/setup-python@v7.1.0':
-        ref: 'v7.1.0'
-        commit: 'sha1-6d4fd22b20465ccc0f7354476588e8df7c9ca0e0'
-        owner_id: 44036562
-        repo_id: 192625525
     'actions/upload-artifact@v7.0.2':
         ref: 'v7.0.2'
         commit: 'sha1-cf430e030ddbb5b0abf93d22962f4752f3646cd9'
@@ -220,11 +215,6 @@ dependencies:
         commit: 'sha1-e1253824e5c10ff9df46874f81ed3ec929e19cfd'
         owner_id: 57468012
         repo_id: 220391287
-    'browser-actions/setup-chrome@v1.7.3':
-        ref: 'v1.7.3'
-        commit: 'sha1-c785b87e244131f27c9f19c1a33e2ead956ab7ce'
-        owner_id: 77263318
-        repo_id: 327321858
     'catchen/eslint-suggestion-action@v4.1.37':
         ref: 'v4.1.37'
         commit: 'sha1-c16f1e40a5cd43506b9c9ea61ba66b0fd0016738'
@@ -242,11 +232,6 @@ dependencies:
         commit: 'sha1-2dc316deee8e90f13e1a351ab510b4d5bc0c82cd'
         owner_id: 1951866
         repo_id: 260488959
-    'cypress-io/github-action@v7.4.6':
-        ref: 'v7.4.6'
-        commit: 'sha1-c541a95ea92d9239347a2355f2e895cd4b3f8060'
-        owner_id: 8908513
-        repo_id: 219649445
     'docker/build-push-action@v7.4.0':
         ref: 'v7.4.0'
         commit: 'sha1-c3c9e263c25d99ce0380d002d59b67737d91b0dc'

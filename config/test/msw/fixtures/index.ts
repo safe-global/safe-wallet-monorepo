@@ -22,6 +22,7 @@ import type {
   TransactionDetails,
   TransactionItem,
   TransactionItemPage,
+  QueuedItemPage,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 // Portfolio fixtures
@@ -68,6 +69,8 @@ import txRemoveOwner from './transactions/details/remove-owner.json'
 import txDisableModule from './transactions/details/disable-module.json'
 import txChangeThreshold from './transactions/details/change-threshold.json'
 import txReceiveQtrust from './transactions/details/receive-qtrust.json'
+import queuePendingBatch from './transactions/queue/pending-batch.json'
+import txBatchAwaiting from './transactions/details/batch-awaiting.json'
 
 // Swap order and staking fixtures: the list item and the details of each transaction
 import swapSell1Action from './transactions/swaps/sell1Action.json'
@@ -195,6 +198,15 @@ export const transactionFixtures = {
     changeThreshold: txChangeThreshold as TransactionDetails,
     receiveQtrust: txReceiveQtrust as TransactionDetails,
   },
+}
+
+/**
+ * Queue of the efSafe on Ethereum with a queued multiSend first (nonce 28, 1 of 3), and the details of that batch
+ */
+export const queueFixtures = {
+  pendingBatch: queuePendingBatch as QueuedItemPage,
+  // CGW sends `dataDecoded: null` for undecoded multiSend actions; the generated type only allows undefined
+  batchAwaiting: txBatchAwaiting as unknown as TransactionDetails,
 }
 
 export type RecordedTransaction = {
