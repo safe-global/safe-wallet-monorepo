@@ -25,12 +25,13 @@ DEBUG_INTERFACE = "127.0.0.1:21325"
 def start_device():
     binaries.explore(argparse.Namespace(verbosity=0))
     # Into the container log, which CI collects; the image's log files are gone after a reset
-    bridge.start(binaries.DEFAULT_BRIDGE, output_to_logfile=False)
     emulator.start(
         os.environ["TREZOR_FIRMWARE"], os.environ["TREZOR_MODEL"], wipe=True, output_to_logfile=False,
         save_screenshots=True,
     )
     emulator.setup_device(os.environ["TREZOR_SEED"], "", False, os.environ["TREZOR_LABEL"])
+    # Only now: the Bridge pings the emulator's UDP port, which then answers the Bridge instead of the setup
+    bridge.start(binaries.DEFAULT_BRIDGE, output_to_logfile=False)
 
 
 def with_debuglink(action):
