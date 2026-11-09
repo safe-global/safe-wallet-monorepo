@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { Button, CircularProgress, InputAdornment, Stack, TextField, Typography } from '@mui/material'
 import { useSafeAppsSDK } from '@safe-global/safe-apps-react-sdk'
 import type { TokenBalance } from '@safe-global/safe-apps-sdk'
@@ -33,18 +33,23 @@ function DrainForm({ assets }: { assets: TokenBalance[] }) {
 
   const nativeFiatPrice = Number(assets.find(isNativeToken)?.fiatConversion ?? 0)
 
+  // A ref, not state: a second click can arrive before React re-renders with `submitting`
+  const isSending = useRef(false)
+
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault()
-
-    const to = await resolveRecipient(recipient, networkPrefix, resolveName)
-    if (!to) {
-      setError('Please enter a valid recipient address')
-      return
-    }
-
-    setError('')
+    if (isSending.current) return
+    isSending.current = true
     setSubmitting(true)
+
     try {
+      const to = await resolveRecipient(recipient, networkPrefix, resolveName)
+      if (!to) {
+        setError('Please enter a valid recipient address')
+        return
+      }
+
+      setError('')
       const txs = assets.filter((item) => selected.includes(item.tokenInfo.address)).map((item) => tokenToTx(to, item))
       await sdk.txs.send({ txs })
       setFinished(true)
@@ -53,6 +58,7 @@ function DrainForm({ assets }: { assets: TokenBalance[] }) {
     } catch (sendError) {
       setError(`Failed sending transactions: ${(sendError as Error).message}`)
     } finally {
+      isSending.current = false
       setSubmitting(false)
     }
   }

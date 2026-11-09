@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { encodeFunctionData, erc20Abi, getAddress, parseGwei, parseUnits } from 'viem'
 import App from './App'
 import { renderApp } from './test/app'
@@ -49,6 +49,36 @@ describe('Drain Account', () => {
 
     await waitFor(() => expect(fakeSdk.txs.send).toHaveBeenCalledTimes(1))
     expect(sentTxs()).toEqual([expect.objectContaining({ to: dai.tokenInfo.address })])
+  })
+
+  it('sends one batch when Transfer is clicked again while the ENS name resolves', async () => {
+    registerEnsName('slow-recipient.eth', newAddress())
+    const answer = fakeSdk.eth.call.getMockImplementation()!
+    fakeSdk.eth.call.mockImplementation(async (args) => {
+      await new Promise((resolve) => setTimeout(resolve, 300))
+      return answer(args)
+    })
+    const user = renderApp([nativeBalance()])
+
+    await user.type(await screen.findByLabelText('Recipient'), 'slow-recipient.eth')
+    const button = screen.getByRole('button', { name: 'Transfer everything' })
+    await user.dblClick(button)
+
+    await waitFor(() => expect(fakeSdk.txs.send).toHaveBeenCalled())
+    await new Promise((resolve) => setTimeout(resolve, 500))
+    expect(fakeSdk.txs.send).toHaveBeenCalledTimes(1)
+  })
+
+  it('sends one batch when Transfer is double-clicked with an address', async () => {
+    const user = renderApp([nativeBalance()])
+
+    await user.type(await screen.findByLabelText('Recipient'), newAddress())
+    const button = screen.getByRole('button', { name: 'Transfer everything' })
+    fireEvent.click(button)
+    fireEvent.click(button)
+
+    await waitFor(() => expect(fakeSdk.txs.send).toHaveBeenCalled())
+    expect(fakeSdk.txs.send).toHaveBeenCalledTimes(1)
   })
 
   it('resolves an ENS name to the recipient address', async () => {
