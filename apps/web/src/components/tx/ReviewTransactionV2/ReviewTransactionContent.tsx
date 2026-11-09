@@ -12,6 +12,7 @@ import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import ConfirmationView from '../confirmation-views'
 import UnknownContractError from '@/components/tx/shared/errors/UnknownContractError'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
+import { FeePayerContext } from '@/components/tx-flow/FeePayerContext'
 import { Slot, SlotName } from '@/components/tx-flow/slots'
 import type { SubmitCallback } from '@/components/tx-flow/TxFlow'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -41,6 +42,8 @@ export const ReviewTransactionContent = ({
   txPreview?: TransactionPreview
 }): ReactElement => {
   const { isBatch, isCreation, isRejection, isSubmitLoading, isSubmitDisabled, onlyExecute } = useContext(TxFlowContext)
+  const feePayer = useContext(FeePayerContext)
+  const isFeeQuoteMissing = !!feePayer && (feePayer.isQuoteLoading || feePayer.hasQuoteError)
   const { needsRiskConfirmation, isRiskConfirmed } = safeShield
   const [readableApprovals] = useApprovalInfos({ safeTransaction: safeTx })
   const isApproval = readableApprovals && readableApprovals.length > 0
@@ -91,7 +94,9 @@ export const ReviewTransactionContent = ({
                   type="submit"
                   size="submit"
                   onClick={onContinueClick}
-                  disabled={!isOk || isSubmitDisabled || (needsRiskConfirmation && !isRiskConfirmed)}
+                  disabled={
+                    !isOk || isSubmitDisabled || isFeeQuoteMissing || (needsRiskConfirmation && !isRiskConfirmed)
+                  }
                   className="order-1"
                 >
                   {isSubmitLoading ? <Spinner className="size-5" /> : 'Continue'}
