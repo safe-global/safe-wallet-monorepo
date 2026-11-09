@@ -29,5 +29,6 @@ test.describe('Drain Account', { tag: '@e2e' }, () => {
       .poll(() => tokenBalanceOf(journey.env, { token: SEPOLIA_USDC.address, holder: recipient }))
       .toBe(USDC_BALANCE)
     expect(await balanceOf(journey.env, safe.address)).toBe(0n)
+    expect(await tokenBalanceOf(journey.env, { token: SEPOLIA_USDC.address, holder: safe.address })).toBe(0n)
   })
 })
