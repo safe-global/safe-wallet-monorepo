@@ -19,7 +19,7 @@ import { getWalletCredentials, type WalletCredentials } from '../data/credential
 import { isIsolated, isolatedSpecData, type Safes } from './isolated-data'
 import { version as TERMS_VERSION } from '@/markdown/terms/version'
 
-// Cookie consent state — mirrors Cypress localstorage_data.js.
+// Cookie consent state.
 // `hasAcceptedTerms` only treats consent as valid when `termsVersion` matches
 // the app's current terms version, so seeding `undefined` left the banner open.
 // Seed the real version so the banner stays suppressed.
@@ -35,7 +35,6 @@ const COOKIE_STATE = JSON.stringify({
  * Seeds localStorage with required consent/dismissal values via addInitScript.
  * This runs before page scripts on every navigation — no extra goto() needed.
  * Prevents popups and modals from blocking test flows.
- * Mirrors: cypress/support/e2e.js beforeEach()
  */
 export async function seedLocalStorage(page: Page): Promise<void> {
   await page.addInitScript(

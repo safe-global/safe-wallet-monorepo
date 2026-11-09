@@ -4,8 +4,8 @@ name: Web Argos Storybook
 # story in light + dark via scripts/storybook/render-sweep.ts, and uploads the
 # screenshots to Argos.
 #
-# Uploads to the Argos project of web-argos-e2e.yml; the build name keeps the
-# Storybook baseline apart from the Cypress one.
+# Uploads to the Argos project that ARGOS_TOKEN_E2E names, under the build
+# name `storybook`.
 
 on:
   # Weekly baseline on dev. Release checks are started by hand.

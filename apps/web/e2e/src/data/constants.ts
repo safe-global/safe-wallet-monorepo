@@ -43,19 +43,19 @@ export const SAFES = {
   SEP_STATIC_SAFE_1: 'sep:0x6E834E9D04ad6b26e1525dE1a37BFd9b215f40B7',
   /** 1/2 Safe — use for multi-owner and tx queue tests */
   SEP_STATIC_SAFE_2: 'sep:0xc2F3645bfd395516d1a18CA6ad9298299d328C01',
-  /** Safe owned by OWNER_4 — for tx-creation flows needing a connected owner (mirrors Cypress SEP_STATIC_SAFE_6) */
+  /** Safe owned by OWNER_4 — for tx-creation flows needing a connected owner (staging SEP_STATIC_SAFE_6) */
   SEP_OWNER_4_SAFE: 'sep:0xBf30F749FC027a5d79c4710D988F0D3C8e217A4F',
-  /** 1/4 Safe holding ETH plus six $0 test tokens, OWNER_4 is an owner — for assets-table tests (mirrors Cypress SEP_STATIC_SAFE_2) */
+  /** 1/4 Safe holding ETH plus six $0 test tokens, OWNER_4 is an owner — for assets-table tests (staging SEP_STATIC_SAFE_2) */
   SEP_ASSETS_SAFE: 'sep:0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415',
-  /** Safe with an executed transaction history — for tx history tests (mirrors Cypress SEP_STATIC_SAFE_7) */
+  /** Safe with an executed transaction history — for tx history tests (staging SEP_STATIC_SAFE_7) */
   SEP_HISTORY_SAFE: 'sep:0x5912f6616c84024cD1aff0D5b55bb36F5180fFdb',
-  /** Safe with queued transactions, two of them for one nonce — for the pending-transactions widget (mirrors Cypress SEP_STATIC_SAFE_2) */
+  /** Safe with queued transactions, two of them for one nonce — for the pending-transactions widget (staging SEP_STATIC_SAFE_2) */
   SEP_QUEUE_SAFE: 'sep:0xc2F3645bfd395516d1a18CA6ad9298299d328C01',
-  /** Mainnet Safe that holds trusted and untrusted tokens — for the token lists (mirrors Cypress ETH_STATIC_SAFE_15) */
+  /** Mainnet Safe that holds trusted and untrusted tokens — for the token lists (staging ETH_STATIC_SAFE_15) */
   ETH_TOKEN_LIST_SAFE: 'eth:0xfF501B324DC6d78dC9F983f140B9211c3EdB4dc7',
-  /** Polygon Safe on an unsupported but known singleton, which can migrate in the app (mirrors Cypress MATIC_STATIC_SAFE_31) */
+  /** Polygon Safe on an unsupported but known singleton, which can migrate in the app (staging MATIC_STATIC_SAFE_31) */
   MATIC_MIGRATABLE_SAFE: 'matic:0x0b268DC6D1DfF21CaEb161c7aF5cEc3093057082',
-  /** Polygon Safe on an unofficial singleton, which only the CLI can migrate (mirrors Cypress MATIC_STATIC_SAFE_32) */
+  /** Polygon Safe on an unofficial singleton, which only the CLI can migrate (staging MATIC_STATIC_SAFE_32) */
   MATIC_UNOFFICIAL_SINGLETON_SAFE: 'matic:0xc8D6C3f866597a63780fdEC4C4Cb08B5C19CDb60',
   /** Isolated stack only (no staging Safe): mainnet Safe whose tokens and positions the local Zerion lists */
   ETH_ZERION_SAFE: 'eth:0x0000000000000000000000000000000000000000',
@@ -96,8 +96,8 @@ export const AB_LOCAL_CONTACT = {
  * checksum casing, so the read-only "selected" chip always renders.
  */
 export const DROPDOWN_TEST_SPACE = {
-  // Legacy numeric space id — accepted by the backend's LegacySpaceIdPipe and what
-  // the Cypress spaces mocks use. `landingSpaceHint` is seeded to this so it resolves.
+  // Legacy numeric space id, accepted by the backend's LegacySpaceIdPipe.
+  // `landingSpaceHint` is seeded to this so it resolves.
   id: '1',
   name: 'E2E Workspace',
 } as const
