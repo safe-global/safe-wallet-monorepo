@@ -94,15 +94,18 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
       cooldownSeconds: 2 * DAY_IN_SECONDS,
     })
 
+    const home = new HomePage(safePage)
     const recovery = new RecoveryPage(safePage)
-    await new HomePage(safePage).goto(safe.prefixedAddress)
+    await home.goto(safe.prefixedAddress)
     await recovery.proposeRecovery(newOwner)
 
     await expect
       .poll(() => readDelayModifier(journey.env, delayModifier))
       .toMatchObject({ txNonce: 0, queueNonce: 1, nextProposalHash: expect.not.stringMatching(ZeroHash) })
 
-    await recovery.openActionRequiredPanel()
+    // The proposal card already shows the panel; the dashboard renders it again, collapsed, once the wallet reads the queue
+    await recovery.inProgressCard.waitFor({ state: 'attached' })
+    await home.expandActionRequired()
     await expect(recovery.inProgressCard).toBeVisible()
     await expect(recovery.inProgressCard).toContainText('Account recovery in progress')
     // Anvil can stamp blocks a few seconds ahead of the browser clock, so the 2-day cooldown can still read 2 days
