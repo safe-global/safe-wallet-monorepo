@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import type { ComponentProps, ReactElement } from 'react'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
@@ -18,7 +18,9 @@ import useIsPending from '@/hooks/useIsPending'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
+import RowActionsMenu from './RowActionsMenu'
 import SignatureGauge from './SignatureGauge'
+import SignersTooltip from './SignersTooltip'
 import { getCounterparty, getNonce, type ConflictOption, type QueueStatus } from './utils'
 
 export const QUEUE_COLUMNS = ['Nonce', 'Transaction', 'To', 'Proposed', 'Signatures', 'Status', 'Action'] as const
@@ -99,9 +101,20 @@ type SpaceQueueRowProps = {
   status: QueueStatus
   nextNonce?: number
   conflict?: ConflictOption
+  /** False when a rejection already holds this nonce */
+  canReject?: boolean
+  rowProps?: ComponentProps<'tr'>
 }
 
-const SpaceQueueRow = ({ item, chainId, status, nextNonce, conflict }: SpaceQueueRowProps): ReactElement => {
+const SpaceQueueRow = ({
+  item,
+  chainId,
+  status,
+  nextNonce,
+  conflict,
+  canReject = true,
+  rowProps,
+}: SpaceQueueRowProps): ReactElement => {
   const { StatusLabel } = useLoadFeature(SwapFeature)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const tx = item.transaction
@@ -113,7 +126,7 @@ const SpaceQueueRow = ({ item, chainId, status, nextNonce, conflict }: SpaceQueu
   const showWarning = isImitation(tx) || (hasDefaultTokenlist && !isTrustedTx(tx))
 
   return (
-    <TableRow data-testid="space-queue-row" className="h-14">
+    <TableRow data-testid="space-queue-row" className="h-14" {...rowProps}>
       <TableCell className="relative py-2 text-center text-sm tabular-nums text-muted-foreground">
         {conflict ? <ConflictBracket {...conflict} nonce={nonce} /> : nonce}
       </TableCell>
@@ -144,13 +157,20 @@ const SpaceQueueRow = ({ item, chainId, status, nextNonce, conflict }: SpaceQueu
 
       <TableCell className="py-1">
         {executionInfo && (
-          <span className="flex items-center gap-1.5 text-sm tabular-nums">
-            <SignatureGauge
-              count={executionInfo.confirmationsSubmitted}
-              threshold={executionInfo.confirmationsRequired}
-            />
-            {executionInfo.confirmationsSubmitted}/{executionInfo.confirmationsRequired}
-          </span>
+          <SignersTooltip
+            chainId={chainId}
+            txId={tx.id}
+            submitted={executionInfo.confirmationsSubmitted}
+            required={executionInfo.confirmationsRequired}
+          >
+            <span className="flex w-fit items-center gap-1.5 text-sm tabular-nums">
+              <SignatureGauge
+                count={executionInfo.confirmationsSubmitted}
+                threshold={executionInfo.confirmationsRequired}
+              />
+              {executionInfo.confirmationsSubmitted}/{executionInfo.confirmationsRequired}
+            </span>
+          </SignersTooltip>
         )}
       </TableCell>
 
@@ -165,7 +185,10 @@ const SpaceQueueRow = ({ item, chainId, status, nextNonce, conflict }: SpaceQueu
       </TableCell>
 
       <TableCell>
-        <div className="flex items-center justify-end">{!expiredSwap && <QueueActions tx={tx} dense />}</div>
+        <div className="flex items-center justify-end gap-1">
+          {!expiredSwap && <QueueActions tx={tx} dense />}
+          <RowActionsMenu tx={tx} canReject={canReject} />
+        </div>
       </TableCell>
     </TableRow>
   )

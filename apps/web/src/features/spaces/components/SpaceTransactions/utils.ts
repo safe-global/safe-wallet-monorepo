@@ -72,6 +72,17 @@ export const getCounterparty = (txInfo: TransactionInfo): { join: string; party:
   return undefined
 }
 
+/** The nonces already held by an on-chain rejection, which a second one would duplicate. */
+export const getRejectedNonces = (rows: QueueRowData[]): Set<number> =>
+  new Set(
+    rows.flatMap((row) => {
+      if (row.kind !== 'transaction') return []
+      const { txInfo } = row.item.transaction
+      const nonce = getNonce(row.item.transaction)
+      return isCustomTxInfo(txInfo) && txInfo.isCancellation && nonce !== undefined ? [nonce] : []
+    }),
+  )
+
 /** The nonce the Safe executes next, or undefined when no loaded row sits under the "Next" label. */
 export const getNextNonce = (rows: QueueRowData[]): number | undefined => {
   const next = rows.find((row) => row.kind === 'transaction' && row.isNext)

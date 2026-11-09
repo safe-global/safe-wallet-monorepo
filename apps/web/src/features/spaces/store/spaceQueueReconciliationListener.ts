@@ -8,7 +8,7 @@ import { clearPendingTx, PendingStatus, selectPendingTxs, type PendingTx } from 
 import { isMultisigExecutionInfo, isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
-import { spaceQueueApi, type SpaceQueue } from './spaceQueueApi'
+import { hasSpaceQueueFilters, spaceQueueApi, type SpaceQueue } from './spaceQueueApi'
 
 const SIGNING_STATES = [PendingStatus.SIGNING, PendingStatus.NESTED_SIGNING]
 const POST_EXECUTION_STATES = [
@@ -122,9 +122,11 @@ export const spaceQueueReconciliationListener = (listenerMiddleware: typeof list
   listenerMiddleware.startListening({
     matcher,
     effect: async (action, { getState, dispatch }) => {
-      const { spaceId } = action.meta.arg.originalArgs
+      const { spaceId, filters } = action.meta.arg.originalArgs
       const queue = action.payload
       reconcileSignatures(queue, getState)
+      // A filtered queue leaves out transactions on purpose, so it cannot tell that one left the queue
+      if (hasSpaceQueueFilters(filters)) return
 
       const settled = Object.entries(selectPendingTxs(getState())).filter(
         ([txId, pendingTx]) =>

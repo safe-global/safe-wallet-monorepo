@@ -59,7 +59,7 @@ const transactionItem = (
 
 const section = (safeAddress: string, chains: SpaceQueueChain[]): SpaceQueueSection => ({ safeAddress, chains })
 
-const visibleRows = () => screen.getAllByTestId('space-queue-row').filter((row) => row.closest('[hidden]') === null)
+const renderedRows = () => screen.queryAllByTestId('space-queue-row')
 
 describe('SpaceQueueTable', () => {
   const chainId = faker.string.numeric(3)
@@ -142,14 +142,14 @@ describe('SpaceQueueTable', () => {
 
     fireEvent.click(screen.getByRole('button', { name: `Collapse ${chainName}` }))
 
-    expect(screen.getByText(`${onChainA.transaction.id} execute ${chainId}`)).not.toBeVisible()
-    expect(screen.getByText(`${onChainB.transaction.id} execute ${otherChainId}`)).toBeVisible()
-    expect(screen.getByText(chainName)).toBeVisible()
+    expect(screen.queryByText(`${onChainA.transaction.id} execute ${chainId}`)).not.toBeInTheDocument()
+    expect(screen.getByText(`${onChainB.transaction.id} execute ${otherChainId}`)).toBeInTheDocument()
+    expect(screen.getByText(chainName)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: `Expand ${chainName}` })).toHaveAttribute('aria-expanded', 'false')
 
     fireEvent.click(screen.getByRole('button', { name: `Expand ${chainName}` }))
 
-    expect(screen.getByText(`${onChainA.transaction.id} execute ${chainId}`)).toBeVisible()
+    expect(screen.getByText(`${onChainA.transaction.id} execute ${chainId}`)).toBeInTheDocument()
   })
 
   it('hides every chain of a collapsed Safe, headers included', () => {
@@ -157,9 +157,9 @@ describe('SpaceQueueTable', () => {
 
     fireEvent.click(screen.getByRole('button', { name: `Collapse ${shortenAddress(safeA)}` }))
 
-    expect(screen.getByText(chainName)).not.toBeVisible()
-    expect(screen.getByText(otherChainName)).not.toBeVisible()
-    expect(visibleRows()).toHaveLength(0)
+    expect(screen.queryByText(chainName)).not.toBeInTheDocument()
+    expect(screen.queryByText(otherChainName)).not.toBeInTheDocument()
+    expect(renderedRows()).toHaveLength(0)
   })
 
   it('collapses one Safe and summarises its transactions in the band', () => {
@@ -167,13 +167,13 @@ describe('SpaceQueueTable', () => {
 
     fireEvent.click(screen.getByRole('button', { name: `Collapse ${shortenAddress(safeA)}` }))
 
-    expect(screen.getByText(`${next.transaction.id} execute ${chainId}`)).not.toBeVisible()
+    expect(screen.queryByText(`${next.transaction.id} execute ${chainId}`)).not.toBeInTheDocument()
     expect(screen.getByText('1 to execute · 1 blocked')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: `Expand ${shortenAddress(safeA)}` })).toHaveAttribute(
       'aria-expanded',
       'false',
     )
-    expect(visibleRows()).toHaveLength(1)
+    expect(renderedRows()).toHaveLength(1)
   })
 
   it('collapses and expands every Safe from the column header', () => {
@@ -181,11 +181,11 @@ describe('SpaceQueueTable', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Collapse all' }))
 
-    screen.getAllByTestId('space-queue-row').forEach((row) => expect(row).not.toBeVisible())
+    expect(renderedRows()).toHaveLength(0)
 
     fireEvent.click(screen.getByRole('button', { name: 'Expand all' }))
 
-    screen.getAllByTestId('space-queue-row').forEach((row) => expect(row).toBeVisible())
+    expect(renderedRows()).toHaveLength(3)
   })
 
   it('puts a conflict header before transactions that share a nonce', () => {
@@ -206,6 +206,25 @@ describe('SpaceQueueTable', () => {
     expect(screen.getByText('Conflicting').closest('tr')).toHaveTextContent(/^5Conflicting/)
     expect(screen.getByText(/Only 1\/2 transactions can execute/)).toBeInTheDocument()
     expect(screen.getAllByTestId('space-queue-row')).toHaveLength(2)
+  })
+
+  it('renders only the rows near the viewport of a long queue', () => {
+    // jsdom lays nothing out: give every row a real height so the virtualizer can measure it
+    const rect = jest
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockReturnValue({ height: 56, width: 1240, top: 0, left: 0, right: 1240, bottom: 56, x: 0, y: 0 } as DOMRect)
+    const items: TransactionQueuedItem[] = Array.from({ length: 300 }, (_, nonce) =>
+      transactionItem('AWAITING_CONFIRMATIONS', nonce),
+    )
+
+    render(<SpaceQueueTable sections={[section(safeA, [{ chainId, items }])]} />)
+
+    const rendered = renderedRows().length
+    expect(rendered).toBeGreaterThan(0)
+    expect(rendered).toBeLessThan(60)
+    // The rows below the window are skeleton placeholders until they render
+    expect(screen.getByTestId('space-queue-skeleton')).toBeInTheDocument()
+    rect.mockRestore()
   })
 
   it('has no Show more', () => {

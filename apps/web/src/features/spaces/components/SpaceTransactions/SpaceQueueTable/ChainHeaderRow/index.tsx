@@ -1,4 +1,4 @@
-import type { ReactElement } from 'react'
+import type { ComponentProps, ReactElement } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
@@ -10,18 +10,18 @@ const ChainHeaderRow = ({
   nextNonce,
   collapsed,
   onToggle,
-  controls,
+  rowProps,
 }: {
   chainId: string
   nextNonce?: number
   collapsed: boolean
   onToggle: () => void
-  controls: string
+  rowProps?: ComponentProps<'tr'>
 }): ReactElement => {
   const chain = useChain(chainId)
   const chainName = chain?.chainName ?? chainId
   return (
-    <TableRow data-no-hover className="cursor-pointer" onClick={onToggle}>
+    <TableRow data-no-hover className="cursor-pointer" onClick={onToggle} {...rowProps}>
       <TableCell className="py-0!">
         <span className="flex justify-center">
           <Button
@@ -29,7 +29,6 @@ const ChainHeaderRow = ({
             variant="ghost-muted"
             aria-label={`${collapsed ? 'Expand' : 'Collapse'} ${chainName}`}
             aria-expanded={!collapsed}
-            aria-controls={controls}
           >
             <ChevronDown className={`transition-transform ${collapsed ? '-rotate-90' : ''}`} />
           </Button>

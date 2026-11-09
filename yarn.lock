@@ -14506,7 +14506,8 @@ __metadata:
     "@svgr/plugin-jsx": "npm:^8.1.0"
     "@svgr/webpack": "npm:^8.1.0"
     "@tailwindcss/postcss": "npm:^4.1.18"
-    "@testing-library/dom": "npm:^10.4.2"
+    "@tanstack/react-virtual": "npm:^3.13.12"
+    "@testing-library/cypress": "npm:^10.1.3"
     "@testing-library/jest-dom": "npm:^6.6.3"
     "@testing-library/react": "npm:^16.3.3"
     "@testing-library/user-event": "npm:^14.6.8"
@@ -18645,9 +18646,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/router-core@npm:1.171.39":
-  version: 1.171.39
-  resolution: "@tanstack/router-core@npm:1.171.39"
+"@tanstack/react-virtual@npm:^3.13.12":
+  version: 3.14.25
+  resolution: "@tanstack/react-virtual@npm:3.14.25"
+  dependencies:
+    "@tanstack/virtual-core": "npm:3.19.10"
+  peerDependencies:
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+    react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10/0f680fc22bb864b64d308e1a16ed27103bf00549196ad0d3775fcd5d0369083321a2d8d97e5c6480c1e2923170e13d8629188e4c4ab6381631db4d90639d9385
+  languageName: node
+  linkType: hard
+
+"@tanstack/router-core@npm:1.159.4":
+  version: 1.159.4
+  resolution: "@tanstack/router-core@npm:1.159.4"
   dependencies:
     "@tanstack/history": "npm:1.162.5"
     cookie-es: "npm:^3.0.0"
@@ -18690,10 +18703,45 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/store@npm:0.11.2":
-  version: 0.11.2
-  resolution: "@tanstack/store@npm:0.11.2"
-  checksum: 10/0fac536c35b1f3fa5955899c1f4d5385d5c0a44c5d1d6490a397f92f3c1e951ced4beba556a2dbb429892975d3dec8702c1a5c4216d71cdd08adcc01ac20facc
+"@tanstack/store@npm:0.8.1, @tanstack/store@npm:^0.8.0":
+  version: 0.8.1
+  resolution: "@tanstack/store@npm:0.8.1"
+  checksum: 10/63eff25a4a3f601c2af38be3637fea127bde9495d5ac128b85adc277c066c7254629b5d0b5853e09b25b7005a8d215cae98aeb5244bdb12997ac8bb880d31fcc
+  languageName: node
+  linkType: hard
+
+"@tanstack/virtual-core@npm:3.19.10":
+  version: 3.19.10
+  resolution: "@tanstack/virtual-core@npm:3.19.10"
+  checksum: 10/31adc74a618a1cdab62ed0340b7fe19ebc5dad9332683869371292c1a9c0b3d58be271ad8f0c4f41f6717dd35e392dcd03a88144895e58a2746d70250384f759
+  languageName: node
+  linkType: hard
+
+"@testing-library/cypress@npm:^10.1.3":
+  version: 10.1.3
+  resolution: "@testing-library/cypress@npm:10.1.3"
+  dependencies:
+    "@babel/runtime": "npm:^7.14.6"
+    "@testing-library/dom": "npm:^10.1.0"
+  peerDependencies:
+    cypress: ">=12"
+  checksum: 10/11b25561cbf4c5b071482fa9f1d4f8b817512cbe301da8bbaf6670b5a3947aeff344787fe8d95bf20049ee0d907d68ca92d6ffdb65ccfd9a4aca4cf435582139
+  languageName: node
+  linkType: hard
+
+"@testing-library/dom@npm:^10.1.0":
+  version: 10.4.0
+  resolution: "@testing-library/dom@npm:10.4.0"
+  dependencies:
+    "@babel/code-frame": "npm:^7.10.4"
+    "@babel/runtime": "npm:^7.12.5"
+    "@types/aria-query": "npm:^5.0.1"
+    aria-query: "npm:5.3.0"
+    chalk: "npm:^4.1.0"
+    dom-accessibility-api: "npm:^0.5.9"
+    lz-string: "npm:^1.5.0"
+    pretty-format: "npm:^27.0.2"
+  checksum: 10/05825ee9a15b88cbdae12c137db7111c34069ed3c7a1bd03b6696cb1b37b29f6f2d2de581ebf03033e7df1ab7ebf08399310293f440a4845d95c02c0a9ecc899
   languageName: node
   linkType: hard
 

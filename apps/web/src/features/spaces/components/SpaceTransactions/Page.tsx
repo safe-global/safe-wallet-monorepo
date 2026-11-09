@@ -3,7 +3,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@safe-global/views/com
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { cn } from '@safe-global/views/utils/cn'
 import AuthState from '../AuthState'
-import NewTransactionButton from './NewTransactionButton'
 import SpaceTransactionQueue from './SpaceTransactionQueue'
 
 export default function SpaceTransactionsPage({ spaceId }: { spaceId: string }) {
@@ -12,11 +11,10 @@ export default function SpaceTransactionsPage({ spaceId }: { spaceId: string }) 
   return (
     <AuthState spaceId={spaceId}>
       <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
-        <div className="mb-6 flex items-center justify-between gap-6">
+        <div className="mb-6 flex flex-col gap-6">
           <Typography variant="h2" className="font-bold leading-[1] tracking-tight">
             Transactions
           </Typography>
-          <NewTransactionButton spaceId={spaceId} />
         </div>
 
         <Tabs defaultValue="pending">

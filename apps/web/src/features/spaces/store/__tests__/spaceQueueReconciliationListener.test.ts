@@ -20,7 +20,7 @@ import {
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { transactionDetailsBuilder } from '@/tests/builders/transactionDetails'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
-import { spaceQueueApi } from '../spaceQueueApi'
+import { spaceQueueApi, type SpaceQueueFilters } from '../spaceQueueApi'
 import { spaceQueueReconciliationListener } from '../spaceQueueReconciliationListener'
 
 jest.mock('@/services/tx/txEvents', () => ({
@@ -81,6 +81,7 @@ const page = (resultList: QueueResults[], overrides: Partial<SpaceQueuedItemPage
     return all
   }, {}),
   unavailableSafes: [],
+  counts: { total: 0, execute: 0, sign: 0, blocked: 0, waiting: 0, conflicting: 0, stale: 0, safes: [] },
   ...overrides,
 })
 
@@ -107,8 +108,8 @@ const respondWithDetails = (
 const respondWithSpaceSafes = (safes: Record<string, string[]>) =>
   server.use(http.get(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () => HttpResponse.json({ safes })))
 
-const pollQueue = async (store: TestStore) => {
-  await store.dispatch(spaceQueueApi.endpoints.getSpaceQueue.initiate({ spaceId }))
+const pollQueue = async (store: TestStore, filters?: SpaceQueueFilters) => {
+  await store.dispatch(spaceQueueApi.endpoints.getSpaceQueue.initiate({ spaceId, filters }))
 }
 
 const processingTx = (nonce: number, safe = safeAddress): PendingProcessingTx => ({
@@ -323,6 +324,22 @@ describe('spaceQueueReconciliationListener', () => {
     await waitFor(() =>
       expect(mockTxDispatch).toHaveBeenCalledWith(TxEvent.SUCCESS, expect.objectContaining({ txId: id })),
     )
+  })
+
+  it('should leave a pending tx untouched when a filtered queue leaves it out', async () => {
+    const store = makeTestStore()
+    const id = txId()
+    const pendingTx = processingTx(4)
+    store.dispatch(setPendingTx({ txId: id, ...pendingTx }))
+    respondWithSpaceSafes({ [chainId]: [safeAddress] })
+    await store.dispatch(spacesApi.endpoints.spaceSafesGetV1.initiate({ spaceId }))
+    respondWithQueue(page([results([queuedTx(txId(), 2)], faker.string.numeric(5))]))
+    respondWithDetails(id, { txStatus: TransactionStatus.SUCCESS })
+
+    await pollQueue(store, { statuses: ['sign'], safes: [] })
+
+    expect(store.getState().pendingTxs[id]).toEqual(pendingTx)
+    expect(mockTxDispatch).not.toHaveBeenCalledWith(TxEvent.SUCCESS, expect.anything())
   })
 
   it('should leave a pending tx untouched while its nonce is still queued', async () => {

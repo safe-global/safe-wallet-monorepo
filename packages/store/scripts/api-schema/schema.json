@@ -7959,9 +7959,49 @@
     },
     "/v1/spaces/{spaceId}/transactions/queued": {
       "get": {
-        "description": "Retrieves the pending transactions of every Safe in a Space, across chains, in nonce order. Results are keyed by Safe address and then by chain ID. The queue is read up to a maximum number of queue service pages; `count` is the size of the whole queue.",
+        "description": "Retrieves the pending transactions of every Safe in a Space, across chains, in nonce order. Results are keyed by Safe address and then by chain ID. The queue is read up to a maximum number of queue service pages; `count` is the size of the whole queue. The filters narrow `results`; `counts` are faceted, each applying every filter but its own. A matching transaction is returned with the rest of its conflict group and its label.",
         "operationId": "spaceTransactionsGetTransactionQueueV1",
         "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Keep the transactions with one of these statuses, comma-separated. `sign` is a transaction one of the caller wallets still has to sign.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "safes",
+            "required": false,
+            "in": "query",
+            "description": "Keep the transactions of these Safes, comma-separated as `{chainId}:{safeAddress}`",
+            "schema": {
+              "example": "11155111:0x0000000000000000000000000000000000000000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "conflicting",
+            "required": false,
+            "in": "query",
+            "description": "Keep the transactions sharing their nonce with another",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "stale",
+            "required": false,
+            "in": "query",
+            "description": "Keep the transactions proposed more than 7 days ago",
+            "schema": {
+              "type": "boolean"
+            }
+          },
           {
             "name": "spaceId",
             "required": true,
@@ -7994,6 +8034,9 @@
           },
           "404": {
             "description": "Space not found"
+          },
+          "422": {
+            "description": "Unknown status, invalid CAIP-10 address or non-boolean flag"
           }
         },
         "summary": "Get the transaction queue of a Space",
@@ -19394,6 +19437,14 @@
             "items": {
               "$ref": "#/components/schemas/SpaceQueueSafe"
             }
+          },
+          "counts": {
+            "description": "Faceted counts of the queue read: the status counts apply the `safes` filter but not the status filters, and `safes` applies the status filters but not the `safes` filter",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpaceQueueCounts"
+              }
+            ]
           }
         },
         "required": [
@@ -19401,7 +19452,8 @@
           "next",
           "previous",
           "results",
-          "unavailableSafes"
+          "unavailableSafes",
+          "counts"
         ]
       },
       "SpaceQueueSafe": {
@@ -19417,6 +19469,76 @@
         "required": [
           "chainId",
           "safeAddress"
+        ]
+      },
+      "SpaceQueueCounts": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number",
+            "description": "Transactions of the selected Safes, the sum of execute, sign, blocked and waiting"
+          },
+          "execute": {
+            "type": "number",
+            "description": "Fully signed and next in line on their Safe and chain"
+          },
+          "sign": {
+            "type": "number",
+            "description": "Awaiting a signature from one of the caller wallets"
+          },
+          "blocked": {
+            "type": "number",
+            "description": "Fully signed but behind an earlier nonce"
+          },
+          "waiting": {
+            "type": "number",
+            "description": "Awaiting signatures from other owners only"
+          },
+          "conflicting": {
+            "type": "number",
+            "description": "Sharing their nonce with another transaction"
+          },
+          "stale": {
+            "type": "number",
+            "description": "Proposed more than 7 days ago"
+          },
+          "safes": {
+            "description": "Every Safe and chain of the queue read, with how many of its transactions match the status filters",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpaceQueueSafeCount"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "execute",
+          "sign",
+          "blocked",
+          "waiting",
+          "conflicting",
+          "stale",
+          "safes"
+        ]
+      },
+      "SpaceQueueSafeCount": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "safeAddress": {
+            "type": "string"
+          },
+          "count": {
+            "type": "number",
+            "description": "Transactions of this Safe on this chain that match the status filters"
+          }
+        },
+        "required": [
+          "chainId",
+          "safeAddress",
+          "count"
         ]
       }
     }

@@ -66,6 +66,7 @@ const queue = (items: TransactionQueuedItem[]): SpaceQueue => ({
   shownCount: items.length,
   totalCount: items.length,
   isComplete: true,
+  counts: { total: 0, execute: 0, sign: 0, blocked: 0, waiting: 0, conflicting: 0, stale: 0, safes: [] },
 })
 
 let queueSpy: jest.SpyInstance

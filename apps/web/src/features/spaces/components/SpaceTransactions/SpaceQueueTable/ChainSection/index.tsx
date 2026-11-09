@@ -1,8 +1,8 @@
-import { useState, type ReactElement } from 'react'
+import { useMemo, useState, type ReactElement } from 'react'
 import { TableBody } from '@safe-global/views/components/ui/table'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import SpaceQueueRow from '../../SpaceQueueRow'
-import { getSafeKey, type QueueRowData, type QueueStatus } from '../../utils'
+import { getNonce, getRejectedNonces, getSafeKey, type QueueRowData, type QueueStatus } from '../../utils'
 import ChainHeaderRow from '../ChainHeaderRow'
 import ConflictHeaderRow from '../ConflictHeaderRow'
 
@@ -26,6 +26,7 @@ const ChainSection = ({
 }): ReactElement => {
   const [collapsed, setCollapsed] = useState(false)
   const id = getChainSectionId(getSafeKey(safeAddress), chainId)
+  const rejectedNonces = useMemo(() => getRejectedNonces(rows), [rows])
 
   return (
     <SafeScopeProvider initial={{ chainId, safeAddress }} pollSafeInfo={false}>
@@ -35,7 +36,6 @@ const ChainSection = ({
           nextNonce={nextNonce}
           collapsed={collapsed}
           onToggle={() => setCollapsed((value) => !value)}
-          controls={id}
         />
       </TableBody>
       <TableBody id={id} hidden={hidden || collapsed}>
@@ -50,6 +50,7 @@ const ChainSection = ({
               conflict={row.conflict}
               status={statuses[index] ?? 'waiting'}
               nextNonce={nextNonce}
+              canReject={!rejectedNonces.has(getNonce(row.item.transaction) ?? -1)}
             />
           ),
         )}

@@ -1,12 +1,20 @@
-import type { ReactElement } from 'react'
+import { memo, useDeferredValue, useState, type ReactElement } from 'react'
 import PagePlaceholder from '@safe-global/views/components/common/PagePlaceholder'
 import SkeletonTxList from '@safe-global/views/components/common/PaginatedTxns/SkeletonTxList'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import NoTransactionsIcon from '@/public/images/transactions/no-transactions.svg'
-import { useGetSpaceQueueQuery } from '../../store/spaceQueueApi'
+import {
+  hasSpaceQueueFilters,
+  NO_SPACE_QUEUE_FILTERS,
+  useGetSpaceQueueQuery,
+  type SpaceQueue,
+  type SpaceQueueFilters,
+} from '../../store/spaceQueueApi'
 import SpaceQueueTable from './SpaceQueueTable'
+import TransactionsToolbar from './TransactionsToolbar'
+import UnavailableSafesAlert from './UnavailableSafesAlert'
 
 const LoadError = ({ onRetry }: { onRetry: () => void }): ReactElement => (
   <div className="flex flex-col items-start gap-3">
@@ -17,38 +25,88 @@ const LoadError = ({ onRetry }: { onRetry: () => void }): ReactElement => (
   </div>
 )
 
-const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement => {
-  const { currentData, isError, refetch } = useGetSpaceQueueQuery({ spaceId })
+const getEmptyText = (isFiltered: boolean, isSearching: boolean): string => {
+  if (isSearching) return 'No pending transactions match your search'
+  if (isFiltered) return 'No pending transactions match these filters'
+  return 'Pending transactions of your Safe accounts will appear here'
+}
 
-  if (!currentData) return isError ? <LoadError onRetry={refetch} /> : <SkeletonTxList />
-
-  const { sections, unavailableSafes } = currentData
+const QueueBody = memo(function QueueBody({
+  spaceId,
+  queue,
+  isFiltered,
+  isSearching,
+  isFetching,
+  onRetry,
+}: {
+  spaceId: string
+  queue: SpaceQueue
+  isFiltered: boolean
+  isSearching: boolean
+  isFetching: boolean
+  onRetry: () => void
+}): ReactElement {
+  const { sections, unavailableSafes } = queue
   // The gateway answers a failed queue read with every Safe unavailable rather than an error
-  if (sections.length === 0 && unavailableSafes.length > 0) return <LoadError onRetry={refetch} />
+  if (sections.length === 0 && unavailableSafes.length > 0) return <LoadError onRetry={onRetry} />
 
   return (
-    <div className="flex flex-col gap-6">
+    <>
       {unavailableSafes.length > 0 && (
-        <Typography variant="paragraph-small" color="muted">
-          {unavailableSafes.length === 1
-            ? "1 Safe account couldn't be loaded, so its transactions aren't shown."
-            : `${unavailableSafes.length} Safe accounts couldn't be loaded, so their transactions aren't shown.`}
-        </Typography>
+        <UnavailableSafesAlert spaceId={spaceId} safes={unavailableSafes} onRetry={onRetry} isRetrying={isFetching} />
       )}
 
-      {!currentData.isComplete && (
+      {!queue.isComplete && (
         <Typography variant="paragraph-small" color="muted">
-          Showing {currentData.shownCount} of {currentData.totalCount} pending transactions.
+          Showing {queue.shownCount} of {queue.totalCount} pending transactions.
         </Typography>
       )}
 
       {sections.length > 0 ? (
         <SpaceQueueTable sections={sections} />
       ) : (
-        <PagePlaceholder
-          img={<NoTransactionsIcon />}
-          text="Pending transactions of your Safe accounts will appear here"
+        <PagePlaceholder img={<NoTransactionsIcon />} text={getEmptyText(isFiltered, isSearching)} />
+      )}
+    </>
+  )
+})
+
+const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement => {
+  const [filters, setFilters] = useState<SpaceQueueFilters>(NO_SPACE_QUEUE_FILTERS)
+  const [search, setSearch] = useState('')
+  // The toolbar shows a click at once; the table follows in a render that doesn't block it
+  const queryFilters = useDeferredValue(filters)
+  const querySearch = useDeferredValue(search)
+  // `data` keeps the last answer while a new filter loads, so the menus keep their counts
+  const { data, currentData, isError, isFetching, refetch } = useGetSpaceQueueQuery({
+    spaceId,
+    filters: queryFilters,
+    ...(querySearch && { search: querySearch }),
+  })
+
+  return (
+    <div className="flex flex-col gap-6">
+      <TransactionsToolbar
+        spaceId={spaceId}
+        counts={data?.counts}
+        filters={filters}
+        onFiltersChange={setFilters}
+        onSearchChange={setSearch}
+      />
+
+      {currentData ? (
+        <QueueBody
+          spaceId={spaceId}
+          queue={currentData}
+          isFetching={isFetching}
+          isFiltered={hasSpaceQueueFilters(queryFilters)}
+          isSearching={querySearch !== ''}
+          onRetry={refetch}
         />
+      ) : isError ? (
+        <LoadError onRetry={refetch} />
+      ) : (
+        <SkeletonTxList />
       )}
     </div>
   )

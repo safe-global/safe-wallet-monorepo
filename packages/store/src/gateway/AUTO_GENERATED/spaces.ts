@@ -279,7 +279,15 @@ const injectedRtkApi = api
         SpaceTransactionsGetTransactionQueueV1ApiResponse,
         SpaceTransactionsGetTransactionQueueV1ApiArg
       >({
-        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/transactions/queued` }),
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/transactions/queued`,
+          params: {
+            status: queryArg.status,
+            safes: queryArg.safes,
+            conflicting: queryArg.conflicting,
+            stale: queryArg.stale,
+          },
+        }),
         providesTags: ['transactions'],
       }),
     }),
@@ -550,6 +558,14 @@ export type SpacePoliciesGetPendingPoliciesV1ApiArg = {
 export type SpaceTransactionsGetTransactionQueueV1ApiResponse =
   /** status 200 Queue of the Safes in the Space */ SpaceQueuedItemPage
 export type SpaceTransactionsGetTransactionQueueV1ApiArg = {
+  /** Keep the transactions with one of these statuses, comma-separated. `sign` is a transaction one of the caller wallets still has to sign. */
+  status?: string[]
+  /** Keep the transactions of these Safes, comma-separated as `{chainId}:{safeAddress}` */
+  safes?: string
+  /** Keep the transactions sharing their nonce with another */
+  conflicting?: boolean
+  /** Keep the transactions proposed more than 7 days ago */
+  stale?: boolean
   /** Space UUID */
   spaceId: string
 }
@@ -1641,6 +1657,30 @@ export type SpaceQueueSafe = {
   chainId: string
   safeAddress: string
 }
+export type SpaceQueueSafeCount = {
+  chainId: string
+  safeAddress: string
+  /** Transactions of this Safe on this chain that match the status filters */
+  count: number
+}
+export type SpaceQueueCounts = {
+  /** Transactions of the selected Safes, the sum of execute, sign, blocked and waiting */
+  total: number
+  /** Fully signed and next in line on their Safe and chain */
+  execute: number
+  /** Awaiting a signature from one of the caller wallets */
+  sign: number
+  /** Fully signed but behind an earlier nonce */
+  blocked: number
+  /** Awaiting signatures from other owners only */
+  waiting: number
+  /** Sharing their nonce with another transaction */
+  conflicting: number
+  /** Proposed more than 7 days ago */
+  stale: number
+  /** Every Safe and chain of the queue read, with how many of its transactions match the status filters */
+  safes: SpaceQueueSafeCount[]
+}
 export type SpaceQueuedItemPage = {
   /** Size of the whole queue, which can exceed the items returned when the queue is longer than the pages read */
   count: number | null
@@ -1656,6 +1696,8 @@ export type SpaceQueuedItemPage = {
   }
   /** Space Safes whose queue is missing from this response because their Safe information could not be loaded or the Space exceeds the Safes one request can cover. */
   unavailableSafes: SpaceQueueSafe[]
+  /** Faceted counts of the queue read: the status counts apply the `safes` filter but not the status filters, and `safes` applies the status filters but not the `safes` filter */
+  counts: SpaceQueueCounts
 }
 export const {
   useAddressBooksGetAddressBookItemsV1Query,
