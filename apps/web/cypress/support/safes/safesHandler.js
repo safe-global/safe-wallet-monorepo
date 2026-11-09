@@ -2,7 +2,6 @@ export const CATEGORIES = {
   funds: 'funds',
   nfts: 'nfts',
   static: 'static',
-  safeapps: 'safeapps',
 }
 
 function loadSafesModule(categoryKey) {

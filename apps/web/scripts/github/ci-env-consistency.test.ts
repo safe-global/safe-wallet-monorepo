@@ -5,13 +5,7 @@ const REPO_ROOT = path.resolve(__dirname, '../../../..')
 const WEB_ROOT = path.resolve(__dirname, '../..')
 const MANIFEST = 'apps/web/scripts/github/ci-env-manifest.json'
 
-const WORKFLOWS = [
-  'web-deploy-dev.yml',
-  'web-tag-release.yml',
-  'web-nextjs-bundle-analysis.yml',
-  'web-e2e-full-ondemand.yml',
-  'web-argos-e2e.yml',
-]
+const WORKFLOWS = ['web-deploy-dev.yml', 'web-tag-release.yml', 'web-nextjs-bundle-analysis.yml', 'web-argos-e2e.yml']
 
 const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'])
 const IGNORED_DIRS = new Set(['node_modules', 'dist', 'build', '.next', '__tests__', '__mocks__'])
