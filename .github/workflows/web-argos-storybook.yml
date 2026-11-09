@@ -173,13 +173,6 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Save the manifest for the next dev commit
-        if: github.event_name == 'push'
-        uses: actions/cache/save@v5.0.5
-        with:
-          path: apps/web/sheets-manifest.json
-          key: storybook-sheets-manifest-${{ github.sha }}
-
       # On dev, a merge that changed no sheet keeps the last baseline
       - name: Upload to Argos
         if: github.event_name != 'push' || steps.diff.outputs.changed == 'true'
@@ -189,6 +182,14 @@ jobs:
           ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN_E2E }}
           ARGOS_REFERENCE_BRANCH: ${{ inputs.reference_branch || 'dev' }}
           ARGOS_REFERENCE_COMMIT: ${{ inputs.reference_commit || '' }}
+
+      # After the upload: a failed upload skips this, so the next dev merge still sees the change
+      - name: Save the manifest for the next dev commit
+        if: github.event_name == 'push'
+        uses: actions/cache/save@v5.0.5
+        with:
+          path: apps/web/sheets-manifest.json
+          key: storybook-sheets-manifest-${{ github.sha }}
 
       # A story broken on dev is already merged; warn on push runs instead of failing every later merge
       - name: Report broken stories
