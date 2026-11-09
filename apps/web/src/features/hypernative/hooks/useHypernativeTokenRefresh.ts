@@ -5,6 +5,7 @@ import {
   AUTH_COOKIE_CHANGE_EVENT,
   clearAuthCookie,
   getAuthCookieData,
+  getUsableRefreshToken,
   markRefreshAbandoned,
 } from '../store/cookieStorage'
 import {
@@ -24,6 +25,7 @@ export const useHypernativeTokenRefresh = (): void => {
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined
     let isBusy = false
+    let isWaitingForOnline = false
     let isUnmounted = false
 
     const exchange: ExchangeRefreshToken = (refreshToken) =>
@@ -56,22 +58,29 @@ export const useHypernativeTokenRefresh = (): void => {
         clearAuthCookie()
       } else if (step.type === 'abandon') {
         markRefreshAbandoned(refreshToken)
-      } else if (step.type === 'done') {
+      } else if (step.type === 'wait-for-online') {
+        isWaitingForOnline = true
+      } else {
         scheduleRefresh()
       }
     }
 
     const scheduleRefresh = () => {
-      if (isBusy) {
+      if (isBusy || isWaitingForOnline) {
         return
       }
       const data = getAuthCookieData()
-      const refreshToken = data?.refreshToken
-      if (!refreshToken || data.refreshAbandoned) {
+      const refreshToken = data ? getUsableRefreshToken(data) : undefined
+      if (!data || !refreshToken) {
         clearTimeout(timer)
         return
       }
       runAfter(getRefreshDelayMs(data.expiry, Date.now()), () => attemptRefresh(refreshToken, 0))
+    }
+
+    const handleOnline = () => {
+      isWaitingForOnline = false
+      scheduleRefresh()
     }
 
     // Timers can stall while the device sleeps, so re-check whenever the app comes back
@@ -83,7 +92,7 @@ export const useHypernativeTokenRefresh = (): void => {
 
     document.addEventListener('visibilitychange', handleVisibilityChange)
     window.addEventListener('focus', scheduleRefresh)
-    window.addEventListener('online', scheduleRefresh)
+    window.addEventListener('online', handleOnline)
     window.addEventListener(AUTH_COOKIE_CHANGE_EVENT, scheduleRefresh)
     scheduleRefresh()
 
@@ -92,7 +101,7 @@ export const useHypernativeTokenRefresh = (): void => {
       clearTimeout(timer)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
       window.removeEventListener('focus', scheduleRefresh)
-      window.removeEventListener('online', scheduleRefresh)
+      window.removeEventListener('online', handleOnline)
       window.removeEventListener(AUTH_COOKIE_CHANGE_EVENT, scheduleRefresh)
     }
   }, [exchangeToken])

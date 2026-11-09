@@ -1,4 +1,4 @@
-import { getAuthCookieData, setAuthCookie, type AuthTokens } from '../store/cookieStorage'
+import { getAuthCookieData, getUsableRefreshToken, setAuthCookie, type AuthTokens } from '../store/cookieStorage'
 
 export const REFRESH_MARGIN_MS = 60_000
 
@@ -13,7 +13,7 @@ const REFRESH_LOCK_NAME = 'hypernative-auth-refresh'
 // RFC 6749 §5.2 codes after which only a new sign-in helps
 const TERMINAL_OAUTH_ERRORS = ['invalid_grant', 'invalid_client', 'unsupported_grant_type', 'invalid_request']
 
-export type RefreshOutcome = 'refreshed' | 'superseded' | 'abandoned' | 'terminal' | 'transient'
+export type RefreshOutcome = 'refreshed' | 'superseded' | 'unusable' | 'terminal' | 'transient'
 
 export type RefreshStep =
   | { type: 'done' }
@@ -79,8 +79,8 @@ const runRefresh = async (refreshToken: string, exchange: ExchangeRefreshToken):
   if (current?.refreshToken !== refreshToken) {
     return 'superseded'
   }
-  if (current.refreshAbandoned) {
-    return 'abandoned'
+  if (getUsableRefreshToken(current) === undefined) {
+    return 'unusable'
   }
 
   try {

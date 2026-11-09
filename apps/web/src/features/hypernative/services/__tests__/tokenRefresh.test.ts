@@ -55,7 +55,7 @@ describe('tokenRefresh', () => {
   })
 
   describe('getNextRefreshStep', () => {
-    it.each(['refreshed', 'superseded', 'abandoned'] as const)('is done after %s', (outcome) => {
+    it.each(['refreshed', 'superseded', 'unusable'] as const)('is done after %s', (outcome) => {
       expect(getNextRefreshStep(outcome, 0, true)).toEqual({ type: 'done' })
     })
 
@@ -130,9 +130,26 @@ describe('tokenRefresh', () => {
       markRefreshAbandoned('refresh-1')
       const exchange = jest.fn()
 
-      await expect(refreshAuthToken('refresh-1', exchange)).resolves.toBe('abandoned')
+      await expect(refreshAuthToken('refresh-1', exchange)).resolves.toBe('unusable')
 
       expect(exchange).not.toHaveBeenCalled()
+    })
+
+    it('never sends a token after its refresh window closed', async () => {
+      setAuthCookie({
+        access_token: 'access-1',
+        token_type: 'Bearer',
+        expires_in: 300,
+        refresh_token: 'refresh-1',
+        refresh_expires_in: 30,
+      })
+      jest.spyOn(Date, 'now').mockReturnValue(Date.now() + 31_000)
+      const exchange = jest.fn()
+
+      await expect(refreshAuthToken('refresh-1', exchange)).resolves.toBe('unusable')
+
+      expect(exchange).not.toHaveBeenCalled()
+      jest.restoreAllMocks()
     })
 
     it.each(['invalid_grant', 'invalid_client', 'unsupported_grant_type', 'invalid_request'])(

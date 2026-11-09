@@ -159,6 +159,16 @@ describe('useHypernativeTokenRefresh', () => {
     expect(mockExchange).toHaveBeenCalledTimes(1)
   })
 
+  it('keeps a valid access token without a refresh once the refresh window closed', async () => {
+    setAuthCookie({ ...tokensFor(1, 300), refresh_expires_in: 30 })
+
+    renderHook(() => useHypernativeTokenRefresh())
+    await advance(250_000)
+
+    expect(mockExchange).not.toHaveBeenCalled()
+    expect(getAuthCookieData()?.token).toBe('access-1')
+  })
+
   it('keeps a token whose retries ran out offline and sends it again when the browser is online', async () => {
     setOnline(false)
     mockExchange.mockRejectedValue({ message: 'Rejected' })
@@ -169,7 +179,8 @@ describe('useHypernativeTokenRefresh', () => {
     expect(mockExchange).toHaveBeenCalledTimes(5)
     expect(getAuthCookieData()?.refreshAbandoned).toBeUndefined()
 
-    await advance(5_000)
+    act(() => window.dispatchEvent(new Event('focus')))
+    await advance(20_000)
     expect(mockExchange).toHaveBeenCalledTimes(5)
 
     setOnline(true)

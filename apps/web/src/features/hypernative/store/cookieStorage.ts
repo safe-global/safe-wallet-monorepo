@@ -18,7 +18,7 @@ export type AuthTokens = Pick<
 /**
  * Authentication data structure stored in cookie
  */
-interface AuthTokenData {
+export interface AuthTokenData {
   token: string
   tokenType: string
   expiry: number // timestamp in milliseconds
@@ -64,7 +64,7 @@ const writeAuthCookie = (data: AuthTokenData, maxAgeInSeconds: number): void => 
 /**
  * Helper function to get and parse auth cookie data
  * Handles expiration checks and cleanup of expired/invalid cookies.
- * A cookie with a usable refresh token lives until the refresh window closes.
+ * A cookie with a usable refresh token lives until both tokens have expired.
  * @returns Parsed auth token data or undefined if not found, expired, or invalid
  */
 export const getAuthCookieData = (): AuthTokenData | undefined => {
@@ -76,7 +76,8 @@ export const getAuthCookieData = (): AuthTokenData | undefined => {
   try {
     const data: AuthTokenData = JSON.parse(cookieValue)
     const refreshExpiry = data.refreshToken && !data.refreshAbandoned ? data.refreshExpiry : undefined
-    if (Date.now() >= (refreshExpiry ?? data.expiry)) {
+    const clearAt = refreshExpiry === undefined ? data.expiry : Math.max(data.expiry, refreshExpiry)
+    if (Date.now() >= clearAt) {
       clearAuthCookie()
       return undefined
     }
@@ -105,11 +106,23 @@ export const setAuthCookie = ({
   if (refresh_token && refresh_expires_in !== undefined) {
     data.refreshToken = refresh_token
     data.refreshExpiry = now + refresh_expires_in * 1000
-    writeAuthCookie(data, refresh_expires_in)
+    // Near the end of the refresh window the refresh token can expire before the access token
+    writeAuthCookie(data, Math.max(expires_in, refresh_expires_in))
     return
   }
 
   writeAuthCookie(data, expires_in)
+}
+
+/**
+ * @param data - The auth cookie data
+ * @returns The refresh token, or undefined when it is missing, abandoned or past its window
+ */
+export const getUsableRefreshToken = (data: AuthTokenData): string | undefined => {
+  if (!data.refreshToken || data.refreshAbandoned || data.refreshExpiry === undefined) {
+    return undefined
+  }
+  return Date.now() < data.refreshExpiry ? data.refreshToken : undefined
 }
 
 /**
@@ -118,10 +131,10 @@ export const setAuthCookie = ({
  */
 export const markRefreshAbandoned = (refreshToken: string): void => {
   const data = getAuthCookieData()
-  if (!data || data.refreshToken !== refreshToken || data.refreshExpiry === undefined) {
+  if (!data || data.refreshToken !== refreshToken) {
     return
   }
-  writeAuthCookie({ ...data, refreshAbandoned: true }, (data.refreshExpiry - Date.now()) / 1000)
+  writeAuthCookie({ ...data, refreshAbandoned: true }, (data.expiry - Date.now()) / 1000)
 }
 
 /**
