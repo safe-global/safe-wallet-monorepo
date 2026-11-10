@@ -167,17 +167,33 @@ const ASSET_TIMEOUT_MS = 5000
 const VIEWPORT = { width: 1280, height: 900 }
 const MAX_VIEWPORT_HEIGHT = 8000
 
+const pageHeight = (page: Page) => page.evaluate(() => document.documentElement.scrollHeight)
+
+// Full-page stories are fitted once
+const fittedPages = new WeakSet<Page>()
+
 // Full-page stories get a viewport as tall as the page, like a user with a very tall window: the fixed sidebar
-// then spans the whole sheet instead of stopping at 900px. Other stories keep the default height, grown over
-// any iframe below it, since Chrome leaves iframes below the viewport blank in a full-page screenshot.
-// Runs before every screenshot, so the height follows the final layout. Returns whether it changed the viewport.
+// then spans the whole sheet instead of stopping at 900px. A screen-sized layout (min-h-screen, 100vh) grows with
+// the viewport instead, so it keeps the default height, as a user sees it. Other stories keep the default height,
+// grown over any iframe below it, since Chrome leaves iframes below the viewport blank in a full-page screenshot.
+// Returns whether it changed the viewport.
 async function fitViewport(page: Page, openRequests: () => number): Promise<boolean> {
-  const needed = await page.evaluate(() =>
-    document.body.classList.contains('sb-main-fullscreen')
-      ? document.documentElement.scrollHeight
-      : Math.max(0, ...[...document.querySelectorAll('iframe')].map((f) => f.getBoundingClientRect().bottom + scrollY)),
+  const fullscreen = await page.evaluate(() => document.body.classList.contains('sb-main-fullscreen'))
+  if (fullscreen) {
+    if (fittedPages.has(page)) return false
+    fittedPages.add(page)
+    const contentHeight = await pageHeight(page)
+    if (contentHeight <= VIEWPORT.height) return false
+    const height = Math.min(contentHeight, MAX_VIEWPORT_HEIGHT)
+    await page.setViewportSize({ width: VIEWPORT.width, height })
+    await waitForQuietNetwork(page, openRequests)
+    if ((await pageHeight(page)) > height) await page.setViewportSize(VIEWPORT)
+    return true
+  }
+  const bottom = await page.evaluate(() =>
+    Math.max(0, ...[...document.querySelectorAll('iframe')].map((f) => f.getBoundingClientRect().bottom + scrollY)),
   )
-  const height = Math.min(Math.max(VIEWPORT.height, Math.ceil(needed)), MAX_VIEWPORT_HEIGHT)
+  const height = Math.min(Math.max(VIEWPORT.height, Math.ceil(bottom)), MAX_VIEWPORT_HEIGHT)
   if (page.viewportSize()?.height === height) return false
   await page.setViewportSize({ width: VIEWPORT.width, height })
   await waitForQuietNetwork(page, openRequests)
