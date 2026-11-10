@@ -1,6 +1,6 @@
 import { Check, Circle } from 'lucide-react'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { getNotSignerNote, getSignatureSummary, getSignerRows } from '../../services/signers'
 import type { Persona, Proposal } from '../../types'
 

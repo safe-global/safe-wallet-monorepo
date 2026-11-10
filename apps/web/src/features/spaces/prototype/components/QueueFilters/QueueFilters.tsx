@@ -25,7 +25,7 @@ import {
   InputGroupInput,
 } from '@safe-global/views/components/ui/input-group'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { getAccount, getTypeLabel, TYPE_LABELS } from '../../services/model'
 import type { Account, Filter } from '../../types'
 import { chainLogoUrl, FLAG_META, FLAGS, RECOVERY_TYPE, STATUS_META, TYPE_ICONS, type Flag } from '../shared'

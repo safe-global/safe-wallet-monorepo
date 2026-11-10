@@ -1,7 +1,7 @@
 // Ported from #9133 Policies/prototype/sharedDrawer; keep names and props in sync.
 import { useLayoutEffect, useRef, useState, type ReactElement, type ReactNode } from 'react'
 import { ChevronDown, ChevronUp, Maximize2, Minimize2, X, type LucideIcon } from 'lucide-react'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Kbd } from '@safe-global/views/components/ui/kbd'

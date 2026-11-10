@@ -5,7 +5,7 @@ import {
   DropdownMenuSubTrigger,
 } from '@safe-global/views/components/ui/dropdown-menu'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { getSignerIdentity, getSignerName } from '../../services/model'
 import { isYou } from '../../services/personas'
 import { PROPOSED_OPTIONS, proposedWithin, type ProposedWithin, type SignerLoad } from '../../services/fleet'

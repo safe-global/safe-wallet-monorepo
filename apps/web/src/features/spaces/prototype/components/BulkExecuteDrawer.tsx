@@ -5,7 +5,7 @@ import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { Drawer, DrawerHeader, DrawerTitle, DrawerBody, DrawerFooter } from '@/components/common/Drawer'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { getTransactionLabel } from '../services/model'
 import type { BulkBatch } from '../services/queue'
 

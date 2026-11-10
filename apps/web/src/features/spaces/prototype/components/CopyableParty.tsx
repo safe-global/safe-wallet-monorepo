@@ -2,7 +2,7 @@ import { Check, Copy, FileCode2 } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { useCopyToClipboard } from '@/components/common/AuditLog'
 import { HINT_CLASS } from './shared'
 
