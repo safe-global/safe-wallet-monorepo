@@ -15,6 +15,7 @@ import { DAPP_NAME, WalletConnectDapp } from '../../src/api/walletconnect-dapp'
 import { WalletConnectPage } from '../../src/pages/walletconnect.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
 import { WalletPage } from '../../src/pages/wallet.page'
+import { nextDeclaredAttribution } from '../../src/api/proposal-request'
 
 type WalletConnectFixtures = {
   safe: SeededSafe
@@ -98,6 +99,18 @@ test.describe('WalletConnect', { tag: ['@e2e', '@walletconnect'] }, () => {
     await expect.poll(async () => (await receiptOf(dapp, hash))?.status).toBe('0x1')
 
     expect(await balanceOf(journey.env, recipient)).toBe(value)
+  })
+
+  test('should declare the dApp when the owner proposes its transaction', async ({ safePage, safe, dapp }) => {
+    const proposal = nextDeclaredAttribution(safePage, safe.address)
+
+    const response = dapp.request('eth_sendTransaction', [
+      { from: safe.address, to: Wallet.createRandom().address, value: '0x1', data: '0x' },
+    ])
+    await new TxReviewPage(safePage).sign()
+    await response
+
+    expect(await proposal).toEqual(expect.objectContaining({ channel: 'wallet-connect', appName: DAPP_NAME }))
   })
 
   test('should give the dApp a signature that the Safe contract accepts when the owner signs its message', async ({
