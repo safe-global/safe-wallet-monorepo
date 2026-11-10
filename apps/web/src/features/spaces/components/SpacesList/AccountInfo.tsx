@@ -3,6 +3,8 @@ import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { Popover, PopoverTrigger } from '@safe-global/views/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import useLogout from '@/hooks/useLogout'
+import useOnboard from '@/hooks/wallets/useOnboard'
+import useWallet from '@/hooks/wallets/useWallet'
 import { ProfilePopoverContent } from '../Sidebar/ProfilePopoverContent'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -25,10 +27,16 @@ export const AccountInfo = ({
   connectedWallet,
 }: MembershipProps) => {
   const { logout } = useLogout()
+  const onboard = useOnboard()
+  const wallet = useWallet()
 
   const handleSignOut = () => {
     trackEvent(SPACE_EVENTS.AUTH_LOGGED_OUT, { timestamp: new Date().toISOString() })
     logout()
+  }
+
+  const handleDisconnectWallet = () => {
+    if (wallet) void onboard?.disconnectWallet({ label: wallet.label })
   }
 
   return (
@@ -68,6 +76,7 @@ export const AccountInfo = ({
         signerAddress={signerAddress}
         connectedWallet={connectedWallet}
         onSignOut={handleSignOut}
+        onDisconnectWallet={connectedWallet ? handleDisconnectWallet : undefined}
       />
     </Popover>
   )
