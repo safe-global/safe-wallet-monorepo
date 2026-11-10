@@ -1,6 +1,15 @@
 import { accounts } from './model'
 import type { Proposal } from '../types'
-import { DEFAULT_DISPLAY, groupQueue, loadDisplay, orderQueue, saveDisplay, sortByColumn } from './order'
+import {
+  DEFAULT_DISPLAY,
+  getColumnSort,
+  groupQueue,
+  loadDisplay,
+  orderQueue,
+  saveDisplay,
+  sortByColumn,
+  type SortBy,
+} from './order'
 
 // Dev ("owner") signs on Treasury (3 of 5, next #42) and Ops Payroll (2 of 4, next #17), not on Grants.
 const [treasury, payroll, grants] = accounts
@@ -23,98 +32,122 @@ const tx = (
   ...extra,
 })
 const ids = (list: { id: string }[]) => list.map((item) => item.id)
-const order = (items: Proposal[], by = DEFAULT_DISPLAY.order) =>
-  ids(orderQueue(items, { order: by, persona: 'owner', accounts: [treasury, payroll, grants] }))
+const order = (items: Proposal[], sort: SortBy) =>
+  ids(orderQueue(items, { sort, accounts: [treasury, payroll, grants] }))
 
 describe('orderQueue', () => {
-  it('puts what you can execute first, then what you can sign, then what waits on others', () => {
-    const items = [
-      tx('grants', 8, [], '9d ago'),
-      tx('treasury', 42, [], '1h ago'),
-      tx('payroll', 17, ['Ana', 'Max'], '5m ago'),
-    ]
-    expect(order(items)).toEqual(['payroll-17', 'treasury-42', 'grants-8'])
-  })
-
-  it('breaks ties by the oldest proposal', () => {
+  it('sorts oldest or newest first', () => {
     const items = [tx('treasury', 42, [], '1h ago'), tx('payroll', 17, [], '3d ago')]
-    expect(order(items)).toEqual(['payroll-17', 'treasury-42'])
+    expect(order(items, 'oldest')).toEqual(['payroll-17', 'treasury-42'])
+    expect(order(items, 'newest')).toEqual(['treasury-42', 'payroll-17'])
   })
 
-  it('keeps options at one nonce together, whatever the order', () => {
+  it('sorts by nonce within each Safe, Safes in workspace order', () => {
+    const items = [tx('payroll', 18, [], '1m ago'), tx('treasury', 43, [], '1m ago'), tx('payroll', 17, [], '1m ago')]
+    expect(order(items, 'nonce')).toEqual(['treasury-43', 'payroll-17', 'payroll-18'])
+  })
+
+  it('sorts by value either way', () => {
+    const items = [tx('treasury', 42, [], '1h ago', { amount: '10 USDC' }), tx('payroll', 17, [], '1h ago')]
+    expect(order(items, 'valueDesc')).toEqual(['payroll-17', 'treasury-42'])
+    expect(order(items, 'valueAsc')).toEqual(['treasury-42', 'payroll-17'])
+  })
+
+  it('keeps options at one nonce together, whatever the sort', () => {
     const items = [
       tx('treasury', 42, [], '1h ago', { id: 'a' }),
       tx('payroll', 17, [], '2h ago'),
       tx('treasury', 42, [], '5d ago', { id: 'b' }),
     ]
-    for (const by of ['status', 'proposed', 'nonce', 'value', 'safe'] as const) {
-      const result = order(items, { by, direction: 'asc' })
-      const first = result.indexOf('treasury-42a')
-      expect(Math.abs(first - result.indexOf('treasury-42b'))).toBe(1)
+    for (const sort of ['nonce', 'oldest', 'newest', 'valueDesc', 'valueAsc', 'safeAsc', 'safeDesc'] as const) {
+      const result = order(items, sort)
+      expect(Math.abs(result.indexOf('treasury-42a') - result.indexOf('treasury-42b'))).toBe(1)
     }
-  })
-
-  it('orders by nonce within each Safe, Safes in workspace order', () => {
-    const items = [tx('payroll', 18, [], '1m ago'), tx('treasury', 43, [], '1m ago'), tx('payroll', 17, [], '1m ago')]
-    expect(order(items, { by: 'nonce', direction: 'asc' })).toEqual(['treasury-43', 'payroll-17', 'payroll-18'])
-  })
-
-  it('orders newest first by proposal date when descending', () => {
-    const items = [tx('treasury', 42, [], '3d ago'), tx('payroll', 17, [], '1h ago')]
-    expect(order(items, { by: 'proposed', direction: 'desc' })).toEqual(['payroll-17', 'treasury-42'])
-  })
-
-  it('orders by value, largest first when descending', () => {
-    const items = [tx('treasury', 42, [], '1h ago', { amount: '10 USDC' }), tx('payroll', 17, [], '1h ago')]
-    expect(order(items, { by: 'value', direction: 'desc' })).toEqual(['payroll-17', 'treasury-42'])
   })
 })
 
-describe('sortByColumn', () => {
-  it('starts a new column in its natural direction and reverses on a second click', () => {
-    const proposed = sortByColumn({ by: 'status', direction: 'asc' }, 'proposed')
-    expect(proposed).toEqual({ by: 'proposed', direction: 'desc' })
-    expect(sortByColumn(proposed, 'proposed')).toEqual({ by: 'proposed', direction: 'asc' })
+describe('column headers', () => {
+  it('flips Proposed between newest and oldest, and Safe between A to Z and Z to A', () => {
+    expect(sortByColumn('nonce', 'Proposed')).toBe('newest')
+    expect(sortByColumn('newest', 'Proposed')).toBe('oldest')
+    expect(sortByColumn('safeAsc', 'Safe')).toBe('safeDesc')
+  })
+
+  it('keeps nonce lowest first', () => {
+    expect(sortByColumn('nonce', 'Nonce')).toBe('nonce')
+  })
+
+  it('marks the header that matches the sort, and none for value', () => {
+    expect(getColumnSort('oldest')).toEqual({ column: 'Proposed', direction: 'asc' })
+    expect(getColumnSort('valueDesc')).toBeUndefined()
   })
 })
 
 describe('groupQueue', () => {
-  const rows = [tx('payroll', 17, [], '1h ago'), tx('treasury', 42, [], '1h ago'), tx('payroll', 18, [], '1h ago')]
-
-  it('returns one group when not grouping', () => {
-    expect(groupQueue(rows, 'none').map((group) => ids(group.rows))).toEqual([
-      ['payroll-17', 'treasury-42', 'payroll-18'],
-    ])
-  })
-
-  it('groups by Safe in the order of each Safe’s first row', () => {
-    const groups = groupQueue(rows, 'safe')
+  it('groups by status in a fixed order and drops empty groups', () => {
+    const rows = [
+      tx('grants', 8, [], '1h ago'),
+      tx('treasury', 42, [], '1h ago'),
+      tx('payroll', 17, ['Ana', 'Max'], '1h ago'),
+      tx('grants', 9, [], '1h ago'),
+    ]
+    const groups = groupQueue(rows, 'status', 'owner')
     expect(groups.map((group) => group.label)).toEqual([
-      payroll.safeName ?? payroll.name,
-      treasury.safeName ?? treasury.name,
+      'Ready to execute',
+      'Ready to sign',
+      'Waiting on others',
+      'Blocked',
     ])
-    expect(ids(groups[0].rows)).toEqual(['payroll-17', 'payroll-18'])
+    expect(groups.map((group) => ids(group.rows))).toEqual([
+      ['payroll-17'],
+      ['treasury-42'],
+      ['grants-8'],
+      ['grants-9'],
+    ])
   })
 
-  it('groups by network', () => {
-    expect(groupQueue(rows, 'network').every((group) => group.chainId)).toBe(true)
+  it('puts rows your signature executes in their own group, first', () => {
+    const [group] = groupQueue(
+      [tx('treasury', 42, ['Ana', 'Max'], '1h ago'), tx('payroll', 17, ['Ana', 'Max'], '1h ago')],
+      'status',
+      'owner',
+    )
+    expect(group.label).toBe('Sign and execute')
+    expect(ids(group.rows)).toEqual(['treasury-42'])
+  })
+
+  it('puts a conflict group under its most urgent option', () => {
+    const rows = [
+      tx('payroll', 17, [], '1h ago', { id: 'a' }),
+      tx('payroll', 17, ['Ana', 'Max'], '1h ago', { id: 'b' }),
+    ]
+    const [group] = groupQueue(rows, 'status', 'owner')
+    expect(group.label).toBe('Ready to execute')
+    expect(ids(group.rows)).toEqual(['payroll-17a', 'payroll-17b'])
+  })
+
+  it('groups by network in the order of each network’s first row', () => {
+    const rows = [tx('payroll', 17, [], '1h ago'), tx('treasury', 42, [], '1h ago')]
+    const groups = groupQueue(rows, 'network', 'owner')
+    expect(groups.map((group) => group.label)).toEqual([payroll.network, treasury.network])
   })
 })
 
 describe('display preference', () => {
   beforeEach(() => localStorage.clear())
 
-  it('defaults to needs-you first with no grouping', () => {
+  it('defaults to grouping by status, oldest first', () => {
     expect(loadDisplay()).toEqual(DEFAULT_DISPLAY)
+    expect(DEFAULT_DISPLAY).toEqual({ groupBy: 'status', sort: 'oldest' })
   })
 
   it('remembers the last choice', () => {
-    saveDisplay({ order: { by: 'nonce', direction: 'desc' }, groupBy: 'safe' })
-    expect(loadDisplay()).toEqual({ order: { by: 'nonce', direction: 'desc' }, groupBy: 'safe' })
+    saveDisplay({ groupBy: 'safe', sort: 'newest' })
+    expect(loadDisplay()).toEqual({ groupBy: 'safe', sort: 'newest' })
   })
 
-  it('ignores a saved value it does not know', () => {
-    localStorage.setItem('prototype.pendingQueue.display', '{"order":{"by":"market cap"},"groupBy":"color"}')
+  it('ignores a saved value it does not know, including the old Display shape', () => {
+    localStorage.setItem('prototype.pendingQueue.display', '{"order":{"by":"nonce"},"groupBy":"none"}')
     expect(loadDisplay()).toEqual(DEFAULT_DISPLAY)
   })
 })

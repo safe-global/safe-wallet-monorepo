@@ -1312,41 +1312,69 @@ describe('queue design exploration', () => {
 describe('option D · flat table', () => {
   beforeEach(() => localStorage.clear())
   const flat = { routerProps: { query: { option: 'flat' } } }
-  const firstStatuses = () =>
+  const headings = () =>
     allPending()
-      .getAllByRole('row')
-      .slice(1, 4)
-      .map((row) => row.textContent)
+      .getAllByRole('heading', { level: 3 })
+      .map((heading) => heading.textContent)
 
-  it('lists every Safe in one table, with Safe and Network columns, needs-you first', () => {
+  it('groups by status by default, needs you first, with Safe and Network columns', () => {
     render(<PendingQueue />, flat)
     expect(screen.getAllByRole('table')).toHaveLength(1)
+    expect(screen.getByRole('button', { name: 'Group by Status' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Sort: Oldest' })).toBeInTheDocument()
+    expect(headings()[0]).toMatch(/^(Sign and execute|Ready to execute|Ready to sign)/)
     expect(screen.getByRole('columnheader', { name: /Safe/ })).toBeInTheDocument()
     expect(screen.getByRole('columnheader', { name: 'Network' })).toBeInTheDocument()
-    expect(screen.getByRole('columnheader', { name: /Status/ })).toHaveAttribute('aria-sort', 'ascending')
+    expect(screen.getByRole('columnheader', { name: /Proposed/ })).toHaveAttribute('aria-sort', 'ascending')
     expect(screen.queryByRole('button', { name: /^(Collapse|Expand) / })).toBeNull()
-    expect(firstStatuses().join()).not.toMatch(/Blocked/)
   })
 
-  it('sorts by a column header, reverses on a second click, and remembers it', async () => {
+  it('sorts from a column header, flips on a second click, and remembers it', async () => {
     const { user, unmount } = renderWithUserEvent(<PendingQueue />, flat)
-    const nonce = () => screen.getByRole('columnheader', { name: /Nonce/ })
-    await user.click(within(nonce()).getByRole('button'))
-    expect(nonce()).toHaveAttribute('aria-sort', 'ascending')
-    await user.click(within(nonce()).getByRole('button'))
-    expect(nonce()).toHaveAttribute('aria-sort', 'descending')
+    const proposed = () => screen.getByRole('columnheader', { name: /Proposed/ })
+    await user.click(within(proposed()).getByRole('button'))
+    expect(proposed()).toHaveAttribute('aria-sort', 'descending')
+    expect(screen.getByRole('button', { name: 'Sort: Newest' })).toBeInTheDocument()
+    await user.click(within(proposed()).getByRole('button'))
+    expect(proposed()).toHaveAttribute('aria-sort', 'ascending')
     unmount()
     render(<PendingQueue />, flat)
-    expect(screen.getByRole('columnheader', { name: /Nonce/ })).toHaveAttribute('aria-sort', 'descending')
+    expect(screen.getByRole('button', { name: 'Sort: Oldest' })).toBeInTheDocument()
   })
 
-  it('groups by Safe from the Display menu, without a Safe column', async () => {
+  it('sorts from the Sort menu, including by value', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, flat)
-    await user.click(screen.getByRole('button', { name: /^Display/ }))
-    await user.click(await screen.findByRole('menuitemradio', { name: 'Safe' }))
-    expect(screen.getByRole('button', { name: 'Collapse Treasury Main' })).toBeInTheDocument()
-    expect(screen.queryByRole('columnheader', { name: /^Safe/ })).toBeNull()
-    expect(screen.getByRole('columnheader', { name: 'Network' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Sort: Oldest' }))
+    await user.click(await screen.findByRole('menuitemradio', { name: 'Largest value' }))
+    expect(screen.getByRole('button', { name: 'Sort: Largest value' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: /Proposed/ })).not.toHaveAttribute('aria-sort')
+  })
+
+  it('grouped by Safe, shows the Safe table with a sub-header per network, in nonce order', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'flat', scenario: '20-safes' } },
+    })
+    await user.click(screen.getByRole('button', { name: 'Group by Status' }))
+    await user.click(await screen.findByRole('menuitemradio', { name: /^Safe/ }))
+    expect(screen.getByRole('button', { name: 'Sort: Nonce' })).toBeInTheDocument()
+    expect(screen.queryByRole('columnheader', { name: 'Network' })).toBeNull()
+    const marketMaking = await screen.findByRole('button', { name: /^(Collapse|Expand) Market making$/ })
+    const subHeaders = marketMaking
+      .getAttribute('aria-controls')!
+      .split(' ')
+      .map((id) => document.getElementById(id)!)
+    expect(subHeaders.map((subHeader) => subHeader.textContent)).toEqual([
+      expect.stringMatching(/^Ethereum/),
+      expect.stringMatching(/^Arbitrum/),
+    ])
+  })
+
+  it('groups by network in collapsible bands, without a Network column', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />, flat)
+    await user.click(screen.getByRole('button', { name: 'Group by Status' }))
+    await user.click(await screen.findByRole('menuitemradio', { name: 'Network' }))
+    expect(screen.getByRole('button', { name: 'Collapse Ethereum' })).toBeInTheDocument()
+    expect(screen.queryByRole('columnheader', { name: 'Network' })).toBeNull()
   })
 })
 

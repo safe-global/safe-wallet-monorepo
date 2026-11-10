@@ -62,11 +62,12 @@ import { AppliedFilters, FilterCountsContext, QueueToolbar, type AppliedPill } f
 import { QueueFlatTable, QueueGroupedTable, QueueOrderedTable } from './QueueTable/QueueGroupedTable'
 import { DisplayMenu } from './QueueTable/DisplayMenu'
 import {
-  COLUMN_ORDER,
+  getColumnSort,
   groupQueue,
   loadDisplay,
   orderQueue,
   saveDisplay,
+  SORTABLE_COLUMNS,
   sortByColumn,
   type QueueDisplay,
 } from '../services/order'
@@ -118,6 +119,8 @@ function PendingQueueView() {
   // Option D: one list across Safes, ordered by status by default. Order and grouping are the viewer's choice.
   const flat = direction === 'flat'
   const [display, setDisplay] = useState(loadDisplay)
+  // Grouped by Safe, D shows the Safe table: each Safe, then each network, so nonces stay in order.
+  const safeView = flat && display.groupBy === 'safe'
   const changeDisplay = (next: QueueDisplay) => {
     setDisplay(next)
     saveDisplay(next)
@@ -571,18 +574,26 @@ function PendingQueueView() {
     if (section && isCollapsed(section.id)) toggleSection(section.id)
     reviewTx(tx)
   }
-  const orderedRows = flat ? orderQueue(visible, { order: display.order, persona, accounts: orderedAccounts }) : []
-  const orderedGroups = groupQueue(orderedRows, display.groupBy)
+  const orderedRows = flat && !safeView ? orderQueue(visible, { sort: display.sort, accounts: orderedAccounts }) : []
+  const orderedGroups =
+    flat && !safeView ? groupQueue(orderedRows, display.groupBy === 'network' ? 'network' : 'status', persona) : []
+  // In the Safe table, a sort other than nonce reorders rows within each network.
+  const tableSections =
+    safeView && display.sort !== 'nonce'
+      ? sections.map((section) => ({
+          ...section,
+          items: orderQueue(section.items, { sort: display.sort, accounts: orderedAccounts }),
+        }))
+      : sections
   const columnSort = {
-    sortable: Object.keys(COLUMN_ORDER),
-    active: Object.entries(COLUMN_ORDER)
-      .filter(([, by]) => by === display.order.by)
-      .map(([column]) => ({ column, direction: display.order.direction }))[0],
-    onSort: (column: string) => changeDisplay({ ...display, order: sortByColumn(display.order, COLUMN_ORDER[column]) }),
+    sortable: SORTABLE_COLUMNS,
+    active: getColumnSort(display.sort),
+    onSort: (column: string) => changeDisplay({ ...display, sort: sortByColumn(display.sort, column) }),
   }
-  const reviewOrder = flat
-    ? orderedRows
-    : [...needsYou, ...sections.filter((section) => !isCollapsed(section.id)).flatMap((section) => section.items)]
+  const reviewOrder =
+    flat && !safeView
+      ? orderedGroups.flatMap((group) => group.rows)
+      : [...needsYou, ...sections.filter((section) => !isCollapsed(section.id)).flatMap((section) => section.items)]
   const reviewIndex = review ? reviewOrder.findIndex((tx) => tx.id === review.id) : -1
   const stepReview = (offset: number) => {
     const next = reviewIndex >= 0 ? reviewOrder[reviewIndex + offset] : undefined
@@ -667,7 +678,7 @@ function PendingQueueView() {
     now,
     onSpeedUp: speedUp,
     alignTo: direction !== 'fleet',
-    safeTable: direction === 'table',
+    safeTable: direction === 'table' || safeView,
     pageSize,
     signLabel,
     // Narrows the table to one Safe, on all its networks, and opens it from the top, under its filter tag.
@@ -931,24 +942,29 @@ function PendingQueueView() {
                   )}
                 </div>
               )}
-              {!unavailable && !list && flat && visible.length > 0 && (
+              {!unavailable && !list && flat && !safeView && visible.length > 0 && (
                 <QueueOrderedTable
                   groups={orderedGroups}
-                  groupBy={display.groupBy}
+                  groupBy={display.groupBy === 'network' ? 'network' : 'status'}
                   sort={columnSort}
                   {...sectionProps}
                 />
               )}
-              {!unavailable && !list && !simple && !flat && (visible.length > 0 || recoveries.visible.length > 0) && (
-                <QueueGroupedTable
-                  sections={sections}
-                  isCollapsed={isCollapsed}
-                  onToggle={toggleSection}
-                  getSafeBatch={safeBatchFor}
-                  collapse={{ allCollapsed, onToggle: toggleAll, count: sections.length }}
-                  {...sectionProps}
-                />
-              )}
+              {!unavailable &&
+                !list &&
+                !simple &&
+                (!flat || safeView) &&
+                (visible.length > 0 || recoveries.visible.length > 0) && (
+                  <QueueGroupedTable
+                    sections={tableSections}
+                    isCollapsed={isCollapsed}
+                    onToggle={toggleSection}
+                    getSafeBatch={safeBatchFor}
+                    collapse={{ allCollapsed, onToggle: toggleAll, count: sections.length }}
+                    sort={safeView ? columnSort : undefined}
+                    {...sectionProps}
+                  />
+                )}
               <div className="mt-6 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
                 <span className="flex items-center gap-2">
                   <CircleHelp className="size-4" />A proposal can need your signature and still wait on earlier

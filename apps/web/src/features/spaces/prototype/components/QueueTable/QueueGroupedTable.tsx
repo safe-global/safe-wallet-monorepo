@@ -19,7 +19,7 @@ import {
   type HeadSort,
   type QueueSectionProps,
 } from './QueueSection'
-import type { GroupBy, QueueGroup } from '../../services/order'
+import { isActionGroup, type QueueGroup } from '../../services/order'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { SafeIdentity, chainLogoUrl } from '../shared'
 import { getColumns, groupBySafe, shareLimit, type QueueSectionData, type SafeGroup } from './sections'
@@ -30,6 +30,8 @@ export type QueueGroupedTableProps = Omit<QueueSectionProps, 'section' | 'collap
   onToggle: (id: string) => void
   getSafeBatch: (section: QueueSectionData) => BulkBatch | undefined
   collapse: CollapseAll
+  // Option D in nonce order: the headers still sort, so the viewer can switch back.
+  sort?: HeadSort
 }
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0! transition-colors group-hover/band:bg-foreground/[0.06]'
@@ -41,6 +43,7 @@ export function QueueGroupedTable({
   onToggle,
   getSafeBatch,
   collapse,
+  sort,
   ...props
 }: QueueGroupedTableProps) {
   const { isWide, showNoteText, persona, recoveries, alignTo, simple, safeTable = false, pageSize = 10 } = props
@@ -241,7 +244,11 @@ export function QueueGroupedTable({
                 <col key={label} className={widths[label]} />
               ))}
             </colgroup>
-            <QueueTableHead columns={columns} collapse={safeTable ? { ...collapse, count: groups.length } : collapse} />
+            <QueueTableHead
+              columns={columns}
+              collapse={safeTable ? { ...collapse, count: groups.length } : collapse}
+              sort={sort}
+            />
             {groups.map((group) => (group.sections.length > 1 ? multiChainSafe(group) : singleSafe(group)))}
           </Table>
         </div>
@@ -334,8 +341,8 @@ function SeeAllButton({ label, onSeeAll }: { label: string; onSeeAll: () => void
 
 export type QueueOrderedTableProps = Omit<
   QueueGroupedTableProps,
-  'sections' | 'isCollapsed' | 'onToggle' | 'getSafeBatch' | 'collapse'
-> & { groups: QueueGroup[]; groupBy: GroupBy; sort: HeadSort }
+  'sections' | 'isCollapsed' | 'onToggle' | 'getSafeBatch' | 'collapse' | 'sort'
+> & { groups: QueueGroup[]; groupBy: 'status' | 'network'; sort: HeadSort }
 
 // Columns for option D. The Safe and its network are columns, so rows from any Safe sit in one list.
 export const ORDERED_COLUMNS = (isWide: boolean) => [
@@ -351,13 +358,11 @@ export const ORDERED_COLUMNS = (isWide: boolean) => [
   'Action',
 ]
 
-// Option D: one list in the chosen order. Grouped, each group is a band that collapses its rows.
+// Option D: rows grouped by status or network, in the chosen sort. Status headings don't collapse.
 export function QueueOrderedTable({ groups, groupBy, sort, ...props }: QueueOrderedTableProps) {
-  const grouped = groupBy !== 'none'
-  // The band already names the Safe or network it groups by.
-  const columns = ORDERED_COLUMNS(props.isWide).filter(
-    (column) => !(groupBy === 'safe' && column === 'Safe') && !(groupBy === 'network' && column === 'Network'),
-  )
+  const byStatus = groupBy === 'status'
+  // A network band already names the network.
+  const columns = ORDERED_COLUMNS(props.isWide).filter((column) => byStatus || column !== 'Network')
   // As in option A, Transaction fits the widest action and To takes the slack.
   const widths: Record<string, string | undefined> = {
     ...getColumnWidths(props.showNoteText, true),
@@ -371,6 +376,7 @@ export function QueueOrderedTable({ groups, groupBy, sort, ...props }: QueueOrde
   const { scroller, overflowing } = useScrollOverflow(`${groups.length}:${collapsed.join()}`)
   const toggle = (id: string) =>
     setCollapsed((ids) => (ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id]))
+  const nothingForYou = byStatus && !groups.some(isActionGroup)
   return (
     <Card radius="xl" size="none">
       <CardContent>
@@ -386,8 +392,17 @@ export function QueueOrderedTable({ groups, groupBy, sort, ...props }: QueueOrde
               ))}
             </colgroup>
             <QueueTableHead columns={columns} sort={sort} />
+            {nothingForYou && (
+              <TableBody>
+                <TableRow data-no-hover data-no-divider>
+                  <TableCell colSpan={columns.length} className="py-4 text-sm text-muted-foreground">
+                    Nothing needs your action right now.
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            )}
             {groups.map((group) => {
-              const isCollapsed = collapsed.includes(group.id)
+              const isCollapsed = !byStatus && collapsed.includes(group.id)
               const section = {
                 id: group.id,
                 label: group.label,
@@ -396,8 +411,17 @@ export function QueueOrderedTable({ groups, groupBy, sort, ...props }: QueueOrde
               }
               return (
                 <Fragment key={group.id}>
-                  {grouped && (
-                    <TableBody>
+                  <TableBody>
+                    {byStatus ? (
+                      <TableRow data-no-hover data-no-divider>
+                        <TableCell colSpan={columns.length} className={`rounded-lg ${BAND_CELL}`}>
+                          <h3 className="flex min-h-11 items-center gap-2 text-sm font-medium">
+                            {group.label}
+                            <span className="font-normal tabular-nums text-muted-foreground">{group.rows.length}</span>
+                          </h3>
+                        </TableCell>
+                      </TableRow>
+                    ) : (
                       <TableRow
                         data-no-hover
                         data-no-divider
@@ -411,27 +435,14 @@ export function QueueOrderedTable({ groups, groupBy, sort, ...props }: QueueOrde
                         </TableCell>
                         <TableCell colSpan={columns.length - 1} className={`rounded-r-lg pr-3! ${BAND_CELL}`}>
                           <span className="flex min-h-11 items-center gap-3 text-sm font-medium">
-                            {group.iconAddress ? (
-                              <SafeIdentity
-                                address={group.iconAddress}
-                                size={24}
-                                className="flex min-w-0 items-center gap-3"
-                                title={group.label}
-                              >
-                                <span className="truncate">{group.label}</span>
-                              </SafeIdentity>
-                            ) : (
-                              <>
-                                <img src={chainLogoUrl(group.chainId!)} alt="" className="size-5 rounded-full" />
-                                <span className="truncate">{group.label}</span>
-                              </>
-                            )}
+                            <img src={chainLogoUrl(group.chainId!)} alt="" className="size-5 rounded-full" />
+                            <span className="truncate">{group.label}</span>
                             <span className="font-normal tabular-nums text-muted-foreground">{group.rows.length}</span>
                           </span>
                         </TableCell>
                       </TableRow>
-                    </TableBody>
-                  )}
+                    )}
+                  </TableBody>
                   <TableBody id={`rows-${group.id}`} hidden={isCollapsed}>
                     <QueueSectionRows {...props} section={section} columns={columns} safeRecoveries={[]} />
                   </TableBody>
