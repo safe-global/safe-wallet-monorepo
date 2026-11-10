@@ -141,7 +141,7 @@ async function fitViewportToIframes(page: Page, requests: RequestTracker): Promi
 
 // Padded/centered stories are clipped to their content, portals (dialogs, popovers) included.
 // Fullscreen stories and the error display keep the whole page.
-async function contentClip(page: Page): Promise<{ fullscreen: boolean; clip?: Clip }> {
+async function contentClip(page: Page): Promise<{ fullscreen: boolean; clip?: Clip; inViewport?: boolean }> {
   return page.evaluate((pad) => {
     const body = document.body
     const fullscreen = body.classList.contains('sb-main-fullscreen')
@@ -171,14 +171,13 @@ async function contentClip(page: Page): Promise<{ fullscreen: boolean; clip?: Cl
 
     const x = Math.max(0, Math.floor(left + window.scrollX - pad))
     const y = Math.max(0, Math.floor(top + window.scrollY - pad))
+    const width = Math.ceil(right + window.scrollX + pad) - x
+    const height = Math.ceil(bottom + window.scrollY + pad) - y
+    const unscrolled = window.scrollX === 0 && window.scrollY === 0
     return {
       fullscreen,
-      clip: {
-        x,
-        y,
-        width: Math.ceil(right + window.scrollX + pad) - x,
-        height: Math.ceil(bottom + window.scrollY + pad) - y,
-      },
+      clip: { x, y, width, height },
+      inViewport: unscrolled && x + width <= window.innerWidth && y + height <= window.innerHeight,
     }
   }, CLIP_PADDING)
 }
@@ -203,9 +202,11 @@ export async function stableScreenshot(
       await waitForAssets(page)
       previous = undefined
     }
-    const { clip } = await contentClip(page)
-    // Spinners and transitions otherwise land on a different frame each run
-    const png = await page.screenshot({ fullPage: true, clip, animations: 'disabled' })
+    const { clip, inViewport } = await contentClip(page)
+    // A full-page capture resizes the viewport for a moment, and popups reposition on that resize (a combobox
+    // list flips above its input), so content that fits is captured as it is shown.
+    // Spinners and transitions otherwise land on a different frame each run.
+    const png = await page.screenshot({ fullPage: !inViewport, clip, animations: 'disabled' })
     const stable = previous !== undefined && png.equals(previous)
     if (stable && !fullscreenFitted) {
       fullscreenFitted = true
