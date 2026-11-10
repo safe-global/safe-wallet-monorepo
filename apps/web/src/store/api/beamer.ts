@@ -10,7 +10,6 @@ type NumberFeaturesResponse = {
   lastPostTitle?: string
   lastPostCategory?: string
   lastPostBody?: string
-  lastPostImageUrl?: string
   lastPostLinkText?: string
   lastPostLinkUrl?: string
 }
@@ -27,7 +26,7 @@ export type WhatsNewTopBarPost = Post & {
 
 export type WhatsNewCornerCardPost = Post & {
   body?: string
-  imageUrl?: string
+  category?: string
 }
 
 export type WhatsNewUpdates = {
@@ -55,7 +54,7 @@ const parseTopBar = (post: Post, response: NumberFeaturesResponse): WhatsNewTopB
 const parseCornerCard = (post: Post, response: NumberFeaturesResponse): WhatsNewCornerCardPost => ({
   ...post,
   body: response.lastPostBody,
-  imageUrl: httpsOnly(response.lastPostImageUrl),
+  category: response.lastPostCategory,
 })
 
 export const parseBeamerUpdates = (response: NumberFeaturesResponse): WhatsNewUpdates => {

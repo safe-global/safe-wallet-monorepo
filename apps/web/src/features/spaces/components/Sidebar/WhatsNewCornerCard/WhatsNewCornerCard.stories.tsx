@@ -18,7 +18,18 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const TextOnly: Story = {}
+export const Default: Story = {}
+
+export const SafenetCategory: Story = {
+  args: {
+    cornerCard: {
+      postId: 3,
+      title: 'Safenet checks now available in Safe Pro',
+      body: 'Independent security checks on every transaction, before it executes.',
+      category: 'Safenet',
+    },
+  },
+}
 
 export const TitleOnly: Story = {
   args: {

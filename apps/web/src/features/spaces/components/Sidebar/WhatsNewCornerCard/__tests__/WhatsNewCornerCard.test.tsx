@@ -14,21 +14,29 @@ describe('WhatsNewCornerCard', () => {
     clearLocalStorageKey('whatsNewDismissedCornerCard')
   })
 
-  it('should, when Beamer sends a corner card post, show its title, text and image', () => {
+  it('should, when Beamer sends a corner card post, show its title and text next to the thumbnail for its category', () => {
     mockCornerCard = {
       postId: 1,
       title: 'Safenet checks now available in Safe Pro',
       body: 'Independent security checks on every transaction.',
-      imageUrl: 'https://app.getbeamer.com/pictures?id=1',
+      category: 'Safenet',
     }
 
-    const { container } = render(<WhatsNewCornerCard onOpen={jest.fn()} />)
+    render(<WhatsNewCornerCard onOpen={jest.fn()} />)
 
     expect(screen.getByTestId('whats-new-corner-card')).toHaveTextContent('Safenet checks now available in Safe Pro')
     expect(screen.getByTestId('whats-new-corner-card')).toHaveTextContent(
       'Independent security checks on every transaction.',
     )
-    expect(container.querySelector('img')).toHaveAttribute('src', 'https://app.getbeamer.com/pictures?id=1')
+    expect(screen.getByTestId('whats-new-thumbnail')).toHaveAttribute('data-variant', 'safenet')
+  })
+
+  it('should, when the post has no category, show the Safe logo thumbnail', () => {
+    mockCornerCard = { postId: 4, title: 'Safenet checks now available in Safe Pro' }
+
+    render(<WhatsNewCornerCard onOpen={jest.fn()} />)
+
+    expect(screen.getByTestId('whats-new-thumbnail')).toHaveAttribute('data-variant', 'safe')
   })
 
   it('should, when Beamer sends no corner card post, show nothing', () => {

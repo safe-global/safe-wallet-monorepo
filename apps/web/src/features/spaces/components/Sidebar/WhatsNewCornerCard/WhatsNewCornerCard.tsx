@@ -5,6 +5,8 @@ import { Card } from '@safe-global/views/components/ui/card'
 import { useWhatsNewUpdates } from '@/hooks/useWhatsNewUpdates'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import type { WhatsNewCornerCardPost } from '@/store/api/beamer'
+import { WhatsNewThumbnail } from '@safe-global/views/features/spaces/components/WhatsNewThumbnail'
+import { getCornerCardThumbnail } from './getCornerCardThumbnail'
 
 const DISMISSED_POST_KEY = 'whatsNewDismissedCornerCard'
 
@@ -25,7 +27,7 @@ export const WhatsNewCornerCardContent = ({
     className="fixed bottom-24 left-4 z-[var(--z-sidebar)] w-[22rem] flex-row"
   >
     <button type="button" onClick={onOpen} className="flex min-w-0 flex-1 cursor-pointer text-left">
-      {cornerCard.imageUrl && <img src={cornerCard.imageUrl} alt="" className="w-32 shrink-0 object-cover" />}
+      <WhatsNewThumbnail variant={getCornerCardThumbnail(cornerCard.category)} className="w-32 shrink-0" />
       <span className="flex min-w-0 flex-col gap-1 p-4 pr-8">
         <span className="font-semibold">{cornerCard.title}</span>
         {cornerCard.body && <span className="line-clamp-3 text-muted-foreground">{cornerCard.body}</span>}
