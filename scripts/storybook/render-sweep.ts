@@ -108,18 +108,22 @@ const LAUNCH_ARGS = [
   // Partial raster repaints only the changed part of a tile, so text edges depend on the order of
   // updates while a story loads; a full repaint gives the same pixels every run
   '--disable-partial-raster',
-  // Stories load token logos from live CDNs; MSW's service worker fetches them, out of Playwright's
-  // reach, so they arrive late or not at all. Failing every external host makes them render
-  // their local fallback in every run. MSW mocks are unaffected: the worker answers them first.
-  '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost',
 ]
 
-async function launch(): Promise<Browser> {
+async function launch(storybookHost: string): Promise<Browser> {
+  const args = [
+    ...LAUNCH_ARGS,
+    // Requests from MSW's service worker are out of Playwright's reach; failing every host except the
+    // swept Storybook's makes anything remote render its local fallback in every run
+    `--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE ${storybookHost}`,
+  ]
   try {
     // Prefer system Chrome — the repo does not ship playwright browser binaries
-    return await chromium.launch({ channel: 'chrome', args: LAUNCH_ARGS })
-  } catch {
-    return await chromium.launch({ args: LAUNCH_ARGS })
+    return await chromium.launch({ channel: 'chrome', args })
+  } catch (error) {
+    // GitHub's ARM runner images have no Google Chrome
+    console.error(`System Chrome did not start (${String(error).split('\n')[0]}); trying Playwright's Chromium`)
+    return await chromium.launch({ args })
   }
 }
 
@@ -289,7 +293,7 @@ async function checkStory(
   const pageErrors: string[] = []
   page.on('console', (msg) => {
     if (msg.type() !== 'error') return
-    // External hosts are blocked on purpose (LAUNCH_ARGS)
+    // External hosts are blocked on purpose (launch)
     const blockedExternal = msg.text().startsWith('Failed to load resource') && !msg.location().url.startsWith(base)
     if (!blockedExternal) consoleErrors.push(msg.text().slice(0, 300))
   })
@@ -389,6 +393,8 @@ async function writeSheets(browser: Browser, sheets: Sheet[], modes: Mode[], cel
 async function main(): Promise<void> {
   const args = parseArgs()
   const base = (typeof args.base === 'string' && args.base) || process.env.SB_BASE || 'http://localhost:6006'
+  // Anything not served by the swept Storybook is external, whatever host name the Storybook uses
+  const { origin: baseOrigin, hostname: storybookHost } = new URL(base)
   const modes: Mode[] = (typeof args.modes === 'string' ? args.modes : 'light,dark').split(',')
   const concurrency = Number(args.concurrency) || 8
   const filters = typeof args.filter === 'string' ? args.filter.split(',').filter(Boolean) : []
@@ -405,7 +411,7 @@ async function main(): Promise<void> {
     `Sweeping ${stories.length} stories x ${modes.length} modes (shard ${shard}/${shardCount}) against ${base}...`,
   )
 
-  const browser = await launch()
+  const browser = await launch(storybookHost)
   const results: Finding[] = []
   const cells: Cell[] = []
   const queue: Array<[StoryEntry, Mode]> = []
@@ -413,14 +419,14 @@ async function main(): Promise<void> {
   let done = 0
 
   async function worker(): Promise<void> {
-    let storyBrowser = await launch()
+    let storyBrowser = await launch(storybookHost)
     let contexts = 0
     for (;;) {
       const item = queue.shift()
       if (!item) break
       if (contexts === CONTEXTS_PER_BROWSER) {
         await storyBrowser.close()
-        storyBrowser = await launch()
+        storyBrowser = await launch(storybookHost)
         contexts = 0
       }
       contexts += 1
@@ -428,13 +434,13 @@ async function main(): Promise<void> {
       const context = await storyBrowser.newContext({
         viewport: { width: 1280, height: 900 },
         timezoneId: TIMEZONE,
-        // JS animations (motion) ignore animations: 'disabled' but honour prefers-reduced-motion
+        // animations: 'disabled' only stops CSS; under reduced motion the preview also skips motion's JS animations
         reducedMotion: 'reduce',
       })
       await context.clock.setFixedTime(FIXED_NOW)
       await context.addInitScript({ content: SEEDED_RANDOM })
       await context.route(
-        (url) => url.hostname !== 'localhost',
+        (url) => url.origin !== baseOrigin,
         (route) =>
           route.request().resourceType() === 'document'
             ? route.fulfill({ contentType: 'text/html', body: externalPage(new URL(route.request().url()).hostname) })
