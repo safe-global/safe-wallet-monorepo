@@ -17,6 +17,7 @@ export interface RenderState {
   textLength: number
   textSample: string
   visibleHeight: number
+  srcdocFrames: number
 }
 
 /** What happened while the story loaded */
@@ -46,6 +47,7 @@ export function renderIssues(state: RenderState, signals: LoadSignals): string[]
   if (state.sbError) issues.push(`SB_ERROR: ${state.errorMessage}`)
   if (state.empty) issues.push('EMPTY_ROOT')
   else if (state.textLength === 0 && state.visibleHeight < MIN_VISIBLE_HEIGHT) issues.push('BLANK_RENDER')
+  if (state.srcdocFrames) issues.push(`SRCDOC_IFRAME: ${state.srcdocFrames} frame(s)`)
   if (signals.pageErrors.length) issues.push(`PAGE_ERROR: ${signals.pageErrors[0]}`)
   if (signals.consoleErrors.length) issues.push(`CONSOLE: ${signals.consoleErrors.slice(0, 2).join(' | ')}`)
   if (signals.externalCalls.length) issues.push(`EXTERNAL_REQUEST: ${signals.externalCalls.join(' | ')}`)

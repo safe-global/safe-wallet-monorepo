@@ -68,6 +68,7 @@ function inspectRender(page: Page): Promise<RenderState> {
         textLength: text.length,
         textSample: text.slice(0, sampleLength),
         visibleHeight,
+        srcdocFrames: document.querySelectorAll('iframe[srcdoc]').length,
       }
     },
     { sampleLength: TEXT_SAMPLE_LENGTH, enoughHeight: MIN_VISIBLE_HEIGHT, messageLength: MESSAGE_LENGTH },

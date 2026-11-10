@@ -6,6 +6,8 @@
  * - EMPTY_ROOT: nothing mounted into #storybook-root (NB: overlay stories that portal
  *   their content to <body> can false-positive — check before filing)
  * - BLANK_RENDER: mounted but paints no text and no visible box (missing mock data)
+ * - SRCDOC_IFRAME: a srcdoc iframe rendered (e.g. IframeIcon without its mock); it can paint after the
+ *   screenshot and still look stable, so its image goes missing
  * - PAGE_ERROR / CONSOLE: uncaught errors while loading
  * - RENDER_TIMEOUT: the story (play function included) did not finish in time
  * - UNSTABLE_SCREENSHOT: (with --shots) the pixels kept changing until the settle timeout

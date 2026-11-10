@@ -15,6 +15,7 @@ const rendered: RenderState = {
   textLength: 12,
   textSample: 'Hello world!',
   visibleHeight: 40,
+  srcdocFrames: 0,
 }
 const quiet: LoadSignals = { pageErrors: [], consoleErrors: [], externalCalls: [] }
 
@@ -40,6 +41,10 @@ describe('renderIssues', () => {
   it('does not report a root without text that paints a box, or a line of text', () => {
     expect(renderIssues({ ...rendered, textLength: 0, visibleHeight: 9 }, quiet)).toEqual([])
     expect(renderIssues({ ...rendered, textLength: 1, visibleHeight: 0 }, quiet)).toEqual([])
+  })
+
+  it('reports srcdoc iframes, whose images can paint after the screenshot', () => {
+    expect(renderIssues({ ...rendered, srcdocFrames: 3 }, quiet)).toEqual(['SRCDOC_IFRAME: 3 frame(s)'])
   })
 
   it('reports the first page error, two console errors and every external call', () => {
