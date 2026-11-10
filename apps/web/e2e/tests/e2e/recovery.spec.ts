@@ -103,7 +103,6 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
       .poll(() => readDelayModifier(journey.env, delayModifier))
       .toMatchObject({ txNonce: 0, queueNonce: 1, nextProposalHash: expect.not.stringMatching(ZeroHash) })
 
-    // The proposal card already shows the panel; the dashboard renders it again, collapsed, once the wallet reads the queue
     await recovery.inProgressCard.waitFor({ state: 'attached' })
     await home.expandActionRequired()
     await expect(recovery.inProgressCard).toBeVisible()
