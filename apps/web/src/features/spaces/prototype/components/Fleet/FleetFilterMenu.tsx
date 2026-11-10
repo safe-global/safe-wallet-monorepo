@@ -10,7 +10,7 @@ import { getSignerIdentity, getSignerName } from '../../services/model'
 import { isYou } from '../../services/personas'
 import { PROPOSED_OPTIONS, proposedWithin, type ProposedWithin, type SignerLoad } from '../../services/fleet'
 import type { Persona, Proposal } from '../../types'
-import { FilterOption, FilterSectionTitle } from '../QueueFilters/QueueFilters'
+import { FilterOption, FilterSectionTitle, SearchableOptions } from '../QueueFilters/QueueFilters'
 
 // Signer section in the Filter menu, for both options. Fleet admin also gets Proposal date. Each takes one value.
 export function FleetFilterMenu({
@@ -39,16 +39,21 @@ export function FleetFilterMenu({
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent className="w-60">
           <p className="px-2 py-1.5 text-xs text-muted-foreground">Transactions still waiting on</p>
-          {load.map(({ id, txs, member }) => (
-            <FilterOption
-              key={id}
-              label={`${getSignerName(id)}${isYou(id, persona) ? ' (you)' : ''}${member ? '' : ' (outside)'}`}
-              checked={signer === id}
-              count={txs.length}
-              icon={<Identicon address={getSignerIdentity(id).address} size={16} />}
-              onToggle={() => onSignerChange(signer === id ? null : id)}
-            />
-          ))}
+          <SearchableOptions
+            items={load}
+            noun="signers"
+            getText={({ id }) => getSignerName(id)}
+            render={({ id, txs, member }) => (
+              <FilterOption
+                key={id}
+                label={`${getSignerName(id)}${isYou(id, persona) ? ' (you)' : ''}${member ? '' : ' (outside)'}`}
+                checked={signer === id}
+                count={txs.length}
+                icon={<Identicon address={getSignerIdentity(id).address} size={16} />}
+                onToggle={() => onSignerChange(signer === id ? null : id)}
+              />
+            )}
+          />
         </DropdownMenuSubContent>
       </DropdownMenuSub>
       {onProposedChange && (

@@ -169,6 +169,37 @@ export function QueueGroupedTable({
                       more={group.sections.some(hasMore)}
                     />
                   )}
+                  {/* One batch per network: bulk execute doesn't cross networks in v1. */}
+                  {group.sections.map((section) => {
+                    const safeBatch = getSafeBatch(section)
+                    return (
+                      safeBatch &&
+                      safeBatch.proposals.length > 1 && (
+                        <Button
+                          key={section.id}
+                          size="2xs"
+                          variant="outline"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            props.onBulkExecute(safeBatch.account.id)
+                          }}
+                        >
+                          Bulk execute {safeBatch.proposals.length}
+                          {group.sections.length > 1 && (
+                            <span className="flex items-center gap-1 text-muted-foreground">
+                              ·
+                              <img
+                                src={chainLogoUrl(section.account.chainId)}
+                                alt=""
+                                className="size-3.5 rounded-full"
+                              />
+                              {section.account.network}
+                            </span>
+                          )}
+                        </Button>
+                      )
+                    )
+                  })}
                   {seeAll(group)}
                 </span>
               </div>
@@ -177,7 +208,6 @@ export function QueueGroupedTable({
         </TableBody>
         {group.sections.map((section) => {
           const chainCollapsed = isCollapsed(section.id)
-          const safeBatch = getSafeBatch(section)
           return (
             <Fragment key={section.id}>
               <TableBody id={`chain-${section.id}`} hidden={collapsed}>
@@ -200,18 +230,6 @@ export function QueueGroupedTable({
                             persona={persona}
                             recoveryCount={recoveries?.forAccount(section.account.id).length ?? 0}
                           />
-                        )}
-                        {safeBatch && safeBatch.proposals.length > 1 && (
-                          <Button
-                            size="2xs"
-                            variant="outline"
-                            onClick={(event) => {
-                              event.stopPropagation()
-                              props.onBulkExecute(safeBatch.account.id)
-                            }}
-                          >
-                            Bulk execute {safeBatch.proposals.length}
-                          </Button>
                         )}
                       </span>
                     </div>

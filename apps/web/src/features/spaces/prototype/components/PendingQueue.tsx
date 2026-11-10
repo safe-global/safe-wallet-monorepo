@@ -726,7 +726,8 @@ function PendingQueueView() {
                     </Button>
                   </span>
                 )}
-                {bulkIds.length > 1 && !simple && (
+                {/* Option D offers bulk execute only on each Safe's row, grouped by Safe. */}
+                {bulkIds.length > 1 && !simple && !flat && (
                   <Tooltip delay={150}>
                     <TooltipTrigger
                       render={

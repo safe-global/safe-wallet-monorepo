@@ -250,22 +250,32 @@ function SafeDropdown({ filters, accounts }: Pick<QueueFiltersProps, 'filters' |
   )
 }
 
-// Same search-in-menu pattern as the production network picker (ChainSelectorBlock).
-const SAFE_SEARCH_FROM = 6
+// Same search-in-menu pattern as the production network picker (ChainSelectorBlock). Long lists get a search field.
+const LIST_SEARCH_FROM = 6
 
-function SafeAccountOptions({ filters, accounts }: Pick<QueueFiltersProps, 'filters' | 'accounts'>) {
+export function SearchableOptions<T>({
+  items,
+  noun,
+  getText,
+  render,
+}: {
+  items: T[]
+  // Plural, for the placeholder and the empty line: "Safes", "networks", "signers".
+  noun: string
+  getText: (item: T) => string
+  render: (item: T) => ReactNode
+}) {
   const [search, setSearch] = useState('')
   const query = search.trim().toLowerCase()
-  const { safes } = filters
-  const shown = query ? safes.filter((safe) => safe.name.toLowerCase().includes(query)) : safes
+  const shown = query ? items.filter((item) => getText(item).toLowerCase().includes(query)) : items
   return (
     <>
-      {safes.length >= SAFE_SEARCH_FROM && (
+      {items.length >= LIST_SEARCH_FROM && (
         <SearchInput
           variant="surface"
           className="m-1 w-[calc(100%-0.5rem)]"
-          placeholder="Search Safes"
-          aria-label="Search Safes"
+          placeholder={`Search ${noun}`}
+          aria-label={`Search ${noun}`}
           value={search}
           onChange={(event) => setSearch(event.target.value)}
           onClear={() => setSearch('')}
@@ -274,7 +284,19 @@ function SafeAccountOptions({ filters, accounts }: Pick<QueueFiltersProps, 'filt
           autoComplete="off"
         />
       )}
-      {shown.map((safe) => (
+      {shown.map(render)}
+      {query && !shown.length && <p className="px-2 py-1.5 text-sm text-muted-foreground">No {noun} match</p>}
+    </>
+  )
+}
+
+function SafeAccountOptions({ filters, accounts }: Pick<QueueFiltersProps, 'filters' | 'accounts'>) {
+  return (
+    <SearchableOptions
+      items={filters.safes}
+      noun="Safes"
+      getText={(safe) => safe.name}
+      render={(safe) => (
         <FilterOption
           key={safe.ids[0]}
           label={safe.name}
@@ -283,9 +305,8 @@ function SafeAccountOptions({ filters, accounts }: Pick<QueueFiltersProps, 'filt
           icon={<Identicon address={accounts.find((account) => account.id === safe.ids[0])!.iconAddress} size={16} />}
           onToggle={() => filters.toggleSafe(safe.ids)}
         />
-      ))}
-      {query && !shown.length && <p className="px-2 py-1.5 text-sm text-muted-foreground">No Safes match</p>}
-    </>
+      )}
+    />
   )
 }
 
@@ -419,24 +440,29 @@ export function QueueToolbar({
                   <FilterSectionTitle title="Network" summary={filters.summaries.networks} />
                 </DropdownMenuSubTrigger>
                 <DropdownMenuSubContent className="w-56">
-                  {filters.networks.map((network) => (
-                    <FilterOption
-                      key={network}
-                      label={network}
-                      checked={filters.networkFilter.includes(network)}
-                      count={filters.optionCount('networks', (tx) => getAccount(tx).network === network)}
-                      icon={
-                        <Avatar className="size-4">
-                          <AvatarImage
-                            src={chainLogoUrl(accounts.find((account) => account.network === network)?.chainId)}
-                            alt=""
-                          />
-                          <AvatarFallback className="text-[10px]">{network[0]}</AvatarFallback>
-                        </Avatar>
-                      }
-                      onToggle={() => filters.toggleNetwork(network)}
-                    />
-                  ))}
+                  <SearchableOptions
+                    items={filters.networks}
+                    noun="networks"
+                    getText={(network) => network}
+                    render={(network) => (
+                      <FilterOption
+                        key={network}
+                        label={network}
+                        checked={filters.networkFilter.includes(network)}
+                        count={filters.optionCount('networks', (tx) => getAccount(tx).network === network)}
+                        icon={
+                          <Avatar className="size-4">
+                            <AvatarImage
+                              src={chainLogoUrl(accounts.find((account) => account.network === network)?.chainId)}
+                              alt=""
+                            />
+                            <AvatarFallback className="text-[10px]">{network[0]}</AvatarFallback>
+                          </Avatar>
+                        }
+                        onToggle={() => filters.toggleNetwork(network)}
+                      />
+                    )}
+                  />
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
               {extraMenu}

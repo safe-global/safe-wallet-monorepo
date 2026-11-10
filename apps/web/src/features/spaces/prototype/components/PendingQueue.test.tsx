@@ -1336,6 +1336,31 @@ describe('option D · flat table', () => {
     expect(allPending().getAllByRole('button', { name: /^Open / }).length).toBeGreaterThan(0)
   })
 
+  it('offers bulk execute only on each Safe row, grouped by Safe', async () => {
+    const heavyFlat = { routerProps: { query: { option: 'flat', scenario: 'conflict-heavy' } } }
+    const { user } = renderWithUserEvent(<PendingQueue />, heavyFlat)
+    expect(screen.queryByRole('button', { name: /^Bulk execute/ })).toBeNull()
+    await user.click(screen.getByRole('button', { name: 'Group by Status' }))
+    await user.click(await screen.findByRole('menuitemradio', { name: /^Safe/ }))
+    await user.click(screen.getByRole('button', { name: 'Bulk execute 2' }))
+    const dialog = within(screen.getByRole('dialog'))
+    expect(dialog.getByRole('region', { name: 'Ops Payroll batch' })).toBeVisible()
+    expect(screen.queryByRole('button', { name: /^Bulk execute \d+ transactions/ })).toBeNull()
+  })
+
+  it('adds a search field to long filter lists, such as signers', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'flat', scenario: '20-safes' } },
+    })
+    await openFilter(user, 'Signer')
+    const search = await screen.findByRole('searchbox', { name: 'Search signers' })
+    const before = screen.getAllByRole('menuitemcheckbox').length
+    fireEvent.change(search, { target: { value: 'zzz' } })
+    expect(screen.getByText('No signers match')).toBeInTheDocument()
+    fireEvent.change(search, { target: { value: '' } })
+    expect(screen.getAllByRole('menuitemcheckbox')).toHaveLength(before)
+  })
+
   it('keeps Status and Safe inside the Filter menu, with no standalone buttons', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, flat)
     expect(screen.queryByRole('button', { name: /^Status/ })).toBeNull()
