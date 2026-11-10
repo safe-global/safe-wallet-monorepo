@@ -109,7 +109,7 @@ exports[`./index.stories Default 1`] = `
                               sandbox="allow-scripts"
                               srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://assets.coingecko.com/coins/images/2518/small/weth.png" alt="Safe App logo" height="32" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/assets.coingecko.com/coins/images/2518/small/weth.webp" alt="Safe App logo" height="32" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -242,7 +242,7 @@ exports[`./index.stories Default 1`] = `
                               sandbox="allow-scripts"
                               srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://assets.coingecko.com/coins/images/6319/small/usdc.png" alt="Safe App logo" height="32" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/assets.coingecko.com/coins/images/6319/small/usdc.webp" alt="Safe App logo" height="32" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -375,7 +375,7 @@ exports[`./index.stories Default 1`] = `
                               sandbox="allow-scripts"
                               srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://assets.coingecko.com/coins/images/9956/small/dai-multi-collateral-mcd.png" alt="Safe App logo" height="32" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/assets.coingecko.com/coins/images/9956/small/dai-multi-collateral-mcd.webp" alt="Safe App logo" height="32" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null

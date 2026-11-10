@@ -43,7 +43,7 @@ yarn workspace @safe-global/tx-builder test
 
 ### E2E Tests
 
-E2E testing for Safe Apps is handled by the main web app's Cypress suite at `apps/web/cypress/e2e/safe-apps/`. This ensures tests run against the actual Safe{Wallet} integration rather than mocked iframe environments.
+The Playwright journey `apps/web/e2e/tests/e2e/tx-builder.spec.ts` runs the app in its iframe in the wallet on the isolated E2E stack.
 
 ## Architecture
 

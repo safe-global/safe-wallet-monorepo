@@ -4,7 +4,7 @@
  * The warning depends on the CGW `implementationVersionState` and on a comparison of the singleton's bytecode
  * with the official deployments. The jest tests mock both; this spec runs them against a real backend and chain.
  *
- * Run: yarn workspace @safe-global/web pw:test dashboard-mastercopy-warning
+ * Run: SAFE_E2E_SPECS=dashboard-mastercopy-warning yarn workspace @safe-global/web e2e:env playwright
  * Tag: @regression — runs under the chromium project, on demand.
  */
 import { test, expect } from '../../src/fixtures/test.fixture'
@@ -18,7 +18,7 @@ test.describe('Dashboard mastercopy warning', { tag: '@regression' }, () => {
     safes,
   }) => {
     const home = new HomePage(safePage)
-    await home.goto(safes.MATIC_MIGRATABLE_SAFE)
+    await home.goto(safes.migratable)
     await home.expandActionRequired()
 
     await expect(home.actionRequiredPanel).toContainText(UNSUPPORTED_VERSION)
@@ -31,7 +31,7 @@ test.describe('Dashboard mastercopy warning', { tag: '@regression' }, () => {
 
   test('should point to the CLI when the Safe runs an unofficial singleton', async ({ safePage, safes }) => {
     const home = new HomePage(safePage)
-    await home.goto(safes.MATIC_UNOFFICIAL_SINGLETON_SAFE)
+    await home.goto(safes.unofficialSingleton)
     await home.expandActionRequired()
 
     await expect(home.actionRequiredPanel).toContainText(UNSUPPORTED_VERSION)

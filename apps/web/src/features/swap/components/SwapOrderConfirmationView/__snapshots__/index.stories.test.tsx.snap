@@ -42,7 +42,7 @@ exports[`./index.stories CustomRecipient 1`] = `
                     sandbox="allow-scripts"
                     srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="40" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="40" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -590,7 +590,7 @@ exports[`./index.stories Default 1`] = `
                     sandbox="allow-scripts"
                     srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="40" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="40" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null

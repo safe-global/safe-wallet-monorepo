@@ -1,6 +1,6 @@
 # Isolated E2E
 
-Runs the Playwright specs registered in `e2e/environment/playwright-specs.mjs` against a local Anvil Sepolia fork and Safe backend services. Scenario setup creates test owners, funded Safes, token balances and transactions through the SDK and local APIs. Cypress does not run here; it runs only against staging. See `.github/workflows/web-isolated-e2e-backend.yml` for CI.
+Runs the Playwright specs registered in `e2e/environment/playwright-specs.mjs` against a local Anvil Sepolia fork and Safe backend services. Scenario setup creates test owners, funded Safes, token balances and transactions through the SDK and local APIs. See `.github/workflows/web-isolated-e2e-backend.yml` for CI.
 
 ## Setup
 
@@ -26,15 +26,15 @@ SAFE_E2E_SPECS=dashboard yarn workspace @safe-global/web e2e:env playwright
 
 ## Specs
 
-The specs run unchanged on staging and on the local stack. Specs read their Safes from the `safes` fixture and their wallets from the `credentials` fixture. On staging these are `SAFES` from `e2e/src/data/constants.ts` and `CYPRESS_WALLET_CREDENTIALS`. In isolated runs (`SAFE_E2E_ISOLATED=true`), `e2e/src/fixtures/isolated-data.ts` runs the spec's scenarios once per spec file and worker with four generated owners, and the fixtures return those owners and the deployed Safes. A key of `SAFES` that the registry does not map throws when a spec reads it.
+The specs run only on the isolated stack. `e2e/src/fixtures/spec-data.ts` runs the spec's scenarios once per spec file and worker with four fresh owners, Alice, Bob, Carol and Dave. The `owners` fixture returns them as ethers wallets, and the `safes` fixture returns the Safes that the scenarios deployed, by name: `safes.assets`, `safes.queue`. Reading a name that none of the spec's scenarios returns throws.
 
-To add a spec, register its path under `e2e/tests` in `playwright-specs.mjs`: `scenarios` lists the scenario functions to run, in order, and `safes` maps each `SAFES` key the spec reads to a static Safe key that those scenarios return. `chains` lists the forks besides Sepolia that the spec needs (`[1, 137]` for Ethereum and Polygon); every CI shard starts them, and a local run names the command that starts a missing fork. A spec that needs no backend data gets `{}`. Only registered specs run in isolated mode, and `e2e:env:test` fails for an unregistered spec. Spec files run in parallel workers on one stack: owners get their ETH from `anvil_setBalance`, not from a shared account. `e2e:env:test` also fails for a scenario function that no spec names.
+To add a spec, register its path under `e2e/tests` in `playwright-specs.mjs`: `scenarios` lists the scenario functions to run, in order. Each scenario returns `{ safes: { <name>: 'sep:0x…' } }` and declares those names in `scenarioSafes` in `scenarios/index.mjs`; two scenarios of one spec cannot return the same name. `chains` lists the forks besides Sepolia that the spec needs (`[1, 137]` for Ethereum and Polygon); every CI shard starts them, and a local run names the command that starts a missing fork. A spec that needs no backend data gets `{}`. Only registered specs run, and `e2e:env:test` fails for an unregistered spec, for a scenario that does not declare its Safes, and for a `safes.<name>` that none of the spec's scenarios returns. Spec files run in parallel workers on one stack: owners get their ETH from `anvil_setBalance`, not from a shared account. `e2e:env:test` also fails for a scenario function that no spec names.
 
-The journeys in `e2e/tests/e2e/` act through the UI from seed to chain, so they run only in isolated mode and register with `{}`; the staging config ignores that folder. They import `test` from `e2e/src/fixtures/journey.fixture.ts`, which gives each test fresh owners and starts the browser connected as `OWNER_4`. `journey.connectAs(owner)` connects another owner, who stays connected on every later navigation. Each test deploys its own Safe with `seedSafe(journey, { owners, threshold })`, which names its owners and puts the Safe's address in the test report, and seeds it with the other functions in `e2e/src/seed/` (on top of the scenario helpers). It then checks the result through CGW (`SafeApiClient`) and the fork (`e2e/src/chain/`), polling with `expect.poll`. They execute with the connected wallet, except the relay and Pay from Safe journeys.
+The journeys in `e2e/tests/e2e/` act through the UI from seed to chain and register with `{}`. They import `test` from `e2e/src/fixtures/journey.fixture.ts`, which gives each test fresh owners and starts the browser connected as `Alice`. `journey.connectAs(owner)` connects another owner, who stays connected on every later navigation. Each test deploys its own Safe with `seedSafe(journey, { owners, threshold })`, which names its owners and puts the Safe's address in the test report, and seeds it with the other functions in `e2e/src/seed/` (on top of the scenario helpers). It then checks the result through CGW (`SafeApiClient`) and the fork (`e2e/src/chain/`), polling with `expect.poll`. They execute with the connected wallet, except the relay and Pay from Safe journeys.
 
 `e2e/walletconnect.spec.ts` plays a dApp that connects to the wallet through the hosted WalletConnect relay, with `@walletconnect/sign-client` in the Playwright process (`e2e/src/api/walletconnect-dapp.ts`). Set `NEXT_PUBLIC_WC_PROJECT_ID` for both `e2e:env build` and `e2e:env playwright`: the wallet and the dApp use the same project ID.
 
-The email sign-in and step-up specs in `tests/regression/auth0/` run only in isolated mode, against `auth0-mock`; the staging config ignores the folder. `email-sign-in.spec.ts` signs in through the UI; every other spec starts signed in: `signInWithEmail` in `e2e/src/fixtures/email-session.ts` signs in through the gateway and the mock from Node, optionally without a second factor so the next sensitive action asks for a step-up, and gives the page the gateway's and the mock's session cookies. `createEmailSession` signs the same user in again with a second factor, so test data created through the gateway needs no step-up; `storeSubscription` stores a Workspace's plan and waits until the gateway has applied it. `e2e/src/fixtures/step-up.ts` answers the step-up in the popup that the wallet's dialog opens, and checks that the action completed on the same page without a reload, and `e2e/src/pages/auth0.page.ts` drives the mock's page. The local nginx returns the caller's origin and allows credentials, as the hosted gateway does, so the browser keeps the session cookie on gateway calls; specs that fake a session with `page.route` must mock every session-scoped call the page makes, or the gateway's 403 makes the app re-check the session.
+The email sign-in and step-up specs in `tests/regression/auth0/` run against `auth0-mock`. `email-sign-in.spec.ts` signs in through the UI; every other spec starts signed in: `signInWithEmail` in `e2e/src/fixtures/email-session.ts` signs in through the gateway and the mock from Node, optionally without a second factor so the next sensitive action asks for a step-up, and gives the page the gateway's and the mock's session cookies. `createEmailSession` signs the same user in again with a second factor, so test data created through the gateway needs no step-up; `storeSubscription` stores a Workspace's plan and waits until the gateway has applied it. `e2e/src/fixtures/step-up.ts` answers the step-up in the popup that the wallet's dialog opens, and checks that the action completed on the same page without a reload, and `e2e/src/pages/auth0.page.ts` drives the mock's page. The local nginx returns the caller's origin and allows credentials, as the hosted gateway does, so the browser keeps the session cookie on gateway calls; specs that fake a session with `page.route` must mock every session-scoped call the page makes, or the gateway's 403 makes the app re-check the session.
 
 ## Cleanup
 
@@ -56,14 +56,14 @@ The local Sepolia chain enables the features that staging serves to `WALLET_WEB`
 
 ## Seeded data
 
-- Each run generates four wallets. `OWNER_4`, `OWNER_1`, `OWNER_2` and `OWNER_3` get the roles their credentials have on staging.
-- `scenarios/staging-safes.mjs` holds the on-chain state of staging static Safes at the fork block: owners, threshold, nonce, balances, tokens and spending limits. `rebuildStagingSafes` deploys them, executing as impersonated owners where no key exists. Staging wallets that sign in tests map to the generated owners.
+- Each spec file and each journey test gets four fresh owners: `alice`, `bob`, `carol` and `dave`. The wallet starts connected as Alice, and scenarios deploy and propose as Alice.
+- `scenarios/staging-safes.mjs` holds the on-chain state of staging static Safes at the fork block: owners, threshold, nonce, balances, tokens and spending limits. `rebuildStagingSafes` deploys them, executing as impersonated owners where no key exists. Staging owners that sign in tests map to the fresh owners.
 - History that predates the fork cannot be indexed. Seed the history a spec needs after the fork block.
 
 ## Adding a scenario
 
 1. Register the spec in `playwright-specs.mjs`, as described above.
-2. Write the scenario as `export async function prepare<Name>Scenario(env, owners)` in a module under `e2e/environment/scenarios/` and import that module in `scenarios/index.mjs`. It returns `{ safes }`, with the static Safes under `safes.static` by key.
+2. Write the scenario as `export async function prepare<Name>Scenario(env, owners)` in a module under `e2e/environment/scenarios/` and import that module in `scenarios/index.mjs`. It returns `{ safes: { <name>: 'sep:0x…' } }`, one name per Safe that says what the Safe is for, and declares those names in `scenarioSafes` in `scenarios/index.mjs`.
 3. Build data with the shared modules: `safe.mjs` (`createSafe`, `openSafe`, `proposeTransaction`, `executeTransaction`), `gateway.mjs` for confirmations, messages and delegates (queued data goes through CGW to the Queue Service, never to the Transaction Service, which copies it from the Queue Service events within a few seconds), `staging.mjs` and `staging-safes.mjs` for staging snapshots, `chain.mjs` for fork primitives, and `indexing.mjs` (`waitUntil`, `waitForQueued`) to wait until CGW serves the data before the spec runs.
 4. Run `yarn workspace @safe-global/web e2e:env:test`; it checks that every registered spec exists and that every scenario function serves a spec.
 
@@ -94,6 +94,13 @@ node apps/web/e2e/environment/simulation.mjs
 ```
 
 Run the last two in separate terminals.
+
+The Drain Account spec needs a production build of `apps/drain-safe` on port 4001, which the local config service lists:
+
+```sh
+yarn workspace @safe-global/drain-safe exec vite build --config vite.config.ts
+yarn workspace @safe-global/drain-safe exec vite preview --config vite.config.ts --host localhost --strictPort
+```
 
 The adapter also serves the wallet's Tenderly card: `e2e:env build` and the CI build point `NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL` at it, with org `safe` and project `safe-apps` for the simulation link. It reads the fork RPCs from the stack manifest of `SAFE_E2E_PROJECT` (default `safe-e2e-local`) when it starts, so start it after any `--chain` fork, and routes each simulation to the fork of its `network_id`. It answers the origins `localhost:4000` (Transaction Builder), `localhost:3080` (local wallet) and `localhost:8080` (CI wallet) only.
 

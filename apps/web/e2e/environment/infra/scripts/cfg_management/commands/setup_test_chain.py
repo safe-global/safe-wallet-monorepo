@@ -98,9 +98,8 @@ SAFE_APPS = [
         "Compose custom contract interactions and batch them into a single transaction",
         True,
     ),
-    # Not in this repository, so the hosted app is listed, as on staging.
     (
-        "https://safe-apps.dev.5afe.dev/drain-safe",
+        "http://localhost:4001",
         "Drain Account",
         "Transfer all your assets in batch",
         False,

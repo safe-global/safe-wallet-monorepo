@@ -23,7 +23,7 @@ const createMockQueuedTransaction = (nonce: number, confirmations: number, thres
         tokenName: 'USD Coin',
         tokenSymbol: 'USDC',
         logoUri:
-          'https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+          'mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp',
         decimals: 6,
         value: '1000000000',
       },

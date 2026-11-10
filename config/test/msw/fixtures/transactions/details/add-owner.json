@@ -79,7 +79,7 @@
     "refundReceiver": {
       "value": "0x0000000000000000000000000000000000000000",
       "name": null,
-      "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x0000000000000000000000000000000000000000.png"
+      "logoUri": "images/common/token-placeholder.svg"
     },
     "safeTxHash": "0x85835820c4119ea7e44537dd4a447264cc08d80ea1467b545b500670573c3d2d",
     "executor": {

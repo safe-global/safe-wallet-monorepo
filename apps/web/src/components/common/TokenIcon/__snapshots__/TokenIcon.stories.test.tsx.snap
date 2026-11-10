@@ -53,7 +53,7 @@ exports[`./TokenIcon.stories Default 1`] = `
         sandbox="allow-scripts"
         srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://assets.coingecko.com/coins/images/279/small/ethereum.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/assets.coingecko.com/coins/images/279/small/ethereum.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -125,7 +125,7 @@ exports[`./TokenIcon.stories LargeSize 1`] = `
         sandbox="allow-scripts"
         srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://assets.coingecko.com/coins/images/279/small/ethereum.png" alt="Safe App logo" height="48" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/assets.coingecko.com/coins/images/279/small/ethereum.webp" alt="Safe App logo" height="48" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -161,7 +161,7 @@ exports[`./TokenIcon.stories NoRadius 1`] = `
         sandbox="allow-scripts"
         srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://assets.coingecko.com/coins/images/279/small/ethereum.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/assets.coingecko.com/coins/images/279/small/ethereum.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -197,7 +197,7 @@ exports[`./TokenIcon.stories SmallSize 1`] = `
         sandbox="allow-scripts"
         srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://assets.coingecko.com/coins/images/279/small/ethereum.png" alt="Safe App logo" height="16" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/assets.coingecko.com/coins/images/279/small/ethereum.webp" alt="Safe App logo" height="16" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -233,7 +233,7 @@ exports[`./TokenIcon.stories WithChainIndicator 1`] = `
         sandbox="allow-scripts"
         srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://assets.coingecko.com/coins/images/6319/small/usdc.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/assets.coingecko.com/coins/images/6319/small/usdc.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null

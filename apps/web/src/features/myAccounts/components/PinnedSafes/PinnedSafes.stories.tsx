@@ -2,12 +2,14 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { withMockProvider } from '@/storybook/decorators'
 import PinnedSafes from './index'
 import type { AllSafeItems } from '@/hooks/safes'
+import { createHandlers } from '@/stories/mocks'
 
 const meta = {
   title: 'Features/MyAccounts/PinnedSafes',
   component: PinnedSafes,
   decorators: [withMockProvider()],
   parameters: {
+    msw: { handlers: createHandlers() },
     layout: 'padded',
   },
   tags: ['autodocs'],
