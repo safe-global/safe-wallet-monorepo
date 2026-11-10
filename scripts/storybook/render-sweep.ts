@@ -9,6 +9,7 @@
  * - PAGE_ERROR / CONSOLE: uncaught errors while loading
  * - RENDER_TIMEOUT: the story (play function included) did not finish in time
  * - UNSTABLE_SCREENSHOT: (with --shots) the pixels kept changing until the settle timeout
+ * - ICONS_NOT_LOADED: (with --shots) an iframe's image (TokenIcon) was still loading at screenshot time
  * - EXTERNAL_REQUEST: an API call had no MSW mock and hit the (blocked) network
  *
  * Usage (from apps/web): yarn storybook:sweep [-- --filter=ui- --modes=light --concurrency=4]
@@ -60,6 +61,15 @@ const TIMEZONE = 'UTC'
 const externalPage = (host: string) =>
   `<body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:#e5e5e5;color:#555;font:14px sans-serif">External page: ${host}</body>`
 // Faker and other story data take their seed from Math.random, so every page gets the same sequence (mulberry32)
+// Lazy iframes and images (every TokenIcon) start loading only near the viewport, and how near depends on
+// Chrome's heuristics; on slow CI runners the lower icons were still missing at screenshot time
+const EAGER_LOADING = `(() => {
+  const setAttribute = Element.prototype.setAttribute
+  Element.prototype.setAttribute = function (name, value) {
+    const lazy = name === 'loading' && (this.tagName === 'IFRAME' || this.tagName === 'IMG')
+    return setAttribute.call(this, name, lazy ? 'eager' : value)
+  }
+})()`
 const SEEDED_RANDOM = `(() => {
   let seed = 1
   Math.random = () => {
@@ -188,6 +198,17 @@ async function waitForSrcdocFrames(page: Page): Promise<void> {
 }
 
 // Fonts and images that are still loading make the screenshot differ between runs.
+// Frames (TokenIcon) whose image has not finished loading; a broken image counts as finished
+async function countPendingImageFrames(page: Page): Promise<number> {
+  const pending = await Promise.all(
+    page
+      .frames()
+      .filter((frame) => frame !== page.mainFrame())
+      .map((frame) => frame.evaluate(() => [...document.images].some((img) => !img.complete)).catch(() => false)),
+  )
+  return pending.filter(Boolean).length
+}
+
 async function waitForAssets(page: Page): Promise<void> {
   // Embedded pages paint only once their frame has loaded
   await Promise.all(
@@ -360,6 +381,8 @@ async function checkStory(
     if (cellsDir && !skipSnapshot) {
       await fitViewportToIframes(page, () => openRequests)
       await waitForAssets(page)
+      const pendingImageFrames = await countPendingImageFrames(page)
+      if (pendingImageFrames) result.issues.push(`ICONS_NOT_LOADED: ${pendingImageFrames} frame(s)`)
       const { fullscreen, png, stable } = await stableScreenshot(page)
       if (!stable) result.issues.push('UNSTABLE_SCREENSHOT')
       const file = path.join(cellsDir, `${story.id}--${mode}.png`)
@@ -439,6 +462,7 @@ async function main(): Promise<void> {
       })
       await context.clock.setFixedTime(FIXED_NOW)
       await context.addInitScript({ content: SEEDED_RANDOM })
+      await context.addInitScript({ content: EAGER_LOADING })
       await context.route(
         (url) => url.origin !== baseOrigin,
         (route) =>
