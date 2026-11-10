@@ -115,6 +115,11 @@ jobs:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
 
+      # The ARM64 runner image has no Chrome, so the sweep uses Playwright's pinned headless shell
+      - name: Install browser dependencies
+        working-directory: apps/web
+        run: yarn exec playwright install --with-deps --only-shell chromium
+
       - name: Build Storybook
         run: yarn workspace @safe-global/web build-storybook --output-dir storybook-static
 
