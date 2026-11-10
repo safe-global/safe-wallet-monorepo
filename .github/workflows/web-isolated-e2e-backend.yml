@@ -54,6 +54,7 @@ jobs:
             .github/actions/yarn/**
             .github/actions/corepack/**
             .github/actions/cache-deps/**
+            .github/actions/playwright-browsers/**
             apps/web/**
             apps/tx-builder/**
             apps/drain-safe/**
@@ -189,9 +190,9 @@ jobs:
           persist-credentials: false
       - uses: $/.github/actions/yarn
 
-      - name: Install browser dependencies
-        working-directory: apps/web
-        run: yarn exec playwright install --with-deps --no-shell chromium
+      - uses: $/.github/actions/playwright-browsers
+        with:
+          build: full
 
       # The Queue Service image is a private package.
       - name: Log in to GitHub Container Registry

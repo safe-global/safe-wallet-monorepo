@@ -74,6 +74,7 @@ jobs:
             .github/actions/yarn/**
             .github/actions/corepack/**
             .github/actions/pr-changes/**
+            .github/actions/playwright-browsers/**
 
   # A PR that cannot change a story still needs a green Argos status to merge
   skip:
@@ -116,9 +117,9 @@ jobs:
           turbo-team: ${{ vars.TURBO_TEAM }}
 
       # The ARM64 runner image has no Chrome, so the sweep uses Playwright's pinned headless shell
-      - name: Install browser dependencies
-        working-directory: apps/web
-        run: yarn exec playwright install --with-deps --only-shell chromium
+      - uses: $/.github/actions/playwright-browsers
+        with:
+          build: shell
 
       - name: Build Storybook
         run: yarn workspace @safe-global/web build-storybook --output-dir storybook-static
