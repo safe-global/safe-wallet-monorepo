@@ -4,14 +4,11 @@
  * This entire file is lazy-loaded via createFeatureHandle.
  * Use direct imports - do NOT use lazy() inside (one dynamic import per feature).
  *
- * Loaded when:
- * 1. The feature flag FEATURES.MY_ACCOUNTS is enabled
- * 2. A consumer calls useLoadFeature(MyAccountsFeature)
+ * Loaded when a consumer calls useLoadFeature(MyAccountsFeature)
  */
 import type { MyAccountsContract } from './contract'
 
 // Direct component imports (already lazy-loaded at feature level)
-import MyAccounts from './components/MyAccounts'
 import MyAccountsV2 from './components/MyAccountsV2'
 import AccountItemButton from './components/AccountItem/AccountItemButton'
 import AccountItemLink from './components/AccountItem/AccountItemLink'
@@ -34,7 +31,6 @@ import AccountsWidget from './components/AccountsWidget/AccountsWidget'
 // Flat structure - naming determines stub behavior
 const feature: MyAccountsContract = {
   // Main component
-  MyAccounts,
   MyAccountsV2,
 
   // Externally used components (individual exports to avoid compound component issues)

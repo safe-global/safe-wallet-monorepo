@@ -18,7 +18,6 @@ jest.mock('@/features/__core__', () => ({
 let mockLanding: { spaceId: string | null; isLoading: boolean } = { spaceId: null, isLoading: false }
 jest.mock('@/features/spaces', () => ({
   SpacesFeature: 'SpacesFeature',
-  useFeatureFlagRedirect: jest.fn(),
   useLandingSpaceId: () => mockLanding,
 }))
 
@@ -39,7 +38,6 @@ const setup = ({
     replace: mockReplace,
   })
   ;(featureModule.useLoadFeature as jest.Mock).mockReturnValue({ SpaceDashboardPage: SpaceDashboardPageMock })
-  ;(spacesFeature.useFeatureFlagRedirect as jest.Mock).mockReturnValue(undefined)
 }
 
 describe('SpacePage (/spaces)', () => {
