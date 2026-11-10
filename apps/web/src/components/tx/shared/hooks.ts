@@ -81,7 +81,9 @@ export const useTxActions = (): TxActions => {
   const feePaymentFeature = useLoadFeature(FeePaymentFeature)
   const { feePaymentMode, feeGasToken } = useContext(SafeTxContext)
   const currency = useAppSelector(selectCurrency)
-  const { data: flowData } = useContext(TxFlowContext) as TxFlowContextType<{ nestedChildTx?: NestedTxEnvelope }>
+  const { data: flowData, declared } = useContext(TxFlowContext) as TxFlowContextType<{
+    nestedChildTx?: NestedTxEnvelope
+  }>
   const nestedChildTx = flowData?.nestedChildTx
 
   return useMemo<TxActions>(() => {
@@ -113,6 +115,7 @@ export const useTxActions = (): TxActions => {
         origin,
         scope,
         nestedTransaction: nestedChildTx,
+        declared,
       })
     }
 
@@ -175,6 +178,7 @@ export const useTxActions = (): TxActions => {
             origin,
             scope,
             nestedTransaction: nestedChildTx,
+            declared,
           })
           return { txId: nestedTxId, isNestedSigning: true }
         }
@@ -297,6 +301,7 @@ export const useTxActions = (): TxActions => {
     feeGasToken,
     currency,
     nestedChildTx,
+    declared,
   ])
 }
 
