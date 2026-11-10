@@ -14207,6 +14207,7 @@ __metadata:
     jest: "npm:^30.5.2"
     jest-transform-stub: "npm:2.0.0"
     msw: "npm:^2.7.3"
+    sharp: "npm:^0.35.5"
     ts-jest: "npm:^29.4.6"
     typescript: "npm:~5.9.2"
   languageName: unknown

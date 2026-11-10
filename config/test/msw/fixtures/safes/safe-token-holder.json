@@ -102,13 +102,13 @@
   "implementation": {
     "value": "0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552",
     "name": "Safe 1.3.0",
-    "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552.png"
+    "logoUri": "mock-assets/safe-transaction-assets.safe.global/contracts/logos/0xd9Db270c1B5E3Bd161E8c8503c55cEABeE709552.webp"
   },
   "modules": [
     {
       "value": "0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134",
       "name": "AllowanceModule",
-      "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134.png"
+      "logoUri": "mock-assets/safe-transaction-assets.safe.global/contracts/logos/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134.webp"
     }
   ],
   "fallbackHandler": {

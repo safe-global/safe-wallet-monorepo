@@ -95,13 +95,13 @@
     "refundReceiver": {
       "value": "0x0000000000000000000000000000000000000000",
       "name": null,
-      "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x0000000000000000000000000000000000000000.png"
+      "logoUri": "images/common/token-placeholder.svg"
     },
     "safeTxHash": "0xd7a2578ba2e610959961ad9816115d33521d7e7904797cece08051c38fa3af6f",
     "executor": {
       "value": "0xC16Db0251654C0a72E91B190d81eAD367d2C6fED",
       "name": null,
-      "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xC16Db0251654C0a72E91B190d81eAD367d2C6fED.png"
+      "logoUri": "images/common/token-placeholder.svg"
     },
     "signers": [
       {

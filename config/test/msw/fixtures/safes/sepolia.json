@@ -22,19 +22,19 @@
   "implementation": {
     "value": "0xfb1bffC9d739B8D520DaF37dF666da4C687191EA",
     "name": "SafeL2 1.3.0",
-    "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xfb1bffC9d739B8D520DaF37dF666da4C687191EA.png"
+    "logoUri": "mock-assets/safe-transaction-assets.safe.global/contracts/logos/0xfb1bffC9d739B8D520DaF37dF666da4C687191EA.webp"
   },
   "modules": [
     {
       "value": "0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134",
       "name": "AllowanceModule",
-      "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134.png"
+      "logoUri": "mock-assets/safe-transaction-assets.safe.global/contracts/logos/0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134.webp"
     }
   ],
   "fallbackHandler": {
     "value": "0x017062a1dE2FE6b99BE3d9d37841FeD19F573804",
     "name": "Safe: CompatibilityFallbackHandler 1.3.0",
-    "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x017062a1dE2FE6b99BE3d9d37841FeD19F573804.png"
+    "logoUri": "mock-assets/safe-transaction-assets.safe.global/contracts/logos/0x017062a1dE2FE6b99BE3d9d37841FeD19F573804.webp"
   },
   "guard": null,
   "version": "1.3.0+L2",

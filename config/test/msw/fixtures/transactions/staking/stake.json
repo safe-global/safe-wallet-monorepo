@@ -21,7 +21,7 @@
         "tokenInfo": {
           "address": "0x0000000000000000000000000000000000000000",
           "decimals": 18,
-          "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png",
+          "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.webp",
           "name": "Ether",
           "symbol": "ETH",
           "trusted": true
@@ -70,7 +70,7 @@
       "tokenInfo": {
         "address": "0x0000000000000000000000000000000000000000",
         "decimals": 18,
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png",
+        "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.webp",
         "name": "Ether",
         "symbol": "ETH",
         "trusted": true
@@ -89,7 +89,7 @@
       "to": {
         "value": "0xC9db9bf0c9c8Fa30B09c45233E6A2D5eEfF9aBF3",
         "name": "StakingContract",
-        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xC9db9bf0c9c8Fa30B09c45233E6A2D5eEfF9aBF3.png"
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "value": "32000000000000000000",
       "operation": 0,
@@ -111,7 +111,7 @@
       "refundReceiver": {
         "value": "0x0000000000000000000000000000000000000000",
         "name": null,
-        "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x0000000000000000000000000000000000000000.png"
+        "logoUri": "images/common/token-placeholder.svg"
       },
       "safeTxHash": "0xd1699838071a472d26963f2b823a4c835e9acd449d0376ca1d468a666903130d",
       "executor": {

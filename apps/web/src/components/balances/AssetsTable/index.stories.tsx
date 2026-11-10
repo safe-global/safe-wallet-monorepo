@@ -53,8 +53,8 @@ export const Default: Story = {
 }
 
 /**
- * AssetsTable with Vitalik's whale portfolio (1551 tokens, $675M).
- * Tests rendering performance with large token lists.
+ * AssetsTable with Vitalik's large portfolio (44 tokens, $677M).
+ * Shows a long token list with pagination.
  */
 export const WhalePortfolio: Story = (() => {
   const setup = createMockStory({

@@ -13,7 +13,7 @@ const FIXED_SELL_TOKEN = {
   address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
   decimals: 6,
   logoUri:
-    'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+    'mock-assets/safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp',
   name: 'USD Coin',
   symbol: 'USDC',
   trusted: true,
