@@ -1,4 +1,5 @@
-import { render, screen } from '@/tests/test-utils'
+import userEvent from '@testing-library/user-event'
+import { render, screen, within } from '@/tests/test-utils'
 import * as coreFeatures from '@/features/__core__'
 import * as useBalancesModule from '@/hooks/useBalances'
 import * as useChains from '@/hooks/useChains'
@@ -28,6 +29,11 @@ jest.mock('@/features/hypernative', () => ({
   useBannerVisibility: jest.fn(),
   HnDashboardBannerWithNoBalanceCheck: () => <div data-testid="hn-banner" />,
 }))
+// jsdom has no canvas, so the QR code shows the value it encodes as an attribute
+jest.mock('qrcode.react', () => ({
+  __esModule: true,
+  default: ({ value }: { value: string }) => <canvas role="img" aria-label="QR code" data-value={value} />,
+}))
 
 const mockUseLoadFeature = coreFeatures.useLoadFeature as jest.Mock
 const mockUseBalances = useBalancesModule.default as jest.Mock
@@ -36,6 +42,7 @@ const mockUseSafeInfo = useSafeInfoModule.default as jest.Mock
 const mockUseBannerVisibility = hypernative.useBannerVisibility as jest.Mock
 
 const SAFE_ADDRESS = '0x0000000000000000000000000000000000005AFE'
+const CHAIN = chainBuilder().with({ chainId: '1', chainName: 'Ethereum' }).build()
 
 describe('FirstSteps', () => {
   beforeEach(() => {
@@ -43,8 +50,7 @@ describe('FirstSteps', () => {
 
     mockUseLoadFeature.mockReturnValue({})
 
-    const chain = chainBuilder().with({ chainId: '1', chainName: 'Ethereum' }).build()
-    mockUseCurrentChain.mockReturnValue(chain)
+    mockUseCurrentChain.mockReturnValue(CHAIN)
 
     mockUseBalances.mockReturnValue({
       balances: balancesBuilder().with({ items: [], fiatTotal: '0' }).build(),
@@ -236,5 +242,29 @@ describe('FirstSteps', () => {
   it('does not show add funds button when safe has balance', () => {
     renderWithUndeployedSafe({ undeployedSafeStatus: 'AWAITING_EXECUTION', hasBalance: true })
     expect(screen.queryByTestId('add-funds-btn')).not.toBeInTheDocument()
+  })
+
+  it('opens a dialog with the QR code and the Safe address when Add funds is clicked', async () => {
+    renderWithUndeployedSafe()
+
+    await userEvent.click(screen.getByTestId('add-funds-btn'))
+
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByRole('heading', { name: 'Add funds to your Safe account' })).toBeInTheDocument()
+    expect(within(dialog).getByRole('img', { name: 'QR code' })).toBeInTheDocument()
+    expect(within(dialog).getByTestId('address-info')).toHaveTextContent(SAFE_ADDRESS)
+  })
+
+  it('adds the chain prefix to the QR code when the switch is turned on', async () => {
+    renderWithUndeployedSafe()
+
+    await userEvent.click(screen.getByTestId('add-funds-btn'))
+    const qrCode = await screen.findByRole('img', { name: 'QR code' })
+    expect(qrCode).toHaveAttribute('data-value', SAFE_ADDRESS)
+
+    await userEvent.click(screen.getByTestId('qr-code-switch'))
+
+    expect(qrCode).toHaveAttribute('data-value', `${CHAIN.shortName}:${SAFE_ADDRESS}`)
+    expect(screen.getByTestId('qr-code-switch')).toBeChecked()
   })
 })

@@ -176,7 +176,7 @@ export const Default: Story = { parameters: { ...setup.parameters }, decorators:
 
 Don't add `loaders: [mswLoader]` — it is global in `preview.tsx`. Don't override feature flags unless testing a disabled state.
 
-**Visual regression (Argos) does NOT auto-run on PRs** — the workflow is currently `workflow_dispatch`-only. Verify UI changes via the story (or live page) yourself; run `yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>` locally. Opt flaky/animated stories out of snapshots with `tags: ['skip-visual-test']` (still render-checked).
+**Visual regression (Argos) does NOT run on PRs** — the workflow runs weekly on `dev` and by hand before a release. Verify UI changes via the story (or live page) yourself; run `yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>` locally. Opt flaky/animated stories out of snapshots with `tags: ['skip-visual-test']` (still render-checked).
 
 ## Web-specific common pitfalls
 

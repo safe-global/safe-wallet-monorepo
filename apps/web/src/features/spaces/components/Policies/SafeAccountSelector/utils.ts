@@ -9,7 +9,7 @@ import {
 /** Same format as the topbar selector's row ids. */
 export const buildSafeAccountId = (chainId: string, address: string): string => `${chainId}:${address}`
 
-const chainLabel = (option: SafeAccountOption) => option.chain?.chainName ?? option.chainId
+export const chainLabel = (option: SafeAccountOption): string => option.chain?.chainName ?? option.chainId
 
 /** Undefined while nothing has resolved: an unknown balance must read empty, not a confident `0`. */
 const totalFiat = (options: SafeAccountOption[]): string | undefined => {

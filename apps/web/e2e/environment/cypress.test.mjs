@@ -57,16 +57,16 @@ test('blocks a Safe backend request from the hosted CoW widget', () => {
 })
 
 const assets = 'cypress/e2e/regression/assets.cy.js'
-const assetsSmoke = 'cypress/e2e/smoke/assets.cy.js'
+const batch = 'cypress/e2e/regression/batch_tx.cy.js'
 const rejection = 'cypress/e2e/regression/tx_queue_reject_btn.cy.js'
 
 test('selects only registered specs and supports a focused local rerun', () => {
   assert.deepEqual(selectCypressSpecs(), Object.keys(isolatedSpecs))
-  assert.deepEqual(selectCypressSpecs('regression/assets'), [assets])
+  assert.deepEqual(selectCypressSpecs('regression/batch_tx'), [batch])
   assert.deepEqual(selectCypressSpecs('spaces_basicflow'), ['cypress/e2e/regression/spaces_basicflow.cy.js'])
-  assert.deepEqual(selectCypressSpecs('tx_queue_reject_btn, regression/assets,tx_queue_reject_btn'), [
+  assert.deepEqual(selectCypressSpecs('tx_queue_reject_btn, regression/batch_tx,tx_queue_reject_btn'), [
     rejection,
-    assets,
+    batch,
   ])
 })
 
@@ -76,9 +76,11 @@ test('rejects unknown or empty spec selection instead of running staging-depende
   }
 })
 
-test('requires suite-qualified selection when existing specs share a file name', () => {
-  assert.throws(() => selectCypressSpecs('assets'), /Ambiguous isolated scenario/)
-  assert.deepEqual(selectCypressSpecs('regression/assets,smoke/assets'), [assets, assetsSmoke])
+test('requires suite-qualified selection when registered specs share a file name', () => {
+  const safeAppsAssets = 'cypress/e2e/safe-apps/assets.cy.js'
+  const specs = { [assets]: {}, [safeAppsAssets]: {} }
+  assert.throws(() => selectCypressSpecs('assets', specs), /Ambiguous isolated scenario/)
+  assert.deepEqual(selectCypressSpecs('regression/assets,safe-apps/assets', specs), [assets, safeAppsAssets])
 })
 
 test('browser credentials sign for the generated scenario owners', async () => {

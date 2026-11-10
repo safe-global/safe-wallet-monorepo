@@ -43,6 +43,11 @@ export const STATUS_PRESENTATION: Record<
     label: 'Risk detected',
     copy: 'Safenet flagged this address/transaction as malicious',
   },
+  [CheckStatus.DISPUTED]: {
+    severity: Severity.WARN,
+    label: 'Under review',
+    copy: 'A sentinel flagged this transaction, and the dispute is open. Safenet will publish a final ruling.',
+  },
   [CheckStatus.TIMED_OUT]: {
     severity: Severity.ERROR,
     label: 'Check failed',
@@ -86,6 +91,7 @@ export const CHIP_VARIANT = {
   [CheckStatus.IN_PROGRESS]: 'info',
   [CheckStatus.BENIGN]: 'positive',
   [CheckStatus.MALICIOUS]: 'negative',
+  [CheckStatus.DISPUTED]: 'warning',
   [CheckStatus.TIMED_OUT]: 'warning',
 } as const satisfies Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string>
 

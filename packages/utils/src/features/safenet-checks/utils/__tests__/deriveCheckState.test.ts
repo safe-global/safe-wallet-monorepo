@@ -1,7 +1,9 @@
 import { deriveCheckState } from '../deriveCheckState'
+import { rulingEventFor } from '../openDispute'
 import {
   attestedEvent,
   disputeResolvedEvent,
+  disputeTriggeredEvent,
   oracleResultEvent,
   proposedEvent,
   requestCreatedEvent,
@@ -13,6 +15,7 @@ import {
   CheckEventType,
   CheckStatus,
   DisputeOutcome,
+  OracleRequestState,
   UNVERIFIED_ATTESTATION,
   type AttestationVerification,
   type NormalizedCheckEvent,
@@ -110,12 +113,8 @@ describe('Gnosis Chain deployment arbitration', () => {
     expect(derive([proposedEvent(), request(), approved])).toBe(CheckStatus.IN_PROGRESS)
   })
 
-  it('keeps a frozen dispute inconclusive before and after its arbitration deadline', () => {
-    const event = { ...disputeResolvedEvent(), type: CheckEventType.DISPUTE_TRIGGERED as const, deadlineBlock: '200' }
-    expect(derive([request(), event], '140')).toBe(CheckStatus.TIMED_OUT)
-    expect(derive([request(), event], '160')).toBe(CheckStatus.TIMED_OUT)
-    expect(derive([request(), event], '200')).toBe(CheckStatus.TIMED_OUT)
-    expect(derive([request(), event], '201')).toBe(CheckStatus.TIMED_OUT)
+  it('keeps a ruled dispute inconclusive until it is denied or attested', () => {
+    const event = disputeTriggeredEvent({ deadlineBlock: '200' })
     expect(derive([event, disputeResolvedEvent({ outcome: DisputeOutcome.RESOLVED_APPROVED })], '160')).toBe(
       CheckStatus.TIMED_OUT,
     )
@@ -182,5 +181,51 @@ describe('deriveCheckState — order independence', () => {
     const verified = verification(AttestationVerificationStatus.VERIFIED)
     expect(derive([...events].reverse(), '140', verified)).toBe(derive(events, '140', verified))
     expect(derive([...events].reverse(), '140', verified)).toBe(CheckStatus.MALICIOUS)
+  })
+})
+
+describe('deriveCheckState — open dispute', () => {
+  const triggered = disputeTriggeredEvent({ deadlineBlock: '200' })
+  const ruled = (state: OracleRequestState) => rulingEventFor(triggered.requestId, state, 160)
+
+  it.each(['140', '160', '200', '201'])('is DISPUTED at head %s while no ruling exists', (head) => {
+    expect(derive([proposedEvent(), request(), triggered], head)).toBe(CheckStatus.DISPUTED)
+  })
+
+  it.each([
+    CheckEventType.DISPUTE_RESOLVED,
+    CheckEventType.ARBITRATION_TIMED_OUT,
+    CheckEventType.DISPUTE_OUT_OF_SCOPE,
+  ] as const)('is TIMED_OUT once %s closes it', (type) => {
+    const closing = { ...disputeResolvedEvent({ outcome: DisputeOutcome.RESOLVED_APPROVED }), type }
+    expect(derive([request(), triggered, closing], '160')).toBe(CheckStatus.TIMED_OUT)
+  })
+
+  it('yields to a negative verdict and to a verified attestation', () => {
+    const denied = oracleResultEvent({ approved: false })
+    expect(derive([request(), triggered, denied], '160')).toBe(CheckStatus.MALICIOUS)
+    expect(
+      derive([request(), triggered, attestedEvent()], '160', verification(AttestationVerificationStatus.VERIFIED)),
+    ).toBe(CheckStatus.BENIGN)
+  })
+
+  it('stays DISPUTED when getRequest reports it frozen', () => {
+    expect(ruled(OracleRequestState.FROZEN)).toBeNull()
+    expect(derive([request(), triggered], '160')).toBe(CheckStatus.DISPUTED)
+  })
+
+  it('is MALICIOUS when getRequest reports the dispute denied', () => {
+    const events = [request(), triggered, ruled(OracleRequestState.RESOLVED_DENIED)!]
+    expect(derive(events, '160')).toBe(CheckStatus.MALICIOUS)
+  })
+
+  it('is TIMED_OUT when getRequest reports the arbitration timed out', () => {
+    const events = [request(), triggered, ruled(OracleRequestState.TIMED_OUT)!]
+    expect(derive(events, '160')).toBe(CheckStatus.TIMED_OUT)
+  })
+
+  it('is TIMED_OUT when getRequest reports the dispute approved and no attestation exists', () => {
+    const events = [request(), triggered, ruled(OracleRequestState.RESOLVED_APPROVED)!]
+    expect(derive(events, '160')).toBe(CheckStatus.TIMED_OUT)
   })
 })

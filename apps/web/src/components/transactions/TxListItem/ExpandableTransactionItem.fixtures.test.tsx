@@ -2,11 +2,14 @@ import type { TransactionDetails, TransactionItem } from '@safe-global/store/gat
 import { TX_HISTORY_SAFE, transactionFixtures } from '@safe-global/test/msw/fixtures'
 import { createTransactionHandlersFromFixture } from '@safe-global/test/msw/handlers/fromFixtures'
 import { userEvent } from '@testing-library/user-event'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { GATEWAY_URL } from '@/config/gateway'
 import { AppRoutes } from '@/config/routes'
+import * as useChains from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { server } from '@/tests/server'
-import { render, screen } from '@/tests/test-utils'
+import { render, screen, waitFor } from '@/tests/test-utils'
 import { isTransactionListItem } from '@/utils/transaction-guards'
 import ExpandableTransactionItem from './ExpandableTransactionItem'
 
@@ -84,6 +87,22 @@ const HISTORY_ROWS: HistoryRow[] = [
   },
 ]
 
+const SENDER = '0x96D4c6fFC338912322813a77655fCC926b9A5aC5'
+const SAFE_PREFIX = TX_HISTORY_SAFE.address
+const SEND_ETH_ID = `multisig_${SAFE_PREFIX}_0xcfbe040521dd80d43f408c7fd3ce7d80f21e8916a04a56ff0fe5cd14eb1a508f`
+const DELETE_ALLOWANCE_ID = `multisig_${SAFE_PREFIX}_0x4380e4deadbd29fb0d098bdfe80572bc22985586e0b400732af8371a5595b84c`
+const RECEIVE_UNTRUSTED_ID = `transfer_${SAFE_PREFIX}_e54e7e766b08d4210bc1cfcc84d84ca4782a0cc1efe9e7d9c032d305060ed2a7c3044`
+
+const SUMMARY_ROWS = [
+  { name: 'token receipt', txId: details.receiveQtrust.txId, summary: ['Received', '1,000 QTRUST', STATUS_SUCCESS] },
+  { name: 'native transfer', txId: SEND_ETH_ID, summary: ['Sent', '-0.0001 ETH', STATUS_SUCCESS] },
+  {
+    name: 'allowance deletion',
+    txId: DELETE_ALLOWANCE_ID,
+    summary: ['AllowanceModule', 'deleteAllowance', STATUS_SUCCESS],
+  },
+]
+
 const historyItems = transactionFixtures.history.results.filter(isTransactionListItem)
 
 const findHistoryItem = (txId: string): TransactionItem => {
@@ -99,6 +118,13 @@ const historySafe = extendedSafeInfoBuilder()
     address: { value: TX_HISTORY_SAFE.address },
     chainId: TX_HISTORY_SAFE.chainId,
     version: TX_HISTORY_SAFE.version,
+  })
+  .build()
+
+const sepolia = chainBuilder()
+  .with({
+    chainId: TX_HISTORY_SAFE.chainId,
+    nativeCurrency: { name: 'Sepolia Ether', symbol: 'ETH', decimals: 18, logoUri: '' },
   })
   .build()
 
@@ -124,6 +150,11 @@ const findLoadedDetails = async () => {
 describe('ExpandableTransactionItem with the recorded staging history', () => {
   beforeEach(() => {
     server.use(...createTransactionHandlersFromFixture(GATEWAY_URL))
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(sepolia)
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   it.each(HISTORY_ROWS)('shows the $name summary', async ({ details: txDetails, summary }) => {
@@ -131,6 +162,33 @@ describe('ExpandableTransactionItem with the recorded staging history', () => {
 
     const row = await screen.findByTestId('transaction-item')
     summary.forEach((text) => expect(row).toHaveTextContent(text))
+  })
+
+  it.each(SUMMARY_ROWS)('shows the $name summary', async ({ txId, summary }) => {
+    renderCollapsedRow(txId)
+
+    const row = await screen.findByTestId('transaction-item')
+    summary.forEach((text) => expect(row).toHaveTextContent(text))
+  })
+
+  it('shows the sender and amount of a token receipt when expanded', async () => {
+    renderExpandedRow(details.receiveQtrust)
+
+    const loadedDetails = await screen.findByTestId('accordion-details')
+    await waitFor(() => expect(loadedDetails).toHaveTextContent(SENDER))
+    expect(loadedDetails).toHaveTextContent('Receive')
+    expect(loadedDetails).toHaveTextContent('1,000 QTRUST')
+  })
+
+  it('warns about an untrusted token receipt on a chain with the default token list', async () => {
+    jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => feature === FEATURES.DEFAULT_TOKENLIST)
+
+    renderCollapsedRow(RECEIVE_UNTRUSTED_ID)
+
+    const row = await screen.findByTestId('transaction-item')
+    expect(row).toHaveTextContent('5 TTONE')
+    expect(row).toHaveTextContent(STATUS_SUCCESS)
+    expect(screen.getByTestId('warning')).toBeInTheDocument()
   })
 
   it.each(HISTORY_ROWS)('shows the $name details when expanded', async ({ details: txDetails, expanded }) => {

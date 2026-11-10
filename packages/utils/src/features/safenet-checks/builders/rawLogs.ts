@@ -215,6 +215,15 @@ export const buildDisputeResolvedLog = (
     ORACLE,
   )
 
+export const buildDisputeTriggeredLog = (
+  spec: { requestId?: string; deadline?: bigint } = {},
+  meta: LogMeta = {},
+): RawLog =>
+  encode(sentinelInterface, 'DisputeTriggered', [spec.requestId ?? hash(), spec.deadline ?? 200n], meta, ORACLE)
+
+export const buildArbitrationTimedOutLog = (spec: { requestId?: string } = {}, meta: LogMeta = {}): RawLog =>
+  encode(sentinelInterface, 'ArbitrationTimedOut', [spec.requestId ?? hash()], meta, ORACLE)
+
 // --- Lifecycle sequence -------------------------------------------------------
 
 /** A full commit-reveal lifecycle: proposed → request → commit → reveal → result → attestation. */

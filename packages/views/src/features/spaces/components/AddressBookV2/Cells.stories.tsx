@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import ChainLogos from './ChainLogos'
 import ContactCell from './ContactCell'
 import GroupedAddress from './GroupedAddress'

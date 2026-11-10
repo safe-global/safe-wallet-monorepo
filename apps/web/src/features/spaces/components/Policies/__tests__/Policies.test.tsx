@@ -21,6 +21,7 @@ import {
   mockProposerPolicy,
   mockUnenforcedPolicy,
 } from '../mocks/policies'
+import { mockActiveAllowlist, mockPendingAllowlist } from '../mocks/allowlistPolicies'
 import { usePendingPolicyTransaction } from '../SpendingLimitDetails/hooks/usePendingPolicyTransaction'
 import ProposerRoleFlow from '../ProposerRoleFlow'
 import { mockWallet } from '@/tests/mocks/hooks'
@@ -57,10 +58,10 @@ jest.mock('@/services/local-storage/useLocalStorage', () => ({
   }),
 }))
 
-let mockIsAllowlistAvailable = false
+let mockIsAllowlistActive: boolean | undefined = false
 
 jest.mock('@/features/policy-guard', () => ({
-  useIsAllowlistAvailableInSpace: () => mockIsAllowlistAvailable,
+  useIsAllowlistActiveInSpace: () => mockIsAllowlistActive,
 }))
 
 jest.mock('../RecipientAllowlistFlow', () => ({
@@ -119,7 +120,7 @@ describe('Policies', () => {
     mockHasSeenSpendingLimitIntro = false
     mockHasSeenProposerIntro = false
     mockHasSeenAllowlistIntro = false
-    mockIsAllowlistAvailable = false
+    mockIsAllowlistActive = false
     jest.clearAllMocks()
     mockUseSpaceSafes.mockReturnValue({
       allSafes: [],
@@ -319,15 +320,29 @@ describe('Policies', () => {
       return { ...utils, setTxFlow }
     }
 
-    it('is not offered when no chain has it enabled', async () => {
+    it('is not offered when the experimental toggle is off', async () => {
       await openAddPolicyDialog()
 
       expect(screen.getByTestId('add-policy-dialog')).toBeInTheDocument()
       expect(screen.queryByTestId('add-policy-option-recipient-allowlist')).not.toBeInTheDocument()
     })
 
-    it('is offered first, in one column, when a chain has it enabled', async () => {
-      mockIsAllowlistAvailable = true
+    it('is not offered while the experimental toggle is still loading', async () => {
+      mockIsAllowlistActive = undefined
+
+      await openAddPolicyDialog()
+
+      expect(screen.queryByTestId('add-policy-option-recipient-allowlist')).not.toBeInTheDocument()
+    })
+
+    it('is not in the catalogue when the experimental toggle is off', () => {
+      render(<Policies policies={[]} />)
+
+      expect(screen.queryByRole('button', { name: 'Set policy: Recipient allowlist' })).not.toBeInTheDocument()
+    })
+
+    it('is offered first, in one column, when the experimental toggle is on', async () => {
+      mockIsAllowlistActive = true
 
       await openAddPolicyDialog()
 
@@ -337,7 +352,7 @@ describe('Policies', () => {
     })
 
     it('explains the allowlist before the flow starts', async () => {
-      mockIsAllowlistAvailable = true
+      mockIsAllowlistActive = true
       const { user, setTxFlow } = await openAddPolicyDialog()
 
       await user.click(screen.getByTestId('add-policy-option-recipient-allowlist'))
@@ -347,7 +362,7 @@ describe('Policies', () => {
     })
 
     it('starts the flow from the intro and records that the intro was shown', async () => {
-      mockIsAllowlistAvailable = true
+      mockIsAllowlistActive = true
       const { user, setTxFlow } = await openAddPolicyDialog()
 
       await user.click(screen.getByTestId('add-policy-option-recipient-allowlist'))
@@ -360,7 +375,7 @@ describe('Policies', () => {
     })
 
     it('starts nothing when the intro is dismissed', async () => {
-      mockIsAllowlistAvailable = true
+      mockIsAllowlistActive = true
       const { user, setTxFlow } = await openAddPolicyDialog()
 
       await user.click(screen.getByTestId('add-policy-option-recipient-allowlist'))
@@ -372,7 +387,7 @@ describe('Policies', () => {
     })
 
     it('can be set up from the catalogue when the Space has no policies yet', async () => {
-      mockIsAllowlistAvailable = true
+      mockIsAllowlistActive = true
       const { user } = renderWithUserEvent(<Policies policies={[]} />)
 
       await user.click(screen.getByRole('button', { name: 'Set policy: Recipient allowlist' }))
@@ -381,7 +396,7 @@ describe('Policies', () => {
     })
 
     it('opens the flow directly once the intro has been seen', async () => {
-      mockIsAllowlistAvailable = true
+      mockIsAllowlistActive = true
       mockHasSeenAllowlistIntro = true
       const { user, setTxFlow } = await openAddPolicyDialog()
 
@@ -616,6 +631,39 @@ describe('Policies', () => {
       expect(screen.getByRole('dialog', { name: 'Spending limit' })).toBeInTheDocument()
     })
 
+    it('should, when an active allowlist row is clicked, open its side panel', () => {
+      render(<Policies policies={[mockActiveAllowlist()]} />)
+      fireEvent.click(screen.getAllByTestId('policy-open-button')[0])
+
+      expect(screen.getByRole('dialog', { name: 'Allowlist' })).toBeInTheDocument()
+    })
+
+    it('should confirm an allowlist that turns up while the page is open, the first time its panel opens', async () => {
+      const { rerender, user } = renderWithUserEvent(<Policies policies={[]} />)
+      rerender(<Policies policies={[mockActiveAllowlist()]} />)
+
+      await user.click(screen.getByTestId('policy-open-button'))
+      expect(screen.getByText('Your allowlist is now active')).toBeInTheDocument()
+
+      await user.click(screen.getByRole('button', { name: 'Close' }))
+      await user.click(screen.getByTestId('policy-open-button'))
+      expect(screen.queryByText('Your allowlist is now active')).not.toBeInTheDocument()
+    })
+
+    it('should not confirm an allowlist that was there when the page loaded', () => {
+      render(<Policies policies={[mockActiveAllowlist()]} />)
+      fireEvent.click(screen.getByTestId('policy-open-button'))
+
+      expect(screen.queryByText('Your allowlist is now active')).not.toBeInTheDocument()
+    })
+
+    it('should, when a pending allowlist row is clicked, open no panel yet', () => {
+      render(<Policies policies={[mockPendingAllowlist()]} />)
+      fireEvent.click(screen.getAllByTestId('policy-open-button')[0])
+
+      expect(screen.queryByRole('dialog', { name: 'Allowlist' })).not.toBeInTheDocument()
+    })
+
     it('should hold one open panel at a time, so a second row replaces the first', () => {
       render(<Policies policies={[asActivePolicy(mockProposerPolicy()), mockActiveSpendingLimit()]} />)
       const [proposerRow, spendingLimitRow] = screen.getAllByTestId('policy-open-button')
@@ -802,7 +850,7 @@ describe('Policies', () => {
     })
 
     it('should, when the plan does not include the recipient allowlist, disable it in the add policy dialog', async () => {
-      mockIsAllowlistAvailable = true
+      mockIsAllowlistActive = true
       const onUpgrade = jest.fn()
       const { user } = renderWithUserEvent(
         <Policies policies={mockPolicies()} locked={{ ...mockStarterPlan, onUpgrade }} />,
@@ -816,7 +864,7 @@ describe('Policies', () => {
     })
 
     it('should, when the plan does not include the recipient allowlist, lead its catalogue tile to the upgrade', async () => {
-      mockIsAllowlistAvailable = true
+      mockIsAllowlistActive = true
       const onUpgrade = jest.fn()
       const { user } = renderWithUserEvent(<Policies locked={{ ...mockStarterPlan, onUpgrade }} />)
 
@@ -932,6 +980,17 @@ describe('Policies', () => {
       await user.click(screen.getByRole('button', { name: /^Open Spending limit/ }))
 
       expect(screen.queryByRole('dialog', { name: 'Spending limit' })).not.toBeInTheDocument()
+    })
+
+    it('hides the allowlist panel while a flow is open', () => {
+      render(
+        <TxModalContext.Provider value={{ txFlow: <div />, setTxFlow: jest.fn(), setFullWidth: jest.fn() }}>
+          <Policies policies={[mockActiveAllowlist()]} />
+        </TxModalContext.Provider>,
+      )
+      fireEvent.click(screen.getAllByTestId('policy-open-button')[0])
+
+      expect(screen.queryByRole('dialog', { name: 'Allowlist' })).not.toBeInTheDocument()
     })
   })
 })

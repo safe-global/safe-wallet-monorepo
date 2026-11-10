@@ -14,20 +14,31 @@ export class HomePage {
   readonly sidebar: Locator
   readonly safeHeaderInfo: Locator
   readonly connectWalletBtn: Locator
+  /** Total balance and the Send / Receive / Swap actions */
+  readonly overviewWidget: Locator
+  readonly overviewSendBtn: Locator
+  readonly overviewReceiveBtn: Locator
   readonly pendingTxWidget: Locator
-  readonly pendingTxItems: Locator
+  /** One row per nonce, each a link to the transaction */
+  readonly pendingTxRows: Locator
   readonly viewAllLink: Locator
   readonly swapBtn: Locator
+  /** "Top positions"; hidden while the Safe has no positions */
+  readonly positionsWidget: Locator
 
   constructor(page: Page) {
     this.page = page
     this.sidebar = page.getByRole('navigation')
     this.safeHeaderInfo = page.getByTestId('safe-header-info')
     this.connectWalletBtn = page.getByTestId('connect-wallet-btn')
+    this.overviewWidget = page.getByTestId('overview-widget')
+    this.overviewSendBtn = this.overviewWidget.getByRole('button', { name: 'Send' })
+    this.overviewReceiveBtn = this.overviewWidget.getByRole('button', { name: 'Receive' })
     this.pendingTxWidget = page.getByTestId('pending-tx-widget')
-    this.pendingTxItems = page.getByTestId('pending-tx-widget').locator('[data-testid]')
+    this.pendingTxRows = this.pendingTxWidget.getByTestId('tx-pending-item')
     this.viewAllLink = page.getByRole('link', { name: /view all/i })
     this.swapBtn = page.getByRole('button', { name: /swap/i })
+    this.positionsWidget = page.getByTestId('positions-widget')
   }
 
   /** Navigate to dashboard for a given Safe address */
@@ -44,10 +55,5 @@ export class HomePage {
   /** Click the connect wallet button */
   async clickConnectWallet(): Promise<void> {
     await this.connectWalletBtn.click()
-  }
-
-  /** Get the count of pending transactions shown in the widget */
-  async getPendingTxCount(): Promise<number> {
-    return this.pendingTxItems.count()
   }
 }

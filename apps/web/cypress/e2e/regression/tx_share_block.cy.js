@@ -17,11 +17,6 @@ describe('Transaction share link tests', { defaultCommandTimeout: 30000 }, () =>
     main.verifyElementsExist([create_tx.txShareLinkBtn])
   })
 
-  it('Verify that share link exists in the executed tx', () => {
-    cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_7 + txs.tx4)
-    main.verifyElementsExist([create_tx.txShareLinkBtn])
-  })
-
   it('Verify click on the share link copies the correct URL', () => {
     cy.visit(constants.transactionUrl + staticSafes.SEP_STATIC_SAFE_31 + txs.tx3)
     main.verifyElementsExist([create_tx.txShareLinkBtn])

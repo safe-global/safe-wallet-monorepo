@@ -29,6 +29,16 @@ export const COORDINATOR_READ_ABI = [
   'function groupKey(bytes32 gid) view returns ((uint256 x, uint256 y) key)',
 ] as const
 
+const REQUEST_TERMS_TUPLE =
+  '(uint64 commitDeadline, uint24 daoFeeShare, uint64 revealDeadline, uint96 bondTarget, uint8 _padding, address sponsor, uint96 slashAmount)'
+const REQUEST_PROGRESS_TUPLE =
+  '(uint8 state, uint96 fee, uint64 arbitrationDeadline, uint16 committedCount, uint16 revealedCount, uint16 approveSentinelCount, uint16 denySentinelCount, uint24 _padding)'
+
+/** `SentinelOracle.getRequest`; `progress.state` holds an `OracleRequestState`. */
+export const ORACLE_READ_ABI = [
+  `function getRequest(bytes32 requestId) view returns ((${REQUEST_TERMS_TUPLE} terms, ${REQUEST_PROGRESS_TUPLE} progress) request)`,
+] as const
+
 export const consensusInterface = new Interface(CONSENSUS_EVENT_FRAGMENTS)
 export const sentinelInterface = new Interface(SENTINEL_EVENT_FRAGMENTS)
 

@@ -6,6 +6,7 @@ import {
   type AttestationVerification,
   type NormalizedCheckEvent,
 } from '../types'
+import { openDisputeRequestIds } from './openDispute'
 
 type DeriveCheckStateInput = {
   /** All decoded events for one check (order-independent; derive is a fold). */
@@ -69,11 +70,12 @@ const hasOracleActivity = (events: ReadonlyArray<NormalizedCheckEvent>): boolean
  *  2. Attested → `BENIGN` only if the FROST signature verified,
  *     `VERIFICATION_FAILED` if it did not, else `AWAITING_VERIFICATION`.
  *     Above the deadline check so a late attestation beats `TIMED_OUT`.
- *  3. Frozen dispute, explicit timeout/out-of-scope or past the deadline block → `TIMED_OUT`.
- *  4. Any oracle activity → `IN_PROGRESS` (a positive `OracleResult` alone is
+ *  3. Open dispute (triggered, no ruling, timeout or out-of-scope event) → `DISPUTED`.
+ *  4. Explicit timeout/out-of-scope, a ruled dispute or past the deadline block → `TIMED_OUT`.
+ *  5. Any oracle activity → `IN_PROGRESS` (a positive `OracleResult` alone is
  *     NOT `BENIGN` without a verified attestation).
- *  5. Any proposal event → `SUBMITTED`.
- *  6. Otherwise → `UNAVAILABLE`: no event of this check was read at all, which
+ *  6. Any proposal event → `SUBMITTED`.
+ *  7. Otherwise → `UNAVAILABLE`: no event of this check was read at all, which
  *     is also what a read over too narrow a block window produces.
  */
 export const deriveCheckState = ({ events, attestation, headBlock }: DeriveCheckStateInput): CheckStatus => {
@@ -87,6 +89,8 @@ export const deriveCheckState = ({ events, attestation, headBlock }: DeriveCheck
     if (attestation.status === AttestationVerificationStatus.INVALID) return CheckStatus.VERIFICATION_FAILED
     return CheckStatus.AWAITING_VERIFICATION
   }
+
+  if (openDisputeRequestIds(events).length > 0) return CheckStatus.DISPUTED
 
   if (hasInconclusiveResult(events)) return CheckStatus.TIMED_OUT
 

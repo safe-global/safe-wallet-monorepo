@@ -1,6 +1,7 @@
 import {
   ARBITRATION_POLL_MS,
   ARBITRATION_WINDOW_MS,
+  DISPUTED_POLL_MS,
   LATE_WINDOW_BLOCKS,
   POLL_INTERVAL_FAST_MS,
   POLL_INTERVAL_LATE_MS,
@@ -34,8 +35,9 @@ type PollingInput = {
 /**
  * How often to re-poll a check, in ms; `0` = stop (RTK Query's convention).
  * Stops on a rejection; otherwise fast (6s) up to the on-chain deadline, slow
- * (30s) through the ~1h late window, then stops. UNAVAILABLE polls slowly inside
- * {@link UNAVAILABLE_GRACE_MS} of submission and BENIGN inside
+ * (30s) through the ~1h late window, then stops. DISPUTED polls every
+ * {@link DISPUTED_POLL_MS} for as long as the dispute is open. UNAVAILABLE polls
+ * slowly inside {@link UNAVAILABLE_GRACE_MS} of submission and BENIGN inside
  * {@link ARBITRATION_WINDOW_MS} of the attestation, then both stop.
  */
 export const computePollingInterval = ({
@@ -47,6 +49,9 @@ export const computePollingInterval = ({
   nowMs,
 }: PollingInput): number => {
   if (status === CheckStatus.MALICIOUS || status === CheckStatus.VERIFICATION_FAILED) return 0
+
+  // The dispute deadline is ~28 days out, so the deadline cadence below would poll at 6s the whole time.
+  if (status === CheckStatus.DISPUTED) return DISPUTED_POLL_MS
 
   // ponytail: BENIGN keeps a slow poll for the arbitration window. The merge
   // permits BENIGN → MALICIOUS precisely because arbitration can still reject a

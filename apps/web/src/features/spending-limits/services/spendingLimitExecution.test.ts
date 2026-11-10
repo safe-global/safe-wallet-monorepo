@@ -120,6 +120,7 @@ describe('createSpendingLimitsTx', () => {
       'setAllowance',
     ])
     expect(mockSDK.createEnableModuleTx).toHaveBeenCalledTimes(1)
+    expect(mockSDK.createEnableModuleTx).toHaveBeenCalledWith(requireModuleAddress())
     const [aliceAdd, bobAdd] = decodeBatch().filter((call) => call.name === 'addDelegate')
     expect(aliceAdd.args[0]).toBe(ALICE)
     expect(bobAdd.args[0]).toBe(BOB)

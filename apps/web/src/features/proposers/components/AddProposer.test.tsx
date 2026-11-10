@@ -19,6 +19,12 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { ZERO_ADDRESS, SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
 import { getStoreInstance } from '@/store'
+import { BrowserProvider, JsonRpcSigner } from 'ethers'
+import { http, HttpResponse } from 'msw'
+import { server } from '@/tests/server'
+import { GATEWAY_URL } from '@/config/gateway'
+import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 
 jest.mock('@/hooks/wallets/useWallet')
 jest.mock('../hooks/useDelegatorSelection')
@@ -510,6 +516,155 @@ describe('AddProposer signing logic', () => {
       const { findByText } = await submitProposer(jest.fn())
 
       expect(await findByText('The signature request was rejected. Try again to continue.')).toBeInTheDocument()
+    })
+  })
+
+  describe('signing for a smart contract or nested Safe delegator', () => {
+    const SIGNATURE = `0x${'a'.repeat(64)}${'b'.repeat(64)}1b`
+    const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>
+    const mockUseDelegatorSelection = useDelegatorSelection as jest.MockedFunction<typeof useDelegatorSelection>
+    const safe = extendedSafeInfoBuilder().build()
+    const walletAddress = fakerChecksummedAddress()
+    const parentSafeAddress = fakerChecksummedAddress()
+    const addDelegateV3 = jest.fn().mockReturnValue({ unwrap: () => Promise.resolve() })
+
+    const mockSigner = () => {
+      const signer = new JsonRpcSigner(new BrowserProvider({ request: jest.fn() }), walletAddress)
+      jest.spyOn(signer.provider, 'send').mockResolvedValue(SIGNATURE)
+      jest.spyOn(signer, 'signTypedData').mockResolvedValue(SIGNATURE)
+      jest.mocked(getAssertedChainSigner).mockResolvedValue(signer)
+      return signer
+    }
+
+    const nestedSelection = (parentThreshold: number): ReturnType<typeof useDelegatorSelection> => ({
+      ...mockDelegatorSelection(),
+      delegatorOptions: [walletAddress, parentSafeAddress],
+      effectiveDelegator: parentSafeAddress,
+      parentSafeAddress,
+      parentThreshold,
+      parentOwners: [
+        { value: walletAddress },
+        { value: fakerChecksummedAddress() },
+        { value: fakerChecksummedAddress() },
+      ],
+      isMultiSigRequired: parentThreshold > 1,
+    })
+
+    const renderAndSubmit = async (proposerAddress: string) => {
+      const utils = render(<AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />, {
+        initialReduxState: { safeInfo: { loading: false, loaded: true, data: safe } },
+      })
+
+      act(() => {
+        fireEvent.change(utils.getByLabelText(/Address/i), { target: { value: proposerAddress } })
+        fireEvent.change(utils.getByLabelText(/^Name/i), { target: { value: 'Payroll bot' } })
+      })
+
+      await waitFor(() => expect(utils.getByTestId('submit-proposer-btn')).not.toBeDisabled())
+
+      act(() => {
+        fireEvent.click(utils.getByTestId('submit-proposer-btn'))
+      })
+
+      return utils
+    }
+
+    beforeEach(() => {
+      jest.restoreAllMocks()
+      mockDelegateChain(true)
+      mockUseWallet.mockReturnValue({
+        address: walletAddress,
+        chainId: '1',
+        label: 'MetaMask',
+        provider: MockEip1193Provider,
+      })
+      mockUseDelegatorSelection.mockReturnValue(mockDelegatorSelection())
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
+      useDelegatesPostDelegateV3Mutation.mockReturnValue([addDelegateV3, {}])
+      useDelegatesPostDelegateV2Mutation.mockReturnValue([jest.fn(), {}])
+      useDelegatesPostDelegateV1Mutation.mockReturnValue([jest.fn(), {}])
+    })
+
+    it('wraps the signature of a contract wallet in a contract signature for the wallet', async () => {
+      jest
+        .spyOn(walletUtils, 'isSmartContractWallet')
+        .mockImplementation(async (_chainId, address) => sameAddress(address, walletAddress))
+      const signer = mockSigner()
+      const proposerAddress = fakerChecksummedAddress()
+
+      await renderAndSubmit(proposerAddress)
+
+      await waitFor(() => expect(addDelegateV3).toHaveBeenCalled())
+      expect(signer.provider.send).toHaveBeenCalledWith('eth_signTypedData_v4', [
+        walletAddress.toLowerCase(),
+        expect.any(String),
+      ])
+      expect(addDelegateV3.mock.calls[0][0].createDelegateDto).toEqual(
+        expect.objectContaining({
+          delegate: proposerAddress,
+          delegator: walletAddress,
+          signature: await proposerUtils.encodeEIP1271Signature(walletAddress, SIGNATURE),
+        }),
+      )
+    })
+
+    it('lets a nested Safe owner delegate as the parent Safe and signs for it with EIP-1271', async () => {
+      mockUseDelegatorSelection.mockReturnValue(nestedSelection(1))
+      const signer = mockSigner()
+      const proposerAddress = fakerChecksummedAddress()
+
+      const { getByText, getByLabelText } = await renderAndSubmit(proposerAddress)
+
+      expect(getByText('Delegate as')).toBeInTheDocument()
+      expect(getByLabelText('Delegator account')).toBeInTheDocument()
+      await waitFor(() => expect(addDelegateV3).toHaveBeenCalled())
+      expect(signer.signTypedData).toHaveBeenCalledWith(
+        expect.objectContaining({ verifyingContract: parentSafeAddress }),
+        { SafeMessage: [{ type: 'bytes', name: 'message' }] },
+        expect.anything(),
+      )
+      expect(addDelegateV3.mock.calls[0][0].createDelegateDto).toEqual(
+        expect.objectContaining({
+          delegate: proposerAddress,
+          delegator: parentSafeAddress,
+          safe: safe.address.value,
+          signature: await proposerUtils.encodeEIP1271Signature(parentSafeAddress, SIGNATURE),
+        }),
+      )
+    })
+
+    it('starts signature collection on the parent Safe when it needs more than one signature', async () => {
+      mockUseDelegatorSelection.mockReturnValue(nestedSelection(2))
+      mockSigner()
+      const messages: Array<{ origin: string }> = []
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/chains/:chainId/safes/${parentSafeAddress}/messages`, async ({ request }) => {
+          messages.push((await request.json()) as { origin: string })
+          return HttpResponse.json({})
+        }),
+      )
+      const proposerAddress = fakerChecksummedAddress()
+
+      const { findByText, getByText } = await renderAndSubmit(proposerAddress)
+
+      expect(await findByText('Signature collection initiated')).toBeInTheDocument()
+      expect(getByText('1 of 2 signatures collected')).toBeInTheDocument()
+      expect(JSON.parse(messages[0].origin)).toEqual({
+        type: 'proposer-delegation',
+        action: 'add',
+        delegate: proposerAddress,
+        nestedSafe: safe.address.value,
+      })
+      expect(addDelegateV3).not.toHaveBeenCalled()
+      expect(addressBookName(proposerAddress)).toBe('Payroll bot')
+    })
+
+    it('tells the user how many parent Safe signatures adding the proposer needs', async () => {
+      mockUseDelegatorSelection.mockReturnValue(nestedSelection(2))
+
+      const { findByText } = render(<AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />)
+
+      expect(await findByText('This requires 2 of 3 parent Safe owner signatures to complete.')).toBeInTheDocument()
     })
   })
 })

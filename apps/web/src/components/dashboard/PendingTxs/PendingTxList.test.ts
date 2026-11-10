@@ -1,70 +1,92 @@
-import type { MultisigExecutionInfo, ModuleTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
 import { faker } from '@faker-js/faker'
-
-import { safeInfoBuilder } from '@/tests/builders/safe'
-import { _getTransactionsToDisplay } from './PendingTxsList'
+import type { MultisigExecutionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { RecoveryQueueItem } from '@/features/recovery'
+import { safeInfoBuilder } from '@/tests/builders/safe'
+import {
+  multisigExecutionInfoBuilder,
+  multisigTransactionBuilder,
+  queuedTransactionItem,
+} from '@/tests/builders/queuedTransaction'
+import { _getTransactionsToDisplay } from './PendingTxsList'
+
+// The selection only passes recovery items through, so their content does not matter.
+const recoveryItems = (count: number): RecoveryQueueItem[] =>
+  Array.from({ length: count }, (_, index) => ({ timestamp: BigInt(index) }) as RecoveryQueueItem)
+
+const queuedItem = (nonce: number, execution: Partial<MultisigExecutionInfo> = {}) =>
+  queuedTransactionItem(
+    multisigTransactionBuilder()
+      .with({
+        executionInfo: multisigExecutionInfoBuilder()
+          .with({ nonce, ...execution })
+          .build(),
+      })
+      .build(),
+  )
 
 describe('_getTransactionsToDisplay', () => {
-  it('should return the recovery queue if it has more than or equal to MAX_TXS items', () => {
-    const walletAddress = faker.finance.ethereumAddress()
-    const safe = safeInfoBuilder().build()
-    const recoveryQueue = [
-      { timestamp: BigInt(1) },
-      { timestamp: BigInt(2) },
-      { timestamp: BigInt(3) },
-      { timestamp: BigInt(4) },
-      { timestamp: BigInt(5) },
-    ] as Array<RecoveryQueueItem>
-    const queue = [] as Array<ModuleTransaction>
+  const walletAddress = faker.finance.ethereumAddress()
+  const safe = safeInfoBuilder().with({ nonce: 10 }).build()
 
-    const result = _getTransactionsToDisplay({ recoveryQueue, queue, walletAddress, safe })
+  it('shows only the first four recovery items when there are four or more', () => {
+    const recoveryQueue = recoveryItems(5)
+
+    const result = _getTransactionsToDisplay({ recoveryQueue, queue: [queuedItem(10)], walletAddress, safe })
+
     expect(result).toStrictEqual([recoveryQueue.slice(0, 4), []])
   })
 
-  it('should return the recovery queue followed by the actionable transactions from the queue', () => {
-    const walletAddress = faker.finance.ethereumAddress()
-    const safe = safeInfoBuilder().build()
-    const recoveryQueue = [
-      { timestamp: BigInt(1) },
-      { timestamp: BigInt(2) },
-      { timestamp: BigInt(3) },
-    ] as Array<RecoveryQueueItem>
-    const actionableQueue = [
-      {
-        transaction: { id: '1' },
-        executionInfo: {
-          type: DetailedExecutionInfoType.MULTISIG,
-          missingSigners: [walletAddress],
-        } as unknown as MultisigExecutionInfo,
-      } as unknown as ModuleTransaction,
-      {
-        transaction: { id: '2' },
-        executionInfo: {
-          type: DetailedExecutionInfoType.MULTISIG,
-          missingSigners: [walletAddress],
-        } as unknown as MultisigExecutionInfo,
-      } as unknown as ModuleTransaction,
-    ]
+  it('shows at most four queued transactions', () => {
+    const queue = [10, 11, 12, 13, 14].map((nonce) => queuedItem(nonce))
 
-    const expected = [recoveryQueue, [actionableQueue[0]]]
-    const result = _getTransactionsToDisplay({ recoveryQueue, queue: actionableQueue, walletAddress, safe })
-    expect(result).toEqual(expected)
+    const result = _getTransactionsToDisplay({ recoveryQueue: [], queue, safe })
+
+    expect(result).toStrictEqual([[], queue.slice(0, 4)])
   })
 
-  it('should return the recovery queue followed by the transactions from the queue if there are no actionable transactions', () => {
-    const walletAddress = faker.finance.ethereumAddress()
-    const safe = safeInfoBuilder().build()
-    const recoveryQueue = [
-      { timestamp: BigInt(1) },
-      { timestamp: BigInt(2) },
-      { timestamp: BigInt(3) },
-    ] as Array<RecoveryQueueItem>
-    const queue = [{ transaction: { id: '1' } }, { transaction: { id: '2' } }] as Array<ModuleTransaction>
+  it('fills the rows that the recovery items leave with queued transactions', () => {
+    const recoveryQueue = recoveryItems(3)
+    const queue = [10, 11].map((nonce) => queuedItem(nonce))
 
-    const expected = [recoveryQueue, [queue[0]]]
-    const result = _getTransactionsToDisplay({ recoveryQueue, queue, walletAddress, safe })
-    expect(result).toEqual(expected)
+    const result = _getTransactionsToDisplay({ recoveryQueue, queue, safe })
+
+    expect(result).toStrictEqual([recoveryQueue, [queue[0]]])
+  })
+
+  it('shows the whole queue when no wallet is connected', () => {
+    const queue = [10, 11].map((nonce) => queuedItem(nonce))
+
+    const result = _getTransactionsToDisplay({ recoveryQueue: [], queue, safe })
+
+    expect(result).toStrictEqual([[], queue])
+  })
+
+  it('shows only the transactions that the connected wallet can sign', () => {
+    const signable = queuedItem(11, { missingSigners: [{ value: walletAddress }] })
+    const queue = [queuedItem(10), signable, queuedItem(12)]
+
+    const result = _getTransactionsToDisplay({ recoveryQueue: [], queue, walletAddress, safe })
+
+    expect(result).toStrictEqual([[], [signable]])
+  })
+
+  it('shows the next transaction when it has all its signatures, so the wallet can execute it', () => {
+    const executable = queuedItem(safe.nonce, { confirmationsSubmitted: 2, confirmationsRequired: 2 })
+    // Fully signed too, but a later nonce cannot be executed yet.
+    const later = queuedItem(safe.nonce + 1, { confirmationsSubmitted: 2, confirmationsRequired: 2 })
+
+    const result = _getTransactionsToDisplay({ recoveryQueue: [], queue: [executable, later], walletAddress, safe })
+
+    expect(result).toStrictEqual([[], [executable]])
+  })
+
+  it('shows the whole queue when the connected wallet has nothing to sign or execute', () => {
+    const queue = [10, 11].map((nonce) =>
+      queuedItem(nonce, { missingSigners: [{ value: faker.finance.ethereumAddress() }] }),
+    )
+
+    const result = _getTransactionsToDisplay({ recoveryQueue: [], queue, walletAddress, safe })
+
+    expect(result).toStrictEqual([[], queue])
   })
 })

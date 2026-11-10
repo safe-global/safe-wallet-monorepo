@@ -17,6 +17,7 @@ import {
   dispatchTxExecution,
   dispatchTxProposal,
   dispatchTxSigning,
+  dispatchProposerTxSigning,
   dispatchBatchExecutionRelay,
   dispatchTxRelay,
 } from '..'
@@ -37,11 +38,13 @@ import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { toBeHex } from 'ethers'
+import { faker } from '@faker-js/faker'
 import { EthSafeSignature, generatePreValidatedSignature } from '@safe-global/protocol-kit'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
 import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
+import { requestSafenetCheck } from '@/features/safenet-checks/services'
 
 const SIGNER_ADDRESS = '0x1234567890123456789012345678901234567890'
 const TX_HASH = '0x1234567890'
@@ -54,6 +57,7 @@ jest.mock('../../extractTxInfo', () => ({
     signatures: [],
   })),
 }))
+jest.mock('@/features/safenet-checks/services', () => ({ requestSafenetCheck: jest.fn() }))
 
 // Mock Safe SDK
 const mockSafeSDK = {
@@ -69,6 +73,7 @@ const mockSafeSDK = {
   })),
   signTransaction: jest.fn(),
   signTypedData: jest.fn(),
+  signHash: jest.fn(),
   executeTransaction: jest.fn(() =>
     Promise.resolve({
       hash: TX_HASH,
@@ -164,6 +169,20 @@ describe('txSender', () => {
       expect(tx).toBeDefined()
       expect(tx.addSignature).toBeDefined()
     })
+
+    it('should add a contract signature confirmation as a contract signature with only its data', async () => {
+      const owner = faker.finance.ethereumAddress()
+      const data = faker.string.hexadecimal({ length: 64, casing: 'lower', prefix: '' })
+      const word = (value: number) => value.toString(16).padStart(64, '0')
+      const signature = `0x${owner.slice(2).padStart(64, '0')}${word(65)}00${word(32)}${data}`
+      ;(extractTxInfo as jest.Mock).mockReturnValueOnce({ txParams: {}, signatures: { [owner]: signature } })
+
+      const tx = await createExistingTx('4', '0x345')
+
+      expect(tx.addSignature).toHaveBeenCalledWith(
+        expect.objectContaining({ signer: owner, data: `0x${data}`, isContractSignature: true }),
+      )
+    })
   })
 
   describe('createRejectTx', () => {
@@ -245,6 +264,7 @@ describe('txSender', () => {
         chainId: '4',
         safeAddress: '0x123',
       })
+      expect(requestSafenetCheck).toHaveBeenCalledWith(expect.objectContaining({ isFirstSignature: true }))
     })
 
     it('should fail to propose a new tx', async () => {
@@ -327,6 +347,7 @@ describe('txSender', () => {
         chainId: '4',
         safeAddress: SAFE_ADDRESS,
       })
+      expect(requestSafenetCheck).toHaveBeenCalledWith(expect.objectContaining({ isFirstSignature: false }))
     })
 
     it('should look up the signature by sender regardless of address casing', async () => {
@@ -546,6 +567,48 @@ describe('txSender', () => {
         })
         expect(txEvents.txDispatch).not.toHaveBeenCalledWith('SIGNED', { txId: '0x345' })
       }
+    })
+  })
+
+  describe('dispatchProposerTxSigning', () => {
+    const proposerAddress = toBeHex(faker.number.bigInt({ min: 1n }), 20)
+    const proposerSignature = new EthSafeSignature(proposerAddress, `0x${'a'.repeat(64)}${'b'.repeat(64)}1f`)
+
+    const proposerWallet = (label: string): ConnectedWallet => ({
+      address: proposerAddress,
+      chainId: '1',
+      label,
+      provider: MockEip1193Provider,
+    })
+
+    it('signs the typed data of the transaction for a typed-data wallet and adds the signature', async () => {
+      ;(mockSafeSDK.signTypedData as jest.Mock).mockResolvedValueOnce(proposerSignature)
+      const safeTx = createMockSafeTransaction({ to: '0x123', data: '0x0' })
+
+      const signedTx = await dispatchProposerTxSigning(safeTx, proposerWallet('MetaMask'))
+
+      expect(mockSafeSDK.signTypedData).toHaveBeenCalledWith(safeTx)
+      expect(mockSafeSDK.signHash).not.toHaveBeenCalled()
+      expect(signedTx.getSignature(proposerAddress)).toBe(proposerSignature)
+    })
+
+    it('signs the transaction hash for an eth_sign wallet and adds the signature', async () => {
+      ;(mockSafeSDK.signHash as jest.Mock).mockResolvedValueOnce(proposerSignature)
+      const safeTx = createMockSafeTransaction({ to: '0x123', data: '0x0' })
+
+      const signedTx = await dispatchProposerTxSigning(safeTx, proposerWallet('Trezor'))
+
+      expect(mockSafeSDK.signHash).toHaveBeenCalledWith(TX_HASH)
+      expect(mockSafeSDK.signTypedData).not.toHaveBeenCalled()
+      expect(signedTx.getSignature(proposerAddress)).toBe(proposerSignature)
+    })
+
+    it('propagates a rejected signature without adding one', async () => {
+      ;(mockSafeSDK.signTypedData as jest.Mock).mockRejectedValueOnce(new Error('User rejected'))
+      const safeTx = createMockSafeTransaction({ to: '0x123', data: '0x0' })
+
+      await expect(dispatchProposerTxSigning(safeTx, proposerWallet('MetaMask'))).rejects.toThrow('User rejected')
+      expect(safeTx.signatures.size).toBe(0)
     })
   })
 

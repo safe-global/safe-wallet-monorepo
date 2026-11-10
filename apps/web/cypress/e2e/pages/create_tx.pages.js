@@ -11,9 +11,7 @@ export const delegateCallWarning = '[data-testid="delegate-call-warning"]'
 export const tokenSelector = '[data-testid="token-selector"]'
 const newTransactionBtnStr = 'New transaction'
 const recepientInput = 'input[name="recipients.0.recipient"]'
-const recepientInput_ = (index) => `input[name="recipients.${index}.recipient"]`
 const amountInput = 'input[name="recipients.0.amount"]'
-const amountInput_ = (index) => `input[name="recipients.${index}.amount"]`
 const nonceInput = 'input[name="nonce"]'
 const walletNonceInput = '[name="userNonce"]'
 const gasLimitInput = '[name="gasLimit"]'
@@ -23,7 +21,6 @@ const gasLimitResetBtn = 'button[aria-label="Reset to recommended gas limit"]'
 export const transactionItem = '[data-testid="transaction-item"]'
 export const connectedWalletExecMethod = '[data-testid="connected-wallet-execution-method"]'
 export const relayExecMethod = '[data-testid="relay-execution-method"]'
-export const payNowExecMethod = '[data-testid="pay-now-execution-method"]'
 export const addToBatchBtn = '[data-testid="combo-submit-batching"]'
 export const executeTxBtn = '[data-testid="execute-tx-btn"]'
 const accordionDetails = '[data-testid="accordion-details"]'
@@ -38,21 +35,12 @@ const advancedDetails = '[data-testid="tx-advanced-details"]'
 const baseGas = '[data-testid="tx-base-gas"]'
 export const txDate = '[data-testid="tx-date"]'
 export const txType = '[data-testid="tx-type"]'
-export const proposalStatus = '[data-testid="proposal-status"]'
-const spamTokenWarningIcon = '[data-testid="warning"]'
 const untrustedTokenWarningModal = '[data-testid="untrusted-token-warning"]'
 const sendTokensBtn = '[data-testid="send-tokens-btn"]'
 export const replacementNewSigner = '[data-testid="new-owner"]'
 export const messageItem = '[data-testid="message-item"]'
-const filterStartDateInput = '[data-testid="start-date"]'
-const filterEndDateInput = '[data-testid="end-date"]'
-const filterAmountInput = '[data-testid="amount-input"]'
-const filterTokenInput = '[data-testid="token-input"]'
-const filterNonceInput = '[data-testid="nonce-input"]'
-const filterApplyBtn = '[data-testid="apply-btn"]'
 const filterClearBtn = '[data-testid="clear-btn"]'
 export const addressItem = '[data-testid="address-book-input"]'
-const radioSelector = 'div[role="radiogroup"]'
 const rejectTxBtn = '[data-testid="reject-btn"]'
 const replaceChoiceBtn = '[data-track="reject-tx: Replace tx button"]'
 const deleteTxModalBtn = '[data-testid="delete-tx-btn"]'
@@ -61,7 +49,6 @@ const simulateTxBtn = '[data-testid="simulate-btn"]'
 const simulateSuccess = '[data-testid="simulation-success-msg"]'
 const signBtn = '[data-testid="combo-submit-sign"]'
 const signedNotice = '[data-testid="signed-notice"]'
-const executeLaterBtn = '[data-testid="execute-later-btn"]'
 export const continueSignBtn = '[data-testid="continue-sign-btn"]'
 export const altImgDai = 'iframe[title="DAI"]'
 export const altImgCow = 'iframe[title="COW"]'
@@ -84,20 +71,11 @@ const txStack = '[data-testid="tx-stack"]'
 const txOperation = '[data-testid="tx-operation"]'
 const txHexDataRow = '[data-testid="tx-hexData"]'
 const addrecipientBtn = '[data-testid="add-recipient-btn"]'
-const removeRecipientBtn = '[data-testid="remove-recipient-btn"]'
-const maxRecipientsReachedMsg = '[data-testid="max-recipients-reached"]'
-const recipientsCount = '[data-testid="recipients-count"]'
-const maxBtn = '[data-testid="max-btn"]'
-const tokenAmountSection = '[data-testid="token-amount-section"]'
-const insufficientBalanceError = '[data-testid="insufficient-balance-error"]'
-const proposeTransactionBtn = '[data-testid="sign-btn"]'
 
-const insufficientFundsErrorStr = 'Insufficient funds'
 const viewTransactionBtn = 'View transaction'
 const transactionDetailsTitle = 'Transaction details'
 const QueueLabel = 'needs to be executed first'
 const transactionsPerHrStr = 'free transactions left today'
-const maxAmountBtnStr = 'Max'
 const nativeTokenTransferStr = 'ETH'
 const estimatedFeeStr = 'Estimated fee'
 // Re-export for backward compatibility
@@ -109,22 +87,9 @@ const confirmBtnStr = 'Confirm'
 const expandAllBtnStr = 'Expand all'
 const collapseAllBtnStr = 'Collapse all'
 const noTxFoundStr = (type) => `0 ${type} transactions found`
-const emptyQueueStr = 'Queued transactions will appear here'
 const deleteFromQueueStr = 'Delete from the queue'
-const bulkExecuteBtn = (tx) => `Bulk execute ${tx} transactions`
-const bulkConfirmationText = (tx) =>
-  `This transaction batches a total of ${tx} transactions from your queue into a single Ethereum transaction`
 
-const disabledBultExecuteBtnTooltip =
-  'Batch execution is only available for transactions that have been fully signed and are strictly sequential in Safe account nonce'
-const enabledBulkExecuteBtnTooltip = 'All highlighted transactions will be included in the batch execution'
-
-const bulkExecuteBtnStr = 'Bulk execute'
-
-const batchModalTitle = 'Batch'
 const gasLimit21000 = 'Gas limit must be at least 21000'
-export const swapOrder = 'Swap order settlement'
-export const bulkTxs = 'Bulk transactions'
 export const txStr = 'Transactions'
 export const txDetailsStr = 'Transaction details'
 export const settingsStr = 'Settings'
@@ -157,21 +122,6 @@ const advancedParametersInputNames = {
 
 // Transaction details on Tx creation
 export const txAccordionDetails = '[data-testid="decoded-tx-details"]'
-
-//Arrays for the Transaction Details on Tx creation for different type of txs
-export const MultisendData = ['Call', 'multiSend', 'on', 'Safe: MultiSendCallOnly 1.4.1']
-export const SafeProxy = ['Call', 'createProxyWithNonce', 'on', constants.safeProxyFactoryLabel]
-
-export const tx_status = {
-  execution_needed: 'Execution needed',
-  execute: 'Execute',
-  proposal: 'Proposal',
-}
-export const filterTypes = {
-  incoming: 'Incoming',
-  outgoing: 'Outgoing',
-  module: 'Module-based',
-}
 
 export const txActions = {
   setFallbackHandler: 'setFallbackHandler',
@@ -206,11 +156,6 @@ export function getRejectButton() {
 
 export function clickOnRejectBtn() {
   getRejectButton().click()
-}
-
-export function verifyPayNowOptionIsDisabled() {
-  // Base UI radios are non-native elements; disabled state is exposed via data-disabled.
-  cy.get(payNowExecMethod).find('[data-slot="radio-group-item"]').should('have.attr', 'data-disabled')
 }
 
 export function verifyTxRejectModalVisible() {
@@ -268,44 +213,12 @@ export function verifyCopiedURL() {
   })
 }
 
-export function verifyBulkExecuteBtnIsEnabled(txs) {
-  return cy.get('button').contains(bulkExecuteBtn(txs)).should('be.enabled')
-}
-
-export function verifyEnabledBulkExecuteBtnTooltip() {
-  // Base UI tooltips open on a native mouseenter on the trigger (mouseover/mousemove don't open them)
-  cy.get('button').contains(bulkExecuteBtnStr).trigger('mouseenter', { force: true })
-  cy.contains(enabledBulkExecuteBtnTooltip).should('exist')
-}
-
 export function deleteTx() {
   clickOnRejectBtn()
   // The delete choice stays disabled until the recommended nonce loads (deletability check),
   // so wait for it to become enabled — a click on the disabled button is silently ignored.
   cy.get(wallet.choiceBtn).contains(deleteFromQueueStr).closest(wallet.choiceBtn).should('be.enabled').click()
   cy.get(deleteTxModalBtn).click()
-}
-
-/** Deletes every queued transaction; call it on the queue page. */
-export function deleteAllTx() {
-  cy.get('body', { timeout: 30000 }).should(($body) => {
-    const loaded = $body.find(transactionItem).length > 0 || $body.text().includes(emptyQueueStr)
-    expect(loaded, 'transaction queue loaded').to.be.true
-  })
-  cy.get('body').then(($body) => {
-    if ($body.find(transactionItem).length > 0) {
-      cy.get(transactionItem).then(($items) => {
-        for (let i = $items.length - 1; i >= 0; i--) {
-          cy.wrap($items[i]).click({ force: true })
-          deleteTx()
-        }
-      })
-    }
-  })
-}
-
-export function setTxType(type) {
-  cy.get(radioSelector).find('label').contains(type).click()
 }
 
 export function verifyNoTxDisplayed(type) {
@@ -318,56 +231,8 @@ export function verifyNoTxDisplayed(type) {
   cy.contains(noTxFoundStr(type)).should('be.visible')
 }
 
-export function clickOnApplyBtn() {
-  cy.get(filterApplyBtn).click()
-}
-
-export function checkApplyBtnEnabled() {
-  cy.get(filterApplyBtn).should('not.be', 'disabled')
-}
-
 export function clickOnClearBtn() {
   cy.get(filterClearBtn).click()
-}
-
-export function fillFilterForm({ address, startDate, endDate, amount, token, nonce, recipient } = {}) {
-  checkApplyBtnEnabled()
-  cy.wait(2000)
-  const inputMap = {
-    address: { selector: addressItem, findInput: true },
-    startDate: { selector: filterStartDateInput, findInput: true },
-    endDate: { selector: filterEndDateInput, findInput: true },
-    amount: { selector: filterAmountInput, findInput: true },
-    token: { selector: filterTokenInput, findInput: true },
-    nonce: { selector: filterNonceInput, findInput: true },
-    recipient: { selector: addressItem, findInput: true },
-  }
-
-  Object.entries({ address, startDate, endDate, amount, token, nonce, recipient }).forEach(([key, value]) => {
-    if (value !== undefined) {
-      const { selector, findInput } = inputMap[key]
-      const element = findInput ? cy.get(selector).find('input') : cy.get(selector)
-      element.invoke('removeAttr', 'readonly').clear().type(value, { force: true })
-    }
-  })
-}
-
-export function clickOnFilterBtn() {
-  cy.get('button').then((buttons) => {
-    const filterButton = [...buttons].find((button) => {
-      return ['Filter', 'Incoming', 'Outgoing', 'Module-based'].includes(button.innerText)
-    })
-
-    if (filterButton) {
-      cy.wrap(filterButton).click()
-    } else {
-      throw new Error('No filter button found')
-    }
-  })
-}
-
-export function checkTxItemDate(index, date) {
-  cy.get(txDate).eq(index).should('contain', date)
 }
 
 export function clickOnSendTokensBtn() {
@@ -472,11 +337,6 @@ export function expandAdvancedDetails(data) {
 export function verifytxAccordionDetails(data) {
   main.checkTextsExistWithinElement(txAccordionDetails, data)
 }
-//Search in the element with the scroll
-export function verifytxAccordionDetailsScroll(data) {
-  main.checkTextsExistWithinElementScroll(txAccordionDetails, data)
-}
-
 export function switchView(view) {
   if (view === advancedDetailsViewOptions.table) {
     cy.get(tableViewBtn).click()
@@ -533,17 +393,6 @@ export function collapseAllActions(data) {
 
 export function verifyActionListExists(data) {
   main.checkTextsExistWithinElement(transactionSideList, data)
-}
-
-export function verifySpamIconIsDisplayed(name, token) {
-  cy.get(transactionItem)
-    .filter(':contains("' + name + '")')
-    .filter(':contains("' + token + '")')
-    .then(($elements) => {
-      cy.wrap($elements.first()).then(($element) => {
-        cy.wrap($element).find(spamTokenWarningIcon).should('be.visible')
-      })
-    })
 }
 
 /**
@@ -642,9 +491,6 @@ export function verifySummaryByName(name, data, { token, alt, altToken } = {}) {
     }
   })
 }
-export function clickOnTransactionItem(item) {
-  cy.get(transactionItem).eq(item).scrollIntoView().click({ force: true })
-}
 
 export function verifyTransactionActionsVisibility(option) {
   cy.get(transactionSideList).should(option)
@@ -667,35 +513,6 @@ export function typeRecipientAddress(address) {
   cy.get(recepientInput).clear().type(address).should('have.value', address)
 }
 
-export function typeRecipientAddress_(index, address) {
-  cy.get(recepientInput_(index)).clear().type(address).should('have.value', address)
-}
-
-export function verifyENSResolves(fullAddress) {
-  let split = fullAddress.split(':')
-  let noPrefixAddress = split[1]
-  cy.get(recepientInput).should('have.value', noPrefixAddress)
-}
-
-export function verifyRandomStringAddress(randomAddressString) {
-  typeRecipientAddress(randomAddressString)
-  cy.contains(constants.addressBookErrrMsg.invalidFormat).should('be.visible')
-}
-
-export function verifyWrongChecksum(wronglyChecksummedAddress) {
-  typeRecipientAddress(wronglyChecksummedAddress)
-  cy.contains(constants.addressBookErrrMsg.invalidChecksum).should('be.visible')
-}
-
-export function verifyAmountLargerThanCurrentBalance() {
-  setSendValue(9999)
-  cy.contains(constants.amountErrorMsg.largerThanCurrentBalance).should('be.visible')
-}
-
-export function verifyTooltipMessage(message) {
-  cy.get('[data-slot="tooltip-content"]').contains(message).should('be.visible')
-}
-
 export function verifyRelayerAttemptsAvailable() {
   cy.contains(transactionsPerHrStr).should('exist')
 }
@@ -707,10 +524,6 @@ export function clickOnTokenselectorAndSelectSepoliaEth() {
 export function clickOnTokenselectorAndSelectToken(tokenName) {
   cy.get(tokenSelector).click()
   cy.get('[data-slot="select-content"]').contains(tokenName).click()
-}
-
-export function setMaxAmount() {
-  cy.contains(maxAmountBtnStr).click()
 }
 
 export function verifyMaxAmount(token, tokenAbbreviation) {
@@ -730,10 +543,6 @@ export function verifyMaxAmount(token, tokenAbbreviation) {
 
 export function setSendValue(value) {
   cy.get(amountInput).clear().type(value)
-}
-
-export function setSendValue_(index, value) {
-  cy.get(amountInput_(index)).clear().type(value)
 }
 
 export function clickOnNextBtn() {
@@ -760,11 +569,8 @@ export function verifyNativeTokenTransfer() {
 }
 
 export function changeNonce(value) {
-  cy.get(nonceInput).clear().type(value, { force: true })
-}
-
-export function hasNonce() {
-  cy.get(nonceInput).invoke('val').should('match', /^\d+$/)
+  cy.get(nonceInput).type(`{selectall}${value}`, { force: true })
+  cy.get(nonceInput).should('have.value', String(value))
 }
 
 export function displayAdvancedDetails() {
@@ -844,15 +650,6 @@ export function signAndOpenExecuteStep() {
   cy.get(signedNotice, { timeout: 30000 }).should('be.visible')
 }
 
-export function clickOnExecuteLaterBtn() {
-  cy.get(executeLaterBtn).click()
-  cy.get(transactionItem, { timeout: 30000 }).should('be.visible')
-}
-
-export function clickOnProposeTransactionBtn() {
-  cy.get(proposeTransactionBtn).click()
-}
-
 export function clickOnContinueSignTransactionBtn() {
   cy.get(continueSignBtn).click()
 }
@@ -863,19 +660,6 @@ export function clickOnConfirmTransactionBtn() {
 
 export function verifyConfirmTransactionBtnIsVisible() {
   cy.get('button').contains(confirmBtnStr).should('be.visible')
-}
-
-export function clickOnConfirmBtn(index) {
-  cy.wait(2000)
-  cy.get(transactionItem)
-    .eq(index)
-    .within(() => {
-      cy.get('button')
-        .contains(confirmBtnStr)
-        .then((elements) => {
-          cy.wrap(elements[0]).click()
-        })
-    })
 }
 
 export function clickOnExecuteBtn(index) {
@@ -953,38 +737,6 @@ export function verifyReplacedSigner(newSignerName) {
   cy.get(replacementNewSigner).should('exist').contains(newSignerName)
 }
 
-function verifyBulkActions(actions) {
-  actions.forEach((action) => {
-    cy.contains(action).should('exist')
-  })
-}
-
-export function verifyBulkConfirmationScreen(tx, actions) {
-  cy.contains(bulkConfirmationText(tx))
-  verifyBulkActions(actions)
-  cy.get(modal.modalHeader).within(() => {
-    cy.contains(batchModalTitle).should('exist')
-    cy.get('svg').should('exist')
-  })
-}
-
-export function verifyBulkTxHistoryBlock(order, tx, actions) {
-  cy.contains(order)
-    .parent('div')
-    .parent()
-    .eq(0)
-    .within(() => {
-      cy.contains(tx)
-      verifyBulkActions(actions)
-    })
-}
-
-export function verifyBulkExecuteBtnIsDisabled() {
-  cy.get('button').contains(bulkExecuteBtnStr).should('be.disabled')
-  main.hoverUntilTooltipOpen(() => cy.get('button').contains(bulkExecuteBtnStr).parent())
-  cy.contains(disabledBultExecuteBtnTooltip).should('exist')
-}
-
 export function toggleUntrustedTxs() {
   cy.get(toggleUntrustedBtn).click()
 }
@@ -997,64 +749,8 @@ export function verifySuccessfulSimulation() {
   cy.get(simulateSuccess).should('exist')
 }
 
-export function insufficientBalanceErrorExists() {
-  cy.get(insufficientBalanceError).should('exist')
-}
-
-export function insufficientFundsErrorExists(index) {
-  cy.get(tokenAmountSection)
-    .eq(index)
-    .within(() => {
-      cy.get('label').should('contain.text', insufficientFundsErrorStr)
-    })
-}
-
-export function checkTokenValue(index, value) {
-  cy.get(amountInput_(index)).should('have.value', value)
-}
-export function clickOnMaxBtn(index) {
-  cy.get(maxBtn).eq(index).click()
-}
-
-export function verifyAddRecipientBtnIsVisible() {
-  cy.get(addrecipientBtn).should('be.visible')
-}
-
-export function verifyAddRecipientBtnDoesNotExist() {
-  main.verifyElementsCount(addrecipientBtn, 0)
-}
-
 export function clickOnAddRecipientBtn() {
   cy.get(addrecipientBtn).click()
-}
-
-export function clickOnRemoveRecipientBtn(index) {
-  cy.get(removeRecipientBtn).eq(index).click()
-}
-
-export function checkNumberOfRecipients(count) {
-  cy.get(recipientsCount).should('have.text', `${count}`)
-}
-
-export function checkMaxRecipientReached(attempt = 0) {
-  const maxAttempts = 4
-
-  cy.get('body').then(($body) => {
-    if ($body.find(maxRecipientsReachedMsg).length > 0) {
-      cy.get(maxRecipientsReachedMsg).should('exist')
-      cy.get(addrecipientBtn).should('be.disabled')
-      checkNumberOfRecipients('5/5')
-      return
-    }
-
-    if (attempt >= maxAttempts) {
-      throw new Error('Max attempts reached but message did not appear')
-    }
-
-    clickOnAddRecipientBtn()
-    checkNumberOfRecipients(`${attempt + 2}/5`)
-    checkMaxRecipientReached(attempt + 1)
-  })
 }
 
 export function selectComboButtonOption(option) {

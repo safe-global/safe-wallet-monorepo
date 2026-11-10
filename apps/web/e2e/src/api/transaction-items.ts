@@ -1,3 +1,4 @@
+import { Interface } from 'ethers'
 import type {
   QueuedItemPage,
   Transaction,
@@ -12,6 +13,23 @@ export function transactionsIn(page: QueuedItemPage | TransactionItemPage): Tran
 /** The Safe nonce of a multisig transaction; undefined for module transactions and incoming transfers. */
 export function nonceOf(transaction: Transaction): number | undefined {
   return transaction.executionInfo?.type === 'MULTISIG' ? transaction.executionInfo.nonce : undefined
+}
+
+/** The confirmations a multisig transaction has; undefined for module transactions and incoming transfers. */
+export function confirmationsOf(transaction: Transaction): number | undefined {
+  return transaction.executionInfo?.type === 'MULTISIG' ? transaction.executionInfo.confirmationsSubmitted : undefined
+}
+
+/** The safeTxHash of a multisig transaction, from its CGW ID `multisig_<safe>_<safeTxHash>`. */
+export function safeTxHashOf(transaction: Transaction): string {
+  return transaction.id.split('_')[2]
+}
+
+const safeInterface = new Interface(['function approveHash(bytes32 hashToApprove)'])
+
+/** The call data of a Safe's `approveHash(safeTxHash)`, the transaction a parent Safe signs for its child with. */
+export function approveHashData(safeTxHash: string): string {
+  return safeInterface.encodeFunctionData('approveHash', [safeTxHash])
 }
 
 /** The action count of each multisig transaction on the page; undefined for one that is not a multiSend. */

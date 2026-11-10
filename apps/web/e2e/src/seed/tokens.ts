@@ -15,7 +15,7 @@ export const SEPOLIA_USDC: SeedToken = {
 }
 
 type TxsBalance = { tokenAddress: string | null; balance: string }
-type CgwBalances = { items: Array<{ tokenInfo: { address: string }; balance: string }> }
+type CgwBalances = { items: Array<{ tokenInfo: { address: string; type: string }; balance: string }> }
 
 /** Transfers `amount` base units of `token` to the Safe, trusts the token, and waits until CGW lists the balance. */
 export async function seedTokenBalance(
@@ -39,5 +39,19 @@ export async function seedTokenBalance(
   await trustToken(env, token.address)
   await waitUntil(env, `${path}/balances/usd?trusted=true&exclude_spam=true`, (balances: CgwBalances) =>
     balances.items.some((item) => item.tokenInfo.address === token.address && item.balance === balance),
+  )
+}
+
+/** Waits until CGW lists the 1 ETH that `seedSafe` sends, so the assets page does not get an empty, cached answer. */
+export async function waitForNativeBalance(safe: SeededSafe): Promise<void> {
+  const { env, path } = safe.context
+  // CGW caches its first answer, so wait for the indexer before CGW is asked.
+  await waitUntil(
+    env,
+    `${env.SAFE_TXS_BASE_URL}/v1/safes/${safe.address}/balances/?trusted=false`,
+    (balances: TxsBalance[]) => balances.some((item) => item.tokenAddress === null && BigInt(item.balance) > 0n),
+  )
+  await waitUntil(env, `${path}/balances/usd?trusted=true&exclude_spam=true`, (balances: CgwBalances) =>
+    balances.items.some((item) => item.tokenInfo.type === 'NATIVE_TOKEN' && BigInt(item.balance) > 0n),
   )
 }

@@ -144,6 +144,22 @@ describe('SafenetAuditRow', () => {
     expect(screen.getByText(formatAuditDateTime(timedOutAtMs))).toBeInTheDocument()
   })
 
+  it('renders an Under review step by Safenet that links the explorer while a dispute is open', () => {
+    const snapshot = buildSnapshot({ safeTxHash: HASH as `0x${string}`, status: CheckStatus.DISPUTED })
+    mockUseSafenetCheck.mockReturnValue(
+      view({ snapshot, status: CheckStatus.DISPUTED, publicStatus: CheckStatus.DISPUTED }),
+    )
+
+    render(<SafenetAuditRow safeTxHash={HASH} chainId="100" />)
+
+    expect(screen.getByText('Under review')).toBeInTheDocument()
+    expect(screen.queryByText('Check failed')).not.toBeInTheDocument()
+    expect(screen.getByTestId('safenet-explorer-link')).toHaveAttribute(
+      'href',
+      expect.stringContaining(`/#/safeTx?chainId=100&safeTxHash=${HASH}`),
+    )
+  })
+
   it('renders No issues found without a date when the attested header could not be read', () => {
     const snapshot = buildBenignSnapshot({ safeTxHash: HASH as `0x${string}`, attestedAtMs: null })
     mockUseSafenetCheck.mockReturnValue(

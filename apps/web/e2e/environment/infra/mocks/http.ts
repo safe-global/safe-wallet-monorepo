@@ -35,6 +35,15 @@ export function json(status: number, payload: unknown): Reply {
   return { status, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
 }
 
+export function html(status: number, body: string): Reply {
+  return { status, headers: { 'Content-Type': 'text/html; charset=utf-8' }, body }
+}
+
+export function escapeHtml(value: string): string {
+  const entities: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#x27;' }
+  return value.replace(/[&<>"']/g, (character) => entities[character])
+}
+
 /** Compose sets MOCK_HOST to 0.0.0.0; anywhere else a mock answers only this machine. */
 export function listenHost(): string {
   return process.env.MOCK_HOST || '127.0.0.1'

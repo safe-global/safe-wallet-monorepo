@@ -10,6 +10,7 @@ import {
   cypressRunArguments,
   missingChainCommands,
   planMatrix,
+  selectPlaywrightSpecs,
   playwrightRunArguments,
   readManifest,
   stackEnvironment,
@@ -89,9 +90,13 @@ test('keeps the wallet on local CGW and removes fork provider credentials', () =
   assert.equal(env.ELECTRON_RUN_AS_NODE, undefined)
   assert.equal(env.NEXT_PUBLIC_CONFIG_SERVICE_KEY, 'WALLET_WEB')
   assert.equal(env.NEXT_PUBLIC_IS_PRODUCTION, 'false')
+  assert.equal(env.NEXT_PUBLIC_POLLING_INTERVAL, '2000')
   assert.equal(env.NEXT_PUBLIC_GATEWAY_URL_STAGING, manifest.gatewayUrl)
   assert.equal(env.NEXT_PUBLIC_GATEWAY_URL_PRODUCTION, manifest.gatewayUrl)
   assert.equal(env.VITE_GATEWAY_URL, manifest.gatewayUrl)
+  assert.equal(env.NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL, 'http://localhost:4003/simulate')
+  assert.equal(env.NEXT_PUBLIC_TENDERLY_ORG_NAME, 'safe')
+  assert.equal(env.NEXT_PUBLIC_TENDERLY_PROJECT_NAME, 'safe-apps')
   assert.equal(env.PATH, '/bin')
   assert.throws(() => walletEnvironment({ ...manifest, gatewayUrl: 'https://safe-client.safe.global' }), /local/)
   assert.throws(() => walletEnvironment({ ...manifest, chainId: 1 }), /identity/)
@@ -150,13 +155,36 @@ test('plans a GitHub Actions matrix with short spec names and the forks of each 
     'cypress/e2e/regression/a.cy.js': { scenario: 'a' },
     'cypress/e2e/regression/b.cy.js': { scenario: 'b', chains: [137] },
   }
-  assert.deepEqual(planMatrix(undefined, 2, registry), {
+  assert.deepEqual(planMatrix(undefined, 2, registry, {}), {
     include: [
       { shard: 1, runner: 'cypress', specs: 'regression/a', chains: '' },
       { shard: 2, runner: 'cypress', specs: 'regression/b', chains: 'polygon' },
       { shard: 3, runner: 'playwright', specs: '', chains: '' },
     ],
   })
+})
+
+test('starts the forks that any Playwright spec needs on the Playwright job', () => {
+  const playwrightRegistry = {
+    'e2e/sepolia.spec.ts': {},
+    'e2e/multichain.spec.ts': { chains: [1, 137] },
+    'e2e/mainnet.spec.ts': { chains: [1] },
+  }
+  const { include } = planMatrix(undefined, 1, { 'cypress/e2e/regression/a.cy.js': {} }, playwrightRegistry)
+  assert.deepEqual(include.at(-1), { shard: 2, runner: 'playwright', specs: '', chains: 'mainnet polygon' })
+})
+
+test('selects the Playwright specs that SAFE_E2E_SPECS matches, as Playwright does', () => {
+  const registry = {
+    'e2e/nested-signer.spec.ts': {},
+    'e2e/walletconnect-nested-signer.spec.ts': {},
+    'e2e/batch.spec.ts': {},
+  }
+  assert.deepEqual(selectPlaywrightSpecs({}, registry), Object.keys(registry))
+  assert.deepEqual(selectPlaywrightSpecs({ SAFE_E2E_SPECS: 'e2e/nested, batch' }, registry), [
+    'e2e/nested-signer.spec.ts',
+    'e2e/batch.spec.ts',
+  ])
 })
 
 test('runs every isolated Playwright spec unless SAFE_E2E_SPECS names some', () => {

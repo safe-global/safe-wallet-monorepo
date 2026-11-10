@@ -2,6 +2,7 @@ import { computePollingInterval } from '../computePollingInterval'
 import {
   ARBITRATION_POLL_MS,
   ARBITRATION_WINDOW_MS,
+  DISPUTED_POLL_MS,
   LATE_WINDOW_BLOCKS,
   POLL_INTERVAL_FAST_MS,
   POLL_INTERVAL_LATE_MS,
@@ -57,6 +58,28 @@ describe('computePollingInterval', () => {
     it('stops when the attestation time is unknown (nothing anchors the window)', () => {
       expect(computePollingInterval({ ...benign, attestedAtMs: null, nowMs: ATTESTED })).toBe(0)
       expect(computePollingInterval(benign)).toBe(0)
+    })
+  })
+
+  describe('DISPUTED — a slow poll for as long as the dispute is open', () => {
+    const disputed = { status: CheckStatus.DISPUTED, deadlineBlock: '49322741' }
+
+    it('polls every 5 minutes, not at the fast rate, while the head is far from the dispute deadline', () => {
+      const interval = computePollingInterval({ ...disputed, headBlock: '48838901' })
+      expect(interval).toBe(DISPUTED_POLL_MS)
+      expect(interval).toBe(5 * 60_000)
+      expect(interval).toBeGreaterThan(POLL_INTERVAL_FAST_MS)
+    })
+
+    it('keeps polling past the dispute deadline and its late window, until a ruling or timeout lands', () => {
+      const headBlock = String(49_322_741 + LATE_WINDOW_BLOCKS + 1)
+      expect(computePollingInterval({ ...disputed, headBlock })).toBe(DISPUTED_POLL_MS)
+    })
+
+    it('polls without a head or deadline block', () => {
+      expect(computePollingInterval({ status: CheckStatus.DISPUTED, headBlock: null, deadlineBlock: null })).toBe(
+        DISPUTED_POLL_MS,
+      )
     })
   })
 

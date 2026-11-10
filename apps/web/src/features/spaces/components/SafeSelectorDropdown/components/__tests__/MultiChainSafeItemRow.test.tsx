@@ -84,6 +84,15 @@ describe('MultiChainSafeItemRow rename gate', () => {
     expect(screen.getByTestId('rename-btn')).toBeInTheDocument()
   })
 
+  it('offers rename for every network of the group', () => {
+    const onRename = jest.fn()
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} onRename={onRename} />)
+
+    fireEvent.click(screen.getByTestId('rename-btn'))
+
+    expect(onRename).toHaveBeenCalledWith({ address: '0xaaa', name: 'Test Safe', chainIds: ['1', '137'] })
+  })
+
   it('withholds rename from a member looking at a workspace Safe', () => {
     mockWriteScope.mockReturnValue({ scope: 'local', canRename: false })
     render(<MultiChainSafeItemRow item={createItem(['1', '137'])} onRename={jest.fn()} />)

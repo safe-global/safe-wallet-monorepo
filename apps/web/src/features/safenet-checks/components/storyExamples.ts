@@ -5,9 +5,11 @@ import {
   type SafenetCheckSnapshot,
 } from '@safe-global/utils/features/safenet-checks'
 import {
+  arbitrationTimedOutEvent,
   attestedEvent,
   buildBenignSnapshot,
   buildSnapshot,
+  disputeTriggeredEvent,
   requestCreatedEvent,
   sentinelRevealedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
@@ -70,3 +72,31 @@ export const inProgressWithDeadline = (): SafenetCheckSnapshot =>
     deadlineBlock: '48600024',
     events: [requestCreatedEvent({ blockNumber: 48_599_976, deadlineBlock: '48600024' })],
   })
+
+const DISPUTE_REQUEST_ID = `0x${'ef'.repeat(32)}` as const
+const DISPUTE_DEADLINE_BLOCK = '49322741'
+
+/** Example #8: the sentinels split and the dispute is open, with about 28 days of arbitration ahead. */
+export const openDisputeSnapshot = (): SafenetCheckSnapshot =>
+  exampleSnapshot(CheckStatus.DISPUTED, {
+    headBlock: '48838950',
+    deadlineBlock: DISPUTE_DEADLINE_BLOCK,
+    events: [
+      ...reveals(SAFENET_EXAMPLE_VOTES.openDispute),
+      disputeTriggeredEvent({
+        requestId: DISPUTE_REQUEST_ID,
+        blockNumber: 48_838_901,
+        deadlineBlock: DISPUTE_DEADLINE_BLOCK,
+      }),
+    ],
+  })
+
+/** Example #8 once arbitration ended without a ruling. */
+export const timedOutDisputeSnapshot = (): SafenetCheckSnapshot => {
+  const open = openDisputeSnapshot()
+  return exampleSnapshot(CheckStatus.TIMED_OUT, {
+    headBlock: '49322750',
+    deadlineBlock: open.deadlineBlock,
+    events: [...open.events, arbitrationTimedOutEvent({ requestId: DISPUTE_REQUEST_ID, blockNumber: 49_322_742 })],
+  })
+}

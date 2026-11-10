@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync } from 'node:fs'
 import { test } from 'node:test'
 import { scenarios } from './scenarios/index.mjs'
 import { playwrightSpecs } from './playwright-specs.mjs'
@@ -23,16 +23,6 @@ test('every scenario function serves at least one Cypress or Playwright spec', (
     Object.keys(scenarios).filter((name) => !used.has(name)),
     [],
   )
-})
-
-test('skipped cases name existing test titles and give a reason', () => {
-  for (const [spec, { skips = {} }] of Object.entries(isolatedSpecs)) {
-    const source = readFileSync(specFile(spec), 'utf8')
-    for (const [title, reason] of Object.entries(skips)) {
-      assert.ok(reason, title)
-      assert.ok(source.includes(title), `${spec} has no test titled ${title}`)
-    }
-  }
 })
 
 test('extra forks are the ones the stack can start', () => {

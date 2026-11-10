@@ -35,7 +35,13 @@ describe('Transaction queue tests', { defaultCommandTimeout: 30000 }, () => {
     ])
     create_tx.clickOnAdvancedDetails()
     create_tx.verifyExpandedDetails(
-      [swapsHistory.multiSend, swapsHistory.multiSend, swapsHistory.multiSendCallOnly1_4_1],
+      [
+        swapsHistory.multiSend,
+        swapsHistory.multiSend,
+        swapsHistory.multiSendCallOnly1_4_1,
+        swapsHistory.gGpV2,
+        swapsHistory.actionPreSignatureG,
+      ],
       create_tx.delegateCallWarning,
     )
     main.verifyElementsExist([create_tx.altImgDai, create_tx.altImgCow])
@@ -54,7 +60,7 @@ describe('Transaction queue tests', { defaultCommandTimeout: 30000 }, () => {
       swapsHistory.sellOrder,
       swapsHistory.sell,
       swapsHistory.expired,
-
+      swapsHistory.sell100Cow,
       dai,
       eq,
     ])
@@ -90,5 +96,7 @@ describe('Transaction queue tests', { defaultCommandTimeout: 30000 }, () => {
     swaps.checkPercentageFilled(0, tokenSoldPrice)
     swaps.checkPartDuration('182 days')
     main.verifyElementsExist([create_tx.altImgDai, create_tx.altImgCow])
+    create_tx.clickOnAdvancedDetails()
+    create_tx.verifyAdvancedDetails([swapsHistory.multiSend, swapsHistory.multiSendCallOnly1_4_1])
   })
 })

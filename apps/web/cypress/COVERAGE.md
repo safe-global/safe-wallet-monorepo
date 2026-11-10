@@ -2,65 +2,22 @@
 
 > **Maintenance:** This file is manually maintained. Update it when adding, removing, or changing visual test files in `e2e/visual/`. Cross-reference with `.storybook/COVERAGE.md` for component-level gaps.
 
-**53 tests** across **31 test files** — each test captures an Argos screenshot automatically.
+**5 tests** across **3 test files** — each test captures an Argos screenshot automatically. Every other visual state is a Storybook story (`src/stories/pages/` and stories next to their components); these tests stay until a story renders the same state.
 
 Screenshots are captured via a global `afterEach` hook in `cypress/support/e2e.js`.
 
 ## Covered pages
 
-| Page                              | Test file                  | Tests | Mocked? | Wallet? |
-| --------------------------------- | -------------------------- | ----- | ------- | ------- |
-| `/welcome/accounts`               | welcome.cy.js              | 1     | No      | No      |
-| `/welcome/spaces` (signed-out)    | welcome.cy.js              | 1     | No      | No      |
-| `/home`                           | dashboard.cy.js            | 1     | Yes     | No      |
-| `/balances`                       | balances.cy.js             | 2     | No      | No      |
-| `/balances/nfts`                  | nfts.cy.js                 | 1     | Yes     | No      |
-| `/balances/positions`             | positions.cy.js            | 1     | No      | No      |
-| `/address-book`                   | address_book.cy.js         | 2     | No      | No      |
-| `/transactions/queue`             | tx_queue.cy.js             | 2     | Yes     | No      |
-| `/transactions/history`           | tx_history.cy.js           | 1     | Yes     | No      |
-| `/transactions/tx`                | tx_details.cy.js           | 1     | No      | No      |
-| `/transactions/msg`               | msg_details.cy.js          | 1     | Yes     | No      |
-| `/settings/setup`                 | settings.cy.js             | 1     | No      | No      |
-| `/settings/appearance`            | settings.cy.js             | 1     | No      | No      |
-| `/settings/modules`               | settings.cy.js             | 1     | No      | No      |
-| `/settings/notifications`         | settings.cy.js             | 1     | No      | No      |
-| `/settings/data`                  | settings.cy.js             | 1     | No      | No      |
-| `/settings/security`              | settings.cy.js             | 1     | No      | No      |
-| `/settings/cookies`               | settings.cy.js             | 1     | No      | No      |
-| `/settings/safe-apps`             | settings.cy.js             | 1     | No      | No      |
-| `/settings/environment-variables` | settings.cy.js             | 1     | No      | No      |
-| `/apps`                           | safe_apps.cy.js            | 2     | No      | No      |
-| `/apps/custom`                    | apps_custom.cy.js          | 1     | No      | No      |
-| `/new-safe/create`                | new_safe.cy.js             | 1     | No      | No      |
-| `/new-safe/load`                  | new_safe.cy.js             | 1     | No      | No      |
-| `/swap`                           | swap.cy.js                 | 1     | No      | No      |
-| `/bridge`                         | bridge.cy.js               | 1     | No      | No      |
-| `/stake`                          | stake.cy.js                | 1     | No      | No      |
-| `/earn`                           | earn.cy.js                 | 1     | No      | No      |
-| `/403`                            | error_pages.cy.js          | 1     | No      | No      |
-| `/404`                            | error_pages.cy.js          | 1     | No      | No      |
-| `/spaces` (dashboard)             | spaces_dashboard.cy.js     | 2     | No      | Yes     |
-| `/spaces/settings/general`        | spaces_settings.cy.js      | 1     | No      | Yes     |
-| `/spaces/settings/account`        | spaces_settings.cy.js      | 1     | No      | Yes     |
-| `/spaces/settings/about`          | spaces_settings.cy.js      | 1     | No      | Yes     |
-| `/spaces/members`                 | spaces_members.cy.js       | 2     | No      | Yes     |
-| `/spaces/safe-accounts`           | spaces_safe_accounts.cy.js | 1     | No      | Yes     |
-| `/spaces/address-book`            | spaces_address_book.cy.js  | 1     | No      | Yes     |
-| `/spaces/activity`                | spaces_activity.cy.js      | 1     | No      | Yes     |
-| `/spaces/security`                | spaces_security.cy.js      | 1     | No      | Yes     |
-| Send tx form (modal)              | create_tx_flow.cy.js       | 1     | No      | Yes     |
-| Add signer form (modal)           | owner_management.cy.js     | 1     | No      | Yes     |
-| Replace signer dialog (modal)     | owner_management.cy.js     | 1     | No      | Yes     |
-| Spending limit form (modal)       | spending_limits.cy.js      | 3     | No      | Yes     |
-| Batch tx modal                    | batch_tx.cy.js             | 1     | No      | Yes     |
-| Sidebar collapsed state           | sidebar.cy.js              | 1     | No      | No      |
-
-> **Spaces tests** sign in with a real wallet (SIWE) against the live backend via `support/spaces-login.js` — no auth/API mocks. `spaces_dashboard.cy.js` also covers the send-from modal, and `spaces_members.cy.js` the pending-invites tab. `spaces_address_book.cy.js` has 2 additional skipped tests (local + pending contacts tabs).
+| Page                           | Test file        | Tests | Mocked? | Wallet? | Missing story                                        |
+| ------------------------------ | ---------------- | ----- | ------- | ------- | ---------------------------------------------------- |
+| `/welcome/accounts`            | welcome.cy.js    | 1     | No      | No      | Page with pinned safes and no wallet                 |
+| `/welcome/spaces` (signed-out) | welcome.cy.js    | 1     | No      | No      | Signed-out state (page stories are signed in)        |
+| `/transactions/queue`          | tx_queue.cy.js   | 2     | Yes     | No      | Queued batch expanded, with and without "Expand all" |
+| `/transactions/tx`             | tx_details.cy.js | 1     | No      | No      | Executed transaction (page story is awaiting)        |
 
 ## Gaps — interactive states not yet covered
 
-Cross-referenced from `.storybook/COVERAGE.md` (823 components). Our page-level screenshots capture the default view of every route, but many components only appear after user interaction (clicks, wallet connection, specific safe states). These are the known gaps, grouped by priority.
+Cross-referenced from `.storybook/COVERAGE.md` (823 components). This list was written for the full Cypress visual suite, before its states moved to Storybook, and has not been re-checked against the stories. Many components only appear after user interaction (clicks, wallet connection, specific safe states). These are the known gaps, grouped by priority.
 
 ### P0 — Address book dialogs (3 components)
 

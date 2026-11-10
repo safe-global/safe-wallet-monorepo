@@ -24,10 +24,6 @@ export function clickOnConfirmBatchBtn() {
   cy.get('button').contains(confirmBatchBtn).should('be.visible').should('be.enabled').click()
 }
 
-export function verifyBatchTransactionsCount(count) {
-  cy.contains(`This batch contains ${count} transactions`).should('be.visible')
-}
-
 export function clickOnBatchCounter() {
   cy.get(batchTxCounter).click()
 }

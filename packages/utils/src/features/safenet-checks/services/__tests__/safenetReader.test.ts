@@ -7,6 +7,9 @@ import { transactionProposalHash } from '../../utils/proposalHash'
 import { BLOCK_ESTIMATE_TOLERANCE_SECONDS } from '../../constants'
 import {
   resetLogCounter,
+  buildDisputeResolvedLog,
+  buildDisputeTriggeredLog,
+  buildNewRequestLog,
   buildOracleProposedLog,
   buildOracleAttestedLog,
   buildOracleResultLog,
@@ -14,9 +17,17 @@ import {
   EMPTY_ORACLE_DATA_HASH,
 } from '../../builders/rawLogs'
 import type { RawLog } from '../../utils/decodeLogs'
-import { AttestationVerificationStatus, CheckEventType, CheckStatus, type Hex } from '../../types'
+import {
+  AttestationVerificationStatus,
+  CheckEventType,
+  CheckStatus,
+  DisputeOutcome,
+  OracleRequestState,
+  UNVERIFIED_ATTESTATION,
+  type Hex,
+} from '../../types'
 import { deriveCheckState } from '../../utils/deriveCheckState'
-import { makeEndpoint, type GetLogsFilter } from './rpcEndpoint'
+import { makeEndpoint, type GetLogsFilter, type RpcConfig } from './rpcEndpoint'
 
 const consensusCalls = (calls: GetLogsFilter[]): GetLogsFilter[] =>
   calls.filter((c) => (Array.isArray(c.topics[0]) ? (c.topics[0] as string[]) : []).includes(CONSENSUS_TOPIC0S[0]))
@@ -63,7 +74,7 @@ let server: SetupServerApi
 afterEach(() => server?.close())
 
 describe('SafenetReader.fetchCheckState', () => {
-  it('verifies a captured Safenet deployment on Gnosis Chain approval and leaves a split dispute inconclusive', async () => {
+  it('verifies a captured Safenet deployment on Gnosis Chain approval and reads a split dispute as open', async () => {
     const fixture = JSON.parse(
       readFileSync(join(__dirname, '../../__fixtures__/safenet-gnosis-chain.captured.json'), 'utf8'),
     ) as {
@@ -76,6 +87,7 @@ describe('SafenetReader.fetchCheckState', () => {
       head: 48597645,
       logs: [...approved.logs, ...disputed.logs],
       groupKey: approved.groupKey,
+      requestState: OracleRequestState.FROZEN,
     })
     server = setupServer(endpoint.handler)
     server.listen()
@@ -89,7 +101,7 @@ describe('SafenetReader.fetchCheckState', () => {
       AttestationVerificationStatus.INVALID,
     )
     const split = await reader.fetchCheckState(disputed.safeTxHash)
-    expect(deriveCheckState({ ...split, attestation })).toBe(CheckStatus.TIMED_OUT)
+    expect(deriveCheckState({ ...split, attestation })).toBe(CheckStatus.DISPUTED)
   })
 
   it('bootstraps from the chain head and returns the sorted, decoded Consensus pair', async () => {
@@ -737,5 +749,68 @@ describe('SafenetReader window coverage', () => {
     // centre = head − ageSeconds/5, then 1,000 blocks back, clamped at the head.
     expect([calls[0].fromBlock, calls[0].toBlock]).toEqual([1_000_000 - ageSeconds / 5 - 1_000, 1_000_000])
     expect(result.windowCoverage).toBe('proven')
+  })
+})
+
+describe('SafenetReader open disputes', () => {
+  const requestId = requestIdFor('1')
+
+  const disputeLogs = (): RawLog[] => {
+    resetLogCounter()
+    return [
+      buildOracleProposedLog({ safeTxHash: SAFE_TX_HASH, epoch: 1n, oracle: ORACLE }),
+      buildNewRequestLog({ requestId }),
+      buildDisputeTriggeredLog({ requestId, deadline: 600n }),
+    ]
+  }
+
+  const readCheck = async (logs: RawLog[], config: Partial<RpcConfig> = {}) => {
+    const endpoint = makeEndpoint({ url: 'http://rpc.test/1', head: 25_000, logs, ...config })
+    server = setupServer(endpoint.handler)
+    server.listen()
+    const read = await makeReader({ oracles: [ORACLE] }).fetchCheckState(SAFE_TX_HASH)
+    const status = deriveCheckState({ ...read, attestation: UNVERIFIED_ATTESTATION })
+    return { endpoint, read, status }
+  }
+
+  it('asks the oracle for the request state once and keeps a frozen dispute open', async () => {
+    const { endpoint, read, status } = await readCheck(disputeLogs(), { requestState: OracleRequestState.FROZEN })
+
+    expect(endpoint.requestReads).toEqual([requestId])
+    expect(read.events.map((event) => event.type)).not.toContain(CheckEventType.DISPUTE_RESOLVED)
+    expect(status).toBe(CheckStatus.DISPUTED)
+  })
+
+  it('reads a ruling that sits outside the block window as a denial', async () => {
+    const { read, status } = await readCheck(disputeLogs(), { requestState: OracleRequestState.RESOLVED_DENIED })
+
+    expect(read.events).toContainEqual(
+      expect.objectContaining({ type: CheckEventType.DISPUTE_RESOLVED, outcome: DisputeOutcome.RESOLVED_DENIED }),
+    )
+    expect(status).toBe(CheckStatus.MALICIOUS)
+  })
+
+  it('reads an arbitration that timed out outside the block window as a timeout', async () => {
+    const { read, status } = await readCheck(disputeLogs(), { requestState: OracleRequestState.TIMED_OUT })
+
+    expect(read.events.map((event) => event.type)).toContain(CheckEventType.ARBITRATION_TIMED_OUT)
+    expect(status).toBe(CheckStatus.TIMED_OUT)
+  })
+
+  it('does not ask the oracle when the logs already carry the ruling', async () => {
+    const logs = [...disputeLogs(), buildDisputeResolvedLog({ requestId, outcome: DisputeOutcome.RESOLVED_DENIED })]
+    const { endpoint, status } = await readCheck(logs, { requestState: OracleRequestState.FROZEN })
+
+    expect(endpoint.requestReads).toEqual([])
+    expect(status).toBe(CheckStatus.MALICIOUS)
+  })
+
+  it('does not ask the oracle about a check that has no dispute', async () => {
+    resetLogCounter()
+    const logs = buildLifecycle({ safeTxHash: SAFE_TX_HASH, requestId, oracle: ORACLE, epoch: 1n })
+    const { endpoint } = await readCheck(logs)
+
+    expect(endpoint.requestReads).toEqual([])
+    expect(endpoint.methods).not.toContain('eth_call')
   })
 })

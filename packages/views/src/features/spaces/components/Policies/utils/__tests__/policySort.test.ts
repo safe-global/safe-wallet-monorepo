@@ -8,6 +8,11 @@ import {
   mockSpendingLimitPolicy,
   mockUnenforcedPolicy,
 } from '@/features/spaces/components/Policies/mocks/policies'
+import {
+  mockActiveAllowlist,
+  mockAllowlistChangePending,
+  mockFailedAllowlist,
+} from '@/features/spaces/components/Policies/mocks/allowlistPolicies'
 import { sortPolicies, type PolicySortContext } from '../policySort'
 import { getPolicyStatus } from '../../types'
 
@@ -102,5 +107,32 @@ describe('sortPolicies', () => {
     sortPolicies(policies, 'rule', context)
 
     expect(policies.map((policy) => policy.type)).toEqual(['proposer', 'recovery'])
+  })
+})
+
+describe('getPolicyStatus', () => {
+  it('should read an allowlist with a scheduled change as change pending', () => {
+    expect(getPolicyStatus(mockAllowlistChangePending())).toBe('change-pending')
+  })
+
+  it('should read a scheduled change as change pending even before the guard enforces the allowlist', () => {
+    expect(getPolicyStatus({ ...mockAllowlistChangePending(), enabled: false })).toBe('change-pending')
+  })
+
+  it('should read a failed pending allowlist as failed', () => {
+    expect(getPolicyStatus(mockFailedAllowlist())).toBe('failed')
+  })
+})
+
+describe('sortPolicies with allowlist statuses', () => {
+  it('should, when sorting by status, put a change pending with activating and a failed one with the unenforced', () => {
+    const active = mockActiveAllowlist()
+    const failed = mockFailedAllowlist()
+    const changePending = mockAllowlistChangePending()
+    const pending = mockPendingPolicy()
+
+    const sorted = sortPolicies([active, failed, changePending, pending], 'status', context)
+
+    expect(sorted.map(getPolicyStatus)).toEqual(['pending', 'change-pending', 'failed', 'active'])
   })
 })

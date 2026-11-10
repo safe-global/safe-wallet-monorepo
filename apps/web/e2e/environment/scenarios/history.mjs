@@ -3,7 +3,6 @@ import { ALLOWANCE_MODULE, allowanceCall, registerAllowanceModule } from './allo
 import { execute, stagingOwners } from './staging.mjs'
 import { dealToken, erc20, multiSend, send, waitForNextSecond, SEPOLIA } from './chain.mjs'
 import { registerToken, trustToken } from './tokens.mjs'
-import { rebuildStagingSafes } from './staging-safes.mjs'
 import { localProvider } from './provider.mjs'
 import { waitUntil } from './indexing.mjs'
 
@@ -191,10 +190,4 @@ export async function prepareHistoryScenario(env) {
   } finally {
     provider.destroy()
   }
-}
-
-export async function prepareAddressBookHistoryScenario(env, owners) {
-  const history = await prepareHistoryScenario(env)
-  const safes = await rebuildStagingSafes(env, owners, ['SEP_STATIC_SAFE_4'])
-  return { ...history, safes: { static: { ...history.safes.static, ...safes } } }
 }

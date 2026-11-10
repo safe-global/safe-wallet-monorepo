@@ -19,8 +19,12 @@ const STEP_ICON: Record<VerdictStatus, ActionType> = {
   [CheckStatus.IN_PROGRESS]: 'pending',
   [CheckStatus.BENIGN]: 'confirmed',
   [CheckStatus.MALICIOUS]: 'expired',
+  [CheckStatus.DISPUTED]: 'pending',
   [CheckStatus.TIMED_OUT]: 'expired',
 }
+
+/** Settled or contested checks name the explorer page as the actor; a check still running has nothing to link. */
+const EXPLORER_LINKED: ReadonlyArray<VerdictStatus> = [CheckStatus.MALICIOUS, CheckStatus.DISPUTED, CheckStatus.BENIGN]
 
 // Dark mode only — in light mode every status follows the sibling rows' default color.
 const DARK_STEP_COLOR: Record<VerdictStatus, string> = {
@@ -28,6 +32,7 @@ const DARK_STEP_COLOR: Record<VerdictStatus, string> = {
   [CheckStatus.IN_PROGRESS]: 'var(--color-info-main)',
   [CheckStatus.BENIGN]: 'var(--color-primary-main)',
   [CheckStatus.MALICIOUS]: 'var(--color-error-main)',
+  [CheckStatus.DISPUTED]: 'var(--color-warning-main)',
   [CheckStatus.TIMED_OUT]: 'var(--color-warning-main)',
 }
 
@@ -70,7 +75,7 @@ export const SafenetAuditRowView = ({
     >
       Safenet
     </ExternalLink>
-  ) : publicStatus === CheckStatus.MALICIOUS || publicStatus === CheckStatus.BENIGN ? (
+  ) : EXPLORER_LINKED.includes(publicStatus) ? (
     <ExternalLink
       data-testid="safenet-explorer-link"
       href={explorerHref}

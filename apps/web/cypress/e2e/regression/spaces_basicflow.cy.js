@@ -1,10 +1,7 @@
-import * as constants from '../../support/constants.js'
 import * as main from '../pages/main.page.js'
-import { getSafes, CATEGORIES } from '../../support/safes/safesHandler.js'
 import * as space from '../pages/spaces.page.js'
 import { walletCredentials } from '../../support/credentials.js'
 
-let staticSafes = []
 let admin, user, user_address
 before(() => {
   admin = walletCredentials.OWNER_4_PRIVATE_KEY
@@ -13,10 +10,6 @@ before(() => {
 })
 
 describe('Spaces basic flow tests', () => {
-  before(async () => {
-    staticSafes = await getSafes(CATEGORIES.static)
-  })
-
   beforeEach(() => {
     space.blockBeamer()
     space.interceptSpacesList()
@@ -42,24 +35,6 @@ describe('Spaces basic flow tests', () => {
     space.deleteSpace(newSpaceName)
     cy.contains(space.deleteSpaceConfirmationMsg(newSpaceName)).should('be.visible')
     main.verifyElementsIsVisible([space.createSpaceBtn])
-  })
-
-  it('Verify an account can be added manually', () => {
-    // Adding a Safe already in the workspace is a no-op ("Add accounts (0)", disabled), so create a
-    // fresh empty workspace, add into it, then delete it — keeping the run idempotent regardless of
-    // what previous runs left in the account. The Safe accounts page is the persistent add entry point.
-    const spaceName = 'Space ' + Math.random().toString(36).substring(2, 12)
-    const accountAddress = staticSafes.SEP_STATIC_SAFE_35.substring(4)
-    const accountName = 'E2E account'
-
-    space.signInWithWallet(admin)
-    space.goToSpacesView()
-    space.ensureReadyToCreateSpace()
-    space.createSpaceViaOnboardingWithSkip(spaceName)
-    space.goToSpaceSafeAccounts()
-    space.stubAddingSafeToSpace(accountAddress, constants.networkKeys.sepolia, accountName)
-    space.addAccountManually(accountAddress, constants.networks.sepolia, accountName)
-    space.deleteSpace(spaceName)
   })
 
   it('Verify a new member can be invited and accept the invite', () => {

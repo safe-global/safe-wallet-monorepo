@@ -49,4 +49,11 @@ describe('GroupedRecoveryListItems', () => {
     expect(screen.getByText('Cancelling Account recovery.')).toBeInTheDocument()
     expect(container.getElementsByClassName('disclaimerContainer')).toHaveLength(1)
   })
+
+  it('names a malicious recovery in the disclaimer', () => {
+    render(<GroupedRecoveryListItems items={[cancellation, { ...recovery, isMalicious: true }]} />)
+
+    expect(screen.getByText('Cancelling malicious transaction.')).toBeInTheDocument()
+    expect(screen.queryByText('Cancelling Account recovery.')).not.toBeInTheDocument()
+  })
 })

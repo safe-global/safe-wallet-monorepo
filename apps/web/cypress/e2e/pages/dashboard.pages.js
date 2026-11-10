@@ -1,16 +1,6 @@
-import * as constants from '../../support/constants.js'
 import * as safeapps from './safeapps.pages.js'
 import * as main from './main.page.js'
 import * as createtx from './create_tx.pages.js'
-
-const transactionQueueStr = 'Pending transactions'
-const noTransactionStr = 'This Safe has no queued transactions'
-const overviewStr = 'Total'
-const sendStr = 'Send'
-const receiveStr = 'Receive'
-const viewAllStr = 'View all'
-const explorePossibleStr = "Explore what's possible"
-const swapSuggestion = 'Swap tokens instantly'
 
 const copyShareBtn = '[data-testid="copy-btn-icon"]'
 const exploreAppsBtn = '[data-testid="explore-apps-btn"]'
@@ -32,7 +22,6 @@ export const mastercopyActions = {
   migrate: '[data-testid="migrate-mastercopy-btn"]',
   getCli: '[data-testid="get-cli-link"]',
 }
-export const reviewSignersTestId = '[data-testid="review-signers-btn"]'
 
 // Case #2 & #3 — Unsupported mastercopy (Warning)
 export const unsupportedMastercopyTitle = 'This Safe is running an unsupported version'
@@ -42,9 +31,6 @@ export const unsupportedCliContent =
   'It may miss security fixes and improvements. You must use our CLI tool to migrate.'
 
 const migrateSafeSubtitle = 'Update Safe account base contract'
-export const nonPinnedWarningTitle = 'Not in your accounts'
-export const trustThisSafeButtonTestId = '[data-testid="trust-this-safe-button"]'
-const trustDialogTestId = '[data-testid="add-trusted-safe-dialog"]'
 
 export function clickOnTxByIndex(index) {
   // Wait for hydration to set the correct safe query param in the link href
@@ -132,42 +118,6 @@ export function verifyShareBtnWorks(index, data) {
     )
 }
 
-export function verifyOverviewWidgetData() {
-  // Alias for the Overview section
-  cy.contains('div', overviewStr).parents('section').as('overviewSection')
-
-  cy.get('@overviewSection').within(() => {
-    // Prefix is separated across elements in EthHashInfo
-    cy.get('button').contains(sendStr)
-    cy.get('button').contains(receiveStr)
-  })
-}
-
-export function verifyTxQueueWidget() {
-  // Alias for the Transaction queue section
-  cy.contains('p', transactionQueueStr).parents('section').as('txQueueSection')
-
-  cy.get('@txQueueSection').within(() => {
-    // There should be queued transactions
-    cy.contains(noTransactionStr).should('not.exist')
-
-    // Queued txns
-    cy.contains(
-      `a[href^="/transactions/tx?id=multisig_0x"]`,
-      'Send' + `-0.00002 ${constants.tokenAbbreviation.sep}`,
-    ).should('exist')
-
-    cy.contains(`a[href^="/transactions/tx?id=multisig_0x"]`, '1/1').should('exist')
-
-    cy.get(viewAllLink).should('exist').and('contain.text', viewAllStr)
-  })
-}
-
-export function verifyExplorePossibleSection() {
-  cy.contains('h2', explorePossibleStr).parents('section').as('explorePossibleSection')
-  cy.get('@explorePossibleSection').contains(swapSuggestion)
-}
-
 export function expandActionRequiredPanel() {
   cy.get(actionRequiredPanel, { timeout: 30000 }).should('be.visible')
   cy.get(actionRequiredPanelToggle).click()
@@ -225,25 +175,4 @@ export function verifyGetCliLinkInPanel() {
   cy.get(actionRequiredPanel).within(() => {
     cy.get(mastercopyActions.getCli, { timeout: 10000 }).should('be.visible')
   })
-}
-
-export function verifyTrustDialogVisible() {
-  cy.get(trustDialogTestId, { timeout: 15000 }).should('be.visible')
-}
-
-/** Message in action-required-panel when signers differ across chains (dashboard) */
-const differentSignersAcrossChainsMsg = 'different signers across different networks'
-
-/** Verifies the "You have different signers across different networks" warning is displayed in action-required-panel. */
-export function checkInconsistentSignersMsgDisplayed() {
-  cy.contains(differentSignersAcrossChainsMsg, { timeout: 30000 }).should('be.visible')
-}
-
-/**
- * Verifies the Safe is present in the current URL, i.e. the router query has hydrated.
- * Use as a precondition before clicking actions that navigate using the `safe` query param.
- * @param {string} safe - Prefixed safe address expected in the URL
- */
-export function verifySafeInUrl(safe) {
-  cy.url().should('include', safe)
 }

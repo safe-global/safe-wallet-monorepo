@@ -8,7 +8,7 @@ import { localProvider } from './provider.mjs'
 import { SEPOLIA } from './chain.mjs'
 
 const chainId = SEPOLIA
-const basicTypesTestContract = '0x11AB70A4564C62F567B92868Cb5e69b50c5434aF'
+export const basicTypesTestContract = '0x11AB70A4564C62F567B92868Cb5e69b50c5434aF'
 // The staging recipient Safe is only typed into the builder as an address, and the fork holds its contract.
 const stagingRecipientSafe = '0x4DD4cB2299E491E1B469245DB589ccB2B16d7bde'
 
@@ -22,7 +22,7 @@ async function assertForkContract(env, address) {
 }
 
 // Transaction Builder reads ABIs only from the local CGW: the test contract and the Safe implementations.
-async function registerBuilderContracts(env) {
+export async function registerBuilderContracts(env) {
   await assertForkContract(env, basicTypesTestContract)
   await registerContract(env, {
     address: basicTypesTestContract,

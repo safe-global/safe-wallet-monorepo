@@ -6,6 +6,7 @@ import { dirname, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { planShards, requiredChains, selectCypressSpecs } from './cypress.mjs'
 import { assertProjectName, chainProfiles, localUrl } from './local-stack.mjs'
+import { playwrightSpecs } from './playwright-specs.mjs'
 import { isolatedSpecs } from './specs.mjs'
 
 const webRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
@@ -47,9 +48,13 @@ export function walletEnvironment(manifest, env = process.env) {
     ...ledger,
     NEXT_PUBLIC_IS_PRODUCTION: 'false',
     NEXT_PUBLIC_IS_TEST_E2E: 'true',
+    NEXT_PUBLIC_POLLING_INTERVAL: '2000',
     NEXT_PUBLIC_CONFIG_SERVICE_KEY: 'WALLET_WEB',
     NEXT_PUBLIC_GATEWAY_URL_STAGING: gatewayUrl,
     NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: gatewayUrl,
+    NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL: 'http://localhost:4003/simulate',
+    NEXT_PUBLIC_TENDERLY_ORG_NAME: 'safe',
+    NEXT_PUBLIC_TENDERLY_PROJECT_NAME: 'safe-apps',
     SAFE_CGW_BASE_URL: gatewayUrl,
     VITE_GATEWAY_URL: gatewayUrl,
   }
@@ -125,9 +130,9 @@ const specName = (spec) => spec.replace(/^cypress\/e2e\/|\.cy\.js$/g, '')
 
 /**
  * The GitHub Actions matrix for the selected specs; each Cypress shard lists its specs and the forks they need.
- * One more entry runs every Playwright spec in playwright-specs.mjs on its own Sepolia stack.
+ * One more entry runs every Playwright spec in playwright-specs.mjs on its own stack, with the forks they need.
  */
-export function planMatrix(selection, shardCount, registry = isolatedSpecs) {
+export function planMatrix(selection, shardCount, registry = isolatedSpecs, playwrightRegistry = playwrightSpecs) {
   const shards = planShards(selectCypressSpecs(selection, registry), shardCount, registry)
   const cypress = shards.map(({ specs, chains }, index) => ({
     shard: index + 1,
@@ -135,7 +140,14 @@ export function planMatrix(selection, shardCount, registry = isolatedSpecs) {
     specs: specs.map(specName).join(','),
     chains: chains.join(' '),
   }))
-  return { include: [...cypress, { shard: cypress.length + 1, runner: 'playwright', specs: '', chains: '' }] }
+  const playwrightChains = requiredChains(Object.keys(playwrightRegistry), playwrightRegistry)
+  const playwright = {
+    shard: cypress.length + 1,
+    runner: 'playwright',
+    specs: '',
+    chains: playwrightChains.map((chainId) => chainProfiles[chainId]).join(' '),
+  }
+  return { include: [...cypress, playwright] }
 }
 
 const webUrl = (env) => env.SAFE_E2E_WEB_URL || `http://localhost:${env.SAFE_E2E_WEB_PORT || '3080'}`
@@ -178,10 +190,17 @@ export function cypressOpenArguments(specs, env = process.env) {
   ]
 }
 
+const playwrightFilters = (env) => (env.SAFE_E2E_SPECS ? env.SAFE_E2E_SPECS.split(',').map((name) => name.trim()) : [])
+
 /** `SAFE_E2E_SPECS` filters the isolated Playwright specs by file name; unset runs them all. */
 export function playwrightRunArguments(env = process.env) {
-  const filters = env.SAFE_E2E_SPECS ? env.SAFE_E2E_SPECS.split(',').map((name) => name.trim()) : []
-  return ['playwright', 'test', '--config', 'e2e/playwright.isolated.config.ts', ...filters]
+  return ['playwright', 'test', '--config', 'e2e/playwright.isolated.config.ts', ...playwrightFilters(env)]
+}
+
+/** The registered Playwright specs that the `SAFE_E2E_SPECS` filters select, as Playwright matches them */
+export function selectPlaywrightSpecs(env = process.env, registry = playwrightSpecs) {
+  const filters = playwrightFilters(env).map((filter) => new RegExp(filter))
+  return Object.keys(registry).filter((spec) => !filters.length || filters.some((filter) => filter.test(spec)))
 }
 
 /** What both runners pass to their specs: the wallet environment plus the stack's service URLs. */
@@ -279,6 +298,10 @@ async function runCypress(config, runner, manifest, walletEnv) {
 }
 
 async function runPlaywright(config, runner, manifest, walletEnv) {
+  const missing = missingChainCommands(selectPlaywrightSpecs(), manifest, config.infrastructure, playwrightSpecs)
+  if (missing.length) {
+    throw new Error(`Selected specs need forks that are not running. Start them with:\n${missing.join('\n')}`)
+  }
   const env = { ...stackEnvironment(config.project, manifest, walletEnv), PLAYWRIGHT_BASE_URL: webUrl(process.env) }
   await rm(resolve(webRoot, playwrightArtifacts), { recursive: true, force: true })
   await runner.execute('yarn', playwrightRunArguments(env), { env })

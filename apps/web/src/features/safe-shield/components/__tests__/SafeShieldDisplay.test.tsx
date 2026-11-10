@@ -1,4 +1,9 @@
-import { render, screen } from '@/tests/test-utils'
+import { useCallback, useMemo, useState } from 'react'
+import { http, HttpResponse } from 'msw'
+import { JsonRpcProvider, Network, toQuantity } from 'ethers'
+import { fakerChecksummedAddress, render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
+import { server } from '@/tests/server'
+import { GATEWAY_URL } from '@/config/gateway'
 import { SafeShieldDisplay } from '../SafeShieldDisplay'
 import { RecipientAnalysisBuilder, ContractAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders'
 import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
@@ -11,6 +16,13 @@ import type {
   DeadlockAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
+import { useRecipientAnalysis } from '@safe-global/utils/features/safe-shield/hooks'
+import { transformThreatAnalysisResponse } from '@safe-global/utils/features/safe-shield/utils/transformThreatAnalysisResponse'
+import type {
+  SingleRecipientAnalysisDto,
+  ThreatAnalysisResponseDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 import { useSafenetShieldState, type SafenetShieldState } from '@/features/safenet-checks'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
@@ -32,6 +44,64 @@ const emptyRecipient: AsyncResult<RecipientAnalysisResults> = [{}, undefined, fa
 const emptyContract: AsyncResult<ContractAnalysisResults> = [{}, undefined, false]
 const emptyThreat: AsyncResult<ThreatAnalysisResults> = [undefined, undefined, false]
 const emptyDeadlock: AsyncResult<DeadlockAnalysisResults> = [{}, undefined, false]
+
+const CHAIN_ID = '137'
+const RPC_URL = 'https://rpc.safe-shield.test'
+const NO_ADDRESSES: string[] = []
+
+type RpcRequest = { id: number }
+
+const mockRecipientServices = ({ isSafe, txCount }: { isSafe: boolean; txCount: number }) => {
+  server.use(
+    http.get(`${GATEWAY_URL}/v1/chains/:chainId/security/:safeAddress/recipient/:recipientAddress`, () =>
+      HttpResponse.json<SingleRecipientAnalysisDto>({ isSafe, RECIPIENT_INTERACTION: [] }),
+    ),
+    http.post(RPC_URL, async ({ request }) => {
+      const body = (await request.json()) as RpcRequest | RpcRequest[]
+      const reply = ({ id }: RpcRequest) => ({ jsonrpc: '2.0', id, result: toQuantity(txCount) })
+      return HttpResponse.json(Array.isArray(body) ? body.map(reply) : reply(body))
+    }),
+  )
+}
+
+const RecipientShield = ({
+  safeAddress,
+  recipient,
+  addressBook = NO_ADDRESSES,
+  ownedSafes = NO_ADDRESSES,
+}: {
+  safeAddress: string
+  recipient: string
+  addressBook?: string[]
+  ownedSafes?: string[]
+}) => {
+  const [web3ReadOnly] = useState(
+    () => new JsonRpcProvider(RPC_URL, Network.from(Number(CHAIN_ID)), { staticNetwork: true }),
+  )
+  const recipients = useMemo(() => [recipient], [recipient])
+  const isInAddressBook = useCallback(
+    (address: string) => addressBook.some((entry) => sameAddress(entry, address)),
+    [addressBook],
+  )
+  const analysis = useRecipientAnalysis({
+    safeAddress,
+    chainId: CHAIN_ID,
+    recipients,
+    isInAddressBook,
+    ownedSafes,
+    web3ReadOnly,
+    debounceDelay: 0,
+  })
+
+  return (
+    <SafeShieldDisplay
+      recipient={analysis ?? emptyRecipient}
+      contract={emptyContract}
+      threat={emptyThreat}
+      deadlock={emptyDeadlock}
+    />
+  )
+}
 
 describe('SafeShieldDisplay', () => {
   let mockRecipientAddress: string
@@ -64,7 +134,7 @@ describe('SafeShieldDisplay', () => {
 
   describe('Basic Rendering', () => {
     it('should render the component with all main elements', () => {
-      const { container } = render(
+      render(
         <SafeShieldDisplay
           recipient={emptyRecipient}
           contract={emptyContract}
@@ -73,12 +143,11 @@ describe('SafeShieldDisplay', () => {
         />,
       )
 
-      // The Safe Shield logo renders as the mocked SVG element
-      expect(container.querySelector('mock-icon')).toBeInTheDocument()
+      expect(screen.getByTestId('safe-shield-logo')).toBeInTheDocument()
     })
 
     it('should render with empty props', () => {
-      const { container } = render(
+      render(
         <SafeShieldDisplay
           recipient={emptyRecipient}
           contract={emptyContract}
@@ -87,9 +156,8 @@ describe('SafeShieldDisplay', () => {
         />,
       )
 
-      // Root widget container and the logo render
       expect(screen.getByTestId('safe-shield-widget')).toBeInTheDocument()
-      expect(container.querySelector('mock-icon')).toBeInTheDocument()
+      expect(screen.getByTestId('safe-shield-logo')).toBeInTheDocument()
     })
 
     it('should have correct layout structure', () => {
@@ -271,6 +339,7 @@ describe('SafeShieldDisplay', () => {
       expect(
         screen.getByText('Transaction details will be automatically scanned for potential risks and will appear here.'),
       ).toBeInTheDocument()
+      expect(within(screen.getByTestId('safe-shield-widget')).getByTestId('safe-shield-logo')).toBeInTheDocument()
     })
 
     it('should not show loading state when data is present', () => {
@@ -349,7 +418,7 @@ describe('SafeShieldDisplay', () => {
     })
 
     it('should handle all props together', () => {
-      const { container } = render(
+      render(
         <SafeShieldDisplay
           recipient={mockRecipient}
           contract={mockContract}
@@ -359,7 +428,100 @@ describe('SafeShieldDisplay', () => {
       )
 
       expect(screen.getByText(/checks passed/i)).toBeInTheDocument()
-      expect(container.querySelector('mock-icon')).toBeInTheDocument()
+      expect(screen.getByTestId('safe-shield-logo')).toBeInTheDocument()
+    })
+  })
+
+  describe('Recipient card', () => {
+    let safeAddress: string
+    let recipient: string
+
+    beforeEach(() => {
+      safeAddress = fakerChecksummedAddress()
+      recipient = fakerChecksummedAddress()
+    })
+
+    const findRecipientCard = () => screen.findByTestId('recipient-analysis-group-card')
+
+    it('shows a recipient from the address book as known', async () => {
+      mockRecipientServices({ isSafe: false, txCount: 10 })
+      render(<RecipientShield safeAddress={safeAddress} recipient={recipient} addressBook={[recipient]} />)
+
+      const card = await findRecipientCard()
+
+      expect(within(card).getByText('Known recipient')).toBeInTheDocument()
+      expect(within(card).getByText('This address is in your address book.')).toBeInTheDocument()
+    })
+
+    it('shows a Safe the user owns as known', async () => {
+      mockRecipientServices({ isSafe: true, txCount: 10 })
+      render(<RecipientShield safeAddress={safeAddress} recipient={recipient} ownedSafes={[recipient]} />)
+
+      const card = await findRecipientCard()
+
+      expect(within(card).getByText('Known recipient')).toBeInTheDocument()
+      expect(within(card).getByText('This address is a Safe you own.')).toBeInTheDocument()
+    })
+
+    it('shows an address outside the address book and the owned Safes as unknown', async () => {
+      mockRecipientServices({ isSafe: false, txCount: 10 })
+      render(<RecipientShield safeAddress={safeAddress} recipient={recipient} />)
+
+      const card = await findRecipientCard()
+
+      expect(within(card).getByText('Unknown recipient')).toBeInTheDocument()
+      expect(within(card).getByText('This address is not in your address book or a Safe you own.')).toBeInTheDocument()
+    })
+
+    it('warns about a recipient with fewer than five transactions', async () => {
+      mockRecipientServices({ isSafe: false, txCount: 4 })
+      render(<RecipientShield safeAddress={safeAddress} recipient={recipient} />)
+
+      const card = await findRecipientCard()
+
+      expect(await within(card).findByText('Low activity recipient')).toBeInTheDocument()
+      expect(within(card).getByText('This address has few transactions.')).toBeInTheDocument()
+    })
+
+    it('does not warn about a recipient with five transactions', async () => {
+      mockRecipientServices({ isSafe: false, txCount: 5 })
+      render(<RecipientShield safeAddress={safeAddress} recipient={recipient} />)
+
+      const card = await findRecipientCard()
+
+      expect(within(card).getByText('Unknown recipient')).toBeInTheDocument()
+      expect(screen.queryByText('Low activity recipient')).not.toBeInTheDocument()
+    })
+  })
+
+  describe('No threat', () => {
+    it('shows no threat detected, its details, and neither a malicious nor a failed result', async () => {
+      const response: ThreatAnalysisResponseDto = {
+        THREAT: [
+          {
+            severity: 'OK',
+            type: 'NO_THREAT',
+            title: 'No threat detected',
+            description: 'Threat analysis found no issues.',
+          },
+        ],
+      }
+      const threat: AsyncResult<ThreatAnalysisResults> = [transformThreatAnalysisResponse(response), undefined, false]
+      const { user } = renderWithUserEvent(
+        <SafeShieldDisplay
+          recipient={emptyRecipient}
+          contract={emptyContract}
+          threat={threat}
+          deadlock={emptyDeadlock}
+        />,
+      )
+
+      const card = screen.getByTestId('threat-analysis-group-card')
+      await user.click(within(card).getByText('No threat detected'))
+
+      await waitFor(() => expect(within(card).getByText('Threat analysis found no issues.')).toBeVisible())
+      expect(screen.queryByText('Malicious threat detected')).not.toBeInTheDocument()
+      expect(screen.queryByText('Threat analysis failed')).not.toBeInTheDocument()
     })
   })
 
@@ -384,7 +546,7 @@ describe('SafeShieldDisplay', () => {
 
   describe('Footer', () => {
     it('should always render the Safe Shield logo', () => {
-      const { container } = render(
+      render(
         <SafeShieldDisplay
           recipient={emptyRecipient}
           contract={emptyContract}
@@ -393,14 +555,14 @@ describe('SafeShieldDisplay', () => {
         />,
       )
 
-      expect(container.querySelector('mock-icon')).toBeInTheDocument()
+      expect(screen.getByTestId('safe-shield-logo')).toBeInTheDocument()
     })
 
     it('should render logo even with errors', () => {
       const error = new Error('Analysis failed')
       const errorRecipient: AsyncResult<RecipientAnalysisResults> = [undefined, error, false]
 
-      const { container } = render(
+      render(
         <SafeShieldDisplay
           recipient={errorRecipient}
           contract={emptyContract}
@@ -409,7 +571,7 @@ describe('SafeShieldDisplay', () => {
         />,
       )
 
-      expect(container.querySelector('mock-icon')).toBeInTheDocument()
+      expect(screen.getByTestId('safe-shield-logo')).toBeInTheDocument()
     })
 
     it('should render logo during loading', () => {
@@ -418,7 +580,7 @@ describe('SafeShieldDisplay', () => {
         loadingRecipient[2] = true
       }
 
-      const { container } = render(
+      render(
         <SafeShieldDisplay
           recipient={loadingRecipient}
           contract={emptyContract}
@@ -427,7 +589,7 @@ describe('SafeShieldDisplay', () => {
         />,
       )
 
-      expect(container.querySelector('mock-icon')).toBeInTheDocument()
+      expect(screen.getByTestId('safe-shield-logo')).toBeInTheDocument()
     })
   })
 
