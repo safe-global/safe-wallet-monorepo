@@ -55,6 +55,10 @@ const SETTLE_TIMEOUT_MS = 3000
 const CONTEXTS_PER_BROWSER = 200
 const FIXED_NOW = new Date('2026-01-15T12:00:00Z')
 const TIMEZONE = 'UTC'
+// Embedded apps and widgets (stake, earn, bridge) load external pages, which the sweep blocks; Chrome's
+// error page for them paints at a different moment each run, so they get a fixed placeholder instead
+const externalPage = (host: string) =>
+  `<body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:#e5e5e5;color:#555;font:14px sans-serif">External page: ${host}</body>`
 // Faker and other story data take their seed from Math.random, so every page gets the same sequence (mulberry32)
 const SEEDED_RANDOM = `(() => {
   let seed = 1
@@ -174,6 +178,10 @@ async function waitForSrcdocFrames(page: Page): Promise<void> {
 
 // Fonts and images that are still loading make the screenshot differ between runs.
 async function waitForAssets(page: Page): Promise<void> {
+  // Embedded pages paint only once their frame has loaded
+  await Promise.all(
+    page.frames().map((frame) => frame.waitForLoadState('load', { timeout: ASSET_TIMEOUT_MS }).catch(() => undefined)),
+  )
   await waitForSrcdocFrames(page)
   // Sandboxed iframes are out of the page's reach, so wait inside every frame
   const frames = page.frames().map((frame) =>
@@ -410,9 +418,21 @@ async function main(): Promise<void> {
       }
       contexts += 1
       // A context per story: localStorage and the like from one story (a collapsed sidebar) must not reach the next
-      const context = await storyBrowser.newContext({ viewport: { width: 1280, height: 900 }, timezoneId: TIMEZONE })
+      const context = await storyBrowser.newContext({
+        viewport: { width: 1280, height: 900 },
+        timezoneId: TIMEZONE,
+        // JS animations (motion) ignore animations: 'disabled' but honour prefers-reduced-motion
+        reducedMotion: 'reduce',
+      })
       await context.clock.setFixedTime(FIXED_NOW)
       await context.addInitScript({ content: SEEDED_RANDOM })
+      await context.route(
+        (url) => url.hostname !== 'localhost',
+        (route) =>
+          route.request().resourceType() === 'document'
+            ? route.fulfill({ contentType: 'text/html', body: externalPage(new URL(route.request().url()).hostname) })
+            : route.fallback(),
+      )
       const { finding, cell } = await checkStory(context, base, item[0], item[1], cellsDir).finally(() =>
         context.close(),
       )
