@@ -56,10 +56,7 @@ const proposeTx = async (
 ): Promise<TransactionDetails> => {
   const signatures = tx.signatures.size > 0 ? tx.encodedSignatures() : undefined
 
-  const proposeTransactionDto: ProposeTransactionDto & {
-    nestedTransaction?: NestedTransactionDto
-    declared?: DeclaredAttribution
-  } = {
+  const proposeTransactionDto: ProposeTransactionDto & { nestedTransaction?: NestedTransactionDto } = {
     to: tx.data.to,
     value: tx.data.value?.toString() ?? '0',
     data: tx.data.data || undefined,

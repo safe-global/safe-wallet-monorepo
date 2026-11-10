@@ -15,6 +15,7 @@ import { makeStore, setStoreInstance } from '@/store'
 import { getCgwErrorInfo } from '@/utils/cgw-errors'
 import { CGW_ERROR_FALLBACK, CGW_SAFE_UNAVAILABLE } from '@safe-global/utils/services/exceptions/gatewayErrors'
 import { Errors, logError } from '@/services/exceptions'
+import { declaredAttributionBuilder } from '@/tests/builders/declaredAttribution'
 
 jest.mock('@/services/exceptions', () => ({
   ...jest.requireActual('@/services/exceptions'),
@@ -64,7 +65,7 @@ describe('safeMsgSender', () => {
       const message = 'Hello world'
       const origin = 'http://example.com'
 
-      await dispatchSafeMsgProposal({ provider: MockEip1193Provider, safe, message, origin })
+      await dispatchSafeMsgProposal({ provider: MockEip1193Provider, safe, message, origin, declared: undefined })
 
       expect(capturedRequest.params.chainId).toBe('5')
       expect(capturedRequest.params.safeAddress).toBe(zeroPadValue('0x0789', 20))
@@ -77,6 +78,26 @@ describe('safeMsgSender', () => {
       expect(safeMsgDispatchSpy).toHaveBeenCalledWith(events.SafeMsgEvent.PROPOSE, {
         messageHash: '0x0123',
       })
+    })
+
+    it('should send the declared attribution with the message proposal', async () => {
+      let capturedBody: any
+      server.use(
+        http.post(`${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress/messages`, async ({ request }) => {
+          capturedBody = await request.json()
+          return HttpResponse.json({})
+        }),
+      )
+      const safe = {
+        version: '1.3.0',
+        chainId: '5',
+        address: { value: zeroPadValue('0x0789', 20) },
+      } as unknown as SafeState
+      const declared = declaredAttributionBuilder().build()
+
+      await dispatchSafeMsgProposal({ provider: MockEip1193Provider, safe, message: 'Hello', origin: '', declared })
+
+      expect(capturedBody.declared).toEqual(declared)
     })
 
     it('should normalize EIP712 messages', async () => {
@@ -121,7 +142,7 @@ describe('safeMsgSender', () => {
       }
       const origin = 'http://example.com'
 
-      await dispatchSafeMsgProposal({ provider: MockEip1193Provider, safe, message, origin })
+      await dispatchSafeMsgProposal({ provider: MockEip1193Provider, safe, message, origin, declared: undefined })
 
       // Normalize message manually for comparison
       const normalizedMessage = {
@@ -171,7 +192,7 @@ describe('safeMsgSender', () => {
       const message = 'Hello world'
       const origin = 'http://example.com'
 
-      await dispatchSafeMsgProposal({ provider: MockEip1193Provider, safe, message, origin })
+      await dispatchSafeMsgProposal({ provider: MockEip1193Provider, safe, message, origin, declared: undefined })
 
       expect(capturedRequest.body).toEqual({
         message,
@@ -205,7 +226,9 @@ describe('safeMsgSender', () => {
       const message = 'Hello world'
       const origin = 'http://example.com'
 
-      await expect(dispatchSafeMsgProposal({ provider: MockEip1193Provider, safe, message, origin })).rejects.toThrow()
+      await expect(
+        dispatchSafeMsgProposal({ provider: MockEip1193Provider, safe, message, origin, declared: undefined }),
+      ).rejects.toThrow()
 
       expect(safeMsgDispatchSpy).toHaveBeenCalledWith(events.SafeMsgEvent.PROPOSE_FAILED, {
         messageHash: '0x0123',
@@ -318,6 +341,7 @@ describe('safeMsgSender', () => {
         message: 'Hello world',
         origin: undefined,
         safeSignerAddress: SIGNER_SAFE,
+        declared: undefined,
       })
 
       expect(captured.body).toEqual(
@@ -374,7 +398,8 @@ describe('safeMsgSender', () => {
         ),
       )
 
-    const propose = () => dispatchSafeMsgProposal({ provider: MockEip1193Provider, safe, message, origin: '' })
+    const propose = () =>
+      dispatchSafeMsgProposal({ provider: MockEip1193Provider, safe, message, origin: '', declared: undefined })
     const confirm = () => dispatchSafeMsgConfirmation({ provider: MockEip1193Provider, safe, message })
 
     const rejection = async (run: () => Promise<void>): Promise<Error> => {

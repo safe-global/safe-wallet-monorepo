@@ -75,6 +75,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSaf
       const id = Math.random().toString(36).slice(2)
       const shouldSignOffChain =
         isOffchainEIP1271Supported(safe, currentChain) && !onChainSigning && settings.offChainSigning
+      const declared = declareWalletConnectApp(appInfo)
 
       const { title, options } = NotificationMessages.SIGNATURE_REQUEST(appInfo)
       showNotification(title, options)
@@ -111,17 +112,12 @@ export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSaf
               origin={appInfo.url}
               message={message}
               requestId={id}
+              declared={declared}
             />,
             onClose,
           )
         } else {
-          setTxFlow(
-            <SignMessageOnChainFlow
-              props={{ requestId: id, message, method }}
-              declared={declareWalletConnectApp(appInfo)}
-            />,
-            onClose,
-          )
+          setTxFlow(<SignMessageOnChainFlow props={{ requestId: id, message, method }} declared={declared} />, onClose)
         }
       })
     }
