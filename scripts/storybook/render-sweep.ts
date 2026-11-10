@@ -105,6 +105,9 @@ const LAUNCH_ARGS = [
   // under CI load, so the screenshot misses the icons; in-process frames paint together with the page
   '--disable-features=IsolateSandboxedIframes',
   '--disable-site-isolation-trials',
+  // Partial raster repaints only the changed part of a tile, so text edges depend on the order of
+  // updates while a story loads; a full repaint gives the same pixels every run
+  '--disable-partial-raster',
   // Stories load token logos from live CDNs; MSW's service worker fetches them, out of Playwright's
   // reach, so they arrive late or not at all. Failing every external host makes them render
   // their local fallback in every run. MSW mocks are unaffected: the worker answers them first.
