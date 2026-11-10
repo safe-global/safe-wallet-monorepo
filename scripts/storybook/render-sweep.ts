@@ -51,6 +51,8 @@ const STORY_FINISHED_TIMEOUT_MS = 30000
 // Loading-state stories hold a request open (MSW delay('infinite')), so both waits are capped.
 const QUIET_MS = 100
 const SETTLE_TIMEOUT_MS = 3000
+// Pages with dozens of icon iframes keep painting for seconds on slow CI runners; a still-changing screenshot is kept only after this
+const SCREENSHOT_SETTLE_TIMEOUT_MS = 10000
 // Stories date their mock data from Date.now(); a fixed clock and time zone keep shown dates the same every day
 // Chrome closed itself twice after about 2,700 stories in one browser; a fresh browser per 200 stories avoids that
 const CONTEXTS_PER_BROWSER = 200
@@ -162,22 +164,23 @@ interface Clip {
 
 const ASSET_TIMEOUT_MS = 5000
 
+const VIEWPORT = { width: 1280, height: 900 }
 const MAX_VIEWPORT_HEIGHT = 8000
 
 // Chrome leaves iframes below the viewport blank in a full-page screenshot, and TokenIcon renders
 // every logo in an iframe. Grow the viewport over them; other stories keep their layout.
-async function fitViewportToIframes(page: Page, openRequests: () => number): Promise<void> {
-  // Content can grow after the first resize (more rows render), which would leave the viewport short and move
-  // anything fixed to its bottom (the sidebar footer); grow until the lowest iframe stays put
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const bottom = await page.evaluate(() =>
-      Math.max(0, ...[...document.querySelectorAll('iframe')].map((f) => f.getBoundingClientRect().bottom + scrollY)),
-    )
-    const viewport = page.viewportSize()
-    if (!viewport || bottom <= viewport.height || viewport.height >= MAX_VIEWPORT_HEIGHT) return
-    await page.setViewportSize({ width: viewport.width, height: Math.min(Math.ceil(bottom), MAX_VIEWPORT_HEIGHT) })
-    await waitForQuietNetwork(page, openRequests)
-  }
+// Sizes the viewport to the lowest iframe (at least the default height), in both directions: the result must
+// depend on the final layout only, since anything fixed to the bottom (the sidebar footer) follows the height.
+// Returns whether it changed the viewport, so the caller can wait for the frames that came into view.
+async function fitViewportToIframes(page: Page, openRequests: () => number): Promise<boolean> {
+  const bottom = await page.evaluate(() =>
+    Math.max(0, ...[...document.querySelectorAll('iframe')].map((f) => f.getBoundingClientRect().bottom + scrollY)),
+  )
+  const height = Math.min(Math.max(VIEWPORT.height, Math.ceil(bottom)), MAX_VIEWPORT_HEIGHT)
+  if (page.viewportSize()?.height === height) return false
+  await page.setViewportSize({ width: VIEWPORT.width, height })
+  await waitForQuietNetwork(page, openRequests)
+  return true
 }
 
 // An iframe keeps its empty about:blank document until Chrome loads its srcdoc, so under load
@@ -291,10 +294,18 @@ async function waitForQuietNetwork(page: Page, openRequests: () => number): Prom
 }
 
 // Re-renders after data arrives (or timers in app code) would otherwise be caught half-way.
-async function stableScreenshot(page: Page): Promise<{ fullscreen: boolean; png: Buffer; stable: boolean }> {
-  const deadline = Date.now() + SETTLE_TIMEOUT_MS
+async function stableScreenshot(
+  page: Page,
+  openRequests: () => number,
+): Promise<{ fullscreen: boolean; png: Buffer; stable: boolean }> {
+  const deadline = Date.now() + SCREENSHOT_SETTLE_TIMEOUT_MS
   let previous: Buffer | undefined
   for (;;) {
+    // A page that is still growing (slow CI runners) can push iframes below the viewport after the first fit
+    if (await fitViewportToIframes(page, openRequests)) {
+      await waitForAssets(page)
+      previous = undefined
+    }
     const { fullscreen, clip } = await contentClip(page)
     // Spinners and transitions otherwise land on a different frame each run
     const png = await page.screenshot({ fullPage: true, clip, animations: 'disabled' })
@@ -382,11 +393,10 @@ async function checkStory(
     // never reached index.json). They are still render-checked — only the screenshot is skipped.
     const skipSnapshot = story.tags?.includes('skip-visual-test')
     if (cellsDir && !skipSnapshot) {
-      await fitViewportToIframes(page, () => openRequests)
       await waitForAssets(page)
       const pendingImageFrames = await countPendingImageFrames(page)
       if (pendingImageFrames) result.issues.push(`ICONS_NOT_LOADED: ${pendingImageFrames} frame(s)`)
-      const { fullscreen, png, stable } = await stableScreenshot(page)
+      const { fullscreen, png, stable } = await stableScreenshot(page, () => openRequests)
       if (!stable) result.issues.push('UNSTABLE_SCREENSHOT')
       const file = path.join(cellsDir, `${story.id}--${mode}.png`)
       fs.writeFileSync(file, png)
@@ -458,7 +468,7 @@ async function main(): Promise<void> {
       contexts += 1
       // A context per story: localStorage and the like from one story (a collapsed sidebar) must not reach the next
       const context = await storyBrowser.newContext({
-        viewport: { width: 1280, height: 900 },
+        viewport: VIEWPORT,
         timezoneId: TIMEZONE,
         // animations: 'disabled' only stops CSS; under reduced motion the preview also skips motion's JS animations
         reducedMotion: 'reduce',
