@@ -4,6 +4,7 @@ import { GATEWAY_URL } from '@/config/gateway'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { generatePreValidatedSignature } from '@safe-global/protocol-kit'
 import proposeTx from '../proposeTransaction'
+import { declaredAttributionBuilder } from '@/tests/builders/declaredAttribution'
 import { makeStore, setStoreInstance } from '@/store'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
@@ -58,7 +59,9 @@ describe('proposeTx', () => {
       data: '0x0',
     })
 
-    const proposedTx = await proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH)
+    const proposedTx = await proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH, {
+      declared: undefined,
+    })
 
     expect(proposedTx).toEqual(mockResponse)
     expect(proposedTx.txId).toBe('123')
@@ -118,7 +121,9 @@ describe('proposeTx', () => {
     })
     tx.addSignature(generatePreValidatedSignature(SENDER_ADDRESS))
 
-    const proposedTx = await proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH)
+    const proposedTx = await proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH, {
+      declared: undefined,
+    })
 
     expect(proposedTx).toEqual(mockResponse)
     expect(proposedTx.txId).toBe('456')
@@ -167,7 +172,10 @@ describe('proposeTx', () => {
       data: '0x0',
     })
 
-    const proposedTx = await proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH, 'https://test.app')
+    const proposedTx = await proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH, {
+      origin: 'https://test.app',
+      declared: undefined,
+    })
 
     expect(proposedTx).toEqual(mockResponse)
   })
@@ -185,7 +193,9 @@ describe('proposeTx', () => {
       data: '0x0',
     })
 
-    await expect(proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH)).rejects.toThrow()
+    await expect(
+      proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH, { declared: undefined }),
+    ).rejects.toThrow()
   })
 
   it('should throw an error with proper message when propose endpoint returns 422', async () => {
@@ -206,9 +216,9 @@ describe('proposeTx', () => {
       data: '0x0',
     })
 
-    await expect(proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH)).rejects.toThrow(
-      'Just one signature is expected if using delegates',
-    )
+    await expect(
+      proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH, { declared: undefined }),
+    ).rejects.toThrow('Just one signature is expected if using delegates')
   })
 
   it('should preserve status code in error when propose endpoint returns 422', async () => {
@@ -230,7 +240,7 @@ describe('proposeTx', () => {
     })
 
     try {
-      await proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH)
+      await proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH, { declared: undefined })
       fail('Expected proposeTx to throw an error')
     } catch (error) {
       expect(error).toBeInstanceOf(Error)
@@ -267,7 +277,7 @@ describe('proposeTx', () => {
       data: '0xabcd',
     })
 
-    await proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH)
+    await proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH, { declared: undefined })
 
     expect(capturedRequest).toMatchObject({
       to: '0x999',
@@ -326,7 +336,10 @@ describe('proposeTx', () => {
       refundReceiver: '0x0000000000000000000000000000000000000000',
     }
 
-    await proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH, undefined, nestedChildTx)
+    await proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH, {
+      nestedTransaction: nestedChildTx,
+      declared: undefined,
+    })
 
     expect(capturedRequest.nestedTransaction).toEqual({
       to: '0x0000000000000000000000000000000000000456',
@@ -368,8 +381,57 @@ describe('proposeTx', () => {
       data: '0xd4d9bdcd',
     })
 
-    await proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH)
+    await proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH, { declared: undefined })
 
     expect(capturedRequest).not.toHaveProperty('nestedTransaction')
+  })
+
+  it('should send the declared attribution on the parent proposal only', async () => {
+    let capturedRequest: any
+    server.use(
+      http.post(`${GATEWAY_URL}/v1/chains/${CHAIN_ID}/transactions/${SAFE_ADDRESS}/propose`, async ({ request }) => {
+        capturedRequest = await request.json()
+        return HttpResponse.json({ txId: '123', safeAddress: SAFE_ADDRESS, txStatus: 'AWAITING_CONFIRMATIONS' })
+      }),
+    )
+    const tx = createMockSafeTransaction({ to: '0x999', value: '0', data: '0xd4d9bdcd' })
+    const nestedChildTx = {
+      chainId: CHAIN_ID,
+      safe: '0x0000000000000000000000000000000000000def',
+      nonce: 7,
+      to: '0x0000000000000000000000000000000000000456',
+      value: '0',
+      data: '0x',
+      operation: 0,
+      safeTxGas: '0',
+      baseGas: '0',
+      gasPrice: '0',
+      gasToken: '0x0000000000000000000000000000000000000000',
+      refundReceiver: '0x0000000000000000000000000000000000000000',
+    }
+    const declared = declaredAttributionBuilder().build()
+
+    await proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH, {
+      nestedTransaction: nestedChildTx,
+      declared,
+    })
+
+    expect(capturedRequest.declared).toEqual(declared)
+    expect(capturedRequest.nestedTransaction).not.toHaveProperty('declared')
+  })
+
+  it('should omit the declared field when nothing is declared', async () => {
+    let capturedRequest: any
+    server.use(
+      http.post(`${GATEWAY_URL}/v1/chains/${CHAIN_ID}/transactions/${SAFE_ADDRESS}/propose`, async ({ request }) => {
+        capturedRequest = await request.json()
+        return HttpResponse.json({ txId: '123', safeAddress: SAFE_ADDRESS, txStatus: 'AWAITING_CONFIRMATIONS' })
+      }),
+    )
+    const tx = createMockSafeTransaction({ to: '0x999', value: '0', data: '0x' })
+
+    await proposeTx(CHAIN_ID, SAFE_ADDRESS, SENDER_ADDRESS, tx, SAFE_TX_HASH, { declared: undefined })
+
+    expect(capturedRequest).not.toHaveProperty('declared')
   })
 })
