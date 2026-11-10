@@ -16,12 +16,12 @@ yarn turbo run test --filter=@safe-global/web --filter=@safe-global/mobile --for
 
 The JSON files under `test/msw/fixtures/` are downloaded from the staging CGW by `test/msw/scripts/fetch-fixtures.ts` — treat them like `AUTO_GENERATED/` output. Two are maintained by hand and the script never writes them: `safe-apps/mainnet.json` and `safes/sepolia.json`. Adding a key to `SAFES` writes a new `safes/<key>.json`: add an `Edit(...)` deny line for it in `.claude/settings.json`.
 
-Two changes are made by hand after a fetch, and a re-fetch undoes them:
+The script also changes the responses before it saves them:
 
-- Image URLs point at local files in `apps/web/.storybook/mock-assets/`. After a re-fetch, `storybook-local-images.test.ts` lists each remote URL to replace.
-- The `vitalik` balances and portfolio keep only their largest non-spam tokens (44 and 4) and the original totals.
+- Each remote image becomes a local WebP file in `apps/web/.storybook/mock-assets/`; the script downloads only images that are not there yet. A logo that the host does not have (403 or 404) becomes `images/common/token-placeholder.svg`. Protocol `logoUrl` values become data URIs, because the schema requires an absolute URI.
+- The `vitalik` balances and portfolio keep only the tokens listed in `KEPT_TOKENS`, and their totals are recalculated.
 
-To refresh or add a generated fixture:
+Commit the new images with the fixtures. To refresh or add a generated fixture:
 
 ```bash
 node config/test/msw/scripts/fetch-fixtures.ts [--safe=ef-safe | --group=transactions | --group=swaps | --group=staking]
