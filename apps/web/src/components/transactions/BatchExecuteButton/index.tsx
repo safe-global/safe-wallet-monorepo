@@ -33,7 +33,7 @@ const BATCHABLE_TOOLTIP = 'All highlighted transactions will be included in the 
 
 const DETAILS_LOADING_TOOLTIP = 'Loading the details of the ready transactions.'
 
-const DETAILS_ERROR_TOOLTIP = "Couldn't load the details of the ready transactions. Bulk execution is not available."
+const DETAILS_ERROR_TOOLTIP = "Couldn't load the details of the ready transactions. Click to try again."
 
 const getTooltip = ({
   isBatchable,
@@ -74,14 +74,12 @@ const BatchExecuteButton = () => {
   const allSafePaid = isBatchable && safePaidCount > 0 && safePaidCount === batchableTransactions.length
   const isMixed = isBatchable && safePaidCount > 0 && safePaidCount < batchableTransactions.length
 
-  // Without the details a click could skip the all-Safe-paid block or the mixed-batch warning
-  const hasDetails = detailsStatus === 'ready'
+  // A click before the details load could skip the all-Safe-paid block or the mixed-batch warning
+  const isDetailsLoading = detailsStatus === 'loading'
 
-  const isDisabled = !isBatchable || hasPendingTx || !wallet || allSafePaid || !hasDetails
+  const isDisabled = !isBatchable || hasPendingTx || !wallet || allSafePaid || isDetailsLoading
 
   const tooltip = getTooltip({ isBatchable, detailsStatus, allSafePaid, isDisabled })
-
-  const handleTriggerMouseEnter = detailsStatus === 'error' ? retryDetails : undefined
 
   const handleOnMouseEnter = useCallback(() => {
     hoverContext.setActiveHover(batchableTransactions.map((tx) => tx.transaction.id))
@@ -100,7 +98,11 @@ const BatchExecuteButton = () => {
     setTxFlow(<ExecuteBatchFlow txs={batchableTransactions} />, undefined, false)
   }, [batchableTransactions, setTxFlow])
 
-  const handleOpenModal = () => {
+  const handleClick = () => {
+    if (detailsStatus === 'error') {
+      retryDetails()
+      return
+    }
     if (isMixed) {
       setShowMixedWarning(true)
       return
@@ -118,14 +120,14 @@ const BatchExecuteButton = () => {
       <Tooltip>
         <TooltipTrigger
           render={
-            <span onMouseEnter={handleTriggerMouseEnter}>
+            <span>
               <Button
                 onMouseEnter={handleOnMouseEnter}
                 onMouseLeave={handleOnMouseLeave}
                 variant="outline"
                 size="action"
                 disabled={isDisabled}
-                onClick={handleOpenModal}
+                onClick={handleClick}
               >
                 Bulk execute{isBatchable && ` ${batchableTransactions.length} transactions`}
               </Button>

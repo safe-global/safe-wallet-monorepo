@@ -29,7 +29,7 @@ const NOT_BATCHABLE_TOOLTIP =
 const ALL_SAFE_PAID_TOOLTIP =
   "Bulk execution is not available when all ready transactions pay fees from the Safe. You'd pay gas twice, once from the Safe and once from your signer wallet."
 const DETAILS_LOADING_TOOLTIP = 'Loading the details of the ready transactions.'
-const DETAILS_ERROR_TOOLTIP = "Couldn't load the details of the ready transactions. Bulk execution is not available."
+const DETAILS_ERROR_TOOLTIP = "Couldn't load the details of the ready transactions. Click to try again."
 
 const queuedTx = (nonce: number, { signed }: { signed: boolean }): TransactionQueuedItem => ({
   type: 'TRANSACTION',
@@ -92,10 +92,6 @@ const bulkButton = () => screen.getByRole('button', { name: /^Bulk execute/ })
 
 const hoverButton = async (user: ReturnType<typeof renderButton>['user']) => {
   await user.hover(bulkButton().closest('span') as HTMLElement)
-}
-
-const unhoverButton = async (user: ReturnType<typeof renderButton>['user']) => {
-  await user.unhover(bulkButton().closest('span') as HTMLElement)
 }
 
 describe('BatchExecuteButton', () => {
@@ -194,7 +190,7 @@ describe('BatchExecuteButton', () => {
     expect(bulkButton()).toBeDisabled()
   })
 
-  it('is disabled and explains why when the gateway rejects the details of one ready transaction', async () => {
+  it('offers to try again when the gateway rejects the details of one ready transaction', async () => {
     const items = [queuedTx(5, { signed: true }), queuedTx(6, { signed: true })]
     setQueue(items)
     serveDetails(detailsFor(items, { safePaid: [false, false] }))
@@ -204,23 +200,39 @@ describe('BatchExecuteButton', () => {
     await hoverButton(user)
 
     expect(await screen.findByText(DETAILS_ERROR_TOOLTIP)).toBeInTheDocument()
-    expect(bulkButton()).toBeDisabled()
+    expect(bulkButton()).toBeEnabled()
   })
 
-  it('loads the rejected details again when the pointer comes back and then offers to execute', async () => {
+  it('loads the rejected details again on click instead of opening the bulk execution flow', async () => {
     const items = [queuedTx(5, { signed: true }), queuedTx(6, { signed: true })]
     setQueue(items)
     serveDetails(detailsFor(items, { safePaid: [false, false] }))
     rateLimitDetailsOf(items[0], { once: true })
     const { user } = renderButton()
-    await hoverButton(user)
-    await screen.findByText(DETAILS_ERROR_TOOLTIP)
+    await waitFor(() => expect(bulkButton()).toBeEnabled())
 
-    await unhoverButton(user)
-    await hoverButton(user)
+    await user.click(bulkButton())
 
-    expect(await screen.findByText(BATCHABLE_TOOLTIP)).toBeInTheDocument()
-    expect(bulkButton()).toBeEnabled()
+    expect(setTxFlow).not.toHaveBeenCalled()
+    await waitFor(() => expect(bulkButton()).toBeEnabled())
+    await user.click(bulkButton())
+    expect(setTxFlow.mock.lastCall[0].type).toBe(ExecuteBatchFlow)
+  })
+
+  it('lets a keyboard user load the rejected details again', async () => {
+    const items = [queuedTx(5, { signed: true }), queuedTx(6, { signed: true })]
+    setQueue(items)
+    serveDetails(detailsFor(items, { safePaid: [false, false] }))
+    rateLimitDetailsOf(items[0], { once: true })
+    const { user } = renderButton()
+    await waitFor(() => expect(bulkButton()).toBeEnabled())
+
+    await user.tab()
+    await user.keyboard('{Enter}')
+    await waitFor(() => expect(bulkButton()).toBeEnabled())
+    await user.keyboard('{Enter}')
+
+    expect(setTxFlow.mock.lastCall[0].type).toBe(ExecuteBatchFlow)
   })
 
   it('is disabled and explains why when every ready transaction pays gas from the Safe', async () => {
