@@ -1,4 +1,4 @@
-import { diffManifests, formatDiff, hashImage } from '../manifest'
+import { diffManifests, formatDiff, formatUploadList, hashImage } from '../manifest'
 
 describe('hashImage', () => {
   it('gives identical bytes the same hash and different bytes a different one', () => {
@@ -40,5 +40,16 @@ describe('formatDiff', () => {
 
   it('prints only the count line when nothing changed', () => {
     expect(formatDiff({ changed: [], added: [], removed: [] }, 640)).toBe('sheets changed: 0 of 640\n')
+  })
+})
+
+describe('formatUploadList', () => {
+  it('ends every line, including the last, with a newline', () => {
+    expect(formatUploadList(['a.png'])).toBe('a.png\n')
+    expect(formatUploadList(['a.png', 'b.png'])).toBe('a.png\nb.png\n')
+  })
+
+  it('is empty without sheets', () => {
+    expect(formatUploadList([])).toBe('')
   })
 })

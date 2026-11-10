@@ -37,3 +37,6 @@ export function formatDiff(diff: ManifestDiff, total: number): string {
     section('Removed', diff.removed)
   )
 }
+
+/** One sheet per line; every line ends with a newline, as `while read` skips a last line without one */
+export const formatUploadList = (files: string[]): string => files.map((file) => `${file}\n`).join('')
