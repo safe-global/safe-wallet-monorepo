@@ -51,6 +51,7 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       pull-requests: read
     outputs:
       relevant: ${{ steps.changes.outputs.relevant }}
@@ -292,3 +293,16 @@ jobs:
           echo "$broken"
           echo "::$LEVEL::render sweep flagged broken stories (SB_ERROR) — see the lines above"
           [ "$LEVEL" = warning ] || exit 1
+
+  # Argos posts no status when the sweep or the upload fails, which leaves a PR waiting with no red check
+  result:
+    name: Storybook visual tests result
+    permissions: {}
+    if: always()
+    needs: [changes, sweep, visual]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: $/.github/actions/required-result
+        with:
+          needs: ${{ toJSON(needs) }}
+          relevant: ${{ needs.changes.outputs.relevant }}

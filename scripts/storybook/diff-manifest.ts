@@ -6,7 +6,7 @@
  */
 
 import * as fs from 'fs'
-import { diffManifests, formatDiff, type Manifest } from './manifest'
+import { diffManifests, formatDiff, formatUploadList, type Manifest } from './manifest'
 
 const readManifest = (file: string): Manifest => JSON.parse(fs.readFileSync(file, 'utf8')) as Manifest
 
@@ -18,7 +18,7 @@ if (!basePath || !headPath) {
 
 // The upload list names the sheets a PR build must upload: changed and added ones, or all without a baseline
 const head = readManifest(headPath)
-const writeUploadList = (files: string[]) => uploadListPath && fs.writeFileSync(uploadListPath, files.join('\n'))
+const writeUploadList = (files: string[]) => uploadListPath && fs.writeFileSync(uploadListPath, formatUploadList(files))
 
 if (!fs.existsSync(basePath)) {
   console.log(`No baseline manifest at ${basePath}: this run only records its own.`)
