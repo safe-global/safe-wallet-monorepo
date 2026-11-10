@@ -1,6 +1,8 @@
 import { http, HttpResponse, type RequestHandler } from 'msw'
 import type { Chain, IndexingStatus } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { SafeOverview, SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import type { SafeNonces, SafeOverview, SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import type { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
+import type { CreationTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { CollectiblePage } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import type { DelegatePage } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
@@ -390,6 +392,68 @@ export function externalServicesHandlers(): RequestHandler[] {
     http.get(/zodiac-check\.safe\.global\/public\/api\/security-check/, () => HttpResponse.json({ status: 'safe' })),
     http.post(/pulse\.walletconnect\.org/, () => HttpResponse.json({})),
   ]
+}
+
+/**
+ * Nonce handler - the Safe's own nonce, so tx flows propose the next transaction
+ */
+export function noncesHandlers(safeData: SafeState): RequestHandler[] {
+  const nonces: SafeNonces = { currentNonce: safeData.nonce, recommendedNonce: safeData.nonce }
+  return [http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+\/nonces$/, () => HttpResponse.json(nonces))]
+}
+
+/**
+ * Relay quota handler - no sponsored transactions left
+ */
+export function relayHandlers(): RequestHandler[] {
+  const noRelays: RelaysRemaining = { remaining: 0, limit: 0 }
+  return [http.get(/\/v1\/chains\/\d+\/relay\/0x[a-fA-F0-9]+$/, () => HttpResponse.json(noRelays))]
+}
+
+/**
+ * Messages handler - empty off-chain message list
+ */
+export function messagesHandlers(): RequestHandler[] {
+  return [
+    http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+\/messages$/, () =>
+      HttpResponse.json({ count: 0, next: null, previous: null, results: [] }),
+    ),
+  ]
+}
+
+/**
+ * Safe creation handler - created by the first owner through the 1.3.0 proxy factory
+ */
+export function creationTxHandlers(safeData: SafeState): RequestHandler[] {
+  const creation: CreationTransaction = {
+    created: '2024-01-15T10:00:00Z',
+    creator: safeData.owners[0].value,
+    transactionHash: `0x${'c0'.repeat(32)}`,
+    factoryAddress: '0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2',
+    masterCopy: safeData.implementation.value,
+  }
+  return [
+    http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+\/transactions\/creation$/, () => HttpResponse.json(creation)),
+  ]
+}
+
+/**
+ * Gas price oracle handler - the Etherscan gas tracker that chain configs point at
+ */
+export function gasOracleHandlers(): RequestHandler[] {
+  const oracle = {
+    status: '1',
+    message: 'OK',
+    result: {
+      LastBlock: '21000000',
+      SafeGasPrice: '10',
+      ProposeGasPrice: '12',
+      FastGasPrice: '15',
+      suggestBaseFee: '9.5',
+      gasUsedRatio: '0.5',
+    },
+  }
+  return [http.get(/etherscan\.io\/v2\/api/, () => HttpResponse.json(oracle))]
 }
 
 /**
@@ -943,6 +1007,11 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     ...ownedSafesHandlers(),
     ...safeOverviewHandlers(safeData),
     ...externalServicesHandlers(),
+    ...noncesHandlers(safeData),
+    ...relayHandlers(),
+    ...messagesHandlers(),
+    ...creationTxHandlers(safeData),
+    ...gasOracleHandlers(),
   )
 
   // Appended after defaults — MSW is first-match-wins, so these only add unmocked routes, never override
