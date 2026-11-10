@@ -2,6 +2,7 @@ import { useState, type ReactElement } from 'react'
 
 // Stands in for IframeIcon: the same image without the sandboxed iframe, whose late painting left icons
 // missing in sweep screenshots. Storybook only loads local mock-assets, so it needs no isolation.
+// The image is the outer element so app CSS that targets the icon (`.info img`, `.shadcn-scope img`) still applies.
 const IframeIcon = ({
   src,
   alt,
@@ -18,22 +19,35 @@ const IframeIcon = ({
   fallbackSrc?: string
 }): ReactElement => {
   const [current, setCurrent] = useState(src)
+  // Inside the iframe the image fills the box height and is centred: cropped when wider, padded when narrower
+  const [fit, setFit] = useState<'contain' | 'cover'>('contain')
 
   return (
-    <div
+    <img
+      src={current}
+      alt="Safe App logo"
       title={alt}
-      style={{ width, height, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}
-    >
-      <img
-        src={current}
-        alt="Safe App logo"
-        height={height}
-        style={{ width: 'auto', borderRadius }}
-        onError={() => {
-          if (fallbackSrc && current !== fallbackSrc) setCurrent(fallbackSrc)
-        }}
-      />
-    </div>
+      width={width}
+      height={height}
+      // The app's base styles (img { max-width: 100%; height: auto }) never reach inside the iframe
+      style={{
+        width,
+        height,
+        maxWidth: 'none',
+        objectFit: fit,
+        borderRadius,
+        pointerEvents: 'none',
+        border: 0,
+        display: 'block',
+      }}
+      onLoad={(event) => {
+        const { naturalWidth, naturalHeight } = event.currentTarget
+        setFit(naturalWidth / naturalHeight > width / height ? 'cover' : 'contain')
+      }}
+      onError={() => {
+        if (fallbackSrc && current !== fallbackSrc) setCurrent(fallbackSrc)
+      }}
+    />
   )
 }
 

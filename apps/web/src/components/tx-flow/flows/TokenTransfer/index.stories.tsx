@@ -1,4 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { http, HttpResponse } from 'msw'
+import type { SafeShieldAnalyzeRecipientV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
 import { expect, waitFor, within } from 'storybook/test'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
@@ -11,13 +13,35 @@ const setup = createMockStory({ scenario: 'efSafe', wallet: 'owner', shadcn: tru
 const RECIPIENT = '0x6a5602335a878ADDCa4BF63a050E34946B56B5bC'
 
 const { balancesData } = getFixtureData('efSafe')
+
+const recipientAnalysis: SafeShieldAnalyzeRecipientV1ApiResponse = {
+  isSafe: false,
+  RECIPIENT_INTERACTION: [
+    {
+      severity: 'INFO',
+      type: 'NEW_RECIPIENT',
+      title: 'New recipient',
+      description: 'You are interacting with this address for the first time.',
+    },
+  ],
+}
+
+// Safe Shield's recipient check; unmocked, it hit the blocked network and failed at a different moment each run
+const recipientAnalysisHandler = http.get(
+  /\/v1\/chains\/\d+\/security\/0x[a-fA-F0-9]+\/recipient\/0x[a-fA-F0-9]+$/,
+  () => HttpResponse.json(recipientAnalysis),
+)
 const ether = balancesData.items.find(({ tokenInfo }) => tokenInfo.type === TokenType.NATIVE_TOKEN)
 
 const meta = {
   title: 'Components/TxFlow/TokenTransfer',
   component: TokenTransferFlow,
   decorators: [setup.decorator],
-  parameters: { layout: 'fullscreen', ...setup.parameters },
+  parameters: {
+    layout: 'fullscreen',
+    ...setup.parameters,
+    msw: { handlers: [recipientAnalysisHandler, ...setup.handlers] },
+  },
 } satisfies Meta<typeof TokenTransferFlow>
 
 export default meta
@@ -33,9 +57,12 @@ export const FilledWithMaxEther: Story = {
       },
     ],
   },
-  // The prefilled form validates after mount; wait for its result, not the interim disabled button
+  // The prefilled form validates after mount, and Safe Shield analyses the recipient:
+  // wait for both results, not the interim disabled button or the loading skeleton
   play: async ({ canvasElement }) => {
-    const next = await within(canvasElement).findByRole('button', { name: 'Next' })
+    const canvas = within(canvasElement)
+    const next = await canvas.findByRole('button', { name: 'Next' })
     await waitFor(() => expect(next).toBeEnabled())
+    await canvas.findByText('New recipient')
   },
 }
