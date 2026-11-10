@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { ChevronDown, ChevronsDownUp, ChevronsUpDown, Info } from 'lucide-react'
+import { ArrowDown, ArrowUp, ArrowUpDown, ChevronDown, ChevronsDownUp, ChevronsUpDown, Info } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { TableHeader, TableHead, TableRow, TableCell } from '@safe-global/views/components/ui/table'
@@ -24,6 +24,7 @@ const STEPS_WIDTHS: Record<string, string> = {
   Transaction: 'w-[22rem]',
   To: 'w-56',
   Safe: 'w-48',
+  Network: 'w-36',
   Chain: 'w-16',
   Proposed: 'w-24',
   Note: 'w-[68px]',
@@ -347,7 +348,22 @@ export function useScrollOverflow(layoutKey: unknown) {
   return { scroller, overflowing }
 }
 
-export function QueueTableHead({ columns, collapse }: { columns: string[]; collapse?: CollapseAll }) {
+// Option D: headers that sort the list. The active one shows its direction.
+export type HeadSort = {
+  sortable: string[]
+  active?: { column: string; direction: 'asc' | 'desc' }
+  onSort: (column: string) => void
+}
+
+export function QueueTableHead({
+  columns,
+  collapse,
+  sort,
+}: {
+  columns: string[]
+  collapse?: CollapseAll
+  sort?: HeadSort
+}) {
   return (
     <TableHeader>
       <TableRow data-no-hover className={collapse ? 'group/head' : undefined}>
@@ -355,9 +371,33 @@ export function QueueTableHead({ columns, collapse }: { columns: string[]; colla
           <TableHead
             key={label}
             scope="col"
+            aria-sort={
+              sort?.active?.column === label
+                ? sort.active.direction === 'asc'
+                  ? 'ascending'
+                  : 'descending'
+                : undefined
+            }
             className={`text-xs text-muted-foreground ${label === 'Nonce' ? 'px-0! text-center' : ''} ${index === 0 ? 'max-md:sticky max-md:left-0 max-md:z-20' : ''} ${label === 'Action' ? 'sticky right-0 z-20 group-data-[overflow]/queue:shadow-[-12px_0_12px_-12px_rgba(0,0,0,0.25)]' : ''}`}
           >
-            {label === 'Action' ? (
+            {sort?.sortable.includes(label) ? (
+              <button
+                type="button"
+                onClick={() => sort.onSort(label)}
+                className={`inline-flex items-center gap-1 rounded-sm hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring ${sort.active?.column === label ? 'text-foreground' : ''}`}
+              >
+                {label}
+                {sort.active?.column === label ? (
+                  sort.active.direction === 'asc' ? (
+                    <ArrowUp className="size-3" aria-hidden="true" />
+                  ) : (
+                    <ArrowDown className="size-3" aria-hidden="true" />
+                  )
+                ) : (
+                  <ArrowUpDown className="size-3 opacity-40" aria-hidden="true" />
+                )}
+              </button>
+            ) : label === 'Action' ? (
               <span className="flex items-center justify-end">
                 <span className="sr-only">{label}</span>
                 {collapse && <CollapseAllButton {...collapse} />}

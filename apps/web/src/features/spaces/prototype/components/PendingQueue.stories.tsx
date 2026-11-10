@@ -18,6 +18,9 @@ export const OneSafe: Story = { parameters: { nextjs: { router: { query: { scena
 export const TwentySafes: Story = {
   parameters: { nextjs: { router: { query: { option: 'table', scenario: '20-safes' } } } },
 }
+export const FlatTable: Story = {
+  parameters: { nextjs: { router: { query: { option: 'flat', scenario: '20-safes' } } } },
+}
 export const Executing: Story = { parameters: { nextjs: { router: { query: { state: 'executing' } } } } }
 export const PartialLoading: Story = { parameters: { nextjs: { router: { query: { state: 'partial' } } } } }
 export const FleetAdmin: Story = {

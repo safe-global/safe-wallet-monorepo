@@ -254,8 +254,19 @@ export function QueueRow({
     Safe: (
       <TableCell>
         <span className="flex min-w-0 items-center gap-2 text-sm">
+          {!columns.includes('Network') && <ChainIcon chainId={account.chainId} network={account.network} />}
+          <span className="truncate">
+            {columns.includes('Network') ? (account.safeName ?? account.name) : account.name}
+          </span>
+        </span>
+      </TableCell>
+    ),
+    // Option D: the network gets its own column, next to the Safe.
+    Network: (
+      <TableCell>
+        <span className="flex min-w-0 items-center gap-2 text-sm">
           <ChainIcon chainId={account.chainId} network={account.network} />
-          <span className="truncate">{account.name}</span>
+          <span className="truncate text-muted-foreground">{account.network}</span>
         </span>
       </TableCell>
     ),

@@ -157,8 +157,8 @@ export function ScenarioBar({
           // Stat cards (option B) open on the 20-Safe workspace, Action first (option C) on 50.
           onValueChange={(value) =>
             onChange(
-              value === 'table'
-                ? { option: 'table' }
+              value === 'table' || value === 'flat'
+                ? { option: String(value) }
                 : { option: String(value), scenario: value === 'fleet' ? '20-safes' : '50-safes' },
             )
           }
@@ -167,6 +167,7 @@ export function ScenarioBar({
             <TabsTrigger value="table">A · Safe table</TabsTrigger>
             <TabsTrigger value="fleet">B · Stat cards</TabsTrigger>
             <TabsTrigger value="simple">C · Action first</TabsTrigger>
+            <TabsTrigger value="flat">D · Flat table</TabsTrigger>
           </TabsList>
         </Tabs>
         {/* Milestone 1 scope from the Oct 22 review: no side panel, no overview cards, no filter counts. */}

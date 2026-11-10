@@ -62,7 +62,17 @@ import type { Account, Direction, Filter, Persona, Proposal } from '../types'
 import { PrototypeFrame } from './PrototypeFrame'
 import { matchesFlag, useQueueFilters } from './QueueFilters/useQueueFilters'
 import { AppliedFilters, FilterCountsContext, QueueToolbar, type AppliedPill } from './QueueFilters/QueueFilters'
-import { QueueFlatTable, QueueGroupedTable } from './QueueTable/QueueGroupedTable'
+import { QueueFlatTable, QueueGroupedTable, QueueOrderedTable } from './QueueTable/QueueGroupedTable'
+import { DisplayMenu } from './QueueTable/DisplayMenu'
+import {
+  COLUMN_ORDER,
+  groupQueue,
+  loadDisplay,
+  orderQueue,
+  saveDisplay,
+  sortByColumn,
+  type QueueDisplay,
+} from '../services/order'
 import { buildSections, rankAccounts } from './QueueTable/sections'
 import { ReviewDrawer, type Replacement, type SectionsMode } from './ReviewDrawer/ReviewDrawer'
 import { BulkExecuteDrawer } from './BulkExecuteDrawer'
@@ -98,10 +108,23 @@ function PendingQueueView() {
   const isWide = contentWidth >= 1050
   const isExtraWide = contentWidth >= 1880
   // The preview opens on option A, the Safe table. `?option=fleet` shows Stat cards, `?option=simple` Action first.
-  // Old `?option=aligned` links open A.
+  // Old `?option=aligned` links open A. `?option=flat` is D, the flat table.
   const direction: Direction =
-    router.query.option === 'fleet' ? 'fleet' : router.query.option === 'simple' ? 'simple' : 'table'
+    router.query.option === 'fleet'
+      ? 'fleet'
+      : router.query.option === 'simple'
+        ? 'simple'
+        : router.query.option === 'flat'
+          ? 'flat'
+          : 'table'
   const fleet = direction === 'fleet'
+  // Option D: one list across Safes, ordered by status by default. Order and grouping are the viewer's choice.
+  const flat = direction === 'flat'
+  const [display, setDisplay] = useState(loadDisplay)
+  const changeDisplay = (next: QueueDisplay) => {
+    setDisplay(next)
+    saveDisplay(next)
+  }
   // Option C: one workspace load, a Needs you list across Safes, then the rest by Safe.
   const simple = direction === 'simple'
   // Milestone 1 (`?m1=1`, always in C): rows open the transaction page, with no side panel or overview cards.
@@ -172,8 +195,8 @@ function PendingQueueView() {
   const [feedback, setFeedback] = useState('')
   // Recoveries come with the 20 and 50 Safe mixes, on their first three Safes.
   const allRecoveries = useRecoveries({
-    // Option C leaves them out.
-    enabled: (scenario === '20-safes' || scenario === '50-safes') && state === 'normal' && !simple,
+    // Options C and D leave them out.
+    enabled: (scenario === '20-safes' || scenario === '50-safes') && state === 'normal' && !simple && !flat,
     accountIds: getScenarioAccounts(scenario)
       .slice(0, 3)
       .map((account) => account.id),
@@ -529,10 +552,18 @@ function PendingQueueView() {
     if (section && isCollapsed(section.id)) toggleSection(section.id)
     reviewTx(tx)
   }
-  const reviewOrder = [
-    ...needsYou,
-    ...sections.filter((section) => !isCollapsed(section.id)).flatMap((section) => section.items),
-  ]
+  const orderedRows = flat ? orderQueue(visible, { order: display.order, persona, accounts: orderedAccounts }) : []
+  const orderedGroups = groupQueue(orderedRows, display.groupBy)
+  const columnSort = {
+    sortable: Object.keys(COLUMN_ORDER),
+    active: Object.entries(COLUMN_ORDER)
+      .filter(([, by]) => by === display.order.by)
+      .map(([column]) => ({ column, direction: display.order.direction }))[0],
+    onSort: (column: string) => changeDisplay({ ...display, order: sortByColumn(display.order, COLUMN_ORDER[column]) }),
+  }
+  const reviewOrder = flat
+    ? orderedRows
+    : [...needsYou, ...sections.filter((section) => !isCollapsed(section.id)).flatMap((section) => section.items)]
   const reviewIndex = review ? reviewOrder.findIndex((tx) => tx.id === review.id) : -1
   const stepReview = (offset: number) => {
     const next = reviewIndex >= 0 ? reviewOrder[reviewIndex + offset] : undefined
@@ -738,15 +769,19 @@ function PendingQueueView() {
                 hasItems={items.length > 0}
                 simple={simple}
                 status={
-                  simple &&
-                  !unavailable && (
-                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                      {formatUpdated(loadedAt ?? clock, Math.max(clock, loadedAt ?? 0))} ·
-                      <Button size="2xs" variant="ghost" onClick={() => setLoadedAt(null)}>
-                        <RefreshCw aria-hidden="true" />
-                        Refresh
-                      </Button>
-                    </span>
+                  flat ? (
+                    <DisplayMenu display={display} onChange={changeDisplay} />
+                  ) : (
+                    simple &&
+                    !unavailable && (
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        {formatUpdated(loadedAt ?? clock, Math.max(clock, loadedAt ?? 0))} ·
+                        <Button size="2xs" variant="ghost" onClick={() => setLoadedAt(null)}>
+                          <RefreshCw aria-hidden="true" />
+                          Refresh
+                        </Button>
+                      </span>
+                    )
                   )
                 }
                 extraMenu={
@@ -884,7 +919,15 @@ function PendingQueueView() {
                   )}
                 </div>
               )}
-              {!unavailable && !list && !simple && (visible.length > 0 || recoveries.visible.length > 0) && (
+              {!unavailable && !list && flat && visible.length > 0 && (
+                <QueueOrderedTable
+                  groups={orderedGroups}
+                  groupBy={display.groupBy}
+                  sort={columnSort}
+                  {...sectionProps}
+                />
+              )}
+              {!unavailable && !list && !simple && !flat && (visible.length > 0 || recoveries.visible.length > 0) && (
                 <QueueGroupedTable
                   sections={sections}
                   isCollapsed={isCollapsed}

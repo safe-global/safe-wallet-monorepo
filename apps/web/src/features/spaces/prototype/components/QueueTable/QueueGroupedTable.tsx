@@ -16,8 +16,10 @@ import {
   SectionToggle,
   useScrollOverflow,
   type CollapseAll,
+  type HeadSort,
   type QueueSectionProps,
 } from './QueueSection'
+import type { GroupBy, QueueGroup } from '../../services/order'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { SafeIdentity, chainLogoUrl } from '../shared'
 import { getColumns, groupBySafe, shareLimit, type QueueSectionData, type SafeGroup } from './sections'
@@ -327,6 +329,119 @@ function SeeAllButton({ label, onSeeAll }: { label: string; onSeeAll: () => void
         </>
       )}
     </Button>
+  )
+}
+
+export type QueueOrderedTableProps = Omit<
+  QueueGroupedTableProps,
+  'sections' | 'isCollapsed' | 'onToggle' | 'getSafeBatch' | 'collapse'
+> & { groups: QueueGroup[]; groupBy: GroupBy; sort: HeadSort }
+
+// Columns for option D. The Safe and its network are columns, so rows from any Safe sit in one list.
+export const ORDERED_COLUMNS = (isWide: boolean) => [
+  'Nonce',
+  'Transaction',
+  'To',
+  'Safe',
+  'Network',
+  'Proposed',
+  ...(isWide ? ['Note'] : []),
+  'Signatures',
+  'Status',
+  'Action',
+]
+
+// Option D: one list in the chosen order. Grouped, each group is a band that collapses its rows.
+export function QueueOrderedTable({ groups, groupBy, sort, ...props }: QueueOrderedTableProps) {
+  const grouped = groupBy !== 'none'
+  // The band already names the Safe or network it groups by.
+  const columns = ORDERED_COLUMNS(props.isWide).filter(
+    (column) => !(groupBy === 'safe' && column === 'Safe') && !(groupBy === 'network' && column === 'Network'),
+  )
+  // As in option A, Transaction fits the widest action and To takes the slack.
+  const widths: Record<string, string | undefined> = {
+    ...getColumnWidths(props.showNoteText, true),
+    Transaction: 'w-72',
+    To: undefined,
+    Safe: 'w-36',
+    Network: 'w-32',
+    Status: 'w-32',
+  }
+  const [collapsed, setCollapsed] = useState<string[]>([])
+  const { scroller, overflowing } = useScrollOverflow(`${groups.length}:${collapsed.join()}`)
+  const toggle = (id: string) =>
+    setCollapsed((ids) => (ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id]))
+  return (
+    <Card radius="xl" size="none">
+      <CardContent>
+        <div ref={scroller} className="group/queue relative" data-overflow={overflowing || undefined}>
+          <Table
+            aria-label="Pending transactions"
+            variant="panel"
+            className="table-fixed min-w-[1300px] [&_td]:px-4 [&_th]:px-4"
+          >
+            <colgroup>
+              {columns.map((column) => (
+                <col key={column} className={widths[column]} />
+              ))}
+            </colgroup>
+            <QueueTableHead columns={columns} sort={sort} />
+            {groups.map((group) => {
+              const isCollapsed = collapsed.includes(group.id)
+              const section = {
+                id: group.id,
+                label: group.label,
+                account: getAccount(group.rows[0]),
+                items: group.rows,
+              }
+              return (
+                <Fragment key={group.id}>
+                  {grouped && (
+                    <TableBody>
+                      <TableRow
+                        data-no-hover
+                        data-no-divider
+                        className="group/band cursor-pointer"
+                        onClick={() => toggle(group.id)}
+                      >
+                        <TableCell className={`rounded-l-lg ${BAND_CELL}`}>
+                          <span className="flex justify-center">
+                            <SectionToggle section={group} collapsed={isCollapsed} controls={`rows-${group.id}`} />
+                          </span>
+                        </TableCell>
+                        <TableCell colSpan={columns.length - 1} className={`rounded-r-lg pr-3! ${BAND_CELL}`}>
+                          <span className="flex min-h-11 items-center gap-3 text-sm font-medium">
+                            {group.iconAddress ? (
+                              <SafeIdentity
+                                address={group.iconAddress}
+                                size={24}
+                                className="flex min-w-0 items-center gap-3"
+                                title={group.label}
+                              >
+                                <span className="truncate">{group.label}</span>
+                              </SafeIdentity>
+                            ) : (
+                              <>
+                                <img src={chainLogoUrl(group.chainId!)} alt="" className="size-5 rounded-full" />
+                                <span className="truncate">{group.label}</span>
+                              </>
+                            )}
+                            <span className="font-normal tabular-nums text-muted-foreground">{group.rows.length}</span>
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  )}
+                  <TableBody id={`rows-${group.id}`} hidden={isCollapsed}>
+                    <QueueSectionRows {...props} section={section} columns={columns} safeRecoveries={[]} />
+                  </TableBody>
+                </Fragment>
+              )
+            })}
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

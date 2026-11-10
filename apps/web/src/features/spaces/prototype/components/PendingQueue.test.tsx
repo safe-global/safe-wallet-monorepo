@@ -1308,3 +1308,44 @@ describe('queue design exploration', () => {
     })
   })
 })
+
+describe('option D · flat table', () => {
+  beforeEach(() => localStorage.clear())
+  const flat = { routerProps: { query: { option: 'flat' } } }
+  const firstStatuses = () =>
+    allPending()
+      .getAllByRole('row')
+      .slice(1, 4)
+      .map((row) => row.textContent)
+
+  it('lists every Safe in one table, with Safe and Network columns, needs-you first', () => {
+    render(<PendingQueue />, flat)
+    expect(screen.getAllByRole('table')).toHaveLength(1)
+    expect(screen.getByRole('columnheader', { name: /Safe/ })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'Network' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: /Status/ })).toHaveAttribute('aria-sort', 'ascending')
+    expect(screen.queryByRole('button', { name: /^(Collapse|Expand) / })).toBeNull()
+    expect(firstStatuses().join()).not.toMatch(/Blocked/)
+  })
+
+  it('sorts by a column header, reverses on a second click, and remembers it', async () => {
+    const { user, unmount } = renderWithUserEvent(<PendingQueue />, flat)
+    const nonce = () => screen.getByRole('columnheader', { name: /Nonce/ })
+    await user.click(within(nonce()).getByRole('button'))
+    expect(nonce()).toHaveAttribute('aria-sort', 'ascending')
+    await user.click(within(nonce()).getByRole('button'))
+    expect(nonce()).toHaveAttribute('aria-sort', 'descending')
+    unmount()
+    render(<PendingQueue />, flat)
+    expect(screen.getByRole('columnheader', { name: /Nonce/ })).toHaveAttribute('aria-sort', 'descending')
+  })
+
+  it('groups by Safe from the Display menu, without a Safe column', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />, flat)
+    await user.click(screen.getByRole('button', { name: /^Display/ }))
+    await user.click(await screen.findByRole('menuitemradio', { name: 'Safe' }))
+    expect(screen.getByRole('button', { name: 'Collapse Treasury Main' })).toBeInTheDocument()
+    expect(screen.queryByRole('columnheader', { name: /^Safe/ })).toBeNull()
+    expect(screen.getByRole('columnheader', { name: 'Network' })).toBeInTheDocument()
+  })
+})
