@@ -1,7 +1,7 @@
 import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState, type ReactElement } from 'react'
 import { useWindowVirtualizer } from '@tanstack/react-virtual'
-import { Card, CardContent } from '@safe-global/views/components/ui/card'
-import { Table, TableBody, TableHead, TableHeader, TableRow } from '@safe-global/views/components/ui/table'
+import { TableBody, TableHead, TableHeader, TableRow, tableVariants } from '@safe-global/views/components/ui/table'
+import { cn } from '@safe-global/views/utils/cn'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import useWallet from '@/hooks/wallets/useWallet'
 import type { SpaceQueueSection } from '../../../store/spaceQueueApi'
@@ -13,7 +13,8 @@ import ConflictHeaderRow from './ConflictHeaderRow'
 import { buildQueueList, groupByScope, type QueueListItem } from './queueList'
 import SafeBandRow from './SafeBandRow'
 
-// Widths include the 16px cell padding on each side; a wider table spreads its extra width across all of them.
+// Widths include the cell padding (8px a side, 16px on the outer cells); a wider table spreads its extra width across
+// all of them. The fixed ones add up to 968px; the table's 1128px floor leaves the To column 160px before it scrolls.
 const COLUMN_WIDTHS: Record<(typeof QUEUE_COLUMNS)[number], string> = {
   Nonce: 'w-16',
   Transaction: 'w-[21.5rem]',
@@ -44,12 +45,12 @@ const toggle = (set: ReadonlySet<string>, id: string): Set<string> => {
 // A transaction row's placeholder bars: [left offset, width], laid out like the columns
 const SKELETON_BARS: Array<[string, number]> = [
   ['20px', 24],
-  ['80px', 180],
-  ['424px', 140],
-  ['calc(100% - 544px)', 72],
-  ['calc(100% - 400px)', 40],
-  ['calc(100% - 288px)', 64],
-  ['calc(100% - 128px)', 72],
+  ['72px', 180],
+  ['416px', 140],
+  ['calc(100% - 552px)', 72],
+  ['calc(100% - 408px)', 40],
+  ['calc(100% - 296px)', 64],
+  ['calc(100% - 120px)', 72],
 ]
 const ROW_HEIGHT = ESTIMATED_HEIGHTS.transaction
 const BAR_TOP = (ROW_HEIGHT - 12) / 2
@@ -189,62 +190,66 @@ const SpaceQueueTable = ({ sections }: { sections: SpaceQueueSection[] }): React
   const groups = groupByScope(virtualItems.map((virtualItem) => ({ virtualItem, item: items[virtualItem.index] })))
 
   return (
-    <Card radius="xl" size="none">
-      <CardContent>
-        <Table
-          aria-label="Pending transactions"
-          variant="panel"
-          className="table-fixed min-w-[1240px] [&_td]:px-4 [&_th]:px-4"
-        >
-          <colgroup>
+    // Same panel surface as the accounts table (SafeAccountsTable): it owns the horizontal scroll, so
+    // the scrollbar and the rounded edge wrap the whole table
+    <div className="w-full overflow-x-auto rounded-lg border border-[var(--color-border-light)] bg-[var(--color-background-paper)] pb-2">
+      <table
+        aria-label="Pending transactions"
+        className={cn(tableVariants({ variant: 'panel' }), 'table-fixed min-w-[1128px]')}
+      >
+        <colgroup>
+          {QUEUE_COLUMNS.map((label) => (
+            <col key={label} className={COLUMN_WIDTHS[label]} />
+          ))}
+        </colgroup>
+        <TableHeader>
+          <TableRow data-no-hover className="group/head">
             {QUEUE_COLUMNS.map((label) => (
-              <col key={label} className={COLUMN_WIDTHS[label]} />
-            ))}
-          </colgroup>
-          <TableHeader>
-            <TableRow data-no-hover className="group/head">
-              {QUEUE_COLUMNS.map((label) => (
-                <TableHead
-                  key={label}
-                  scope="col"
-                  className={`text-xs text-muted-foreground ${label === 'Nonce' ? 'px-0! text-center' : ''}`}
-                >
-                  {label === 'To' ? (
+              <TableHead
+                key={label}
+                scope="col"
+                className={cn(
+                  'px-2 py-2.5',
+                  label === 'Nonce' && 'px-0! text-center',
+                  // The collapse-all button is taller than a label: keep the bar at its 40px height
+                  label === 'Action' && 'py-0',
+                )}
+              >
+                {label === 'To' ? (
+                  <span className="sr-only">{label}</span>
+                ) : label === 'Action' ? (
+                  <span className="flex items-center justify-end">
                     <span className="sr-only">{label}</span>
-                  ) : label === 'Action' ? (
-                    <span className="flex items-center justify-end">
-                      <span className="sr-only">{label}</span>
-                      <CollapseAllButton allCollapsed={allCollapsed} count={sections.length} onToggle={toggleAll} />
-                    </span>
-                  ) : (
-                    label
-                  )}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody ref={bodyRef}>
-            <SpacerRow height={paddingTop} />
-            {groups.map(({ scopeKey, entries }) => {
-              const rows = entries.map(({ virtualItem, item }) => renderItem(item, virtualItem.index))
-              const first = entries[0].item
-              if (!scopeKey || first.kind === 'safe') return rows
-              // One scope per visible run of a Safe's chain: each scope sets up its own provider and SDK
-              return (
-                <SafeScopeProvider
-                  key={`scope-${scopeKey}`}
-                  initial={{ chainId: first.chainId, safeAddress: first.safeAddress }}
-                  pollSafeInfo={false}
-                >
-                  {rows}
-                </SafeScopeProvider>
-              )
-            })}
-            <SpacerRow height={paddingBottom} />
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+                    <CollapseAllButton allCollapsed={allCollapsed} count={sections.length} onToggle={toggleAll} />
+                  </span>
+                ) : (
+                  label
+                )}
+              </TableHead>
+            ))}
+          </TableRow>
+        </TableHeader>
+        <TableBody ref={bodyRef}>
+          <SpacerRow height={paddingTop} />
+          {groups.map(({ scopeKey, entries }) => {
+            const rows = entries.map(({ virtualItem, item }) => renderItem(item, virtualItem.index))
+            const first = entries[0].item
+            if (!scopeKey || first.kind === 'safe') return rows
+            // One scope per visible run of a Safe's chain: each scope sets up its own provider and SDK
+            return (
+              <SafeScopeProvider
+                key={`scope-${scopeKey}`}
+                initial={{ chainId: first.chainId, safeAddress: first.safeAddress }}
+                pollSafeInfo={false}
+              >
+                {rows}
+              </SafeScopeProvider>
+            )
+          })}
+          <SpacerRow height={paddingBottom} />
+        </TableBody>
+      </table>
+    </div>
   )
 }
 
