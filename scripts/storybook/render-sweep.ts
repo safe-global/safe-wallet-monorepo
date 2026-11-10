@@ -167,16 +167,17 @@ const ASSET_TIMEOUT_MS = 5000
 const VIEWPORT = { width: 1280, height: 900 }
 const MAX_VIEWPORT_HEIGHT = 8000
 
-// Chrome leaves iframes below the viewport blank in a full-page screenshot, and TokenIcon renders
-// every logo in an iframe. Grow the viewport over them; other stories keep their layout.
-// Sizes the viewport to the lowest iframe (at least the default height), in both directions: the result must
-// depend on the final layout only, since anything fixed to the bottom (the sidebar footer) follows the height.
-// Returns whether it changed the viewport, so the caller can wait for the frames that came into view.
-async function fitViewportToIframes(page: Page, openRequests: () => number): Promise<boolean> {
-  const bottom = await page.evaluate(() =>
-    Math.max(0, ...[...document.querySelectorAll('iframe')].map((f) => f.getBoundingClientRect().bottom + scrollY)),
+// Full-page stories get a viewport as tall as the page, like a user with a very tall window: the fixed sidebar
+// then spans the whole sheet instead of stopping at 900px. Other stories keep the default height, grown over
+// any iframe below it, since Chrome leaves iframes below the viewport blank in a full-page screenshot.
+// Runs before every screenshot, so the height follows the final layout. Returns whether it changed the viewport.
+async function fitViewport(page: Page, openRequests: () => number): Promise<boolean> {
+  const needed = await page.evaluate(() =>
+    document.body.classList.contains('sb-main-fullscreen')
+      ? document.documentElement.scrollHeight
+      : Math.max(0, ...[...document.querySelectorAll('iframe')].map((f) => f.getBoundingClientRect().bottom + scrollY)),
   )
-  const height = Math.min(Math.max(VIEWPORT.height, Math.ceil(bottom)), MAX_VIEWPORT_HEIGHT)
+  const height = Math.min(Math.max(VIEWPORT.height, Math.ceil(needed)), MAX_VIEWPORT_HEIGHT)
   if (page.viewportSize()?.height === height) return false
   await page.setViewportSize({ width: VIEWPORT.width, height })
   await waitForQuietNetwork(page, openRequests)
@@ -302,7 +303,7 @@ async function stableScreenshot(
   let previous: Buffer | undefined
   for (;;) {
     // A page that is still growing (slow CI runners) can push iframes below the viewport after the first fit
-    if (await fitViewportToIframes(page, openRequests)) {
+    if (await fitViewport(page, openRequests)) {
       await waitForAssets(page)
       previous = undefined
     }
