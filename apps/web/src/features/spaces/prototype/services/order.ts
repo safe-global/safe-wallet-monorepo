@@ -1,73 +1,28 @@
 import type { Account, Persona, Proposal } from '../types'
 import { getAccount, getCreatedAt, getPrimaryStatus } from './model'
 import { getStepKind, STEP_RANK } from './nextSteps'
-import { getFiat } from './columns'
 
-// Option D · Flat table: rows grouped by status, Safe or network, and sorted from the Sort menu or a column header.
+// Option D · Flat table: rows grouped by status, Safe or network, each in a fixed order.
 
 export type GroupBy = 'status' | 'safe' | 'network'
-export type SortBy = 'nonce' | 'newest' | 'oldest' | 'valueDesc' | 'valueAsc' | 'safeAsc' | 'safeDesc'
-export type QueueDisplay = { groupBy: GroupBy; sort: SortBy }
+type SortBy = 'nonce' | 'oldest'
+export type QueueDisplay = { groupBy: GroupBy }
 
-export const GROUP_OPTIONS: { value: GroupBy; label: string; hint?: string }[] = [
-  { value: 'status', label: 'Status', hint: 'Needs you first' },
-  { value: 'safe', label: 'Safe', hint: 'Then network, in nonce order' },
-  { value: 'network', label: 'Network' },
+export const GROUP_OPTIONS: { value: GroupBy; label: string; hint: string }[] = [
+  { value: 'status', label: 'Status', hint: 'Show what needs your action first' },
+  { value: 'safe', label: 'Safe', hint: 'Grouped by Safe and network in nonce order' },
+  { value: 'network', label: 'Network', hint: 'Grouped by network, each Safe in nonce order' },
 ]
 
-export const SORT_OPTIONS: { value: SortBy; label: string }[] = [
-  { value: 'nonce', label: 'Nonce' },
-  { value: 'oldest', label: 'Oldest' },
-  { value: 'newest', label: 'Newest' },
-  { value: 'valueDesc', label: 'Largest value' },
-  { value: 'valueAsc', label: 'Smallest value' },
-  { value: 'safeAsc', label: 'Safe name, A to Z' },
-  { value: 'safeDesc', label: 'Safe name, Z to A' },
-]
-
-// Each grouping starts from the order that reads best for it. Grouped by Safe, that is the nonce.
-export const DEFAULT_SORT: Record<GroupBy, SortBy> = { status: 'oldest', safe: 'nonce', network: 'nonce' }
-export const DEFAULT_DISPLAY: QueueDisplay = { groupBy: 'status', sort: DEFAULT_SORT.status }
-
-const SORT_DIRECTION: Record<SortBy, 'asc' | 'desc'> = {
-  nonce: 'asc',
-  oldest: 'asc',
-  newest: 'desc',
-  valueDesc: 'desc',
-  valueAsc: 'asc',
-  safeAsc: 'asc',
-  safeDesc: 'desc',
-}
-
-// A header's first click picks its first sort, the next click the second. Nonce only runs lowest first.
-const COLUMN_SORTS: Record<string, [SortBy, SortBy]> = {
-  Nonce: ['nonce', 'nonce'],
-  Proposed: ['newest', 'oldest'],
-  Safe: ['safeAsc', 'safeDesc'],
-}
-
-export const SORTABLE_COLUMNS = Object.keys(COLUMN_SORTS)
-
-export const sortByColumn = (current: SortBy, column: string): SortBy => {
-  const [first, second] = COLUMN_SORTS[column]
-  return current === first ? second : first
-}
-
-export const getColumnSort = (sort: SortBy) => {
-  const column = Object.entries(COLUMN_SORTS).find(([, sorts]) => sorts.includes(sort))?.[0]
-  return column ? { column, direction: SORT_DIRECTION[sort] } : undefined
-}
+// Each grouping has one fixed order. Grouped by Safe or network, nonces stay in sequence.
+export const GROUP_SORT: Record<GroupBy, SortBy> = { status: 'oldest', safe: 'nonce', network: 'nonce' }
+export const DEFAULT_DISPLAY: QueueDisplay = { groupBy: 'status' }
 
 // Last signatures and executes first, then signatures, then rows waiting on others, then blocked rows.
 export const getStatusRank = (tx: Proposal, persona: Persona) => {
   const kind = getStepKind(tx, persona)
   if (kind) return STEP_RANK.indexOf(kind)
   return getPrimaryStatus(tx, persona) === 'waiting' ? STEP_RANK.length + 1 : STEP_RANK.length
-}
-
-const getValue = (tx: Proposal) => {
-  const fiat = getFiat(tx)
-  return fiat ? Number(fiat.replace(/[^0-9.]/g, '')) : -1
 }
 
 const clusterKey = (tx: Proposal) => `${tx.account}:${tx.nonce}`
@@ -93,8 +48,6 @@ export const orderQueue = (items: Proposal[], { sort, accounts }: { sort: SortBy
   const keyed = toClusters(items).map((cluster) => ({
     cluster,
     created: Math.min(...cluster.rows.map((tx) => getCreatedAt(tx))),
-    value: Math.max(...cluster.rows.map(getValue)),
-    safe: getAccount(cluster.rows[0]).name,
   }))
   type Keyed = (typeof keyed)[number]
   // Nonces only compare within a Safe, so ties fall back to the Safe, then its nonce.
@@ -103,11 +56,6 @@ export const orderQueue = (items: Proposal[], { sort, accounts }: { sort: SortBy
   const compare: Record<SortBy, (a: Keyed, b: Keyed) => number> = {
     nonce: tieBreak,
     oldest: (a, b) => a.created - b.created,
-    newest: (a, b) => b.created - a.created,
-    valueDesc: (a, b) => b.value - a.value,
-    valueAsc: (a, b) => a.value - b.value,
-    safeAsc: (a, b) => a.safe.localeCompare(b.safe),
-    safeDesc: (a, b) => b.safe.localeCompare(a.safe),
   }
   return keyed.sort((a, b) => compare[sort](a, b) || tieBreak(a, b)).flatMap(({ cluster }) => cluster.rows)
 }
@@ -159,9 +107,7 @@ export const loadDisplay = (): QueueDisplay => {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') as Partial<QueueDisplay> | null
     const groupBy = GROUP_OPTIONS.find((option) => option.value === saved?.groupBy)?.value
-    const sort = SORT_OPTIONS.find((option) => option.value === saved?.sort)?.value
-    if (!groupBy) return DEFAULT_DISPLAY
-    return { groupBy, sort: sort ?? DEFAULT_SORT[groupBy] }
+    return groupBy ? { groupBy } : DEFAULT_DISPLAY
   } catch {
     return DEFAULT_DISPLAY
   }

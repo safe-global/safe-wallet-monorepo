@@ -61,16 +61,7 @@ import { matchesFlag, useQueueFilters } from './QueueFilters/useQueueFilters'
 import { AppliedFilters, FilterCountsContext, QueueToolbar, type AppliedPill } from './QueueFilters/QueueFilters'
 import { QueueFlatTable, QueueGroupedTable, QueueOrderedTable } from './QueueTable/QueueGroupedTable'
 import { DisplayMenu } from './QueueTable/DisplayMenu'
-import {
-  getColumnSort,
-  groupQueue,
-  loadDisplay,
-  orderQueue,
-  saveDisplay,
-  SORTABLE_COLUMNS,
-  sortByColumn,
-  type QueueDisplay,
-} from '../services/order'
+import { GROUP_SORT, groupQueue, loadDisplay, orderQueue, saveDisplay, type QueueDisplay } from '../services/order'
 import { buildSections, rankAccounts } from './QueueTable/sections'
 import { ReviewDrawer, type Replacement, type SectionsMode } from './ReviewDrawer/ReviewDrawer'
 import { BulkExecuteDrawer } from './BulkExecuteDrawer'
@@ -574,22 +565,10 @@ function PendingQueueView() {
     if (section && isCollapsed(section.id)) toggleSection(section.id)
     reviewTx(tx)
   }
-  const orderedRows = flat && !safeView ? orderQueue(visible, { sort: display.sort, accounts: orderedAccounts }) : []
+  const orderedRows =
+    flat && !safeView ? orderQueue(visible, { sort: GROUP_SORT[display.groupBy], accounts: orderedAccounts }) : []
   const orderedGroups =
     flat && !safeView ? groupQueue(orderedRows, display.groupBy === 'network' ? 'network' : 'status', persona) : []
-  // In the Safe table, a sort other than nonce reorders rows within each network.
-  const tableSections =
-    safeView && display.sort !== 'nonce'
-      ? sections.map((section) => ({
-          ...section,
-          items: orderQueue(section.items, { sort: display.sort, accounts: orderedAccounts }),
-        }))
-      : sections
-  const columnSort = {
-    sortable: SORTABLE_COLUMNS,
-    active: getColumnSort(display.sort),
-    onSort: (column: string) => changeDisplay({ ...display, sort: sortByColumn(display.sort, column) }),
-  }
   const reviewOrder =
     flat && !safeView
       ? orderedGroups.flatMap((group) => group.rows)
@@ -791,6 +770,7 @@ function PendingQueueView() {
                 accounts={orderedAccounts}
                 hasItems={items.length > 0}
                 simple={simple}
+                quickFilters={!flat}
                 status={
                   flat ? (
                     <DisplayMenu display={display} onChange={changeDisplay} />
@@ -946,7 +926,6 @@ function PendingQueueView() {
                 <QueueOrderedTable
                   groups={orderedGroups}
                   groupBy={display.groupBy === 'network' ? 'network' : 'status'}
-                  sort={columnSort}
                   {...sectionProps}
                 />
               )}
@@ -956,12 +935,11 @@ function PendingQueueView() {
                 (!flat || safeView) &&
                 (visible.length > 0 || recoveries.visible.length > 0) && (
                   <QueueGroupedTable
-                    sections={tableSections}
+                    sections={sections}
                     isCollapsed={isCollapsed}
                     onToggle={toggleSection}
                     getSafeBatch={safeBatchFor}
                     collapse={{ allCollapsed, onToggle: toggleAll, count: sections.length }}
-                    sort={safeView ? columnSort : undefined}
                     {...sectionProps}
                   />
                 )}

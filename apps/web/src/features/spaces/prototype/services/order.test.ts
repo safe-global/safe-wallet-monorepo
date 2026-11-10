@@ -1,15 +1,6 @@
 import { accounts } from './model'
 import type { Proposal } from '../types'
-import {
-  DEFAULT_DISPLAY,
-  getColumnSort,
-  groupQueue,
-  loadDisplay,
-  orderQueue,
-  saveDisplay,
-  sortByColumn,
-  type SortBy,
-} from './order'
+import { DEFAULT_DISPLAY, groupQueue, loadDisplay, orderQueue, saveDisplay } from './order'
 
 // Dev ("owner") signs on Treasury (3 of 5, next #42) and Ops Payroll (2 of 4, next #17), not on Grants.
 const [treasury, payroll, grants] = accounts
@@ -32,14 +23,13 @@ const tx = (
   ...extra,
 })
 const ids = (list: { id: string }[]) => list.map((item) => item.id)
-const order = (items: Proposal[], sort: SortBy) =>
+const order = (items: Proposal[], sort: 'nonce' | 'oldest') =>
   ids(orderQueue(items, { sort, accounts: [treasury, payroll, grants] }))
 
 describe('orderQueue', () => {
-  it('sorts oldest or newest first', () => {
+  it('sorts oldest first', () => {
     const items = [tx('treasury', 42, [], '1h ago'), tx('payroll', 17, [], '3d ago')]
     expect(order(items, 'oldest')).toEqual(['payroll-17', 'treasury-42'])
-    expect(order(items, 'newest')).toEqual(['treasury-42', 'payroll-17'])
   })
 
   it('sorts by nonce within each Safe, Safes in workspace order', () => {
@@ -47,39 +37,16 @@ describe('orderQueue', () => {
     expect(order(items, 'nonce')).toEqual(['treasury-43', 'payroll-17', 'payroll-18'])
   })
 
-  it('sorts by value either way', () => {
-    const items = [tx('treasury', 42, [], '1h ago', { amount: '10 USDC' }), tx('payroll', 17, [], '1h ago')]
-    expect(order(items, 'valueDesc')).toEqual(['payroll-17', 'treasury-42'])
-    expect(order(items, 'valueAsc')).toEqual(['treasury-42', 'payroll-17'])
-  })
-
-  it('keeps options at one nonce together, whatever the sort', () => {
+  it('keeps options at one nonce together', () => {
     const items = [
       tx('treasury', 42, [], '1h ago', { id: 'a' }),
       tx('payroll', 17, [], '2h ago'),
       tx('treasury', 42, [], '5d ago', { id: 'b' }),
     ]
-    for (const sort of ['nonce', 'oldest', 'newest', 'valueDesc', 'valueAsc', 'safeAsc', 'safeDesc'] as const) {
+    for (const sort of ['nonce', 'oldest'] as const) {
       const result = order(items, sort)
       expect(Math.abs(result.indexOf('treasury-42a') - result.indexOf('treasury-42b'))).toBe(1)
     }
-  })
-})
-
-describe('column headers', () => {
-  it('flips Proposed between newest and oldest, and Safe between A to Z and Z to A', () => {
-    expect(sortByColumn('nonce', 'Proposed')).toBe('newest')
-    expect(sortByColumn('newest', 'Proposed')).toBe('oldest')
-    expect(sortByColumn('safeAsc', 'Safe')).toBe('safeDesc')
-  })
-
-  it('keeps nonce lowest first', () => {
-    expect(sortByColumn('nonce', 'Nonce')).toBe('nonce')
-  })
-
-  it('marks the header that matches the sort, and none for value', () => {
-    expect(getColumnSort('oldest')).toEqual({ column: 'Proposed', direction: 'asc' })
-    expect(getColumnSort('valueDesc')).toBeUndefined()
   })
 })
 
@@ -136,18 +103,18 @@ describe('groupQueue', () => {
 describe('display preference', () => {
   beforeEach(() => localStorage.clear())
 
-  it('defaults to grouping by status, oldest first', () => {
-    expect(loadDisplay()).toEqual(DEFAULT_DISPLAY)
-    expect(DEFAULT_DISPLAY).toEqual({ groupBy: 'status', sort: 'oldest' })
+  it('defaults to grouping by status', () => {
+    expect(loadDisplay()).toEqual({ groupBy: 'status' })
+    expect(DEFAULT_DISPLAY).toEqual({ groupBy: 'status' })
   })
 
-  it('remembers the last choice', () => {
-    saveDisplay({ groupBy: 'safe', sort: 'newest' })
-    expect(loadDisplay()).toEqual({ groupBy: 'safe', sort: 'newest' })
+  it('remembers the last grouping', () => {
+    saveDisplay({ groupBy: 'network' })
+    expect(loadDisplay()).toEqual({ groupBy: 'network' })
   })
 
-  it('ignores a saved value it does not know, including the old Display shape', () => {
-    localStorage.setItem('prototype.pendingQueue.display', '{"order":{"by":"nonce"},"groupBy":"none"}')
+  it('ignores a saved value it does not know', () => {
+    localStorage.setItem('prototype.pendingQueue.display', '{"groupBy":"color"}')
     expect(loadDisplay()).toEqual(DEFAULT_DISPLAY)
   })
 })

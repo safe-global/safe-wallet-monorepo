@@ -197,10 +197,14 @@ export function QueueRow({
     </Tooltip>
   )
 
+  // Option D by status or network: Nonce follows Transaction, so conflict options show their own nonce.
+  const nonceFirst = columns[0] === 'Nonce'
   const cells: Record<string, ReactNode> = {
     Nonce: (
-      <TableCell className="relative py-2 max-md:sticky max-md:left-0 max-md:z-10 max-md:border-l-card! max-md:bg-card">
-        {groupSize > 1 ? (
+      <TableCell
+        className={`relative py-2 ${nonceFirst ? 'max-md:sticky max-md:left-0 max-md:z-10 max-md:border-l-card! max-md:bg-card' : ''}`}
+      >
+        {groupSize > 1 && nonceFirst ? (
           // Conflict options show the nonce once, in the group sub-header.
           <span
             aria-label={`Option ${optionIndex} of ${groupSize} at nonce ${tx.nonce}`}
@@ -254,9 +258,12 @@ export function QueueRow({
     Safe: (
       <TableCell>
         <span className="flex min-w-0 items-center gap-2 text-sm">
-          {!columns.includes('Network') && <ChainIcon chainId={account.chainId} network={account.network} />}
+          {/* Option D names the network in its own column or band, so the Safe cell is just the name. */}
+          {nonceFirst && !columns.includes('Network') && (
+            <ChainIcon chainId={account.chainId} network={account.network} />
+          )}
           <span className="truncate">
-            {columns.includes('Network') ? (account.safeName ?? account.name) : account.name}
+            {nonceFirst && !columns.includes('Network') ? account.name : (account.safeName ?? account.name)}
           </span>
         </span>
       </TableCell>
@@ -490,7 +497,24 @@ export function QueueRow({
 
   return (
     <Fragment>
-      {startsGroup && (
+      {startsGroup && !nonceFirst && (
+        <TableRow data-no-hover data-no-divider>
+          <TableCell colSpan={columnCount} className="pt-4 pb-1">
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
+              <NonceMark tx={tx} persona={persona} group active={conflictHover === `${tx.account}:${tx.nonce}`} />
+              <Badge variant="warning">Conflicting</Badge>
+              <span className="text-muted-foreground">
+                Only 1/{groupSize} transactions can execute. Once it does, the{' '}
+                {groupSize === 2 ? 'other becomes' : 'others become'} invalid.
+              </span>
+              <ExternalLink href={HelpCenterArticle.CONFLICTING_TRANSACTIONS} className="text-muted-foreground" noIcon>
+                Learn more
+              </ExternalLink>
+            </div>
+          </TableCell>
+        </TableRow>
+      )}
+      {startsGroup && nonceFirst && (
         <TableRow data-no-hover data-no-divider>
           <TableCell className="pt-4 pb-1">
             <span className="flex justify-center text-xs">

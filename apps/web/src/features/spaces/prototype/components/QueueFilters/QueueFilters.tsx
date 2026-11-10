@@ -97,6 +97,8 @@ type QueueFiltersProps = {
   simple?: boolean
   // When the queue was fetched, before New.
   status?: ReactNode
+  // Option D: Status and Safe live only in the Filter menu.
+  quickFilters?: boolean
 }
 
 export type AppliedPill = { section: string; title: string; values: string[]; clear: () => void }
@@ -343,14 +345,22 @@ function QueueSearch({ filters }: Pick<QueueFiltersProps, 'filters'>) {
   )
 }
 
-export function QueueToolbar({ filters, accounts, hasItems, extraMenu, simple, status }: QueueFiltersProps) {
+export function QueueToolbar({
+  filters,
+  accounts,
+  hasItems,
+  extraMenu,
+  simple,
+  status,
+  quickFilters = true,
+}: QueueFiltersProps) {
   return (
     // Under 640px of content, search takes its own row and the buttons go below.
     <div className="@container mb-5">
       <div className="flex flex-wrap items-center gap-3">
         <QueueSearch filters={filters} />
-        {hasItems && <StatusDropdown filters={filters} simple={simple} />}
-        {hasItems && <SafeDropdown filters={filters} accounts={accounts} />}
+        {hasItems && quickFilters && <StatusDropdown filters={filters} simple={simple} />}
+        {hasItems && quickFilters && <SafeDropdown filters={filters} accounts={accounts} />}
         {!simple && (
           <DropdownMenu>
             <Tooltip delay={300}>
