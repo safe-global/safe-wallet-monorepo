@@ -49,6 +49,19 @@ const STORY_FINISHED_TIMEOUT_MS = 30000
 // Loading-state stories hold a request open (MSW delay('infinite')), so both waits are capped.
 const QUIET_MS = 100
 const SETTLE_TIMEOUT_MS = 3000
+// Stories date their mock data from Date.now(); a fixed clock and time zone keep shown dates the same every day
+const FIXED_NOW = new Date('2026-01-15T12:00:00Z')
+const TIMEZONE = 'UTC'
+// Faker and other story data take their seed from Math.random, so every page gets the same sequence (mulberry32)
+const SEEDED_RANDOM = `(() => {
+  let seed = 1
+  Math.random = () => {
+    seed = (seed + 0x6d2b79f5) | 0
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+})()`
 
 type Mode = string
 
@@ -352,17 +365,21 @@ async function main(): Promise<void> {
   let done = 0
 
   async function worker(): Promise<void> {
-    const context = await browser.newContext({ viewport: { width: 1280, height: 900 } })
     for (;;) {
       const item = queue.shift()
       if (!item) break
-      const { finding, cell } = await checkStory(context, base, item[0], item[1], cellsDir)
+      // A context per story: localStorage and the like from one story (a collapsed sidebar) must not reach the next
+      const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, timezoneId: TIMEZONE })
+      await context.clock.setFixedTime(FIXED_NOW)
+      await context.addInitScript({ content: SEEDED_RANDOM })
+      const { finding, cell } = await checkStory(context, base, item[0], item[1], cellsDir).finally(() =>
+        context.close(),
+      )
       results.push(finding)
       if (cell) cells.push(cell)
       done += 1
       if (done % 50 === 0) console.error(`  ${done}/${stories.length * modes.length}`)
     }
-    await context.close()
   }
 
   await Promise.all(Array.from({ length: concurrency }, worker))
