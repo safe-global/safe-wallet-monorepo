@@ -3,6 +3,7 @@ import { getStepKind } from './nextSteps'
 import {
   applyPreviewAction,
   BULK_EXECUTE_LIMIT,
+  getFailedAccounts,
   createPreviewQueue,
   executePreviewBatches,
   getFirstReady,
@@ -162,6 +163,13 @@ describe('scenarios and states', () => {
     expect(getScenarioAccounts('10-safes')).toHaveLength(10)
     expect(getScenarioAccounts('20-safes')).toHaveLength(20)
     expect(getScenarioAccounts('50-safes')).toHaveLength(50)
+  })
+
+  it('fails the last Safes, never all of them', () => {
+    const all = getScenarioAccounts('5-safes')
+    expect(getFailedAccounts('5-safes', 3).map((account) => account.id)).toEqual(all.slice(-3).map((a) => a.id))
+    expect(getFailedAccounts('5-safes', 9)).toHaveLength(4)
+    expect(getFailedAccounts('1-safe', 3)).toHaveLength(0)
   })
 
   it('layers states on any scenario', () => {

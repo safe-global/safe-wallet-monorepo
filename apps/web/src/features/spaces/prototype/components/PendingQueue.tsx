@@ -4,13 +4,6 @@ import { Bell, Check, CircleHelp, LoaderCircle, RefreshCw, ShieldAlert, ShieldCh
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import {
-  Alert,
-  AlertAction,
-  AlertDescription,
-  AlertSeverityIcon,
-  AlertTitle,
-} from '@safe-global/views/components/ui/alert'
-import {
   Empty,
   EmptyContent,
   EmptyDescription,
@@ -26,6 +19,7 @@ import {
   getConflicts,
   getOutstandingSigners,
   getPrimaryStatus,
+  getScenario,
   getScenarioAccounts,
   getSignerName,
   getState,
@@ -44,9 +38,12 @@ import {
   createPreviewQueue,
   executePreviewBatches,
   getBulkExecutable,
+  getFailedAccounts,
   proposePreviewAlternative,
   type PreviewAction,
 } from '../services/queue'
+import { LoadWarnings, type LoadWarningStyle } from './LoadWarnings'
+import { FAILED_COUNTS } from './ScenarioBar'
 import { getOutsiders, getRemindable, type MenuAction, type SignLabel } from '../services/actions'
 import {
   advanceExecution,
@@ -97,7 +94,7 @@ const OPEN_WAITING_SAFES = 3
 export default function PendingQueue() {
   const router = useRouter()
   const { scenario, state } = parseScenario(router.query)
-  return <PendingQueueView key={`${scenario}:${state}:${router.query.option ?? 'table'}`} />
+  return <PendingQueueView key={`${scenario}:${state}:${router.query.option ?? 'table'}:${router.query.failed ?? 1}`} />
 }
 
 function PendingQueueView() {
@@ -135,8 +132,30 @@ function PendingQueueView() {
   // Option A: rows per Safe before See all (`?page=20` or `5`), and the Sign button's label (`?cta=review`).
   const pageSize = router.query.page === '5' ? 5 : router.query.page === '20' ? 20 : 10
   const signLabel: SignLabel = router.query.cta === 'review' ? 'Review' : 'Sign'
+  // Partial loading: how many Safes fail (`?failed=3`), and one warning each or one summary (`?warn=summary`).
+  const failedCount = FAILED_COUNTS.find((count) => String(count) === router.query.failed) ?? 1
+  const warningStyle: LoadWarningStyle = router.query.warn === 'summary' ? 'summary' : 'each'
 
-  const [queue, setQueue] = useState(() => createPreviewQueue(scenario, state, { deepQueue: direction === 'table' }))
+  const deepQueue = direction === 'table'
+  const [queue, setQueue] = useState(() => createPreviewQueue(scenario, state, { deepQueue, failedCount }))
+  const [failedIds, setFailedIds] = useState(() =>
+    state === 'partial' ? getFailedAccounts(scenario, failedCount).map((account) => account.id) : [],
+  )
+  const [retrying, setRetrying] = useState<string[]>([])
+  const retryTimers = useRef<ReturnType<typeof setTimeout>[]>([])
+  useEffect(() => () => retryTimers.current.forEach(clearTimeout), [])
+  // Try again succeeds after a short wait, and the Safe's rows join the queue.
+  const retryLoad = (ids: string[]) => {
+    setRetrying((current) => [...new Set([...current, ...ids])])
+    retryTimers.current.push(
+      setTimeout(() => {
+        const rows = getScenario(scenario, { deepQueue }).filter((tx) => ids.includes(tx.account))
+        setQueue((current) => ({ ...current, items: [...current.items, ...rows] }))
+        setFailedIds((current) => current.filter((id) => !ids.includes(id)))
+        setRetrying((current) => current.filter((id) => !ids.includes(id)))
+      }, 900),
+    )
+  }
   // Execute runs through Processing and Indexing before the queue updates.
   const [executions, setExecutions] = useState<Executions>(() =>
     simple ? {} : getInitialExecutions(queue.items, state, Date.now()),
@@ -746,20 +765,13 @@ function PendingQueueView() {
               </p>
             )}
             <section aria-label="Queue">
-              {state === 'partial' && (
-                <Alert variant="warning" outlined={false} className="mb-5">
-                  <AlertSeverityIcon variant="warning" />
-                  <AlertTitle>{accounts.at(-1)?.name} is unavailable</AlertTitle>
-                  <AlertDescription>
-                    Showing proposals from {accounts.length - 1} of {accounts.length} Safes. Counts are partial.
-                  </AlertDescription>
-                  <AlertAction>
-                    <Button variant="outline" size="sm" onClick={() => setOption({ state: 'normal' })}>
-                      Retry loading
-                    </Button>
-                  </AlertAction>
-                </Alert>
-              )}
+              <LoadWarnings
+                failed={accounts.filter((account) => failedIds.includes(account.id))}
+                total={accounts.length}
+                retrying={retrying}
+                onRetry={retryLoad}
+                style={warningStyle}
+              />
               {fleet && !milestone1 && !unavailable && (
                 <FleetPulse counts={cardCounts} isActive={isCardActive} onSelect={selectCard} />
               )}
@@ -961,6 +973,8 @@ function PendingQueueView() {
           milestone1={milestone1}
           pageSize={pageSize}
           signLabel={signLabel}
+          failedCount={failedCount}
+          warningStyle={warningStyle}
           onChange={setOption}
         />
         <ReviewDrawer

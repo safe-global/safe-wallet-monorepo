@@ -13,11 +13,26 @@ export type PreviewAction = 'sign' | 'execute' | 'signAndExecute'
 // The first fully signed transaction, which the Executing state starts with.
 export const getFirstReady = (items: Proposal[]) => items.find((tx) => getState(tx).ready)
 
-// States layer on any scenario. Partial loading drops the last Safe. Executing gives the running
+// Partial loading: the last Safes in the workspace fail to load, never all of them.
+export const getFailedAccounts = (scenario: Scenario, count = 1): Account[] => {
+  const all = getScenarioAccounts(scenario)
+  const failing = Math.min(Math.max(count, 1), all.length - 1)
+  return failing > 0 ? all.slice(all.length - failing) : []
+}
+
+// States layer on any scenario. Partial loading drops the failed Safes. Executing gives the running
 // transaction a rejection at its nonce, so the lock shows.
-export const applyQueueState = (items: Proposal[], scenario: Scenario, state: QueueState): Proposal[] => {
+export const applyQueueState = (
+  items: Proposal[],
+  scenario: Scenario,
+  state: QueueState,
+  failedCount = 1,
+): Proposal[] => {
   if (state === 'empty' || state === 'loading' || state === 'error') return []
-  if (state === 'partial') return items.filter((tx) => tx.account !== getScenarioAccounts(scenario).at(-1)?.id)
+  if (state === 'partial') {
+    const failed = getFailedAccounts(scenario, failedCount).map((account) => account.id)
+    return items.filter((tx) => !failed.includes(tx.account))
+  }
   const running = state === 'executing' ? getFirstReady(items) : undefined
   if (
     !running ||
@@ -43,9 +58,9 @@ export const applyQueueState = (items: Proposal[], scenario: Scenario, state: Qu
 export const createPreviewQueue = (
   scenario: Scenario,
   state: QueueState = 'normal',
-  options: { deepQueue?: boolean } = {},
+  options: { deepQueue?: boolean; failedCount?: number } = {},
 ): PreviewQueue => ({
-  items: applyQueueState(getScenario(scenario, options), scenario, state),
+  items: applyQueueState(getScenario(scenario, options), scenario, state, options.failedCount),
   completed: [],
   nextProposalId: 1,
   nextNonces: Object.fromEntries(getScenarioAccounts(scenario).map((account) => [account.id, account.nextNonce])),

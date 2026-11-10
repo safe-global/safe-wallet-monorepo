@@ -969,7 +969,7 @@ describe('queue design exploration', () => {
     render(<PendingQueue />, { routerProps: { query: { scenario: 'partial' } } })
     expect(screen.getByRole('combobox', { name: 'Scenario' })).toHaveTextContent('5 Safes')
     expect(screen.getByRole('combobox', { name: 'State' })).toHaveTextContent('Partial loading')
-    expect(screen.getByRole('alert')).toHaveTextContent('Showing proposals from 4 of 5 Safes')
+    expect(screen.getByRole('alert')).toHaveTextContent(/didn’t load/)
   })
   it('opens the transaction from a shared link', () => {
     render(<PendingQueue />, { routerProps: { query: { tx: 'treasury-42' } } })
@@ -1347,5 +1347,36 @@ describe('option D · flat table', () => {
     expect(screen.getByRole('button', { name: 'Collapse Treasury Main' })).toBeInTheDocument()
     expect(screen.queryByRole('columnheader', { name: /^Safe/ })).toBeNull()
     expect(screen.getByRole('columnheader', { name: 'Network' })).toBeInTheDocument()
+  })
+})
+
+describe('Safes that fail to load', () => {
+  const partial = (query: Record<string, string>) => ({
+    routerProps: { query: { state: 'partial', scenario: '5-safes', ...query } },
+  })
+  afterEach(() => jest.useRealTimers())
+
+  it('shows one warning per Safe, and Try again brings that Safe back', () => {
+    jest.useFakeTimers()
+    render(<PendingQueue />, partial({ failed: '3' }))
+    const alerts = screen.getAllByRole('alert')
+    expect(alerts).toHaveLength(3)
+    fireEvent.click(within(alerts[0]).getByRole('button', { name: /^Try again for / }))
+    expect(within(alerts[0]).getByRole('button', { name: /^Try again for / })).toHaveTextContent('Loading…')
+    act(() => jest.advanceTimersByTime(1000))
+    expect(screen.getAllByRole('alert')).toHaveLength(2)
+  })
+
+  it('shows one summary that lists the Safes on demand and retries them together', () => {
+    jest.useFakeTimers()
+    render(<PendingQueue />, partial({ failed: '3', warn: 'summary' }))
+    const alert = screen.getByRole('alert')
+    expect(alert).toHaveTextContent('3 Safes didn’t load')
+    expect(alert).toHaveTextContent('Showing transactions from 2 of 5 Safes')
+    fireEvent.click(within(alert).getByRole('button', { name: 'Show Safes' }))
+    expect(within(alert).getAllByRole('listitem')).toHaveLength(3)
+    fireEvent.click(within(alert).getByRole('button', { name: 'Try again for 3 Safes' }))
+    act(() => jest.advanceTimersByTime(1000))
+    expect(screen.queryByRole('alert')).toBeNull()
   })
 })

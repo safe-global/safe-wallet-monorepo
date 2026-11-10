@@ -121,6 +121,9 @@ function PersonaCard({ persona, scenario }: { persona: Persona; scenario: Scenar
 }
 
 const PAGE_SIZES = { '10': '10 per Safe', '20': '20 per Safe', '5': '5 per Safe' }
+export const FAILED_COUNTS = [1, 3, 5] as const
+const FAILED_LABELS = { '1': '1 Safe failed', '3': '3 Safes failed', '5': '5 Safes failed' }
+const WARNING_STYLES = { each: 'One warning per Safe', summary: 'One summary' }
 const SIGN_LABELS: Record<SignLabel, string> = { Sign: 'Button · Sign', Review: 'Button · Review' }
 
 export function ScenarioBar({
@@ -132,8 +135,12 @@ export function ScenarioBar({
   milestone1,
   pageSize,
   signLabel,
+  failedCount,
+  warningStyle,
   onChange,
 }: {
+  failedCount: number
+  warningStyle: 'each' | 'summary'
   milestone1: boolean
   pageSize: number
   signLabel: SignLabel
@@ -212,6 +219,42 @@ export function ScenarioBar({
               </SelectTrigger>
               <SelectContent className="w-auto min-w-(--anchor-width)">
                 {Object.entries(SIGN_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </>
+        )}
+        {state === 'partial' && (
+          <>
+            <Select
+              value={String(failedCount)}
+              items={FAILED_LABELS}
+              onValueChange={(value) => value && onChange({ failed: value })}
+            >
+              <SelectTrigger size="sm" variant="ghost" aria-label="Safes that fail to load">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="w-auto min-w-(--anchor-width)">
+                {Object.entries(FAILED_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={warningStyle}
+              items={WARNING_STYLES}
+              onValueChange={(value) => value && onChange({ warn: value })}
+            >
+              <SelectTrigger size="sm" variant="ghost" aria-label="Warning style">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="w-auto min-w-(--anchor-width)">
+                {Object.entries(WARNING_STYLES).map(([value, label]) => (
                   <SelectItem key={value} value={value}>
                     {label}
                   </SelectItem>
