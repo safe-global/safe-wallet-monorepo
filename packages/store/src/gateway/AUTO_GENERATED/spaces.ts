@@ -237,6 +237,22 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/counterfactual-safes` }),
         providesTags: ['spaces'],
       }),
+      spaceTransactionsGetTransactionQueueV1: build.query<
+        SpaceTransactionsGetTransactionQueueV1ApiResponse,
+        SpaceTransactionsGetTransactionQueueV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/transactions/queued`,
+          params: {
+            status: queryArg.status,
+            safes: queryArg.safes,
+            conflicting: queryArg.conflicting,
+            stale: queryArg.stale,
+            search: queryArg.search,
+          },
+        }),
+        providesTags: ['transactions'],
+      }),
       policiesCreateConfigurationRequestV1: build.mutation<
         PoliciesCreateConfigurationRequestV1ApiResponse,
         PoliciesCreateConfigurationRequestV1ApiArg
@@ -274,21 +290,6 @@ const injectedRtkApi = api
           },
         }),
         providesTags: ['spaces'],
-      }),
-      spaceTransactionsGetTransactionQueueV1: build.query<
-        SpaceTransactionsGetTransactionQueueV1ApiResponse,
-        SpaceTransactionsGetTransactionQueueV1ApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/v1/spaces/${queryArg.spaceId}/transactions/queued`,
-          params: {
-            status: queryArg.status,
-            safes: queryArg.safes,
-            conflicting: queryArg.conflicting,
-            stale: queryArg.stale,
-          },
-        }),
-        providesTags: ['transactions'],
       }),
     }),
     overrideExisting: false,
@@ -511,6 +512,22 @@ export type SpaceCounterfactualSafesGetV1ApiArg = {
   /** Space UUID */
   spaceId: string
 }
+export type SpaceTransactionsGetTransactionQueueV1ApiResponse =
+  /** status 200 Queue of the Safes in the Space */ SpaceQueuedItemPage
+export type SpaceTransactionsGetTransactionQueueV1ApiArg = {
+  /** Keep the transactions with one of these statuses, comma-separated. `sign` is a transaction one of the caller wallets still has to sign. */
+  status?: string[]
+  /** Keep the transactions of these Safes, comma-separated as `{chainId}:{safeAddress}` */
+  safes?: string
+  /** Keep the transactions sharing their nonce with another */
+  conflicting?: boolean
+  /** Keep the transactions proposed more than 7 days ago */
+  stale?: boolean
+  /** Keep the transactions whose Safe (address or Space address book name), network name, status, or a signer still to sign (address or name) contains this text, ignoring case. Unlike the filters, it narrows every count. At most 100 characters. */
+  search?: string
+  /** Space UUID */
+  spaceId: string
+}
 export type PoliciesCreateConfigurationRequestV1ApiResponse =
   /** status 201  */ CreatePolicyConfigurationRequestResponse
 export type PoliciesCreateConfigurationRequestV1ApiArg = {
@@ -554,20 +571,6 @@ export type SpacePoliciesGetPendingPoliciesV1ApiArg = {
   safes?: string[]
   /** Also report the queued `setGuard` and `setModuleGuard` calls that install, replace or remove a `SafePolicyGuard` on each Safe, as `guard-installation` items. */
   includeGuardInstallation?: boolean
-}
-export type SpaceTransactionsGetTransactionQueueV1ApiResponse =
-  /** status 200 Queue of the Safes in the Space */ SpaceQueuedItemPage
-export type SpaceTransactionsGetTransactionQueueV1ApiArg = {
-  /** Keep the transactions with one of these statuses, comma-separated. `sign` is a transaction one of the caller wallets still has to sign. */
-  status?: string[]
-  /** Keep the transactions of these Safes, comma-separated as `{chainId}:{safeAddress}` */
-  safes?: string
-  /** Keep the transactions sharing their nonce with another */
-  conflicting?: boolean
-  /** Keep the transactions proposed more than 7 days ago */
-  stale?: boolean
-  /** Space UUID */
-  spaceId: string
 }
 export type SpaceAddressBookItemDto = {
   name: string
@@ -848,312 +851,6 @@ export type GetCounterfactualSafesResponse = {
   safes: {
     [key: string]: GetCounterfactualSafeItem[]
   }
-}
-export type CreatePolicyConfigurationRequestResponse = {
-  /** The stored configuration root */
-  root: string
-}
-export type PolicyConfigurationDto = {
-  /** Contract the guarded call targets */
-  target: string
-  /** 4-byte function selector */
-  selector: string
-  /** 0 = CALL, 1 = DELEGATECALL */
-  operation: 0 | 1
-  /** Policy contract to bind. The zero address removes the policy of this access. */
-  policy: string
-  /** Policy payload, abi-encoded as passed to the guard. At most 64 KiB (65,536 bytes). */
-  data: string
-}
-export type CreatePolicyConfigurationRequestDto = {
-  /** keccak256(abi.encode(Configuration[])), as requested on-chain */
-  root: string
-  configurations: PolicyConfigurationDto[]
-}
-export type ModuleEnforcementDto = {
-  via: 'module'
-  /** The module enforcing the policy */
-  moduleAddress: string
-}
-export type PolicyContractsDto = {
-  /** The policy implementation the guard delegates to */
-  policyContract: string
-  /** The SafePolicyGuard deployment */
-  safePolicyGuard: string
-}
-export type GuardSlotsDto = {
-  transactionGuard?: PolicyContractsDto
-  moduleGuard?: PolicyContractsDto
-}
-export type PolicyAccessDto = {
-  /** The contract the governed calls target */
-  target: string
-  /** The 4-byte function selector of the governed calls */
-  selector: string
-  operation: 'CALL' | 'DELEGATECALL'
-}
-export type GuardEnforcementDto = {
-  via: 'guard'
-  guards: GuardSlotsDto
-  /** The calls the guard applies the policy to */
-  access: PolicyAccessDto
-}
-export type OffChainEnforcementDto = {
-  /** Nothing on chain enforces the policy, so it is access rather than an audited restriction */
-  via: 'offchain'
-  /** Where the grant is held */
-  source: 'delegates'
-}
-export type NativeTokenMetadataDto = {
-  address: string
-  decimals: number
-  logoUri: string
-  name: string
-  symbol: string
-  /** Whether the Transaction Service lists the token in one of its imported token lists */
-  trusted: boolean
-  type: 'NATIVE_TOKEN'
-}
-export type Erc20TokenMetadataDto = {
-  address: string
-  decimals: number
-  logoUri: string
-  name: string
-  symbol: string
-  /** Whether the Transaction Service lists the token in one of its imported token lists */
-  trusted: boolean
-  type: 'ERC20'
-}
-export type SpendingLimitAllowanceDto = {
-  /** The token the limit applies to; zero address for native */
-  tokenAddress: string
-  /** Metadata of `tokenAddress`; null when it could not be resolved */
-  tokenMetadata:
-    | (
-        | ({
-            type: 'NATIVE_TOKEN'
-          } & NativeTokenMetadataDto)
-        | ({
-            type: 'ERC20'
-          } & Erc20TokenMetadataDto)
-      )
-    | null
-  /** Per-window ceiling, in base units */
-  amount: string
-  /** Spent in the current window, in base units */
-  spent: string
-  /** Window length in minutes; 0 never resets */
-  resetPeriodMinutes: number
-  /** Minutes since the epoch of the next reset, the unit the module counts windows in; null when it never resets */
-  resetsAtMinute: number | null
-  /** False when the reset boundary could not be recovered exactly, so `resetsAtMinute` may be up to one period out. `amount` is unaffected. */
-  resetBoundaryIsExact: boolean
-  /** False when the spender's delegate registration was removed: nothing is spendable now, but the allowance returns to effect if the delegate is re-added */
-  isDelegateActive: boolean
-  /** Unix seconds this allowance was (re-)established */
-  createdAt: number
-  /** Unix seconds of the last event that changed this allowance */
-  updatedAt: number
-}
-export type SpendingLimitSpenderDto = {
-  /** Name resolved by the client, never carried here */
-  spender: string
-  /** False when the spender is deregistered: nothing is spendable now, but the allowances survive and return if it is re-added */
-  isActive: boolean
-  allowances: SpendingLimitAllowanceDto[]
-}
-export type SpendingLimitPolicyDataDto = {
-  /** The allowance module holding this state */
-  module: string
-  spenders: SpendingLimitSpenderDto[]
-}
-export type ProposerGrantDto = {
-  /** The owner that granted the proposer */
-  delegator: string
-  /** The label this owner gave the proposer; empty when unlabelled */
-  label: string
-}
-export type ProposerDto = {
-  /** The address allowed to propose transactions */
-  proposer: string
-  /** The owners that granted it, each with the label they gave. The label is stored per grant, so two owners can label the same proposer differently */
-  delegatedBy: ProposerGrantDto[]
-}
-export type ProposerPolicyDataDto = {
-  proposers: ProposerDto[]
-}
-export type Erc20TransferRecipientDto = {
-  /** An address the Safe can send this token to */
-  account: string
-  permission: 'ONCE' | 'ALWAYS'
-}
-export type Erc20TransferPolicyDataDto = {
-  /** The ERC20 token the allowlist applies to */
-  tokenAddress: string
-  /** Metadata of `tokenAddress`; null when it could not be resolved */
-  tokenMetadata:
-    | (
-        | ({
-            type: 'NATIVE_TOKEN'
-          } & NativeTokenMetadataDto)
-        | ({
-            type: 'ERC20'
-          } & Erc20TokenMetadataDto)
-      )
-    | null
-  /** The recipients of the token transfers the policy permits */
-  recipients: Erc20TransferRecipientDto[]
-}
-export type CosignerPolicyDataDto = {
-  /** The cosigner the policy enforces. */
-  cosignerAddress: string
-}
-export type StatelessPolicyDataDto = {}
-export type SafeRefDto = {
-  chainId: string
-  address: string
-}
-export type ActivePolicyDto = {
-  type:
-    | 'spending-limit'
-    | 'recovery'
-    | 'proposer'
-    | 'erc20-transfer'
-    | 'cosigner'
-    | 'allow'
-    | 'native-transfer'
-    | 'deny'
-    | 'multisend'
-  enforcement:
-    | ({
-        via: 'module'
-      } & ModuleEnforcementDto)
-    | ({
-        via: 'guard'
-      } & GuardEnforcementDto)
-    | ({
-        via: 'offchain'
-      } & OffChainEnforcementDto)
-  /** False when the policy is configured but not enforced */
-  enabled: boolean
-  data:
-    | SpendingLimitPolicyDataDto
-    | ProposerPolicyDataDto
-    | Erc20TransferPolicyDataDto
-    | CosignerPolicyDataDto
-    | StatelessPolicyDataDto
-  /** The Safe the policy is in effect on */
-  safe: SafeRefDto
-}
-export type EnableModuleChangeDto = {
-  kind: 'enable-module'
-}
-export type AddDelegateChangeDto = {
-  kind: 'add-delegate'
-  /** The address being added as a delegate in AllowanceModule contract */
-  delegate: string
-}
-export type RemoveDelegateChangeDto = {
-  kind: 'remove-delegate'
-  /** The delegate being removed */
-  delegate: string
-  /** Whether the delegate's allowances are deleted along with it */
-  removeAllowances: boolean
-}
-export type SetAllowanceChangeDto = {
-  kind: 'set-allowance'
-  delegate: string
-  /** The token the limit applies to; zero address for native */
-  token: string
-  /** Metadata of `token`; null when it could not be resolved */
-  tokenMetadata:
-    | (
-        | ({
-            type: 'NATIVE_TOKEN'
-          } & NativeTokenMetadataDto)
-        | ({
-            type: 'ERC20'
-          } & Erc20TokenMetadataDto)
-      )
-    | null
-  /** Per-window ceiling, in base units */
-  amount: string
-  /** Window length in minutes; 0 never resets */
-  resetPeriodMinutes: number
-}
-export type ResetAllowanceChangeDto = {
-  kind: 'reset-allowance'
-  delegate: string
-  token: string
-  /** Metadata of `token`; null when it could not be resolved */
-  tokenMetadata:
-    | (
-        | ({
-            type: 'NATIVE_TOKEN'
-          } & NativeTokenMetadataDto)
-        | ({
-            type: 'ERC20'
-          } & Erc20TokenMetadataDto)
-      )
-    | null
-}
-export type DeleteAllowanceChangeDto = {
-  kind: 'delete-allowance'
-  delegate: string
-  token: string
-  /** Metadata of `token`; null when it could not be resolved */
-  tokenMetadata:
-    | (
-        | ({
-            type: 'NATIVE_TOKEN'
-          } & NativeTokenMetadataDto)
-        | ({
-            type: 'ERC20'
-          } & Erc20TokenMetadataDto)
-      )
-    | null
-}
-export type PendingSpendingLimitDataDto = {
-  /** The AllowanceModule deployment holding this state */
-  module: string
-  /** The AllowanceModule calls this transaction decodes to */
-  changes: (
-    | ({
-        kind: 'enable-module'
-      } & EnableModuleChangeDto)
-    | ({
-        kind: 'add-delegate'
-      } & AddDelegateChangeDto)
-    | ({
-        kind: 'remove-delegate'
-      } & RemoveDelegateChangeDto)
-    | ({
-        kind: 'set-allowance'
-      } & SetAllowanceChangeDto)
-    | ({
-        kind: 'reset-allowance'
-      } & ResetAllowanceChangeDto)
-    | ({
-        kind: 'delete-allowance'
-      } & DeleteAllowanceChangeDto)
-  )[]
-}
-export type PendingPolicyDto = {
-  kind: 'queued-transaction'
-  type: 'spending-limit'
-  enforcement: ModuleEnforcementDto
-  /** The queued transaction this change was found in */
-  safeTxHash: string
-  nonce: number
-  confirmations: number
-  confirmationsRequired: number
-  /** Unix seconds the transaction was proposed at */
-  proposedAt: number
-  /** The owner or delegate who proposed the transaction, if known */
-  proposer: string | null
-  data: PendingSpendingLimitDataDto
-  /** The Safe the change is queued on */
-  safe: SafeRefDto
 }
 export type ConflictHeaderQueuedItem = {
   type: 'CONFLICT_HEADER'
@@ -1699,6 +1396,390 @@ export type SpaceQueuedItemPage = {
   /** Faceted counts of the queue read: the status counts apply the `safes` filter but not the status filters, and `safes` applies the status filters but not the `safes` filter */
   counts: SpaceQueueCounts
 }
+export type CreatePolicyConfigurationRequestResponse = {
+  /** The stored configuration root */
+  root: string
+}
+export type PolicyConfigurationDto = {
+  /** Contract the guarded call targets */
+  target: string
+  /** 4-byte function selector */
+  selector: string
+  /** 0 = CALL, 1 = DELEGATECALL */
+  operation: 0 | 1
+  /** Policy contract to bind. The zero address removes the policy of this access. */
+  policy: string
+  /** Policy payload, abi-encoded as passed to the guard. At most 64 KiB (65,536 bytes). */
+  data: string
+}
+export type CreatePolicyConfigurationRequestDto = {
+  /** keccak256(abi.encode(Configuration[])), as requested on-chain */
+  root: string
+  configurations: PolicyConfigurationDto[]
+}
+export type ModuleEnforcementDto = {
+  via: 'module'
+  /** The module enforcing the policy */
+  moduleAddress: string
+}
+export type PolicyContractsDto = {
+  /** The policy implementation the guard delegates to */
+  policyContract: string
+  /** The SafePolicyGuard deployment */
+  safePolicyGuard: string
+}
+export type GuardSlotsDto = {
+  transactionGuard?: PolicyContractsDto
+  moduleGuard?: PolicyContractsDto
+}
+export type PolicyAccessDto = {
+  /** The contract the governed calls target */
+  target: string
+  /** The 4-byte function selector of the governed calls */
+  selector: string
+  operation: 'CALL' | 'DELEGATECALL'
+}
+export type GuardEnforcementDto = {
+  via: 'guard'
+  guards: GuardSlotsDto
+  /** The calls the guard applies the policy to */
+  access: PolicyAccessDto
+}
+export type OffChainEnforcementDto = {
+  /** Nothing on chain enforces the policy, so it is access rather than an audited restriction */
+  via: 'offchain'
+  /** Where the grant is held */
+  source: 'delegates'
+}
+export type NativeTokenMetadataDto = {
+  address: string
+  decimals: number
+  logoUri: string
+  name: string
+  symbol: string
+  /** Whether the Transaction Service lists the token in one of its imported token lists */
+  trusted: boolean
+  type: 'NATIVE_TOKEN'
+}
+export type Erc20TokenMetadataDto = {
+  address: string
+  decimals: number
+  logoUri: string
+  name: string
+  symbol: string
+  /** Whether the Transaction Service lists the token in one of its imported token lists */
+  trusted: boolean
+  type: 'ERC20'
+}
+export type SpendingLimitAllowanceDto = {
+  /** The token the limit applies to; zero address for native */
+  tokenAddress: string
+  /** Metadata of `tokenAddress`; null when it could not be resolved */
+  tokenMetadata:
+    | (
+        | ({
+            type: 'NATIVE_TOKEN'
+          } & NativeTokenMetadataDto)
+        | ({
+            type: 'ERC20'
+          } & Erc20TokenMetadataDto)
+      )
+    | null
+  /** Per-window ceiling, in base units */
+  amount: string
+  /** Spent in the current window, in base units */
+  spent: string
+  /** Window length in minutes; 0 never resets */
+  resetPeriodMinutes: number
+  /** Minutes since the epoch of the next reset, the unit the module counts windows in; null when it never resets */
+  resetsAtMinute: number | null
+  /** False when the reset boundary could not be recovered exactly, so `resetsAtMinute` may be up to one period out. `amount` is unaffected. */
+  resetBoundaryIsExact: boolean
+  /** False when the spender's delegate registration was removed: nothing is spendable now, but the allowance returns to effect if the delegate is re-added */
+  isDelegateActive: boolean
+  /** Unix seconds this allowance was (re-)established */
+  createdAt: number
+  /** Unix seconds of the last event that changed this allowance */
+  updatedAt: number
+}
+export type SpendingLimitSpenderDto = {
+  /** Name resolved by the client, never carried here */
+  spender: string
+  /** False when the spender is deregistered: nothing is spendable now, but the allowances survive and return if it is re-added */
+  isActive: boolean
+  allowances: SpendingLimitAllowanceDto[]
+}
+export type SpendingLimitPolicyDataDto = {
+  /** The allowance module holding this state */
+  module: string
+  spenders: SpendingLimitSpenderDto[]
+}
+export type ProposerGrantDto = {
+  /** The owner that granted the proposer */
+  delegator: string
+  /** The label this owner gave the proposer; empty when unlabelled */
+  label: string
+}
+export type ProposerDto = {
+  /** The address allowed to propose transactions */
+  proposer: string
+  /** The owners that granted it, each with the label they gave. The label is stored per grant, so two owners can label the same proposer differently */
+  delegatedBy: ProposerGrantDto[]
+}
+export type ProposerPolicyDataDto = {
+  proposers: ProposerDto[]
+}
+export type Erc20TransferRecipientDto = {
+  /** An address the Safe can send this token to */
+  account: string
+  permission: 'ONCE' | 'ALWAYS'
+}
+export type Erc20TransferPolicyDataDto = {
+  /** The ERC20 token the allowlist applies to */
+  tokenAddress: string
+  /** Metadata of `tokenAddress`; null when it could not be resolved */
+  tokenMetadata:
+    | (
+        | ({
+            type: 'NATIVE_TOKEN'
+          } & NativeTokenMetadataDto)
+        | ({
+            type: 'ERC20'
+          } & Erc20TokenMetadataDto)
+      )
+    | null
+  /** The recipients of the token transfers the policy permits */
+  recipients: Erc20TransferRecipientDto[]
+}
+export type CosignerPolicyDataDto = {
+  /** The cosigner the policy enforces. */
+  cosignerAddress: string
+}
+export type StatelessPolicyDataDto = {}
+export type SafeRefDto = {
+  chainId: string
+  address: string
+}
+export type ActivePolicyDto = {
+  type:
+    | 'spending-limit'
+    | 'recovery'
+    | 'proposer'
+    | 'erc20-transfer'
+    | 'cosigner'
+    | 'allow'
+    | 'native-transfer'
+    | 'deny'
+    | 'multisend'
+  enforcement:
+    | ({
+        via: 'module'
+      } & ModuleEnforcementDto)
+    | ({
+        via: 'guard'
+      } & GuardEnforcementDto)
+    | ({
+        via: 'offchain'
+      } & OffChainEnforcementDto)
+  /** False when the policy is configured but not enforced */
+  enabled: boolean
+  data:
+    | SpendingLimitPolicyDataDto
+    | ProposerPolicyDataDto
+    | Erc20TransferPolicyDataDto
+    | CosignerPolicyDataDto
+    | StatelessPolicyDataDto
+  /** The Safe the policy is in effect on */
+  safe: SafeRefDto
+}
+export type EnableModuleChangeDto = {
+  kind: 'enable-module'
+}
+export type AddDelegateChangeDto = {
+  kind: 'add-delegate'
+  /** The address being added as a delegate in AllowanceModule contract */
+  delegate: string
+}
+export type RemoveDelegateChangeDto = {
+  kind: 'remove-delegate'
+  /** The delegate being removed */
+  delegate: string
+  /** Whether the delegate's allowances are deleted along with it */
+  removeAllowances: boolean
+}
+export type SetAllowanceChangeDto = {
+  kind: 'set-allowance'
+  delegate: string
+  /** The token the limit applies to; zero address for native */
+  token: string
+  /** Metadata of `token`; null when it could not be resolved */
+  tokenMetadata:
+    | (
+        | ({
+            type: 'NATIVE_TOKEN'
+          } & NativeTokenMetadataDto)
+        | ({
+            type: 'ERC20'
+          } & Erc20TokenMetadataDto)
+      )
+    | null
+  /** Per-window ceiling, in base units */
+  amount: string
+  /** Window length in minutes; 0 never resets */
+  resetPeriodMinutes: number
+}
+export type ResetAllowanceChangeDto = {
+  kind: 'reset-allowance'
+  delegate: string
+  token: string
+  /** Metadata of `token`; null when it could not be resolved */
+  tokenMetadata:
+    | (
+        | ({
+            type: 'NATIVE_TOKEN'
+          } & NativeTokenMetadataDto)
+        | ({
+            type: 'ERC20'
+          } & Erc20TokenMetadataDto)
+      )
+    | null
+}
+export type DeleteAllowanceChangeDto = {
+  kind: 'delete-allowance'
+  delegate: string
+  token: string
+  /** Metadata of `token`; null when it could not be resolved */
+  tokenMetadata:
+    | (
+        | ({
+            type: 'NATIVE_TOKEN'
+          } & NativeTokenMetadataDto)
+        | ({
+            type: 'ERC20'
+          } & Erc20TokenMetadataDto)
+      )
+    | null
+}
+export type PendingSpendingLimitDataDto = {
+  /** The AllowanceModule deployment holding this state */
+  module: string
+  /** The AllowanceModule calls this transaction decodes to */
+  changes: (
+    | ({
+        kind: 'enable-module'
+      } & EnableModuleChangeDto)
+    | ({
+        kind: 'add-delegate'
+      } & AddDelegateChangeDto)
+    | ({
+        kind: 'remove-delegate'
+      } & RemoveDelegateChangeDto)
+    | ({
+        kind: 'set-allowance'
+      } & SetAllowanceChangeDto)
+    | ({
+        kind: 'reset-allowance'
+      } & ResetAllowanceChangeDto)
+    | ({
+        kind: 'delete-allowance'
+      } & DeleteAllowanceChangeDto)
+  )[]
+}
+export type PendingPolicyDto = {
+  kind: 'queued-transaction'
+  type: 'spending-limit'
+  enforcement: ModuleEnforcementDto
+  /** The queued transaction this change was found in */
+  safeTxHash: string
+  nonce: number
+  confirmations: number
+  confirmationsRequired: number
+  /** Unix seconds the transaction was proposed at */
+  proposedAt: number
+  /** The owner or delegate who proposed the transaction, if known */
+  proposer: string | null
+  data: PendingSpendingLimitDataDto
+  /** The Safe the change is queued on */
+  safe: SafeRefDto
+}
+export type SetGuardChangeDto = {
+  kind: 'set-guard'
+  /** The transaction guard before this call; null for none */
+  from: string | null
+  /** The transaction guard after this call; null removes it */
+  to: string | null
+}
+export type SetModuleGuardChangeDto = {
+  kind: 'set-module-guard'
+  /** The module guard before this call; null for none */
+  from: string | null
+  /** The module guard after this call; null removes it */
+  to: string | null
+}
+export type PendingTransactionDto = {
+  safeTxHash: string
+  nonce: number
+  confirmations: number
+  confirmationsRequired: number
+  /** Unix seconds the transaction was proposed at */
+  proposedAt: number
+  /** The owner or delegate who proposed the transaction, if known */
+  proposer: string | null
+}
+export type PendingGuardInstallationDto = {
+  kind: 'guard-installation'
+  status: 'in-signing' | 'ready'
+  /** The Safe the transaction is queued on */
+  safe: SafeRefDto
+  /** The guard installation calls of the transaction, in calldata order */
+  changes: (
+    | ({
+        kind: 'set-guard'
+      } & SetGuardChangeDto)
+    | ({
+        kind: 'set-module-guard'
+      } & SetModuleGuardChangeDto)
+  )[]
+  transaction: PendingTransactionDto
+}
+export type PendingImmediateGuardPoliciesDto = {
+  kind: 'immediate-guard-policies'
+  status: 'in-signing' | 'ready'
+  /** The Safe the transaction is queued on */
+  safe: SafeRefDto
+  /** The SafePolicyGuard the policies are bound on */
+  guard: string
+  /** The configurations configureImmediately binds */
+  configurations: PolicyConfigurationDto[]
+  transaction: PendingTransactionDto
+}
+export type PendingDelayedGuardPoliciesDto = {
+  kind: 'delayed-guard-policies'
+  /** draft: stored in CGW, no transaction in signing yet. configuration-in-signing: requestConfiguration is queued. pending-application: requested, waiting for or past readyAt. application-in-signing: applyConfiguration is queued and collecting signatures. application-ready: applyConfiguration is signed and can execute. expired: the application window has closed. */
+  status:
+    | 'draft'
+    | 'configuration-in-signing'
+    | 'pending-application'
+    | 'application-in-signing'
+    | 'application-ready'
+    | 'expired'
+  /** The Safe the configuration belongs to */
+  safe: SafeRefDto
+  /** The SafePolicyGuard of the root; null for a draft */
+  guard: string | null
+  /** keccak256(abi.encode(Configuration[])) */
+  root: string
+  /** The configurations behind the root; null when CGW does not know them */
+  configurations: PolicyConfigurationDto[] | null
+  /** Unix seconds applyConfiguration is valid from; null until the root is requested on-chain */
+  readyAt: number | null
+  /** Unix seconds the application window closes; null until the root is requested on-chain */
+  expiresAt: number | null
+  /** The queued request or apply transaction, if any */
+  transaction: PendingTransactionDto | null
+  /** Unix seconds the change was first seen: when CGW stored its configurations, else when its queued transaction was proposed. Null for a root requested outside the wallet. */
+  createdAt: number | null
+}
 export const {
   useAddressBooksGetAddressBookItemsV1Query,
   useLazyAddressBooksGetAddressBookItemsV1Query,
@@ -1744,11 +1825,11 @@ export const {
   useMembersRemoveUserV1Mutation,
   useSpaceCounterfactualSafesGetV1Query,
   useLazySpaceCounterfactualSafesGetV1Query,
+  useSpaceTransactionsGetTransactionQueueV1Query,
+  useLazySpaceTransactionsGetTransactionQueueV1Query,
   usePoliciesCreateConfigurationRequestV1Mutation,
   useSpacePoliciesGetActivePoliciesV1Query,
   useLazySpacePoliciesGetActivePoliciesV1Query,
   useSpacePoliciesGetPendingPoliciesV1Query,
   useLazySpacePoliciesGetPendingPoliciesV1Query,
-  useSpaceTransactionsGetTransactionQueueV1Query,
-  useLazySpaceTransactionsGetTransactionQueueV1Query,
 } = injectedRtkApi
