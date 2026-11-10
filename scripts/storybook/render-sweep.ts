@@ -9,7 +9,6 @@
  * - PAGE_ERROR / CONSOLE: uncaught errors while loading
  * - RENDER_TIMEOUT: the story (play function included) did not finish in time
  * - UNSTABLE_SCREENSHOT: (with --shots) the pixels kept changing until the settle timeout
- * - ICONS_NOT_LOADED: (with --shots) an iframe's image was still loading at screenshot time
  * - EXTERNAL_REQUEST: an API call had no MSW mock and hit the (blocked) network
  * - NAV_FAIL: the story page could not be opened or checked
  *

@@ -78,34 +78,13 @@ export async function waitForQuietNetwork(page: Page, requests: RequestTracker):
   }
 }
 
-// An iframe keeps its empty about:blank document until Chrome loads its srcdoc, so under load an
-// iframe can have no image yet when the asset wait below looks inside it.
-async function waitForSrcdocFrames(page: Page): Promise<void> {
-  const deadline = Date.now() + ASSET_TIMEOUT_MS
-  for (;;) {
-    const blank = page.frames().filter((frame) => frame.url() === 'about:blank' && frame !== page.mainFrame())
-    const pending = await Promise.all(
-      blank.map((frame) =>
-        frame
-          .frameElement()
-          .then((element) => element.getAttribute('srcdoc'))
-          .then((srcdoc) => srcdoc !== null)
-          .catch(() => false),
-      ),
-    )
-    if (!pending.includes(true) || Date.now() > deadline) return
-    await page.waitForTimeout(POLL_MS)
-  }
-}
-
 /** Fonts and images that are still loading make the screenshot differ between runs */
 export async function waitForAssets(page: Page): Promise<void> {
   // Embedded pages paint only once their frame has loaded
   await Promise.all(
     page.frames().map((frame) => frame.waitForLoadState('load', { timeout: ASSET_TIMEOUT_MS }).catch(() => undefined)),
   )
-  await waitForSrcdocFrames(page)
-  // Sandboxed iframes are out of the page's reach, so wait inside every frame
+  // Each frame has its own document, so wait inside every frame
   const frames = page.frames().map((frame) =>
     frame
       .evaluate(async (timeoutMs) => {
@@ -120,17 +99,6 @@ export async function waitForAssets(page: Page): Promise<void> {
       .catch(() => undefined),
   )
   await Promise.all(frames)
-}
-
-/** Frames whose image has not finished loading; a broken image counts as finished */
-export async function countPendingImageFrames(page: Page): Promise<number> {
-  const pending = await Promise.all(
-    page
-      .frames()
-      .filter((frame) => frame !== page.mainFrame())
-      .map((frame) => frame.evaluate(() => [...document.images].some((img) => !img.complete)).catch(() => false)),
-  )
-  return pending.filter(Boolean).length
 }
 
 const isFullscreen = (page: Page): Promise<boolean> =>

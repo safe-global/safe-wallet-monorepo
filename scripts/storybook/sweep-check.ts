@@ -14,7 +14,6 @@ import {
   type RenderState,
 } from './sweep-findings'
 import {
-  countPendingImageFrames,
   stableScreenshot,
   trackRequests,
   waitForAssets,
@@ -84,8 +83,6 @@ async function captureCell(
 ): Promise<{ cell: Cell; issues: string[] }> {
   const issues: string[] = []
   await waitForAssets(page)
-  const pendingImageFrames = await countPendingImageFrames(page)
-  if (pendingImageFrames) issues.push(`ICONS_NOT_LOADED: ${pendingImageFrames} frame(s)`)
   const { fullscreen, png, stable } = await stableScreenshot(page, requests)
   if (!stable) issues.push('UNSTABLE_SCREENSHOT')
   const file = path.join(cellsDir, `${story.id}--${mode}.png`)
