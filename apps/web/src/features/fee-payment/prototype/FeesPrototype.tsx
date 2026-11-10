@@ -5,6 +5,7 @@ import { SCENARIOS, type ScenarioId } from './sampleData'
 import { useFeePayerChoice } from './hooks/useFeePayerChoice'
 import { useGasParams } from './hooks/useGasParams'
 import { useFeesView } from './hooks/useFeesView'
+import { useDetailsToggle } from './hooks/useDetailsToggle'
 import { FeesFooter } from './FeesFooter'
 
 const renderTokenIcon: TokenIconRenderer = ({ logoUri, symbol }) => (
@@ -15,12 +16,12 @@ export const FeesPrototype = ({ scenario: id }: { scenario: ScenarioId }) => {
   const scenario = SCENARIOS[id]
   const { choice, onChoiceChange } = useFeePayerChoice(scenario)
   const gas = useGasParams(scenario)
-  const { view, gasFeeEditor } = useFeesView(scenario, choice, gas)
+  const { view, gasFeeDetails } = useFeesView(scenario, choice, gas, useDetailsToggle())
 
   return (
     <FeesPage
       view={view}
-      gasFeeEditor={gasFeeEditor}
+      gasFeeDetails={gasFeeDetails}
       onChoiceChange={onChoiceChange}
       currency="usd"
       renderTokenIcon={renderTokenIcon}

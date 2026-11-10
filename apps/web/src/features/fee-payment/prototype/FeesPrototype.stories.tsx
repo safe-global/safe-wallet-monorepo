@@ -20,8 +20,8 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const openEditor: Story['play'] = async ({ canvasElement }) => {
-  const toggle = within(canvasElement).getByTestId('gas-fee-edit-toggle')
+const openDetails: Story['play'] = async ({ canvasElement }) => {
+  const toggle = within(canvasElement).getByTestId('gas-fee-details-toggle')
   await userEvent.click(toggle)
   toggle.blur()
 }
@@ -35,7 +35,7 @@ export const SignerWallet: Story = {
 export const SignerWalletOpen: Story = {
   name: 'Signer wallet · editing',
   args: { scenario: 'signerWallet' },
-  play: openEditor,
+  play: openDetails,
 }
 
 export const CannotEstimate: Story = {
@@ -44,11 +44,17 @@ export const CannotEstimate: Story = {
 }
 
 export const PaidFromSafe: Story = {
-  name: 'Safe account · static row',
+  name: 'Safe account · view only',
   args: { scenario: 'paidFromSafe' },
 }
 
+export const PaidFromSafeOpen: Story = {
+  name: 'Safe account · view open',
+  args: { scenario: 'paidFromSafe' },
+  play: openDetails,
+}
+
 export const ProPlan: Story = {
-  name: 'Pro plan · static row',
+  name: 'Pro plan · view only',
   args: { scenario: 'proPlan' },
 }

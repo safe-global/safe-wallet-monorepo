@@ -250,50 +250,75 @@ export type GasPayerSelectorProps = {
   renderTokenIcon: TokenIconRenderer
   /** The strip under the fee rows (Pro upsell or sponsored counter); none when null. */
   footer: ReactNode
-  /** The gas settings editor opened by the Gas fee row's Edit link; the row is static without it. */
-  gasFeeEditor?: GasFeeEditorSlot
+  /** Opened by the Edit/View button next to "Gas fee": an editor ('edit') or read-only details ('view'); static row without it. */
+  gasFeeDetails?: GasFeeDetailsSlot
 }
 
-export type GasFeeEditorSlot = { open: boolean; onOpenChange: (open: boolean) => void; content: ReactNode }
+export type GasFeeDetailsSlot = {
+  mode: 'edit' | 'view'
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  content: ReactNode
+}
 
-const EditableGasFeeRow = ({
+const DETAILS_BUTTON = {
+  edit: { label: 'Edit gas settings', text: 'Edit', className: 'border border-border bg-card shadow-xs' },
+  view: { label: 'View gas details', text: 'View', className: 'bg-foreground/[0.08]' },
+}
+
+const ExpandableGasFeeRow = ({
   label,
   value,
-  editor,
+  details,
 }: {
   label: ReactNode
   value: ReactNode
-  editor: GasFeeEditorSlot
-}): ReactElement => (
-  // One gray box for the row and its editor: on hover, and while the panel is mounted (open or closing).
-  <Collapsible
-    open={editor.open}
-    onOpenChange={editor.onOpenChange}
-    className="-mx-2 rounded-md px-2 transition-colors duration-200 hover:bg-muted has-[[data-slot=collapsible-content]]:bg-muted has-[[data-slot=collapsible-trigger]:focus-visible]:ring-2 has-[[data-slot=collapsible-trigger]:focus-visible]:ring-ring motion-reduce:transition-none"
-  >
-    <CollapsibleTrigger
-      aria-label="Edit gas settings"
-      data-testid="gas-fee-edit-toggle"
-      nativeButton={false}
-      render={<div />}
-      className={cn(css.feeRow, 'group/gas-fee cursor-pointer outline-none')}
+  details: GasFeeDetailsSlot
+}): ReactElement => {
+  const { label: ariaLabel, text, className } = DETAILS_BUTTON[details.mode]
+  return (
+    // One gray box for the row and its panel: on hover, and while the panel is mounted (open or closing).
+    <Collapsible
+      open={details.open}
+      onOpenChange={details.onOpenChange}
+      className="-mx-2 rounded-md px-2 transition-colors duration-200 hover:bg-muted has-[[data-slot=collapsible-content]]:bg-muted has-[[data-slot=collapsible-trigger]:focus-visible]:ring-2 has-[[data-slot=collapsible-trigger]:focus-visible]:ring-ring motion-reduce:transition-none"
     >
-      {label}
-      <span className="flex items-center gap-3">
+      <CollapsibleTrigger
+        aria-label={ariaLabel}
+        data-testid="gas-fee-details-toggle"
+        nativeButton={false}
+        render={<div />}
+        className={cn(css.feeRow, 'group/gas-fee cursor-pointer outline-none')}
+      >
+        <span className="flex items-center gap-2">
+          {label}
+          <span
+            aria-hidden
+            data-testid={`gas-fee-${details.mode}-button`}
+            className={cn(
+              'inline-flex h-5 items-center rounded-full px-2 text-xs leading-none font-medium text-muted-foreground transition-colors group-hover/gas-fee:text-foreground',
+              details.mode === 'edit' && 'group-data-[panel-open]/gas-fee:hidden',
+              className,
+            )}
+          >
+            {details.mode === 'view' ? (
+              <>
+                <span className="group-data-[panel-open]/gas-fee:hidden">{text}</span>
+                <span className="hidden group-data-[panel-open]/gas-fee:inline">Hide</span>
+              </>
+            ) : (
+              text
+            )}
+          </span>
+        </span>
         {value}
-        <Typography
-          variant="paragraph-small-medium"
-          className="underline underline-offset-4 group-data-[panel-open]/gas-fee:hidden"
-        >
-          Edit
-        </Typography>
-      </span>
-    </CollapsibleTrigger>
-    <CollapsibleContent className="h-(--collapsible-panel-height) overflow-hidden transition-[height] duration-[420ms] ease-soft data-ending-style:h-0 data-ending-style:duration-[320ms] data-ending-style:ease-in-out data-starting-style:h-0 motion-reduce:transition-none">
-      {editor.content}
-    </CollapsibleContent>
-  </Collapsible>
-)
+      </CollapsibleTrigger>
+      <CollapsibleContent className="h-(--collapsible-panel-height) overflow-hidden transition-[height] duration-[420ms] ease-soft data-ending-style:h-0 data-ending-style:duration-[320ms] data-ending-style:ease-in-out data-starting-style:h-0 motion-reduce:transition-none">
+        {details.content}
+      </CollapsibleContent>
+    </Collapsible>
+  )
+}
 
 const GasPayerSelector = ({
   view,
@@ -302,7 +327,7 @@ const GasPayerSelector = ({
   currency,
   renderTokenIcon,
   footer,
-  gasFeeEditor,
+  gasFeeDetails,
 }: GasPayerSelectorProps): ReactElement => {
   const { payer, gasToken, executionFee, gasFee, sponsored, sponsorKind, totalOutgoing, safeHasEnoughGas } = view
   const singleToken = gasToken.tokens.length <= 1
@@ -347,11 +372,11 @@ const GasPayerSelector = ({
             )}
           </FeeRow>
 
-          {gasFeeEditor ? (
-            <EditableGasFeeRow
+          {gasFeeDetails ? (
+            <ExpandableGasFeeRow
               label={<FeeLabel label="Gas fee" tooltip={GAS_FEE_TOOLTIP} />}
               value={<FeeValue fee={gasFee} sponsored={sponsored} sponsorKind={sponsorKind} />}
-              editor={gasFeeEditor}
+              details={gasFeeDetails}
             />
           ) : (
             <FeeRow testId="gas-fee-row">

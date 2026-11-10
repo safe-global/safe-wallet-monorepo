@@ -2,6 +2,7 @@ import type { FeePayerView, GasPayerChoice, NetworkFee } from '@safe-global/view
 import type { FeesPageProps } from '@safe-global/views/features/fee-payment/components/FeesPage'
 import { ETH_TOKEN, ETH_USD, type Scenario } from '../sampleData'
 import type { GasParamName, GasParamsState } from './useGasParams'
+import type { useDetailsToggle } from './useDetailsToggle'
 
 const GWEI = 1e-9
 
@@ -26,7 +27,8 @@ export const useFeesView = (
   scenario: Scenario,
   choice: GasPayerChoice,
   gas: GasParamsState,
-): Pick<FeesPageProps, 'view' | 'gasFeeEditor'> => {
+  viewToggle: ReturnType<typeof useDetailsToggle>,
+): Pick<FeesPageProps, 'view' | 'gasFeeDetails'> => {
   const paysFromSafe = choice === 'PAY_FROM_SAFE'
   const walletFee: NetworkFee = gas.saved.gasLimit ? toFee(gas.saved.gasLimit, gas.saved.maxFeeGwei) : { error: true }
   const draft = gas.draft
@@ -41,25 +43,60 @@ export const useFeesView = (
     footer: scenario.footer,
   }
 
-  if (choice !== 'WALLET') return { view }
+  if (paysFromSafe)
+    return {
+      view,
+      gasFeeDetails: {
+        mode: 'view',
+        ...viewToggle,
+        summary: {
+          rows: [
+            { label: 'Gas limit', value: scenario.safeQuote.gasLimit },
+            { label: 'Gas price (Gwei)', value: scenario.safeQuote.gasPriceGwei },
+            { label: 'Refund to', value: 'Safe relayer' },
+          ],
+          note: 'Set by the relayer quote at signing. Paid from the Safe, so it cannot be edited.',
+        },
+      },
+    }
+
+  if (choice === 'SPONSORED')
+    return {
+      view,
+      gasFeeDetails: {
+        mode: 'view',
+        ...viewToggle,
+        summary: {
+          rows: (['gasLimit', 'maxPriorityFeeGwei', 'maxFeeGwei'] as const).map((name) => ({
+            label: FIELD_LABELS[name],
+            value: gas.saved[name] || 'Cannot estimate',
+          })),
+          note: 'Covered by your Pro plan. The relayer sets the gas.',
+        },
+      },
+    }
 
   return {
     view,
-    gasFeeEditor: {
+    gasFeeDetails: {
+      mode: 'edit',
       open: draft !== null,
       onOpenChange: (open) => (open ? gas.startEditing() : gas.cancelEditing()),
-      fields: (Object.keys(FIELD_LABELS) as GasParamName[]).map((name) => ({
-        name,
-        label: FIELD_LABELS[name],
-        value: draft?.[name] ?? '',
-        error: gas.errors[name],
-        autoFocus: name === 'gasLimit' && !gas.estimate.gasLimit,
-        onChange: (value: string) => gas.change(name, value),
-      })),
-      canSave: Object.keys(gas.errors).length === 0,
-      onSave: gas.save,
-      onCancel: gas.cancelEditing,
-      onReset: gas.estimate.gasLimit && JSON.stringify(draft) !== JSON.stringify(gas.estimate) ? gas.reset : undefined,
+      editor: {
+        fields: (Object.keys(FIELD_LABELS) as GasParamName[]).map((name) => ({
+          name,
+          label: FIELD_LABELS[name],
+          value: draft?.[name] ?? '',
+          error: gas.errors[name],
+          autoFocus: name === 'gasLimit' && !gas.estimate.gasLimit,
+          onChange: (value: string) => gas.change(name, value),
+        })),
+        canSave: Object.keys(gas.errors).length === 0,
+        onSave: gas.save,
+        onCancel: gas.cancelEditing,
+        onReset:
+          gas.estimate.gasLimit && JSON.stringify(draft) !== JSON.stringify(gas.estimate) ? gas.reset : undefined,
+      },
     },
   }
 }
