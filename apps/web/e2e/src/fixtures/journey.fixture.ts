@@ -1,17 +1,17 @@
-import { cypressEnvironment } from '../../environment/cypress.mjs'
+import { isolatedEnvironment } from '../../environment/isolated-environment.mjs'
 import { short } from '../../environment/scenarios/chain.mjs'
 import { createOwners } from '../../environment/scenarios/safe.mjs'
 import { WalletPage } from '../pages/wallet.page'
 import { addSafeToAccounts } from './seed-added-safes'
 import { seedSwitchableWallet } from './seed-wallet'
+import type { Owners } from './spec-data'
 import { test as base } from './test.fixture'
 
-export type JourneyEnvironment = ReturnType<typeof cypressEnvironment> & { SAFE_RPC_URL: string }
+export type JourneyEnvironment = ReturnType<typeof isolatedEnvironment> & { SAFE_RPC_URL: string }
 
-export type Owners = ReturnType<typeof createOwners>
-export type OwnerName = 'owner1' | 'owner2' | 'owner3' | 'owner4'
+export type OwnerName = keyof Owners
 
-const OWNER_NAMES: OwnerName[] = ['owner1', 'owner2', 'owner3', 'owner4']
+const OWNER_NAMES: OwnerName[] = ['alice', 'bob', 'carol', 'dave']
 /** Names the owner that the wallet connects on the next page load */
 const CONNECTED_OWNER_COOKIE = 'e2e-connected-owner'
 
@@ -27,7 +27,7 @@ export type Journey = {
 }
 
 function journeyEnvironment(): JourneyEnvironment {
-  const env = cypressEnvironment(process.env)
+  const env = isolatedEnvironment(process.env)
   if (!('SAFE_RPC_URL' in env) || typeof env.SAFE_RPC_URL !== 'string') {
     throw new Error(
       'Journeys need the isolated stack: run them with `yarn workspace @safe-global/web e2e:env playwright`',
@@ -36,7 +36,7 @@ function journeyEnvironment(): JourneyEnvironment {
   return { ...env, SAFE_RPC_URL: env.SAFE_RPC_URL }
 }
 
-/** Every journey starts connected as OWNER_4 */
+/** Every journey starts connected as Alice */
 export const test = base.extend<{ journey: Journey }>({
   // Not `use`: the React hooks lint rule takes that name for a hook.
   journey: async ({ safePage }, provide, testInfo) => {
@@ -46,7 +46,7 @@ export const test = base.extend<{ journey: Journey }>({
     if (!baseURL) throw new Error('Journeys need a baseURL for the cookie that names the connected owner')
     await seedSwitchableWallet(safePage, {
       keys: Object.fromEntries(OWNER_NAMES.map((name) => [name, owners[name].privateKey])),
-      initial: 'owner4',
+      initial: 'alice',
       cookie: CONNECTED_OWNER_COOKIE,
     })
 

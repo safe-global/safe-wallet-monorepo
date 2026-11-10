@@ -1,4 +1,3 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import NextLink from 'next/link'
@@ -75,7 +74,7 @@ const SafeImprint = () => (
   </div>
 )
 
-const Imprint: NextPage = () => {
+const Imprint = () => {
   const isOfficialHost = useIsOfficialHost()
 
   return (

@@ -1,20 +1,18 @@
-import { spawn } from 'node:child_process'
+import { execFile, spawn } from 'node:child_process'
 import { existsSync } from 'node:fs'
 import { readFile, rm } from 'node:fs/promises'
 import { randomUUID } from 'node:crypto'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
-import { requiredChains, selectCypressSpecs } from './cypress.mjs'
+import { promisify } from 'node:util'
 import { assertProjectName, chainProfiles, localUrl } from './local-stack.mjs'
 import { playwrightSpecs } from './playwright-specs.mjs'
-import { isolatedSpecs } from './specs.mjs'
 
 const webRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
-const cypressArtifacts = 'e2e/environment/artifacts/cypress'
 const playwrightArtifacts = 'e2e/environment/artifacts/playwright'
-const walletActions = ['dev', 'build', 'cypress', 'cypress-open', 'playwright']
+const walletActions = ['dev', 'build', 'playwright']
 const actions = new Set(['up', 'down', 'reset', 'status', 'logs', 'config', 'test', 'smoke', 'indexing', 'check'])
-for (const action of [...walletActions, 'plan']) actions.add(action)
+for (const action of [...walletActions, 'plan', 'needs']) actions.add(action)
 
 // Each check gets its own project, so it never touches an interactive stack.
 const defaultProject = (action) => (action === 'check' ? `safe-e2e-${randomUUID()}` : 'safe-e2e-local')
@@ -43,9 +41,13 @@ export function walletEnvironment(manifest, env = process.env) {
   const ledger = manifest.ledgerEmulatorUrl
     ? { NEXT_PUBLIC_LEDGER_EMULATOR_URL: localUrl(manifest.ledgerEmulatorUrl, 'Ledger emulator') }
     : {}
+  const trezor = manifest.trezorEmulatorUrl
+    ? { TREZOR_EMULATOR_URL: localUrl(manifest.trezorEmulatorUrl, 'Trezor emulator') }
+    : {}
   return {
     ...filtered,
     ...ledger,
+    ...trezor,
     NEXT_PUBLIC_IS_PRODUCTION: 'false',
     NEXT_PUBLIC_IS_TEST_E2E: 'true',
     NEXT_PUBLIC_POLLING_INTERVAL: '2000',
@@ -120,65 +122,58 @@ async function assertForkReady(fork) {
   }
 }
 
-export function missingChainCommands(specs, manifest, infrastructure, registry = isolatedSpecs) {
-  return requiredChains(specs, registry)
-    .filter((chainId) => !manifest.chains?.[chainId])
-    .map((chainId) => `python3 ${infrastructure}/scripts/test_env.py up --chain ${chainProfiles[chainId]}`)
+/** The optional forks (by Compose profile) and device emulators that `specs` need */
+export function stackNeeds(specs, registry = playwrightSpecs) {
+  const required = (key) => [...new Set(specs.flatMap((spec) => registry[spec]?.[key] ?? []))]
+  return { chains: required('chains').map((chainId) => chainProfiles[chainId]), devices: required('devices') }
 }
 
-/**
- * The GitHub Actions matrix: one entry per Playwright shard, each on its own stack. Playwright assigns the specs to
- * shards only when it runs, so every shard starts the forks that any registered spec needs.
- */
+/** The commands that start the forks and device emulators that `specs` need and the stack does not run */
+export function missingStackCommands(specs, manifest, infrastructure, registry = playwrightSpecs) {
+  const up = `python3 ${infrastructure}/scripts/test_env.py up`
+  const running = Object.keys(manifest.chains ?? {}).map((chainId) => chainProfiles[chainId])
+  const { chains, devices } = stackNeeds(specs, registry)
+  return [
+    ...chains.filter((chain) => !running.includes(chain)).map((chain) => `${up} --chain ${chain}`),
+    ...devices.filter((device) => !manifest.devices?.includes(device)).map((device) => `${up} --device ${device}`),
+  ]
+}
+
+/** The commands that start what the specs of this shard need and the stack does not run */
+export async function missingShardCommands(env, manifest, infrastructure) {
+  return missingStackCommands(await shardSpecs(env), manifest, infrastructure)
+}
+
+/** The GitHub Actions matrix: one entry per Playwright shard, each on its own stack. */
 export function planMatrix(shardCount, env = process.env, registry = playwrightSpecs) {
   if (!Number.isInteger(shardCount) || shardCount < 1) throw new Error('Shard count must be a positive integer')
   // A sharded Playwright run that matches no test passes, so an unmatched filter must fail here.
   if (!selectPlaywrightSpecs(env, registry).length) {
     throw new Error(`SAFE_E2E_SPECS matches no registered Playwright spec: ${env.SAFE_E2E_SPECS}`)
   }
-  const chains = requiredChains(Object.keys(registry), registry).map((chainId) => chainProfiles[chainId])
-  return { include: Array.from({ length: shardCount }, (_, index) => ({ shard: index + 1, chains: chains.join(' ') })) }
+  return { include: Array.from({ length: shardCount }, (_, index) => ({ shard: index + 1 })) }
+}
+
+/** The spec files in a Playwright JSON report of `--list`, by path under e2e/tests */
+export function listedSpecs(report) {
+  const files = new Set()
+  const collect = (suite) => {
+    if (suite.file && suite.specs?.length) files.add(suite.file)
+    for (const child of suite.suites ?? []) collect(child)
+  }
+  for (const suite of report.suites ?? []) collect(suite)
+  return [...files]
+}
+
+/** The specs that this shard runs: Playwright assigns them to shards, so only its own list can tell */
+export async function shardSpecs(env) {
+  const listEnv = { ...env, SAFE_E2E_ISOLATED: 'true', PLAYWRIGHT_BASE_URL: webUrl(env) }
+  const args = [...playwrightRunArguments(env), '--list', '--reporter=json']
+  const { stdout } = await promisify(execFile)('yarn', args, { cwd: webRoot, env: listEnv, maxBuffer: 64 << 20 })
+  return listedSpecs(JSON.parse(stdout))
 }
 
 const webUrl = (env) => env.SAFE_E2E_WEB_URL || `http://localhost:${env.SAFE_E2E_WEB_PORT || '3080'}`
-
-const cypressConfig = (env, extra) =>
-  JSON.stringify({
-    baseUrl: webUrl(env),
-    retries: 0,
-    video: true,
-    trashAssetsBeforeRuns: false,
-    videosFolder: `${cypressArtifacts}/videos`,
-    ...extra,
-  })
-
-export function cypressRunArguments(specs, env = process.env) {
-  return [
-    'cypress:run',
-    '--browser',
-    env.SAFE_E2E_BROWSER || 'chrome',
-    '--config',
-    cypressConfig(env, {}),
-    '--spec',
-    specs.join(','),
-    '--record',
-    'false',
-    '--reporter',
-    'junit',
-    '--reporter-options',
-    `mochaFile=${cypressArtifacts}/reports/[hash].xml,toConsole=true`,
-  ]
-}
-
-export function cypressOpenArguments(specs, env = process.env) {
-  return [
-    'cypress:open',
-    '--browser',
-    env.SAFE_E2E_BROWSER || 'chrome',
-    '--config',
-    cypressConfig(env, { specPattern: specs }),
-  ]
-}
 
 const playwrightFilters = (env) => (env.SAFE_E2E_SPECS ? env.SAFE_E2E_SPECS.split(',').map((name) => name.trim()) : [])
 
@@ -197,7 +192,7 @@ export function selectPlaywrightSpecs(env = process.env, registry = playwrightSp
   return Object.keys(registry).filter((spec) => !filters.length || filters.some((filter) => filter.test(spec)))
 }
 
-/** What both runners pass to their specs: the wallet environment plus the stack's service URLs. */
+/** What the Playwright run passes to its specs: the wallet environment plus the stack's service URLs. */
 export function stackEnvironment(project, manifest, walletEnv) {
   return {
     ...walletEnv,
@@ -275,26 +270,12 @@ function stackRunner(config, runner) {
   }
 }
 
-async function runCypress(config, runner, manifest, walletEnv) {
-  const specs = selectCypressSpecs(process.env.SAFE_E2E_SPECS)
-  const missing = missingChainCommands(specs, manifest, config.infrastructure)
-  if (missing.length) {
-    throw new Error(`Selected specs need forks that are not running. Start them with:\n${missing.join('\n')}`)
-  }
-  const env = stackEnvironment(config.project, manifest, walletEnv)
-  if (config.action === 'cypress-open') {
-    await runner.execute('yarn', cypressOpenArguments(specs, env), { env })
-    return
-  }
-  await rm(resolve(webRoot, cypressArtifacts), { recursive: true, force: true })
-  // One process for the whole shard: Cypress starts once, and browser memory management clears between specs.
-  await runner.execute('yarn', cypressRunArguments(specs, env), { env })
-}
-
 async function runPlaywright(config, runner, manifest, walletEnv) {
-  const missing = missingChainCommands(selectPlaywrightSpecs(), manifest, config.infrastructure, playwrightSpecs)
+  const missing = await missingShardCommands(process.env, manifest, config.infrastructure)
   if (missing.length) {
-    throw new Error(`Selected specs need forks that are not running. Start them with:\n${missing.join('\n')}`)
+    throw new Error(
+      `Selected specs need forks or device emulators that are not running. Start them with:\n${missing.join('\n')}`,
+    )
   }
   const env = { ...stackEnvironment(config.project, manifest, walletEnv), PLAYWRIGHT_BASE_URL: webUrl(process.env) }
   await rm(resolve(webRoot, playwrightArtifacts), { recursive: true, force: true })
@@ -305,8 +286,7 @@ async function runWalletAction(config, runner) {
   const manifest = await readManifest(config.infrastructure, config.project)
   const env = { ...walletEnvironment(manifest), PORT: process.env.SAFE_E2E_WEB_PORT || '3080' }
   await assertEnvironmentReady(manifest)
-  if (config.action.startsWith('cypress')) await runCypress(config, runner, manifest, env)
-  else if (config.action === 'playwright') await runPlaywright(config, runner, manifest, env)
+  if (config.action === 'playwright') await runPlaywright(config, runner, manifest, env)
   else await runner.execute('yarn', [config.action], { env })
 }
 
@@ -321,6 +301,12 @@ async function main() {
   const config = configuration(process.argv.slice(2))
   if (config.action === 'plan') {
     console.log(JSON.stringify(planMatrix(Number(process.env.SAFE_E2E_SHARDS || 1))))
+    return
+  }
+  // GitHub Actions step outputs for the stack of this shard
+  if (config.action === 'needs') {
+    const { chains, devices } = stackNeeds(await shardSpecs(process.env))
+    console.log(`chains=${chains.join(' ')}\ndevices=${devices.join(' ')}`)
     return
   }
   const runner = createProcessRunner()

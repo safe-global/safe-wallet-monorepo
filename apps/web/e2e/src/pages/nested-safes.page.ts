@@ -40,8 +40,13 @@ export class NestedSafesPage {
     return this.rows.filter({ hasText: name })
   }
 
-  openSafeLink(name: string): Locator {
-    return this.row(name).getByRole('link', { name: 'Open Safe' })
+  /** Open the Safe of the row named `name` by clicking its row link */
+  async openSafe(name: string): Promise<void> {
+    const link = this.row(name).getByRole('link', { name: 'Open Safe' })
+    await link.waitFor()
+    const { height } = (await link.boundingBox()) ?? { height: 0 }
+    // Beside the row content: a wide address can push the copy button over the row's centre
+    await link.click({ position: { x: 4, y: height / 2 } })
   }
 
   /**

@@ -15,22 +15,27 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
-    "@faker-js/faker": "^9.0.3",
+    "@faker-js/faker": "^10.5.0",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
     "@types/jest": "^30.0.0",
-    "eslint": "^9.29.0",
+    "@types/node": "^22.13.1",
+    "eslint": "^9.39.4",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "ethers": "6.17.0",
     "jest": "^30.5.2",
-    "prettier": "^3.9.9",
+    "jest-environment-jsdom": "^30.5.2",
+    "prettier": "^3.9.10",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
     "typescript": "~5.9.2",
-    "typescript-eslint": "^8.70.1"
+    "typescript-eslint": "^8.72.1"
   },
   "dependencies": {
     "@cowprotocol/sdk-app-data": "5.3.2",
     "@noble/curves": "1.9.7",
     "@noble/hashes": "1.8.0",
-    "@testing-library/react": "^16.3.0",
     "date-fns": "^4.1.0",
     "jest-fixed-jsdom": "^0.0.11",
     "ts-node": "^10.9.2"
@@ -38,6 +43,6 @@
   "peerDependencies": {
     "@safe-global/protocol-kit": "^8.0.10",
     "@safe-global/store": "*",
-    "@safe-global/types-kit": "^3.1.x"
+    "@safe-global/types-kit": "^4.0.1"
   }
 }

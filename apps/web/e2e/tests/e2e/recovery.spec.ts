@@ -17,7 +17,7 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const recoverer = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
 
     const recovery = new RecoveryPage(safePage)
     const review = new TxReviewPage(safePage)
@@ -40,7 +40,7 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
     safePage,
     journey,
   }) => {
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
     const { delayModifier } = await seedRecovery(safe, {
       recoverer: Wallet.createRandom().address,
       cooldownSeconds: 2 * DAY_IN_SECONDS,
@@ -63,7 +63,7 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
     safePage,
     journey,
   }) => {
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
     const { delayModifier } = await seedRecovery(safe, {
       recoverer: Wallet.createRandom().address,
       cooldownSeconds: 2 * DAY_IN_SECONDS,
@@ -88,9 +88,9 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const newOwner = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
     const { delayModifier } = await seedRecovery(safe, {
-      recoverer: journey.owners.owner4.address,
+      recoverer: journey.owners.alice.address,
       cooldownSeconds: 2 * DAY_IN_SECONDS,
     })
 
@@ -110,12 +110,12 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
   })
 
   test('should skip the queued recovery when an owner cancels it', async ({ safePage, journey }) => {
-    const { owner1, owner2, owner3, owner4 } = journey.owners
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
-    const seeded = await seedRecovery(safe, { recoverer: owner2.address, cooldownSeconds: 2 * DAY_IN_SECONDS })
+    const { bob, carol, dave, alice } = journey.owners
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
+    const seeded = await seedRecovery(safe, { recoverer: carol.address, cooldownSeconds: 2 * DAY_IN_SECONDS })
     await seedProposedRecovery(seeded, {
-      recoverer: owner2,
-      swap: { oldOwner: owner1.address, newOwner: owner3.address },
+      recoverer: carol,
+      swap: { oldOwner: bob.address, newOwner: dave.address },
     })
 
     const recovery = new RecoveryPage(safePage)
@@ -129,7 +129,7 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
       .poll(() => readDelayModifier(journey.env, seeded.delayModifier))
       .toMatchObject({ txNonce: 1, queueNonce: 1 })
     expect(sorted((await readSafeSetup(journey.env, safe.address)).owners)).toEqual(
-      sorted([owner4.address, owner1.address]),
+      sorted([alice.address, bob.address]),
     )
 
     await safePage.goto(`${ROUTES.transactionsQueue}?safe=${safe.prefixedAddress}`)
@@ -140,12 +140,12 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
     safePage,
     journey,
   }) => {
-    const { owner1, owner2, owner3, owner4 } = journey.owners
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
-    const seeded = await seedRecovery(safe, { recoverer: owner2.address, cooldownSeconds: 1 })
+    const { bob, carol, dave, alice } = journey.owners
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
+    const seeded = await seedRecovery(safe, { recoverer: carol.address, cooldownSeconds: 1 })
     await seedExecutableRecovery(seeded, {
-      recoverer: owner2,
-      swap: { oldOwner: owner1.address, newOwner: owner3.address },
+      recoverer: carol,
+      swap: { oldOwner: bob.address, newOwner: dave.address },
     })
 
     const recovery = new RecoveryPage(safePage)
@@ -155,9 +155,9 @@ test.describe('Account recovery', { tag: '@e2e' }, () => {
 
     await expect
       .poll(async () => sorted((await readSafeSetup(journey.env, safe.address)).owners))
-      .toEqual(sorted([owner4.address, owner3.address]))
+      .toEqual(sorted([alice.address, dave.address]))
 
     await recovery.gotoOwners(safe.prefixedAddress)
-    await expect(safePage.getByTestId('signer-list')).toContainText(owner3.address)
+    await expect(safePage.getByTestId('signer-list')).toContainText(dave.address)
   })
 })

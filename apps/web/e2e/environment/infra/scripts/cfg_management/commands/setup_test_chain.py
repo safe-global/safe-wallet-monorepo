@@ -19,7 +19,7 @@ def create_placeholder_image(color: str = "#B8AAF8") -> ContentFile:
     return ContentFile(buffer.getvalue(), name="currency_logo.png")
 
 
-# Staging Sepolia features for WALLET_WEB, which the existing Cypress specs expect.
+# Staging Sepolia features for WALLET_WEB, which the specs expect.
 # Left out: SECURITY_HUB stalls transaction signing in the local stack.
 # Added: QUEUE_SERVICE, because CGW runs with FF_SAFE_QUEUE_SERVICE and the wallet must sign for it.
 DEFAULT_FEATURES = [
@@ -98,9 +98,8 @@ SAFE_APPS = [
         "Compose custom contract interactions and batch them into a single transaction",
         True,
     ),
-    # Not in this repository, so the hosted app is listed, as on staging.
     (
-        "https://safe-apps.dev.5afe.dev/drain-safe",
+        "http://localhost:4001",
         "Drain Account",
         "Transfer all your assets in batch",
         False,

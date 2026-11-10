@@ -1,17 +1,17 @@
 import { useContext, useEffect, type ReactElement } from 'react'
 import { useLoadFeature } from '@/features/__core__'
-import { GTFFeature, useFeesPreview, useIsGtfSlotVisible } from '@/features/gtf'
+import { FeePaymentFeature, useFeesPreview, useIsFeeCardSlotVisible } from '@/features/fee-payment'
 import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 import { TxFlowContext } from '../TxFlowProvider'
 import { SlotName, withSlot } from '../slots'
 
 const FeesPreview = (): ReactElement => {
-  const { FeesPreview: FeesPreviewComponent } = useLoadFeature(GTFFeature)
+  const { FeesPreview: FeesPreviewComponent } = useLoadFeature(FeePaymentFeature)
   const feesData = useFeesPreview()
   const { setIsSubmitDisabled } = useContext(TxFlowContext)
 
   // Block submit while the CGW fee preview is resolving. Otherwise a fast click on Continue/Execute
-  // signs before `gtfSelectedGasToken` is set, silently downgrading a Safe-pays tx to signer-pays.
+  // signs before `feeGasToken` is set, silently downgrading a Safe-pays tx to signer-pays.
   useEffect(() => {
     setIsSubmitDisabled(!!feesData.loading)
     return () => setIsSubmitDisabled(false)
@@ -30,7 +30,7 @@ const FeesPreviewSlot = withSlot({
   Component: FeesPreview,
   slotName: SlotName.Main,
   id: 'feesPreview',
-  useSlotCondition: useIsGtfSlotVisible,
+  useSlotCondition: useIsFeeCardSlotVisible,
 })
 
 export default FeesPreviewSlot

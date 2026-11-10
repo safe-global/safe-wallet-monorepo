@@ -16,7 +16,7 @@ export type SeededRecovery = {
 /** Swaps one owner of the Safe for a new one, the proposal that a recoverer sends */
 export type OwnerSwap = { oldOwner: string; newOwner: string }
 
-/** Enables a Delay modifier on the Safe with `recoverer` and no expiry, signed by the Safe's OWNER_4. */
+/** Enables a Delay modifier on the Safe with `recoverer` and no expiry, signed by the Safe's Alice. */
 export async function seedRecovery(
   safe: SeededSafe,
   { recoverer, cooldownSeconds }: { recoverer: string; cooldownSeconds: number },

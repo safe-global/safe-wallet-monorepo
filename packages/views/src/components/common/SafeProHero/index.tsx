@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import { cn } from '@safe-global/views/utils/cn'
 
 const ALT = 'A Workspace from Safe Pro, with its accounts, members and transactions'
@@ -13,12 +12,15 @@ const VARIANTS = {
 
 const SafeProHero = ({ variant = 'wide' }: { variant?: keyof typeof VARIANTS }) => (
   <div className={cn('relative w-full overflow-hidden', VARIANTS[variant])}>
-    <Image src="/images/safe-pro/pro-announcement-hero.jpg" alt={ALT} fill className="object-cover dark:hidden" />
-    <Image
+    <img
+      src="/images/safe-pro/pro-announcement-hero.jpg"
+      alt={ALT}
+      className="absolute inset-0 h-full w-full object-cover dark:hidden"
+    />
+    <img
       src="/images/safe-pro/pro-announcement-hero-dark.jpg"
       alt={ALT}
-      fill
-      className="hidden object-cover dark:block"
+      className="absolute inset-0 hidden h-full w-full object-cover dark:block"
     />
   </div>
 )

@@ -49,8 +49,8 @@ test.describe('Ledger signing', { tag: '@e2e' }, () => {
   }, testInfo) => {
     const queue = new TxQueuePage(safePage)
     const transactionReview = new TxReviewPage(safePage)
-    await addSafeToAccounts(safePage, safes.SEP_LEDGER_SIGN_SAFE)
-    await queue.goto(safes.SEP_LEDGER_SIGN_SAFE)
+    await addSafeToAccounts(safePage, safes.ledgerSign)
+    await queue.goto(safes.ledgerSign)
     await expect(queue.transactionWithNonce(0)).toContainText('1/3')
     await walletPage.connectLedger(ledgerOwner.address)
 
@@ -70,8 +70,8 @@ test.describe('Ledger signing', { tag: '@e2e' }, () => {
   }, testInfo) => {
     const queue = new TxQueuePage(safePage)
     const transactionReview = new TxReviewPage(safePage)
-    await addSafeToAccounts(safePage, safes.SEP_LEDGER_EXECUTE_SAFE)
-    await queue.goto(safes.SEP_LEDGER_EXECUTE_SAFE)
+    await addSafeToAccounts(safePage, safes.ledgerExecute)
+    await queue.goto(safes.ledgerExecute)
     await walletPage.connectLedger(ledgerOwner.address)
 
     await queue.execute(0)

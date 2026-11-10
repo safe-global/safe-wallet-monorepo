@@ -17,7 +17,7 @@ test.describe('Workspace', { tag: '@e2e' }, () => {
     const name = `Workspace ${testInfo.testId.slice(0, 8)}`
     const workspace = new WorkspacePage(safePage)
 
-    await journey.connectAs('owner4')
+    await journey.connectAs('alice')
     await safePage.goto('/welcome/spaces')
     await new WalletPage(safePage).signInWithEthereum()
     await workspace.createViaWizard(name)
@@ -31,8 +31,8 @@ test.describe('Workspace', { tag: '@e2e' }, () => {
     safePage,
     journey,
   }) => {
-    const treasury = await seedSafe(journey, { owners: ['owner1', 'owner4'], threshold: 2 })
-    const payroll = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
+    const treasury = await seedSafe(journey, { owners: ['bob', 'alice'], threshold: 2 })
+    const payroll = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
     await seedQueuedTransfer(treasury, { nonce: 0, recipient: payroll.address, amount: '0.001' })
     const { id: workspaceId } = await seedBusinessWorkspace(safePage, { Treasury: treasury, Payroll: payroll })
 

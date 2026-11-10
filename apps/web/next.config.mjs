@@ -84,12 +84,9 @@ const withPWA = withPWAInit({
 const isProd = process.env.NODE_ENV === 'production'
 const enableExperimentalOptimizations = process.env.ENABLE_EXPERIMENTAL_OPTIMIZATIONS === '1'
 
-let appVersion = pkg.version
-
 // Pin volatile values for visual regression builds to avoid Chromatic diffs
 if (process.env.VISUAL_REGRESSION_BUILD === 'true') {
   commitHash = 'vistest'
-  appVersion = 'istest' // UI prepends 'v' → displays 'vistest'
 }
 
 /** @type {import('next').NextConfig} */
@@ -180,7 +177,7 @@ const nextConfig = {
       config.optimization.minimize = false
     }
 
-    // Add SRI manifest plugin (production only, skip for Cypress tests)
+    // Add SRI manifest plugin (production only, skip for E2E test builds)
     if (!dev && process.env.NODE_ENV !== 'cypress') {
       config.plugins.push(new SriManifestWebpackPlugin())
     }
