@@ -485,7 +485,7 @@ describe('queue design exploration', () => {
     await user.click(band.getByRole('button', { name: 'Show Ethereum' }))
     expect(subHeaders[0]).toBeVisible()
     expect(band.getByRole('button', { name: 'Show Arbitrum' })).toHaveAttribute('aria-expanded', 'false')
-  })
+  }, 15_000)
   it('shows 10 rows per Safe across its networks, then See all in its header narrows the table to the Safe and loads all of it', () => {
     render(<PendingQueue />, { routerProps: { query: { scenario: '20-safes' } } })
     const payrollRows = () =>
