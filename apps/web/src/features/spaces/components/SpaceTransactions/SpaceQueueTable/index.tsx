@@ -190,9 +190,9 @@ const SpaceQueueTable = ({ sections }: { sections: SpaceQueueSection[] }): React
   const groups = groupByScope(virtualItems.map((virtualItem) => ({ virtualItem, item: items[virtualItem.index] })))
 
   return (
-    // Same panel surface as the accounts table (SafeAccountsTable): it owns the horizontal scroll, so
-    // the scrollbar and the rounded edge wrap the whole table
-    <div className="w-full overflow-x-auto rounded-lg border border-[var(--color-border-light)] bg-[var(--color-background-paper)] pb-2">
+    // Same panel surface as the Space accounts table (SafeAccountsTable with `bordered={false}`): it owns the
+    // horizontal scroll, and its 1px edge stays transparent so nothing shifts against that table
+    <div className="w-full overflow-x-auto rounded-lg border border-transparent bg-[var(--color-background-paper)] pb-2">
       <table
         aria-label="Pending transactions"
         className={cn(tableVariants({ variant: 'panel' }), 'table-fixed min-w-[1128px]')}
