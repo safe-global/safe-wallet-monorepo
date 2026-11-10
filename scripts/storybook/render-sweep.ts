@@ -101,6 +101,10 @@ function parseArgs(): Record<string, string | boolean> {
 const LAUNCH_ARGS = [
   // GPU rasterization varies a few colour levels between runs, which changes the sheet hashes
   '--disable-gpu',
+  // Chrome runs every sandboxed iframe (each TokenIcon) in its own process, which can paint after the page
+  // under CI load, so the screenshot misses the icons; in-process frames paint together with the page
+  '--disable-features=IsolateSandboxedIframes',
+  '--disable-site-isolation-trials',
   // Stories load token logos from live CDNs; MSW's service worker fetches them, out of Playwright's
   // reach, so they arrive late or not at all. Failing every external host makes them render
   // their local fallback in every run. MSW mocks are unaffected: the worker answers them first.
