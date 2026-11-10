@@ -9,6 +9,7 @@
  * - PAGE_ERROR / CONSOLE: uncaught errors while loading
  * - RENDER_TIMEOUT: the story (play function included) did not finish in time
  * - UNSTABLE_SCREENSHOT: (with --shots) the pixels kept changing until the settle timeout
+ * - EXTERNAL_REQUEST: an API call had no MSW mock and hit the (blocked) network
  *
  * Usage (from apps/web): yarn storybook:sweep [-- --filter=ui- --modes=light --concurrency=4]
  *   --base=<url>        Storybook to sweep (default http://localhost:6006 or $SB_BASE).
@@ -259,7 +260,15 @@ async function checkStory(
   let openRequests = 0
   page.on('request', () => openRequests++)
   page.on('requestfinished', () => openRequests--)
-  page.on('requestfailed', () => openRequests--)
+  // An API call that reached the blocked network has no MSW mock: the story depends on live data
+  const externalCalls = new Set<string>()
+  page.on('requestfailed', (req) => {
+    openRequests--
+    const url = new URL(req.url())
+    if (url.origin !== new URL(base).origin && ['fetch', 'xhr'].includes(req.resourceType())) {
+      externalCalls.add(`${url.host}${url.pathname}`)
+    }
+  })
 
   const result: Finding = { id: story.id, title: story.title, name: story.name, mode, issues: [] }
   let cell: Cell | undefined
@@ -299,6 +308,7 @@ async function checkStory(
     else if (state.textLen === 0 && state.visibleHeight < 8) result.issues.push('BLANK_RENDER')
     if (pageErrors.length) result.issues.push(`PAGE_ERROR: ${pageErrors[0]}`)
     if (consoleErrors.length) result.issues.push(`CONSOLE: ${consoleErrors.slice(0, 2).join(' | ')}`)
+    if (externalCalls.size) result.issues.push(`EXTERNAL_REQUEST: ${[...externalCalls].join(' | ')}`)
     result.textSample = state.textSample
 
     // 'skip-visual-test' marks flaky/animated/interactive-only stories that must not be
