@@ -8,8 +8,15 @@ import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2
 import { type SubmitCallback, TxFlow } from '../../TxFlow'
 import { dispatchSafeAppsTx } from '@/services/tx/tx-sender'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
+import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
 
-const SignMessageOnChainFlow = ({ props }: { props: Omit<SignMessageOnChainProps, 'onSubmit'> }) => {
+const SignMessageOnChainFlow = ({
+  props,
+  declared,
+}: {
+  props: Omit<SignMessageOnChainProps, 'onSubmit'>
+  declared: DeclaredAttribution
+}) => {
   const { requestId } = props
   const ReviewComponent = useCallback(
     (reviewTxProps: ReviewTransactionProps) => {
@@ -40,6 +47,7 @@ const SignMessageOnChainFlow = ({ props }: { props: Omit<SignMessageOnChainProps
       eventCategory={TxFlowType.SIGN_MESSAGE_ON_CHAIN}
       ReviewTransactionComponent={ReviewComponent}
       onSubmit={handleSubmit}
+      declared={declared}
     />
   )
 }

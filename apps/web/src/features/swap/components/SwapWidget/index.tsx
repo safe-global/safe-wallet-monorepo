@@ -210,7 +210,7 @@ const SwapWidget = ({ sell }: Params) => {
     }
   }, [params, isConsentAccepted, safeLoading])
 
-  useCustomAppCommunicator(iframeRef, appData, chain)
+  useCustomAppCommunicator(iframeRef, appData, chain, { channel: 'widget' })
 
   if (blockedAddress) {
     return <BlockedAddress address={blockedAddress} featureTitle="embedded swaps feature with CoW Swap" />

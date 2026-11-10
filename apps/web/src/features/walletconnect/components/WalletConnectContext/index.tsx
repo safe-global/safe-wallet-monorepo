@@ -9,6 +9,7 @@ import useSafeWalletProvider from '@/services/safe-wallet-provider/useSafeWallet
 import { IS_PRODUCTION } from '@/config/constants'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { getEip155ChainId, getPeerName, isExpiredProposalError, stripEip155Prefix } from '../../services/utils'
+import { getAttestedOrigin } from '@safe-global/utils/features/walletconnect/verify'
 import { trackRequest } from '../../services/tracking'
 import { wcPopupStore } from '../../store/wcPopupStore'
 import type WalletConnectWallet from '../../services/WalletConnectWallet'
@@ -150,6 +151,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
           name: peerName,
           description: session.peer.metadata.description,
           iconUrl: session.peer.metadata.icons[0],
+          dappUrl: getAttestedOrigin(event.verifyContext?.verified),
         })
       }
 
@@ -195,6 +197,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
           name: peerName,
           description: requester.metadata.description,
           iconUrl: requester.metadata.icons[0],
+          dappUrl: getAttestedOrigin(event.verifyContext?.verified),
         }
 
         return safeWalletProvider.request(

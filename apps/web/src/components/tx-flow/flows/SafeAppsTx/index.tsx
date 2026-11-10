@@ -9,6 +9,7 @@ import { dispatchSafeAppsTx } from '@/services/tx/tx-sender'
 import { trackSafeAppTxCount } from '@/services/safe-apps/track-app-usage-count'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
 import type { NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
+import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
 
 export type SafeAppsTxParams = {
   appId?: string
@@ -21,9 +22,11 @@ export type SafeAppsTxParams = {
 
 const SafeAppsTxFlow = ({
   data,
+  declared,
   onSubmit,
 }: {
   data: SafeAppsTxParams
+  declared: DeclaredAttribution
   onSubmit?: (txId: string, safeTxHash: string) => void
 }) => {
   const ReviewTransactionComponent = useCallback(
@@ -58,6 +61,7 @@ const SafeAppsTxFlow = ({
       onSubmit={handleSubmit}
       subtitle={<AppTitle name={data.app?.name} logoUri={data.app?.iconUrl} txs={data.txs} />}
       ReviewTransactionComponent={ReviewTransactionComponent}
+      declared={declared}
     />
   )
 }

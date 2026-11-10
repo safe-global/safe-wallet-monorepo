@@ -67,6 +67,7 @@ export type AppInfo = {
   description: string
   url: string
   iconUrl: string
+  dappUrl?: string
 }
 
 export type WalletSDK = {
