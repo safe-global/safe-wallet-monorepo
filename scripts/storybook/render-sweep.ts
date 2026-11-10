@@ -15,7 +15,7 @@
  *   --base=<url>        Storybook to sweep (default http://localhost:6006 or $SB_BASE).
  *                       For static builds serve on a port whitelisted in OFFICIAL_HOSTS
  *                       (e.g. 4000) or host-gated pages (Imprint/Licenses) flag as blank.
- *   --filter=<substr>   Only story ids/titles containing this substring
+ *   --filter=<substr>   Only story ids/titles containing this substring (comma-separated: any of them)
  *   --modes=light,dark  Themes to sweep (default both)
  *   --shard=k/n         Only sweep shard k of n; whole titles per shard (see shardStories)
  *   --concurrency=N     Parallel pages (default 8; static builds tolerate 10+, the
@@ -51,6 +51,8 @@ const STORY_FINISHED_TIMEOUT_MS = 30000
 const QUIET_MS = 100
 const SETTLE_TIMEOUT_MS = 3000
 // Stories date their mock data from Date.now(); a fixed clock and time zone keep shown dates the same every day
+// Chrome closed itself twice after about 2,700 stories in one browser; a fresh browser per 200 stories avoids that
+const CONTEXTS_PER_BROWSER = 200
 const FIXED_NOW = new Date('2026-01-15T12:00:00Z')
 const TIMEZONE = 'UTC'
 // Faker and other story data take their seed from Math.random, so every page gets the same sequence (mulberry32)
@@ -150,8 +152,29 @@ async function fitViewportToIframes(page: Page, openRequests: () => number): Pro
   await waitForQuietNetwork(page, openRequests)
 }
 
+// An iframe keeps its empty about:blank document until Chrome loads its srcdoc, so under load
+// TokenIcon's frames can have no image yet when the asset wait below looks inside them.
+async function waitForSrcdocFrames(page: Page): Promise<void> {
+  const deadline = Date.now() + ASSET_TIMEOUT_MS
+  for (;;) {
+    const blank = page.frames().filter((frame) => frame.url() === 'about:blank' && frame !== page.mainFrame())
+    const pending = await Promise.all(
+      blank.map((frame) =>
+        frame
+          .frameElement()
+          .then((element) => element.getAttribute('srcdoc'))
+          .then((srcdoc) => srcdoc !== null)
+          .catch(() => false),
+      ),
+    )
+    if (!pending.includes(true) || Date.now() > deadline) return
+    await page.waitForTimeout(QUIET_MS / 4)
+  }
+}
+
 // Fonts and images that are still loading make the screenshot differ between runs.
 async function waitForAssets(page: Page): Promise<void> {
+  await waitForSrcdocFrames(page)
   // Sandboxed iframes are out of the page's reach, so wait inside every frame
   const frames = page.frames().map((frame) =>
     frame
@@ -353,13 +376,13 @@ async function main(): Promise<void> {
   const base = (typeof args.base === 'string' && args.base) || process.env.SB_BASE || 'http://localhost:6006'
   const modes: Mode[] = (typeof args.modes === 'string' ? args.modes : 'light,dark').split(',')
   const concurrency = Number(args.concurrency) || 8
-  const filter = typeof args.filter === 'string' ? args.filter : ''
+  const filters = typeof args.filter === 'string' ? args.filter.split(',').filter(Boolean) : []
   const shotsDir = typeof args.shots === 'string' ? args.shots : undefined
   const cellsDir = shotsDir ? fs.mkdtempSync(path.join(os.tmpdir(), 'sb-cells-')) : undefined
 
   const index = (await (await fetch(`${base}/index.json`)).json()) as { entries: Record<string, StoryEntry> }
   const matching = Object.values(index.entries).filter(
-    (e) => e.type === 'story' && (!filter || e.id.includes(filter) || e.title.includes(filter)),
+    (e) => e.type === 'story' && (!filters.length || filters.some((f) => e.id.includes(f) || e.title.includes(f))),
   )
   const [shard, shardCount] = typeof args.shard === 'string' ? args.shard.split('/').map(Number) : [1, 1]
   const stories = shardStories(matching, shard, shardCount)
@@ -375,11 +398,19 @@ async function main(): Promise<void> {
   let done = 0
 
   async function worker(): Promise<void> {
+    let storyBrowser = await launch()
+    let contexts = 0
     for (;;) {
       const item = queue.shift()
       if (!item) break
+      if (contexts === CONTEXTS_PER_BROWSER) {
+        await storyBrowser.close()
+        storyBrowser = await launch()
+        contexts = 0
+      }
+      contexts += 1
       // A context per story: localStorage and the like from one story (a collapsed sidebar) must not reach the next
-      const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, timezoneId: TIMEZONE })
+      const context = await storyBrowser.newContext({ viewport: { width: 1280, height: 900 }, timezoneId: TIMEZONE })
       await context.clock.setFixedTime(FIXED_NOW)
       await context.addInitScript({ content: SEEDED_RANDOM })
       const { finding, cell } = await checkStory(context, base, item[0], item[1], cellsDir).finally(() =>
@@ -390,6 +421,7 @@ async function main(): Promise<void> {
       done += 1
       if (done % 50 === 0) console.error(`  ${done}/${stories.length * modes.length}`)
     }
+    await storyBrowser.close()
   }
 
   await Promise.all(Array.from({ length: concurrency }, worker))
