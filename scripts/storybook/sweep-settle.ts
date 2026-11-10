@@ -185,8 +185,8 @@ async function contentClip(page: Page): Promise<{ fullscreen: boolean; clip?: Cl
 
 /**
  * Takes screenshots until two in a row are identical: re-renders after data arrives (or timers in app code)
- * would otherwise be caught half-way. Before each one, the viewport is fitted to the current layout, since a
- * page that is still growing (slow CI runners) can push iframes below the viewport after the first fit.
+ * would otherwise be caught half-way. For a padded story, the viewport is fitted to the current layout before
+ * each one, since a page that is still growing (slow CI runners) can push iframes below the viewport.
  */
 export async function stableScreenshot(
   page: Page,
@@ -194,18 +194,12 @@ export async function stableScreenshot(
 ): Promise<{ fullscreen: boolean; png: Buffer; stable: boolean }> {
   const deadline = Date.now() + SCREENSHOT_SETTLE_TIMEOUT_MS
   const fullscreen = await isFullscreen(page)
-  // A full-page story is fitted once: refitting a screen-sized layout would grow it on every pass
-  let fullscreenFitted = false
+  // A full-page story is fitted once, after it settles at the default height: an earlier fit can measure a
+  // page that is still loading, and refitting a screen-sized layout would grow it on every pass
+  let fullscreenFitted = !fullscreen
   let previous: Buffer | undefined
   for (;;) {
-    let resized = false
-    if (fullscreen && !fullscreenFitted) {
-      fullscreenFitted = true
-      resized = await fitFullscreenViewport(page, requests)
-    } else if (!fullscreen) {
-      resized = await fitViewportToIframes(page, requests)
-    }
-    if (resized) {
+    if (!fullscreen && (await fitViewportToIframes(page, requests))) {
       await waitForAssets(page)
       previous = undefined
     }
@@ -213,6 +207,14 @@ export async function stableScreenshot(
     // Spinners and transitions otherwise land on a different frame each run
     const png = await page.screenshot({ fullPage: true, clip, animations: 'disabled' })
     const stable = previous !== undefined && png.equals(previous)
+    if (stable && !fullscreenFitted) {
+      fullscreenFitted = true
+      if (await fitFullscreenViewport(page, requests)) {
+        await waitForAssets(page)
+        previous = undefined
+        continue
+      }
+    }
     if (stable || Date.now() > deadline) return { fullscreen, png, stable }
     previous = png
     await page.waitForTimeout(QUIET_MS)
