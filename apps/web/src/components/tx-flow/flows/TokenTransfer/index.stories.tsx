@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { expect, waitFor, within } from 'storybook/test'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
@@ -31,5 +32,10 @@ export const FilledWithMaxEther: Story = {
         amount: ether ? safeFormatUnits(ether.balance, ether.tokenInfo.decimals) : '',
       },
     ],
+  },
+  // The prefilled form validates after mount; wait for its result, not the interim disabled button
+  play: async ({ canvasElement }) => {
+    const next = await within(canvasElement).findByRole('button', { name: 'Next' })
+    await waitFor(() => expect(next).toBeEnabled())
   },
 }

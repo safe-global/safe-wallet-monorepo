@@ -167,14 +167,17 @@ const MAX_VIEWPORT_HEIGHT = 8000
 // Chrome leaves iframes below the viewport blank in a full-page screenshot, and TokenIcon renders
 // every logo in an iframe. Grow the viewport over them; other stories keep their layout.
 async function fitViewportToIframes(page: Page, openRequests: () => number): Promise<void> {
-  const bottom = await page.evaluate(() =>
-    Math.max(0, ...[...document.querySelectorAll('iframe')].map((f) => f.getBoundingClientRect().bottom + scrollY)),
-  )
-  const viewport = page.viewportSize()
-  if (!viewport || bottom <= viewport.height) return
-  await page.setViewportSize({ width: viewport.width, height: Math.min(Math.ceil(bottom), MAX_VIEWPORT_HEIGHT) })
-  // Lazy iframes that are now in view start loading
-  await waitForQuietNetwork(page, openRequests)
+  // Content can grow after the first resize (more rows render), which would leave the viewport short and move
+  // anything fixed to its bottom (the sidebar footer); grow until the lowest iframe stays put
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const bottom = await page.evaluate(() =>
+      Math.max(0, ...[...document.querySelectorAll('iframe')].map((f) => f.getBoundingClientRect().bottom + scrollY)),
+    )
+    const viewport = page.viewportSize()
+    if (!viewport || bottom <= viewport.height || viewport.height >= MAX_VIEWPORT_HEIGHT) return
+    await page.setViewportSize({ width: viewport.width, height: Math.min(Math.ceil(bottom), MAX_VIEWPORT_HEIGHT) })
+    await waitForQuietNetwork(page, openRequests)
+  }
 }
 
 // An iframe keeps its empty about:blank document until Chrome loads its srcdoc, so under load
