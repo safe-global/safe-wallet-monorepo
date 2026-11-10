@@ -16,7 +16,7 @@ on:
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     permissions:
       pull-requests: read
     outputs:
@@ -40,7 +40,7 @@ jobs:
     permissions: {}
     if: always()
     needs: [changes, lint]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: $/.github/actions/required-result
         with:

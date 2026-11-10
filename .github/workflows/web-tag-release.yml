@@ -22,7 +22,7 @@ jobs:
     permissions:
       actions: write
       contents: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     outputs:
       version: ${{ steps.version.outputs.version }}
       version_number: ${{ steps.version.outputs.version_number }}
@@ -102,7 +102,7 @@ jobs:
       contents: write
       id-token: write
       pull-requests: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
 
     steps:
       - name: Checkout

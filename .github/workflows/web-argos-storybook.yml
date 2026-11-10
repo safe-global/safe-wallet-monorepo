@@ -34,7 +34,7 @@ permissions: {}
 
 jobs:
   storybook-visual:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 60
     name: Storybook visual tests (Argos)
     permissions:
