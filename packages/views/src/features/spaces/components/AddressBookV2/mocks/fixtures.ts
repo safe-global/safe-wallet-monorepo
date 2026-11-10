@@ -5,7 +5,7 @@
 import type { ChainInfo } from '@safe-global/views/features/spaces/types'
 import type { AddressBookContact } from '../types'
 
-const logo = (chainId: string) => `https://safe-transaction-assets.safe.global/chains/${chainId}/chain_logo.png`
+const logo = (chainId: string) => `mock-assets/safe-transaction-assets.safe.global/chains/${chainId}/chain_logo.webp`
 
 export const CHAINS = {
   ethereum: { chainId: '1', chainName: 'Ethereum', chainLogoUri: logo('1'), shortName: 'eth' },

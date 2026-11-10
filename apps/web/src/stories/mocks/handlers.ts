@@ -156,8 +156,7 @@ export function createMockTransactionDetails(safeData: SafeState, txId: string) 
     refundReceiver: {
       value: '0x0000000000000000000000000000000000000000',
       name: null,
-      logoUri:
-        'https://safe-transaction-assets.safe.global/contracts/logos/0x0000000000000000000000000000000000000000.png',
+      logoUri: 'images/common/token-placeholder.svg',
     },
     safeTxHash:
       '0x' +
@@ -232,7 +231,7 @@ export function createMockTransactionDetails(safeData: SafeState, txId: string) 
             tokenName: 'USD Coin',
             tokenSymbol: 'USDC',
             logoUri:
-              'https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+              'mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp',
             decimals: 6,
             value: '4018860000',
             trusted: true,
@@ -604,7 +603,7 @@ export function createMockHistoryTransactions(safeData: SafeState) {
               tokenName: 'USD Coin',
               tokenSymbol: 'USDC',
               logoUri:
-                'https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+                'mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp',
               decimals: 6,
               value: '5000000000',
             },
@@ -700,11 +699,11 @@ export function createMockHistoryTransactions(safeData: SafeState) {
             direction: 'INCOMING' as const,
             transferInfo: {
               type: 'ERC20' as const,
-              tokenAddress: '0x6B175474E89094C44Da98b954EescdeCB5E1cFB85',
+              tokenAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
               tokenName: 'Dai Stablecoin',
               tokenSymbol: 'DAI',
               logoUri:
-                'https://safe-transaction-assets.safe.global/tokens/logos/0x6B175474E89094C44Da98b954EedscdeCB5B1cFBA5.png',
+                'mock-assets/safe-transaction-assets.safe.global/tokens/logos/0x6B175474E89094C44Da98b954EedeAC495271d0F.webp',
               decimals: 18,
               value: '10000000000000000000000',
             },
@@ -792,7 +791,7 @@ export function createMockPendingTransactions(safeData: SafeState) {
               tokenName: 'USD Coin',
               tokenSymbol: 'USDC',
               logoUri:
-                'https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+                'mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp',
               decimals: 6,
               value: '4018860000',
             },
