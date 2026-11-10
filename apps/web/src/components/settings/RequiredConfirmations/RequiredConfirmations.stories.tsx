@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMinimalDecorator } from '@/stories/mocks'
+import { createMinimalDecorator, createHandlers } from '@/stories/mocks'
 import { RequiredConfirmation } from './index'
 
 const MOCK_WALLET_ADDRESS = '0x1234567890123456789012345678901234567890'
@@ -29,7 +29,7 @@ const decorator = createMinimalDecorator({
 const meta: Meta<typeof RequiredConfirmation> = {
   title: 'Components/Settings/RequiredConfirmations',
   component: RequiredConfirmation,
-  parameters: { layout: 'padded' },
+  parameters: { layout: 'padded', msw: { handlers: createHandlers() } },
   decorators: [decorator],
   tags: ['autodocs'],
 }

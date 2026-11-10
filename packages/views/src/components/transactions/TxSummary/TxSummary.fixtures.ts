@@ -35,7 +35,7 @@ const CONFIRMATIONS_REQUIRED = 3
 const SAFE: AddressInfo = { value: SAFE_ADDRESS, name: null, logoUri: null }
 const VITALIK: AddressInfo = { value: '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', name: 'vitalik.eth', logoUri: null }
 
-const TOKEN_LOGO = (address: string) => `https://safe-transaction-assets.safe.global/tokens/logos/${address}.png`
+const TOKEN_LOGO = (address: string) => `mock-assets/safe-transaction-assets.safe.global/tokens/logos/${address}.webp`
 
 const WETH: TokenInfo = {
   address: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
@@ -59,7 +59,7 @@ const USDC: TokenInfo = {
 const LONG_NAME_LP: TokenInfo = {
   address: '0x06325440D014e39736583c165C2963BA99fAf14E',
   decimals: 18,
-  logoUri: TOKEN_LOGO('0x06325440D014e39736583c165C2963BA99fAf14E'),
+  logoUri: 'images/common/token-placeholder.svg',
   name: 'Curve.fi ETH/stETH Gauge Deposit',
   symbol: 'steCRV-GAUGE-DEPOSIT',
   trusted: true,

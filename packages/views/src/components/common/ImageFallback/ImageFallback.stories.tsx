@@ -16,7 +16,7 @@ type Story = StoryObj<typeof meta>
 
 export const WithValidImage: Story = {
   args: {
-    src: 'https://safe-transaction-assets.safe.global/chains/1/chain_logo.png',
+    src: 'mock-assets/safe-transaction-assets.safe.global/chains/1/chain_logo.webp',
     fallbackSrc: '/images/common/token-placeholder.svg',
     alt: 'Ethereum logo',
     width: 48,
@@ -52,7 +52,7 @@ export const WithFallbackComponent: Story = {
 
 export const SmallSize: Story = {
   args: {
-    src: 'https://safe-transaction-assets.safe.global/chains/1/chain_logo.png',
+    src: 'mock-assets/safe-transaction-assets.safe.global/chains/1/chain_logo.webp',
     fallbackSrc: '/images/common/token-placeholder.svg',
     alt: 'Small image',
     width: 24,
@@ -62,7 +62,7 @@ export const SmallSize: Story = {
 
 export const LargeSize: Story = {
   args: {
-    src: 'https://safe-transaction-assets.safe.global/chains/1/chain_logo.png',
+    src: 'mock-assets/safe-transaction-assets.safe.global/chains/1/chain_logo.webp',
     fallbackSrc: '/images/common/token-placeholder.svg',
     alt: 'Large image',
     width: 96,

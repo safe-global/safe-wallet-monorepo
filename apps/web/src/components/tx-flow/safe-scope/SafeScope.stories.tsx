@@ -10,6 +10,7 @@ import useChainId from '@/hooks/useChainId'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
+import { createHandlers } from '@/stories/mocks'
 
 /** Renders what the tx-flow's hooks currently resolve to. Lives in this stories file only — nothing in the app imports it. */
 const SafeScopeProbe = (): ReactElement => {
@@ -61,6 +62,7 @@ const meta = {
     ),
   ],
   parameters: {
+    msw: { handlers: createHandlers() },
     docs: {
       description: {
         component:
