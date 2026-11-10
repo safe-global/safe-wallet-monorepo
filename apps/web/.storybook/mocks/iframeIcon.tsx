@@ -18,7 +18,9 @@ const IframeIcon = ({
   borderRadius?: string
   fallbackSrc?: string
 }): ReactElement => {
-  const [current, setCurrent] = useState(src)
+  // Follows src like the iframe does: callers render a placeholder first and the logo once it is known
+  const [failedSrc, setFailedSrc] = useState<string>()
+  const current = failedSrc === src && fallbackSrc ? fallbackSrc : src
   // Inside the iframe the image fills the box height and is centred: cropped when wider, padded when narrower
   const [fit, setFit] = useState<'contain' | 'cover'>('contain')
 
@@ -45,7 +47,7 @@ const IframeIcon = ({
         setFit(naturalWidth / naturalHeight > width / height ? 'cover' : 'contain')
       }}
       onError={() => {
-        if (fallbackSrc && current !== fallbackSrc) setCurrent(fallbackSrc)
+        if (current === src) setFailedSrc(src)
       }}
     />
   )
