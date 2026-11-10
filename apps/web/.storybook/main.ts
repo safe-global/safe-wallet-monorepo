@@ -175,7 +175,8 @@ const config: StorybookConfig = {
     return config
   },
 
-  staticDirs: ['../public'],
+  // Images that stories and config/test fixtures reference; outside public/ so they never ship with the app
+  staticDirs: ['../public', { from: './mock-assets', to: '/mock-assets' }],
 
   env: (config) => ({
     ...config,

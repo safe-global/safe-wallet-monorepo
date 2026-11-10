@@ -115,7 +115,7 @@ import { safeFixtures, chainFixtures, balancesFixtures, SAFE_ADDRESSES } from '@
 | Scenario          | Tokens | Positions           | Use case            |
 | ----------------- | ------ | ------------------- | ------------------- |
 | `efSafe`          | 32     | $142M (8 protocols) | DeFi heavy, default |
-| `vitalik`         | 1551   | $19M                | Whale, performance  |
+| `vitalik`         | 44     | $19M                | Large, pagination   |
 | `spamTokens`      | 26     | $1.7M               | Spam filtering      |
 | `safeTokenHolder` | 25     | $707 (15 protocols) | Protocol diversity  |
 | `empty`           | 0      | $0                  | Empty states        |
@@ -167,6 +167,7 @@ yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>   # add --filte
 
 - CI splits the sweep into 4 shards (`--shard=k/n`, whole titles per shard). Locally, run it without `--shard`.
 - Screenshots are taken with animations disabled, once no request is open and two screenshots in a row match, with the GPU off and every external host unresolvable. Each story gets a new browser context (empty `localStorage`), a clock fixed at 2026-01-15 12:00 UTC and a seeded `Math.random`, so dates and faker data are the same in every run. Text anti-aliasing can still change a few pixels between runs. A sheet that changes on a commit that did not touch it is flaky — fix the story, as it triggers a needless baseline upload.
+- Stories, their mock data and `config/test` fixtures never point at remote images: they use relative `mock-assets/<host>/<path>.webp` paths to files in `.storybook/mock-assets/` (Storybook-only, never in the app build). A relative path also works in the deployed `/storybook/` and inside `IframeIcon`'s sandboxed iframe. To add one, resize it to at most 128 px and save it as WebP, e.g. `cwebp -resize 128 0 -q 82 logo.png -o logo.webp`; a logo that does not exist upstream is `images/common/token-placeholder.svg`. `fetch-fixtures.ts` does this for the fixtures, and `storybook-local-images.test.ts` enforces it.
 - Opt a story out of pixel snapshots with `tags: ['skip-visual-test']` (story- or meta-level) for flaky/animated stories. It is still render-checked — errors fail CI; only the snapshot is skipped.
 - Never ship a story that permanently renders skeletons/blank without a doc comment saying so — a broken story that "passes" is worse than no story.
 

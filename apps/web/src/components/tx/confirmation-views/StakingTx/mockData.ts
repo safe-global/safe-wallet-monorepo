@@ -31,8 +31,7 @@ export const mockStakingDepositTxInfo: NativeStakingDepositTransactionInfo = {
   tokenInfo: {
     address: '0x0000000000000000000000000000000000000000',
     decimals: 18,
-    logoUri:
-      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
+    logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
     name: 'Ether',
     symbol: 'ETH',
     trusted: true,
@@ -54,8 +53,7 @@ export const mockStakingExitTxInfo: NativeStakingValidatorsExitTransactionInfo =
   tokenInfo: {
     address: '0x0000000000000000000000000000000000000000',
     decimals: 18,
-    logoUri:
-      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
+    logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
     name: 'Ether',
     symbol: 'ETH',
     trusted: true,
@@ -70,8 +68,7 @@ export const mockStakingWithdrawTxInfo: NativeStakingWithdrawTransactionInfo = {
   tokenInfo: {
     address: '0x0000000000000000000000000000000000000000',
     decimals: 18,
-    logoUri:
-      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
+    logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
     name: 'Ether',
     symbol: 'ETH',
     trusted: true,

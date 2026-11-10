@@ -16,7 +16,7 @@
           "to": {
             "value": "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
             "name": "Safe: MultiSendCallOnly 1.3.0",
-            "logoUri": "https://safe-transaction-assets.staging.5afe.dev/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.png"
+            "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.webp"
           },
           "dataSize": "580",
           "value": "0",
@@ -142,7 +142,7 @@
           "to": {
             "value": "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
             "name": "Safe: MultiSendCallOnly 1.3.0",
-            "logoUri": "https://safe-transaction-assets.staging.5afe.dev/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.png"
+            "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.webp"
           },
           "dataSize": "388",
           "value": "0",

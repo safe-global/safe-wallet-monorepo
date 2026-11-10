@@ -82,7 +82,7 @@ export const Default: Story = {
     proposal: createProposal({
       name: 'Uniswap Interface',
       url: 'https://app.uniswap.org',
-      icon: 'https://app.uniswap.org/favicon.png',
+      icon: 'mock-assets/app.uniswap.org/favicon.webp',
       chains: ['eip155:1'],
       validation: 'VALID',
     }),

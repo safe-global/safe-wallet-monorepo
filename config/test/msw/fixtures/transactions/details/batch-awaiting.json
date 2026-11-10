@@ -9,7 +9,7 @@
     "to": {
       "value": "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
       "name": "Safe: MultiSendCallOnly 1.3.0",
-      "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.png"
+      "logoUri": "mock-assets/safe-transaction-assets.safe.global/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.webp"
     },
     "dataSize": "260",
     "value": "0",
@@ -49,7 +49,7 @@
     "to": {
       "value": "0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B",
       "name": "Safe: MultiSendCallOnly 1.3.0",
-      "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.png"
+      "logoUri": "mock-assets/safe-transaction-assets.safe.global/contracts/logos/0xA1dabEF33b3B82c7814B6D82A79e50F4AC44102B.webp"
     },
     "value": "0",
     "operation": 1,
@@ -60,7 +60,7 @@
         "type": "NATIVE_TOKEN",
         "address": "0x0000000000000000000000000000000000000000",
         "decimals": 18,
-        "logoUri": "https://safe-transaction-assets.safe.global/chains/1/currency_logo.png",
+        "logoUri": "mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp",
         "name": "Ether",
         "symbol": "ETH",
         "trusted": true
@@ -81,7 +81,7 @@
     "refundReceiver": {
       "value": "0x0000000000000000000000000000000000000000",
       "name": null,
-      "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x0000000000000000000000000000000000000000.png"
+      "logoUri": "images/common/token-placeholder.svg"
     },
     "safeTxHash": "0xdd83250c3ba9add601062d9750504f37a89ef27b134cc185cdc044ec70213075",
     "executor": null,

@@ -125,7 +125,7 @@ export const handlers = (GATEWAY_URL: string) => [
             decimals: 18,
             address: '0x',
             type: 'ERC20',
-            logoUri: 'https://safe-transaction-assets.safe.global/chains/1/chain_logo.png',
+            logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/chain_logo.webp',
           },
           balance: '1000000000000000000',
           fiatBalance: '2000',

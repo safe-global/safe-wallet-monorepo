@@ -42,7 +42,7 @@
   "implementation": {
     "value": "0x34CfAC646f301356fAa8B21e94227e3583Fe3F5F",
     "name": "Safe 1.1.1",
-    "logoUri": "https://safe-transaction-assets.safe.global/contracts/logos/0x34CfAC646f301356fAa8B21e94227e3583Fe3F5F.png"
+    "logoUri": "mock-assets/safe-transaction-assets.safe.global/contracts/logos/0x34CfAC646f301356fAa8B21e94227e3583Fe3F5F.webp"
   },
   "modules": null,
   "fallbackHandler": {
