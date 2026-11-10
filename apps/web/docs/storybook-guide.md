@@ -166,7 +166,7 @@ yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>   # add --filte
 ```
 
 - CI splits the sweep into 4 shards (`--shard=k/n`, whole titles per shard). Locally, run it without `--shard`.
-- Screenshots are taken with animations disabled, once no request is open and two screenshots in a row match, with the GPU off and every external host unresolvable (remote logos render their local fallback), so a sheet is byte-identical across runs of the same commit. A sheet that changes on a commit that did not touch it is flaky — fix the story, as it triggers a needless baseline upload.
+- Screenshots are taken with animations disabled, once no request is open and two screenshots in a row match, with the GPU off and every external host unresolvable. Each story gets a new browser context (empty `localStorage`), a clock fixed at 2026-01-15 12:00 UTC and a seeded `Math.random`, so dates and faker data are the same in every run. Text anti-aliasing can still change a few pixels between runs. A sheet that changes on a commit that did not touch it is flaky — fix the story, as it triggers a needless baseline upload.
 - Opt a story out of pixel snapshots with `tags: ['skip-visual-test']` (story- or meta-level) for flaky/animated stories. It is still render-checked — errors fail CI; only the snapshot is skipped.
 - Never ship a story that permanently renders skeletons/blank without a doc comment saying so — a broken story that "passes" is worse than no story.
 
