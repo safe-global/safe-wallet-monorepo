@@ -37,20 +37,22 @@ const DETAILS_ERROR_TOOLTIP = "Couldn't load the details of the ready transactio
 
 const getTooltip = ({
   isBatchable,
+  hasPendingTx,
+  hasWallet,
   detailsStatus,
   allSafePaid,
-  isDisabled,
 }: {
   isBatchable: boolean
+  hasPendingTx: boolean
+  hasWallet: boolean
   detailsStatus: BatchTxDetailsStatus
   allSafePaid: boolean
-  isDisabled: boolean
 }): string => {
-  if (!isBatchable) return NOT_BATCHABLE_TOOLTIP
+  if (!isBatchable || hasPendingTx || !hasWallet) return NOT_BATCHABLE_TOOLTIP
   if (detailsStatus === 'loading') return DETAILS_LOADING_TOOLTIP
   if (detailsStatus === 'error') return DETAILS_ERROR_TOOLTIP
   if (allSafePaid) return ALL_SAFE_PAID_TOOLTIP
-  return isDisabled ? NOT_BATCHABLE_TOOLTIP : BATCHABLE_TOOLTIP
+  return BATCHABLE_TOOLTIP
 }
 
 const BatchExecuteButton = () => {
@@ -79,7 +81,7 @@ const BatchExecuteButton = () => {
 
   const isDisabled = !isBatchable || hasPendingTx || !wallet || allSafePaid || isDetailsLoading
 
-  const tooltip = getTooltip({ isBatchable, detailsStatus, allSafePaid, isDisabled })
+  const tooltip = getTooltip({ isBatchable, hasPendingTx, hasWallet: !!wallet, detailsStatus, allSafePaid })
 
   const handleOnMouseEnter = useCallback(() => {
     hoverContext.setActiveHover(batchableTransactions.map((tx) => tx.transaction.id))

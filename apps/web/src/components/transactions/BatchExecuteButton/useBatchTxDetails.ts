@@ -16,21 +16,21 @@ const paysGasFromSafe = ({ detailedExecutionInfo }: TransactionDetails): boolean
   })
 
 const toStatus = (details: TransactionDetails[] | undefined, isError: boolean): BatchTxDetailsStatus => {
-  if (details) return 'ready'
-  return isError ? 'error' : 'loading'
+  if (isError) return 'error'
+  return details ? 'ready' : 'loading'
 }
 
 /** Loads the details of a batch, which tell whether its transactions pay gas from the Safe. */
 const useBatchTxDetails = (txs: ModuleTransaction[], { skip }: { skip: boolean }) => {
   const chainId = useChainId()
-  const { data, isError, refetch } = useTransactionsGetMultipleTransactionDetailsQuery(
+  const { currentData, isError, refetch } = useTransactionsGetMultipleTransactionDetailsQuery(
     { chainId, txIds: txs.map((tx) => tx.transaction.id) },
     { skip: skip || !chainId },
   )
 
-  const safePaidCount = useMemo(() => data?.filter(paysGasFromSafe).length ?? 0, [data])
+  const safePaidCount = useMemo(() => currentData?.filter(paysGasFromSafe).length ?? 0, [currentData])
 
-  return { status: toStatus(data, isError), safePaidCount, retry: refetch }
+  return { status: toStatus(currentData, isError), safePaidCount, retry: refetch }
 }
 
 export default useBatchTxDetails

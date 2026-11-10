@@ -80,18 +80,23 @@ const rateLimitDetailsOf = (item: TransactionQueuedItem, { once }: { once: boole
 
 const setTxFlow = jest.fn()
 
+const buttonInModal = () => (
+  <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+    <BatchExecuteButton />
+  </TxModalContext.Provider>
+)
+
 const renderButton = (options?: Parameters<typeof renderWithUserEvent>[1]) =>
-  renderWithUserEvent(
-    <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
-      <BatchExecuteButton />
-    </TxModalContext.Provider>,
-    options,
-  )
+  renderWithUserEvent(buttonInModal(), options)
 
 const bulkButton = () => screen.getByRole('button', { name: /^Bulk execute/ })
 
 const hoverButton = async (user: ReturnType<typeof renderButton>['user']) => {
   await user.hover(bulkButton().closest('span') as HTMLElement)
+}
+
+const unhoverButton = async (user: ReturnType<typeof renderButton>['user']) => {
+  await user.unhover(bulkButton().closest('span') as HTMLElement)
 }
 
 describe('BatchExecuteButton', () => {
@@ -209,30 +214,31 @@ describe('BatchExecuteButton', () => {
     serveDetails(detailsFor(items, { safePaid: [false, false] }))
     rateLimitDetailsOf(items[0], { once: true })
     const { user } = renderButton()
-    await waitFor(() => expect(bulkButton()).toBeEnabled())
+    await hoverButton(user)
+    await screen.findByText(DETAILS_ERROR_TOOLTIP)
 
     await user.click(bulkButton())
+    await unhoverButton(user)
+    await hoverButton(user)
 
+    expect(await screen.findByText(BATCHABLE_TOOLTIP)).toBeInTheDocument()
     expect(setTxFlow).not.toHaveBeenCalled()
-    await waitFor(() => expect(bulkButton()).toBeEnabled())
-    await user.click(bulkButton())
-    expect(setTxFlow.mock.lastCall[0].type).toBe(ExecuteBatchFlow)
   })
 
-  it('lets a keyboard user load the rejected details again', async () => {
-    const items = [queuedTx(5, { signed: true }), queuedTx(6, { signed: true })]
+  it('offers to try again when the details of a newly ready transaction are rejected', async () => {
+    const items = [queuedTx(5, { signed: true }), queuedTx(6, { signed: true }), queuedTx(7, { signed: true })]
+    setQueue(items.slice(0, 2))
+    serveDetails(detailsFor(items, { safePaid: [false, false, false] }))
+    const { user, rerender } = renderButton()
+    await hoverButton(user)
+    await screen.findByText(BATCHABLE_TOOLTIP)
+
+    rateLimitDetailsOf(items[2], { once: false })
     setQueue(items)
-    serveDetails(detailsFor(items, { safePaid: [false, false] }))
-    rateLimitDetailsOf(items[0], { once: true })
-    const { user } = renderButton()
-    await waitFor(() => expect(bulkButton()).toBeEnabled())
+    rerender(buttonInModal())
 
-    await user.tab()
-    await user.keyboard('{Enter}')
-    await waitFor(() => expect(bulkButton()).toBeEnabled())
-    await user.keyboard('{Enter}')
-
-    expect(setTxFlow.mock.lastCall[0].type).toBe(ExecuteBatchFlow)
+    expect(await screen.findByText(DETAILS_ERROR_TOOLTIP)).toBeInTheDocument()
+    expect(bulkButton()).toHaveTextContent('Bulk execute 3 transactions')
   })
 
   it('is disabled and explains why when every ready transaction pays gas from the Safe', async () => {
