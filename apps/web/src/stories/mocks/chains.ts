@@ -23,20 +23,20 @@ export const DEFAULT_FEATURES: Required<FeatureFlags> = {
   workspacesExperimentalFeatures: false,
   policyRecipientAllowlist: false,
   spaceAuditLog: false,
-  myAccounts: false,
 }
+
+type ChainFeatureKey = Exclude<keyof FeatureFlags, 'spaces'>
 
 /**
  * Mapping of FeatureFlags keys to chain feature strings
  */
-const FEATURE_MAP: Record<keyof FeatureFlags, string> = {
+const FEATURE_MAP: Record<ChainFeatureKey, string> = {
   portfolio: 'PORTFOLIO_ENDPOINT',
   positions: 'POSITIONS',
   swaps: 'NATIVE_SWAPS',
   recovery: 'RECOVERY',
   hypernative: 'HYPERNATIVE',
   earn: 'EARN',
-  spaces: 'SPACES',
   oidcAuth: 'OIDC_AUTH',
   switchAuthenticator: 'SWITCH_AUTHENTICATOR',
   twoFactorAwarenessBanner: 'TWO_FACTOR_AWARENESS_BANNER',
@@ -45,7 +45,6 @@ const FEATURE_MAP: Record<keyof FeatureFlags, string> = {
   workspacesExperimentalFeatures: 'WORKSPACES_EXPERIMENTAL_FEATURES',
   policyRecipientAllowlist: 'POLICY_RECIPIENT_ALLOWLIST',
   spaceAuditLog: 'SPACE_AUDIT_LOG',
-  myAccounts: 'MY_ACCOUNTS',
 }
 
 /**
@@ -78,9 +77,8 @@ export function createChainData(features: FeatureFlags = {}, baseChain: Chain = 
 
   // Build list of features to keep
   const enabledFeatureStrings = Object.entries(mergedFeatures)
-    .filter(([, enabled]) => enabled)
-    .map(([key]) => FEATURE_MAP[key as keyof FeatureFlags])
-    .filter(Boolean)
+    .filter(([key, enabled]) => enabled && key in FEATURE_MAP)
+    .map(([key]) => FEATURE_MAP[key as ChainFeatureKey])
 
   // Filter chain features: keep enabled ones and remove always-disabled ones
   chainData.features = chainData.features.filter((f: string) => {

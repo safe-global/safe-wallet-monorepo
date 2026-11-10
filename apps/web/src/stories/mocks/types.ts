@@ -33,7 +33,7 @@ export interface FeatureFlags {
   hypernative?: boolean
   /** EARN - staking/yield features (default: false) */
   earn?: boolean
-  /** SPACES - collaborative spaces (default: false) */
+  /** Workspaces mocks and a signed-in session; not a chain feature (default: false) */
   spaces?: boolean
   /** OIDC_AUTH - OIDC-based login for email and Google (default: false) */
   oidcAuth?: boolean
@@ -51,8 +51,6 @@ export interface FeatureFlags {
   policyRecipientAllowlist?: boolean
   /** SPACE_AUDIT_LOG - the Workspace activity log (default: false) */
   spaceAuditLog?: boolean
-  /** MY_ACCOUNTS - the accounts list widgets, e.g. on the Workspace dashboard (default: false) */
-  myAccounts?: boolean
 }
 
 /**

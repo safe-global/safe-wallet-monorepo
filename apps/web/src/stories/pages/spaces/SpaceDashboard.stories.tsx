@@ -15,7 +15,7 @@ const defaultSetup = createMockStory({
   wallet: 'connected',
   layout: 'fullPage',
   pathname: '/spaces',
-  features: { spaces: true, myAccounts: true },
+  features: { spaces: true },
   query: { spaceId: '1' },
   shadcn: true,
 })

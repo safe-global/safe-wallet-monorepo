@@ -3,7 +3,6 @@ import SpacePage from '../../pages/spaces/index'
 import { AppRoutes } from '@/config/routes'
 import * as router from 'next/router'
 import * as featureModule from '@/features/__core__'
-import * as spacesFeature from '@/features/spaces'
 
 const mockReplace = jest.fn()
 
