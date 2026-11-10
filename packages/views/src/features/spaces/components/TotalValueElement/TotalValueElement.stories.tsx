@@ -41,3 +41,23 @@ export const InCard: Story = {
     value: '$123,456.01',
   },
 }
+
+export const LargeValue: Story = {
+  args: {
+    value: '$1,278,243,618.88',
+  },
+}
+
+export const LargeValueInNarrowCard: Story = {
+  decorators: InCard.decorators,
+  args: {
+    value: '$1,278,243,618.88',
+  },
+}
+
+export const HugeValueInNarrowCard: Story = {
+  decorators: InCard.decorators,
+  args: {
+    value: '$12,345,678,901,234.56',
+  },
+}
