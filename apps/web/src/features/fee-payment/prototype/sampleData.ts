@@ -11,7 +11,6 @@ export type Scenario = {
   /** gasLimit is empty when it cannot be estimated. */
   estimate: GasEstimate
   safeQuote: SafeQuote
-  startEditing?: boolean
 }
 
 export const ETH_USD = 3650
@@ -43,7 +42,6 @@ const signerCanPickSafe = {
 
 export const SCENARIOS = {
   signerWallet: signerCanPickSafe,
-  editing: { ...signerCanPickSafe, startEditing: true },
   cannotEstimate: { ...signerCanPickSafe, estimate: { ...ESTIMATE, gasLimit: '' } },
   paidFromSafe: { ...signerCanPickSafe, payer: { kind: 'locked', value: 'PAY_FROM_SAFE' }, footer: { kind: 'none' } },
   proPlan: {

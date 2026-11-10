@@ -3,19 +3,29 @@ import type { FeePayerView, GasPayerChoice } from '@safe-global/views/features/f
 import GasPayerSelector, {
   type TokenIconRenderer,
 } from '@safe-global/views/features/fee-payment/components/GasPayerSelector'
-import { GasFeeDetails, type GasFeeDetailsProps } from '../GasFeeDetails'
+import { GasParamsEditor, type GasParamsEditorProps } from '../GasParamsEditor'
 
 export type FeesPageProps = {
   view: FeePayerView
-  gasFeeDetails: GasFeeDetailsProps
+  /** Only when the signer can change the gas settings; the Gas fee row is static otherwise. */
+  gasFeeEditor?: GasParamsEditorProps & { open: boolean; onOpenChange: (open: boolean) => void }
   onChoiceChange: (choice: GasPayerChoice) => void
   currency: string
   renderTokenIcon: TokenIconRenderer
   footer: ReactNode
 }
 
-export const FeesPage = ({ gasFeeDetails, ...props }: FeesPageProps): ReactElement => (
+export const FeesPage = ({ gasFeeEditor, ...props }: FeesPageProps): ReactElement => (
   <div className="w-full max-w-[600px]">
-    <GasPayerSelector {...props} gasFeeDetails={<GasFeeDetails {...gasFeeDetails} />} />
+    <GasPayerSelector
+      {...props}
+      gasFeeEditor={
+        gasFeeEditor && {
+          open: gasFeeEditor.open,
+          onOpenChange: gasFeeEditor.onOpenChange,
+          content: <GasParamsEditor {...gasFeeEditor} />,
+        }
+      }
+    />
   </div>
 )

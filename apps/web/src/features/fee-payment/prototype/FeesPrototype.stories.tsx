@@ -20,8 +20,8 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const openDetails: Story['play'] = async ({ canvasElement }) => {
-  const toggle = within(canvasElement).getByTestId('gas-fee-details-toggle')
+const openEditor: Story['play'] = async ({ canvasElement }) => {
+  const toggle = within(canvasElement).getByTestId('gas-fee-edit-toggle')
   await userEvent.click(toggle)
   toggle.blur()
 }
@@ -31,16 +31,11 @@ export const SignerWallet: Story = {
   args: { scenario: 'signerWallet' },
 }
 
+// Keeps the `signer-wallet-open` story id that the shared links point to.
 export const SignerWalletOpen: Story = {
-  name: 'Signer wallet · details open',
-  args: { scenario: 'signerWallet' },
-  play: openDetails,
-}
-
-export const SignerWalletEditing: Story = {
   name: 'Signer wallet · editing',
-  args: { scenario: 'editing' },
-  play: openDetails,
+  args: { scenario: 'signerWallet' },
+  play: openEditor,
 }
 
 export const CannotEstimate: Story = {
@@ -49,13 +44,11 @@ export const CannotEstimate: Story = {
 }
 
 export const PaidFromSafe: Story = {
-  name: 'Safe account · read-only',
+  name: 'Safe account · static row',
   args: { scenario: 'paidFromSafe' },
-  play: openDetails,
 }
 
 export const ProPlan: Story = {
-  name: 'Pro plan · read-only',
+  name: 'Pro plan · static row',
   args: { scenario: 'proPlan' },
-  play: openDetails,
 }

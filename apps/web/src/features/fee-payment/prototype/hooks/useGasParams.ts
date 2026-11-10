@@ -8,7 +8,8 @@ const isPositiveNumber = (value: string) => value.trim() !== '' && Number(value)
 const validate = (draft: GasEstimate): Partial<Record<GasParamName, string>> => {
   const errors: Partial<Record<GasParamName, string>> = {}
   if (!/^\d+$/.test(draft.userNonce)) errors.userNonce = 'Enter a whole number'
-  if (!/^\d+$/.test(draft.gasLimit) || Number(draft.gasLimit) < 21000) errors.gasLimit = 'At least 21000'
+  if (draft.gasLimit.trim() === '') errors.gasLimit = 'Enter a gas limit to continue'
+  else if (!/^\d+$/.test(draft.gasLimit) || Number(draft.gasLimit) < 21000) errors.gasLimit = 'At least 21000'
   if (!isPositiveNumber(draft.maxPriorityFeeGwei)) errors.maxPriorityFeeGwei = 'Enter an amount'
   if (!isPositiveNumber(draft.maxFeeGwei)) errors.maxFeeGwei = 'Enter an amount'
   else if (Number(draft.maxPriorityFeeGwei) > Number(draft.maxFeeGwei))
@@ -16,11 +17,11 @@ const validate = (draft: GasEstimate): Partial<Record<GasParamName, string>> => 
   return errors
 }
 
-/** The signer-wallet gas settings: the estimate, the user's saved overrides and the open draft. */
+/** The signer-wallet gas settings: the estimate, the saved values and the open draft (null while closed). */
 export const useGasParams = (scenario: Scenario) => {
   const estimate = scenario.estimate
   const [saved, setSaved] = useState<GasEstimate>(estimate)
-  const [draft, setDraft] = useState<GasEstimate | null>(scenario.startEditing ? estimate : null)
+  const [draft, setDraft] = useState<GasEstimate | null>(estimate.gasLimit ? null : estimate)
   const errors = draft ? validate(draft) : {}
 
   return {
@@ -28,7 +29,6 @@ export const useGasParams = (scenario: Scenario) => {
     saved,
     draft,
     errors,
-    isEdited: JSON.stringify(saved) !== JSON.stringify(estimate),
     startEditing: () => setDraft(saved),
     cancelEditing: () => setDraft(null),
     change: (name: GasParamName, value: string) => setDraft((d) => (d ? { ...d, [name]: value } : d)),

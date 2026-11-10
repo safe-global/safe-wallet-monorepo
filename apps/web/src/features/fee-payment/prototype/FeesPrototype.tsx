@@ -15,12 +15,12 @@ export const FeesPrototype = ({ scenario: id }: { scenario: ScenarioId }) => {
   const scenario = SCENARIOS[id]
   const { choice, onChoiceChange } = useFeePayerChoice(scenario)
   const gas = useGasParams(scenario)
-  const { view, gasFeeDetails } = useFeesView(scenario, choice, gas)
+  const { view, gasFeeEditor } = useFeesView(scenario, choice, gas)
 
   return (
     <FeesPage
       view={view}
-      gasFeeDetails={gasFeeDetails}
+      gasFeeEditor={gasFeeEditor}
       onChoiceChange={onChoiceChange}
       currency="usd"
       renderTokenIcon={renderTokenIcon}

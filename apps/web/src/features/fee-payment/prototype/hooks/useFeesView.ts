@@ -1,5 +1,5 @@
 import type { FeePayerView, GasPayerChoice, NetworkFee } from '@safe-global/views/features/fee-payment/types'
-import type { GasFeeDetailsProps } from '@safe-global/views/features/fee-payment/components/GasFeeDetails'
+import type { FeesPageProps } from '@safe-global/views/features/fee-payment/components/FeesPage'
 import { ETH_TOKEN, ETH_USD, type Scenario } from '../sampleData'
 import type { GasParamName, GasParamsState } from './useGasParams'
 
@@ -21,67 +21,45 @@ const FIELD_LABELS: Record<GasParamName, string> = {
   maxFeeGwei: 'Max fee (Gwei)',
 }
 
-const READ_ONLY_NOTE: Partial<Record<GasPayerChoice, string>> = {
-  PAY_FROM_SAFE: 'Set by the relayer quote at signing. Paid from the Safe, so it cannot be edited.',
-  SPONSORED: 'Covered by your Pro plan. The relayer sets the gas.',
-}
-
 /** Turns the payer and gas settings into the finished values the Fees card shows. */
 export const useFeesView = (
   scenario: Scenario,
   choice: GasPayerChoice,
   gas: GasParamsState,
-): { view: FeePayerView; gasFeeDetails: GasFeeDetailsProps } => {
+): Pick<FeesPageProps, 'view' | 'gasFeeEditor'> => {
   const paysFromSafe = choice === 'PAY_FROM_SAFE'
   const walletFee: NetworkFee = gas.saved.gasLimit ? toFee(gas.saved.gasLimit, gas.saved.maxFeeGwei) : { error: true }
-  const gasFee = paysFromSafe ? toFee(scenario.safeQuote.gasLimit, scenario.safeQuote.gasPriceGwei) : walletFee
+  const draft = gas.draft
 
   const view: FeePayerView = {
     payer: scenario.payer.kind === 'choice' ? { ...scenario.payer, value: choice } : scenario.payer,
     gasToken: { tokens: [ETH_TOKEN], selected: ETH_TOKEN.address, locked: true },
     executionFee: {},
-    gasFee,
+    gasFee: paysFromSafe ? toFee(scenario.safeQuote.gasLimit, scenario.safeQuote.gasPriceGwei) : walletFee,
     sponsored: choice === 'SPONSORED',
     sponsorKind: scenario.sponsorKind,
     footer: scenario.footer,
   }
 
-  const rows = paysFromSafe
-    ? [
-        { label: 'Gas limit', value: scenario.safeQuote.gasLimit },
-        { label: 'Gas price (Gwei)', value: scenario.safeQuote.gasPriceGwei },
-        { label: 'Refund to', value: 'Safe relayer' },
-      ]
-    : (Object.keys(FIELD_LABELS) as GasParamName[])
-        .filter((name) => choice === 'WALLET' || name !== 'userNonce')
-        .map((name) => ({
-          label:
-            gas.isEdited && gas.saved[name] !== gas.estimate[name]
-              ? `${FIELD_LABELS[name]} · edited`
-              : FIELD_LABELS[name],
-          value: gas.saved[name] || 'Cannot estimate',
-        }))
-
-  const editor =
-    choice === 'WALLET' && gas.draft
-      ? {
-          fields: (Object.keys(FIELD_LABELS) as GasParamName[]).map((name) => ({
-            name,
-            label: FIELD_LABELS[name],
-            value: gas.draft?.[name] ?? '',
-            error: gas.errors[name],
-            onChange: (value: string) => gas.change(name, value),
-          })),
-          canSave: Object.keys(gas.errors).length === 0,
-          onSave: gas.save,
-          onCancel: gas.cancelEditing,
-          onReset:
-            gas.estimate.gasLimit && JSON.stringify(gas.draft) !== JSON.stringify(gas.estimate) ? gas.reset : undefined,
-        }
-      : undefined
+  if (choice !== 'WALLET') return { view }
 
   return {
     view,
-    gasFeeDetails: { rows, readOnlyNote: READ_ONLY_NOTE[choice], onEdit: gas.startEditing, editor },
+    gasFeeEditor: {
+      open: draft !== null,
+      onOpenChange: (open) => (open ? gas.startEditing() : gas.cancelEditing()),
+      fields: (Object.keys(FIELD_LABELS) as GasParamName[]).map((name) => ({
+        name,
+        label: FIELD_LABELS[name],
+        value: draft?.[name] ?? '',
+        error: gas.errors[name],
+        autoFocus: name === 'gasLimit' && !gas.estimate.gasLimit,
+        onChange: (value: string) => gas.change(name, value),
+      })),
+      canSave: Object.keys(gas.errors).length === 0,
+      onSave: gas.save,
+      onCancel: gas.cancelEditing,
+      onReset: gas.estimate.gasLimit && JSON.stringify(draft) !== JSON.stringify(gas.estimate) ? gas.reset : undefined,
+    },
   }
 }
