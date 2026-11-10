@@ -44,11 +44,14 @@ function sourceFiles(dir: string, keep: (file: string) => boolean): string[] {
   })
 }
 
-const isStory = (file: string) => file.endsWith('.stories.tsx')
+// Stories and the mock data they import; src/tests holds Jest-only data
+const isStoryData = (file: string) =>
+  !/[/\\]src[/\\]tests[/\\]/.test(file) &&
+  (file.endsWith('.stories.tsx') || /[/\\](mocks|stories)[/\\]/.test(file) || /(mockData|\.fixtures)\.tsx?$/.test(file))
 const SOURCES = [
   ...sourceFiles(path.join(REPO_ROOT, 'config/test'), (file) => /\.(json|ts)$/.test(file)),
-  ...sourceFiles(path.join(REPO_ROOT, 'apps/web/src'), isStory),
-  ...sourceFiles(path.join(REPO_ROOT, 'packages/views/src'), isStory),
+  ...sourceFiles(path.join(REPO_ROOT, 'apps/web/src'), isStoryData),
+  ...sourceFiles(path.join(REPO_ROOT, 'packages/views/src'), isStoryData),
 ].map((file) => ({ file: path.relative(REPO_ROOT, file), text: fs.readFileSync(file, 'utf8') }))
 
 describe('Storybook images', () => {
@@ -62,7 +65,7 @@ describe('Storybook images', () => {
     )
 
     // Fix: save the image to apps/web/.storybook/mock-assets as WebP (max 128 px) and reference it as
-    // mock-assets/<host>/<path>.webp; use "" for a logo that does not exist upstream
+    // mock-assets/<host>/<path>.webp; use images/common/token-placeholder.svg for a logo that does not exist upstream
     expect(remote).toEqual([])
   })
 

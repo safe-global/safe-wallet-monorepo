@@ -27,8 +27,7 @@ export const mockSwapOrderTxInfo: SwapOrderTransactionInfo = {
   executedFeeToken: {
     address: faker.finance.ethereumAddress(),
     decimals: 18,
-    logoUri:
-      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
+    logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
     name: 'Ether',
     symbol: 'ETH',
     trusted: true,
@@ -36,8 +35,7 @@ export const mockSwapOrderTxInfo: SwapOrderTransactionInfo = {
   sellToken: {
     address: faker.finance.ethereumAddress(),
     decimals: 18,
-    logoUri:
-      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
+    logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
     name: 'Ether',
     symbol: 'ETH',
     trusted: true,
@@ -46,7 +44,7 @@ export const mockSwapOrderTxInfo: SwapOrderTransactionInfo = {
     address: faker.finance.ethereumAddress(),
     decimals: 6,
     logoUri:
-      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+      'mock-assets/safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp',
     name: 'USD Coin',
     symbol: 'USDC',
     trusted: true,
@@ -82,8 +80,7 @@ export const mockTwapOrderTxInfo: TwapOrderTransactionInfo = {
   executedFeeToken: {
     address: faker.finance.ethereumAddress(),
     decimals: 18,
-    logoUri:
-      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
+    logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
     name: 'Ether',
     symbol: 'ETH',
     trusted: true,
@@ -91,8 +88,7 @@ export const mockTwapOrderTxInfo: TwapOrderTransactionInfo = {
   sellToken: {
     address: faker.finance.ethereumAddress(),
     decimals: 18,
-    logoUri:
-      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE.png',
+    logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
     name: 'Ether',
     symbol: 'ETH',
     trusted: true,
@@ -101,7 +97,7 @@ export const mockTwapOrderTxInfo: TwapOrderTransactionInfo = {
     address: faker.finance.ethereumAddress(),
     decimals: 6,
     logoUri:
-      'https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+      'mock-assets/safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp',
     name: 'USD Coin',
     symbol: 'USDC',
     trusted: true,
