@@ -104,6 +104,7 @@ export const useCustomAppCommunicator = (
             message={message as string | TypedData}
             origin={appData?.url}
             requestId={requestId}
+            declared={declared}
           />,
           onTxFlowClose,
         )

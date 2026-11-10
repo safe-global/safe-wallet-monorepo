@@ -59,6 +59,7 @@ import type { SafeVersion } from '@safe-global/types-kit'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { RiskConfirmation } from '../../features/RiskConfirmation'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
+import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
 
 const createSkeletonMessage = (confirmationsRequired: number): MessageItem => {
   return {
@@ -235,9 +236,10 @@ type BaseProps = Pick<MessageItem, 'logoUri' | 'name' | 'message'>
 export type SignMessageProps = BaseProps & {
   origin?: string
   requestId?: RequestId
+  declared: DeclaredAttribution | undefined
 }
 
-const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactElement => {
+const SignMessage = ({ message, origin, requestId, declared }: SignMessageProps): ReactElement => {
   // Hooks & variables
   const { setTxFlow } = useContext(TxModalContext)
   const { setSafeMessage: setContextSafeMessage, setSafeMessageHash: setContextSafeMessageHash } =
@@ -281,6 +283,7 @@ const SignMessage = ({ message, origin, requestId }: SignMessageProps): ReactEle
     safeMessageHash,
     requestId,
     origin,
+    declared,
     () => setTxFlow(undefined),
   )
 

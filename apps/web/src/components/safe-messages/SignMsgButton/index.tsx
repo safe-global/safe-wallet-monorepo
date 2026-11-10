@@ -19,7 +19,8 @@ const SignMsgButton = ({ msg, compact = false }: { msg: MessageItem; compact?: b
 
   const onClick = (e: SyntheticEvent) => {
     e.stopPropagation()
-    setTxFlow(<SignMessageFlow {...msg} origin={msg.origin || undefined} />)
+    // Only confirms an existing message, which keeps the attribution declared when it was created
+    setTxFlow(<SignMessageFlow {...msg} origin={msg.origin || undefined} declared={undefined} />)
   }
 
   return (
