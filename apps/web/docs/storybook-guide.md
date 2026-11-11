@@ -66,6 +66,7 @@ export const Default: Story = {}
 | `pathname`      | `string`                                                                                                                       | `'/home'`                                           | Router pathname                               |
 
 - **Do not override feature flags** unless testing a specific disabled state (e.g. `features: { swaps: false }`).
+- `fullPage` and `withSidebar` render `AppChrome` next to `PageLayout`, as the app shells do. The mock store accepts all cookies, so the banner stays closed; set `store: { cookies_terms: {...} }` to show it.
 - Escape hatch for custom composition — import the pieces the factory is built from: `MockContextProvider`, `createChainData`, `createInitialState`, `getFixtureData`, `resolveWallet`, `coreHandlers`, `balanceHandlers` (all from `@/stories/mocks`). `MockContextProvider` already covers the Wallet, SDK, and TxModal contexts.
 
 ## What preview.tsx already provides globally (don't re-add)
@@ -162,7 +163,7 @@ _Status as of 2026-08 — re-verify against `src/stories/mocks/handlers.ts` befo
 `.github/workflows/web-argos-storybook.yml` builds the static Storybook, screenshots every story in **light and dark**, and uploads them to Argos as **sheets**: one image per title with every story as a row and light/dark side by side, and one image per fullscreen (page) story. A changed story shows up as a diff in its title's sheet. It runs on every merge to `dev` and uploads a new baseline only when a sheet's hash changed, every Monday as a safety net, and by hand (`workflow_dispatch`) before a release. On a PR it uploads only the sheets that differ from the PR's merge base on `dev`, or reports a skipped build when none differ; the PR cannot merge until someone approves the changes in Argos. To check a change before you push, run the sweep locally:
 
 ```bash
-yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>   # add --filter=<substr> to scope
+yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>   # add --filter=<substr>[,<substr>] to scope
 ```
 
 - CI splits the sweep into 4 shards (`--shard=k/n`, whole titles per shard). Locally, run it without `--shard`.

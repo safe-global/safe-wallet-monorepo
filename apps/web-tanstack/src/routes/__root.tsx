@@ -16,10 +16,7 @@ import { makeStore, setStoreInstance, useHydrateStore, useInitChains } from '@/s
 import MetaTags from '@/components/common/MetaTags'
 import PageLayout from '@/components/common/PageLayout'
 import PwaReloadPrompt from '../components/PwaReloadPrompt'
-import Notifications from '@/components/common/Notifications'
-import CookieAndTermBanner from '@/components/common/CookieAndTermBanner'
-import WhatsNewTopBar from '@/components/common/WhatsNewTopBar'
-import WhatsNewUpdatesFrame from '@/components/common/WhatsNewUpdatesFrame'
+import AppChrome from '@/components/common/AppChrome'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import useChangedValue from '@/hooks/useChangedValue'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
@@ -32,18 +29,16 @@ import { useInitSession } from '@/hooks/useInitSession'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import { useVisitedSafes } from '@/features/myAccounts'
-import { StepUpDialog, useOidcLoginCallback, useStepUpRecovery } from '@/features/oidc-auth'
+import { useOidcLoginCallback, useStepUpRecovery } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import { useHypernativeTokenRefresh } from '@/features/hypernative'
 import { initObservability } from '@/services/observability'
 import Analytics from '@/services/analytics/Analytics'
-import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import { useLoadFeature } from '@/features/__core__'
 import { RecoveryFeature } from '@/features/recovery'
 import { CounterfactualFeature } from '@/features/counterfactual'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
-import { TargetedOutreachFeature } from '@/features/targeted-outreach'
 import { useLocation, useSearch } from '@tanstack/react-router'
 
 import '@/styles/globals.css'
@@ -72,10 +67,6 @@ const CounterfactualHooksLoader = () => {
 const SpendingLimitsLoaderWrapper = () => {
   const { SpendingLimitsLoader } = useLoadFeature(SpendingLimitsFeature)
   return <SpendingLimitsLoader />
-}
-const TargetedOutreachPopupLoader = () => {
-  const { OutreachPopup } = useLoadFeature(TargetedOutreachFeature)
-  return <OutreachPopup />
 }
 
 const InitApp = (): ReactElement => {
@@ -109,16 +100,10 @@ const MemoizedTree = memo(function MemoizedTree({ pathname, outlet }: { pathname
   return (
     <>
       <PageLayout pathname={pathname}>{outlet}</PageLayout>
-      <CookieAndTermBanner />
-      <WhatsNewTopBar />
-      <WhatsNewUpdatesFrame />
-      <TargetedOutreachPopupLoader />
-      <Notifications />
-      <StepUpDialog />
+      <AppChrome />
       <RecoveryLoader />
       <CounterfactualHooksLoader />
       <SpendingLimitsLoaderWrapper />
-      <PkModulePopup />
     </>
   )
 })
