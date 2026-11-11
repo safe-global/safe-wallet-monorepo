@@ -46,11 +46,11 @@ test.describe('Pay from Safe', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const recipient = Wallet.createRandom().address
-    const owner = journey.owners.owner4.address
-    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
+    const owner = journey.owners.alice.address
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
     await emptyBalance(journey.env, owner)
     const safeBalance = await balanceOf(journey.env, safe.address)
-    await journey.connectAs('owner4')
+    await journey.connectAs('alice')
 
     const review = await createTransfer(safePage, safe, recipient)
     await review.payFeesFromSafe()
@@ -76,10 +76,10 @@ test.describe('Pay from Safe', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const recipient = Wallet.createRandom().address
-    const executor = journey.owners.owner1.address
-    const safe = await seedSafe(journey, { owners: ['owner1', 'owner4'], threshold: 2 })
+    const executor = journey.owners.bob.address
+    const safe = await seedSafe(journey, { owners: ['bob', 'alice'], threshold: 2 })
     await emptyBalance(journey.env, executor)
-    await journey.connectAs('owner4')
+    await journey.connectAs('alice')
 
     const review = await createTransfer(safePage, safe, recipient)
     await review.payFeesFromSafe()
@@ -90,7 +90,7 @@ test.describe('Pay from Safe', { tag: '@e2e' }, () => {
     await queue.goto(safe.prefixedAddress)
     await expect(queue.transactionWithNonce(0)).toContainText('1/2')
 
-    await journey.connectAs('owner1')
+    await journey.connectAs('bob')
     await queue.confirm(0)
     await expect(review.lockedFeePayer).toHaveText('Safe account')
     await review.continueButton.click()
