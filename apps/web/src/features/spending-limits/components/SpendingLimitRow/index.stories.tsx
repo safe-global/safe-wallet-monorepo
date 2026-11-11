@@ -116,6 +116,7 @@ export const SpendingLimitOnly: Story = (() => {
       signer: { address: OTHER_ADDRESS, chainId: '1', provider: null },
       setSignerAddress: () => {},
       setParentSafeNonce: () => {},
+      clearParentSafeNonce: () => {},
       isReady: true,
     },
     shadcn: true,

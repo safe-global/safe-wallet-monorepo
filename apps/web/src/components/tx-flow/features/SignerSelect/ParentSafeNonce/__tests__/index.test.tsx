@@ -1,9 +1,11 @@
 import { http, HttpResponse } from 'msw'
 import { userEvent } from '@testing-library/user-event'
 import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { fakerChecksummedAddress, render, screen, waitFor } from '@/tests/test-utils'
+import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { act, fakerChecksummedAddress, render, screen, waitFor } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
+import { getStoreInstance } from '@/store'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import {
   multisigExecutionInfoBuilder,
@@ -34,30 +36,48 @@ const queuedPage = (nonce: number): QueuedItemPage => ({
   ],
 })
 
-const mockParentSafeApi = (parentSafeAddress: string, { noncesStatus = 200 } = {}) => {
+const unavailable = () => HttpResponse.json({ message: 'Unavailable' }, { status: 500 })
+
+const mockParentSafeApi = (parentSafeAddress: string, { noncesFail = false, queueFails = false } = {}) => {
   const safePath = `${GATEWAY_URL}/v1/chains/${CHAIN_ID}/safes/${parentSafeAddress}`
   server.use(
     http.get(`${safePath}/nonces`, () =>
-      noncesStatus === 200
-        ? HttpResponse.json({ currentNonce: CURRENT_NONCE, recommendedNonce: RECOMMENDED_NONCE })
-        : HttpResponse.json({ message: 'Unavailable' }, { status: noncesStatus }),
+      noncesFail
+        ? unavailable()
+        : HttpResponse.json({ currentNonce: CURRENT_NONCE, recommendedNonce: RECOMMENDED_NONCE }),
     ),
-    http.get(`${safePath}/transactions/queued`, () => HttpResponse.json(queuedPage(QUEUED_NONCE))),
+    http.get(`${safePath}/transactions/queued`, () =>
+      queueFails ? unavailable() : HttpResponse.json(queuedPage(QUEUED_NONCE)),
+    ),
   )
 }
 
 const renderParentSafeNonce = (parentSafeAddress: string) => {
   const setParentSafeNonce = jest.fn()
-  const walletContext = { setParentSafeNonce } as unknown as WalletContextType
+  const clearParentSafeNonce = jest.fn()
+  const walletContext = { setParentSafeNonce, clearParentSafeNonce } as unknown as WalletContextType
   const view = render(
     <WalletContext.Provider value={walletContext}>
       <ParentSafeNonce parentSafeAddress={parentSafeAddress} />
     </WalletContext.Provider>,
   )
-  return { ...view, setParentSafeNonce }
+  return { ...view, setParentSafeNonce, clearParentSafeNonce }
 }
 
-const getNonceInput = () => screen.findByRole('combobox')
+const getLoadedNonceInput = async () => {
+  const input = await screen.findByRole('combobox')
+  await waitFor(() => expect(input).toHaveValue(String(RECOMMENDED_NONCE)))
+  return input
+}
+
+// RTK batches store notifications, so a refetch result reaches the component after the dispatch resolves
+const settle = () => act(() => new Promise((resolve) => setTimeout(resolve, 50)))
+
+const typeNonce = async (input: HTMLElement, nonce: number) => {
+  const user = userEvent.setup()
+  await user.clear(input)
+  await user.type(input, String(nonce))
+}
 
 describe('ParentSafeNonce', () => {
   const parentSafeAddress = fakerChecksummedAddress()
@@ -67,13 +87,13 @@ describe('ParentSafeNonce', () => {
     mockUseSafeInfo.mockReturnValue({ safe: extendedSafeInfoBuilder().with({ chainId: CHAIN_ID }).build() })
   })
 
-  it('shows the parent Safe recommended nonce but leaves the signer to re-fetch it', async () => {
+  it('shows the parent Safe recommended nonce without pinning it for the signer', async () => {
     mockParentSafeApi(parentSafeAddress)
     const { setParentSafeNonce } = renderParentSafeNonce(parentSafeAddress)
 
-    expect(await getNonceInput()).toHaveValue(String(RECOMMENDED_NONCE))
-    expect(setParentSafeNonce).toHaveBeenLastCalledWith(undefined)
-    expect(setParentSafeNonce).not.toHaveBeenCalledWith(RECOMMENDED_NONCE)
+    await getLoadedNonceInput()
+
+    expect(setParentSafeNonce).not.toHaveBeenCalled()
   })
 
   it('offers the parent Safe queued txs as nonces to replace', async () => {
@@ -81,59 +101,89 @@ describe('ParentSafeNonce', () => {
     mockParentSafeApi(parentSafeAddress)
     renderParentSafeNonce(parentSafeAddress)
 
-    await user.click(await getNonceInput())
+    await user.click(await getLoadedNonceInput())
 
     expect(await screen.findByText('Replace existing')).toBeInTheDocument()
     expect(screen.getByRole('option', { name: new RegExp(`^${QUEUED_NONCE} -`) })).toBeInTheDocument()
   })
 
   it('hands the signer a nonce the user types', async () => {
-    const user = userEvent.setup()
     mockParentSafeApi(parentSafeAddress)
     const { setParentSafeNonce } = renderParentSafeNonce(parentSafeAddress)
-    const input = await getNonceInput()
-    await waitFor(() => expect(input).toHaveValue(String(RECOMMENDED_NONCE)))
 
-    await user.clear(input)
-    await user.type(input, String(QUEUED_NONCE))
+    await typeNonce(await getLoadedNonceInput(), QUEUED_NONCE)
 
     await waitFor(() => expect(setParentSafeNonce).toHaveBeenLastCalledWith(QUEUED_NONCE))
   })
 
-  it('rejects a nonce below the parent Safe on-chain nonce', async () => {
+  it('stops pinning a nonce when the user resets to the recommended one', async () => {
     const user = userEvent.setup()
     mockParentSafeApi(parentSafeAddress)
-    const { setParentSafeNonce } = renderParentSafeNonce(parentSafeAddress)
-    const input = await getNonceInput()
-    await waitFor(() => expect(input).toHaveValue(String(RECOMMENDED_NONCE)))
+    const { setParentSafeNonce, clearParentSafeNonce } = renderParentSafeNonce(parentSafeAddress)
+    const input = await getLoadedNonceInput()
+    await typeNonce(input, QUEUED_NONCE)
+    await waitFor(() => expect(setParentSafeNonce).toHaveBeenLastCalledWith(QUEUED_NONCE))
 
-    await user.clear(input)
-    await user.type(input, String(CURRENT_NONCE - 1))
+    await user.click(screen.getByRole('button', { name: 'Reset to recommended nonce' }))
+
+    await waitFor(() => expect(clearParentSafeNonce).toHaveBeenCalled())
+    expect(input).toHaveValue(String(RECOMMENDED_NONCE))
+    expect(setParentSafeNonce).not.toHaveBeenCalledWith(RECOMMENDED_NONCE)
+  })
+
+  it('rejects a nonce below the parent Safe on-chain nonce', async () => {
+    mockParentSafeApi(parentSafeAddress)
+    const { setParentSafeNonce } = renderParentSafeNonce(parentSafeAddress)
+    const input = await getLoadedNonceInput()
+
+    await typeNonce(input, CURRENT_NONCE - 1)
 
     await waitFor(() => expect(input).toHaveAccessibleName(`Nonce can't be lower than ${CURRENT_NONCE}`))
     expect(setParentSafeNonce).not.toHaveBeenCalledWith(CURRENT_NONCE - 1)
   })
 
-  it('clears the nonce it handed to the signer when it unmounts', async () => {
-    const user = userEvent.setup()
+  it('clears the signer nonce when it unmounts', async () => {
     mockParentSafeApi(parentSafeAddress)
-    const { setParentSafeNonce, unmount } = renderParentSafeNonce(parentSafeAddress)
-    const input = await getNonceInput()
-    await waitFor(() => expect(input).toHaveValue(String(RECOMMENDED_NONCE)))
-    await user.clear(input)
-    await user.type(input, String(QUEUED_NONCE))
-    await waitFor(() => expect(setParentSafeNonce).toHaveBeenLastCalledWith(QUEUED_NONCE))
+    const { clearParentSafeNonce, unmount } = renderParentSafeNonce(parentSafeAddress)
+    await getLoadedNonceInput()
 
     unmount()
 
-    expect(setParentSafeNonce).toHaveBeenLastCalledWith(undefined)
+    expect(clearParentSafeNonce).toHaveBeenCalled()
   })
 
   it('shows an error when the parent Safe nonce cannot be loaded', async () => {
-    mockParentSafeApi(parentSafeAddress, { noncesStatus: 500 })
+    mockParentSafeApi(parentSafeAddress, { noncesFail: true })
     renderParentSafeNonce(parentSafeAddress)
 
     expect(await screen.findByText("Couldn't load the parent Safe nonce")).toBeInTheDocument()
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
+  })
+
+  it('keeps showing the field when a later refresh of the nonce fails', async () => {
+    mockParentSafeApi(parentSafeAddress)
+    renderParentSafeNonce(parentSafeAddress)
+    await getLoadedNonceInput()
+    mockParentSafeApi(parentSafeAddress, { noncesFail: true })
+
+    await act(async () => {
+      const args = { chainId: CHAIN_ID, safeAddress: parentSafeAddress }
+      await getStoreInstance().dispatch(cgwApi.endpoints.safesGetNoncesV1.initiate(args, { forceRefetch: true }))
+    })
+    await settle()
+
+    expect(screen.getByRole('combobox')).toHaveValue(String(RECOMMENDED_NONCE))
+    expect(screen.queryByText("Couldn't load the parent Safe nonce")).not.toBeInTheDocument()
+  })
+
+  it('offers only the recommended nonce when the parent Safe queue cannot be loaded', async () => {
+    const user = userEvent.setup()
+    mockParentSafeApi(parentSafeAddress, { queueFails: true })
+    renderParentSafeNonce(parentSafeAddress)
+
+    await user.click(await getLoadedNonceInput())
+
+    expect(await screen.findByText('Recommended nonce')).toBeInTheDocument()
+    expect(screen.queryByText('Replace existing')).not.toBeInTheDocument()
   })
 })

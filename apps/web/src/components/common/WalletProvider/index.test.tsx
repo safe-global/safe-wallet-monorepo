@@ -257,12 +257,15 @@ describe('WalletProvider', () => {
       act(() => result.current?.setSignerAddress(nestedSafeAddress))
       await waitFor(() => expect(result.current?.signer?.isSafe).toBe(true))
       const signer = result.current?.signer
-      const getChosenNonce = getNestedWalletSpy.mock.lastCall?.[4]
+      const getParentSafeNonce = getNestedWalletSpy.mock.lastCall?.[4]
 
-      expect(getChosenNonce?.()).toBeUndefined()
+      expect(getParentSafeNonce?.()).toBeUndefined()
       act(() => result.current?.setParentSafeNonce(7))
-      expect(getChosenNonce?.()).toBe(7)
+      expect(getParentSafeNonce?.()).toBe(7)
       expect(result.current?.signer).toBe(signer)
+
+      act(() => result.current?.clearParentSafeNonce())
+      expect(getParentSafeNonce?.()).toBeUndefined()
     })
 
     it('prefers the selected nested Safe over a connected wallet that is itself a Safe', async () => {

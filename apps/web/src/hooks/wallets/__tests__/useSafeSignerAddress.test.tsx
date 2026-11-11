@@ -12,6 +12,7 @@ const renderWithSigner = (signer: SignerWallet | null) => {
         signer,
         setSignerAddress: jest.fn(),
         setParentSafeNonce: jest.fn(),
+        clearParentSafeNonce: jest.fn(),
         isReady: true,
       }}
     >

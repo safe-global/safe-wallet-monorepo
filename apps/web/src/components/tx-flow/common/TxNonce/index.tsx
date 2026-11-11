@@ -105,7 +105,7 @@ type TxNonceFormProps = {
   recommendedNonce: string
   // The Safe's on-chain nonce, the lowest valid value
   currentNonce: number
-  previousNonces: number[]
+  queuedNonces: number[]
   readOnly: boolean
   onNonceChange: (nonce: number) => void
   renderOption: (nonce: string) => ReactNode
@@ -115,12 +115,12 @@ export const TxNonceForm = ({
   nonce,
   recommendedNonce,
   currentNonce,
-  previousNonces,
+  queuedNonces,
   readOnly,
   onNonceChange,
   renderOption,
 }: TxNonceFormProps) => {
-  const previousNonceOptions = previousNonces.map((nonce) => nonce.toString())
+  const queuedNonceOptions = queuedNonces.map((nonce) => nonce.toString())
   const [warning, setWarning] = useState<string>('')
 
   const showRecommendedNonceButton = recommendedNonce !== nonce
@@ -154,7 +154,7 @@ export const TxNonceForm = ({
     setWarning(message)
   }, [nonce, recommendedNonce, currentNonce])
 
-  const options = [recommendedNonce, ...previousNonceOptions]
+  const options = [recommendedNonce, ...queuedNonceOptions]
 
   return (
     <Controller
@@ -268,8 +268,8 @@ export const TxNonceForm = ({
                   </ComboboxCollection>
                 </ComboboxGroup>
 
-                {previousNonceOptions.length > 0 && (
-                  <ComboboxGroup items={previousNonceOptions}>
+                {queuedNonceOptions.length > 0 && (
+                  <ComboboxGroup items={queuedNonceOptions}>
                     <ComboboxLabel className="pt-3">Replace existing</ComboboxLabel>
                     <ComboboxCollection>
                       {(option: string) => (
@@ -292,7 +292,7 @@ export const TxNonceForm = ({
 const SafeTxNonceForm = ({ nonce, recommendedNonce }: { nonce: number; recommendedNonce: number }) => {
   const { safeTx, setNonce } = useContext(SafeTxContext)
   const { isRejection } = useContext(TxFlowContext)
-  const previousNonces = usePreviousNonces()
+  const queuedNonces = usePreviousNonces()
   const { safe } = useSafeInfo()
   const isEditable = !safeTx || safeTx.signatures.size === 0
 
@@ -301,7 +301,7 @@ const SafeTxNonceForm = ({ nonce, recommendedNonce }: { nonce: number; recommend
       nonce={nonce.toString()}
       recommendedNonce={recommendedNonce.toString()}
       currentNonce={safe.nonce}
-      previousNonces={previousNonces}
+      queuedNonces={queuedNonces}
       readOnly={!isEditable || isRejection}
       onNonceChange={setNonce}
       renderOption={renderNonceFormOption}

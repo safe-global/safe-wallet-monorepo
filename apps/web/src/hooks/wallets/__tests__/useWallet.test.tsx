@@ -26,6 +26,7 @@ describe('useWallet hook', () => {
           signer: null,
           setSignerAddress: jest.fn(),
           setParentSafeNonce: jest.fn(),
+          clearParentSafeNonce: jest.fn(),
           isReady: true,
         }}
       >
@@ -53,6 +54,7 @@ describe('useWallet hook', () => {
           signer: null,
           setSignerAddress: jest.fn(),
           setParentSafeNonce: jest.fn(),
+          clearParentSafeNonce: jest.fn(),
           isReady: true,
         }}
       >
@@ -102,6 +104,7 @@ describe('useSigner hook', () => {
           signer: mockSigner as any,
           setSignerAddress: jest.fn(),
           setParentSafeNonce: jest.fn(),
+          clearParentSafeNonce: jest.fn(),
           isReady: true,
         }}
       >
@@ -134,6 +137,7 @@ describe('useSigner hook', () => {
           signer: null,
           setSignerAddress: jest.fn(),
           setParentSafeNonce: jest.fn(),
+          clearParentSafeNonce: jest.fn(),
           isReady: true,
         }}
       >
@@ -169,6 +173,7 @@ describe('useWalletContext hook', () => {
       signer: mockSigner as any,
       setSignerAddress: jest.fn(),
       setParentSafeNonce: jest.fn(),
+      clearParentSafeNonce: jest.fn(),
       isReady: true,
     }
 
@@ -190,6 +195,7 @@ describe('useWalletContext hook', () => {
       signer: null,
       setSignerAddress: jest.fn(),
       setParentSafeNonce: jest.fn(),
+      clearParentSafeNonce: jest.fn(),
       isReady: true,
     }
 

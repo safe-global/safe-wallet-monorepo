@@ -59,6 +59,7 @@ const TestWalletContextProvider = ({
               connectedWallet,
               setSignerAddress,
               setParentSafeNonce: jest.fn(),
+              clearParentSafeNonce: jest.fn(),
               signer: {
                 address: signerAddress || connectedWallet.address,
                 chainId: '1',

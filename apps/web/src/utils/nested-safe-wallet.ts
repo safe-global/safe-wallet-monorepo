@@ -30,7 +30,7 @@ export const getNestedWallet = (
   safeInfo: SafeState,
   web3ReadOnly: JsonRpcProvider,
   router: NextRouter,
-  getChosenNonce: () => number | undefined,
+  getParentSafeNonce: () => number | undefined,
 ): NestedWallet => {
   let requestId = 0
   const nestedSafeSdk: WalletSDK = {
@@ -85,7 +85,7 @@ export const getNestedWallet = (
       })
 
       // The SDK defaults to the on-chain nonce, which collides with txs already queued in this Safe
-      const nonce = getChosenNonce() ?? (await getNonces(safeInfo.chainId, safeInfo.address.value)).recommendedNonce
+      const nonce = getParentSafeNonce() ?? (await getNonces(safeInfo.chainId, safeInfo.address.value)).recommendedNonce
       const safeTx = await connectedSDK.createTransaction({
         transactions,
         onlyCalls: true,

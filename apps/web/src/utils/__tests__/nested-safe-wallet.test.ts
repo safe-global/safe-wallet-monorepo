@@ -76,13 +76,13 @@ describe('getNestedWallet send', () => {
     executeTransaction: jest.fn(() => Promise.resolve({ hash: '0xhash' })),
   } as unknown as Safe
 
-  const sendTransaction = async (data: string, chosenNonce?: number) => {
+  const sendTransaction = async (data: string, parentSafeNonce?: number) => {
     const nestedWallet = getNestedWallet(
       actualWallet,
       safeInfo,
       {} as JsonRpcProvider,
       {} as NextRouter,
-      () => chosenNonce,
+      () => parentSafeNonce,
     )
     return nestedWallet.provider?.request({
       method: 'eth_sendTransaction',
@@ -118,6 +118,7 @@ describe('getNestedWallet send', () => {
     await sendTransaction(concat([APPROVE_HASH_SELECTOR, keccak256('0x01')]), 51)
 
     expect(mockCreateTransaction.mock.calls[0][0].options?.nonce).toBe(51)
+    expect(transactions.getNonces).not.toHaveBeenCalled()
   })
 
   it('creates no tx when the recommended nonce cannot be fetched', async () => {

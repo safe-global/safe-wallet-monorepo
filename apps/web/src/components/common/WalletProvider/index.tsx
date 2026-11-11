@@ -32,8 +32,9 @@ export type WalletContextType = {
   connectedWallet: ConnectedWallet | null
   signer: SignerWallet | null
   setSignerAddress: (address: string | undefined) => void
-  // Nonce of the tx the in-app parent Safe signer creates; undefined uses the recommended nonce
-  setParentSafeNonce: (nonce: number | undefined) => void
+  // Nonce of the tx the in-app parent Safe signer creates; without one it uses the recommended nonce
+  setParentSafeNonce: (nonce: number) => void
+  clearParentSafeNonce: () => void
   isReady: boolean
 }
 
@@ -51,8 +52,11 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const [signerAddress, setSignerAddress] = useState<string>()
   // A ref, so a nonce edit doesn't rebuild the signer object
   const parentSafeNonce = useRef<number | undefined>(undefined)
-  const setParentSafeNonce = useCallback((nonce: number | undefined) => {
+  const setParentSafeNonce = useCallback((nonce: number) => {
     parentSafeNonce.current = nonce
+  }, [])
+  const clearParentSafeNonce = useCallback(() => {
+    parentSafeNonce.current = undefined
   }, [])
 
   const { currentData: nestedSafeInfo } = useSafesGetSafeV1Query(
@@ -101,6 +105,7 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
         signer,
         setSignerAddress,
         setParentSafeNonce,
+        clearParentSafeNonce,
         isReady: !!walletReady,
       }}
     >
