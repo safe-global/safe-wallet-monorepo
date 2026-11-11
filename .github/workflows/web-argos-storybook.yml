@@ -179,13 +179,13 @@ jobs:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
 
-      - name: Find the PR's merge base
+      # With dev, not the PR's base branch: Argos compares every PR with dev, and only dev commits have a manifest
+      - name: Find the PR's merge base with dev
         id: merge-base
         if: github.event_name == 'pull_request'
         env:
-          BASE_REF: ${{ github.base_ref }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-        run: echo "sha=$(git merge-base "origin/$BASE_REF" "$HEAD_SHA")" >> "$GITHUB_OUTPUT"
+        run: echo "sha=$(git merge-base origin/dev "$HEAD_SHA")" >> "$GITHUB_OUTPUT"
 
       # Only dev push runs give a baseline; a PR takes its merge base only, a push may fall back (counted as changed)
       - name: Find the baseline manifest
