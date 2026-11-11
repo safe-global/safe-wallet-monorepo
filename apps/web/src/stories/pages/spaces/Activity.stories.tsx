@@ -41,7 +41,8 @@ const defaultSetup = createMockStory({
   wallet: 'connected',
   layout: 'fullPage',
   pathname: '/spaces/activity',
-  features: { spaces: true, spaceAuditLog: true },
+  authenticated: true,
+  features: { spaceAuditLog: true },
   query: { spaceId: '1' },
   handlers: [
     http.get(/\/v1\/spaces\/[^/]+\/audit-log$/, () =>

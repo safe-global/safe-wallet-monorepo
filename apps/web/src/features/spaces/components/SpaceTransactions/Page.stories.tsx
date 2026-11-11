@@ -7,7 +7,7 @@ const SPACE_ID = '1'
 const setup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
+  authenticated: true,
   pathname: '/spaces/transactions',
   query: { spaceId: SPACE_ID },
   layout: 'paper',

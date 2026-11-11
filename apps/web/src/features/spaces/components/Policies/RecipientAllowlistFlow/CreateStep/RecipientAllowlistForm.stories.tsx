@@ -111,7 +111,7 @@ const setup = createMockStory({
   scenario: 'efSafe',
   wallet: 'connected',
   shadcn: true,
-  features: { spaces: true },
+  authenticated: true,
   query: { spaceId: '1' },
   store: { addressBook: { '1': { [LOCAL_CONTACT]: 'Cold storage' } } },
 })

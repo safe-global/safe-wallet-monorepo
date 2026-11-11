@@ -958,7 +958,7 @@ export function getFixtureData(scenario: FixtureScenario) {
  * })
  */
 export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
-  const { scenario = 'efSafe', features = {}, handlers: customHandlers = [] } = config
+  const { scenario = 'efSafe', features = {}, handlers: customHandlers = [], authenticated = false } = config
 
   // Get fixture data for scenario
   const { safeData, balancesData, portfolioData, positionsData } = getFixtureData(scenario)
@@ -983,7 +983,6 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     recovery: features.recovery ?? false,
     hypernative: features.hypernative ?? false,
     earn: features.earn ?? false,
-    spaces: features.spaces ?? false,
     oidcAuth: features.oidcAuth ?? false,
     switchAuthenticator: features.switchAuthenticator ?? false,
     twoFactorAwarenessBanner: features.twoFactorAwarenessBanner ?? false,
@@ -992,7 +991,6 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     workspacesExperimentalFeatures: features.workspacesExperimentalFeatures ?? false,
     policyRecipientAllowlist: features.policyRecipientAllowlist ?? false,
     spaceAuditLog: features.spaceAuditLog ?? false,
-    myAccounts: features.myAccounts ?? false,
   }
 
   // Build handlers array
@@ -1018,12 +1016,11 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     allHandlers.push(...positionsHandlers(positionsData))
   }
 
-  // Add spaces handlers if feature enabled
-  if (mergedFeatures.spaces) {
+  if (authenticated) {
     allHandlers.push(...spacesHandlers())
   }
 
-  // Fallback handlers registered after spaces so spaces-specific mocks win when enabled
+  // Fallback handlers registered after spaces so spaces-specific mocks win when signed in
   allHandlers.push(
     ...fiatCodesHandlers(),
     ...delegatesHandlers(),

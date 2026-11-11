@@ -3,7 +3,8 @@ import { createMockStory } from '@/stories/mocks'
 import WorkspaceTwoFactorAwarenessCard from './index'
 
 const defaultSetup = createMockStory({
-  features: { spaces: true, oidcAuth: true, twoFactorAwarenessBanner: true },
+  authenticated: true,
+  features: { oidcAuth: true, twoFactorAwarenessBanner: true },
   pathname: '/spaces',
   query: { spaceId: '1' },
   shadcn: true,

@@ -17,7 +17,8 @@ const member = (id: number, email: string | null): MemberDto => ({
 })
 
 const defaultSetup = createMockStory({
-  features: { spaces: true, oidcAuth: true, switchAuthenticator: true },
+  authenticated: true,
+  features: { oidcAuth: true, switchAuthenticator: true },
   pathname: '/spaces/settings/general',
   query: { spaceId: '1' },
   shadcn: true,

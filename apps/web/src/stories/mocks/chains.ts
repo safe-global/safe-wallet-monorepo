@@ -14,7 +14,6 @@ export const DEFAULT_FEATURES: Required<FeatureFlags> = {
   recovery: false,
   hypernative: false,
   earn: false,
-  spaces: false,
   oidcAuth: false,
   switchAuthenticator: false,
   twoFactorAwarenessBanner: false,
@@ -23,7 +22,6 @@ export const DEFAULT_FEATURES: Required<FeatureFlags> = {
   workspacesExperimentalFeatures: false,
   policyRecipientAllowlist: false,
   spaceAuditLog: false,
-  myAccounts: false,
 }
 
 /**
@@ -36,7 +34,6 @@ const FEATURE_MAP: Record<keyof FeatureFlags, string> = {
   recovery: 'RECOVERY',
   hypernative: 'HYPERNATIVE',
   earn: 'EARN',
-  spaces: 'SPACES',
   oidcAuth: 'OIDC_AUTH',
   switchAuthenticator: 'SWITCH_AUTHENTICATOR',
   twoFactorAwarenessBanner: 'TWO_FACTOR_AWARENESS_BANNER',
@@ -45,7 +42,6 @@ const FEATURE_MAP: Record<keyof FeatureFlags, string> = {
   workspacesExperimentalFeatures: 'WORKSPACES_EXPERIMENTAL_FEATURES',
   policyRecipientAllowlist: 'POLICY_RECIPIENT_ALLOWLIST',
   spaceAuditLog: 'SPACE_AUDIT_LOG',
-  myAccounts: 'MY_ACCOUNTS',
 }
 
 /**
