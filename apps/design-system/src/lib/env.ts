@@ -1,9 +1,8 @@
-export const REGISTRY_NAMESPACE = '@safe'
+import { normaliseBasePath } from './base-path.mjs'
 
-export const normaliseBasePath = (value: string | undefined): string => {
-  const trimmed = (value ?? '').trim().replace(/^\/+|\/+$/g, '')
-  return trimmed ? `/${trimmed}` : ''
-}
+export { normaliseBasePath }
+
+export const REGISTRY_NAMESPACE = '@safe'
 
 export const normaliseUrl = (value: string | undefined): string => (value ?? '').trim().replace(/\/+$/, '')
 

@@ -1,14 +1,10 @@
 import path from 'node:path'
 import { createRequire } from 'node:module'
 import { createMDX } from 'fumadocs-mdx/next'
+import { normaliseBasePath } from './src/lib/base-path.mjs'
 
 const require = createRequire(import.meta.url)
 const uiDir = path.dirname(require.resolve('@safe-global/ui/package.json'))
-
-const normaliseBasePath = (value) => {
-  const trimmed = (value ?? '').trim().replace(/^\/+|\/+$/g, '')
-  return trimmed ? `/${trimmed}` : ''
-}
 
 const basePath = normaliseBasePath(process.env.NEXT_PUBLIC_BASE_PATH)
 const assetPrefix = (process.env.NEXT_PUBLIC_ASSET_PREFIX ?? '').trim().replace(/\/+$/, '') || basePath
