@@ -160,6 +160,7 @@ export function ScenarioBar({
           Preview · simulated
         </div>
         <Tabs
+          className="min-w-0 max-w-full"
           value={direction}
           // Stat cards (option B) open on the 20-Safe workspace, Action first (option C) on 50.
           onValueChange={(value) =>
@@ -170,7 +171,7 @@ export function ScenarioBar({
             )
           }
         >
-          <TabsList aria-label="Design direction">
+          <TabsList aria-label="Design direction" className="max-w-full justify-start overflow-x-auto">
             <TabsTrigger value="table">A · Safe table</TabsTrigger>
             <TabsTrigger value="fleet">B · Stat cards</TabsTrigger>
             <TabsTrigger value="simple">C · Action first</TabsTrigger>

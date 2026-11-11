@@ -674,6 +674,7 @@ function PendingQueueView() {
     safeTable: direction === 'table' || safeView,
     safenet: direction === 'table' || flat,
     partyTags: cards,
+    compact: flat && isMobile,
     pageSize,
     signLabel,
     // Narrows the table to one Safe, on all its networks, and opens it from the top, under its filter tag.
@@ -783,7 +784,12 @@ function PendingQueueView() {
                 <FleetPulse counts={cardCounts} isActive={isCardActive} onSelect={selectCard} />
               )}
               {cards && !unavailable && (
-                <GroupByCards display={display} counts={getGroupCounts(visible, persona)} onChange={changeDisplay} />
+                <GroupByCards
+                  display={display}
+                  counts={getGroupCounts(visible, persona)}
+                  onChange={changeDisplay}
+                  compact={isMobile}
+                />
               )}
               <QueueToolbar
                 filters={filters}

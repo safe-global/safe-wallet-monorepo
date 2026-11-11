@@ -72,6 +72,8 @@ export type QueueSectionProps = {
   safenet?: boolean
   // Option E: the Safe and the other party read as tags in the transaction line.
   partyTags?: boolean
+  // Options D and E on a phone: Nonce, a two-line Transaction and Action, so nothing scrolls sideways.
+  compact?: boolean
   pageSize?: number
   signLabel?: SignLabel
   onSeeMore?: (accountIds: string[]) => void
@@ -418,6 +420,7 @@ export function QueueSectionRows({
   safeTable,
   safenet,
   partyTags,
+  compact,
   signLabel,
 }: QueueSectionRowsProps) {
   const [conflictHover, setConflictHover] = useState<string | null>(null)
@@ -461,6 +464,7 @@ export function QueueSectionRows({
           safeTable={safeTable}
           safenet={safenet}
           partyTags={partyTags}
+          compact={compact}
           signLabel={signLabel}
         />
       ))}

@@ -48,11 +48,11 @@ export function QueueGroupedTable({
   const { isWide, showNoteText, persona, recoveries, alignTo, simple, safeTable = false, pageSize = 10 } = props
   // Option A: one band per Safe and a sub-header per network, in place of the Chain column.
   const columns = ordered
-    ? ORDERED_COLUMNS(isWide, props.partyTags)
+    ? ORDERED_COLUMNS(isWide, props.partyTags, props.compact)
     : getColumns(isWide, alignTo).filter((column) => !safeTable || column !== 'Chain')
   // Option A: Transaction fits the widest action and To takes the slack, so a row reads as one short sentence.
   const widths = ordered
-    ? orderedWidths(showNoteText, props.partyTags)
+    ? orderedWidths(showNoteText, props.partyTags, props.compact)
     : safeTable
       ? { ...getColumnWidths(showNoteText, alignTo), Transaction: 'w-[21.5rem]', To: undefined }
       : getColumnWidths(showNoteText, alignTo)
@@ -258,7 +258,7 @@ export function QueueGroupedTable({
           <Table
             aria-label="Pending transactions"
             variant="panel"
-            className={`table-fixed [&_td]:px-4 [&_th]:px-4 ${ordered ? 'min-w-[1300px]' : safeTable ? 'min-w-[1160px]' : 'min-w-[1080px]'}`}
+            className={`table-fixed ${props.compact ? '[&_td]:px-2 [&_th]:px-2' : '[&_td]:px-4 [&_th]:px-4'} ${ordered ? (props.compact ? '' : 'min-w-[1300px]') : safeTable ? 'min-w-[1160px]' : 'min-w-[1080px]'}`}
           >
             <colgroup>
               {columns.map((label) => (
@@ -363,9 +363,14 @@ export type QueueOrderedTableProps = Omit<
 
 // As in option A, Transaction fits the widest action and To takes the slack.
 // Option E fits the Safe tag in Transaction, in place of the Safe column.
-const orderedWidths = (showNoteText: boolean | undefined, partyTags = false): Record<string, string | undefined> => ({
+const orderedWidths = (
+  showNoteText: boolean | undefined,
+  partyTags = false,
+  compact = false,
+): Record<string, string | undefined> => ({
   ...getColumnWidths(showNoteText, true),
-  Transaction: partyTags ? 'w-[23rem]' : 'w-72',
+  Transaction: compact ? undefined : partyTags ? 'w-[23rem]' : 'w-72',
+  ...(compact ? { Nonce: 'w-11', Action: 'w-12' } : {}),
   To: undefined,
   Safe: 'w-44',
   Network: 'w-24',
@@ -373,24 +378,27 @@ const orderedWidths = (showNoteText: boolean | undefined, partyTags = false): Re
 })
 
 // Columns for options D and E, the same in every grouping. Nonce leads, so conflicts draw the same bracket.
-export const ORDERED_COLUMNS = (isWide: boolean, partyTags = false) => [
-  'Nonce',
-  'Transaction',
-  'To',
-  ...(partyTags ? [] : ['Safe']),
-  'Network',
-  'Proposed',
-  ...(isWide ? ['Note'] : []),
-  'Signatures',
-  'Status',
-  'Action',
-]
+export const ORDERED_COLUMNS = (isWide: boolean, partyTags = false, compact = false) =>
+  compact
+    ? ['Nonce', 'Transaction', 'Action']
+    : [
+        'Nonce',
+        'Transaction',
+        'To',
+        ...(partyTags ? [] : ['Safe']),
+        'Network',
+        'Proposed',
+        ...(isWide ? ['Note'] : []),
+        'Signatures',
+        'Status',
+        'Action',
+      ]
 
 // Option D: rows grouped by status, network or next nonce. Each group collapses, and the header collapses them all.
 export function QueueOrderedTable({ groups, groupBy, ...props }: QueueOrderedTableProps) {
   const byNetwork = groupBy === 'network'
-  const columns = ORDERED_COLUMNS(props.isWide, props.partyTags)
-  const widths = orderedWidths(props.showNoteText, props.partyTags)
+  const columns = ORDERED_COLUMNS(props.isWide, props.partyTags, props.compact)
+  const widths = orderedWidths(props.showNoteText, props.partyTags, props.compact)
   const [collapsed, setCollapsed] = useState<string[]>([])
   const { scroller, overflowing } = useScrollOverflow(`${groups.length}:${collapsed.join()}`)
   const toggle = (id: string) =>
@@ -404,7 +412,7 @@ export function QueueOrderedTable({ groups, groupBy, ...props }: QueueOrderedTab
           <Table
             aria-label="Pending transactions"
             variant="panel"
-            className="table-fixed min-w-[1300px] [&_td]:px-4 [&_th]:px-4"
+            className={`table-fixed ${props.compact ? '[&_td]:px-2 [&_th]:px-2' : 'min-w-[1300px] [&_td]:px-4 [&_th]:px-4'}`}
           >
             <colgroup>
               {columns.map((column) => (

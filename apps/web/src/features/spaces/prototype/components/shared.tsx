@@ -81,15 +81,16 @@ export const chainLogoUrl = (chainId: string | undefined) =>
   `https://safe-transaction-assets.safe.global/chains/${chainId}/chain_logo.png`
 
 // The chain as a 24px logo, the same size as the other party's avatar. The name is in the tooltip.
+// 16px, the size of the icons inside tags and the signature circle, so rows read as one line.
 export function ChainIcon({ chainId, network }: { chainId: string; network: string }) {
   return (
     <Tooltip delay={150}>
       <TooltipTrigger
-        render={<span className="flex size-6 shrink-0" role="img" />}
+        render={<span className="flex size-4 shrink-0" role="img" />}
         aria-label={network}
         onClick={(event) => event.stopPropagation()}
       >
-        <img src={chainLogoUrl(chainId)} alt="" className="size-6 rounded-full" />
+        <img src={chainLogoUrl(chainId)} alt="" className="size-4 rounded-full" />
       </TooltipTrigger>
       <TooltipContent>{network}</TooltipContent>
     </Tooltip>

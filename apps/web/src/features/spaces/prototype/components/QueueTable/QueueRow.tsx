@@ -86,6 +86,7 @@ export type QueueRowProps = {
   // Options A, D and E: the Safenet mark next to the signatures.
   safenet?: boolean
   partyTags?: boolean
+  compact?: boolean
   signLabel?: SignLabel
 }
 
@@ -117,6 +118,7 @@ export function QueueRow({
   safeTable = false,
   safenet = false,
   partyTags = false,
+  compact = false,
   signLabel = 'Sign',
 }: QueueRowProps) {
   const [hovered, setHovered] = useState(false)
@@ -208,6 +210,206 @@ export function QueueRow({
 
   // Option D by status or network: Nonce follows Transaction, so conflict options show their own nonce.
   const nonceFirst = columns[0] === 'Nonce'
+  const signaturesContent = (
+    <span className="flex items-center gap-2">
+      <Tooltip delay={150}>
+        <TooltipTrigger
+          aria-label={
+            signatureCount === 0
+              ? `0 of ${account.threshold} signatures, proposal, ${getSignerSummary(tx, persona)}`
+              : `${signatureCount} of ${account.threshold} signatures, ${getSignerSummary(tx, persona)}`
+          }
+          className="flex text-sm tabular-nums"
+          onClick={(event) => event.stopPropagation()}
+        >
+          {signatureCount === 0 ? (
+            // As production: with no signatures yet, only a proposer can have created it.
+            <StatusChip tone="secondary">Proposal</StatusChip>
+          ) : (
+            <span className="flex items-center gap-1.5">
+              <SignatureGauge count={signatureCount} threshold={account.threshold} />
+              {signatureCount}/{account.threshold}
+            </span>
+          )}
+        </TooltipTrigger>
+        <TooltipContent className={HINT_CLASS}>
+          {signatureCount === 0 ? (
+            <HintContent
+              title="Proposal"
+              body={`Created by a proposer. No signatures yet, ${account.threshold} needed. Sign or reject it to proceed.`}
+            />
+          ) : (
+            <SignerList tx={tx} persona={persona} />
+          )}
+        </TooltipContent>
+      </Tooltip>
+      {safenet && !compact && <SafenetMark tx={tx} />}
+    </span>
+  )
+  const statusContent = (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {execution ? (
+        <ExecutionChip execution={execution} now={now} />
+      ) : lockedBy ? (
+        <LockedChip by={lockedBy} />
+      ) : (
+        <Tooltip delay={150}>
+          <TooltipTrigger
+            render={<span />}
+            aria-label={
+              parentApproval
+                ? `Awaiting parent signature. ${getAccount(parentApproval).name} #${parentApproval.nonce}`
+                : `${lastSignature ? 'Sign & execute' : getStepsStatus(tx, persona).label}. ${statusHint}`
+            }
+            onClick={(event) => event.stopPropagation()}
+          >
+            {willBeReplaced ? (
+              <StatusChip tone="secondary">Would be replaced</StatusChip>
+            ) : parentApproval ? (
+              <StatusChip tone="warning">Awaiting parent</StatusChip>
+            ) : (
+              <StepsStatusChip tx={tx} persona={persona} label={lastSignature ? 'Sign & execute' : undefined} />
+            )}
+          </TooltipTrigger>
+          <TooltipContent className={HINT_CLASS}>
+            {willBeReplaced ? (
+              'Replaced if the option you are pointing at executes.'
+            ) : parentApproval ? (
+              <HintContent
+                title="Awaiting parent signature"
+                body={`${getAccount(parentApproval).name} signs this through its own transaction #${parentApproval.nonce}. The signature counts once ${getAccount(parentApproval).name} executes it.`}
+              />
+            ) : (
+              statusHint
+            )}
+          </TooltipContent>
+        </Tooltip>
+      )}
+      {getRiskFlags(tx)
+        .filter((flag) => flag.key === 'untrusted')
+        .map((flag) => (
+          <RiskFlagBadge key={flag.key} flag={flag} />
+        ))}
+      {/* Grouped conflicts carry the badge on their group header instead. */}
+      {conflicts.length > 0 && groupSize < 2 && <Badge variant="warning">Conflicting</Badge>}
+    </div>
+  )
+  const actionContent = (
+    <div className="flex items-center justify-end gap-1">
+      {execution ? (
+        canSpeedUp(execution, now) ? (
+          <Button
+            size="2xs"
+            variant="default"
+            className="w-20"
+            aria-label={`Speed up ${getTransactionLabel(tx)}`}
+            onClick={stop(() => onSpeedUp?.(tx.id))}
+          >
+            Speed up
+          </Button>
+        ) : (
+          <span className="w-20" aria-hidden="true" />
+        )
+      ) : lockedBy ? (
+        <Tooltip delay={150}>
+          <TooltipTrigger render={<span className="flex" />}>
+            <Button
+              size="2xs"
+              variant="outline"
+              className="w-20"
+              disabled
+              aria-label={`${primaryLabel} ${getTransactionLabel(tx)}, locked`}
+            >
+              {primaryLabel}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Available if #{lockedBy.nonce} fails.</TooltipContent>
+        </Tooltip>
+      ) : primaryAction.kind === 'review' && !primary.hint ? (
+        // No main button when there is nothing to do. The row still opens the drawer.
+        <span className="w-20" aria-hidden="true" />
+      ) : primary.hint ? (
+        <Tooltip delay={150}>
+          <TooltipTrigger
+            render={
+              <Button
+                size="2xs"
+                variant={hovered ? 'default' : 'outline'}
+                className={lastSignature ? 'w-28' : 'w-20'}
+                aria-label={`${primaryLabel} ${getTransactionLabel(tx)}`}
+                onMouseEnter={() => conflicts.length && onReplaceHover(tx.id)}
+                onMouseLeave={() => onReplaceHover(null)}
+                onFocus={() => conflicts.length && onReplaceHover(tx.id)}
+                onBlur={() => onReplaceHover(null)}
+                onClick={primary.onClick}
+              >
+                {primaryLabel}
+              </Button>
+            }
+          />
+          <TooltipContent>{primary.hint}</TooltipContent>
+        </Tooltip>
+      ) : (
+        <Button
+          size="2xs"
+          variant={hovered ? 'default' : 'outline'}
+          className={lastSignature ? 'w-28' : 'w-20'}
+          aria-label={`${primaryLabel} ${getTransactionLabel(tx)}`}
+          onMouseEnter={() => conflicts.length && onReplaceHover(tx.id)}
+          onMouseLeave={() => onReplaceHover(null)}
+          onFocus={() => conflicts.length && onReplaceHover(tx.id)}
+          onBlur={() => onReplaceHover(null)}
+          onClick={primary.onClick}
+        >
+          {primaryLabel}
+        </Button>
+      )}
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={
+            <Button
+              size="icon-xs"
+              variant="ghost"
+              aria-label={`More actions for ${getTransactionLabel(tx)}`}
+
+              onClick={(event) => event.stopPropagation()}
+            />
+          }
+        >
+          <MoreHorizontal />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          className="w-auto min-w-40 whitespace-nowrap"
+          onClick={(event) => event.stopPropagation()}
+        >
+          {menuItems.map(({ action, reason }, index) => {
+            const label = action === 'remind' && reminded ? 'Remind signers again' : MENU_LABELS[action]
+            const divider = index > 0 && action === RARE_MENU_ACTIONS[0] && <DropdownMenuSeparator />
+            const item = reason ? (
+              // Disabled items ignore the pointer, so the wrapper holds the tooltip.
+              <Tooltip delay={150}>
+                <TooltipTrigger render={<div />}>
+                  <DropdownMenuItem disabled>{label}</DropdownMenuItem>
+                </TooltipTrigger>
+                <TooltipContent side="left" className={HINT_CLASS}>
+                  {reason}
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <DropdownMenuItem onClick={() => onMenuAction?.(tx, action)}>{label}</DropdownMenuItem>
+            )
+            return (
+              <Fragment key={action}>
+                {divider}
+                {item}
+              </Fragment>
+            )
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  )
   const cells: Record<string, ReactNode> = {
     Nonce: (
       <TableCell
@@ -240,26 +442,42 @@ export function QueueRow({
       </TableCell>
     ),
     Transaction: (
-      <TableCell className="py-2" colSpan={spanTo ? 2 : undefined}>
+      <TableCell className="py-2" colSpan={compact || spanTo ? 2 : undefined}>
         {/* min-h-10 matches the Policies table, so rows are the same height across Spaces. */}
-        <div className="flex min-h-10 min-w-0 items-center gap-1.5">
-          <button
-            className={`flex min-w-0 max-w-full items-center gap-3 text-left text-sm font-normal focus-visible:outline-none focus-visible:underline ${willBeReplaced ? 'text-muted-foreground line-through' : ''}`}
-            onClick={() => onReview(tx)}
-            aria-label={`Open ${getTransactionLabel(tx)}`}
-          >
-            <span className="flex min-w-0 items-center gap-2">
-              {partyTags && (
-                <span className="flex shrink-0">
-                  <CopyableParty name={account.safeName ?? account.name} address={account.iconAddress} tag />
-                </span>
-              )}
-              <TransactionHead tx={tx} onRow keepWidth={!columns.includes('To')} />
-              {!columns.includes('To') && <Counterparty tx={tx} />}
-            </span>
-          </button>
-          {warningMarker}
-          {!isWide && noteButton}
+        <div className={compact ? 'flex min-w-0 flex-col gap-1.5 py-1' : 'flex min-h-10 min-w-0 items-center gap-1.5'}>
+          <div className="flex min-w-0 items-center gap-1.5">
+            <button
+              className={`flex min-w-0 max-w-full items-center gap-3 text-left text-sm font-normal focus-visible:outline-none focus-visible:underline ${willBeReplaced ? 'text-muted-foreground line-through' : ''}`}
+              onClick={() => onReview(tx)}
+              aria-label={`Open ${getTransactionLabel(tx)}`}
+            >
+              <span className="flex min-w-0 items-center gap-2">
+                {partyTags && (
+                  <span className={compact ? 'flex max-w-28 min-w-0 shrink' : 'flex shrink-0'}>
+                    <CopyableParty name={account.safeName ?? account.name} address={account.iconAddress} tag />
+                  </span>
+                )}
+                <TransactionHead tx={tx} onRow keepWidth={!compact && !columns.includes('To')} />
+                {!compact && !columns.includes('To') && <Counterparty tx={tx} />}
+              </span>
+            </button>
+            {warningMarker}
+            {!isWide && !compact && noteButton}
+          </div>
+          {compact && (
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <ChainIcon chainId={account.chainId} network={account.network} />
+              {signaturesContent}
+              {/* The button already says Sign or Execute, so the pill only shows when it adds something. */}
+              {(execution ||
+                lockedBy ||
+                parentApproval ||
+                willBeReplaced ||
+                !['Sign', 'Execute'].includes(getStepsStatus(tx, persona).label)) &&
+                statusContent}
+              <span className="ml-auto">{actionContent}</span>
+            </div>
+          )}
         </div>
       </TableCell>
     ),
@@ -294,44 +512,7 @@ export function QueueRow({
         <Counterparty tx={tx} inColumn tag={partyTags} />
       </TableCell>
     ),
-    Signatures: (
-      <TableCell className="py-1">
-        <span className="flex items-center gap-2">
-          <Tooltip delay={150}>
-            <TooltipTrigger
-              aria-label={
-                signatureCount === 0
-                  ? `0 of ${account.threshold} signatures, proposal, ${getSignerSummary(tx, persona)}`
-                  : `${signatureCount} of ${account.threshold} signatures, ${getSignerSummary(tx, persona)}`
-              }
-              className="flex text-sm tabular-nums"
-              onClick={(event) => event.stopPropagation()}
-            >
-              {signatureCount === 0 ? (
-                // As production: with no signatures yet, only a proposer can have created it.
-                <StatusChip tone="secondary">Proposal</StatusChip>
-              ) : (
-                <span className="flex items-center gap-1.5">
-                  <SignatureGauge count={signatureCount} threshold={account.threshold} />
-                  {signatureCount}/{account.threshold}
-                </span>
-              )}
-            </TooltipTrigger>
-            <TooltipContent className={HINT_CLASS}>
-              {signatureCount === 0 ? (
-                <HintContent
-                  title="Proposal"
-                  body={`Created by a proposer. No signatures yet, ${account.threshold} needed. Sign or reject it to proceed.`}
-                />
-              ) : (
-                <SignerList tx={tx} persona={persona} />
-              )}
-            </TooltipContent>
-          </Tooltip>
-          {safenet && <SafenetMark tx={tx} />}
-        </span>
-      </TableCell>
-    ),
+    Signatures: <TableCell className="py-1">{signaturesContent}</TableCell>,
     Note:
       showNoteText && tx.note ? (
         <TableCell className="whitespace-normal py-2">
@@ -358,56 +539,7 @@ export function QueueRow({
       ) : (
         <TableCell>{noteButton}</TableCell>
       ),
-    Status: (
-      <TableCell>
-        <div className="flex flex-wrap items-center gap-1.5">
-          {execution ? (
-            <ExecutionChip execution={execution} now={now} />
-          ) : lockedBy ? (
-            <LockedChip by={lockedBy} />
-          ) : (
-            <Tooltip delay={150}>
-              <TooltipTrigger
-                render={<span />}
-                aria-label={
-                  parentApproval
-                    ? `Awaiting parent signature. ${getAccount(parentApproval).name} #${parentApproval.nonce}`
-                    : `${lastSignature ? 'Sign & execute' : getStepsStatus(tx, persona).label}. ${statusHint}`
-                }
-                onClick={(event) => event.stopPropagation()}
-              >
-                {willBeReplaced ? (
-                  <StatusChip tone="secondary">Would be replaced</StatusChip>
-                ) : parentApproval ? (
-                  <StatusChip tone="warning">Awaiting parent</StatusChip>
-                ) : (
-                  <StepsStatusChip tx={tx} persona={persona} label={lastSignature ? 'Sign & execute' : undefined} />
-                )}
-              </TooltipTrigger>
-              <TooltipContent className={HINT_CLASS}>
-                {willBeReplaced ? (
-                  'Replaced if the option you are pointing at executes.'
-                ) : parentApproval ? (
-                  <HintContent
-                    title="Awaiting parent signature"
-                    body={`${getAccount(parentApproval).name} signs this through its own transaction #${parentApproval.nonce}. The signature counts once ${getAccount(parentApproval).name} executes it.`}
-                  />
-                ) : (
-                  statusHint
-                )}
-              </TooltipContent>
-            </Tooltip>
-          )}
-          {getRiskFlags(tx)
-            .filter((flag) => flag.key === 'untrusted')
-            .map((flag) => (
-              <RiskFlagBadge key={flag.key} flag={flag} />
-            ))}
-          {/* Grouped conflicts carry the badge on their group header instead. */}
-          {conflicts.length > 0 && groupSize < 2 && <Badge variant="warning">Conflicting</Badge>}
-        </div>
-      </TableCell>
-    ),
+    Status: <TableCell>{statusContent}</TableCell>,
     Proposed: (
       <TableCell className="text-sm">
         <Tooltip delay={150}>
@@ -418,122 +550,9 @@ export function QueueRow({
         </Tooltip>
       </TableCell>
     ),
-    Action: (
+    Action: compact ? null : (
       <TableCell className="sticky right-0 z-10 bg-card group-data-[overflow]/queue:shadow-[-12px_0_12px_-12px_rgba(0,0,0,0.25)]">
-        <div className="flex items-center justify-end gap-1">
-          {execution ? (
-            canSpeedUp(execution, now) ? (
-              <Button
-                size="2xs"
-                variant="default"
-                className="w-20"
-                aria-label={`Speed up ${getTransactionLabel(tx)}`}
-                onClick={stop(() => onSpeedUp?.(tx.id))}
-              >
-                Speed up
-              </Button>
-            ) : (
-              <span className="w-20" aria-hidden="true" />
-            )
-          ) : lockedBy ? (
-            <Tooltip delay={150}>
-              <TooltipTrigger render={<span className="flex" />}>
-                <Button
-                  size="2xs"
-                  variant="outline"
-                  className="w-20"
-                  disabled
-                  aria-label={`${primaryLabel} ${getTransactionLabel(tx)}, locked`}
-                >
-                  {primaryLabel}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Available if #{lockedBy.nonce} fails.</TooltipContent>
-            </Tooltip>
-          ) : primaryAction.kind === 'review' && !primary.hint ? (
-            // No main button when there is nothing to do. The row still opens the drawer.
-            <span className="w-20" aria-hidden="true" />
-          ) : primary.hint ? (
-            <Tooltip delay={150}>
-              <TooltipTrigger
-                render={
-                  <Button
-                    size="2xs"
-                    variant={hovered ? 'default' : 'outline'}
-                    className={lastSignature ? 'w-28' : 'w-20'}
-                    aria-label={`${primaryLabel} ${getTransactionLabel(tx)}`}
-                    onMouseEnter={() => conflicts.length && onReplaceHover(tx.id)}
-                    onMouseLeave={() => onReplaceHover(null)}
-                    onFocus={() => conflicts.length && onReplaceHover(tx.id)}
-                    onBlur={() => onReplaceHover(null)}
-                    onClick={primary.onClick}
-                  >
-                    {primaryLabel}
-                  </Button>
-                }
-              />
-              <TooltipContent>{primary.hint}</TooltipContent>
-            </Tooltip>
-          ) : (
-            <Button
-              size="2xs"
-              variant={hovered ? 'default' : 'outline'}
-              className={lastSignature ? 'w-28' : 'w-20'}
-              aria-label={`${primaryLabel} ${getTransactionLabel(tx)}`}
-              onMouseEnter={() => conflicts.length && onReplaceHover(tx.id)}
-              onMouseLeave={() => onReplaceHover(null)}
-              onFocus={() => conflicts.length && onReplaceHover(tx.id)}
-              onBlur={() => onReplaceHover(null)}
-              onClick={primary.onClick}
-            >
-              {primaryLabel}
-            </Button>
-          )}
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  size="icon-xs"
-                  variant="ghost"
-                  aria-label={`More actions for ${getTransactionLabel(tx)}`}
-
-                  onClick={(event) => event.stopPropagation()}
-                />
-              }
-            >
-              <MoreHorizontal />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-auto min-w-40 whitespace-nowrap"
-              onClick={(event) => event.stopPropagation()}
-            >
-              {menuItems.map(({ action, reason }, index) => {
-                const label = action === 'remind' && reminded ? 'Remind signers again' : MENU_LABELS[action]
-                const divider = index > 0 && action === RARE_MENU_ACTIONS[0] && <DropdownMenuSeparator />
-                const item = reason ? (
-                  // Disabled items ignore the pointer, so the wrapper holds the tooltip.
-                  <Tooltip delay={150}>
-                    <TooltipTrigger render={<div />}>
-                      <DropdownMenuItem disabled>{label}</DropdownMenuItem>
-                    </TooltipTrigger>
-                    <TooltipContent side="left" className={HINT_CLASS}>
-                      {reason}
-                    </TooltipContent>
-                  </Tooltip>
-                ) : (
-                  <DropdownMenuItem onClick={() => onMenuAction?.(tx, action)}>{label}</DropdownMenuItem>
-                )
-                return (
-                  <Fragment key={action}>
-                    {divider}
-                    {item}
-                  </Fragment>
-                )
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        {actionContent}
       </TableCell>
     ),
   }
@@ -565,7 +584,9 @@ export function QueueRow({
             </span>
           </TableCell>
           <TableCell colSpan={columnCount - 1} className="pt-4 pb-1">
-            <div className="flex w-max flex-wrap items-center gap-x-2 gap-y-1 text-xs max-md:sticky max-md:left-4 max-md:w-[calc(100vw-5rem)] max-md:whitespace-normal">
+            <div
+              className={`flex flex-wrap items-center gap-x-2 gap-y-1 text-xs ${compact ? 'whitespace-normal' : 'w-max max-md:sticky max-md:left-4 max-md:w-[calc(100vw-5rem)] max-md:whitespace-normal'}`}
+            >
               {/* Orange, so the conflict reads at a glance (Oct 22 review). */}
               <Badge variant="warning">Conflicting</Badge>
               <span className="text-muted-foreground">
