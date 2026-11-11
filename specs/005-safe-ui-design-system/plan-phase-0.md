@@ -389,3 +389,4 @@ Deviations from the plan, all small:
 
 - Phase 2: prune the `next-themes` dependency from `apps/web`, `apps/web-tanstack` and `packages/views`. `Toaster` no longer reads it, and none of their source imports it.
 - `build-storybook:vite` fails on the base commit too (`UNLOADABLE_DEPENDENCY` on the `signature.svg` import in `packages/views/src/components/tx-flow/common/TxSectionTitle/TxSectionTitle.stories.tsx`). That bug belongs to a separate fix.
+- The root-level `packages/ui/src/**` and `packages/views/src/**` inputs in `turbo.json` also invalidate `type-check`/`test` caches for unrelated workspaces (mobile, tx-builder, utils). Correct but costs cache hits; narrow later with per-workspace `turbo.json` files for `web`, `web-tanstack` and `views`.
