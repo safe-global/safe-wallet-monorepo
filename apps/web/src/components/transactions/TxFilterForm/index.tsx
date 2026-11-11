@@ -2,6 +2,8 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
 import { Label } from '@safe-global/views/components/ui/label'
+import { Switch } from '@safe-global/views/components/ui/switch'
+import { Field, FieldContent, FieldDescription, FieldLabel } from '@safe-global/views/components/ui/field'
 import { isBefore, isAfter, startOfDay } from 'date-fns'
 import { Controller, FormProvider, useForm, useFormState, type DefaultValues } from 'react-hook-form'
 import { useMemo, type ReactElement } from 'react'
@@ -54,6 +56,8 @@ const defaultValues: DefaultValues<TxFilterFormState> = {
   [TxFilterFormFieldNames.TRANSFERS]: false,
 }
 
+const TRANSFERS_SWITCH_ID = 'filter-transfers-only'
+
 const getInitialFormValues = (filter: TxFilter | null): DefaultValues<TxFilterFormState> => {
   return filter
     ? {
@@ -80,6 +84,7 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
   const isIncomingFilter = filterType === TxFilterType.INCOMING
   const isMultisigFilter = filterType === TxFilterType.MULTISIG
   const isModuleFilter = filterType === TxFilterType.MODULE
+  const isTransfersOnly = isMultisigFilter && watch(TxFilterFormFieldNames.TRANSFERS)
 
   const { dirtyFields, isValid } = useFormState({ control })
 
@@ -150,6 +155,29 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
               <div className="flex w-full flex-col">
                 <Label className={css.filterSectionTitle}>Parameters</Label>
                 <div className="flex flex-col gap-4">
+                  {isMultisigFilter && (
+                    <Controller
+                      name={TxFilterFormFieldNames.TRANSFERS}
+                      control={control}
+                      render={({ field }) => (
+                        <Field orientation="horizontal">
+                          <Switch
+                            id={TRANSFERS_SWITCH_ID}
+                            aria-label="Transfers only"
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                          <FieldContent>
+                            <FieldLabel htmlFor={TRANSFERS_SWITCH_ID}>Transfers only</FieldLabel>
+                            <FieldDescription>
+                              Find payments by who received them, including those sent in a batch
+                            </FieldDescription>
+                          </FieldContent>
+                        </Field>
+                      )}
+                    />
+                  )}
+
                   {!isModuleFilter && (
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div className={css.paramField} data-testid="start-date">
@@ -183,42 +211,34 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
 
                   {!isModuleFilter && (
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div className={css.paramField}>
-                        <Controller
-                          name={TxFilterFormFieldNames.AMOUNT}
-                          control={control}
-                          rules={{
-                            validate: (val: TxFilterFormState[TxFilterFormFieldNames.AMOUNT]) => {
-                              if (val?.length > 0) {
-                                return validateAmount(val)
-                              }
-                            },
-                          }}
-                          render={({ field, fieldState }) => (
-                            <NumberField
-                              data-testid="amount-input"
-                              inputSize="hero"
-                              variant="surface"
-                              label={
-                                fieldState.error?.message ||
-                                (isIncomingFilter ? 'Amount' : `Amount (only ${chain?.nativeCurrency.symbol || 'ETH'})`)
-                              }
-                              error={!!fieldState.error}
-                              {...field}
-                              fullWidth
-                            />
-                          )}
-                        />
-                      </div>
-
-                      {isIncomingFilter && (
+                      {!isTransfersOnly && (
                         <div className={css.paramField}>
-                          <AddressInput
-                            data-testid="token-input"
-                            label="Token address"
-                            name={TxFilterFormFieldNames.TOKEN_ADDRESS}
-                            required={false}
-                            fullWidth
+                          <Controller
+                            name={TxFilterFormFieldNames.AMOUNT}
+                            control={control}
+                            rules={{
+                              validate: (val: TxFilterFormState[TxFilterFormFieldNames.AMOUNT]) => {
+                                if (val?.length > 0) {
+                                  return validateAmount(val)
+                                }
+                              },
+                            }}
+                            render={({ field, fieldState }) => (
+                              <NumberField
+                                data-testid="amount-input"
+                                inputSize="hero"
+                                variant="surface"
+                                label={
+                                  fieldState.error?.message ||
+                                  (isIncomingFilter
+                                    ? 'Amount'
+                                    : `Amount (only ${chain?.nativeCurrency.symbol || 'ETH'})`)
+                                }
+                                error={!!fieldState.error}
+                                {...field}
+                                fullWidth
+                              />
+                            )}
                           />
                         </div>
                       )}
@@ -233,10 +253,22 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                           />
                         </div>
                       )}
+
+                      {(isIncomingFilter || isTransfersOnly) && (
+                        <div className={css.paramField}>
+                          <AddressInput
+                            data-testid="token-input"
+                            label="Token address"
+                            name={TxFilterFormFieldNames.TOKEN_ADDRESS}
+                            required={false}
+                            fullWidth
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
 
-                  {isMultisigFilter && (
+                  {isMultisigFilter && !isTransfersOnly && (
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div className={css.paramField}>
                         <Controller

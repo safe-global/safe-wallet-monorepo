@@ -234,4 +234,96 @@ describe('TxFilterForm Component Tests', () => {
     // Check that onClose callback has been called
     expect(onClose).toHaveBeenCalled()
   })
+
+  describe('transfers only toggle', () => {
+    const selectOutgoing = () => fireEvent.click(screen.getByRole('radio', { name: 'Outgoing' }))
+    const transfersSwitch = () => screen.getByRole('switch', { name: 'Transfers only' })
+    const lastPushedQuery = () => mockRouter.push.mock.calls.at(-1)[0].query
+
+    beforeEach(() => {
+      mockRouter.push.mockClear()
+    })
+
+    it('is not offered for the incoming filter', () => {
+      renderComponent()
+
+      expect(screen.queryByRole('switch', { name: 'Transfers only' })).not.toBeInTheDocument()
+    })
+
+    it('is off when the outgoing filter is selected', () => {
+      renderComponent()
+
+      selectOutgoing()
+
+      expect(transfersSwitch()).not.toBeChecked()
+      expect(screen.getByTestId('amount-input')).toBeInTheDocument()
+      expect(screen.getByTestId('nonce-input')).toBeInTheDocument()
+      expect(screen.queryByLabelText('Token address')).not.toBeInTheDocument()
+    })
+
+    it('replaces the amount and nonce with the token address when turned on', async () => {
+      renderComponent()
+      selectOutgoing()
+
+      await act(async () => {
+        fireEvent.click(transfersSwitch())
+      })
+
+      expect(screen.queryByTestId('amount-input')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('nonce-input')).not.toBeInTheDocument()
+      expect(screen.getByLabelText('Token address')).toBeInTheDocument()
+      expect(screen.getByLabelText('Recipient')).toBeInTheDocument()
+    })
+
+    it('puts the transfers flag in the URL when applied turned on', async () => {
+      renderComponent()
+      selectOutgoing()
+      await act(async () => {
+        fireEvent.click(transfersSwitch())
+      })
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('apply-btn'))
+      })
+
+      expect(lastPushedQuery()).toMatchObject({ type: 'Outgoing', transfers: 'true' })
+    })
+
+    it('leaves the transfers flag out of the URL when applied turned off', async () => {
+      renderComponent()
+      await act(async () => {
+        selectOutgoing()
+      })
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('apply-btn'))
+      })
+
+      expect(lastPushedQuery()).toMatchObject({ type: 'Outgoing' })
+      expect(lastPushedQuery()).not.toHaveProperty('transfers')
+    })
+
+    it('is turned off by clearing the filter', async () => {
+      renderComponent()
+      selectOutgoing()
+      await act(async () => {
+        fireEvent.click(transfersSwitch())
+      })
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('clear-btn'))
+      })
+
+      expect(transfersSwitch()).not.toBeChecked()
+    })
+
+    it('starts turned on when the URL has the transfers flag', () => {
+      ;(useRouter as jest.Mock).mockReturnValue({ ...mockRouter, query: { type: 'Outgoing', transfers: 'true' } })
+
+      renderComponent()
+
+      expect(transfersSwitch()).toBeChecked()
+      expect(screen.getByLabelText('Token address')).toBeInTheDocument()
+    })
+  })
 })
