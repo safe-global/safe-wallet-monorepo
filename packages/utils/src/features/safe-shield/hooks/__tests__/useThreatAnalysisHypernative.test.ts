@@ -103,17 +103,20 @@ describe('useThreatAnalysisHypernative', () => {
   }
 
   describe('requests', () => {
-    it('sends the transaction for assessment with the auth token', async () => {
+    it('sends the transaction for assessment with its safeTxHash and the auth token', async () => {
       const requests = answerWithAssessment()
-      const safeTx = createSafeTransaction()
+      const fixedSafeAddress = '0x1111111111111111111111111111111111111111'
+      const safeTx = createSafeTransaction({ to: '0x2222222222222222222222222222222222222222' })
+      // EIP-712 SafeTx hash of this transaction for this Safe on chain 1, Safe 1.4.1
+      const expectedSafeTxHash = '0xb2c2e06269f16a730d83543d3d0ac8e9ba7224fa5de422f086351c0d833fa62c'
 
-      renderTransactionHook({ data: safeTx, origin: 'https://app.example.com' })
+      renderTransactionHook({ safeAddress: fixedSafeAddress, data: safeTx, origin: 'https://app.example.com' })
 
       await waitFor(() => expect(requests).toHaveLength(1))
       expect(requests[0].authorization).toBe(authToken)
       expect(requests[0].body).toEqual({
-        safeAddress,
-        safeTxHash: expect.stringMatching(/^0x[0-9a-f]{64}$/),
+        safeAddress: fixedSafeAddress,
+        safeTxHash: expectedSafeTxHash,
         transaction: {
           chain: chainId,
           input: '0x',
