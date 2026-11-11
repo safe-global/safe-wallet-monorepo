@@ -12,7 +12,7 @@ const NO_TRANSACTIONS: never[] = []
 export const useSpacePendingTransactions = (limit = 3) => {
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
-  // The gateway serves the Space queue behind the same flag; undefined until the chains load
+  // Chain flag that rolls out the Space queue; undefined until the chains load
   const hasSpaceQueue = useHasFeature(FEATURES.SPACE_TRANSACTIONS)
   const skipSpaceQueue = hasSpaceQueue !== true || !isUserSignedIn || !spaceId
 
@@ -29,7 +29,7 @@ export const useSpacePendingTransactions = (limit = 3) => {
   return {
     transactions,
     count: transactions.length,
-    isLoading: hasSpaceQueue === undefined || (spaceQueue.isFetching && !spaceQueue.currentData),
+    isLoading: hasSpaceQueue === undefined || !spaceId || (spaceQueue.isFetching && !spaceQueue.currentData),
     error: spaceQueue.isError ? 'Failed to load pending transactions' : undefined,
     refetch: () => {
       if (!skipSpaceQueue) spaceQueue.refetch()

@@ -167,11 +167,22 @@ describe('useSpacePendingTransactions', () => {
     expect(result.current.isLoading).toBe(false)
   })
 
-  it('does not request the Space queue when signed out', async () => {
+  it('requests the Space queue again on refetch', async () => {
+    const requests = respondWithQueue(createPage({}))
+
+    const { result } = renderInSpace()
+
+    await waitFor(() => expect(requests).toHaveLength(1))
+    await act(async () => result.current.refetch())
+    await waitFor(() => expect(requests).toHaveLength(2))
+  })
+
+  it('does not request the Space queue when signed out, even on refetch', async () => {
     const requests = respondWithQueue(createPage({}))
 
     const { result } = renderInSpace(4, null)
 
+    await act(async () => result.current.refetch())
     await act(() => new Promise((resolve) => setTimeout(resolve, 50)))
     expect(requests).toHaveLength(0)
     expect(result.current.transactions).toEqual([])
