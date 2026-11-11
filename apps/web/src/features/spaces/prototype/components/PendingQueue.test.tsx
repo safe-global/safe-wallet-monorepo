@@ -1526,6 +1526,46 @@ describe('option E · Group by cards', () => {
   })
 })
 
+describe('option E · Safes that fail to load', () => {
+  const partial = (query: Record<string, string>) => ({
+    routerProps: { query: { option: 'cards', state: 'partial', scenario: '5-safes', ...query } },
+  })
+  beforeEach(() => localStorage.clear())
+
+  it('shows a toolbar chip instead of a banner, listing failed Safes by network and undeployed ones apart', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />, partial({ failed: '3' }))
+    expect(screen.queryAllByText(/didn’t load$/)).toHaveLength(0)
+    await user.click(screen.getByRole('button', { name: '3 not loaded' }))
+    const failed = await screen.findByRole('region', { name: 'Safes that didn’t load' })
+    expect(within(failed).getByRole('button', { name: 'Try again on Ethereum' })).toBeInTheDocument()
+    expect(within(failed).getByText('Grants')).toBeInTheDocument()
+    expect(
+      within(screen.getByRole('region', { name: 'Safes not deployed yet' })).getByText('Ops Payroll'),
+    ).toBeInTheDocument()
+  })
+
+  it('keeps a band with Try again for each failed Safe when grouped by Safe', async () => {
+    jest.useFakeTimers()
+    render(<PendingQueue />, partial({ failed: '3' }))
+    fireEvent.click(screen.getByRole('radio', { name: /^Safes/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Try again for Grants on Arbitrum' }))
+    act(() => jest.advanceTimersByTime(1000))
+    expect(screen.queryByRole('button', { name: 'Try again for Grants on Arbitrum' })).toBeNull()
+    expect(screen.getByRole('button', { name: '2 not loaded' })).toBeInTheDocument()
+    jest.useRealTimers()
+  })
+
+  it('explains an empty page when no Safe loads, and Try again brings the queue back', () => {
+    jest.useFakeTimers()
+    render(<PendingQueue />, partial({ failed: 'all' }))
+    expect(screen.getByRole('heading', { name: 'We couldn’t load your pending transactions' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+    act(() => jest.advanceTimersByTime(1000))
+    expect(screen.queryByRole('heading', { name: 'We couldn’t load your pending transactions' })).toBeNull()
+    jest.useRealTimers()
+  })
+})
+
 describe('Safes that fail to load', () => {
   const partial = (query: Record<string, string>) => ({
     routerProps: { query: { state: 'partial', scenario: '5-safes', ...query } },

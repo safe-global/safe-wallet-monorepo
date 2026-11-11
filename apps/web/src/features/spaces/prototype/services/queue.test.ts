@@ -3,7 +3,9 @@ import { getStepKind } from './nextSteps'
 import {
   applyPreviewAction,
   BULK_EXECUTE_LIMIT,
+  ALL_FAILED,
   getFailedAccounts,
+  getUndeployedAccounts,
   createPreviewQueue,
   executePreviewBatches,
   getFirstReady,
@@ -170,6 +172,17 @@ describe('scenarios and states', () => {
     expect(getFailedAccounts('5-safes', 3).map((account) => account.id)).toEqual(all.slice(-3).map((a) => a.id))
     expect(getFailedAccounts('5-safes', 9)).toHaveLength(4)
     expect(getFailedAccounts('1-safe', 3)).toHaveLength(0)
+  })
+
+  it('fails every Safe only when asked to, and keeps undeployed Safes apart from failed ones', () => {
+    const all = getScenarioAccounts('5-safes')
+    expect(getFailedAccounts('5-safes', ALL_FAILED)).toHaveLength(all.length)
+    const failed = getFailedAccounts('5-safes', 3).map((account) => account.id)
+    const undeployed = getUndeployedAccounts('5-safes', 3, 1).map((account) => account.id)
+    expect(undeployed).toEqual([all[all.length - 4].id])
+    expect(failed).not.toContain(undeployed[0])
+    const items = createPreviewQueue('5-safes', 'partial', { failedCount: 3, undeployedCount: 1 }).items
+    expect(items.some((tx) => [...failed, ...undeployed].includes(tx.account))).toBe(false)
   })
 
   it('layers states on any scenario', () => {
