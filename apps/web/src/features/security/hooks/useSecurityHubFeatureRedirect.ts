@@ -7,10 +7,7 @@ import { withSpaceId } from '@/hooks/useUrlSpaceId'
 
 /**
  * Redirect away from the Security Hub page when `FEATURES.SECURITY_HUB` is disabled
- * on the current chain. The broader Spaces UI may still be enabled — in that case
- * we land the user back on the Space home rather than ejecting to welcome.
- *
- * Mirrors `apps/web/src/features/spaces/hooks/useFeatureFlagRedirect.ts`.
+ * on the current chain, landing the user back on the Space home.
  */
 const useSecurityHubFeatureRedirect = () => {
   const router = useRouter()

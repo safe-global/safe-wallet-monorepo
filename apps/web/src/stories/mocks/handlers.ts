@@ -9,7 +9,9 @@ import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balance
 import type { Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import type { SafeShieldAnalyzeRecipientV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
 import type { GetSpaceResponse, UpdateSpaceDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { EntitlementsGetAllEntitlementsV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
 import {
   safeFixtures,
   balancesFixtures,
@@ -386,11 +388,13 @@ export function safeOverviewHandlers(safeData: SafeState): RequestHandler[] {
  * External (non-CGW) services that pages call on load:
  * - Zodiac security-check (vulnerable modules banner) - report "safe"
  * - WalletConnect telemetry - accept and discard
+ * - Beamer What's new poll - no unread posts, so no top bar or corner card
  */
 export function externalServicesHandlers(): RequestHandler[] {
   return [
     http.get(/zodiac-check\.safe\.global\/public\/api\/security-check/, () => HttpResponse.json({ status: 'safe' })),
     http.post(/pulse\.walletconnect\.org/, () => HttpResponse.json({})),
+    http.get(/backend\.getbeamer\.com\/numberFeatures/, () => HttpResponse.json({ number: 0 })),
   ]
 }
 
@@ -478,6 +482,27 @@ export const mockOwnedSafes = {
  */
 export const spaceWithSafesHandler = http.get(/\/v1\/spaces\/[^/]+\/safes$/, () =>
   HttpResponse.json({ safes: mockOwnedSafes }),
+)
+
+const newRecipientAnalysis: SafeShieldAnalyzeRecipientV1ApiResponse = {
+  isSafe: false,
+  RECIPIENT_INTERACTION: [
+    {
+      severity: 'INFO',
+      type: 'NEW_RECIPIENT',
+      title: 'New recipient',
+      description: 'You are interacting with this address for the first time.',
+    },
+  ],
+}
+
+/**
+ * Safe Shield's recipient check, answering "new recipient" for any address; unmocked, it hits the blocked
+ * network and shows "Recipient analysis failed"
+ */
+export const newRecipientAnalysisHandler = http.get(
+  /\/v1\/chains\/\d+\/security\/0x[a-fA-F0-9]+\/recipient\/0x[a-fA-F0-9]+$/,
+  () => HttpResponse.json(newRecipientAnalysis),
 )
 
 /**
@@ -569,6 +594,15 @@ export function spacesHandlers(): RequestHandler[] {
     ),
     // The caller's own membership (useCurrentMemberProfile)
     http.get(/\/v1\/spaces\/[^/]+\/membership$/, () => HttpResponse.json(createMockSpace().members[0])),
+    // Before "Get space by ID", which would answer for `entitlements` as a Workspace ID
+    http.get(/\/v1\/spaces\/entitlements$/, () =>
+      HttpResponse.json({
+        [MOCK_SPACE_ID]: {
+          plan: { id: 'business', name: 'Business', cycleEndsAt: '2030-01-01T00:00:00.000Z', status: 'trialing' },
+          entitlements: [],
+        },
+      } satisfies EntitlementsGetAllEntitlementsV1ApiResponse),
+    ),
     // Get space by ID
     http.get(/\/v1\/spaces\/[^/]+$/, ({ params }) => {
       const url = new URL(params[0] as string, 'https://example.com')
@@ -934,7 +968,7 @@ export function getFixtureData(scenario: FixtureScenario) {
  * })
  */
 export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
-  const { scenario = 'efSafe', features = {}, handlers: customHandlers = [] } = config
+  const { scenario = 'efSafe', features = {}, handlers: customHandlers = [], authenticated = false } = config
 
   // Get fixture data for scenario
   const { safeData, balancesData, portfolioData, positionsData } = getFixtureData(scenario)
@@ -959,16 +993,15 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     recovery: features.recovery ?? false,
     hypernative: features.hypernative ?? false,
     earn: features.earn ?? false,
-    spaces: features.spaces ?? false,
     oidcAuth: features.oidcAuth ?? false,
     switchAuthenticator: features.switchAuthenticator ?? false,
     twoFactorAwarenessBanner: features.twoFactorAwarenessBanner ?? false,
     safeStaking: features.safeStaking ?? false,
     safePro: features.safePro ?? false,
+    safeProAnnouncement: features.safeProAnnouncement ?? false,
     workspacesExperimentalFeatures: features.workspacesExperimentalFeatures ?? false,
     policyRecipientAllowlist: features.policyRecipientAllowlist ?? false,
     spaceAuditLog: features.spaceAuditLog ?? false,
-    myAccounts: features.myAccounts ?? false,
   }
 
   // Build handlers array
@@ -994,12 +1027,11 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     allHandlers.push(...positionsHandlers(positionsData))
   }
 
-  // Add spaces handlers if feature enabled
-  if (mergedFeatures.spaces) {
+  if (authenticated) {
     allHandlers.push(...spacesHandlers())
   }
 
-  // Fallback handlers registered after spaces so spaces-specific mocks win when enabled
+  // Fallback handlers registered after spaces so spaces-specific mocks win when signed in
   allHandlers.push(
     ...fiatCodesHandlers(),
     ...delegatesHandlers(),

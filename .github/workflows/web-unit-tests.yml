@@ -22,7 +22,7 @@ permissions: {}
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     permissions:
       contents: read
       pull-requests: read
@@ -53,7 +53,7 @@ jobs:
     permissions:
       contents: read
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
 
@@ -110,7 +110,7 @@ jobs:
     permissions:
       contents: read
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -142,7 +142,7 @@ jobs:
       checks: write
       pull-requests: write
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
 
@@ -170,9 +170,9 @@ jobs:
     # The one check that branch protection requires for this workflow.
     name: Web unit tests result
     permissions: {}
-    if: always()
+    if: ${{ !cancelled() }}
     needs: [changes, test]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: $/.github/actions/required-result
         with:

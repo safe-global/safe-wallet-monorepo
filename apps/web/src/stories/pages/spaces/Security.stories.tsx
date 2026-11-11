@@ -9,7 +9,7 @@ const defaultSetup = createMockStory({
   wallet: 'connected',
   layout: 'fullPage',
   pathname: '/spaces/security',
-  features: { spaces: true },
+  authenticated: true,
   query: { spaceId: '1' },
 })
 
@@ -23,7 +23,12 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-export const Default: Story = {}
+// The hub stays empty until its data loads, and an empty page passes the sweep's stable check
+export const Default: Story = {
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText('No accounts to check yet', undefined, { timeout: 10_000 })
+  },
+}
 
 export const WithSafes: Story = {
   parameters: { msw: { handlers: [spaceWithSafesHandler, ...defaultSetup.handlers] } },

@@ -7,6 +7,8 @@ Branch protection can require a check only if it reports on every pull request. 
 
 Require the result job, not the jobs it checks: its name stays the same when jobs are added, renamed or sharded.
 
+The result job runs `if: ${{ !cancelled() }}`, not `if: always()`: when a newer push cancels a run, its result job is cancelled too, and the run that replaced it reports the check. With `always()` the replaced run reports a failure.
+
 ```yaml
 on:
   pull_request:
@@ -16,7 +18,7 @@ on:
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     permissions:
       pull-requests: read
     outputs:
@@ -38,9 +40,9 @@ jobs:
   result:
     name: Web lint result
     permissions: {}
-    if: always()
+    if: ${{ !cancelled() }}
     needs: [changes, lint]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: $/.github/actions/required-result
         with:

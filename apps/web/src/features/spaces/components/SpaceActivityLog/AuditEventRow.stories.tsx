@@ -6,7 +6,7 @@ import AuditEventRow from './AuditEventRow'
 
 const baseSetup = createMockStory({
   scenario: 'efSafe',
-  features: { spaces: true },
+  authenticated: true,
   query: { spaceId: MOCK_SPACE_ID },
   shadcn: true,
 })

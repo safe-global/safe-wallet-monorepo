@@ -19,7 +19,10 @@ export const Default: Story = {}
 
 export const ZeroAmountError: Story = {
   play: async ({ canvasElement }) => {
-    await userEvent.type(await within(canvasElement).findByTestId('token-amount-field'), '0')
+    const canvas = within(canvasElement)
+    await userEvent.type(await canvas.findByTestId('token-amount-field'), '0')
+    // Validation runs after the keystroke
+    await canvas.findByText('The value must be greater than 0')
   },
 }
 

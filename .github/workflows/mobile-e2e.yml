@@ -14,7 +14,7 @@ jobs:
   build:
     if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'mobile-e2e-test')
     name: Install and build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     permissions:
       contents: read
 

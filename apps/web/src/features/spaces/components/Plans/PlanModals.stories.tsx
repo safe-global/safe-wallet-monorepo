@@ -14,7 +14,8 @@ import { DAY, PAID_LINKS, PAID_PLANS, TRIAL_LINKS, billingHandlers, now, subscri
 const setup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true, safePro: true },
+  authenticated: true,
+  features: { safePro: true },
   pathname: '/spaces',
   query: { spaceId: MOCK_SPACE_ID },
   shadcn: true,

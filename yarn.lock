@@ -8093,7 +8093,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hapi/topo@npm:^5.0.0, @hapi/topo@npm:^5.1.0":
+"@hapi/topo@npm:^5.1.0":
   version: 5.1.0
   resolution: "@hapi/topo@npm:5.1.0"
   dependencies:
@@ -14737,7 +14737,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sideway/address@npm:^4.1.3, @sideway/address@npm:^4.1.5":
+"@sideway/address@npm:^4.1.5":
   version: 4.1.5
   resolution: "@sideway/address@npm:4.1.5"
   dependencies:
@@ -23520,29 +23520,20 @@ __metadata:
   linkType: hard
 
 "brace-expansion@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "brace-expansion@npm:2.0.1"
+  version: 2.1.7
+  resolution: "brace-expansion@npm:2.1.7"
   dependencies:
     balanced-match: "npm:^1.0.0"
-  checksum: 10/a61e7cd2e8a8505e9f0036b3b6108ba5e926b4b55089eeb5550cd04a471fe216c96d4fe7e4c7f995c728c554ae20ddfc4244cad10aef255e72b62930afd233d1
+  checksum: 10/4763be07b688136db4f98f71ab96c4a1a73b6785f69864c130c748f4429be961c6a9a4129c0a81aad4f9cfb08e31a3cf2809b2427509bf2990d1490b7b5dd2d0
   languageName: node
   linkType: hard
 
-"brace-expansion@npm:^5.0.12":
+"brace-expansion@npm:^5.0.12, brace-expansion@npm:^5.0.2":
   version: 5.0.12
   resolution: "brace-expansion@npm:5.0.12"
   dependencies:
     balanced-match: "npm:^4.0.2"
   checksum: 10/65b550f1836e3b43f512f12afbc3be96616eee5c353e16d70181b7dffec8c08beabffb51d69a3bbdb27d675840725cbab025fda9d10716b5cda7dd864dc7bc4a
-  languageName: node
-  linkType: hard
-
-"brace-expansion@npm:^5.0.8":
-  version: 5.0.8
-  resolution: "brace-expansion@npm:5.0.8"
-  dependencies:
-    balanced-match: "npm:^4.0.2"
-  checksum: 10/75d2d2ebc8f5f65156d16706216d23e48f499a1164e4b045e0ca4045d3ce6b16ced11ea2e4c76e3670b6c38454123213f43d23127df8fc6840980aea9a35e061
   languageName: node
   linkType: hard
 
@@ -33381,35 +33372,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"joi@npm:17.9.1":
-  version: 17.9.1
-  resolution: "joi@npm:17.9.1"
-  dependencies:
-    "@hapi/hoek": "npm:^9.0.0"
-    "@hapi/topo": "npm:^5.0.0"
-    "@sideway/address": "npm:^4.1.3"
-    "@sideway/formula": "npm:^3.0.1"
-    "@sideway/pinpoint": "npm:^2.0.0"
-  checksum: 10/2ffc81be5b88b123b715df2dd52adcc5333ba995d9dc36c4179572fa459831bbdaa25b32f75654342bbe18c04931125c4fa44445f46341369598993550e4db76
-  languageName: node
-  linkType: hard
-
-"joi@npm:^17.11.0":
-  version: 17.13.3
-  resolution: "joi@npm:17.13.3"
+"joi@npm:^17.11.0, joi@npm:^17.13.9":
+  version: 17.13.9
+  resolution: "joi@npm:17.13.9"
   dependencies:
     "@hapi/hoek": "npm:^9.3.0"
     "@hapi/topo": "npm:^5.1.0"
     "@sideway/address": "npm:^4.1.5"
     "@sideway/formula": "npm:^3.0.1"
     "@sideway/pinpoint": "npm:^2.0.0"
-  checksum: 10/4c150db0c820c3a52f4a55c82c1fc5e144a5b5f4da9ffebc7339a15469d1a447ebb427ced446efcb9709ab56bd71a06c4c67c9381bc1b9f9ae63fc7c89209bdf
+  checksum: 10/879e9664049463d8fd9387be3813c5c8a29987de82b045688b1b3a69473cb3895200e4fe76d9b329f3522228722f94c5e9117fa45094e3d7443b0a501b161764
   languageName: node
   linkType: hard
 
 "joi@npm:^18.2.9":
-  version: 18.3.0
-  resolution: "joi@npm:18.3.0"
+  version: 18.3.1
+  resolution: "joi@npm:18.3.1"
   dependencies:
     "@hapi/address": "npm:^5.1.1"
     "@hapi/formula": "npm:^3.0.2"
@@ -33418,7 +33396,7 @@ __metadata:
     "@hapi/tlds": "npm:^1.1.1"
     "@hapi/topo": "npm:^6.0.2"
     "@standard-schema/spec": "npm:^1.1.0"
-  checksum: 10/b6cb61b45513415131ffa9617405713d54cc50392f2c3872c9841c6509b575bbb53145edd1fd7464075aa1f8a3eb0092171f36eb65dbb9aff06afaebc88ea46b
+  checksum: 10/2ebcb82bb507c9e8d28a71fab6e0111b59ec5ab8d88b6096c49e8d39c411692e871f35401a6a72d96ef6f7f437d5e7936d5e17466a65887c0530a1d15bc7a972
   languageName: node
   linkType: hard
 
@@ -37211,9 +37189,9 @@ __metadata:
   linkType: hard
 
 "node-forge@npm:^1.3.1, node-forge@npm:^1.3.3":
-  version: 1.4.2
-  resolution: "node-forge@npm:1.4.2"
-  checksum: 10/e401ccd23d8933c4daa3e1a314e6781b53871509193c6b487cb96d8d596b4841090b57f53e15b734dee6a0c0c45bfc19304476927f4f17175f25d0031ecc6720
+  version: 1.4.3
+  resolution: "node-forge@npm:1.4.3"
+  checksum: 10/e0341f893234fd15aeb52c704ad1ea3b31f0bd8671f2c2aa45abaef9dac928ebbf473c7fcfca69994e90478d71936d0cc1b2001bc4b81ab70b86da0d676060c1
   languageName: node
   linkType: hard
 
