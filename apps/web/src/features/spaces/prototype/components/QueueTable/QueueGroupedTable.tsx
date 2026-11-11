@@ -369,12 +369,13 @@ const orderedWidths = (
   compact = false,
 ): Record<string, string | undefined> => ({
   ...getColumnWidths(showNoteText, true),
-  Transaction: compact ? undefined : partyTags ? 'w-[23rem]' : 'w-72',
+  Transaction: compact ? undefined : partyTags ? 'w-[22.5rem]' : 'w-72',
   ...(compact ? { Nonce: 'w-11', Action: 'w-12' } : {}),
   To: undefined,
   Safe: 'w-44',
-  Network: 'w-24',
-  Status: 'w-32',
+  Network: partyTags ? 'w-20' : 'w-24',
+  // Option E's badges name states, such as Awaiting 2 · after #42, so the column is wider.
+  Status: partyTags ? 'w-48' : 'w-32',
 })
 
 // Columns for options D and E, the same in every grouping. Nonce leads, so conflicts draw the same bracket.

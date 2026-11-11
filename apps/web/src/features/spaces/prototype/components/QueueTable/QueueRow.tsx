@@ -22,6 +22,7 @@ import {
   getParentApproval,
   getSignatureCount,
   getSignerSummary,
+  getRowState,
   getStepsStatus,
   getTransactionLabel,
   getWarnings,
@@ -259,7 +260,7 @@ export function QueueRow({
             aria-label={
               parentApproval
                 ? `Awaiting parent signature. ${getAccount(parentApproval).name} #${parentApproval.nonce}`
-                : `${lastSignature ? 'Sign & execute' : getStepsStatus(tx, persona).label}. ${statusHint}`
+                : `${partyTags ? getRowState(tx, persona).label : lastSignature ? 'Sign & execute' : getStepsStatus(tx, persona).label}. ${statusHint}`
             }
             onClick={(event) => event.stopPropagation()}
           >
@@ -267,6 +268,8 @@ export function QueueRow({
               <StatusChip tone="secondary">Would be replaced</StatusChip>
             ) : parentApproval ? (
               <StatusChip tone="warning">Awaiting parent</StatusChip>
+            ) : partyTags ? (
+              <StatusChip tone={getRowState(tx, persona).tone}>{getRowState(tx, persona).label}</StatusChip>
             ) : (
               <StepsStatusChip tx={tx} persona={persona} label={lastSignature ? 'Sign & execute' : undefined} />
             )}
@@ -468,8 +471,9 @@ export function QueueRow({
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <ChainIcon chainId={account.chainId} network={account.network} />
               {signaturesContent}
-              {/* The button already says Sign or Execute, so the pill only shows when it adds something. */}
-              {(execution ||
+              {/* Option E's badge names a state, so it always shows. Elsewhere it shows only when it adds to the button. */}
+              {(partyTags ||
+                execution ||
                 lockedBy ||
                 parentApproval ||
                 willBeReplaced ||

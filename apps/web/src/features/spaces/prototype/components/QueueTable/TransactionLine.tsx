@@ -69,7 +69,7 @@ export function Counterparty({
   // Inline, the other party stops at 14rem so the action stays readable. Its tooltip has the full name.
   return (
     <span className={`flex min-w-0 items-center gap-2 ${inColumn ? '' : 'max-w-56'}`}>
-      {inColumn ? (
+      {inColumn && !tag ? (
         // Fixed width, so names line up whether the tag says To or Via.
         <span className={`flex w-10 shrink-0 ${ROW_TAG_FILL}`}>
           <Tag className="w-full justify-center">
@@ -77,7 +77,10 @@ export function Counterparty({
           </Tag>
         </span>
       ) : (
-        <span className="shrink-0 text-sm text-muted-foreground">{getCounterpartyJoin(tx)}</span>
+        // Option E: a plain word in the sentence. Fixed width in the column, so names line up.
+        <span className={`shrink-0 text-sm text-muted-foreground ${inColumn ? 'w-7' : ''}`}>
+          {getCounterpartyJoin(tx)}
+        </span>
       )}
       <CopyableParty
         name={named ? counterparty.name : short(address)}

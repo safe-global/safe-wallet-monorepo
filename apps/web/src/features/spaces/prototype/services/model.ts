@@ -1169,6 +1169,23 @@ export const getScenario = (scenario: Scenario, { deepQueue = false } = {}): Pro
   if (scenario === 'realistic') return realistic()
   return items
 }
+// Option E: the badge names the transaction's state and the button names your action, so they never repeat.
+export const getRowState = (
+  tx: Proposal,
+  persona: Persona,
+): { label: string; tone: 'success' | 'warning' | 'secondary' } => {
+  const { missing, waiting, canSign } = getState(tx, persona)
+  const { nextNonce } = getAccount(tx)
+  if (missing === 0)
+    return waiting ? { label: `Blocked by #${nextNonce}`, tone: 'warning' } : { label: 'Ready', tone: 'success' }
+  // Green whenever it's on you.
+  if (canSign)
+    return waiting
+      ? { label: `Needs you · after #${nextNonce}`, tone: 'success' }
+      : { label: 'Needs your signature', tone: 'success' }
+  if (waiting) return { label: `Awaiting ${missing} · after #${nextNonce}`, tone: 'secondary' }
+  return { label: `Awaiting ${missing} signature${missing === 1 ? '' : 's'}`, tone: 'secondary' }
+}
 export const getPrimaryStatus = (tx: Proposal, persona: Persona): Filter => {
   const state = getState(tx, persona)
   if (state.ready) return 'ready'

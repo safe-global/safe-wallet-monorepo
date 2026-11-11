@@ -94,10 +94,11 @@ export const orderQueue = (items: Proposal[], { sort, accounts }: { sort: SortBy
 
 export type QueueGroup = { id: string; label: string; chainId?: string; rows: Proposal[] }
 
+// Ordered by how close each group is to done: nothing missing, then only your signature, then more.
 const STATUS_GROUPS = [
-  // Your signature is the last one, so signing also executes. These come first, as agreed in October.
-  { id: 'status-sign-execute', label: 'Sign and execute', ranks: [0] },
   { id: 'status-execute', label: 'Ready to execute', ranks: [1] },
+  // Your signature is the last one, so signing also executes.
+  { id: 'status-sign-execute', label: 'Sign and execute', ranks: [0] },
   { id: 'status-sign', label: 'Ready to sign', ranks: [2, 3] },
   { id: 'status-awaiting', label: 'Waiting on others', ranks: [STEP_RANK.length] },
   { id: 'status-blocked', label: 'Blocked', ranks: [STEP_RANK.length + 1] },
