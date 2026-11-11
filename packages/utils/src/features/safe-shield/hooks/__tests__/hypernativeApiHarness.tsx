@@ -9,7 +9,7 @@ import { HYPERNATIVE_API_BASE_URL } from '@safe-global/utils/config/constants'
 
 const server = setupServer()
 
-export const startHypernativeServer = (): void => {
+export const setupHypernativeServer = (): void => {
   beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
   afterEach(() => server.resetHandlers())
   afterAll(() => server.close())
@@ -24,28 +24,37 @@ export type HypernativeRequest = {
  * Answers every POST to a Hypernative API path and records the requests it receives.
  *
  * @param path - The API path, e.g. '/safe/eip712/assessment'
- * @param respond - Builds the response for each request
+ * @param respond - Builds the response for each request, from its body and abort signal
  * @returns The live list of received requests
  */
-export const answerHypernative = (path: string, respond: () => Response | Promise<Response>): HypernativeRequest[] => {
+export const answerHypernative = (
+  path: string,
+  respond: (request: { body: unknown; signal: AbortSignal }) => Response | Promise<Response>,
+): HypernativeRequest[] => {
   const requests: HypernativeRequest[] = []
   server.use(
     http.post(`${HYPERNATIVE_API_BASE_URL}${path}`, async ({ request }) => {
-      requests.push({ body: await request.json(), authorization: request.headers.get('Authorization') })
-      return respond()
+      const body = await request.json()
+      requests.push({ body, authorization: request.headers.get('Authorization') })
+      return respond({ body, signal: request.signal })
     }),
   )
   return requests
 }
 
-export const renderWithHypernativeApi = <Result, Props>(
-  hook: (props: Props) => Result,
-  options?: { initialProps: Props },
-) => {
-  const store = configureStore({
+export const makeHypernativeStore = () =>
+  configureStore({
     reducer: { [hypernativeApi.reducerPath]: hypernativeApi.reducer },
     middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(hypernativeApi.middleware),
   })
+
+export const renderWithHypernativeApi = <Result, Props>(
+  hook: (props: Props) => Result,
+  {
+    initialProps,
+    store = makeHypernativeStore(),
+  }: { initialProps?: Props; store?: ReturnType<typeof makeHypernativeStore> } = {},
+) => {
   const wrapper = ({ children }: { children: ReactNode }) => <Provider store={store}>{children}</Provider>
-  return renderHook(hook, { wrapper, ...options })
+  return renderHook(hook, { wrapper, initialProps })
 }

@@ -9,12 +9,12 @@ import type {
   HypernativeMessageAssessmentErrorDto,
 } from '@safe-global/store/hypernative/hypernativeApi.dto'
 import { ErrorType, getErrorInfo } from '@safe-global/utils/features/safe-shield/utils/errors'
-import { answerHypernative, renderWithHypernativeApi, startHypernativeServer } from './hypernativeApiHarness'
+import { answerHypernative, renderWithHypernativeApi, setupHypernativeServer } from './hypernativeApiHarness'
 
 const MESSAGE_ASSESSMENT_PATH = '/safe/eip712/assessment'
 
 describe('useThreatAnalysisHypernativeMessage', () => {
-  startHypernativeServer()
+  setupHypernativeServer()
 
   const safeAddress = faker.finance.ethereumAddress() as `0x${string}`
   const chainId = '1'
