@@ -5,5 +5,5 @@
 
 @source '../';
 @source '../../../../packages';
-/* Its token names would otherwise emit stray utilities such as accent-foreground. */
-@source not '../../../../packages/theme/src/tokens/ui.ts';
+/* Token names in the ui token source and its tests would otherwise emit stray utilities such as accent-foreground. */
+@source not '../../../../packages/theme/src/**/ui*.ts';

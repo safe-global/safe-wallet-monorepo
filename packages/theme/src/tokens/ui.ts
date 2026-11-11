@@ -1,21 +1,24 @@
 /**
  * Safe UI (shadcn) tokens: CSS variable name (without `--`) to value, in output order.
- * Not part of ColorPalette, so the MUI and Tamagui outputs never see them.
+ * Not part of ColorPalette, so the MUI and Tamagui outputs never see them. Palette colours are referenced, not copied.
  * Generated into packages/ui/src/styles/tokens*.css by `yarn workspace @safe-global/theme generate:ui-tokens`.
  */
 
-import { webDarkPalette } from '../generators/css-vars'
+import staticColors from '../palettes/static'
+import { webDarkPalette, webLightPalette } from '../palettes/web'
 
 type UiTokenMap = Readonly<Record<string, string>>
+
+const hex = (value: string): string => value.toLowerCase()
 
 const light: UiTokenMap = {
   background: '#ffffff',
   foreground: '#0a0a0a',
-  card: '#ffffff',
+  card: hex(webLightPalette.background.paper),
   'card-foreground': '#0a0a0a',
-  popover: '#ffffff',
+  popover: hex(webLightPalette.background.paper),
   'popover-foreground': '#0a0a0a',
-  dialog: '#ffffff',
+  dialog: hex(webLightPalette.background.paper),
   // The one modal scrim (packages/ui/src/components/overlay.ts); a light tint so the blur stays visible.
   backdrop: 'rgba(0, 0, 0, 0.1)',
   primary: '#171717',
@@ -50,7 +53,8 @@ const light: UiTokenMap = {
   'sidebar-border': '#e5e5e5',
   'sidebar-ring': '#d4d4d4',
   'accent-secondary': '#c4fddd',
-  'accent-secondary-foreground': '#121312',
+  // Brand ink on the mint accent, both themes.
+  'accent-secondary-foreground': hex(staticColors.main),
   mint: '#7ffab7',
   'accent-success': '#16a34a',
   // Figma warning surface (alert node 4316-12854) is Tailwind yellow-50/700/500, not the brand warning tint.
@@ -85,9 +89,9 @@ const dark: UiTokenMap = {
   'card-foreground': '#f5f5f5',
   popover: '#171717',
   'popover-foreground': '#f5f5f5',
-  dialog: '#1c1c1c',
+  dialog: hex(webDarkPalette.background.paper),
   backdrop: 'rgba(0, 0, 0, 0.1)',
-  primary: '#12ff80',
+  primary: hex(webDarkPalette.primary.main),
   'primary-foreground': '#0a0a0a',
   secondary: '#262626',
   'secondary-foreground': '#f5f5f5',
@@ -99,7 +103,7 @@ const dark: UiTokenMap = {
   accent: '#052e16',
   'accent-foreground': '#f5f5f5',
   // Brand dark error.main; the old #9e4042 was sub-AA as text on dark surfaces.
-  destructive: webDarkPalette.error.main.toLowerCase(),
+  destructive: hex(webDarkPalette.error.main),
   'destructive-foreground': '#ffffff',
   border: '#404040',
   input: '#ffffff0d',
@@ -119,9 +123,9 @@ const dark: UiTokenMap = {
   'sidebar-border': '#262626',
   'sidebar-ring': '#404040',
   'accent-secondary': '#c4fddd',
-  'accent-secondary-foreground': '#121312',
+  'accent-secondary-foreground': hex(staticColors.main),
   mint: '#7ffab7',
-  'accent-success': webDarkPalette.success.main.toLowerCase(),
+  'accent-success': hex(webDarkPalette.success.main),
   // No dark warning/error spec in Figma, so dark keeps the brand tints.
   'warning-subtle': 'var(--color-warning-background)',
   'warning-strong': 'var(--color-warning1-text)',

@@ -1,4 +1,6 @@
-import { generateWebVarDeclarations, webDarkPalette } from './css-vars'
+import { generateWebVarDeclarations } from './css-vars'
+import { webDarkPalette, webLightPalette } from '../palettes/web'
+import staticColors from '../palettes/static'
 import { generateUiScopedTokensCSS, generateUiTokensCSS } from './ui-css'
 import { uiTokens } from '../tokens/ui'
 
@@ -67,12 +69,18 @@ describe.each([
   })
 })
 
-describe('dark tokens taken from the palette', () => {
+describe('tokens taken from the palette', () => {
   it.each([
-    ['destructive', () => webDarkPalette.error.main],
-    ['accent-success', () => webDarkPalette.success.main],
-  ])('--%s follows the web dark palette', (name, read) => {
-    expect(uiTokens.dark[name]).toBe(read().toLowerCase())
-    expect(generateUiScopedTokensCSS()).toContain(`--${name}: ${read().toLowerCase()};`)
+    ['light', 'card', () => webLightPalette.background.paper],
+    ['light', 'popover', () => webLightPalette.background.paper],
+    ['light', 'dialog', () => webLightPalette.background.paper],
+    ['light', 'accent-secondary-foreground', () => staticColors.main],
+    ['dark', 'primary', () => webDarkPalette.primary.main],
+    ['dark', 'dialog', () => webDarkPalette.background.paper],
+    ['dark', 'destructive', () => webDarkPalette.error.main],
+    ['dark', 'accent-secondary-foreground', () => staticColors.main],
+    ['dark', 'accent-success', () => webDarkPalette.success.main],
+  ] as const)('%s --%s follows the palette', (mode, name, read) => {
+    expect(uiTokens[mode][name]).toBe(read().toLowerCase())
   })
 })
