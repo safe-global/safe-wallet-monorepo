@@ -9,8 +9,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
  * migration: two of them had no blur at all and two sat two orders of magnitude below
  * `--z-overlay`. Change the look here, never at the call site.
  *
- * The tint is the `--backdrop` token (src/styles/tokens.scoped.css, generated from
- * packages/theme/src/tokens/ui.ts). The blur sits behind
+ * The tint is the `--backdrop` token, generated with the other design tokens. The blur sits behind
  * `supports-backdrop-filter:` so a browser without `backdrop-filter` still gets the tint.
  *
  * `data-closed:pointer-events-none` is load-bearing, not a nicety: a surface that mounts already

@@ -179,7 +179,7 @@ export const AllVariants: Story = {
  * ESLint rule and documented in `.storybook/AGENTS.md`.
  */
 export const Guidelines: Story = {
-  tags: ['!chromatic'],
+  tags: ['!chromatic', 'docs-hidden'],
   render: () => (
     <div className="flex max-w-3xl flex-col gap-8">
       <div>

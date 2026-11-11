@@ -9,7 +9,7 @@ import { cn } from '../lib/utils'
  * In Figma, typography is defined by styles (heading 1, paragraph/regular, etc.), not by components.
  * We use a component with variants in code because it centralizes styles and makes usage easier.
  *
- * Figma style → variant mapping: see .claude/skills/design.figma-to-code/reference.md
+ * Each variant maps to one Figma text style (heading 1, paragraph/regular, …).
  *
  * @see https://www.figma.com/design/trBVcpjZslO63zxiNUI9io/Obra-shadcn-ui--safe-?node-id=310-257309
  */
