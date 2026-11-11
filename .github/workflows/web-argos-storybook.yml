@@ -74,7 +74,6 @@ jobs:
             .github/actions/yarn/**
             .github/actions/corepack/**
             .github/actions/pr-changes/**
-            .github/actions/playwright-browsers/**
 
   # A PR that cannot change a story still needs a green Argos status to merge
   skip:
@@ -116,10 +115,23 @@ jobs:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
 
+      # TEMPORARY: shows whether --with-deps changes the monospace font. Remove before merge.
+      - name: Fonts before the browser install
+        run: |
+          fc-match monospace
+          fc-match sans-serif
+          fc-list : family | sort -u
+
       # The ARM64 runner image has no Chrome, so the sweep uses Playwright's pinned headless shell
-      - uses: $/.github/actions/playwright-browsers
-        with:
-          build: shell
+      - name: Install browser dependencies
+        working-directory: apps/web
+        run: yarn exec playwright install --with-deps --only-shell chromium
+
+      # TEMPORARY: see the step before the install
+      - name: Fonts after the browser install
+        run: |
+          fc-match monospace
+          fc-match sans-serif
 
       - name: Build Storybook
         run: yarn workspace @safe-global/web build-storybook --output-dir storybook-static

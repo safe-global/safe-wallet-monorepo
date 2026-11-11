@@ -54,7 +54,6 @@ jobs:
             .github/actions/yarn/**
             .github/actions/corepack/**
             .github/actions/cache-deps/**
-            .github/actions/playwright-browsers/**
             apps/web/**
             apps/tx-builder/**
             apps/drain-safe/**
@@ -190,9 +189,10 @@ jobs:
           persist-credentials: false
       - uses: $/.github/actions/yarn
 
-      - uses: $/.github/actions/playwright-browsers
-        with:
-          build: full
+      # No --with-deps: the image has Chromium's libraries, and the fonts it adds are not used by the English UI
+      - name: Install Chromium
+        working-directory: apps/web
+        run: yarn exec playwright install --no-shell chromium
 
       # The Queue Service image is a private package.
       - name: Log in to GitHub Container Registry
