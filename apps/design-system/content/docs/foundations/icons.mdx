@@ -1,0 +1,17 @@
+---
+title: Icons
+description: Safe UI uses lucide icons with a shared stroke width.
+---
+
+Safe UI uses [lucide-react](https://lucide.dev/icons/), and you can use any lucide icon next to the components. Pass `strokeWidth={ICON_STROKE}` (from `@safe-global/ui/utils`) so the stroke matches the components: it is `1.5` in the 24-unit viewBox, which scales with the icon size.
+
+```tsx
+import { Plus } from 'lucide-react'
+import { ICON_STROKE } from '@safe-global/ui/utils'
+
+;<Plus className="size-4" strokeWidth={ICON_STROKE} />
+```
+
+## Icons the components use
+
+<IconGrid />

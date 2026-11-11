@@ -1,0 +1,54 @@
+---
+title: Dark mode
+description: Turn on dark mode with the dark class on an ancestor element.
+---
+
+Safe UI switches to its dark tokens inside any element with the `dark` class. Put the class on `<html>` to switch the whole page. The `dark:` Tailwind variant uses the same rule (`@custom-variant dark (&:is(.dark *))`).
+
+## Next.js
+
+[`next-themes`](https://github.com/pacocoursey/next-themes) toggles the class and remembers the choice:
+
+```tsx title="app/layout.tsx"
+import { ThemeProvider } from 'next-themes'
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+        </ThemeProvider>
+      </body>
+    </html>
+  )
+}
+```
+
+Safe UI does not import `next-themes` itself. Components that need the theme take it as a prop, for example `<Toaster theme={resolvedTheme} />`.
+
+## Vite and other apps
+
+Toggle the class yourself and store the choice:
+
+```tsx
+import { Button } from '@safe-global/ui/button'
+
+export function ThemeToggle() {
+  const toggle = () => {
+    const dark = document.documentElement.classList.toggle('dark')
+    localStorage.setItem('theme', dark ? 'dark' : 'light')
+  }
+  return (
+    <Button variant="outline" onClick={toggle}>
+      Toggle theme
+    </Button>
+  )
+}
+```
+
+Apply the stored choice before the first paint, in a small inline script in `index.html`, to avoid a flash of the light theme.
+
+## Scoped apps
+
+With `scoped.css`, put the class on the scope instead: `<ShadcnProvider dark>` renders `.shadcn-scope.dark`. See [`ShadcnProvider`](/utilities/provider/).

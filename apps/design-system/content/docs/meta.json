@@ -1,0 +1,17 @@
+{
+  "title": "Safe UI",
+  "pages": [
+    "---Getting started---",
+    "index",
+    "installation",
+    "theming",
+    "dark-mode",
+    "changelog",
+    "---Foundations---",
+    "...foundations",
+    "---Utilities---",
+    "...utilities",
+    "---Components---",
+    "...components"
+  ]
+}

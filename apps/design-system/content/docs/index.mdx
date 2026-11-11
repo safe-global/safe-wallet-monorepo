@@ -1,6 +1,34 @@
 ---
 title: Introduction
-description: Safe UI
+description: Safe UI is Safe's design system for React web apps.
 ---
 
-Hello
+Safe UI gives Safe web apps one set of components, tokens and styles. The components are [shadcn/ui](https://ui.shadcn.com/) templates built on [Base UI](https://base-ui.com/), Tailwind CSS v4 and `class-variance-authority`, themed for Safe. The token values come from `@safe-global/theme`, the same source as the mobile app.
+
+## Two ways to use it
+
+<Cards>
+  <Card title="npm package" href="/installation/#npm-package">
+    Install `@safe-global/ui`, import its stylesheet once and import each component from its own subpath. You get updates
+    by upgrading the package.
+  </Card>
+  <Card title="shadcn registry" href="/installation/#shadcn-registry">
+    Run `npx shadcn add @safe/<name>` to copy a component's source into your app, when you need to change it beyond its
+    props.
+  </Card>
+</Cards>
+
+Both come from the same source files in `packages/ui`, so they cannot drift apart.
+
+## What is on this site
+
+- **Getting started**: [Installation](/installation/), [Theming](/theming/), [Dark mode](/dark-mode/) and the [Changelog](/changelog/).
+- **Foundations**: [Colors](/foundations/colors/), [Typography](/foundations/typography/), [Spacing](/foundations/spacing/), [Radius](/foundations/radius/) and [Icons](/foundations/icons/), generated from the package CSS.
+- **Utilities**: [`cn`](/utilities/cn/), the [responsive hooks](/utilities/hooks/) and [`ShadcnProvider`](/utilities/provider/).
+- **Components**: one page per component, with a live preview, the code, install steps, props, accessibility notes and Do/Don't rules. Start with [Button](/components/button/).
+
+The previews are the package's own Storybook stories, so a story added to `packages/ui` shows up here without a docs change. Press <Kbd>⌘</Kbd> <Kbd>K</Kbd> to search. Agents can read [`llms.txt`](/llms.txt) for an index of every page.
+
+## Contributing
+
+The source lives in [`packages/ui`](https://github.com/safe-global/safe-wallet-monorepo/tree/dev/packages/ui) and this site in [`apps/design-system`](https://github.com/safe-global/safe-wallet-monorepo/tree/dev/apps/design-system). Read `packages/ui/AGENTS.md` before adding or changing a component.
