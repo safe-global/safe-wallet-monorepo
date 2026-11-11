@@ -4238,6 +4238,26 @@
             }
           },
           {
+            "name": "chainIds",
+            "required": false,
+            "in": "query",
+            "description": "Keep the transactions on these chains, comma-separated",
+            "schema": {
+              "example": "1,137",
+              "type": "string"
+            }
+          },
+          {
+            "name": "signers",
+            "required": false,
+            "in": "query",
+            "description": "Keep the transactions still awaiting a signature from one of these addresses, comma-separated",
+            "schema": {
+              "example": "0x0000000000000000000000000000000000000000",
+              "type": "string"
+            }
+          },
+          {
             "name": "conflicting",
             "required": false,
             "in": "query",
@@ -14985,7 +15005,7 @@
           },
           "count": {
             "type": "number",
-            "description": "Transactions of this Safe on this chain that match the status filters"
+            "description": "Transactions of this Safe on this chain that match every filter but `safes`"
           }
         },
         "required": [
@@ -14999,7 +15019,7 @@
         "properties": {
           "total": {
             "type": "number",
-            "description": "Transactions of the selected Safes, the sum of execute, sign, blocked and waiting"
+            "description": "Transactions that match every filter but the status ones, the sum of execute, sign, blocked and waiting"
           },
           "execute": {
             "type": "number",
@@ -15026,10 +15046,24 @@
             "description": "Proposed more than 7 days ago"
           },
           "safes": {
-            "description": "Every Safe and chain of the queue read, with how many of its transactions match the status filters",
+            "description": "Every Safe and chain of the queue read, with how many of its transactions match every filter but `safes`",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/SpaceQueueSafeCount"
+            }
+          },
+          "chains": {
+            "description": "Every chain of the queue read, with how many of its transactions match every filter but `chainIds`",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpaceQueueChainCount"
+            }
+          },
+          "signers": {
+            "description": "Every signer a transaction of the queue read still awaits, with how many of those transactions match every filter but `signers`",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpaceQueueSignerCount"
             }
           }
         },
@@ -15041,7 +15075,9 @@
           "waiting",
           "conflicting",
           "stale",
-          "safes"
+          "safes",
+          "chains",
+          "signers"
         ]
       },
       "SpaceQueuedItemPage": {
@@ -19295,6 +19331,38 @@
         },
         "required": [
           "subscriptions"
+        ]
+      },
+      "SpaceQueueChainCount": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "count": {
+            "type": "number",
+            "description": "Transactions on this chain that match every filter but `chainIds`"
+          }
+        },
+        "required": [
+          "chainId",
+          "count"
+        ]
+      },
+      "SpaceQueueSignerCount": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "count": {
+            "type": "number",
+            "description": "Transactions still awaiting this signer that match every filter but `signers`"
+          }
+        },
+        "required": [
+          "address",
+          "count"
         ]
       }
     }
