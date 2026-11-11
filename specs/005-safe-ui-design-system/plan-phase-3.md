@@ -626,8 +626,58 @@ These have defaults, and the plan proceeds with them unless the user says otherw
 
 ## Implementation notes
 
-_(filled in during implementation)_
+All seven "Decisions needing user input" use their default (first) option: docs at the site root, iframe previews, `'use client'` only in the registry copies, the docs app self-hosts DM Sans, no `packages/ui/components.json`, the optional `design-system-checks.yml`, and the `@safe` namespace with item names equal to the export keys.
+
+Deviations from the plan:
+
+1. **No subagents.** The plan's parallel streams were done in sequence by one engineer, so no two streams ever touched the same file.
+2. **Dependencies.**
+   - `zod` is `^4.6.7`, not `^4.1.11`. With `^4.1.11` the app got zod 4.3.5 while `fumadocs-mdx` nested 4.6.7, and `frontmatterSchema.extend()` failed type-checking (TS2589). 4.6.7 was already in the lockfile.
+   - Added `lucide-react ^0.563.0` (the `packages/ui` range) for the Icons page, `storybook ^10.6.5` (the `@storybook/react` peer), `eslint-plugin-react`, `eslint-plugin-react-hooks` and `@eslint/js` (needed by `config/eslint/base.mjs`), and `prettier ^3.9.10`: without its own entry the workspace script resolved a hoisted prettier 3.8.1, which formats MDX code samples differently from the root 3.9.
+   - The root resolution `motion: 12.34.0` also applies to `fumadocs-ui` (which asks for `^14.6.0`). Only the unused Flux layout imports `motion`, and the build and crawl pass, so no override was added.
+   - No age-gate refusal happened; `yarn.lock` only adds packages (`git diff 5dba2e98 -- yarn.lock | grep '^-  version'` prints nothing).
+3. **Fumadocs 16.17.10 API.**
+   - `fumadocs-mdx:collections/server` is a URI scheme that Next's webpack does not handle, so `src/lib/source.ts` imports `../../.source/server` and the tsconfig has no `fumadocs-mdx:collections/*` path.
+   - The static search uses `search.options.type: 'static'` (deprecated in the typings, still supported) with `withBasePath('/api/search')`. The dialog's hotkey compares `e.key === 'k'`, so the crawl presses `ControlOrMeta+k`.
+   - `llms.txt` and `llms-full.txt` are in: `includeProcessedMarkdown` exists in 15.4.10.
+   - The generated Fumadocs CSS prints two harmless `::highlight(fd-search)` warnings during the CSS optimisation step.
+4. **`composeStories` works in the browser bundle**, so the D4 fallback was not needed. The `@ui-stories` webpack alias is transpiled through `transpilePackages`, so no `./stories/*` export was added.
+5. **Previews.**
+   - Stories whose meta has `decorators` (card, typography) wrap the canvas in a `min-height: 100vh` box with padding. In an auto-height iframe the preview padding made that box grow on every resize message. The generated preview module drops the canvas padding for decorated files, and `StoryFrame` ignores height changes under 2px.
+   - The avatar and aspect-ratio stories load `mock-assets/github.com/*.webp` relative to the document (served by the `apps/web` Storybook's `staticDirs`). The two images are copied read-only into `apps/design-system/mock-assets/`, and `stories.ts` copies each into `public/preview/<component>/<story>/mock-assets/` (gitignored) for the stories that use them.
+   - The crawl allowlists one console error: the avatar story's deliberately broken `https://example.com/does-not-exist.png`, which demonstrates `AvatarFallback`.
+   - The story layout parameter (`fullscreen`, `centered`, `padded`) is read from the composed story.
+6. **Props.** `react-docgen-typescript` reports declaration file names relative to the parent of the working directory, so the filter matches `packages/ui/src/` by path segment. It also treats `overlayVariants` as a component, so only capitalised exports count as components. Exports aliased in an `export { A as B }` list are renamed to their public name. Besides `packages/ui/src`, Base UI and `cva`, props declared by `react-resizable-panels`, `vaul`, `input-otp` and `sonner` are kept (react-day-picker's are not: too many). Button has 8 variants and 12 sizes in the `cva` config, not the 6 and 10 the story's `argTypes` list, so `props.test.ts` compares the props against the `cva` config.
+7. **Tokens.** `--destructive-foreground` is declared only on `.dark`, so `TokenEntry.light` is optional and the tables show 124 variables. The Colors page resolves each `var()` reference from the generated token values at build time instead of reading `getComputedStyle` in the browser: inside `html.dark` every element inherits the dark values, so a light swatch could not be measured on a dark page.
+8. **Registry.**
+   - `registry.json` is in `.prettierignore`. Lint-staged had reformatted the first committed copy, which broke the drift test (fixed in its own commit).
+   - shadcn 3.8.5 places `table.module.css` next to `table.tsx` (`src/components/ui/`) with both CLI versions, so the Table page needs no manual step.
+   - The theme item's `css` carries the two `@import`s, the `@custom-variant dark` and the `@layer base` rules; `cssVars.theme` holds every `@theme inline` declaration, including `--font-sans` and the radius scale.
+9. **Code tab sources** include top-level helpers that a story references (for example overlay's `PageBehind`). A block-bodied `render` is printed as a named function, and `{...args}` is replaced by the merged meta and story args.
+10. **Usage section.** `ComponentUsage` shows the shortest story's source when it has 30 lines or fewer, otherwise the import line and the root component.
+11. **Theme in previews** follows the plan (query, `localStorage.theme`, `prefers-color-scheme`, `storage` listener); the crawl checks that an open preview follows the toggle.
+12. **Crawl.** `playwright.config.ts` takes `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` (the container has Chromium 1243, the lockfile Playwright expects 1248) and `HOST_DIR` for the base-path run instead of a hard-coded scratchpad. It uses 2 workers: with 4, two iframe-heavy pages timed out under load. Search results are listbox options, not links, so the test checks the option and presses Enter.
+13. **Extras.** `src/app/icon.svg` (the missing favicon was the only 404 in the console), `Kbd` from `@safe-global/ui/kbd` in the MDX map, and `src/scripts/paths.ts` for the shared paths.
+14. **Commits.** D17's sequence, with two `fix(design-system)` commits (registry formatting, prettier pin) and the workflow and guidance split into `chore:` and `docs:`. `.github/workflows/actions.lock` gained the new workflow's entry by hand, since `gh actions-lock` is not installed here; it lists the same actions as `web-tanstack-checks.yml`.
+15. **SC4 smoke test environment.** The shadcn CLI sends every request, `localhost` included, through `https_proxy` and ignores `NO_PROXY`. The agent proxy refuses both localhost and `ui.shadcn.com`. So the CLI ran with only the lowercase `https_proxy` removed from its environment (npm installs still used the proxy), and with `REGISTRY_URL` pointing at a local stub of `colors/neutral.json`, which the CLI fetches for every component. The `npm install` that `shadcn add` runs for item dependencies does not take `--before`. None of this applies outside this container.
+
+Verification results (all after the last code change):
+
+- `yarn constraints` passes; `yarn why next` shows one `next@patch:16.4.2` resolution.
+- `packages/ui`: type-check, lint, test (243), prettier and `build-storybook` pass.
+- `apps/design-system`: type-check, lint, test (31 tests: stories, props, tokens, rules, env, registry drift, page coverage), prettier and `build` pass. `registry.json` is current. `out/` has 58 registry JSON files, 160 `index.html` files (65 docs pages: 13 + 52 components; 93 previews; the `404` and `_not-found` pages), 52 component pages, `llms.txt` and `llms-full.txt`. Build time is about 50 s; generation is about 8 s, so no props cache.
+- Crawl: 179 tests pass at the root and from `/safe-ui/` (base-path build copied into a subfolder): every page and preview returns 200 with no console errors, every internal link resolves, every preview iframe renders, every registry item is served as JSON, `llms.txt` lists every page, and search, the theme toggle (with an open preview following it), copy and the mobile layout work.
+- `yarn turbo run type-check lint test --filter=@safe-global/ui --filter=@safe-global/design-system --force`, `yarn knip --workspace apps/design-system` and `yarn prettier` pass.
+- Acceptance checks 1, 8, 10 and 11: no host files; the host-name grep only matches gitignored build output (`tsconfig.tsbuildinfo`, `src/generated`); no hex or `oklch()` in `src/` or `content/`; `shadcn-scope`/`ShadcnProvider` appear only in the Theming, Dark mode, Introduction and Utilities prose; `git diff 5dba2e98 -- apps/web apps/web-tanstack packages/views` is empty; `packages/ui` changes are the `./eslint` key, `AGENTS.md` and `README.md`.
+- Check 4: a temporary `DocsReuseProbe` story in `badge.stories.tsx` appeared under Examples on `/components/badge/` (and as `/preview/badge/docs-reuse-probe/`) after `build`; reverted.
+- SC4: in a fresh Vite 8 + Tailwind v4 app, `shadcn@3.8.5 add` installed `@safe/theme` and then all 56 other items; `tsc --noEmit` and `vite build` pass; `src/index.css` has the `@theme inline` block and the light and dark variables; screenshots show a Safe-styled Button and an open Dialog in both modes (DM Sans is not loaded there, as documented). With `shadcn@4.23.0` in a fresh copy, all 57 items install and `tsc` and `vite build` pass.
+- SC1 (best effort): `yarn workspace @safe-global/ui pack` installed into a fresh Vite app; following the Installation page (`styles.css` plus `@source '../node_modules/@safe-global/ui/src'`), `vite build` compiles the raw `.tsx` with no `optimizeDeps` setting, and `tsc` passes. The dev server was not tried. The tarball has no `files` list yet, so it ships `storybook-static`, tests and configs (Phase 4).
 
 ## Follow-ups
 
-_(filled in during implementation)_
+- Phase 4: `files` in `packages/ui/package.json` (the packed tarball carries `storybook-static`, tests and configs), the `dist` build, and a hosted registry URL.
+- `packages/ui`'s own Storybook does not serve `mock-assets/`, so the avatar and aspect-ratio images 404 there; the docs app now holds a copy. Moving the two images into `packages/ui` (and pointing both Storybooks at them) would remove the copy.
+- Font packaging (Phase 1 D8) is still open: the docs app and `apps/web` each hold a copy of DM Sans.
+- shadcn CLI: it ignores `NO_PROXY`, and it needs `ui.shadcn.com` for every component, even from a third-party registry. Teams behind a proxy should know this before relying on the registry path.
+- `fumadocs-ui` asks for `motion ^14.6.0` while the root pins `12.34.0`; harmless while the Flux layout is unused.
+- `packages/ui/components.json` (D13) and an alias-free flow for adding upstream components.
