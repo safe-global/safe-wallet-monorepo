@@ -37,6 +37,9 @@ const withDefaults = (options: RenderOptions = {}): RenderOptions => ({
 const render = (ui: Parameters<typeof baseRender>[0], options?: RenderOptions) => baseRender(ui, withDefaults(options))
 const renderWithUserEvent = (ui: Parameters<typeof baseRenderWithUserEvent>[0], options?: RenderOptions) =>
   baseRenderWithUserEvent(ui, withDefaults(options))
+// The drawer opens with every section collapsed. Tests that read a section open them all first.
+const expandSections = (user: ReturnType<typeof renderWithUserEvent>['user']) =>
+  user.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Expand all sections' }))
 
 type TestUser = ReturnType<typeof renderWithUserEvent>['user']
 const openFilter = async (user: TestUser, section: string) => {
@@ -146,6 +149,7 @@ describe('queue design exploration', () => {
     })
     expect(screen.queryByRole('button', { name: 'Open Send to Globex Payroll' })).not.toBeInTheDocument()
     await user.click(allPending().getByRole('button', { name: 'Open Add signer Priya' }))
+    await expandSections(user)
     const dialog = within(screen.getByRole('dialog'))
     expect(dialog.getByRole('button', { name: 'Conflicts and checks' })).toHaveAttribute('aria-expanded', 'true')
     expect(screen.getByRole('dialog')).toHaveTextContent('Blocked by #42')
@@ -173,6 +177,7 @@ describe('queue design exploration', () => {
   it('shows competing proposals in the side panel', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { scenario: 'conflict' } } })
     await user.click(allPending().getByRole('button', { name: 'Open Send to Globex Payroll' }))
+    await expandSections(user)
     const dialog = within(screen.getByRole('dialog'))
     expect(dialog.getByRole('button', { name: 'Conflicts and checks' })).toHaveAttribute('aria-expanded', 'true')
     expect(screen.getByRole('dialog')).toHaveTextContent('2 transactions at #42')
@@ -265,6 +270,7 @@ describe('queue design exploration', () => {
     await toggleFilter(user, 'Status', 'Blocked')
     expect(allPending().queryByRole('button', { name: 'Open Send to Globex Payroll' })).not.toBeInTheDocument()
     await user.click(allPending().getByRole('button', { name: 'Open Add signer Priya' }))
+    await expandSections(user)
     expect(screen.getByRole('dialog')).toHaveTextContent('Send 48.5 ETH · Sign #42 first.')
   })
   it('shows signatures as a count with a gauge, keeping outstanding signers in the tooltip, and the note as an icon', () => {
@@ -302,13 +308,12 @@ describe('queue design exploration', () => {
     await user.keyboard('{Enter}')
     expect(screen.getByRole('dialog')).toBeVisible()
   })
-  it('opens with the summary open and the rest collapsed, and resets them for another proposal', async () => {
+  it('opens with every section collapsed and the signatures open, and resets them for another proposal', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />)
     await user.click(allPending().getByRole('button', { name: 'Open Add signer Priya' }))
     const dialog = () => within(screen.getByRole('dialog'))
-    expect(dialog().getByRole('button', { name: 'Summary' })).toHaveAttribute('aria-expanded', 'true')
-    expect(dialog().getByRole('button', { name: 'Conflicts and checks' })).toHaveAttribute('aria-expanded', 'true')
-    for (const name of ['Security', 'Note', 'Transaction data'])
+    expect(dialog().queryByRole('button', { name: 'Show signatures' })).toBeNull()
+    for (const name of ['Summary', 'Conflicts and checks', 'Security', 'Note', 'Transaction data'])
       expect(dialog().getByRole('button', { name })).toHaveAttribute('aria-expanded', 'false')
     await user.click(dialog().getByRole('button', { name: 'Note' }))
     expect(dialog().getByRole('button', { name: 'Note' })).toHaveAttribute('aria-expanded', 'true')
@@ -322,10 +327,9 @@ describe('queue design exploration', () => {
     const { user } = renderWithUserEvent(<PendingQueue />)
     await user.click(allPending().getByRole('button', { name: 'Open Batch · 14 actions' }))
     const dialog = within(screen.getByRole('dialog'))
-    expect(dialog.getByRole('button', { name: 'Show signatures' })).toHaveAttribute('aria-expanded', 'false')
-    expect(dialog.getByRole('button', { name: 'Copy transaction link' })).toBeVisible()
-    await user.click(dialog.getByRole('button', { name: 'Show signatures' }))
+    // The signatures list starts open.
     expect(dialog.getByRole('button', { name: 'Hide signatures' })).toHaveAttribute('aria-expanded', 'true')
+    expect(dialog.getByRole('button', { name: 'Copy transaction link' })).toBeVisible()
     const signers = dialog.getAllByRole('listitem').map((item) => item.textContent)
     expect(signers[0]).toMatch(/^Created by Ana/)
     expect(signers[1]).toBe('Ana0x7C21…D2e4Signed')
@@ -357,6 +361,7 @@ describe('queue design exploration', () => {
     await user.click(screen.getByRole('button', { name: 'More actions for Send to Contoso Ltd' }))
     await user.click(await screen.findByRole('menuitem', { name: 'Reject' }))
     await user.click(screen.getByRole('button', { name: 'Reject in preview' }))
+    await expandSections(user)
     const dialog = within(screen.getByRole('dialog'))
     expect(dialog.getByText('Cancels #44')).toBeVisible()
     expect(dialog.getByRole('status')).toHaveTextContent('Competing proposal created')
@@ -406,6 +411,7 @@ describe('queue design exploration', () => {
   it('uses the selected proposal type in the review panel icon', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { scenario: 'conflict' } } })
     await user.click(allPending().getByRole('button', { name: 'Open Swap USDC → ETH' }))
+    await expandSections(user)
     expect(screen.getByRole('dialog').querySelector('svg.lucide-repeat-2')).toBeVisible()
     expect(screen.getByRole('dialog').querySelector('svg.lucide-arrow-up-right')).not.toBeInTheDocument()
   })
@@ -530,6 +536,7 @@ describe('queue design exploration', () => {
     expect(screen.getByRole('searchbox', { name: 'Find a proposal' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^Filter/ })).toBeInTheDocument()
     await user.click(allPending().getByRole('button', { name: 'Open Batch · 14 actions' }))
+    await expandSections(user)
     expect(screen.getByRole('dialog')).toHaveAttribute('data-mobile-full-screen', 'true')
     const dialog = within(screen.getByRole('dialog'))
     expect(dialog.getByRole('button', { name: 'Summary' })).toHaveAttribute('aria-expanded', 'true')
@@ -756,6 +763,7 @@ describe('queue design exploration', () => {
     it('summarises the transaction in the open Summary section without repeating the amount', async () => {
       const { user } = renderWithUserEvent(<PendingQueue />)
       await user.click(allPending().getByRole('button', { name: 'Open Send to Globex Payroll' }))
+      await user.click(dialog().getByRole('button', { name: 'Summary' }))
       expect(dialog().getByRole('button', { name: 'Summary' })).toHaveAttribute('aria-expanded', 'true')
       // The dollar value is a tooltip on the amount, not text.
       expect(dialog().queryByText(/\$155,200/)).toBeNull()
@@ -812,12 +820,14 @@ describe('queue design exploration', () => {
     it('titles the drawer with the Safe and nonce, and puts the type and action in Summary', async () => {
       const { user } = renderWithUserEvent(<PendingQueue />)
       await user.click(allPending().getByRole('button', { name: 'Open Send to Globex Payroll' }))
+      await user.click(dialog().getByRole('button', { name: 'Summary' }))
       expect(dialog().getByRole('heading', { name: 'Treasury Main' })).toBeVisible()
       expect(screen.getByRole('dialog')).toHaveTextContent('Nonce #42 · Ethereum')
       expect(screen.getByRole('dialog')).toHaveTextContent('TypeSendAction48.5 ETH')
       expect(screen.getByRole('dialog')).toHaveAccessibleName('Send to Globex Payroll')
       await user.click(screen.getByRole('button', { name: 'Close' }))
       await user.click(allPending().getByRole('button', { name: 'Open Batch · 14 actions' }))
+      await user.click(dialog().getByRole('button', { name: 'Summary' }))
       expect(screen.getByRole('dialog')).toHaveTextContent('TypeBatchAction14 actions')
     })
     it('keeps every section expanded while stepping after Expand all, and resets on a fresh open', async () => {
@@ -873,6 +883,7 @@ describe('queue design exploration', () => {
         target: { value: 'Add signer Priya' },
       })
       await user.click(allPending().getByRole('button', { name: 'Open Add signer Priya' }))
+      await expandSections(user)
       await user.click(dialog().getByRole('button', { name: /^Runs after #42.*Send 48\.5 ETH/ }))
       expect(screen.getByRole('dialog')).toHaveAccessibleName('Send to Globex Payroll')
       expect(dialog().getByRole('button', { name: 'Previous' })).toBeDisabled()
@@ -1065,6 +1076,7 @@ describe('queue design exploration', () => {
     it('leads with the warnings, then the summary and security checks', async () => {
       const { user } = renderRealistic()
       await user.click(allPending().getByRole('button', { name: 'Open Bridge ETH to Unknown network' }))
+      await expandSections(user)
       const dialog = within(screen.getByRole('dialog'))
       expect(dialog.getByRole('alert')).toHaveTextContent('Unknown network')
       expect(dialog.getByRole('alert').compareDocumentPosition(dialog.getByRole('button', { name: 'Summary' }))).toBe(
@@ -1081,8 +1093,7 @@ describe('queue design exploration', () => {
       const { user } = renderRealistic()
       await user.click(allPending().getByRole('button', { name: 'Open Send to Globex Payroll' }))
       const dialog = within(screen.getByRole('dialog'))
-      expect(screen.getByRole('dialog')).toHaveTextContent('2/3 Signatures· Your signature required')
-      await user.click(dialog.getByRole('button', { name: 'Show signatures' }))
+      expect(screen.getByRole('dialog')).toHaveTextContent('2/3 Signatures')
       const rows = dialog.getAllByRole('listitem')
       expect(rows[3]).toHaveTextContent(/^Dev \(you\).*Your signature required$/)
       expect(dialog.getByRole('button', { name: 'Copy transaction link' })).toBeVisible()
@@ -1421,7 +1432,9 @@ describe('option E · Group by cards', () => {
     render(<PendingQueue />, cards)
     // The last header cell also holds Collapse all, whose label names the groups.
     const byStatus = columnTitles().slice(0, -1)
-    expect(byStatus.slice(0, 4)).toEqual(['Nonce', 'Transaction', 'To', 'Network'])
+    expect(byStatus.slice(0, 4)).toEqual(['Nonce', 'Transaction', 'To', 'Proposed'])
+    // The network sits in the Safe tag, so there's no Network column.
+    expect(allPending().getAllByAltText(/^on (Ethereum|Base|Arbitrum)$/).length).toBeGreaterThan(0)
     for (const name of [/^Safe/, /^Network/, /^Up next/]) {
       pick(name)
       expect(columnTitles().slice(0, -1)).toEqual(byStatus)
