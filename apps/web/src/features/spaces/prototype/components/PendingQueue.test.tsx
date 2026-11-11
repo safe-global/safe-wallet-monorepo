@@ -1067,7 +1067,8 @@ describe('queue design exploration', () => {
       expect(blocked).toHaveAttribute('aria-checked', 'true')
       await closeMenus(user)
       expect(openRows()).toHaveLength(count)
-      expect(allPending().getAllByText(/^Blocked by #/)).toHaveLength(count)
+      // An expired order still counts as blocked, as in production, but its badge says Expired
+      expect(allPending().getAllByText(/^(Blocked by #\d+|Expired)$/)).toHaveLength(count)
       await user.click(screen.getByRole('button', { name: /^Status/ }))
       fireEvent.click(await screen.findByRole('menuitemcheckbox', { name: /^Blocked/ }))
       await closeMenus(user)
@@ -1543,6 +1544,15 @@ describe('option E · Safes that fail to load', () => {
     expect(screen.queryByText('Not deployed yet')).toBeNull()
   })
 
+  it('explains the 100-Safe limit, with no Reload, when that is why Safes are left out', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />, partial({ failed: '3', reason: 'limit' }))
+    await user.click(screen.getByRole('button', { name: '3 Safes not loaded' }))
+    const failed = await screen.findByRole('region', { name: '3 Safes not loaded' })
+    expect(within(failed).getByText(/covers up to 100 Safe accounts/)).toBeInTheDocument()
+    expect(within(failed).queryByRole('button', { name: /^Reload/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /^Reload all/ })).toBeNull()
+  })
+
   it('puts failed Safes at the top when grouped by Safe', () => {
     render(<PendingQueue />, partial({ failed: '3' }))
     fireEvent.click(screen.getByRole('radio', { name: /^Safes/ }))
@@ -1602,5 +1612,32 @@ describe('Safes that fail to load', () => {
     fireEvent.click(within(alert).getByRole('button', { name: 'Reload 3 Safes' }))
     act(() => jest.advanceTimersByTime(1000))
     expect(screen.queryByRole('alert')).toBeNull()
+  })
+})
+
+describe('option E · production queue states', () => {
+  const state = (value: string) => ({ routerProps: { query: { option: 'cards', state: value, scenario: '5-safes' } } })
+  beforeEach(() => localStorage.clear())
+
+  it('says how much of a capped queue it shows, until a filter narrows it', () => {
+    render(<PendingQueue />, state('capped'))
+    expect(screen.getByText(/^Showing \d+ of \d+ pending transactions\.$/)).toBeInTheDocument()
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Find a proposal' }), { target: { value: 'Treasury' } })
+    expect(screen.queryByText(/^Showing \d+ of \d+ pending transactions\.$/)).toBeNull()
+  })
+
+  it('adds a new proposal on refresh and says it needs your confirmation', () => {
+    jest.useFakeTimers()
+    render(<PendingQueue />, state('incoming'))
+    expect(screen.queryByText('A transaction requires your confirmation.')).toBeNull()
+    act(() => jest.advanceTimersByTime(4100))
+    expect(screen.getByRole('status')).toHaveTextContent('A transaction requires your confirmation.')
+    expect(allPending().getAllByText('12,500 USDC').length).toBeGreaterThan(0)
+    jest.useRealTimers()
+  })
+
+  it('caps the search at 100 characters, as production does', () => {
+    render(<PendingQueue />, state('normal'))
+    expect(screen.getByRole('searchbox', { name: 'Find a proposal' })).toHaveAttribute('maxLength', '100')
   })
 })

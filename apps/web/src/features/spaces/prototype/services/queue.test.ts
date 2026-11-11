@@ -10,6 +10,7 @@ import {
   executePreviewBatches,
   getFirstReady,
   getBulkExecutable,
+  getIncomingProposal,
   proposePreviewAlternative,
 } from './queue'
 import type { Proposal } from '../types'
@@ -194,5 +195,26 @@ describe('scenarios and states', () => {
     expect(
       executing.filter((tx) => tx.account === running.account && tx.nonce === running.nonce).length,
     ).toBeGreaterThan(1)
+  })
+})
+
+describe('production refresh and limits', () => {
+  it('never bulk executes an expired order', () => {
+    const items = getScenario('20-safes')
+    const expired = items.filter((tx) => tx.kind.type === 'swap' && tx.kind.expired)
+    const batched = getBulkExecutable(items).flatMap((batch) => batch.proposals)
+    expect(batched.some((tx) => expired.includes(tx))).toBe(false)
+  })
+
+  it('brings in a new proposal that needs your signature, after the last nonce of a Safe you sign', () => {
+    const items = getScenario('5-safes')
+    const incoming = getIncomingProposal(items, 'owner')!
+    expect(getState(incoming, 'owner').canSign).toBe(true)
+    const last = Math.max(...items.filter((tx) => tx.account === incoming.account).map((tx) => tx.nonce))
+    expect(incoming.nonce).toBe(last + 1)
+  })
+
+  it('brings in nothing for a member who signs no Safe', () => {
+    expect(getIncomingProposal(getScenario('5-safes'), 'member')).toBeUndefined()
   })
 })

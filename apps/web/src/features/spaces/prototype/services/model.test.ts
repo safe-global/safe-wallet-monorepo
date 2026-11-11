@@ -1,4 +1,5 @@
-import { getCounterpartyCell } from './columns'
+import { getPrimaryAction } from './actions'
+import { getCounterpartyCell, getSummary, getSummaryHint } from './columns'
 import {
   generateBatchActions,
   getAmountLabel,
@@ -251,5 +252,58 @@ describe('next steps status', () => {
     expect(matchesFilter(tx, 'waiting', 'owner')).toBe(true)
     expect(matchesFilter(tx, 'waiting', 'owner', true)).toBe(false)
     expect(matchesFilter(tx, 'sign', 'owner', true)).toBe(true)
+  })
+})
+
+// Behaviour taken from the production queue (#9178), so the preview reads the same as the build
+describe('matches the production queue', () => {
+  const twenty = getScenario('20-safes')
+  const byKind = (match: (tx: (typeof twenty)[number]) => boolean) => twenty.find(match)!
+
+  it('shows an expired order as Expired, with nothing to sign or execute', () => {
+    const tx = byKind((item) => item.kind.type === 'swap' && !!item.kind.expired)
+    const state = getState(tx, 'owner')
+    expect(state.expired).toBe(true)
+    expect(state.canSign).toBe(false)
+    expect(state.ready).toBe(false)
+    expect(getRowState(tx, 'owner').label).toBe('Expired')
+    expect(getStepsStatus(tx, 'owner').label).toBe('Expired')
+    expect(getStatusLabel(tx, 'owner')).toBe('Expired')
+    expect(getExecutionReason(tx, 'owner', twenty)).toMatch(/^The order expired/)
+    expect(getPrimaryAction(tx, twenty, 'owner', [], 'row')).toMatchObject({ kind: 'review', label: 'Review' })
+  })
+
+  it('names staking transactions as production does, through Kiln', () => {
+    const stake = byKind((item) => item.kind.type === 'staking' && item.kind.action === 'stake')
+    const exit = byKind((item) => item.kind.type === 'staking' && item.kind.action === 'withdrawRequest')
+    const claim = byKind((item) => item.kind.type === 'staking' && item.kind.action === 'claim')
+    expect([stake, exit, claim].map(getTypeLabel)).toEqual(['Stake', 'Withdraw request', 'Claim'])
+    expect(getSummary(exit)).toBe('3 validators')
+    expect(getSummary(stake)).toBe('64 ETH')
+    expect(getCounterpartyCell(claim).name).toBe('Kiln')
+  })
+
+  it('describes the settings changes production names', () => {
+    const labels = twenty.filter((tx) => tx.kind.type === 'settings').map((tx) => getTransactionLabel(tx))
+    expect(labels).toEqual(
+      expect.arrayContaining(['Replace signer Max with Lena', 'Disable module AllowanceModule', 'Remove guard']),
+    )
+  })
+
+  it('says Unknown method when the call data is not decoded', () => {
+    const tx = byKind((item) => item.kind.type === 'contract' && item.kind.method === '')
+    expect(getSummary(tx)).toBe('Unknown method')
+    expect(getTransactionLabel(tx)).toBe('Call an unknown method on Unverified contract')
+  })
+
+  it('names the protocol for swaps and bridges', () => {
+    expect(getCounterpartyCell(byKind((item) => item.kind.type === 'swap')).name).toBe('CoW Protocol')
+    expect(getCounterpartyCell(byKind((item) => item.kind.type === 'bridge')).name).toBe('LI.FI')
+  })
+
+  it('leaves the parent nonce out of a nested row, which the list response does not carry', () => {
+    const tx = byKind((item) => item.kind.type === 'nested')
+    expect(getSummary(tx)).toBe('Approves a transaction')
+    expect(getSummaryHint(tx)).not.toMatch(/#\d/)
   })
 })
