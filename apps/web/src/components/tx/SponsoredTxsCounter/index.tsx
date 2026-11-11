@@ -18,7 +18,7 @@ const PROMPT = {
 }
 
 /** "Nov 1, 00:00 UTC": the reset moment of a sponsored-transactions cycle, always in UTC so every member reads the same. */
-export const _formatResetsAt = (iso: string | null): string | null => {
+export const formatResetsAt = (iso: string | null): string | null => {
   if (!iso) return null
   const timestamp = Date.parse(iso)
   if (Number.isNaN(timestamp)) return null
@@ -50,7 +50,7 @@ const SponsoredTxsCounter = ({
   /** Shows the Pro chip instead of the upgrade button; null (plan unknown, or Pro does not apply as in Safe creation) shows neither. */
   isPro: boolean | null
 }): ReactElement => {
-  const resets = _formatResetsAt(resetsAt)
+  const resets = formatResetsAt(resetsAt)
   useTrackOnce(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT, !isPro)
 
   return (

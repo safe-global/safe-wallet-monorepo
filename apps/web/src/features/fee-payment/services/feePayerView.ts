@@ -112,7 +112,7 @@ export const buildFooter = ({
     }
   }
   if (offer?.option === 'NO_FEE_CAMPAIGN') {
-    return { kind: 'counter', left: offer.remaining, quota: offer.limit, resetsAt: null, isSubscription: false }
+    return { kind: 'campaign', left: offer.remaining, limit: offer.limit }
   }
   if (!chainSponsorsPlans) return { kind: 'none' }
   if (planState === 'FREE') return { kind: 'upsell' }

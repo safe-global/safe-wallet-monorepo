@@ -53,12 +53,25 @@ jest.mock('@/hooks/useGasPaymentOptions', () => ({
 }))
 
 // The fee card stub exposes the view it was given, so tests can read who the form decided pays.
+const mockIsFeatureReady = jest.fn(() => true)
 jest.mock('@/features/__core__', () => ({
   ...jest.requireActual('@/features/__core__'),
   useLoadFeature: () => ({
-    $isReady: true,
-    GasPayerSelector: ({ selection }: { selection: { view: FeePayerView | null } }) =>
-      selection.view && <div data-testid="gas-payer-selector" data-payer={JSON.stringify(selection.view.payer)} />,
+    $isReady: mockIsFeatureReady(),
+    GasPayerSelector: ({
+      selection,
+      gasFeeDetails,
+    }: {
+      selection: { view: FeePayerView | null }
+      gasFeeDetails?: { mode: string }
+    }) =>
+      selection.view && (
+        <div
+          data-testid="gas-payer-selector"
+          data-payer={JSON.stringify(selection.view.payer)}
+          data-gas-details={gasFeeDetails?.mode}
+        />
+      ),
     GasTooHighBanner: () => <div data-testid="gas-too-high-banner" />,
   }),
 }))
@@ -161,10 +174,21 @@ describe('ExecuteForm', () => {
     mockUseSafeScope.mockReturnValue(undefined)
   })
 
-  it('shows estimated fees', () => {
-    const { getByText } = render(<ExecuteForm {...defaultProps} />)
+  it('shows the gas settings inside the Fees card instead of the Estimated fee block', () => {
+    const { getByTestId, queryByText } = render(<ExecuteForm {...defaultProps} safeTx={safeTransaction} />)
+
+    expect(getByTestId('gas-payer-selector')).toHaveAttribute('data-gas-details', 'edit')
+    expect(queryByText('Estimated fee')).not.toBeInTheDocument()
+  })
+
+  it('keeps the Estimated fee block when the Fees card is not available', () => {
+    mockIsFeatureReady.mockReturnValue(false)
+
+    const { getByText, queryByTestId } = render(<ExecuteForm {...defaultProps} />)
 
     expect(getByText('Estimated fee')).toBeInTheDocument()
+    expect(queryByTestId('gas-payer-selector')).not.toBeInTheDocument()
+    mockIsFeatureReady.mockReturnValue(true)
   })
 
   it('renders a secondary action before the submit button when one is passed', () => {

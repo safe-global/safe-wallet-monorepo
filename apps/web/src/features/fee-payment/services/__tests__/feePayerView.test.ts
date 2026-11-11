@@ -121,6 +121,11 @@ describe('buildFooter', () => {
     })
   })
 
+  it("shows what is left of the gas campaign's allowance", () => {
+    const offer: SponsoredOffer = { option: 'NO_FEE_CAMPAIGN', disabledReason: null, remaining: 2, limit: 5 }
+    expect(buildFooter({ ...base, offer })).toEqual({ kind: 'campaign', left: 2, limit: 5 })
+  })
+
   it('shows nothing where the chain sponsors no plans', () => {
     expect(buildFooter({ ...base, chainSponsorsPlans: false })).toEqual({ kind: 'none' })
   })

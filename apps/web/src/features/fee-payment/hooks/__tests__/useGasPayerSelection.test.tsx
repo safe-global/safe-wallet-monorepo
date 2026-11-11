@@ -468,13 +468,7 @@ describe('useGasPayerSelection', () => {
 
       expect(result.current.choice).toBe('SPONSORED')
       expect(result.current.view?.sponsorKind).toBe('free')
-      expect(result.current.view?.footer).toEqual({
-        kind: 'counter',
-        left: 2,
-        quota: 5,
-        resetsAt: null,
-        isSubscription: false,
-      })
+      expect(result.current.view?.footer).toEqual({ kind: 'campaign', left: 2, limit: 5 })
     })
 
     it('locks the wallet without a footer where the chain sponsors nothing', () => {

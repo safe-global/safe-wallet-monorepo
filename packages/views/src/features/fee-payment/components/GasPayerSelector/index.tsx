@@ -22,6 +22,7 @@ import {
 import type {
   FeePayerControl,
   FeePayerView,
+  GasFeeDetails,
   GasPayerChoice,
   GasTokenLockReason,
   GasTokenOption,
@@ -30,9 +31,11 @@ import type {
 } from '@safe-global/views/features/fee-payment/types'
 import { GasTokenSelector, type TokenIconRenderer } from './GasTokenSelector'
 import { TotalOutgoingSection } from './TotalOutgoingSection'
+import { ExpandableGasFeeRow } from './GasFeeDetails'
 import css from './styles.module.css'
 
 export type { TokenIconRenderer } from './GasTokenSelector'
+export { CampaignQuota, SponsoredQuota } from './SponsoredQuota'
 
 const PAYER_LABEL: Record<GasPayerChoice, string> = {
   PAY_FROM_SAFE: 'Safe account',
@@ -166,7 +169,8 @@ const FeeLabel = ({ label, tooltip }: { label: string; tooltip: string }): React
   <Typography variant="paragraph-small" className={css.feeLabel}>
     {label}
     <Tooltip>
-      <TooltipTrigger render={<span className={css.tooltipIcon} />}>
+      {/* Keeps a tap on the icon from toggling a clickable row it sits in. */}
+      <TooltipTrigger render={<span className={css.tooltipIcon} onClick={(e) => e.stopPropagation()} />}>
         <InfoIcon className="size-4 text-[var(--color-border-main)]" />
       </TooltipTrigger>
       <TooltipContent>{tooltip}</TooltipContent>
@@ -248,6 +252,8 @@ export type GasPayerSelectorProps = {
   renderTokenIcon: TokenIconRenderer
   /** The strip under the fee rows (Pro upsell or sponsored counter); none when null. */
   footer: ReactNode
+  /** Opened from the Gas fee row: an editor ('edit') or read-only details ('view'); a static row without it. */
+  gasFeeDetails?: GasFeeDetails
 }
 
 const GasPayerSelector = ({
@@ -257,6 +263,7 @@ const GasPayerSelector = ({
   currency,
   renderTokenIcon,
   footer,
+  gasFeeDetails,
 }: GasPayerSelectorProps): ReactElement => {
   const { payer, gasToken, executionFee, gasFee, sponsored, sponsorKind, totalOutgoing, safeHasEnoughGas } = view
   const singleToken = gasToken.tokens.length <= 1
@@ -301,10 +308,18 @@ const GasPayerSelector = ({
             )}
           </FeeRow>
 
-          <FeeRow testId="gas-fee-row">
-            <FeeLabel label="Gas fee" tooltip={GAS_FEE_TOOLTIP} />
-            <FeeValue fee={gasFee} sponsored={sponsored} sponsorKind={sponsorKind} />
-          </FeeRow>
+          {gasFeeDetails ? (
+            <ExpandableGasFeeRow
+              label={<FeeLabel label="Gas fee" tooltip={GAS_FEE_TOOLTIP} />}
+              value={<FeeValue fee={gasFee} sponsored={sponsored} sponsorKind={sponsorKind} />}
+              details={gasFeeDetails}
+            />
+          ) : (
+            <FeeRow testId="gas-fee-row">
+              <FeeLabel label="Gas fee" tooltip={GAS_FEE_TOOLTIP} />
+              <FeeValue fee={gasFee} sponsored={sponsored} sponsorKind={sponsorKind} />
+            </FeeRow>
+          )}
 
           {totalOutgoing && (
             <div className={css.totalOutgoingWrap}>

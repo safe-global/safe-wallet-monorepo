@@ -1,11 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useState, type ReactNode } from 'react'
 import { Button } from '@safe-global/views/components/ui/button'
-import type { FeePayerView, GasPayerChoice, NetworkFee } from '@safe-global/views/features/fee-payment/types'
+import type {
+  FeePayerView,
+  GasDetailName,
+  GasFeeDetails,
+  GasPayerChoice,
+  NetworkFee,
+} from '@safe-global/views/features/fee-payment/types'
+import { userEvent, within } from 'storybook/test'
 import { withMockProvider } from '@/storybook/decorators'
 import TokenIcon from '@/components/common/TokenIcon'
 import SponsoredTxsCounter from '@/components/tx/SponsoredTxsCounter'
-import GasPayerSelector, { ProUpsell, type TokenIconRenderer } from './index'
+import GasPayerSelector, { CampaignQuota, ProUpsell, SponsoredQuota, type TokenIconRenderer } from './index'
 
 // Every screen of the fee payment design (Prototype/Fee payment), one story per cell of its case table.
 const ZERO = '0x0000000000000000000000000000000000000000'
@@ -63,10 +70,64 @@ const storyFooter = (footer: FeePayerView['footer']): ReactNode => {
         }
       />
     )
+  if (footer.kind === 'campaign') return <CampaignQuota left={footer.left} limit={footer.limit} />
+  if (footer.isSubscription && footer.left !== null && footer.quota !== null)
+    return <SponsoredQuota left={footer.left} quota={footer.quota} resetsAt="Nov 11, 00:00 UTC" />
   return <SponsoredTxsCounter {...footer} isPro={footer.isSubscription} />
 }
 
-const Harness = ({ view }: { view: FeePayerView }) => {
+type DetailsSample = 'edit' | 'cannotEstimate' | 'paidFromSafe' | 'proPlan' | 'freeTx'
+
+const ESTIMATE: Record<string, string> = {
+  userNonce: '12',
+  gasLimit: '79262',
+  maxPriorityFeePerGas: '0.05',
+  maxFeePerGas: '1.82',
+}
+
+/** Sample gas settings for the Gas fee row; the app validates and saves them, the story only keeps the typing. */
+const useSampleDetails = (sample?: DetailsSample): GasFeeDetails | undefined => {
+  const estimate = sample === 'cannotEstimate' ? { ...ESTIMATE, gasLimit: '' } : ESTIMATE
+  const [draft, setDraft] = useState<Record<string, string> | null>(sample === 'cannotEstimate' ? estimate : null)
+  const [isViewOpen, setIsViewOpen] = useState(false)
+  if (!sample) return undefined
+
+  if (sample === 'paidFromSafe' || sample === 'proPlan' || sample === 'freeTx')
+    return {
+      mode: 'view',
+      open: isViewOpen,
+      onOpenChange: setIsViewOpen,
+      rows:
+        sample === 'paidFromSafe'
+          ? [{ name: 'gasLimit', value: '112400' }, { name: 'gasPrice', value: '1.9' }, { name: 'refundReceiver' }]
+          : (['gasLimit', 'maxPriorityFeePerGas', 'maxFeePerGas'] as const).map((name) => ({
+              name,
+              value: ESTIMATE[name],
+            })),
+      reason: sample === 'paidFromSafe' ? 'PAID_FROM_SAFE' : sample === 'proPlan' ? 'SPONSORED_PLAN' : 'SPONSORED_FREE',
+    }
+
+  const names: GasDetailName[] = ['userNonce', 'gasLimit', 'maxPriorityFeePerGas', 'maxFeePerGas']
+  return {
+    mode: 'edit',
+    open: draft !== null,
+    onOpenChange: (open) => setDraft(open ? estimate : null),
+    fields: names.map((name) => ({
+      name,
+      value: draft?.[name] ?? '',
+      error: name === 'gasLimit' && !draft?.gasLimit ? 'REQUIRED' : undefined,
+      autoFocus: name === 'gasLimit' && !estimate.gasLimit,
+    })),
+    onFieldChange: (name, value) => setDraft((current) => current && { ...current, [name]: value }),
+    canSave: !!draft?.gasLimit,
+    onSave: () => setDraft(null),
+    onCancel: () => setDraft(null),
+    onReset: draft && draft.gasLimit !== estimate.gasLimit && estimate.gasLimit ? () => setDraft(estimate) : undefined,
+  }
+}
+
+const Harness = ({ view, details }: { view: FeePayerView; details?: DetailsSample }) => {
+  const gasFeeDetails = useSampleDetails(details)
   const [choice, setChoice] = useState<GasPayerChoice>(view.payer.value)
   const [token, setToken] = useState(view.gasToken.selected)
   const paysFromSafe = choice === 'PAY_FROM_SAFE'
@@ -91,6 +152,7 @@ const Harness = ({ view }: { view: FeePayerView }) => {
         currency="usd"
         renderTokenIcon={renderTokenIcon}
         footer={storyFooter(live.footer)}
+        gasFeeDetails={gasFeeDetails}
       />
     </div>
   )
@@ -353,5 +415,85 @@ export const SignAsProposer: Story = {
       totalOutgoing: outgoing(false),
       footer: free,
     },
+  },
+}
+
+const executeSigner: FeePayerView = {
+  ...base,
+  payer: locked('WALLET'),
+  gasToken: nativeLocked,
+  gasFee: signerFee,
+  totalOutgoing: outgoing(false),
+  footer: free,
+}
+
+const openDetails: Story['play'] = async ({ canvasElement }) => {
+  const toggle = within(canvasElement).getByTestId('gas-fee-details-toggle')
+  await userEvent.click(toggle)
+  toggle.blur()
+}
+
+export const ExecuteGasEdit: Story = {
+  name: 'Execute · Signer wallet · gas settings (Edit)',
+  args: { view: executeSigner, details: 'edit' },
+}
+
+export const ExecuteGasEditing: Story = {
+  name: 'Execute · Signer wallet · editing gas settings',
+  args: { view: executeSigner, details: 'edit' },
+  play: openDetails,
+}
+
+export const ExecuteGasCannotEstimate: Story = {
+  name: 'Execute · Signer wallet · gas cannot be estimated',
+  args: { view: { ...executeSigner, gasFee: { error: true } }, details: 'cannotEstimate' },
+}
+
+export const ExecuteGasPaidFromSafe: Story = {
+  name: 'Execute · Safe account · gas details (View)',
+  args: {
+    view: {
+      ...base,
+      payer: locked('PAY_FROM_SAFE'),
+      gasToken: { tokens: [ETH], selected: ZERO, locked: true, lockedReason: 'SET_AT_SIGNING' },
+      gasFee: safeFee,
+      totalOutgoing: outgoing(true),
+      footer: free,
+    },
+    details: 'paidFromSafe',
+  },
+  play: openDetails,
+}
+
+export const ExecuteGasProPlan: Story = {
+  name: 'Execute · Pro plan · gas details (View)',
+  args: {
+    view: {
+      ...base,
+      payer: choice('SPONSORED', ['SPONSORED', 'WALLET']),
+      gasToken: nativeLocked,
+      gasFee: signerFee,
+      sponsored: true,
+      totalOutgoing: outgoing(false),
+      footer: pro(49),
+    },
+    details: 'proPlan',
+  },
+}
+
+export const ExecuteGasCampaign: Story = {
+  name: 'Execute · gas campaign (Free transaction / Signer wallet)',
+  args: {
+    view: {
+      ...base,
+      payer: choice('SPONSORED', ['SPONSORED', 'WALLET']),
+      gasToken: nativeLocked,
+      gasFee: signerFee,
+      sponsored: true,
+      sponsorKind: 'free',
+      totalOutgoing: outgoing(false),
+      footer: { kind: 'campaign', left: 3, limit: 5 },
+    },
+    details: 'freeTx',
   },
 }

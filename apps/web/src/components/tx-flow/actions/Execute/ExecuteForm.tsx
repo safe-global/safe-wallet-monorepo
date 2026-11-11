@@ -34,7 +34,7 @@ import { TxFlowContext } from '../../TxFlowProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 import { useLoadFeature } from '@/features/__core__'
-import { FeePaymentFeature, useGasPayerSelection } from '@/features/fee-payment'
+import { FeePaymentFeature, useGasFeeDetails, useGasPayerSelection } from '@/features/fee-payment'
 import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'
 
 export const ExecuteForm = ({
@@ -101,7 +101,17 @@ export const ExecuteForm = ({
 
   // Estimate gas limit
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)
-  const [advancedParams, setAdvancedParams] = useAdvancedParams(gasLimit)
+  const [advancedParams, setAdvancedParams, gasEstimate] = useAdvancedParams(gasLimit)
+
+  const isFeeCardShown = isPayFromSafeReady && !!selection.view
+  const { selection: feeCardSelection, gasFeeDetails } = useGasFeeDetails({
+    selection,
+    safeTx,
+    params: advancedParams,
+    estimate: gasEstimate,
+    onParamsChange: setAdvancedParams,
+    gasLimitError,
+  })
 
   const { executionValidationError } = useIsValidExecution(
     safeTx,
@@ -209,25 +219,27 @@ export const ExecuteForm = ({
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <div className={commonCss.params}>
-          <AdvancedParams
-            willExecute
-            params={advancedParams}
-            recommendedGasLimit={gasLimit}
-            onFormSubmit={setAdvancedParams}
-            gasLimitError={gasLimitError}
-            willRelay={willRelay}
-            isReadOnly={isPayFromSafe}
-            feeLabel={isPayFromSafe ? 'Paid from Safe' : undefined}
-            noFeeCampaign={
-              offer?.option === 'NO_FEE_CAMPAIGN' && gasPayer === 'NO_FEE_CAMPAIGN'
-                ? { isEligible: true, remaining: offer.remaining, limit: offer.limit }
-                : undefined
-            }
-          />
-        </div>
+        {!isFeeCardShown && (
+          <div className={commonCss.params}>
+            <AdvancedParams
+              willExecute
+              params={advancedParams}
+              recommendedGasLimit={gasLimit}
+              onFormSubmit={setAdvancedParams}
+              gasLimitError={gasLimitError}
+              willRelay={willRelay}
+              isReadOnly={isPayFromSafe}
+              feeLabel={isPayFromSafe ? 'Paid from Safe' : undefined}
+              noFeeCampaign={
+                offer?.option === 'NO_FEE_CAMPAIGN' && gasPayer === 'NO_FEE_CAMPAIGN'
+                  ? { isEligible: true, remaining: offer.remaining, limit: offer.limit }
+                  : undefined
+              }
+            />
+          </div>
+        )}
 
-        {isPayFromSafeReady && <GasPayerSelector selection={selection} />}
+        {isFeeCardShown && <GasPayerSelector selection={feeCardSelection} gasFeeDetails={gasFeeDetails} />}
 
         {offer?.option === 'NO_FEE_CAMPAIGN' && offer.disabledReason === 'GAS_TOO_HIGH' && <GasTooHighBanner />}
 

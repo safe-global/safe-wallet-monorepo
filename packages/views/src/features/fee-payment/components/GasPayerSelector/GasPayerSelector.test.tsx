@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import type { FeePayerView } from '@safe-global/views/features/fee-payment/types'
+import type { FeePayerView, GasFeeDetails } from '@safe-global/views/features/fee-payment/types'
 import GasPayerSelector, { type GasPayerSelectorProps } from './index'
 
 const ZERO = '0x0000000000000000000000000000000000000000'
@@ -143,5 +143,114 @@ describe('GasPayerSelector view', () => {
     renderCard()
 
     expect(screen.getByTestId('token-icon')).toHaveTextContent('ETH')
+  })
+})
+
+describe('GasPayerSelector gas fee details', () => {
+  type EditDetails = Extract<GasFeeDetails, { mode: 'edit' }>
+  const editDetails = (overrides: Partial<EditDetails> = {}): EditDetails => ({
+    mode: 'edit',
+    open: false,
+    onOpenChange: jest.fn(),
+    fields: [
+      { name: 'userNonce', value: '12' },
+      { name: 'gasLimit', value: '79262' },
+      { name: 'maxPriorityFeePerGas', value: '0.05' },
+      { name: 'maxFeePerGas', value: '1.82' },
+    ],
+    onFieldChange: jest.fn(),
+    canSave: true,
+    onSave: jest.fn(),
+    onCancel: jest.fn(),
+    ...overrides,
+  })
+
+  it('renders a static Gas fee row without details', () => {
+    renderCard()
+
+    expect(screen.getByTestId('gas-fee-row')).toBeInTheDocument()
+    expect(screen.queryByTestId('gas-fee-details-toggle')).not.toBeInTheDocument()
+  })
+
+  it('opens the editor from the Edit pill of the Gas fee row', async () => {
+    const details = editDetails()
+    renderCard({ gasFeeDetails: details })
+
+    expect(screen.getByTestId('gas-fee-edit-button')).toHaveTextContent('Edit')
+    await userEvent.click(screen.getByTestId('gas-fee-details-toggle'))
+
+    expect(details.onOpenChange).toHaveBeenCalledWith(true, expect.anything())
+  })
+
+  it('edits, resets and saves the gas settings', async () => {
+    const details = editDetails({ open: true, onReset: jest.fn() })
+    renderCard({ gasFeeDetails: details })
+
+    expect(screen.getByLabelText('Max fee (Gwei)')).toHaveValue('1.82')
+    await userEvent.type(screen.getByLabelText('Gas limit'), '1')
+    expect(details.onFieldChange).toHaveBeenLastCalledWith('gasLimit', '792621')
+
+    await userEvent.click(screen.getByTestId('gas-params-reset'))
+    await userEvent.click(screen.getByTestId('gas-params-save'))
+    await userEvent.click(screen.getByTestId('gas-params-cancel'))
+
+    expect(details.onReset).toHaveBeenCalled()
+    expect(details.onSave).toHaveBeenCalled()
+    expect(details.onCancel).toHaveBeenCalled()
+  })
+
+  it('saves on Enter instead of submitting the surrounding form', async () => {
+    const details = editDetails({ open: true })
+    const onSubmit = jest.fn((e: { preventDefault: () => void }) => e.preventDefault())
+    render(
+      <form onSubmit={onSubmit}>
+        <GasPayerSelector
+          view={view()}
+          onChoiceChange={jest.fn()}
+          currency="usd"
+          renderTokenIcon={() => null}
+          footer={null}
+          gasFeeDetails={details}
+        />
+      </form>,
+    )
+
+    await userEvent.type(screen.getByLabelText('Gas limit'), '{Enter}')
+    await userEvent.click(screen.getByTestId('gas-params-cancel'))
+
+    expect(details.onSave).toHaveBeenCalled()
+    expect(onSubmit).not.toHaveBeenCalled()
+  })
+
+  it('explains why a value is wrong and blocks saving', () => {
+    renderCard({
+      gasFeeDetails: editDetails({
+        open: true,
+        canSave: false,
+        fields: [{ name: 'gasLimit', value: '', error: 'REQUIRED' }],
+      }),
+    })
+
+    expect(screen.getByText('Enter a gas limit to continue')).toBeInTheDocument()
+    expect(screen.getByTestId('gas-params-save')).toBeDisabled()
+  })
+
+  it('shows read-only details with the reason they cannot be changed', () => {
+    renderCard({
+      gasFeeDetails: {
+        mode: 'view',
+        open: true,
+        onOpenChange: jest.fn(),
+        rows: [{ name: 'gasLimit', value: '112400' }, { name: 'gasPrice', value: '1.9' }, { name: 'refundReceiver' }],
+        reason: 'PAID_FROM_SAFE',
+      },
+    })
+
+    const summary = screen.getByTestId('gas-params-summary')
+    expect(summary).toHaveTextContent('Gas limit112400')
+    expect(summary).toHaveTextContent('Gas price (Gwei)1.9')
+    expect(summary).toHaveTextContent('Refund toSafe relayer')
+    expect(summary).toHaveTextContent("Paid from the Safe, so it can't be edited.")
+    expect(screen.queryByTestId('gas-params-editor')).not.toBeInTheDocument()
   })
 })
