@@ -71,6 +71,11 @@ const config: StorybookConfig = {
       'mocks/useBytecodeComparison.ts',
     )
 
+    // Token logos without their sandboxed iframe, which painted too late for the visual sweep
+    // Keyed by the resolved path: '@/' imports reach the resolver as absolute paths
+    ;(config.resolve.alias as Record<string, string>)[path.resolve(__dirname, '../src/components/common/IframeIcon')] =
+      path.resolve(__dirname, 'mocks/iframeIcon.tsx')
+
     // Replace the live CoW Swap iframe with a fixed placeholder so swap stories are deterministic
     ;(config.resolve.alias as Record<string, string>)['@cowprotocol/widget-react$'] = path.resolve(
       __dirname,

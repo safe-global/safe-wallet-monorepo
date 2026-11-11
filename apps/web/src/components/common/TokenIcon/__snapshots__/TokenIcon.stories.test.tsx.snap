@@ -17,11 +17,11 @@ exports[`./TokenIcon.stories CustomFallback 1`] = `
         sandbox="allow-scripts"
         srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://via.placeholder.com/26" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="/images/common/safe-token.svg" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
-          e.target.src = "https://via.placeholder.com/26"
+          e.target.src = "/images/common/safe-token.svg"
         }
       </script>
     </body>

@@ -170,6 +170,9 @@ const config: StorybookConfig = {
     // which transforms SVGs via SVGR (aliases would bypass the plugin)
     config.resolve = config.resolve || {}
     config.resolve.alias = {
+      // Before the spread: Vite takes the first matching alias, and a generic '@' entry would win
+      // Token logos without their sandboxed iframe, which painted too late for the visual sweep
+      '@/components/common/IframeIcon': path.resolve(__dirname, '../.storybook/mocks/iframeIcon.tsx'),
       ...(config.resolve.alias || {}),
       // Mock useIsOfficialHost to always return true in Storybook
       '@/hooks/useIsOfficialHost': path.resolve(__dirname, '../.storybook/mocks/useIsOfficialHost.ts'),

@@ -9,6 +9,7 @@
  * - PAGE_ERROR / CONSOLE: uncaught errors while loading
  * - RENDER_TIMEOUT: the story (play function included) did not finish in time
  * - UNSTABLE_SCREENSHOT: (with --shots) the pixels kept changing until the settle timeout
+ * - ICONS_NOT_LOADED: (with --shots) an iframe's image (TokenIcon) was still loading at screenshot time
  * - EXTERNAL_REQUEST: an API call had no MSW mock and hit the (blocked) network
  *
  * Usage (from apps/web): yarn storybook:sweep [-- --filter=ui- --modes=light --concurrency=4]
@@ -50,12 +51,27 @@ const STORY_FINISHED_TIMEOUT_MS = 30000
 // Loading-state stories hold a request open (MSW delay('infinite')), so both waits are capped.
 const QUIET_MS = 100
 const SETTLE_TIMEOUT_MS = 3000
+// Pages with dozens of icon iframes keep painting for seconds on slow CI runners; a still-changing screenshot is kept only after this
+const SCREENSHOT_SETTLE_TIMEOUT_MS = 10000
 // Stories date their mock data from Date.now(); a fixed clock and time zone keep shown dates the same every day
 // Chrome closed itself twice after about 2,700 stories in one browser; a fresh browser per 200 stories avoids that
 const CONTEXTS_PER_BROWSER = 200
 const FIXED_NOW = new Date('2026-01-15T12:00:00Z')
 const TIMEZONE = 'UTC'
+// Embedded apps and widgets (stake, earn, bridge) load external pages, which the sweep blocks; Chrome's
+// error page for them paints at a different moment each run, so they get a fixed placeholder instead
+const externalPage = (host: string) =>
+  `<body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:#e5e5e5;color:#555;font:14px sans-serif">External page: ${host}</body>`
 // Faker and other story data take their seed from Math.random, so every page gets the same sequence (mulberry32)
+// Lazy iframes and images (every TokenIcon) start loading only near the viewport, and how near depends on
+// Chrome's heuristics; on slow CI runners the lower icons were still missing at screenshot time
+const EAGER_LOADING = `(() => {
+  const setAttribute = Element.prototype.setAttribute
+  Element.prototype.setAttribute = function (name, value) {
+    const lazy = name === 'loading' && (this.tagName === 'IFRAME' || this.tagName === 'IMG')
+    return setAttribute.call(this, name, lazy ? 'eager' : value)
+  }
+})()`
 const SEEDED_RANDOM = `(() => {
   let seed = 1
   Math.random = () => {
@@ -97,18 +113,29 @@ function parseArgs(): Record<string, string | boolean> {
 const LAUNCH_ARGS = [
   // GPU rasterization varies a few colour levels between runs, which changes the sheet hashes
   '--disable-gpu',
-  // Stories load token logos from live CDNs; MSW's service worker fetches them, out of Playwright's
-  // reach, so they arrive late or not at all. Failing every external host makes them render
-  // their local fallback in every run. MSW mocks are unaffected: the worker answers them first.
-  '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE localhost',
+  // Chrome runs every sandboxed iframe (each TokenIcon) in its own process, which can paint after the page
+  // under CI load, so the screenshot misses the icons; in-process frames paint together with the page
+  '--disable-features=IsolateSandboxedIframes',
+  '--disable-site-isolation-trials',
+  // Partial raster repaints only the changed part of a tile, so text edges depend on the order of
+  // updates while a story loads; a full repaint gives the same pixels every run
+  '--disable-partial-raster',
 ]
 
-async function launch(): Promise<Browser> {
+async function launch(storybookHost: string): Promise<Browser> {
+  const args = [
+    ...LAUNCH_ARGS,
+    // Requests from MSW's service worker are out of Playwright's reach; failing every host except the
+    // swept Storybook's makes anything remote render its local fallback in every run
+    `--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE ${storybookHost}`,
+  ]
   try {
     // Prefer system Chrome — the repo does not ship playwright browser binaries
-    return await chromium.launch({ channel: 'chrome', args: LAUNCH_ARGS })
-  } catch {
-    return await chromium.launch({ args: LAUNCH_ARGS })
+    return await chromium.launch({ channel: 'chrome', args })
+  } catch (error) {
+    // GitHub's ARM runner images have no Google Chrome
+    console.error(`System Chrome did not start (${String(error).split('\n')[0]}); trying Playwright's Chromium`)
+    return await chromium.launch({ args })
   }
 }
 
@@ -137,19 +164,40 @@ interface Clip {
 
 const ASSET_TIMEOUT_MS = 5000
 
+const VIEWPORT = { width: 1280, height: 900 }
 const MAX_VIEWPORT_HEIGHT = 8000
 
-// Chrome leaves iframes below the viewport blank in a full-page screenshot, and TokenIcon renders
-// every logo in an iframe. Grow the viewport over them; other stories keep their layout.
-async function fitViewportToIframes(page: Page, openRequests: () => number): Promise<void> {
+const pageHeight = (page: Page) => page.evaluate(() => document.documentElement.scrollHeight)
+
+// Full-page stories are fitted once
+const fittedPages = new WeakSet<Page>()
+
+// Full-page stories get a viewport as tall as the page, like a user with a very tall window: the fixed sidebar
+// then spans the whole sheet instead of stopping at 900px. A screen-sized layout (min-h-screen, 100vh) grows with
+// the viewport instead, so it keeps the default height, as a user sees it. Other stories keep the default height,
+// grown over any iframe below it, since Chrome leaves iframes below the viewport blank in a full-page screenshot.
+// Returns whether it changed the viewport.
+async function fitViewport(page: Page, openRequests: () => number): Promise<boolean> {
+  const fullscreen = await page.evaluate(() => document.body.classList.contains('sb-main-fullscreen'))
+  if (fullscreen) {
+    if (fittedPages.has(page)) return false
+    fittedPages.add(page)
+    const contentHeight = await pageHeight(page)
+    if (contentHeight <= VIEWPORT.height) return false
+    const height = Math.min(contentHeight, MAX_VIEWPORT_HEIGHT)
+    await page.setViewportSize({ width: VIEWPORT.width, height })
+    await waitForQuietNetwork(page, openRequests)
+    if ((await pageHeight(page)) > height) await page.setViewportSize(VIEWPORT)
+    return true
+  }
   const bottom = await page.evaluate(() =>
     Math.max(0, ...[...document.querySelectorAll('iframe')].map((f) => f.getBoundingClientRect().bottom + scrollY)),
   )
-  const viewport = page.viewportSize()
-  if (!viewport || bottom <= viewport.height) return
-  await page.setViewportSize({ width: viewport.width, height: Math.min(Math.ceil(bottom), MAX_VIEWPORT_HEIGHT) })
-  // Lazy iframes that are now in view start loading
+  const height = Math.min(Math.max(VIEWPORT.height, Math.ceil(bottom)), MAX_VIEWPORT_HEIGHT)
+  if (page.viewportSize()?.height === height) return false
+  await page.setViewportSize({ width: VIEWPORT.width, height })
   await waitForQuietNetwork(page, openRequests)
+  return true
 }
 
 // An iframe keeps its empty about:blank document until Chrome loads its srcdoc, so under load
@@ -173,7 +221,22 @@ async function waitForSrcdocFrames(page: Page): Promise<void> {
 }
 
 // Fonts and images that are still loading make the screenshot differ between runs.
+// Frames (TokenIcon) whose image has not finished loading; a broken image counts as finished
+async function countPendingImageFrames(page: Page): Promise<number> {
+  const pending = await Promise.all(
+    page
+      .frames()
+      .filter((frame) => frame !== page.mainFrame())
+      .map((frame) => frame.evaluate(() => [...document.images].some((img) => !img.complete)).catch(() => false)),
+  )
+  return pending.filter(Boolean).length
+}
+
 async function waitForAssets(page: Page): Promise<void> {
+  // Embedded pages paint only once their frame has loaded
+  await Promise.all(
+    page.frames().map((frame) => frame.waitForLoadState('load', { timeout: ASSET_TIMEOUT_MS }).catch(() => undefined)),
+  )
   await waitForSrcdocFrames(page)
   // Sandboxed iframes are out of the page's reach, so wait inside every frame
   const frames = page.frames().map((frame) =>
@@ -248,10 +311,18 @@ async function waitForQuietNetwork(page: Page, openRequests: () => number): Prom
 }
 
 // Re-renders after data arrives (or timers in app code) would otherwise be caught half-way.
-async function stableScreenshot(page: Page): Promise<{ fullscreen: boolean; png: Buffer; stable: boolean }> {
-  const deadline = Date.now() + SETTLE_TIMEOUT_MS
+async function stableScreenshot(
+  page: Page,
+  openRequests: () => number,
+): Promise<{ fullscreen: boolean; png: Buffer; stable: boolean }> {
+  const deadline = Date.now() + SCREENSHOT_SETTLE_TIMEOUT_MS
   let previous: Buffer | undefined
   for (;;) {
+    // A page that is still growing (slow CI runners) can push iframes below the viewport after the first fit
+    if (await fitViewport(page, openRequests)) {
+      await waitForAssets(page)
+      previous = undefined
+    }
     const { fullscreen, clip } = await contentClip(page)
     // Spinners and transitions otherwise land on a different frame each run
     const png = await page.screenshot({ fullPage: true, clip, animations: 'disabled' })
@@ -274,7 +345,7 @@ async function checkStory(
   const pageErrors: string[] = []
   page.on('console', (msg) => {
     if (msg.type() !== 'error') return
-    // External hosts are blocked on purpose (LAUNCH_ARGS)
+    // External hosts are blocked on purpose (launch)
     const blockedExternal = msg.text().startsWith('Failed to load resource') && !msg.location().url.startsWith(base)
     if (!blockedExternal) consoleErrors.push(msg.text().slice(0, 300))
   })
@@ -339,9 +410,10 @@ async function checkStory(
     // never reached index.json). They are still render-checked — only the screenshot is skipped.
     const skipSnapshot = story.tags?.includes('skip-visual-test')
     if (cellsDir && !skipSnapshot) {
-      await fitViewportToIframes(page, () => openRequests)
       await waitForAssets(page)
-      const { fullscreen, png, stable } = await stableScreenshot(page)
+      const pendingImageFrames = await countPendingImageFrames(page)
+      if (pendingImageFrames) result.issues.push(`ICONS_NOT_LOADED: ${pendingImageFrames} frame(s)`)
+      const { fullscreen, png, stable } = await stableScreenshot(page, () => openRequests)
       if (!stable) result.issues.push('UNSTABLE_SCREENSHOT')
       const file = path.join(cellsDir, `${story.id}--${mode}.png`)
       fs.writeFileSync(file, png)
@@ -374,6 +446,8 @@ async function writeSheets(browser: Browser, sheets: Sheet[], modes: Mode[], cel
 async function main(): Promise<void> {
   const args = parseArgs()
   const base = (typeof args.base === 'string' && args.base) || process.env.SB_BASE || 'http://localhost:6006'
+  // Anything not served by the swept Storybook is external, whatever host name the Storybook uses
+  const { origin: baseOrigin, hostname: storybookHost } = new URL(base)
   const modes: Mode[] = (typeof args.modes === 'string' ? args.modes : 'light,dark').split(',')
   const concurrency = Number(args.concurrency) || 8
   const filters = typeof args.filter === 'string' ? args.filter.split(',').filter(Boolean) : []
@@ -390,7 +464,7 @@ async function main(): Promise<void> {
     `Sweeping ${stories.length} stories x ${modes.length} modes (shard ${shard}/${shardCount}) against ${base}...`,
   )
 
-  const browser = await launch()
+  const browser = await launch(storybookHost)
   const results: Finding[] = []
   const cells: Cell[] = []
   const queue: Array<[StoryEntry, Mode]> = []
@@ -398,21 +472,34 @@ async function main(): Promise<void> {
   let done = 0
 
   async function worker(): Promise<void> {
-    let storyBrowser = await launch()
+    let storyBrowser = await launch(storybookHost)
     let contexts = 0
     for (;;) {
       const item = queue.shift()
       if (!item) break
       if (contexts === CONTEXTS_PER_BROWSER) {
         await storyBrowser.close()
-        storyBrowser = await launch()
+        storyBrowser = await launch(storybookHost)
         contexts = 0
       }
       contexts += 1
       // A context per story: localStorage and the like from one story (a collapsed sidebar) must not reach the next
-      const context = await storyBrowser.newContext({ viewport: { width: 1280, height: 900 }, timezoneId: TIMEZONE })
+      const context = await storyBrowser.newContext({
+        viewport: VIEWPORT,
+        timezoneId: TIMEZONE,
+        // animations: 'disabled' only stops CSS; under reduced motion the preview also skips motion's JS animations
+        reducedMotion: 'reduce',
+      })
       await context.clock.setFixedTime(FIXED_NOW)
       await context.addInitScript({ content: SEEDED_RANDOM })
+      await context.addInitScript({ content: EAGER_LOADING })
+      await context.route(
+        (url) => url.origin !== baseOrigin,
+        (route) =>
+          route.request().resourceType() === 'document'
+            ? route.fulfill({ contentType: 'text/html', body: externalPage(new URL(route.request().url()).hostname) })
+            : route.fallback(),
+      )
       const { finding, cell } = await checkStory(context, base, item[0], item[1], cellsDir).finally(() =>
         context.close(),
       )
