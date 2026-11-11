@@ -24,7 +24,7 @@ export const ReviewRemoveModule = ({
   }, [onSubmit])
 
   return (
-    <ReviewTransaction onSubmit={onFormSubmit}>
+    <ReviewTransaction onSubmit={onFormSubmit} withDecodedData={false}>
       <Typography className="text-[var(--color-primary-light)]">Module</Typography>
 
       <EthHashInfo address={params.address} showCopyButton hasExplorer shortAddress={false} />
