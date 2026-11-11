@@ -115,10 +115,10 @@ jobs:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
 
-      # The image has no Chrome; no --with-deps, as it only adds fonts that the stories do not render
-      - name: Install Chromium headless shell
+      # Keep --with-deps: Chromium maps sans-serif to Arial, which needs its Liberation Sans
+      - name: Install browser dependencies
         working-directory: apps/web
-        run: yarn exec playwright install --only-shell chromium
+        run: yarn exec playwright install --with-deps --only-shell chromium
 
       - name: Build Storybook
         run: yarn workspace @safe-global/web build-storybook --output-dir storybook-static
