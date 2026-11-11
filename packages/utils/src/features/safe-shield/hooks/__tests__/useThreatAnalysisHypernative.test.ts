@@ -7,14 +7,19 @@ import type { HypernativeAssessmentResponseDto } from '@safe-global/store/hypern
 import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import { ErrorType, getErrorInfo } from '@safe-global/utils/features/safe-shield/utils/errors'
 import { useThreatAnalysisHypernative } from '../useThreatAnalysisHypernative'
-import { answerHypernative, renderWithHypernativeApi, startHypernativeServer } from './hypernativeApiHarness'
+import {
+  answerHypernative,
+  makeHypernativeStore,
+  renderWithHypernativeApi,
+  setupHypernativeServer,
+} from './hypernativeApiHarness'
 
 const TRANSACTION_ASSESSMENT_PATH = '/safe/transaction/assessment'
 const MESSAGE_ASSESSMENT_PATH = '/safe/eip712/assessment'
 const DEBOUNCE_MS = 300
 
 describe('useThreatAnalysisHypernative', () => {
-  startHypernativeServer()
+  setupHypernativeServer()
 
   const safeAddress = faker.finance.ethereumAddress() as `0x${string}`
   const chainId = '1'
@@ -87,7 +92,7 @@ describe('useThreatAnalysisHypernative', () => {
 
   type HookProps = Parameters<typeof useThreatAnalysisHypernative>[0]
 
-  const renderTransactionHook = (initialProps: Partial<HookProps> = {}) => {
+  const renderTransactionHook = (initialProps: Partial<HookProps> = {}, store = makeHypernativeStore()) => {
     const defaults: HookProps = {
       safeAddress,
       chainId,
@@ -98,41 +103,70 @@ describe('useThreatAnalysisHypernative', () => {
     }
     return renderWithHypernativeApi(
       (props: Partial<HookProps>) => useThreatAnalysisHypernative({ ...defaults, ...props }),
-      { initialProps },
+      { initialProps, store },
     )
   }
 
-  describe('requests', () => {
-    it('sends the transaction for assessment with its safeTxHash and the auth token', async () => {
-      const requests = answerWithAssessment()
-      const fixedSafeAddress = '0x1111111111111111111111111111111111111111'
-      const safeTx = createSafeTransaction({ to: '0x2222222222222222222222222222222222222222' })
-      // EIP-712 SafeTx hash of this transaction for this Safe on chain 1, Safe 1.4.1
-      const expectedSafeTxHash = '0xb2c2e06269f16a730d83543d3d0ac8e9ba7224fa5de422f086351c0d833fa62c'
+  const passTime = (ms: number) => act(() => jest.advanceTimersByTimeAsync(ms))
 
-      renderTransactionHook({ safeAddress: fixedSafeAddress, data: safeTx, origin: 'https://app.example.com' })
+  describe('requests', () => {
+    it('sends the transaction with its EIP-712 safeTxHash for the Safe, chain and Safe version', async () => {
+      const requests = answerWithAssessment()
+      const zeroAddress = '0x0000000000000000000000000000000000000000'
+      const safeTx = createSafeTransaction({
+        to: '0x2222222222222222222222222222222222222222',
+        value: '1000000000000000000',
+        data: '0x',
+        operation: 0,
+        safeTxGas: '0',
+        baseGas: '0',
+        gasPrice: '0',
+        gasToken: zeroAddress,
+        refundReceiver: zeroAddress,
+        nonce: 1,
+      })
+
+      renderTransactionHook({
+        safeAddress: '0x1111111111111111111111111111111111111111',
+        chainId: '1',
+        safeVersion: '1.4.1',
+        data: safeTx,
+        origin: 'https://app.example.com',
+      })
 
       await waitFor(() => expect(requests).toHaveLength(1))
       expect(requests[0].authorization).toBe(authToken)
       expect(requests[0].body).toEqual({
-        safeAddress: fixedSafeAddress,
-        safeTxHash: expectedSafeTxHash,
+        safeAddress: '0x1111111111111111111111111111111111111111',
+        safeTxHash: '0xb2c2e06269f16a730d83543d3d0ac8e9ba7224fa5de422f086351c0d833fa62c',
         transaction: {
-          chain: chainId,
+          chain: '1',
           input: '0x',
           operation: '0',
-          toAddress: safeTx.data.to,
+          toAddress: '0x2222222222222222222222222222222222222222',
           fromAddress: walletAddress,
           safeTxGas: '0',
           value: '1000000000000000000',
           baseGas: '0',
           gasPrice: '0',
-          gasToken: '0x0000000000000000000000000000000000000000',
-          refundReceiver: '0x0000000000000000000000000000000000000000',
+          gasToken: zeroAddress,
+          refundReceiver: zeroAddress,
           nonce: '1',
         },
         url: 'https://app.example.com',
       })
+    })
+
+    it('assesses the transaction again with a new auth token', async () => {
+      const requests = answerWithAssessment()
+      const newAuthToken = `Bearer ${faker.string.alphanumeric(32)}`
+      const { rerender } = renderTransactionHook({ authToken })
+      await waitFor(() => expect(requests).toHaveLength(1))
+
+      rerender({ authToken: newAuthToken })
+
+      await waitFor(() => expect(requests).toHaveLength(2))
+      expect(requests[1].authorization).toBe(newAuthToken)
     })
 
     it('sends the url from a JSON origin', async () => {
@@ -183,8 +217,6 @@ describe('useThreatAnalysisHypernative', () => {
     beforeEach(() => jest.useFakeTimers())
     afterEach(() => jest.useRealTimers())
 
-    const passTime = (ms: number) => act(() => jest.advanceTimersByTimeAsync(ms))
-
     it('assesses the edited transaction once the edits settle', async () => {
       const requests = answerWithAssessment()
       const safeTx = createSafeTransaction()
@@ -217,17 +249,68 @@ describe('useThreatAnalysisHypernative', () => {
       expect(result.current[0]).toBeDefined()
     })
 
-    it('drops an edit that has not settled when the review closes', async () => {
-      const requests = answerWithAssessment()
+    it('shows the assessment of the latest edit when the previous one answers late', async () => {
+      let answerFirstRequest = () => {}
+      const firstRequestAnswered = new Promise<void>((resolve) => (answerFirstRequest = resolve))
+      const deniedTransaction = createAssessment({
+        status: 'Risks found',
+        severity: 'deny',
+        risks: [{ title: 'Transfer to malicious', details: 'Phishing.', severity: 'deny', safeCheckId: 'x' }],
+      })
+      let requestCount = 0
+      answerHypernative(TRANSACTION_ASSESSMENT_PATH, async () => {
+        requestCount += 1
+        if (requestCount === 1) {
+          await firstRequestAnswered
+          return HttpResponse.json(deniedTransaction)
+        }
+        return HttpResponse.json(createAssessment())
+      })
       const safeTx = createSafeTransaction()
-      const { rerender, unmount } = renderTransactionHook({ data: safeTx })
-      await waitFor(() => expect(requests).toHaveLength(1))
+      const { result, rerender } = renderTransactionHook({ data: safeTx })
 
       rerender({ data: withData(safeTx, { nonce: 2 }) })
-      unmount()
       await passTime(DEBOUNCE_MS)
+      await waitFor(() => expect(result.current[0]?.[StatusGroup.THREAT]?.[0].severity).toBe(Severity.OK))
+      answerFirstRequest()
+      await passTime(1)
 
-      expect(requests).toHaveLength(1)
+      expect(result.current[0]?.[StatusGroup.THREAT]?.[0].severity).toBe(Severity.OK)
+    })
+  })
+
+  describe('review lifetime', () => {
+    beforeEach(() => jest.useFakeTimers())
+    afterEach(() => jest.useRealTimers())
+
+    it('assesses the transaction again when its review opens again', async () => {
+      const requests = answerWithAssessment()
+      const store = makeHypernativeStore()
+      const safeTx = createSafeTransaction()
+      const firstReview = renderTransactionHook({ data: safeTx }, store)
+      await waitFor(() => expect(firstReview.result.current[0]).toBeDefined())
+
+      firstReview.unmount()
+      await passTime(1)
+      renderTransactionHook({ data: safeTx }, store)
+
+      await waitFor(() => expect(requests).toHaveLength(2))
+    })
+
+    it('cancels the request when the review closes before the answer', async () => {
+      let isCancelled = false
+      answerHypernative(TRANSACTION_ASSESSMENT_PATH, async ({ signal }) => {
+        signal.addEventListener('abort', () => (isCancelled = true))
+        await delay('infinite')
+        return HttpResponse.json(createAssessment())
+      })
+      const { result, unmount } = renderTransactionHook()
+      await waitFor(() => expect(result.current[2]).toBe(true))
+
+      unmount()
+      await passTime(1)
+
+      expect(isCancelled).toBe(true)
     })
   })
 
