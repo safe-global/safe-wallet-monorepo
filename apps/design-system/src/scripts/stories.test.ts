@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
-import { componentNames } from './paths.ts'
+import { componentNames, INTERNAL_REFERENCE } from './paths.ts'
 import { generateStories, toSlug, toTitle } from './stories.ts'
 
 const { index, sources } = generateStories()
@@ -10,7 +10,7 @@ describe('stories', () => {
     assert.deepEqual(index.map((entry) => entry.component).sort(), componentNames())
     assert.equal(
       index.reduce((total, entry) => total + entry.stories.length, 0),
-      93,
+      92,
     )
     for (const entry of index) assert.ok(entry.stories.length > 0, `${entry.component} has no story`)
   })
@@ -32,6 +32,19 @@ describe('stories', () => {
   it('substitutes args into render spreads and synthesises arg-only stories', () => {
     assert.match(sources['search-input'].default, /<SearchInput placeholder="Search" \/>/)
     assert.doesNotMatch(sources['search-input'].default, /\.\.\.args/)
+  })
+
+  it('shows no repo-internal references in the docs', () => {
+    for (const entry of index) {
+      for (const story of entry.stories) {
+        assert.doesNotMatch(story.description ?? '', INTERNAL_REFERENCE, `${entry.component}/${story.slug}`)
+        assert.doesNotMatch(
+          sources[entry.component][story.slug],
+          INTERNAL_REFERENCE,
+          `${entry.component}/${story.slug}`,
+        )
+      }
+    }
   })
 
   it('names stories like Storybook', () => {

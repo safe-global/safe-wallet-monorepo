@@ -12,6 +12,16 @@ describe('env', () => {
     assert.equal(normaliseBasePath(' /a/b/ '), '/a/b')
   })
 
+  it('gives next.config.mjs the same base path as the client', async () => {
+    const { normaliseBasePath: fromConfig } = await import('./base-path.mjs')
+    assert.equal(fromConfig, normaliseBasePath)
+    const config = await import('node:fs').then((fs) =>
+      fs.readFileSync(new URL('../../next.config.mjs', import.meta.url), 'utf8'),
+    )
+    assert.match(config, /import \{ normaliseBasePath \} from '\.\/src\/lib\/base-path\.mjs'/)
+    assert.match(config, /normaliseBasePath\(process\.env\.NEXT_PUBLIC_BASE_PATH\)/)
+  })
+
   it('prefixes paths', () => {
     assert.equal(withBasePath('/api/search', ''), '/api/search')
     assert.equal(withBasePath('r/x.json', '/safe-ui'), '/safe-ui/r/x.json')

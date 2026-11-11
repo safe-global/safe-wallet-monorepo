@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, it } from 'node:test'
-import { componentNames } from './paths.ts'
+import { componentNames, INTERNAL_REFERENCE } from './paths.ts'
 import { buildRegistry, generateRegistry, registryJsonPath, serialiseRegistry } from './registry.ts'
 import { readDeclarations, stylesDir } from './tokens.ts'
 
@@ -50,6 +50,12 @@ describe('registry', () => {
         assert.ok(names.has(dependency.slice('@safe/'.length)), `${item.name} → ${dependency}`)
       }
       for (const dependency of item.dependencies ?? []) assert.match(dependency, /^(@[\w-]+\/)?[\w.-]+@\^?[\d.]+/)
+    }
+  })
+
+  it('ships no repo-internal references to consumers', () => {
+    for (const [file, content] of Object.entries(buildRegistry().outputs)) {
+      assert.doesNotMatch(content, INTERNAL_REFERENCE, file)
     }
   })
 
