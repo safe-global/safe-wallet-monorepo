@@ -73,14 +73,14 @@ describe('groupQueue', () => {
     ])
   })
 
-  it('puts rows your signature executes in their own group, first', () => {
-    const [group] = groupQueue(
+  it('puts rows ready to execute first, then rows your signature executes', () => {
+    const groups = groupQueue(
       [tx('treasury', 42, ['Ana', 'Max'], '1h ago'), tx('payroll', 17, ['Ana', 'Max'], '1h ago')],
       'status',
       'owner',
     )
-    expect(group.label).toBe('Sign and execute')
-    expect(ids(group.rows)).toEqual(['treasury-42'])
+    expect(groups.map((group) => group.label)).toEqual(['Ready to execute', 'Sign and execute'])
+    expect(groups.map((group) => ids(group.rows))).toEqual([['payroll-17'], ['treasury-42']])
   })
 
   it('puts a conflict group under its most urgent option', () => {

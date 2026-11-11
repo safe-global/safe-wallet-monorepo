@@ -17,6 +17,7 @@ import {
   getScenario,
   getState,
   getPrimaryStatus,
+  getRowState,
   getStepsStatus,
   matchesFilter,
 } from './model'
@@ -226,6 +227,15 @@ describe('next steps status', () => {
 
   it('does not add an after nonce to the next nonce', () => {
     expect(getStepsStatus(proposal('treasury-42'), 'owner').after).toBeUndefined()
+  })
+
+  it('names the state for option E, green when it is on you', () => {
+    expect(getRowState(proposal('payroll-17'), 'owner')).toEqual({ label: 'Ready', tone: 'success' })
+    expect(getRowState(proposal('treasury-42'), 'owner')).toEqual({ label: 'Needs your signature', tone: 'success' })
+    expect(getRowState(proposal('treasury-42'), 'member').label).toBe('Awaiting 1 signature')
+    expect(getRowState(proposal('treasury-44'), 'owner').label).toBe('Needs you · after #42')
+    expect(getRowState(proposal('treasury-44'), 'member').label).toBe('Awaiting 2 · after #42')
+    expect(getRowState(proposal('treasury-43'), 'owner')).toEqual({ label: 'Blocked by #42', tone: 'warning' })
   })
 
   it('labels a fully signed row behind an earlier nonce as blocked', () => {

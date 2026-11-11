@@ -1430,13 +1430,24 @@ describe('option E · Group by cards', () => {
     expect(screen.getByRole('button', { name: 'Collapse Ethereum' })).toBeInTheDocument()
   })
 
-  it('says Sign ahead only on rows behind an earlier nonce', () => {
+  it('names states in its badges, with the earlier nonce only on rows behind one', () => {
     render(<PendingQueue />, cards)
     fireEvent.click(screen.getByRole('radio', { name: /^Up next/ }))
     const next = document.getElementById('rows-next')!
     const behind = document.getElementById('rows-queue')!
-    expect(within(next).queryByText('Sign ahead')).toBeNull()
-    expect(within(behind).getAllByText('Sign ahead').length).toBeGreaterThan(0)
+    expect(within(next).getAllByText(/^(Ready|Needs your signature|Awaiting \d+ signatures?)$/).length).toBeGreaterThan(
+      0,
+    )
+    expect(within(next).queryByText(/after #/)).toBeNull()
+    expect(within(behind).getAllByText(/^(Needs you|Awaiting \d+) · after #\d+$/).length).toBeGreaterThan(0)
+    expect(within(behind).queryByText('Sign ahead')).toBeNull()
+  })
+
+  it('reads to, via and on as plain words between the amount and the other party', () => {
+    render(<PendingQueue />, cards)
+    expect(allPending().getAllByText(/^(to|via|on)$/).length).toBeGreaterThan(0)
+    // The To column header stays for screen readers.
+    expect(allPending().queryAllByText(/^(To|Via|On)$/, { ignore: '.sr-only' })).toHaveLength(0)
   })
 
   it('on a phone, shows pills without explanations and rows with Nonce, Transaction and the action', () => {
@@ -1461,7 +1472,7 @@ describe('option E · Group by cards', () => {
     render(<PendingQueue />, cards)
     expect(screen.queryByRole('columnheader', { name: 'Safe' })).toBeNull()
     const [firstRow] = allPending().getAllByRole('button', { name: /^Open / })
-    expect(firstRow.textContent).toMatch(/^Treasury Main/)
+    expect(firstRow.textContent).toMatch(/^(Treasury Main|Ops Payroll|Market Making|Security Council|Grants)/)
   })
 
   it('draws conflicting options under one nonce in every grouping', () => {
