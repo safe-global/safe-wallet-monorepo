@@ -66,6 +66,7 @@
     "./styles.css": "./src/styles/styles.css",
     "./scoped.css": "./src/styles/scoped.css",
     "./tokens.css": "./src/styles/tokens.css",
+    "./eslint": "./eslint/design-system.mjs",
     "./package.json": "./package.json"
   },
   "scripts": {

@@ -28,6 +28,14 @@
 - `styles.css`, `scoped.css` and `tailwind-theme.css` hold no token values. Neither entry imports `tailwindcss`: the app owns that import and its `@source` lines.
 - Every bare `@import` in `src/styles` must be a `dependencies` or `peerDependencies` entry (`src/styles/styles.test.ts`).
 
+## Docs site and registry
+
+`apps/design-system` (the Safe UI docs site and shadcn registry) reads this package the way an outside app does. It builds its previews from the stories, its props tables from the component types, its token pages from `tokens.css` / `tailwind-theme.css`, its Do/Don't cards from `eslint/design-system.mjs` (exported as `./eslint`) and the registry from `src/`. So:
+
+- A story's `title`, its first exported story and its JSDoc show up on the docs page: the first story is the top preview, the others are Examples.
+- Tag a story `docs-hidden` (`tags: ['docs-hidden']`) to keep it out of the docs; it stays in Storybook.
+- Every new component needs a docs page: run `yarn workspace @safe-global/design-system scaffold:pages`, fill in the page, and commit it with the regenerated `apps/design-system/registry.json`. The docs tests fail otherwise.
+
 ## Adding a component with the shadcn CLI
 
 `apps/web/components.json` still points at `views` until Phase 2, so `npx shadcn@latest add <name>` from `apps/web` writes into `packages/views/src/components/ui/`. Then:
