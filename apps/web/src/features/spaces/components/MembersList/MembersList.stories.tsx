@@ -24,7 +24,8 @@ const member = (overrides: Omit<Partial<MemberDto>, 'user'> & { user?: Partial<M
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true, switchAuthenticator: true },
+  authenticated: true,
+  features: { switchAuthenticator: true },
   pathname: '/spaces/members',
   query: { spaceId: '1' },
   shadcn: true,

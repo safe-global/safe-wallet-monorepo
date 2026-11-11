@@ -14,7 +14,6 @@ export const DEFAULT_FEATURES: Required<FeatureFlags> = {
   recovery: false,
   hypernative: false,
   earn: false,
-  spaces: false,
   oidcAuth: false,
   switchAuthenticator: false,
   twoFactorAwarenessBanner: false,
@@ -25,12 +24,10 @@ export const DEFAULT_FEATURES: Required<FeatureFlags> = {
   spaceAuditLog: false,
 }
 
-type ChainFeatureKey = Exclude<keyof FeatureFlags, 'spaces'>
-
 /**
  * Mapping of FeatureFlags keys to chain feature strings
  */
-const FEATURE_MAP: Record<ChainFeatureKey, string> = {
+const FEATURE_MAP: Record<keyof FeatureFlags, string> = {
   portfolio: 'PORTFOLIO_ENDPOINT',
   positions: 'POSITIONS',
   swaps: 'NATIVE_SWAPS',
@@ -77,8 +74,8 @@ export function createChainData(features: FeatureFlags = {}, baseChain: Chain = 
 
   // Build list of features to keep
   const enabledFeatureStrings = Object.entries(mergedFeatures)
-    .filter(([key, enabled]) => enabled && key in FEATURE_MAP)
-    .map(([key]) => FEATURE_MAP[key as ChainFeatureKey])
+    .filter(([, enabled]) => enabled)
+    .map(([key]) => FEATURE_MAP[key as keyof FeatureFlags])
 
   // Filter chain features: keep enabled ones and remove always-disabled ones
   chainData.features = chainData.features.filter((f: string) => {

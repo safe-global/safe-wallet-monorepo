@@ -33,8 +33,6 @@ export interface FeatureFlags {
   hypernative?: boolean
   /** EARN - staking/yield features (default: false) */
   earn?: boolean
-  /** Workspaces mocks and a signed-in session; not a chain feature (default: false) */
-  spaces?: boolean
   /** OIDC_AUTH - OIDC-based login for email and Google (default: false) */
   oidcAuth?: boolean
   /** SWITCH_AUTHENTICATOR - 2FA management surfaces (default: false) */
@@ -99,8 +97,8 @@ export interface MockStoryConfig {
   layout?: LayoutType
 
   /**
-   * Signs the user in to the gateway
-   * @default true when `features.spaces` is on, else false
+   * Signs the user in to the gateway and serves the Workspace mocks
+   * @default false
    */
   authenticated?: boolean
 

@@ -20,7 +20,7 @@ const baseMember: MemberDto = {
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
+  authenticated: true,
   pathname: '/spaces/members',
   query: { spaceId: '1' },
   shadcn: true,

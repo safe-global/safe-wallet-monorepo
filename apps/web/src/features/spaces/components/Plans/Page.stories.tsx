@@ -7,7 +7,8 @@ import { DAY, billingHandlers, now, subscription } from './plans.fixtures'
 const setup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true, safePro: true },
+  authenticated: true,
+  features: { safePro: true },
   pathname: '/spaces/plans',
   query: { spaceId: MOCK_SPACE_ID },
   layout: 'paper',

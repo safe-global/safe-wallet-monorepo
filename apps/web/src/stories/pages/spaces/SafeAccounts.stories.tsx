@@ -15,7 +15,7 @@ const defaultSetup = createMockStory({
   wallet: 'connected',
   layout: 'fullPage',
   pathname: '/spaces/safe-accounts',
-  features: { spaces: true },
+  authenticated: true,
   query: { spaceId: '1' },
 })
 

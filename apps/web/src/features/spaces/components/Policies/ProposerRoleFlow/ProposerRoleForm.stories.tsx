@@ -99,7 +99,7 @@ const setup = createMockStory({
   layout: 'none',
   shadcn: true,
   // Also what marks the session authenticated, which the Workspace address book needs.
-  features: { spaces: true },
+  authenticated: true,
   store: { addressBook: localAddressBook, auth: spaceAuth },
   query: { spaceId: SPACE_ID },
 })
