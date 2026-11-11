@@ -9,6 +9,7 @@ import {
   getNextNonce,
   getQueueStatus,
   getQueueTypeLabel,
+  getRejectedNonces,
   getSectionRows,
   getSettingsSummary,
 } from './utils'
@@ -344,5 +345,27 @@ describe('getQueueStatus', () => {
     expect(getQueueStatus(multisigTx('AWAITING_CONFIRMATIONS', [wallet]), true, wallet)).toBe('sign')
     expect(getQueueStatus(multisigTx('AWAITING_CONFIRMATIONS'), true, wallet)).toBe('waiting')
     expect(getQueueStatus(multisigTx('AWAITING_CONFIRMATIONS', [wallet]), true, undefined)).toBe('waiting')
+  })
+})
+
+describe('getRejectedNonces', () => {
+  const withTxInfo = (nonce: number, txInfo: Partial<Transaction['txInfo']>): TransactionQueuedItem => {
+    const item = transactionItem(nonce)
+    return { ...item, transaction: { ...item.transaction, txInfo: txInfo as Transaction['txInfo'] } }
+  }
+
+  it('collects the nonces held by an on-chain rejection', () => {
+    const rows = getSectionRows([
+      { type: 'LABEL', label: 'Next' },
+      conflictHeader(3),
+      withTxInfo(3, { type: 'Custom', isCancellation: false } as Partial<Transaction['txInfo']>),
+      {
+        ...withTxInfo(3, { type: 'Custom', isCancellation: true } as Partial<Transaction['txInfo']>),
+        conflictType: 'End',
+      },
+      withTxInfo(4, { type: 'Custom', isCancellation: false } as Partial<Transaction['txInfo']>),
+    ])
+
+    expect(getRejectedNonces(rows)).toEqual(new Set([3]))
   })
 })

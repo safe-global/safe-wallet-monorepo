@@ -1,7 +1,7 @@
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { SpaceQueueSection } from '../../../store/spaceQueueApi'
 import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
-import { getNextNonce, getQueueStatus, getSafeKey, getSectionRows } from '../utils'
+import { getNextNonce, getNonce, getQueueStatus, getRejectedNonces, getSafeKey, getSectionRows } from '../utils'
 
 /** One table row of the queue, in display order */
 export type QueueListItem =
@@ -34,6 +34,7 @@ export type QueueListItem =
       status: QueueStatus
       nextNonce?: number
       conflict?: ConflictOption
+      canReject: boolean
     }
 
 const SUMMARY_LABELS: Record<QueueStatus, string> = {
@@ -68,6 +69,7 @@ export const buildQueueList = (args: {
         chainId,
         rows,
         nextNonce: getNextNonce(rows),
+        rejectedNonces: getRejectedNonces(rows),
         statuses: rows.map((row) =>
           row.kind === 'transaction' ? getQueueStatus(row.item.transaction, row.isNext, args.walletAddress) : undefined,
         ),
@@ -85,7 +87,7 @@ export const buildQueueList = (args: {
 
     return [
       band,
-      ...chains.flatMap(({ chainId, rows, nextNonce, statuses }) => {
+      ...chains.flatMap(({ chainId, rows, nextNonce, rejectedNonces, statuses }) => {
         const scopeKey = getChainKey(section.safeAddress, chainId)
         const chainCollapsed = args.collapsedChains.has(scopeKey)
         const header: QueueListItem = {
@@ -122,6 +124,7 @@ export const buildQueueList = (args: {
                   status: statuses[index] ?? 'waiting',
                   nextNonce,
                   conflict: row.conflict,
+                  canReject: !rejectedNonces.has(getNonce(row.item.transaction) ?? -1),
                 },
           ),
         ]

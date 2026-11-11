@@ -64,6 +64,19 @@
   white-space: nowrap;
 }
 
+.gridContainer.withSafe {
+  --grid-safe: minmax(120px, 2fr);
+
+  grid-template-columns:
+    var(--grid-nonce) var(--grid-safe) var(--grid-type) var(--grid-info) var(--grid-date) var(--grid-confirmations)
+    var(--grid-assessment) var(--grid-actions);
+  grid-template-areas: 'nonce safe type info date confirmations assessment actions';
+}
+
+.gridContainer .safe {
+  overflow: hidden;
+}
+
 .gridContainer.history {
   grid-template-columns: var(--grid-nonce) var(--grid-type) var(--grid-info) var(--grid-date) var(--grid-status);
   grid-template-areas: 'nonce type info date status';
@@ -78,6 +91,13 @@
     var(--grid-type) var(--grid-info) var(--grid-date) var(--grid-confirmations) var(--grid-assessment)
     var(--grid-actions);
   grid-template-areas: 'type info date confirmations assessment actions';
+}
+
+.gridContainer.conflictGroup.withSafe {
+  grid-template-columns:
+    var(--grid-safe) var(--grid-type) var(--grid-info) var(--grid-date) var(--grid-confirmations)
+    var(--grid-assessment) var(--grid-actions);
+  grid-template-areas: 'safe type info date confirmations assessment actions';
 }
 
 .gridContainer.bulkGroup {
@@ -169,6 +189,12 @@
       'nonce date . confirmations actions';
     align-items: center;
   }
+
+  .gridContainer.queue.withSafe {
+    grid-template-areas:
+      'nonce type info info info'
+      'nonce safe date confirmations actions';
+  }
 }
 
 /* Phones: rather than stacking five lines, strip the row to what a scanning user needs — nonce,
@@ -214,7 +240,8 @@
     display: none !important;
   }
 
-  .gridContainer.queue .date {
+  .gridContainer.queue .date,
+  .gridContainer.queue .safe {
     display: none;
   }
 }

@@ -5,6 +5,8 @@ import * as spaceQueueApi from '../../store/spaceQueueApi'
 import type { SpaceQueue, SpaceQueueSection } from '../../store/spaceQueueApi'
 import SpaceTransactionQueue from './SpaceTransactionQueue'
 
+jest.mock('./TransactionsToolbar', () => ({ __esModule: true, default: () => null }))
+
 jest.mock('./SpaceQueueTable', () => ({
   __esModule: true,
   default: ({ sections }: { sections: SpaceQueueSection[] }) => (

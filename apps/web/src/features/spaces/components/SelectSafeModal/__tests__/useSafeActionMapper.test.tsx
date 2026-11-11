@@ -5,6 +5,7 @@ import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { AppRoutes } from '@/config/routes'
 import { ESafeAction } from '@/features/spaces/store'
 import type { SafeItem } from '@/hooks/safes'
+import { unwrapScopedFlow } from '@/tests/mocks/safeScope'
 
 const mockReplace = jest.fn()
 const mockPush = jest.fn()
@@ -40,6 +41,7 @@ jest.mock('@/hooks/safe-apps/useTxBuilderApp', () => ({
 
 jest.mock('@/components/tx-flow/flows', () => ({
   TokenTransferFlow: () => null,
+  NewTxFlow: () => null,
 }))
 
 const mockSafe: SafeItem = {
@@ -85,41 +87,25 @@ describe('useSafeActionMapper', () => {
     expect(typeof result.current.actionMapper[ESafeAction.Receive]).toBe('function')
     expect(typeof result.current.actionMapper[ESafeAction.Swap]).toBe('function')
     expect(typeof result.current.actionMapper[ESafeAction.BuildTransaction]).toBe('function')
+    expect(typeof result.current.actionMapper[ESafeAction.NewTransaction]).toBe('function')
   })
 
   describe(ESafeAction.Send, () => {
-    it('navigates to the Safe and opens the TokenTransferFlow with a reset-on-close callback', async () => {
+    it('opens the TokenTransferFlow scoped to the picked Safe without touching the URL', async () => {
       const { result, setTxFlow } = renderMapper()
 
       await act(async () => {
         await result.current.actionMapper[ESafeAction.Send](mockSafe)
       })
 
-      expect(mockReplace).toHaveBeenCalledWith({
-        pathname: '/current/path',
-        query: { foo: 'bar', safe: `eth:${mockSafe.address}` },
-      })
+      expect(mockReplace).not.toHaveBeenCalled()
       expect(setTxFlow).toHaveBeenCalledTimes(1)
-      expect(setTxFlow).toHaveBeenCalledWith(expect.anything(), expect.any(Function), false)
-    })
-
-    it('awaits navigation before opening the tx flow', async () => {
-      const callOrder: string[] = []
-      mockReplace.mockImplementation(() => {
-        callOrder.push('replace')
-        return Promise.resolve(true)
-      })
-      const setTxFlow = jest.fn(() => {
-        callOrder.push('setTxFlow')
-      })
-
-      const { result } = renderMapper(jest.fn(), setTxFlow)
-
-      await act(async () => {
-        await result.current.actionMapper[ESafeAction.Send](mockSafe)
-      })
-
-      expect(callOrder).toEqual(['replace', 'setTxFlow'])
+      const [txFlow, onClose, shouldWarn] = setTxFlow.mock.calls[0] as [React.ReactElement, unknown, boolean]
+      const { flow, target } = unwrapScopedFlow(txFlow)
+      expect(flow?.type).toBe(jest.requireMock('@/components/tx-flow/flows').TokenTransferFlow)
+      expect(target).toEqual({ chainId: mockSafe.chainId, safeAddress: mockSafe.address })
+      expect(onClose).toBeUndefined()
+      expect(shouldWarn).toBe(false)
     })
   })
 
@@ -206,6 +192,25 @@ describe('useSafeActionMapper', () => {
     })
   })
 
+  describe(ESafeAction.NewTransaction, () => {
+    it('opens the new transaction flow scoped to the picked Safe without touching the URL', async () => {
+      const { result, setTxFlow } = renderMapper()
+
+      await act(async () => {
+        await result.current.actionMapper[ESafeAction.NewTransaction]({ ...mockSafe, chainId: '137' })
+      })
+
+      expect(mockReplace).not.toHaveBeenCalled()
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      const [txFlow, onClose, shouldWarn] = setTxFlow.mock.calls[0] as [React.ReactElement, unknown, boolean]
+      const { flow, target } = unwrapScopedFlow(txFlow)
+      expect(flow?.type).toBe(jest.requireMock('@/components/tx-flow/flows').NewTxFlow)
+      expect(target).toEqual({ chainId: '137', safeAddress: mockSafe.address })
+      expect(onClose).toBeUndefined()
+      expect(shouldWarn).toBe(false)
+    })
+  })
+
   describe('resetActiveSafe', () => {
     it('strips the safe and chain query params while preserving the rest', async () => {
       mockQuery.mockReturnValue({ foo: 'bar', safe: 'eth:0xabc', chain: 'eth' })
@@ -213,27 +218,6 @@ describe('useSafeActionMapper', () => {
 
       await act(async () => {
         await result.current.resetActiveSafe()
-      })
-
-      expect(mockReplace).toHaveBeenCalledWith({
-        pathname: '/current/path',
-        query: { foo: 'bar' },
-      })
-    })
-
-    it('is used as the Send tx flow onClose callback so closing the modal clears the active safe', async () => {
-      mockQuery.mockReturnValue({ foo: 'bar', safe: 'eth:0xabc', chain: 'eth' })
-      const { result, setTxFlow } = renderMapper()
-
-      await act(async () => {
-        await result.current.actionMapper[ESafeAction.Send](mockSafe)
-      })
-
-      const onClose = setTxFlow.mock.calls[0][1] as () => Promise<void>
-      mockReplace.mockClear()
-
-      await act(async () => {
-        await onClose()
       })
 
       expect(mockReplace).toHaveBeenCalledWith({
