@@ -14539,6 +14539,7 @@ __metadata:
     fumadocs-mdx: "npm:15.4.10"
     fumadocs-ui: "npm:16.17.10"
     http-server: "npm:^14.1.1"
+    lucide-react: "npm:^0.563.0"
     next: "patch:next@npm%3A16.4.2#~/.yarn/patches/next-npm-16.4.2-6ca9d0fedd.patch"
     postcss: "npm:^8.5.18"
     react: "npm:19.2.0"

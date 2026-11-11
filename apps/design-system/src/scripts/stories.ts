@@ -1,8 +1,8 @@
-import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import ts from 'typescript'
 import type { StoryEntry, StoryIndex, StorySource } from '../lib/types.ts'
-import { generatedDir, readUiExports, uiDir } from './paths.ts'
+import { appDir, generatedDir, readUiExports, uiDir } from './paths.ts'
 
 export const HIDDEN_TAG = 'docs-hidden'
 
@@ -156,6 +156,8 @@ const buildImportHeader = (bindings: ImportBinding[], code: string): string => {
 export interface ParsedStoryFile {
   component: string
   title: string
+  /** The meta declares decorators, which own the canvas padding */
+  decorated: boolean
   stories: Array<StoryEntry & { tags: string[]; code: string }>
 }
 
@@ -305,7 +307,7 @@ export const parseStoryFile = (file: string, root: string = uiDir, keys = export
     }
   })
 
-  return { component, title: titleNode.text, stories }
+  return { component, title: titleNode.text, decorated: Boolean(getProperty(meta, 'decorators')), stories }
 }
 
 export const storyFiles = (root: string = uiDir): string[] =>
@@ -314,12 +316,16 @@ export const storyFiles = (root: string = uiDir): string[] =>
     .sort()
     .map((file) => path.join(storiesDir(root), file))
 
-export const generateStories = (root: string = uiDir): { index: StoryIndex; sources: StorySource } => {
+export const generateStories = (
+  root: string = uiDir,
+): { index: StoryIndex; sources: StorySource; decorated: Set<string> } => {
   const keys = exportKeyByFile(root)
+  const decorated = new Set<string>()
   const index: StoryIndex = []
   const sources: StorySource = {}
   for (const file of storyFiles(root)) {
     const parsed = parseStoryFile(file, root, keys)
+    if (parsed.decorated) decorated.add(parsed.component)
     const visible = parsed.stories.filter((story) => !story.tags.includes(HIDDEN_TAG))
     index.push({
       component: parsed.component,
@@ -333,19 +339,37 @@ export const generateStories = (root: string = uiDir): { index: StoryIndex; sour
     })
     sources[parsed.component] = Object.fromEntries(visible.map((story) => [story.slug, story.code]))
   }
-  return { index, sources }
+  return { index, sources, decorated }
 }
 
-const previewModule = (component: string): string => `'use client'
+const previewModule = (component: string, decorated: boolean): string => `'use client'
 
+import type { ComponentType } from 'react'
 import { composeStories } from '@storybook/react'
 import * as stories from '@ui-stories/${component}.stories'
 
-const composed = composeStories(stories) as unknown as Record<string, () => React.ReactNode>
+type Composed = ComponentType & { parameters?: { layout?: string } }
+
+const composed = composeStories(stories) as unknown as Record<string, Composed>
+
+const PADDING: Record<string, string> = ${decorated ? "{ fullscreen: '0', centered: '0', padded: '0' }" : "{ fullscreen: '0', centered: '1rem', padded: '1rem' }"}
 
 export default function Preview({ name }: { name: string }) {
   const Story = composed[name]
-  return Story ? <Story /> : null
+  if (!Story) return null
+  const layout = Story.parameters?.layout ?? 'padded'
+  const centered = layout === 'centered'
+  return (
+    <div
+      data-layout={layout}
+      style={{
+        padding: PADDING[layout] ?? '1rem',
+        ...(centered ? { display: 'flex', justifyContent: 'center', alignItems: 'center' } : {}),
+      }}
+    >
+      <Story />
+    </div>
+  )
 }
 `
 
@@ -361,15 +385,43 @@ ${index.map(({ component }) => `  '${component}': dynamic(() => import('./${comp
 }
 `
 
+const MOCK_ASSET = /["'](mock-assets\/[^"']+)["']/g
+
+/** Stories load `mock-assets/…` relative to their document, so each preview page gets its own copy */
+export const mockAssetsByPreview = (sources: StorySource): Array<{ dir: string; asset: string }> =>
+  Object.entries(sources).flatMap(([component, stories]) =>
+    Object.entries(stories).flatMap(([slug, code]) =>
+      [...new Set([...code.matchAll(MOCK_ASSET)].map((match) => match[1]))].map((asset) => ({
+        dir: `preview/${component}/${slug}`,
+        asset,
+      })),
+    ),
+  )
+
+const copyMockAssets = (sources: StorySource): void => {
+  const publicPreview = path.join(appDir, 'public/preview')
+  rmSync(publicPreview, { recursive: true, force: true })
+  for (const { dir, asset } of mockAssetsByPreview(sources)) {
+    const from = path.join(appDir, asset)
+    if (!existsSync(from))
+      throw new Error(`A story uses ${asset}, which is missing from apps/design-system/mock-assets`)
+    const to = path.join(appDir, 'public', dir, asset)
+    mkdirSync(path.dirname(to), { recursive: true })
+    copyFileSync(from, to)
+  }
+}
+
 export const main = (): void => {
-  const { index, sources } = generateStories()
+  const { index, sources, decorated } = generateStories()
   const previewsDir = path.join(generatedDir, 'previews')
   rmSync(previewsDir, { recursive: true, force: true })
   mkdirSync(previewsDir, { recursive: true })
   writeFileSync(path.join(generatedDir, 'story-index.json'), `${JSON.stringify(index, null, 2)}\n`)
   writeFileSync(path.join(generatedDir, 'stories.json'), `${JSON.stringify(sources, null, 2)}\n`)
-  for (const { component } of index) writeFileSync(path.join(previewsDir, `${component}.tsx`), previewModule(component))
+  for (const { component } of index)
+    writeFileSync(path.join(previewsDir, `${component}.tsx`), previewModule(component, decorated.has(component)))
   writeFileSync(path.join(previewsDir, 'index.ts'), previewIndex(index))
+  copyMockAssets(sources)
   const count = index.reduce((total, entry) => total + entry.stories.length, 0)
   console.log(`stories: ${index.length} files, ${count} stories`)
 }
