@@ -15,6 +15,7 @@
     "@safe-global/protocol-kit": "^8.0.11",
     "@safe-global/store": "workspace:^",
     "@safe-global/types-kit": "^4.0.1",
+    "@safe-global/ui": "workspace:^",
     "@safe-global/utils": "workspace:^",
     "blo": "^1.1.1",
     "class-variance-authority": "^0.7.1",

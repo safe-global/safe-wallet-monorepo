@@ -14323,6 +14323,48 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@safe-global/ui@workspace:^, @safe-global/ui@workspace:packages/ui":
+  version: 0.0.0-use.local
+  resolution: "@safe-global/ui@workspace:packages/ui"
+  dependencies:
+    "@base-ui/react": "npm:^1.1.0"
+    "@eslint/js": "npm:^9.18.0"
+    "@safe-global/test": "workspace:^"
+    "@shadcn/lint": "npm:^0.2.4"
+    "@storybook/react": "npm:^10.6.5"
+    "@testing-library/dom": "npm:^10.4.2"
+    "@testing-library/jest-dom": "npm:^6.6.3"
+    "@testing-library/react": "npm:^16.3.3"
+    "@testing-library/user-event": "npm:^14.6.8"
+    "@types/jest": "npm:^30.0.0"
+    "@types/react": "npm:~19.2.10"
+    "@types/react-dom": "npm:~19.2.0"
+    class-variance-authority: "npm:^0.7.1"
+    clsx: "npm:^2.1.1"
+    eslint: "npm:^9.39.4"
+    eslint-plugin-react-hooks: "npm:^5.2.0"
+    input-otp: "npm:^1.4.2"
+    jest: "npm:^30.5.2"
+    jest-environment-jsdom: "npm:^30.5.2"
+    jest-fixed-jsdom: "npm:^0.0.11"
+    lucide-react: "npm:^0.563.0"
+    react: "npm:19.2.0"
+    react-day-picker: "npm:^9.13.0"
+    react-dom: "npm:19.2.0"
+    react-resizable-panels: "npm:^4.5.3"
+    sonner: "npm:^2.0.7"
+    storybook: "npm:^10.6.5"
+    tailwind-merge: "npm:^3.4.0"
+    ts-jest: "npm:^29.4.6"
+    typescript: "npm:~5.9.2"
+    typescript-eslint: "npm:^8.72.1"
+    vaul: "npm:^1.1.2"
+  peerDependencies:
+    react: ^19.2.0
+    react-dom: ^19.2.0
+  languageName: unknown
+  linkType: soft
+
 "@safe-global/utils@workspace:*, @safe-global/utils@workspace:^, @safe-global/utils@workspace:packages/utils":
   version: 0.0.0-use.local
   resolution: "@safe-global/utils@workspace:packages/utils"
@@ -14367,6 +14409,7 @@ __metadata:
     "@safe-global/protocol-kit": "npm:^8.0.11"
     "@safe-global/store": "workspace:^"
     "@safe-global/types-kit": "npm:^4.0.1"
+    "@safe-global/ui": "workspace:^"
     "@safe-global/utils": "workspace:^"
     "@shadcn/lint": "npm:^0.2.4"
     blo: "npm:^1.1.1"
@@ -14410,6 +14453,7 @@ __metadata:
     "@safe-global/test": "workspace:*"
     "@safe-global/theme": "workspace:*"
     "@safe-global/types-kit": "npm:^4.0.1"
+    "@safe-global/ui": "workspace:^"
     "@safe-global/utils": "workspace:*"
     "@safe-global/views": "workspace:*"
     "@safe-global/web": "workspace:*"
@@ -14489,6 +14533,7 @@ __metadata:
     "@safe-global/test": "workspace:^"
     "@safe-global/theme": "workspace:^"
     "@safe-global/types-kit": "npm:^4.0.1"
+    "@safe-global/ui": "workspace:^"
     "@safe-global/utils": "workspace:^"
     "@safe-global/views": "workspace:^"
     "@storybook/addon-designs": "npm:^11.1.4"
