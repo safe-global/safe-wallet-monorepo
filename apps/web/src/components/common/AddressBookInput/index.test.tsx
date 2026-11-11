@@ -26,6 +26,7 @@ const spaceContactBuilder = (overrides: Partial<SpaceAddressBookItemDto> = {}): 
   name: 'Server Contact',
   address: checksumAddress(faker.finance.ethereumAddress()),
   chainIds: ['4'],
+  tagIds: [],
   createdBy: '',
   createdByUserId: 0,
   lastUpdatedBy: '',
