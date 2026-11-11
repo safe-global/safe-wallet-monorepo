@@ -1,0 +1,127 @@
+/* Opt-in variant for apps that coexist with MUI: tokens and preflight only inside .shadcn-scope. */
+@import './tailwind-theme.css';
+@import './tokens.scoped.css';
+
+@layer base {
+  /* Any author `display` (e.g. the iframe reset below, or `flex`) beats the browser's own [hidden] rule. */
+  .shadcn-scope [hidden]:where(:not([hidden='until-found'])) {
+    display: none !important;
+  }
+
+  /* 1. Box model reset  2. Remove default margins/padding  3. Reset borders */
+  .shadcn-scope,
+  .shadcn-scope *,
+  .shadcn-scope ::before,
+  .shadcn-scope ::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border-width: 0;
+    border-style: solid;
+    border-color: var(--border, currentColor);
+  }
+
+  .shadcn-scope * {
+    @apply outline-ring/50;
+  }
+
+  /* Heading reset — shadcn uses h-tags in accordions, dialogs, sheets, etc. */
+  .shadcn-scope h1,
+  .shadcn-scope h2,
+  .shadcn-scope h3,
+  .shadcn-scope h4,
+  .shadcn-scope h5,
+  .shadcn-scope h6 {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+
+  /* Link reset */
+  .shadcn-scope a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+
+  /* List reset */
+  .shadcn-scope ol,
+  .shadcn-scope ul,
+  .shadcn-scope menu {
+    list-style: none;
+  }
+
+  /* Replaced elements: block display + vertical alignment */
+  .shadcn-scope img,
+  .shadcn-scope svg,
+  .shadcn-scope video,
+  .shadcn-scope canvas,
+  .shadcn-scope audio,
+  .shadcn-scope iframe,
+  .shadcn-scope embed,
+  .shadcn-scope object {
+    display: block;
+    vertical-align: middle;
+  }
+
+  .shadcn-scope img,
+  .shadcn-scope video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Form element reset — fixes browser user-agent button/input defaults */
+  .shadcn-scope button,
+  .shadcn-scope input,
+  .shadcn-scope select,
+  .shadcn-scope optgroup,
+  .shadcn-scope textarea {
+    font: inherit;
+    font-feature-settings: inherit;
+    font-variation-settings: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    border-radius: 0;
+    background-color: transparent;
+    opacity: 1;
+  }
+
+  /* Button appearance fix for iOS Safari */
+  .shadcn-scope button,
+  .shadcn-scope input:where([type='button'], [type='reset'], [type='submit']) {
+    appearance: button;
+  }
+
+  /* Textarea resize */
+  .shadcn-scope textarea {
+    resize: vertical;
+  }
+
+  /* Placeholder styling */
+  .shadcn-scope ::placeholder {
+    opacity: 1;
+  }
+
+  @supports (not (-webkit-appearance: -apple-pay-button)) or (contain-intrinsic-size: 1px) {
+    .shadcn-scope ::placeholder {
+      color: color-mix(in oklab, currentcolor 50%, transparent);
+    }
+  }
+
+  /* Table reset */
+  .shadcn-scope table {
+    text-indent: 0;
+    border-color: inherit;
+    border-collapse: collapse;
+  }
+
+  /* HR reset */
+  .shadcn-scope hr {
+    height: 0;
+    color: inherit;
+    border-top-width: 1px;
+  }
+
+  /* Summary display */
+  .shadcn-scope summary {
+    display: list-item;
+  }
+}
