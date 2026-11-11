@@ -68,7 +68,7 @@ const joinOrOmit = (values: string[]): string | undefined => (values.length > 0 
 
 type SpaceQueueQuery = { filters?: SpaceQueueFilters; search?: string }
 
-const toQueryArgs = (spaceId: string, { filters = NO_SPACE_QUEUE_FILTERS, search }: SpaceQueueQuery) => {
+export const toQueryArgs = (spaceId: string, { filters = NO_SPACE_QUEUE_FILTERS, search }: SpaceQueueQuery) => {
   const statuses = filters.statuses.filter((option) => (SPACE_QUEUE_STATUSES as readonly string[]).includes(option))
   return {
     spaceId,
@@ -82,9 +82,12 @@ const toQueryArgs = (spaceId: string, { filters = NO_SPACE_QUEUE_FILTERS, search
   } satisfies SpaceTransactionsGetTransactionQueueV1ApiArg
 }
 
-export const useSpaceQueue = (spaceId: string, query: SpaceQueueQuery = {}) => {
+type SpaceQueueOptions = Parameters<typeof useSpaceTransactionsGetTransactionQueueV1Query>[1]
+
+export const useSpaceQueue = (spaceId: string, query: SpaceQueueQuery = {}, options?: SpaceQueueOptions) => {
   const { data, currentData, isError, isFetching, refetch } = useSpaceTransactionsGetTransactionQueueV1Query(
     toQueryArgs(spaceId, query),
+    options,
   )
   const isNarrowed = hasSpaceQueueFilters(query.filters) || !!query.search
   const queue = useMemo(
