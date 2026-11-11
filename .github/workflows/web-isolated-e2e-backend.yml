@@ -430,7 +430,7 @@ jobs:
   result:
     # The one stable check name for branch protection; the shard names change with the shard count.
     name: Isolated E2E result
-    if: always()
+    if: ${{ !cancelled() }}
     needs: [plan, build, e2e]
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 5
