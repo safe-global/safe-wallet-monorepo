@@ -47,7 +47,7 @@ const MOCK_ETH: PolicyTokenInfo = {
   address: ZERO_ADDRESS,
   symbol: 'ETH',
   decimals: 18,
-  logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
+  logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
 }
 
 const resolveMockToken = (_chainId: string, address: string): PolicyTokenInfo | undefined =>

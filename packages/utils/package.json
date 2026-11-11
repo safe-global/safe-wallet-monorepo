@@ -17,7 +17,7 @@
     "@eslint/js": "^9.18.0",
     "@faker-js/faker": "^10.5.0",
     "@testing-library/dom": "^10.4.2",
-    "@testing-library/react": "^16.3.0",
+    "@testing-library/react": "^16.3.3",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.13.1",
     "eslint": "^9.39.4",
@@ -30,7 +30,7 @@
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "typescript": "~5.9.2",
-    "typescript-eslint": "^8.72.0"
+    "typescript-eslint": "^8.72.1"
   },
   "dependencies": {
     "@cowprotocol/sdk-app-data": "5.3.2",

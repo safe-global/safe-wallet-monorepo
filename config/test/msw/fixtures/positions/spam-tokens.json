@@ -4,7 +4,7 @@
     "protocol_metadata": {
       "name": "CoW Swap",
       "icon": {
-        "url": "https://protocol-icons.s3.amazonaws.com/icons/cow-swap.jpg"
+        "url": "mock-assets/protocol-icons.s3.amazonaws.com/icons/cow-swap.webp"
       },
       "url": "https://cow.fi"
     },
@@ -21,7 +21,7 @@
               "decimals": 18,
               "symbol": "COW",
               "name": "CoW Protocol",
-              "logoUri": "https://cdn.zerion.io/0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab.webp"
             },
             "balance": "9889456964168240710287360",
             "fiatBalance": "1761049.3988286138",
@@ -36,7 +36,7 @@
               "decimals": 18,
               "symbol": "COW",
               "name": "CoW Protocol",
-              "logoUri": "https://cdn.zerion.io/0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0xdef1ca1fb7fbcdc777520aa7f396b4e015f497ab.webp"
             },
             "balance": "45423106832085289712640",
             "fiatBalance": "8088.647867057026",
@@ -52,7 +52,7 @@
     "protocol_metadata": {
       "name": "Safe Factory",
       "icon": {
-        "url": "https://protocol-icons.s3.amazonaws.com/icons/gnosis-safe-factory.jpg"
+        "url": "mock-assets/protocol-icons.s3.amazonaws.com/icons/gnosis-safe-factory.webp"
       },
       "url": "https://gnosis.io/"
     },
@@ -69,7 +69,7 @@
               "decimals": 18,
               "symbol": "SAFE",
               "name": "Safe Token",
-              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp"
             },
             "balance": "5170126051567719153664",
             "fiatBalance": "713.1604327835648",
@@ -84,7 +84,7 @@
               "decimals": 18,
               "symbol": "SAFE",
               "name": "Safe Token",
-              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp"
             },
             "balance": "2857990768787701891072",
             "fiatBalance": "394.22751268163614",
@@ -99,7 +99,7 @@
               "decimals": 18,
               "symbol": "SAFE",
               "name": "Safe Token",
-              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp"
             },
             "balance": "1253480031778953846336",
             "fiatBalance": "172.90339791192736",
@@ -114,7 +114,7 @@
               "decimals": 18,
               "symbol": "SAFE",
               "name": "Safe Token",
-              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp"
             },
             "balance": "762221521575918608928",
             "fiatBalance": "105.13984084376426",

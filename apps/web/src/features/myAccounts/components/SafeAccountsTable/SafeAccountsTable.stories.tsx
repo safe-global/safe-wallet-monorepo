@@ -2,12 +2,14 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { withMockProvider } from '@/storybook/decorators'
 import type { AllSafeItems } from '@/hooks/safes'
 import SafeAccountsTable from './index'
+import { createHandlers } from '@/stories/mocks'
 
 const meta = {
   title: 'Features/MyAccounts/SafeAccountsTable',
   component: SafeAccountsTable,
   decorators: [withMockProvider()],
   parameters: {
+    msw: { handlers: createHandlers() },
     layout: 'padded',
   },
   tags: ['autodocs'],
