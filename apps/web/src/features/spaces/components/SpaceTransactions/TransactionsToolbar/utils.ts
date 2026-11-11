@@ -49,3 +49,19 @@ export const getSelectedSafeAddresses = (selected: SpaceQueueSafe[]): SpaceQueue
   selected.filter(
     (safe, index) => selected.findIndex((other) => sameAddress(other.safeAddress, safe.safeAddress)) === index,
   )
+
+/** The options of a count list, most transactions first. */
+export const sortByCount = <T extends { count: number }>(options: T[]): T[] =>
+  [...options].sort((a, b) => b.count - a.count)
+
+/** The selection with `value` added or, when it was selected, removed. */
+export const toggleValue = (
+  value: string,
+  selected: string[],
+  isSame: (a: string, b: string) => boolean = (a, b) => a === b,
+): string[] =>
+  selected.some((other) => isSame(other, value))
+    ? selected.filter((other) => !isSame(other, value))
+    : [...selected, value]
+
+export const isSameSigner = (a: string, b: string): boolean => sameAddress(a, b)

@@ -18,12 +18,16 @@ export type SpaceQueueStatusOption = (typeof SPACE_QUEUE_STATUSES)[number] | (ty
 export type SpaceQueueFilters = {
   statuses: SpaceQueueStatusOption[]
   safes: SpaceQueueSafe[]
+  chainIds: string[]
+  /** Keeps the transactions still awaiting one of these signers */
+  signers: string[]
 }
 
-export const NO_SPACE_QUEUE_FILTERS: SpaceQueueFilters = { statuses: [], safes: [] }
+export const NO_SPACE_QUEUE_FILTERS: SpaceQueueFilters = { statuses: [], safes: [], chainIds: [], signers: [] }
 
 export const hasSpaceQueueFilters = (filters?: SpaceQueueFilters): boolean =>
-  !!filters && (filters.statuses.length > 0 || filters.safes.length > 0)
+  !!filters &&
+  (filters.statuses.length > 0 || filters.safes.length > 0 || filters.chainIds.length > 0 || filters.signers.length > 0)
 
 export type SpaceQueue = {
   sections: SpaceQueueSection[]
@@ -60,18 +64,19 @@ const toSpaceQueue = (page: SpaceQueuedItemPage, filters?: SpaceQueueFilters, se
 
 type SpaceQueueArgs = { spaceId: string; filters?: SpaceQueueFilters; search?: string }
 
+const joinOrOmit = (values: string[]): string | undefined => (values.length > 0 ? values.join(',') : undefined)
+
 const toParams = ({ filters, search }: SpaceQueueArgs) => {
   if (!filters || !hasSpaceQueueFilters(filters)) return search ? { search } : undefined
   const statuses = filters.statuses.filter((option) => (SPACE_QUEUE_STATUSES as readonly string[]).includes(option))
   return {
     search,
-    status: statuses.length > 0 ? statuses.join(',') : undefined,
+    status: joinOrOmit(statuses),
     conflicting: filters.statuses.includes('conflicting') || undefined,
     stale: filters.statuses.includes('stale') || undefined,
-    safes:
-      filters.safes.length > 0
-        ? filters.safes.map(({ chainId, safeAddress }) => `${chainId}:${safeAddress}`).join(',')
-        : undefined,
+    safes: joinOrOmit(filters.safes.map(({ chainId, safeAddress }) => `${chainId}:${safeAddress}`)),
+    chainIds: joinOrOmit(filters.chainIds),
+    signers: joinOrOmit(filters.signers),
   }
 }
 

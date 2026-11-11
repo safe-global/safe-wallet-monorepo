@@ -3,7 +3,15 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { ConflictHeaderQueuedItem, TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
-import { getCounterparty, getNextNonce, getQueueStatus, getRejectedNonces, getSectionRows } from './utils'
+import {
+  getCounterparty,
+  getNextNonce,
+  getQueueStatus,
+  getQueueTypeLabel,
+  getRejectedNonces,
+  getSectionRows,
+  getSettingsSummary,
+} from './utils'
 
 const transactionItem = (
   nonce = faker.number.int({ max: 1000 }),
@@ -94,7 +102,7 @@ describe('getCounterparty', () => {
     expect(getCounterparty(transfer('INCOMING'))).toEqual({ join: 'from', party: sender })
   })
 
-  it('is the contract a batch goes through, or the contract a call goes to', () => {
+  it('is the contract a batch goes through, or the contract a call happens on', () => {
     const to = party()
 
     expect(getCounterparty({ type: 'Custom', methodName: 'multiSend', to } as TransactionInfo)).toEqual({
@@ -102,13 +110,80 @@ describe('getCounterparty', () => {
       party: to,
     })
     expect(getCounterparty({ type: 'Custom', methodName: 'approve', to } as TransactionInfo)).toEqual({
-      join: 'to',
+      join: 'on',
       party: to,
     })
   })
 
-  it('has no other party for a settings change', () => {
+  it('names the protocol of a bridge or a swap, which the list response has no address for', () => {
+    expect(getCounterparty({ type: 'SwapAndBridge' } as TransactionInfo)).toEqual({ join: 'via', protocol: 'LI.FI' })
+    expect(getCounterparty({ type: 'Swap' } as TransactionInfo)).toEqual({ join: 'on', protocol: 'LI.FI' })
+    expect(getCounterparty({ type: 'SwapOrder' } as TransactionInfo)).toEqual({ join: 'on', protocol: 'CoW Protocol' })
+    expect(getCounterparty({ type: 'TwapOrder' } as TransactionInfo)).toEqual({ join: 'on', protocol: 'CoW Protocol' })
+  })
+
+  it('has no other party for a settings change or an on-chain rejection', () => {
     expect(getCounterparty({ type: 'SettingsChange' } as TransactionInfo)).toBeUndefined()
+    expect(
+      getCounterparty({ type: 'Custom', isCancellation: true, to: party(), dataSize: '0' } as TransactionInfo),
+    ).toBeUndefined()
+  })
+})
+
+describe('getQueueTypeLabel', () => {
+  const to = { value: checksumAddress(faker.finance.ethereumAddress()), name: 'Uniswap Router' }
+  const withInfo = (txInfo: Partial<Transaction['txInfo']>, extra: Partial<Transaction> = {}): Transaction =>
+    ({ executionInfo: { type: 'MULTISIG' }, txInfo, ...extra }) as Transaction
+
+  it('tags settings changes as Settings and contract calls as Contract', () => {
+    expect(getQueueTypeLabel(withInfo({ type: 'SettingsChange' }))).toBe('Settings')
+    expect(getQueueTypeLabel(withInfo({ type: 'Custom', methodName: 'swap', to, isCancellation: false }))).toBe(
+      'Contract',
+    )
+  })
+
+  it('tags an approveHash on a parent Safe as Nested', () => {
+    expect(
+      getQueueTypeLabel(
+        withInfo({ type: 'Custom', methodName: 'approveHash', to, isCancellation: false, dataSize: '36' }),
+      ),
+    ).toBe('Nested')
+  })
+
+  it('keeps the shared type for batches, rejections, Safe App transactions and transfers', () => {
+    expect(getQueueTypeLabel(withInfo({ type: 'Custom', methodName: 'multiSend', to, isCancellation: false }))).toBe(
+      undefined,
+    )
+    expect(getQueueTypeLabel(withInfo({ type: 'Custom', to, isCancellation: true, dataSize: '0' }))).toBeUndefined()
+    expect(
+      getQueueTypeLabel(
+        withInfo(
+          { type: 'Custom', methodName: 'swap', to, isCancellation: false },
+          { safeAppInfo: { id: 1, name: 'CoW Swap', url: 'https://swap.cow.fi' } },
+        ),
+      ),
+    ).toBeUndefined()
+    expect(getQueueTypeLabel(withInfo({ type: 'Transfer' }))).toBeUndefined()
+  })
+})
+
+describe('getSettingsSummary', () => {
+  const summary = (settingsInfo: object) =>
+    getSettingsSummary({ type: 'SettingsChange', dataDecoded: { method: 'raw' }, settingsInfo } as never)
+  const owner = { value: '0x1234567890123456789012345678901234567890' }
+
+  it('describes the change with the address book name, or the short address', () => {
+    expect(summary({ type: 'ADD_OWNER', owner: { ...owner, name: 'Priya' }, threshold: 2 })).toBe('Add signer Priya')
+    expect(summary({ type: 'REMOVE_OWNER', owner, threshold: 1 })).toBe('Remove signer 0x1234...7890')
+    expect(summary({ type: 'CHANGE_THRESHOLD', threshold: 3 })).toBe('Change threshold to 3')
+    expect(summary({ type: 'ENABLE_MODULE', module: { ...owner, name: 'Zodiac Roles' } })).toBe(
+      'Enable module Zodiac Roles',
+    )
+    expect(summary({ type: 'DELETE_GUARD' })).toBe('Remove guard')
+  })
+
+  it('falls back to the method name for a change it has no words for', () => {
+    expect(summary(undefined as never)).toBe('raw')
   })
 })
 

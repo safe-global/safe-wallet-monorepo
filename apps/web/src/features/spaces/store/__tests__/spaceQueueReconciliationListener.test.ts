@@ -81,7 +81,18 @@ const page = (resultList: QueueResults[], overrides: Partial<SpaceQueuedItemPage
     return all
   }, {}),
   unavailableSafes: [],
-  counts: { total: 0, execute: 0, sign: 0, blocked: 0, waiting: 0, conflicting: 0, stale: 0, safes: [] },
+  counts: {
+    total: 0,
+    execute: 0,
+    sign: 0,
+    blocked: 0,
+    waiting: 0,
+    conflicting: 0,
+    stale: 0,
+    safes: [],
+    chains: [],
+    signers: [],
+  },
   ...overrides,
 })
 
@@ -336,7 +347,7 @@ describe('spaceQueueReconciliationListener', () => {
     respondWithQueue(page([results([queuedTx(txId(), 2)], faker.string.numeric(5))]))
     respondWithDetails(id, { txStatus: TransactionStatus.SUCCESS })
 
-    await pollQueue(store, { statuses: ['sign'], safes: [] })
+    await pollQueue(store, { statuses: ['sign'], safes: [], chainIds: [], signers: [] })
 
     expect(store.getState().pendingTxs[id]).toEqual(pendingTx)
     expect(mockTxDispatch).not.toHaveBeenCalledWith(TxEvent.SUCCESS, expect.anything())

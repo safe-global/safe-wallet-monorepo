@@ -16,7 +16,10 @@ jest.mock('./TransactionsToolbar', () => ({
     mockToolbarProps(props)
     return (
       <>
-        <button type="button" onClick={() => props.onFiltersChange({ statuses: ['sign'], safes: [] })}>
+        <button
+          type="button"
+          onClick={() => props.onFiltersChange({ statuses: ['sign'], safes: [], chainIds: [], signers: [] })}
+        >
           Filter by sign
         </button>
         <input aria-label="Search" onChange={(event) => props.onSearchChange(event.target.value)} />
@@ -49,7 +52,18 @@ const queue = (sections: SpaceQueueSection[], overrides: Partial<SpaceQueue> = {
   shownCount: 0,
   totalCount: 0,
   isComplete: true,
-  counts: { total: 0, execute: 0, sign: 0, blocked: 0, waiting: 0, conflicting: 0, stale: 0, safes: [] },
+  counts: {
+    total: 0,
+    execute: 0,
+    sign: 0,
+    blocked: 0,
+    waiting: 0,
+    conflicting: 0,
+    stale: 0,
+    safes: [],
+    chains: [],
+    signers: [],
+  },
   ...overrides,
 })
 
@@ -85,7 +99,7 @@ describe('SpaceTransactionQueue', () => {
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(querySpy).toHaveBeenCalledWith({ spaceId, filters: { statuses: [], safes: [] } })
+    expect(querySpy).toHaveBeenCalledWith({ spaceId, filters: { statuses: [], safes: [], chainIds: [], signers: [] } })
     const sections = screen.getAllByTestId('space-queue-safe')
     expect(sections).toHaveLength(2)
     expect(sections[0]).toHaveTextContent(`2 chains of ${safeA}`)
@@ -169,9 +183,12 @@ describe('SpaceTransactionQueue', () => {
     render(<SpaceTransactionQueue spaceId={spaceId} />)
     fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
 
-    expect(querySpy).toHaveBeenLastCalledWith({ spaceId, filters: { statuses: ['sign'], safes: [] } })
+    expect(querySpy).toHaveBeenLastCalledWith({
+      spaceId,
+      filters: { statuses: ['sign'], safes: [], chainIds: [], signers: [] },
+    })
     expect(mockToolbarProps).toHaveBeenLastCalledWith(
-      expect.objectContaining({ filters: { statuses: ['sign'], safes: [] } }),
+      expect.objectContaining({ filters: { statuses: ['sign'], safes: [], chainIds: [], signers: [] } }),
     )
   })
 
@@ -193,7 +210,10 @@ describe('SpaceTransactionQueue', () => {
     fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value: 'treasury' } })
     fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }))
 
-    expect(querySpy.mock.lastCall?.[0]).toEqual({ spaceId, filters: { statuses: [], safes: [] } })
+    expect(querySpy.mock.lastCall?.[0]).toEqual({
+      spaceId,
+      filters: { statuses: [], safes: [], chainIds: [], signers: [] },
+    })
     expect(screen.getByRole('textbox', { name: 'Search' })).toHaveValue('')
   })
 
@@ -206,13 +226,16 @@ describe('SpaceTransactionQueue', () => {
 
       render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-      expect(querySpy).toHaveBeenLastCalledWith({ spaceId, filters: { statuses: [], safes: [] } })
+      expect(querySpy).toHaveBeenLastCalledWith({
+        spaceId,
+        filters: { statuses: [], safes: [], chainIds: [], signers: [] },
+      })
 
       typeSearch('treasury')
 
       expect(querySpy).toHaveBeenLastCalledWith({
         spaceId,
-        filters: { statuses: [], safes: [] },
+        filters: { statuses: [], safes: [], chainIds: [], signers: [] },
         search: 'treasury',
       })
     })
@@ -224,7 +247,10 @@ describe('SpaceTransactionQueue', () => {
       typeSearch('treasury')
       typeSearch('')
 
-      expect(querySpy.mock.lastCall?.[0]).toEqual({ spaceId, filters: { statuses: [], safes: [] } })
+      expect(querySpy.mock.lastCall?.[0]).toEqual({
+        spaceId,
+        filters: { statuses: [], safes: [], chainIds: [], signers: [] },
+      })
     })
 
     it('tells that nothing matches the search instead of the empty queue state', () => {
@@ -250,7 +276,18 @@ describe('SpaceTransactionQueue', () => {
 
   it('keeps the last counts in the toolbar while a filtered queue loads', () => {
     const previous = queue([section(safeA, ['1'])], {
-      counts: { total: 3, execute: 1, sign: 2, blocked: 0, waiting: 0, conflicting: 0, stale: 0, safes: [] },
+      counts: {
+        total: 3,
+        execute: 1,
+        sign: 2,
+        blocked: 0,
+        waiting: 0,
+        conflicting: 0,
+        stale: 0,
+        safes: [],
+        chains: [],
+        signers: [],
+      },
     })
     mockQueue({ currentData: undefined, data: previous })
 

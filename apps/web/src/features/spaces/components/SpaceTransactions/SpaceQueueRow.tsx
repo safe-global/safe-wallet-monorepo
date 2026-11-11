@@ -7,10 +7,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import MaliciousTxWarning from '@safe-global/views/components/transactions/MaliciousTxWarning'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { formatDateTime, formatTimeInWords } from '@safe-global/utils/utils/date'
-import TxInfo from '@/components/transactions/TxInfo'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import QueueActions from '@/components/transactions/TxSummary/QueueActions'
-import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
 import { SwapFeature, useIsExpiredSwap } from '@/features/swap'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { useHasFeature } from '@/hooks/useChains'
@@ -18,6 +16,7 @@ import useIsPending from '@/hooks/useIsPending'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
+import QueueTxDetails from './QueueTxDetails'
 import RowActionsMenu from './RowActionsMenu'
 import SignatureGauge from './SignatureGauge'
 import SignersTooltip from './SignersTooltip'
@@ -51,20 +50,25 @@ const Counterparty = ({ txInfo, chainId }: { txInfo: TransactionInfo; chainId: s
   if (!counterparty) return null
   return (
     <span className="flex min-w-0 items-center gap-2 text-sm">
-      <span className="shrink-0 text-muted-foreground">{counterparty.join}</span>
+      {/* Fixed width so the names line up whichever word the pill says */}
+      <span className="flex w-12 shrink-0 justify-center rounded-md bg-muted py-1 capitalize">{counterparty.join}</span>
       <span className="min-w-0 truncate">
-        <EthHashInfo
-          address={counterparty.party.value}
-          name={counterparty.party.name}
-          customAvatar={counterparty.party.logoUri}
-          chainId={chainId}
-          onlyName
-          shortAddress
-          showPrefix={false}
-          showCopyButton={false}
-          hasExplorer={false}
-          avatarSize={20}
-        />
+        {'protocol' in counterparty ? (
+          counterparty.protocol
+        ) : (
+          <EthHashInfo
+            address={counterparty.party.value}
+            name={counterparty.party.name}
+            customAvatar={counterparty.party.logoUri}
+            chainId={chainId}
+            onlyName
+            shortAddress
+            showPrefix={false}
+            showCopyButton={false}
+            hasExplorer={false}
+            avatarSize={20}
+          />
+        )}
       </span>
     </span>
   )
@@ -135,11 +139,10 @@ const SpaceQueueRow = ({
         <div className="flex min-h-10 min-w-0 items-center gap-2">
           {showWarning && <MaliciousTxWarning withTooltip={!isImitation(tx)} />}
           <span className="flex shrink-0 items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-sm">
-            <TxTypeIcon tx={tx} />
-            <TxTypeText tx={tx} />
+            <QueueTxDetails.Type tx={tx} />
           </span>
-          <span className="min-w-0 truncate text-sm">
-            <TxInfo info={tx.txInfo} />
+          <span className="min-w-0 text-sm">
+            <QueueTxDetails.Summary tx={tx} />
           </span>
         </div>
       </TableCell>

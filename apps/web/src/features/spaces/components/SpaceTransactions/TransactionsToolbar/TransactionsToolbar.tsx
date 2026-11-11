@@ -40,7 +40,11 @@ const TransactionsToolbar = ({
         <FilterMenu counts={counts} filters={filters} onChange={onFiltersChange} />
         <NewTransactionButton spaceId={spaceId} />
       </div>
-      <FilterChips filters={filters} onChange={onFiltersChange} />
+      <FilterChips
+        filters={filters}
+        chainIds={(counts?.chains ?? []).map(({ chainId }) => chainId)}
+        onChange={onFiltersChange}
+      />
     </div>
   )
 }

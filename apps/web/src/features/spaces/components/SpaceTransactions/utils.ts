@@ -1,12 +1,25 @@
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import type { AddressInfo, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type {
+  AddressInfo,
+  SettingsChangeTransaction,
+  Transaction,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { groupConflictingTxs } from '@/utils/tx-list'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import {
   isAwaitingExecution,
+  isBridgeOrderTxInfo,
+  isCancellationTxInfo,
   isCustomTxInfo,
   isIncomingTransfer,
+  isLifiSwapTxInfo,
+  isMigrateToL2TxInfo,
+  isModuleExecutionInfo,
   isMultiSendTxInfo,
+  isNestedConfirmationTxInfo,
+  isOrderTxInfo,
+  isSettingsChangeTxInfo,
   isTransferTxInfo,
   isLabelListItem,
   isMultisigExecutionInfo,
@@ -62,14 +75,75 @@ export const getSectionRows = (items: SpaceQueueItems): QueueRowData[] => {
   })
 }
 
-/** The other party shown after a transaction's summary, joined by "to", "from" or "via". */
-export const getCounterparty = (txInfo: TransactionInfo): { join: string; party: AddressInfo } | undefined => {
+export type CounterpartyJoin = 'to' | 'from' | 'via' | 'on'
+
+/** The other party after a transaction's summary: an address, or a protocol the list response names without one. */
+export type Counterparty = { join: CounterpartyJoin; party: AddressInfo } | { join: CounterpartyJoin; protocol: string }
+
+// The gateway only gives these types to calls to the LI.FI Diamond or CoW Protocol, so the type names the contract
+const LIFI = 'LI.FI'
+const COW_PROTOCOL = 'CoW Protocol'
+
+export const getCounterparty = (txInfo: TransactionInfo): Counterparty | undefined => {
   if (isTransferTxInfo(txInfo)) {
     return isIncomingTransfer(txInfo) ? { join: 'from', party: txInfo.sender } : { join: 'to', party: txInfo.recipient }
   }
+  // A rejection is an empty transaction to the Safe itself
+  if (isCancellationTxInfo(txInfo)) return undefined
   if (isMultiSendTxInfo(txInfo)) return { join: 'via', party: txInfo.to }
-  if (isCustomTxInfo(txInfo)) return { join: 'to', party: txInfo.to }
+  if (isCustomTxInfo(txInfo)) return { join: 'on', party: txInfo.to }
+  if (isBridgeOrderTxInfo(txInfo)) return { join: 'via', protocol: LIFI }
+  if (isLifiSwapTxInfo(txInfo)) return { join: 'on', protocol: LIFI }
+  if (isOrderTxInfo(txInfo)) return { join: 'on', protocol: COW_PROTOCOL }
   return undefined
+}
+
+/** Type tags the queue names differently from the shared transaction type, or undefined to keep that one. */
+export type QueueTypeLabel = 'Settings' | 'Contract' | 'Nested'
+
+export const getQueueTypeLabel = (tx: Transaction): QueueTypeLabel | undefined => {
+  const { txInfo } = tx
+  if (isSettingsChangeTxInfo(txInfo) || isMigrateToL2TxInfo(txInfo)) return 'Settings'
+  if (!isCustomTxInfo(txInfo) || tx.safeAppInfo || isMultiSendTxInfo(txInfo) || isCancellationTxInfo(txInfo)) {
+    return undefined
+  }
+  if (isModuleExecutionInfo(tx.executionInfo)) return undefined
+  return isNestedConfirmationTxInfo(txInfo) ? 'Nested' : 'Contract'
+}
+
+const addressLabel = (address: AddressInfo): string => address.name || shortenAddress(address.value)
+
+/** What a settings change does, in words: "Add signer Alice", "Change threshold to 3". */
+export const getSettingsSummary = (txInfo: SettingsChangeTransaction): string => {
+  const { settingsInfo } = txInfo
+  switch (settingsInfo?.type) {
+    case 'ADD_OWNER':
+      return `Add signer ${addressLabel(settingsInfo.owner)}`
+    case 'REMOVE_OWNER':
+      return `Remove signer ${addressLabel(settingsInfo.owner)}`
+    case 'SWAP_OWNER':
+      return `Replace signer ${addressLabel(settingsInfo.oldOwner)} with ${addressLabel(settingsInfo.newOwner)}`
+    case 'CHANGE_THRESHOLD':
+      return `Change threshold to ${settingsInfo.threshold}`
+    case 'ENABLE_MODULE':
+      return `Enable module ${addressLabel(settingsInfo.module)}`
+    case 'DISABLE_MODULE':
+      return `Disable module ${addressLabel(settingsInfo.module)}`
+    case 'SET_GUARD':
+      return `Set guard ${addressLabel(settingsInfo.guard)}`
+    case 'DELETE_GUARD':
+      return 'Remove guard'
+    case 'SET_MODULE_GUARD':
+      return `Set module guard ${addressLabel(settingsInfo.moduleGuard)}`
+    case 'DELETE_MODULE_GUARD':
+      return 'Remove module guard'
+    case 'SET_FALLBACK_HANDLER':
+      return `Set fallback handler ${addressLabel(settingsInfo.handler)}`
+    case 'CHANGE_MASTER_COPY':
+      return `Update Safe to ${addressLabel(settingsInfo.implementation)}`
+    default:
+      return txInfo.humanDescription || txInfo.dataDecoded.method
+  }
 }
 
 /** The nonces already held by an on-chain rejection, which a second one would duplicate. */

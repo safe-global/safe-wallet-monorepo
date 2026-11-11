@@ -11,7 +11,9 @@ import {
   DropdownMenuTrigger,
 } from '@safe-global/views/components/ui/dropdown-menu'
 import type { SpaceQueueFilters } from '../../../../store/spaceQueueApi'
+import NetworkOptions from '../NetworkOptions'
 import { SafeOptions } from '../SafeFilter'
+import SignerOptions from '../SignerOptions'
 import { StatusOptions } from '../StatusFilter'
 
 type FilterMenuProps = {
@@ -41,6 +43,26 @@ const FilterMenu = ({ counts, filters, onChange }: FilterMenuProps): ReactElemen
         <DropdownMenuSubTrigger>Safe account</DropdownMenuSubTrigger>
         <DropdownMenuSubContent className="min-w-64">
           <SafeOptions counts={counts} selected={filters.safes} onChange={(safes) => onChange({ ...filters, safes })} />
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger>Network</DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="min-w-56">
+          <NetworkOptions
+            counts={counts}
+            selected={filters.chainIds}
+            onChange={(chainIds) => onChange({ ...filters, chainIds })}
+          />
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger>Signer</DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="min-w-64">
+          <SignerOptions
+            counts={counts}
+            selected={filters.signers}
+            onChange={(signers) => onChange({ ...filters, signers })}
+          />
         </DropdownMenuSubContent>
       </DropdownMenuSub>
     </DropdownMenuContent>

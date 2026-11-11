@@ -5,6 +5,8 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Chip } from '@safe-global/views/components/ui/chip'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { NO_SPACE_QUEUE_FILTERS, hasSpaceQueueFilters, type SpaceQueueFilters } from '../../../../store/spaceQueueApi'
+import { NetworkName } from '../NetworkOptions'
+import { useSignerName } from '../useSignerName'
 import { getSelectedSafeAddresses, STATUS_OPTION_LABELS } from '../utils'
 
 const MAX_CHIP_VALUES = 2
@@ -13,6 +15,10 @@ const SafeName = ({ safe }: { safe: SpaceQueueSafe }): ReactElement => {
   const name = useSafeDisplayName(safe.safeAddress, safe.chainId)
   return <>{name || shortenAddress(safe.safeAddress)}</>
 }
+
+const SignerName = ({ address, chainIds }: { address: string; chainIds: string[] }): ReactElement => (
+  <>{useSignerName(address, chainIds)}</>
+)
 
 const FilterChip = ({
   label,
@@ -41,10 +47,12 @@ const FilterChip = ({
 
 type FilterChipsProps = {
   filters: SpaceQueueFilters
+  /** The chains of the queue, to find the signers' names */
+  chainIds: string[]
   onChange: (filters: SpaceQueueFilters) => void
 }
 
-const FilterChips = ({ filters, onChange }: FilterChipsProps): ReactElement | null => {
+const FilterChips = ({ filters, chainIds, onChange }: FilterChipsProps): ReactElement | null => {
   if (!hasSpaceQueueFilters(filters)) return null
 
   return (
@@ -63,6 +71,24 @@ const FilterChips = ({ filters, onChange }: FilterChipsProps): ReactElement | nu
           label="Status"
           values={filters.statuses.map((option) => STATUS_OPTION_LABELS[option].chip)}
           onDelete={() => onChange({ ...filters, statuses: [] })}
+        />
+      )}
+      {filters.chainIds.length > 0 && (
+        <FilterChip
+          label="Network"
+          values={filters.chainIds.map((chainId) => (
+            <NetworkName key={chainId} chainId={chainId} />
+          ))}
+          onDelete={() => onChange({ ...filters, chainIds: [] })}
+        />
+      )}
+      {filters.signers.length > 0 && (
+        <FilterChip
+          label="Signer"
+          values={filters.signers.map((address) => (
+            <SignerName key={address} address={address} chainIds={chainIds} />
+          ))}
+          onDelete={() => onChange({ ...filters, signers: [] })}
         />
       )}
       <Button variant="ghost" size="sm" onClick={() => onChange(NO_SPACE_QUEUE_FILTERS)}>

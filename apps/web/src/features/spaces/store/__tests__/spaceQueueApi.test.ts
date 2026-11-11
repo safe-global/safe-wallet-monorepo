@@ -36,6 +36,8 @@ const zeroCounts: SpaceQueuedItemPage['counts'] = {
   conflicting: 0,
   stale: 0,
   safes: [],
+  chains: [],
+  signers: [],
 }
 
 const page = (results: SpaceQueuedItemPage['results'], overrides: Partial<SpaceQueuedItemPage> = {}) => ({
@@ -150,27 +152,34 @@ describe('spaceQueueApi.getSpaceQueue', () => {
     expect(result.data).toBeUndefined()
   })
 
-  it('sends the statuses, the flags and the Safes of the filters as query params', async () => {
+  it('sends the statuses, the flags, the Safes, the networks and the signers of the filters as query params', async () => {
     const urls = respondWith(page({}, { count: 0 }))
     const safes = [
       { chainId: '1', safeAddress: safeA },
       { chainId: '100', safeAddress: safeB },
     ]
 
-    await fetchQueue(makeStore(), { statuses: ['sign', 'conflicting', 'execute', 'stale'], safes })
+    await fetchQueue(makeStore(), {
+      statuses: ['sign', 'conflicting', 'execute', 'stale'],
+      safes,
+      chainIds: ['1', '137'],
+      signers: [safeA, safeB],
+    })
 
     expect(Object.fromEntries(urls[0].searchParams)).toEqual({
       status: 'sign,execute',
       conflicting: 'true',
       stale: 'true',
       safes: `1:${safeA},100:${safeB}`,
+      chainIds: '1,137',
+      signers: `${safeA},${safeB}`,
     })
   })
 
   it('sends only the params of the filters in use', async () => {
     const urls = respondWith(page({}, { count: 0 }))
 
-    await fetchQueue(makeStore(), { statuses: ['conflicting'], safes: [] })
+    await fetchQueue(makeStore(), { statuses: ['conflicting'], safes: [], chainIds: [], signers: [] })
 
     expect(Object.fromEntries(urls[0].searchParams)).toEqual({ conflicting: 'true' })
   })
@@ -178,7 +187,7 @@ describe('spaceQueueApi.getSpaceQueue', () => {
   it('sends no params when no filter is chosen', async () => {
     const urls = respondWith(page({}, { count: 0 }))
 
-    await fetchQueue(makeStore(), { statuses: [], safes: [] })
+    await fetchQueue(makeStore(), { statuses: [], safes: [], chainIds: [], signers: [] })
 
     expect(urls[0].search).toBe('')
   })
@@ -195,7 +204,7 @@ describe('spaceQueueApi.getSpaceQueue', () => {
   it('does not flag a filtered queue as incomplete for holding fewer transactions than the count', async () => {
     respondWith(page({ [safeA]: { '1': transactions(1) } }, { count: 10 }))
 
-    const { data } = await fetchQueue(makeStore(), { statuses: ['sign'], safes: [] })
+    const { data } = await fetchQueue(makeStore(), { statuses: ['sign'], safes: [], chainIds: [], signers: [] })
 
     expect(data?.isComplete).toBe(true)
   })
@@ -207,7 +216,7 @@ describe('spaceQueueApi.getSpaceQueue', () => {
     await makeStore().dispatch(
       spaceQueueApi.endpoints.getSpaceQueue.initiate({
         spaceId,
-        filters: { statuses: ['sign'], safes: [] },
+        filters: { statuses: ['sign'], safes: [], chainIds: [], signers: [] },
         search: 'polygon',
       }),
     )
