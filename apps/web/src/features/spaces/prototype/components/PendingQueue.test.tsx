@@ -1462,9 +1462,11 @@ describe('option E · Group by cards', () => {
     expect(allPending().getAllByRole('button', { name: /^(Sign|Execute)/ }).length).toBeGreaterThan(0)
   })
 
-  it('shows Proposal for rows with no signatures, and Awaiting parent when a signer Safe approves it', () => {
+  it('marks rows a proposer created next to 0 signatures, and shows Awaiting parent when a signer Safe approves it', () => {
     render(<PendingQueue />, { routerProps: { query: { option: 'cards', scenario: '5-safes' } } })
-    expect(allPending().getAllByRole('button', { name: /^0 of \d+ signatures, proposal/ }).length).toBeGreaterThan(0)
+    expect(allPending().getAllByRole('button', { name: /^0 of \d+ signatures/ }).length).toBeGreaterThan(0)
+    expect(allPending().getAllByLabelText('Created by a proposer').length).toBeGreaterThan(0)
+    expect(allPending().queryByText('Proposal')).toBeNull()
     expect(allPending().getByLabelText(/^Awaiting parent signature\. Ops Payroll #20$/)).toBeInTheDocument()
   })
 
