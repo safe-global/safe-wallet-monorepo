@@ -3,11 +3,13 @@ import type {
   AddressInfo,
   SettingsChangeTransaction,
   Transaction,
+  VaultInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
 import { groupConflictingTxs } from '@/utils/tx-list'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import {
+  isAnyStakingTxInfo,
   isAwaitingExecution,
   isBridgeOrderTxInfo,
   isCancellationTxInfo,
@@ -25,6 +27,8 @@ import {
   isMultisigExecutionInfo,
   isSignableBy,
   isTransactionQueuedItem,
+  isVaultDepositTxInfo,
+  isVaultRedeemTxInfo,
 } from '@/utils/transaction-guards'
 import type { SpaceQueueItems } from '../../store/spaceQueueApi'
 
@@ -80,21 +84,32 @@ export type CounterpartyJoin = 'to' | 'from' | 'via' | 'on'
 /** The other party after a transaction's summary: an address, or a protocol the list response names without one. */
 export type Counterparty = { join: CounterpartyJoin; party: AddressInfo } | { join: CounterpartyJoin; protocol: string }
 
-// The gateway only gives these types to calls to the LI.FI Diamond or CoW Protocol, so the type names the contract
+// The gateway only gives these types to calls to the LI.FI Diamond, CoW Protocol or Kiln, so the type names the contract
 const LIFI = 'LI.FI'
 const COW_PROTOCOL = 'CoW Protocol'
+const KILN = 'Kiln'
+
+const vaultParty = ({ address, name, logoUri }: VaultInfo): AddressInfo => ({ value: address, name, logoUri })
 
 export const getCounterparty = (txInfo: TransactionInfo): Counterparty | undefined => {
   if (isTransferTxInfo(txInfo)) {
     return isIncomingTransfer(txInfo) ? { join: 'from', party: txInfo.sender } : { join: 'to', party: txInfo.recipient }
   }
-  // A rejection is an empty transaction to the Safe itself
+  // A rejection is an empty call to the Safe itself
   if (isCancellationTxInfo(txInfo)) return undefined
   if (isMultiSendTxInfo(txInfo)) return { join: 'via', party: txInfo.to }
-  if (isCustomTxInfo(txInfo)) return { join: 'on', party: txInfo.to }
+  if (isCustomTxInfo(txInfo)) {
+    // A migration is a delegate call that changes the Safe itself. Read `to` first: the migration guard claims every
+    // custom call, so txInfo is narrowed to never once it returns false
+    const { to } = txInfo
+    return isMigrateToL2TxInfo(txInfo) ? undefined : { join: 'on', party: to }
+  }
   if (isBridgeOrderTxInfo(txInfo)) return { join: 'via', protocol: LIFI }
   if (isLifiSwapTxInfo(txInfo)) return { join: 'on', protocol: LIFI }
   if (isOrderTxInfo(txInfo)) return { join: 'on', protocol: COW_PROTOCOL }
+  if (isAnyStakingTxInfo(txInfo)) return { join: 'via', protocol: KILN }
+  if (isVaultDepositTxInfo(txInfo)) return { join: 'to', party: vaultParty(txInfo.vaultInfo) }
+  if (isVaultRedeemTxInfo(txInfo)) return { join: 'from', party: vaultParty(txInfo.vaultInfo) }
   return undefined
 }
 

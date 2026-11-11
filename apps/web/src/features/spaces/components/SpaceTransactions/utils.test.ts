@@ -3,6 +3,7 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { ConflictHeaderQueuedItem, TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
+import { getSafeToL2MigrationDeployment } from '@safe-global/safe-deployments'
 import {
   getCounterparty,
   getNextNonce,
@@ -12,6 +13,8 @@ import {
   getSectionRows,
   getSettingsSummary,
 } from './utils'
+
+const SAFE_TO_L2_MIGRATION = checksumAddress(getSafeToL2MigrationDeployment()!.defaultAddress)
 
 const transactionItem = (
   nonce = faker.number.int({ max: 1000 }),
@@ -122,10 +125,92 @@ describe('getCounterparty', () => {
     expect(getCounterparty({ type: 'TwapOrder' } as TransactionInfo)).toEqual({ join: 'on', protocol: 'CoW Protocol' })
   })
 
-  it('has no other party for a settings change or an on-chain rejection', () => {
+  it('is the recipient of an ERC-20 or ERC-721 transfer, not the token contract', () => {
+    const recipient = party()
+    const tokenAddress = checksumAddress(faker.finance.ethereumAddress())
+    const transfer = (transferInfo: object) =>
+      ({ type: 'Transfer', direction: 'OUTGOING', sender: party(), recipient, transferInfo }) as TransactionInfo
+
+    expect(getCounterparty(transfer({ type: 'ERC20', tokenAddress, value: '1' }))).toEqual({
+      join: 'to',
+      party: recipient,
+    })
+    expect(getCounterparty(transfer({ type: 'ERC721', tokenAddress, tokenId: '7' }))).toEqual({
+      join: 'to',
+      party: recipient,
+    })
+  })
+
+  it('is the contract called, whether or not the gateway decoded the method', () => {
+    const to = party()
+
+    expect(getCounterparty({ type: 'Custom', methodName: null, to, dataSize: '68' } as TransactionInfo)).toEqual({
+      join: 'on',
+      party: to,
+    })
+  })
+
+  it('is the parent Safe of a nested confirmation', () => {
+    const parent = party()
+
+    expect(
+      getCounterparty({
+        type: 'Custom',
+        methodName: 'approveHash',
+        to: parent,
+        dataSize: '36',
+        isCancellation: false,
+      } as TransactionInfo),
+    ).toEqual({ join: 'on', party: parent })
+  })
+
+  it('names Kiln for staking, which the list response has no address for', () => {
+    expect(getCounterparty({ type: 'NativeStakingDeposit' } as TransactionInfo)).toEqual({
+      join: 'via',
+      protocol: 'Kiln',
+    })
+    expect(getCounterparty({ type: 'NativeStakingValidatorsExit' } as TransactionInfo)).toEqual({
+      join: 'via',
+      protocol: 'Kiln',
+    })
+    expect(getCounterparty({ type: 'NativeStakingWithdraw' } as TransactionInfo)).toEqual({
+      join: 'via',
+      protocol: 'Kiln',
+    })
+  })
+
+  it('is the vault deposited to or redeemed from', () => {
+    const vaultInfo = {
+      address: checksumAddress(faker.finance.ethereumAddress()),
+      name: 'Morpho USDC',
+      logoUri: 'https://example.com/morpho.png',
+      description: '',
+    }
+    const vault = { value: vaultInfo.address, name: vaultInfo.name, logoUri: vaultInfo.logoUri }
+
+    expect(getCounterparty({ type: 'VaultDeposit', vaultInfo } as TransactionInfo)).toEqual({
+      join: 'to',
+      party: vault,
+    })
+    expect(getCounterparty({ type: 'VaultRedeem', vaultInfo } as TransactionInfo)).toEqual({
+      join: 'from',
+      party: vault,
+    })
+  })
+
+  it('has no other party for a settings change, an on-chain rejection or a migration to L2', () => {
     expect(getCounterparty({ type: 'SettingsChange' } as TransactionInfo)).toBeUndefined()
     expect(
       getCounterparty({ type: 'Custom', isCancellation: true, to: party(), dataSize: '0' } as TransactionInfo),
+    ).toBeUndefined()
+    expect(
+      getCounterparty({
+        type: 'Custom',
+        methodName: 'migrateL2Singleton',
+        to: { value: SAFE_TO_L2_MIGRATION },
+        dataSize: '4',
+        isCancellation: false,
+      } as TransactionInfo),
     ).toBeUndefined()
   })
 })
@@ -148,6 +233,47 @@ describe('getQueueTypeLabel', () => {
         withInfo({ type: 'Custom', methodName: 'approveHash', to, isCancellation: false, dataSize: '36' }),
       ),
     ).toBe('Nested')
+  })
+
+  it('tags a migration to L2 as Settings', () => {
+    expect(
+      getQueueTypeLabel(
+        withInfo({ type: 'Custom', methodName: 'migrateL2Singleton', to: { value: SAFE_TO_L2_MIGRATION } }),
+      ),
+    ).toBe('Settings')
+  })
+
+  it('tags an execTransaction on a parent Safe as Nested, and an undecoded call as Contract', () => {
+    expect(
+      getQueueTypeLabel(withInfo({ type: 'Custom', methodName: 'execTransaction', to, isCancellation: false })),
+    ).toBe('Nested')
+    expect(
+      getQueueTypeLabel(withInfo({ type: 'Custom', methodName: null, to, isCancellation: false, dataSize: '68' })),
+    ).toBe('Contract')
+  })
+
+  it('keeps the shared type for module executions, swaps, bridges, staking and vaults', () => {
+    expect(
+      getQueueTypeLabel(
+        withInfo(
+          { type: 'Custom', methodName: 'swap', to, isCancellation: false },
+          { executionInfo: { type: 'MODULE' } as Transaction['executionInfo'] },
+        ),
+      ),
+    ).toBeUndefined()
+    for (const type of [
+      'SwapOrder',
+      'TwapOrder',
+      'Swap',
+      'SwapAndBridge',
+      'NativeStakingDeposit',
+      'NativeStakingValidatorsExit',
+      'NativeStakingWithdraw',
+      'VaultDeposit',
+      'VaultRedeem',
+    ]) {
+      expect(getQueueTypeLabel(withInfo({ type } as Partial<Transaction['txInfo']>))).toBeUndefined()
+    }
   })
 
   it('keeps the shared type for batches, rejections, Safe App transactions and transfers', () => {
@@ -180,6 +306,24 @@ describe('getSettingsSummary', () => {
       'Enable module Zodiac Roles',
     )
     expect(summary({ type: 'DELETE_GUARD' })).toBe('Remove guard')
+  })
+
+  it('describes every settings change the gateway decodes', () => {
+    const named = (name: string) => ({ ...owner, name })
+
+    expect(summary({ type: 'SWAP_OWNER', oldOwner: named('Ana'), newOwner: named('Ben') })).toBe(
+      'Replace signer Ana with Ben',
+    )
+    expect(summary({ type: 'DISABLE_MODULE', module: named('Allowance') })).toBe('Disable module Allowance')
+    expect(summary({ type: 'SET_GUARD', guard: named('Hypernative') })).toBe('Set guard Hypernative')
+    expect(summary({ type: 'SET_MODULE_GUARD', moduleGuard: owner })).toBe('Set module guard 0x1234...7890')
+    expect(summary({ type: 'DELETE_MODULE_GUARD' })).toBe('Remove module guard')
+    expect(summary({ type: 'SET_FALLBACK_HANDLER', handler: named('CompatibilityFallbackHandler') })).toBe(
+      'Set fallback handler CompatibilityFallbackHandler',
+    )
+    expect(summary({ type: 'CHANGE_MASTER_COPY', implementation: named('SafeL2 1.4.1') })).toBe(
+      'Update Safe to SafeL2 1.4.1',
+    )
   })
 
   it('falls back to the method name for a change it has no words for', () => {

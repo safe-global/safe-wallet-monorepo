@@ -24,6 +24,15 @@ import { getCounterparty, getNonce, type ConflictOption, type QueueStatus } from
 
 export const QUEUE_COLUMNS = ['Nonce', 'Transaction', 'To', 'Proposed', 'Signatures', 'Status', 'Action'] as const
 
+// The outline Sign/Execute action turns into the filled primary button while its row is hovered, as in the design
+const ROW_HOVER_PRIMARY_ACTION = [
+  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled]:border-transparent',
+  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled]:bg-primary',
+  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled]:text-primary-foreground',
+  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled]:shadow-none',
+  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled:hover]:bg-primary/80',
+].join(' ')
+
 const STATUS_TONES: Record<QueueStatus, 'success' | 'warning'> = {
   execute: 'success',
   sign: 'success',
@@ -51,8 +60,11 @@ const Counterparty = ({ txInfo, chainId }: { txInfo: TransactionInfo; chainId: s
   return (
     <span className="flex min-w-0 items-center gap-2 text-sm">
       {/* Fixed width so the names line up whichever word the pill says */}
-      <span className="flex w-12 shrink-0 justify-center rounded-md bg-muted py-1 capitalize">{counterparty.join}</span>
-      <span className="min-w-0 truncate">
+      <span className="flex w-12 shrink-0 justify-center rounded-md bg-muted py-1 capitalize group-hover/transaction:bg-card">
+        {counterparty.join}
+      </span>
+      {/* Grayscale only tints the avatar: the name is already a neutral colour */}
+      <span className="min-w-0 truncate grayscale group-hover/transaction:grayscale-0">
         {'protocol' in counterparty ? (
           counterparty.protocol
         ) : (
@@ -130,15 +142,15 @@ const SpaceQueueRow = ({
   const showWarning = isImitation(tx) || (hasDefaultTokenlist && !isTrustedTx(tx))
 
   return (
-    <TableRow data-testid="space-queue-row" className="h-14" {...rowProps}>
-      <TableCell className="relative py-2 text-center text-sm tabular-nums text-muted-foreground">
+    <TableRow data-testid="space-queue-row" className="group/transaction h-14" {...rowProps}>
+      <TableCell className="relative py-2 text-center text-sm tabular-nums text-muted-foreground group-hover/transaction:text-foreground">
         {conflict ? <ConflictBracket {...conflict} nonce={nonce} /> : nonce}
       </TableCell>
 
       <TableCell className="py-2">
         <div className="flex min-h-10 min-w-0 items-center gap-2">
           {showWarning && <MaliciousTxWarning withTooltip={!isImitation(tx)} />}
-          <span className="flex shrink-0 items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-sm">
+          <span className="flex shrink-0 items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-sm group-hover/transaction:bg-card">
             <QueueTxDetails.Type tx={tx} />
           </span>
           <span className="min-w-0 text-sm">
@@ -188,7 +200,7 @@ const SpaceQueueRow = ({
       </TableCell>
 
       <TableCell>
-        <div className="flex items-center justify-end gap-1">
+        <div className={`flex items-center justify-end gap-1 ${ROW_HOVER_PRIMARY_ACTION}`}>
           {!expiredSwap && <QueueActions tx={tx} dense />}
           <RowActionsMenu tx={tx} canReject={canReject} />
         </div>

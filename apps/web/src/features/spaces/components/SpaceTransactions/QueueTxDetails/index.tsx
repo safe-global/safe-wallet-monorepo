@@ -8,13 +8,19 @@ import TokenAmount from '@/components/common/TokenAmount'
 import TxInfo from '@/components/transactions/TxInfo'
 import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
 import { useChain } from '@/hooks/useChains'
+import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
+import { maybePlural } from '@safe-global/utils/utils/formatters'
 import {
   isBridgeOrderTxInfo,
   isCancellationTxInfo,
+  isCustomTxInfo,
   isExecTxInfo,
   isLifiSwapTxInfo,
+  isMigrateToL2TxInfo,
   isNestedConfirmationTxInfo,
+  isOrderTxInfo,
   isSettingsChangeTxInfo,
+  isStakingTxExitInfo,
 } from '@/utils/transaction-guards'
 import { getNonce, getQueueTypeLabel, getSettingsSummary, type QueueTypeLabel } from '../utils'
 
@@ -68,6 +74,32 @@ const BridgeSummary = ({ info }: { info: Extract<Transaction['txInfo'], { type: 
   )
 }
 
+const Exchange = ({ from, to }: { from: ReactNode; to: ReactNode }): ReactElement => (
+  <span className="flex min-w-0 items-center gap-1 whitespace-nowrap">
+    {from}
+    <span className="shrink-0">→</span>
+    {to}
+  </span>
+)
+
+const TokenSymbol = ({ token }: { token: TokenInfo }): ReactElement => (
+  <b className="min-w-0 truncate">{token.symbol}</b>
+)
+
+// A sell order fixes the amount sold and a buy order the amount bought; the other side is only a limit
+const OrderSummary = ({ info }: { info: OrderTransactionInfo }): ReactElement =>
+  info.kind === 'buy' ? (
+    <Exchange
+      from={<TokenSymbol token={info.sellToken} />}
+      to={<Amount value={info.buyAmount} token={info.buyToken} />}
+    />
+  ) : (
+    <Exchange
+      from={<Amount value={info.sellAmount} token={info.sellToken} />}
+      to={<TokenSymbol token={info.buyToken} />}
+    />
+  )
+
 const QueueTxSummary = ({ tx }: { tx: Transaction }): ReactElement => {
   const { txInfo } = tx
 
@@ -102,17 +134,30 @@ const QueueTxSummary = ({ tx }: { tx: Transaction }): ReactElement => {
 
   if (isLifiSwapTxInfo(txInfo)) {
     return (
-      <span className="flex min-w-0 items-center gap-1 whitespace-nowrap">
-        <Amount value={txInfo.fromAmount} token={txInfo.fromToken} />
-        <span className="shrink-0">→</span>
-        <Amount value={txInfo.toAmount} token={txInfo.toToken} />
-      </span>
+      <Exchange
+        from={<Amount value={txInfo.fromAmount} token={txInfo.fromToken} />}
+        to={<Amount value={txInfo.toAmount} token={txInfo.toToken} />}
+      />
     )
+  }
+
+  if (isOrderTxInfo(txInfo)) return <OrderSummary info={txInfo} />
+
+  if (isStakingTxExitInfo(txInfo)) {
+    return (
+      <span className="block min-w-0 truncate">{`${txInfo.numValidators} validator${maybePlural(txInfo.numValidators)}`}</span>
+    )
+  }
+
+  // The gateway leaves the method out when it can't decode the call data
+  if (isCustomTxInfo(txInfo) && !txInfo.methodName && !isMigrateToL2TxInfo(txInfo)) {
+    return <span className="block min-w-0 truncate">Unknown method</span>
   }
 
   return (
     <span className="block min-w-0 truncate">
-      <TxInfo info={txInfo} />
+      {/* The type tag already says which way the tokens go */}
+      <TxInfo info={txInfo} omitSign />
     </span>
   )
 }
