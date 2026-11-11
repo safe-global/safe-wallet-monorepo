@@ -3,6 +3,7 @@ import SecurityDrawerChecks from './SecurityDrawerChecks'
 import { createMockStory } from '@/stories/mocks'
 import { createMockContext } from '@/features/security/testing'
 import type { ScanResult } from '@/features/security/types'
+import { mockNow } from '@/stories/mocks/now'
 
 const SAFE_QUERY = 'eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6'
 
@@ -12,7 +13,7 @@ const mkResult = (overrides: Partial<ScanResult> = {}): ScanResult => ({
   score: 100,
   evidence: [],
   remediation: '',
-  lastChecked: new Date().toISOString(),
+  lastChecked: new Date(mockNow()).toISOString(),
   ...overrides,
 })
 
@@ -78,7 +79,7 @@ export const WithIssues: Story = {
     scanContext: createMockContext(),
     results: withIssues,
     isComplete: true,
-    lastScannedAt: Date.now() - 3_600_000,
+    lastScannedAt: mockNow() - 3_600_000,
     safeQueryParam: SAFE_QUERY,
   },
 }
@@ -88,7 +89,7 @@ export const AllPassing: Story = {
     scanContext: createMockContext(),
     results: allPassing,
     isComplete: true,
-    lastScannedAt: Date.now() - 3_600_000,
+    lastScannedAt: mockNow() - 3_600_000,
     safeQueryParam: SAFE_QUERY,
   },
 }
@@ -98,7 +99,7 @@ export const UpdateAvailable: Story = {
     scanContext: createMockContext(),
     results: updateAvailable,
     isComplete: true,
-    lastScannedAt: Date.now() - 3_600_000,
+    lastScannedAt: mockNow() - 3_600_000,
     safeQueryParam: SAFE_QUERY,
   },
 }

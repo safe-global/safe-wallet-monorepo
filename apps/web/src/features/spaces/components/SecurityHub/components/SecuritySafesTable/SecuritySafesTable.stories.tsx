@@ -3,6 +3,7 @@ import SecuritySafesTable from './SecuritySafesTable'
 import { createMockStory } from '@/stories/mocks'
 import type { ScanResult } from '@/features/security/types'
 import type { SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
+import { mockNow } from '@/stories/mocks/now'
 
 const mkResult = (overrides: Partial<ScanResult> = {}): ScanResult => ({
   status: 'clear',
@@ -10,7 +11,7 @@ const mkResult = (overrides: Partial<ScanResult> = {}): ScanResult => ({
   score: 100,
   evidence: [],
   remediation: '',
-  lastChecked: new Date().toISOString(),
+  lastChecked: new Date(mockNow()).toISOString(),
   ...overrides,
 })
 
@@ -107,8 +108,8 @@ export const SingleChainSafes: Story = {
       [`${SAFE_B}:1`]: mixedResults,
     },
     scanTimestamps: {
-      [`${SAFE_A}:1`]: Date.now() - 90_000,
-      [`${SAFE_B}:1`]: Date.now() - 90_000,
+      [`${SAFE_A}:1`]: mockNow() - 90_000,
+      [`${SAFE_B}:1`]: mockNow() - 90_000,
     },
     scanningKeys: new Set(),
     selectedSafe: null,
@@ -129,8 +130,8 @@ export const MultichainSafe: Story = {
       [`${SAFE_MC}:137`]: mixedResults,
     },
     scanTimestamps: {
-      [`${SAFE_MC}:1`]: Date.now() - 120_000,
-      [`${SAFE_MC}:137`]: Date.now() - 120_000,
+      [`${SAFE_MC}:1`]: mockNow() - 120_000,
+      [`${SAFE_MC}:137`]: mockNow() - 120_000,
     },
     scanningKeys: new Set(),
     selectedSafe: null,
@@ -165,10 +166,10 @@ export const UpdateAvailable: Story = {
       [`${SAFE_MC}:137`]: updateAvailable,
     },
     scanTimestamps: {
-      [`${SAFE_A}:1`]: Date.now() - 90_000,
-      [`${SAFE_B}:1`]: Date.now() - 90_000,
-      [`${SAFE_MC}:1`]: Date.now() - 90_000,
-      [`${SAFE_MC}:137`]: Date.now() - 90_000,
+      [`${SAFE_A}:1`]: mockNow() - 90_000,
+      [`${SAFE_B}:1`]: mockNow() - 90_000,
+      [`${SAFE_MC}:1`]: mockNow() - 90_000,
+      [`${SAFE_MC}:137`]: mockNow() - 90_000,
     },
     scanningKeys: new Set(),
     selectedSafe: null,

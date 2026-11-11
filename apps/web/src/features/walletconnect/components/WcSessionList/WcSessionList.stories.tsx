@@ -3,6 +3,7 @@ import { mswLoader } from 'msw-storybook-addon'
 import type { SessionTypes } from '@walletconnect/types'
 import { createMockStory } from '@/stories/mocks'
 import WcSessionList from './index'
+import { mockNow } from '@/stories/mocks/now'
 
 const setup = createMockStory({
   scenario: 'efSafe',
@@ -14,7 +15,7 @@ const createSession = (topic: string, name: string, url: string, icon: string): 
   topic,
   pairingTopic: `pairing-${topic}`,
   relay: { protocol: 'irn' },
-  expiry: Math.floor(Date.now() / 1000) + 86_400,
+  expiry: Math.floor(mockNow() / 1000) + 86_400,
   acknowledged: true,
   controller: 'controller',
   namespaces: {

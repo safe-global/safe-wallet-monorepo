@@ -3,6 +3,7 @@ import type { WalletKitTypes } from '@reown/walletkit'
 import { createMockStory } from '@/stories/mocks'
 import { withWcPopupFrame } from '../withWcPopupFrame'
 import WcProposalForm from './index'
+import { mockNow } from '@/stories/mocks/now'
 
 const setup = createMockStory({
   scenario: 'efSafe',
@@ -29,7 +30,7 @@ const createProposal = ({
   params: {
     id: 1710000000000000,
     pairingTopic: 'mock-pairing-topic',
-    expiryTimestamp: Math.floor(Date.now() / 1000) + 300,
+    expiryTimestamp: Math.floor(mockNow() / 1000) + 300,
     relays: [{ protocol: 'irn' }],
     proposer: {
       publicKey: 'mock-proposer-public-key',

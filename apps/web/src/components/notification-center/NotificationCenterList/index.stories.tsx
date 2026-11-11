@@ -3,6 +3,7 @@ import { mswLoader } from 'msw-storybook-addon'
 import type { NotificationState } from '@/store/notificationsSlice'
 import { createMockStory } from '@/stories/mocks'
 import NotificationCenterList from './index'
+import { mockNow } from '@/stories/mocks/now'
 
 const setup = createMockStory({
   scenario: 'efSafe',
@@ -10,7 +11,7 @@ const setup = createMockStory({
   shadcn: true,
 })
 
-const now = Date.now()
+const now = mockNow()
 
 const notifications: NotificationState = [
   {

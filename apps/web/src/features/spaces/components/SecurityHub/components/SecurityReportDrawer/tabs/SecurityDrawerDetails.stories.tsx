@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import SecurityDrawerDetails from './SecurityDrawerDetails'
 import { createMockStory } from '@/stories/mocks'
 import { createMockContext } from '@/features/security/testing'
+import { mockNow } from '@/stories/mocks/now'
 
 const setup = createMockStory({ authenticated: true, layout: 'paper' })
 
@@ -34,7 +35,7 @@ export const Default: Story = {
       chainId: '1',
       balanceUsd: 612900,
     }),
-    lastScannedAt: Date.now() - 4 * 3_600_000,
+    lastScannedAt: mockNow() - 4 * 3_600_000,
   },
 }
 
