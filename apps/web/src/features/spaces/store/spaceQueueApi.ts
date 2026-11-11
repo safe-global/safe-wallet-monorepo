@@ -42,7 +42,7 @@ export type SpaceQueue = {
   isComplete: boolean
 }
 
-const toSpaceQueue = (page: SpaceQueuedItemPage, filters?: SpaceQueueFilters): SpaceQueue => {
+const toSpaceQueue = (page: SpaceQueuedItemPage, filters?: SpaceQueueFilters, search?: string): SpaceQueue => {
   const sections = Object.entries(page.results).map(([safeAddress, chainItems]) => ({
     safeAddress,
     chains: Object.entries(chainItems).map(([chainId, items]) => ({ chainId, items })),
@@ -58,18 +58,19 @@ const toSpaceQueue = (page: SpaceQueuedItemPage, filters?: SpaceQueueFilters): S
     counts: page.counts,
     shownCount,
     totalCount,
-    isComplete: hasSpaceQueueFilters(filters) || shownCount >= totalCount,
+    isComplete: hasSpaceQueueFilters(filters) || !!search || shownCount >= totalCount,
   }
 }
 
-type SpaceQueueArgs = { spaceId: string; filters?: SpaceQueueFilters }
+type SpaceQueueArgs = { spaceId: string; filters?: SpaceQueueFilters; search?: string }
 
 const joinOrOmit = (values: string[]): string | undefined => (values.length > 0 ? values.join(',') : undefined)
 
-const toParams = ({ filters }: SpaceQueueArgs) => {
-  if (!filters || !hasSpaceQueueFilters(filters)) return undefined
+const toParams = ({ filters, search }: SpaceQueueArgs) => {
+  if (!filters || !hasSpaceQueueFilters(filters)) return search ? { search } : undefined
   const statuses = filters.statuses.filter((option) => (SPACE_QUEUE_STATUSES as readonly string[]).includes(option))
   return {
+    search,
     status: joinOrOmit(statuses),
     conflicting: filters.statuses.includes('conflicting') || undefined,
     stale: filters.statuses.includes('stale') || undefined,
@@ -87,7 +88,7 @@ export const spaceQueueApi = cgwClient.enhanceEndpoints({ addTagTypes: ['transac
         url: `/v1/spaces/${args.spaceId}/transactions/queued`,
         params: toParams(args),
       }),
-      transformResponse: (page: SpaceQueuedItemPage, _meta, { filters }) => toSpaceQueue(page, filters),
+      transformResponse: (page: SpaceQueuedItemPage, _meta, { filters, search }) => toSpaceQueue(page, filters, search),
       providesTags: ['transactions'],
     }),
   }),
