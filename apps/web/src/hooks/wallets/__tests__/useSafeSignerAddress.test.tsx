@@ -6,7 +6,15 @@ import useSafeSignerAddress from '@/hooks/wallets/useSafeSignerAddress'
 
 const renderWithSigner = (signer: SignerWallet | null) => {
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <WalletContext.Provider value={{ connectedWallet: null, signer, setSignerAddress: jest.fn(), isReady: true }}>
+    <WalletContext.Provider
+      value={{
+        connectedWallet: null,
+        signer,
+        setSignerAddress: jest.fn(),
+        setParentSafeNonce: jest.fn(),
+        isReady: true,
+      }}
+    >
       {children}
     </WalletContext.Provider>
   )

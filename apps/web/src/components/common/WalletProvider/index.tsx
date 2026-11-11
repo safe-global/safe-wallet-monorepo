@@ -1,4 +1,13 @@
-import { createContext, type ReactElement, type ReactNode, useEffect, useState, useMemo } from 'react'
+import {
+  createContext,
+  type ReactElement,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import useOnboard, { type ConnectedWallet, getConnectedWallet, useIsWalletReady } from '@/hooks/wallets/useOnboard'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
@@ -23,6 +32,8 @@ export type WalletContextType = {
   connectedWallet: ConnectedWallet | null
   signer: SignerWallet | null
   setSignerAddress: (address: string | undefined) => void
+  // Nonce of the tx the in-app parent Safe signer creates; undefined uses the recommended nonce
+  setParentSafeNonce: (nonce: number | undefined) => void
   isReady: boolean
 }
 
@@ -38,6 +49,11 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const [wallet, setWallet] = useState<ConnectedWallet | null>(getConnectedWallet(onboardWallets))
 
   const [signerAddress, setSignerAddress] = useState<string>()
+  // A ref, so a nonce edit doesn't rebuild the signer object
+  const parentSafeNonce = useRef<number | undefined>(undefined)
+  const setParentSafeNonce = useCallback((nonce: number | undefined) => {
+    parentSafeNonce.current = nonce
+  }, [])
 
   const { currentData: nestedSafeInfo } = useSafesGetSafeV1Query(
     { chainId: currentChain?.chainId || '', safeAddress: signerAddress || '' },
@@ -70,7 +86,7 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
 
   const signer = useMemo(() => {
     if (wallet && nestedSafeInfo && web3ReadOnly) {
-      return getNestedWallet(wallet, nestedSafeInfo, web3ReadOnly, router)
+      return getNestedWallet(wallet, nestedSafeInfo, web3ReadOnly, router, () => parentSafeNonce.current)
     }
     if (wallet && connectedSafeInfo) {
       return { ...wallet, isConnectedSafe: true as const, threshold: connectedSafeInfo.threshold }
@@ -84,6 +100,7 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
         connectedWallet: wallet,
         signer,
         setSignerAddress,
+        setParentSafeNonce,
         isReady: !!walletReady,
       }}
     >
