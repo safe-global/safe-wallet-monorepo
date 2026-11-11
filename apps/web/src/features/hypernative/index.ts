@@ -106,4 +106,9 @@ export * from './store'
 // CONSTANTS
 // ─────────────────────────────────────────────────────────────────
 
-export { HYPERNATIVE_OUTREACH_ID, HYPERNATIVE_ALLOWLIST_OUTREACH_ID } from './constants'
+export {
+  HYPERNATIVE_OUTREACH_ID,
+  HYPERNATIVE_ALLOWLIST_OUTREACH_ID,
+  HN_RECONNECT_MESSAGE,
+  HN_RECONNECT_LABEL,
+} from './constants'

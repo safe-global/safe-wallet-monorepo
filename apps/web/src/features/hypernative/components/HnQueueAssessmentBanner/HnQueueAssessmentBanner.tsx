@@ -8,6 +8,7 @@ import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { useHypernativeOAuth } from '../../hooks/useHypernativeOAuth'
 import { useAssessmentUrl } from '../../hooks/useAssessmentUrl'
 import { useHnAssessmentSeverity } from '../../hooks/useHnAssessmentSeverity'
+import { HN_RECONNECT_LABEL, HN_RECONNECT_MESSAGE } from '../../constants'
 import LockIcon from '@safe-global/views/assets/images/common/lock-small.svg'
 // eslint-disable-next-line no-restricted-imports -- routing SeverityIcon through the safe-shield barrel closes a hypernative<->safe-shield module-init cycle (TDZ)
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
@@ -64,9 +65,7 @@ export const HnQueueAssessmentBanner = ({
         <AlertDescription>
           <div className="flex flex-col gap-2">
             <Typography variant="paragraph-small">
-              {isSessionRejected
-                ? "Please reconnect your Hypernative account to review this transaction's risks."
-                : 'Log in to Hypernative to view security scan result.'}
+              {isSessionRejected ? HN_RECONNECT_MESSAGE : 'Log in to Hypernative to view security scan result.'}
             </Typography>
             <ExternalLink
               onClick={handleLogin}
@@ -74,7 +73,7 @@ export const HnQueueAssessmentBanner = ({
               noIcon={false}
               className="inline-flex self-start hover:text-[var(--color-primary-light)]!"
             >
-              {isSessionRejected ? 'Reconnect to Hypernative' : 'Log in'}
+              {isSessionRejected ? HN_RECONNECT_LABEL : 'Log in'}
             </ExternalLink>
           </div>
         </AlertDescription>

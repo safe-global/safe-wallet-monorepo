@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { ExternalLinkIcon } from '@safe-global/views/components/common/ExternalLink/ExternalLinkIcon'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import type { HypernativeAuthStatus } from '@/features/hypernative'
+import { HN_RECONNECT_LABEL, HN_RECONNECT_MESSAGE, type HypernativeAuthStatus } from '@/features/hypernative'
 import { HYPERNATIVE_EVENTS, trackEvent } from '@/services/analytics'
 import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -32,13 +32,13 @@ export const HypernativeLoginLine = ({
         className="flex flex-col items-center gap-1 py-2 text-[var(--color-primary-light)]"
         data-testid="hypernative-reconnect-line"
       >
-        Please reconnect your Hypernative account to review this transaction&apos;s risks.
+        {HN_RECONNECT_MESSAGE}
         <button
           type="button"
           onClick={login}
           className="flex cursor-pointer items-center gap-1 font-semibold underline"
         >
-          Reconnect to Hypernative
+          {HN_RECONNECT_LABEL}
           <ExternalLinkIcon className="size-3.5" aria-hidden />
         </button>
       </Typography>
