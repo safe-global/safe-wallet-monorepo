@@ -154,7 +154,7 @@ yarn workspace @safe-global/web type-check
 ## Project Notes
 
 - **Components Path**: `packages/ui/src/components/`
-- **Utility Path**: `apps/web/src/utils/cn.ts`
+- **Utility Path**: `packages/ui/src/lib/utils.ts`
 - **Icon Library**: `lucide-react`
 
 **Component Usage Rules:**

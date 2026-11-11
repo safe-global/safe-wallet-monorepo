@@ -378,4 +378,14 @@ Deviations from the plan, all small:
 8. **Environment.** `build-storybook` ran out of memory at Node's default heap of about 2 GB in this container, both on the base commit and after the change. Every Storybook build here ran with `NODE_OPTIONS=--max-old-space-size=8192`. No repo change was needed.
 9. **Visual comparison.** The T0 sweep filtered on `ui-,design-system` snapshots only 56 of the 208 story×mode cells, because most `UI/*` stories are tagged `skip-visual-test`. A second sweep ran with that tag ignored, using a temporary copy of `scripts/storybook` with `SKIP_SNAPSHOT_TAG` changed. That copy was deleted after each run and never committed. The sweep covered all 208 cells (63 sheets) before and after. Two runs on the base commit gave identical hashes, so the comparison is deterministic.
 10. **`build-storybook:vite` fails on the base commit too.** It stops with `UNLOADABLE_DEPENDENCY` on `@safe-global/views/assets/images/transactions/signature.svg`, imported by `packages/views/src/components/tx-flow/common/TxSectionTitle/TxSectionTitle.stories.tsx`. The same error occurs at `03af007`, so it is unrelated to this phase and was left alone. It also writes into `apps/web/storybook-static` by default, so run the webpack build after it, or give it its own `--output-dir`.
-11. **`node scripts/verify.mjs --changed`** finds no base branch in this clone (`origin/dev`, `dev` and `main` don't exist), so it reported nothing to verify. The full type-check, lint, test and build commands above were run explicitly instead.
+11. **`node scripts/verify.mjs --changed`** first reported nothing to verify. The clone was shallow and had not fetched `dev`, so `git merge-base HEAD origin/dev` failed, and the script fell back to an empty file list. After `git fetch --deepen=300 origin dev` the merge base resolves and the scoped run works. The full type-check, lint, test and build commands were also run explicitly.
+12. **Review fixes.**
+    - A relative path could climb out of the package past the import ban. Two guards now stop that: `src/relative-imports.test.ts` fails on any relative import that resolves outside `src/`, and lint rejects any relative import that climbs three or more levels (`^(\.\./){3,}`).
+    - The turbo `type-check` and `test` inputs now include `$TURBO_ROOT$/packages/ui/src/**` and `$TURBO_ROOT$/packages/views/src/**`, so a change there invalidates the `web` and `views` hashes. Before this, those hashes ignored package changes.
+    - The `web-checks` type-check step now also runs `@safe-global/ui`.
+    - The unused `@safe-global/test` devDependency is dropped, because `jest.config.cjs` loads the preset by relative path.
+
+## Follow-ups
+
+- Phase 2: prune the `next-themes` dependency from `apps/web`, `apps/web-tanstack` and `packages/views`. `Toaster` no longer reads it, and none of their source imports it.
+- `build-storybook:vite` fails on the base commit too (`UNLOADABLE_DEPENDENCY` on the `signature.svg` import in `packages/views/src/components/tx-flow/common/TxSectionTitle/TxSectionTitle.stories.tsx`). That bug belongs to a separate fix.
