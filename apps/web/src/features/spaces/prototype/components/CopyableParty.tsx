@@ -5,7 +5,7 @@ import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import { Tag } from '@safe-global/views/components/ui/tag'
 import { useCopyToClipboard } from '@/components/common/AuditLog'
-import { HINT_CLASS, ROW_TAG_FILL } from './shared'
+import { HINT_CLASS, ROW_TAG_FILL, chainLogoUrl } from './shared'
 
 // An address shown as an avatar and a name. Clicking it does what its row does; clicking the tooltip copies the address.
 export function CopyableParty({
@@ -17,6 +17,7 @@ export function CopyableParty({
   logo,
   contract = false,
   tag = false,
+  network,
 }: {
   name: string
   address: string
@@ -29,6 +30,8 @@ export function CopyableParty({
   contract?: boolean
   // Option E: the party as a tag, like the type tag.
   tag?: boolean
+  // Option E: the Safe's network, as a logo after the name inside its tag.
+  network?: { chainId: string; name: string }
 }) {
   const [copied, copy] = useCopyToClipboard(address)
   const CopyIcon = copied ? Check : Copy
@@ -56,6 +59,13 @@ export function CopyableParty({
           <Tag className="min-w-0 shrink gap-1.5 pl-1">
             {avatarIcon(16)}
             <span className={`truncate ${mono ? 'font-mono text-xs' : ''}`}>{name}</span>
+            {network && (
+              <img
+                src={chainLogoUrl(network.chainId)}
+                alt={`on ${network.name}`}
+                className="size-4 shrink-0 rounded-full"
+              />
+            )}
           </Tag>
         ) : (
           <>
@@ -78,7 +88,9 @@ export function CopyableParty({
           }}
         >
           <span className="min-w-0">
-            <span className="block font-medium">{copied ? 'Copied' : mono ? 'Address' : name}</span>
+            <span className="block font-medium">
+              {copied ? 'Copied' : mono ? 'Address' : network ? `${name} on ${network.name}` : name}
+            </span>
             <span className="mt-1 block break-all font-mono">{address}</span>
           </span>
           <CopyIcon className="mt-0.5 size-3.5 shrink-0" strokeWidth={ICON_STROKE} aria-hidden="true" />

@@ -88,6 +88,7 @@ export function StatusAlerts({ tx, items, persona }: { tx: Proposal; items: Prop
   )
 }
 
+// Every section starts collapsed, so the signatures list at the bottom is what you see first. Warnings show in each title row.
 export const SectionsContext = createContext<{ mode: SectionsMode; version: number }>({ mode: 'default', version: 0 })
 
 // A section's open state: its own default, overridden by "Expand all" / "Collapse all" each time they're pressed.
@@ -102,9 +103,6 @@ const useSectionOpen = (defaultOpen: boolean) => {
   }
   return { open, onOpenChange: setOpen }
 }
-
-// Only Summary opens by default. Security and the type section also open when there's a warning to look at.
-const hasSecurityIssue = (tx: Proposal) => getWarnings(tx).length > 0 || getSafenetCheck(tx) === 'risk'
 
 // Types whose details are a list or a long block get their own section. The rest fit in Summary.
 const hasOwnSection = (tx: Proposal) =>
@@ -143,7 +141,7 @@ export function SummarySection({ tx, status }: { tx: Proposal; status?: ReactNod
   const account = getAccount(tx)
   const creatorId = tx.signers[0]
   const creator = creatorId ? getSignerIdentity(creatorId) : undefined
-  const section = useSectionOpen(true)
+  const section = useSectionOpen(false)
   return (
     <PanelSection collapsible {...section} title="Summary" rightNode={status}>
       <PanelRow label="Type">
@@ -212,7 +210,7 @@ export function SummarySection({ tx, status }: { tx: Proposal; status?: ReactNod
 
 export function WhatItDoesSection({ tx }: { tx: Proposal }) {
   const { kind } = tx
-  const section = useSectionOpen(hasSecurityIssue(tx))
+  const section = useSectionOpen(false)
   if (!hasOwnSection(tx)) return null
   return (
     <PanelSection collapsible {...section} title={SECTION_TITLES[kind.type]} rightNode={getSectionSummary(tx)}>
@@ -261,7 +259,7 @@ type QueueProps = { tx: Proposal; items: Proposal[]; persona: Persona; onReview:
 
 // Why this can't simply be signed and executed: what it waits on, what it competes with, and its risk flags.
 export function ConflictsSection({ tx, items, persona, onReview }: QueueProps) {
-  const section = useSectionOpen(true)
+  const section = useSectionOpen(false)
   const earlierNonces = getEarlierNonces(tx, persona)
   const next = earlierNonces.flatMap((nonce) => atNonce(tx, items, nonce))[0]
   const conflicts = getConflicts(tx, items)
@@ -386,7 +384,7 @@ export function SecuritySection({ tx, hypernative }: { tx: Proposal; hypernative
   const safenet = getSafenetCheck(tx)
   const SafenetIcon = SAFENET_ICONS[safenet]
   const issues = getWarnings(tx).length > 0
-  const section = useSectionOpen(hasSecurityIssue(tx))
+  const section = useSectionOpen(false)
   return (
     <PanelSection
       collapsible

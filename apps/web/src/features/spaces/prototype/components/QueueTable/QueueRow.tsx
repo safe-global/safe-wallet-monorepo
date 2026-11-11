@@ -459,7 +459,12 @@ export function QueueRow({
               <span className="flex min-w-0 items-center gap-2">
                 {partyTags && (
                   <span className={compact ? 'flex max-w-28 min-w-0 shrink' : 'flex shrink-0'}>
-                    <CopyableParty name={account.safeName ?? account.name} address={account.iconAddress} tag />
+                    <CopyableParty
+                      name={account.safeName ?? account.name}
+                      address={account.iconAddress}
+                      network={{ chainId: account.chainId, name: account.network }}
+                      tag
+                    />
                   </span>
                 )}
                 <TransactionHead tx={tx} onRow keepWidth={!compact && !columns.includes('To')} />
@@ -471,7 +476,7 @@ export function QueueRow({
           </div>
           {compact && (
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <ChainIcon chainId={account.chainId} network={account.network} />
+              {!partyTags && <ChainIcon chainId={account.chainId} network={account.network} />}
               {signaturesContent}
               {/* Option E's badge names a state, so it always shows. Elsewhere it shows only when it adds to the button. */}
               {(partyTags ||

@@ -369,7 +369,7 @@ const orderedWidths = (
   compact = false,
 ): Record<string, string | undefined> => ({
   ...getColumnWidths(showNoteText, true),
-  Transaction: compact ? undefined : partyTags ? 'w-[22.5rem]' : 'w-72',
+  Transaction: compact ? undefined : partyTags ? 'w-[24rem]' : 'w-72',
   ...(compact ? { Nonce: 'w-11', Action: 'w-12' } : {}),
   To: undefined,
   Safe: 'w-44',
@@ -386,8 +386,8 @@ export const ORDERED_COLUMNS = (isWide: boolean, partyTags = false, compact = fa
         'Nonce',
         'Transaction',
         'To',
-        ...(partyTags ? [] : ['Safe']),
-        'Network',
+        // Option E shows the Safe and its network in the Safe tag.
+        ...(partyTags ? [] : ['Safe', 'Network']),
         'Proposed',
         ...(isWide ? ['Note'] : []),
         'Signatures',

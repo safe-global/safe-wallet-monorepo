@@ -297,7 +297,8 @@ function PendingQueueView() {
   // The J/K cursor stays after the drawer closes only for keyboard users. A click clears it on close.
   const usingKeys = useRef(false)
   const [reviewSections, setReviewSections] = useState<string[]>([])
-  const [signersOpen, setSignersOpen] = useState(false)
+  // The drawer opens on the signatures list, with every section above it collapsed.
+  const [signersOpen, setSignersOpen] = useState(true)
   const [showTechnical, setShowTechnical] = useState(false)
   const [sectionsMode, setSectionsMode] = useState<SectionsMode>('default')
   const [sectionsVersion, setSectionsVersion] = useState(0)
@@ -336,7 +337,7 @@ function PendingQueueView() {
     setReplacement(null)
     if (!keepLayout) {
       setReviewSections([])
-      setSignersOpen(false)
+      setSignersOpen(true)
       setSectionsMode('default')
       setShowTechnical(false)
     }
