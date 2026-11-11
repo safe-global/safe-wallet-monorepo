@@ -168,7 +168,7 @@ jobs:
     # The one check that branch protection requires for this workflow.
     name: Web checks result
     permissions: {}
-    if: always()
+    if: ${{ !cancelled() }}
     needs: [changes, lint, prettier, type-check, knip-exports]
     runs-on: ubuntu-latest
     steps:

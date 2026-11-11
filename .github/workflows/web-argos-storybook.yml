@@ -298,7 +298,7 @@ jobs:
   result:
     name: Storybook visual tests result
     permissions: {}
-    if: always()
+    if: ${{ !cancelled() }}
     needs: [changes, sweep, visual]
     runs-on: ubuntu-latest
     steps:
