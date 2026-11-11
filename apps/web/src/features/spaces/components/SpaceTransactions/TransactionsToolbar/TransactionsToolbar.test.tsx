@@ -75,6 +75,35 @@ describe('TransactionsToolbar', () => {
     })
   })
 
+  it('shows each status with its icon, statuses on a tinted tile and flags muted', () => {
+    renderToolbar()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
+    const icons = screen.getAllByRole('menuitemcheckbox').map((option) => option.querySelector('svg.lucide'))
+
+    expect(
+      icons.map((icon) =>
+        icon
+          ?.getAttribute('class')
+          ?.match(/lucide-[a-z0-9-]+/g)
+          ?.at(-1),
+      ),
+    ).toEqual([
+      'lucide-circle-check',
+      'lucide-pen-line',
+      'lucide-clock-3',
+      'lucide-users',
+      'lucide-split',
+      'lucide-calendar-clock',
+    ])
+    expect(icons[0]?.parentElement).toHaveClass('bg-success-subtle', 'text-success-strong')
+    expect(icons[1]?.parentElement).toHaveClass('bg-success-subtle', 'text-success-strong')
+    expect(icons[2]?.parentElement).toHaveClass('bg-warning-subtle', 'text-warning-strong')
+    expect(icons[3]?.parentElement).toHaveClass('bg-warning-subtle', 'text-warning-strong')
+    expect(icons[4]).toHaveClass('text-muted-foreground')
+    expect(icons[5]).toHaveClass('text-muted-foreground')
+  })
+
   it('removes a status that is picked again', () => {
     const onFiltersChange = renderToolbar({ statuses: ['execute', 'sign'], safes: [], chainIds: [], signers: [] })
 

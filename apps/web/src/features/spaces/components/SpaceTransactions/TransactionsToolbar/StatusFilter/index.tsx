@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { CalendarClock, ChevronDown, CircleCheck, Clock3, PenLine, Split, Users, type LucideIcon } from 'lucide-react'
+import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import type { SpaceQueueCounts } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
@@ -11,6 +12,34 @@ import {
 } from '@safe-global/views/components/ui/dropdown-menu'
 import { SPACE_QUEUE_FLAGS, SPACE_QUEUE_STATUSES, type SpaceQueueStatusOption } from '../../../../store/spaceQueueApi'
 import { STATUS_OPTION_LABELS } from '../utils'
+
+const SUCCESS_TILE = 'bg-success-subtle text-success-strong'
+const WARNING_TILE = 'bg-warning-subtle text-warning-strong'
+
+// Flags only narrow the statuses, so they get a plain icon instead of a tinted tile.
+const STATUS_OPTION_ICONS: Record<SpaceQueueStatusOption, { icon: LucideIcon; tile?: string }> = {
+  execute: { icon: CircleCheck, tile: SUCCESS_TILE },
+  sign: { icon: PenLine, tile: SUCCESS_TILE },
+  blocked: { icon: Clock3, tile: WARNING_TILE },
+  waiting: { icon: Users, tile: WARNING_TILE },
+  conflicting: { icon: Split },
+  stale: { icon: CalendarClock },
+}
+
+const StatusOptionIcon = ({ option }: { option: SpaceQueueStatusOption }): ReactElement => {
+  const { icon: Icon, tile } = STATUS_OPTION_ICONS[option]
+  return (
+    <span className="flex size-4 shrink-0 items-center justify-center" aria-hidden="true">
+      {tile ? (
+        <span className={`flex size-4 items-center justify-center rounded ${tile}`}>
+          <Icon className="size-3" strokeWidth={ICON_STROKE} />
+        </span>
+      ) : (
+        <Icon className="size-4 text-muted-foreground" strokeWidth={ICON_STROKE} />
+      )}
+    </span>
+  )
+}
 
 type StatusOptionsProps = {
   counts?: SpaceQueueCounts
@@ -29,6 +58,7 @@ export const StatusOptions = ({ counts, selected, onChange }: StatusOptionsProps
       checked={selected.includes(option)}
       onCheckedChange={(checked) => toggle(option, checked)}
     >
+      <StatusOptionIcon option={option} />
       {STATUS_OPTION_LABELS[option].menu}
       <span className="ml-auto pl-6 tabular-nums text-muted-foreground">{counts?.[option] ?? 0}</span>
     </DropdownMenuCheckboxItem>
