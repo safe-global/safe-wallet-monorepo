@@ -1,5 +1,6 @@
-import { renderHook, waitFor } from '@testing-library/react'
+import { waitFor } from '@testing-library/react'
 import { faker } from '@faker-js/faker'
+import { delay, HttpResponse } from 'msw'
 import { useThreatAnalysisHypernativeMessage } from '../useThreatAnalysisHypernativeMessage'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
@@ -7,29 +8,23 @@ import type {
   HypernativeMessageAssessmentResponseDto,
   HypernativeMessageAssessmentErrorDto,
 } from '@safe-global/store/hypernative/hypernativeApi.dto'
-import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { ErrorType, getErrorInfo } from '@safe-global/utils/features/safe-shield/utils/errors'
+import { answerHypernative, renderWithHypernativeApi, startHypernativeServer } from './hypernativeApiHarness'
 
-jest.mock('@safe-global/store/hypernative/hypernativeApi', () => ({
-  hypernativeApi: {
-    useAssessMessageMutation: jest.fn(),
-  },
-}))
-
-const mockUseAssessMessageMutation = hypernativeApi.useAssessMessageMutation as jest.MockedFunction<
-  typeof hypernativeApi.useAssessMessageMutation
->
+const MESSAGE_ASSESSMENT_PATH = '/safe/eip712/assessment'
 
 describe('useThreatAnalysisHypernativeMessage', () => {
-  const mockSafeAddress = faker.finance.ethereumAddress() as `0x${string}`
-  const mockChainId = '1'
-  const mockMessageHash = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
-  const mockAuthToken = 'test-bearer-token-123'
+  startHypernativeServer()
 
-  const createMockTypedData = (): TypedData => ({
+  const safeAddress = faker.finance.ethereumAddress() as `0x${string}`
+  const chainId = '1'
+  const messageHash = faker.string.hexadecimal({ length: 64, casing: 'lower' }) as `0x${string}`
+  const authToken = `Bearer ${faker.string.alphanumeric(32)}`
+
+  const createTypedData = (): TypedData => ({
     domain: {
       chainId: 1,
-      verifyingContract: mockSafeAddress,
+      verifyingContract: safeAddress,
     },
     primaryType: 'Permit',
     types: {
@@ -54,329 +49,217 @@ describe('useThreatAnalysisHypernativeMessage', () => {
     },
   })
 
-  const createMockHypernativeResponse = (): HypernativeMessageAssessmentResponseDto['data'] => ({
-    safeTxHash: mockMessageHash,
-    status: 'OK',
-    assessmentData: {
-      assessmentId: faker.string.uuid(),
-      assessmentTimestamp: new Date().toISOString(),
-      recommendation: 'accept',
-      interpretation: 'Permit signature to approve token transfer',
-      findings: {
-        THREAT_ANALYSIS: {
-          status: 'No risks found',
-          severity: 'accept',
-          risks: [],
-        },
-        CUSTOM_CHECKS: {
-          status: 'Passed',
-          severity: 'accept',
-          risks: [],
+  const createAssessment = (
+    threatAnalysis: HypernativeMessageAssessmentResponseDto['data']['assessmentData']['findings']['THREAT_ANALYSIS'] = {
+      status: 'No risks found',
+      severity: 'accept',
+      risks: [],
+    },
+  ): HypernativeMessageAssessmentResponseDto => ({
+    data: {
+      safeTxHash: messageHash,
+      status: 'OK',
+      assessmentData: {
+        assessmentId: faker.string.uuid(),
+        assessmentTimestamp: new Date().toISOString(),
+        recommendation: threatAnalysis.severity,
+        interpretation: 'Permit signature to approve token transfer',
+        findings: {
+          THREAT_ANALYSIS: threatAnalysis,
+          CUSTOM_CHECKS: { status: 'Passed', severity: 'accept', risks: [] },
         },
       },
     },
   })
 
-  const mockTriggerAssessment = jest.fn()
+  const answerWithAssessment = (assessment = createAssessment()) =>
+    answerHypernative(MESSAGE_ASSESSMENT_PATH, () => HttpResponse.json(assessment))
 
-  beforeEach(() => {
-    jest.clearAllMocks()
-    mockUseAssessMessageMutation.mockReturnValue([
-      mockTriggerAssessment,
-      { data: undefined, error: undefined, isLoading: false },
-    ] as any)
-  })
+  type HookProps = Parameters<typeof useThreatAnalysisHypernativeMessage>[0]
 
-  describe('API calls', () => {
-    it('should trigger mutation with correct payload', async () => {
-      const mockTypedData = createMockTypedData()
-      const mockOrigin = 'https://app.example.com'
+  const renderMessageHook = (props: Partial<HookProps> = {}) => {
+    const hookProps: HookProps = {
+      safeAddress,
+      chainId,
+      messageHash,
+      typedData: createTypedData(),
+      authToken,
+      ...props,
+    }
+    return renderWithHypernativeApi(() => useThreatAnalysisHypernativeMessage(hookProps))
+  }
 
-      renderHook(() =>
-        useThreatAnalysisHypernativeMessage({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          messageHash: mockMessageHash,
-          typedData: mockTypedData,
-          origin: mockOrigin,
-          authToken: mockAuthToken,
-        }),
-      )
+  describe('requests', () => {
+    it('sends the message for assessment with the auth token', async () => {
+      const requests = answerWithAssessment()
+      const typedData = createTypedData()
 
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledWith(
-          expect.objectContaining({
-            safeAddress: mockSafeAddress,
-            messageHash: mockMessageHash,
-            authToken: mockAuthToken,
-            url: mockOrigin,
-            message: expect.objectContaining({
-              primaryType: 'Permit',
-              domain: mockTypedData.domain,
-              message: mockTypedData.message,
-            }),
+      renderMessageHook({ typedData, origin: 'https://app.example.com' })
+
+      await waitFor(() => expect(requests).toHaveLength(1))
+      expect(requests[0].authorization).toBe(authToken)
+      expect(requests[0].body).toEqual(
+        expect.objectContaining({
+          safeAddress,
+          messageHash,
+          url: 'https://app.example.com',
+          message: expect.objectContaining({
+            primaryType: 'Permit',
+            domain: typedData.domain,
+            message: typedData.message,
           }),
-        )
-      })
-    })
-
-    it('should not trigger mutation when typedData is undefined', () => {
-      renderHook(() =>
-        useThreatAnalysisHypernativeMessage({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          messageHash: mockMessageHash,
-          typedData: undefined,
-          authToken: mockAuthToken,
         }),
       )
-
-      expect(mockTriggerAssessment).not.toHaveBeenCalled()
     })
 
-    it('should not trigger mutation when authToken is missing', () => {
-      const mockTypedData = createMockTypedData()
+    it('includes the proposer when one is given', async () => {
+      const requests = answerWithAssessment()
+      const proposer = faker.finance.ethereumAddress() as `0x${string}`
 
-      renderHook(() =>
-        useThreatAnalysisHypernativeMessage({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          messageHash: mockMessageHash,
-          typedData: mockTypedData,
-        }),
-      )
+      renderMessageHook({ proposer })
 
-      expect(mockTriggerAssessment).not.toHaveBeenCalled()
+      await waitFor(() => expect(requests).toHaveLength(1))
+      expect(requests[0].body).toEqual(expect.objectContaining({ proposer }))
     })
 
-    it('should not trigger mutation twice for the same messageHash', async () => {
-      const mockTypedData = createMockTypedData()
+    it('sends the url from a JSON origin', async () => {
+      const requests = answerWithAssessment()
 
-      const { rerender } = renderHook(
-        ({ typedData }) =>
-          useThreatAnalysisHypernativeMessage({
-            safeAddress: mockSafeAddress,
-            chainId: mockChainId,
-            messageHash: mockMessageHash,
-            typedData,
-            authToken: mockAuthToken,
-          }),
-        { initialProps: { typedData: mockTypedData } },
-      )
+      renderMessageHook({ origin: JSON.stringify({ url: 'https://parsed.example.com' }) })
 
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledTimes(1)
+      await waitFor(() => expect(requests).toHaveLength(1))
+      expect(requests[0].body).toEqual(expect.objectContaining({ url: 'https://parsed.example.com' }))
+    })
+
+    it('sends the chain of the typed data domain over the chainId prop', async () => {
+      const requests = answerWithAssessment()
+
+      renderMessageHook({ chainId: '137' })
+
+      await waitFor(() => expect(requests).toHaveLength(1))
+      expect(requests[0].body).toEqual(expect.objectContaining({ chain: '1' }))
+    })
+
+    it('sends the chainId prop when the typed data domain has no chain', async () => {
+      const requests = answerWithAssessment()
+
+      renderMessageHook({
+        chainId: '137',
+        typedData: { ...createTypedData(), domain: { verifyingContract: safeAddress } },
       })
 
-      // Rerender with same messageHash (different typedData object, same hash)
-      rerender({ typedData: { ...mockTypedData } })
-
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledTimes(1)
-      })
+      await waitFor(() => expect(requests).toHaveLength(1))
+      expect(requests[0].body).toEqual(expect.objectContaining({ chain: '137' }))
     })
 
-    it('assesses the same messageHash again after the auth token changes', async () => {
-      const typedData = createMockTypedData()
+    it('sends nothing without typed data', async () => {
+      const requests = answerWithAssessment()
+
+      const { result } = renderMessageHook({ typedData: undefined })
+
+      await waitFor(() => expect(result.current).toEqual([undefined, undefined, false]))
+      expect(requests).toHaveLength(0)
+    })
+
+    it('assesses a message once when its typed data object is recreated', async () => {
+      const requests = answerWithAssessment()
+      const typedData = createTypedData()
+      const { result, rerender } = renderWithHypernativeApi(
+        ({ data }) =>
+          useThreatAnalysisHypernativeMessage({ safeAddress, chainId, messageHash, typedData: data, authToken }),
+        { initialProps: { data: typedData } },
+      )
+      await waitFor(() => expect(result.current[0]).toBeDefined())
+
+      rerender({ data: { ...typedData } })
+
+      expect(result.current[2]).toBe(false)
+      expect(requests).toHaveLength(1)
+    })
+
+    it('assesses the same message again after the auth token changes', async () => {
+      const requests = answerWithAssessment()
       const newAuthToken = `Bearer ${faker.string.alphanumeric(32)}`
-      const { rerender } = renderHook(
-        ({ authToken }) =>
-          useThreatAnalysisHypernativeMessage({
-            safeAddress: mockSafeAddress,
-            chainId: mockChainId,
-            messageHash: mockMessageHash,
-            typedData,
-            authToken,
-          }),
-        { initialProps: { authToken: mockAuthToken as string | undefined } },
+      const typedData = createTypedData()
+      const { rerender } = renderWithHypernativeApi(
+        ({ token }) =>
+          useThreatAnalysisHypernativeMessage({ safeAddress, chainId, messageHash, typedData, authToken: token }),
+        { initialProps: { token: authToken as string | undefined } },
       )
-      await waitFor(() => expect(mockTriggerAssessment).toHaveBeenCalledTimes(1))
+      await waitFor(() => expect(requests).toHaveLength(1))
 
-      rerender({ authToken: undefined })
-      rerender({ authToken: newAuthToken })
+      rerender({ token: undefined })
+      rerender({ token: newAuthToken })
 
-      await waitFor(() => expect(mockTriggerAssessment).toHaveBeenCalledTimes(2))
-      expect(mockTriggerAssessment).toHaveBeenLastCalledWith(
-        expect.objectContaining({ messageHash: mockMessageHash, authToken: newAuthToken }),
-      )
-    })
-
-    it('should include proposer when provided', async () => {
-      const mockTypedData = createMockTypedData()
-      const mockProposer = faker.finance.ethereumAddress() as `0x${string}`
-
-      renderHook(() =>
-        useThreatAnalysisHypernativeMessage({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          messageHash: mockMessageHash,
-          typedData: mockTypedData,
-          proposer: mockProposer,
-          authToken: mockAuthToken,
-        }),
-      )
-
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledWith(expect.objectContaining({ proposer: mockProposer }))
-      })
-    })
-
-    it('should parse origin from JSON string with url property', async () => {
-      const mockTypedData = createMockTypedData()
-      const inputUrl = 'https://parsed.example.com'
-      const jsonOrigin = JSON.stringify({ url: inputUrl })
-
-      renderHook(() =>
-        useThreatAnalysisHypernativeMessage({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          messageHash: mockMessageHash,
-          typedData: mockTypedData,
-          origin: jsonOrigin,
-          authToken: mockAuthToken,
-        }),
-      )
-
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledWith(expect.objectContaining({ url: inputUrl }))
-      })
-    })
-
-    it('should use domain.chainId when present', async () => {
-      const mockTypedData = createMockTypedData() // domain.chainId = 1
-
-      renderHook(() =>
-        useThreatAnalysisHypernativeMessage({
-          safeAddress: mockSafeAddress,
-          chainId: '137', // different from domain
-          messageHash: mockMessageHash,
-          typedData: mockTypedData,
-          authToken: mockAuthToken,
-        }),
-      )
-
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledWith(
-          expect.objectContaining({ chain: '1' }), // domain.chainId wins
-        )
-      })
-    })
-
-    it('should fall back to chainId prop when domain has no chainId', async () => {
-      const mockTypedData: TypedData = {
-        ...createMockTypedData(),
-        domain: { verifyingContract: mockSafeAddress }, // no chainId
-      }
-
-      renderHook(() =>
-        useThreatAnalysisHypernativeMessage({
-          safeAddress: mockSafeAddress,
-          chainId: '137',
-          messageHash: mockMessageHash,
-          typedData: mockTypedData,
-          authToken: mockAuthToken,
-        }),
-      )
-
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledWith(expect.objectContaining({ chain: '137' }))
-      })
+      await waitFor(() => expect(requests).toHaveLength(2))
+      expect(requests[1].authorization).toBe(newAuthToken)
     })
   })
 
-  describe('return values', () => {
-    it('should return error when no authToken provided', () => {
-      const mockTypedData = createMockTypedData()
+  describe('result', () => {
+    it('reports no threat for an accepted message', async () => {
+      answerWithAssessment()
 
-      const { result } = renderHook(() =>
-        useThreatAnalysisHypernativeMessage({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          messageHash: mockMessageHash,
-          typedData: mockTypedData,
-        }),
-      )
-
-      const [, error] = result.current
-      expect(error).toBeDefined()
-      expect(error?.message).toBe('authToken is required')
-      expect(mockTriggerAssessment).not.toHaveBeenCalled()
-    })
-
-    it('should return mapped threat data when successful', async () => {
-      const mockTypedData = createMockTypedData()
-      const mockResponse = createMockHypernativeResponse()
-      mockUseAssessMessageMutation.mockReturnValue([
-        mockTriggerAssessment,
-        { data: mockResponse, error: undefined, isLoading: false, reset: jest.fn() },
-      ] as any)
-
-      const { result } = renderHook(() =>
-        useThreatAnalysisHypernativeMessage({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          messageHash: mockMessageHash,
-          typedData: mockTypedData,
-          authToken: mockAuthToken,
-        }),
-      )
+      const { result } = renderMessageHook()
 
       await waitFor(() => {
         const [data, error, loading] = result.current
-        expect(data).toBeDefined()
-        expect(data?.[StatusGroup.THREAT]).toBeDefined()
+        expect(data?.[StatusGroup.THREAT]?.[0]).toEqual(
+          expect.objectContaining({ severity: Severity.OK, type: ThreatStatus.NO_THREAT }),
+        )
         expect(error).toBeUndefined()
         expect(loading).toBe(false)
       })
     })
 
-    it('should return error result when mutation fails with structured error', async () => {
-      const mockTypedData = createMockTypedData()
-      const mockError: HypernativeMessageAssessmentErrorDto = {
+    it('reports a critical threat for a denied message', async () => {
+      answerWithAssessment(
+        createAssessment({
+          status: 'Risks found',
+          severity: 'deny',
+          risks: [
+            {
+              title: 'Malicious permit',
+              details: 'Permit signature to known malicious spender.',
+              severity: 'deny',
+              safeCheckId: faker.string.alphanumeric(10),
+            },
+          ],
+        }),
+      )
+
+      const { result } = renderMessageHook()
+
+      await waitFor(() =>
+        expect(result.current[0]?.[StatusGroup.THREAT]?.[0]).toEqual(
+          expect.objectContaining({ severity: Severity.CRITICAL, type: ThreatStatus.HYPERNATIVE_GUARD }),
+        ),
+      )
+    })
+
+    it('reports the reason the API gives for refusing the message', async () => {
+      const refusal: HypernativeMessageAssessmentErrorDto = {
         status: 'FAILED',
         error: {
           reason: 'MESSAGE_HASH_MISMATCH',
           message: 'The provided messageHash does not match the computed hash',
         },
       }
-      mockUseAssessMessageMutation.mockReturnValue([
-        mockTriggerAssessment,
-        { data: undefined, error: mockError, isLoading: false, reset: jest.fn() },
-      ] as any)
+      answerHypernative(MESSAGE_ASSESSMENT_PATH, () => HttpResponse.json(refusal, { status: 400 }))
 
-      const { result } = renderHook(() =>
-        useThreatAnalysisHypernativeMessage({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          messageHash: mockMessageHash,
-          typedData: mockTypedData,
-          authToken: mockAuthToken,
-        }),
-      )
+      const { result } = renderMessageHook()
 
       await waitFor(() => {
         const [data, error] = result.current
         expect(data).toEqual({ [StatusGroup.COMMON]: [getErrorInfo(ErrorType.THREAT)] })
-        expect(error?.message).toContain('MESSAGE_HASH_MISMATCH')
+        expect(error?.message).toBe('MESSAGE_HASH_MISMATCH: The provided messageHash does not match the computed hash')
       })
     })
 
-    it('should return generic error result when mutation fails with unknown error', async () => {
-      const mockTypedData = createMockTypedData()
-      mockUseAssessMessageMutation.mockReturnValue([
-        mockTriggerAssessment,
-        { data: undefined, error: new Error('Network error'), isLoading: false, reset: jest.fn() },
-      ] as any)
+    it('reports a generic error when the API answers with something unexpected', async () => {
+      answerHypernative(MESSAGE_ASSESSMENT_PATH, () => new HttpResponse('<html>Bad gateway</html>', { status: 400 }))
 
-      const { result } = renderHook(() =>
-        useThreatAnalysisHypernativeMessage({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          messageHash: mockMessageHash,
-          typedData: mockTypedData,
-          authToken: mockAuthToken,
-        }),
-      )
+      const { result } = renderMessageHook()
 
       await waitFor(() => {
         const [data, error] = result.current
@@ -385,166 +268,52 @@ describe('useThreatAnalysisHypernativeMessage', () => {
       })
     })
 
-    it('should return loading state when mutation is in progress', () => {
-      const mockTypedData = createMockTypedData()
-      mockUseAssessMessageMutation.mockReturnValue([
-        mockTriggerAssessment,
-        { data: undefined, error: undefined, isLoading: true, reset: jest.fn() },
-      ] as any)
+    it('is loading while the assessment is in flight', async () => {
+      answerHypernative(MESSAGE_ASSESSMENT_PATH, async () => {
+        await delay('infinite')
+        return HttpResponse.json(createAssessment())
+      })
 
-      const { result } = renderHook(() =>
-        useThreatAnalysisHypernativeMessage({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          messageHash: mockMessageHash,
-          typedData: mockTypedData,
-          authToken: mockAuthToken,
-        }),
-      )
+      const { result } = renderMessageHook()
 
-      const [, , loading] = result.current
-      expect(loading).toBe(true)
+      await waitFor(() => expect(result.current[2]).toBe(true))
     })
 
-    it('should return CRITICAL threat when deny risk detected', async () => {
-      const mockTypedData = createMockTypedData()
-      const mockResponse: HypernativeMessageAssessmentResponseDto['data'] = {
-        ...createMockHypernativeResponse(),
-        assessmentData: {
-          assessmentId: faker.string.uuid(),
-          assessmentTimestamp: new Date().toISOString(),
-          recommendation: 'deny',
-          interpretation: 'Malicious permit signature',
-          findings: {
-            THREAT_ANALYSIS: {
-              status: 'Risks found',
-              severity: 'deny',
-              risks: [
-                {
-                  title: 'Malicious permit',
-                  details: 'Permit signature to known malicious spender.',
-                  severity: 'deny',
-                  safeCheckId: faker.string.alphanumeric(10),
-                },
-              ],
-            },
-            CUSTOM_CHECKS: {
-              status: 'Passed',
-              severity: 'accept',
-              risks: [],
-            },
-          },
-        },
-      }
-      mockUseAssessMessageMutation.mockReturnValue([
-        mockTriggerAssessment,
-        { data: mockResponse, error: undefined, isLoading: false, reset: jest.fn() },
-      ] as any)
+    it('requires an auth token', () => {
+      const requests = answerWithAssessment()
 
-      const { result } = renderHook(() =>
-        useThreatAnalysisHypernativeMessage({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          messageHash: mockMessageHash,
-          typedData: mockTypedData,
-          authToken: mockAuthToken,
-        }),
-      )
+      const { result } = renderMessageHook({ authToken: undefined })
 
-      await waitFor(() => {
-        const [data] = result.current
-        expect(data?.[StatusGroup.THREAT]?.[0]).toEqual(
-          expect.objectContaining({
-            severity: Severity.CRITICAL,
-            type: ThreatStatus.HYPERNATIVE_GUARD,
-          }),
-        )
-      })
+      expect(result.current[1]?.message).toBe('authToken is required')
+      expect(requests).toHaveLength(0)
     })
   })
 
-  describe('skip parameter', () => {
-    it('should not trigger mutation when skip is true', () => {
-      const mockTypedData = createMockTypedData()
+  describe('skip', () => {
+    it('sends nothing and returns nothing, even without an auth token', async () => {
+      const requests = answerWithAssessment()
 
-      renderHook(() =>
-        useThreatAnalysisHypernativeMessage({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          messageHash: mockMessageHash,
-          typedData: mockTypedData,
-          authToken: mockAuthToken,
-          skip: true,
-        }),
-      )
+      const { result } = renderMessageHook({ skip: true, authToken: undefined })
 
-      expect(mockTriggerAssessment).not.toHaveBeenCalled()
+      await waitFor(() => expect(result.current).toEqual([undefined, undefined, false]))
+      expect(requests).toHaveLength(0)
     })
 
-    it('should return undefined result when skip is true', () => {
-      const mockResponse = createMockHypernativeResponse()
-      mockUseAssessMessageMutation.mockReturnValue([
-        mockTriggerAssessment,
-        { data: mockResponse, error: undefined, isLoading: false, reset: jest.fn() },
-      ] as any)
-
-      const { result } = renderHook(() =>
-        useThreatAnalysisHypernativeMessage({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          messageHash: mockMessageHash,
-          typedData: createMockTypedData(),
-          authToken: mockAuthToken,
-          skip: true,
-        }),
+    it('reports no error once skipped after the API rejected the token', async () => {
+      answerHypernative(MESSAGE_ASSESSMENT_PATH, () =>
+        HttpResponse.json({ success: false, data: null, error: 'Please reconnect', errorCode: 1038 }, { status: 401 }),
       )
-
-      const [data, error, loading] = result.current
-      expect(data).toBeUndefined()
-      expect(error).toBeUndefined()
-      expect(loading).toBe(false)
-    })
-
-    it('reports no error once skipped after the API rejected the token', () => {
-      mockUseAssessMessageMutation.mockReturnValue([
-        mockTriggerAssessment,
-        {
-          data: undefined,
-          error: { error: 'Please reconnect', errorCode: 1038, success: false, data: null },
-          isLoading: false,
-          reset: jest.fn(),
-        },
-      ] as unknown as ReturnType<typeof hypernativeApi.useAssessMessageMutation>)
-
-      const { result } = renderHook(() =>
-        useThreatAnalysisHypernativeMessage({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          messageHash: mockMessageHash,
-          typedData: createMockTypedData(),
-          authToken: undefined,
-          skip: true,
-        }),
+      const typedData = createTypedData()
+      const { result, rerender } = renderWithHypernativeApi(
+        ({ token, skip }) =>
+          useThreatAnalysisHypernativeMessage({ safeAddress, chainId, messageHash, typedData, authToken: token, skip }),
+        { initialProps: { token: authToken as string | undefined, skip: false } },
       )
+      await waitFor(() => expect(result.current[1]).toBeDefined())
 
-      const [, error] = result.current
-      expect(error).toBeUndefined()
-    })
+      rerender({ token: undefined, skip: true })
 
-    it('should not throw error when skip is true and authToken is missing', () => {
-      expect(() =>
-        renderHook(() =>
-          useThreatAnalysisHypernativeMessage({
-            safeAddress: mockSafeAddress,
-            chainId: mockChainId,
-            messageHash: mockMessageHash,
-            typedData: createMockTypedData(),
-            skip: true,
-          }),
-        ),
-      ).not.toThrow()
-
-      expect(mockTriggerAssessment).not.toHaveBeenCalled()
+      expect(result.current).toEqual([undefined, undefined, false])
     })
   })
 })

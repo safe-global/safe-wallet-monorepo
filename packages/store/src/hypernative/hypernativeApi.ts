@@ -57,10 +57,8 @@ export const hypernativeApi = createApi({
       extraOptions: { maxRetries: 0 },
       invalidatesTags: ['hypernative-oauth'],
     }),
-    assessTransaction: build.mutation<
-      HypernativeAssessmentResponseDto['data'],
-      HypernativeAssessmentRequestWithAuthDto
-    >({
+    // The assessments keepUnusedDataFor: 0, so a review that opens again is assessed again
+    assessTransaction: build.query<HypernativeAssessmentResponseDto['data'], HypernativeAssessmentRequestWithAuthDto>({
       query: ({ authToken, ...request }) => ({
         url: '/safe/transaction/assessment',
         method: 'POST',
@@ -74,7 +72,7 @@ export const hypernativeApi = createApi({
       transformResponse: (response: HypernativeAssessmentResponseDto): HypernativeAssessmentResponseDto['data'] =>
         (response as HypernativeAssessmentResponseDto).data,
       transformErrorResponse: (response: HypernativeAssessmentResponseDto) => response.data,
-      invalidatesTags: ['hypernative-threat-analysis'],
+      keepUnusedDataFor: 0,
     }),
     getBatchAssessments: build.mutation<
       HypernativeBatchAssessmentResponseDto['data'],
@@ -96,7 +94,7 @@ export const hypernativeApi = createApi({
       transformErrorResponse: (response: HypernativeBatchAssessmentResponseDto) => response.data,
       invalidatesTags: ['hypernative-threat-analysis'],
     }),
-    assessMessage: build.mutation<
+    assessMessage: build.query<
       HypernativeMessageAssessmentResponseDto['data'],
       HypernativeMessageAssessmentRequestWithAuthDto
     >({
@@ -114,7 +112,7 @@ export const hypernativeApi = createApi({
         response: HypernativeMessageAssessmentResponseDto,
       ): HypernativeMessageAssessmentResponseDto['data'] => response.data,
       transformErrorResponse: (response: HypernativeMessageAssessmentResponseDto) => response.data,
-      invalidatesTags: ['hypernative-threat-analysis'],
+      keepUnusedDataFor: 0,
     }),
   }),
 })
