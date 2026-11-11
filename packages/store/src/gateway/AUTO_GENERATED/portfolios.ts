@@ -20,8 +20,28 @@ const injectedRtkApi = api
         providesTags: ['portfolio'],
       }),
       portfolioClearPortfolioV1: build.mutation<PortfolioClearPortfolioV1ApiResponse, PortfolioClearPortfolioV1ApiArg>({
-        query: (queryArg) => ({ url: `/v1/portfolio/${queryArg.address}`, method: 'DELETE' }),
+        query: (queryArg) => ({
+          url: `/v1/portfolio/${queryArg.address}`,
+          method: 'DELETE',
+          params: {
+            chainId: queryArg.chainId,
+          },
+        }),
         invalidatesTags: ['portfolio'],
+      }),
+      portfolioSummariesGetSummariesV2: build.query<
+        PortfolioSummariesGetSummariesV2ApiResponse,
+        PortfolioSummariesGetSummariesV2ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v2/portfolio/summaries`,
+          params: {
+            safes: queryArg.safes,
+            currency: queryArg.currency,
+            trusted: queryArg.trusted,
+          },
+        }),
+        providesTags: ['portfolio'],
       }),
     }),
     overrideExisting: false,
@@ -44,8 +64,19 @@ export type PortfolioGetPortfolioV1ApiArg = {
 }
 export type PortfolioClearPortfolioV1ApiResponse = unknown
 export type PortfolioClearPortfolioV1ApiArg = {
-  /** Wallet address (0x prefixed hex string) */
+  /** Safe address (0x prefixed hex string) */
   address: string
+  /** A chain on which the address is a Safe */
+  chainId: string
+}
+export type PortfolioSummariesGetSummariesV2ApiResponse = /** status 200  */ PortfolioSummary[]
+export type PortfolioSummariesGetSummariesV2ApiArg = {
+  /** Comma-separated list of Safe addresses in chainId:address format. Only the first MAX_SAFE_OVERVIEWS distinct entries are used. */
+  safes: string
+  /** Fiat currency code (e.g. USD, EUR) */
+  currency: string
+  /** If true, only trusted tokens count. Defaults to false. */
+  trusted?: boolean
 }
 export type PortfolioNativeToken = {
   address: string
@@ -149,8 +180,40 @@ export type Portfolio = {
   /** List of app balances */
   positionBalances: AppBalance[]
 }
+export type PortfolioSummarySnapshot = {
+  /** Total across every chain of this address in this environment (mainnets or testnets). Decimal string. */
+  fiatTotal: string
+  /** Absolute change of the total over 1 day. Decimal string, null when Zerion has no history. */
+  fiatChange1d: string | null
+  /** Percentage change of the total over 1 day, null when Zerion has no history. */
+  percentChange1d: number | null
+  /** Total per chain, keyed by chainId. Only chains whose Zerion network maps to a chainId are listed, so the values may not add up to fiatTotal. */
+  fiatTotalByChain: {
+    [key: string]: string
+  }
+  /** Total per position type as returned by Zerion (e.g. wallet, deposited, borrowed, locked, staked). */
+  fiatTotalByType: {
+    [key: string]: string
+  }
+  /** When the snapshot was fetched from Zerion. */
+  updatedAt: string
+  /** When the cached snapshot expires. A transaction or a manual refresh can clear it earlier. */
+  expiresAt: string
+}
+export type PortfolioSummary = {
+  chainId: string
+  address: string
+  /** Value of this Safe on this chain. Decimal string. */
+  fiatTotal: string
+  /** zerion: read from the Zerion snapshot. tx_service: the chain is not on Zerion, or the snapshot is unavailable. */
+  source: 'zerion' | 'tx_service'
+  /** The Zerion snapshot the value was read from, null for tx_service. */
+  snapshot: PortfolioSummarySnapshot | null
+}
 export const {
   usePortfolioGetPortfolioV1Query,
   useLazyPortfolioGetPortfolioV1Query,
   usePortfolioClearPortfolioV1Mutation,
+  usePortfolioSummariesGetSummariesV2Query,
+  useLazyPortfolioSummariesGetSummariesV2Query,
 } = injectedRtkApi
