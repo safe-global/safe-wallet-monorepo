@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react'
-import { MoreHorizontal, StickyNote, TriangleAlert } from 'lucide-react'
+import { MoreHorizontal, StickyNote, TriangleAlert, UserPen } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
   DropdownMenu,
@@ -215,35 +215,37 @@ export function QueueRow({
     <span className="flex items-center gap-2">
       <Tooltip delay={150}>
         <TooltipTrigger
-          aria-label={
-            signatureCount === 0
-              ? `0 of ${account.threshold} signatures, proposal, ${getSignerSummary(tx, persona)}`
-              : `${signatureCount} of ${account.threshold} signatures, ${getSignerSummary(tx, persona)}`
-          }
+          aria-label={`${signatureCount} of ${account.threshold} signatures, ${getSignerSummary(tx, persona)}`}
           className="flex text-sm tabular-nums"
           onClick={(event) => event.stopPropagation()}
         >
-          {signatureCount === 0 ? (
-            // As production: with no signatures yet, only a proposer can have created it.
-            <StatusChip tone="secondary">Proposal</StatusChip>
-          ) : (
-            <span className="flex items-center gap-1.5">
-              <SignatureGauge count={signatureCount} threshold={account.threshold} />
-              {signatureCount}/{account.threshold}
-            </span>
-          )}
+          <span className="flex items-center gap-1.5">
+            <SignatureGauge count={signatureCount} threshold={account.threshold} />
+            {signatureCount}/{account.threshold}
+          </span>
         </TooltipTrigger>
         <TooltipContent className={HINT_CLASS}>
-          {signatureCount === 0 ? (
-            <HintContent
-              title="Proposal"
-              body={`Created by a proposer. No signatures yet, ${account.threshold} needed. Sign or reject it to proceed.`}
-            />
-          ) : (
-            <SignerList tx={tx} persona={persona} />
-          )}
+          <SignerList tx={tx} persona={persona} />
         </TooltipContent>
       </Tooltip>
+      {/* Production shows a Proposal chip here. We keep the count and mark who created it instead. */}
+      {signatureCount === 0 && (
+        <Tooltip delay={150}>
+          <TooltipTrigger
+            render={<span className="flex shrink-0 text-muted-foreground" />}
+            aria-label="Created by a proposer"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <UserPen className="size-4" strokeWidth={ICON_STROKE} aria-hidden="true" />
+          </TooltipTrigger>
+          <TooltipContent className={HINT_CLASS}>
+            <HintContent
+              title="Created by a proposer"
+              body={`No owner has signed yet, ${account.threshold} needed. Sign or reject it to proceed.`}
+            />
+          </TooltipContent>
+        </Tooltip>
+      )}
       {safenet && !compact && <SafenetMark tx={tx} />}
     </span>
   )
