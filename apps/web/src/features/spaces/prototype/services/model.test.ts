@@ -216,8 +216,12 @@ describe('prototype queue state', () => {
 })
 
 describe('next steps status', () => {
-  it('labels a row you can sign behind an earlier nonce as Sign, with the nonce it executes after', () => {
-    expect(getStepsStatus(proposal('treasury-44'), 'owner')).toEqual({ label: 'Sign', tone: 'success', after: 42 })
+  it('labels a row you can sign behind an earlier nonce as Sign ahead, with the nonce it executes after', () => {
+    expect(getStepsStatus(proposal('treasury-44'), 'owner')).toEqual({
+      label: 'Sign ahead',
+      tone: 'success',
+      after: 42,
+    })
   })
 
   it('does not add an after nonce to the next nonce', () => {

@@ -1,6 +1,6 @@
 import { accounts } from './model'
 import type { Proposal } from '../types'
-import { DEFAULT_DISPLAY, groupQueue, loadDisplay, orderQueue, saveDisplay } from './order'
+import { DEFAULT_DISPLAY, getGroupCounts, groupQueue, loadDisplay, orderQueue, saveDisplay } from './order'
 
 // Dev ("owner") signs on Treasury (3 of 5, next #42) and Ops Payroll (2 of 4, next #17), not on Grants.
 const [treasury, payroll, grants] = accounts
@@ -110,7 +110,7 @@ describe('groupQueue', () => {
       tx('treasury', 44, [], '1h ago'),
     ]
     const groups = groupQueue(rows, 'next', 'owner')
-    expect(groups.map((group) => group.label)).toEqual(['Next', 'Queue'])
+    expect(groups.map((group) => group.label)).toEqual(['Next in line', 'Behind it'])
     expect(groups.map((group) => ids(group.rows))).toEqual([
       ['treasury-42a', 'treasury-42b', 'payroll-17'],
       ['treasury-43', 'treasury-44', 'payroll-18', 'grants-9'],
@@ -119,7 +119,19 @@ describe('groupQueue', () => {
 
   it('drops Next when no Safe can run its next nonce', () => {
     const groups = groupQueue([tx('grants', 9, [], '1h ago')], 'next', 'owner')
-    expect(groups.map((group) => group.label)).toEqual(['Queue'])
+    expect(groups.map((group) => group.label)).toEqual(['Behind it'])
+  })
+})
+
+describe('getGroupCounts', () => {
+  it('counts rows that need you, Safes, networks and rows next in line', () => {
+    const rows = [
+      tx('treasury', 42, [], '1h ago'),
+      tx('treasury', 43, [], '1h ago'),
+      tx('payroll', 17, ['Ana', 'Max'], '1h ago'),
+      tx('grants', 9, [], '1h ago'),
+    ]
+    expect(getGroupCounts(rows, 'owner')).toEqual({ status: 3, safe: 3, network: 3, next: 2 })
   })
 })
 

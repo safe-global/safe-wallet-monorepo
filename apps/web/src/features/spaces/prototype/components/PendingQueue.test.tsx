@@ -1405,8 +1405,8 @@ describe('option D · flat table', () => {
   it('groups by next nonce, then the rest of the queue, with a Network column', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, flat)
     await user.click(screen.getByRole('button', { name: 'Group by Status' }))
-    await user.click(await screen.findByRole('menuitemradio', { name: /^Next \/ Queue/ }))
-    expect(headings().map((heading) => heading?.replace(/\d+$/, ''))).toEqual(['Next', 'Queue'])
+    await user.click(await screen.findByRole('menuitemradio', { name: /^Up next/ }))
+    expect(headings().map((heading) => heading?.replace(/\d+$/, ''))).toEqual(['Next in line', 'Behind it'])
     expect(screen.getByRole('columnheader', { name: 'Network' })).toBeInTheDocument()
   })
 })
@@ -1422,12 +1422,21 @@ describe('option E · Group by cards', () => {
     // The last header cell also holds Collapse all, whose label names the groups.
     const byStatus = columnTitles().slice(0, -1)
     expect(byStatus.slice(0, 4)).toEqual(['Nonce', 'Transaction', 'To', 'Network'])
-    for (const name of [/^Safe/, /^Network/, /^Next \/ Queue/]) {
+    for (const name of [/^Safe/, /^Network/, /^Up next/]) {
       pick(name)
       expect(columnTitles().slice(0, -1)).toEqual(byStatus)
     }
     pick(/^Network/)
     expect(screen.getByRole('button', { name: 'Collapse Ethereum' })).toBeInTheDocument()
+  })
+
+  it('says Sign ahead only on rows behind an earlier nonce', () => {
+    render(<PendingQueue />, cards)
+    fireEvent.click(screen.getByRole('radio', { name: /^Up next/ }))
+    const next = document.getElementById('rows-next')!
+    const behind = document.getElementById('rows-queue')!
+    expect(within(next).queryByText('Sign ahead')).toBeNull()
+    expect(within(behind).getAllByText('Sign ahead').length).toBeGreaterThan(0)
   })
 
   it('starts each transaction with its Safe as a tag, in place of the Safe column', () => {
@@ -1439,7 +1448,7 @@ describe('option E · Group by cards', () => {
 
   it('draws conflicting options under one nonce in every grouping', () => {
     render(<PendingQueue />, { routerProps: { query: { option: 'cards', scenario: '20-safes' } } })
-    for (const name of [/^Status/, /^Safe/, /^Network/, /^Next \/ Queue/]) {
+    for (const name of [/^Status/, /^Safe/, /^Network/, /^Up next/]) {
       pick(name)
       expect(allPending().getAllByRole('img', { name: /^Option 1 of \d+ at nonce/ }).length).toBeGreaterThan(0)
     }
@@ -1453,10 +1462,10 @@ describe('option E · Group by cards', () => {
         .getAllByRole('radio')
         .map((card) => card.textContent),
     ).toEqual([
-      'StatusWhat needs you first',
-      'SafeEach Safe in nonce order',
-      'NetworkEach network in nonce order',
-      'Next / QueueWhat can run now, then the rest',
+      expect.stringMatching(/^\d+StatusTransactions that need your action first$/),
+      expect.stringMatching(/^\d+Up nextNext transaction on each Safe$/),
+      expect.stringMatching(/^\d+SafesTransactions grouped by Safe, network, and nonce$/),
+      expect.stringMatching(/^\d+NetworksTransactions grouped by network$/),
     ])
     expect(within(group).getByRole('radio', { name: /^Status/ })).toHaveAttribute('aria-checked', 'true')
     expect(screen.queryByRole('button', { name: /^Group by / })).toBeNull()
@@ -1464,8 +1473,8 @@ describe('option E · Group by cards', () => {
 
   it('regroups when a card is picked, and remembers it apart from option D', async () => {
     const { user, unmount } = renderWithUserEvent(<PendingQueue />, cards)
-    await user.click(screen.getByRole('radio', { name: /^Next \/ Queue/ }))
-    expect(screen.getByRole('radio', { name: /^Next \/ Queue/ })).toHaveAttribute('aria-checked', 'true')
+    await user.click(screen.getByRole('radio', { name: /^Up next/ }))
+    expect(screen.getByRole('radio', { name: /^Up next/ })).toHaveAttribute('aria-checked', 'true')
     expect(allPending().getByRole('heading', { level: 3, name: /^Next/ })).toBeInTheDocument()
     unmount()
     render(<PendingQueue />, { routerProps: { query: { option: 'flat' } } })
