@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { registryItemSchema } from 'shadcn/schema'
-import { appDir } from './paths.ts'
+import { appDir, INTERNAL_REFERENCE } from './paths.ts'
 import type { Registry } from './registry.ts'
 
 export const outputDir = path.join(appDir, 'public/r')
@@ -23,6 +23,8 @@ export const checkRegistry = (dir: string = outputDir): string[] => {
     for (const entry of item.files ?? []) {
       if (!entry.content?.trim()) errors.push(`${file}: ${entry.path} has no content`)
       if (/from\s+['"]\.\.\//.test(entry.content ?? '')) errors.push(`${file}: ${entry.path} imports outside its item`)
+      const internal = entry.content?.match(INTERNAL_REFERENCE)
+      if (internal) errors.push(`${file}: ${entry.path} mentions the repo-internal ${internal[0]}`)
     }
     for (const dependency of item.registryDependencies ?? []) {
       const target = dependency.replace(/^@safe\//, '')

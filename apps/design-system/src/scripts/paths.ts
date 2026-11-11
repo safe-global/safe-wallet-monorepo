@@ -30,3 +30,7 @@ export const componentNames = (root: string = uiDir): string[] =>
 
 export const componentFile = (name: string, root: string = uiDir): string =>
   path.join(root, readUiExports(root)[`./${name}`])
+
+/** Repo-internal references that must not reach docs readers or registry consumers */
+export const INTERNAL_REFERENCE =
+  /\.claude\/|AGENTS\.md|apps\/web|@safe-global\/views|packages\/(ui|theme|views)\/|\.storybook\//

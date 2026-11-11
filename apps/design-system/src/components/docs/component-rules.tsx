@@ -1,17 +1,11 @@
 import { ServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc'
 import { getProps, getRules } from '@/lib/generated'
+import { withCode } from './inline-code'
 
 const hasStylingProps = (component: string) =>
   getProps(component).components.some((doc) =>
     doc.props.some((prop) => prop.name === 'variant' || prop.name === 'size'),
   )
-
-const withCode = (text: string) =>
-  text
-    .split(/(`[^`]+`)/)
-    .map((part, index) =>
-      part.startsWith('`') && part.endsWith('`') ? <code key={index}>{part.slice(1, -1)}</code> : part,
-    )
 
 export function ComponentRules({ component }: { component: string }) {
   const rules = getRules().filter((rule) => rule.component === component)
