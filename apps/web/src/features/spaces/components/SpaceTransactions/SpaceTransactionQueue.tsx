@@ -34,10 +34,6 @@ const QueueBody = memo(function QueueBody({
 }): ReactElement {
   const { sections, unavailableSafes } = queue
   const isNarrowed = isFiltered || isSearching
-  // The gateway answers a failed queue read with every Safe unavailable rather than an error
-  if (!isNarrowed && sections.length === 0 && unavailableSafes.length > 0) {
-    return <QueueLoadError onRetry={onRetry} />
-  }
 
   return (
     <>

@@ -167,14 +167,14 @@ describe('SpaceTransactionQueue', () => {
     expect(refetch).toHaveBeenCalled()
   })
 
-  it('shows an error instead of the empty state when no Safe could be loaded', () => {
+  it('shows the empty state with the unavailable Safes when none of them could be loaded', () => {
     mockQueue({ currentData: queue([], { unavailableSafes: [{ chainId: '1', safeAddress: safeA }] }) })
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(screen.getByText("Couldn't load the queue")).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument()
-    expect(screen.queryByText('Pending transactions of your Safe accounts will appear here')).not.toBeInTheDocument()
+    expect(screen.queryByText("Couldn't load the queue")).not.toBeInTheDocument()
+    expect(screen.getByText('Pending transactions of your Safe accounts will appear here')).toBeInTheDocument()
+    expect(screen.getByText("1 Safe account couldn't be loaded")).toBeInTheDocument()
   })
 
   it('requests the queue again with the filters chosen in the toolbar', () => {
