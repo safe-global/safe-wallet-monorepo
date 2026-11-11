@@ -13,8 +13,9 @@ name: Web Argos Storybook
 # still correct because their images are identical.
 #
 # Pull requests upload only the sheets that differ from their merge base on dev, as an Argos
-# subset build, and a skipped build when none differ. A PR that removes a sheet uploads all
-# sheets as a full build, because a subset build ignores removals. Thus the Argos status
+# subset build, and a skipped build when none differ. A subset build ignores removals, so a
+# removed sheet shows only in the job summary; the dev build after the merge drops it from the
+# baseline. Thus the Argos status
 # `argos/safe-wallet-monorepo/storybook` reports on every PR and can be a required check
 # (docs/ci-required-checks.md).
 
@@ -242,11 +243,15 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
           echo "to-upload=$(grep -c . upload-list.txt || true)" >> "$GITHUB_OUTPUT"
-          # A subset build ignores the sheets it leaves out, so a removed sheet or a missing baseline needs a full build
-          if [ -z "$BASE_SHA" ] || grep -q '^### Removed' <<< "$report"; then
+          # Without a baseline every sheet counts as changed, so the full set goes up either way
+          if [ -z "$BASE_SHA" ]; then
             echo "full=true" >> "$GITHUB_OUTPUT"
           else
             echo "full=false" >> "$GITHUB_OUTPUT"
+          fi
+          # A subset build does not show removals; a full build only to show one cost every sheet on every push
+          if grep -q '^### Removed' <<< "$report"; then
+            echo "::notice::This PR removes sheets; Argos does not show removals in a subset build, see the job summary"
           fi
 
       # On dev, a merge that changed no sheet keeps the last baseline
