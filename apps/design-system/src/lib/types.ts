@@ -57,7 +57,8 @@ export type TokenGroup = 'color' | 'palette' | 'spacing' | 'radius' | 'z-index' 
 /** One row of `src/generated/tokens.json` */
 export interface TokenEntry {
   name: string
-  light: string
+  /** Value on `:root`; absent when the variable is only declared on `.dark` */
+  light?: string
   dark?: string
   group: TokenGroup
   /** Example utility the token maps to through `@theme inline`, e.g. `bg-primary` */
