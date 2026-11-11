@@ -303,7 +303,7 @@ jobs:
   result:
     name: Storybook visual tests result
     permissions: {}
-    if: always()
+    if: ${{ !cancelled() }}
     needs: [changes, sweep, visual]
     runs-on: ubuntu-26.04-arm
     steps:

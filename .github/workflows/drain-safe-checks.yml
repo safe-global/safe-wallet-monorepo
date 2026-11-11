@@ -128,7 +128,7 @@ jobs:
     # The one check that branch protection requires for this workflow.
     name: drain-safe checks result
     permissions: {}
-    if: always()
+    if: ${{ !cancelled() }}
     needs: [changes, lint, prettier, type-check, unit-tests, build]
     runs-on: ubuntu-26.04-arm
     steps:

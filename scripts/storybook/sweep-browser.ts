@@ -39,6 +39,16 @@ const EAGER_LOADING = `(() => {
   }
 })()`
 
+// A screenshot sometimes shrinks the viewport to 1px for a moment. Popups that hear that resize flip above their
+// anchor and keep that side, so the resize is stopped before any page listener (this script runs first)
+const HIDE_CAPTURE_RESIZE = `(() => {
+  const stopCaptureResize = (event) => {
+    if (innerHeight <= 1 || innerWidth <= 1) event.stopImmediatePropagation()
+  }
+  addEventListener('resize', stopCaptureResize, true)
+  visualViewport?.addEventListener('resize', stopCaptureResize)
+})()`
+
 // Embedded apps and widgets (stake, earn, bridge) load external pages, which the sweep blocks; Chrome's
 // error page for them paints at a different moment each run, so they get a fixed placeholder instead
 const externalPagePlaceholder = (host: string): string =>
@@ -75,6 +85,7 @@ async function newStoryContext(browser: Browser, storybookOrigin: string): Promi
   await context.clock.setFixedTime(FIXED_NOW)
   await context.addInitScript({ content: SEEDED_RANDOM })
   await context.addInitScript({ content: EAGER_LOADING })
+  await context.addInitScript({ content: HIDE_CAPTURE_RESIZE })
   await context.route(
     (url) => url.origin !== storybookOrigin,
     (route) =>
