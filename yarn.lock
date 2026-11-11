@@ -14542,6 +14542,7 @@ __metadata:
     lucide-react: "npm:^0.563.0"
     next: "patch:next@npm%3A16.4.2#~/.yarn/patches/next-npm-16.4.2-6ca9d0fedd.patch"
     postcss: "npm:^8.5.18"
+    prettier: "npm:^3.9.10"
     react: "npm:19.2.0"
     react-docgen-typescript: "npm:2.2.2"
     react-dom: "npm:19.2.0"

@@ -46,6 +46,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "http-server": "^14.1.1",
     "postcss": "^8.5.18",
+    "prettier": "^3.9.10",
     "react-docgen-typescript": "2.2.2",
     "shadcn": "^3.7.0",
     "storybook": "^10.6.5",

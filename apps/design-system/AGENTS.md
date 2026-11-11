@@ -6,7 +6,7 @@
 
 - **Consume `@safe-global/ui` like an outside app.** Import its public subpaths (`@safe-global/ui/button`, `@safe-global/ui/styles.css`, `@safe-global/ui/eslint`), never relative `packages/ui` paths. Never import `@safe-global/views`, and never use `.shadcn-scope`, `scoped.css` or `ShadcnProvider` outside the prose that explains them.
 - **Never copy values.** Colours, sizes and token names come from the generated data; no hex or `oklch()` value lives in `src/` or `content/`.
-- **Stay host-agnostic.** No `vercel.json`, `netlify.toml`, `_redirects`, `CNAME` or other host files, and no host name in the source. The base path and URLs come from the env variables below.
+- **Stay host-agnostic.** No host-specific files (deploy, redirect or header config, custom-domain files) and no host name in the source. The base path and URLs come from the env variables below.
 - **Never edit a story to fix the docs.** The stories are the wallet's visual baseline. Fix previews in `src/lib/preview-config.ts` or the docs components.
 - Previews load only `preview.css` (Tailwind + `@safe-global/ui/styles.css`), so they show exactly what a consumer gets. The docs chrome adds the Fumadocs CSS.
 
