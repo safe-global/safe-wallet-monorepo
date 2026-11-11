@@ -8,7 +8,11 @@ import SpaceTransactionQueue from './SpaceTransactionQueue'
 const mockToolbarProps = jest.fn()
 jest.mock('./TransactionsToolbar', () => ({
   __esModule: true,
-  default: (props: { filters: SpaceQueueFilters; onFiltersChange: (filters: SpaceQueueFilters) => void }) => {
+  default: (props: {
+    filters: SpaceQueueFilters
+    onFiltersChange: (filters: SpaceQueueFilters) => void
+    onSearchChange: (search: string) => void
+  }) => {
     mockToolbarProps(props)
     return (
       <>
@@ -18,6 +22,7 @@ jest.mock('./TransactionsToolbar', () => ({
         >
           Filter by sign
         </button>
+        <input aria-label="Search" onChange={(event) => props.onSearchChange(event.target.value)} />
       </>
     )
   },
@@ -88,7 +93,10 @@ describe('SpaceTransactionQueue', () => {
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(querySpy).toHaveBeenCalledWith(spaceId, { statuses: [], safes: [], chainIds: [], signers: [] })
+    expect(querySpy).toHaveBeenCalledWith(spaceId, {
+      filters: { statuses: [], safes: [], chainIds: [], signers: [] },
+      search: '',
+    })
     const sections = screen.getAllByTestId('space-queue-safe')
     expect(sections).toHaveLength(2)
     expect(sections[0]).toHaveTextContent(`2 chains of ${safeA}`)
@@ -147,7 +155,10 @@ describe('SpaceTransactionQueue', () => {
     render(<SpaceTransactionQueue spaceId={spaceId} />)
     fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
 
-    expect(querySpy).toHaveBeenLastCalledWith(spaceId, { statuses: ['sign'], safes: [], chainIds: [], signers: [] })
+    expect(querySpy).toHaveBeenLastCalledWith(spaceId, {
+      filters: { statuses: ['sign'], safes: [], chainIds: [], signers: [] },
+      search: '',
+    })
     expect(mockToolbarProps).toHaveBeenLastCalledWith(
       expect.objectContaining({ filters: { statuses: ['sign'], safes: [], chainIds: [], signers: [] } }),
     )
@@ -163,14 +174,65 @@ describe('SpaceTransactionQueue', () => {
     expect(screen.queryByText('Pending transactions of your Safe accounts will appear here')).not.toBeInTheDocument()
   })
 
-  it('clears the filters from the no-match state', () => {
+  it('clears the filters and the search from the no-match state', () => {
     mockQueue({ queue: queue([]) })
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
     fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value: 'treasury' } })
     fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }))
 
-    expect(querySpy.mock.lastCall).toEqual([spaceId, { statuses: [], safes: [], chainIds: [], signers: [] }])
+    expect(querySpy.mock.lastCall).toEqual([
+      spaceId,
+      { filters: { statuses: [], safes: [], chainIds: [], signers: [] }, search: '' },
+    ])
+    expect(screen.getByRole('textbox', { name: 'Search' })).toHaveValue('')
+  })
+
+  describe('search', () => {
+    const typeSearch = (value: string) =>
+      fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value } })
+
+    it('requests the queue with the search from the toolbar', () => {
+      mockQueue({ queue: queue([section(safeA, ['1'])]) })
+
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+
+      expect(querySpy).toHaveBeenLastCalledWith(spaceId, {
+        filters: { statuses: [], safes: [], chainIds: [], signers: [] },
+        search: '',
+      })
+
+      typeSearch('treasury')
+
+      expect(querySpy).toHaveBeenLastCalledWith(spaceId, {
+        filters: { statuses: [], safes: [], chainIds: [], signers: [] },
+        search: 'treasury',
+      })
+    })
+
+    it('requests the queue without a search once it is cleared', () => {
+      mockQueue({ queue: queue([section(safeA, ['1'])]) })
+
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      typeSearch('treasury')
+      typeSearch('')
+
+      expect(querySpy.mock.lastCall).toEqual([
+        spaceId,
+        { filters: { statuses: [], safes: [], chainIds: [], signers: [] }, search: '' },
+      ])
+    })
+
+    it('tells that nothing matches the search instead of the empty queue state', () => {
+      mockQueue({ queue: queue([]) })
+
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      typeSearch('no such safe')
+
+      expect(screen.getByText('No proposals match these filters')).toBeInTheDocument()
+      expect(screen.queryByText('Pending transactions of your Safe accounts will appear here')).not.toBeInTheDocument()
+    })
   })
 
   it('keeps the last counts in the toolbar while a filtered queue loads', () => {
