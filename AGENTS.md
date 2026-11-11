@@ -17,7 +17,7 @@ This monorepo uses nested AGENTS.md files. Agents working in a subtree automatic
 | `apps/mobile/`         | [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md)                 | Expo/React Native + Tamagui                                                                                                      |
 | `packages/`            | [packages/AGENTS.md](packages/AGENTS.md)                       | `store`, `theme`, `utils`, shared by web **and** mobile: verification, codegen, dual env vars, theme workflow                    |
 | `packages/views/`      | [packages/views/AGENTS.md](packages/views/AGENTS.md)           | Web-only presentation shared by `apps/web` and `apps/web-tanstack`; no app imports or business logic (primitives: `packages/ui`) |
-| `packages/ui/`         | [packages/ui/AGENTS.md](packages/ui/AGENTS.md)                 | Safe UI (`@safe-global/ui`): generic shadcn/ui primitives, `cn` and hooks; no Next, no workspace imports, no domain logic        |
+| `packages/ui/`         | [packages/ui/AGENTS.md](packages/ui/AGENTS.md)                 | Safe UI (`@safe-global/ui`): shadcn/ui primitives, hooks, styles, tokens; no Next, no workspace imports, no domain logic         |
 | `config/`              | [config/AGENTS.md](config/AGENTS.md)                           | Shared test workspace (`@safe-global/test`): MSW fixtures/scenarios, verify caveat                                               |
 
 When adding new guidance, place it in the most-specific subtree it applies to. When a workspace, script, generated path, test framework, or architecture boundary changes, update the nearest AGENTS.md in the same PR — and prefer replacing old rules over appending exceptions.

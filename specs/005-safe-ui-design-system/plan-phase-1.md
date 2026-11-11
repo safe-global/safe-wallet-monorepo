@@ -387,6 +387,27 @@ yarn prettier
 9. **`shadcn` as a runtime dependency** pulls the CLI's dependencies into a future published package. That's acceptable while the package is private. Phase 4 decides whether to vendor the CSS.
 10. **Agents editing the old places.** The stale `design.sync-variables` skill, `apps/web/AGENTS.md` and `packages/AGENTS.md` are updated in T5. The generated header and the drift-test message both name the command.
 
+## Implementation notes
+
+Deviations from the plan:
+
+1. **`@source not` line in `apps/web/src/styles/shadcn.css`.** With `@source '../../../../packages'`, Tailwind scanned the new `packages/theme/src/tokens/ui.ts` and found three utility candidates in its quoted keys (`accent-foreground`, `accent-secondary`, `accent-secondary-foreground`). The compiled web-tanstack CSS gained those three rules. Check 6 would allow additions, but the entry now excludes exactly that file (`@source not '../../../../packages/theme/src/tokens/ui.ts'`, with a one-line comment), so the compiled CSS is byte-identical to the base, file hashes included. Excluding all of `packages/theme` was tried and rejected: it dropped `.text-secondary` and `.overline`, which the base build emits because theme files mention them.
+2. **`packages/views/package.json`** gains `tailwindcss ^4.1.18` as a peer and dev dependency. `yarn install` warned (YN0002) that `views`, which depends on `@safe-global/ui`, did not provide the new `tailwindcss` peer. The other YN0002 (root `eslint` for `eslint-plugin-eslint-comments`) is pre-existing.
+3. **Exports from `css-vars.ts`.** `webLightPalette` and `webDarkPalette` became exported module constants (content unchanged), so `tokens/ui.ts` reads dark `destructive` / `accent-success` from `webDarkPalette`. `generateCSSVars()` output is byte-identical (the raw string, not just `vars.css`).
+4. **Drift test message.** `generatedCss.test.ts` asserts a status string, so a failure prints `<file> is stale: run \`<command>\` and commit the result` instead of a long string diff.
+5. **`scoped.css`** starts with a one-line comment saying what the opt-in variant is for.
+6. **The commits** follow D11, with two splits so each prefix matches `docs/ai/git-conventions.md`: the `apps/web` test changes are a `tests:` commit, and the turbo input is a `chore:` commit. Every commit compiles.
+7. **Environment.**
+   - `yarn workspace @safe-global/web type-check` and `lint` run out of memory at Node's default heap here, on the base commit too (proven with the changes stashed and no warm `tsconfig.tsbuildinfo`). In this container the root `tsc` bin resolves to TypeScript 5.9, not the native 7 compiler. Every command ran with `NODE_OPTIONS=--max-old-space-size=8192`.
+   - The scratch `dump-tokens.mjs` waits for `html.dark` before reading the ui Storybook in dark mode, because `withThemeByClassName` applies the class in an effect after the first render.
+8. **Next production build** (optional in the plan) was not run. The web-tanstack `dist` CSS and the webpack Storybook build cover the two Tailwind pipelines.
+9. **Results.** Checks 1–11 pass. Generated scoped tokens equal the base `shadcn.css` blocks (selectors and ordered pairs), and `tokens.css` palette pairs equal `vars.css`. The web-tanstack `dist` CSS is byte-identical (same file names and hashes). Story IDs (1606) are unchanged. Computed values for all 93 `ui-*` stories, light and dark, are identical, and the ui Storybook resolves every shadcn token to the same color as the wallet (10,788 comparisons, 0 differences). Both sweeps match the base hashes (24 filtered sheets, and all 208 cells in 63 sheets). The theme outputs (raw `generateCSSVars()`, Tamagui tokens/themes, MUI palettes) are identical. The drift test fails on a `ui.ts` edit, a hand edit of `tokens.css` and a palette edit without `css-vars`.
+10. **Flaky test under load.** `node scripts/verify.mjs --changed --workspace=web` reported 7 timeouts in `SpendingLimitPolicyForm.test.tsx` while the screenshot sweep ran in parallel. The file is untouched by this phase, passes on its own (21/21), and passes in the full `yarn workspace @safe-global/web test` run.
+
 ## Follow-ups
 
-_To be filled in during implementation and review._
+- `type-check` scripts run `yarn run -T -B tsc`, and in this container that resolves to TypeScript 5.9 (`node_modules/typescript`), not the root `@typescript/native` 7 compiler, so `apps/web` type-check needs an 8 GB heap without a warm `tsbuildinfo`. Confirm which compiler CI runs and make the bin unambiguous.
+- `scoped.css` relies on the host's `vars.css` for the `--color-*` palette; a self-contained scoped variant for another MUI app is open (D4).
+- The `@source not` exclusion for `packages/theme/src/tokens/ui.ts` in the wallet entry can go once the wallet scans `packages/ui` `dist` instead of the whole `packages` tree (Phase 4).
+- Font delivery for the ui Storybook and the docs site (D8), and the design-owned mapping of the shadcn neutrals onto palette entries (D4 out of scope), are unchanged.
+- The Next production build was not compared (optional in this plan).
