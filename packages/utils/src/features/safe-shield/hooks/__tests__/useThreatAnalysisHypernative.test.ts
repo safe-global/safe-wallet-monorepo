@@ -1,53 +1,30 @@
-import { renderHook, waitFor } from '@testing-library/react'
+import { act, waitFor } from '@testing-library/react'
 import { faker } from '@faker-js/faker'
-import { useThreatAnalysisHypernative } from '../useThreatAnalysisHypernative'
-import { isSafeTransaction } from '@safe-global/utils/utils/safeTransaction'
+import { delay, HttpResponse } from 'msw'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import type { HypernativeAssessmentResponseDto } from '@safe-global/store/hypernative/hypernativeApi.dto'
 import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
-import type {
-  HypernativeAssessmentResponseDto,
-  HypernativeAssessmentFailedResponseDto,
-} from '@safe-global/store/hypernative/hypernativeApi.dto'
-import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { ErrorType, getErrorInfo } from '@safe-global/utils/features/safe-shield/utils/errors'
+import { useThreatAnalysisHypernative } from '../useThreatAnalysisHypernative'
+import { answerHypernative, renderWithHypernativeApi, startHypernativeServer } from './hypernativeApiHarness'
 
-// Mock dependencies
-jest.mock('@safe-global/utils/utils/safeTransaction')
-jest.mock('@safe-global/protocol-kit', () => ({
-  calculateSafeTransactionHash: jest.fn(),
-}))
-jest.mock('@safe-global/store/hypernative/hypernativeApi', () => ({
-  hypernativeApi: {
-    useAssessTransactionMutation: jest.fn(),
-    useAssessMessageMutation: jest.fn(),
-  },
-}))
+const TRANSACTION_ASSESSMENT_PATH = '/safe/transaction/assessment'
+const MESSAGE_ASSESSMENT_PATH = '/safe/eip712/assessment'
+const DEBOUNCE_MS = 300
 
-const mockIsSafeTransaction = isSafeTransaction as jest.MockedFunction<typeof isSafeTransaction>
-const mockUseAssessTransactionMutation = hypernativeApi.useAssessTransactionMutation as jest.MockedFunction<
-  typeof hypernativeApi.useAssessTransactionMutation
->
-const mockUseAssessMessageMutation = hypernativeApi.useAssessMessageMutation as jest.MockedFunction<
-  typeof hypernativeApi.useAssessMessageMutation
->
-
-// Import the mocked function
-import { calculateSafeTransactionHash } from '@safe-global/protocol-kit'
-const mockCalculateSafeTransactionHash = calculateSafeTransactionHash as jest.MockedFunction<
-  typeof calculateSafeTransactionHash
->
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 describe('useThreatAnalysisHypernative', () => {
-  const mockSafeAddress = faker.finance.ethereumAddress() as `0x${string}`
-  const mockChainId = '1'
-  const mockWalletAddress = faker.finance.ethereumAddress()
-  const mockSafeVersion = '1.4.1'
-  const mockOrigin = 'https://app.example.com'
-  const mockSafeTxHash = faker.string.hexadecimal({ length: 64 }) as `0x${string}`
-  const mockAuthToken = 'test-bearer-token-123'
+  startHypernativeServer()
 
-  const createMockSafeTransaction = (): SafeTransaction => ({
+  const safeAddress = faker.finance.ethereumAddress() as `0x${string}`
+  const chainId = '1'
+  const walletAddress = faker.finance.ethereumAddress()
+  const safeVersion = '1.4.1'
+  const authToken = `Bearer ${faker.string.alphanumeric(32)}`
+
+  const createSafeTransaction = (overrides: Partial<SafeTransaction['data']> = {}): SafeTransaction => ({
     data: {
       to: faker.finance.ethereumAddress(),
       value: '1000000000000000000',
@@ -59,6 +36,7 @@ describe('useThreatAnalysisHypernative', () => {
       gasToken: '0x0000000000000000000000000000000000000000',
       refundReceiver: '0x0000000000000000000000000000000000000000',
       nonce: 1,
+      ...overrides,
     },
     signatures: new Map(),
     addSignature: jest.fn(),
@@ -66,11 +44,13 @@ describe('useThreatAnalysisHypernative', () => {
     getSignature: jest.fn(),
   })
 
-  const createMockTypedData = (): TypedData => ({
-    domain: {
-      chainId: 1,
-      verifyingContract: mockSafeAddress,
-    },
+  const withData = (safeTx: SafeTransaction, data: Partial<SafeTransaction['data']>): SafeTransaction => ({
+    ...safeTx,
+    data: { ...safeTx.data, ...data },
+  })
+
+  const createTypedData = (): TypedData => ({
+    domain: { chainId: 1, verifyingContract: safeAddress },
     primaryType: 'SafeTx',
     types: {
       SafeTx: [
@@ -78,827 +58,296 @@ describe('useThreatAnalysisHypernative', () => {
         { name: 'value', type: 'uint256' },
       ],
     },
-    message: {
-      to: faker.finance.ethereumAddress(),
-      value: '100',
-    },
+    message: { to: faker.finance.ethereumAddress(), value: '100' },
   })
 
-  const createMockHypernativeResponse = (): HypernativeAssessmentResponseDto['data'] => ({
-    safeTxHash: mockSafeTxHash,
-    status: 'OK',
-    assessmentData: {
-      assessmentId: faker.string.uuid(),
-      assessmentTimestamp: new Date().toISOString(),
-      recommendation: 'accept',
-      interpretation: 'Transfer 1 ETH to recipient',
-      findings: {
-        THREAT_ANALYSIS: {
-          status: 'No risks found',
-          severity: 'accept',
-          risks: [],
-        },
-        CUSTOM_CHECKS: {
-          status: 'Passed',
-          severity: 'accept',
-          risks: [],
+  const createAssessment = (
+    threatAnalysis: HypernativeAssessmentResponseDto['data']['assessmentData']['findings']['THREAT_ANALYSIS'] = {
+      status: 'No risks found',
+      severity: 'accept',
+      risks: [],
+    },
+  ): HypernativeAssessmentResponseDto => ({
+    data: {
+      safeTxHash: faker.string.hexadecimal({ length: 64, casing: 'lower' }) as `0x${string}`,
+      status: 'OK',
+      assessmentData: {
+        assessmentId: faker.string.uuid(),
+        assessmentTimestamp: new Date().toISOString(),
+        recommendation: threatAnalysis.severity,
+        interpretation: 'Transfer 1 ETH to recipient',
+        findings: {
+          THREAT_ANALYSIS: threatAnalysis,
+          CUSTOM_CHECKS: { status: 'Passed', severity: 'accept', risks: [] },
         },
       },
     },
   })
 
-  const mockTriggerAssessment = jest.fn()
+  const answerWithAssessment = (assessment = createAssessment()) =>
+    answerHypernative(TRANSACTION_ASSESSMENT_PATH, () => HttpResponse.json(assessment))
 
-  beforeEach(() => {
-    jest.clearAllMocks()
+  type HookProps = Parameters<typeof useThreatAnalysisHypernative>[0]
 
-    // Default mock implementations
-    mockIsSafeTransaction.mockReturnValue(false)
-    mockCalculateSafeTransactionHash.mockReturnValue(mockSafeTxHash as `0x${string}`)
-    mockUseAssessTransactionMutation.mockReturnValue([
-      mockTriggerAssessment,
-      { data: undefined, error: undefined, isLoading: false },
-    ] as any)
-    mockUseAssessMessageMutation.mockReturnValue([
-      jest.fn(),
-      { data: undefined, error: undefined, isLoading: false },
-    ] as any)
-  })
+  const renderTransactionHook = (initialProps: Partial<HookProps> = {}) => {
+    const defaults: HookProps = {
+      safeAddress,
+      chainId,
+      data: createSafeTransaction(),
+      walletAddress,
+      safeVersion,
+      authToken,
+    }
+    return renderWithHypernativeApi(
+      (props: Partial<HookProps>) => useThreatAnalysisHypernative({ ...defaults, ...props }),
+      { initialProps },
+    )
+  }
 
-  describe('API calls', () => {
-    it('should trigger Hypernative mutation with SafeTransaction data', async () => {
-      const mockSafeTx = createMockSafeTransaction()
-      mockIsSafeTransaction.mockReturnValue(true)
+  describe('requests', () => {
+    it('sends the transaction for assessment with the auth token', async () => {
+      const requests = answerWithAssessment()
+      const safeTx = createSafeTransaction()
 
-      renderHook(() =>
-        useThreatAnalysisHypernative({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          data: mockSafeTx,
-          walletAddress: mockWalletAddress,
-          origin: mockOrigin,
-          safeVersion: mockSafeVersion,
-          authToken: mockAuthToken,
-        }),
-      )
+      renderTransactionHook({ data: safeTx, origin: 'https://app.example.com' })
 
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledWith(
-          expect.objectContaining({
-            safeAddress: mockSafeAddress,
-            safeTxHash: mockSafeTxHash,
-            transaction: expect.objectContaining({
-              chain: mockChainId,
-              input: '0x',
-              operation: '0',
-              toAddress: mockSafeTx.data.to,
-              fromAddress: mockWalletAddress,
-              safeTxGas: '0',
-              value: '1000000000000000000',
-              baseGas: '0',
-              gasPrice: '0',
-              gasToken: '0x0000000000000000000000000000000000000000',
-              refundReceiver: '0x0000000000000000000000000000000000000000',
-              nonce: String(mockSafeTx.data.nonce),
-            }),
-            url: mockOrigin,
-            authToken: mockAuthToken,
-          }),
-        )
+      await waitFor(() => expect(requests).toHaveLength(1))
+      expect(requests[0].authorization).toBe(authToken)
+      expect(requests[0].body).toEqual({
+        safeAddress,
+        safeTxHash: expect.stringMatching(/^0x[0-9a-f]{64}$/),
+        transaction: {
+          chain: chainId,
+          input: '0x',
+          operation: '0',
+          toAddress: safeTx.data.to,
+          fromAddress: walletAddress,
+          safeTxGas: '0',
+          value: '1000000000000000000',
+          baseGas: '0',
+          gasPrice: '0',
+          gasToken: '0x0000000000000000000000000000000000000000',
+          refundReceiver: '0x0000000000000000000000000000000000000000',
+          nonce: '1',
+        },
+        url: 'https://app.example.com',
       })
     })
 
-    it('should not trigger mutation with TypedData (only SafeTransaction)', async () => {
-      const mockTypedData = createMockTypedData()
+    it('sends the url from a JSON origin', async () => {
+      const requests = answerWithAssessment()
 
-      renderHook(() =>
-        useThreatAnalysisHypernative({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          data: mockTypedData,
-          walletAddress: mockWalletAddress,
-          safeVersion: mockSafeVersion,
-          authToken: mockAuthToken,
-        }),
-      )
+      renderTransactionHook({ origin: JSON.stringify({ url: 'https://parsed.example.com' }) })
 
-      await waitFor(() => {
-        expect(mockTriggerAssessment).not.toHaveBeenCalled()
-      })
+      await waitFor(() => expect(requests).toHaveLength(1))
+      expect(requests[0].body).toEqual(expect.objectContaining({ url: 'https://parsed.example.com' }))
     })
 
-    it('should not trigger mutation when data is undefined', () => {
-      renderHook(() =>
-        useThreatAnalysisHypernative({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          data: undefined,
-          walletAddress: mockWalletAddress,
-          safeVersion: mockSafeVersion,
-          authToken: mockAuthToken,
-        }),
-      )
+    it('sends an origin that is not JSON as it is', async () => {
+      const requests = answerWithAssessment()
 
-      expect(mockTriggerAssessment).not.toHaveBeenCalled()
+      renderTransactionHook({ origin: 'https://plain.example.com' })
+
+      await waitFor(() => expect(requests).toHaveLength(1))
+      expect(requests[0].body).toEqual(expect.objectContaining({ url: 'https://plain.example.com' }))
     })
 
-    it('should not trigger mutation when safeTxHash generation fails', () => {
-      const mockSafeTx = createMockSafeTransaction()
-      mockIsSafeTransaction.mockReturnValue(true)
-      mockCalculateSafeTransactionHash.mockReturnValue(undefined as unknown as `0x${string}`)
+    it.each([
+      ['without data', { data: undefined }],
+      ['for typed data without a message hash', { data: createTypedData() }],
+      ['without a wallet address', { walletAddress: '' }],
+    ])('sends no transaction assessment %s', async (_label, props) => {
+      const requests = answerWithAssessment()
 
-      renderHook(() =>
-        useThreatAnalysisHypernative({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          data: mockSafeTx,
-          walletAddress: mockWalletAddress,
-          safeVersion: mockSafeVersion,
-          authToken: mockAuthToken,
-        }),
-      )
+      const { result } = renderTransactionHook(props)
 
-      expect(mockTriggerAssessment).not.toHaveBeenCalled()
+      await waitFor(() => expect(result.current).toEqual([undefined, undefined, false]))
+      expect(requests).toHaveLength(0)
     })
 
-    it('should not trigger mutation when walletAddress is empty', () => {
-      const mockSafeTx = createMockSafeTransaction()
-      mockIsSafeTransaction.mockReturnValue(true)
+    it('assesses typed data with a message hash as a message', async () => {
+      const transactionRequests = answerWithAssessment()
+      const messageRequests = answerHypernative(MESSAGE_ASSESSMENT_PATH, () => HttpResponse.json(createAssessment()))
+      const messageHash = faker.string.hexadecimal({ length: 64, casing: 'lower' }) as `0x${string}`
 
-      renderHook(() =>
-        useThreatAnalysisHypernative({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          data: mockSafeTx,
-          walletAddress: '',
-          safeVersion: mockSafeVersion,
-          authToken: mockAuthToken,
-        }),
-      )
+      renderTransactionHook({ data: createTypedData(), messageHash })
 
-      expect(mockTriggerAssessment).not.toHaveBeenCalled()
-    })
-
-    it('should not trigger mutation when walletAddress is undefined', () => {
-      const mockSafeTx = createMockSafeTransaction()
-      mockIsSafeTransaction.mockReturnValue(true)
-
-      renderHook(() =>
-        useThreatAnalysisHypernative({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          data: mockSafeTx,
-          walletAddress: undefined as unknown as string,
-          safeVersion: mockSafeVersion,
-          authToken: mockAuthToken,
-        }),
-      )
-
-      expect(mockTriggerAssessment).not.toHaveBeenCalled()
+      await waitFor(() => expect(messageRequests).toHaveLength(1))
+      expect(messageRequests[0].body).toEqual(expect.objectContaining({ messageHash }))
+      expect(transactionRequests).toHaveLength(0)
     })
   })
 
-  describe('nonce change handling with debounce', () => {
-    beforeEach(() => {
-      jest.useFakeTimers()
-    })
+  describe('transaction edits', () => {
+    it('assesses the edited transaction once the edits settle', async () => {
+      const requests = answerWithAssessment()
+      const safeTx = createSafeTransaction()
+      const { rerender } = renderTransactionHook({ data: safeTx })
+      await waitFor(() => expect(requests).toHaveLength(1))
 
-    afterEach(() => {
-      jest.runOnlyPendingTimers()
-      jest.useRealTimers()
-    })
+      rerender({ data: withData(safeTx, { nonce: 2 }) })
+      rerender({ data: withData(safeTx, { nonce: 3 }) })
+      rerender({ data: withData(safeTx, { nonce: 4 }) })
 
-    it('should re-trigger mutation when nonce changes (with debounce)', async () => {
-      const mockSafeTx = createMockSafeTransaction()
-      mockIsSafeTransaction.mockReturnValue(true)
-
-      const { rerender } = renderHook(
-        ({ data }) =>
-          useThreatAnalysisHypernative({
-            safeAddress: mockSafeAddress,
-            chainId: mockChainId,
-            data,
-            walletAddress: mockWalletAddress,
-            safeVersion: mockSafeVersion,
-            authToken: mockAuthToken,
-          }),
-        { initialProps: { data: mockSafeTx } },
+      await waitFor(() => expect(requests).toHaveLength(2))
+      expect(requests[1].body).toEqual(
+        expect.objectContaining({ transaction: expect.objectContaining({ nonce: '4' }) }),
       )
-
-      // Fast-forward past initial debounce
-      jest.advanceTimersByTime(300)
-
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledTimes(1)
-      })
-
-      // Create new transaction with only nonce changed
-      const updatedSafeTx = {
-        ...mockSafeTx,
-        data: {
-          ...mockSafeTx.data,
-          nonce: mockSafeTx.data.nonce + 1,
-        },
-      }
-
-      mockTriggerAssessment.mockClear()
-      rerender({ data: updatedSafeTx })
-
-      // Should not trigger immediately (debounced)
-      expect(mockTriggerAssessment).toHaveBeenCalledTimes(0)
-
-      // Fast-forward past debounce delay
-      jest.advanceTimersByTime(300)
-
-      // Should trigger after debounce
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledTimes(1)
-      })
     })
 
-    it('should debounce multiple rapid changes and only trigger once', async () => {
-      const mockSafeTx = createMockSafeTransaction()
-      mockIsSafeTransaction.mockReturnValue(true)
+    it('does not assess the same transaction again when only its object is recreated', async () => {
+      const requests = answerWithAssessment()
+      const safeTx = createSafeTransaction()
+      const { result, rerender } = renderTransactionHook({ data: safeTx })
+      await waitFor(() => expect(result.current[0]).toBeDefined())
 
-      const { rerender } = renderHook(
-        ({ data }) =>
-          useThreatAnalysisHypernative({
-            safeAddress: mockSafeAddress,
-            chainId: mockChainId,
-            data,
-            walletAddress: mockWalletAddress,
-            safeVersion: mockSafeVersion,
-            authToken: mockAuthToken,
-          }),
-        { initialProps: { data: mockSafeTx } },
-      )
+      rerender({ data: withData(safeTx, {}) })
+      await act(() => sleep(DEBOUNCE_MS + 100))
 
-      // Fast-forward past initial debounce
-      jest.advanceTimersByTime(300)
-
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledTimes(1)
-      })
-
-      mockTriggerAssessment.mockClear()
-
-      // Make multiple rapid changes
-      const changes = [
-        { ...mockSafeTx, data: { ...mockSafeTx.data, nonce: 1 } },
-        { ...mockSafeTx, data: { ...mockSafeTx.data, nonce: 2 } },
-        { ...mockSafeTx, data: { ...mockSafeTx.data, nonce: 3 } },
-      ]
-
-      // Apply changes rapidly (within debounce window)
-      changes.forEach((change) => {
-        rerender({ data: change })
-        jest.advanceTimersByTime(100) // Less than 300ms debounce
-      })
-
-      // Should not have triggered yet
-      expect(mockTriggerAssessment).toHaveBeenCalledTimes(0)
-
-      // Fast-forward past final debounce delay
-      jest.advanceTimersByTime(300)
-
-      // Should only trigger once with the final state
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledTimes(1)
-      })
+      expect(requests).toHaveLength(1)
+      expect(result.current[0]).toBeDefined()
     })
 
-    it('should trigger for non-nonce changes with debounce', async () => {
-      const mockSafeTx = createMockSafeTransaction()
-      mockIsSafeTransaction.mockReturnValue(true)
+    it('drops an edit that has not settled when the review closes', async () => {
+      const requests = answerWithAssessment()
+      const safeTx = createSafeTransaction()
+      const { rerender, unmount } = renderTransactionHook({ data: safeTx })
+      await waitFor(() => expect(requests).toHaveLength(1))
 
-      const { rerender } = renderHook(
-        ({ data }) =>
-          useThreatAnalysisHypernative({
-            safeAddress: mockSafeAddress,
-            chainId: mockChainId,
-            data,
-            walletAddress: mockWalletAddress,
-            safeVersion: mockSafeVersion,
-            authToken: mockAuthToken,
-          }),
-        { initialProps: { data: mockSafeTx } },
-      )
-
-      // Fast-forward past initial debounce
-      jest.advanceTimersByTime(300)
-
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledTimes(1)
-      })
-
-      // Create new transaction with different data (not just nonce)
-      const updatedSafeTx = {
-        ...mockSafeTx,
-        data: {
-          ...mockSafeTx.data,
-          to: faker.finance.ethereumAddress(),
-          value: '2000000000000000000',
-        },
-      }
-
-      mockTriggerAssessment.mockClear()
-      rerender({ data: updatedSafeTx })
-
-      // Should not trigger immediately (debounced)
-      expect(mockTriggerAssessment).toHaveBeenCalledTimes(0)
-
-      // Fast-forward past debounce
-      jest.advanceTimersByTime(300)
-
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledTimes(1)
-      })
-    })
-
-    it('should cancel pending debounced calls on unmount', async () => {
-      const mockSafeTx = createMockSafeTransaction()
-      mockIsSafeTransaction.mockReturnValue(true)
-
-      const { rerender, unmount } = renderHook(
-        ({ data }) =>
-          useThreatAnalysisHypernative({
-            safeAddress: mockSafeAddress,
-            chainId: mockChainId,
-            data,
-            walletAddress: mockWalletAddress,
-            safeVersion: mockSafeVersion,
-            authToken: mockAuthToken,
-          }),
-        { initialProps: { data: mockSafeTx } },
-      )
-
-      // Fast-forward past initial debounce
-      jest.advanceTimersByTime(300)
-
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledTimes(1)
-      })
-
-      mockTriggerAssessment.mockClear()
-
-      // Make a change that would trigger debounced update
-      const updatedSafeTx = {
-        ...mockSafeTx,
-        data: {
-          ...mockSafeTx.data,
-          nonce: mockSafeTx.data.nonce + 1,
-        },
-      }
-
-      rerender({ data: updatedSafeTx })
-
-      // Unmount before debounce completes
+      rerender({ data: withData(safeTx, { nonce: 2 }) })
       unmount()
+      await act(() => sleep(DEBOUNCE_MS + 100))
 
-      // Fast-forward past debounce delay
-      jest.advanceTimersByTime(300)
-
-      // Should not have triggered after unmount
-      expect(mockTriggerAssessment).toHaveBeenCalledTimes(0)
+      expect(requests).toHaveLength(1)
     })
   })
 
-  describe('origin parsing', () => {
-    it('should parse origin from JSON string with url property', async () => {
-      const mockSafeTx = createMockSafeTransaction()
-      const inputUrl = 'https://parsed.example.com'
-      const jsonOrigin = JSON.stringify({ url: inputUrl })
+  describe('result', () => {
+    it('reports no threat for an accepted transaction', async () => {
+      answerWithAssessment()
 
-      mockIsSafeTransaction.mockReturnValue(true)
-
-      renderHook(() =>
-        useThreatAnalysisHypernative({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          data: mockSafeTx,
-          walletAddress: mockWalletAddress,
-          origin: jsonOrigin,
-          safeVersion: mockSafeVersion,
-          authToken: mockAuthToken,
-        }),
-      )
-
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledWith(
-          expect.objectContaining({
-            url: inputUrl,
-          }),
-        )
-      })
-    })
-
-    it('should use origin as-is when not valid JSON', async () => {
-      const mockSafeTx = createMockSafeTransaction()
-      const plainOrigin = 'https://plain.example.com'
-
-      mockIsSafeTransaction.mockReturnValue(true)
-
-      renderHook(() =>
-        useThreatAnalysisHypernative({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          data: mockSafeTx,
-          walletAddress: mockWalletAddress,
-          origin: plainOrigin,
-          safeVersion: mockSafeVersion,
-          authToken: mockAuthToken,
-        }),
-      )
-
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledWith(
-          expect.objectContaining({
-            url: plainOrigin,
-          }),
-        )
-      })
-    })
-  })
-
-  describe('return values', () => {
-    it('should return error when no authToken provided', async () => {
-      const mockSafeTx = createMockSafeTransaction()
-      mockIsSafeTransaction.mockReturnValue(true)
-
-      const { result } = renderHook(() =>
-        useThreatAnalysisHypernative({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          data: mockSafeTx,
-          walletAddress: mockWalletAddress,
-          safeVersion: mockSafeVersion,
-        }),
-      )
-
-      const [, error] = result.current
-      expect(error).toBeDefined()
-      expect(error?.message).toBe('authToken is required')
-      expect(mockTriggerAssessment).not.toHaveBeenCalled()
-    })
-
-    it('should return mapped threat data when successful', async () => {
-      const mockSafeTx = createMockSafeTransaction()
-      const mockHypernativeResponse = createMockHypernativeResponse()
-      mockIsSafeTransaction.mockReturnValue(true)
-      mockUseAssessTransactionMutation.mockReturnValue([
-        mockTriggerAssessment,
-        { data: mockHypernativeResponse, error: undefined, isLoading: false, reset: jest.fn() },
-      ])
-
-      const { result } = renderHook(() =>
-        useThreatAnalysisHypernative({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          data: mockSafeTx,
-          walletAddress: mockWalletAddress,
-          safeVersion: mockSafeVersion,
-          authToken: mockAuthToken,
-        }),
-      )
+      const { result } = renderTransactionHook()
 
       await waitFor(() => {
         const [data, error, loading] = result.current
-        expect(data).toBeDefined()
-        expect(data?.[StatusGroup.THREAT]).toBeDefined()
+        expect(data?.[StatusGroup.THREAT]?.[0]).toEqual(
+          expect.objectContaining({ severity: Severity.OK, type: ThreatStatus.NO_THREAT }),
+        )
         expect(error).toBeUndefined()
         expect(loading).toBe(false)
       })
     })
 
-    it('should return error result when mutation fails', async () => {
-      const mockSafeTx = createMockSafeTransaction()
-      const mockError: HypernativeAssessmentFailedResponseDto = {
-        error: 'Failed to analyze threat',
-        errorCode: 500,
-        success: false,
-        data: null,
-      }
-      mockIsSafeTransaction.mockReturnValue(true)
-      mockUseAssessTransactionMutation.mockReturnValue([
-        mockTriggerAssessment,
-        { data: undefined, error: mockError, isLoading: false, reset: jest.fn() },
-      ])
-
-      const { result } = renderHook(() =>
-        useThreatAnalysisHypernative({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          data: mockSafeTx,
-          walletAddress: mockWalletAddress,
-          safeVersion: mockSafeVersion,
-          authToken: mockAuthToken,
-        }),
-      )
-
-      await waitFor(() => {
-        const [data, error, loading] = result.current
-        expect(data).toEqual({ [StatusGroup.COMMON]: [getErrorInfo(ErrorType.THREAT)] })
-        expect(error).toBeDefined()
-        expect(error?.message).toContain('Failed to analyze threat')
-        expect(loading).toBe(false)
-      })
-    })
-
-    it('should return loading state when mutation is in progress', async () => {
-      const mockSafeTx = createMockSafeTransaction()
-      mockIsSafeTransaction.mockReturnValue(true)
-      mockUseAssessTransactionMutation.mockReturnValue([
-        mockTriggerAssessment,
-        { data: undefined, error: undefined, isLoading: true, reset: jest.fn() },
-      ])
-
-      const { result } = renderHook(() =>
-        useThreatAnalysisHypernative({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          data: mockSafeTx,
-          walletAddress: mockWalletAddress,
-          safeVersion: mockSafeVersion,
-          authToken: mockAuthToken,
-        }),
-      )
-
-      const [, , loading] = result.current
-      expect(loading).toBe(true)
-    })
-
-    it('should handle Hypernative response with risks', async () => {
-      const mockSafeTx = createMockSafeTransaction()
-      const mockHypernativeResponse: HypernativeAssessmentResponseDto['data'] = {
-        ...createMockHypernativeResponse(),
-        assessmentData: {
-          assessmentId: faker.string.uuid(),
-          assessmentTimestamp: new Date().toISOString(),
-          recommendation: 'deny',
-          interpretation: 'Transfer to malicious address',
-          findings: {
-            THREAT_ANALYSIS: {
-              status: 'Risks found',
+    it('reports a critical threat for a denied transaction', async () => {
+      answerWithAssessment(
+        createAssessment({
+          status: 'Risks found',
+          severity: 'deny',
+          risks: [
+            {
+              title: 'Transfer to malicious',
+              details: 'Transfer to known phishing address.',
               severity: 'deny',
-              risks: [
-                {
-                  title: 'Transfer to malicious',
-                  details: 'Transfer to known phishing address.',
-                  severity: 'deny',
-                  safeCheckId: faker.string.alphanumeric(10),
-                },
-              ],
+              safeCheckId: faker.string.alphanumeric(10),
             },
-            CUSTOM_CHECKS: {
-              status: 'Passed',
-              severity: 'accept',
-              risks: [],
-            },
-          },
-        },
-      }
-
-      mockIsSafeTransaction.mockReturnValue(true)
-      mockUseAssessTransactionMutation.mockReturnValue([
-        mockTriggerAssessment,
-        { data: mockHypernativeResponse, error: undefined, isLoading: false, reset: jest.fn() },
-      ])
-
-      const { result } = renderHook(() =>
-        useThreatAnalysisHypernative({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          data: mockSafeTx,
-          walletAddress: mockWalletAddress,
-          safeVersion: mockSafeVersion,
-          authToken: mockAuthToken,
+          ],
         }),
       )
 
-      await waitFor(() => {
-        const [data] = result.current
-        expect(data?.[StatusGroup.THREAT]?.[0]).toEqual(
+      const { result } = renderTransactionHook()
+
+      await waitFor(() =>
+        expect(result.current[0]?.[StatusGroup.THREAT]?.[0]).toEqual(
           expect.objectContaining({
             severity: Severity.CRITICAL,
             type: ThreatStatus.HYPERNATIVE_GUARD,
             title: 'Malicious threat detected',
             description: 'Transfer to malicious. The full threat report is available in your Hypernative account.',
           }),
-        )
+        ),
+      )
+    })
+
+    it('reports the error the API gives for a refused transaction', async () => {
+      answerHypernative(TRANSACTION_ASSESSMENT_PATH, () =>
+        HttpResponse.json(
+          { success: false, data: null, error: 'Failed to analyze threat', errorCode: 1027 },
+          { status: 422 },
+        ),
+      )
+
+      const { result } = renderTransactionHook()
+
+      await waitFor(() => {
+        const [data, error, loading] = result.current
+        expect(data).toEqual({ [StatusGroup.COMMON]: [getErrorInfo(ErrorType.THREAT)] })
+        expect(error?.message).toBe('Failed to analyze threat')
+        expect(loading).toBe(false)
       })
+    })
+
+    it('is loading while the assessment is in flight', async () => {
+      answerHypernative(TRANSACTION_ASSESSMENT_PATH, async () => {
+        await delay('infinite')
+        return HttpResponse.json(createAssessment())
+      })
+
+      const { result } = renderTransactionHook()
+
+      await waitFor(() => expect(result.current[2]).toBe(true))
+    })
+
+    it('requires an auth token', () => {
+      const requests = answerWithAssessment()
+
+      const { result } = renderTransactionHook({ authToken: undefined })
+
+      expect(result.current[1]?.message).toBe('authToken is required')
+      expect(requests).toHaveLength(0)
     })
   })
 
-  describe('skip parameter', () => {
-    it('should not trigger mutation when skip is true', async () => {
-      const mockSafeTx = createMockSafeTransaction()
-      mockIsSafeTransaction.mockReturnValue(true)
+  describe('skip', () => {
+    it('sends nothing and returns nothing, even without an auth token', async () => {
+      const requests = answerWithAssessment()
 
-      renderHook(() =>
-        useThreatAnalysisHypernative({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          data: mockSafeTx,
-          walletAddress: mockWalletAddress,
-          safeVersion: mockSafeVersion,
-          authToken: mockAuthToken,
-          skip: true,
-        }),
-      )
+      const { result } = renderTransactionHook({ skip: true, authToken: undefined })
 
-      await waitFor(() => {
-        expect(mockTriggerAssessment).not.toHaveBeenCalled()
-      })
+      await waitFor(() => expect(result.current).toEqual([undefined, undefined, false]))
+      expect(requests).toHaveLength(0)
     })
 
-    it('should return undefined result when skip is true', () => {
-      const mockSafeTx = createMockSafeTransaction()
-      const mockHypernativeResponse = createMockHypernativeResponse()
-      mockIsSafeTransaction.mockReturnValue(true)
-      mockUseAssessTransactionMutation.mockReturnValue([
-        mockTriggerAssessment,
-        { data: mockHypernativeResponse, error: undefined, isLoading: false, reset: jest.fn() },
-      ])
+    it('stops returning the assessment once skipped', async () => {
+      answerWithAssessment()
+      const { result, rerender } = renderTransactionHook({ skip: false })
+      await waitFor(() => expect(result.current[0]).toBeDefined())
 
-      const { result } = renderHook(() =>
-        useThreatAnalysisHypernative({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          data: mockSafeTx,
-          walletAddress: mockWalletAddress,
-          safeVersion: mockSafeVersion,
-          authToken: mockAuthToken,
-          skip: true,
-        }),
-      )
-
-      const [data] = result.current
-      expect(data).toBeUndefined()
-    })
-
-    it('should return undefined result when skip is true even if there is an error', () => {
-      const mockSafeTx = createMockSafeTransaction()
-      const mockError: HypernativeAssessmentFailedResponseDto = {
-        error: 'Failed to analyze threat',
-        errorCode: 500,
-        success: false,
-        data: null,
-      }
-      mockIsSafeTransaction.mockReturnValue(true)
-      mockUseAssessTransactionMutation.mockReturnValue([
-        mockTriggerAssessment,
-        { data: undefined, error: mockError, isLoading: false, reset: jest.fn() },
-      ])
-
-      const { result } = renderHook(() =>
-        useThreatAnalysisHypernative({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          data: mockSafeTx,
-          walletAddress: mockWalletAddress,
-          safeVersion: mockSafeVersion,
-          authToken: mockAuthToken,
-          skip: true,
-        }),
-      )
-
-      const [data] = result.current
-      expect(data).toBeUndefined()
-    })
-
-    it('reports no error once skipped after the API rejected the token', () => {
-      mockIsSafeTransaction.mockReturnValue(true)
-      mockUseAssessTransactionMutation.mockReturnValue([
-        mockTriggerAssessment,
-        {
-          data: undefined,
-          error: { error: 'Please reconnect', errorCode: 1038, success: false, data: null },
-          isLoading: false,
-          reset: jest.fn(),
-        },
-      ])
-
-      const { result } = renderHook(() =>
-        useThreatAnalysisHypernative({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          data: createMockSafeTransaction(),
-          walletAddress: mockWalletAddress,
-          safeVersion: mockSafeVersion,
-          authToken: undefined,
-          skip: true,
-        }),
-      )
-
-      const [, error] = result.current
-      expect(error).toBeUndefined()
-    })
-
-    it('should stop triggering mutation when skip changes from false to true', async () => {
-      const mockSafeTx = createMockSafeTransaction()
-      mockIsSafeTransaction.mockReturnValue(true)
-
-      const { rerender } = renderHook(
-        ({ skip }) =>
-          useThreatAnalysisHypernative({
-            safeAddress: mockSafeAddress,
-            chainId: mockChainId,
-            data: mockSafeTx,
-            walletAddress: mockWalletAddress,
-            safeVersion: mockSafeVersion,
-            authToken: mockAuthToken,
-            skip,
-          }),
-        { initialProps: { skip: false } },
-      )
-
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledTimes(1)
-      })
-
-      mockTriggerAssessment.mockClear()
       rerender({ skip: true })
 
-      await waitFor(() => {
-        expect(mockTriggerAssessment).not.toHaveBeenCalled()
-      })
+      expect(result.current).toEqual([undefined, undefined, false])
     })
 
-    it('should start triggering mutation when skip changes from true to false', async () => {
-      const mockSafeTx = createMockSafeTransaction()
-      mockIsSafeTransaction.mockReturnValue(true)
-
-      const { rerender } = renderHook(
-        ({ skip }) =>
-          useThreatAnalysisHypernative({
-            safeAddress: mockSafeAddress,
-            chainId: mockChainId,
-            data: mockSafeTx,
-            walletAddress: mockWalletAddress,
-            safeVersion: mockSafeVersion,
-            authToken: mockAuthToken,
-            skip,
-          }),
-        { initialProps: { skip: true } },
-      )
-
-      await waitFor(() => {
-        expect(mockTriggerAssessment).not.toHaveBeenCalled()
-      })
+    it('assesses the transaction once no longer skipped', async () => {
+      const requests = answerWithAssessment()
+      const { result, rerender } = renderTransactionHook({ skip: true })
+      await waitFor(() => expect(result.current).toEqual([undefined, undefined, false]))
+      expect(requests).toHaveLength(0)
 
       rerender({ skip: false })
 
-      await waitFor(() => {
-        expect(mockTriggerAssessment).toHaveBeenCalledTimes(1)
-      })
+      await waitFor(() => expect(requests).toHaveLength(1))
     })
 
-    it('should return undefined when skip is true even with successful mutation data', () => {
-      const mockSafeTx = createMockSafeTransaction()
-      const mockHypernativeResponse = createMockHypernativeResponse()
-      mockIsSafeTransaction.mockReturnValue(true)
-      mockUseAssessTransactionMutation.mockReturnValue([
-        mockTriggerAssessment,
-        { data: mockHypernativeResponse, error: undefined, isLoading: false, reset: jest.fn() },
-      ])
-
-      const { result } = renderHook(() =>
-        useThreatAnalysisHypernative({
-          safeAddress: mockSafeAddress,
-          chainId: mockChainId,
-          data: mockSafeTx,
-          walletAddress: mockWalletAddress,
-          safeVersion: mockSafeVersion,
-          authToken: mockAuthToken,
-          skip: true,
-        }),
+    it('reports no error once skipped after the API rejected the token', async () => {
+      answerHypernative(TRANSACTION_ASSESSMENT_PATH, () =>
+        HttpResponse.json({ success: false, data: null, error: 'Please reconnect', errorCode: 1038 }, { status: 401 }),
       )
+      const { result, rerender } = renderTransactionHook({ skip: false })
+      await waitFor(() => expect(result.current[1]).toBeDefined())
 
-      const [data, error, loading] = result.current
+      rerender({ authToken: undefined, skip: true })
 
-      expect(data).toBeUndefined()
-      expect(error).toBeUndefined()
-      expect(loading).toBe(false)
-    })
-
-    it('should not throw error when skip is true and authToken is missing', () => {
-      const mockSafeTx = createMockSafeTransaction()
-      mockIsSafeTransaction.mockReturnValue(true)
-
-      expect(() =>
-        renderHook(() =>
-          useThreatAnalysisHypernative({
-            safeAddress: mockSafeAddress,
-            chainId: mockChainId,
-            data: mockSafeTx,
-            walletAddress: mockWalletAddress,
-            safeVersion: mockSafeVersion,
-            skip: true,
-          }),
-        ),
-      ).not.toThrow()
-
-      expect(mockTriggerAssessment).not.toHaveBeenCalled()
+      expect(result.current).toEqual([undefined, undefined, false])
     })
   })
 })

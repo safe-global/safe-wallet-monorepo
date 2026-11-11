@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import isEqual from 'lodash/isEqual'
+import { useMemo } from 'react'
+import { skipToken } from '@reduxjs/toolkit/query/react'
 import { StatusGroup, type ThreatAnalysisResults } from '../types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
@@ -54,16 +54,7 @@ export function useThreatAnalysisHypernative({
 }: UseThreatAnalysisHypernativeProps): AsyncResult<ThreatAnalysisResults> {
   const isMessageAnalysis = !isSafeTransaction(dataProp) && !!messageHash && !!dataProp
 
-  const debouncedData = useDebounce(dataProp, 300)
-  const [data, setData] = useState<SafeTransaction | TypedData | undefined>(dataProp)
-  const [triggerAssessment, { data: hypernativeData, error, isLoading }] = hypernativeApi.useAssessTransactionMutation()
-
-  useEffect(() => {
-    if (isSafeTransaction(debouncedData) && isSafeTransaction(data) && isEqual(debouncedData.data, data.data)) {
-      return
-    }
-    setData(debouncedData)
-  }, [debouncedData, data])
+  const data = useDebounce(dataProp, 300)
 
   // Parse origin if it's a JSON string containing url
   const origin = useParsedOrigin(originProp)
@@ -84,24 +75,13 @@ export function useThreatAnalysisHypernative({
     })
   }, [data, safeAddress, chainId, walletAddress, origin, safeVersion, skip, isMessageAnalysis])
 
-  // RTK Query mutations don't dedup or cancel, `data` reflects the last settled call. Abort
-  // any in-flight request before triggering a new one so a slow stale response can't overwrite
-  // a fresh result
-  const inflightRef = useRef<{ abort?: () => void } | null>(null)
-
-  useEffect(() => {
-    if (!skip && !isMessageAnalysis && hypernativeRequest && authToken && walletAddress) {
-      inflightRef.current?.abort?.()
-      const promise = triggerAssessment({
-        ...hypernativeRequest,
-        authToken,
-      })
-      inflightRef.current = promise ?? null
-      return () => {
-        promise?.abort?.()
-      }
-    }
-  }, [hypernativeRequest, authToken, triggerAssessment, skip, walletAddress, isMessageAnalysis])
+  const {
+    currentData: hypernativeData,
+    error,
+    isFetching,
+  } = hypernativeApi.useAssessTransactionQuery(
+    hypernativeRequest && authToken ? { ...hypernativeRequest, authToken } : skipToken,
+  )
 
   const fetchError = useMemo(() => {
     const errorMessage = isHypernativeAssessmentFailedResponse(error)
@@ -111,10 +91,6 @@ export function useThreatAnalysisHypernative({
   }, [error])
 
   const threatAnalysisResult = useMemo<ThreatAnalysisResults | undefined>(() => {
-    if (skip || isMessageAnalysis) {
-      return undefined
-    }
-
     if (fetchError) {
       return { [StatusGroup.COMMON]: [getErrorInfo(ErrorType.THREAT)] }
     }
@@ -124,7 +100,7 @@ export function useThreatAnalysisHypernative({
     }
 
     return mapHypernativeResponse(hypernativeData, safeAddress)
-  }, [hypernativeData, fetchError, skip, safeAddress, isMessageAnalysis])
+  }, [hypernativeData, fetchError, safeAddress])
 
   // Use message-specific assessment for EIP-712 typed messages
   const messageAnalysisResult = useThreatAnalysisHypernativeMessage({
@@ -145,5 +121,5 @@ export function useThreatAnalysisHypernative({
     return messageAnalysisResult
   }
 
-  return [threatAnalysisResult, skip ? undefined : fetchError, isLoading]
+  return [threatAnalysisResult, fetchError, isFetching]
 }
