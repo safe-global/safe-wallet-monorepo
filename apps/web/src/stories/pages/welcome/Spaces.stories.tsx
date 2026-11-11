@@ -28,6 +28,7 @@ const spacesStory = (config: MockStoryConfig): Story => {
     pathname: '/welcome/spaces',
     authenticated: true,
     layout: 'fullPage',
+    features: { safePro: true, oidcAuth: true, safeProAnnouncement: true },
     ...config,
   })
   return { parameters: { ...setup.parameters }, decorators: [setup.decorator] }

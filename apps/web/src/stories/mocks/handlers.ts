@@ -966,6 +966,7 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     twoFactorAwarenessBanner: features.twoFactorAwarenessBanner ?? false,
     safeStaking: features.safeStaking ?? false,
     safePro: features.safePro ?? false,
+    safeProAnnouncement: features.safeProAnnouncement ?? false,
     workspacesExperimentalFeatures: features.workspacesExperimentalFeatures ?? false,
     policyRecipientAllowlist: features.policyRecipientAllowlist ?? false,
     spaceAuditLog: features.spaceAuditLog ?? false,

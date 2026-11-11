@@ -26,6 +26,7 @@ const accountsStory = (config: MockStoryConfig): Story => {
     scenario: 'efSafe',
     pathname: '/welcome/accounts',
     layout: 'fullPage',
+    features: { safePro: true, oidcAuth: true, safeProAnnouncement: true },
     ...config,
   })
   return { parameters: { ...setup.parameters }, decorators: [setup.decorator] }

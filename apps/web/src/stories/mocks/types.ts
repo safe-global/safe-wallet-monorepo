@@ -43,6 +43,8 @@ export interface FeatureFlags {
   safeStaking?: boolean
   /** SAFE_PRO - Safe Pro plans and billing (default: false) */
   safePro?: boolean
+  /** SAFE_PRO_ANNOUNCEMENT - Safe Pro announcement banners and modal (default: false) */
+  safeProAnnouncement?: boolean
   /** WORKSPACES_EXPERIMENTAL_FEATURES - Experimental Features page in Workspace settings (default: false) */
   workspacesExperimentalFeatures?: boolean
   /** POLICY_RECIPIENT_ALLOWLIST on Sepolia - shows the Recipient allowlist row in Experimental settings (default: false) */
