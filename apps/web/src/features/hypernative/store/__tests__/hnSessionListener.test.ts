@@ -4,8 +4,8 @@ import { HYPERNATIVE_API_BASE_URL } from '@safe-global/utils/config/constants'
 import { http, HttpResponse } from 'msw'
 import { makeStore } from '@/store'
 import { server } from '@/tests/server'
-import { clearAuthCookie, getAuthCookieToken, setAuthCookie } from '../cookieStorage'
-import { selectRejectedHypernativeToken } from '../hnSessionSlice'
+import { clearAuthCookie, getAuthCookieAuthorization, setAuthCookie } from '../cookieStorage'
+import { selectRejectedHypernativeAuthorization } from '../hnSessionSlice'
 
 type Store = ReturnType<typeof makeStore>
 
@@ -64,7 +64,7 @@ const ENDPOINTS = [
 
 const signIn = (): string => {
   setAuthCookie({ access_token: faker.string.alphanumeric(40), token_type: 'Bearer', expires_in: 3600 })
-  return getAuthCookieToken() as string
+  return getAuthCookieAuthorization() as string
 }
 
 const answerWith = (path: string, status: number, body: object) =>
@@ -80,8 +80,8 @@ describe('hnSessionListener', () => {
 
     await call(store, token)
 
-    expect(getAuthCookieToken()).toBeUndefined()
-    expect(selectRejectedHypernativeToken(store.getState())).toBe(token)
+    expect(getAuthCookieAuthorization()).toBeUndefined()
+    expect(selectRejectedHypernativeAuthorization(store.getState())).toBe(token)
   })
 
   it('keeps a newer session when a 1038 answers a token that was already replaced', async () => {
@@ -92,8 +92,8 @@ describe('hnSessionListener', () => {
 
     await assessTransaction(store, replacedToken)
 
-    expect(getAuthCookieToken()).toBe(currentToken)
-    expect(selectRejectedHypernativeToken(store.getState())).toBeUndefined()
+    expect(getAuthCookieAuthorization()).toBe(currentToken)
+    expect(selectRejectedHypernativeAuthorization(store.getState())).toBeUndefined()
   })
 
   it('keeps the session when the API refuses the request for another reason', async () => {
@@ -103,7 +103,7 @@ describe('hnSessionListener', () => {
 
     await assessTransaction(store, token)
 
-    expect(getAuthCookieToken()).toBe(token)
-    expect(selectRejectedHypernativeToken(store.getState())).toBeUndefined()
+    expect(getAuthCookieAuthorization()).toBe(token)
+    expect(selectRejectedHypernativeAuthorization(store.getState())).toBeUndefined()
   })
 })

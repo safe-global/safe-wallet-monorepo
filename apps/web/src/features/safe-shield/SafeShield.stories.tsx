@@ -262,6 +262,7 @@ export const HypernativeGuardActive: Story = {
     hypernativeAuth: {
       isAuthenticated: true,
       isTokenExpired: false,
+      isSessionRejected: false,
       initiateLogin: () => {},
       logout: () => {},
     },
@@ -286,6 +287,7 @@ export const HypernativeNotLoggedIn: Story = {
     hypernativeAuth: {
       isAuthenticated: false,
       isTokenExpired: false,
+      isSessionRejected: false,
       initiateLogin: () => {
         console.log('Initiate login clicked')
       },
@@ -316,6 +318,7 @@ export const HypernativeMaliciousThreat: Story = {
     hypernativeAuth: {
       isAuthenticated: true,
       isTokenExpired: false,
+      isSessionRejected: false,
       initiateLogin: () => {},
       logout: () => {},
     },
@@ -379,6 +382,7 @@ export const OverflowFindings: Story = {
     hypernativeAuth: {
       isAuthenticated: true,
       isTokenExpired: false,
+      isSessionRejected: false,
       initiateLogin: () => {},
       logout: () => {},
     },
@@ -413,6 +417,7 @@ export const HypernativeCustomCheckFailed: Story = {
     hypernativeAuth: {
       isAuthenticated: true,
       isTokenExpired: false,
+      isSessionRejected: false,
       initiateLogin: () => {},
       logout: () => {},
     },

@@ -1,40 +1,32 @@
 import { faker } from '@faker-js/faker'
-import { configureStore } from '@reduxjs/toolkit'
-import type { RootState } from '@/store'
-import {
-  hnSessionRejected,
-  hnSessionRejectionCleared,
-  hnSessionSlice,
-  selectRejectedHypernativeToken,
-} from '../hnSessionSlice'
+import { makeStore } from '@/store'
+import { hnSessionRejected, hnSessionRejectionCleared, selectRejectedHypernativeAuthorization } from '../hnSessionSlice'
 
-const makeStore = () => configureStore({ reducer: { [hnSessionSlice.name]: hnSessionSlice.reducer } })
-
-const rejectedToken = (store: ReturnType<typeof makeStore>) =>
-  selectRejectedHypernativeToken(store.getState() as unknown as RootState)
+const rejectedAuthorization = (store: ReturnType<typeof makeStore>) =>
+  selectRejectedHypernativeAuthorization(store.getState())
 
 describe('hnSessionSlice', () => {
-  it('starts with no rejected token', () => {
+  it('starts with no rejected authorization', () => {
     const store = makeStore()
 
-    expect(rejectedToken(store)).toBeUndefined()
+    expect(rejectedAuthorization(store)).toBeUndefined()
   })
 
-  it('remembers the token the API rejected', () => {
+  it('remembers the authorization the API rejected', () => {
     const store = makeStore()
-    const token = `Bearer ${faker.string.alphanumeric(40)}`
+    const authorization = `Bearer ${faker.string.alphanumeric(40)}`
 
-    store.dispatch(hnSessionRejected(token))
+    store.dispatch(hnSessionRejected(authorization))
 
-    expect(rejectedToken(store)).toBe(token)
+    expect(rejectedAuthorization(store)).toBe(authorization)
   })
 
-  it('forgets the rejected token once cleared', () => {
+  it('forgets the rejected authorization once cleared', () => {
     const store = makeStore()
     store.dispatch(hnSessionRejected(`Bearer ${faker.string.alphanumeric(40)}`))
 
     store.dispatch(hnSessionRejectionCleared())
 
-    expect(rejectedToken(store)).toBeUndefined()
+    expect(rejectedAuthorization(store)).toBeUndefined()
   })
 })

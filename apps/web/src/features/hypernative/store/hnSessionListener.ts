@@ -2,7 +2,7 @@ import { isAnyOf } from '@reduxjs/toolkit'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { isHypernativeReconnectRequiredError } from '@safe-global/store/hypernative/hypernativeApi.dto'
 import type { listenerMiddlewareInstance } from '@/store/index'
-import { clearAuthCookie, getAuthCookieToken } from './cookieStorage'
+import { clearAuthCookie, getAuthCookieAuthorization } from './cookieStorage'
 import { hnSessionRejected } from './hnSessionSlice'
 
 const { assessTransaction, assessMessage, getBatchAssessments } = hypernativeApi.endpoints
@@ -17,15 +17,15 @@ export const hnSessionListener = (listenerMiddleware: typeof listenerMiddlewareI
   listenerMiddleware.startListening({
     matcher: isRejectedAssessment,
     effect: (action, listenerApi) => {
-      if (!isRejectedAssessment(action) || !isHypernativeReconnectRequiredError(action.payload)) {
+      if (!isHypernativeReconnectRequiredError(action.payload)) {
         return
       }
-      const rejectedToken = action.meta.arg.originalArgs.authToken
-      if (rejectedToken !== getAuthCookieToken()) {
+      const rejectedAuthorization = action.meta.arg.originalArgs.authToken
+      if (rejectedAuthorization !== getAuthCookieAuthorization()) {
         return
       }
       clearAuthCookie()
-      listenerApi.dispatch(hnSessionRejected(rejectedToken))
+      listenerApi.dispatch(hnSessionRejected(rejectedAuthorization))
     },
   })
 }

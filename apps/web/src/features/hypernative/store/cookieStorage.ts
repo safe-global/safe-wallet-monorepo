@@ -146,10 +146,10 @@ export const clearAuthCookie = (): void => {
 }
 
 // Legacy cookies may lack a tokenType
-export const toAuthorizationValue = ({ token, tokenType }: Pick<AuthTokenData, 'token' | 'tokenType'>): string =>
+export const toAuthorizationValue = ({ token, tokenType }: { token: string; tokenType?: string }): string =>
   `${tokenType?.trim() || 'Bearer'} ${token}`
 
-export const getAuthCookieToken = (): string | undefined => {
+export const getAuthCookieAuthorization = (): string | undefined => {
   const data = getAuthCookieData()
   return data?.token ? toAuthorizationValue(data) : undefined
 }

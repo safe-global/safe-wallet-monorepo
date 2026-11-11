@@ -35,13 +35,12 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
   })
 
   const checkAuthState = useCallback(() => {
-    const data = getAuthCookieData()
-    const { token, expiry } = data || {}
+    const { token, tokenType, expiry } = getAuthCookieData() || {}
     // isExpired should only be true when a token exists AND it's expired
     // If no token exists, isExpired should be false (not expired, just not authenticated)
     const isExpired = !!token && (expiry === undefined || Date.now() >= expiry)
     // The cookie outlives the access token while a refresh is possible, so hide an expired token
-    const newToken = data?.token && !isExpired ? toAuthorizationValue(data) : undefined
+    const newToken = token && !isExpired ? toAuthorizationValue({ token, tokenType }) : undefined
     const newIsAuthenticated = !!newToken
 
     setAuthState((prevState) => {

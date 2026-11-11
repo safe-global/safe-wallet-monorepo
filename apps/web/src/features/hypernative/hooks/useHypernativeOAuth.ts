@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { hnSessionRejectionCleared, selectRejectedHypernativeToken } from '../store/hnSessionSlice'
+import { hnSessionRejectionCleared, selectRejectedHypernativeAuthorization } from '../store/hnSessionSlice'
 import { HYPERNATIVE_OAUTH_CONFIG, MOCK_AUTH_ENABLED, getRedirectUri } from '../config/oauth'
 import { showNotification } from '@/store/notificationsSlice'
 import Cookies from 'js-cookie'
@@ -21,7 +21,7 @@ export type HypernativeAuthStatus = {
   /** Clears authentication token and logs out user */
   logout: () => void
   /** Whether the API rejected the last token and the user has not signed in again */
-  isSessionRejected?: boolean
+  isSessionRejected: boolean
 }
 
 /**
@@ -212,17 +212,17 @@ async function buildAuthUrl(chainId?: string, safeAddress?: string): Promise<str
 export const useHypernativeOAuth = (): HypernativeAuthStatus => {
   const dispatch = useAppDispatch()
   const [{ token, isAuthenticated: hasToken, isExpired }, setToken, clearToken] = useAuthToken()
-  const rejectedToken = useAppSelector(selectRejectedHypernativeToken)
-  const isAuthenticated = hasToken && token !== rejectedToken
-  const isSessionRejected = rejectedToken !== undefined && !isAuthenticated
+  const rejectedAuthorization = useAppSelector(selectRejectedHypernativeAuthorization)
+  const isAuthenticated = hasToken && token !== rejectedAuthorization
+  const isSessionRejected = rejectedAuthorization !== undefined && !isAuthenticated
   const { safeAddress } = useSafeInfo()
+  const chainId = useChainId()
 
   useEffect(() => {
-    if (rejectedToken && token && token !== rejectedToken) {
+    if (rejectedAuthorization && token && token !== rejectedAuthorization) {
       dispatch(hnSessionRejectionCleared())
     }
-  }, [rejectedToken, token, dispatch])
-  const chainId = useChainId()
+  }, [rejectedAuthorization, token, dispatch])
 
   // Reference to popup check interval
   const popupCheckIntervalRef = useRef<NodeJS.Timeout | null>(null)
@@ -357,10 +357,10 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
    */
   const logout = useCallback(() => {
     clearToken()
-    if (rejectedToken) {
+    if (rejectedAuthorization) {
       dispatch(hnSessionRejectionCleared())
     }
-  }, [clearToken, rejectedToken, dispatch])
+  }, [clearToken, rejectedAuthorization, dispatch])
 
   useEffect(() => {
     return () => clearAllTimers()

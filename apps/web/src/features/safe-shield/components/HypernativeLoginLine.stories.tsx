@@ -20,14 +20,26 @@ type Story = StoryObj<typeof meta>
 
 export const LoggedOut: Story = {
   args: {
-    hypernativeAuth: { isAuthenticated: false, isTokenExpired: false, initiateLogin: () => {}, logout: () => {} },
+    hypernativeAuth: {
+      isAuthenticated: false,
+      isTokenExpired: false,
+      isSessionRejected: false,
+      initiateLogin: () => {},
+      logout: () => {},
+    },
   },
   parameters: { docs: { description: { story: 'Eligible Safe whose user has not logged in to Hypernative' } } },
 }
 
 export const TokenExpired: Story = {
   args: {
-    hypernativeAuth: { isAuthenticated: true, isTokenExpired: true, initiateLogin: () => {}, logout: () => {} },
+    hypernativeAuth: {
+      isAuthenticated: true,
+      isTokenExpired: true,
+      isSessionRejected: false,
+      initiateLogin: () => {},
+      logout: () => {},
+    },
   },
   parameters: { docs: { description: { story: 'Eligible Safe whose Hypernative session has expired' } } },
 }

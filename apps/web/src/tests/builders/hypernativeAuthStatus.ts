@@ -5,6 +5,7 @@ export const hypernativeAuthStatusBuilder = () =>
   Builder.new<HypernativeAuthStatus>().with({
     isAuthenticated: false,
     isTokenExpired: false,
+    isSessionRejected: false,
     initiateLogin: jest.fn(),
     logout: jest.fn(),
   })
