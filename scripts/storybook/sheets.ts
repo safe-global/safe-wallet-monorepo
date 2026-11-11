@@ -1,4 +1,18 @@
+import * as fs from 'fs'
+import * as path from 'path'
 import { pathToFileURL } from 'url'
+
+/** The sheet label font, embedded: a file:// page cannot load web fonts, and system fonts differ per runner image */
+export const SHEET_FONT = 'DM Sans'
+
+const FONTS_DIR = path.resolve(__dirname, '../../apps/web/public/fonts')
+
+const fontFace = (weight: number, file: string): string => {
+  const data = fs.readFileSync(path.join(FONTS_DIR, file)).toString('base64')
+  return `@font-face{font-family:'${SHEET_FONT}';font-weight:${weight};src:url(data:font/woff2;base64,${data})}`
+}
+
+const SHEET_FONT_FACES = fontFace(400, 'DMSansRegular.woff2') + fontFace(700, 'DMSans700.woff2')
 
 /** One screenshot of one story in one mode. */
 export interface Cell {
@@ -97,7 +111,8 @@ export function sheetHtml(sheet: Sheet, modes: string[]): string {
     return `<tr><th>${escapeHtml(row.label)}</th>${cells.join('')}</tr>`
   })
   return `<!doctype html><style>
-body{margin:0;background:#fff;color:#000;font:12px/1.4 sans-serif}
+${SHEET_FONT_FACES}
+body{margin:0;background:#fff;color:#000;font:12px/1.4 '${SHEET_FONT}'}
 table{border-spacing:8px}
 th{text-align:left;vertical-align:top;white-space:nowrap}
 td{vertical-align:top;padding:0}

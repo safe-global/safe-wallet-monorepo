@@ -38,7 +38,7 @@ import * as path from 'path'
 import { pathToFileURL } from 'url'
 import type { Browser } from 'playwright'
 import { hashImage, type Manifest } from './manifest'
-import { planSheets, shardStories, sheetHtml, type Cell, type Sheet } from './sheets'
+import { planSheets, SHEET_FONT, shardStories, sheetHtml, type Cell, type Sheet } from './sheets'
 import { launchBrowser, storyContexts } from './sweep-browser'
 import { checkStory } from './sweep-check'
 import { hasBrokenStory, type Finding } from './sweep-findings'
@@ -102,6 +102,15 @@ async function writeSheets(
       const html = path.join(cellsDir, `${sheet.file}.html`)
       fs.writeFileSync(html, sheetHtml(sheet, modes))
       await page.goto(pathToFileURL(html).href)
+      const fontLoaded = await page.evaluate(async (font) => {
+        const faces = await Promise.all([
+          document.fonts.load(`12px '${font}'`),
+          document.fonts.load(`bold 12px '${font}'`),
+        ])
+        return faces.every((loaded) => loaded.length > 0)
+      }, SHEET_FONT)
+      // A system fallback would change every sheet without an error
+      if (!fontLoaded) throw new Error(`${sheet.file}: the sheet font ${SHEET_FONT} did not load; check sheets.ts`)
       await page.locator('table').screenshot({ path: path.join(shotsDir, sheet.file) })
     }
     await page.close()
