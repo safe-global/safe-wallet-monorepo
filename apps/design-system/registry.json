@@ -7,8 +7,13 @@
       "name": "accordion",
       "type": "registry:ui",
       "title": "Accordion",
-      "dependencies": ["@base-ui/react@^1.1.0", "lucide-react@^0.563.0"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/accordion.tsx",
@@ -20,8 +25,13 @@
       "name": "alert",
       "type": "registry:ui",
       "title": "Alert",
-      "dependencies": ["class-variance-authority@^0.7.1", "lucide-react@^0.563.0"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/alert.tsx",
@@ -33,8 +43,15 @@
       "name": "alert-dialog",
       "type": "registry:ui",
       "title": "Alert Dialog",
-      "dependencies": ["@base-ui/react@^1.1.0"],
-      "registryDependencies": ["@safe/button", "@safe/overlay", "@safe/provider", "@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/overlay",
+        "@safe/provider",
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/alert-dialog.tsx",
@@ -46,7 +63,9 @@
       "name": "aspect-ratio",
       "type": "registry:ui",
       "title": "Aspect Ratio",
-      "registryDependencies": ["@safe/utils"],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/aspect-ratio.tsx",
@@ -58,8 +77,12 @@
       "name": "avatar",
       "type": "registry:ui",
       "title": "Avatar",
-      "dependencies": ["@base-ui/react@^1.1.0"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/avatar.tsx",
@@ -71,8 +94,13 @@
       "name": "badge",
       "type": "registry:ui",
       "title": "Badge",
-      "dependencies": ["@base-ui/react@^1.1.0", "class-variance-authority@^0.7.1"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/badge.tsx",
@@ -84,8 +112,13 @@
       "name": "breadcrumb",
       "type": "registry:ui",
       "title": "Breadcrumb",
-      "dependencies": ["@base-ui/react@^1.1.0", "lucide-react@^0.563.0"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/breadcrumb.tsx",
@@ -97,8 +130,13 @@
       "name": "button",
       "type": "registry:ui",
       "title": "Button",
-      "dependencies": ["@base-ui/react@^1.1.0", "class-variance-authority@^0.7.1"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/button.tsx",
@@ -110,8 +148,14 @@
       "name": "calendar",
       "type": "registry:ui",
       "title": "Calendar",
-      "dependencies": ["lucide-react@^0.563.0", "react-day-picker@^9.13.0"],
-      "registryDependencies": ["@safe/button", "@safe/utils"],
+      "dependencies": [
+        "lucide-react@^0.563.0",
+        "react-day-picker@^9.13.0"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/calendar.tsx",
@@ -123,8 +167,12 @@
       "name": "card",
       "type": "registry:ui",
       "title": "Card",
-      "dependencies": ["class-variance-authority@^0.7.1"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/card.tsx",
@@ -136,8 +184,13 @@
       "name": "checkbox",
       "type": "registry:ui",
       "title": "Checkbox",
-      "dependencies": ["@base-ui/react@^1.1.0", "lucide-react@^0.563.0"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/checkbox.tsx",
@@ -149,8 +202,13 @@
       "name": "chip",
       "type": "registry:ui",
       "title": "Chip",
-      "dependencies": ["class-variance-authority@^0.7.1", "lucide-react@^0.563.0"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/chip.tsx",
@@ -162,7 +220,9 @@
       "name": "collapsible",
       "type": "registry:ui",
       "title": "Collapsible",
-      "dependencies": ["@base-ui/react@^1.1.0"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/collapsible.tsx",
@@ -174,8 +234,16 @@
       "name": "combobox",
       "type": "registry:ui",
       "title": "Combobox",
-      "dependencies": ["@base-ui/react@^1.1.0", "lucide-react@^0.563.0"],
-      "registryDependencies": ["@safe/button", "@safe/input-group", "@safe/provider", "@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/input-group",
+        "@safe/provider",
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/combobox.tsx",
@@ -187,8 +255,14 @@
       "name": "context-menu",
       "type": "registry:ui",
       "title": "Context Menu",
-      "dependencies": ["@base-ui/react@^1.1.0", "lucide-react@^0.563.0"],
-      "registryDependencies": ["@safe/provider", "@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/provider",
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/context-menu.tsx",
@@ -200,8 +274,17 @@
       "name": "dialog",
       "type": "registry:ui",
       "title": "Dialog",
-      "dependencies": ["@base-ui/react@^1.1.0", "class-variance-authority@^0.7.1", "lucide-react@^0.563.0"],
-      "registryDependencies": ["@safe/button", "@safe/overlay", "@safe/provider", "@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/overlay",
+        "@safe/provider",
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/dialog.tsx",
@@ -213,8 +296,14 @@
       "name": "drawer",
       "type": "registry:ui",
       "title": "Drawer",
-      "dependencies": ["vaul@^1.1.2"],
-      "registryDependencies": ["@safe/overlay", "@safe/provider", "@safe/utils"],
+      "dependencies": [
+        "vaul@^1.1.2"
+      ],
+      "registryDependencies": [
+        "@safe/overlay",
+        "@safe/provider",
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/drawer.tsx",
@@ -226,8 +315,14 @@
       "name": "dropdown-menu",
       "type": "registry:ui",
       "title": "Dropdown Menu",
-      "dependencies": ["@base-ui/react@^1.1.0", "lucide-react@^0.563.0"],
-      "registryDependencies": ["@safe/provider", "@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/provider",
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/dropdown-menu.tsx",
@@ -239,8 +334,12 @@
       "name": "empty",
       "type": "registry:ui",
       "title": "Empty",
-      "dependencies": ["class-variance-authority@^0.7.1"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/empty.tsx",
@@ -252,8 +351,14 @@
       "name": "field",
       "type": "registry:ui",
       "title": "Field",
-      "dependencies": ["class-variance-authority@^0.7.1"],
-      "registryDependencies": ["@safe/label", "@safe/separator", "@safe/utils"],
+      "dependencies": [
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/label",
+        "@safe/separator",
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/field.tsx",
@@ -265,8 +370,13 @@
       "name": "hover-card",
       "type": "registry:ui",
       "title": "Hover Card",
-      "dependencies": ["@base-ui/react@^1.1.0"],
-      "registryDependencies": ["@safe/provider", "@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "registryDependencies": [
+        "@safe/provider",
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/hover-card.tsx",
@@ -278,8 +388,13 @@
       "name": "input",
       "type": "registry:ui",
       "title": "Input",
-      "dependencies": ["@base-ui/react@^1.1.0", "class-variance-authority@^0.7.1"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/input.tsx",
@@ -291,8 +406,15 @@
       "name": "input-group",
       "type": "registry:ui",
       "title": "Input Group",
-      "dependencies": ["class-variance-authority@^0.7.1"],
-      "registryDependencies": ["@safe/button", "@safe/input", "@safe/textarea", "@safe/utils"],
+      "dependencies": [
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/input",
+        "@safe/textarea",
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/input-group.tsx",
@@ -304,8 +426,13 @@
       "name": "input-otp",
       "type": "registry:ui",
       "title": "Input Otp",
-      "dependencies": ["input-otp@^1.4.2", "lucide-react@^0.563.0"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "input-otp@^1.4.2",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/input-otp.tsx",
@@ -317,7 +444,9 @@
       "name": "kbd",
       "type": "registry:ui",
       "title": "Kbd",
-      "registryDependencies": ["@safe/utils"],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/kbd.tsx",
@@ -329,7 +458,9 @@
       "name": "label",
       "type": "registry:ui",
       "title": "Label",
-      "registryDependencies": ["@safe/utils"],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/label.tsx",
@@ -341,8 +472,13 @@
       "name": "link",
       "type": "registry:ui",
       "title": "Link",
-      "dependencies": ["@base-ui/react@^1.1.0", "class-variance-authority@^0.7.1"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/link.tsx",
@@ -354,7 +490,9 @@
       "name": "list",
       "type": "registry:ui",
       "title": "List",
-      "registryDependencies": ["@safe/utils"],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/list.tsx",
@@ -366,8 +504,15 @@
       "name": "navigation-menu",
       "type": "registry:ui",
       "title": "Navigation Menu",
-      "dependencies": ["@base-ui/react@^1.1.0", "class-variance-authority@^0.7.1", "lucide-react@^0.563.0"],
-      "registryDependencies": ["@safe/provider", "@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/provider",
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/navigation-menu.tsx",
@@ -379,7 +524,9 @@
       "name": "overlay",
       "type": "registry:ui",
       "title": "Overlay",
-      "dependencies": ["class-variance-authority@^0.7.1"],
+      "dependencies": [
+        "class-variance-authority@^0.7.1"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/overlay.ts",
@@ -391,8 +538,13 @@
       "name": "pagination",
       "type": "registry:ui",
       "title": "Pagination",
-      "dependencies": ["lucide-react@^0.563.0"],
-      "registryDependencies": ["@safe/button", "@safe/utils"],
+      "dependencies": [
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/pagination.tsx",
@@ -404,8 +556,14 @@
       "name": "popover",
       "type": "registry:ui",
       "title": "Popover",
-      "dependencies": ["@base-ui/react@^1.1.0"],
-      "registryDependencies": ["@safe/overlay", "@safe/provider", "@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "registryDependencies": [
+        "@safe/overlay",
+        "@safe/provider",
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/popover.tsx",
@@ -417,8 +575,12 @@
       "name": "progress",
       "type": "registry:ui",
       "title": "Progress",
-      "dependencies": ["@base-ui/react@^1.1.0"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/progress.tsx",
@@ -430,7 +592,9 @@
       "name": "provider",
       "type": "registry:ui",
       "title": "Provider",
-      "registryDependencies": ["@safe/utils"],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/provider.tsx",
@@ -442,8 +606,13 @@
       "name": "radio-group",
       "type": "registry:ui",
       "title": "Radio Group",
-      "dependencies": ["@base-ui/react@^1.1.0", "lucide-react@^0.563.0"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/radio-group.tsx",
@@ -455,8 +624,12 @@
       "name": "resizable",
       "type": "registry:ui",
       "title": "Resizable",
-      "dependencies": ["react-resizable-panels@^4.5.3"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "react-resizable-panels@^4.5.3"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/resizable.tsx",
@@ -468,8 +641,12 @@
       "name": "scroll-area",
       "type": "registry:ui",
       "title": "Scroll Area",
-      "dependencies": ["@base-ui/react@^1.1.0"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/scroll-area.tsx",
@@ -481,8 +658,13 @@
       "name": "search-input",
       "type": "registry:ui",
       "title": "Search Input",
-      "dependencies": ["lucide-react@^0.563.0"],
-      "registryDependencies": ["@safe/input-group", "@safe/utils"],
+      "dependencies": [
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/input-group",
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/search-input.tsx",
@@ -494,8 +676,16 @@
       "name": "select",
       "type": "registry:ui",
       "title": "Select",
-      "dependencies": ["@base-ui/react@^1.1.0", "class-variance-authority@^0.7.1", "lucide-react@^0.563.0"],
-      "registryDependencies": ["@safe/overlay", "@safe/provider", "@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/overlay",
+        "@safe/provider",
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/select.tsx",
@@ -507,8 +697,13 @@
       "name": "separator",
       "type": "registry:ui",
       "title": "Separator",
-      "dependencies": ["@base-ui/react@^1.1.0", "class-variance-authority@^0.7.1"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/separator.tsx",
@@ -520,8 +715,17 @@
       "name": "sheet",
       "type": "registry:ui",
       "title": "Sheet",
-      "dependencies": ["@base-ui/react@^1.1.0", "class-variance-authority@^0.7.1", "lucide-react@^0.563.0"],
-      "registryDependencies": ["@safe/button", "@safe/overlay", "@safe/provider", "@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/overlay",
+        "@safe/provider",
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/sheet.tsx",
@@ -533,7 +737,11 @@
       "name": "sidebar",
       "type": "registry:ui",
       "title": "Sidebar",
-      "dependencies": ["@base-ui/react@^1.1.0", "class-variance-authority@^0.7.1", "lucide-react@^0.563.0"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
       "registryDependencies": [
         "@safe/button",
         "@safe/input",
@@ -556,7 +764,9 @@
       "name": "skeleton",
       "type": "registry:ui",
       "title": "Skeleton",
-      "registryDependencies": ["@safe/utils"],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/skeleton.tsx",
@@ -568,8 +778,12 @@
       "name": "slider",
       "type": "registry:ui",
       "title": "Slider",
-      "dependencies": ["@base-ui/react@^1.1.0"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/slider.tsx",
@@ -581,7 +795,10 @@
       "name": "sonner",
       "type": "registry:ui",
       "title": "Sonner",
-      "dependencies": ["lucide-react@^0.563.0", "sonner@^2.0.7"],
+      "dependencies": [
+        "lucide-react@^0.563.0",
+        "sonner@^2.0.7"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/sonner.tsx",
@@ -593,8 +810,12 @@
       "name": "spinner",
       "type": "registry:ui",
       "title": "Spinner",
-      "dependencies": ["lucide-react@^0.563.0"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/spinner.tsx",
@@ -606,8 +827,12 @@
       "name": "switch",
       "type": "registry:ui",
       "title": "Switch",
-      "dependencies": ["@base-ui/react@^1.1.0"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/switch.tsx",
@@ -619,8 +844,13 @@
       "name": "table",
       "type": "registry:ui",
       "title": "Table",
-      "dependencies": ["class-variance-authority@^0.7.1", "lucide-react@^0.563.0"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/table.tsx",
@@ -637,8 +867,13 @@
       "name": "tabs",
       "type": "registry:ui",
       "title": "Tabs",
-      "dependencies": ["@base-ui/react@^1.1.0", "class-variance-authority@^0.7.1"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/tabs.tsx",
@@ -650,7 +885,9 @@
       "name": "textarea",
       "type": "registry:ui",
       "title": "Textarea",
-      "registryDependencies": ["@safe/utils"],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/textarea.tsx",
@@ -663,7 +900,10 @@
       "type": "registry:theme",
       "title": "Theme",
       "description": "Safe UI design tokens: light and dark variables, the Tailwind theme mapping and base styles.",
-      "dependencies": ["shadcn@^3.7.0", "tw-animate-css@^1.4.0"],
+      "dependencies": [
+        "shadcn@^3.7.0",
+        "tw-animate-css@^1.4.0"
+      ],
       "cssVars": {
         "theme": {
           "font-sans": "'DM Sans', sans-serif",
@@ -987,8 +1227,13 @@
       "name": "toggle",
       "type": "registry:ui",
       "title": "Toggle",
-      "dependencies": ["@base-ui/react@^1.1.0", "class-variance-authority@^0.7.1"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/toggle.tsx",
@@ -1000,8 +1245,13 @@
       "name": "tooltip",
       "type": "registry:ui",
       "title": "Tooltip",
-      "dependencies": ["@base-ui/react@^1.1.0"],
-      "registryDependencies": ["@safe/provider", "@safe/utils"],
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "registryDependencies": [
+        "@safe/provider",
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/tooltip.tsx",
@@ -1013,8 +1263,12 @@
       "name": "typography",
       "type": "registry:ui",
       "title": "Typography",
-      "dependencies": ["class-variance-authority@^0.7.1"],
-      "registryDependencies": ["@safe/utils"],
+      "dependencies": [
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
       "files": [
         {
           "path": "registry/safe/ui/typography.tsx",
@@ -1048,7 +1302,10 @@
       "name": "utils",
       "type": "registry:lib",
       "title": "Utils",
-      "dependencies": ["clsx@^2.1.1", "tailwind-merge@^3.4.0"],
+      "dependencies": [
+        "clsx@^2.1.1",
+        "tailwind-merge@^3.4.0"
+      ],
       "files": [
         {
           "path": "registry/safe/lib/utils.ts",
