@@ -76,6 +76,7 @@ export function createChainData(features: FeatureFlags = {}, baseChain: Chain = 
   const enabledFeatureStrings = Object.entries(mergedFeatures)
     .filter(([, enabled]) => enabled)
     .map(([key]) => FEATURE_MAP[key as keyof FeatureFlags])
+    .filter(Boolean)
 
   // Filter chain features: keep enabled ones and remove always-disabled ones
   chainData.features = chainData.features.filter((f: string) => {
