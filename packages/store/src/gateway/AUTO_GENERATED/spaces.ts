@@ -246,6 +246,8 @@ const injectedRtkApi = api
           params: {
             status: queryArg.status,
             safes: queryArg.safes,
+            chainIds: queryArg.chainIds,
+            signers: queryArg.signers,
             conflicting: queryArg.conflicting,
             stale: queryArg.stale,
             search: queryArg.search,
@@ -519,6 +521,10 @@ export type SpaceTransactionsGetTransactionQueueV1ApiArg = {
   status?: string[]
   /** Keep the transactions of these Safes, comma-separated as `{chainId}:{safeAddress}` */
   safes?: string
+  /** Keep the transactions on these chains, comma-separated */
+  chainIds?: string
+  /** Keep the transactions still awaiting a signature from one of these addresses, comma-separated */
+  signers?: string
   /** Keep the transactions sharing their nonce with another */
   conflicting?: boolean
   /** Keep the transactions proposed more than 7 days ago */
@@ -1357,11 +1363,21 @@ export type SpaceQueueSafe = {
 export type SpaceQueueSafeCount = {
   chainId: string
   safeAddress: string
-  /** Transactions of this Safe on this chain that match the status filters */
+  /** Transactions of this Safe on this chain that match every filter but `safes` */
+  count: number
+}
+export type SpaceQueueChainCount = {
+  chainId: string
+  /** Transactions on this chain that match every filter but `chainIds` */
+  count: number
+}
+export type SpaceQueueSignerCount = {
+  address: string
+  /** Transactions still awaiting this signer that match every filter but `signers` */
   count: number
 }
 export type SpaceQueueCounts = {
-  /** Transactions of the selected Safes, the sum of execute, sign, blocked and waiting */
+  /** Transactions that match every filter but the status ones, the sum of execute, sign, blocked and waiting */
   total: number
   /** Fully signed and next in line on their Safe and chain */
   execute: number
@@ -1375,8 +1391,12 @@ export type SpaceQueueCounts = {
   conflicting: number
   /** Proposed more than 7 days ago */
   stale: number
-  /** Every Safe and chain of the queue read, with how many of its transactions match the status filters */
+  /** Every Safe and chain of the queue read, with how many of its transactions match every filter but `safes` */
   safes: SpaceQueueSafeCount[]
+  /** Every chain of the queue read, with how many of its transactions match every filter but `chainIds` */
+  chains: SpaceQueueChainCount[]
+  /** Every signer a transaction of the queue read still awaits, with how many of those transactions match every filter but `signers` */
+  signers: SpaceQueueSignerCount[]
 }
 export type SpaceQueuedItemPage = {
   /** Size of the whole queue, which can exceed the items returned when the queue is longer than the pages read */
