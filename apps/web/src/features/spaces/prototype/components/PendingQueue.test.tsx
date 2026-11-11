@@ -1439,6 +1439,12 @@ describe('option E · Group by cards', () => {
     expect(within(behind).getAllByText('Sign ahead').length).toBeGreaterThan(0)
   })
 
+  it('shows Proposal for rows with no signatures, and Awaiting parent when a signer Safe approves it', () => {
+    render(<PendingQueue />, { routerProps: { query: { option: 'cards', scenario: '5-safes' } } })
+    expect(allPending().getAllByRole('button', { name: /^0 of \d+ signatures, proposal/ }).length).toBeGreaterThan(0)
+    expect(allPending().getByLabelText(/^Awaiting parent signature\. Ops Payroll #20$/)).toBeInTheDocument()
+  })
+
   it('starts each transaction with its Safe as a tag, in place of the Safe column', () => {
     render(<PendingQueue />, cards)
     expect(screen.queryByRole('columnheader', { name: 'Safe' })).toBeNull()
