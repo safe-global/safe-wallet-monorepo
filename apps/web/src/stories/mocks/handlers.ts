@@ -23,6 +23,7 @@ import {
 import { createChainData, createChainsPageData, createChainsPageDataV2 } from './chains'
 import type { FeatureFlags, MockStoryConfig } from './types'
 import { MOCK_SPACE_ID } from './ids'
+import { mockNow } from './now'
 
 type ExperimentalFeature = GetSpaceResponse['experimentalFeatures'][number]
 
@@ -32,15 +33,15 @@ type ExperimentalFeature = GetSpaceResponse['experimentalFeatures'][number]
 export function coreHandlers(chainData: Chain, features: FeatureFlags = {}): RequestHandler[] {
   const indexingStatus: IndexingStatus = {
     currentBlockNumber: 20000000,
-    currentBlockTimestamp: new Date().toISOString(),
+    currentBlockTimestamp: new Date(mockNow()).toISOString(),
     erc20BlockNumber: 20000000,
-    erc20BlockTimestamp: new Date().toISOString(),
+    erc20BlockTimestamp: new Date(mockNow()).toISOString(),
     erc20Synced: true,
     masterCopiesBlockNumber: 20000000,
-    masterCopiesBlockTimestamp: new Date().toISOString(),
+    masterCopiesBlockTimestamp: new Date(mockNow()).toISOString(),
     masterCopiesSynced: true,
     synced: true,
-    lastSync: Date.now(),
+    lastSync: mockNow(),
   }
 
   return [
@@ -128,7 +129,7 @@ export function txDetailsHandlers(safeData: SafeState): RequestHandler[] {
  * Uses real CGW fixture data as a base, customized for the story context
  */
 export function createMockTransactionDetails(safeData: SafeState, txId: string) {
-  const now = Date.now()
+  const now = mockNow()
   const isERC20 = txId.includes('abc1') || txId.includes('exec1')
   const isSettings = txId.includes('abc3') || txId.includes('exec3')
   const isExecuted = txId.includes('exec')
@@ -567,8 +568,8 @@ export function createMockSpace(spaceId: string = MOCK_SPACE_ID, experimentalFea
         name: 'Admin User',
         invitedBy: null,
         status: 'ACTIVE' as const,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: new Date(mockNow()).toISOString(),
+        updatedAt: new Date(mockNow()).toISOString(),
         user: {
           id: mockUser.id,
           status: 'ACTIVE' as const,
@@ -645,8 +646,8 @@ export function spacesHandlers(): RequestHandler[] {
             name: 'Admin User',
             invitedBy: null,
             status: 'ACTIVE',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            createdAt: new Date(mockNow()).toISOString(),
+            updatedAt: new Date(mockNow()).toISOString(),
             user: { id: mockUser.id, status: 'ACTIVE' },
           },
           {
@@ -655,8 +656,8 @@ export function spacesHandlers(): RequestHandler[] {
             name: 'Jane Member',
             invitedBy: null,
             status: 'ACTIVE',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            createdAt: new Date(mockNow()).toISOString(),
+            updatedAt: new Date(mockNow()).toISOString(),
             user: { id: 2, status: 'ACTIVE' },
           },
         ],
@@ -669,7 +670,7 @@ export function spacesHandlers(): RequestHandler[] {
  * Mock executed transactions for history stories
  */
 export function createMockHistoryTransactions(safeData: SafeState) {
-  const now = Date.now()
+  const now = mockNow()
   return {
     count: 5,
     next: null,
@@ -818,6 +819,7 @@ export function createMockHistoryTransactions(safeData: SafeState) {
  * Mock pending transactions for stories
  */
 export function createMockPendingTransactions(safeData: SafeState) {
+  const now = mockNow()
   return {
     count: 3,
     next: null,
@@ -832,7 +834,7 @@ export function createMockPendingTransactions(safeData: SafeState) {
         transaction: {
           id: 'multisig_0x123_0xabc3',
           txHash: null,
-          timestamp: Date.now() - 1000 * 60 * 60 * 24,
+          timestamp: now - 1000 * 60 * 60 * 24,
           txStatus: 'AWAITING_EXECUTION' as const,
           txInfo: {
             type: 'SettingsChange' as const,
@@ -872,7 +874,7 @@ export function createMockPendingTransactions(safeData: SafeState) {
         transaction: {
           id: 'multisig_0x123_0xabc1',
           txHash: null,
-          timestamp: Date.now() - 1000 * 60 * 5,
+          timestamp: now - 1000 * 60 * 5,
           txStatus: 'AWAITING_CONFIRMATIONS' as const,
           txInfo: {
             type: 'Transfer' as const,
@@ -909,7 +911,7 @@ export function createMockPendingTransactions(safeData: SafeState) {
         transaction: {
           id: 'multisig_0x123_0xabc2',
           txHash: null,
-          timestamp: Date.now() - 1000 * 60 * 60 * 2,
+          timestamp: now - 1000 * 60 * 60 * 2,
           txStatus: 'AWAITING_CONFIRMATIONS' as const,
           txInfo: {
             type: 'Transfer' as const,

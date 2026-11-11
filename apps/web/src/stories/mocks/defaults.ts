@@ -5,6 +5,7 @@ import { CookieAndTermType, cookiesAndTermsSlice, type CookiesAndTermsState } fr
 import { version } from '@/markdown/terms/version'
 import type { StoreOverrides } from './types'
 import { createMockPendingTransactions, createMockHistoryTransactions } from './handlers'
+import { mockNow } from './now'
 
 /**
  * Creates default settings state for stories
@@ -98,7 +99,7 @@ export function createAuthState(isAuthenticated: boolean) {
   }
   // Set session to expire 1 hour from now
   return {
-    sessionExpiresAt: Date.now() + 60 * 60 * 1000,
+    sessionExpiresAt: mockNow() + 60 * 60 * 1000,
     lastUsedSpaceId: null,
     isStoreHydrated: true,
   }
