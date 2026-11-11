@@ -115,7 +115,7 @@ jobs:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
 
-      # No --with-deps: its fonts change sans-serif from DejaVu Sans to Liberation Sans in every sheet
+      # No --with-deps: it only adds fonts, and the stories and sheet labels render DM Sans
       - name: Install Chromium headless shell
         working-directory: apps/web
         run: yarn exec playwright install --only-shell chromium
