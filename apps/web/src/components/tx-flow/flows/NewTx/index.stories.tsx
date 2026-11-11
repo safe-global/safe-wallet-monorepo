@@ -70,5 +70,7 @@ export const SendTokensJourney: Story = {
     await userEvent.click(nextButton)
 
     await expect(await canvas.findByRole('heading', { name: 'Confirm transaction' })).toBeVisible()
+    // Safe Shield keeps its skeleton row for 500ms after the first result
+    await waitFor(() => expect(canvasElement.querySelector('[data-slot="skeleton"]')).toBeNull())
   },
 }
