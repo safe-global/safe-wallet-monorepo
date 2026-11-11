@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from 'react'
 import { ChevronDown, Lock } from 'lucide-react'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -166,7 +167,8 @@ const FeeLabel = ({ label, tooltip }: { label: string; tooltip: string }): React
   <Typography variant="paragraph-small" className={css.feeLabel}>
     {label}
     <Tooltip>
-      <TooltipTrigger render={<span className={css.tooltipIcon} />}>
+      {/* Keeps a tap on the icon from toggling a clickable row it sits in. */}
+      <TooltipTrigger render={<span className={css.tooltipIcon} onClick={(e) => e.stopPropagation()} />}>
         <InfoIcon className="size-4 text-[var(--color-border-main)]" />
       </TooltipTrigger>
       <TooltipContent>{tooltip}</TooltipContent>
@@ -248,6 +250,74 @@ export type GasPayerSelectorProps = {
   renderTokenIcon: TokenIconRenderer
   /** The strip under the fee rows (Pro upsell or sponsored counter); none when null. */
   footer: ReactNode
+  /** Opened by the Edit/View button next to "Gas fee": an editor ('edit') or read-only details ('view'); static row without it. */
+  gasFeeDetails?: GasFeeDetailsSlot
+}
+
+export type GasFeeDetailsSlot = {
+  mode: 'edit' | 'view'
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  content: ReactNode
+}
+
+const DETAILS_BUTTON = {
+  edit: { label: 'Edit gas settings', text: 'Edit', className: 'border border-border bg-card shadow-xs' },
+  view: { label: 'View gas details', text: 'View', className: 'bg-foreground/[0.08]' },
+}
+
+const ExpandableGasFeeRow = ({
+  label,
+  value,
+  details,
+}: {
+  label: ReactNode
+  value: ReactNode
+  details: GasFeeDetailsSlot
+}): ReactElement => {
+  const { label: ariaLabel, text, className } = DETAILS_BUTTON[details.mode]
+  return (
+    // One gray box for the row and its panel: on hover, and while the panel is mounted (open or closing).
+    <Collapsible
+      open={details.open}
+      onOpenChange={details.onOpenChange}
+      className="-mx-2 rounded-md px-2 transition-colors duration-200 hover:bg-muted has-[[data-slot=collapsible-content]]:bg-muted has-[[data-slot=collapsible-trigger]:focus-visible]:ring-2 has-[[data-slot=collapsible-trigger]:focus-visible]:ring-ring motion-reduce:transition-none"
+    >
+      <CollapsibleTrigger
+        aria-label={ariaLabel}
+        data-testid="gas-fee-details-toggle"
+        nativeButton={false}
+        render={<div />}
+        className={cn(css.feeRow, 'group/gas-fee cursor-pointer outline-none')}
+      >
+        <span className="flex items-center gap-2">
+          {label}
+          <span
+            aria-hidden
+            data-testid={`gas-fee-${details.mode}-button`}
+            className={cn(
+              'inline-flex h-5 items-center rounded-full px-2 text-xs leading-none font-medium text-muted-foreground transition-colors group-hover/gas-fee:text-foreground',
+              details.mode === 'edit' && 'group-data-[panel-open]/gas-fee:hidden',
+              className,
+            )}
+          >
+            {details.mode === 'view' ? (
+              <>
+                <span className="group-data-[panel-open]/gas-fee:hidden">{text}</span>
+                <span className="hidden group-data-[panel-open]/gas-fee:inline">Hide</span>
+              </>
+            ) : (
+              text
+            )}
+          </span>
+        </span>
+        {value}
+      </CollapsibleTrigger>
+      <CollapsibleContent className="h-(--collapsible-panel-height) overflow-hidden transition-[height] duration-[420ms] ease-soft data-ending-style:h-0 data-ending-style:duration-[320ms] data-ending-style:ease-in-out data-starting-style:h-0 motion-reduce:transition-none">
+        {details.content}
+      </CollapsibleContent>
+    </Collapsible>
+  )
 }
 
 const GasPayerSelector = ({
@@ -257,6 +327,7 @@ const GasPayerSelector = ({
   currency,
   renderTokenIcon,
   footer,
+  gasFeeDetails,
 }: GasPayerSelectorProps): ReactElement => {
   const { payer, gasToken, executionFee, gasFee, sponsored, sponsorKind, totalOutgoing, safeHasEnoughGas } = view
   const singleToken = gasToken.tokens.length <= 1
@@ -301,10 +372,18 @@ const GasPayerSelector = ({
             )}
           </FeeRow>
 
-          <FeeRow testId="gas-fee-row">
-            <FeeLabel label="Gas fee" tooltip={GAS_FEE_TOOLTIP} />
-            <FeeValue fee={gasFee} sponsored={sponsored} sponsorKind={sponsorKind} />
-          </FeeRow>
+          {gasFeeDetails ? (
+            <ExpandableGasFeeRow
+              label={<FeeLabel label="Gas fee" tooltip={GAS_FEE_TOOLTIP} />}
+              value={<FeeValue fee={gasFee} sponsored={sponsored} sponsorKind={sponsorKind} />}
+              details={gasFeeDetails}
+            />
+          ) : (
+            <FeeRow testId="gas-fee-row">
+              <FeeLabel label="Gas fee" tooltip={GAS_FEE_TOOLTIP} />
+              <FeeValue fee={gasFee} sponsored={sponsored} sponsorKind={sponsorKind} />
+            </FeeRow>
+          )}
 
           {totalOutgoing && (
             <div className={css.totalOutgoingWrap}>
