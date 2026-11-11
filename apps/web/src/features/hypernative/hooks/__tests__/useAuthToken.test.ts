@@ -7,6 +7,7 @@ jest.mock('../../store/cookieStorage', () => ({
   getAuthCookieData: jest.fn(),
   setAuthCookie: jest.fn(),
   clearAuthCookie: jest.fn(),
+  AUTH_COOKIE_CHANGE_EVENT: jest.requireActual('../../store/cookieStorage').AUTH_COOKIE_CHANGE_EVENT,
 }))
 
 const mockGetAuthCookieData = cookieStorage.getAuthCookieData as jest.MockedFunction<
@@ -17,46 +18,18 @@ const mockClearAuthCookie = cookieStorage.clearAuthCookie as jest.MockedFunction
 
 describe('useAuthToken', () => {
   const originalDateNow = Date.now
-  const originalSetInterval = global.setInterval
-  const originalClearInterval = global.clearInterval
-  const originalAddEventListener = window.addEventListener
-  const originalRemoveEventListener = window.removeEventListener
 
   beforeEach(() => {
     jest.clearAllMocks()
     Date.now = originalDateNow
     mockGetAuthCookieData.mockReturnValue(undefined)
-
-    // Mock storage event listeners
-    const storageListeners: Array<() => void> = []
-    window.addEventListener = jest.fn((event: string, listener: () => void) => {
-      if (event === 'storage') {
-        storageListeners.push(listener)
-      }
-    }) as unknown as typeof window.addEventListener
-
-    window.removeEventListener = jest.fn((event: string, listener: () => void) => {
-      if (event === 'storage') {
-        const index = storageListeners.indexOf(listener)
-        if (index > -1) {
-          storageListeners.splice(index, 1)
-        }
-      }
-    }) as unknown as typeof window.removeEventListener
-
-    // Helper to trigger storage events
-    ;(window as { triggerStorageEvent?: () => void }).triggerStorageEvent = () => {
-      storageListeners.forEach((listener) => listener())
-    }
+    jest.spyOn(window, 'addEventListener')
+    jest.spyOn(window, 'removeEventListener')
   })
 
   afterEach(() => {
     Date.now = originalDateNow
-    global.setInterval = originalSetInterval
-    global.clearInterval = originalClearInterval
-    window.addEventListener = originalAddEventListener
-    window.removeEventListener = originalRemoveEventListener
-    delete (window as { triggerStorageEvent?: () => void }).triggerStorageEvent
+    jest.restoreAllMocks()
   })
 
   describe('initial state', () => {
@@ -85,17 +58,20 @@ describe('useAuthToken', () => {
       expect(result.current[0].isExpired).toBe(false)
     })
 
-    it('should return expired state when token is expired', () => {
+    it('should hide an expired token that the cookie keeps for a refresh', () => {
       const now = Date.now()
       mockGetAuthCookieData.mockReturnValue({
         token: 'expired-token',
         tokenType: 'Bearer',
         expiry: now - 1000, // 1 second ago
+        refreshToken: 'refresh-token',
+        refreshExpiry: now + 3600000,
       })
 
       const { result } = renderHook(() => useAuthToken())
 
-      expect(result.current[0].isAuthenticated).toBe(true)
+      expect(result.current[0].token).toBeUndefined()
+      expect(result.current[0].isAuthenticated).toBe(false)
       expect(result.current[0].isExpired).toBe(true)
     })
 
@@ -155,44 +131,21 @@ describe('useAuthToken', () => {
   })
 
   describe('setToken', () => {
-    it('should set token and update state', () => {
-      mockGetAuthCookieData.mockReturnValue(undefined)
-
-      const { result } = renderHook(() => useAuthToken())
-
-      // Initially unauthenticated
-      expect(result.current[0].isAuthenticated).toBe(false)
-
-      // After setting token, mock should return the new token
-      act(() => {
-        result.current[1]('new-token', 'Bearer', 3600)
-      })
-
-      // Mock the cookie data after setToken is called
-      mockGetAuthCookieData.mockReturnValue({
-        token: 'new-token',
-        tokenType: 'Bearer',
-        expiry: Date.now() + 3600000,
-      })
-
-      // Trigger a re-check by calling checkAuthState manually
-      // Since setToken calls checkAuthState, we need to wait for it
-      act(() => {
-        // The setToken already called checkAuthState, but we need to ensure state updates
-        // Let's trigger it again to simulate the effect
-      })
-
-      expect(mockSetAuthCookie).toHaveBeenCalledWith('new-token', 'Bearer', 3600)
-    })
-
-    it('should handle different token types', () => {
+    it('should store the whole token response, including the refresh token', () => {
+      const tokens = {
+        access_token: 'new-token',
+        token_type: 'Bearer',
+        expires_in: 300,
+        refresh_token: 'refresh-token',
+        refresh_expires_in: 2592000,
+      }
       const { result } = renderHook(() => useAuthToken())
 
       act(() => {
-        result.current[1]('custom-token', 'Custom', 7200)
+        result.current[1](tokens)
       })
 
-      expect(mockSetAuthCookie).toHaveBeenCalledWith('custom-token', 'Custom', 7200)
+      expect(mockSetAuthCookie).toHaveBeenCalledWith(tokens)
     })
 
     it('should update state immediately after setting token', () => {
@@ -211,7 +164,7 @@ describe('useAuthToken', () => {
       })
 
       act(() => {
-        result.current[1]('immediate-token', 'Bearer', 3600)
+        result.current[1]({ access_token: 'immediate-token', token_type: 'Bearer', expires_in: 3600 })
       })
 
       // State should be updated because setToken calls checkAuthState
@@ -362,6 +315,7 @@ describe('useAuthToken', () => {
 
       await waitFor(() => {
         expect(result.current[0].isExpired).toBe(true)
+        expect(result.current[0].token).toBeUndefined()
       })
     })
 
@@ -401,12 +355,8 @@ describe('useAuthToken', () => {
         expiry: Date.now() + 3600000,
       })
 
-      // Trigger storage event
       act(() => {
-        const triggerStorageEvent = (window as { triggerStorageEvent?: () => void }).triggerStorageEvent
-        if (triggerStorageEvent) {
-          triggerStorageEvent()
-        }
+        window.dispatchEvent(new Event('storage'))
       })
 
       await waitFor(() => {
@@ -421,6 +371,21 @@ describe('useAuthToken', () => {
       unmount()
 
       expect(window.removeEventListener).toHaveBeenCalledWith('storage', expect.any(Function))
+    })
+
+    it('should pick up a token written in this tab without waiting for the poll', () => {
+      const { result } = renderHook(() => useAuthToken())
+
+      mockGetAuthCookieData.mockReturnValue({
+        token: 'refreshed-token',
+        tokenType: 'Bearer',
+        expiry: Date.now() + 300000,
+      })
+      act(() => {
+        window.dispatchEvent(new Event(cookieStorage.AUTH_COOKIE_CHANGE_EVENT))
+      })
+
+      expect(result.current[0].token).toBe('Bearer refreshed-token')
     })
   })
 
@@ -531,7 +496,6 @@ describe('useAuthToken', () => {
       const { result } = renderHook(() => useAuthToken())
 
       expect(typeof result.current[1]).toBe('function')
-      expect(result.current[1].length).toBe(3) // Function expects 3 parameters
     })
 
     it('should return clearToken function as third element', () => {

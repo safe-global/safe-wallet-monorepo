@@ -14,7 +14,7 @@ const safeEntry: SpaceSafeEntry = {
   chainEntries: [{ chainId: '1', isDeployed: true }],
 }
 
-const setup = createMockStory({ features: { spaces: true } })
+const setup = createMockStory({ authenticated: true })
 
 const meta = {
   title: 'Features/SecurityHub/SecurityReportDrawer',

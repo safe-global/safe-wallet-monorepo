@@ -60,6 +60,7 @@ export {
   txQueueHandlers,
   masterCopiesHandlers,
   targetedMessagingHandlers,
+  spacesHandlers,
   createHandlers,
   createMockPendingTransactions,
   getFixtureData,

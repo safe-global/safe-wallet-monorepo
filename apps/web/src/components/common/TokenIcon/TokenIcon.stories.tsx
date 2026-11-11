@@ -73,6 +73,6 @@ export const Fallback: Story = {
 export const CustomFallback: Story = {
   args: {
     tokenSymbol: 'CUSTOM',
-    fallbackSrc: 'https://via.placeholder.com/26',
+    fallbackSrc: '/images/common/safe-token.svg',
   },
 }

@@ -4,6 +4,7 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { mswLoader } from 'msw-storybook-addon'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { createMockStory } from '@/stories/mocks'
+import { newRecipientAnalysisHandler } from '@/stories/mocks/handlers'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import NewTxFlow from './index'
 
@@ -42,6 +43,7 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     ...setup.parameters,
+    msw: { handlers: [newRecipientAnalysisHandler, ...setup.handlers] },
   },
 } satisfies Meta<typeof NewTransactionJourney>
 
@@ -70,5 +72,9 @@ export const SendTokensJourney: Story = {
     await userEvent.click(nextButton)
 
     await expect(await canvas.findByRole('heading', { name: 'Confirm transaction' })).toBeVisible()
+    // The skeleton may not be there yet when the page mounts, so wait for the result first.
+    // Safe Shield keeps its skeleton row for 500ms after the first result.
+    await canvas.findByText('New recipient')
+    await waitFor(() => expect(canvasElement.querySelector('[data-slot="skeleton"]')).toBeNull())
   },
 }

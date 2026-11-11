@@ -6,7 +6,7 @@ import SelectSafesOnboarding from '.'
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
+  authenticated: true,
   pathname: '/welcome/select-safes',
   query: { spaceId: MOCK_SPACE_ID },
   shadcn: true,

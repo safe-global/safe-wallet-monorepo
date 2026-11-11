@@ -77,7 +77,7 @@ const actors = [
 const storyConfig = (handlers: MockStoryConfig['handlers']): MockStoryConfig => ({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
+  authenticated: true,
   pathname: '/spaces/activity',
   query: { spaceId: MOCK_SPACE_ID },
   shadcn: true,

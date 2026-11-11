@@ -19,7 +19,7 @@ permissions: {}
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     permissions:
       contents: read
       pull-requests: write
@@ -112,7 +112,7 @@ jobs:
           include-hidden-files: true
 
   storybook:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     permissions:
       contents: read
 
@@ -141,7 +141,7 @@ jobs:
   deploy:
     needs: [build, storybook]
     if: ${{ !cancelled() }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     permissions:
       contents: read
       pull-requests: write
@@ -232,7 +232,7 @@ jobs:
   dora:
     needs: deploy
     if: github.event_name == 'push' && needs.deploy.result == 'success'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     permissions:
       actions: read
     steps:

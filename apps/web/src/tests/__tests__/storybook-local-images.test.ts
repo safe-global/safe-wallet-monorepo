@@ -19,7 +19,6 @@ const ALLOWED_REMOTE_HOSTS = new Set([
   'mock.images',
   'test-dapp.com',
   'app.com',
-  'via.placeholder.com',
   'cloudflare-ipfs.com',
 ])
 

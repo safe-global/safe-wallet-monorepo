@@ -6,8 +6,6 @@ import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import useChainId from '@/hooks/useChainId'
 import { AppRoutes } from '@/config/routes'
 import { useMemo } from 'react'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useRouter } from 'next/router'
 
 /**
@@ -15,7 +13,6 @@ import { useRouter } from 'next/router'
  * content can be displayed outside of space routes
  */
 const useIsQualifiedSafe = () => {
-  const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const { pathname } = useRouter()
   const spaceId = useCurrentSpaceId()
   const isUserSignedIn = useAppSelector(isAuthenticated)
@@ -33,7 +30,7 @@ const useIsQualifiedSafe = () => {
     [chainId, safeAddress, safes],
   )
 
-  return isUserSignedIn && !!spaceId && !isSpaceRoute && !!space && !!isSpacesFeatureEnabled && !!isSafePartOfSpace
+  return isUserSignedIn && !!spaceId && !isSpaceRoute && !!space && !!isSafePartOfSpace
 }
 
 export default useIsQualifiedSafe
