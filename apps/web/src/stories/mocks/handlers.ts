@@ -9,6 +9,7 @@ import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balance
 import type { Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import type { SafeShieldAnalyzeRecipientV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
 import type { GetSpaceResponse, UpdateSpaceDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import {
   safeFixtures,
@@ -386,11 +387,13 @@ export function safeOverviewHandlers(safeData: SafeState): RequestHandler[] {
  * External (non-CGW) services that pages call on load:
  * - Zodiac security-check (vulnerable modules banner) - report "safe"
  * - WalletConnect telemetry - accept and discard
+ * - Beamer What's new poll - no unread posts, so no top bar or corner card
  */
 export function externalServicesHandlers(): RequestHandler[] {
   return [
     http.get(/zodiac-check\.safe\.global\/public\/api\/security-check/, () => HttpResponse.json({ status: 'safe' })),
     http.post(/pulse\.walletconnect\.org/, () => HttpResponse.json({})),
+    http.get(/backend\.getbeamer\.com\/numberFeatures/, () => HttpResponse.json({ number: 0 })),
   ]
 }
 
@@ -478,6 +481,27 @@ export const mockOwnedSafes = {
  */
 export const spaceWithSafesHandler = http.get(/\/v1\/spaces\/[^/]+\/safes$/, () =>
   HttpResponse.json({ safes: mockOwnedSafes }),
+)
+
+const newRecipientAnalysis: SafeShieldAnalyzeRecipientV1ApiResponse = {
+  isSafe: false,
+  RECIPIENT_INTERACTION: [
+    {
+      severity: 'INFO',
+      type: 'NEW_RECIPIENT',
+      title: 'New recipient',
+      description: 'You are interacting with this address for the first time.',
+    },
+  ],
+}
+
+/**
+ * Safe Shield's recipient check, answering "new recipient" for any address; unmocked, it hits the blocked
+ * network and shows "Recipient analysis failed"
+ */
+export const newRecipientAnalysisHandler = http.get(
+  /\/v1\/chains\/\d+\/security\/0x[a-fA-F0-9]+\/recipient\/0x[a-fA-F0-9]+$/,
+  () => HttpResponse.json(newRecipientAnalysis),
 )
 
 /**

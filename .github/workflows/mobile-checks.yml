@@ -21,7 +21,7 @@ concurrency:
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     permissions:
       contents: read
       pull-requests: read
@@ -57,7 +57,7 @@ jobs:
       contents: read
       pull-requests: read
       statuses: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: $/.github/actions/yarn
@@ -74,7 +74,7 @@ jobs:
       contents: read
       pull-requests: read
       statuses: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: $/.github/actions/yarn
@@ -91,7 +91,7 @@ jobs:
       contents: read
       pull-requests: read
       statuses: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: $/.github/actions/yarn
@@ -104,9 +104,9 @@ jobs:
     # The one check that branch protection requires for this workflow.
     name: Mobile checks result
     permissions: {}
-    if: always()
+    if: ${{ !cancelled() }}
     needs: [changes, lint, prettier, type-check]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: $/.github/actions/required-result
         with:

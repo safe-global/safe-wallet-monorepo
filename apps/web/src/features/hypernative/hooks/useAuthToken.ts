@@ -1,5 +1,11 @@
 import { useEffect, useState, useCallback } from 'react'
-import { clearAuthCookie, getAuthCookieData, setAuthCookie } from '../store/cookieStorage'
+import {
+  AUTH_COOKIE_CHANGE_EVENT,
+  clearAuthCookie,
+  getAuthCookieData,
+  setAuthCookie,
+  type AuthTokens,
+} from '../store/cookieStorage'
 
 type AuthTokenResult = {
   token: string | undefined
@@ -7,7 +13,7 @@ type AuthTokenResult = {
   isExpired: boolean
 }
 
-type SetTokenResult = (token: string, tokenType: string, expiresIn: number) => void
+type SetTokenResult = (tokens: AuthTokens) => void
 type ClearTokenResult = () => void
 
 /**
@@ -35,8 +41,9 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
     // isExpired should only be true when a token exists AND it's expired
     // If no token exists, isExpired should be false (not expired, just not authenticated)
     const isExpired = !!token && (expiry === undefined || Date.now() >= expiry)
-    const newToken = token ? `${normalizedTokenType} ${token}` : undefined
-    const newIsAuthenticated = !!token
+    // The cookie outlives the access token while a refresh is possible, so hide an expired token
+    const newToken = token && !isExpired ? `${normalizedTokenType} ${token}` : undefined
+    const newIsAuthenticated = !!newToken
 
     setAuthState((prevState) => {
       // Only update state if values actually changed
@@ -55,8 +62,8 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
     })
   }, [])
 
-  const setToken = (token: string, tokenType: string, expiresIn: number) => {
-    setAuthCookie(token, tokenType, expiresIn)
+  const setToken = (tokens: AuthTokens) => {
+    setAuthCookie(tokens)
     checkAuthState()
   }
 
@@ -69,11 +76,12 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
     })
   }
 
-  // Update auth state when cookies change (e.g., from other tabs)
+  // Update auth state when cookies change (e.g., from other tabs or the token refresh)
   useEffect(() => {
     // Check auth state when storage event occurs
     const handleStorageEvent = () => checkAuthState()
     window.addEventListener('storage', handleStorageEvent)
+    window.addEventListener(AUTH_COOKIE_CHANGE_EVENT, checkAuthState)
 
     // Additionally, check auth state periodically to catch cookie changes
     const interval = setInterval(checkAuthState, AUTH_POLLING_INTERVAL)
@@ -81,9 +89,10 @@ export const useAuthToken = (): [AuthTokenResult, SetTokenResult, ClearTokenResu
 
     return () => {
       window.removeEventListener('storage', handleStorageEvent)
+      window.removeEventListener(AUTH_COOKIE_CHANGE_EVENT, checkAuthState)
       clearInterval(interval)
     }
-  }, [])
+  }, [checkAuthState])
 
   return [authState, setToken, clearToken]
 }

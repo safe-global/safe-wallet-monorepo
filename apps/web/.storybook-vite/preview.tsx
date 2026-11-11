@@ -2,10 +2,16 @@ import type { Preview } from '@storybook/nextjs-vite'
 import React, { useEffect } from 'react'
 
 import { initialize, mswLoader } from 'msw-storybook-addon'
+import { MotionGlobalConfig } from 'motion/react'
 
 import '../src/styles/globals.css'
 import { ShadcnProvider } from '../.storybook/shadcn'
 import { mockChainHandlers } from '../.storybook/mockChains'
+
+// The visual sweep asks for reduced motion; motion ignores it, so render its animations at their end state
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  MotionGlobalConfig.skipAnimations = true
+}
 
 // Initialize MSW for API mocking in Storybook. Initial handlers survive each story's own
 // handlers (msw-storybook-addon resets to them), and a story's handlers still take priority.
