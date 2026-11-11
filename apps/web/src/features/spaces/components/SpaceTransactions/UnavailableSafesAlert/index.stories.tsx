@@ -6,7 +6,6 @@ import UnavailableSafesAlert from '.'
 const setup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
   layout: 'paper',
   shadcn: true,
 })
