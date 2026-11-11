@@ -21,6 +21,7 @@ import SignatureGauge from '@safe-global/views/features/spaces/components/SpaceQ
 import StatusChip from '@safe-global/views/features/spaces/components/SpaceQueue/StatusChip'
 import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import RowActionsMenu from './RowActionsMenu'
+import SignersTooltip from './SignersTooltip'
 import { getCounterparty, getNonce } from './utils'
 
 // The outline Sign/Execute action turns into the filled primary button while its row is hovered, as in the design
@@ -125,13 +126,20 @@ const SpaceQueueRow = ({
 
       <TableCell className="py-1">
         {executionInfo && (
-          <span className="flex w-fit items-center gap-1.5 text-sm tabular-nums">
-            <SignatureGauge
-              count={executionInfo.confirmationsSubmitted}
-              threshold={executionInfo.confirmationsRequired}
-            />
-            {executionInfo.confirmationsSubmitted}/{executionInfo.confirmationsRequired}
-          </span>
+          <SignersTooltip
+            chainId={chainId}
+            txId={tx.id}
+            submitted={executionInfo.confirmationsSubmitted}
+            required={executionInfo.confirmationsRequired}
+          >
+            <span className="flex w-fit items-center gap-1.5 text-sm tabular-nums">
+              <SignatureGauge
+                count={executionInfo.confirmationsSubmitted}
+                threshold={executionInfo.confirmationsRequired}
+              />
+              {executionInfo.confirmationsSubmitted}/{executionInfo.confirmationsRequired}
+            </span>
+          </SignersTooltip>
         )}
       </TableCell>
 
