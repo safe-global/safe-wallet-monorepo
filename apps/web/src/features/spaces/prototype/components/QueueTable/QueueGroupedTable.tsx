@@ -32,7 +32,7 @@ export type QueueGroupedTableProps = Omit<QueueSectionProps, 'section' | 'collap
   collapse: CollapseAll
   // Options D and E: the same columns as their other groupings.
   ordered?: boolean
-  // Option E: Safes that didn't load keep a band, with Try again.
+  // Option E: Safes that didn't load keep a band at the top, with Try again.
   failedSafes?: { accounts: Account[]; retrying: string[]; onRetry: (ids: string[]) => void }
 }
 
@@ -270,7 +270,7 @@ export function QueueGroupedTable({
               ))}
             </colgroup>
             <QueueTableHead columns={columns} collapse={safeTable ? { ...collapse, count: groups.length } : collapse} />
-            {groups.map((group) => (group.sections.length > 1 ? multiChainSafe(group) : singleSafe(group)))}
+            {/* Safes that didn't load come first, so nobody misses them. */}
             {failedSafes?.accounts.map((account) => (
               <TableBody key={`failed-${account.id}`}>
                 <FailedSafeBand
@@ -281,6 +281,7 @@ export function QueueGroupedTable({
                 />
               </TableBody>
             ))}
+            {groups.map((group) => (group.sections.length > 1 ? multiChainSafe(group) : singleSafe(group)))}
           </Table>
         </div>
       </CardContent>

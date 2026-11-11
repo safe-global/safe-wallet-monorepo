@@ -122,8 +122,14 @@ function PersonaCard({ persona, scenario }: { persona: Persona; scenario: Scenar
 }
 
 const PAGE_SIZES = { '10': '10 per Safe', '20': '20 per Safe', '5': '5 per Safe' }
-export const FAILED_COUNTS = [1, 3, 5] as const
-const FAILED_LABELS = { '1': '1 Safe failed', '3': '3 Safes failed', '5': '5 Safes failed', all: 'All Safes failed' }
+export const FAILED_COUNTS = [1, 3, 4, 5] as const
+const FAILED_LABELS = {
+  '1': '1 Safe failed',
+  '3': '3 Safes failed',
+  '4': '4 Safes failed',
+  '5': '5 Safes failed',
+  all: 'All Safes failed',
+}
 const WARNING_STYLES = { chip: 'Toolbar chip', each: 'One warning per Safe', summary: 'One summary' }
 export const UNDEPLOYED_COUNTS = [0, 1, 2] as const
 const UNDEPLOYED_LABELS = { '0': 'All deployed', '1': '1 not deployed', '2': '2 not deployed' }

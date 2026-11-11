@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { CloudOff, Info, RefreshCw, TriangleAlert } from 'lucide-react'
+import { CloudOff, RefreshCw, TriangleAlert } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Popover, PopoverContent, PopoverTrigger } from '@safe-global/views/components/ui/popover'
@@ -22,6 +22,7 @@ import {
 } from '@safe-global/views/components/ui/alert'
 import type { Account } from '../types'
 import { chainLogoUrl } from './shared'
+import { CopyableParty } from './CopyableParty'
 
 export type LoadWarningStyle = 'chip' | 'each' | 'summary'
 
@@ -45,7 +46,7 @@ function RetryButton({ loading, onClick, label }: { loading: boolean; onClick: (
   return (
     <Button variant="outline" size="sm" disabled={loading} onClick={onClick} aria-label={label}>
       {loading ? <Spinner className="size-3" /> : <RefreshCw />}
-      {loading ? 'Loading…' : 'Try again'}
+      {loading ? 'Loading…' : 'Reload'}
     </Button>
   )
 }
@@ -70,7 +71,7 @@ export function LoadWarnings({ failed, total, retrying, onRetry, style }: LoadWa
               <RetryButton
                 loading={retrying.includes(account.id)}
                 onClick={() => onRetry([account.id])}
-                label={`Try again for ${account.safeName ?? account.name} on ${account.network}`}
+                label={`Reload ${account.safeName ?? account.name} on ${account.network}`}
               />
             </AlertAction>
           </Alert>
@@ -122,7 +123,7 @@ export function LoadWarnings({ failed, total, retrying, onRetry, style }: LoadWa
         <RetryButton
           loading={anyRetrying}
           onClick={() => onRetry(failed.map((account) => account.id))}
-          label={failed.length === 1 ? 'Try again' : `Try again for ${failed.length} Safes`}
+          label={failed.length === 1 ? 'Reload' : `Reload ${failed.length} Safes`}
         />
       </AlertAction>
     </Alert>
@@ -131,111 +132,76 @@ export function LoadWarnings({ failed, total, retrying, onRetry, style }: LoadWa
 
 const nameOf = (account: Account) => account.safeName ?? account.name
 
-const byNetwork = (accounts: Account[]) => {
-  const groups = new Map<string, Account[]>()
-  accounts.forEach((account) => groups.set(account.chainId, [...(groups.get(account.chainId) ?? []), account]))
-  return [...groups.values()]
-}
-
-const SafeLine = ({ account }: { account: Account }) => (
-  <li className="flex min-w-0 items-center gap-2 text-sm">
-    <Identicon address={account.iconAddress} size={16} />
-    <span className="truncate">{nameOf(account)}</span>
-    <span className="ml-auto shrink-0 font-mono text-xs text-muted-foreground">{account.address}</span>
+// One line per Safe: the same tag as the table (icon, name, network), then Reload. The tag's tooltip has the address.
+const SafeLine = ({ account, loading, onReload }: { account: Account; loading: boolean; onReload: () => void }) => (
+  <li className="flex min-w-0 items-center gap-2 whitespace-nowrap">
+    <CopyableParty
+      name={nameOf(account)}
+      address={account.iconAddress}
+      network={{ chainId: account.chainId, name: account.network }}
+      tag
+    />
+    <Button
+      size="2xs"
+      variant="ghost"
+      className="ml-auto"
+      disabled={loading}
+      onClick={onReload}
+      aria-label={`Reload ${nameOf(account)} on ${account.network}`}
+    >
+      {loading ? <Spinner className="size-3" /> : <RefreshCw />}
+      {loading ? 'Loading…' : 'Reload'}
+    </Button>
   </li>
-)
-
-const NetworkLabel = ({ account, count }: { account: Account; count: number }) => (
-  <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-    <img src={chainLogoUrl(account.chainId)} alt="" className="size-4 rounded-full" />
-    {account.network} · {count}
-  </span>
 )
 
 type LoadStatusProps = {
   failed: Account[]
-  undeployed: Account[]
   retrying: string[]
   onRetry: (ids: string[]) => void
 }
 
-// Option E: a quiet chip in the toolbar. It names the Safes that didn't load, by network, with Try again.
-// Safes that aren't deployed yet are listed apart and never count as an error.
-export function LoadStatusChip({ failed, undeployed, retrying, onRetry }: LoadStatusProps) {
-  if (!failed.length && !undeployed.length) return null
-  const isRetrying = (accounts: Account[]) => accounts.some((account) => retrying.includes(account.id))
+const SafeList = ({ failed, retrying, onRetry, className }: LoadStatusProps & { className?: string }) => (
+  <ul aria-label="Safes that didn’t load" className={`flex flex-col gap-1.5 ${className ?? ''}`}>
+    {failed.map((account) => (
+      <SafeLine
+        key={account.id}
+        account={account}
+        loading={retrying.includes(account.id)}
+        onReload={() => onRetry([account.id])}
+      />
+    ))}
+  </ul>
+)
+
+// Option E: a quiet chip in the page header, next to Hypernative. It names the Safes that didn't load, with Reload.
+// Safes that aren't deployed yet have nothing to load, so they never show here.
+export function LoadStatusChip({ failed, retrying, onRetry }: LoadStatusProps) {
+  if (!failed.length) return null
+  const loadingAll = failed.some((account) => retrying.includes(account.id))
+  const label = `${failed.length} ${failed.length === 1 ? 'Safe' : 'Safes'} not loaded`
   return (
     <Popover>
-      <PopoverTrigger render={<Button variant="outline" />}>
-        {failed.length ? (
-          <TriangleAlert className="text-warning-strong" strokeWidth={ICON_STROKE} />
-        ) : (
-          <Info strokeWidth={ICON_STROKE} />
-        )}
-        {failed.length ? `${failed.length} not loaded` : `${undeployed.length} not deployed`}
+      <PopoverTrigger render={<Button variant="outline" size="2xs" />}>
+        <TriangleAlert className="text-warning-strong" strokeWidth={ICON_STROKE} />
+        {label}
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 gap-0 p-0">
-        {failed.length > 0 && (
-          <section aria-label="Safes that didn’t load" className="flex flex-col gap-3 p-4">
-            <div>
-              <p className="text-sm font-medium">
-                Couldn’t load {failed.length === 1 ? '1 Safe' : `${failed.length} Safes`}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Their transactions aren’t shown, and counts leave them out.
-              </p>
-            </div>
-            {byNetwork(failed).map((accounts) => (
-              <div key={accounts[0].chainId} className="flex flex-col gap-1.5">
-                <div className="flex items-center justify-between">
-                  <NetworkLabel account={accounts[0]} count={accounts.length} />
-                  <Button
-                    size="2xs"
-                    variant="ghost"
-                    disabled={isRetrying(accounts)}
-                    onClick={() => onRetry(accounts.map((account) => account.id))}
-                    aria-label={`Try again on ${accounts[0].network}`}
-                  >
-                    {isRetrying(accounts) ? <Spinner className="size-3" /> : <RefreshCw />}
-                    {isRetrying(accounts) ? 'Loading…' : 'Try again'}
-                  </Button>
-                </div>
-                <ul className="flex flex-col gap-1">
-                  {accounts.map((account) => (
-                    <SafeLine key={account.id} account={account} />
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </section>
-        )}
-        {undeployed.length > 0 && (
-          <section
-            aria-label="Safes not deployed yet"
-            className="flex flex-col gap-2 border-t border-border p-4 first:border-t-0"
-          >
-            <div>
-              <p className="text-sm font-medium">Not deployed yet</p>
-              <p className="text-xs text-muted-foreground">Nothing can be pending until they’re deployed.</p>
-            </div>
-            <ul className="flex flex-col gap-1">
-              {undeployed.map((account) => (
-                <SafeLine key={account.id} account={account} />
-              ))}
-            </ul>
-          </section>
-        )}
-        {byNetwork(failed).length > 1 && (
+        <section aria-label={label} className="flex flex-col gap-3 p-4">
+          <p className="text-xs text-muted-foreground">Transactions aren’t shown in the table.</p>
+          <SafeList failed={failed} retrying={retrying} onRetry={onRetry} />
+        </section>
+        {failed.length > 1 && (
           <div className="border-t border-border p-3">
             <Button
               variant="outline"
               size="sm"
               className="w-full"
-              disabled={isRetrying(failed)}
+              disabled={loadingAll}
               onClick={() => onRetry(failed.map((account) => account.id))}
             >
-              {isRetrying(failed) ? <Spinner className="size-3" /> : <RefreshCw />}
-              Try again for all {failed.length}
+              {loadingAll ? <Spinner className="size-3" /> : <RefreshCw />}
+              Reload all {failed.length}
             </Button>
           </div>
         )}
@@ -245,34 +211,28 @@ export function LoadStatusChip({ failed, undeployed, retrying, onRetry }: LoadSt
 }
 
 // Option E: when no Safe loads, the page is empty anyway, so it explains why and lists the Safes.
-export function NothingLoaded({ failed, undeployed, retrying, onRetry }: LoadStatusProps) {
-  const notDeployedOnly = failed.length === 0
+export function NothingLoaded({ failed, retrying, onRetry }: LoadStatusProps) {
   const loading = failed.some((account) => retrying.includes(account.id))
   return (
     <Empty className="rounded-2xl border border-border bg-card">
       <EmptyHeader>
-        <EmptyMedia variant="icon">{notDeployedOnly ? <Info /> : <CloudOff />}</EmptyMedia>
+        <EmptyMedia variant="icon">
+          <CloudOff />
+        </EmptyMedia>
         <EmptyTitle>
-          <h2>{notDeployedOnly ? 'Your Safes aren’t deployed yet' : 'We couldn’t load your pending transactions'}</h2>
+          <h2>We couldn’t load your pending transactions</h2>
         </EmptyTitle>
         <EmptyDescription>
-          {notDeployedOnly
-            ? 'Nothing can be pending until they’re deployed.'
-            : `${failed.length === 1 ? '1 Safe' : `${failed.length} Safes`} didn’t load. A network may be down, so try again in a moment.`}
+          {failed.length === 1 ? '1 Safe' : `${failed.length} Safes`} didn’t load. A network may be down, so reload in a
+          moment.
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <ul aria-label="Safes that didn’t load" className="flex w-72 flex-col gap-1 text-left">
-          {[...failed, ...undeployed].map((account) => (
-            <SafeLine key={account.id} account={account} />
-          ))}
-        </ul>
-        {!notDeployedOnly && (
-          <Button variant="outline" disabled={loading} onClick={() => onRetry(failed.map((account) => account.id))}>
-            {loading ? <Spinner className="size-3" /> : <RefreshCw />}
-            {loading ? 'Loading…' : 'Try again'}
-          </Button>
-        )}
+        <SafeList failed={failed} retrying={retrying} onRetry={onRetry} className="w-72 text-left" />
+        <Button variant="outline" disabled={loading} onClick={() => onRetry(failed.map((account) => account.id))}>
+          {loading ? <Spinner className="size-3" /> : <RefreshCw />}
+          {loading ? 'Loading…' : failed.length > 1 ? `Reload all ${failed.length}` : 'Reload'}
+        </Button>
       </EmptyContent>
     </Empty>
   )
@@ -307,10 +267,10 @@ export function FailedSafeBand({
             className="ml-auto"
             disabled={loading}
             onClick={onRetry}
-            aria-label={`Try again for ${nameOf(account)} on ${account.network}`}
+            aria-label={`Reload ${nameOf(account)} on ${account.network}`}
           >
             {loading ? <Spinner className="size-3" /> : <RefreshCw />}
-            {loading ? 'Loading…' : 'Try again'}
+            {loading ? 'Loading…' : 'Reload'}
           </Button>
         </div>
       </td>

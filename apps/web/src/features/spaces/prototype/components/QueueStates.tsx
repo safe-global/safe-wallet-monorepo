@@ -68,7 +68,7 @@ export function QueueError({ onRetry }: { onRetry: () => void }) {
       </EmptyHeader>
       <EmptyContent>
         <Button variant="outline" onClick={onRetry}>
-          Try again
+          Reload
         </Button>
       </EmptyContent>
     </Empty>

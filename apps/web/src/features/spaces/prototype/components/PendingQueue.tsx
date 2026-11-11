@@ -143,20 +143,20 @@ function PendingQueueView() {
   const pageSize = router.query.page === '5' ? 5 : router.query.page === '20' ? 20 : 10
   const signLabel: SignLabel = router.query.cta === 'review' ? 'Review' : 'Sign'
   // Partial loading: how many Safes fail (`?failed=3`), and one warning each or one summary (`?warn=summary`).
+  // Option E's default shows 4 Safes that didn't load.
   const failedCount =
     router.query.failed === 'all'
       ? ALL_FAILED
-      : (FAILED_COUNTS.find((count) => String(count) === router.query.failed) ?? 1)
-  // Option E defaults to the toolbar chip and one Safe that isn't deployed yet (`?warn=`, `?undeployed=0|1|2`).
+      : (FAILED_COUNTS.find((count) => String(count) === router.query.failed) ??
+        (router.query.option === 'cards' ? 4 : 1))
+  // Option E defaults to the chip (`?warn=`). Undeployed Safes (`?undeployed=1|2`) are skipped quietly.
   const warningStyle: LoadWarningStyle =
     router.query.warn === 'summary' || router.query.warn === 'each' || router.query.warn === 'chip'
       ? router.query.warn
       : router.query.option === 'cards'
         ? 'chip'
         : 'each'
-  const undeployedCount =
-    UNDEPLOYED_COUNTS.find((count) => String(count) === router.query.undeployed) ??
-    (router.query.option === 'cards' ? 1 : 0)
+  const undeployedCount = UNDEPLOYED_COUNTS.find((count) => String(count) === router.query.undeployed) ?? 0
   const undeployedIds =
     state === 'partial'
       ? getUndeployedAccounts(scenario, failedCount, undeployedCount).map((account) => account.id)
@@ -220,6 +220,7 @@ function PendingQueueView() {
     cards &&
     warningStyle === 'chip' &&
     state === 'partial' &&
+    failedIds.length > 0 &&
     failedIds.length + undeployedIds.length >= accounts.length
   // The first Safe with a blocked row and the first with a waiting one, then the next by rank.
   const openWaitingSafes = () => {
@@ -770,6 +771,14 @@ function PendingQueueView() {
                     </Button>
                   </span>
                 )}
+                {/* Option E: Safes that didn't load, next to Hypernative so it reads as page status. */}
+                {cards && warningStyle === 'chip' && !nothingLoaded && (
+                  <LoadStatusChip
+                    failed={accounts.filter((account) => failedIds.includes(account.id))}
+                    retrying={retrying}
+                    onRetry={retryLoad}
+                  />
+                )}
                 {/* Option D offers bulk execute only on each Safe's row, grouped by Safe. */}
                 {bulkIds.length > 1 && !simple && !flat && (
                   <Tooltip delay={150}>
@@ -825,31 +834,18 @@ function PendingQueueView() {
                 simple={simple}
                 quickFilters={!flat}
                 status={
-                  flat ? (
-                    cards ? (
-                      warningStyle === 'chip' && (
-                        <LoadStatusChip
-                          failed={accounts.filter((account) => failedIds.includes(account.id))}
-                          undeployed={accounts.filter((account) => undeployedIds.includes(account.id))}
-                          retrying={retrying}
-                          onRetry={retryLoad}
-                        />
+                  flat
+                    ? !cards && <DisplayMenu display={display} onChange={changeDisplay} />
+                    : simple &&
+                      !unavailable && (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          {formatUpdated(loadedAt ?? clock, Math.max(clock, loadedAt ?? 0))} ·
+                          <Button size="2xs" variant="ghost" onClick={() => setLoadedAt(null)}>
+                            <RefreshCw aria-hidden="true" />
+                            Refresh
+                          </Button>
+                        </span>
                       )
-                    ) : (
-                      <DisplayMenu display={display} onChange={changeDisplay} />
-                    )
-                  ) : (
-                    simple &&
-                    !unavailable && (
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        {formatUpdated(loadedAt ?? clock, Math.max(clock, loadedAt ?? 0))} ·
-                        <Button size="2xs" variant="ghost" onClick={() => setLoadedAt(null)}>
-                          <RefreshCw aria-hidden="true" />
-                          Refresh
-                        </Button>
-                      </span>
-                    )
-                  )
                 }
                 extraMenu={
                   <FleetFilterMenu
@@ -895,7 +891,6 @@ function PendingQueueView() {
               {nothingLoaded && (
                 <NothingLoaded
                   failed={accounts.filter((account) => failedIds.includes(account.id))}
-                  undeployed={accounts.filter((account) => undeployedIds.includes(account.id))}
                   retrying={retrying}
                   onRetry={retryLoad}
                 />
