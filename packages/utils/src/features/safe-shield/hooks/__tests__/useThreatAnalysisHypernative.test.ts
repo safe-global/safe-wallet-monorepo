@@ -13,8 +13,6 @@ const TRANSACTION_ASSESSMENT_PATH = '/safe/transaction/assessment'
 const MESSAGE_ASSESSMENT_PATH = '/safe/eip712/assessment'
 const DEBOUNCE_MS = 300
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-
 describe('useThreatAnalysisHypernative', () => {
   startHypernativeServer()
 
@@ -179,16 +177,24 @@ describe('useThreatAnalysisHypernative', () => {
   })
 
   describe('transaction edits', () => {
+    beforeEach(() => jest.useFakeTimers())
+    afterEach(() => jest.useRealTimers())
+
+    const passTime = (ms: number) => act(() => jest.advanceTimersByTimeAsync(ms))
+
     it('assesses the edited transaction once the edits settle', async () => {
       const requests = answerWithAssessment()
       const safeTx = createSafeTransaction()
       const { rerender } = renderTransactionHook({ data: safeTx })
       await waitFor(() => expect(requests).toHaveLength(1))
 
-      rerender({ data: withData(safeTx, { nonce: 2 }) })
-      rerender({ data: withData(safeTx, { nonce: 3 }) })
-      rerender({ data: withData(safeTx, { nonce: 4 }) })
+      for (const nonce of [2, 3, 4]) {
+        rerender({ data: withData(safeTx, { nonce }) })
+        await passTime(DEBOUNCE_MS - 100)
+      }
+      expect(requests).toHaveLength(1)
 
+      await passTime(DEBOUNCE_MS)
       await waitFor(() => expect(requests).toHaveLength(2))
       expect(requests[1].body).toEqual(
         expect.objectContaining({ transaction: expect.objectContaining({ nonce: '4' }) }),
@@ -202,7 +208,7 @@ describe('useThreatAnalysisHypernative', () => {
       await waitFor(() => expect(result.current[0]).toBeDefined())
 
       rerender({ data: withData(safeTx, {}) })
-      await act(() => sleep(DEBOUNCE_MS + 100))
+      await passTime(DEBOUNCE_MS)
 
       expect(requests).toHaveLength(1)
       expect(result.current[0]).toBeDefined()
@@ -216,7 +222,7 @@ describe('useThreatAnalysisHypernative', () => {
 
       rerender({ data: withData(safeTx, { nonce: 2 }) })
       unmount()
-      await act(() => sleep(DEBOUNCE_MS + 100))
+      await passTime(DEBOUNCE_MS)
 
       expect(requests).toHaveLength(1)
     })
