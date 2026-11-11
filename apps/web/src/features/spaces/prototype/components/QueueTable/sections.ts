@@ -47,28 +47,6 @@ export function buildSections({
   return ranked.sort((a, b) => compareUrgency(a.urgency, b.urgency))
 }
 
-// A Safe's first page, shared across its networks a nonce at a time, so each network shows the start of its queue.
-// Options at one nonce stay together, so a network stops once its next nonce doesn't fit.
-export const shareLimit = (sections: QueueSectionData[], limit: number): QueueSectionData[] => {
-  const shown = sections.map(() => 0)
-  let left = limit
-  let added = true
-  while (added) {
-    added = false
-    sections.forEach(({ items }, index) => {
-      const start = shown[index]
-      if (start >= items.length) return
-      const next = items.findIndex((tx, position) => position > start && tx.nonce !== items[start].nonce)
-      const size = (next < 0 ? items.length : next) - start
-      if (size > left) return
-      shown[index] += size
-      left -= size
-      added = true
-    })
-  }
-  return sections.map((section, index) => ({ ...section, items: section.items.slice(0, shown[index]) }))
-}
-
 export type SafeGroup = { id: string; label: string; sections: QueueSectionData[] }
 
 // One group per Safe address, with a section per network. A Safe sits where its most urgent network ranks.
@@ -111,18 +89,3 @@ const compareUrgency = (a?: Urgency, b?: Urgency) => {
   if (!a || !b) return a ? -1 : b ? 1 : 0
   return a.rank - b.rank || a.oldest - b.oldest
 }
-
-// The Safe header already names the Safe and its chain.
-// Option C gives the other party its own column, so it lines up from row to row.
-export const getColumns = (isWide: boolean, alignTo = false) => [
-  'Nonce',
-  'Transaction',
-  ...(alignTo ? ['To'] : []),
-  // A chain column instead of splitting the queue by chain (Oct 22 review).
-  'Chain',
-  'Proposed',
-  ...(isWide ? ['Note'] : []),
-  'Signatures',
-  'Status',
-  'Action',
-]

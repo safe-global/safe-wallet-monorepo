@@ -32,7 +32,7 @@ import type { Filter, Persona, Proposal } from '../types'
 
 // Blocked comes before Waiting on others: you can act on what blocks it.
 export const STATUS_ORDER: Filter[] = ['ready', 'sign', 'waiting', 'awaiting']
-// Status filters that narrow the statuses. Fleet admin cards share them.
+// Status filters that narrow the statuses.
 export type Flag = 'conflicting' | 'stale'
 export const FLAGS: Flag[] = ['conflicting', 'stale']
 export const FLAG_META: Record<Flag, { short: string; icon: LucideIcon; hint: string }> = {

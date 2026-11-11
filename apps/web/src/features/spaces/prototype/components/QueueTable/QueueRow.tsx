@@ -40,7 +40,6 @@ import {
   MENU_LABELS,
   RARE_MENU_ACTIONS,
   type MenuAction,
-  type SignLabel,
 } from '../../services/actions'
 import type { PreviewAction } from '../../services/queue'
 import { Counterparty, hasCounterparty, TransactionHead } from './TransactionLine'
@@ -80,15 +79,10 @@ export type QueueRowProps = {
   executions?: Executions
   now?: number
   onSpeedUp?: (id: string) => void
-  // Option C, Needs you: the last signature reads "Sign & execute", so it doesn't look like a plain Sign above Execute.
-  labelLastSignature?: boolean
-  // Option A: rows with no counterparty span To.
+  // Grouped by Safe: rows with no counterparty span To.
   safeTable?: boolean
-  // Options A, D and E: the Safenet mark next to the signatures.
-  safenet?: boolean
   partyTags?: boolean
   compact?: boolean
-  signLabel?: SignLabel
 }
 
 export function QueueRow({
@@ -115,12 +109,9 @@ export function QueueRow({
   executions = {},
   now = Date.now(),
   onSpeedUp,
-  labelLastSignature = false,
   safeTable = false,
-  safenet = false,
   partyTags = false,
   compact = false,
-  signLabel = 'Sign',
 }: QueueRowProps) {
   const [hovered, setHovered] = useState(false)
   const noteIcon = useRef<SVGSVGElement>(null)
@@ -154,17 +145,14 @@ export function QueueRow({
     else if (primaryAction.kind === 'remind') onRemind?.(primaryAction.target)
     else onReview(tx)
   }
-  const lastSignature = labelLastSignature && primaryAction.kind === 'flow' && primaryAction.flow === 'signAndExecute'
-  // "Review" opens the transaction instead of signing from the row.
-  const reviewToSign = signLabel === 'Review' && primaryAction.kind === 'flow' && primaryAction.flow !== 'execute'
   const primary = {
-    label: lastSignature ? 'Sign & execute' : reviewToSign ? 'Review' : primaryAction.label,
+    label: primaryAction.label,
     hint: 'hint' in primaryAction ? primaryAction.hint : undefined,
-    onClick: reviewToSign ? stop(() => onReview(tx)) : stop(runPrimary),
+    onClick: stop(runPrimary),
   }
   const primaryLabel = primary.label
   const columnCount = columns.length
-  // Option A: with no other party, the action runs into the To column instead of truncating.
+  // Grouped by Safe: with no other party, the action runs into the To column instead of truncating.
   const spanTo = safeTable && columns.includes('To') && !hasCounterparty(tx)
   const review = (event: { stopPropagation: () => void }) => {
     event.stopPropagation()
@@ -209,8 +197,6 @@ export function QueueRow({
     </Tooltip>
   )
 
-  // Option D by status or network: Nonce follows Transaction, so conflict options show their own nonce.
-  const nonceFirst = columns[0] === 'Nonce'
   const signaturesContent = (
     <span className="flex items-center gap-2">
       <Tooltip delay={150}>
@@ -246,7 +232,7 @@ export function QueueRow({
           </TooltipContent>
         </Tooltip>
       )}
-      {safenet && !compact && <SafenetMark tx={tx} />}
+      {!compact && <SafenetMark tx={tx} />}
     </span>
   )
   const statusContent = (
@@ -262,7 +248,7 @@ export function QueueRow({
             aria-label={
               parentApproval
                 ? `Awaiting parent signature. ${getAccount(parentApproval).name} #${parentApproval.nonce}`
-                : `${partyTags ? getRowState(tx, persona).label : lastSignature ? 'Sign & execute' : getStepsStatus(tx, persona).label}. ${statusHint}`
+                : `${partyTags ? getRowState(tx, persona).label : getStepsStatus(tx, persona).label}. ${statusHint}`
             }
             onClick={(event) => event.stopPropagation()}
           >
@@ -273,7 +259,7 @@ export function QueueRow({
             ) : partyTags ? (
               <StatusChip tone={getRowState(tx, persona).tone}>{getRowState(tx, persona).label}</StatusChip>
             ) : (
-              <StepsStatusChip tx={tx} persona={persona} label={lastSignature ? 'Sign & execute' : undefined} />
+              <StepsStatusChip tx={tx} persona={persona} />
             )}
           </TooltipTrigger>
           <TooltipContent className={HINT_CLASS}>
@@ -340,7 +326,7 @@ export function QueueRow({
               <Button
                 size="2xs"
                 variant={hovered ? 'default' : 'outline'}
-                className={lastSignature ? 'w-28' : 'w-20'}
+                className="w-20"
                 aria-label={`${primaryLabel} ${getTransactionLabel(tx)}`}
                 onMouseEnter={() => conflicts.length && onReplaceHover(tx.id)}
                 onMouseLeave={() => onReplaceHover(null)}
@@ -358,7 +344,7 @@ export function QueueRow({
         <Button
           size="2xs"
           variant={hovered ? 'default' : 'outline'}
-          className={lastSignature ? 'w-28' : 'w-20'}
+          className="w-20"
           aria-label={`${primaryLabel} ${getTransactionLabel(tx)}`}
           onMouseEnter={() => conflicts.length && onReplaceHover(tx.id)}
           onMouseLeave={() => onReplaceHover(null)}
@@ -417,10 +403,8 @@ export function QueueRow({
   )
   const cells: Record<string, ReactNode> = {
     Nonce: (
-      <TableCell
-        className={`relative py-2 ${nonceFirst ? 'max-md:sticky max-md:left-0 max-md:z-10 max-md:border-l-card! max-md:bg-card' : ''}`}
-      >
-        {groupSize > 1 && nonceFirst ? (
+      <TableCell className="relative py-2 max-md:sticky max-md:left-0 max-md:z-10 max-md:border-l-card! max-md:bg-card">
+        {groupSize > 1 ? (
           // Conflict options show the nonce once, in the group sub-header.
           <span
             aria-label={`Option ${optionIndex} of ${groupSize} at nonce ${tx.nonce}`}
@@ -492,22 +476,14 @@ export function QueueRow({
         </div>
       </TableCell>
     ),
-    Chain: (
-      <TableCell>
-        <ChainIcon chainId={account.chainId} network={account.network} />
-      </TableCell>
-    ),
-    // Option C: the Needs you list mixes Safes, so the chain cell also names the Safe.
+    // Option D's Safe column: the network has its own column.
     Safe: (
       <TableCell>
         <span className="flex min-w-0 items-center gap-2 text-sm">
-          {/* Option D names the network in its own column or band, so the Safe cell is just the name. */}
-          {nonceFirst && !columns.includes('Network') && (
-            <ChainIcon chainId={account.chainId} network={account.network} />
-          )}
+          {!columns.includes('Network') && <ChainIcon chainId={account.chainId} network={account.network} />}
           <Identicon address={account.iconAddress} size={20} />
           <span className="truncate">
-            {nonceFirst && !columns.includes('Network') ? account.name : (account.safeName ?? account.name)}
+            {!columns.includes('Network') ? account.name : (account.safeName ?? account.name)}
           </span>
         </span>
       </TableCell>
@@ -570,24 +546,7 @@ export function QueueRow({
 
   return (
     <Fragment>
-      {startsGroup && !nonceFirst && (
-        <TableRow data-no-hover data-no-divider>
-          <TableCell colSpan={columnCount} className="pt-4 pb-1">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
-              <NonceMark tx={tx} persona={persona} group active={conflictHover === `${tx.account}:${tx.nonce}`} />
-              <Badge variant="warning">Conflicting</Badge>
-              <span className="text-muted-foreground">
-                Only 1/{groupSize} transactions can execute. Once it does, the{' '}
-                {groupSize === 2 ? 'other becomes' : 'others become'} invalid.
-              </span>
-              <ExternalLink href={HelpCenterArticle.CONFLICTING_TRANSACTIONS} className="text-muted-foreground" noIcon>
-                Learn more
-              </ExternalLink>
-            </div>
-          </TableCell>
-        </TableRow>
-      )}
-      {startsGroup && nonceFirst && (
+      {startsGroup && (
         <TableRow data-no-hover data-no-divider>
           <TableCell className="pt-4 pb-1">
             <span className="flex justify-center text-xs">

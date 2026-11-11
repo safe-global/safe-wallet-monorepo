@@ -5,13 +5,10 @@ import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/ta
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@safe-global/views/components/ui/select'
 import { ALL_FAILED } from '../services/queue'
 import type { Direction, Persona, QueueState, Scenario } from '../types'
-import type { SignLabel } from '../services/actions'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { FAMILY_LABELS, getPersonaLabel, PERSONAS } from '../services/personas'
 import { getScenario, getScenarioAccounts, shortAddress } from '../services/model'
 import { PixelAvatar } from './PixelAvatar'
-import { Switch } from '@safe-global/views/components/ui/switch'
-import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
 import { getPersonaAddress, getSignerStatus, getWorkspaceProfile } from '../services/workspace'
 
 // Workspace sizes. From 20 Safes up, each one has every transaction type, recoveries and conflicts.
@@ -36,26 +33,11 @@ export const STATES: { value: QueueState; label: string }[] = [
   { value: 'incoming', label: 'New proposal arrives' },
 ]
 export const DEFAULT_SCENARIO: Scenario = '5-safes'
-// Links from before the split keep working: removed scenarios open the closest size or state.
-const OLD_SCENARIOS: Record<string, { scenario: Scenario; state?: QueueState }> = {
-  fleet: { scenario: '20-safes' },
-  'many-safes': { scenario: '20-safes' },
-  recovery: { scenario: '20-safes' },
-  protocol: { scenario: '50-safes' },
-  gap: { scenario: DEFAULT_SCENARIO },
-  'conflict-mixed': { scenario: DEFAULT_SCENARIO },
-  loading: { scenario: DEFAULT_SCENARIO, state: 'loading' },
-  error: { scenario: DEFAULT_SCENARIO, state: 'error' },
-  empty: { scenario: DEFAULT_SCENARIO, state: 'empty' },
-  partial: { scenario: DEFAULT_SCENARIO, state: 'partial' },
-  executing: { scenario: DEFAULT_SCENARIO, state: 'executing' },
-}
 export const parseScenario = (query: { scenario?: unknown; state?: unknown }) => {
   const value = typeof query.scenario === 'string' ? query.scenario : ''
   const known = [...SCENARIOS.map((item) => item.value), ...HIDDEN_SCENARIOS].find((item) => item === value)
-  const old = OLD_SCENARIOS[value]
-  const state = STATES.find((item) => item.value === query.state)?.value ?? old?.state ?? 'normal'
-  return { scenario: known ?? old?.scenario ?? DEFAULT_SCENARIO, state }
+  const state = STATES.find((item) => item.value === query.state)?.value ?? 'normal'
+  return { scenario: known ?? DEFAULT_SCENARIO, state }
 }
 const describeScenario = (scenario: Scenario) => {
   const count = getScenario(scenario).length
@@ -123,7 +105,6 @@ function PersonaCard({ persona, scenario }: { persona: Persona; scenario: Scenar
   )
 }
 
-const PAGE_SIZES = { '10': '10 per Safe', '20': '20 per Safe', '5': '5 per Safe' }
 export const FAILED_COUNTS = [1, 3, 4, 5] as const
 const FAILED_LABELS = {
   '1': '1 Safe failed',
@@ -134,10 +115,8 @@ const FAILED_LABELS = {
 }
 export type LoadReason = 'error' | 'limit'
 const LOAD_REASONS: Record<LoadReason, string> = { error: "Couldn't load", limit: 'Over the 100-Safe limit' }
-const WARNING_STYLES = { chip: 'Toolbar chip', each: 'One warning per Safe', summary: 'One summary' }
 export const UNDEPLOYED_COUNTS = [0, 1, 2] as const
 const UNDEPLOYED_LABELS = { '0': 'All deployed', '1': '1 not deployed', '2': '2 not deployed' }
-const SIGN_LABELS: Record<SignLabel, string> = { Sign: 'Button · Sign', Review: 'Button · Review' }
 
 export function ScenarioBar({
   direction,
@@ -145,22 +124,14 @@ export function ScenarioBar({
   state,
   hypernative,
   persona,
-  milestone1,
-  pageSize,
-  signLabel,
   failedCount,
   loadReason,
-  warningStyle,
   undeployedCount,
   onChange,
 }: {
   failedCount: number
   loadReason: LoadReason
-  warningStyle: 'chip' | 'each' | 'summary'
   undeployedCount: number
-  milestone1: boolean
-  pageSize: number
-  signLabel: SignLabel
   state: QueueState
   direction: Direction
   scenario: Scenario
@@ -179,73 +150,13 @@ export function ScenarioBar({
         <Tabs
           className="min-w-0 max-w-full"
           value={direction}
-          // Stat cards (option B) open on the 20-Safe workspace, Action first (option C) on 50.
-          onValueChange={(value) =>
-            onChange(
-              value === 'table' || value === 'flat' || value === 'cards'
-                ? { option: String(value) }
-                : { option: String(value), scenario: value === 'fleet' ? '20-safes' : '50-safes' },
-            )
-          }
+          onValueChange={(value) => onChange({ option: String(value) })}
         >
           <TabsList aria-label="Design direction" className="max-w-full justify-start overflow-x-auto">
-            <TabsTrigger value="table">A · Safe table</TabsTrigger>
-            <TabsTrigger value="fleet">B · Stat cards</TabsTrigger>
-            <TabsTrigger value="simple">C · Action first</TabsTrigger>
             <TabsTrigger value="flat">D · Flat table</TabsTrigger>
             <TabsTrigger value="cards">E · Group cards</TabsTrigger>
           </TabsList>
         </Tabs>
-        {/* Milestone 1 scope from the Oct 22 review: no side panel, no overview cards, no filter counts. */}
-        <Field orientation="horizontal" className="w-auto px-2">
-          <Switch
-            id="prototype-milestone-1"
-            checked={milestone1}
-            // Option C is Milestone 1 by design.
-            disabled={direction === 'simple'}
-            onCheckedChange={(checked) => onChange({ m1: checked ? '1' : '0' })}
-          />
-          <FieldLabel htmlFor="prototype-milestone-1" className="text-xs">
-            Milestone 1
-          </FieldLabel>
-        </Field>
-        {/* Oct 22 review: the first 10 rows per Safe before See all, and "Sign" or "Review" on the row button. */}
-        {direction === 'table' && (
-          <>
-            <Select
-              value={String(pageSize)}
-              items={PAGE_SIZES}
-              onValueChange={(value) => value && onChange({ page: value })}
-            >
-              <SelectTrigger size="sm" variant="ghost" aria-label="Rows per Safe">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="w-auto min-w-(--anchor-width)">
-                {Object.entries(PAGE_SIZES).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={signLabel}
-              items={SIGN_LABELS}
-              onValueChange={(value) => value && onChange({ cta: value === 'Review' ? 'review' : 'sign' })}
-            >
-              <SelectTrigger size="sm" variant="ghost" aria-label="Sign button label">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="w-auto min-w-(--anchor-width)">
-                {Object.entries(SIGN_LABELS).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </>
-        )}
         {state === 'partial' && (
           <>
             <Select
@@ -274,22 +185,6 @@ export function ScenarioBar({
               </SelectTrigger>
               <SelectContent className="w-auto min-w-(--anchor-width)">
                 {Object.entries(LOAD_REASONS).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={warningStyle}
-              items={WARNING_STYLES}
-              onValueChange={(value) => value && onChange({ warn: value })}
-            >
-              <SelectTrigger size="sm" variant="ghost" aria-label="Warning style">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="w-auto min-w-(--anchor-width)">
-                {Object.entries(WARNING_STYLES).map(([value, label]) => (
                   <SelectItem key={value} value={value}>
                     {label}
                   </SelectItem>

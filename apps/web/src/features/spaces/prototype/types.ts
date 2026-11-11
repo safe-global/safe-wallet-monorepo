@@ -4,7 +4,8 @@ export type Scenario =
 // A moment layered on any scenario.
 // `capped`: the gateway stopped reading past 500 transactions. `incoming`: a refresh brings in a new proposal.
 export type QueueState = 'normal' | 'loading' | 'error' | 'empty' | 'partial' | 'executing' | 'capped' | 'incoming'
-export type Direction = 'table' | 'fleet' | 'simple' | 'flat' | 'cards'
+// D: Group by as a menu. E: Group by as cards.
+export type Direction = 'flat' | 'cards'
 export type Filter = 'sign' | 'ready' | 'waiting' | 'awaiting'
 export type Persona = 'owner' | 'single' | 'security' | 'member' | 'admin'
 export type Account = {
@@ -61,7 +62,7 @@ export type Proposal = {
   origin?: 'replacement'
   // The Safe App the transaction was created in, as safeAppInfo in production.
   app?: { name: string; logo?: string }
-  // Fleet admin: why this is urgent. Shown as the drawer's first alert; its Safe is pinned to the top.
+  // Why this is urgent. Shown as the drawer's first alert.
   emergency?: string
   proposedBy?: string
   note?: { text: string; author: string; date: string; onchain?: boolean }

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { ChevronDown, ChevronsDownUp, ChevronsUpDown, Info } from 'lucide-react'
+import { ChevronDown, ChevronsDownUp, ChevronsUpDown } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { TableHeader, TableHead, TableRow, TableCell } from '@safe-global/views/components/ui/table'
 import type { BulkBatch, PreviewAction } from '../../services/queue'
-import type { MenuAction, SignLabel } from '../../services/actions'
+import type { MenuAction } from '../../services/actions'
 import type { Account, Filter, Persona, Proposal } from '../../types'
 import type { Executions } from '../../services/execution'
 import { SafeIdentity, STATUS_ORDER, chainLogoUrl } from '../shared'
@@ -14,7 +14,6 @@ import { getOwnerWallet } from '../../services/nextSteps'
 import { isSignerOf } from '../../services/personas'
 import { RecoveryNoticeRow, RecoveryRow, type RecoveryController } from '../Recovery/RecoveryPanel'
 import { getPrimaryStatus } from '../../services/model'
-import { getSafeBadges } from '../../services/simple'
 
 // Action has no width so it takes the slack and right-aligns its buttons.
 // Widths include 16px cell padding on each side.
@@ -57,26 +56,16 @@ export type QueueSectionProps = {
   onMenuAction?: (tx: Proposal, action: MenuAction) => void
   // Safe view: this Safe's recoveries show at the top of its table.
   recoveries?: RecoveryController
-  // Fleet admin: a button by the Safe name opens its registry record.
-  onOpenSafe?: (account: Account) => void
-  // Option C: the other party gets its own column.
-  alignTo?: boolean
-  // Option C: a plain Safe header with the next nonce and a conflict or blocked badge.
-  simple?: boolean
   // Transactions executing now, and the clock that drives their elapsed time.
   executions?: Executions
   now?: number
   onSpeedUp?: (id: string) => void
-  // Option A: network sub-headers and pages of rows.
+  // Grouped by Safe: network sub-headers and pages of rows.
   safeTable?: boolean
-  safenet?: boolean
   // Option E: the Safe and the other party read as tags in the transaction line.
   partyTags?: boolean
   // Options D and E on a phone: Nonce, a two-line Transaction and Action, so nothing scrolls sideways.
   compact?: boolean
-  pageSize?: number
-  signLabel?: SignLabel
-  onSeeMore?: (accountIds: string[]) => void
 }
 
 const SUMMARY_LABELS = {
@@ -107,13 +96,10 @@ export function SafeSummary({
   section,
   persona,
   recoveryCount,
-  more = false,
 }: {
   section: QueueSectionData
   persona: Persona
   recoveryCount: number
-  // Only the first pages are loaded, so the counts are a minimum.
-  more?: boolean
 }) {
   const summary = getSummary(section, persona)
   if (!summary.length && !recoveryCount)
@@ -127,7 +113,6 @@ export function SafeSummary({
         </span>
       )}
       {summary.map(({ status, count }) => `${count} ${SUMMARY_LABELS[status]}`).join(' · ')}
-      {more && ' · more not loaded'}
     </span>
   )
 }
@@ -174,17 +159,13 @@ export function SafeTitle({
 
 type SectionHeaderProps = Pick<
   QueueSectionProps,
-  'section' | 'collapsed' | 'onToggle' | 'safeBatch' | 'onBulkExecute' | 'persona' | 'onOpenSafe' | 'simple'
+  'section' | 'collapsed' | 'onToggle' | 'safeBatch' | 'onBulkExecute' | 'persona'
 > & {
-  items?: Proposal[]
   recoveryCount?: number
-  // Option A has no Chain column, so the band names the Safe and shows its network.
+  // The band names the Safe, without its network.
   label?: string
-  // Option A: the network logos after the name, which open and close each network.
+  // The network logos after the name, which open and close each network.
   chains?: ReactNode
-  // Option A: See all, when only the Safe's first page is loaded.
-  actions?: ReactNode
-  more?: boolean
 }
 
 // The chevron button. It sits in the Nonce column, so the Safe lines up with the type icons.
@@ -221,15 +202,9 @@ export function SectionHeader({
   onBulkExecute,
   persona,
   recoveryCount = 0,
-  onOpenSafe,
-  simple,
-  items = section.items,
   label,
   chains,
-  actions,
-  more,
 }: SectionHeaderProps) {
-  if (simple) return <SimpleSectionHeader section={section} onToggle={onToggle} persona={persona} items={items} />
   return (
     <div
       data-slot="section-header"
@@ -238,23 +213,9 @@ export function SectionHeader({
     >
       <SafeTitle account={section.account} persona={persona} size={24} showNetwork={false} name={label} />
       {chains}
-      {onOpenSafe && (
-        <Button
-          size="2xs"
-          variant="ghost"
-          aria-label={`Details for ${section.account.name}`}
-          onClick={(event) => {
-            event.stopPropagation()
-            onOpenSafe(section.account)
-          }}
-        >
-          <Info /> Details
-        </Button>
-      )}
       <div className="ml-auto flex items-center gap-2">
         {/* Open Safes show each status in their rows. */}
-        {collapsed && <SafeSummary section={section} persona={persona} recoveryCount={recoveryCount} more={more} />}
-        {actions}
+        {collapsed && <SafeSummary section={section} persona={persona} recoveryCount={recoveryCount} />}
         {safeBatch && safeBatch.proposals.length > 1 && (
           <Button
             size="2xs"
@@ -266,36 +227,6 @@ export function SectionHeader({
           >
             Bulk execute {safeBatch.proposals.length}
           </Button>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// Option C: the Safe, its chain and next nonce, and a badge for a conflict or a blocked queue.
-function SimpleSectionHeader({
-  section,
-  onToggle,
-  persona,
-  items,
-}: Pick<QueueSectionProps, 'section' | 'onToggle' | 'persona' | 'items'>) {
-  const { account } = section
-  const { conflict, blocked } = getSafeBadges(account, items, persona)
-  return (
-    <div
-      data-slot="section-header"
-      className="flex min-h-11 cursor-pointer items-center gap-3 text-sm font-medium"
-      onClick={onToggle}
-    >
-      <SafeTitle account={account} persona={persona} size={24} />
-      <span className="shrink-0 font-mono text-xs font-normal text-muted-foreground">Next #{account.nextNonce}</span>
-      <div className="ml-auto flex items-center gap-2">
-        <span className="text-xs font-normal tabular-nums text-muted-foreground">{section.items.length} pending</span>
-        {conflict && <Badge variant="warning">Conflict</Badge>}
-        {blocked > 0 && (
-          <Badge variant="outline" className="font-normal text-muted-foreground">
-            {blocked} blocked behind #{account.nextNonce}
-          </Badge>
         )}
       </div>
     </div>
@@ -323,14 +254,8 @@ export function CollapseAllButton({ allCollapsed, onToggle, count, unit = ['Safe
 }
 
 // When the note text shows, the note column fills the extra width.
-export const getColumnWidths = (
-  showNoteText: boolean | undefined,
-  alignTo = false,
-): Record<string, string | undefined> => ({
+export const getColumnWidths = (showNoteText: boolean | undefined): Record<string, string | undefined> => ({
   ...STEPS_WIDTHS,
-  // Option C: the other party moves to its own column.
-  // The Safe table: Transaction takes the space left, so the To column fits without scrolling.
-  ...(alignTo ? { Transaction: undefined } : {}),
   ...(showNoteText ? { Note: undefined } : {}),
 })
 
@@ -370,7 +295,7 @@ export function QueueTableHead({ columns, collapse }: { columns: string[]; colla
                 {collapse && <CollapseAllButton {...collapse} />}
               </span>
             ) : label === 'To' ? (
-              // Option C: the names speak for themselves, so the title is for screen readers only.
+              // The names speak for themselves, so the title is for screen readers only.
               <span className="sr-only">{label}</span>
             ) : (
               label
@@ -389,7 +314,6 @@ export type QueueSectionRowsProps = Omit<
   columns: string[]
   safeRecoveries: ReturnType<RecoveryController['forAccount']>
   recoveries?: RecoveryController
-  labelLastSignature?: boolean
 }
 
 // The body rows of one section: its recoveries, then its proposals.
@@ -416,12 +340,9 @@ export function QueueSectionRows({
   executions,
   now,
   onSpeedUp,
-  labelLastSignature,
   safeTable,
-  safenet,
   partyTags,
   compact,
-  signLabel,
 }: QueueSectionRowsProps) {
   const [conflictHover, setConflictHover] = useState<string | null>(null)
   return (
@@ -460,12 +381,9 @@ export function QueueSectionRows({
           onGoTo={onGoTo}
           onStartFlow={onStartFlow}
           onMenuAction={onMenuAction}
-          labelLastSignature={labelLastSignature}
           safeTable={safeTable}
-          safenet={safenet}
           partyTags={partyTags}
           compact={compact}
-          signLabel={signLabel}
         />
       ))}
       {!section.items.length && !safeRecoveries.length && (

@@ -12,7 +12,7 @@ import {
 import type { Account, Filter, Persona, Proposal } from '../../types'
 import { FLAG_META, FLAGS, RECOVERY_TYPE, STATUS_META, STATUS_ORDER, type Flag } from '../shared'
 import { getRecoveryHeadline, type Recovery } from '../Recovery/recoveryData'
-import { isStale } from '../../services/fleet'
+import { isStale } from '../../services/flags'
 
 export type FilterSection = 'accounts' | 'networks' | 'types' | 'statuses' | 'flags'
 export type QueueFilterValues = {

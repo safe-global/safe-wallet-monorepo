@@ -164,7 +164,7 @@ export const protocolAccounts: Account[] = PROTOCOL_TEAMS.flatMap(([team, name, 
       }
     }),
 )
-// Fleet admin: 20 Safes and 11 signers, with conflicts, untrusted and stale proposals to monitor.
+// The 20-Safe workspace: 11 signers, with conflicts, untrusted and stale proposals.
 const CHAIN_IDS: Record<string, string> = {
   Ethereum: '1',
   Arbitrum: '42161',
@@ -282,7 +282,7 @@ export const generateBatchActions = (count: number, recipient = 'Supplier'): Bat
     }
   })
 
-// Fleet admin: 6 conflicting proposals at 3 nonces, 3 untrusted, 5 stale for 7+ days.
+// The 20-Safe queue: 6 conflicting proposals at 3 nonces, 3 untrusted, 5 stale for 7+ days.
 const fleetProposals = (): Proposal[] => {
   const at = (
     account: string,
@@ -1118,31 +1118,7 @@ const withMix = (items: Proposal[], scenarioAccounts: Account[]): Proposal[] => 
   return all
 }
 
-// Payroll on Base queues a month of contractor payouts, more than one page of the queue.
-const PAYEES = ['Northwind', 'Contoso Ltd', 'Fabrikam', 'Tailspin Labs', 'Litware Markets', 'Adventure Works']
-export const DEEP_QUEUE_SIZE = 40
-const withDeepQueue = (items: Proposal[], accountId: string): Proposal[] => {
-  const nonces = items.filter((tx) => tx.account === accountId).map((tx) => tx.nonce)
-  const start = Math.max(...nonces) + 1
-  const payouts = Array.from({ length: DEEP_QUEUE_SIZE }, (_, index): Proposal => {
-    const payee = PAYEES[index % PAYEES.length]
-    return {
-      id: `${accountId}-payout-${index}`,
-      account: accountId,
-      nonce: start + index,
-      recipient: `${payee} · ${shortAddress(fixtureAddress(`${payee}-${index % 3}`))}`,
-      amount: `${((4 + ((index * 7) % 18)) * 500).toLocaleString('en-US')} EURe`,
-      kind: { type: 'transfer' },
-      age: `${1 + (index % 6)}d ago`,
-      signers: index % 4 === 0 ? ['Ana'] : [],
-      eligible: true,
-    }
-  })
-  return [...items, ...payouts]
-}
-
-// Option A only: Stat cards rank signers and Safes by queue size, and a month of payouts would skew them.
-export const getScenario = (scenario: Scenario, { deepQueue = false } = {}): Proposal[] => {
+export const getScenario = (scenario: Scenario): Proposal[] => {
   const items = proposals.map((tx) => ({ ...tx, signers: [...tx.signers] }))
   const realistic = () => [...items, ...realisticProposals.map((tx) => ({ ...tx, signers: [...tx.signers] }))]
   const withSafes = (ids: string[]) => manySafesProposals().filter((tx) => ids.includes(tx.account))
@@ -1156,14 +1132,8 @@ export const getScenario = (scenario: Scenario, { deepQueue = false } = {}): Pro
       tx.id === 'market-making-213' ? { ...tx, signers: ['Ana', 'Max'] } : tx,
     )
   if (scenario === '10-safes') return [...realistic(), ...withSafes(TEN_SAFES)]
-  if (scenario === '20-safes') {
-    const items = withMix(fleetProposals(), fleetAccounts)
-    return deepQueue ? withDeepQueue(items, 'fleet-payroll-base') : items
-  }
-  if (scenario === '50-safes') {
-    const items = withMix(protocolProposals(), protocolAccounts)
-    return deepQueue ? withDeepQueue(items, 'payroll-base') : items
-  }
+  if (scenario === '20-safes') return withMix(fleetProposals(), fleetAccounts)
+  if (scenario === '50-safes') return withMix(protocolProposals(), protocolAccounts)
   if (scenario === 'conflict')
     items.push({
       id: 'treasury-42-swap',
@@ -1283,9 +1253,6 @@ export const getRowAction = (tx: Proposal, persona: Persona) => {
   if (state.canSign) return 'Sign'
   return 'Review'
 }
-export type RowSecondaryAction = 'replace' | 'reject'
-export const getSecondaryActions = (tx: Proposal, persona: Persona): RowSecondaryAction[] =>
-  isSignerOf(getAccount(tx), persona) ? ['replace', 'reject'] : []
 export const getStatusLabel = (tx: Proposal, persona: Persona) => {
   const state = getState(tx, persona)
   if (state.expired) return 'Expired'
@@ -1544,8 +1511,4 @@ export const getStepsStatus = (tx: Proposal, persona: Persona) => {
     tone: status === 'ready' || status === 'sign' ? ('success' as const) : ('warning' as const),
     after: signAhead ? nextNonce : undefined,
   }
-}
-export const getStatusTone = (tx: Proposal, persona: Persona) => {
-  const state = getState(tx, persona)
-  return state.ready || (state.canSign && !state.waiting) ? 'success' : 'warning'
 }

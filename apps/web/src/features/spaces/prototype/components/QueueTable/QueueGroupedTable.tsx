@@ -1,12 +1,10 @@
-import { Fragment, useEffect, useRef, useState } from 'react'
-import { ArrowRight } from 'lucide-react'
+import { Fragment, useState } from 'react'
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { Button } from '@safe-global/views/components/ui/button'
-import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Table, TableBody, TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import type { BulkBatch } from '../../services/queue'
 import { getAccount } from '../../services/model'
-import type { Account, Proposal } from '../../types'
+import type { Account } from '../../types'
 import {
   getColumnWidths,
   QueueSectionRows,
@@ -22,7 +20,7 @@ import { FailedSafeBand } from '../LoadWarnings'
 import { isActionGroup, type OrderedGroupBy, type QueueGroup } from '../../services/order'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { SafeIdentity, chainLogoUrl } from '../shared'
-import { getColumns, groupBySafe, shareLimit, type QueueSectionData, type SafeGroup } from './sections'
+import { groupBySafe, type QueueSectionData, type SafeGroup } from './sections'
 
 export type QueueGroupedTableProps = Omit<QueueSectionProps, 'section' | 'collapsed' | 'onToggle' | 'safeBatch'> & {
   sections: QueueSectionData[]
@@ -30,62 +28,32 @@ export type QueueGroupedTableProps = Omit<QueueSectionProps, 'section' | 'collap
   onToggle: (id: string) => void
   getSafeBatch: (section: QueueSectionData) => BulkBatch | undefined
   collapse: CollapseAll
-  // Options D and E: the same columns as their other groupings.
-  ordered?: boolean
-  // Option E: Safes that didn't load keep a band at the top, with Try again.
+  // Safes that didn't load keep a band at the top, with Reload.
   failedSafes?: { accounts: Account[]; retrying: string[]; onRetry: (ids: string[]) => void }
 }
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0! transition-colors group-hover/band:bg-foreground/[0.06]'
 
-// One table: a single column header, and each Safe is a band that collapses its rows.
+// Grouped by Safe: one band per Safe, a sub-header per network, the same columns as the other groupings.
 export function QueueGroupedTable({
   sections,
   isCollapsed,
   onToggle,
   getSafeBatch,
   collapse,
-  ordered = false,
   failedSafes,
   ...props
 }: QueueGroupedTableProps) {
-  const { isWide, showNoteText, persona, recoveries, alignTo, simple, safeTable = false, pageSize = 10 } = props
-  // Option A: one band per Safe and a sub-header per network, in place of the Chain column.
-  const columns = ordered
-    ? ORDERED_COLUMNS(isWide, props.partyTags, props.compact)
-    : getColumns(isWide, alignTo).filter((column) => !safeTable || column !== 'Chain')
-  // Option A: Transaction fits the widest action and To takes the slack, so a row reads as one short sentence.
-  const widths = ordered
-    ? orderedWidths(showNoteText, props.partyTags, props.compact)
-    : safeTable
-      ? { ...getColumnWidths(showNoteText, alignTo), Transaction: 'w-[21.5rem]', To: undefined }
-      : getColumnWidths(showNoteText, alignTo)
-  const groups: SafeGroup[] = safeTable
-    ? groupBySafe(sections)
-    : sections.map((section) => ({ id: section.id, label: section.label, sections: [section] }))
+  const { isWide, showNoteText, persona, recoveries } = props
+  const columns = ORDERED_COLUMNS(isWide, props.partyTags, props.compact)
+  const widths = orderedWidths(showNoteText, props.partyTags, props.compact)
+  const groups: SafeGroup[] = groupBySafe(sections)
   const { scroller, overflowing } = useScrollOverflow(sections.map((section) => isCollapsed(section.id)).join())
-  // Across Safes, each Safe shows a first page shared by its networks. Narrowed to one Safe, it shows everything.
-  const limited = safeTable && groups.length > 1
-  const pages = new Map(
-    limited ? groups.flatMap((group) => shareLimit(group.sections, pageSize)).map((page) => [page.id, page]) : [],
-  )
-  const paged = (section: QueueSectionData) => pages.get(section.id) ?? section
-  const hasMore = (section: QueueSectionData) => paged(section).items.length < section.items.length
-
-  const seeAll = (group: SafeGroup) =>
-    group.sections.some(hasMore) &&
-    props.onSeeMore && (
-      <SeeAllButton
-        label={group.label}
-        onSeeAll={() => props.onSeeMore!(group.sections.map((section) => section.account.id))}
-      />
-    )
-
   const rows = (section: QueueSectionData, hidden: boolean) => (
     <TableBody id={`section-${section.id}`} hidden={hidden}>
       <QueueSectionRows
         {...props}
-        section={paged(section)}
+        section={section}
         columns={columns}
         safeRecoveries={recoveries?.forAccount(section.account.id) ?? []}
       />
@@ -106,22 +74,15 @@ export function QueueGroupedTable({
             </TableCell>
             <TableCell colSpan={columns.length - 1} className={`rounded-r-lg pr-3! ${BAND_CELL}`}>
               <SectionHeader
-                section={paged(section)}
-                more={hasMore(section)}
+                section={section}
                 collapsed={collapsed}
                 onToggle={() => onToggle(section.id)}
                 safeBatch={getSafeBatch(section)}
                 onBulkExecute={props.onBulkExecute}
                 persona={persona}
                 recoveryCount={recoveries?.forAccount(section.account.id).length ?? 0}
-                onOpenSafe={props.onOpenSafe}
-                simple={simple}
-                items={props.items}
-                label={safeTable ? group.label : undefined}
-                actions={seeAll(group)}
-                chains={
-                  safeTable && <ChainToggles sections={group.sections} isCollapsed={isCollapsed} onToggle={onToggle} />
-                }
+                label={group.label}
+                chains={<ChainToggles sections={group.sections} isCollapsed={isCollapsed} onToggle={onToggle} />}
               />
             </TableCell>
           </TableRow>
@@ -139,7 +100,7 @@ export function QueueGroupedTable({
         .filter((section) => isCollapsed(section.id) === collapsed)
         .forEach((section) => onToggle(section.id))
     const { account } = group.sections[0]
-    const all = { ...group.sections[0], items: group.sections.flatMap((section) => paged(section).items) }
+    const all = { ...group.sections[0], items: group.sections.flatMap((section) => section.items) }
     const recoveryCount = group.sections.reduce(
       (sum, section) => sum + (recoveries?.forAccount(section.account.id).length ?? 0),
       0,
@@ -172,14 +133,7 @@ export function QueueGroupedTable({
                 </SafeIdentity>
                 <ChainToggles sections={group.sections} isCollapsed={isCollapsed} onToggle={onToggle} />
                 <span className="ml-auto flex items-center gap-2">
-                  {collapsed && (
-                    <SafeSummary
-                      section={all}
-                      persona={persona}
-                      recoveryCount={recoveryCount}
-                      more={group.sections.some(hasMore)}
-                    />
-                  )}
+                  {collapsed && <SafeSummary section={all} persona={persona} recoveryCount={recoveryCount} />}
                   {/* One batch per network: bulk execute doesn't cross networks in v1. */}
                   {group.sections.map((section) => {
                     const safeBatch = getSafeBatch(section)
@@ -211,7 +165,6 @@ export function QueueGroupedTable({
                       )
                     )
                   })}
-                  {seeAll(group)}
                 </span>
               </div>
             </TableCell>
@@ -236,8 +189,7 @@ export function QueueGroupedTable({
                       <span className="ml-auto flex items-center gap-2">
                         {chainCollapsed && (
                           <SafeSummary
-                            section={paged(section)}
-                            more={hasMore(section)}
+                            section={section}
                             persona={persona}
                             recoveryCount={recoveries?.forAccount(section.account.id).length ?? 0}
                           />
@@ -262,14 +214,14 @@ export function QueueGroupedTable({
           <Table
             aria-label="Pending transactions"
             variant="panel"
-            className={`table-fixed ${props.compact ? '[&_td]:px-2 [&_th]:px-2' : '[&_td]:px-4 [&_th]:px-4'} ${ordered ? (props.compact ? '' : 'min-w-[1300px]') : safeTable ? 'min-w-[1160px]' : 'min-w-[1080px]'}`}
+            className={`table-fixed ${props.compact ? '[&_td]:px-2 [&_th]:px-2' : 'min-w-[1300px] [&_td]:px-4 [&_th]:px-4'}`}
           >
             <colgroup>
               {columns.map((label) => (
                 <col key={label} className={widths[label]} />
               ))}
             </colgroup>
-            <QueueTableHead columns={columns} collapse={safeTable ? { ...collapse, count: groups.length } : collapse} />
+            <QueueTableHead columns={columns} collapse={{ ...collapse, count: groups.length }} />
             {/* Safes that didn't load come first, so nobody misses them. */}
             {failedSafes?.accounts.map((account) => (
               <TableBody key={`failed-${account.id}`}>
@@ -340,50 +292,19 @@ function ChainToggles({
   )
 }
 
-// Across Safes only a first page is loaded, and the queue service gives no total. This loads the rest of one Safe.
-function SeeAllButton({ label, onSeeAll }: { label: string; onSeeAll: () => void }) {
-  const [loading, setLoading] = useState(false)
-  const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
-  useEffect(() => () => clearTimeout(timer.current), [])
-  return (
-    <Button
-      size="2xs"
-      variant="outline"
-      aria-label={`See all in ${label}`}
-      disabled={loading}
-      onClick={(event) => {
-        event.stopPropagation()
-        setLoading(true)
-        // A short wait, as fetching the Safe's whole queue would take.
-        timer.current = setTimeout(onSeeAll, 600)
-      }}
-    >
-      {loading ? (
-        <>
-          <Spinner className="size-3" /> Loading…
-        </>
-      ) : (
-        <>
-          See all <ArrowRight />
-        </>
-      )}
-    </Button>
-  )
-}
-
 export type QueueOrderedTableProps = Omit<
   QueueGroupedTableProps,
   'sections' | 'isCollapsed' | 'onToggle' | 'getSafeBatch' | 'collapse'
 > & { groups: QueueGroup[]; groupBy: OrderedGroupBy }
 
-// As in option A, Transaction fits the widest action and To takes the slack.
+// Transaction fits the widest action and To takes the slack.
 // Option E fits the Safe tag in Transaction, in place of the Safe column.
 const orderedWidths = (
   showNoteText: boolean | undefined,
   partyTags = false,
   compact = false,
 ): Record<string, string | undefined> => ({
-  ...getColumnWidths(showNoteText, true),
+  ...getColumnWidths(showNoteText),
   Transaction: compact ? undefined : partyTags ? 'w-[24rem]' : 'w-72',
   ...(compact ? { Nonce: 'w-11', Action: 'w-12' } : {}),
   To: undefined,
@@ -493,39 +414,6 @@ export function QueueOrderedTable({ groups, groupBy, ...props }: QueueOrderedTab
                 </Fragment>
               )
             })}
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
-
-export type QueueFlatTableProps = Omit<
-  QueueGroupedTableProps,
-  'sections' | 'isCollapsed' | 'onToggle' | 'getSafeBatch' | 'collapse'
-> & { rows: Proposal[]; label: string }
-
-// Option C: one list across Safes, no bands. Conflict options still group by nonce within their Safe.
-export function QueueFlatTable({ rows, label, ...props }: QueueFlatTableProps) {
-  // Option A's columns, with the Safe and its chain in place of Chain.
-  const columns = getColumns(props.isWide, props.alignTo).map((column) => (column === 'Chain' ? 'Safe' : column))
-  const widths = getColumnWidths(props.showNoteText, props.alignTo)
-  const { scroller, overflowing } = useScrollOverflow(rows.length)
-  const section = { id: 'needs-you', label, account: getAccount(rows[0]), items: rows }
-  return (
-    <Card radius="xl" size="none">
-      <CardContent>
-        <div ref={scroller} className="group/queue relative" data-overflow={overflowing || undefined}>
-          <Table aria-label={label} variant="panel" className="table-fixed min-w-[1300px] [&_td]:px-4 [&_th]:px-4">
-            <colgroup>
-              {columns.map((column) => (
-                <col key={column} className={widths[column]} />
-              ))}
-            </colgroup>
-            <QueueTableHead columns={columns} />
-            <TableBody>
-              <QueueSectionRows {...props} section={section} columns={columns} safeRecoveries={[]} labelLastSignature />
-            </TableBody>
           </Table>
         </div>
       </CardContent>

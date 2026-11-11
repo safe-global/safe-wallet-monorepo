@@ -96,9 +96,9 @@ export const getIncomingProposal = (items: Proposal[], persona: Persona): Propos
 export const createPreviewQueue = (
   scenario: Scenario,
   state: QueueState = 'normal',
-  options: { deepQueue?: boolean; failedCount?: number; undeployedCount?: number } = {},
+  options: { failedCount?: number; undeployedCount?: number } = {},
 ): PreviewQueue => ({
-  items: applyQueueState(getScenario(scenario, options), scenario, state, options.failedCount, options.undeployedCount),
+  items: applyQueueState(getScenario(scenario), scenario, state, options.failedCount, options.undeployedCount),
   completed: [],
   nextProposalId: 1,
   nextNonces: Object.fromEntries(getScenarioAccounts(scenario).map((account) => [account.id, account.nextNonce])),

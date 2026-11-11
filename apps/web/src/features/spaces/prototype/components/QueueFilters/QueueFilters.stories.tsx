@@ -16,7 +16,7 @@ function QueueFiltersPreview({
   const filters = useQueueFilters(items, accounts, persona, initial)
   return (
     <div className="bg-secondary p-6">
-      <QueueToolbar filters={filters} accounts={accounts} hasItems={items.length > 0} />
+      <QueueToolbar filters={filters} accounts={accounts} />
       <AppliedFilters filters={filters} />
       <p className="text-sm text-muted-foreground">
         {filters.visible.length} of {items.length} transactions match
