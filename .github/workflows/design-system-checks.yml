@@ -8,8 +8,15 @@ on:
       - packages/ui/**
       - packages/theme/**
       - yarn.lock
+      - package.json
+      - .yarnrc.yml
+      - yarn.config.cjs
       - .yarn/patches/**
+      - .prettierrc
+      - .prettierignore
       - .github/workflows/design-system-checks.yml
+      - .github/actions/yarn/**
+      - .github/actions/corepack/**
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -30,6 +37,7 @@ jobs:
           turbo-team: ${{ vars.TURBO_TEAM }}
       - run: yarn workspace @safe-global/design-system type-check
       - run: yarn workspace @safe-global/design-system lint
+      - run: yarn workspace @safe-global/design-system prettier
       - run: yarn workspace @safe-global/design-system test
       - run: yarn workspace @safe-global/design-system build
         env:
@@ -39,3 +47,9 @@ jobs:
       - name: Static export and registry exist
         working-directory: apps/design-system
         run: test -d out/r && test -f out/index.html
+      - name: Install Playwright Chromium
+        working-directory: apps/design-system
+        run: yarn exec playwright install --only-shell chromium
+      # Playwright's webServer serves out/ on :3100 for the crawl.
+      - name: Crawl the static export
+        run: yarn workspace @safe-global/design-system test:e2e
