@@ -54,7 +54,7 @@ const goToQueue = (router: NextRouter) => {
  * To avoid nonce gaps in the queue, we allow deleting the last transaction in the queue or duplicates.
  * The recommended nonce is used to calculate the last transaction in the queue.
  */
-const useIsNonceDeletable = (txNonce: number) => {
+export const useIsNonceDeletable = (txNonce: number) => {
   const queuedTxsByNonce = useQueuedTxByNonce(txNonce)
   const recommendedNonce = useRecommendedNonce() || 0
   const duplicateCount = queuedTxsByNonce?.length || 0
