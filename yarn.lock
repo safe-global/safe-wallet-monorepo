@@ -14329,7 +14329,6 @@ __metadata:
   dependencies:
     "@base-ui/react": "npm:^1.1.0"
     "@eslint/js": "npm:^9.18.0"
-    "@safe-global/test": "workspace:^"
     "@shadcn/lint": "npm:^0.2.4"
     "@storybook/react": "npm:^10.6.5"
     "@testing-library/dom": "npm:^10.4.2"

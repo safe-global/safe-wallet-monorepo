@@ -12,7 +12,15 @@
   "globalPassThroughEnv": ["TURBO_TOKEN", "TURBO_TEAM", "TURBO_API", "TURBO_REMOTE_CACHE_SIGNATURE_KEY"],
   "tasks": {
     "type-check": {
-      "inputs": ["src/**/*.{ts,tsx,js,jsx,json}", "tsconfig*.json", "package.json", "next-env.d.ts", "**/*.d.ts"],
+      "inputs": [
+        "src/**/*.{ts,tsx,js,jsx,json}",
+        "tsconfig*.json",
+        "package.json",
+        "next-env.d.ts",
+        "**/*.d.ts",
+        "$TURBO_ROOT$/packages/ui/src/**",
+        "$TURBO_ROOT$/packages/views/src/**"
+      ],
       "outputs": [],
       "outputLogs": "new-only"
     },
@@ -34,7 +42,9 @@
         "jest.config.{js,cjs,mjs,ts}",
         "jest.setup.{js,cjs,mjs,ts}",
         "package.json",
-        "**/*.d.ts"
+        "**/*.d.ts",
+        "$TURBO_ROOT$/packages/ui/src/**",
+        "$TURBO_ROOT$/packages/views/src/**"
       ],
       "outputs": ["coverage/**"],
       "env": ["NEXT_PUBLIC_IS_OFFICIAL_HOST", "DEBUG_PRINT_LIMIT", "LC_ALL"],

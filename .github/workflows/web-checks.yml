@@ -119,7 +119,7 @@ jobs:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
       - name: Type check
-        run: yarn turbo run type-check --filter=@safe-global/web
+        run: yarn turbo run type-check --filter=@safe-global/web --filter=@safe-global/ui
 
   knip-exports:
     needs: changes
