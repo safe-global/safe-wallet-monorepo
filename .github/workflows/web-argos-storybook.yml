@@ -49,7 +49,7 @@ permissions: {}
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     permissions:
       contents: read
       pull-requests: read
@@ -79,7 +79,7 @@ jobs:
   skip:
     needs: changes
     if: needs.changes.outputs.relevant != 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     name: Storybook visual tests (Argos) skipped
     permissions:
       contents: read
@@ -94,7 +94,7 @@ jobs:
   sweep:
     needs: changes
     if: needs.changes.outputs.relevant == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 30
     name: Storybook sweep (${{ matrix.shard }}/4)
     permissions:
@@ -114,6 +114,11 @@ jobs:
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
+
+      # The ARM64 runner image has no Chrome, so the sweep uses Playwright's pinned headless shell
+      - name: Install browser dependencies
+        working-directory: apps/web
+        run: yarn exec playwright install --with-deps --only-shell chromium
 
       - name: Build Storybook
         run: yarn workspace @safe-global/web build-storybook --output-dir storybook-static
@@ -157,7 +162,7 @@ jobs:
 
   visual:
     needs: sweep
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     name: Storybook visual tests (Argos)
     permissions:
@@ -300,7 +305,7 @@ jobs:
     permissions: {}
     if: always()
     needs: [changes, sweep, visual]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: $/.github/actions/required-result
         with:

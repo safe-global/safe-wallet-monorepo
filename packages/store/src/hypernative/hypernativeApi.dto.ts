@@ -107,6 +107,15 @@ export type HypernativeTokenExchangeRequestDto = {
 }
 
 /**
+ * Request DTO for exchanging a refresh token for a new access/refresh token pair
+ */
+export type HypernativeTokenRefreshRequestDto = {
+  grant_type: 'refresh_token'
+  client_id: string
+  refresh_token: string
+}
+
+/**
  * Hypernative API token response format
  * The API wraps the OAuth token response in a `data` object
  */
@@ -116,7 +125,26 @@ export type HypernativeTokenExchangeResponseDto = {
     expires_in: number
     scope: string
     token_type: string
+    refresh_token?: string
+    refresh_expires_in?: number
   }
+}
+
+/**
+ * A failed OAuth call: the RFC 6749 §5.2 body nested for a 4xx, a flat code for a 5xx
+ */
+export type HypernativeOAuthErrorEnvelopeDto = {
+  success: false
+  data: unknown
+  error?: string | { error: string; error_description?: string }
+}
+
+/**
+ * The error `fetchBaseQuery` passes on; `data` is absent for a network failure
+ */
+export type HypernativeQueryErrorDto = {
+  status: number | string
+  data?: HypernativeOAuthErrorEnvelopeDto
 }
 
 /**

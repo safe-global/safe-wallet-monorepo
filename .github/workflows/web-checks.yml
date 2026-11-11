@@ -24,7 +24,7 @@ permissions: {}
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     permissions:
       contents: read
       pull-requests: read
@@ -62,7 +62,7 @@ jobs:
       checks: write
       pull-requests: read
       statuses: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: $/.github/actions/yarn
@@ -93,7 +93,7 @@ jobs:
       checks: write
       pull-requests: read
       statuses: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: $/.github/actions/yarn
@@ -111,7 +111,7 @@ jobs:
       checks: write
       pull-requests: read
       statuses: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: $/.github/actions/yarn
@@ -129,7 +129,7 @@ jobs:
       checks: write
       pull-requests: read
       statuses: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: $/.github/actions/yarn
@@ -142,7 +142,7 @@ jobs:
   notify:
     if: failure() && github.event_name == 'push'
     needs: [lint, prettier, type-check, knip-exports]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     permissions: {}
     steps:
       - name: Notify Slack on failure
@@ -170,7 +170,7 @@ jobs:
     permissions: {}
     if: always()
     needs: [changes, lint, prettier, type-check, knip-exports]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: $/.github/actions/required-result
         with:

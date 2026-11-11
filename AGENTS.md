@@ -93,6 +93,8 @@ Before writing code for any non-trivial change (beyond a typo, doc tweak or sing
 
 A workflow that branch protection requires has no `pull_request` `paths` filter; it detects changes with the `pr-changes` action and reports one result job with `required-result`. See [docs/ci-required-checks.md](docs/ci-required-checks.md).
 
+Every job runs on `ubuntu-26.04-arm`: the Yarn and Next.js cache keys include the runner architecture, so a job on another runner restores nothing and saves a second copy.
+
 ### Commit and PR conventions
 
 Before committing, pushing, opening a PR, or reviewing one, read [docs/ai/git-conventions.md](docs/ai/git-conventions.md) first — the pre-commit hook, commit-message prefixes, how to fill the PR template, the required visual summary, and PR citation rules live there. Read it before you commit or open a PR, and work through its "Before you open a PR" list (Claude Code skill: `pre-pr`).

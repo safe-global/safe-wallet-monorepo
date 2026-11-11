@@ -386,11 +386,13 @@ export function safeOverviewHandlers(safeData: SafeState): RequestHandler[] {
  * External (non-CGW) services that pages call on load:
  * - Zodiac security-check (vulnerable modules banner) - report "safe"
  * - WalletConnect telemetry - accept and discard
+ * - Beamer What's new poll - no unread posts, so no top bar or corner card
  */
 export function externalServicesHandlers(): RequestHandler[] {
   return [
     http.get(/zodiac-check\.safe\.global\/public\/api\/security-check/, () => HttpResponse.json({ status: 'safe' })),
     http.post(/pulse\.walletconnect\.org/, () => HttpResponse.json({})),
+    http.get(/backend\.getbeamer\.com\/numberFeatures/, () => HttpResponse.json({ number: 0 })),
   ]
 }
 
