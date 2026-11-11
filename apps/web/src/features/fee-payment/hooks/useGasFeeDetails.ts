@@ -32,8 +32,7 @@ const LEGACY_FIELDS: DraftField[] = ['userNonce', 'gasLimit', 'maxFeePerGas']
 // Without EIP-1559 the max fee is the gas price, and the view labels it as such.
 const detailName = (field: DraftField, isEIP1559: boolean): GasDetailName =>
   !isEIP1559 && field === 'maxFeePerGas' ? 'gasPrice' : field
-const draftField = (name: GasDetailName): DraftField | undefined =>
-  name === 'gasPrice' ? 'maxFeePerGas' : name === 'refundReceiver' ? undefined : name
+const draftField = (name: GasDetailName): DraftField => (name === 'gasPrice' ? 'maxFeePerGas' : name)
 
 const formatGwei = (value: bigint | null | undefined): string | undefined =>
   value === null || value === undefined ? undefined : safeFormatUnits(value)
@@ -47,7 +46,6 @@ const safePaysRows = (data: SafeTransaction['data'] | undefined): GasDetailRow[]
     ...(isNativeGasToken
       ? [{ name: 'gasPrice' as const, value: data ? formatGwei(BigInt(data.gasPrice)) : undefined }]
       : []),
-    { name: 'refundReceiver' },
   ]
 }
 
@@ -177,7 +175,7 @@ export const useGasFeeDetails = ({
       fields,
       onFieldChange: (name, value) => {
         const field = draftField(name)
-        if (field) setDraft((current) => (current ? { ...current, [field]: value } : current))
+        setDraft((current) => (current ? { ...current, [field]: value } : current))
       },
       canSave: Object.keys(errors).length === 0,
       onSave: () => {

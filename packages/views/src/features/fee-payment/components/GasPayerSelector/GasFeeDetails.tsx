@@ -24,13 +24,12 @@ const GAS_DETAIL_LABEL: Record<GasDetailName, string> = {
   maxPriorityFeePerGas: 'Max priority fee (Gwei)',
   maxFeePerGas: 'Max fee (Gwei)',
   gasPrice: 'Gas price (Gwei)',
-  refundReceiver: 'Refund to',
 }
 
 const READ_ONLY_NOTE: Record<GasDetailsReadOnlyReason, string> = {
-  PAID_FROM_SAFE: "Set by the relayer quote at signing. Paid from the Safe, so it can't be edited.",
+  PAID_FROM_SAFE: "Paid from your Safe account. Set at signing, so it can't be changed.",
   SPONSORED_PLAN: 'Covered by your Pro plan.',
-  SPONSORED_FREE: 'Covered by a free transaction. The relayer sets the gas.',
+  SPONSORED_FREE: 'Covered by a free transaction.',
 }
 
 const paramErrorText = (name: GasDetailName, error: GasParamError): string => {
@@ -49,7 +48,6 @@ const paramErrorText = (name: GasDetailName, error: GasParamError): string => {
 }
 
 const rowValue = (row: GasDetailRow): string => {
-  if (row.name === 'refundReceiver') return 'Safe relayer'
   if (row.error) return 'Cannot estimate'
   return row.value ?? '-'
 }

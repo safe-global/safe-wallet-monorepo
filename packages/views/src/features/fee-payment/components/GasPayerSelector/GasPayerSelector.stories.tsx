@@ -99,7 +99,10 @@ const useSampleDetails = (sample?: DetailsSample): GasFeeDetails | undefined => 
       onOpenChange: setIsViewOpen,
       rows:
         sample === 'paidFromSafe'
-          ? [{ name: 'gasLimit', value: '112400' }, { name: 'gasPrice', value: '1.9' }, { name: 'refundReceiver' }]
+          ? [
+              { name: 'gasLimit', value: '112400' },
+              { name: 'gasPrice', value: '1.9' },
+            ]
           : (['gasLimit', 'maxPriorityFeePerGas', 'maxFeePerGas'] as const).map((name) => ({
               name,
               value: ESTIMATE[name],

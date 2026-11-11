@@ -241,7 +241,10 @@ describe('GasPayerSelector gas fee details', () => {
         mode: 'view',
         open: true,
         onOpenChange: jest.fn(),
-        rows: [{ name: 'gasLimit', value: '112400' }, { name: 'gasPrice', value: '1.9' }, { name: 'refundReceiver' }],
+        rows: [
+          { name: 'gasLimit', value: '112400' },
+          { name: 'gasPrice', value: '1.9' },
+        ],
         reason: 'PAID_FROM_SAFE',
       },
     })
@@ -249,8 +252,8 @@ describe('GasPayerSelector gas fee details', () => {
     const summary = screen.getByTestId('gas-params-summary')
     expect(summary).toHaveTextContent('Gas limit112400')
     expect(summary).toHaveTextContent('Gas price (Gwei)1.9')
-    expect(summary).toHaveTextContent('Refund toSafe relayer')
-    expect(summary).toHaveTextContent("Paid from the Safe, so it can't be edited.")
+    expect(summary).not.toHaveTextContent('Refund to')
+    expect(summary).toHaveTextContent("Paid from your Safe account. Set at signing, so it can't be changed.")
     expect(screen.queryByTestId('gas-params-editor')).not.toBeInTheDocument()
   })
 })

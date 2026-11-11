@@ -63,8 +63,7 @@ export type FeePayerView = {
 }
 
 /** A gas setting of the transaction, as shown in the Gas fee details. `gasPrice` is the max fee on chains without EIP-1559. */
-export type GasDetailName =
-  'userNonce' | 'gasLimit' | 'maxPriorityFeePerGas' | 'maxFeePerGas' | 'gasPrice' | 'refundReceiver'
+export type GasDetailName = 'userNonce' | 'gasLimit' | 'maxPriorityFeePerGas' | 'maxFeePerGas' | 'gasPrice'
 
 /** Why an edited gas setting can't be saved. The view picks the copy. */
 export type GasParamError = 'REQUIRED' | 'NOT_INTEGER' | 'BELOW_MIN_GAS_LIMIT' | 'INVALID_AMOUNT' | 'BELOW_PRIORITY_FEE'

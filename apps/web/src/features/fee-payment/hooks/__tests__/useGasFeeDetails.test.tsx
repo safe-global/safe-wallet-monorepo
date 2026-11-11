@@ -177,7 +177,6 @@ describe('useGasFeeDetails', () => {
     expect(details.rows).toEqual([
       { name: 'gasLimit', value: '100000' },
       { name: 'gasPrice', value: '2' },
-      { name: 'refundReceiver' },
     ])
     expect(result.current.selection.view?.gasFee).toBe(safeFee)
   })
