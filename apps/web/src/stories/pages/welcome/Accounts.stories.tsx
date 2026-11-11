@@ -28,6 +28,7 @@ const accountsStory = (config: MockStoryConfig, loadedTexts: string[]): Story =>
     scenario: 'efSafe',
     pathname: '/welcome/accounts',
     layout: 'fullPage',
+    features: { safePro: true, oidcAuth: true, safeProAnnouncement: true },
     ...config,
   })
   return {
