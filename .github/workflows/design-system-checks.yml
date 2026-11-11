@@ -1,0 +1,41 @@
+name: Design System Checks
+
+# Optional, not a required check: builds the Safe UI docs site and registry, no deploy.
+on:
+  pull_request:
+    paths:
+      - apps/design-system/**
+      - packages/ui/**
+      - packages/theme/**
+      - yarn.lock
+      - .yarn/patches/**
+      - .github/workflows/design-system-checks.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: $/.github/actions/yarn
+        with:
+          after-install: 'false'
+          turbo-token: ${{ secrets.TURBO_TOKEN }}
+          turbo-team: ${{ vars.TURBO_TEAM }}
+      - run: yarn workspace @safe-global/design-system type-check
+      - run: yarn workspace @safe-global/design-system lint
+      - run: yarn workspace @safe-global/design-system test
+      - run: yarn workspace @safe-global/design-system build
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+      - name: registry.json is current
+        run: git diff --exit-code apps/design-system/registry.json
+      - name: Static export and registry exist
+        working-directory: apps/design-system
+        run: test -d out/r && test -f out/index.html
