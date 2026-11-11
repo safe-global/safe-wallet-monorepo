@@ -70,7 +70,7 @@ export const _isValidTxFilterType = (type: unknown) => {
   return !!type && Object.values(TxFilterType).includes(type as TxFilterType)
 }
 
-const isTransfersOnlyFilter = ({ type, filter }: TxFilter): boolean => {
+export const isTransfersOnlyFilter = ({ type, filter }: TxFilter): boolean => {
   return type === TxFilterType.MULTISIG && 'transfers' in filter && filter.transfers === 'true'
 }
 

@@ -102,3 +102,85 @@ describe('PaginatedTxns with the recorded staging history', () => {
     await waitFor(() => expect(screen.getAllByTestId('transaction-item')).toHaveLength(joinedRows))
   })
 })
+
+const OUTGOING_TRANSFERS_URL = `${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress/outgoing-transfers`
+const SECOND_PAGE_CURSOR = 'limit=20&offset=20'
+const secondPageUrl = `${GATEWAY_URL}/v1/chains/${TX_HISTORY_SAFE.chainId}/safes/${TX_HISTORY_SAFE.address}/outgoing-transfers?cursor=${encodeURIComponent(SECOND_PAGE_CURSOR)}`
+const transfers = recordedHistory.results.filter(isTransactionListItem)
+
+const serveTransfers = (firstPage: TransactionItemPage['results'], secondPage: TransactionItemPage['results']) =>
+  server.use(
+    http.get(OUTGOING_TRANSFERS_URL, ({ request }) => {
+      const isSecondPage = new URL(request.url).searchParams.get('cursor') === SECOND_PAGE_CURSOR
+      return HttpResponse.json(
+        isSecondPage ? { next: null, results: secondPage } : { next: secondPageUrl, results: firstPage },
+      )
+    }),
+  )
+
+const renderTransfersOnly = () =>
+  render(<PaginatedTxns useTxns={useTxHistory} />, {
+    routerProps: {
+      pathname: AppRoutes.transactions.history,
+      query: {
+        safe: `${TX_HISTORY_SAFE.shortName}:${TX_HISTORY_SAFE.address}`,
+        type: 'Outgoing',
+        transfers: 'true',
+      },
+    },
+    initialReduxState: {
+      safeInfo: { data: historySafe, loading: false, loaded: true },
+    },
+  })
+
+describe('PaginatedTxns with the transfers only filter', () => {
+  beforeEach(() => {
+    sentinelObservers.length = 0
+    Object.defineProperty(window, 'IntersectionObserver', { configurable: true, value: SentinelObserver })
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(sepolia)
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  it('counts the transfers of every loaded page once the last page is in', async () => {
+    serveTransfers(transfers.slice(0, 2), transfers.slice(2, 5))
+    renderTransfersOnly()
+    await screen.findByText('> 2 outgoing transfers found')
+
+    scrollToTheEnd()
+
+    expect(await screen.findByText('5 outgoing transfers found')).toBeInTheDocument()
+  })
+
+  it('shows no count while an empty page still has a next page', async () => {
+    serveTransfers([], transfers.slice(0, 3))
+    renderTransfersOnly()
+
+    await waitFor(() => expect(sentinelObservers).toHaveLength(1))
+
+    expect(screen.queryByText(/found/)).not.toBeInTheDocument()
+  })
+
+  it('loads the page after an empty one and counts its transfers', async () => {
+    serveTransfers([], transfers.slice(0, 3))
+    renderTransfersOnly()
+    await waitFor(() => expect(sentinelObservers).toHaveLength(1))
+
+    scrollToTheEnd()
+
+    expect(await screen.findByText('3 outgoing transfers found')).toBeInTheDocument()
+    expect(screen.getAllByTestId('transaction-item')).toHaveLength(3)
+  })
+
+  it('reports 0 transfers only after the last page comes back empty', async () => {
+    serveTransfers([], [])
+    renderTransfersOnly()
+    await waitFor(() => expect(sentinelObservers).toHaveLength(1))
+
+    scrollToTheEnd()
+
+    expect(await screen.findByText('0 outgoing transfers found')).toBeInTheDocument()
+  })
+})
