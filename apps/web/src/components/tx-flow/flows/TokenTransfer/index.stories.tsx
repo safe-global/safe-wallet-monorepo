@@ -64,5 +64,7 @@ export const FilledWithMaxEther: Story = {
     const next = await canvas.findByRole('button', { name: 'Next' })
     await waitFor(() => expect(next).toBeEnabled())
     await canvas.findByText('New recipient')
+    // Safe Shield keeps its skeleton row for 500ms after the first result
+    await waitFor(() => expect(canvasElement.querySelector('[data-slot="skeleton"]')).toBeNull())
   },
 }
