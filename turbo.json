@@ -22,7 +22,8 @@
         "eslint.config.{js,mjs,cjs,ts}",
         "eslint-suppressions.json",
         ".eslintrc*",
-        "package.json"
+        "package.json",
+        "$TURBO_ROOT$/packages/ui/eslint/**"
       ],
       "outputs": [],
       "outputLogs": "new-only"

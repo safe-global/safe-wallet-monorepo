@@ -82,8 +82,8 @@ jobs:
       - name: Run ESLint (push only)
         if: github.event_name == 'push'
         run: yarn turbo run lint --filter=@safe-global/web
-      - name: Run ESLint (packages/views)
-        run: yarn turbo run lint --filter=@safe-global/views
+      - name: Run ESLint (packages/views, packages/ui)
+        run: yarn turbo run lint --filter=@safe-global/views --filter=@safe-global/ui
 
   prettier:
     needs: changes

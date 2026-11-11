@@ -1,2 +1,3 @@
 /* Tailwind source for Storybook story files — excluded from production build */
 @source '../../../packages/views/src/components/ui/stories';
+@source '../../../packages/ui/src/components/stories';
