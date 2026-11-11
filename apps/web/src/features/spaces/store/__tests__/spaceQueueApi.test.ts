@@ -7,7 +7,7 @@ import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import type { SpaceQueuedItemPage, TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { TransactionListItemType } from '@safe-global/store/gateway/types'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
-import { toSpaceQueue, useSpaceQueue } from '../spaceQueueApi'
+import { toSpaceQueue, useSpaceQueue, type SpaceQueueFilters } from '../spaceQueueApi'
 
 const spaceId = faker.string.uuid()
 const queueUrl = `${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`
@@ -69,9 +69,11 @@ describe('toSpaceQueue', () => {
         },
         { safeAddress: safeB, chains: [{ chainId: '1', items: safeBItems }] },
       ],
+      counts: zeroCounts,
       shownCount: 4,
       totalCount: 4,
       isComplete: true,
+      unavailableSafes: [],
     })
   })
 
@@ -104,10 +106,43 @@ describe('toSpaceQueue', () => {
       isComplete: true,
     })
   })
+
+  it('passes the unavailable Safes through', () => {
+    const unavailableSafes = [{ chainId: '1', safeAddress: safeB }]
+
+    const queue = toSpaceQueue(page({ [safeA]: { '1': transactions(1) } }, { count: 1, unavailableSafes }))
+
+    expect(queue.unavailableSafes).toEqual(unavailableSafes)
+  })
+
+  it('passes the counts through', () => {
+    const counts = { ...zeroCounts, total: 2, sign: 2, safes: [{ chainId: '1', safeAddress: safeA, count: 2 }] }
+
+    expect(toSpaceQueue(page({ [safeA]: { '1': transactions(2) } }, { count: 2, counts })).counts).toEqual(counts)
+  })
 })
+
+/** Answers with the given body, recording every request URL. */
+const respondWith = (body: SpaceQueuedItemPage) => {
+  const urls: URL[] = []
+  server.use(
+    http.get(queueUrl, ({ request }) => {
+      urls.push(new URL(request.url))
+      return HttpResponse.json(body)
+    }),
+  )
+  return urls
+}
+
+const fetchQueue = async (filters?: SpaceQueueFilters) => {
+  const { result } = renderHook(() => useSpaceQueue(spaceId, filters))
+  await waitFor(() => expect(result.current.queue).toBeDefined())
+  return result.current
+}
 
 describe('useSpaceQueue', () => {
   const safeA = faker.finance.ethereumAddress()
+  const safeB = faker.finance.ethereumAddress()
 
   beforeEach(() => setBaseUrl(GATEWAY_URL))
 
@@ -136,5 +171,62 @@ describe('useSpaceQueue', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true))
     expect(result.current.queue).toBeUndefined()
+  })
+
+  it('returns the counts of the answer', async () => {
+    const counts = { ...zeroCounts, total: 1, sign: 1 }
+    respondWith(page({ [safeA]: { '1': transactions(1) } }, { count: 1, counts }))
+
+    const result = await fetchQueue()
+
+    expect(result.counts).toEqual(counts)
+  })
+
+  it('sends the statuses, the flags, the Safes, the networks and the signers of the filters as query params', async () => {
+    const urls = respondWith(page({}, { count: 0 }))
+    const safes = [
+      { chainId: '1', safeAddress: safeA },
+      { chainId: '100', safeAddress: safeB },
+    ]
+
+    await fetchQueue({
+      statuses: ['sign', 'conflicting', 'execute', 'stale'],
+      safes,
+      chainIds: ['1', '137'],
+      signers: [safeA, safeB],
+    })
+
+    expect(Object.fromEntries(urls[0].searchParams)).toEqual({
+      status: 'sign,execute',
+      conflicting: 'true',
+      stale: 'true',
+      safes: `1:${safeA},100:${safeB}`,
+      chainIds: '1,137',
+      signers: `${safeA},${safeB}`,
+    })
+  })
+
+  it('sends only the params of the filters in use', async () => {
+    const urls = respondWith(page({}, { count: 0 }))
+
+    await fetchQueue({ statuses: ['conflicting'], safes: [], chainIds: [], signers: [] })
+
+    expect(Object.fromEntries(urls[0].searchParams)).toEqual({ conflicting: 'true' })
+  })
+
+  it('sends no params when no filter is chosen', async () => {
+    const urls = respondWith(page({}, { count: 0 }))
+
+    await fetchQueue({ statuses: [], safes: [], chainIds: [], signers: [] })
+
+    expect(urls[0].search).toBe('')
+  })
+
+  it('does not flag a filtered queue as incomplete for holding fewer transactions than the count', async () => {
+    respondWith(page({ [safeA]: { '1': transactions(1) } }, { count: 10 }))
+
+    const { queue } = await fetchQueue({ statuses: ['sign'], safes: [], chainIds: [], signers: [] })
+
+    expect(queue?.isComplete).toBe(true)
   })
 })

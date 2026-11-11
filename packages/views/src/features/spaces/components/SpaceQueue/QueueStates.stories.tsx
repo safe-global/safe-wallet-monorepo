@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
 import SkeletonTxList from '@safe-global/views/components/common/PaginatedTxns/SkeletonTxList'
-import { QueueEmpty, QueueLoadError, QueueTruncatedNotice } from './QueueStates'
+import { QueueEmpty, QueueLoadError, QueueNoMatches, QueueTruncatedNotice } from './QueueStates'
 
 const meta = {
   title: 'Features/Spaces/SpaceQueue/QueueStates',
@@ -17,6 +17,10 @@ export const Loading: Story = {
 
 export const Empty: Story = {
   render: () => <QueueEmpty />,
+}
+
+export const NoMatches: Story = {
+  render: () => <QueueNoMatches onClear={fn()} />,
 }
 
 export const LoadError: Story = {
