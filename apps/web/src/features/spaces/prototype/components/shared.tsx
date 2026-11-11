@@ -14,6 +14,9 @@ import {
   Layers,
   Split,
   CalendarClock,
+  Coins,
+  Download,
+  LogOut,
   type LucideIcon,
   Info,
 } from 'lucide-react'
@@ -72,6 +75,9 @@ export const TYPE_ICONS: Record<TypeLabel, LucideIcon> = {
   Settings,
   Nested: Network,
   'On-chain rejection': CircleX,
+  Stake: Coins,
+  'Withdraw request': LogOut,
+  Claim: Download,
 }
 
 // Recoveries are not proposals. They have their own Type filter label.

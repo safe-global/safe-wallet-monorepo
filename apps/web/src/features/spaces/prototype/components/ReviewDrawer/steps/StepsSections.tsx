@@ -50,6 +50,7 @@ const SECTION_TITLES: Record<Proposal['kind']['type'], string> = {
   settings: 'Settings',
   nested: 'Nested Safe approval',
   rejection: 'On-chain rejection',
+  staking: 'Staking',
 }
 
 // Earlier nonces this transaction waits on, at most 10.

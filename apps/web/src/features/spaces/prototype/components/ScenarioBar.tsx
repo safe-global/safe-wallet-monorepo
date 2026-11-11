@@ -32,6 +32,8 @@ export const STATES: { value: QueueState; label: string }[] = [
   { value: 'empty', label: 'Empty workspace' },
   { value: 'partial', label: 'Partial loading' },
   { value: 'executing', label: 'Executing' },
+  { value: 'capped', label: 'Over 500 transactions' },
+  { value: 'incoming', label: 'New proposal arrives' },
 ]
 export const DEFAULT_SCENARIO: Scenario = '5-safes'
 // Links from before the split keep working: removed scenarios open the closest size or state.
@@ -130,6 +132,8 @@ const FAILED_LABELS = {
   '5': '5 Safes failed',
   all: 'All Safes failed',
 }
+export type LoadReason = 'error' | 'limit'
+const LOAD_REASONS: Record<LoadReason, string> = { error: "Couldn't load", limit: 'Over the 100-Safe limit' }
 const WARNING_STYLES = { chip: 'Toolbar chip', each: 'One warning per Safe', summary: 'One summary' }
 export const UNDEPLOYED_COUNTS = [0, 1, 2] as const
 const UNDEPLOYED_LABELS = { '0': 'All deployed', '1': '1 not deployed', '2': '2 not deployed' }
@@ -145,11 +149,13 @@ export function ScenarioBar({
   pageSize,
   signLabel,
   failedCount,
+  loadReason,
   warningStyle,
   undeployedCount,
   onChange,
 }: {
   failedCount: number
+  loadReason: LoadReason
   warningStyle: 'chip' | 'each' | 'summary'
   undeployedCount: number
   milestone1: boolean
@@ -252,6 +258,22 @@ export function ScenarioBar({
               </SelectTrigger>
               <SelectContent className="w-auto min-w-(--anchor-width)">
                 {Object.entries(FAILED_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={loadReason}
+              items={LOAD_REASONS}
+              onValueChange={(value) => value && onChange({ reason: value })}
+            >
+              <SelectTrigger size="sm" variant="ghost" aria-label="Why Safes didn't load">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="w-auto min-w-(--anchor-width)">
+                {Object.entries(LOAD_REASONS).map(([value, label]) => (
                   <SelectItem key={value} value={value}>
                     {label}
                   </SelectItem>

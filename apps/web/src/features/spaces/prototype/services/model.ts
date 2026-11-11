@@ -893,7 +893,10 @@ export const getState = (tx: Proposal, persona: Persona = 'owner') => {
   const confirmations = tx.signers.filter((name) => account.owners.includes(name))
   const missing = Math.max(0, account.threshold - confirmations.length)
   const waiting = tx.nonce > account.nextNonce
+  // Production shows an expired order as Expired, with no Sign or Execute.
+  const expired = tx.kind.type === 'swap' && !!tx.kind.expired
   const canSign =
+    !expired &&
     tx.nonce >= account.nextNonce &&
     isSignerOf(account, persona) &&
     tx.eligible &&
@@ -903,7 +906,8 @@ export const getState = (tx: Proposal, persona: Persona = 'owner') => {
     missing,
     waiting,
     canSign,
-    ready: missing === 0 && tx.nonce === account.nextNonce,
+    expired,
+    ready: !expired && missing === 0 && tx.nonce === account.nextNonce,
     finalSignature: canSign && missing === 1 && tx.nonce === account.nextNonce,
   }
 }
@@ -1023,6 +1027,56 @@ const VARIATIONS: MixTemplate[] = [
     kind: { type: 'settings', change: { kind: 'removeOwner', owner: 'Max' } },
     age: '4h ago',
     signers: [],
+  },
+  // Types the gateway sends that the mixes above lack, worded as production does.
+  {
+    recipient: 'Kiln · 0x4f1d…a907',
+    amount: '64 ETH',
+    kind: { type: 'staking', action: 'stake', validators: 2 },
+    age: '2h ago',
+    signers: ['Ana'],
+  },
+  {
+    recipient: 'Kiln · 0x4f1d…a907',
+    amount: '',
+    kind: { type: 'staking', action: 'withdrawRequest', validators: 3 },
+    age: '5h ago',
+    signers: ['Ana'],
+  },
+  {
+    recipient: 'Kiln · 0x4f1d…a907',
+    amount: '32.4 ETH',
+    kind: { type: 'staking', action: 'claim' },
+    age: '1d ago',
+    signers: ['Ana'],
+  },
+  {
+    recipient: 'Lena · 0x5a2e…c13b',
+    amount: '',
+    kind: { type: 'settings', change: { kind: 'swapOwner', oldOwner: 'Max', newOwner: 'Lena' } },
+    age: '7h ago',
+    signers: ['Ana'],
+  },
+  {
+    recipient: 'AllowanceModule · 0x6a09…b1c4',
+    amount: '',
+    kind: { type: 'settings', change: { kind: 'disableModule', module: 'AllowanceModule' } },
+    age: '9h ago',
+    signers: ['Ana'],
+  },
+  {
+    recipient: 'This Safe account',
+    amount: '',
+    kind: { type: 'settings', change: { kind: 'removeGuard' } },
+    age: '1d ago',
+    signers: ['Ana'],
+  },
+  {
+    recipient: 'Unverified contract · 0x2c7e…f04d',
+    amount: '',
+    kind: { type: 'contract', contract: 'Unverified contract', method: '', verified: false },
+    age: '50m ago',
+    signers: ['Ana'],
   },
 ]
 const withMix = (items: Proposal[], scenarioAccounts: Account[]): Proposal[] => {
@@ -1174,8 +1228,9 @@ export const getRowState = (
   tx: Proposal,
   persona: Persona,
 ): { label: string; tone: 'success' | 'warning' | 'secondary' } => {
-  const { missing, waiting, canSign } = getState(tx, persona)
+  const { missing, waiting, canSign, expired } = getState(tx, persona)
   const { nextNonce } = getAccount(tx)
+  if (expired) return { label: 'Expired', tone: 'secondary' }
   if (missing === 0)
     return waiting ? { label: `Blocked by #${nextNonce}`, tone: 'warning' } : { label: 'Ready', tone: 'success' }
   // Green whenever it's on you.
@@ -1233,6 +1288,7 @@ export const getSecondaryActions = (tx: Proposal, persona: Persona): RowSecondar
   isSignerOf(getAccount(tx), persona) ? ['replace', 'reject'] : []
 export const getStatusLabel = (tx: Proposal, persona: Persona) => {
   const state = getState(tx, persona)
+  if (state.expired) return 'Expired'
   if (state.ready) return 'Ready to execute'
   if (state.waiting) return `Blocked by #${getAccount(tx).nextNonce}`
   if (state.canSign) return 'Ready to sign'
@@ -1253,6 +1309,8 @@ export const getCounterparty = (tx: Proposal): { label: string; value: string } 
       return { label: 'To', value: getDestinationLabel(kind) }
     case 'nested':
       return { label: 'Parent Safe', value: kind.parentSafe }
+    case 'staking':
+      return { label: 'Protocol', value: 'Kiln' }
     default:
       return undefined
   }
@@ -1267,21 +1325,27 @@ export const TYPE_LABELS = [
   'Settings',
   'Nested',
   'On-chain rejection',
+  'Stake',
+  'Withdraw request',
+  'Claim',
 ] as const
 export type TypeLabel = (typeof TYPE_LABELS)[number]
+const STAKING_LABELS = { stake: 'Stake', withdrawRequest: 'Withdraw request', claim: 'Claim' } as const
 export const getTypeLabel = (tx: Proposal): TypeLabel =>
-  (
-    ({
-      transfer: 'Send',
-      swap: 'Swap',
-      bridge: 'Bridge',
-      batch: 'Batch',
-      contract: 'Contract',
-      settings: 'Settings',
-      nested: 'Nested',
-      rejection: 'On-chain rejection',
-    }) as const
-  )[tx.kind.type]
+  tx.kind.type === 'staking'
+    ? STAKING_LABELS[tx.kind.action]
+    : (
+        {
+          transfer: 'Send',
+          swap: 'Swap',
+          bridge: 'Bridge',
+          batch: 'Batch',
+          contract: 'Contract',
+          settings: 'Settings',
+          nested: 'Nested',
+          rejection: 'On-chain rejection',
+        } as const
+      )[tx.kind.type]
 const describeChange = (change: SettingsChange, completed: boolean) => {
   const verb = (present: string, past: string) => (completed ? past : present)
   switch (change.kind) {
@@ -1289,12 +1353,18 @@ const describeChange = (change: SettingsChange, completed: boolean) => {
       return `${verb('Add', 'Added')} signer ${change.owner}`
     case 'removeOwner':
       return `${verb('Remove', 'Removed')} signer ${change.owner}`
+    case 'swapOwner':
+      return `${verb('Replace', 'Replaced')} signer ${change.oldOwner} with ${change.newOwner}`
     case 'changeThreshold':
       return `${verb('Change', 'Changed')} threshold to ${change.threshold}`
     case 'enableModule':
       return `${verb('Enable', 'Enabled')} module ${change.module}`
+    case 'disableModule':
+      return `${verb('Disable', 'Disabled')} module ${change.module}`
     case 'setGuard':
       return `Set guard ${change.guard}`
+    case 'removeGuard':
+      return `${verb('Remove', 'Removed')} guard`
     case 'setFallbackHandler':
       return `Set fallback handler ${change.handler}`
     case 'updateVersion':
@@ -1314,7 +1384,13 @@ export const getTransactionLabel = (tx: Proposal, completed = false) => {
     case 'batch':
       return `Batch · ${kind.actions.length} actions`
     case 'contract':
-      return `${verb('Call', 'Called')} ${kind.method} on ${kind.contract}`
+      return `${verb('Call', 'Called')} ${kind.method || 'an unknown method'} on ${kind.contract}`
+    case 'staking':
+      return kind.action === 'stake'
+        ? `${verb('Stake', 'Staked')} ${tx.amount} via Kiln`
+        : kind.action === 'withdrawRequest'
+          ? `${verb('Request', 'Requested')} withdrawal of ${validatorCount(kind.validators)}`
+          : `${verb('Claim', 'Claimed')} ${tx.amount} from Kiln`
     case 'swap':
       return `${verb('Swap', 'Swapped')} ${getToken(kind.sell)} → ${getToken(kind.buy)}`
     case 'bridge':
@@ -1331,18 +1407,25 @@ const describeChangeShort = (change: SettingsChange, threshold: number) => {
       return `New signer: ${change.owner}`
     case 'removeOwner':
       return `Remove signer: ${change.owner}`
+    case 'swapOwner':
+      return `Replace signer: ${change.oldOwner} → ${change.newOwner}`
     case 'changeThreshold':
       return `Threshold ${threshold} → ${change.threshold}`
     case 'enableModule':
       return `Enable module: ${change.module}`
+    case 'disableModule':
+      return `Disable module: ${change.module}`
     case 'setGuard':
       return `Set guard: ${change.guard}`
+    case 'removeGuard':
+      return 'Remove guard'
     case 'setFallbackHandler':
       return `Fallback handler: ${change.handler}`
     case 'updateVersion':
       return `Safe version ${change.from} → ${change.to}`
   }
 }
+export const validatorCount = (count = 1) => `${count} validator${count === 1 ? '' : 's'}`
 export const getAmountLabel = (tx: Proposal) => {
   const { kind } = tx
   switch (kind.type) {
@@ -1353,7 +1436,9 @@ export const getAmountLabel = (tx: Proposal) => {
     case 'batch':
       return [`${kind.actions.length} actions`, tx.amount, tx.fiat].filter(Boolean).join(' · ')
     case 'contract':
-      return `${kind.method} · ${kind.contract}`
+      return `${kind.method || 'Unknown method'} · ${kind.contract}`
+    case 'staking':
+      return kind.action === 'withdrawRequest' ? validatorCount(kind.validators) : `${tx.amount} · Kiln`
     case 'swap':
       return `${kind.sell} → ${kind.buy}${kind.order === 'limit' ? ' · Limit' : kind.order === 'twap' ? ' · TWAP' : ''}`
     case 'bridge':
@@ -1415,6 +1500,8 @@ export const getExecutionReason = (tx: Proposal, persona: Persona, items: Propos
     ? ` Executing it cancels ${competing} competing ${competing === 1 ? 'proposal' : 'proposals'}.`
     : ''
   const more = `${state.missing} more ${state.missing === 1 ? 'signature' : 'signatures'}`
+  if (state.expired)
+    return 'The order expired, so there is nothing to execute. Reject it or delete it to free the nonce.'
   if (state.ready) return `All signatures are in and #${tx.nonce} is next, so it can execute now.${replaces}`
   if (state.waiting)
     return `Blocked by #${nextNonce}. Earlier transactions must execute first.${state.canSign ? ' You can still sign now.' : ''}`
@@ -1444,6 +1531,7 @@ export const getStepsStatus = (tx: Proposal, persona: Persona) => {
   const status = getPrimaryStatus(tx, persona)
   const { nextNonce } = getAccount(tx)
   const signAhead = status === 'sign' && getState(tx, persona).waiting
+  if (getState(tx, persona).expired) return { label: 'Expired', tone: 'warning' as const, after: undefined }
   const labels: Record<Filter, string> = {
     ready: 'Execute',
     // Your signature counts now, but it executes after an earlier nonce. The review drawer says the same.

@@ -322,6 +322,8 @@ function QueueSearch({ filters }: Pick<QueueFiltersProps, 'filters'>) {
         type="search"
         aria-label="Find a proposal"
         placeholder="Search Safes, networks, status, and signers…"
+        // Production caps the search at 100 characters
+        maxLength={100}
         className="[&::-webkit-search-cancel-button]:hidden"
         value={filters.search}
         onChange={(event) => filters.setSearch(event.target.value)}

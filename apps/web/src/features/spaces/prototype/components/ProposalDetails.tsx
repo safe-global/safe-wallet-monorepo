@@ -26,6 +26,7 @@ import {
   getToken,
   getTransactionLabel,
   shortAddress,
+  validatorCount,
 } from '../services/model'
 import { getYou, isYou } from '../services/personas'
 import type { BatchAction, Persona, Proposal } from '../types'
@@ -187,6 +188,13 @@ export const getDetailItems = (proposal: Proposal, extended = false): { label: s
         },
         { label: 'Nested transaction', content: `#${kind.parentNonce} on ${kind.parentSafe}` },
         ...addressItem,
+      ]
+    case 'staking':
+      return [
+        { label: 'Provider', content: 'Kiln' },
+        kind.action === 'withdrawRequest'
+          ? { label: 'Validators', content: validatorCount(kind.validators) }
+          : { label: kind.action === 'stake' ? 'Stake' : 'Claim', content: amount },
       ]
     case 'rejection':
       return [

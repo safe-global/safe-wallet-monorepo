@@ -1,6 +1,6 @@
 import { getAccount, getScenario, getScenarioAccounts, getState, knownAccounts } from './model'
 import type { Account, Persona, Proposal, QueueState, Scenario } from '../types'
-import { getYou, isSignerOf } from './personas'
+import { getYou, isSignerOf, isYou } from './personas'
 
 export type PreviewQueue = {
   items: Proposal[]
@@ -67,6 +67,30 @@ export const applyQueueState = (
       eligible: true,
     },
   ]
+}
+
+// Over 500 transactions: the gateway returns the first 500 in nonce order and the size of the whole queue.
+export const CAPPED_EXTRA = 120
+
+// New proposal arrives: what production's 15-second refresh brings in. Someone else proposed it, and it needs you.
+export const getIncomingProposal = (items: Proposal[], persona: Persona): Proposal | undefined => {
+  const base = knownAccounts.find(
+    (account) => account.threshold > 1 && isSignerOf(account, persona) && items.some((tx) => tx.account === account.id),
+  )
+  if (!base) return undefined
+  const safeItems = items.filter((tx) => tx.account === base.id)
+  const { nextNonce } = getAccount(safeItems[0])
+  return {
+    id: `${base.id}-incoming`,
+    account: base.id,
+    nonce: Math.max(nextNonce - 1, ...safeItems.map((tx) => tx.nonce)) + 1,
+    recipient: 'Northwind · 0x2b9c…71e0',
+    amount: '12,500 USDC',
+    kind: { type: 'transfer' },
+    age: 'Just now',
+    signers: [base.owners.find((owner) => !isYou(owner, persona)) ?? base.owners[0]],
+    eligible: true,
+  }
 }
 
 export const createPreviewQueue = (
@@ -147,7 +171,7 @@ export function getBulkExecutable(items: Proposal[]): BulkBatch[] {
     let blocked: BulkBatch['blocked']
     for (let nonce = account.nextNonce; proposals.length < BULK_EXECUTE_LIMIT; nonce++) {
       const atNonce = safeItems.filter((tx) => tx.nonce === nonce)
-      if (!atNonce.some((tx) => getState(tx).missing === 0)) break
+      if (!atNonce.some((tx) => getState(tx).missing === 0 && !getState(tx).expired)) break
       if (atNonce.length > 1) {
         blocked = { nonce, competing: atNonce.length }
         break

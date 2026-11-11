@@ -8,6 +8,7 @@ import {
   getTransactionLabel,
   shortAddress,
   type TypeLabel,
+  validatorCount,
 } from './model'
 
 // Transaction and With columns: what a proposal does, and what it changes.
@@ -24,7 +25,9 @@ export const getHeadline = (tx: Proposal) => {
     case 'batch':
       return `Batch · ${kind.actions.length} actions`
     case 'contract':
-      return `Call ${kind.method}`
+      return `Call ${kind.method || 'unknown method'}`
+    case 'staking':
+      return getTransactionLabel(tx)
     case 'nested':
       return `Approve #${kind.parentNonce}`
     case 'rejection':
@@ -47,9 +50,13 @@ export const getSummary = (tx: Proposal) => {
     case 'batch':
       return `${kind.actions.length} actions`
     case 'contract':
-      return kind.method
+      // The gateway leaves the method out when it can't decode the call data
+      return kind.method || 'Unknown method'
+    case 'staking':
+      return kind.action === 'withdrawRequest' ? validatorCount(kind.validators) : tx.amount
+    // The list response doesn't carry the parent transaction's nonce, only its hash. The drawer shows it.
     case 'nested':
-      return `Approves #${kind.parentNonce}`
+      return 'Approves a transaction'
     case 'rejection':
       return `Cancels #${tx.nonce}`
     case 'settings':
@@ -81,7 +88,13 @@ export const getSummaryHint = (tx: Proposal) => {
         .filter(Boolean)
         .join(' · ')
     case 'nested':
-      return `Signs #${kind.parentNonce} on ${kind.parentSafe}, a Safe this one is a signer of`
+      return `Signs a transaction on ${kind.parentSafe}, a Safe this one is a signer of`
+    case 'staking':
+      return kind.action === 'stake'
+        ? [`Deposits into ${validatorCount(kind.validators)} with Kiln`, getFiat(tx)].filter(Boolean).join(' · ')
+        : kind.action === 'withdrawRequest'
+          ? 'Asks Kiln to exit these validators. You claim the ETH once they have exited.'
+          : [`Claims exited stake from Kiln`, getFiat(tx)].filter(Boolean).join(' · ')
     case 'rejection':
       return `An empty transaction at #${tx.nonce}. Executing it cancels everything else at this nonce.`
     case 'settings':
@@ -92,6 +105,8 @@ export const getSummaryHint = (tx: Proposal) => {
           return `Threshold ${threshold} of ${owners.length - 1}`
         case 'changeThreshold':
           return `${threshold} → ${kind.change.threshold} of ${owners.length}`
+        case 'swapOwner':
+          return `Threshold stays ${threshold} of ${owners.length}`
         default:
           return 'Changes who controls funds'
       }
@@ -124,7 +139,11 @@ export const getFiat = (tx: Proposal) => {
 
 // Between the summary and the other party, so the line reads as a sentence.
 export const getCounterpartyJoin = (tx: Proposal) =>
-  tx.kind.type === 'transfer' ? 'to' : tx.kind.type === 'bridge' || tx.kind.type === 'batch' ? 'via' : 'on'
+  tx.kind.type === 'transfer'
+    ? 'to'
+    : tx.kind.type === 'bridge' || tx.kind.type === 'batch' || tx.kind.type === 'staking'
+      ? 'via'
+      : 'on'
 
 export type Counterparty = {
   name: string
@@ -152,18 +171,22 @@ export const getCounterpartyCell = (tx: Proposal): Counterparty => {
     detail,
     address: recipientAddress?.startsWith('0x') ? fullAddress(recipientAddress) : undefined,
   })
+  const protocol = (name: string, detail: string) => ({ name, avatar: getSignerIdentity(name).address, detail })
   switch (kind.type) {
     case 'settings':
     case 'rejection':
       return self
     case 'transfer':
       return kind.toSelf ? self : named(getRecipientName(tx))
+    // Production names the protocol: the gateway only gives these types to CoW Protocol, LI.FI and Kiln calls
     case 'swap':
-      return named(getRecipientName(tx), 'Swap protocol')
+      return protocol('CoW Protocol', 'Swap protocol')
     case 'bridge':
       return kind.destination
-        ? named(getRecipientName(tx), `To ${kind.destination}`)
-        : { ...named(getRecipientName(tx), 'To an unknown network'), tone: 'warning' }
+        ? protocol('LI.FI', `To ${kind.destination}`)
+        : { ...protocol('LI.FI', 'To an unknown network'), tone: 'warning' }
+    case 'staking':
+      return protocol('Kiln', 'Staking provider')
     case 'contract':
       return {
         ...named(kind.contract, kind.verified ? 'Verified contract' : 'Unverified contract'),
@@ -198,6 +221,9 @@ export const TYPE_HINTS: Record<TypeLabel, string> = {
   Settings: 'Changes this Safe’s settings, such as its signers or threshold.',
   Nested: 'Approves a transaction on another Safe that this Safe co-owns.',
   'On-chain rejection': 'Cancels the proposal at this nonce by replacing it.',
+  Stake: 'Stakes ETH with Kiln, in 32 ETH validators.',
+  'Withdraw request': 'Asks Kiln to exit validators, so their ETH can be claimed.',
+  Claim: 'Claims ETH from validators that have exited.',
 }
 
 // Fixtures name every recipient, so this lists the ones treated as not in the address book.

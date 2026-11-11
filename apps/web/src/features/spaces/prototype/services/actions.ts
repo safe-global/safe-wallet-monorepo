@@ -68,6 +68,9 @@ export const getPrimaryAction = (
   surface: 'row' | 'drawer' = 'drawer',
 ): PrimaryAction => {
   const state = getState(tx, persona)
+  // Production drops Sign and Execute on an expired order. Reject or Delete in the menu frees its nonce.
+  if (state.expired)
+    return { kind: 'review', label: 'Review', hint: 'This order expired. Reject or delete it to free the nonce.' }
   if (state.ready) return { kind: 'flow', label: 'Execute', flow: 'execute' }
   // Only one conflicting option can execute. The row asks you to review before you sign a second one.
   const you = getYou(persona)

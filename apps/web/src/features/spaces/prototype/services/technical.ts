@@ -45,6 +45,9 @@ export const getTechnicalData = (tx: Proposal) => {
 const SETTINGS_METHODS: Record<string, string> = {
   addOwner: 'addOwnerWithThreshold',
   removeOwner: 'removeOwner',
+  swapOwner: 'swapOwner',
+  disableModule: 'disableModule',
+  removeGuard: 'setGuard',
   changeThreshold: 'changeThreshold',
   enableModule: 'enableModule',
   setGuard: 'setGuard',
@@ -70,6 +73,12 @@ export const getMethodName = (tx: Proposal): string | undefined => {
       return SETTINGS_METHODS[kind.change.kind]
     case 'nested':
       return 'approveHash'
+    case 'staking':
+      return kind.action === 'stake'
+        ? 'deposit'
+        : kind.action === 'withdrawRequest'
+          ? 'requestValidatorsExit'
+          : 'batchWithdrawCLFee'
     case 'rejection':
       return undefined
   }

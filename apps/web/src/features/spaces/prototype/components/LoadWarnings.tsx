@@ -133,7 +133,7 @@ export function LoadWarnings({ failed, total, retrying, onRetry, style }: LoadWa
 const nameOf = (account: Account) => account.safeName ?? account.name
 
 // One line per Safe: the same tag as the table (icon, name, network), then Reload. The tag's tooltip has the address.
-const SafeLine = ({ account, loading, onReload }: { account: Account; loading: boolean; onReload: () => void }) => (
+const SafeLine = ({ account, loading, onReload }: { account: Account; loading: boolean; onReload?: () => void }) => (
   <li className="flex min-w-0 items-center gap-2 whitespace-nowrap">
     <CopyableParty
       name={nameOf(account)}
@@ -141,17 +141,19 @@ const SafeLine = ({ account, loading, onReload }: { account: Account; loading: b
       network={{ chainId: account.chainId, name: account.network }}
       tag
     />
-    <Button
-      size="2xs"
-      variant="ghost"
-      className="ml-auto"
-      disabled={loading}
-      onClick={onReload}
-      aria-label={`Reload ${nameOf(account)} on ${account.network}`}
-    >
-      {loading ? <Spinner className="size-3" /> : <RefreshCw />}
-      {loading ? 'Loading…' : 'Reload'}
-    </Button>
+    {onReload && (
+      <Button
+        size="2xs"
+        variant="ghost"
+        className="ml-auto"
+        disabled={loading}
+        onClick={onReload}
+        aria-label={`Reload ${nameOf(account)} on ${account.network}`}
+      >
+        {loading ? <Spinner className="size-3" /> : <RefreshCw />}
+        {loading ? 'Loading…' : 'Reload'}
+      </Button>
+    )}
   </li>
 )
 
@@ -161,14 +163,23 @@ type LoadStatusProps = {
   onRetry: (ids: string[]) => void
 }
 
-const SafeList = ({ failed, retrying, onRetry, className }: LoadStatusProps & { className?: string }) => (
+// Production: one queue request covers up to 100 Safes, so the rest are left out and Reload can't help.
+const OVER_LIMIT = 'The pending queue covers up to 100 Safe accounts, so these aren’t included.'
+
+const SafeList = ({
+  failed,
+  retrying,
+  onRetry,
+  className,
+  overLimit = false,
+}: LoadStatusProps & { className?: string; overLimit?: boolean }) => (
   <ul aria-label="Safes that didn’t load" className={`flex flex-col gap-1.5 ${className ?? ''}`}>
     {failed.map((account) => (
       <SafeLine
         key={account.id}
         account={account}
         loading={retrying.includes(account.id)}
-        onReload={() => onRetry([account.id])}
+        onReload={overLimit ? undefined : () => onRetry([account.id])}
       />
     ))}
   </ul>
@@ -176,7 +187,12 @@ const SafeList = ({ failed, retrying, onRetry, className }: LoadStatusProps & { 
 
 // Option E: a quiet chip in the page header, next to Hypernative. It names the Safes that didn't load, with Reload.
 // Safes that aren't deployed yet have nothing to load, so they never show here.
-export function LoadStatusChip({ failed, retrying, onRetry }: LoadStatusProps) {
+export function LoadStatusChip({
+  failed,
+  retrying,
+  onRetry,
+  overLimit = false,
+}: LoadStatusProps & { overLimit?: boolean }) {
   if (!failed.length) return null
   const loadingAll = failed.some((account) => retrying.includes(account.id))
   const label = `${failed.length} ${failed.length === 1 ? 'Safe' : 'Safes'} not loaded`
@@ -188,10 +204,12 @@ export function LoadStatusChip({ failed, retrying, onRetry }: LoadStatusProps) {
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 gap-0 p-0">
         <section aria-label={label} className="flex flex-col gap-3 p-4">
-          <p className="text-xs text-muted-foreground">Transactions aren’t shown in the table.</p>
-          <SafeList failed={failed} retrying={retrying} onRetry={onRetry} />
+          <p className="text-xs text-muted-foreground">
+            {overLimit ? OVER_LIMIT : 'Transactions aren’t shown in the table.'}
+          </p>
+          <SafeList failed={failed} retrying={retrying} onRetry={onRetry} overLimit={overLimit} />
         </section>
-        {failed.length > 1 && (
+        {failed.length > 1 && !overLimit && (
           <div className="border-t border-border p-3">
             <Button
               variant="outline"

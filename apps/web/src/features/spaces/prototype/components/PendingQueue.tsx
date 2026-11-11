@@ -41,6 +41,8 @@ import {
   ALL_FAILED,
   getFailedAccounts,
   getUndeployedAccounts,
+  CAPPED_EXTRA,
+  getIncomingProposal,
   proposePreviewAlternative,
   type PreviewAction,
 } from '../services/queue'
@@ -76,7 +78,7 @@ import {
 import { buildSections, rankAccounts } from './QueueTable/sections'
 import { ReviewDrawer, type Replacement, type SectionsMode } from './ReviewDrawer/ReviewDrawer'
 import { BulkExecuteDrawer } from './BulkExecuteDrawer'
-import { parseScenario, ScenarioBar, type Hypernative } from './ScenarioBar'
+import { parseScenario, ScenarioBar, type Hypernative, type LoadReason } from './ScenarioBar'
 import { useRecoveries } from './Recovery/RecoveryPanel'
 import { RecoveryDrawer } from './Recovery/RecoveryDrawer'
 import { QueueError, QueueSkeleton } from './QueueStates'
@@ -156,6 +158,8 @@ function PendingQueueView() {
       : router.query.option === 'cards'
         ? 'chip'
         : 'each'
+  // Why the Safes didn't load (`?reason=limit`): past the 100 Safes one queue request covers, Reload can't help.
+  const loadReason: LoadReason = router.query.reason === 'limit' ? 'limit' : 'error'
   const undeployedCount = UNDEPLOYED_COUNTS.find((count) => String(count) === router.query.undeployed) ?? 0
   const undeployedIds =
     state === 'partial'
@@ -247,6 +251,20 @@ function PendingQueueView() {
     setCollapsedSections(idleSafeIds())
   }
   const [feedback, setFeedback] = useState('')
+  // New proposal arrives: the refresh adds a transaction that needs you, and says so, as production's poll does.
+  useEffect(() => {
+    if (state !== 'incoming') return
+    const timer = setTimeout(() => {
+      setQueue((current) => {
+        const incoming = getIncomingProposal(current.items, persona)
+        return incoming && !current.items.some((tx) => tx.id === incoming.id)
+          ? { ...current, items: [...current.items, incoming] }
+          : current
+      })
+      setFeedback('A transaction requires your confirmation.')
+    }, 4000)
+    return () => clearTimeout(timer)
+  }, [state, persona])
   // Recoveries come with the 20 and 50 Safe mixes, on their first three Safes.
   const allRecoveries = useRecoveries({
     // Options C and D leave them out.
@@ -775,6 +793,7 @@ function PendingQueueView() {
                 {cards && warningStyle === 'chip' && !nothingLoaded && (
                   <LoadStatusChip
                     failed={accounts.filter((account) => failedIds.includes(account.id))}
+                    overLimit={loadReason === 'limit'}
                     retrying={retrying}
                     onRetry={retryLoad}
                   />
@@ -806,6 +825,12 @@ function PendingQueueView() {
             {feedback && !review && (
               <p role="status" className="mb-4 text-sm">
                 {feedback}
+              </p>
+            )}
+            {/* Over 500 transactions: only without filters, which ask the gateway for a narrower queue. */}
+            {state === 'capped' && filters.applied.length === 0 && !filters.search && (
+              <p className="mb-4 text-xs text-muted-foreground">
+                Showing {items.length} of {items.length + CAPPED_EXTRA} pending transactions.
               </p>
             )}
             <section aria-label="Queue">
@@ -1045,6 +1070,7 @@ function PendingQueueView() {
           pageSize={pageSize}
           signLabel={signLabel}
           failedCount={failedCount}
+          loadReason={loadReason}
           warningStyle={warningStyle}
           undeployedCount={undeployedCount}
           onChange={setOption}

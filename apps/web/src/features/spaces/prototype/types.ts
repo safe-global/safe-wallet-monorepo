@@ -2,7 +2,8 @@
 export type Scenario =
   '1-safe' | '5-safes' | '10-safes' | '20-safes' | '50-safes' | 'everyday' | 'realistic' | 'conflict' | 'conflict-heavy'
 // A moment layered on any scenario.
-export type QueueState = 'normal' | 'loading' | 'error' | 'empty' | 'partial' | 'executing'
+// `capped`: the gateway stopped reading past 500 transactions. `incoming`: a refresh brings in a new proposal.
+export type QueueState = 'normal' | 'loading' | 'error' | 'empty' | 'partial' | 'executing' | 'capped' | 'incoming'
 export type Direction = 'table' | 'fleet' | 'simple' | 'flat' | 'cards'
 export type Filter = 'sign' | 'ready' | 'waiting' | 'awaiting'
 export type Persona = 'owner' | 'single' | 'security' | 'member' | 'admin'
@@ -22,9 +23,12 @@ export type Account = {
 export type SettingsChange =
   | { kind: 'addOwner'; owner: string }
   | { kind: 'removeOwner'; owner: string }
+  | { kind: 'swapOwner'; oldOwner: string; newOwner: string }
   | { kind: 'changeThreshold'; threshold: number }
   | { kind: 'enableModule'; module: string }
+  | { kind: 'disableModule'; module: string }
   | { kind: 'setGuard'; guard: string }
+  | { kind: 'removeGuard' }
   | { kind: 'setFallbackHandler'; handler: string }
   | { kind: 'updateVersion'; from: string; to: string }
 export type BatchAction = { method: string; to: string; value?: string }
@@ -32,11 +36,14 @@ export type TransactionKind =
   | { type: 'transfer'; toSelf?: boolean }
   | { type: 'batch'; actions: BatchAction[]; delegateCall?: 'trusted' | 'untrusted' }
   // `logo` mirrors the contract info logoUri. Without one, the row shows the code icon.
+  // `method` is empty when the gateway can't decode the call data: the row reads "Unknown method".
   | { type: 'contract'; contract: string; method: string; verified: boolean; steps?: string[]; logo?: string }
   | { type: 'swap'; sell: string; buy: string; order: 'market' | 'limit' | 'twap'; expiry: string; expired?: boolean }
   | { type: 'bridge'; sell: string; destination?: string; destinationChainId: string; fees: string }
   | { type: 'settings'; change: SettingsChange }
   | { type: 'nested'; parentSafe: string; parentNonce: number }
+  // Native staking through Kiln, with production's names: Stake, Withdraw request, Claim.
+  | { type: 'staking'; action: 'stake' | 'withdrawRequest' | 'claim'; validators?: number }
   | { type: 'rejection' }
 export type Proposal = {
   id: string
