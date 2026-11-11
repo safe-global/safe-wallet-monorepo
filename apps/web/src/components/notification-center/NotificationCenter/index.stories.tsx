@@ -4,9 +4,8 @@ import { userEvent, within } from 'storybook/test'
 import type { NotificationState } from '@/store/notificationsSlice'
 import { createMockStory } from '@/stories/mocks'
 import NotificationCenter from './index'
-import { mockNow } from '@/stories/mocks/now'
 
-const now = mockNow()
+const now = Date.now()
 
 const notifications: NotificationState = [
   {

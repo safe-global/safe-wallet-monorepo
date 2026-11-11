@@ -7,7 +7,6 @@ import { PendingStatus, PendingTxType, type PendingProcessingTx } from '@/store/
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { safeFixtures } from '../../../../../../../config/test/msw/fixtures'
 import SpeedUpModal from './index'
-import { mockNow } from '@/stories/mocks/now'
 
 // SpeedUpModal renders its content only when the connected wallet is the
 // signer of the pending transaction, so the pending tx uses the first efSafe
@@ -19,7 +18,7 @@ const pendingTx: PendingProcessingTx = {
   safeAddress: safeFixtures.efSafe.address.value,
   nonce: 42,
   txHash: '0x4a8f9c2e6b1d3a5f7e9c0b2d4f6a8c1e3b5d7f9a0c2e4b6d8f0a1c3e5b7d9f1a',
-  submittedAt: mockNow() - 5 * 60 * 1000,
+  submittedAt: Date.now() - 5 * 60 * 1000,
   signerNonce: 7,
   signerAddress,
   gasLimit: '150000',

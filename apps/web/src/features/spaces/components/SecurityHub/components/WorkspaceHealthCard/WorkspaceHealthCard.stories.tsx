@@ -3,7 +3,6 @@ import WorkspaceHealthCard from './WorkspaceHealthCard'
 import { createMockStory } from '@/stories/mocks'
 import type { ScanResult } from '@/features/security/types'
 import type { SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
-import { mockNow } from '@/stories/mocks/now'
 
 const mkResult = (overrides: Partial<ScanResult> = {}): ScanResult => ({
   status: 'clear',
@@ -11,7 +10,7 @@ const mkResult = (overrides: Partial<ScanResult> = {}): ScanResult => ({
   score: 100,
   evidence: [],
   remediation: '',
-  lastChecked: new Date(mockNow()).toISOString(),
+  lastChecked: new Date().toISOString(),
   ...overrides,
 })
 
@@ -78,7 +77,7 @@ export const Healthy: Story = {
     isScanning: false,
     activeFilter: null,
     onFilterChange: () => {},
-    lastScannedAt: mockNow() - 120_000,
+    lastScannedAt: Date.now() - 120_000,
     onRescan: () => {},
   },
 }
@@ -94,7 +93,7 @@ export const MixedGrades: Story = {
     isScanning: false,
     activeFilter: null,
     onFilterChange: () => {},
-    lastScannedAt: mockNow() - 60_000,
+    lastScannedAt: Date.now() - 60_000,
     onRescan: () => {},
   },
 }
@@ -122,7 +121,7 @@ export const CriticalFilterActive: Story = {
     isScanning: false,
     activeFilter: 'critical',
     onFilterChange: () => {},
-    lastScannedAt: mockNow() - 60_000,
+    lastScannedAt: Date.now() - 60_000,
     onRescan: () => {},
   },
 }
