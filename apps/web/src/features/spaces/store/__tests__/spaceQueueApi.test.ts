@@ -208,4 +208,30 @@ describe('spaceQueueApi.getSpaceQueue', () => {
 
     expect(data?.isComplete).toBe(true)
   })
+
+  it('sends the search alone or with the filters', async () => {
+    const urls = respondWith(page({}, { count: 0 }))
+
+    await makeStore().dispatch(spaceQueueApi.endpoints.getSpaceQueue.initiate({ spaceId, search: 'treasury' }))
+    await makeStore().dispatch(
+      spaceQueueApi.endpoints.getSpaceQueue.initiate({
+        spaceId,
+        filters: { statuses: ['sign'], safes: [], chainIds: [], signers: [] },
+        search: 'polygon',
+      }),
+    )
+
+    expect(Object.fromEntries(urls[0].searchParams)).toEqual({ search: 'treasury' })
+    expect(Object.fromEntries(urls[1].searchParams)).toEqual({ status: 'sign', search: 'polygon' })
+  })
+
+  it('does not flag a searched queue as incomplete for holding fewer transactions than the count', async () => {
+    respondWith(page({ [safeA]: { '1': transactions(1) } }, { count: 10 }))
+
+    const { data } = await makeStore().dispatch(
+      spaceQueueApi.endpoints.getSpaceQueue.initiate({ spaceId, search: 'treasury' }),
+    )
+
+    expect(data?.isComplete).toBe(true)
+  })
 })
