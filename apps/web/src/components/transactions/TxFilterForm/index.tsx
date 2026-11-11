@@ -2,6 +2,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
 import { Label } from '@safe-global/views/components/ui/label'
+import { cn } from '@safe-global/views/utils/cn'
 import { Switch } from '@safe-global/views/components/ui/switch'
 import { Field, FieldContent, FieldDescription, FieldLabel } from '@safe-global/views/components/ui/field'
 import { isBefore, isAfter, startOfDay } from 'date-fns'
@@ -209,15 +210,66 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                     </div>
                   )}
 
-                  {!isModuleFilter && (
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      {!isTransfersOnly && (
+                  {isMultisigFilter && (
+                    <div className={css.paramField}>
+                      <AddressBookInput
+                        label="Recipient"
+                        name={TxFilterFormFieldNames.RECIPIENT}
+                        required={false}
+                        fullWidth
+                      />
+                    </div>
+                  )}
+
+                  {(isIncomingFilter || isTransfersOnly) && (
+                    <div className={css.paramField}>
+                      <AddressInput
+                        data-testid="token-input"
+                        label="Token address"
+                        name={TxFilterFormFieldNames.TOKEN_ADDRESS}
+                        required={false}
+                        fullWidth
+                      />
+                    </div>
+                  )}
+
+                  {!isModuleFilter && !isTransfersOnly && (
+                    <div className={cn('grid grid-cols-1 gap-4', isMultisigFilter && 'md:grid-cols-2')}>
+                      <div className={css.paramField}>
+                        <Controller
+                          name={TxFilterFormFieldNames.AMOUNT}
+                          control={control}
+                          rules={{
+                            validate: (val: TxFilterFormState[TxFilterFormFieldNames.AMOUNT]) => {
+                              if (val?.length > 0) {
+                                return validateAmount(val)
+                              }
+                            },
+                          }}
+                          render={({ field, fieldState }) => (
+                            <NumberField
+                              data-testid="amount-input"
+                              inputSize="hero"
+                              variant="surface"
+                              label={
+                                fieldState.error?.message ||
+                                (isIncomingFilter ? 'Amount' : `Amount (only ${chain?.nativeCurrency.symbol || 'ETH'})`)
+                              }
+                              error={!!fieldState.error}
+                              {...field}
+                              fullWidth
+                            />
+                          )}
+                        />
+                      </div>
+
+                      {isMultisigFilter && (
                         <div className={css.paramField}>
                           <Controller
-                            name={TxFilterFormFieldNames.AMOUNT}
+                            name={TxFilterFormFieldNames.NONCE}
                             control={control}
                             rules={{
-                              validate: (val: TxFilterFormState[TxFilterFormFieldNames.AMOUNT]) => {
+                              validate: (val: TxFilterFormState[TxFilterFormFieldNames.NONCE]) => {
                                 if (val?.length > 0) {
                                   return validateAmount(val)
                                 }
@@ -225,15 +277,10 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                             }}
                             render={({ field, fieldState }) => (
                               <NumberField
-                                data-testid="amount-input"
+                                data-testid="nonce-input"
                                 inputSize="hero"
                                 variant="surface"
-                                label={
-                                  fieldState.error?.message ||
-                                  (isIncomingFilter
-                                    ? 'Amount'
-                                    : `Amount (only ${chain?.nativeCurrency.symbol || 'ETH'})`)
-                                }
+                                label={fieldState.error?.message || 'Nonce'}
                                 error={!!fieldState.error}
                                 {...field}
                                 fullWidth
@@ -242,58 +289,6 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                           />
                         </div>
                       )}
-
-                      {isMultisigFilter && (
-                        <div className={css.paramField}>
-                          <AddressBookInput
-                            label="Recipient"
-                            name={TxFilterFormFieldNames.RECIPIENT}
-                            required={false}
-                            fullWidth
-                          />
-                        </div>
-                      )}
-
-                      {(isIncomingFilter || isTransfersOnly) && (
-                        <div className={css.paramField}>
-                          <AddressInput
-                            data-testid="token-input"
-                            label="Token address"
-                            name={TxFilterFormFieldNames.TOKEN_ADDRESS}
-                            required={false}
-                            fullWidth
-                          />
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {isMultisigFilter && !isTransfersOnly && (
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div className={css.paramField}>
-                        <Controller
-                          name={TxFilterFormFieldNames.NONCE}
-                          control={control}
-                          rules={{
-                            validate: (val: TxFilterFormState[TxFilterFormFieldNames.NONCE]) => {
-                              if (val?.length > 0) {
-                                return validateAmount(val)
-                              }
-                            },
-                          }}
-                          render={({ field, fieldState }) => (
-                            <NumberField
-                              data-testid="nonce-input"
-                              inputSize="hero"
-                              variant="surface"
-                              label={fieldState.error?.message || 'Nonce'}
-                              error={!!fieldState.error}
-                              {...field}
-                              fullWidth
-                            />
-                          )}
-                        />
-                      </div>
                     </div>
                   )}
 
