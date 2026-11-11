@@ -27,6 +27,7 @@ enum TxFilterFormFieldNames {
   TOKEN_ADDRESS = 'token_address',
   MODULE = 'module',
   NONCE = 'nonce',
+  TRANSFERS = 'transfers',
 }
 
 export type TxFilterFormState = {
@@ -38,6 +39,7 @@ export type TxFilterFormState = {
   [TxFilterFormFieldNames.TOKEN_ADDRESS]: string
   [TxFilterFormFieldNames.MODULE]: string
   [TxFilterFormFieldNames.NONCE]: string
+  [TxFilterFormFieldNames.TRANSFERS]: boolean
 }
 
 const defaultValues: DefaultValues<TxFilterFormState> = {
@@ -49,6 +51,7 @@ const defaultValues: DefaultValues<TxFilterFormState> = {
   [TxFilterFormFieldNames.TOKEN_ADDRESS]: '',
   [TxFilterFormFieldNames.MODULE]: '',
   [TxFilterFormFieldNames.NONCE]: '',
+  [TxFilterFormFieldNames.TRANSFERS]: false,
 }
 
 const getInitialFormValues = (filter: TxFilter | null): DefaultValues<TxFilterFormState> => {
