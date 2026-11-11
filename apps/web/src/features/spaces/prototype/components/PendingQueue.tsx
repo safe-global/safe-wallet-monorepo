@@ -62,7 +62,15 @@ import { AppliedFilters, FilterCountsContext, QueueToolbar, type AppliedPill } f
 import { QueueFlatTable, QueueGroupedTable, QueueOrderedTable } from './QueueTable/QueueGroupedTable'
 import { DisplayMenu } from './QueueTable/DisplayMenu'
 import { GroupByCards } from './QueueTable/GroupByCards'
-import { GROUP_SORT, groupQueue, loadDisplay, orderQueue, saveDisplay, type QueueDisplay } from '../services/order'
+import {
+  GROUP_SORT,
+  getGroupCounts,
+  groupQueue,
+  loadDisplay,
+  orderQueue,
+  saveDisplay,
+  type QueueDisplay,
+} from '../services/order'
 import { buildSections, rankAccounts } from './QueueTable/sections'
 import { ReviewDrawer, type Replacement, type SectionsMode } from './ReviewDrawer/ReviewDrawer'
 import { BulkExecuteDrawer } from './BulkExecuteDrawer'
@@ -774,7 +782,9 @@ function PendingQueueView() {
               {fleet && !milestone1 && !unavailable && (
                 <FleetPulse counts={cardCounts} isActive={isCardActive} onSelect={selectCard} />
               )}
-              {cards && !unavailable && <GroupByCards display={display} onChange={changeDisplay} />}
+              {cards && !unavailable && (
+                <GroupByCards display={display} counts={getGroupCounts(visible, persona)} onChange={changeDisplay} />
+              )}
               <QueueToolbar
                 filters={filters}
                 accounts={orderedAccounts}

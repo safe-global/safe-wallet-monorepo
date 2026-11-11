@@ -9,26 +9,35 @@ export type OrderedGroupBy = Exclude<GroupBy, 'safe'>
 type SortBy = 'nonce' | 'oldest'
 export type QueueDisplay = { groupBy: GroupBy }
 
-// `short` is the one-line explanation on option E's cards.
-export const GROUP_OPTIONS: { value: GroupBy; label: string; hint: string; short: string }[] = [
-  { value: 'status', label: 'Status', hint: 'Show what needs your action first', short: 'What needs you first' },
+// `card` and `short` are the title and one-line explanation on option E's cards.
+export const GROUP_OPTIONS: { value: GroupBy; label: string; hint: string; card: string; short: string }[] = [
+  {
+    value: 'status',
+    label: 'Status',
+    hint: 'Show what needs your action first',
+    card: 'Status',
+    short: 'Transactions that need your action first',
+  },
+  {
+    value: 'next',
+    label: 'Up next',
+    hint: 'The next transaction on each Safe, then the ones behind it',
+    card: 'Up next',
+    short: 'Next transaction on each Safe',
+  },
   {
     value: 'safe',
     label: 'Safe',
     hint: 'Grouped by Safe and network in nonce order',
-    short: 'Each Safe in nonce order',
+    card: 'Safes',
+    short: 'Transactions grouped by Safe, network, and nonce',
   },
   {
     value: 'network',
     label: 'Network',
     hint: 'Grouped by network, each Safe in nonce order',
-    short: 'Each network in nonce order',
-  },
-  {
-    value: 'next',
-    label: 'Next / Queue',
-    hint: 'Each Safe’s next nonce on every network, then the rest',
-    short: 'What can run now, then the rest',
+    card: 'Networks',
+    short: 'Transactions grouped by network',
   },
 ]
 
@@ -111,13 +120,17 @@ const byNetwork = (rows: Proposal[]) => {
 
 // Status groups come in a fixed order and drop when empty. A conflict group sits under its most urgent option.
 // Network groups appear in the order of their first row.
-// Next holds what each Safe can run now on each network. Queue holds the rest, by network, then Safe and nonce.
+// Next in line holds each Safe's next nonce on each network. Behind it holds the rest, by network, then Safe and nonce.
 export const groupQueue = (rows: Proposal[], groupBy: OrderedGroupBy, persona: Persona): QueueGroup[] => {
   if (groupBy === 'next') {
     const isNext = (tx: Proposal) => tx.nonce === getAccount(tx).nextNonce
     return [
-      { id: 'next', label: 'Next', rows: rows.filter(isNext) },
-      { id: 'queue', label: 'Queue', rows: byNetwork(rows.filter((tx) => !isNext(tx))).flatMap((group) => group.rows) },
+      { id: 'next', label: 'Next in line', rows: rows.filter(isNext) },
+      {
+        id: 'queue',
+        label: 'Behind it',
+        rows: byNetwork(rows.filter((tx) => !isNext(tx))).flatMap((group) => group.rows),
+      },
     ].filter((group) => group.rows.length > 0)
   }
   if (groupBy === 'status') {
@@ -135,6 +148,16 @@ export const groupQueue = (rows: Proposal[], groupBy: OrderedGroupBy, persona: P
   }
   return byNetwork(rows)
 }
+
+// Option E's card numbers: what needs you, Safes and networks with pending rows, and rows next in line.
+export const getGroupCounts = (rows: Proposal[], persona: Persona): Record<GroupBy, number> => ({
+  status: groupQueue(rows, 'status', persona)
+    .filter(isActionGroup)
+    .reduce((sum, group) => sum + group.rows.length, 0),
+  safe: new Set(rows.map((tx) => getAccount(tx).iconAddress)).size,
+  network: new Set(rows.map((tx) => getAccount(tx).chainId)).size,
+  next: rows.filter((tx) => tx.nonce === getAccount(tx).nextNonce).length,
+})
 
 // Options D and E each remember their own grouping.
 const STORAGE_KEYS = { flat: 'prototype.pendingQueue.display', cards: 'prototype.pendingQueue.display.cards' }

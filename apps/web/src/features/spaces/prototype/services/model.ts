@@ -1414,16 +1414,18 @@ export const getSignerSummary = (tx: Proposal, persona: Persona) => {
 export const getStepsStatus = (tx: Proposal, persona: Persona) => {
   const status = getPrimaryStatus(tx, persona)
   const { nextNonce } = getAccount(tx)
+  const signAhead = status === 'sign' && getState(tx, persona).waiting
   const labels: Record<Filter, string> = {
     ready: 'Execute',
-    sign: 'Sign',
+    // Your signature counts now, but it executes after an earlier nonce. The review drawer says the same.
+    sign: signAhead ? 'Sign ahead' : 'Sign',
     awaiting: 'Waiting',
     waiting: `Blocked by #${nextNonce}`,
   }
   return {
     label: labels[status],
     tone: status === 'ready' || status === 'sign' ? ('success' as const) : ('warning' as const),
-    after: status === 'sign' && getState(tx, persona).waiting ? nextNonce : undefined,
+    after: signAhead ? nextNonce : undefined,
   }
 }
 export const getStatusTone = (tx: Proposal, persona: Persona) => {
