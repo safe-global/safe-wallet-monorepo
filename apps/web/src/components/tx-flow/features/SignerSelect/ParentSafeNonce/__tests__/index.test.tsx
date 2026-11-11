@@ -67,12 +67,13 @@ describe('ParentSafeNonce', () => {
     mockUseSafeInfo.mockReturnValue({ safe: extendedSafeInfoBuilder().with({ chainId: CHAIN_ID }).build() })
   })
 
-  it('starts at the parent Safe recommended nonce and hands it to the signer', async () => {
+  it('shows the parent Safe recommended nonce but leaves the signer to re-fetch it', async () => {
     mockParentSafeApi(parentSafeAddress)
     const { setParentSafeNonce } = renderParentSafeNonce(parentSafeAddress)
 
     expect(await getNonceInput()).toHaveValue(String(RECOMMENDED_NONCE))
-    expect(setParentSafeNonce).toHaveBeenLastCalledWith(RECOMMENDED_NONCE)
+    expect(setParentSafeNonce).toHaveBeenLastCalledWith(undefined)
+    expect(setParentSafeNonce).not.toHaveBeenCalledWith(RECOMMENDED_NONCE)
   })
 
   it('offers the parent Safe queued txs as nonces to replace', async () => {
@@ -114,9 +115,14 @@ describe('ParentSafeNonce', () => {
   })
 
   it('clears the nonce it handed to the signer when it unmounts', async () => {
+    const user = userEvent.setup()
     mockParentSafeApi(parentSafeAddress)
     const { setParentSafeNonce, unmount } = renderParentSafeNonce(parentSafeAddress)
-    await waitFor(() => expect(setParentSafeNonce).toHaveBeenLastCalledWith(RECOMMENDED_NONCE))
+    const input = await getNonceInput()
+    await waitFor(() => expect(input).toHaveValue(String(RECOMMENDED_NONCE)))
+    await user.clear(input)
+    await user.type(input, String(QUEUED_NONCE))
+    await waitFor(() => expect(setParentSafeNonce).toHaveBeenLastCalledWith(QUEUED_NONCE))
 
     unmount()
 
