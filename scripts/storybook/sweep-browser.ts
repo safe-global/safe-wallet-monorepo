@@ -1,7 +1,8 @@
 import { chromium, type Browser, type BrowserContext } from 'playwright'
 
 export const VIEWPORT = { width: 1280, height: 900 }
-// Stories date their mock data from Date.now(); a fixed clock and time zone keep shown dates the same every day
+// Stories date their mock data from Date.now(); a clock that starts at a fixed time, and a fixed time zone, keep
+// shown dates the same every day. The clock then runs: debounce, throttle and polling measure time with Date.now()
 const FIXED_NOW = new Date('2026-01-15T12:00:00Z')
 const TIMEZONE = 'UTC'
 // Chrome closed itself twice after about 2,700 stories in one browser; a fresh browser per 200 stories avoids that
@@ -73,7 +74,7 @@ export async function launchBrowser(storybookHost: string): Promise<Browser> {
 
 /**
  * A browser context for one story: nothing (localStorage, a collapsed sidebar) carries over from the last story,
- * and the clock, Math.random, motion and external pages are the same in every run.
+ * and the clock's start, Math.random, motion and external pages are the same in every run.
  */
 async function newStoryContext(browser: Browser, storybookOrigin: string): Promise<BrowserContext> {
   const context = await browser.newContext({
@@ -82,7 +83,7 @@ async function newStoryContext(browser: Browser, storybookOrigin: string): Promi
     // animations: 'disabled' only stops CSS; under reduced motion the preview also skips motion's JS animations
     reducedMotion: 'reduce',
   })
-  await context.clock.setFixedTime(FIXED_NOW)
+  await context.clock.install({ time: FIXED_NOW })
   await context.addInitScript({ content: SEEDED_RANDOM })
   await context.addInitScript({ content: EAGER_LOADING })
   await context.addInitScript({ content: HIDE_CAPTURE_RESIZE })
