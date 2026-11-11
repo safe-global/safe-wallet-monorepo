@@ -4,13 +4,14 @@ import { mswLoader } from 'msw-storybook-addon'
 import { createMockStory, createChainData } from '@/stories/mocks'
 import { SAFE_ADDRESSES, chainFixtures, safeFixtures } from '../../../../../../config/test/msw/fixtures'
 import PendingTxsList from './PendingTxsList'
+import { mockNow } from '@/stories/mocks/now'
 
 // Mock transaction data for queue - keep this helper as it's unique to this story
 const createMockQueuedTransaction = (nonce: number, confirmations: number, threshold: number) => ({
   type: 'TRANSACTION',
   transaction: {
     id: `multisig_0x${nonce.toString(16).padStart(8, '0')}`,
-    timestamp: Date.now() - nonce * 3600000,
+    timestamp: mockNow() - nonce * 3600000,
     txStatus: 'AWAITING_CONFIRMATIONS',
     txInfo: {
       type: 'Transfer',
@@ -74,7 +75,7 @@ const createCustomContractTx = (nonce: number, methodName: string, name: string)
   type: 'TRANSACTION',
   transaction: {
     id: `multisig_custom_0x${nonce.toString(16).padStart(8, '0')}`,
-    timestamp: Date.now() - nonce * 3600000,
+    timestamp: mockNow() - nonce * 3600000,
     txStatus: 'AWAITING_CONFIRMATIONS',
     txInfo: {
       type: 'Custom',
@@ -98,7 +99,7 @@ const createTxBuilderTx = (nonce: number, actionCount: number) => ({
   type: 'TRANSACTION',
   transaction: {
     id: `multisig_txbuilder_0x${nonce.toString(16).padStart(8, '0')}`,
-    timestamp: Date.now() - nonce * 3600000,
+    timestamp: mockNow() - nonce * 3600000,
     txStatus: 'AWAITING_CONFIRMATIONS',
     txInfo: {
       type: 'Custom',
