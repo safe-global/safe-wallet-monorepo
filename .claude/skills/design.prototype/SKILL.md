@@ -20,7 +20,7 @@ Create a Storybook prototype from **$ARGUMENTS** using only shadcn/ui components
 
 **Goal:** besides a good design, produce a diff that is a pleasure to review. A developer should be able to skim it, see that it is only markup and touches no business logic, and approve it quickly. Keep that goal in mind at every step.
 
-**Note:** All shadcn/ui components are already installed and available at `packages/views/src/components/ui/`. Import them directly (e.g., `import { Button } from '@safe-global/views/components/ui/button'`).
+**Note:** All shadcn/ui components are already installed and available at `packages/ui/src/components/`. Import them directly (e.g., `import { Button } from '@safe-global/views/components/ui/button'`).
 
 ## Step 1: Gather Requirements
 
@@ -55,7 +55,7 @@ Lay the prototype out the way a developer would build the real feature, so each 
 
 **Rules**:
 
-- Use only shadcn/ui components from `packages/views/src/components/ui/`
+- Use only shadcn/ui components from `packages/ui/src/components/`
 - No custom styling on components
 - Use layout-only Tailwind classes on wrapper `div`s
 
@@ -199,7 +199,7 @@ yarn workspace @safe-global/web storybook
 
 ## Project Notes
 
-- **Components Path**: `packages/views/src/components/ui/`
+- **Components Path**: `packages/ui/src/components/`
 - **Utility Path**: `@safe-global/views/utils/cn`
 - **Icon Library**: `lucide-react`
 - **Views Path**: `packages/views/src/features/<feature>/components/`

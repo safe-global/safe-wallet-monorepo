@@ -19,7 +19,7 @@ allowed-tools:
 
 Implement the Figma design at **$ARGUMENTS** using shadcn/ui components.
 
-**Note:** All shadcn/ui components are already installed and available at `packages/views/src/components/ui/`. Import them directly (e.g., `import { Button } from '@safe-global/views/components/ui/button'`). Avoid other components.
+**Note:** All shadcn/ui components are already installed and available at `packages/ui/src/components/`. Import them directly (e.g., `import { Button } from '@safe-global/views/components/ui/button'`). Avoid other components.
 
 ## Step 1: Parse Figma URL
 
@@ -173,7 +173,7 @@ yarn workspace @safe-global/web storybook
 
 ## Project Notes
 
-- **Components Path**: `packages/views/src/components/ui/`
+- **Components Path**: `packages/ui/src/components/`
 - **Utility Path**: `apps/web/src/utils/cn.ts`
 - **Icon Library**: `lucide-react`
 

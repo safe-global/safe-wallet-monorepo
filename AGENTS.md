@@ -6,18 +6,19 @@ This repository is the Safe{Wallet} monorepo, containing both web and mobile app
 
 This monorepo uses nested AGENTS.md files. Agents working in a subtree automatically load the nearest one — for Claude Code this works via a one-line pointer `CLAUDE.md` next to each AGENTS.md, so every new AGENTS.md needs one. Start at root for cross-cutting rules, then drop into the relevant subtree (`expo-plugins/*` and `tools/codemods/*` are tooling workspaces without one):
 
-| Subtree                | File                                                           | Covers                                                                                                                         |
-| ---------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `apps/web/`            | [apps/web/AGENTS.md](apps/web/AGENTS.md)                       | Main Next.js app: feature architecture, variants/styling, web testing, web pitfalls                                            |
-| `apps/web/e2e/`        | [apps/web/e2e/AGENTS.md](apps/web/e2e/AGENTS.md)               | **Playwright E2E — all new tests go here**                                                                                     |
-| `apps/web/.storybook/` | [apps/web/.storybook/AGENTS.md](apps/web/.storybook/AGENTS.md) | Storybook config; story authoring: [storybook-guide](apps/web/docs/storybook-guide.md)                                         |
-| `apps/web-tanstack/`   | [apps/web-tanstack/AGENTS.md](apps/web-tanstack/AGENTS.md)     | Second runtime (TanStack Router + Vite) for the same code — reuses `apps/web/src` via Vite aliases                             |
-| `apps/tx-builder/`     | [apps/tx-builder/AGENTS.md](apps/tx-builder/AGENTS.md)         | Safe App (iframe), **MUI v6 + Vite — web styling rules do not apply**                                                          |
-| `apps/drain-safe/`     | [apps/drain-safe/AGENTS.md](apps/drain-safe/AGENTS.md)         | Drain Account Safe App (iframe), **MUI v6 + Vite + viem — web styling rules do not apply**                                     |
-| `apps/mobile/`         | [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md)                 | Expo/React Native + Tamagui                                                                                                    |
-| `packages/`            | [packages/AGENTS.md](packages/AGENTS.md)                       | `store`, `theme`, `utils`, shared by web **and** mobile: verification, codegen, dual env vars, theme workflow                  |
-| `packages/views/`      | [packages/views/AGENTS.md](packages/views/AGENTS.md)           | Web-only presentation and shadcn/ui primitives, shared by `apps/web` and `apps/web-tanstack`; no app imports or business logic |
-| `config/`              | [config/AGENTS.md](config/AGENTS.md)                           | Shared test workspace (`@safe-global/test`): MSW fixtures/scenarios, verify caveat                                             |
+| Subtree                | File                                                           | Covers                                                                                                                           |
+| ---------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/web/`            | [apps/web/AGENTS.md](apps/web/AGENTS.md)                       | Main Next.js app: feature architecture, variants/styling, web testing, web pitfalls                                              |
+| `apps/web/e2e/`        | [apps/web/e2e/AGENTS.md](apps/web/e2e/AGENTS.md)               | **Playwright E2E — all new tests go here**                                                                                       |
+| `apps/web/.storybook/` | [apps/web/.storybook/AGENTS.md](apps/web/.storybook/AGENTS.md) | Storybook config; story authoring: [storybook-guide](apps/web/docs/storybook-guide.md)                                           |
+| `apps/web-tanstack/`   | [apps/web-tanstack/AGENTS.md](apps/web-tanstack/AGENTS.md)     | Second runtime (TanStack Router + Vite) for the same code — reuses `apps/web/src` via Vite aliases                               |
+| `apps/tx-builder/`     | [apps/tx-builder/AGENTS.md](apps/tx-builder/AGENTS.md)         | Safe App (iframe), **MUI v6 + Vite — web styling rules do not apply**                                                            |
+| `apps/drain-safe/`     | [apps/drain-safe/AGENTS.md](apps/drain-safe/AGENTS.md)         | Drain Account Safe App (iframe), **MUI v6 + Vite + viem — web styling rules do not apply**                                       |
+| `apps/mobile/`         | [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md)                 | Expo/React Native + Tamagui                                                                                                      |
+| `packages/`            | [packages/AGENTS.md](packages/AGENTS.md)                       | `store`, `theme`, `utils`, shared by web **and** mobile: verification, codegen, dual env vars, theme workflow                    |
+| `packages/views/`      | [packages/views/AGENTS.md](packages/views/AGENTS.md)           | Web-only presentation shared by `apps/web` and `apps/web-tanstack`; no app imports or business logic (primitives: `packages/ui`) |
+| `packages/ui/`         | [packages/ui/AGENTS.md](packages/ui/AGENTS.md)                 | Safe UI (`@safe-global/ui`): generic shadcn/ui primitives, `cn` and hooks; no Next, no workspace imports, no domain logic        |
+| `config/`              | [config/AGENTS.md](config/AGENTS.md)                           | Shared test workspace (`@safe-global/test`): MSW fixtures/scenarios, verify caveat                                               |
 
 When adding new guidance, place it in the most-specific subtree it applies to. When a workspace, script, generated path, test framework, or architecture boundary changes, update the nearest AGENTS.md in the same PR — and prefer replacing old rules over appending exceptions.
 

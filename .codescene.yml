@@ -5,7 +5,7 @@ version: 2
 
 # Exclude paths from code health analysis
 exclude:
-  - pattern: 'apps/web/src/components/ui/**'
+  - pattern: 'packages/ui/src/components/**'
     reason: 'shadcn UI components are semi-auto generated from templates'
-  - pattern: 'apps/web/src/components/ui/stories/**'
+  - pattern: 'packages/ui/src/components/stories/**'
     reason: 'Storybook stories for shadcn UI components'

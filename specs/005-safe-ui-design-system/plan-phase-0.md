@@ -363,3 +363,19 @@ yarn workspace @safe-global/web build
 7. **shadcn CLI.** `apps/web/components.json` still points at `views` until Phase 2. Running `shadcn add` in this window puts files in `views`, so `packages/ui/AGENTS.md` documents the manual move.
 8. **CSS module in a future published package.** `table.module.css` works in-repo. Phase 4's build must handle it or convert it.
 9. **Tests run twice.** The ui tests run in both `ui` jest and `web` jest until `ui` has its own CI job. They're cheap and keep the coverage thresholds unchanged.
+
+## Implementation notes
+
+Deviations from the plan, all small:
+
+1. **Extra dev dependencies.** `packages/ui` also lists `jest-environment-jsdom ^30.5.2` and `storybook ^10.6.5`. They are required peers of `jest-fixed-jsdom` and `@storybook/react`, and `yarn install` warned (YN0002) without them. Both ranges match the other workspaces, so `yarn constraints` stays green.
+2. **Story lint.** Stories get the import ban only, as planned. Their existing `eslint-disable-next-line no-restricted-syntax` comments would then be reported as unused, so the stories block sets `reportUnusedDisableDirectives: 'off'`.
+3. **`search-input.tsx`** imported `ICON_STROKE` and `cn` from two paths that both became `../lib/utils`. They are merged into one import.
+4. **`AddressPasteInput`** has a default export only, like the other `views/components/common/*` components. `MemberInviteRow` imports it as a default.
+5. **Code Connect doc.** Moving `figma-code-connect.md` from `components/ui/docs/` to `packages/ui/docs/` broke its `../<name>.tsx` links, so they now point at `../src/components/<name>.tsx`. The stale "Code Location" line now says `packages/ui/src/components/`. Links to components that never existed (carousel, command, …) are unchanged.
+6. **`storybook-local-images.test.ts`** in `apps/web` scanned `packages/views/src` for story data. It now also scans `packages/ui/src`, so the moved stories stay covered.
+7. **Acceptance checks 4, 6 and 7** are literal greps over all of `packages/ui`. The package docs are worded so that check 4 prints nothing. `next-themes` still appears in `eslint.config.mjs` and `AGENTS.md`, because that is where it is banned. No source file under `packages/ui/src` imports it, and check 3 is clean.
+8. **Environment.** `build-storybook` ran out of memory at Node's default heap of about 2 GB in this container, both on the base commit and after the change. Every Storybook build here ran with `NODE_OPTIONS=--max-old-space-size=8192`. No repo change was needed.
+9. **Visual comparison.** The T0 sweep filtered on `ui-,design-system` snapshots only 56 of the 208 story×mode cells, because most `UI/*` stories are tagged `skip-visual-test`. A second sweep ran with that tag ignored, using a temporary copy of `scripts/storybook` with `SKIP_SNAPSHOT_TAG` changed. That copy was deleted after each run and never committed. The sweep covered all 208 cells (63 sheets) before and after. Two runs on the base commit gave identical hashes, so the comparison is deterministic.
+10. **`build-storybook:vite` fails on the base commit too.** It stops with `UNLOADABLE_DEPENDENCY` on `@safe-global/views/assets/images/transactions/signature.svg`, imported by `packages/views/src/components/tx-flow/common/TxSectionTitle/TxSectionTitle.stories.tsx`. The same error occurs at `03af007`, so it is unrelated to this phase and was left alone. It also writes into `apps/web/storybook-static` by default, so run the webpack build after it, or give it its own `--output-dir`.
+11. **`node scripts/verify.mjs --changed`** finds no base branch in this clone (`origin/dev`, `dev` and `main` don't exist), so it reported nothing to verify. The full type-check, lint, test and build commands above were run explicitly instead.

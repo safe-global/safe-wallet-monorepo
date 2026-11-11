@@ -1,49 +1,31 @@
-# shadcn/ui Components
+# @safe-global/ui
 
-This directory contains UI components from [shadcn/ui](https://ui.shadcn.com/), a collection of re-usable components built with Base UI (`@base-ui/react`) and Tailwind CSS.
-
-## ⚠️ Semi-Auto Generated Code
-
-These components are **semi-auto generated** from shadcn/ui templates using the `shadcn` CLI:
-
-```bash
-npx shadcn@latest add <component-name>
-```
-
-The components are:
-
-- Generated from upstream templates
-- Customized for Safe Wallet's design system
-- Not manually written from scratch
-- May contain intentional code patterns that trigger linters/analyzers
-
-## Code Quality Notes
-
-**These files are excluded from CodeScene analysis** (`.codescene.yml`) because:
-
-- Code duplication is inherent to the shadcn/ui component architecture
-- Component complexity reflects upstream patterns, not local technical debt
-- False positives from code health tools are expected and acceptable
+Safe UI, Safe's design system for React web apps: [shadcn/ui](https://ui.shadcn.com/) components built on Base UI (`@base-ui/react`), Tailwind CSS v4 and `class-variance-authority`.
 
 ## Usage
 
-Import components from this directory:
+Import each component from its own subpath. There is no root barrel.
 
 ```tsx
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
+import { Button } from '@safe-global/ui/button'
+import { Card, CardContent } from '@safe-global/ui/card'
+import { cn } from '@safe-global/ui/utils'
+import { useIsMobile } from '@safe-global/ui/hooks/use-mobile'
+import { ShadcnProvider } from '@safe-global/ui/provider'
 ```
 
-## Customization
+The package is private for now and consumed from source inside the monorepo: its `exports` point at the `.tsx` files, and each app compiles them. The wallet still imports through the re-exports in `packages/views/src/components/ui` until it migrates. Styles and tokens are still provided by the app (`apps/web/src/styles/shadcn.css`).
 
-While these are generated files, they can be customized as needed. However, be aware that:
+## Semi-generated code
 
-- Updates from upstream may require manual merging
-- Customizations should be documented in component files
-- Consider creating wrapper components for heavy customizations
+The components start from the shadcn/ui templates (`npx shadcn@latest add <name>`) and are then themed for Safe. So:
 
-## Documentation
+- they follow upstream patterns that may trip linters and code-health tools, and they are excluded from CodeScene (`.codescene.yml`)
+- upstream updates may need a manual merge
+- customisations belong in the component file; heavy ones belong in a wrapper in `packages/views`
 
-See individual component stories in `apps/web/src/components/ui/stories/` for usage examples.
+## Stories
 
-For shadcn/ui documentation: https://ui.shadcn.com/docs
+Stories live in `src/components/stories/` and render in the `apps/web` Storybook. Design-to-code mapping: [docs/figma-code-connect.md](docs/figma-code-connect.md).
+
+Contributor rules: [AGENTS.md](AGENTS.md).
