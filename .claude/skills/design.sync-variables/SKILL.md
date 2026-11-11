@@ -24,7 +24,7 @@ Sync CSS variables from Figma plugin [variables2css](https://www.figma.com/commu
 ## Source Files
 
 - **Source of truth**: Figma plugin export (user provides)
-- **Target**: `packages/theme/src/tokens/ui.ts` (`uiTokens.light` / `uiTokens.dark`). Values read from the palette there (dark `destructive`, `accent-success`) change in `packages/theme/src/palettes` or the web overrides in `src/generators/css-vars.ts`, which also changes `vars.css`
+- **Target**: `packages/theme/src/tokens/ui.ts` (`uiTokens.light` / `uiTokens.dark`). Values that reference the palette there (`hex(webDarkPalette.primary.main)`, `hex(staticColors.main)`, …) change in `packages/theme/src/palettes` (web overrides in `palettes/web.ts`), which also changes `vars.css`
 
 ## Process
 
@@ -36,34 +36,36 @@ Sync CSS variables from Figma plugin [variables2css](https://www.figma.com/commu
 
 ## Variable Mapping
 
-| Figma Export                           | CSS Variable (`ui.ts` key without `--`) |
-| -------------------------------------- | --------------------------------------- |
-| `--general-background`                 | `--background`                          |
-| `--general-foreground`                 | `--foreground`                          |
-| `--general-primary`                    | `--primary`                             |
-| `--general-primary-foreground`         | `--primary-foreground`                  |
-| `--general-secondary`                  | `--secondary`                           |
-| `--general-secondary-foreground`       | `--secondary-foreground`                |
-| `--general-muted`                      | `--muted`                               |
-| `--general-muted-foreground`           | `--muted-foreground`                    |
-| `--general-accent`                     | `--accent`                              |
-| `--general-accent-foreground`          | `--accent-foreground`                   |
-| `--general-destructive`                | `--destructive`                         |
-| `--general-border`                     | `--border`                              |
-| `--general-input`                      | `--input`                               |
-| `--card-card`                          | `--card`                                |
-| `--card-card-foreground`               | `--card-foreground`                     |
-| `--popover-popover`                    | `--popover`                             |
-| `--popover-popover-foreground`         | `--popover-foreground`                  |
-| `--focus-ring`                         | `--ring`                                |
-| `--sidebar-sidebar`                    | `--sidebar`                             |
-| `--sidebar-sidebar-foreground`         | `--sidebar-foreground`                  |
-| `--sidebar-sidebar-primary`            | `--sidebar-primary`                     |
-| `--sidebar-sidebar-primary-foreground` | `--sidebar-primary-foreground`          |
-| `--sidebar-sidebar-accent`             | `--sidebar-accent`                      |
-| `--sidebar-sidebar-accent-foreground`  | `--sidebar-accent-foreground`           |
-| `--sidebar-sidebar-border`             | `--sidebar-border`                      |
-| `--sidebar-sidebar-ring`               | `--sidebar-ring`                        |
+The `ui.ts` key is the CSS variable without its leading `--` (`--sidebar-primary` is `'sidebar-primary'`).
+
+| Figma Export                           | CSS Variable                   |
+| -------------------------------------- | ------------------------------ |
+| `--general-background`                 | `--background`                 |
+| `--general-foreground`                 | `--foreground`                 |
+| `--general-primary`                    | `--primary`                    |
+| `--general-primary-foreground`         | `--primary-foreground`         |
+| `--general-secondary`                  | `--secondary`                  |
+| `--general-secondary-foreground`       | `--secondary-foreground`       |
+| `--general-muted`                      | `--muted`                      |
+| `--general-muted-foreground`           | `--muted-foreground`           |
+| `--general-accent`                     | `--accent`                     |
+| `--general-accent-foreground`          | `--accent-foreground`          |
+| `--general-destructive`                | `--destructive`                |
+| `--general-border`                     | `--border`                     |
+| `--general-input`                      | `--input`                      |
+| `--card-card`                          | `--card`                       |
+| `--card-card-foreground`               | `--card-foreground`            |
+| `--popover-popover`                    | `--popover`                    |
+| `--popover-popover-foreground`         | `--popover-foreground`         |
+| `--focus-ring`                         | `--ring`                       |
+| `--sidebar-sidebar`                    | `--sidebar`                    |
+| `--sidebar-sidebar-foreground`         | `--sidebar-foreground`         |
+| `--sidebar-sidebar-primary`            | `--sidebar-primary`            |
+| `--sidebar-sidebar-primary-foreground` | `--sidebar-primary-foreground` |
+| `--sidebar-sidebar-accent`             | `--sidebar-accent`             |
+| `--sidebar-sidebar-accent-foreground`  | `--sidebar-accent-foreground`  |
+| `--sidebar-sidebar-border`             | `--sidebar-border`             |
+| `--sidebar-sidebar-ring`               | `--sidebar-ring`               |
 
 ## Example
 
@@ -78,5 +80,5 @@ Update in `packages/theme/src/tokens/ui.ts` (`light` for the light export, `dark
 
 ```ts
 background: '#ffffff',
-primary: '#12ff80',
+primary: '#12ff80', // if the key holds a palette reference such as hex(webDarkPalette.primary.main), change the palette instead
 ```
