@@ -23,6 +23,7 @@ import {
 import { createChainData, createChainsPageData, createChainsPageDataV2 } from './chains'
 import type { FeatureFlags, MockStoryConfig } from './types'
 import { MOCK_SPACE_ID } from './ids'
+import { mockNow } from './now'
 
 type ExperimentalFeature = GetSpaceResponse['experimentalFeatures'][number]
 
@@ -128,7 +129,7 @@ export function txDetailsHandlers(safeData: SafeState): RequestHandler[] {
  * Uses real CGW fixture data as a base, customized for the story context
  */
 export function createMockTransactionDetails(safeData: SafeState, txId: string) {
-  const now = Date.now()
+  const now = mockNow()
   const isERC20 = txId.includes('abc1') || txId.includes('exec1')
   const isSettings = txId.includes('abc3') || txId.includes('exec3')
   const isExecuted = txId.includes('exec')
@@ -669,7 +670,7 @@ export function spacesHandlers(): RequestHandler[] {
  * Mock executed transactions for history stories
  */
 export function createMockHistoryTransactions(safeData: SafeState) {
-  const now = Date.now()
+  const now = mockNow()
   return {
     count: 5,
     next: null,
@@ -818,6 +819,7 @@ export function createMockHistoryTransactions(safeData: SafeState) {
  * Mock pending transactions for stories
  */
 export function createMockPendingTransactions(safeData: SafeState) {
+  const now = mockNow()
   return {
     count: 3,
     next: null,
@@ -832,7 +834,7 @@ export function createMockPendingTransactions(safeData: SafeState) {
         transaction: {
           id: 'multisig_0x123_0xabc3',
           txHash: null,
-          timestamp: Date.now() - 1000 * 60 * 60 * 24,
+          timestamp: now - 1000 * 60 * 60 * 24,
           txStatus: 'AWAITING_EXECUTION' as const,
           txInfo: {
             type: 'SettingsChange' as const,
@@ -872,7 +874,7 @@ export function createMockPendingTransactions(safeData: SafeState) {
         transaction: {
           id: 'multisig_0x123_0xabc1',
           txHash: null,
-          timestamp: Date.now() - 1000 * 60 * 5,
+          timestamp: now - 1000 * 60 * 5,
           txStatus: 'AWAITING_CONFIRMATIONS' as const,
           txInfo: {
             type: 'Transfer' as const,
@@ -909,7 +911,7 @@ export function createMockPendingTransactions(safeData: SafeState) {
         transaction: {
           id: 'multisig_0x123_0xabc2',
           txHash: null,
-          timestamp: Date.now() - 1000 * 60 * 60 * 2,
+          timestamp: now - 1000 * 60 * 60 * 2,
           txStatus: 'AWAITING_CONFIRMATIONS' as const,
           txInfo: {
             type: 'Transfer' as const,
