@@ -25,7 +25,7 @@ permissions:
 
 jobs:
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     permissions:
       contents: read
       pull-requests: read
@@ -58,7 +58,7 @@ jobs:
   build:
     needs: changes
     if: needs.changes.outputs.relevant == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: $/.github/actions/yarn
@@ -82,7 +82,7 @@ jobs:
   verify-changed:
     needs: changes
     if: needs.changes.outputs.relevant == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -99,7 +99,7 @@ jobs:
     permissions: {}
     if: always()
     needs: [changes, build, verify-changed]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: $/.github/actions/required-result
         with:

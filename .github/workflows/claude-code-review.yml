@@ -42,7 +42,7 @@ jobs:
     #   github.event.pull_request.user.login == 'new-developer' ||
     #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 5
     concurrency:
       group: claude-review-${{ github.event.issue.number || github.event.pull_request.number || github.ref }}

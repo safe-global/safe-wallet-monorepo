@@ -34,7 +34,7 @@ permissions: {}
 jobs:
   pr-preview:
     name: PR Preview
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     if: github.event_name == 'pull_request'
     permissions:
       contents: read
@@ -97,7 +97,7 @@ jobs:
 
   deploy-staging:
     name: Deploy Staging
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     permissions:
       contents: read
@@ -128,7 +128,7 @@ jobs:
 
   prepare-release:
     name: Prepare Release
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     if: github.event_name == 'workflow_dispatch' && inputs.release && github.ref == 'refs/heads/dev'
     permissions:
       attestations: write

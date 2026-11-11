@@ -32,7 +32,7 @@ concurrency:
 
 jobs:
   plan:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 5
     permissions:
       contents: read
@@ -114,7 +114,7 @@ jobs:
   build:
     needs: plan
     if: needs.plan.outputs.run == 'true'
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7.0.1
@@ -167,7 +167,7 @@ jobs:
     needs: plan
     if: needs.plan.outputs.run == 'true'
     name: playwright ${{ matrix.shard }}
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     permissions:
       contents: read
       actions: read
@@ -322,7 +322,7 @@ jobs:
     name: Merge E2E report
     needs: [plan, e2e]
     if: always() && needs.plan.outputs.run == 'true' && vars.E2E_REPORTS_BUCKET != '' && (needs.e2e.result == 'success' || needs.e2e.result == 'failure')
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7.0.1
@@ -381,7 +381,7 @@ jobs:
     name: Publish E2E report
     needs: merge-report
     if: always() && needs.merge-report.result == 'success'
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 10
     permissions:
       id-token: write
@@ -432,7 +432,7 @@ jobs:
     name: Isolated E2E result
     if: always()
     needs: [plan, build, e2e]
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 5
     steps:
       - uses: $/.github/actions/required-result
