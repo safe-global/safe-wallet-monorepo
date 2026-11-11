@@ -12,12 +12,13 @@ import {
 import { mapActivePolicies } from '../utils/mapActivePolicies'
 import { MODULE_GUARD_ONLY, TRANSACTION_GUARD_ONLY, mockTreasuryAllowlistDtos } from './activePolicies'
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS, asActivePolicy } from './policies'
+import { mockNow } from '@/stories/mocks/now'
 
 const POLICY_GUARD = '0x1a4F7b8C9d0E1f2A3b4C5d6E7f8091A2b3C4c802'
 
 const DAY = 86_400
 
-const secondsFromNow = (seconds: number): number => Math.floor(Date.now() / 1_000) + seconds
+const secondsFromNow = (seconds: number): number => Math.floor(mockNow() / 1_000) + seconds
 
 const RECIPIENTS: AllowlistRecipient[] = [
   { account: MOCK_ADDRESSES.alice, permission: 'ALWAYS' },

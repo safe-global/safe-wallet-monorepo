@@ -4,6 +4,7 @@ import { OperationType } from '@safe-global/types-kit'
 import { createMockStory } from '@/stories/mocks'
 import type { DraftBatchItem } from '../../store/batchSlice'
 import BatchTxList from './BatchTxList'
+import { mockNow } from '@/stories/mocks/now'
 
 /**
  * `BatchTxList` renders the queued draft transactions inside the batch sidebar.
@@ -38,7 +39,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 const draftItem = (overrides: Partial<DraftBatchItem> & Pick<DraftBatchItem, 'id'>): DraftBatchItem => ({
-  timestamp: Date.now(),
+  timestamp: mockNow(),
   txData: {
     to: '0x1c8b9B111C97Ed26088c8b6bC0000000cAfE0001',
     value: '0',

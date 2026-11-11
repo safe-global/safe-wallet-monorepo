@@ -33,15 +33,15 @@ type ExperimentalFeature = GetSpaceResponse['experimentalFeatures'][number]
 export function coreHandlers(chainData: Chain, features: FeatureFlags = {}): RequestHandler[] {
   const indexingStatus: IndexingStatus = {
     currentBlockNumber: 20000000,
-    currentBlockTimestamp: new Date().toISOString(),
+    currentBlockTimestamp: new Date(mockNow()).toISOString(),
     erc20BlockNumber: 20000000,
-    erc20BlockTimestamp: new Date().toISOString(),
+    erc20BlockTimestamp: new Date(mockNow()).toISOString(),
     erc20Synced: true,
     masterCopiesBlockNumber: 20000000,
-    masterCopiesBlockTimestamp: new Date().toISOString(),
+    masterCopiesBlockTimestamp: new Date(mockNow()).toISOString(),
     masterCopiesSynced: true,
     synced: true,
-    lastSync: Date.now(),
+    lastSync: mockNow(),
   }
 
   return [
@@ -568,8 +568,8 @@ export function createMockSpace(spaceId: string = MOCK_SPACE_ID, experimentalFea
         name: 'Admin User',
         invitedBy: null,
         status: 'ACTIVE' as const,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: new Date(mockNow()).toISOString(),
+        updatedAt: new Date(mockNow()).toISOString(),
         user: {
           id: mockUser.id,
           status: 'ACTIVE' as const,
@@ -646,8 +646,8 @@ export function spacesHandlers(): RequestHandler[] {
             name: 'Admin User',
             invitedBy: null,
             status: 'ACTIVE',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            createdAt: new Date(mockNow()).toISOString(),
+            updatedAt: new Date(mockNow()).toISOString(),
             user: { id: mockUser.id, status: 'ACTIVE' },
           },
           {
@@ -656,8 +656,8 @@ export function spacesHandlers(): RequestHandler[] {
             name: 'Jane Member',
             invitedBy: null,
             status: 'ACTIVE',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            createdAt: new Date(mockNow()).toISOString(),
+            updatedAt: new Date(mockNow()).toISOString(),
             user: { id: 2, status: 'ACTIVE' },
           },
         ],

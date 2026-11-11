@@ -5,6 +5,7 @@ import type { RecoveryQueueItem, RecoveryState } from '../../services/recovery-s
 import { RecoveryEvent, RecoveryTxType } from '../../services/recoveryEvents'
 import recoveryStore, { type RecoveryContextType } from '../RecoveryContext'
 import RecoveryListItem from '.'
+import { mockNow } from '@/stories/mocks/now'
 
 const setup = createMockStory({
   scenario: 'efSafe',
@@ -31,7 +32,7 @@ const createRecoveryQueueItem = ({
   ({
     address: DELAY_MODIFIER_ADDRESS,
     transactionHash: '0x6f465f9d996728a4c34e8fb0e767bb87f884f5901f26fa933f60a4d40b0bbe7d',
-    timestamp: BigInt(Date.now() - DAY_IN_MS),
+    timestamp: BigInt(mockNow() - DAY_IN_MS),
     validFrom,
     expiresAt,
     isMalicious,
@@ -53,13 +54,13 @@ const withRecoveryState = (recoveryState: Partial<RecoveryContextType>) => () =>
   return () => recoveryStore.setStore(INITIAL_RECOVERY_STATE)
 }
 
-const pending = createRecoveryQueueItem({ validFrom: BigInt(Date.now() + 2 * DAY_IN_MS) })
-const executable = createRecoveryQueueItem({ validFrom: BigInt(Date.now() - DAY_IN_MS) })
+const pending = createRecoveryQueueItem({ validFrom: BigInt(mockNow() + 2 * DAY_IN_MS) })
+const executable = createRecoveryQueueItem({ validFrom: BigInt(mockNow() - DAY_IN_MS) })
 const expired = createRecoveryQueueItem({
-  validFrom: BigInt(Date.now() - 2 * DAY_IN_MS),
-  expiresAt: BigInt(Date.now() - DAY_IN_MS),
+  validFrom: BigInt(mockNow() - 2 * DAY_IN_MS),
+  expiresAt: BigInt(mockNow() - DAY_IN_MS),
 })
-const notNext = createRecoveryQueueItem({ validFrom: BigInt(Date.now() - DAY_IN_MS), queueNonce: BigInt(1) })
+const notNext = createRecoveryQueueItem({ validFrom: BigInt(mockNow() - DAY_IN_MS), queueNonce: BigInt(1) })
 
 const notNextRecoveryState: RecoveryState = [
   {
@@ -112,7 +113,7 @@ export const Executable: Story = {
 }
 
 export const Malicious: Story = {
-  args: { item: createRecoveryQueueItem({ validFrom: BigInt(Date.now() + 2 * DAY_IN_MS), isMalicious: true }) },
+  args: { item: createRecoveryQueueItem({ validFrom: BigInt(mockNow() + 2 * DAY_IN_MS), isMalicious: true }) },
 }
 
 export const Expired: Story = {
