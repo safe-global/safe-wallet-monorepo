@@ -1,7 +1,7 @@
-import { useCallback, useContext } from 'react'
+import { useCallback } from 'react'
 import { MakeASwapButton, SendTokensButton, TxBuilderButton } from '@/components/tx-flow/common/TxButton'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { TxModalContext } from '../../'
+import useSetScopedTxFlow from '@/components/tx-flow/safe-scope/useSetScopedTxFlow'
 import TokenTransferFlow from '../TokenTransfer'
 import { ProgressBar } from '@safe-global/views/components/common/ProgressBar'
 import ChainIndicator from '@/components/common/ChainIndicator'
@@ -13,7 +13,8 @@ import { useLoadFeature } from '@/features/__core__'
 import css from './styles.module.css'
 
 const NewTxFlow = () => {
-  const { setTxFlow } = useContext(TxModalContext)
+  // Opened from a Space, the flow is scoped to the picked Safe: the next step must stay in that scope
+  const setTxFlow = useSetScopedTxFlow()
   const hn = useLoadFeature(HypernativeFeature)
   const isDarkMode = useDarkMode()
 
