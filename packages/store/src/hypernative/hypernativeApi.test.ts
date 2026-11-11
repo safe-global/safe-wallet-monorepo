@@ -71,7 +71,15 @@ describe('hypernativeApi retries', () => {
 
   it.each([400, 401, 403, 404, 409, 422])('sends a request the API rejects with %s exactly once', async (status) => {
     const requests = countRequestsTo(ASSESSMENT_URL, () =>
-      HttpResponse.json({ success: false, data: null, error: faker.lorem.sentence(), errorCode: status }, { status }),
+      HttpResponse.json(
+        {
+          success: false,
+          data: null,
+          error: faker.lorem.sentence(),
+          errorCode: faker.number.int({ min: 1000, max: 1037 }),
+        },
+        { status },
+      ),
     )
 
     await assessTransaction(makeStore())

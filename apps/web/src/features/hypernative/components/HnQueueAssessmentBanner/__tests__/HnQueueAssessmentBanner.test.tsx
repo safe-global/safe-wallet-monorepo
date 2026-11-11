@@ -40,7 +40,7 @@ describe('HnQueueAssessmentBanner', () => {
 
     render(<HnQueueAssessmentBanner safeTxHash="0x123" assessment={undefined} isAuthenticated={false} />)
 
-    await user.click(screen.getByText('Log in'))
+    await user.click(screen.getByRole('link', { name: 'Log in' }))
 
     expect(trackEvent).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.HYPERNATIVE_LOGIN_CLICKED, {
       [MixpanelEventParams.SOURCE]: HYPERNATIVE_SOURCE.Queue,
@@ -53,7 +53,7 @@ describe('HnQueueAssessmentBanner', () => {
     mockIsSessionRejected = true
     render(<HnQueueAssessmentBanner safeTxHash="0x123" assessment={undefined} isAuthenticated={false} />)
 
-    await user.click(screen.getByText('Reconnect to Hypernative'))
+    await user.click(screen.getByRole('link', { name: 'Reconnect to Hypernative' }))
 
     expect(
       screen.getByText("Please reconnect your Hypernative account to review this transaction's risks."),
