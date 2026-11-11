@@ -71,7 +71,7 @@ export class TxReviewPage {
     this.lockedFeePayer = page.getByTestId('fee-payer-locked')
     this.gasFeeRow = page.getByTestId('gas-fee-row')
     this.remainingRelays = page.getByText(/free transactions? left today/)
-    this.sponsoredTxsCounter = page.getByTestId('sponsored-txs-counter')
+    this.sponsoredTxsCounter = page.getByTestId('sponsored-txs-counter').or(page.getByTestId('sponsored-quota'))
     this.executeButton = page.getByTestId('combo-submit-execute')
     this.spendingLimitExecuteButton = page.getByRole('button', { name: 'Execute', exact: true })
     this.status = page.getByTestId('transaction-status')
