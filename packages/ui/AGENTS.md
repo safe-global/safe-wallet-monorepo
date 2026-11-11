@@ -6,7 +6,7 @@
 
 - **Only generic, domain-free primitives live here.** No business logic, address parsing, chains, store, SDK calls or Safe-specific widgets: compose those in `packages/views` on top of a primitive (see `packages/views/src/components/common/AddressPasteInput`).
 - **Framework agnostic.** No `next`, `next/*` or `next-themes`, no `@safe-global/*` workspace packages and no app aliases (`@/…`). Lint enforces this and `tsconfig.json` drops the inherited `paths`.
-- **Imports inside the package are relative** (`./button`, `../lib/utils`). Consumers compile the source with their own resolver, so a package alias would not resolve for them.
+- **Imports inside the package are relative** (`./button`, `../lib/utils`) and must resolve inside `src/`. Consumers compile the source with their own resolver, so a package alias would not resolve for them. `src/relative-imports.test.ts` fails on a relative import that leaves `src/`, and lint rejects one that climbs three or more levels.
 - **Every component file gets an `exports` key** in `package.json` (`"./<name>": "./src/components/<name>.tsx"`). There is no root barrel. `src/package-exports.test.ts` fails when a key is missing or points at a missing file.
 - Tests sit next to the component (`<name>.test.tsx`). Stories go in `src/components/stories/<name>.stories.tsx` with an explicit `title`, so story IDs stay stable.
 - Until Phase 2, `packages/views/src/components/ui/<name>` re-exports each component, and app code keeps importing it through that path. A new component also needs that one-line re-export (`export * from '@safe-global/ui/<name>'`).

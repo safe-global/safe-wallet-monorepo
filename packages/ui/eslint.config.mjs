@@ -26,6 +26,10 @@ const noFrameworkOrDomainImports = [
         group: ['next/*', '@safe-global/*', '@/*'],
         message: 'packages/ui is framework- and domain-agnostic: no Next, no workspace packages, no app aliases.',
       },
+      {
+        regex: '^(\\.\\./){3,}',
+        message: 'Relative imports must stay inside packages/ui/src.',
+      },
     ],
   },
 ]
