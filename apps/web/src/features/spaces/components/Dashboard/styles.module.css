@@ -29,20 +29,18 @@
   justify-content: center;
 }
 
-.widgetItem {
-  /* Token logos: whichever element renders them */
-  iframe,
-  img {
-    display: none !important;
-  }
-}
-
 .widgetItemLabel {
   @apply flex items-center truncate;
   font-weight: 600;
 
   & > div {
     font-weight: 600;
+  }
+
+  /* Token logos in the label; the tx type icon is outside it */
+  iframe,
+  img {
+    display: none !important;
   }
 }
 
