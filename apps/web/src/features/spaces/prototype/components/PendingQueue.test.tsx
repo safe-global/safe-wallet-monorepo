@@ -1532,34 +1532,42 @@ describe('option E · Safes that fail to load', () => {
   })
   beforeEach(() => localStorage.clear())
 
-  it('shows a toolbar chip instead of a banner, listing failed Safes by network and undeployed ones apart', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, partial({ failed: '3' }))
+  it('shows a toolbar chip instead of a banner, listing failed Safes by network, never undeployed ones', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />, partial({ failed: '3', undeployed: '1' }))
     expect(screen.queryAllByText(/didn’t load$/)).toHaveLength(0)
-    await user.click(screen.getByRole('button', { name: '3 not loaded' }))
-    const failed = await screen.findByRole('region', { name: 'Safes that didn’t load' })
-    expect(within(failed).getByRole('button', { name: 'Try again on Ethereum' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: '3 Safes not loaded' }))
+    const failed = await screen.findByRole('region', { name: '3 Safes not loaded' })
+    expect(within(failed).getByRole('button', { name: 'Reload Market Making on Ethereum' })).toBeInTheDocument()
     expect(within(failed).getByText('Grants')).toBeInTheDocument()
-    expect(
-      within(screen.getByRole('region', { name: 'Safes not deployed yet' })).getByText('Ops Payroll'),
-    ).toBeInTheDocument()
+    expect(within(failed).queryByText('Ops Payroll')).toBeNull()
+    expect(screen.queryByText('Not deployed yet')).toBeNull()
   })
 
-  it('keeps a band with Try again for each failed Safe when grouped by Safe', async () => {
+  it('puts failed Safes at the top when grouped by Safe', () => {
+    render(<PendingQueue />, partial({ failed: '3' }))
+    fireEvent.click(screen.getByRole('radio', { name: /^Safes/ }))
+    const firstBand = allPending()
+      .getAllByRole('row')
+      .find((row) => /Couldn’t load|Treasury Main|Ops Payroll/.test(row.textContent ?? ''))
+    expect(firstBand).toHaveTextContent('Couldn’t load')
+  })
+
+  it('keeps a band with Reload for each failed Safe when grouped by Safe', async () => {
     jest.useFakeTimers()
     render(<PendingQueue />, partial({ failed: '3' }))
     fireEvent.click(screen.getByRole('radio', { name: /^Safes/ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Try again for Grants on Arbitrum' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Reload Grants on Arbitrum' }))
     act(() => jest.advanceTimersByTime(1000))
-    expect(screen.queryByRole('button', { name: 'Try again for Grants on Arbitrum' })).toBeNull()
-    expect(screen.getByRole('button', { name: '2 not loaded' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Reload Grants on Arbitrum' })).toBeNull()
+    expect(screen.getByRole('button', { name: '2 Safes not loaded' })).toBeInTheDocument()
     jest.useRealTimers()
   })
 
-  it('explains an empty page when no Safe loads, and Try again brings the queue back', () => {
+  it('explains an empty page when no Safe loads, and Reload brings the queue back', () => {
     jest.useFakeTimers()
     render(<PendingQueue />, partial({ failed: 'all' }))
     expect(screen.getByRole('heading', { name: 'We couldn’t load your pending transactions' })).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+    fireEvent.click(screen.getByRole('button', { name: /^Reload all/ }))
     act(() => jest.advanceTimersByTime(1000))
     expect(screen.queryByRole('heading', { name: 'We couldn’t load your pending transactions' })).toBeNull()
     jest.useRealTimers()
@@ -1572,13 +1580,13 @@ describe('Safes that fail to load', () => {
   })
   afterEach(() => jest.useRealTimers())
 
-  it('shows one warning per Safe, and Try again brings that Safe back', () => {
+  it('shows one warning per Safe, and Reload brings that Safe back', () => {
     jest.useFakeTimers()
     render(<PendingQueue />, partial({ failed: '3' }))
     const alerts = screen.getAllByRole('alert')
     expect(alerts).toHaveLength(3)
-    fireEvent.click(within(alerts[0]).getByRole('button', { name: /^Try again for / }))
-    expect(within(alerts[0]).getByRole('button', { name: /^Try again for / })).toHaveTextContent('Loading…')
+    fireEvent.click(within(alerts[0]).getByRole('button', { name: /^Reload / }))
+    expect(within(alerts[0]).getByRole('button', { name: /^Reload / })).toHaveTextContent('Loading…')
     act(() => jest.advanceTimersByTime(1000))
     expect(screen.getAllByRole('alert')).toHaveLength(2)
   })
@@ -1591,7 +1599,7 @@ describe('Safes that fail to load', () => {
     expect(alert).toHaveTextContent('Showing transactions from 2 of 5 Safes')
     fireEvent.click(within(alert).getByRole('button', { name: 'Show Safes' }))
     expect(within(alert).getAllByRole('listitem')).toHaveLength(3)
-    fireEvent.click(within(alert).getByRole('button', { name: 'Try again for 3 Safes' }))
+    fireEvent.click(within(alert).getByRole('button', { name: 'Reload 3 Safes' }))
     act(() => jest.advanceTimersByTime(1000))
     expect(screen.queryByRole('alert')).toBeNull()
   })
