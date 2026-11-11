@@ -189,7 +189,7 @@ jobs:
           persist-credentials: false
       - uses: $/.github/actions/yarn
 
-      # No --with-deps: the image has Chromium's libraries, and the fonts it adds are not used by the English UI
+      # No --with-deps: the image has Chromium's libraries; the fonts it adds only matter for pixel diffs
       - name: Install Chromium
         working-directory: apps/web
         run: yarn exec playwright install --no-shell chromium
