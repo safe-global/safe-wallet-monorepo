@@ -1096,7 +1096,11 @@ export const getScenario = (scenario: Scenario, { deepQueue = false } = {}): Pro
     return realistic()
       .filter((tx) => tx.account === 'treasury' || tx.id === 'grants-12')
       .map((tx) => (tx.id === 'grants-12' ? { ...tx, id: 'treasury-49', account: 'treasury', nonce: 49 } : tx))
-  if (scenario === '5-safes') return [...realistic(), ...withSafes(FIVE_SAFES)]
+  // Market Making is fully signed at #212 and #213, so the 5-Safe default shows Bulk execute on a Safe band.
+  if (scenario === '5-safes')
+    return [...realistic(), ...withSafes(FIVE_SAFES)].map((tx) =>
+      tx.id === 'market-making-213' ? { ...tx, signers: ['Ana', 'Max'] } : tx,
+    )
   if (scenario === '10-safes') return [...realistic(), ...withSafes(TEN_SAFES)]
   if (scenario === '20-safes') {
     const items = withMix(fleetProposals(), fleetAccounts)
@@ -1375,6 +1379,14 @@ export const getWarnings = (tx: Proposal): Warning[] => {
     kind.type === 'transfer' && kind.toSelf && 'toSelf',
   ].filter((warning): warning is Warning => !!warning)
 }
+// A Safe that signs this one has queued its approval as a nested transaction. Production: "Awaiting parent signature".
+export const getParentApproval = (tx: Proposal, items: Proposal[]) =>
+  items.find(
+    (other) =>
+      other.kind.type === 'nested' &&
+      other.kind.parentSafe === getAccount(tx).name &&
+      other.kind.parentNonce === tx.nonce,
+  )
 export const getSignatureCount = (tx: Proposal) =>
   tx.signers.filter((name) => getAccount(tx).owners.includes(name)).length
 // The RFC's plain-language answer to "can this execute, and if not, why not?"

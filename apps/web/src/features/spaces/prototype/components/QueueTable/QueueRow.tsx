@@ -19,6 +19,7 @@ import {
   getAccount,
   getConflicts,
   getCreatedAt,
+  getParentApproval,
   getSignatureCount,
   getSignerSummary,
   getStepsStatus,
@@ -47,7 +48,7 @@ import { CopyableParty } from '../CopyableParty'
 import { SafenetMark } from '../SafenetMark'
 import { ExecutionChip, LockedChip } from './ExecutionStatus'
 import { canSpeedUp, getLockingTx, type Executions } from '../../services/execution'
-import { ChainIcon, HINT_CLASS, StatusChip, StepsStatusChip } from '../shared'
+import { ChainIcon, HINT_CLASS, HintContent, StatusChip, StepsStatusChip } from '../shared'
 
 export type QueueRowProps = {
   tx: Proposal
@@ -133,6 +134,7 @@ export function QueueRow({
   const willBeReplaced = !!replaceHover && conflicts.some((other) => other.id === replaceHover)
   const account = getAccount(tx)
   const signatureCount = getSignatureCount(tx)
+  const parentApproval = getParentApproval(tx, items)
   const warnings = getWarnings(tx)
   const reminded = remindedIds.includes(tx.id)
   // Shared action rules set the main button, the menu and the status hint.
@@ -297,17 +299,33 @@ export function QueueRow({
         <span className="flex items-center gap-2">
           <Tooltip delay={150}>
             <TooltipTrigger
-              aria-label={`${signatureCount} of ${account.threshold} signatures, ${getSignerSummary(tx, persona)}`}
+              aria-label={
+                signatureCount === 0
+                  ? `0 of ${account.threshold} signatures, proposal, ${getSignerSummary(tx, persona)}`
+                  : `${signatureCount} of ${account.threshold} signatures, ${getSignerSummary(tx, persona)}`
+              }
               className="flex text-sm tabular-nums"
               onClick={(event) => event.stopPropagation()}
             >
-              <span className="flex items-center gap-1.5">
-                <SignatureGauge count={signatureCount} threshold={account.threshold} />
-                {signatureCount}/{account.threshold}
-              </span>
+              {signatureCount === 0 ? (
+                // As production: with no signatures yet, only a proposer can have created it.
+                <StatusChip tone="secondary">Proposal</StatusChip>
+              ) : (
+                <span className="flex items-center gap-1.5">
+                  <SignatureGauge count={signatureCount} threshold={account.threshold} />
+                  {signatureCount}/{account.threshold}
+                </span>
+              )}
             </TooltipTrigger>
             <TooltipContent className={HINT_CLASS}>
-              <SignerList tx={tx} persona={persona} />
+              {signatureCount === 0 ? (
+                <HintContent
+                  title="Proposal"
+                  body={`Created by a proposer. No signatures yet, ${account.threshold} needed. Sign or reject it to proceed.`}
+                />
+              ) : (
+                <SignerList tx={tx} persona={persona} />
+              )}
             </TooltipContent>
           </Tooltip>
           {safenet && <SafenetMark tx={tx} />}
@@ -351,17 +369,32 @@ export function QueueRow({
             <Tooltip delay={150}>
               <TooltipTrigger
                 render={<span />}
-                aria-label={`${lastSignature ? 'Sign & execute' : getStepsStatus(tx, persona).label}. ${statusHint}`}
+                aria-label={
+                  parentApproval
+                    ? `Awaiting parent signature. ${getAccount(parentApproval).name} #${parentApproval.nonce}`
+                    : `${lastSignature ? 'Sign & execute' : getStepsStatus(tx, persona).label}. ${statusHint}`
+                }
                 onClick={(event) => event.stopPropagation()}
               >
                 {willBeReplaced ? (
                   <StatusChip tone="secondary">Would be replaced</StatusChip>
+                ) : parentApproval ? (
+                  <StatusChip tone="warning">Awaiting parent</StatusChip>
                 ) : (
                   <StepsStatusChip tx={tx} persona={persona} label={lastSignature ? 'Sign & execute' : undefined} />
                 )}
               </TooltipTrigger>
-              <TooltipContent>
-                {willBeReplaced ? 'Replaced if the option you are pointing at executes.' : statusHint}
+              <TooltipContent className={HINT_CLASS}>
+                {willBeReplaced ? (
+                  'Replaced if the option you are pointing at executes.'
+                ) : parentApproval ? (
+                  <HintContent
+                    title="Awaiting parent signature"
+                    body={`${getAccount(parentApproval).name} signs this through its own transaction #${parentApproval.nonce}. The signature counts once ${getAccount(parentApproval).name} executes it.`}
+                  />
+                ) : (
+                  statusHint
+                )}
               </TooltipContent>
             </Tooltip>
           )}
