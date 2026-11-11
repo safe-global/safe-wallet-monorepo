@@ -21,6 +21,12 @@ import * as remoteSafeAppsHooks from '@/hooks/safe-apps/useRemoteSafeApps'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { act, fireEvent, waitFor, within } from '@testing-library/react'
+import { faker } from '@faker-js/faker'
+import { http, HttpResponse } from 'msw'
+import { server } from '@/tests/server'
+import { AbiCoder } from 'ethers'
+import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
+import { safeScopeContextFor } from '@/tests/mocks/safeScope'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import type { ReactElement } from 'react'
 
@@ -207,6 +213,66 @@ describe('CreateTokenTransfer', () => {
     const { queryByText } = renderCreateTokenTransfer({ txNonce: 1 })
 
     expect(queryByText('Send as')).not.toBeInTheDocument()
+  })
+
+  it('should not display a type selection in a Safe scope, whose spending limits are not loaded', async () => {
+    jest
+      .spyOn(tokenUtils, 'useTokenAmount')
+      .mockReturnValue({ totalAmount: BigInt(1000), spendingLimitAmount: BigInt(500) })
+    jest.spyOn(useBalances, 'default').mockReturnValue({
+      balances: {
+        fiatTotal: '0',
+        items: [
+          {
+            balance: '10',
+            tokenInfo: {
+              address: ZERO_ADDRESS,
+              decimals: 18,
+              logoUri: 'someurl',
+              name: 'Test token',
+              symbol: 'TST',
+              type: TokenType.ERC20,
+            },
+            fiatBalance: '10',
+            fiatConversion: '1',
+          },
+        ],
+      },
+      loaded: true,
+      loading: false,
+      error: undefined,
+    })
+    // A scoped Safe is checked against the sanctions oracle on Ethereum
+    let sanctionsChecked = false
+    server.use(
+      http.post('https://ethereum.publicnode.com/', async ({ request }) => {
+        const body = (await request.json()) as { id: number } | Array<{ id: number }>
+        const answer = ({ id }: { id: number }) => ({
+          jsonrpc: '2.0',
+          id,
+          result: AbiCoder.defaultAbiCoder().encode(['bool'], [false]),
+        })
+        sanctionsChecked = true
+        return HttpResponse.json(Array.isArray(body) ? body.map(answer) : answer(body))
+      }),
+    )
+    const scope = safeScopeContextFor({
+      chainId: faker.string.numeric(5),
+      safeAddress: faker.finance.ethereumAddress(),
+    })
+
+    const { queryByText } = render(
+      <SafeScopeContext.Provider value={scope}>
+        <SafeShieldProvider>
+          <TxFlowProvider step={0} data={mockParams} prevStep={() => {}} nextStep={jest.fn()}>
+            <CreateTokenTransfer />
+          </TxFlowProvider>
+        </SafeShieldProvider>
+      </SafeScopeContext.Provider>,
+    )
+
+    expect(queryByText('Send as')).not.toBeInTheDocument()
+    await waitFor(() => expect(sanctionsChecked).toBe(true))
   })
 
   it('should preselect a specific token (USDC) when passed in data', () => {

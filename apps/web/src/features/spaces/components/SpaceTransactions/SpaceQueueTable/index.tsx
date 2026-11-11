@@ -121,6 +121,7 @@ const VirtualRow = memo(function VirtualRow({
           conflict={item.conflict}
           status={item.status}
           nextNonce={item.nextNonce}
+          canReject={item.canReject}
           rowProps={rowProps}
         />
       )
