@@ -10,6 +10,7 @@ import type { Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfo
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import type { GetSpaceResponse, UpdateSpaceDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { EntitlementsGetAllEntitlementsV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
 import {
   safeFixtures,
   balancesFixtures,
@@ -571,6 +572,15 @@ export function spacesHandlers(): RequestHandler[] {
     ),
     // The caller's own membership (useCurrentMemberProfile)
     http.get(/\/v1\/spaces\/[^/]+\/membership$/, () => HttpResponse.json(createMockSpace().members[0])),
+    // Before "Get space by ID", which would answer for `entitlements` as a Workspace ID
+    http.get(/\/v1\/spaces\/entitlements$/, () =>
+      HttpResponse.json({
+        [MOCK_SPACE_ID]: {
+          plan: { id: 'business', name: 'Business', cycleEndsAt: '2030-01-01T00:00:00.000Z', status: 'trialing' },
+          entitlements: [],
+        },
+      } satisfies EntitlementsGetAllEntitlementsV1ApiResponse),
+    ),
     // Get space by ID
     http.get(/\/v1\/spaces\/[^/]+$/, ({ params }) => {
       const url = new URL(params[0] as string, 'https://example.com')
