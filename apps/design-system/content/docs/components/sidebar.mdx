@@ -1,0 +1,35 @@
+---
+title: Sidebar
+description: 'A collapsible app sidebar with groups, menus and a mobile sheet.'
+component: sidebar
+---
+
+<ComponentPreview component="sidebar" />
+
+## Installation
+
+<ComponentInstall component="sidebar" />
+
+## Usage
+
+<ComponentUsage component="sidebar" />
+
+Wrap the layout in `SidebarProvider`, then compose `Sidebar` (with `side`, `variant` and `collapsible`), `SidebarHeader`, `SidebarContent` with `SidebarGroup`s and `SidebarMenu`s, and `SidebarFooter`. Put the page in `SidebarInset` and toggle with `SidebarTrigger`. On mobile it renders as a sheet.
+
+## Examples
+
+<ComponentExamples component="sidebar" />
+
+## Props
+
+<ComponentProps component="sidebar" />
+
+## Accessibility
+
+<BaseUiReference component="sidebar" />
+
+Menu buttons are real buttons or links; pass `isActive` for the current page. `SidebarTrigger` has an accessible label, and the provider toggles the sidebar with ⌘B or Ctrl+B. On mobile the sheet traps focus like a dialog.
+
+## Do / Don't
+
+<ComponentRules component="sidebar" />
