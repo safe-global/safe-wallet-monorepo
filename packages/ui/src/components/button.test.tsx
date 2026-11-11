@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import NextLink from 'next/link'
 import { Button } from './button'
+
+const AppLink = (props: React.ComponentProps<'a'> & { href: string }) => <a {...props} />
 
 describe('Button', () => {
   it('renders anchor buttons without requesting native button semantics', () => {
@@ -17,11 +18,11 @@ describe('Button', () => {
     }
   })
 
-  it('renders Next.js link buttons without requesting native button semantics', () => {
+  it('renders link component buttons without requesting native button semantics', () => {
     const consoleError = jest.spyOn(console, 'error').mockImplementation()
 
     try {
-      render(<Button render={<NextLink href="/welcome" />}>Welcome</Button>)
+      render(<Button render={<AppLink href="/welcome" />}>Welcome</Button>)
 
       expect(screen.getByRole('link', { name: 'Welcome' })).toHaveAttribute('href', '/welcome')
       expect(consoleError).not.toHaveBeenCalled()
@@ -34,7 +35,7 @@ describe('Button', () => {
     const onClick = jest.fn()
 
     render(
-      <Button disabled onClick={onClick} render={<NextLink href="/nested-safe" />}>
+      <Button disabled onClick={onClick} render={<AppLink href="/nested-safe" />}>
         Go to Nested Safe
       </Button>,
     )
@@ -53,7 +54,7 @@ describe('Button', () => {
     const onClick = jest.fn()
 
     render(
-      <Button onClick={onClick} render={<NextLink href="/nested-safe" />}>
+      <Button onClick={onClick} render={<AppLink href="/nested-safe" />}>
         Go to Nested Safe
       </Button>,
     )
@@ -70,7 +71,7 @@ describe('Button', () => {
   it("keeps the render element's own onClick when Button has none", async () => {
     const onClick = jest.fn()
 
-    render(<Button render={<NextLink href="/nested-safe" onClick={onClick} />}>Go to Nested Safe</Button>)
+    render(<Button render={<AppLink href="/nested-safe" onClick={onClick} />}>Go to Nested Safe</Button>)
 
     await userEvent.click(screen.getByRole('link', { name: 'Go to Nested Safe' }))
     expect(onClick).toHaveBeenCalledTimes(1)

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { OTPInput, OTPInputContext } from 'input-otp'
 
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '../lib/utils'
 import { MinusIcon } from 'lucide-react'
 
 /**

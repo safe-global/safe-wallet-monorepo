@@ -2,7 +2,7 @@ import { type ComponentProps } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { XIcon } from 'lucide-react'
 
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '../lib/utils'
 
 /**
  * Chip Component

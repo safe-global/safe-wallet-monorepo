@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '../lib/utils'
 
 /**
  * Skeleton Component

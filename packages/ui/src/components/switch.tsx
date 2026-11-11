@@ -1,6 +1,6 @@
 import { Switch as SwitchPrimitive } from '@base-ui/react/switch'
 
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '../lib/utils'
 
 /**
  * Switch Component

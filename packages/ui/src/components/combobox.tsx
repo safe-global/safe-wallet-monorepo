@@ -2,15 +2,10 @@ import * as React from 'react'
 import { Combobox as ComboboxPrimitive } from '@base-ui/react'
 import { Autocomplete as AutocompletePrimitive } from '@base-ui/react/autocomplete'
 
-import { cn } from '@safe-global/views/utils/cn'
-import { usePortalContainer } from '@safe-global/views/components/ui/ShadcnProvider'
-import { Button } from '@safe-global/views/components/ui/button'
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from '@safe-global/views/components/ui/input-group'
+import { cn } from '../lib/utils'
+import { usePortalContainer } from '../provider'
+import { Button } from './button'
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from './input-group'
 import { ChevronDownIcon, XIcon, CheckIcon } from 'lucide-react'
 
 /**

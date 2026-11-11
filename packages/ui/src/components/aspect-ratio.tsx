@@ -1,4 +1,4 @@
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '../lib/utils'
 
 /**
  * Aspect Ratio Component

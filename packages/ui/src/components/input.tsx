@@ -1,9 +1,8 @@
 import * as React from 'react'
 import { Input as InputPrimitive } from '@base-ui/react/input'
 import { cva, type VariantProps } from 'class-variance-authority'
-import { cleanInputValue, parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '../lib/utils'
 
 /**
  * Heights mirror `Button`'s so a field and a button on the same row line up: `sm` (h-8) pairs with
@@ -102,22 +101,14 @@ function sanitizeInputValue(value: string): string {
   return sanitized
 }
 
-function stripChainPrefix(value: string): string {
-  const cleaned = cleanInputValue(value)
-  const { address } = parsePrefixedAddress(cleaned)
-  return address
-}
-
 function Input({
   className,
   type,
   inputSize,
   variant,
   onChange,
-  onPaste,
   error,
   errorSize,
-  address,
   // Destructured so the `{...props}` spread below cannot overwrite the computed attribute: a caller
   // passing `aria-invalid={undefined}` (or `false`) alongside `error` would otherwise erase the
   // invalid state the error or the script-injection guard had set.
@@ -125,7 +116,7 @@ function Input({
   ...props
 }: React.ComponentProps<'input'> &
   VariantProps<typeof inputVariants> &
-  VariantProps<typeof inputErrorVariants> & { error?: string; address?: boolean }) {
+  VariantProps<typeof inputErrorVariants> & { error?: string }) {
   const [hasScriptInjection, setHasScriptInjection] = React.useState(false)
 
   const handleChange = React.useCallback(
@@ -144,21 +135,6 @@ function Input({
     [onChange],
   )
 
-  const handlePaste = React.useCallback(
-    (e: React.ClipboardEvent<HTMLInputElement>) => {
-      if (address) {
-        e.preventDefault()
-        const pasted = e.clipboardData.getData('text')
-        const stripped = stripChainPrefix(pasted)
-        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value')?.set
-        nativeInputValueSetter?.call(e.currentTarget, stripped)
-        e.currentTarget.dispatchEvent(new Event('input', { bubbles: true }))
-      }
-      onPaste?.(e)
-    },
-    [address, onPaste],
-  )
-
   const errorMessage = hasScriptInjection ? SCRIPT_INJECTION_ERROR : error
 
   return (
@@ -170,7 +146,6 @@ function Input({
         className={cn(inputVariants({ inputSize, variant }), className)}
         {...props}
         onChange={handleChange}
-        onPaste={handlePaste}
       />
       {errorMessage ? (
         <p role="alert" data-slot="field-error" className={inputErrorVariants({ errorSize })}>

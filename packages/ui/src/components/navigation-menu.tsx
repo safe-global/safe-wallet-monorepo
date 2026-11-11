@@ -1,8 +1,8 @@
 import { NavigationMenu as NavigationMenuPrimitive } from '@base-ui/react/navigation-menu'
 import { cva } from 'class-variance-authority'
 
-import { cn } from '@safe-global/views/utils/cn'
-import { usePortalContainer } from '@safe-global/views/components/ui/ShadcnProvider'
+import { cn } from '../lib/utils'
+import { usePortalContainer } from '../provider'
 import { ChevronDownIcon } from 'lucide-react'
 
 /**

@@ -53,6 +53,8 @@ export default tseslint.config(
     name: 'ui/stories',
     files: STORY_FILES,
     extends: [tseslint.configs.base],
+    // Stories keep the eslint-disable comments for the design-system rules they would trip in an app
+    linterOptions: { reportUnusedDisableDirectives: 'off' },
   },
   {
     name: 'ui/import-boundary',

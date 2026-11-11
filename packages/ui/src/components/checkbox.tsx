@@ -2,7 +2,7 @@
 
 import { Checkbox as CheckboxPrimitive } from '@base-ui/react/checkbox'
 
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '../lib/utils'
 import { CheckIcon, MinusIcon } from 'lucide-react'
 
 /**

@@ -11,7 +11,7 @@ import {
   FieldSeparator,
   FieldTitle,
 } from '../field'
-import { Input } from '@safe-global/views/components/ui/input'
+import { Input } from '../input'
 import { Label } from '../label'
 import { Checkbox } from '../checkbox'
 

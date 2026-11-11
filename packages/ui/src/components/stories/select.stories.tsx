@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../select'
-import { Input } from '@safe-global/views/components/ui/input'
+import { Input } from '../input'
 import { Button } from '../button'
 
 /**

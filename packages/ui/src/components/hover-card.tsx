@@ -2,8 +2,8 @@
 
 import { PreviewCard as PreviewCardPrimitive } from '@base-ui/react/preview-card'
 
-import { cn } from '@safe-global/views/utils/cn'
-import { usePortalContainer } from '@safe-global/views/components/ui/ShadcnProvider'
+import { cn } from '../lib/utils'
+import { usePortalContainer } from '../provider'
 
 /**
  * Hover Card Component

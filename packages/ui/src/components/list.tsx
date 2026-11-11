@@ -1,6 +1,6 @@
 import { type ComponentProps, type ReactNode } from 'react'
 
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '../lib/utils'
 
 /**
  * List primitives

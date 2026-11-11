@@ -1,14 +1,8 @@
 import * as React from 'react'
 import { Search, XIcon } from 'lucide-react'
 
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from '@safe-global/views/components/ui/input-group'
-import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
-import { cn } from '@safe-global/views/utils/cn'
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from './input-group'
+import { cn, ICON_STROKE } from '../lib/utils'
 
 type SearchInputProps = Omit<React.ComponentProps<'input'>, 'type'> &
   Pick<React.ComponentProps<typeof InputGroup>, 'inputSize' | 'variant'> & {

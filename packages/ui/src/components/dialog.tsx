@@ -2,10 +2,10 @@ import * as React from 'react'
 import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import { cva, type VariantProps } from 'class-variance-authority'
 
-import { cn } from '@safe-global/views/utils/cn'
-import { usePortalContainer } from '@safe-global/views/components/ui/ShadcnProvider'
-import { overlayVariants } from '@safe-global/views/components/ui/overlay'
-import { Button } from '@safe-global/views/components/ui/button'
+import { cn } from '../lib/utils'
+import { usePortalContainer } from '../provider'
+import { overlayVariants } from './overlay'
+import { Button } from './button'
 import { XIcon } from 'lucide-react'
 
 /**

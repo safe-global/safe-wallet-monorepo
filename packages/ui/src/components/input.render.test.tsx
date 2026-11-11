@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 
 import { Input, SCRIPT_INJECTION_ERROR } from './input'
-import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
+import { Field, FieldLabel } from './field'
 
 // The warning and the validation error share one element, so a regression here silently drops the
 // script-injection warning rather than showing the wrong one.
@@ -68,5 +68,19 @@ describe('Input invalid state', () => {
 
     expect(screen.getByText('Amount')).toHaveClass('text-destructive')
     expect(screen.getByPlaceholderText('Nested in invalid field')).toHaveClass('text-foreground')
+  })
+})
+
+describe('Input paste', () => {
+  it('forwards onPaste and leaves the pasted text alone', () => {
+    const onPaste = jest.fn()
+    render(<Input placeholder="Paste" onPaste={onPaste} />)
+
+    const input = screen.getByPlaceholderText('Paste')
+    const notPrevented = fireEvent.paste(input, { clipboardData: { getData: () => 'eth:0x123' } })
+
+    expect(onPaste).toHaveBeenCalledTimes(1)
+    expect(notPrevented).toBe(true)
+    expect(input).toHaveValue('')
   })
 })

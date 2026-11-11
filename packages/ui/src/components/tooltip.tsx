@@ -1,7 +1,7 @@
 import { Tooltip as TooltipPrimitive } from '@base-ui/react/tooltip'
 
-import { cn } from '@safe-global/views/utils/cn'
-import { usePortalContainer } from '@safe-global/views/components/ui/ShadcnProvider'
+import { cn } from '../lib/utils'
+import { usePortalContainer } from '../provider'
 
 /**
  * Tooltip Component

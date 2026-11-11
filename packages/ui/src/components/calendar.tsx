@@ -2,8 +2,8 @@ import * as React from 'react'
 import { DayPicker, getDefaultClassNames, type DayButton, type Locale } from 'react-day-picker'
 import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon } from 'lucide-react'
 
-import { cn } from '@safe-global/views/utils/cn'
-import { Button, buttonVariants } from '@safe-global/views/components/ui/button'
+import { cn } from '../lib/utils'
+import { Button, buttonVariants } from './button'
 
 /**
  * Calendar component built on react-day-picker (v9), styled with shadcn tokens.

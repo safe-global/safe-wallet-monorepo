@@ -3,9 +3,9 @@
 import { useMemo } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 
-import { cn } from '@safe-global/views/utils/cn'
-import { Label } from '@safe-global/views/components/ui/label'
-import { Separator } from '@safe-global/views/components/ui/separator'
+import { cn } from '../lib/utils'
+import { Label } from './label'
+import { Separator } from './separator'
 
 /**
  * Field Component

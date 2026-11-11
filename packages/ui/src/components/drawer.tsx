@@ -1,9 +1,9 @@
 import * as React from 'react'
 import { Drawer as DrawerPrimitive } from 'vaul'
 
-import { cn } from '@safe-global/views/utils/cn'
-import { usePortalContainerElement } from '@safe-global/views/components/ui/ShadcnProvider'
-import { overlayVariants } from '@safe-global/views/components/ui/overlay'
+import { cn } from '../lib/utils'
+import { usePortalContainerElement } from '../provider'
+import { overlayVariants } from './overlay'
 
 /**
  * Drawer Component

@@ -2,9 +2,9 @@ import * as React from 'react'
 import { Select as SelectPrimitive } from '@base-ui/react/select'
 import { cva, type VariantProps } from 'class-variance-authority'
 
-import { cn } from '@safe-global/views/utils/cn'
-import { usePortalContainer } from '@safe-global/views/components/ui/ShadcnProvider'
-import { overlayVariants } from '@safe-global/views/components/ui/overlay'
+import { cn } from '../lib/utils'
+import { usePortalContainer } from '../provider'
+import { overlayVariants } from './overlay'
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from 'lucide-react'
 
 /**

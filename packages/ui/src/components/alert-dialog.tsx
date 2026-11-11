@@ -3,10 +3,10 @@
 import * as React from 'react'
 import { AlertDialog as AlertDialogPrimitive } from '@base-ui/react/alert-dialog'
 
-import { cn } from '@safe-global/views/utils/cn'
-import { usePortalContainer } from '@safe-global/views/components/ui/ShadcnProvider'
-import { overlayVariants } from '@safe-global/views/components/ui/overlay'
-import { Button } from '@safe-global/views/components/ui/button'
+import { cn } from '../lib/utils'
+import { usePortalContainer } from '../provider'
+import { overlayVariants } from './overlay'
+import { Button } from './button'
 
 /**
  * Alert Dialog Component

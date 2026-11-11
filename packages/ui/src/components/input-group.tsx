@@ -1,10 +1,10 @@
 import * as React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 
-import { cn } from '@safe-global/views/utils/cn'
-import { Button } from '@safe-global/views/components/ui/button'
-import { Input } from '@safe-global/views/components/ui/input'
-import { Textarea } from '@safe-global/views/components/ui/textarea'
+import { cn } from '../lib/utils'
+import { Button } from './button'
+import { Input } from './input'
+import { Textarea } from './textarea'
 
 /**
  * Input Group Component

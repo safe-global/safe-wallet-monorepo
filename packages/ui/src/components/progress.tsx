@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Progress as ProgressPrimitive } from '@base-ui/react/progress'
 
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from '../lib/utils'
 
 /**
  * Progress Component

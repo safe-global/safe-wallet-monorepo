@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Input } from '../input'
-import { Button } from '@safe-global/views/components/ui/button'
+import { Button } from '../button'
 
 /**
  * Input Component Stories

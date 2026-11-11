@@ -10,7 +10,7 @@ import {
   type ReactNode,
   type RefObject,
 } from 'react'
-import { cn } from '@safe-global/views/utils/cn'
+import { cn } from './lib/utils'
 
 interface PortalContainerValue {
   ref: RefObject<HTMLDivElement | null>
