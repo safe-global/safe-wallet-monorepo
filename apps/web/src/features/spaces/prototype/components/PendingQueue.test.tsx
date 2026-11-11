@@ -1318,13 +1318,13 @@ describe('option D · flat table', () => {
       .map((heading) => heading.textContent)
   const columnTitles = () => screen.getAllByRole('columnheader').map((header) => header.textContent)
 
-  it('groups by status by default, needs you first, with Safe and Network columns and Nonce after Transaction', () => {
+  it('groups by status by default, needs you first, with Nonce first and Safe and Network columns', () => {
     render(<PendingQueue />, flat)
     expect(screen.getAllByRole('table')).toHaveLength(1)
     expect(screen.getByRole('button', { name: 'Group by Status' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /^Sort/ })).toBeNull()
     expect(headings()[0]).toMatch(/^(Sign and execute|Ready to execute|Ready to sign)/)
-    expect(columnTitles().slice(0, 5)).toEqual(['Transaction', 'Nonce', 'To', 'Safe', 'Network'])
+    expect(columnTitles().slice(0, 5)).toEqual(['Nonce', 'Transaction', 'To', 'Safe', 'Network'])
     expect(screen.getByRole('button', { name: 'Collapse all' })).toBeInTheDocument()
   })
 
@@ -1386,7 +1386,6 @@ describe('option D · flat table', () => {
     await user.click(screen.getByRole('button', { name: 'Group by Status' }))
     await user.click(await screen.findByRole('menuitemradio', { name: /^Safe/ }))
     expect(columnTitles()[0]).toBe('Nonce')
-    expect(screen.queryByRole('columnheader', { name: 'Network' })).toBeNull()
     const marketMaking = await screen.findByRole('button', { name: /^(Collapse|Expand) Market making$/ })
     const subHeaders = marketMaking
       .getAttribute('aria-controls')!
@@ -1398,13 +1397,79 @@ describe('option D · flat table', () => {
     ])
   })
 
-  it('groups by network in collapsible bands, without a Network column', async () => {
+  it('shows the Safenet mark next to the signatures in every grouping', () => {
+    render(<PendingQueue />, flat)
+    expect(allPending().getAllByRole('button', { name: /\(Safenet\)$/ }).length).toBeGreaterThan(0)
+  })
+
+  it('groups by next nonce, then the rest of the queue, with a Network column', async () => {
     const { user } = renderWithUserEvent(<PendingQueue />, flat)
     await user.click(screen.getByRole('button', { name: 'Group by Status' }))
-    await user.click(await screen.findByRole('menuitemradio', { name: /^Network/ }))
+    await user.click(await screen.findByRole('menuitemradio', { name: /^Next \/ Queue/ }))
+    expect(headings().map((heading) => heading?.replace(/\d+$/, ''))).toEqual(['Next', 'Queue'])
+    expect(screen.getByRole('columnheader', { name: 'Network' })).toBeInTheDocument()
+  })
+})
+
+describe('option E · Group by cards', () => {
+  beforeEach(() => localStorage.clear())
+  const cards = { routerProps: { query: { option: 'cards' } } }
+  const pick = (name: RegExp) => fireEvent.click(screen.getByRole('radio', { name }))
+  const columnTitles = () => screen.getAllByRole('columnheader').map((header) => header.textContent)
+
+  it('keeps the same columns in every grouping, Nonce first', () => {
+    render(<PendingQueue />, cards)
+    // The last header cell also holds Collapse all, whose label names the groups.
+    const byStatus = columnTitles().slice(0, -1)
+    expect(byStatus.slice(0, 4)).toEqual(['Nonce', 'Transaction', 'To', 'Network'])
+    for (const name of [/^Safe/, /^Network/, /^Next \/ Queue/]) {
+      pick(name)
+      expect(columnTitles().slice(0, -1)).toEqual(byStatus)
+    }
+    pick(/^Network/)
     expect(screen.getByRole('button', { name: 'Collapse Ethereum' })).toBeInTheDocument()
-    expect(columnTitles().slice(0, 2)).toEqual(['Transaction', 'Nonce'])
-    expect(screen.queryByRole('columnheader', { name: 'Network' })).toBeNull()
+  })
+
+  it('starts each transaction with its Safe as a tag, in place of the Safe column', () => {
+    render(<PendingQueue />, cards)
+    expect(screen.queryByRole('columnheader', { name: 'Safe' })).toBeNull()
+    const [firstRow] = allPending().getAllByRole('button', { name: /^Open / })
+    expect(firstRow.textContent).toMatch(/^Treasury Main/)
+  })
+
+  it('draws conflicting options under one nonce in every grouping', () => {
+    render(<PendingQueue />, { routerProps: { query: { option: 'cards', scenario: '20-safes' } } })
+    for (const name of [/^Status/, /^Safe/, /^Network/, /^Next \/ Queue/]) {
+      pick(name)
+      expect(allPending().getAllByRole('img', { name: /^Option 1 of \d+ at nonce/ }).length).toBeGreaterThan(0)
+    }
+  })
+
+  it('shows Group by as cards with Status selected, and no Group by menu', () => {
+    render(<PendingQueue />, cards)
+    const group = screen.getByRole('radiogroup', { name: 'Group by' })
+    expect(
+      within(group)
+        .getAllByRole('radio')
+        .map((card) => card.textContent),
+    ).toEqual([
+      'StatusWhat needs you first',
+      'SafeEach Safe in nonce order',
+      'NetworkEach network in nonce order',
+      'Next / QueueWhat can run now, then the rest',
+    ])
+    expect(within(group).getByRole('radio', { name: /^Status/ })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.queryByRole('button', { name: /^Group by / })).toBeNull()
+  })
+
+  it('regroups when a card is picked, and remembers it apart from option D', async () => {
+    const { user, unmount } = renderWithUserEvent(<PendingQueue />, cards)
+    await user.click(screen.getByRole('radio', { name: /^Next \/ Queue/ }))
+    expect(screen.getByRole('radio', { name: /^Next \/ Queue/ })).toHaveAttribute('aria-checked', 'true')
+    expect(allPending().getByRole('heading', { level: 3, name: /^Next/ })).toBeInTheDocument()
+    unmount()
+    render(<PendingQueue />, { routerProps: { query: { option: 'flat' } } })
+    expect(screen.getByRole('button', { name: 'Group by Status' })).toBeInTheDocument()
   })
 })
 

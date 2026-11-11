@@ -98,6 +98,29 @@ describe('groupQueue', () => {
     const groups = groupQueue(rows, 'network', 'owner')
     expect(groups.map((group) => group.label)).toEqual([payroll.network, treasury.network])
   })
+
+  it('puts each Safe’s next nonce under Next, conflicts included, and the rest under Queue by network', () => {
+    const rows = [
+      tx('treasury', 42, [], '1h ago', { id: 'a' }),
+      tx('treasury', 42, [], '1h ago', { id: 'b' }),
+      tx('treasury', 43, [], '1h ago'),
+      tx('payroll', 17, [], '1h ago'),
+      tx('payroll', 18, [], '1h ago'),
+      tx('grants', 9, [], '1h ago'),
+      tx('treasury', 44, [], '1h ago'),
+    ]
+    const groups = groupQueue(rows, 'next', 'owner')
+    expect(groups.map((group) => group.label)).toEqual(['Next', 'Queue'])
+    expect(groups.map((group) => ids(group.rows))).toEqual([
+      ['treasury-42a', 'treasury-42b', 'payroll-17'],
+      ['treasury-43', 'treasury-44', 'payroll-18', 'grants-9'],
+    ])
+  })
+
+  it('drops Next when no Safe can run its next nonce', () => {
+    const groups = groupQueue([tx('grants', 9, [], '1h ago')], 'next', 'owner')
+    expect(groups.map((group) => group.label)).toEqual(['Queue'])
+  })
 })
 
 describe('display preference', () => {
@@ -111,6 +134,12 @@ describe('display preference', () => {
   it('remembers the last grouping', () => {
     saveDisplay({ groupBy: 'network' })
     expect(loadDisplay()).toEqual({ groupBy: 'network' })
+  })
+
+  it('keeps option E’s grouping apart from option D’s', () => {
+    saveDisplay({ groupBy: 'next' }, 'cards')
+    expect(loadDisplay('cards')).toEqual({ groupBy: 'next' })
+    expect(loadDisplay()).toEqual(DEFAULT_DISPLAY)
   })
 
   it('ignores a saved value it does not know', () => {
