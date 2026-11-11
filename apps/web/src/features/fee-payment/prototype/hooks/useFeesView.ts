@@ -53,9 +53,8 @@ export const useFeesView = (
           rows: [
             { label: 'Gas limit', value: scenario.safeQuote.gasLimit },
             { label: 'Gas price (Gwei)', value: scenario.safeQuote.gasPriceGwei },
-            { label: 'Refund to', value: 'Safe relayer' },
           ],
-          note: 'Set by the relayer quote at signing. Paid from the Safe, so it cannot be edited.',
+          note: "Paid from your Safe account. Set at signing, so it can't be changed.",
         },
       },
     }
@@ -71,7 +70,7 @@ export const useFeesView = (
             label: FIELD_LABELS[name],
             value: gas.saved[name] || 'Cannot estimate',
           })),
-          note: 'Covered by your Pro plan. The relayer sets the gas.',
+          note: 'Covered by your Pro plan.',
         },
       },
     }
