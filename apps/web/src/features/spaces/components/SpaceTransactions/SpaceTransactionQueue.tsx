@@ -13,23 +13,34 @@ import {
 import { QueueLoadError, QueueNoMatches } from './QueueStates'
 import SpaceQueueTable from './SpaceQueueTable'
 import TransactionsToolbar from './TransactionsToolbar'
+import UnavailableSafesAlert from './UnavailableSafesAlert'
 
 const QueueBody = memo(function QueueBody({
+  spaceId,
   queue,
   isFiltered,
   isSearching,
+  isFetching,
+  onRetry,
   onClearFilters,
 }: {
+  spaceId: string
   queue: SpaceQueue
   isFiltered: boolean
   isSearching: boolean
+  isFetching: boolean
+  onRetry: () => void
   onClearFilters: () => void
 }): ReactElement {
-  const { sections } = queue
+  const { sections, unavailableSafes } = queue
   const isNarrowed = isFiltered || isSearching
 
   return (
     <>
+      {unavailableSafes.length > 0 && (
+        <UnavailableSafesAlert spaceId={spaceId} safes={unavailableSafes} onRetry={onRetry} isRetrying={isFetching} />
+      )}
+
       {!queue.isComplete && (
         <Typography variant="paragraph-small" color="muted">
           Showing {queue.shownCount} of {queue.totalCount} pending transactions.
@@ -59,7 +70,7 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
   const queryFilters = useDeferredValue(filters)
   const querySearch = useDeferredValue(search)
   // `data` keeps the last answer while a new filter loads, so the menus keep their counts
-  const { data, currentData, isError, refetch } = useGetSpaceQueueQuery({
+  const { data, currentData, isError, isFetching, refetch } = useGetSpaceQueueQuery({
     spaceId,
     filters: queryFilters,
     ...(querySearch && { search: querySearch }),
@@ -84,9 +95,12 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
 
       {currentData ? (
         <QueueBody
+          spaceId={spaceId}
           queue={currentData}
+          isFetching={isFetching}
           isFiltered={hasSpaceQueueFilters(queryFilters)}
           isSearching={querySearch !== ''}
+          onRetry={refetch}
           onClearFilters={clearFilters}
         />
       ) : isError ? (
