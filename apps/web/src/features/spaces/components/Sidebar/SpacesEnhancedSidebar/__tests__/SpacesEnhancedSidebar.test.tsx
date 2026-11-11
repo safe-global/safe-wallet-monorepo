@@ -13,7 +13,7 @@ const mockGetNonDeclinedSpaces = jest.fn()
 const mockUseSidebar = jest.fn()
 const mockUseIsQualifiedSafe = jest.fn()
 
-jest.mock('@safe-global/views/components/ui/sidebar', () => ({
+jest.mock('@safe-global/ui/sidebar', () => ({
   SidebarProvider: ({ children }: { children: ReactNode }) => <div data-testid="sidebar-provider">{children}</div>,
   useSidebar: () => mockUseSidebar(),
   Sidebar: ({ children, 'data-testid': testId }: { children: ReactNode; 'data-testid'?: string }) => (
