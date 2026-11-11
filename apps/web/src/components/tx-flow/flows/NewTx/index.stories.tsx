@@ -4,6 +4,7 @@ import { expect, userEvent, waitFor, within } from 'storybook/test'
 import { mswLoader } from 'msw-storybook-addon'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { createMockStory } from '@/stories/mocks'
+import { newRecipientAnalysisHandler } from '@/stories/mocks/handlers'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import NewTxFlow from './index'
 
@@ -42,6 +43,7 @@ const meta = {
   parameters: {
     layout: 'fullscreen',
     ...setup.parameters,
+    msw: { handlers: [newRecipientAnalysisHandler, ...setup.handlers] },
   },
 } satisfies Meta<typeof NewTransactionJourney>
 
