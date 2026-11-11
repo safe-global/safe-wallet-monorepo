@@ -97,7 +97,7 @@ jobs:
     # The one check that branch protection requires for this workflow.
     name: Web TanStack checks result
     permissions: {}
-    if: always()
+    if: ${{ !cancelled() }}
     needs: [changes, build, verify-changed]
     runs-on: ubuntu-26.04-arm
     steps:
