@@ -1439,6 +1439,18 @@ describe('option E · Group by cards', () => {
     expect(within(behind).getAllByText('Sign ahead').length).toBeGreaterThan(0)
   })
 
+  it('on a phone, shows pills without explanations and rows with Nonce, Transaction and the action', () => {
+    jest.mocked(useIsMobile).mockReturnValue(true)
+    render(<PendingQueue />, cards)
+    expect(screen.getByRole('radio', { name: /^Status/ })).toHaveTextContent(/^\d+Status$/)
+    expect(columnTitles().map((title) => title?.replace(/Collapse.*|Expand.*/, ''))).toEqual([
+      'Nonce',
+      'Transaction',
+      'Action',
+    ])
+    expect(allPending().getAllByRole('button', { name: /^(Sign|Execute)/ }).length).toBeGreaterThan(0)
+  })
+
   it('shows Proposal for rows with no signatures, and Awaiting parent when a signer Safe approves it', () => {
     render(<PendingQueue />, { routerProps: { query: { option: 'cards', scenario: '5-safes' } } })
     expect(allPending().getAllByRole('button', { name: /^0 of \d+ signatures, proposal/ }).length).toBeGreaterThan(0)
