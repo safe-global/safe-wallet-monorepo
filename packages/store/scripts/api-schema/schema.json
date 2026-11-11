@@ -6031,6 +6031,109 @@
         ]
       }
     },
+    "/v1/chains/{chainId}/safes/{safeAddress}/outgoing-transfers": {
+      "get": {
+        "description": "Retrieves native, ERC-20 and ERC-721 transfers sent by a Safe. Unlike multisig-transactions, `to` matches the recipient of each transfer rather than the target of the Safe transaction. Token transfers made inside batches are included; native transfers made inside batches are not available on chains indexed from events (most L2s). Only the newest 1000 transfers per direction and transfer type can be reached, so narrow with filters for older history. A page can hold fewer items than requested, or none, once untrusted transfers are dropped: keep following `next` until it is null.",
+        "operationId": "transactionsGetOutgoingTransfersV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "trusted",
+            "required": false,
+            "in": "query",
+            "description": "When true (default), ERC-20 transfers of untrusted tokens are omitted, since any token contract can emit a transfer the Safe never made. ERC-721 and native transfers are not filtered. ERC-20 transfers without value are always omitted.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "execution_date__gte",
+            "required": false,
+            "in": "query",
+            "description": "Filter by execution date greater than or equal to (ISO 8601 UTC, e.g. 2024-01-01T00:00:00Z)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "execution_date__lte",
+            "required": false,
+            "in": "query",
+            "description": "Filter by execution date less than or equal to (ISO 8601 UTC, e.g. 2024-01-01T00:00:00Z)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Filter by transfer recipient address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "token_address",
+            "required": false,
+            "in": "query",
+            "description": "Filter by token contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of outgoing transfers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferTransactionItemPage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe or chain not found"
+          },
+          "422": {
+            "description": "Invalid chain ID, address, date or trusted flag"
+          }
+        },
+        "summary": "Get outgoing transfers",
+        "tags": [
+          "transactions"
+        ]
+      }
+    },
     "/v1/chains/{chainId}/transactions/{safeAddress}/preview": {
       "post": {
         "description": "Simulates a transaction execution to preview its effects, including gas estimates, balance changes, and potential errors before actually proposing or executing it.",
@@ -17705,6 +17808,32 @@
           "type",
           "transaction",
           "conflictType"
+        ]
+      },
+      "TransferTransactionItemPage": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "nullable": true
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransactionItem"
+            }
+          }
+        },
+        "required": [
+          "results"
         ]
       },
       "TransactionItemPage": {
