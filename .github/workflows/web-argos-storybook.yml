@@ -115,10 +115,10 @@ jobs:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
 
-      # The ARM64 runner image has no Chrome, so the sweep uses Playwright's pinned headless shell
-      - name: Install browser dependencies
+      # No --with-deps: it only adds fonts, and the stories and sheet labels render DM Sans
+      - name: Install Chromium headless shell
         working-directory: apps/web
-        run: yarn exec playwright install --with-deps --only-shell chromium
+        run: yarn exec playwright install --only-shell chromium
 
       - name: Build Storybook
         run: yarn workspace @safe-global/web build-storybook --output-dir storybook-static
