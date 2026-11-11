@@ -67,8 +67,11 @@ export type QueueSectionProps = {
   executions?: Executions
   now?: number
   onSpeedUp?: (id: string) => void
-  // Option A: network sub-headers, pages of rows and the Safenet mark.
+  // Option A: network sub-headers and pages of rows.
   safeTable?: boolean
+  safenet?: boolean
+  // Option E: the Safe and the other party read as tags in the transaction line.
+  partyTags?: boolean
   pageSize?: number
   signLabel?: SignLabel
   onSeeMore?: (accountIds: string[]) => void
@@ -413,6 +416,8 @@ export function QueueSectionRows({
   onSpeedUp,
   labelLastSignature,
   safeTable,
+  safenet,
+  partyTags,
   signLabel,
 }: QueueSectionRowsProps) {
   const [conflictHover, setConflictHover] = useState<string | null>(null)
@@ -454,6 +459,8 @@ export function QueueSectionRows({
           onMenuAction={onMenuAction}
           labelLastSignature={labelLastSignature}
           safeTable={safeTable}
+          safenet={safenet}
+          partyTags={partyTags}
           signLabel={signLabel}
         />
       ))}

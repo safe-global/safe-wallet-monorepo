@@ -42,6 +42,8 @@ import {
 } from '../../services/actions'
 import type { PreviewAction } from '../../services/queue'
 import { Counterparty, hasCounterparty, TransactionHead } from './TransactionLine'
+import Identicon from '@safe-global/views/components/common/Identicon'
+import { CopyableParty } from '../CopyableParty'
 import { SafenetMark } from '../SafenetMark'
 import { ExecutionChip, LockedChip } from './ExecutionStatus'
 import { canSpeedUp, getLockingTx, type Executions } from '../../services/execution'
@@ -78,8 +80,11 @@ export type QueueRowProps = {
   onSpeedUp?: (id: string) => void
   // Option C, Needs you: the last signature reads "Sign & execute", so it doesn't look like a plain Sign above Execute.
   labelLastSignature?: boolean
-  // Option A: the Safenet mark.
+  // Option A: rows with no counterparty span To.
   safeTable?: boolean
+  // Options A, D and E: the Safenet mark next to the signatures.
+  safenet?: boolean
+  partyTags?: boolean
   signLabel?: SignLabel
 }
 
@@ -109,6 +114,8 @@ export function QueueRow({
   onSpeedUp,
   labelLastSignature = false,
   safeTable = false,
+  safenet = false,
+  partyTags = false,
   signLabel = 'Sign',
 }: QueueRowProps) {
   const [hovered, setHovered] = useState(false)
@@ -240,6 +247,11 @@ export function QueueRow({
             aria-label={`Open ${getTransactionLabel(tx)}`}
           >
             <span className="flex min-w-0 items-center gap-2">
+              {partyTags && (
+                <span className="flex shrink-0">
+                  <CopyableParty name={account.safeName ?? account.name} address={account.iconAddress} tag />
+                </span>
+              )}
               <TransactionHead tx={tx} onRow keepWidth={!columns.includes('To')} />
               {!columns.includes('To') && <Counterparty tx={tx} />}
             </span>
@@ -262,24 +274,22 @@ export function QueueRow({
           {nonceFirst && !columns.includes('Network') && (
             <ChainIcon chainId={account.chainId} network={account.network} />
           )}
+          <Identicon address={account.iconAddress} size={20} />
           <span className="truncate">
             {nonceFirst && !columns.includes('Network') ? account.name : (account.safeName ?? account.name)}
           </span>
         </span>
       </TableCell>
     ),
-    // Option D: the network gets its own column, next to the Safe.
+    // Options D and E: the network gets its own column, next to the Safe. Its name is in the logo's tooltip.
     Network: (
       <TableCell>
-        <span className="flex min-w-0 items-center gap-2 text-sm">
-          <ChainIcon chainId={account.chainId} network={account.network} />
-          <span className="truncate text-muted-foreground">{account.network}</span>
-        </span>
+        <ChainIcon chainId={account.chainId} network={account.network} />
       </TableCell>
     ),
     To: (
       <TableCell className="py-2">
-        <Counterparty tx={tx} inColumn />
+        <Counterparty tx={tx} inColumn tag={partyTags} />
       </TableCell>
     ),
     Signatures: (
@@ -300,7 +310,7 @@ export function QueueRow({
               <SignerList tx={tx} persona={persona} />
             </TooltipContent>
           </Tooltip>
-          {safeTable && <SafenetMark tx={tx} />}
+          {safenet && <SafenetMark tx={tx} />}
         </span>
       </TableCell>
     ),

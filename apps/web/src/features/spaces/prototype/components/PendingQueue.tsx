@@ -61,6 +61,7 @@ import { matchesFlag, useQueueFilters } from './QueueFilters/useQueueFilters'
 import { AppliedFilters, FilterCountsContext, QueueToolbar, type AppliedPill } from './QueueFilters/QueueFilters'
 import { QueueFlatTable, QueueGroupedTable, QueueOrderedTable } from './QueueTable/QueueGroupedTable'
 import { DisplayMenu } from './QueueTable/DisplayMenu'
+import { GroupByCards } from './QueueTable/GroupByCards'
 import { GROUP_SORT, groupQueue, loadDisplay, orderQueue, saveDisplay, type QueueDisplay } from '../services/order'
 import { buildSections, rankAccounts } from './QueueTable/sections'
 import { ReviewDrawer, type Replacement, type SectionsMode } from './ReviewDrawer/ReviewDrawer'
@@ -97,7 +98,7 @@ function PendingQueueView() {
   const isWide = contentWidth >= 1050
   const isExtraWide = contentWidth >= 1880
   // The preview opens on option A, the Safe table. `?option=fleet` shows Stat cards, `?option=simple` Action first.
-  // Old `?option=aligned` links open A. `?option=flat` is D, the flat table.
+  // Old `?option=aligned` links open A. `?option=flat` is D, the flat table. `?option=cards` is E, D with Group by cards.
   const direction: Direction =
     router.query.option === 'fleet'
       ? 'fleet'
@@ -105,16 +106,21 @@ function PendingQueueView() {
         ? 'simple'
         : router.query.option === 'flat'
           ? 'flat'
-          : 'table'
+          : router.query.option === 'cards'
+            ? 'cards'
+            : 'table'
   const fleet = direction === 'fleet'
   // Option D: one list across Safes, ordered by status by default. Order and grouping are the viewer's choice.
-  const flat = direction === 'flat'
-  const [display, setDisplay] = useState(loadDisplay)
+  const cards = direction === 'cards'
+  const flat = direction === 'flat' || cards
+  const displayOption = cards ? 'cards' : 'flat'
+  const [displays, setDisplays] = useState(() => ({ flat: loadDisplay('flat'), cards: loadDisplay('cards') }))
+  const display = displays[displayOption]
   // Grouped by Safe, D shows the Safe table: each Safe, then each network, so nonces stay in order.
   const safeView = flat && display.groupBy === 'safe'
   const changeDisplay = (next: QueueDisplay) => {
-    setDisplay(next)
-    saveDisplay(next)
+    setDisplays((current) => ({ ...current, [displayOption]: next }))
+    saveDisplay(next, displayOption)
   }
   // Option C: one workspace load, a Needs you list across Safes, then the rest by Safe.
   const simple = direction === 'simple'
@@ -568,7 +574,7 @@ function PendingQueueView() {
   const orderedRows =
     flat && !safeView ? orderQueue(visible, { sort: GROUP_SORT[display.groupBy], accounts: orderedAccounts }) : []
   const orderedGroups =
-    flat && !safeView ? groupQueue(orderedRows, display.groupBy === 'network' ? 'network' : 'status', persona) : []
+    flat && !safeView ? groupQueue(orderedRows, display.groupBy === 'safe' ? 'status' : display.groupBy, persona) : []
   const reviewOrder =
     flat && !safeView
       ? orderedGroups.flatMap((group) => group.rows)
@@ -658,6 +664,8 @@ function PendingQueueView() {
     onSpeedUp: speedUp,
     alignTo: direction !== 'fleet',
     safeTable: direction === 'table' || safeView,
+    safenet: direction === 'table' || flat,
+    partyTags: cards,
     pageSize,
     signLabel,
     // Narrows the table to one Safe, on all its networks, and opens it from the top, under its filter tag.
@@ -766,6 +774,7 @@ function PendingQueueView() {
               {fleet && !milestone1 && !unavailable && (
                 <FleetPulse counts={cardCounts} isActive={isCardActive} onSelect={selectCard} />
               )}
+              {cards && !unavailable && <GroupByCards display={display} onChange={changeDisplay} />}
               <QueueToolbar
                 filters={filters}
                 accounts={orderedAccounts}
@@ -773,20 +782,18 @@ function PendingQueueView() {
                 simple={simple}
                 quickFilters={!flat}
                 status={
-                  flat ? (
-                    <DisplayMenu display={display} onChange={changeDisplay} />
-                  ) : (
-                    simple &&
-                    !unavailable && (
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        {formatUpdated(loadedAt ?? clock, Math.max(clock, loadedAt ?? 0))} ·
-                        <Button size="2xs" variant="ghost" onClick={() => setLoadedAt(null)}>
-                          <RefreshCw aria-hidden="true" />
-                          Refresh
-                        </Button>
-                      </span>
-                    )
-                  )
+                  flat
+                    ? !cards && <DisplayMenu display={display} onChange={changeDisplay} />
+                    : simple &&
+                      !unavailable && (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          {formatUpdated(loadedAt ?? clock, Math.max(clock, loadedAt ?? 0))} ·
+                          <Button size="2xs" variant="ghost" onClick={() => setLoadedAt(null)}>
+                            <RefreshCw aria-hidden="true" />
+                            Refresh
+                          </Button>
+                        </span>
+                      )
                 }
                 extraMenu={
                   <FleetFilterMenu
@@ -926,7 +933,7 @@ function PendingQueueView() {
               {!unavailable && !list && flat && !safeView && visible.length > 0 && (
                 <QueueOrderedTable
                   groups={orderedGroups}
-                  groupBy={display.groupBy === 'network' ? 'network' : 'status'}
+                  groupBy={display.groupBy === 'safe' ? 'status' : display.groupBy}
                   {...sectionProps}
                 />
               )}
@@ -937,6 +944,7 @@ function PendingQueueView() {
                 (visible.length > 0 || recoveries.visible.length > 0) && (
                   <QueueGroupedTable
                     sections={sections}
+                    ordered={flat}
                     isCollapsed={isCollapsed}
                     onToggle={toggleSection}
                     getSafeBatch={safeBatchFor}

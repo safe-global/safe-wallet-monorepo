@@ -18,7 +18,7 @@ import {
   type CollapseAll,
   type QueueSectionProps,
 } from './QueueSection'
-import { isActionGroup, type QueueGroup } from '../../services/order'
+import { isActionGroup, type OrderedGroupBy, type QueueGroup } from '../../services/order'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { SafeIdentity, chainLogoUrl } from '../shared'
 import { getColumns, groupBySafe, shareLimit, type QueueSectionData, type SafeGroup } from './sections'
@@ -29,6 +29,8 @@ export type QueueGroupedTableProps = Omit<QueueSectionProps, 'section' | 'collap
   onToggle: (id: string) => void
   getSafeBatch: (section: QueueSectionData) => BulkBatch | undefined
   collapse: CollapseAll
+  // Options D and E: the same columns as their other groupings.
+  ordered?: boolean
 }
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0! transition-colors group-hover/band:bg-foreground/[0.06]'
@@ -40,15 +42,20 @@ export function QueueGroupedTable({
   onToggle,
   getSafeBatch,
   collapse,
+  ordered = false,
   ...props
 }: QueueGroupedTableProps) {
   const { isWide, showNoteText, persona, recoveries, alignTo, simple, safeTable = false, pageSize = 10 } = props
   // Option A: one band per Safe and a sub-header per network, in place of the Chain column.
-  const columns = getColumns(isWide, alignTo).filter((column) => !safeTable || column !== 'Chain')
+  const columns = ordered
+    ? ORDERED_COLUMNS(isWide, props.partyTags)
+    : getColumns(isWide, alignTo).filter((column) => !safeTable || column !== 'Chain')
   // Option A: Transaction fits the widest action and To takes the slack, so a row reads as one short sentence.
-  const widths = safeTable
-    ? { ...getColumnWidths(showNoteText, alignTo), Transaction: 'w-[21.5rem]', To: undefined }
-    : getColumnWidths(showNoteText, alignTo)
+  const widths = ordered
+    ? orderedWidths(showNoteText, props.partyTags)
+    : safeTable
+      ? { ...getColumnWidths(showNoteText, alignTo), Transaction: 'w-[21.5rem]', To: undefined }
+      : getColumnWidths(showNoteText, alignTo)
   const groups: SafeGroup[] = safeTable
     ? groupBySafe(sections)
     : sections.map((section) => ({ id: section.id, label: section.label, sections: [section] }))
@@ -251,7 +258,7 @@ export function QueueGroupedTable({
           <Table
             aria-label="Pending transactions"
             variant="panel"
-            className={`table-fixed [&_td]:px-4 [&_th]:px-4 ${safeTable ? 'min-w-[1160px]' : 'min-w-[1080px]'}`}
+            className={`table-fixed [&_td]:px-4 [&_th]:px-4 ${ordered ? 'min-w-[1300px]' : safeTable ? 'min-w-[1160px]' : 'min-w-[1080px]'}`}
           >
             <colgroup>
               {columns.map((label) => (
@@ -352,15 +359,25 @@ function SeeAllButton({ label, onSeeAll }: { label: string; onSeeAll: () => void
 export type QueueOrderedTableProps = Omit<
   QueueGroupedTableProps,
   'sections' | 'isCollapsed' | 'onToggle' | 'getSafeBatch' | 'collapse'
-> & { groups: QueueGroup[]; groupBy: 'status' | 'network' }
+> & { groups: QueueGroup[]; groupBy: OrderedGroupBy }
 
-// Columns for option D. The Safe and its network are columns, so rows from any Safe sit in one list.
-// Nonce follows Transaction, since rows here aren't in nonce order.
-export const ORDERED_COLUMNS = (isWide: boolean) => [
-  'Transaction',
+// As in option A, Transaction fits the widest action and To takes the slack.
+// Option E fits the Safe tag in Transaction, in place of the Safe column.
+const orderedWidths = (showNoteText: boolean | undefined, partyTags = false): Record<string, string | undefined> => ({
+  ...getColumnWidths(showNoteText, true),
+  Transaction: partyTags ? 'w-[23rem]' : 'w-72',
+  To: undefined,
+  Safe: 'w-44',
+  Network: 'w-24',
+  Status: 'w-32',
+})
+
+// Columns for options D and E, the same in every grouping. Nonce leads, so conflicts draw the same bracket.
+export const ORDERED_COLUMNS = (isWide: boolean, partyTags = false) => [
   'Nonce',
+  'Transaction',
   'To',
-  'Safe',
+  ...(partyTags ? [] : ['Safe']),
   'Network',
   'Proposed',
   ...(isWide ? ['Note'] : []),
@@ -369,25 +386,16 @@ export const ORDERED_COLUMNS = (isWide: boolean) => [
   'Action',
 ]
 
-// Option D: rows grouped by status or network. Each group collapses, and the header collapses them all.
+// Option D: rows grouped by status, network or next nonce. Each group collapses, and the header collapses them all.
 export function QueueOrderedTable({ groups, groupBy, ...props }: QueueOrderedTableProps) {
-  const byStatus = groupBy === 'status'
-  // A network band already names the network.
-  const columns = ORDERED_COLUMNS(props.isWide).filter((column) => byStatus || column !== 'Network')
-  // As in option A, Transaction fits the widest action and To takes the slack.
-  const widths: Record<string, string | undefined> = {
-    ...getColumnWidths(props.showNoteText, true),
-    Transaction: 'w-72',
-    To: undefined,
-    Safe: 'w-36',
-    Network: 'w-32',
-    Status: 'w-32',
-  }
+  const byNetwork = groupBy === 'network'
+  const columns = ORDERED_COLUMNS(props.isWide, props.partyTags)
+  const widths = orderedWidths(props.showNoteText, props.partyTags)
   const [collapsed, setCollapsed] = useState<string[]>([])
   const { scroller, overflowing } = useScrollOverflow(`${groups.length}:${collapsed.join()}`)
   const toggle = (id: string) =>
     setCollapsed((ids) => (ids.includes(id) ? ids.filter((item) => item !== id) : [...ids, id]))
-  const nothingForYou = byStatus && !groups.some(isActionGroup)
+  const nothingForYou = groupBy === 'status' && !groups.some(isActionGroup)
   const allCollapsed = groups.length > 0 && groups.every((group) => collapsed.includes(group.id))
   return (
     <Card radius="xl" size="none">
@@ -409,7 +417,7 @@ export function QueueOrderedTable({ groups, groupBy, ...props }: QueueOrderedTab
                 allCollapsed,
                 onToggle: () => setCollapsed(allCollapsed ? [] : groups.map((group) => group.id)),
                 count: groups.length,
-                unit: byStatus ? ['group', 'groups'] : ['network', 'networks'],
+                unit: byNetwork ? ['network', 'networks'] : ['group', 'groups'],
               }}
             />
             {nothingForYou && (
@@ -432,7 +440,7 @@ export function QueueOrderedTable({ groups, groupBy, ...props }: QueueOrderedTab
               return (
                 <Fragment key={group.id}>
                   <TableBody>
-                    {byStatus ? (
+                    {!byNetwork ? (
                       <TableRow
                         data-no-hover
                         data-no-divider

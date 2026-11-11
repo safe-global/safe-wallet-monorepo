@@ -3,8 +3,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/componen
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import Identicon from '@safe-global/views/components/common/Identicon'
+import { Tag } from '@safe-global/views/components/ui/tag'
 import { useCopyToClipboard } from '@/components/common/AuditLog'
-import { HINT_CLASS } from './shared'
+import { HINT_CLASS, ROW_TAG_FILL } from './shared'
 
 // An address shown as an avatar and a name. Clicking it does what its row does; clicking the tooltip copies the address.
 export function CopyableParty({
@@ -15,6 +16,7 @@ export function CopyableParty({
   tone,
   logo,
   contract = false,
+  tag = false,
 }: {
   name: string
   address: string
@@ -25,30 +27,46 @@ export function CopyableParty({
   // A contract shows its logo, or the code icon when it has none, as production does.
   logo?: string
   contract?: boolean
+  // Option E: the party as a tag, like the type tag.
+  tag?: boolean
 }) {
   const [copied, copy] = useCopyToClipboard(address)
   const CopyIcon = copied ? Check : Copy
+  // Grey until the row or the avatar is hovered, so colour doesn't compete with the type tag.
+  const avatarIcon = (size: number) => (
+    <span className="flex shrink-0 grayscale transition-[filter] group-hover/transaction:grayscale-0 group-hover/party:grayscale-0">
+      {contract ? (
+        <Avatar style={{ width: size, height: size }}>
+          {logo && <AvatarImage src={logo} alt="" />}
+          <AvatarFallback>
+            <FileCode2 className="size-3.5 text-muted-foreground" strokeWidth={ICON_STROKE} aria-hidden="true" />
+          </AvatarFallback>
+        </Avatar>
+      ) : (
+        <Identicon address={avatar} size={size} />
+      )}
+    </span>
+  )
   return (
     <Tooltip delay={150}>
-      <TooltipTrigger render={<span className="group/party flex min-w-0 shrink items-center gap-1.5" />}>
-        {/* Grey until the row or the avatar is hovered, so colour doesn't compete with the type tag. */}
-        <span className="flex shrink-0 grayscale transition-[filter] group-hover/transaction:grayscale-0 group-hover/party:grayscale-0">
-          {contract ? (
-            <Avatar className="size-6">
-              {logo && <AvatarImage src={logo} alt="" />}
-              <AvatarFallback>
-                <FileCode2 className="size-3.5 text-muted-foreground" strokeWidth={ICON_STROKE} aria-hidden="true" />
-              </AvatarFallback>
-            </Avatar>
-          ) : (
-            <Identicon address={avatar} size={24} />
-          )}
-        </span>
-        <span
-          className={`truncate ${mono ? 'font-mono text-xs' : ''} ${tone === 'destructive' ? 'text-destructive' : ''}`}
-        >
-          {name}
-        </span>
+      <TooltipTrigger
+        render={<span className={`group/party flex min-w-0 shrink items-center ${tag ? ROW_TAG_FILL : 'gap-1.5'}`} />}
+      >
+        {tag ? (
+          <Tag className="min-w-0 shrink gap-1.5 pl-1">
+            {avatarIcon(16)}
+            <span className={`truncate ${mono ? 'font-mono text-xs' : ''}`}>{name}</span>
+          </Tag>
+        ) : (
+          <>
+            {avatarIcon(24)}
+            <span
+              className={`truncate ${mono ? 'font-mono text-xs' : ''} ${tone === 'destructive' ? 'text-destructive' : ''}`}
+            >
+              {name}
+            </span>
+          </>
+        )}
       </TooltipTrigger>
       <TooltipContent className={HINT_CLASS}>
         <button

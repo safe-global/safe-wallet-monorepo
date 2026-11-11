@@ -52,7 +52,15 @@ export const hasCounterparty = (tx: Proposal) =>
   tx.kind.type !== 'settings' && tx.kind.type !== 'rejection' && getCounterpartyCell(tx).name !== 'This Safe'
 
 // The other party. Its tooltip copies the address. In its own column, "to" or "via" becomes a tag like the type.
-export function Counterparty({ tx, inColumn = false }: { tx: Proposal; inColumn?: boolean }) {
+export function Counterparty({
+  tx,
+  inColumn = false,
+  tag = false,
+}: {
+  tx: Proposal
+  inColumn?: boolean
+  tag?: boolean
+}) {
   const counterparty = getCounterpartyCell(tx)
   if (!hasCounterparty(tx)) return null
   const address = counterparty.address ?? counterparty.avatar
@@ -78,6 +86,7 @@ export function Counterparty({ tx, inColumn = false }: { tx: Proposal; inColumn?
         mono={!named}
         logo={counterparty.logo}
         contract={counterparty.contract}
+        tag={tag}
       />
     </span>
   )

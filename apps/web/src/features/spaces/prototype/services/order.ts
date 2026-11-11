@@ -2,20 +2,43 @@ import type { Account, Persona, Proposal } from '../types'
 import { getAccount, getCreatedAt, getPrimaryStatus } from './model'
 import { getStepKind, STEP_RANK } from './nextSteps'
 
-// Option D · Flat table: rows grouped by status, Safe or network, each in a fixed order.
+// Option D · Flat table: rows grouped by status, Safe, network or next nonce, each in a fixed order.
 
-export type GroupBy = 'status' | 'safe' | 'network'
+export type GroupBy = 'status' | 'safe' | 'network' | 'next'
+export type OrderedGroupBy = Exclude<GroupBy, 'safe'>
 type SortBy = 'nonce' | 'oldest'
 export type QueueDisplay = { groupBy: GroupBy }
 
-export const GROUP_OPTIONS: { value: GroupBy; label: string; hint: string }[] = [
-  { value: 'status', label: 'Status', hint: 'Show what needs your action first' },
-  { value: 'safe', label: 'Safe', hint: 'Grouped by Safe and network in nonce order' },
-  { value: 'network', label: 'Network', hint: 'Grouped by network, each Safe in nonce order' },
+// `short` is the one-line explanation on option E's cards.
+export const GROUP_OPTIONS: { value: GroupBy; label: string; hint: string; short: string }[] = [
+  { value: 'status', label: 'Status', hint: 'Show what needs your action first', short: 'What needs you first' },
+  {
+    value: 'safe',
+    label: 'Safe',
+    hint: 'Grouped by Safe and network in nonce order',
+    short: 'Each Safe in nonce order',
+  },
+  {
+    value: 'network',
+    label: 'Network',
+    hint: 'Grouped by network, each Safe in nonce order',
+    short: 'Each network in nonce order',
+  },
+  {
+    value: 'next',
+    label: 'Next / Queue',
+    hint: 'Each Safe’s next nonce on every network, then the rest',
+    short: 'What can run now, then the rest',
+  },
 ]
 
 // Each grouping has one fixed order. Grouped by Safe or network, nonces stay in sequence.
-export const GROUP_SORT: Record<GroupBy, SortBy> = { status: 'oldest', safe: 'nonce', network: 'nonce' }
+export const GROUP_SORT: Record<GroupBy, SortBy> = {
+  status: 'oldest',
+  safe: 'nonce',
+  network: 'nonce',
+  next: 'nonce',
+}
 export const DEFAULT_DISPLAY: QueueDisplay = { groupBy: 'status' }
 
 // Last signatures and executes first, then signatures, then rows waiting on others, then blocked rows.
@@ -74,9 +97,29 @@ const STATUS_GROUPS = [
 export const isActionGroup = (group: QueueGroup) =>
   ['status-sign-execute', 'status-execute', 'status-sign'].includes(group.id)
 
+const byNetwork = (rows: Proposal[]) => {
+  const groups = new Map<string, QueueGroup>()
+  rows.forEach((tx) => {
+    const { chainId, network } = getAccount(tx)
+    const id = `network-${chainId}`
+    const group = groups.get(id) ?? { id, label: network, chainId, rows: [] }
+    group.rows.push(tx)
+    groups.set(id, group)
+  })
+  return [...groups.values()]
+}
+
 // Status groups come in a fixed order and drop when empty. A conflict group sits under its most urgent option.
 // Network groups appear in the order of their first row.
-export const groupQueue = (rows: Proposal[], groupBy: 'status' | 'network', persona: Persona): QueueGroup[] => {
+// Next holds what each Safe can run now on each network. Queue holds the rest, by network, then Safe and nonce.
+export const groupQueue = (rows: Proposal[], groupBy: OrderedGroupBy, persona: Persona): QueueGroup[] => {
+  if (groupBy === 'next') {
+    const isNext = (tx: Proposal) => tx.nonce === getAccount(tx).nextNonce
+    return [
+      { id: 'next', label: 'Next', rows: rows.filter(isNext) },
+      { id: 'queue', label: 'Queue', rows: byNetwork(rows.filter((tx) => !isNext(tx))).flatMap((group) => group.rows) },
+    ].filter((group) => group.rows.length > 0)
+  }
   if (groupBy === 'status') {
     const rank = new Map<string, number>()
     rows.forEach((tx) => {
@@ -90,22 +133,16 @@ export const groupQueue = (rows: Proposal[], groupBy: 'status' | 'network', pers
       rows: rows.filter((tx) => ranks.includes(rank.get(clusterKey(tx))!)),
     })).filter((group) => group.rows.length > 0)
   }
-  const groups = new Map<string, QueueGroup>()
-  rows.forEach((tx) => {
-    const { chainId, network } = getAccount(tx)
-    const id = `network-${chainId}`
-    const group = groups.get(id) ?? { id, label: network, chainId, rows: [] }
-    group.rows.push(tx)
-    groups.set(id, group)
-  })
-  return [...groups.values()]
+  return byNetwork(rows)
 }
 
-const STORAGE_KEY = 'prototype.pendingQueue.display'
+// Options D and E each remember their own grouping.
+const STORAGE_KEYS = { flat: 'prototype.pendingQueue.display', cards: 'prototype.pendingQueue.display.cards' }
+export type DisplayOption = keyof typeof STORAGE_KEYS
 
-export const loadDisplay = (): QueueDisplay => {
+export const loadDisplay = (option: DisplayOption = 'flat'): QueueDisplay => {
   try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') as Partial<QueueDisplay> | null
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS[option]) ?? 'null') as Partial<QueueDisplay> | null
     const groupBy = GROUP_OPTIONS.find((option) => option.value === saved?.groupBy)?.value
     return groupBy ? { groupBy } : DEFAULT_DISPLAY
   } catch {
@@ -113,9 +150,9 @@ export const loadDisplay = (): QueueDisplay => {
   }
 }
 
-export const saveDisplay = (display: QueueDisplay) => {
+export const saveDisplay = (display: QueueDisplay, option: DisplayOption = 'flat') => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(display))
+    localStorage.setItem(STORAGE_KEYS[option], JSON.stringify(display))
   } catch {
     // Private windows can block storage. The choice then lasts until reload.
   }
