@@ -661,6 +661,14 @@ Deviations from the plan:
 14. **Commits.** D17's sequence, with two `fix(design-system)` commits (registry formatting, prettier pin) and the workflow and guidance split into `chore:` and `docs:`. `.github/workflows/actions.lock` gained the new workflow's entry by hand, since `gh actions-lock` is not installed here; it lists the same actions as `web-tanstack-checks.yml`.
 15. **SC4 smoke test environment.** The shadcn CLI sends every request, `localhost` included, through `https_proxy` and ignores `NO_PROXY`. The agent proxy refuses both localhost and `ui.shadcn.com`. So the CLI ran with only the lowercase `https_proxy` removed from its environment (npm installs still used the proxy), and with `REGISTRY_URL` pointing at a local stub of `colors/neutral.json`, which the CLI fetches for every component. The `npm install` that `shadcn add` runs for item dependencies does not take `--before`. None of this applies outside this container.
 
+16. **Review fixes (after approval).**
+    - Story descriptions render backtick spans as `<code>` (shared `withCode` in `src/components/docs/inline-code.tsx`).
+    - The Button `Guidelines` story is wallet-internal guidance (its canvas names `components/ui/button.tsx`), so it is tagged `docs-hidden`: the docs show 92 of the 93 stories. Two `packages/ui` comments that pointed at repo paths were reworded (`typography.tsx`, `overlay.ts`), so the registry ships none. This widens check 11: besides the `./eslint` key, `AGENTS.md` and `README.md`, `packages/ui` now has those two comment edits and the one tag. The ui Storybook's 93 story IDs are identical before and after.
+    - `INTERNAL_REFERENCE` in `src/scripts/paths.ts` (`.claude/`, `AGENTS.md`, `apps/web`, `@safe-global/views`, `packages/{ui,theme,views}/`, `.storybook/`) is rejected by `check-registry` in every item's content and asserted by `registry.test.ts` and `stories.test.ts` (descriptions and Code tab sources).
+    - `next.config.mjs` and `src/lib/env.ts` share `normaliseBasePath` from `src/lib/base-path.mjs` (with a `.d.mts`), and `env.test.ts` pins that the config uses it.
+    - `design-system-checks.yml` now runs prettier and, after the build, installs the Chromium headless shell and runs the crawl (D16 had no Playwright job in CI). Its paths filter adds `package.json`, `.yarnrc.yml`, `yarn.config.cjs`, `.prettierrc`, `.prettierignore` and the `yarn`/`corepack` actions, per `docs/ci-required-checks.md`.
+    - After these fixes: ui type-check, lint, test (243) and prettier pass; design-system type-check, lint, test (34), prettier and build pass; `registry.json` is current; no `out/r/*.json` mentions `.claude`, `AGENTS.md`, `apps/web` or `@safe-global/views`; knip passes; the root crawl passes (178 tests, one preview fewer).
+
 Verification results (all after the last code change):
 
 - `yarn constraints` passes; `yarn why next` shows one `next@patch:16.4.2` resolution.
