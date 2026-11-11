@@ -14,10 +14,20 @@ export type PreviewAction = 'sign' | 'execute' | 'signAndExecute'
 export const getFirstReady = (items: Proposal[]) => items.find((tx) => getState(tx).ready)
 
 // Partial loading: the last Safes in the workspace fail to load, never all of them.
+// `?failed=all`: nothing loads, so the page explains why instead of showing an empty queue.
+export const ALL_FAILED = 99
 export const getFailedAccounts = (scenario: Scenario, count = 1): Account[] => {
   const all = getScenarioAccounts(scenario)
+  if (count >= ALL_FAILED) return all
   const failing = Math.min(Math.max(count, 1), all.length - 1)
   return failing > 0 ? all.slice(all.length - failing) : []
+}
+
+// Safes that aren't deployed yet have no queue, so they're never an error. They sit just before the failed ones.
+export const getUndeployedAccounts = (scenario: Scenario, failedCount = 1, count = 0): Account[] => {
+  const all = getScenarioAccounts(scenario)
+  const end = all.length - getFailedAccounts(scenario, failedCount).length
+  return count > 0 ? all.slice(Math.max(0, end - count), end) : []
 }
 
 // States layer on any scenario. Partial loading drops the failed Safes. Executing gives the running
@@ -27,11 +37,15 @@ export const applyQueueState = (
   scenario: Scenario,
   state: QueueState,
   failedCount = 1,
+  undeployedCount = 0,
 ): Proposal[] => {
   if (state === 'empty' || state === 'loading' || state === 'error') return []
   if (state === 'partial') {
-    const failed = getFailedAccounts(scenario, failedCount).map((account) => account.id)
-    return items.filter((tx) => !failed.includes(tx.account))
+    const missing = [
+      ...getFailedAccounts(scenario, failedCount),
+      ...getUndeployedAccounts(scenario, failedCount, undeployedCount),
+    ].map((account) => account.id)
+    return items.filter((tx) => !missing.includes(tx.account))
   }
   const running = state === 'executing' ? getFirstReady(items) : undefined
   if (
@@ -58,9 +72,9 @@ export const applyQueueState = (
 export const createPreviewQueue = (
   scenario: Scenario,
   state: QueueState = 'normal',
-  options: { deepQueue?: boolean; failedCount?: number } = {},
+  options: { deepQueue?: boolean; failedCount?: number; undeployedCount?: number } = {},
 ): PreviewQueue => ({
-  items: applyQueueState(getScenario(scenario, options), scenario, state, options.failedCount),
+  items: applyQueueState(getScenario(scenario, options), scenario, state, options.failedCount, options.undeployedCount),
   completed: [],
   nextProposalId: 1,
   nextNonces: Object.fromEntries(getScenarioAccounts(scenario).map((account) => [account.id, account.nextNonce])),

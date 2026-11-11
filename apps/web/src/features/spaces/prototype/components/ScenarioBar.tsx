@@ -3,6 +3,7 @@ import { Check, Copy, FlaskConical } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@safe-global/views/components/ui/select'
+import { ALL_FAILED } from '../services/queue'
 import type { Direction, Persona, QueueState, Scenario } from '../types'
 import type { SignLabel } from '../services/actions'
 import { Badge } from '@safe-global/views/components/ui/badge'
@@ -122,8 +123,10 @@ function PersonaCard({ persona, scenario }: { persona: Persona; scenario: Scenar
 
 const PAGE_SIZES = { '10': '10 per Safe', '20': '20 per Safe', '5': '5 per Safe' }
 export const FAILED_COUNTS = [1, 3, 5] as const
-const FAILED_LABELS = { '1': '1 Safe failed', '3': '3 Safes failed', '5': '5 Safes failed' }
-const WARNING_STYLES = { each: 'One warning per Safe', summary: 'One summary' }
+const FAILED_LABELS = { '1': '1 Safe failed', '3': '3 Safes failed', '5': '5 Safes failed', all: 'All Safes failed' }
+const WARNING_STYLES = { chip: 'Toolbar chip', each: 'One warning per Safe', summary: 'One summary' }
+export const UNDEPLOYED_COUNTS = [0, 1, 2] as const
+const UNDEPLOYED_LABELS = { '0': 'All deployed', '1': '1 not deployed', '2': '2 not deployed' }
 const SIGN_LABELS: Record<SignLabel, string> = { Sign: 'Button · Sign', Review: 'Button · Review' }
 
 export function ScenarioBar({
@@ -137,10 +140,12 @@ export function ScenarioBar({
   signLabel,
   failedCount,
   warningStyle,
+  undeployedCount,
   onChange,
 }: {
   failedCount: number
-  warningStyle: 'each' | 'summary'
+  warningStyle: 'chip' | 'each' | 'summary'
+  undeployedCount: number
   milestone1: boolean
   pageSize: number
   signLabel: SignLabel
@@ -232,7 +237,7 @@ export function ScenarioBar({
         {state === 'partial' && (
           <>
             <Select
-              value={String(failedCount)}
+              value={failedCount >= ALL_FAILED ? 'all' : String(failedCount)}
               items={FAILED_LABELS}
               onValueChange={(value) => value && onChange({ failed: value })}
             >
@@ -257,6 +262,22 @@ export function ScenarioBar({
               </SelectTrigger>
               <SelectContent className="w-auto min-w-(--anchor-width)">
                 {Object.entries(WARNING_STYLES).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={String(undeployedCount)}
+              items={UNDEPLOYED_LABELS}
+              onValueChange={(value) => value && onChange({ undeployed: value })}
+            >
+              <SelectTrigger size="sm" variant="ghost" aria-label="Safes not deployed yet">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="w-auto min-w-(--anchor-width)">
+                {Object.entries(UNDEPLOYED_LABELS).map(([value, label]) => (
                   <SelectItem key={value} value={value}>
                     {label}
                   </SelectItem>

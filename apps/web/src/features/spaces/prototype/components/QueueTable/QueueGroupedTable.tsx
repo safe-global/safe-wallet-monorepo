@@ -6,7 +6,7 @@ import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Table, TableBody, TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import type { BulkBatch } from '../../services/queue'
 import { getAccount } from '../../services/model'
-import type { Proposal } from '../../types'
+import type { Account, Proposal } from '../../types'
 import {
   getColumnWidths,
   QueueSectionRows,
@@ -18,6 +18,7 @@ import {
   type CollapseAll,
   type QueueSectionProps,
 } from './QueueSection'
+import { FailedSafeBand } from '../LoadWarnings'
 import { isActionGroup, type OrderedGroupBy, type QueueGroup } from '../../services/order'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { SafeIdentity, chainLogoUrl } from '../shared'
@@ -31,6 +32,8 @@ export type QueueGroupedTableProps = Omit<QueueSectionProps, 'section' | 'collap
   collapse: CollapseAll
   // Options D and E: the same columns as their other groupings.
   ordered?: boolean
+  // Option E: Safes that didn't load keep a band, with Try again.
+  failedSafes?: { accounts: Account[]; retrying: string[]; onRetry: (ids: string[]) => void }
 }
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0! transition-colors group-hover/band:bg-foreground/[0.06]'
@@ -43,6 +46,7 @@ export function QueueGroupedTable({
   getSafeBatch,
   collapse,
   ordered = false,
+  failedSafes,
   ...props
 }: QueueGroupedTableProps) {
   const { isWide, showNoteText, persona, recoveries, alignTo, simple, safeTable = false, pageSize = 10 } = props
@@ -267,6 +271,16 @@ export function QueueGroupedTable({
             </colgroup>
             <QueueTableHead columns={columns} collapse={safeTable ? { ...collapse, count: groups.length } : collapse} />
             {groups.map((group) => (group.sections.length > 1 ? multiChainSafe(group) : singleSafe(group)))}
+            {failedSafes?.accounts.map((account) => (
+              <TableBody key={`failed-${account.id}`}>
+                <FailedSafeBand
+                  account={account}
+                  columnCount={columns.length}
+                  loading={failedSafes.retrying.includes(account.id)}
+                  onRetry={() => failedSafes.onRetry([account.id])}
+                />
+              </TableBody>
+            ))}
           </Table>
         </div>
       </CardContent>

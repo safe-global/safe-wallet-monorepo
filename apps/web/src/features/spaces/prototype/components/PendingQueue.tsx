@@ -38,12 +38,14 @@ import {
   createPreviewQueue,
   executePreviewBatches,
   getBulkExecutable,
+  ALL_FAILED,
   getFailedAccounts,
+  getUndeployedAccounts,
   proposePreviewAlternative,
   type PreviewAction,
 } from '../services/queue'
-import { LoadWarnings, type LoadWarningStyle } from './LoadWarnings'
-import { FAILED_COUNTS } from './ScenarioBar'
+import { LoadStatusChip, LoadWarnings, NothingLoaded, type LoadWarningStyle } from './LoadWarnings'
+import { FAILED_COUNTS, UNDEPLOYED_COUNTS } from './ScenarioBar'
 import { getOutsiders, getRemindable, type MenuAction, type SignLabel } from '../services/actions'
 import {
   advanceExecution,
@@ -141,11 +143,29 @@ function PendingQueueView() {
   const pageSize = router.query.page === '5' ? 5 : router.query.page === '20' ? 20 : 10
   const signLabel: SignLabel = router.query.cta === 'review' ? 'Review' : 'Sign'
   // Partial loading: how many Safes fail (`?failed=3`), and one warning each or one summary (`?warn=summary`).
-  const failedCount = FAILED_COUNTS.find((count) => String(count) === router.query.failed) ?? 1
-  const warningStyle: LoadWarningStyle = router.query.warn === 'summary' ? 'summary' : 'each'
+  const failedCount =
+    router.query.failed === 'all'
+      ? ALL_FAILED
+      : (FAILED_COUNTS.find((count) => String(count) === router.query.failed) ?? 1)
+  // Option E defaults to the toolbar chip and one Safe that isn't deployed yet (`?warn=`, `?undeployed=0|1|2`).
+  const warningStyle: LoadWarningStyle =
+    router.query.warn === 'summary' || router.query.warn === 'each' || router.query.warn === 'chip'
+      ? router.query.warn
+      : router.query.option === 'cards'
+        ? 'chip'
+        : 'each'
+  const undeployedCount =
+    UNDEPLOYED_COUNTS.find((count) => String(count) === router.query.undeployed) ??
+    (router.query.option === 'cards' ? 1 : 0)
+  const undeployedIds =
+    state === 'partial'
+      ? getUndeployedAccounts(scenario, failedCount, undeployedCount).map((account) => account.id)
+      : []
 
   const deepQueue = direction === 'table'
-  const [queue, setQueue] = useState(() => createPreviewQueue(scenario, state, { deepQueue, failedCount }))
+  const [queue, setQueue] = useState(() =>
+    createPreviewQueue(scenario, state, { deepQueue, failedCount, undeployedCount }),
+  )
   const [failedIds, setFailedIds] = useState(() =>
     state === 'partial' ? getFailedAccounts(scenario, failedCount).map((account) => account.id) : [],
   )
@@ -195,6 +215,12 @@ function PendingQueueView() {
     nextNonce: queue.nextNonces[account.id],
   }))
   const unavailable = state === 'loading' || state === 'error' || simpleLoading
+  // Option E: when no Safe loads, the page says why instead of showing an empty queue.
+  const nothingLoaded =
+    cards &&
+    warningStyle === 'chip' &&
+    state === 'partial' &&
+    failedIds.length + undeployedIds.length >= accounts.length
   // The first Safe with a blocked row and the first with a waiting one, then the next by rank.
   const openWaitingSafes = () => {
     const needsYouIds = new Set(getNeedsYou(items, persona).map((tx) => tx.id))
@@ -799,18 +825,31 @@ function PendingQueueView() {
                 simple={simple}
                 quickFilters={!flat}
                 status={
-                  flat
-                    ? !cards && <DisplayMenu display={display} onChange={changeDisplay} />
-                    : simple &&
-                      !unavailable && (
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                          {formatUpdated(loadedAt ?? clock, Math.max(clock, loadedAt ?? 0))} ·
-                          <Button size="2xs" variant="ghost" onClick={() => setLoadedAt(null)}>
-                            <RefreshCw aria-hidden="true" />
-                            Refresh
-                          </Button>
-                        </span>
+                  flat ? (
+                    cards ? (
+                      warningStyle === 'chip' && (
+                        <LoadStatusChip
+                          failed={accounts.filter((account) => failedIds.includes(account.id))}
+                          undeployed={accounts.filter((account) => undeployedIds.includes(account.id))}
+                          retrying={retrying}
+                          onRetry={retryLoad}
+                        />
                       )
+                    ) : (
+                      <DisplayMenu display={display} onChange={changeDisplay} />
+                    )
+                  ) : (
+                    simple &&
+                    !unavailable && (
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        {formatUpdated(loadedAt ?? clock, Math.max(clock, loadedAt ?? 0))} ·
+                        <Button size="2xs" variant="ghost" onClick={() => setLoadedAt(null)}>
+                          <RefreshCw aria-hidden="true" />
+                          Refresh
+                        </Button>
+                      </span>
+                    )
+                  )
                 }
                 extraMenu={
                   <FleetFilterMenu
@@ -853,7 +892,15 @@ function PendingQueueView() {
               />
               {(state === 'loading' || simpleLoading) && <QueueSkeleton />}
               {state === 'error' && <QueueError onRetry={() => setOption({ state: 'normal' })} />}
-              {!unavailable && !list && !visible.length && !recoveries.visible.length && (
+              {nothingLoaded && (
+                <NothingLoaded
+                  failed={accounts.filter((account) => failedIds.includes(account.id))}
+                  undeployed={accounts.filter((account) => undeployedIds.includes(account.id))}
+                  retrying={retrying}
+                  onRetry={retryLoad}
+                />
+              )}
+              {!unavailable && !nothingLoaded && !list && !visible.length && !recoveries.visible.length && (
                 <Empty className="rounded-2xl border border-border bg-card">
                   <EmptyHeader>
                     <EmptyMedia variant="icon">
@@ -966,6 +1013,15 @@ function PendingQueueView() {
                     onToggle={toggleSection}
                     getSafeBatch={safeBatchFor}
                     collapse={{ allCollapsed, onToggle: toggleAll, count: sections.length }}
+                    failedSafes={
+                      cards && warningStyle === 'chip'
+                        ? {
+                            accounts: accounts.filter((account) => failedIds.includes(account.id)),
+                            retrying,
+                            onRetry: retryLoad,
+                          }
+                        : undefined
+                    }
                     {...sectionProps}
                   />
                 )}
@@ -995,6 +1051,7 @@ function PendingQueueView() {
           signLabel={signLabel}
           failedCount={failedCount}
           warningStyle={warningStyle}
+          undeployedCount={undeployedCount}
           onChange={setOption}
         />
         <ReviewDrawer
