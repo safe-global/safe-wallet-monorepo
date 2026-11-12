@@ -50,6 +50,8 @@ const History = () => {
 
           <PopoverContent
             align="end"
+            // The form grows when a recipient is entered; flipping above the button would make it jump
+            collisionAvoidance={{ side: 'none' }}
             className="mt-1 w-[min(720px,calc(100vw-2rem))] max-w-[90vw] overflow-visible rounded-xl border border-border bg-card p-0 shadow-md ring-0"
           >
             <TxFilterForm onClose={handleFilterClose} />
