@@ -313,7 +313,7 @@ describe('TokenLimitCard', () => {
       const options = Array.from(screen.getByTestId('limit-token-selector').querySelectorAll('option')).map(
         (option) => option.textContent,
       )
-      expect(options).toEqual(['none', 'ETH', 'USDC', 'DAI'])
+      expect(options).toEqual(['none', 'ETH', 'USDC', 'DAI', 'NEW'])
       expect(screen.getByRole('option', { name: 'USDC' })).toBeDisabled()
     })
 
