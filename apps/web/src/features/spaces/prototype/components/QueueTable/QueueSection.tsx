@@ -5,7 +5,7 @@ import { Badge } from '@safe-global/views/components/ui/badge'
 import { TableHeader, TableHead, TableRow, TableCell } from '@safe-global/views/components/ui/table'
 import type { BulkBatch, PreviewAction } from '../../services/queue'
 import type { MenuAction } from '../../services/actions'
-import type { Account, Filter, Persona, Proposal } from '../../types'
+import type { Account, Filter, Persona, Proposal, Milestone } from '../../types'
 import type { Executions } from '../../services/execution'
 import { SafeIdentity, STATUS_ORDER, chainLogoUrl } from '../shared'
 import { QueueRow } from './QueueRow'
@@ -34,6 +34,7 @@ const STEPS_WIDTHS: Record<string, string> = {
 }
 
 export type QueueSectionProps = {
+  milestone?: Milestone
   section: QueueSectionData
   items: Proposal[]
   persona: Persona
@@ -343,6 +344,7 @@ export function QueueSectionRows({
   safeTable,
   partyTags,
   compact,
+  milestone,
 }: QueueSectionRowsProps) {
   const [conflictHover, setConflictHover] = useState<string | null>(null)
   return (
@@ -384,6 +386,7 @@ export function QueueSectionRows({
           safeTable={safeTable}
           partyTags={partyTags}
           compact={compact}
+          milestone={milestone}
         />
       ))}
       {!section.items.length && !safeRecoveries.length && (

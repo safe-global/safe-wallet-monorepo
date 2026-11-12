@@ -4,7 +4,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@safe-global/views/components/ui/select'
 import { ALL_FAILED } from '../services/queue'
-import type { Direction, Persona, QueueState, Scenario } from '../types'
+import type { Direction, Persona, QueueState, Scenario, Milestone } from '../types'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { FAMILY_LABELS, getPersonaLabel, PERSONAS } from '../services/personas'
 import { getScenario, getScenarioAccounts, shortAddress } from '../services/model'
@@ -126,11 +126,13 @@ export function ScenarioBar({
   state,
   hypernative,
   persona,
+  milestone,
   failedCount,
   loadReason,
   undeployedCount,
   onChange,
 }: {
+  milestone: Milestone
   failedCount: number
   loadReason: LoadReason
   undeployedCount: number
@@ -155,8 +157,14 @@ export function ScenarioBar({
           onValueChange={(value) => onChange({ option: String(value) })}
         >
           <TabsList aria-label="Design direction" className="max-w-full justify-start overflow-x-auto">
-            <TabsTrigger value="flat">D · Flat table</TabsTrigger>
+            <TabsTrigger value="flat">D · Group button</TabsTrigger>
             <TabsTrigger value="cards">E · Group cards</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <Tabs value={String(milestone)} onValueChange={(value) => onChange({ m: String(value) })}>
+          <TabsList aria-label="Milestone">
+            <TabsTrigger value="1">M1</TabsTrigger>
+            <TabsTrigger value="2">M2</TabsTrigger>
           </TabsList>
         </Tabs>
         {state === 'partial' && (

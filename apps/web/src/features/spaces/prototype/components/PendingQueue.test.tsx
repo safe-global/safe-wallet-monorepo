@@ -25,18 +25,18 @@ beforeEach(() => {
 
 jest.mock('./PrototypeFrame', () => ({ PrototypeFrame: ({ children }: { children: ReactNode }) => <>{children}</> }))
 
-// These tests cover option E on the everyday queue unless they say otherwise.
+// These tests cover option E on the everyday queue in M2, with every feature on, unless they say otherwise.
 type RenderOptions = Parameters<typeof baseRender>[1]
 const withDefaults = (options: RenderOptions = {}): RenderOptions => ({
   ...options,
   routerProps: {
     ...options?.routerProps,
-    query: { option: 'cards', scenario: 'everyday', ...options?.routerProps?.query },
+    query: { option: 'cards', scenario: 'everyday', m: '2', ...options?.routerProps?.query },
   },
 })
 // Option E remembers its grouping. The Safe view tests start grouped by Safe.
 const groupBySafe = () =>
-  localStorage.setItem('prototype.pendingQueue.display.cards', JSON.stringify({ groupBy: 'safe' }))
+  localStorage.setItem('prototype.pendingQueue.display.cards.flat', JSON.stringify({ groupBy: 'safe' }))
 const render = (ui: Parameters<typeof baseRender>[0], options?: RenderOptions) => baseRender(ui, withDefaults(options))
 const renderWithUserEvent = (ui: Parameters<typeof baseRenderWithUserEvent>[0], options?: RenderOptions) =>
   baseRenderWithUserEvent(ui, withDefaults(options))
@@ -61,6 +61,9 @@ const toggleFilter = async (user: TestUser, section: string, ...options: string[
 
 const allPending = () => within(screen.getByRole('region', { name: 'Queue' }))
 const openRows = () => allPending().getAllByRole('button', { name: /^Open / })
+// Option E's Group by cards: toggle buttons, none pressed at first
+const groupCard = (name: RegExp) =>
+  within(screen.getByRole('group', { name: 'Group by' })).getByRole('button', { name })
 const rowFor = (label: string) =>
   allPending()
     .getByRole('button', { name: `Open ${label}` })
@@ -807,7 +810,11 @@ describe('queue design exploration', () => {
     localStorage.clear()
     baseRender(<PendingQueue />)
     expect(screen.getByRole('tab', { name: 'E · Group cards' })).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['D · Flat table', 'E · Group cards'])
+    expect(
+      within(screen.getByRole('tablist', { name: 'Design direction' }))
+        .getAllByRole('tab')
+        .map((tab) => tab.textContent),
+    ).toEqual(['D · Group button', 'E · Group cards'])
     expect(screen.getByRole('combobox', { name: 'Scenario' })).toHaveTextContent('8 Safes · typical')
     expect(screen.getByRole('combobox', { name: 'State' })).toHaveTextContent('Normal')
     expect(
@@ -1117,19 +1124,19 @@ describe('option D · flat table', () => {
 describe('option E · Group by cards', () => {
   beforeEach(() => localStorage.clear())
   const cards = { routerProps: { query: { option: 'cards' } } }
-  const pick = (name: RegExp) => fireEvent.click(screen.getByRole('radio', { name }))
+  const pick = (name: RegExp) => fireEvent.click(groupCard(name))
   const columnTitles = () => screen.getAllByRole('columnheader').map((header) => header.textContent)
 
   it('keeps the same columns in every grouping, Nonce first', () => {
     render(<PendingQueue />, cards)
     // The last header cell also holds Collapse all, whose label names the groups.
-    const byStatus = columnTitles().slice(0, -1)
-    expect(byStatus.slice(0, 4)).toEqual(['Nonce', 'Transaction', 'To', 'Proposed'])
+    const flat = columnTitles().slice(0, -1)
+    expect(flat.slice(0, 4)).toEqual(['Nonce', 'Transaction', 'To', 'Proposed'])
     // The network sits in the Safe tag, so there's no Network column.
     expect(allPending().getAllByAltText(/^on (Ethereum|Base|Arbitrum)$/).length).toBeGreaterThan(0)
-    for (const name of [/^Safe/, /^Network/, /^Up next/]) {
+    for (const name of [/^Status/, /^Safe/, /^Network/, /^Up next/]) {
       pick(name)
-      expect(columnTitles().slice(0, -1)).toEqual(byStatus)
+      expect(columnTitles().slice(0, -1)).toEqual(flat)
     }
     pick(/^Network/)
     expect(screen.getByRole('button', { name: 'Collapse Ethereum' })).toBeInTheDocument()
@@ -1137,7 +1144,7 @@ describe('option E · Group by cards', () => {
 
   it('names states in its badges, with the earlier nonce only on rows behind one', () => {
     render(<PendingQueue />, cards)
-    fireEvent.click(screen.getByRole('radio', { name: /^Up next/ }))
+    fireEvent.click(groupCard(/^Up next/))
     const next = document.getElementById('rows-next')!
     const behind = document.getElementById('rows-queue')!
     expect(within(next).getAllByText(/^(Ready|Needs your signature|Awaiting \d+ signatures?)$/).length).toBeGreaterThan(
@@ -1158,7 +1165,7 @@ describe('option E · Group by cards', () => {
   it('on a phone, shows pills without explanations and rows with Nonce, Transaction and the action', () => {
     jest.mocked(useIsMobile).mockReturnValue(true)
     render(<PendingQueue />, cards)
-    expect(screen.getByRole('radio', { name: /^Status/ })).toHaveTextContent(/^\d+Status$/)
+    expect(groupCard(/^Status/)).toHaveTextContent(/^\d+Status$/)
     expect(columnTitles().map((title) => title?.replace(/Collapse.*|Expand.*/, ''))).toEqual([
       'Nonce',
       'Transaction',
@@ -1190,31 +1197,32 @@ describe('option E · Group by cards', () => {
     }
   })
 
-  it('shows Group by as cards with Status selected, and no Group by menu', () => {
+  it('shows Group by as cards with none pressed, so the table opens as a flat list', () => {
     render(<PendingQueue />, cards)
-    const group = screen.getByRole('radiogroup', { name: 'Group by' })
-    expect(
-      within(group)
-        .getAllByRole('radio')
-        .map((card) => card.textContent),
-    ).toEqual([
+    const group = screen.getByRole('group', { name: 'Group by' })
+    const all = within(group).getAllByRole('button')
+    expect(all.map((card) => card.textContent)).toEqual([
       expect.stringMatching(/^\d+StatusTransactions that need your action first$/),
       expect.stringMatching(/^\d+Up nextNext transaction on each Safe$/),
       expect.stringMatching(/^\d+SafesTransactions grouped by Safe, network, and nonce$/),
       expect.stringMatching(/^\d+NetworksTransactions grouped by network$/),
     ])
-    expect(within(group).getByRole('radio', { name: /^Status/ })).toHaveAttribute('aria-checked', 'true')
-    expect(screen.queryByRole('button', { name: /^Group by / })).toBeNull()
+    all.forEach((card) => expect(card).toHaveAttribute('aria-pressed', 'false'))
+    expect(allPending().queryAllByRole('heading', { level: 3 })).toHaveLength(0)
+    expect(screen.queryByRole('button', { name: /^Group by/ })).toBeNull()
   })
 
-  it('regroups when a card is picked, and remembers it apart from option D', async () => {
+  it('groups when a card is pressed, goes back to the flat list when pressed again, and remembers it', async () => {
     const { user, unmount } = renderWithUserEvent(<PendingQueue />, cards)
-    await user.click(screen.getByRole('radio', { name: /^Up next/ }))
-    expect(screen.getByRole('radio', { name: /^Up next/ })).toHaveAttribute('aria-checked', 'true')
+    await user.click(groupCard(/^Up next/))
+    expect(groupCard(/^Up next/)).toHaveAttribute('aria-pressed', 'true')
     expect(allPending().getByRole('heading', { level: 3, name: /^Next/ })).toBeInTheDocument()
     unmount()
-    render(<PendingQueue />, { routerProps: { query: { option: 'flat' } } })
-    expect(screen.getByRole('button', { name: 'Group by' })).toBeInTheDocument()
+    const again = renderWithUserEvent(<PendingQueue />, cards)
+    expect(groupCard(/^Up next/)).toHaveAttribute('aria-pressed', 'true')
+    await again.user.click(groupCard(/^Up next/))
+    expect(groupCard(/^Up next/)).toHaveAttribute('aria-pressed', 'false')
+    expect(allPending().queryAllByRole('heading', { level: 3 })).toHaveLength(0)
   })
 })
 
@@ -1246,7 +1254,7 @@ describe('option E · Safes that fail to load', () => {
 
   it('puts failed Safes at the top when grouped by Safe', () => {
     render(<PendingQueue />, partial({ failed: '3' }))
-    fireEvent.click(screen.getByRole('radio', { name: /^Safes/ }))
+    fireEvent.click(groupCard(/^Safes/))
     const firstBand = allPending()
       .getAllByRole('row')
       .find((row) => /Couldn’t load|Treasury Main|Ops Payroll/.test(row.textContent ?? ''))
@@ -1256,7 +1264,7 @@ describe('option E · Safes that fail to load', () => {
   it('keeps a band with Reload for each failed Safe when grouped by Safe', async () => {
     jest.useFakeTimers()
     render(<PendingQueue />, partial({ failed: '3' }))
-    fireEvent.click(screen.getByRole('radio', { name: /^Safes/ }))
+    fireEvent.click(groupCard(/^Safes/))
     fireEvent.click(screen.getByRole('button', { name: 'Reload Grants on Arbitrum' }))
     act(() => jest.advanceTimersByTime(1000))
     expect(screen.queryByRole('button', { name: 'Reload Grants on Arbitrum' })).toBeNull()
@@ -1299,5 +1307,35 @@ describe('option E · production queue states', () => {
   it('caps the search at 100 characters, as production does', () => {
     render(<PendingQueue />, state('normal'))
     expect(screen.getByRole('searchbox', { name: 'Find a proposal' })).toHaveAttribute('maxLength', '100')
+  })
+})
+
+describe('M1 · what ships first', () => {
+  beforeEach(() => localStorage.clear())
+  const m1 = { routerProps: { query: { m: '1' } } }
+
+  it('opens on M1, with an M1 and M2 switch in the scenario bar', () => {
+    baseRender(<PendingQueue />)
+    expect(screen.getByRole('tab', { name: 'M1' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'M2' })).toHaveAttribute('aria-selected', 'false')
+  })
+
+  it('opens no drawer: the row does nothing, and the action opens the transaction page', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />, m1)
+    await user.click(allPending().getAllByRole('button', { name: /^Open / })[0])
+    expect(screen.queryByRole('dialog')).toBeNull()
+    await user.click(allPending().getAllByRole('button', { name: /^(Sign|Execute|Review)/ })[0])
+    expect(screen.queryByRole('dialog')).toBeNull()
+    expect(screen.getByRole('status')).toHaveTextContent(/opens on its transaction page in the product\.$/)
+  })
+
+  it('leaves out Remind, bulk execute, the Safenet mark, Hypernative and Awaiting parent', () => {
+    groupBySafe()
+    render(<PendingQueue />, { routerProps: { query: { m: '1', scenario: 'conflict-heavy' } } })
+    expect(allPending().queryAllByRole('button', { name: /^Remind/ })).toHaveLength(0)
+    expect(screen.queryByRole('button', { name: /^Bulk execute/ })).toBeNull()
+    expect(allPending().queryAllByRole('button', { name: /\(Safenet\)$/ })).toHaveLength(0)
+    expect(screen.queryByText(/^(Logged in to Hypernative|Hypernative not connected)$/)).toBeNull()
+    expect(allPending().queryByLabelText(/^Awaiting parent signature/)).toBeNull()
   })
 })

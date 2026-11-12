@@ -28,7 +28,7 @@ import {
   getWarnings,
   WARNING_LABELS,
 } from '../../services/model'
-import type { Persona, Proposal } from '../../types'
+import type { Persona, Proposal, Milestone } from '../../types'
 import { SignatureGauge } from './SignatureGauge'
 import { getRiskFlags, RiskFlagBadge } from '../RiskFlag'
 import { NonceLabel, NonceMark } from './NonceCell'
@@ -83,6 +83,8 @@ export type QueueRowProps = {
   safeTable?: boolean
   partyTags?: boolean
   compact?: boolean
+  // M1 has no drawer: a row click does nothing, and Remind, the Safenet mark and Awaiting parent wait for M2
+  milestone?: Milestone
 }
 
 export function QueueRow({
@@ -112,7 +114,9 @@ export function QueueRow({
   safeTable = false,
   partyTags = false,
   compact = false,
+  milestone = 2,
 }: QueueRowProps) {
+  const m1 = milestone === 1
   const [hovered, setHovered] = useState(false)
   const noteIcon = useRef<SVGSVGElement>(null)
   // The drawer covers the row, so mouseleave does not fire. mousemove resets the hover.
@@ -128,12 +132,16 @@ export function QueueRow({
   const willBeReplaced = !!replaceHover && conflicts.some((other) => other.id === replaceHover)
   const account = getAccount(tx)
   const signatureCount = getSignatureCount(tx)
-  const parentApproval = getParentApproval(tx, items)
+  const parentApproval = m1 ? undefined : getParentApproval(tx, items)
   const warnings = getWarnings(tx)
   const reminded = remindedIds.includes(tx.id)
   // Shared action rules set the main button, the menu and the status hint.
-  const primaryAction = getPrimaryAction(tx, items, persona, remindedIds, 'row')
-  const menuItems = getMenuItems(tx, items, persona)
+  const fullAction = getPrimaryAction(tx, items, persona, remindedIds, 'row')
+  // M1: no Remind yet. The row offers Review, which opens the transaction page.
+  const primaryAction = m1 && fullAction.kind === 'remind' ? ({ kind: 'review', label: 'Review' } as const) : fullAction
+  const menuItems = getMenuItems(tx, items, persona).filter(
+    ({ action }) => !m1 || (action !== 'remind' && action !== 'invite'),
+  )
   const statusHint = getStatusHint(tx, items, persona)
   const stop = (run: () => void) => (event: { stopPropagation: () => void }) => {
     event.stopPropagation()
@@ -154,9 +162,11 @@ export function QueueRow({
   const columnCount = columns.length
   // Grouped by Safe: with no other party, the action runs into the To column instead of truncating.
   const spanTo = safeTable && columns.includes('To') && !hasCounterparty(tx)
+  // M1: only the action button opens a transaction. The row and its title do nothing.
+  const openDetails = m1 ? () => undefined : () => onReview(tx)
   const review = (event: { stopPropagation: () => void }) => {
     event.stopPropagation()
-    onReview(tx)
+    openDetails()
   }
 
   const warningMarker = warnings.length > 0 && (
@@ -235,7 +245,7 @@ export function QueueRow({
           </TooltipContent>
         </Tooltip>
       )}
-      {!compact && <SafenetMark tx={tx} />}
+      {!compact && !m1 && <SafenetMark tx={tx} />}
     </span>
   )
   const statusContent = (
@@ -440,7 +450,7 @@ export function QueueRow({
           <div className="flex min-w-0 items-center gap-1.5">
             <button
               className={`flex min-w-0 max-w-full items-center gap-3 text-left text-sm font-normal focus-visible:outline-none focus-visible:underline ${willBeReplaced ? 'text-muted-foreground line-through' : ''}`}
-              onClick={() => onReview(tx)}
+              onClick={openDetails}
               aria-label={`Open ${getTransactionLabel(tx)}`}
             >
               <span className="flex min-w-0 items-center gap-2">
@@ -577,7 +587,7 @@ export function QueueRow({
         data-state={selected ? 'selected' : undefined}
         data-cursor={cursor || undefined}
         data-conflict-group={groupSize > 1 || undefined}
-        onClick={() => onReview(tx)}
+        onClick={openDetails}
         onMouseMove={() => setHovered(true)}
         onMouseEnter={() => groupSize > 1 && onConflictHover?.(`${tx.account}:${tx.nonce}`)}
         onMouseLeave={() => {

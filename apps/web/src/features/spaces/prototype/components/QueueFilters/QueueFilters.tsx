@@ -266,6 +266,8 @@ export function QueueToolbar({ filters, accounts, extraMenu, status }: QueueFilt
     <div className="@container mb-5">
       <div className="flex flex-wrap items-center gap-3">
         <QueueSearch filters={filters} />
+        {/* Option D: Group by sits next to search, before Filter */}
+        {status}
         <DropdownMenu>
           <Tooltip delay={300}>
             <TooltipTrigger render={<DropdownMenuTrigger render={<Button variant="outline" />} />}>
@@ -360,7 +362,6 @@ export function QueueToolbar({ filters, accounts, extraMenu, status }: QueueFilt
             )}
           </DropdownMenuContent>
         </DropdownMenu>
-        {status}
         <Tooltip delay={300}>
           <TooltipTrigger
             render={<Button size="action" aria-label="New transaction" className="@max-[640px]:ml-auto" />}

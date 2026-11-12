@@ -51,7 +51,7 @@ import {
 } from '../services/execution'
 import { canInvite, isYou, parsePersona } from '../services/personas'
 import { ConfirmActionDialog, type PendingConfirm } from './ConfirmActionDialog'
-import type { Direction, Persona, Proposal } from '../types'
+import type { Direction, Persona, Proposal, Milestone } from '../types'
 import { PrototypeFrame } from './PrototypeFrame'
 import { useQueueFilters } from './QueueFilters/useQueueFilters'
 import { AppliedFilters, QueueToolbar, type AppliedPill } from './QueueFilters/QueueFilters'
@@ -79,7 +79,11 @@ import { SignerFilterMenu } from './QueueFilters/SignerFilterMenu'
 export default function PendingQueue() {
   const router = useRouter()
   const { scenario, state } = parseScenario(router.query)
-  return <PendingQueueView key={`${scenario}:${state}:${router.query.option ?? 'cards'}:${router.query.failed ?? 4}`} />
+  return (
+    <PendingQueueView
+      key={`${scenario}:${state}:${router.query.option ?? 'cards'}:${router.query.failed ?? 4}:${router.query.m ?? 1}`}
+    />
+  )
 }
 
 function PendingQueueView() {
@@ -89,7 +93,7 @@ function PendingQueueView() {
   const [mainRef, contentWidth] = useElementWidth<HTMLElement>()
   const isWide = contentWidth >= 1050
   const isExtraWide = contentWidth >= 1880
-  // The preview opens on option E, Group by cards. `?option=flat` is D, the same table with a Group by menu.
+  // Both options open as one flat list, most urgent first. E groups with cards, D (`?option=flat`) with a menu.
   // Any other option, such as links to the removed A, B and C, opens E.
   const direction: Direction = router.query.option === 'flat' ? 'flat' : 'cards'
   const cards = direction === 'cards'
@@ -103,14 +107,16 @@ function PendingQueueView() {
     saveDisplay(next, displayOption)
   }
   const { scenario, state } = parseScenario(router.query)
+  // M1 by default: no drawer, bulk execute, Remind or security marks. `?m=2` shows them.
+  const milestone: Milestone = router.query.m === '2' ? 2 : 1
   const persona: Persona = parsePersona(router.query.persona)
   const hypernative: Hypernative = router.query.hn === 'out' || router.query.hn === 'none' ? router.query.hn : 'in'
-  // Partial loading: how many Safes fail (`?failed=3`). Option E's default shows 4, D's 1.
+  // Partial loading: how many Safes fail (`?failed=3`). Both options show 4 by default.
   // Undeployed Safes (`?undeployed=1|2`) are skipped quietly.
   const failedCount =
     router.query.failed === 'all'
       ? ALL_FAILED
-      : (FAILED_COUNTS.find((count) => String(count) === router.query.failed) ?? (cards ? 4 : 1))
+      : (FAILED_COUNTS.find((count) => String(count) === router.query.failed) ?? 4)
   // Why the Safes didn't load (`?reason=limit`): past the 100 Safes one queue request covers, Reload can't help.
   const loadReason: LoadReason = router.query.reason === 'limit' ? 'limit' : 'error'
   const undeployedCount = UNDEPLOYED_COUNTS.find((count) => String(count) === router.query.undeployed) ?? 0
@@ -280,6 +286,9 @@ function PendingQueueView() {
     })
   }
 
+  // M1 has no drawer: the action opens the transaction on its Safe's transaction page
+  const openTxPage = (tx: Proposal) =>
+    setFeedback(`${getTransactionLabel(tx)} opens on its transaction page in the product.`)
   const reviewTx = (tx: Proposal, keepLayout = false) => {
     setReject(false)
     setPendingAction(null)
@@ -292,7 +301,8 @@ function PendingQueueView() {
     }
     setFeedback('')
     setCursorId(tx.id)
-    setReview(tx)
+    // M1 has no drawer: Go to and the keyboard only move the highlight
+    if (milestone === 2) setReview(tx)
   }
 
   const [remindedIds, setRemindedIds] = useState<string[]>([])
@@ -522,8 +532,8 @@ function PendingQueueView() {
     const linked = queue.items.find((tx) => tx.id === linkedTx)
     if (!linked || openedLink.current === linkedTx) return
     openedLink.current = linkedTx
-    setReview(linked)
-  }, [linkedTx, queue.items])
+    if (milestone === 2) setReview(linked)
+  }, [linkedTx, queue.items, milestone])
 
   useEffect(() => {
     document.querySelector('tr[data-state="selected"]')?.scrollIntoView?.({ block: 'nearest' })
@@ -544,11 +554,12 @@ function PendingQueueView() {
     bulkHover,
     replaceHover,
     onReplaceHover: setReplaceHover,
-    onReview: reviewTx,
+    // M1: the action button opens the transaction page instead of the drawer
+    onReview: milestone === 2 ? reviewTx : openTxPage,
     remindedIds,
     onRemind: remindSigners,
     onGoTo: goTo,
-    onStartFlow: startFlow,
+    onStartFlow: milestone === 2 ? startFlow : openTxPage,
     onMenuAction: runMenuAction,
     recoveries,
     executions,
@@ -558,6 +569,7 @@ function PendingQueueView() {
     // D and E share one row: the Safe tag (icon, name and network) and the other party as tags, no Safe column
     partyTags: true,
     compact: isMobile,
+    milestone,
   }
 
   return (
@@ -587,7 +599,7 @@ function PendingQueueView() {
                   {Object.keys(executions).length} executing
                 </Button>
               )}
-              {hypernative === 'in' && (
+              {milestone === 2 && hypernative === 'in' && (
                 // Under 600px of content, only the shield shows. Its tooltip names it.
                 <Tooltip delay={300}>
                   <TooltipTrigger render={<span className="flex items-center gap-1.5 text-xs text-muted-foreground" />}>
@@ -597,7 +609,7 @@ function PendingQueueView() {
                   <TooltipContent>Logged in to Hypernative</TooltipContent>
                 </Tooltip>
               )}
-              {hypernative === 'out' && (
+              {milestone === 2 && hypernative === 'out' && (
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <ShieldAlert className="size-4 text-warning-strong" aria-hidden="true" />
                   <span className="@max-[600px]:sr-only">Hypernative not connected</span>
@@ -720,7 +732,7 @@ function PendingQueueView() {
                 sections={sections}
                 isCollapsed={isCollapsed}
                 onToggle={toggleSection}
-                getSafeBatch={safeBatchFor}
+                getSafeBatch={milestone === 2 ? safeBatchFor : () => undefined}
                 collapse={{ allCollapsed, onToggle: toggleAll, count: sections.length }}
                 failedSafes={{
                   accounts: accounts.filter((account) => failedIds.includes(account.id)),
@@ -735,7 +747,7 @@ function PendingQueueView() {
                 <CircleHelp className="size-4" />A proposal can need your signature and still wait on earlier
                 transactions.
               </span>
-              {!isMobile && visible.length > 0 && (
+              {!isMobile && visible.length > 0 && milestone === 2 && (
                 <span className="flex items-center gap-1">
                   <Kbd>J</Kbd>
                   <Kbd>K</Kbd> to move, <Kbd>Enter</Kbd> to open
@@ -750,6 +762,7 @@ function PendingQueueView() {
           state={state}
           hypernative={hypernative}
           persona={persona}
+          milestone={milestone}
           failedCount={failedCount}
           loadReason={loadReason}
           undeployedCount={undeployedCount}

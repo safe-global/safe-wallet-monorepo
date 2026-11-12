@@ -1,7 +1,8 @@
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { GROUP_OPTIONS, type GroupBy, type QueueDisplay } from '../../services/order'
 
-// Option E: Group by as option B's stat cards, each with its count. One card is always selected.
+// Option E: Group by as cards, each with its count. None is selected at first: the table is one flat list.
+// A card groups the table. Pressing it again goes back to the flat list.
 export function GroupByCards({
   display,
   counts,
@@ -16,7 +17,7 @@ export function GroupByCards({
 }) {
   return (
     <div
-      role="radiogroup"
+      role="group"
       aria-label="Group by"
       className={
         compact ? '-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1' : 'mb-6 grid grid-cols-2 gap-4 xl:grid-cols-4'
@@ -29,10 +30,9 @@ export function GroupByCards({
           <button
             key={value}
             type="button"
-            role="radio"
-            aria-checked={selected}
+            aria-pressed={selected}
             aria-label={`${card} (${count}). ${short}`}
-            onClick={() => onChange({ groupBy: value })}
+            onClick={() => onChange({ groupBy: selected ? 'none' : value })}
             className={`group/card flex rounded-xl border bg-card text-left ${compact ? 'shrink-0 items-center gap-2 py-1.5 pr-3 pl-1.5' : 'flex-col items-start gap-2 p-3'} transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 ${selected ? 'border-foreground/25' : 'border-transparent hover:border-border'}`}
           >
             <span

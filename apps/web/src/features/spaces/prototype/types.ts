@@ -14,6 +14,8 @@ export type Scenario =
 // `capped`: the gateway stopped reading past 500 transactions. `incoming`: a refresh brings in a new proposal.
 export type QueueState = 'normal' | 'loading' | 'error' | 'empty' | 'partial' | 'executing' | 'capped' | 'incoming'
 // D: Group by as a menu. E: Group by as cards.
+// M1 is what ships first. M2 adds the drawer, bulk execute, Remind, security marks and nested Safes.
+export type Milestone = 1 | 2
 export type Direction = 'flat' | 'cards'
 export type Filter = 'sign' | 'ready' | 'waiting' | 'awaiting'
 export type Persona = 'owner' | 'single' | 'security' | 'member' | 'admin'
