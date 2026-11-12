@@ -59,4 +59,5 @@ export { default as usePortfolioRefetchOnTxHistory } from './hooks/usePortfolioR
 export { default as usePortfolioSummaries } from './hooks/usePortfolioSummaries'
 export type { PortfolioSummaries, SafeRef } from './hooks/usePortfolioSummaries'
 export { default as useClearPortfolioOnTx } from './hooks/useClearPortfolioOnTx'
+export { default as useRefetchSummaryOnSettle } from './hooks/useRefetchSummaryOnSettle'
 export { default as useSafePortfolioSummary } from './hooks/useSafePortfolioSummary'
