@@ -7978,7 +7978,7 @@
     },
     "/v2/portfolio/summaries": {
       "get": {
-        "description": "Returns the fiat value of each Safe, read from one cached Zerion snapshot per wallet on Zerion-supported chains and from the Transaction Service elsewhere. Safes that cannot be resolved are left out of the response.",
+        "description": "Returns the fiat value of each Safe, summed from the cached Zerion snapshot that GET /v1/portfolio serves (one /positions call per wallet and environment) on Zerion-supported chains, and from the Transaction Service elsewhere. Safes that cannot be resolved, or that no source can value, are left out of the response.",
         "operationId": "portfolioSummariesGetSummariesV2",
         "parameters": [
           {
@@ -7995,7 +7995,7 @@
             "name": "currency",
             "required": true,
             "in": "query",
-            "description": "Fiat currency code (e.g. USD, EUR)",
+            "description": "Fiat currency code, any case (e.g. USD, eur)",
             "schema": {
               "example": "USD",
               "type": "string"
@@ -8005,9 +8005,9 @@
             "name": "trusted",
             "required": false,
             "in": "query",
-            "description": "If true, only trusted tokens count. Defaults to false.",
+            "description": "If true, only trusted tokens count. Defaults to true, like GET /v1/portfolio, so the totals match the Assets page.",
             "schema": {
-              "example": false,
+              "example": true,
               "type": "boolean"
             }
           }
@@ -19401,11 +19401,11 @@
               "zerion",
               "tx_service"
             ],
-            "description": "zerion: read from the Zerion snapshot. tx_service: the chain is not on Zerion, or the snapshot is unavailable."
+            "description": "zerion: summed from the Zerion snapshot the Assets page reads. tx_service: the chain is not on Zerion, or the snapshot is unavailable."
           },
           "snapshot": {
             "nullable": true,
-            "description": "The Zerion snapshot the value was read from, null for tx_service.",
+            "description": "The Zerion snapshot the value was summed from, null for tx_service.",
             "type": "object",
             "allOf": [
               {
@@ -19429,29 +19429,19 @@
             "type": "string",
             "description": "Total across every chain of this address in this environment (mainnets or testnets). Decimal string."
           },
-          "fiatChange1d": {
-            "type": "string",
-            "nullable": true,
-            "description": "Absolute change of the total over 1 day. Decimal string, null when Zerion has no history."
-          },
-          "percentChange1d": {
-            "type": "number",
-            "nullable": true,
-            "description": "Percentage change of the total over 1 day, null when Zerion has no history."
-          },
           "fiatTotalByChain": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Total per chain, keyed by chainId. Only chains whose Zerion network maps to a chainId are listed, so the values may not add up to fiatTotal."
+            "description": "Total per chain, keyed by chainId. Adds up to fiatTotal. Decimal strings."
           },
           "fiatTotalByType": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             },
-            "description": "Total per position type as returned by Zerion (e.g. wallet, deposited, borrowed, locked, staked)."
+            "description": "Total per Zerion position type (wallet, deposit, loan, staked, locked, reward, ...) across every chain of this address in this environment. Loans are negative. Adds up to fiatTotal. Decimal strings."
           },
           "updatedAt": {
             "format": "date-time",
@@ -19461,13 +19451,11 @@
           "expiresAt": {
             "format": "date-time",
             "type": "string",
-            "description": "When the cached snapshot expires. A transaction or a manual refresh can clear it earlier."
+            "description": "Approximately when the cached snapshot expires: the cache adds jitter to its lifetime, and a transaction or a manual refresh can clear it earlier."
           }
         },
         "required": [
           "fiatTotal",
-          "fiatChange1d",
-          "percentChange1d",
           "fiatTotalByChain",
           "fiatTotalByType",
           "updatedAt",

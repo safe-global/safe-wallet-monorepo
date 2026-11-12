@@ -6,15 +6,28 @@ import {
 } from '../AUTO_GENERATED/portfolios'
 import { chunkArray, MAX_SAFES_PER_REQUEST } from '../chunkArray'
 
+export const PORTFOLIO_SUMMARY_TAG = 'PortfolioSummary'
+
+/** Tag id of one Safe's summary. Lowercased so a checksummed and a lowercase address invalidate the same entry. */
+export const makePortfolioSummaryTag = (chainId: string, address: string): string =>
+  `${chainId}:${address.toLowerCase()}`
+
+export type PortfolioSummariesForManyArg = Omit<PortfolioSummariesGetSummariesV2ApiArg, 'safes' | 'trusted'> & {
+  /** Safes in chainId:address format */
+  safes: string[]
+  // Required: CGW defaults to true, and a request whose value differs from /v1/portfolio reads another Zerion snapshot
+  trusted: boolean
+}
+
 export const portfolioSummariesRtkApi = cgwClient
   .enhanceEndpoints({
-    addTagTypes,
+    addTagTypes: [...addTagTypes, PORTFOLIO_SUMMARY_TAG],
   })
   .injectEndpoints({
     endpoints: (build) => ({
       portfolioGetSummariesForMany: build.query<
         PortfolioSummariesGetSummariesV2ApiResponse,
-        Omit<PortfolioSummariesGetSummariesV2ApiArg, 'safes'> & { safes: string[] }
+        PortfolioSummariesForManyArg
       >({
         async queryFn({ safes, currency, trusted }, _api, _extraOptions, fetchWithBaseQuery) {
           let combinedData: PortfolioSummariesGetSummariesV2ApiResponse = []
@@ -34,8 +47,14 @@ export const portfolioSummariesRtkApi = cgwClient
 
           return { data: combinedData }
         },
-        // Shares the tag of DELETE /v1/portfolio, which clears the snapshot these summaries read
-        providesTags: ['portfolio'],
+        // `portfolio` refetches after DELETE /v1/portfolio; the per-Safe tags let a refresh target one Safe
+        providesTags: (_result, _error, { safes }) => [
+          'portfolio' as const,
+          ...safes.map((safe) => {
+            const [chainId, address] = safe.split(':')
+            return { type: PORTFOLIO_SUMMARY_TAG, id: makePortfolioSummaryTag(chainId, address) } as const
+          }),
+        ],
       }),
     }),
     overrideExisting: true,

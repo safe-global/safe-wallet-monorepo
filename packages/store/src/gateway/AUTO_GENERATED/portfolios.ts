@@ -73,9 +73,9 @@ export type PortfolioSummariesGetSummariesV2ApiResponse = /** status 200  */ Por
 export type PortfolioSummariesGetSummariesV2ApiArg = {
   /** Comma-separated list of Safe addresses in chainId:address format. Only the first MAX_SAFE_OVERVIEWS distinct entries are used. */
   safes: string
-  /** Fiat currency code (e.g. USD, EUR) */
+  /** Fiat currency code, any case (e.g. USD, eur) */
   currency: string
-  /** If true, only trusted tokens count. Defaults to false. */
+  /** If true, only trusted tokens count. Defaults to true, like GET /v1/portfolio, so the totals match the Assets page. */
   trusted?: boolean
 }
 export type PortfolioNativeToken = {
@@ -183,21 +183,17 @@ export type Portfolio = {
 export type PortfolioSummarySnapshot = {
   /** Total across every chain of this address in this environment (mainnets or testnets). Decimal string. */
   fiatTotal: string
-  /** Absolute change of the total over 1 day. Decimal string, null when Zerion has no history. */
-  fiatChange1d: string | null
-  /** Percentage change of the total over 1 day, null when Zerion has no history. */
-  percentChange1d: number | null
-  /** Total per chain, keyed by chainId. Only chains whose Zerion network maps to a chainId are listed, so the values may not add up to fiatTotal. */
+  /** Total per chain, keyed by chainId. Adds up to fiatTotal. Decimal strings. */
   fiatTotalByChain: {
     [key: string]: string
   }
-  /** Total per position type as returned by Zerion (e.g. wallet, deposited, borrowed, locked, staked). */
+  /** Total per Zerion position type (wallet, deposit, loan, staked, locked, reward, ...) across every chain of this address in this environment. Loans are negative. Adds up to fiatTotal. Decimal strings. */
   fiatTotalByType: {
     [key: string]: string
   }
   /** When the snapshot was fetched from Zerion. */
   updatedAt: string
-  /** When the cached snapshot expires. A transaction or a manual refresh can clear it earlier. */
+  /** Approximately when the cached snapshot expires: the cache adds jitter to its lifetime, and a transaction or a manual refresh can clear it earlier. */
   expiresAt: string
 }
 export type PortfolioSummary = {
@@ -205,9 +201,9 @@ export type PortfolioSummary = {
   address: string
   /** Value of this Safe on this chain. Decimal string. */
   fiatTotal: string
-  /** zerion: read from the Zerion snapshot. tx_service: the chain is not on Zerion, or the snapshot is unavailable. */
+  /** zerion: summed from the Zerion snapshot the Assets page reads. tx_service: the chain is not on Zerion, or the snapshot is unavailable. */
   source: 'zerion' | 'tx_service'
-  /** The Zerion snapshot the value was read from, null for tx_service. */
+  /** The Zerion snapshot the value was summed from, null for tx_service. */
   snapshot: PortfolioSummarySnapshot | null
 }
 export const {
