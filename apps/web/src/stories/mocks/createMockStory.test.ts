@@ -22,10 +22,17 @@ const ChainName = () => {
   )
 }
 
+const neverAnswers = http.get(/\/v2\/chains/, () => new Promise<never>(() => {}))
+
 // Renders a story with the decorator and returns what the first render shows, before any request can answer
-const firstRenderChainName = (config: Parameters<typeof createMockStory>[0]) => {
-  const { decorator } = createMockStory(config)
-  const Decorated = () => decorator(ChainName, { globals: {}, id: 'test' } as unknown as StoryContext)
+const firstRenderChainName = (
+  config: Parameters<typeof createMockStory>[0],
+  storyHandlers?: (handlers: HttpHandler[]) => unknown,
+) => {
+  const { decorator, parameters, handlers } = createMockStory(config)
+  const msw = { handlers: storyHandlers ? storyHandlers(handlers as HttpHandler[]) : parameters.msw.handlers }
+  const context = { globals: {}, id: 'test', parameters: { ...parameters, msw } } as unknown as StoryContext
+  const Decorated = () => decorator(ChainName, context)
   render(createElement(Decorated))
   return screen.getByTestId('chain-name').textContent
 }
@@ -51,8 +58,25 @@ describe('createMockStory', () => {
     expect(firstRenderChainName({})).toBe(chainFixtures.mainnet.chainName)
   })
 
-  it('leaves the chain config to a story that answers /v2/chains itself', () => {
-    const neverAnswers = http.get(/\/v2\/chains/, () => new Promise<never>(() => {}))
-    expect(firstRenderChainName({ handlers: [neverAnswers] })).toBe('no chain')
+  // createHandlers appends config handlers after the defaults, so MSW never reaches this one
+  it('preloads the chain config when the config handler for /v2/chains comes after the default', () => {
+    expect(firstRenderChainName({ handlers: [neverAnswers] })).toBe(chainFixtures.mainnet.chainName)
+  })
+
+  it('leaves the chain config to a story that answers /v2/chains through its parameters', () => {
+    expect(firstRenderChainName({}, (handlers) => [neverAnswers, ...handlers])).toBe('no chain')
+  })
+
+  it('leaves the chain config to a story with named handler groups that answer /v2/chains', () => {
+    expect(firstRenderChainName({}, (handlers) => ({ chains: [neverAnswers], rest: handlers }))).toBe('no chain')
+  })
+
+  it('preloads the chain config when the story adds handlers for other requests', () => {
+    const other = http.get(/\/v1\/other$/, () => new Promise<never>(() => {}))
+    expect(firstRenderChainName({}, (handlers) => [other, ...handlers])).toBe(chainFixtures.mainnet.chainName)
+  })
+
+  it('does not preload when the story does not use the createMockStory handlers', () => {
+    expect(firstRenderChainName({}, () => [])).toBe('no chain')
   })
 })
