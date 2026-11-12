@@ -94,9 +94,9 @@ describe('ReviewTokenTransfer', () => {
             setSafeTxGas: jest.fn(),
             setTxOrigin: jest.fn(),
             isReadOnly: false,
-            gtfPaymentMode: 'safe',
-            setGtfPaymentMode: jest.fn(),
-            setGtfSelectedGasToken: jest.fn(),
+            feePaymentMode: 'safe',
+            setFeePaymentMode: jest.fn(),
+            setFeeGasToken: jest.fn(),
           }}
         >
           <ReviewTokenTransfer params={params} onSubmit={jest.fn()} txNonce={txNonce} />
@@ -189,6 +189,55 @@ describe('ReviewTokenTransfer', () => {
       await waitFor(() => {
         expect(createMultiSendCallOnlyTxSpy).toHaveBeenCalledWith(expect.any(Array), undefined)
       })
+    })
+  })
+
+  describe('recipient rows', () => {
+    const recipients = [
+      { recipient: '0x1111111111111111111111111111111111111111', tokenAddress: USDC_ADDRESS, amount: '10' },
+      { recipient: '0x2222222222222222222222222222222222222222', tokenAddress: USDC_ADDRESS, amount: '20' },
+      { recipient: '0x3333333333333333333333333333333333333333', tokenAddress: ZERO_ADDRESS, amount: '0.5' },
+    ]
+
+    it('shows one numbered row with the amount and address for each recipient', async () => {
+      const { getByText, getAllByText } = renderComponent({ ...mockParams, recipients })
+
+      expect(getByText('Recipient 1')).toBeInTheDocument()
+      expect(getByText('Recipient 2')).toBeInTheDocument()
+      expect(getByText('Recipient 3')).toBeInTheDocument()
+      expect(getByText('0x1111111111111111111111111111111111111111')).toBeInTheDocument()
+      expect(getByText('0x3333333333333333333333333333333333333333')).toBeInTheDocument()
+      expect(getByText('0x2222222222222222222222222222222222222222')).toBeInTheDocument()
+      expect(getByText('10')).toBeInTheDocument()
+      expect(getByText('20')).toBeInTheDocument()
+      expect(getByText('0.5')).toBeInTheDocument()
+      expect(getAllByText('USDC')).toHaveLength(2)
+      expect(getAllByText('ETH')).toHaveLength(1)
+
+      await waitFor(() => expect(createMultiSendCallOnlyTxSpy).toHaveBeenCalled())
+    })
+
+    it('builds one transfer per recipient', async () => {
+      renderComponent({ ...mockParams, recipients })
+
+      await waitFor(() => {
+        expect(createMultiSendCallOnlyTxSpy).toHaveBeenCalledWith(
+          [
+            expect.objectContaining({ to: USDC_ADDRESS, value: '0' }),
+            expect.objectContaining({ to: USDC_ADDRESS, value: '0' }),
+            expect.objectContaining({ to: '0x3333333333333333333333333333333333333333', value: '500000000000000000' }),
+          ],
+          undefined,
+        )
+      })
+    })
+
+    it('shows no recipient rows for a single recipient', async () => {
+      const { queryByText } = renderComponent()
+
+      expect(queryByText('Recipient 1')).not.toBeInTheDocument()
+
+      await waitFor(() => expect(createMultiSendCallOnlyTxSpy).toHaveBeenCalled())
     })
   })
 })

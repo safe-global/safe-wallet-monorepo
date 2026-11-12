@@ -68,14 +68,14 @@ const config: ConfigFile = {
       filterEndpoints: [/^tokens/],
     },
     '../src/gateway/AUTO_GENERATED/transactions.ts': {
-      filterEndpoints: [/^(transactions|spaceTransactions)/],
+      filterEndpoints: [/^transactions/],
     },
     '../src/gateway/AUTO_GENERATED/users.ts': {
       filterEndpoints: [/^users/],
     },
     '../src/gateway/AUTO_GENERATED/spaces.ts': {
       filterEndpoints: [
-        /^(spaces|members|spaceSafes|spaceAudit|spaceCounterfactualSafes|spacePolicies|spaceTransactions|addressBook|userAddressBook)/,
+        /^(spaces|members|spaceSafes|spaceAudit|spaceCounterfactualSafes|spacePolicies|policies|spaceTransactions|addressBook|userAddressBook)/,
       ],
     },
     '../src/gateway/AUTO_GENERATED/counterfactual-safes.ts': {

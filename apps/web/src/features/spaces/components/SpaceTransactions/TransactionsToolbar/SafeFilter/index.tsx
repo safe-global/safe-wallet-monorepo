@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@safe-global/views/components/ui/dropdown-menu'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { getSafeOptions, isSafeOptionSelected, toggleSafeOption, type SafeOption } from '../utils'
 

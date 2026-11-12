@@ -20,10 +20,46 @@ import * as sharedTxHooks from '@/components/tx/shared/hooks'
 import * as remoteSafeAppsHooks from '@/hooks/safe-apps/useRemoteSafeApps'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { act, fireEvent, waitFor } from '@testing-library/react'
+import { act, fireEvent, waitFor, within } from '@testing-library/react'
 import { faker } from '@faker-js/faker'
+import { http, HttpResponse } from 'msw'
+import { server } from '@/tests/server'
+import { AbiCoder } from 'ethers'
 import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import { safeScopeContextFor } from '@/tests/mocks/safeScope'
+import userEvent, { type UserEvent } from '@testing-library/user-event'
+import type { ReactElement } from 'react'
+
+jest.mock('@/features/safe-shield/hooks', () => ({
+  __esModule: true,
+  ...jest.requireActual('@/features/safe-shield/hooks'),
+  useRecipientAnalysis: jest.fn(() => undefined),
+  useCounterpartyAnalysis: jest.fn(() => ({
+    recipient: [undefined, undefined, false],
+    contract: [undefined, undefined, false],
+    deadlock: [undefined, undefined, false],
+  })),
+  useThreatAnalysis: jest.fn(() => [undefined, undefined, false]),
+}))
+
+jest.mock('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks', () => ({
+  ...jest.requireActual('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'),
+  useRoles: jest.fn(() => []),
+}))
+
+jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible', () => ({
+  useIsHypernativeEligible: jest.fn(() => ({
+    isHypernativeEligible: false,
+    isHypernativeGuard: false,
+    isAllowlistedSafe: false,
+    loading: false,
+  })),
+}))
+
+jest.mock('@/features/ledger', () => {
+  const actual = jest.requireActual('@/features/ledger')
+  return { __esModule: true, ...actual, LedgerFeature: { ...actual.LedgerFeature, useIsEnabled: () => false } }
+})
 
 // Mock the SpendingLimitRowWrapper component with the same "Send as" label as the real component
 jest.mock('@/components/tx-flow/flows/TokenTransfer/SpendingLimitRow', () => ({
@@ -179,7 +215,7 @@ describe('CreateTokenTransfer', () => {
     expect(queryByText('Send as')).not.toBeInTheDocument()
   })
 
-  it('should not display a type selection in a Safe scope, whose spending limits are not loaded', () => {
+  it('should not display a type selection in a Safe scope, whose spending limits are not loaded', async () => {
     jest
       .spyOn(tokenUtils, 'useTokenAmount')
       .mockReturnValue({ totalAmount: BigInt(1000), spendingLimitAmount: BigInt(500) })
@@ -206,6 +242,20 @@ describe('CreateTokenTransfer', () => {
       loading: false,
       error: undefined,
     })
+    // A scoped Safe is checked against the sanctions oracle on Ethereum
+    let sanctionsChecked = false
+    server.use(
+      http.post('https://ethereum.publicnode.com/', async ({ request }) => {
+        const body = (await request.json()) as { id: number } | Array<{ id: number }>
+        const answer = ({ id }: { id: number }) => ({
+          jsonrpc: '2.0',
+          id,
+          result: AbiCoder.defaultAbiCoder().encode(['bool'], [false]),
+        })
+        sanctionsChecked = true
+        return HttpResponse.json(Array.isArray(body) ? body.map(answer) : answer(body))
+      }),
+    )
     const scope = safeScopeContextFor({
       chainId: faker.string.numeric(5),
       safeAddress: faker.finance.ethereumAddress(),
@@ -222,6 +272,7 @@ describe('CreateTokenTransfer', () => {
     )
 
     expect(queryByText('Send as')).not.toBeInTheDocument()
+    await waitFor(() => expect(sanctionsChecked).toBe(true))
   })
 
   it('should preselect a specific token (USDC) when passed in data', () => {
