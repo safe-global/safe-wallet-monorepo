@@ -84,8 +84,8 @@ async function captureCell(
 ): Promise<{ cell: Cell; issues: string[] }> {
   const issues: string[] = []
   await waitForAssets(page)
-  const { fullscreen, png, stable } = await stableScreenshot(page, requests)
-  if (!stable) issues.push('UNSTABLE_SCREENSHOT')
+  const { fullscreen, png, stable, change } = await stableScreenshot(page, requests)
+  if (!stable) issues.push(change ? `UNSTABLE_SCREENSHOT: changed ${change}` : 'UNSTABLE_SCREENSHOT')
   const file = path.join(cellsDir, `${story.id}--${mode}.png`)
   fs.writeFileSync(file, png)
   return { cell: { storyId: story.id, name: story.name, mode, file, fullscreen }, issues }

@@ -183,6 +183,52 @@ async function contentClip(page: Page): Promise<{ fullscreen: boolean; clip?: Cl
 }
 
 /**
+ * Where two screenshots differ, as "x=a-b y=c-d" in screenshot pixels, so an unstable story's finding names the
+ * part of the page that kept changing. The page decodes both, as Node has no PNG decoder here.
+ */
+export async function changedArea(page: Page, before: Buffer, after: Buffer): Promise<string> {
+  return page.evaluate(
+    async ([a, b]) => {
+      // No named helpers in here: tsx wraps them in a __name() call that does not exist in the page.
+      const images = [new Image(), new Image()]
+      images[0].src = `data:image/png;base64,${a}`
+      images[1].src = `data:image/png;base64,${b}`
+      await Promise.all(images.map((image) => image.decode()))
+      const [first, second] = images
+      if (first.width !== second.width || first.height !== second.height) {
+        return `size ${first.width}x${first.height} -> ${second.width}x${second.height}`
+      }
+      const pixels = images.map((image) => {
+        const canvas = document.createElement('canvas')
+        canvas.width = image.width
+        canvas.height = image.height
+        const context = canvas.getContext('2d', { willReadFrequently: true })!
+        context.drawImage(image, 0, 0)
+        return context.getImageData(0, 0, image.width, image.height).data
+      })
+      let [left, top, right, bottom] = [Infinity, Infinity, -1, -1]
+      for (let y = 0; y < first.height; y++) {
+        for (let x = 0; x < first.width; x++) {
+          const i = (y * first.width + x) * 4
+          if (
+            pixels[0][i] !== pixels[1][i] ||
+            pixels[0][i + 1] !== pixels[1][i + 1] ||
+            pixels[0][i + 2] !== pixels[1][i + 2]
+          ) {
+            left = Math.min(left, x)
+            top = Math.min(top, y)
+            right = Math.max(right, x)
+            bottom = Math.max(bottom, y)
+          }
+        }
+      }
+      return right < 0 ? 'no pixel change' : `x=${left}-${right} y=${top}-${bottom}`
+    },
+    [before.toString('base64'), after.toString('base64')],
+  )
+}
+
+/**
  * Takes screenshots until two in a row are identical: re-renders after data arrives (or timers in app code)
  * would otherwise be caught half-way. For a padded story, the viewport is fitted to the current layout before
  * each one, since a page that is still growing (slow CI runners) can push iframes below the viewport.
@@ -190,7 +236,7 @@ async function contentClip(page: Page): Promise<{ fullscreen: boolean; clip?: Cl
 export async function stableScreenshot(
   page: Page,
   requests: RequestTracker,
-): Promise<{ fullscreen: boolean; png: Buffer; stable: boolean }> {
+): Promise<{ fullscreen: boolean; png: Buffer; stable: boolean; change?: string }> {
   const deadline = Date.now() + SCREENSHOT_SETTLE_TIMEOUT_MS
   const fullscreen = await isFullscreen(page)
   // A full-page story is fitted once, after it settles at the default height: an earlier fit can measure a
@@ -216,7 +262,11 @@ export async function stableScreenshot(
         continue
       }
     }
-    if (stable || Date.now() > deadline) return { fullscreen, png, stable }
+    if (stable) return { fullscreen, png, stable }
+    if (Date.now() > deadline) {
+      const change = previous ? await changedArea(page, previous, png) : undefined
+      return { fullscreen, png, stable, change }
+    }
     previous = png
     await page.waitForTimeout(QUIET_MS)
   }
