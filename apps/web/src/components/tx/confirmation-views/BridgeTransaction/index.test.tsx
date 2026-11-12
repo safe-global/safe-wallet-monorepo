@@ -3,7 +3,7 @@ import { formatUnits } from 'ethers'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { render } from '@/tests/test-utils'
 import BridgeTransaction from '.'
-import { mockPendingBridgeTxInfo } from './mockData'
+import { mockPendingBridgeTxInfo } from './BridgeTransaction.fixtures'
 
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' }))
 

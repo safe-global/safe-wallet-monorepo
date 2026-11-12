@@ -222,7 +222,7 @@ const config = [
     },
   },
   {
-    files: ['**/mockData.ts', '**/storyExamples.ts'],
+    files: ['**/*.storyData.ts'],
     rules: {
       'no-restricted-syntax': [
         'error',

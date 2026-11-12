@@ -3,7 +3,7 @@ import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERAT
 import type { Meta, StoryObj } from '@storybook/react'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
-import { ownerAddress, txInfo } from './mockData'
+import { ownerAddress, txInfo } from './SettingsChange.fixtures'
 import SettingsChange from '.'
 
 const meta = {
