@@ -106,7 +106,7 @@ export const WithTrailingActions: Story = {
         tone="warning"
         title="2 modules enabled"
         trailing={
-          <Button variant="secondary" size="xs" onClick={(event) => event.stopPropagation()}>
+          <Button variant="secondary" size="xs" onClick={() => console.log('View modules')}>
             View 2
           </Button>
         }

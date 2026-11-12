@@ -68,7 +68,7 @@ interface ExpandableListItemProps
   title: ReactNode
   /** Leading node, e.g. a status icon */
   leading?: ReactNode
-  /** Node before the chevron, e.g. a count button; stop its click from bubbling to keep the row closed */
+  /** Node before the chevron, e.g. a count button; it sits beside the row's trigger, not inside it */
   trailing?: ReactNode
   /** First line of the body, in the muted mini style */
   description?: ReactNode
@@ -77,6 +77,9 @@ interface ExpandableListItemProps
 }
 
 const bodyLine = 'block leading-normal'
+
+const OWN_CLICKS =
+  '[data-slot=expandable-list-trigger], [data-slot=expandable-list-trailing], [data-slot=expandable-list-panel]'
 
 function ExpandableListItem({
   title,
@@ -90,11 +93,11 @@ function ExpandableListItem({
 }: ExpandableListItemProps) {
   const expandable = Boolean(children || description)
   const triggerRef = useRef<HTMLElement>(null)
-  // The row's padding belongs to the click target too
-  const clickPadding = (event: MouseEvent<HTMLDivElement>) => {
-    if (event.target === event.currentTarget) triggerRef.current?.click()
+  // The row's padding, gaps and chevron toggle it too; the trailing node and the body keep their own clicks
+  const clickOutsideTrigger = (event: MouseEvent<HTMLDivElement>) => {
+    if (!(event.target as Element).closest(OWN_CLICKS)) triggerRef.current?.click()
   }
-  const heading = (
+  const label = (
     <>
       {tone && tone !== 'none' && (
         <span aria-hidden data-slot="expandable-list-tone" className={toneVariants({ tone })} />
@@ -107,38 +110,44 @@ function ExpandableListItem({
       >
         {title}
       </Typography>
-      {trailing}
     </>
+  )
+  const trailingNode = trailing && (
+    <div data-slot="expandable-list-trailing" className="contents">
+      {trailing}
+    </div>
   )
 
   return (
     <AccordionPrimitive.Item
       data-slot="expandable-list-item"
-      className={cn('overflow-hidden rounded-lg bg-card', className)}
+      className={cn('group/expandable-list-item overflow-hidden rounded-lg bg-card', className)}
       {...props}
     >
       <div
         className={cn('px-5 py-2', expandable ? 'cursor-pointer hover:bg-secondary-hover' : 'cursor-default')}
-        onClick={expandable ? clickPadding : undefined}
+        onClick={expandable ? clickOutsideTrigger : undefined}
       >
         {expandable ? (
-          <AccordionPrimitive.Header className="m-0">
+          <AccordionPrimitive.Header className="m-0 flex items-center gap-2.5 py-2.5">
             <AccordionPrimitive.Trigger
               ref={triggerRef}
-              nativeButton={false}
-              render={<div />}
               data-slot="expandable-list-trigger"
-              className="group/expandable-list-trigger flex w-full items-center gap-2.5 py-2.5 text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5 self-stretch text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
-              {heading}
-              <ChevronDown
-                aria-hidden
-                className="h-[18px] w-[18px] shrink-0 text-muted-foreground transition-transform group-data-[panel-open]/expandable-list-trigger:rotate-180"
-              />
+              {label}
             </AccordionPrimitive.Trigger>
+            {trailingNode}
+            <ChevronDown
+              aria-hidden
+              className="h-[18px] w-[18px] shrink-0 text-muted-foreground transition-transform group-data-[open]/expandable-list-item:rotate-180"
+            />
           </AccordionPrimitive.Header>
         ) : (
-          <div className="flex items-center gap-2.5 py-2.5">{heading}</div>
+          <div className="flex items-center gap-2.5 py-2.5">
+            {label}
+            {trailingNode}
+          </div>
         )}
         {expandable && (
           <AccordionPrimitive.Panel

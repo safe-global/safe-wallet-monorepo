@@ -104,4 +104,35 @@ describe('ExpandableList', () => {
 
     expect(trigger).toHaveAttribute('aria-expanded', 'true')
   })
+
+  it('keeps a trailing control outside the trigger: its own click, not part of the row name', async () => {
+    const onView = jest.fn()
+    render(
+      <ExpandableList>
+        <ExpandableListItem
+          value="modules"
+          title="2 modules enabled"
+          trailing={<button onClick={onView}>View 2</button>}
+        >
+          Allowance module
+        </ExpandableListItem>
+      </ExpandableList>,
+    )
+    const trigger = screen.getByRole('button', { name: '2 modules enabled' })
+
+    await userEvent.click(screen.getByRole('button', { name: 'View 2' }))
+
+    expect(onView).toHaveBeenCalledTimes(1)
+    expect(trigger).toHaveAttribute('aria-expanded', 'false')
+    expect(trigger).not.toContainElement(screen.getByRole('button', { name: 'View 2' }))
+  })
+
+  it('opens from a click on the chevron', async () => {
+    const { container } = renderList()
+    const trigger = screen.getByRole('button', { name: 'No recovery set up' })
+
+    await userEvent.click(container.querySelector('[data-slot="expandable-list-item"] svg.lucide-chevron-down')!)
+
+    expect(trigger).toHaveAttribute('aria-expanded', 'true')
+  })
 })
