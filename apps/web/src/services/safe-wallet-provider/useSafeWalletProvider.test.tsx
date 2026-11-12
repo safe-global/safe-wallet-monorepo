@@ -217,7 +217,7 @@ describe('useSafeWalletProvider', () => {
         message: 'message',
         requestId: expect.any(String),
         origin: appInfo.url,
-        declared: { channel: 'wallet-connect', appName: appInfo.name },
+        declared: { channel: 'WALLET_CONNECT', appName: appInfo.name },
       })
 
       expect(resp).toBeInstanceOf(Promise)
@@ -351,7 +351,7 @@ describe('useSafeWalletProvider', () => {
         message: typedMessage,
         requestId: expect.any(String),
         origin: appInfo.url,
-        declared: { channel: 'wallet-connect', appName: appInfo.name },
+        declared: { channel: 'WALLET_CONNECT', appName: appInfo.name },
       })
 
       expect(resp).toBeInstanceOf(Promise)
