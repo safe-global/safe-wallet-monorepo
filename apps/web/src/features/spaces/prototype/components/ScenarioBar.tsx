@@ -14,6 +14,7 @@ import { getPersonaAddress, getSignerStatus, getWorkspaceProfile } from '../serv
 // Workspace sizes. From 20 Safes up, each one has every transaction type, recoveries and conflicts.
 export const SCENARIOS: { value: Scenario; label: string }[] = [
   { value: '1-safe', label: '1 Safe' },
+  { value: '8-safes', label: '8 Safes · typical' },
   { value: '5-safes', label: '5 Safes' },
   { value: '10-safes', label: '10 Safes' },
   { value: '20-safes', label: '20 Safes' },
@@ -32,7 +33,8 @@ export const STATES: { value: QueueState; label: string }[] = [
   { value: 'capped', label: 'Over 500 transactions' },
   { value: 'incoming', label: 'New proposal arrives' },
 ]
-export const DEFAULT_SCENARIO: Scenario = '5-safes'
+// The most common high-value team opens by default: 8 Safes, 9 pending on 4 of them, one conflict.
+export const DEFAULT_SCENARIO: Scenario = '8-safes'
 export const parseScenario = (query: { scenario?: unknown; state?: unknown }) => {
   const value = typeof query.scenario === 'string' ? query.scenario : ''
   const known = [...SCENARIOS.map((item) => item.value), ...HIDDEN_SCENARIOS].find((item) => item === value)

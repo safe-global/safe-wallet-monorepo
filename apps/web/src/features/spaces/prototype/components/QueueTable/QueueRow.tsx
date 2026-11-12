@@ -207,7 +207,10 @@ export function QueueRow({
         >
           <span className="flex items-center gap-1.5">
             <SignatureGauge count={signatureCount} threshold={account.threshold} />
-            {signatureCount}/{account.threshold}
+            {/* Fixed width, up to 10/10, so the Safenet and proposer icons line up whatever the count */}
+            <span className="w-[5ch] text-left">
+              {signatureCount}/{account.threshold}
+            </span>
           </span>
         </TooltipTrigger>
         <TooltipContent className={HINT_CLASS}>

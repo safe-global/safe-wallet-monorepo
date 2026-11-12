@@ -1,6 +1,15 @@
 // The workspace size. Everyday, realistic and the conflict sets are hidden fixtures that old links and tests still use.
 export type Scenario =
-  '1-safe' | '5-safes' | '10-safes' | '20-safes' | '50-safes' | 'everyday' | 'realistic' | 'conflict' | 'conflict-heavy'
+  | '1-safe'
+  | '5-safes'
+  | '8-safes'
+  | '10-safes'
+  | '20-safes'
+  | '50-safes'
+  | 'everyday'
+  | 'realistic'
+  | 'conflict'
+  | 'conflict-heavy'
 // A moment layered on any scenario.
 // `capped`: the gateway stopped reading past 500 transactions. `incoming`: a refresh brings in a new proposal.
 export type QueueState = 'normal' | 'loading' | 'error' | 'empty' | 'partial' | 'executing' | 'capped' | 'incoming'

@@ -2,15 +2,22 @@ import type { Account, Persona, Proposal } from '../types'
 import { getAccount, getCreatedAt, getPrimaryStatus } from './model'
 import { getStepKind, STEP_RANK } from './nextSteps'
 
-// Option E groups rows by status, Safe, network or next nonce, each in a fixed order. Option D lists them in the status order.
+// Option D · Flat table: rows grouped by status, Safe, network or next nonce, each in a fixed order.
 
-export type GroupBy = 'status' | 'safe' | 'network' | 'next'
-export type OrderedGroupBy = Exclude<GroupBy, 'safe'>
+// `none`: option D's default, one list in the status order with no group rows.
+export type GroupBy = 'none' | 'status' | 'safe' | 'network' | 'next'
+export type OrderedGroupBy = Exclude<GroupBy, 'safe' | 'none'>
 type SortBy = 'nonce' | 'oldest'
 export type QueueDisplay = { groupBy: GroupBy }
 
 // `card` and `short` are the title and one-line explanation on option E's cards.
-export const GROUP_OPTIONS: { value: GroupBy; label: string; hint: string; card: string; short: string }[] = [
+export const GROUP_OPTIONS: {
+  value: Exclude<GroupBy, 'none'>
+  label: string
+  hint: string
+  card: string
+  short: string
+}[] = [
   {
     value: 'status',
     label: 'Status',
@@ -43,12 +50,16 @@ export const GROUP_OPTIONS: { value: GroupBy; label: string; hint: string; card:
 
 // Each grouping has one fixed order. Grouped by Safe or network, nonces stay in sequence.
 export const GROUP_SORT: Record<GroupBy, SortBy> = {
+  none: 'oldest',
   status: 'oldest',
   safe: 'nonce',
   network: 'nonce',
   next: 'nonce',
 }
 export const DEFAULT_DISPLAY: QueueDisplay = { groupBy: 'status' }
+// Option D opens as one flat list. Its Group by menu adds None to the four groupings.
+export const FLAT_DISPLAY: QueueDisplay = { groupBy: 'none' }
+export const NO_GROUP = { value: 'none' as const, label: 'None', hint: 'One list, most urgent first' }
 
 // Last signatures and executes first, then signatures, then rows waiting on others, then blocked rows.
 export const getStatusRank = (tx: Proposal, persona: Persona) => {
@@ -151,7 +162,7 @@ export const groupQueue = (rows: Proposal[], groupBy: OrderedGroupBy, persona: P
 }
 
 // Option E's card numbers: what needs you, Safes and networks with pending rows, and rows next in line.
-export const getGroupCounts = (rows: Proposal[], persona: Persona): Record<GroupBy, number> => ({
+export const getGroupCounts = (rows: Proposal[], persona: Persona): Record<Exclude<GroupBy, 'none'>, number> => ({
   status: groupQueue(rows, 'status', persona)
     .filter(isActionGroup)
     .reduce((sum, group) => sum + group.rows.length, 0),
@@ -161,16 +172,18 @@ export const getGroupCounts = (rows: Proposal[], persona: Persona): Record<Group
 })
 
 // Options D and E each remember their own grouping.
-const STORAGE_KEYS = { flat: 'prototype.pendingQueue.display', cards: 'prototype.pendingQueue.display.cards' }
+const STORAGE_KEYS = { flat: 'prototype.pendingQueue.display.flat', cards: 'prototype.pendingQueue.display.cards' }
 export type DisplayOption = keyof typeof STORAGE_KEYS
 
 export const loadDisplay = (option: DisplayOption = 'flat'): QueueDisplay => {
+  const fallback = option === 'flat' ? FLAT_DISPLAY : DEFAULT_DISPLAY
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS[option]) ?? 'null') as Partial<QueueDisplay> | null
-    const groupBy = GROUP_OPTIONS.find((option) => option.value === saved?.groupBy)?.value
-    return groupBy ? { groupBy } : DEFAULT_DISPLAY
+    const choices = option === 'flat' ? [NO_GROUP, ...GROUP_OPTIONS] : GROUP_OPTIONS
+    const groupBy = choices.find((choice) => choice.value === saved?.groupBy)?.value
+    return groupBy ? { groupBy } : fallback
   } catch {
-    return DEFAULT_DISPLAY
+    return fallback
   }
 }
 

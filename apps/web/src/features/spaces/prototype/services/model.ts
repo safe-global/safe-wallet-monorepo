@@ -225,18 +225,22 @@ const TEN_SAFES = [
   'bug-bounty',
 ]
 const pick = (ids: string[]) => manySafesAccounts.filter((account) => ids.includes(account.id))
+// The most common high-value team: 8 Safes, with 9 transactions pending on 4 of them, one conflict. The rest have nothing queued.
+const TYPICAL_SAFES = ['market-making', 'marketing', 'ecosystem-fund', 'legal', 'vesting']
 export const getScenarioAccounts = (scenario: Scenario) =>
   scenario === '1-safe'
     ? accounts.filter((account) => account.id === 'treasury')
     : scenario === '5-safes'
       ? [...accounts, ...pick(FIVE_SAFES)]
-      : scenario === '10-safes'
-        ? [...accounts, ...pick(TEN_SAFES)]
-        : scenario === '50-safes'
-          ? protocolAccounts
-          : scenario === '20-safes'
-            ? fleetAccounts
-            : accounts
+      : scenario === '8-safes'
+        ? [...accounts, ...pick(TYPICAL_SAFES)]
+        : scenario === '10-safes'
+          ? [...accounts, ...pick(TEN_SAFES)]
+          : scenario === '50-safes'
+            ? protocolAccounts
+            : scenario === '20-safes'
+              ? fleetAccounts
+              : accounts
 
 const queued = (
   account: string,
@@ -247,6 +251,43 @@ const queued = (
   age: string,
   kind: TransactionKind = { type: 'transfer' },
 ): Proposal => ({ id: `${account}-${nonce}`, account, nonce, recipient, amount, kind, age, signers, eligible: true })
+// One or two of each status, as a team with 8 Safes sees on a normal day. You are Dev.
+const typicalProposals = (): Proposal[] => [
+  // Treasury, 3 of 5: ready to execute, and a batch you can sign ahead of it.
+  queued('treasury', 42, 'Northwind · 0x2b9c…71e0', '250,000 USDC', ['Ana', 'Max', 'Jonas'], '5h ago'),
+  queued('treasury', 43, 'MultiSendCallOnly · 0x9641…3a6f', '', ['Ana'], '3h ago', {
+    type: 'batch',
+    actions: generateBatchActions(4),
+  }),
+  // Payroll, 2 of 4: your signature is the last one, and a fully signed transfer waits behind it.
+  queued('payroll', 17, 'MultiSendCallOnly · 0x9641…3a6f', '', ['Ana'], '1h ago', {
+    type: 'batch',
+    actions: generateBatchActions(12, 'Contractor'),
+  }),
+  queued('payroll', 18, 'Contoso Ltd · 0x7c2e…4f19', '8,400 USDC', ['Ana', 'Max'], '50m ago'),
+  // Grants, which you don't sign: waiting on others, and a transfer blocked behind it.
+  queued('grants', 8, 'Priya · 0x3e1b…09cd', '', ['Lena'], '1d ago', {
+    type: 'settings',
+    change: { kind: 'addOwner', owner: 'Priya' },
+  }),
+  queued('grants', 9, 'Fabrikam · 0x1d8a…b2c6', '15,000 USDC', ['Jonas', 'Lena'], '20h ago'),
+  // A conflict: someone proposed a rejection at #9 to cancel the transfer. Only one of the two can execute.
+  { ...queued('grants', 9, 'Grants', '', ['Ana'], '2h ago', { type: 'rejection' }), id: 'grants-9-reject' },
+  // Market Making, 2 of 4: a new proposal nobody has signed, and one you signed behind it.
+  queued('market-making', 212, 'CoW Swap · Limit order', '400,000 USDC', [], '30m ago', {
+    type: 'swap',
+    sell: '400,000 USDC',
+    buy: '124.8 ETH',
+    order: 'limit',
+    expiry: 'Expires in 6d',
+  }),
+  queued('market-making', 213, 'Aave v3 Pool · 0x8787…4e2a', '', ['Dev'], '10m ago', {
+    type: 'contract',
+    contract: 'Aave v3 Pool',
+    method: 'supply',
+    verified: true,
+  }),
+]
 // Threshold is 2 of 4. Two signatures at the next nonce is ready, Dev alone is waiting, a later nonce is blocked.
 const manySafesProposals = (): Proposal[] => [
   queued('market-making', 212, 'Litware Markets · 0x51c7…9a02', '1,500,000 USDC', ['Ana', 'Max'], '4h ago'),
@@ -1131,6 +1172,7 @@ export const getScenario = (scenario: Scenario): Proposal[] => {
     return [...realistic(), ...withSafes(FIVE_SAFES)].map((tx) =>
       tx.id === 'market-making-213' ? { ...tx, signers: ['Ana', 'Max'] } : tx,
     )
+  if (scenario === '8-safes') return typicalProposals()
   if (scenario === '10-safes') return [...realistic(), ...withSafes(TEN_SAFES)]
   if (scenario === '20-safes') return withMix(fleetProposals(), fleetAccounts)
   if (scenario === '50-safes') return withMix(protocolProposals(), protocolAccounts)

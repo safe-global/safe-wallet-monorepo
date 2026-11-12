@@ -9,7 +9,7 @@ export function GroupByCards({
   compact = false,
 }: {
   display: QueueDisplay
-  counts: Record<GroupBy, number>
+  counts: Record<Exclude<GroupBy, 'none'>, number>
   onChange: (display: QueueDisplay) => void
   // On a phone: one row of pills, count and title only, that scrolls sideways if it has to.
   compact?: boolean

@@ -803,12 +803,29 @@ describe('queue design exploration', () => {
     expect(openRows()).toHaveLength(8)
     expect(screen.getByRole('button', { name: 'Expand Grants' })).toBeInTheDocument()
   })
-  it('opens on option E with 5 Safes when the link has no options', () => {
+  it('opens on option E with the typical 8-Safe team when the link has no options', () => {
+    localStorage.clear()
     baseRender(<PendingQueue />)
     expect(screen.getByRole('tab', { name: 'E · Group cards' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['D · Flat table', 'E · Group cards'])
-    expect(screen.getByRole('combobox', { name: 'Scenario' })).toHaveTextContent('5 Safes')
+    expect(screen.getByRole('combobox', { name: 'Scenario' })).toHaveTextContent('8 Safes · typical')
     expect(screen.getByRole('combobox', { name: 'State' })).toHaveTextContent('Normal')
+    expect(
+      allPending()
+        .getAllByRole('row')
+        .filter((row) => /^\d+/.test(row.textContent ?? '')),
+    ).toHaveLength(8)
+    // Nine transactions on eight nonces: two options at Grants #9 conflict
+    expect(allPending().getAllByText('Conflicting')).toHaveLength(1)
+  })
+  it('opens option D on the typical 8-Safe team too', () => {
+    baseRender(<PendingQueue />, { routerProps: { query: { option: 'flat' } } })
+    expect(screen.getByRole('combobox', { name: 'Scenario' })).toHaveTextContent('8 Safes · typical')
+    expect(
+      allPending()
+        .getAllByRole('row')
+        .filter((row) => /^\d+/.test(row.textContent ?? '')),
+    ).toHaveLength(8)
   })
   it.each(['table', 'fleet', 'simple', 'aligned'])('opens links to the removed option %s on option E', (option) => {
     render(<PendingQueue />, { routerProps: { query: { option } } })
@@ -973,24 +990,33 @@ describe('queue design exploration', () => {
 describe('option D · flat table', () => {
   beforeEach(() => localStorage.clear())
   const flat = { routerProps: { query: { option: 'flat' } } }
+  const headings = () =>
+    allPending()
+      .getAllByRole('heading', { level: 3 })
+      .map((heading) => heading.textContent)
   const columnTitles = () => screen.getAllByRole('columnheader').map((header) => header.textContent)
+
   const rowTexts = () =>
     allPending()
       .getAllByRole('row')
-      .filter((row) => within(row).queryByRole('button', { name: /^Open / }))
+      .filter((row) => /^\d+/.test(row.textContent ?? ''))
       .map((row) => row.textContent ?? '')
+  const groupBy = async (user: ReturnType<typeof renderWithUserEvent>['user'], name: RegExp) => {
+    await user.click(screen.getByRole('button', { name: /^Group by/ }))
+    await user.click(await screen.findByRole('menuitemradio', { name }))
+  }
 
-  it('is one plain table with no Group by, group rows or Collapse all', () => {
+  it('opens as one flat list, with Group by offered but not applied', () => {
     render(<PendingQueue />, flat)
     expect(screen.getAllByRole('table')).toHaveLength(1)
-    expect(screen.queryByRole('button', { name: /^Group by/ })).toBeNull()
-    expect(screen.queryByRole('radiogroup', { name: 'Group by' })).toBeNull()
+    expect(screen.getByRole('button', { name: 'Group by' })).toBeInTheDocument()
     expect(allPending().queryAllByRole('heading', { level: 3 })).toHaveLength(0)
     expect(screen.queryByRole('button', { name: /^(Collapse|Expand) all/ })).toBeNull()
-    expect(columnTitles().slice(0, 5)).toEqual(['Nonce', 'Transaction', 'To', 'Safe', 'Network'])
+    expect(columnTitles().slice(0, 3)).toEqual(['Nonce', 'Transaction', 'To'])
+    expect(screen.queryByRole('columnheader', { name: 'Safe' })).toBeNull()
   })
 
-  it('lists the most urgent first and blocked rows last, in the Status order', () => {
+  it('sorts the flat list most urgent first, with blocked rows last', () => {
     render(<PendingQueue />, { routerProps: { query: { option: 'flat', scenario: '20-safes' } } })
     const rows = rowTexts()
     const firstBlocked = rows.findIndex((text) => /Blocked by #/.test(text))
@@ -1001,9 +1027,31 @@ describe('option D · flat table', () => {
     expect(firstBlocked).toBeGreaterThan(lastAction)
   })
 
-  it('has no bulk execute, which needs the Safe view', () => {
-    render(<PendingQueue />, { routerProps: { query: { option: 'flat', scenario: 'conflict-heavy' } } })
+  it('groups by status on request, needs you first', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />, flat)
+    await groupBy(user, /^Status/)
+    expect(screen.getByRole('button', { name: 'Group by Status' })).toBeInTheDocument()
+    expect(headings()[0]).toMatch(/^(Sign and execute|Ready to execute|Ready to sign)/)
+  })
+
+  it('collapses every group from the header, and opens them again', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />, flat)
+    await groupBy(user, /^Status/)
+    await user.click(screen.getByRole('button', { name: 'Collapse all' }))
+    expect(allPending().queryAllByRole('button', { name: /^Open / })).toHaveLength(0)
+    await user.click(screen.getByRole('button', { name: 'Expand all' }))
+    expect(allPending().getAllByRole('button', { name: /^Open / }).length).toBeGreaterThan(0)
+  })
+
+  it('offers bulk execute only on each Safe row, grouped by Safe', async () => {
+    const heavyFlat = { routerProps: { query: { option: 'flat', scenario: 'conflict-heavy' } } }
+    const { user } = renderWithUserEvent(<PendingQueue />, heavyFlat)
     expect(screen.queryByRole('button', { name: /^Bulk execute/ })).toBeNull()
+    await groupBy(user, /^Safe/)
+    await user.click(screen.getByRole('button', { name: 'Bulk execute 2' }))
+    const dialog = within(screen.getByRole('dialog'))
+    expect(dialog.getByRole('region', { name: 'Ops Payroll batch' })).toBeVisible()
+    expect(screen.queryByRole('button', { name: /^Bulk execute \d+ transactions/ })).toBeNull()
   })
 
   it('adds a search field to long filter lists, such as signers', async () => {
@@ -1028,9 +1076,41 @@ describe('option D · flat table', () => {
     expect(screen.getByRole('menuitem', { name: /^Safe account/ })).toBeInTheDocument()
   })
 
-  it('shows the Safenet mark next to the signatures', () => {
+  it('remembers the grouping', async () => {
+    const { user, unmount } = renderWithUserEvent(<PendingQueue />, flat)
+    await groupBy(user, /^Network/)
+    unmount()
+    render(<PendingQueue />, flat)
+    expect(screen.getByRole('button', { name: 'Group by Network' })).toBeInTheDocument()
+  })
+
+  it('grouped by Safe, shows the Safe table with Nonce first and a sub-header per network', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />, {
+      routerProps: { query: { option: 'flat', scenario: '20-safes' } },
+    })
+    await groupBy(user, /^Safe/)
+    expect(columnTitles()[0]).toBe('Nonce')
+    const marketMaking = await screen.findByRole('button', { name: /^(Collapse|Expand) Market making$/ })
+    const subHeaders = marketMaking
+      .getAttribute('aria-controls')!
+      .split(' ')
+      .map((id) => document.getElementById(id)!)
+    expect(subHeaders.map((subHeader) => subHeader.textContent)).toEqual([
+      expect.stringMatching(/^Ethereum/),
+      expect.stringMatching(/^Arbitrum/),
+    ])
+  })
+
+  it('shows the Safenet mark next to the signatures in every grouping', () => {
     render(<PendingQueue />, flat)
     expect(allPending().getAllByRole('button', { name: /\(Safenet\)$/ }).length).toBeGreaterThan(0)
+  })
+
+  it('groups by next nonce, then the rest of the queue, with the network in each Safe tag', async () => {
+    const { user } = renderWithUserEvent(<PendingQueue />, flat)
+    await groupBy(user, /^Up next/)
+    expect(headings().map((heading) => heading?.replace(/\d+$/, ''))).toEqual(['Next in line', 'Behind it'])
+    expect(screen.queryByRole('columnheader', { name: 'Network' })).toBeNull()
   })
 })
 
@@ -1127,14 +1207,14 @@ describe('option E · Group by cards', () => {
     expect(screen.queryByRole('button', { name: /^Group by / })).toBeNull()
   })
 
-  it('regroups when a card is picked, and remembers it', async () => {
+  it('regroups when a card is picked, and remembers it apart from option D', async () => {
     const { user, unmount } = renderWithUserEvent(<PendingQueue />, cards)
     await user.click(screen.getByRole('radio', { name: /^Up next/ }))
     expect(screen.getByRole('radio', { name: /^Up next/ })).toHaveAttribute('aria-checked', 'true')
     expect(allPending().getByRole('heading', { level: 3, name: /^Next/ })).toBeInTheDocument()
     unmount()
-    render(<PendingQueue />, cards)
-    expect(screen.getByRole('radio', { name: /^Up next/ })).toHaveAttribute('aria-checked', 'true')
+    render(<PendingQueue />, { routerProps: { query: { option: 'flat' } } })
+    expect(screen.getByRole('button', { name: 'Group by' })).toBeInTheDocument()
   })
 })
 

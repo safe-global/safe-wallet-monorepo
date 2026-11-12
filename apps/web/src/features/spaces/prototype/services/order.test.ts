@@ -1,6 +1,14 @@
 import { accounts } from './model'
 import type { Proposal } from '../types'
-import { DEFAULT_DISPLAY, getGroupCounts, groupQueue, loadDisplay, orderQueue, saveDisplay } from './order'
+import {
+  DEFAULT_DISPLAY,
+  FLAT_DISPLAY,
+  getGroupCounts,
+  groupQueue,
+  loadDisplay,
+  orderQueue,
+  saveDisplay,
+} from './order'
 
 // Dev ("owner") signs on Treasury (3 of 5, next #42) and Ops Payroll (2 of 4, next #17), not on Grants.
 const [treasury, payroll, grants] = accounts
@@ -138,8 +146,10 @@ describe('getGroupCounts', () => {
 describe('display preference', () => {
   beforeEach(() => localStorage.clear())
 
-  it('defaults to grouping by status', () => {
-    expect(loadDisplay()).toEqual({ groupBy: 'status' })
+  it('opens option D as a flat list, and option E grouped by status', () => {
+    expect(loadDisplay()).toEqual(FLAT_DISPLAY)
+    expect(loadDisplay('flat')).toEqual({ groupBy: 'none' })
+    expect(loadDisplay('cards')).toEqual(DEFAULT_DISPLAY)
     expect(DEFAULT_DISPLAY).toEqual({ groupBy: 'status' })
   })
 
@@ -151,11 +161,13 @@ describe('display preference', () => {
   it('keeps option E’s grouping apart from option D’s', () => {
     saveDisplay({ groupBy: 'next' }, 'cards')
     expect(loadDisplay('cards')).toEqual({ groupBy: 'next' })
-    expect(loadDisplay()).toEqual(DEFAULT_DISPLAY)
+    expect(loadDisplay()).toEqual(FLAT_DISPLAY)
   })
 
-  it('ignores a saved value it does not know', () => {
-    localStorage.setItem('prototype.pendingQueue.display', '{"groupBy":"color"}')
-    expect(loadDisplay()).toEqual(DEFAULT_DISPLAY)
+  it('gives option E no flat list, and ignores a saved value it does not know', () => {
+    saveDisplay({ groupBy: 'none' }, 'cards')
+    expect(loadDisplay('cards')).toEqual(DEFAULT_DISPLAY)
+    localStorage.setItem('prototype.pendingQueue.display.flat', '{"groupBy":"color"}')
+    expect(loadDisplay()).toEqual(FLAT_DISPLAY)
   })
 })
