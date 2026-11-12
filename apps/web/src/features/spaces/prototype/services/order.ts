@@ -1,51 +1,19 @@
 import type { Account, Persona, Proposal } from '../types'
-import { getAccount, getCreatedAt, getPrimaryStatus } from './model'
+import { getAccount, getCreatedAt, getRowStatus } from './model'
 import { getStepKind, STEP_RANK } from './nextSteps'
 
-// Option D · Group button: rows grouped by status, Safe, network or next nonce, each in a fixed order.
+// Group by: the default Status list, or rows grouped by next nonce, Safe or network, each in a fixed order.
 
-// `none`: option D's default, one list in the status order with no group rows.
+// `none` is the Status choice: one list in status order with no group rows. `status` only orders that list.
 export type GroupBy = 'none' | 'status' | 'safe' | 'network' | 'next'
 export type OrderedGroupBy = Exclude<GroupBy, 'safe' | 'none'>
 type SortBy = 'nonce' | 'oldest'
 export type QueueDisplay = { groupBy: GroupBy }
 
-// `card` and `short` are the title and one-line explanation on option E's cards.
-export const GROUP_OPTIONS: {
-  value: Exclude<GroupBy, 'none'>
-  label: string
-  hint: string
-  card: string
-  short: string
-}[] = [
-  {
-    value: 'status',
-    label: 'Status',
-    hint: 'Show what needs your action first',
-    card: 'Status',
-    short: 'Transactions that need your action first',
-  },
-  {
-    value: 'next',
-    label: 'Up next',
-    hint: 'The next transaction on each Safe, then the ones behind it',
-    card: 'Up next',
-    short: 'Next transaction on each Safe',
-  },
-  {
-    value: 'safe',
-    label: 'Safe',
-    hint: 'Grouped by Safe and network in nonce order',
-    card: 'Safes',
-    short: 'Transactions grouped by Safe, network, and nonce',
-  },
-  {
-    value: 'network',
-    label: 'Network',
-    hint: 'Grouped by network, each Safe in nonce order',
-    card: 'Networks',
-    short: 'Transactions grouped by network',
-  },
+export const GROUP_OPTIONS: { value: Exclude<GroupBy, 'none' | 'status'>; label: string; hint: string }[] = [
+  { value: 'next', label: 'Up next', hint: 'Next transaction on each Safe' },
+  { value: 'safe', label: 'Safe', hint: 'Grouped by Safe, network and nonce order' },
+  { value: 'network', label: 'Network', hint: 'Grouped by network' },
 ]
 
 // Each grouping has one fixed order. Grouped by Safe or network, nonces stay in sequence.
@@ -56,16 +24,19 @@ export const GROUP_SORT: Record<GroupBy, SortBy> = {
   network: 'nonce',
   next: 'nonce',
 }
-export const DEFAULT_DISPLAY: QueueDisplay = { groupBy: 'status' }
-// Option D opens as one flat list. Its Group by menu adds None to the four groupings.
-export const FLAT_DISPLAY: QueueDisplay = { groupBy: 'none' }
-export const NO_GROUP = { value: 'none' as const, label: 'None', hint: 'One list, most urgent first' }
+export const DEFAULT_DISPLAY: QueueDisplay = { groupBy: 'none' }
+export const STATUS_CHOICE = {
+  value: 'none' as const,
+  label: 'Status',
+  hint: 'Transactions listed by order of urgency',
+}
+export const DISPLAY_CHOICES = [STATUS_CHOICE, ...GROUP_OPTIONS]
 
-// Last signatures and executes first, then signatures, then rows waiting on others, then blocked rows.
+// With a wallet: your last signatures and executes first, then your signatures. Then Signing, Ready to sign, Blocked.
 export const getStatusRank = (tx: Proposal, persona: Persona) => {
   const kind = getStepKind(tx, persona)
   if (kind) return STEP_RANK.indexOf(kind)
-  return getPrimaryStatus(tx, persona) === 'waiting' ? STEP_RANK.length + 1 : STEP_RANK.length
+  return STEP_RANK.length + ['awaiting', 'sign', 'waiting'].indexOf(getRowStatus(tx))
 }
 
 const clusterKey = (tx: Proposal) => `${tx.account}:${tx.nonce}`
@@ -111,8 +82,8 @@ const STATUS_GROUPS = [
   // Your signature is the last one, so signing also executes.
   { id: 'status-sign-execute', label: 'Sign and execute', ranks: [0] },
   { id: 'status-sign', label: 'Ready to sign', ranks: [2, 3] },
-  { id: 'status-awaiting', label: 'Waiting on others', ranks: [STEP_RANK.length] },
-  { id: 'status-blocked', label: 'Blocked', ranks: [STEP_RANK.length + 1] },
+  { id: 'status-awaiting', label: 'Signing', ranks: [STEP_RANK.length, STEP_RANK.length + 1] },
+  { id: 'status-blocked', label: 'Blocked', ranks: [STEP_RANK.length + 2] },
 ]
 
 export const isActionGroup = (group: QueueGroup) =>
@@ -161,36 +132,22 @@ export const groupQueue = (rows: Proposal[], groupBy: OrderedGroupBy, persona: P
   return byNetwork(rows)
 }
 
-// Option E's card numbers: what needs you, Safes and networks with pending rows, and rows next in line.
-export const getGroupCounts = (rows: Proposal[], persona: Persona): Record<Exclude<GroupBy, 'none'>, number> => ({
-  status: groupQueue(rows, 'status', persona)
-    .filter(isActionGroup)
-    .reduce((sum, group) => sum + group.rows.length, 0),
-  safe: new Set(rows.map((tx) => getAccount(tx).iconAddress)).size,
-  network: new Set(rows.map((tx) => getAccount(tx).chainId)).size,
-  next: rows.filter((tx) => tx.nonce === getAccount(tx).nextNonce).length,
-})
+// Renamed when Status replaced None, so an old saved Status grouping doesn't come back.
+const STORAGE_KEY = 'prototype.pendingQueue.groupBy'
 
-// Options D and E each remember their own grouping.
-const STORAGE_KEYS = { flat: 'prototype.pendingQueue.display.flat', cards: 'prototype.pendingQueue.display.cards.flat' }
-export type DisplayOption = keyof typeof STORAGE_KEYS
-
-export const loadDisplay = (option: DisplayOption = 'flat'): QueueDisplay => {
-  // Both options open as one flat list, most urgent first
-  const fallback = FLAT_DISPLAY
+export const loadDisplay = (): QueueDisplay => {
   try {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEYS[option]) ?? 'null') as Partial<QueueDisplay> | null
-    const choices = [NO_GROUP, ...GROUP_OPTIONS]
-    const groupBy = choices.find((choice) => choice.value === saved?.groupBy)?.value
-    return groupBy ? { groupBy } : fallback
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null') as Partial<QueueDisplay> | null
+    const groupBy = DISPLAY_CHOICES.find((choice) => choice.value === saved?.groupBy)?.value
+    return groupBy ? { groupBy } : DEFAULT_DISPLAY
   } catch {
-    return fallback
+    return DEFAULT_DISPLAY
   }
 }
 
-export const saveDisplay = (display: QueueDisplay, option: DisplayOption = 'flat') => {
+export const saveDisplay = (display: QueueDisplay) => {
   try {
-    localStorage.setItem(STORAGE_KEYS[option], JSON.stringify(display))
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(display))
   } catch {
     // Private windows can block storage. The choice then lasts until reload.
   }

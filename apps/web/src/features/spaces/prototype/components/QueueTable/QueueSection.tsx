@@ -63,7 +63,7 @@ export type QueueSectionProps = {
   onSpeedUp?: (id: string) => void
   // Grouped by Safe: network sub-headers and pages of rows.
   safeTable?: boolean
-  // Option E: the Safe and the other party read as tags in the transaction line.
+  // The Safe and the other party read as tags in the transaction line.
   partyTags?: boolean
   // Options D and E on a phone: Nonce, a two-line Transaction and Action, so nothing scrolls sideways.
   compact?: boolean
@@ -234,7 +234,7 @@ export function SectionHeader({
   )
 }
 
-// `unit` names what collapses, for option D's networks and status groups. Safes by default.
+// `unit` names what collapses, for networks and status groups. Safes by default.
 export type CollapseAll = { allCollapsed: boolean; onToggle: () => void; count?: number; unit?: [string, string] }
 
 // Column header: chevrons always, outline and word on header hover. The wrapper undoes the header's capitals.

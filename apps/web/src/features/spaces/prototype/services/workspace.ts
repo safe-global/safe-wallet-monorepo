@@ -21,7 +21,7 @@ export const getWorkspaceProfile = (scenario: Scenario) => {
   const accounts = getScenarioAccounts(scenario)
   const signers = [...new Set(accounts.flatMap((account) => account.owners))]
   const outside = signers.filter((id) => !isWorkspaceMember(id)).length
-  const nonSigners = Object.values(PERSONAS).filter((profile) => !profile.you).length
+  const nonSigners = Object.entries(PERSONAS).filter(([id, profile]) => id !== 'guest' && !profile.you).length
   return {
     // The fixture workspace is a crypto-native company running its own treasury, payroll and grants.
     segment:

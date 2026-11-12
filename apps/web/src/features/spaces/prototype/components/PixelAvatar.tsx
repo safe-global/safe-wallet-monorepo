@@ -85,6 +85,7 @@ const LOOKS: Record<Persona, Look> = {
   security: { template: 'glasses', hair: '#3a2a1e', skin: '#d9a77f', top: '#1f2937', trim: '#4b5563' },
   member: { template: 'long', hair: '#141414', skin: '#e6bfa0', top: '#333333', trim: '#555555' },
   admin: { template: 'long', hair: '#4a3222', skin: '#9c6a48', top: '#a34a55', trim: '#e8e8e8' },
+  guest: { template: 'short', hair: '#9ca3af', skin: '#d4d4d4', top: '#a3a3a3', trim: '#e5e5e5' },
 }
 
 export function PixelAvatar({ persona, size = 48 }: { persona: Persona; size?: number }) {

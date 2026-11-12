@@ -35,7 +35,7 @@ export const SECTION_STYLES: Record<Filter | 'conflicting', string> = {
 const STATE_LABELS: Record<NonceState, string> = {
   now: 'Ready to execute',
   sign: 'Ready to sign',
-  waiting: 'Waiting on others',
+  waiting: 'Signing',
   blocked: 'Blocked',
 }
 

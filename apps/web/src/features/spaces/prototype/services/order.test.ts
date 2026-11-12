@@ -1,6 +1,6 @@
 import { accounts } from './model'
 import type { Proposal } from '../types'
-import { FLAT_DISPLAY, getGroupCounts, groupQueue, loadDisplay, orderQueue, saveDisplay } from './order'
+import { DEFAULT_DISPLAY, DISPLAY_CHOICES, groupQueue, loadDisplay, orderQueue, saveDisplay } from './order'
 
 // Dev ("owner") signs on Treasury (3 of 5, next #42) and Ops Payroll (2 of 4, next #17), not on Grants.
 const [treasury, payroll, grants] = accounts
@@ -59,12 +59,7 @@ describe('groupQueue', () => {
       tx('grants', 9, [], '1h ago'),
     ]
     const groups = groupQueue(rows, 'status', 'owner')
-    expect(groups.map((group) => group.label)).toEqual([
-      'Ready to execute',
-      'Ready to sign',
-      'Waiting on others',
-      'Blocked',
-    ])
+    expect(groups.map((group) => group.label)).toEqual(['Ready to execute', 'Ready to sign', 'Signing', 'Blocked'])
     expect(groups.map((group) => ids(group.rows))).toEqual([
       ['payroll-17'],
       ['treasury-42'],
@@ -123,25 +118,12 @@ describe('groupQueue', () => {
   })
 })
 
-describe('getGroupCounts', () => {
-  it('counts rows that need you, Safes, networks and rows next in line', () => {
-    const rows = [
-      tx('treasury', 42, [], '1h ago'),
-      tx('treasury', 43, [], '1h ago'),
-      tx('payroll', 17, ['Ana', 'Max'], '1h ago'),
-      tx('grants', 9, [], '1h ago'),
-    ]
-    expect(getGroupCounts(rows, 'owner')).toEqual({ status: 3, safe: 3, network: 3, next: 2 })
-  })
-})
-
 describe('display preference', () => {
   beforeEach(() => localStorage.clear())
 
-  it('opens options D and E as a flat list', () => {
-    expect(loadDisplay()).toEqual(FLAT_DISPLAY)
-    expect(loadDisplay('cards')).toEqual(FLAT_DISPLAY)
-    expect(FLAT_DISPLAY).toEqual({ groupBy: 'none' })
+  it('opens as the Status list', () => {
+    expect(loadDisplay()).toEqual(DEFAULT_DISPLAY)
+    expect(DEFAULT_DISPLAY).toEqual({ groupBy: 'none' })
   })
 
   it('remembers the last grouping', () => {
@@ -149,14 +131,14 @@ describe('display preference', () => {
     expect(loadDisplay()).toEqual({ groupBy: 'network' })
   })
 
-  it('keeps option E’s grouping apart from option D’s', () => {
-    saveDisplay({ groupBy: 'next' }, 'cards')
-    expect(loadDisplay('cards')).toEqual({ groupBy: 'next' })
-    expect(loadDisplay()).toEqual(FLAT_DISPLAY)
+  it('offers Status, Up next, Safe and Network, and drops the old Status grouping', () => {
+    expect(DISPLAY_CHOICES.map((choice) => choice.label)).toEqual(['Status', 'Up next', 'Safe', 'Network'])
+    localStorage.setItem('prototype.pendingQueue.groupBy', '{"groupBy":"status"}')
+    expect(loadDisplay()).toEqual(DEFAULT_DISPLAY)
   })
 
   it('ignores a saved value it does not know', () => {
-    localStorage.setItem('prototype.pendingQueue.display.flat', '{"groupBy":"color"}')
-    expect(loadDisplay()).toEqual(FLAT_DISPLAY)
+    localStorage.setItem('prototype.pendingQueue.groupBy', '{"groupBy":"color"}')
+    expect(loadDisplay()).toEqual(DEFAULT_DISPLAY)
   })
 })

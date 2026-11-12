@@ -89,7 +89,7 @@ type QueueFiltersProps = {
   accounts: Account[]
   // More sections in the Filter menu, after Type: the Signer filter.
   extraMenu?: ReactNode
-  // Before New: option D's Group by menu.
+  // Before New: the Group by menu.
   status?: ReactNode
 }
 
@@ -266,7 +266,7 @@ export function QueueToolbar({ filters, accounts, extraMenu, status }: QueueFilt
     <div className="@container mb-5">
       <div className="flex flex-wrap items-center gap-3">
         <QueueSearch filters={filters} />
-        {/* Option D: Group by sits next to search, before Filter */}
+        {/* Group by sits next to search, before Filter */}
         {status}
         <DropdownMenu>
           <Tooltip delay={300}>

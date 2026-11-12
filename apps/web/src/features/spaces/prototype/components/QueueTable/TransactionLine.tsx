@@ -7,7 +7,7 @@ import {
   getSummaryHint,
   isNewRecipient,
 } from '../../services/columns'
-import { getTypeLabel, shortAddress } from '../../services/model'
+import { getAccount, getTypeLabel, shortAddress } from '../../services/model'
 import type { Proposal } from '../../types'
 import { Tag } from '@safe-global/views/components/ui/tag'
 import { AppTag, HINT_CLASS, ROW_TAG_FILL, TypeTag } from '../shared'
@@ -16,15 +16,18 @@ import { AppTag, HINT_CLASS, ROW_TAG_FILL, TypeTag } from '../shared'
 const hasName = (name: string) => !!name && name !== 'Unknown' && !name.startsWith('0x')
 const short = (address: string) => (address.includes('…') ? address : shortAddress(address))
 
-// What happens. The tooltip gives the dollar value or explains the action.
+// What happens. The tooltip repeats it in full, with the dollar value or what the action does.
 export function SummaryText({ tx }: { tx: Proposal }) {
   const hint = getSummaryHint(tx)
   const summary = getSummary(tx)
-  if (!hint) return <span className="min-w-0 truncate tabular-nums">{summary}</span>
+  // Long method and contract names truncate, so the tooltip always has the full text.
   return (
     <Tooltip delay={150}>
       <TooltipTrigger render={<span className="min-w-0 truncate tabular-nums" />}>{summary}</TooltipTrigger>
-      <TooltipContent className={HINT_CLASS}>{hint}</TooltipContent>
+      <TooltipContent className={HINT_CLASS}>
+        <span className="block break-words font-medium">{summary}</span>
+        {hint && <span className="mt-1 block">{hint}</span>}
+      </TooltipContent>
     </Tooltip>
   )
 }
@@ -77,7 +80,7 @@ export function Counterparty({
           </Tag>
         </span>
       ) : (
-        // Option E: a plain word in the sentence. Fixed width in the column, so names line up.
+        // A plain word in the sentence. Fixed width in the column, so names line up.
         <span className={`shrink-0 text-sm text-muted-foreground ${inColumn ? 'w-7' : ''}`}>
           {getCounterpartyJoin(tx)}
         </span>
@@ -90,6 +93,7 @@ export function Counterparty({
         logo={counterparty.logo}
         contract={counterparty.contract}
         tag={tag}
+        chainId={getAccount(tx).chainId}
       />
     </span>
   )

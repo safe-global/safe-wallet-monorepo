@@ -71,7 +71,7 @@ const SafeList = ({
   </ul>
 )
 
-// Option E: a quiet chip in the page header, next to Hypernative. It names the Safes that didn't load, with Reload.
+// A quiet chip in the page header, next to Hypernative. It names the Safes that didn't load, with Reload.
 // Safes that aren't deployed yet have nothing to load, so they never show here.
 export function LoadStatusChip({
   failed,
@@ -114,7 +114,7 @@ export function LoadStatusChip({
   )
 }
 
-// Option E: when no Safe loads, the page is empty anyway, so it explains why and lists the Safes.
+// When no Safe loads, the page is empty anyway, so it explains why and lists the Safes.
 export function NothingLoaded({ failed, retrying, onRetry }: LoadStatusProps) {
   const loading = failed.some((account) => retrying.includes(account.id))
   return (
@@ -142,7 +142,7 @@ export function NothingLoaded({ failed, retrying, onRetry }: LoadStatusProps) {
   )
 }
 
-// Option E, grouped by Safe: a Safe that didn't load keeps its band, so you see it where you'd look for it.
+// Grouped by Safe: a Safe that didn't load keeps its band, so you see it where you'd look for it.
 export function FailedSafeBand({
   account,
   columnCount,

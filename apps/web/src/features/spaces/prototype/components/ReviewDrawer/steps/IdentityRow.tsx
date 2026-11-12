@@ -5,7 +5,7 @@ import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import { useCopyToClipboard } from '@/components/common/AuditLog'
 
-const EXPLORERS: Record<string, string> = {
+export const EXPLORERS: Record<string, string> = {
   '1': 'https://etherscan.io/address/',
   '8453': 'https://basescan.org/address/',
   '42161': 'https://arbiscan.io/address/',

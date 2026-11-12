@@ -9,10 +9,9 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from '@safe-global/views/components/ui/dropdown-menu'
-import { GROUP_OPTIONS, NO_GROUP, type GroupBy, type QueueDisplay } from '../../services/order'
+import { DISPLAY_CHOICES, STATUS_CHOICE, type GroupBy, type QueueDisplay } from '../../services/order'
 
-// Option D: a flat list by default, or grouped. Each grouping has its own fixed order.
-const CHOICES = [NO_GROUP, ...GROUP_OPTIONS]
+// Status, the default, is one list in status order. The other choices group it, each in its own fixed order.
 export function DisplayMenu({
   display,
   onChange,
@@ -20,15 +19,12 @@ export function DisplayMenu({
   display: QueueDisplay
   onChange: (display: QueueDisplay) => void
 }) {
-  const group = CHOICES.find((option) => option.value === display.groupBy) ?? NO_GROUP
-  const grouped = group.value !== 'none'
+  const group = DISPLAY_CHOICES.find((option) => option.value === display.groupBy) ?? STATUS_CHOICE
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger
-        render={<Button variant="outline" aria-label={grouped ? `Group by ${group.label}` : 'Group by'} />}
-      >
+      <DropdownMenuTrigger render={<Button variant="outline" aria-label={`Group by ${group.label}`} />}>
         <Rows3 />
-        {grouped ? `Group by: ${group.label}` : 'Group by'}
+        Group by: {group.label}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuGroup>
@@ -37,7 +33,7 @@ export function DisplayMenu({
             value={display.groupBy}
             onValueChange={(value: GroupBy) => onChange({ groupBy: value })}
           >
-            {CHOICES.map((option) => (
+            {DISPLAY_CHOICES.map((option) => (
               <DropdownMenuRadioItem key={option.value} value={option.value}>
                 <span className="flex flex-col">
                   {option.label}

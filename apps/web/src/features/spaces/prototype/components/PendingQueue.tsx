@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
-import { Bell, Check, CircleHelp, LoaderCircle, ShieldAlert, ShieldCheck, UserPlus } from 'lucide-react'
+import { Bell, Check, CircleHelp, LoaderCircle, ShieldAlert, ShieldCheck, UserPlus, Wallet } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import {
@@ -51,22 +51,13 @@ import {
 } from '../services/execution'
 import { canInvite, isYou, parsePersona } from '../services/personas'
 import { ConfirmActionDialog, type PendingConfirm } from './ConfirmActionDialog'
-import type { Direction, Persona, Proposal, Milestone } from '../types'
+import type { Persona, Proposal, Milestone, WalletState } from '../types'
 import { PrototypeFrame } from './PrototypeFrame'
 import { useQueueFilters } from './QueueFilters/useQueueFilters'
 import { AppliedFilters, QueueToolbar, type AppliedPill } from './QueueFilters/QueueFilters'
 import { QueueGroupedTable, QueueOrderedTable } from './QueueTable/QueueGroupedTable'
 import { DisplayMenu } from './QueueTable/DisplayMenu'
-import { GroupByCards } from './QueueTable/GroupByCards'
-import {
-  GROUP_SORT,
-  getGroupCounts,
-  groupQueue,
-  loadDisplay,
-  orderQueue,
-  saveDisplay,
-  type QueueDisplay,
-} from '../services/order'
+import { GROUP_SORT, groupQueue, loadDisplay, orderQueue, saveDisplay, type QueueDisplay } from '../services/order'
 import { buildSections, rankAccounts } from './QueueTable/sections'
 import { ReviewDrawer, type Replacement, type SectionsMode } from './ReviewDrawer/ReviewDrawer'
 import { BulkExecuteDrawer } from './BulkExecuteDrawer'
@@ -79,11 +70,7 @@ import { SignerFilterMenu } from './QueueFilters/SignerFilterMenu'
 export default function PendingQueue() {
   const router = useRouter()
   const { scenario, state } = parseScenario(router.query)
-  return (
-    <PendingQueueView
-      key={`${scenario}:${state}:${router.query.option ?? 'cards'}:${router.query.failed ?? 4}:${router.query.m ?? 1}`}
-    />
-  )
+  return <PendingQueueView key={`${scenario}:${state}:${router.query.failed ?? 4}:${router.query.m ?? 1}`} />
 }
 
 function PendingQueueView() {
@@ -93,25 +80,23 @@ function PendingQueueView() {
   const [mainRef, contentWidth] = useElementWidth<HTMLElement>()
   const isWide = contentWidth >= 1050
   const isExtraWide = contentWidth >= 1880
-  // Both options open as one flat list, most urgent first. E groups with cards, D (`?option=flat`) with a menu.
-  // Any other option, such as links to the removed A, B and C, opens E.
-  const direction: Direction = router.query.option === 'flat' ? 'flat' : 'cards'
-  const cards = direction === 'cards'
-  const displayOption = cards ? 'cards' : 'flat'
-  const [displays, setDisplays] = useState(() => ({ flat: loadDisplay('flat'), cards: loadDisplay('cards') }))
-  const display = displays[displayOption]
+  // Opens as the Status list, most urgent first. Group by changes it. Old `?option=` links open the same page.
+  const [display, setDisplay] = useState(loadDisplay)
   // Grouped by Safe: each Safe, then each network, so nonces stay in order.
   const safeView = display.groupBy === 'safe'
   const changeDisplay = (next: QueueDisplay) => {
-    setDisplays((current) => ({ ...current, [displayOption]: next }))
-    saveDisplay(next, displayOption)
+    setDisplay(next)
+    saveDisplay(next)
   }
   const { scenario, state } = parseScenario(router.query)
-  // M1 by default: no drawer, bulk execute, Remind or security marks. `?m=2` shows them.
+  // M1 by default: no drawer, bulk execute, Remind or Safenet marks. `?m=2` shows them.
   const milestone: Milestone = router.query.m === '2' ? 2 : 1
-  const persona: Persona = parsePersona(router.query.persona)
+  const pickedPersona: Persona = parsePersona(router.query.persona)
+  const wallet: WalletState = router.query.wallet === 'none' ? 'none' : 'connected'
+  // Without a wallet, nobody is "you": rows show what anyone can see, and no row asks for your signature.
+  const persona: Persona = wallet === 'none' ? 'guest' : pickedPersona
   const hypernative: Hypernative = router.query.hn === 'out' || router.query.hn === 'none' ? router.query.hn : 'in'
-  // Partial loading: how many Safes fail (`?failed=3`). Both options show 4 by default.
+  // Partial loading: how many Safes fail (`?failed=3`). 4 by default.
   // Undeployed Safes (`?undeployed=1|2`) are skipped quietly.
   const failedCount =
     router.query.failed === 'all'
@@ -159,7 +144,7 @@ function PendingQueueView() {
     nextNonce: queue.nextNonces[account.id],
   }))
   const unavailable = state === 'loading' || state === 'error'
-  // Option E: when no Safe loads, the page says why instead of showing an empty queue.
+  // When no Safe loads, the page says why instead of showing an empty queue.
   const nothingLoaded =
     state === 'partial' && failedIds.length > 0 && failedIds.length + undeployedIds.length >= accounts.length
   // Safes with nothing for you start collapsed.
@@ -207,7 +192,7 @@ function PendingQueueView() {
     apply: () => setSignerFocus(id),
     test: (tx: Proposal) => getState(tx, persona).missing > 0 && getOutstandingSigners(tx).includes(id),
   }))
-  const filters = useQueueFilters(items, accounts, persona, {}, allRecoveries.visible, true, signerOptions)
+  const filters = useQueueFilters(items, accounts, persona, {}, allRecoveries.visible, signerOptions)
   const visible = filters.visible.filter(
     (tx) => !signerFocus || (getState(tx, persona).missing > 0 && getOutstandingSigners(tx).includes(signerFocus)),
   )
@@ -599,7 +584,7 @@ function PendingQueueView() {
                   {Object.keys(executions).length} executing
                 </Button>
               )}
-              {milestone === 2 && hypernative === 'in' && (
+              {hypernative === 'in' && (
                 // Under 600px of content, only the shield shows. Its tooltip names it.
                 <Tooltip delay={300}>
                   <TooltipTrigger render={<span className="flex items-center gap-1.5 text-xs text-muted-foreground" />}>
@@ -609,7 +594,7 @@ function PendingQueueView() {
                   <TooltipContent>Logged in to Hypernative</TooltipContent>
                 </Tooltip>
               )}
-              {milestone === 2 && hypernative === 'out' && (
+              {hypernative === 'out' && (
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <ShieldAlert className="size-4 text-warning-strong" aria-hidden="true" />
                   <span className="@max-[600px]:sr-only">Hypernative not connected</span>
@@ -627,6 +612,17 @@ function PendingQueueView() {
                   onRetry={retryLoad}
                 />
               )}
+              {wallet === 'none' && (
+                <Tooltip delay={300}>
+                  <TooltipTrigger
+                    render={<Button size="2xs" variant="outline" onClick={() => setOption({ wallet: 'connected' })} />}
+                  >
+                    <Wallet aria-hidden="true" />
+                    Connect wallet
+                  </TooltipTrigger>
+                  <TooltipContent>See what needs your signature</TooltipContent>
+                </Tooltip>
+              )}
             </div>
           </div>
           {feedback && !review && (
@@ -641,18 +637,10 @@ function PendingQueueView() {
             </p>
           )}
           <section aria-label="Queue">
-            {cards && !unavailable && (
-              <GroupByCards
-                display={display}
-                counts={getGroupCounts(visible, persona)}
-                onChange={changeDisplay}
-                compact={isMobile}
-              />
-            )}
             <QueueToolbar
               filters={filters}
               accounts={orderedAccounts}
-              status={!cards && <DisplayMenu display={display} onChange={changeDisplay} />}
+              status={<DisplayMenu display={display} onChange={changeDisplay} />}
               extraMenu={
                 <SignerFilterMenu
                   load={signerLoad}
@@ -757,11 +745,11 @@ function PendingQueueView() {
           </section>
         </main>
         <ScenarioBar
-          direction={direction}
+          wallet={wallet}
           scenario={scenario}
           state={state}
           hypernative={hypernative}
-          persona={persona}
+          persona={pickedPersona}
           milestone={milestone}
           failedCount={failedCount}
           loadReason={loadReason}

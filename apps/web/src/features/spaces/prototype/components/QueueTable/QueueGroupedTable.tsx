@@ -298,12 +298,12 @@ export type QueueOrderedTableProps = Omit<
 > & {
   groups: QueueGroup[]
   groupBy: OrderedGroupBy
-  // Option D: one plain list in the groups' order, with no group rows and nothing to collapse
+  // The Status list: one plain list in the groups' order, with no group rows and nothing to collapse
   plain?: boolean
 }
 
 // Transaction fits the widest action and To takes the slack.
-// Option E fits the Safe tag in Transaction, in place of the Safe column.
+// The Safe tag fits in Transaction, in place of the Safe column.
 const orderedWidths = (
   showNoteText: boolean | undefined,
   partyTags = false,
@@ -315,11 +315,11 @@ const orderedWidths = (
   To: undefined,
   Safe: 'w-44',
   Network: partyTags ? 'w-20' : 'w-24',
-  // Option E's badges name states, such as Awaiting 2 · after #42, so the column is wider.
+  // Badges such as Blocked by #42 need the wider column.
   Status: partyTags ? 'w-48' : 'w-32',
 })
 
-// Columns for options D and E, the same in every grouping. Nonce leads, so conflicts draw the same bracket.
+// Columns, the same in every grouping. Nonce leads, so conflicts draw the same bracket.
 export const ORDERED_COLUMNS = (isWide: boolean, partyTags = false, compact = false) =>
   compact
     ? ['Nonce', 'Transaction', 'Action']
@@ -327,7 +327,7 @@ export const ORDERED_COLUMNS = (isWide: boolean, partyTags = false, compact = fa
         'Nonce',
         'Transaction',
         'To',
-        // Option E shows the Safe and its network in the Safe tag.
+        // The Safe tag shows the Safe and its network in the Safe tag.
         ...(partyTags ? [] : ['Safe', 'Network']),
         'Proposed',
         ...(isWide ? ['Note'] : []),
@@ -336,8 +336,8 @@ export const ORDERED_COLUMNS = (isWide: boolean, partyTags = false, compact = fa
         'Action',
       ]
 
-// Option E: rows grouped by status, network or next nonce. Each group collapses, and the header collapses them all.
-// Option D (`plain`): the same rows in one list, with no group rows.
+// Rows grouped by network or next nonce. Each group collapses, and the header collapses them all.
+// The Status list (`plain`): the same rows in one list, with no group rows.
 export function QueueOrderedTable({ groups, groupBy, plain = false, ...props }: QueueOrderedTableProps) {
   const byNetwork = groupBy === 'network'
   const columns = ORDERED_COLUMNS(props.isWide, props.partyTags, props.compact)

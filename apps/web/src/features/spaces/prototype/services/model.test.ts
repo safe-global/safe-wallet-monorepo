@@ -19,6 +19,7 @@ import {
   getState,
   getPrimaryStatus,
   getRowState,
+  getRowStatus,
   getStepsStatus,
   matchesFilter,
 } from './model'
@@ -32,10 +33,20 @@ describe('prototype queue state', () => {
   it('allows a final signature and execution at the current nonce', () => {
     expect(getAction(proposal('treasury-42'), 'owner')).toBe('Review, sign and execute')
   })
-  it('keeps signature and dependency filters overlapping', () => {
+  it('matches the Status filter to the row badge, with or without a wallet', () => {
     const tx = proposal('treasury-44')
-    expect(matchesFilter(tx, 'sign', 'owner')).toBe(true)
-    expect(matchesFilter(tx, 'waiting', 'owner')).toBe(true)
+    expect(matchesFilter(tx, 'waiting')).toBe(true)
+    expect(matchesFilter(tx, 'sign')).toBe(false)
+    expect(getRowStatus(proposal('payroll-17'))).toBe('ready')
+  })
+  it('names the same status for everyone, and turns it green only when you can sign', () => {
+    const signing = proposal('treasury-42')
+    expect(getRowState(signing, 'owner')).toEqual({ label: 'Signing', tone: 'success' })
+    expect(getRowState(signing, 'guest')).toEqual({ label: 'Signing', tone: 'secondary' })
+    expect(getRowState(proposal('treasury-44'), 'guest').label).toBe('Blocked by #42')
+    expect(getRowState(proposal('payroll-17'), 'guest').label).toBe('Ready to execute')
+    const unsigned = { ...signing, signers: [] }
+    expect(getRowState(unsigned, 'guest').label).toBe('Ready to sign')
   })
   it('assigns actionable status first while preserving secondary waiting filters', () => {
     expect(getPrimaryStatus(proposal('payroll-17'), 'owner')).toBe('ready')
@@ -43,7 +54,6 @@ describe('prototype queue state', () => {
     expect(getPrimaryStatus(proposal('treasury-44'), 'owner')).toBe('sign')
     expect(getPrimaryStatus(proposal('treasury-43'), 'owner')).toBe('waiting')
     expect(getPrimaryStatus(proposal('grants-8'), 'owner')).toBe('awaiting')
-    expect(matchesFilter(proposal('grants-8'), 'awaiting', 'owner')).toBe(true)
     expect(getPrimaryStatus(proposal('treasury-44'), 'member')).toBe('waiting')
     expect(getPrimaryStatus(proposal('treasury-42'), 'member')).toBe('awaiting')
   })
@@ -230,28 +240,12 @@ describe('next steps status', () => {
     expect(getStepsStatus(proposal('treasury-42'), 'owner').after).toBeUndefined()
   })
 
-  it('names the state for option E, green when it is on you', () => {
-    expect(getRowState(proposal('payroll-17'), 'owner')).toEqual({ label: 'Ready', tone: 'success' })
-    expect(getRowState(proposal('treasury-42'), 'owner')).toEqual({ label: 'Needs your signature', tone: 'success' })
-    expect(getRowState(proposal('treasury-42'), 'member').label).toBe('Awaiting 1 signature')
-    expect(getRowState(proposal('treasury-44'), 'owner').label).toBe('Needs you · after #42')
-    expect(getRowState(proposal('treasury-44'), 'member').label).toBe('Awaiting 2 · after #42')
-    expect(getRowState(proposal('treasury-43'), 'owner')).toEqual({ label: 'Blocked by #42', tone: 'warning' })
-  })
-
   it('labels a fully signed row behind an earlier nonce as blocked', () => {
     expect(getStepsStatus(proposal('treasury-43'), 'owner')).toEqual({
       label: 'Blocked by #42',
       tone: 'warning',
       after: undefined,
     })
-  })
-
-  it('matches each row to one status only when exclusive', () => {
-    const tx = proposal('treasury-44')
-    expect(matchesFilter(tx, 'waiting', 'owner')).toBe(true)
-    expect(matchesFilter(tx, 'waiting', 'owner', true)).toBe(false)
-    expect(matchesFilter(tx, 'sign', 'owner', true)).toBe(true)
   })
 })
 

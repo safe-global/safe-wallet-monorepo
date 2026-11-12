@@ -30,8 +30,8 @@ import { TYPE_HINTS } from '../services/columns'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import type { Filter, Persona, Proposal } from '../types'
 
-// Blocked comes before Waiting on others: you can act on what blocks it.
-export const STATUS_ORDER: Filter[] = ['ready', 'sign', 'waiting', 'awaiting']
+// Closest to done first.
+export const STATUS_ORDER: Filter[] = ['ready', 'awaiting', 'sign', 'waiting']
 // Status filters that narrow the statuses.
 export type Flag = 'conflicting' | 'stale'
 export const FLAGS: Flag[] = ['conflicting', 'stale']
@@ -55,7 +55,7 @@ export const STATUS_META: Record<Filter, { label: string; icon: LucideIcon; tone
     tone: 'bg-success-subtle text-success-strong',
   },
   awaiting: {
-    label: 'Waiting on others',
+    label: 'Signing',
     icon: Users,
     tone: 'bg-warning-subtle text-warning-strong',
   },

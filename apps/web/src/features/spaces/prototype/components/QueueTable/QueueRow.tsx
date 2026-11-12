@@ -475,7 +475,7 @@ export function QueueRow({
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               {!partyTags && <ChainIcon chainId={account.chainId} network={account.network} />}
               {signaturesContent}
-              {/* Option E's badge names a state, so it always shows. Elsewhere it shows only when it adds to the button. */}
+              {/* The badge names a state, so it always shows. Elsewhere it shows only when it adds to the button. */}
               {(partyTags ||
                 execution ||
                 lockedBy ||
@@ -489,7 +489,7 @@ export function QueueRow({
         </div>
       </TableCell>
     ),
-    // Option D's Safe column: the network has its own column.
+    // The Safe column: the network has its own column.
     Safe: (
       <TableCell>
         <span className="flex min-w-0 items-center gap-2 text-sm">

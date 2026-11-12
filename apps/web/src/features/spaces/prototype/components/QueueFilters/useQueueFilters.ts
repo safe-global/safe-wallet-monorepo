@@ -48,7 +48,7 @@ export type SearchOption = {
 const STATUS_NAMES: Record<Filter, string[]> = {
   ready: ['Execute'],
   sign: ['Sign'],
-  awaiting: ['Waiting'],
+  awaiting: ['Waiting', 'Waiting on others'],
   waiting: [],
 }
 const FLAG_NAMES: Record<Flag, string[]> = { conflicting: [], stale: ['Stale'] }
@@ -84,7 +84,6 @@ export function useQueueFilters(
   persona: Persona,
   initial: Partial<QueueFilterValues> = {},
   recoveries: Recovery[] = [],
-  exclusive = false,
   // Filters the page keeps itself, such as Signer, that Enter in the search box can also apply.
   moreSearchOptions: SearchOption[] = [],
 ) {
@@ -126,7 +125,7 @@ export function useQueueFilters(
       label: STATUS_META[status].label,
       names: [STATUS_META[status].label, ...STATUS_NAMES[status]],
       apply: () => add(setStateFilter, status),
-      test: (tx: Proposal) => matchesFilter(tx, status, persona, exclusive),
+      test: (tx: Proposal) => matchesFilter(tx, status),
       testRecovery: (recovery: Recovery) =>
         status === 'ready' && recovery.state === 'executable' && !recovery.malicious,
     })),
@@ -154,9 +153,7 @@ export function useQueueFilters(
     (skip.includes('accounts') || inSelection(accountFilter, tx.account)) &&
     (skip.includes('networks') || inSelection(networkFilter, getAccount(tx).network)) &&
     (skip.includes('types') || inSelection(typeFilter, getTypeLabel(tx))) &&
-    (skip.includes('statuses') ||
-      !stateFilter.length ||
-      stateFilter.some((status) => matchesFilter(tx, status, persona, exclusive))) &&
+    (skip.includes('statuses') || !stateFilter.length || stateFilter.some((status) => matchesFilter(tx, status))) &&
     (skip.includes('flags') || !flags.length || flags.some((flag) => matchesFlag(tx, flag, items))) &&
     searchPasses(tx)
   const optionCount = (skip: FilterSection | FilterSection[], match: (tx: Proposal) => boolean) =>
@@ -236,7 +233,7 @@ export function useQueueFilters(
     search,
     networks,
     items,
-    matches: (tx: Proposal, status: Filter) => matchesFilter(tx, status, persona, exclusive),
+    matches: (tx: Proposal, status: Filter) => matchesFilter(tx, status),
     toggleAccount: (id: string) => setAccountFilter(toggled(accountFilter, id)),
     setAccounts: setAccountFilter,
     safes,

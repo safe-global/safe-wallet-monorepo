@@ -120,6 +120,16 @@ export const PERSONAS: Record<Persona, PersonaProfile> = {
       'No single view of who can do what',
     ],
   },
+  guest: {
+    name: 'No wallet',
+    role: 'Not connected',
+    family: 'risk',
+    priority: 'secondary',
+    admin: false,
+    jtbd: 'When I check the queue without a wallet, I want to see what is pending and why, so I can follow up without signing.',
+    jobs: ['See what is pending across Safes', 'Spot stuck transactions'],
+    pains: ["Can't tell which transactions need a signature from them"],
+  },
 }
 export const getPersonaLabel = (persona: Persona) => `${PERSONAS[persona].name} · ${PERSONAS[persona].role}`
 

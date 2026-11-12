@@ -13,12 +13,13 @@ export type Scenario =
 // A moment layered on any scenario.
 // `capped`: the gateway stopped reading past 500 transactions. `incoming`: a refresh brings in a new proposal.
 export type QueueState = 'normal' | 'loading' | 'error' | 'empty' | 'partial' | 'executing' | 'capped' | 'incoming'
-// D: Group by as a menu. E: Group by as cards.
-// M1 is what ships first. M2 adds the drawer, bulk execute, Remind, security marks and nested Safes.
+// M1 is what ships first. M2 adds the drawer, bulk execute, Remind, Safenet marks and nested Safes. Hypernative status shows in both.
 export type Milestone = 1 | 2
-export type Direction = 'flat' | 'cards'
+// Without a wallet, nothing can say what needs your signature. Viewing still works, as for an admin checking in.
+export type WalletState = 'connected' | 'none'
 export type Filter = 'sign' | 'ready' | 'waiting' | 'awaiting'
-export type Persona = 'owner' | 'single' | 'security' | 'member' | 'admin'
+// `guest`: whoever opens the queue with no wallet connected. Not in the persona picker.
+export type Persona = 'owner' | 'single' | 'security' | 'member' | 'admin' | 'guest'
 export type Account = {
   id: string
   name: string

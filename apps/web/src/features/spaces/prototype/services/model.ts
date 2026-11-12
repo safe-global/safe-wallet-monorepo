@@ -252,27 +252,42 @@ const queued = (
   kind: TransactionKind = { type: 'transfer' },
 ): Proposal => ({ id: `${account}-${nonce}`, account, nonce, recipient, amount, kind, age, signers, eligible: true })
 // One or two of each status, as a team with 8 Safes sees on a normal day. You are Dev.
+// Four carry a note, and two send to addresses missing from the address book.
 const typicalProposals = (): Proposal[] => [
   // Treasury, 3 of 5: ready to execute, and a batch you can sign ahead of it.
-  queued('treasury', 42, 'Northwind · 0x2b9c…71e0', '250,000 USDC', ['Ana', 'Max', 'Jonas'], '5h ago'),
+  {
+    ...queued('treasury', 42, 'Northwind · 0x2b9c…71e0', '250,000 USDC', ['Ana', 'Max', 'Jonas'], '5h ago'),
+    note: { text: 'Q4 invoice for market data. Due Friday.', author: 'Ana', date: '11 Nov, 09:40' },
+  },
   queued('treasury', 43, 'MultiSendCallOnly · 0x9641…3a6f', '', ['Ana'], '3h ago', {
     type: 'batch',
     actions: generateBatchActions(4),
   }),
   // Payroll, 2 of 4: your signature is the last one, and a fully signed transfer waits behind it.
-  queued('payroll', 17, 'MultiSendCallOnly · 0x9641…3a6f', '', ['Ana'], '1h ago', {
-    type: 'batch',
-    actions: generateBatchActions(12, 'Contractor'),
-  }),
-  queued('payroll', 18, 'Contoso Ltd · 0x7c2e…4f19', '8,400 USDC', ['Ana', 'Max'], '50m ago'),
+  {
+    ...queued('payroll', 17, 'MultiSendCallOnly · 0x9641…3a6f', '', ['Ana'], '1h ago', {
+      type: 'batch',
+      actions: generateBatchActions(12, 'Contractor'),
+    }),
+    note: { text: 'November contractor payroll, 12 recipients.', author: 'Ana', date: '12 Nov, 08:15' },
+  },
+  queued('payroll', 18, 'Unknown · 0x7c2e…4f19', '8,400 USDC', ['Ana', 'Max'], '50m ago'),
   // Grants, which you don't sign: waiting on others, and a transfer blocked behind it.
   queued('grants', 8, 'Priya · 0x3e1b…09cd', '', ['Lena'], '1d ago', {
     type: 'settings',
     change: { kind: 'addOwner', owner: 'Priya' },
   }),
-  queued('grants', 9, 'Fabrikam · 0x1d8a…b2c6', '15,000 USDC', ['Jonas', 'Lena'], '20h ago'),
+  queued('grants', 9, 'Unknown · 0x1d8a…b2c6', '15,000 USDC', ['Jonas', 'Lena'], '20h ago'),
   // A conflict: someone proposed a rejection at #9 to cancel the transfer. Only one of the two can execute.
-  { ...queued('grants', 9, 'Grants', '', ['Ana'], '2h ago', { type: 'rejection' }), id: 'grants-9-reject' },
+  {
+    ...queued('grants', 9, 'Grants', '', ['Ana'], '2h ago', { type: 'rejection' }),
+    id: 'grants-9-reject',
+    note: {
+      text: 'Milestone not delivered yet. Cancelling until we get the report.',
+      author: 'Ana',
+      date: '12 Nov, 07:30',
+    },
+  },
   // Market Making, 2 of 4: a new proposal nobody has signed, and one you signed behind it.
   queued('market-making', 212, 'CoW Swap · Limit order', '400,000 USDC', [], '30m ago', {
     type: 'swap',
@@ -281,12 +296,15 @@ const typicalProposals = (): Proposal[] => [
     order: 'limit',
     expiry: 'Expires in 6d',
   }),
-  queued('market-making', 213, 'Aave v3 Pool · 0x8787…4e2a', '', ['Dev'], '10m ago', {
-    type: 'contract',
-    contract: 'Aave v3 Pool',
-    method: 'supply',
-    verified: true,
-  }),
+  {
+    ...queued('market-making', 213, 'Aave v3 Pool · 0x8787…4e2a', '', ['Dev'], '10m ago', {
+      type: 'contract',
+      contract: 'Aave v3 Pool',
+      method: 'supply',
+      verified: true,
+    }),
+    note: { text: 'Parks idle USDC until the next rebalance.', author: 'Dev', date: '12 Nov, 10:05' },
+  },
 ]
 // Threshold is 2 of 4. Two signatures at the next nonce is ready, Dev alone is waiting, a later nonce is blocked.
 const manySafesProposals = (): Proposal[] => [
@@ -1235,23 +1253,32 @@ export const getScenario = (scenario: Scenario): Proposal[] => {
   if (scenario === 'realistic') return realistic()
   return items
 }
-// Option E: the badge names the transaction's state and the button names your action, so they never repeat.
+// The row's status, the same for everyone: it never depends on a connected wallet.
+// Ready to sign has no signatures yet, Signing has some. An expired order can't execute, so it counts as Blocked.
+export const getRowStatus = (tx: Proposal): Filter => {
+  const account = getAccount(tx)
+  const { missing, waiting, expired } = getState(tx)
+  if (waiting || expired) return 'waiting'
+  if (missing === 0) return 'ready'
+  return tx.signers.some((name) => account.owners.includes(name)) ? 'awaiting' : 'sign'
+}
+const ROW_STATUS_LABELS: Record<Filter, string> = {
+  ready: 'Ready to execute',
+  awaiting: 'Signing',
+  sign: 'Ready to sign',
+  waiting: 'Blocked',
+}
+// The badge names the status and the button names your action. Green only when it's on you, which needs a wallet.
 export const getRowState = (
   tx: Proposal,
   persona: Persona,
 ): { label: string; tone: 'success' | 'warning' | 'secondary' } => {
-  const { missing, waiting, canSign, expired } = getState(tx, persona)
-  const { nextNonce } = getAccount(tx)
+  const { canSign, expired } = getState(tx, persona)
   if (expired) return { label: 'Expired', tone: 'secondary' }
-  if (missing === 0)
-    return waiting ? { label: `Blocked by #${nextNonce}`, tone: 'warning' } : { label: 'Ready', tone: 'success' }
-  // Green whenever it's on you.
-  if (canSign)
-    return waiting
-      ? { label: `Needs you · after #${nextNonce}`, tone: 'success' }
-      : { label: 'Needs your signature', tone: 'success' }
-  if (waiting) return { label: `Awaiting ${missing} · after #${nextNonce}`, tone: 'secondary' }
-  return { label: `Awaiting ${missing} signature${missing === 1 ? '' : 's'}`, tone: 'secondary' }
+  const status = getRowStatus(tx)
+  if (status === 'waiting') return { label: `Blocked by #${getAccount(tx).nextNonce}`, tone: 'warning' }
+  if (status === 'ready') return { label: ROW_STATUS_LABELS.ready, tone: 'success' }
+  return { label: ROW_STATUS_LABELS[status], tone: canSign ? 'success' : 'secondary' }
 }
 export const getPrimaryStatus = (tx: Proposal, persona: Persona): Filter => {
   const state = getState(tx, persona)
@@ -1262,16 +1289,8 @@ export const getPrimaryStatus = (tx: Proposal, persona: Persona): Filter => {
 }
 
 // `exclusive` (next steps): each row matches one status only, the status of its section.
-export const matchesFilter = (tx: Proposal, filter: Filter, persona: Persona, exclusive = false) => {
-  if (exclusive) return getPrimaryStatus(tx, persona) === filter
-  const state = getState(tx, persona)
-  return (
-    (filter === 'sign' && state.canSign) ||
-    (filter === 'ready' && state.ready) ||
-    (filter === 'waiting' && state.waiting) ||
-    (filter === 'awaiting' && getPrimaryStatus(tx, persona) === 'awaiting')
-  )
-}
+// The Status filter matches the row's badge, so it works the same with or without a wallet.
+export const matchesFilter = (tx: Proposal, filter: Filter) => getRowStatus(tx) === filter
 export const getConflicts = (tx: Proposal, items: Proposal[]) =>
   items.filter((other) => other.id !== tx.id && other.account === tx.account && other.nonce === tx.nonce)
 export const getAction = (tx: Proposal, persona: Persona) => {

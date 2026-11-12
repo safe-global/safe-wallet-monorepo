@@ -4,7 +4,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@safe-global/views/components/ui/select'
 import { ALL_FAILED } from '../services/queue'
-import type { Direction, Persona, QueueState, Scenario, Milestone } from '../types'
+import type { Persona, QueueState, Scenario, Milestone, WalletState } from '../types'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { FAMILY_LABELS, getPersonaLabel, PERSONAS } from '../services/personas'
 import { getScenario, getScenarioAccounts, shortAddress } from '../services/model'
@@ -38,7 +38,8 @@ export const DEFAULT_SCENARIO: Scenario = '8-safes'
 export const parseScenario = (query: { scenario?: unknown; state?: unknown }) => {
   const value = typeof query.scenario === 'string' ? query.scenario : ''
   const known = [...SCENARIOS.map((item) => item.value), ...HIDDEN_SCENARIOS].find((item) => item === value)
-  const state = STATES.find((item) => item.value === query.state)?.value ?? 'normal'
+  // Opens on partial loading, the state most workspaces this size hit, so the failed-Safes chip shows.
+  const state = STATES.find((item) => item.value === query.state)?.value ?? 'partial'
   return { scenario: known ?? DEFAULT_SCENARIO, state }
 }
 const describeScenario = (scenario: Scenario) => {
@@ -48,7 +49,7 @@ const describeScenario = (scenario: Scenario) => {
 
 export type Hypernative = 'in' | 'out' | 'none'
 
-const personas = Object.keys(PERSONAS) as Persona[]
+const personas = (Object.keys(PERSONAS) as Persona[]).filter((value) => value !== 'guest')
 const PRIORITY_GROUPS = [
   { priority: 'primary', label: 'Primary personas' },
   { priority: 'secondary', label: 'Secondary personas' },
@@ -121,7 +122,7 @@ export const UNDEPLOYED_COUNTS = [0, 1, 2] as const
 const UNDEPLOYED_LABELS = { '0': 'All deployed', '1': '1 not deployed', '2': '2 not deployed' }
 
 export function ScenarioBar({
-  direction,
+  wallet,
   scenario,
   state,
   hypernative,
@@ -137,7 +138,7 @@ export function ScenarioBar({
   loadReason: LoadReason
   undeployedCount: number
   state: QueueState
-  direction: Direction
+  wallet: WalletState
   scenario: Scenario
   hypernative: Hypernative
   persona: Persona
@@ -151,14 +152,10 @@ export function ScenarioBar({
           <FlaskConical className="size-4" />
           Preview · simulated
         </div>
-        <Tabs
-          className="min-w-0 max-w-full"
-          value={direction}
-          onValueChange={(value) => onChange({ option: String(value) })}
-        >
-          <TabsList aria-label="Design direction" className="max-w-full justify-start overflow-x-auto">
-            <TabsTrigger value="flat">D · Group button</TabsTrigger>
-            <TabsTrigger value="cards">E · Group cards</TabsTrigger>
+        <Tabs value={wallet} onValueChange={(value) => onChange({ wallet: String(value) })}>
+          <TabsList aria-label="Wallet">
+            <TabsTrigger value="connected">Wallet connected</TabsTrigger>
+            <TabsTrigger value="none">No wallet</TabsTrigger>
           </TabsList>
         </Tabs>
         <Tabs value={String(milestone)} onValueChange={(value) => onChange({ m: String(value) })}>
