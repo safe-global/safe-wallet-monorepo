@@ -3,6 +3,7 @@ import { Separator } from '@safe-global/views/components/ui/separator'
 import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
 import { Label } from '@safe-global/views/components/ui/label'
 import { cn } from '@safe-global/views/utils/cn'
+import { InfoTooltip } from '@safe-global/views/components/common/InfoTooltip'
 import {
   Field,
   FieldContent,
@@ -73,9 +74,12 @@ const RECIPIENT_MATCH_OPTIONS = [
   {
     value: RecipientMatch.CALLED,
     label: 'Address called',
-    description: 'Transactions sent to this address, e.g. a contract',
+    description: 'Only transactions sent directly to this address',
   },
 ]
+
+const RECIPIENT_MATCH_INFO =
+  'Most payments are found with "Who was paid". Use "Address called" to find interactions with a contract, like a swap or an app.'
 
 const getInitialFormValues = (filter: TxFilter | null): DefaultValues<TxFilterFormState> => {
   return filter
@@ -233,7 +237,14 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                       control={control}
                       render={({ field }) => (
                         <FieldSet>
-                          <FieldLegend variant="label">Match recipient by</FieldLegend>
+                          <FieldLegend variant="label">
+                            Match recipient by
+                            <InfoTooltip
+                              title={RECIPIENT_MATCH_INFO}
+                              className="size-4"
+                              data-testid="recipient-match-info"
+                            />
+                          </FieldLegend>
                           <RadioGroup
                             value={field.value ? RecipientMatch.PAID : RecipientMatch.CALLED}
                             onValueChange={(value) => field.onChange(value === RecipientMatch.PAID)}
