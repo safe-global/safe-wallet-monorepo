@@ -22,13 +22,14 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-// The rows show a threshold and a balance only once the Safe overviews load; until then they show skeletons
+// Waits for texts that appear only once the page has loaded: rows show a threshold and a balance only after the
+// Safe overviews load, and skeletons until then
 const accountsStory = (config: MockStoryConfig, loadedTexts: string[]): Story => {
   const setup = createMockStory({
     scenario: 'efSafe',
     pathname: '/welcome/accounts',
-    features: { myAccounts: true },
     layout: 'fullPage',
+    features: { safePro: true, oidcAuth: true, safeProAnnouncement: true },
     ...config,
   })
   return {
@@ -48,9 +49,10 @@ const TREASURY = '0x9fC3dc011b461664c835F2527fffb1169b3C213e'
 const PAYROLL = '0xB63F3D0a4a7eFd1d0c08A9ef17C5e5d3DbBDE867'
 const OPERATIONS = '0xA77DE01e157f9f57C7c4A326eeEaf0BDD2CFcD01'
 
-// Balances without the currency sign: the app puts a hair space after it
-export const Default: Story = accountsStory({ wallet: 'connected' }, ['3/5', '48,251'])
+// No Safe is added yet, so the page shows its empty state
+export const Default: Story = accountsStory({ wallet: 'connected' }, ['What are my accounts?'])
 
+// Balances without the currency sign: the app puts a hair space after it
 export const AddedSafesNoWallet: Story = accountsStory(
   {
     wallet: 'disconnected',

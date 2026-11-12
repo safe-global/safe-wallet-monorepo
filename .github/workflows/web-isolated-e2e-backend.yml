@@ -189,9 +189,10 @@ jobs:
           persist-credentials: false
       - uses: $/.github/actions/yarn
 
-      - name: Install browser dependencies
+      # No --with-deps: the image has Chromium's libraries; the fonts it adds only matter for pixel diffs
+      - name: Install Chromium
         working-directory: apps/web
-        run: yarn exec playwright install --with-deps --no-shell chromium
+        run: yarn exec playwright install --no-shell chromium
 
       # The Queue Service image is a private package.
       - name: Log in to GitHub Container Registry

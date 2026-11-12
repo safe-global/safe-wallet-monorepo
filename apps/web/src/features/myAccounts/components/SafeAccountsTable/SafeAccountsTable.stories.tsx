@@ -3,6 +3,7 @@ import { withMockProvider } from '@/storybook/decorators'
 import type { AllSafeItems } from '@/hooks/safes'
 import SafeAccountsTable from './index'
 import { createHandlers } from '@/stories/mocks'
+import { mockNow } from '@/stories/mocks/now'
 
 const meta = {
   title: 'Features/MyAccounts/SafeAccountsTable',
@@ -25,13 +26,13 @@ const singleAndMulti: AllSafeItems = [
     isPinned: true,
     chainId: '1',
     isReadOnly: false,
-    lastVisited: Date.now(),
+    lastVisited: mockNow(),
   },
   {
     name: 'Ops',
     address: '0xabcdef1234567890abcdef1234567890abcdef12',
     isPinned: true,
-    lastVisited: Date.now(),
+    lastVisited: mockNow(),
     safes: [
       {
         name: 'Ops',
@@ -39,7 +40,7 @@ const singleAndMulti: AllSafeItems = [
         chainId: '1',
         isReadOnly: false,
         isPinned: true,
-        lastVisited: Date.now(),
+        lastVisited: mockNow(),
       },
       {
         name: 'Ops',
@@ -47,7 +48,7 @@ const singleAndMulti: AllSafeItems = [
         chainId: '10',
         isReadOnly: false,
         isPinned: true,
-        lastVisited: Date.now(),
+        lastVisited: mockNow(),
       },
     ],
   },
@@ -106,8 +107,8 @@ const VAULT_B = addr('2222', 'b', '333333')
 
 // Cluster members deliberately interleaved to exercise the table's similarity ordering.
 const groupedItems: AllSafeItems = [
-  { name: 'Treasury', address: REAL, isPinned: true, chainId: '1', isReadOnly: false, lastVisited: Date.now() },
-  { name: 'Ops', address: OPS, isPinned: true, chainId: '1', isReadOnly: false, lastVisited: Date.now() },
+  { name: 'Treasury', address: REAL, isPinned: true, chainId: '1', isReadOnly: false, lastVisited: mockNow() },
+  { name: 'Ops', address: OPS, isPinned: true, chainId: '1', isReadOnly: false, lastVisited: mockNow() },
   { name: 'Treasury', address: IMPOSTOR_1, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },
   { name: 'Vault A', address: VAULT_A, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },
   { name: 'Treasury', address: IMPOSTOR_2, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },

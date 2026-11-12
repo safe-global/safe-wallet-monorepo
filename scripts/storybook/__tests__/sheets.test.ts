@@ -1,4 +1,4 @@
-import { planSheets, shardStories, sheetHtml, type Cell } from '../sheets'
+import { planSheets, SHEET_FONT, shardStories, sheetHtml, type Cell } from '../sheets'
 
 const MODES = ['light', 'dark']
 
@@ -116,6 +116,17 @@ describe('sheetHtml', () => {
     const [sheet] = planSheets([cell('ui-button--primary', 'dark')], ['ui-button--primary'], MODES)
 
     expect(sheetHtml(sheet, MODES)).toContain('<td class="missing">no screenshot</td><td><img')
+  })
+
+  it('renders the labels in an embedded font, never a system font', () => {
+    const html = sheetHtml({ file: 'x.png', rows: [] }, MODES)
+
+    const faces = [
+      ...html.matchAll(/@font-face\{font-family:'(.+?)';font-weight:(\d+);src:url\(data:font\/woff2;base64,(.+?)\)\}/g),
+    ]
+    expect(faces.map(([, family, weight]) => `${family} ${weight}`)).toEqual([`${SHEET_FONT} 400`, `${SHEET_FONT} 700`])
+    faces.forEach(([, , , data]) => expect(Buffer.from(data, 'base64').subarray(0, 4).toString()).toBe('wOF2'))
+    expect(html).toContain(`font:12px/1.4 '${SHEET_FONT}'}`)
   })
 
   it('escapes story names', () => {

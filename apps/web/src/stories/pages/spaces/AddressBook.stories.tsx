@@ -17,7 +17,7 @@ const defaultSetup = createMockStory({
   wallet: 'connected',
   layout: 'fullPage',
   pathname: '/spaces/address-book',
-  features: { spaces: true },
+  authenticated: true,
   query: { spaceId: '1' },
 })
 

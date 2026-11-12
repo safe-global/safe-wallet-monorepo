@@ -11,6 +11,7 @@ import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positio
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import type { SafeShieldAnalyzeRecipientV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
 import type { GetSpaceResponse, UpdateSpaceDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { EntitlementsGetAllEntitlementsV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
 import {
   safeFixtures,
   balancesFixtures,
@@ -22,6 +23,7 @@ import {
 import { createChainData, createChainsPageData, createChainsPageDataV2 } from './chains'
 import type { FeatureFlags, MockStoryConfig } from './types'
 import { MOCK_SPACE_ID } from './ids'
+import { mockNow } from './now'
 
 type ExperimentalFeature = GetSpaceResponse['experimentalFeatures'][number]
 
@@ -31,15 +33,15 @@ type ExperimentalFeature = GetSpaceResponse['experimentalFeatures'][number]
 export function coreHandlers(chainData: Chain, features: FeatureFlags = {}): RequestHandler[] {
   const indexingStatus: IndexingStatus = {
     currentBlockNumber: 20000000,
-    currentBlockTimestamp: new Date().toISOString(),
+    currentBlockTimestamp: new Date(mockNow()).toISOString(),
     erc20BlockNumber: 20000000,
-    erc20BlockTimestamp: new Date().toISOString(),
+    erc20BlockTimestamp: new Date(mockNow()).toISOString(),
     erc20Synced: true,
     masterCopiesBlockNumber: 20000000,
-    masterCopiesBlockTimestamp: new Date().toISOString(),
+    masterCopiesBlockTimestamp: new Date(mockNow()).toISOString(),
     masterCopiesSynced: true,
     synced: true,
-    lastSync: Date.now(),
+    lastSync: mockNow(),
   }
 
   return [
@@ -127,7 +129,7 @@ export function txDetailsHandlers(safeData: SafeState): RequestHandler[] {
  * Uses real CGW fixture data as a base, customized for the story context
  */
 export function createMockTransactionDetails(safeData: SafeState, txId: string) {
-  const now = Date.now()
+  const now = mockNow()
   const isERC20 = txId.includes('abc1') || txId.includes('exec1')
   const isSettings = txId.includes('abc3') || txId.includes('exec3')
   const isExecuted = txId.includes('exec')
@@ -566,8 +568,8 @@ export function createMockSpace(spaceId: string = MOCK_SPACE_ID, experimentalFea
         name: 'Admin User',
         invitedBy: null,
         status: 'ACTIVE' as const,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: new Date(mockNow()).toISOString(),
+        updatedAt: new Date(mockNow()).toISOString(),
         user: {
           id: mockUser.id,
           status: 'ACTIVE' as const,
@@ -593,6 +595,15 @@ export function spacesHandlers(): RequestHandler[] {
     ),
     // The caller's own membership (useCurrentMemberProfile)
     http.get(/\/v1\/spaces\/[^/]+\/membership$/, () => HttpResponse.json(createMockSpace().members[0])),
+    // Before "Get space by ID", which would answer for `entitlements` as a Workspace ID
+    http.get(/\/v1\/spaces\/entitlements$/, () =>
+      HttpResponse.json({
+        [MOCK_SPACE_ID]: {
+          plan: { id: 'business', name: 'Business', cycleEndsAt: '2030-01-01T00:00:00.000Z', status: 'trialing' },
+          entitlements: [],
+        },
+      } satisfies EntitlementsGetAllEntitlementsV1ApiResponse),
+    ),
     // Get space by ID
     http.get(/\/v1\/spaces\/[^/]+$/, ({ params }) => {
       const url = new URL(params[0] as string, 'https://example.com')
@@ -635,8 +646,8 @@ export function spacesHandlers(): RequestHandler[] {
             name: 'Admin User',
             invitedBy: null,
             status: 'ACTIVE',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            createdAt: new Date(mockNow()).toISOString(),
+            updatedAt: new Date(mockNow()).toISOString(),
             user: { id: mockUser.id, status: 'ACTIVE' },
           },
           {
@@ -645,8 +656,8 @@ export function spacesHandlers(): RequestHandler[] {
             name: 'Jane Member',
             invitedBy: null,
             status: 'ACTIVE',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            createdAt: new Date(mockNow()).toISOString(),
+            updatedAt: new Date(mockNow()).toISOString(),
             user: { id: 2, status: 'ACTIVE' },
           },
         ],
@@ -659,7 +670,7 @@ export function spacesHandlers(): RequestHandler[] {
  * Mock executed transactions for history stories
  */
 export function createMockHistoryTransactions(safeData: SafeState) {
-  const now = Date.now()
+  const now = mockNow()
   return {
     count: 5,
     next: null,
@@ -808,6 +819,7 @@ export function createMockHistoryTransactions(safeData: SafeState) {
  * Mock pending transactions for stories
  */
 export function createMockPendingTransactions(safeData: SafeState) {
+  const now = mockNow()
   return {
     count: 3,
     next: null,
@@ -822,7 +834,7 @@ export function createMockPendingTransactions(safeData: SafeState) {
         transaction: {
           id: 'multisig_0x123_0xabc3',
           txHash: null,
-          timestamp: Date.now() - 1000 * 60 * 60 * 24,
+          timestamp: now - 1000 * 60 * 60 * 24,
           txStatus: 'AWAITING_EXECUTION' as const,
           txInfo: {
             type: 'SettingsChange' as const,
@@ -862,7 +874,7 @@ export function createMockPendingTransactions(safeData: SafeState) {
         transaction: {
           id: 'multisig_0x123_0xabc1',
           txHash: null,
-          timestamp: Date.now() - 1000 * 60 * 5,
+          timestamp: now - 1000 * 60 * 5,
           txStatus: 'AWAITING_CONFIRMATIONS' as const,
           txInfo: {
             type: 'Transfer' as const,
@@ -899,7 +911,7 @@ export function createMockPendingTransactions(safeData: SafeState) {
         transaction: {
           id: 'multisig_0x123_0xabc2',
           txHash: null,
-          timestamp: Date.now() - 1000 * 60 * 60 * 2,
+          timestamp: now - 1000 * 60 * 60 * 2,
           txStatus: 'AWAITING_CONFIRMATIONS' as const,
           txInfo: {
             type: 'Transfer' as const,
@@ -958,7 +970,7 @@ export function getFixtureData(scenario: FixtureScenario) {
  * })
  */
 export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
-  const { scenario = 'efSafe', features = {}, handlers: customHandlers = [] } = config
+  const { scenario = 'efSafe', features = {}, handlers: customHandlers = [], authenticated = false } = config
 
   // Get fixture data for scenario
   const { safeData, balancesData, portfolioData, positionsData } = getFixtureData(scenario)
@@ -983,16 +995,15 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     recovery: features.recovery ?? false,
     hypernative: features.hypernative ?? false,
     earn: features.earn ?? false,
-    spaces: features.spaces ?? false,
     oidcAuth: features.oidcAuth ?? false,
     switchAuthenticator: features.switchAuthenticator ?? false,
     twoFactorAwarenessBanner: features.twoFactorAwarenessBanner ?? false,
     safeStaking: features.safeStaking ?? false,
     safePro: features.safePro ?? false,
+    safeProAnnouncement: features.safeProAnnouncement ?? false,
     workspacesExperimentalFeatures: features.workspacesExperimentalFeatures ?? false,
     policyRecipientAllowlist: features.policyRecipientAllowlist ?? false,
     spaceAuditLog: features.spaceAuditLog ?? false,
-    myAccounts: features.myAccounts ?? false,
   }
 
   // Build handlers array
@@ -1018,12 +1029,11 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     allHandlers.push(...positionsHandlers(positionsData))
   }
 
-  // Add spaces handlers if feature enabled
-  if (mergedFeatures.spaces) {
+  if (authenticated) {
     allHandlers.push(...spacesHandlers())
   }
 
-  // Fallback handlers registered after spaces so spaces-specific mocks win when enabled
+  // Fallback handlers registered after spaces so spaces-specific mocks win when signed in
   allHandlers.push(
     ...fiatCodesHandlers(),
     ...delegatesHandlers(),

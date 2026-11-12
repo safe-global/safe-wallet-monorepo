@@ -38,7 +38,7 @@ const logo = (address: string) => `mock-assets/safe-transaction-assets.safe.glob
 const USDC_LOGO = logo('0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48')
 const USDT_LOGO = 'mock-assets/assets.coingecko.com/coins/images/325/large/Tether.webp'
 
-const baseChain = createChainData({ spaces: true })
+const baseChain = createChainData()
 const chain: Chain = {
   ...baseChain,
   chainId: CHAIN_ID,
@@ -193,7 +193,7 @@ const rpcHandler = (moduleGuard: string) =>
 const setup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
+  authenticated: true,
   layout: 'fullPage',
   shadcn: true,
   pathname: '/spaces/policies',

@@ -3,10 +3,11 @@ import { mswLoader } from 'msw-storybook-addon'
 import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
 import type { SpaceAuditLogEntryDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import AuditEventRow from './AuditEventRow'
+import { mockNow } from '@/stories/mocks/now'
 
 const baseSetup = createMockStory({
   scenario: 'efSafe',
-  features: { spaces: true },
+  authenticated: true,
   query: { spaceId: MOCK_SPACE_ID },
   shadcn: true,
 })
@@ -18,7 +19,7 @@ const buildEvent = (overrides: Partial<SpaceAuditLogEntryDto>): SpaceAuditLogEnt
   actor: '0x1234567890AbcdEF1234567890aBcdef12345678',
   targetUser: null,
   payload: {},
-  createdAt: new Date().toISOString(),
+  createdAt: new Date(mockNow()).toISOString(),
   ...overrides,
 })
 

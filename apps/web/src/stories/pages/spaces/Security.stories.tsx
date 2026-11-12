@@ -9,7 +9,7 @@ const defaultSetup = createMockStory({
   wallet: 'connected',
   layout: 'fullPage',
   pathname: '/spaces/security',
-  features: { spaces: true },
+  authenticated: true,
   query: { spaceId: '1' },
 })
 

@@ -19,7 +19,8 @@ const createSettingsSetup = (pathname: string, features: FeatureFlags = {}) =>
     wallet: 'connected',
     layout: 'fullPage',
     pathname,
-    features: { spaces: true, ...features },
+    authenticated: true,
+    features,
     query: { spaceId: '1' },
   })
 

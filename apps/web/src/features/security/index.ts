@@ -23,9 +23,8 @@
  * }
  * ```
  *
- * Gated on FEATURES.SECURITY_HUB so ops can roll out the Hub independently of broader
- * Spaces UI. Spaces itself remains gated on FEATURES.SPACES; both flags must be on for
- * the Hub to render.
+ * Gated on FEATURES.SECURITY_HUB so ops can roll out the Hub independently of the rest of
+ * the Spaces UI.
  */
 
 import { createFeatureHandle } from '@/features/__core__'

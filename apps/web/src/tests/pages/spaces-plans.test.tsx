@@ -21,7 +21,6 @@ jest.mock('@/features/__core__', () => ({
 
 jest.mock('@/features/spaces', () => ({
   SpacesFeature: 'SpacesFeature',
-  useFeatureFlagRedirect: jest.fn(),
   useRedirectWhenOff: jest.fn(),
 }))
 
