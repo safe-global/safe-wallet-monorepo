@@ -973,40 +973,37 @@ describe('queue design exploration', () => {
 describe('option D · flat table', () => {
   beforeEach(() => localStorage.clear())
   const flat = { routerProps: { query: { option: 'flat' } } }
-  const headings = () =>
-    allPending()
-      .getAllByRole('heading', { level: 3 })
-      .map((heading) => heading.textContent)
   const columnTitles = () => screen.getAllByRole('columnheader').map((header) => header.textContent)
+  const rowTexts = () =>
+    allPending()
+      .getAllByRole('row')
+      .filter((row) => within(row).queryByRole('button', { name: /^Open / }))
+      .map((row) => row.textContent ?? '')
 
-  it('groups by status by default, needs you first, with Nonce first and Safe and Network columns', () => {
+  it('is one plain table with no Group by, group rows or Collapse all', () => {
     render(<PendingQueue />, flat)
     expect(screen.getAllByRole('table')).toHaveLength(1)
-    expect(screen.getByRole('button', { name: 'Group by Status' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /^Sort/ })).toBeNull()
-    expect(headings()[0]).toMatch(/^(Sign and execute|Ready to execute|Ready to sign)/)
+    expect(screen.queryByRole('button', { name: /^Group by/ })).toBeNull()
+    expect(screen.queryByRole('radiogroup', { name: 'Group by' })).toBeNull()
+    expect(allPending().queryAllByRole('heading', { level: 3 })).toHaveLength(0)
+    expect(screen.queryByRole('button', { name: /^(Collapse|Expand) all/ })).toBeNull()
     expect(columnTitles().slice(0, 5)).toEqual(['Nonce', 'Transaction', 'To', 'Safe', 'Network'])
-    expect(screen.getByRole('button', { name: 'Collapse all' })).toBeInTheDocument()
   })
 
-  it('collapses every group from the header, and opens them again', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, flat)
-    await user.click(screen.getByRole('button', { name: 'Collapse all' }))
-    expect(allPending().queryAllByRole('button', { name: /^Open / })).toHaveLength(0)
-    await user.click(screen.getByRole('button', { name: 'Expand all' }))
-    expect(allPending().getAllByRole('button', { name: /^Open / }).length).toBeGreaterThan(0)
+  it('lists the most urgent first and blocked rows last, in the Status order', () => {
+    render(<PendingQueue />, { routerProps: { query: { option: 'flat', scenario: '20-safes' } } })
+    const rows = rowTexts()
+    const firstBlocked = rows.findIndex((text) => /Blocked by #/.test(text))
+    const lastAction = rows
+      .map((text) => /(Execute|Sign)(?! ahead)/.test(text) && !/Blocked by #/.test(text))
+      .lastIndexOf(true)
+    expect(rows[0]).toMatch(/Execute|Sign/)
+    expect(firstBlocked).toBeGreaterThan(lastAction)
   })
 
-  it('offers bulk execute only on each Safe row, grouped by Safe', async () => {
-    const heavyFlat = { routerProps: { query: { option: 'flat', scenario: 'conflict-heavy' } } }
-    const { user } = renderWithUserEvent(<PendingQueue />, heavyFlat)
+  it('has no bulk execute, which needs the Safe view', () => {
+    render(<PendingQueue />, { routerProps: { query: { option: 'flat', scenario: 'conflict-heavy' } } })
     expect(screen.queryByRole('button', { name: /^Bulk execute/ })).toBeNull()
-    await user.click(screen.getByRole('button', { name: 'Group by Status' }))
-    await user.click(await screen.findByRole('menuitemradio', { name: /^Safe/ }))
-    await user.click(screen.getByRole('button', { name: 'Bulk execute 2' }))
-    const dialog = within(screen.getByRole('dialog'))
-    expect(dialog.getByRole('region', { name: 'Ops Payroll batch' })).toBeVisible()
-    expect(screen.queryByRole('button', { name: /^Bulk execute \d+ transactions/ })).toBeNull()
   })
 
   it('adds a search field to long filter lists, such as signers', async () => {
@@ -1031,44 +1028,9 @@ describe('option D · flat table', () => {
     expect(screen.getByRole('menuitem', { name: /^Safe account/ })).toBeInTheDocument()
   })
 
-  it('remembers the grouping', async () => {
-    const { user, unmount } = renderWithUserEvent(<PendingQueue />, flat)
-    await user.click(screen.getByRole('button', { name: 'Group by Status' }))
-    await user.click(await screen.findByRole('menuitemradio', { name: /^Network/ }))
-    unmount()
-    render(<PendingQueue />, flat)
-    expect(screen.getByRole('button', { name: 'Group by Network' })).toBeInTheDocument()
-  })
-
-  it('grouped by Safe, shows the Safe table with Nonce first and a sub-header per network', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, {
-      routerProps: { query: { option: 'flat', scenario: '20-safes' } },
-    })
-    await user.click(screen.getByRole('button', { name: 'Group by Status' }))
-    await user.click(await screen.findByRole('menuitemradio', { name: /^Safe/ }))
-    expect(columnTitles()[0]).toBe('Nonce')
-    const marketMaking = await screen.findByRole('button', { name: /^(Collapse|Expand) Market making$/ })
-    const subHeaders = marketMaking
-      .getAttribute('aria-controls')!
-      .split(' ')
-      .map((id) => document.getElementById(id)!)
-    expect(subHeaders.map((subHeader) => subHeader.textContent)).toEqual([
-      expect.stringMatching(/^Ethereum/),
-      expect.stringMatching(/^Arbitrum/),
-    ])
-  })
-
-  it('shows the Safenet mark next to the signatures in every grouping', () => {
+  it('shows the Safenet mark next to the signatures', () => {
     render(<PendingQueue />, flat)
     expect(allPending().getAllByRole('button', { name: /\(Safenet\)$/ }).length).toBeGreaterThan(0)
-  })
-
-  it('groups by next nonce, then the rest of the queue, with a Network column', async () => {
-    const { user } = renderWithUserEvent(<PendingQueue />, flat)
-    await user.click(screen.getByRole('button', { name: 'Group by Status' }))
-    await user.click(await screen.findByRole('menuitemradio', { name: /^Up next/ }))
-    expect(headings().map((heading) => heading?.replace(/\d+$/, ''))).toEqual(['Next in line', 'Behind it'])
-    expect(screen.getByRole('columnheader', { name: 'Network' })).toBeInTheDocument()
   })
 })
 
@@ -1165,14 +1127,14 @@ describe('option E · Group by cards', () => {
     expect(screen.queryByRole('button', { name: /^Group by / })).toBeNull()
   })
 
-  it('regroups when a card is picked, and remembers it apart from option D', async () => {
+  it('regroups when a card is picked, and remembers it', async () => {
     const { user, unmount } = renderWithUserEvent(<PendingQueue />, cards)
     await user.click(screen.getByRole('radio', { name: /^Up next/ }))
     expect(screen.getByRole('radio', { name: /^Up next/ })).toHaveAttribute('aria-checked', 'true')
     expect(allPending().getByRole('heading', { level: 3, name: /^Next/ })).toBeInTheDocument()
     unmount()
-    render(<PendingQueue />, { routerProps: { query: { option: 'flat' } } })
-    expect(screen.getByRole('button', { name: 'Group by Status' })).toBeInTheDocument()
+    render(<PendingQueue />, cards)
+    expect(screen.getByRole('radio', { name: /^Up next/ })).toHaveAttribute('aria-checked', 'true')
   })
 })
 

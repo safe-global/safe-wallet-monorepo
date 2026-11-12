@@ -295,7 +295,12 @@ function ChainToggles({
 export type QueueOrderedTableProps = Omit<
   QueueGroupedTableProps,
   'sections' | 'isCollapsed' | 'onToggle' | 'getSafeBatch' | 'collapse'
-> & { groups: QueueGroup[]; groupBy: OrderedGroupBy }
+> & {
+  groups: QueueGroup[]
+  groupBy: OrderedGroupBy
+  // Option D: one plain list in the groups' order, with no group rows and nothing to collapse
+  plain?: boolean
+}
 
 // Transaction fits the widest action and To takes the slack.
 // Option E fits the Safe tag in Transaction, in place of the Safe column.
@@ -331,8 +336,9 @@ export const ORDERED_COLUMNS = (isWide: boolean, partyTags = false, compact = fa
         'Action',
       ]
 
-// Option D: rows grouped by status, network or next nonce. Each group collapses, and the header collapses them all.
-export function QueueOrderedTable({ groups, groupBy, ...props }: QueueOrderedTableProps) {
+// Option E: rows grouped by status, network or next nonce. Each group collapses, and the header collapses them all.
+// Option D (`plain`): the same rows in one list, with no group rows.
+export function QueueOrderedTable({ groups, groupBy, plain = false, ...props }: QueueOrderedTableProps) {
   const byNetwork = groupBy === 'network'
   const columns = ORDERED_COLUMNS(props.isWide, props.partyTags, props.compact)
   const widths = orderedWidths(props.showNoteText, props.partyTags, props.compact)
@@ -358,12 +364,16 @@ export function QueueOrderedTable({ groups, groupBy, ...props }: QueueOrderedTab
             </colgroup>
             <QueueTableHead
               columns={columns}
-              collapse={{
-                allCollapsed,
-                onToggle: () => setCollapsed(allCollapsed ? [] : groups.map((group) => group.id)),
-                count: groups.length,
-                unit: byNetwork ? ['network', 'networks'] : ['group', 'groups'],
-              }}
+              collapse={
+                plain
+                  ? undefined
+                  : {
+                      allCollapsed,
+                      onToggle: () => setCollapsed(allCollapsed ? [] : groups.map((group) => group.id)),
+                      count: groups.length,
+                      unit: byNetwork ? ['network', 'networks'] : ['group', 'groups'],
+                    }
+              }
             />
             {nothingForYou && (
               <TableBody>
@@ -374,46 +384,62 @@ export function QueueOrderedTable({ groups, groupBy, ...props }: QueueOrderedTab
                 </TableRow>
               </TableBody>
             )}
-            {groups.map((group) => {
-              const isCollapsed = collapsed.includes(group.id)
-              const section = {
-                id: group.id,
-                label: group.label,
-                account: getAccount(group.rows[0]),
-                items: group.rows,
-              }
-              return (
-                <Fragment key={group.id}>
-                  <TableBody>
-                    {/* Laid out like a Safe band: the toggle under Nonce, the title in line with Transaction. */}
-                    <TableRow
-                      data-no-hover
-                      data-no-divider
-                      className="group/band cursor-pointer"
-                      onClick={() => toggle(group.id)}
-                    >
-                      <TableCell className={`rounded-l-lg ${BAND_CELL}`}>
-                        <span className="flex justify-center">
-                          <SectionToggle section={group} collapsed={isCollapsed} controls={`rows-${group.id}`} />
-                        </span>
-                      </TableCell>
-                      <TableCell colSpan={columns.length - 1} className={`rounded-r-lg pr-3! ${BAND_CELL}`}>
-                        <h3 className="flex min-h-11 items-center gap-3 text-sm font-medium">
-                          {byNetwork && (
-                            <img src={chainLogoUrl(group.chainId!)} alt="" className="size-6 shrink-0 rounded-full" />
-                          )}
-                          <span className="truncate">{group.label}</span>
-                          <span className="font-normal tabular-nums text-muted-foreground">{group.rows.length}</span>
-                        </h3>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                  <TableBody id={`rows-${group.id}`} hidden={isCollapsed}>
-                    <QueueSectionRows {...props} section={section} columns={columns} safeRecoveries={[]} />
-                  </TableBody>
-                </Fragment>
-              )
-            })}
+            {plain && groups.length > 0 && (
+              <TableBody>
+                <QueueSectionRows
+                  {...props}
+                  section={{
+                    id: 'all',
+                    label: 'Pending transactions',
+                    account: getAccount(groups[0].rows[0]),
+                    items: groups.flatMap((group) => group.rows),
+                  }}
+                  columns={columns}
+                  safeRecoveries={[]}
+                />
+              </TableBody>
+            )}
+            {!plain &&
+              groups.map((group) => {
+                const isCollapsed = collapsed.includes(group.id)
+                const section = {
+                  id: group.id,
+                  label: group.label,
+                  account: getAccount(group.rows[0]),
+                  items: group.rows,
+                }
+                return (
+                  <Fragment key={group.id}>
+                    <TableBody>
+                      {/* Laid out like a Safe band: the toggle under Nonce, the title in line with Transaction. */}
+                      <TableRow
+                        data-no-hover
+                        data-no-divider
+                        className="group/band cursor-pointer"
+                        onClick={() => toggle(group.id)}
+                      >
+                        <TableCell className={`rounded-l-lg ${BAND_CELL}`}>
+                          <span className="flex justify-center">
+                            <SectionToggle section={group} collapsed={isCollapsed} controls={`rows-${group.id}`} />
+                          </span>
+                        </TableCell>
+                        <TableCell colSpan={columns.length - 1} className={`rounded-r-lg pr-3! ${BAND_CELL}`}>
+                          <h3 className="flex min-h-11 items-center gap-3 text-sm font-medium">
+                            {byNetwork && (
+                              <img src={chainLogoUrl(group.chainId!)} alt="" className="size-6 shrink-0 rounded-full" />
+                            )}
+                            <span className="truncate">{group.label}</span>
+                            <span className="font-normal tabular-nums text-muted-foreground">{group.rows.length}</span>
+                          </h3>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                    <TableBody id={`rows-${group.id}`} hidden={isCollapsed}>
+                      <QueueSectionRows {...props} section={section} columns={columns} safeRecoveries={[]} />
+                    </TableBody>
+                  </Fragment>
+                )
+              })}
           </Table>
         </div>
       </CardContent>

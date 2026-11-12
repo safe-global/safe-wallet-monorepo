@@ -56,9 +56,9 @@ import { PrototypeFrame } from './PrototypeFrame'
 import { useQueueFilters } from './QueueFilters/useQueueFilters'
 import { AppliedFilters, QueueToolbar, type AppliedPill } from './QueueFilters/QueueFilters'
 import { QueueGroupedTable, QueueOrderedTable } from './QueueTable/QueueGroupedTable'
-import { DisplayMenu } from './QueueTable/DisplayMenu'
 import { GroupByCards } from './QueueTable/GroupByCards'
 import {
+  DEFAULT_DISPLAY,
   GROUP_SORT,
   getGroupCounts,
   groupQueue,
@@ -89,18 +89,18 @@ function PendingQueueView() {
   const [mainRef, contentWidth] = useElementWidth<HTMLElement>()
   const isWide = contentWidth >= 1050
   const isExtraWide = contentWidth >= 1880
-  // The preview opens on option E, Group by cards. `?option=flat` is D, the same table with a Group by menu.
+  // The preview opens on option E, Group by cards. `?option=flat` is D: one plain table, most urgent first.
   // Any other option, such as links to the removed A, B and C, opens E.
   const direction: Direction = router.query.option === 'flat' ? 'flat' : 'cards'
   const cards = direction === 'cards'
-  const displayOption = cards ? 'cards' : 'flat'
-  const [displays, setDisplays] = useState(() => ({ flat: loadDisplay('flat'), cards: loadDisplay('cards') }))
-  const display = displays[displayOption]
+  // E keeps each person's Group by choice. D has no Group by: it keeps the Status order, without the group rows.
+  const [cardsDisplay, setCardsDisplay] = useState(() => loadDisplay('cards'))
+  const display = cards ? cardsDisplay : DEFAULT_DISPLAY
   // Grouped by Safe: each Safe, then each network, so nonces stay in order.
   const safeView = display.groupBy === 'safe'
   const changeDisplay = (next: QueueDisplay) => {
-    setDisplays((current) => ({ ...current, [displayOption]: next }))
-    saveDisplay(next, displayOption)
+    setCardsDisplay(next)
+    saveDisplay(next, 'cards')
   }
   const { scenario, state } = parseScenario(router.query)
   const persona: Persona = parsePersona(router.query.persona)
@@ -635,7 +635,6 @@ function PendingQueueView() {
             <QueueToolbar
               filters={filters}
               accounts={orderedAccounts}
-              status={!cards && <DisplayMenu display={display} onChange={changeDisplay} />}
               extraMenu={
                 <SignerFilterMenu
                   load={signerLoad}
@@ -706,6 +705,7 @@ function PendingQueueView() {
               <QueueOrderedTable
                 groups={orderedGroups}
                 groupBy={display.groupBy === 'safe' ? 'status' : display.groupBy}
+                plain={!cards}
                 {...sectionProps}
               />
             )}

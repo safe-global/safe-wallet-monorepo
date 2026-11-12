@@ -2,7 +2,7 @@ import type { Account, Persona, Proposal } from '../types'
 import { getAccount, getCreatedAt, getPrimaryStatus } from './model'
 import { getStepKind, STEP_RANK } from './nextSteps'
 
-// Option D · Flat table: rows grouped by status, Safe, network or next nonce, each in a fixed order.
+// Option E groups rows by status, Safe, network or next nonce, each in a fixed order. Option D lists them in the status order.
 
 export type GroupBy = 'status' | 'safe' | 'network' | 'next'
 export type OrderedGroupBy = Exclude<GroupBy, 'safe'>
