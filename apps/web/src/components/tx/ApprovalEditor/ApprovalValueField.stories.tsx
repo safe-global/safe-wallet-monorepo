@@ -1,18 +1,21 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { FormProvider, useForm } from 'react-hook-form'
+import { faker } from '@faker-js/faker'
 import { ApprovalValueField } from './ApprovalValueField'
 import type { ApprovalInfo } from './hooks/useApprovalInfos'
 import { TokenType } from '@safe-global/store/gateway/types'
-import { mockAddress } from '@/stories/mocks/address'
+
+// Seed faker for deterministic visual regression tests
+faker.seed(321)
 
 const FIELD_NAME = 'approvals.0'
 
-const tokenAddress = mockAddress(1)
+const tokenAddress = faker.finance.ethereumAddress()
 
 const approval: ApprovalInfo = {
   tokenInfo: { symbol: 'TST', decimals: 18, address: tokenAddress, type: TokenType.ERC20 },
   tokenAddress,
-  spender: mockAddress(2),
+  spender: faker.finance.ethereumAddress(),
   amount: 4200000n,
   amountFormatted: '420.0',
   method: 'approve',

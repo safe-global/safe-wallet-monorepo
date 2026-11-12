@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import { mswLoader } from 'msw-storybook-addon'
+import { faker } from '@faker-js/faker'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
 import { createMockChain } from '@safe-global/test'
@@ -22,6 +23,8 @@ import {
   rejectedSnapshot,
   timedOutDisputeSnapshot,
 } from './storyExamples'
+
+faker.seed(456)
 
 const SAFE = '0x0000000000000000000000000000000000000123'
 const SAFE_TX_HASH = `0x${'cd'.repeat(32)}`

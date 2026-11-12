@@ -6,6 +6,7 @@ import {
   RecipientAnalysisBuilder,
 } from '@safe-global/utils/features/safe-shield/builders'
 import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
+import { faker } from '@faker-js/faker'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import { Provider } from 'react-redux'
@@ -14,7 +15,9 @@ import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/Sa
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { safeFixtures } from '../../../../../config/test/msw/fixtures'
 import { createSafeInfoState } from '@/stories/mocks/defaults'
-import { mockAddress } from '@/stories/mocks/address'
+
+// Seed faker for deterministic visual regression tests
+faker.seed(456)
 
 const meta: Meta<typeof SafeShieldDisplay> = {
   title: 'Features/SafeShield',
@@ -39,8 +42,8 @@ const meta: Meta<typeof SafeShieldDisplay> = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const contractAddress = mockAddress(1)
-const recipientAddress = mockAddress(2)
+const contractAddress = faker.finance.ethereumAddress()
+const recipientAddress = faker.finance.ethereumAddress()
 
 // Checks passed
 export const ChecksPassed: Story = {
@@ -210,11 +213,11 @@ export const MultipleIssues: Story = {
 export const MultipleCounterparties: Story = {
   args: {
     ...FullAnalysisBuilder.verifiedContract(contractAddress)
-      .contract(ContractAnalysisBuilder.verifiedContract(mockAddress(3)).build())
+      .contract(ContractAnalysisBuilder.verifiedContract(faker.finance.ethereumAddress()).build())
       .recipient(RecipientAnalysisBuilder.knownRecipient(recipientAddress).build())
-      .recipient(RecipientAnalysisBuilder.knownRecipient(mockAddress(4)).build())
+      .recipient(RecipientAnalysisBuilder.knownRecipient(faker.finance.ethereumAddress()).build())
       .recipient(RecipientAnalysisBuilder.newRecipient(recipientAddress).build())
-      .recipient(RecipientAnalysisBuilder.newRecipient(mockAddress(5)).build())
+      .recipient(RecipientAnalysisBuilder.newRecipient(faker.finance.ethereumAddress()).build())
       .recipient(RecipientAnalysisBuilder.lowActivity(recipientAddress).build())
       .recipient(RecipientAnalysisBuilder.incompatibleSafe(recipientAddress).build())
       .threat(FullAnalysisBuilder.moderateThreat().build().threat)

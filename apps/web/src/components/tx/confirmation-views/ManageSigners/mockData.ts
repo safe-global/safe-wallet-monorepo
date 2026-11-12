@@ -1,9 +1,12 @@
-import { mockAddress } from '@/stories/mocks/address'
+import { faker } from '@faker-js/faker'
 import { SettingsInfoType, TransactionInfoType } from '@safe-global/store/gateway/types'
 import type {
   TransactionDetails,
   SettingsChangeTransaction,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+
+// Seed faker for deterministic visual regression tests
+faker.seed(789)
 
 export const mockAddOwnerTxInfo: SettingsChangeTransaction = {
   type: TransactionInfoType.SETTINGS_CHANGE,
@@ -15,8 +18,8 @@ export const mockAddOwnerTxInfo: SettingsChangeTransaction = {
   settingsInfo: {
     type: SettingsInfoType.ADD_OWNER,
     owner: {
-      value: mockAddress(1),
-      name: 'Alice Martin',
+      value: faker.finance.ethereumAddress(),
+      name: faker.person.fullName(),
       logoUri: null,
     },
     threshold: 2,
@@ -33,8 +36,8 @@ export const mockRemoveOwnerTxInfo: SettingsChangeTransaction = {
   settingsInfo: {
     type: SettingsInfoType.REMOVE_OWNER,
     owner: {
-      value: mockAddress(2),
-      name: 'Bob Chen',
+      value: faker.finance.ethereumAddress(),
+      name: faker.person.fullName(),
       logoUri: null,
     },
     threshold: 1,
@@ -51,13 +54,13 @@ export const mockSwapOwnerTxInfo: SettingsChangeTransaction = {
   settingsInfo: {
     type: SettingsInfoType.SWAP_OWNER,
     oldOwner: {
-      value: mockAddress(3),
-      name: 'Carol Diaz',
+      value: faker.finance.ethereumAddress(),
+      name: faker.person.fullName(),
       logoUri: null,
     },
     newOwner: {
-      value: mockAddress(4),
-      name: 'David Kim',
+      value: faker.finance.ethereumAddress(),
+      name: faker.person.fullName(),
       logoUri: null,
     },
   },
@@ -67,7 +70,7 @@ export const mockTxData: TransactionDetails['txData'] = {
   hexData: '0x',
   dataDecoded: null,
   to: {
-    value: mockAddress(5),
+    value: faker.finance.ethereumAddress(),
     name: null,
     logoUri: null,
   },

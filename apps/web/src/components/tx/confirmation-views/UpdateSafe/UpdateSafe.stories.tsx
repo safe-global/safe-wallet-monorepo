@@ -2,7 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { _UpdateSafe } from './index'
 import { MOCK_SAFE_ADDRESS, mockUpdateSafeTxData, mockUnknownContractTxData } from './mockData'
-import { mockAddress } from '@/stories/mocks/address'
+import { faker } from '@faker-js/faker'
+
+// Seed faker for deterministic visual regression tests
+faker.seed(123)
 
 const meta = {
   title: 'Components/TxFlow/ConfirmationViews/UpdateSafe',
@@ -33,20 +36,20 @@ const mockSafeInfo = {
     threshold: 2,
     owners: [
       {
-        value: mockAddress(10),
+        value: faker.finance.ethereumAddress(),
         name: 'Owner 1',
         logoUri: null,
       },
       {
-        value: mockAddress(11),
+        value: faker.finance.ethereumAddress(),
         name: 'Owner 2',
         logoUri: null,
       },
     ],
-    implementation: { value: mockAddress(12) },
+    implementation: { value: faker.finance.ethereumAddress() },
     implementationVersionState: 'UP_TO_DATE' as const,
     modules: null,
-    fallbackHandler: { value: mockAddress(13) },
+    fallbackHandler: { value: faker.finance.ethereumAddress() },
     guard: null,
     version: '1.3.0',
     collectiblesTag: '1234',
@@ -55,7 +58,7 @@ const mockSafeInfo = {
     messagesTag: '1234',
     deployed: true,
   },
-  safeAddress: mockAddress(14),
+  safeAddress: faker.finance.ethereumAddress(),
   safeLoaded: true,
   safeLoading: false,
   safeError: undefined,

@@ -1,9 +1,12 @@
+import { faker } from '@faker-js/faker'
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
-import { mockAddress } from '@/stories/mocks/address'
 
-const mockToAddress = mockAddress(1)
-const mockNestedSafeAddress = mockAddress(2)
+// Seed faker for deterministic addresses in stories
+faker.seed(42)
+
+const mockToAddress = faker.finance.ethereumAddress()
+const mockNestedSafeAddress = faker.finance.ethereumAddress()
 
 // Generate valid ABI-encoded execTransaction calldata
 const safeInterface = Safe__factory.createInterface()

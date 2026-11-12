@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import {
   Severity,
   ContractStatus,
@@ -79,7 +80,7 @@ export class ContractAnalysisResultBuilder<T extends CommonSharedStatus | Contra
       .severity(Severity.OK)
       .type(ContractStatus.KNOWN_CONTRACT)
       .title('Known contract')
-      .description('You have interacted with this contract 3 times.')
+      .description(`You have interacted with this contract ${faker.number.int({ min: 2, max: 100 })} times.`)
   }
 
   static newContract(): ContractAnalysisResultBuilder<ContractStatus.NEW_CONTRACT> {
@@ -120,7 +121,7 @@ export class ContractAnalysisResultBuilder<T extends CommonSharedStatus | Contra
     fallbackHandlerDetails?: FallbackHandlerDetails,
   ): ContractAnalysisResultBuilder<ContractStatus.UNOFFICIAL_FALLBACK_HANDLER> {
     const defaultFallbackHandler: FallbackHandlerDetails = {
-      address: '0x000000000000000000000000000000000000fb04',
+      address: faker.finance.ethereumAddress(),
     }
 
     return new ContractAnalysisResultBuilder<ContractStatus.UNOFFICIAL_FALLBACK_HANDLER>()

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { faker } from '@faker-js/faker'
 import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
 import { createMockStory } from '@/stories/mocks'
 import { safenetChainsHandler } from '@/stories/pages/safenet/safenetChainMocks'
@@ -14,6 +15,8 @@ import {
   rejectedSnapshot,
   timedOutDisputeSnapshot,
 } from './storyExamples'
+
+faker.seed(456)
 
 const setup = createMockStory()
 

@@ -1,4 +1,4 @@
-import { mockAddress } from '@/stories/mocks/address'
+import { faker } from '@faker-js/faker'
 import type {
   SwapOrderTransactionInfo,
   TwapOrderTransactionInfo,
@@ -6,23 +6,26 @@ import type {
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
+// Seed faker for deterministic values in stories
+faker.seed(123)
+
 // Fixed timestamp for deterministic tests: Dec 24, 2024
 const FIXED_TIMESTAMP = 1735000000
 
 export const mockSwapOrderTxInfo: SwapOrderTransactionInfo = {
   type: TransactionInfoType.SWAP_ORDER,
   humanDescription: null,
-  uid: '5f3c8a2e-9b1d-4e7a-8c6f-2d4b1a9e7c30',
+  uid: faker.string.uuid(),
   kind: 'sell',
   orderClass: 'market',
   validUntil: FIXED_TIMESTAMP + 3600,
-  sellAmount: '2000000000000000000',
-  buyAmount: '6800000000000000000',
+  sellAmount: faker.number.bigInt({ min: 1000000000000000000n, max: 10000000000000000000n }).toString(),
+  buyAmount: faker.number.bigInt({ min: 2000000000000000000n, max: 20000000000000000000n }).toString(),
   executedSellAmount: '0',
   executedBuyAmount: '0',
   executedFee: '0',
   executedFeeToken: {
-    address: mockAddress(1),
+    address: faker.finance.ethereumAddress(),
     decimals: 18,
     logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
     name: 'Ether',
@@ -30,7 +33,7 @@ export const mockSwapOrderTxInfo: SwapOrderTransactionInfo = {
     trusted: true,
   },
   sellToken: {
-    address: mockAddress(2),
+    address: faker.finance.ethereumAddress(),
     decimals: 18,
     logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
     name: 'Ether',
@@ -38,7 +41,7 @@ export const mockSwapOrderTxInfo: SwapOrderTransactionInfo = {
     trusted: true,
   },
   buyToken: {
-    address: mockAddress(3),
+    address: faker.finance.ethereumAddress(),
     decimals: 6,
     logoUri:
       'mock-assets/safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp',
@@ -46,8 +49,8 @@ export const mockSwapOrderTxInfo: SwapOrderTransactionInfo = {
     symbol: 'USDC',
     trusted: true,
   },
-  receiver: mockAddress(4),
-  owner: mockAddress(5),
+  receiver: faker.finance.ethereumAddress(),
+  owner: faker.finance.ethereumAddress(),
   fullAppData: null,
   status: 'open',
   explorerUrl: 'https://explorer.cow.fi/orders/0x123abc',
@@ -66,16 +69,16 @@ export const mockTwapOrderTxInfo: TwapOrderTransactionInfo = {
     durationType: 'AUTO',
   },
   timeBetweenParts: 3600,
-  minPartLimit: '500000000000000000',
+  minPartLimit: faker.number.bigInt({ min: 100000000000000000n, max: 1000000000000000000n }).toString(),
   numberOfParts: '10',
-  partSellAmount: '5000000000000000000',
-  sellAmount: '50000000000000000000',
-  buyAmount: '170000000000000000000',
-  executedSellAmount: '3000000000000000000',
-  executedBuyAmount: '5000000000000000000',
+  partSellAmount: faker.number.bigInt({ min: 1000000000000000000n, max: 10000000000000000000n }).toString(),
+  sellAmount: faker.number.bigInt({ min: 10000000000000000000n, max: 100000000000000000000n }).toString(),
+  buyAmount: faker.number.bigInt({ min: 20000000000000000000n, max: 200000000000000000000n }).toString(),
+  executedSellAmount: faker.number.bigInt({ min: 1000000000000000000n, max: 5000000000000000000n }).toString(),
+  executedBuyAmount: faker.number.bigInt({ min: 2000000000000000000n, max: 10000000000000000000n }).toString(),
   executedFee: '0',
   executedFeeToken: {
-    address: mockAddress(6),
+    address: faker.finance.ethereumAddress(),
     decimals: 18,
     logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
     name: 'Ether',
@@ -83,7 +86,7 @@ export const mockTwapOrderTxInfo: TwapOrderTransactionInfo = {
     trusted: true,
   },
   sellToken: {
-    address: mockAddress(7),
+    address: faker.finance.ethereumAddress(),
     decimals: 18,
     logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
     name: 'Ether',
@@ -91,7 +94,7 @@ export const mockTwapOrderTxInfo: TwapOrderTransactionInfo = {
     trusted: true,
   },
   buyToken: {
-    address: mockAddress(8),
+    address: faker.finance.ethereumAddress(),
     decimals: 6,
     logoUri:
       'mock-assets/safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp',
@@ -99,8 +102,8 @@ export const mockTwapOrderTxInfo: TwapOrderTransactionInfo = {
     symbol: 'USDC',
     trusted: true,
   },
-  receiver: mockAddress(9),
-  owner: mockAddress(10),
+  receiver: faker.finance.ethereumAddress(),
+  owner: faker.finance.ethereumAddress(),
   fullAppData: null,
   status: 'open',
 }
@@ -109,7 +112,7 @@ export const mockSwapOrderTxData: TransactionDetails['txData'] = {
   hexData: '0x',
   dataDecoded: null,
   to: {
-    value: mockAddress(11),
+    value: faker.finance.ethereumAddress(),
     name: 'CoW Swap Settlement',
     logoUri: null,
   },

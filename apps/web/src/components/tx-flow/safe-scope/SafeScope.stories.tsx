@@ -1,8 +1,8 @@
+import { faker } from '@faker-js/faker'
 import type { Meta, StoryObj } from '@storybook/react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { StoreDecorator } from '@/stories/storeDecorator'
-import { mockAddress } from '@/stories/mocks/address'
-import { safeFixtures } from '@safe-global/test/msw/fixtures'
+import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { SafeScopeProvider } from './SafeScopeProvider'
 import { useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import type { ReactElement } from 'react'
@@ -12,6 +12,8 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { createHandlers } from '@/stories/mocks'
+
+faker.seed(1)
 
 /** Renders what the tx-flow's hooks currently resolve to. Lives in this stories file only — nothing in the app imports it. */
 const SafeScopeProbe = (): ReactElement => {
@@ -47,10 +49,10 @@ const SafeScopeProbe = (): ReactElement => {
 }
 
 // The Safe the URL/Redux would point at on a Safe-level route.
-const urlSafe = { ...safeFixtures.efSafe, chainId: '11155111', deployed: true }
+const urlSafe = extendedSafeInfoBuilder().with({ chainId: '11155111' }).build()
 // Two Safes a Space-level flow might select.
-const safeA = { chainId: '137', safeAddress: mockAddress(1) }
-const safeB = { chainId: '11155111', safeAddress: mockAddress(2) }
+const safeA = { chainId: '137', safeAddress: extendedSafeInfoBuilder().build().address.value }
+const safeB = { chainId: '11155111', safeAddress: extendedSafeInfoBuilder().build().address.value }
 
 const meta = {
   title: 'Components/TxFlow/SafeScope',

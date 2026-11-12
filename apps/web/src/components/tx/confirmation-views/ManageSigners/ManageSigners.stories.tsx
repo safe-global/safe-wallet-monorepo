@@ -2,7 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { ManageSigners } from './index'
 import { mockAddOwnerTxInfo, mockRemoveOwnerTxInfo, mockSwapOwnerTxInfo, mockTxData } from './mockData'
-import { mockAddress } from '@/stories/mocks/address'
+import { faker } from '@faker-js/faker'
+
+// Use a different seed than mockData.ts (789) to avoid address collisions
+faker.seed(999)
 
 const meta = {
   title: 'Components/TxFlow/ConfirmationViews/ManageSigners',
@@ -14,28 +17,28 @@ const meta = {
           initialState={{
             safeInfo: {
               data: {
-                address: { value: mockAddress(10) },
+                address: { value: faker.finance.ethereumAddress() },
                 chainId: '1',
                 nonce: 100,
                 threshold: 2,
                 owners: [
                   {
-                    value: mockAddress(11),
+                    value: faker.finance.ethereumAddress(),
                     name: 'Owner 1',
                     logoUri: null,
                   },
                   {
-                    value: mockAddress(12),
+                    value: faker.finance.ethereumAddress(),
                     name: 'Owner 2',
                     logoUri: null,
                   },
                   {
-                    value: mockAddress(13),
+                    value: faker.finance.ethereumAddress(),
                     name: 'Owner 3',
                     logoUri: null,
                   },
                 ],
-                implementation: { value: mockAddress(14) },
+                implementation: { value: faker.finance.ethereumAddress() },
                 modules: null,
                 fallbackHandler: null,
                 guard: null,

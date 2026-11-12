@@ -1,24 +1,26 @@
-import { mockAddress } from '@/stories/mocks/address'
+import { faker } from '@faker-js/faker'
 import type { DraftBatchItem } from '@/features/batching/store'
 import { OperationType } from '@safe-global/types-kit'
 
+faker.seed(1)
+
 export const mockedDraftBatch: DraftBatchItem[] = [
   {
-    id: 'kq3Zt8mWb1',
+    id: faker.string.alphanumeric(10),
     timestamp: 1726820415651,
     txData: {
-      to: mockAddress(1),
-      value: '2500000000000',
+      to: faker.finance.ethereumAddress(),
+      value: faker.number.bigInt({ min: 1000000000000n, max: 10000000000000n }).toString(),
       data: '0x',
       operation: OperationType.Call,
     },
   },
   {
-    id: 'Hx7pLc2Rv9',
+    id: faker.string.alphanumeric(10),
     timestamp: 1726820415652,
     txData: {
-      to: mockAddress(2),
-      value: '7300000000000',
+      to: faker.finance.ethereumAddress(),
+      value: faker.number.bigInt({ min: 1000000000000n, max: 10000000000000n }).toString(),
       data: '0x',
       operation: OperationType.Call,
     },

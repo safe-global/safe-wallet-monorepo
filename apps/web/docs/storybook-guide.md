@@ -121,7 +121,7 @@ import { safeFixtures, chainFixtures, balancesFixtures, SAFE_ADDRESSES } from '@
 | `safeTokenHolder` | 25     | $707 (15 protocols) | Protocol diversity  |
 | `empty`           | 0      | $0                  | Empty states        |
 
-Story data must be the same on every render, so stories, their `mockData.ts` files and `src/stories/**` never use faker or `@/tests/builders` (both are random by design, for unit tests; ESLint enforces this). Take data from the fixtures above or `createMockStory`, write literal values, and use `mockAddress(n)` from `@/stories/mocks/address` for an address. For many rows, build them from the index in a loop, not at random.
+Story data must be the same in every run. Faker continues one sequence for the whole page, so a story, `mockData.ts` or `storyExamples.ts` file that imports faker or a test builder calls `faker.seed(<number>)` after its imports (ESLint enforces this). Then a file gets the same values in every run, whatever other files do with faker.
 
 ## Context error reference
 

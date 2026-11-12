@@ -1,9 +1,13 @@
+import { faker } from '@faker-js/faker'
 import type {
   NativeStakingDepositTransactionInfo,
   NativeStakingValidatorsExitTransactionInfo,
   NativeStakingWithdrawTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
+
+// Seed faker for deterministic values in stories
+faker.seed(456)
 
 // Fixed timestamp for deterministic tests: Dec 24, 2024
 const FIXED_TIMESTAMP = 1735000000
@@ -33,8 +37,8 @@ export const mockStakingDepositTxInfo: NativeStakingDepositTransactionInfo = {
     trusted: true,
   },
   validators: [
-    '0xa1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6',
-    '0x0f1e2d3c4b5a0f1e2d3c4b5a0f1e2d3c4b5a0f1e2d3c4b5a0f1e2d3c4b5a0f1e2d3c4b5a0f1e2d3c4b5a0f1e2d3c4b5a',
+    '0x' + faker.string.hexadecimal({ length: 96, casing: 'lower', prefix: '' }),
+    '0x' + faker.string.hexadecimal({ length: 96, casing: 'lower', prefix: '' }),
   ],
 }
 
@@ -54,7 +58,7 @@ export const mockStakingExitTxInfo: NativeStakingValidatorsExitTransactionInfo =
     symbol: 'ETH',
     trusted: true,
   },
-  validators: ['0x9a8b7c6d5e4f9a8b7c6d5e4f9a8b7c6d5e4f9a8b7c6d5e4f9a8b7c6d5e4f9a8b7c6d5e4f9a8b7c6d5e4f9a8b7c6d5e4f'],
+  validators: ['0x' + faker.string.hexadecimal({ length: 96, casing: 'lower', prefix: '' })],
 }
 
 export const mockStakingWithdrawTxInfo: NativeStakingWithdrawTransactionInfo = {
@@ -69,5 +73,5 @@ export const mockStakingWithdrawTxInfo: NativeStakingWithdrawTransactionInfo = {
     symbol: 'ETH',
     trusted: true,
   },
-  validators: ['0x3c5e7a9b1d2f3c5e7a9b1d2f3c5e7a9b1d2f3c5e7a9b1d2f3c5e7a9b1d2f3c5e7a9b1d2f3c5e7a9b1d2f3c5e7a9b1d2f'],
+  validators: ['0x' + faker.string.hexadecimal({ length: 96, casing: 'lower', prefix: '' })],
 }

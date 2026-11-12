@@ -1,13 +1,15 @@
-import { mockAddress } from '@/stories/mocks/address'
+import { faker } from '@faker-js/faker'
 import type { VaultRedeemTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
+
+faker.seed(1)
 
 export const mockVaultRedeemTxInfo: VaultRedeemTransactionInfo = {
   type: TransactionInfoType.VAULT_REDEEM,
   humanDescription: null,
-  value: '4000000000000000000',
+  value: faker.number.bigInt({ min: 1000000000000000000n, max: 10000000000000000000n }).toString(),
   tokenInfo: {
-    address: mockAddress(1),
+    address: faker.finance.ethereumAddress(),
     decimals: 18,
     logoUri:
       'mock-assets/safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp',
@@ -16,7 +18,7 @@ export const mockVaultRedeemTxInfo: VaultRedeemTransactionInfo = {
     trusted: true,
   },
   vaultInfo: {
-    address: mockAddress(2),
+    address: faker.finance.ethereumAddress(),
     name: 'Morpho USDC Vault',
     description:
       'A high-yield USDC vault powered by Morpho protocol, optimizing lending rates across multiple markets.',
@@ -25,11 +27,11 @@ export const mockVaultRedeemTxInfo: VaultRedeemTransactionInfo = {
   baseNrr: 450,
   additionalRewardsNrr: 150,
   fee: 500,
-  currentReward: '120000000000000000',
+  currentReward: faker.number.bigInt({ min: 50000000000000000n, max: 500000000000000000n }).toString(),
   additionalRewards: [
     {
       tokenInfo: {
-        address: mockAddress(3),
+        address: faker.finance.ethereumAddress(),
         decimals: 18,
         logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
         name: 'Morpho Token',
@@ -37,8 +39,8 @@ export const mockVaultRedeemTxInfo: VaultRedeemTransactionInfo = {
         trusted: true,
       },
       nrr: 150,
-      claimable: '40000000000000000',
-      claimableNext: '15000000000000000',
+      claimable: faker.number.bigInt({ min: 10000000000000000n, max: 100000000000000000n }).toString(),
+      claimableNext: faker.number.bigInt({ min: 5000000000000000n, max: 50000000000000000n }).toString(),
     },
   ],
 }

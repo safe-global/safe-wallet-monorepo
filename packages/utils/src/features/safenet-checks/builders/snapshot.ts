@@ -1,4 +1,4 @@
-import { keccak256, toBeHex } from 'ethers'
+import { faker } from '@faker-js/faker'
 import {
   AttestationVerificationStatus,
   CheckStatus,
@@ -7,11 +7,9 @@ import {
   type SafenetCheckSnapshot,
 } from '../types'
 
-// Every call gives a new hash, and the same sequence on every run (stories render these snapshots too)
-let hashCounter = 0
-const hexHash = (): Hex => keccak256(toBeHex(++hashCounter, 32)) as Hex
+const hexHash = (): Hex => faker.string.hexadecimal({ length: 64, prefix: '0x', casing: 'lower' }) as Hex
 
-/** Builder for a {@link SafenetCheckSnapshot} — all bigints as strings. */
+/** Faker builder for a {@link SafenetCheckSnapshot} — all bigints as strings. */
 export const buildSnapshot = (over: Partial<SafenetCheckSnapshot> = {}): SafenetCheckSnapshot => ({
   safeTxHash: hexHash(),
   chainId: '100',

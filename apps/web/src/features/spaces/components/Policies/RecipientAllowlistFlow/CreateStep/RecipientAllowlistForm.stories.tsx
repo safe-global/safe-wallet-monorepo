@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
+import { faker } from '@faker-js/faker'
 import type { Erc20TokenMetadata } from '@safe-global/store/gateway/AUTO_GENERATED/tokens'
 import { createMockStory } from '@/stories/mocks'
-import { mockAddress } from '@/stories/mocks/address'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import type { SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope'
 import { createDefaultAllowlistValues, type AllowlistFormRecipient, type RecipientAllowlistFormValues } from '../types'
@@ -58,13 +58,13 @@ const filledValues: RecipientAllowlistFormValues = {
   ],
 }
 
-const RECIPIENT_NAMES = ['Alice', 'Bob', 'Carol', 'Dave', 'Erin', 'Frank', 'Grace', 'Heidi', 'Ivan', 'Judy']
+faker.seed(3079)
 const manyRecipients: AllowlistFormRecipient[] = Array.from({ length: 20 }, (_, index) => ({
-  address: mockAddress(index + 1),
-  name: index % 2 === 0 ? RECIPIENT_NAMES[index / 2] : undefined,
+  address: faker.finance.ethereumAddress(),
+  name: index % 2 === 0 ? faker.person.firstName() : undefined,
   selected: index % 3 !== 0,
 }))
-const manyTokens = Array.from({ length: 20 }, (_, index) => mockAddress(index + 21))
+const manyTokens = Array.from({ length: 20 }, () => faker.finance.ethereumAddress())
 
 type StoryProps = {
   initialValues?: RecipientAllowlistFormValues

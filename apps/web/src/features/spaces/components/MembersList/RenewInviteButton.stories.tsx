@@ -1,11 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
+import { faker } from '@faker-js/faker'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { createMockStory } from '@/stories/mocks'
-import { mockNow } from '@/stories/mocks/now'
 import RenewInviteButton from './RenewInviteButton'
 
-const DAY_MS = 24 * 60 * 60 * 1000
+faker.seed(1)
 
 const baseMember: MemberDto = {
   id: 1,
@@ -14,8 +14,8 @@ const baseMember: MemberDto = {
   name: 'Bob',
   alias: null,
   invitedBy: null,
-  createdAt: new Date(mockNow() - 90 * DAY_MS).toISOString(),
-  updatedAt: new Date(mockNow() - DAY_MS).toISOString(),
+  createdAt: faker.date.past().toISOString(),
+  updatedAt: faker.date.recent().toISOString(),
   user: { id: 42, status: 'PENDING', email: 'bob@example.com', address: null },
 }
 
