@@ -48,7 +48,7 @@ yarn workspace @safe-global/design-system type-check
 yarn workspace @safe-global/design-system lint
 yarn workspace @safe-global/design-system test       # generators, registry drift, page coverage
 yarn workspace @safe-global/design-system prettier
-NODE_OPTIONS=--max-old-space-size=8192 yarn workspace @safe-global/design-system build   # → out/
+yarn workspace @safe-global/design-system build   # → out/
 yarn workspace @safe-global/design-system test:e2e   # Playwright crawl of out/ (serves it on :3100)
 ```
 

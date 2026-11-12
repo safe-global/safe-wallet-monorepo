@@ -40,8 +40,6 @@ jobs:
       - run: yarn workspace @safe-global/design-system prettier
       - run: yarn workspace @safe-global/design-system test
       - run: yarn workspace @safe-global/design-system build
-        env:
-          NODE_OPTIONS: --max-old-space-size=8192
       - name: registry.json is current
         run: git diff --exit-code apps/design-system/registry.json
       - name: Static export and registry exist

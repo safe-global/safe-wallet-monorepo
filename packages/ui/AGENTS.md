@@ -52,7 +52,7 @@ The stories render in two Storybooks: the `apps/web` one (both `.storybook` and 
 yarn workspace @safe-global/ui type-check
 yarn workspace @safe-global/ui lint
 yarn workspace @safe-global/ui test
-yarn workspace @safe-global/ui build-storybook   # standalone Storybook, NODE_OPTIONS=--max-old-space-size=8192 if it runs out of memory
+yarn workspace @safe-global/ui build-storybook   # standalone Storybook
 yarn workspace @safe-global/web type-check     # also covers the stories and drawer.stories.test.tsx
 yarn workspace @safe-global/web build-storybook
 ```

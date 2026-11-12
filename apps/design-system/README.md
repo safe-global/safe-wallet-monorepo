@@ -11,7 +11,7 @@ yarn workspace @safe-global/design-system dev      # http://localhost:3100
 ## Build and preview
 
 ```bash
-NODE_OPTIONS=--max-old-space-size=8192 yarn workspace @safe-global/design-system build
+yarn workspace @safe-global/design-system build
 yarn workspace @safe-global/design-system serve    # serves out/ on http://localhost:3100
 ```
 
