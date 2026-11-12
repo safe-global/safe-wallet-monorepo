@@ -689,3 +689,34 @@ Verification results (all after the last code change):
 - shadcn CLI: it ignores `NO_PROXY`, and it needs `ui.shadcn.com` for every component, even from a third-party registry. Teams behind a proxy should know this before relying on the registry path.
 - `fumadocs-ui` asks for `motion ^14.6.0` while the root pins `12.34.0`; harmless while the Flux layout is unused.
 - `packages/ui/components.json` (D13) and an alias-free flow for adding upstream components.
+
+## Redesign (post-review)
+
+The user finds the current site too close to Storybook and wants a dev-focused site in the spirit of ui.shadcn.com, with an original layout and Safe colours. Constraints are unchanged: wallet untouched, static export, host-agnostic, `basePath` works, no new hex or `oklch()` in `src/` or `content/`, sentence case, minimal comments.
+
+### Decisions
+
+- **Routes.** `/` landing, `/docs/…` (Introduction at `/docs/`, Get started at `/docs/installation/`), `/components/` index plus the existing `/components/<name>/` pages, `/typeset/`, `/create/`. Previews stay at `/preview/<component>/<story>/`. The old root docs URLs (`/installation/`, `/foundations/…`, …) move under `/docs/`; there are no redirects, since the site has never been deployed.
+- **One Fumadocs source, two sections.** `content/docs/docs/**` and `content/docs/components/**` stay in one loader (`baseUrl: '/'`), so URLs, search and `llms.txt` come for free. Each section's layout passes only its own folder of the page tree to `DocsLayout`, so Docs and Components get separate sidebars. Docs sidebar order: Introduction, Installation, Theming, Dark mode, Foundations, Changelog, Utilities.
+- **Site shell.** A `(site)` route group with one root layout: `RootProvider` (static search, `next-themes`, system default) and a full-width sticky header on every page: the Safe UI wordmark, nav (Home, Docs, Get started, Components, Typeset, Create), a ⌘K search box, the GitHub link, the theme toggle and a green "New project" button to `/create/`. Below `md` the nav collapses into a menu sheet. `DocsLayout` sits under the header through `--fd-banner-height`; its own search and theme controls are off.
+- **Brand colour from tokens only.** Safe green is `--color-static-text-brand` (the same in both themes), with `--color-static-main` as its ink. A `.brand` scope re-points `--primary`/`--primary-foreground` at them, so CTAs stay plain `Button variant="default"` and the design-system lint rules still hold. Dark mode uses the Safe dark tokens (`--background`, `--card`, `--color-background-main`).
+- **Home.** An announcement pill linking to the registry section, a large hero, two CTAs, then a responsive masonry of showcase cards built inline with real `@safe-global/ui` components and Safe-flavoured demo content (send tokens form, controls, signers 2 of 3, pending transactions, activity chart from divs and tokens, settings tabs, alert and dialog, calendar). Demo content lives in the docs app only; `packages/ui` does not change.
+- **Components index.** `content/docs/components/index.mdx` renders a client-side filterable grid of the 52 components: a lazily loaded, scaled live thumbnail of the first story, the name and the page description.
+- **Typeset.** A client page that renders every `Typography` variant large, reads font size, weight and line height from the computed style (so the labels always match the tokens), offers copyable code per variant and an editable sample text shared by all specimens.
+- **Create.** A client-only generator: framework (Vite, Next.js), components (checkbox grid, select all, presets Forms, Overlays, Navigation, Data display), install path (npm package, shadcn registry). It prints the create and install commands, the CSS entry with `@source`, `next.config` for Next on the npm path, `components.json` with the `@safe` registry (served origin, or `NEXT_PUBLIC_REGISTRY_URL`) and the `npx shadcn add @safe/…` command.
+
+### Tasks and files
+
+1. Content moves: `content/docs/{index,installation,theming,dark-mode,changelog}.mdx`, `foundations/`, `utilities/` → `content/docs/docs/`, with their own `meta.json`; the root `meta.json` lists `docs` and `components`; `components/index.mdx`; every internal link updated. `scaffold-pages.ts` writes `index` first in the components `meta.json`.
+2. Shell: `src/app/(site)/layout.tsx`, `site.css` (was `(docs)/docs.css`), `src/components/site/*` (header, nav, mobile menu, search box, brand button), `src/lib/site.ts` (nav items, GitHub URL, section trees). The `(docs)` group goes away.
+3. Section routes: `src/app/(site)/docs/**` and `src/app/(site)/components/**`, sharing `src/components/docs-page.tsx`.
+4. Pages: `src/app/(site)/page.tsx` with `src/components/home/*`, `typeset/page.tsx` with `src/components/typeset/*`, `create/page.tsx` with `src/components/create/*`, and `src/components/docs/component-grid.tsx`.
+5. `llms.txt` lists the source pages plus Home, Typeset and Create; the search dialog suggests Home, Docs, Components, Typeset and Create when empty.
+6. Tests: `pages.test.ts` (the components index is not a component page; every docs page sits under `docs/` or `components/`), a `site.test.ts` for the Create generator output, and the crawl (new routes, header nav on every page, mobile menu, Create output follows the options, Typeset sample text updates).
+7. `AGENTS.md`, `README.md` and the Installation links for the new structure.
+
+### Verification and acceptance
+
+- type-check, lint, test, prettier, `build`, the crawl at the root and with `NEXT_PUBLIC_BASE_PATH=/safe-ui`, knip, and `git diff 5dba2e98 -- apps/web apps/web-tanstack packages/views` empty.
+- No 404s, no console errors, header on every docs and site page, the hex/`oklch()` grep still empty.
+- Screenshots, desktop light and dark: `/`, `/components/`, `/components/button/`, `/typeset/`, `/create/`, `/docs/`; mobile dark: `/` with the menu open. Reviewed by eye until the home page reads as a product landing, not a Storybook.
