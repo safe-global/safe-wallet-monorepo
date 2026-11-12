@@ -6,6 +6,30 @@ import { getTransactionTrackingType } from '@/services/analytics/tx-tracking'
 import { isNestedConfirmationTxInfo } from '@/utils/transaction-guards'
 import type { GasPayer } from '@/utils/gasPayment'
 
+export type GasPaymentSource = 'safe' | 'signing_wallet' | 'sponsored'
+
+/**
+ * Who pays the gas, for the Gas Payment Source property:
+ *   - a payload that refunds the gas is paid by the Safe, whatever the step;
+ *   - at execution, the payer the user picked (a sponsored option means nobody in the Safe paid);
+ *   - otherwise, where the Safe could pay, the signer — at signing, before anyone picks.
+ */
+export const getGasPaymentSource = ({
+  isSafePaid,
+  isExecuted,
+  gasPaymentOption,
+  isPayFromSafeChain,
+}: {
+  isSafePaid: boolean
+  isExecuted: boolean
+  gasPaymentOption: GasPayer | undefined
+  isPayFromSafeChain: boolean
+}): GasPaymentSource | undefined => {
+  if (isSafePaid) return 'safe'
+  if (isExecuted && gasPaymentOption) return gasPaymentOption === 'WALLET' ? 'signing_wallet' : 'sponsored'
+  return isPayFromSafeChain ? 'signing_wallet' : undefined
+}
+
 function getCreationEvent(args: { isParentSigner: boolean; isRoleExecution: boolean; isProposerCreation: boolean }) {
   if (args.isParentSigner) {
     return TX_EVENTS.CREATE_VIA_PARENT
@@ -52,7 +76,7 @@ export function trackTxEvents(
   origin?: string,
   isMassPayout: boolean = false,
   threshold?: number,
-  gasPaymentSource?: 'safe' | 'signing_wallet',
+  gasPaymentSource?: GasPaymentSource,
   gasPaymentOption?: GasPayer,
 ) {
   const isNestedConfirmation = !!details && isNestedConfirmationTxInfo(details.txInfo)

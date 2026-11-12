@@ -25,6 +25,38 @@ const TX_PALETTE_BY_TYPE: Record<string, AccordionPalette> = {
 }
 const DEFAULT_PALETTE: AccordionPalette = { border: 'var(--color-info-dark)', bg: 'var(--color-info-background)' }
 
+const PAID_FROM_LABEL: Record<HistoryFeesData['paidFrom'], string> = {
+  safe: 'Paid from Safe account',
+  signer: 'Paid from signer wallet',
+  sponsored: 'Sponsored',
+}
+
+/** The total paid; for a sponsored tx, what it would have cost, struck through. */
+const SummaryTotal = ({ data }: { data: HistoryFeesData }): ReactElement => {
+  const { amount, currency, fiatAmount } = data.totalFee
+
+  if (data.paidFrom === 'sponsored') {
+    return (
+      <Typography variant="paragraph-small" as="del" color="muted">
+        {amount} {currency}
+      </Typography>
+    )
+  }
+
+  return (
+    <>
+      <Typography variant="paragraph-small-bold">
+        {amount} {currency}
+      </Typography>
+      {fiatAmount && (
+        <Typography variant="paragraph-mini" color="muted">
+          {fiatAmount}
+        </Typography>
+      )}
+    </>
+  )
+}
+
 const HistoryFeesAccordion = ({
   data,
   txInfo,
@@ -59,20 +91,13 @@ const HistoryFeesAccordion = ({
               <div className={css.summaryLeft}>
                 <Typography variant="paragraph-small-bold">Fees</Typography>
               </div>
-              <Typography variant="paragraph-mini" color="muted">
-                {data.paidFrom === 'safe' ? 'Paid from the Safe' : 'Paid from the signer'}
+              <Typography variant="paragraph-mini" color="muted" data-testid="history-fees-paid-from">
+                {PAID_FROM_LABEL[data.paidFrom]}
               </Typography>
             </div>
 
             <div className={css.summaryRight}>
-              <Typography variant="paragraph-small-bold">
-                {data.totalFee.amount} {data.totalFee.currency}
-              </Typography>
-              {data.totalFee.fiatAmount && (
-                <Typography variant="paragraph-mini" color="muted">
-                  {data.totalFee.fiatAmount}
-                </Typography>
-              )}
+              <SummaryTotal data={data} />
             </div>
           </div>
         </AccordionTrigger>

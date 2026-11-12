@@ -63,6 +63,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
 
 jest.mock('@/components/tx/shared/tracking', () => ({
   __esModule: true,
+  ...jest.requireActual('@/components/tx/shared/tracking'),
   trackTxEvents: jest.fn(),
 }))
 

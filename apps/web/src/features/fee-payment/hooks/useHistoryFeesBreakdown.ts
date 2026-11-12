@@ -18,6 +18,8 @@ import { Errors, logError } from '@/services/exceptions'
 import { isRateLimitError } from '@/utils/transaction-errors'
 import type { FeeRow, HistoryFeesData } from '@safe-global/views/features/fee-payment/types'
 import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
+import { RHINESTONE_RELAYER } from '../constants'
+import { isRelayedByRhinestone } from '../utils/isRelayedByRhinestone'
 
 export type { HistoryFeesData } from '@safe-global/views/features/fee-payment/types'
 
@@ -32,19 +34,32 @@ const buildFees = (
   amount: string,
   currency: string,
   fiatAmount: string | undefined,
-  paidFrom: 'safe' | 'signer',
+  paidFrom: HistoryFeesData['paidFrom'],
 ): HistoryFeesData => ({
   totalFee: { amount, currency, fiatAmount },
   executionFee: EXECUTION_FEE,
-  gasFee: { label: 'Max gas fee', amount, currency, fiatAmount },
+  gasFee: { label: 'Max gas fee', amount, currency, fiatAmount, isFree: paidFrom === 'sponsored' },
   paidFrom,
 })
 
+type NonSafePayer = 'signer' | 'sponsored' | 'unknown'
+
+/** Who paid a tx the Safe didn't pay for, from the executor alone (no RPC): an owner, Rhinestone, or unknown. */
+const payerFromExecutor = (executor: string | undefined, owners: string[]): NonSafePayer => {
+  if (!executor) return 'unknown'
+  if (owners.some((owner) => sameAddress(owner, executor))) return 'signer'
+  if (sameAddress(executor, RHINESTONE_RELAYER)) return 'sponsored'
+  return 'unknown'
+}
+
 /**
  * Fee breakdown for executed multisig txs. Execution fee is always "Free" in Phase 2.
- * Max gas fee derives from:
- *   - Safe-pays → the signed payload (safeTxGas + baseGas × gasPrice) — deterministic.
- *   - Signer-pays → the on-chain tx receipt (gasUsed × gasPrice) — signer wallet's actual cost.
+ * Who paid, in this order:
+ *   - Safe → the signed payload carries refund params; the gas fee is the `payment` the Safe made.
+ *   - Signer → an owner executed; the gas fee is the receipt's gasUsed × gasPrice.
+ *   - Sponsored → Rhinestone relayed (its account executed, or its executor logged `IntentExecuted`);
+ *     the receipt's cost is shown struck through, as nobody in the Safe paid it.
+ *   - Anyone else → null: we can't say who paid, so no breakdown is shown.
  * Deps are narrowed to scalars so polling `balances` doesn't re-trigger the receipt RPC.
  */
 export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryFeesData | null => {
@@ -64,6 +79,12 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
   const gasTokenDecimals = exec?.gasTokenInfo?.decimals
   const payment = exec?.payment
   const refundReceiver = exec?.refundReceiver?.value
+  const executor = exec?.executor?.value
+  // Current owners plus whoever confirmed: an owner removed after executing still confirmed the tx.
+  const ownersKey = [
+    ...(exec?.signers ?? []).map((signer) => signer.value),
+    ...(exec?.confirmations ?? []).map((confirmation) => confirmation.signer.value),
+  ].join(',')
   const { txHash, executedAt } = txDetails
 
   const isSafePaid = isPaidFromSafe({ gasPrice, baseGas, refundReceiver })
@@ -106,8 +127,14 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
     currency,
   ])
 
-  // Signer-pays: fetch receipt once per txHash. Deps are primitives so polling balances
-  // doesn't trigger a re-fetch.
+  // The executor tells signer from Rhinestone without an RPC call; the logs only settle an unknown executor.
+  const payerByExecutor = useMemo(
+    () => payerFromExecutor(executor, ownersKey ? ownersKey.split(',') : []),
+    [executor, ownersKey],
+  )
+
+  // Not Safe-paid: fetch the receipt once per txHash, for the gas cost and, for an unknown
+  // executor, Rhinestone's log. Deps are primitives so polling balances doesn't trigger a re-fetch.
   const [receipt] = useAsync(async () => {
     if (!isPayFromSafeEnabled || !executedAt || !exec) return null
     if (isSafePaid) return null
@@ -121,17 +148,20 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
     }
   }, [isPayFromSafeEnabled, executedAt, !!exec, isSafePaid, txHash, provider])
 
-  const signerPaidData = useMemo<HistoryFeesData | null>(() => {
+  const receiptPaidData = useMemo<HistoryFeesData | null>(() => {
     if (!receipt) return null
+    const payer = payerByExecutor !== 'unknown' ? payerByExecutor : isRelayedByRhinestone(receipt) ? 'sponsored' : null
+    if (!payer) return null
+
     const decimals = chain?.nativeCurrency.decimals ?? 18
     const symbol = chain?.nativeCurrency.symbol ?? 'ETH'
-    // Signer-pays: EOA paid the network in native gas — gasUsed × gasPrice from the tx receipt.
+    // Whoever executed paid the network in native gas — gasUsed × gasPrice from the tx receipt.
     const gasFeeBaseUnits = receipt.gasUsed * receipt.gasPrice
     const amount = formatVisualAmount(gasFeeBaseUnits, decimals)
     const fiatAmount = formatFiat(gasFeeBaseUnits, decimals, fiatConversion, currency)
 
-    return buildFees(amount, symbol, fiatAmount, 'signer')
-  }, [receipt, chain?.nativeCurrency.decimals, chain?.nativeCurrency.symbol, fiatConversion, currency])
+    return buildFees(amount, symbol, fiatAmount, payer)
+  }, [receipt, payerByExecutor, chain?.nativeCurrency.decimals, chain?.nativeCurrency.symbol, fiatConversion, currency])
 
-  return safePaidData ?? signerPaidData ?? null
+  return safePaidData ?? receiptPaidData ?? null
 }
