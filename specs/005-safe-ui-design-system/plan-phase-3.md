@@ -731,3 +731,23 @@ The user finds the current site too close to Storybook and wants a dev-focused s
   - Base UI puts a radio's `id` on its hidden native input, so the Create option cards are whole `<label>`s and the crawl clicks the label.
   - `packages/ui/README.md` points at the moved Installation page (`content/docs/docs/installation.mdx`).
 - Verification after the last change: type-check, lint, test (39), prettier, `build`, `registry.json` current, knip, the hex/`oklch()` grep empty, the wallet diff empty, and the crawl passes at the root and from `/safe-ui/` (183 tests each: every site, docs and preview page with the header and its six nav items, the components filter, search, theme toggle, copy, the mobile menu sheet, Create output following framework, preset and install path, Typeset sample text).
+
+### Redesign review fixes (round 1)
+
+- **Accessible names.** Base UI puts a control's `id` on its hidden native input, so `<Label htmlFor>` does not name the visible radio, checkbox or switch. The Create radios, the Create checkboxes and the home showcase's switches and checkboxes now carry `aria-labelledby` pointing at their label. The Create radios also get `aria-describedby` for their description, and the radio groups are named "Framework" and "Install path". Text inputs are native, so `htmlFor` already names them. The crawl asserts `getByRole('radio', { name: 'Next.js' })`, `getByRole('checkbox', { name: 'Button' })` and both group names.
+- **Create, Vite and registry.** The output now includes `src/index.css` (`@import 'tailwindcss';`, before `@safe/theme` appends to it), plus the `@/*` paths for both `tsconfig.json` and `tsconfig.app.json`. `vite.config.ts` uses `import.meta.dirname`: Vite 8 warns about `__dirname` under its native config loader. On the npm path, a callout says the package is not published yet.
+- **End-to-end runs of the printed output** happened in throwaway apps in the scratchpad against a locally served `out/`, with the SC4 workarounds (lowercase `https_proxy` removed for the shadcn CLI, a local stub of `ui.shadcn.com/r/colors/neutral.json`). `npm_config_before=2026-11-04` applied to every install. `shadcn@latest` was pinned to 4.23.0, the newest version before the cutoff.
+  - Vite + registry: `create-vite` (react-ts template, TypeScript 7), then every printed block in order. `tsc -b && vite build` passes, and the page renders a Safe-styled Button and Dialog in dark mode.
+  - Next.js + registry: `create-next-app` (Next 16.4.5; it already sets up `@import "tailwindcss"` and the `@/*` paths with `--src-dir`), then `components.json` and the add command. `next build` passes, and the page renders the same.
+- **Badge contrast** was measured on the home page against WCAG AA (4.5:1 for small text):
+  - Badge `success` in dark mode is 3.67:1 (`--color-success-main` text on its 20% tint). It fails.
+  - Badge `destructive` in light mode is 4.12:1. It fails.
+  - All other badge variants on the page pass: warning 12.5:1, info 14.4:1, `positive` 13.8:1, light `success` 16.4:1, dark `destructive` 4.6:1.
+  - These are token or variant issues in `packages/theme` and `packages/ui`, so the docs app does not patch them (see Follow-ups).
+- **Avatar group** in the Signers card shows single initials, so the overlapping avatars no longer clip two-letter text.
+- **Verification:** type-check, lint, test (40), prettier, `build`, `registry.json` current, knip, the hex grep empty, the wallet diff empty; the crawl passes at the root and from `/safe-ui/` (183 each).
+
+### Redesign follow-ups
+
+- Badge contrast (WCAG AA): dark `success` (3.67:1) and light `destructive` (4.12:1). Fix in the badge variants or the success and destructive tokens, with design sign-off.
+- Base UI checkbox, radio and switch need `aria-labelledby` (or wrapping) to be named by a visible label. Worth a note in `packages/ui` docs or a `Field` helper that wires it.
