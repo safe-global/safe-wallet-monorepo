@@ -3,7 +3,7 @@ import { getStoryIndex } from '@/lib/generated'
 import { ComponentGridClient, type ComponentCard } from './component-grid-client'
 
 export function ComponentGrid() {
-  const stories = new Map(getStoryIndex().map((entry) => [entry.component, entry.stories[0]?.slug]))
+  const index = new Map(getStoryIndex().map((entry) => [entry.component, entry]))
   const cards: ComponentCard[] = source
     .getPages()
     .filter((page) => page.slugs[0] === 'components' && page.slugs.length === 2)
@@ -12,7 +12,8 @@ export function ComponentGrid() {
       title: page.data.title,
       description: page.data.description ?? '',
       url: page.url,
-      story: stories.get(page.slugs[1]) ?? null,
+      story: index.get(page.slugs[1])?.stories[0]?.slug ?? null,
+      layer: index.get(page.slugs[1])?.layer ?? 'primitive',
     }))
     .sort((a, b) => a.title.localeCompare(b.title))
   return <ComponentGridClient cards={cards} />

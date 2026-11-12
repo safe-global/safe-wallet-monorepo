@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { componentNames, contentDir } from './paths.ts'
+import { componentEntries, contentDir, type ComponentEntry } from './paths.ts'
 
 export const componentsContentDir = path.join(contentDir, 'components')
 
@@ -49,20 +49,32 @@ TODO keyboard and ARIA notes.
 <ComponentRules component="${name}" />
 `
 
-export const metaJson = (names: string[]): string =>
-  `${JSON.stringify({ title: 'Components', pages: ['index', ...[...names].sort()] }, null, 2)}\n`
+export const GROUPS = [
+  { layer: 'primitive', title: 'Primitives' },
+  { layer: 'component', title: 'Safe components' },
+] as const
+
+/** The sidebar: the index, then one Fumadocs separator per layer with its pages in name order */
+export const metaJson = (entries: ComponentEntry[]): string => {
+  const pages = ['index']
+  for (const { layer, title } of GROUPS) {
+    const names = entries.filter((entry) => entry.layer === layer).map((entry) => entry.name)
+    if (names.length) pages.push(`---${title}---`, ...names.sort())
+  }
+  return `${JSON.stringify({ title: 'Components', pages }, null, 2)}\n`
+}
 
 export const main = (): void => {
   mkdirSync(componentsContentDir, { recursive: true })
-  const names = componentNames()
+  const entries = componentEntries()
   const created: string[] = []
-  for (const name of names) {
+  for (const { name } of entries) {
     const file = path.join(componentsContentDir, `${name}.mdx`)
     if (existsSync(file)) continue
     writeFileSync(file, pageTemplate(name))
     created.push(name)
   }
-  writeFileSync(path.join(componentsContentDir, 'meta.json'), metaJson(names))
+  writeFileSync(path.join(componentsContentDir, 'meta.json'), metaJson(entries))
   console.log(created.length ? `scaffold: created ${created.join(', ')}` : 'scaffold: every component has a page')
 }
 

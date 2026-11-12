@@ -27,6 +27,17 @@ describe('props', () => {
     assert.ok(cva.variants.size.length >= 10)
   })
 
+  it('documents the generic DataTable props', () => {
+    for (const prop of ['columns', 'rows', 'getRowKey']) assert.ok(propOf('data-table', 'DataTable', prop), prop)
+  })
+
+  it('lists component props, not exported prop types', () => {
+    assert.deepEqual(
+      byName.get('stat')?.components.map((doc) => doc.displayName),
+      ['Stat'],
+    )
+  })
+
   it('documents DialogContent size', () => {
     assert.ok(propOf('dialog', 'DialogContent', 'size'))
   })

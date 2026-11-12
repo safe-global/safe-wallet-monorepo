@@ -1,0 +1,35 @@
+---
+title: Stat
+description: 'A muted label above a large bold value, with a skeleton while it loads.'
+component: stat
+---
+
+<ComponentPreview component="stat" />
+
+## Installation
+
+<ComponentInstall component="stat" />
+
+## Usage
+
+<ComponentUsage component="stat" />
+
+Pass a `label` and a `value`; `loading` swaps the value for a skeleton of the same height. Use `valueProps` for attributes of the value element, such as a `data-testid`, and the usual div props for the root.
+
+## Examples
+
+<ComponentExamples component="stat" />
+
+## Props
+
+<ComponentProps component="stat" />
+
+## Accessibility
+
+<BaseUiReference component="stat" />
+
+The value is an `h2`, so a stat can anchor a dashboard section; place it where that level fits the page outline. While `loading`, the skeleton has no text, so announce the loading state elsewhere on the page if it matters.
+
+## Do / Don't
+
+<ComponentRules component="stat" />

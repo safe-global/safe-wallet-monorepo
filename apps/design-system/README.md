@@ -1,6 +1,6 @@
 # Safe UI docs site
 
-The docs site and shadcn registry for [`@safe-global/ui`](../../packages/ui): a landing page, the docs (`/docs/`), a filterable component index (`/components/`), a type scale playground (`/typeset/`) and a project generator (`/create/`). It is a plain static site: `out/` deploys to any static host. Contributor rules: [AGENTS.md](AGENTS.md).
+The docs site and shadcn registry for [`@safe-global/ui`](../../packages/ui): a landing page, the docs (`/docs/`), a filterable component index (`/components/`) in two groups, the shadcn primitives and the Safe components, a type scale playground (`/typeset/`) and a project generator (`/create/`). It is a plain static site: `out/` deploys to any static host. Contributor rules: [AGENTS.md](AGENTS.md).
 
 ## Run it
 

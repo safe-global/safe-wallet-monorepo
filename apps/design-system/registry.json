@@ -271,6 +271,27 @@
       ]
     },
     {
+      "name": "data-table",
+      "type": "registry:component",
+      "title": "Data Table",
+      "dependencies": [
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/table",
+        "@safe/use-mobile",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/components/data-table.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "dialog",
       "type": "registry:ui",
       "title": "Dialog",
@@ -344,6 +365,44 @@
         {
           "path": "registry/safe/ui/empty.tsx",
           "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "expandable-card",
+      "type": "registry:component",
+      "title": "Expandable Card",
+      "dependencies": [
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/card",
+        "@safe/collapsible"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/components/expandable-card.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "expandable-list",
+      "type": "registry:component",
+      "title": "Expandable List",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/typography",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/components/expandable-list.tsx",
+          "type": "registry:component"
         }
       ]
     },
@@ -549,6 +608,21 @@
         {
           "path": "registry/safe/ui/pagination.tsx",
           "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "peek-collapsible",
+      "type": "registry:component",
+      "title": "Peek Collapsible",
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/components/peek-collapsible.tsx",
+          "type": "registry:component"
         }
       ]
     },
@@ -824,6 +898,22 @@
       ]
     },
     {
+      "name": "stat",
+      "type": "registry:component",
+      "title": "Stat",
+      "registryDependencies": [
+        "@safe/skeleton",
+        "@safe/typography",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/components/stat.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
       "name": "switch",
       "type": "registry:ui",
       "title": "Switch",
@@ -967,6 +1057,15 @@
           "color-info-subtle": "var(--color-info-background)",
           "color-info-muted": "var(--color-info-light)",
           "color-info-strong": "var(--color-info-dark)",
+          "color-tone-critical": "var(--tone-critical)",
+          "color-tone-warning": "var(--tone-warning)",
+          "color-tone-attention": "var(--tone-attention)",
+          "color-tone-success": "var(--tone-success)",
+          "color-tone-neutral": "var(--tone-neutral)",
+          "color-tone-muted": "var(--tone-muted)",
+          "color-widget-count": "var(--widget-count)",
+          "color-widget-count-foreground": "var(--widget-count-foreground)",
+          "color-widget-icon-halo": "var(--widget-icon-halo)",
           "ease-soft": "cubic-bezier(0.22, 1, 0.36, 1)",
           "radius-2xs": "0.25rem",
           "radius-xs": "0.5rem",
@@ -1101,7 +1200,16 @@
           "z-overlay": "1400",
           "z-nested-overlay": "1450",
           "z-above-onboard": "1451",
-          "z-picker": "1500"
+          "z-picker": "1500",
+          "tone-critical": "var(--color-error-main)",
+          "tone-warning": "var(--color-warning-main)",
+          "tone-attention": "var(--color-review-main)",
+          "tone-success": "var(--color-success-main)",
+          "tone-neutral": "var(--color-text-secondary)",
+          "tone-muted": "var(--color-text-disabled)",
+          "widget-count": "#f0fdf4",
+          "widget-count-foreground": "#166534",
+          "widget-icon-halo": "oklch(96.2% 0.044 156.743)"
         },
         "dark": {
           "color-text-primary": "#ffffff",
@@ -1206,7 +1314,16 @@
           "error-subtle": "var(--color-error-background)",
           "badge-warning-subtle": "#301d02",
           "badge-warning-strong": "#eab308",
-          "badge-dot-warning": "#facc15"
+          "badge-dot-warning": "#facc15",
+          "tone-critical": "var(--color-error-main)",
+          "tone-warning": "var(--color-warning-main)",
+          "tone-attention": "var(--color-review-main)",
+          "tone-success": "var(--color-success-main)",
+          "tone-neutral": "var(--color-text-secondary)",
+          "tone-muted": "var(--color-text-disabled)",
+          "widget-count": "#f0fdf4",
+          "widget-count-foreground": "#166534",
+          "widget-icon-halo": "oklch(96.2% 0.044 156.743)"
         }
       },
       "css": {
@@ -1310,6 +1427,27 @@
         {
           "path": "registry/safe/lib/utils.ts",
           "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "widget",
+      "type": "registry:component",
+      "title": "Widget",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/skeleton",
+        "@safe/typography",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/components/widget.tsx",
+          "type": "registry:component"
         }
       ]
     }

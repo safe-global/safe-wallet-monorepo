@@ -2,6 +2,7 @@
   "title": "Components",
   "pages": [
     "index",
+    "---Primitives---",
     "accordion",
     "alert",
     "alert-dialog",
@@ -53,6 +54,13 @@
     "textarea",
     "toggle",
     "tooltip",
-    "typography"
+    "typography",
+    "---Safe components---",
+    "data-table",
+    "expandable-card",
+    "expandable-list",
+    "peek-collapsible",
+    "stat",
+    "widget"
   ]
 }

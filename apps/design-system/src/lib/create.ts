@@ -51,14 +51,17 @@ export const PRESETS: Record<string, string[]> = {
     'badge',
     'card',
     'chip',
+    'data-table',
     'empty',
     'kbd',
     'list',
     'progress',
     'separator',
     'skeleton',
+    'stat',
     'table',
     'typography',
+    'widget',
   ],
 }
 

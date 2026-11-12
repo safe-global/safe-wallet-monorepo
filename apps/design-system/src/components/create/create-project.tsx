@@ -27,6 +27,11 @@ export interface CreateComponent {
   exports: string[]
 }
 
+const COMPONENT_GROUPS: Array<{ layer: Layer; title: string }> = [
+  { layer: 'primitive', title: 'Primitives' },
+  { layer: 'component', title: 'Safe components' },
+]
+
 const DEFAULT_SELECTION = ['button', 'card', 'dialog', 'input', 'tooltip', 'typography']
 
 function Step({ index, title, children }: { index: number; title: string; children: React.ReactNode }) {
@@ -161,24 +166,35 @@ export function CreateProject({ components }: { components: CreateComponent[] })
               {selected.length} selected
             </span>
           </div>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 rounded-xl border p-4 sm:grid-cols-3">
-            {components.map((component) => (
-              <div key={component.name} className="flex items-center gap-2">
-                <Checkbox
-                  id={`create-${component.name}`}
-                  checked={selected.includes(component.name)}
-                  onCheckedChange={(checked) => toggle(component.name, checked === true)}
-                  aria-labelledby={`create-${component.name}-label`}
-                />
-                <Label
-                  id={`create-${component.name}-label`}
-                  htmlFor={`create-${component.name}`}
-                  className="font-normal"
-                >
-                  {component.title}
-                </Label>
-              </div>
-            ))}
+          <div className="flex flex-col gap-4 rounded-xl border p-4">
+            {COMPONENT_GROUPS.map(({ layer, title }) => {
+              const group = components.filter((component) => component.layer === layer)
+              if (group.length === 0) return null
+              return (
+                <fieldset key={layer} className="m-0 flex flex-col gap-2.5 border-0 p-0" data-create-group={layer}>
+                  <legend className="mb-2.5 p-0 text-sm font-medium text-muted-foreground">{title}</legend>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2.5 sm:grid-cols-3">
+                    {group.map((component) => (
+                      <div key={component.name} className="flex items-center gap-2">
+                        <Checkbox
+                          id={`create-${component.name}`}
+                          checked={selected.includes(component.name)}
+                          onCheckedChange={(checked) => toggle(component.name, checked === true)}
+                          aria-labelledby={`create-${component.name}-label`}
+                        />
+                        <Label
+                          id={`create-${component.name}-label`}
+                          htmlFor={`create-${component.name}`}
+                          className="font-normal"
+                        >
+                          {component.title}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </fieldset>
+              )
+            })}
           </div>
         </Step>
       </div>

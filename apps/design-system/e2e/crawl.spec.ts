@@ -89,6 +89,13 @@ test.describe('site and docs pages', () => {
 
       if (route === 'components/') {
         await expect(page.locator('[data-component-card]')).toHaveCount(componentPages.length)
+        await expect(page.getByRole('heading', { level: 2, name: 'Primitives' })).toBeVisible()
+        await expect(page.getByRole('heading', { level: 2, name: 'Safe components' })).toBeVisible()
+        await expect(page.locator('[data-component-section="component"] [data-component-card]')).toHaveCount(
+          storyIndex.filter((entry) => entry.layer === 'component').length,
+        )
+        await expect(page.locator('#nd-sidebar').getByText('Primitives', { exact: true })).toBeAttached()
+        await expect(page.locator('#nd-sidebar').getByText('Safe components', { exact: true })).toBeAttached()
         await page.getByLabel('Filter components').fill('calendar')
         await expect(page.locator('[data-component-card]')).toHaveCount(1)
       }

@@ -1,0 +1,35 @@
+---
+title: Data Table
+description: 'A typed, sortable and paginated table on the panel look, framed by a card.'
+component: data-table
+---
+
+<ComponentPreview component="data-table" />
+
+## Installation
+
+<ComponentInstall component="data-table" />
+
+## Usage
+
+<ComponentUsage component="data-table" />
+
+Pass `columns`, `rows` and `getRowKey`. Each column renders its cell with `cell(row, { isCompact })` and picks its look from bounded options: `align`, `emphasis`, `width` (a fixed scale, or `fit` with `minWidth`), `priority`, `sticky` and `sortValue`, which makes the header a sort control that cycles ascending, descending and unsorted. More rows than `pageSize` (25) add a pagination footer. When the viewport is mobile or the container is narrower than the summed `minWidth`s, `secondary` columns drop out and `renderRowDetail` becomes a per-row detail toggle. Frame the table and its empty or loading states in `DataTableCard`, which draws the surface only: the table brings its own edge insets.
+
+## Examples
+
+<ComponentExamples component="data-table" />
+
+## Props
+
+<ComponentProps component="data-table" />
+
+## Accessibility
+
+<BaseUiReference component="data-table" />
+
+It renders a native table, so screen readers navigate it by row and column. A sortable header holds a button and sets `aria-sort` (`ascending`, `descending` or `none`). The detail toggle is a button with `aria-expanded`, `aria-controls` and a "Show details" or "Hide details" label, and the pagination buttons are labelled "Previous page" and "Next page". `onRowClick` makes a row a pointer target only: the row stays a plain table row, so also render a focusable control with an accessible name in one of its cells. Clicks on links and buttons inside a row go to those controls, not to `onRowClick`.
+
+## Do / Don't
+
+<ComponentRules component="data-table" />

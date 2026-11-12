@@ -137,12 +137,14 @@ const buildImportHeader = (bindings: ImportBinding[], code: string): string => {
   const used = identifiersIn(code)
   const bySpecifier = new Map<string, { named: string[]; defaultName?: string; namespace?: string }>()
   for (const binding of bindings) {
-    if (binding.isType || !used.has(binding.local)) continue
+    if (!used.has(binding.local)) continue
     const entry = bySpecifier.get(binding.specifier) ?? { named: [] }
     if (binding.isDefault) entry.defaultName = binding.local
     else if (binding.isNamespace) entry.namespace = binding.local
-    else
-      entry.named.push(binding.imported === binding.local ? binding.local : `${binding.imported} as ${binding.local}`)
+    else {
+      const name = binding.imported === binding.local ? binding.local : `${binding.imported} as ${binding.local}`
+      entry.named.push(binding.isType ? `type ${name}` : name)
+    }
     bySpecifier.set(binding.specifier, entry)
   }
   const lines: string[] = []
@@ -231,6 +233,8 @@ export const parseStoryFile = (file: string, root: string = uiDir, keys = export
         else locals.set(name, statement)
       }
     } else if (ts.isFunctionDeclaration(statement) && statement.name && !isExported) {
+      locals.set(statement.name.text, statement)
+    } else if ((ts.isTypeAliasDeclaration(statement) || ts.isInterfaceDeclaration(statement)) && !isExported) {
       locals.set(statement.name.text, statement)
     } else if (ts.isExportAssignment(statement) && !meta) {
       const expression = unwrapExpression(statement.expression)

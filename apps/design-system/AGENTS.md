@@ -39,7 +39,7 @@
 
 ## Adding a page
 
-- **A new component:** add it to `packages/ui` with its export key and a story, then run `yarn workspace @safe-global/design-system scaffold:pages`. Fill in the frontmatter `description`, the usage notes and the accessibility notes (facts from the Base UI or upstream page; link it when unsure). Keep the seven sections: preview, Installation, Usage, Examples, Props, Accessibility, Do / Don't. Run `registry:build` and commit `registry.json`.
+- **A new component:** add it to `packages/ui` with its canonical export key (`./primitives/<name>` or `./components/<name>`) and a story, then run `yarn workspace @safe-global/design-system scaffold:pages`. The layer comes from the key: `scaffold:pages` writes `components/meta.json` with a Primitives and a Safe components group, the Components index and Create show the same two groups, and the registry makes a primitive a `registry:ui` item and a Safe component a `registry:component` item. Fill in the frontmatter `description`, the usage notes and the accessibility notes (facts from the Base UI or upstream page; link it when unsure). Keep the seven sections: preview, Installation, Usage, Examples, Props, Accessibility, Do / Don't. Run `registry:build` and commit `registry.json`.
 - **A new story** needs no docs change: the first story is the top preview, the others are Examples. Tag a story `docs-hidden` to keep it out.
 - **Other docs pages:** add the MDX file under `content/docs/docs/` and list it in that folder's `meta.json`. A new top-level route also needs an entry in `NAV_ITEMS` or `SITE_PAGES` (`src/lib/site.ts`) and in the crawl.
 - In MDX, escape braces in prose (`Safe\{Wallet\}`).

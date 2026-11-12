@@ -2,8 +2,8 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, it } from 'node:test'
-import { componentNames, contentDir } from './paths.ts'
-import { componentsContentDir, SECTIONS } from './scaffold-pages.ts'
+import { componentEntries, componentNames, contentDir } from './paths.ts'
+import { componentsContentDir, metaJson, SECTIONS } from './scaffold-pages.ts'
 import { generateStories } from './stories.ts'
 
 const pages = readdirSync(componentsContentDir)
@@ -56,6 +56,21 @@ describe('component pages', () => {
     const top = readdirSync(contentDir).filter((entry) => entry !== 'meta.json')
     assert.deepEqual(top.sort(), ['components', 'docs'])
     assert.ok(readdirSync(componentsContentDir).includes('index.mdx'), 'components/index.mdx is the components index')
+  })
+
+  it('groups the sidebar into Primitives and Safe components, each name once', () => {
+    const meta = readFileSync(path.join(componentsContentDir, 'meta.json'), 'utf8')
+    assert.equal(meta, metaJson(componentEntries()), 'meta.json is stale: run yarn scaffold:pages')
+    const { pages: listed } = JSON.parse(meta) as { pages: string[] }
+    const names = listed.filter((page) => !page.startsWith('---') && page !== 'index')
+    assert.equal(new Set(names).size, names.length)
+    const separator = (title: string) => listed.indexOf(`---${title}---`)
+    for (const { name, layer } of componentEntries()) {
+      const position = listed.indexOf(name)
+      const inComponents = separator('Safe components') > -1 && position > separator('Safe components')
+      assert.equal(inComponents, layer === 'component', `${name} sits in the wrong group`)
+      assert.ok(position > separator('Primitives'), `${name} is above the Primitives separator`)
+    }
   })
 
   it('has no placeholder text left', () => {

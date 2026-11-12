@@ -112,7 +112,12 @@ export const exportedNames = (file: string): Map<string, string> => {
   )
   const names = new Map<string, string>()
   for (const statement of sourceFile.statements) {
-    if (ts.isExportDeclaration(statement) && statement.exportClause && ts.isNamedExports(statement.exportClause)) {
+    if (
+      ts.isExportDeclaration(statement) &&
+      !statement.isTypeOnly &&
+      statement.exportClause &&
+      ts.isNamedExports(statement.exportClause)
+    ) {
       for (const element of statement.exportClause.elements) {
         if (!element.isTypeOnly) names.set(element.propertyName?.text ?? element.name.text, element.name.text)
       }

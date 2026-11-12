@@ -51,7 +51,7 @@ The theme sets `--font-sans` to DM Sans, but the package does not ship the font 
 
 ### Use a component
 
-Each component has its own subpath. There is no root barrel, so unused components stay out of your bundle.
+Each component has its own subpath: `@safe-global/ui/primitives/<name>` for the shadcn primitives and `@safe-global/ui/components/<name>` for the Safe components built from them. There is no root barrel, so unused components stay out of your bundle.
 
 ```tsx
 import { Button } from '@safe-global/ui/primitives/button'
@@ -75,7 +75,7 @@ The registry lets you copy a component's source into your app with the shadcn CL
 
 ### Set up shadcn
 
-Your app needs a `components.json` (run `npx shadcn@latest init` if it has none) with the `ui`, `lib`, `hooks` and `utils` aliases.
+Your app needs a `components.json` (run `npx shadcn@latest init` if it has none) with the `components`, `ui`, `lib`, `hooks` and `utils` aliases. Primitives land in the `ui` folder, Safe components in `components`.
 
 </Step>
 <Step>

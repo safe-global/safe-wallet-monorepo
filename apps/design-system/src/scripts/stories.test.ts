@@ -10,7 +10,7 @@ describe('stories', () => {
     assert.deepEqual(index.map((entry) => entry.component).sort(), componentNames())
     assert.equal(
       index.reduce((total, entry) => total + entry.stories.length, 0),
-      92,
+      114,
     )
     for (const entry of index) assert.ok(entry.stories.length > 0, `${entry.component} has no story`)
   })
@@ -19,6 +19,15 @@ describe('stories', () => {
     const source = sources.button['all-variants']
     assert.match(source, /import \{ Button \} from '@safe-global\/ui\/primitives\/button'/)
     assert.match(source, /<Button variant="secondary">/)
+  })
+
+  it('keeps the types a story uses, imported and local', () => {
+    const source = sources['data-table'].default
+    assert.match(
+      source,
+      /import \{ DataTable, DataTableCard, type DataTableColumn \} from '@safe-global\/ui\/components\/data-table'/,
+    )
+    assert.match(source, /^type Row = \{/m)
   })
 
   it('never leaves a relative import in a source', () => {
