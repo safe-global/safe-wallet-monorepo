@@ -19,9 +19,15 @@ import {
 import TokenIcon from '@/components/common/TokenIcon'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
-import useCustomTokenLookup from '../hooks/useCustomTokenLookup'
+import useTokenLookup from '@/hooks/useTokenLookup'
 import { useAddCustomToken } from '../CustomTokensProvider'
-import { findTokenOption, tokenOptionLabel, type TokenOption, type TokenOptionGroup } from '../utils/tokenOptions'
+import {
+  findTokenOption,
+  toCustomTokenOption,
+  tokenOptionLabel,
+  type TokenOption,
+  type TokenOptionGroup,
+} from '../utils/tokenOptions'
 import { matchesTokenQuery } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/utils/tokenSearch'
 import TokenOptionRow from './TokenOptionRow'
 import DisabledTokenOption from './DisabledTokenOption'
@@ -111,16 +117,17 @@ const TokenSelector = ({
   const chainId = useChainId()
   const addCustomToken = useAddCustomToken()
   const [query, setQuery] = useState('')
-  const lookup = useCustomTokenLookup(query, options)
+  const lookup = useTokenLookup(findTokenOption(options, query.trim()) ? undefined : query)
+  const lookupOption = useMemo(() => lookup.token && toCustomTokenOption(lookup.token), [lookup.token])
 
   const visibleOptions = useMemo(
     () =>
-      [...options, ...(lookup.option ? [lookup.option] : [])].filter(
+      [...options, ...(lookupOption ? [lookupOption] : [])].filter(
         (option) =>
           sameAddress(option.address, value) ||
           !excludeAddresses?.some((excluded) => sameAddress(excluded, option.address)),
       ),
-    [options, lookup.option, excludeAddresses, value],
+    [options, lookupOption, excludeAddresses, value],
   )
 
   const groups = useMemo<TokenGroup[]>(
