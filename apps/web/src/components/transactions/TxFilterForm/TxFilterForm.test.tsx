@@ -1,6 +1,6 @@
 import React from 'react'
 import { screen, fireEvent, within } from '@testing-library/react'
-import { act, render } from '@/tests/test-utils'
+import { act, fakerChecksummedAddress, render } from '@/tests/test-utils'
 import '@testing-library/jest-dom'
 import TxFilterForm from './index'
 import { TxFilterType } from '@/utils/tx-history-filter'
@@ -241,9 +241,19 @@ describe('TxFilterForm Component Tests', () => {
     const paidOption = () => screen.getByRole('radio', { name: 'Who was paid' })
     const calledOption = () => screen.getByRole('radio', { name: 'Address called' })
     const lastPushedQuery = () => mockRouter.push.mock.calls.at(-1)[0].query
-    const typeRecipient = async () => {
+    const typeRecipient = async (recipient = RECIPIENT) => {
       await act(async () => {
-        fireEvent.change(screen.getByLabelText('Recipient'), { target: { value: RECIPIENT } })
+        fireEvent.change(screen.getByLabelText('Recipient'), { target: { value: recipient } })
+      })
+    }
+    const typeToken = async (token: string) => {
+      await act(async () => {
+        fireEvent.change(within(screen.getByTestId('token-input')).getByRole('textbox'), { target: { value: token } })
+      })
+    }
+    const apply = async () => {
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('apply-btn'))
       })
     }
 
@@ -291,6 +301,58 @@ describe('TxFilterForm Component Tests', () => {
 
       expect(calledOption()).toBeChecked()
       expect(screen.getByTestId('nonce-input')).toHaveValue('64')
+    })
+
+    it('keeps the address called search when an amount was entered first', async () => {
+      renderComponent()
+      selectOutgoing()
+      await act(async () => {
+        fireEvent.change(screen.getByTestId('amount-input'), { target: { value: '1' } })
+      })
+
+      await typeRecipient()
+
+      expect(calledOption()).toBeChecked()
+      expect(screen.getByTestId('amount-input')).toHaveValue('1')
+    })
+
+    it('offers amount and nonce again, without the match options, once the recipient is cleared', async () => {
+      renderComponent()
+      selectOutgoing()
+      await typeRecipient()
+
+      await typeRecipient('')
+
+      expect(screen.queryByRole('radio', { name: 'Who was paid' })).not.toBeInTheDocument()
+      expect(screen.getByTestId('amount-input')).toBeInTheDocument()
+      expect(screen.getByTestId('nonce-input')).toBeInTheDocument()
+    })
+
+    it('puts the token address in the URL when applied with who was paid', async () => {
+      const token = fakerChecksummedAddress()
+      renderComponent()
+      selectOutgoing()
+      await typeRecipient()
+      await typeToken(token)
+
+      await apply()
+
+      expect(lastPushedQuery()).toMatchObject({ to: RECIPIENT, transfers: 'true', token_address: token })
+    })
+
+    it('leaves the token address out of the URL when switched to address called', async () => {
+      renderComponent()
+      selectOutgoing()
+      await typeRecipient()
+      await typeToken(fakerChecksummedAddress())
+      await act(async () => {
+        fireEvent.click(calledOption())
+      })
+
+      await apply()
+
+      expect(lastPushedQuery()).toMatchObject({ type: 'Outgoing', to: RECIPIENT })
+      expect(lastPushedQuery()).not.toHaveProperty('token_address')
     })
 
     it('puts the transfers flag in the URL when applied with who was paid', async () => {

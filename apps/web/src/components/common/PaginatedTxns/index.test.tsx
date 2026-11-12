@@ -8,7 +8,7 @@ import useTxHistory from '@/hooks/useTxHistory'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { server } from '@/tests/server'
-import { act, fireEvent, render, screen, waitFor } from '@/tests/test-utils'
+import { act, fakerChecksummedAddress, fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { isTransactionListItem } from '@/utils/transaction-guards'
 import PaginatedTxns from '.'
 
@@ -133,6 +133,36 @@ const renderTransfersOnly = () =>
     },
   })
 
+const transfersTo = (recipient: string) => ({
+  safe: `${TX_HISTORY_SAFE.shortName}:${TX_HISTORY_SAFE.address}`,
+  type: 'Outgoing',
+  transfers: 'true',
+  to: recipient,
+})
+
+const serveTransfersByRecipient = (transfersByRecipient: Record<string, TransactionItemPage['results']>) =>
+  server.use(
+    http.get(OUTGOING_TRANSFERS_URL, ({ request }) => {
+      const recipient = new URL(request.url).searchParams.get('to') ?? ''
+      return HttpResponse.json({ next: null, results: transfersByRecipient[recipient] ?? [] })
+    }),
+  )
+
+const renderTransfersTo = (recipient: string) => {
+  const routerProps = { pathname: AppRoutes.transactions.history, query: transfersTo(recipient) }
+  const { rerender } = render(<PaginatedTxns useTxns={useTxHistory} />, {
+    routerProps,
+    initialReduxState: {
+      safeInfo: { data: historySafe, loading: false, loaded: true },
+    },
+  })
+
+  return (nextRecipient: string) => {
+    routerProps.query = transfersTo(nextRecipient)
+    rerender(<PaginatedTxns useTxns={useTxHistory} />)
+  }
+}
+
 describe('PaginatedTxns with the transfers only filter', () => {
   beforeEach(() => {
     sentinelObservers.length = 0
@@ -182,6 +212,40 @@ describe('PaginatedTxns with the transfers only filter', () => {
     scrollToTheEnd()
 
     expect(await screen.findByText('0 outgoing payments found')).toBeInTheDocument()
+  })
+
+  it('shows the transfers of the new recipient when the filter changes to another single page', async () => {
+    const firstRecipient = fakerChecksummedAddress()
+    const secondRecipient = fakerChecksummedAddress()
+    serveTransfersByRecipient({ [firstRecipient]: transfers.slice(0, 2), [secondRecipient]: transfers.slice(2, 5) })
+    const searchFor = renderTransfersTo(firstRecipient)
+    await screen.findByText('2 outgoing payments found')
+
+    searchFor(secondRecipient)
+
+    expect(await screen.findByText('3 outgoing payments found')).toBeInTheDocument()
+    expect(screen.getAllByTestId('transaction-item')).toHaveLength(3)
+  })
+
+  it('sends the recipient, token and dates of the filter to the outgoing transfers route', async () => {
+    const filter = {
+      to: fakerChecksummedAddress(),
+      token_address: fakerChecksummedAddress(),
+      execution_date__gte: '2026-01-01T00:00:00.000Z',
+      execution_date__lte: '2026-01-31T23:59:59.999Z',
+    }
+    let requested = new URLSearchParams()
+    server.use(
+      http.get(OUTGOING_TRANSFERS_URL, ({ request }) => {
+        requested = new URL(request.url).searchParams
+        return HttpResponse.json({ next: null, results: [] })
+      }),
+    )
+
+    renderOutgoing({ transfers: 'true', ...filter })
+    await screen.findByText('0 outgoing payments found')
+
+    expect(Object.fromEntries(requested)).toMatchObject(filter)
   })
 })
 
