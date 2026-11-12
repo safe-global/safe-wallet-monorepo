@@ -4,7 +4,7 @@ import { ManageSigners } from './index'
 import { mockAddOwnerTxInfo, mockRemoveOwnerTxInfo, mockSwapOwnerTxInfo, mockTxData } from './ManageSigners.storyData'
 import { faker } from '@faker-js/faker'
 
-// Use a different seed than mockData.ts (789) to avoid address collisions
+// Use a different seed than ManageSigners.storyData.ts (789) to avoid address collisions
 faker.seed(999)
 
 const meta = {
