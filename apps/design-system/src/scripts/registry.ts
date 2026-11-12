@@ -2,7 +2,7 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import postcss from 'postcss'
 import ts from 'typescript'
-import { appDir, componentFile, componentNames, readUiPackage, uiDir } from './paths.ts'
+import { appDir, componentEntries, componentFile, readUiPackage, uiDir } from './paths.ts'
 import { readDeclarations, readThemeInline, stylesDir } from './tokens.ts'
 
 export const REGISTRY_NAME = 'safe'
@@ -10,7 +10,7 @@ export const NAMESPACE = '@safe'
 export const HOMEPAGE = 'https://github.com/safe-global/safe-wallet-monorepo/tree/dev/apps/design-system'
 const STYLE_DIR = `registry/${REGISTRY_NAME}`
 
-type FileType = 'registry:ui' | 'registry:lib' | 'registry:hook' | 'registry:file'
+type FileType = 'registry:ui' | 'registry:component' | 'registry:lib' | 'registry:hook' | 'registry:file'
 type ItemType = FileType | 'registry:theme'
 
 export interface RegistryFile {
@@ -46,7 +46,7 @@ interface Source {
   /** Absolute path of the source file in packages/ui */
   file: string
   /** Folder under registry/safe */
-  folder: 'ui' | 'lib' | 'hooks'
+  folder: 'ui' | 'components' | 'lib' | 'hooks'
 }
 
 const titleOf = (name: string): string =>
@@ -61,11 +61,11 @@ const packageName = (specifier: string): string => {
 }
 
 const sources = (root: string): Source[] => [
-  ...componentNames(root).map((name) => ({
+  ...componentEntries(root).map(({ name, layer }) => ({
     name,
-    type: 'registry:ui' as const,
+    type: layer === 'primitive' ? ('registry:ui' as const) : ('registry:component' as const),
     file: componentFile(name, root),
-    folder: 'ui' as const,
+    folder: layer === 'primitive' ? ('ui' as const) : ('components' as const),
   })),
   { name: 'provider', type: 'registry:ui', file: path.join(root, 'src/provider.tsx'), folder: 'ui' },
   { name: 'utils', type: 'registry:lib', file: path.join(root, 'src/lib/utils.ts'), folder: 'lib' },
@@ -131,7 +131,7 @@ const transform = (source: Source, imports: ResolvedImport[]): string => {
   for (const entry of [...imports].sort((a, b) => b.start - a.start)) {
     if (entry.rewrite) text = text.slice(0, entry.start) + entry.rewrite + text.slice(entry.end)
   }
-  const needsClient = source.type === 'registry:ui' || source.type === 'registry:hook'
+  const needsClient = source.type !== 'registry:lib'
   if (needsClient && !/^\s*['"]use client['"]/.test(text)) text = `'use client'\n\n${text}`
   return text
 }
@@ -156,7 +156,11 @@ const buildItem = (source: Source, byFile: Map<string, Source>, ranges: Record<s
   for (const entry of imports) {
     if (!entry.asset) continue
     const assetPath = `${STYLE_DIR}/${source.folder}/${entry.asset}`
-    files.push({ path: assetPath, type: 'registry:file', target: `components/ui/${entry.asset}` })
+    files.push({
+      path: assetPath,
+      type: 'registry:file',
+      target: `${source.folder === 'components' ? 'components' : 'components/ui'}/${entry.asset}`,
+    })
     outputs[assetPath] = readFileSync(path.join(path.dirname(source.file), entry.asset), 'utf8')
   }
   const item: RegistryItem = {

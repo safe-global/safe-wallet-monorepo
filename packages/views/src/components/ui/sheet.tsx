@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/sheet'
+export * from '@safe-global/ui/primitives/sheet'

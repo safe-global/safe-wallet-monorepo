@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/button'
+export * from '@safe-global/ui/primitives/button'

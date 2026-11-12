@@ -1,12 +1,10 @@
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import ts from 'typescript'
 import type { StoryEntry, StoryIndex, StorySource } from '../lib/types.ts'
-import { appDir, generatedDir, readUiExports, uiDir } from './paths.ts'
+import { appDir, componentEntries, componentFile, generatedDir, readUiExports, uiDir, type Layer } from './paths.ts'
 
 export const HIDDEN_TAG = 'docs-hidden'
-
-const storiesDir = (root: string) => path.join(root, 'src/components/stories')
 
 export const toSlug = (exportName: string): string =>
   exportName
@@ -110,10 +108,14 @@ interface ImportBinding {
   specifier: string
 }
 
+/** A deprecated flat key (`./button`) that points at the same file as its canonical `./primitives/button` */
+const isLegacyAlias = (key: string, target: string): boolean =>
+  target.startsWith('./src/primitives/') && !key.startsWith('./primitives/')
+
 const exportKeyByFile = (root: string): Map<string, string> => {
   const map = new Map<string, string>()
   for (const [key, target] of Object.entries(readUiExports(root))) {
-    if (key.includes('*')) continue
+    if (key.includes('*') || isLegacyAlias(key, target)) continue
     map.set(path.join(root, target).replace(/\.(tsx?|mjs)$/, ''), `@safe-global/ui/${key.slice(2)}`)
   }
   return map
@@ -310,11 +312,16 @@ export const parseStoryFile = (file: string, root: string = uiDir, keys = export
   return { component, title: titleNode.text, decorated: Boolean(getProperty(meta, 'decorators')), stories }
 }
 
-export const storyFiles = (root: string = uiDir): string[] =>
-  readdirSync(storiesDir(root))
-    .filter((file) => file.endsWith('.stories.tsx'))
-    .sort()
-    .map((file) => path.join(storiesDir(root), file))
+export const LAYER_DIR: Record<Layer, string> = { primitive: 'primitives', component: 'components' }
+
+/** Each component's colocated `<name>.stories.tsx` */
+export const storyFiles = (root: string = uiDir): Array<{ file: string; layer: Layer }> =>
+  componentEntries(root)
+    .map(({ name, layer }) => ({
+      file: path.join(path.dirname(componentFile(name, root)), `${name}.stories.tsx`),
+      layer,
+    }))
+    .filter(({ file }) => existsSync(file))
 
 export const generateStories = (
   root: string = uiDir,
@@ -323,12 +330,13 @@ export const generateStories = (
   const decorated = new Set<string>()
   const index: StoryIndex = []
   const sources: StorySource = {}
-  for (const file of storyFiles(root)) {
+  for (const { file, layer } of storyFiles(root)) {
     const parsed = parseStoryFile(file, root, keys)
     if (parsed.decorated) decorated.add(parsed.component)
     const visible = parsed.stories.filter((story) => !story.tags.includes(HIDDEN_TAG))
     index.push({
       component: parsed.component,
+      layer,
       title: parsed.title,
       stories: visible.map(({ exportName, slug, title, description }) => ({
         exportName,
@@ -342,11 +350,11 @@ export const generateStories = (
   return { index, sources, decorated }
 }
 
-const previewModule = (component: string, decorated: boolean): string => `'use client'
+const previewModule = (component: string, layer: Layer, decorated: boolean): string => `'use client'
 
 import type { ComponentType } from 'react'
 import { composeStories } from '@storybook/react'
-import * as stories from '@ui-stories/${component}.stories'
+import * as stories from '@ui-src/${LAYER_DIR[layer]}/${component}/${component}.stories'
 
 type Composed = ComponentType & { parameters?: { layout?: string } }
 
@@ -418,8 +426,8 @@ export const main = (): void => {
   mkdirSync(previewsDir, { recursive: true })
   writeFileSync(path.join(generatedDir, 'story-index.json'), `${JSON.stringify(index, null, 2)}\n`)
   writeFileSync(path.join(generatedDir, 'stories.json'), `${JSON.stringify(sources, null, 2)}\n`)
-  for (const { component } of index)
-    writeFileSync(path.join(previewsDir, `${component}.tsx`), previewModule(component, decorated.has(component)))
+  for (const { component, layer } of index)
+    writeFileSync(path.join(previewsDir, `${component}.tsx`), previewModule(component, layer, decorated.has(component)))
   writeFileSync(path.join(previewsDir, 'index.ts'), previewIndex(index))
   copyMockAssets(sources)
   const count = index.reduce((total, entry) => total + entry.stories.length, 0)

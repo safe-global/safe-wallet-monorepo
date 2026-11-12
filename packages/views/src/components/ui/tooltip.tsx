@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/tooltip'
+export * from '@safe-global/ui/primitives/tooltip'

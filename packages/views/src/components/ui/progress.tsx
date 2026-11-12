@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/progress'
+export * from '@safe-global/ui/primitives/progress'

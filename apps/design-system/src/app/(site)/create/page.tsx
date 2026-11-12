@@ -17,11 +17,12 @@ export default function CreatePage() {
       .map((page) => [page.slugs[1], page.data.title]),
   )
   const components: CreateComponent[] = getStoryIndex()
-    .map(({ component }) => {
+    .map(({ component, layer }) => {
       const { components: docs, cva } = getProps(component)
       return {
         name: component,
         title: titles.get(component) ?? component,
+        layer,
         exports: docs.length ? docs.map((doc) => doc.displayName) : cva.map((doc) => doc.name),
       }
     })

@@ -17,7 +17,7 @@ describe('stories', () => {
 
   it('prints the Code tab source with package imports', () => {
     const source = sources.button['all-variants']
-    assert.match(source, /import \{ Button \} from '@safe-global\/ui\/button'/)
+    assert.match(source, /import \{ Button \} from '@safe-global\/ui\/primitives\/button'/)
     assert.match(source, /<Button variant="secondary">/)
   })
 

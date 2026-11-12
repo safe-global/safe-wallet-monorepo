@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/badge'
+export * from '@safe-global/ui/primitives/badge'

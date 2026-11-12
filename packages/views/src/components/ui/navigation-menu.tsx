@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/navigation-menu'
+export * from '@safe-global/ui/primitives/navigation-menu'

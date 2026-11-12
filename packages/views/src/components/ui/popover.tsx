@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/popover'
+export * from '@safe-global/ui/primitives/popover'

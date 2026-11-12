@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/typography'
+export * from '@safe-global/ui/primitives/typography'

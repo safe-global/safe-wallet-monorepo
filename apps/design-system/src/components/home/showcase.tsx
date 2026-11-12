@@ -2,13 +2,21 @@
 
 import { useState } from 'react'
 import { ArrowDownLeft, ArrowUpRight, CalendarClock, FileCode2, Repeat, ShieldCheck, TriangleAlert } from 'lucide-react'
-import { Alert, AlertDescription, AlertTitle } from '@safe-global/ui/alert'
-import { Avatar, AvatarFallback, AvatarGroup } from '@safe-global/ui/avatar'
-import { Badge, BadgeDot } from '@safe-global/ui/badge'
-import { Button } from '@safe-global/ui/button'
-import { Calendar } from '@safe-global/ui/calendar'
-import { Card, CardAction, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@safe-global/ui/card'
-import { Checkbox } from '@safe-global/ui/checkbox'
+import { Alert, AlertDescription, AlertTitle } from '@safe-global/ui/primitives/alert'
+import { Avatar, AvatarFallback, AvatarGroup } from '@safe-global/ui/primitives/avatar'
+import { Badge, BadgeDot } from '@safe-global/ui/primitives/badge'
+import { Button } from '@safe-global/ui/primitives/button'
+import { Calendar } from '@safe-global/ui/primitives/calendar'
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@safe-global/ui/primitives/card'
+import { Checkbox } from '@safe-global/ui/primitives/checkbox'
 import {
   Dialog,
   DialogClose,
@@ -18,16 +26,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@safe-global/ui/dialog'
-import { Field, FieldDescription, FieldLabel } from '@safe-global/ui/field'
-import { Input } from '@safe-global/ui/input'
-import { Label } from '@safe-global/ui/label'
-import { Progress } from '@safe-global/ui/progress'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/ui/select'
-import { Separator } from '@safe-global/ui/separator'
-import { Switch } from '@safe-global/ui/switch'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@safe-global/ui/tabs'
-import { Toggle } from '@safe-global/ui/toggle'
+} from '@safe-global/ui/primitives/dialog'
+import { Field, FieldDescription, FieldLabel } from '@safe-global/ui/primitives/field'
+import { Input } from '@safe-global/ui/primitives/input'
+import { Label } from '@safe-global/ui/primitives/label'
+import { Progress } from '@safe-global/ui/primitives/progress'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/ui/primitives/select'
+import { Separator } from '@safe-global/ui/primitives/separator'
+import { Switch } from '@safe-global/ui/primitives/switch'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@safe-global/ui/primitives/tabs'
+import { Toggle } from '@safe-global/ui/primitives/toggle'
 import { Code } from '../site/code'
 
 const TOKENS = { eth: 'ETH', usdc: 'USDC', safe: 'SAFE' }
@@ -401,7 +409,7 @@ function ReviewCard() {
 
 const INSTALL = {
   registry: 'npx shadcn@latest add @safe/button',
-  npm: "npm install @safe-global/ui\n\nimport { Button } from '@safe-global/ui/button'",
+  npm: "npm install @safe-global/ui\n\nimport { Button } from '@safe-global/ui/primitives/button'",
 }
 
 function InstallCard() {

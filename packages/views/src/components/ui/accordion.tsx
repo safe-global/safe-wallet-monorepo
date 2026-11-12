@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/accordion'
+export * from '@safe-global/ui/primitives/accordion'

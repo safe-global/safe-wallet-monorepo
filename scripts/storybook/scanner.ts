@@ -295,7 +295,7 @@ function extractDependencies(sourceFile: ts.SourceFile): ComponentDependencies {
 /**
  * Candidate story-file locations for a component: colocated next to the
  * component, or in a sibling `stories/` folder (the pattern used by the shadcn
- * UI atoms in packages/ui/src/components/stories/).
+ * re-exports in packages/views/src/components/ui/stories/).
  */
 function getStoryCandidates(componentPath: string): string[] {
   const dir = path.dirname(componentPath)

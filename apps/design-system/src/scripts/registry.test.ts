@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, it } from 'node:test'
-import { componentNames, INTERNAL_REFERENCE } from './paths.ts'
+import { componentEntries, INTERNAL_REFERENCE } from './paths.ts'
 import { buildRegistry, generateRegistry, registryJsonPath, serialiseRegistry } from './registry.ts'
 import { readDeclarations, stylesDir } from './tokens.ts'
 
@@ -17,15 +17,16 @@ describe('registry', () => {
     )
   })
 
-  it('has a registry:ui item for every component export, plus the shared items', () => {
+  it('has a registry:ui item per primitive, a registry:component item per Safe component, plus the shared items', () => {
     const byName = new Map(registry.items.map((item) => [item.name, item]))
-    for (const name of componentNames()) assert.equal(byName.get(name)?.type, 'registry:ui', name)
+    for (const { name, layer } of componentEntries())
+      assert.equal(byName.get(name)?.type, layer === 'primitive' ? 'registry:ui' : 'registry:component', name)
     assert.equal(byName.get('provider')?.type, 'registry:ui')
     assert.equal(byName.get('utils')?.type, 'registry:lib')
     assert.equal(byName.get('use-mobile')?.type, 'registry:hook')
     assert.equal(byName.get('use-tablet')?.type, 'registry:hook')
     assert.equal(byName.get('theme')?.type, 'registry:theme')
-    assert.equal(registry.items.length, componentNames().length + 5)
+    assert.equal(registry.items.length, componentEntries().length + 5)
   })
 
   it('puts exactly the tokens.css declarations in the theme cssVars', () => {

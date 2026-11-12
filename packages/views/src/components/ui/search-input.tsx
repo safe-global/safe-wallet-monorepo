@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/search-input'
+export * from '@safe-global/ui/primitives/search-input'

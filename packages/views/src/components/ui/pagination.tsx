@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/pagination'
+export * from '@safe-global/ui/primitives/pagination'

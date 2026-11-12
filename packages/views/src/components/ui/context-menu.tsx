@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/context-menu'
+export * from '@safe-global/ui/primitives/context-menu'

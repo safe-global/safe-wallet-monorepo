@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/input-group'
+export * from '@safe-global/ui/primitives/input-group'

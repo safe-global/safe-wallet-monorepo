@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from 'fs'
+import { existsSync, readdirSync, readFileSync } from 'fs'
 import path from 'path'
 
 const stylesDir = __dirname
@@ -63,9 +63,11 @@ describe('tokens.css', () => {
       ...declarations(tokens).keys(),
       ...declarations(ruleBody(themeCss, '@theme inline')).keys(),
     ])
-    const componentSources = filesIn(path.join(stylesDir, '../components'), /\.tsx?$/).map((file) =>
-      readFileSync(file, 'utf8'),
-    )
+    const componentSources = ['../primitives', '../components']
+      .map((dir) => path.join(stylesDir, dir))
+      .filter((dir) => existsSync(dir))
+      .flatMap((dir) => filesIn(dir, /\.tsx?$/))
+      .map((file) => readFileSync(file, 'utf8'))
     const references = [
       ...varReferences(themeCss),
       ...varReferences(tokens),

@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/calendar'
+export * from '@safe-global/ui/primitives/calendar'

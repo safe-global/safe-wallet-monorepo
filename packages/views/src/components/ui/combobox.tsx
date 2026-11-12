@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/combobox'
+export * from '@safe-global/ui/primitives/combobox'

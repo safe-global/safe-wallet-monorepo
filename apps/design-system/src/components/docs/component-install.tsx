@@ -1,13 +1,14 @@
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs'
 import { ServerCodeBlock } from 'fumadocs-ui/components/codeblock.rsc'
 import { Callout } from 'fumadocs-ui/components/callout'
-import { getProps } from '@/lib/generated'
+import { getLayer, getProps } from '@/lib/generated'
+import { importPath } from '@/lib/import-path'
 import { RegistrySnippet } from './registry-snippet'
 
 export const importLine = (component: string): string => {
   const { components, cva } = getProps(component)
   const names = components.length ? components.map((doc) => doc.displayName) : cva.map((doc) => doc.name)
-  return `import { ${names.join(', ')} } from '@safe-global/ui/${component}'`
+  return `import { ${names.join(', ')} } from '${importPath(component, getLayer(component))}'`
 }
 
 export function ComponentInstall({ component }: { component: string }) {

@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { Callout } from 'fumadocs-ui/components/callout'
-import { Button } from '@safe-global/ui/button'
-import { Checkbox } from '@safe-global/ui/checkbox'
-import { Label } from '@safe-global/ui/label'
-import { RadioGroup, RadioGroupItem } from '@safe-global/ui/radio-group'
+import { Button } from '@safe-global/ui/primitives/button'
+import { Checkbox } from '@safe-global/ui/primitives/checkbox'
+import { Label } from '@safe-global/ui/primitives/label'
+import { RadioGroup, RadioGroupItem } from '@safe-global/ui/primitives/radio-group'
 import { cn } from '@safe-global/ui/utils'
 import {
   buildCreateOutput,
@@ -16,12 +16,14 @@ import {
   type Framework,
   type InstallPath,
 } from '@/lib/create'
+import type { Layer } from '@/lib/types'
 import { resolveRegistryUrl } from '@/lib/env'
 import { Code } from '../site/code'
 
 export interface CreateComponent {
   name: string
   title: string
+  layer: Layer
   exports: string[]
 }
 
@@ -102,7 +104,18 @@ export function CreateProject({ components }: { components: CreateComponent[] })
     () => Object.fromEntries(components.map((component) => [component.name, component.exports])),
     [components],
   )
-  const blocks = buildCreateOutput({ framework, installPath, components: selected, registryUrl, exportsByComponent })
+  const layerByComponent = useMemo(
+    () => Object.fromEntries(components.map((component) => [component.name, component.layer])),
+    [components],
+  )
+  const blocks = buildCreateOutput({
+    framework,
+    installPath,
+    components: selected,
+    registryUrl,
+    exportsByComponent,
+    layerByComponent,
+  })
   const allSelected = selected.length === components.length
 
   const toggle = (name: string, checked: boolean) =>

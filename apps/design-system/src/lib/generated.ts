@@ -17,6 +17,12 @@ export const getRules = () => read<RuleDoc[]>('rules.json')
 export const getIcons = () => read<IconList>('icons.json')
 export const getProps = (component: string) => read<PropsDoc>(`props/${component}.json`)
 
+export const getLayer = (component: string) => {
+  const entry = getStoryIndex().find((item) => item.component === component)
+  if (!entry) throw new Error(`No stories for component "${component}"`)
+  return entry.layer
+}
+
 export const getStories = (component: string) => {
   const entry = getStoryIndex().find((item) => item.component === component)
   if (!entry) throw new Error(`No stories for component "${component}"`)

@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/breadcrumb'
+export * from '@safe-global/ui/primitives/breadcrumb'

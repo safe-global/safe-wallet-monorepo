@@ -1,3 +1,6 @@
+import { importPath } from './import-path.ts'
+import type { Layer } from './types.ts'
+
 export type Framework = 'vite' | 'next'
 export type InstallPath = 'npm' | 'registry'
 
@@ -67,6 +70,8 @@ export interface CreateOptions {
   registryUrl: string
   /** Component name → its exported names, for the npm import lines */
   exportsByComponent: Record<string, string[]>
+  /** Component name → its layer, for the npm import paths */
+  layerByComponent: Record<string, Layer>
   projectName?: string
 }
 
@@ -132,6 +137,7 @@ export const buildCreateOutput = ({
   components,
   registryUrl,
   exportsByComponent,
+  layerByComponent,
   projectName = 'my-safe-app',
 }: CreateOptions): OutputBlock[] => {
   const selected = [...components].sort()
@@ -175,7 +181,10 @@ export const buildCreateOutput = ({
       lang: 'tsx',
       code: selected.length
         ? selected
-            .map((name) => `import { ${(exportsByComponent[name] ?? []).join(', ')} } from '@safe-global/ui/${name}'`)
+            .map(
+              (name) =>
+                `import { ${(exportsByComponent[name] ?? []).join(', ')} } from '${importPath(name, layerByComponent[name])}'`,
+            )
             .join('\n')
         : '// Pick components above to see their imports',
     })

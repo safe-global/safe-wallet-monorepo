@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/slider'
+export * from '@safe-global/ui/primitives/slider'

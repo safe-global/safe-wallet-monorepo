@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/spinner'
+export * from '@safe-global/ui/primitives/spinner'

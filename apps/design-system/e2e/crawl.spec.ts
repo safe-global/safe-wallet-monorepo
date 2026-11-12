@@ -172,7 +172,7 @@ test.describe('features', () => {
     await tabs.getByRole('tab', { name: 'Code' }).click()
     await tabs.getByRole('button', { name: 'Copy Text' }).first().click()
     const copied = await page.evaluate(() => navigator.clipboard.readText())
-    expect(copied).toContain("from '@safe-global/ui/button'")
+    expect(copied).toContain("from '@safe-global/ui/primitives/button'")
   })
 
   test('the mobile header collapses into a menu sheet and the page does not scroll sideways', async ({ page }) => {
@@ -214,7 +214,7 @@ test.describe('features', () => {
     await expect(page.locator('[data-npm-note]')).toContainText('not published to npm yet')
     await expect(output('install')).toContainText('npm install @safe-global/ui')
     await expect(output('next-config')).toContainText('transpilePackages')
-    await expect(output('usage')).toContainText("from '@safe-global/ui/sheet'")
+    await expect(output('usage')).toContainText("from '@safe-global/ui/primitives/sheet'")
     await expect(output('components-json')).toHaveCount(0)
   })
 

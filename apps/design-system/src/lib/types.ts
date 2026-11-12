@@ -9,9 +9,13 @@ export interface StoryEntry {
   description?: string
 }
 
+/** `primitive`: a shadcn component under `@safe-global/ui/primitives/*`; `component`: a Safe component under `@safe-global/ui/components/*` */
+export type Layer = 'primitive' | 'component'
+
 export interface StoryFileEntry {
-  /** Component name, equal to the package export key without `./` */
+  /** Component name, the last segment of its package export key */
   component: string
+  layer: Layer
   /** Storybook title, e.g. `UI/Button` */
   title: string
   stories: StoryEntry[]

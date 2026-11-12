@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/resizable'
+export * from '@safe-global/ui/primitives/resizable'

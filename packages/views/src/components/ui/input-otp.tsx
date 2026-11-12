@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/input-otp'
+export * from '@safe-global/ui/primitives/input-otp'

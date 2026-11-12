@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/separator'
+export * from '@safe-global/ui/primitives/separator'

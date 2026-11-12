@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/scroll-area'
+export * from '@safe-global/ui/primitives/scroll-area'

@@ -3,7 +3,7 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"],
-      "@ui-stories/*": ["../../packages/ui/src/components/stories/*"]
+      "@ui-src/*": ["../../packages/ui/src/*"]
     },
     "jsx": "preserve",
     "noEmit": true,

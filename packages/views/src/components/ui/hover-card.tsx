@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/hover-card'
+export * from '@safe-global/ui/primitives/hover-card'

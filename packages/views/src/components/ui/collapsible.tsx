@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/collapsible'
+export * from '@safe-global/ui/primitives/collapsible'

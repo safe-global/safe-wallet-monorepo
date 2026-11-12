@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/textarea'
+export * from '@safe-global/ui/primitives/textarea'

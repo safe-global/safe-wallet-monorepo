@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/dropdown-menu'
+export * from '@safe-global/ui/primitives/dropdown-menu'

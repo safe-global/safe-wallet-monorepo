@@ -20,7 +20,7 @@ const config = {
   env: { NEXT_PUBLIC_BASE_PATH: basePath },
   transpilePackages: ['@safe-global/ui'],
   webpack(webpackConfig) {
-    webpackConfig.resolve.alias['@ui-stories'] = path.join(uiDir, 'src/components/stories')
+    webpackConfig.resolve.alias['@ui-src'] = path.join(uiDir, 'src')
     return webpackConfig
   },
 }

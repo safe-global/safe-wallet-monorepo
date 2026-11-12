@@ -65,4 +65,23 @@ export default tseslint.config(
     files: ['src/**/*.{ts,tsx}'],
     rules: { 'no-restricted-imports': noFrameworkOrDomainImports },
   },
+  {
+    name: 'ui/layers',
+    files: ['src/primitives/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          ...noFrameworkOrDomainImports[1],
+          patterns: [
+            ...noFrameworkOrDomainImports[1].patterns,
+            {
+              group: ['**/components/*', '**/components/**'],
+              message: 'Primitives never import Safe components: the direction is components → primitives.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 )

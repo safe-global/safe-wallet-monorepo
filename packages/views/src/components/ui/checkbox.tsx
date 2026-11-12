@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/checkbox'
+export * from '@safe-global/ui/primitives/checkbox'

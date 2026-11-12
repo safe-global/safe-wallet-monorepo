@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/toggle'
+export * from '@safe-global/ui/primitives/toggle'

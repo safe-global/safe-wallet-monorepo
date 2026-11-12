@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/list'
+export * from '@safe-global/ui/primitives/list'

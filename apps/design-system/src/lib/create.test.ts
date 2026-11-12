@@ -9,6 +9,7 @@ const base: CreateOptions = {
   components: ['dialog', 'button'],
   registryUrl: 'https://example.org/r/{name}.json',
   exportsByComponent: { button: ['Button'], dialog: ['Dialog', 'DialogContent'] },
+  layerByComponent: { button: 'primitive', dialog: 'primitive' },
 }
 const byId = (options: CreateOptions) =>
   Object.fromEntries(buildCreateOutput(options).map((block) => [block.id, block]))
@@ -52,7 +53,7 @@ describe('create', () => {
     assert.match(blocks['next-config'].code, /transpilePackages/)
     assert.equal(
       blocks.usage.code,
-      "import { Button } from '@safe-global/ui/button'\nimport { Dialog, DialogContent } from '@safe-global/ui/dialog'",
+      "import { Button } from '@safe-global/ui/primitives/button'\nimport { Dialog, DialogContent } from '@safe-global/ui/primitives/dialog'",
     )
     assert.equal(blocks['components-json'], undefined)
   })

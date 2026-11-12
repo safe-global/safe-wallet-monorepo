@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import { Search } from 'lucide-react'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@safe-global/ui/input-group'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@safe-global/ui/primitives/input-group'
 import { withBasePath } from '@/lib/env'
 
 export interface ComponentCard {

@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/overlay'
+export * from '@safe-global/ui/primitives/overlay'

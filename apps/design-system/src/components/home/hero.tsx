@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { Button } from '@safe-global/ui/button'
+import { Button } from '@safe-global/ui/primitives/button'
 
 const STACK = ['React 19', 'Tailwind CSS v4', 'Base UI', 'shadcn registry', 'Dark mode']
 

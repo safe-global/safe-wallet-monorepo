@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Code } from '../site/code'
-import { Input } from '@safe-global/ui/input'
-import { Label } from '@safe-global/ui/label'
-import { Badge } from '@safe-global/ui/badge'
-import { Typography } from '@safe-global/ui/typography'
+import { Input } from '@safe-global/ui/primitives/input'
+import { Label } from '@safe-global/ui/primitives/label'
+import { Badge } from '@safe-global/ui/primitives/badge'
+import { Typography } from '@safe-global/ui/primitives/typography'
 
 type Variant = Parameters<typeof Typography>[0]['variant']
 

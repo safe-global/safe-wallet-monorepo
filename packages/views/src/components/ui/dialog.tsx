@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/dialog'
+export * from '@safe-global/ui/primitives/dialog'

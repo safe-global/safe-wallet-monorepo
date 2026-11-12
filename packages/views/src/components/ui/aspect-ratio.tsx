@@ -1,1 +1,1 @@
-export * from '@safe-global/ui/aspect-ratio'
+export * from '@safe-global/ui/primitives/aspect-ratio'
