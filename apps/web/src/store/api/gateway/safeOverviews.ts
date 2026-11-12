@@ -28,7 +28,8 @@ type SafeOverviewQueueItem = {
 }
 
 export const SAFE_OVERVIEWS_BATCH_WINDOW_MS = 300
-export const CHAINS_WAIT_CAP_MS = 2_000
+// High so only a hung or failing chain configs request hits it; a miss sends trusted=false (a Zerion call per Safe)
+export const CHAINS_WAIT_CAP_MS = 10_000
 
 const selectChains = apiSliceWithChainsConfig.endpoints.getChainsConfigV2.select(CONFIG_SERVICE_KEY)
 

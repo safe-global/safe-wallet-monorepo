@@ -149,7 +149,7 @@ describe('safeOverviews trusted param', () => {
     it('does not wait for a chain configs refetch when they are already loaded', async () => {
       const requests = recordSafesRequests()
       const chain = flaggedChain()
-      serveChainsAfter(chain, CHAINS_WAIT_CAP_MS * 2)
+      serveChainsAfter(chain, CHAINS_WAIT_CAP_MS / 2)
       const store = makeStore({ settings: initialSettings })
       setStoreInstance(store)
       await store.dispatch(
@@ -172,7 +172,7 @@ describe('safeOverviews trusted param', () => {
       )
       await overviewsQuery
 
-      expect(Date.now() - startedAt).toBeLessThan(CHAINS_WAIT_CAP_MS)
+      expect(Date.now() - startedAt).toBeLessThan(CHAINS_WAIT_CAP_MS / 2)
       expect(requests.map((params) => params.get('trusted'))).toEqual(['true'])
       overviewsQuery.unsubscribe()
       chainsRefetch.unsubscribe()
@@ -188,15 +188,42 @@ describe('safeOverviews trusted param', () => {
       expect(requests.map((params) => params.get('trusted'))).toEqual(['true'])
     })
 
-    it('sends one request with trusted=false when the chain configs take longer than the cap', async () => {
-      const requests = recordSafesRequests()
-      const chain = flaggedChain()
-      serveChainsAfter(chain, CHAINS_WAIT_CAP_MS * 2)
+    describe('with slow chain configs', () => {
+      beforeEach(() => {
+        jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] })
+      })
 
-      const elapsed = await requestWhileChainsLoad(chain)
+      afterEach(() => {
+        jest.useRealTimers()
+      })
 
-      expect(elapsed).toBeLessThan(CHAINS_WAIT_CAP_MS * 2)
-      expect(requests.map((params) => params.get('trusted'))).toEqual(['false'])
+      const requestAfter = async (chain: Chain, ms: number) => {
+        const elapsed = requestWhileChainsLoad(chain)
+        await jest.advanceTimersByTimeAsync(ms)
+        return elapsed
+      }
+
+      it('waits for chain configs that take a few seconds and sends their trusted value', async () => {
+        const requests = recordSafesRequests()
+        const chain = flaggedChain()
+        const chainsDelay = 3_000
+        serveChainsAfter(chain, chainsDelay)
+
+        await requestAfter(chain, chainsDelay + SAFE_OVERVIEWS_BATCH_WINDOW_MS)
+
+        expect(requests.map((params) => params.get('trusted'))).toEqual(['true'])
+      })
+
+      it('sends one request with trusted=false when the chain configs hang past the cap', async () => {
+        const requests = recordSafesRequests()
+        const chain = flaggedChain()
+        serveChainsAfter(chain, CHAINS_WAIT_CAP_MS * 2)
+
+        const elapsed = await requestAfter(chain, CHAINS_WAIT_CAP_MS + SAFE_OVERVIEWS_BATCH_WINDOW_MS)
+
+        expect(elapsed).toBeLessThan(CHAINS_WAIT_CAP_MS * 2)
+        expect(requests.map((params) => params.get('trusted'))).toEqual(['false'])
+      })
     })
   })
 })
