@@ -1,4 +1,4 @@
-import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import type { Balance, Erc20Token, NativeToken } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
@@ -118,3 +118,15 @@ export const findTokenOption = (
 /** What the input shows for a selected option: symbol, else name, else the shortened address. */
 export const tokenOptionLabel = (option: TokenOption): string =>
   option.symbol || option.name || shortenAddress(option.address)
+
+/** The balances API's token shape, which the spending limit loader and review screens read. */
+export const toTokenInfo = (option: TokenOption): Erc20Token | NativeToken => {
+  const info = {
+    address: option.address,
+    decimals: option.decimals,
+    symbol: option.symbol,
+    name: option.name,
+    logoUri: option.logoUri ?? '',
+  }
+  return sameAddress(option.address, ZERO_ADDRESS) ? { ...info, type: 'NATIVE_TOKEN' } : { ...info, type: 'ERC20' }
+}

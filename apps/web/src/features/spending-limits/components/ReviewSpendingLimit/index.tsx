@@ -3,8 +3,9 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useEffect, useMemo, useContext } from 'react'
 
 import { getResetTimeOptions } from '../../public/constants'
-import useBalances from '@/hooks/useBalances'
 import useChainId from '@/hooks/useChainId'
+import useSpendingLimitTokenOptions from '@/hooks/useSpendingLimitTokenOptions'
+import { findTokenOption, toTokenInfo } from '@/utils/tokenOptions'
 import { trackEvent } from '@/services/analytics'
 import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
 import { selectSpendingLimits } from '../../public/store/spendingLimitsSlice'
@@ -23,14 +24,14 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
   const { safe } = useSafeInfo()
   const chainId = useChainId()
   const chain = useCurrentChain()
-  const { balances } = useBalances()
+  const { options } = useSpendingLimitTokenOptions()
   const { setSafeTx, setSafeTxError } = useContext(SafeTxContext)
-  const token = balances.items.find((item) => item.tokenInfo.address === data?.tokenAddress)
-  const { decimals } = token?.tokenInfo || {}
+  const token = findTokenOption(options, data?.tokenAddress)
+  const decimals = token?.decimals
 
   const amountInWei = useMemo(
-    () => safeParseUnits(data?.amount || '0', token?.tokenInfo.decimals)?.toString() || '0',
-    [data?.amount, token?.tokenInfo.decimals],
+    () => safeParseUnits(data?.amount || '0', decimals)?.toString() || '0',
+    [data?.amount, decimals],
   )
 
   const existingSpendingLimit = useMemo(() => {
@@ -82,7 +83,7 @@ const ReviewSpendingLimit = ({ onSubmit, children }: ReviewTransactionProps) => 
   return (
     <ReviewTransaction onSubmit={onFormSubmit} withDecodedData={false}>
       <SpendingLimitReviewDetails
-        tokenInfo={token?.tokenInfo}
+        tokenInfo={token && toTokenInfo(token)}
         amountInWei={amountInWei}
         beneficiary={data?.beneficiary || ''}
         resetTime={resetTime || 'One-time spending limit'}
