@@ -114,6 +114,11 @@ jest.mock('../AggregatedBalances', () => () => null)
 jest.mock('../../InviteBanner/PreviewInvite', () => () => null)
 jest.mock('@/features/spaces/components/AddAccounts', () => () => null)
 jest.mock('../../SetupWidget', () => () => null)
+let mockIsSetupHidden = false
+jest.mock('../../SetupWidget/useSetupWidgetState', () => ({
+  __esModule: true,
+  default: () => ({ isHidden: mockIsSetupHidden, dismiss: jest.fn(), markCompleted: jest.fn() }),
+}))
 jest.mock('@/components/common/Track', () => {
   const Track = ({ children }: { children: React.ReactNode }) => <>{children}</>
   Track.displayName = 'Track'
@@ -181,6 +186,7 @@ const restoreDefaultMocks = () => {
   mockUseSpacePlanState.mockReturnValue(PLAN_STATE)
   mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: false, trialPeriodDays: null })
   mockUseCheckoutReturn.mockReturnValue({ status: 'idle', subscription: undefined, dismiss: jest.fn() })
+  mockIsSetupHidden = false
 }
 
 // ---- Tests ----
@@ -446,5 +452,28 @@ describe('SpaceDashboard – locked Workspace (SAFE_PRO)', () => {
 
     expect(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`)).toBeInTheDocument()
     expect(mockUseSafeProAnnouncementModal).toHaveBeenCalledWith(false)
+  })
+})
+
+describe('SpaceDashboard – setup widget in an empty Workspace', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    restoreDefaultMocks()
+    setupUseLoadFeature([{ safeAddress: MOCK_SAFE_ADDRESS, txId: MOCK_TX_ID }])
+    ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [], isLoading: false })
+  })
+
+  it('shows the setup widget instead of the pending transactions', () => {
+    render(<SpaceDashboard />)
+
+    expect(screen.queryByTestId(`pending-tx-row-${MOCK_TX_ID}`)).not.toBeInTheDocument()
+  })
+
+  it('shows the pending transactions once the setup widget is hidden for the Workspace', () => {
+    mockIsSetupHidden = true
+
+    render(<SpaceDashboard />)
+
+    expect(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`)).toBeInTheDocument()
   })
 })
