@@ -63,6 +63,12 @@ const sponsoredData: HistoryFeesData = {
   paidFrom: 'sponsored',
 }
 
+export const PaidByAnotherWallet: Story = {
+  args: {
+    data: { ...sponsoredData, gasFee: { ...sponsoredData.gasFee, isFree: false }, paidFrom: 'other' },
+  },
+}
+
 export const Sponsored: Story = {
   args: { data: sponsoredData },
 }
@@ -91,6 +97,13 @@ export const AllPayers: Story = {
           ...sponsoredData,
           gasFee: { ...sponsoredData.gasFee, isFree: false },
           paidFrom: 'signer',
+        }}
+      />
+      <HistoryFeesAccordion
+        data={{
+          ...sponsoredData,
+          gasFee: { ...sponsoredData.gasFee, isFree: false },
+          paidFrom: 'other',
         }}
       />
       <HistoryFeesAccordion data={sponsoredData} />

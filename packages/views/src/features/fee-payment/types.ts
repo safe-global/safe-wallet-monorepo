@@ -17,4 +17,4 @@ export type HistoryFeesData = {
   paidFrom: FeePaidFrom
 }
 
-export type FeePaidFrom = 'safe' | 'signer' | 'sponsored'
+export type FeePaidFrom = 'safe' | 'signer' | 'other' | 'sponsored'

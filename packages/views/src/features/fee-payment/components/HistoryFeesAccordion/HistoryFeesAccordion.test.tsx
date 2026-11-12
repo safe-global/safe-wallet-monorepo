@@ -93,10 +93,19 @@ describe('HistoryFeesAccordion', () => {
   it.each([
     ['signer', 'Paid from signer wallet'],
     ['safe', 'Paid from Safe account'],
+    ['other', 'Paid by another wallet'],
     ['sponsored', 'Sponsored'],
   ] as const)('labels paidFrom %s as "%s"', (paidFrom, label) => {
     render(<HistoryFeesAccordion data={{ ...defaultData, paidFrom }} />)
     expect(screen.getByText(label)).toBeInTheDocument()
+  })
+
+  it('shows the full cost when another wallet paid', () => {
+    render(<HistoryFeesAccordion data={{ ...defaultData, paidFrom: 'other' }} />)
+
+    const summary = screen.getByTestId('history-fees-summary')
+    expect(within(summary).getByText('0.005 ETH').tagName).not.toBe('DEL')
+    expect(within(summary).getByText('$15.12')).toBeInTheDocument()
   })
 
   it('strikes through the network cost of a sponsored fee and hides its fiat value', () => {

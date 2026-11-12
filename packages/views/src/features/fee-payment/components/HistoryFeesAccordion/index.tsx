@@ -28,6 +28,7 @@ const DEFAULT_PALETTE: AccordionPalette = { border: 'var(--color-info-dark)', bg
 const PAID_FROM_LABEL: Record<FeePaidFrom, string> = {
   safe: 'Paid from Safe account',
   signer: 'Paid from signer wallet',
+  other: 'Paid by another wallet',
   sponsored: 'Sponsored',
 }
 
