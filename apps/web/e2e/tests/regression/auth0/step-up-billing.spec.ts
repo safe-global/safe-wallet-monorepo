@@ -62,9 +62,9 @@ test.describe('Step-up for the billing actions of a Workspace', { tag: '@regress
     await safePage.getByRole('textbox', { name: 'Workspace name' }).fill(WORKSPACE_NAME)
     await safePage.getByRole('button', { name: 'Next' }).click()
 
-    const offer = safePage.getByRole('dialog', { name: 'Workspaces run on Safe Pro' })
-    await offer.getByRole('radio', { name: /^Starter/ }).click()
-    await offer.getByRole('button', { name: 'Claim free access' }).click()
+    const offer = safePage.getByRole('dialog', { name: /^Safe Pro/ })
+    await offer.getByRole('tab', { name: '2 Safes' }).click()
+    await offer.getByRole('button', { name: 'Start free trial' }).click()
     await completeStepUp(safePage)
 
     // The checkout returns to the next step of the wizard.
