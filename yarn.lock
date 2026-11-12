@@ -13961,7 +13961,7 @@ __metadata:
     expo-task-manager: "npm:~55.0.9"
     expo-web-browser: "npm:~55.0.9"
     freerasp-react-native: "npm:^4.2.4"
-    glob: "npm:^14.0.5"
+    glob: "npm:^14.0.6"
     globals: "npm:^15.14.0"
     jest: "npm:^30.5.2"
     jest-expo: "npm:~55.0.9"
@@ -29942,14 +29942,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^14.0.5":
-  version: 14.0.5
-  resolution: "glob@npm:14.0.5"
+"glob@npm:^14.0.6":
+  version: 14.0.6
+  resolution: "glob@npm:14.0.6"
   dependencies:
     minimatch: "npm:^11.0.5"
     minipass: "npm:^7.1.3"
     path-scurry: "npm:^3.0.0"
-  checksum: 10/8c96d586d8c149e26faecb474640eb50d77aa6b926ae6df1c25c3a8cd512c0f074bd983f7631ea2c6490ed3f8d64a879156445c98467ae9e0fb9256929e9f489
+  checksum: 10/6674454c61d4146ce33c9bfa7980273c16f14893538805ca4c38ca4de7fc1823f01ea4db10da8db4e2d18391fa58c9ad6b72b59b0598ac60b8bce746429e84ea
   languageName: node
   linkType: hard
 
