@@ -17,8 +17,10 @@ import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
 
 const ONBOARDING_ROUTES = [
   AppRoutes.welcome.createSpace,
+  AppRoutes.welcome.plan,
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
+  AppRoutes.welcome.survey,
 ]
 
 const guardRules: GuardRule[] = [

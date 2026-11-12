@@ -30,6 +30,8 @@ import type CreateSpaceOnboarding from './components/CreateSpaceOnboarding'
 import type SelectSafesOnboarding from './components/SelectSafesOnboarding'
 import type InviteMembersOnboarding from './components/InviteMembersOnboarding'
 import type SurveyOnboarding from './components/SurveyOnboarding'
+import type WorkspaceWizard from './components/WorkspaceWizard'
+import type WorkspaceOnboardingStep from './components/WorkspaceWizard/WorkspaceOnboardingStep'
 import type SelectSafeModal from './components/SelectSafeModal'
 import type SafeWorkspaceSignInDialog from './components/SafeWorkspaceSignInDialog'
 import type SafeWorkspaceChooserDialog from './components/SafeWorkspaceChooserDialog'
@@ -83,6 +85,8 @@ export interface SpacesContract {
   SelectSafesOnboarding: typeof SelectSafesOnboarding
   InviteMembersOnboarding: typeof InviteMembersOnboarding
   SurveyOnboarding: typeof SurveyOnboarding
+  WorkspaceWizard: typeof WorkspaceWizard
+  WorkspaceOnboardingStep: typeof WorkspaceOnboardingStep
 
   // Services (camelCase) - undefined when not ready
   isUnauthorized: typeof isUnauthorized
