@@ -3,6 +3,7 @@ import { useWindowVirtualizer } from '@tanstack/react-virtual'
 import { TableBody, TableHead, TableHeader, TableRow, tableVariants } from '@safe-global/views/components/ui/table'
 import { cn } from '@safe-global/views/utils/cn'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
+import { DeleteTxDialogProvider } from '../RowActionsMenu/DeleteTxDialog'
 import useWallet from '@/hooks/wallets/useWallet'
 import type { SpaceQueueSection } from '../../../store/spaceQueueApi'
 import SpaceQueueRow, { QUEUE_COLUMNS } from '../SpaceQueueRow'
@@ -190,66 +191,68 @@ const SpaceQueueTable = ({ sections }: { sections: SpaceQueueSection[] }): React
   const groups = groupByScope(virtualItems.map((virtualItem) => ({ virtualItem, item: items[virtualItem.index] })))
 
   return (
-    // Same panel surface as the Space accounts table (SafeAccountsTable with `bordered={false}`): it owns the
-    // horizontal scroll, and its 1px edge stays transparent so nothing shifts against that table
-    <div className="w-full overflow-x-auto rounded-lg border border-transparent bg-[var(--color-background-paper)] pb-2">
-      <table
-        aria-label="Pending transactions"
-        className={cn(tableVariants({ variant: 'panel' }), 'table-fixed min-w-[1128px]')}
-      >
-        <colgroup>
-          {QUEUE_COLUMNS.map((label) => (
-            <col key={label} className={COLUMN_WIDTHS[label]} />
-          ))}
-        </colgroup>
-        <TableHeader>
-          <TableRow data-no-hover className="group/head">
+    <DeleteTxDialogProvider>
+      {/* Same panel surface as the Space accounts table (SafeAccountsTable with `bordered={false}`): it owns the
+        horizontal scroll, and its 1px edge stays transparent so nothing shifts against that table */}
+      <div className="w-full overflow-x-auto rounded-lg border border-transparent bg-[var(--color-background-paper)] pb-2">
+        <table
+          aria-label="Pending transactions"
+          className={cn(tableVariants({ variant: 'panel' }), 'table-fixed min-w-[1128px]')}
+        >
+          <colgroup>
             {QUEUE_COLUMNS.map((label) => (
-              <TableHead
-                key={label}
-                scope="col"
-                className={cn(
-                  'px-2 py-2.5',
-                  label === 'Nonce' && 'px-0! text-center',
-                  // The collapse-all button is taller than a label: keep the bar at its 40px height
-                  label === 'Action' && 'py-0',
-                )}
-              >
-                {label === 'To' ? (
-                  <span className="sr-only">{label}</span>
-                ) : label === 'Action' ? (
-                  <span className="flex items-center justify-end">
-                    <span className="sr-only">{label}</span>
-                    <CollapseAllButton allCollapsed={allCollapsed} count={sections.length} onToggle={toggleAll} />
-                  </span>
-                ) : (
-                  label
-                )}
-              </TableHead>
+              <col key={label} className={COLUMN_WIDTHS[label]} />
             ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody ref={bodyRef}>
-          <SpacerRow height={paddingTop} />
-          {groups.map(({ scopeKey, entries }) => {
-            const rows = entries.map(({ virtualItem, item }) => renderItem(item, virtualItem.index))
-            const first = entries[0].item
-            if (!scopeKey || first.kind === 'safe') return rows
-            // One scope per visible run of a Safe's chain: each scope sets up its own provider and SDK
-            return (
-              <SafeScopeProvider
-                key={`scope-${scopeKey}`}
-                initial={{ chainId: first.chainId, safeAddress: first.safeAddress }}
-                pollSafeInfo={false}
-              >
-                {rows}
-              </SafeScopeProvider>
-            )
-          })}
-          <SpacerRow height={paddingBottom} />
-        </TableBody>
-      </table>
-    </div>
+          </colgroup>
+          <TableHeader>
+            <TableRow data-no-hover className="group/head">
+              {QUEUE_COLUMNS.map((label) => (
+                <TableHead
+                  key={label}
+                  scope="col"
+                  className={cn(
+                    'px-2 py-2.5',
+                    label === 'Nonce' && 'px-0! text-center',
+                    // The collapse-all button is taller than a label: keep the bar at its 40px height
+                    label === 'Action' && 'py-0',
+                  )}
+                >
+                  {label === 'To' ? (
+                    <span className="sr-only">{label}</span>
+                  ) : label === 'Action' ? (
+                    <span className="flex items-center justify-end">
+                      <span className="sr-only">{label}</span>
+                      <CollapseAllButton allCollapsed={allCollapsed} count={sections.length} onToggle={toggleAll} />
+                    </span>
+                  ) : (
+                    label
+                  )}
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody ref={bodyRef}>
+            <SpacerRow height={paddingTop} />
+            {groups.map(({ scopeKey, entries }) => {
+              const rows = entries.map(({ virtualItem, item }) => renderItem(item, virtualItem.index))
+              const first = entries[0].item
+              if (!scopeKey || first.kind === 'safe') return rows
+              // One scope per visible run of a Safe's chain: each scope sets up its own provider and SDK
+              return (
+                <SafeScopeProvider
+                  key={`scope-${scopeKey}`}
+                  initial={{ chainId: first.chainId, safeAddress: first.safeAddress }}
+                  pollSafeInfo={false}
+                >
+                  {rows}
+                </SafeScopeProvider>
+              )
+            })}
+            <SpacerRow height={paddingBottom} />
+          </TableBody>
+        </table>
+      </div>
+    </DeleteTxDialogProvider>
   )
 }
 

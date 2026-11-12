@@ -11,6 +11,9 @@ import { SafeTxContext } from '../../SafeTxProvider'
 import TxNonce from '../TxNonce'
 import TxStatusWidget from '../TxStatusWidget'
 import SafeShieldWidget from '@/features/safe-shield'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
+import ChainIndicator from '@/components/common/ChainIndicator'
+import EthHashInfo from '@/components/common/EthHashInfo'
 import css from './styles.module.css'
 
 export const TxLayoutHeader = ({
@@ -106,6 +109,8 @@ const TxLayoutBase = ({
 }: TxLayoutBaseProps): ReactElement => {
   const isSmallScreen = useIsBelowMd()
   const isDarkMode = useDarkMode()
+  // A flow opened from a Workspace has no Safe in the URL or sidebar, so the header names it
+  const scope = useSafeScope()
 
   return (
     <div className={classnames('flex flex-wrap', css.container)}>
@@ -144,6 +149,20 @@ const TxLayoutBase = ({
                 <Typography data-testid="modal-title" variant="h3" className={classnames('font-bold', css.title)}>
                   {title}
                 </Typography>
+                {scope && (
+                  <div data-testid="tx-flow-scoped-safe" className="flex min-w-0 items-center gap-2 text-sm">
+                    <EthHashInfo
+                      address={scope.safeAddress}
+                      chainId={scope.chainId}
+                      avatarSize={20}
+                      shortAddress
+                      showPrefix={false}
+                      showCopyButton={false}
+                      hasExplorer={false}
+                    />
+                    <ChainIndicator chainId={scope.chainId} inline imageSize={16} />
+                  </div>
+                )}
               </div>
 
               <div
