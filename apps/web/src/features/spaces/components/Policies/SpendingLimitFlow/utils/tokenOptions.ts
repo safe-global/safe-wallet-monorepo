@@ -24,6 +24,12 @@ export const toPopularToken = (token: TokenMetadata): PopularToken => ({
   logoUri: token.logoUri,
 })
 
+export const toCustomTokenOption = (token: TokenMetadata): TokenOption => ({
+  ...toPopularOption(token),
+  group: 'custom',
+  untrusted: !token.trusted,
+})
+
 export type {
   TokenOption,
   TokenOptionGroup,
@@ -46,7 +52,7 @@ export type BuildTokenOptionsInput = {
   showNative?: boolean
   /**
    * Tokens that must be selectable whether or not the lists above offer them — an existing spending
-   * limit's token, which may be untrusted or never held. Appended, so the held order does not move.
+   * limit's token or one picked by pasting its address. Appended, so the held order does not move.
    */
   extra?: readonly TokenOption[]
 }

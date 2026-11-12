@@ -1,6 +1,12 @@
 import type { ReactElement, ReactNode } from 'react'
 import { faker } from '@faker-js/faker'
+import { delay, http, HttpResponse } from 'msw'
 import { render, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
+import { server } from '@/tests/server'
+import { GATEWAY_URL } from '@/config/gateway'
+import { erc20TokenMetadataBuilder, erc721TokenMetadataBuilder } from '@/tests/builders/tokens'
+import useChainId from '@/hooks/useChainId'
+import { CustomTokensProvider, useCustomTokens } from '../../CustomTokensProvider'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
@@ -10,10 +16,13 @@ import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
 import TokenSelector from '..'
 import {
   BALANCES_LOAD_ERROR_TEXT,
+  CUSTOM_GROUP_LABEL,
   HELD_GROUP_LABEL,
   NO_TOKENS_FOUND_TEXT,
   POPULAR_GROUP_LABEL,
   POPULAR_LOAD_ERROR_TEXT,
+  TOKEN_LOOKUP_ERROR_TEXT,
+  TOKEN_NOT_FOUND_TEXT,
   TOKEN_SELECTOR_LABEL,
   TOKEN_SELECTOR_PLACEHOLDER,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
@@ -69,6 +78,11 @@ const setOptions = (overrides: Partial<TokenOptionsResult> = {}) => {
   }
   mockUseOptions.mockReturnValue(result)
   return result
+}
+
+const CustomTokensProbe = () => {
+  const tokens = useCustomTokens(useChainId())
+  return <span data-testid="custom-tokens">{tokens.map((token) => token.address).join(',')}</span>
 }
 
 const renderSelector = (props: Partial<Parameters<typeof TokenSelector>[0]> = {}) =>
@@ -192,20 +206,129 @@ describe('TokenSelector — search', () => {
     expect(onChange).toHaveBeenCalledWith(heldUsdc.address)
   })
 
-  it('shows the empty state and does not accept an unknown address', async () => {
+  it('shows the empty state for a query that matches nothing', async () => {
+    const { user } = renderSelector()
+    const input = await openSelector(user)
+
+    await user.type(input, 'zzz')
+
+    await waitFor(() => expect(screen.getByText(NO_TOKENS_FOUND_TEXT)).toBeInTheDocument())
+  })
+})
+
+describe('TokenSelector — address lookup', () => {
+  const TOKEN_URL = `${GATEWAY_URL}/v1/chains/:chainId/tokens/:address`
+  const pasted = checksumAddress(faker.finance.ethereumAddress())
+
+  const respondWith = (resolver: Parameters<typeof http.get>[1]) => server.use(http.get(TOKEN_URL, resolver))
+
+  it('shows a loading row while the address is looked up', async () => {
+    respondWith(async () => {
+      await delay('infinite')
+      return HttpResponse.json({})
+    })
+    const { user } = renderSelector()
+    const input = await openSelector(user)
+
+    await user.type(input, pasted)
+
+    expect(await screen.findByTestId('custom-token-loading')).toBeInTheDocument()
+    expect(screen.queryByText(TOKEN_NOT_FOUND_TEXT)).not.toBeInTheDocument()
+  })
+
+  it('offers an ERC-20 the Transaction Service knows and keeps it once selected', async () => {
+    const token = erc20TokenMetadataBuilder().with({ address: pasted, symbol: 'SAFE', trusted: true }).build()
+    respondWith(() => HttpResponse.json(token))
+    const onChange = jest.fn()
+    const { user } = renderWithUserEvent(
+      <CustomTokensProvider>
+        <TokenSelector onChange={onChange} />
+        <CustomTokensProbe />
+      </CustomTokensProvider>,
+    )
+    const input = await openSelector(user)
+
+    await user.type(input, pasted)
+
+    const listbox = screen.getByRole('listbox')
+    await waitFor(() => expect(within(listbox).getByText(CUSTOM_GROUP_LABEL)).toBeInTheDocument())
+    expect(screen.queryByTestId('token-untrusted-icon')).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('option', { name: /SAFE/ }))
+
+    expect(onChange).toHaveBeenCalledWith(pasted)
+    expect(screen.getByTestId('custom-tokens')).toHaveTextContent(pasted)
+  })
+
+  it('marks a token that is on no trusted list', async () => {
+    const token = erc20TokenMetadataBuilder().with({ address: pasted, trusted: false }).build()
+    respondWith(() => HttpResponse.json(token))
+    const { user } = renderSelector()
+    const input = await openSelector(user)
+
+    await user.type(input, pasted)
+
+    expect(await screen.findByTestId('token-untrusted-icon')).toBeInTheDocument()
+  })
+
+  it('does not accept an address the Transaction Service does not know', async () => {
+    respondWith(() => new HttpResponse(null, { status: 404 }))
     const onChange = jest.fn()
     const { user } = renderSelector({ onChange })
     const input = await openSelector(user)
 
-    await user.type(input, checksumAddress(faker.finance.ethereumAddress()))
+    await user.type(input, pasted)
 
-    // Base UI's ComboboxInput closes (and unmounts) the popup on Enter whenever no item is
-    // highlighted, so the empty-state text must be asserted before the key press, not after.
-    await waitFor(() => expect(screen.getByText(NO_TOKENS_FOUND_TEXT)).toBeInTheDocument())
-
+    // Base UI closes the popup on Enter when nothing is highlighted, so assert the message first.
+    await waitFor(() => expect(screen.getByText(TOKEN_NOT_FOUND_TEXT)).toBeInTheDocument())
     await user.keyboard('{Enter}')
 
     expect(onChange).not.toHaveBeenCalled()
+  })
+
+  it('does not offer an ERC-721 at the address', async () => {
+    const nft = erc721TokenMetadataBuilder().with({ address: pasted }).build()
+    respondWith(() => HttpResponse.json(nft))
+    const { user } = renderSelector()
+    const input = await openSelector(user)
+
+    await user.type(input, pasted)
+
+    await waitFor(() => expect(screen.getByText(TOKEN_NOT_FOUND_TEXT)).toBeInTheDocument())
+    expect(screen.queryByRole('option')).not.toBeInTheDocument()
+  })
+
+  it('shows an error when the lookup fails and offers the token after a retry', async () => {
+    const token = erc20TokenMetadataBuilder().with({ address: pasted, symbol: 'SAFE' }).build()
+    let attempts = 0
+    respondWith(() => (++attempts === 1 ? new HttpResponse(null, { status: 500 }) : HttpResponse.json(token)))
+    const { user } = renderSelector()
+    const input = await openSelector(user)
+
+    await user.type(input, pasted)
+
+    expect(await screen.findByText(TOKEN_LOOKUP_ERROR_TEXT)).toBeInTheDocument()
+    expect(screen.queryByText(TOKEN_NOT_FOUND_TEXT)).not.toBeInTheDocument()
+
+    await user.click(within(screen.getByTestId('custom-token-error')).getByRole('button', { name: /retry/i }))
+
+    expect(await screen.findByRole('option', { name: /SAFE/ })).toBeInTheDocument()
+  })
+
+  it('does not look up an address already in the list', async () => {
+    const lookups = jest.fn()
+    respondWith(() => {
+      lookups()
+      return new HttpResponse(null, { status: 404 })
+    })
+    const { user } = renderSelector()
+    const input = await openSelector(user)
+
+    await user.type(input, popularDai.address)
+
+    expect(screen.queryByTestId('custom-token-loading')).not.toBeInTheDocument()
+    await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(1))
+    expect(lookups).not.toHaveBeenCalled()
   })
 })
 

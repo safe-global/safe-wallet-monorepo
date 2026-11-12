@@ -39,6 +39,7 @@ import {
   LIMIT_AMOUNT_PLACEHOLDER,
   REMOVE_LIMIT_LABEL,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+import { UNTRUSTED_TOKEN_WARNING } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 
 /** Figma draws the remove glyph at lucide's 1.5 stroke, not its default 2. */
 const ICON_STROKE_WIDTH = 1.5
@@ -190,6 +191,10 @@ const TokenLimitCard = ({
                     <HelperLine>
                       {tokenError?.message ? (
                         <span data-testid="token-error">{String(tokenError.message)}</span>
+                      ) : selectedToken?.untrusted ? (
+                        <span className="text-warning-strong" data-testid="token-untrusted-warning">
+                          {UNTRUSTED_TOKEN_WARNING}
+                        </span>
                       ) : selectedToken?.balance !== undefined ? (
                         <span data-testid="token-balance">
                           {formatVisualAmount(selectedToken.balance, selectedToken.decimals)}{' '}

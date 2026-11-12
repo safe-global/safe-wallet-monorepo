@@ -35,7 +35,7 @@ import { tokenOptionLabel, type TokenOption } from '../../SpendingLimitFlow/util
 
 type TokenGroup = { value: TokenOption['group']; label: string; items: TokenOption[] }
 
-const GROUP_LABELS: Record<TokenOption['group'], string> = { held: HELD_GROUP_LABEL, popular: POPULAR_GROUP_LABEL }
+const GROUP_LABELS: Record<'held' | 'popular', string> = { held: HELD_GROUP_LABEL, popular: POPULAR_GROUP_LABEL }
 
 type TokenDraftRowProps = {
   /** Tokens not on the form yet. */

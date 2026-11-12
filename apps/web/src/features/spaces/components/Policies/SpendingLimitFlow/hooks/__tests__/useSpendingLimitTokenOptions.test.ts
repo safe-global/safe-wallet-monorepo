@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { renderHook } from '@/tests/test-utils'
+import { act, renderHook } from '@/tests/test-utils'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -16,6 +16,8 @@ import { useTokenListSetting } from '@/hooks/loadables/useLoadBalances'
 import { makeStore } from '@/store'
 import { POPULAR_TOKEN_ADDRESSES } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/popularTokens'
 import useSpendingLimitTokenOptions, { buildIdentityKey } from '../useSpendingLimitTokenOptions'
+import { CustomTokensProvider, useAddCustomToken } from '../../CustomTokensProvider'
+import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
 
 jest.mock('@/hooks/useSafeInfo', () => ({ __esModule: true, default: jest.fn() }))
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: jest.fn() }))
@@ -150,6 +152,24 @@ describe('useSpendingLimitTokenOptions', () => {
     expect(querySpy).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ skip: true }))
     expect(result.current.identityKey).toBe('')
     expect(result.current.isLoading).toBe(false)
+  })
+
+  it("includes custom tokens picked on the Safe's chain only", () => {
+    const onChain = tokenOptionBuilder().with({ group: 'custom' }).build()
+    const otherChain = tokenOptionBuilder().with({ group: 'custom' }).build()
+
+    const { result } = renderHook(
+      () => ({ options: useSpendingLimitTokenOptions().options, addToken: useAddCustomToken() }),
+      { wrapper: CustomTokensProvider },
+    )
+    act(() => {
+      result.current.addToken(CHAIN_ID, onChain)
+      result.current.addToken('137', otherChain)
+    })
+
+    const addresses = result.current.options.map((option) => option.address)
+    expect(addresses).toContain(onChain.address)
+    expect(addresses).not.toContain(otherChain.address)
   })
 
   it('merges held balances with the chain popular list and native currency', () => {

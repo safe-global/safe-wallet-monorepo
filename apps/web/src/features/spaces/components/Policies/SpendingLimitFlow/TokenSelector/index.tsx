@@ -1,6 +1,7 @@
-import { useEffect, useId, useMemo, useRef, type ReactNode } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Search } from 'lucide-react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import useChainId from '@/hooks/useChainId'
 import { Field, FieldDescription, FieldLabel } from '@safe-global/views/components/ui/field'
 import { InputGroupAddon } from '@safe-global/views/components/ui/input-group'
 import {
@@ -18,6 +19,8 @@ import {
 import TokenIcon from '@/components/common/TokenIcon'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
+import useCustomTokenLookup from '../hooks/useCustomTokenLookup'
+import { useAddCustomToken } from '../CustomTokensProvider'
 import { findTokenOption, tokenOptionLabel, type TokenOption, type TokenOptionGroup } from '../utils/tokenOptions'
 import { matchesTokenQuery } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/utils/tokenSearch'
 import TokenOptionRow from './TokenOptionRow'
@@ -28,10 +31,13 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/TokenGroupState'
 import {
   BALANCES_LOAD_ERROR_TEXT,
+  CUSTOM_GROUP_LABEL,
   HELD_GROUP_LABEL,
   NO_TOKENS_FOUND_TEXT,
   POPULAR_GROUP_LABEL,
   POPULAR_LOAD_ERROR_TEXT,
+  TOKEN_LOOKUP_ERROR_TEXT,
+  TOKEN_NOT_FOUND_TEXT,
   TOKEN_FIELD_ICON_SIZE,
   TOKEN_SELECTOR_LABEL,
   TOKEN_SELECTOR_PLACEHOLDER,
@@ -62,8 +68,11 @@ type TokenGroup = { value: TokenOptionGroup; items: TokenOption[] }
 
 const GROUP_LABELS: Record<TokenOptionGroup, string> = {
   held: HELD_GROUP_LABEL,
+  custom: CUSTOM_GROUP_LABEL,
   popular: POPULAR_GROUP_LABEL,
 }
+
+const GROUP_ORDER: TokenOptionGroup[] = ['held', 'custom', 'popular']
 
 /** A `value` the current list does not know (edit flow, or a table change). Renders as its address. */
 const unknownTokenOption = (address: string): TokenOption => ({
@@ -76,7 +85,7 @@ const unknownTokenOption = (address: string): TokenOption => ({
 
 const isSameOption = (a: TokenOption, b: TokenOption): boolean => sameAddress(a.address, b.address)
 
-/** Search only: typing an address that is not in the list selects nothing. */
+/** An address that is not in the list is looked up on CGW; only ERC-20s the Transaction Service knows are offered. */
 const TokenSelector = ({
   value,
   onChange,
@@ -99,25 +108,29 @@ const TokenSelector = ({
   const extraTokens = useExistingLimitTokens()
   const { options, isLoading, isError, refetch, isPopularLoading, isPopularError, refetchPopular, identityKey } =
     useSpendingLimitTokenOptions(extraTokens)
+  const chainId = useChainId()
+  const addCustomToken = useAddCustomToken()
+  const [query, setQuery] = useState('')
+  const lookup = useCustomTokenLookup(query, options)
 
   const visibleOptions = useMemo(
     () =>
-      options.filter(
+      [...options, ...(lookup.option ? [lookup.option] : [])].filter(
         (option) =>
           sameAddress(option.address, value) ||
           !excludeAddresses?.some((excluded) => sameAddress(excluded, option.address)),
       ),
-    [options, excludeAddresses, value],
+    [options, lookup.option, excludeAddresses, value],
   )
 
-  const groups = useMemo<TokenGroup[]>(() => {
-    const held = visibleOptions.filter((option) => option.group === 'held')
-    const popular = visibleOptions.filter((option) => option.group === 'popular')
-    return [
-      ...(held.length ? [{ value: 'held' as const, items: held }] : []),
-      ...(popular.length ? [{ value: 'popular' as const, items: popular }] : []),
-    ]
-  }, [visibleOptions])
+  const groups = useMemo<TokenGroup[]>(
+    () =>
+      GROUP_ORDER.map((group) => ({
+        value: group,
+        items: visibleOptions.filter((option) => option.group === group),
+      })).filter((group) => group.items.length > 0),
+    [visibleOptions],
+  )
 
   const selectedOption = useMemo<TokenOption | null>(
     () => (value ? (findTokenOption(options, value) ?? unknownTokenOption(value)) : null),
@@ -148,7 +161,11 @@ const TokenSelector = ({
       <Combobox<TokenOption>
         items={groups}
         value={selectedOption}
-        onValueChange={(next) => onChange(next?.address)}
+        onValueChange={(next) => {
+          if (next?.group === 'custom') addCustomToken(chainId, next)
+          onChange(next?.address)
+        }}
+        onInputValueChange={setQuery}
         itemToStringLabel={tokenOptionLabel}
         itemToStringValue={(option) => option.address}
         isItemEqualToValue={isSameOption}
@@ -193,6 +210,17 @@ const TokenSelector = ({
               data-testid="held-tokens-error"
             />
           )}
+          {lookup.isLoading && (
+            <TokenGroupLoading label={CUSTOM_GROUP_LABEL} rowCount={1} data-testid="custom-token-loading" />
+          )}
+          {lookup.isError && (
+            <TokenGroupError
+              label={CUSTOM_GROUP_LABEL}
+              message={TOKEN_LOOKUP_ERROR_TEXT}
+              onRetry={lookup.refetch}
+              data-testid="custom-token-error"
+            />
+          )}
           <ComboboxList>
             {(group: TokenGroup) => (
               <ComboboxGroup key={group.value} items={group.items}>
@@ -220,7 +248,9 @@ const TokenSelector = ({
               data-testid="popular-tokens-error"
             />
           )}
-          {!isLoading && !isPopularLoading && <ComboboxEmpty>{NO_TOKENS_FOUND_TEXT}</ComboboxEmpty>}
+          {!isLoading && !isPopularLoading && !lookup.isLoading && !lookup.isError && (
+            <ComboboxEmpty>{lookup.address ? TOKEN_NOT_FOUND_TEXT : NO_TOKENS_FOUND_TEXT}</ComboboxEmpty>
+          )}
         </ComboboxContent>
       </Combobox>
 
