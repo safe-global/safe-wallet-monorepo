@@ -1,12 +1,21 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { Callout } from 'fumadocs-ui/components/callout'
 import { Button } from '@safe-global/ui/button'
 import { Checkbox } from '@safe-global/ui/checkbox'
 import { Label } from '@safe-global/ui/label'
 import { RadioGroup, RadioGroupItem } from '@safe-global/ui/radio-group'
 import { cn } from '@safe-global/ui/utils'
-import { buildCreateOutput, FRAMEWORKS, INSTALL_PATHS, PRESETS, type Framework, type InstallPath } from '@/lib/create'
+import {
+  buildCreateOutput,
+  FRAMEWORKS,
+  INSTALL_PATHS,
+  NPM_NOT_PUBLISHED,
+  PRESETS,
+  type Framework,
+  type InstallPath,
+} from '@/lib/create'
 import { resolveRegistryUrl } from '@/lib/env'
 import { Code } from '../site/code'
 
@@ -32,11 +41,13 @@ function Step({ index, title, children }: { index: number; title: string; childr
 
 function OptionCards<T extends string>({
   name,
+  label,
   value,
   options,
   onChange,
 }: {
   name: string
+  label: string
   value: T
   options: Array<{ value: T; label: string; description: string }>
   onChange: (value: T) => void
@@ -46,7 +57,7 @@ function OptionCards<T extends string>({
       value={value}
       onValueChange={(next) => onChange(next as T)}
       className="grid gap-3 sm:grid-cols-2"
-      aria-label={name}
+      aria-label={label}
     >
       {options.map((option) => (
         <Label
@@ -57,10 +68,19 @@ function OptionCards<T extends string>({
             value === option.value ? 'border-foreground/40 bg-muted/60' : 'hover:bg-muted/40',
           )}
         >
-          <RadioGroupItem id={`${name}-${option.value}`} value={option.value} />
+          <RadioGroupItem
+            id={`${name}-${option.value}`}
+            value={option.value}
+            aria-labelledby={`${name}-${option.value}-label`}
+            aria-describedby={`${name}-${option.value}-description`}
+          />
           <span className="flex flex-col gap-1">
-            <span className="font-medium">{option.label}</span>
-            <span className="text-sm font-normal text-muted-foreground">{option.description}</span>
+            <span id={`${name}-${option.value}-label`} className="font-medium">
+              {option.label}
+            </span>
+            <span id={`${name}-${option.value}-description`} className="text-sm font-normal text-muted-foreground">
+              {option.description}
+            </span>
           </span>
         </Label>
       ))}
@@ -93,10 +113,22 @@ export function CreateProject({ components }: { components: CreateComponent[] })
     <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" data-create>
       <div className="flex flex-col gap-10">
         <Step index={1} title="Framework">
-          <OptionCards name="framework" value={framework} options={FRAMEWORKS} onChange={setFramework} />
+          <OptionCards
+            name="framework"
+            label="Framework"
+            value={framework}
+            options={FRAMEWORKS}
+            onChange={setFramework}
+          />
         </Step>
         <Step index={2} title="Install path">
-          <OptionCards name="install-path" value={installPath} options={INSTALL_PATHS} onChange={setInstallPath} />
+          <OptionCards
+            name="install-path"
+            label="Install path"
+            value={installPath}
+            options={INSTALL_PATHS}
+            onChange={setInstallPath}
+          />
         </Step>
         <Step index={3} title="Components">
           <div className="flex flex-wrap items-center gap-2">
@@ -123,8 +155,13 @@ export function CreateProject({ components }: { components: CreateComponent[] })
                   id={`create-${component.name}`}
                   checked={selected.includes(component.name)}
                   onCheckedChange={(checked) => toggle(component.name, checked === true)}
+                  aria-labelledby={`create-${component.name}-label`}
                 />
-                <Label htmlFor={`create-${component.name}`} className="font-normal">
+                <Label
+                  id={`create-${component.name}-label`}
+                  htmlFor={`create-${component.name}`}
+                  className="font-normal"
+                >
                   {component.title}
                 </Label>
               </div>
@@ -137,6 +174,11 @@ export function CreateProject({ components }: { components: CreateComponent[] })
         <p className="m-0 text-sm text-muted-foreground">
           Run these in order. The theme expects DM Sans: load it in your app (weights 400, 600 and 700).
         </p>
+        {installPath === 'npm' ? (
+          <Callout type="warn" className="my-0" data-npm-note>
+            {NPM_NOT_PUBLISHED}
+          </Callout>
+        ) : null}
         {blocks.map((block) => (
           <div key={block.id} data-output={block.id}>
             <Code code={block.code} lang={block.lang} title={block.title} />

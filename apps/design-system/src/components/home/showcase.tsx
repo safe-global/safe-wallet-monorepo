@@ -114,7 +114,7 @@ function SignersCard() {
             <AvatarGroup>
               {SIGNERS.map((signer) => (
                 <Avatar key={signer.initials} size="sm">
-                  <AvatarFallback>{signer.initials}</AvatarFallback>
+                  <AvatarFallback>{signer.name[0]}</AvatarFallback>
                 </Avatar>
               ))}
             </AvatarGroup>
@@ -272,18 +272,26 @@ function SettingsCard() {
             ].map(([id, title, description, on]) => (
               <div key={id as string} className="flex items-start justify-between gap-4">
                 <div className="flex flex-col gap-0.5">
-                  <Label htmlFor={id as string}>{title as string}</Label>
+                  <Label id={`${id}-label`} htmlFor={id as string}>
+                    {title as string}
+                  </Label>
                   <span className="text-xs text-muted-foreground">{description as string}</span>
                 </div>
-                <Switch id={id as string} defaultChecked={on as boolean} />
+                <Switch id={id as string} defaultChecked={on as boolean} aria-labelledby={`${id}-label`} />
               </div>
             ))}
           </TabsContent>
           <TabsContent value="alerts" className="flex flex-col gap-3 pt-4">
             {['New transaction queued', 'Transaction executed', 'Signer added or removed'].map((label, index) => (
               <div key={label} className="flex items-center gap-2">
-                <Checkbox id={`showcase-alert-${index}`} defaultChecked={index !== 2} />
-                <Label htmlFor={`showcase-alert-${index}`}>{label}</Label>
+                <Checkbox
+                  id={`showcase-alert-${index}`}
+                  defaultChecked={index !== 2}
+                  aria-labelledby={`showcase-alert-${index}-label`}
+                />
+                <Label id={`showcase-alert-${index}-label`} htmlFor={`showcase-alert-${index}`}>
+                  {label}
+                </Label>
               </div>
             ))}
           </TabsContent>
@@ -327,12 +335,16 @@ function ControlsCard() {
           <Separator />
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Switch id="showcase-hide-small" defaultChecked />
-              <Label htmlFor="showcase-hide-small">Hide small balances</Label>
+              <Switch id="showcase-hide-small" defaultChecked aria-labelledby="showcase-hide-small-label" />
+              <Label id="showcase-hide-small-label" htmlFor="showcase-hide-small">
+                Hide small balances
+              </Label>
             </div>
             <div className="flex items-center gap-2">
-              <Checkbox id="showcase-trusted" defaultChecked />
-              <Label htmlFor="showcase-trusted">Trusted only</Label>
+              <Checkbox id="showcase-trusted" defaultChecked aria-labelledby="showcase-trusted-label" />
+              <Label id="showcase-trusted-label" htmlFor="showcase-trusted">
+                Trusted only
+              </Label>
             </div>
           </div>
           <div className="flex gap-1" role="group" aria-label="View">
