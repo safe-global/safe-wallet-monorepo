@@ -6,7 +6,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
 import type { TokenOptionsResult } from '../../hooks/useSpendingLimitTokenOptions'
 import type { TokenOption } from '../../utils/tokenOptions'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
+import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
 import TokenSelector from '..'
 import {
   BALANCES_LOAD_ERROR_TEXT,

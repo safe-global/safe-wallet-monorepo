@@ -2,6 +2,8 @@ import { faker } from '@faker-js/faker'
 import type { VaultRedeemTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
 
+faker.seed(1)
+
 export const mockVaultRedeemTxInfo: VaultRedeemTransactionInfo = {
   type: TransactionInfoType.VAULT_REDEEM,
   humanDescription: null,

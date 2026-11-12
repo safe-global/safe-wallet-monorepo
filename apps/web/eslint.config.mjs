@@ -23,6 +23,20 @@ const safeLinkWithoutSpaceIdRules = [
     'A Safe link must keep `spaceId`: use `useSafeLinkQuery()`, or wrap the query in `withSpaceId(query, spaceId)`. If the link must leave the Workspace, add `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
 }))
 
+// Faker continues one shared sequence, so story data is the same in every run only if the file seeds it first
+const seedFakerInStoryData = {
+  selector:
+    "Program:has(ImportDeclaration[source.value=/faker|builders/]):not(:has(CallExpression[callee.object.name='faker'][callee.property.name='seed']))",
+  message: 'Story data must be the same in every run: call faker.seed(<number>) after the imports.',
+}
+
+const noTestDataInStories = {
+  selector: 'ImportDeclaration[source.value=/\\.testData$/]',
+  message: 'testData files may be random and are for tests only. Move the data a story needs to a .storyData.ts file.',
+}
+
+const storyDataRules = [seedFakerInStoryData, noTestDataInStories]
+
 const config = [
   {
     ignores: [
@@ -206,6 +220,18 @@ const config = [
     files: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**', '**/*.stories.tsx', 'src/tests/**', 'src/stories/**'],
     rules: {
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules],
+    },
+  },
+  {
+    files: ['**/*.stories.tsx', '**/*.stories.ts', 'src/stories/**'],
+    rules: {
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...storyDataRules],
+    },
+  },
+  {
+    files: ['**/*.storyData.ts'],
+    rules: {
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules, ...storyDataRules],
     },
   },
   // Override for story files: allow type-only imports from @storybook/react

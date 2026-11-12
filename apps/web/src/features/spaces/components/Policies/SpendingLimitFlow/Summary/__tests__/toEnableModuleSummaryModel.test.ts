@@ -1,6 +1,6 @@
 import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS, mockSpendingLimitPolicy } from '../../../mocks/policies'
 import { groupSafeAccounts } from '../../../SafeAccountSelector/utils'
-import { safeAccountOptionBuilder } from '../SpendingLimitSummary.fixtures'
+import { safeAccountOptionBuilder } from '../SpendingLimitSummary.testData'
 import { toEnableModuleSummaryModel } from '../toEnableModuleSummaryModel'
 
 describe('toEnableModuleSummaryModel', () => {

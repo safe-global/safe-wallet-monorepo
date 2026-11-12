@@ -2,7 +2,7 @@ import chains from '@safe-global/utils/config/chains'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { render, screen } from '@/tests/test-utils'
 import LimitSummaryRow from '../LimitSummaryRow'
-import { limitSummaryBuilder, limitSummaryTokenBuilder } from '../SpendingLimitSummary.fixtures'
+import { limitSummaryBuilder, limitSummaryTokenBuilder } from '../SpendingLimitSummary.testData'
 
 describe('LimitSummaryRow', () => {
   it('shows the amount with the token symbol and the frequency label', () => {

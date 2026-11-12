@@ -20,6 +20,12 @@ jest.mock('@/hooks/useNestedSafeOwners')
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/useProposers')
+jest.mock('../../ParentSafeNonce', () => ({
+  __esModule: true,
+  default: ({ parentSafeAddress }: { parentSafeAddress: string }) => (
+    <div>Parent Safe nonce of {parentSafeAddress}</div>
+  ),
+}))
 
 const TestSafeTxProvider = ({
   initialSafeTx,
@@ -52,6 +58,8 @@ const TestWalletContextProvider = ({
           ? {
               connectedWallet,
               setSignerAddress,
+              setParentSafeNonce: jest.fn(),
+              clearParentSafeNonce: jest.fn(),
               signer: {
                 address: signerAddress || connectedWallet.address,
                 chainId: '1',
@@ -141,6 +149,44 @@ describe('SignerForm', () => {
       </TestWalletContextProvider>,
     )
     expect(result.queryByText('Sign with')).toBeVisible()
+  })
+
+  it('shows the parent Safe nonce when a parent Safe is the signer', async () => {
+    const parentSafeAddress = mockOwners[0].value
+    mockUseNestedSafeOwners.mockReturnValue([parentSafeAddress])
+    const result = render(
+      <TestWalletContextProvider
+        connectedWallet={{
+          address: faker.finance.ethereumAddress(),
+          chainId: '1',
+          label: 'MetaMask',
+          provider: {} as Eip1193Provider,
+        }}
+      >
+        <SignerForm />
+      </TestWalletContextProvider>,
+    )
+
+    expect(await result.findByText(`Parent Safe nonce of ${parentSafeAddress}`)).toBeVisible()
+  })
+
+  it('does not show the parent Safe nonce when the connected wallet signs', async () => {
+    mockUseNestedSafeOwners.mockReturnValue([mockOwners[1].value])
+    const result = render(
+      <TestWalletContextProvider
+        connectedWallet={{
+          address: mockOwners[0].value,
+          chainId: '1',
+          label: 'MetaMask',
+          provider: {} as Eip1193Provider,
+        }}
+      >
+        <SignerForm />
+      </TestWalletContextProvider>,
+    )
+
+    await waitFor(() => expect(result.getByRole('combobox')).toHaveTextContent(shortenAddress(mockOwners[0].value)))
+    expect(result.queryByText(/Parent Safe nonce/)).not.toBeInTheDocument()
   })
 
   it('should render execution form if there are nested Safes', () => {

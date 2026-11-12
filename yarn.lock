@@ -13961,7 +13961,7 @@ __metadata:
     expo-task-manager: "npm:~55.0.9"
     expo-web-browser: "npm:~55.0.9"
     freerasp-react-native: "npm:^4.2.4"
-    glob: "npm:^14.0.4"
+    glob: "npm:^14.0.5"
     globals: "npm:^15.14.0"
     jest: "npm:^30.5.2"
     jest-expo: "npm:~55.0.9"
@@ -29942,14 +29942,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^14.0.4":
-  version: 14.0.4
-  resolution: "glob@npm:14.0.4"
+"glob@npm:^14.0.5":
+  version: 14.0.5
+  resolution: "glob@npm:14.0.5"
   dependencies:
     minimatch: "npm:^11.0.5"
     minipass: "npm:^7.1.3"
     path-scurry: "npm:^3.0.0"
-  checksum: 10/d43e532cc85bd2e26bc3a0064a809ed57f2581999fb0bf2b6bafe7d394358fac2693331c313d6eccc9952e0f2bfdd78f53c88ad06a657dc47c6bc99745e470e2
+  checksum: 10/8c96d586d8c149e26faecb474640eb50d77aa6b926ae6df1c25c3a8cd512c0f074bd983f7631ea2c6490ed3f8d64a879156445c98467ae9e0fb9256929e9f489
   languageName: node
   linkType: hard
 
@@ -36830,29 +36830,20 @@ __metadata:
   linkType: hard
 
 "nanoid@npm:^3.3.1, nanoid@npm:^3.3.11, nanoid@npm:^3.3.16, nanoid@npm:^3.3.8":
-  version: 3.3.19
-  resolution: "nanoid@npm:3.3.19"
+  version: 3.3.20
+  resolution: "nanoid@npm:3.3.20"
   bin:
     nanoid: bin/nanoid.cjs
-  checksum: 10/a330adb28dad63eccb0a0c95a2a61353e84b7e067061fff94167803d94be8eef0f7b75cf2da1bece06e8b7afb892abbe52cf0ec33298c817a083eedccd7656e4
+  checksum: 10/b19641487fc25325189175226a4b9fcc8da39989c6a39fd35921802158d6b1725d59d8454a4e30643d2bb4837382cac11ee129417282678a67f8394b31c228d9
   languageName: node
   linkType: hard
 
-"nanoid@npm:^4.0.0":
-  version: 4.0.2
-  resolution: "nanoid@npm:4.0.2"
+"nanoid@npm:^5.1.16, nanoid@npm:^5.1.2":
+  version: 5.1.16
+  resolution: "nanoid@npm:5.1.16"
   bin:
     nanoid: bin/nanoid.js
-  checksum: 10/8c0c267de44cddcad79c3361d2cbd281694c36bf7ab6a163f36dd8f6e6ee43e9783561302c55fab2986a2fa847e7a6b30fedabd1e117fdb8aecc5ab21555428d
-  languageName: node
-  linkType: hard
-
-"nanoid@npm:^5.1.2":
-  version: 5.1.5
-  resolution: "nanoid@npm:5.1.5"
-  bin:
-    nanoid: bin/nanoid.js
-  checksum: 10/6de2d006b51c983be385ef7ee285f7f2a57bd96f8c0ca881c4111461644bd81fafc2544f8e07cb834ca0f3e0f3f676c1fe78052183f008b0809efe6e273119f5
+  checksum: 10/b1e702e2b7072e74ac2ae880907d0a291853a36617ec5c3d27d81ab04965ebc0d4d0f707cf9220928cf93d5370b1f561c930efee853dc9c1a3facaefdf1a42ee
   languageName: node
   linkType: hard
 

@@ -9,6 +9,8 @@ export const disconnectedWallet: WalletContextType = {
   connectedWallet: null,
   signer: null,
   setSignerAddress: () => {},
+  setParentSafeNonce: () => {},
+  clearParentSafeNonce: () => {},
   isReady: true,
 }
 
@@ -47,6 +49,8 @@ export function createConnectedWallet(
       provider: null,
     },
     setSignerAddress: () => {},
+    setParentSafeNonce: () => {},
+    clearParentSafeNonce: () => {},
     isReady: true,
   }
 }
@@ -78,6 +82,8 @@ export function createNonOwnerWallet(
       provider: null,
     },
     setSignerAddress: () => {},
+    setParentSafeNonce: () => {},
+    clearParentSafeNonce: () => {},
     isReady: true,
   }
 }

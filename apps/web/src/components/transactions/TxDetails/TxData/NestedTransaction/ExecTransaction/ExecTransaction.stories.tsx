@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { ExecTransaction } from './index'
-import { mockExecTransactionData } from './mockData'
+import { mockExecTransactionData } from './ExecTransaction.storyData'
 import { http, HttpResponse } from 'msw'
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
 
