@@ -71,11 +71,13 @@ describe('ExecuteTxStep', () => {
     spaceId,
     scope,
     txFlowContext,
+    pathname,
   }: {
     afterSigning?: boolean
     spaceId?: string
     scope?: SafeScope
     txFlowContext?: Partial<TxFlowContextType>
+    pathname?: string
   } = {}) => {
     const setSafeTx = jest.fn()
     const setTxFlow = jest.fn()
@@ -96,7 +98,7 @@ describe('ExecuteTxStep', () => {
           </SafeTxState>
         </TxModalContext.Provider>
       </SafeScopeContext.Provider>,
-      { routerProps: { push, query } },
+      { routerProps: { push, query, ...(pathname && { pathname }) } },
     )
 
     return { setSafeTx, setTxFlow, onPrev, push, safeQuery, updateTxLayoutProps }
@@ -257,18 +259,31 @@ describe('ExecuteTxStep', () => {
     expect(mockCreateExistingTx).not.toHaveBeenCalled()
   })
 
-  it('opens the queue of the selected Safe when executing later from a Workspace-level flow', async () => {
+  it('returns to the Workspace Pending list when executing later from a Workspace-level flow', async () => {
     mockCreateExistingTx.mockResolvedValue(reloadedTx)
     const spaceId = faker.string.uuid()
-    const scope = buildScope({} as Safe)
 
-    const { push } = renderStep({ afterSigning: true, spaceId, scope })
+    const { setTxFlow, push } = renderStep({ afterSigning: true, spaceId, scope: buildScope({} as Safe) })
 
     fireEvent.click(await screen.findByTestId('execute-later-btn'))
 
-    expect(push).toHaveBeenCalledWith({
-      pathname: AppRoutes.transactions.queue,
-      query: { safe: `${scope.chain?.shortName}:${scope.safeAddress}`, spaceId },
+    expect(setTxFlow).toHaveBeenCalledWith(undefined)
+    expect(push).toHaveBeenCalledWith({ pathname: AppRoutes.spaces.transactions, query: { spaceId } })
+  })
+
+  it('only closes the flow when executing later from the Workspace Pending list itself', async () => {
+    mockCreateExistingTx.mockResolvedValue(reloadedTx)
+
+    const { setTxFlow, push } = renderStep({
+      afterSigning: true,
+      spaceId: faker.string.uuid(),
+      scope: buildScope({} as Safe),
+      pathname: AppRoutes.spaces.transactions,
     })
+
+    fireEvent.click(await screen.findByTestId('execute-later-btn'))
+
+    expect(setTxFlow).toHaveBeenCalledWith(undefined)
+    expect(push).not.toHaveBeenCalled()
   })
 })

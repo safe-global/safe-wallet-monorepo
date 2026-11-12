@@ -1,4 +1,4 @@
-import { useState, type ReactElement } from 'react'
+import type { ReactElement } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { MoreHorizontal } from 'lucide-react'
 import {
@@ -21,7 +21,6 @@ import CheckWallet from '@/components/common/CheckWallet'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import RejectTxFlow from '@/components/tx-flow/flows/RejectTx'
 import { useIsNonceDeletable } from '@/components/tx-flow/flows/ReplaceTx'
-import DeleteTxModal from '@/components/tx-flow/flows/ReplaceTx/DeleteTxModal'
 import useSetScopedTxFlow from '@/components/tx-flow/safe-scope/useSetScopedTxFlow'
 import { AppRoutes } from '@/config/routes'
 import { useChain } from '@/hooks/useChains'
@@ -36,6 +35,7 @@ import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
 import { getNonce } from '../utils'
+import { useOpenDeleteTxDialog } from './DeleteTxDialog'
 
 export const DELETE_LABEL = 'Delete from queue'
 
@@ -63,6 +63,8 @@ const useTxLink = (txId: string): string | undefined => {
 
 const NOT_PROPOSER = 'Only the person who proposed it can delete it.'
 const NOT_DELETABLE = 'Delete the later transactions first, or replace this one.'
+const alreadyRejected = (nonce: number | undefined) =>
+  `Transaction with nonce ${nonce} already has a reject transaction`
 
 type DeleteState =
   | { status: 'hidden' }
@@ -90,8 +92,8 @@ const useDeleteState = (txId: string): DeleteState => {
 }
 
 // Disabled items ignore the pointer, so the wrapper holds the tooltip
-const BlockedDeleteItem = ({ reason }: { reason?: string }): ReactElement => {
-  const item = <DropdownMenuItem disabled>{DELETE_LABEL}</DropdownMenuItem>
+const BlockedItem = ({ label, reason }: { label: string; reason?: string }): ReactElement => {
+  const item = <DropdownMenuItem disabled>{label}</DropdownMenuItem>
   if (!reason) return item
   return (
     <Tooltip delay={150}>
@@ -105,7 +107,7 @@ const BlockedDeleteItem = ({ reason }: { reason?: string }): ReactElement => {
 
 const ProposerDeleteItem = ({ nonce, onDelete }: { nonce: number; onDelete: () => void }): ReactElement => {
   const isDeletable = useIsNonceDeletable(nonce)
-  if (!isDeletable) return <BlockedDeleteItem reason={NOT_DELETABLE} />
+  if (!isDeletable) return <BlockedItem label={DELETE_LABEL} reason={NOT_DELETABLE} />
   const onClick = () => {
     trackEvent(REJECT_TX_EVENTS.DELETE_OFFCHAIN_BUTTON)
     onDelete()
@@ -124,7 +126,7 @@ const DeleteItem = ({ tx, onDelete }: { tx: Transaction; onDelete: (safeTxHash: 
       {state.status === 'proposer' ? (
         <ProposerDeleteItem nonce={nonce} onDelete={() => onDelete(state.safeTxHash)} />
       ) : (
-        <BlockedDeleteItem reason={state.status === 'blocked' ? state.reason : undefined} />
+        <BlockedItem label={DELETE_LABEL} reason={state.status === 'blocked' ? state.reason : undefined} />
       )}
     </>
   )
@@ -138,11 +140,12 @@ type RowActionsMenuProps = {
 
 const RowActionsMenu = ({ tx, canReject }: RowActionsMenuProps): ReactElement => {
   const setTxFlow = useSetScopedTxFlow()
+  const scope = useSafeScope()
+  const openDeleteDialog = useOpenDeleteTxDialog()
   const dispatch = useAppDispatch()
   const isPending = useIsPending(tx.id)
   const link = useTxLink(tx.id)
   const nonce = getNonce(tx)
-  const [deletingSafeTxHash, setDeletingSafeTxHash] = useState<string>()
 
   const copyLink = async () => {
     if (!link) return
@@ -155,47 +158,47 @@ const RowActionsMenu = ({ tx, canReject }: RowActionsMenuProps): ReactElement =>
   }
 
   return (
-    <>
-      <CheckWallet noTooltip>
-        {(isOk) => {
-          const canReplace = isOk && !isPending && nonce !== undefined
-          return (
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={<Button variant="ghost" size="icon-xs" aria-label={`More actions for #${nonce ?? ''}`} />}
+    <CheckWallet noTooltip>
+      {(isOk) => {
+        const canReplace = isOk && !isPending && nonce !== undefined
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={<Button variant="ghost" size="icon-xs" aria-label={`More actions for #${nonce ?? ''}`} />}
+            >
+              <MoreHorizontal />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                disabled={!canReplace}
+                onClick={() => nonce !== undefined && setTxFlow(<TokenTransferFlow txNonce={nonce} />)}
               >
-                <MoreHorizontal />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+                Replace with a transfer
+              </DropdownMenuItem>
+              {canReject ? (
                 <DropdownMenuItem
                   disabled={!canReplace}
-                  onClick={() => nonce !== undefined && setTxFlow(<TokenTransferFlow txNonce={nonce} />)}
-                >
-                  Replace with a transfer
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  disabled={!canReplace || !canReject}
                   onClick={() => nonce !== undefined && setTxFlow(<RejectTxFlow txNonce={nonce} />)}
                 >
                   Reject
                 </DropdownMenuItem>
-                <DropdownMenuItem disabled={!link} onClick={copyLink}>
-                  Copy link
-                </DropdownMenuItem>
-                <DeleteItem tx={tx} onDelete={setDeletingSafeTxHash} />
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )
-        }}
-      </CheckWallet>
-      {deletingSafeTxHash && (
-        <DeleteTxModal
-          safeTxHash={deletingSafeTxHash}
-          onClose={() => setDeletingSafeTxHash(undefined)}
-          onSuccess={() => setDeletingSafeTxHash(undefined)}
-        />
-      )}
-    </>
+              ) : (
+                <BlockedItem label="Reject" reason={alreadyRejected(nonce)} />
+              )}
+              <DropdownMenuItem disabled={!link} onClick={copyLink}>
+                Copy link
+              </DropdownMenuItem>
+              <DeleteItem
+                tx={tx}
+                onDelete={(safeTxHash) =>
+                  scope && openDeleteDialog({ chainId: scope.chainId, safeAddress: scope.safeAddress, safeTxHash })
+                }
+              />
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
+      }}
+    </CheckWallet>
   )
 }
 
