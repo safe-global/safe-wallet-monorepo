@@ -19,7 +19,7 @@ const app = transactionBuilderSafeApp
 const renderFlow = (message: string) =>
   render(
     <SignMessageOnChainFlow
-      declared={{ channel: 'safe-app' }}
+      declared={{ channel: 'SAFE_APP' }}
       props={{ app, requestId: faker.string.uuid(), message, method: Methods.signMessage }}
     />,
   )

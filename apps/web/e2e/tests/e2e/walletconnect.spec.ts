@@ -110,7 +110,7 @@ test.describe('WalletConnect', { tag: ['@e2e', '@walletconnect'] }, () => {
     await new TxReviewPage(safePage).sign()
     await response
 
-    expect(await proposal).toEqual(expect.objectContaining({ channel: 'wallet-connect', appName: DAPP_NAME }))
+    expect(await proposal).toEqual(expect.objectContaining({ channel: 'WALLET_CONNECT', appName: DAPP_NAME }))
   })
 
   test('should give the dApp a signature that the Safe contract accepts when the owner signs its message', async ({

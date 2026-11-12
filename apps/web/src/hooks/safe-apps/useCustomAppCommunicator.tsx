@@ -37,7 +37,7 @@ export const useCustomAppCommunicator = (
   iframeRef: MutableRefObject<HTMLIFrameElement | null>,
   app: SafeAppData,
   chain: WebCoreChainInfo | undefined,
-  declaredSource: { channel: Extract<DeclaredChannel, 'safe-app' | 'widget'>; listedAppId?: number },
+  declaredSource: { channel: Extract<DeclaredChannel, 'SAFE_APP' | 'WIDGET'>; listedAppId?: number },
   overrideHandlers?: Partial<UseAppCommunicatorHandlers>,
 ): AppCommunicator | undefined => {
   const [currentRequestId, setCurrentRequestId] = useState<RequestId | undefined>()

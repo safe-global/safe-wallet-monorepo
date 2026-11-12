@@ -68,7 +68,7 @@ const AppFrame = ({ appUrl, allowedFeaturesList, safeAppFromManifest, isNativeEm
     iframeRef,
     remoteApp || safeAppFromManifest,
     chain,
-    { channel: isNativeEmbed ? 'widget' : 'safe-app', listedAppId: remoteApp?.id },
+    { channel: isNativeEmbed ? 'WIDGET' : 'SAFE_APP', listedAppId: remoteApp?.id },
     {
       onGetPermissions: getPermissions,
       onRequestAddressBook: (origin: string): AddressBookItem[] => {

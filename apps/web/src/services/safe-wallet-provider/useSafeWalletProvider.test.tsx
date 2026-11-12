@@ -278,7 +278,7 @@ describe('useSafeWalletProvider', () => {
           message: 'message',
           method: 'signMessage',
         },
-        declared: { channel: 'wallet-connect', appName: appInfo.name },
+        declared: { channel: 'WALLET_CONNECT', appName: appInfo.name },
       })
 
       expect(resp2).toBeInstanceOf(Promise)
@@ -425,7 +425,7 @@ describe('useSafeWalletProvider', () => {
           ],
           params: { safeTxGas: 0 },
         },
-        declared: { channel: 'wallet-connect', appName: appInfo.name },
+        declared: { channel: 'WALLET_CONNECT', appName: appInfo.name },
         onSubmit: expect.any(Function),
       })
 
@@ -459,7 +459,7 @@ describe('useSafeWalletProvider', () => {
       expect(mockSetTxFlow).toHaveBeenCalledWith(
         expect.objectContaining({
           props: expect.objectContaining({
-            declared: { channel: 'wallet-connect', appName: appInfo.name, appUrl: dappUrl },
+            declared: { channel: 'WALLET_CONNECT', appName: appInfo.name, appUrl: dappUrl },
           }),
         }),
         expect.any(Function),

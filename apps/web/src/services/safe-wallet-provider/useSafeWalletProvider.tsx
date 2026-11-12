@@ -34,7 +34,7 @@ import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { buildDeclared } from '@safe-global/utils/utils/declaredAttribution'
 
 const declareWalletConnectApp = (appInfo: AppInfo) =>
-  buildDeclared('wallet-connect', { name: appInfo.name, url: appInfo.dappUrl })
+  buildDeclared('WALLET_CONNECT', { name: appInfo.name, url: appInfo.dappUrl })
 
 export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSafes = true): WalletSDK | undefined => {
   const { safe } = useSafeInfo()

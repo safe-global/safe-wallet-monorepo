@@ -54,7 +54,7 @@ const setup = ({
   deployed = true,
   features = [],
   tokenList = TOKEN_LISTS.TRUSTED,
-  declaredSource = { channel: 'safe-app' },
+  declaredSource = { channel: 'SAFE_APP' },
 }: SetupOptions = {}) => {
   const safe = extendedSafeInfoBuilder()
     .with({ chainId: '1', deployed, implementation: addressExBuilder().build() })
@@ -208,13 +208,13 @@ describe('useCustomAppCommunicator', () => {
     })
 
     it('declares a listed Safe App with its id', async () => {
-      const { setTxFlow, request } = setup({ declaredSource: { channel: 'safe-app', listedAppId: APP.id } })
+      const { setTxFlow, request } = setup({ declaredSource: { channel: 'SAFE_APP', listedAppId: APP.id } })
 
       await request(Methods.sendTransactions, { txs: sentTxs })
 
       const flow = openedFlow<ComponentProps<typeof SafeAppsTxFlow>>(setTxFlow)
       expect(flow.props.declared).toEqual({
-        channel: 'safe-app',
+        channel: 'SAFE_APP',
         appName: APP.name,
         appUrl: APP.url,
         appId: APP.id,
@@ -222,22 +222,22 @@ describe('useCustomAppCommunicator', () => {
     })
 
     it('does not declare an app id for a Safe App that is not listed', async () => {
-      const { setTxFlow, request } = setup({ declaredSource: { channel: 'safe-app' } })
+      const { setTxFlow, request } = setup({ declaredSource: { channel: 'SAFE_APP' } })
 
       await request(Methods.sendTransactions, { txs: sentTxs })
 
       const flow = openedFlow<ComponentProps<typeof SafeAppsTxFlow>>(setTxFlow)
-      expect(flow.props.declared).toEqual(expect.objectContaining({ channel: 'safe-app', appName: APP.name }))
+      expect(flow.props.declared).toEqual(expect.objectContaining({ channel: 'SAFE_APP', appName: APP.name }))
       expect(flow.props.declared).not.toHaveProperty('appId')
     })
 
     it('declares a native embed as a widget without an app id', async () => {
-      const { setTxFlow, request } = setup({ declaredSource: { channel: 'widget', listedAppId: APP.id } })
+      const { setTxFlow, request } = setup({ declaredSource: { channel: 'WIDGET', listedAppId: APP.id } })
 
       await request(Methods.sendTransactions, { txs: sentTxs })
 
       const flow = openedFlow<ComponentProps<typeof SafeAppsTxFlow>>(setTxFlow)
-      expect(flow.props.declared).toEqual(expect.objectContaining({ channel: 'widget', appName: APP.name }))
+      expect(flow.props.declared).toEqual(expect.objectContaining({ channel: 'WIDGET', appName: APP.name }))
       expect(flow.props.declared).not.toHaveProperty('appId')
     })
 
