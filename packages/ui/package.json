@@ -2,7 +2,7 @@
   "private": true,
   "name": "@safe-global/ui",
   "version": "0.0.0",
-  "description": "Safe UI: shadcn/ui primitives built on Base UI and Tailwind",
+  "description": "Safe UI: shadcn/ui primitives and Safe components built on Base UI and Tailwind",
   "type": "module",
   "sideEffects": [
     "*.css"
@@ -60,6 +60,9 @@
     "./primitives/toggle": "./src/primitives/toggle/toggle.tsx",
     "./primitives/tooltip": "./src/primitives/tooltip/tooltip.tsx",
     "./primitives/typography": "./src/primitives/typography/typography.tsx",
+    "./components/data-table": "./src/components/data-table/data-table.tsx",
+    "./components/expandable-list": "./src/components/expandable-list/expandable-list.tsx",
+    "./components/widget": "./src/components/widget/widget.tsx",
     "./accordion": "./src/primitives/accordion/accordion.tsx",
     "./alert-dialog": "./src/primitives/alert-dialog/alert-dialog.tsx",
     "./alert": "./src/primitives/alert/alert.tsx",
