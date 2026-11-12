@@ -29,7 +29,7 @@ import {
   TOKENS_NO_ACCOUNT_DESCRIPTION,
   TOKENS_SECTION_TITLE,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
-import { findTokenOption } from '../../SpendingLimitFlow/utils/tokenOptions'
+import { findTokenOption } from '@/features/spending-limits/services'
 import type { HeldTokenAddresses } from '../hooks/useHeldTokenAddresses'
 import TokenDraftRow from './TokenDraftRow'
 

@@ -9,7 +9,7 @@ import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { MixpanelEventParams, TxFlowType, trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { ExistingSpendingLimitsProvider } from './ExistingSpendingLimitsProvider'
-import { CustomTokensProvider } from './CustomTokensProvider'
+import { CustomTokensProvider } from '@/features/spending-limits'
 import CreateSpendingLimitPolicy from './CreateStep'
 import ReviewSpendingLimitPolicy from './ReviewStep'
 import {

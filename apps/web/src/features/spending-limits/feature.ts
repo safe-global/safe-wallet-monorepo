@@ -5,6 +5,7 @@ import ReviewSpendingLimit from './components/ReviewSpendingLimit'
 import RemoveSpendingLimitReview from './components/RemoveSpendingLimitReview'
 import ReviewSpendingLimitTx from './components/ReviewSpendingLimitTx'
 import SpendingLimitsLoader from './components/SpendingLimitsLoader'
+import TokenSelector from './components/TokenSelector'
 import { loadSpendingLimits } from './services/spendingLimitLoader'
 import {
   createNewSpendingLimitTx,
@@ -23,6 +24,7 @@ export default {
   RemoveSpendingLimitReview,
   ReviewSpendingLimitTx,
   SpendingLimitsLoader, // Global loader component - render once in app layout
+  TokenSelector,
 
   // Services
   loadSpendingLimits,

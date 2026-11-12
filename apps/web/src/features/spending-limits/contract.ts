@@ -5,6 +5,7 @@ import type ReviewSpendingLimit from './components/ReviewSpendingLimit'
 import type RemoveSpendingLimitReview from './components/RemoveSpendingLimitReview'
 import type ReviewSpendingLimitTx from './components/ReviewSpendingLimitTx'
 import type SpendingLimitsLoader from './components/SpendingLimitsLoader'
+import type TokenSelector from './components/TokenSelector'
 import type { loadSpendingLimits } from './services/spendingLimitLoader'
 import type {
   createNewSpendingLimitTx,
@@ -23,6 +24,7 @@ export interface SpendingLimitsContract {
   RemoveSpendingLimitReview: typeof RemoveSpendingLimitReview
   ReviewSpendingLimitTx: typeof ReviewSpendingLimitTx
   SpendingLimitsLoader: typeof SpendingLimitsLoader // Global loader - render once in app layout
+  TokenSelector: typeof TokenSelector
 
   // Services (camelCase) - undefined when not ready
   loadSpendingLimits: typeof loadSpendingLimits

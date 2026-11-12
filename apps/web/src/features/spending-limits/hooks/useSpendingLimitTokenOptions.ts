@@ -9,8 +9,8 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useChain } from '@/hooks/useChains'
 import { useTokenListSetting } from '@/hooks/loadables/useLoadBalances'
 import { getPopularTokenAddresses } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/popularTokens'
-import { buildTokenOptions, toPopularToken, type NativeCurrencyInfo, type TokenOption } from '../utils/tokenOptions'
-import { useCustomTokens } from '../CustomTokensProvider'
+import { buildTokenOptions, toPopularToken, type NativeCurrencyInfo, type TokenOption } from '../services/tokenOptions'
+import { useCustomTokens } from '../components/CustomTokensProvider'
 
 export type TokenOptionsResult = {
   /** Held tokens first (fiat desc), then existing-limit and custom tokens, then popular in table order (native first). */
@@ -34,8 +34,8 @@ export const buildIdentityKey = (chainId: string, safeAddress: string): string =
 const noop = (): void => {}
 
 /**
- * @param extraTokens - Tokens to keep selectable whichever lists the queries return. See
- *   {@link useExistingLimitTokens}; pass nothing outside the edit flow.
+ * @param extraTokens - Tokens to keep selectable whichever lists the queries return, such as an
+ *   existing limit's token in the Workspace edit flow.
  *
  * @remarks
  * Held tokens come from the Transaction Service balances endpoint, not the portfolio one: only it

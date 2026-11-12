@@ -17,11 +17,10 @@ import {
   useComboboxAnchor,
 } from '@safe-global/views/components/ui/combobox'
 import TokenIcon from '@/components/common/TokenIcon'
-import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
-import { useExistingLimitTokens } from '../hooks/useExistingLimitTokens'
-import useCustomTokenLookup from '../hooks/useCustomTokenLookup'
+import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
+import useCustomTokenLookup from '../../hooks/useCustomTokenLookup'
 import { useAddCustomToken } from '../CustomTokensProvider'
-import { findTokenOption, tokenOptionLabel, type TokenOption, type TokenOptionGroup } from '../utils/tokenOptions'
+import { findTokenOption, tokenOptionLabel, type TokenOption, type TokenOptionGroup } from '../../services/tokenOptions'
 import { matchesTokenQuery } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/utils/tokenSearch'
 import TokenOptionRow from './TokenOptionRow'
 import DisabledTokenOption from './DisabledTokenOption'
@@ -47,6 +46,8 @@ export type TokenSelectorProps = {
   /** Token address; `ZERO_ADDRESS` for the native currency. */
   value?: string
   onChange: (address: string | undefined) => void
+  /** Kept selectable whatever the lists offer, such as an existing limit's token. Pass a stable reference. */
+  extraTokens?: readonly TokenOption[]
   /** Never hides `value` itself. Pass a stable reference — a new array each render recomputes the list. */
   excludeAddresses?: string[]
   /** Listed and searchable but not selectable; hovering one shows `disabledAddressReason`. */
@@ -89,6 +90,7 @@ const isSameOption = (a: TokenOption, b: TokenOption): boolean => sameAddress(a.
 const TokenSelector = ({
   value,
   onChange,
+  extraTokens,
   excludeAddresses,
   disabledAddresses,
   disabledAddressReason,
@@ -105,7 +107,6 @@ const TokenSelector = ({
   const fieldId = id ?? generatedId
   // Base UI anchors the popup to the <input>; anchoring to the InputGroup makes it match the visible field.
   const fieldAnchor = useComboboxAnchor()
-  const extraTokens = useExistingLimitTokens()
   const { options, isLoading, isError, refetch, isPopularLoading, isPopularError, refetchPopular, identityKey } =
     useSpendingLimitTokenOptions(extraTokens)
   const chainId = useChainId()

@@ -4,14 +4,14 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { balanceBuilder, erc20TokenBuilder, nativeTokenBuilder } from '@/tests/builders/balances'
-import type { PopularToken } from '../tokenOptions'
+import type { PopularToken } from './tokenOptions'
 import {
   buildTokenOptions,
   findTokenOption,
   tokenOptionLabel,
   toPopularToken,
   type NativeCurrencyInfo,
-} from '../tokenOptions'
+} from './tokenOptions'
 
 const popularTokenBuilder = (overrides: Partial<PopularToken> = {}): PopularToken => ({
   symbol: faker.finance.currencyCode(),

@@ -29,6 +29,12 @@ export {
   useIsSpendingLimitBeneficiary,
   default as useIsOnlySpendingLimitBeneficiary,
 } from './hooks/useIsOnlySpendingLimitBeneficiary'
+export {
+  default as useSpendingLimitTokenOptions,
+  buildIdentityKey,
+  type TokenOptionsResult,
+} from './hooks/useSpendingLimitTokenOptions'
+export { CustomTokensProvider, useCustomTokens, useAddCustomToken } from './components/CustomTokensProvider'
 
 // Store exports for cross-feature access
 export { spendingLimitSlice, selectSpendingLimits, selectSpendingLimitsLoading } from './store/spendingLimitsSlice'

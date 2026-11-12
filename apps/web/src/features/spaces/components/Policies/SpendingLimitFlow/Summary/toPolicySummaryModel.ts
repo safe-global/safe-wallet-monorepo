@@ -7,7 +7,7 @@ import {
   type SafeAccountOption,
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
-import { findTokenOption, type TokenOption } from '../utils/tokenOptions'
+import { findTokenOption, type TokenOption } from '@/features/spending-limits/services'
 import type {
   LimitSummaryToken,
   SpendingLimitSummaryModel,

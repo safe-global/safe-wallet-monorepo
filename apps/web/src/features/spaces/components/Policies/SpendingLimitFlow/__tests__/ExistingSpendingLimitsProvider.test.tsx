@@ -8,8 +8,8 @@ import type { SafeScope } from '@safe-global/views/components/tx-flow/safe-scope
 import { Errors, logError } from '@/services/exceptions'
 import { addressExBuilder, extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
-import { tokenOptionBuilder } from '../utils/tokenOptions.testData'
-import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
+import { tokenOptionBuilder } from '@/tests/builders/tokenOptions'
+import { useSpendingLimitTokenOptions } from '@/features/spending-limits'
 import { ExistingSpendingLimitsProvider, useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 
 jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
@@ -24,7 +24,10 @@ jest.mock('@/services/exceptions', () => ({
   ...jest.requireActual('@/services/exceptions'),
   logError: jest.fn(),
 }))
-jest.mock('../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('@/features/spending-limits', () => ({
+  ...jest.requireActual('@/features/spending-limits'),
+  useSpendingLimitTokenOptions: jest.fn(),
+}))
 
 const mockUseSafeScope = useSafeScope as jest.MockedFunction<typeof useSafeScope>
 const mockUseLoadFeature = useLoadFeature as jest.Mock

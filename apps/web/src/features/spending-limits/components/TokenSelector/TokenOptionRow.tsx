@@ -3,7 +3,7 @@ import TokenIcon from '@/components/common/TokenIcon'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { tokenOptionLabel, type TokenOption } from '../utils/tokenOptions'
+import { tokenOptionLabel, type TokenOption } from '../../services/tokenOptions'
 import {
   TOKEN_ICON_SIZE,
   UNTRUSTED_TOKEN_WARNING,
