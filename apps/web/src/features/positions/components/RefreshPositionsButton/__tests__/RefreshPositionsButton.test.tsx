@@ -30,6 +30,7 @@ describe('RefreshPositionsButton', () => {
     jest.spyOn(useRefetchBalances, 'useRefetchBalances').mockReturnValue({
       refetch: mockRefetch,
       refetchPositions: mockRefetch,
+      refetchSummary: mockRefetch,
       shouldUsePortfolioEndpoint: false,
       fulfilledTimeStamp: undefined,
       isFetching: false,
@@ -57,6 +58,7 @@ describe('RefreshPositionsButton', () => {
       jest.spyOn(useRefetchBalances, 'useRefetchBalances').mockReturnValue({
         refetch: mockRefetch,
         refetchPositions: mockRefetch,
+        refetchSummary: mockRefetch,
         shouldUsePortfolioEndpoint: true,
         fulfilledTimeStamp: undefined,
         isFetching: false,

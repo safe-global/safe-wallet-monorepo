@@ -6,25 +6,22 @@ import { selectCurrency } from '@/store/settingsSlice'
 import { usePositionsGetPositionsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import { useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { usePortfolioGetPortfolioV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
-import {
-  makePortfolioSummaryTag,
-  PORTFOLIO_SUMMARY_TAG,
-  portfolioSummariesRtkApi,
-} from '@safe-global/store/gateway/portfolioSummaries'
+import { refreshPortfolioSummary } from '@safe-global/store/gateway/portfolioSummaries'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import { useTokenListSetting } from '@/hooks/loadables/useLoadBalances'
+import { makeSafeTag } from '@/store/api/gateway'
 
 /**
  * Shared hook for refetching positions and balances data.
  * Automatically selects the appropriate endpoint (portfolio or positions/balances) based on feature flags.
  *
- * Used by both the portfolio and positions features. With PORTFOLIO_SUMMARIES, a refetch also refetches every
- * portfolio summary of the Safe, so the totals follow the balances it refreshed.
+ * Used by both the portfolio and positions features. With PORTFOLIO_SUMMARIES it also refetches the Safe's summary.
  *
  * @returns Object containing:
  *   - `refetch`: Function to refetch all data (positions + balances)
  *   - `refetchPositions`: Function to refetch positions only
+ *   - `refetchSummary`: Function to refetch the Safe's portfolio summary (no-op without PORTFOLIO_SUMMARIES)
  *   - `shouldUsePortfolioEndpoint`: Boolean indicating if portfolio endpoint is active
  *   - `fulfilledTimeStamp`: Timestamp of the last successful fetch (undefined if no data yet)
  *   - `isFetching`: Boolean indicating if a fetch is currently in progress
@@ -77,25 +74,27 @@ export const useRefetchBalances = () => {
     },
   )
 
-  // Runs after the balances refetch, so the summaries read the snapshot it just cached rather than asking Zerion again
-  const refetchSummaries = useCallback(() => {
-    if (!hasPortfolioSummaries || !safeAddress) return
-    dispatch(
-      portfolioSummariesRtkApi.util.invalidateTags([
-        { type: PORTFOLIO_SUMMARY_TAG, id: makePortfolioSummaryTag(safe.chainId, safeAddress) },
-      ]),
+  // Runs after the balances refetch, so the summary reads the snapshot it just cached rather than asking Zerion again
+  const refetchSummary = useCallback(async () => {
+    if (!hasPortfolioSummaries || !safeAddress || !safe.deployed || isTrustedTokenList === undefined) return
+    await dispatch(
+      refreshPortfolioSummary({
+        safes: [makeSafeTag(safe.chainId, safeAddress)],
+        currency,
+        trusted: isTrustedTokenList,
+      }),
     )
-  }, [hasPortfolioSummaries, safeAddress, safe.chainId, dispatch])
+  }, [hasPortfolioSummaries, safeAddress, safe.deployed, safe.chainId, currency, isTrustedTokenList, dispatch])
 
   const refetch = useCallback(async () => {
     if (shouldUsePortfolioEndpoint) {
       const result = await portfolioRefetch()
-      refetchSummaries()
+      await refetchSummary()
       return result
     }
     await Promise.all([positionsRefetch(), txServiceBalancesRefetch()])
-    refetchSummaries()
-  }, [shouldUsePortfolioEndpoint, portfolioRefetch, positionsRefetch, txServiceBalancesRefetch, refetchSummaries])
+    await refetchSummary()
+  }, [shouldUsePortfolioEndpoint, portfolioRefetch, positionsRefetch, txServiceBalancesRefetch, refetchSummary])
 
   const refetchPositions = useCallback(async () => {
     if (shouldUsePortfolioEndpoint) {
@@ -110,5 +109,5 @@ export const useRefetchBalances = () => {
     ? portfolioIsFetching
     : positionsIsFetching || txServiceBalancesIsFetching
 
-  return { refetch, refetchPositions, shouldUsePortfolioEndpoint, fulfilledTimeStamp, isFetching }
+  return { refetch, refetchPositions, refetchSummary, shouldUsePortfolioEndpoint, fulfilledTimeStamp, isFetching }
 }

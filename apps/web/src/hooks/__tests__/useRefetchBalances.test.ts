@@ -1,9 +1,7 @@
 import { http, HttpResponse } from 'msw'
-import { act, fakerChecksummedAddress, renderHook, waitFor } from '@/tests/test-utils'
+import { act, renderHook, waitFor } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
-import { getStoreInstance } from '@/store'
-import { portfolioSummariesRtkApi } from '@safe-global/store/gateway/portfolioSummaries'
 import { useRefetchBalances } from '@/hooks/useRefetchBalances'
 import * as useChainId from '@/hooks/useChainId'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
@@ -181,67 +179,53 @@ describe('useRefetchBalances', () => {
 
   describe('portfolio summaries', () => {
     const recordSummaryRequests = () => {
-      const requests: string[] = []
+      const requests: Array<Record<string, string | null>> = []
       server.use(
         http.get(`${GATEWAY_URL}/v2/portfolio/summaries`, ({ request }) => {
-          requests.push(new URL(request.url).searchParams.get('safes') ?? '')
+          const params = new URL(request.url).searchParams
+          requests.push({
+            safes: params.get('safes'),
+            currency: params.get('currency'),
+            trusted: params.get('trusted'),
+          })
           return HttpResponse.json([])
         }),
       )
       return requests
     }
 
-    const subscribeToSummary = async (safeId: string) => {
-      const subscription = getStoreInstance().dispatch(
-        portfolioSummariesRtkApi.endpoints.portfolioGetSummariesForMany.initiate({
-          safes: [safeId],
-          currency: 'usd',
-          trusted: true,
-        }),
-      )
-      await subscription
-      return { unsubscribe: subscription.unsubscribe }
-    }
-
     const mockFeatures = (enabled: FEATURES[]) =>
       jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => enabled.includes(feature))
 
-    it('refetches the summaries holding the Safe after its balances refetch, when the chain has the flag', async () => {
+    it('refetches the current Safe summary once after refetching its portfolio, when the chain has the flag', async () => {
       mockFeatures([FEATURES.PORTFOLIO_ENDPOINT, FEATURES.POSITIONS, FEATURES.PORTFOLIO_SUMMARIES])
       const requests = recordSummaryRequests()
       const { result } = renderHook(() => useRefetchBalances())
-      const subscription = await subscribeToSummary(`${CHAIN_ID}:${SAFE_ADDRESS.toUpperCase().replace('0X', '0x')}`)
 
-      await result.current.refetch()
+      await act(() => result.current.refetch())
 
-      await waitFor(() => expect(requests).toHaveLength(2))
-      subscription.unsubscribe()
+      expect(mockRefetch).toHaveBeenCalled()
+      expect(requests).toEqual([{ safes: `${CHAIN_ID}:${SAFE_ADDRESS}`, currency: 'USD', trusted: 'true' }])
     })
 
-    it('leaves the summaries of other Safes alone', async () => {
-      mockFeatures([FEATURES.PORTFOLIO_ENDPOINT, FEATURES.POSITIONS, FEATURES.PORTFOLIO_SUMMARIES])
+    it('refetches the current Safe summary without the portfolio endpoint', async () => {
+      mockFeatures([FEATURES.PORTFOLIO_SUMMARIES])
       const requests = recordSummaryRequests()
       const { result } = renderHook(() => useRefetchBalances())
-      const subscription = await subscribeToSummary(`${CHAIN_ID}:${fakerChecksummedAddress()}`)
 
-      await result.current.refetch()
+      await act(() => result.current.refetchSummary())
 
-      await act(() => new Promise((resolve) => setTimeout(resolve, 50)))
       expect(requests).toHaveLength(1)
-      subscription.unsubscribe()
     })
 
     it('does not refetch summaries when the chain has the flag off', async () => {
       mockFeatures([FEATURES.PORTFOLIO_ENDPOINT, FEATURES.POSITIONS])
       const requests = recordSummaryRequests()
       const { result } = renderHook(() => useRefetchBalances())
-      const subscription = await subscribeToSummary(`${CHAIN_ID}:${SAFE_ADDRESS}`)
 
-      await result.current.refetch()
+      await act(() => result.current.refetch())
 
-      await act(() => new Promise((resolve) => setTimeout(resolve, 50)))
-      expect(requests).toHaveLength(1)
-      subscription.unsubscribe()
+      expect(requests).toEqual([])
     })
   })
 })

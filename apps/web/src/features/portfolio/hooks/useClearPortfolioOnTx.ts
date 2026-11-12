@@ -1,25 +1,41 @@
 import { useEffect } from 'react'
-import { usePortfolioClearPortfolioV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
+import {
+  refreshPortfolioSummary,
+  usePortfolioClearForSummaryMutation,
+} from '@safe-global/store/gateway/portfolioSummaries'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import useChains from '@/hooks/useChains'
+import { useAppDispatch, useAppSelector } from '@/store'
+import { selectCurrency, selectTokenList } from '@/store/settingsSlice'
+import { makeSafeTag } from '@/store/api/gateway'
+import { isTrustedTokenList } from '@/utils/tokenList'
 import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 
-/**
- * Clears the CGW portfolio snapshot of a Safe once its tx executes, on chains that read summaries.
- * The mutation invalidates the `portfolio` tag, so summaries and `/v1/portfolio` refetch.
- */
+/** On a summaries chain, clears an executed Safe's CGW portfolio cache, then refetches that Safe's summary only. */
 const useClearPortfolioOnTx = (): void => {
   const { configs } = useChains()
-  const [clearPortfolio] = usePortfolioClearPortfolioV1Mutation()
+  const currency = useAppSelector(selectCurrency)
+  const tokenList = useAppSelector(selectTokenList)
+  const dispatch = useAppDispatch()
+  const [clearPortfolio] = usePortfolioClearForSummaryMutation()
 
   useEffect(() => {
-    return txSubscribe(TxEvent.SUCCESS, ({ chainId, safeAddress }) => {
+    return txSubscribe(TxEvent.SUCCESS, async ({ chainId, safeAddress }) => {
       const chain = configs.find((config) => config.chainId === chainId)
       if (!chain || !hasFeature(chain, FEATURES.PORTFOLIO_SUMMARIES)) return
 
-      clearPortfolio({ address: safeAddress, chainId })
+      const result = await clearPortfolio({ address: safeAddress, chainId })
+      if ('error' in result) return
+
+      await dispatch(
+        refreshPortfolioSummary({
+          safes: [makeSafeTag(chainId, safeAddress)],
+          currency,
+          trusted: isTrustedTokenList(chain, tokenList),
+        }),
+      )
     })
-  }, [configs, clearPortfolio])
+  }, [configs, clearPortfolio, dispatch, currency, tokenList])
 }
 
 export default useClearPortfolioOnTx
