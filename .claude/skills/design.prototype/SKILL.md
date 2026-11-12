@@ -20,7 +20,7 @@ Create a Storybook prototype from **$ARGUMENTS** using only shadcn/ui components
 
 **Goal:** besides a good design, produce a diff that is a pleasure to review. A developer should be able to skim it, see that it is only markup and touches no business logic, and approve it quickly. Keep that goal in mind at every step.
 
-**Note:** All shadcn/ui components are already installed and available at `packages/ui/src/primitives/<name>/` (Safe composed components live in `packages/ui/src/components/<name>/`). Import them directly (e.g., `import { Button } from '@safe-global/views/components/ui/button'`).
+**Note:** All shadcn/ui components are already installed and available at `packages/ui/src/primitives/<name>/`. Import them directly (e.g., `import { Button } from '@safe-global/views/components/ui/button'`). Safe composed components (`packages/ui/src/components/<name>/`, imported as `@safe-global/ui/components/<name>`) have no `views` re-export, so wallet prototypes cannot use them until Phase 2.
 
 ## Step 1: Gather Requirements
 
@@ -55,7 +55,7 @@ Lay the prototype out the way a developer would build the real feature, so each 
 
 **Rules**:
 
-- Use only shadcn/ui components from `packages/ui/src/primitives/` and Safe components from `packages/ui/src/components/`
+- Use only shadcn/ui components from `packages/ui/src/primitives/` (Safe components in `packages/ui/src/components/` are not wired into the wallet until Phase 2)
 - No custom styling on components
 - Use layout-only Tailwind classes on wrapper `div`s
 
