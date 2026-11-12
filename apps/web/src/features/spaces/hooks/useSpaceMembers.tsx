@@ -4,6 +4,7 @@ import {
   type MemberDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useMemo } from 'react'
+import { MemberRole } from '../memberRole'
 import { useAuthGetMeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
@@ -28,10 +29,7 @@ export enum MemberStatus {
   DECLINED = 'DECLINED',
 }
 
-export enum MemberRole {
-  ADMIN = 'ADMIN',
-  MEMBER = 'MEMBER',
-}
+export { MemberRole }
 
 // CGW stores the self-set alias with the default NameSchema (30), not the 255-char member name.
 export const MEMBER_ALIAS_MAX_LENGTH = NAME_MAX_LENGTH

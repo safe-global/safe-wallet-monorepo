@@ -2098,7 +2098,7 @@
         },
         "responses": {
           "202": {
-            "description": "Message accepted. The Transaction Service indexes messages asynchronously, so the message may not be immediately retrievable — poll GET /v1/chains/{chainId}/messages/{messageHash}."
+            "description": "Message accepted. The Transaction Service indexes messages asynchronously, so the message may not be immediately retrievable \u2014 poll GET /v1/chains/{chainId}/messages/{messageHash}."
           },
           "400": {
             "description": "Invalid message format or signature"
@@ -3123,7 +3123,7 @@
     },
     "/v1/spaces/{spaceId}/audit-log": {
       "get": {
-        "description": "Retrieves the append-only audit log of a space — who did what, when. Requires ACTIVE membership. Events are ordered by creation time (newest first by default) with a stable id tie-break.",
+        "description": "Retrieves the append-only audit log of a space \u2014 who did what, when. Requires ACTIVE membership. Events are ordered by creation time (newest first by default) with a stable id tie-break.",
         "operationId": "spaceAuditGetAuditLogV1",
         "parameters": [
           {
@@ -3224,7 +3224,7 @@
     },
     "/v1/spaces/{spaceId}/audit-log/actors": {
       "get": {
-        "description": "Retrieves the distinct actors appearing in a space audit log — including former and deleted members — as a filter dropdown source. Requires ACTIVE membership.",
+        "description": "Retrieves the distinct actors appearing in a space audit log \u2014 including former and deleted members \u2014 as a filter dropdown source. Requires ACTIVE membership.",
         "operationId": "spaceAuditGetAuditLogActorsV1",
         "parameters": [
           {
@@ -4760,7 +4760,7 @@
     },
     "/v1/spaces/{spaceId}/chains/{chainId}/relay": {
       "post": {
-        "description": "Relays a Safe transaction against the workspace's sponsored-transaction allowance, which its plan grants and this spends one unit of per call — a batch included. The chain must list SUBSCRIPTION among its gas payment options; no other option applies here. A call acting on an existing Safe is admitted only for a Safe the workspace holds; a Safe creation or a passkey signer deployment, having no Safe yet, is admitted as it is there.",
+        "description": "Relays a Safe transaction against the workspace's sponsored-transaction allowance, which its plan grants and this spends one unit of per call \u2014 a batch included. The chain must list SUBSCRIPTION among its gas payment options; no other option applies here. A call acting on an existing Safe is admitted only for a Safe the workspace holds; a Safe creation or a passkey signer deployment, having no Safe yet, is admitted as it is there.",
         "operationId": "spaceRelayRelayV1",
         "parameters": [
           {
@@ -7954,6 +7954,231 @@
         "summary": "Delete device",
         "tags": [
           "notifications"
+        ]
+      }
+    },
+    "/v1/billing/trial-plans": {
+      "get": {
+        "description": "The general trial payment links a space that does not exist yet is offered: the standard trial, no negotiated links. Same shape as the payment links of a space.",
+        "operationId": "billingGetTrialPlansV1",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PaymentLink"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get the trial plans for a new space",
+        "tags": [
+          "billing"
+        ]
+      }
+    },
+    "/v1/surveys/{slug}": {
+      "get": {
+        "description": "Returns the active survey for the slug. It needs no space, so a Workspace that does not exist yet can show it.",
+        "operationId": "surveysGetActiveSurveyV1",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "onboarding",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SurveyDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authenticated"
+          },
+          "404": {
+            "description": "No active survey for this slug"
+          }
+        },
+        "summary": "Get the active survey",
+        "tags": [
+          "surveys"
+        ]
+      }
+    },
+    "/v1/spaces/setup": {
+      "post": {
+        "description": "Creates the space and its creator, stores the rest of the form as a pending setup, and starts the trial checkout. The setup (Safes, contacts, invites, survey) is applied when the trial starts. When billing is off or not enforced, the setup is applied at once and checkoutUrl is null.",
+        "operationId": "spacesCreateSetupV1",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSpaceSetupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceSetupCheckoutDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid return URL or survey selections"
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
+          },
+          "403": {
+            "description": "Elevation required, a plan that is not offered, or the space limit is reached"
+          },
+          "404": {
+            "description": "No active survey for this slug"
+          },
+          "409": {
+            "description": "The plan has fewer Safe seats than selected, or too many invites"
+          },
+          "422": {
+            "description": "Invalid body, or no plan while billing is enforced"
+          },
+          "502": {
+            "description": "The space was created, but the checkout could not start. The body carries spaceId; retry with PUT."
+          }
+        },
+        "summary": "Create a space from the onboarding form",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{id}/setup": {
+      "get": {
+        "description": "Returns the onboarding form stored for the space. While it is pending, the subscription is read from the billing service, and a started trial applies the setup before this answers. Admins only.",
+        "operationId": "spacesGetSetupV1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceSetupDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier"
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
+          },
+          "403": {
+            "description": "User is not an admin of this space"
+          },
+          "404": {
+            "description": "Space not found, or it has no setup"
+          }
+        },
+        "summary": "Get the setup of a space",
+        "tags": [
+          "spaces"
+        ]
+      },
+      "put": {
+        "description": "Replaces the name and the onboarding form of a space whose trial has not started, and starts a new checkout. Admins only.",
+        "operationId": "spacesUpdateSetupV1",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSpaceSetupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceSetupCheckoutDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier, return URL or survey selections"
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
+          },
+          "403": {
+            "description": "Elevation required, not an admin, or a plan that is not offered"
+          },
+          "404": {
+            "description": "Space not found, it has no setup, or no active survey"
+          },
+          "409": {
+            "description": "The setup is applied or the trial has started, the plan has fewer Safe seats than selected, or too many invites"
+          },
+          "422": {
+            "description": "Invalid body, or no plan while billing is enforced"
+          }
+        },
+        "summary": "Replace the setup of a space",
+        "tags": [
+          "spaces"
         ]
       }
     }
@@ -11702,6 +11927,15 @@
                 "POLICY_RECIPIENT_ALLOWLIST"
               ]
             }
+          },
+          "setupStatus": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "applied"
+            ],
+            "nullable": true,
+            "description": "Status of the onboarding setup, or null for a Workspace created without one. Pending until the trial starts and the setup is applied."
           }
         },
         "required": [
@@ -11710,7 +11944,8 @@
           "members",
           "memberCount",
           "safeCount",
-          "experimentalFeatures"
+          "experimentalFeatures",
+          "setupStatus"
         ]
       },
       "UpdateSpaceDto": {
@@ -16419,7 +16654,7 @@
                 "type": "string"
               }
             },
-            "description": "Map from page id → selected option keys"
+            "description": "Map from page id \u2192 selected option keys"
           },
           "submittedAt": {
             "format": "date-time",
@@ -16474,7 +16709,7 @@
                 "type": "string"
               }
             },
-            "description": "Map from page id → selected option keys",
+            "description": "Map from page id \u2192 selected option keys",
             "example": {
               "use_cases": [
                 "run_payments",
@@ -19272,7 +19507,7 @@
           "signerAddress": {
             "type": "string",
             "nullable": true,
-            "description": "Optional signer address filter:\n• Omitted (undefined): Deletes subscriptions regardless of signer address\n• null: Deletes only subscriptions with no signer address\n• Valid address: Deletes only subscriptions with that specific signer address"
+            "description": "Optional signer address filter:\n\u2022 Omitted (undefined): Deletes subscriptions regardless of signer address\n\u2022 null: Deletes only subscriptions with no signer address\n\u2022 Valid address: Deletes only subscriptions with that specific signer address"
           }
         },
         "required": [
@@ -19295,6 +19530,166 @@
         },
         "required": [
           "subscriptions"
+        ]
+      },
+      "CreateSpaceSetupDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "paymentLinkId": {
+            "type": "string",
+            "nullable": true,
+            "description": "The picked trial plan. Null only while billing is off or not enforced."
+          },
+          "safes": {
+            "description": "Safes to add when the trial starts. One seat per address, however many chains.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpaceSafeDto"
+            }
+          },
+          "addressBookItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressBookItem"
+            }
+          },
+          "invites": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/WalletInviteUserDto"
+                },
+                {
+                  "$ref": "#/components/schemas/EmailInviteUserDto"
+                }
+              ]
+            }
+          },
+          "survey": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpaceSetupSurveyDto"
+              }
+            ]
+          },
+          "returnUrl": {
+            "type": "string",
+            "description": "Where the checkout returns to. Must be on an allowed redirect domain."
+          }
+        },
+        "required": [
+          "name",
+          "paymentLinkId",
+          "safes",
+          "addressBookItems",
+          "invites",
+          "survey",
+          "returnUrl"
+        ]
+      },
+      "SpaceSetupCheckoutDto": {
+        "type": "object",
+        "properties": {
+          "spaceId": {
+            "type": "string",
+            "description": "Space UUID"
+          },
+          "checkoutUrl": {
+            "type": "string",
+            "nullable": true,
+            "description": "The checkout to redirect to. Null when billing is off or not enforced: the setup is applied already."
+          }
+        },
+        "required": [
+          "spaceId",
+          "checkoutUrl"
+        ]
+      },
+      "SpaceSetupDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "applied"
+            ]
+          },
+          "paymentLinkId": {
+            "type": "string",
+            "nullable": true
+          },
+          "safes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpaceSafeDto"
+            }
+          },
+          "addressBookItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressBookItem"
+            }
+          },
+          "invites": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/WalletInviteUserDto"
+                },
+                {
+                  "$ref": "#/components/schemas/EmailInviteUserDto"
+                }
+              ]
+            }
+          },
+          "survey": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpaceSetupSurveyDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "paymentLinkId",
+          "safes",
+          "addressBookItems",
+          "invites",
+          "survey"
+        ]
+      },
+      "SpaceSetupSurveyDto": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "example": "onboarding"
+          },
+          "selections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Map from page id to selected option keys"
+          }
+        },
+        "required": [
+          "slug",
+          "selections"
         ]
       }
     }

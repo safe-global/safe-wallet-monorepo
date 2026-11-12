@@ -379,6 +379,21 @@ describe('useFlowActivationGuard', () => {
       expect(guardResult).toEqual({ success: true })
     })
 
+    it.each([
+      ['plan', AppRoutes.welcome.plan],
+      ['survey', AppRoutes.welcome.survey],
+    ])(
+      'should allow the %s step to a user with no spaces, since the Workspace is only created at the end',
+      async (_, pathname) => {
+        setupMocks({ pathname, spaces: [] })
+
+        const { result } = renderHook(() => useFlowActivationGuard())
+        const guardResult = await result.current.activationGuard()
+
+        expect(guardResult).toEqual({ success: true })
+      },
+    )
+
     it('should preserve ?safe= when redirecting to create space onboarding', async () => {
       setupMocks({
         pathname: AppRoutes.spaces.index,

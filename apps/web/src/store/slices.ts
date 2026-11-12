@@ -65,4 +65,6 @@ export {
   spaceNavigationSlice,
   setLastUsedSpaceOrigin,
   selectLastUsedSpaceOrigin,
+  workspaceDraftSlice,
+  workspaceWizardSlice,
 } from '@/features/spaces/store'

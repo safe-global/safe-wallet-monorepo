@@ -26,6 +26,7 @@ const spaceAlpha = {
   memberCount: 1,
   safeCount: 1,
   experimentalFeatures: [],
+  setupStatus: null,
 } as GetSpaceResponse
 const spaceBravo = {
   uuid: 'bravo',
@@ -34,6 +35,7 @@ const spaceBravo = {
   memberCount: 1,
   safeCount: 1,
   experimentalFeatures: [],
+  setupStatus: null,
 } as GetSpaceResponse
 
 const mockSafesResolver = (safesBySpace: Record<string, { safes: Record<string, string[]> }>) =>

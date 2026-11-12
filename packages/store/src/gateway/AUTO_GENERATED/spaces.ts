@@ -275,6 +275,22 @@ const injectedRtkApi = api
         }),
         providesTags: ['spaces'],
       }),
+      spacesCreateSetupV1: build.mutation<SpacesCreateSetupV1ApiResponse, SpacesCreateSetupV1ApiArg>({
+        query: (queryArg) => ({ url: `/v1/spaces/setup`, method: 'POST', body: queryArg.createSpaceSetupDto }),
+        invalidatesTags: ['spaces'],
+      }),
+      spacesGetSetupV1: build.query<SpacesGetSetupV1ApiResponse, SpacesGetSetupV1ApiArg>({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.id}/setup` }),
+        providesTags: ['spaces'],
+      }),
+      spacesUpdateSetupV1: build.mutation<SpacesUpdateSetupV1ApiResponse, SpacesUpdateSetupV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.id}/setup`,
+          method: 'PUT',
+          body: queryArg.createSpaceSetupDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
     }),
     overrideExisting: false,
   })
@@ -540,6 +556,21 @@ export type SpacePoliciesGetPendingPoliciesV1ApiArg = {
   /** Also report the queued `setGuard` and `setModuleGuard` calls that install, replace or remove a `SafePolicyGuard` on each Safe, as `guard-installation` items. */
   includeGuardInstallation?: boolean
 }
+export type SpacesCreateSetupV1ApiResponse = /** status 201  */ SpaceSetupCheckoutDto
+export type SpacesCreateSetupV1ApiArg = {
+  createSpaceSetupDto: CreateSpaceSetupDto
+}
+export type SpacesGetSetupV1ApiResponse = /** status 200  */ SpaceSetupDto
+export type SpacesGetSetupV1ApiArg = {
+  /** Space UUID */
+  id: string
+}
+export type SpacesUpdateSetupV1ApiResponse = /** status 200  */ SpaceSetupCheckoutDto
+export type SpacesUpdateSetupV1ApiArg = {
+  /** Space UUID */
+  id: string
+  createSpaceSetupDto: CreateSpaceSetupDto
+}
 export type SpaceAddressBookItemDto = {
   name: string
   address: string
@@ -660,6 +691,8 @@ export type GetSpaceResponse = {
   safeCount: number
   /** Experimental features this Workspace has opted into. */
   experimentalFeatures: 'POLICY_RECIPIENT_ALLOWLIST'[]
+  /** Status of the onboarding setup, or null for a Workspace created without one. Pending until the trial starts and the setup is applied. */
+  setupStatus: ('pending' | 'applied') | null
 }
 export type UpdateSpaceResponse = {
   /** Space UUID */
@@ -1204,6 +1237,39 @@ export type PendingDelayedGuardPoliciesDto = {
   /** Unix seconds the change was first seen: when CGW stored its configurations, else when its queued transaction was proposed. Null for a root requested outside the wallet. */
   createdAt: number | null
 }
+export type SpaceSetupCheckoutDto = {
+  /** Space UUID */
+  spaceId: string
+  /** The checkout to redirect to. Null when billing is off or not enforced: the setup is applied already. */
+  checkoutUrl: string | null
+}
+export type SpaceSetupSurveyDto = {
+  slug: string
+  /** Map from page id to selected option keys */
+  selections: {
+    [key: string]: string[]
+  }
+}
+export type CreateSpaceSetupDto = {
+  name: string
+  /** The picked trial plan. Null only while billing is off or not enforced. */
+  paymentLinkId: string | null
+  /** Safes to add when the trial starts. One seat per address, however many chains. */
+  safes: SpaceSafeDto[]
+  addressBookItems: AddressBookItem[]
+  invites: (WalletInviteUserDto | EmailInviteUserDto)[]
+  survey: SpaceSetupSurveyDto | null
+  /** Where the checkout returns to. Must be on an allowed redirect domain. */
+  returnUrl: string
+}
+export type SpaceSetupDto = {
+  status: 'pending' | 'applied'
+  paymentLinkId: string | null
+  safes: SpaceSafeDto[]
+  addressBookItems: AddressBookItem[]
+  invites: (WalletInviteUserDto | EmailInviteUserDto)[]
+  survey: SpaceSetupSurveyDto | null
+}
 export const {
   useAddressBooksGetAddressBookItemsV1Query,
   useLazyAddressBooksGetAddressBookItemsV1Query,
@@ -1254,4 +1320,8 @@ export const {
   useLazySpacePoliciesGetActivePoliciesV1Query,
   useSpacePoliciesGetPendingPoliciesV1Query,
   useLazySpacePoliciesGetPendingPoliciesV1Query,
+  useSpacesCreateSetupV1Mutation,
+  useSpacesGetSetupV1Query,
+  useLazySpacesGetSetupV1Query,
+  useSpacesUpdateSetupV1Mutation,
 } = injectedRtkApi

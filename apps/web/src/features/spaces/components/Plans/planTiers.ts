@@ -18,6 +18,7 @@ import type {
   PlanSeatOption,
   PlanSummary,
   PlanTier,
+  TrialSize,
 } from '@safe-global/views/features/spaces/components/Plans/types'
 
 const CYCLES = ['month', 'year'] as const
@@ -269,6 +270,28 @@ export const claimTiers = (trialPlans: PlanGroup[]): PlanTier[] =>
     .filter((tier) => tier.billingCycle === 'month')
     .map((tier) => ({ ...tier, features: [tier.options[0].label, ...tier.features] }))
     .sort((a, b) => rank(a.name) - rank(b.name))
+
+/** Every monthly trial option with a link and a seat count, smallest first, so Starter leads. */
+export const trialSizes = (trialPlans: PlanGroup[]): TrialSize[] =>
+  _offersToTiers(trialPlans)
+    .filter((tier) => tier.billingCycle === 'month')
+    .flatMap((tier) =>
+      tier.options.flatMap((option) =>
+        option.paymentLinkId && typeof option.seats === 'number'
+          ? [
+              {
+                paymentLinkId: option.paymentLinkId,
+                seats: option.seats,
+                planName: tier.name,
+                subtitle: tier.copy?.subtitle,
+                monthlyPrice: option.price,
+                currency: tier.currency,
+              },
+            ]
+          : [],
+      ),
+    )
+    .sort((a, b) => a.seats - b.seats)
 
 export const getCatalogTiers = (tiers: PlanTier[]): PlanTier[] => {
   const hasCurrentEnterprise = tiers.some((tier) => tier.isCurrent && tier.name === ENTERPRISE_TIER.name)
