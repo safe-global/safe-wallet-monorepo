@@ -1,7 +1,7 @@
 import { getOriginPath } from './url'
 
-type NativeChannel = 'native-transfer' | 'native-batch'
-type AppChannel = 'safe-app' | 'widget' | 'wallet-connect'
+type NativeChannel = 'NATIVE_TRANSFER' | 'NATIVE_BATCH'
+type AppChannel = 'SAFE_APP' | 'WIDGET' | 'WALLET_CONNECT'
 
 export type DeclaredChannel = NativeChannel | AppChannel
 
@@ -32,7 +32,7 @@ export function buildDeclared(channel: DeclaredChannel, app?: DeclaredApp): Decl
   if (!app) return { channel }
 
   const appUrl = toHttpOriginPath(app.url)
-  const appId = channel === 'safe-app' ? app.listedAppId : undefined
+  const appId = channel === 'SAFE_APP' ? app.listedAppId : undefined
 
   return {
     channel,
