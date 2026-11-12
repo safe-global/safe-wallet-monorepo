@@ -13,7 +13,7 @@ import { useAppDispatch } from '@/store'
 import * as useSafeWalletProvider from '@/services/safe-wallet-provider/useSafeWalletProvider'
 import * as useLocalStorageHook from '@/services/local-storage/useLocalStorage'
 import * as useSafeAppSuggestionHook from '../hooks/useSafeAppSuggestion'
-import { safeAppSuggestionBuilder } from '../hooks/safeAppSuggestion.fixtures'
+import { safeAppSuggestionBuilder } from '../hooks/safeAppSuggestion.testData'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 
 jest.mock('@reown/walletkit', () => jest.fn())
