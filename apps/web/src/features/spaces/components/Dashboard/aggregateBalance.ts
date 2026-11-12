@@ -1,18 +1,10 @@
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import type { PortfolioSummary } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import type { PortfolioSummaries, SafeRef } from '@/features/portfolio'
 
-type SafeRef = { chainId: string; address: string }
+type Summaries = Pick<PortfolioSummaries, 'isEnabled' | 'getSummary'>
 
-type Summaries = {
-  isEnabled: (chainId: string) => boolean
-  getSummary: (chainId: string, address: string) => PortfolioSummary | undefined
-}
-
-/**
- * Sums the Workspace balance. A chain with portfolio summaries reads its summary (falling back to the
- * overview when CGW dropped the Safe) and leaves testnets out; any other chain keeps the overview.
- */
+/** Workspace total: summaries on flagged chains (testnets left out, overview when missing), overviews elsewhere. */
 export const aggregateBalance = (
   safes: SafeRef[],
   overviews: SafeOverview[] | undefined,

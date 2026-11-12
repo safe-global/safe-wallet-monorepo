@@ -1,16 +1,21 @@
 import { useCallback, useMemo } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
-import { usePortfolioGetSummariesForManyQuery } from '@safe-global/store/gateway/portfolioSummaries'
+import {
+  portfolioSummariesRtkApi,
+  usePortfolioGetSummariesForManyQuery,
+} from '@safe-global/store/gateway/portfolioSummaries'
 import type { PortfolioSummary } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import useChains from '@/hooks/useChains'
-import { useAppSelector } from '@/store'
+import { type RootState, useAppSelector } from '@/store'
 import { selectCurrency, selectTokenList, type TOKEN_LISTS } from '@/store/settingsSlice'
 import { makeSafeOverviewTag, makeSafeTag } from '@/store/api/gateway'
 import { isTrustedTokenList } from '@/utils/tokenList'
 
-type SafeRef = { chainId: string; address: string }
+export type SafeRef = { chainId: string; address: string }
+
+type CachedSummaries = { trusted: boolean; summaries: PortfolioSummary[]; fetchedAt: number }
 
 const toSortedSafeIds = (safes: SafeRef[]): string[] =>
   Array.from(new Set(safes.map((safe) => makeSafeTag(safe.chainId, safe.address)))).sort()
@@ -27,15 +32,46 @@ const splitByTrusted = (safes: SafeRef[], enabledChains: Map<string, Chain>, tok
   }
 }
 
-/**
- * Fetches CGW portfolio summaries for the Safes whose chain has PORTFOLIO_SUMMARIES enabled.
- * A Safe on a chain without the flag is not requested, so its caller keeps its current source.
- * Each Safe is requested with the `trusted` value its chain sends to /v1/portfolio, so both read one Zerion snapshot.
- */
+const summaryKey = (trusted: boolean, chainId: string, address: string) =>
+  `${trusted}:${makeSafeOverviewTag(chainId, address)}`
+
+// Every cached summaries list in the user's currency, from any screen
+const selectCachedSummaries = (state: RootState): CachedSummaries[] => {
+  const currency = selectCurrency(state)
+  const { util, endpoints } = portfolioSummariesRtkApi
+  return util
+    .selectCachedArgsForQuery(state, 'portfolioGetSummariesForMany')
+    .filter((args) => args.currency === currency)
+    .flatMap((args) => {
+      const { data, fulfilledTimeStamp } = endpoints.portfolioGetSummariesForMany.select(args)(state)
+      return data && fulfilledTimeStamp
+        ? [{ trusted: args.trusted, summaries: data, fetchedAt: fulfilledTimeStamp }]
+        : []
+    })
+}
+
+const isSameCache = (a: CachedSummaries[], b: CachedSummaries[]) =>
+  a.length === b.length &&
+  a.every((entry, i) => entry.summaries === b[i].summaries && entry.fetchedAt === b[i].fetchedAt)
+
+const pickNewest = (cached: CachedSummaries[]) => {
+  const newest = new Map<string, { summary: PortfolioSummary; fetchedAt: number }>()
+  for (const { trusted, summaries, fetchedAt } of cached) {
+    for (const summary of summaries) {
+      const key = summaryKey(trusted, summary.chainId, summary.address)
+      const current = newest.get(key)
+      if (!current || current.fetchedAt < fetchedAt) newest.set(key, { summary, fetchedAt })
+    }
+  }
+  return newest
+}
+
+/** Summaries of the Safes on PORTFOLIO_SUMMARIES chains; `getSummary` returns the newest one any screen fetched. */
 const usePortfolioSummaries = (safes: SafeRef[]) => {
   const { configs } = useChains()
   const currency = useAppSelector(selectCurrency)
   const tokenList = useAppSelector(selectTokenList)
+  const cached = useAppSelector(selectCachedSummaries, isSameCache)
 
   const enabledChains = useMemo(
     () =>
@@ -60,28 +96,26 @@ const usePortfolioSummaries = (safes: SafeRef[]) => {
     requestedSafes.untrusted.length > 0 ? { safes: requestedSafes.untrusted, currency, trusted: false } : skipToken,
   )
 
-  const summariesByTag = useMemo(
-    () =>
-      new Map(
-        [...(trustedQuery.data ?? []), ...(untrustedQuery.data ?? [])].map((summary) => [
-          makeSafeOverviewTag(summary.chainId, summary.address),
-          summary,
-        ]),
-      ),
-    [trustedQuery.data, untrustedQuery.data],
-  )
+  const newestSummaries = useMemo(() => pickNewest(cached), [cached])
 
   const isEnabled = useCallback((chainId: string) => enabledChains.has(chainId), [enabledChains])
 
   const getSummary = useCallback(
-    (chainId: string, address: string): PortfolioSummary | undefined =>
-      summariesByTag.get(makeSafeOverviewTag(chainId, address)),
-    [summariesByTag],
+    (chainId: string, address: string): PortfolioSummary | undefined => {
+      const chain = enabledChains.get(chainId)
+      if (!chain) return undefined
+      return newestSummaries.get(summaryKey(isTrustedTokenList(chain, tokenList), chainId, address))?.summary
+    },
+    [enabledChains, newestSummaries, tokenList],
   )
 
-  const isLoading = trustedQuery.isLoading || untrustedQuery.isLoading
+  // currentData, not data: data keeps the previous args' result after a token list, currency or Safe change
+  const isLoading =
+    (trustedQuery.isFetching && !trustedQuery.currentData) || (untrustedQuery.isFetching && !untrustedQuery.currentData)
 
   return useMemo(() => ({ isEnabled, getSummary, isLoading }), [isEnabled, getSummary, isLoading])
 }
+
+export type PortfolioSummaries = ReturnType<typeof usePortfolioSummaries>
 
 export default usePortfolioSummaries
