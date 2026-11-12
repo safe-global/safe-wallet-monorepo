@@ -1,4 +1,4 @@
-import { http, HttpResponse } from 'msw'
+import { delay, http, HttpResponse } from 'msw'
 import { faker } from '@faker-js/faker'
 import { fakerChecksummedAddress } from '@/tests/test-utils'
 import { server } from '@/tests/server'
@@ -109,5 +109,35 @@ describe('safeOverviews trusted param', () => {
       ['false', `${otherChain.chainId}:${safe}`],
       ['true', `${summariesChain.chainId}:${safe}`],
     ])
+  })
+
+  it('waits for chain configs that are still loading before choosing the trusted value', async () => {
+    const requests = recordSafesRequests()
+    const chain = chainBuilder()
+      .with({ features: [...TRUSTED_TOKENLIST, FEATURES.PORTFOLIO_SUMMARIES] })
+      .build()
+    server.use(
+      http.get(`${GATEWAY_URL}/v2/chains`, async () => {
+        await delay(100)
+        return HttpResponse.json({ results: [chain], next: null })
+      }),
+    )
+    const store = makeStore({ settings: initialSettings })
+    setStoreInstance(store)
+
+    const chainsQuery = store.dispatch(
+      apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY),
+    )
+    const overviewsQuery = store.dispatch(
+      gatewayApi.endpoints.getMultipleSafeOverviews.initiate({
+        currency: 'usd',
+        safes: [{ chainId: chain.chainId, address: fakerChecksummedAddress() }],
+      }),
+    )
+    await overviewsQuery
+
+    expect(requests.map((params) => params.get('trusted'))).toEqual(['true'])
+    chainsQuery.unsubscribe()
+    overviewsQuery.unsubscribe()
   })
 })
