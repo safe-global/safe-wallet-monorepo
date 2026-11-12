@@ -1,19 +1,16 @@
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { PortfolioSummary } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
+import { fakerChecksummedAddress } from '@/tests/test-utils'
+import { portfolioSummaryBuilder } from '@/tests/builders/portfolioSummary'
 import { aggregateBalance } from '../aggregateBalance'
 
-const SAFE = '0x1111111111111111111111111111111111111111'
+const SAFE = fakerChecksummedAddress()
 
 const overview = (chainId: string, fiatTotal: string) =>
   ({ chainId, address: { value: SAFE }, fiatTotal }) as unknown as SafeOverview
 
-const summary = (chainId: string, fiatTotal: string): PortfolioSummary => ({
-  chainId,
-  address: SAFE,
-  fiatTotal,
-  source: 'zerion',
-  snapshot: null,
-})
+const summary = (chainId: string, fiatTotal: string): PortfolioSummary =>
+  portfolioSummaryBuilder().with({ chainId, address: SAFE, fiatTotal }).build()
 
 const makeSummaries = (enabledChainIds: string[], items: PortfolioSummary[]) => ({
   isEnabled: (chainId: string) => enabledChainIds.includes(chainId),

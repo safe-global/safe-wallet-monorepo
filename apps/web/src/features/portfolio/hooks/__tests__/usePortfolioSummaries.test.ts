@@ -1,10 +1,10 @@
-import { faker } from '@faker-js/faker'
 import { renderHook, fakerChecksummedAddress } from '@/tests/test-utils'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { usePortfolioGetSummariesForManyQuery } from '@safe-global/store/gateway/portfolioSummaries'
 import type { PortfolioSummary } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import { chainBuilder } from '@/tests/builders/chains'
+import { portfolioSummaryBuilder } from '@/tests/builders/portfolioSummary'
 import useChains from '@/hooks/useChains'
 import { initialState as initialSettings, TOKEN_LISTS } from '@/store/settingsSlice'
 import usePortfolioSummaries from '../usePortfolioSummaries'
@@ -24,13 +24,8 @@ const SUMMARIES_CHAIN = '1'
 const UNTRUSTED_SUMMARIES_CHAIN = '100'
 const OTHER_CHAIN = '137'
 
-const summary = (chainId: string, address: string): PortfolioSummary => ({
-  chainId,
-  address,
-  fiatTotal: faker.finance.amount(),
-  source: 'zerion',
-  snapshot: null,
-})
+const summary = (chainId: string, address: string): PortfolioSummary =>
+  portfolioSummaryBuilder().with({ chainId, address }).build()
 
 const withTokenList = (tokenList: TOKEN_LISTS) => ({
   initialReduxState: { settings: { ...initialSettings, tokenList } },

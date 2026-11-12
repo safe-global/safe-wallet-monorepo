@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker'
 import { renderHook } from '@/tests/test-utils'
 import type { PortfolioSummary } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import { portfolioSummaryBuilder } from '@/tests/builders/portfolioSummary'
 import { useSafePortfolioSummary } from '@/features/portfolio'
 import useSafeTotalBalance from '../useSafeTotalBalance'
 
@@ -20,10 +21,14 @@ const mockBalances = (fiatTotal: string, balances: string[]) =>
     error: undefined,
   } as unknown as ReturnType<typeof useVisibleBalances>)
 
-const mockSummary = (state: { isEnabled: boolean; summary?: Partial<PortfolioSummary>; isLoading?: boolean }) =>
+const mockSummary = (state: {
+  isEnabled: boolean
+  summary?: Pick<PortfolioSummary, 'fiatTotal'>
+  isLoading?: boolean
+}) =>
   jest.mocked(useSafePortfolioSummary).mockReturnValue({
     isEnabled: state.isEnabled,
-    summary: state.summary as PortfolioSummary | undefined,
+    summary: state.summary && portfolioSummaryBuilder().with(state.summary).build(),
     isLoading: state.isLoading ?? false,
   })
 

@@ -1,5 +1,5 @@
-import { renderHook } from '@/tests/test-utils'
-import type { PortfolioSummary } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
+import { renderHook, fakerChecksummedAddress } from '@/tests/test-utils'
+import { portfolioSummaryBuilder } from '@/tests/builders/portfolioSummary'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import usePortfolioSummaries from '../usePortfolioSummaries'
 import useSafePortfolioSummary from '../useSafePortfolioSummary'
@@ -13,8 +13,8 @@ jest.mock('../usePortfolioSummaries', () => ({
   default: jest.fn(),
 }))
 
-const SAFE = '0x1111111111111111111111111111111111111111'
-const SUMMARY: PortfolioSummary = { chainId: '1', address: SAFE, fiatTotal: '42', source: 'zerion', snapshot: null }
+const SAFE = fakerChecksummedAddress()
+const SUMMARY = portfolioSummaryBuilder().with({ chainId: '1', address: SAFE }).build()
 
 const mockSafe = (deployed: boolean) =>
   jest.mocked(useSafeInfo).mockReturnValue({

@@ -1,4 +1,5 @@
-import { act, renderHook } from '@/tests/test-utils'
+import { faker } from '@faker-js/faker'
+import { act, fakerChecksummedAddress, renderHook } from '@/tests/test-utils'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { usePortfolioClearPortfolioV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import { chainBuilder } from '@/tests/builders/chains'
@@ -15,11 +16,16 @@ jest.mock('@/hooks/useChains', () => ({
   default: jest.fn(),
 }))
 
-const SAFE = '0x1111111111111111111111111111111111111111'
+const SAFE = fakerChecksummedAddress()
 
 const dispatchSuccess = (chainId: string) =>
   act(() => {
-    txDispatch(TxEvent.SUCCESS, { chainId, safeAddress: SAFE, txId: 'tx', groupKey: 'group' })
+    txDispatch(TxEvent.SUCCESS, {
+      chainId,
+      safeAddress: SAFE,
+      txId: faker.string.uuid(),
+      groupKey: faker.string.uuid(),
+    })
   })
 
 describe('useClearPortfolioOnTx', () => {
