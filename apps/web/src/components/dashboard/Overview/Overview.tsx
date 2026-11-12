@@ -1,7 +1,7 @@
 import { type ReactElement } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import useHomeBalance from '@/components/dashboard/useHomeBalance'
+import useSafeTotalBalance from '@/hooks/useSafeTotalBalance'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import OverviewSkeleton from '@safe-global/views/components/dashboard/Overview/OverviewSkeleton'
 import { PortfolioFeature } from '@/features/portfolio'
@@ -11,7 +11,7 @@ import { useLoadFeature } from '@/features/__core__'
 const Overview = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()
   const { loading: balancesLoading } = useVisibleBalances()
-  const { fiatTotal, noAssets } = useHomeBalance()
+  const { fiatTotal, noAssets } = useSafeTotalBalance()
   const portfolio = useLoadFeature(PortfolioFeature)
   const { ActionsTray } = useLoadFeature(ActionsTrayFeature)
 

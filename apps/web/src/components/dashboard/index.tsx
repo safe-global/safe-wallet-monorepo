@@ -15,7 +15,7 @@ import { ActionRequiredPanel } from './ActionRequiredPanel'
 import { VulnerableModuleWarning } from './ActionRequiredPanel/VulnerableModuleWarning'
 import { useVulnerableSafe } from '@/features/security'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import useHomeBalance from '@/components/dashboard/useHomeBalance'
+import useSafeTotalBalance from '@/hooks/useSafeTotalBalance'
 import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
 import { useIsPositionsFeatureEnabled } from '@/features/positions'
 import { useBannerVisibility, BannerType, HnBannerForCarousel, HypernativeFeature } from '@/features/hypernative'
@@ -34,7 +34,7 @@ const Dashboard = (): ReactElement => {
   const supportsRecovery = useIsRecoverySupported()
   const isVulnerableSafe = useVulnerableSafe()
 
-  const { noAssets } = useHomeBalance()
+  const { noAssets } = useSafeTotalBalance()
 
   const isPositionsFeatureEnabled = useIsPositionsFeatureEnabled()
   const { showBanner: showHnBanner } = useBannerVisibility(BannerType.Promo)
