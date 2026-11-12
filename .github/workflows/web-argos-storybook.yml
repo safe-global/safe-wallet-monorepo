@@ -15,11 +15,13 @@ name: Web Argos Storybook
 # Pull requests upload only the sheets that differ from their merge base on dev, as an Argos
 # subset build, and a skipped build when none differ. A PR that removes a sheet uploads all
 # sheets as a full build, because a subset build ignores removals. Thus the Argos status
-# `argos/safe-wallet-monorepo/storybook` reports on every PR and can be a required check
-# (docs/ci-required-checks.md).
+# `argos/safe-wallet-monorepo/storybook` reports on every PR that is ready for review and can be a
+# required check (docs/ci-required-checks.md). Drafts are skipped; marking one ready runs it.
 
 on:
+  # ready_for_review runs the drafts that the jobs below skip
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [dev]
   # Weekly baseline on dev. Release checks are started by hand.
@@ -49,6 +51,8 @@ permissions: {}
 
 jobs:
   changes:
+    # Skipping this job skips the sweep, the Argos upload and the skip report of a draft
+    if: github.event.pull_request.draft != true
     runs-on: ubuntu-26.04-arm
     permissions:
       contents: read
@@ -309,7 +313,7 @@ jobs:
   result:
     name: Storybook visual tests result
     permissions: {}
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && github.event.pull_request.draft != true }}
     needs: [changes, sweep, visual]
     runs-on: ubuntu-26.04-arm
     steps:
