@@ -312,13 +312,13 @@ describe('useCustomAppCommunicator', () => {
     it('declares the Safe App on its off-chain message', async () => {
       const { setTxFlow, request } = setup({
         features: [FEATURES.EIP1271],
-        declaredSource: { channel: 'safe-app', listedAppId: APP.id },
+        declaredSource: { channel: 'SAFE_APP', listedAppId: APP.id },
       })
 
       await request(Methods.signMessage, { message: 'Message 1' })
 
       const flow = openedFlow<ComponentProps<typeof SignMessageFlow>>(setTxFlow)
-      expect(flow.props.declared).toEqual({ channel: 'safe-app', appName: APP.name, appUrl: APP.url, appId: APP.id })
+      expect(flow.props.declared).toEqual({ channel: 'SAFE_APP', appName: APP.name, appUrl: APP.url, appId: APP.id })
     })
 
     it('opens the on-chain sign message flow when the app turned off-chain signing off', async () => {

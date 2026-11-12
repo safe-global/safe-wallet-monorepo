@@ -53,7 +53,7 @@ export async function createDelegationMessage(
     signature,
     safeAppId: null,
     origin,
-    declared: buildDeclared('native-transfer'),
+    declared: buildDeclared('NATIVE_TRANSFER'),
   }
 
   try {

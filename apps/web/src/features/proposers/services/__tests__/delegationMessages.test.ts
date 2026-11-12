@@ -110,7 +110,7 @@ describe('delegationMessages', () => {
 
       expect(initiate).toHaveBeenCalledWith(
         expect.objectContaining({
-          createMessageDto: expect.objectContaining({ declared: { channel: 'native-transfer' } }),
+          createMessageDto: expect.objectContaining({ declared: { channel: 'NATIVE_TRANSFER' } }),
         }),
       )
     })
