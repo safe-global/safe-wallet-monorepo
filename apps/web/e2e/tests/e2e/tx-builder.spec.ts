@@ -65,7 +65,7 @@ test.describe('Transaction Builder', { tag: '@e2e' }, () => {
     await new TxReviewPage(safePage).sign()
 
     expect(await proposal).toEqual({
-      channel: 'safe-app',
+      channel: 'SAFE_APP',
       appName: 'Transaction Builder',
       appUrl: TX_BUILDER_URL,
       appId: expect.any(Number),
