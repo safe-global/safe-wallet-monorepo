@@ -1,6 +1,6 @@
-import { delay, http, HttpResponse } from 'msw'
+import { http, HttpResponse } from 'msw'
 import { faker } from '@faker-js/faker'
-import { fakerChecksummedAddress } from '@/tests/test-utils'
+import { act, fakerChecksummedAddress, waitFor } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
@@ -11,6 +11,7 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { initialState as initialSettings, TOKEN_LISTS } from '@/store/settingsSlice'
 import { makeStore, setStoreInstance } from '@/store'
 import { gatewayApi } from '../api/gateway'
+import { SAFE_OVERVIEWS_BATCH_WINDOW_MS } from '../api/gateway/safeOverviews'
 
 const TRUSTED_TOKENLIST = [FEATURES.PORTFOLIO_ENDPOINT, FEATURES.DEFAULT_TOKENLIST]
 
@@ -111,23 +112,16 @@ describe('safeOverviews trusted param', () => {
     ])
   })
 
-  it('waits for chain configs that are still loading before choosing the trusted value', async () => {
+  it.each([
+    ['refetches them with the summaries trusted value', [FEATURES.PORTFOLIO_SUMMARIES], ['false', 'true']],
+    ['leaves them alone without PORTFOLIO_SUMMARIES', [], ['false']],
+  ])('for overviews fetched before the chain configs loaded, %s', async (_, flags, expectedTrusted) => {
     const requests = recordSafesRequests()
     const chain = chainBuilder()
-      .with({ features: [...TRUSTED_TOKENLIST, FEATURES.PORTFOLIO_SUMMARIES] })
+      .with({ features: [...TRUSTED_TOKENLIST, ...flags] })
       .build()
-    server.use(
-      http.get(`${GATEWAY_URL}/v2/chains`, async () => {
-        await delay(100)
-        return HttpResponse.json({ results: [chain], next: null })
-      }),
-    )
     const store = makeStore({ settings: initialSettings })
     setStoreInstance(store)
-
-    const chainsQuery = store.dispatch(
-      apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY),
-    )
     const overviewsQuery = store.dispatch(
       gatewayApi.endpoints.getMultipleSafeOverviews.initiate({
         currency: 'usd',
@@ -136,8 +130,17 @@ describe('safeOverviews trusted param', () => {
     )
     await overviewsQuery
 
-    expect(requests.map((params) => params.get('trusted'))).toEqual(['true'])
-    chainsQuery.unsubscribe()
+    await store.dispatch(
+      apiSliceWithChainsConfig.util.upsertQueryData(
+        'getChainsConfigV2',
+        CONFIG_SERVICE_KEY,
+        chainsAdapter.setAll(chainsInitialState, [chain]),
+      ),
+    )
+
+    await waitFor(() => expect(requests.map((params) => params.get('trusted'))).toEqual(expectedTrusted))
+    await act(() => new Promise((resolve) => setTimeout(resolve, SAFE_OVERVIEWS_BATCH_WINDOW_MS * 2)))
+    expect(requests.map((params) => params.get('trusted'))).toEqual(expectedTrusted)
     overviewsQuery.unsubscribe()
   })
 })

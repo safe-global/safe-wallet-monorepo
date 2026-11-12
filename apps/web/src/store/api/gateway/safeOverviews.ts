@@ -28,8 +28,7 @@ type SafeOverviewQueueItem = {
 
 export const SAFE_OVERVIEWS_BATCH_WINDOW_MS = 300
 
-// With PORTFOLIO_SUMMARIES, the trusted value of the summaries and /v1/portfolio; local flag overrides don't apply.
-// `state` is the root state, which can't be typed here: these endpoints are part of RootState.
+// `state` is untyped: RootState would be circular, as these endpoints are part of it. Flag overrides don't apply.
 const getOverviewTrusted = (state: unknown, chainId: string): boolean => {
   const rootState = state as never
   const { data } = apiSliceWithChainsConfig.endpoints.getChainsConfigV2.select(CONFIG_SERVICE_KEY)(rootState)
@@ -37,10 +36,6 @@ const getOverviewTrusted = (state: unknown, chainId: string): boolean => {
   if (!chain || !hasFeature(chain, FEATURES.PORTFOLIO_SUMMARIES)) return false
   return isTrustedTokenList(chain, selectTokenList(rootState))
 }
-
-// Dispatched and awaited before reading `trusted`: on a cold load the chain configs can still be in flight
-const runningChainsQuery = () =>
-  apiSliceWithChainsConfig.util.getRunningQueryThunk('getChainsConfigV2', CONFIG_SERVICE_KEY)
 
 class SafeOverviewFetcher {
   private requestQueue: SafeOverviewQueueItem[] = []
@@ -171,15 +166,13 @@ export const safeOverviewEndpoints = (
           ? [{ type: 'SafeOverviews' as const, id: makeSafeOverviewTag(result.chainId, result.address.value) }]
           : [{ type: 'SafeOverviews' as const }],
       async queryFn({ safeAddress, walletAddress, chainId }, { getState, dispatch }) {
+        const state = getState()
+        const currency = selectCurrency(state as never)
         const dispatchFn: DispatchFn = (action) => dispatch(action)
 
         if (!safeAddress) {
           return { data: null }
         }
-
-        await dispatch(runningChainsQuery())
-        const state = getState()
-        const currency = selectCurrency(state as never)
 
         try {
           const safeOverview = await batchedFetcher.getOverview({
@@ -218,14 +211,12 @@ export const safeOverviewEndpoints = (
         : [{ type: 'SafeOverviews' as const }],
     async queryFn(params, { getState, dispatch }) {
       const { safes, walletAddress, currency } = params
+      const state = getState()
       const dispatchFn: DispatchFn = (action) => dispatch(action)
 
       if (safes.length === 0) {
         return { data: [] }
       }
-
-      await dispatch(runningChainsQuery())
-      const state = getState()
 
       try {
         const promisedSafeOverviews = safes.map((safe) =>

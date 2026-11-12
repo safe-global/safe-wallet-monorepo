@@ -47,6 +47,7 @@ import { migrateBatchTxs } from '@/services/ls-migration/batch'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway'
 import { cgwErrorAlert } from './middleware/cgwErrorAlert'
 import { forbiddenSessionListener } from '@/services/sessionExpiry/forbiddenSessionListener'
+import { safeOverviewsTrustedListener } from './api/gateway/safeOverviewsTrustedListener'
 
 const rootReducer = combineReducers({
   [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
@@ -149,6 +150,7 @@ const listeners = [
   spaceSafesCacheListener,
   trialReminderListener,
   forbiddenSessionListener,
+  safeOverviewsTrustedListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {
