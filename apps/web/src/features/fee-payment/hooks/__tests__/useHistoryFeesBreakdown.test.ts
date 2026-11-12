@@ -1,4 +1,4 @@
-import { waitFor } from '@testing-library/react'
+import { act, waitFor } from '@testing-library/react'
 import { renderHook } from '@/tests/test-utils'
 import { useHistoryFeesBreakdown } from '../useHistoryFeesBreakdown'
 import * as useChainsModule from '@/hooks/useChains'
@@ -238,15 +238,15 @@ describe('useHistoryFeesBreakdown', () => {
     })
 
     it('ignores an IntentExecuted log from any other contract', async () => {
-      jest
-        .spyOn(web3Module, 'useWeb3ReadOnly')
-        .mockReturnValue(
-          buildProvider({ ...relayerReceipt, logs: [{ ...INTENT_EXECUTED_LOG, address: OTHER_ACCOUNT }] }),
-        )
+      const provider = buildProvider({ ...relayerReceipt, logs: [{ ...INTENT_EXECUTED_LOG, address: OTHER_ACCOUNT }] })
+      jest.spyOn(web3Module, 'useWeb3ReadOnly').mockReturnValue(provider)
 
       const { result } = renderHook(() => useHistoryFeesBreakdown(executedBy(OTHER_ACCOUNT)))
 
-      await waitFor(() => expect(result.current).toBeNull())
+      await waitFor(() => expect(provider.getTransactionReceipt).toHaveBeenCalled())
+      // Let useAsync store the receipt, so the assertion sees the decision and not the initial null
+      await act(async () => {})
+      expect(result.current).toBeNull()
     })
   })
 
@@ -275,6 +275,8 @@ describe('useHistoryFeesBreakdown', () => {
     const { result } = renderHook(() => useHistoryFeesBreakdown(executedBy(OTHER_ACCOUNT)))
 
     await waitFor(() => expect(provider.getTransactionReceipt).toHaveBeenCalled())
+    // Let useAsync store the receipt, so the assertion sees the decision and not the initial null
+    await act(async () => {})
     expect(result.current).toBeNull()
   })
 
