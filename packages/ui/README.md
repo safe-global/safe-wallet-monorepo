@@ -1,20 +1,28 @@
 # @safe-global/ui
 
-Safe UI, Safe's design system for React web apps: [shadcn/ui](https://ui.shadcn.com/) components built on Base UI (`@base-ui/react`), Tailwind CSS v4 and `class-variance-authority`.
+Safe UI, Safe's design system for React web apps: [shadcn/ui](https://ui.shadcn.com/) primitives built on Base UI (`@base-ui/react`), Tailwind CSS v4 and `class-variance-authority`, and Safe components composed from them.
 
 ## Usage
 
-Import each component from its own subpath. There is no root barrel.
+The package has two layers, each with its own subpath family. There is no root barrel.
+
+| Layer           | Subpath                             | What it holds                                                                           |
+| --------------- | ----------------------------------- | --------------------------------------------------------------------------------------- |
+| Primitives      | `@safe-global/ui/primitives/<name>` | The shadcn/ui components (button, dialog, table, …)                                     |
+| Safe components | `@safe-global/ui/components/<name>` | Safe's own components composed from primitives (data table, widget, expandable list, …) |
 
 ```tsx
-import { Button } from '@safe-global/ui/button'
-import { Card, CardContent } from '@safe-global/ui/card'
+import { Button } from '@safe-global/ui/primitives/button'
+import { Card, CardContent } from '@safe-global/ui/primitives/card'
+import { DataTable, DataTableCard } from '@safe-global/ui/components/data-table'
 import { cn } from '@safe-global/ui/utils'
 import { useIsMobile } from '@safe-global/ui/hooks/use-mobile'
 import { ShadcnProvider } from '@safe-global/ui/provider'
 ```
 
 The package is private for now and consumed from source inside the monorepo: its `exports` point at the `.tsx` files, and each app compiles them. The wallet still imports through the re-exports in `packages/views/src/components/ui` until it migrates.
+
+The flat keys of the first release (`@safe-global/ui/button`, …) are **deprecated** aliases of `@safe-global/ui/primitives/<name>`. They stay, frozen to today's 52 names, until the wallet migrates (Phase 2), because wallet tests mock them. New code uses the canonical subpaths, and no flat key is ever added.
 
 ## Styles
 
@@ -38,7 +46,7 @@ Adjust the `@source` path to point at the installed package from your CSS file. 
 
 ## Semi-generated code
 
-The components start from the shadcn/ui templates (`npx shadcn@latest add <name>`) and are then themed for Safe. So:
+The primitives start from the shadcn/ui templates (`npx shadcn@latest add <name>`) and are then themed for Safe. So:
 
 - they follow upstream patterns that may trip linters and code-health tools, and they are excluded from CodeScene (`.codescene.yml`)
 - upstream updates may need a manual merge
@@ -46,8 +54,8 @@ The components start from the shadcn/ui templates (`npx shadcn@latest add <name>
 
 ## Stories
 
-Stories live in `src/components/stories/`. They render in the `apps/web` Storybook with the wallet's scoped CSS, and in this package's own Storybook (`yarn workspace @safe-global/ui storybook`) with the default `styles.css`. Design-to-code mapping: [docs/figma-code-connect.md](docs/figma-code-connect.md).
+Every component has its own folder, `src/primitives/<name>/` or `src/components/<name>/`, holding the component, its test and its story (`<name>.stories.tsx`). Primitive stories are titled `UI/<Name>`, Safe component stories `Safe UI/<Name>`. They render in the `apps/web` Storybook with the wallet's scoped CSS, and in this package's own Storybook (`yarn workspace @safe-global/ui storybook`) with the default `styles.css`. Design-to-code mapping: [docs/figma-code-connect.md](docs/figma-code-connect.md).
 
-The docs site in [`apps/design-system`](../../apps/design-system) documents every component (see its [Installation page](../../apps/design-system/content/docs/docs/installation.mdx)) and serves a shadcn registry, so an app can also copy a component with `npx shadcn add @safe/<name>`.
+The docs site in [`apps/design-system`](../../apps/design-system) documents every component (see its [Installation page](../../apps/design-system/content/docs/docs/installation.mdx)) and serves a shadcn registry, so an app can also copy a component with `npx shadcn add @safe/<name>`. It writes primitives to the app's `components/ui/` and Safe components to its `components/`.
 
 Contributor rules: [AGENTS.md](AGENTS.md).

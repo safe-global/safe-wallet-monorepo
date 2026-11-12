@@ -4,7 +4,7 @@
 
 ## Rules
 
-- **Consume `@safe-global/ui` like an outside app.** Import its public subpaths (`@safe-global/ui/button`, `@safe-global/ui/styles.css`, `@safe-global/ui/eslint`), never relative `packages/ui` paths. Never import `@safe-global/views`, and never use `.shadcn-scope`, `scoped.css` or `ShadcnProvider` outside the prose that explains them.
+- **Consume `@safe-global/ui` like an outside app.** Import its public subpaths (`@safe-global/ui/primitives/button`, `@safe-global/ui/components/data-table`, `@safe-global/ui/styles.css`, `@safe-global/ui/eslint`), never the deprecated flat keys (`@safe-global/ui/button`), never relative `packages/ui` paths. Never import `@safe-global/views`, and never use `.shadcn-scope`, `scoped.css` or `ShadcnProvider` outside the prose that explains them.
 - **Never copy values.** Colours, sizes and token names come from the generated data; no hex or `oklch()` value lives in `src/` or `content/`.
 - **Stay host-agnostic.** No host-specific files (deploy, redirect or header config, custom-domain files) and no host name in the source. The base path and URLs come from the env variables below.
 - **Never edit a story to fix the docs.** The stories are the wallet's visual baseline. Fix previews in `src/lib/preview-config.ts` or the docs components.

@@ -1,16 +1,29 @@
 # UI package guidelines
 
-`@safe-global/ui` is Safe UI, the design system: generic shadcn/ui primitives built on Base UI (`@base-ui/react`), Tailwind v4 and `cva`, plus `cn`, the responsive hooks and `ShadcnProvider`. It is web only; mobile does not use it. The package ships its own CSS ([specs/005-safe-ui-design-system](../../specs/005-safe-ui-design-system/spec.md)).
+`@safe-global/ui` is Safe UI, the design system: generic shadcn/ui primitives built on Base UI (`@base-ui/react`), Tailwind v4 and `cva`, Safe components composed from them, plus `cn`, the responsive hooks and `ShadcnProvider`. It is web only; mobile does not use it. The package ships its own CSS ([specs/005-safe-ui-design-system](../../specs/005-safe-ui-design-system/spec.md)).
+
+## Layers
+
+| Layer           | Folder                             | Export key            | Story title      |
+| --------------- | ---------------------------------- | --------------------- | ---------------- |
+| Primitives      | `src/primitives/<name>/<name>.tsx` | `./primitives/<name>` | `UI/<Name>`      |
+| Safe components | `src/components/<name>/<name>.tsx` | `./components/<name>` | `Safe UI/<Name>` |
+
+- **Primitives** are the shadcn/ui components, semi-generated and managed with the shadcn CLI. A primitive may import another primitive (`../button/button`), `../../lib/*`, `../../hooks/*` and `../../provider`.
+- **Safe components** are Safe's own generic patterns (table, widget, expandable list, …), built only from primitives, Base UI, `cn` and the hooks. The direction is one way: a Safe component imports primitives, never the reverse, and never another Safe component. `src/relative-imports.test.ts` and the `ui/layers` lint block enforce it.
+- `lib/`, `hooks/`, `provider.tsx` and `styles/` belong to neither layer and keep their keys. `src/primitives/anchored-surface.test.tsx` covers several primitives, so it sits at the layer root.
+- A primitive and a Safe component never share a name: registry items, docs URLs and preview routes are one flat namespace.
 
 ## Rules
 
-- **Only generic, domain-free primitives live here.** No business logic, address parsing, chains, store, SDK calls or Safe-specific widgets: compose those in `packages/views` on top of a primitive (see `packages/views/src/components/common/AddressPasteInput`).
+- **Only generic, domain-free code lives here.** No business logic, address parsing, chains, store, SDK calls or Safe-specific widgets: compose those in `packages/views` on top of a primitive or Safe component (see `packages/views/src/components/common/AddressPasteInput`). A Safe component takes its domain content (copy, cells, icons, links) through props and slots.
 - **Framework agnostic.** No `next`, `next/*` or `next-themes`, no `@safe-global/*` workspace packages and no app aliases (`@/…`). Lint enforces this and `tsconfig.json` drops the inherited `paths`.
-- **Imports inside the package are relative** (`./button`, `../lib/utils`) and must resolve inside `src/`. Consumers compile the source with their own resolver, so a package alias would not resolve for them. `src/relative-imports.test.ts` fails on a relative import that leaves `src/`, and lint rejects one that climbs three or more levels.
-- **Every component file gets an `exports` key** in `package.json` (`"./<name>": "./src/components/<name>.tsx"`). There is no root barrel. `src/package-exports.test.ts` fails when a key is missing or points at a missing file.
-- Tests sit next to the component (`<name>.test.tsx`). Stories go in `src/components/stories/<name>.stories.tsx` with an explicit `title`, so story IDs stay stable.
-- Until Phase 2, `packages/views/src/components/ui/<name>` re-exports each component, and app code keeps importing it through that path. A new component also needs that one-line re-export (`export * from '@safe-global/ui/<name>'`).
-- In jest, mock a primitive by its real path (`jest.mock('@safe-global/ui/<name>')`), not the `views` re-export, or the mock misses the package's internal imports.
+- **Imports inside the package are relative** (`../button/button`, `../../lib/utils`) and must resolve inside `src/`. Consumers compile the source with their own resolver, so a package alias would not resolve for them. `src/relative-imports.test.ts` fails on a relative import that leaves `src/`, and lint rejects one that climbs three or more levels.
+- **Every component folder gets one canonical `exports` key** pointing straight at the component file: `"./primitives/<name>": "./src/primitives/<name>/<name>.tsx"` or `"./components/<name>": "./src/components/<name>/<name>.tsx"`. No `index.ts` barrels, no root barrel. `src/package-exports.test.ts` fails when a key is missing, points at a missing file or two layers share a name.
+- **The flat keys are deprecated.** `"./<name>"` aliases exist for the 52 primitives of the first release only, point at the same file as `./primitives/<name>`, and are frozen (`LEGACY_FLAT_KEYS` in the export test) until Phase 2 removes them. Never add one, and never give a Safe component one.
+- Each component's test (`<name>.test.tsx`) and story (`<name>.stories.tsx`, explicit `title` so story IDs stay stable) sit in its folder, next to companion files such as `table.module.css`.
+- Until Phase 2, `packages/views/src/components/ui/<name>` re-exports each primitive, and app code keeps importing it through that path. A new primitive also needs that one-line re-export (`export * from '@safe-global/ui/primitives/<name>'`). Safe components get no `views` re-export; the wallet adopts them in Phase 2.
+- In jest, mock a primitive by its real path (`jest.mock('@safe-global/ui/primitives/<name>')`), not the `views` re-export, or the mock misses the package's internal imports. Existing wallet tests mock the deprecated flat keys; that still works because both keys resolve to the same file.
 
 ## Styles and tokens
 
@@ -40,8 +53,8 @@
 
 `apps/web/components.json` still points at `views` until Phase 2, so `npx shadcn@latest add <name>` from `apps/web` writes into `packages/views/src/components/ui/`. Then:
 
-1. Move the file to `src/components/` here and make its imports relative.
-2. Add its `exports` key, its re-export file in `views` and a story.
+1. Move the file to `src/primitives/<name>/<name>.tsx` here and make its imports relative.
+2. Add its `./primitives/<name>` key, its re-export file in `views` and a story (`src/primitives/<name>/<name>.stories.tsx`).
 3. Read [README.md](README.md) on the semi-generated code.
 
 ## Checks
