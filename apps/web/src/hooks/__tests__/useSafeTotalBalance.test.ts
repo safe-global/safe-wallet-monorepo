@@ -2,6 +2,7 @@ import { faker } from '@faker-js/faker'
 import { renderHook } from '@/tests/test-utils'
 import type { PortfolioSummary } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import { balanceBuilder } from '@/tests/builders/balances'
 import { portfolioSummaryBuilder } from '@/tests/builders/portfolioSummary'
 import { useSafePortfolioSummary } from '@/features/portfolio'
 import useSafeTotalBalance from '../useSafeTotalBalance'
@@ -13,13 +14,17 @@ jest.mock('@/features/portfolio', () => ({
   useSafePortfolioSummary: jest.fn(),
 }))
 
-const mockBalances = (fiatTotal: string, balances: string[]) =>
+const VISIBLE_TOTAL = faker.finance.amount()
+const HELD = balanceBuilder().build()
+const EMPTY = balanceBuilder().with({ balance: '0' }).build()
+
+const mockBalances = (fiatTotal: string, items = [HELD]) =>
   jest.mocked(useVisibleBalances).mockReturnValue({
-    balances: { fiatTotal, items: balances.map((balance) => ({ balance })) },
+    balances: { fiatTotal, items },
     loaded: true,
     loading: false,
     error: undefined,
-  } as unknown as ReturnType<typeof useVisibleBalances>)
+  })
 
 const mockSummary = (state: {
   isEnabled: boolean
@@ -32,12 +37,10 @@ const mockSummary = (state: {
     isLoading: state.isLoading ?? false,
   })
 
-const VISIBLE_TOTAL = faker.finance.amount()
-
 describe('useSafeTotalBalance', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockBalances(VISIBLE_TOTAL, ['1'])
+    mockBalances(VISIBLE_TOTAL)
     mockSummary({ isEnabled: false })
   })
 
@@ -48,7 +51,7 @@ describe('useSafeTotalBalance', () => {
   })
 
   it('reports no assets from the token balances when the flag is off', () => {
-    mockBalances('0', ['0'])
+    mockBalances('0', [EMPTY])
 
     const { result } = renderHook(() => useSafeTotalBalance())
 
@@ -56,23 +59,34 @@ describe('useSafeTotalBalance', () => {
   })
 
   it('uses the summary total when the flag is on', () => {
-    mockSummary({ isEnabled: true, summary: { fiatTotal: '650.25' } })
+    const fiatTotal = faker.finance.amount({ min: 1 })
+    mockSummary({ isEnabled: true, summary: { fiatTotal } })
 
     const { result } = renderHook(() => useSafeTotalBalance())
 
-    expect(result.current).toEqual({ fiatTotal: '650.25', noAssets: false, isSummaryEnabled: true })
+    expect(result.current).toEqual({ fiatTotal, noAssets: false, isSummaryEnabled: true })
   })
 
   it('does not report no assets for a Safe holding only DeFi positions', () => {
-    mockBalances('0', ['0'])
-    mockSummary({ isEnabled: true, summary: { fiatTotal: '354000' } })
+    mockBalances('0', [EMPTY])
+    mockSummary({ isEnabled: true, summary: { fiatTotal: faker.finance.amount({ min: 1 }) } })
 
     const { result } = renderHook(() => useSafeTotalBalance())
 
     expect(result.current.noAssets).toBe(false)
   })
 
-  it('reports no assets when the summary total is zero', () => {
+  it('does not report no assets for a Safe holding tokens the summary values at zero', () => {
+    mockBalances('0', [HELD])
+    mockSummary({ isEnabled: true, summary: { fiatTotal: '0' } })
+
+    const { result } = renderHook(() => useSafeTotalBalance())
+
+    expect(result.current.noAssets).toBe(false)
+  })
+
+  it('reports no assets when the summary total is zero and the Safe holds no tokens', () => {
+    mockBalances('0', [EMPTY])
     mockSummary({ isEnabled: true, summary: { fiatTotal: '0' } })
 
     const { result } = renderHook(() => useSafeTotalBalance())
