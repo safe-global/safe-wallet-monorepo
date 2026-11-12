@@ -1,6 +1,6 @@
-import { http, HttpResponse } from 'msw'
+import { delay, http, HttpResponse } from 'msw'
 import { faker } from '@faker-js/faker'
-import { act, fakerChecksummedAddress, waitFor } from '@/tests/test-utils'
+import { fakerChecksummedAddress } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
@@ -11,7 +11,7 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { initialState as initialSettings, TOKEN_LISTS } from '@/store/settingsSlice'
 import { makeStore, setStoreInstance } from '@/store'
 import { gatewayApi } from '../api/gateway'
-import { SAFE_OVERVIEWS_BATCH_WINDOW_MS } from '../api/gateway/safeOverviews'
+import { CHAINS_WAIT_CAP_MS, SAFE_OVERVIEWS_BATCH_WINDOW_MS } from '../api/gateway/safeOverviews'
 
 const TRUSTED_TOKENLIST = [FEATURES.PORTFOLIO_ENDPOINT, FEATURES.DEFAULT_TOKENLIST]
 
@@ -112,35 +112,91 @@ describe('safeOverviews trusted param', () => {
     ])
   })
 
-  it.each([
-    ['refetches them with the summaries trusted value', [FEATURES.PORTFOLIO_SUMMARIES], ['false', 'true']],
-    ['leaves them alone without PORTFOLIO_SUMMARIES', [], ['false']],
-  ])('for overviews fetched before the chain configs loaded, %s', async (_, flags, expectedTrusted) => {
-    const requests = recordSafesRequests()
-    const chain = chainBuilder()
-      .with({ features: [...TRUSTED_TOKENLIST, ...flags] })
-      .build()
-    const store = makeStore({ settings: initialSettings })
-    setStoreInstance(store)
-    const overviewsQuery = store.dispatch(
-      gatewayApi.endpoints.getMultipleSafeOverviews.initiate({
-        currency: 'usd',
-        safes: [{ chainId: chain.chainId, address: fakerChecksummedAddress() }],
-      }),
-    )
-    await overviewsQuery
+  describe('on a cold load', () => {
+    const flaggedChain = () =>
+      chainBuilder()
+        .with({ features: [...TRUSTED_TOKENLIST, FEATURES.PORTFOLIO_SUMMARIES] })
+        .build()
 
-    await store.dispatch(
-      apiSliceWithChainsConfig.util.upsertQueryData(
-        'getChainsConfigV2',
-        CONFIG_SERVICE_KEY,
-        chainsAdapter.setAll(chainsInitialState, [chain]),
-      ),
-    )
+    const serveChainsAfter = (chain: Chain, ms: number) =>
+      server.use(
+        http.get(`${GATEWAY_URL}/v2/chains`, async () => {
+          await delay(ms)
+          return HttpResponse.json({ results: [chain], next: null })
+        }),
+      )
 
-    await waitFor(() => expect(requests.map((params) => params.get('trusted'))).toEqual(expectedTrusted))
-    await act(() => new Promise((resolve) => setTimeout(resolve, SAFE_OVERVIEWS_BATCH_WINDOW_MS * 2)))
-    expect(requests.map((params) => params.get('trusted'))).toEqual(expectedTrusted)
-    overviewsQuery.unsubscribe()
+    const requestWhileChainsLoad = async (chain: Chain) => {
+      const store = makeStore({ settings: initialSettings })
+      setStoreInstance(store)
+      const chainsQuery = store.dispatch(
+        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY),
+      )
+      const startedAt = Date.now()
+      const overviewsQuery = store.dispatch(
+        gatewayApi.endpoints.getMultipleSafeOverviews.initiate({
+          currency: 'usd',
+          safes: [{ chainId: chain.chainId, address: fakerChecksummedAddress() }],
+        }),
+      )
+      await overviewsQuery
+      const elapsed = Date.now() - startedAt
+      overviewsQuery.unsubscribe()
+      chainsQuery.unsubscribe()
+      return elapsed
+    }
+
+    it('does not wait for a chain configs refetch when they are already loaded', async () => {
+      const requests = recordSafesRequests()
+      const chain = flaggedChain()
+      serveChainsAfter(chain, CHAINS_WAIT_CAP_MS * 2)
+      const store = makeStore({ settings: initialSettings })
+      setStoreInstance(store)
+      await store.dispatch(
+        apiSliceWithChainsConfig.util.upsertQueryData(
+          'getChainsConfigV2',
+          CONFIG_SERVICE_KEY,
+          chainsAdapter.setAll(chainsInitialState, [chain]),
+        ),
+      )
+      const chainsRefetch = store.dispatch(
+        apiSliceWithChainsConfig.endpoints.getChainsConfigV2.initiate(CONFIG_SERVICE_KEY, { forceRefetch: true }),
+      )
+
+      const startedAt = Date.now()
+      const overviewsQuery = store.dispatch(
+        gatewayApi.endpoints.getMultipleSafeOverviews.initiate({
+          currency: 'usd',
+          safes: [{ chainId: chain.chainId, address: fakerChecksummedAddress() }],
+        }),
+      )
+      await overviewsQuery
+
+      expect(Date.now() - startedAt).toBeLessThan(CHAINS_WAIT_CAP_MS)
+      expect(requests.map((params) => params.get('trusted'))).toEqual(['true'])
+      overviewsQuery.unsubscribe()
+      chainsRefetch.unsubscribe()
+    })
+
+    it('waits for chain configs that are still loading and sends one request with their trusted value', async () => {
+      const requests = recordSafesRequests()
+      const chain = flaggedChain()
+      serveChainsAfter(chain, SAFE_OVERVIEWS_BATCH_WINDOW_MS)
+
+      await requestWhileChainsLoad(chain)
+
+      expect(requests.map((params) => params.get('trusted'))).toEqual(['true'])
+    })
+
+    it('sends one request with trusted=false when the chain configs take longer than the cap', async () => {
+      const requests = recordSafesRequests()
+      const chain = flaggedChain()
+      serveChainsAfter(chain, CHAINS_WAIT_CAP_MS * 2)
+
+      const elapsed = await requestWhileChainsLoad(chain)
+
+      expect(elapsed).toBeLessThan(CHAINS_WAIT_CAP_MS * 2)
+      expect(requests.map((params) => params.get('trusted'))).toEqual(['false'])
+    })
   })
 })

@@ -1,4 +1,4 @@
-import { type EndpointBuilder } from '@reduxjs/toolkit/query/react'
+import { type BaseQueryApi, type EndpointBuilder } from '@reduxjs/toolkit/query/react'
 
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { apiSliceWithChainsConfig, chainsAdapter } from '@safe-global/store/gateway'
@@ -9,6 +9,7 @@ import type { SafeItem } from '@/hooks/safes'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { isTrustedTokenList } from '@/utils/tokenList'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { delay } from '@safe-global/utils/utils/helpers'
 import { makeSafeTag, makeSafeOverviewTag } from '.'
 import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
 
@@ -27,11 +28,21 @@ type SafeOverviewQueueItem = {
 }
 
 export const SAFE_OVERVIEWS_BATCH_WINDOW_MS = 300
+export const CHAINS_WAIT_CAP_MS = 2_000
+
+const selectChains = apiSliceWithChainsConfig.endpoints.getChainsConfigV2.select(CONFIG_SERVICE_KEY)
+
+// A cold load can ask for overviews before the chain configs arrive: wait for them (capped) to send the right trusted
+const waitForLoadingChains = async ({ dispatch, getState }: Pick<BaseQueryApi, 'dispatch' | 'getState'>) => {
+  if (selectChains(getState() as never).data) return
+  const running = dispatch(apiSliceWithChainsConfig.util.getRunningQueryThunk('getChainsConfigV2', CONFIG_SERVICE_KEY))
+  if (running) await Promise.race([running, delay(CHAINS_WAIT_CAP_MS)])
+}
 
 // `state` is untyped: RootState would be circular, as these endpoints are part of it. Flag overrides don't apply.
 const getOverviewTrusted = (state: unknown, chainId: string): boolean => {
   const rootState = state as never
-  const { data } = apiSliceWithChainsConfig.endpoints.getChainsConfigV2.select(CONFIG_SERVICE_KEY)(rootState)
+  const { data } = selectChains(rootState)
   const chain = data ? chainsAdapter.getSelectors().selectById(data, chainId) : undefined
   if (!chain || !hasFeature(chain, FEATURES.PORTFOLIO_SUMMARIES)) return false
   return isTrustedTokenList(chain, selectTokenList(rootState))
@@ -166,13 +177,15 @@ export const safeOverviewEndpoints = (
           ? [{ type: 'SafeOverviews' as const, id: makeSafeOverviewTag(result.chainId, result.address.value) }]
           : [{ type: 'SafeOverviews' as const }],
       async queryFn({ safeAddress, walletAddress, chainId }, { getState, dispatch }) {
-        const state = getState()
-        const currency = selectCurrency(state as never)
+        const currency = selectCurrency(getState() as never)
         const dispatchFn: DispatchFn = (action) => dispatch(action)
 
         if (!safeAddress) {
           return { data: null }
         }
+
+        await waitForLoadingChains({ dispatch, getState })
+        const state = getState()
 
         try {
           const safeOverview = await batchedFetcher.getOverview({
@@ -211,12 +224,14 @@ export const safeOverviewEndpoints = (
         : [{ type: 'SafeOverviews' as const }],
     async queryFn(params, { getState, dispatch }) {
       const { safes, walletAddress, currency } = params
-      const state = getState()
       const dispatchFn: DispatchFn = (action) => dispatch(action)
 
       if (safes.length === 0) {
         return { data: [] }
       }
+
+      await waitForLoadingChains({ dispatch, getState })
+      const state = getState()
 
       try {
         const promisedSafeOverviews = safes.map((safe) =>
