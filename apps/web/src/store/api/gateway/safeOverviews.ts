@@ -1,9 +1,13 @@
 import { type EndpointBuilder } from '@reduxjs/toolkit/query/react'
 
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { apiSliceWithChainsConfig, chainsAdapter } from '@safe-global/store/gateway'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { selectCurrency } from '../../settingsSlice'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { selectCurrency, selectTokenList } from '../../settingsSlice'
 import type { SafeItem } from '@/hooks/safes'
+import { CONFIG_SERVICE_KEY } from '@/config/constants'
+import { isTrustedTokenList } from '@/utils/tokenList'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { makeSafeTag, makeSafeOverviewTag } from '.'
 import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
@@ -17,11 +21,22 @@ type SafeOverviewQueueItem = {
   walletAddress?: string
   chainId: string
   currency: string
+  trusted: boolean
   dispatch: DispatchFn
   callback: (result: { data: SafeOverview | undefined; error?: never } | { data?: never; error: string }) => void
 }
 
 export const SAFE_OVERVIEWS_BATCH_WINDOW_MS = 300
+
+// With PORTFOLIO_SUMMARIES, the trusted value of the summaries and /v1/portfolio; local flag overrides don't apply.
+// `state` is the root state, which can't be typed here: these endpoints are part of RootState.
+const getOverviewTrusted = (state: unknown, chainId: string): boolean => {
+  const rootState = state as never
+  const { data } = apiSliceWithChainsConfig.endpoints.getChainsConfigV2.select(CONFIG_SERVICE_KEY)(rootState)
+  const chain = data ? chainsAdapter.getSelectors().selectById(data, chainId) : undefined
+  if (!chain || !hasFeature(chain, FEATURES.PORTFOLIO_SUMMARIES)) return false
+  return isTrustedTokenList(chain, selectTokenList(rootState))
+}
 
 class SafeOverviewFetcher {
   private requestQueue: SafeOverviewQueueItem[] = []
@@ -32,11 +47,13 @@ class SafeOverviewFetcher {
     safeIds,
     walletAddress,
     currency,
+    trusted,
     dispatch,
   }: {
     safeIds: `${number}:0x${string}`[]
     walletAddress?: string
     currency: string
+    trusted: boolean
     dispatch: DispatchFn
   }) {
     // forceRefetch so a cache invalidation (e.g. after a tx) re-runs the wrapping
@@ -47,7 +64,7 @@ class SafeOverviewFetcher {
         safes: safeIds,
         currency,
         walletAddress,
-        trusted: false,
+        trusted,
       },
       { forceRefetch: true },
     )
@@ -72,17 +89,27 @@ class SafeOverviewFetcher {
       return
     }
 
-    const { walletAddress, currency, dispatch } = itemsToProcess[0]
+    // One request per trusted value: it is a query param of the whole batch
+    const batches = [true, false]
+      .map((trusted) => itemsToProcess.filter((item) => item.trusted === trusted))
+      .filter((batch) => batch.length > 0)
+
+    await Promise.all(batches.map((batch) => this.processBatch(batch)))
+  }
+
+  private async processBatch(items: SafeOverviewQueueItem[]) {
+    const { walletAddress, currency, trusted, dispatch } = items[0]
 
     try {
       const overviews = await this.fetchSafeOverviews({
-        safeIds: itemsToProcess.map((item) => makeSafeTag(item.chainId, item.safeAddress)),
+        safeIds: items.map((item) => makeSafeTag(item.chainId, item.safeAddress)),
         currency,
         walletAddress,
+        trusted,
         dispatch,
       })
 
-      itemsToProcess.forEach((item) => {
+      items.forEach((item) => {
         const overview = overviews.find(
           (entry) =>
             entry != null && sameAddress(entry.address?.value, item.safeAddress) && entry.chainId === item.chainId,
@@ -90,7 +117,7 @@ class SafeOverviewFetcher {
         item.callback({ data: overview })
       })
     } catch {
-      itemsToProcess.forEach((item) => item.callback({ error: 'Could not fetch Safe overview' }))
+      items.forEach((item) => item.callback({ error: 'Could not fetch Safe overview' }))
     }
   }
 
@@ -140,7 +167,8 @@ export const safeOverviewEndpoints = (
           ? [{ type: 'SafeOverviews' as const, id: makeSafeOverviewTag(result.chainId, result.address.value) }]
           : [{ type: 'SafeOverviews' as const }],
       async queryFn({ safeAddress, walletAddress, chainId }, { getState, dispatch }) {
-        const currency = selectCurrency(getState() as never)
+        const state = getState()
+        const currency = selectCurrency(state as never)
         const dispatchFn: DispatchFn = (action) => dispatch(action)
 
         if (!safeAddress) {
@@ -151,6 +179,7 @@ export const safeOverviewEndpoints = (
           const safeOverview = await batchedFetcher.getOverview({
             chainId,
             currency,
+            trusted: getOverviewTrusted(state, chainId),
             walletAddress,
             safeAddress,
             dispatch: dispatchFn,
@@ -181,8 +210,9 @@ export const safeOverviewEndpoints = (
             id: makeSafeOverviewTag(overview.chainId, overview.address.value),
           }))
         : [{ type: 'SafeOverviews' as const }],
-    async queryFn(params, { dispatch }) {
+    async queryFn(params, { getState, dispatch }) {
       const { safes, walletAddress, currency } = params
+      const state = getState()
       const dispatchFn: DispatchFn = (action) => dispatch(action)
 
       if (safes.length === 0) {
@@ -195,6 +225,7 @@ export const safeOverviewEndpoints = (
             chainId: safe.chainId,
             safeAddress: safe.address,
             currency,
+            trusted: getOverviewTrusted(state, safe.chainId),
             walletAddress,
             dispatch: dispatchFn,
           }),
