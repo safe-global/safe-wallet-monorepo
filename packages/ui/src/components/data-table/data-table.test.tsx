@@ -377,6 +377,38 @@ describe('DataTable', () => {
   })
 })
 
+describe('DataTable detail ids', () => {
+  it('gives each table its own detail ids, valid for keys with spaces', () => {
+    mockUseIsMobile.mockReturnValue(true)
+    const table = () => (
+      <DataTable
+        columns={columns}
+        rows={['a b']}
+        getRowKey={(row) => row}
+        renderRowDetail={(row) => <span>{`detail-${row}`}</span>}
+      />
+    )
+    render(
+      <>
+        {table()}
+        {table()}
+      </>,
+    )
+
+    const toggles = screen.getAllByRole('button', { name: 'Show details' })
+    toggles.forEach((toggle) => fireEvent.click(toggle))
+    const ids = screen
+      .getAllByRole('button', { name: 'Hide details' })
+      .map((toggle) => toggle.getAttribute('aria-controls')!)
+
+    expect(new Set(ids).size).toBe(2)
+    for (const id of ids) {
+      expect(id).not.toMatch(/\s/)
+      expect(document.getElementById(id)).toHaveTextContent('detail-a b')
+    }
+  })
+})
+
 describe('DataTableCard', () => {
   it('frames its children in the card surface and keeps the props of the root div', () => {
     render(

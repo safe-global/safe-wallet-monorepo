@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useMemo, useRef, useState, type ComponentProps, type ReactNode } from 'react'
+import { Fragment, useEffect, useId, useMemo, useRef, useState, type ComponentProps, type ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { ChevronDown, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import {
@@ -136,6 +136,7 @@ function DataTable<T>({
   onRowClick,
 }: DataTableProps<T>) {
   const isMobile = useIsMobile()
+  const detailIdPrefix = useId()
   const [page, setPage] = useState(0)
   const [sort, setSort] = useState<SortState | null>(null)
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set())
@@ -247,7 +248,7 @@ function DataTable<T>({
           {paginatedRows.map((row) => {
             const key = getRowKey(row)
             const isOpen = expanded.has(key)
-            const detailId = `data-table-detail-${key}`
+            const detailId = `${detailIdPrefix}-detail-${encodeURIComponent(key)}`
             // An expanded row hands its divider to the detail row below it.
             const showDetail = showDetailToggle && isOpen
 

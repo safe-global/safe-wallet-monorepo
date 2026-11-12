@@ -90,7 +90,15 @@ function PeekCollapsible({ id, open, onOpen, peekUntil, expandLabel, className, 
           aria-hidden
           className="absolute inset-0 rounded-b-xl bg-linear-to-b from-card/0 to-card backdrop-blur-[3px] [mask-image:linear-gradient(to_bottom,transparent,black_45%)]"
         />
-        <Button variant="outline" size="sm" weight="semibold" className="relative" onClick={onOpen}>
+        <Button
+          variant="outline"
+          size="sm"
+          weight="semibold"
+          className="relative"
+          aria-expanded={open}
+          aria-controls={id}
+          onClick={onOpen}
+        >
           {expandLabel}
         </Button>
       </div>

@@ -1,18 +1,16 @@
-import { useState, type ReactNode } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { Card } from '../../primitives/card/card'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../primitives/collapsible/collapsible'
 
-interface ExpandableCardProps {
+interface ExpandableCardProps extends Omit<ComponentProps<typeof Collapsible>, 'children'> {
   summary: ReactNode
   /** Names the details for screen readers, e.g. "recipient details" */
   detailsLabel: string
   children: ReactNode
-  open?: boolean
-  defaultOpen?: boolean
-  onOpenChange?: (open: boolean) => void
-  className?: string
 }
+
+const chevron = 'size-4 shrink-0 text-muted-foreground transition-colors group-hover/expandable:text-foreground'
 
 /**
  * ExpandableCard
@@ -26,36 +24,19 @@ interface ExpandableCardProps {
  * </ExpandableCard>
  * ```
  */
-function ExpandableCard({
-  summary,
-  detailsLabel,
-  children,
-  open,
-  defaultOpen = false,
-  onOpenChange,
-  className,
-}: ExpandableCardProps) {
-  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen)
-  const isOpen = open ?? uncontrolledOpen
-  const Chevron = isOpen ? ChevronDown : ChevronRight
-
-  const handleOpenChange = (next: boolean) => {
-    if (open === undefined) setUncontrolledOpen(next)
-    onOpenChange?.(next)
-  }
-
+function ExpandableCard({ summary, detailsLabel, children, ...props }: ExpandableCardProps) {
   return (
-    <Collapsible data-slot="expandable-card" open={isOpen} onOpenChange={handleOpenChange} className={className}>
+    <Collapsible data-slot="expandable-card" {...props}>
       <Card variant="muted" size="none" radius="lg">
         <CollapsibleTrigger
-          aria-label={`${isOpen ? 'Hide' : 'Show'} ${detailsLabel}`}
+          render={(triggerProps, state) => (
+            <button {...triggerProps} aria-label={`${state.open ? 'Hide' : 'Show'} ${detailsLabel}`} />
+          )}
           className="group/expandable flex w-full cursor-pointer items-center gap-3 rounded-lg p-3 text-left transition-colors hover:bg-foreground/5 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
           {summary}
-          <Chevron
-            className="size-4 shrink-0 text-muted-foreground transition-colors group-hover/expandable:text-foreground"
-            aria-hidden
-          />
+          <ChevronRight className={`${chevron} group-data-[panel-open]/expandable:hidden`} aria-hidden />
+          <ChevronDown className={`${chevron} hidden group-data-[panel-open]/expandable:block`} aria-hidden />
         </CollapsibleTrigger>
       </Card>
 

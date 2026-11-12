@@ -27,7 +27,10 @@ describe('PeekCollapsible', () => {
     render(<Peek open={false} onOpen={onOpen} />)
 
     expect(document.getElementById('peek')).toHaveStyle({ height: '120px' })
-    fireEvent.click(screen.getByRole('button', { name: 'Expand table' }))
+    const button = screen.getByRole('button', { name: 'Expand table' })
+    expect(button).toHaveAttribute('aria-expanded', 'false')
+    expect(button).toHaveAttribute('aria-controls', 'peek')
+    fireEvent.click(button)
     expect(onOpen).toHaveBeenCalled()
   })
 

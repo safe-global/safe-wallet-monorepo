@@ -39,7 +39,7 @@ describe('ExpandableCard', () => {
     )
 
     await userEvent.click(screen.getByRole('button', { name: 'Show token details' }))
-    expect(onOpenChange).toHaveBeenCalledWith(true)
+    expect(onOpenChange.mock.calls[0][0]).toBe(true)
     expect(screen.queryByText('USDC, DAI')).not.toBeInTheDocument()
 
     rerender(
@@ -48,5 +48,18 @@ describe('ExpandableCard', () => {
       </ExpandableCard>,
     )
     expect(screen.getByText('USDC, DAI')).toBeVisible()
+  })
+
+  it('swaps the chevron and passes props to the root', async () => {
+    render(
+      <ExpandableCard summary="Tokens" detailsLabel="token details" data-testid="card" className="mt-2">
+        <p>USDC, DAI</p>
+      </ExpandableCard>,
+    )
+
+    const [right, down] = Array.from(screen.getByRole('button').querySelectorAll('svg'))
+    expect(right).toHaveClass('lucide-chevron-right', 'group-data-[panel-open]/expandable:hidden')
+    expect(down).toHaveClass('lucide-chevron-down', 'hidden')
+    expect(screen.getByTestId('card')).toHaveClass('mt-2')
   })
 })
