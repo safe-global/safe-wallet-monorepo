@@ -13,7 +13,7 @@ const meta = {
   component: ExpandableList,
   decorators: [
     (Story) => (
-      <div className="bg-background p-6">
+      <div className="bg-surface-sunken p-6">
         <div className="max-w-[560px]">
           <Story />
         </div>

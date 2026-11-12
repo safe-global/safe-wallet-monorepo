@@ -3,6 +3,17 @@ import { ChevronDown, ChevronRight } from 'lucide-react'
 import { Card } from '../../primitives/card/card'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../primitives/collapsible/collapsible'
 
+interface ExpandableCardProps {
+  summary: ReactNode
+  /** Names the details for screen readers, e.g. "recipient details" */
+  detailsLabel: string
+  children: ReactNode
+  open?: boolean
+  defaultOpen?: boolean
+  onOpenChange?: (open: boolean) => void
+  className?: string
+}
+
 /**
  * ExpandableCard
  *
@@ -15,17 +26,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../../primi
  * </ExpandableCard>
  * ```
  */
-interface ExpandableCardProps {
-  summary: ReactNode
-  /** Names the details for screen readers, e.g. "recipient details" */
-  detailsLabel: string
-  children: ReactNode
-  open?: boolean
-  defaultOpen?: boolean
-  onOpenChange?: (open: boolean) => void
-  className?: string
-}
-
 function ExpandableCard({
   summary,
   detailsLabel,

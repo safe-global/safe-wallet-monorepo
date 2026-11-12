@@ -7,6 +7,14 @@ import { Skeleton } from '../../primitives/skeleton/skeleton'
 import { Typography } from '../../primitives/typography/typography'
 import { cn } from '../../lib/utils'
 
+interface WidgetProps extends Omit<ComponentProps<'div'>, 'title'> {
+  title: ReactNode
+  /** Makes the title a pointer target, e.g. to open the full list */
+  onTitleClick?: () => void
+  /** Trailing node in the title row, e.g. `WidgetViewAll` or an icon button */
+  action?: ReactNode
+}
+
 /**
  * Widget
  *
@@ -20,14 +28,6 @@ import { cn } from '../../lib/utils'
  * </Widget>
  * ```
  */
-interface WidgetProps extends Omit<ComponentProps<'div'>, 'title'> {
-  title: ReactNode
-  /** Makes the title a pointer target, e.g. to open the full list */
-  onTitleClick?: () => void
-  /** Trailing node in the title row, e.g. `WidgetViewAll` or an icon button */
-  action?: ReactNode
-}
-
 function Widget({ title, onTitleClick, action, children, className, ...props }: WidgetProps) {
   return (
     <div data-slot="widget" className={cn('flex h-full min-h-0 flex-col rounded-xl bg-card p-1', className)} {...props}>

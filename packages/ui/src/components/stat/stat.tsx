@@ -3,6 +3,15 @@ import { Skeleton } from '../../primitives/skeleton/skeleton'
 import { Typography } from '../../primitives/typography/typography'
 import { cn } from '../../lib/utils'
 
+interface StatProps extends Omit<ComponentProps<'div'>, 'children'> {
+  label: ReactNode
+  value: ReactNode
+  /** Shows a skeleton instead of the value */
+  loading?: boolean
+  /** Props for the value element, e.g. a `data-testid` */
+  valueProps?: Omit<HTMLAttributes<HTMLElement>, 'color'> & { [attribute: `data-${string}`]: string | undefined }
+}
+
 /**
  * Stat
  *
@@ -13,15 +22,6 @@ import { cn } from '../../lib/utils'
  * <Stat label="Total value" value="$123,456.01" loading={isLoading} />
  * ```
  */
-interface StatProps extends Omit<ComponentProps<'div'>, 'children'> {
-  label: ReactNode
-  value: ReactNode
-  /** Shows a skeleton instead of the value */
-  loading?: boolean
-  /** Props for the value element, e.g. a `data-testid` */
-  valueProps?: Omit<HTMLAttributes<HTMLElement>, 'color'> & { [attribute: `data-${string}`]: string | undefined }
-}
-
 function Stat({ label, value, loading = false, valueProps, className, ...props }: StatProps) {
   return (
     <div data-slot="stat" className={cn('flex flex-col gap-1', className)} {...props}>

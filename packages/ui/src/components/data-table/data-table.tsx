@@ -113,6 +113,19 @@ const compareNullable = (
 const ariaSortValue = (direction?: SortDirection): 'ascending' | 'descending' | 'none' =>
   direction === 'asc' ? 'ascending' : direction === 'desc' ? 'descending' : 'none'
 
+/**
+ * DataTable
+ *
+ * A typed, sortable and paginated table on the panel look of `Table`. Columns pick their look from bounded
+ * options, and secondary columns fold into an optional detail row when the full set doesn't fit.
+ *
+ * @example
+ * ```tsx
+ * <DataTableCard>
+ *   <DataTable columns={columns} rows={members} getRowKey={(member) => member.id} />
+ * </DataTableCard>
+ * ```
+ */
 function DataTable<T>({
   columns,
   rows,

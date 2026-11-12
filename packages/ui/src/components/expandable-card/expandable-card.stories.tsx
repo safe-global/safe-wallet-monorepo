@@ -17,7 +17,7 @@ const meta = {
   args: { summary: 'Recipients', detailsLabel: 'recipient details', children: null },
   decorators: [
     (Story) => (
-      <div className="max-w-[420px]">
+      <div className="max-w-[420px] p-4">
         <Story />
       </div>
     ),

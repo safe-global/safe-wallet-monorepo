@@ -32,6 +32,18 @@ const useHeights = (contentRef: RefObject<HTMLElement | null>, peekUntil: RefObj
   return heights
 }
 
+interface PeekCollapsibleProps {
+  open: boolean
+  onOpen: () => void
+  /** The last element still visible while collapsed */
+  peekUntil: RefObject<HTMLElement | null>
+  expandLabel: string
+  /** Id of the clipped region, e.g. for `aria-controls` on an outside toggle */
+  id?: string
+  className?: string
+  children: ReactNode
+}
+
 /**
  * PeekCollapsible
  *
@@ -47,18 +59,6 @@ const useHeights = (contentRef: RefObject<HTMLElement | null>, peekUntil: RefObj
  * </PeekCollapsible>
  * ```
  */
-interface PeekCollapsibleProps {
-  open: boolean
-  onOpen: () => void
-  /** The last element still visible while collapsed */
-  peekUntil: RefObject<HTMLElement | null>
-  expandLabel: string
-  /** Id of the clipped region, e.g. for `aria-controls` on an outside toggle */
-  id?: string
-  className?: string
-  children: ReactNode
-}
-
 function PeekCollapsible({ id, open, onOpen, peekUntil, expandLabel, className, children }: PeekCollapsibleProps) {
   const contentRef = useRef<HTMLDivElement>(null)
   const heights = useHeights(contentRef, peekUntil)

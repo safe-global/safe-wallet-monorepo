@@ -22,7 +22,7 @@ const meta = {
   component: Widget,
   decorators: [
     (Story) => (
-      <div className="bg-background p-8">
+      <div className="bg-surface-sunken p-8">
         <div className="max-w-[560px]">
           <Story />
         </div>

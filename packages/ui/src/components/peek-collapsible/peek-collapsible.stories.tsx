@@ -60,7 +60,7 @@ const meta = {
   parameters: { layout: 'padded' },
   decorators: [
     (Story) => (
-      <div className="bg-background p-6">
+      <div className="bg-surface-sunken p-6">
         <div className="max-w-[640px]">
           <Story />
         </div>
