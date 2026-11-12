@@ -48,7 +48,7 @@ describe('PendingDelegationsList', () => {
     render(<PendingDelegationsList />)
 
     expect(screen.getByText('Pending confirmations')).toBeInTheDocument()
-    expect(screen.getByText('2')).toBeInTheDocument()
+    expect(screen.getByText('2', { selector: '[data-slot="chip"]' })).toBeInTheDocument()
     expect(screen.getByText('New proposer:')).toBeInTheDocument()
     expect(screen.getByText('Remove proposer:')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sign' })).toBeInTheDocument()
