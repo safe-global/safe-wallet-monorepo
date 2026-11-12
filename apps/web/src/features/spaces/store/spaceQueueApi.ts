@@ -1,3 +1,4 @@
+import { defaultSerializeQueryArgs } from '@reduxjs/toolkit/query'
 import { cgwClient } from '@safe-global/store/gateway/cgwClient'
 import type {
   SpaceQueueCounts,
@@ -64,6 +65,13 @@ const toSpaceQueue = (page: SpaceQueuedItemPage, filters?: SpaceQueueFilters, se
 
 type SpaceQueueArgs = { spaceId: string; filters?: SpaceQueueFilters; search?: string }
 
+/** Empty filters and an empty search ask for the same queue as none, so they share its cache entry and polling */
+export const toCacheArgs = ({ spaceId, filters, search }: SpaceQueueArgs): SpaceQueueArgs => ({
+  spaceId,
+  ...(hasSpaceQueueFilters(filters) && { filters }),
+  ...(search && { search }),
+})
+
 const joinOrOmit = (values: string[]): string | undefined => (values.length > 0 ? values.join(',') : undefined)
 
 const toParams = ({ filters, search }: SpaceQueueArgs) => {
@@ -89,6 +97,8 @@ export const spaceQueueApi = cgwClient.enhanceEndpoints({ addTagTypes: ['transac
         params: toParams(args),
       }),
       transformResponse: (page: SpaceQueuedItemPage, _meta, { filters, search }) => toSpaceQueue(page, filters, search),
+      serializeQueryArgs: ({ endpointName, endpointDefinition, queryArgs }) =>
+        defaultSerializeQueryArgs({ endpointName, endpointDefinition, queryArgs: toCacheArgs(queryArgs) }),
       providesTags: ['transactions'],
     }),
   }),

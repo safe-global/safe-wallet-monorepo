@@ -4,7 +4,7 @@ import { cgwApi as spacesApi, type SpaceQueueSafe } from '@safe-global/store/gat
 import { cgwApi as transactionsApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
-import { clearPendingTx, PendingStatus, selectPendingTxs, type PendingTx } from '@/store/pendingTxsSlice'
+import { PendingStatus, selectPendingTxs, type PendingTx } from '@/store/pendingTxsSlice'
 import { isMultisigExecutionInfo, isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
@@ -106,7 +106,19 @@ const settleExecution = async (
   }
 
   if (details.txStatus === TransactionStatus.FAILED || details.txStatus === TransactionStatus.CANCELLED) {
-    dispatch(clearPendingTx({ txId }))
+    // FAILED is a final status, so the pending entry clears and the user gets the same toast as on the Safe page
+    txDispatch(TxEvent.FAILED, {
+      txId,
+      chainId: current.chainId,
+      safeAddress: current.safeAddress,
+      nonce: current.nonce,
+      groupKey: current.groupKey,
+      error: new Error(
+        details.txStatus === TransactionStatus.CANCELLED
+          ? 'Another transaction with the same nonce was executed instead.'
+          : 'The transaction failed on-chain.',
+      ),
+    })
   }
 }
 
@@ -122,11 +134,11 @@ export const spaceQueueReconciliationListener = (listenerMiddleware: typeof list
   listenerMiddleware.startListening({
     matcher,
     effect: async (action, { getState, dispatch }) => {
-      const { spaceId, filters } = action.meta.arg.originalArgs
+      const { spaceId, filters, search } = action.meta.arg.originalArgs
       const queue = action.payload
       reconcileSignatures(queue, getState)
-      // A filtered queue leaves out transactions on purpose, so it cannot tell that one left the queue
-      if (hasSpaceQueueFilters(filters)) return
+      // A filtered or searched queue leaves out transactions on purpose, so it cannot tell that one left the queue
+      if (hasSpaceQueueFilters(filters) || search) return
 
       const settled = Object.entries(selectPendingTxs(getState())).filter(
         ([txId, pendingTx]) =>

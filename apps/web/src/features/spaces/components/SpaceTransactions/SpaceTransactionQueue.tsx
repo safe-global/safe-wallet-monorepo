@@ -2,6 +2,7 @@ import { memo, useCallback, useDeferredValue, useState, type ReactElement } from
 import PagePlaceholder from '@safe-global/views/components/common/PagePlaceholder'
 import SkeletonTxList from '@safe-global/views/components/common/PaginatedTxns/SkeletonTxList'
 import { Typography } from '@safe-global/views/components/ui/typography'
+import { POLLING_INTERVAL } from '@/config/constants'
 import NoTransactionsIcon from '@/public/images/transactions/no-transactions.svg'
 import {
   hasSpaceQueueFilters,
@@ -70,11 +71,11 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
   const queryFilters = useDeferredValue(filters)
   const querySearch = useDeferredValue(search)
   // `data` keeps the last answer while a new filter loads, so the menus keep their counts
-  const { data, currentData, isError, isFetching, refetch } = useGetSpaceQueueQuery({
-    spaceId,
-    filters: queryFilters,
-    ...(querySearch && { search: querySearch }),
-  })
+  // Unfiltered, this is the same cache entry useSpaceQueuePolling polls; a filtered view polls its own
+  const { data, currentData, isError, isFetching, refetch } = useGetSpaceQueueQuery(
+    { spaceId, filters: queryFilters, ...(querySearch && { search: querySearch }) },
+    { pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true },
+  )
 
   const clearFilters = useCallback(() => {
     setFilters(NO_SPACE_QUEUE_FILTERS)
