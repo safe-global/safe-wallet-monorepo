@@ -10,7 +10,7 @@
 | Safe components | `src/components/<name>/<name>.tsx` | `./components/<name>` | `Safe UI/<Name>` |
 
 - **Primitives** are the shadcn/ui components, semi-generated and managed with the shadcn CLI. A primitive may import another primitive (`../button/button`), `../../lib/*`, `../../hooks/*` and `../../provider`.
-- **Safe components** are Safe's own generic patterns (table, widget, expandable list, …), built only from primitives, Base UI, `cn` and the hooks. The direction is one way: a Safe component imports primitives, never the reverse, and never another Safe component. `src/relative-imports.test.ts` and the `ui/layers` lint block enforce it.
+- **Safe components** are Safe's own generic patterns (table, widget, expandable list, …), built only from primitives, Base UI, `cn` and the hooks. The direction is one way: a Safe component imports primitives, never the reverse, and never another Safe component. `src/relative-imports.test.ts` and the `ui/layers` and `ui/components` lint blocks enforce it.
 - `lib/`, `hooks/`, `provider.tsx` and `styles/` belong to neither layer and keep their keys. `src/primitives/anchored-surface.test.tsx` covers several primitives, so it sits at the layer root.
 - A primitive and a Safe component never share a name: registry items, docs URLs and preview routes are one flat namespace.
 

@@ -84,4 +84,27 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    name: 'ui/components',
+    files: ['src/components/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          ...noFrameworkOrDomainImports[1],
+          patterns: [
+            ...noFrameworkOrDomainImports[1].patterns,
+            {
+              group: ['@safe-global/ui/components/*'],
+              message: 'A Safe component never imports another Safe component; compose primitives instead.',
+            },
+            {
+              regex: '^\\.\\./(?!\\.\\./)',
+              message: 'A Safe component never imports another Safe component; compose primitives instead.',
+            },
+          ],
+        },
+      ],
+    },
+  },
 )
