@@ -720,3 +720,14 @@ The user finds the current site too close to Storybook and wants a dev-focused s
 - type-check, lint, test, prettier, `build`, the crawl at the root and with `NEXT_PUBLIC_BASE_PATH=/safe-ui`, knip, and `git diff 5dba2e98 -- apps/web apps/web-tanstack packages/views` empty.
 - No 404s, no console errors, header on every docs and site page, the hex/`oklch()` grep still empty.
 - Screenshots, desktop light and dark: `/`, `/components/`, `/components/button/`, `/typeset/`, `/create/`, `/docs/`; mobile dark: `/` with the menu open. Reviewed by eye until the home page reads as a product landing, not a Storybook.
+
+### Redesign implementation notes
+
+- The plan held. Deviations and details:
+  - On mobile, the Fumadocs section bar (with "Open Sidebar") stays under the site header, because it is the only way to reach the Docs and Components sidebars there. Its own search and theme controls are off.
+  - The root content `meta.json` is titled "Safe UI", so search breadcrumbs read "Safe UI › Components › Button".
+  - Client-rendered code (Create, Typeset, the home install card, the registry snippet) uses Fumadocs' `DynamicCodeBlock`, which highlights with shiki in the browser; server pages keep `ServerCodeBlock`.
+  - Component index thumbnails are lazily loaded live previews of each first story, scaled to 50%. The Avatar thumbnail triggers the same allowlisted broken-image request as its story.
+  - Base UI puts a radio's `id` on its hidden native input, so the Create option cards are whole `<label>`s and the crawl clicks the label.
+  - `packages/ui/README.md` points at the moved Installation page (`content/docs/docs/installation.mdx`).
+- Verification after the last change: type-check, lint, test (39), prettier, `build`, `registry.json` current, knip, the hex/`oklch()` grep empty, the wallet diff empty, and the crawl passes at the root and from `/safe-ui/` (183 tests each: every site, docs and preview page with the header and its six nav items, the components filter, search, theme toggle, copy, the mobile menu sheet, Create output following framework, preset and install path, Typeset sample text).
