@@ -288,7 +288,7 @@ function WidgetEmptyState({
       >
         {icon}
       </div>
-      <div className="flex flex-col items-center gap-2 text-center animate-in fade-in duration-350 ease-out delay-150 fill-mode-both">
+      <div className="flex flex-col items-center gap-2 text-center animate-in fade-in duration-350 ease-out delay-150 fill-mode-backwards">
         <Typography variant="paragraph-bold">{text}</Typography>
         {subtitle && (
           <Typography variant="paragraph-small" color="muted">
@@ -296,7 +296,7 @@ function WidgetEmptyState({
           </Typography>
         )}
       </div>
-      {action && <div className="animate-in fade-in duration-350 ease-out delay-300 fill-mode-both">{action}</div>}
+      {action && <div className="animate-in fade-in duration-350 ease-out delay-300 fill-mode-backwards">{action}</div>}
     </div>
   )
 }
