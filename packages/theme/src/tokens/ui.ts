@@ -11,6 +11,25 @@ type UiTokenMap = Readonly<Record<string, string>>
 
 const hex = (value: string): string => value.toLowerCase()
 
+const ACCENT_LIGHT = '#f0fdf4'
+const GREEN_100 = 'oklch(96.2% 0.044 156.743)'
+const GREEN_800 = '#166534'
+
+/** Safe component tokens with one declaration for both themes */
+const shared: UiTokenMap = {
+  // Status tones (accent bars, status icons), from the palette so each theme keeps its own shade.
+  'tone-critical': 'var(--color-error-main)',
+  'tone-warning': 'var(--color-warning-main)',
+  'tone-attention': 'var(--color-review-main)',
+  'tone-success': 'var(--color-success-main)',
+  'tone-neutral': 'var(--color-text-secondary)',
+  'tone-muted': 'var(--color-text-disabled)',
+  // Widget overflow pill and empty-state halo stay light in dark mode, as the Spaces dashboard draws them.
+  'widget-count': ACCENT_LIGHT,
+  'widget-count-foreground': GREEN_800,
+  'widget-icon-halo': GREEN_100,
+}
+
 const light: UiTokenMap = {
   background: '#ffffff',
   foreground: '#0a0a0a',
@@ -31,7 +50,7 @@ const light: UiTokenMap = {
   'muted-foreground': '#737373',
   // A well sunk into a card; pinned to the page floor so it reads as recessed in both themes.
   'surface-sunken': 'var(--color-background-main)',
-  accent: '#f0fdf4',
+  accent: ACCENT_LIGHT,
   'accent-foreground': '#171717',
   destructive: '#dc2626',
   border: '#e5e5e5',
@@ -80,18 +99,7 @@ const light: UiTokenMap = {
   // Must beat onboard.css's --onboard-modal-z-index (1450) for dialogs the wallet-connect modal opens.
   'z-above-onboard': '1451',
   'z-picker': '1500',
-  // Status tones (accent bars, status icons), from the palette so each theme keeps its own shade.
-  'tone-critical': 'var(--color-error-main)',
-  'tone-warning': 'var(--color-warning-main)',
-  'tone-attention': 'var(--color-review-main)',
-  'tone-success': 'var(--color-success-main)',
-  'tone-neutral': 'var(--color-text-secondary)',
-  'tone-muted': 'var(--color-text-disabled)',
-  // Widget overflow pill and empty-state icon halo; the same in both themes, as the Spaces dashboard draws them.
-  'widget-count': '#f0fdf4',
-  'widget-count-foreground': '#166534',
-  // green-100
-  'widget-icon-halo': 'oklch(96.2% 0.044 156.743)',
+  ...shared,
 }
 
 const dark: UiTokenMap = {
@@ -148,15 +156,7 @@ const dark: UiTokenMap = {
   'badge-warning-subtle': '#301d02',
   'badge-warning-strong': '#eab308',
   'badge-dot-warning': '#facc15',
-  'tone-critical': 'var(--color-error-main)',
-  'tone-warning': 'var(--color-warning-main)',
-  'tone-attention': 'var(--color-review-main)',
-  'tone-success': 'var(--color-success-main)',
-  'tone-neutral': 'var(--color-text-secondary)',
-  'tone-muted': 'var(--color-text-disabled)',
-  'widget-count': '#f0fdf4',
-  'widget-count-foreground': '#166534',
-  'widget-icon-halo': 'oklch(96.2% 0.044 156.743)',
+  ...shared,
 }
 
 export const uiTokens: { light: UiTokenMap; dark: UiTokenMap } = { light, dark }
