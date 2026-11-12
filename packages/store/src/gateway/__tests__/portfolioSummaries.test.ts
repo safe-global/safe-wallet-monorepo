@@ -2,7 +2,12 @@ import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
 import { setupServer } from 'msw/node'
 import { configureStore } from '@reduxjs/toolkit'
-import { makePortfolioSummaryTag, portfolioSummariesRtkApi, PORTFOLIO_SUMMARY_TAG } from '../portfolioSummaries'
+import {
+  makePortfolioSummaryTag,
+  portfolioSummariesRtkApi,
+  PORTFOLIO_SUMMARY_TAG,
+  refreshPortfolioSummary,
+} from '../portfolioSummaries'
 import { setBaseUrl, cgwClient } from '../cgwClient'
 import type { PortfolioSummary } from '../AUTO_GENERATED/portfolios'
 
@@ -71,7 +76,39 @@ describe('portfolioGetSummariesForMany', () => {
     ])
   })
 
-  it('returns the error of a failed batch', async () => {
+  it('keeps the batches that succeeded when another batch fails', async () => {
+    const safes = Array.from({ length: 13 }, makeSafeId)
+    const failingBatch = safes.slice(0, 10).join(',')
+    server.use(
+      http.get(SUMMARIES_URL, ({ request }) => {
+        const batch = new URL(request.url).searchParams.get('safes') ?? ''
+        if (batch === failingBatch) return HttpResponse.json({ message: 'Too many requests' }, { status: 429 })
+        return HttpResponse.json(batch.split(',').map(toSummary))
+      }),
+    )
+
+    const result = await makeStore().dispatch(
+      portfolioSummariesRtkApi.endpoints.portfolioGetSummariesForMany.initiate({
+        safes,
+        currency: 'usd',
+        trusted: true,
+      }),
+    )
+
+    expect(result.data?.map((summary) => `${summary.chainId}:${summary.address}`)).toEqual(safes.slice(10))
+  })
+
+  it('refetches the given Safes with refreshPortfolioSummary even when their summary is cached', async () => {
+    const store = makeStore()
+    const safe = makeSafeId()
+    await store.dispatch(refreshPortfolioSummary({ safes: [safe], currency: 'usd', trusted: true }))
+
+    await store.dispatch(refreshPortfolioSummary({ safes: [safe], currency: 'usd', trusted: true }))
+
+    expect(requests.map((params) => params.get('safes'))).toEqual([safe, safe])
+  })
+
+  it('returns the error when every batch fails', async () => {
     server.use(http.get(SUMMARIES_URL, () => HttpResponse.json({ message: 'Too many requests' }, { status: 429 })))
 
     const result = await makeStore().dispatch(

@@ -1,3 +1,5 @@
+import type { ThunkAction, UnknownAction } from '@reduxjs/toolkit'
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import { cgwClient } from '../cgwClient'
 import {
   addTagTypes,
@@ -29,8 +31,11 @@ export const portfolioSummariesRtkApi = cgwClient
         PortfolioSummariesGetSummariesV2ApiResponse,
         PortfolioSummariesForManyArg
       >({
+        // Keeps the batches that succeeded: a Safe missing from the result falls back to its previous source
         async queryFn({ safes, currency, trusted }, _api, _extraOptions, fetchWithBaseQuery) {
           let combinedData: PortfolioSummariesGetSummariesV2ApiResponse = []
+          let firstError: FetchBaseQueryError | undefined
+          let succeededBatches = 0
 
           for (const chunk of chunkArray(safes, MAX_SAFES_PER_REQUEST)) {
             const result = await fetchWithBaseQuery({
@@ -39,13 +44,15 @@ export const portfolioSummariesRtkApi = cgwClient
             })
 
             if (result.error) {
-              return { error: result.error }
+              firstError ??= result.error
+              continue
             }
 
+            succeededBatches += 1
             combinedData = combinedData.concat(result.data as PortfolioSummariesGetSummariesV2ApiResponse)
           }
 
-          return { data: combinedData }
+          return succeededBatches === 0 && firstError ? { error: firstError } : { data: combinedData }
         },
         // `portfolio` refetches after DELETE /v1/portfolio; the per-Safe tags let a refresh target one Safe
         providesTags: (_result, _error, { safes }) => [
@@ -59,5 +66,16 @@ export const portfolioSummariesRtkApi = cgwClient
     }),
     overrideExisting: true,
   })
+
+/** Refetches the summary of the given Safes as a list of its own; readers pick the newest summary of each Safe. */
+export const refreshPortfolioSummary =
+  (arg: PortfolioSummariesForManyArg): ThunkAction<Promise<void>, unknown, unknown, UnknownAction> =>
+  async (dispatch) => {
+    const query = dispatch(
+      portfolioSummariesRtkApi.endpoints.portfolioGetSummariesForMany.initiate(arg, { forceRefetch: true }),
+    )
+    await query
+    query.unsubscribe()
+  }
 
 export const { usePortfolioGetSummariesForManyQuery } = portfolioSummariesRtkApi
