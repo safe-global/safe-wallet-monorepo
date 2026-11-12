@@ -3,7 +3,7 @@ import { formatUnits } from 'ethers'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { render } from '@/tests/test-utils'
 import { LifiSwapTransaction } from '.'
-import { mockLifiSwapTxInfo } from './LifiSwapTransaction.fixtures'
+import { mockLifiSwapTxInfo } from './LifiSwapTransaction.storyData'
 
 describe('LifiSwapTransaction', () => {
   it('shows the total fee', () => {

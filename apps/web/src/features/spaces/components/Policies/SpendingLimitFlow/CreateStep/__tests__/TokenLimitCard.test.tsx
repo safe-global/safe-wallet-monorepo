@@ -6,7 +6,7 @@ import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/services'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
 import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
+import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
 import {
   DUPLICATE_TOKEN_ERROR,
   EXISTING_LIMIT_ERROR,

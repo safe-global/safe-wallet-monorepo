@@ -121,7 +121,7 @@ import { safeFixtures, chainFixtures, balancesFixtures, SAFE_ADDRESSES } from '@
 | `safeTokenHolder` | 25     | $707 (15 protocols) | Protocol diversity  |
 | `empty`           | 0      | $0                  | Empty states        |
 
-Put data that only stories use in `<Component>.storyData.ts` next to the story, and data that tests and stories share in `<Component>.fixtures.ts`. Story data must be the same in every run. Faker continues one sequence for the whole page, so a story or `.storyData.ts` file that imports faker or a test builder calls `faker.seed(<number>)` after its imports (ESLint enforces this), and so does a `.fixtures.ts` file that a story imports. Then a file gets the same values in every run, whatever other files do with faker.
+Name a data file by what its data must do. `<Component>.storyData.ts` holds data that a story shows, so it must be the same in every run; tests can import it too. `<Component>.testData.ts` holds data for tests only, which can be random; stories never import it. Faker continues one sequence for the whole page, so a story or `.storyData.ts` file that imports faker or a test builder calls `faker.seed(<number>)` after its imports. ESLint enforces both rules. The recorded API data in `config/test/msw/fixtures` is fixed, and stories and tests both use it.
 
 ## Context error reference
 

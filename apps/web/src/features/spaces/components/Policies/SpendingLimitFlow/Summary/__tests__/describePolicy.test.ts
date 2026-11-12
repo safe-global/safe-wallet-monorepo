@@ -15,7 +15,7 @@ import {
   spendingLimitSummaryBuilder,
   safeAccountOptionBuilder,
   spenderSummaryBuilder,
-} from '../SpendingLimitSummary.fixtures'
+} from '../SpendingLimitSummary.testData'
 
 const spender = (name: string | undefined, resetTimes: string[]) =>
   spenderSummaryBuilder()

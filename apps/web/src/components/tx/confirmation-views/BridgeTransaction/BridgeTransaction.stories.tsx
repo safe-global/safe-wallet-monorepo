@@ -5,7 +5,7 @@ import {
   mockPendingBridgeTxInfo,
   mockFailedBridgeTxInfo,
   mockSuccessfulBridgeTxInfo,
-} from './BridgeTransaction.fixtures'
+} from './BridgeTransaction.storyData'
 
 const meta = {
   title: 'Components/TxFlow/ConfirmationViews/BridgeTransaction',

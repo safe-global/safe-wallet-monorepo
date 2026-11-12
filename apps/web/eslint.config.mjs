@@ -30,6 +30,13 @@ const seedFakerInStoryData = {
   message: 'Story data must be the same in every run: call faker.seed(<number>) after the imports.',
 }
 
+const noTestDataInStories = {
+  selector: 'ImportDeclaration[source.value=/\\.testData$/]',
+  message: 'testData files may be random and are for tests only. Move the data a story needs to a .storyData.ts file.',
+}
+
+const storyDataRules = [seedFakerInStoryData, noTestDataInStories]
+
 const config = [
   {
     ignores: [
@@ -218,18 +225,13 @@ const config = [
   {
     files: ['**/*.stories.tsx', '**/*.stories.ts', 'src/stories/**'],
     rules: {
-      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, seedFakerInStoryData],
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...storyDataRules],
     },
   },
   {
     files: ['**/*.storyData.ts'],
     rules: {
-      'no-restricted-syntax': [
-        'error',
-        ...designSystemSyntaxRules,
-        ...safeLinkWithoutSpaceIdRules,
-        seedFakerInStoryData,
-      ],
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules, ...storyDataRules],
     },
   },
   // Override for story files: allow type-only imports from @storybook/react
