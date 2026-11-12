@@ -1,15 +1,12 @@
 import { createContext, useContext, useMemo, type ReactElement, type ReactNode } from 'react'
-import type { Erc20Token, NativeToken } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { useLoadFeature } from '@/features/__core__'
 import { SpendingLimitsFeature, type SpendingLimitState } from '@/features/spending-limits'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import { Errors, logError } from '@/services/exceptions'
 import { useSpendingLimitTokenOptions } from '@/features/spending-limits'
-import type { TokenOption } from '@/features/spending-limits/services'
+import { toTokenInfo } from '@/features/spending-limits/services'
 
 export type ExistingSpendingLimits = {
   /** Undefined until loaded for the selected Safe, or while no Safe is selected. */
@@ -25,18 +22,6 @@ export const ExistingSpendingLimitsContext = createContext<ExistingSpendingLimit
 
 /** Outside the provider (stories, Safe-level) nothing is known, so nothing is excluded. */
 export const useExistingSpendingLimits = (): ExistingSpendingLimits => useContext(ExistingSpendingLimitsContext)
-
-/** The loader names tokens from this list first; anything missing costs an on-chain lookup. */
-const toTokenInfo = (option: TokenOption): Erc20Token | NativeToken => {
-  const info = {
-    address: option.address,
-    decimals: option.decimals,
-    symbol: option.symbol,
-    name: option.name,
-    logoUri: option.logoUri ?? '',
-  }
-  return sameAddress(option.address, ZERO_ADDRESS) ? { ...info, type: 'NATIVE_TOKEN' } : { ...info, type: 'ERC20' }
-}
 
 /**
  * The selected Safe's current spending limits, loaded once per Safe. Lives above `TxFlow` so the Create

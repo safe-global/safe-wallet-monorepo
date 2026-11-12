@@ -2,14 +2,13 @@ import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { useFormContext } from 'react-hook-form'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { TokenType } from '@safe-global/store/gateway/types'
-import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import type { PortfolioBalances } from '@/hooks/loadables/useLoadBalances'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
+import { tokenOptionBuilder } from '@/tests/builders/tokenOptions'
 import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../types'
 import CreateSpendingLimit from './index'
 import { NO_TOKEN_SELECTED_ERROR } from '../../services/spendingLimitValidation'
-import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
+import type { TokenOption } from '../../services/tokenOptions'
+import * as useSpendingLimitTokenOptionsHook from '../../hooks/useSpendingLimitTokenOptions'
 import * as useIsSpendingLimitSupportedHook from '../../hooks/useIsSpendingLimitSupported'
 
 jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
@@ -33,25 +32,27 @@ jest.mock('@/components/common/AddressBookInput', () => {
 
 const BENEFICIARY = '0x1234567890123456789012345678901234567890'
 
-const nativeBalance: Balances['items'][number] = {
-  balance: '1000000000000000000',
-  fiatBalance: '1000',
-  fiatConversion: '1000',
-  tokenInfo: {
+const nativeOption = tokenOptionBuilder()
+  .with({
     address: ZERO_ADDRESS,
-    decimals: 18,
-    logoUri: '',
-    name: 'Ether',
     symbol: 'ETH',
-    type: TokenType.NATIVE_TOKEN,
-  },
-}
+    name: 'Ether',
+    decimals: 18,
+    group: 'held',
+    balance: '1000000000000000000',
+  })
+  .build()
 
-const mockBalances = (items: Balances['items']) => {
-  jest.spyOn(useVisibleBalancesHook, 'useVisibleBalances').mockReturnValue({
-    balances: { items, fiatTotal: '' } as PortfolioBalances,
-    loaded: true,
-    loading: false,
+const mockOptions = (options: TokenOption[]) => {
+  jest.spyOn(useSpendingLimitTokenOptionsHook, 'default').mockReturnValue({
+    options,
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+    isPopularLoading: false,
+    isPopularError: false,
+    refetchPopular: jest.fn(),
+    identityKey: `1:${BENEFICIARY}`,
   })
 }
 
@@ -96,24 +97,17 @@ describe('CreateSpendingLimit', () => {
 
   afterEach(() => jest.restoreAllMocks())
 
-  it('does not render the raw token address in the amount selector when the Safe has no balances', () => {
-    mockBalances([])
+  it('shows the selected token and its balance in the token picker', () => {
+    mockOptions([nativeOption])
 
     renderForm()
 
-    expect(screen.getByTestId('token-selector')).not.toHaveTextContent(ZERO_ADDRESS)
-  })
-
-  it('shows the selected token when it is present in the balances', () => {
-    mockBalances([nativeBalance])
-
-    renderForm()
-
-    expect(screen.getByTestId('token-selector')).toHaveTextContent('ETH')
+    expect(screen.getByTestId('spending-limit-token-selector')).toHaveValue('ETH')
+    expect(screen.getByText('1 ETH')).toBeInTheDocument()
   })
 
   it('resets the limit only once by default', () => {
-    mockBalances([nativeBalance])
+    mockOptions([nativeOption])
 
     renderForm()
 
@@ -122,7 +116,7 @@ describe('CreateSpendingLimit', () => {
 
   describe('Next button', () => {
     it('stays disabled and asks for more than 0 when the amount is 0', async () => {
-      mockBalances([nativeBalance])
+      mockOptions([nativeOption])
 
       renderForm()
       await fillForm('0')
@@ -132,7 +126,7 @@ describe('CreateSpendingLimit', () => {
     })
 
     it('is disabled while the form is empty', () => {
-      mockBalances([nativeBalance])
+      mockOptions([nativeOption])
 
       renderForm()
 
@@ -140,7 +134,7 @@ describe('CreateSpendingLimit', () => {
     })
 
     it('stays disabled and flags the missing token when an amount is entered without a selectable token', async () => {
-      mockBalances([])
+      mockOptions([])
 
       const { onNext } = renderForm()
       await fillForm('1')
@@ -154,7 +148,7 @@ describe('CreateSpendingLimit', () => {
     })
 
     it('stays disabled when the amount exceeds the allowance range of the selected token', async () => {
-      mockBalances([nativeBalance])
+      mockOptions([nativeOption])
 
       renderForm()
       await fillForm('100000000000000000000')
@@ -164,7 +158,7 @@ describe('CreateSpendingLimit', () => {
     })
 
     it('is enabled and submits once beneficiary, token and amount are valid', async () => {
-      mockBalances([nativeBalance])
+      mockOptions([nativeOption])
 
       const { onNext } = renderForm()
       await fillForm('1')
@@ -185,8 +179,29 @@ describe('CreateSpendingLimit', () => {
       )
     })
 
+    it('submits a popular token the Safe does not hold', async () => {
+      const popular = tokenOptionBuilder().with({ symbol: 'USDC', decimals: 6, group: 'popular' }).build()
+      mockOptions([nativeOption, popular])
+
+      const { onNext } = renderForm({ [SpendingLimitFields.tokenAddress]: popular.address })
+      await fillForm('1.5')
+
+      await waitFor(() => expect(screen.getByTestId('next-btn')).toBeEnabled())
+      await userEvent.click(screen.getByTestId('next-btn'))
+
+      await waitFor(() =>
+        expect(onNext).toHaveBeenCalledWith(
+          expect.objectContaining({
+            [SpendingLimitFields.tokenAddress]: popular.address,
+            [SpendingLimitFields.amount]: '1.5',
+          }),
+          expect.anything(),
+        ),
+      )
+    })
+
     it('re-validates a prefilled amount once the selected token becomes available', async () => {
-      mockBalances([])
+      mockOptions([])
 
       const { rerender, buildUi } = renderForm({
         [SpendingLimitFields.beneficiary]: BENEFICIARY,
@@ -196,7 +211,7 @@ describe('CreateSpendingLimit', () => {
       expect(await screen.findByText(NO_TOKEN_SELECTED_ERROR)).toBeInTheDocument()
       expect(screen.getByTestId('next-btn')).toBeDisabled()
 
-      mockBalances([nativeBalance])
+      mockOptions([nativeOption])
       rerender(buildUi())
 
       await waitFor(() => expect(screen.getByTestId('next-btn')).toBeEnabled())
