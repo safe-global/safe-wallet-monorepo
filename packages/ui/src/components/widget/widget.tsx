@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ComponentProps, type KeyboardEvent, type ReactNode } from 'react'
+import { useEffect, useRef, type ComponentProps, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react'
 import { mergeProps } from '@base-ui/react/merge-props'
 import { useRender } from '@base-ui/react/use-render'
 import { ChevronRight, CircleAlert } from 'lucide-react'
@@ -9,7 +9,7 @@ import { cn } from '../../lib/utils'
 
 interface WidgetProps extends Omit<ComponentProps<'div'>, 'title'> {
   title: ReactNode
-  /** Makes the title a pointer target, e.g. to open the full list */
+  /** Renders the title as a button, e.g. to open the full list */
   onTitleClick?: () => void
   /** Trailing node in the title row, e.g. `WidgetViewAll` or an icon button */
   action?: ReactNode
@@ -32,8 +32,20 @@ function Widget({ title, onTitleClick, action, children, className, ...props }: 
   return (
     <div data-slot="widget" className={cn('flex h-full min-h-0 flex-col rounded-xl bg-card p-1', className)} {...props}>
       <div className="flex shrink-0 items-center pl-6 pr-2 justify-between pb-3 pt-6">
-        <div className={cn('flex min-h-10 items-center', onTitleClick && 'cursor-pointer')} onClick={onTitleClick}>
-          <Typography variant="h4">{title}</Typography>
+        <div className="flex min-h-10 items-center">
+          <Typography variant="h4">
+            {onTitleClick ? (
+              <button
+                type="button"
+                onClick={onTitleClick}
+                className="cursor-pointer rounded-sm text-left outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                {title}
+              </button>
+            ) : (
+              title
+            )}
+          </Typography>
         </div>
         {action && <div className="flex items-center">{action}</div>}
       </div>
@@ -43,15 +55,30 @@ function Widget({ title, onTitleClick, action, children, className, ...props }: 
   )
 }
 
-const enterKey = (onClick?: () => void) =>
-  onClick ? (event: KeyboardEvent) => event.key === 'Enter' && onClick() : undefined
+const NESTED_CONTROLS = 'a, button, input, select, textarea, [role="button"], [role="menuitem"]'
+
+/** Click and key handlers for a `role="button"` container whose content may hold its own controls */
+const buttonHandlers = (onClick?: () => void) =>
+  onClick
+    ? {
+        onClick: (event: MouseEvent<HTMLElement>) => {
+          if ((event.target as Element).closest(NESTED_CONTROLS) !== event.currentTarget) return
+          onClick()
+        },
+        onKeyDown: (event: KeyboardEvent<HTMLElement>) => {
+          if (event.target !== event.currentTarget || (event.key !== 'Enter' && event.key !== ' ')) return
+          event.preventDefault()
+          onClick()
+        },
+      }
+    : {}
 
 interface WidgetItemProps extends Omit<useRender.ComponentProps<'div'>, 'onClick'> {
   label: ReactNode
   info: ReactNode
   /** Optional second line that wraps, e.g. amount and recipient */
   description?: ReactNode
-  /** Makes the row a button (Enter activates it) */
+  /** Makes the row a button (Enter and Space activate it; controls inside keep their own clicks) */
   onClick?: () => void
   /** Leading node, e.g. an avatar */
   startNode?: ReactNode
@@ -89,8 +116,7 @@ function WidgetItem({
       {
         role: isButton ? 'button' : undefined,
         tabIndex: isButton ? 0 : undefined,
-        onClick,
-        onKeyDown: isButton ? enterKey(onClick) : undefined,
+        ...(isButton ? buttonHandlers(onClick) : { onClick }),
         className: cn(
           'flex flex-wrap items-center gap-x-4 gap-y-2 rounded-sm py-4 pl-4 pr-6',
           interactive && 'cursor-pointer transition-colors hover:bg-muted/50',
@@ -169,7 +195,7 @@ interface WidgetFooterProps extends Omit<ComponentProps<'div'>, 'onClick'> {
   text: ReactNode
   /** Overflow count shown as a `+N` pill in the leading slot */
   count?: number
-  /** Makes the footer a button (Enter activates it) */
+  /** Makes the footer a button (Enter and Space activate it) */
   onClick?: () => void
   /** Keeps the leading pill or spacer so the text aligns with the rows' content */
   showLeadingSlot?: boolean
@@ -181,10 +207,10 @@ function WidgetFooter({ count, text, className, onClick, showLeadingSlot = true,
       data-slot="widget-footer"
       role={onClick ? 'button' : undefined}
       tabIndex={onClick ? 0 : undefined}
-      onClick={onClick}
-      onKeyDown={enterKey(onClick)}
+      {...buttonHandlers(onClick)}
       className={cn(
-        'mt-auto flex cursor-pointer items-center rounded-lg py-1 px-6 transition-colors hover:bg-muted/50',
+        'mt-auto flex items-center rounded-lg py-1 px-6 transition-colors hover:bg-muted/50',
+        onClick && 'cursor-pointer',
         showLeadingSlot ? 'gap-4' : 'gap-0',
         !showLeadingSlot && 'min-h-10',
         className,
@@ -262,7 +288,7 @@ function WidgetEmptyState({
   const iconRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!iconRef.current) return
+    if (!iconRef.current || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return
     iconRef.current.querySelectorAll('path, line, polyline, circle, rect').forEach((element) => {
       const shape = element as SVGGeometryElement
       if (typeof shape.getTotalLength !== 'function' || typeof shape.animate !== 'function') return
@@ -282,13 +308,13 @@ function WidgetEmptyState({
       <div
         ref={iconRef}
         className={cn(
-          'flex size-14 items-center justify-center rounded-full bg-widget-icon-halo animate-in fade-in duration-400 ease-out',
+          'flex size-14 items-center justify-center rounded-full bg-widget-icon-halo animate-in fade-in duration-400 ease-out motion-reduce:animate-none',
           iconContainerClassName,
         )}
       >
         {icon}
       </div>
-      <div className="flex flex-col items-center gap-2 text-center animate-in fade-in duration-350 ease-out delay-150 fill-mode-backwards">
+      <div className="flex flex-col items-center gap-2 text-center animate-in fade-in duration-350 ease-out delay-150 fill-mode-backwards motion-reduce:animate-none">
         <Typography variant="paragraph-bold">{text}</Typography>
         {subtitle && (
           <Typography variant="paragraph-small" color="muted">
@@ -296,7 +322,11 @@ function WidgetEmptyState({
           </Typography>
         )}
       </div>
-      {action && <div className="animate-in fade-in duration-350 ease-out delay-300 fill-mode-backwards">{action}</div>}
+      {action && (
+        <div className="animate-in fade-in duration-350 ease-out delay-300 fill-mode-backwards motion-reduce:animate-none">
+          {action}
+        </div>
+      )}
     </div>
   )
 }

@@ -14,7 +14,7 @@ component: widget
 
 <ComponentUsage component="widget" />
 
-Put `WidgetItem` rows inside `Widget`. A row has a `label`, an optional wrapping `description` and an `info` line, plus `startNode`, `featuredNode` and `actionNode` slots; `fixedActionWidth` aligns values across rows. Use `WidgetItemSkeleton` while loading, `WidgetEmptyState` and `WidgetErrorState` (with `onRefresh` for the reload button) when there is nothing to show, and `WidgetFooter` or `WidgetViewAll` for the overflow. To make a row a link, pass your router link through `render`, for example `render={<a href="/accounts" />}`; the empty-state icon stroke draws itself in with the Web Animations API.
+Put `WidgetItem` rows inside `Widget`. A row has a `label`, an optional wrapping `description` and an `info` line, plus `startNode`, `featuredNode` and `actionNode` slots; `fixedActionWidth` aligns values across rows. Use `WidgetItemSkeleton` while loading, `WidgetEmptyState` and `WidgetErrorState` (with `onRefresh` for the reload button) when there is nothing to show, and `WidgetFooter` or `WidgetViewAll` for the overflow. To make a row a link, pass your router link through `render`, for example `render={<a href="/accounts" />}`. In `WidgetEmptyState` the icon's stroke draws itself in with the Web Animations API, and the text fades in; both are skipped when the user prefers reduced motion.
 
 ## Examples
 
@@ -28,7 +28,7 @@ Put `WidgetItem` rows inside `Widget`. A row has a `label`, an optional wrapping
 
 <BaseUiReference component="widget" />
 
-A `WidgetItem` with `onClick` (and no `render`) is a `role="button"` with `tabIndex={0}` that Enter activates; with `render` it is the element you pass, such as a link, with its native semantics. `WidgetFooter` with `onClick` behaves the same way. The title is an `h4`, so place widgets where that level fits the page outline. `onTitleClick` makes the title a pointer target only; offer the same action through a focusable control such as `WidgetViewAll`.
+A `WidgetItem` with `onClick` (and no `render`) is a `role="button"` with `tabIndex={0}` that Enter and Space activate, while links and buttons inside it keep their own clicks and keys; with `render` it is the element you pass, such as a link, with its native semantics. `WidgetFooter` with `onClick` behaves the same way. The title is an `h4`, so place widgets where that level fits the page outline. With `onTitleClick` the title text becomes a button inside the heading.
 
 ## Do / Don't
 
