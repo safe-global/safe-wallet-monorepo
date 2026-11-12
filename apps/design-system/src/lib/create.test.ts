@@ -22,6 +22,20 @@ describe('create', () => {
     assert.equal(config.rsc, false)
     assert.equal(config.tailwind.css, 'src/index.css')
     assert.match(blocks['vite-config'].code, /alias/)
+    assert.equal(blocks.css.code, "@import 'tailwindcss';")
+    assert.match(blocks.css.title, /^src\/index\.css/)
+    for (const id of ['tsconfig', 'tsconfig-app']) {
+      assert.deepEqual(JSON.parse(blocks[id].code).compilerOptions.paths, { '@/*': ['./src/*'] })
+    }
+    assert.match(blocks.tsconfig.title, /^tsconfig\.json/)
+    assert.match(blocks['tsconfig-app'].title, /^tsconfig\.app\.json/)
+  })
+
+  it('relies on create-next-app for the Next.js CSS and paths', () => {
+    const blocks = byId({ ...base, framework: 'next' })
+    assert.match(blocks.create.code, /--tailwind --app --src-dir/)
+    assert.equal(blocks.css, undefined)
+    assert.equal(blocks.tsconfig, undefined)
   })
 
   it('switches components.json to Next.js', () => {
