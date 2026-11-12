@@ -11,6 +11,16 @@ import CreateSpendingLimit from './index'
 import { NO_TOKEN_SELECTED_ERROR } from '../../services/spendingLimitValidation'
 import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
 import * as useIsSpendingLimitSupportedHook from '../../hooks/useIsSpendingLimitSupported'
+import { faker } from '@faker-js/faker'
+import { http, HttpResponse } from 'msw'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { server } from '@/tests/server'
+import { GATEWAY_URL } from '@/config/gateway'
+import { erc20TokenMetadataBuilder } from '@/tests/builders/tokens'
+import {
+  TOKEN_NOT_FOUND_TEXT,
+  UNTRUSTED_TOKEN_WARNING,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 
 jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
   useSafeShieldForAddressPoisoning: jest.fn(),
@@ -201,6 +211,58 @@ describe('CreateSpendingLimit', () => {
 
       await waitFor(() => expect(screen.getByTestId('next-btn')).toBeEnabled())
       expect(screen.queryByText(NO_TOKEN_SELECTED_ERROR)).not.toBeInTheDocument()
+    })
+  })
+
+  describe('token address', () => {
+    const TOKEN_URL = `${GATEWAY_URL}/v1/chains/:chainId/tokens/:address`
+    const pasted = checksumAddress(faker.finance.ethereumAddress())
+
+    it('selects a pasted ERC-20 the Safe does not hold and submits it', async () => {
+      mockBalances([])
+      const token = erc20TokenMetadataBuilder().with({ address: pasted, symbol: 'SAFE', trusted: true }).build()
+      server.use(http.get(TOKEN_URL, () => HttpResponse.json(token)))
+
+      const { onNext } = renderForm()
+      await userEvent.type(screen.getByTestId('token-address-input'), pasted)
+
+      await waitFor(() => expect(screen.getByTestId('token-selector')).toHaveTextContent('SAFE'))
+      expect(screen.queryByTestId('token-lookup-status')).not.toBeInTheDocument()
+
+      await fillForm('1')
+      await waitFor(() => expect(screen.getByTestId('next-btn')).toBeEnabled())
+      await userEvent.click(screen.getByTestId('next-btn'))
+
+      await waitFor(() =>
+        expect(onNext).toHaveBeenCalledWith(
+          expect.objectContaining({ [SpendingLimitFields.tokenAddress]: pasted }),
+          expect.anything(),
+        ),
+      )
+    })
+
+    it('warns when the pasted token is on no trusted list', async () => {
+      mockBalances([])
+      const token = erc20TokenMetadataBuilder().with({ address: pasted, trusted: false }).build()
+      server.use(http.get(TOKEN_URL, () => HttpResponse.json(token)))
+
+      renderForm()
+      await userEvent.type(screen.getByTestId('token-address-input'), pasted)
+
+      expect(await screen.findByText(UNTRUSTED_TOKEN_WARNING)).toBeInTheDocument()
+    })
+
+    it('selects nothing for an address the Transaction Service does not know', async () => {
+      mockBalances([])
+      server.use(http.get(TOKEN_URL, () => new HttpResponse(null, { status: 404 })))
+
+      renderForm()
+      await userEvent.type(screen.getByTestId('token-address-input'), pasted)
+
+      expect(await screen.findByText(TOKEN_NOT_FOUND_TEXT)).toBeInTheDocument()
+      await fillForm('1')
+      expect(await screen.findByText(NO_TOKEN_SELECTED_ERROR)).toBeInTheDocument()
+      expect(screen.getByTestId('next-btn')).toBeDisabled()
     })
   })
 })

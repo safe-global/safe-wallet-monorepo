@@ -13,6 +13,10 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
 import { safeTxContextBuilder } from '@/tests/builders/safeTxContext'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
+import { delay, http, HttpResponse } from 'msw'
+import { server } from '@/tests/server'
+import { GATEWAY_URL } from '@/config/gateway'
+import { erc20TokenMetadataBuilder } from '@/tests/builders/tokens'
 import { createNewSpendingLimitTx } from '../../services/spendingLimitExecution'
 import type { NewSpendingLimitFlowProps, SpendingLimitState } from '../../types'
 import ReviewSpendingLimit from '.'
@@ -22,6 +26,7 @@ const ONE_DAY_IN_MINUTES = '1440'
 const ONE_WEEK_IN_MINUTES = '10080'
 const ONE_USDC = '1000000'
 const ONE_THOUSAND_USDC = '1000000000'
+const TOKEN_URL = `${GATEWAY_URL}/v1/chains/:chainId/tokens/:address`
 
 jest.mock('../../services/spendingLimitExecution', () => ({ createNewSpendingLimitTx: jest.fn() }))
 jest.mock('@/components/tx/ReviewTransactionV2', () => ({
@@ -128,9 +133,27 @@ describe('ReviewSpendingLimit', () => {
 
   it('waits for the token decimals before it builds the transaction', () => {
     givenSafeHolds([])
+    server.use(
+      http.get(TOKEN_URL, async () => {
+        await delay('infinite')
+        return HttpResponse.json({})
+      }),
+    )
 
     renderReview()
 
     expect(mockCreateNewSpendingLimitTx).not.toHaveBeenCalled()
+  })
+
+  it('builds the transaction for a token the Safe does not hold, with the decimals the token lookup returns', async () => {
+    givenSafeHolds([])
+    const metadata = erc20TokenMetadataBuilder().with({ address: usdc.address, symbol: 'USDC', decimals: 6 }).build()
+    server.use(http.get(TOKEN_URL, () => HttpResponse.json(metadata)))
+
+    const context = renderReview()
+
+    await waitFor(() => expect(context.setSafeTx).toHaveBeenCalledWith(builtTx))
+    expect(mockCreateNewSpendingLimitTx.mock.calls[0][6]).toBe(6)
+    expect(screen.getByText('USDC')).toBeInTheDocument()
   })
 })
