@@ -51,14 +51,30 @@ function rejection(status: number, message: string): Reply {
 
 type RelayBody = { chainId?: unknown; to?: string; data?: string }
 
+// Anvil picks the relayer's nonce per send, so two sends at once on a fork can get the same nonce
+const sendQueues = new Map<string, Promise<unknown>>()
+
+function oneAtATime<T>(url: string, task: () => Promise<T>): Promise<T> {
+  const next = (sendQueues.get(url) ?? Promise.resolve()).then(task)
+  sendQueues.set(
+    url,
+    next.catch(() => undefined),
+  )
+  return next
+}
+
 async function relay(body: RelayBody, rpcUrls: Map<string, string>, rpc: Rpc): Promise<Reply> {
   const url = rpcUrls.get(String(body.chainId))
   if (url === undefined) return rejection(400, `No local fork for chain ${body.chainId}`)
   if (!body.to || !body.data) return rejection(400, 'Relay requests need to and data')
+  return oneAtATime(url, () => send(url, { to: body.to, data: body.data }, rpc))
+}
+
+async function send(url: string, call: Pick<RelayBody, 'to' | 'data'>, rpc: Rpc): Promise<Reply> {
   await rpc(url, 'anvil_setBalance', [RELAYER, RELAYER_BALANCE])
   await rpc(url, 'anvil_impersonateAccount', [RELAYER])
   try {
-    const taskId = await rpc(url, 'eth_sendTransaction', [{ from: RELAYER, to: body.to, data: body.data }])
+    const taskId = await rpc(url, 'eth_sendTransaction', [{ from: RELAYER, ...call }])
     return json(200, { taskId })
   } catch (error) {
     if (error instanceof RpcError) return rejection(400, error.message)
