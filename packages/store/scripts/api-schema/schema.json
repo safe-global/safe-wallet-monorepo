@@ -11144,7 +11144,7 @@
           "channel": {
             "type": "string",
             "nullable": true,
-            "description": "Known values: native-transfer, native-batch, safe-app, wallet-connect, widget, direct. Truncated to 64 characters."
+            "description": "Known values: NATIVE_TRANSFER, NATIVE_BATCH, SAFE_APP, WALLET_CONNECT, WIDGET, DIRECT. Truncated to 64 characters."
           },
           "appName": {
             "type": "string",
