@@ -7,7 +7,10 @@ import useTxQueue from '@/hooks/useTxQueue'
 import PagePlaceholder from '@safe-global/views/components/common/PagePlaceholder'
 import InfiniteScroll from '../InfiniteScroll'
 import SkeletonTxList from '@safe-global/views/components/common/PaginatedTxns/SkeletonTxList'
-import { type TxFilter, isTransfersOnlyFilter, useTxFilter } from '@/utils/tx-history-filter'
+import ShowTransfersHint from '@safe-global/views/components/common/PaginatedTxns/ShowTransfersHint'
+import Track from '@/components/common/Track'
+import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
+import { type TxFilter, TxFilterType, isTransfersOnlyFilter, useTxFilter } from '@/utils/tx-history-filter'
 import { isTransactionListItem } from '@/utils/transaction-guards'
 import NoTransactionsIcon from '@/public/images/transactions/no-transactions.svg'
 import { useHasPendingTxs } from '@/hooks/usePendingTxs'
@@ -35,6 +38,23 @@ const getTransfersResultCount = (pages: Array<QueuedItemPage | undefined>): stri
   return `${hasMore ? '> ' : ''}${count} outgoing ${count === 1 ? 'transfer' : 'transfers'} found`
 }
 
+const isEmptyRecipientSearch = (filter: TxFilter, page: TransactionItemPage | QueuedItemPage): boolean => {
+  return (
+    filter.type === TxFilterType.MULTISIG &&
+    !isTransfersOnlyFilter(filter) &&
+    'to' in filter.filter &&
+    !!filter.filter.to &&
+    !page.next &&
+    page.results.filter(isTransactionListItem).length === 0
+  )
+}
+
+// The transfers route can't filter by amount or nonce
+const toTransfersFilter = ({ type, filter }: TxFilter): TxFilter => {
+  const { value: _value, nonce: _nonce, ...rest } = filter as { value?: string; nonce?: string }
+  return { type, filter: { ...rest, transfers: 'true' } }
+}
+
 // Transfer pages have no `count`, so two pages of different filters can share `count` and `next`
 const isSameLoadedPage = (pageA: QueuedItemPage, pageB: QueuedItemPage, isTransfersOnly: boolean): boolean => {
   return isSamePage(pageA, pageB) && (!isTransfersOnly || pageA.results.length === pageB.results.length)
@@ -54,7 +74,7 @@ const TxPage = ({
   onPageLoaded: (page: QueuedItemPage) => void
 }): ReactElement => {
   const { page, error, loading } = useTxns(pageUrl)
-  const [filter] = useTxFilter()
+  const [filter, setFilter] = useTxFilter()
   const isTransfersOnly = !!filter && isTransfersOnlyFilter(filter)
   const isQueue = useTxns === useTxQueue
   const recoveryQueue = useRecoveryQueue()
@@ -77,6 +97,12 @@ const TxPage = ({
       )}
 
       {page && page.results.length > 0 && <TxList items={page.results} />}
+
+      {isFirstPage && filter && page && isEmptyRecipientSearch(filter, page) && (
+        <Track {...TX_LIST_EVENTS.FILTER} label="transfers_hint" as="div">
+          <ShowTransfersHint onShowTransfers={() => setFilter(toTransfersFilter(filter))} />
+        </Track>
+      )}
 
       {isQueue && page?.results.length === 0 && recoveryQueue.length === 0 && !hasPending && <NoQueuedTxns />}
 

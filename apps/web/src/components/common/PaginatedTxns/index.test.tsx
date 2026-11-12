@@ -8,7 +8,7 @@ import useTxHistory from '@/hooks/useTxHistory'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { server } from '@/tests/server'
-import { act, render, screen, waitFor } from '@/tests/test-utils'
+import { act, fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { isTransactionListItem } from '@/utils/transaction-guards'
 import PaginatedTxns from '.'
 
@@ -182,5 +182,62 @@ describe('PaginatedTxns with the transfers only filter', () => {
     scrollToTheEnd()
 
     expect(await screen.findByText('0 outgoing transfers found')).toBeInTheDocument()
+  })
+})
+
+const MULTISIG_TXS_URL = `${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress/multisig-transactions`
+const RECIPIENT = '0x23cbCbbC748c961E570Cfc05Ff65554ECB8955E9'
+
+const renderOutgoing = (filter: Record<string, string>, push = jest.fn(() => Promise.resolve(true))) => {
+  render(<PaginatedTxns useTxns={useTxHistory} />, {
+    routerProps: {
+      pathname: AppRoutes.transactions.history,
+      query: { safe: `${TX_HISTORY_SAFE.shortName}:${TX_HISTORY_SAFE.address}`, type: 'Outgoing', ...filter },
+      push,
+    },
+    initialReduxState: {
+      safeInfo: { data: historySafe, loading: false, loaded: true },
+    },
+  })
+  return push
+}
+
+describe('PaginatedTxns hint to show transfers', () => {
+  beforeEach(() => {
+    jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(sepolia)
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  it('switches an empty recipient search to transfers and drops amount and nonce', async () => {
+    server.use(http.get(MULTISIG_TXS_URL, () => HttpResponse.json({ next: null, previous: null, results: [] })))
+    const push = renderOutgoing({ to: RECIPIENT, value: '699', nonce: '64' })
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Show transfers' }))
+
+    const { query } = (push.mock.calls[0] as unknown as [{ query: Record<string, string> }])[0]
+    expect(query).toMatchObject({ type: 'Outgoing', to: RECIPIENT, transfers: 'true' })
+    expect(query).not.toHaveProperty('value')
+    expect(query).not.toHaveProperty('nonce')
+  })
+
+  it('shows no hint when the recipient search finds transactions', async () => {
+    server.use(http.get(MULTISIG_TXS_URL, () => HttpResponse.json(lastPage)))
+    renderOutgoing({ to: RECIPIENT })
+
+    await screen.findAllByTestId('transaction-item')
+
+    expect(screen.queryByRole('button', { name: 'Show transfers' })).not.toBeInTheDocument()
+  })
+
+  it('shows no hint for an empty search without a recipient', async () => {
+    server.use(http.get(MULTISIG_TXS_URL, () => HttpResponse.json({ next: null, previous: null, results: [] })))
+    renderOutgoing({ nonce: '64' })
+
+    await screen.findByText('0 outgoing transactions found')
+
+    expect(screen.queryByRole('button', { name: 'Show transfers' })).not.toBeInTheDocument()
   })
 })
