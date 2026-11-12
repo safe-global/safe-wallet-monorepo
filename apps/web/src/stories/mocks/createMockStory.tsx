@@ -1,11 +1,23 @@
 import React from 'react'
 import type { Decorator, StoryContext } from '@storybook/react'
+import { HttpHandler, matchRequestUrl, type RequestHandler } from 'msw'
 import { SAFE_ADDRESSES } from '../../../../../config/test/msw/fixtures'
 import { MockContextProvider } from './MockContextProvider'
 import { resolveWallet } from './wallets'
 import { createHandlers, getFixtureData } from './handlers'
 import { createInitialState } from './defaults'
+import { createChainData, createChainsPageDataV2 } from './chains'
 import type { MockStoryConfig, MockStoryResult } from './types'
+
+const CHAINS_URL = new URL('http://localhost/v2/chains')
+
+const answersChainsRequest = (handlers: RequestHandler[]): boolean =>
+  handlers.some(
+    (handler) =>
+      handler instanceof HttpHandler &&
+      handler.info.method === 'GET' &&
+      matchRequestUrl(CHAINS_URL, handler.info.path).matches,
+  )
 
 /**
  * Creates a complete mock story setup with decorator, handlers, and state
@@ -89,6 +101,12 @@ export function createMockStory(config: MockStoryConfig = {}): MockStoryResult {
     authenticated: isAuthenticated,
   })
 
+  // In the cache, the chain config is there in the first frame: the sidebar menu needs it and rendered after the
+  // story had finished. A story that answers /v2/chains itself (a loading screen, other chains) keeps its request.
+  const chains = answersChainsRequest(customHandlers)
+    ? undefined
+    : createChainsPageDataV2(createChainData(features), features).results
+
   // Create decorator function
   const decorator: Decorator = (Story, context: StoryContext) => {
     const isDarkMode = context.globals?.theme === 'dark'
@@ -112,6 +130,7 @@ export function createMockStory(config: MockStoryConfig = {}): MockStoryResult {
         layout={layout}
         pathname={pathname}
         shadcn={shadcn}
+        chains={chains}
       >
         <Story />
       </MockContextProvider>
