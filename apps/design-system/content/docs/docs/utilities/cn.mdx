@@ -1,0 +1,33 @@
+---
+title: cn
+description: Merge class names and resolve Tailwind conflicts, plus the shared icon stroke.
+---
+
+```tsx
+import { cn, ICON_STROKE } from '@safe-global/ui/utils'
+```
+
+## cn
+
+`cn` joins class names with [`clsx`](https://github.com/lukeed/clsx) and resolves Tailwind conflicts with [`tailwind-merge`](https://github.com/dcastil/tailwind-merge), so a later class wins over an earlier one.
+
+```tsx
+cn('px-2 py-1', isActive && 'bg-primary', className)
+cn('px-2', 'px-4') // 'px-4'
+```
+
+<TypeTable
+  type={{
+    inputs: { type: 'ClassValue[]', description: 'Strings, arrays, objects or falsy values, as accepted by clsx.' },
+  }}
+/>
+
+## ICON_STROKE
+
+The lucide stroke width the components use (`1.5`). See [Icons](/docs/foundations/icons/).
+
+## Registry
+
+```bash
+npx shadcn@latest add @safe/utils
+```

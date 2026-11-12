@@ -37,6 +37,22 @@ apps/web-tanstack/dist
 # Utils package
 packages/utils/src/types/contracts/**/*
 
+# Design system docs site
+apps/design-system/.next
+apps/design-system/out
+apps/design-system/.source
+apps/design-system/public/r
+apps/design-system/registry.json
+apps/design-system/public/preview
+apps/design-system/registry/safe
+apps/design-system/src/generated
+apps/design-system/next-env.d.ts
+apps/design-system/playwright-report
+apps/design-system/test-results
+
+# UI package
+packages/ui/storybook-static
+
 # Store package (auto-generated from CGW API)
 packages/store/scripts/api-schema/schema.json
 packages/store/src/gateway/AUTO_GENERATED/

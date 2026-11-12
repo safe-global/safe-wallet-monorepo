@@ -5,7 +5,7 @@ import { SidebarDeveloperGroup } from '../SidebarDeveloperGroup'
 import type { ResolvedSidebarItem } from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { setIsProduction } from '@/tests/env'
 
-jest.mock('@safe-global/views/components/ui/sidebar', () => ({
+jest.mock('@safe-global/ui/sidebar', () => ({
   SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroupLabel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroupContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,

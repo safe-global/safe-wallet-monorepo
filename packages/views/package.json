@@ -15,6 +15,7 @@
     "@safe-global/protocol-kit": "^8.0.11",
     "@safe-global/store": "workspace:^",
     "@safe-global/types-kit": "^4.0.1",
+    "@safe-global/ui": "workspace:^",
     "@safe-global/utils": "workspace:^",
     "blo": "^1.1.1",
     "class-variance-authority": "^0.7.1",
@@ -35,7 +36,8 @@
     "next": "*",
     "next-themes": "^0.4.6",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
     "@eslint/js": "^9.18.0",
@@ -44,6 +46,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "tailwindcss": "^4.1.18",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.72.1"
   },

@@ -1,0 +1,35 @@
+---
+title: Peek Collapsible
+description: 'Content clipped to a peek element with a blurred fade and a button that expands it.'
+component: peek-collapsible
+---
+
+<ComponentPreview component="peek-collapsible" />
+
+## Installation
+
+<ComponentInstall component="peek-collapsible" />
+
+## Usage
+
+<ComponentUsage component="peek-collapsible" />
+
+Give it a ref to the last element that should stay visible (`peekUntil`), an `expandLabel` and `open`/`onOpen`: the parent owns `open` and sets it from `onOpen`, so opening is one way. It measures its content with a `ResizeObserver`, animates the height and respects reduced motion. Pass `className` to give the clipped region its surface, for example `rounded-xl bg-card`.
+
+## Examples
+
+<ComponentExamples component="peek-collapsible" />
+
+## Props
+
+<ComponentProps component="peek-collapsible" />
+
+## Accessibility
+
+<BaseUiReference component="peek-collapsible" />
+
+The expand button is a real button, and once open the fade and button become `inert` and `aria-hidden`, so they leave the tab order. The clipped rows stay in the DOM while collapsed, so screen readers can still reach them; give the region an `id` when an outside control also toggles it.
+
+## Do / Don't
+
+<ComponentRules component="peek-collapsible" />

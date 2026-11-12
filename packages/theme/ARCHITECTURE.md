@@ -103,15 +103,18 @@ packages/theme/
 │   │   ├── light.ts          # Unified light mode palette
 │   │   ├── dark.ts           # Unified dark mode palette
 │   │   ├── static.ts         # Theme-independent brand colors
+│   │   ├── web.ts            # Web overrides read by the CSS generators
 │   │   └── types.ts          # TypeScript color palette types
 │   ├── tokens/
 │   │   ├── typography.ts     # Font family, sizes, weights
 │   │   ├── spacing.ts        # Mobile (4px) & Web (8px) spacing
-│   │   └── radius.ts         # Border radius scale
+│   │   ├── radius.ts         # Border radius scale
+│   │   └── ui.ts             # Safe UI (shadcn) tokens, not part of ColorPalette
 │   ├── generators/
 │   │   ├── mui.ts            # MUI theme generator (web)
 │   │   ├── tamagui.ts        # Tamagui theme generator (mobile)
 │   │   ├── css-vars.ts       # CSS variables generator (web)
+│   │   ├── ui-css.ts         # @safe-global/ui tokens.css and tokens.scoped.css
 │   │   └── mui-extensions.ts # MUI TypeScript type extensions
 │   └── index.ts              # Public API exports
 ├── package.json
@@ -173,7 +176,7 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
 
 ### 3. CSS Variables Generator
 
-The CSS variables generator (`packages/theme/src/generators/css-vars.ts`) also applies web-specific overrides:
+The CSS variables generator (`packages/theme/src/generators/css-vars.ts`) applies web-specific overrides, defined in `packages/theme/src/palettes/web.ts`:
 
 ```typescript
 export function generateCSSVars(): string {
@@ -199,6 +202,19 @@ export function generateCSSVars(): string {
   // Output as :root and [data-theme="dark"] rules
 }
 ```
+
+The overrides are `webLightPalette` / `webDarkPalette` in `src/palettes/web.ts` (not exported from the palettes index, so mobile never sees them), and `generateWebVarDeclarations()` returns the web palette and spacing declarations that every web CSS generator shares.
+
+### 3b. Safe UI CSS Generator
+
+`packages/theme/src/generators/ui-css.ts` writes the token CSS of `@safe-global/ui`:
+
+- `generateUiTokensCSS()` → `packages/ui/src/styles/tokens.css`: the web palette and spacing declarations plus the shadcn-named tokens, on `:root` and `.dark`. Self-contained, for apps outside the wallet.
+- `generateUiScopedTokensCSS()` → `packages/ui/src/styles/tokens.scoped.css`: only the shadcn-named tokens, on `.shadcn-scope` and `.dark.shadcn-scope, .shadcn-scope.dark`. The wallet loads it and gets the palette variables from `vars.css`.
+
+The shadcn-named tokens (`--background`, `--primary`, `--sidebar`, `--z-overlay`, …) live in `src/tokens/ui.ts`, **not** in `ColorPalette`. The Tamagui and MUI generators flatten the whole palette, so a new palette key would add mobile tokens and change the theme types, and most of these values (the Tailwind neutrals, the Figma yellow warning set, z-index layers) have no palette counterpart. Values that are palette colours are read from the palette (for example dark `primary`, `destructive` and `accent-success` from `webDarkPalette`, card surfaces from `background.paper`), not copied.
+
+Run `yarn workspace @safe-global/theme generate:ui-tokens` after editing `ui.ts` or the web palettes. `apps/web/src/styles/generatedCss.test.ts` fails in CI when the committed files (or `vars.css`) are stale.
 
 ### 4. Tamagui Generator (Mobile)
 
@@ -306,7 +322,7 @@ Now there's **one set of palettes** with platform-specific overrides:
 packages/theme/src/palettes/light.ts        (single source)
 packages/theme/src/palettes/dark.ts         (single source)
 packages/theme/src/generators/mui.ts        (web overrides)
-packages/theme/src/generators/css-vars.ts   (web overrides)
+packages/theme/src/palettes/web.ts          (web overrides for CSS)
 packages/theme/src/generators/tamagui.ts    (uses base directly)
 ```
 
@@ -330,10 +346,11 @@ const lightPalette: ColorPalette = {
 }
 ```
 
-Then regenerate CSS vars for web:
+Then regenerate the web CSS:
 
 ```bash
 yarn workspace @safe-global/web css-vars
+yarn workspace @safe-global/theme generate:ui-tokens
 ```
 
 ### Changing Web-Only Colors
@@ -351,12 +368,10 @@ export function generateMuiTheme(mode: PaletteMode): Theme {
   })
 }
 
-// packages/theme/src/generators/css-vars.ts
-export function generateCSSVars(): string {
-  const webLightPalette: ColorPalette = {
-    ...lightPalette,
-    info: { main: '#NEW_WEB_COLOR' }, // Only affects web CSS vars
-  }
+// packages/theme/src/palettes/web.ts
+export const webLightPalette: ColorPalette = {
+  ...lightPalette,
+  info: { main: '#NEW_WEB_COLOR' }, // Only affects web CSS vars and the Safe UI tokens
 }
 ```
 

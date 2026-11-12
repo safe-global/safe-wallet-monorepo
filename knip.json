@@ -35,6 +35,18 @@
       "project": ["src/**/*.{ts,tsx}", "plugins/**/*.ts"],
       "ignore": ["**/*.test.{ts,tsx}", "dist/**"]
     },
+    "apps/design-system": {
+      "entry": [
+        "src/app/**/{page,layout,route}.{ts,tsx}",
+        "src/scripts/*.ts",
+        "next.config.mjs",
+        "source.config.ts",
+        "playwright.config.ts",
+        "e2e/**/*.ts"
+      ],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignore": ["src/generated/**", ".source/**"]
+    },
     "packages/store": {
       "entry": ["src/index.ts"],
       "project": ["src/**/*.ts"],

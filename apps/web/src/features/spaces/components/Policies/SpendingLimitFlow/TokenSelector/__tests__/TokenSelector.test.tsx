@@ -20,7 +20,7 @@ import {
 
 jest.mock('../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
 // Render the tooltip parts inline so a disabled row's reason is assertable without hovering a portal.
-jest.mock('@safe-global/views/components/ui/tooltip', () => ({
+jest.mock('@safe-global/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({
     render: { type: Element, props },

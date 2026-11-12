@@ -16,7 +16,7 @@ const payroll = byAddress(ADDRESSES.payroll)
 const atlas = byAddress(ADDRESSES.atlas)
 
 const mockIsMobile = jest.fn(() => false)
-jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockIsMobile() }))
+jest.mock('@safe-global/ui/hooks/use-mobile', () => ({ useIsMobile: () => mockIsMobile() }))
 
 const columnHeaders = () => screen.getAllByRole('columnheader').map((header) => header.textContent)
 

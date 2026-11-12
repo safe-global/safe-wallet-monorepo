@@ -1,0 +1,57 @@
+{
+  "private": true,
+  "name": "@safe-global/design-system",
+  "version": "0.0.0",
+  "description": "Safe UI docs site and shadcn registry",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "generate": "node src/scripts/generate.ts && fumadocs-mdx",
+    "registry:build": "node src/scripts/registry.ts && shadcn build registry.json --output public/r && node src/scripts/check-registry.ts",
+    "dev": "yarn generate && yarn registry:build && next dev --webpack -p 3100",
+    "build": "yarn generate && yarn registry:build && next build --webpack",
+    "serve": "http-server out -p 3100 -c-1",
+    "type-check": "yarn generate && yarn run -T -B tsc --noEmit",
+    "lint": "eslint src",
+    "test": "node --test \"src/**/*.test.ts\"",
+    "test:e2e": "playwright test",
+    "scaffold:pages": "node src/scripts/scaffold-pages.ts",
+    "prettier": "prettier --check . --config ../../.prettierrc --ignore-path ../../.prettierignore",
+    "prettier:fix": "prettier --write . --config ../../.prettierrc --ignore-path ../../.prettierignore"
+  },
+  "dependencies": {
+    "@safe-global/ui": "workspace:^",
+    "@storybook/react": "^10.6.5",
+    "fumadocs-core": "16.17.10",
+    "fumadocs-mdx": "15.4.10",
+    "fumadocs-ui": "16.17.10",
+    "lucide-react": "^0.563.0",
+    "next": "patch:next@npm%3A16.4.2#~/.yarn/patches/next-npm-16.4.2-6ca9d0fedd.patch",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@playwright/test": "^1.64.1",
+    "@tailwindcss/postcss": "^4.1.18",
+    "@types/mdx": "^2.0.13",
+    "@types/node": "^22.13.1",
+    "@types/react": "~19.2.10",
+    "@types/react-dom": "~19.2.0",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "http-server": "^14.1.1",
+    "postcss": "^8.5.18",
+    "prettier": "^3.9.10",
+    "react-docgen-typescript": "2.2.2",
+    "shadcn": "^3.7.0",
+    "storybook": "^10.6.5",
+    "tailwindcss": "^4.1.18",
+    "typescript": "~5.9.2",
+    "typescript-eslint": "^8.72.1"
+  }
+}

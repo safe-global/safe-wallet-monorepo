@@ -52,7 +52,7 @@ jest.mock('@/components/common/FiatValue', () => {
   return { __esModule: true, default: Mock }
 })
 
-jest.mock('@safe-global/views/components/ui/select', () => ({
+jest.mock('@safe-global/ui/select', () => ({
   SelectItem: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
 }))
 

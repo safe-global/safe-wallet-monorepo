@@ -26,6 +26,7 @@
     "@safe-global/store": "workspace:*",
     "@safe-global/theme": "workspace:*",
     "@safe-global/types-kit": "^4.0.1",
+    "@safe-global/ui": "workspace:^",
     "@safe-global/utils": "workspace:*",
     "@safe-global/views": "workspace:*",
     "@safe-global/web": "workspace:*",

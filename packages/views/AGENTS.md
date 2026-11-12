@@ -1,6 +1,6 @@
 # Views package guidelines
 
-`@safe-global/views` holds how the web app looks: the shadcn/ui primitives in `src/components/ui/`, the views that turn props into markup, and what they need to render. `apps/web` and `apps/web-tanstack` import them as `@safe-global/views/<path inside src>`. It is web only; mobile does not use it.
+`@safe-global/views` holds how the web app looks: the views that turn props into markup, and what they need to render. The shadcn/ui primitives live in `@safe-global/ui` ([packages/ui](../ui/AGENTS.md)). `apps/web` and `apps/web-tanstack` import them as `@safe-global/views/<path inside src>`. It is web only; mobile does not use it.
 
 ## Rules
 
@@ -8,11 +8,11 @@
 - **No hooks, store access, SDK calls or analytics.** Production files must not import anything that holds them. Data and callbacks come in through props.
 - Inside the package, import other package files as `@safe-global/views/…`.
 - Assets the views render (SVGs, CSS modules) live in the package (`src/assets/`, next to the view). An SVG that the app also serves by URL stays in `apps/web/public` as well.
-- shadcn primitives are managed with the shadcn CLI from `apps/web` (`components.json` points at this package); read `src/components/ui/README.md` before editing them by hand.
+- `src/components/ui/` only holds temporary one-line re-exports of `@safe-global/ui` (plus the design-system overview story). Don't add or edit primitives there: change them in `packages/ui` ([README](../ui/README.md)). The re-exports are removed in Phase 2.
 
 ## Checks
 
-The package has no test or Storybook setup of its own. Its tests and stories run in `apps/web` (jest `roots` and Storybook `stories` include `packages/views/src`) and may use apps/web test helpers.
+The package has no test or Storybook setup of its own. Its tests and stories run in `apps/web` (jest `roots` and Storybook `stories` include `packages/views/src`) and may use apps/web test helpers. `packages/ui` has its own checks: see [ui/AGENTS.md](../ui/AGENTS.md#checks).
 
 ```bash
 yarn workspace @safe-global/views type-check   # production source only

@@ -1,0 +1,35 @@
+---
+title: Overlay
+description: 'The shared backdrop class used behind dialogs, sheets, drawers and popovers.'
+component: overlay
+---
+
+<ComponentPreview component="overlay" />
+
+## Installation
+
+<ComponentInstall component="overlay" />
+
+## Usage
+
+<ComponentUsage component="overlay" />
+
+`overlayVariants()` is a `cva` function, not a component: the modal components already use it. Call it only when you build a new modal surface, so every backdrop has the same tint, blur and stacking.
+
+## Examples
+
+<ComponentExamples component="overlay" />
+
+## Props
+
+<ComponentProps component="overlay" />
+
+## Accessibility
+
+<BaseUiReference component="overlay" />
+
+The backdrop is decorative. A closed backdrop never captures pointer events, so it cannot block the page after a modal closes.
+
+## Do / Don't
+
+<ComponentRules component="overlay" />

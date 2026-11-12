@@ -1,0 +1,36 @@
+---
+title: Hooks
+description: useIsMobile and useIsTablet, the responsive hooks the components share.
+---
+
+```tsx
+import { useIsMobile } from '@safe-global/ui/hooks/use-mobile'
+import { useIsTablet } from '@safe-global/ui/hooks/use-tablet'
+```
+
+| Hook          | Returns `true` when                 |
+| ------------- | ----------------------------------- |
+| `useIsMobile` | the viewport is narrower than 768px |
+| `useIsTablet` | the viewport is 768px to 899px wide |
+
+Both read `window.matchMedia` in an effect and return `false` on the server and on the first render, then update when the viewport crosses a breakpoint. `Sidebar` uses them to switch to its mobile sheet.
+
+```tsx
+function Toolbar() {
+  const isMobile = useIsMobile()
+  return isMobile ? <CompactToolbar /> : <FullToolbar />
+}
+```
+
+<TypeTable
+  type={{
+    useIsMobile: { type: '() => boolean', description: 'True below 768px.' },
+    useIsTablet: { type: '() => boolean', description: 'True from 768px to 899px.' },
+  }}
+/>
+
+## Registry
+
+```bash
+npx shadcn@latest add @safe/use-mobile @safe/use-tablet
+```

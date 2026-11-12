@@ -9,7 +9,7 @@ import {
 import type { PolicyTokenInfo } from '@safe-global/views/features/spaces/components/Policies/types'
 import PolicyTokens from '../PolicyTokens'
 
-jest.mock('@safe-global/views/components/ui/tooltip', () => ({
+jest.mock('@safe-global/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   TooltipTrigger: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   TooltipContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,

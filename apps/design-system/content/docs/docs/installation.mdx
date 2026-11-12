@@ -1,0 +1,104 @@
+---
+title: Installation
+description: Add Safe UI to a React app with Tailwind CSS v4, from npm or from the shadcn registry.
+---
+
+Safe UI needs React 19 and Tailwind CSS v4. It works in Next.js and Vite apps; it has no Next.js imports.
+
+## npm package
+
+<Callout type="warn">
+  `@safe-global/ui` is not published to npm yet; publishing comes in a later phase. Inside the monorepo, add it as a
+  workspace dependency (`"@safe-global/ui": "workspace:^"`). The steps below are what an app will do once it is
+  published.
+</Callout>
+
+<Steps>
+<Step>
+
+### Install the package
+
+```bash
+yarn add @safe-global/ui
+```
+
+`tailwindcss` (v4), `react` and `react-dom` are peer dependencies, so your app provides them.
+
+</Step>
+<Step>
+
+### Import the styles
+
+In your main CSS file, import Tailwind, then the Safe UI styles, and point Tailwind at the package source so it generates the classes the components use:
+
+```css title="src/index.css"
+@import 'tailwindcss';
+@import '@safe-global/ui/styles.css';
+@source '../node_modules/@safe-global/ui/src';
+```
+
+Adjust the `@source` path so it points at the installed package from your CSS file. The package ships TypeScript source for now, so your bundler compiles it (in Next.js, add `transpilePackages: ['@safe-global/ui']`).
+
+</Step>
+<Step>
+
+### Load DM Sans
+
+The theme sets `--font-sans` to DM Sans, but the package does not ship the font files. Load DM Sans (weights 400, 600 and 700) in your app, for example with `@font-face` rules or `next/font`.
+
+</Step>
+<Step>
+
+### Use a component
+
+Each component has its own subpath: `@safe-global/ui/primitives/<name>` for the shadcn primitives and `@safe-global/ui/components/<name>` for the Safe components built from them. There is no root barrel, so unused components stay out of your bundle.
+
+```tsx
+import { Button } from '@safe-global/ui/primitives/button'
+
+export function Save() {
+  return <Button>Save</Button>
+}
+```
+
+</Step>
+</Steps>
+
+Dark mode is the `dark` class on an ancestor, usually `<html>`. See [Dark mode](/docs/dark-mode/).
+
+## shadcn registry
+
+The registry lets you copy a component's source into your app with the shadcn CLI, so you own and can change it.
+
+<Steps>
+<Step>
+
+### Set up shadcn
+
+Your app needs a `components.json` (run `npx shadcn@latest init` if it has none) with the `components`, `ui`, `lib`, `hooks` and `utils` aliases. Primitives land in the `ui` folder, Safe components in `components`.
+
+</Step>
+<Step>
+
+### Add the Safe registry
+
+Add the `@safe` namespace to `components.json`. The URL below points at the registry on the host that serves this page:
+
+<RegistrySnippet />
+
+</Step>
+<Step>
+
+### Install the theme, then components
+
+```bash
+npx shadcn@latest add @safe/theme
+npx shadcn@latest add @safe/button
+```
+
+`@safe/theme` writes the light and dark variables, the `@theme inline` mapping and the base styles into your CSS file. Each component pulls in what it imports: `@safe/utils` for `cn`, other components, hooks, and npm dependencies such as `@base-ui/react`.
+
+</Step>
+</Steps>
+
+The copied components start with `'use client'`, which Next.js App Router needs. With `"rsc": false` in `components.json`, the CLI removes it.

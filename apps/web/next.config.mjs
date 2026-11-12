@@ -93,7 +93,7 @@ if (process.env.VISUAL_REGRESSION_BUILD === 'true') {
 const nextConfig = {
   output: 'export', // static site export
 
-  transpilePackages: ['@safe-global/store', '@safe-global/theme'],
+  transpilePackages: ['@safe-global/store', '@safe-global/theme', '@safe-global/ui'],
   images: {
     unoptimized: true,
   },

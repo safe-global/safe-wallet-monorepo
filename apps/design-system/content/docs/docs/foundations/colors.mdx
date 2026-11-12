@@ -1,0 +1,18 @@
+---
+title: Colors
+description: The semantic colour tokens and the theme palette, in light and dark mode.
+---
+
+Use the semantic tokens in components (`bg-primary`, `text-muted-foreground`, `border-border`). Each one names a role, not a colour, and has a light and a dark value. The values are generated from `@safe-global/theme`; see [Theming](/docs/theming/) to override one.
+
+Each card shows the variable, the Tailwind utility it maps to, and its raw and resolved value in light and dark mode.
+
+## Semantic tokens
+
+<ColorSwatches group="color" />
+
+## Palette
+
+The theme palette (`--color-*`) is shared with the mobile app. Semantic tokens refer to it; reach for a palette variable only when no semantic token fits.
+
+<ColorSwatches group="palette" />

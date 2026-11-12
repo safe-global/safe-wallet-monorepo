@@ -6,7 +6,7 @@ Unified theme package for Safe Wallet web and mobile applications.
 
 This package provides a single source of truth for all design tokens (colors, spacing, typography, etc.) used across the Safe Wallet monorepo. It exports platform-specific theme generators for:
 
-- **Web**: MUI themes and CSS custom properties
+- **Web**: MUI themes and CSS custom properties (`vars.css`, and the `@safe-global/ui` token CSS)
 - **Mobile**: Tamagui tokens and themes
 
 ## Installation
@@ -41,6 +41,16 @@ import { generateTamaguiColorTokens, generateTamaguiFontSizes } from '@safe-glob
 const colorTokens = generateTamaguiColorTokens()
 const fontSizes = generateTamaguiFontSizes()
 ```
+
+### Safe UI tokens
+
+`src/tokens/ui.ts` holds the shadcn-named tokens of `@safe-global/ui` (`--background`, `--primary`, …). They are kept out of `ColorPalette` so the MUI and Tamagui outputs never change with them. `src/generators/ui-css.ts` turns them, with the web palette, into `packages/ui/src/styles/tokens.css` (unscoped, `:root` / `.dark`) and `tokens.scoped.css` (`.shadcn-scope`, used by the wallet):
+
+```bash
+yarn workspace @safe-global/theme generate:ui-tokens
+```
+
+Never edit the generated files; `apps/web/src/styles/generatedCss.test.ts` fails when they are stale.
 
 ### Direct Token Access
 

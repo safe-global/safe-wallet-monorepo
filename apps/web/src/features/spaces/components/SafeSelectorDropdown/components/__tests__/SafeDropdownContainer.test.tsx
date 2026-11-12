@@ -31,7 +31,7 @@ class ResizeObserverStub {
 
 // Render SelectContent as a plain div carrying the `data-slot` marker that the
 // component's `closest()` lookup relies on, so the scroll-hint effect can find it.
-jest.mock('@safe-global/views/components/ui/select', () => ({
+jest.mock('@safe-global/ui/select', () => ({
   __esModule: true,
   SelectContent: ({ children, className }: { children?: React.ReactNode; className?: string }) => (
     <div data-slot="select-content" data-testid="select-content" className={className}>

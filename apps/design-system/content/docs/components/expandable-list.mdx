@@ -1,0 +1,35 @@
+---
+title: Expandable List
+description: 'Separate card rows that open into an inset body, with tone bars, icons and group headers.'
+component: expandable-list
+---
+
+<ComponentPreview component="expandable-list" />
+
+## Installation
+
+<ComponentInstall component="expandable-list" />
+
+## Usage
+
+<ComponentUsage component="expandable-list" />
+
+Wrap `ExpandableListItem`s in `ExpandableList`, optionally in `ExpandableListGroup`s that each take a `header` such as a status badge. A row takes a `title`, a `leading` icon, a `trailing` node and a `tone` (`critical`, `warning`, `attention`, `success`, `neutral`, `muted`) for its accent bar; its `description` and `children` form the inset body. A row without a body or description has no chevron and does not open. Several rows can be open at once; pass `multiple={false}` to keep one. The `trailing` node sits beside the row's trigger, so a button there keeps its own click.
+
+## Examples
+
+<ComponentExamples component="expandable-list" />
+
+## Props
+
+<ComponentProps component="expandable-list" />
+
+## Accessibility
+
+<BaseUiReference component="expandable-list" />
+
+Each expandable row's trigger is a button with `aria-expanded` and `aria-controls`, wired by the Base UI accordion; its accessible name is the title, and the trailing node and chevron sit outside it. Enter and Space toggle the focused row, Tab moves between rows, and the arrow keys move between headers. The tone bar is decorative (`aria-hidden`), so put the status into the title or the leading icon's label as well.
+
+## Do / Don't
+
+<ComponentRules component="expandable-list" />

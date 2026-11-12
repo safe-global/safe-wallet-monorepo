@@ -43,7 +43,7 @@ jest.mock('@/components/tx-flow/flows', () => ({
   NewTxFlow: () => <div>NewTxFlow</div>,
 }))
 
-jest.mock('@safe-global/views/components/ui/button', () => ({
+jest.mock('@safe-global/ui/button', () => ({
   Button: ({
     children,
     onClick,

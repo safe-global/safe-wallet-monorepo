@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+@import '@safe-global/ui/styles.css';
+@import '../../../../fonts/fonts.css';
+
+@source '../../../../../../../../node_modules/@safe-global/ui/src';

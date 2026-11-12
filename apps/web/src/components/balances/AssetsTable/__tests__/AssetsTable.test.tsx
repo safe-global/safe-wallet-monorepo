@@ -33,7 +33,7 @@ jest.mock('qrcode.react', () => ({
 }))
 
 const mockUseIsMobile = jest.fn(() => false)
-jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
+jest.mock('@safe-global/ui/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 
 const mockUseSafeTokenEnabled = jest.fn(() => false)
 jest.mock('@/hooks/useSafeTokenEnabled', () => ({ useSafeTokenEnabled: () => mockUseSafeTokenEnabled() }))

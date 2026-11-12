@@ -153,8 +153,8 @@ yarn workspace @safe-global/web type-check
 
 ## Project Notes
 
-- **Components Path**: `packages/views/src/components/ui/`
-- **Utility Path**: `apps/web/src/utils/cn.ts`
+- **Components Path**: `packages/ui/src/primitives/<name>/` (shadcn primitives); Safe composed components in `packages/ui/src/components/<name>/`
+- **Utility Path**: `packages/ui/src/lib/utils.ts`
 - **Icon Library**: `lucide-react`
 
 **Component Usage Rules:**

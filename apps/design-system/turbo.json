@@ -1,0 +1,15 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "type-check": {
+      "inputs": ["$TURBO_EXTENDS$", "content/**", "registry.json", "source.config.ts", "next.config.mjs"]
+    },
+    "lint": {
+      "inputs": ["$TURBO_EXTENDS$", "content/**", "registry.json", "source.config.ts", "next.config.mjs"]
+    },
+    "test": {
+      "inputs": ["$TURBO_EXTENDS$", "content/**", "registry.json", "source.config.ts", "next.config.mjs"]
+    }
+  }
+}

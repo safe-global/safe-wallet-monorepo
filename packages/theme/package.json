@@ -13,6 +13,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "type-check": "yarn run -T -B tsc --noEmit",
+    "generate:ui-tokens": "npx -y tsx scripts/generate-ui-tokens.ts",
     "prettier": "prettier --check . --config ../../.prettierrc --ignore-path ../../.prettierignore",
     "prettier:fix": "prettier --write . --config ../../.prettierrc --ignore-path ../../.prettierignore"
   },

@@ -7,7 +7,7 @@ import ExperimentalSection, {
   type ExperimentalFeature,
 } from '../ExperimentalSection'
 
-jest.mock('@safe-global/views/components/ui/tooltip', () => ({
+jest.mock('@safe-global/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <div data-testid="tooltip">{children}</div>,
   TooltipTrigger: ({ children }: { children: ReactNode }) => <div data-testid="tooltip-trigger">{children}</div>,
   TooltipContent: ({ children }: { children: ReactNode }) => <div data-testid="tooltip-content">{children}</div>,

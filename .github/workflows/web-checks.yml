@@ -82,8 +82,8 @@ jobs:
       - name: Run ESLint (push only)
         if: github.event_name == 'push'
         run: yarn turbo run lint --filter=@safe-global/web
-      - name: Run ESLint (packages/views)
-        run: yarn turbo run lint --filter=@safe-global/views
+      - name: Run ESLint (packages/views, packages/ui)
+        run: yarn turbo run lint --filter=@safe-global/views --filter=@safe-global/ui
 
   prettier:
     needs: changes
@@ -119,7 +119,7 @@ jobs:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
       - name: Type check
-        run: yarn turbo run type-check --filter=@safe-global/web
+        run: yarn turbo run type-check --filter=@safe-global/web --filter=@safe-global/ui
 
   knip-exports:
     needs: changes

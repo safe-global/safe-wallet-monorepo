@@ -1,0 +1,11 @@
+.next
+out
+.source
+src/generated
+registry/safe
+public/r
+next-env.d.ts
+playwright-report
+test-results
+tsconfig.tsbuildinfo
+public/preview
