@@ -68,7 +68,7 @@ const config: ConfigFile = {
       filterEndpoints: [/^tokens/],
     },
     '../src/gateway/AUTO_GENERATED/transactions.ts': {
-      filterEndpoints: [/^transactions/],
+      filterEndpoints: [/^(transactions|spaceTransactions)/],
     },
     '../src/gateway/AUTO_GENERATED/users.ts': {
       filterEndpoints: [/^users/],
