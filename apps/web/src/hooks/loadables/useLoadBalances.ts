@@ -5,7 +5,8 @@ import { useCurrentChain, useHasFeature } from '../useChains'
 import useSafeInfo from '../useSafeInfo'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { useCounterfactualBalances } from '@/features/counterfactual'
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { isTrustedTokenList } from '@/utils/tokenList'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useTotalBalances from '@safe-global/utils/hooks/useTotalBalances'
 import type { PortfolioBalances } from '@safe-global/utils/hooks/portfolioBalances'
@@ -22,7 +23,7 @@ export const useTokenListSetting = (): boolean | undefined => {
   return useMemo(() => {
     if (hasPortfolioFeature === false) return false
     if (settings.tokenList === TOKEN_LISTS.ALL) return false
-    return chain ? hasFeature(chain, FEATURES.DEFAULT_TOKENLIST) : undefined
+    return chain ? isTrustedTokenList(chain, settings.tokenList) : undefined
   }, [chain, hasPortfolioFeature, settings.tokenList])
 }
 
