@@ -1,4 +1,3 @@
-import type { OrderStatuses } from '@safe-global/store/gateway/types'
 import type { Meta, StoryObj } from '@storybook/react'
 import CowOrderConfirmationView from './index'
 import { swapOrderConfirmationViewBuilder } from '@/features/swap/helpers/swapOrderBuilder'
@@ -19,13 +18,7 @@ const FIXED_SELL_TOKEN = {
   trusted: true,
 }
 
-const Order = swapOrderConfirmationViewBuilder()
-  .with({ kind: 'sell' })
-  .with({ sellAmount: '10000000' })
-  .with({ executedSellAmount: '10000000' })
-  .with({ sellToken: FIXED_SELL_TOKEN })
-  .with({ validUntil: 1735001680 }) // Fixed timestamp for deterministic tests (Dec 24, 2024)
-  .with({ status: 'open' as OrderStatuses })
+const Order = swapOrderConfirmationViewBuilder().with({ sellToken: FIXED_SELL_TOKEN })
 
 const meta = {
   title: 'Features/Swap/SwapOrderConfirmationView',
