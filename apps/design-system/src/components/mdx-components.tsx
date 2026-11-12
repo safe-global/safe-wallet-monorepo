@@ -7,6 +7,7 @@ import { Kbd } from '@safe-global/ui/kbd'
 import { BaseUiReference } from './docs/base-ui-reference'
 import { ColorSwatches } from './docs/color-swatches'
 import { ComponentExamples } from './docs/component-examples'
+import { ComponentGrid } from './docs/component-grid'
 import { ComponentInstall } from './docs/component-install'
 import { ComponentPreview } from './docs/component-preview'
 import { ComponentProps } from './docs/component-props'
@@ -29,6 +30,7 @@ export const getMDXComponents = (components?: MDXComponents): MDXComponents => (
   BaseUiReference,
   ColorSwatches,
   ComponentExamples,
+  ComponentGrid,
   ComponentInstall,
   ComponentPreview,
   ComponentProps,

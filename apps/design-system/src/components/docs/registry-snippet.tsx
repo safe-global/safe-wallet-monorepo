@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { CodeBlock, Pre } from 'fumadocs-ui/components/codeblock'
+import { Code } from '../site/code'
 import { REGISTRY_NAMESPACE, resolveRegistryUrl } from '@/lib/env'
 
 const snippet = (url: string) =>
@@ -16,10 +16,8 @@ export function RegistrySnippet() {
   }, [])
 
   return (
-    <CodeBlock title="components.json" data-registry-url={url}>
-      <Pre>
-        <code>{snippet(url)}</code>
-      </Pre>
-    </CodeBlock>
+    <div data-registry-url={url}>
+      <Code code={snippet(url)} lang="json" title="components.json" />
+    </div>
   )
 }

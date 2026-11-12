@@ -48,6 +48,6 @@ The components start from the shadcn/ui templates (`npx shadcn@latest add <name>
 
 Stories live in `src/components/stories/`. They render in the `apps/web` Storybook with the wallet's scoped CSS, and in this package's own Storybook (`yarn workspace @safe-global/ui storybook`) with the default `styles.css`. Design-to-code mapping: [docs/figma-code-connect.md](docs/figma-code-connect.md).
 
-The docs site in [`apps/design-system`](../../apps/design-system) documents every component (see its [Installation page](../../apps/design-system/content/docs/installation.mdx)) and serves a shadcn registry, so an app can also copy a component with `npx shadcn add @safe/<name>`.
+The docs site in [`apps/design-system`](../../apps/design-system) documents every component (see its [Installation page](../../apps/design-system/content/docs/docs/installation.mdx)) and serves a shadcn registry, so an app can also copy a component with `npx shadcn add @safe/<name>`.
 
 Contributor rules: [AGENTS.md](AGENTS.md).

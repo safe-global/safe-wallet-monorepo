@@ -8,11 +8,11 @@ Safe UI gives Safe web apps one set of components, tokens and styles. The compon
 ## Two ways to use it
 
 <Cards>
-  <Card title="npm package" href="/installation/#npm-package">
+  <Card title="npm package" href="/docs/installation/#npm-package">
     Install `@safe-global/ui`, import its stylesheet once and import each component from its own subpath. You get updates
     by upgrading the package.
   </Card>
-  <Card title="shadcn registry" href="/installation/#shadcn-registry">
+  <Card title="shadcn registry" href="/docs/installation/#shadcn-registry">
     Run `npx shadcn add @safe/<name>` to copy a component's source into your app, when you need to change it beyond its
     props.
   </Card>
@@ -22,10 +22,11 @@ Both come from the same source files in `packages/ui`, so they cannot drift apar
 
 ## What is on this site
 
-- **Getting started**: [Installation](/installation/), [Theming](/theming/), [Dark mode](/dark-mode/) and the [Changelog](/changelog/).
-- **Foundations**: [Colors](/foundations/colors/), [Typography](/foundations/typography/), [Spacing](/foundations/spacing/), [Radius](/foundations/radius/) and [Icons](/foundations/icons/), generated from the package CSS.
-- **Utilities**: [`cn`](/utilities/cn/), the [responsive hooks](/utilities/hooks/) and [`ShadcnProvider`](/utilities/provider/).
-- **Components**: one page per component, with a live preview, the code, install steps, props, accessibility notes and Do/Don't rules. Start with [Button](/components/button/).
+- **Getting started**: [Installation](/docs/installation/), [Theming](/docs/theming/), [Dark mode](/docs/dark-mode/) and the [Changelog](/docs/changelog/).
+- **Foundations**: [Colors](/docs/foundations/colors/), [Typography](/docs/foundations/typography/), [Spacing](/docs/foundations/spacing/), [Radius](/docs/foundations/radius/) and [Icons](/docs/foundations/icons/), generated from the package CSS.
+- **Utilities**: [`cn`](/docs/utilities/cn/), the [responsive hooks](/docs/utilities/hooks/) and [`ShadcnProvider`](/docs/utilities/provider/).
+- **[Typeset](/typeset/)**: the type scale with your own sample text, and **[Create](/create/)**: the setup for a new project.
+- **Components**: one page per component, with a live preview, the code, install steps, props, accessibility notes and Do/Don't rules. Browse them all on the [Components](/components/) page, or start with [Button](/components/button/).
 
 The previews are the package's own Storybook stories, so a story added to `packages/ui` shows up here without a docs change. Press <Kbd>⌘</Kbd> <Kbd>K</Kbd> to search. Agents can read [`llms.txt`](/llms.txt) for an index of every page.
 

@@ -1,6 +1,7 @@
 {
   "title": "Components",
   "pages": [
+    "index",
     "accordion",
     "alert",
     "alert-dialog",

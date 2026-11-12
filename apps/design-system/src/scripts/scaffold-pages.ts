@@ -50,7 +50,7 @@ TODO keyboard and ARIA notes.
 `
 
 export const metaJson = (names: string[]): string =>
-  `${JSON.stringify({ title: 'Components', pages: [...names].sort() }, null, 2)}\n`
+  `${JSON.stringify({ title: 'Components', pages: ['index', ...[...names].sort()] }, null, 2)}\n`
 
 export const main = (): void => {
   mkdirSync(componentsContentDir, { recursive: true })
