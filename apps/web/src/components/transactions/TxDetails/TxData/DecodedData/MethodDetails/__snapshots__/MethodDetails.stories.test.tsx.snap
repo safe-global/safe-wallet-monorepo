@@ -1675,7 +1675,7 @@ exports[`./MethodDetails.stories AllAbiTypes 1`] = `
                           >
                             <div
                               class="icon"
-                              style="background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woNzUgNDElIDYxJSkiIGQ9Ik0wLDBIOFY4SDB6Ii8+PHBhdGggZmlsbD0iaHNsKDY3IDc0JSA2NiUpIiBkPSJNMSwwaDF2MWgtMXpNNiwwaDF2MWgtMXpNMiwwaDF2MWgtMXpNNSwwaDF2MWgtMXpNMywxaDF2MWgtMXpNNCwxaDF2MWgtMXpNMCwyaDF2MWgtMXpNNywyaDF2MWgtMXpNMywyaDF2MWgtMXpNNCwyaDF2MWgtMXpNMiwzaDF2MWgtMXpNNSwzaDF2MWgtMXpNMywzaDF2MWgtMXpNNCwzaDF2MWgtMXpNMSw0aDF2MWgtMXpNNiw0aDF2MWgtMXpNMiw0aDF2MWgtMXpNNSw0aDF2MWgtMXpNMCw1aDF2MWgtMXpNNyw1aDF2MWgtMXpNMSw1aDF2MWgtMXpNNiw1aDF2MWgtMXpNMiw1aDF2MWgtMXpNNSw1aDF2MWgtMXpNMyw1aDF2MWgtMXpNNCw1aDF2MWgtMXpNMSw2aDF2MWgtMXpNNiw2aDF2MWgtMXpNMyw2aDF2MWgtMXpNNCw2aDF2MWgtMXoiLz48cGF0aCBmaWxsPSJoc2woMTI5IDk1JSA0NCUpIiBkPSJNMCwwaDF2MWgtMXpNNywwaDF2MWgtMXpNMCwxaDF2MWgtMXpNNywxaDF2MWgtMXpNMiwxaDF2MWgtMXpNNSwxaDF2MWgtMXpNMSw3aDF2MWgtMXpNNiw3aDF2MWgtMXpNMyw3aDF2MWgtMXpNNCw3aDF2MWgtMXoiLz48L3N2Zz4="); width: 20px; height: 20px;"
+                              style="background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMTc1IDkyJSAzNyUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgzNCA3NyUgNzYlKSIgZD0iTTAsMGgxdjFoLTF6TTcsMGgxdjFoLTF6TTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTIsMWgxdjFoLTF6TTUsMWgxdjFoLTF6TTMsMWgxdjFoLTF6TTQsMWgxdjFoLTF6TTAsMmgxdjFoLTF6TTcsMmgxdjFoLTF6TTAsM2gxdjFoLTF6TTcsM2gxdjFoLTF6TTIsM2gxdjFoLTF6TTUsM2gxdjFoLTF6TTAsNGgxdjFoLTF6TTcsNGgxdjFoLTF6TTEsNGgxdjFoLTF6TTYsNGgxdjFoLTF6TTMsNGgxdjFoLTF6TTQsNGgxdjFoLTF6TTEsNWgxdjFoLTF6TTYsNWgxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6TTMsNWgxdjFoLTF6TTQsNWgxdjFoLTF6TTAsNmgxdjFoLTF6TTcsNmgxdjFoLTF6TTIsN2gxdjFoLTF6TTUsN2gxdjFoLTF6TTMsN2gxdjFoLTF6TTQsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDk1IDgxJSA0OSUpIiBkPSJNMSw2aDF2MWgtMXpNNiw2aDF2MWgtMXpNMSw3aDF2MWgtMXpNNiw3aDF2MWgtMXoiLz48L3N2Zz4="); width: 20px; height: 20px;"
                             />
                           </div>
                           <div
@@ -1696,11 +1696,11 @@ exports[`./MethodDetails.stories AllAbiTypes 1`] = `
                                   <span>
                                     0x
                                     <b>
-                                      29C0
+                                      C41B
                                     </b>
-                                    8A5c9e6959caAfaB5Ab8432aCD4d09dE
+                                    3BA8828b3321CA811111fA75Cd3Aa3BB
                                     <b>
-                                      cE3F
+                                      5ACe
                                     </b>
                                   </span>
                                 </span>
@@ -1713,7 +1713,7 @@ exports[`./MethodDetails.stories AllAbiTypes 1`] = `
                                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                   data-slot="tooltip-trigger"
                                   data-testid="explorer-btn"
-                                  href="https://rinkeby.etherscan.io/address/0x29C08A5c9e6959caAfaB5Ab8432aCD4d09dEcE3F"
+                                  href="https://rinkeby.etherscan.io/address/0xC41B3BA8828b3321CA811111fA75Cd3Aa3BB5ACe"
                                   id="base-ui-_r_1j_"
                                   rel="noreferrer"
                                   target="_blank"
@@ -2041,7 +2041,7 @@ exports[`./MethodDetails.stories AllAbiTypes 1`] = `
                               <span
                                 class="monospace"
                               >
-                                0x29C08A5c9e6959caAfaB5Ab8432aCD4d09dEcE3F
+                                0xC41B3BA8828b3321CA811111fA75Cd3Aa3BB5ACe
                               </span>
                             </span>
                           </div>
@@ -2581,7 +2581,7 @@ exports[`./MethodDetails.stories AllAbiTypes 1`] = `
                               <span
                                 class="monospace"
                               >
-                                0x29C08A5c9e6959caAfaB5Ab8432aCD4d09dEcE3F
+                                0xC41B3BA8828b3321CA811111fA75Cd3Aa3BB5ACe
                               </span>
                             </span>
                           </div>
@@ -3261,7 +3261,7 @@ exports[`./MethodDetails.stories AllAbiTypes 1`] = `
                                         :
                                       </b>
                                       <span>
-                                        0x29C08A5c9e6959caAfaB5Ab8432aCD4d09dEcE3F
+                                        0xC41B3BA8828b3321CA811111fA75Cd3Aa3BB5ACe
                                       </span>
                                     </span>
                                   </div>
@@ -3292,7 +3292,7 @@ exports[`./MethodDetails.stories AllAbiTypes 1`] = `
                                       class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                       data-slot="tooltip-trigger"
                                       data-testid="explorer-btn"
-                                      href="https://rinkeby.etherscan.io/address/0x29C08A5c9e6959caAfaB5Ab8432aCD4d09dEcE3F"
+                                      href="https://rinkeby.etherscan.io/address/0xC41B3BA8828b3321CA811111fA75Cd3Aa3BB5ACe"
                                       id="base-ui-_r_3r_"
                                       rel="noreferrer"
                                       target="_blank"
@@ -3397,7 +3397,7 @@ exports[`./MethodDetails.stories AllAbiTypes 1`] = `
                                         :
                                       </b>
                                       <span>
-                                        0x29C08A5c9e6959caAfaB5Ab8432aCD4d09dEcE3F
+                                        0xC41B3BA8828b3321CA811111fA75Cd3Aa3BB5ACe
                                       </span>
                                     </span>
                                   </div>
@@ -3428,7 +3428,7 @@ exports[`./MethodDetails.stories AllAbiTypes 1`] = `
                                       class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                       data-slot="tooltip-trigger"
                                       data-testid="explorer-btn"
-                                      href="https://rinkeby.etherscan.io/address/0x29C08A5c9e6959caAfaB5Ab8432aCD4d09dEcE3F"
+                                      href="https://rinkeby.etherscan.io/address/0xC41B3BA8828b3321CA811111fA75Cd3Aa3BB5ACe"
                                       id="base-ui-_r_41_"
                                       rel="noreferrer"
                                       target="_blank"
@@ -3466,7 +3466,7 @@ exports[`./MethodDetails.stories AllAbiTypes 1`] = `
                                         :
                                       </b>
                                       <span>
-                                        0x29C08A5c9e6959caAfaB5Ab8432aCD4d09dEcE3F
+                                        0xC41B3BA8828b3321CA811111fA75Cd3Aa3BB5ACe
                                       </span>
                                     </span>
                                   </div>
@@ -3497,7 +3497,7 @@ exports[`./MethodDetails.stories AllAbiTypes 1`] = `
                                       class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                       data-slot="tooltip-trigger"
                                       data-testid="explorer-btn"
-                                      href="https://rinkeby.etherscan.io/address/0x29C08A5c9e6959caAfaB5Ab8432aCD4d09dEcE3F"
+                                      href="https://rinkeby.etherscan.io/address/0xC41B3BA8828b3321CA811111fA75Cd3Aa3BB5ACe"
                                       id="base-ui-_r_47_"
                                       rel="noreferrer"
                                       target="_blank"
@@ -4700,7 +4700,7 @@ exports[`./MethodDetails.stories AllAbiTypes 1`] = `
                               <span
                                 class="monospace"
                               >
-                                0x29c08a5c9e6959caafab5ab8432acd4d09dece3f
+                                0xc41b3ba8828b3321ca811111fa75cd3aa3bb5ace
                               </span>
                             </span>
                           </div>

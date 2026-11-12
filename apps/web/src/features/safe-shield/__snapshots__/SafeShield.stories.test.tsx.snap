@@ -5807,7 +5807,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   data-slot="typography"
                                                   data-variant="paragraph-mini"
                                                 >
-                                                  0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b
+                                                  0xC41B3BA8828b3321CA811111fA75Cd3Aa3BB5ACe
                                                 </span>
                                               </span>
                                               <span
@@ -5818,7 +5818,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                                   data-slot="tooltip-trigger"
                                                   data-testid="explorer-btn"
-                                                  href="https://etherscan.io/address/0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b"
+                                                  href="https://etherscan.io/address/0xC41B3BA8828b3321CA811111fA75Cd3Aa3BB5ACe"
                                                   id="base-ui-_r_23_"
                                                   rel="noreferrer"
                                                   target="_blank"
@@ -5926,7 +5926,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   data-slot="typography"
                                                   data-variant="paragraph-mini"
                                                 >
-                                                  0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b
+                                                  0xC41B3BA8828b3321CA811111fA75Cd3Aa3BB5ACe
                                                 </span>
                                               </span>
                                               <span
@@ -5937,7 +5937,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                                   data-slot="tooltip-trigger"
                                                   data-testid="explorer-btn"
-                                                  href="https://etherscan.io/address/0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b"
+                                                  href="https://etherscan.io/address/0xC41B3BA8828b3321CA811111fA75Cd3Aa3BB5ACe"
                                                   id="base-ui-_r_28_"
                                                   rel="noreferrer"
                                                   target="_blank"
@@ -6045,7 +6045,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   data-slot="typography"
                                                   data-variant="paragraph-mini"
                                                 >
-                                                  0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b
+                                                  0xC41B3BA8828b3321CA811111fA75Cd3Aa3BB5ACe
                                                 </span>
                                               </span>
                                               <span
@@ -6056,7 +6056,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                                   data-slot="tooltip-trigger"
                                                   data-testid="explorer-btn"
-                                                  href="https://etherscan.io/address/0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b"
+                                                  href="https://etherscan.io/address/0xC41B3BA8828b3321CA811111fA75Cd3Aa3BB5ACe"
                                                   id="base-ui-_r_2d_"
                                                   rel="noreferrer"
                                                   target="_blank"
@@ -6088,7 +6088,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   data-slot="typography"
                                                   data-variant="paragraph-mini"
                                                 >
-                                                  0x75a4a3378eb9be1d6cd40847aa7fac5d66b99cfe
+                                                  0x2D0C79bB0604C104A5fB6F4eB0703F3154BB3db0
                                                 </span>
                                               </span>
                                               <span
@@ -6099,7 +6099,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                                   data-slot="tooltip-trigger"
                                                   data-testid="explorer-btn"
-                                                  href="https://etherscan.io/address/0x75a4a3378eb9be1d6cd40847aa7fac5d66b99cfe"
+                                                  href="https://etherscan.io/address/0x2D0C79bB0604C104A5fB6F4eB0703F3154BB3db0"
                                                   id="base-ui-_r_2h_"
                                                   rel="noreferrer"
                                                   target="_blank"
@@ -6207,7 +6207,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   data-slot="typography"
                                                   data-variant="paragraph-mini"
                                                 >
-                                                  0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b
+                                                  0xC41B3BA8828b3321CA811111fA75Cd3Aa3BB5ACe
                                                 </span>
                                               </span>
                                               <span
@@ -6218,7 +6218,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                                   data-slot="tooltip-trigger"
                                                   data-testid="explorer-btn"
-                                                  href="https://etherscan.io/address/0xce3d3d0e8b0a22cdfffbb275d1acb1d8f180834b"
+                                                  href="https://etherscan.io/address/0xC41B3BA8828b3321CA811111fA75Cd3Aa3BB5ACe"
                                                   id="base-ui-_r_2m_"
                                                   rel="noreferrer"
                                                   target="_blank"
@@ -6250,7 +6250,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   data-slot="typography"
                                                   data-variant="paragraph-mini"
                                                 >
-                                                  0x9648b1e4ad3eecbae513afb45e7ea8b2918e91ff
+                                                  0x4Fd709f28e8600b4aa8c65c6B64bFe7fE36bd19b
                                                 </span>
                                               </span>
                                               <span
@@ -6261,7 +6261,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                                   data-slot="tooltip-trigger"
                                                   data-testid="explorer-btn"
-                                                  href="https://etherscan.io/address/0x9648b1e4ad3eecbae513afb45e7ea8b2918e91ff"
+                                                  href="https://etherscan.io/address/0x4Fd709f28e8600b4aa8c65c6B64bFe7fE36bd19b"
                                                   id="base-ui-_r_2q_"
                                                   rel="noreferrer"
                                                   target="_blank"
@@ -6446,7 +6446,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   data-slot="typography"
                                                   data-variant="paragraph-mini"
                                                 >
-                                                  0x53bbddda3398c3facefe325073bc424fcb946d7a
+                                                  0x717e6a320cf44b4aFAc2b0732D9fcBe2B7fa0Cf6
                                                 </span>
                                               </span>
                                               <span
@@ -6457,7 +6457,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                                   data-slot="tooltip-trigger"
                                                   data-testid="explorer-btn"
-                                                  href="https://etherscan.io/address/0x53bbddda3398c3facefe325073bc424fcb946d7a"
+                                                  href="https://etherscan.io/address/0x717e6a320cf44b4aFAc2b0732D9fcBe2B7fa0Cf6"
                                                   id="base-ui-_r_30_"
                                                   rel="noreferrer"
                                                   target="_blank"
@@ -6501,7 +6501,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   data-slot="typography"
                                                   data-variant="paragraph-mini"
                                                 >
-                                                  0xcf00af6ed21dbbd45c8f46ca1c9be8f6ebb0a4a2
+                                                  0x2F12DB2869C3395A3b0502d05E2516446f71F85B
                                                 </span>
                                               </span>
                                               <span
@@ -6512,7 +6512,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                                   data-slot="tooltip-trigger"
                                                   data-testid="explorer-btn"
-                                                  href="https://etherscan.io/address/0xcf00af6ed21dbbd45c8f46ca1c9be8f6ebb0a4a2"
+                                                  href="https://etherscan.io/address/0x2F12DB2869C3395A3b0502d05E2516446f71F85B"
                                                   id="base-ui-_r_34_"
                                                   rel="noreferrer"
                                                   target="_blank"
@@ -6998,7 +6998,7 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                                     data-slot="typography"
                                     data-variant="paragraph-small"
                                   >
-                                    You have interacted with this contract 43 times.
+                                    You have interacted with this contract 3 times.
                                   </span>
                                 </div>
                               </div>
@@ -8293,7 +8293,7 @@ exports[`./SafeShield.stories RecurringRecipient 1`] = `
                                     data-slot="typography"
                                     data-variant="paragraph-small"
                                   >
-                                    You have interacted with this address 21 times.
+                                    You have interacted with this address 3 times.
                                   </span>
                                 </div>
                               </div>

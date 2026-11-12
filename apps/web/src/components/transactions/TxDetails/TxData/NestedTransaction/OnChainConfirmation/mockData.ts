@@ -1,6 +1,6 @@
-import { faker } from '@faker-js/faker'
 import type { TransactionData, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
+import { mockAddress } from '@/stories/mocks/address'
 
 export const mockOnChainConfirmationData: TransactionData = {
   hexData:
@@ -17,7 +17,7 @@ export const mockOnChainConfirmationData: TransactionData = {
     ],
   },
   to: {
-    value: faker.finance.ethereumAddress(),
+    value: mockAddress(1),
     name: 'Safe',
     logoUri: null,
   },
@@ -28,21 +28,21 @@ export const mockOnChainConfirmationData: TransactionData = {
 }
 
 export const mockNestedTxDetails: TransactionDetails = {
-  safeAddress: faker.finance.ethereumAddress(),
-  txId: faker.string.uuid(),
+  safeAddress: mockAddress(2),
+  txId: '3f8c2a6e-9b1d-4c7a-8e5f-2d4b6a8c0e1f',
   executedAt: null,
   txStatus: 'AWAITING_CONFIRMATIONS',
   txInfo: {
     type: TransactionInfoType.TRANSFER,
     humanDescription: null,
     sender: {
-      value: faker.finance.ethereumAddress(),
+      value: mockAddress(3),
       name: null,
       logoUri: null,
     },
     recipient: {
-      value: faker.finance.ethereumAddress(),
-      name: faker.person.fullName(),
+      value: mockAddress(4),
+      name: 'Alice Johnson',
       logoUri: null,
     },
     direction: 'OUTGOING',
@@ -55,7 +55,7 @@ export const mockNestedTxDetails: TransactionDetails = {
     hexData: '0x',
     dataDecoded: null,
     to: {
-      value: faker.finance.ethereumAddress(),
+      value: mockAddress(5),
       name: null,
       logoUri: null,
     },

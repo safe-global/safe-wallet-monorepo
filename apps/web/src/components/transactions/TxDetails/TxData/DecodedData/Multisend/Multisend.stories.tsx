@@ -1,12 +1,26 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { faker } from '@faker-js/faker'
+import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { Operation } from '@safe-global/store/gateway/types'
 import { createMockStory } from '@/stories/mocks'
-import { multiSendTxDataBuilder } from '@/tests/builders/dataDecoded'
+import { mockAddress } from '@/stories/mocks/address'
+import { basicTypesActions } from '../MethodDetails/mockData'
 import Multisend from '.'
 
-faker.seed(1002)
-
 const setup = createMockStory({ shadcn: true })
+
+const multiSendTxData: TransactionData = {
+  hexData: '0x8d80ff0a0000000000000000000000000000000000000000000000000000000000000020',
+  dataDecoded: {
+    method: 'multiSend',
+    parameters: [{ name: 'transactions', type: 'bytes', value: '0x', valueDecoded: basicTypesActions }],
+  },
+  to: { value: mockAddress(3), name: 'MultiSendCallOnly', logoUri: null },
+  value: '0',
+  operation: Operation.DELEGATE,
+  trustedDelegateCallTarget: null,
+  addressInfoIndex: null,
+  tokenInfoIndex: null,
+}
 
 const meta = {
   title: 'Components/Transactions/Multisend',
@@ -17,7 +31,7 @@ const meta = {
     ...setup.parameters,
   },
   args: {
-    txData: multiSendTxDataBuilder().build(),
+    txData: multiSendTxData,
   },
 } satisfies Meta<typeof Multisend>
 

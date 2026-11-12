@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker'
+import { mockAddress } from '@/stories/mocks/address'
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 /** Fixed Safe address shared with the stories: the version extractor only recognises the
@@ -41,13 +41,13 @@ export const mockUnknownContractTxData: TransactionData = {
       {
         name: '_masterCopy',
         type: 'address',
-        value: faker.finance.ethereumAddress(),
+        value: mockAddress(1),
         valueDecoded: null,
       },
     ],
   },
   to: {
-    value: faker.finance.ethereumAddress(),
+    value: mockAddress(2),
     name: 'Safe',
     logoUri: null,
   },

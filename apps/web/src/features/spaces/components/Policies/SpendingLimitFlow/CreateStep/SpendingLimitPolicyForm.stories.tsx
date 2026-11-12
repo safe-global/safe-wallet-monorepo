@@ -17,7 +17,7 @@ import {
   createDefaultFormValues,
   type SpendingLimitPolicyFormValues,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
-import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
+import type { SpendingLimitState } from '@/features/spending-limits'
 import { ExistingSpendingLimitsContext } from '../ExistingSpendingLimitsProvider'
 import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import SpendingLimitPolicyForm, { type SpendingLimitPolicyFormProps } from './SpendingLimitPolicyForm'
@@ -180,23 +180,25 @@ export const AccountsLoading: Story = {
 }
 
 /** What the chain holds for the edit stories: Nicole already has both limits, Dev has none. */
-const onChain = [
-  spendingLimitStateBuilder()
-    .with({
-      beneficiary: NICOLE,
-      amount: '500000000000000',
-      resetTimeMin: '1440',
-      token: { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: '' },
-    })
-    .build(),
-  spendingLimitStateBuilder()
-    .with({
-      beneficiary: NICOLE,
-      amount: '250000000',
-      resetTimeMin: '10080',
-      token: { address: USDC, symbol: 'USDC', decimals: 6, logoUri: '' },
-    })
-    .build(),
+const onChain: SpendingLimitState[] = [
+  {
+    beneficiary: NICOLE,
+    token: { address: ZERO_ADDRESS, symbol: 'ETH', decimals: 18, logoUri: '' },
+    amount: '500000000000000',
+    spent: '0',
+    nonce: '1',
+    resetTimeMin: '1440',
+    lastResetMin: '29000000',
+  },
+  {
+    beneficiary: NICOLE,
+    token: { address: USDC, symbol: 'USDC', decimals: 6, logoUri: '' },
+    amount: '250000000',
+    spent: '0',
+    nonce: '1',
+    resetTimeMin: '10080',
+    lastResetMin: '29000000',
+  },
 ]
 
 const EditingForm = (props: StoryProps) => (

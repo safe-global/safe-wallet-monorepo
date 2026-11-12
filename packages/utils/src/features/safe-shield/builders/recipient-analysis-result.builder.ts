@@ -1,4 +1,3 @@
-import { faker } from '@faker-js/faker'
 import { Severity, RecipientStatus, BridgeStatus, type AnalysisResult } from '../types'
 
 export class RecipientAnalysisResultBuilder<T extends RecipientStatus | BridgeStatus> {
@@ -75,7 +74,7 @@ export class RecipientAnalysisResultBuilder<T extends RecipientStatus | BridgeSt
       .severity(Severity.OK)
       .type(RecipientStatus.RECURRING_RECIPIENT)
       .title('Recurring recipient')
-      .description(`You have interacted with this address ${faker.number.int({ min: 2, max: 100 })} times.`)
+      .description('You have interacted with this address 3 times.')
   }
 
   static incompatibleSafe(): RecipientAnalysisResultBuilder<BridgeStatus.INCOMPATIBLE_SAFE> {

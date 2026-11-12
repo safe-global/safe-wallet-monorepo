@@ -23,6 +23,59 @@ const safeLinkWithoutSpaceIdRules = [
     'A Safe link must keep `spaceId`: use `useSafeLinkQuery()`, or wrap the query in `withSpaceId(query, spaceId)`. If the link must leave the Workspace, add `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
 }))
 
+// Imports that app code must not use; story files add their own restrictions on top (see below)
+const restrictedImports = {
+  paths: [
+    { name: 'next', importNames: ['NextPage'], message: 'Type a page as a plain function component.' },
+    { name: 'next/dynamic', message: 'Import dynamic from @/utils/dynamic, which does not depend on Next.' },
+    { name: 'next/app', message: 'Type the app props yourself, as pages/_app.tsx does.' },
+    {
+      name: 'next/image',
+      message: 'Use a plain <img>. Images are served unoptimized, so next/image adds nothing.',
+    },
+  ],
+  patterns: [
+    // Block deep imports into feature components (defeats lazy loading)
+    {
+      group: ['@/features/*/components', '@/features/*/components/**'],
+      message:
+        'Do not import components directly. Use useLoadFeature() to access lazy-loaded components. See docs/feature-architecture.md',
+    },
+    // Block deep imports into feature hooks (should go through barrel)
+    {
+      group: ['@/features/*/hooks', '@/features/*/hooks/**'],
+      message: 'Import hooks from the feature barrel (@/features/myfeature) not from hooks folder directly.',
+    },
+    // Block deep imports into services internal files (barrel is OK for lightweight utils)
+    {
+      group: ['@/features/*/services/*', '!@/features/*/services/index'],
+      message:
+        'Import from @/features/myfeature/services (barrel) for lightweight utils, or use useLoadFeature() for heavy services.',
+    },
+    // Block deep imports into store internal files (barrel is OK)
+    {
+      group: ['@/features/*/store/*', '!@/features/*/store/index'],
+      message: 'Import from @/features/myfeature/store (barrel) not from internal store files.',
+    },
+    // Block internal file imports (handle.ts is internal, only index.ts is public)
+    {
+      group: ['@/features/*/handle'],
+      message: 'Import from feature index file only. The handle is internal - use @/features/{name} instead.',
+    },
+    // Same patterns for relative imports
+    {
+      // Same for relative imports
+      group: [
+        '../features/*/components',
+        '../features/*/components/**',
+        '../../features/*/components',
+        '../../features/*/components/**',
+      ],
+      message: 'Do not import components directly. Use useLoadFeature() instead.',
+    },
+  ],
+}
+
 const config = [
   {
     ignores: [
@@ -125,60 +178,7 @@ const config = [
       //   @/features/myfeature/services/*   - heavy services should be in contract, accessed via useLoadFeature()
       //
       // See apps/web/docs/feature-architecture.md for details
-      'no-restricted-imports': [
-        'error',
-        {
-          paths: [
-            { name: 'next', importNames: ['NextPage'], message: 'Type a page as a plain function component.' },
-            { name: 'next/dynamic', message: 'Import dynamic from @/utils/dynamic, which does not depend on Next.' },
-            { name: 'next/app', message: 'Type the app props yourself, as pages/_app.tsx does.' },
-            {
-              name: 'next/image',
-              message: 'Use a plain <img>. Images are served unoptimized, so next/image adds nothing.',
-            },
-          ],
-          patterns: [
-            // Block deep imports into feature components (defeats lazy loading)
-            {
-              group: ['@/features/*/components', '@/features/*/components/**'],
-              message:
-                'Do not import components directly. Use useLoadFeature() to access lazy-loaded components. See docs/feature-architecture.md',
-            },
-            // Block deep imports into feature hooks (should go through barrel)
-            {
-              group: ['@/features/*/hooks', '@/features/*/hooks/**'],
-              message: 'Import hooks from the feature barrel (@/features/myfeature) not from hooks folder directly.',
-            },
-            // Block deep imports into services internal files (barrel is OK for lightweight utils)
-            {
-              group: ['@/features/*/services/*', '!@/features/*/services/index'],
-              message:
-                'Import from @/features/myfeature/services (barrel) for lightweight utils, or use useLoadFeature() for heavy services.',
-            },
-            // Block deep imports into store internal files (barrel is OK)
-            {
-              group: ['@/features/*/store/*', '!@/features/*/store/index'],
-              message: 'Import from @/features/myfeature/store (barrel) not from internal store files.',
-            },
-            // Block internal file imports (handle.ts is internal, only index.ts is public)
-            {
-              group: ['@/features/*/handle'],
-              message: 'Import from feature index file only. The handle is internal - use @/features/{name} instead.',
-            },
-            // Same patterns for relative imports
-            {
-              // Same for relative imports
-              group: [
-                '../features/*/components',
-                '../features/*/components/**',
-                '../../features/*/components',
-                '../../features/*/components/**',
-              ],
-              message: 'Do not import components directly. Use useLoadFeature() instead.',
-            },
-          ],
-        },
-      ],
+      'no-restricted-imports': ['error', restrictedImports],
 
       // Design-system consistency: on <Button>, `className` is for LAYOUT only
       // (w-full, margins, grid placement). Height/padding/font-size/radius/background
@@ -206,6 +206,33 @@ const config = [
     files: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**', '**/*.stories.tsx', 'src/tests/**', 'src/stories/**'],
     rules: {
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules],
+    },
+  },
+  // Stories must render the same data every time: no faker and no test builders, which are random by design
+  {
+    files: ['**/*.stories.tsx', '**/*.stories.ts', '**/mockData.ts', '**/storyExamples.ts', 'src/stories/**'],
+    ignores: ['**/*.test.ts', '**/*.test.tsx'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            ...restrictedImports.paths,
+            {
+              name: '@faker-js/faker',
+              message: 'Stories need fixed data: use the fixtures, createMockStory, mockAddress() or literal values.',
+            },
+          ],
+          patterns: [
+            ...restrictedImports.patterns,
+            {
+              group: ['@/tests/builders', '@/tests/builders/**', '@safe-global/utils/tests/builders/**'],
+              message:
+                'Test builders are random by design. Use the fixtures, createMockStory or literal values in stories.',
+            },
+          ],
+        },
+      ],
     },
   },
   // Override for story files: allow type-only imports from @storybook/react

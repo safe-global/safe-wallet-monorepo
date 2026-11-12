@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { StoreDecorator } from '@/stories/storeDecorator'
-import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
+import { mockAddress } from '@/stories/mocks/address'
+import { safeFixtures } from '@safe-global/test/msw/fixtures'
 import { SafeScopeProvider } from './SafeScopeProvider'
 import { useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import type { ReactElement } from 'react'
@@ -46,10 +47,10 @@ const SafeScopeProbe = (): ReactElement => {
 }
 
 // The Safe the URL/Redux would point at on a Safe-level route.
-const urlSafe = extendedSafeInfoBuilder().with({ chainId: '11155111' }).build()
+const urlSafe = { ...safeFixtures.efSafe, chainId: '11155111', deployed: true }
 // Two Safes a Space-level flow might select.
-const safeA = { chainId: '137', safeAddress: extendedSafeInfoBuilder().build().address.value }
-const safeB = { chainId: '11155111', safeAddress: extendedSafeInfoBuilder().build().address.value }
+const safeA = { chainId: '137', safeAddress: mockAddress(1) }
+const safeB = { chainId: '11155111', safeAddress: mockAddress(2) }
 
 const meta = {
   title: 'Components/TxFlow/SafeScope',

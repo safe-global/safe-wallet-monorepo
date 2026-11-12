@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useContext, useState } from 'react'
-import { faker } from '@faker-js/faker'
 import TxNonce from './index'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext, initialContext as initialTxFlowContext } from '@/components/tx-flow/TxFlowProvider'
@@ -8,9 +7,6 @@ import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import { createInitialState } from '@/stories/mocks/defaults'
 import { safeFixtures } from '@safe-global/test/msw/fixtures'
-
-// Seed faker for deterministic visual regression tests
-faker.seed(789)
 
 const RECOMMENDED_NONCE = 12
 

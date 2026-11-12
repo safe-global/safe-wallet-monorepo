@@ -1,15 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { faker } from '@faker-js/faker'
 import type { DataDecoded, DataDecodedParameter } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { createMockStory } from '@/stories/mocks'
-import { basicTypesActions, HUGE_UINT } from '@/tests/builders/dataDecoded'
+import { basicTypesActions, HUGE_UINT } from './mockData'
 import { MethodDetails } from '.'
-
-faker.seed(1001)
 
 const setup = createMockStory({ shadcn: true })
 
-const actions = basicTypesActions()
+const actions = basicTypesActions
 
 // Malformed values are the point of this story, so they are wider than the generated type
 const parameter = (type: string, value: unknown): DataDecodedParameter => ({

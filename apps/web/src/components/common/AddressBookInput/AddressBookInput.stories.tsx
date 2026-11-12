@@ -1,25 +1,21 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { FormProvider, useForm } from 'react-hook-form'
-import { faker } from '@faker-js/faker'
 import AddressBookInput from './index'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
 import { createInitialState } from '@/stories/mocks/defaults'
 import { safeFixtures } from '@safe-global/test/msw/fixtures'
 import { DEFAULT_CHAIN_ID } from '@/config/constants'
-import { checksumAddress } from '@safe-global/utils/utils/addresses'
-
-// Seed faker for deterministic visual regression tests
-faker.seed(654)
+import { mockAddress } from '@/stories/mocks/address'
 
 const FIELD_NAME = 'recipient'
 
 // Keyed by the chain useChainId resolves to in Storybook (no URL chain, no wallet), so the
 // contacts pass AddressBookInput's per-chain filter and actually appear in the list.
 const contacts = {
-  [checksumAddress(faker.finance.ethereumAddress())]: 'Alice',
-  [checksumAddress(faker.finance.ethereumAddress())]: 'Bob',
-  [checksumAddress(faker.finance.ethereumAddress())]: 'Treasury multisig',
+  [mockAddress(1)]: 'Alice',
+  [mockAddress(2)]: 'Bob',
+  [mockAddress(3)]: 'Treasury multisig',
 }
 
 type HarnessProps = {
@@ -85,5 +81,5 @@ export const WithContacts: Story = {
  * unknown-address hint offers to save it.
  */
 export const UnknownAddress: Story = {
-  args: { address: checksumAddress(faker.finance.ethereumAddress()), canAdd: true },
+  args: { address: mockAddress(4), canAdd: true },
 }

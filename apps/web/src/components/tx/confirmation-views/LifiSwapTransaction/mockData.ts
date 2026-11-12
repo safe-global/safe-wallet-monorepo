@@ -1,14 +1,14 @@
-import { faker } from '@faker-js/faker'
+import { mockAddress } from '@/stories/mocks/address'
 import type { SwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionInfoType } from '@safe-global/store/gateway/types'
 
 export const mockLifiSwapTxInfo: SwapTransactionInfo = {
   type: TransactionInfoType.SWAP,
   humanDescription: null,
-  fromAmount: faker.number.bigInt({ min: 1000000000000000000n, max: 10000000000000000000n }).toString(),
-  toAmount: faker.number.bigInt({ min: 2000000000000000000n, max: 20000000000000000000n }).toString(),
+  fromAmount: '4200000000000000000',
+  toAmount: '12600000000000000000',
   fromToken: {
-    address: faker.finance.ethereumAddress(),
+    address: mockAddress(1),
     decimals: 18,
     logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
     name: 'Ether',
@@ -16,7 +16,7 @@ export const mockLifiSwapTxInfo: SwapTransactionInfo = {
     trusted: true,
   },
   toToken: {
-    address: faker.finance.ethereumAddress(),
+    address: mockAddress(2),
     decimals: 6,
     logoUri:
       'mock-assets/safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp',
@@ -25,12 +25,12 @@ export const mockLifiSwapTxInfo: SwapTransactionInfo = {
     trusted: true,
   },
   recipient: {
-    value: faker.finance.ethereumAddress(),
-    name: faker.person.fullName(),
+    value: mockAddress(3),
+    name: 'Bob Chen',
     logoUri: null,
   },
   fees: {
-    tokenAddress: faker.finance.ethereumAddress(),
+    tokenAddress: mockAddress(4),
     integratorFee: '5000000000000000',
     lifiFee: '3000000000000000',
   },

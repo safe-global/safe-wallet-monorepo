@@ -1,10 +1,9 @@
-import { faker } from '@faker-js/faker'
 import { keccak256, toBeHex, ZeroAddress, type Interface } from 'ethers'
 import { consensusInterface, sentinelInterface } from '../abi'
 import type { RawLog } from '../utils/decodeLogs'
 
 /**
- * Faker builders that ABI-encode the real event fragments into raw logs. Since
+ * Builders that ABI-encode the real event fragments into raw logs. Since
  * they encode through the exact `Interface`s the decoder uses, a decode of their
  * output round-trips the true onchain wire format. These builders are the ONLY
  * source of synthetic test data — the derived `checkEvents` factories decode
@@ -20,8 +19,10 @@ export const resetLogCounter = (): void => {
 
 type LogMeta = { blockNumber?: number; logIndex?: number; transactionHash?: string }
 
-const hash = (): string => faker.string.hexadecimal({ length: 64, prefix: '0x', casing: 'lower' })
-const addr = (): string => faker.finance.ethereumAddress()
+// Every call gives a new value, and the same sequence on every run (stories render these logs too)
+let valueCounter = 0
+const hash = (): string => keccak256(toBeHex(++valueCounter, 32))
+const addr = (): string => toBeHex(++valueCounter, 20)
 
 const encode = (
   iface: Interface,
@@ -63,7 +64,7 @@ const txTuple = (chainId: bigint, safe: string): unknown[] => [
   0n,
   ZeroAddress,
   ZeroAddress,
-  faker.number.bigInt({ min: 0n, max: 1000n }),
+  500n,
 ]
 
 // --- Consensus (unified oracle pair) -------------------------------------------
@@ -111,7 +112,7 @@ export const buildOracleAttestedLog = (
   } = {},
   meta: LogMeta = {},
 ): RawLog => {
-  const r = spec.r ?? { x: faker.number.bigInt(), y: faker.number.bigInt() }
+  const r = spec.r ?? { x: 1n, y: 2n }
   return encode(
     consensusInterface,
     'TransactionAttested',
@@ -122,7 +123,7 @@ export const buildOracleAttestedLog = (
       spec.epoch ?? 1n,
       spec.oracleDataHash ?? EMPTY_ORACLE_DATA_HASH,
       spec.signatureId ?? hash(),
-      [[r.x, r.y], spec.z ?? faker.number.bigInt()],
+      [[r.x, r.y], spec.z ?? 3n],
     ],
     meta,
     CONSENSUS,

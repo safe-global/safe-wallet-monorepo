@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { faker } from '@faker-js/faker'
 import {
   CheckStatus,
   type PublicCheckStatus,
@@ -19,8 +18,6 @@ import {
   rejectedSnapshot,
   timedOutDisputeSnapshot,
 } from './storyExamples'
-
-faker.seed(456)
 
 const OWNER = '0x1234567890123456789012345678901234567890'
 
