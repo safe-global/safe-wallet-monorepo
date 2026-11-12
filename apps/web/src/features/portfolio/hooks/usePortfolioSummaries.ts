@@ -10,8 +10,6 @@ import { selectCurrency, selectTokenList, type TOKEN_LISTS } from '@/store/setti
 import { makeSafeOverviewTag, makeSafeTag } from '@/store/api/gateway'
 import { isTrustedTokenList } from '@/utils/tokenList'
 
-export const PORTFOLIO_SUMMARIES_POLLING_INTERVAL = 60_000
-
 type SafeRef = { chainId: string; address: string }
 
 const toSortedSafeIds = (safes: SafeRef[]): string[] =>
@@ -54,14 +52,12 @@ const usePortfolioSummaries = (safes: SafeRef[]) => {
     [safes, enabledChains, tokenList],
   )
 
-  const queryOptions = { pollingInterval: PORTFOLIO_SUMMARIES_POLLING_INTERVAL, skipPollingIfUnfocused: true }
+  // Not polled: CGW caches the snapshot briefly, so each poll would be a paid Zerion call (see useRefetchBalances)
   const trustedQuery = usePortfolioGetSummariesForManyQuery(
     requestedSafes.trusted.length > 0 ? { safes: requestedSafes.trusted, currency, trusted: true } : skipToken,
-    queryOptions,
   )
   const untrustedQuery = usePortfolioGetSummariesForManyQuery(
     requestedSafes.untrusted.length > 0 ? { safes: requestedSafes.untrusted, currency, trusted: false } : skipToken,
-    queryOptions,
   )
 
   const summariesByTag = useMemo(

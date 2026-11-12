@@ -1,11 +1,16 @@
 import { useCallback } from 'react'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useAppSelector } from '@/store'
+import { useAppDispatch, useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { usePositionsGetPositionsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import { useBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { usePortfolioGetPortfolioV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
+import {
+  makePortfolioSummaryTag,
+  PORTFOLIO_SUMMARY_TAG,
+  portfolioSummariesRtkApi,
+} from '@safe-global/store/gateway/portfolioSummaries'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import { useTokenListSetting } from '@/hooks/loadables/useLoadBalances'
@@ -14,7 +19,8 @@ import { useTokenListSetting } from '@/hooks/loadables/useLoadBalances'
  * Shared hook for refetching positions and balances data.
  * Automatically selects the appropriate endpoint (portfolio or positions/balances) based on feature flags.
  *
- * Used by both the portfolio and positions features.
+ * Used by both the portfolio and positions features. With PORTFOLIO_SUMMARIES, a refetch also refetches every
+ * portfolio summary of the Safe, so the totals follow the balances it refreshed.
  *
  * @returns Object containing:
  *   - `refetch`: Function to refetch all data (positions + balances)
@@ -33,6 +39,8 @@ export const useRefetchBalances = () => {
   const isPositionsEnabled = useHasFeature(FEATURES.POSITIONS) ?? false
   const isPortfolioEndpointEnabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) ?? false
   const shouldUsePortfolioEndpoint = isPositionsEnabled && isPortfolioEndpointEnabled
+  const hasPortfolioSummaries = useHasFeature(FEATURES.PORTFOLIO_SUMMARIES) ?? false
+  const dispatch = useAppDispatch()
 
   const {
     refetch: portfolioRefetch,
@@ -69,12 +77,25 @@ export const useRefetchBalances = () => {
     },
   )
 
+  // Runs after the balances refetch, so the summaries read the snapshot it just cached rather than asking Zerion again
+  const refetchSummaries = useCallback(() => {
+    if (!hasPortfolioSummaries || !safeAddress) return
+    dispatch(
+      portfolioSummariesRtkApi.util.invalidateTags([
+        { type: PORTFOLIO_SUMMARY_TAG, id: makePortfolioSummaryTag(safe.chainId, safeAddress) },
+      ]),
+    )
+  }, [hasPortfolioSummaries, safeAddress, safe.chainId, dispatch])
+
   const refetch = useCallback(async () => {
     if (shouldUsePortfolioEndpoint) {
-      return portfolioRefetch()
+      const result = await portfolioRefetch()
+      refetchSummaries()
+      return result
     }
     await Promise.all([positionsRefetch(), txServiceBalancesRefetch()])
-  }, [shouldUsePortfolioEndpoint, portfolioRefetch, positionsRefetch, txServiceBalancesRefetch])
+    refetchSummaries()
+  }, [shouldUsePortfolioEndpoint, portfolioRefetch, positionsRefetch, txServiceBalancesRefetch, refetchSummaries])
 
   const refetchPositions = useCallback(async () => {
     if (shouldUsePortfolioEndpoint) {

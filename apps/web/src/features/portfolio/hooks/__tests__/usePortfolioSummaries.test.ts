@@ -7,7 +7,7 @@ import type { PortfolioSummary } from '@safe-global/store/gateway/AUTO_GENERATED
 import { chainBuilder } from '@/tests/builders/chains'
 import useChains from '@/hooks/useChains'
 import { initialState as initialSettings, TOKEN_LISTS } from '@/store/settingsSlice'
-import usePortfolioSummaries, { PORTFOLIO_SUMMARIES_POLLING_INTERVAL } from '../usePortfolioSummaries'
+import usePortfolioSummaries from '../usePortfolioSummaries'
 
 jest.mock('@safe-global/store/gateway/portfolioSummaries', () => ({
   usePortfolioGetSummariesForManyQuery: jest.fn(),
@@ -23,7 +23,6 @@ const mockUseChains = useChains as jest.Mock
 const SUMMARIES_CHAIN = '1'
 const UNTRUSTED_SUMMARIES_CHAIN = '100'
 const OTHER_CHAIN = '137'
-const POLLING = { pollingInterval: PORTFOLIO_SUMMARIES_POLLING_INTERVAL, skipPollingIfUnfocused: true }
 
 const summary = (chainId: string, address: string): PortfolioSummary => ({
   chainId,
@@ -69,15 +68,12 @@ describe('usePortfolioSummaries', () => {
       ]),
     )
 
-    expect(mockQuery).toHaveBeenCalledWith(
-      {
-        safes: [`${SUMMARIES_CHAIN}:${otherSafe}`, `${SUMMARIES_CHAIN}:${safe}`].sort(),
-        currency: 'usd',
-        trusted: true,
-      },
-      POLLING,
-    )
-    expect(mockQuery).toHaveBeenCalledWith(skipToken, POLLING)
+    expect(mockQuery).toHaveBeenCalledWith({
+      safes: [`${SUMMARIES_CHAIN}:${otherSafe}`, `${SUMMARIES_CHAIN}:${safe}`].sort(),
+      currency: 'usd',
+      trusted: true,
+    })
+    expect(mockQuery).toHaveBeenCalledWith(skipToken)
   })
 
   it('requests trusted=false when the user shows all tokens', () => {
@@ -88,11 +84,8 @@ describe('usePortfolioSummaries', () => {
       withTokenList(TOKEN_LISTS.ALL),
     )
 
-    expect(mockQuery).toHaveBeenCalledWith(
-      { safes: [`${SUMMARIES_CHAIN}:${safe}`], currency: 'usd', trusted: false },
-      POLLING,
-    )
-    expect(mockQuery).not.toHaveBeenCalledWith(expect.objectContaining({ trusted: true }), POLLING)
+    expect(mockQuery).toHaveBeenCalledWith({ safes: [`${SUMMARIES_CHAIN}:${safe}`], currency: 'usd', trusted: false })
+    expect(mockQuery).not.toHaveBeenCalledWith(expect.objectContaining({ trusted: true }))
   })
 
   it('requests each chain with its own trusted value', () => {
@@ -105,20 +98,18 @@ describe('usePortfolioSummaries', () => {
       ]),
     )
 
-    expect(mockQuery).toHaveBeenCalledWith(
-      { safes: [`${SUMMARIES_CHAIN}:${safe}`], currency: 'usd', trusted: true },
-      POLLING,
-    )
-    expect(mockQuery).toHaveBeenCalledWith(
-      { safes: [`${UNTRUSTED_SUMMARIES_CHAIN}:${safe}`], currency: 'usd', trusted: false },
-      POLLING,
-    )
+    expect(mockQuery).toHaveBeenCalledWith({ safes: [`${SUMMARIES_CHAIN}:${safe}`], currency: 'usd', trusted: true })
+    expect(mockQuery).toHaveBeenCalledWith({
+      safes: [`${UNTRUSTED_SUMMARIES_CHAIN}:${safe}`],
+      currency: 'usd',
+      trusted: false,
+    })
   })
 
   it('skips the request when no chain has the flag', () => {
     renderHook(() => usePortfolioSummaries([{ chainId: OTHER_CHAIN, address: fakerChecksummedAddress() }]))
 
-    expect(mockQuery).not.toHaveBeenCalledWith(expect.objectContaining({ safes: expect.anything() }), POLLING)
+    expect(mockQuery).not.toHaveBeenCalledWith(expect.objectContaining({ safes: expect.anything() }))
   })
 
   it('reports which chains have the flag', () => {
