@@ -1,6 +1,6 @@
 # Safe UI docs site
 
-The docs site and shadcn registry for [`@safe-global/ui`](../../packages/ui). It is a plain static site: `out/` deploys to any static host. Contributor rules: [AGENTS.md](AGENTS.md).
+The docs site and shadcn registry for [`@safe-global/ui`](../../packages/ui): a landing page, the docs (`/docs/`), a filterable component index (`/components/`), a type scale playground (`/typeset/`) and a project generator (`/create/`). It is a plain static site: `out/` deploys to any static host. Contributor rules: [AGENTS.md](AGENTS.md).
 
 ## Run it
 
@@ -39,4 +39,4 @@ The registry is served next to the site at `<origin><base path>/r/<name>.json`. 
 }
 ```
 
-and runs `npx shadcn@latest add @safe/theme @safe/button`. The Installation page shows the URL of whichever host serves it; set `NEXT_PUBLIC_REGISTRY_URL` to show a fixed one.
+and runs `npx shadcn@latest add @safe/theme @safe/button`. The Installation and Create pages show the URL of whichever host serves it; set `NEXT_PUBLIC_REGISTRY_URL` to show a fixed one.

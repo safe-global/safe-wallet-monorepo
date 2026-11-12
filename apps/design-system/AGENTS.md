@@ -10,11 +10,25 @@
 - **Never edit a story to fix the docs.** The stories are the wallet's visual baseline. Fix previews in `src/lib/preview-config.ts` or the docs components.
 - Previews load only `preview.css` (Tailwind + `@safe-global/ui/styles.css`), so they show exactly what a consumer gets. The docs chrome adds the Fumadocs CSS.
 
+## Site structure
+
+| Route                           | Source                                                                                  |
+| ------------------------------- | --------------------------------------------------------------------------------------- |
+| `/`                             | `src/app/(site)/page.tsx`: hero, showcase built inline with `@safe-global/ui`, features |
+| `/docs/…`                       | `content/docs/docs/**` in the Docs sidebar (`/docs/installation/` is Get started)       |
+| `/components/`, `/components/…` | `content/docs/components/**`: the filterable index and one page per component           |
+| `/typeset/`, `/create/`         | `src/app/(site)/{typeset,create}/page.tsx` with `src/components/{typeset,create}/*`     |
+| `/preview/<component>/<story>/` | `src/app/(preview)/**`: bare story pages that only load the consumer CSS                |
+
+- Every page under `(site)` gets the sticky header from `src/components/site/site-header.tsx`; the nav items live in `src/lib/site.ts`.
+- One Fumadocs source holds both content folders; `src/components/section-layout.tsx` gives each section its own sidebar.
+- Safe green is `--color-static-text-brand`. Wrap a `Button` in `<span className="brand">` to make it green, never restyle it with `className`. Demo content (addresses, amounts) lives in this app only, never in `packages/ui`.
+
 ## Generated vs hand-written
 
 | Path                                                                           | What                                                                                          |
 | ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| `content/docs/**/*.mdx`, `meta.json`                                           | Hand-written pages. Component pages are thin MDX over generated data                          |
+| `content/docs/{docs,components}/**/*.mdx`, `meta.json`                         | Hand-written pages. Component pages are thin MDX over generated data                          |
 | `src/components/docs/*`                                                        | Hand-written MDX components (`ComponentPreview`, `ComponentProps`, `TokenTable`, …)           |
 | `src/scripts/*.ts`                                                             | Generators and their `node --test` tests                                                      |
 | `registry.json`                                                                | **Generated and committed** by `src/scripts/registry.ts`; `registry.test.ts` fails when stale |
@@ -27,7 +41,7 @@
 
 - **A new component:** add it to `packages/ui` with its export key and a story, then run `yarn workspace @safe-global/design-system scaffold:pages`. Fill in the frontmatter `description`, the usage notes and the accessibility notes (facts from the Base UI or upstream page; link it when unsure). Keep the seven sections: preview, Installation, Usage, Examples, Props, Accessibility, Do / Don't. Run `registry:build` and commit `registry.json`.
 - **A new story** needs no docs change: the first story is the top preview, the others are Examples. Tag a story `docs-hidden` to keep it out.
-- **Other pages:** add the MDX file and list it in the folder's `meta.json`.
+- **Other docs pages:** add the MDX file under `content/docs/docs/` and list it in that folder's `meta.json`. A new top-level route also needs an entry in `NAV_ITEMS` or `SITE_PAGES` (`src/lib/site.ts`) and in the crawl.
 - In MDX, escape braces in prose (`Safe\{Wallet\}`).
 
 ## Env variables
