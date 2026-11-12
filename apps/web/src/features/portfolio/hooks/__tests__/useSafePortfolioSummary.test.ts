@@ -1,5 +1,6 @@
 import { renderHook, fakerChecksummedAddress } from '@/tests/test-utils'
 import { portfolioSummaryBuilder } from '@/tests/builders/portfolioSummary'
+import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import usePortfolioSummaries from '../usePortfolioSummaries'
 import useSafePortfolioSummary from '../useSafePortfolioSummary'
@@ -18,9 +19,14 @@ const SUMMARY = portfolioSummaryBuilder().with({ chainId: '1', address: SAFE }).
 
 const mockSafe = (deployed: boolean) =>
   jest.mocked(useSafeInfo).mockReturnValue({
-    safe: { chainId: '1', deployed },
+    safe: extendedSafeInfoBuilder()
+      .with({ chainId: '1', deployed, address: { value: SAFE } })
+      .build(),
     safeAddress: SAFE,
-  } as unknown as ReturnType<typeof useSafeInfo>)
+    safeLoaded: true,
+    safeLoading: false,
+    safeError: undefined,
+  })
 
 const mockSummaries = (enabled: boolean, isLoading = false) =>
   jest.mocked(usePortfolioSummaries).mockReturnValue({
