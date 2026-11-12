@@ -8,7 +8,7 @@ import {
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import type { HistoryFeesData } from '@safe-global/views/features/fee-payment/types'
+import type { FeePaidFrom, HistoryFeesData } from '@safe-global/views/features/fee-payment/types'
 import { FeeBreakdownRow } from '../shared/FeeBreakdownRow'
 import { GAS_FEE_TOOLTIP } from '../shared/tooltips'
 import css from './styles.module.css'
@@ -25,6 +25,12 @@ const TX_PALETTE_BY_TYPE: Record<string, AccordionPalette> = {
 }
 const DEFAULT_PALETTE: AccordionPalette = { border: 'var(--color-info-dark)', bg: 'var(--color-info-background)' }
 
+const PAID_FROM_LABEL: Record<FeePaidFrom, string> = {
+  safe: 'Paid from Safe account',
+  signer: 'Paid from signer wallet',
+  sponsored: 'Sponsored',
+}
+
 const HistoryFeesAccordion = ({
   data,
   txInfo,
@@ -33,6 +39,7 @@ const HistoryFeesAccordion = ({
   txInfo?: TransactionDetails['txInfo']
 }): ReactElement => {
   const palette = (txInfo?.type && TX_PALETTE_BY_TYPE[txInfo.type]) || DEFAULT_PALETTE
+  const isSponsored = data.paidFrom === 'sponsored'
 
   const paletteVars = {
     '--fees-accordion-border': palette.border,
@@ -60,20 +67,28 @@ const HistoryFeesAccordion = ({
                 <Typography variant="paragraph-small-bold">Fees</Typography>
               </div>
               <Typography variant="paragraph-mini" color="muted">
-                {data.paidFrom === 'safe' ? 'Paid from the Safe' : 'Paid from the signer'}
+                {PAID_FROM_LABEL[data.paidFrom]}
               </Typography>
             </div>
 
-            <div className={css.summaryRight}>
-              <Typography variant="paragraph-small-bold">
-                {data.totalFee.amount} {data.totalFee.currency}
-              </Typography>
-              {data.totalFee.fiatAmount && (
-                <Typography variant="paragraph-mini" color="muted">
-                  {data.totalFee.fiatAmount}
+            {isSponsored ? (
+              <div className={css.summaryRight}>
+                <Typography variant="paragraph-small" as="del" color="muted">
+                  {data.totalFee.amount} {data.totalFee.currency}
                 </Typography>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div className={css.summaryRight}>
+                <Typography variant="paragraph-small-bold">
+                  {data.totalFee.amount} {data.totalFee.currency}
+                </Typography>
+                {data.totalFee.fiatAmount && (
+                  <Typography variant="paragraph-mini" color="muted">
+                    {data.totalFee.fiatAmount}
+                  </Typography>
+                )}
+              </div>
+            )}
           </div>
         </AccordionTrigger>
 
