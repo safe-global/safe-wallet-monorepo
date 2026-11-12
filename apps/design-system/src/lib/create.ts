@@ -6,6 +6,9 @@ export const FRAMEWORKS: Array<{ value: Framework; label: string; description: s
   { value: 'next', label: 'Next.js', description: 'App Router with Tailwind CSS' },
 ]
 
+export const NPM_NOT_PUBLISHED =
+  'The package is not published to npm yet; inside the monorepo it is the workspace @safe-global/ui.'
+
 export const INSTALL_PATHS: Array<{ value: InstallPath; label: string; description: string }> = [
   { value: 'npm', label: 'npm package', description: 'Import from @safe-global/ui and upgrade with the package' },
   { value: 'registry', label: 'shadcn registry', description: 'Copy the source into your app and own it' },
@@ -97,7 +100,7 @@ const viteConfig = (withAlias: boolean) =>
     '',
     'export default defineConfig({',
     '  plugins: [react(), tailwindcss()],',
-    ...(withAlias ? ["  resolve: { alias: { '@': path.resolve(__dirname, './src') } },"] : []),
+    ...(withAlias ? ["  resolve: { alias: { '@': path.resolve(import.meta.dirname, './src') } },"] : []),
     '})',
   ].join('\n')
 
@@ -181,11 +184,14 @@ export const buildCreateOutput = ({
 
   if (framework === 'vite') {
     blocks.push({
-      id: 'tsconfig',
-      title: 'tsconfig.app.json (compilerOptions)',
-      lang: 'json',
-      code: JSON.stringify({ compilerOptions: { paths: { '@/*': ['./src/*'] } } }, null, 2),
+      id: 'css',
+      title: `${cssFile(framework)} (replace its contents)`,
+      lang: 'css',
+      code: "@import 'tailwindcss';",
     })
+    const paths = JSON.stringify({ compilerOptions: { paths: { '@/*': ['./src/*'] } } }, null, 2)
+    blocks.push({ id: 'tsconfig', title: 'tsconfig.json (add compilerOptions)', lang: 'json', code: paths })
+    blocks.push({ id: 'tsconfig-app', title: 'tsconfig.app.json (add to compilerOptions)', lang: 'json', code: paths })
   }
   blocks.push({
     id: 'components-json',
