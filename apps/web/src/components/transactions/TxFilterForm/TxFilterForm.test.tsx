@@ -235,10 +235,17 @@ describe('TxFilterForm Component Tests', () => {
     expect(onClose).toHaveBeenCalled()
   })
 
-  describe('transfers only toggle', () => {
+  describe('match recipient by', () => {
+    const RECIPIENT = '0x23cbCbbC748c961E570Cfc05Ff65554ECB8955E9'
     const selectOutgoing = () => fireEvent.click(screen.getByRole('radio', { name: 'Outgoing' }))
-    const transfersSwitch = () => screen.getByRole('switch', { name: 'Transfers only' })
+    const paidOption = () => screen.getByRole('radio', { name: 'Who was paid' })
+    const calledOption = () => screen.getByRole('radio', { name: 'Address called' })
     const lastPushedQuery = () => mockRouter.push.mock.calls.at(-1)[0].query
+    const typeRecipient = async () => {
+      await act(async () => {
+        fireEvent.change(screen.getByLabelText('Recipient'), { target: { value: RECIPIENT } })
+      })
+    }
 
     beforeEach(() => {
       mockRouter.push.mockClear()
@@ -247,83 +254,90 @@ describe('TxFilterForm Component Tests', () => {
     it('is not offered for the incoming filter', () => {
       renderComponent()
 
-      expect(screen.queryByRole('switch', { name: 'Transfers only' })).not.toBeInTheDocument()
+      expect(screen.queryByRole('radio', { name: 'Who was paid' })).not.toBeInTheDocument()
     })
 
-    it('is off when the outgoing filter is selected', () => {
+    it('is not offered on outgoing until a recipient is entered', () => {
       renderComponent()
 
       selectOutgoing()
 
-      expect(transfersSwitch()).not.toBeChecked()
+      expect(screen.queryByRole('radio', { name: 'Who was paid' })).not.toBeInTheDocument()
       expect(screen.getByTestId('amount-input')).toBeInTheDocument()
       expect(screen.getByTestId('nonce-input')).toBeInTheDocument()
       expect(screen.queryByLabelText('Token address')).not.toBeInTheDocument()
     })
 
-    it('replaces the amount and nonce with the token address when turned on', async () => {
+    it('matches who was paid once a recipient is entered', async () => {
       renderComponent()
       selectOutgoing()
 
-      await act(async () => {
-        fireEvent.click(transfersSwitch())
-      })
+      await typeRecipient()
 
+      expect(paidOption()).toBeChecked()
       expect(screen.queryByTestId('amount-input')).not.toBeInTheDocument()
       expect(screen.queryByTestId('nonce-input')).not.toBeInTheDocument()
       expect(screen.getByLabelText('Token address')).toBeInTheDocument()
-      expect(screen.getByLabelText('Recipient')).toBeInTheDocument()
     })
 
-    it('puts the transfers flag in the URL when applied turned on', async () => {
+    it('keeps the address called search when a nonce was entered first', async () => {
       renderComponent()
       selectOutgoing()
       await act(async () => {
-        fireEvent.click(transfersSwitch())
+        fireEvent.change(screen.getByTestId('nonce-input'), { target: { value: '64' } })
       })
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('apply-btn'))
-      })
+      await typeRecipient()
 
-      expect(lastPushedQuery()).toMatchObject({ type: 'Outgoing', transfers: 'true' })
+      expect(calledOption()).toBeChecked()
+      expect(screen.getByTestId('nonce-input')).toHaveValue('64')
     })
 
-    it('leaves the transfers flag out of the URL when applied turned off', async () => {
+    it('puts the transfers flag in the URL when applied with who was paid', async () => {
       renderComponent()
+      selectOutgoing()
+      await typeRecipient()
+
       await act(async () => {
-        selectOutgoing()
+        fireEvent.click(screen.getByTestId('apply-btn'))
+      })
+
+      expect(lastPushedQuery()).toMatchObject({ type: 'Outgoing', to: RECIPIENT, transfers: 'true' })
+    })
+
+    it('leaves the transfers flag out of the URL when applied with address called', async () => {
+      renderComponent()
+      selectOutgoing()
+      await typeRecipient()
+      await act(async () => {
+        fireEvent.click(calledOption())
       })
 
       await act(async () => {
         fireEvent.click(screen.getByTestId('apply-btn'))
       })
 
-      expect(lastPushedQuery()).toMatchObject({ type: 'Outgoing' })
+      expect(lastPushedQuery()).toMatchObject({ type: 'Outgoing', to: RECIPIENT })
       expect(lastPushedQuery()).not.toHaveProperty('transfers')
     })
 
-    it('is turned off by clearing the filter', async () => {
+    it('starts on who was paid when the URL has the transfers flag', () => {
+      ;(useRouter as jest.Mock).mockReturnValue({
+        ...mockRouter,
+        query: { type: 'Outgoing', to: RECIPIENT, transfers: 'true' },
+      })
+
       renderComponent()
-      selectOutgoing()
-      await act(async () => {
-        fireEvent.click(transfersSwitch())
-      })
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('clear-btn'))
-      })
-
-      expect(transfersSwitch()).not.toBeChecked()
+      expect(paidOption()).toBeChecked()
     })
 
-    it('starts turned on when the URL has the transfers flag', () => {
-      ;(useRouter as jest.Mock).mockReturnValue({ ...mockRouter, query: { type: 'Outgoing', transfers: 'true' } })
+    it('starts on address called for a link without the transfers flag', () => {
+      ;(useRouter as jest.Mock).mockReturnValue({ ...mockRouter, query: { type: 'Outgoing', to: RECIPIENT } })
 
       renderComponent()
 
-      expect(transfersSwitch()).toBeChecked()
-      expect(screen.getByLabelText('Token address')).toBeInTheDocument()
+      expect(calledOption()).toBeChecked()
     })
   })
 })

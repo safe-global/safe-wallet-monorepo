@@ -42,9 +42,7 @@ export const Incoming: Story = storyWithFilter({})
 
 export const Outgoing: Story = storyWithFilter({ type: 'Outgoing' })
 
-export const OutgoingTransfersOnly: Story = storyWithFilter({ type: 'Outgoing', transfers: 'true' })
-
-export const OutgoingTransfersOnlyFilled: Story = storyWithFilter({
+export const OutgoingWhoWasPaid: Story = storyWithFilter({
   type: 'Outgoing',
   transfers: 'true',
   execution_date__gte: '2026-01-01T00:00:00.000Z',
@@ -53,9 +51,15 @@ export const OutgoingTransfersOnlyFilled: Story = storyWithFilter({
   token_address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
 })
 
+export const OutgoingAddressCalled: Story = storyWithFilter({
+  type: 'Outgoing',
+  to: '0x23cbCbbC748c961E570Cfc05Ff65554ECB8955E9',
+  nonce: '64',
+})
+
 /** The recipient suggestions from the address book, opened with the chevron. */
-export const OutgoingTransfersOnlyRecipientList: Story = {
-  ...storyWithFilter({ type: 'Outgoing', transfers: 'true' }),
+export const OutgoingRecipientList: Story = {
+  ...storyWithFilter({ type: 'Outgoing' }),
   play: async ({ canvasElement }) => {
     const { userEvent, within } = await import('storybook/test')
     await userEvent.click(await within(canvasElement).findByTestId('address-book-toggle'))

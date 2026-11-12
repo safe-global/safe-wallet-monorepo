@@ -147,11 +147,11 @@ describe('PaginatedTxns with the transfers only filter', () => {
   it('counts the transfers of every loaded page once the last page is in', async () => {
     serveTransfers(transfers.slice(0, 2), transfers.slice(2, 5))
     renderTransfersOnly()
-    await screen.findByText('> 2 outgoing transfers found')
+    await screen.findByText('> 2 outgoing payments found')
 
     scrollToTheEnd()
 
-    expect(await screen.findByText('5 outgoing transfers found')).toBeInTheDocument()
+    expect(await screen.findByText('5 outgoing payments found')).toBeInTheDocument()
   })
 
   it('shows no count while an empty page still has a next page', async () => {
@@ -170,7 +170,7 @@ describe('PaginatedTxns with the transfers only filter', () => {
 
     scrollToTheEnd()
 
-    expect(await screen.findByText('3 outgoing transfers found')).toBeInTheDocument()
+    expect(await screen.findByText('3 outgoing payments found')).toBeInTheDocument()
     expect(screen.getAllByTestId('transaction-item')).toHaveLength(3)
   })
 
@@ -181,7 +181,7 @@ describe('PaginatedTxns with the transfers only filter', () => {
 
     scrollToTheEnd()
 
-    expect(await screen.findByText('0 outgoing transfers found')).toBeInTheDocument()
+    expect(await screen.findByText('0 outgoing payments found')).toBeInTheDocument()
   })
 })
 
@@ -215,7 +215,7 @@ describe('PaginatedTxns hint to show transfers', () => {
     server.use(http.get(MULTISIG_TXS_URL, () => HttpResponse.json({ next: null, previous: null, results: [] })))
     const push = renderOutgoing({ to: RECIPIENT, value: '699', nonce: '64' })
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Show transfers' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Show payments' }))
 
     const { query } = (push.mock.calls[0] as unknown as [{ query: Record<string, string> }])[0]
     expect(query).toMatchObject({ type: 'Outgoing', to: RECIPIENT, transfers: 'true' })
@@ -229,7 +229,7 @@ describe('PaginatedTxns hint to show transfers', () => {
 
     await screen.findAllByTestId('transaction-item')
 
-    expect(screen.queryByRole('button', { name: 'Show transfers' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Show payments' })).not.toBeInTheDocument()
   })
 
   it('shows no hint for an empty search without a recipient', async () => {
@@ -238,6 +238,6 @@ describe('PaginatedTxns hint to show transfers', () => {
 
     await screen.findByText('0 outgoing transactions found')
 
-    expect(screen.queryByRole('button', { name: 'Show transfers' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Show payments' })).not.toBeInTheDocument()
   })
 })

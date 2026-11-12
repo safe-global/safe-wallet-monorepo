@@ -3,11 +3,17 @@ import { Separator } from '@safe-global/views/components/ui/separator'
 import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
 import { Label } from '@safe-global/views/components/ui/label'
 import { cn } from '@safe-global/views/utils/cn'
-import { Switch } from '@safe-global/views/components/ui/switch'
-import { Field, FieldContent, FieldDescription, FieldLabel } from '@safe-global/views/components/ui/field'
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from '@safe-global/views/components/ui/field'
 import { isBefore, isAfter, startOfDay } from 'date-fns'
 import { Controller, FormProvider, useForm, useFormState, type DefaultValues } from 'react-hook-form'
-import { useMemo, type ReactElement } from 'react'
+import { useEffect, useMemo, useRef, type ReactElement } from 'react'
 
 import AddressBookInput from '@/components/common/AddressBookInput'
 import DatePickerInput from '@/components/common/DatePickerInput'
@@ -57,7 +63,19 @@ const defaultValues: DefaultValues<TxFilterFormState> = {
   [TxFilterFormFieldNames.TRANSFERS]: false,
 }
 
-const TRANSFERS_SWITCH_ID = 'filter-transfers-only'
+enum RecipientMatch {
+  PAID = 'paid',
+  CALLED = 'called',
+}
+
+const RECIPIENT_MATCH_OPTIONS = [
+  { value: RecipientMatch.PAID, label: 'Who was paid', description: 'ETH and token payments, including batches' },
+  {
+    value: RecipientMatch.CALLED,
+    label: 'Address called',
+    description: 'Transactions sent to this address, e.g. a contract',
+  },
+]
 
 const getInitialFormValues = (filter: TxFilter | null): DefaultValues<TxFilterFormState> => {
   return filter
@@ -78,14 +96,25 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
     defaultValues: getInitialFormValues(filter),
   })
 
-  const { control, watch, handleSubmit, reset, getValues } = formMethods
+  const { control, watch, handleSubmit, reset, getValues, setValue } = formMethods
 
   const filterType = watch(TxFilterFormFieldNames.FILTER_TYPE)
 
   const isIncomingFilter = filterType === TxFilterType.INCOMING
   const isMultisigFilter = filterType === TxFilterType.MULTISIG
   const isModuleFilter = filterType === TxFilterType.MODULE
-  const isTransfersOnly = isMultisigFilter && watch(TxFilterFormFieldNames.TRANSFERS)
+  const recipient = watch(TxFilterFormFieldNames.RECIPIENT)
+  const hasRecipient = isMultisigFilter && !!recipient
+  const isTransfersOnly = hasRecipient && watch(TxFilterFormFieldNames.TRANSFERS)
+
+  // Amount and nonce only work with the "Address called" search, so keep it when either is filled
+  const hadRecipientRef = useRef(!!recipient)
+  useEffect(() => {
+    if (hadRecipientRef.current === !!recipient) return
+    hadRecipientRef.current = !!recipient
+    const hasAmountOrNonce = !!getValues(TxFilterFormFieldNames.AMOUNT) || !!getValues(TxFilterFormFieldNames.NONCE)
+    setValue(TxFilterFormFieldNames.TRANSFERS, !!recipient && !hasAmountOrNonce, { shouldDirty: true })
+  }, [recipient, getValues, setValue])
 
   const { dirtyFields, isValid } = useFormState({ control })
 
@@ -156,29 +185,6 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
               <div className="flex w-full flex-col">
                 <Label className={css.filterSectionTitle}>Parameters</Label>
                 <div className="flex flex-col gap-4">
-                  {isMultisigFilter && (
-                    <Controller
-                      name={TxFilterFormFieldNames.TRANSFERS}
-                      control={control}
-                      render={({ field }) => (
-                        <Field orientation="horizontal">
-                          <Switch
-                            id={TRANSFERS_SWITCH_ID}
-                            aria-label="Transfers only"
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                          <FieldContent>
-                            <FieldLabel htmlFor={TRANSFERS_SWITCH_ID}>Transfers only</FieldLabel>
-                            <FieldDescription>
-                              Find payments by who received them, including those sent in a batch
-                            </FieldDescription>
-                          </FieldContent>
-                        </Field>
-                      )}
-                    />
-                  )}
-
                   {!isModuleFilter && (
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div className={css.paramField} data-testid="start-date">
@@ -219,6 +225,32 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                         fullWidth
                       />
                     </div>
+                  )}
+
+                  {hasRecipient && (
+                    <Controller
+                      name={TxFilterFormFieldNames.TRANSFERS}
+                      control={control}
+                      render={({ field }) => (
+                        <FieldSet>
+                          <FieldLegend variant="label">Match recipient by</FieldLegend>
+                          <RadioGroup
+                            value={field.value ? RecipientMatch.PAID : RecipientMatch.CALLED}
+                            onValueChange={(value) => field.onChange(value === RecipientMatch.PAID)}
+                          >
+                            {RECIPIENT_MATCH_OPTIONS.map(({ value, label, description }) => (
+                              <Field key={value} orientation="horizontal">
+                                <RadioGroupItem value={value} id={`recipient-match-${value}`} aria-label={label} />
+                                <FieldContent>
+                                  <FieldLabel htmlFor={`recipient-match-${value}`}>{label}</FieldLabel>
+                                  <FieldDescription>{description}</FieldDescription>
+                                </FieldContent>
+                              </Field>
+                            ))}
+                          </RadioGroup>
+                        </FieldSet>
+                      )}
+                    />
                   )}
 
                   {(isIncomingFilter || isTransfersOnly) && (

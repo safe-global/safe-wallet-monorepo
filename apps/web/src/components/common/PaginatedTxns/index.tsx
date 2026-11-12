@@ -35,7 +35,7 @@ const getTransfersResultCount = (pages: Array<QueuedItemPage | undefined>): stri
 
   if (count === 0 && hasMore) return undefined
 
-  return `${hasMore ? '> ' : ''}${count} outgoing ${count === 1 ? 'transfer' : 'transfers'} found`
+  return `${hasMore ? '> ' : ''}${count} outgoing ${count === 1 ? 'payment' : 'payments'} found`
 }
 
 const isEmptyRecipientSearch = (filter: TxFilter, page: TransactionItemPage | QueuedItemPage): boolean => {
