@@ -2,12 +2,12 @@ import assert from 'node:assert/strict'
 import { readdirSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, it } from 'node:test'
-import { componentNames } from './paths.ts'
+import { componentNames, contentDir } from './paths.ts'
 import { componentsContentDir, SECTIONS } from './scaffold-pages.ts'
 import { generateStories } from './stories.ts'
 
 const pages = readdirSync(componentsContentDir)
-  .filter((file) => file.endsWith('.mdx'))
+  .filter((file) => file.endsWith('.mdx') && file !== 'index.mdx')
   .map((file) => {
     const text = readFileSync(path.join(componentsContentDir, file), 'utf8')
     const frontmatter = text.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? ''
@@ -50,6 +50,12 @@ describe('component pages', () => {
         assert.ok(page.text.includes(`<${tag} component="${page.component}"`), `${page.file}: no <${tag}>`)
       }
     }
+  })
+
+  it('keeps every docs page under docs/ or components/', () => {
+    const top = readdirSync(contentDir).filter((entry) => entry !== 'meta.json')
+    assert.deepEqual(top.sort(), ['components', 'docs'])
+    assert.ok(readdirSync(componentsContentDir).includes('index.mdx'), 'components/index.mdx is the components index')
   })
 
   it('has no placeholder text left', () => {

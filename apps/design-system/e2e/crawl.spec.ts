@@ -31,7 +31,10 @@ const docsPages = walk(contentDir)
     return slug ? `${slug}/` : ''
   })
   .sort()
-const componentPages = docsPages.filter((page) => page.startsWith('components/'))
+const sitePages = ['', 'typeset/', 'create/']
+const allPages = [...sitePages, ...docsPages]
+const componentPages = docsPages.filter((page) => page.startsWith('components/') && page !== 'components/')
+const NAV = ['Home', 'Docs', 'Get started', 'Components', 'Typeset', 'Create']
 const storyIndex = JSON.parse(readFileSync(path.join(appDir, 'src/generated/story-index.json'), 'utf8')) as StoryIndex
 const previewPages = storyIndex.flatMap(({ component, stories }) =>
   stories.map(({ slug }) => `preview/${component}/${slug}/`),
@@ -48,13 +51,17 @@ const trackErrors = (page: Page) => {
   return errors
 }
 
-test.describe('docs pages', () => {
-  for (const route of docsPages) {
+test.describe('site and docs pages', () => {
+  for (const route of allPages) {
     test(`/${route}`, async ({ page, request, baseURL }) => {
       const errors = trackErrors(page)
-      const response = await page.goto(route, { waitUntil: 'networkidle' })
+      const response = await page.goto(route, { waitUntil: 'load' })
       expect(response?.status()).toBe(200)
       await expect(page.locator('h1').first()).toBeVisible()
+      const nav = page.locator('[data-site-header] nav[aria-label="Main"] a')
+      await expect(nav).toHaveText(NAV)
+      await expect(page.locator('[data-site-header] a[href$="/create/"]', { hasText: 'New project' })).toBeVisible()
+      await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => undefined)
 
       const origin = new URL(baseURL!).origin
       const hrefs = await page.$$eval('a[href]', (anchors) => anchors.map((a) => (a as HTMLAnchorElement).href))
@@ -64,7 +71,7 @@ test.describe('docs pages', () => {
         expect(linked.status(), `${route} links to ${href}`).toBe(200)
       }
 
-      if (route.startsWith('components/')) {
+      if (componentPages.includes(route)) {
         const frames = page.locator('iframe[data-story-frame]')
         const count = await frames.count()
         expect(count, 'at least one preview').toBeGreaterThan(0)
@@ -78,6 +85,12 @@ test.describe('docs pages', () => {
           )
         }
         await expect(page.locator('[data-props-table]').first()).toBeAttached()
+      }
+
+      if (route === 'components/') {
+        await expect(page.locator('[data-component-card]')).toHaveCount(componentPages.length)
+        await page.getByLabel('Filter components').fill('calendar')
+        await expect(page.locator('[data-component-card]')).toHaveCount(1)
       }
 
       await page.waitForTimeout(250)
@@ -121,7 +134,7 @@ test('serves llms.txt with every page', async ({ request }) => {
   const response = await request.get('llms.txt')
   expect(response.status()).toBe(200)
   const text = await response.text()
-  for (const route of docsPages) expect(text).toContain(`/${route})`)
+  for (const route of allPages) expect(text).toContain(`/${route})`)
 })
 
 test.describe('features', () => {
@@ -131,7 +144,7 @@ test.describe('features', () => {
     const input = page.getByRole('dialog').locator('input')
     await expect(input).toBeVisible()
     await input.fill('button')
-    await expect(page.getByRole('option', { name: /Components\s*Button$/ }).first()).toBeVisible()
+    await expect(page.getByRole('option', { name: /Components.*Button$/ }).first()).toBeVisible()
     await page.keyboard.press('Enter')
     await expect(page).toHaveURL(/components\/button\/$/)
   })
@@ -162,48 +175,85 @@ test.describe('features', () => {
     expect(copied).toContain("from '@safe-global/ui/button'")
   })
 
-  test('the mobile layout collapses the sidebar and does not scroll sideways', async ({ page }) => {
+  test('the mobile header collapses into a menu sheet and the page does not scroll sideways', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
-    await page.goto('components/button/', { waitUntil: 'networkidle' })
+    for (const route of ['', 'components/button/']) {
+      await page.goto(route, { waitUntil: 'load' })
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
+      expect(overflow, `/${route} scrolls sideways`).toBeLessThanOrEqual(0)
+    }
+    await expect(page.locator('[data-site-header] nav[aria-label="Main"]')).toBeHidden()
     await expect(page.getByRole('button', { name: 'Open Sidebar' }).first()).toBeVisible()
-    await expect(page.locator('#nd-sidebar')).toBeHidden()
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
-    expect(overflow).toBeLessThanOrEqual(0)
+    await page.getByRole('button', { name: 'Open menu' }).click()
+    const menu = page.locator('[data-mobile-menu]')
+    await expect(menu).toBeVisible()
+    await expect(menu.locator('nav[aria-label="Main"] a')).toHaveText(NAV)
+    await menu.getByRole('link', { name: 'Typeset' }).click()
+    await expect(page).toHaveURL(/typeset\/$/)
+  })
+
+  test('the Create output follows the options', async ({ page }) => {
+    await page.goto('create/', { waitUntil: 'load' })
+    const output = (id: string) => page.locator(`[data-output="${id}"]`)
+    await expect(output('add')).toContainText('npx shadcn@latest add @safe/theme @safe/button')
+    await expect(output('components-json')).toContainText('"rsc": false')
+    await page.locator('label', { hasText: 'Next.js' }).click()
+    await expect(output('components-json')).toContainText('"rsc": true')
+    await expect(output('components-json')).toContainText('src/app/globals.css')
+    await page.locator('[data-preset="Overlays"]').click()
+    await expect(output('add')).toContainText('@safe/sheet')
+    await page.locator('label', { hasText: 'npm package' }).click()
+    await expect(output('install')).toContainText('npm install @safe-global/ui')
+    await expect(output('next-config')).toContainText('transpilePackages')
+    await expect(output('usage')).toContainText("from '@safe-global/ui/sheet'")
+    await expect(output('components-json')).toHaveCount(0)
+  })
+
+  test('the Typeset sample text updates every specimen', async ({ page }) => {
+    await page.goto('typeset/', { waitUntil: 'load' })
+    const samples = page.locator('[data-sample]')
+    const count = await samples.count()
+    expect(count).toBeGreaterThan(10)
+    await page.locator('[data-typeset-input]').fill('Hello from Safe')
+    await expect(samples).toHaveText(Array(count).fill('Hello from Safe'))
+    await expect(page.locator('[data-specimen="h1"] [data-metric="size"]')).toHaveText(/\d+(\.\d+)?px/)
   })
 })
 
-const SHOTS = [
-  '',
-  'installation/',
-  'foundations/colors/',
-  'components/button/',
-  'components/dialog/',
-  'components/sidebar/',
-]
+const SHOTS = ['', 'components/', 'components/button/', 'typeset/', 'create/', 'docs/']
+
+const settle = async (page: Page) => {
+  await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => undefined)
+  for (const frame of await page.locator('iframe[data-story-frame]').all()) {
+    if (!(await frame.isVisible())) continue
+    await frame.scrollIntoViewIfNeeded()
+    await frame.contentFrame().locator('#story-root > *').first().waitFor({ state: 'attached' })
+  }
+  await page.evaluate(() => window.scrollTo(0, 0))
+  await page.waitForTimeout(800)
+}
 
 test.describe('screenshots', () => {
   for (const scheme of ['light', 'dark'] as const) {
     for (const route of SHOTS) {
       test(`${scheme} /${route}`, async ({ page }) => {
+        await page.setViewportSize({ width: 1440, height: 1000 })
         await page.emulateMedia({ colorScheme: scheme })
-        await page.goto(route, { waitUntil: 'networkidle' })
-        for (const frame of await page.locator('iframe[data-story-frame]').all()) {
-          if (!(await frame.isVisible())) continue
-          await frame.scrollIntoViewIfNeeded()
-          await frame.contentFrame().locator('#story-root > *').first().waitFor({ state: 'attached' })
-        }
-        await page.evaluate(() => window.scrollTo(0, 0))
-        await page.waitForTimeout(500)
+        await page.goto(route, { waitUntil: 'load' })
+        await settle(page)
         const name = (route.replace(/\/$/, '').replace(/\//g, '-') || 'home') + `-${scheme}`
         await page.screenshot({ path: `test-results/shots/${name}.png`, fullPage: true })
       })
     }
-    test(`${scheme} mobile /components/button/`, async ({ page }) => {
-      await page.setViewportSize({ width: 390, height: 844 })
-      await page.emulateMedia({ colorScheme: scheme })
-      await page.goto('components/button/', { waitUntil: 'networkidle' })
-      await page.waitForTimeout(500)
-      await page.screenshot({ path: `test-results/shots/components-button-mobile-${scheme}.png`, fullPage: true })
-    })
   }
+  test('dark mobile / with the menu open', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.goto('', { waitUntil: 'load' })
+    await settle(page)
+    await page.getByRole('button', { name: 'Open menu' }).click()
+    await expect(page.locator('[data-mobile-menu]')).toBeVisible()
+    await page.waitForTimeout(500)
+    await page.screenshot({ path: 'test-results/shots/home-mobile-menu-dark.png' })
+  })
 })
