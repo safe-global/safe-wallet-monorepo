@@ -1,5 +1,4 @@
 import { renderHook } from '@/tests/test-utils'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { PortfolioSummary } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import usePortfolioSummaries from '../usePortfolioSummaries'
@@ -37,17 +36,14 @@ describe('useSafePortfolioSummary', () => {
     mockSummaries(true)
   })
 
-  it('requests the current Safe on the current chain for the given flag', () => {
-    renderHook(() => useSafePortfolioSummary(FEATURES.PORTFOLIO_SUMMARIES_HOME))
+  it('requests the current Safe on the current chain', () => {
+    renderHook(() => useSafePortfolioSummary())
 
-    expect(usePortfolioSummaries).toHaveBeenCalledWith(
-      [{ chainId: '1', address: SAFE }],
-      FEATURES.PORTFOLIO_SUMMARIES_HOME,
-    )
+    expect(usePortfolioSummaries).toHaveBeenCalledWith([{ chainId: '1', address: SAFE }])
   })
 
   it('returns the summary when the chain has the flag', () => {
-    const { result } = renderHook(() => useSafePortfolioSummary(FEATURES.PORTFOLIO_SUMMARIES_HOME))
+    const { result } = renderHook(() => useSafePortfolioSummary())
 
     expect(result.current).toEqual({ isEnabled: true, summary: SUMMARY, isLoading: false })
   })
@@ -55,7 +51,7 @@ describe('useSafePortfolioSummary', () => {
   it('returns nothing when the chain has the flag off', () => {
     mockSummaries(false, true)
 
-    const { result } = renderHook(() => useSafePortfolioSummary(FEATURES.PORTFOLIO_SUMMARIES_HOME))
+    const { result } = renderHook(() => useSafePortfolioSummary())
 
     expect(result.current).toEqual({ isEnabled: false, summary: undefined, isLoading: false })
   })
@@ -63,9 +59,9 @@ describe('useSafePortfolioSummary', () => {
   it('skips counterfactual Safes', () => {
     mockSafe(false)
 
-    const { result } = renderHook(() => useSafePortfolioSummary(FEATURES.PORTFOLIO_SUMMARIES_HOME))
+    const { result } = renderHook(() => useSafePortfolioSummary())
 
-    expect(usePortfolioSummaries).toHaveBeenCalledWith([], FEATURES.PORTFOLIO_SUMMARIES_HOME)
+    expect(usePortfolioSummaries).toHaveBeenCalledWith([])
     expect(result.current.isEnabled).toBe(false)
   })
 })

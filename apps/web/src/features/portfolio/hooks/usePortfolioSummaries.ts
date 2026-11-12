@@ -2,7 +2,7 @@ import { useCallback, useMemo } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { usePortfolioGetSummariesForManyQuery } from '@safe-global/store/gateway/portfolioSummaries'
 import type { PortfolioSummary } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
-import { type FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import useChains from '@/hooks/useChains'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
@@ -13,16 +13,17 @@ export const PORTFOLIO_SUMMARIES_POLLING_INTERVAL = 60_000
 type SafeRef = { chainId: string; address: string }
 
 /**
- * Fetches CGW portfolio summaries for the Safes whose chain has `feature` enabled.
+ * Fetches CGW portfolio summaries for the Safes whose chain has PORTFOLIO_SUMMARIES enabled.
  * A Safe on a chain without the flag is not requested, so its caller keeps its current source.
  */
-const usePortfolioSummaries = (safes: SafeRef[], feature: FEATURES) => {
+const usePortfolioSummaries = (safes: SafeRef[]) => {
   const { configs } = useChains()
   const currency = useAppSelector(selectCurrency)
 
   const enabledChainIds = useMemo(
-    () => new Set(configs.filter((chain) => hasFeature(chain, feature)).map((chain) => chain.chainId)),
-    [configs, feature],
+    () =>
+      new Set(configs.filter((chain) => hasFeature(chain, FEATURES.PORTFOLIO_SUMMARIES)).map((chain) => chain.chainId)),
+    [configs],
   )
 
   const requestedSafes = useMemo(

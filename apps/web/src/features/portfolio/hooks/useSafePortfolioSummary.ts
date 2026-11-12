@@ -1,10 +1,9 @@
 import { useMemo } from 'react'
-import type { FEATURES } from '@safe-global/utils/utils/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import usePortfolioSummaries from './usePortfolioSummaries'
 
-/** The portfolio summary of the current Safe on the current chain, when `feature` is enabled there. */
-const useSafePortfolioSummary = (feature: FEATURES) => {
+/** The portfolio summary of the current Safe on the current chain, when PORTFOLIO_SUMMARIES is enabled there. */
+const useSafePortfolioSummary = () => {
   const { safe, safeAddress } = useSafeInfo()
   const { chainId, deployed } = safe
 
@@ -13,7 +12,7 @@ const useSafePortfolioSummary = (feature: FEATURES) => {
     () => (safeAddress && deployed ? [{ chainId, address: safeAddress }] : []),
     [chainId, safeAddress, deployed],
   )
-  const { isEnabled, getSummary, isLoading } = usePortfolioSummaries(safes, feature)
+  const { isEnabled, getSummary, isLoading } = usePortfolioSummaries(safes)
 
   const enabled = safes.length > 0 && isEnabled(chainId)
   const summary = enabled ? getSummary(chainId, safeAddress) : undefined

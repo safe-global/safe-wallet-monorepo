@@ -31,7 +31,7 @@ describe('useClearPortfolioOnTx', () => {
     ;(useChains as jest.Mock).mockReturnValue({
       configs: [
         chainBuilder()
-          .with({ chainId: '1', features: [FEATURES.PORTFOLIO_SUMMARIES_HOME] })
+          .with({ chainId: '1', features: [FEATURES.PORTFOLIO_SUMMARIES] })
           .build(),
         chainBuilder().with({ chainId: '137', features: [] }).build(),
       ],

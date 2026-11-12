@@ -35,7 +35,7 @@ describe('usePortfolioSummaries', () => {
     mockUseChains.mockReturnValue({
       configs: [
         chainBuilder()
-          .with({ chainId: '1', features: [FEATURES.PORTFOLIO_SUMMARIES_SELECTOR] })
+          .with({ chainId: '1', features: [FEATURES.PORTFOLIO_SUMMARIES] })
           .build(),
         chainBuilder().with({ chainId: '137', features: [] }).build(),
       ],
@@ -45,14 +45,11 @@ describe('usePortfolioSummaries', () => {
 
   it('requests only the Safes whose chain has the flag, polling every 60s while focused', () => {
     renderHook(() =>
-      usePortfolioSummaries(
-        [
-          { chainId: '137', address: SAFE },
-          { chainId: '1', address: OTHER_SAFE },
-          { chainId: '1', address: SAFE },
-        ],
-        FEATURES.PORTFOLIO_SUMMARIES_SELECTOR,
-      ),
+      usePortfolioSummaries([
+        { chainId: '137', address: SAFE },
+        { chainId: '1', address: OTHER_SAFE },
+        { chainId: '1', address: SAFE },
+      ]),
     )
 
     expect(mockQuery).toHaveBeenCalledWith(
@@ -62,13 +59,13 @@ describe('usePortfolioSummaries', () => {
   })
 
   it('skips the request when no chain has the flag', () => {
-    renderHook(() => usePortfolioSummaries([{ chainId: '137', address: SAFE }], FEATURES.PORTFOLIO_SUMMARIES_SELECTOR))
+    renderHook(() => usePortfolioSummaries([{ chainId: '137', address: SAFE }]))
 
     expect(mockQuery).toHaveBeenCalledWith(skipToken, expect.anything())
   })
 
   it('reports which chains have the flag', () => {
-    const { result } = renderHook(() => usePortfolioSummaries([], FEATURES.PORTFOLIO_SUMMARIES_SELECTOR))
+    const { result } = renderHook(() => usePortfolioSummaries([]))
 
     expect(result.current.isEnabled('1')).toBe(true)
     expect(result.current.isEnabled('137')).toBe(false)
@@ -77,9 +74,7 @@ describe('usePortfolioSummaries', () => {
   it('finds a summary by chain and address, ignoring address case', () => {
     mockQuery.mockReturnValue({ data: [summary('1', SAFE, '42')], isLoading: false })
 
-    const { result } = renderHook(() =>
-      usePortfolioSummaries([{ chainId: '1', address: SAFE }], FEATURES.PORTFOLIO_SUMMARIES_SELECTOR),
-    )
+    const { result } = renderHook(() => usePortfolioSummaries([{ chainId: '1', address: SAFE }]))
 
     expect(result.current.getSummary('1', SAFE.toUpperCase().replace('0X', '0x'))?.fiatTotal).toBe('42')
     expect(result.current.getSummary('137', SAFE)).toBeUndefined()

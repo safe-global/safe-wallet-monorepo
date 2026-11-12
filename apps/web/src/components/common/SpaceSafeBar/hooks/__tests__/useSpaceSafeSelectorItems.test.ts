@@ -75,7 +75,6 @@ import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { usePortfolioSummaries } from '@/features/portfolio'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useAppSelector } from '@/store'
 import { selectUndeployedSafes } from '@/features/counterfactual/store'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -818,16 +817,13 @@ describe('useSpaceSafeSelectorItems', () => {
     expect(polygonChain?.isActivating).toBe(false)
   })
 
-  // ── portfolio summaries (PORTFOLIO_SUMMARIES_SELECTOR) ──
-
   describe('with portfolio summaries', () => {
-    it('reads summaries for the selector flag', () => {
+    it('reads the summaries of the Safes it lists', () => {
       renderHook(() => useSpaceSafeSelectorItems())
 
-      expect(usePortfolioSummaries).toHaveBeenCalledWith(
-        [expect.objectContaining({ chainId: '1', address: '0xSafe1' })],
-        FEATURES.PORTFOLIO_SUMMARIES_SELECTOR,
-      )
+      expect(usePortfolioSummaries).toHaveBeenCalledWith([
+        expect.objectContaining({ chainId: '1', address: '0xSafe1' }),
+      ])
     })
 
     it('keeps the overview balance when the chain has the flag off', () => {

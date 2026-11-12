@@ -1,5 +1,4 @@
 import { renderHook } from '@/tests/test-utils'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { PortfolioSummary } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { useSafePortfolioSummary } from '@/features/portfolio'
@@ -32,12 +31,6 @@ describe('useHomeBalance', () => {
     jest.clearAllMocks()
     mockBalances('500', ['1'])
     mockSummary({ isEnabled: false })
-  })
-
-  it('reads the Home flag', () => {
-    renderHook(() => useHomeBalance())
-
-    expect(useSafePortfolioSummary).toHaveBeenCalledWith(FEATURES.PORTFOLIO_SUMMARIES_HOME)
   })
 
   it('keeps the balances when the flag is off', () => {

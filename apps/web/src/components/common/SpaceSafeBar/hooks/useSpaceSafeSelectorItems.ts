@@ -25,7 +25,6 @@ import type { SafeItemData, SafeItemDataChain } from '@/features/spaces'
 import type { ChainInfo } from '@/features/spaces/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import { usePortfolioSummaries } from '@/features/portfolio'
 import { useSafeBarSafes } from './useSafeBarSafes'
 import { withSpaceId } from '@/hooks/useUrlSpaceId'
@@ -202,7 +201,7 @@ export function useSpaceSafeSelectorItems() {
     refetch: refetchOverviews,
   } = useGetMultipleSafeOverviewsQuery(flatSafes.length > 0 ? { safes: flatSafes, currency, walletAddress } : skipToken)
 
-  const summaries = usePortfolioSummaries(flatSafes, FEATURES.PORTFOLIO_SUMMARIES_SELECTOR)
+  const summaries = usePortfolioSummaries(flatSafes)
 
   // A Safe missing from the summaries response falls back to its overview rather than showing $0
   const resolveBalance = useCallback<ResolveBalance>(

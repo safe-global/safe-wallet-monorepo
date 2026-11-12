@@ -6,7 +6,6 @@ import { selectCurrency } from '@/store/settingsSlice'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import type { SafeItem } from '@/hooks/safes'
 import useChains, { useChain } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import { usePortfolioSummaries } from '@/features/portfolio'
 import { aggregateBalance } from './aggregateBalance'
 import { formatCurrencyPrecise } from '@safe-global/utils/utils/formatNumber'
@@ -41,7 +40,7 @@ const AggregatedBalance = ({
     safes: safeItems,
     currency,
   })
-  const summaries = usePortfolioSummaries(safeItems, FEATURES.PORTFOLIO_SUMMARIES_SELECTOR)
+  const summaries = usePortfolioSummaries(safeItems)
   const testnetChainIds = useMemo(
     () => new Set(configs.filter((config) => config.isTestnet).map((config) => config.chainId)),
     [configs],
