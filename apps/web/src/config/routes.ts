@@ -81,6 +81,7 @@ export const AppRoutes = {
 
     // Onboarding routes
     createSpace: '/welcome/create-space',
+    plan: '/welcome/plan',
     selectSafes: '/welcome/select-safes',
     inviteMembers: '/welcome/invite-members',
     survey: '/welcome/survey',

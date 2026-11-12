@@ -18,6 +18,10 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['surveys'],
       }),
+      surveysGetActiveSurveyV1: build.query<SurveysGetActiveSurveyV1ApiResponse, SurveysGetActiveSurveyV1ApiArg>({
+        query: (queryArg) => ({ url: `/v1/surveys/${queryArg.slug}` }),
+        providesTags: ['surveys'],
+      }),
     }),
     overrideExisting: false,
   })
@@ -34,6 +38,10 @@ export type SurveysSubmitResponseV1ApiArg = {
   spaceId: string
   slug: string
   submitSurveyResponseDto: SubmitSurveyResponseDto
+}
+export type SurveysGetActiveSurveyV1ApiResponse = /** status 200  */ SurveyDto
+export type SurveysGetActiveSurveyV1ApiArg = {
+  slug: string
 }
 export type SurveyOptionDto = {
   key: string
@@ -92,5 +100,10 @@ export type SubmitSurveyResponseDto = {
     [key: string]: string[]
   }
 }
-export const { useSurveysGetStateV1Query, useLazySurveysGetStateV1Query, useSurveysSubmitResponseV1Mutation } =
-  injectedRtkApi
+export const {
+  useSurveysGetStateV1Query,
+  useLazySurveysGetStateV1Query,
+  useSurveysSubmitResponseV1Mutation,
+  useSurveysGetActiveSurveyV1Query,
+  useLazySurveysGetActiveSurveyV1Query,
+} = injectedRtkApi
