@@ -69,7 +69,7 @@ const SpendingLimitsLoaderWrapper = () => {
 
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts'
-import { useClearPortfolioOnTx, usePortfolioRefetchOnTxHistory, useRefetchSummaryOnSettle } from '@/features/portfolio'
+import { useClearPortfolioOnTx, usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
 import useInvalidateOverviewsOnTx from '@/hooks/useInvalidateOverviewsOnTx'
 import { GATEWAY_URL } from '@/config/gateway'
 import { captureRenderError, initObservability } from '@/services/observability'
@@ -111,7 +111,6 @@ export const SafeScopedSubscriptions = (): null => {
   useSafeMsgTracking()
   usePortfolioRefetchOnTxHistory()
   useClearPortfolioOnTx()
-  useRefetchSummaryOnSettle()
   useInvalidateOverviewsOnTx()
   useCounterfactualSafeSync()
   useInviteNotification()
