@@ -17,6 +17,7 @@ import type {
 } from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
+import { useDefiV1 } from '@/features/earn/defiV1/context'
 
 const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.earn]
 
@@ -84,13 +85,18 @@ export const SafeSidebarContent = ({
     })
   }, [chain, isBlockedCountry])
 
+  const defiV1 = useDefiV1()
+  const earnLabel = defiV1 ? (defiV1.framing === 'treasury' ? 'Treasury' : 'DeFi') : undefined
+
   const visibleDefiGroup = useMemo(() => {
-    const filteredItems = safeDefiGroup.items.filter((item) => {
-      if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) return false
-      return isRouteEnabled(item.href, chain)
-    })
+    const filteredItems = safeDefiGroup.items
+      .filter((item) => {
+        if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) return false
+        return isRouteEnabled(item.href, chain)
+      })
+      .map((item) => (earnLabel && item.href === AppRoutes.earn ? { ...item, label: earnLabel } : item))
     return { ...safeDefiGroup, items: filteredItems }
-  }, [chain, isBlockedCountry])
+  }, [chain, isBlockedCountry, earnLabel])
   // tx queue badge
 
   const mainNavWithBadges = useMemo(() => {
