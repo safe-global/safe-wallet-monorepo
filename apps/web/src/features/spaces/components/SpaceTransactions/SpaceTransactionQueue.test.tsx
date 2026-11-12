@@ -3,7 +3,10 @@ import { fireEvent, render, screen } from '@/tests/test-utils'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import * as spaceQueueApi from '../../store/spaceQueueApi'
 import type { SpaceQueue, SpaceQueueFilters, SpaceQueueSection } from '../../store/spaceQueueApi'
+import { POLLING_INTERVAL } from '@/config/constants'
 import SpaceTransactionQueue from './SpaceTransactionQueue'
+
+const POLLING = { pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true }
 
 const mockToolbarProps = jest.fn()
 jest.mock('./TransactionsToolbar', () => ({
@@ -94,10 +97,14 @@ describe('SpaceTransactionQueue', () => {
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(querySpy).toHaveBeenCalledWith(spaceId, {
-      filters: { statuses: [], safes: [], chainIds: [], signers: [] },
-      search: '',
-    })
+    expect(querySpy).toHaveBeenCalledWith(
+      spaceId,
+      {
+        filters: { statuses: [], safes: [], chainIds: [], signers: [] },
+        search: '',
+      },
+      POLLING,
+    )
     const sections = screen.getAllByTestId('space-queue-safe')
     expect(sections).toHaveLength(2)
     expect(sections[0]).toHaveTextContent(`2 chains of ${safeA}`)
@@ -181,10 +188,14 @@ describe('SpaceTransactionQueue', () => {
     render(<SpaceTransactionQueue spaceId={spaceId} />)
     fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
 
-    expect(querySpy).toHaveBeenLastCalledWith(spaceId, {
-      filters: { statuses: ['sign'], safes: [], chainIds: [], signers: [] },
-      search: '',
-    })
+    expect(querySpy).toHaveBeenLastCalledWith(
+      spaceId,
+      {
+        filters: { statuses: ['sign'], safes: [], chainIds: [], signers: [] },
+        search: '',
+      },
+      POLLING,
+    )
     expect(mockToolbarProps).toHaveBeenLastCalledWith(
       expect.objectContaining({ filters: { statuses: ['sign'], safes: [], chainIds: [], signers: [] } }),
     )
@@ -211,6 +222,7 @@ describe('SpaceTransactionQueue', () => {
     expect(querySpy.mock.lastCall).toEqual([
       spaceId,
       { filters: { statuses: [], safes: [], chainIds: [], signers: [] }, search: '' },
+      POLLING,
     ])
     expect(screen.getByRole('textbox', { name: 'Search' })).toHaveValue('')
   })
@@ -224,17 +236,25 @@ describe('SpaceTransactionQueue', () => {
 
       render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-      expect(querySpy).toHaveBeenLastCalledWith(spaceId, {
-        filters: { statuses: [], safes: [], chainIds: [], signers: [] },
-        search: '',
-      })
+      expect(querySpy).toHaveBeenLastCalledWith(
+        spaceId,
+        {
+          filters: { statuses: [], safes: [], chainIds: [], signers: [] },
+          search: '',
+        },
+        POLLING,
+      )
 
       typeSearch('treasury')
 
-      expect(querySpy).toHaveBeenLastCalledWith(spaceId, {
-        filters: { statuses: [], safes: [], chainIds: [], signers: [] },
-        search: 'treasury',
-      })
+      expect(querySpy).toHaveBeenLastCalledWith(
+        spaceId,
+        {
+          filters: { statuses: [], safes: [], chainIds: [], signers: [] },
+          search: 'treasury',
+        },
+        POLLING,
+      )
     })
 
     it('requests the queue without a search once it is cleared', () => {
@@ -247,6 +267,7 @@ describe('SpaceTransactionQueue', () => {
       expect(querySpy.mock.lastCall).toEqual([
         spaceId,
         { filters: { statuses: [], safes: [], chainIds: [], signers: [] }, search: '' },
+        POLLING,
       ])
     })
 
