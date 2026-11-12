@@ -6,6 +6,22 @@ const injectedRtkApi = api
   })
   .injectEndpoints({
     endpoints: (build) => ({
+      spaceTransactionsGetTransactionQueueV1: build.query<
+        SpaceTransactionsGetTransactionQueueV1ApiResponse,
+        SpaceTransactionsGetTransactionQueueV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/transactions/queued`,
+          params: {
+            status: queryArg.status,
+            safes: queryArg.safes,
+            conflicting: queryArg.conflicting,
+            stale: queryArg.stale,
+            search: queryArg.search,
+          },
+        }),
+        providesTags: ['transactions'],
+      }),
       transactionsGetTransactionByIdV1: build.query<
         TransactionsGetTransactionByIdV1ApiResponse,
         TransactionsGetTransactionByIdV1ApiArg
@@ -86,6 +102,23 @@ const injectedRtkApi = api
         }),
         providesTags: ['transactions'],
       }),
+      transactionsGetOutgoingTransfersV1: build.query<
+        TransactionsGetOutgoingTransfersV1ApiResponse,
+        TransactionsGetOutgoingTransfersV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/chains/${queryArg.chainId}/safes/${queryArg.safeAddress}/outgoing-transfers`,
+          params: {
+            trusted: queryArg.trusted,
+            execution_date__gte: queryArg.executionDateGte,
+            execution_date__lte: queryArg.executionDateLte,
+            to: queryArg.to,
+            token_address: queryArg.tokenAddress,
+            cursor: queryArg.cursor,
+          },
+        }),
+        providesTags: ['transactions'],
+      }),
       transactionsPreviewTransactionV1: build.mutation<
         TransactionsPreviewTransactionV1ApiResponse,
         TransactionsPreviewTransactionV1ApiArg
@@ -150,6 +183,22 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
+export type SpaceTransactionsGetTransactionQueueV1ApiResponse =
+  /** status 200 Queue of the Safes in the Space */ SpaceQueuedItemPage
+export type SpaceTransactionsGetTransactionQueueV1ApiArg = {
+  /** Keep the transactions with one of these statuses, comma-separated. `sign` is a transaction one of the caller wallets still has to sign. */
+  status?: string[]
+  /** Keep the transactions of these Safes, comma-separated as `{chainId}:{safeAddress}` */
+  safes?: string
+  /** Keep the transactions sharing their nonce with another */
+  conflicting?: boolean
+  /** Keep the transactions proposed more than 7 days ago */
+  stale?: boolean
+  /** Keep the transactions whose Safe (address or Space address book name), network name, status, or a signer still to sign (address or name) contains this text, ignoring case. Unlike the filters, it narrows every count. At most 100 characters. */
+  search?: string
+  /** Space UUID */
+  spaceId: string
+}
 export type TransactionsGetTransactionByIdV1ApiResponse =
   /** status 200 Transaction details retrieved successfully */ TransactionDetails
 export type TransactionsGetTransactionByIdV1ApiArg = {
@@ -237,6 +286,26 @@ export type TransactionsGetIncomingTransfersV1ApiArg = {
   /** Pagination cursor for retrieving the next set of results */
   cursor?: string
 }
+export type TransactionsGetOutgoingTransfersV1ApiResponse =
+  /** status 200 Paginated list of outgoing transfers */ TransferTransactionItemPage
+export type TransactionsGetOutgoingTransfersV1ApiArg = {
+  /** Chain ID where the Safe is deployed */
+  chainId: string
+  /** Safe contract address (0x prefixed hex string) */
+  safeAddress: string
+  /** When true (default), ERC-20 transfers of untrusted tokens are omitted, since any token contract can emit a transfer the Safe never made. ERC-721 and native transfers are not filtered. ERC-20 transfers without value are always omitted. */
+  trusted?: boolean
+  /** Filter by execution date greater than or equal to (ISO 8601 UTC, e.g. 2024-01-01T00:00:00Z) */
+  executionDateGte?: string
+  /** Filter by execution date less than or equal to (ISO 8601 UTC, e.g. 2024-01-01T00:00:00Z) */
+  executionDateLte?: string
+  /** Filter by transfer recipient address (0x prefixed hex string) */
+  to?: string
+  /** Filter by token contract address (0x prefixed hex string) */
+  tokenAddress?: string
+  /** Pagination cursor for retrieving the next set of results */
+  cursor?: string
+}
 export type TransactionsPreviewTransactionV1ApiResponse =
   /** status 200 Transaction preview with simulation results, gas estimates, and potential effects */ TransactionPreview
 export type TransactionsPreviewTransactionV1ApiArg = {
@@ -294,6 +363,14 @@ export type TransactionsGetCreationTransactionV1ApiArg = {
   chainId: string
   /** Safe contract address (0x prefixed hex string) */
   safeAddress: string
+}
+export type ConflictHeaderQueuedItem = {
+  type: 'CONFLICT_HEADER'
+  nonce: number
+}
+export type LabelQueuedItem = {
+  type: 'LABEL'
+  label: string
 }
 export type AddressInfo = {
   value: string
@@ -738,6 +815,99 @@ export type VaultRedeemTransactionInfo = {
   additionalRewardsNrr: number
   additionalRewards: VaultExtraReward[]
 }
+export type MultisigExecutionInfo = {
+  type: 'MULTISIG'
+  nonce: number
+  confirmationsRequired: number
+  confirmationsSubmitted: number
+  missingSigners?: AddressInfo[] | null
+}
+export type ModuleExecutionInfo = {
+  type: 'MODULE'
+  address: AddressInfo
+}
+export type SafeAppInfo = {
+  id: number
+  name: string
+  url: string
+  logoUri?: string | null
+}
+export type Transaction = {
+  txInfo:
+    | CreationTransactionInfo
+    | CustomTransactionInfo
+    | MultiSendTransactionInfo
+    | SettingsChangeTransaction
+    | TransferTransactionInfo
+    | SwapOrderTransactionInfo
+    | BridgeAndSwapTransactionInfo
+    | SwapTransactionInfo
+    | SwapTransferTransactionInfo
+    | TwapOrderTransactionInfo
+    | NativeStakingDepositTransactionInfo
+    | NativeStakingValidatorsExitTransactionInfo
+    | NativeStakingWithdrawTransactionInfo
+    | VaultDepositTransactionInfo
+    | VaultRedeemTransactionInfo
+  id: string
+  txHash?: string | null
+  timestamp: number
+  txStatus: 'SUCCESS' | 'FAILED' | 'CANCELLED' | 'AWAITING_CONFIRMATIONS' | 'AWAITING_EXECUTION'
+  executionInfo?: (MultisigExecutionInfo | ModuleExecutionInfo) | null
+  safeAppInfo?: SafeAppInfo | null
+  note?: string | null
+}
+export type TransactionQueuedItem = {
+  type: 'TRANSACTION'
+  transaction: Transaction
+  conflictType: 'None' | 'HasNext' | 'End'
+}
+export type SpaceQueueSafe = {
+  chainId: string
+  safeAddress: string
+}
+export type SpaceQueueSafeCount = {
+  chainId: string
+  safeAddress: string
+  /** Transactions of this Safe on this chain that match the status filters */
+  count: number
+}
+export type SpaceQueueCounts = {
+  /** Transactions of the selected Safes, the sum of execute, sign, blocked and waiting */
+  total: number
+  /** Fully signed and next in line on their Safe and chain */
+  execute: number
+  /** Awaiting a signature from one of the caller wallets */
+  sign: number
+  /** Fully signed but behind an earlier nonce */
+  blocked: number
+  /** Awaiting signatures from other owners only */
+  waiting: number
+  /** Sharing their nonce with another transaction */
+  conflicting: number
+  /** Proposed more than 7 days ago */
+  stale: number
+  /** Every Safe and chain of the queue read, with how many of its transactions match the status filters */
+  safes: SpaceQueueSafeCount[]
+}
+export type SpaceQueuedItemPage = {
+  /** Size of the whole queue, which can exceed the items returned when the queue is longer than the pages read */
+  count: number | null
+  /** Always null: the queue is returned in one response */
+  next: string | null
+  /** Always null: the queue is returned in one response */
+  previous: string | null
+  /** Queued items, keyed by Safe address and then by chain ID, each list in nonce order. */
+  results: {
+    [key: string]: {
+      [key: string]: (ConflictHeaderQueuedItem | LabelQueuedItem | TransactionQueuedItem)[]
+    }
+  }
+  /** Space Safes whose queue is missing from this response because their Safe information could not be loaded or the Space exceeds the Safes one request can cover. */
+  unavailableSafes: SpaceQueueSafe[]
+  /** Faceted counts of the queue read: the status counts apply the `safes` filter but not the status filters, and `safes` applies the status filters but not the `safes` filter */
+  counts: SpaceQueueCounts
+}
 export type NativeToken = {
   address: string
   decimals: number
@@ -808,12 +978,6 @@ export type ModuleExecutionDetails = {
   type: 'MODULE'
   address: AddressInfo
 }
-export type SafeAppInfo = {
-  id: number
-  name: string
-  url: string
-  logoUri?: string | null
-}
 export type TransactionDetails = {
   txInfo:
     | CreationTransactionInfo
@@ -838,42 +1002,6 @@ export type TransactionDetails = {
   txData?: TransactionData | null
   detailedExecutionInfo?: (MultisigExecutionDetails | ModuleExecutionDetails) | null
   txHash?: string | null
-  safeAppInfo?: SafeAppInfo | null
-  note?: string | null
-}
-export type MultisigExecutionInfo = {
-  type: 'MULTISIG'
-  nonce: number
-  confirmationsRequired: number
-  confirmationsSubmitted: number
-  missingSigners?: AddressInfo[] | null
-}
-export type ModuleExecutionInfo = {
-  type: 'MODULE'
-  address: AddressInfo
-}
-export type Transaction = {
-  txInfo:
-    | CreationTransactionInfo
-    | CustomTransactionInfo
-    | MultiSendTransactionInfo
-    | SettingsChangeTransaction
-    | TransferTransactionInfo
-    | SwapOrderTransactionInfo
-    | BridgeAndSwapTransactionInfo
-    | SwapTransactionInfo
-    | SwapTransferTransactionInfo
-    | TwapOrderTransactionInfo
-    | NativeStakingDepositTransactionInfo
-    | NativeStakingValidatorsExitTransactionInfo
-    | NativeStakingWithdrawTransactionInfo
-    | VaultDepositTransactionInfo
-    | VaultRedeemTransactionInfo
-  id: string
-  txHash?: string | null
-  timestamp: number
-  txStatus: 'SUCCESS' | 'FAILED' | 'CANCELLED' | 'AWAITING_CONFIRMATIONS' | 'AWAITING_EXECUTION'
-  executionInfo?: (MultisigExecutionInfo | ModuleExecutionInfo) | null
   safeAppInfo?: SafeAppInfo | null
   note?: string | null
 }
@@ -916,6 +1044,17 @@ export type IncomingTransferPage = {
   previous?: string | null
   results: IncomingTransfer[]
 }
+export type TransactionItem = {
+  type: 'TRANSACTION'
+  transaction: Transaction
+  conflictType: 'None'
+}
+export type TransferTransactionItemPage = {
+  count?: number | null
+  next?: string | null
+  previous?: string | null
+  results: TransactionItem[]
+}
 export type TransactionPreview = {
   txInfo:
     | CreationTransactionInfo
@@ -942,29 +1081,11 @@ export type PreviewTransactionDto = {
   /** Operation type: 0 for CALL, 1 for DELEGATE */
   operation: Operation
 }
-export type ConflictHeaderQueuedItem = {
-  type: 'CONFLICT_HEADER'
-  nonce: number
-}
-export type LabelQueuedItem = {
-  type: 'LABEL'
-  label: string
-}
-export type TransactionQueuedItem = {
-  type: 'TRANSACTION'
-  transaction: Transaction
-  conflictType: 'None' | 'HasNext' | 'End'
-}
 export type QueuedItemPage = {
   count?: number | null
   next?: string | null
   previous?: string | null
   results: (ConflictHeaderQueuedItem | LabelQueuedItem | TransactionQueuedItem)[]
-}
-export type TransactionItem = {
-  type: 'TRANSACTION'
-  transaction: Transaction
-  conflictType: 'None'
 }
 export type DateLabel = {
   type: 'DATE_LABEL'
@@ -1021,6 +1142,8 @@ export type CreationTransaction = {
   dataDecoded?: DataDecoded | null
 }
 export const {
+  useSpaceTransactionsGetTransactionQueueV1Query,
+  useLazySpaceTransactionsGetTransactionQueueV1Query,
   useTransactionsGetTransactionByIdV1Query,
   useLazyTransactionsGetTransactionByIdV1Query,
   useTransactionsGetMultisigTransactionsV1Query,
@@ -1031,6 +1154,8 @@ export const {
   useTransactionsAddConfirmationV1Mutation,
   useTransactionsGetIncomingTransfersV1Query,
   useLazyTransactionsGetIncomingTransfersV1Query,
+  useTransactionsGetOutgoingTransfersV1Query,
+  useLazyTransactionsGetOutgoingTransfersV1Query,
   useTransactionsPreviewTransactionV1Mutation,
   useTransactionsGetTransactionQueueV1Query,
   useLazyTransactionsGetTransactionQueueV1Query,

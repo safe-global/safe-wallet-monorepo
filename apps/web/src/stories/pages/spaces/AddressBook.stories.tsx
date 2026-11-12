@@ -41,6 +41,7 @@ const contact = (name: string, address: string, chainIds: string[]) => ({
   name,
   address,
   chainIds,
+  tagIds: [],
   createdBy: 'alice@example.com',
   createdByUserId: 1,
   lastUpdatedBy: 'alice@example.com',
@@ -56,6 +57,7 @@ const addressBook: SpaceAddressBookDto = {
     contact('Payroll', '0xB63F3D0a4a7eFd1d0c08A9ef17C5e5d3DbBDE867', ['1']),
     contact('Exchange deposit', '0x5eD8Cee6b63b1c6AFce3AD7c92f4fD7E1B8fAd9F', ['1']),
   ],
+  tags: [],
 }
 
 const spaceAddressBookHandler = http.get(/\/v1\/spaces\/[^/]+\/address-book$/, () => HttpResponse.json(addressBook))
