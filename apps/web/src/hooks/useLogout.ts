@@ -4,6 +4,8 @@ import { AppRoutes } from '@/config/routes'
 import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import useWallet from '@/hooks/wallets/useWallet'
+import { useAppDispatch } from '@/store'
+import { clearWorkspaceDraft } from '@/features/spaces/store'
 
 const LOGOUT_REDIRECT_PATH = '/v1/auth/logout/redirect'
 
@@ -23,8 +25,11 @@ const LOGOUT_REDIRECT_PATH = '/v1/auth/logout/redirect'
 const useLogout = () => {
   const onboard = useOnboard()
   const wallet = useWallet()
+  const dispatch = useAppDispatch()
 
   const logout = useCallback(async () => {
+    dispatch(clearWorkspaceDraft())
+
     if (onboard && wallet) {
       await onboard.disconnectWallet({ label: wallet.label })
     }
@@ -48,7 +53,7 @@ const useLogout = () => {
     document.body.appendChild(form)
     form.submit()
     document.body.removeChild(form)
-  }, [onboard, wallet])
+  }, [dispatch, onboard, wallet])
 
   return { logout }
 }
