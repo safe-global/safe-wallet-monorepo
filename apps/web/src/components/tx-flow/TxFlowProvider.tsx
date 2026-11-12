@@ -316,7 +316,7 @@ const TxFlowProvider = <T extends unknown>({
   )
 
   const resolvedDeclared = useMemo(
-    () => declared ?? buildDeclared(isBatch ? 'native-batch' : 'native-transfer'),
+    () => declared ?? buildDeclared(isBatch ? 'NATIVE_BATCH' : 'NATIVE_TRANSFER'),
     [declared, isBatch],
   )
 

@@ -140,13 +140,13 @@ describe('TxFlowProvider', () => {
   it('declares an in-app flow as a native transfer', () => {
     const { result } = renderContext({})
 
-    expect(result.current.declared).toEqual({ channel: 'native-transfer' })
+    expect(result.current.declared).toEqual({ channel: 'NATIVE_TRANSFER' })
   })
 
   it('declares a batch as a native batch', () => {
     const { result } = renderContext({ isBatch: true })
 
-    expect(result.current.declared).toEqual({ channel: 'native-batch' })
+    expect(result.current.declared).toEqual({ channel: 'NATIVE_BATCH' })
   })
 
   it('declares the source the flow was opened with', () => {
