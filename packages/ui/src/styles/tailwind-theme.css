@@ -68,6 +68,15 @@
   --color-info-subtle: var(--color-info-background);
   --color-info-muted: var(--color-info-light);
   --color-info-strong: var(--color-info-dark);
+  --color-tone-critical: var(--tone-critical);
+  --color-tone-warning: var(--tone-warning);
+  --color-tone-attention: var(--tone-attention);
+  --color-tone-success: var(--tone-success);
+  --color-tone-neutral: var(--tone-neutral);
+  --color-tone-muted: var(--tone-muted);
+  --color-widget-count: var(--widget-count);
+  --color-widget-count-foreground: var(--widget-count-foreground);
+  --color-widget-icon-halo: var(--widget-icon-halo);
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
   --radius-2xs: 0.25rem;
   --radius-xs: 0.5rem;

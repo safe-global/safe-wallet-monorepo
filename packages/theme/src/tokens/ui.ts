@@ -19,7 +19,7 @@ const light: UiTokenMap = {
   popover: hex(webLightPalette.background.paper),
   'popover-foreground': '#0a0a0a',
   dialog: hex(webLightPalette.background.paper),
-  // The one modal scrim (packages/ui/src/components/overlay.ts); a light tint so the blur stays visible.
+  // The one modal scrim (packages/ui/src/primitives/overlay/overlay.ts); a light tint so the blur stays visible.
   backdrop: 'rgba(0, 0, 0, 0.1)',
   primary: '#171717',
   'primary-foreground': '#fafafa',
@@ -80,6 +80,18 @@ const light: UiTokenMap = {
   // Must beat onboard.css's --onboard-modal-z-index (1450) for dialogs the wallet-connect modal opens.
   'z-above-onboard': '1451',
   'z-picker': '1500',
+  // Status tones (accent bars, status icons), from the palette so each theme keeps its own shade.
+  'tone-critical': 'var(--color-error-main)',
+  'tone-warning': 'var(--color-warning-main)',
+  'tone-attention': 'var(--color-review-main)',
+  'tone-success': 'var(--color-success-main)',
+  'tone-neutral': 'var(--color-text-secondary)',
+  'tone-muted': 'var(--color-text-disabled)',
+  // Widget overflow pill and empty-state icon halo; the same in both themes, as the Spaces dashboard draws them.
+  'widget-count': '#f0fdf4',
+  'widget-count-foreground': '#166534',
+  // green-100
+  'widget-icon-halo': 'oklch(96.2% 0.044 156.743)',
 }
 
 const dark: UiTokenMap = {
@@ -136,6 +148,15 @@ const dark: UiTokenMap = {
   'badge-warning-subtle': '#301d02',
   'badge-warning-strong': '#eab308',
   'badge-dot-warning': '#facc15',
+  'tone-critical': 'var(--color-error-main)',
+  'tone-warning': 'var(--color-warning-main)',
+  'tone-attention': 'var(--color-review-main)',
+  'tone-success': 'var(--color-success-main)',
+  'tone-neutral': 'var(--color-text-secondary)',
+  'tone-muted': 'var(--color-text-disabled)',
+  'widget-count': '#f0fdf4',
+  'widget-count-foreground': '#166534',
+  'widget-icon-halo': 'oklch(96.2% 0.044 156.743)',
 }
 
 export const uiTokens: { light: UiTokenMap; dark: UiTokenMap } = { light, dark }

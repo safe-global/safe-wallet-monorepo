@@ -37,6 +37,7 @@
 | `styles.css`         | Default entry (`./styles.css`): theme + `tokens.css` + upstream shadcn base layer                                                |
 | `scoped.css`         | Opt-in entry (`./scoped.css`) for apps that coexist with MUI, used by the wallet: theme + `tokens.scoped.css` + scoped preflight |
 
+- Safe components get their own tokens there too when no shadcn token matches the wallet's look (`tone-*` for status accents, `widget-*`), so a component never falls back to a raw colour.
 - **Never hand-edit `tokens.css` or `tokens.scoped.css`.** Token values live in `packages/theme` (`src/tokens/ui.ts` for the shadcn-named tokens, the palettes for `--color-*`). Edit there, then run `yarn workspace @safe-global/theme generate:ui-tokens`. `apps/web/src/styles/generatedCss.test.ts` fails in CI when a generated file is stale.
 - `styles.css`, `scoped.css` and `tailwind-theme.css` hold no token values. Neither entry imports `tailwindcss`: the app owns that import and its `@source` lines.
 - Every bare `@import` in `src/styles` must be a `dependencies` or `peerDependencies` entry (`src/styles/styles.test.ts`).
