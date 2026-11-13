@@ -294,3 +294,37 @@ and new states, and fixes rely on review and Argos runs of existing stories.
 
 Decision Needed: pick A, B or C, then narrow or keep the bug-fix clause of
 TEST-07.
+
+### OQ-PKG-01 — Logic helpers already in packages/views
+
+Question: PKG-02 now keeps `packages/views` presentational. On #9257 a reviewer
+asked to move all business logic the PR touched into `apps/web`; the author
+moved what the PR added but kept its additions to the policy helpers that #8988
+had already put in views (`isPendingPolicy`, `getPolicyStatus`,
+`getPolicySummary`), because views components call them and moving them would
+also change spending-limit code. The thread ended there.
+
+Evidence: [#9257 issuecomment-6340162968](https://github.com/safe-global/safe-wallet-monorepo/pull/9257#issuecomment-6340162968),
+[issuecomment-6361256825](https://github.com/safe-global/safe-wallet-monorepo/pull/9257#issuecomment-6361256825).
+
+Option A — move each helper to `apps/web` the next time a PR touches it, and
+pass its result to the view as a prop:
+
+```tsx
+// apps/web
+const status = getPolicyStatus(policy)
+return <PolicyRow policy={policy} status={status} />
+```
+
+Option B — leave existing helpers in views and move them in one dedicated
+follow-up PR; new logic never goes there.
+
+Option C — allow pure status and summary helpers in views, since they read only
+the DTO; permission rules and gateway mapping stay in the app.
+
+```tsx
+// packages/views: a view may call a pure helper that reads only the DTO
+const status = getPolicyStatus(policy)
+```
+
+Decision Needed: pick A, B or C, then add the legacy case to PKG-02.

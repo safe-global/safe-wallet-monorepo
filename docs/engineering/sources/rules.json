@@ -70,7 +70,8 @@
       "RL-20260930-002",
       "RL-20261008-003",
       "RL-20261009-004",
-      "RL-20261016-002"
+      "RL-20261016-002",
+      "RL-20261027-008"
     ]
   },
   {
@@ -146,7 +147,9 @@
       "RL-20261008-008",
       "RL-20261009-003",
       "RL-20261014-003",
-      "RL-20261021-008"
+      "RL-20261021-008",
+      "RL-20261023-002",
+      "RL-20261027-010"
     ]
   },
   {
@@ -177,7 +180,8 @@
       "RL-20260603-001",
       "RL-20260615-002",
       "RL-20260609-006",
-      "RL-20260728-001"
+      "RL-20260728-001",
+      "RL-20261023-008"
     ]
   },
   {
@@ -244,7 +248,8 @@
       "RL-20260720-004",
       "RL-20260909-006",
       "RL-20260922-001",
-      "RL-20261021-003"
+      "RL-20261021-003",
+      "RL-20261028-005"
     ]
   },
   {
@@ -293,7 +298,8 @@
     "exampleRefs": [
       "examples/general/chain-contracts.md#normalize-versions-and-origin",
       "examples/general/testing.md#match-real-gateway-response-shapes-when-intercepting",
-      "examples/general/testing.md#data-04-read-e2e-test-data-and-hosts-from-shared-sources"
+      "examples/general/testing.md#data-04-read-e2e-test-data-and-hosts-from-shared-sources",
+      "examples/general/data-integrity.md#data-04-read-the-url-query-through-the-existing-helper"
     ],
     "reviewLearningIds": [
       "RL-20260220-003",
@@ -313,7 +319,8 @@
       "RL-20260930-001",
       "RL-20261008-002",
       "RL-20261014-001",
-      "RL-20261020-005"
+      "RL-20261020-005",
+      "RL-20261027-007"
     ]
   },
   {
@@ -378,7 +385,8 @@
     "check": "Did this update an E2E or component-test selector? If yes, can another visible control with similar copy match instead, and does it avoid styling-class selectors?",
     "exampleRefs": [
       "examples/general/testing.md#unambiguous-e2e-selectors",
-      "examples/general/testing.md#e2e-01-match-formatted-value-regex-to-actual-rendered-output"
+      "examples/general/testing.md#e2e-01-match-formatted-value-regex-to-actual-rendered-output",
+      "examples/general/testing.md#e2e-01-query-inside-the-visible-cell-not-the-whole-row"
     ],
     "reviewLearningIds": [
       "RL-20260225-002",
@@ -392,7 +400,8 @@
       "RL-20260729-004",
       "RL-20260811-002",
       "RL-20260820-004",
-      "RL-20260825-004"
+      "RL-20260825-004",
+      "RL-20261028-002"
     ]
   },
   {
@@ -409,7 +418,8 @@
       "examples/general/testing.md#test-01-test-the-debounce-not-just-the-post-debounce-assertion",
       "examples/general/testing.md#overwriting-localstorage-fixtures-must-include-implicit-app-seeded-entries",
       "examples/general/testing.md#test-01-click-links-without-asserting-their-href",
-      "examples/general/testing.md#test-01-check-a-value-is-complete-before-testing-containment"
+      "examples/general/testing.md#test-01-check-a-value-is-complete-before-testing-containment",
+      "examples/general/testing.md#test-01-flush-async-work-before-a-positive-assertion"
     ],
     "reviewLearningIds": [
       "RL-20260217-001",
@@ -434,7 +444,9 @@
       "RL-20260925-002",
       "RL-20261002-003",
       "RL-20261012-001",
-      "RL-20261022-006"
+      "RL-20261022-006",
+      "RL-20261026-002",
+      "RL-20261029-005"
     ]
   },
   {
@@ -472,7 +484,8 @@
       "RL-20261001-002",
       "RL-20261002-003",
       "RL-20261013-001",
-      "RL-20261022-005"
+      "RL-20261022-005",
+      "RL-20261023-006"
     ]
   },
   {
@@ -500,11 +513,13 @@
     "project": "general",
     "area": "testing",
     "title": "Moved behavior needs replacement coverage and matching mocks",
-    "rule": "When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts. Mocks follow the code: they target the exact module specifier it imports (barrel vs deep path), and mocks for dependencies it no longer uses are removed. A component test that replaces deleted E2E coverage keeps the child it wires real, or has the mock render the props it receives and act on them, and drives the interaction instead of asserting presence. CI path filters and test or story discovery cover the new location.",
-    "check": "Did this move or remove a return field, prop, branch, or dependency, or replace E2E coverage with component tests? If yes, did equivalent tests move to the new owner, do the tests' mocks still match what the code imports, does the replacement exercise the same wiring and interaction, and do CI triggers still run them?",
+    "rule": "When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts. Mocks follow the code: they target the exact module specifier it imports (barrel vs deep path), and mocks for dependencies it no longer uses are removed. A test that replaces deleted E2E coverage makes every assertion the deleted test made, drives the interaction instead of asserting presence, and covers each link the value crosses (prop, provider, context, persisted store and its hydration) with the wired child real or a mock that renders and acts on its props, never state set by hand; an embedded third-party widget's own UI is exempt, the params the wallet passes it are not. CI path filters and test or story discovery cover the new location.",
+    "check": "Did this move or remove a return field, prop, branch, or dependency, or replace E2E coverage with component tests? If yes, did equivalent tests move to the new owner, do the tests' mocks still match what the code imports, does the replacement keep every assertion and exercise each link and interaction the deleted test crossed, and do CI triggers still run them?",
     "exampleRefs": [
       "examples/general/testing.md#test-04-extend-ci-path-filters-when-tests-or-stories-move",
-      "examples/general/testing.md#test-04-let-the-mocked-child-act-on-the-props-it-receives"
+      "examples/general/testing.md#test-04-let-the-mocked-child-act-on-the-props-it-receives",
+      "examples/general/testing.md#test-04-test-each-link-the-replaced-e2e-check-crossed",
+      "examples/general/testing.md#test-04-keep-the-deleted-tests-format-check"
     ],
     "reviewLearningIds": [
       "RL-20260428-002",
@@ -519,7 +534,10 @@
       "RL-20260921-010",
       "RL-20261001-002",
       "RL-20261009-002",
-      "RL-20261022-001"
+      "RL-20261022-001",
+      "RL-20261023-001",
+      "RL-20261027-001",
+      "RL-20261027-002"
     ]
   },
   {
@@ -547,8 +565,8 @@
     "project": "web",
     "area": "ui",
     "title": "Constrained text must truncate or wrap intentionally",
-    "rule": "Long user-provided identifiers such as email addresses and names must fit constrained UI the same way wallet addresses do.",
-    "check": "Did this add user-provided text to a constrained sidebar, card, badge, or menu? If yes, is overflow handled intentionally?",
+    "rule": "Long user-provided identifiers such as email addresses and names must fit constrained UI the same way wallet addresses do, and a group of action buttons wraps (`max-w-full flex-wrap`) instead of overflowing at narrow widths.",
+    "check": "Did this add user-provided text or a group of action buttons to a constrained sidebar, card, badge, menu, or toolbar? If yes, is overflow handled intentionally at a narrow width?",
     "exampleRefs": [],
     "reviewLearningIds": [
       "RL-20260217-005",
@@ -559,7 +577,8 @@
       "RL-20260909-005",
       "RL-20260921-003",
       "RL-20261001-005",
-      "RL-20261008-007"
+      "RL-20261008-007",
+      "RL-20261027-004"
     ]
   },
   {
@@ -597,7 +616,8 @@
       "RL-20261007-001",
       "RL-20261013-003",
       "RL-20261019-001",
-      "RL-20261021-009"
+      "RL-20261021-009",
+      "RL-20261027-003"
     ]
   },
   {
@@ -674,7 +694,9 @@
       "RL-20261015-001",
       "RL-20261020-004",
       "RL-20261021-006",
-      "RL-20261021-007"
+      "RL-20261021-007",
+      "RL-20261027-009",
+      "RL-20261023-005"
     ]
   },
   {
@@ -798,7 +820,8 @@
       "RL-20260619-002",
       "RL-20260930-008",
       "RL-20261002-006",
-      "RL-20261021-012"
+      "RL-20261021-012",
+      "RL-20261023-009"
     ]
   },
   {
@@ -868,9 +891,12 @@
     "id": "TEST-05",
     "area": "testing",
     "title": "Pick the right test fixture surface: builders for unit tests, MSW fixtures for integration",
-    "rule": "Use Builder.new<T>().with({...}) data for unit tests so the field under test is isolated and randomized data exposes hidden assumptions. Reach for MSW fixtures only when the test mocks the network layer and needs a realistic CGW response.",
-    "check": "Unit tests under `*.test.ts(x)` must not import from `config/test/msw/fixtures/`.",
-    "exampleRefs": ["examples/general/testing.md#builders-vs-msw-fixtures"],
+    "rule": "Use Builder.new<T>().with({...}) data for unit tests so the field under test is isolated and randomized data exposes hidden assumptions. Reach for MSW fixtures only when the test mocks the network layer and needs a realistic CGW response. Helpers that derive test data return values the app's validators accept (re-checksum a derived address).",
+    "check": "Unit tests under `*.test.ts(x)` must not import from `config/test/msw/fixtures/`, and derived test values (addresses) pass the app's own validators.",
+    "exampleRefs": [
+      "examples/general/testing.md#builders-vs-msw-fixtures",
+      "examples/general/testing.md#test-05-derived-test-addresses-stay-valid"
+    ],
     "reviewLearningIds": [
       "RL-20260313-002",
       "RL-20260713-005",
@@ -878,7 +904,8 @@
       "RL-20260803-001",
       "RL-20260811-004",
       "RL-20260826-001",
-      "RL-20260916-003"
+      "RL-20260916-003",
+      "RL-20261028-004"
     ],
     "project": "web"
   },
@@ -911,7 +938,8 @@
     "exampleRefs": [
       "mobile/examples/permissions.md#name-the-warning-condition-do-not-chain",
       "examples/general/api-and-packages.md#code-05-return-early-from-guard-branches",
-      "web/examples/feature-boundaries.md#hoist-derived-values-out-of-jsx"
+      "web/examples/feature-boundaries.md#hoist-derived-values-out-of-jsx",
+      "examples/general/api-and-packages.md#code-05-key-type-guards-on-the-discriminant"
     ],
     "reviewLearningIds": [
       "RL-20260312-008",
@@ -930,7 +958,9 @@
       "RL-20260911-001",
       "RL-20261002-005",
       "RL-20261014-005",
-      "RL-20261021-010"
+      "RL-20261021-010",
+      "RL-20261027-005",
+      "RL-20261027-006"
     ],
     "project": "general"
   },
@@ -1041,15 +1071,16 @@
     "id": "E2E-02",
     "area": "e2e",
     "title": "Put E2E waits, timeouts, and failure hooks where they take effect",
-    "rule": "Cypress retries the command, not the chained assertion, so timeouts must go on `cy.get(..., { timeout })`/`cy.contains(..., { timeout })` — passing timeout into `should()` or `expect()` does nothing. A test's own time budget must cover the sum of its inner waits (`test.slow()` or an explicit test timeout). A journey opens a page only after every seeded value the page reads is indexed, Transaction Service first and then CGW, since CGW caches an early empty response. Failure-only diagnostics attach in fixture teardown or `afterEach`; inside the test body `testInfo.status` is still `passed`.",
-    "check": "Did this E2E test add or raise a timeout, chain slow setup, seed data, or attach diagnostics on failure? Is the timeout on the retryable command, does the test budget cover its inner waits, does it wait for every seeded value before navigating, and does the failure hook run where the final status is known?",
+    "rule": "Cypress retries the command, not the chained assertion, so timeouts must go on `cy.get(..., { timeout })`/`cy.contains(..., { timeout })` — passing timeout into `should()` or `expect()` does nothing. A test's own time budget must cover the sum of its inner waits (`test.slow()` or an explicit test timeout). A journey opens a page only after every seeded value the page reads is indexed, Transaction Service first and then CGW, since CGW caches an early empty response. Failure-only diagnostics attach in fixture teardown or `afterEach`; inside the test body `testInfo.status` is still `passed`. The global step timeout stays tight: a step measured slower gets its own timeout with a one-line reason. Setup that runs on every page load (`addInitScript`) is registered once and reads switchable state, since several init scripts run in an undefined order.",
+    "check": "Did this E2E test add or raise a timeout, chain slow setup, seed data, or attach diagnostics on failure? Is the timeout on the retryable command, does the test budget cover its inner waits, does it wait for every seeded value before navigating, does the failure hook run where the final status is known, does a slow step carry its own timeout instead of a raised global one, and is per-load setup registered once?",
     "exampleRefs": ["examples/general/testing.md#cypress-retry-timeout-belongs-on-the-preceding-command"],
     "reviewLearningIds": [
       "RL-20260218-001",
       "RL-20260612-001",
       "RL-20260918-001",
       "RL-20261022-002",
-      "RL-20261022-003"
+      "RL-20261022-003",
+      "RL-20261023-003"
     ],
     "project": "web"
   },
@@ -1120,8 +1151,8 @@
     "id": "CODE-06",
     "area": "abstractions",
     "title": "Own the lifecycle of async work",
-    "rule": "An async call outside normal awaited control flow (an `onClick={asyncFn}`, a cleanup `disconnect()`, a background effect, a clipboard read) is awaited in a `try/catch` or an IIFE that handles rejection, even when an error state already renders, unless the callee already catches and logs. Timers and awaited calls that set state afterwards are cleared or guarded on unmount.",
-    "check": "Did this add an async call, timer, or awaited state update in a handler, effect, or hook? If yes, is rejection handled, and is it cleared or guarded on unmount?",
+    "rule": "An async call outside normal awaited control flow (an `onClick={asyncFn}`, a cleanup `disconnect()`, a background effect, a clipboard read) is awaited in a `try/catch` or an IIFE that handles rejection, even when an error state already renders, unless the callee already catches and logs. Timers and awaited calls that set state afterwards are cleared or guarded on unmount, and a run that a newer run superseded applies nothing (the cleanup sets a cancelled flag).",
+    "check": "Did this add an async call, timer, or awaited state update in a handler, effect, or hook? If yes, is rejection handled, and is it cleared or guarded on unmount and ignored once a newer run supersedes it?",
     "exampleRefs": ["examples/general/gateway-hooks.md#code-06-await-or-catch-fire-and-forget-async"],
     "reviewLearningIds": [
       "RL-20260522-002",
@@ -1131,7 +1162,8 @@
       "RL-20260626-002",
       "RL-20260715-001",
       "RL-20260806-006",
-      "RL-20261021-004"
+      "RL-20261021-004",
+      "RL-20261029-004"
     ],
     "project": "general"
   },
@@ -1203,11 +1235,12 @@
     "project": "web",
     "area": "ui",
     "title": "Keep interactive elements operable, unnested, and truly disabled",
-    "rule": "Clickable elements are keyboard-operable (`<button type=\"button\">`, or `role` + `tabIndex` + an Enter/Space handler) and never nested in another interactive element. Primitives that can render as links, and controls that must stay focusable for nested actions, disable with `aria-disabled` plus blocked pointer events. Repeated controls and indicators are named after their item, a state shown only as an icon carries visually hidden text rather than an `aria-label` on a non-interactive element, and a clickable row keeps its row role, uses a real button for focus, and ignores key events bubbled from nested controls.",
-    "check": "Did this add or change a clickable element or shared interactive primitive? If yes, is it keyboard-operable and unnested, does its disabled state block and announce, and does each repeated control have a distinct accessible name?",
+    "rule": "Clickable elements are keyboard-operable (`<button type=\"button\">`, or `role` + `tabIndex` + an Enter/Space handler) and never nested in another interactive element. Primitives that can render as links, and controls that must stay focusable for nested actions, disable with `aria-disabled` plus blocked pointer events. Repeated controls and indicators are named after their item, a state shown only as an icon carries visually hidden text rather than an `aria-label` on a non-interactive element, and a clickable row keeps its row role, uses a real button for focus, and ignores key events bubbled from nested controls. Controls inside a hover surface (copy buttons, links) live in a Popover with `openOnHover`, never a Tooltip, whose popup is outside the tab order.",
+    "check": "Did this add or change a clickable element or shared interactive primitive? If yes, is it keyboard-operable and unnested, does its disabled state block and announce, does each repeated control have a distinct accessible name, and can the keyboard reach controls inside a hover surface?",
     "exampleRefs": [
       "web/examples/feature-boundaries.md#disable-link-rendered-buttons-with-aria-disabled",
-      "web/examples/feature-boundaries.md#a11y-01-name-repeated-controls-after-their-item"
+      "web/examples/feature-boundaries.md#a11y-01-name-repeated-controls-after-their-item",
+      "web/examples/feature-boundaries.md#a11y-01-put-interactive-hover-content-in-a-popover"
     ],
     "reviewLearningIds": [
       "RL-20260605-002",
@@ -1219,7 +1252,8 @@
       "RL-20260811-003",
       "RL-20260921-006",
       "RL-20260929-003",
-      "RL-20261021-005"
+      "RL-20261021-005",
+      "RL-20261028-003"
     ]
   },
   {
@@ -1287,18 +1321,26 @@
     "project": "general",
     "area": "testing",
     "title": "Tests must not leak state into other tests",
-    "rule": "Tests that assign to globals (`navigator`, `window`, `Date`, env) restore them, via `jest.spyOn` + restore or save/restore in `afterEach`/`afterAll`. Only state that survives `beforeEach` leaks: `*Once` queues and unreset module state; a `beforeEach` that re-sets `mockReturnValue` already isolates per-test implementations.",
-    "check": "Did this test mutate a global or module-level state? If yes, is it restored so test order cannot change the outcome?",
+    "rule": "Tests that assign to globals (`navigator`, `window`, `Date`, env) restore them, via `jest.spyOn` + restore or save/restore in `afterEach`/`afterAll`. Only state that survives `beforeEach` leaks: `*Once` queues, unreset module state, a mocked hook value no outer `beforeEach` resets, a default object a builder stores by reference, and localStorage a persisted slice writes (`initialReduxState` does not override it); a `beforeEach` that re-sets `mockReturnValue` already isolates per-test implementations. Pin random builder fields a test depends on.",
+    "check": "Did this test mutate a global, module-level state, a persisted slice, or a shared fixture default? If yes, is it restored so test order cannot change the outcome?",
     "exampleRefs": [],
-    "reviewLearningIds": ["RL-20260615-012", "RL-20260611-002", "RL-20260806-002", "RL-20260811-005", "RL-20260820-003"]
+    "reviewLearningIds": [
+      "RL-20260615-012",
+      "RL-20260611-002",
+      "RL-20260806-002",
+      "RL-20260811-005",
+      "RL-20260820-003",
+      "RL-20261028-001",
+      "RL-20261026-001"
+    ]
   },
   {
     "id": "PKG-02",
     "project": "general",
     "area": "packages",
     "title": "Import only declared dependencies, through their public entrypoint",
-    "rule": "App and package code imports only packages declared in its own `package.json`, through the package's public entrypoint (the same module tree its provider uses, React Native on mobile), and uses the repo's established library for a concern (e.g. ethers) rather than one present only transitively. A package, its tests and stories included, never imports from an app (`@/…`) and carries its own test utils. Presentational UI that needs no app module lives in `packages/views`; one that needs an app-only component (web `Identicon`) stays in the app. A new package needs a reason existing dependencies cannot cover, and third-party versions never bypass the dependency age gate (`npmPreapprovedPackages` is for in-house `@safe-global/*` only).",
-    "check": "Did this import a package or add a dependency? If yes, is it declared by this workspace, the library the repo already uses for that job, and imported through the entrypoint its provider uses, and does package code import nothing from an app?",
+    "rule": "App and package code imports only packages declared in its own `package.json`, through the package's public entrypoint (the same module tree its provider uses, React Native on mobile), and uses the repo's established library for a concern (e.g. ethers) rather than one present only transitively. A package, its tests and stories included, never imports from an app (`@/…`) and carries its own test utils. Presentational UI that needs no app module lives in `packages/views`; one that needs an app-only component stays in the app. `packages/views` holds presentation only: permission rules, status resolution, mapping gateway data to display values and form state stay in the app, and shared logic returns reason codes while the component that shows them owns the copy. A new package needs a reason existing dependencies cannot cover, and third-party versions never bypass the dependency age gate (`npmPreapprovedPackages` is for in-house `@safe-global/*` only).",
+    "check": "Did this import a package or add a dependency? If yes, is it declared by this workspace, the library the repo already uses for that job, and imported through the entrypoint its provider uses, does package code import nothing from an app, and does `packages/views` code stay presentational?",
     "exampleRefs": [],
     "reviewLearningIds": [
       "RL-20260610-001",
@@ -1308,7 +1350,9 @@
       "RL-20260729-001",
       "RL-20260413-006",
       "RL-20261009-001",
-      "RL-20261021-013"
+      "RL-20261021-013",
+      "RL-20261029-006",
+      "RL-20261023-007"
     ]
   },
   {
@@ -1326,10 +1370,10 @@
     "project": "general",
     "area": "forms",
     "title": "Form values track what inputs show and what they depend on",
-    "rule": "An unfinished or invalid entry never maps to the empty form value; store an invalid sentinel or set a field error so submit stays blocked. When a field's dependency changes (selected token, signer list), clear it explicitly (RHF `resetField` restores the registered default) and give it a validation rule that re-runs. React to user edits in change handlers, since effects on a watched value also fire on `reset()`/`setValue`. A lookup-based `validate` fails on a miss, and edit-form options include every stored value.",
-    "check": "Did this add or change a form field, a dependent field, or a reaction to a watched value? If yes, does the form value match what the input shows, is the dependent field cleared and revalidated, do edit reactions fire only on user input, and do lookup validators fail on a miss and edit options include stored values?",
+    "rule": "An unfinished or invalid entry never maps to the empty form value; store an invalid sentinel or set a field error so submit stays blocked. When a field's dependency changes (selected token, signer list), clear it explicitly (RHF `resetField` restores the registered default) and give it a validation rule that re-runs. React to user edits in change handlers, since effects on a watched value also fire on `reset()`/`setValue`. A lookup-based `validate` fails on a miss, and edit-form options include every stored value. An edit whose target keeps entries it is not told to change loads the stored set and submits every removal explicitly.",
+    "check": "Did this add or change a form field, a dependent field, or a reaction to a watched value? If yes, does the form value match what the input shows, is the dependent field cleared and revalidated, do edit reactions fire only on user input, do lookup validators fail on a miss and edit options include stored values, and does an edit submit its removals explicitly?",
     "exampleRefs": ["examples/general/data-integrity.md#clear-dependent-form-fields-with-setvalue-not-resetfield"],
-    "reviewLearningIds": ["RL-20260821-001", "RL-20260818-004", "RL-20260907-001", "RL-20260930-007"]
+    "reviewLearningIds": ["RL-20260821-001", "RL-20260818-004", "RL-20260907-001", "RL-20260930-007", "RL-20261028-006"]
   },
   {
     "id": "TEST-07",
@@ -1339,7 +1383,14 @@
     "rule": "A new visible component or state, and every visual or layout bug fix, gets a Storybook story rendering that state (error, long content, nesting, dismissed) so the visual-regression run catches a recurrence; class-string snapshots and DOM unit tests don't verify geometry. Stories rely on the global `mswLoader` from the preview and never register it locally, pass callbacks as `fn()`, and apply a scenario decorator once per story (meta and story decorators stack). A story seeds or clears every persisted value its state reads (consent, localStorage) and renders recorded fixtures in their own Safe and chain, so the named state looks the same on every run.",
     "check": "Did this add a visible component or state, or fix a visual/layout bug? If yes, is there a story rendering exactly that state, including long, empty, and loading content, with one decorator per story, and does it render the same regardless of persisted state?",
     "exampleRefs": ["examples/general/testing.md#test-07-clear-persisted-state-a-storys-named-state-depends-on"],
-    "reviewLearningIds": ["RL-20260827-001", "RL-20260911-005", "RL-20260921-008", "RL-20260930-012", "RL-20261020-002"]
+    "reviewLearningIds": [
+      "RL-20260827-001",
+      "RL-20260911-005",
+      "RL-20260921-008",
+      "RL-20260930-012",
+      "RL-20261020-002",
+      "RL-20261023-004"
+    ]
   },
   {
     "id": "PERF-02",
@@ -1370,5 +1421,25 @@
     "check": "Does this add or widen a check that keeps secrets, writes, or requests inside a boundary? If yes, does it name what is allowed (types, bindings, origin and host pairs) rather than what is forbidden?",
     "exampleRefs": ["examples/general/api-and-packages.md#sec-06-keep-only-values-known-to-be-safe"],
     "reviewLearningIds": ["RL-20261021-001"]
+  },
+  {
+    "id": "CI-05",
+    "project": "general",
+    "area": "ci",
+    "title": "A green check means the work ran; a best-effort step cannot fail the run",
+    "rule": "A required check gated by a change filter reports a skip as a pass, so its path lists cover every input the job reads (shared `config/**`, root tooling such as `.prettierrc`, `turbo.json`, `yarn.config.cjs`), change detection matches a renamed file's old path (`previous_filename`) as well as its new one, and a spec filter or shard plan that selects nothing fails. A best-effort step (deploy events, notifications) cannot fail the run: GitHub runs `run:` steps with `bash -e`, so guard each command substitution (`|| VAR=\"\"`) or `set +e` with a one-line why.",
+    "check": "Did this add or change a path filter, change detector, test selection, or best-effort CI step? If yes, can a skipped or empty run report green, and can a best-effort failure turn the run red?",
+    "exampleRefs": ["examples/general/api-and-packages.md#ci-05-match-a-renamed-files-old-path-too"],
+    "reviewLearningIds": ["RL-20261029-001", "RL-20261029-002"]
+  },
+  {
+    "id": "CI-06",
+    "project": "general",
+    "area": "ci",
+    "title": "Keep PR-controlled runs out of caches that trusted builds restore",
+    "rule": "A job that holds deploy or publish credentials (`EXPO_TOKEN`, `id-token: write`) or builds a deployed artifact restores no shared cache, and prefix `restore-keys` fallbacks apply to `pull_request` runs only, so `dev` and `main` builds take an exact key. A `workflow_run` job runs in the default-branch cache scope, so it runs scripts from the default branch and reads the PR checkout as data only. Build-cache validation catches a stale entry, not a crafted one.",
+    "check": "Did this add or change a cache step, `restore-keys`, a deploy or publish job, or a `workflow_run` job? If yes, can a run that PR code controls write an entry that a credentialed or deploy build restores?",
+    "exampleRefs": ["examples/general/api-and-packages.md#ci-06-restore-prefix-cache-keys-on-pull-requests-only"],
+    "reviewLearningIds": ["RL-20261029-003"]
   }
 ]

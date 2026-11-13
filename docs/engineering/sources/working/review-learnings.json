@@ -10915,5 +10915,830 @@
     "ruleIds": [
       "TEST-01"
     ]
+  },
+  {
+    "id": "RL-20261023-001",
+    "title": "Replacement tests set the middle of the chain by hand",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9311,
+      9285,
+      9409,
+      9396,
+      9400
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4358087691,
+      4358140598,
+      4348996357,
+      4357515811,
+      4385993911,
+      4403815241,
+      4380523325,
+      4388785777
+    ],
+    "reviewIds": [
+      5693947754,
+      5666453724
+    ],
+    "issueCommentIds": [
+      6442236570
+    ],
+    "learning": "Jest replacements for deleted Cypress checks injected what the old test crossed: a Redux settings value instead of the persisted key and its hydration, a curation put into the store instead of saved and reloaded, a details query mock that ignored its arguments, `isBatchable` read from a mocked `TxFlow` while the provider and context links stayed untested (\"each end is tested, the middle is not\"), and a `sell` prop stubbed one step before the swap widget. The fixes write localStorage and hydrate as the app does, assert the query args with unique ids, add one test per untested link, and render the real widget with the prop; mutations of each link now fail.",
+    "ruleIds": [
+      "TEST-04"
+    ]
+  },
+  {
+    "id": "RL-20261027-001",
+    "title": "Replacement tests checked less than the deleted E2E test",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9392,
+      9388,
+      9384,
+      9375,
+      9393,
+      9401,
+      9402,
+      9413,
+      9397,
+      9409
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4380002561,
+      4388718439,
+      4380002569,
+      4388718819,
+      4379401862,
+      4379583530,
+      4379176888,
+      4379299778,
+      4379176903,
+      4379300209,
+      4377039832,
+      4377368825,
+      4380137270,
+      4386457835,
+      4385800968,
+      4403601647,
+      4385993906,
+      4403814858
+    ],
+    "reviewIds": [
+      5666454190,
+      5694463526,
+      5656034667,
+      5684693941
+    ],
+    "issueCommentIds": [
+      6475341130,
+      6492324497,
+      6475014471
+    ],
+    "learning": "Deletions of Cypress checks were held until the replacement made every assertion the old test made: reward cells against the amount-and-fiat format instead of containing `ETH`, both sort directions, opening the token selector instead of starting on the token, the module address that reaches `createEnableModuleTx` instead of a call count, the Overview mounted on the dashboard, the message and Safe App name in the signing popup, an executed note rendered read-only, and the three-action swap, sidebar Bridge, Import button and disconnect paths that had no replacement. Reviewers proved each gap with a mutation that left the suite green.",
+    "ruleIds": [
+      "TEST-04"
+    ]
+  },
+  {
+    "id": "RL-20261027-002",
+    "title": "Third-party widget UI left uncovered on purpose",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9395,
+      9384,
+      9396
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4387743156,
+      4379299778
+    ],
+    "reviewIds": [
+      5666453276
+    ],
+    "issueCommentIds": [
+      6442236570
+    ],
+    "learning": "Deleting the CoW TWAP and swap specs and the sidebar Bridge case left the widgets' own UI (token list, Max, recipient toggle inside the iframe, LI.FI content) untested as an accepted risk: the deleted tests asserted on third-party UI and never reached the wallet's transaction path. What the wallet owns kept coverage: the entry points, the params and `sell` token handed to the widget, and the sanctions block.",
+    "ruleIds": [
+      "TEST-04"
+    ]
+  },
+  {
+    "id": "RL-20261023-002",
+    "title": "Deletions left orphaned helpers, data and references, or removed a helper still in use",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9323,
+      9394,
+      9396,
+      9397,
+      9401,
+      9402,
+      9241
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4358765980,
+      4359068622,
+      4387626587,
+      4387761216,
+      4360901964,
+      4360962770
+    ],
+    "reviewIds": [
+      5666453724,
+      5684693941,
+      5663167587,
+      5666454190
+    ],
+    "issueCommentIds": [
+      6442236570,
+      6475014471,
+      6475339431,
+      6475341130
+    ],
+    "learning": "Removing Cypress specs left page-object exports, selectors, scenario builders, a fixture doc comment and a `cypress.test.mjs` sample that only the deleted tests used, plus JSDoc above a deleted function and the second line of a deleted constant at module level. One removal script cut a helper a remaining spec still called, which ESLint cannot catch because it ignores `apps/web/cypress`; the author re-checked with `git grep` and an esbuild bundle of every spec. Moving `Identicon` into `packages/views` also dropped `blo` from the web app's dependencies.",
+    "ruleIds": [
+      "API-01"
+    ]
+  },
+  {
+    "id": "RL-20261028-001",
+    "title": "Persisted settings and mocked hook values leaked between tests",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9417,
+      9396
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5695450463,
+      5684933726
+    ],
+    "issueCommentIds": [
+      6495557367,
+      6494676778
+    ],
+    "learning": "A QR prefix test failed under `--randomize` because the settings slice is persisted: a switch test wrote `shortName.qr` to localStorage, and an `initialReduxState` with `qr: false` did not override the persisted value; clearing localStorage in `beforeEach` fixed it and a sibling file. In the assets table tests a `useCurrentChain` value set by one test stayed for later ones, and a random `chainBuilder` chain sometimes enabled `HIDE_NATIVE_TOKEN`; the outer `beforeEach` now resets the mock and the test pins `features: []`.",
+    "ruleIds": [
+      "TEST-06"
+    ]
+  },
+  {
+    "id": "RL-20261026-001",
+    "title": "Fixture builder stored a shared default object by reference",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9371,
+      9389
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4376720036,
+      4379399306
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A Safe Shield analysis builder stored the module-level `DEFAULT_INFO` object by reference, so an earlier story's edits reached the new stories built after it. The follow-up PR copies the default per entry.",
+    "ruleIds": [
+      "TEST-06"
+    ]
+  },
+  {
+    "id": "RL-20261026-002",
+    "title": "Tests that passed before the work settled or on data that could not show the bug",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9350,
+      9370,
+      9426,
+      9397,
+      9402
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4361163149,
+      4375787434,
+      4376204266,
+      4376253520
+    ],
+    "reviewIds": [
+      5679131981,
+      5684693941,
+      5686981409
+    ],
+    "issueCommentIds": [
+      6464804729,
+      6475014471
+    ],
+    "learning": "A positive `waitFor` passed on the first render because the pre-check default already allowed Execute, so the smart-account case stayed green when the rule broke; a relay test mutated the tx in place while the real SDK returns a signed copy, hiding a dropped assignment. A `toHaveCount(0)` for a button that only exists in a closed dropdown passed either way, a withdrawal fixture with one validator could not catch a first-only loop, and a queue smoke test derived its expected rows from raw API order instead of the newest proposal per nonce and required its conflict precondition outside the rows the widget shows. Each fix was confirmed by a mutation that now fails.",
+    "ruleIds": [
+      "TEST-01"
+    ]
+  },
+  {
+    "id": "RL-20261028-002",
+    "title": "Assertions found the control anywhere in the row or page",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9396,
+      9414
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5666453724,
+      5679132883
+    ],
+    "issueCommentIds": [
+      6442236570,
+      6478542077
+    ],
+    "learning": "A Swap button count over the whole asset row passed on the CSS-hidden mobile copy when the desktop Actions cell lost its button, and a journey looked for the Safe name anywhere on the page instead of in `safe-header-info`. Both now query inside the container the deleted Cypress check used.",
+    "ruleIds": [
+      "E2E-01"
+    ]
+  },
+  {
+    "id": "RL-20261029-001",
+    "title": "Required checks passed when their work never ran",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9462,
+      9412
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4411699281,
+      4411748009,
+      4386093162,
+      4386292118
+    ],
+    "reviewIds": [
+      5665960883
+    ],
+    "issueCommentIds": [
+      6473748326
+    ],
+    "learning": "Once lint, type-check, unit-test and isolated E2E results became required, a skipped job read as a pass. Path lists missed `config/**`, root tooling (`.prettierrc`, `turbo.json`, `yarn.config.cjs`, `knip.json`) and `expo-plugins/**`; the change detector matched only a renamed file's new path; and a manual spec filter that matched nothing let every shard pass empty. The fixes add the inputs, match `previous_filename` too, and make the planner throw on an empty selection.",
+    "ruleIds": [
+      "CI-05"
+    ]
+  },
+  {
+    "id": "RL-20261029-002",
+    "title": "Best-effort deploy event failed the run under bash -e",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9422
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5679132410
+    ],
+    "issueCommentIds": [
+      6447465313
+    ],
+    "learning": "A DORA event step meant only to warn ended the dev deploy run on a transient GitHub API error: GitHub runs `run:` steps as `bash -e`, so with `pipefail` the failed command substitution stopped the step before its `||` fallback. The step now turns `-e` off with a one-line comment saying why.",
+    "ruleIds": [
+      "CI-05"
+    ]
+  },
+  {
+    "id": "RL-20261029-003",
+    "title": "PR-controlled runs could write caches that deploy builds restore",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9452,
+      9451
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4403094956,
+      4403148882
+    ],
+    "reviewIds": [
+      5686549444,
+      5686605212
+    ],
+    "issueCommentIds": [
+      6475732772,
+      6476574288,
+      6475733333
+    ],
+    "learning": "Mobile jobs holding `EXPO_TOKEN` and the `dev`/`main` web builds that deploy to dev and staging restored shared caches, `restore-keys` turned an exact Next.js key into \"newest entry wins\" for every event, and two `workflow_run` workflows ran scripts from the PR checkout in the default-branch cache scope. Credentialed and deploy jobs now skip the cache, prefix fallbacks apply to `pull_request` runs only, and the PR description dropped the claim that webpack validation guards the output, since it catches a stale entry, not a crafted one.",
+    "ruleIds": [
+      "CI-06"
+    ]
+  },
+  {
+    "id": "RL-20261023-003",
+    "title": "E2E steps waited on the wrong thing or with the wrong budget",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9288,
+      9302,
+      9357,
+      9460
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4349296445,
+      4349665761,
+      4356996694,
+      4357152769,
+      4362175300,
+      4376670789
+    ],
+    "reviewIds": [
+      5695571720
+    ],
+    "issueCommentIds": [
+      6495548134
+    ],
+    "learning": "A proposer page object clicked before its section rendered; `goto()` now waits with the suite's 30 s allowance. `connectAs` added an init script per owner and relied on the last one winning, though several init scripts run in an undefined order; one script now reads a cookie that names the owner. A journey polled a plan-gated route before the Workspace existed and now waits on the CGW history. When the global step timeout dropped to 20 s, step times were measured with `trace: 'on'`, the one slow step got its own 45 s timeout with a comment, and fixed app polls got a note in the config.",
+    "ruleIds": [
+      "E2E-02"
+    ]
+  },
+  {
+    "id": "RL-20261029-004",
+    "title": "Async continuation outlived its component or a newer run",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9446,
+      9482
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4402114164,
+      4402703212,
+      4413455436,
+      4413827535
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "After `await connect()` the WalletConnect input scheduled a timeout even when closing the popup had unmounted it; the continuation now returns early once unmounted. A router guard re-check wrote its result after a newer check for another page had settled, rewinding the allowed path; the effect cleanup now sets a cancelled flag so a superseded run records nothing and does not redirect. Both fixes came with tests that fail without the guard.",
+    "ruleIds": [
+      "CODE-06"
+    ]
+  },
+  {
+    "id": "RL-20261029-005",
+    "title": "Error predicate and its test used hand-written SDK messages",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9446
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4402114153,
+      4402702692
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "The expired-proposal predicate matched two messages but missed `Expired. proposal id` that the pinned sign-client throws directly. It now covers that form, and its test builds the error with the SDK's own `getInternalError('EXPIRED', …)`, so a rewording in a later SDK fails the test.",
+    "ruleIds": [
+      "TEST-01"
+    ]
+  },
+  {
+    "id": "RL-20261027-003",
+    "title": "New buttons reused an analytics event without a surface label",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9425
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [],
+    "issueCommentIds": [
+      6447645892,
+      6447940887
+    ],
+    "learning": "Workspace local-contact CSV buttons fired the same import and download events as the Safe-level toolbar, so their use could not be told apart; both clicks now send `label: 'workspace_local_contacts'`.",
+    "ruleIds": [
+      "OBS-01"
+    ]
+  },
+  {
+    "id": "RL-20261023-004",
+    "title": "Stories for a new component and for deleted visual tests",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9203,
+      9425
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4323825943,
+      4323825953,
+      4324128504,
+      4324128737,
+      4391432657,
+      4391539992
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [
+      6447645892,
+      6447940887
+    ],
+    "learning": "Earn and Swap visual Cypress tests were deleted only after `ConsentAccepted` stories set the consent the page reads and Storybook swapped the live CoW iframe for a fixed placeholder. A new CSV action component got a story and a test that opens its dialogs, not only enabled and disabled checks.",
+    "ruleIds": [
+      "TEST-07"
+    ]
+  },
+  {
+    "id": "RL-20261027-004",
+    "title": "Action button group overflowed on mobile",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9425
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4391432651,
+      4391537638
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A new pair of CSV buttons sat in a `shrink-0` toolbar and overflowed on narrow screens; the group is now `max-w-full flex-wrap`.",
+    "ruleIds": [
+      "UX-01"
+    ]
+  },
+  {
+    "id": "RL-20261028-003",
+    "title": "Copy and explorer controls placed inside a Tooltip",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9173
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5665960332
+    ],
+    "issueCommentIds": [
+      6469398080
+    ],
+    "learning": "A look-alike address tooltip held copy buttons and explorer links that keyboard users could not reach: the Base UI tooltip popup is outside the tab order and closes on Tab. It and the onboarding warning icon now use a Popover with `openOnHover`, with a test that focuses the trigger, presses Enter and lands on \"Copy address\".",
+    "ruleIds": [
+      "A11Y-01"
+    ]
+  },
+  {
+    "id": "RL-20261028-004",
+    "title": "Look-alike test address failed checksum validation",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9173
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5665960332
+    ],
+    "issueCommentIds": [
+      6469398080
+    ],
+    "learning": "A shared `fakerLookalikeAddress` helper kept the mixed-case ends of a checksummed address and added a lowercase middle, so 912 of 1000 results failed `isAddress`; any later test typing one into a validated field would fail at random. The helper now lowercases and re-checksums.",
+    "ruleIds": [
+      "TEST-05"
+    ]
+  },
+  {
+    "id": "RL-20261028-005",
+    "title": "Peer explorer link used the row's chain",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9173
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4359975809,
+      4375273182
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [
+      6367328184,
+      6411676032
+    ],
+    "learning": "Look-alike clusters span chains but dropped each peer's chain id, so a peer's explorer link used the current row's chain and could point at an address that does not exist there. Each peer now carries its chains, links only when it is on exactly one, and gets no link otherwise.",
+    "ruleIds": [
+      "DATA-01"
+    ]
+  },
+  {
+    "id": "RL-20261027-005",
+    "title": "Type guards keyed on a shared shape or field presence",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9290
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4376655927,
+      4376693048,
+      4376739726,
+      4376763279,
+      4378841145,
+      4378844532,
+      4378846463
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "An allowlist DTO type was narrowed by `enforcement.via === 'guard'`, which future guard-based policies share, and its data by `'tokenAddress' in data`, which any later policy with that field would pass. Both now key on the `type` members they accept, and a `type` re-check the guard already covers was dropped.",
+    "ruleIds": [
+      "CODE-05"
+    ]
+  },
+  {
+    "id": "RL-20261027-006",
+    "title": "Opaque conditions and names too close to tell apart",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9290,
+      9292,
+      9270,
+      9267
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4376824648,
+      4378852425,
+      4379968995,
+      4386603738,
+      4386741086,
+      4388591284,
+      4389850003,
+      4361234172,
+      4363555177
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A repeated `isAllowlistPolicy(p) && p.status === 'active'` became `isActiveAllowlistPolicy`, and `!!scopeContext && !scopeContext.scope` became `isPickingSafe`. Two label constants for different buttons (`ADD_TOKEN_LABEL`, `ADD_TOKEN_CONFIRM_LABEL`) were renamed so they read apart, and a form type that reused the generated `AllowlistRecipient` name became `AllowlistFormRecipient`.",
+    "ruleIds": [
+      "CODE-05"
+    ]
+  },
+  {
+    "id": "RL-20261027-007",
+    "title": "Literal, hand-built key and hand-parsed query where a helper exists",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9290,
+      9385
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4376575894,
+      4378837365,
+      4376832506,
+      4378859551,
+      4379858753,
+      4385981742
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A token filter compared against `'ERC20'` instead of `TokenType.ERC20`, a `chainId:address` key was built inline in several places instead of one helper, and a hook parsed `window.location.search` by hand while the router was not ready although `getLocationQuery()` already does it; each now uses the existing enum or helper.",
+    "ruleIds": [
+      "DATA-04"
+    ]
+  },
+  {
+    "id": "RL-20261027-008",
+    "title": "Policy detail hooks duplicated their shared scaffolding",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9290
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4376377733,
+      4376807246,
+      4378830577
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "The allowlist and spending-limit detail hooks repeated the same signer, Safe and wallet derivation. One `usePolicyDetailsBase` hook now returns `{ viewer, safe, names, onConnectWallet }`, and each details hook adds only its own parts.",
+    "ruleIds": [
+      "CODE-01"
+    ]
+  },
+  {
+    "id": "RL-20261027-009",
+    "title": "Comments that narrate or restate a data limitation",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9290,
+      9402
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4376146607,
+      4385802291,
+      4403602345
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A doc comment explaining that CGW allowlists carry no timestamp, and a JSDoc restating what a test helper returns, were removed.",
+    "ruleIds": [
+      "DOC-01"
+    ]
+  },
+  {
+    "id": "RL-20261023-005",
+    "title": "Docs and agent guidance out of step with scripts and workflows",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9316,
+      9462
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4358154934,
+      4359075104
+    ],
+    "reviewIds": [
+      5696871450
+    ],
+    "issueCommentIds": [
+      6495414680
+    ],
+    "learning": "Widening `e2e:env:test` to `e2e/src/**/*.test.mjs` came with an update to `apps/web/e2e/AGENTS.md`, and the example `result` job in `docs/ci-required-checks.md` gained the `permissions: {}` every real workflow sets, so copying it no longer grants the default token.",
+    "ruleIds": [
+      "DOC-01"
+    ]
+  },
+  {
+    "id": "RL-20261027-010",
+    "title": "Variant prop added but never passed by its parent",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9272
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4389193030,
+      4390281345
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "`AllowlistSummary` gained `isGuardEnabled`, but `RecipientAllowlistForm` never passed it, so the guard-enabled tooltip could not show; the parent now passes it.",
+    "ruleIds": [
+      "API-01"
+    ]
+  },
+  {
+    "id": "RL-20261023-006",
+    "title": "New ENS branch and an environment fix shipped without tests",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9271,
+      9332
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4387801806,
+      4389173185,
+      4360507209,
+      4360587025
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Recipient row tests covered hex addresses but not ENS input with resolution, and a fix serving config-service logos on the isolated stack had no check that it keeps working. ENS tests were added, and the stack's readiness check now requires an `image/*` logo on the stack's own address, with tests for a 404, a non-image and a wrong port.",
+    "ruleIds": [
+      "TEST-02"
+    ]
+  },
+  {
+    "id": "RL-20261029-006",
+    "title": "Shared utils package imported viem",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9428
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4402455150,
+      4402992362
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "`packages/utils` imported the `Address` type from viem, which it does not declare; it now uses the in-house `Address` type from `@safe-global/utils/utils/formatters`.",
+    "ruleIds": [
+      "PKG-02"
+    ]
+  },
+  {
+    "id": "RL-20261023-007",
+    "title": "Business logic and user copy placed in shared packages",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9257,
+      9267,
+      9428
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4363555177,
+      4402759560,
+      4402885903,
+      4403028352,
+      4403484631,
+      4403524160,
+      4403532626,
+      4410321089
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [
+      6340162968,
+      6361256825
+    ],
+    "learning": "`packages/views` is for presentation only, so designers can change the look without touching logic: permission rules, policy state resolution, CGW-to-display mapping and allowlist form state added there moved to `apps/web`. Refusal reasons written like contract docs in `packages/utils` were rewritten in plain language in the PR that delivers them, and moved to the Safe Shield component that shows them; the decoder now carries only the error name.",
+    "ruleIds": [
+      "PKG-02"
+    ]
+  },
+  {
+    "id": "RL-20261023-008",
+    "title": "Hand-written policy shape beside generated DTO types",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9257
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4347984626,
+      4357517679
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Policy enforcement and recipient types were written by hand while `GuardEnforcementDto` and `Erc20TransferRecipientDto` already existed in the generated gateway client with a different shape; the child PR wiring CGW moved to the generated types.",
+    "ruleIds": [
+      "API-03"
+    ]
+  },
+  {
+    "id": "RL-20261023-009",
+    "title": "Copy and banners that departed from the design or the base branch",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9257,
+      9268
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4348180409,
+      4348181130,
+      4348181569,
+      4348182040,
+      4348182629,
+      4348183088,
+      4349730263,
+      4350060825,
+      4350094132,
+      4357237560,
+      4357444594,
+      4357461872,
+      4357500701,
+      4376648482
+    ],
+    "reviewIds": [
+      5651182742
+    ],
+    "issueCommentIds": [
+      6340566285
+    ],
+    "learning": "Each copy difference from the prototype was either fixed or kept with a stated reason: UTC stays because the time is on chain, an expired state and two signer hints were added because the design had no state for them, and a missing activation banner was added. A redesigned guard banner that dropped the guard addresses the base branch showed was questioned as a possible regression.",
+    "ruleIds": [
+      "UX-03"
+    ]
+  },
+  {
+    "id": "RL-20261028-006",
+    "title": "Allowlist edit never revoked removed entries on chain",
+    "sourceWindowId": "CLOSED-20261022-20261030",
+    "prNumbers": [
+      9312
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4400439610
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Allowlist configurations were built from the new list only, while the policy contracts keep every entry they are not told to change, so a recipient or token removed in the UI stayed allowed on chain. An edit has to load the stored allowlist and encode each removal (`Permission.NONE`, or `policy = address(0)`).",
+    "ruleIds": [
+      "FORM-01"
+    ]
   }
 ]

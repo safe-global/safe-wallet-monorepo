@@ -533,3 +533,126 @@ export const Disclaimer: Story = {
 ### Why
 
 The page reads consent from local storage, so once someone clicks Continue in Storybook the story renders the page instead of the disclaimer, and the visual run compares the wrong state.
+
+## TEST-04 — Test each link the replaced E2E check crossed
+
+Source: PR #9409 (RL-20261023-001)
+
+### Avoid
+
+```ts
+jest.mock('../../TxFlow', () => ({ TxFlow: jest.fn(() => null) }))
+expect(txFlowProps()).toMatchObject({ txNonce, isRejection: true, isBatchable: false })
+// TxFlow → TxFlowProvider → context is never exercised
+```
+
+### Prefer
+
+```tsx
+it('passes isBatchable to the flow context', () => {
+  const { result } = renderHook(() => useContext(TxFlowContext), {
+    wrapper: ({ children }) => (
+      <TxFlowProvider step={0} data={{}} isBatchable={false}>
+        {children}
+      </TxFlowProvider>
+    ),
+  })
+  expect(result.current.isBatchable).toBe(false)
+})
+```
+
+### Why
+
+The deleted browser test ran the whole chain from the flow to the slot. Testing only the two ends lets a dropped prop in the middle bring the bug back with every test green; one test per link catches it.
+
+## TEST-04 — Keep the deleted test's format check
+
+Source: PR #9402 (RL-20261027-001)
+
+### Avoid
+
+```ts
+expect(getFieldValue(details, 'Net annual rewards')).toHaveTextContent('ETH')
+```
+
+### Prefer
+
+```ts
+const REWARD = /^\d+(\.\d+)? ETH \(\$\s?\d{1,3}(,\d{3})*\)$/
+
+expect(getFieldValue(details, 'Net annual rewards').textContent).toMatch(REWARD)
+```
+
+### Why
+
+The deleted Cypress test checked the amount and the fiat value. A cell that renders only the symbol still contains `ETH`, so the weaker check passes when both values disappear.
+
+## TEST-01 — Flush async work before a positive assertion
+
+Source: PR #9426 (RL-20261026-002)
+
+### Avoid
+
+```ts
+await waitFor(() => expect(mockIsSmartContractWallet).toHaveBeenCalled())
+await waitFor(() => {
+  expect(result.current).toContain('execute')
+})
+```
+
+### Prefer
+
+```ts
+await waitFor(() => expect(mockIsSmartContractWallet).toHaveBeenCalled())
+await act(async () => {})
+expect(result.current).toContain('execute')
+```
+
+### Why
+
+The pre-check default already registers Execute, so a positive `waitFor` passes on the first render, before the async result it is meant to test arrives. Flushing first makes the assertion read the settled state.
+
+## E2E-01 — Query inside the visible cell, not the whole row
+
+Source: PR #9396 (RL-20261028-002)
+
+### Avoid
+
+```tsx
+expect(within(rowOf(name)!).queryAllByTestId('swap-btn').length).toBeGreaterThan(0)
+```
+
+### Prefer
+
+```tsx
+const actionsCell = within(rowOf(name)!).getByTestId('table-cell-actions')
+expect(within(actionsCell).getByTestId('swap-btn')).toBeInTheDocument()
+```
+
+### Why
+
+Each row also renders a mobile copy of the buttons that CSS hides on desktop. Counting over the whole row passes on that hidden copy when the visible button is gone.
+
+## TEST-05 — Derived test addresses stay valid
+
+Source: PR #9173 (RL-20261028-004)
+
+### Avoid
+
+```ts
+export const fakerLookalikeAddress = (address: string) =>
+  `0x${address.slice(2, 6)}${faker.string.hexadecimal({ length: 32, prefix: '', casing: 'lower' })}${address.slice(-4)}`
+```
+
+### Prefer
+
+```ts
+export const fakerLookalikeAddress = (address: string) =>
+  checksumAddress(
+    `0x${address.slice(2, 6)}${faker.string.hexadecimal({ length: 32, prefix: '', casing: 'lower' })}${address.slice(-4)}`.toLowerCase(),
+  )
+```
+
+### Why
+
+Mixed-case ends with a lowercase middle fail the EIP-55 checksum in most runs, so a test that types the value into a validated address field fails at random.

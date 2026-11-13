@@ -736,3 +736,33 @@ getRowAriaLabel: ({ item }) => `Open ${getItemLabel(item)} for ${shortenAddress(
 ### Why
 
 A screen reader that lists controls by name cannot tell apart rows or tiles that all announce the same text. Put the item into the accessible name of every repeated control or indicator.
+
+## A11Y-01 — Put interactive hover content in a Popover
+
+Source: PR #9173 (RL-20261028-003)
+
+### Avoid
+
+```tsx
+<Tooltip>
+  <TooltipTrigger type="button">{name}</TooltipTrigger>
+  <TooltipContent>
+    <PeerAddress address={address} explorerLink={link} />
+  </TooltipContent>
+</Tooltip>
+```
+
+### Prefer
+
+```tsx
+<Popover>
+  <PopoverTrigger openOnHover>{name}</PopoverTrigger>
+  <PopoverContent>
+    <PeerAddress address={address} explorerLink={link} />
+  </PopoverContent>
+</Popover>
+```
+
+### Why
+
+The tooltip popup is outside the tab order and closes on Tab, so keyboard users cannot reach its copy button or link. A popover keeps hover, opens on Enter and tap, and moves focus inside.

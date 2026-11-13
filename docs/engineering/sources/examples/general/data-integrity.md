@@ -811,3 +811,23 @@ previousAmount: BigInt(existingSpendingLimit.amount) !== BigInt(amountInWei) ? p
 ### Why
 
 The formatted value follows the locale ("1,000" or "1.000"), so it never equals the typed "1000" and an unchanged amount shows as replaced. Compare the wei values and use the formatted string only for display.
+
+## DATA-04 — Read the URL query through the existing helper
+
+Source: PR #9385 (RL-20261027-007)
+
+### Avoid
+
+```ts
+const currentQuery = router.isReady ? router.query : parse(window.location.search.slice(1))
+```
+
+### Prefer
+
+```ts
+const currentQuery = router.isReady ? router.query : getLocationQuery()
+```
+
+### Why
+
+`getLocationQuery()` already reads the query before the router is ready. A second hand-written parser can drift from it.

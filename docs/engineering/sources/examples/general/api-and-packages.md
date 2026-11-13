@@ -472,3 +472,67 @@ const safeIntegerCode = (thrown: unknown): number | undefined => {
 ### Why
 
 An unprefixed 64-character hex private key matches the pattern and would be copied into the error message that reaches logs. Keeping only the one shape that cannot carry a secret leaves nothing for an unexpected value to slip through.
+
+## CI-05 — Match a renamed file's old path too
+
+Source: PR #9412 (RL-20261029-001)
+
+### Avoid
+
+```bash
+files=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" --jq '.[].filename')
+```
+
+### Prefer
+
+```bash
+files=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" \
+  --jq '.[] | .filename, (.previous_filename // empty)')
+```
+
+### Why
+
+A PR that only moves a file out of a covered path otherwise reads as irrelevant, skips the build and the tests, and the required result check passes.
+
+## CI-06 — Restore prefix cache keys on pull requests only
+
+Source: PR #9451, #9452 (RL-20261029-003)
+
+### Avoid
+
+```yaml
+restore-keys: ${{ runner.os }}-nextjs-${{ hashFiles('yarn.lock') }}-
+```
+
+### Prefer
+
+```yaml
+restore-keys: ${{ github.event_name == 'pull_request' && format('{0}-{1}-nextjs-{2}-', runner.os, runner.arch, hashFiles('yarn.lock', 'apps/web/package.json')) || '' }}
+# jobs that deploy or hold publish credentials
+cache: ${{ github.event_name == 'pull_request' }}
+```
+
+### Why
+
+A prefix fallback restores the newest entry under the prefix, so anyone who can write that cache scope can feed the deploy build. Builds on `dev` and `main` take an exact key or no cache.
+
+## CODE-05 — Key type guards on the discriminant
+
+Source: PR #9290 (RL-20261027-005)
+
+### Avoid
+
+```ts
+type AllowlistDto = PolicyDto & { enforcement: Extract<PolicyDto['enforcement'], { via: 'guard' }> }
+const isAllowlistData = (data: PolicyDto['data']): data is Erc20TransferData => 'tokenAddress' in data
+```
+
+### Prefer
+
+```ts
+type AllowlistDto = PolicyDto & { type: Extract<PolicyDto['type'], 'erc20-transfer' | 'native-transfer'> }
+```
+
+### Why
+
+Other guard-based policies share the enforcement shape, and any later policy with a `tokenAddress` field passes the presence check. Naming the accepted `type` members keeps new kinds out.
