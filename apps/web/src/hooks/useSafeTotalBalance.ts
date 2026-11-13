@@ -16,6 +16,8 @@ const useSafeTotalBalance = () => {
       return { fiatTotal: summary.fiatTotal, noAssets, isSummaryEnabled: isEnabled }
     }
     if (isEnabled && isLoading) return { fiatTotal: undefined, noAssets: false, isSummaryEnabled: isEnabled }
+    // Without a summary the balances are the fallback; until they load their total is '', which would show as $0
+    if (isEnabled && !balancesLoaded) return { fiatTotal: undefined, noAssets: false, isSummaryEnabled: isEnabled }
 
     return { fiatTotal: balances.fiatTotal, noAssets: hasNoTokens, isSummaryEnabled: isEnabled }
   }, [summary, isEnabled, isLoading, balances.items, balances.fiatTotal, balancesLoaded])

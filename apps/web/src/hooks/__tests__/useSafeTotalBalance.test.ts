@@ -18,11 +18,11 @@ const VISIBLE_TOTAL = faker.finance.amount()
 const HELD = balanceBuilder().build()
 const EMPTY = balanceBuilder().with({ balance: '0' }).build()
 
-const mockBalances = (fiatTotal: string, items = [HELD]) =>
+const mockBalances = (fiatTotal: string, items = [HELD], loaded = true) =>
   jest.mocked(useVisibleBalances).mockReturnValue({
     balances: { fiatTotal, items },
-    loaded: true,
-    loading: false,
+    loaded,
+    loading: !loaded,
     error: undefined,
   })
 
@@ -108,5 +108,14 @@ describe('useSafeTotalBalance', () => {
     const { result } = renderHook(() => useSafeTotalBalance())
 
     expect(result.current).toEqual({ fiatTotal: VISIBLE_TOTAL, noAssets: false, isSummaryEnabled: true })
+  })
+
+  it('shows no total, not $0, while it falls back to balances that are still loading', () => {
+    mockBalances('', [], false)
+    mockSummary({ isEnabled: true })
+
+    const { result } = renderHook(() => useSafeTotalBalance())
+
+    expect(result.current).toEqual({ fiatTotal: undefined, noAssets: false, isSummaryEnabled: true })
   })
 })
