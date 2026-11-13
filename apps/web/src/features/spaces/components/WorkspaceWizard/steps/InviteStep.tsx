@@ -8,7 +8,6 @@ import type { DraftInvite, WorkspaceDraft } from '@/features/spaces/store'
 import { MemberRole } from '../../../memberRole'
 import MemberInviteRow from '../../InviteMembersOnboarding/components/MemberInviteRow'
 import type { InviteMembersFormValues } from '../../InviteMembersOnboarding/hooks/useInviteForm'
-import { useFormFromDraft } from '../hooks/useFormFromDraft'
 import { useStepAdvance } from '../hooks/useStepAdvance'
 import { useWorkspaceDraft } from '../hooks/useWorkspaceDraft'
 import { validateStep } from '../validation'
@@ -30,10 +29,10 @@ const InviteStep = (): ReactElement => {
   const { stepNumber, totalSteps, advance, retreat, continueLabel, submitError, isSubmitting, isLastStep } =
     useStepAdvance('invite')
   const [error, setError] = useState<string>()
-  const { control, formState, register, setValue, trigger, reset, getValues, handleSubmit } =
-    useForm<InviteMembersFormValues>({ mode: 'onChange', defaultValues: { members: [EMPTY_ROW] } })
+  const { control, formState, register, setValue, trigger, getValues, handleSubmit } = useForm<InviteMembersFormValues>(
+    { mode: 'onChange', defaultValues: toInviteForm(draft) },
+  )
   const { fields, append, remove } = useFieldArray({ control, name: 'members' })
-  const isReady = useFormFromDraft(reset, toInviteForm)
 
   const onSubmit = handleSubmit(({ members }) => {
     const invites = toDraftInvites(members)
@@ -60,7 +59,7 @@ const InviteStep = (): ReactElement => {
             continueLabel={continueLabel}
             continueType="submit"
             continueForm={FORM_ID}
-            continueDisabled={!isReady || !formState.isValid || isSubmitting}
+            continueDisabled={!formState.isValid || isSubmitting}
             continueLoading={isSubmitting}
             continueTestId="invite-members-continue-button"
           />
@@ -77,8 +76,7 @@ const InviteStep = (): ReactElement => {
       }
     >
       <form id={FORM_ID} onSubmit={onSubmit} className="flex flex-col gap-6">
-        {/* Disabled until the draft fills the form: anything typed earlier would be replaced. */}
-        <fieldset disabled={!isReady} className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3">
           {fields.map((field, index) => (
             <MemberInviteRow
               key={field.id}
@@ -95,7 +93,7 @@ const InviteStep = (): ReactElement => {
               }}
             />
           ))}
-        </fieldset>
+        </div>
 
         <button
           type="button"

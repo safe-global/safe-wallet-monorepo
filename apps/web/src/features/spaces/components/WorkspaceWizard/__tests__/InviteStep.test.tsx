@@ -11,10 +11,14 @@ import { fakerChecksummedAddress, renderWithUserEvent, screen, waitFor } from '@
 import { MemberRole } from '../../../memberRole'
 import { INVALID_IDENTIFIER_ERROR } from '../../AddMemberModal/utils'
 import InviteStep from '../steps/InviteStep'
+import WizardReady from '../WizardReady'
 
 let mockIsSafePro = false
 let mockIsSurveyEnabled = false
-jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockIsSafePro }))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({
+  useIsSafeProEnabled: () => mockIsSafePro,
+  useSafeProFlag: () => mockIsSafePro,
+}))
 jest.mock('@/hooks/useIsSurveyEnabled', () => ({ __esModule: true, default: () => mockIsSurveyEnabled }))
 
 const renderInviteStep = (changes: Partial<WorkspaceDraft> = {}, ownWallets: string[] = []) => {
@@ -24,10 +28,15 @@ const renderInviteStep = (changes: Partial<WorkspaceDraft> = {}, ownWallets: str
     .with({ ownerId, name: fakeWorkspaceName(), ...changes })
     .build()
   const push = jest.fn(() => Promise.resolve(true))
-  const view = renderWithUserEvent(<InviteStep />, {
-    routerProps: { push },
-    initialReduxState: { auth: signedInAuthState(), workspaceDraft: draft },
-  })
+  const view = renderWithUserEvent(
+    <WizardReady>
+      <InviteStep />
+    </WizardReady>,
+    {
+      routerProps: { push },
+      initialReduxState: { auth: signedInAuthState(), workspaceDraft: draft },
+    },
+  )
   return { ...view, push }
 }
 
@@ -50,14 +59,6 @@ describe('InviteStep', () => {
 
     expect(getStoreInstance().getState().workspaceDraft.invites).toEqual([])
     expect(push).toHaveBeenCalledWith({ pathname: AppRoutes.welcome.survey, query: {} })
-  })
-
-  it('keeps the invite field locked until the draft has filled it, so nothing typed is lost', async () => {
-    renderInviteStep()
-
-    expect(identifierInput()).toBeDisabled()
-    await userLoaded()
-    await waitFor(() => expect(identifierInput()).toBeEnabled())
   })
 
   it('shows why an identifier is invalid and does not go on', async () => {

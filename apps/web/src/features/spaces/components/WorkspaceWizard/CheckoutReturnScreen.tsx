@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactElement } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useBillingGetCheckoutSessionV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
@@ -24,10 +24,12 @@ const CheckoutReturnScreen = ({ sessionId, spaceId }: { sessionId: string; space
   const isCancelled = session !== undefined && !isComplete
 
   const [isSlow, setIsSlow] = useState(false)
-  const [isApplied, setIsApplied] = useState(false)
+  const hasOpened = useRef(false)
+  // Once applied the screen opens the Workspace and unmounts, which ends the polling.
   const { data: setup } = useSpacesGetSetupV1Query(isComplete && spaceId ? { id: spaceId } : skipToken, {
-    pollingInterval: isApplied || isSlow ? 0 : POLL_INTERVAL,
+    pollingInterval: isSlow ? 0 : POLL_INTERVAL,
   })
+  const isApplied = setup?.status === 'applied'
 
   const openWorkspace = useCallback(() => {
     dispatch(clearWorkspaceDraft())
@@ -44,10 +46,10 @@ const CheckoutReturnScreen = ({ sessionId, spaceId }: { sessionId: string; space
   }, [isComplete])
 
   useEffect(() => {
-    if (setup?.status !== 'applied' || isApplied) return
-    setIsApplied(true)
+    if (!isApplied || hasOpened.current) return
+    hasOpened.current = true
     openWorkspace()
-  }, [setup?.status, isApplied, openWorkspace])
+  }, [isApplied, openWorkspace])
 
   useEffect(() => {
     if (!isCancelled) return
