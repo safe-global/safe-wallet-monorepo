@@ -41,7 +41,7 @@ export type PendingPolicyTransaction = {
 }
 
 export const usePendingPolicyTransaction = (
-  policy: PendingSpendingLimitPolicy,
+  policy: Pick<PendingSpendingLimitPolicy, 'safe' | 'safeTxHash'>,
   isUnlisted = false,
 ): PendingPolicyTransaction => {
   // A transaction that has left the queue can no longer change.
