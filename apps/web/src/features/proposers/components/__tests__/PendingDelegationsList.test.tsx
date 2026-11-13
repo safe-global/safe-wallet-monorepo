@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { render, screen, fakerChecksummedAddress } from '@/tests/test-utils'
+import { render, screen, within, fakerChecksummedAddress } from '@/tests/test-utils'
 import { mockSafeInfo, mockChainId, mockWallet } from '@/tests/mocks/hooks'
 import { getCurrentTotp } from '@/features/proposers/utils/totp'
 import type { PendingDelegation } from '@/features/proposers/types'
@@ -48,7 +48,8 @@ describe('PendingDelegationsList', () => {
     render(<PendingDelegationsList />)
 
     expect(screen.getByText('Pending confirmations')).toBeInTheDocument()
-    expect(screen.getByText('2')).toBeInTheDocument()
+    const header = screen.getByRole('button', { name: /Pending confirmations/ })
+    expect(within(header).getByText('2')).toBeInTheDocument()
     expect(screen.getByText('New proposer:')).toBeInTheDocument()
     expect(screen.getByText('Remove proposer:')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sign' })).toBeInTheDocument()
