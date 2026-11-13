@@ -108,22 +108,17 @@ export const getNestedWallet = (
             actualWallet.address,
             safeTx,
             safeTxHash,
-            undefined,
-            nestedChildTx,
+            // TODO(PLA-2351): declare the nested signer's channel
+            { nestedTransaction: nestedChildTx, declared: undefined },
           )
           result = await connectedSDK.approveTransactionHash(safeTxHash)
         } else {
           // Never executed here, even at threshold 1: the user executes it from the parent Safe
           const signedTx = await tryOffChainTxSigning(safeTx, connectedSDK)
-          await proposeTx(
-            safeInfo.chainId,
-            safeInfo.address.value,
-            actualWallet.address,
-            signedTx,
-            safeTxHash,
-            undefined,
-            nestedChildTx,
-          )
+          await proposeTx(safeInfo.chainId, safeInfo.address.value, actualWallet.address, signedTx, safeTxHash, {
+            nestedTransaction: nestedChildTx,
+            declared: undefined,
+          })
         }
       } catch (err) {
         logError(ErrorCodes._817, err)

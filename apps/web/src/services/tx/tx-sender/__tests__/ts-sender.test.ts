@@ -219,7 +219,13 @@ describe('txSender', () => {
         data: '0x0',
       })
 
-      const proposedTx = await dispatchTxProposal({ chainId: '4', safeAddress: '0x123', sender: '0x456', safeTx: tx })
+      const proposedTx = await dispatchTxProposal({
+        chainId: '4',
+        safeAddress: '0x123',
+        sender: '0x456',
+        safeTx: tx,
+        declared: undefined,
+      })
 
       expect(proposedTx).toEqual({
         txId: '123',
@@ -254,7 +260,13 @@ describe('txSender', () => {
       })
       tx.addSignature(generatePreValidatedSignature('0x1234567890123456789012345678901234567890'))
 
-      const proposedTx = await dispatchTxProposal({ chainId: '4', safeAddress: '0x123', sender: '0x456', safeTx: tx })
+      const proposedTx = await dispatchTxProposal({
+        chainId: '4',
+        safeAddress: '0x123',
+        sender: '0x456',
+        safeTx: tx,
+        declared: undefined,
+      })
 
       expect(proposedTx.txId).toBe('123')
 
@@ -281,7 +293,7 @@ describe('txSender', () => {
       })
 
       await expect(
-        dispatchTxProposal({ chainId: '4', safeAddress: '0x123', sender: '0x456', safeTx: tx }),
+        dispatchTxProposal({ chainId: '4', safeAddress: '0x123', sender: '0x456', safeTx: tx, declared: undefined }),
       ).rejects.toThrow()
 
       expect(txEvents.txDispatch).toHaveBeenCalledWith('PROPOSE_FAILED', {
@@ -1454,6 +1466,7 @@ describe('txSender', () => {
           chainId: '4',
           safeAddress: CHILD_SAFE,
           executed,
+          declared: undefined,
         })
 
       beforeEach(() => {

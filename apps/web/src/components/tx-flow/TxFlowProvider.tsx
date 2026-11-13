@@ -8,7 +8,7 @@
  * - Role execution state (canExecuteThroughRole, willExecuteThroughRole)
  */
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { createContext, useCallback, useContext, useState } from 'react'
+import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import type { ReactNode, ReactElement, SetStateAction, Dispatch, ComponentType } from 'react'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
@@ -28,6 +28,7 @@ import { useSigner } from '@/hooks/wallets/useWallet'
 import useChainId from '@/hooks/useChainId'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import useTxDetails from '@/hooks/useTxDetails'
+import { buildDeclared, type DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { useHasFeature } from '@/hooks/useChains'
@@ -96,6 +97,7 @@ export type TxFlowContextType<T extends unknown = any> = {
   isBatch: boolean
   isBatchable: boolean
   role?: Role
+  declared?: DeclaredAttribution
 }
 
 export const initialContext: TxFlowContextType = {
@@ -159,6 +161,7 @@ export type TxFlowProviderProps<T extends unknown> = {
   txLayoutProps?: TxFlowContextType['txLayoutProps']
   isBatch?: TxFlowContextType['isBatch']
   isBatchable?: TxFlowContextType['isBatchable']
+  declared?: DeclaredAttribution
   onContinueToExecute?: (txId: string) => void
 }
 
@@ -177,6 +180,7 @@ const TxFlowProvider = <T extends unknown>({
   isRejection = initialContext.isRejection,
   isBatch = initialContext.isBatch,
   isBatchable = initialContext.isBatchable,
+  declared,
   onContinueToExecute,
 }: TxFlowProviderProps<T>): ReactElement => {
   const signer = useSigner()
@@ -311,6 +315,11 @@ const TxFlowProvider = <T extends unknown>({
     ],
   )
 
+  const resolvedDeclared = useMemo(
+    () => declared ?? buildDeclared(isBatch ? 'NATIVE_BATCH' : 'NATIVE_TRANSFER'),
+    [declared, isBatch],
+  )
+
   const value = {
     step,
     progress,
@@ -358,6 +367,7 @@ const TxFlowProvider = <T extends unknown>({
     txDetailsLoading,
     isBatch,
     isBatchable,
+    declared: resolvedDeclared,
   }
 
   return <TxFlowContext.Provider value={value}>{children}</TxFlowContext.Provider>

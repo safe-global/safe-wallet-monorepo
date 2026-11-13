@@ -30,6 +30,7 @@ type TxFlowProps<T extends unknown> = {
   isRejection?: TxFlowProviderProps<T>['isRejection']
   isBatch?: TxFlowProviderProps<T>['isBatch']
   isBatchable?: TxFlowProviderProps<T>['isBatchable']
+  declared?: TxFlowProviderProps<T>['declared']
   ReviewTransactionComponent?: typeof ReviewTransaction
   eventCategory?: string
 } & TxFlowContextType['txLayoutProps']
@@ -51,6 +52,7 @@ export const TxFlow = <T extends unknown>({
   isRejection,
   isBatch,
   isBatchable,
+  declared,
   ReviewTransactionComponent = ReviewTransaction,
   eventCategory,
   ...txLayoutProps
@@ -103,6 +105,7 @@ export const TxFlow = <T extends unknown>({
               isRejection={isRejection}
               isBatch={isBatch}
               isBatchable={isBatchable}
+              declared={declared}
               onContinueToExecute={handleContinueToExecute}
             >
               <TxFlowContent>

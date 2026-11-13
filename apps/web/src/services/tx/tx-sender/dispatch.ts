@@ -50,6 +50,7 @@ import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import { concat, dataLength } from 'ethers'
 import { encodeNestedTxPayload, supportsNestedTxEnvelope, type NestedTxEnvelope } from '../nestedTxEnvelope'
+import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
 
 /**
  * Propose a new transaction
@@ -59,6 +60,7 @@ export const dispatchTxProposal = async ({
   safeAddress,
   sender,
   safeTx,
+  declared,
   origin,
   scope,
   nestedTransaction,
@@ -67,6 +69,7 @@ export const dispatchTxProposal = async ({
   safeAddress: string
   sender: string
   safeTx: SafeTransaction
+  declared: DeclaredAttribution | undefined
   origin?: string
   scope?: TxSenderScope
   // Verified child tx of a nested approveHash, proposed alongside the parent tx
@@ -77,7 +80,11 @@ export const dispatchTxProposal = async ({
 
   let proposedTx: TransactionDetails | undefined
   try {
-    proposedTx = await proposeTx(chainId, safeAddress, sender, safeTx, safeTxHash, origin, nestedTransaction)
+    proposedTx = await proposeTx(chainId, safeAddress, sender, safeTx, safeTxHash, {
+      declared,
+      origin,
+      nestedTransaction,
+    })
   } catch (error) {
     txDispatch(TxEvent.PROPOSE_FAILED, { error: asError(error) })
     throw error
@@ -294,6 +301,7 @@ export const dispatchNestedTxCreation = async ({
   chainId,
   safeAddress,
   executed,
+  declared,
   origin,
   scope,
   nestedTransaction,
@@ -305,6 +313,7 @@ export const dispatchNestedTxCreation = async ({
   chainId: SafeState['chainId']
   safeAddress: string
   executed: boolean
+  declared: DeclaredAttribution | undefined
   origin?: string
   scope?: TxSenderScope
   nestedTransaction?: NestedTxEnvelope
@@ -328,6 +337,7 @@ export const dispatchNestedTxCreation = async ({
     safeAddress,
     sender: wallet.address,
     safeTx: signedTx,
+    declared,
     origin,
     scope,
     nestedTransaction,

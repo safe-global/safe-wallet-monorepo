@@ -8,6 +8,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { getStoreInstance } from '@/store'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import type { NestedTxEnvelope } from './nestedTxEnvelope'
+import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
 
 // TODO: replace with the generated type once the CGW schema ships `nestedTransaction`
 export type NestedTransactionDto = {
@@ -43,12 +44,22 @@ const proposeTx = async (
   sender: string,
   tx: SafeTransaction,
   safeTxHash: string,
-  origin?: string,
-  nestedTransaction?: NestedTxEnvelope,
+  {
+    declared,
+    origin,
+    nestedTransaction,
+  }: {
+    declared: DeclaredAttribution | undefined
+    origin?: string
+    nestedTransaction?: NestedTxEnvelope
+  },
 ): Promise<TransactionDetails> => {
   const signatures = tx.signatures.size > 0 ? tx.encodedSignatures() : undefined
 
-  const proposeTransactionDto: ProposeTransactionDto & { nestedTransaction?: NestedTransactionDto } = {
+  const proposeTransactionDto: ProposeTransactionDto & {
+    nestedTransaction?: NestedTransactionDto
+    declared?: DeclaredAttribution
+  } = {
     to: tx.data.to,
     value: tx.data.value?.toString() ?? '0',
     data: tx.data.data || undefined,
@@ -64,6 +75,7 @@ const proposeTx = async (
     signature: signatures,
     origin,
     ...(nestedTransaction && { nestedTransaction: toNestedTransactionDto(nestedTransaction) }),
+    ...(declared && { declared }),
   }
 
   const store = getStoreInstance()
