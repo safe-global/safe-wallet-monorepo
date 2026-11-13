@@ -479,7 +479,7 @@ describe('queue design exploration', () => {
   })
   it('opens mobile details full screen with the actions in the footer', async () => {
     jest.mocked(useIsMobile).mockReturnValue(true)
-    const { user } = renderWithUserEvent(<PendingQueue />)
+    const { user } = renderWithUserEvent(<PendingQueue />, { routerProps: { query: { view: 'table' } } })
     expect(screen.getByRole('searchbox', { name: 'Find a proposal' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^Filter/ })).toBeInTheDocument()
     await user.click(allPending().getByRole('button', { name: 'Open Batch · 14 actions' }))
@@ -1156,7 +1156,7 @@ describe('rows in every grouping', () => {
 
   it('on a phone, shows rows with Nonce, Transaction and the action', () => {
     jest.mocked(useIsMobile).mockReturnValue(true)
-    render(<PendingQueue />)
+    render(<PendingQueue />, { routerProps: { query: { view: 'table' } } })
     expect(columnTitles().map((title) => title?.replace(/Collapse.*|Expand.*/, ''))).toEqual([
       'Nonce',
       'Transaction',
@@ -1290,6 +1290,80 @@ describe('without a wallet', () => {
     expect(allPending().queryAllByRole('button', { name: /^Sign/ })).toHaveLength(0)
     expect(screen.getByRole('button', { name: 'Connect wallet' })).toBeInTheDocument()
     expect(screen.getByRole('tab', { name: 'No wallet' })).toHaveAttribute('aria-selected', 'true')
+  })
+})
+
+describe('mobile compact view', () => {
+  beforeEach(() => localStorage.clear())
+  const compactList = () => screen.queryByRole('list', { name: 'Pending transactions' })
+  const STATUS = /^(Ready to execute|Ready to sign|Signing|Blocked by #\d+|Expired)$/
+
+  it('shows only at phone width', () => {
+    render(<PendingQueue />)
+    expect(compactList()).not.toBeInTheDocument()
+    expect(screen.queryByRole('tablist', { name: 'Phone layout' })).not.toBeInTheDocument()
+  })
+
+  it('lists every transaction with its Safe, signatures and status, and no table', () => {
+    const { unmount } = render(<PendingQueue />)
+    const rowCount = openRows().length
+    unmount()
+    jest.mocked(useIsMobile).mockReturnValue(true)
+    render(<PendingQueue />)
+    const rows = within(compactList()!).getAllByRole('listitem')
+    expect(rows).toHaveLength(rowCount)
+    expect(screen.queryByRole('table')).not.toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Compact' })).toHaveAttribute('aria-selected', 'true')
+    for (const row of rows) {
+      expect(within(row).getByRole('img', { name: /^on / })).toBeInTheDocument()
+      expect(within(row).getByLabelText(/^\d+ of \d+ signatures$/)).toBeInTheDocument()
+    }
+  })
+
+  it('M2: rows show every status and a chevron that opens the drawer, and the buttons at the right edge', async () => {
+    jest.mocked(useIsMobile).mockReturnValue(true)
+    const { user } = renderWithUserEvent(<PendingQueue />)
+    const list = compactList()!
+    const scroller = list.parentElement!
+    const rows = within(list).getAllByRole('listitem')
+    expect(within(list).getAllByText(STATUS)).toHaveLength(rows.length)
+    // Scrolled to the start of a list wider than the screen: chevrons only.
+    Object.defineProperty(scroller, 'scrollWidth', { configurable: true, value: 700 })
+    Object.defineProperty(scroller, 'clientWidth', { configurable: true, value: 340 })
+    fireEvent.scroll(scroller)
+    expect(within(list).getAllByRole('button')).toHaveLength(rows.length)
+    expect(within(list).getAllByRole('button', { name: /^Open / })).toHaveLength(rows.length)
+    // At the right edge: the table's buttons.
+    scroller.scrollLeft = 360
+    fireEvent.scroll(scroller)
+    expect(within(list).queryAllByRole('button', { name: /^Open / })).toHaveLength(0)
+    expect(within(list).getAllByRole('button', { name: /^(Sign|Execute) / }).length).toBeGreaterThan(0)
+    scroller.scrollLeft = 0
+    fireEvent.scroll(scroller)
+    await user.click(within(list).getAllByRole('button', { name: /^Open / })[0])
+    expect(await screen.findByRole('dialog')).toBeInTheDocument()
+  })
+
+  it("M1: rows keep the table's buttons, one filled, and drop a status the button repeats", () => {
+    jest.mocked(useIsMobile).mockReturnValue(true)
+    render(<PendingQueue />, { routerProps: { query: { m: '1' } } })
+    const rows = within(compactList()!).getAllByRole('listitem')
+    for (const row of rows) {
+      expect(within(row).getByRole('button', { name: /^More actions for / })).toBeInTheDocument()
+      const main = within(row).queryByRole('button', { name: /^(Sign|Execute) / })
+      if (main)
+        expect(within(row).queryByText(main.textContent === 'Sign' ? 'Ready to sign' : 'Ready to execute')).toBeNull()
+    }
+    const mains = rows.flatMap((row) => within(row).queryAllByRole('button', { name: /^(Sign|Execute) / }))
+    expect(mains.length).toBeGreaterThan(1)
+    expect(mains.filter((button) => button.className.includes('bg-primary'))).toHaveLength(1)
+  })
+
+  it('keeps the table on phones with ?view=table', () => {
+    jest.mocked(useIsMobile).mockReturnValue(true)
+    render(<PendingQueue />, { routerProps: { query: { view: 'table' } } })
+    expect(compactList()).not.toBeInTheDocument()
+    expect(screen.getByRole('table')).toBeInTheDocument()
   })
 })
 

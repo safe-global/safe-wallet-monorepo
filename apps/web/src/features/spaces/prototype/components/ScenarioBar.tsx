@@ -4,7 +4,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@safe-global/views/components/ui/select'
 import { ALL_FAILED } from '../services/queue'
-import type { Persona, QueueState, Scenario, Milestone, WalletState } from '../types'
+import type { Persona, QueueState, QueueView, Scenario, Milestone, WalletState } from '../types'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { FAMILY_LABELS, getPersonaLabel, PERSONAS } from '../services/personas'
 import { getScenario, getScenarioAccounts, shortAddress } from '../services/model'
@@ -123,6 +123,7 @@ const UNDEPLOYED_LABELS = { '0': 'All deployed', '1': '1 not deployed', '2': '2 
 
 export function ScenarioBar({
   wallet,
+  view,
   scenario,
   state,
   hypernative,
@@ -139,6 +140,8 @@ export function ScenarioBar({
   undeployedCount: number
   state: QueueState
   wallet: WalletState
+  // Phones only: the compact list or the table.
+  view?: QueueView
   scenario: Scenario
   hypernative: Hypernative
   persona: Persona
@@ -164,6 +167,14 @@ export function ScenarioBar({
             <TabsTrigger value="2">M2</TabsTrigger>
           </TabsList>
         </Tabs>
+        {view && (
+          <Tabs value={view} onValueChange={(value) => onChange({ view: String(value) })}>
+            <TabsList aria-label="Phone layout">
+              <TabsTrigger value="compact">Compact</TabsTrigger>
+              <TabsTrigger value="table">Table</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        )}
         {state === 'partial' && (
           <>
             <Select

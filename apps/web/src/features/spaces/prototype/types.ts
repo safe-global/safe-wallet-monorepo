@@ -17,6 +17,8 @@ export type QueueState = 'normal' | 'loading' | 'error' | 'empty' | 'partial' | 
 export type Milestone = 1 | 2
 // Without a wallet, nothing can say what needs your signature. Viewing still works, as for an admin checking in.
 export type WalletState = 'connected' | 'none'
+// Phones: the compact list with icons in place of most text, or the table.
+export type QueueView = 'table' | 'compact'
 export type Filter = 'sign' | 'ready' | 'waiting' | 'awaiting'
 // `guest`: whoever opens the queue with no wallet connected. Not in the persona picker.
 export type Persona = 'owner' | 'single' | 'security' | 'member' | 'admin' | 'guest'

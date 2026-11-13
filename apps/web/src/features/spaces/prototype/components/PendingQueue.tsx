@@ -51,11 +51,12 @@ import {
 } from '../services/execution'
 import { canInvite, isYou, parsePersona } from '../services/personas'
 import { ConfirmActionDialog, type PendingConfirm } from './ConfirmActionDialog'
-import type { Persona, Proposal, Milestone, WalletState } from '../types'
+import type { Persona, Proposal, Milestone, QueueView, WalletState } from '../types'
 import { PrototypeFrame } from './PrototypeFrame'
 import { useQueueFilters } from './QueueFilters/useQueueFilters'
 import { AppliedFilters, QueueToolbar, type AppliedPill } from './QueueFilters/QueueFilters'
 import { QueueGroupedTable, QueueOrderedTable } from './QueueTable/QueueGroupedTable'
+import { CompactQueueList } from './QueueTable/CompactQueueList'
 import { DisplayMenu } from './QueueTable/DisplayMenu'
 import { GROUP_SORT, groupQueue, loadDisplay, orderQueue, saveDisplay, type QueueDisplay } from '../services/order'
 import { buildSections, rankAccounts } from './QueueTable/sections'
@@ -93,6 +94,8 @@ function PendingQueueView() {
   const milestone: Milestone = router.query.m === '2' ? 2 : 1
   const pickedPersona: Persona = parsePersona(router.query.persona)
   const wallet: WalletState = router.query.wallet === 'none' ? 'none' : 'connected'
+  // Phones get the compact list. `?view=table` keeps the table there to compare. Wider screens always get the table.
+  const view: QueueView = isMobile && router.query.view !== 'table' ? 'compact' : 'table'
   // Without a wallet, nobody is "you": rows show what anyone can see, and no row asks for your signature.
   const persona: Persona = wallet === 'none' ? 'guest' : pickedPersona
   const hypernative: Hypernative = router.query.hn === 'out' || router.query.hn === 'none' ? router.query.hn : 'in'
@@ -707,7 +710,24 @@ function PendingQueueView() {
                 )}
               </Empty>
             )}
-            {!unavailable && !safeView && visible.length > 0 && (
+            {!unavailable && view === 'compact' && reviewOrder.length > 0 && (
+              <CompactQueueList
+                rows={reviewOrder}
+                items={items}
+                persona={persona}
+                milestone={milestone}
+                remindedIds={remindedIds}
+                executions={executions}
+                now={now}
+                onReview={sectionProps.onReview}
+                onStartFlow={sectionProps.onStartFlow}
+                onGoTo={goTo}
+                onRemind={remindSigners}
+                onMenuAction={runMenuAction}
+                onSpeedUp={speedUp}
+              />
+            )}
+            {!unavailable && view === 'table' && !safeView && visible.length > 0 && (
               <QueueOrderedTable
                 groups={orderedGroups}
                 groupBy={display.groupBy === 'safe' || display.groupBy === 'none' ? 'status' : display.groupBy}
@@ -715,7 +735,7 @@ function PendingQueueView() {
                 {...sectionProps}
               />
             )}
-            {!unavailable && safeView && (visible.length > 0 || recoveries.visible.length > 0) && (
+            {!unavailable && view === 'table' && safeView && (visible.length > 0 || recoveries.visible.length > 0) && (
               <QueueGroupedTable
                 sections={sections}
                 isCollapsed={isCollapsed}
@@ -746,6 +766,7 @@ function PendingQueueView() {
         </main>
         <ScenarioBar
           wallet={wallet}
+          view={isMobile ? view : undefined}
           scenario={scenario}
           state={state}
           hypernative={hypernative}
