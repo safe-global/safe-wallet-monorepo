@@ -12,9 +12,9 @@ import {
 } from '@safe-global/views/components/ui/dropdown-menu'
 import type { SpaceQueueFilters } from '../../../../store/spaceQueueApi'
 import NetworkOptions from '../NetworkOptions'
-import { SafeOptions } from '../SafeFilter'
+import SafeOptions from '../SafeOptions'
 import SignerOptions from '../SignerOptions'
-import { StatusOptions } from '../StatusFilter'
+import StatusOptions from '../StatusOptions'
 
 type FilterMenuProps = {
   counts?: SpaceQueueCounts

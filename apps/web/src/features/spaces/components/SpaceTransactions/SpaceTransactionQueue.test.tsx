@@ -15,6 +15,7 @@ jest.mock('./TransactionsToolbar', () => ({
     filters: SpaceQueueFilters
     onFiltersChange: (filters: SpaceQueueFilters) => void
     onSearchChange: (search: string) => void
+    onGroupByChange: (groupBy: string) => void
   }) => {
     mockToolbarProps(props)
     return (
@@ -26,6 +27,9 @@ jest.mock('./TransactionsToolbar', () => ({
           Filter by sign
         </button>
         <input aria-label="Search" onChange={(event) => props.onSearchChange(event.target.value)} />
+        <button type="button" onClick={() => props.onGroupByChange('network')}>
+          Group by network
+        </button>
       </>
     )
   },
@@ -33,14 +37,14 @@ jest.mock('./TransactionsToolbar', () => ({
 
 jest.mock('./SpaceQueueTable', () => ({
   __esModule: true,
-  default: ({ sections }: { sections: SpaceQueueSection[] }) => (
-    <>
+  default: ({ sections, groupBy }: { sections: SpaceQueueSection[]; groupBy: string }) => (
+    <div data-testid="space-queue-table" data-group-by={groupBy}>
       {sections.map((section) => (
         <div key={section.safeAddress} data-testid="space-queue-safe">
           {section.chains.length} chains of {section.safeAddress}
         </div>
       ))}
-    </>
+    </div>
   ),
 }))
 
@@ -286,6 +290,43 @@ describe('SpaceTransactionQueue', () => {
 
       expect(screen.getByText('No proposals match these filters')).toBeInTheDocument()
       expect(screen.queryByText("Couldn't load the queue")).not.toBeInTheDocument()
+    })
+  })
+
+  describe('group by', () => {
+    afterEach(() => {
+      localStorage.clear()
+    })
+
+    it('lists the queue by status when no grouping was picked', () => {
+      mockQueue({ currentData: queue([section(safeA, ['1'])]) })
+
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+
+      expect(screen.getByTestId('space-queue-table')).toHaveAttribute('data-group-by', 'status')
+    })
+
+    it('regroups the queue picked in the toolbar from the same request', () => {
+      mockQueue({ currentData: queue([section(safeA, ['1'])]) })
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Group by network' }))
+
+      expect(screen.getByTestId('space-queue-table')).toHaveAttribute('data-group-by', 'network')
+      expect(querySpy).toHaveBeenLastCalledWith(
+        { spaceId, filters: { statuses: [], safes: [], chainIds: [], signers: [] } },
+        POLLING,
+      )
+    })
+
+    it('opens the queue with the grouping picked earlier', () => {
+      mockQueue({ currentData: queue([section(safeA, ['1'])]) })
+
+      render(<SpaceTransactionQueue spaceId={spaceId} />, {
+        initialReduxState: { spaceQueueView: { groupBy: 'next' } },
+      })
+
+      expect(screen.getByTestId('space-queue-table')).toHaveAttribute('data-group-by', 'next')
     })
   })
 

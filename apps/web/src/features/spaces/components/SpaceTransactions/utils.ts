@@ -25,7 +25,6 @@ import {
   isTransferTxInfo,
   isLabelListItem,
   isMultisigExecutionInfo,
-  isSignableBy,
   isTransactionQueuedItem,
   isVaultDepositTxInfo,
   isVaultRedeemTxInfo,
@@ -39,9 +38,14 @@ export const getNonce = (tx: Transaction): number | undefined =>
 
 export type QueueStatus = 'execute' | 'sign' | 'waiting' | 'blocked'
 
-export const getQueueStatus = (tx: Transaction, isNext: boolean, walletAddress?: string): QueueStatus => {
+/** Lowercased addresses of the caller's wallets, the ones that make a transaction theirs to sign */
+export type SignerWallets = ReadonlySet<string>
+
+/** The gateway's status: `sign` when one of the caller's wallets is still a missing signer of the Safe */
+export const getQueueStatus = (tx: Transaction, isNext: boolean, signers: SignerWallets): QueueStatus => {
   if (isAwaitingExecution(tx.txStatus)) return isNext ? 'execute' : 'blocked'
-  return walletAddress && isSignableBy(tx, walletAddress) ? 'sign' : 'waiting'
+  const missingSigners = isMultisigExecutionInfo(tx.executionInfo) ? (tx.executionInfo.missingSigners ?? []) : []
+  return missingSigners.some(({ value }) => signers.has(value.toLowerCase())) ? 'sign' : 'waiting'
 }
 
 export type QueueRowData =

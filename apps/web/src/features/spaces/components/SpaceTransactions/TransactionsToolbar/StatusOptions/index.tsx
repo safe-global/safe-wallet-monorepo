@@ -1,15 +1,8 @@
 import type { ReactElement } from 'react'
-import { CalendarClock, ChevronDown, CircleCheck, Clock3, PenLine, Split, Users, type LucideIcon } from 'lucide-react'
+import { CalendarClock, CircleCheck, Clock3, PenLine, Split, Users, type LucideIcon } from 'lucide-react'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import type { SpaceQueueCounts } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { Button } from '@safe-global/views/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@safe-global/views/components/ui/dropdown-menu'
+import { DropdownMenuCheckboxItem, DropdownMenuSeparator } from '@safe-global/views/components/ui/dropdown-menu'
 import { SPACE_QUEUE_FLAGS, SPACE_QUEUE_STATUSES, type SpaceQueueStatusOption } from '../../../../store/spaceQueueApi'
 import { STATUS_OPTION_LABELS } from '../utils'
 
@@ -47,8 +40,7 @@ type StatusOptionsProps = {
   onChange: (selected: SpaceQueueStatusOption[]) => void
 }
 
-/** The Status filter's checkboxes, shared by its own menu and the Filter menu. */
-export const StatusOptions = ({ counts, selected, onChange }: StatusOptionsProps): ReactElement => {
+const StatusOptions = ({ counts, selected, onChange }: StatusOptionsProps): ReactElement => {
   const toggle = (option: SpaceQueueStatusOption, checked: boolean) =>
     onChange(checked ? [...selected, option] : selected.filter((other) => other !== option))
 
@@ -73,16 +65,4 @@ export const StatusOptions = ({ counts, selected, onChange }: StatusOptionsProps
   )
 }
 
-const StatusFilter = (props: StatusOptionsProps): ReactElement => (
-  <DropdownMenu>
-    <DropdownMenuTrigger render={<Button variant="outline" />}>
-      Status
-      <ChevronDown />
-    </DropdownMenuTrigger>
-    <DropdownMenuContent align="start" className="min-w-56">
-      <StatusOptions {...props} />
-    </DropdownMenuContent>
-  </DropdownMenu>
-)
-
-export default StatusFilter
+export default StatusOptions

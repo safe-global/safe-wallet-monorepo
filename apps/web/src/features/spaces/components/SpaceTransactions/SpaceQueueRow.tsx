@@ -16,6 +16,7 @@ import useIsPending from '@/hooks/useIsPending'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
+import QueueRowSafeTag from './QueueRowSafeTag'
 import QueueTxDetails from './QueueTxDetails'
 import RowActionsMenu from './RowActionsMenu'
 import SignatureGauge from './SignatureGauge'
@@ -119,6 +120,8 @@ type SpaceQueueRowProps = {
   conflict?: ConflictOption
   /** False when a rejection already holds this nonce */
   canReject?: boolean
+  /** Set where rows of several Safes share a list, to name the row's Safe */
+  safeAddress?: string
   rowProps?: ComponentProps<'tr'>
 }
 
@@ -129,6 +132,7 @@ const SpaceQueueRow = ({
   nextNonce,
   conflict,
   canReject = true,
+  safeAddress,
   rowProps,
 }: SpaceQueueRowProps): ReactElement => {
   const { StatusLabel } = useLoadFeature(SwapFeature)
@@ -149,6 +153,7 @@ const SpaceQueueRow = ({
 
       <TableCell className="py-2">
         <div className="flex min-h-10 min-w-0 items-center gap-2">
+          {safeAddress && <QueueRowSafeTag safeAddress={safeAddress} chainId={chainId} />}
           {showWarning && <MaliciousTxWarning withTooltip={!isImitation(tx)} />}
           <span className="flex shrink-0 items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-sm group-hover/transaction:bg-card">
             <QueueTxDetails.Type tx={tx} />

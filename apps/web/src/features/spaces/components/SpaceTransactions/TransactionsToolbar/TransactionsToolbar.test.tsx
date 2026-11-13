@@ -43,16 +43,31 @@ const renderToolbar = (filters: SpaceQueueFilters = NO_SPACE_QUEUE_FILTERS) => {
       filters={filters}
       onFiltersChange={onFiltersChange}
       onSearchChange={jest.fn()}
+      groupBy="status"
+      onGroupByChange={jest.fn()}
     />,
   )
   return onFiltersChange
 }
 
+const openFilterSection = (section: string) => {
+  fireEvent.click(screen.getByRole('button', { name: 'Filter' }))
+  fireEvent.click(screen.getByRole('menuitem', { name: section }))
+}
+
 describe('TransactionsToolbar', () => {
-  it('lists every status with its count and adds the one picked to the filters', () => {
+  it('has no Status or Safe button beside the Filter menu', () => {
+    renderToolbar()
+
+    expect(screen.queryByRole('button', { name: 'Status' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Safe' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Filter' })).toBeInTheDocument()
+  })
+
+  it('lists every status with its count in the Filter menu and adds the one picked', () => {
     const onFiltersChange = renderToolbar({ statuses: ['execute'], safes: [], chainIds: [], signers: [] })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
+    openFilterSection('Status')
     const options = screen.getAllByRole('menuitemcheckbox')
 
     expect(options.map((option) => option.textContent)).toEqual([
@@ -78,7 +93,7 @@ describe('TransactionsToolbar', () => {
   it('shows each status with its icon, statuses on a tinted tile and flags muted', () => {
     renderToolbar()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
+    openFilterSection('Status')
     const icons = screen.getAllByRole('menuitemcheckbox').map((option) => option.querySelector('svg.lucide'))
 
     expect(
@@ -107,16 +122,16 @@ describe('TransactionsToolbar', () => {
   it('removes a status that is picked again', () => {
     const onFiltersChange = renderToolbar({ statuses: ['execute', 'sign'], safes: [], chainIds: [], signers: [] })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
+    openFilterSection('Status')
     fireEvent.click(screen.getByRole('menuitemcheckbox', { name: /Execute/ }))
 
     expect(onFiltersChange).toHaveBeenCalledWith({ statuses: ['sign'], safes: [], chainIds: [], signers: [] })
   })
 
-  it('lists the Safes by count and selects every chain of the one picked', () => {
+  it('lists the Safes by count in the Filter menu and selects every chain of the one picked', () => {
     const onFiltersChange = renderToolbar()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Safe' }))
+    openFilterSection('Safe account')
     const options = screen.getAllByRole('menuitemcheckbox')
 
     expect(options).toHaveLength(2)
@@ -136,8 +151,7 @@ describe('TransactionsToolbar', () => {
   it('lists the networks by count in the Filter menu and adds the one picked', () => {
     const onFiltersChange = renderToolbar()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Filter' }))
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Network' }))
+    openFilterSection('Network')
     const options = screen.getAllByRole('menuitemcheckbox')
 
     expect(options.map((option) => option.textContent)).toEqual([
@@ -153,8 +167,7 @@ describe('TransactionsToolbar', () => {
   it('lists the signers by count in the Filter menu and removes one picked again, in any address case', () => {
     const onFiltersChange = renderToolbar({ ...NO_SPACE_QUEUE_FILTERS, signers: [signerB.toLowerCase()] })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Filter' }))
-    fireEvent.click(screen.getByRole('menuitem', { name: 'Signer' }))
+    openFilterSection('Signer')
     const options = screen.getAllByRole('menuitemcheckbox')
 
     expect(options).toHaveLength(2)
@@ -212,6 +225,26 @@ describe('TransactionsToolbar', () => {
     expect(onFiltersChange).toHaveBeenLastCalledWith(NO_SPACE_QUEUE_FILTERS)
   })
 
+  it('passes the grouping picked in Group by on to the queue', () => {
+    const onGroupByChange = jest.fn()
+    render(
+      <TransactionsToolbar
+        spaceId={faker.string.uuid()}
+        counts={counts}
+        filters={NO_SPACE_QUEUE_FILTERS}
+        onFiltersChange={jest.fn()}
+        onSearchChange={jest.fn()}
+        groupBy="status"
+        onGroupByChange={onGroupByChange}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Group by Status' }))
+    fireEvent.click(screen.getByRole('menuitemradio', { name: /Up next/ }))
+
+    expect(onGroupByChange).toHaveBeenCalledWith('next')
+  })
+
   it('passes the search on to the queue', () => {
     const onSearchChange = jest.fn()
     render(
@@ -221,6 +254,8 @@ describe('TransactionsToolbar', () => {
         filters={NO_SPACE_QUEUE_FILTERS}
         onFiltersChange={jest.fn()}
         onSearchChange={onSearchChange}
+        groupBy="status"
+        onGroupByChange={jest.fn()}
       />,
     )
     const searchbox = screen.getByRole('searchbox', { name: 'Search transactions' })
