@@ -445,3 +445,30 @@ const startCheckout = useCallback(
 ### Why
 
 Nothing enforces the dispatch, so a caller that skips it sends the previous checkout's entry point, and the slice is never cleared. Passing the properties into the call that fires the event adds no global state and sends the event only after the request succeeds. The PR dropped the property instead, because the funnel reads the entry point from its first step; either way, no global slice.
+
+## SEC-06 — Keep only values known to be safe
+
+Source: PR #9250 (RL-20261021-001)
+
+### Avoid
+
+```ts
+// Wallet and RPC error codes are short identifiers (4001, ACTION_REJECTED), so they carry no secrets
+const ERROR_CODE_RE = /^[A-Za-z0-9_]{1,64}$/
+```
+
+### Prefer
+
+```ts
+// EIP-1193 and JSON-RPC codes are safe integers, which cannot hold a secret; any other code could
+const safeIntegerCode = (thrown: unknown): number | undefined => {
+  if (typeof thrown !== 'object' || thrown === null || Array.isArray(thrown)) return undefined
+
+  const { code } = thrown as { code?: unknown }
+  return typeof code === 'number' && Number.isSafeInteger(code) ? code : undefined
+}
+```
+
+### Why
+
+An unprefixed 64-character hex private key matches the pattern and would be copied into the error message that reaches logs. Keeping only the one shape that cannot carry a secret leaves nothing for an unexpected value to slip through.

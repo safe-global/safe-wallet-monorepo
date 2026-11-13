@@ -456,3 +456,80 @@ on:
 ### Why
 
 A PR that changes only the moved files no longer triggers the run, so their tests or stories lose coverage without any failure. Every discovery glob that scans the old path (changed-story scripts, screenshot steps) needs the new location too.
+
+## TEST-04 — Let the mocked child act on the props it receives
+
+Source: PR #9224, #9283, #9118 (RL-20261022-001)
+
+### Avoid
+
+```tsx
+// Replaces the deleted Cypress sidebar checks
+jest.mock('../BatchTxList', () => ({ __esModule: true, default: () => null }))
+```
+
+### Prefer
+
+```tsx
+jest.mock('../BatchTxList', () => ({
+  __esModule: true,
+  default({ txItems, onDelete }: { txItems: DraftBatchItem[]; onDelete: (id: string) => void }) {
+    return txItems.map((item) => (
+      <button key={item.id} onClick={() => onDelete(item.id)}>
+        Delete {item.id}
+      </button>
+    ))
+  },
+}))
+```
+
+### Why
+
+A child mocked as `null` lets the parent stop passing the list or the delete handler and every test still passes. The mock renders what it receives and calls back, so a test can click delete and assert the parent's handler ran with the right id.
+
+## TEST-01 — Check a value is complete before testing containment
+
+Source: PR #9094 (RL-20261022-006)
+
+### Avoid
+
+```ts
+expect(appHash).toContain(deviceTransactionHash(review).toLowerCase())
+```
+
+### Prefer
+
+```ts
+const deviceHash = deviceTransactionHash(review).toLowerCase()
+expect(deviceHash).toMatch(/^0x[0-9a-f]{64}$/)
+expect(appHash).toContain(deviceHash)
+```
+
+### Why
+
+Every string contains `''`, so when the device shows no hash the first assertion passes without comparing anything. Asserting the full 32-byte shape first makes the comparison mean what the test claims.
+
+## TEST-07 — Clear persisted state a story's named state depends on
+
+Source: PR #9132 (RL-20261020-002)
+
+### Avoid
+
+```tsx
+export const Disclaimer: Story = {
+  parameters: createMockStory({ scenario: 'efSafe', pathname: '/earn', features: { earn: true } }).parameters,
+}
+```
+
+### Prefer
+
+```tsx
+export const Disclaimer: Story = {
+  parameters: createMockStory({ scenario: 'efSafe', pathname: '/earn', features: { earn: true } }).parameters,
+  beforeEach: () => localItem(EARN_CONSENT_STORAGE_KEY).remove(),
+}
+```
+
+### Why
+
+The page reads consent from local storage, so once someone clicks Continue in Storybook the story renders the page instead of the disclaimer, and the visual run compares the wrong state.

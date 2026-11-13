@@ -74,6 +74,15 @@ Evidence: [#8910 r4166505819](https://github.com/safe-global/safe-wallet-monorep
 [r4166511949](https://github.com/safe-global/safe-wallet-monorepo/pull/8910#discussion_r4166511949),
 [r4166524024](https://github.com/safe-global/safe-wallet-monorepo/pull/8910#discussion_r4166524024),
 [r4166538503](https://github.com/safe-global/safe-wallet-monorepo/pull/8910#discussion_r4166538503).
+On #9187 a reviewer asked for `space?.experimentalFeatures ?? []` so a missing
+field does not crash, although the generated type marks it required, and the
+author added it. On #9167 a reviewer asked why the frontend fixes an
+out-of-range Delay cooldown the app never creates; the author answered that a
+contract accepts any value, so the UI must handle it, and the PR merged.
+[#9187 r4324263841](https://github.com/safe-global/safe-wallet-monorepo/pull/9187#discussion_r4324263841),
+[r4326460622](https://github.com/safe-global/safe-wallet-monorepo/pull/9187#discussion_r4326460622),
+[#9167 review 5572227080](https://github.com/safe-global/safe-wallet-monorepo/pull/9167#pullrequestreview-5572227080),
+[issuecomment-6270269365](https://github.com/safe-global/safe-wallet-monorepo/pull/9167#issuecomment-6270269365).
 
 Option A — trust CGW and the generated type; a null field renders as absent:
 
@@ -254,3 +263,34 @@ subscriptions, instead of a test per root.
 
 Decision Needed: pick A, B or C, then record the exception or the requirement
 in TEST-02.
+
+### OQ-TEST-03 — Does every visual or layout fix need a story or test?
+
+Question: TEST-07 asks for a Storybook story for every visual or layout bug fix
+(RL-20260827-001), so the visual-regression run catches a recurrence. In this
+window reviewers declined that for small fixes. On #9166 (Add member button
+stretched to full width) a bot asked for regression coverage and the author
+answered "We don't have to test every design detail". On #9136 a request for a test of the Enterprise support copy got
+"No.", and on #9170 a story for a nesting fix was called out of scope because
+the group never had one.
+
+Evidence: [#9166 r4311900424](https://github.com/safe-global/safe-wallet-monorepo/pull/9166#discussion_r4311900424),
+[#9136 r4294992752](https://github.com/safe-global/safe-wallet-monorepo/pull/9136#discussion_r4294992752),
+[#9170 issuecomment-6266665879](https://github.com/safe-global/safe-wallet-monorepo/pull/9170#issuecomment-6266665879).
+
+Option A — TEST-07 as written: every visual or layout fix adds or extends a
+story for the broken state.
+
+```tsx
+export const AdminWithLongName: Story = { args: { isAdmin: true, name: LONG_NAME } }
+```
+
+Option B — a story only when the component already has one, or the fix
+touches layout that depends on content (long text, nesting, empty states);
+one-class tweaks such as `self-start` need neither a story nor a test.
+
+Option C — no story requirement for fixes; stories stay for new components
+and new states, and fixes rely on review and Argos runs of existing stories.
+
+Decision Needed: pick A, B or C, then narrow or keep the bug-fix clause of
+TEST-07.

@@ -61,7 +61,7 @@
 | [`TX-05`](#tx-05) | Centralize transaction-derived analyses in SafeShield | web / transactions |
 | [`WEB-06`](#web-06) | Derive reactive parent state from the store, not from child refs | web / state |
 | [`MOB-06`](#mob-06) | Forward auto theme to native APIs as null | mobile / theme |
-| [`E2E-02`](#e2e-02) | Put E2E timeouts where they take effect | web / e2e |
+| [`E2E-02`](#e2e-02) | Put E2E waits, timeouts, and failure hooks where they take effect | web / e2e |
 | [`DATA-06`](#data-06) | Normalize shared identifiers and keys one way | general / data |
 | [`CI-03`](#ci-03) | Codegen drift checks must catch untracked outputs and run against PR HEAD | general / ci |
 | [`WEB-07`](#web-07) | Handle the loading tri-state of feature-flag hooks | web / auth |
@@ -81,6 +81,7 @@
 | [`TEST-07`](#test-07) | Visual changes get a Storybook state | web / testing |
 | [`PERF-02`](#perf-02) | Bound request fan-out and polling | general / performance |
 | [`SEC-05`](#sec-05) | Gate actions on the identity the backend authorizes | general / security |
+| [`SEC-06`](#sec-06) | Enforce safety boundaries with allowlists | general / security |
 
 ---
 
@@ -260,7 +261,7 @@ External callers go through the public barrel; internals stay relative. Self-imp
 <a id="code-01"></a>
 ### `CODE-01` Extract shared UI only when behavior is actually shared
 
-> **web** · abstractions · 4 examples · ↩ `RL-20260227-002` · `RL-20260318-011` · `RL-20260327-006` · `RL-20260331-006` · `RL-20260505-006` · `RL-20260505-011` · `RL-20260605-007` · `RL-20260611-004` · `RL-20260610-002` · `RL-20260622-001` · `RL-20260624-001` · `RL-20260701-003` · `RL-20260709-001` · `RL-20260716-001` · `RL-20260722-001` · `RL-20260731-002` · `RL-20260806-004` · `RL-20260828-003` · `RL-20260911-003` · `RL-20260916-004` · `RL-20260930-002` · `RL-20261008-003` · `RL-20261009-004`
+> **web** · abstractions · 4 examples · ↩ `RL-20260227-002` · `RL-20260318-011` · `RL-20260327-006` · `RL-20260331-006` · `RL-20260505-006` · `RL-20260505-011` · `RL-20260605-007` · `RL-20260611-004` · `RL-20260610-002` · `RL-20260622-001` · `RL-20260624-001` · `RL-20260701-003` · `RL-20260709-001` · `RL-20260716-001` · `RL-20260722-001` · `RL-20260731-002` · `RL-20260806-004` · `RL-20260828-003` · `RL-20260911-003` · `RL-20260916-004` · `RL-20260930-002` · `RL-20261008-003` · `RL-20261009-004` · `RL-20261016-002`
 
 **📜 Rule**\
 When two components share form, state, loading, and error flow, prefer one configurable component over near-duplicate implementations. Logic copied between call sites or between web and mobile moves once into a shared hook or `packages/utils`, and a helper peer modules share gets its own module rather than one peer importing it from another.
@@ -782,7 +783,7 @@ unauthenticated so they re-login.
 <a id="api-01"></a>
 ### `API-01` Search consumers when removing or changing public exports
 
-> **general** · api · 1 example · ↩ `RL-20260410-002` · `RL-20260428-003` · `RL-20260506-003` · `RL-20260611-009` · `RL-20260625-001` · `RL-20260702-006` · `RL-20260805-003` · `RL-20260820-007` · `RL-20260921-002` · `RL-20260930-009` · `RL-20260929-005` · `RL-20261008-008` · `RL-20261009-003` · `RL-20261014-003`
+> **general** · api · 1 example · ↩ `RL-20260410-002` · `RL-20260428-003` · `RL-20260506-003` · `RL-20260611-009` · `RL-20260625-001` · `RL-20260702-006` · `RL-20260805-003` · `RL-20260820-007` · `RL-20260921-002` · `RL-20260930-009` · `RL-20260929-005` · `RL-20261008-008` · `RL-20261009-003` · `RL-20261014-003` · `RL-20261021-008`
 
 **📜 Rule**\
 Removing or changing a public export, hook return field, endpoint, compatibility API, URL-served asset, or visible copy that tests assert requires updating all tests, E2E helpers, and consumers in the same change. Every prop, field, export, or branch a change adds has a consumer that can reach it; dead code is deleted, not commented out.
@@ -1102,13 +1103,13 @@ failure.
 <a id="rtk-02"></a>
 ### `RTK-02` Choose RTK Query read state by UX meaning
 
-> **general** · state · 2 examples · ↩ `RL-20260302-005` · `RL-20260415-006` · `RL-20260420-001` · `RL-20260615-001` · `RL-20260615-010` · `RL-20260609-010` · `RL-20260930-003`
+> **general** · state · 2 examples · ↩ `RL-20260302-005` · `RL-20260415-006` · `RL-20260420-001` · `RL-20260615-001` · `RL-20260615-010` · `RL-20260609-010` · `RL-20260930-003` · `RL-20261016-001` · `RL-20261020-001`
 
 **📜 Rule**\
-Pick the flag by whether existing data should stay visible: `isLoading` is the first load only, `isFetching` includes refetches, and a load-more control stays mounted and disabled while the next page fetches. A failed refetch keeps the last `data`: access-derived hooks drop it on 403/404, other errors keep it as transient. A new arg's load shows as `currentData === undefined` (`isLoading` stays false), and a failed dependency query renders as an error, not as empty.
+Pick the flag by whether existing data should stay visible: `isLoading` is the first load only, `isFetching` includes refetches, and a load-more control stays mounted and disabled while the next page fetches. A failed refetch keeps the last `data`: access-derived hooks drop it on 403/404, other errors keep it as transient. A new arg's load shows as `currentData === undefined` (`isLoading` stays false), and a failed dependency query renders as an error, not as empty. A loader shows only while a request is in flight: a failed or impossible load renders an error or the reason an action is disabled, never a permanent skeleton or spinner.
 
 **✅ Check**\
-> Did this render from RTK Query state? If yes, does a refetch hide content only when it should, can a failed refetch leave stale or forbidden data on screen, and can an arg change or failed dependency read as a confident empty answer?
+> Did this render from RTK Query or other async read state? If yes, does a refetch hide content only when it should, can a failed refetch leave stale or forbidden data on screen, can an arg change or failed dependency read as a confident empty answer, and can a failure read as still loading?
 
 <details>
 <summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/data-integrity.md</code> § <em>loading-vs-fetching</em></summary>
@@ -1196,7 +1197,7 @@ Add a validity guard on the ID itself to the `skip` predicate.
 <a id="data-01"></a>
 ### `DATA-01` Preserve chain scope in address-like merges
 
-> **general** · data · 2 examples · ↩ `RL-20260223-001` · `RL-20260313-010` · `RL-20260323-001` · `RL-20260415-003` · `RL-20260505-002` · `RL-20260505-005` · `RL-20260720-004` · `RL-20260909-006` · `RL-20260922-001`
+> **general** · data · 2 examples · ↩ `RL-20260223-001` · `RL-20260313-010` · `RL-20260323-001` · `RL-20260415-003` · `RL-20260505-002` · `RL-20260505-005` · `RL-20260720-004` · `RL-20260909-006` · `RL-20260922-001` · `RL-20261021-003`
 
 **📜 Rule**\
 Address-book and Safe-like merge logic must compare entries at the relevant identity granularity, usually address plus chain ID.
@@ -1539,7 +1540,7 @@ The original `positions: []` patch made portfolio errors look like known-empty; 
 <a id="data-04"></a>
 ### `DATA-04` Use the canonical helper, predicate, or constant
 
-> **general** · data · 3 examples · ↩ `RL-20260220-003` · `RL-20260331-002` · `RL-20260402-002` · `RL-20260416-001` · `RL-20260423-001` · `RL-20260605-012` · `RL-20260604-003` · `RL-20260608-007` · `RL-20260615-004` · `RL-20260612-004` · `RL-20260619-001` · `RL-20260713-004` · `RL-20260722-002` · `RL-20260812-001` · `RL-20260930-001` · `RL-20261008-002` · `RL-20261014-001`
+> **general** · data · 3 examples · ↩ `RL-20260220-003` · `RL-20260331-002` · `RL-20260402-002` · `RL-20260416-001` · `RL-20260423-001` · `RL-20260605-012` · `RL-20260604-003` · `RL-20260608-007` · `RL-20260615-004` · `RL-20260612-004` · `RL-20260619-001` · `RL-20260713-004` · `RL-20260722-002` · `RL-20260812-001` · `RL-20260930-001` · `RL-20261008-002` · `RL-20261014-001` · `RL-20261020-005`
 
 **📜 Rule**\
 Before adding a helper, constant, or route builder, search for the existing one (lodash `uniqWith`/`chunk`, shared formatters, `ROUTES`, E2E `TEST_ADDRESSES`/`CHAIN_IDS`) and use it; E2E helpers take hosts from the configured `baseURL`. Bounded or formatted values (tx origin, Safe version, `chainId:address`) go through their helper, not raw serialization or parsing. Domain classifications call the canonical predicate, never an inline copy or a field-presence check that legacy defaults (zero address, 0) fool, and every consumer of a shared check (submit gate, builder, summary) calls the same one. A call site that must bypass a helper keeps its fallbacks.
@@ -1982,7 +1983,7 @@ correct, so the helper produces false negatives whenever it is used.
 <a id="test-01"></a>
 ### `TEST-01` Assertions must fail on the regression they claim to cover
 
-> **general** · testing · 6 examples · ↩ `RL-20260217-001` · `RL-20260218-004` · `RL-20260303-010` · `RL-20260318-002` · `RL-20260331-005` · `RL-20260408-001` · `RL-20260408-002` · `RL-20260409-002` · `RL-20260423-002` · `RL-20260506-006` · `RL-20260608-005` · `RL-20260602-002` · `RL-20260609-001` · `RL-20260624-005` · `RL-20260803-003` · `RL-20260806-003` · `RL-20260820-008` · `RL-20260826-002` · `RL-20260911-002` · `RL-20260925-002` · `RL-20261002-003` · `RL-20261012-001`
+> **general** · testing · 7 examples · ↩ `RL-20260217-001` · `RL-20260218-004` · `RL-20260303-010` · `RL-20260318-002` · `RL-20260331-005` · `RL-20260408-001` · `RL-20260408-002` · `RL-20260409-002` · `RL-20260423-002` · `RL-20260506-006` · `RL-20260608-005` · `RL-20260602-002` · `RL-20260609-001` · `RL-20260624-005` · `RL-20260803-003` · `RL-20260806-003` · `RL-20260820-008` · `RL-20260826-002` · `RL-20260911-002` · `RL-20260925-002` · `RL-20261002-003` · `RL-20261012-001` · `RL-20261022-006`
 
 **📜 Rule**\
 Assertions and fixtures must fail loudly when the behavior or fixture data they rely on disappears, and only then: E2E helpers assert what the user sees or the navigation that follows, not implementation details such as a link `href`.
@@ -1991,7 +1992,7 @@ Assertions and fixtures must fail loudly when the behavior or fixture data they 
 > Did this add or update a test assertion? If yes, would it fail if the bug reappeared or fixture data vanished, and keep passing through a refactor that keeps the behavior?
 
 <details>
-<summary><strong>💡 Example 1 of 6</strong> — <code>examples/general/testing.md</code> § <em>negative-assertions</em></summary>
+<summary><strong>💡 Example 1 of 7</strong> — <code>examples/general/testing.md</code> § <em>negative-assertions</em></summary>
 
 <br>
 
@@ -2022,7 +2023,7 @@ renders with the new text.
 </details>
 
 <details>
-<summary><strong>💡 Example 2 of 6</strong> — <code>examples/general/testing.md</code> § <em>test-01-assert-the-specific-behavior-the-description-claims</em></summary>
+<summary><strong>💡 Example 2 of 7</strong> — <code>examples/general/testing.md</code> § <em>test-01-assert-the-specific-behavior-the-description-claims</em></summary>
 
 <br>
 
@@ -2065,7 +2066,7 @@ the description.
 </details>
 
 <details>
-<summary><strong>💡 Example 3 of 6</strong> — <code>examples/general/testing.md</code> § <em>test-01-mock-external-lookups-instead-of-relying-on-real-fixture-state</em></summary>
+<summary><strong>💡 Example 3 of 7</strong> — <code>examples/general/testing.md</code> § <em>test-01-mock-external-lookups-instead-of-relying-on-real-fixture-state</em></summary>
 
 <br>
 
@@ -2118,7 +2119,7 @@ to lock in current behavior.
 </details>
 
 <details>
-<summary><strong>💡 Example 4 of 6</strong> — <code>examples/general/testing.md</code> § <em>test-01-test-the-debounce-not-just-the-post-debounce-assertion</em></summary>
+<summary><strong>💡 Example 4 of 7</strong> — <code>examples/general/testing.md</code> § <em>test-01-test-the-debounce-not-just-the-post-debounce-assertion</em></summary>
 
 <br>
 
@@ -2159,7 +2160,7 @@ An assertion that holds on render zero never exercises the debounced behavior, s
 </details>
 
 <details>
-<summary><strong>💡 Example 5 of 6</strong> — <code>examples/general/testing.md</code> § <em>overwriting-localstorage-fixtures-must-include-implicit-app-seeded-entries</em></summary>
+<summary><strong>💡 Example 5 of 7</strong> — <code>examples/general/testing.md</code> § <em>overwriting-localstorage-fixtures-must-include-implicit-app-seeded-entries</em></summary>
 
 <br>
 
@@ -2200,7 +2201,7 @@ If the helper writes the whole key (not a merge), any state the app would popula
 </details>
 
 <details>
-<summary><strong>💡 Example 6 of 6</strong> — <code>examples/general/testing.md</code> § <em>test-01-click-links-without-asserting-their-href</em></summary>
+<summary><strong>💡 Example 6 of 7</strong> — <code>examples/general/testing.md</code> § <em>test-01-click-links-without-asserting-their-href</em></summary>
 
 <br>
 
@@ -2230,12 +2231,43 @@ The `href` check makes every spec that uses the helper depend on how the link en
 
 </details>
 
+<details>
+<summary><strong>💡 Example 7 of 7</strong> — <code>examples/general/testing.md</code> § <em>test-01-check-a-value-is-complete-before-testing-containment</em></summary>
+
+<br>
+
+**TEST-01 — Check a value is complete before testing containment**
+
+Source: PR #9094 (RL-20261022-006)
+
+### Avoid
+
+```ts
+expect(appHash).toContain(deviceTransactionHash(review).toLowerCase())
+```
+
+### Prefer
+
+```ts
+const deviceHash = deviceTransactionHash(review).toLowerCase()
+expect(deviceHash).toMatch(/^0x[0-9a-f]{64}$/)
+expect(appHash).toContain(deviceHash)
+```
+
+### Why
+
+Every string contains `''`, so when the device shows no hash the first assertion passes without comparing anything. Asserting the full 32-byte shape first makes the comparison mean what the test claims.
+
+<sub>Source: <a href="examples/general/testing.md#test-01-check-a-value-is-complete-before-testing-containment">examples/general/testing.md#test-01-check-a-value-is-complete-before-testing-containment</a></sub>
+
+</details>
+
 ---
 
 <a id="test-02"></a>
 ### `TEST-02` New branch logic needs branch-specific tests
 
-> **general** · testing · 1 example · ↩ `RL-20260318-001` · `RL-20260324-001` · `RL-20260327-004` · `RL-20260407-001` · `RL-20260417-001` · `RL-20260420-002` · `RL-20260428-002` · `RL-20260429-001` · `RL-20260430-001` · `RL-20260430-002` · `RL-20260504-001` · `RL-20260505-002` · `RL-20260505-006` · `RL-20260506-002` · `RL-20260605-009` · `RL-20260609-005` · `RL-20260624-006` · `RL-20260630-001` · `RL-20260806-008` · `RL-20260813-002` · `RL-20260820-006` · `RL-20260909-003` · `RL-20260921-005` · `RL-20261001-002` · `RL-20261002-003` · `RL-20261013-001`
+> **general** · testing · 1 example · ↩ `RL-20260318-001` · `RL-20260324-001` · `RL-20260327-004` · `RL-20260407-001` · `RL-20260417-001` · `RL-20260420-002` · `RL-20260428-002` · `RL-20260429-001` · `RL-20260430-001` · `RL-20260430-002` · `RL-20260504-001` · `RL-20260505-002` · `RL-20260505-006` · `RL-20260506-002` · `RL-20260605-009` · `RL-20260609-005` · `RL-20260624-006` · `RL-20260630-001` · `RL-20260806-008` · `RL-20260813-002` · `RL-20260820-006` · `RL-20260909-003` · `RL-20260921-005` · `RL-20261001-002` · `RL-20261002-003` · `RL-20261013-001` · `RL-20261022-005`
 
 **📜 Rule**\
 New skip, hydration, merge-priority, permission, compatibility, and conditional-rendering branches need focused tests that exercise the new branch, not only the happy path.
@@ -2383,16 +2415,16 @@ Re-declaring the capability shape in two places lets them drift the moment a new
 <a id="test-04"></a>
 ### `TEST-04` Moved behavior needs replacement coverage and matching mocks
 
-> **general** · testing · 1 example · ↩ `RL-20260428-002` · `RL-20260428-003` · `RL-20260615-005` · `RL-20260623-002` · `RL-20260701-004` · `RL-20260714-002` · `RL-20260722-003` · `RL-20260806-001` · `RL-20260812-002` · `RL-20260921-010` · `RL-20261001-002` · `RL-20261009-002`
+> **general** · testing · 2 examples · ↩ `RL-20260428-002` · `RL-20260428-003` · `RL-20260615-005` · `RL-20260623-002` · `RL-20260701-004` · `RL-20260714-002` · `RL-20260722-003` · `RL-20260806-001` · `RL-20260812-002` · `RL-20260921-010` · `RL-20261001-002` · `RL-20261009-002` · `RL-20261022-001`
 
 **📜 Rule**\
-When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts. Mocks follow the code: they target the exact module specifier it imports (barrel vs deep path), and mocks for dependencies it no longer uses are removed. CI path filters and test or story discovery cover the new location.
+When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts. Mocks follow the code: they target the exact module specifier it imports (barrel vs deep path), and mocks for dependencies it no longer uses are removed. A component test that replaces deleted E2E coverage keeps the child it wires real, or has the mock render the props it receives and act on them, and drives the interaction instead of asserting presence. CI path filters and test or story discovery cover the new location.
 
 **✅ Check**\
-> Did this move or remove a return field, prop, branch, or dependency? If yes, did equivalent tests move to the new owner, do the tests' mocks still match what the code imports, and do CI triggers still run them?
+> Did this move or remove a return field, prop, branch, or dependency, or replace E2E coverage with component tests? If yes, did equivalent tests move to the new owner, do the tests' mocks still match what the code imports, does the replacement exercise the same wiring and interaction, and do CI triggers still run them?
 
 <details>
-<summary><strong>💡 Example</strong> — <code>examples/general/testing.md</code> § <em>test-04-extend-ci-path-filters-when-tests-or-stories-move</em></summary>
+<summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/testing.md</code> § <em>test-04-extend-ci-path-filters-when-tests-or-stories-move</em></summary>
 
 <br>
 
@@ -2426,6 +2458,45 @@ on:
 A PR that changes only the moved files no longer triggers the run, so their tests or stories lose coverage without any failure. Every discovery glob that scans the old path (changed-story scripts, screenshot steps) needs the new location too.
 
 <sub>Source: <a href="examples/general/testing.md#test-04-extend-ci-path-filters-when-tests-or-stories-move">examples/general/testing.md#test-04-extend-ci-path-filters-when-tests-or-stories-move</a></sub>
+
+</details>
+
+<details>
+<summary><strong>💡 Example 2 of 2</strong> — <code>examples/general/testing.md</code> § <em>test-04-let-the-mocked-child-act-on-the-props-it-receives</em></summary>
+
+<br>
+
+**TEST-04 — Let the mocked child act on the props it receives**
+
+Source: PR #9224, #9283, #9118 (RL-20261022-001)
+
+### Avoid
+
+```tsx
+// Replaces the deleted Cypress sidebar checks
+jest.mock('../BatchTxList', () => ({ __esModule: true, default: () => null }))
+```
+
+### Prefer
+
+```tsx
+jest.mock('../BatchTxList', () => ({
+  __esModule: true,
+  default({ txItems, onDelete }: { txItems: DraftBatchItem[]; onDelete: (id: string) => void }) {
+    return txItems.map((item) => (
+      <button key={item.id} onClick={() => onDelete(item.id)}>
+        Delete {item.id}
+      </button>
+    ))
+  },
+}))
+```
+
+### Why
+
+A child mocked as `null` lets the parent stop passing the list or the delete handler and every test still passes. The mock renders what it receives and calls back, so a test can click delete and assert the parent's handler ran with the right id.
+
+<sub>Source: <a href="examples/general/testing.md#test-04-let-the-mocked-child-act-on-the-props-it-receives">examples/general/testing.md#test-04-let-the-mocked-child-act-on-the-props-it-receives</a></sub>
 
 </details>
 
@@ -2541,10 +2612,10 @@ server-side store before exposing the action.
 <a id="obs-01"></a>
 ### `OBS-01` Promote telemetry only when user impact justifies it
 
-> **web** · observability · 3 examples · ↩ `RL-20260319-001` · `RL-20260417-003` · `RL-20260601-002` · `RL-20260625-002` · `RL-20260720-005` · `RL-20260729-005` · `RL-20260824-002` · `RL-20260914-002` · `RL-20260921-007` · `RL-20261007-001` · `RL-20261013-003`
+> **web** · observability · 3 examples · ↩ `RL-20260319-001` · `RL-20260417-003` · `RL-20260601-002` · `RL-20260625-002` · `RL-20260720-005` · `RL-20260729-005` · `RL-20260824-002` · `RL-20260914-002` · `RL-20260921-007` · `RL-20261007-001` · `RL-20261013-003` · `RL-20261019-001` · `RL-20261021-009`
 
 **📜 Rule**\
-Log and error levels follow user impact: expected retries, browser noise, and duplicate signals stay below error so they don't flood SLOs. An analytics event fired from a shared component takes its entry point or label as a prop, with a dedicated label per surface, never a hardcoded or borrowed one, and event properties come from the call that fires it, never from global state a caller must set first. Impression events fire once per mount and only while shown, session-wide properties are registered globally, and a refactor keeps an existing event's properties and values.
+Log and error levels follow user impact: expected retries, browser noise, and duplicate signals stay below error so they don't flood SLOs. An analytics event fired from a shared component takes its entry point or label as a prop, with a dedicated label per surface, never a hardcoded or borrowed one, and event properties come from the call that fires it, never from global state a caller must set first. Impression events fire once per mount and only while shown, an event emitted before the analytics client is ready is queued rather than dropped or marked tracked, session-wide properties are registered globally, and a refactor keeps an existing event's properties and values.
 
 **✅ Check**\
 > Did this change logging/RUM/error levels or fire an analytics event? If yes, is the level justified by user impact, is the event attributed to its real entry point by the call that fires it, do impressions fire once and only when visible, and do existing events keep their properties?
@@ -2753,10 +2824,10 @@ User-controlled strings used as map keys must not index inherited object propert
 <a id="doc-01"></a>
 ### `DOC-01` Keep docs, comments, and agent guidance true to the code
 
-> **general** · docs · 2 examples · ↩ `RL-20260303-008` · `RL-20260318-012` · `RL-20260408-003` · `RL-20260430-003` · `RL-20260602-001` · `RL-20260615-003` · `RL-20260622-003` · `RL-20260702-003` · `RL-20260716-008` · `RL-20260803-002` · `RL-20260805-004` · `RL-20260820-001` · `RL-20260825-001` · `RL-20260909-002` · `RL-20260921-001` · `RL-20261001-001` · `RL-20261008-006` · `RL-20260415-001` · `RL-20260615-007` · `RL-20260928-001` · `RL-20261013-002` · `RL-20261014-002` · `RL-20261015-001`
+> **general** · docs · 2 examples · ↩ `RL-20260303-008` · `RL-20260318-012` · `RL-20260408-003` · `RL-20260430-003` · `RL-20260602-001` · `RL-20260615-003` · `RL-20260622-003` · `RL-20260702-003` · `RL-20260716-008` · `RL-20260803-002` · `RL-20260805-004` · `RL-20260820-001` · `RL-20260825-001` · `RL-20260909-002` · `RL-20260921-001` · `RL-20261001-001` · `RL-20261008-006` · `RL-20260415-001` · `RL-20260615-007` · `RL-20260928-001` · `RL-20261013-002` · `RL-20261014-002` · `RL-20261015-001` · `RL-20261020-004` · `RL-20261021-006` · `RL-20261021-007`
 
 **📜 Rule**\
-Moved or split docs keep every removed section or call it out. Comments next to a changed condition or contract change with it and give the non-obvious why in one line, without restating code, decision history, or ticket IDs; a test states its regression intent in its name. Runbooks name real branches and fallback commands, processor disclosures match the integrated SDKs, and a framework, script, or tool change updates the nearest AGENTS.md with how the tool really behaves.
+Moved or split docs keep every removed section or call it out. Comments next to a changed condition or contract change with it and give the non-obvious why in one line, without restating code, decision history, or ticket IDs (the dated change log in `components/ui` headers is deliberate: it keeps them in sync with Figma); a test states its regression intent in its name. Runbooks name real branches and fallback commands, processor disclosures match the integrated SDKs, and a framework, script, or tool change updates the nearest AGENTS.md with how the tool really behaves.
 
 **✅ Check**\
 > Did this move docs, add a comment, change logic a comment describes, or change a runbook, disclosure, framework, script, or tool? If yes, is every removed section accounted for, is each comment one line of why that matches the code, and do runbooks, disclosures, and AGENTS.md match the real setup?
@@ -3304,7 +3375,7 @@ consumer parses: no trailing slash on origin entries.
 <a id="ux-03"></a>
 ### `UX-03` Visible behaviour changes are deliberate and confirmed
 
-> **general** · ui · ↩ `RL-20260302-003` · `RL-20260318-010` · `RL-20260410-004` · `RL-20260604-004` · `RL-20260908-002` · `RL-20260420-004` · `RL-20260619-002` · `RL-20260930-008` · `RL-20261002-006`
+> **general** · ui · ↩ `RL-20260302-003` · `RL-20260318-010` · `RL-20260410-004` · `RL-20260604-004` · `RL-20260908-002` · `RL-20260420-004` · `RL-20260619-002` · `RL-20260930-008` · `RL-20261002-006` · `RL-20261021-012`
 
 **📜 Rule**\
 A visible change the code does not mechanically imply (balances, disabled actions, copy, navigation, flows) cites the product or design decision, including copy that departs from the design file. Replacing shared chrome (topbar, sidebar, layout) or an existing input or control starts from a feature delta against the old one: carry forward the icons, indicators, entry points, row actions, test IDs, and input behaviour users rely on, and document each deliberate removal.
@@ -3388,7 +3459,7 @@ When introducing or adjusting a z-index, place it on a documented scale of exist
 <a id="review-01"></a>
 ### `REVIEW-01` Keep each PR to one stated scope
 
-> **general** · review · ↩ `RL-20260318-004` · `RL-20260603-002` · `RL-20260818-001` · `RL-20260907-003` · `RL-20260909-009` · `RL-20260921-011` · `RL-20261001-003` · `RL-20261002-007`
+> **general** · review · ↩ `RL-20260318-004` · `RL-20260603-002` · `RL-20260818-001` · `RL-20260907-003` · `RL-20260909-009` · `RL-20260921-011` · `RL-20261001-003` · `RL-20261002-007` · `RL-20261019-002`
 
 **📜 Rule**\
 A PR carries one ticket's worth of change so it can be reviewed, verified, and reverted alone: no unrelated production refactors in CI, tooling, or test-infrastructure PRs, no unrelated UI in a critical fix, and no AI working docs or review screenshots. Port and restore PRs keep behaviour parity and send pre-existing bugs to a separate fix.
@@ -3608,7 +3679,7 @@ MSW fixtures are scenario-shaped real responses tied to specific Safes. They are
 <a id="code-03"></a>
 ### `CODE-03` Split multi-job code; close over shared arguments
 
-> **general** · abstractions · 1 example · ↩ `RL-20260311-005` · `RL-20260929-002`
+> **general** · abstractions · 1 example · ↩ `RL-20260311-005` · `RL-20260929-002` · `RL-20261016-003`
 
 **📜 Rule**\
 A hook, handler, or component that does several things (fetch, resolve, and map; a multi-case switch; a long try/finally) splits into named hooks, functions, or one component per case. Helpers take at most 4 positional parameters: close over shared hook state in a local builder or pass one `deps` object, and group props that travel together into one object.
@@ -3730,7 +3801,7 @@ Allocating the regex once and collapsing the two near-identical JSX branches rem
 <a id="code-05"></a>
 ### `CODE-05` Compute and name derived values before the return
 
-> **general** · abstractions · 3 examples · ↩ `RL-20260312-008` · `RL-20260608-004` · `RL-20260608-008` · `RL-20260612-008` · `RL-20260909-004` · `RL-20260930-011` · `RL-20260929-001` · `RL-20261008-005` · `RL-20260310-006` · `RL-20260604-005` · `RL-20260710-001` · `RL-20260716-005` · `RL-20260806-005` · `RL-20260911-001` · `RL-20261002-005` · `RL-20261014-005`
+> **general** · abstractions · 3 examples · ↩ `RL-20260312-008` · `RL-20260608-004` · `RL-20260608-008` · `RL-20260612-008` · `RL-20260909-004` · `RL-20260930-011` · `RL-20260929-001` · `RL-20261008-005` · `RL-20260310-006` · `RL-20260604-005` · `RL-20260710-001` · `RL-20260716-005` · `RL-20260806-005` · `RL-20260911-001` · `RL-20261002-005` · `RL-20261014-005` · `RL-20261021-010`
 
 **📜 Rule**\
 Derive values once before the return, not inline in JSX: a pure helper that reads no hook state lives at module scope, and `useMemo` (above every early return) is for expensive work or identity a consumer needs, not cheap primitives. Three or more `!==` checks on one value become `!DISALLOWED.includes(value)`, and reused conjunctions and multi-way JSX branches become named booleans. Guards return early, type guards list the members they accept, and names say what a value means at the call site (`pendingActions`, positively framed `signersOnly`).
@@ -4204,15 +4275,15 @@ When the user picks 'Auto' for theme/appearance, forward that to the native API 
 ## 🌐 web › e2e
 
 <a id="e2e-02"></a>
-### `E2E-02` Put E2E timeouts where they take effect
+### `E2E-02` Put E2E waits, timeouts, and failure hooks where they take effect
 
-> **web** · e2e · 1 example · ↩ `RL-20260218-001` · `RL-20260612-001` · `RL-20260918-001`
+> **web** · e2e · 1 example · ↩ `RL-20260218-001` · `RL-20260612-001` · `RL-20260918-001` · `RL-20261022-002` · `RL-20261022-003`
 
 **📜 Rule**\
-Cypress retries the command, not the chained assertion, so timeouts must go on `cy.get(..., { timeout })`/`cy.contains(..., { timeout })` — passing timeout into `should()` or `expect()` does nothing. A test's own time budget must cover the sum of its inner waits (`test.slow()` or an explicit test timeout).
+Cypress retries the command, not the chained assertion, so timeouts must go on `cy.get(..., { timeout })`/`cy.contains(..., { timeout })` — passing timeout into `should()` or `expect()` does nothing. A test's own time budget must cover the sum of its inner waits (`test.slow()` or an explicit test timeout). A journey opens a page only after every seeded value the page reads is indexed, Transaction Service first and then CGW, since CGW caches an early empty response. Failure-only diagnostics attach in fixture teardown or `afterEach`; inside the test body `testInfo.status` is still `passed`.
 
 **✅ Check**\
-> Did this E2E test add or raise a timeout, or chain slow setup? Is the timeout on the retryable command, and does the test budget cover its inner waits?
+> Did this E2E test add or raise a timeout, chain slow setup, seed data, or attach diagnostics on failure? Is the timeout on the retryable command, does the test budget cover its inner waits, does it wait for every seeded value before navigating, and does the failure hook run where the final status is known?
 
 <details>
 <summary><strong>💡 Example</strong> — <code>examples/general/testing.md</code> § <em>cypress-retry-timeout-belongs-on-the-preceding-command</em></summary>
@@ -4250,16 +4321,16 @@ Cypress retries the chained command using the preceding command's timeout. The t
 <a id="data-06"></a>
 ### `DATA-06` Normalize shared identifiers and keys one way
 
-> **general** · data · 3 examples · ↩ `RL-20260218-002` · `RL-20260604-001` · `RL-20260611-006` · `RL-20260702-001` · `RL-20260710-002` · `RL-20260713-001` · `RL-20260707-003` · `RL-20260716-010` · `RL-20260818-005` · `RL-20260916-001` · `RL-20260309-007` · `RL-20260709-002` · `RL-20260716-002` · `RL-20260716-003` · `RL-20260930-001` · `RL-20260302-001` · `RL-20261014-004`
+> **general** · data · 4 examples · ↩ `RL-20260218-002` · `RL-20260604-001` · `RL-20260611-006` · `RL-20260702-001` · `RL-20260710-002` · `RL-20260713-001` · `RL-20260707-003` · `RL-20260716-010` · `RL-20260818-005` · `RL-20260916-001` · `RL-20260309-007` · `RL-20260709-002` · `RL-20260716-002` · `RL-20260716-003` · `RL-20260930-001` · `RL-20260302-001` · `RL-20261014-004` · `RL-20261022-004`
 
 **📜 Rule**\
-Every consumer of the same identifier or input (selector, hook, persistence, validator, submit guard, payload) normalizes it identically (`getAddress`, `toLowerCase`, `trim`); divergent normalization fragments caches and lets validation pass a value submit rejects. Compare addresses with `sameAddress`, never `===` or `toLowerCase()`, and key maps by the normalized address, but render the user's casing where users compare characters by eye. A cache, dedup, or list `key` covers every input that changes or distinguishes the value, consumers sharing a cached result pass identical query args, and persisted RTK cache keys use the runtime's exact serialization.
+Every consumer of the same identifier or input (selector, hook, persistence, validator, submit guard, payload) normalizes it identically (`getAddress`, `toLowerCase`, `trim`); divergent normalization fragments caches and lets validation pass a value submit rejects. Compare addresses with `sameAddress`, never `===` or `toLowerCase()`, and key maps by the normalized address, but render the user's casing where users compare characters by eye. Amounts compare in base units (`BigInt` wei), never as locale-formatted display strings. A cache, dedup, or list `key` covers every input that changes or distinguishes the value, consumers sharing a cached result pass identical query args, and persisted RTK cache keys use the runtime's exact serialization.
 
 **✅ Check**\
-> Did this compare or consume an address, identifier, or user input, or build a cache, dedup, or list key, query args, or persisted cache path? If yes, does it normalize like every other consumer (`sameAddress` for addresses), and does the key cover every input and match the runtime serialization?
+> Did this compare or consume an address, identifier, amount, or user input, or build a cache, dedup, or list key, query args, or persisted cache path? If yes, does it normalize like every other consumer (`sameAddress` for addresses), and does the key cover every input and match the runtime serialization?
 
 <details>
-<summary><strong>💡 Example 1 of 3</strong> — <code>examples/general/data-integrity.md</code> § <em>normalize-rtk-query-cache-keys-at-one-place</em></summary>
+<summary><strong>💡 Example 1 of 4</strong> — <code>examples/general/data-integrity.md</code> § <em>normalize-rtk-query-cache-keys-at-one-place</em></summary>
 
 <br>
 
@@ -4298,7 +4369,7 @@ RTK Query keys by argument value. Normalizing on read but not on invalidation me
 </details>
 
 <details>
-<summary><strong>💡 Example 2 of 3</strong> — <code>examples/general/data-integrity.md</code> § <em>compare-addresses-with-sameaddress-not-tolowercase</em></summary>
+<summary><strong>💡 Example 2 of 4</strong> — <code>examples/general/data-integrity.md</code> § <em>compare-addresses-with-sameaddress-not-tolowercase</em></summary>
 
 <br>
 
@@ -4339,7 +4410,7 @@ function projectRemove(currentOwners: string[], change: { ownerAddress: string }
 </details>
 
 <details>
-<summary><strong>💡 Example 3 of 3</strong> — <code>examples/general/data-integrity.md</code> § <em>data-06-key-list-items-by-everything-that-distinguishes-them</em></summary>
+<summary><strong>💡 Example 3 of 4</strong> — <code>examples/general/data-integrity.md</code> § <em>data-06-key-list-items-by-everything-that-distinguishes-them</em></summary>
 
 <br>
 
@@ -4367,6 +4438,39 @@ The usual flow removes each spender once, but the decoder accepts any batch, so 
 
 </details>
 
+<details>
+<summary><strong>💡 Example 4 of 4</strong> — <code>examples/general/data-integrity.md</code> § <em>data-06-compare-amounts-in-base-units-not-formatted-text</em></summary>
+
+<br>
+
+**DATA-06 — Compare amounts in base units, not formatted text**
+
+Source: PR #9252 (RL-20261022-004)
+
+### Avoid
+
+```ts
+const previousAmount = formatVisualAmount(BigInt(existingSpendingLimit.amount), decimals)
+// ...
+previousAmount: previousAmount !== data?.amount ? previousAmount : undefined,
+```
+
+### Prefer
+
+```ts
+const previousAmount = formatVisualAmount(BigInt(existingSpendingLimit.amount), decimals)
+// ...
+previousAmount: BigInt(existingSpendingLimit.amount) !== BigInt(amountInWei) ? previousAmount : undefined,
+```
+
+### Why
+
+The formatted value follows the locale ("1,000" or "1.000"), so it never equals the typed "1000" and an unchanged amount shows as replaced. Compare the wei values and use the formatted string only for display.
+
+<sub>Source: <a href="examples/general/data-integrity.md#data-06-compare-amounts-in-base-units-not-formatted-text">examples/general/data-integrity.md#data-06-compare-amounts-in-base-units-not-formatted-text</a></sub>
+
+</details>
+
 ---
 
 ## 🌐 general › ci
@@ -4389,7 +4493,7 @@ Drift checks for generated code must (1) include `--include-untracked` so newly 
 <a id="web-07"></a>
 ### `WEB-07` Handle the loading tri-state of feature-flag hooks
 
-> **web** · auth · 1 example · ↩ `RL-20260521-001` · `RL-20260522-001` · `RL-20260604-002` · `RL-20260609-004` · `RL-20260818-003` · `RL-20260909-008` · `RL-20260930-005`
+> **web** · auth · 1 example · ↩ `RL-20260521-001` · `RL-20260522-001` · `RL-20260604-002` · `RL-20260609-004` · `RL-20260818-003` · `RL-20260909-008` · `RL-20260930-005` · `RL-20261021-011`
 
 **📜 Rule**\
 Flag and gate hooks return `undefined` while config loads; never coerce it with `?? false`. Treat it as still resolving (wait, show a loader, or allow until known), branch on `=== true`/`=== false`, and have callers consume the loading state. A gate escape hatch re-checks `isAuthenticated` so it cannot bypass the gate after sign-in. The flag-off path keeps pre-feature behaviour, and every visible change of an unlaunched feature sits behind its own flag.
@@ -4442,7 +4546,7 @@ A flag hook that is `undefined` while its source loads must not be coerced to a 
 <a id="code-06"></a>
 ### `CODE-06` Own the lifecycle of async work
 
-> **general** · abstractions · 1 example · ↩ `RL-20260522-002` · `RL-20260611-005` · `RL-20260612-003` · `RL-20260612-007` · `RL-20260626-002` · `RL-20260715-001` · `RL-20260806-006`
+> **general** · abstractions · 1 example · ↩ `RL-20260522-002` · `RL-20260611-005` · `RL-20260612-003` · `RL-20260612-007` · `RL-20260626-002` · `RL-20260715-001` · `RL-20260806-006` · `RL-20261021-004`
 
 **📜 Rule**\
 An async call outside normal awaited control flow (an `onClick={asyncFn}`, a cleanup `disconnect()`, a background effect, a clipboard read) is awaited in a `try/catch` or an IIFE that handles rejection, even when an error state already renders, unless the callee already catches and logs. Timers and awaited calls that set state afterwards are cleared or guarded on unmount.
@@ -4782,10 +4886,10 @@ A top-level `permissions: {}` removes the inherited `contents: read` scope, so e
 <a id="a11y-01"></a>
 ### `A11Y-01` Keep interactive elements operable, unnested, and truly disabled
 
-> **web** · ui · 2 examples · ↩ `RL-20260605-002` · `RL-20260605-006` · `RL-20260624-002` · `RL-20260624-003` · `RL-20260729-003` · `RL-20260805-001` · `RL-20260811-003` · `RL-20260921-006` · `RL-20260929-003`
+> **web** · ui · 2 examples · ↩ `RL-20260605-002` · `RL-20260605-006` · `RL-20260624-002` · `RL-20260624-003` · `RL-20260729-003` · `RL-20260805-001` · `RL-20260811-003` · `RL-20260921-006` · `RL-20260929-003` · `RL-20261021-005`
 
 **📜 Rule**\
-Clickable elements are keyboard-operable (`<button type="button">`, or `role` + `tabIndex` + an Enter/Space handler) and never nested in another interactive element. Primitives that can render as links, and controls that must stay focusable for nested actions, disable with `aria-disabled` plus blocked pointer events. Repeated controls and indicators are named after their item, and a clickable row keeps its row role, uses a real button for focus, and ignores key events bubbled from nested controls.
+Clickable elements are keyboard-operable (`<button type="button">`, or `role` + `tabIndex` + an Enter/Space handler) and never nested in another interactive element. Primitives that can render as links, and controls that must stay focusable for nested actions, disable with `aria-disabled` plus blocked pointer events. Repeated controls and indicators are named after their item, a state shown only as an icon carries visually hidden text rather than an `aria-label` on a non-interactive element, and a clickable row keeps its row role, uses a real button for focus, and ignores key events bubbled from nested controls.
 
 **✅ Check**\
 > Did this add or change a clickable element or shared interactive primitive? If yes, is it keyboard-operable and unnested, does its disabled state block and announce, and does each repeated control have a distinct accessible name?
@@ -4917,7 +5021,7 @@ A compromised or misconfigured backend could otherwise redirect funds through a 
 <a id="type-01"></a>
 ### `TYPE-01` Keep types honest instead of casting
 
-> **general** · types · 1 example · ↩ `RL-20260608-012` · `RL-20260609-002` · `RL-20260622-002` · `RL-20260624-010` · `RL-20260702-002` · `RL-20260713-005` · `RL-20260720-001` · `RL-20260722-004` · `RL-20260731-003` · `RL-20260811-006` · `RL-20260828-002` · `RL-20261001-004` · `RL-20261002-004` · `RL-20261009-005`
+> **general** · types · 1 example · ↩ `RL-20260608-012` · `RL-20260609-002` · `RL-20260622-002` · `RL-20260624-010` · `RL-20260702-002` · `RL-20260713-005` · `RL-20260720-001` · `RL-20260722-004` · `RL-20260731-003` · `RL-20260811-006` · `RL-20260828-002` · `RL-20261001-004` · `RL-20261002-004` · `RL-20261009-005` · `RL-20261020-003`
 
 **📜 Rule**\
 Narrow unknown or wider values with a type predicate (`(x: unknown): x is T`), a guard, or a correctly typed source instead of `as T` casts or `@ts-ignore`; a cast silences the checker exactly where the value is unverified. Signatures state what they need: required inputs are not optional, and parameters are typed by the fields they read (`Pick<T, …>`). Branches on a discriminant end in a `never` check so a new kind fails to compile.
@@ -5085,10 +5189,10 @@ Tests that assign to globals (`navigator`, `window`, `Date`, env) restore them, 
 <a id="pkg-02"></a>
 ### `PKG-02` Import only declared dependencies, through their public entrypoint
 
-> **general** · packages · ↩ `RL-20260610-001` · `RL-20260618-001` · `RL-20260629-001` · `RL-20260708-001` · `RL-20260729-001` · `RL-20260413-006` · `RL-20261009-001`
+> **general** · packages · ↩ `RL-20260610-001` · `RL-20260618-001` · `RL-20260629-001` · `RL-20260708-001` · `RL-20260729-001` · `RL-20260413-006` · `RL-20261009-001` · `RL-20261021-013`
 
 **📜 Rule**\
-App and package code imports only packages declared in its own `package.json`, through the package's public entrypoint (the same module tree its provider uses, React Native on mobile), and uses the repo's established library for a concern (e.g. ethers) rather than one present only transitively. A package, its tests and stories included, never imports from an app (`@/…`) and carries its own test utils. A new package needs a reason existing dependencies cannot cover, and third-party versions never bypass the dependency age gate (`npmPreapprovedPackages` is for in-house `@safe-global/*` only).
+App and package code imports only packages declared in its own `package.json`, through the package's public entrypoint (the same module tree its provider uses, React Native on mobile), and uses the repo's established library for a concern (e.g. ethers) rather than one present only transitively. A package, its tests and stories included, never imports from an app (`@/…`) and carries its own test utils. Presentational UI that needs no app module lives in `packages/views`; one that needs an app-only component (web `Identicon`) stays in the app. A new package needs a reason existing dependencies cannot cover, and third-party versions never bypass the dependency age gate (`npmPreapprovedPackages` is for in-house `@safe-global/*` only).
 
 **✅ Check**\
 > Did this import a package or add a dependency? If yes, is it declared by this workspace, the library the repo already uses for that job, and imported through the entrypoint its provider uses, and does package code import nothing from an app?
@@ -5100,13 +5204,13 @@ App and package code imports only packages declared in its own `package.json`, t
 <a id="sec-04"></a>
 ### `SEC-04` Keep secrets and raw identifiers out of logs and telemetry
 
-> **general** · security · ↩ `RL-20260707-001` · `RL-20260914-001`
+> **general** · security · ↩ `RL-20260707-001` · `RL-20260914-001` · `RL-20261021-002`
 
 **📜 Rule**\
-Logs, error reports, and telemetry never include raw URIs, deep links, or payloads that can carry secrets (WalletConnect symKeys, tokens, signatures). Log a redacted form such as the scheme or first path segment, and send errors with the sanitized message and a sanitized or omitted stack, since raw provider messages embed addresses, hashes, and calldata.
+Logs, error reports, and telemetry never include raw URIs, deep links, or payloads that can carry secrets (WalletConnect symKeys, tokens, signatures). Log a redacted form such as the scheme or first path segment, and send errors with the sanitized message and a sanitized or omitted stack, since raw provider messages embed addresses, hashes, and calldata. Predicates that classify an error (wallet rejection) run on the raw thrown value; the redacted form is only for what gets reported.
 
 **✅ Check**\
-> Did this log, report, or track a URI, deep link, request payload, or error? If yes, is anything secret-bearing or raw redacted or sanitized first?
+> Did this log, report, or track a URI, deep link, request payload, or error? If yes, is anything secret-bearing or raw redacted or sanitized first, and do error classifiers still read the raw value?
 
 ---
 
@@ -5163,13 +5267,47 @@ const onChangeToken = () => {
 <a id="test-07"></a>
 ### `TEST-07` Visual changes get a Storybook state
 
-> **web** · testing · ↩ `RL-20260827-001` · `RL-20260911-005` · `RL-20260921-008` · `RL-20260930-012`
+> **web** · testing · 1 example · ↩ `RL-20260827-001` · `RL-20260911-005` · `RL-20260921-008` · `RL-20260930-012` · `RL-20261020-002`
 
 **📜 Rule**\
-A new visible component or state, and every visual or layout bug fix, gets a Storybook story rendering that state (error, long content, nesting, dismissed) so the visual-regression run catches a recurrence; class-string snapshots and DOM unit tests don't verify geometry. Stories rely on the global `mswLoader` from the preview and never register it locally, pass callbacks as `fn()`, and apply a scenario decorator once per story (meta and story decorators stack).
+A new visible component or state, and every visual or layout bug fix, gets a Storybook story rendering that state (error, long content, nesting, dismissed) so the visual-regression run catches a recurrence; class-string snapshots and DOM unit tests don't verify geometry. Stories rely on the global `mswLoader` from the preview and never register it locally, pass callbacks as `fn()`, and apply a scenario decorator once per story (meta and story decorators stack). A story seeds or clears every persisted value its state reads (consent, localStorage) and renders recorded fixtures in their own Safe and chain, so the named state looks the same on every run.
 
 **✅ Check**\
-> Did this add a visible component or state, or fix a visual/layout bug? If yes, is there a story rendering exactly that state, including long, empty, and loading content, with one decorator per story?
+> Did this add a visible component or state, or fix a visual/layout bug? If yes, is there a story rendering exactly that state, including long, empty, and loading content, with one decorator per story, and does it render the same regardless of persisted state?
+
+<details>
+<summary><strong>💡 Example</strong> — <code>examples/general/testing.md</code> § <em>test-07-clear-persisted-state-a-storys-named-state-depends-on</em></summary>
+
+<br>
+
+**TEST-07 — Clear persisted state a story's named state depends on**
+
+Source: PR #9132 (RL-20261020-002)
+
+### Avoid
+
+```tsx
+export const Disclaimer: Story = {
+  parameters: createMockStory({ scenario: 'efSafe', pathname: '/earn', features: { earn: true } }).parameters,
+}
+```
+
+### Prefer
+
+```tsx
+export const Disclaimer: Story = {
+  parameters: createMockStory({ scenario: 'efSafe', pathname: '/earn', features: { earn: true } }).parameters,
+  beforeEach: () => localItem(EARN_CONSENT_STORAGE_KEY).remove(),
+}
+```
+
+### Why
+
+The page reads consent from local storage, so once someone clicks Continue in Storybook the story renders the page instead of the disclaimer, and the visual run compares the wrong state.
+
+<sub>Source: <a href="examples/general/testing.md#test-07-clear-persisted-state-a-storys-named-state-depends-on">examples/general/testing.md#test-07-clear-persisted-state-a-storys-named-state-depends-on</a></sub>
+
+</details>
 
 ---
 
@@ -5200,5 +5338,54 @@ Enable an action by the exact permission the backend enforces (the grant's deleg
 
 **✅ Check**\
 > Does this enable an action or build a signed request for a specific identity? If yes, is it gated on the backend's exact permission, and does a missing record refuse rather than fall back?
+
+---
+
+<a id="sec-06"></a>
+### `SEC-06` Enforce safety boundaries with allowlists
+
+> **general** · security · 1 example · ↩ `RL-20261021-001`
+
+**📜 Rule**\
+A check that guards a safety boundary (what an error message may carry, what a sandboxed mock may import, which hosts an isolated test may reach) passes only an explicit list of known-safe values and rejects the rest. A denylist or a loose pattern lets an unanticipated value through: a 64-character hex key matches an alphanumeric code regex, and `openSync` slips past a list of write calls.
+
+**✅ Check**\
+> Does this add or widen a check that keeps secrets, writes, or requests inside a boundary? If yes, does it name what is allowed (types, bindings, origin and host pairs) rather than what is forbidden?
+
+<details>
+<summary><strong>💡 Example</strong> — <code>examples/general/api-and-packages.md</code> § <em>sec-06-keep-only-values-known-to-be-safe</em></summary>
+
+<br>
+
+**SEC-06 — Keep only values known to be safe**
+
+Source: PR #9250 (RL-20261021-001)
+
+### Avoid
+
+```ts
+// Wallet and RPC error codes are short identifiers (4001, ACTION_REJECTED), so they carry no secrets
+const ERROR_CODE_RE = /^[A-Za-z0-9_]{1,64}$/
+```
+
+### Prefer
+
+```ts
+// EIP-1193 and JSON-RPC codes are safe integers, which cannot hold a secret; any other code could
+const safeIntegerCode = (thrown: unknown): number | undefined => {
+  if (typeof thrown !== 'object' || thrown === null || Array.isArray(thrown)) return undefined
+
+  const { code } = thrown as { code?: unknown }
+  return typeof code === 'number' && Number.isSafeInteger(code) ? code : undefined
+}
+```
+
+### Why
+
+An unprefixed 64-character hex private key matches the pattern and would be copied into the error message that reaches logs. Keeping only the one shape that cannot carry a secret leaves nothing for an unexpected value to slip through.
+
+<sub>Source: <a href="examples/general/api-and-packages.md#sec-06-keep-only-values-known-to-be-safe">examples/general/api-and-packages.md#sec-06-keep-only-values-known-to-be-safe</a></sub>
+
+</details>
 
 ---

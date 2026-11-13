@@ -787,3 +787,27 @@ const rows = removedSpenders.map((spender, index) => <SpenderRow key={`${spender
 ### Why
 
 The usual flow removes each spender once, but the decoder accepts any batch, so a hand-built one can repeat a spender and two rows would share a key. A key stays unique for every input the parser accepts, not only for what the usual flow produces.
+
+## DATA-06 — Compare amounts in base units, not formatted text
+
+Source: PR #9252 (RL-20261022-004)
+
+### Avoid
+
+```ts
+const previousAmount = formatVisualAmount(BigInt(existingSpendingLimit.amount), decimals)
+// ...
+previousAmount: previousAmount !== data?.amount ? previousAmount : undefined,
+```
+
+### Prefer
+
+```ts
+const previousAmount = formatVisualAmount(BigInt(existingSpendingLimit.amount), decimals)
+// ...
+previousAmount: BigInt(existingSpendingLimit.amount) !== BigInt(amountInWei) ? previousAmount : undefined,
+```
+
+### Why
+
+The formatted value follows the locale ("1,000" or "1.000"), so it never equals the typed "1000" and an unchanged amount shows as replaced. Compare the wei values and use the formatted string only for display.

@@ -10266,5 +10266,654 @@
     "ruleIds": [
       "STATE-02"
     ]
+  },
+  {
+    "id": "RL-20261016-001",
+    "title": "Polling hook switched the row to loading on every refetch",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9091
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4292046799,
+      4292992029
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A guarded-Safe row derived `safeLoading` from `!safeLoaded && isFetching`, so a failed or counterfactual (404) target blinked between loading and error on every poll. It switched to `isLoading`, and the error now stays visible while polling.",
+    "ruleIds": [
+      "RTK-02"
+    ]
+  },
+  {
+    "id": "RL-20261016-002",
+    "title": "Two near-identical CTA helpers for the same plan decision",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9028
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4284071910,
+      4284915799
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "`getPlanCta` and `getCardCta` computed almost the same plan call to action and were combined into one. Logic two call sites share lives in one helper.",
+    "ruleIds": [
+      "CODE-01"
+    ]
+  },
+  {
+    "id": "RL-20261016-003",
+    "title": "Growing component file and one prop pair per experiment",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9028,
+      9099
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4284131321,
+      4284916498,
+      4292778507,
+      4293893469
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "`PlanCards.tsx` was split into `PlanCard` and `PlanCatalog` files, as the rest of the feature does. `ExperimentalSection` took an `isXEnabled`/`onXChange` pair per experiment; it now renders one row per entry of an `EXPERIMENTAL_FEATURES` registry from an `enabled` array and one `onChange`, so a new experiment is one registry entry.",
+    "ruleIds": [
+      "CODE-03"
+    ]
+  },
+  {
+    "id": "RL-20261019-001",
+    "title": "Analytics events dropped before the GA client loaded",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9096
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4291816872,
+      4291939333
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Loading GA only after consent made `sendEvent` return early while `window.gtag` was missing. For a returning user, consent hydrates in an effect, so the initial page view and mount-time viewed events were dropped, and `useTrackOnce` had already marked them tracked. Events emitted before the client is ready are queued or their emitters wait for readiness.",
+    "ruleIds": [
+      "OBS-01"
+    ]
+  },
+  {
+    "id": "RL-20261019-002",
+    "title": "Architecture drawing committed with a feature scaffold",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9138
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4296167846
+    ],
+    "reviewIds": [
+      5549754793
+    ],
+    "issueCommentIds": [],
+    "learning": "A transactions-page scaffold added a 6,000-line `architecture.excalidraw` under `docs/`; the reviewer requested changes until it was removed from the repo.",
+    "ruleIds": [
+      "REVIEW-01"
+    ]
+  },
+  {
+    "id": "RL-20261020-001",
+    "title": "Failed or impossible loads rendered as still loading",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9231,
+      9187,
+      9177
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4326503865,
+      4326652586,
+      4324248664,
+      4326544778,
+      4315913885,
+      4319019255
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Malformed `approveHash` calldata left no lookup to run, so the confirmation fell through to a skeleton forever; it now shows an error. An experimental toggle passed `isSaving || !space`, so a failed Workspace load spun indefinitely; the spinner now shows only while loading and a failed load disables the switch. A recovery review kept Execute disabled with no reason when the gas price failed to load; it now shows the error. A loader means a request is in flight, nothing else.",
+    "ruleIds": [
+      "RTK-02"
+    ]
+  },
+  {
+    "id": "RL-20261020-002",
+    "title": "Stories whose named state depended on persisted data or the wrong chain",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9132,
+      9120,
+      9230
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4294558054,
+      4311255734,
+      4290976437,
+      4292036355,
+      4326328435,
+      4326596775
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "An Earn `Disclaimer` story rendered the page instead once consent had been accepted in Storybook; it now clears the stored consent in `beforeEach`. Transaction stories rendered Sepolia recordings in the mainnet `efSafe` scenario, so addresses got the wrong prefix and explorer links; they now use the recorded Safe and chain. A new `ParsingErrorBoundary` got `Default` and `RenderError` stories.",
+    "ruleIds": [
+      "TEST-07"
+    ]
+  },
+  {
+    "id": "RL-20261020-003",
+    "title": "Cast on a parsed request body hid a crash",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9162
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4322261579,
+      4322648591,
+      4323178422
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A CoW mock cast `JSON.parse(body)` to `{ txHash?: string; uids?: string[] }`. Replacing the cast with type guards (`'txHash' in data`, `typeof`, `isStringArray`) exposed that a non-JSON body or non-array `uids` gave an uncaught 500; every malformed body now gets a 400.",
+    "ruleIds": [
+      "TYPE-01"
+    ]
+  },
+  {
+    "id": "RL-20261020-004",
+    "title": "Replacement journey left its Cypress migration row unrecorded",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9157
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4310615506,
+      4311256649
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A Playwright journey recreated a Cypress flow while the migration status doc still listed that spec as pending with no equivalent. Each journey PR now records the verdict and equivalent on the rows of the specs it replaces, so the live queue matches the code.",
+    "ruleIds": [
+      "DOC-01"
+    ]
+  },
+  {
+    "id": "RL-20261020-005",
+    "title": "String literal and route query used where a generated type and hook exist",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9187,
+      9138
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4324118904,
+      4326774536,
+      4327122709,
+      4327139680,
+      4296402492,
+      4296407245
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "An opt-in check compared `experimentalFeatures` against a bare `'POLICY_RECIPIENT_ALLOWLIST'`; it was refactored to the generated backend enum type. A Workspace page read `router.query.spaceId` and cast it `as string`; it now uses `useCurrentSpaceId()`, which removed the cast.",
+    "ruleIds": [
+      "DATA-04"
+    ]
+  },
+  {
+    "id": "RL-20261021-001",
+    "title": "Safety checks built as denylists or loose patterns",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9250,
+      9087,
+      9233
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4336637499,
+      4336888223,
+      4271610225,
+      4271808026,
+      4327499241,
+      4333319130
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "`asError` kept error codes matching `/^[A-Za-z0-9_]{1,64}$/`, which a 64-character hex private key passes; it now keeps only safe-integer codes. The mock hardening test allowed all of `node:fs` and denied a list of write calls, which `openSync`/`writeSync` bypassed; it now allows only `{ readFileSync }`. The E2E network guard let a hosted widget reach any host; it now allows only RPC hosts for that origin and blocks the rest.",
+    "ruleIds": [
+      "SEC-06"
+    ]
+  },
+  {
+    "id": "RL-20261021-002",
+    "title": "Wallet-rejection check ran on the redacted error",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9250
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4336637483,
+      4336888696
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Passing `asError(_err)` to `isWalletRejection` replaced a plain `{ message: 'user rejected…' }` object's message with the generic text, so rejections were reported as failures. Execute and Sign forms went back to classifying the raw `_err` and keep `err` for reporting.",
+    "ruleIds": [
+      "SEC-04"
+    ]
+  },
+  {
+    "id": "RL-20261021-003",
+    "title": "Grouped contacts appended the same chain ID per casing",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9171
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4325750896,
+      4326051546
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "The v2 address book grouped contacts by lowercased address but pushed `chainId` once per raw entry, so an address saved in two casings on one chain showed the chain twice and sent it twice to the add APIs. Chain IDs now collect in a `Set`, as v1 does.",
+    "ruleIds": [
+      "DATA-01"
+    ]
+  },
+  {
+    "id": "RL-20261021-004",
+    "title": "Copy button reported success before the clipboard write",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9171
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4325750912,
+      4326054559
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "`void navigator.clipboard?.writeText(address); setCopied(true)` showed Copied when the API was missing or permission was denied, and left the rejection unhandled. The check now shows only after the write resolves, and a rejected write is handled.",
+    "ruleIds": [
+      "CODE-06"
+    ]
+  },
+  {
+    "id": "RL-20261021-005",
+    "title": "Status conveyed only by an aria-label on a span",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9171
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [],
+    "issueCommentIds": [
+      6265106712,
+      6268498949
+    ],
+    "learning": "In the compact layout, \"Already shared\" existed only as an `aria-label` on a plain `<span>`, which screen readers may skip. It became visually hidden text next to an `aria-hidden` icon, with a test.",
+    "ruleIds": [
+      "A11Y-01"
+    ]
+  },
+  {
+    "id": "RL-20261021-006",
+    "title": "Narrative headers, chat leftovers and ticket references in comments",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9154,
+      9112,
+      9142,
+      8835,
+      8129
+    ],
+    "prState": "closed/merged",
+    "reviewCommentIds": [
+      4310617381,
+      4311256307,
+      4290960171,
+      4292035990,
+      4323861157,
+      4323865686,
+      4324436981,
+      4324438876,
+      4132888664,
+      4133048890,
+      4133055218,
+      4133075666,
+      4133408947,
+      4133409575,
+      4133410255,
+      4133410561,
+      3452429825,
+      3458306065
+    ],
+    "reviewIds": [
+      5352714288
+    ],
+    "issueCommentIds": [],
+    "learning": "Comments were again cut to one line of non-obvious why: narrative spec headers across 22 journey files, an eight-line helper JSDoc, two comments naming the ticket that would enable a button, and comments left over from an AI chat. A comment next to a condition whose rule changed was updated with it.",
+    "ruleIds": [
+      "DOC-01"
+    ]
+  },
+  {
+    "id": "RL-20261021-007",
+    "title": "Dated change log in shared UI component headers is deliberate",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      8835
+    ],
+    "prState": "closed",
+    "reviewCommentIds": [
+      4132899992,
+      4133409261
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "The dated entries in a `components/ui/card.tsx` header (\"2026-09-28: Added `hairline`…\") are kept on purpose: they help the AI pipelines keep the components in sync with Figma. New variants add an entry there instead of being cut as decision history.",
+    "ruleIds": [
+      "DOC-01"
+    ]
+  },
+  {
+    "id": "RL-20261021-008",
+    "title": "Commented-out alternatives, an unused constant and a removed secret's leftover consumer",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9232,
+      9028,
+      9204
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4327860007,
+      4328496329,
+      4284091946,
+      4284916150,
+      4323170379,
+      4323233510
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Two commented-out guard addresses kept for switching delays became a `POLICY_GUARD_BY_DELAY` map. An unused `TRIAL_COUNTDOWN_DAYS` was deleted. Dropping `CYPRESS_RECORD_KEY` from three workflows also had to drop it from the CI env manifest that the consistency test reads.",
+    "ruleIds": [
+      "API-01"
+    ]
+  },
+  {
+    "id": "RL-20261021-009",
+    "title": "Tracking that bypassed the shared helper, drifted from its link, or logged expected refusals",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9139,
+      9028,
+      8835,
+      9105
+    ],
+    "prState": "closed/merged",
+    "reviewCommentIds": [
+      4133106982,
+      4133410869
+    ],
+    "reviewIds": [
+      5569154703,
+      5545415999
+    ],
+    "issueCommentIds": [
+      6263871643,
+      6212255872,
+      6210571020,
+      6211354418
+    ],
+    "learning": "A Plans click called `trackMixpanelEvent` directly; it moved to the common `trackEvent` so GA gets it too. A banner click helper defaulted `destinationUrl`, so a caller could track a URL other than its `href`; the argument became required. A refactor was checked against `dev` for event properties and restored missing `location`s. A daily-limit 429 from CGW is an expected refusal and is no longer logged as an error.",
+    "ruleIds": [
+      "OBS-01"
+    ]
+  },
+  {
+    "id": "RL-20261021-010",
+    "title": "Field name that hid what the list holds",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      8835
+    ],
+    "prState": "closed",
+    "reviewCommentIds": [
+      4133159483,
+      4133411212
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A plan field documented as \"only what this plan adds over the one before it\" was named `features`; it was renamed `additionalFeatures` so the name says it.",
+    "ruleIds": [
+      "CODE-05"
+    ]
+  },
+  {
+    "id": "RL-20261021-011",
+    "title": "Query fetched while its flag was off, and new copy leaked to flag-off users",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9187,
+      8835
+    ],
+    "prState": "closed/merged",
+    "reviewCommentIds": [
+      4324206957,
+      4326447072,
+      4181625861,
+      4247618185
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [
+      5953505609,
+      5954606885
+    ],
+    "learning": "An allowlist hook fetched the Workspace even with its experimental flag off; it now skips on `hasExperimentalFlag === false` but not on availability, which is false while chain configs load. A Plans v2 constant moved into the v2 catalog changed the yearly-savings copy on the flag-off launch page; the team kept the redesign behind its flag.",
+    "ruleIds": [
+      "WEB-07"
+    ]
+  },
+  {
+    "id": "RL-20261021-012",
+    "title": "Unrequested color change and a Current badge on the inactive billing cycle",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      8835,
+      9028
+    ],
+    "prState": "closed/merged",
+    "reviewCommentIds": [],
+    "reviewIds": [],
+    "issueCommentIds": [
+      5953799581,
+      5956760163,
+      6192909681,
+      6195683043
+    ],
+    "learning": "A design pass restyled the \"Free access\" chip to grey with a dot; a reviewer flagged the clashing greens and it was reverted for a separate PR. With a monthly plan, the yearly tab marked the same tier Current; after review the styling follows the real subscription.",
+    "ruleIds": [
+      "UX-03"
+    ]
+  },
+  {
+    "id": "RL-20261021-013",
+    "title": "Presentational flow parts kept in the app instead of packages/views",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9142
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4323896361,
+      4324435183,
+      4323904451,
+      4324409084,
+      4323911482,
+      4324429333
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A flow subtitle with no app dependencies moved into `@safe-global/views`. A preview that renders the web `Identicon` stayed in the app, since views cannot import it, like the spending-limit and proposer previews; intro explainers wired to app constants stayed too.",
+    "ruleIds": [
+      "PKG-02"
+    ]
+  },
+  {
+    "id": "RL-20261022-001",
+    "title": "Component tests replacing deleted E2E coverage mocked away the wiring",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9283,
+      9224,
+      9118
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4348618291,
+      4348978165,
+      4325640175,
+      4325666402,
+      4290970006,
+      4292036184
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Cypress checks were deleted in favour of Jest, but the replacements could not catch the regression: `ReviewBatch` mocked `DecodedTxs`, `BatchSidebar` mocked `BatchTxList` as `() => null`, and the Topbar test only asserted the buttons exist. The fixes render the real list, make the mock render a delete button per item that calls `onDelete`, and click each control to open its popup.",
+    "ruleIds": [
+      "TEST-04"
+    ]
+  },
+  {
+    "id": "RL-20261022-002",
+    "title": "Journey opened the page before the seeded balance was indexed",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9274
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4346358342,
+      4346417971
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "`seedSafe` waits for the Safe but not its funding transfer, so the assets page could request balances early and CGW cached the empty answer. A `waitForNativeBalance` now waits in the Transaction Service, then in CGW, before the journey navigates.",
+    "ruleIds": [
+      "E2E-02"
+    ]
+  },
+  {
+    "id": "RL-20261022-003",
+    "title": "Failure log attached from the test body, where the status is still passed",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9281
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4349035966,
+      4349769636
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A `finally` attached the dApp log when `testInfo.status !== testInfo.expectedStatus`, but inside the test body the status is still `passed`, so failures never got the log. The dApp moved into a fixture whose teardown attaches it.",
+    "ruleIds": [
+      "E2E-02"
+    ]
+  },
+  {
+    "id": "RL-20261022-004",
+    "title": "Amounts compared as locale-formatted text",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9252
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4337488388,
+      4338020902
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "The replaced spending limit's amount went through `formatVisualAmount` (\"1,000\" in English, \"1.000\" in German) and was compared with the typed \"1000\", so an unchanged amount showed as replaced. Amounts are now compared in wei with `BigInt`; only the display uses the formatted value.",
+    "ruleIds": [
+      "DATA-06"
+    ]
+  },
+  {
+    "id": "RL-20261022-005",
+    "title": "Branches that hide unchanged values had no tests",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9252
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4337458188,
+      4338020537
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "The spending-limit review hides the previous amount or reset time when it equals the new one; both branches got a test (keep the amount, keep the reset time).",
+    "ruleIds": [
+      "TEST-02"
+    ]
+  },
+  {
+    "id": "RL-20261022-006",
+    "title": "Assertions that pass vacuously or fail for the wrong reason",
+    "sourceWindowId": "CLOSED-20261015-20261023",
+    "prNumbers": [
+      9249,
+      9094,
+      9159,
+      9091,
+      9232
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4337548562,
+      4337828245,
+      4282074976,
+      4282643671,
+      4310625812,
+      4311256905,
+      4291921879,
+      4292988975,
+      4327913207,
+      4328501864
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A test titled \"without amount\" never asserted the amount was absent. `expect(appHash).toContain(deviceHash)` passed when the device showed no hash, since every string contains `''`. Text checks on a recovery card passed while the panel was collapsed and the card hidden. A chain test with a mocked `useChain` could not catch the fallback it named. \"No deployment\" cases used a real chain that may get one later; they now use a made-up chain ID.",
+    "ruleIds": [
+      "TEST-01"
+    ]
   }
 ]

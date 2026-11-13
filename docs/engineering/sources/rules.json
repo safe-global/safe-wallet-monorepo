@@ -69,7 +69,8 @@
       "RL-20260916-004",
       "RL-20260930-002",
       "RL-20261008-003",
-      "RL-20261009-004"
+      "RL-20261009-004",
+      "RL-20261016-002"
     ]
   },
   {
@@ -144,7 +145,8 @@
       "RL-20260929-005",
       "RL-20261008-008",
       "RL-20261009-003",
-      "RL-20261014-003"
+      "RL-20261014-003",
+      "RL-20261021-008"
     ]
   },
   {
@@ -203,8 +205,8 @@
     "project": "general",
     "area": "state",
     "title": "Choose RTK Query read state by UX meaning",
-    "rule": "Pick the flag by whether existing data should stay visible: `isLoading` is the first load only, `isFetching` includes refetches, and a load-more control stays mounted and disabled while the next page fetches. A failed refetch keeps the last `data`: access-derived hooks drop it on 403/404, other errors keep it as transient. A new arg's load shows as `currentData === undefined` (`isLoading` stays false), and a failed dependency query renders as an error, not as empty.",
-    "check": "Did this render from RTK Query state? If yes, does a refetch hide content only when it should, can a failed refetch leave stale or forbidden data on screen, and can an arg change or failed dependency read as a confident empty answer?",
+    "rule": "Pick the flag by whether existing data should stay visible: `isLoading` is the first load only, `isFetching` includes refetches, and a load-more control stays mounted and disabled while the next page fetches. A failed refetch keeps the last `data`: access-derived hooks drop it on 403/404, other errors keep it as transient. A new arg's load shows as `currentData === undefined` (`isLoading` stays false), and a failed dependency query renders as an error, not as empty. A loader shows only while a request is in flight: a failed or impossible load renders an error or the reason an action is disabled, never a permanent skeleton or spinner.",
+    "check": "Did this render from RTK Query or other async read state? If yes, does a refetch hide content only when it should, can a failed refetch leave stale or forbidden data on screen, can an arg change or failed dependency read as a confident empty answer, and can a failure read as still loading?",
     "exampleRefs": [
       "examples/general/data-integrity.md#loading-vs-fetching",
       "examples/general/data-integrity.md#rtk-02-skip-queries-until-the-resource-id-is-resolved"
@@ -216,7 +218,9 @@
       "RL-20260615-001",
       "RL-20260615-010",
       "RL-20260609-010",
-      "RL-20260930-003"
+      "RL-20260930-003",
+      "RL-20261016-001",
+      "RL-20261020-001"
     ]
   },
   {
@@ -239,7 +243,8 @@
       "RL-20260505-005",
       "RL-20260720-004",
       "RL-20260909-006",
-      "RL-20260922-001"
+      "RL-20260922-001",
+      "RL-20261021-003"
     ]
   },
   {
@@ -307,7 +312,8 @@
       "RL-20260812-001",
       "RL-20260930-001",
       "RL-20261008-002",
-      "RL-20261014-001"
+      "RL-20261014-001",
+      "RL-20261020-005"
     ]
   },
   {
@@ -402,7 +408,8 @@
       "examples/general/testing.md#test-01-mock-external-lookups-instead-of-relying-on-real-fixture-state",
       "examples/general/testing.md#test-01-test-the-debounce-not-just-the-post-debounce-assertion",
       "examples/general/testing.md#overwriting-localstorage-fixtures-must-include-implicit-app-seeded-entries",
-      "examples/general/testing.md#test-01-click-links-without-asserting-their-href"
+      "examples/general/testing.md#test-01-click-links-without-asserting-their-href",
+      "examples/general/testing.md#test-01-check-a-value-is-complete-before-testing-containment"
     ],
     "reviewLearningIds": [
       "RL-20260217-001",
@@ -426,7 +433,8 @@
       "RL-20260911-002",
       "RL-20260925-002",
       "RL-20261002-003",
-      "RL-20261012-001"
+      "RL-20261012-001",
+      "RL-20261022-006"
     ]
   },
   {
@@ -463,7 +471,8 @@
       "RL-20260921-005",
       "RL-20261001-002",
       "RL-20261002-003",
-      "RL-20261013-001"
+      "RL-20261013-001",
+      "RL-20261022-005"
     ]
   },
   {
@@ -491,9 +500,12 @@
     "project": "general",
     "area": "testing",
     "title": "Moved behavior needs replacement coverage and matching mocks",
-    "rule": "When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts. Mocks follow the code: they target the exact module specifier it imports (barrel vs deep path), and mocks for dependencies it no longer uses are removed. CI path filters and test or story discovery cover the new location.",
-    "check": "Did this move or remove a return field, prop, branch, or dependency? If yes, did equivalent tests move to the new owner, do the tests' mocks still match what the code imports, and do CI triggers still run them?",
-    "exampleRefs": ["examples/general/testing.md#test-04-extend-ci-path-filters-when-tests-or-stories-move"],
+    "rule": "When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts. Mocks follow the code: they target the exact module specifier it imports (barrel vs deep path), and mocks for dependencies it no longer uses are removed. A component test that replaces deleted E2E coverage keeps the child it wires real, or has the mock render the props it receives and act on them, and drives the interaction instead of asserting presence. CI path filters and test or story discovery cover the new location.",
+    "check": "Did this move or remove a return field, prop, branch, or dependency, or replace E2E coverage with component tests? If yes, did equivalent tests move to the new owner, do the tests' mocks still match what the code imports, does the replacement exercise the same wiring and interaction, and do CI triggers still run them?",
+    "exampleRefs": [
+      "examples/general/testing.md#test-04-extend-ci-path-filters-when-tests-or-stories-move",
+      "examples/general/testing.md#test-04-let-the-mocked-child-act-on-the-props-it-receives"
+    ],
     "reviewLearningIds": [
       "RL-20260428-002",
       "RL-20260428-003",
@@ -506,7 +518,8 @@
       "RL-20260812-002",
       "RL-20260921-010",
       "RL-20261001-002",
-      "RL-20261009-002"
+      "RL-20261009-002",
+      "RL-20261022-001"
     ]
   },
   {
@@ -564,7 +577,7 @@
     "project": "web",
     "area": "observability",
     "title": "Promote telemetry only when user impact justifies it",
-    "rule": "Log and error levels follow user impact: expected retries, browser noise, and duplicate signals stay below error so they don't flood SLOs. An analytics event fired from a shared component takes its entry point or label as a prop, with a dedicated label per surface, never a hardcoded or borrowed one, and event properties come from the call that fires it, never from global state a caller must set first. Impression events fire once per mount and only while shown, session-wide properties are registered globally, and a refactor keeps an existing event's properties and values.",
+    "rule": "Log and error levels follow user impact: expected retries, browser noise, and duplicate signals stay below error so they don't flood SLOs. An analytics event fired from a shared component takes its entry point or label as a prop, with a dedicated label per surface, never a hardcoded or borrowed one, and event properties come from the call that fires it, never from global state a caller must set first. Impression events fire once per mount and only while shown, an event emitted before the analytics client is ready is queued rather than dropped or marked tracked, session-wide properties are registered globally, and a refactor keeps an existing event's properties and values.",
     "check": "Did this change logging/RUM/error levels or fire an analytics event? If yes, is the level justified by user impact, is the event attributed to its real entry point by the call that fires it, do impressions fire once and only when visible, and do existing events keep their properties?",
     "exampleRefs": [
       "examples/general/api-and-packages.md#obs-01-use-the-shared-analytics-param-key",
@@ -582,7 +595,9 @@
       "RL-20260914-002",
       "RL-20260921-007",
       "RL-20261007-001",
-      "RL-20261013-003"
+      "RL-20261013-003",
+      "RL-20261019-001",
+      "RL-20261021-009"
     ]
   },
   {
@@ -627,7 +642,7 @@
     "project": "general",
     "area": "docs",
     "title": "Keep docs, comments, and agent guidance true to the code",
-    "rule": "Moved or split docs keep every removed section or call it out. Comments next to a changed condition or contract change with it and give the non-obvious why in one line, without restating code, decision history, or ticket IDs; a test states its regression intent in its name. Runbooks name real branches and fallback commands, processor disclosures match the integrated SDKs, and a framework, script, or tool change updates the nearest AGENTS.md with how the tool really behaves.",
+    "rule": "Moved or split docs keep every removed section or call it out. Comments next to a changed condition or contract change with it and give the non-obvious why in one line, without restating code, decision history, or ticket IDs (the dated change log in `components/ui` headers is deliberate: it keeps them in sync with Figma); a test states its regression intent in its name. Runbooks name real branches and fallback commands, processor disclosures match the integrated SDKs, and a framework, script, or tool change updates the nearest AGENTS.md with how the tool really behaves.",
     "check": "Did this move docs, add a comment, change logic a comment describes, or change a runbook, disclosure, framework, script, or tool? If yes, is every removed section accounted for, is each comment one line of why that matches the code, and do runbooks, disclosures, and AGENTS.md match the real setup?",
     "exampleRefs": [
       "examples/general/comments-and-docs.md#doc-01-one-line-of-why-no-narration-or-ticket-ids",
@@ -656,7 +671,10 @@
       "RL-20260928-001",
       "RL-20261013-002",
       "RL-20261014-002",
-      "RL-20261015-001"
+      "RL-20261015-001",
+      "RL-20261020-004",
+      "RL-20261021-006",
+      "RL-20261021-007"
     ]
   },
   {
@@ -779,7 +797,8 @@
       "RL-20260420-004",
       "RL-20260619-002",
       "RL-20260930-008",
-      "RL-20261002-006"
+      "RL-20261002-006",
+      "RL-20261021-012"
     ]
   },
   {
@@ -817,7 +836,8 @@
       "RL-20260909-009",
       "RL-20260921-011",
       "RL-20261001-003",
-      "RL-20261002-007"
+      "RL-20261002-007",
+      "RL-20261019-002"
     ],
     "project": "general"
   },
@@ -869,7 +889,7 @@
     "rule": "A hook, handler, or component that does several things (fetch, resolve, and map; a multi-case switch; a long try/finally) splits into named hooks, functions, or one component per case. Helpers take at most 4 positional parameters: close over shared hook state in a local builder or pass one `deps` object, and group props that travel together into one object.",
     "check": "Did this add or grow a hook, handler, or component a reviewer must read top to bottom, or a helper with 5+ positional args? If yes, can its steps become named units and its arguments a closure or one object?",
     "exampleRefs": ["examples/general/api-and-packages.md#close-over-hook-deps-instead-of-threading-6-args"],
-    "reviewLearningIds": ["RL-20260311-005", "RL-20260929-002"],
+    "reviewLearningIds": ["RL-20260311-005", "RL-20260929-002", "RL-20261016-003"],
     "project": "general"
   },
   {
@@ -909,7 +929,8 @@
       "RL-20260806-005",
       "RL-20260911-001",
       "RL-20261002-005",
-      "RL-20261014-005"
+      "RL-20261014-005",
+      "RL-20261021-010"
     ],
     "project": "general"
   },
@@ -1019,23 +1040,30 @@
   {
     "id": "E2E-02",
     "area": "e2e",
-    "title": "Put E2E timeouts where they take effect",
-    "rule": "Cypress retries the command, not the chained assertion, so timeouts must go on `cy.get(..., { timeout })`/`cy.contains(..., { timeout })` — passing timeout into `should()` or `expect()` does nothing. A test's own time budget must cover the sum of its inner waits (`test.slow()` or an explicit test timeout).",
-    "check": "Did this E2E test add or raise a timeout, or chain slow setup? Is the timeout on the retryable command, and does the test budget cover its inner waits?",
+    "title": "Put E2E waits, timeouts, and failure hooks where they take effect",
+    "rule": "Cypress retries the command, not the chained assertion, so timeouts must go on `cy.get(..., { timeout })`/`cy.contains(..., { timeout })` — passing timeout into `should()` or `expect()` does nothing. A test's own time budget must cover the sum of its inner waits (`test.slow()` or an explicit test timeout). A journey opens a page only after every seeded value the page reads is indexed, Transaction Service first and then CGW, since CGW caches an early empty response. Failure-only diagnostics attach in fixture teardown or `afterEach`; inside the test body `testInfo.status` is still `passed`.",
+    "check": "Did this E2E test add or raise a timeout, chain slow setup, seed data, or attach diagnostics on failure? Is the timeout on the retryable command, does the test budget cover its inner waits, does it wait for every seeded value before navigating, and does the failure hook run where the final status is known?",
     "exampleRefs": ["examples/general/testing.md#cypress-retry-timeout-belongs-on-the-preceding-command"],
-    "reviewLearningIds": ["RL-20260218-001", "RL-20260612-001", "RL-20260918-001"],
+    "reviewLearningIds": [
+      "RL-20260218-001",
+      "RL-20260612-001",
+      "RL-20260918-001",
+      "RL-20261022-002",
+      "RL-20261022-003"
+    ],
     "project": "web"
   },
   {
     "id": "DATA-06",
     "area": "data",
     "title": "Normalize shared identifiers and keys one way",
-    "rule": "Every consumer of the same identifier or input (selector, hook, persistence, validator, submit guard, payload) normalizes it identically (`getAddress`, `toLowerCase`, `trim`); divergent normalization fragments caches and lets validation pass a value submit rejects. Compare addresses with `sameAddress`, never `===` or `toLowerCase()`, and key maps by the normalized address, but render the user's casing where users compare characters by eye. A cache, dedup, or list `key` covers every input that changes or distinguishes the value, consumers sharing a cached result pass identical query args, and persisted RTK cache keys use the runtime's exact serialization.",
-    "check": "Did this compare or consume an address, identifier, or user input, or build a cache, dedup, or list key, query args, or persisted cache path? If yes, does it normalize like every other consumer (`sameAddress` for addresses), and does the key cover every input and match the runtime serialization?",
+    "rule": "Every consumer of the same identifier or input (selector, hook, persistence, validator, submit guard, payload) normalizes it identically (`getAddress`, `toLowerCase`, `trim`); divergent normalization fragments caches and lets validation pass a value submit rejects. Compare addresses with `sameAddress`, never `===` or `toLowerCase()`, and key maps by the normalized address, but render the user's casing where users compare characters by eye. Amounts compare in base units (`BigInt` wei), never as locale-formatted display strings. A cache, dedup, or list `key` covers every input that changes or distinguishes the value, consumers sharing a cached result pass identical query args, and persisted RTK cache keys use the runtime's exact serialization.",
+    "check": "Did this compare or consume an address, identifier, amount, or user input, or build a cache, dedup, or list key, query args, or persisted cache path? If yes, does it normalize like every other consumer (`sameAddress` for addresses), and does the key cover every input and match the runtime serialization?",
     "exampleRefs": [
       "examples/general/data-integrity.md#normalize-rtk-query-cache-keys-at-one-place",
       "examples/general/data-integrity.md#compare-addresses-with-sameaddress-not-tolowercase",
-      "examples/general/data-integrity.md#data-06-key-list-items-by-everything-that-distinguishes-them"
+      "examples/general/data-integrity.md#data-06-key-list-items-by-everything-that-distinguishes-them",
+      "examples/general/data-integrity.md#data-06-compare-amounts-in-base-units-not-formatted-text"
     ],
     "reviewLearningIds": [
       "RL-20260218-002",
@@ -1054,7 +1082,8 @@
       "RL-20260716-003",
       "RL-20260930-001",
       "RL-20260302-001",
-      "RL-20261014-004"
+      "RL-20261014-004",
+      "RL-20261022-004"
     ],
     "project": "general"
   },
@@ -1082,7 +1111,8 @@
       "RL-20260609-004",
       "RL-20260818-003",
       "RL-20260909-008",
-      "RL-20260930-005"
+      "RL-20260930-005",
+      "RL-20261021-011"
     ],
     "project": "web"
   },
@@ -1100,7 +1130,8 @@
       "RL-20260612-007",
       "RL-20260626-002",
       "RL-20260715-001",
-      "RL-20260806-006"
+      "RL-20260806-006",
+      "RL-20261021-004"
     ],
     "project": "general"
   },
@@ -1172,7 +1203,7 @@
     "project": "web",
     "area": "ui",
     "title": "Keep interactive elements operable, unnested, and truly disabled",
-    "rule": "Clickable elements are keyboard-operable (`<button type=\"button\">`, or `role` + `tabIndex` + an Enter/Space handler) and never nested in another interactive element. Primitives that can render as links, and controls that must stay focusable for nested actions, disable with `aria-disabled` plus blocked pointer events. Repeated controls and indicators are named after their item, and a clickable row keeps its row role, uses a real button for focus, and ignores key events bubbled from nested controls.",
+    "rule": "Clickable elements are keyboard-operable (`<button type=\"button\">`, or `role` + `tabIndex` + an Enter/Space handler) and never nested in another interactive element. Primitives that can render as links, and controls that must stay focusable for nested actions, disable with `aria-disabled` plus blocked pointer events. Repeated controls and indicators are named after their item, a state shown only as an icon carries visually hidden text rather than an `aria-label` on a non-interactive element, and a clickable row keeps its row role, uses a real button for focus, and ignores key events bubbled from nested controls.",
     "check": "Did this add or change a clickable element or shared interactive primitive? If yes, is it keyboard-operable and unnested, does its disabled state block and announce, and does each repeated control have a distinct accessible name?",
     "exampleRefs": [
       "web/examples/feature-boundaries.md#disable-link-rendered-buttons-with-aria-disabled",
@@ -1187,7 +1218,8 @@
       "RL-20260805-001",
       "RL-20260811-003",
       "RL-20260921-006",
-      "RL-20260929-003"
+      "RL-20260929-003",
+      "RL-20261021-005"
     ]
   },
   {
@@ -1222,7 +1254,8 @@
       "RL-20260828-002",
       "RL-20261001-004",
       "RL-20261002-004",
-      "RL-20261009-005"
+      "RL-20261009-005",
+      "RL-20261020-003"
     ]
   },
   {
@@ -1264,7 +1297,7 @@
     "project": "general",
     "area": "packages",
     "title": "Import only declared dependencies, through their public entrypoint",
-    "rule": "App and package code imports only packages declared in its own `package.json`, through the package's public entrypoint (the same module tree its provider uses, React Native on mobile), and uses the repo's established library for a concern (e.g. ethers) rather than one present only transitively. A package, its tests and stories included, never imports from an app (`@/…`) and carries its own test utils. A new package needs a reason existing dependencies cannot cover, and third-party versions never bypass the dependency age gate (`npmPreapprovedPackages` is for in-house `@safe-global/*` only).",
+    "rule": "App and package code imports only packages declared in its own `package.json`, through the package's public entrypoint (the same module tree its provider uses, React Native on mobile), and uses the repo's established library for a concern (e.g. ethers) rather than one present only transitively. A package, its tests and stories included, never imports from an app (`@/…`) and carries its own test utils. Presentational UI that needs no app module lives in `packages/views`; one that needs an app-only component (web `Identicon`) stays in the app. A new package needs a reason existing dependencies cannot cover, and third-party versions never bypass the dependency age gate (`npmPreapprovedPackages` is for in-house `@safe-global/*` only).",
     "check": "Did this import a package or add a dependency? If yes, is it declared by this workspace, the library the repo already uses for that job, and imported through the entrypoint its provider uses, and does package code import nothing from an app?",
     "exampleRefs": [],
     "reviewLearningIds": [
@@ -1274,7 +1307,8 @@
       "RL-20260708-001",
       "RL-20260729-001",
       "RL-20260413-006",
-      "RL-20261009-001"
+      "RL-20261009-001",
+      "RL-20261021-013"
     ]
   },
   {
@@ -1282,10 +1316,10 @@
     "project": "general",
     "area": "security",
     "title": "Keep secrets and raw identifiers out of logs and telemetry",
-    "rule": "Logs, error reports, and telemetry never include raw URIs, deep links, or payloads that can carry secrets (WalletConnect symKeys, tokens, signatures). Log a redacted form such as the scheme or first path segment, and send errors with the sanitized message and a sanitized or omitted stack, since raw provider messages embed addresses, hashes, and calldata.",
-    "check": "Did this log, report, or track a URI, deep link, request payload, or error? If yes, is anything secret-bearing or raw redacted or sanitized first?",
+    "rule": "Logs, error reports, and telemetry never include raw URIs, deep links, or payloads that can carry secrets (WalletConnect symKeys, tokens, signatures). Log a redacted form such as the scheme or first path segment, and send errors with the sanitized message and a sanitized or omitted stack, since raw provider messages embed addresses, hashes, and calldata. Predicates that classify an error (wallet rejection) run on the raw thrown value; the redacted form is only for what gets reported.",
+    "check": "Did this log, report, or track a URI, deep link, request payload, or error? If yes, is anything secret-bearing or raw redacted or sanitized first, and do error classifiers still read the raw value?",
     "exampleRefs": [],
-    "reviewLearningIds": ["RL-20260707-001", "RL-20260914-001"]
+    "reviewLearningIds": ["RL-20260707-001", "RL-20260914-001", "RL-20261021-002"]
   },
   {
     "id": "FORM-01",
@@ -1302,10 +1336,10 @@
     "project": "web",
     "area": "testing",
     "title": "Visual changes get a Storybook state",
-    "rule": "A new visible component or state, and every visual or layout bug fix, gets a Storybook story rendering that state (error, long content, nesting, dismissed) so the visual-regression run catches a recurrence; class-string snapshots and DOM unit tests don't verify geometry. Stories rely on the global `mswLoader` from the preview and never register it locally, pass callbacks as `fn()`, and apply a scenario decorator once per story (meta and story decorators stack).",
-    "check": "Did this add a visible component or state, or fix a visual/layout bug? If yes, is there a story rendering exactly that state, including long, empty, and loading content, with one decorator per story?",
-    "exampleRefs": [],
-    "reviewLearningIds": ["RL-20260827-001", "RL-20260911-005", "RL-20260921-008", "RL-20260930-012"]
+    "rule": "A new visible component or state, and every visual or layout bug fix, gets a Storybook story rendering that state (error, long content, nesting, dismissed) so the visual-regression run catches a recurrence; class-string snapshots and DOM unit tests don't verify geometry. Stories rely on the global `mswLoader` from the preview and never register it locally, pass callbacks as `fn()`, and apply a scenario decorator once per story (meta and story decorators stack). A story seeds or clears every persisted value its state reads (consent, localStorage) and renders recorded fixtures in their own Safe and chain, so the named state looks the same on every run.",
+    "check": "Did this add a visible component or state, or fix a visual/layout bug? If yes, is there a story rendering exactly that state, including long, empty, and loading content, with one decorator per story, and does it render the same regardless of persisted state?",
+    "exampleRefs": ["examples/general/testing.md#test-07-clear-persisted-state-a-storys-named-state-depends-on"],
+    "reviewLearningIds": ["RL-20260827-001", "RL-20260911-005", "RL-20260921-008", "RL-20260930-012", "RL-20261020-002"]
   },
   {
     "id": "PERF-02",
@@ -1326,5 +1360,15 @@
     "check": "Does this enable an action or build a signed request for a specific identity? If yes, is it gated on the backend's exact permission, and does a missing record refuse rather than fall back?",
     "exampleRefs": [],
     "reviewLearningIds": ["RL-20260925-004"]
+  },
+  {
+    "id": "SEC-06",
+    "project": "general",
+    "area": "security",
+    "title": "Enforce safety boundaries with allowlists",
+    "rule": "A check that guards a safety boundary (what an error message may carry, what a sandboxed mock may import, which hosts an isolated test may reach) passes only an explicit list of known-safe values and rejects the rest. A denylist or a loose pattern lets an unanticipated value through: a 64-character hex key matches an alphanumeric code regex, and `openSync` slips past a list of write calls.",
+    "check": "Does this add or widen a check that keeps secrets, writes, or requests inside a boundary? If yes, does it name what is allowed (types, bindings, origin and host pairs) rather than what is forbidden?",
+    "exampleRefs": ["examples/general/api-and-packages.md#sec-06-keep-only-values-known-to-be-safe"],
+    "reviewLearningIds": ["RL-20261021-001"]
   }
 ]
