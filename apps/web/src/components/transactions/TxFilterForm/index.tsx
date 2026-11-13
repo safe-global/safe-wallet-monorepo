@@ -2,9 +2,19 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
 import { Label } from '@safe-global/views/components/ui/label'
+import { cn } from '@safe-global/views/utils/cn'
+import { InfoTooltip } from '@safe-global/views/components/common/InfoTooltip'
+import {
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldLabel,
+  FieldLegend,
+  FieldSet,
+} from '@safe-global/views/components/ui/field'
 import { isBefore, isAfter, startOfDay } from 'date-fns'
 import { Controller, FormProvider, useForm, useFormState, type DefaultValues } from 'react-hook-form'
-import { useMemo, type ReactElement } from 'react'
+import { useEffect, useMemo, useRef, type ReactElement } from 'react'
 
 import AddressBookInput from '@/components/common/AddressBookInput'
 import DatePickerInput from '@/components/common/DatePickerInput'
@@ -27,6 +37,7 @@ enum TxFilterFormFieldNames {
   TOKEN_ADDRESS = 'token_address',
   MODULE = 'module',
   NONCE = 'nonce',
+  TRANSFERS = 'transfers',
 }
 
 export type TxFilterFormState = {
@@ -38,6 +49,7 @@ export type TxFilterFormState = {
   [TxFilterFormFieldNames.TOKEN_ADDRESS]: string
   [TxFilterFormFieldNames.MODULE]: string
   [TxFilterFormFieldNames.NONCE]: string
+  [TxFilterFormFieldNames.TRANSFERS]: boolean
 }
 
 const defaultValues: DefaultValues<TxFilterFormState> = {
@@ -49,7 +61,25 @@ const defaultValues: DefaultValues<TxFilterFormState> = {
   [TxFilterFormFieldNames.TOKEN_ADDRESS]: '',
   [TxFilterFormFieldNames.MODULE]: '',
   [TxFilterFormFieldNames.NONCE]: '',
+  [TxFilterFormFieldNames.TRANSFERS]: false,
 }
+
+enum RecipientMatch {
+  PAID = 'paid',
+  CALLED = 'called',
+}
+
+const RECIPIENT_MATCH_OPTIONS = [
+  { value: RecipientMatch.PAID, label: 'Who was paid', description: 'ETH and token payments, including batches' },
+  {
+    value: RecipientMatch.CALLED,
+    label: 'Address called',
+    description: 'Only transactions sent directly to this address',
+  },
+]
+
+const RECIPIENT_MATCH_INFO =
+  'Most payments are found with "Who was paid". Use "Address called" to find interactions with a contract, like a swap or an app.'
 
 const getInitialFormValues = (filter: TxFilter | null): DefaultValues<TxFilterFormState> => {
   return filter
@@ -70,13 +100,25 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
     defaultValues: getInitialFormValues(filter),
   })
 
-  const { control, watch, handleSubmit, reset, getValues } = formMethods
+  const { control, watch, handleSubmit, reset, getValues, setValue } = formMethods
 
   const filterType = watch(TxFilterFormFieldNames.FILTER_TYPE)
 
   const isIncomingFilter = filterType === TxFilterType.INCOMING
   const isMultisigFilter = filterType === TxFilterType.MULTISIG
   const isModuleFilter = filterType === TxFilterType.MODULE
+  const recipient = watch(TxFilterFormFieldNames.RECIPIENT)
+  const hasRecipient = isMultisigFilter && !!recipient
+  const isTransfersOnly = hasRecipient && watch(TxFilterFormFieldNames.TRANSFERS)
+
+  // Amount and nonce only work with the "Address called" search, so keep it when either is filled
+  const hadRecipientRef = useRef(!!recipient)
+  useEffect(() => {
+    if (hadRecipientRef.current === !!recipient) return
+    hadRecipientRef.current = !!recipient
+    const hasAmountOrNonce = !!getValues(TxFilterFormFieldNames.AMOUNT) || !!getValues(TxFilterFormFieldNames.NONCE)
+    setValue(TxFilterFormFieldNames.TRANSFERS, !!recipient && !hasAmountOrNonce, { shouldDirty: true })
+  }, [recipient, getValues, setValue])
 
   const { dirtyFields, isValid } = useFormState({ control })
 
@@ -178,8 +220,64 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                     </div>
                   )}
 
-                  {!isModuleFilter && (
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {isMultisigFilter && (
+                    <div className={css.paramField}>
+                      <AddressBookInput
+                        label="Recipient"
+                        name={TxFilterFormFieldNames.RECIPIENT}
+                        required={false}
+                        fullWidth
+                      />
+                    </div>
+                  )}
+
+                  {hasRecipient && (
+                    <Controller
+                      name={TxFilterFormFieldNames.TRANSFERS}
+                      control={control}
+                      render={({ field }) => (
+                        <FieldSet>
+                          <FieldLegend variant="label">
+                            Match recipient by
+                            <InfoTooltip
+                              title={RECIPIENT_MATCH_INFO}
+                              className="size-4"
+                              data-testid="recipient-match-info"
+                            />
+                          </FieldLegend>
+                          <RadioGroup
+                            value={field.value ? RecipientMatch.PAID : RecipientMatch.CALLED}
+                            onValueChange={(value) => field.onChange(value === RecipientMatch.PAID)}
+                          >
+                            {RECIPIENT_MATCH_OPTIONS.map(({ value, label, description }) => (
+                              <Field key={value} orientation="horizontal">
+                                <RadioGroupItem value={value} id={`recipient-match-${value}`} aria-label={label} />
+                                <FieldContent>
+                                  <FieldLabel htmlFor={`recipient-match-${value}`}>{label}</FieldLabel>
+                                  <FieldDescription>{description}</FieldDescription>
+                                </FieldContent>
+                              </Field>
+                            ))}
+                          </RadioGroup>
+                        </FieldSet>
+                      )}
+                    />
+                  )}
+
+                  {(isIncomingFilter || isTransfersOnly) && (
+                    <div className={css.paramField}>
+                      <AddressInput
+                        data-testid="token-input"
+                        label="Token address"
+                        name={TxFilterFormFieldNames.TOKEN_ADDRESS}
+                        required={false}
+                        fullWidth
+                      />
+                    </div>
+                  )}
+
+                  {!isModuleFilter && !isTransfersOnly && (
+                    <div className={cn('grid grid-cols-1 gap-4', isMultisigFilter && 'md:grid-cols-2')}>
                       <div className={css.paramField}>
                         <Controller
                           name={TxFilterFormFieldNames.AMOUNT}
@@ -208,57 +306,32 @@ const TxFilterForm = ({ onClose }: { onClose: () => void }): ReactElement => {
                         />
                       </div>
 
-                      {isIncomingFilter && (
-                        <div className={css.paramField}>
-                          <AddressInput
-                            data-testid="token-input"
-                            label="Token address"
-                            name={TxFilterFormFieldNames.TOKEN_ADDRESS}
-                            required={false}
-                            fullWidth
-                          />
-                        </div>
-                      )}
-
                       {isMultisigFilter && (
                         <div className={css.paramField}>
-                          <AddressBookInput
-                            label="Recipient"
-                            name={TxFilterFormFieldNames.RECIPIENT}
-                            required={false}
-                            fullWidth
+                          <Controller
+                            name={TxFilterFormFieldNames.NONCE}
+                            control={control}
+                            rules={{
+                              validate: (val: TxFilterFormState[TxFilterFormFieldNames.NONCE]) => {
+                                if (val?.length > 0) {
+                                  return validateAmount(val)
+                                }
+                              },
+                            }}
+                            render={({ field, fieldState }) => (
+                              <NumberField
+                                data-testid="nonce-input"
+                                inputSize="hero"
+                                variant="surface"
+                                label={fieldState.error?.message || 'Nonce'}
+                                error={!!fieldState.error}
+                                {...field}
+                                fullWidth
+                              />
+                            )}
                           />
                         </div>
                       )}
-                    </div>
-                  )}
-
-                  {isMultisigFilter && (
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                      <div className={css.paramField}>
-                        <Controller
-                          name={TxFilterFormFieldNames.NONCE}
-                          control={control}
-                          rules={{
-                            validate: (val: TxFilterFormState[TxFilterFormFieldNames.NONCE]) => {
-                              if (val?.length > 0) {
-                                return validateAmount(val)
-                              }
-                            },
-                          }}
-                          render={({ field, fieldState }) => (
-                            <NumberField
-                              data-testid="nonce-input"
-                              inputSize="hero"
-                              variant="surface"
-                              label={fieldState.error?.message || 'Nonce'}
-                              error={!!fieldState.error}
-                              {...field}
-                              fullWidth
-                            />
-                          )}
-                        />
-                      </div>
                     </div>
                   )}
 

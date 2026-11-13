@@ -2,6 +2,7 @@ import type {
   IncomingTransferPage,
   MultisigTransactionPage,
   ModuleTransactionPage,
+  TransferTransactionItemPage,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { useMemo } from 'react'
 import { useRouter } from 'next/router'
@@ -9,7 +10,13 @@ import type { ParsedUrlQuery } from 'querystring'
 import { startOfDay, endOfDay, isValid } from 'date-fns'
 
 import type { TxFilterFormState } from '@/components/transactions/TxFilterForm'
-import { getModuleTransactions, getIncomingTransfers, getMultisigTransactions } from '@/utils/transactions'
+import {
+  getModuleTransactions,
+  getIncomingTransfers,
+  getMultisigTransactions,
+  getOutgoingTransfers,
+} from '@/utils/transactions'
+import { parsePrefixedAddress } from '@safe-global/utils/utils/addresses'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 // Filter types using snake_case for backward compatibility with forms
@@ -30,6 +37,8 @@ type MultisigTxFilter = {
   value?: string
   nonce?: string
   executed?: string
+  transfers?: 'true'
+  token_address?: string
 }
 
 type ModuleTxFilter = {
@@ -59,6 +68,14 @@ export const _omitNullish = (data: { [key: string]: unknown }) => {
 
 export const _isValidTxFilterType = (type: unknown) => {
   return !!type && Object.values(TxFilterType).includes(type as TxFilterType)
+}
+
+export const isTransfersOnlyFilter = ({ type, filter }: TxFilter): boolean => {
+  return type === TxFilterType.MULTISIG && 'transfers' in filter && filter.transfers === 'true'
+}
+
+const withoutChainPrefix = (address: string | undefined): string | undefined => {
+  return address ? parsePrefixedAddress(address).address : undefined
 }
 
 export const _isModuleFilter = (filter: TxFilter['filter']): filter is ModuleTxFilter => {
@@ -97,6 +114,7 @@ export const txFilter = {
         ? endOfDay(formData.execution_date__lte).toISOString()
         : undefined,
       value: formData.value,
+      transfers: formData.transfers ? 'true' : undefined,
     })
 
     return {
@@ -112,12 +130,14 @@ export const txFilter = {
     }
   },
 
-  formatFormData: ({ type, filter }: TxFilter): Partial<TxFilterFormState> => {
+  formatFormData: (txFilterData: TxFilter): Partial<TxFilterFormState> => {
+    const { type, filter } = txFilterData
     const isModule = _isModuleFilter(filter)
 
     return {
       type,
       ...filter,
+      transfers: isTransfersOnlyFilter(txFilterData),
       execution_date__gte: isModule ? null : parseFilterDate(filter.execution_date__gte),
       execution_date__lte: isModule ? null : parseFilterDate(filter.execution_date__lte),
       value: isModule ? '' : filter.value,
@@ -150,7 +170,7 @@ export const fetchFilteredTxHistory = async (
   hideUntrustedTxs: boolean,
   hideImitationTxs: boolean,
   pageUrl?: string,
-): Promise<IncomingTransferPage | MultisigTransactionPage | ModuleTransactionPage> => {
+): Promise<IncomingTransferPage | MultisigTransactionPage | ModuleTransactionPage | TransferTransactionItemPage> => {
   const fetchPage = () => {
     const filter = filterData.filter
 
@@ -171,6 +191,21 @@ export const fetchFilteredTxHistory = async (
         )
       }
       case TxFilterType.MULTISIG: {
+        if (isTransfersOnlyFilter(filterData)) {
+          return getOutgoingTransfers(
+            chainId,
+            safeAddress,
+            {
+              trusted: hideUntrustedTxs,
+              execution_date__gte: 'execution_date__gte' in filter ? filter.execution_date__gte : undefined,
+              execution_date__lte: 'execution_date__lte' in filter ? filter.execution_date__lte : undefined,
+              to: withoutChainPrefix(filter.to),
+              token_address: 'token_address' in filter ? withoutChainPrefix(filter.token_address) : undefined,
+            },
+            pageUrl,
+          )
+        }
+
         return getMultisigTransactions(
           chainId,
           safeAddress,

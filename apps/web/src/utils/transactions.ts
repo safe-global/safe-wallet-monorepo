@@ -9,6 +9,7 @@ import type {
   IncomingTransferPage,
   MultisigTransactionPage,
   TransactionItemPage,
+  TransferTransactionItemPage,
   CreationTransaction,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
@@ -174,6 +175,54 @@ export const getIncomingTransfers = async (
     .unwrap()
 
   return result
+}
+
+/**
+ * Fetch outgoing transfers from the gateway using RTK Query.
+ * This function can be used in non-React contexts (e.g., async functions, services).
+ * It dispatches the query and waits for the result.
+ * Unlike multisig transactions, `to` matches the recipient of each transfer.
+ *
+ * @param chainId - The chain ID where the Safe exists
+ * @param safeAddress - The Safe address
+ * @param query - Optional query parameters (trusted, execution_date__gte, execution_date__lte, to, token_address)
+ * @param pageUrl - Optional pagination URL
+ * @returns The outgoing transfer page
+ * @throws Error if the store is not initialized or if the request fails
+ */
+export const getOutgoingTransfers = async (
+  chainId: string,
+  safeAddress: string,
+  query?: {
+    trusted?: boolean
+    execution_date__gte?: string
+    execution_date__lte?: string
+    to?: string
+    token_address?: string
+  },
+  pageUrl?: string,
+): Promise<TransferTransactionItemPage> => {
+  const store = getStoreInstance()
+
+  const cursor = pageUrl ? new URL(pageUrl).searchParams.get('cursor') || undefined : undefined
+
+  return store
+    .dispatch(
+      cgwApi.endpoints.transactionsGetOutgoingTransfersV1.initiate(
+        {
+          chainId,
+          safeAddress,
+          trusted: query?.trusted,
+          executionDateGte: query?.execution_date__gte,
+          executionDateLte: query?.execution_date__lte,
+          to: query?.to,
+          tokenAddress: query?.token_address,
+          cursor,
+        },
+        { forceRefetch: true },
+      ),
+    )
+    .unwrap()
 }
 
 /**

@@ -21,8 +21,13 @@ MockDate.set('2021-01-01T00:00:00.000Z')
 jest.mock('@/utils/transactions', () => ({
   getIncomingTransfers: jest.fn(() => Promise.resolve({ results: [] })),
   getMultisigTransactions: jest.fn(() => Promise.resolve({ results: [] })),
+  getOutgoingTransfers: jest.fn(() => Promise.resolve({ results: [] })),
   getModuleTransactions: jest.fn(() => Promise.resolve({ results: [] })),
 }))
+
+const SAFE = '0xA73047Ab98C1BB6AeA090AD9dc362E5462F6765F'
+const RECIPIENT = '0x23cbCbbC748c961E570Cfc05Ff65554ECB8955E9'
+const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 
 describe('tx-history-filter', () => {
   describe('_omitNullish', () => {
@@ -243,6 +248,26 @@ describe('tx-history-filter', () => {
         })
       })
 
+      it('keeps the transfers flag when the form has the toggle on', () => {
+        const result = txFilter.parseFormData({
+          to: RECIPIENT,
+          transfers: true,
+          type: 'Outgoing' as TxFilterType,
+        } as TxFilterFormState)
+
+        expect(result).toEqual({ type: 'Outgoing', filter: { to: RECIPIENT, transfers: 'true' } })
+      })
+
+      it('leaves the transfers flag out when the form has the toggle off', () => {
+        const result = txFilter.parseFormData({
+          to: RECIPIENT,
+          transfers: false,
+          type: 'Outgoing' as TxFilterType,
+        } as TxFilterFormState)
+
+        expect(result).toEqual({ type: 'Outgoing', filter: { to: RECIPIENT } })
+      })
+
       it('should return module filters', () => {
         const result = txFilter.parseFormData({
           to: '0x1234567890123456789012345678901234567890',
@@ -312,7 +337,27 @@ describe('tx-history-filter', () => {
           execution_date__lte: null,
           value: '123',
           nonce: '123',
+          transfers: false,
         })
+      })
+
+      it('turns the toggle on for an outgoing filter with the transfers flag', () => {
+        const result = txFilter.formatFormData({
+          type: 'Outgoing' as TxFilterType,
+          filter: { transfers: 'true', token_address: USDC },
+        })
+
+        expect(result.transfers).toBe(true)
+        expect(result.token_address).toBe(USDC)
+      })
+
+      it('keeps the toggle off for an incoming filter with the transfers flag', () => {
+        const result = txFilter.formatFormData({
+          type: 'Incoming' as TxFilterType,
+          filter: { transfers: 'true' } as TxFilter['filter'],
+        })
+
+        expect(result.transfers).toBe(false)
       })
     })
   })
@@ -448,6 +493,75 @@ describe('tx-history-filter', () => {
 
       expect(transactionUtils.getIncomingTransfers).not.toHaveBeenCalled()
       expect(transactionUtils.getModuleTransactions).not.toHaveBeenCalled()
+      expect(transactionUtils.getOutgoingTransfers).not.toHaveBeenCalled()
+    })
+
+    it('gets outgoing transfers when an outgoing filter has the transfers flag', () => {
+      const hideUntrustedTxs = true
+
+      fetchFilteredTxHistory(
+        '1',
+        SAFE,
+        {
+          type: 'Outgoing' as TxFilterType,
+          filter: {
+            transfers: 'true',
+            execution_date__gte: '1970-01-01T00:00:00.000Z',
+            to: RECIPIENT,
+            token_address: USDC,
+          },
+        },
+        hideUntrustedTxs,
+        false,
+        'pageUrl4',
+      )
+
+      expect(transactionUtils.getOutgoingTransfers).toHaveBeenCalledWith(
+        '1',
+        SAFE,
+        {
+          trusted: true,
+          execution_date__gte: '1970-01-01T00:00:00.000Z',
+          execution_date__lte: undefined,
+          to: RECIPIENT,
+          token_address: USDC,
+        },
+        'pageUrl4',
+      )
+      expect(transactionUtils.getMultisigTransactions).not.toHaveBeenCalled()
+    })
+
+    it('sends the recipient and the token without the chain prefix', () => {
+      fetchFilteredTxHistory(
+        '1',
+        SAFE,
+        {
+          type: 'Outgoing' as TxFilterType,
+          filter: { transfers: 'true', to: `eth:${RECIPIENT}`, token_address: `eth:${USDC}` },
+        },
+        false,
+        false,
+      )
+
+      expect(transactionUtils.getOutgoingTransfers).toHaveBeenCalledWith(
+        '1',
+        SAFE,
+        expect.objectContaining({ to: RECIPIENT, token_address: USDC }),
+        undefined,
+      )
+    })
+
+    it('ignores the transfers flag on an incoming filter', () => {
+      fetchFilteredTxHistory(
+        '1',
+        SAFE,
+        { type: 'Incoming' as TxFilterType, filter: { transfers: 'true' } as TxFilter['filter'] },
+        false,
+        false,
+      )
+
+      expect(transactionUtils.getIncomingTransfers).toHaveBeenCalled()
+      expect(transactionUtils.getOutgoingTransfers).not.toHaveBeenCalled()
     })
 
     it('should get module transfers relevant to `type`', () => {
