@@ -43,6 +43,23 @@ describe('HypernativeLoginLine', () => {
     expect(screen.getByTestId('hypernative-login-line')).toBeInTheDocument()
   })
 
+  it('asks to reconnect when the API rejected the session, tracking the click with the Copilot source', () => {
+    const hypernativeAuth = hypernativeAuthStatusBuilder().with({ isSessionRejected: true }).build()
+    render(<HypernativeLoginLine hypernativeAuth={hypernativeAuth} />)
+
+    expect(screen.getByTestId('hypernative-reconnect-line')).toHaveTextContent(
+      "Please reconnect your Hypernative account to review this transaction's risks.",
+    )
+    expect(screen.queryByTestId('hypernative-login-line')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Reconnect to Hypernative' }))
+
+    expect(hypernativeAuth.initiateLogin).toHaveBeenCalled()
+    expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+    expect(mockTrackEvent).toHaveBeenCalledWith(HYPERNATIVE_EVENTS.HYPERNATIVE_LOGIN_CLICKED, {
+      [MixpanelEventParams.SOURCE]: HYPERNATIVE_SOURCE.Copilot,
+    })
+  })
+
   it('renders nothing while the user is logged in', () => {
     const hypernativeAuth = hypernativeAuthStatusBuilder().with({ isAuthenticated: true }).build()
     const { container } = render(<HypernativeLoginLine hypernativeAuth={hypernativeAuth} />)
