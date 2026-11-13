@@ -220,7 +220,7 @@ Every test runs on a fake clock (`fakeTimers` in `jest.config.cjs`). It starts a
 - **On the default clock, do not assert at an exact boundary** such as `delay - 1` when an `await` sits between the steps: real time also moves the clock by a few milliseconds. Check at half the delay, then after it, or wait with `findBy*` / `waitFor`.
 - **For exact timing, give every test in the file a strict clock:** `beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))`. Without the option, `jest.useFakeTimers()` takes `advanceTimers: true` from the config.
 - **Do not switch clocks for a single test**, and do not call `jest.useRealTimers()` in a file whose other tests use the default clock. React and libraries keep the clock they saw first, and their timers stop firing.
-- **Each test starts clean:** `jest.setup.js` sets the clock back to the start and clears pending timers before every test, so `setSystemTime` and advances do not carry over.
+- **Each test starts at the same instant:** `jest.setup.js` sets the clock back to the start before every test, so `setSystemTime` and advances do not carry over. Pending timers are not cleared, because UI libraries keep timers across tests.
 
 ## Templates
 
