@@ -26,9 +26,10 @@ jest.mock('@/services/tx/tx-sender', () => {
 const mockedCreateTx = createTx as jest.MockedFunction<typeof createTx>
 
 const mockUseRecommendedNonce = jest.fn<number | undefined, []>(() => undefined)
+const mockUseSafeTxGas = jest.fn<string | undefined, []>(() => undefined)
 jest.mock('@/components/tx/shared/hooks', () => ({
   useRecommendedNonce: () => mockUseRecommendedNonce(),
-  useSafeTxGas: () => undefined,
+  useSafeTxGas: () => mockUseSafeTxGas(),
 }))
 
 const mockUseWallet = jest.fn<ConnectedWallet | null, []>(() => null)
@@ -83,6 +84,7 @@ describe('SafeTxProvider', () => {
   beforeEach(() => {
     mockUseWallet.mockReturnValue(null)
     mockUseRecommendedNonce.mockReturnValue(undefined)
+    mockUseSafeTxGas.mockReturnValue(undefined)
     mockedLogError.mockClear()
     mockedCreateTx.mockClear()
   })
@@ -138,6 +140,44 @@ describe('SafeTxProvider', () => {
         transactions: [expect.objectContaining({ nonce: 5 })],
       })
       expect(screen.getByTestId('safe-tx-error')).toHaveTextContent('none')
+    })
+  })
+
+  describe('a payload the Safe pays for', () => {
+    it("keeps its safeTxGas and nonce, so a proposal's hash does not change before it is signed", async () => {
+      mockUseRecommendedNonce.mockReturnValue(22)
+      mockUseSafeTxGas.mockReturnValue('50000')
+      const tx = createMockSafeTransaction({ to: SCOPED_SAFE, data: '0x' })
+      tx.data.safeTxGas = '12983'
+      tx.data.baseGas = '72094'
+      tx.data.gasPrice = '1000018'
+      tx.data.refundReceiver = '0x53b3BDD8dB8352D9aB7bF39A527F9C24fC404DcD'
+
+      render(
+        <SafeTxProvider>
+          <BuiltFlow tx={tx} />
+        </SafeTxProvider>,
+      )
+      await act(async () => {
+        await Promise.resolve()
+      })
+
+      expect(mockedCreateTx).not.toHaveBeenCalled()
+    })
+
+    it('still rebuilds a signer-paid payload with the recommended safeTxGas', async () => {
+      mockUseSafeTxGas.mockReturnValue('50000')
+      const tx = createMockSafeTransaction({ to: SCOPED_SAFE, data: '0x' })
+
+      render(
+        <SafeTxProvider>
+          <BuiltFlow tx={tx} />
+        </SafeTxProvider>,
+      )
+
+      await waitFor(() =>
+        expect(mockedCreateTx).toHaveBeenCalledWith(expect.objectContaining({ safeTxGas: '50000' }), 0, undefined),
+      )
     })
   })
 

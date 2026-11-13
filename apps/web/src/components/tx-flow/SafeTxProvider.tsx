@@ -8,6 +8,7 @@ import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/c
 import { useRecommendedNonce, useSafeTxGas } from '@/components/tx/shared/hooks'
 import { Errors, logError } from '@/services/exceptions'
 import { getTxOrigin } from '@/utils/transactions'
+import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 
 export { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 export type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
@@ -39,7 +40,9 @@ const SafeTxProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const recommendedNonce = useRecommendedNonce()
   const recommendedSafeTxGas = useSafeTxGas(safeTx)
 
-  const canEdit = !isSigned
+  // A payload the Safe pays for carries a fee quoted for its safeTxGas and nonce: changing either breaks the
+  // quote and the hash a proposer already signed.
+  const canEdit = !isSigned && !(safeTx && isPaidFromSafe(safeTx.data))
   const isReadOnly = !canEdit
 
   // Priority to external nonce, then to the recommended one

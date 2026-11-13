@@ -408,11 +408,11 @@ export const SignNoPayFromSafeChain: Story = {
 }
 
 export const SignAsProposer: Story = {
-  name: 'Sign · Proposer (the first signer picks)',
+  name: 'Sign · Proposer (picks who pays)',
   args: {
     view: {
       ...base,
-      payer: { kind: 'locked', value: 'WALLET', reason: 'FIRST_SIGNER_PICKS' },
+      payer: { kind: 'choice', value: 'WALLET', options: ['PAY_FROM_SAFE', 'WALLET'] },
       gasToken: nativeLocked,
       gasFee: { note: 'Calculated at execution' },
       totalOutgoing: outgoing(false),

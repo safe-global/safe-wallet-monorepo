@@ -4,6 +4,7 @@ import { skipToken } from '@reduxjs/toolkit/query'
 import { renderHook } from '@/tests/test-utils'
 import { useFeesPreview } from '../useFeesPreview'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
 import * as useGasLimitModule from '@/hooks/useGasLimit'
 import * as useGasPriceModule from '@/hooks/useGasPrice'
 import * as useChainsModule from '@/hooks/useChains'
@@ -170,6 +171,16 @@ const withSafeTx = (safeTx: SafeTransaction | undefined) => {
     )
   }
   return SafeTxWrapper
+}
+
+const withProposer = (safeTx: SafeTransaction | undefined) => {
+  const SafeTxWrapper = withSafeTx(safeTx)
+  const ProposerWrapper = ({ children }: { children: ReactNode }) => (
+    <TxFlowContext.Provider value={{ ...initialContext, isProposing: true }}>
+      <SafeTxWrapper>{children}</SafeTxWrapper>
+    </TxFlowContext.Provider>
+  )
+  return ProposerWrapper
 }
 
 const ETH_ADDRESS = '0x0000000000000000000000000000000000000000'
@@ -504,6 +515,60 @@ describe('useFeesPreview', () => {
       expect(result.current.gasFee.amount).toBeDefined()
       expect(result.current.gasFee.currency).toBe('ETH')
       expect(result.current.canCoverFees).toBe(true)
+    })
+  })
+
+  describe("when the gas can't be estimated locally", () => {
+    const singleSignerSafe = extendedSafeInfoBuilder().with({ threshold: 1 }).build()
+
+    beforeEach(() => {
+      jest.spyOn(gatewayApi, 'useGetPayFromSafeFeePreviewQuery').mockReturnValue(emptyPreview)
+      jest.spyOn(useSafeInfoModule, 'default').mockReturnValue({
+        safe: singleSignerSafe,
+        safeAddress: singleSignerSafe.address.value,
+        safeLoaded: true,
+        safeLoading: false,
+      })
+    })
+
+    it('skips the gas estimation for a proposer and shows "Calculated at execution"', () => {
+      const gasLimitSpy = jest.spyOn(useGasLimitModule, 'default')
+
+      const { result } = renderHook(() => useFeesPreview(), { wrapper: withProposer(nativeSafeTx) })
+
+      expect(gasLimitSpy).toHaveBeenCalled()
+      expect(gasLimitSpy.mock.calls.every(([safeTx]) => safeTx === undefined)).toBe(true)
+      expect(result.current.gasFee.note).toBe('Calculated at execution')
+      expect(result.current.gasFee.amount).toBeUndefined()
+    })
+
+    it('shows "Calculated at execution" in Signer mode when the estimation fails', () => {
+      jest
+        .spyOn(useGasLimitModule, 'default')
+        .mockReturnValue({ gasLimitError: new Error('revert'), gasLimitLoading: false })
+
+      const { result } = renderHook(() => useFeesPreview(), { wrapper: withSafeTx(nativeSafeTx) })
+
+      expect(result.current.gasFee.note).toBe('Calculated at execution')
+      expect(result.current.gasFee.amount).toBeUndefined()
+    })
+
+    it('shows "Calculated at execution" when executing a signed Signer-pays tx whose estimation fails', () => {
+      jest
+        .spyOn(useGasLimitModule, 'default')
+        .mockReturnValue({ gasLimitError: new Error('revert'), gasLimitLoading: false })
+      const signedSignerPaysTx = buildSafeTx(
+        { to: singleSignerSafe.address.value, value: '100000000000000', data: '0x', gasToken: ETH_ADDRESS },
+        new Map([['0xSigner', {}]]),
+      )
+
+      const { result } = renderHook(() => useFeesPreview({ isExecution: true }), {
+        wrapper: withSafeTx(signedSignerPaysTx),
+      })
+
+      expect(result.current.isLegacySigned).toBe(true)
+      expect(result.current.gasFee.note).toBe('Calculated at execution')
+      expect(result.current.gasFee.amount).toBeUndefined()
     })
   })
 

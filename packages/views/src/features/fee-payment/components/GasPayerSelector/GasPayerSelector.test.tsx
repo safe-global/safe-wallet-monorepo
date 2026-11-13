@@ -43,17 +43,13 @@ describe('GasPayerSelector view', () => {
     expect(onChoiceChange).toHaveBeenCalledWith('PAY_FROM_SAFE')
   })
 
-  it('shows a locked payer with the reason it is locked', async () => {
-    renderCard({
-      view: view({
-        payer: { kind: 'locked', value: 'WALLET', reason: 'FIRST_SIGNER_PICKS' },
-      }),
-    })
+  it('shows a locked payer with why it is locked', async () => {
+    renderCard({ view: view({ payer: { kind: 'locked', value: 'WALLET' } }) })
 
     expect(screen.queryByTestId('fee-payer-selector')).not.toBeInTheDocument()
     await userEvent.hover(screen.getByTestId('fee-payer-locked'))
 
-    expect(await screen.findByText('Whoever signs first picks who pays the gas fee.')).toBeInTheDocument()
+    expect(await screen.findByText('Whoever executes pays the gas fee.')).toBeInTheDocument()
   })
 
   it.each([

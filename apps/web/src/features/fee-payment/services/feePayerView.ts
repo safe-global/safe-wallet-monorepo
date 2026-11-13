@@ -47,7 +47,6 @@ export const buildPayerControl = ({
   step,
   planState,
   offersSafeToggle,
-  isProposing,
   hasSponsoredOffer,
   choice,
 }: {
@@ -55,7 +54,6 @@ export const buildPayerControl = ({
   step: Step
   planState: FeePayerPlanState
   offersSafeToggle: boolean
-  isProposing: boolean
   hasSponsoredOffer: boolean
   choice: GasPayerChoice
 }): FeePayerControl => {
@@ -63,9 +61,6 @@ export const buildPayerControl = ({
   if (step === 'sign') {
     if (planState === 'PRO_SPONSORED_LEFT') return { kind: 'locked', value: 'SPONSORED' }
     if (offersSafeToggle) return safeOrWallet(choice)
-    if (isProposing) {
-      return { kind: 'locked', value: 'WALLET', reason: 'FIRST_SIGNER_PICKS' }
-    }
     return { kind: 'locked', value: 'WALLET' }
   }
   if (hasSponsoredOffer) {

@@ -93,11 +93,12 @@ export const useTxActions = (): TxActions => {
     const safeAddress = scope?.safeAddress ?? safe.address.value
     const chainId = scope?.chainId ?? safe.chainId
 
-    const withPayFromSafeFeeParams = (safeTx: SafeTransaction, isPayFromSafe: boolean) =>
+    // A tx CGW already knows (a proposal) keeps its payload: merging the fee would change its hash.
+    const withPayFromSafeFeeParams = (safeTx: SafeTransaction, isPayFromSafe: boolean, txId?: string) =>
       mergePayFromSafeFeeParams({
         safeTx,
         chain,
-        isPayFromSafe,
+        isPayFromSafe: isPayFromSafe && !txId,
         feeGasToken,
         feePaymentFeature,
         chainId,
@@ -139,9 +140,6 @@ export const useTxActions = (): TxActions => {
       return _propose(wallet?.address || safe.owners[0].value, safeTx, origin)
     }
 
-    // Merging the Safe-pays fee changes the hash, so a proposal is proposed again as a new tx instead of confirmed.
-    const confirmableTxId = (txId: string | undefined, feesMerged: boolean) => (feesMerged ? undefined : txId)
-
     const signRelayedTx = async (
       safeTx: SafeTransaction,
       txId: string | undefined,
@@ -149,13 +147,12 @@ export const useTxActions = (): TxActions => {
     ): Promise<{ signedTx: SafeTransaction; txId?: string }> => {
       assertProvider(signer?.provider)
 
-      const { safeTx: txToSign, feesMerged } = await withPayFromSafeFeeParams(safeTx, isPayFromSafe)
-      const confirmTxId = confirmableTxId(txId, feesMerged)
+      const { safeTx: txToSign } = await withPayFromSafeFeeParams(safeTx, isPayFromSafe, txId)
 
       if (await isSmartContractWallet(signer.chainId, signer.address)) {
         throw new Error('Cannot relay an unsigned transaction from a smart contract wallet')
       }
-      return { signedTx: await dispatchTxSigning(txToSign, signer.provider, confirmTxId, scope), txId: confirmTxId }
+      return { signedTx: await dispatchTxSigning(txToSign, signer.provider, txId, scope), txId }
     }
 
     const signTx: TxActions['signTx'] = async (safeTx, txId, origin) => {
@@ -163,8 +160,7 @@ export const useTxActions = (): TxActions => {
       assertProvider(signer?.provider)
       assertOnboard(onboard)
 
-      const { safeTx: txToSign, feesMerged } = await withPayFromSafeFeeParams(safeTx, signStepPaysFromSafe)
-      const confirmTxId = confirmableTxId(txId, feesMerged)
+      const { safeTx: txToSign } = await withPayFromSafeFeeParams(safeTx, signStepPaysFromSafe, txId)
 
       // Smart contract wallets can't sign off-chain
       const viaSafe = isSafeSigner(signer)
@@ -174,7 +170,7 @@ export const useTxActions = (): TxActions => {
         const carriesEnvelope = viaSafe && supportsNestedTxEnvelope(safe.version)
 
         // The queue rejects unsigned proposals, so the nested signer's EOA signs the child hash first
-        if (signer.isSafe && !confirmTxId && !carriesEnvelope) {
+        if (signer.isSafe && !txId && !carriesEnvelope) {
           assertWallet(wallet)
           const nestedTxId = await dispatchNestedTxCreation({
             safeTx: txToSign,
@@ -191,8 +187,7 @@ export const useTxActions = (): TxActions => {
           return { txId: nestedTxId, isNestedSigning: true }
         }
 
-        const id =
-          confirmTxId || (carriesEnvelope ? undefined : (await _propose(signer.address, txToSign, origin)).txId)
+        const id = txId || (carriesEnvelope ? undefined : (await _propose(signer.address, txToSign, origin)).txId)
         const signedTxId = await dispatchOnChainSigning(
           txToSign,
           id,
@@ -209,8 +204,8 @@ export const useTxActions = (): TxActions => {
       }
 
       // Otherwise, sign off-chain
-      const signedTx = await dispatchTxSigning(txToSign, signer.provider, confirmTxId, scope)
-      const signedTxId = await _proposeOrConfirm(signer.address, signedTx, confirmTxId, origin)
+      const signedTx = await dispatchTxSigning(txToSign, signer.provider, txId, scope)
+      const signedTxId = await _proposeOrConfirm(signer.address, signedTx, txId, origin)
       return { txId: signedTxId, isNestedSigning: false }
     }
 
@@ -219,7 +214,9 @@ export const useTxActions = (): TxActions => {
       assertProvider(wallet?.provider)
       assertOnboard(onboard)
 
-      const signedTx = await dispatchProposerTxSigning(safeTx, wallet, scope)
+      // The proposer picks who pays: Safe account puts the fee in the payload now, as for a first signer.
+      const { safeTx: txToSign } = await withPayFromSafeFeeParams(safeTx, signStepPaysFromSafe)
+      const signedTx = await dispatchProposerTxSigning(txToSign, wallet, scope)
 
       const tx = await _propose(wallet.address, signedTx, origin)
       return tx.txId

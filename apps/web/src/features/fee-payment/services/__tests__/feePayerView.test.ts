@@ -37,7 +37,6 @@ describe('buildPayerControl', () => {
     step: 'sign' as const,
     planState: 'FREE' as const,
     offersSafeToggle: true,
-    isProposing: false,
     hasSponsoredOffer: false,
     choice: 'WALLET' as const,
   }
@@ -61,12 +60,8 @@ describe('buildPayerControl', () => {
     })
   })
 
-  it('tells a proposer that the first signer picks', () => {
-    expect(buildPayerControl({ ...base, offersSafeToggle: false, isProposing: true })).toEqual({
-      kind: 'locked',
-      value: 'WALLET',
-      reason: 'FIRST_SIGNER_PICKS',
-    })
+  it('locks the Signer wallet at signing when the Safe cannot be offered', () => {
+    expect(buildPayerControl({ ...base, offersSafeToggle: false })).toEqual({ kind: 'locked', value: 'WALLET' })
   })
 
   it('offers the sponsor or Signer wallet at execution', () => {

@@ -5,6 +5,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -77,6 +78,7 @@ export const useFeesPreview = ({
   isPayFromSafe = false,
 }: { isExecution?: boolean; isPayFromSafe?: boolean } = {}): FeesPreviewData => {
   const { safeTx, feeGasToken, setFeeGasToken } = useContext(SafeTxContext)
+  const { isProposing } = useContext(TxFlowContext)
   const { safe, safeAddress } = useSafeInfo()
   const chain = useCurrentChain()
   const { balances } = useBalances()
@@ -195,8 +197,11 @@ export const useFeesPreview = ({
   ])
 
   // Fallback local estimation — drives the gas fee shown in the EOA fallback variant.
-  const { gasLimit, gasLimitError, gasLimitLoading } = useGasLimit(safeTx)
+  // A proposer is no owner: execTransaction can't be simulated from their wallet, so skip the call.
+  const { gasLimit, gasLimitError, gasLimitLoading } = useGasLimit(isProposing ? undefined : safeTx)
   const [gasPrice, gasPriceError, gasPriceLoading] = useGasPrice()
+  // Without a local estimate there is no number to show, only that the executor's wallet will price it.
+  const cannotEstimateLocally = isProposing || !!gasLimitError || !!gasPriceError
 
   // Memoize the merged signing payload so threat analysis (which receives this) doesn't
   // re-run on unrelated re-renders. Identity changes only when the CGW-resolved fee fields
@@ -274,7 +279,7 @@ export const useFeesPreview = ({
 
   // Signed without Safe-pays fees: locked, "Calculated at execution" until the executor is known.
   if (isLegacySigned && safeTx) {
-    if (!isExecution && safeTx.signatures.size < safe.threshold) {
+    if ((!isExecution && safeTx.signatures.size < safe.threshold) || cannotEstimateLocally) {
       return {
         ...base,
         isConfirmation: true,
@@ -302,8 +307,8 @@ export const useFeesPreview = ({
 
   if (isSignerMode) {
     // Multi-signer can't simulate execTransaction at sign time — executor unknown, signatures
-    // incomplete — so we surface an explanatory note instead of a fake number.
-    if (safe.threshold > 1) {
+    // incomplete — nor can a proposer or a failed estimate, so we surface an explanatory note instead of a fake number.
+    if (safe.threshold > 1 || cannotEstimateLocally) {
       return {
         ...base,
         canCoverFees: true,

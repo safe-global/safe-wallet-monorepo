@@ -1524,53 +1524,57 @@ describe('SignOrExecute hooks', () => {
       expect(signSpy).toHaveBeenCalledWith(mergedTx, expect.anything(), undefined, undefined)
     })
 
-    it("proposes a new tx, instead of confirming the proposer's, when the first signer signs it with the Safe paying", async () => {
+    it("confirms the proposer's tx unchanged, never re-quoting it, even with the Safe paying picked", async () => {
       setupPayFromSafeChain()
       jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
 
-      // The merged payload has fee params, so a different hash from the proposal known as 'proposal-id'
-      const mergedTx = createSafeTx()
-      mockFeatureResolve(jest.fn().mockResolvedValue(mergedTx))
+      const resolveFeeParams = jest.fn()
+      mockFeatureResolve(resolveFeeParams)
 
-      const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockResolvedValue(mergedTx)
-      const proposeSpy = jest
-        .spyOn(txSender, 'dispatchTxProposal')
-        .mockImplementation((() =>
-          Promise.resolve({ txId: 'new-id' })) as unknown as typeof txSender.dispatchTxProposal)
+      const proposal = createSafeTx()
+      const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockResolvedValue(proposal)
+      const proposeSpy = jest.spyOn(txSender, 'dispatchTxProposal')
       const confirmSpy = jest
         .spyOn(txSender, 'dispatchTxConfirmation')
         .mockImplementation((() =>
           Promise.resolve({ txId: 'proposal-id' })) as unknown as typeof txSender.dispatchTxConfirmation)
 
       const ref = captureActions()
-      const { txId } = await ref.current!.signTx(createSafeTx(), 'proposal-id')
+      const { txId } = await ref.current!.signTx(proposal, 'proposal-id')
 
-      expect(signSpy).toHaveBeenCalledWith(mergedTx, expect.anything(), undefined, undefined)
-      expect(confirmSpy).not.toHaveBeenCalled()
-      expect(proposeSpy).toHaveBeenCalledWith(expect.objectContaining({ safeTx: mergedTx }))
-      expect(txId).toBe('new-id')
+      expect(resolveFeeParams).not.toHaveBeenCalled()
+      expect(signSpy).toHaveBeenCalledWith(proposal, expect.anything(), 'proposal-id', undefined)
+      expect(proposeSpy).not.toHaveBeenCalled()
+      expect(confirmSpy).toHaveBeenCalledWith(expect.objectContaining({ txId: 'proposal-id' }))
+      expect(txId).toBe('proposal-id')
     })
 
-    it('proposes a new tx when the fees are merged even if the merge hands back the same object', async () => {
+    it('puts the Safe-pays fee in the payload the proposer signs, when the proposer picks Safe account', async () => {
       setupPayFromSafeChain()
-      jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
+      const proposerWallet = {
+        label: 'MetaMask',
+        chainId: '1',
+        address: zeroPadValue('0x0789', 20),
+        provider: MockEip1193Provider,
+      } as ConnectedWallet
+      jest.spyOn(wallet, 'default').mockReturnValue(proposerWallet)
 
-      const safeTx = createSafeTx()
-      mockFeatureResolve(jest.fn().mockResolvedValue(safeTx))
+      const mergedTx = createSafeTx()
+      const resolveFeeParams = jest.fn().mockResolvedValue(mergedTx)
+      mockFeatureResolve(resolveFeeParams)
 
-      jest.spyOn(txSender, 'dispatchTxSigning').mockResolvedValue(safeTx)
+      const signSpy = jest.spyOn(txSender, 'dispatchProposerTxSigning').mockResolvedValue(mergedTx)
       const proposeSpy = jest
         .spyOn(txSender, 'dispatchTxProposal')
         .mockImplementation((() =>
-          Promise.resolve({ txId: 'new-id' })) as unknown as typeof txSender.dispatchTxProposal)
-      const confirmSpy = jest.spyOn(txSender, 'dispatchTxConfirmation')
+          Promise.resolve({ txId: 'proposal-id' })) as unknown as typeof txSender.dispatchTxProposal)
 
       const ref = captureActions()
-      const { txId } = await ref.current!.signTx(safeTx, 'proposal-id')
+      await ref.current!.signProposerTx(createSafeTx(), 'origin')
 
-      expect(confirmSpy).not.toHaveBeenCalled()
-      expect(proposeSpy).toHaveBeenCalled()
-      expect(txId).toBe('new-id')
+      expect(resolveFeeParams).toHaveBeenCalledWith(expect.objectContaining({ gasToken: GAS_TOKEN }))
+      expect(signSpy).toHaveBeenCalledWith(mergedTx, proposerWallet, undefined)
+      expect(proposeSpy).toHaveBeenCalledWith(expect.objectContaining({ safeTx: mergedTx }))
     })
 
     it("confirms the proposer's tx when the first signer leaves the signer paying", async () => {

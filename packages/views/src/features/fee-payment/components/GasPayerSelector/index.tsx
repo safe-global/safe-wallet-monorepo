@@ -27,7 +27,6 @@ import type {
   GasTokenLockReason,
   GasTokenOption,
   NetworkFee,
-  PayerLockReason,
 } from '@safe-global/views/features/fee-payment/types'
 import { GasTokenSelector, type TokenIconRenderer } from './GasTokenSelector'
 import { TotalOutgoingSection } from './TotalOutgoingSection'
@@ -52,10 +51,6 @@ const LOCKED_TOOLTIP: Record<GasPayerChoice, string> = {
   PAY_FROM_SAFE: "Set at signing and can't be changed.",
   WALLET: 'Whoever executes pays the gas fee.',
   SPONSORED: 'Covered by your sponsored transactions.',
-}
-
-const PAYER_LOCK_REASON_TOOLTIP: Record<PayerLockReason, string> = {
-  FIRST_SIGNER_PICKS: 'Whoever signs first picks who pays the gas fee.',
 }
 
 const gasTokenLockTooltip = (reason: GasTokenLockReason | undefined, token?: GasTokenOption): string | undefined => {
@@ -151,7 +146,7 @@ const PayerControl = ({
   control.kind === 'choice' ? (
     <PayerChoice value={control.value} options={control.options} sponsorKind={sponsorKind} onChange={onChange} />
   ) : (
-    <LockedPill tooltip={control.reason ? PAYER_LOCK_REASON_TOOLTIP[control.reason] : LOCKED_TOOLTIP[control.value]}>
+    <LockedPill tooltip={LOCKED_TOOLTIP[control.value]}>
       <PillLabel>{payerLabel(control.value, sponsorKind)}</PillLabel>
     </LockedPill>
   )

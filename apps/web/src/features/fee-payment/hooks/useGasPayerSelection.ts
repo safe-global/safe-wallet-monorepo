@@ -51,7 +51,7 @@ export const useGasPayerSelection = ({
   const chain = useCurrentChain()
   const { safe, safeAddress } = useSafeInfo()
   const { feeGasToken } = useContext(SafeTxContext)
-  const { isProposing } = useContext(TxFlowContext)
+  const { txId } = useContext(TxFlowContext)
   const { isPro, left, meter } = useSafeSponsoredTxs()
   const [explicitChoice, setExplicitChoice] = useState<GasPayerChoice>()
   const dispatch = useAppDispatch()
@@ -61,6 +61,8 @@ export const useGasPayerSelection = ({
   const signatures = safeTx?.signatures.size ?? 0
   const isUnsigned = !!safeTx && signatures === 0
   const isLocked = !!safeTx && isPaidFromSafe(safeTx.data)
+  // An unsigned tx CGW already knows is a proposal: its proposer picked who pays, so signing it must not change the hash.
+  const isProposal = !!txId && isUnsigned
   const isChainReady = isPayFromSafeAvailable(chain)
   const chainOptions = useMemo(() => getGasPaymentOptions(chain), [chain])
   const hasSponsoredOffer = !!offer && !offer.disabledReason
@@ -78,10 +80,10 @@ export const useGasPayerSelection = ({
       ? { to: safeTx.data.to, value: safeTx.data.value, data: safeTx.data.data, operation: safeTx.data.operation }
       : undefined,
   )
-  const canPayFromSafe = !isLocked && isChainReady && isUnsigned && candidates.length > 0
+  const canPayFromSafe = !isLocked && !isProposal && isChainReady && isUnsigned && candidates.length > 0
 
-  // Pro with sponsored txs left decides at execution; a proposer leaves the pick to the first signer.
-  const offersSafeToggle = canPayFromSafe && planState !== 'PRO_SPONSORED_LEFT' && !isProposing
+  // Pro with sponsored txs left decides at execution.
+  const offersSafeToggle = canPayFromSafe && planState !== 'PRO_SPONSORED_LEFT'
   const isSafeOptionShown = offersSafeToggle && !(step === 'execute' && hasSponsoredOffer)
 
   const choice = resolveChoice({
@@ -133,7 +135,6 @@ export const useGasPayerSelection = ({
       step,
       planState,
       offersSafeToggle,
-      isProposing,
       hasSponsoredOffer,
       choice,
     })
@@ -199,7 +200,6 @@ export const useGasPayerSelection = ({
     step,
     planState,
     offersSafeToggle,
-    isProposing,
     hasSponsoredOffer,
     choice,
     chain,

@@ -325,18 +325,36 @@ describe('useGasPayerSelection', () => {
       </TxFlowContext.Provider>
     )
 
-    it('locks the Signer wallet and leaves the pick to the first signer', () => {
+    it('lets the proposer pick Safe account, as a first signer would', () => {
       const { result } = renderHook(() => useGasPayerSelection({ safeTx: unsignedTx, offer: null, step: 'sign' }), {
         wrapper: ProposingWrapper,
         ...preference('PAY_FROM_SAFE'),
       })
 
-      expect(result.current.choice).toBe('WALLET')
       expect(result.current.view?.payer).toEqual({
-        kind: 'locked',
-        value: 'WALLET',
-        reason: 'FIRST_SIGNER_PICKS',
+        kind: 'choice',
+        value: 'PAY_FROM_SAFE',
+        options: ['PAY_FROM_SAFE', 'WALLET'],
       })
+      expect(result.current.isPayFromSafe).toBe(true)
+    })
+  })
+
+  describe("signing a proposer's tx", () => {
+    const ProposalWrapper = ({ children }: { children: ReactNode }) => (
+      <TxFlowContext.Provider value={{ ...initialContext, txId: 'proposal-id' }}>
+        <>{children}</>
+      </TxFlowContext.Provider>
+    )
+
+    it('keeps the payer the proposer picked: no Safe account, no quote', () => {
+      const { result } = renderHook(() => useGasPayerSelection({ safeTx: unsignedTx, offer: null, step: 'sign' }), {
+        wrapper: ProposalWrapper,
+        ...preference('PAY_FROM_SAFE'),
+      })
+
+      expect(result.current.choice).toBe('WALLET')
+      expect(result.current.view?.payer).toEqual({ kind: 'locked', value: 'WALLET' })
       expect(quoteRequested()).toBe(false)
       expect(result.current.isPayFromSafe).toBe(false)
     })
