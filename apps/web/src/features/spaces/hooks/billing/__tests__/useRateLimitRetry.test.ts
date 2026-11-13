@@ -2,9 +2,6 @@ import { act, renderHook } from '@testing-library/react'
 import { isRateLimited, useRateLimitRetry } from '../useRateLimitRetry'
 
 describe('useRateLimitRetry', () => {
-  beforeEach(() => jest.useFakeTimers())
-  afterEach(() => jest.useRealTimers())
-
   it('recognises a 429 and nothing else', () => {
     expect(isRateLimited({ status: 429, data: {} })).toBe(true)
     expect(isRateLimited({ status: 500, data: {} })).toBe(false)

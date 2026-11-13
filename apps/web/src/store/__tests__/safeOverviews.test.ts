@@ -30,11 +30,6 @@ describe('safeOverviews', () => {
   beforeEach(() => {
     jest.resetAllMocks()
     mockedInitiate.mockReset()
-    jest.useFakeTimers()
-  })
-
-  afterEach(() => {
-    jest.useRealTimers()
   })
 
   describe('useGetSafeOverviewQuery', () => {

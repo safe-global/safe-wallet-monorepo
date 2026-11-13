@@ -14,8 +14,6 @@ describe('CopyButton', () => {
   })
 
   it('swaps to a checkmark after clicking, then reverts', async () => {
-    jest.useFakeTimers()
-
     const { getByTestId, queryByTestId } = render(<CopyButton text="0x123" />)
 
     fireEvent.click(getByTestId('copy-btn-icon'))
@@ -29,7 +27,5 @@ describe('CopyButton', () => {
 
     await waitFor(() => expect(getByTestId('copy-btn-icon')).toBeInTheDocument())
     expect(queryByTestId('copy-btn-check')).not.toBeInTheDocument()
-
-    jest.useRealTimers()
   })
 })

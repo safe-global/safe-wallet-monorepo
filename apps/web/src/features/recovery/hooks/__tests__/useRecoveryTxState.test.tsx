@@ -7,8 +7,6 @@ import type { RecoveryQueueItem } from '../../services/recovery-state'
 
 describe('useRecoveryTxState', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
-
     store.setStore({
       state: [undefined, undefined, false],
       pending: {},

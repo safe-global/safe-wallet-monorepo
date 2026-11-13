@@ -13,7 +13,6 @@ const setChainsState = (state: { isSuccess?: boolean; isError?: boolean }) =>
 
 describe('useLaunchScreen', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
     setChainsState({}) // still loading
   })
 
@@ -21,7 +20,7 @@ describe('useLaunchScreen', () => {
     act(() => {
       jest.runOnlyPendingTimers()
     })
-    jest.useRealTimers()
+
     jest.clearAllMocks()
   })
 

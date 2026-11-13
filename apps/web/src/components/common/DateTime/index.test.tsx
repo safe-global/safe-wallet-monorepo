@@ -11,12 +11,8 @@ jest.mock('@/utils/tx-history-filter', () => ({
 describe('DateTime', () => {
   beforeAll(() => {
     // If we do not use a fixed date, this test will fail once a year (in some timezones) due to daylight saving time.
-    jest.useFakeTimers()
-    jest.setSystemTime(Date.parse('01.01.2023'))
-  })
 
-  afterAll(() => {
-    jest.useRealTimers()
+    jest.setSystemTime(Date.parse('01.01.2023'))
   })
 
   it('should render the relative time before threshold on the queue', () => {

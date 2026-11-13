@@ -97,13 +97,12 @@ const mkServices = (
 describe('useAutoScan', () => {
   beforeEach(() => {
     mockScanContext = null
-    jest.useFakeTimers()
+
     // Silence expected console.error for failing-scanner tests
     jest.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   afterEach(() => {
-    jest.useRealTimers()
     jest.restoreAllMocks()
   })
 

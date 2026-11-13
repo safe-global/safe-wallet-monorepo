@@ -118,13 +118,6 @@ describe('addressBookListener', () => {
   describe('batch imports', () => {
     // The debounce runs on timers; fake them so the 300ms wait is deterministic
     // and instant instead of a real-clock sleep.
-    beforeEach(() => {
-      jest.useFakeTimers()
-    })
-
-    afterEach(() => {
-      jest.useRealTimers()
-    })
 
     // advanceTimersByTimeAsync flushes both the debounce timer and the
     // microtasks that resume the listener's async effect afterwards.

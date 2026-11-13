@@ -14,7 +14,7 @@ const mockUseActors = useGetSpaceAuditLogActors as jest.MockedFunction<typeof us
 describe('ActivityLogFilters', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    jest.useFakeTimers().setSystemTime(new Date('2026-06-24T12:00:00'))
+    jest.setSystemTime(new Date('2026-06-24T12:00:00'))
 
     mockResolveMemberName.mockReturnValue(undefined)
     // Includes a former/deleted member — the dropdown is fed from the audit
@@ -23,10 +23,6 @@ describe('ActivityLogFilters', () => {
       { actorUserId: 1, actor: '0x1234567890abcdef1234567890abcdef12345678' },
       { actorUserId: 2, actor: 'Former member' },
     ])
-  })
-
-  afterEach(() => {
-    jest.useRealTimers()
   })
 
   it('emits an inclusive ISO lower bound for the from date', () => {

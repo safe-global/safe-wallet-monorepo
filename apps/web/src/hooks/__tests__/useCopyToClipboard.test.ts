@@ -12,13 +12,12 @@ describe('useCopyToClipboard', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    jest.useFakeTimers()
+
     Object.assign(navigator, { clipboard: { writeText } })
   })
 
   afterEach(() => {
     jest.runOnlyPendingTimers()
-    jest.useRealTimers()
   })
 
   it('writes to the clipboard and flips `copied`, then auto-resets', async () => {

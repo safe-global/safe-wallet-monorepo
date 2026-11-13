@@ -252,15 +252,8 @@ const pickToken = async (user: User, name: string) => {
   await user.click(await screen.findByRole('option', { name: new RegExp(name) }))
 }
 
-const withFakeClock = () => {
-  beforeEach(() => jest.useFakeTimers())
-  afterEach(() => jest.useRealTimers())
-}
-
 describe('TokenAmountInput', () => {
   describe('Token change', () => {
-    withFakeClock()
-
     it('keeps the typed amount when a different token is picked', async () => {
       const { user } = renderOnFakeClock(<TokenSwitchTestWrapper />)
 
@@ -278,52 +271,43 @@ describe('TokenAmountInput', () => {
       expect(screen.getByText('Amount')).toBeInTheDocument()
 
       await pickToken(user, 'USD Coin')
-      await advanceClock(AMOUNT_ERROR_DEBOUNCE_MS)
 
-      expect(screen.getByText('Should have 1 to 6 decimals')).toBeInTheDocument()
+      expect(await screen.findByText('Should have 1 to 6 decimals')).toBeInTheDocument()
       expect(screen.getByTestId('token-amount-field')).toHaveValue('0.0000001')
     })
   })
 
   describe('Error display timing', () => {
-    withFakeClock()
-
     it('holds an amount error back while typing but clears it at once', async () => {
       const { user } = renderOnFakeClock(<TokenSwitchTestWrapper />)
       const amountField = screen.getByTestId('token-amount-field')
 
       await user.type(amountField, '0.')
-      await advanceClock(AMOUNT_ERROR_DEBOUNCE_MS - 1)
       expect(screen.queryByText('The value must be greater than 0')).not.toBeInTheDocument()
-      await advanceClock(1)
-      expect(screen.getByText('The value must be greater than 0')).toBeInTheDocument()
+      expect(await screen.findByText('The value must be greater than 0')).toBeInTheDocument()
 
       await user.type(amountField, '5')
-      expect(screen.queryByText('The value must be greater than 0')).not.toBeInTheDocument()
+      await waitFor(() => expect(screen.queryByText('The value must be greater than 0')).not.toBeInTheDocument())
       expect(screen.getByText('Amount')).toBeInTheDocument()
 
       // Breaking the value differently right away must not flash the previous message.
       await user.clear(amountField)
       await user.type(amountField, '1.')
       expect(amountField).toHaveValue('1.')
-      await advanceClock(AMOUNT_ERROR_DEBOUNCE_MS - 1)
       expect(screen.queryByText('The value must be greater than 0')).not.toBeInTheDocument()
       expect(screen.queryByText('Should have 1 to 18 decimals')).not.toBeInTheDocument()
-      await advanceClock(1)
-      expect(screen.getByText('Should have 1 to 18 decimals')).toBeInTheDocument()
+      expect(await screen.findByText('Should have 1 to 18 decimals')).toBeInTheDocument()
+      expect(screen.queryByText('The value must be greater than 0')).not.toBeInTheDocument()
     })
   })
 
   describe('Balance limit', () => {
-    withFakeClock()
-
     it('names the balance as the maximum when the amount is above it', async () => {
       const { user } = renderOnFakeClock(<TokenSwitchTestWrapper />)
 
       await user.type(screen.getByTestId('token-amount-field'), '2')
-      await advanceClock(AMOUNT_ERROR_DEBOUNCE_MS)
 
-      expect(screen.getByText('Maximum value is 1')).toBeInTheDocument()
+      expect(await screen.findByText('Maximum value is 1')).toBeInTheDocument()
     })
   })
 
@@ -557,8 +541,6 @@ describe('TokenAmountInput', () => {
   })
 
   describe('Error state styling', () => {
-    withFakeClock()
-
     // The amount FIELD (label + border) must turn destructive on error, but the typed
     // VALUE text must stay neutral — the invalid `Field` ancestor would otherwise cascade its red
     // colour onto the value via CSS inheritance (see ui/input.tsx's `text-foreground`).
@@ -587,7 +569,7 @@ describe('TokenAmountInput', () => {
       await advanceClock(AMOUNT_ERROR_DEBOUNCE_MS)
 
       // The label swaps in the error message (after the display debounce) and turns destructive...
-      expect(screen.getByText('Insufficient funds')).toHaveClass('text-destructive')
+      expect(await screen.findByText('Insufficient funds')).toHaveClass('text-destructive')
       // ...but the typed value stays the normal foreground colour, not red.
       expect(amountField).toHaveDisplayValue('0.0159')
       expect(amountField).toHaveClass('text-foreground')

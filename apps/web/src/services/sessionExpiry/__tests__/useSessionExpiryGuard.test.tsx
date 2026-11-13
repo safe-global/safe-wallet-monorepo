@@ -58,7 +58,7 @@ const renderGuardWithStore = (
 
 describe('useSessionExpiryGuard', () => {
   beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-05-07T12:00:00Z'))
+    jest.setSystemTime(new Date('2026-05-07T12:00:00Z'))
     mockUnwrap.mockReset()
     mockUnsubscribe.mockReset()
     mockInitiate.mockReset()
@@ -70,10 +70,6 @@ describe('useSessionExpiryGuard', () => {
     // be replayed into this test's store via useHydrateStore's HYDRATE_ACTION
     // and clobber initialReduxState.auth.sessionExpiresAt. Do not remove.
     localStorage.clear()
-  })
-
-  afterEach(() => {
-    jest.useRealTimers()
   })
 
   it('does nothing when the user is not signed in (sessionExpiresAt is null)', async () => {

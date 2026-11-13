@@ -398,7 +398,6 @@ describe('useCounterfactualSafeSync', () => {
   it('retries once after a transient GET failure and applies the result on success', async () => {
     // Without the retry, a single network blip stuck users who land on a
     // space-mate's CF safe URL on "Safe couldn't be loaded".
-    jest.useFakeTimers()
 
     userFailureCount = 1
     userResponse = {
@@ -442,13 +441,9 @@ describe('useCounterfactualSafeSync', () => {
         typeof d === 'object' && d !== null && (d as { type?: string }).type === 'addUndeployedSafe',
     )
     expect(addActions.find((a) => a.payload.address === '0xRetry')).toBeDefined()
-
-    jest.useRealTimers()
   })
 
   it('settles cfSafeSynced=true even when both attempts fail so consumers do not wait forever', async () => {
-    jest.useFakeTimers()
-
     userFailureCount = 2
     mockSelectors(true, true, null)
 
@@ -466,14 +461,11 @@ describe('useCounterfactualSafeSync', () => {
         typeof d === 'object' && d !== null && (d as { type?: string }).type === 'setCfSafeSynced',
     )
     expect(syncedActions.some((a) => a.payload === true)).toBe(true)
-
-    jest.useRealTimers()
   })
 
   it('tags each failed sync attempt so the retry stays distinguishable from the first failure', async () => {
     // Both attempts share the same error code 2s apart, so without the attempt
     // facet they are indistinguishable duplicates in analytics.
-    jest.useFakeTimers()
 
     userFailureCount = 2
     mockSelectors(true, true, null)
@@ -487,7 +479,5 @@ describe('useCounterfactualSafeSync', () => {
 
     expect(logErrorMock).toHaveBeenCalledWith('650', expect.any(Error), { attempt: 1 })
     expect(logErrorMock).toHaveBeenCalledWith('650', expect.any(Error), { attempt: 2 })
-
-    jest.useRealTimers()
   })
 })
