@@ -1,10 +1,17 @@
+import { faker } from '@faker-js/faker'
 import { render, screen } from '@/tests/test-utils'
 import BalancesPage from '@/pages/balances'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import useSafeTotalBalance from '@/hooks/useSafeTotalBalance'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
 
 jest.mock('@/hooks/useVisibleBalances', () => ({
   useVisibleBalances: jest.fn(),
+}))
+
+jest.mock('@/hooks/useSafeTotalBalance', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }))
 
 jest.mock('@/components/balances/AssetsHeader', () => ({
@@ -19,7 +26,12 @@ jest.mock('@/components/balances/AssetsTable', () => ({
 
 jest.mock('@/components/balances/TotalAssetValue', () => ({
   __esModule: true,
-  default: ({ tooltipTitle }: { tooltipTitle?: string }) => <div data-testid="total-asset-value">{tooltipTitle}</div>,
+  default: ({ fiatTotal, tooltipTitle }: { fiatTotal?: string | number; tooltipTitle?: string }) => (
+    <div data-testid="total-asset-value">
+      <span data-testid="total-asset-value-amount">{fiatTotal}</span>
+      {tooltipTitle}
+    </div>
+  ),
 }))
 
 jest.mock('@/components/balances/ManageTokensButton', () => ({
@@ -83,6 +95,7 @@ describe('Balances page', () => {
       loading: false,
       error: undefined,
     })
+    jest.mocked(useSafeTotalBalance).mockReturnValue({ fiatTotal: '', noAssets: true, isSummaryEnabled: false })
   })
 
   it('keeps token management controls visible when assets fail to load', () => {
@@ -127,5 +140,44 @@ describe('Balances page', () => {
     renderWithTokenList(TOKEN_LISTS.TRUSTED)
 
     expect(screen.getByTestId('total-asset-value')).toHaveTextContent(tooltipText)
+  })
+
+  describe('total assets value', () => {
+    const tokensFiatTotal = faker.finance.amount()
+    const summaryTotal = faker.finance.amount()
+
+    beforeEach(() => {
+      jest.mocked(useVisibleBalances).mockReturnValue({
+        balances: { items: [], fiatTotal: faker.finance.amount(), tokensFiatTotal },
+        loaded: true,
+        loading: false,
+        error: undefined,
+      })
+    })
+
+    it('shows the token list total when the chain has the summaries flag off', () => {
+      jest.mocked(useSafeTotalBalance).mockReturnValue({
+        fiatTotal: summaryTotal,
+        noAssets: false,
+        isSummaryEnabled: false,
+      })
+
+      render(<BalancesPage />)
+
+      expect(screen.getByTestId('total-asset-value-amount')).toHaveTextContent(String(Number(tokensFiatTotal)))
+    })
+
+    it('shows the same total as Home, positions included, when the chain has the summaries flag on', () => {
+      jest
+        .mocked(useSafeTotalBalance)
+        .mockReturnValue({ fiatTotal: summaryTotal, noAssets: false, isSummaryEnabled: true })
+
+      render(<BalancesPage />)
+
+      expect(screen.getByTestId('total-asset-value-amount')).toHaveTextContent(summaryTotal)
+      expect(screen.getByTestId('total-asset-value')).toHaveTextContent(
+        'Includes positions, the same total as on Home.',
+      )
+    })
   })
 })

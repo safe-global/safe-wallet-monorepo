@@ -1,10 +1,15 @@
-import { type EndpointBuilder } from '@reduxjs/toolkit/query/react'
+import { type BaseQueryApi, type EndpointBuilder } from '@reduxjs/toolkit/query/react'
 
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { apiSliceWithChainsConfig, chainsAdapter } from '@safe-global/store/gateway'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { selectCurrency } from '../../settingsSlice'
+import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
+import { selectCurrency, selectTokenList } from '../../settingsSlice'
 import type { SafeItem } from '@/hooks/safes'
+import { CONFIG_SERVICE_KEY } from '@/config/constants'
+import { isTrustedTokenList } from '@/utils/tokenList'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { delay } from '@safe-global/utils/utils/helpers'
 import { makeSafeTag, makeSafeOverviewTag } from '.'
 import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
 
@@ -17,11 +22,32 @@ type SafeOverviewQueueItem = {
   walletAddress?: string
   chainId: string
   currency: string
+  trusted: boolean
   dispatch: DispatchFn
   callback: (result: { data: SafeOverview | undefined; error?: never } | { data?: never; error: string }) => void
 }
 
 export const SAFE_OVERVIEWS_BATCH_WINDOW_MS = 300
+// High so only a hung or failing chain configs request hits it; a miss sends trusted=false (a Zerion call per Safe)
+export const CHAINS_WAIT_CAP_MS = 10_000
+
+const selectChains = apiSliceWithChainsConfig.endpoints.getChainsConfigV2.select(CONFIG_SERVICE_KEY)
+
+// A cold load can ask for overviews before the chain configs arrive: wait for them (capped) to send the right trusted
+const waitForLoadingChains = async ({ dispatch, getState }: Pick<BaseQueryApi, 'dispatch' | 'getState'>) => {
+  if (selectChains(getState() as never).data) return
+  const running = dispatch(apiSliceWithChainsConfig.util.getRunningQueryThunk('getChainsConfigV2', CONFIG_SERVICE_KEY))
+  if (running) await Promise.race([running, delay(CHAINS_WAIT_CAP_MS)])
+}
+
+// `state` is untyped: RootState would be circular, as these endpoints are part of it. Flag overrides don't apply.
+const getOverviewTrusted = (state: unknown, chainId: string): boolean => {
+  const rootState = state as never
+  const { data } = selectChains(rootState)
+  const chain = data ? chainsAdapter.getSelectors().selectById(data, chainId) : undefined
+  if (!chain || !hasFeature(chain, FEATURES.PORTFOLIO_SUMMARIES)) return false
+  return isTrustedTokenList(chain, selectTokenList(rootState))
+}
 
 class SafeOverviewFetcher {
   private requestQueue: SafeOverviewQueueItem[] = []
@@ -32,11 +58,13 @@ class SafeOverviewFetcher {
     safeIds,
     walletAddress,
     currency,
+    trusted,
     dispatch,
   }: {
     safeIds: `${number}:0x${string}`[]
     walletAddress?: string
     currency: string
+    trusted: boolean
     dispatch: DispatchFn
   }) {
     // forceRefetch so a cache invalidation (e.g. after a tx) re-runs the wrapping
@@ -47,7 +75,7 @@ class SafeOverviewFetcher {
         safes: safeIds,
         currency,
         walletAddress,
-        trusted: false,
+        trusted,
       },
       { forceRefetch: true },
     )
@@ -72,17 +100,27 @@ class SafeOverviewFetcher {
       return
     }
 
-    const { walletAddress, currency, dispatch } = itemsToProcess[0]
+    // One request per trusted value: it is a query param of the whole batch
+    const batches = [true, false]
+      .map((trusted) => itemsToProcess.filter((item) => item.trusted === trusted))
+      .filter((batch) => batch.length > 0)
+
+    await Promise.all(batches.map((batch) => this.processBatch(batch)))
+  }
+
+  private async processBatch(items: SafeOverviewQueueItem[]) {
+    const { walletAddress, currency, trusted, dispatch } = items[0]
 
     try {
       const overviews = await this.fetchSafeOverviews({
-        safeIds: itemsToProcess.map((item) => makeSafeTag(item.chainId, item.safeAddress)),
+        safeIds: items.map((item) => makeSafeTag(item.chainId, item.safeAddress)),
         currency,
         walletAddress,
+        trusted,
         dispatch,
       })
 
-      itemsToProcess.forEach((item) => {
+      items.forEach((item) => {
         const overview = overviews.find(
           (entry) =>
             entry != null && sameAddress(entry.address?.value, item.safeAddress) && entry.chainId === item.chainId,
@@ -90,7 +128,7 @@ class SafeOverviewFetcher {
         item.callback({ data: overview })
       })
     } catch {
-      itemsToProcess.forEach((item) => item.callback({ error: 'Could not fetch Safe overview' }))
+      items.forEach((item) => item.callback({ error: 'Could not fetch Safe overview' }))
     }
   }
 
@@ -147,10 +185,14 @@ export const safeOverviewEndpoints = (
           return { data: null }
         }
 
+        await waitForLoadingChains({ dispatch, getState })
+        const state = getState()
+
         try {
           const safeOverview = await batchedFetcher.getOverview({
             chainId,
             currency,
+            trusted: getOverviewTrusted(state, chainId),
             walletAddress,
             safeAddress,
             dispatch: dispatchFn,
@@ -181,7 +223,7 @@ export const safeOverviewEndpoints = (
             id: makeSafeOverviewTag(overview.chainId, overview.address.value),
           }))
         : [{ type: 'SafeOverviews' as const }],
-    async queryFn(params, { dispatch }) {
+    async queryFn(params, { getState, dispatch }) {
       const { safes, walletAddress, currency } = params
       const dispatchFn: DispatchFn = (action) => dispatch(action)
 
@@ -189,12 +231,16 @@ export const safeOverviewEndpoints = (
         return { data: [] }
       }
 
+      await waitForLoadingChains({ dispatch, getState })
+      const state = getState()
+
       try {
         const promisedSafeOverviews = safes.map((safe) =>
           batchedFetcher.getOverview({
             chainId: safe.chainId,
             safeAddress: safe.address,
             currency,
+            trusted: getOverviewTrusted(state, safe.chainId),
             walletAddress,
             dispatch: dispatchFn,
           }),

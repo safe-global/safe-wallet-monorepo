@@ -915,22 +915,41 @@
         ]
       },
       "delete": {
-        "description": "Clears all cached Zerion portfolio data (overview, portfolio, positions) for a specific address",
+        "description": "Clears all cached Zerion portfolio data (overview, portfolio, positions) for a Safe. Repeat clears for the same Safe within a short cooldown are skipped.",
         "operationId": "portfolioClearPortfolioV1",
         "parameters": [
           {
             "name": "address",
             "required": true,
             "in": "path",
-            "description": "Wallet address (0x prefixed hex string)",
+            "description": "Safe address (0x prefixed hex string)",
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "query",
+            "description": "A chain on which the address is a Safe",
+            "schema": {
+              "example": "1",
               "type": "string"
             }
           }
         ],
         "responses": {
           "204": {
-            "description": ""
+            "description": "Cleared, or skipped within cooldown"
+          },
+          "404": {
+            "description": "The address is not a Safe on chainId"
+          },
+          "422": {
+            "description": "Invalid address or chainId"
+          },
+          "429": {
+            "description": "Rate limit reached"
           }
         },
         "summary": "Clear portfolio cache",
@@ -7954,6 +7973,72 @@
         "summary": "Delete device",
         "tags": [
           "notifications"
+        ]
+      }
+    },
+    "/v2/portfolio/summaries": {
+      "get": {
+        "description": "Returns the fiat value of each Safe, summed from the cached Zerion snapshot that GET /v1/portfolio serves (one /positions call per wallet and environment) on Zerion-supported chains, and from the Transaction Service elsewhere. Safes that cannot be resolved, or that no source can value, are left out of the response.",
+        "operationId": "portfolioSummariesGetSummariesV2",
+        "parameters": [
+          {
+            "name": "safes",
+            "required": true,
+            "in": "query",
+            "description": "Comma-separated list of Safe addresses in chainId:address format. Only the first MAX_SAFE_OVERVIEWS distinct entries are used.",
+            "schema": {
+              "example": "1:0x1234567890123456789012345678901234567890,137:0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+              "type": "string"
+            }
+          },
+          {
+            "name": "currency",
+            "required": true,
+            "in": "query",
+            "description": "Fiat currency code, any case (e.g. USD, eur)",
+            "schema": {
+              "example": "USD",
+              "type": "string"
+            }
+          },
+          {
+            "name": "trusted",
+            "required": false,
+            "in": "query",
+            "description": "If true, only trusted tokens count. Defaults to true, like GET /v1/portfolio, so the totals match the Assets page.",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PortfolioSummary"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unsupported currency"
+          },
+          "422": {
+            "description": "Invalid query parameters"
+          },
+          "429": {
+            "description": "Rate limit reached"
+          }
+        },
+        "summary": "Get portfolio summaries",
+        "tags": [
+          "portfolio"
         ]
       }
     }
@@ -19295,6 +19380,86 @@
         },
         "required": [
           "subscriptions"
+        ]
+      },
+      "PortfolioSummary": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "fiatTotal": {
+            "type": "string",
+            "description": "Value of this Safe on this chain. Decimal string."
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "zerion",
+              "tx_service"
+            ],
+            "description": "zerion: summed from the Zerion snapshot the Assets page reads. tx_service: the chain is not on Zerion, or the snapshot is unavailable."
+          },
+          "snapshot": {
+            "nullable": true,
+            "description": "The Zerion snapshot the value was summed from, null for tx_service.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PortfolioSummarySnapshot"
+              }
+            ]
+          }
+        },
+        "required": [
+          "chainId",
+          "address",
+          "fiatTotal",
+          "source",
+          "snapshot"
+        ]
+      },
+      "PortfolioSummarySnapshot": {
+        "type": "object",
+        "properties": {
+          "fiatTotal": {
+            "type": "string",
+            "description": "Total across every chain of this address in this environment (mainnets or testnets). Decimal string."
+          },
+          "fiatTotalByChain": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Total per chain, keyed by chainId. Adds up to fiatTotal. Decimal strings."
+          },
+          "fiatTotalByType": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Total per Zerion position type (wallet, deposit, loan, staked, locked, reward, ...) across every chain of this address in this environment. Loans are negative. Adds up to fiatTotal. Decimal strings."
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "When the snapshot was fetched from Zerion."
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Approximately when the cached snapshot expires: the cache adds jitter to its lifetime, and a transaction or a manual refresh can clear it earlier."
+          }
+        },
+        "required": [
+          "fiatTotal",
+          "fiatTotalByChain",
+          "fiatTotalByType",
+          "updatedAt",
+          "expiresAt"
         ]
       }
     }

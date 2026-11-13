@@ -34,6 +34,9 @@ jest.mock('@/hooks/useChains', () => ({
 jest.mock('@/store/api/gateway', () => ({
   useGetMultipleSafeOverviewsQuery: jest.fn(),
 }))
+jest.mock('@/features/portfolio', () => ({
+  usePortfolioSummaries: jest.fn(),
+}))
 jest.mock('@/store', () => ({
   useAppSelector: jest.fn(),
 }))
@@ -71,6 +74,7 @@ import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
+import { usePortfolioSummaries } from '@/features/portfolio'
 import { useAppSelector } from '@/store'
 import { selectUndeployedSafes } from '@/features/counterfactual/store'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -129,6 +133,9 @@ function setupDefaults(
     }>
     overviewsLoading?: boolean
     overviewsError?: boolean
+    summaryChainIds?: string[]
+    summaries?: Array<{ chainId: string; address: string; fiatTotal: string }>
+    summariesLoading?: boolean
   } = {},
 ) {
   ;(useSafeBarSafes as jest.Mock).mockReturnValue({
@@ -155,6 +162,12 @@ function setupDefaults(
     isLoading: overrides.overviewsLoading ?? false,
     isError: overrides.overviewsError ?? false,
     refetch: jest.fn(),
+  })
+  ;(usePortfolioSummaries as jest.Mock).mockReturnValue({
+    isEnabled: (chainId: string) => (overrides.summaryChainIds ?? []).includes(chainId),
+    getSummary: (chainId: string, address: string) =>
+      overrides.summaries?.find((s) => s.chainId === chainId && s.address.toLowerCase() === address.toLowerCase()),
+    isLoading: overrides.summariesLoading ?? false,
   })
   ;(useAppSelector as jest.Mock).mockReturnValue('usd')
   ;(useWallet as jest.Mock).mockReturnValue({ address: '0xWallet' })
@@ -802,5 +815,69 @@ describe('useSpaceSafeSelectorItems', () => {
     expect(ethChain?.isActivating).toBe(true)
     expect(polygonChain?.isUndeployed).toBe(false)
     expect(polygonChain?.isActivating).toBe(false)
+  })
+
+  describe('with portfolio summaries', () => {
+    it('reads the summaries of the Safes it lists', () => {
+      renderHook(() => useSpaceSafeSelectorItems())
+
+      expect(usePortfolioSummaries).toHaveBeenCalledWith([
+        expect.objectContaining({ chainId: '1', address: '0xSafe1' }),
+      ])
+    })
+
+    it('keeps the overview balance when the chain has the flag off', () => {
+      setupDefaults({ summaries: [{ chainId: '1', address: '0xSafe1', fiatTotal: '7000' }] })
+
+      const { result } = renderHook(() => useSpaceSafeSelectorItems())
+
+      expect(result.current.items[0].balance).toBe('5000')
+    })
+
+    it('uses the summary balance when the chain has the flag on', () => {
+      setupDefaults({ summaryChainIds: ['1'], summaries: [{ chainId: '1', address: '0xsafe1', fiatTotal: '7000' }] })
+
+      const { result } = renderHook(() => useSpaceSafeSelectorItems())
+
+      expect(result.current.items[0]).toMatchObject({ balance: '7000', isLoading: false })
+    })
+
+    it('falls back to the overview balance when the Safe is missing from the summaries', () => {
+      setupDefaults({ summaryChainIds: ['1'], summaries: [] })
+
+      const { result } = renderHook(() => useSpaceSafeSelectorItems())
+
+      expect(result.current.items[0]).toMatchObject({ balance: '5000', isLoading: false })
+    })
+
+    it('marks the Safe as loading while its summary loads', () => {
+      setupDefaults({ summaryChainIds: ['1'], summariesLoading: true })
+
+      const { result } = renderHook(() => useSpaceSafeSelectorItems())
+
+      expect(result.current.items[0].isLoading).toBe(true)
+    })
+
+    it('takes each chain of a multi-chain Safe from its own source', () => {
+      setupDefaults({
+        allSafes: [multiChainSafe],
+        safeAddress: '0xSafe2',
+        overviews: [
+          { address: { value: '0xSafe2' }, chainId: '1', fiatTotal: '3000', threshold: 2, owners: [] },
+          { address: { value: '0xSafe2' }, chainId: '137', fiatTotal: '2000', threshold: 2, owners: [] },
+        ],
+        summaryChainIds: ['1'],
+        summaries: [
+          { chainId: '1', address: '0xSafe2', fiatTotal: '3500' },
+          { chainId: '137', address: '0xSafe2', fiatTotal: '9999' },
+        ],
+      })
+
+      const { result } = renderHook(() => useSpaceSafeSelectorItems())
+      const item = result.current.items[0]
+
+      expect(item.balance).toBe('3500')
+      expect(item.chains.map((chain) => chain.balance)).toEqual(['3500', '2000'])
+    })
   })
 })

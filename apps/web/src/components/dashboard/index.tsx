@@ -1,6 +1,6 @@
 import FirstSteps from '@/components/dashboard/FirstSteps'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { type ReactElement, useMemo } from 'react'
+import { type ReactElement } from 'react'
 import dynamic from '@/utils/dynamic'
 import PendingTxsList from '@/components/dashboard/PendingTxs/PendingTxsList'
 import AssetsWidget from '@/components/dashboard/Assets'
@@ -15,7 +15,7 @@ import { ActionRequiredPanel } from './ActionRequiredPanel'
 import { VulnerableModuleWarning } from './ActionRequiredPanel/VulnerableModuleWarning'
 import { useVulnerableSafe } from '@/features/security'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { useVisibleBalances } from '@/hooks/useVisibleBalances'
+import useSafeTotalBalance from '@/hooks/useSafeTotalBalance'
 import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
 import { useIsPositionsFeatureEnabled } from '@/features/positions'
 import { useBannerVisibility, BannerType, HnBannerForCarousel, HypernativeFeature } from '@/features/hypernative'
@@ -34,18 +34,13 @@ const Dashboard = (): ReactElement => {
   const supportsRecovery = useIsRecoverySupported()
   const isVulnerableSafe = useVulnerableSafe()
 
-  const { balances, loaded: balancesLoaded } = useVisibleBalances()
-  const items = useMemo(() => {
-    return balances.items.filter((item) => item.balance !== '0')
-  }, [balances.items])
+  const { noAssets } = useSafeTotalBalance()
 
   const isPositionsFeatureEnabled = useIsPositionsFeatureEnabled()
   const { showBanner: showHnBanner } = useBannerVisibility(BannerType.Promo)
   const { StakingPromoBanner } = useLoadFeature(StakeFeature)
   const isStakingPromoBannerVisible = useIsStakingPromoBannerVisible()
   const [, setHideStakingPromoBanner] = useLocalStorage<boolean>(STAKING_PROMO_BANNER_HIDE_KEY)
-
-  const noAssets = balancesLoaded && items.length === 0
 
   return (
     <>
