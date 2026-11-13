@@ -65,6 +65,44 @@ describe('relay API', () => {
     assert.match(message(revert), /reverted/)
   })
 
+  it('sends one relayed transaction at a time per fork, so the relayer nonces do not collide', async () => {
+    let sending = 0
+    let mostAtOnce = 0
+    const rpc: Rpc = async (_url, method) => {
+      if (method !== 'eth_sendTransaction') return null
+      sending += 1
+      mostAtOnce = Math.max(mostAtOnce, sending)
+      await new Promise((resolve) => setTimeout(resolve, 10))
+      sending -= 1
+      return TASK
+    }
+    const body = { chainId: 1, to: '0x1', data: '0x6a76' }
+
+    const replies = await Promise.all([1, 2].map(() => call('POST', '/safe-transactions', rpc, body)))
+
+    assert.deepEqual(
+      replies.map(([status]) => status),
+      [200, 200],
+    )
+    assert.equal(mostAtOnce, 1)
+  })
+
+  it('relays the next call on a fork after the fork rejected the previous one', async () => {
+    const results = [new RpcError('execution reverted'), TASK]
+    const rpc: Rpc = async (_url, method) => {
+      if (method !== 'eth_sendTransaction') return null
+      const result = results.shift()
+      if (result instanceof Error) throw result
+      return result
+    }
+    const body = { chainId: 1, to: '0x1', data: '0x6a76' }
+
+    const [rejected, relayed] = await Promise.all([1, 2].map(() => call('POST', '/safe-transactions', rpc, body)))
+
+    assert.equal(rejected[0], 400)
+    assert.deepEqual(relayed, [200, { taskId: TASK }])
+  })
+
   it('reports included, reverted and pending tasks', async () => {
     const path = `/safe-transactions/${TASK}/status`
     for (const [receipt, expected] of [
