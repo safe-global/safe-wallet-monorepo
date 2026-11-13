@@ -1293,6 +1293,38 @@ describe('without a wallet', () => {
   })
 })
 
+describe('aligned Transaction column', () => {
+  beforeEach(() => localStorage.clear())
+  // The type tag's slot in each row: fixed when aligned, the tag's own width otherwise.
+  const typeSlots = () => openRows().map((row) => within(row).getAllByRole('img').at(-1)!.parentElement!)
+
+  it.each(['1', '2'])('M%s: gives every Safe tag and type tag a fixed width', (m) => {
+    render(<PendingQueue />, { routerProps: { query: { m, align: 'fixed' } } })
+    expect(screen.getByRole('tab', { name: 'Aligned' })).toHaveAttribute('aria-selected', 'true')
+    for (const slot of typeSlots()) expect(slot).toHaveClass('w-26')
+    for (const row of openRows()) {
+      expect(within(row).getByRole('img', { name: /^on / }).closest('.w-36')).not.toBeNull()
+    }
+  })
+
+  it('puts the age after the other party, in To, in place of the Proposed column', () => {
+    render(<PendingQueue />, { routerProps: { query: { align: 'fixed' } } })
+    const titles = screen.getAllByRole('columnheader').map((header) => header.textContent)
+    expect(titles).not.toContain('Proposed')
+    const toColumn = titles.indexOf('To')
+    for (const row of openRows()) {
+      const cells = within(row.closest('tr')!).getAllByRole('cell')
+      expect(within(cells[toColumn]).getByLabelText(/^Proposed /)).toBeInTheDocument()
+    }
+  })
+
+  it('keeps the flowing layout by default', () => {
+    render(<PendingQueue />)
+    expect(screen.getByRole('tab', { name: 'Flowing' })).toHaveAttribute('aria-selected', 'true')
+    for (const slot of typeSlots()) expect(slot).not.toHaveClass('w-26')
+  })
+})
+
 describe('mobile compact view', () => {
   beforeEach(() => localStorage.clear())
   const compactList = () => screen.queryByRole('list', { name: 'Pending transactions' })

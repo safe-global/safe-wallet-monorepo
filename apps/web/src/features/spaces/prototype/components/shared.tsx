@@ -192,19 +192,30 @@ export const ROW_TAG_FILL = 'group-hover/transaction:*:bg-card group-data-[state
 
 // A transaction's type as a tag: its icon and name, like the Type filter. The tooltip says what the type means.
 // A transaction created in a Safe App shows the app in place of its type, as production does.
-export function AppTag({ app, onRow = false }: { app: { name: string; logo?: string }; onRow?: boolean }) {
+export function AppTag({
+  app,
+  onRow = false,
+  truncate = false,
+}: {
+  app: { name: string; logo?: string }
+  onRow?: boolean
+  // Shrinks into a fixed width and cuts the name short.
+  truncate?: boolean
+}) {
   return (
     <Tooltip delay={150}>
       <TooltipTrigger
-        render={<span className={`flex shrink-0 ${onRow ? ROW_TAG_FILL : ''}`} role="img" />}
+        render={
+          <span className={`flex ${truncate ? 'min-w-0' : 'shrink-0'} ${onRow ? ROW_TAG_FILL : ''}`} role="img" />
+        }
         aria-label={`${app.name}. Created in the ${app.name} Safe App.`}
       >
-        <Tag>
-          <Avatar className="size-4">
+        <Tag className={truncate ? 'min-w-0 shrink' : undefined}>
+          <Avatar className="size-4 shrink-0">
             {app.logo && <AvatarImage src={app.logo} alt="" />}
             <AvatarFallback className="text-[10px]">{app.name[0]}</AvatarFallback>
           </Avatar>
-          {app.name}
+          <span className="truncate">{app.name}</span>
         </Tag>
       </TooltipTrigger>
       <TooltipContent className={HINT_CLASS}>
@@ -214,17 +225,28 @@ export function AppTag({ app, onRow = false }: { app: { name: string; logo?: str
   )
 }
 
-export function TypeTag({ type, onRow = false }: { type: TypeLabel; onRow?: boolean }) {
+export function TypeTag({
+  type,
+  onRow = false,
+  truncate = false,
+}: {
+  type: TypeLabel
+  onRow?: boolean
+  // Shrinks into a fixed width and cuts the name short.
+  truncate?: boolean
+}) {
   const Icon = TYPE_ICONS[type]
   return (
     <Tooltip delay={150}>
       <TooltipTrigger
-        render={<span className={`flex shrink-0 ${onRow ? ROW_TAG_FILL : ''}`} role="img" />}
+        render={
+          <span className={`flex ${truncate ? 'min-w-0' : 'shrink-0'} ${onRow ? ROW_TAG_FILL : ''}`} role="img" />
+        }
         aria-label={`${type}. ${TYPE_HINTS[type]}`}
       >
-        <Tag>
+        <Tag className={truncate ? 'min-w-0 shrink' : undefined}>
           <Icon strokeWidth={ICON_STROKE} aria-hidden="true" />
-          {type}
+          <span className="truncate">{type}</span>
         </Tag>
       </TooltipTrigger>
       <TooltipContent className={HINT_CLASS}>

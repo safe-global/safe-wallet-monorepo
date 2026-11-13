@@ -45,8 +45,8 @@ export function QueueGroupedTable({
   ...props
 }: QueueGroupedTableProps) {
   const { isWide, showNoteText, persona, recoveries } = props
-  const columns = ORDERED_COLUMNS(isWide, props.partyTags, props.compact)
-  const widths = orderedWidths(showNoteText, props.partyTags, props.compact)
+  const columns = ORDERED_COLUMNS(isWide, props.partyTags, props.compact, props.aligned)
+  const widths = orderedWidths(showNoteText, props.partyTags, props.compact, props.aligned)
   const groups: SafeGroup[] = groupBySafe(sections)
   const { scroller, overflowing } = useScrollOverflow(sections.map((section) => isCollapsed(section.id)).join())
   const rows = (section: QueueSectionData, hidden: boolean) => (
@@ -308,9 +308,10 @@ const orderedWidths = (
   showNoteText: boolean | undefined,
   partyTags = false,
   compact = false,
+  aligned = false,
 ): Record<string, string | undefined> => ({
   ...getColumnWidths(showNoteText),
-  Transaction: compact ? undefined : partyTags ? 'w-[24rem]' : 'w-72',
+  Transaction: compact ? undefined : aligned ? 'w-[27rem]' : partyTags ? 'w-[24rem]' : 'w-72',
   ...(compact ? { Nonce: 'w-11', Action: 'w-12' } : {}),
   To: undefined,
   Safe: 'w-44',
@@ -320,7 +321,7 @@ const orderedWidths = (
 })
 
 // Columns, the same in every grouping. Nonce leads, so conflicts draw the same bracket.
-export const ORDERED_COLUMNS = (isWide: boolean, partyTags = false, compact = false) =>
+export const ORDERED_COLUMNS = (isWide: boolean, partyTags = false, compact = false, aligned = false) =>
   compact
     ? ['Nonce', 'Transaction', 'Action']
     : [
@@ -329,7 +330,8 @@ export const ORDERED_COLUMNS = (isWide: boolean, partyTags = false, compact = fa
         'To',
         // The Safe tag shows the Safe and its network in the Safe tag.
         ...(partyTags ? [] : ['Safe', 'Network']),
-        'Proposed',
+        // Aligned: the age sits after the other party, in To.
+        ...(aligned ? [] : ['Proposed']),
         ...(isWide ? ['Note'] : []),
         'Signatures',
         'Status',
@@ -340,8 +342,8 @@ export const ORDERED_COLUMNS = (isWide: boolean, partyTags = false, compact = fa
 // The Status list (`plain`): the same rows in one list, with no group rows.
 export function QueueOrderedTable({ groups, groupBy, plain = false, ...props }: QueueOrderedTableProps) {
   const byNetwork = groupBy === 'network'
-  const columns = ORDERED_COLUMNS(props.isWide, props.partyTags, props.compact)
-  const widths = orderedWidths(props.showNoteText, props.partyTags, props.compact)
+  const columns = ORDERED_COLUMNS(props.isWide, props.partyTags, props.compact, props.aligned)
+  const widths = orderedWidths(props.showNoteText, props.partyTags, props.compact, props.aligned)
   const [collapsed, setCollapsed] = useState<string[]>([])
   const { scroller, overflowing } = useScrollOverflow(`${groups.length}:${collapsed.join()}`)
   const toggle = (id: string) =>

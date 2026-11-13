@@ -124,6 +124,7 @@ const UNDEPLOYED_LABELS = { '0': 'All deployed', '1': '1 not deployed', '2': '2 
 export function ScenarioBar({
   wallet,
   view,
+  aligned,
   scenario,
   state,
   hypernative,
@@ -142,6 +143,8 @@ export function ScenarioBar({
   wallet: WalletState
   // Phones only: the compact list or the table.
   view?: QueueView
+  // Wider screens: the Transaction column as it flows, or in fixed widths.
+  aligned?: boolean
   scenario: Scenario
   hypernative: Hypernative
   persona: Persona
@@ -167,6 +170,14 @@ export function ScenarioBar({
             <TabsTrigger value="2">M2</TabsTrigger>
           </TabsList>
         </Tabs>
+        {aligned !== undefined && (
+          <Tabs value={aligned ? 'fixed' : 'flow'} onValueChange={(value) => onChange({ align: String(value) })}>
+            <TabsList aria-label="Transaction column">
+              <TabsTrigger value="flow">Flowing</TabsTrigger>
+              <TabsTrigger value="fixed">Aligned</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        )}
         {view && (
           <Tabs value={view} onValueChange={(value) => onChange({ view: String(value) })}>
             <TabsList aria-label="Phone layout">

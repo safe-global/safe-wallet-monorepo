@@ -37,14 +37,22 @@ export function TransactionHead({
   tx,
   onRow = false,
   keepWidth = false,
+  aligned = false,
 }: {
   tx: Proposal
   onRow?: boolean
   keepWidth?: boolean
+  // Fixed-width type tag, so summaries start at the same place on every row.
+  aligned?: boolean
 }) {
+  const tag = tx.app ? (
+    <AppTag app={tx.app} onRow={onRow} truncate={aligned} />
+  ) : (
+    <TypeTag type={getTypeLabel(tx)} onRow={onRow} truncate={aligned} />
+  )
   return (
-    <span className={`flex min-w-0 items-center gap-2 ${keepWidth ? 'shrink-0' : ''}`}>
-      {tx.app ? <AppTag app={tx.app} onRow={onRow} /> : <TypeTag type={getTypeLabel(tx)} onRow={onRow} />}
+    <span className={`flex min-w-0 items-center gap-2 ${keepWidth ? 'shrink-0' : ''} ${aligned ? 'flex-1' : ''}`}>
+      {aligned ? <span className="flex w-26 min-w-0 shrink-0">{tag}</span> : tag}
       <SummaryText tx={tx} />
     </span>
   )

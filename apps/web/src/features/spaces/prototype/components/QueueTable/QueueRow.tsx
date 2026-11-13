@@ -68,6 +68,7 @@ export type QueueRowProps = {
   // Grouped by Safe: rows with no counterparty span To.
   safeTable?: boolean
   partyTags?: boolean
+  aligned?: boolean
   compact?: boolean
   // M1 has no drawer: a row click does nothing, and Remind, the Safenet mark and Awaiting parent wait for M2
   milestone?: Milestone
@@ -99,9 +100,12 @@ export function QueueRow({
   onSpeedUp,
   safeTable = false,
   partyTags = false,
+  aligned: alignedOption = false,
   compact = false,
   milestone = 2,
 }: QueueRowProps) {
+  // Fixed widths only where the Transaction cell is one line.
+  const aligned = alignedOption && !compact
   const m1 = milestone === 1
   const [hovered, setHovered] = useState(false)
   const noteIcon = useRef<SVGSVGElement>(null)
@@ -260,6 +264,14 @@ export function QueueRow({
       {conflicts.length > 0 && groupSize < 2 && <Badge variant="warning">Conflicting</Badge>}
     </div>
   )
+  const proposedContent = (
+    <Tooltip delay={150}>
+      <TooltipTrigger aria-label={`Proposed ${tx.age}`} onClick={(event) => event.stopPropagation()}>
+        {tx.age}
+      </TooltipTrigger>
+      <TooltipContent>{formatDateTime(getCreatedAt(tx))}</TooltipContent>
+    </Tooltip>
+  )
   const actionContent = (
     <RowActions
       tx={tx}
@@ -314,13 +326,22 @@ export function QueueRow({
         <div className={compact ? 'flex min-w-0 flex-col gap-1.5 py-1' : 'flex min-h-10 min-w-0 items-center gap-1.5'}>
           <div className="flex min-w-0 items-center gap-1.5">
             <button
-              className={`flex min-w-0 max-w-full items-center gap-3 text-left text-sm font-normal focus-visible:outline-none focus-visible:underline ${willBeReplaced ? 'text-muted-foreground line-through' : ''}`}
+              className={`flex min-w-0 max-w-full items-center gap-3 text-left ${aligned ? 'flex-1' : ''} text-sm font-normal focus-visible:outline-none focus-visible:underline ${willBeReplaced ? 'text-muted-foreground line-through' : ''}`}
               onClick={openDetails}
               aria-label={`Open ${getTransactionLabel(tx)}`}
             >
-              <span className="flex min-w-0 items-center gap-2">
+              <span className={`flex min-w-0 items-center gap-2 ${aligned ? 'w-full' : ''}`}>
                 {partyTags && (
-                  <span className={compact ? 'flex max-w-28 min-w-0 shrink' : 'flex shrink-0'}>
+                  // Aligned: as wide as a Safe tag with a short address, so longer names truncate.
+                  <span
+                    className={
+                      compact
+                        ? 'flex max-w-28 min-w-0 shrink'
+                        : aligned
+                          ? 'flex w-36 min-w-0 shrink-0'
+                          : 'flex shrink-0'
+                    }
+                  >
                     <CopyableParty
                       name={account.safeName ?? account.name}
                       address={account.iconAddress}
@@ -329,7 +350,12 @@ export function QueueRow({
                     />
                   </span>
                 )}
-                <TransactionHead tx={tx} onRow keepWidth={!compact && !columns.includes('To')} />
+                <TransactionHead
+                  tx={tx}
+                  onRow
+                  aligned={aligned}
+                  keepWidth={!compact && !aligned && !columns.includes('To')}
+                />
                 {!compact && !columns.includes('To') && <Counterparty tx={tx} />}
               </span>
             </button>
@@ -374,7 +400,17 @@ export function QueueRow({
     ),
     To: (
       <TableCell className="py-2">
-        <Counterparty tx={tx} inColumn tag={partyTags} />
+        {aligned ? (
+          // Fixed width for the other party, so the age lines up on every row, with or without one.
+          <span className="flex items-center gap-3">
+            <span className="flex w-40 min-w-0 shrink-0">
+              <Counterparty tx={tx} inColumn tag={partyTags} />
+            </span>
+            <span className="text-sm text-muted-foreground">{proposedContent}</span>
+          </span>
+        ) : (
+          <Counterparty tx={tx} inColumn tag={partyTags} />
+        )}
       </TableCell>
     ),
     Signatures: <TableCell className="py-1">{signaturesContent}</TableCell>,
@@ -405,16 +441,7 @@ export function QueueRow({
         <TableCell>{noteButton}</TableCell>
       ),
     Status: <TableCell>{statusContent}</TableCell>,
-    Proposed: (
-      <TableCell className="text-sm">
-        <Tooltip delay={150}>
-          <TooltipTrigger aria-label={`Proposed ${tx.age}`} onClick={(event) => event.stopPropagation()}>
-            {tx.age}
-          </TooltipTrigger>
-          <TooltipContent>{formatDateTime(getCreatedAt(tx))}</TooltipContent>
-        </Tooltip>
-      </TableCell>
-    ),
+    Proposed: <TableCell className="text-sm">{proposedContent}</TableCell>,
     Action: compact ? null : (
       <TableCell className="sticky right-0 z-10 bg-card group-data-[overflow]/queue:shadow-[-12px_0_12px_-12px_rgba(0,0,0,0.25)]">
         {actionContent}

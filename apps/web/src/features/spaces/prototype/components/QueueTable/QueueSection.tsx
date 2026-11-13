@@ -65,6 +65,8 @@ export type QueueSectionProps = {
   safeTable?: boolean
   // The Safe and the other party read as tags in the transaction line.
   partyTags?: boolean
+  // Option: the Safe, type and summary get fixed widths, so they line up from row to row.
+  aligned?: boolean
   // Options D and E on a phone: Nonce, a two-line Transaction and Action, so nothing scrolls sideways.
   compact?: boolean
 }
@@ -343,6 +345,7 @@ export function QueueSectionRows({
   onSpeedUp,
   safeTable,
   partyTags,
+  aligned,
   compact,
   milestone,
 }: QueueSectionRowsProps) {
@@ -385,6 +388,7 @@ export function QueueSectionRows({
           onMenuAction={onMenuAction}
           safeTable={safeTable}
           partyTags={partyTags}
+          aligned={aligned}
           compact={compact}
           milestone={milestone}
         />
