@@ -9,10 +9,18 @@ import AddressBookInput from '@/components/common/AddressBookInput'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
 import useChainId from '@/hooks/useChainId'
 import { getResetTimeOptions } from '../../constants'
-import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
-import TokenAmountInput from '@/components/common/TokenAmountInput'
+import NumberField from '@/components/common/NumberField'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
+import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
+import { getLocalDecimalSeparator } from '@safe-global/utils/utils/formatNumber'
+import {
+  LIMIT_AMOUNT_LABEL,
+  LIMIT_AMOUNT_PLACEHOLDER,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+import TokenSelector from '../TokenSelector'
+import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
+import { findTokenOption, tokenOptionLabel } from '../../services/tokenOptions'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../types'
 import useIsSpendingLimitSupported from '../../hooks/useIsSpendingLimitSupported'
@@ -22,7 +30,7 @@ import { validateSpendingLimitAmount } from '../../services/spendingLimitValidat
 const CreateSpendingLimit = () => {
   const chainId = useChainId()
   const isSupported = useIsSpendingLimitSupported()
-  const { balances } = useVisibleBalances()
+  const { options } = useSpendingLimitTokenOptions()
   const { onNext, data } = useContext<TxFlowContextType<NewSpendingLimitFlowProps>>(TxFlowContext)
 
   const resetTimeOptions = useMemo(() => getResetTimeOptions(chainId), [chainId])
@@ -32,18 +40,17 @@ const CreateSpendingLimit = () => {
     mode: 'onChange',
   })
 
-  const { handleSubmit, watch, control, formState, getValues, trigger } = formMethods
+  const { handleSubmit, watch, control, formState, getValues, trigger, register } = formMethods
 
   const tokenAddress = watch(SpendingLimitFields.tokenAddress)
   const beneficiary = watch(SpendingLimitFields.beneficiary)
 
   // Copilot address-poisoning check for the beneficiary
   useSafeShieldForAddressPoisoning([beneficiary])
-  const selectedToken = tokenAddress
-    ? balances.items.find((item) => item.tokenInfo.address === tokenAddress)
-    : undefined
+  const selectedToken = findTokenOption(options, tokenAddress)
 
-  const tokenDecimals = selectedToken?.tokenInfo.decimals
+  const tokenDecimals = selectedToken?.decimals
+  const amountError = formState.errors[SpendingLimitFields.amount]
 
   const validateSpendingLimit = useCallback(
     (value: string) =>
@@ -77,7 +84,43 @@ const CreateSpendingLimit = () => {
             />
           </div>
 
-          <TokenAmountInput balances={balances.items} selectedToken={selectedToken} validate={validateSpendingLimit} />
+          <div className="flex items-start gap-4">
+            <div className="flex min-w-0 flex-1 flex-col">
+              <Controller
+                control={control}
+                name={SpendingLimitFields.tokenAddress}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <TokenSelector
+                    value={field.value || undefined}
+                    onChange={(next) => field.onChange(next ?? '')}
+                    name={field.name}
+                    helperText={
+                      selectedToken?.balance !== undefined
+                        ? `${formatVisualAmount(selectedToken.balance, selectedToken.decimals)} ${tokenOptionLabel(selectedToken)}`
+                        : undefined
+                    }
+                  />
+                )}
+              />
+            </div>
+            <div className="flex min-w-0 flex-1 flex-col">
+              <NumberField
+                label={LIMIT_AMOUNT_LABEL}
+                placeholder={LIMIT_AMOUNT_PLACEHOLDER}
+                fullWidth
+                error={!!amountError}
+                helperText={amountError?.message}
+                data-testid="token-amount-field"
+                {...register(SpendingLimitFields.amount, {
+                  required: true,
+                  setValueAs: (value: unknown) =>
+                    typeof value === 'string' ? value.replace(getLocalDecimalSeparator(), '.') : value,
+                  validate: validateSpendingLimit,
+                })}
+              />
+            </div>
+          </div>
 
           <Typography variant="h4" className="mt-6 font-bold">
             Reset Timer
