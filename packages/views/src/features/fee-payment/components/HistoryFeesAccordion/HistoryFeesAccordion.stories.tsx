@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { userEvent, within } from 'storybook/test'
 import HistoryFeesAccordion from './index'
 import type { HistoryFeesData } from '@/features/fee-payment/hooks/useHistoryFeesBreakdown'
 
@@ -53,6 +54,61 @@ export const NonNativeGasToken: Story = {
       paidFrom: 'safe',
     },
   },
+}
+
+const sponsoredData: HistoryFeesData = {
+  totalFee: { amount: '0.00001', currency: 'ETH', fiatAmount: '$0.03' },
+  executionFee: { label: 'Execution fee', isFree: true },
+  gasFee: { label: 'Max gas fee', amount: '0.00001', currency: 'ETH', fiatAmount: '$0.03', isFree: true },
+  paidFrom: 'sponsored',
+}
+
+export const PaidByAnotherWallet: Story = {
+  args: {
+    data: { ...sponsoredData, gasFee: { ...sponsoredData.gasFee, isFree: false }, paidFrom: 'other' },
+  },
+}
+
+export const Sponsored: Story = {
+  args: { data: sponsoredData },
+}
+
+export const SponsoredExpanded: Story = {
+  args: { data: sponsoredData },
+  play: async ({ canvasElement }) => {
+    await userEvent.click(within(canvasElement).getByTestId('history-fees-summary'))
+  },
+}
+
+export const AllPayers: Story = {
+  args: { data: defaultData },
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <HistoryFeesAccordion
+        data={{
+          totalFee: { amount: '3.50', currency: 'USDC', fiatAmount: '$3.50' },
+          executionFee: { label: 'Execution fee', isFree: true },
+          gasFee: { label: 'Max gas fee', amount: '3.50', currency: 'USDC', fiatAmount: '$3.50' },
+          paidFrom: 'safe',
+        }}
+      />
+      <HistoryFeesAccordion
+        data={{
+          ...sponsoredData,
+          gasFee: { ...sponsoredData.gasFee, isFree: false },
+          paidFrom: 'signer',
+        }}
+      />
+      <HistoryFeesAccordion
+        data={{
+          ...sponsoredData,
+          gasFee: { ...sponsoredData.gasFee, isFree: false },
+          paidFrom: 'other',
+        }}
+      />
+      <HistoryFeesAccordion data={sponsoredData} />
+    </div>
+  ),
 }
 
 export const NoFiat: Story = {

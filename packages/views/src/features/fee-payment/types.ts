@@ -14,5 +14,7 @@ export type HistoryFeesData = {
   totalFee: { amount: string; currency: string; fiatAmount?: string }
   executionFee: FeeRow
   gasFee: FeeRow
-  paidFrom: 'safe' | 'signer'
+  paidFrom: FeePaidFrom
 }
+
+export type FeePaidFrom = 'safe' | 'signer' | 'other' | 'sponsored'

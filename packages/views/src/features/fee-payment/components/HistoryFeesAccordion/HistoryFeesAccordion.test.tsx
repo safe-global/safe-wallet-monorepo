@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { transactionDetailsBuilder } from '@/tests/builders/transactionDetails'
 import HistoryFeesAccordion from './index'
@@ -90,14 +90,30 @@ describe('HistoryFeesAccordion', () => {
     expect(screen.queryByText('$15.12')).not.toBeInTheDocument()
   })
 
-  it('shows "Paid from the signer" subtitle when paidFrom is signer', () => {
-    render(<HistoryFeesAccordion data={{ ...defaultData, paidFrom: 'signer' }} />)
-    expect(screen.getByText('Paid from the signer')).toBeInTheDocument()
+  it.each([
+    ['signer', 'Paid from signer wallet'],
+    ['safe', 'Paid from Safe account'],
+    ['other', 'Paid by another wallet'],
+    ['sponsored', 'Sponsored'],
+  ] as const)('labels paidFrom %s as "%s"', (paidFrom, label) => {
+    render(<HistoryFeesAccordion data={{ ...defaultData, paidFrom }} />)
+    expect(screen.getByText(label)).toBeInTheDocument()
   })
 
-  it('shows "Paid from the Safe" subtitle when paidFrom is safe', () => {
-    render(<HistoryFeesAccordion data={{ ...defaultData, paidFrom: 'safe' }} />)
-    expect(screen.getByText('Paid from the Safe')).toBeInTheDocument()
+  it('shows the full cost when another wallet paid', () => {
+    render(<HistoryFeesAccordion data={{ ...defaultData, paidFrom: 'other' }} />)
+
+    const summary = screen.getByTestId('history-fees-summary')
+    expect(within(summary).getByText('0.005 ETH').tagName).not.toBe('DEL')
+    expect(within(summary).getByText('$15.12')).toBeInTheDocument()
+  })
+
+  it('strikes through the network cost of a sponsored fee and hides its fiat value', () => {
+    render(<HistoryFeesAccordion data={{ ...defaultData, paidFrom: 'sponsored' }} />)
+
+    const summary = screen.getByTestId('history-fees-summary')
+    expect(within(summary).getByText('0.005 ETH').tagName).toBe('DEL')
+    expect(within(summary).queryByText('$15.12')).not.toBeInTheDocument()
   })
 
   it('renders non-free execution fee without FREE badge', () => {
