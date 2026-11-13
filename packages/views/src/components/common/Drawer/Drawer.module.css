@@ -1,0 +1,42 @@
+.resizeHandle {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 12px;
+  cursor: ew-resize;
+  touch-action: none;
+  z-index: 1;
+}
+
+.resizeHandle::after {
+  content: '';
+  position: absolute;
+  inset-block-start: calc(50% - 24px);
+  inset-inline-start: 4px;
+  height: 48px;
+  width: 4px;
+  border-radius: var(--radius-lg);
+  background: var(--color-border);
+}
+
+.resizeHandle:hover::after,
+.resizeHandle:focus-visible::after {
+  background: var(--color-muted-foreground);
+}
+
+.fullScreen {
+  inset: 0;
+  /* Sheet's side-scoped sizing utilities outrank a single module class. */
+  width: 100vw !important;
+  max-width: 100vw !important;
+  height: 100dvh !important;
+  border-radius: 0;
+}
+
+.mobileFullScreen {
+  padding-block-start: env(safe-area-inset-top);
+}
+
+.mobileFullScreen > button {
+  top: calc(var(--spacing) * 6 + env(safe-area-inset-top));
+}
