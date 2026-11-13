@@ -19,6 +19,7 @@ interface AnalysisIssuesDisplayProps {
 export const AnalysisIssuesDisplay = ({ result, issueBackgroundColor }: AnalysisIssuesDisplayProps) => {
   const currentChain = useCurrentChain()
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
   if (!('issues' in result)) {
     return null
@@ -61,7 +62,15 @@ export const AnalysisIssuesDisplay = ({ result, issueBackgroundColor }: Analysis
               {issue.address && (
                 <div className="p-2">
                   <div className="leading-5" onClick={() => handleCopyToClipboard(issue.address!, globalIndex)}>
-                    <Tooltip>
+                    <Tooltip
+                      open={hoveredIndex === globalIndex || copiedIndex === globalIndex}
+                      onOpenChange={(open) =>
+                        setHoveredIndex((current) => {
+                          if (open) return globalIndex
+                          return current === globalIndex ? null : current
+                        })
+                      }
+                    >
                       <TooltipTrigger render={<span className="inline-flex" />}>
                         <Typography
                           variant="paragraph-mini"

@@ -1,10 +1,11 @@
-import { type ComponentProps, type ReactElement, type ReactNode, useState, useCallback, useRef, useEffect } from 'react'
+import { type ComponentProps, type ReactElement, type ReactNode, useState, useCallback } from 'react'
 import { type LucideIcon, Plus, Check, PenLine, Clock, CircleAlert } from 'lucide-react'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { cn } from '@safe-global/views/utils/cn'
+import useCopyToClipboard from '@/hooks/useCopyToClipboard'
 
 import css from './styles.module.css'
 
@@ -30,28 +31,7 @@ const auditDateFormatter = new Intl.DateTimeFormat(undefined, {
 
 export const formatAuditDateTime = (ts: number): string => auditDateFormatter.format(new Date(ts))
 
-const COPIED_TOOLTIP_MS = 750
-
-export const useCopyToClipboard = (text?: string | null): [boolean, () => void] => {
-  const [copied, setCopied] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-
-  useEffect(() => () => clearTimeout(timerRef.current), [])
-
-  const handleCopy = useCallback(() => {
-    if (!text) return
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        setCopied(true)
-        clearTimeout(timerRef.current)
-        timerRef.current = setTimeout(() => setCopied(false), COPIED_TOOLTIP_MS)
-      })
-      .catch(() => {})
-  }, [text])
-
-  return [copied, handleCopy]
-}
+export const COPIED_TOOLTIP_MS = 750
 
 /**
  * Wraps a header and its rows, and is the container their breakpoint resolves against — so the log
@@ -100,7 +80,11 @@ export const AuditRow = ({
   iconColor,
 }: AuditRowProps): ReactElement => {
   const displayText = address ? name || shortenAddress(address) : undefined
-  const [copied, handleCopy] = useCopyToClipboard(address)
+  const { copied, copy } = useCopyToClipboard(COPIED_TOOLTIP_MS)
+  const [tooltipOpen, setTooltipOpen] = useState(false)
+  const handleCopy = useCallback(() => {
+    if (address) copy(address)
+  }, [address, copy])
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -138,7 +122,7 @@ export const AuditRow = ({
       {(showActor || actor || showDash) && (
         <div className={css.actorRow}>
           {showActor ? (
-            <Tooltip>
+            <Tooltip open={tooltipOpen || copied} onOpenChange={setTooltipOpen}>
               <TooltipTrigger
                 render={
                   <div
