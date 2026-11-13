@@ -1,0 +1,525 @@
+import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react'
+import { StickyNote, TriangleAlert, UserPen } from 'lucide-react'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { TableRow, TableCell } from '@safe-global/views/components/ui/table'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
+import { HelpCenterArticle } from '@safe-global/utils/config/constants'
+import { formatDateTime } from '@safe-global/utils/utils/date'
+import {
+  getAccount,
+  getConflicts,
+  getCreatedAt,
+  getParentApproval,
+  getSignatureCount,
+  getSignerSummary,
+  getRowState,
+  getGaugeTone,
+  getStepsStatus,
+  getTransactionLabel,
+  getWarnings,
+  WARNING_LABELS,
+} from '../../services/model'
+import type { Persona, Proposal, Milestone } from '../../types'
+import { SignatureGauge } from './SignatureGauge'
+import { getRiskFlags, RiskFlagBadge } from '../RiskFlag'
+import { NonceLabel, NonceMark } from './NonceCell'
+import { SignerList } from './SignerList'
+import { getStatusHint, type MenuAction } from '../../services/actions'
+import type { PreviewAction } from '../../services/queue'
+import { Counterparty, hasCounterparty, TransactionHead } from './TransactionLine'
+import Identicon from '@safe-global/views/components/common/Identicon'
+import { CopyableParty } from '../CopyableParty'
+import { SafenetMark } from '../SafenetMark'
+import { ExecutionChip, LockedChip } from './ExecutionStatus'
+import { getLockingTx, type Executions } from '../../services/execution'
+import { RowActions } from './RowActions'
+import { ChainIcon, HINT_CLASS, HintContent, StatusChip, StepsStatusChip } from '../shared'
+
+export type QueueRowProps = {
+  tx: Proposal
+  sectionItems: Proposal[]
+  items: Proposal[]
+  persona: Persona
+  // Extra-wide screens show the note text, not only the icon.
+  showNoteText?: boolean
+  isWide: boolean
+  columns: string[]
+  selected: boolean
+  cursor: boolean
+  highlighted: boolean
+  replaceHover: string | null
+  onReplaceHover: (id: string | null) => void
+  onReview: (tx: Proposal) => void
+  // After you sign, the main action reminds the missing signers.
+  remindedIds?: string[]
+  onRemind?: (tx: Proposal) => void
+  // A blocked row goes to the earlier transaction that blocks it.
+  onGoTo?: (tx: Proposal) => void
+  // Sign and Execute start a flow. Menu items run immediately.
+  onStartFlow?: (tx: Proposal, flow: PreviewAction) => void
+  onMenuAction?: (tx: Proposal, action: MenuAction) => void
+  // The hovered conflict group, as `account:nonce`.
+  conflictHover?: string | null
+  onConflictHover?: (key: string | null) => void
+  executions?: Executions
+  now?: number
+  onSpeedUp?: (id: string) => void
+  // Grouped by Safe: rows with no counterparty span To.
+  safeTable?: boolean
+  partyTags?: boolean
+  aligned?: boolean
+  compact?: boolean
+  // M1 has no drawer: a row click does nothing, and Remind, the Safenet mark and Awaiting parent wait for M2
+  milestone?: Milestone
+}
+
+export function QueueRow({
+  tx,
+  sectionItems,
+  items,
+  persona,
+  showNoteText,
+  isWide,
+  columns,
+  selected,
+  cursor,
+  highlighted,
+  replaceHover,
+  onReplaceHover,
+  onReview,
+  remindedIds = [],
+  onRemind,
+  onGoTo,
+  onStartFlow,
+  onMenuAction,
+  conflictHover,
+  onConflictHover,
+  executions = {},
+  now = Date.now(),
+  onSpeedUp,
+  safeTable = false,
+  partyTags = false,
+  aligned: alignedOption = false,
+  compact = false,
+  milestone = 2,
+}: QueueRowProps) {
+  // Fixed widths only where the Transaction cell is one line.
+  const aligned = alignedOption && !compact
+  const m1 = milestone === 1
+  const [hovered, setHovered] = useState(false)
+  const noteIcon = useRef<SVGSVGElement>(null)
+  // The drawer covers the row, so mouseleave does not fire. mousemove resets the hover.
+  useEffect(() => setHovered(false), [selected])
+  const conflicts = getConflicts(tx, items)
+  const execution = executions[tx.id]
+  const lockedBy = execution ? undefined : getLockingTx(tx, items, executions)
+  const sameNonce = (other: Proposal) => other.account === tx.account && other.nonce === tx.nonce
+  const groupSize = sectionItems.filter(sameNonce).length
+  const optionIndex = sectionItems.filter(sameNonce).indexOf(tx) + 1
+  const isLastOption = optionIndex === groupSize
+  const startsGroup = groupSize > 1 && sectionItems.find(sameNonce) === tx
+  const willBeReplaced = !!replaceHover && conflicts.some((other) => other.id === replaceHover)
+  const account = getAccount(tx)
+  const signatureCount = getSignatureCount(tx)
+  const parentApproval = m1 ? undefined : getParentApproval(tx, items)
+  const warnings = getWarnings(tx)
+  const statusHint = getStatusHint(tx, items, persona)
+  const columnCount = columns.length
+  // Grouped by Safe: with no other party, the action runs into the To column instead of truncating.
+  const spanTo = safeTable && columns.includes('To') && !hasCounterparty(tx)
+  // M1: only the action button opens a transaction. The row and its title do nothing.
+  const openDetails = m1 ? () => undefined : () => onReview(tx)
+  const review = (event: { stopPropagation: () => void }) => {
+    event.stopPropagation()
+    openDetails()
+  }
+
+  const warningMarker = warnings.length > 0 && (
+    <Tooltip delay={150}>
+      <TooltipTrigger
+        aria-label={`Warnings: ${warnings.map((warning) => WARNING_LABELS[warning]).join(', ')}`}
+        className="flex shrink-0 items-center text-warning-strong"
+        onClick={review}
+      >
+        <TriangleAlert className="size-4" strokeWidth={ICON_STROKE} aria-hidden="true" />
+      </TooltipTrigger>
+      <TooltipContent>
+        {warnings.map((warning) => (
+          <p key={warning}>{WARNING_LABELS[warning]}</p>
+        ))}
+      </TooltipContent>
+    </Tooltip>
+  )
+  const noteDetails = tx.note && (
+    <>
+      <p className="font-medium">Off-chain note</p>
+      <p className="mt-1 leading-relaxed">{tx.note.text}</p>
+      <p className="mt-1 text-background/70">
+        {tx.note.author} · {tx.note.date}
+      </p>
+    </>
+  )
+  const noteButton = tx.note && (
+    <Tooltip delay={150}>
+      <TooltipTrigger
+        aria-label={`Note for ${getTransactionLabel(tx)}`}
+        className="flex shrink-0 items-center text-muted-foreground hover:text-foreground"
+        onClick={review}
+      >
+        <StickyNote className="size-4" strokeWidth={ICON_STROKE} aria-hidden="true" />
+      </TooltipTrigger>
+      <TooltipContent className="max-w-sm whitespace-normal">{noteDetails}</TooltipContent>
+    </Tooltip>
+  )
+
+  // Aligned: the everyday status is in the gauge, so only exceptions show here.
+  const plainStatus = aligned && !willBeReplaced && !parentApproval
+  const statusContent = (
+    <div className="flex flex-wrap items-center gap-1.5">
+      {execution ? (
+        <ExecutionChip execution={execution} now={now} />
+      ) : lockedBy ? (
+        <LockedChip by={lockedBy} />
+      ) : plainStatus ? null : (
+        <Tooltip delay={150}>
+          <TooltipTrigger
+            render={<span />}
+            aria-label={
+              parentApproval
+                ? `Awaiting parent signature. ${getAccount(parentApproval).name} #${parentApproval.nonce}`
+                : `${partyTags ? getRowState(tx, persona).label : getStepsStatus(tx, persona).label}. ${statusHint}`
+            }
+            onClick={(event) => event.stopPropagation()}
+          >
+            {willBeReplaced ? (
+              <StatusChip tone="secondary">Would be replaced</StatusChip>
+            ) : parentApproval ? (
+              <StatusChip tone="warning">Awaiting parent</StatusChip>
+            ) : partyTags ? (
+              <StatusChip tone={getRowState(tx, persona).tone}>{getRowState(tx, persona).label}</StatusChip>
+            ) : (
+              <StepsStatusChip tx={tx} persona={persona} />
+            )}
+          </TooltipTrigger>
+          <TooltipContent className={HINT_CLASS}>
+            {willBeReplaced ? (
+              'Replaced if the option you are pointing at executes.'
+            ) : parentApproval ? (
+              <HintContent
+                title="Awaiting parent signature"
+                body={`${getAccount(parentApproval).name} signs this through its own transaction #${parentApproval.nonce}. The signature counts once ${getAccount(parentApproval).name} executes it.`}
+              />
+            ) : (
+              statusHint
+            )}
+          </TooltipContent>
+        </Tooltip>
+      )}
+      {getRiskFlags(tx)
+        .filter((flag) => flag.key === 'untrusted')
+        .map((flag) => (
+          <RiskFlagBadge key={flag.key} flag={flag} />
+        ))}
+      {/* Grouped conflicts carry the badge on their group header instead. */}
+      {conflicts.length > 0 && groupSize < 2 && <Badge variant="warning">Conflicting</Badge>}
+    </div>
+  )
+  const rowState = getRowState(tx, persona)
+  // Aligned: the status moves into the gauge.
+  const gaugeTone = aligned ? getGaugeTone(tx, persona) : undefined
+  // Production shows a Proposal chip here. We keep the count and mark who created it instead.
+  const proposerMark = signatureCount === 0 && (
+    <Tooltip delay={150}>
+      <TooltipTrigger
+        render={<span className="flex shrink-0 text-muted-foreground" />}
+        aria-label="Created by a proposer"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <UserPen className="size-4" strokeWidth={ICON_STROKE} aria-hidden="true" />
+      </TooltipTrigger>
+      <TooltipContent className={HINT_CLASS}>
+        <HintContent
+          title="Created by a proposer"
+          body={`No owner has signed yet, ${account.threshold} needed. Sign or reject it to proceed.`}
+        />
+      </TooltipContent>
+    </Tooltip>
+  )
+  const signaturesContent = (
+    <span className="flex items-center gap-2">
+      <Tooltip delay={150}>
+        <TooltipTrigger
+          aria-label={`${aligned ? `${rowState.label}. ` : ''}${signatureCount} of ${account.threshold} signatures, ${getSignerSummary(tx, persona)}`}
+          className="flex text-sm tabular-nums"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <span className="flex items-center gap-1.5">
+            <SignatureGauge count={signatureCount} threshold={account.threshold} tone={gaugeTone} />
+            {/* Fixed width, up to 10/10, so the Safenet and proposer icons line up whatever the count */}
+            <span className="w-[5ch] text-left">
+              {signatureCount}/{account.threshold}
+            </span>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent className={HINT_CLASS}>
+          {aligned && (
+            <span className="mb-2 block border-b border-background/15 pb-2">
+              <HintContent title={rowState.label} body={statusHint} />
+            </span>
+          )}
+          <SignerList tx={tx} persona={persona} />
+        </TooltipContent>
+      </Tooltip>
+      {!aligned && proposerMark}
+      {!compact && !m1 && <SafenetMark tx={tx} />}
+      {/* Aligned: only states the gauge can't show keep a chip, such as executing or locked. */}
+      {aligned && statusContent}
+    </span>
+  )
+  const proposedContent = (
+    <Tooltip delay={150}>
+      <TooltipTrigger aria-label={`Proposed ${tx.age}`} onClick={(event) => event.stopPropagation()}>
+        {tx.age}
+      </TooltipTrigger>
+      <TooltipContent>{formatDateTime(getCreatedAt(tx))}</TooltipContent>
+    </Tooltip>
+  )
+  const actionContent = (
+    <RowActions
+      tx={tx}
+      items={items}
+      persona={persona}
+      milestone={milestone}
+      remindedIds={remindedIds}
+      executions={executions}
+      now={now}
+      hovered={hovered}
+      onReplaceHover={onReplaceHover}
+      onReview={onReview}
+      onGoTo={onGoTo}
+      onRemind={onRemind}
+      onStartFlow={onStartFlow}
+      onMenuAction={onMenuAction}
+      onSpeedUp={onSpeedUp}
+      blockedLabel={aligned}
+    />
+  )
+  const cells: Record<string, ReactNode> = {
+    Nonce: (
+      <TableCell className="relative py-2 max-md:sticky max-md:left-0 max-md:z-10 max-md:border-l-card! max-md:bg-card">
+        {groupSize > 1 ? (
+          // Conflict options show the nonce once, in the group sub-header.
+          <span
+            aria-label={`Option ${optionIndex} of ${groupSize} at nonce ${tx.nonce}`}
+            role="img"
+            className="block h-6"
+          >
+            <span
+              aria-hidden="true"
+              className={`absolute left-1/2 w-3 border-l-[1.5px] border-[var(--warning-accent)] ${isLastOption ? 'top-[-30px] h-[calc(50%+30px)] rounded-bl-md border-b-[1.5px]' : optionIndex === 1 ? 'top-[-22px] bottom-[-8px]' : 'top-[-30px] bottom-[-8px]'}`}
+            />
+            {!isLastOption && (
+              <span
+                aria-hidden="true"
+                className="absolute top-1/2 left-1/2 w-3 border-b-[1.5px] border-[var(--warning-accent)]"
+              />
+            )}
+          </span>
+        ) : (
+          // Centred in the column, under the Safe chevron and the "Nonce" title.
+          <span className="flex justify-center">
+            <NonceLabel tx={tx} persona={persona} competing={conflicts.length} />
+          </span>
+        )}
+      </TableCell>
+    ),
+    Transaction: (
+      <TableCell className="py-2" colSpan={compact || spanTo ? 2 : undefined}>
+        {/* min-h-10 matches the Policies table, so rows are the same height across Spaces. */}
+        <div className={compact ? 'flex min-w-0 flex-col gap-1.5 py-1' : 'flex min-h-10 min-w-0 items-center gap-1.5'}>
+          <div className="flex min-w-0 items-center gap-1.5">
+            <button
+              className={`flex min-w-0 max-w-full items-center gap-3 text-left ${aligned ? 'flex-1' : ''} text-sm font-normal focus-visible:outline-none focus-visible:underline ${willBeReplaced ? 'text-muted-foreground line-through' : ''}`}
+              onClick={openDetails}
+              aria-label={`Open ${getTransactionLabel(tx)}`}
+            >
+              <span className={`flex min-w-0 items-center gap-2 ${aligned ? 'w-full' : ''}`}>
+                {partyTags && (
+                  // Aligned: as wide as a Safe tag with a short address, so longer names truncate.
+                  <span
+                    className={
+                      compact
+                        ? 'flex max-w-28 min-w-0 shrink'
+                        : aligned
+                          ? 'flex w-36 min-w-0 shrink-0'
+                          : 'flex shrink-0'
+                    }
+                  >
+                    <CopyableParty
+                      name={account.safeName ?? account.name}
+                      address={account.iconAddress}
+                      network={{ chainId: account.chainId, name: account.network }}
+                      tag
+                    />
+                  </span>
+                )}
+                <TransactionHead
+                  tx={tx}
+                  onRow
+                  aligned={aligned}
+                  keepWidth={!compact && !aligned && !columns.includes('To')}
+                />
+                {!compact && !columns.includes('To') && <Counterparty tx={tx} />}
+              </span>
+            </button>
+            {warningMarker}
+            {!isWide && !compact && noteButton}
+          </div>
+          {compact && (
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              {!partyTags && <ChainIcon chainId={account.chainId} network={account.network} />}
+              {signaturesContent}
+              {/* The badge names a state, so it always shows. Elsewhere it shows only when it adds to the button. */}
+              {(partyTags ||
+                execution ||
+                lockedBy ||
+                parentApproval ||
+                willBeReplaced ||
+                !['Sign', 'Execute'].includes(getStepsStatus(tx, persona).label)) &&
+                statusContent}
+              <span className="ml-auto">{actionContent}</span>
+            </div>
+          )}
+        </div>
+      </TableCell>
+    ),
+    // The Safe column: the network has its own column.
+    Safe: (
+      <TableCell>
+        <span className="flex min-w-0 items-center gap-2 text-sm">
+          {!columns.includes('Network') && <ChainIcon chainId={account.chainId} network={account.network} />}
+          <Identicon address={account.iconAddress} size={20} />
+          <span className="truncate">
+            {!columns.includes('Network') ? account.name : (account.safeName ?? account.name)}
+          </span>
+        </span>
+      </TableCell>
+    ),
+    // Options D and E: the network gets its own column, next to the Safe. Its name is in the logo's tooltip.
+    Network: (
+      <TableCell>
+        <ChainIcon chainId={account.chainId} network={account.network} />
+      </TableCell>
+    ),
+    To: (
+      <TableCell className="py-2">
+        {aligned ? (
+          // Fixed width for the other party, so the age lines up on every row, with or without one.
+          <span className="flex items-center gap-3">
+            <span className="flex w-40 min-w-0 shrink-0">
+              <Counterparty tx={tx} inColumn tag={partyTags} />
+            </span>
+            {/* Fixed width for the age, so the proposer icon lines up too. */}
+            <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <span className="w-16">{proposedContent}</span>
+              {proposerMark}
+            </span>
+          </span>
+        ) : (
+          <Counterparty tx={tx} inColumn tag={partyTags} />
+        )}
+      </TableCell>
+    ),
+    Signatures: <TableCell className="py-1">{signaturesContent}</TableCell>,
+    Note:
+      showNoteText && tx.note ? (
+        <TableCell className="whitespace-normal py-2">
+          <Tooltip delay={150}>
+            <TooltipTrigger
+              aria-label={`Note for ${getTransactionLabel(tx)}: ${tx.note.text}`}
+              className="flex items-start gap-2 text-left"
+              onClick={review}
+            >
+              <StickyNote
+                ref={noteIcon}
+                className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+                strokeWidth={ICON_STROKE}
+                aria-hidden="true"
+              />
+              <span className="line-clamp-2 text-sm">{tx.note.text}</span>
+            </TooltipTrigger>
+            {/* The tooltip points at the icon, not the middle of the note text. */}
+            <TooltipContent anchor={noteIcon} className="max-w-sm whitespace-normal">
+              {noteDetails}
+            </TooltipContent>
+          </Tooltip>
+        </TableCell>
+      ) : (
+        <TableCell>{noteButton}</TableCell>
+      ),
+    Status: <TableCell>{statusContent}</TableCell>,
+    Proposed: <TableCell className="text-sm">{proposedContent}</TableCell>,
+    Action: compact ? null : (
+      <TableCell
+        className={
+          aligned
+            ? undefined
+            : 'sticky right-0 z-10 bg-card group-data-[overflow]/queue:shadow-[-12px_0_12px_-12px_rgba(0,0,0,0.25)]'
+        }
+      >
+        {actionContent}
+      </TableCell>
+    ),
+  }
+
+  return (
+    <Fragment>
+      {startsGroup && (
+        <TableRow data-no-hover data-no-divider>
+          <TableCell className="pt-4 pb-1">
+            <span className="flex justify-center text-xs">
+              <NonceMark tx={tx} persona={persona} group active={conflictHover === `${tx.account}:${tx.nonce}`} />
+            </span>
+          </TableCell>
+          <TableCell colSpan={columnCount - 1} className="pt-4 pb-1">
+            <div
+              className={`flex flex-wrap items-center gap-x-2 gap-y-1 text-xs ${compact ? 'whitespace-normal' : 'w-max max-md:sticky max-md:left-4 max-md:w-[calc(100vw-5rem)] max-md:whitespace-normal'}`}
+            >
+              {/* Orange, so the conflict reads at a glance (Oct 22 review). */}
+              <Badge variant="warning">Conflicting</Badge>
+              <span className="text-muted-foreground">
+                Only 1/{groupSize} transactions can execute. Once it does, the{' '}
+                {groupSize === 2 ? 'other becomes' : 'others become'} invalid.
+              </span>
+              <ExternalLink href={HelpCenterArticle.CONFLICTING_TRANSACTIONS} className="text-muted-foreground" noIcon>
+                Learn more
+              </ExternalLink>
+            </div>
+          </TableCell>
+        </TableRow>
+      )}
+      <TableRow
+        data-state={selected ? 'selected' : undefined}
+        data-cursor={cursor || undefined}
+        data-conflict-group={groupSize > 1 || undefined}
+        onClick={openDetails}
+        onMouseMove={() => setHovered(true)}
+        onMouseEnter={() => groupSize > 1 && onConflictHover?.(`${tx.account}:${tx.nonce}`)}
+        onMouseLeave={() => {
+          setHovered(false)
+          if (groupSize > 1) onConflictHover?.(null)
+        }}
+        data-executing={execution ? true : undefined}
+        className={`group/transaction relative h-14 cursor-pointer data-[executing]:[&>td]:bg-info-subtle/40 data-[state=selected]:bg-transparent [&:has(:focus-visible)>td]:bg-muted [&[data-state=selected]>td]:bg-muted [&[data-state=selected]>td:first-child]:rounded-l-lg [&[data-state=selected]>td:last-child]:rounded-r-lg ${highlighted || cursor ? '[&>td]:bg-muted' : ''}`}
+      >
+        {columns
+          .filter((label) => !(spanTo && label === 'To'))
+          .map((label) => (
+            <Fragment key={label}>{cells[label]}</Fragment>
+          ))}
+      </TableRow>
+    </Fragment>
+  )
+}

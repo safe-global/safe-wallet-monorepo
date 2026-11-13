@@ -1,3 +1,5 @@
+export type TagColor = 'default' | 'slate' | 'clay' | 'rose' | 'orchid' | 'lilac' | 'iris' | 'cobalt' | 'sky' | 'lagoon'
+
 /**
  * Unified color palette type for Safe Wallet theme system.
  * Supports both light and dark modes.
@@ -67,6 +69,8 @@ export interface ColorPalette {
     main: string
     background: string
   }
+  /** Category colours for `Tag`; never green, yellow, red or mint, which mean status. */
+  tag: Record<TagColor, { background: string; text: string }>
   background: {
     default: string
     main: string
