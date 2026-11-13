@@ -1354,7 +1354,9 @@ describe('aligned Transaction column', () => {
 describe('mobile compact view', () => {
   beforeEach(() => localStorage.clear())
   const compactList = () => screen.queryByRole('list', { name: 'Pending transactions' })
-  const STATUS = /^(Ready to execute|Ready to sign|Signing|Blocked by #\d+|Expired)$/
+  const STATES = 'Ready to execute|Ready to sign|Signing|Blocked by #\\d+|Expired'
+  const STATUS = new RegExp(`^(${STATES})$`)
+  const SIGNATURES = new RegExp(`^(${STATES})\\. \\d+ of \\d+ signatures$`)
 
   it('shows only at phone width', () => {
     render(<PendingQueue />)
@@ -1362,7 +1364,7 @@ describe('mobile compact view', () => {
     expect(screen.queryByRole('tablist', { name: 'Phone layout' })).not.toBeInTheDocument()
   })
 
-  it('lists every transaction with its Safe, signatures and status, and no table', () => {
+  it('lists every transaction with its Safe and the status in the signature gauge, and no table', () => {
     const { unmount } = render(<PendingQueue />)
     const rowCount = openRows().length
     unmount()
@@ -1374,17 +1376,17 @@ describe('mobile compact view', () => {
     expect(screen.getByRole('tab', { name: 'Compact' })).toHaveAttribute('aria-selected', 'true')
     for (const row of rows) {
       expect(within(row).getByRole('img', { name: /^on / })).toBeInTheDocument()
-      expect(within(row).getByLabelText(/^\d+ of \d+ signatures$/)).toBeInTheDocument()
+      expect(within(row).getByLabelText(SIGNATURES)).toBeInTheDocument()
     }
+    expect(within(compactList()!).queryAllByText(STATUS, { ignore: 'button, script, style' })).toHaveLength(0)
   })
 
-  it('M2: rows show every status and a chevron that opens the drawer, and the buttons at the right edge', async () => {
+  it('M2: rows show a chevron that opens the drawer, and the buttons at the right edge', async () => {
     jest.mocked(useIsMobile).mockReturnValue(true)
     const { user } = renderWithUserEvent(<PendingQueue />)
     const list = compactList()!
     const scroller = list.parentElement!
     const rows = within(list).getAllByRole('listitem')
-    expect(within(list).getAllByText(STATUS)).toHaveLength(rows.length)
     // Scrolled to the start of a list wider than the screen: chevrons only.
     Object.defineProperty(scroller, 'scrollWidth', { configurable: true, value: 700 })
     Object.defineProperty(scroller, 'clientWidth', { configurable: true, value: 340 })
@@ -1396,21 +1398,23 @@ describe('mobile compact view', () => {
     fireEvent.scroll(scroller)
     expect(within(list).queryAllByRole('button', { name: /^Open / })).toHaveLength(0)
     expect(within(list).getAllByRole('button', { name: /^(Sign|Execute) / }).length).toBeGreaterThan(0)
+    expect(within(list).getAllByRole('button', { name: /^Blocked by #\d+ / }).length).toBeGreaterThan(0)
+    expect(within(list).queryAllByRole('button', { name: /^Go to #/ })).toHaveLength(0)
     scroller.scrollLeft = 0
     fireEvent.scroll(scroller)
     await user.click(within(list).getAllByRole('button', { name: /^Open / })[0])
     expect(await screen.findByRole('dialog')).toBeInTheDocument()
   })
 
-  it("M1: rows keep the table's buttons, one filled, and drop a status the button repeats", () => {
+  it("M1: rows keep the table's buttons, one filled, with a green gauge where you can act", () => {
     jest.mocked(useIsMobile).mockReturnValue(true)
     render(<PendingQueue />, { routerProps: { query: { m: '1' } } })
     const rows = within(compactList()!).getAllByRole('listitem')
     for (const row of rows) {
       expect(within(row).getByRole('button', { name: /^More actions for / })).toBeInTheDocument()
       const main = within(row).queryByRole('button', { name: /^(Sign|Execute) / })
-      if (main)
-        expect(within(row).queryByText(main.textContent === 'Sign' ? 'Ready to sign' : 'Ready to execute')).toBeNull()
+      const gauge = within(row).getByLabelText(SIGNATURES).querySelector('svg')
+      expect(gauge).toHaveClass(main ? 'text-success-strong' : 'text-warning-strong')
     }
     const mains = rows.flatMap((row) => within(row).queryAllByRole('button', { name: /^(Sign|Execute) / }))
     expect(mains.length).toBeGreaterThan(1)

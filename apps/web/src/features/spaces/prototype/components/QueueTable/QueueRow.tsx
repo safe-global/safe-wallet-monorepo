@@ -15,7 +15,7 @@ import {
   getSignatureCount,
   getSignerSummary,
   getRowState,
-  getState,
+  getGaugeTone,
   getStepsStatus,
   getTransactionLabel,
   getWarnings,
@@ -227,10 +227,8 @@ export function QueueRow({
     </div>
   )
   const rowState = getRowState(tx, persona)
-  // Aligned: the status moves into the gauge. Green when you can sign or execute now, even if a block stops
-  // execution. Yellow when you're waiting on others or on another transaction.
-  const canAct = rowState.tone === 'success' || (rowState.label !== 'Expired' && getState(tx, persona).canSign)
-  const gaugeTone = aligned ? (canAct ? 'success' : 'warning') : undefined
+  // Aligned: the status moves into the gauge.
+  const gaugeTone = aligned ? getGaugeTone(tx, persona) : undefined
   // Production shows a Proposal chip here. We keep the count and mark who created it instead.
   const proposerMark = signatureCount === 0 && (
     <Tooltip delay={150}>

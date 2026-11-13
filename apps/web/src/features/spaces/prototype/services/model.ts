@@ -1280,6 +1280,13 @@ export const getRowState = (
   if (status === 'ready') return { label: ROW_STATUS_LABELS.ready, tone: 'success' }
   return { label: ROW_STATUS_LABELS[status], tone: canSign ? 'success' : 'secondary' }
 }
+// The signature gauge in place of the badge: green when you can sign or execute now, even if a block stops
+// execution. Yellow when you're waiting on others or on another transaction.
+export const getGaugeTone = (tx: Proposal, persona: Persona): 'success' | 'warning' => {
+  const { canSign, expired } = getState(tx, persona)
+  if (expired) return 'warning'
+  return canSign || getRowStatus(tx) === 'ready' ? 'success' : 'warning'
+}
 export const getPrimaryStatus = (tx: Proposal, persona: Persona): Filter => {
   const state = getState(tx, persona)
   if (state.ready) return 'ready'

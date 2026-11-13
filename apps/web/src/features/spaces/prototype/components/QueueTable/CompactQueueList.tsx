@@ -7,6 +7,7 @@ import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import {
   getAccount,
   getConflicts,
+  getGaugeTone,
   getRowState,
   getSignatureCount,
   getTransactionLabel,
@@ -17,7 +18,7 @@ import { getLockingTx } from '../../services/execution'
 import { getPrimaryAction } from '../../services/actions'
 import type { Proposal } from '../../types'
 import { RowActions, type RowActionsProps } from './RowActions'
-import { StatusChip, TYPE_ICONS } from '../shared'
+import { TYPE_ICONS } from '../shared'
 import { CopyableParty } from '../CopyableParty'
 import { SignatureGauge } from './SignatureGauge'
 import { ExecutionChip, LockedChip } from './ExecutionStatus'
@@ -63,7 +64,7 @@ function CompactRow({
   atEnd,
   ...props
 }: Omit<CompactQueueListProps, 'rows'> & { tx: Proposal; filled: boolean; atEnd: boolean }) {
-  const { tx, items, persona, remindedIds, executions = {}, now = Date.now(), onReview, milestone = 2 } = props
+  const { tx, items, persona, executions = {}, now = Date.now(), onReview, milestone = 2 } = props
   // M2: the row opens the full-screen drawer, which has the actions. M1 has no drawer, so rows keep their buttons.
   const showActions = milestone === 1
   const account = getAccount(tx)
@@ -75,12 +76,6 @@ function CompactRow({
   const lockedBy = execution ? undefined : getLockingTx(tx, items, executions)
   const conflicting = getConflicts(tx, items).length > 0
   const state = getRowState(tx, persona)
-  const action = getPrimaryAction(tx, items, persona, remindedIds, 'row')
-  // The button already says it: no "Ready to execute" next to Execute, no "Ready to sign" next to Sign.
-  const repeatsButton =
-    showActions &&
-    ((state.label === 'Ready to execute' && action.label === 'Execute') ||
-      (state.label === 'Ready to sign' && action.label === 'Sign'))
 
   return (
     <li
@@ -127,19 +122,15 @@ function CompactRow({
       </span>
       <span
         className="flex items-center gap-1 text-xs tabular-nums text-muted-foreground"
-        aria-label={`${signatureCount} of ${account.threshold} signatures`}
+        aria-label={`${state.label}. ${signatureCount} of ${account.threshold} signatures`}
       >
-        <SignatureGauge count={signatureCount} threshold={account.threshold} />
+        {/* The status as the gauge's colour, as in the aligned table. */}
+        <SignatureGauge count={signatureCount} threshold={account.threshold} tone={getGaugeTone(tx, persona)} />
         {signatureCount}/{account.threshold}
       </span>
       <span className="flex items-center gap-1.5">
-        {execution ? (
-          <ExecutionChip execution={execution} now={now} />
-        ) : lockedBy ? (
-          <LockedChip by={lockedBy} />
-        ) : (
-          !repeatsButton && <StatusChip tone={state.tone}>{state.label}</StatusChip>
-        )}
+        {/* Only states the gauge can't show keep a chip. */}
+        {execution ? <ExecutionChip execution={execution} now={now} /> : lockedBy && <LockedChip by={lockedBy} />}
         {conflicting && (
           <Split className="size-3.5 shrink-0 text-warning-strong" strokeWidth={ICON_STROKE} aria-label="Conflicting" />
         )}
@@ -147,16 +138,21 @@ function CompactRow({
       {/* Pinned to the right edge, so the button or chevron stays in view while the row scrolls. */}
       {showActions ? (
         <span className="sticky right-0 ml-auto flex items-center self-stretch bg-card pr-2 pl-1">
-          <RowActions {...props} fit />
+          <RowActions {...props} fit blockedLabel />
         </span>
       ) : (
-        // Fixed width, so swapping the chevron for the buttons doesn't change how far the rows scroll.
-        <span
-          className={`sticky right-0 ml-auto flex w-28 shrink-0 items-center justify-end self-stretch pr-2 ${atEnd ? 'bg-card' : 'bg-transparent bg-linear-to-r from-transparent via-card via-50% to-card'}`}
-        >
-          <span className="flex rounded-md bg-card pl-1">
+        <>
+          {/* Room at the end of the row for "Blocked by #N", which is wider than the chevron. */}
+          <span className="ml-auto w-16 shrink-0" aria-hidden="true" />
+          {/* Fixed width, so swapping the chevron for the buttons doesn't change how far the rows scroll. */}
+          <span
+            className={`sticky right-0 flex w-28 shrink-0 items-center justify-end self-stretch pr-2 ${atEnd ? 'bg-card' : 'bg-transparent bg-linear-to-r from-transparent via-card via-50% to-card'}`}
+          >
             {atEnd ? (
-              <RowActions {...props} fit />
+              // Grows left over the spacer, outside the layout, so a long label doesn't move the scroll edge.
+              <span className="absolute right-2 flex rounded-md bg-card pl-1">
+                <RowActions {...props} fit blockedLabel />
+              </span>
             ) : (
               // Light grey and 40px tall, so it reads as a button before you scroll to the copy.
               <Button
@@ -172,7 +168,7 @@ function CompactRow({
               </Button>
             )}
           </span>
-        </span>
+        </>
       )}
     </li>
   )
