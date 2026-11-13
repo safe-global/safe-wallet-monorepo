@@ -5,9 +5,7 @@ import type { SpaceQueueFilters } from '../../../store/spaceQueueApi'
 import NewTransactionButton from '../NewTransactionButton'
 import FilterChips from './FilterChips'
 import FilterMenu from './FilterMenu'
-import SafeFilter from './SafeFilter'
 import SearchTransactions from './SearchTransactions'
-import StatusFilter from './StatusFilter'
 
 type TransactionsToolbarProps = {
   spaceId: string
@@ -33,16 +31,6 @@ const TransactionsToolbar = ({
       <div className="flex flex-wrap items-center gap-2">
         <SearchTransactions onSearch={onSearchChange} />
         <QueueGroupByMenu value={groupBy} onChange={onGroupByChange} />
-        <StatusFilter
-          counts={counts}
-          selected={filters.statuses}
-          onChange={(statuses) => onFiltersChange({ ...filters, statuses })}
-        />
-        <SafeFilter
-          counts={counts}
-          selected={filters.safes}
-          onChange={(safes) => onFiltersChange({ ...filters, safes })}
-        />
         <FilterMenu counts={counts} filters={filters} onChange={onFiltersChange} />
         <NewTransactionButton spaceId={spaceId} />
       </div>

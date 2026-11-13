@@ -1,15 +1,8 @@
 import type { ReactElement } from 'react'
-import { ChevronDown, Info } from 'lucide-react'
+import { Info } from 'lucide-react'
 import type { SpaceQueueCounts, SpaceQueueSafe } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { Button } from '@safe-global/views/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@safe-global/views/components/ui/dropdown-menu'
+import { DropdownMenuCheckboxItem, DropdownMenuSeparator } from '@safe-global/views/components/ui/dropdown-menu'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { getSafeOptions, isSafeOptionSelected, toggleSafeOption, type SafeOption } from '../utils'
@@ -39,8 +32,7 @@ const SafeOptionItem = ({
   )
 }
 
-/** The Safe filter's checkboxes, shared by its own menu and the Filter menu. */
-export const SafeOptions = ({ counts, selected, onChange }: SafeOptionsProps): ReactElement => {
+const SafeOptions = ({ counts, selected, onChange }: SafeOptionsProps): ReactElement => {
   const options = getSafeOptions(counts?.safes ?? [])
 
   if (options.length === 0) {
@@ -66,16 +58,4 @@ export const SafeOptions = ({ counts, selected, onChange }: SafeOptionsProps): R
   )
 }
 
-const SafeFilter = (props: SafeOptionsProps): ReactElement => (
-  <DropdownMenu>
-    <DropdownMenuTrigger render={<Button variant="outline" />}>
-      Safe
-      <ChevronDown />
-    </DropdownMenuTrigger>
-    <DropdownMenuContent align="start" className="min-w-64">
-      <SafeOptions {...props} />
-    </DropdownMenuContent>
-  </DropdownMenu>
-)
-
-export default SafeFilter
+export default SafeOptions
