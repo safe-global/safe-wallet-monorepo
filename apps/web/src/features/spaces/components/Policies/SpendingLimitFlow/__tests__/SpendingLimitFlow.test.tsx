@@ -11,24 +11,38 @@ import {
   FLOW_HELP_LABEL,
   FLOW_SUBTITLE,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+import {
+  useAddCustomToken as mockUseAddCustomToken,
+  useCustomTokens as mockUseCustomTokens,
+} from '../CustomTokensProvider'
+import { tokenOptionBuilder } from '../utils/tokenOptions.testData'
 import SpendingLimitFlow from '..'
 
 // A miniature of TxFlow: it shows one step at a time, so the Create step really unmounts when the
 // flow moves on — which is the whole reason state it must keep lives above it.
-jest.mock('@/components/tx-flow/TxFlow', () => ({
-  TxFlow: jest.fn(({ children }: { children: React.ReactNode }) => {
-    // `mock`-prefixed so the hoisted factory may reach it.
-    const [isOnCreateStep, setIsOnCreateStep] = mockUseState(true)
-    return (
-      <div data-testid="tx-flow">
-        {isOnCreateStep ? children : <div data-testid="other-step" />}
-        <button type="button" onClick={() => setIsOnCreateStep((current) => !current)}>
-          change step
-        </button>
-      </div>
-    )
-  }),
-}))
+jest.mock('@/components/tx-flow/TxFlow', () => {
+  const MockOtherStep = () => (
+    <div data-testid="other-step">
+      {mockUseCustomTokens('1')
+        .map((token) => token.symbol)
+        .join(',')}
+    </div>
+  )
+  return {
+    TxFlow: jest.fn(({ children }: { children: React.ReactNode }) => {
+      // `mock`-prefixed so the hoisted factory may reach it.
+      const [isOnCreateStep, setIsOnCreateStep] = mockUseState(true)
+      return (
+        <div data-testid="tx-flow">
+          {isOnCreateStep ? children : <MockOtherStep />}
+          <button type="button" onClick={() => setIsOnCreateStep((current) => !current)}>
+            change step
+          </button>
+        </div>
+      )
+    }),
+  }
+})
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),
@@ -53,14 +67,22 @@ jest.mock('../CreateStep', () => ({
   }: {
     isCalloutDismissed: boolean
     onDismissCallout: () => void
-  }) => (
-    <div data-testid="create-step" data-callout-dismissed={String(isCalloutDismissed)}>
-      <button type="button" onClick={onDismissCallout}>
-        dismiss callout
-      </button>
-    </div>
-  ),
+  }) => {
+    const addToken = mockUseAddCustomToken()
+    return (
+      <div data-testid="create-step" data-callout-dismissed={String(isCalloutDismissed)}>
+        <button type="button" onClick={onDismissCallout}>
+          dismiss callout
+        </button>
+        <button type="button" onClick={() => addToken('1', mockCustomToken)}>
+          pick custom token
+        </button>
+      </div>
+    )
+  },
 }))
+
+const mockCustomToken = tokenOptionBuilder().with({ group: 'custom', symbol: 'NEW' }).build()
 
 const mockTxFlow = TxFlow as jest.MockedFunction<typeof TxFlow>
 
@@ -107,6 +129,15 @@ describe('SpendingLimitFlow', () => {
     await user.click(screen.getByRole('button', { name: 'change step' }))
 
     expect(screen.getByTestId('create-step')).toHaveAttribute('data-callout-dismissed', 'true')
+  })
+
+  it('keeps a token picked by address for the next step', async () => {
+    const { user } = renderWithUserEvent(<SpendingLimitFlow />)
+
+    await user.click(screen.getByRole('button', { name: 'pick custom token' }))
+    await user.click(screen.getByRole('button', { name: 'change step' }))
+
+    expect(screen.getByTestId('other-step')).toHaveTextContent(mockCustomToken.symbol)
   })
 
   it('titles the first step and hides the nonce on it', () => {
