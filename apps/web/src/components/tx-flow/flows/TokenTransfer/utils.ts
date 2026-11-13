@@ -8,6 +8,7 @@ import useHiddenTokens from '@/hooks/useHiddenTokens'
 import { useMemo } from 'react'
 import { useNativeTokenDisplay } from '@/hooks/useNativeTokenDisplay'
 import { TokenType } from '@safe-global/store/gateway/types'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 
 export const useTokenAmount = (selectedToken: Balances['items'][0] | undefined) => {
   const spendingLimit = useSpendingLimit(selectedToken?.tokenInfo)
@@ -28,6 +29,7 @@ export const useVisibleTokens = () => {
   const wallet = useWallet()
   const hiddenTokens = useHiddenTokens()
   const { showNativeInBalances } = useNativeTokenDisplay()
+  const isScoped = !!useSafeScope()
 
   return useMemo(() => {
     if (!balances) {
@@ -40,7 +42,7 @@ export const useVisibleTokens = () => {
       items = items.filter((item) => item.tokenInfo.type !== TokenType.NATIVE_TOKEN)
     }
 
-    if (isOnlySpendingLimitBeneficiary) {
+    if (isOnlySpendingLimitBeneficiary && !isScoped) {
       return items.filter(({ tokenInfo }) => {
         return spendingLimits?.some(({ beneficiary, token }) => {
           return sameAddress(beneficiary, wallet?.address) && sameAddress(tokenInfo.address, token.address)
@@ -49,5 +51,13 @@ export const useVisibleTokens = () => {
     }
 
     return items
-  }, [balances, hiddenTokens, showNativeInBalances, isOnlySpendingLimitBeneficiary, spendingLimits, wallet?.address])
+  }, [
+    balances,
+    hiddenTokens,
+    showNativeInBalances,
+    isOnlySpendingLimitBeneficiary,
+    isScoped,
+    spendingLimits,
+    wallet?.address,
+  ])
 }

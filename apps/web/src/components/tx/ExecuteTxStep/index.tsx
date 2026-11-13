@@ -62,6 +62,13 @@ export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean
 
   const executeLater = () => {
     setTxFlow(undefined)
+    // A flow scoped from a Workspace returns to its Pending list, not to the Safe's own queue
+    if (scope && safeLinkQuery.spaceId) {
+      if (router.pathname !== AppRoutes.spaces.transactions) {
+        router.push({ pathname: AppRoutes.spaces.transactions, query: { spaceId: safeLinkQuery.spaceId } })
+      }
+      return
+    }
     const query = scopedSafeQuery ? { ...safeLinkQuery, safe: scopedSafeQuery } : safeLinkQuery
     router.push({ pathname: AppRoutes.transactions.queue, query })
   }
