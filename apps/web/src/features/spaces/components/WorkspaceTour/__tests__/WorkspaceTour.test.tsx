@@ -6,16 +6,9 @@ import WorkspaceTourSection from '../WorkspaceTourSection'
 import { useWorkspaceTourOpen } from '../hooks/useWorkspaceTourOpen'
 import { getWorkspaceTourSeenKey } from '../hooks/useWorkspaceTourVisit'
 
-const mockIsTourFlagOn = jest.fn()
 const mockIsBelowMd = jest.fn()
 const mockIsSpaceRoute = jest.fn()
 const mockIsActiveMember = jest.fn()
-
-jest.mock('@/hooks/useChains', () => ({
-  __esModule: true,
-  default: jest.fn(() => ({ configs: [] })),
-  useHasFeature: () => mockIsTourFlagOn(),
-}))
 
 jest.mock('@/hooks/useMediaQuery', () => ({
   ...jest.requireActual('@/hooks/useMediaQuery'),
@@ -58,7 +51,6 @@ const addSpaceSelector = () => {
 describe('WorkspaceTour', () => {
   beforeEach(() => {
     window.localStorage.clear()
-    mockIsTourFlagOn.mockReturnValue(true)
     mockIsBelowMd.mockReturnValue(false)
     mockIsSpaceRoute.mockReturnValue(true)
     mockIsActiveMember.mockReturnValue(true)
@@ -78,16 +70,6 @@ describe('WorkspaceTour', () => {
     renderTour()
 
     expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
-  })
-
-  it('stays hidden and leaves the visit unrecorded while the flag is off', () => {
-    mockIsTourFlagOn.mockReturnValue(false)
-
-    renderTour()
-
-    expect(screen.queryByText('Welcome to your workspace')).not.toBeInTheDocument()
-    expect(screen.queryByText('Take the tour')).not.toBeInTheDocument()
-    expect(local.getItem(getWorkspaceTourSeenKey(mockUserId, mockSpaceId))).toBeNull()
   })
 
   it('stays hidden and leaves the visit unrecorded for a member who is not active', () => {
@@ -144,7 +126,7 @@ describe('WorkspaceTour', () => {
 
     expect(await screen.findByText('Switch between workspaces here.')).toBeInTheDocument()
     expect(screen.getByText('1 of 7')).toBeInTheDocument()
-    expect(screen.getByTestId('workspace-tour-spotlight')).toBeInTheDocument()
+    expect(screen.getByTestId('workspace-tour-highlight')).toBeInTheDocument()
   })
 
   it('reopens from the Settings section after it was seen', () => {

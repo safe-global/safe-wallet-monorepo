@@ -5,11 +5,12 @@ import TourPlaceholderRow from '@safe-global/views/features/spaces/components/Wo
 import TourSpotlight from '@safe-global/views/features/spaces/components/WorkspaceTour/TourSpotlight'
 import TourStepPopover from '@safe-global/views/features/spaces/components/WorkspaceTour/TourStepPopover'
 import type { TourProgress } from '@safe-global/views/features/spaces/components/WorkspaceTour/types'
+import { SIDEBAR } from './constants'
 import { useAnchorElement } from './hooks/useAnchorElement'
 import { useElementRect } from './hooks/useElementRect'
 import { useRouteToStep } from './hooks/useRouteToStep'
 import type { TourStep } from './types'
-import { toStopHighlight, toVirtualAnchor } from './utils'
+import { toStopLayout, toVirtualAnchor } from './utils'
 
 type TourStopProps = {
   step: TourStep
@@ -23,43 +24,45 @@ type TourStopProps = {
 const TourStop = ({ step, progress, onBack, onNext, onClose, onMissingAnchor }: TourStopProps) => {
   const portalContainer = usePortalContainerElement() ?? document.body
   const anchor = useAnchorElement(step.anchor)
+  const sidebarItem = useAnchorElement(step.sidebarItem)
+  const sidebar = useAnchorElement(step.sidebarItem ? SIDEBAR : undefined)
   const emptyState = useAnchorElement(anchor.element ? step.emptyState : undefined)
-  const navItem = useAnchorElement(step.navAnchor)
   const controlToSelect = useAnchorElement(step.selectOnEnter)
-  const anchorRect = useElementRect(anchor.element)
-  const emptyStateRect = useElementRect(emptyState.element)
-  const navRect = useElementRect(navItem.element)
+  const target = step.anchor ? anchor : sidebarItem
+  const layout = toStopLayout({
+    anchor: useElementRect(anchor.element),
+    emptyState: useElementRect(emptyState.element),
+    sidebarItem: useElementRect(sidebarItem.element),
+    sidebar: useElementRect(sidebar.element),
+  })
 
   useRouteToStep(step)
 
   useEffect(() => {
-    if (anchor.isMissing) onMissingAnchor()
-  }, [anchor.isMissing, onMissingAnchor])
+    if (target.isMissing) onMissingAnchor()
+  }, [target.isMissing, onMissingAnchor])
 
   useEffect(() => {
     if (controlToSelect.element instanceof HTMLElement) controlToSelect.element.click()
   }, [controlToSelect.element])
 
   useEffect(() => {
-    anchor.element?.scrollIntoView({ block: 'nearest' })
-  }, [anchor.element])
+    target.element?.scrollIntoView({ block: 'nearest' })
+  }, [target.element])
 
-  if (!anchorRect) return null
-
-  const { hole, placeholderRow } = toStopHighlight(anchorRect, emptyStateRect)
-  const holes = navRect ? [hole, navRect] : [hole]
+  if (!target.element || !layout.popoverTarget) return null
 
   return (
     <>
       {createPortal(
         <>
-          <TourSpotlight holes={holes} />
-          {placeholderRow && <TourPlaceholderRow rect={placeholderRow} />}
+          {layout.placeholderRow && <TourPlaceholderRow rect={layout.placeholderRow} />}
+          <TourSpotlight hole={layout.hole} uncoveredLeft={layout.uncoveredLeft} highlights={layout.highlights} />
         </>,
         portalContainer,
       )}
       <TourStepPopover
-        anchor={toVirtualAnchor(hole)}
+        anchor={toVirtualAnchor(layout.popoverTarget)}
         placement={step.placement}
         content={step}
         progress={progress}

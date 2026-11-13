@@ -38,12 +38,7 @@ const LOCAL_CONTACTS = { '1': { [TREASURY_MULTISIG]: 'Treasury multisig' } }
 const features = { spaceAuditLog: true, safeProAnnouncement: true }
 
 const chain = createChainData(features)
-chain.features = [
-  ...chain.features,
-  FEATURES.WORKSPACE_TOUR,
-  FEATURES.WORKSPACES_ADDRESS_BOOK_V2,
-  FEATURES.PRIVATE_ADDRESS_BOOK,
-]
+chain.features = [...chain.features, FEATURES.WORKSPACES_ADDRESS_BOOK_V2, FEATURES.PRIVATE_ADDRESS_BOOK]
 
 const chainHandlers = [
   http.get(/\/v1\/chains\/\d+$/, () => HttpResponse.json(chain)),

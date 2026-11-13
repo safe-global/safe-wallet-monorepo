@@ -12,11 +12,13 @@ const selectedAddressBookTab = (tabTestId: string) =>
 
 const ADDRESS_BOOK_EMPTY = byTestId('address-book-empty')
 
+export const SIDEBAR = byTestId('sidebar-container')
+
 export const TOUR_STEPS: TourStep[] = [
   {
     id: 'switcher',
     route: AppRoutes.spaces.index,
-    anchor: byTestId('space-selector-button'),
+    sidebarItem: byTestId('space-selector-button'),
     placement: { side: 'right', align: 'start' },
     title: 'Your workspace',
     body: 'Switch between workspaces here.',
@@ -44,7 +46,7 @@ export const TOUR_STEPS: TourStep[] = [
     route: AppRoutes.spaces.safeAccounts,
     anchor: `${byTestId('space-safe-accounts-list')} tbody tr, ${byTestId('safe-accounts-empty')}`,
     emptyState: byTestId('safe-accounts-empty'),
-    navAnchor: sidebarItem('Safe accounts'),
+    sidebarItem: sidebarItem('Safe accounts'),
     placement: { side: 'bottom', align: 'start' },
     title: 'Open a Safe to work inside it',
     body: 'The workspace is your overview. Everything for a single Safe lives inside that Safe:',
@@ -63,7 +65,7 @@ export const TOUR_STEPS: TourStep[] = [
     selectOnEnter: byTestId('address-book-workspace-tab'),
     anchor: selectedAddressBookTab('address-book-workspace-tab'),
     emptyState: ADDRESS_BOOK_EMPTY,
-    navAnchor: sidebarItem('Address book'),
+    sidebarItem: sidebarItem('Address book'),
     placement: { side: 'bottom', align: 'center' },
     title: 'Workspace contacts',
     body: 'Address book entries everyone in the workspace can see.',
@@ -75,7 +77,7 @@ export const TOUR_STEPS: TourStep[] = [
     selectOnEnter: byTestId('address-book-local-tab'),
     anchor: selectedAddressBookTab('address-book-local-tab'),
     emptyState: ADDRESS_BOOK_EMPTY,
-    navAnchor: sidebarItem('Address book'),
+    sidebarItem: sidebarItem('Address book'),
     placement: { side: 'bottom', align: 'center' },
     title: 'Local contacts',
     body: 'Only you see these, and only in this browser.',
@@ -85,7 +87,7 @@ export const TOUR_STEPS: TourStep[] = [
     id: 'replay',
     route: AppRoutes.spaces.settingsGeneral,
     anchor: byTestId('settings-take-tour'),
-    navAnchor: sidebarItem('Settings'),
+    sidebarItem: sidebarItem('Settings'),
     placement: { side: 'bottom', align: 'end' },
     title: 'Take the tour again',
     body: 'Replay it anytime from Settings.',
