@@ -14,12 +14,14 @@ export enum EnvVariablesField {
   rpc = 'rpc',
   tenderlyURL = 'tenderlyURL',
   tenderlyToken = 'tenderlyToken',
+  tenderlyPublicSharing = 'tenderlyPublicSharing',
 }
 
 export type EnvVariablesFormData = {
   [EnvVariablesField.rpc]: string
   [EnvVariablesField.tenderlyURL]: string
   [EnvVariablesField.tenderlyToken]: string
+  [EnvVariablesField.tenderlyPublicSharing]: boolean
 }
 
 const EnvironmentVariables = () => {
@@ -33,6 +35,7 @@ const EnvironmentVariables = () => {
       [EnvVariablesField.rpc]: settings.env?.rpc[chainId] ?? '',
       [EnvVariablesField.tenderlyURL]: settings.env?.tenderly.url ?? '',
       [EnvVariablesField.tenderlyToken]: settings.env?.tenderly.accessToken ?? '',
+      [EnvVariablesField.tenderlyPublicSharing]: settings.env?.tenderly.publicSharing ?? false,
     },
   })
 
@@ -56,6 +59,7 @@ const EnvironmentVariables = () => {
       setTenderly({
         url: data[EnvVariablesField.tenderlyURL].replace(/\/$/, ''),
         accessToken: data[EnvVariablesField.tenderlyToken],
+        publicSharing: data[EnvVariablesField.tenderlyPublicSharing],
       }),
     )
 

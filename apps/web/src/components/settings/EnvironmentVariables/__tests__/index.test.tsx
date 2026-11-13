@@ -153,6 +153,61 @@ describe('EnvironmentVariables', () => {
     expect(tenderlyTokenInput).toHaveAttribute('type', 'text')
   })
 
+  it('should render the public sharing checkbox from the stored Tenderly settings', () => {
+    render(<EnvironmentVariables />, {
+      initialReduxState: {
+        settings: {
+          ...settingsInitialState,
+          env: {
+            rpc: {},
+            tenderly: { url: mockTenderlyUrl, accessToken: mockTenderlyToken, publicSharing: true },
+          },
+        },
+      },
+    })
+
+    expect(screen.getByLabelText('Make simulations publicly shareable')).toBeChecked()
+  })
+
+  it('should disable the public sharing checkbox until an access token is entered', async () => {
+    render(<EnvironmentVariables />, {
+      initialReduxState: {
+        settings: {
+          ...settingsInitialState,
+          env: { rpc: {}, tenderly: { url: '', accessToken: '' } },
+        },
+      },
+    })
+
+    const checkbox = screen.getByLabelText('Make simulations publicly shareable')
+    expect(checkbox).toBeDisabled()
+
+    fireEvent.change(screen.getByLabelText('Tenderly access token'), { target: { value: mockTenderlyToken } })
+
+    await waitFor(() => {
+      expect(checkbox).toBeEnabled()
+    })
+  })
+
+  it('should save the public sharing flag on submit', async () => {
+    const { store } = renderWithStore(<EnvironmentVariables />, {
+      settings: {
+        ...settingsInitialState,
+        env: { rpc: {}, tenderly: { url: '', accessToken: mockTenderlyToken } },
+      },
+    })
+
+    const checkbox = screen.getByLabelText('Make simulations publicly shareable')
+    expect(checkbox).not.toBeChecked()
+
+    fireEvent.click(checkbox)
+    fireEvent.click(screen.getByText('Save'))
+
+    await waitFor(() => {
+      expect(store.getState().settings.env.tenderly.publicSharing).toBe(true)
+    })
+  })
+
   it('should show reset button when value is entered', async () => {
     render(<EnvironmentVariables />, {
       initialReduxState: {
@@ -371,6 +426,7 @@ describe('EnvironmentVariables', () => {
       expect(store.getState().settings.env.tenderly).toEqual({
         url: mockTenderlyUrl,
         accessToken: mockTenderlyToken,
+        publicSharing: false,
       })
     })
     expect(reloadPage).toHaveBeenCalled()
