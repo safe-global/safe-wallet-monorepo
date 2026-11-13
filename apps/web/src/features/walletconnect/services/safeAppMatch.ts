@@ -1,5 +1,6 @@
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
-import { getOriginPath, trimTrailingSlash } from '@/utils/url'
+import { getOriginPath } from '@safe-global/utils/utils/url'
+import { trimTrailingSlash } from '@/utils/url'
 
 export const getSafeAppHostname = (url: string): string | undefined => {
   try {

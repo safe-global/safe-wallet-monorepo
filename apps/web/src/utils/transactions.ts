@@ -40,7 +40,7 @@ import { Errors, logError } from '@/services/exceptions'
 import { type BaseTransaction } from '@safe-global/safe-apps-sdk'
 import { isMultiSendCalldata } from './transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit'
-import { getOriginPath } from './url'
+import { getOriginPath } from '@safe-global/utils/utils/url'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { getStoreInstance } from '@/store'
 

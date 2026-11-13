@@ -19,3 +19,10 @@ export const verifyStatusToVariant = (verifyContext?: VerifiedContext): VerifyVa
   }
   return 'unverified' // UNKNOWN or INVALID
 }
+
+export const getAttestedOrigin = (verifyContext?: VerifiedContext & { origin?: string }): string | undefined => {
+  if (verifyContext?.validation !== 'VALID') {
+    return undefined
+  }
+  return verifyContext.origin || undefined
+}
