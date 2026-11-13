@@ -9,7 +9,7 @@ import { useLazySpacesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERAT
 import type { GuardRule } from '../types'
 import { allow, evaluateGuard, redirect } from '../utils'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
-import { useIsWorkspaceWizardEnabled } from '@/features/spaces'
+import { useIsWorkspaceWizardEnabled } from '@/hooks/useIsWorkspaceWizardEnabled'
 import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
 
 // ---------------------------------------------------------------------------

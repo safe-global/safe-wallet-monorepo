@@ -6,7 +6,7 @@ import * as useWalletModule from '@/hooks/wallets/useWallet'
 import * as spacesQueries from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
 import * as useIsSpaceRouteModule from '@/hooks/useIsSpaceRoute'
-import * as spacesFeature from '@/features/spaces'
+import * as wizardFlag from '@/hooks/useIsWorkspaceWizardEnabled'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 const MOCK_SPACE_UUID_ALT = '22222222-2222-2222-2222-222222222222'
 
@@ -27,7 +27,7 @@ jest.mock('@/hooks/useIsSpaceRoute', () => ({
   useIsSpaceRoute: jest.fn(() => false),
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/hooks/useIsWorkspaceWizardEnabled', () => ({
   useIsWorkspaceWizardEnabled: jest.fn(() => undefined),
 }))
 
@@ -67,7 +67,7 @@ const setupMocks = ({
 }: SetupOptions = {}) => {
   ;(router.useRouter as jest.Mock).mockReturnValue({ pathname, query, isReady: true })
   ;(useIsSpaceRouteModule.useIsSpaceRoute as jest.Mock).mockReturnValue(isSpaceRoute)
-  ;(spacesFeature.useIsWorkspaceWizardEnabled as jest.Mock).mockReturnValue(isWorkspaceWizardEnabled)
+  ;(wizardFlag.useIsWorkspaceWizardEnabled as jest.Mock).mockReturnValue(isWorkspaceWizardEnabled)
 
   jest.spyOn(useWalletModule, 'default').mockReturnValue(wallet as ReturnType<typeof useWalletModule.default>)
   jest
