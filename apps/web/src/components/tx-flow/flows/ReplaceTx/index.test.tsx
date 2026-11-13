@@ -8,6 +8,8 @@ import { safeTxSummaryBuilder, txInfoBuilder } from '@/tests/builders/safeTx'
 import { TxModalContext } from '@/components/tx-flow'
 import TokenTransferFlow from '../TokenTransfer'
 import RejectTxFlow from '../RejectTx'
+import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
+import { safeScopeContextFor, unwrapScopedFlow } from '@/tests/mocks/safeScope'
 import ReplaceTxMenu from '.'
 
 jest.mock('@/hooks/wallets/useWallet')
@@ -164,5 +166,29 @@ describe('ReplaceTxMenu', () => {
 
     expect(deleteButton).toBeDisabled()
     expect(await screen.findByText(NOT_DELETABLE_TOOLTIP)).toBeInTheDocument()
+  })
+
+  describe('in a Safe scope', () => {
+    const target = { chainId: faker.string.numeric(5), safeAddress: faker.finance.ethereumAddress() }
+
+    it.each([
+      [REPLACE_BUTTON, TokenTransferFlow],
+      [REJECT_BUTTON, RejectTxFlow],
+    ])('opens %s inside the Safe scope the menu was opened in', async (button, Flow) => {
+      const { user } = renderWithUserEvent(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <SafeScopeContext.Provider value={safeScopeContextFor(target)}>
+            <ReplaceTxMenu txNonce={TX_NONCE} />
+          </SafeScopeContext.Provider>
+        </TxModalContext.Provider>,
+      )
+
+      await user.click(screen.getByRole('button', { name: button }))
+
+      const { flow, target: flowTarget, pollSafeInfo } = unwrapScopedFlow(openedFlow())
+      expect(flow?.type).toBe(Flow)
+      expect(flowTarget).toEqual(target)
+      expect(pollSafeInfo).toBe(false)
+    })
   })
 })

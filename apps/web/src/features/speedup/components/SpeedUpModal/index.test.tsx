@@ -11,6 +11,10 @@ import * as useChains from '@/hooks/useChains'
 import { createExistingTx } from '@/services/tx/tx-sender'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import SpeedUpModal from '.'
+import type Safe from '@safe-global/protocol-kit'
+import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
+import type { SafeScopeContextValue } from '@safe-global/views/components/tx-flow/safe-scope/types'
+import { safeScopeContextFor } from '@/tests/mocks/safeScope'
 
 const SIGNER_ADDRESS = fakerChecksummedAddress()
 const SAFE_ADDRESS = fakerChecksummedAddress()
@@ -85,18 +89,22 @@ const setSafeOwners = (owners: string[]) => {
   } as unknown as ReturnType<typeof useSafeInfo>)
 }
 
-const renderModal = () =>
+const TX_ID = `multisig_${SAFE_ADDRESS}_0xabc`
+
+const renderModal = (scope?: SafeScopeContextValue) =>
   render(
-    <SpeedUpModal
-      open
-      handleClose={jest.fn()}
-      pendingTx={pendingTx}
-      txId={`multisig_${SAFE_ADDRESS}_0xabc`}
-      txHash={pendingTx.txHash}
-      signerAddress={SIGNER_ADDRESS}
-      signerNonce={pendingTx.signerNonce}
-      gasLimit={pendingTx.gasLimit}
-    />,
+    <SafeScopeContext.Provider value={scope}>
+      <SpeedUpModal
+        open
+        handleClose={jest.fn()}
+        pendingTx={pendingTx}
+        txId={TX_ID}
+        txHash={pendingTx.txHash}
+        signerAddress={SIGNER_ADDRESS}
+        signerNonce={pendingTx.signerNonce}
+        gasLimit={pendingTx.gasLimit}
+      />
+    </SafeScopeContext.Provider>,
   )
 
 describe('SpeedUpModal', () => {
@@ -164,5 +172,27 @@ describe('SpeedUpModal', () => {
     await waitFor(() => expect(mockCreateExistingTx).toHaveBeenCalled())
 
     expect(queryByTestId('speedup-summary')).not.toBeInTheDocument()
+  })
+
+  it('rebuilds the transaction with the URL Safe outside a scope', async () => {
+    renderModal()
+
+    await waitFor(() => expect(mockCreateExistingTx).toHaveBeenCalledWith('1', TX_ID, undefined, undefined))
+  })
+
+  it('rebuilds the transaction with the SDK of the Safe scope it is opened in', async () => {
+    const context = safeScopeContextFor({ chainId: '1', safeAddress: SAFE_ADDRESS })
+    const scope = { ...context, scope: context.scope && { ...context.scope, sdk: {} as Safe } }
+
+    renderModal(scope)
+
+    await waitFor(() => expect(mockCreateExistingTx).toHaveBeenCalledWith('1', TX_ID, undefined, scope.scope))
+  })
+
+  it('waits for the scoped Safe SDK before rebuilding the transaction', async () => {
+    renderModal(safeScopeContextFor({ chainId: '1', safeAddress: SAFE_ADDRESS }))
+
+    await waitFor(() => expect(mockUseWallet).toHaveBeenCalled())
+    expect(mockCreateExistingTx).not.toHaveBeenCalled()
   })
 })

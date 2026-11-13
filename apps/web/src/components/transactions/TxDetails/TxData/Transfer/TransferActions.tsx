@@ -1,5 +1,5 @@
 import type { TransferTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { type ReactElement, useContext, useState } from 'react'
+import { type ReactElement, useState } from 'react'
 import { Ellipsis } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
@@ -16,7 +16,7 @@ import { isERC20Transfer, isNativeTokenTransfer, isOutgoingTransfer } from '@/ut
 import { trackEvent, TX_LIST_EVENTS } from '@/services/analytics'
 import { safeFormatUnits } from '@safe-global/utils/utils/formatters'
 import CheckWallet from '@/components/common/CheckWallet'
-import { TxModalContext } from '@/components/tx-flow'
+import useSetScopedTxFlow from '@/components/tx-flow/safe-scope/useSetScopedTxFlow'
 
 // TODO: No need for an enum anymore
 enum ModalType {
@@ -40,7 +40,7 @@ const TransferActions = ({
   const [open, setOpen] = useState<typeof defaultOpen>(defaultOpen)
   const addressBook = useAddressBook()
   const name = addressBook?.[address]
-  const { setTxFlow } = useContext(TxModalContext)
+  const setTxFlow = useSetScopedTxFlow()
 
   const handleOpenModal = (type: keyof typeof open, event?: typeof TX_LIST_EVENTS.ADDRESS_BOOK) => () => {
     setMenuOpen(false)

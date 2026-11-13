@@ -39,6 +39,7 @@ jest.mock('../SpaceQueueRow', () => ({
   ),
 }))
 jest.mock('@/hooks/useSafeDisplayName', () => ({ useSafeDisplayName: () => '' }))
+jest.mock('@/components/transactions/TxSummary/QueueActions', () => ({ __esModule: true, default: () => null }))
 
 const transactionItem = (
   txStatus: Transaction['txStatus'],

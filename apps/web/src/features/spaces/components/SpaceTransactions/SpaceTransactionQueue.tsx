@@ -6,6 +6,7 @@ import NoTransactionsIcon from '@/public/images/transactions/no-transactions.svg
 import { useGetSpaceQueueQuery, type SpaceQueue } from '../../store/spaceQueueApi'
 import { QueueLoadError } from './QueueStates'
 import SpaceQueueTable from './SpaceQueueTable'
+import TransactionsToolbar from './TransactionsToolbar'
 
 const QueueBody = ({ queue }: { queue: SpaceQueue }): ReactElement => {
   const { sections } = queue
@@ -35,6 +36,8 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
 
   return (
     <div className="flex flex-col gap-6">
+      <TransactionsToolbar spaceId={spaceId} />
+
       {currentData ? (
         <QueueBody queue={currentData} />
       ) : isError ? (

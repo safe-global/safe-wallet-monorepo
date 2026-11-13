@@ -8,6 +8,7 @@ import MaliciousTxWarning from '@safe-global/views/components/transactions/Malic
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { formatDateTime, formatTimeInWords } from '@safe-global/utils/utils/date'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
+import QueueActions from '@/components/transactions/TxSummary/QueueActions'
 import { SwapFeature, useIsExpiredSwap } from '@/features/swap'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { useHasFeature } from '@/hooks/useChains'
@@ -16,10 +17,20 @@ import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
 import QueueTxDetails from './QueueTxDetails'
+import RowActionsMenu from './RowActionsMenu'
 import SignatureGauge from './SignatureGauge'
 import { getCounterparty, getNonce, type ConflictOption, type QueueStatus } from './utils'
 
 export const QUEUE_COLUMNS = ['Nonce', 'Transaction', 'To', 'Proposed', 'Signatures', 'Status', 'Action'] as const
+
+// The outline Sign/Execute action turns into the filled primary button while its row is hovered, as in the design
+const ROW_HOVER_PRIMARY_ACTION = [
+  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled]:border-transparent',
+  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled]:bg-primary',
+  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled]:text-primary-foreground',
+  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled]:shadow-none',
+  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled:hover]:bg-primary/80',
+].join(' ')
 
 const STATUS_TONES: Record<QueueStatus, 'success' | 'warning'> = {
   execute: 'success',
@@ -105,10 +116,20 @@ type SpaceQueueRowProps = {
   status: QueueStatus
   nextNonce?: number
   conflict?: ConflictOption
+  /** False when a rejection already holds this nonce */
+  canReject?: boolean
   rowProps?: ComponentProps<'tr'>
 }
 
-const SpaceQueueRow = ({ item, chainId, status, nextNonce, conflict, rowProps }: SpaceQueueRowProps): ReactElement => {
+const SpaceQueueRow = ({
+  item,
+  chainId,
+  status,
+  nextNonce,
+  conflict,
+  canReject = true,
+  rowProps,
+}: SpaceQueueRowProps): ReactElement => {
   const { StatusLabel } = useLoadFeature(SwapFeature)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const tx = item.transaction
@@ -170,7 +191,12 @@ const SpaceQueueRow = ({ item, chainId, status, nextNonce, conflict, rowProps }:
         )}
       </TableCell>
 
-      <TableCell />
+      <TableCell>
+        <div className={`flex items-center justify-end gap-1 ${ROW_HOVER_PRIMARY_ACTION}`}>
+          {!expiredSwap && <QueueActions tx={tx} dense />}
+          <RowActionsMenu tx={tx} canReject={canReject} />
+        </div>
+      </TableCell>
     </TableRow>
   )
 }
