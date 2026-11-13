@@ -1,8 +1,8 @@
 import { render, screen } from '@/tests/test-utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import type { TokenOption } from '../../utils/tokenOptions'
+import type { TokenOption } from '../../../services/tokenOptions'
 import TokenOptionRow from '../TokenOptionRow'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
+import { tokenOptionBuilder } from '@/tests/builders/tokenOptions'
 
 const option = (overrides: Partial<TokenOption> = {}): TokenOption =>
   tokenOptionBuilder()

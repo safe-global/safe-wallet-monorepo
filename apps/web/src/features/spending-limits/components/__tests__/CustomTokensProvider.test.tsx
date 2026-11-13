@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { act, renderHook } from '@/tests/test-utils'
-import { tokenOptionBuilder } from '../utils/tokenOptions.testData'
+import { tokenOptionBuilder } from '@/tests/builders/tokenOptions'
 import { CustomTokensProvider, useAddCustomToken, useCustomTokens } from '../CustomTokensProvider'
 
 const wrapper = ({ children }: { children: ReactNode }) => <CustomTokensProvider>{children}</CustomTokensProvider>

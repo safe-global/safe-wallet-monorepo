@@ -8,8 +8,8 @@ import { useLoadFeature } from '@/features/__core__'
 import { SpendingLimitsFeature, type SpendingLimitState } from '@/features/spending-limits'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import { Errors, logError } from '@/services/exceptions'
-import useSpendingLimitTokenOptions from './hooks/useSpendingLimitTokenOptions'
-import type { TokenOption } from './utils/tokenOptions'
+import { useSpendingLimitTokenOptions } from '@/features/spending-limits'
+import type { TokenOption } from '@/features/spending-limits/services'
 
 export type ExistingSpendingLimits = {
   /** Undefined until loaded for the selected Safe, or while no Safe is selected. */

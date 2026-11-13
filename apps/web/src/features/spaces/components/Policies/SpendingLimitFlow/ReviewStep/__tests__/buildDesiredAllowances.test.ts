@@ -1,6 +1,6 @@
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
+import { tokenOptionBuilder } from '@/tests/builders/tokenOptions'
 import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { buildDesiredAllowances, findExistingAllowance, UNKNOWN_TOKEN_IN_POLICY_ERROR } from '../buildDesiredAllowances'
 

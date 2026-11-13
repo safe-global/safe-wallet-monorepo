@@ -14,8 +14,8 @@ import {
 import {
   useAddCustomToken as mockUseAddCustomToken,
   useCustomTokens as mockUseCustomTokens,
-} from '../CustomTokensProvider'
-import { tokenOptionBuilder } from '../utils/tokenOptions.testData'
+} from '@/features/spending-limits'
+import { tokenOptionBuilder } from '@/tests/builders/tokenOptions'
 import SpendingLimitFlow from '..'
 
 // A miniature of TxFlow: it shows one step at a time, so the Create step really unmounts when the

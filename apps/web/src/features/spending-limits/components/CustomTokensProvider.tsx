@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState, type ReactElement, type ReactNode } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { TokenOption } from './utils/tokenOptions'
+import type { TokenOption } from '../services/tokenOptions'
 
 type CustomToken = { chainId: string; token: TokenOption }
 

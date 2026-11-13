@@ -1,8 +1,8 @@
 import { useFormContext } from 'react-hook-form'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
-import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
+import { useSpendingLimitTokenOptions } from '@/features/spending-limits'
+import { tokenOptionBuilder } from '@/tests/builders/tokenOptions'
 import { buildSafeAccountId } from '../../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import {
@@ -83,38 +83,43 @@ jest.mock('@/components/common/AddressBookInput', () => {
   return { __esModule: true, default: MockAddressBookInput }
 })
 
-jest.mock('../../TokenSelector', () => ({
-  __esModule: true,
-  default: ({
-    value,
-    onChange,
-    excludeAddresses = [],
-    helperText,
-    'data-testid': testId = 'limit-token-selector',
-  }: {
-    value?: string
-    onChange: (next: string | undefined) => void
-    excludeAddresses?: string[]
-    helperText?: React.ReactNode
-    'data-testid'?: string
-  }) => (
-    <div>
-      <select data-testid={testId} value={value ?? ''} onChange={(event) => onChange(event.target.value || undefined)}>
-        <option value="">none</option>
-        {mockTokens
-          .filter((token) => !excludeAddresses.includes(token.address))
-          .map((token) => (
-            <option key={token.address} value={token.address}>
-              {token.symbol}
-            </option>
-          ))}
-      </select>
-      {helperText}
-    </div>
-  ),
+jest.mock('@/features/__core__', () => ({
+  ...jest.requireActual('@/features/__core__'),
+  useLoadFeature: () => ({ TokenSelector: MockTokenSelector }),
 }))
 
-jest.mock('../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
+const MockTokenSelector = ({
+  value,
+  onChange,
+  excludeAddresses = [],
+  helperText,
+  'data-testid': testId = 'limit-token-selector',
+}: {
+  value?: string
+  onChange: (next: string | undefined) => void
+  excludeAddresses?: string[]
+  helperText?: React.ReactNode
+  'data-testid'?: string
+}) => (
+  <div>
+    <select data-testid={testId} value={value ?? ''} onChange={(event) => onChange(event.target.value || undefined)}>
+      <option value="">none</option>
+      {mockTokens
+        .filter((token) => !excludeAddresses.includes(token.address))
+        .map((token) => (
+          <option key={token.address} value={token.address}>
+            {token.symbol}
+          </option>
+        ))}
+    </select>
+    {helperText}
+  </div>
+)
+
+jest.mock('@/features/spending-limits', () => ({
+  ...jest.requireActual('@/features/spending-limits'),
+  useSpendingLimitTokenOptions: jest.fn(),
+}))
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' }))
 jest.mock('../../ExistingSpendingLimitsProvider', () => ({
   useExistingSpendingLimits: jest.fn(() => ({ loading: false })),

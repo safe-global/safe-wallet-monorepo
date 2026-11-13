@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import type { SpendingLimitState } from '@/features/spending-limits'
 import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
-import type { TokenOption } from '../utils/tokenOptions'
+import type { TokenOption } from '@/features/spending-limits/services'
 
 /** The loader resolves a token the option lists never offered by asking the chain, so this is complete. */
 const toTokenOption = ({ token }: SpendingLimitState): TokenOption | undefined => {

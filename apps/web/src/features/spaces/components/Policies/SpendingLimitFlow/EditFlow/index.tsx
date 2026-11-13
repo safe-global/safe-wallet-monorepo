@@ -8,7 +8,7 @@ import { TxFlowType } from '@/services/analytics'
 import type { PolicySafe } from '@safe-global/views/features/spaces/components/Policies/types'
 import CreateSpendingLimitPolicy from '../CreateStep'
 import { ExistingSpendingLimitsProvider, useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
-import { CustomTokensProvider } from '../CustomTokensProvider'
+import { CustomTokensProvider } from '@/features/spending-limits'
 import ReviewSpendingLimitPolicy from '../ReviewStep'
 import { toSpendingLimitFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/utils/prefill'
 import {

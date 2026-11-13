@@ -9,10 +9,10 @@ import useChainId from '@/hooks/useChainId'
 import { CustomTokensProvider, useCustomTokens } from '../../CustomTokensProvider'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
-import type { TokenOptionsResult } from '../../hooks/useSpendingLimitTokenOptions'
-import type { TokenOption } from '../../utils/tokenOptions'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
+import useSpendingLimitTokenOptions from '../../../hooks/useSpendingLimitTokenOptions'
+import type { TokenOptionsResult } from '../../../hooks/useSpendingLimitTokenOptions'
+import type { TokenOption } from '../../../services/tokenOptions'
+import { tokenOptionBuilder } from '@/tests/builders/tokenOptions'
 import TokenSelector from '..'
 import {
   BALANCES_LOAD_ERROR_TEXT,
@@ -27,7 +27,7 @@ import {
   TOKEN_SELECTOR_PLACEHOLDER,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 
-jest.mock('../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
+jest.mock('../../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
 // Render the tooltip parts inline so a disabled row's reason is assertable without hovering a portal.
 jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
