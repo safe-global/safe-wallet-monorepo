@@ -4224,7 +4224,8 @@
               "type": "array",
               "items": {
                 "type": "string"
-              }
+              },
+              "example": "sign,execute"
             }
           },
           {
@@ -4286,6 +4287,17 @@
             }
           },
           {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Return only the first transactions of the queue, by nonce across every Safe (not by age), up to the transactions an unlimited request returns. Without a filter or `search`, only that many are read: `counts` cover only those, and a conflict group cut by the limit is returned in part. With a filter or `search`, the whole queue is read and filtered first, so `counts` cover the whole queue and a conflict group is kept whole, which can return a few more than `limit`. `count` is always the size of the whole queue.",
+            "schema": {
+              "minimum": 1,
+              "example": 4,
+              "type": "number"
+            }
+          },
+          {
             "name": "spaceId",
             "required": true,
             "in": "path",
@@ -4319,7 +4331,7 @@
             "description": "Space not found"
           },
           "422": {
-            "description": "Unknown status, invalid CAIP-10 address, non-boolean flag or too long search"
+            "description": "Unknown status, invalid CAIP-10 address, chain ID or signer address, non-boolean flag, too long search or invalid limit"
           }
         },
         "summary": "Get the transaction queue of a Space",
@@ -15134,7 +15146,7 @@
             }
           },
           "counts": {
-            "description": "Faceted counts of the queue read: the status counts apply the `safes` filter but not the status filters, and `safes` applies the status filters but not the `safes` filter",
+            "description": "Faceted counts of the queue read: each applies every filter but its own. The status counts skip the status filters (`status`, `conflicting`, `stale`); `safes`, `chains` and `signers` skip `safes`, `chainIds` and `signers`. The search narrows every count.",
             "allOf": [
               {
                 "$ref": "#/components/schemas/SpaceQueueCounts"
