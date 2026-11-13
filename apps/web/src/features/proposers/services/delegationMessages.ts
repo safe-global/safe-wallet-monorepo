@@ -7,6 +7,7 @@ import { PendingDelegationConflictError } from '@/features/proposers/utils/propo
 import { normalizeDelegateTypedData } from '@safe-global/utils/services/delegates'
 import type { DelegateTypedData } from '@safe-global/utils/services/delegates'
 import type { AppDispatch } from '@/store'
+import { buildDeclared } from '@safe-global/utils/utils/declaredAttribution'
 
 /**
  * Builds the origin metadata JSON string for a delegation off-chain message.
@@ -52,6 +53,7 @@ export async function createDelegationMessage(
     signature,
     safeAppId: null,
     origin,
+    declared: buildDeclared('NATIVE_TRANSFER'),
   }
 
   try {

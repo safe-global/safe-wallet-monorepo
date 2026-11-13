@@ -95,6 +95,26 @@ describe('delegationMessages', () => {
       )
     })
 
+    it('should declare the delegation message as created in our own UI', async () => {
+      const initiate = jest.spyOn(cgwApi.endpoints.messagesCreateMessageV1, 'initiate')
+      const mockDispatch = jest.fn().mockReturnValue({ unwrap: jest.fn().mockResolvedValue({}) })
+
+      await createDelegationMessage(
+        mockDispatch as unknown as AppDispatch,
+        chainId,
+        parentSafeAddress,
+        typedData,
+        signature,
+        origin,
+      )
+
+      expect(initiate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          createMessageDto: expect.objectContaining({ declared: { channel: 'NATIVE_TRANSFER' } }),
+        }),
+      )
+    })
+
     it('should confirm existing message when 400 "already exists" error with same action', async () => {
       const existingMessage: MessageItem = {
         type: 'MESSAGE',
