@@ -63,9 +63,13 @@ export class HomePage {
     await this.safeHeaderInfo.waitFor({ state: 'visible' })
   }
 
-  /** Open the "Action required" panel once its header has rendered */
+  /** Open the "Action required" panel; Enter reaches the toggle under toasts and the full-screen recovery modal */
   async expandActionRequired(): Promise<void> {
-    await this.actionRequiredToggle.click()
+    // The panel stays hidden until it has a warning, and a key press on the hidden toggle does nothing
+    await this.actionRequiredToggle.waitFor()
+    if ((await this.actionRequiredToggle.getAttribute('aria-expanded')) !== 'true') {
+      await this.actionRequiredToggle.press('Enter')
+    }
     await this.page.getByRole('button', { name: ACTION_REQUIRED_TOGGLE, expanded: true }).waitFor()
   }
 

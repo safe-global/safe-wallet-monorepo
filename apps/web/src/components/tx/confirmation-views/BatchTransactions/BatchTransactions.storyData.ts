@@ -2,6 +2,8 @@ import { faker } from '@faker-js/faker'
 import type { DraftBatchItem } from '@/features/batching/store'
 import { OperationType } from '@safe-global/types-kit'
 
+faker.seed(1)
+
 export const mockedDraftBatch: DraftBatchItem[] = [
   {
     id: faker.string.alphanumeric(10),

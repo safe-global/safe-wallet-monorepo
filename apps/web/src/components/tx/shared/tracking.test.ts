@@ -1,4 +1,4 @@
-import { trackTxEvents } from './tracking'
+import { getGasPaymentSource, trackTxEvents } from './tracking'
 import { trackEvent, MixpanelEventParams } from '@/services/analytics'
 import { TX_EVENTS, TX_TYPES } from '@/services/analytics/events/transactions'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -412,5 +412,41 @@ describe('trackTxEvents', () => {
         }),
       )
     })
+  })
+})
+
+describe('getGasPaymentSource', () => {
+  const base = { isSafePaid: false, isExecuted: true, gasPaymentOption: undefined, isPayFromSafeChain: true }
+
+  it('is the Safe when the payload refunds the gas, at any step and on any chain', () => {
+    expect(getGasPaymentSource({ ...base, isSafePaid: true, isExecuted: false, isPayFromSafeChain: false })).toBe(
+      'safe',
+    )
+    expect(getGasPaymentSource({ ...base, isSafePaid: true, gasPaymentOption: 'WALLET' })).toBe('safe')
+  })
+
+  it.each([
+    ['WALLET', 'signing_wallet'],
+    ['PAY_FROM_SAFE', 'safe'],
+    ['FREE_DAILY_LIMIT', 'sponsored'],
+    ['SUBSCRIPTION', 'sponsored'],
+    ['NO_FEE_CAMPAIGN', 'sponsored'],
+  ] as const)('at execution, maps the picked %s to %s on any chain', (gasPaymentOption, expected) => {
+    expect(getGasPaymentSource({ ...base, gasPaymentOption, isPayFromSafeChain: false })).toBe(expected)
+  })
+
+  it('falls back to the signer where the Safe could pay, when nobody picked a payer', () => {
+    expect(getGasPaymentSource({ ...base, isExecuted: false })).toBe('signing_wallet')
+    expect(getGasPaymentSource(base)).toBe('signing_wallet')
+  })
+
+  it('is omitted where the Safe could not pay and nobody picked a payer', () => {
+    expect(getGasPaymentSource({ ...base, isExecuted: false, isPayFromSafeChain: false })).toBeUndefined()
+  })
+
+  it('ignores the picked payer outside an execution', () => {
+    expect(getGasPaymentSource({ ...base, isExecuted: false, gasPaymentOption: 'FREE_DAILY_LIMIT' })).toBe(
+      'signing_wallet',
+    )
   })
 })

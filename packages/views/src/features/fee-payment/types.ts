@@ -12,7 +12,7 @@ export type HistoryFeesData = {
   totalFee: { amount: string; currency: string; fiatAmount?: string }
   executionFee: FeeRow
   gasFee: FeeRow
-  paidFrom: 'safe' | 'signer'
+  paidFrom: 'safe' | 'signer' | 'sponsored'
 }
 
 export type GasPayerChoice = 'SPONSORED' | 'PAY_FROM_SAFE' | 'WALLET'

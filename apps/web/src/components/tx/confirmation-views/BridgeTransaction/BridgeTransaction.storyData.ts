@@ -1,6 +1,8 @@
 import { faker } from '@faker-js/faker'
 import type { BridgeAndSwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
+faker.seed(1)
+
 export const mockPendingBridgeTxInfo: BridgeAndSwapTransactionInfo = {
   type: 'SwapAndBridge',
   humanDescription: null,

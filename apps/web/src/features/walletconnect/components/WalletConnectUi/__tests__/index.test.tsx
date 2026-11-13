@@ -13,7 +13,7 @@ import { WALLETCONNECT_EVENTS, WcSafeAppSuggestionResult } from '@/services/anal
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { safeAppBuilder } from '@/tests/builders/walletConnect'
 import * as useSafeAppSuggestionHook from '../../../hooks/useSafeAppSuggestion'
-import { safeAppSuggestionBuilder } from '../../../hooks/safeAppSuggestion.fixtures'
+import { safeAppSuggestionBuilder } from '../../../hooks/safeAppSuggestion.testData'
 
 jest.mock('@reown/walletkit', () => jest.fn())
 jest.mock('@/services/analytics', () => ({

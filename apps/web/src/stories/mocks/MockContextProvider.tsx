@@ -8,6 +8,7 @@ import AppChrome from '@/components/common/AppChrome'
 import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
 import type { StoryContext } from '@storybook/react'
 import type { LayoutType } from './types'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import {
   QueueAssessmentContext,
   type QueueAssessmentContextValue,
@@ -65,6 +66,8 @@ interface MockContextProviderProps {
   pathname?: string
   /** Wrap with ShadcnProvider for shadcn component support */
   shadcn?: boolean
+  /** Chain configs to put in the store's cache before the first render */
+  chains?: Chain[]
 }
 
 /**
@@ -147,6 +150,7 @@ export function MockContextProvider({
   layout = 'none',
   pathname = '/home',
   shadcn = false,
+  chains,
 }: MockContextProviderProps) {
   const isDark = context?.globals?.theme === 'dark'
 
@@ -155,7 +159,7 @@ export function MockContextProvider({
       <WalletContext.Provider value={wallet}>
         <TxModalContext.Provider value={mockTxModalContext}>
           <QueueAssessmentContext.Provider value={mockQueueAssessmentContext}>
-            <StoreDecorator initialState={initialState} context={context}>
+            <StoreDecorator initialState={initialState} context={context} chains={chains}>
               <LayoutWrapper layout={layout} pathname={pathname} storyId={context?.id} isDark={isDark} shadcn={shadcn}>
                 {children}
               </LayoutWrapper>

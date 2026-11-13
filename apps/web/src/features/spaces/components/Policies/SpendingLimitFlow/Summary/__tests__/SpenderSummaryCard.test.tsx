@@ -5,7 +5,7 @@ import {
   LIMITS_LABEL,
   SPENDER_LABEL,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
-import { limitSummaryBuilder, limitSummaryTokenBuilder, spenderSummaryBuilder } from '../SpendingLimitSummary.fixtures'
+import { limitSummaryBuilder, limitSummaryTokenBuilder, spenderSummaryBuilder } from '../SpendingLimitSummary.testData'
 
 const SPENDER = '0x8675B754342754A30A2AeF474D114d8460bca19b'
 
