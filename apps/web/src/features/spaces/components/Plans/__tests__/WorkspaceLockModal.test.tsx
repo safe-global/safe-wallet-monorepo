@@ -19,7 +19,11 @@ let mockPathname = '/spaces'
 jest.mock('next/router', () => ({
   useRouter: () => ({ push: mockPush, replace: mockReplace, pathname: mockPathname }),
 }))
-jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => true }))
+let mockSafeProFlag: boolean | undefined = true
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({
+  useIsSafeProEnabled: () => mockSafeProFlag === true,
+  useSafeProFlag: () => mockSafeProFlag,
+}))
 jest.mock('@/hooks/useIsSurveyEnabled', () => ({ __esModule: true, default: () => true }))
 jest.mock('../../../hooks/useWorkspaceLock', () => ({
   useWorkspaceLock: (spaceId?: string) => mockUseWorkspaceLock(spaceId),
@@ -88,6 +92,7 @@ describe('WorkspaceLockModal', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockPathname = '/spaces'
+    mockSafeProFlag = true
     mockUseWorkspaceLock.mockReturnValue(lock({}))
     mockUseCurrentMembership.mockReturnValue({ id: 1 })
     mockUseIsAdmin.mockReturnValue(true)
@@ -110,6 +115,15 @@ describe('WorkspaceLockModal', () => {
 
     expect(container).toBeEmptyDOMElement()
     expect(mockReplace).toHaveBeenCalledWith({ pathname: '/welcome/survey', query: { spaceId: SPACE_ID } })
+  })
+
+  it('waits for the flags before it picks the last step of an unfinished onboarding', () => {
+    mockUseWorkspaceLock.mockReturnValue(lock({ reason: 'setup-pending' }))
+    mockSafeProFlag = undefined
+
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+
+    expect(mockReplace).not.toHaveBeenCalled()
   })
 
   it('shows the lock right away when the user came back from an abandoned checkout', () => {

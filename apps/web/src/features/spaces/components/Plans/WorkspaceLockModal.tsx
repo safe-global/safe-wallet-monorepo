@@ -80,7 +80,8 @@ const FinishSetupRedirect = ({ spaceId }: { spaceId: string }) => {
   const steps = useEnabledWizardSteps()
 
   useEffect(() => {
-    void router.replace(finishSetupRoute(steps, spaceId))
+    // Only once the flags are known: the last step depends on them.
+    if (steps) void router.replace(finishSetupRoute(steps, spaceId))
   }, [steps, router, spaceId])
 
   return null
