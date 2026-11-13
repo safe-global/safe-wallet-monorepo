@@ -1,0 +1,156 @@
+name: Storybook flake census
+
+# Experiment, not for merging: builds Storybook once and runs the visual sweep several times on the
+# same build, on the runner of the Argos job. One commit has no UI change between its own runs, so a
+# sheet whose hash differs between runs is flaky. Runs when this file changes; re-run it from the PR.
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/storybook-flake-census.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  RUNS: 5
+
+jobs:
+  census:
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 150
+    name: Census (${{ matrix.shard }}/4)
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - uses: $/.github/actions/yarn
+        with:
+          turbo-token: ${{ secrets.TURBO_TOKEN }}
+          turbo-team: ${{ vars.TURBO_TEAM }}
+
+      - name: Install Chromium headless shell
+        working-directory: apps/web
+        run: yarn exec playwright install --only-shell chromium
+
+      - name: Build Storybook
+        run: yarn workspace @safe-global/web build-storybook --output-dir storybook-static
+
+      # Port 4000, as in the Argos job: other ports blank the host-gated pages
+      - name: Serve Storybook
+        working-directory: apps/web
+        run: |
+          npx --yes http-server storybook-static -p 4000 -s &
+          for _ in $(seq 1 30); do
+            curl -sf http://localhost:4000/index.json -o /dev/null && exit 0
+            sleep 2
+          done
+          echo "Storybook static server did not come up" >&2
+          exit 1
+
+      - name: Sweep this shard ${{ env.RUNS }} times
+        working-directory: apps/web
+        run: |
+          for i in $(seq 1 "$RUNS"); do
+            echo "::group::Run $i of $RUNS"
+            # A broken story exits 1; the census still compares what rendered
+            yarn storybook:sweep \
+              --base=http://localhost:4000 \
+              --shard=${{ matrix.shard }}/${{ strategy.job-total }} \
+              --shots="census/run-$i" \
+              --manifest="census/manifest-$i.json" \
+              --json="census/findings-$i.json" \
+              --concurrency=6 || true
+            echo "::endgroup::"
+          done
+
+      - name: Compare the runs
+        working-directory: apps/web
+        env:
+          SHARD: ${{ matrix.shard }}
+        run: |
+          node - <<'EOF'
+          const fs = require('fs')
+          const path = require('path')
+          const runs = Number(process.env.RUNS)
+          const manifests = Array.from({ length: runs }, (_, i) =>
+            JSON.parse(fs.readFileSync(`census/manifest-${i + 1}.json`, 'utf8')),
+          )
+          const findings = Array.from({ length: runs }, (_, i) => {
+            const file = `census/findings-${i + 1}.json`
+            return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : []
+          })
+          const sheets = [...new Set(manifests.flatMap((m) => Object.keys(m)))].sort()
+          const rows = []
+          fs.mkdirSync('census/flaky', { recursive: true })
+          for (const sheet of sheets) {
+            const hashes = manifests.map((m) => m[sheet] ?? 'missing')
+            const variants = [...new Set(hashes)]
+            if (variants.length === 1) continue
+            // One letter per distinct image, in run order: "AABAA" flipped once in run 3
+            const pattern = hashes.map((h) => String.fromCharCode(65 + variants.indexOf(h))).join('')
+            const dir = path.join('census/flaky', sheet.replace(/\.png$/, ''))
+            fs.mkdirSync(dir, { recursive: true })
+            variants.forEach((hash, v) => {
+              const run = hashes.indexOf(hash) + 1
+              const src = path.join(`census/run-${run}`, sheet)
+              if (fs.existsSync(src)) fs.copyFileSync(src, path.join(dir, `${String.fromCharCode(65 + v)}-run-${run}.png`))
+            })
+            const storyIssues = new Set()
+            for (const list of findings) {
+              for (const f of Array.isArray(list) ? list : list.findings ?? []) {
+                // A title sheet holds all stories of its title; a fullscreen sheet is one story
+                const base = sheet.replace(/\.png$/, '')
+                if (f.id === base || f.id.startsWith(`${base}--`)) {
+                  for (const issue of f.issues) storyIssues.add(`${f.mode}: ${issue.split('\n')[0].slice(0, 120)}`)
+                }
+              }
+            }
+            rows.push(`| \`${sheet}\` | ${pattern} | ${[...storyIssues].join('<br>') || ''} |`)
+          }
+          const summary = [
+            `### Shard ${process.env.SHARD}: ${rows.length} flaky of ${sheets.length} sheets in ${runs} runs`,
+            '',
+            ...(rows.length ? ['| Sheet | Runs | Sweep findings |', '| --- | --- | --- |', ...rows] : ['No sheet changed between runs.']),
+            '',
+          ].join('\n')
+          fs.writeFileSync('census/summary.md', summary)
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary)
+          EOF
+
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: storybook-census-${{ matrix.shard }}
+          path: |
+            apps/web/census/flaky/
+            apps/web/census/summary.md
+            apps/web/census/manifest-*.json
+            apps/web/census/findings-*.json
+          if-no-files-found: error
+          retention-days: 7
+
+  report:
+    needs: census
+    if: always()
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 5
+    name: Census report
+    permissions: {}
+    steps:
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          pattern: storybook-census-*
+          path: census
+      - name: Join the shard summaries
+        run: cat census/*/summary.md >> "$GITHUB_STEP_SUMMARY"
