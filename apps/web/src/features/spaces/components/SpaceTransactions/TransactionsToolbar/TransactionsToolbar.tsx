@@ -5,6 +5,7 @@ import NewTransactionButton from '../NewTransactionButton'
 import FilterChips from './FilterChips'
 import FilterMenu from './FilterMenu'
 import SafeFilter from './SafeFilter'
+import SearchTransactions from './SearchTransactions'
 import StatusFilter from './StatusFilter'
 
 type TransactionsToolbarProps = {
@@ -12,12 +13,20 @@ type TransactionsToolbarProps = {
   counts?: SpaceQueueCounts
   filters: SpaceQueueFilters
   onFiltersChange: (filters: SpaceQueueFilters) => void
+  onSearchChange: (search: string) => void
 }
 
-const TransactionsToolbar = ({ spaceId, counts, filters, onFiltersChange }: TransactionsToolbarProps): ReactElement => {
+const TransactionsToolbar = ({
+  spaceId,
+  counts,
+  filters,
+  onFiltersChange,
+  onSearchChange,
+}: TransactionsToolbarProps): ReactElement => {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
+        <SearchTransactions onSearch={onSearchChange} />
         <StatusFilter
           counts={counts}
           selected={filters.statuses}

@@ -42,6 +42,7 @@ const renderToolbar = (filters: SpaceQueueFilters = NO_SPACE_QUEUE_FILTERS) => {
       counts={counts}
       filters={filters}
       onFiltersChange={onFiltersChange}
+      onSearchChange={jest.fn()}
     />,
   )
   return onFiltersChange
@@ -209,5 +210,24 @@ describe('TransactionsToolbar', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Clear' }))
     expect(onFiltersChange).toHaveBeenLastCalledWith(NO_SPACE_QUEUE_FILTERS)
+  })
+
+  it('passes the search on to the queue', () => {
+    const onSearchChange = jest.fn()
+    render(
+      <TransactionsToolbar
+        spaceId={faker.string.uuid()}
+        counts={counts}
+        filters={NO_SPACE_QUEUE_FILTERS}
+        onFiltersChange={jest.fn()}
+        onSearchChange={onSearchChange}
+      />,
+    )
+    const searchbox = screen.getByRole('searchbox', { name: 'Search transactions' })
+
+    expect(searchbox).toBeEnabled()
+    fireEvent.change(searchbox, { target: { value: 'polygon' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Clear search' }))
+    expect(onSearchChange).toHaveBeenLastCalledWith('')
   })
 })
