@@ -102,8 +102,8 @@ export {
   sanitizeMemberAlias,
   MEMBER_ALIAS_MAX_LENGTH,
   MemberStatus,
-  MemberRole,
 } from './hooks/useSpaceMembers'
+export { MemberRole } from './memberRole'
 
 // Hooks from useSpaceSafes.tsx
 export { useSpaceSafes } from './hooks/useSpaceSafes'

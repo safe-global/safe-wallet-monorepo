@@ -7,7 +7,8 @@ import type {
   SpaceMemberDto,
   SpaceAddressBookItemDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { MemberStatus, MemberRole } from './hooks/useSpaceMembers'
+import { MemberStatus } from './hooks/useSpaceMembers'
+import { MemberRole } from './memberRole'
 import type { AddressBookState } from '@/store/addressBookSlice'
 
 // TODO: Currently also checks for 404 because the /v1/spaces/<orgId> endpoint does not return 401

@@ -29,8 +29,6 @@ export enum MemberStatus {
   DECLINED = 'DECLINED',
 }
 
-export { MemberRole }
-
 // CGW stores the self-set alias with the default NameSchema (30), not the 255-char member name.
 export const MEMBER_ALIAS_MAX_LENGTH = NAME_MAX_LENGTH
 
