@@ -1,7 +1,8 @@
-import { Fragment, useState, type ReactNode } from 'react'
+import { Fragment, useEffect, useState, type ReactNode } from 'react'
 import { ChevronDown, Clock, Lock } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import {
   Dialog,
@@ -12,15 +13,17 @@ import {
   DialogTitle,
 } from '@safe-global/views/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableRow } from '@safe-global/views/components/ui/table'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { cn } from '@safe-global/views/utils/cn'
 import { DEFI_V1_COPY, formatApy, formatCompactUsd, formatUsd } from '../copy'
+import { CHAIN_IDS } from '../opportunities'
 import type { Opportunity } from '../types'
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0! transition-colors group-hover/band:bg-foreground/[0.06]'
-const COLUMN_WIDTHS = ['w-10', 'w-[16rem]', 'w-56', 'w-28', 'w-48', '', 'w-20', 'w-32']
+const COLUMN_WIDTHS = ['w-10', 'w-64', 'w-20', 'w-32', 'w-28', 'w-36', '', 'w-20', 'w-36']
 const COLUMN_COUNT = COLUMN_WIDTHS.length
-const INVESTMENT_HEADERS = ['Position', 'Exit time', 'Network', 'Deposited', 'Earned', 'Rate']
-const OPPORTUNITY_HEADERS = ['Opportunity', 'Exit time', 'Risk', 'Access', 'Networks', 'Rate']
+const INVESTMENT_HEADERS = ['Position', 'Asset', 'Exit time', 'Deposited', 'Network', 'Earned', 'Rate']
+const OPPORTUNITY_HEADERS = ['Opportunity', 'Asset', 'Exit time', 'Risk', 'Access', 'Networks', 'Rate']
 const INVESTMENTS_SECTION = 'investments'
 const OPPORTUNITIES_SECTION = 'opportunities'
 
@@ -62,6 +65,7 @@ const SectionBand = ({
     className="group/band cursor-pointer"
     onClick={() => onToggle(id)}
     aria-expanded={!collapsed}
+    id={`band-${id}`}
     data-testid={`shelf-${id}`}
   >
     <TableCell className={cn('rounded-l-lg', nested ? 'py-0!' : BAND_CELL)}>
@@ -91,40 +95,93 @@ const ColumnHeaders = ({ labels }: { labels: string[] }) => (
   </TableRow>
 )
 
-const NameCell = ({ opportunity }: { opportunity: Opportunity }) => (
-  <div className="flex min-w-0 flex-col">
-    <span className="truncate font-medium text-foreground">{opportunity.name}</span>
-    <span className="truncate text-xs text-muted-foreground">
-      {opportunity.runBy}
-      {opportunity.curator ? ` · curated by ${opportunity.curator}` : ''}
-    </span>
-  </div>
-)
-
-const ExitCell = ({ label }: { label: string }) => (
-  <span className="flex items-center gap-1.5 whitespace-normal">
-    <Clock className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
-    {label}
+// Mirrors the Tag in the pending queue prototype, which is not on dev yet.
+const Tag = ({ children, muted }: { children: ReactNode; muted?: boolean }) => (
+  <span
+    className={cn(
+      'inline-flex h-6 w-fit shrink-0 items-center gap-1 whitespace-nowrap rounded-[6px] px-2 text-[13px] leading-5 font-medium [&>svg]:size-3.5 [&>svg]:shrink-0',
+      muted ? 'text-muted-foreground' : 'bg-muted text-foreground',
+    )}
+  >
+    {children}
   </span>
 )
 
-const AccessBadges = ({ opportunity, locked }: { opportunity: Opportunity; locked: boolean }) => (
-  <span className="flex flex-wrap gap-1">
-    {opportunity.kyc && <Badge variant="outline">{DEFI_V1_COPY.kyc}</Badge>}
-    {opportunity.access === 'pro' && (
-      <Badge variant={locked ? 'outline' : 'brand'}>
-        {locked && <Lock data-icon="inline-start" />}
-        {DEFI_V1_COPY.proOnly}
-      </Badge>
-    )}
-    {opportunity.placement === 'featured' && <Badge variant="info">{DEFI_V1_COPY.featured}</Badge>}
-    {opportunity.placement === 'premium' && <Badge variant="info">{DEFI_V1_COPY.premium}</Badge>}
-    {opportunity.placement === 'sponsored' && <Badge variant="warning">{DEFI_V1_COPY.sponsored}</Badge>}
-    {!opportunity.kyc && opportunity.access === 'all' && opportunity.placement === 'base' && (
-      <span className="text-xs text-muted-foreground">Open to all</span>
-    )}
-  </span>
+const PLACEMENT_TAG: Partial<Record<Opportunity['placement'], string>> = {
+  featured: DEFI_V1_COPY.featured,
+  premium: DEFI_V1_COPY.premium,
+  sponsored: DEFI_V1_COPY.sponsored,
+}
+
+const NameCell = ({ opportunity }: { opportunity: Opportunity }) => {
+  const placement = PLACEMENT_TAG[opportunity.placement]
+  return (
+    <div className="flex min-w-0 items-center gap-3">
+      <span
+        className="flex size-8 shrink-0 items-center justify-center rounded-md bg-foreground text-xs font-semibold text-background"
+        aria-hidden
+      >
+        {opportunity.mark}
+      </span>
+      <div className="flex min-w-0 flex-col">
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="truncate font-medium text-foreground">{opportunity.name}</span>
+          {placement && <Badge variant={opportunity.placement === 'sponsored' ? 'warning' : 'info'}>{placement}</Badge>}
+        </span>
+        <span className="truncate text-xs text-muted-foreground">
+          {opportunity.runBy}
+          {opportunity.curator ? ` · ${opportunity.curator}` : ''}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+const ExitCell = ({ opportunity }: { opportunity: Opportunity }) => (
+  <Tooltip delay={150}>
+    <TooltipTrigger render={<span className="flex min-w-0 items-center gap-1.5" />}>
+      <Clock className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
+      <span className="truncate">{opportunity.exitShort}</span>
+    </TooltipTrigger>
+    <TooltipContent>{opportunity.exitLabel}</TooltipContent>
+  </Tooltip>
 )
+
+const ChainLogo = ({ chain }: { chain: string }) => (
+  <Avatar size="xs" className="size-4 ring-2 ring-card">
+    {CHAIN_IDS[chain] && (
+      <AvatarImage
+        src={`https://safe-transaction-assets.safe.global/chains/${CHAIN_IDS[chain]}/chain_logo.png`}
+        alt=""
+      />
+    )}
+    <AvatarFallback className="text-[9px]">{chain[0]}</AvatarFallback>
+  </Avatar>
+)
+
+const NetworksCell = ({ chains }: { chains: string[] }) => (
+  <Tooltip delay={150}>
+    <TooltipTrigger render={<span className="flex min-w-0 items-center gap-2" />}>
+      <span className="flex shrink-0 -space-x-1">
+        {chains.map((chain) => (
+          <ChainLogo key={chain} chain={chain} />
+        ))}
+      </span>
+      <span className="truncate">{chains.length > 1 ? `${chains.length} networks` : chains[0]}</span>
+    </TooltipTrigger>
+    <TooltipContent>{chains.join(', ')}</TooltipContent>
+  </Tooltip>
+)
+
+const AccessTag = ({ opportunity, locked }: { opportunity: Opportunity; locked: boolean }) => {
+  if (opportunity.access === 'all' && !opportunity.kyc) return <Tag muted>Open to all</Tag>
+  return (
+    <Tag>
+      {locked && <Lock aria-hidden />}
+      {[opportunity.access === 'pro' && DEFI_V1_COPY.proOnly, opportunity.kyc && 'KYC'].filter(Boolean).join(' · ')}
+    </Tag>
+  )
+}
 
 const OpportunityRow = ({
   opportunity,
@@ -148,15 +205,20 @@ const OpportunityRow = ({
       <TableCell>
         <NameCell opportunity={opportunity} />
       </TableCell>
+      <TableCell className="font-semibold">{opportunity.asset}</TableCell>
       <TableCell>
-        <ExitCell label={opportunity.exitLabel} />
+        <ExitCell opportunity={opportunity} />
       </TableCell>
-      <TableCell className="text-muted-foreground">{DEFI_V1_COPY.risk[opportunity.risk]}</TableCell>
       <TableCell>
-        <AccessBadges opportunity={opportunity} locked={locked} />
+        <Tag>{DEFI_V1_COPY.risk[opportunity.risk]}</Tag>
       </TableCell>
-      <TableCell className="truncate text-muted-foreground">{opportunity.chains.join(', ')}</TableCell>
-      <TableCell className="tabular-nums">{formatApy(opportunity.apy)}</TableCell>
+      <TableCell>
+        <AccessTag opportunity={opportunity} locked={locked} />
+      </TableCell>
+      <TableCell>
+        <NetworksCell chains={opportunity.chains} />
+      </TableCell>
+      <TableCell className="font-semibold tabular-nums">{formatApy(opportunity.apy)}</TableCell>
       <TableCell className="text-right">
         <Button
           variant="outline"
@@ -181,15 +243,18 @@ const InvestmentRow = ({ position, onWithdraw }: { position: Position; onWithdra
     <TableCell>
       <NameCell opportunity={position.opportunity} />
     </TableCell>
+    <TableCell className="font-semibold">{position.opportunity.asset}</TableCell>
     <TableCell>
-      <ExitCell label={position.opportunity.exitLabel} />
+      <ExitCell opportunity={position.opportunity} />
     </TableCell>
-    <TableCell className="text-muted-foreground">{position.opportunity.chains[0]}</TableCell>
     <TableCell className="tabular-nums">{formatUsd(position.principal)}</TableCell>
+    <TableCell>
+      <NetworksCell chains={position.opportunity.chains.slice(0, 1)} />
+    </TableCell>
     <TableCell className="tabular-nums text-badge-dot-success">
       {position.earned > 0 ? `+${formatUsd(position.earned)}` : '—'}
     </TableCell>
-    <TableCell className="tabular-nums">{formatApy(position.opportunity.apy)}</TableCell>
+    <TableCell className="font-semibold tabular-nums">{formatApy(position.opportunity.apy)}</TableCell>
     <TableCell className="text-right">
       {position.pending ? (
         <Badge variant="warning">{DEFI_V1_COPY.positions.pending}</Badge>
@@ -239,11 +304,13 @@ export const TreasuryTable = ({
   positions,
   groups,
   flat,
+  focus,
   isLocked,
   onSelect,
   onDeposit,
 }: {
   positions: Position[]
+  focus?: { id: string; nonce: number }
   groups: OpportunityGroup[]
   flat?: boolean
   isLocked: (item: Opportunity) => boolean
@@ -252,6 +319,14 @@ export const TreasuryTable = ({
 }) => {
   const [collapsed, setCollapsed] = useState<string[]>([INVESTMENTS_SECTION, MORE_GROUP])
   const [withdrawing, setWithdrawing] = useState<Position | null>(null)
+  useEffect(() => {
+    if (!focus) return
+    setCollapsed((current) => current.filter((id) => id !== OPPORTUNITIES_SECTION && id !== focus.id))
+    requestAnimationFrame(() =>
+      document.getElementById(`band-${focus.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
+    )
+  }, [focus])
+
   const toggle = (id: string) =>
     setCollapsed((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]))
   const isCollapsed = (id: string) => collapsed.includes(id)
@@ -263,7 +338,7 @@ export const TreasuryTable = ({
   return (
     <Card radius="xl" size="none">
       <CardContent>
-        <Table aria-label="Treasury" variant="panel" className="table-fixed min-w-[960px] [&_td]:px-4 [&_th]:px-4">
+        <Table aria-label="Treasury" variant="panel" className="table-fixed min-w-[1040px] [&_td]:px-4 [&_th]:px-4">
           <colgroup>
             {COLUMN_WIDTHS.map((width, index) => (
               <col key={index} className={width || undefined} />

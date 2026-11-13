@@ -5,6 +5,7 @@ export const OPPORTUNITIES: Opportunity[] = [
   {
     id: 'aave-usdc',
     name: 'Aave USDC',
+    mark: 'Aa',
     runBy: 'Aave DAO',
     category: 'cash',
     risk: 'low',
@@ -12,6 +13,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     holds: 'aUSDC, redeemable 1:1 for USDC',
     apy: 0.041,
     exitLabel: 'Instant, while the pool has liquidity',
+    exitShort: 'Instant',
     exitHours: 0,
     audits: ['OpenZeppelin', 'Trail of Bits', 'Certora', 'Sigma Prime'],
     liveSince: '2023-01',
@@ -24,6 +26,7 @@ export const OPPORTUNITIES: Opportunity[] = [
   {
     id: 'tbill-fund',
     name: 'Tokenised T-bill fund',
+    mark: 'T',
     runBy: 'Regulated fund manager',
     category: 'cash',
     risk: 'low',
@@ -31,6 +34,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     holds: 'Shares of a short-term US Treasury fund',
     apy: 0.039,
     exitLabel: 'Same business day',
+    exitShort: 'Same day',
     exitHours: 24,
     audits: ['Fund auditor', 'Smart contract audit (2)'],
     liveSince: '2024-03',
@@ -44,6 +48,7 @@ export const OPPORTUNITIES: Opportunity[] = [
   {
     id: 'partner-vault',
     name: 'Partner vault (USD)',
+    mark: 'M',
     runBy: 'Morpho',
     curator: 'Independent risk curator',
     category: 'yield',
@@ -52,6 +57,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     holds: 'Vault shares backed by over-collateralised loans',
     apy: 0.056,
     exitLabel: 'Instant, while the vault has liquidity',
+    exitShort: 'Instant',
     exitHours: 0,
     audits: ['Spearbit', 'Cantina', 'OpenZeppelin'],
     liveSince: '2026-09',
@@ -65,6 +71,7 @@ export const OPPORTUNITIES: Opportunity[] = [
   {
     id: 'credit-fund',
     name: 'Tokenised AAA credit fund',
+    mark: 'C',
     runBy: 'Regulated fund manager',
     category: 'yield',
     risk: 'medium',
@@ -72,6 +79,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     holds: 'Shares of a fund holding AAA-rated loan notes',
     apy: 0.054,
     exitLabel: 'Up to 3 business days',
+    exitShort: 'Up to 3 days',
     exitHours: 72,
     audits: ['Fund auditor', 'Smart contract audit (3)'],
     liveSince: '2025-06',
@@ -84,6 +92,7 @@ export const OPPORTUNITIES: Opportunity[] = [
   {
     id: 'lido-steth',
     name: 'Lido staked ETH',
+    mark: 'L',
     runBy: 'Lido DAO',
     category: 'staking',
     risk: 'low',
@@ -91,6 +100,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     holds: 'stETH, which tracks staked ETH',
     apy: 0.028,
     exitLabel: 'Instant by swap, or 1 to 5 days to withdraw',
+    exitShort: '1 to 5 days',
     exitHours: 120,
     audits: ['Sigma Prime', 'Certora', 'Statemind', 'MixBytes'],
     liveSince: '2020-12',
@@ -103,6 +113,7 @@ export const OPPORTUNITIES: Opportunity[] = [
   {
     id: 'kiln-eth',
     name: 'Kiln native staking',
+    mark: 'K',
     runBy: 'Kiln',
     category: 'staking',
     risk: 'low',
@@ -110,6 +121,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     holds: 'Validators owned by this Safe',
     apy: 0.03,
     exitLabel: 'Several days, set by the network exit queue',
+    exitShort: 'Exit queue',
     exitHours: 168,
     audits: ['Spearbit', 'Halborn'],
     liveSince: '2021-04',
@@ -122,6 +134,7 @@ export const OPPORTUNITIES: Opportunity[] = [
   {
     id: 'spark-savings',
     name: 'Spark savings USDC',
+    mark: 'Sp',
     runBy: 'Spark',
     category: 'cash',
     risk: 'low',
@@ -129,6 +142,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     holds: 'sUSDC savings shares',
     apy: 0.045,
     exitLabel: 'Instant',
+    exitShort: 'Instant',
     exitHours: 0,
     audits: ['ChainSecurity', 'Cantina'],
     liveSince: '2024-10',
@@ -141,6 +155,7 @@ export const OPPORTUNITIES: Opportunity[] = [
   {
     id: 'compound-usdc',
     name: 'Compound USDC',
+    mark: 'Co',
     runBy: 'Compound DAO',
     category: 'cash',
     risk: 'low',
@@ -148,6 +163,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     holds: 'cUSDCv3 lending position',
     apy: 0.038,
     exitLabel: 'Instant, while the pool has liquidity',
+    exitShort: 'Instant',
     exitHours: 0,
     audits: ['OpenZeppelin', 'ChainSecurity'],
     liveSince: '2022-08',
@@ -160,6 +176,7 @@ export const OPPORTUNITIES: Opportunity[] = [
   {
     id: 'etherfi',
     name: 'ether.fi restaked ETH',
+    mark: 'e',
     runBy: 'ether.fi',
     category: 'staking',
     risk: 'medium',
@@ -167,6 +184,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     holds: 'weETH, restaked ETH',
     apy: 0.031,
     exitLabel: 'Instant by swap, or up to 7 days',
+    exitShort: 'Up to 7 days',
     exitHours: 168,
     audits: ['Certora', 'Nethermind'],
     liveSince: '2023-05',
@@ -179,6 +197,7 @@ export const OPPORTUNITIES: Opportunity[] = [
   {
     id: 'ethena-susde',
     name: 'Ethena staked USDe',
+    mark: 'Et',
     runBy: 'Ethena',
     category: 'yield',
     risk: 'higher',
@@ -186,6 +205,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     holds: 'sUSDe, backed by a delta-neutral strategy',
     apy: 0.07,
     exitLabel: '7 days cooldown',
+    exitShort: '7-day cooldown',
     exitHours: 168,
     audits: ['Spearbit', 'Code4rena'],
     liveSince: '2024-02',
@@ -198,6 +218,7 @@ export const OPPORTUNITIES: Opportunity[] = [
   {
     id: 'sponsored-vault',
     name: 'New-chain USD vault',
+    mark: 'N',
     runBy: 'Partner protocol',
     category: 'yield',
     risk: 'higher',
@@ -205,6 +226,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     holds: 'Vault shares on a newer network',
     apy: 0.082,
     exitLabel: 'Up to 24 hours',
+    exitShort: 'Up to 24 h',
     exitHours: 24,
     audits: ['Smart contract audit (2)'],
     liveSince: '2026-07',
@@ -223,6 +245,8 @@ export const IDLE_CASH = {
   chain: 'Base',
   idleDays: 30,
 }
+
+export const CHAIN_IDS: Record<string, string> = { Ethereum: '1', Base: '8453', Arbitrum: '42161' }
 
 export const TREASURY_TOTAL = 6_700_000
 

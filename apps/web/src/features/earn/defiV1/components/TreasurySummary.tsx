@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { Progress } from '@safe-global/views/components/ui/progress'
 import { Separator } from '@safe-global/views/components/ui/separator'
@@ -6,7 +7,7 @@ import type { TreasurySummary as Summary } from '../shelf'
 
 const percent = new Intl.NumberFormat('en-US', { style: 'percent', maximumFractionDigits: 0 })
 
-export const TreasurySummary = ({ summary }: { summary: Summary }) => (
+export const TreasurySummary = ({ summary, footer }: { summary: Summary; footer?: ReactNode }) => (
   <Card size="sm" className="w-full md:w-[400px]" data-testid="treasury-summary">
     <CardContent>
       <div className="flex flex-col gap-3 text-sm">
@@ -44,6 +45,12 @@ export const TreasurySummary = ({ summary }: { summary: Summary }) => (
             <span className="text-muted-foreground">blended APY</span>
           </span>
         </div>
+        {footer && (
+          <>
+            <Separator />
+            {footer}
+          </>
+        )}
       </div>
     </CardContent>
   </Card>

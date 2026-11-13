@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Lock, ShieldCheck } from 'lucide-react'
+import { Lock, Repeat } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
@@ -12,7 +12,7 @@ import {
 } from '@safe-global/views/components/ui/dialog'
 import { Switch } from '@safe-global/views/components/ui/switch'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { DEFI_V1_COPY, formatUsd } from '../copy'
+import { DEFI_V1_COPY, formatCompactUsd, formatUsd } from '../copy'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { OPPORTUNITIES, POLICY_PREVIEW } from '../opportunities'
 import type { DefiV1Plan } from '../types'
@@ -28,7 +28,7 @@ const Row = ({ label, value }: { label: string; value: string }) => (
   </div>
 )
 
-export const PolicyPanel = ({ plan }: { plan: DefiV1Plan }) => {
+export const PolicyPanel = ({ plan, idle }: { plan: DefiV1Plan; idle: number }) => {
   const { safe } = useSafeInfo()
   const [isOpen, setIsOpen] = useState(false)
   const [sweep, setSweep] = useState(true)
@@ -36,13 +36,18 @@ export const PolicyPanel = ({ plan }: { plan: DefiV1Plan }) => {
   const isPro = plan === 'pro'
 
   return (
-    <span className="flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="policy-panel">
-      <ShieldCheck className="size-4" aria-hidden />
-      <span className="@max-[700px]:sr-only">{COPY.title}</span>
-      <Badge variant="warning">{DEFI_V1_COPY.deposit.comingSoon}</Badge>
-      <Button variant="outline" size="xs" onClick={() => setIsOpen(true)}>
+    <div className="flex items-center gap-3" data-testid="policy-panel">
+      <Repeat className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+      <div className="flex min-w-0 flex-col">
+        <span className="font-medium">{COPY.footerTitle(formatCompactUsd(idle))}</span>
+        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          {COPY.footerLead}
+          <Badge variant="warning">{DEFI_V1_COPY.deposit.comingSoon}</Badge>
+        </span>
+      </div>
+      <Button variant="outline" size="xs" className="ml-auto" onClick={() => setIsOpen(true)}>
         {!isPro && <Lock />}
-        {isPro ? COPY.cta : DEFI_V1_COPY.locked}
+        {isPro ? COPY.cta : DEFI_V1_COPY.proOnly}
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -76,6 +81,6 @@ export const PolicyPanel = ({ plan }: { plan: DefiV1Plan }) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </span>
+    </div>
   )
 }

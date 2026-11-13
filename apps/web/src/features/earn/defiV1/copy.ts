@@ -31,13 +31,13 @@ export const DEFI_V1_COPY = {
       'A short list of vetted options, grouped by what your treasury needs. Exit time and who runs it come first.',
     defi: 'Lending, staking and tokenised funds you can use from this Safe. Filter by asset, network and exit time.',
   } satisfies Record<DefiV1Framing, string>,
+  bestRate: (rate: string) => `Up to ${rate}`,
   category: {
     cash: { title: 'Cash-like', subtitle: 'Exit within a day. For cash you may need soon.' },
     yield: { title: 'Enhanced yield', subtitle: 'A bit more yield for cash you can leave for a while.' },
     staking: { title: 'Staking', subtitle: 'Earn on ETH the treasury plans to hold.' },
   } satisfies Record<OpportunityCategory, { title: string; subtitle: string }>,
   risk: { low: 'Lower risk', medium: 'Medium risk', higher: 'Higher risk' } satisfies Record<RiskLevel, string>,
-  more: (count: number) => `More options (${count})`,
   moreTitle: 'More options',
   moreLead: 'Options that passed the listing checks but are not on the shelf. Same facts, same format.',
   nudgeTitle: (value: string, asset: string, chain: string, days: number) =>
@@ -106,7 +106,9 @@ export const DEFI_V1_COPY = {
   policy: {
     title: 'Investment policy',
     lead: 'Signers approve a rule once. Then one signer can deposit and withdraw inside it, and funds only ever return to this Safe.',
-    cta: 'Preview a policy',
+    cta: 'Set up policy',
+    footerTitle: (idle: string) => `Sweep idle ${idle} automatically`,
+    footerLead: 'Approve a policy once, then one signer invests',
     dialogTitle: 'Treasury cash policy',
     options: 'Allowed options',
     cap: 'Cap',

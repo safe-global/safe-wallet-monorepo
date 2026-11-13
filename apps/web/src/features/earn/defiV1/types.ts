@@ -7,6 +7,8 @@ export type Access = 'all' | 'pro'
 export type Opportunity = {
   id: string
   name: string
+  /** Initials on the opportunity's icon. */
+  mark: string
   runBy: string
   curator?: string
   category: OpportunityCategory
@@ -15,6 +17,7 @@ export type Opportunity = {
   holds: string
   apy: number
   exitLabel: string
+  exitShort: string
   exitHours: number
   audits: string[]
   liveSince: string

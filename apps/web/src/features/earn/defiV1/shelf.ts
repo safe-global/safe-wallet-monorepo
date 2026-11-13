@@ -91,3 +91,20 @@ export const summariseTreasury = (
     blendedApy: invested > 0 ? weighted / invested : 0,
   }
 }
+
+export const fastestExitLabel = (hours: number): string => {
+  if (hours === 0) return 'Exit instantly'
+  if (hours <= 24) return 'Exit same day'
+  if (hours <= 72) return 'Exit within 3 days'
+  return 'Exit within days'
+}
+
+export type CategoryHighlight = { category: OpportunityCategory; bestApy: number; exitLabel: string; count: number }
+
+export const categoryHighlights = (opportunities: Opportunity[]): CategoryHighlight[] =>
+  buildShelf(opportunities).groups.map((group) => ({
+    category: group.category,
+    bestApy: Math.max(...group.items.map((item) => item.apy)),
+    exitLabel: fastestExitLabel(Math.min(...group.items.map((item) => item.exitHours))),
+    count: group.items.length,
+  }))

@@ -9,15 +9,17 @@ import {
   filterOpportunities,
   isLocked,
   NUDGE_MAX_EXIT_HOURS,
+  categoryHighlights,
   summariseTreasury,
   type ListFilters,
 } from '../shelf'
-import type { DefiV1Config, Opportunity } from '../types'
+import type { DefiV1Config, Opportunity, OpportunityCategory } from '../types'
 import { DepositDialog, type DepositResult } from './DepositDialog'
 import { FactSheet } from './FactSheet'
 import { PolicyPanel } from './PolicyPanel'
 import { MORE_GROUP, TreasuryTable, type OpportunityGroup, type Position } from './TreasuryTables'
 import { TreasurySummary } from './TreasurySummary'
+import { CategoryCards } from './CategoryCards'
 
 const ALL = 'all'
 
@@ -79,6 +81,10 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const [chain, setChain] = useState(ALL)
   const [exit, setExit] = useState(ALL)
   const summary = summariseTreasury(TREASURY_TOTAL, positions)
+  const highlights = useMemo(() => categoryHighlights(OPPORTUNITIES), [])
+  const [focus, setFocus] = useState<{ id: string; nonce: number }>()
+  const focusCategory = (category: OpportunityCategory) =>
+    setFocus((current) => ({ id: category, nonce: (current?.nonce ?? 0) + 1 }))
   const isDefi = config.framing === 'defi'
   const locked = (item: Opportunity) => isLocked(item, config.model, config.plan)
 
@@ -104,7 +110,7 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   return (
     <div className="@container min-w-0 px-6 pb-8 pt-5" data-testid="defi-v1-page">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div className="flex flex-col gap-4">
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
           <div className="flex flex-col gap-1">
             <Typography as="h1" variant="h3">
               {DEFI_V1_COPY.tabName[config.framing]}
@@ -115,8 +121,9 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
               </Typography>
             )}
           </div>
+          {!isDefi && <CategoryCards highlights={highlights} onSelect={focusCategory} />}
         </div>
-        <TreasurySummary summary={summary} />
+        <TreasurySummary summary={summary} footer={<PolicyPanel plan={config.plan} idle={summary.idle} />} />
       </div>
 
       <section aria-label="Treasury" className="flex flex-col gap-3">
@@ -163,15 +170,13 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
               />
             </div>
           )}
-          <div className="ml-auto">
-            <PolicyPanel plan={config.plan} />
-          </div>
         </div>
 
         <TreasuryTable
           positions={positions}
           groups={groups}
           flat={isDefi}
+          focus={focus}
           isLocked={locked}
           onSelect={setSelected}
           onDeposit={setDepositing}

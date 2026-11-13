@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker'
 import {
   buildShelf,
+  categoryHighlights,
   depositSteps,
   filterOpportunities,
   isLocked,
@@ -13,6 +14,7 @@ import type { Opportunity } from './types'
 const opportunity = (overrides: Partial<Opportunity> = {}): Opportunity => ({
   id: faker.string.uuid(),
   name: faker.company.name(),
+  mark: 'X',
   runBy: faker.company.name(),
   category: 'cash',
   risk: 'low',
@@ -20,6 +22,7 @@ const opportunity = (overrides: Partial<Opportunity> = {}): Opportunity => ({
   holds: faker.lorem.words(3),
   apy: faker.number.float({ min: 0.01, max: 0.08 }),
   exitLabel: faker.lorem.words(2),
+  exitShort: faker.lorem.word(),
   exitHours: 0,
   audits: [faker.company.name()],
   liveSince: '2024-01',
@@ -142,5 +145,16 @@ describe('summariseTreasury', () => {
 
     expect(summary.invested).toBe(0)
     expect(summary.idle).toBe(1_000)
+  })
+})
+
+describe('categoryHighlights', () => {
+  it('shows the best rate and the fastest exit of each shelf category', () => {
+    const slowHighRate = opportunity({ apy: 0.05, exitHours: 24 })
+    const fastLowRate = opportunity({ apy: 0.03, exitHours: 0 })
+
+    const [cash] = categoryHighlights([slowHighRate, fastLowRate])
+
+    expect(cash).toEqual({ category: 'cash', bestApy: 0.05, exitLabel: 'Exit instantly', count: 2 })
   })
 })
