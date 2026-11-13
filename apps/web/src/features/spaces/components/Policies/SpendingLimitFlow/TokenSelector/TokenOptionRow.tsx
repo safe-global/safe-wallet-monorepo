@@ -1,6 +1,7 @@
 import { TriangleAlert } from 'lucide-react'
 import TokenIcon from '@/components/common/TokenIcon'
 import { Typography } from '@safe-global/views/components/ui/typography'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { tokenOptionLabel, type TokenOption } from '../utils/tokenOptions'
 import {
@@ -36,11 +37,12 @@ const TokenOptionRow = ({ option }: { option: TokenOption }) => {
       </div>
 
       {option.untrusted && (
-        <TriangleAlert
-          className="text-warning-strong size-4 shrink-0"
-          aria-label={UNTRUSTED_TOKEN_WARNING}
-          data-testid="token-untrusted-icon"
-        />
+        <Tooltip>
+          <TooltipTrigger render={<span className="flex shrink-0" data-testid="token-untrusted-icon" />}>
+            <TriangleAlert className="text-warning-strong size-4" aria-label={UNTRUSTED_TOKEN_WARNING} />
+          </TooltipTrigger>
+          <TooltipContent>{UNTRUSTED_TOKEN_WARNING}</TooltipContent>
+        </Tooltip>
       )}
     </div>
   )
