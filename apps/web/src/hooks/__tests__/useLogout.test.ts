@@ -1,7 +1,7 @@
 /**
  * @jest-environment-options {"url": "http://localhost:3000/"}
  */
-import { renderHook, act } from '@testing-library/react'
+import { renderHook, act } from '@/tests/test-utils'
 import useLogout from '@/hooks/useLogout'
 import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
 import useOnboard from '@/hooks/wallets/useOnboard'
