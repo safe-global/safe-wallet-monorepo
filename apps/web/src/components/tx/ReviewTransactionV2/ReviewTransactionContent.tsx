@@ -21,7 +21,11 @@ import CheckWallet from '@/components/common/CheckWallet'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 
-export type ReviewTransactionContentProps = PropsWithChildren<{ onSubmit: SubmitCallback; withDecodedData?: boolean }>
+export type ReviewTransactionContentProps = PropsWithChildren<{
+  onSubmit: SubmitCallback
+  withDecodedData?: boolean
+  withMultisend?: boolean
+}>
 
 export const ReviewTransactionContent = ({
   safeTx,
@@ -32,6 +36,7 @@ export const ReviewTransactionContent = ({
   txDetails,
   txPreview,
   withDecodedData = true,
+  withMultisend = true,
 }: ReviewTransactionContentProps & {
   safeTx: ReturnType<typeof useSafeTx>
   safeTxError: ReturnType<typeof useSafeTxError>
@@ -63,6 +68,7 @@ export const ReviewTransactionContent = ({
           isBatch={isBatch}
           isApproval={isApproval}
           withDecodedData={withDecodedData}
+          withMultisend={withMultisend}
         >
           {!isRejection && isApproval && (
             <ParsingErrorBoundary>

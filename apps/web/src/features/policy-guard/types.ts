@@ -1,12 +1,12 @@
-import type { OperationType } from '@safe-global/types-kit'
+import type { MetaTransactionData } from '@safe-global/types-kit'
+import type {
+  CreatePolicyConfigurationRequestDto,
+  PolicyConfigurationDto,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
-export type PolicyConfiguration = {
-  target: string
-  selector: string
-  operation: OperationType
-  policy: string
-  data: string
-}
+export type PolicyConfiguration = PolicyConfigurationDto
+
+export type AllowlistSetup = CreatePolicyConfigurationRequestDto & { txs: MetaTransactionData[] }
 
 export type GuardSlot = 'transaction' | 'module'
 
@@ -24,3 +24,10 @@ export type AllowlistIneligibilityReason = 'chain-not-enabled' | 'safe-not-deplo
 export type AllowlistEligibility = { eligible: true } | { eligible: false; reason: AllowlistIneligibilityReason }
 
 export type PolicyGuardTarget = { chainId: string; safeAddress: string }
+
+export type SetupCallDescription = {
+  method: string
+  target: 'guard' | 'safe'
+  /** The address a Safe setter points at, e.g. `{ name: 'guard', value: '0x…' }`. */
+  param?: { name: string; value: string }
+}
