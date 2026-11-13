@@ -1,0 +1,256 @@
+name: drain-safe Deploy
+
+on:
+  pull_request:
+    paths:
+      - apps/drain-safe/**
+      - packages/**
+      - .github/workflows/drain-safe-deploy.yml
+
+  push:
+    branches:
+      - dev
+    paths:
+      - apps/drain-safe/**
+      - packages/**
+
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Prepare a production release'
+        type: boolean
+        default: true
+
+# A release gets its own group and is never cancelled: a push to dev must not stop it after the tag is pushed.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && 'release' || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+
+env:
+  WORKING_DIRECTORY: apps/drain-safe
+
+permissions: {}
+
+jobs:
+  pr-preview:
+    name: PR Preview
+    runs-on: ubuntu-26.04-arm
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+
+    steps:
+      - name: Post building comment
+        uses: mshick/add-pr-comment@v3.12.0
+        with:
+          message-id: drain-safe-preview
+          message: |
+            ## drain-safe Preview
+            ⏳ Building preview deployment...
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - uses: $/.github/actions/yarn
+        # This job holds the OIDC deploy credentials, so it must not run files from a cache.
+        with:
+          cache: 'false'
+
+      - name: Build
+        run: yarn workspace @safe-global/drain-safe build
+
+      - name: Extract branch name
+        id: extract_branch
+        uses: $/.github/actions/branch-slug
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to S3
+        env:
+          BUCKET: s3://${{ secrets.AWS_REVIEW_BUCKET_NAME }}/drain-safe/${{ steps.extract_branch.outputs.slug }}
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: aws s3 sync ./build $BUCKET --delete
+
+      - name: Post deployment link
+        if: always()
+        uses: mshick/add-pr-comment@v3.12.0
+        with:
+          message-id: drain-safe-preview
+          message: |
+            ## drain-safe Preview
+            ✅ Deploy successful!
+
+            **Preview URL:**
+            https://${{ steps.extract_branch.outputs.slug }}--drain-safe.review.5afe.dev/
+          message-failure: |
+            ## drain-safe Preview
+            ❌ Deploy failed!
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-staging:
+    name: Deploy Staging
+    runs-on: ubuntu-26.04-arm
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: $/.github/actions/yarn
+        # This job holds the OIDC deploy credentials, so it must not run files from a cache.
+        with:
+          cache: 'false'
+
+      - name: Build
+        run: yarn workspace @safe-global/drain-safe build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: ${{ secrets.DRAIN_SAFE_AWS_ROLE }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to staging
+        env:
+          BUCKET: s3://${{ secrets.DRAIN_SAFE_AWS_STAGING_BUCKET_NAME }}/current
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: aws s3 sync ./build $BUCKET --delete
+
+  prepare-release:
+    name: Prepare Release
+    runs-on: ubuntu-26.04-arm
+    if: github.event_name == 'workflow_dispatch' && inputs.release && github.ref == 'refs/heads/dev'
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: $/.github/actions/yarn
+        # This job holds the OIDC deploy credentials, so it must not run files from a cache.
+        with:
+          cache: 'false'
+
+      - name: Extract version
+        id: version
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          VERSION=$(node -p 'require("./package.json").version')
+          echo "version=drain-safe-v$VERSION" >> $GITHUB_OUTPUT
+          echo "version_number=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Check if tag already exists
+        run: |
+          if git rev-parse "${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "Tag ${{ steps.version.outputs.version }} already exists!"
+            echo "Make sure you've bumped the version in apps/drain-safe/package.json"
+            exit 1
+          fi
+          echo "Tag is new"
+
+      - name: Build (production base path)
+        run: yarn workspace @safe-global/drain-safe build
+        env:
+          VITE_BASE_PATH: /drain-safe/
+
+      - name: Create release archive
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: tar -czf drain-safe-${{ steps.version.outputs.version_number }}.tar.gz -C build .
+
+      - name: Generate artifact attestation
+        uses: actions/attest@v4.2.2
+        with:
+          subject-path: ${{ env.WORKING_DIRECTORY }}/drain-safe-${{ steps.version.outputs.version_number }}.tar.gz
+
+      - name: Create checksum
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: sha256sum drain-safe-${{ steps.version.outputs.version_number }}.tar.gz > drain-safe-${{ steps.version.outputs.version_number }}-sha256-checksum.txt
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          PREV_TAG=$(git tag --list 'drain-safe-v*' --sort=-v:refname | head -1)
+          if [ -n "$PREV_TAG" ]; then
+            LOG=$(git log "$PREV_TAG"..HEAD --oneline -- apps/drain-safe/)
+          else
+            LOG="Initial release"
+          fi
+          {
+            echo "log<<EOF"
+            echo "$LOG"
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Create git tag
+        env:
+          HUSKY: '0'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.version.outputs.version }}
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v3.0.3
+        with:
+          name: ${{ steps.version.outputs.version }}
+          tag_name: ${{ steps.version.outputs.version }}
+          files: |
+            ${{ env.WORKING_DIRECTORY }}/drain-safe-${{ steps.version.outputs.version_number }}.tar.gz
+            ${{ env.WORKING_DIRECTORY }}/drain-safe-${{ steps.version.outputs.version_number }}-sha256-checksum.txt
+          body: |
+            ### Changes
+            ${{ steps.changelog.outputs.log }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      # Fail-open like the GitLab hook it replaced: a promotion-dispatch problem must not block the
+      # release publish above. If either step fails, dispatch drain-safe-production.yml manually in
+      # safe-production-promotions with this tag.
+      - name: Generate production promotion token
+        id: promotions_token
+        continue-on-error: true
+        uses: actions/create-github-app-token@v3.3.0
+        with:
+          app-id: ${{ secrets.PROMOTIONS_APP_ID }}
+          private-key: ${{ secrets.PROMOTIONS_APP_PRIVATE_KEY }}
+          repositories: ${{ secrets.PROMOTIONS_REPO }}
+          permission-actions: write
+
+      - name: Dispatch production promotion
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ steps.promotions_token.outputs.token }}
+          PROMOTIONS_REPO: ${{ github.repository_owner }}/${{ secrets.PROMOTIONS_REPO }}
+          TAG: ${{ steps.version.outputs.version }}
+        run: |
+          gh workflow run drain-safe-production.yml \
+            --repo "$PROMOTIONS_REPO" \
+            --ref main \
+            -f tag="$TAG"
+
+      - name: Summary
+        run: |
+          echo "### drain-safe Release Ready" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Artifact:** drain-safe-${{ steps.version.outputs.version_number }}.tar.gz" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "A production promotion was dispatched to safe-production-promotions and awaits reviewer approval." >> $GITHUB_STEP_SUMMARY
+          echo "If it is not queued there, the dispatch failed (fail-open): run drain-safe-production.yml manually with this tag." >> $GITHUB_STEP_SUMMARY

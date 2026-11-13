@@ -94,7 +94,7 @@ const isNotFirstPartyStack = (stack: string | undefined): boolean => {
  * the block is the intended behaviour and nothing is broken for the user, so
  * it is dropped rather than counted as a real error (WA-2952).
  *
- * Trade-off this accepts: `'unsafe-eval'` **is** permitted in dev/Cypress
+ * Trade-off this accepts: `'unsafe-eval'` **is** permitted in dev
  * (`config/securityHeaders.ts`), so a first-party eval()/Function() call would
  * pass locally and only throw — as this same `EvalError` type — in
  * production, where this filter would otherwise hide it. Accepted because (a)
@@ -243,6 +243,8 @@ export class DatadogProvider implements IObservabilityProvider {
         service: DATADOG_RUM_SERVICE,
         env: DATADOG_RUM_ENV,
         version: COMMIT_HASH,
+        // No session cookie and no data until Analytics.tsx grants analytics consent
+        trackingConsent: 'not-granted',
         sessionSampleRate: DATADOG_RUM_SESSION_SAMPLE_RATE,
         sessionReplaySampleRate: DATADOG_RUM_SESSION_REPLAY_SAMPLE_RATE,
         trackUserInteractions: DATADOG_RUM_TRACK_USER_INTERACTIONS,

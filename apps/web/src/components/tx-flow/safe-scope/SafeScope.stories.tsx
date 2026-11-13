@@ -1,15 +1,19 @@
+import { faker } from '@faker-js/faker'
 import type { Meta, StoryObj } from '@storybook/react'
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { SafeScopeProvider } from './SafeScopeProvider'
-import { useSafeScope, useSafeScopeControls } from './context'
+import { useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import type { ReactElement } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useChainId from '@/hooks/useChainId'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
+import { createHandlers } from '@/stories/mocks'
+
+faker.seed(1)
 
 /** Renders what the tx-flow's hooks currently resolve to. Lives in this stories file only — nothing in the app imports it. */
 const SafeScopeProbe = (): ReactElement => {
@@ -61,6 +65,7 @@ const meta = {
     ),
   ],
   parameters: {
+    msw: { handlers: createHandlers() },
     docs: {
       description: {
         component:

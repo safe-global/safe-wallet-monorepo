@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
-import { createMockStory } from '@/stories/mocks'
+import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
 import SelectSafesOnboarding from '.'
 
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
+  authenticated: true,
   pathname: '/welcome/select-safes',
-  query: { spaceId: 'uuid-1' },
+  query: { spaceId: MOCK_SPACE_ID },
   shadcn: true,
 })
 

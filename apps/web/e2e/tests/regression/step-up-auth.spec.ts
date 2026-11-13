@@ -1,37 +1,118 @@
 import type { Page } from '@playwright/test'
+import type { AuthGetMeV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/auth'
+import type {
+  BillingGetSpacePaymentLinksV1ApiResponse,
+  BillingGetSubscriptionsV1ApiResponse,
+} from '@safe-global/store/gateway/AUTO_GENERATED/billing'
+import type { CounterfactualSafesGetV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/counterfactual-safes'
+import type { EntitlementsGetEntitlementsV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
+import type {
+  AddressBooksGetAddressBookItemsV1ApiResponse,
+  MembersGetMembershipV1ApiResponse,
+  MembersGetUsersV1ApiResponse,
+  SpaceCounterfactualSafesGetV1ApiResponse,
+  SpaceSafesGetV1ApiResponse,
+  SpacesGetOneV1ApiResponse,
+  SpacesGetV1ApiResponse,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { UsersGetWithWalletsV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { ELEVATION_REQUIRED_ERROR } from '@/features/oidc-auth/utils/elevation'
 import { test, expect } from '../../src/fixtures/test.fixture'
+import { clickVerify, expectActionCompleted, stepUpDialog } from '../../src/fixtures/step-up'
 import { LS_NAMESPACE } from '../../src/data/constants'
 
 /**
- * When a sensitive action needs a fresh second factor, the user is sent to Auth0,
- * and the state of the action they were trying to perform has to be preserved
- * until they come back. That state is kept in sessionStorage. There are many ways
- * for it to become corrupted during this interaction, so this file tests the
- * unhappy paths.
+ * The browser side of a step-up, with the gateway and Auth0 mocked: the popup ends on the static completion page,
+ * which reports to the wallet tab over a BroadcastChannel; and a browser that blocks the popup gets a same-tab
+ * verification. The isolated specs cover the real Auth0 round-trip.
  */
 
 const SIGNER = '0x1234567890123456789012345678901234567890'
+const CHAIN_ID = '1'
 const SPACE_ID = '00000000-0000-0000-0000-0000000000bb'
 const SAFE_ADDRESS = '0x1111111111111111111111111111111111111111'
-const STEP_UP_KEY = 'oidc_step_up'
+const SAFE_ACCOUNTS_URL = `/spaces/safe-accounts?spaceId=${SPACE_ID}`
 const AUTHORIZE_PATTERN = /\/v1\/auth\/oidc\/authorize/
+const SPACE_SAFES_PATTERN = /\/v1\/spaces\/[^/]+\/safes$/
+const SESSION_LIFETIME_MS = 24 * 60 * 60 * 1000
+
+const ELEVATION_REQUIRED_RESPONSE = { status: 403, json: { message: ELEVATION_REQUIRED_ERROR, statusCode: 403 } }
+
+const SESSION = { id: '1', authMethod: 'siwe', signerAddress: SIGNER } satisfies AuthGetMeV1ApiResponse
+
+const USER = { id: 1, status: 1, wallets: [{ id: 1, address: SIGNER }] } satisfies UsersGetWithWalletsV1ApiResponse
+
+const MEMBERSHIP = {
+  id: 1,
+  role: 'ADMIN',
+  status: 'ACTIVE',
+  name: 'Admin',
+  invitedBy: null,
+  createdAt: '',
+  updatedAt: '',
+  user: { id: 1, status: 'ACTIVE', email: null, address: SIGNER },
+} satisfies MembersGetMembershipV1ApiResponse
+
+const MEMBERS = { members: [MEMBERSHIP] } satisfies MembersGetUsersV1ApiResponse
 
 const SPACE = {
-  id: 1,
   uuid: SPACE_ID,
   name: 'Step-up Test Workspace',
-  status: 'ACTIVE',
+  memberCount: 1,
   safeCount: 1,
-  members: [{ id: 1, role: 'ADMIN', name: 'Admin', status: 'ACTIVE', user: { id: 1, status: 'ACTIVE' } }],
-}
+  experimentalFeatures: [],
+  members: [
+    { role: 'ADMIN', name: 'Admin', status: 'ACTIVE', invitedBy: null, inviteExpiresAt: null, user: { id: 1 } },
+  ],
+} satisfies SpacesGetOneV1ApiResponse
+
+const SPACES = [SPACE] satisfies SpacesGetV1ApiResponse
+
+const SPACE_SAFES = { safes: { [CHAIN_ID]: [SAFE_ADDRESS] } } satisfies SpaceSafesGetV1ApiResponse
+
+// Safe Pro locks a Workspace without a live subscription behind a blocking modal.
+const LIVE_SUBSCRIPTIONS = [
+  {
+    id: 'sub_e2e',
+    customerId: 'cus_e2e',
+    upstreamCustomerId: 'cus_e2e',
+    plan: {
+      id: 'plan_e2e',
+      currentPrice: 0,
+      originalPrice: null,
+      paymentMethod: 'fiat',
+      currency: 'usd',
+      features: [],
+      type: 'standard',
+      product: null,
+    },
+    status: 'active',
+    createdAt: 0,
+    startAt: 0,
+    cancelledAt: null,
+    cancelAt: null,
+  },
+] satisfies BillingGetSubscriptionsV1ApiResponse
+
+const NO_COUNTERFACTUAL_SAFES = { safes: {} } satisfies CounterfactualSafesGetV1ApiResponse &
+  SpaceCounterfactualSafesGetV1ApiResponse
+
+const ENTITLEMENTS = {
+  plan: { id: 'plan_e2e', name: 'Business', cycleEndsAt: null, status: 'active' },
+  entitlements: [],
+} satisfies EntitlementsGetEntitlementsV1ApiResponse
+
+const ADDRESS_BOOK = { spaceUuid: SPACE_ID, data: [], tags: [] } satisfies AddressBooksGetAddressBookItemsV1ApiResponse
+
+const PAYMENT_LINKS = [] satisfies BillingGetSpacePaymentLinksV1ApiResponse
 
 async function seedWorkspaceSession(page: Page): Promise<void> {
   await page.addInitScript(
-    ({ ns, spaceId }) => {
+    ({ ns, spaceId, sessionLifetimeMs }) => {
       window.localStorage.setItem(
         `${ns}auth`,
         JSON.stringify({
-          sessionExpiresAt: Date.now() + 24 * 60 * 60 * 1000,
+          sessionExpiresAt: Date.now() + sessionLifetimeMs,
           landingSpaceHint: spaceId,
           isStoreHydrated: false,
           cfSafeSynced: false,
@@ -39,30 +120,53 @@ async function seedWorkspaceSession(page: Page): Promise<void> {
         }),
       )
     },
-    { ns: LS_NAMESPACE, spaceId: SPACE_ID },
+    { ns: LS_NAMESPACE, spaceId: SPACE_ID, sessionLifetimeMs: SESSION_LIFETIME_MS },
   )
 
-  await page.route(/\/v1\/auth\/me(\?.*)?$/, (route) =>
-    route.fulfill({ json: { id: '1', authMethod: 'siwe', signerAddress: SIGNER } }),
-  )
-  await page.route(/\/v1\/users(\?.*)?$/, (route) =>
-    route.fulfill({ json: { id: 1, status: 1, wallets: [{ id: 1, address: SIGNER }] } }),
-  )
-  await page.route(/\/v1\/spaces\/[^/]+\/members(\?.*)?$/, (route) =>
-    route.fulfill({ json: { members: SPACE.members } }),
-  )
-  await page.route(/\/v1\/spaces\/[^/]+\/safes(\?.*)?$/, (route) =>
-    route.fulfill({ json: { safes: { '1': [SAFE_ADDRESS] } } }),
-  )
+  await page.route(/\/v1\/auth\/me(\?.*)?$/, (route) => route.fulfill({ json: SESSION }))
+  await page.route(/\/v1\/users(\?.*)?$/, (route) => route.fulfill({ json: USER }))
+  await page.route(/\/v1\/spaces\/[^/]+\/members(\?.*)?$/, (route) => route.fulfill({ json: MEMBERS }))
+  await page.route(/\/v1\/spaces\/[^/]+\/safes(\?.*)?$/, (route) => route.fulfill({ json: SPACE_SAFES }))
   await page.route(/\/v1\/spaces\/[^/]+(\?.*)?$/, (route) => route.fulfill({ json: SPACE }))
-  await page.route(/\/v1\/spaces(\?.*)?$/, (route) => route.fulfill({ json: [SPACE] }))
+  await page.route(/\/v1\/spaces(\?.*)?$/, (route) => route.fulfill({ json: SPACES }))
+  await page.route(/\/v1\/billing\/spaces\/[^/]+\/subscriptions(\?.*)?$/, (route) =>
+    route.fulfill({ json: LIVE_SUBSCRIPTIONS }),
+  )
+  // Session-scoped calls of the Workspace pages; unmocked, the gateway answers 403 and the app re-checks the session.
+  await page.route(/\/v1\/users\/counterfactual-safes(\?.*)?$/, (route) =>
+    route.fulfill({ json: NO_COUNTERFACTUAL_SAFES }),
+  )
+  await page.route(/\/v1\/spaces\/[^/]+\/counterfactual-safes(\?.*)?$/, (route) =>
+    route.fulfill({ json: NO_COUNTERFACTUAL_SAFES }),
+  )
+  await page.route(/\/v1\/spaces\/[^/]+\/membership(\?.*)?$/, (route) => route.fulfill({ json: MEMBERSHIP }))
+  await page.route(/\/v1\/spaces\/[^/]+\/entitlements(\?.*)?$/, (route) => route.fulfill({ json: ENTITLEMENTS }))
+  await page.route(/\/v1\/spaces\/[^/]+\/address-book(\?.*)?$/, (route) => route.fulfill({ json: ADDRESS_BOOK }))
+  await page.route(/\/v1\/billing\/spaces\/[^/]+\/payment-links(\?.*)?$/, (route) =>
+    route.fulfill({ json: PAYMENT_LINKS }),
+  )
 }
 
-async function gateSafeRemoval(page: Page): Promise<void> {
-  await page.route(/\/v1\/spaces\/[^/]+\/safes$/, async (route) => {
+/** Rejects the first removals with `elevation_required` and accepts the rest; returns the number of removals sent. */
+async function gateSafeRemoval(page: Page, rejections = 1): Promise<() => number> {
+  let removals = 0
+  await page.route(SPACE_SAFES_PATTERN, async (route) => {
     if (route.request().method() !== 'DELETE') return route.fallback()
 
-    return route.fulfill({ status: 403, json: { message: 'elevation_required', statusCode: 403 } })
+    removals += 1
+    return removals <= rejections
+      ? route.fulfill(ELEVATION_REQUIRED_RESPONSE)
+      : route.fulfill({ status: 200, body: '' })
+  })
+  return () => removals
+}
+
+/** The gateway sends a completed challenge to its `redirect_url`; the popup is a new page, so the route is the context's. */
+async function stubCompletedChallenge(page: Page): Promise<void> {
+  await page.context().route(AUTHORIZE_PATTERN, (route) => {
+    const returnUrl = new URL(route.request().url()).searchParams.get('redirect_url')
+
+    return route.fulfill({ status: 302, headers: { location: returnUrl ?? '/' } })
   })
 }
 
@@ -76,153 +180,51 @@ async function stubProviderChallengePage(page: Page): Promise<void> {
   )
 }
 
-async function stubCompletedChallenge(page: Page): Promise<void> {
-  await page.route(AUTHORIZE_PATTERN, (route) => {
-    const returnUrl = new URL(route.request().url()).searchParams.get('redirect_url')
-
-    return route.fulfill({ status: 302, headers: { location: returnUrl ?? '/' } })
-  })
-}
-
-function captureAuthorizeRequest(page: Page) {
-  return page.waitForRequest((request) => AUTHORIZE_PATTERN.test(request.url()))
-}
-
-async function openRemoveDialog(page: Page): Promise<void> {
-  await page.goto(`/spaces/safe-accounts?spaceId=${SPACE_ID}`)
+async function removeSafe(page: Page): Promise<void> {
+  await page.goto(SAFE_ACCOUNTS_URL)
   await page.getByRole('button', { name: 'Safe Account actions' }).first().click()
   await page.getByRole('menuitem', { name: 'Remove from Workspace' }).click()
+  await page.getByRole('button', { name: 'Remove' }).click()
 }
 
-const readStepUpRecord = (page: Page) => page.evaluate((key) => window.sessionStorage.getItem(key), STEP_UP_KEY)
-
-// Next.js renders its route announcer with role="alert" too, so a bare getByRole('alert') trips strict mode once a toast shows.
-const toast = (page: Page, text: string) => page.getByRole('alert').filter({ hasText: text })
-
-test.describe('Step-up auth round-trip', { tag: '@regression' }, () => {
+test.describe('Step-up auth in a popup', { tag: '@regression' }, () => {
   test.beforeEach(async ({ safePage }) => {
     await seedWorkspaceSession(safePage)
-    await gateSafeRemoval(safePage)
+  })
+
+  test('that the request is sent again once the popup reports the verification', async ({ safePage }) => {
+    const removals = await gateSafeRemoval(safePage)
+    await stubCompletedChallenge(safePage)
+
+    await removeSafe(safePage)
+    const popup = await clickVerify(safePage)
+    // The mocked challenge ends at once, so the popup can close before a 'close' listener exists.
+    await expect.poll(() => popup.isClosed()).toBe(true)
+
+    await expectActionCompleted(safePage, new RegExp(`/spaces/safe-accounts\\?spaceId=${SPACE_ID}$`))
+    await expect(safePage.getByRole('alert').filter({ hasText: 'Removed safe account from space' })).toBeVisible()
+    expect(removals()).toBe(2)
+  })
+
+  test('that a blocked popup offers the verification in the same tab', async ({ safePage }) => {
+    const removals = await gateSafeRemoval(safePage)
     await stubProviderChallengePage(safePage)
-  })
+    // Chromium under test opens every popup, so the page sees what a blocking browser returns.
+    await safePage.addInitScript(() => Object.assign(window, { open: () => null }))
 
-  test('that it sends the user to the provider when an action needs a fresh second factor', async ({ safePage }) => {
-    await openRemoveDialog(safePage)
+    await removeSafe(safePage)
+    await safePage.getByTestId('step-up-verify-button').click()
+    await expect(stepUpDialog(safePage)).toContainText('Your browser blocked the verification window')
 
-    const authorizeRequest = captureAuthorizeRequest(safePage)
-    await safePage.getByRole('button', { name: 'Remove' }).click()
+    const challenge = safePage.waitForRequest(AUTHORIZE_PATTERN)
+    await safePage.getByRole('button', { name: /Verify in this tab instead/ }).click()
+    const authorize = new URL((await challenge).url())
 
-    const url = new URL((await authorizeRequest).url())
-    expect(url.searchParams.get('elevate')).toBe('true')
-    expect(url.searchParams.get('redirect_url')).toContain('/spaces/safe-accounts')
-  })
-
-  test('that it still redirects when a leftover trip record is present', async ({ safePage }) => {
-    await openRemoveDialog(safePage)
-
-    await safePage.evaluate(
-      ({ key, spaceId, address }) => {
-        window.sessionStorage.setItem(
-          key,
-          JSON.stringify({
-            endpoint: 'spaceSafesDeleteV1',
-            args: { spaceId, deleteSpaceSafesDto: { safes: [{ chainId: '1', address }] } },
-            createdAt: Date.now(),
-          }),
-        )
-      },
-      { key: STEP_UP_KEY, spaceId: SPACE_ID, address: SAFE_ADDRESS },
-    )
-
-    const authorizeRequest = captureAuthorizeRequest(safePage)
-    await safePage.getByRole('button', { name: 'Remove' }).click()
-
-    expect(new URL((await authorizeRequest).url()).searchParams.get('elevate')).toBe('true')
-  })
-
-  test('that it discards the pending action without reporting an error when the challenge is abandoned', async ({
-    safePage,
-  }) => {
-    await openRemoveDialog(safePage)
-    await safePage.getByRole('button', { name: 'Remove' }).click()
     await expect(safePage.getByRole('heading', { name: 'Provider challenge' })).toBeVisible()
-
-    await safePage.goto(`/spaces/safe-accounts?spaceId=${SPACE_ID}`)
-
-    await expect.poll(() => readStepUpRecord(safePage)).toBeNull()
-    await expect(toast(safePage, 'Verification was not completed')).toBeHidden()
-    await expect(safePage.getByText('elevation_required')).toBeHidden()
-  })
-
-  test('that it ignores a pending action older than the challenge window', async ({ safePage }) => {
-    await safePage.addInitScript(
-      ({ key, address, spaceId }) => {
-        // Init scripts also run in child frames; Beamer's iframe shares this sessionStorage while it is still about:blank and would write the record back after the app has removed it.
-        if (window !== window.top) return
-
-        window.sessionStorage.setItem(
-          key,
-          JSON.stringify({
-            endpoint: 'spaceSafesDeleteV1',
-            args: { spaceId, deleteSpaceSafesDto: { safes: [{ chainId: '1', address }] } },
-            createdAt: Date.now() - 6 * 60 * 1000,
-          }),
-        )
-      },
-      { key: STEP_UP_KEY, address: SAFE_ADDRESS, spaceId: SPACE_ID },
+    expect(authorize.searchParams.get('elevate')).toBe('true')
+    expect(authorize.searchParams.get('redirect_url')).toMatch(
+      new RegExp(`/spaces/safe-accounts\\?spaceId=${SPACE_ID}$`),
     )
-
-    let replayAttempted = false
-    await safePage.route(/\/v1\/spaces\/[^/]+\/safes$/, async (route) => {
-      if (route.request().method() === 'DELETE') replayAttempted = true
-      return route.fallback()
-    })
-
-    await safePage.goto(`/spaces/safe-accounts?spaceId=${SPACE_ID}`)
-    await expect(safePage.getByRole('button', { name: 'Add accounts' })).toBeVisible()
-
-    await expect.poll(() => readStepUpRecord(safePage)).toBeNull()
-    expect(replayAttempted).toBe(false)
-  })
-
-  test('that it completes the interrupted action when the challenge succeeds', async ({ safePage }) => {
-    await stubCompletedChallenge(safePage)
-
-    let removalCalls = 0
-    await safePage.route(/\/v1\/spaces\/[^/]+\/safes$/, async (route) => {
-      if (route.request().method() !== 'DELETE') return route.fallback()
-
-      removalCalls += 1
-      return removalCalls === 1
-        ? route.fulfill({ status: 403, json: { message: 'elevation_required', statusCode: 403 } })
-        : route.fulfill({ status: 204, body: '' })
-    })
-
-    await openRemoveDialog(safePage)
-    await safePage.getByRole('button', { name: 'Remove' }).click()
-
-    await expect(toast(safePage, 'Safe account removed')).toBeVisible()
-    expect(removalCalls).toBe(2)
-    await expect.poll(() => readStepUpRecord(safePage)).toBeNull()
-  })
-
-  test('that it reports an error when the replayed action fails', async ({ safePage }) => {
-    await stubCompletedChallenge(safePage)
-
-    let removalCalls = 0
-    await safePage.route(/\/v1\/spaces\/[^/]+\/safes$/, async (route) => {
-      if (route.request().method() !== 'DELETE') return route.fallback()
-
-      removalCalls += 1
-      return removalCalls === 1
-        ? route.fulfill({ status: 403, json: { message: 'elevation_required', statusCode: 403 } })
-        : route.fulfill({ status: 500, json: { message: 'Internal error', statusCode: 500 } })
-    })
-
-    await openRemoveDialog(safePage)
-    await safePage.getByRole('button', { name: 'Remove' }).click()
-
-    await expect(toast(safePage, 'Internal error')).toBeVisible()
-    await expect.poll(() => readStepUpRecord(safePage)).toBeNull()
+    expect(removals()).toBe(1)
   })
 })

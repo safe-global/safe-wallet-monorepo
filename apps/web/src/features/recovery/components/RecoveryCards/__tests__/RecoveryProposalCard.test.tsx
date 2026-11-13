@@ -49,7 +49,7 @@ describe('RecoveryProposalCard', () => {
       const button = getByText('Start recovery')
       fireEvent.click(button)
 
-      expect(mockedTrackEvent).toHaveBeenCalledWith(RECOVERY_EVENTS.START_RECOVERY)
+      expect(mockedTrackEvent).toHaveBeenCalledWith(RECOVERY_EVENTS.START_RECOVERY, undefined)
     })
   })
   describe('horizontal', () => {
@@ -79,7 +79,7 @@ describe('RecoveryProposalCard', () => {
       const button = getByText('Start recovery')
       fireEvent.click(button)
 
-      expect(mockedTrackEvent).toHaveBeenCalledWith(RECOVERY_EVENTS.START_RECOVERY)
+      expect(mockedTrackEvent).toHaveBeenCalledWith(RECOVERY_EVENTS.START_RECOVERY, undefined)
     })
   })
 })

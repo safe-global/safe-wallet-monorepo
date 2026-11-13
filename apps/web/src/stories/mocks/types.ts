@@ -33,8 +33,6 @@ export interface FeatureFlags {
   hypernative?: boolean
   /** EARN - staking/yield features (default: false) */
   earn?: boolean
-  /** SPACES - collaborative spaces (default: false) */
-  spaces?: boolean
   /** OIDC_AUTH - OIDC-based login for email and Google (default: false) */
   oidcAuth?: boolean
   /** SWITCH_AUTHENTICATOR - 2FA management surfaces (default: false) */
@@ -45,6 +43,14 @@ export interface FeatureFlags {
   safeStaking?: boolean
   /** SAFE_PRO - Safe Pro plans and billing (default: false) */
   safePro?: boolean
+  /** SAFE_PRO_ANNOUNCEMENT - Safe Pro announcement banners and modal (default: false) */
+  safeProAnnouncement?: boolean
+  /** WORKSPACES_EXPERIMENTAL_FEATURES - Experimental Features page in Workspace settings (default: false) */
+  workspacesExperimentalFeatures?: boolean
+  /** POLICY_RECIPIENT_ALLOWLIST on Sepolia - shows the Recipient allowlist row in Experimental settings (default: false) */
+  policyRecipientAllowlist?: boolean
+  /** SPACE_AUDIT_LOG - the Workspace activity log (default: false) */
+  spaceAuditLog?: boolean
 }
 
 /**
@@ -91,6 +97,12 @@ export interface MockStoryConfig {
    * @default 'none'
    */
   layout?: LayoutType
+
+  /**
+   * Signs the user in to the gateway and serves the Workspace mocks
+   * @default false
+   */
+  authenticated?: boolean
 
   /**
    * Redux store state overrides

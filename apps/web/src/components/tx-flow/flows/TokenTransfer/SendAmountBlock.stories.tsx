@@ -2,13 +2,14 @@ import type { Meta, StoryObj } from '@storybook/react'
 import SendAmountBlock from './SendAmountBlock'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { parseUnits } from 'ethers'
-import { withMockProvider } from '@/storybook/preview'
+import { withMockProvider } from '@/storybook/decorators'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 
 const usdcToken: Balance['tokenInfo'] = {
   address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
   decimals: 6,
-  logoUri: 'https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+  logoUri:
+    'mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp',
   name: 'USD Coin',
   symbol: 'USDC',
   type: TokenType.ERC20,
@@ -17,7 +18,7 @@ const usdcToken: Balance['tokenInfo'] = {
 const ethToken: Balance['tokenInfo'] = {
   address: '0x0000000000000000000000000000000000000000',
   decimals: 18,
-  logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
+  logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
   name: 'Ether',
   symbol: 'ETH',
   type: TokenType.NATIVE_TOKEN,

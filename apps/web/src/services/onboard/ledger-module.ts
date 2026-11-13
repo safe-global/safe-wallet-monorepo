@@ -5,6 +5,8 @@ import type {
 } from '@ledgerhq/device-management-kit'
 import { mapLedgerError } from './ledger-errors'
 import { styleAccountSelectAlert } from './accountSelectAlert'
+import { loadLedgerTransport } from './ledger-transport'
+import { LEDGER_EMULATOR_URL } from '@/config/constants'
 import type {
   GetAddressDAOutput,
   SignPersonalMessageDAOutput,
@@ -353,13 +355,13 @@ export function ledgerModule(): WalletInit {
 // Promisified Ledger SDK
 async function getLedgerSdk() {
   const { DeviceManagementKitBuilder } = await import('@ledgerhq/device-management-kit')
-  const { webHidTransportFactory, webHidIdentifier } = await import('@ledgerhq/device-transport-kit-web-hid')
+  const transport = await loadLedgerTransport(LEDGER_EMULATOR_URL)
   const { SignerEthBuilder } = await import('@ledgerhq/device-signer-kit-ethereum')
   const { lastValueFrom } = await import('rxjs')
 
   // Get connected device and create signer
-  const dmk = new DeviceManagementKitBuilder().addTransport(webHidTransportFactory).build()
-  const device = await lastValueFrom(dmk.startDiscovering({ transport: webHidIdentifier }))
+  const dmk = new DeviceManagementKitBuilder().addTransport(transport.factory).build()
+  const device = await lastValueFrom(dmk.startDiscovering({ transport: transport.identifier }))
   const sessionId = await dmk.connect({ device })
   const signer = new SignerEthBuilder({ dmk, sessionId, originToken: 'your-origin-token' }).build()
 

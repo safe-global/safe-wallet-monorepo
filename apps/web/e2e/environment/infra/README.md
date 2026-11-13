@@ -1,0 +1,78 @@
+# Isolated Safe backend
+
+Docker Compose environment for validating Safe APIs against a pinned Anvil Sepolia fork. Includes Client Gateway (CGW), Transaction Service (TXS), Queue Service, Config Service, Decoder Service and Events Service. Backend checks cover deployment registration, indexing from the fork block and the Safe transaction lifecycle through CGW. Wallet builds and browser tests are outside this workflow.
+
+CGW runs with `FF_SAFE_QUEUE_SERVICE` on, and the chains have the `QUEUE_SERVICE` feature: queued transactions, confirmations, deletions, messages and v3 delegates go to the Queue Service; executed history still comes from TXS. Scenarios write queued data through CGW, as the wallet does, so it exists only in the Queue Service; its worker reads the TXS events to mark queued transactions as executed.
+
+## Requirements
+
+- Docker with Compose v2 and Buildx, and an ARM64 host. CGW images are ARM64-only.
+- Python 3.9 or later for `scripts/test_env.py`. The mocks in `mocks/` are TypeScript and run in the pinned Node image, so the host needs no Node.
+- A Sepolia RPC endpoint with archive access at the block pinned in `test-images.env`.
+- Read access to the private Queue Service image: `docker login ghcr.io` with a GitHub token that has `read:packages` and SSO for `safe-global`.
+
+## Local setup
+
+This environment uses public test credentials and Anvil accounts. Keep it private and never fund these accounts on a real network.
+
+Run these commands from this directory:
+
+```sh
+cp .env.test.sample .env.test
+```
+
+Set `SEPOLIA_FORK_RPC_URL` in `.env.test` to the complete Sepolia RPC URL, including its API key. Then run:
+
+```sh
+python3 -m unittest discover -s tests
+python3 scripts/test_env.py up
+python3 scripts/test_env.py test
+python3 scripts/test_env.py smoke
+```
+
+Default endpoints:
+
+| Service | URL                                             |
+| ------- | ----------------------------------------------- |
+| Anvil   | `http://localhost:8545`                         |
+| CGW     | `http://localhost:8000/cgw`                     |
+| TXS     | `http://localhost:8000/txs/api`                 |
+| Decoder | `http://localhost:8000/decoder`                 |
+| Billing | `http://localhost:8000/billing`                 |
+| Auth0   | `https://auth.safe-e2e.test` (`127.0.0.1:8443`) |
+| Ledger  | `http://localhost:9555` (Speculos API)          |
+| Trezor  | `http://localhost:9556` (debug interface)       |
+
+Use `python3 scripts/test_env.py status` to inspect containers. `python3 scripts/test_env.py logs [service...] [--tail N|all]` prints container logs with every fork provider URL replaced by `<fork-provider>`. Remove the project's containers and volumes with `python3 scripts/test_env.py reset`; `status`, `down` and `reset` work without a provider URL. Reset before starting a new fork so backend databases remain consistent with chain state.
+
+Check the mocks with `yarn workspace @safe-global/web e2e:env:test`, which type-checks `mocks/` and runs its tests.
+
+The CoW API mock answers unrecorded requests with 404 (`COW_API_OFFLINE: 'true'` in Compose). Set it to `false` to forward them to the real `api.cow.fi` while capturing new recordings.
+
+## Configuration
+
+`test-images.env` pins the infrastructure images, chain IDs and fork blocks. The optional, ignored `.env.test` file overrides those defaults; exported environment variables take precedence over both files. Service settings are checked in under `container_env_files/` and referenced by Compose.
+
+`up` does not use pins for CGW, the Config Service, the Transaction Service, the Queue Service and the Decoder. It reads the version that staging (default) or production runs from each service's `/about` endpoint, pins the matching GHCR image by digest and writes the result to `.test-runs/<project>.images.env`. Later commands of the project use that file until `reset`. Print the images without starting anything with `python3 scripts/test_env.py versions [--backend production]`. To test one service at another version, export its variable (`CGW_IMAGE`, `CFG_IMAGE`, `TXS_IMAGE`, `QUEUE_IMAGE`, `DECODER_IMAGE` or `EVENTS_IMAGE`) before `up`.
+
+The Transaction Service, Queue Service and Decoder have no image tag per commit on staging: each `main` build overwrites the `staging` tag. `up` uses the current `staging` image and warns when its `BUILD_COMMIT` differs from the build that staging reports.
+
+The Events Service `/about` is behind a login, so `up` reads the [GitHub deployments](https://github.com/safe-global/safe-events-service/deployments) of the Events Service instead: the newest successful `devstaging` deployment for staging (image `main-<sha7>`) or `production` deployment (its `vX.Y.Z` tag). A production deployment from a manual redeploy records no release tag; then `up` stops, and `EVENTS_IMAGE` selects the image. Set `GITHUB_TOKEN` when the unauthenticated GitHub rate limit runs out.
+
+| Variable               | Purpose                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------ |
+| `SEPOLIA_FORK_RPC_URL` | Required Sepolia archive RPC URL                                                     |
+| `SAFE_E2E_BACKEND`     | `staging` (default) or `production`: the deployment whose service versions `up` uses |
+| `SAFE_E2E_PROJECT`     | Exported project name; defaults to `safe-e2e-local` and must start with `safe-e2e-`  |
+| `RPC_PORT`             | Local Anvil port; defaults to `8545`                                                 |
+| `REVERSE_PROXY_PORT`   | Local API port; defaults to `8000`                                                   |
+| `AUTH0_MOCK_PORT`      | Local port of the Auth0 mock; defaults to `8443`                                     |
+| `LEDGER_EMULATOR_PORT` | Local port of the Ledger emulator's API; defaults to `9555`                          |
+| `TREZOR_EMULATOR_PORT` | Local port of the Trezor emulator's screen and button API; defaults to `9556`        |
+| `TREZOR_BRIDGE_PORT`   | Local port of Trezor Bridge; defaults to `21328`, the only port Trezor Connect uses  |
+| `FORK_RPC_URL_MAINNET` | Archive RPC URL for the optional mainnet profile                                     |
+| `FORK_RPC_URL_POLYGON` | Archive RPC URL for the optional Polygon profile                                     |
+
+After starting Sepolia, add an optional chain with `python3 scripts/test_env.py up --chain mainnet` or `--chain polygon`. Remove it with `reset --chain <name>`; other chains remain running.
+
+The Ledger and Trezor emulators are optional too: start one with `python3 scripts/test_env.py up --device ledger` or `--device trezor`. It waits for the emulator's healthcheck. `reset` removes the emulators with the rest of the stack.

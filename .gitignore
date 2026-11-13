@@ -119,6 +119,11 @@ apps/tx-builder/build/*
 apps/tx-builder/vite.config.js
 apps/tx-builder/vite.config.d.ts
 
+# drain-safe
+apps/drain-safe/build/*
+apps/drain-safe/vite.config.js
+apps/drain-safe/vite.config.d.ts
+
 # claude-workflows
 todos/*
 /docs/plans/
@@ -133,3 +138,5 @@ todos/*
 # Claude Code worktrees
 .claude/worktrees/
 .claude/settings.local.json
+
+/apps/web/e2e/environment/artifacts/

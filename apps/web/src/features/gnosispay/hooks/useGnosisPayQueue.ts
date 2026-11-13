@@ -36,7 +36,7 @@ export const _toGnosisPayQueue = (queue: RecoveryQueueItem[]): GnosisPayTxItem[]
 export const useGnosisPayQueue = (): AsyncResult<GnosisPayTxItem[]> => {
   const chainId = useChainId()
   const web3ReadOnly = useWeb3ReadOnly()
-  const { safe, safeAddress } = useSafeInfo()
+  const { safeAddress } = useSafeInfo()
   const [delayModule] = useGnosisPayDelayModule()
   const [pollCount] = useIntervalCounter(REFRESH_INTERVAL)
   const [refreshCount, setRefreshCount] = useState(0)
@@ -58,7 +58,6 @@ export const useGnosisPayQueue = (): AsyncResult<GnosisPayTxItem[]> => {
         safeAddress,
         provider: web3ReadOnly,
         chainId,
-        version: safe.version,
       }).catch((e) => {
         logError(Errors._603, e)
         throw e
@@ -66,7 +65,7 @@ export const useGnosisPayQueue = (): AsyncResult<GnosisPayTxItem[]> => {
 
       return _toGnosisPayQueue(queue)
     },
-    [delayModule, web3ReadOnly, safeAddress, chainId, safe.version, pollCount, refreshCount],
+    [delayModule, web3ReadOnly, safeAddress, chainId, pollCount, refreshCount],
     false,
   )
 }

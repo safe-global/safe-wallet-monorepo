@@ -1,10 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import type { ReactElement } from 'react'
 import { FormProvider, useForm } from 'react-hook-form'
-import { withMockProvider } from '@/storybook/preview'
+import { withMockProvider } from '@/storybook/decorators'
 import type { AllSafeItems } from '@/hooks/safes'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import NameAccountsFields from './NameAccountsFields'
+import { createHandlers } from '@/stories/mocks'
 
 /** Supplies the form context the fields read through useFormContext. */
 const withForm = (Story: () => ReactElement) => {
@@ -22,7 +23,7 @@ const meta = {
   title: 'Features/Spaces/NameAccountsFields',
   component: NameAccountsFields,
   decorators: [withForm, withMockProvider()],
-  parameters: { layout: 'padded' },
+  parameters: { layout: 'padded', msw: { handlers: createHandlers() } },
 } satisfies Meta<typeof NameAccountsFields>
 
 export default meta

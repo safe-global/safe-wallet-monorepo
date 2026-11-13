@@ -1,0 +1,916 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`./SpendingLimitReviewDetails.stories NewLimit 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="shadcn-scope"
+    >
+      <div
+        class="bg-background min-h-screen [&>main]:p-6"
+      >
+        <main>
+          <div
+            class="flex flex-wrap gap-2 xl:flex-nowrap"
+          >
+            <div
+              class="break-words min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
+              data-testid="tx-row-title"
+            >
+              <span
+                class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)]"
+                data-slot="typography"
+                data-variant="paragraph-small"
+              >
+                Amount
+              </span>
+            </div>
+            <div
+              class="max-w-full flex-1 xl:min-w-0"
+              data-testid="tx-data-row"
+            >
+              <div
+                class="flex items-center gap-2"
+              >
+                <div
+                  class="relative"
+                >
+                  <iframe
+                    height="26"
+                    loading="lazy"
+                    referrerpolicy="strict-origin"
+                    sandbox="allow-scripts"
+                    srcdoc="
+    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <img src="/images/common/token-placeholder.svg" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <script>
+        document.querySelector('img').onerror = (e) => {
+          e.target.onerror = null
+          e.target.src = "/images/common/token-placeholder.svg"
+        }
+      </script>
+    </body>
+  "
+                    style="pointer-events: none; border: 0px; display: block;"
+                    tabindex="-1"
+                    title="USDC"
+                    width="26"
+                  />
+                </div>
+                <span
+                  class="m-0 text-sm leading-5 font-semibold"
+                  data-slot="typography"
+                  data-variant="paragraph-small-bold"
+                >
+                  USDC
+                </span>
+                <span
+                  class="m-0 text-sm leading-5 font-normal"
+                  data-slot="typography"
+                  data-testid="token-amount"
+                  data-variant="paragraph-small"
+                >
+                  1.5
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="flex flex-row flex-wrap items-center gap-2 justify-start"
+          >
+            <span
+              class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)] min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Beneficiary
+            </span>
+            <div
+              data-testid="beneficiary-address"
+            >
+              <div
+                class="container"
+              >
+                <div
+                  class="gap-1 overflow-hidden"
+                >
+                  <div
+                    class="addressContainer"
+                  >
+                    <div
+                      class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
+                    >
+                      <span
+                        aria-label="Copy to clipboard"
+                        class="inline-flex cursor-pointer"
+                        data-slot="tooltip-trigger"
+                        id="base-ui-_r_1_"
+                      >
+                        <b>
+                          rin
+                          :
+                        </b>
+                        <span>
+                          0x5eD8Cee6b63b1c6AFce3AD7c92f4fD7E1B8fAd9F
+                        </span>
+                      </span>
+                    </div>
+                    <span
+                      aria-label="Copy to clipboard"
+                      class="inline-flex cursor-pointer"
+                      data-slot="tooltip-trigger"
+                      id="base-ui-_r_3_"
+                    >
+                      <button
+                        aria-label="Copy to clipboard"
+                        class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3"
+                        data-slot="button"
+                        tabindex="0"
+                        type="button"
+                      >
+                        <mock-icon
+                          class="size-4 text-[var(--color-border-main)]"
+                          data-testid="copy-btn-icon"
+                        />
+                      </button>
+                    </span>
+                    <div
+                      class="text-[var(--color-border-main)]"
+                    >
+                      <a
+                        aria-label="View on rinkeby.etherscan.io"
+                        class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
+                        data-slot="tooltip-trigger"
+                        data-testid="explorer-btn"
+                        href="https://rinkeby.etherscan.io/address/0x5eD8Cee6b63b1c6AFce3AD7c92f4fD7E1B8fAd9F"
+                        id="base-ui-_r_5_"
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        <mock-icon
+                          class="size-4"
+                        />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="flex flex-row flex-wrap items-center gap-2 justify-start"
+          >
+            <span
+              class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)] min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Reset time
+            </span>
+            <div
+              class="flex items-center gap-1 "
+              data-testid="spending-limit-label"
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-clock size-4 shrink-0 text-[var(--color-border-main)]"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 6v6l4 2"
+                />
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+              </svg>
+              <p
+                class="m-0 text-base leading-6 font-normal"
+                data-slot="typography"
+                data-variant="paragraph"
+              >
+                1 day
+              </p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./SpendingLimitReviewDetails.stories OneTimeLimit 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="shadcn-scope"
+    >
+      <div
+        class="bg-background min-h-screen [&>main]:p-6"
+      >
+        <main>
+          <div
+            class="flex flex-wrap gap-2 xl:flex-nowrap"
+          >
+            <div
+              class="break-words min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
+              data-testid="tx-row-title"
+            >
+              <span
+                class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)]"
+                data-slot="typography"
+                data-variant="paragraph-small"
+              >
+                Amount
+              </span>
+            </div>
+            <div
+              class="max-w-full flex-1 xl:min-w-0"
+              data-testid="tx-data-row"
+            >
+              <div
+                class="flex items-center gap-2"
+              >
+                <div
+                  class="relative"
+                >
+                  <iframe
+                    height="26"
+                    loading="lazy"
+                    referrerpolicy="strict-origin"
+                    sandbox="allow-scripts"
+                    srcdoc="
+    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <img src="/images/common/token-placeholder.svg" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <script>
+        document.querySelector('img').onerror = (e) => {
+          e.target.onerror = null
+          e.target.src = "/images/common/token-placeholder.svg"
+        }
+      </script>
+    </body>
+  "
+                    style="pointer-events: none; border: 0px; display: block;"
+                    tabindex="-1"
+                    title="USDC"
+                    width="26"
+                  />
+                </div>
+                <span
+                  class="m-0 text-sm leading-5 font-semibold"
+                  data-slot="typography"
+                  data-variant="paragraph-small-bold"
+                >
+                  USDC
+                </span>
+                <span
+                  class="m-0 text-sm leading-5 font-normal"
+                  data-slot="typography"
+                  data-testid="token-amount"
+                  data-variant="paragraph-small"
+                >
+                  1.5
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="flex flex-row flex-wrap items-center gap-2 justify-start"
+          >
+            <span
+              class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)] min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Beneficiary
+            </span>
+            <div
+              data-testid="beneficiary-address"
+            >
+              <div
+                class="container"
+              >
+                <div
+                  class="gap-1 overflow-hidden"
+                >
+                  <div
+                    class="addressContainer"
+                  >
+                    <div
+                      class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
+                    >
+                      <span
+                        aria-label="Copy to clipboard"
+                        class="inline-flex cursor-pointer"
+                        data-slot="tooltip-trigger"
+                        id="base-ui-_r_7_"
+                      >
+                        <b>
+                          rin
+                          :
+                        </b>
+                        <span>
+                          0x5eD8Cee6b63b1c6AFce3AD7c92f4fD7E1B8fAd9F
+                        </span>
+                      </span>
+                    </div>
+                    <span
+                      aria-label="Copy to clipboard"
+                      class="inline-flex cursor-pointer"
+                      data-slot="tooltip-trigger"
+                      id="base-ui-_r_9_"
+                    >
+                      <button
+                        aria-label="Copy to clipboard"
+                        class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3"
+                        data-slot="button"
+                        tabindex="0"
+                        type="button"
+                      >
+                        <mock-icon
+                          class="size-4 text-[var(--color-border-main)]"
+                          data-testid="copy-btn-icon"
+                        />
+                      </button>
+                    </span>
+                    <div
+                      class="text-[var(--color-border-main)]"
+                    >
+                      <a
+                        aria-label="View on rinkeby.etherscan.io"
+                        class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
+                        data-slot="tooltip-trigger"
+                        data-testid="explorer-btn"
+                        href="https://rinkeby.etherscan.io/address/0x5eD8Cee6b63b1c6AFce3AD7c92f4fD7E1B8fAd9F"
+                        id="base-ui-_r_b_"
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        <mock-icon
+                          class="size-4"
+                        />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="flex flex-row flex-wrap items-center gap-2 justify-start"
+          >
+            <span
+              class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)] min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Reset time
+            </span>
+            <div
+              class="flex items-center gap-1 "
+              data-testid="spending-limit-label"
+            >
+              <p
+                class="m-0 text-base leading-6 font-normal"
+                data-slot="typography"
+                data-variant="paragraph"
+              >
+                One-time spending limit
+              </p>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./SpendingLimitReviewDetails.stories ReplacesLimit 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="shadcn-scope"
+    >
+      <div
+        class="bg-background min-h-screen [&>main]:p-6"
+      >
+        <main>
+          <div
+            class="flex flex-wrap gap-2 xl:flex-nowrap"
+          >
+            <div
+              class="break-words min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
+              data-testid="tx-row-title"
+            >
+              <span
+                class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)]"
+                data-slot="typography"
+                data-variant="paragraph-small"
+              >
+                Amount
+              </span>
+            </div>
+            <div
+              class="max-w-full flex-1 xl:min-w-0"
+              data-testid="tx-data-row"
+            >
+              <div
+                class="flex items-center gap-2"
+              >
+                <div
+                  class="relative"
+                >
+                  <iframe
+                    height="26"
+                    loading="lazy"
+                    referrerpolicy="strict-origin"
+                    sandbox="allow-scripts"
+                    srcdoc="
+    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <img src="/images/common/token-placeholder.svg" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <script>
+        document.querySelector('img').onerror = (e) => {
+          e.target.onerror = null
+          e.target.src = "/images/common/token-placeholder.svg"
+        }
+      </script>
+    </body>
+  "
+                    style="pointer-events: none; border: 0px; display: block;"
+                    tabindex="-1"
+                    title="USDC"
+                    width="26"
+                  />
+                </div>
+                <span
+                  class="m-0 text-sm leading-5 font-semibold"
+                  data-slot="typography"
+                  data-variant="paragraph-small-bold"
+                >
+                  USDC
+                </span>
+                <span
+                  class="text-destructive line-through"
+                  data-testid="old-token-amount"
+                >
+                  1
+                </span>
+                 → 
+                <span
+                  class="m-0 text-sm leading-5 font-normal"
+                  data-slot="typography"
+                  data-testid="token-amount"
+                  data-variant="paragraph-small"
+                >
+                  1.5
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="flex flex-row flex-wrap items-center gap-2 justify-start"
+          >
+            <span
+              class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)] min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Beneficiary
+            </span>
+            <div
+              data-testid="beneficiary-address"
+            >
+              <div
+                class="container"
+              >
+                <div
+                  class="gap-1 overflow-hidden"
+                >
+                  <div
+                    class="addressContainer"
+                  >
+                    <div
+                      class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
+                    >
+                      <span
+                        aria-label="Copy to clipboard"
+                        class="inline-flex cursor-pointer"
+                        data-slot="tooltip-trigger"
+                        id="base-ui-_r_d_"
+                      >
+                        <b>
+                          rin
+                          :
+                        </b>
+                        <span>
+                          0x5eD8Cee6b63b1c6AFce3AD7c92f4fD7E1B8fAd9F
+                        </span>
+                      </span>
+                    </div>
+                    <span
+                      aria-label="Copy to clipboard"
+                      class="inline-flex cursor-pointer"
+                      data-slot="tooltip-trigger"
+                      id="base-ui-_r_f_"
+                    >
+                      <button
+                        aria-label="Copy to clipboard"
+                        class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3"
+                        data-slot="button"
+                        tabindex="0"
+                        type="button"
+                      >
+                        <mock-icon
+                          class="size-4 text-[var(--color-border-main)]"
+                          data-testid="copy-btn-icon"
+                        />
+                      </button>
+                    </span>
+                    <div
+                      class="text-[var(--color-border-main)]"
+                    >
+                      <a
+                        aria-label="View on rinkeby.etherscan.io"
+                        class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
+                        data-slot="tooltip-trigger"
+                        data-testid="explorer-btn"
+                        href="https://rinkeby.etherscan.io/address/0x5eD8Cee6b63b1c6AFce3AD7c92f4fD7E1B8fAd9F"
+                        id="base-ui-_r_h_"
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        <mock-icon
+                          class="size-4"
+                        />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="flex flex-row flex-wrap items-center gap-2 justify-start"
+          >
+            <span
+              class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)] min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Reset time
+            </span>
+            <div
+              class="flex items-center gap-1 "
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-clock size-4 shrink-0 text-[var(--color-border-main)]"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 6v6l4 2"
+                />
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+              </svg>
+              <span
+                class="text-destructive line-through"
+                data-testid="old-reset-time"
+              >
+                1 week
+              </span>
+               → 
+              <span>
+                1 day
+              </span>
+            </div>
+          </div>
+          <div
+            class="grid gap-0.5 rounded-md border px-4 py-4 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-14 has-[>svg]:grid-cols-[auto_minmax(0,1fr)] has-[>svg]:gap-x-3 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert text-foreground *:data-[slot=alert-description]:text-muted-foreground *:[svg]:text-warning-accent bg-warning-subtle border-transparent border-none"
+            data-slot="alert"
+            role="alert"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-triangle-alert"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+              />
+              <path
+                d="M12 9v4"
+              />
+              <path
+                d="M12 17h.01"
+              />
+            </svg>
+            <p
+              class="m-0 text-base leading-6 font-bold"
+              data-slot="typography"
+              data-testid="limit-replacement-warning"
+              data-variant="paragraph"
+            >
+              You are about to replace an existing spending limit
+            </p>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./SpendingLimitReviewDetails.stories ReplacesLimitWithSameResetTime 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 1rem;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      class="shadcn-scope"
+    >
+      <div
+        class="bg-background min-h-screen [&>main]:p-6"
+      >
+        <main>
+          <div
+            class="flex flex-wrap gap-2 xl:flex-nowrap"
+          >
+            <div
+              class="break-words min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
+              data-testid="tx-row-title"
+            >
+              <span
+                class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)]"
+                data-slot="typography"
+                data-variant="paragraph-small"
+              >
+                Amount
+              </span>
+            </div>
+            <div
+              class="max-w-full flex-1 xl:min-w-0"
+              data-testid="tx-data-row"
+            >
+              <div
+                class="flex items-center gap-2"
+              >
+                <div
+                  class="relative"
+                >
+                  <iframe
+                    height="26"
+                    loading="lazy"
+                    referrerpolicy="strict-origin"
+                    sandbox="allow-scripts"
+                    srcdoc="
+    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+      <img src="/images/common/token-placeholder.svg" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <script>
+        document.querySelector('img').onerror = (e) => {
+          e.target.onerror = null
+          e.target.src = "/images/common/token-placeholder.svg"
+        }
+      </script>
+    </body>
+  "
+                    style="pointer-events: none; border: 0px; display: block;"
+                    tabindex="-1"
+                    title="USDC"
+                    width="26"
+                  />
+                </div>
+                <span
+                  class="m-0 text-sm leading-5 font-semibold"
+                  data-slot="typography"
+                  data-variant="paragraph-small-bold"
+                >
+                  USDC
+                </span>
+                <span
+                  class="text-destructive line-through"
+                  data-testid="old-token-amount"
+                >
+                  1
+                </span>
+                 → 
+                <span
+                  class="m-0 text-sm leading-5 font-normal"
+                  data-slot="typography"
+                  data-testid="token-amount"
+                  data-variant="paragraph-small"
+                >
+                  1.5
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="flex flex-row flex-wrap items-center gap-2 justify-start"
+          >
+            <span
+              class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)] min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Beneficiary
+            </span>
+            <div
+              data-testid="beneficiary-address"
+            >
+              <div
+                class="container"
+              >
+                <div
+                  class="gap-1 overflow-hidden"
+                >
+                  <div
+                    class="addressContainer"
+                  >
+                    <div
+                      class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
+                    >
+                      <span
+                        aria-label="Copy to clipboard"
+                        class="inline-flex cursor-pointer"
+                        data-slot="tooltip-trigger"
+                        id="base-ui-_r_j_"
+                      >
+                        <b>
+                          rin
+                          :
+                        </b>
+                        <span>
+                          0x5eD8Cee6b63b1c6AFce3AD7c92f4fD7E1B8fAd9F
+                        </span>
+                      </span>
+                    </div>
+                    <span
+                      aria-label="Copy to clipboard"
+                      class="inline-flex cursor-pointer"
+                      data-slot="tooltip-trigger"
+                      id="base-ui-_r_l_"
+                    >
+                      <button
+                        aria-label="Copy to clipboard"
+                        class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3"
+                        data-slot="button"
+                        tabindex="0"
+                        type="button"
+                      >
+                        <mock-icon
+                          class="size-4 text-[var(--color-border-main)]"
+                          data-testid="copy-btn-icon"
+                        />
+                      </button>
+                    </span>
+                    <div
+                      class="text-[var(--color-border-main)]"
+                    >
+                      <a
+                        aria-label="View on rinkeby.etherscan.io"
+                        class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
+                        data-slot="tooltip-trigger"
+                        data-testid="explorer-btn"
+                        href="https://rinkeby.etherscan.io/address/0x5eD8Cee6b63b1c6AFce3AD7c92f4fD7E1B8fAd9F"
+                        id="base-ui-_r_n_"
+                        rel="noreferrer"
+                        target="_blank"
+                      >
+                        <mock-icon
+                          class="size-4"
+                        />
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="flex flex-row flex-wrap items-center gap-2 justify-start"
+          >
+            <span
+              class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)] min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Reset time
+            </span>
+            <div
+              class="flex items-center gap-1 "
+            >
+              <svg
+                aria-hidden="true"
+                class="lucide lucide-clock size-4 shrink-0 text-[var(--color-border-main)]"
+                fill="none"
+                height="24"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                width="24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 6v6l4 2"
+                />
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+              </svg>
+              <span>
+                1 day
+              </span>
+            </div>
+          </div>
+          <div
+            class="grid gap-0.5 rounded-md border px-4 py-4 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-14 has-[>svg]:grid-cols-[auto_minmax(0,1fr)] has-[>svg]:gap-x-3 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert text-foreground *:data-[slot=alert-description]:text-muted-foreground *:[svg]:text-warning-accent bg-warning-subtle border-transparent border-none"
+            data-slot="alert"
+            role="alert"
+          >
+            <svg
+              aria-hidden="true"
+              class="lucide lucide-triangle-alert"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+              />
+              <path
+                d="M12 9v4"
+              />
+              <path
+                d="M12 17h.01"
+              />
+            </svg>
+            <p
+              class="m-0 text-base leading-6 font-bold"
+              data-slot="typography"
+              data-testid="limit-replacement-warning"
+              data-variant="paragraph"
+            >
+              You are about to replace an existing spending limit
+            </p>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</div>
+`;

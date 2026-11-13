@@ -1,5 +1,10 @@
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
-import { Typography } from '@/components/ui/typography'
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@safe-global/views/components/ui/accordion'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useState } from 'react'
 import type { ReactElement } from 'react'
 import Question from '@/public/images/common/question.svg'

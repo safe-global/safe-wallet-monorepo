@@ -9,46 +9,36 @@ import { Provider } from 'react-redux'
 import { lazy, memo, Suspense, useMemo, type ReactElement } from 'react'
 
 // Reused verbatim from apps/web/src — the provider chain itself is exported.
-import { AppProviders } from '@/pages/_app'
+import { AppProviders, SafeScopedSubscriptions } from '@/pages/_app'
 import { BRAND_NAME } from '@/config/constants'
 import { GATEWAY_URL } from '@/config/gateway'
 import { makeStore, setStoreInstance, useHydrateStore, useInitChains } from '@/store'
 import MetaTags from '@/components/common/MetaTags'
 import PageLayout from '@/components/common/PageLayout'
 import PwaReloadPrompt from '../components/PwaReloadPrompt'
-import Notifications from '@/components/common/Notifications'
-import CookieAndTermBanner from '@/components/common/CookieAndTermBanner'
+import AppChrome from '@/components/common/AppChrome'
 import { CaptchaProvider } from '@/components/common/Captcha'
 import useChangedValue from '@/hooks/useChangedValue'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
 import useGtm from '@/services/analytics/useGtm'
 import useMixpanel from '@/services/analytics/useMixpanel'
-import useBeamer from '@/hooks/Beamer/useBeamer'
 import useLoadableStores from '@/hooks/useLoadableStores'
-import useTxNotifications from '@/hooks/useTxNotifications'
-import useSafeNotifications from '@/hooks/useSafeNotifications'
-import useTxPendingStatuses from '@/hooks/useTxPendingStatuses'
-import useSafeMessageNotifications from '@/hooks/messages/useSafeMessageNotifications'
-import useSafeMessagePendingStatuses from '@/hooks/messages/useSafeMessagePendingStatuses'
+import useUnlockBodyScroll from '@/hooks/useUnlockBodyScroll'
+import { useRememberSpace } from '@/hooks/useRememberSpace'
 import { useInitSession } from '@/hooks/useInitSession'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
-import { useTxTracking } from '@/hooks/useTxTracking'
-import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import { useVisitedSafes } from '@/features/myAccounts'
-import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
-import LaunchScreen from '@/components/common/LaunchScreen'
-import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
+import { useOidcLoginCallback, useStepUpRecovery } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
+import { useHypernativeTokenRefresh } from '@/features/hypernative'
 import { initObservability } from '@/services/observability'
 import Analytics from '@/services/analytics/Analytics'
-import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import { useLoadFeature } from '@/features/__core__'
 import { RecoveryFeature } from '@/features/recovery'
 import { CounterfactualFeature } from '@/features/counterfactual'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
-import { TargetedOutreachFeature } from '@/features/targeted-outreach'
 import { useLocation, useSearch } from '@tanstack/react-router'
 
 import '@/styles/globals.css'
@@ -78,18 +68,8 @@ const SpendingLimitsLoaderWrapper = () => {
   const { SpendingLimitsLoader } = useLoadFeature(SpendingLimitsFeature)
   return <SpendingLimitsLoader />
 }
-const TargetedOutreachPopupLoader = () => {
-  const { OutreachPopup } = useLoadFeature(TargetedOutreachFeature)
-  return <OutreachPopup />
-}
 
-const StepUpSplash = (): ReactElement | null => {
-  const stepUpCaption = useStepUpSplash()
-
-  return stepUpCaption ? <LaunchScreen stepUpCaption={stepUpCaption} /> : null
-}
-
-const InitApp = (): null => {
+const InitApp = (): ReactElement => {
   useHydrateStore(reduxStore)
   useInitChains()
   useAdjustUrl()
@@ -99,21 +79,16 @@ const InitApp = (): null => {
   useInitSession()
   useLoadableStores()
   useInitWeb3()
-  useTxNotifications()
-  useSafeMessageNotifications()
-  useSafeNotifications()
-  useTxPendingStatuses()
-  useSafeMessagePendingStatuses()
-  useTxTracking()
-  useSafeMsgTracking()
-  useBeamer()
   useVisitedSafes()
-  usePortfolioRefetchOnTxHistory()
   useOidcLoginCallback()
-  useStepUpCallback()
+  useStepUpRecovery()
   useLogoutCallback()
   useSessionExpiryGuard()
-  return null
+  useHypernativeTokenRefresh()
+  useUnlockBodyScroll()
+  useRememberSpace()
+
+  return <SafeScopedSubscriptions />
 }
 
 // Memoized subtree — bails out of re-render when pathname and outlet are
@@ -125,14 +100,10 @@ const MemoizedTree = memo(function MemoizedTree({ pathname, outlet }: { pathname
   return (
     <>
       <PageLayout pathname={pathname}>{outlet}</PageLayout>
-      <CookieAndTermBanner />
-      <TargetedOutreachPopupLoader />
-      <Notifications />
+      <AppChrome />
       <RecoveryLoader />
       <CounterfactualHooksLoader />
       <SpendingLimitsLoaderWrapper />
-      <Analytics />
-      <PkModulePopup />
     </>
   )
 })
@@ -154,8 +125,9 @@ function RootShell() {
         <MetaTags prefetchUrl={GATEWAY_URL} />
         <AppProviders>
           <CaptchaProvider>
+            {/* Before InitApp and the page, so GA exists before their mount effects send events */}
+            <Analytics />
             <InitApp />
-            <StepUpSplash />
             <PwaReloadPrompt />
             <Suspense fallback={null}>
               <LazyWeb3Init />

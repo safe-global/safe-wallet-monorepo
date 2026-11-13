@@ -43,7 +43,7 @@ export type EntitlementsPlan = {
   /** Status of the subscription the plan comes from */
   status: EntitlementsPlanStatus
 }
-export type FeatureKey = 'safe_seats' | 'copilot_scans' | 'sponsored_transactions' | 'policies'
+export type FeatureKey = 'safe_seats' | 'copilot_scans' | 'sponsored_transactions' | 'policies' | 'safenet_checks'
 export type BinaryEntitlement = {
   /** Feature key from the entitlements catalog. */
   feature: FeatureKey

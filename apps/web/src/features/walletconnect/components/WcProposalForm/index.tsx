@@ -1,19 +1,19 @@
-import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
+import SafeAppIconCard from '@safe-global/views/components/safe-apps/SafeAppIconCard'
 import { WCLoadingState } from '../../types'
-import { getPeerName, getSupportedChainIds, isBlockedBridge, isWarnedBridge } from '../../services/utils'
-import { isSafePassApp } from '@/services/safe-apps/utils'
+import { getPeerName } from '../../services/utils'
+import { getProposalRisk } from '../../services/proposalRisk'
 import { WalletConnectContext } from '../WalletConnectContext'
 import useChains from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
 
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Spinner } from '@/components/ui/spinner'
-import { Separator } from '@/components/ui/separator'
-import { Field, FieldLabel } from '@/components/ui/field'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Checkbox } from '@safe-global/views/components/ui/checkbox'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import type { WalletKitTypes } from '@reown/walletkit'
 import type { ReactElement } from 'react'
 import { useId } from 'react'
@@ -26,7 +26,7 @@ import BlockedAddress from '@/components/common/BlockedAddress'
 
 type ProposalFormProps = {
   proposal: WalletKitTypes.SessionProposal
-  onApprove: () => Promise<void>
+  onApprove: () => Promise<unknown>
   onReject: () => Promise<void>
 }
 
@@ -39,18 +39,15 @@ const WcProposalForm = ({ proposal, onApprove, onReject }: ProposalFormProps): R
   const { chainId } = safe
   const [understandsRisk, setUnderstandsRisk] = useState(false)
   const { proposer } = proposal.params
-  const { isScam, origin } = proposal.verifyContext.verified
-  const url = proposer.metadata.url || origin
+  const url = proposer.metadata.url || proposal.verifyContext.verified.origin
+  const name = getPeerName(proposer) || 'Unknown dApp'
 
-  const isSafePass = isSafePassApp(origin)
+  const { chainIds, isUnsupportedChain, isHighRisk, isBlocked, isSafePass } = useMemo(
+    () => getProposalRisk(proposal, configs, chainId),
+    [proposal, configs, chainId],
+  )
   const sanctionedAddress = useSanctionedAddress(isSafePass)
 
-  const chainIds = useMemo(() => getSupportedChainIds(configs, proposal.params), [configs, proposal.params])
-  const isUnsupportedChain = !chainIds.includes(chainId)
-
-  const name = getPeerName(proposer) || 'Unknown dApp'
-  const isHighRisk = proposal.verifyContext.verified.validation === 'INVALID' || isWarnedBridge(origin, name)
-  const isBlocked = isScam || isBlockedBridge(origin)
   const disabled =
     !safeLoaded ||
     isUnsupportedChain ||

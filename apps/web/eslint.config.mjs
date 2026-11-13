@@ -2,75 +2,11 @@ import unusedImports from 'eslint-plugin-unused-imports'
 import typescriptEslint from '@typescript-eslint/eslint-plugin'
 import noOnlyTests from 'eslint-plugin-no-only-tests'
 import tsParser from '@typescript-eslint/parser'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import js from '@eslint/js'
-import { FlatCompat } from '@eslint/eslintrc'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-})
-
-// Design-system button-styling guard: flags size/skin utilities (owned by the
-// `size`/`variant` props) set via `className` on a <Button> or a closed button
-// preset. Matches the literal even inside cn(...). See apps/web/AGENTS.md.
-const dsButtonClassnameRule = (element, message) => ({
-  selector: `JSXOpeningElement[name.name='${element}'] > JSXAttribute[name.name='className'] Literal[value=/(?:^|\\s)(h-|px-|py-|text-(xs|sm|base|lg)|rounded-|bg-)/]`,
-  message,
-})
-
-// Design-system Card-styling guard. Card owns spacing (gap/padding), radius, and
-// surface (bg/border/shadow) via its `size`/`variant`/`radius` props — so this rule
-// flags a wider set than the button rule: `gap-`, full-side `p-`/`pt-`/`pb-`, `border`,
-// and `shadow-`. `className` stays layout-only (w-*, margins, flex/grid). Matches the
-// literal even inside cn(...). Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.
-const dsCardClassnameRule = (element, message) => ({
-  selector: `JSXOpeningElement[name.name='${element}'] > JSXAttribute[name.name='className'] Literal[value=/(?:^|\\s)(h-|p-|px-|py-|pt-|pb-|pl-|pr-|gap-|text-(xs|sm|base|lg)|rounded-|bg-|border|shadow-)/]`,
-  message,
-})
-
-// Design-system Input-styling guard. Input/InputGroup own height (`inputSize`) and skin
-// (`variant`: bg/border) — so this flags `h-`, `px-`/`py-`, `rounded-`, `bg-`, `border`, and
-// font sizes on className. `w-*`, margins, and flex/grid stay layout-only. Matches literals
-// inside cn(...). Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.
-const dsInputClassnameRule = (element, message) => ({
-  selector: `JSXOpeningElement[name.name='${element}'] > JSXAttribute[name.name='className'] Literal[value=/(?:^|\\s)(h-|px-|py-|text-(xs|sm|base|lg)|rounded-|bg-|border)/]`,
-  message,
-})
-
-// Design-system Tabs-styling guard. TabsList owns bg/padding/height/radius/gap via its
-// `variant` (underline/toggle, + tone/size) and TabsTrigger owns its per-variant styling — so
-// call sites pass only `variant` + layout-only className (w-*, margins, flex/grid). Same wide
-// regex as Card. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.
-const dsTabsClassnameRule = (element, message) => ({
-  selector: `JSXOpeningElement[name.name='${element}'] > JSXAttribute[name.name='className'] Literal[value=/(?:^|\\s)(h-|p-|px-|py-|pt-|pb-|pl-|pr-|gap-|text-(xs|sm|base|lg)|rounded-|bg-|border|shadow-)/]`,
-  message,
-})
-
-// Design-system Badge/Chip-styling guard. Badge/Chip own geometry (`size`/`shape`) and
-// colour (`variant`) — so this flags `h-`, `px-`/`py-`, font sizes (incl. arbitrary
-// `text-[10px]`/`text-[var(--…)]`), `rounded-`, `bg-`, and `border`. `w-*`, margins, and
-// flex/grid stay layout-only. Matches literals inside cn(...). Escape hatch:
-// `// eslint-disable-next-line no-restricted-syntax -- <reason>`.
-const dsBadgeClassnameRule = (element, message) => ({
-  selector: `JSXOpeningElement[name.name='${element}'] > JSXAttribute[name.name='className'] Literal[value=/(?:^|\\s)(h-|px-|py-|text-(xs|sm|base|lg)|text-\\[|rounded-|bg-|border)/]`,
-  message,
-})
-
-// Design-system Dialog/Sheet/Drawer-styling guard. Content owns width (`size`), body
-// `padding`, and `surface` (bg/border/shadow); Header/Footer own `divided`. So this flags
-// `max-w-`, arbitrary `w-[…]`, `p-`/`px-`/`py-`/`pt-`/`pb-`, `gap-`, `rounded-`, `bg-`,
-// `border`, `shadow-`. It deliberately does NOT flag `max-h-`, `w-full`, `w-3/4`, flex/grid
-// or overflow — those stay layout-only. Matches literals inside cn(...). Escape hatch:
-// `// eslint-disable-next-line no-restricted-syntax -- <reason>`.
-const dsDialogClassnameRule = (element, message) => ({
-  selector: `JSXOpeningElement[name.name='${element}'] > JSXAttribute[name.name='className'] Literal[value=/(?:^|\\s)(p-|px-|py-|pt-|pb-|gap-|max-w-|w-\\[|rounded-|bg-|border|shadow-)/]`,
-  message,
-})
+import next from 'eslint-config-next'
+import prettier from 'eslint-config-prettier'
+import storybook from 'eslint-plugin-storybook'
+import { designSystemSyntaxRules } from '../../packages/views/eslint-design-system.mjs'
+import noExplicitAny from '../../config/eslint/no-explicit-any.mjs'
 
 // A Safe link without `spaceId` opens the Safe outside the Workspace of the current page. Matches a
 // `query` property or variable that holds such an object, directly or in a conditional.
@@ -87,117 +23,39 @@ const safeLinkWithoutSpaceIdRules = [
     'A Safe link must keep `spaceId`: use `useSafeLinkQuery()`, or wrap the query in `withSpaceId(query, spaceId)`. If the link must leave the Workspace, add `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
 }))
 
-const designSystemSyntaxRules = [
-  dsButtonClassnameRule(
-    'Button',
-    "Don't set size/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*) on <Button> — use a `size`/`variant` prop. See the UI/Button story and apps/web/AGENTS.md; add a variant/size to components/ui/button.tsx if none fits. The only sanctioned raw-styling escape is `// eslint-disable-next-line no-restricted-syntax -- <reason>`.",
-  ),
-  dsButtonClassnameRule(
-    'SubmitButton',
-    'SubmitButton is a closed preset and takes no styling className — use `fullWidth` for layout, or the primitive <Button> for a genuine one-off.',
-  ),
-  dsButtonClassnameRule(
-    'ActionButton',
-    'ActionButton is a closed preset and takes no styling className — use `fullWidth` for layout, or the primitive <Button> for a genuine one-off.',
-  ),
-  dsButtonClassnameRule(
-    'SelectTrigger',
-    "Don't set size/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*) on <SelectTrigger> — use `size` ('sm'|'default'|'lg' — match the height of the button/field on the same row) / `variant` ('default'|'ghost'). See the UI/Select story; add a variant to components/ui/select.tsx if none fits. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.",
-  ),
-  ...['Card', 'CardHeader', 'CardContent', 'CardFooter', 'CardTitle', 'CardDescription', 'CardAction'].map((element) =>
-    dsCardClassnameRule(
-      element,
-      `Don't set spacing/surface/radius utilities (gap-*, p-*/px-*/py-*, rounded-*, bg-*, border, shadow-*, text-xs|sm|base|lg) on <${element}> — use the \`size\` ('sm'|'default'|'lg'|'none'), \`variant\` ('outlined'|'muted'), and \`radius\` props. \`className\` is layout-only (w-*, margins, flex/grid). See the UI/Card story; add a variant/size to components/ui/card.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
-    ),
-  ),
-  dsCardClassnameRule(
-    'SettingsCard',
-    'SettingsCard is a Card preset — pass layout-only `className` (w-*, margins, flex/grid), not spacing/surface/radius utilities. Use `contentClassName` for the body or the primitive <Card> for a one-off. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
-  ),
-  dsCardClassnameRule(
-    'SpaceSettingsSection',
-    'SpaceSettingsSection is a Card preset — pass layout-only `className`, not spacing/surface/radius utilities. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
-  ),
-  dsCardClassnameRule(
-    'TxCard',
-    'TxCard is a Card preset — pass layout-only `className`, not spacing/surface/radius utilities. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
-  ),
-  ...[
-    'Input',
-    'InputGroup',
-    'InputGroupInput',
-    'InputGroupAddon',
-    'InputGroupText',
-    'InputGroupTextarea',
-    'InputGroupButton',
-  ].map((element) =>
-    dsInputClassnameRule(
-      element,
-      `Don't set height/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*, border) on <${element}> — use \`inputSize\` ('sm'|'default'|'lg'|'hero', plus 'heroWrap' on InputGroup for a hero-height control whose content wraps — match the height of the button on the same row) / \`variant\` ('default'|'surface', plus 'search'|'outline' on InputGroup). \`className\` is layout-only (w-*, margins, flex/grid). See the UI/Input story; add a variant to components/ui/input.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
-    ),
-  ),
-  dsInputClassnameRule(
-    'SearchInput',
-    'SearchInput is the shared search preset — pass layout-only `className` (w-*, margins), not height/skin utilities. Use `inputSize`/`variant`, or the primitive <InputGroup> for a one-off. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
-  ),
-  dsInputClassnameRule(
-    'SearchField',
-    'SearchField is a search preset (being retired for <SearchInput>) — pass layout-only `className`, not height/skin utilities. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
-  ),
-  dsInputClassnameRule(
-    'NumberField',
-    'NumberField forwards styling to its Input — pass `inputSize`/`variant`, not height/skin utilities via `className`. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
-  ),
-  dsInputClassnameRule(
-    'NameInput',
-    'NameInput forwards styling to its Input — pass `inputSize`/`variant`, not height/skin utilities via `className`. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
-  ),
-  ...['TabsList', 'TabsTrigger'].map((element) =>
-    dsTabsClassnameRule(
-      element,
-      `Don't set spacing/surface/radius utilities (gap-*, p-*/px-*/py-*, rounded-*, bg-*, border, shadow-*, text-xs|sm|base|lg) on <${element}> — use the TabsList \`variant\` ('underline'|'toggle', with tone/size). \`className\` is layout-only (w-*, margins, flex/grid). See the UI/Tabs story; add a variant to components/ui/tabs.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
-    ),
-  ),
-  ...['Badge', 'Chip'].map((element) =>
-    dsBadgeClassnameRule(
-      element,
-      `Don't set geometry/colour utilities (h-*, px-*/py-*, text-xs|sm|base|lg, text-[…], rounded-*, bg-*, border) on <${element}> — use the \`variant\`, \`size\` ('sm'|'default'|'lg'|'auto'), and \`shape\` ('pill'|'tag') props. \`className\` is layout-only (w-*, margins, flex/grid). See the UI/${element} story; add a variant to components/ui/${element.toLowerCase()}.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
-    ),
-  ),
-  ...[
-    'DialogContent',
-    'DialogHeader',
-    'DialogFooter',
-    'SheetContent',
-    'SheetHeader',
-    'SheetFooter',
-    'DrawerContent',
-    'DrawerHeader',
-    'DrawerFooter',
-  ].map((element) =>
-    dsDialogClassnameRule(
-      element,
-      `Don't set width/padding/surface utilities (max-w-*, w-[…], p-*/px-*/py-*, gap-*, rounded-*, bg-*, border, shadow-*) on <${element}> — use the \`size\`, \`padding\`, \`surface\`, and (Header/Footer) \`divided\` props. Layout-only className (max-h-*, w-full, flex/grid, overflow) is fine. See the UI/Dialog|Sheet|Drawer story; add a variant to the primitive if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
-    ),
-  ),
-]
+// Faker continues one shared sequence, so story data is the same in every run only if the file seeds it first
+const seedFakerInStoryData = {
+  selector:
+    "Program:has(ImportDeclaration[source.value=/faker|builders/]):not(:has(CallExpression[callee.object.name='faker'][callee.property.name='seed']))",
+  message: 'Story data must be the same in every run: call faker.seed(<number>) after the imports.',
+}
 
-export default [
+const noTestDataInStories = {
+  selector: 'ImportDeclaration[source.value=/\\.testData$/]',
+  message: 'testData files may be random and are for tests only. Move the data a story needs to a .storyData.ts file.',
+}
+
+const storyDataRules = [seedFakerInStoryData, noTestDataInStories]
+
+const config = [
   {
     ignores: [
       '**/node_modules/',
       '**/.next/',
       '**/.github/',
-      '**/cypress/',
-      '**/cypress.config.js',
       '**/src/types/contracts/',
       '**/.storybook/test-runner.mjs',
       '**/.storybook/mocks/*.js',
       '**/public/mockServiceWorker.js',
+      '**/public/step-up-complete.js',
     ],
   },
-  ...compat.extends('next', 'prettier', 'plugin:storybook/recommended'),
+  ...next,
+  prettier,
+  ...storybook.configs['flat/recommended'],
   {
+    // Same files as eslint-config-next, which registers the react-hooks plugin only for these.
+    files: ['**/*.{js,jsx,mjs,ts,tsx,mts,cts}'],
     plugins: {
       'unused-imports': unusedImports,
       '@typescript-eslint': typescriptEslint,
@@ -229,6 +87,7 @@ export default [
         {
           varsIgnorePattern: '^_',
           ignoreRestSiblings: true,
+          caughtErrors: 'none',
         },
       ],
 
@@ -238,6 +97,21 @@ export default [
           additionalHooks: 'useAsync',
         },
       ],
+      // React Compiler rules from eslint-plugin-react-hooks 7. The app does not use the compiler yet.
+      'react-hooks/config': 'off',
+      'react-hooks/error-boundaries': 'off',
+      'react-hooks/gating': 'off',
+      'react-hooks/globals': 'off',
+      'react-hooks/immutability': 'off',
+      'react-hooks/incompatible-library': 'off',
+      'react-hooks/preserve-manual-memoization': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/refs': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/set-state-in-render': 'off',
+      'react-hooks/static-components': 'off',
+      'react-hooks/unsupported-syntax': 'off',
+      'react-hooks/use-memo': 'off',
 
       'no-only-tests/no-only-tests': 'error',
       'object-shorthand': ['error', 'properties'],
@@ -268,6 +142,15 @@ export default [
       'no-restricted-imports': [
         'error',
         {
+          paths: [
+            { name: 'next', importNames: ['NextPage'], message: 'Type a page as a plain function component.' },
+            { name: 'next/dynamic', message: 'Import dynamic from @/utils/dynamic, which does not depend on Next.' },
+            { name: 'next/app', message: 'Type the app props yourself, as pages/_app.tsx does.' },
+            {
+              name: 'next/image',
+              message: 'Use a plain <img>. Images are served unoptimized, so next/image adds nothing.',
+            },
+          ],
           patterns: [
             // Block deep imports into feature components (defeats lazy loading)
             {
@@ -320,11 +203,35 @@ export default [
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules],
     },
   },
+  // The isolated-stack mocks run in Node with their own compiler settings, which the main tsconfig excludes.
+  {
+    files: ['e2e/environment/infra/mocks/*.ts'],
+    languageOptions: { parserOptions: { project: ['./e2e/environment/infra/mocks/tsconfig.json'] } },
+  },
+  // No tsconfig includes JavaScript, so these files get only the rules that need no type information.
+  {
+    files: ['**/*.{js,mjs,cjs}'],
+    languageOptions: { parserOptions: { project: null } },
+    rules: { '@typescript-eslint/await-thenable': 'off' },
+  },
+  noExplicitAny,
   // Tests build router mocks with a bare `safe` query, so only the design-system guards apply there.
   {
     files: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**', '**/*.stories.tsx', 'src/tests/**', 'src/stories/**'],
     rules: {
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules],
+    },
+  },
+  {
+    files: ['**/*.stories.tsx', '**/*.stories.ts', 'src/stories/**'],
+    rules: {
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...storyDataRules],
+    },
+  },
+  {
+    files: ['**/*.storyData.ts'],
+    rules: {
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules, ...storyDataRules],
     },
   },
   // Override for story files: allow type-only imports from @storybook/react
@@ -336,3 +243,5 @@ export default [
     },
   },
 ]
+
+export default config

@@ -1,15 +1,16 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
-import { DataRow } from '@/components/common/Table/DataRow'
-import { DataTable } from '@/components/common/Table/DataTable'
+import { DataRow } from '@safe-global/views/components/common/Table/DataRow'
+import { DataTable } from '@safe-global/views/components/common/Table/DataTable'
 import TokenAmount from '@/components/common/TokenAmount'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type BridgeAndSwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
+import { getTotalBridgeFee } from '@safe-global/utils/components/confirmation-views/BridgeTransaction/getTotalBridgeFee'
 import { formatUnits } from 'ethers'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import css from './styles.module.css'
 
 interface BridgeTransactionProps {
@@ -143,10 +144,7 @@ function BridgeTransaction({ txInfo }: BridgeTransactionProps) {
   const chainId = useChainId()
   const { configs } = useChains()
 
-  const totalFee = formatUnits(
-    BigInt(txInfo.fees?.integratorFee ?? 0n) + BigInt(txInfo.fees?.lifiFee ?? 0n),
-    txInfo.fromToken.decimals,
-  )
+  const totalFee = getTotalBridgeFee(txInfo.fees)
 
   let rows = []
   if (txInfo.status === 'PENDING' || txInfo.status === 'AWAITING_EXECUTION') {
@@ -161,7 +159,13 @@ function BridgeTransaction({ txInfo }: BridgeTransactionProps) {
   rows.push(
     <BridgeTxRecipientRow key="recipient" txInfo={txInfo} />,
     <DataRow datatestid="total-fee" key="fees" title="Fees">
-      {formatAmount(totalFee)} {txInfo.fromToken.symbol}
+      {totalFee === null ? (
+        'Unknown'
+      ) : (
+        <>
+          {formatAmount(formatUnits(totalFee, txInfo.fromToken.decimals))} {txInfo.fromToken.symbol}
+        </>
+      )}
     </DataRow>,
   )
 

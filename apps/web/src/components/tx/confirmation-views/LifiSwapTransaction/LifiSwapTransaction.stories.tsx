@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { LifiSwapTransaction } from './index'
-import { mockLifiSwapTxInfo } from './mockData'
+import { mockLifiSwapTxInfo } from './LifiSwapTransaction.storyData'
 
 const meta = {
   title: 'Components/TxFlow/ConfirmationViews/LifiSwapTransaction',

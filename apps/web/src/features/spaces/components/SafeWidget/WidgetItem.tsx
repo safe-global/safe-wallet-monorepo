@@ -1,7 +1,7 @@
 import type { ReactElement, ReactNode } from 'react'
 import { useRouter } from 'next/router'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 
 interface WidgetItemProps {
   label: string | ReactNode
@@ -15,7 +15,7 @@ interface WidgetItemProps {
   actionNode?: ReactNode
   highlighted?: boolean
   className?: string
-  /** Cypress: indexed rows in Space dashboard Accounts widget (`space-dashboard-accounts-row-${n}`). */
+  /** Tests: indexed rows in Space dashboard Accounts widget (`space-dashboard-accounts-row-${n}`). */
   testId?: string
   fixedActionWidth?: boolean
 }

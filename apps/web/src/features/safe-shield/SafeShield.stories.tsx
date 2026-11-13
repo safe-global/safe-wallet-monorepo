@@ -364,9 +364,9 @@ const overflowSafeTxContextValue: SafeTxContextParams = {
   setSafeTxGas: () => {},
   setTxOrigin: () => {},
   isReadOnly: false,
-  gtfPaymentMode: 'safe',
-  setGtfPaymentMode: () => {},
-  setGtfSelectedGasToken: () => {},
+  feePaymentMode: 'safe',
+  setFeePaymentMode: () => {},
+  setFeeGasToken: () => {},
 }
 
 const overflowStore = makeStore({
@@ -424,6 +424,76 @@ export const HypernativeCustomCheckFailed: Story = {
         story:
           'SafeShieldWidget when Hypernative guard is enabled, user is authenticated, and there is a custom check failed result',
       },
+    },
+  },
+}
+
+export const NewRecipient: Story = {
+  args: {
+    ...FullAnalysisBuilder.verifiedContract(contractAddress)
+      .recipient(RecipientAnalysisBuilder.newRecipient(recipientAddress).build())
+      .threat(FullAnalysisBuilder.noThreat().build().threat)
+      .build(),
+  },
+  parameters: { docs: { description: { story: 'SafeShieldWidget when the Safe has never sent to the recipient' } } },
+}
+
+export const RecurringRecipient: Story = {
+  args: {
+    ...FullAnalysisBuilder.verifiedContract(contractAddress)
+      .recipient(RecipientAnalysisBuilder.recurringRecipient(recipientAddress).build())
+      .threat(FullAnalysisBuilder.noThreat().build().threat)
+      .build(),
+  },
+  parameters: { docs: { description: { story: 'SafeShieldWidget when the Safe has sent to the recipient before' } } },
+}
+
+export const BridgeIncompatibleSafe: Story = {
+  args: {
+    ...FullAnalysisBuilder.verifiedContract(contractAddress)
+      .recipient(RecipientAnalysisBuilder.incompatibleSafe(recipientAddress).build())
+      .threat(FullAnalysisBuilder.noThreat().build().threat)
+      .build(),
+  },
+  parameters: {
+    docs: { description: { story: 'SafeShieldWidget when the Safe cannot be created on the bridge target chain' } },
+  },
+}
+
+export const BridgeMissingOwnership: Story = {
+  args: {
+    ...FullAnalysisBuilder.verifiedContract(contractAddress)
+      .recipient(RecipientAnalysisBuilder.missingOwnership(recipientAddress).build())
+      .threat(FullAnalysisBuilder.noThreat().build().threat)
+      .build(),
+  },
+  parameters: {
+    docs: { description: { story: 'SafeShieldWidget when the Safe does not exist on the bridge target chain' } },
+  },
+}
+
+export const BridgeUnsupportedNetwork: Story = {
+  args: {
+    ...FullAnalysisBuilder.verifiedContract(contractAddress)
+      .recipient(RecipientAnalysisBuilder.unsupportedNetwork(recipientAddress).build())
+      .threat(FullAnalysisBuilder.noThreat().build().threat)
+      .build(),
+  },
+  parameters: {
+    docs: { description: { story: 'SafeShieldWidget when the wallet does not support the bridge target chain' } },
+  },
+}
+
+export const BridgeDifferentSetup: Story = {
+  args: {
+    ...FullAnalysisBuilder.verifiedContract(contractAddress)
+      .recipient(RecipientAnalysisBuilder.differentSafeSetup(recipientAddress).build())
+      .threat(FullAnalysisBuilder.noThreat().build().threat)
+      .build(),
+  },
+  parameters: {
+    docs: {
+      description: { story: 'SafeShieldWidget when the Safe has other owners or threshold on the bridge target chain' },
     },
   },
 }

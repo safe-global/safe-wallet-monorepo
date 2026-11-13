@@ -1,14 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { ArrowRight } from 'lucide-react'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
-import { Separator } from '@/components/ui/separator'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Dialog, DialogContent, DialogTitle } from '@safe-global/views/components/ui/dialog'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import { isElevationRequiredError } from '@/features/oidc-auth'
 import { formatCurrency } from '@safe-global/utils/utils/formatNumber'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { trackEvent } from '@/services/analytics'
@@ -17,9 +16,17 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { flattenSafeItems } from '@/hooks/safes'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
-import { removedSafesNote, summarizeRemovedSafes } from './removedSafes'
+import {
+  removedSafesNote,
+  summarizeRemovedSafes,
+} from '@safe-global/views/features/spaces/components/Plans/removedSafes'
 import { formatPlanPrice, getChangeDirection, priceSuffix } from './planTiers'
-import type { CurrentPlan, PlanChangeDirection, PlanPick, SafeRef } from './types'
+import type {
+  CurrentPlan,
+  PlanChangeDirection,
+  PlanPick,
+  SafeRef,
+} from '@safe-global/views/features/spaces/components/Plans/types'
 
 /** Stripe amounts arrive in minor units and its dates in seconds. */
 const money = (minorUnits: number, currency: string) => formatCurrency(minorUnits / 100, currency.toUpperCase())
@@ -70,7 +77,6 @@ export default function ChangePlanDialog({
 }) {
   const { previewChange, preview, isPreviewing, previewError, changePlan, isChanging, changeError } =
     useChangePlan(spaceId)
-  const [isVerifying, setIsVerifying] = useState(false)
   const { priceId, paymentLinkId } = pick.option
   const direction = getChangeDirection(currentPlan, pick)
   const title = changeTitle(direction, pick.option.label)
@@ -81,11 +87,6 @@ export default function ChangePlanDialog({
   useEffect(() => {
     if (priceId && !isTrialSwitch) previewChange(priceId)
   }, [priceId, isTrialSwitch, previewChange])
-
-  // The step-up redirect is on its way; the rejection must not read as a failure.
-  useEffect(() => {
-    if (isElevationRequiredError(changeError)) setIsVerifying(true)
-  }, [changeError])
 
   const changeProps = {
     [MixpanelEventParams.FROM_PLAN]: currentPlan.name.toLowerCase(),
@@ -102,15 +103,14 @@ export default function ChangePlanDialog({
     }
   }
 
-  const error = previewError ?? (isVerifying ? undefined : changeError)
+  const error = previewError ?? changeError
   const errorMessage = error ? getRtkQueryErrorMessage(error) || 'Something went wrong. Please try again.' : undefined
-  const isBusy = isChanging || isVerifying
   const canConfirm = Boolean(priceId && paymentLinkId) && (isTrialSwitch || (Boolean(preview) && !previewError))
   const { allSafes } = useSpaceSafes()
   const removedNote = removedSafesNote(summarizeRemovedSafes(flattenSafeItems(allSafes), removed))
 
   return (
-    <Dialog open onOpenChange={(open) => !open && !isBusy && onClose()}>
+    <Dialog open onOpenChange={(open) => !open && !isChanging && onClose()}>
       <DialogContent size="sm" surface="card" padding="sm">
         <div className="flex flex-col gap-4 pt-5">
           <Typography variant="h3" as={DialogTitle}>
@@ -197,28 +197,19 @@ export default function ChangePlanDialog({
             </Alert>
           )}
 
-          {isVerifying && (
-            <Alert variant="info">
-              <AlertSeverityIcon variant="info" />
-              <AlertDescription>
-                Verify your identity to confirm the plan change. You will be redirected.
-              </AlertDescription>
-            </Alert>
-          )}
-
           <div className="flex gap-4 pt-2">
-            <Button variant="secondary" size="lg" className="flex-1" onClick={onClose} disabled={isBusy}>
+            <Button variant="secondary" size="lg" className="flex-1" onClick={onClose} disabled={isChanging}>
               Cancel
             </Button>
             <Button
               size="lg"
               accentIcon
               className="flex-1"
-              disabled={!canConfirm || isBusy}
+              disabled={!canConfirm || isChanging}
               onClick={() => void onConfirm()}
               data-testid="change-plan-confirm"
             >
-              {isBusy ? (
+              {isChanging ? (
                 <Spinner />
               ) : (
                 <>

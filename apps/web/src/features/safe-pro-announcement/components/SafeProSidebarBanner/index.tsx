@@ -1,7 +1,7 @@
 import { ArrowUpRight, X } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
 import ProWordmark from '@/public/images/safe-pro/pro-wordmark.svg'
 import { MixpanelEventParams } from '@/services/analytics'
@@ -62,7 +62,7 @@ const SafeProSidebarBanner = ({
         size="xs"
         render={
           <a
-            onClick={() => trackSafeProBannerClick('sidebar')}
+            onClick={() => trackSafeProBannerClick('sidebar', SAFE_PRO_ANNOUNCEMENT_URL)}
             href={SAFE_PRO_ANNOUNCEMENT_URL}
             target="_blank"
             rel="noopener noreferrer"

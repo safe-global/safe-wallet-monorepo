@@ -4,7 +4,8 @@ import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { setSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import PageLayout from '@/components/common/PageLayout'
-import { ShadcnProvider } from '@/components/ui/ShadcnProvider'
+import AppChrome from '@/components/common/AppChrome'
+import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
 import type { StoryContext } from '@storybook/react'
 import type { LayoutType } from './types'
 import {
@@ -98,17 +99,14 @@ function LayoutWrapper({
       return wrapShadcn(<div className="bg-card rounded-lg p-4">{children}</div>)
 
     case 'fullPage':
-      return wrapShadcn(
-        <PageLayout key={storyId} pathname={pathname}>
-          {children as ReactElement}
-        </PageLayout>,
-      )
-
     case 'withSidebar':
       return wrapShadcn(
-        <PageLayout key={storyId} pathname={pathname}>
-          {children as ReactElement}
-        </PageLayout>,
+        <>
+          <PageLayout key={storyId} pathname={pathname}>
+            {children as ReactElement}
+          </PageLayout>
+          <AppChrome />
+        </>,
       )
 
     case 'none':

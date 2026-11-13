@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse, delay } from 'msw'
 import { mswLoader } from 'msw-storybook-addon'
-import { createMockStory } from '@/stories/mocks'
+import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
 import type { SurveyStateDto } from '@safe-global/store/gateway/AUTO_GENERATED/surveys'
 import SurveyOnboarding from '.'
 
@@ -69,9 +69,9 @@ const onboardingSurveyState: SurveyStateDto = {
 const baseSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
+  authenticated: true,
   pathname: '/welcome/survey',
-  query: { spaceId: 'uuid-1' },
+  query: { spaceId: MOCK_SPACE_ID },
   shadcn: true,
   handlers: [http.get(SURVEY_STATE_URL, () => HttpResponse.json(onboardingSurveyState))],
 })
@@ -99,9 +99,9 @@ export const Loading: Story = {
     ...createMockStory({
       scenario: 'efSafe',
       wallet: 'owner',
-      features: { spaces: true },
+      authenticated: true,
       pathname: '/welcome/survey',
-      query: { spaceId: 'uuid-1' },
+      query: { spaceId: MOCK_SPACE_ID },
       shadcn: true,
       handlers: [
         http.get(SURVEY_STATE_URL, async () => {
@@ -119,9 +119,9 @@ export const Error: Story = {
     ...createMockStory({
       scenario: 'efSafe',
       wallet: 'owner',
-      features: { spaces: true },
+      authenticated: true,
       pathname: '/welcome/survey',
-      query: { spaceId: 'uuid-1' },
+      query: { spaceId: MOCK_SPACE_ID },
       shadcn: true,
       handlers: [http.get(SURVEY_STATE_URL, () => HttpResponse.json({ message: 'kaboom' }, { status: 500 }))],
     }).parameters,

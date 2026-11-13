@@ -67,4 +67,11 @@ describe('countChecks', () => {
       total: 0,
     })
   })
+
+  it('adds the Safenet row only when shown, and passes it only on its own verdict', () => {
+    const allPassed = { threat, recipient, hasProFeatures: true, hasSimulation: true, isSimulationSuccess: true }
+    expect(countChecks({ ...allPassed, safenet: { shown: true, passed: false } })).toEqual({ passed: 3, total: 4 })
+    expect(countChecks({ ...allPassed, safenet: { shown: true, passed: true } })).toEqual({ passed: 4, total: 4 })
+    expect(countChecks({ ...allPassed, safenet: { shown: false, passed: true } })).toEqual({ passed: 3, total: 3 })
+  })
 })

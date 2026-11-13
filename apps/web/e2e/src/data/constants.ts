@@ -9,8 +9,15 @@
 // Environment / URLs
 // ---------------------------------------------------------------------------
 
-export const STAGING_CGW_URL = 'https://safe-client.staging.5afe.dev'
-export const CGW_BASE_URL = process.env.SAFE_CGW_BASE_URL || STAGING_CGW_URL
+/** The gateway of the isolated stack. Read at use: `run.mjs` lists the specs before the stack is up. */
+export function cgwBaseUrl(): string {
+  const url = process.env.SAFE_CGW_BASE_URL
+  if (!url)
+    throw new Error(
+      'SAFE_CGW_BASE_URL is not set: run the specs with `yarn workspace @safe-global/web e2e:env playwright`',
+    )
+  return url
+}
 
 // ---------------------------------------------------------------------------
 // Chain IDs
@@ -34,22 +41,8 @@ export const NETWORK_PREFIXES = {
   gnosis: 'gno',
 } as const
 
-// ---------------------------------------------------------------------------
-// Static test Safes on Sepolia (read-only — shared across parallel tests)
-// ---------------------------------------------------------------------------
-
-export const SAFES = {
-  /** 1/1 Safe with ETH balance — use for dashboard and balance tests */
-  SEP_STATIC_SAFE_1: 'sep:0x6E834E9D04ad6b26e1525dE1a37BFd9b215f40B7',
-  /** 1/2 Safe — use for multi-owner and tx queue tests */
-  SEP_STATIC_SAFE_2: 'sep:0xc2F3645bfd395516d1a18CA6ad9298299d328C01',
-  /** Safe owned by OWNER_4 — for tx-creation flows needing a connected owner (mirrors Cypress SEP_STATIC_SAFE_6) */
-  SEP_OWNER_4_SAFE: 'sep:0xBf30F749FC027a5d79c4710D988F0D3C8e217A4F',
-  /** 1/4 Safe holding ETH plus six $0 test tokens, OWNER_4 is an owner — for assets-table tests (mirrors Cypress SEP_STATIC_SAFE_2) */
-  SEP_ASSETS_SAFE: 'sep:0xBd69b0a9DC90eB6F9bAc3E4a5875f437348b6415',
-  /** 1/2 Safe where OWNER_1 is a proposer but not an owner — for proposer-permission tests (mirrors Cypress SEP_STATIC_SAFE_31) */
-  SEP_PROPOSER_SAFE: 'sep:0x09725D3c2f9bE905F8f9f1b11a771122cf9C9f35',
-} as const
+/** The address of a prefixed Safe such as `sep:0x…` */
+export const safeAddress = (prefixedSafe: string): string => prefixedSafe.split(':')[1]
 
 /** Fiat value below which "Hide small balances" hides a token — mirrors DUST_THRESHOLD in src/config/constants.ts */
 export const DUST_THRESHOLD_USD = 0.01
@@ -73,8 +66,8 @@ export const AB_LOCAL_CONTACT = {
  * checksum casing, so the read-only "selected" chip always renders.
  */
 export const DROPDOWN_TEST_SPACE = {
-  // Legacy numeric space id — accepted by the backend's LegacySpaceIdPipe and what
-  // the Cypress spaces mocks use. `landingSpaceHint` is seeded to this so it resolves.
+  // Legacy numeric space id, accepted by the backend's LegacySpaceIdPipe.
+  // `landingSpaceHint` is seeded to this so it resolves.
   id: '1',
   name: 'E2E Workspace',
 } as const
@@ -104,6 +97,9 @@ export const TEST_ADDRESSES = {
   NON_OWNER: '0x1234567890123456789012345678901234567890',
   /** Zero address — for edge case tests */
   ZERO: '0x0000000000000000000000000000000000000000',
+  /** Placeholder accounts, e.g. for a Workspace that holds more Safes than a plan allows */
+  PLACEHOLDER_A: '0xa0000000000000000000000000000000000000a0',
+  PLACEHOLDER_B: '0xb0000000000000000000000000000000000000b0',
 } as const
 
 // ---------------------------------------------------------------------------
@@ -113,14 +109,19 @@ export const TEST_ADDRESSES = {
 export const ROUTES = {
   home: '/home',
   welcomeSpaces: '/welcome/spaces',
+  spacesPolicies: '/spaces/policies',
   welcomeAccounts: '/welcome/accounts',
   balances: '/balances',
+  balancesNfts: '/balances/nfts',
   transactions: '/transactions',
   transactionsQueue: '/transactions/queue',
   transactionsHistory: '/transactions/history',
+  transactionsMessages: '/transactions/messages',
   settings: '/settings',
+  settingsSetup: '/settings/setup',
   addressBook: '/address-book',
   apps: '/apps',
+  loadSafe: '/new-safe/load',
 } as const
 
 // ---------------------------------------------------------------------------
@@ -133,4 +134,5 @@ export const LS_KEYS = {
   cookiesTerms: `${LS_NAMESPACE}cookies_terms`,
   safeLabsTerms: `${LS_NAMESPACE}safeLabsTerms`,
   tokenList: `${LS_NAMESPACE}tokenList`,
+  stakingPromoBannerHidden: `${LS_NAMESPACE}hideStakingPromoBanner_v2`,
 } as const

@@ -148,51 +148,9 @@ Unit tests:
 yarn workspace @safe-global/web test --watch
 ```
 
-### Cypress tests
+### E2E tests
 
-Build a static site:
-
-```
-yarn workspace @safe-global/web build
-```
-
-Serve the static files:
-
-```
-yarn workspace @safe-global/web serve
-```
-
-**Interactive mode:**
-
-Launch the Cypress UI:
-
-```
-yarn workspace @safe-global/web cypress:open
-```
-
-You can then choose which e2e tests to run.
-
-**Headless mode:**
-
-Run all tests in headless mode:
-
-```
-yarn workspace @safe-global/web cypress:run
-```
-
-Run a specific test file in headless mode with Chrome:
-
-```
-npx cypress run --browser chrome --headless --spec "cypress/e2e/regression/example.cy.js"
-```
-
-Run multiple test files:
-
-```
-npx cypress run --browser chrome --headless --spec "cypress/e2e/regression/*.cy.js"
-```
-
-Some tests will require signer private keys, please include them in your .env file
+Playwright runs the E2E tests on an isolated local stack. Setup and commands: [e2e/docs/ISOLATED_ENVIRONMENT.md](e2e/docs/ISOLATED_ENVIRONMENT.md).
 
 ## Component template
 
@@ -219,7 +177,7 @@ When creating new components, add a corresponding `.stories.tsx` file for docume
 This app is built using the following frameworks:
 
 - [Safe Protocol Kit](https://github.com/safe-global/safe-core-sdk/tree/main/packages/protocol-kit) and [API Kit](https://github.com/safe-global/safe-core-sdk/tree/main/packages/api-kit)
-- [Next.js 15](https://nextjs.org/)
+- [Next.js 16](https://nextjs.org/)
 - [React 19](https://react.dev/)
 - [Redux Toolkit](https://redux-toolkit.js.org/)
 - [shadcn/ui](https://ui.shadcn.com/) + [Tailwind CSS v4](https://tailwindcss.com/)

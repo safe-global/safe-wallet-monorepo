@@ -22,7 +22,7 @@ const withIssues: Record<string, ScanResult> = {
     status: 'issue',
     severity: 'High',
     evidence: [
-      { label: 'Current version', value: '1.3.0' },
+      { label: 'Current version', value: '1.1.1' },
       { label: 'Latest version', value: '1.4.1' },
     ],
     remediation: 'Update to the latest version.',
@@ -37,7 +37,7 @@ const withIssues: Record<string, ScanResult> = {
   multichain_setup: mkResult({ status: 'not_applicable' }),
 }
 
-const setup = createMockStory({ features: { spaces: true }, layout: 'paper' })
+const setup = createMockStory({ authenticated: true, layout: 'paper' })
 
 const meta = {
   title: 'Features/SecurityHub/SecurityDrawerContent',

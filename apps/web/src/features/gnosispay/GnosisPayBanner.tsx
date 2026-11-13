@@ -1,4 +1,4 @@
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { Alert, AlertDescription, AlertTitle } from '@safe-global/views/components/ui/alert'
 import GnosisPayIcon from '@/public/images/common/gnosis-pay.svg'
 import { useIsGnosisPaySafe } from './hooks/useIsGnosisPaySafe'
 

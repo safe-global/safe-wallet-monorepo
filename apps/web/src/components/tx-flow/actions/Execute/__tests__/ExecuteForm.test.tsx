@@ -23,8 +23,22 @@ import type {
 } from '@safe-global/utils/features/safe-shield/types'
 import { TxModalContext } from '@/components/tx-flow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows'
-import { useSafeScope } from '@/components/tx-flow/safe-scope'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
+
+jest.mock('@/hooks/useGasPrice', () => ({ __esModule: true, default: jest.fn(() => [undefined, undefined, false]) }))
+jest.mock('@/hooks/useGasLimit', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({ gasLimit: undefined, gasLimitError: undefined, gasLimitLoading: false })),
+}))
+jest.mock('@/hooks/useIsValidExecution', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    isValidExecution: undefined,
+    executionValidationError: undefined,
+    isValidExecutionLoading: false,
+  })),
+}))
 
 const mockUseGasPaymentOptions = jest.fn<GasPaymentOptions, []>()
 jest.mock('@/hooks/useGasPaymentOptions', () => ({
@@ -80,8 +94,8 @@ jest.mock('@/components/common/CheckWallet', () => ({
   },
 }))
 
-jest.mock('@/components/tx-flow/safe-scope', () => ({
-  ...jest.requireActual('@/components/tx-flow/safe-scope'),
+jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
+  ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
   useSafeScope: jest.fn(),
 }))
 const mockUseSafeScope = useSafeScope as jest.MockedFunction<typeof useSafeScope>
@@ -102,7 +116,6 @@ describe('ExecuteForm', () => {
     txActions: {
       proposeTx: jest.fn(),
       signTx: jest.fn(),
-      addToBatch: jest.fn(),
       executeTx: jest.fn(),
       signProposerTx: jest.fn(),
     },
@@ -146,6 +159,18 @@ describe('ExecuteForm', () => {
     const { getByText } = render(<ExecuteForm {...defaultProps} />)
 
     expect(getByText('Estimated fee')).toBeInTheDocument()
+  })
+
+  it('renders a secondary action before the submit button when one is passed', () => {
+    const { getByTestId, queryByTestId } = render(
+      <ExecuteForm {...defaultProps} secondaryAction={<button data-testid="secondary-action">Later</button>} />,
+    )
+
+    const secondary = getByTestId('secondary-action')
+    const submit = getByTestId('combo-submit-execute')
+
+    expect(secondary.compareDocumentPosition(submit) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(queryByTestId('secondary-action')?.closest('.txCardActions')).toHaveClass('[&>div]:justify-between')
   })
 
   it('shows a non-owner error if the transaction still needs signatures and its not an owner', () => {
@@ -344,7 +369,6 @@ describe('ExecuteForm', () => {
         txActions={{
           proposeTx: jest.fn(),
           signTx: jest.fn(),
-          addToBatch: jest.fn(),
           executeTx: jest.fn(),
           signProposerTx: jest.fn(),
         }}
@@ -365,7 +389,7 @@ describe('ExecuteForm', () => {
   })
 
   it('execute the tx when the submit button is clicked', async () => {
-    const mockExecuteTx = jest.fn()
+    const mockExecuteTx = jest.fn().mockResolvedValue({ txId: '0x123', isExecuted: true })
 
     const { getByText } = render(
       <ExecuteForm
@@ -374,7 +398,6 @@ describe('ExecuteForm', () => {
         txActions={{
           proposeTx: jest.fn(),
           signTx: jest.fn(),
-          addToBatch: jest.fn(),
           executeTx: mockExecuteTx,
           signProposerTx: jest.fn(),
         }}
@@ -393,7 +416,7 @@ describe('ExecuteForm', () => {
   describe('success screen scope', () => {
     const renderWithModal = () => {
       const setTxFlow = jest.fn()
-      const mockExecuteTx = jest.fn().mockResolvedValue('0xexecuted')
+      const mockExecuteTx = jest.fn().mockResolvedValue({ txId: '0xexecuted', isExecuted: true })
       const view = render(
         <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
           <ExecuteForm
@@ -569,11 +592,31 @@ describe('ExecuteForm', () => {
     })
   })
 
+  it('reports a rejection that the wallet throws as a plain EIP-1193 object as a user rejection', async () => {
+    const setSubmitError = jest.fn()
+    const setIsRejectedByUser = jest.fn()
+    const mockExecuteTx = jest.fn().mockRejectedValue({ code: 4001, message: 'User rejected transaction' })
+
+    const { getByText } = render(
+      <TxFlowContext.Provider value={{ ...initialContext, setSubmitError, setIsRejectedByUser }}>
+        <ExecuteForm
+          {...defaultProps}
+          safeTx={safeTransaction}
+          txActions={{ ...defaultProps.txActions, executeTx: mockExecuteTx }}
+        />
+      </TxFlowContext.Provider>,
+    )
+    fireEvent.click(getByText('Execute'))
+
+    await waitFor(() => expect(setIsRejectedByUser).toHaveBeenCalledWith(true))
+    expect(setSubmitError).not.toHaveBeenCalledWith(expect.any(Error))
+  })
+
   it('offers an "Execute anyway" retry with acceptUnverifiedSimulation on INDETERMINATE_SIMULATION', async () => {
     const mockExecuteTx = jest
       .fn()
       .mockRejectedValueOnce(new RelaySimulationError('INDETERMINATE_SIMULATION', 'service down'))
-      .mockResolvedValueOnce('0xnewtx')
+      .mockResolvedValueOnce({ txId: '0xnewtx', isExecuted: true })
 
     const { getByText, getByTestId } = render(
       <ExecuteForm

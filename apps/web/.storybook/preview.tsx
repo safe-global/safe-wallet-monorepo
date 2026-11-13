@@ -1,19 +1,31 @@
+// Every story downloads what this file imports: keep app-heavy modules (e.g. the store) in per-story decorators
 import type { Preview } from '@storybook/nextjs'
 import React, { useEffect } from 'react'
 
 import { initialize, mswLoader } from 'msw-storybook-addon'
+import { MotionGlobalConfig } from 'motion/react'
+import { configure } from 'storybook/test'
 
 import '../src/styles/globals.css'
 import { ShadcnProvider } from './shadcn'
+import { mockChainHandlers } from './mockChains'
 
-// Initialize MSW for API mocking in Storybook
-initialize({
-  onUnhandledRequest: 'bypass', // Don't warn about unhandled requests
-})
+// Play functions wait for forms and pages to settle; on the CI runner that can take longer than the 1s default
+configure({ asyncUtilTimeout: 10000 })
 
-// Export decorators for use in individual stories
-// These are not applied globally but can be imported and used per-story
-export { withMockProvider } from './decorators'
+// The visual sweep asks for reduced motion; motion ignores it, so render its animations at their end state
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  MotionGlobalConfig.skipAnimations = true
+}
+
+// Initialize MSW for API mocking in Storybook. Initial handlers survive each story's own
+// handlers (msw-storybook-addon resets to them), and a story's handlers still take priority.
+initialize(
+  {
+    onUnhandledRequest: 'bypass', // Don't warn about unhandled requests
+  },
+  mockChainHandlers,
+)
 
 // Canvas colors mirror the card/paper surface components actually sit on (--color-background-paper):
 // light #fff, dark #1c1c1c. Transparent controls (the default Input, ghost Button, etc.) rely on this

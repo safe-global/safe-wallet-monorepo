@@ -29,12 +29,14 @@ import {
 } from '../../../hooks/useUpsertWorkspaceSafeName'
 import { buildWorkspaceSafeNames, getSafesToName, hasAllNames, touchNames } from '../../NameAccounts/utils'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
-import { getSafeId, getMultiChainSafeId } from '../utils/safeIds'
-import { MULTICHAIN_SAFE_KEY_PREFIX } from '../constants'
+import {
+  getSafeId,
+  getMultiChainSafeId,
+} from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/utils/safeIds'
+import { MULTICHAIN_SAFE_KEY_PREFIX } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/constants'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
-import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
-import { getSeatLimitMessage } from '../../../utils/seatLimitError'
+import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 
 // URL safe-param prefix can be either numeric chainId or shortName ("1:" or "eth:").
 const safeParamToFormKey = (safeParam: string, chains: Chain[]): string | undefined => {
@@ -66,7 +68,6 @@ const useOnboardingSubmit = (
   spaceId: string | undefined,
   onSuccess: () => void,
   allSafes: AllSafeItems = EMPTY_ALL_SAFES,
-  nextStepUrl?: string,
 ) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
@@ -182,9 +183,8 @@ const useOnboardingSubmit = (
     })
     if (isElevationRequiredError(result.error)) throw result.error
     if (result.error) {
-      const seatLimit = getSeatLimitMessage(result.error)
-      if (seatLimit) refreshSpaceEntitlements(dispatch, spaceIdStr)
-      throw new Error(seatLimit ?? getRtkQueryErrorMessage(result.error))
+      if (getQuotaExceededError(result.error)) refreshSpaceEntitlements(dispatch, spaceIdStr)
+      throw new Error(getRtkQueryErrorMessage(result.error))
     }
   }
 
@@ -271,11 +271,6 @@ const useOnboardingSubmit = (
       setError(undefined)
       setIsSubmitting(true)
 
-      // A removal is rejected first and only it is replayed, so only a plain add may move on to the next step.
-      const stepUpReturnUrl = nextStepUrl && getSafesToRemove(data.selectedSafes).length === 0 ? nextStepUrl : undefined
-      if (stepUpReturnUrl) dispatch(stepUpReturnUrlSet(stepUpReturnUrl))
-      let isStepUpPending = false
-
       try {
         if (safesToAdd.length > 0) {
           trackEvent(SPACE_EVENTS.ADD_ACCOUNTS, {
@@ -293,13 +288,9 @@ const useOnboardingSubmit = (
 
         onSuccess()
       } catch (e) {
-        if (isElevationRequiredError(e)) {
-          isStepUpPending = true
-          return
-        }
+        if (isElevationRequiredError(e)) return
         setError(e instanceof Error ? e.message : 'Something went wrong updating Safe accounts. Please try again.')
       } finally {
-        if (stepUpReturnUrl && !isStepUpPending) dispatch(stepUpReturnUrlCleared(stepUpReturnUrl))
         setIsSubmitting(false)
       }
     },

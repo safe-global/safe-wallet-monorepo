@@ -124,7 +124,12 @@ function publicAssetsPlugin(): Plugin {
 }
 
 const config: StorybookConfig = {
-  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
+  stories: [
+    '../src/**/*.mdx',
+    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+    '../../../packages/views/src/**/*.mdx',
+    '../../../packages/views/src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+  ],
 
   addons: [
     '@storybook/addon-onboarding',
@@ -165,11 +170,14 @@ const config: StorybookConfig = {
     // which transforms SVGs via SVGR (aliases would bypass the plugin)
     config.resolve = config.resolve || {}
     config.resolve.alias = {
+      // Before the spread: Vite takes the first matching alias, and a generic '@' entry would win
+      // Token logos without their sandboxed iframe, which painted too late for the visual sweep
+      '@/components/common/IframeIcon': path.resolve(__dirname, '../.storybook/mocks/iframeIcon.tsx'),
       ...(config.resolve.alias || {}),
       // Mock useIsOfficialHost to always return true in Storybook
       '@/hooks/useIsOfficialHost': path.resolve(__dirname, '../.storybook/mocks/useIsOfficialHost.ts'),
-      // Mock next/image to bypass the image loader stub
-      'next/image': path.resolve(__dirname, '../.storybook/mocks/nextImage.js'),
+      // Replace the live CoW Swap iframe with a fixed placeholder so swap stories are deterministic
+      '@cowprotocol/widget-react': path.resolve(__dirname, '../.storybook/mocks/cowSwapWidget.tsx'),
       // Polyfill Node.js querystring module for browser
       querystring: path.resolve(__dirname, '../.storybook/mocks/querystring.ts'),
     }
@@ -184,12 +192,13 @@ const config: StorybookConfig = {
 
     // Ensure proper resolution of monorepo packages
     config.resolve = config.resolve || {}
-    config.resolve.dedupe = [...(config.resolve.dedupe || []), 'react', 'react-dom']
+    config.resolve.dedupe = [...(config.resolve.dedupe || []), 'react', 'react-dom', 'react-hook-form']
 
     return config
   },
 
-  staticDirs: ['../public'],
+  // Images that stories and config/test fixtures reference; outside public/ so they never ship with the app
+  staticDirs: ['../public', { from: '../.storybook/mock-assets', to: '/mock-assets' }],
 
   env: (config) => ({
     ...config,
@@ -198,6 +207,10 @@ const config: StorybookConfig = {
     NEXT_PUBLIC_APP_HOMEPAGE: process.env.NEXT_PUBLIC_APP_HOMEPAGE || packageJson.homepage,
     // Enable official host features (logo, branding) in Storybook
     NEXT_PUBLIC_IS_OFFICIAL_HOST: 'true',
+    // Generated Safe names ("Ecstatic Ethereum Safe") take the first adjective instead of a random one
+    VISUAL_REGRESSION_BUILD: 'true',
+    // Any non-empty ID mounts the What's new frame; the sweep blocks the Beamer host
+    NEXT_PUBLIC_BEAMER_ID: 'storybook',
   }),
 
   typescript: {

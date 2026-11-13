@@ -7,9 +7,14 @@ import ErrorMessage from '@/components/tx/ErrorMessage'
 import { createMockStory } from '@/stories/mocks'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { buildSafeAccountId, groupSafeAccounts } from '../SafeAccountSelector/utils'
-import { isSafeAccountGroup, type SafeAccountEntry, type SafeAccountOption } from '../SafeAccountSelector/types'
+import {
+  isSafeAccountGroup,
+  type SafeAccountEntry,
+  type SafeAccountOption,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import type { ChainInfo } from '@/features/spaces/types'
 import ProposerRoleForm from './ProposerRoleForm'
+import { mockNow } from '@/stories/mocks/now'
 
 const ETHEREUM = '1'
 const POLYGON = '137'
@@ -67,12 +72,13 @@ const localAddressBook = { [ETHEREUM]: { [PROPOSER]: PROPOSER_NAME, [LOCAL_CONTA
 const SPACE_ID = '1'
 
 /** `useGetSpaceAddressBook` skips without a live session and a Workspace in scope. */
-const spaceAuth = { sessionExpiresAt: Date.now() + 60 * 60 * 1000, lastUsedSpaceId: SPACE_ID }
+const spaceAuth = { sessionExpiresAt: mockNow() + 60 * 60 * 1000, lastUsedSpaceId: SPACE_ID }
 
 const spaceContact = (address: string, name: string): SpaceAddressBookItemDto => ({
   name,
   address,
   chainIds: [ETHEREUM],
+  tagIds: [],
   createdBy: '',
   createdByUserId: 0,
   lastUpdatedBy: '',
@@ -95,7 +101,7 @@ const setup = createMockStory({
   layout: 'none',
   shadcn: true,
   // Also what marks the session authenticated, which the Workspace address book needs.
-  features: { spaces: true },
+  authenticated: true,
   store: { addressBook: localAddressBook, auth: spaceAuth },
   query: { spaceId: SPACE_ID },
 })

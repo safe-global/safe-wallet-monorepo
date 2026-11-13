@@ -1,14 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import type { CSSProperties, ReactNode } from 'react'
 import { House, ArrowRightLeft, WalletCards, BookUser, UsersRound, Shield, Settings, ListChecks } from 'lucide-react'
-import { SidebarProvider, Sidebar, SidebarHeader } from '@/components/ui/sidebar'
+import { SidebarProvider, Sidebar, SidebarHeader } from '@safe-global/views/components/ui/sidebar'
 import { AppRoutes } from '@/config/routes'
-import { withMockProvider } from '@/storybook/preview'
+import { withMockProvider } from '@/storybook/decorators'
 import { SpacesSidebarVariant } from './variants/SpacesSidebarVariant'
 import { SidebarTopBar } from './SidebarTopBar'
 import { SidebarCommonFooter } from './SidebarCommonFooter'
-import type { SpaceItem } from './types'
-import type { ResolvedSidebarNavItem, ResolvedSidebarGroup } from './types'
+import type { SpaceItem } from '@safe-global/views/features/spaces/components/Sidebar/types'
+import type {
+  ResolvedSidebarNavItem,
+  ResolvedSidebarGroup,
+} from '@safe-global/views/features/spaces/components/Sidebar/types'
+import { MOCK_SPACE_ID, createHandlers } from '@/stories/mocks'
 
 const mockSpaceId = '1'
 
@@ -96,7 +100,7 @@ const mockDisabledSetupGroup: ResolvedSidebarGroup = {
 }
 
 const mockSpaces: SpaceItem[] = [
-  { uuid: 'uuid-1', name: 'Company Space', safeCount: 0 },
+  { uuid: MOCK_SPACE_ID, name: 'Company Space', safeCount: 0 },
   { uuid: 'uuid-2', name: 'Personal Space', safeCount: 0 },
 ]
 
@@ -134,6 +138,7 @@ const meta = {
   component: SpacesSidebarVariant,
   decorators: [withMockProvider({ shadcn: true })],
   parameters: {
+    msw: { handlers: createHandlers() },
     layout: 'fullscreen',
   },
 } satisfies Meta<typeof SpacesSidebarVariant>

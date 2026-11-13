@@ -1,4 +1,13 @@
-import { createContext, type ReactElement, type ReactNode, useEffect, useState, useMemo } from 'react'
+import {
+  createContext,
+  type ReactElement,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import useOnboard, { type ConnectedWallet, getConnectedWallet, useIsWalletReady } from '@/hooks/wallets/useOnboard'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
@@ -12,13 +21,20 @@ export type SignerWallet = {
   provider: Eip1193Provider | null
   address: string
   chainId: string
+  // In-app nested signer: only proposes in the parent, never executes
   isSafe?: boolean
+  // The connected wallet is itself a Safe, e.g. via WalletConnect
+  isConnectedSafe?: boolean
+  threshold?: number
 }
 
 export type WalletContextType = {
   connectedWallet: ConnectedWallet | null
   signer: SignerWallet | null
   setSignerAddress: (address: string | undefined) => void
+  // Nonce of the tx the in-app parent Safe signer creates; without one it uses the recommended nonce
+  setParentSafeNonce: (nonce: number) => void
+  clearParentSafeNonce: () => void
   isReady: boolean
 }
 
@@ -34,11 +50,27 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const [wallet, setWallet] = useState<ConnectedWallet | null>(getConnectedWallet(onboardWallets))
 
   const [signerAddress, setSignerAddress] = useState<string>()
+  // A ref, so a nonce edit doesn't rebuild the signer object
+  const parentSafeNonce = useRef<number | undefined>(undefined)
+  const setParentSafeNonce = useCallback((nonce: number) => {
+    parentSafeNonce.current = nonce
+  }, [])
+  const clearParentSafeNonce = useCallback(() => {
+    parentSafeNonce.current = undefined
+  }, [])
 
   const { currentData: nestedSafeInfo } = useSafesGetSafeV1Query(
     { chainId: currentChain?.chainId || '', safeAddress: signerAddress || '' },
     {
       skip: !signerAddress || !currentChain || sameAddress(signerAddress, wallet?.address || ''),
+    },
+  )
+
+  // Chain-gated so a same-address Safe on another chain isn't misdetected
+  const { currentData: connectedSafeInfo } = useSafesGetSafeV1Query(
+    { chainId: currentChain?.chainId || '', safeAddress: wallet?.address || '' },
+    {
+      skip: !wallet?.address || !currentChain || wallet.chainId !== currentChain.chainId,
     },
   )
 
@@ -58,10 +90,13 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
 
   const signer = useMemo(() => {
     if (wallet && nestedSafeInfo && web3ReadOnly) {
-      return getNestedWallet(wallet, nestedSafeInfo, web3ReadOnly, router)
+      return getNestedWallet(wallet, nestedSafeInfo, web3ReadOnly, router, () => parentSafeNonce.current)
+    }
+    if (wallet && connectedSafeInfo) {
+      return { ...wallet, isConnectedSafe: true as const, threshold: connectedSafeInfo.threshold }
     }
     return wallet
-  }, [wallet, nestedSafeInfo, web3ReadOnly, router])
+  }, [wallet, nestedSafeInfo, connectedSafeInfo, web3ReadOnly, router])
 
   return (
     <WalletContext.Provider
@@ -69,6 +104,8 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
         connectedWallet: wallet,
         signer,
         setSignerAddress,
+        setParentSafeNonce,
+        clearParentSafeNonce,
         isReady: !!walletReady,
       }}
     >

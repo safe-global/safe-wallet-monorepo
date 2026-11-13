@@ -1,26 +1,32 @@
 import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { ArrowRight } from 'lucide-react'
-import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { DialogTitle } from '@/components/ui/dialog'
-import { highlightSafePro } from '@/components/common/ProHighlight'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { SearchInput } from '@/components/ui/search-input'
-import { Typography } from '@/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
+import { DialogTitle } from '@safe-global/views/components/ui/dialog'
+import { highlightSafePro } from '@safe-global/views/components/common/ProHighlight'
+import { ScrollArea } from '@safe-global/views/components/ui/scroll-area'
+import { SearchInput } from '@safe-global/views/components/ui/search-input'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { SafeAccountsTable, type SafeAccountColumnId } from '@/features/myAccounts'
 import { isMultiChainSafeItem, useSafesSearch, type AllSafeItems, type SafeItem } from '@/hooks/safes'
 import Track from '@/components/common/Track'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import type { SafeRef } from './types'
-import { removedSafesNote, summarizeRemovedSafes } from './removedSafes'
+import type { SafeRef } from '@safe-global/views/features/spaces/components/Plans/types'
+import {
+  removedSafesNote,
+  summarizeRemovedSafes,
+} from '@safe-global/views/features/spaces/components/Plans/removedSafes'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
-import SelectedCounter from '../SelectedCounter'
+import SelectedCounter from '@safe-global/views/features/spaces/components/SelectedCounter'
 import useOnboardingSelection from '../SelectSafesOnboarding/hooks/useOnboardingSelection'
-import { getMultiChainSafeId, getSafeId } from '../SelectSafesOnboarding/utils/safeIds'
+import {
+  getMultiChainSafeId,
+  getSafeId,
+} from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/utils/safeIds'
 
 const COLUMNS: SafeAccountColumnId[] = ['name', 'networks', 'balance']
 const NO_FLAGGED = new Set<string>()

@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
-import { highlightSafePro } from '@/components/common/ProHighlight'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Dialog, DialogContent, DialogTitle } from '@safe-global/views/components/ui/dialog'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { highlightSafePro } from '@safe-global/views/components/common/ProHighlight'
 import { formatDate } from '@safe-global/utils/utils/date'
 import { trackEvent } from '@/services/analytics'
 import Track from '@/components/common/Track'
@@ -16,27 +16,15 @@ import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import type { WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
-import { ENTERPRISE_TIER, RECOMMENDED_PLAN } from './planCatalog'
-import { PlanCatalog } from './PlanCards'
+import { ENTERPRISE_TIER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
+import { PlanCatalog } from './PlanCatalog'
 import { InfoTip } from './PlanStatusCard'
-import { buildPlanTiers, pickProps } from './planTiers'
+import { buildPlanTiers } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
-import type { PlanPick, PlanTier } from './types'
+import type { PlanPick } from '@safe-global/views/features/spaces/components/Plans/types'
 
 export const _LAPSED_DATA_NOTE =
   'Nothing was charged. Your paid subscription only starts once you add a payment method. Your Workspace data is kept for 90 days and your Safe accounts stay available in My accounts.'
-
-const maxSeats = (tier: PlanTier): number => Math.max(0, ...tier.options.map((option) => option.seats ?? 0))
-
-/** "Need more than 20?" under the tier with the most seats, pointing to sales. */
-export const salesHintFor = (tiers: PlanTier[]) => {
-  const largest = tiers.reduce<PlanTier | undefined>(
-    (best, tier) => (!best || maxSeats(tier) > maxSeats(best) ? tier : best),
-    undefined,
-  )
-  return (tier: PlanTier) =>
-    largest && tier.name === largest.name && maxSeats(tier) > 0 ? `Need more than ${maxSeats(tier)}?` : undefined
-}
 
 export const chooserCopy = (
   reason: Exclude<WorkspaceLockReason, 'trial-offered'>,
@@ -85,12 +73,12 @@ export default function PlanChooserModal({
   const subscribe = (picked: PlanPick) => {
     if (!picked.option.paymentLinkId) return
     if (needsTrim(picked.option.seats)) setPick(picked)
-    else void checkout(picked.option.paymentLinkId, { ...pickProps(picked), ...entry })
+    else void checkout(picked.option.paymentLinkId)
   }
 
   return (
     <Dialog open onOpenChange={(open) => !open && trimming && setPick(undefined)}>
-      <DialogContent size="md" surface="card" padding="sm" showCloseButton={Boolean(trimming)}>
+      <DialogContent size={trimming ? 'md' : 'lg'} surface="card" padding="sm" showCloseButton={Boolean(trimming)}>
         <div className="flex flex-col gap-6 pt-5">
           {trimming ? (
             <SelectAccountsStep
@@ -99,7 +87,7 @@ export default function PlanChooserModal({
               onBack={() => setPick(undefined)}
               onContinue={(removed) => {
                 if (trimming.option.paymentLinkId) {
-                  void checkout(trimming.option.paymentLinkId, { ...pickProps(trimming), ...entry }, removed)
+                  void checkout(trimming.option.paymentLinkId, removed)
                 }
               }}
               isSubmitting={isBusy}
@@ -141,9 +129,8 @@ export default function PlanChooserModal({
                 </Alert>
               ) : (
                 <PlanCatalog
+                  embedded
                   tiers={tiers}
-                  recommendedPlan={RECOMMENDED_PLAN}
-                  salesHint={salesHintFor(tiers)}
                   onSubscribe={subscribe}
                   isBusy={isBusy}
                   location={PlanLocation.LOCKED_MODAL}

@@ -6,12 +6,15 @@ import { CheckStatus } from '../types'
  * terminal; `BENIGN` yields only to `MALICIOUS` (a late arbitration result is
  * the one correction that increases safety); `BENIGN`/`MALICIOUS` may replace
  * `TIMED_OUT`; `VERIFICATION_FAILED` may become `MALICIOUS` but never `BENIGN`.
+ * `DISPUTED` is entered only from a state before any outcome and yields to every
+ * outcome, so a ruling or timeout never reads as an open dispute again.
  */
 const ALLOWED_TRANSITIONS: Record<CheckStatus, ReadonlyArray<CheckStatus>> = {
   [CheckStatus.UNAVAILABLE]: [
     CheckStatus.SUBMITTED,
     CheckStatus.IN_PROGRESS,
     CheckStatus.AWAITING_VERIFICATION,
+    CheckStatus.DISPUTED,
     CheckStatus.TIMED_OUT,
     CheckStatus.VERIFICATION_FAILED,
     CheckStatus.BENIGN,
@@ -20,6 +23,7 @@ const ALLOWED_TRANSITIONS: Record<CheckStatus, ReadonlyArray<CheckStatus>> = {
   [CheckStatus.SUBMITTED]: [
     CheckStatus.IN_PROGRESS,
     CheckStatus.AWAITING_VERIFICATION,
+    CheckStatus.DISPUTED,
     CheckStatus.TIMED_OUT,
     CheckStatus.VERIFICATION_FAILED,
     CheckStatus.BENIGN,
@@ -27,12 +31,20 @@ const ALLOWED_TRANSITIONS: Record<CheckStatus, ReadonlyArray<CheckStatus>> = {
   ],
   [CheckStatus.IN_PROGRESS]: [
     CheckStatus.AWAITING_VERIFICATION,
+    CheckStatus.DISPUTED,
     CheckStatus.TIMED_OUT,
     CheckStatus.VERIFICATION_FAILED,
     CheckStatus.BENIGN,
     CheckStatus.MALICIOUS,
   ],
   [CheckStatus.AWAITING_VERIFICATION]: [
+    CheckStatus.TIMED_OUT,
+    CheckStatus.VERIFICATION_FAILED,
+    CheckStatus.BENIGN,
+    CheckStatus.MALICIOUS,
+  ],
+  [CheckStatus.DISPUTED]: [
+    CheckStatus.AWAITING_VERIFICATION,
     CheckStatus.TIMED_OUT,
     CheckStatus.VERIFICATION_FAILED,
     CheckStatus.BENIGN,

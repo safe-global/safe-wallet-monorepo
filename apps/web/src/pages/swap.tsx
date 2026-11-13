@@ -1,7 +1,6 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { useHasFeature } from '@/hooks/useChains'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -17,7 +16,7 @@ const adjustEthAddress = (address: string) => {
   return address
 }
 
-const SwapPage: NextPage = () => {
+const SwapPage = () => {
   const router = useRouter()
   const { token, amount } = router.query
   const isFeatureEnabled = useHasFeature(FEATURES.NATIVE_SWAPS)

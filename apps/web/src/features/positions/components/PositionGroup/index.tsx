@@ -1,11 +1,11 @@
-import EnhancedTable from '@/components/common/EnhancedTable'
+import EnhancedTable from '@safe-global/views/components/common/EnhancedTable'
 import FiatValue from '@/components/common/FiatValue'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import { getReadablePositionType } from '@/features/positions/utils'
 import TokenIcon from '@/components/common/TokenIcon'
-import { FiatChange } from '@/components/balances/AssetsTable/FiatChange'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
+import { FiatChange } from '@safe-global/views/components/balances/AssetsTable/FiatChange'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 
 interface PositionGroupProps {
@@ -36,8 +36,9 @@ export const PositionGroup = ({ group, isLast = false, protocolIconUrl }: Positi
     { id: 'value', label: 'Value', width: '40%', align: 'right', disableSort: true },
   ]
 
-  const rows = group.items.map((position) => ({
-    key: `${position.tokenInfo.address}-${position.position_type}`,
+  // A group can hold the same token and type twice (e.g. two Aave WETH deposits) and positions carry no id
+  const rows = group.items.map((position, index) => ({
+    key: `${position.tokenInfo.address}-${position.position_type}-${index}`,
     cells: {
       name: {
         content: (
@@ -71,7 +72,7 @@ export const PositionGroup = ({ group, isLast = false, protocolIconUrl }: Positi
         content: (
           <div className="text-right">
             <Typography>
-              <FiatValue value={position.fiatBalance} />
+              <FiatValue value={position.fiatBalance} precise />
             </Typography>
             <Typography variant="paragraph-mini" className="block">
               <FiatChange balanceItem={position} inline />

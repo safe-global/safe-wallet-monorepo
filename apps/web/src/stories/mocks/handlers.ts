@@ -1,12 +1,17 @@
 import { http, HttpResponse, type RequestHandler } from 'msw'
 import type { Chain, IndexingStatus } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { SafeOverview, SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import type { SafeNonces, SafeOverview, SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import type { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
+import type { CreationTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { CollectiblePage } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import type { DelegatePage } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positions'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
+import type { SafeShieldAnalyzeRecipientV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
+import type { GetSpaceResponse, UpdateSpaceDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { EntitlementsGetAllEntitlementsV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/entitlements'
 import {
   safeFixtures,
   balancesFixtures,
@@ -17,29 +22,33 @@ import {
 } from '../../../../../config/test/msw/fixtures'
 import { createChainData, createChainsPageData, createChainsPageDataV2 } from './chains'
 import type { FeatureFlags, MockStoryConfig } from './types'
+import { MOCK_SPACE_ID } from './ids'
+import { mockNow } from './now'
+
+type ExperimentalFeature = GetSpaceResponse['experimentalFeatures'][number]
 
 /**
  * Core chain configuration handlers
  */
-export function coreHandlers(chainData: Chain): RequestHandler[] {
+export function coreHandlers(chainData: Chain, features: FeatureFlags = {}): RequestHandler[] {
   const indexingStatus: IndexingStatus = {
     currentBlockNumber: 20000000,
-    currentBlockTimestamp: new Date().toISOString(),
+    currentBlockTimestamp: new Date(mockNow()).toISOString(),
     erc20BlockNumber: 20000000,
-    erc20BlockTimestamp: new Date().toISOString(),
+    erc20BlockTimestamp: new Date(mockNow()).toISOString(),
     erc20Synced: true,
     masterCopiesBlockNumber: 20000000,
-    masterCopiesBlockTimestamp: new Date().toISOString(),
+    masterCopiesBlockTimestamp: new Date(mockNow()).toISOString(),
     masterCopiesSynced: true,
     synced: true,
-    lastSync: Date.now(),
+    lastSync: mockNow(),
   }
 
   return [
     http.get(/\/v1\/chains\/\d+\/about\/indexing$/, () => HttpResponse.json(indexingStatus)),
     http.get(/\/v1\/chains\/\d+$/, () => HttpResponse.json(chainData)),
     http.get(/\/v1\/chains$/, () => HttpResponse.json(createChainsPageData(chainData))),
-    http.get(/\/v2\/chains$/, () => HttpResponse.json(createChainsPageDataV2(chainData))),
+    http.get(/\/v2\/chains$/, () => HttpResponse.json(createChainsPageDataV2(chainData, features))),
   ]
 }
 
@@ -120,7 +129,7 @@ export function txDetailsHandlers(safeData: SafeState): RequestHandler[] {
  * Uses real CGW fixture data as a base, customized for the story context
  */
 export function createMockTransactionDetails(safeData: SafeState, txId: string) {
-  const now = Date.now()
+  const now = mockNow()
   const isERC20 = txId.includes('abc1') || txId.includes('exec1')
   const isSettings = txId.includes('abc3') || txId.includes('exec3')
   const isExecuted = txId.includes('exec')
@@ -143,7 +152,8 @@ export function createMockTransactionDetails(safeData: SafeState, txId: string) 
   const detailedExecutionInfo = {
     type: 'MULTISIG',
     submittedAt: now - 1000 * 60 * 5,
-    nonce: isSettings ? 44 : isERC20 ? 42 : 43,
+    // An executed transaction always has a nonce below the Safe's
+    nonce: isExecuted ? safeData.nonce - 1 : isSettings ? 44 : isERC20 ? 42 : 43,
     safeTxGas: '0',
     baseGas: '0',
     gasPrice: '0',
@@ -151,8 +161,7 @@ export function createMockTransactionDetails(safeData: SafeState, txId: string) 
     refundReceiver: {
       value: '0x0000000000000000000000000000000000000000',
       name: null,
-      logoUri:
-        'https://safe-transaction-assets.safe.global/contracts/logos/0x0000000000000000000000000000000000000000.png',
+      logoUri: 'images/common/token-placeholder.svg',
     },
     safeTxHash:
       '0x' +
@@ -227,7 +236,7 @@ export function createMockTransactionDetails(safeData: SafeState, txId: string) 
             tokenName: 'USD Coin',
             tokenSymbol: 'USDC',
             logoUri:
-              'https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+              'mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp',
             decimals: 6,
             value: '4018860000',
             trusted: true,
@@ -288,7 +297,7 @@ export function fiatCodesHandlers(): RequestHandler[] {
  */
 export function delegatesHandlers(): RequestHandler[] {
   const emptyDelegatePage: DelegatePage = { count: 0, next: null, previous: null, results: [] }
-  return [http.get(/\/v[12]\/chains\/\d+\/delegates$/, () => HttpResponse.json(emptyDelegatePage))]
+  return [http.get(/\/v[123]\/chains\/\d+\/delegates$/, () => HttpResponse.json(emptyDelegatePage))]
 }
 
 /**
@@ -380,12 +389,76 @@ export function safeOverviewHandlers(safeData: SafeState): RequestHandler[] {
  * External (non-CGW) services that pages call on load:
  * - Zodiac security-check (vulnerable modules banner) - report "safe"
  * - WalletConnect telemetry - accept and discard
+ * - Beamer What's new poll - no unread posts, so no top bar or corner card
  */
 export function externalServicesHandlers(): RequestHandler[] {
   return [
     http.get(/zodiac-check\.safe\.global\/public\/api\/security-check/, () => HttpResponse.json({ status: 'safe' })),
     http.post(/pulse\.walletconnect\.org/, () => HttpResponse.json({})),
+    http.get(/backend\.getbeamer\.com\/numberFeatures/, () => HttpResponse.json({ number: 0 })),
   ]
+}
+
+/**
+ * Nonce handler - the Safe's own nonce, so tx flows propose the next transaction
+ */
+export function noncesHandlers(safeData: SafeState): RequestHandler[] {
+  const nonces: SafeNonces = { currentNonce: safeData.nonce, recommendedNonce: safeData.nonce }
+  return [http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+\/nonces$/, () => HttpResponse.json(nonces))]
+}
+
+/**
+ * Relay quota handler - no sponsored transactions left
+ */
+export function relayHandlers(): RequestHandler[] {
+  const noRelays: RelaysRemaining = { remaining: 0, limit: 0 }
+  return [http.get(/\/v1\/chains\/\d+\/relay\/0x[a-fA-F0-9]+$/, () => HttpResponse.json(noRelays))]
+}
+
+/**
+ * Messages handler - empty off-chain message list
+ */
+export function messagesHandlers(): RequestHandler[] {
+  return [
+    http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+\/messages$/, () =>
+      HttpResponse.json({ count: 0, next: null, previous: null, results: [] }),
+    ),
+  ]
+}
+
+/**
+ * Safe creation handler - created by the first owner through the 1.3.0 proxy factory
+ */
+export function creationTxHandlers(safeData: SafeState): RequestHandler[] {
+  const creation: CreationTransaction = {
+    created: '2024-01-15T10:00:00Z',
+    creator: safeData.owners[0].value,
+    transactionHash: `0x${'c0'.repeat(32)}`,
+    factoryAddress: '0xa6B71E26C5e0845f74c812102Ca7114b6a896AB2',
+    masterCopy: safeData.implementation.value,
+  }
+  return [
+    http.get(/\/v1\/chains\/\d+\/safes\/0x[a-fA-F0-9]+\/transactions\/creation$/, () => HttpResponse.json(creation)),
+  ]
+}
+
+/**
+ * Gas price oracle handler - the Etherscan gas tracker that chain configs point at
+ */
+export function gasOracleHandlers(): RequestHandler[] {
+  const oracle = {
+    status: '1',
+    message: 'OK',
+    result: {
+      LastBlock: '21000000',
+      SafeGasPrice: '10',
+      ProposeGasPrice: '12',
+      FastGasPrice: '15',
+      suggestBaseFee: '9.5',
+      gasUsedRatio: '0.5',
+    },
+  }
+  return [http.get(/etherscan\.io\/v2\/api/, () => HttpResponse.json(oracle))]
 }
 
 /**
@@ -404,6 +477,34 @@ export const mockOwnedSafes = {
   '1': ['0xA77DE01e157f9f57C7c4A326eeEaf0BDD2CFcD01', '0xB63F3D0a4a7eFd1d0c08A9ef17C5e5d3DbBDE867'],
   '137': ['0xA77DE01e157f9f57C7c4A326eeEaf0BDD2CFcD01'],
 }
+
+/**
+ * Space safes endpoint returning the owned Safes, for Spaces stories that need a populated Space
+ */
+export const spaceWithSafesHandler = http.get(/\/v1\/spaces\/[^/]+\/safes$/, () =>
+  HttpResponse.json({ safes: mockOwnedSafes }),
+)
+
+const newRecipientAnalysis: SafeShieldAnalyzeRecipientV1ApiResponse = {
+  isSafe: false,
+  RECIPIENT_INTERACTION: [
+    {
+      severity: 'INFO',
+      type: 'NEW_RECIPIENT',
+      title: 'New recipient',
+      description: 'You are interacting with this address for the first time.',
+    },
+  ],
+}
+
+/**
+ * Safe Shield's recipient check, answering "new recipient" for any address; unmocked, it hits the blocked
+ * network and shows "Recipient analysis failed"
+ */
+export const newRecipientAnalysisHandler = http.get(
+  /\/v1\/chains\/\d+\/security\/0x[a-fA-F0-9]+\/recipient\/0x[a-fA-F0-9]+$/,
+  () => HttpResponse.json(newRecipientAnalysis),
+)
 
 /**
  * Mock safe overviews for owned safes
@@ -452,11 +553,14 @@ export const mockSafeOverviews = [
 /**
  * Mock space data for spaces feature
  */
-export function createMockSpace(spaceId: string = 'uuid-1') {
+export function createMockSpace(spaceId: string = MOCK_SPACE_ID, experimentalFeatures: ExperimentalFeature[] = []) {
   return {
     uuid: spaceId,
     name: 'Test Space',
     status: 'ACTIVE' as const,
+    memberCount: 1,
+    safeCount: 0,
+    experimentalFeatures,
     members: [
       {
         id: 1,
@@ -464,8 +568,8 @@ export function createMockSpace(spaceId: string = 'uuid-1') {
         name: 'Admin User',
         invitedBy: null,
         status: 'ACTIVE' as const,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        createdAt: new Date(mockNow()).toISOString(),
+        updatedAt: new Date(mockNow()).toISOString(),
         user: {
           id: mockUser.id,
           status: 'ACTIVE' as const,
@@ -479,20 +583,49 @@ export function createMockSpace(spaceId: string = 'uuid-1') {
  * Spaces feature handlers - users and spaces API
  */
 export function spacesHandlers(): RequestHandler[] {
+  // Kept across requests so the refetch after a PATCH reflects the toggle
+  let experimentalFeatures: ExperimentalFeature[] = []
+
   return [
     // User with wallets endpoint
     http.get(/\/v1\/users$/, () => HttpResponse.json(mockUser)),
+    // Session probe: a 403 here makes useSessionExpiryGuard sign the story out, leaving AuthState on its spinner
+    http.get(/\/v1\/auth\/me$/, () =>
+      HttpResponse.json({ id: String(mockUser.id), authMethod: 'siwe', signerAddress: mockUser.wallets[0].address }),
+    ),
+    // The caller's own membership (useCurrentMemberProfile)
+    http.get(/\/v1\/spaces\/[^/]+\/membership$/, () => HttpResponse.json(createMockSpace().members[0])),
+    // Before "Get space by ID", which would answer for `entitlements` as a Workspace ID
+    http.get(/\/v1\/spaces\/entitlements$/, () =>
+      HttpResponse.json({
+        [MOCK_SPACE_ID]: {
+          plan: { id: 'business', name: 'Business', cycleEndsAt: '2030-01-01T00:00:00.000Z', status: 'trialing' },
+          entitlements: [],
+        },
+      } satisfies EntitlementsGetAllEntitlementsV1ApiResponse),
+    ),
     // Get space by ID
     http.get(/\/v1\/spaces\/[^/]+$/, ({ params }) => {
       const url = new URL(params[0] as string, 'https://example.com')
       const pathParts = url.pathname.split('/')
-      const spaceId = pathParts[pathParts.length - 1] || 'uuid-1'
-      return HttpResponse.json(createMockSpace(spaceId))
+      const spaceId = pathParts[pathParts.length - 1] || MOCK_SPACE_ID
+      return HttpResponse.json(createMockSpace(spaceId, experimentalFeatures))
+    }),
+    // Update space (name or experimental features)
+    http.patch(/\/v1\/spaces\/[^/]+$/, async ({ request }) => {
+      const body = (await request.json()) as UpdateSpaceDto
+      if (body.experimentalFeatures) experimentalFeatures = body.experimentalFeatures
+      return HttpResponse.json({ uuid: MOCK_SPACE_ID })
     }),
     // List all spaces for user
-    http.get(/\/v1\/spaces$/, () => HttpResponse.json([createMockSpace('uuid-1')])),
+    http.get(/\/v1\/spaces$/, () => HttpResponse.json([createMockSpace(MOCK_SPACE_ID)])),
     // Get space safes
     http.get(/\/v1\/spaces\/[^/]+\/safes$/, () => HttpResponse.json({ safes: {} })),
+    // A 403 on a Workspace route starts a session check that remounts the page and refetches it, in a loop
+    http.get(/\/v1\/spaces\/[^/]+\/address-book$/, () => HttpResponse.json({ spaceUuid: MOCK_SPACE_ID, data: [] })),
+    http.get(/\/v1\/spaces\/[^/]+\/address-book\/requests$/, () =>
+      HttpResponse.json({ spaceUuid: MOCK_SPACE_ID, data: [] }),
+    ),
     // Get all safes owned by address (used by useOwnedSafesGrouped)
     http.get(/\/v2\/owners\/0x[a-fA-F0-9]+\/safes$/, () => HttpResponse.json(mockOwnedSafes)),
     // Safe overviews v1 (batch endpoint for safe card data)
@@ -513,8 +646,8 @@ export function spacesHandlers(): RequestHandler[] {
             name: 'Admin User',
             invitedBy: null,
             status: 'ACTIVE',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            createdAt: new Date(mockNow()).toISOString(),
+            updatedAt: new Date(mockNow()).toISOString(),
             user: { id: mockUser.id, status: 'ACTIVE' },
           },
           {
@@ -523,8 +656,8 @@ export function spacesHandlers(): RequestHandler[] {
             name: 'Jane Member',
             invitedBy: null,
             status: 'ACTIVE',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
+            createdAt: new Date(mockNow()).toISOString(),
+            updatedAt: new Date(mockNow()).toISOString(),
             user: { id: 2, status: 'ACTIVE' },
           },
         ],
@@ -537,7 +670,7 @@ export function spacesHandlers(): RequestHandler[] {
  * Mock executed transactions for history stories
  */
 export function createMockHistoryTransactions(safeData: SafeState) {
-  const now = Date.now()
+  const now = mockNow()
   return {
     count: 5,
     next: null,
@@ -569,7 +702,7 @@ export function createMockHistoryTransactions(safeData: SafeState) {
               tokenName: 'USD Coin',
               tokenSymbol: 'USDC',
               logoUri:
-                'https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+                'mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp',
               decimals: 6,
               value: '5000000000',
             },
@@ -665,11 +798,11 @@ export function createMockHistoryTransactions(safeData: SafeState) {
             direction: 'INCOMING' as const,
             transferInfo: {
               type: 'ERC20' as const,
-              tokenAddress: '0x6B175474E89094C44Da98b954EescdeCB5E1cFB85',
+              tokenAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
               tokenName: 'Dai Stablecoin',
               tokenSymbol: 'DAI',
               logoUri:
-                'https://safe-transaction-assets.safe.global/tokens/logos/0x6B175474E89094C44Da98b954EedscdeCB5B1cFBA5.png',
+                'mock-assets/safe-transaction-assets.safe.global/tokens/logos/0x6B175474E89094C44Da98b954EedeAC495271d0F.webp',
               decimals: 18,
               value: '10000000000000000000000',
             },
@@ -686,6 +819,7 @@ export function createMockHistoryTransactions(safeData: SafeState) {
  * Mock pending transactions for stories
  */
 export function createMockPendingTransactions(safeData: SafeState) {
+  const now = mockNow()
   return {
     count: 3,
     next: null,
@@ -700,7 +834,7 @@ export function createMockPendingTransactions(safeData: SafeState) {
         transaction: {
           id: 'multisig_0x123_0xabc3',
           txHash: null,
-          timestamp: Date.now() - 1000 * 60 * 60 * 24,
+          timestamp: now - 1000 * 60 * 60 * 24,
           txStatus: 'AWAITING_EXECUTION' as const,
           txInfo: {
             type: 'SettingsChange' as const,
@@ -740,7 +874,7 @@ export function createMockPendingTransactions(safeData: SafeState) {
         transaction: {
           id: 'multisig_0x123_0xabc1',
           txHash: null,
-          timestamp: Date.now() - 1000 * 60 * 5,
+          timestamp: now - 1000 * 60 * 5,
           txStatus: 'AWAITING_CONFIRMATIONS' as const,
           txInfo: {
             type: 'Transfer' as const,
@@ -757,7 +891,7 @@ export function createMockPendingTransactions(safeData: SafeState) {
               tokenName: 'USD Coin',
               tokenSymbol: 'USDC',
               logoUri:
-                'https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+                'mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp',
               decimals: 6,
               value: '4018860000',
             },
@@ -777,7 +911,7 @@ export function createMockPendingTransactions(safeData: SafeState) {
         transaction: {
           id: 'multisig_0x123_0xabc2',
           txHash: null,
-          timestamp: Date.now() - 1000 * 60 * 60 * 2,
+          timestamp: now - 1000 * 60 * 60 * 2,
           txStatus: 'AWAITING_CONFIRMATIONS' as const,
           txInfo: {
             type: 'Transfer' as const,
@@ -836,7 +970,7 @@ export function getFixtureData(scenario: FixtureScenario) {
  * })
  */
 export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
-  const { scenario = 'efSafe', features = {}, handlers: customHandlers = [] } = config
+  const { scenario = 'efSafe', features = {}, handlers: customHandlers = [], authenticated = false } = config
 
   // Get fixture data for scenario
   const { safeData, balancesData, portfolioData, positionsData } = getFixtureData(scenario)
@@ -861,17 +995,20 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     recovery: features.recovery ?? false,
     hypernative: features.hypernative ?? false,
     earn: features.earn ?? false,
-    spaces: features.spaces ?? false,
     oidcAuth: features.oidcAuth ?? false,
     switchAuthenticator: features.switchAuthenticator ?? false,
     twoFactorAwarenessBanner: features.twoFactorAwarenessBanner ?? false,
     safeStaking: features.safeStaking ?? false,
     safePro: features.safePro ?? false,
+    safeProAnnouncement: features.safeProAnnouncement ?? false,
+    workspacesExperimentalFeatures: features.workspacesExperimentalFeatures ?? false,
+    policyRecipientAllowlist: features.policyRecipientAllowlist ?? false,
+    spaceAuditLog: features.spaceAuditLog ?? false,
   }
 
   // Build handlers array
   const allHandlers: RequestHandler[] = [
-    ...coreHandlers(chainData),
+    ...coreHandlers(chainData, features),
     ...safeInfoHandlers(safeData),
     ...balanceHandlers(balancesData),
     ...safeAppsHandlers(safeAppsData),
@@ -892,12 +1029,11 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     allHandlers.push(...positionsHandlers(positionsData))
   }
 
-  // Add spaces handlers if feature enabled
-  if (mergedFeatures.spaces) {
+  if (authenticated) {
     allHandlers.push(...spacesHandlers())
   }
 
-  // Fallback handlers registered after spaces so spaces-specific mocks win when enabled
+  // Fallback handlers registered after spaces so spaces-specific mocks win when signed in
   allHandlers.push(
     ...fiatCodesHandlers(),
     ...delegatesHandlers(),
@@ -905,6 +1041,11 @@ export function createHandlers(config: MockStoryConfig = {}): RequestHandler[] {
     ...ownedSafesHandlers(),
     ...safeOverviewHandlers(safeData),
     ...externalServicesHandlers(),
+    ...noncesHandlers(safeData),
+    ...relayHandlers(),
+    ...messagesHandlers(),
+    ...creationTxHandlers(safeData),
+    ...gasOracleHandlers(),
   )
 
   // Appended after defaults — MSW is first-match-wins, so these only add unmocked routes, never override

@@ -7,8 +7,8 @@
 import { type Page, type Locator } from '@playwright/test'
 import { ROUTES } from '../data/constants'
 
-/** Headline shown when CGW blocks the Safe with `451 Unavailable for legal reasons` */
-export const LEGAL_BLOCK_MESSAGE = 'Unavailable for legal reasons'
+/** Fixed copy shown when CGW blocks the Safe with `451` — mirrors `SAFE_UNAVAILABLE_MESSAGE` in the app */
+export const SAFE_UNAVAILABLE_MESSAGE = 'This Safe account is unavailable.'
 
 /** Headline shown for every other Safe loading failure — mirrors `GENERIC_LOADING_ERROR` in the app */
 export const GENERIC_LOADING_ERROR = "This Safe account couldn't be loaded"

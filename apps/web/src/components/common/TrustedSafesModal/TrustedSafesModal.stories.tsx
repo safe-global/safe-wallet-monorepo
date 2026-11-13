@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { withMockProvider } from '@/storybook/preview'
+import { withMockProvider } from '@/storybook/decorators'
 import TrustedSafesModal from './index'
 import type { UseTrustedSafesModalReturn } from './useTrustedSafesModal'
+import { createHandlers } from '@/stories/mocks'
 
 const baseMockModal: UseTrustedSafesModalReturn = {
   isOpen: true,
@@ -69,6 +70,7 @@ const meta = {
   component: TrustedSafesModal,
   decorators: [withMockProvider()],
   parameters: {
+    msw: { handlers: createHandlers() },
     layout: 'centered',
   },
   tags: ['autodocs'],

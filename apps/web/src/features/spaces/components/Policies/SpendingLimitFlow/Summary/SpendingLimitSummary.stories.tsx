@@ -2,9 +2,14 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { createMockStory } from '@/stories/mocks'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
-import type { SafeAccountOption } from '../../SafeAccountSelector/types'
+import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import SpendingLimitSummary from './index'
-import type { LimitSummary, LimitSummaryToken, SpendingLimitSummaryModel, SpenderSummary } from './types'
+import type {
+  LimitSummary,
+  LimitSummaryToken,
+  SpendingLimitSummaryModel,
+  SpenderSummary,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/types'
 
 /** `SAFE_ADDRESSES.efSafe` in config/test/msw/fixtures. */
 const EF_SAFE = '0x9fC3dc011b461664c835F2527fffb1169b3C213e'
@@ -21,19 +26,21 @@ const ETH: LimitSummaryToken = {
   address: ZERO_ADDRESS,
   symbol: 'ETH',
   decimals: 18,
-  logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
+  logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
 }
 const LINK_TOKEN: LimitSummaryToken = {
   address: '0x514910771AF9Ca656af840dff83E8264EcF986CA',
   symbol: 'LINK',
   decimals: 18,
-  logoUri: 'https://safe-transaction-assets.safe.global/tokens/logos/0x514910771AF9Ca656af840dff83E8264EcF986CA.png',
+  logoUri:
+    'mock-assets/safe-transaction-assets.safe.global/tokens/logos/0x514910771AF9Ca656af840dff83E8264EcF986CA.webp',
 }
 const USDC_TOKEN: LimitSummaryToken = {
   address: USDC,
   symbol: 'USDC',
   decimals: 6,
-  logoUri: 'https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+  logoUri:
+    'mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp',
 }
 
 const treasury = (chainId = ETHEREUM): SafeAccountOption => ({

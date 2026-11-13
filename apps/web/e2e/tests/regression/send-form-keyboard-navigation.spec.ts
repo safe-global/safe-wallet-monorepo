@@ -5,16 +5,16 @@
  * restarts Tab from the top of the document, so keyboard users had to tab through the whole header
  * to reach Amount. Only a real browser implements that focus fixup, hence Playwright.
  *
- * Data: the static OWNER_4 Safe (read-only) plus two local contacts — parallel-safe, no cleanup.
+ * Data: Alice's `transferForm` Safe (read-only) plus two local contacts — parallel-safe, no cleanup.
  *
- * Run: yarn workspace @safe-global/web pw:test send-form-keyboard-navigation
+ * Run: SAFE_E2E_SPECS=send-form-keyboard-navigation yarn workspace @safe-global/web e2e:env playwright
  * Tag: @regression — runs under the chromium project, on demand.
  */
 import { test, expect } from '../../src/fixtures/test.fixture'
 import { seedLocalAddressBook } from '../../src/fixtures/seed-address-book'
 import { HomePage } from '../../src/pages/home.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
-import { SAFES, DROPDOWN_LOCAL_CONTACTS } from '../../src/data/constants'
+import { DROPDOWN_LOCAL_CONTACTS } from '../../src/data/constants'
 
 const [FIRST_CONTACT, SECOND_CONTACT] = DROPDOWN_LOCAL_CONTACTS
 
@@ -22,18 +22,19 @@ test.describe('Send tokens — keyboard navigation', { tag: '@regression' }, () 
   test('should tab from the picked contact through amount, Max and token to Next when the recipient is chosen with the keyboard', async ({
     safePage,
     walletPage,
-    credentials,
+    owners,
+    safes,
   }, testInfo) => {
-    testInfo.annotations.push({ type: 'safe-address', description: SAFES.SEP_OWNER_4_SAFE })
+    testInfo.annotations.push({ type: 'safe-address', description: safes.transferForm })
 
     await seedLocalAddressBook(safePage, [FIRST_CONTACT, SECOND_CONTACT])
 
     const home = new HomePage(safePage)
     const sendTokens = new SendTokensPage(safePage)
 
-    await home.goto(SAFES.SEP_OWNER_4_SAFE)
+    await home.goto(safes.transferForm)
     await walletPage.acceptCookies()
-    await walletPage.connectWallet(credentials.OWNER_4_PRIVATE_KEY)
+    await walletPage.connectWallet(owners.alice.privateKey)
     await expect(walletPage.accountCenter).toBeVisible()
 
     await expect(sendTokens.newTxButton).toBeEnabled()

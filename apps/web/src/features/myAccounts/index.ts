@@ -2,7 +2,7 @@
  * MyAccounts Feature - Public API (v3 Architecture)
  *
  * Core feature for managing user Safe accounts.
- * Feature flag: MY_ACCOUNTS (enabled by default, can be disabled via CGW config)
+ * Always enabled (no feature flag).
  *
  * @example
  * ```typescript
@@ -24,15 +24,15 @@
  * import { useAllSafes, useAllSafesGrouped, isMultiChainSafeItem } from '@/hooks/safes'
  * ```
  */
-import { createFeatureHandle } from '@/features/__core__'
+import type { FeatureHandle } from '@/features/__core__'
 import type { MyAccountsContract } from './contract'
 
-// ─────────────────────────────────────────────────────────────────
-// FEATURE HANDLE (lazy-loads components when flag is enabled)
-// ─────────────────────────────────────────────────────────────────
-
-// Uses FEATURES.MY_ACCOUNTS via mapping in createFeatureHandle
-export const MyAccountsFeature = createFeatureHandle<MyAccountsContract>('myAccounts')
+// Core feature: always enabled, not gated by a CGW feature flag.
+export const MyAccountsFeature: FeatureHandle<MyAccountsContract> = {
+  name: 'myAccounts',
+  useIsEnabled: () => true,
+  load: () => import(/* webpackMode: "lazy" */ './feature') as Promise<{ default: MyAccountsContract }>,
+}
 
 // Contract type
 export type { MyAccountsContract } from './contract'
@@ -69,7 +69,7 @@ export { default as AddTrustedSafeDialog } from './components/NonPinnedWarning/A
 export { default as SafeAccountsTable } from './components/SafeAccountsTable'
 export type { SafeAccountsSelection } from './components/SafeAccountsTable'
 export type { AccountLine } from './components/SafeAccountsTable/useSafeAccountRows'
-export type { SafeAccountColumnId } from './components/SafeAccountsTable/columns'
+export type { SafeAccountColumnId } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
 
 // Public types
 export type * from './types'

@@ -4,9 +4,6 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import svgr from 'vite-plugin-svgr'
 import mdx from '@mdx-js/rollup'
-import remarkFrontmatter from 'remark-frontmatter'
-import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
-import remarkHeadingId from 'remark-heading-id'
 import remarkGfm from 'remark-gfm'
 import path from 'node:path'
 import { execSync } from 'node:child_process'
@@ -50,8 +47,8 @@ export default defineConfig(({ mode }) => {
     NEXT_PUBLIC_COMMIT_HASH: commitHash,
     NEXT_PUBLIC_APP_VERSION: appVersion,
     NEXT_PUBLIC_APP_HOMEPAGE: pkg.homepage ?? '',
-    // Honour an explicit cypress/test NODE_ENV from the host shell so the
-    // existing `cross-env NODE_ENV=cypress cypress run` script can flip
+    // Honour an explicit cypress/test NODE_ENV from the host shell so an E2E
+    // build (NODE_ENV=cypress) can flip
     // `IS_TEST_E2E` in apps/web/src/config/constants.ts (and the require-login
     // gate it gates) without needing a separate NEXT_PUBLIC_IS_TEST_E2E flag.
     NODE_ENV:
@@ -133,8 +130,6 @@ export default defineConfig(({ mode }) => {
         { find: 'next/link', replacement: path.resolve(__dirname, 'src/compat/next-link.tsx') },
         { find: 'next/head', replacement: path.resolve(__dirname, 'src/compat/next-head.tsx') },
         { find: 'next/dynamic', replacement: path.resolve(__dirname, 'src/compat/next-dynamic.tsx') },
-        { find: 'next/image', replacement: path.resolve(__dirname, 'src/compat/next-image.tsx') },
-        { find: 'next/app', replacement: path.resolve(__dirname, 'src/compat/next-app.ts') },
         { find: 'next/navigation', replacement: path.resolve(__dirname, 'src/compat/next-navigation.tsx') },
 
         // Node builtins referenced by reused source. `querystring-es3` is the
@@ -166,6 +161,7 @@ export default defineConfig(({ mode }) => {
         { find: /^@safe-global\/theme\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/theme/src/$1') },
         { find: /^@safe-global\/store\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/store/src/$1') },
         { find: /^@safe-global\/utils\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/utils/src/$1') },
+        { find: /^@safe-global\/views\/(.*)$/, replacement: path.resolve(__dirname, '../../packages/views/src/$1') },
         { find: /^@safe-global\/test\/(.*)$/, replacement: path.resolve(__dirname, '../../config/test/$1') },
 
         // apps/web/src/pages/_app.tsx uses bare `src/...` imports (Next.js baseUrl convention).
@@ -188,7 +184,7 @@ export default defineConfig(({ mode }) => {
       // @mdx-js/loader. Must run BEFORE react() so React's JSX transform sees
       // the compiled MDX output.
       mdx({
-        remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, remarkHeadingId, remarkGfm],
+        remarkPlugins: [remarkGfm],
       }),
       react(),
       svgr({

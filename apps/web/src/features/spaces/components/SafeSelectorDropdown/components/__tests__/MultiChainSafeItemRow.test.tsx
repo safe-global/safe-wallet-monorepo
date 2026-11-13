@@ -2,7 +2,10 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useChain } from '@/hooks/useChains'
 import MultiChainSafeItemRow from '../MultiChainSafeItemRow'
-import type { SafeItemData, SafeItemDataChain } from '../../types'
+import type {
+  SafeItemData,
+  SafeItemDataChain,
+} from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 jest.mock('@/hooks/useSafeDisplayName', () => ({
   useSafeDisplayName: () => 'Test Safe',
@@ -24,14 +27,14 @@ jest.mock('@/components/common/AccountRow/SafeInfoDisplay', () => {
   const Mock = ({ explorerLink, onRename }: { explorerLink?: { href: string }; onRename?: () => void }) => (
     <div data-testid="safe-info-display">
       {explorerLink && <a data-testid="summary-explorer-link" href={explorerLink.href} />}
-      {onRename && <button data-testid="rename-btn" onClick={onRename} />}
+      {onRename && <span role="button" data-testid="rename-btn" onClick={onRename} />}
     </div>
   )
   Mock.displayName = 'SafeInfoDisplay'
   return { __esModule: true, default: Mock }
 })
 
-jest.mock('../BalanceDisplay', () => {
+jest.mock('@safe-global/views/features/spaces/components/SafeSelectorDropdown/components/BalanceDisplay', () => {
   const Mock = () => <div data-testid="balance-display" />
   Mock.displayName = 'BalanceDisplay'
   return { __esModule: true, default: Mock }
@@ -49,7 +52,7 @@ jest.mock('@/components/common/FiatValue', () => {
   return { __esModule: true, default: Mock }
 })
 
-jest.mock('@/components/ui/select', () => ({
+jest.mock('@safe-global/views/components/ui/select', () => ({
   SelectItem: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
 }))
 
@@ -79,6 +82,15 @@ describe('MultiChainSafeItemRow rename gate', () => {
     render(<MultiChainSafeItemRow item={createItem(['1', '137'])} onRename={jest.fn()} />)
 
     expect(screen.getByTestId('rename-btn')).toBeInTheDocument()
+  })
+
+  it('offers rename for every network of the group', () => {
+    const onRename = jest.fn()
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} onRename={onRename} />)
+
+    fireEvent.click(screen.getByTestId('rename-btn'))
+
+    expect(onRename).toHaveBeenCalledWith({ address: '0xaaa', name: 'Test Safe', chainIds: ['1', '137'] })
   })
 
   it('withholds rename from a member looking at a workspace Safe', () => {

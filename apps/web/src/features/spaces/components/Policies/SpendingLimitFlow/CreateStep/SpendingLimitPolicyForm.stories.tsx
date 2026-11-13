@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
@@ -6,15 +7,23 @@ import type { Erc20TokenMetadata } from '@safe-global/store/gateway/AUTO_GENERAT
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { createMockStory } from '@/stories/mocks'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
-import { useSafeScope, useSafeScopeControls } from '@/components/tx-flow/safe-scope'
-import type { SafeScopeTarget } from '@/components/tx-flow/safe-scope'
+import { useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
+import type { SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope'
 import { buildSafeAccountId, groupSafeAccounts } from '../../SafeAccountSelector/utils'
-import type { SafeAccountEntry, SafeAccountOption } from '../../SafeAccountSelector/types'
-import { createDefaultFormValues, type SpendingLimitPolicyFormValues } from '../types'
+import type {
+  SafeAccountEntry,
+  SafeAccountOption,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+import {
+  createDefaultFormValues,
+  type SpendingLimitPolicyFormValues,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { ExistingSpendingLimitsContext } from '../ExistingSpendingLimitsProvider'
-import { EditModeProvider } from '../EditFlow/EditModeContext'
+import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import SpendingLimitPolicyForm, { type SpendingLimitPolicyFormProps } from './SpendingLimitPolicyForm'
+
+faker.seed(1)
 
 /** `SAFE_ADDRESSES.efSafe` in config/test/msw/fixtures. */
 const EF_SAFE = '0x9fC3dc011b461664c835F2527fffb1169b3C213e'

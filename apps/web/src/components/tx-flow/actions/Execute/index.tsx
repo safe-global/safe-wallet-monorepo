@@ -1,5 +1,5 @@
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { useCallback, useContext, useEffect } from 'react'
+import { type ReactNode, useCallback, useContext, useEffect } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
 import ExecuteForm from './ExecuteForm'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
@@ -7,13 +7,13 @@ import { useIsGnosisPaySafe } from '@/features/gnosispay'
 import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
 import type { SubmitCallback } from '../../TxFlow'
 
-const Execute = ({
+export const Execute = ({
   onSubmit,
   onSubmitSuccess,
   disabled = false,
   onChange,
   ...props
-}: SlotComponentProps<SlotName.ComboSubmit>) => {
+}: SlotComponentProps<SlotName.ComboSubmit> & { secondaryAction?: ReactNode }) => {
   const { safeTx, txOrigin } = useContext(SafeTxContext)
   const { txId, isCreation, onlyExecute, isSubmitDisabled, trackTxEvent, setShouldExecute } = useContext(TxFlowContext)
 
@@ -58,9 +58,9 @@ const Execute = ({
 const useShouldRegisterSlot = () => {
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const [isGnosisPaySafe] = useIsGnosisPaySafe()
-  const { canExecute, isProposing } = useContext(TxFlowContext)
+  const { canExecute, isProposing, willSignBeforeExecute } = useContext(TxFlowContext)
 
-  return !isCounterfactualSafe && !isGnosisPaySafe && canExecute && !isProposing
+  return !isCounterfactualSafe && !isGnosisPaySafe && canExecute && !isProposing && !willSignBeforeExecute
 }
 
 const ExecuteSlot = withSlot({

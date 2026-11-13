@@ -1,7 +1,7 @@
 import { type ReactElement } from 'react'
 import WalletConnectIcon from '@/public/images/common/walletconnect.svg'
-import SafeAppIconCard from '@/components/safe-apps/SafeAppIconCard'
-import IconAction from '@/components/common/IconAction'
+import SafeAppIconCard from '@safe-global/views/components/safe-apps/SafeAppIconCard'
+import IconAction from '@safe-global/views/components/common/IconAction'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
 import Track from '@/components/common/Track'
 

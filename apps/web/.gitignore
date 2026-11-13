@@ -1,4 +1,4 @@
-# Ignore auto-generated service workers but allow public/beamer-embed.js
+# Ignore auto-generated service workers
 public/work*.js
 
 # testing
@@ -10,12 +10,8 @@ public/firebase*.js
 public/fallback*.js
 public/*.map
 
-# Cypress
-cypress/snapshots/
-
 # Chromatic
 .chromatic
-cypress/downloads/
 
 # Storybook
 storybook-static

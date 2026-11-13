@@ -1,7 +1,8 @@
-import { useEffect, useRef } from 'react'
-import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
-import { trackEvent, OVERVIEW_EVENTS } from '@/services/analytics'
+import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
+import { OVERVIEW_EVENTS } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
+import Track from '@/components/common/Track'
 import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
 import useNonPinnedSafeWarning from '../../hooks/useNonPinnedSafeWarning'
 import AddTrustedSafeDialog from './AddTrustedSafeDialog'
@@ -25,14 +26,7 @@ const NonPinnedWarning = () => {
     confirmAndAddToPinnedList,
   } = useNonPinnedSafeWarning()
 
-  // Track when warning is shown (once per render)
-  const hasTrackedWarning = useRef(false)
-  useEffect(() => {
-    if (shouldShowWarning && !hasTrackedWarning.current) {
-      trackEvent(OVERVIEW_EVENTS.TRUSTED_SAFES_WARNING_SHOW)
-      hasTrackedWarning.current = true
-    }
-  }, [shouldShowWarning])
+  useTrackOnce(OVERVIEW_EVENTS.TRUSTED_SAFES_WARNING_SHOW, undefined, shouldShowWarning)
 
   if (!shouldShowWarning) {
     return null
@@ -47,18 +41,17 @@ const NonPinnedWarning = () => {
           You&apos;re a signer of this Safe, but you haven&apos;t added it to your accounts yet. Adding it helps you
           recognize it and reduces the risk of impersonation.
           <div className="mt-4">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-foreground"
-              data-testid="trust-this-safe-button"
-              onClick={() => {
-                trackEvent(ATTENTION_PANEL_EVENTS.TRUST_SAFE)
-                openConfirmDialog()
-              }}
-            >
-              Add to my accounts
-            </Button>
+            <Track {...ATTENTION_PANEL_EVENTS.TRUST_SAFE}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-foreground"
+                data-testid="trust-this-safe-button"
+                onClick={openConfirmDialog}
+              >
+                Add to my accounts
+              </Button>
+            </Track>
           </div>
         </AlertDescription>
       </Alert>

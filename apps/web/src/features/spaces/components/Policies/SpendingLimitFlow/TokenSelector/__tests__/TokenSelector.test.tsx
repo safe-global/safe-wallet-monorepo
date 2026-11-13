@@ -6,7 +6,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
 import type { TokenOptionsResult } from '../../hooks/useSpendingLimitTokenOptions'
 import type { TokenOption } from '../../utils/tokenOptions'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
+import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
 import TokenSelector from '..'
 import {
   BALANCES_LOAD_ERROR_TEXT,
@@ -16,11 +16,11 @@ import {
   POPULAR_LOAD_ERROR_TEXT,
   TOKEN_SELECTOR_LABEL,
   TOKEN_SELECTOR_PLACEHOLDER,
-} from '../constants'
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/TokenSelector/constants'
 
 jest.mock('../../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
 // Render the tooltip parts inline so a disabled row's reason is assertable without hovering a portal.
-jest.mock('@/components/ui/tooltip', () => ({
+jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({
     render: { type: Element, props },

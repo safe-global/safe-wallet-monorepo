@@ -1,9 +1,8 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Typography } from '@/components/ui/typography'
-import InfoIcon from '@/public/images/notifications/info.svg'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import { ContractVersion } from '@/components/settings/ContractVersion'
 import { OwnerList } from '@/components/settings/owner/OwnerList'
 import { RequiredConfirmation } from '@/components/settings/RequiredConfirmations'
@@ -16,7 +15,7 @@ import { BRAND_NAME } from '@/config/constants'
 import { NestedSafesList } from '@/components/settings/NestedSafesList'
 import { FeeTokenPreference } from '@/components/settings/FeeTokenPreference'
 
-const Setup: NextPage = () => {
+const Setup = () => {
   const { safe, safeLoaded } = useSafeInfo()
   const { SpendingLimitsSettings } = useLoadFeature(SpendingLimitsFeature)
   const nonce = safe.nonce

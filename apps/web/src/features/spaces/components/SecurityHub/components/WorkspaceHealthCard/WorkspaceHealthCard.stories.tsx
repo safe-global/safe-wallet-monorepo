@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import WorkspaceHealthCard from './WorkspaceHealthCard'
 import { createMockStory } from '@/stories/mocks'
 import type { ScanResult } from '@/features/security/types'
-import type { SpaceSafeEntry } from '../../types'
+import type { SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 const mkResult = (overrides: Partial<ScanResult> = {}): ScanResult => ({
   status: 'clear',
@@ -50,7 +50,7 @@ const criticalResults = {
   pending_tx: mkResult({ status: 'clear' }),
 }
 
-const setup = createMockStory({ features: { spaces: true }, layout: 'paper' })
+const setup = createMockStory({ authenticated: true, layout: 'paper' })
 
 const meta = {
   title: 'Features/SecurityHub/WorkspaceHealthCard',

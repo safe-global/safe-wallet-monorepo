@@ -7,7 +7,7 @@ import {
 import { useAppSelector } from '@/store'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { POLLING_INTERVAL } from '@/config/constants'
-import { useSafeScopeContext } from '@/components/tx-flow/safe-scope/context'
+import { useSafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import { selectTxQueue, selectQueuedTransactionsByNonce, filterQueuedTransactionsByNonce } from '@/store/txQueueSlice'
 import useSafeInfo from './useSafeInfo'
 import { isTransactionQueuedItem } from '@/utils/transaction-guards'

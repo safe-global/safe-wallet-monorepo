@@ -1,7 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import BridgeTransaction from './index'
-import { mockPendingBridgeTxInfo, mockFailedBridgeTxInfo, mockSuccessfulBridgeTxInfo } from './mockData'
+import {
+  mockPendingBridgeTxInfo,
+  mockFailedBridgeTxInfo,
+  mockSuccessfulBridgeTxInfo,
+} from './BridgeTransaction.storyData'
 
 const meta = {
   title: 'Components/TxFlow/ConfirmationViews/BridgeTransaction',

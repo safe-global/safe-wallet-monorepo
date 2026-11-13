@@ -9,7 +9,7 @@ import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import useChains from '@/hooks/useChains'
 import SafeSelectorDropdown from '../index'
-import type { SafeItemData } from '../types'
+import type { SafeItemData } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 /**
  * base-ui dismisses an open Select popup part-way through the outside pointerdown, flushing the
@@ -31,7 +31,7 @@ jest.mock('@/hooks/useChains', () => ({
   default: jest.fn(),
 }))
 
-jest.mock('@/components/ui/tooltip', () => ({
+jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   __esModule: true,
   Tooltip: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
   TooltipTrigger: ({
@@ -97,7 +97,7 @@ jest.mock('../components/SafeDropdownContainer', () => ({
  * then again with the previous id (e.g. before the router updates selectedItemId).
  * See SafeSelectorDropdown + SpaceSafeBar: selection is driven by the URL async.
  */
-jest.mock('@/components/ui/select', () => {
+jest.mock('@safe-global/views/components/ui/select', () => {
   const { flushSync } = jest.requireActual<typeof ReactDomModule>('react-dom')
   const NEW_ID = '2:0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb'
   const PREV_ID = '1:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'

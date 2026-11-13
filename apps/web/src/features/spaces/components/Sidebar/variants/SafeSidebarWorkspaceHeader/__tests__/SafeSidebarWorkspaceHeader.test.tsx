@@ -2,7 +2,10 @@ import { render, screen } from '@testing-library/react'
 import type { CSSProperties, ReactNode } from 'react'
 import { getDeterministicColor } from '@/utils/colors'
 import { SafeSidebarWorkspaceHeader } from '../SafeSidebarWorkspaceHeader'
-import type { SafeWorkspaceHeaderBackToSpace, SafeWorkspaceHeaderAddToWorkspace } from '../../../types'
+import type {
+  SafeWorkspaceHeaderBackToSpace,
+  SafeWorkspaceHeaderAddToWorkspace,
+} from '@safe-global/views/features/spaces/components/Sidebar/types'
 
 const spaceSelectorDropdownMock = jest.fn()
 
@@ -12,7 +15,7 @@ jest.mock('@/components/common/SpaceSafeBar/hooks/useSpaceBackLink', () => ({
   useSpaceBackLink: () => ({ handleBackToSpace: mockHandleBackToSpace }),
 }))
 
-jest.mock('@/components/ui/dialog', () => ({
+jest.mock('@safe-global/views/components/ui/dialog', () => ({
   Dialog: ({ children }: { children: ReactNode }) => <div data-testid="dialog-root">{children}</div>,
   DialogTrigger: ({ children, render: renderProp }: { children: ReactNode; render?: ReactNode }) => (
     <div data-testid="dialog-trigger">
@@ -45,7 +48,7 @@ jest.mock('@/utils/colors', () => ({
   getDeterministicColor: (name: string) => `color-${name}`,
 }))
 
-jest.mock('@/components/ui/sidebar', () => ({
+jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   SidebarMenuButton: ({
     children,
     isActive,
@@ -79,7 +82,7 @@ jest.mock('@/components/ui/sidebar', () => ({
   ),
 }))
 
-jest.mock('@/components/ui/avatar', () => ({
+jest.mock('@safe-global/views/components/ui/avatar', () => ({
   Avatar: ({ children, className }: { children: ReactNode; className?: string }) => (
     <div className={className}>{children}</div>
   ),

@@ -1,5 +1,6 @@
 import { matchUserOutcome, normalizeError, sanitizeErrorMessage } from '../normalizeError'
 import { ErrorDomain, ErrorLayer, ErrorType } from '../errorTaxonomy'
+import { asError } from '../utils'
 
 describe('sanitizeErrorMessage', () => {
   it('strips Ethereum addresses', () => {
@@ -65,6 +66,18 @@ describe('normalizeError', () => {
     const result = normalizeError({
       code: 804,
       message: 'Code 804: ... (ethers-user-denied) code=ACTION_REJECTED',
+      isUserFacing: true,
+    })
+
+    expect(result.type).toBe(ErrorType.USER_REJECTED)
+  })
+
+  it('detects an EIP-1193 rejection that the wallet threw as a plain object', () => {
+    const rejection = asError({ code: 4001, message: 'User rejected the request' })
+
+    const result = normalizeError({
+      code: 801,
+      message: `Code 801: Failed to send a tx with a spending limit (${rejection.message})`,
       isUserFacing: true,
     })
 

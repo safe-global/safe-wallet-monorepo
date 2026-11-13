@@ -1,4 +1,4 @@
-import chains from '@safe-global/utils/config/chains'
+import { MAINNET_CHAIN_ID, SEPOLIA_CHAIN_ID } from '@safe-global/utils/config/chainIds'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 
 type Environment = 'development' | 'production' | 'test' | 'cypress'
@@ -8,15 +8,17 @@ export const IS_PRODUCTION = process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true'
 export const IS_DEV = APP_ENV === 'development'
 // NOTE: `next build` rewrites process.env.NODE_ENV to 'production' in client
 // bundles, so the APP_ENV check below only works during `next dev`. For
-// production-built Cypress runs (where the workflow serves the static export)
+// production-built E2E runs (where the isolated stack serves the static export)
 // we also honour an explicit NEXT_PUBLIC_IS_TEST_E2E flag, which survives the
 // build because of its NEXT_PUBLIC_ prefix.
 export const IS_TEST_E2E = APP_ENV === 'cypress' || process.env.NEXT_PUBLIC_IS_TEST_E2E === 'true'
 export const COMMIT_HASH = process.env.NEXT_PUBLIC_COMMIT_HASH || ''
+// Set only by the isolated e2e build: Ledger talks to the Speculos emulator at this URL instead of over USB.
+export const LEDGER_EMULATOR_URL = process.env.NEXT_PUBLIC_LEDGER_EMULATOR_URL || ''
 
 // default chain ID's as provided to the environment
-export const DEFAULT_TESTNET_CHAIN_ID = +(process.env.NEXT_PUBLIC_DEFAULT_TESTNET_CHAIN_ID ?? chains.sep)
-export const DEFAULT_MAINNET_CHAIN_ID = +(process.env.NEXT_PUBLIC_DEFAULT_MAINNET_CHAIN_ID ?? chains.eth)
+export const DEFAULT_TESTNET_CHAIN_ID = +(process.env.NEXT_PUBLIC_DEFAULT_TESTNET_CHAIN_ID ?? SEPOLIA_CHAIN_ID)
+export const DEFAULT_MAINNET_CHAIN_ID = +(process.env.NEXT_PUBLIC_DEFAULT_MAINNET_CHAIN_ID ?? MAINNET_CHAIN_ID)
 
 // default chain ID used in the application
 export const DEFAULT_CHAIN_ID = IS_PRODUCTION ? DEFAULT_MAINNET_CHAIN_ID : DEFAULT_TESTNET_CHAIN_ID
@@ -30,7 +32,8 @@ export const CONFIG_SERVICE_KEY = process.env.NEXT_PUBLIC_CONFIG_SERVICE_KEY || 
 export const STATUS_PAGE_URL = process.env.NEXT_PUBLIC_SAFE_STATUS_PAGE_URL || 'https://status.safe.global'
 
 // Magic numbers
-export const POLLING_INTERVAL = 15_000
+// Shorter in the isolated E2E build, so journeys do not wait 15 s per relayed transaction
+export const POLLING_INTERVAL = Number(process.env.NEXT_PUBLIC_POLLING_INTERVAL) || 15_000
 export const PORTFOLIO_CACHE_TIME_MS = 10_000
 export const BASE_TX_GAS = 21_000
 export const LS_NAMESPACE = 'SAFE_v2__'
@@ -87,8 +90,8 @@ export const TREZOR_EMAIL = 'support@safe.global'
 
 // Safe Token
 export const SAFE_TOKEN_ADDRESSES: { [chainId: string]: string } = {
-  [chains.eth]: '0x5aFE3855358E112B5647B952709E6165e1c1eEEe',
-  [chains.sep]: '0xd16d9C09d13E9Cf77615771eADC5d51a1Ae92a26',
+  [MAINNET_CHAIN_ID]: '0x5aFE3855358E112B5647B952709E6165e1c1eEEe',
+  [SEPOLIA_CHAIN_ID]: '0xd16d9C09d13E9Cf77615771eADC5d51a1Ae92a26',
 }
 
 export const DEVELOPER_PORTAL_URL =
@@ -152,11 +155,13 @@ export const MULTICHAIN_HELP_ARTICLE = `${HELP_CENTER_URL}/articles/9317165368-d
 export const WORKSPACE_ANNOUNCEMENT_URL = `${SAFE_GLOBAL_DOMAIN}/blog/introducing-workspace-the-onchain-operating-environment-for-treasury-teams`
 
 export const SAFE_PRO_ANNOUNCEMENT_URL = `${SAFE_GLOBAL_DOMAIN}/blog/safe-pro-early-partner-program`
+export const SAFE_PRO_INTRO_URL = `${SAFE_GLOBAL_DOMAIN}/blog/introducing-safe-pro`
 export const SAFE_PRO_PRICING_URL = `${SAFE_GLOBAL_DOMAIN}/pricing`
 
 export const SAFE_PRO_USER_TERMS_URL = `${SAFE_GLOBAL_DOMAIN}/pro-user-terms`
 export const SAFE_PRO_TERMS_URL = `${SAFE_GLOBAL_DOMAIN}/pro-terms`
 export const LEGAL_URL = `${SAFE_GLOBAL_DOMAIN}/legal`
+export const SAFE_PRO_SERVICE_DESCRIPTIONS_URL = `${HELP_CENTER_URL}/articles/4148651106-safe-pro-service-descriptions`
 
 // Hypernative Campaign IDs
 export const PROD_HYPERNATIVE_OUTREACH_ID = parseInt(process.env.NEXT_PUBLIC_PROD_HYPERNATIVE_OUTREACH_ID ?? `${3}`)

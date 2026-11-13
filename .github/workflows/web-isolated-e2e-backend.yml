@@ -1,0 +1,442 @@
+name: Web isolated E2E
+
+on:
+  workflow_dispatch:
+    inputs:
+      specs:
+        description: Comma-separated Playwright spec filters (file name patterns); empty runs every registered spec
+        required: false
+        default: ''
+      shards:
+        description: Number of parallel Playwright jobs, each with its own backend
+        required: false
+        default: '3'
+      backend:
+        description: Deployment whose service versions the backend runs
+        type: choice
+        options: [staging, production]
+        default: staging
+  # No paths filter: the required result check must report on every pull request, so the plan job detects changes.
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [dev]
+
+permissions:
+  contents: read
+
+concurrency:
+  # Each merge to dev gets its own group, so a later merge cannot cancel the run of an earlier one.
+  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.sha || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plan:
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+      packages: read
+    outputs:
+      run: ${{ steps.changes.outputs.relevant }}
+      matrix: ${{ steps.plan.outputs.matrix }}
+      images: ${{ steps.images.outputs.images }}
+    steps:
+      - name: Detect changes that the isolated E2E covers
+        id: changes
+        uses: $/.github/actions/pr-changes
+        with:
+          paths: |
+            .github/workflows/web-isolated-e2e-backend.yml
+            .github/actions/isolated-e2e-backend/**
+            .github/actions/build/**
+            .github/actions/yarn/**
+            .github/actions/corepack/**
+            .github/actions/cache-deps/**
+            apps/web/**
+            apps/tx-builder/**
+            apps/drain-safe/**
+            packages/**
+            config/**
+            package.json
+            yarn.lock
+            .yarnrc.yml
+            .yarn/patches/**
+
+      # Fork pull requests get no secrets for the backend, so they cannot pass the check.
+      - name: Block fork pull requests
+        if: >-
+          github.event_name == 'pull_request' && steps.changes.outputs.relevant == 'true' &&
+          github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          echo '::error::Isolated E2E cannot run on a fork pull request; push the branch to this repository'
+          exit 1
+
+      - uses: actions/checkout@v7.0.1
+        if: steps.changes.outputs.relevant == 'true'
+        with:
+          persist-credentials: false
+      - name: Plan shards
+        id: plan
+        if: steps.changes.outputs.relevant == 'true'
+        env:
+          SAFE_E2E_SPECS: ${{ inputs.specs }}
+          SAFE_E2E_SHARDS: ${{ inputs.shards || '3' }}
+        run: echo "matrix=$(node apps/web/e2e/environment/run.mjs plan)" >> "$GITHUB_OUTPUT"
+
+      # The Queue Service image is a private package.
+      - name: Log in to GitHub Container Registry
+        if: steps.changes.outputs.relevant == 'true'
+        uses: docker/login-action@v4.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      # Resolved once, so that every shard tests the same images even when staging deploys during the run.
+      - name: Resolve backend images
+        id: images
+        if: steps.changes.outputs.relevant == 'true'
+        env:
+          # The Events Service version comes from its GitHub deployments; the token lifts the API rate limit.
+          GITHUB_TOKEN: ${{ github.token }}
+          REQUESTED_BACKEND: ${{ inputs.backend }}
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          backend="${REQUESTED_BACKEND:-staging}"
+          # A release must work with the backend that production runs today.
+          if [ "$HEAD_REF" = release ] && [ "$BASE_REF" = main ]; then backend=production; fi
+          images=$(python3 apps/web/e2e/environment/infra/scripts/test_env.py versions --backend "$backend")
+          { echo 'images<<IMAGES'; echo "$images"; echo IMAGES; } >> "$GITHUB_OUTPUT"
+          { echo "### Backend: $backend"; echo '```'; echo "$images"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+
+  build:
+    needs: plan
+    if: needs.plan.outputs.run == 'true'
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: $/.github/actions/yarn
+
+      - name: Check isolated runner
+        run: yarn workspace @safe-global/web e2e:env:test
+
+      - name: Build wallet for local CGW
+        uses: $/.github/actions/build
+        with:
+          prod: 'false'
+        env:
+          NODE_ENV: cypress
+          NEXT_PUBLIC_IS_TEST_E2E: 'true'
+          NEXT_PUBLIC_POLLING_INTERVAL: '2000'
+          NEXT_PUBLIC_CONFIG_SERVICE_KEY: WALLET_WEB
+          NEXT_PUBLIC_GATEWAY_URL_STAGING: http://localhost:8000/cgw
+          NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: http://localhost:8000/cgw
+          NEXT_PUBLIC_LEDGER_EMULATOR_URL: http://localhost:9555
+          NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL: http://localhost:4003/simulate
+          NEXT_PUBLIC_TENDERLY_ORG_NAME: safe
+          NEXT_PUBLIC_TENDERLY_PROJECT_NAME: safe-apps
+          NEXT_PUBLIC_WC_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WC_PROJECT_ID }}
+
+      - name: Build Transaction Builder for local CGW
+        env:
+          VITE_GATEWAY_URL: http://localhost:8000/cgw
+          VITE_TENDERLY_SIMULATE_ENDPOINT_URL: http://localhost:4003/simulate
+        run: yarn workspace @safe-global/tx-builder exec vite build --config vite.config.ts
+
+      - name: Build Drain Account
+        run: yarn workspace @safe-global/drain-safe exec vite build --config vite.config.ts
+
+      - name: Upload builds
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: isolated-e2e-builds
+          path: |
+            apps/web/out
+            apps/tx-builder/build
+            apps/drain-safe/build
+          retention-days: 1
+          if-no-files-found: error
+
+  e2e:
+    # Starts next to the build job: setting up the backend takes about as long as the build.
+    needs: plan
+    if: needs.plan.outputs.run == 'true'
+    name: playwright ${{ matrix.shard }}
+    runs-on: ubuntu-26.04-arm
+    permissions:
+      contents: read
+      actions: read
+      packages: read
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    env:
+      SAFE_E2E_PROJECT: safe-e2e-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.shard }}
+      SAFE_E2E_WEB_PORT: '8080'
+      SAFE_E2E_WEB_URL: http://localhost:8080
+      # Pull requests have no inputs, so every shard runs its part of all registered specs.
+      SAFE_E2E_SPECS: ${{ inputs.specs }}
+      SAFE_E2E_SHARD: ${{ matrix.shard }}/${{ strategy.job-total }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: $/.github/actions/yarn
+
+      # No --with-deps: the image has Chromium's libraries; the fonts it adds only matter for pixel diffs
+      - name: Install Chromium
+        working-directory: apps/web
+        run: yarn exec playwright install --no-shell chromium
+
+      # The Queue Service image is a private package.
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Use the planned backend images
+        env:
+          IMAGES: ${{ needs.plan.outputs.images }}
+        run: printf '%s\n' "$IMAGES" >> "$GITHUB_ENV"
+
+      # Playwright assigns the specs to shards, so the stack starts only the forks and emulators of this shard's specs.
+      - name: Find the forks and device emulators of this shard
+        id: needs
+        run: node apps/web/e2e/environment/run.mjs needs >> "$GITHUB_OUTPUT"
+
+      - name: Start and validate backend
+        id: backend
+        uses: $/.github/actions/isolated-e2e-backend
+        with:
+          project: ${{ env.SAFE_E2E_PROJECT }}
+          fork-rpc-url: ${{ secrets.SEPOLIA_FORK_RPC_URL }}
+          chains: ${{ steps.needs.outputs.chains }}
+          devices: ${{ steps.needs.outputs.devices }}
+          mainnet-rpc-url: ${{ secrets.FORK_RPC_URL_MAINNET }}
+          polygon-rpc-url: ${{ secrets.FORK_RPC_URL_POLYGON }}
+
+      - name: Wait for the builds
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ github.run_id }}
+        run: |
+          for _ in $(seq 1 120); do
+            conclusion=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/jobs" \
+              --jq '.jobs[] | select(.name == "build") | .conclusion')
+            case "$conclusion" in
+              success) exit 0 ;;
+              failure | cancelled | skipped)
+                echo "The build job ended with $conclusion" >&2
+                exit 1
+                ;;
+            esac
+            sleep 5
+          done
+          echo 'The build job did not finish within 10 minutes' >&2
+          exit 1
+
+      - name: Download builds
+        uses: actions/download-artifact@v8.0.2
+        with:
+          name: isolated-e2e-builds
+          path: apps
+
+      - name: Serve Safe Apps and simulation adapter
+        run: |
+          nohup yarn workspace @safe-global/tx-builder exec \
+            vite preview --config vite.config.ts --host localhost --strictPort \
+            > "$RUNNER_TEMP/tx-builder.log" 2>&1 &
+          nohup yarn workspace @safe-global/drain-safe exec \
+            vite preview --config vite.config.ts --host localhost --strictPort \
+            > "$RUNNER_TEMP/drain-safe.log" 2>&1 &
+          nohup node apps/web/e2e/environment/simulation.mjs \
+            > "$RUNNER_TEMP/simulation.log" 2>&1 &
+          timeout 60 bash -c 'until curl -sf http://localhost:4000 > /dev/null; do sleep 2; done'
+          timeout 60 bash -c 'until curl -sf http://localhost:4001 > /dev/null; do sleep 2; done'
+          timeout 30 bash -c 'until curl -sf -X OPTIONS http://localhost:4003/simulate > /dev/null; do sleep 1; done'
+
+      - name: Run isolated Playwright shard
+        working-directory: apps/web
+        env:
+          REVERSE_PROXY_UI_PORT: '8080'
+          # The WalletConnect spec's dApp uses the wallet's project ID to reach the relay.
+          NEXT_PUBLIC_WC_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_WC_PROJECT_ID }}
+        run: |
+          nohup yarn serve > "$RUNNER_TEMP/wallet.log" 2>&1 &
+          timeout 120 bash -c 'until curl -sf http://localhost:8080 > /dev/null; do sleep 2; done'
+          yarn e2e:env playwright
+
+      - name: Collect redacted container diagnostics
+        if: always() && steps.backend.outcome != 'skipped'
+        working-directory: apps/web/e2e/environment/infra
+        env:
+          # The logs command needs the provider URLs to redact them.
+          SEPOLIA_FORK_RPC_URL: ${{ secrets.SEPOLIA_FORK_RPC_URL }}
+          FORK_RPC_URL_MAINNET: ${{ secrets.FORK_RPC_URL_MAINNET }}
+          FORK_RPC_URL_POLYGON: ${{ secrets.FORK_RPC_URL_POLYGON }}
+        run: |
+          output="$RUNNER_TEMP/isolated-e2e-backend"
+          mkdir -p "$output"
+          docker ps --all --filter "label=com.docker.compose.project=$SAFE_E2E_PROJECT" \
+            --format '{{.Names}}\t{{.State}}\t{{.Status}}' > "$output/containers.txt"
+          for service in cgw-web decoder-web txs-web txs-worker-indexer queue-web queue-worker events-web nginx \
+            ledger-emulator trezor-emulator; do
+            python3 scripts/test_env.py logs "$service" --tail all > "$output/$service.log"
+          done
+
+      - name: Clean up owned backend
+        if: always() && steps.backend.outcome != 'skipped'
+        working-directory: apps/web/e2e/environment/infra
+        run: python3 scripts/test_env.py reset
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: isolated-e2e-results-${{ matrix.shard }}
+          # The fork cache lives in .anvil-cache, which the action skips as hidden by default.
+          include-hidden-files: true
+          path: |
+            apps/web/e2e/environment/artifacts/playwright/**
+            ${{ runner.temp }}/wallet.log
+            ${{ runner.temp }}/isolated-e2e-backend/manifest.json
+            ${{ runner.temp }}/isolated-e2e-backend/wallet-ref.txt
+            ${{ runner.temp }}/isolated-e2e-backend/containers.txt
+            ${{ runner.temp }}/isolated-e2e-backend/*.log
+            apps/web/e2e/environment/infra/.anvil-cache/**
+            ${{ runner.temp }}/tx-builder.log
+            ${{ runner.temp }}/drain-safe.log
+            ${{ runner.temp }}/simulation.log
+          retention-days: 1
+          if-no-files-found: ignore
+
+  merge-report:
+    # Runs repository code (yarn install) without an OIDC token; publish-report gets the token but runs no repository code.
+    name: Merge E2E report
+    needs: [plan, e2e]
+    if: always() && needs.plan.outputs.run == 'true' && vars.E2E_REPORTS_BUCKET != '' && (needs.e2e.result == 'success' || needs.e2e.result == 'failure')
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: $/.github/actions/yarn
+
+      - name: Download shard results
+        uses: actions/download-artifact@v8.0.2
+        with:
+          pattern: isolated-e2e-results-*
+          path: ${{ runner.temp }}/results
+
+      - name: Merge blob reports and collect shard logs
+        env:
+          RESULTS: ${{ runner.temp }}/results
+          REPORT: ${{ runner.temp }}/report
+          PLAYWRIGHT_HTML_OUTPUT_DIR: ${{ runner.temp }}/report
+          PLAYWRIGHT_HTML_OPEN: never
+        run: |
+          blobs="$RUNNER_TEMP/blob"
+          mkdir -p "$blobs" "$REPORT"
+          find "$RESULTS" -path '*/artifacts/playwright/blob/*.zip' -exec cp {} "$blobs/" \;
+          if ls "$blobs"/*.zip > /dev/null 2>&1; then
+            yarn workspace @safe-global/web exec playwright merge-reports --reporter html "$blobs"
+          else
+            echo '::warning::No blob reports found; publishing the shard logs only'
+          fi
+          # The merged report already holds the traces, videos and screenshots; the fork cache is not worth keeping.
+          for shard in "$RESULTS"/isolated-e2e-results-*; do
+            mkdir -p "$REPORT/shards/${shard##*-}"
+            rsync -a --prune-empty-dirs --exclude '.anvil-cache/' --exclude 'artifacts/playwright/' \
+              "$shard/" "$REPORT/shards/${shard##*-}/"
+          done
+          # The PR comment always links index.html, so a run without tests still opens the shard logs.
+          if [ ! -f "$REPORT/index.html" ]; then
+            {
+              echo '<!doctype html><meta charset="utf-8"><title>Isolated E2E logs</title>'
+              echo '<h1>Playwright did not run</h1>'
+              echo "<p>No test report was produced, usually because the backend did not start. See the <a href=\"$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\">workflow run</a> and the shard logs:</p><ul>"
+              (cd "$REPORT" && find shards -type f | sort | sed -E 's|.*|<li><a href="&">&</a></li>|')
+              echo '</ul>'
+            } > "$REPORT/index.html"
+          fi
+
+      - name: Upload merged report
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: isolated-e2e-report
+          path: ${{ runner.temp }}/report
+          retention-days: 1
+          include-hidden-files: true
+          if-no-files-found: error
+
+  publish-report:
+    name: Publish E2E report
+    needs: merge-report
+    if: always() && needs.merge-report.result == 'success'
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 10
+    permissions:
+      id-token: write
+      pull-requests: write
+    env:
+      REPORT_PREFIX: safe-wallet-monorepo/runs/${{ github.run_id }}/${{ github.run_attempt }}
+    steps:
+      - name: Download merged report
+        uses: actions/download-artifact@v8.0.2
+        with:
+          name: isolated-e2e-report
+          path: report
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6.3.0
+        with:
+          role-to-assume: ${{ secrets.AWS_E2E_REPORTS_ROLE }}
+          aws-region: eu-central-1
+
+      - name: Upload report to S3
+        env:
+          BUCKET: ${{ vars.E2E_REPORTS_BUCKET }}
+        run: aws s3 sync report "s3://$BUCKET/$REPORT_PREFIX/" --no-progress --only-show-errors
+
+      - name: Write report link
+        id: link
+        env:
+          REPORTS_URL: ${{ vars.E2E_REPORTS_URL }}
+        run: |
+          url="$REPORTS_URL/$REPORT_PREFIX/index.html"
+          body="**Isolated E2E report** (run attempt $GITHUB_RUN_ATTEMPT): $url"$'\n\n'"Sign in with your safe.global JumpCloud account to open it."
+          echo "$body" >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo 'body<<EOF'
+            echo "$body"
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Comment the report link on the pull request
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v3.0.5
+        with:
+          header: isolated-e2e-report
+          message: ${{ steps.link.outputs.body }}
+
+  result:
+    # The one stable check name for branch protection; the shard names change with the shard count.
+    name: Isolated E2E result
+    if: ${{ !cancelled() }}
+    needs: [plan, build, e2e]
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 5
+    steps:
+      - uses: $/.github/actions/required-result
+        with:
+          needs: ${{ toJSON(needs) }}
+          relevant: ${{ needs.plan.outputs.run }}

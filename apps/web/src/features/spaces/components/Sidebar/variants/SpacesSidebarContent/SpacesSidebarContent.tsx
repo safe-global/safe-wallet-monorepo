@@ -3,7 +3,10 @@ import { useCurrentSpaceId } from '../../../../hooks/useCurrentSpaceId'
 import { useIsActiveMember } from '../../../../hooks/useSpaceMembers'
 import { spacesMainNavigation, spacesSetupGroup } from '../../config'
 import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
-import type { SidebarItemConfig, SidebarVariantContentProps } from '../../types'
+import type {
+  SidebarItemConfig,
+  SidebarVariantContentProps,
+} from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { SpacesSidebarVariant } from '../SpacesSidebarVariant'
 import { useHasFeature } from '@/hooks/useChains'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
@@ -21,6 +24,7 @@ export const SpacesSidebarContent = ({
   const isActiveMember = useIsActiveMember(selectedSpace?.uuid)
   const isSecurityHubEnabled = useHasFeature(FEATURES.SECURITY_HUB)
   const isAuditLogEnabled = useHasFeature(FEATURES.SPACE_AUDIT_LOG)
+  const isTransactionsEnabled = useHasFeature(FEATURES.SPACE_TRANSACTIONS)
   const isPoliciesEnabled = useHasFeature(FEATURES.POLICIES)
   const isAnnounced = useIsSafeProAnnouncementEnabled()
   const isSafePro = useIsSafeProEnabled()
@@ -51,6 +55,7 @@ export const SpacesSidebarContent = ({
           [
             [AppRoutes.spaces.security, isSecurityHubEnabled],
             [AppRoutes.spaces.activity, isAuditLogEnabled],
+            [AppRoutes.spaces.transactions, isTransactionsEnabled],
             [AppRoutes.spaces.policies, isPoliciesEnabled],
             [AppRoutes.spaces.plans, isAnnounced || isSafePro],
           ] as const
@@ -58,7 +63,7 @@ export const SpacesSidebarContent = ({
           .filter(([, isEnabled]) => isEnabled === false)
           .map(([href]) => href),
       ),
-    [isSecurityHubEnabled, isAuditLogEnabled, isPoliciesEnabled, isAnnounced, isSafePro],
+    [isSecurityHubEnabled, isAuditLogEnabled, isTransactionsEnabled, isPoliciesEnabled, isAnnounced, isSafePro],
   )
 
   const filteredSetupGroup = useMemo(

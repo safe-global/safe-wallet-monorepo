@@ -20,6 +20,7 @@ import type { MockStoryConfig, MockStoryResult } from './types'
  * - Data scenarios (efSafe, vitalik, empty, etc.)
  * - Layout wrappers (none, paper, fullPage)
  * - Redux store state
+ * - Sign-in state and Workspace mocks (`authenticated`)
  * - MSW request handlers
  *
  * IMPORTANT: Do not override feature flags unless testing a specific disabled feature.
@@ -68,6 +69,7 @@ export function createMockStory(config: MockStoryConfig = {}): MockStoryResult {
     pathname = '/home',
     query: customQuery = {},
     shadcn = false,
+    authenticated,
   } = config
 
   // Get fixture data for scenario
@@ -77,14 +79,14 @@ export function createMockStory(config: MockStoryConfig = {}): MockStoryResult {
   const safeAddressInfo = scenario === 'empty' ? SAFE_ADDRESSES.efSafe : SAFE_ADDRESSES[scenario]
   const safeAddress = safeAddressInfo.address
 
-  // Determine if user should be authenticated (required for spaces)
-  const isAuthenticated = features.spaces === true
+  const isAuthenticated = authenticated ?? false
 
   // Create all MSW handlers
   const handlers = createHandlers({
     scenario,
     features,
     handlers: customHandlers,
+    authenticated: isAuthenticated,
   })
 
   // Create decorator function

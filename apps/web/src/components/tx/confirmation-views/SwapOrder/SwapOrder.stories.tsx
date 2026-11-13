@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { within } from 'storybook/test'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import SwapOrder from './index'
-import { mockSwapOrderTxInfo, mockTwapOrderTxInfo, mockSwapOrderTxData } from './mockData'
+import { mockSwapOrderTxInfo, mockTwapOrderTxInfo, mockSwapOrderTxData } from './SwapOrder.storyData'
 
 const meta = {
   title: 'Components/TxFlow/ConfirmationViews/SwapOrder',
@@ -19,6 +20,10 @@ const meta = {
   ],
   // Skip visual regression tests until baseline snapshots are generated
   tags: ['autodocs', '!test'],
+  // The swap feature loads lazily and renders nothing until it arrives
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText('Order details', undefined, { timeout: 10_000 })
+  },
 } satisfies Meta<typeof SwapOrder>
 
 export default meta

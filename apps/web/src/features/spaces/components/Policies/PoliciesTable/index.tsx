@@ -1,21 +1,26 @@
 import { ChevronRight } from 'lucide-react'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import useChains from '@/hooks/useChains'
 import ChainIndicator from '@/components/common/ChainIndicator'
-import PaginatedDataTable, { type DataTableColumn } from '@/components/common/PaginatedDataTable'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import PolicyRule from './components/PolicyRule'
+import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import PolicyRule from '@safe-global/views/features/spaces/components/Policies/PoliciesTable/components/PolicyRule'
 import PolicyTokens from './components/PolicyTokens'
-import PolicyStatusChip from '../components/PolicyStatusChip'
-import { getPolicyLabel } from '../utils/policyLabel'
+import PolicyStatusChip from '@safe-global/views/features/spaces/components/Policies/components/PolicyStatusChip'
+import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
+import { getPendingStatusDetail } from '../utils/policyStatusDetail'
 import { AppRoutes } from '@/config/routes'
 import { buildSafeHref } from '@/features/spaces/utils/safeHref'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
-import { getPolicyStatus, isProposerPolicy, type Policy } from '../types'
+import {
+  getPolicyStatus,
+  isProposerPolicy,
+  type Policy,
+} from '@safe-global/views/features/spaces/components/Policies/types'
 
 export type PoliciesTableProps = {
   policies: Policy[]
@@ -148,7 +153,20 @@ const PoliciesTable = ({ policies, matchedSpenderNames, onSelect }: PoliciesTabl
       width: 'fit',
       minWidth: 140,
       cellTestId: 'policy-cell-status',
-      cell: (policy) => <PolicyStatusChip status={getPolicyStatus(policy)} />,
+      cell: (policy) => {
+        const chip = <PolicyStatusChip status={getPolicyStatus(policy)} />
+        const detail = getPendingStatusDetail(policy)
+        if (!detail) return chip
+
+        return (
+          <Tooltip>
+            <TooltipTrigger render={<span className="inline-flex" />}>{chip}</TooltipTrigger>
+            <TooltipContent className="bg-popover text-popover-foreground ring-foreground/10 shadow-md ring-1 [&>[data-side]]:hidden">
+              <span data-testid="policy-status-detail">{detail}</span>
+            </TooltipContent>
+          </Tooltip>
+        )
+      },
     },
     {
       id: 'open',

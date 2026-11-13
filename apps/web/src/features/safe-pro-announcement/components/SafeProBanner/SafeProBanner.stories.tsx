@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { withMockProvider } from '@/storybook/preview'
+import { withMockProvider } from '@/storybook/decorators'
 import SafeProBanner from './index'
 
-const meta = {
+const meta: Meta<typeof SafeProBanner> = {
   component: SafeProBanner,
   title: 'Features/SafePro/SafeProBanner',
   tags: ['autodocs'],
@@ -16,7 +16,7 @@ const meta = {
     ),
     withMockProvider({ initialState: { settings: { theme: {} } } }),
   ],
-} satisfies Meta<typeof SafeProBanner>
+}
 
 export default meta
 type Story = StoryObj<typeof meta>

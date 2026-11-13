@@ -1,18 +1,18 @@
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 
-import { Button } from '@/components/ui/button'
+import { Button } from '@safe-global/views/components/ui/button'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import { AppRoutes } from '@/config/routes'
 import Track from '@/components/common/Track'
-import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
+import { MODALS_EVENTS } from '@/services/analytics'
 import { SWAP_EVENTS, SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { GA_LABEL_TO_MIXPANEL_PROPERTY } from '@/services/analytics/ga-mixpanel-mapping'
 import { useContext } from 'react'
 import { TxModalContext } from '..'
 import SwapIcon from '@/public/images/common/swap.svg'
-import AssetsIcon from '@/public/images/sidebar/assets.svg'
+import AssetsIcon from '@safe-global/views/assets/images/sidebar/assets.svg'
 import { useIsSwapFeatureEnabled } from '@/features/swap'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
@@ -63,13 +63,6 @@ export const MakeASwapButton = () => {
   const isSwapPage = router.pathname === AppRoutes.swap
 
   const onClick = () => {
-    trackEvent(
-      { ...SWAP_EVENTS.OPEN_SWAPS, label: SWAP_LABELS.newTransaction },
-      {
-        [MixpanelEventParams.ENTRY_POINT]: GA_LABEL_TO_MIXPANEL_PROPERTY[SWAP_LABELS.newTransaction],
-      },
-    )
-
     if (isSwapPage) {
       setTxFlow(undefined)
     } else {
@@ -82,9 +75,17 @@ export const MakeASwapButton = () => {
   }
 
   return (
-    <Button className={buttonClasses} onClick={onClick}>
-      <SwapIcon width={20} />
-      Swap tokens
-    </Button>
+    <Track
+      {...SWAP_EVENTS.OPEN_SWAPS}
+      label={SWAP_LABELS.newTransaction}
+      mixpanelParams={{
+        [MixpanelEventParams.ENTRY_POINT]: GA_LABEL_TO_MIXPANEL_PROPERTY[SWAP_LABELS.newTransaction],
+      }}
+    >
+      <Button className={buttonClasses} onClick={onClick}>
+        <SwapIcon width={20} />
+        Swap tokens
+      </Button>
+    </Track>
   )
 }

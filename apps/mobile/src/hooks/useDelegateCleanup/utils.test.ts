@@ -5,16 +5,37 @@ import { getDelegateKeyId } from '@/src/utils/delegate'
 import { type Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { type Address } from '@/src/types/address'
 import Logger from '@/src/utils/logger'
+import { faker } from '@faker-js/faker'
+import { chainBuilder } from '@safe-global/utils/tests/builders/chains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { getDelegateTypedData } from '@safe-global/utils/services/delegates'
 
 // Mock dependencies
 jest.mock('@/src/services/key-storage')
 jest.mock('@/src/utils/delegate')
 jest.mock('@/src/utils/logger')
 jest.mock('ethers')
+jest.mock('@safe-global/utils/services/delegates', () => {
+  const actual = jest.requireActual<typeof import('@safe-global/utils/services/delegates')>(
+    '@safe-global/utils/services/delegates',
+  )
+  return { ...actual, getDelegateTypedData: jest.fn(actual.getDelegateTypedData) }
+})
 
 const mockKeyStorageService = keyStorageService as jest.Mocked<typeof keyStorageService>
 const mockGetDelegateKeyId = getDelegateKeyId as jest.MockedFunction<typeof getDelegateKeyId>
 const mockLogger = Logger as jest.Mocked<typeof Logger>
+const mockGetDelegateTypedData = jest.mocked(getDelegateTypedData)
+
+const withoutQueueService = () =>
+  faker.helpers.arrayElements(Object.values(FEATURES).filter((feature) => feature !== FEATURES.QUEUE_SERVICE))
+
+const transactionServiceChain = () => chainBuilder().with({ features: withoutQueueService() }).build()
+
+const queueServiceChain = () =>
+  chainBuilder()
+    .with({ features: [...withoutQueueService(), FEATURES.QUEUE_SERVICE] })
+    .build()
 
 describe('useDelegateCleanup utils', () => {
   const mockOwnerAddress = '0x123456789abcdef' as Address
@@ -131,11 +152,12 @@ describe('useDelegateCleanup utils', () => {
   describe('removeDelegatesFromBackend', () => {
     const mockOwnerWallet = new Wallet('0x123')
     const mockDeleteDelegate = jest.fn()
-    const mockSignTypedData = jest.fn()
+    const mockSign = jest.fn()
 
     beforeEach(() => {
-      mockOwnerWallet.signTypedData = mockSignTypedData
-      mockSignTypedData.mockResolvedValue('0xsignature')
+      // Signing now derives from the raw EIP-712 digest via signingKey.sign()
+      mockSign.mockReturnValue({ serialized: '0xsignature' })
+      ;(mockOwnerWallet as unknown as { signingKey: { sign: jest.Mock } }).signingKey = { sign: mockSign }
       mockDeleteDelegate.mockResolvedValue({})
     })
 
@@ -169,6 +191,87 @@ describe('useDelegateCleanup utils', () => {
       expect(result.success).toBe(true)
       // 2 delegates * 2 chains = 4 calls
       expect(mockDeleteDelegate).toHaveBeenCalledTimes(4)
+    })
+
+    it('should call deleteDelegate with the chain, delegate address and signed dto', async () => {
+      const resultPromise = removeDelegatesFromBackend(
+        mockOwnerAddress,
+        [mockDelegateAddress1],
+        mockOwnerWallet,
+        mockChains,
+        mockDeleteDelegate,
+      )
+
+      await jest.advanceTimersByTimeAsync(10000)
+
+      await resultPromise
+
+      expect(mockDeleteDelegate).toHaveBeenCalledWith(mockChains[0], mockDelegateAddress1, {
+        delegator: mockOwnerAddress,
+        signature: '0xsignature',
+      })
+      expect(mockDeleteDelegate).toHaveBeenCalledWith(mockChains[1], mockDelegateAddress1, {
+        delegator: mockOwnerAddress,
+        signature: '0xsignature',
+      })
+    })
+
+    it('should sign queue service typed data with the delete action on chains with QUEUE_SERVICE', async () => {
+      const chain = queueServiceChain()
+
+      const resultPromise = removeDelegatesFromBackend(
+        mockOwnerAddress,
+        [mockDelegateAddress1],
+        mockOwnerWallet,
+        [chain],
+        mockDeleteDelegate,
+      )
+
+      await jest.advanceTimersByTimeAsync(10000)
+
+      const result = await resultPromise
+
+      expect(result.success).toBe(true)
+      expect(mockGetDelegateTypedData).toHaveBeenCalledWith(chain, mockDelegateAddress1, null, 'delete')
+      expect(mockGetDelegateTypedData).toHaveReturnedWith(
+        expect.objectContaining({
+          domain: expect.objectContaining({ name: 'Safe Queue Service', chainId: Number(chain.chainId) }),
+          message: expect.objectContaining({ delegateAddress: mockDelegateAddress1, action: 'delete' }),
+        }),
+      )
+      expect(mockDeleteDelegate).toHaveBeenCalledWith(chain, mockDelegateAddress1, {
+        delegator: mockOwnerAddress,
+        signature: '0xsignature',
+      })
+    })
+
+    it('should sign transaction service typed data on chains without QUEUE_SERVICE', async () => {
+      const chain = transactionServiceChain()
+
+      const resultPromise = removeDelegatesFromBackend(
+        mockOwnerAddress,
+        [mockDelegateAddress1],
+        mockOwnerWallet,
+        [chain],
+        mockDeleteDelegate,
+      )
+
+      await jest.advanceTimersByTimeAsync(10000)
+
+      const result = await resultPromise
+
+      expect(result.success).toBe(true)
+      expect(mockGetDelegateTypedData).toHaveBeenCalledWith(chain, mockDelegateAddress1, null, 'delete')
+      expect(mockGetDelegateTypedData).toHaveReturnedWith(
+        expect.objectContaining({
+          domain: { name: 'Safe Transaction Service', version: '1.0', chainId: Number(chain.chainId) },
+          message: { delegateAddress: mockDelegateAddress1, totp: expect.any(Number) },
+        }),
+      )
+      expect(mockDeleteDelegate).toHaveBeenCalledWith(chain, mockDelegateAddress1, {
+        delegator: mockOwnerAddress,
+        signature: '0xsignature',
+      })
     })
 
     it('should handle API failures and retry', async () => {

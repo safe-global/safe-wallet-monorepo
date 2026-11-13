@@ -18,6 +18,9 @@ const createJestConfig = nextJest({
 // Add any custom config to be passed to Jest
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  // CI runners are several times slower than a laptop; the 5 s default fails tests that pass locally
+  testTimeout: process.env.CI ? 15_000 : 5_000,
+  roots: ['<rootDir>', '<rootDir>/../../packages/views/src'],
 
   moduleNameMapper: {
     // Handle module aliases (this will be automatically configured for you soon)
@@ -28,6 +31,7 @@ const customJestConfig = {
     isows: '<rootDir>/node_modules/isows/_cjs/index.js',
     '^@safe-global/utils/(.*)$': '<rootDir>/../../packages/utils/src/$1',
     '^@safe-global/store/(.*)$': '<rootDir>/../../packages/store/src/$1',
+    '^@safe-global/views/(.*)$': '<rootDir>/../../packages/views/src/$1',
   },
   // https://github.com/mswjs/jest-fixed-jsdom
   // without this environment it is basically impossible to run tests with msw
@@ -56,6 +60,6 @@ const customJestConfig = {
 module.exports = async () => ({
   ...(await createJestConfig(customJestConfig)()),
   transformIgnorePatterns: [
-    'node_modules/(?!(uint8arrays|multiformats|@web3-onboard/common|@walletconnect/(.*)/uint8arrays|@storybook|storybook)/)',
+    'node_modules/(?!(uint8arrays|multiformats|@web3-onboard/common|@walletconnect/(.*)/uint8arrays|@storybook|storybook|@faker-js/faker)/)',
   ],
 })

@@ -1,7 +1,7 @@
 import type { MetaTransactionData, SafeTransaction } from '@safe-global/types-kit'
 import type { JsonRpcProvider } from 'ethers'
 import type Safe from '@safe-global/protocol-kit'
-import type { TxSenderScope } from '@/components/tx-flow/safe-scope/types'
+import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { zeroPadValue, Interface, toBeHex } from 'ethers'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'

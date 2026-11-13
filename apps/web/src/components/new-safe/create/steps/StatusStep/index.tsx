@@ -12,9 +12,8 @@ import { useCurrentChain } from '@/hooks/useChains'
 import Rocket from '@/public/images/common/rocket.svg'
 import { CREATE_SAFE_EVENTS, trackEvent } from '@/services/analytics'
 import { useAddNewSafeToUrlSpace } from '@/features/spaces'
-import { getNewSafeHomeUrl } from '../ReviewStep/utils'
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
+import { Alert, AlertTitle, AlertDescription } from '@safe-global/views/components/ui/alert'
+import { Button } from '@safe-global/views/components/ui/button'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
@@ -50,9 +49,7 @@ export const CreateSafeStatus = ({ setProgressColor, setStep, setStepData }: Ste
     if (!chain || !safeAddress || status !== SafeCreationEvent.SUCCESS || hasRedirected.current) return
     hasRedirected.current = true
 
-    const getStepUpReturnUrl = (spaceId: string) => getNewSafeHomeUrl(chain.shortName, safeAddress, spaceId)
-    addNewSafeToUrlSpace(chain.chainId, safeAddress, getStepUpReturnUrl).then(({ spaceId, isStepUpPending }) => {
-      if (isStepUpPending) return
+    addNewSafeToUrlSpace(chain.chainId, safeAddress).then((spaceId) => {
       const redirect = getRedirect(chain.shortName, safeAddress, spaceId, router.query?.safeViewRedirectURL)
       if (typeof redirect !== 'string' || redirect.startsWith('/')) {
         router.push(redirect)

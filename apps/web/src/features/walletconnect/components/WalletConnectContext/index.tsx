@@ -7,17 +7,20 @@ import type { WalletKitTypes } from '@reown/walletkit'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useSafeWalletProvider from '@/services/safe-wallet-provider/useSafeWalletProvider'
 import { IS_PRODUCTION } from '@/config/constants'
-import { getEip155ChainId, getPeerName, stripEip155Prefix } from '../../services/utils'
+import { asError } from '@safe-global/utils/services/exceptions/utils'
+import { getEip155ChainId, getPeerName, isExpiredProposalError, stripEip155Prefix } from '../../services/utils'
 import { trackRequest } from '../../services/tracking'
 import { wcPopupStore } from '../../store/wcPopupStore'
 import type WalletConnectWallet from '../../services/WalletConnectWallet'
 import walletConnectInstance from '../../services/walletConnectInstance'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { useSafeAppSuggestion } from '../../hooks/useSafeAppSuggestion'
 import type { WalletConnectContextType, WcAutoApproveProps } from '../../types'
 import { WCLoadingState } from '../../types'
 
 enum Errors {
   WRONG_CHAIN = '%%dappName%% made a request on a different chain than the one you are connected to',
+  EXPIRED_PROPOSAL = 'This connection request has expired. Please start a new connection from the dApp.',
 }
 
 const WC_AUTO_APPROVE_KEY = 'wcAutoApprove'
@@ -45,6 +48,15 @@ export const WalletConnectContext = createContext<WalletConnectContextType>({
   setLoading: () => {},
   approveSession: () => Promise.resolve(),
   rejectSession: () => Promise.resolve(),
+  safeAppSuggestion: {
+    status: 'off',
+    safeApp: undefined,
+    isShown: false,
+    blocksAutoApprove: false,
+    remember: false,
+    setRemember: () => {},
+    rememberChoice: () => {},
+  },
 })
 
 export const WalletConnectProvider = ({ children }: { children: ReactNode }) => {
@@ -222,6 +234,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   // --- Proposals
   //
   const [sessionProposal, setSessionProposal] = useState<WalletKitTypes.SessionProposal | null>(null)
+  const safeAppSuggestion = useSafeAppSuggestion(sessionProposal)
 
   const approveSession = useCallback(async () => {
     if (!walletConnect || !sessionProposal) return
@@ -254,6 +267,10 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
       }
     } catch (e) {
       setLoading(null)
+      if (isExpiredProposalError(asError(e))) {
+        setSessionProposal(null)
+        throw new Error(Errors.EXPIRED_PROPOSAL)
+      }
       throw e
     }
 
@@ -262,14 +279,16 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
     setOpen(false)
   }, [walletConnect, sessionProposal, chainId, safeAddress, setAutoApprove, setOpen])
 
-  // Auto approve previously approved non-malicious dApps
+  // Auto approve previously approved non-malicious dApps, unless the user gets to choose the Safe App instead
+  const { blocksAutoApprove } = safeAppSuggestion
   useEffect(() => {
+    if (blocksAutoApprove) return
     if (sessionProposal && autoApprove[chainId]?.[sessionProposal.verifyContext.verified.origin]) {
       approveSession().catch((e) => {
         setError(e as Error)
       })
     }
-  }, [autoApprove, approveSession, sessionProposal, chainId])
+  }, [autoApprove, approveSession, sessionProposal, chainId, blocksAutoApprove])
 
   const rejectSession = useCallback(async () => {
     if (!walletConnect || !sessionProposal) return
@@ -280,6 +299,10 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
       await walletConnect.rejectSession(sessionProposal)
     } catch (e) {
       setLoading(null)
+      if (isExpiredProposalError(asError(e))) {
+        setSessionProposal(null)
+        throw new Error(Errors.EXPIRED_PROPOSAL)
+      }
       throw e
     }
 
@@ -292,6 +315,8 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
   useEffect(() => {
     return walletConnect?.onSessionPropose((proposalData) => {
       setLoading(null)
+      // A proposal that arrives after the pairing timeout must not stay hidden behind the timeout error
+      setError(null)
       setSessionProposal(proposalData)
     })
   }, [walletConnect])
@@ -310,6 +335,7 @@ export const WalletConnectProvider = ({ children }: { children: ReactNode }) => 
         sessionProposal,
         approveSession,
         rejectSession,
+        safeAppSuggestion,
       }}
     >
       {children}

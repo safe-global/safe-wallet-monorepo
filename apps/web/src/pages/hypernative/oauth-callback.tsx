@@ -1,13 +1,12 @@
-import type { NextPage } from 'next'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
-import { Typography } from '@/components/ui/typography'
-import { GradientCircularProgress } from '@/components/common/GradientCircularProgress'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { GradientCircularProgress } from '@safe-global/views/components/common/GradientCircularProgress'
 import { readPkce, clearPkce, useAuthToken, HYPERNATIVE_OAUTH_CONFIG, getRedirectUri } from '@/features/hypernative'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
-import InfoIcon from '@/public/images/notifications/info.svg'
-import CheckIcon from '@/public/images/common/check.svg'
+import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
+import CheckIcon from '@safe-global/views/assets/images/common/check.svg'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
 
@@ -27,7 +26,7 @@ import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
  * - This page exchanges code for token and notifies parent window
  * - Popup closes automatically after successful token exchange
  */
-const HypernativeOAuthCallback: NextPage = () => {
+const HypernativeOAuthCallback = () => {
   const router = useRouter()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [errorMessage, setErrorMessage] = useState<string>('')
@@ -105,7 +104,7 @@ const HypernativeOAuthCallback: NextPage = () => {
         }
 
         // Step 6: Store token in cookie
-        setToken(tokenResponse.access_token, tokenResponse.token_type, tokenResponse.expires_in)
+        setToken(tokenResponse)
 
         // Step 7: Clean up sessionStorage
         clearPkce()

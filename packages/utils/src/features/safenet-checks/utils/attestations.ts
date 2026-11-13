@@ -1,24 +1,15 @@
-import { CheckEventType, type AttestedCheckEvent, type NormalizedCheckEvent } from '../types'
+import { CheckEventType, type OracleAttestedEvent, type NormalizedCheckEvent } from '../types'
 import type { SafenetCheckSnapshot } from '../types/snapshot'
 
-const isAttested = (event: NormalizedCheckEvent): event is AttestedCheckEvent =>
-  event.type === CheckEventType.ORACLE_ATTESTED || event.type === CheckEventType.PLAIN_ATTESTED
-
-// The oracle family outranks the plain one because deriveCheckState reads the
-// oracle branch first: verifying a plain event while an oracle one exists would
-// answer a question the status machine never asks.
-const familyRank = (event: AttestedCheckEvent): number => (event.type === CheckEventType.ORACLE_ATTESTED ? 1 : 0)
+const isAttested = (event: NormalizedCheckEvent): event is OracleAttestedEvent =>
+  event.type === CheckEventType.ORACLE_ATTESTED
 
 /**
- * A check's attested events in verification order: oracle family first, newest
- * first inside each family. Newest first because a cross-epoch re-proposal is
- * the protocol's only retry — verifying the earliest event lets one invalid
- * attestation terminalize a check that a later valid one settles.
+ * Newest first: a cross-epoch re-proposal is the protocol's only retry, so an
+ * invalid earlier attestation must not terminalize a later valid check.
  */
-const attestationCandidates = (events: ReadonlyArray<NormalizedCheckEvent>): AttestedCheckEvent[] =>
-  events
-    .filter(isAttested)
-    .sort((a, b) => familyRank(b) - familyRank(a) || b.blockNumber - a.blockNumber || b.logIndex - a.logIndex)
+const attestationCandidates = (events: ReadonlyArray<NormalizedCheckEvent>): OracleAttestedEvent[] =>
+  events.filter(isAttested).sort((a, b) => b.blockNumber - a.blockNumber || b.logIndex - a.logIndex)
 
 /** The Safe a check is being viewed for. An attestation must be bound to it. */
 export type CheckTarget = {
@@ -39,7 +30,7 @@ export type CheckTarget = {
 export const bindAttestations = (
   events: ReadonlyArray<NormalizedCheckEvent>,
   target: CheckTarget,
-): { events: NormalizedCheckEvent[]; candidates: AttestedCheckEvent[] } => {
+): { events: NormalizedCheckEvent[]; candidates: OracleAttestedEvent[] } => {
   const safeAddress = target.safeAddress.toLowerCase()
   const bound = events.filter(
     (event) => !isAttested(event) || (event.chainId === target.chainId && event.safe.toLowerCase() === safeAddress),
@@ -52,7 +43,7 @@ export const bindAttestations = (
  * skips attestations that do not verify, so the verdict's own event is the one
  * matching the verified signature id — not simply the first attestation read.
  */
-export const verdictAttestation = (snapshot: SafenetCheckSnapshot): AttestedCheckEvent | undefined => {
+export const verdictAttestation = (snapshot: SafenetCheckSnapshot): OracleAttestedEvent | undefined => {
   const { signatureId } = snapshot.attestation
   if (signatureId === null) return undefined
   return attestationCandidates(snapshot.events).find((event) => event.signatureId === signatureId)

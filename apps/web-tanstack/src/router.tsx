@@ -41,16 +41,17 @@ import { Route as SettingsSetupRoute } from './routes/settings/setup'
 // Group C — /spaces/*
 import { Route as SpacesIndexRoute } from './routes/spaces'
 import { Route as SpacesAddressBookRoute } from './routes/spaces/address-book'
-import { Route as SpacesCreateSpaceRoute } from './routes/spaces/create-space'
 import { Route as SpacesMembersRoute } from './routes/spaces/members'
 import { Route as SpacesSafeAccountsRoute } from './routes/spaces/safe-accounts'
 import { Route as SpacesSecurityRoute } from './routes/spaces/security'
 import { Route as SpacesActivityRoute } from './routes/spaces/activity'
 import { Route as SpacesPoliciesRoute } from './routes/spaces/policies'
+import { Route as SpacesTransactionsRoute } from './routes/spaces/transactions'
 import { Route as SpacesPlansRoute } from './routes/spaces/plans'
 import { Route as SpacesSettingsRoute } from './routes/spaces/settings'
 import { Route as SpacesSettingsAboutRoute } from './routes/spaces/settings/about'
 import { Route as SpacesSettingsAccountRoute } from './routes/spaces/settings/account'
+import { Route as SpacesSettingsExperimentalRoute } from './routes/spaces/settings/experimental'
 import { Route as SpacesSettingsGeneralRoute } from './routes/spaces/settings/general'
 
 // Group D — /apps/*, /new-safe/*, /balances/*, /welcome/*
@@ -115,17 +116,18 @@ const routeTree = RootRoute.addChildren([
   // Group C
   SpacesIndexRoute,
   SpacesAddressBookRoute,
-  SpacesCreateSpaceRoute,
   SpacesMembersRoute,
   SpacesSafeAccountsRoute,
   SpacesSecurityRoute,
   SpacesActivityRoute,
   SpacesPoliciesRoute,
+  SpacesTransactionsRoute,
   SpacesPlansRoute,
   SpacesSettingsRoute,
   SpacesSettingsGeneralRoute,
   SpacesSettingsAboutRoute,
   SpacesSettingsAccountRoute,
+  SpacesSettingsExperimentalRoute,
   // Group D
   AppsIndexRoute,
   AppsBookmarkedRoute,

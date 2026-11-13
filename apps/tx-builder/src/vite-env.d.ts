@@ -5,6 +5,7 @@ interface ImportMetaEnv {
   readonly VITE_TENDERLY_PROJECT_NAME: string
   readonly VITE_TENDERLY_SIMULATE_ENDPOINT_URL: string
   readonly VITE_ETHERSCAN_API_KEY: string
+  readonly VITE_GATEWAY_URL?: string
   readonly BASE_URL: string
 }
 

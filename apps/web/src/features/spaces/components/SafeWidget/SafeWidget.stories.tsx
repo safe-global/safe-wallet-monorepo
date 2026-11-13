@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { ChevronRight, Plus, WalletCards } from 'lucide-react'
 import SafeWidget from './index'
-import { Button } from '@/components/ui/button'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 
 /**
  * SafeWidget - Compound component for Space dashboard widgets.
@@ -50,7 +50,7 @@ export const Assets: Story = {
         info="19,188.40 ETH"
         startNode={
           <Avatar>
-            <AvatarImage src="https://safe-transaction-assets.safe.global/chains/1/chain_logo.png" alt="Ether" />
+            <AvatarImage src="mock-assets/safe-transaction-assets.safe.global/chains/1/chain_logo.webp" alt="Ether" />
             <AvatarFallback>ETH</AvatarFallback>
           </Avatar>
         }
@@ -61,7 +61,10 @@ export const Assets: Story = {
         info="8,40213 GNO"
         startNode={
           <Avatar>
-            <AvatarImage src="https://safe-transaction-assets.safe.global/chains/100/chain_logo.png" alt="Gnosis" />
+            <AvatarImage
+              src="mock-assets/safe-transaction-assets.safe.global/chains/100/chain_logo.webp"
+              alt="Gnosis"
+            />
             <AvatarFallback>GNO</AvatarFallback>
           </Avatar>
         }
@@ -73,7 +76,7 @@ export const Assets: Story = {
         startNode={
           <Avatar>
             <AvatarImage
-              src="https://safe-transaction-assets.safe.global/tokens/logos/0x5aFE3855358E112B5647B952709E6165e1c1eEEe.png"
+              src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0x5aFE3855358E112B5647B952709E6165e1c1eEEe.webp"
               alt="SAFE"
             />
             <AvatarFallback className="bg-[#f0fdf4] text-xs font-semibold">SA</AvatarFallback>
@@ -146,7 +149,7 @@ export const WithoutActionAndFooter: Story = {
         info="19,188.40 ETH"
         startNode={
           <Avatar>
-            <AvatarImage src="https://safe-transaction-assets.safe.global/chains/1/chain_logo.png" alt="Ether" />
+            <AvatarImage src="mock-assets/safe-transaction-assets.safe.global/chains/1/chain_logo.webp" alt="Ether" />
             <AvatarFallback>ETH</AvatarFallback>
           </Avatar>
         }
@@ -157,7 +160,10 @@ export const WithoutActionAndFooter: Story = {
         info="8,40213 GNO"
         startNode={
           <Avatar>
-            <AvatarImage src="https://safe-transaction-assets.safe.global/chains/100/chain_logo.png" alt="Gnosis" />
+            <AvatarImage
+              src="mock-assets/safe-transaction-assets.safe.global/chains/100/chain_logo.webp"
+              alt="Gnosis"
+            />
             <AvatarFallback>GNO</AvatarFallback>
           </Avatar>
         }
@@ -169,7 +175,7 @@ export const WithoutActionAndFooter: Story = {
         startNode={
           <Avatar>
             <AvatarImage
-              src="https://safe-transaction-assets.safe.global/tokens/logos/0x5aFE3855358E112B5647B952709E6165e1c1eEEe.png"
+              src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0x5aFE3855358E112B5647B952709E6165e1c1eEEe.webp"
               alt="SAFE"
             />
             <AvatarFallback className="bg-[#f0fdf4] text-xs font-semibold">SA</AvatarFallback>

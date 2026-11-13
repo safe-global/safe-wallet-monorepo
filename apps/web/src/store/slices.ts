@@ -37,7 +37,7 @@ export * from './visitedSafesSlice'
 export * from './orderByPreferenceSlice'
 export * from './authSlice'
 export * from '@/features/hypernative/store'
-export * from '@/features/gtf/store'
+export * from '@/features/fee-payment/store'
 export * from '@/features/address-poisoning/store'
 export * from '@/features/feature-flag-overrides/store'
 export {
@@ -47,17 +47,12 @@ export {
   toggleGlobalSearch,
   selectGlobalSearchOpen,
 } from '@/features/global-search/store'
-export {
-  elevationListener,
-  stepUpSlice,
-  stepUpLeaving,
-  stepUpReturning,
-  stepUpSettled,
-  selectStepUpPhase,
-} from '@/features/oidc-auth/store'
+export { stepUpSlice } from '@/features/oidc-auth/store'
 export {
   spaceSafesEntitlementsListener,
   planChangeSyncListener,
+  checkoutTrackingListener,
+  workspaceTrackingListener,
   spaceSafesCacheListener,
   trialReminderListener,
   safeActionsModalSlice,

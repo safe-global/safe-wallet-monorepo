@@ -1,6 +1,7 @@
-import { type ReactElement, useEffect, useRef, useState } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { type ReactElement, useState } from 'react'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { trackEvent } from '@/services/analytics'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import type { SafeGrade } from '@/features/security/types'
@@ -42,15 +43,12 @@ const SecurityHubContent = (): ReactElement => {
     overviewMap,
   })
   const [gradeFilter, setGradeFilter] = useState<SafeGrade | null>(null)
-  const hasTrackedView = useRef(false)
-
   // Once per mount is once per space: the parent remounts this on every space switch.
-  useEffect(() => {
-    if (isLoadingSpacesSafes || hasTrackedView.current) return
-
-    hasTrackedView.current = true
-    trackEvent(SPACE_EVENTS.SECURITY_HUB_VIEWED, { [MixpanelEventParams.ACCOUNT_COUNT]: safes.length })
-  }, [isLoadingSpacesSafes, safes.length])
+  useTrackOnce(
+    SPACE_EVENTS.SECURITY_HUB_VIEWED,
+    { [MixpanelEventParams.ACCOUNT_COUNT]: safes.length },
+    !isLoadingSpacesSafes,
+  )
 
   const handleViewReport = (address: string, chainId: string) => {
     if (!isSameSelection(selectedSafe, address, chainId)) {

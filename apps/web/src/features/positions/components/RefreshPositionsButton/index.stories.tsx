@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import RefreshPositionsButton from './index'
 import { toBeHex } from 'ethers'
+import { createHandlers } from '@/stories/mocks'
 
 const SAFE_ADDRESS = toBeHex('0x1234', 20)
 
@@ -9,6 +10,7 @@ const meta: Meta<typeof RefreshPositionsButton> = {
   title: 'Features/Positions/RefreshPositionsButton',
   component: RefreshPositionsButton,
   parameters: {
+    msw: { handlers: createHandlers() },
     layout: 'centered',
     docs: {
       description: {

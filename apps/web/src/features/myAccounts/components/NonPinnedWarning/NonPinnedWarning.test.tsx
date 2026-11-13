@@ -77,6 +77,7 @@ describe('NonPinnedWarning', () => {
       expect.objectContaining({
         action: 'Show untrusted Safe warning',
       }),
+      undefined,
     )
   })
 

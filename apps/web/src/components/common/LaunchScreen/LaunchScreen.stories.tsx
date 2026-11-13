@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { http } from 'msw'
-import { withMockProvider } from '@/storybook/preview'
+import { withMockProvider } from '@/storybook/decorators'
 import LaunchScreen from './index'
 
 const meta = {
@@ -24,11 +24,3 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Default: Story = {}
-
-export const StepUpLeaving: Story = {
-  args: { stepUpCaption: 'Verifying your identity…' },
-}
-
-export const StepUpReturning: Story = {
-  args: { stepUpCaption: 'Finishing your request…' },
-}

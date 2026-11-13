@@ -1,4 +1,4 @@
-import TxCard from '@/components/tx-flow/common/TxCard'
+import TxCard from '@safe-global/views/components/tx-flow/common/TxCard'
 import TxLayout from '@/components/tx-flow/common/TxLayout'
 import { RiskConfirmation } from '@/components/tx-flow/features/RiskConfirmation'
 import GnosisPayExecutionForm from './GnosisPayExecutionForm'
@@ -24,7 +24,7 @@ const ExecuteGnosisPayModal = ({ gnosisPayTx }: { gnosisPayTx: GnosisPayTxItem }
 
   return (
     <TxCard>
-      <RiskConfirmation />
+      <RiskConfirmation subject="transaction" />
       <GnosisPayExecutionForm queuedGnosisPayTx={gnosisPayTx} />
     </TxCard>
   )

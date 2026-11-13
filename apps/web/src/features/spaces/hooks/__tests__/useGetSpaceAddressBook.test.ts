@@ -28,7 +28,7 @@ describe('useGetSpaceAddressBook', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockIsAuthenticated = true
-    mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({ currentData: undefined })
+    mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({ currentData: undefined, refetch: jest.fn() })
   })
 
   it('skips the query when the user is not authenticated', () => {
@@ -79,7 +79,7 @@ describe('useGetSpaceAddressBook', () => {
   it('returns the address book data when the query resolves', () => {
     mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
     const data = [{ address: '0xabc', name: 'Alice', chainIds: ['1'] }]
-    mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({ currentData: { data } })
+    mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({ currentData: { data }, refetch: jest.fn() })
 
     const { result } = renderHook(() => useGetSpaceAddressBook())
 
@@ -103,11 +103,15 @@ describe('useSpaceAddressBookState', () => {
   })
 
   it('reports the first load so callers can tell an empty book from an unloaded one', () => {
-    mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({ currentData: undefined, isLoading: true })
+    mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({
+      currentData: undefined,
+      isLoading: true,
+      refetch: jest.fn(),
+    })
 
     const { result } = renderHook(() => useSpaceAddressBookState())
 
-    expect(result.current).toEqual({ items: [], isLoading: true })
+    expect(result.current).toMatchObject({ items: [], isLoading: true })
   })
 
   it('reports a failed read rather than an empty book', () => {
@@ -115,19 +119,34 @@ describe('useSpaceAddressBookState', () => {
       currentData: undefined,
       isLoading: false,
       isError: true,
+      refetch: jest.fn(),
     })
 
     const { result } = renderHook(() => useSpaceAddressBookState())
 
-    expect(result.current).toEqual({ items: [], isLoading: false, isError: true })
+    expect(result.current).toMatchObject({ items: [], isLoading: false, isError: true })
+  })
+
+  it('exposes refetch so a failed read can be retried', () => {
+    const refetch = jest.fn()
+    mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({ currentData: undefined, isError: true, refetch })
+
+    const { result } = renderHook(() => useSpaceAddressBookState())
+    result.current.refetch()
+
+    expect(refetch).toHaveBeenCalled()
   })
 
   it('returns the loaded items once the query resolves', () => {
     const items = [{ address: '0x1', name: 'Treasury', chainIds: ['1'] }]
-    mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({ currentData: { data: items }, isLoading: false })
+    mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({
+      currentData: { data: items },
+      isLoading: false,
+      refetch: jest.fn(),
+    })
 
     const { result } = renderHook(() => useSpaceAddressBookState())
 
-    expect(result.current).toEqual({ items, isLoading: false })
+    expect(result.current).toMatchObject({ items, isLoading: false })
   })
 })

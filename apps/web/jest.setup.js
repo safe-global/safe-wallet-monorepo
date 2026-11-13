@@ -1,11 +1,15 @@
 // Used for __tests__/testing-library.js
 // Learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom'
+import { configure } from '@testing-library/react'
 import { server } from '@/tests/server'
 import { faker } from '@faker-js/faker'
 
 // Seed faker for deterministic test data
 faker.seed(123)
+
+// waitFor and findBy* give up after 1 s by default, which slow CI runners exceed
+configure({ asyncUtilTimeout: process.env.CI ? 3_000 : 1_000 })
 
 // jsdom lacks the Pointer Events API that Base UI components (shadcn/ui) rely on.
 // Polyfill only what's missing so interaction tests (e.g. clicking a Base UI Checkbox)
@@ -64,9 +68,6 @@ globalThis.BroadcastChannel = class BroadcastChannel {
   close() {}
 }
 
-// Set timezone to UTC for consistent date formatting across environments
-process.env.TZ = 'UTC'
-
 // Default-mock the Gnosis Pay barrel so any component using CheckWallet or the
 // tx-flow action slots in tests doesn't need to wire up useChains/wallet/web3
 // mocks. Use plain functions (not jest.fn) so `jest.resetAllMocks()` in test
@@ -114,6 +115,7 @@ jest.mock(
       addError: jest.fn(),
       setGlobalContextProperty: jest.fn(),
       getInitConfiguration: jest.fn(),
+      setTrackingConsent: jest.fn(),
     },
   }),
   { virtual: true },
@@ -156,7 +158,7 @@ Object.defineProperty = (obj, prop, desc) => {
 }
 
 beforeAll(() => {
-  server.listen()
+  server.listen({ onUnhandledRequest: 'error' })
 })
 
 afterEach(() => server.resetHandlers())

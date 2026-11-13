@@ -24,6 +24,40 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['spaces'],
       }),
+      addressBooksSetContactTagsV1: build.mutation<
+        AddressBooksSetContactTagsV1ApiResponse,
+        AddressBooksSetContactTagsV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/tags`,
+          method: 'PUT',
+          body: queryArg.setContactTagsDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      addressBooksCreateTagV1: build.mutation<AddressBooksCreateTagV1ApiResponse, AddressBooksCreateTagV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/tags`,
+          method: 'POST',
+          body: queryArg.createTagDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      addressBooksRenameTagV1: build.mutation<AddressBooksRenameTagV1ApiResponse, AddressBooksRenameTagV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/tags/${queryArg.tagId}`,
+          method: 'PATCH',
+          body: queryArg.renameTagDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
+      addressBooksDeleteTagV1: build.mutation<AddressBooksDeleteTagV1ApiResponse, AddressBooksDeleteTagV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/address-book/tags/${queryArg.tagId}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['spaces'],
+      }),
       addressBooksDeleteByAddressV1: build.mutation<
         AddressBooksDeleteByAddressV1ApiResponse,
         AddressBooksDeleteByAddressV1ApiArg
@@ -203,6 +237,17 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/counterfactual-safes` }),
         providesTags: ['spaces'],
       }),
+      policiesCreateConfigurationRequestV1: build.mutation<
+        PoliciesCreateConfigurationRequestV1ApiResponse,
+        PoliciesCreateConfigurationRequestV1ApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.spaceId}/chains/${queryArg.chainId}/safes/${queryArg.safeAddress}/policies/requests`,
+          method: 'POST',
+          body: queryArg.createPolicyConfigurationRequestDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
       spacePoliciesGetActivePoliciesV1: build.query<
         SpacePoliciesGetActivePoliciesV1ApiResponse,
         SpacePoliciesGetActivePoliciesV1ApiArg
@@ -225,6 +270,7 @@ const injectedRtkApi = api
           params: {
             types: queryArg.types,
             safes: queryArg.safes,
+            include_guard_installation: queryArg.includeGuardInstallation,
           },
         }),
         providesTags: ['spaces'],
@@ -246,6 +292,36 @@ export type AddressBooksUpsertAddressBookItemsV1ApiArg = {
   spaceId: string
   /** Address book items to create or update, including addresses and their labels */
   upsertAddressBookItemsDto: UpsertAddressBookItemsDto
+}
+export type AddressBooksSetContactTagsV1ApiResponse = /** status 200 Tags set successfully */ SpaceAddressBookDto
+export type AddressBooksSetContactTagsV1ApiArg = {
+  /** Space UUID containing the address book */
+  spaceId: string
+  /** The entries to tag, each with its full set of tag names */
+  setContactTagsDto: SetContactTagsDto
+}
+export type AddressBooksCreateTagV1ApiResponse = /** status 201 Tag created successfully */ SpaceAddressBookDto
+export type AddressBooksCreateTagV1ApiArg = {
+  /** Space UUID containing the address book */
+  spaceId: string
+  /** The tag name */
+  createTagDto: CreateTagDto
+}
+export type AddressBooksRenameTagV1ApiResponse = /** status 200 Tag renamed successfully */ SpaceAddressBookDto
+export type AddressBooksRenameTagV1ApiArg = {
+  /** Space UUID containing the address book */
+  spaceId: string
+  /** ID of the tag to rename */
+  tagId: number
+  /** The new tag name */
+  renameTagDto: RenameTagDto
+}
+export type AddressBooksDeleteTagV1ApiResponse = unknown
+export type AddressBooksDeleteTagV1ApiArg = {
+  /** Space UUID containing the address book */
+  spaceId: string
+  /** ID of the tag to delete */
+  tagId: number
 }
 export type AddressBooksDeleteByAddressV1ApiResponse = unknown
 export type AddressBooksDeleteByAddressV1ApiArg = {
@@ -420,6 +496,17 @@ export type SpaceCounterfactualSafesGetV1ApiArg = {
   /** Space UUID */
   spaceId: string
 }
+export type PoliciesCreateConfigurationRequestV1ApiResponse =
+  /** status 201  */ CreatePolicyConfigurationRequestResponse
+export type PoliciesCreateConfigurationRequestV1ApiArg = {
+  /** Space UUID the Safe belongs to */
+  spaceId: string
+  /** Chain ID where the Safe is deployed */
+  chainId: string
+  /** Safe contract address, must be registered to the Space */
+  safeAddress: string
+  createPolicyConfigurationRequestDto: CreatePolicyConfigurationRequestDto
+}
 export type SpacePoliciesGetActivePoliciesV1ApiResponse = /** status 200  */ ActivePolicyDto[]
 export type SpacePoliciesGetActivePoliciesV1ApiArg = {
   /** Space UUID */
@@ -429,19 +516,36 @@ export type SpacePoliciesGetActivePoliciesV1ApiArg = {
   /** Narrow the read to a subset of the Space's Safes, comma-separated as `{chainId}:{safeAddress}` */
   safes?: string
 }
-export type SpacePoliciesGetPendingPoliciesV1ApiResponse = /** status 200  */ PendingPolicyDto[]
+export type SpacePoliciesGetPendingPoliciesV1ApiResponse = /** status 200  */ (
+  | ({
+      kind: 'queued-transaction'
+    } & PendingPolicyDto)
+  | ({
+      kind: 'guard-installation'
+    } & PendingGuardInstallationDto)
+  | ({
+      kind: 'immediate-guard-policies'
+    } & PendingImmediateGuardPoliciesDto)
+  | ({
+      kind: 'delayed-guard-policies'
+    } & PendingDelayedGuardPoliciesDto)
+)[]
 export type SpacePoliciesGetPendingPoliciesV1ApiArg = {
   /** Space UUID */
   spaceId: string
-  /** The policy types to report, comma-separated. Only `spending-limit` yields pending items today; other types are accepted and return none. */
+  /** The policy types to report, comma-separated. `spending-limit` returns queued AllowanceModule changes. A guard type (`allow`, `deny`, `cosigner`, `erc20-transfer`, `multisend`, `native-transfer`) returns the delayed `SafePolicyGuard` configurations that may set a policy of that type. `proposer` and `recovery` return none. */
   types: string[]
   /** Narrow the read to a subset of the Space's Safes, comma-separated as `{chainId}:{safeAddress}` */
   safes?: string[]
+  /** Also report the queued `setGuard` and `setModuleGuard` calls that install, replace or remove a `SafePolicyGuard` on each Safe, as `guard-installation` items. */
+  includeGuardInstallation?: boolean
 }
 export type SpaceAddressBookItemDto = {
   name: string
   address: string
   chainIds: string[]
+  /** IDs of the workspace tags assigned to the contact */
+  tagIds: number[]
   /** Email or wallet address of the creator, "Unknown user" if the user has no display identity, or "Deleted user" */
   createdBy: string
   /** User ID of the creator */
@@ -453,18 +557,46 @@ export type SpaceAddressBookItemDto = {
   createdAt: string
   updatedAt: string
 }
+export type SpaceAddressBookTagDto = {
+  id: number
+  name: string
+  color: 'slate' | 'clay' | 'rose' | 'lilac' | 'iris' | 'cobalt' | 'sky' | 'lagoon'
+  /** Number of contacts that have this tag */
+  contactCount: number
+}
 export type SpaceAddressBookDto = {
   /** Space UUID */
   spaceUuid: string
   data: SpaceAddressBookItemDto[]
+  /** All tags defined in the workspace address book */
+  tags: SpaceAddressBookTagDto[]
 }
-export type AddressBookItem = {
+export type UpsertAddressBookItem = {
   name: string
   address: string
   chainIds: string[]
+  /** Tag names of the contact (replaces the current tags when provided; omit to leave them unchanged) */
+  tags?: string[]
 }
 export type UpsertAddressBookItemsDto = {
-  items: AddressBookItem[]
+  items: UpsertAddressBookItem[]
+}
+export type SetContactTagsItem = {
+  address: string
+  /** The full set of tag names for the contact. 'Workspace Safe' and 'Signer' aren't allowed, in any case */
+  tags: string[]
+}
+export type SetContactTagsDto = {
+  /** At most as many entries as the address book can hold, each address at most once */
+  items: SetContactTagsItem[]
+}
+export type CreateTagDto = {
+  /** 'Workspace Safe' and 'Signer' aren't allowed, in any case */
+  name: string
+}
+export type RenameTagDto = {
+  /** 'Workspace Safe' and 'Signer' aren't allowed, in any case */
+  name: string
 }
 export type AddressBookRequestItemDto = {
   id: number
@@ -526,6 +658,8 @@ export type GetSpaceResponse = {
   memberCount: number
   /** Total count of Safes in the space */
   safeCount: number
+  /** Experimental features this Workspace has opted into. */
+  experimentalFeatures: 'POLICY_RECIPIENT_ALLOWLIST'[]
 }
 export type UpdateSpaceResponse = {
   /** Space UUID */
@@ -534,6 +668,8 @@ export type UpdateSpaceResponse = {
 export type UpdateSpaceDto = {
   name?: string
   status?: 'ACTIVE'
+  /** Replaces the stored set; [] opts out of all. Omit to leave it unchanged. */
+  experimentalFeatures?: 'POLICY_RECIPIENT_ALLOWLIST'[]
 }
 export type SpaceAuditLogEntryDto = {
   /** Monotonic entry id (bigint serialized as string) */
@@ -556,6 +692,10 @@ export type SpaceAuditLogEntryDto = {
     | 'ADDRESS_BOOK_DELETED'
     | 'ADDRESS_BOOK_REQUEST_CREATED'
     | 'ADDRESS_BOOK_REQUEST_REJECTED'
+    | 'ADDRESS_BOOK_TAGS_UPDATED'
+    | 'ADDRESS_BOOK_TAG_CREATED'
+    | 'ADDRESS_BOOK_TAG_RENAMED'
+    | 'ADDRESS_BOOK_TAG_DELETED'
   actorUserId: number
   /** Resolved (and masked) display string of the acting user. */
   actor: string
@@ -579,6 +719,11 @@ export type SpaceAuditLogActorDto = {
 export type SpaceSafeDto = {
   chainId: string
   address: string
+}
+export type AddressBookItem = {
+  name: string
+  address: string
+  chainIds: string[]
 }
 export type CreateSpaceSafesDto = {
   safes: SpaceSafeDto[]
@@ -675,6 +820,27 @@ export type GetCounterfactualSafesResponse = {
     [key: string]: GetCounterfactualSafeItem[]
   }
 }
+export type CreatePolicyConfigurationRequestResponse = {
+  /** The stored configuration root */
+  root: string
+}
+export type PolicyConfigurationDto = {
+  /** Contract the guarded call targets */
+  target: string
+  /** 4-byte function selector */
+  selector: string
+  /** 0 = CALL, 1 = DELEGATECALL */
+  operation: 0 | 1
+  /** Policy contract to bind. The zero address removes the policy of this access. */
+  policy: string
+  /** Policy payload, abi-encoded as passed to the guard. At most 64 KiB (65,536 bytes). */
+  data: string
+}
+export type CreatePolicyConfigurationRequestDto = {
+  /** keccak256(abi.encode(Configuration[])), as requested on-chain */
+  root: string
+  configurations: PolicyConfigurationDto[]
+}
 export type ModuleEnforcementDto = {
   via: 'module'
   /** The module enforcing the policy */
@@ -690,9 +856,18 @@ export type GuardSlotsDto = {
   transactionGuard?: PolicyContractsDto
   moduleGuard?: PolicyContractsDto
 }
+export type PolicyAccessDto = {
+  /** The contract the governed calls target */
+  target: string
+  /** The 4-byte function selector of the governed calls */
+  selector: string
+  operation: 'CALL' | 'DELEGATECALL'
+}
 export type GuardEnforcementDto = {
   via: 'guard'
   guards: GuardSlotsDto
+  /** The calls the guard applies the policy to */
+  access: PolicyAccessDto
 }
 export type OffChainEnforcementDto = {
   /** Nothing on chain enforces the policy, so it is access rather than an audited restriction */
@@ -700,9 +875,40 @@ export type OffChainEnforcementDto = {
   /** Where the grant is held */
   source: 'delegates'
 }
+export type NativeTokenMetadataDto = {
+  address: string
+  decimals: number
+  logoUri: string
+  name: string
+  symbol: string
+  /** Whether the Transaction Service lists the token in one of its imported token lists */
+  trusted: boolean
+  type: 'NATIVE_TOKEN'
+}
+export type Erc20TokenMetadataDto = {
+  address: string
+  decimals: number
+  logoUri: string
+  name: string
+  symbol: string
+  /** Whether the Transaction Service lists the token in one of its imported token lists */
+  trusted: boolean
+  type: 'ERC20'
+}
 export type SpendingLimitAllowanceDto = {
   /** The token the limit applies to; zero address for native */
   tokenAddress: string
+  /** Metadata of `tokenAddress`; null when it could not be resolved */
+  tokenMetadata:
+    | (
+        | ({
+            type: 'NATIVE_TOKEN'
+          } & NativeTokenMetadataDto)
+        | ({
+            type: 'ERC20'
+          } & Erc20TokenMetadataDto)
+      )
+    | null
   /** Per-window ceiling, in base units */
   amount: string
   /** Spent in the current window, in base units */
@@ -747,6 +953,33 @@ export type ProposerDto = {
 export type ProposerPolicyDataDto = {
   proposers: ProposerDto[]
 }
+export type Erc20TransferRecipientDto = {
+  /** An address the Safe can send this token to */
+  account: string
+  permission: 'ONCE' | 'ALWAYS'
+}
+export type Erc20TransferPolicyDataDto = {
+  /** The ERC20 token the allowlist applies to */
+  tokenAddress: string
+  /** Metadata of `tokenAddress`; null when it could not be resolved */
+  tokenMetadata:
+    | (
+        | ({
+            type: 'NATIVE_TOKEN'
+          } & NativeTokenMetadataDto)
+        | ({
+            type: 'ERC20'
+          } & Erc20TokenMetadataDto)
+      )
+    | null
+  /** The recipients of the token transfers the policy permits */
+  recipients: Erc20TransferRecipientDto[]
+}
+export type CosignerPolicyDataDto = {
+  /** The cosigner the policy enforces. */
+  cosignerAddress: string
+}
+export type StatelessPolicyDataDto = {}
 export type SafeRefDto = {
   chainId: string
   address: string
@@ -761,6 +994,7 @@ export type ActivePolicyDto = {
     | 'allow'
     | 'native-transfer'
     | 'deny'
+    | 'multisend'
   enforcement:
     | ({
         via: 'module'
@@ -773,7 +1007,12 @@ export type ActivePolicyDto = {
       } & OffChainEnforcementDto)
   /** False when the policy is configured but not enforced */
   enabled: boolean
-  data: SpendingLimitPolicyDataDto | ProposerPolicyDataDto
+  data:
+    | SpendingLimitPolicyDataDto
+    | ProposerPolicyDataDto
+    | Erc20TransferPolicyDataDto
+    | CosignerPolicyDataDto
+    | StatelessPolicyDataDto
   /** The Safe the policy is in effect on */
   safe: SafeRefDto
 }
@@ -797,6 +1036,17 @@ export type SetAllowanceChangeDto = {
   delegate: string
   /** The token the limit applies to; zero address for native */
   token: string
+  /** Metadata of `token`; null when it could not be resolved */
+  tokenMetadata:
+    | (
+        | ({
+            type: 'NATIVE_TOKEN'
+          } & NativeTokenMetadataDto)
+        | ({
+            type: 'ERC20'
+          } & Erc20TokenMetadataDto)
+      )
+    | null
   /** Per-window ceiling, in base units */
   amount: string
   /** Window length in minutes; 0 never resets */
@@ -806,11 +1056,33 @@ export type ResetAllowanceChangeDto = {
   kind: 'reset-allowance'
   delegate: string
   token: string
+  /** Metadata of `token`; null when it could not be resolved */
+  tokenMetadata:
+    | (
+        | ({
+            type: 'NATIVE_TOKEN'
+          } & NativeTokenMetadataDto)
+        | ({
+            type: 'ERC20'
+          } & Erc20TokenMetadataDto)
+      )
+    | null
 }
 export type DeleteAllowanceChangeDto = {
   kind: 'delete-allowance'
   delegate: string
   token: string
+  /** Metadata of `token`; null when it could not be resolved */
+  tokenMetadata:
+    | (
+        | ({
+            type: 'NATIVE_TOKEN'
+          } & NativeTokenMetadataDto)
+        | ({
+            type: 'ERC20'
+          } & Erc20TokenMetadataDto)
+      )
+    | null
 }
 export type PendingSpendingLimitDataDto = {
   /** The AllowanceModule deployment holding this state */
@@ -848,14 +1120,98 @@ export type PendingPolicyDto = {
   confirmationsRequired: number
   /** Unix seconds the transaction was proposed at */
   proposedAt: number
+  /** The owner or delegate who proposed the transaction, if known */
+  proposer: string | null
   data: PendingSpendingLimitDataDto
   /** The Safe the change is queued on */
   safe: SafeRefDto
+}
+export type SetGuardChangeDto = {
+  kind: 'set-guard'
+  /** The transaction guard before this call; null for none */
+  from: string | null
+  /** The transaction guard after this call; null removes it */
+  to: string | null
+}
+export type SetModuleGuardChangeDto = {
+  kind: 'set-module-guard'
+  /** The module guard before this call; null for none */
+  from: string | null
+  /** The module guard after this call; null removes it */
+  to: string | null
+}
+export type PendingTransactionDto = {
+  safeTxHash: string
+  nonce: number
+  confirmations: number
+  confirmationsRequired: number
+  /** Unix seconds the transaction was proposed at */
+  proposedAt: number
+  /** The owner or delegate who proposed the transaction, if known */
+  proposer: string | null
+}
+export type PendingGuardInstallationDto = {
+  kind: 'guard-installation'
+  status: 'in-signing' | 'ready'
+  /** The Safe the transaction is queued on */
+  safe: SafeRefDto
+  /** The guard installation calls of the transaction, in calldata order */
+  changes: (
+    | ({
+        kind: 'set-guard'
+      } & SetGuardChangeDto)
+    | ({
+        kind: 'set-module-guard'
+      } & SetModuleGuardChangeDto)
+  )[]
+  transaction: PendingTransactionDto
+}
+export type PendingImmediateGuardPoliciesDto = {
+  kind: 'immediate-guard-policies'
+  status: 'in-signing' | 'ready'
+  /** The Safe the transaction is queued on */
+  safe: SafeRefDto
+  /** The SafePolicyGuard the policies are bound on */
+  guard: string
+  /** The configurations configureImmediately binds */
+  configurations: PolicyConfigurationDto[]
+  transaction: PendingTransactionDto
+}
+export type PendingDelayedGuardPoliciesDto = {
+  kind: 'delayed-guard-policies'
+  /** draft: stored in CGW, no transaction in signing yet. configuration-in-signing: requestConfiguration is queued. pending-application: requested, waiting for or past readyAt. application-in-signing: applyConfiguration is queued and collecting signatures. application-ready: applyConfiguration is signed and can execute. expired: the application window has closed. */
+  status:
+    | 'draft'
+    | 'configuration-in-signing'
+    | 'pending-application'
+    | 'application-in-signing'
+    | 'application-ready'
+    | 'expired'
+  /** The Safe the configuration belongs to */
+  safe: SafeRefDto
+  /** The SafePolicyGuard of the root; null for a draft */
+  guard: string | null
+  /** keccak256(abi.encode(Configuration[])) */
+  root: string
+  /** The configurations behind the root; null when CGW does not know them */
+  configurations: PolicyConfigurationDto[] | null
+  /** Unix seconds applyConfiguration is valid from; null until the root is requested on-chain */
+  readyAt: number | null
+  /** Unix seconds the application window closes; null until the root is requested on-chain */
+  expiresAt: number | null
+  /** The queued request or apply transaction, if any */
+  transaction: PendingTransactionDto | null
+  /** Unix seconds the change was first seen: when CGW stored its configurations, else when its queued transaction was proposed. Null for a root requested outside the wallet. */
+  createdAt: number | null
 }
 export const {
   useAddressBooksGetAddressBookItemsV1Query,
   useLazyAddressBooksGetAddressBookItemsV1Query,
   useAddressBooksUpsertAddressBookItemsV1Mutation,
+  useAddressBooksSetContactTagsV1Mutation,
+  useAddressBooksCreateTagV1Mutation,
+  useAddressBooksRenameTagV1Mutation,
+  useAddressBooksDeleteTagV1Mutation,
   useAddressBooksDeleteByAddressV1Mutation,
   useAddressBookRequestsGetPendingRequestsV1Query,
   useLazyAddressBookRequestsGetPendingRequestsV1Query,
@@ -893,6 +1249,7 @@ export const {
   useMembersRemoveUserV1Mutation,
   useSpaceCounterfactualSafesGetV1Query,
   useLazySpaceCounterfactualSafesGetV1Query,
+  usePoliciesCreateConfigurationRequestV1Mutation,
   useSpacePoliciesGetActivePoliciesV1Query,
   useLazySpacePoliciesGetActivePoliciesV1Query,
   useSpacePoliciesGetPendingPoliciesV1Query,

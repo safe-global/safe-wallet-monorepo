@@ -1,5 +1,4 @@
 import { renderHook, act } from '@testing-library/react'
-import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
 import { ELEVATION_REQUIRED_ERROR } from '@/features/oidc-auth/utils/elevation'
 import { Errors } from '@/services/exceptions'
 import { useAddSafeToSpace } from '../useAddSafeToSpace'
@@ -10,9 +9,14 @@ const mockUseSafeInfo = jest.fn()
 const mockUseCurrentChain = jest.fn()
 const mockLogError = jest.fn()
 const mockRouter = { pathname: '/home', query: {} as Record<string, string | string[]>, replace: jest.fn() }
+const mockUseSafeLinkQuery = jest.fn()
 
 jest.mock('next/router', () => ({
   useRouter: () => mockRouter,
+}))
+
+jest.mock('@/hooks/useSafeLinkQuery', () => ({
+  useSafeLinkQuery: () => mockUseSafeLinkQuery(),
 }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
@@ -53,6 +57,7 @@ describe('useAddSafeToSpace', () => {
     mockAddSafeToSpace.mockResolvedValue({ data: {} })
     mockRouter.pathname = '/home'
     mockRouter.query = { safe: 'sep:0xSafe' }
+    mockUseSafeLinkQuery.mockReturnValue({ safe: 'sep:0xSafe' })
   })
 
   it('calls the mutation with correct args and returns true on success', async () => {
@@ -80,7 +85,7 @@ describe('useAddSafeToSpace', () => {
     expect(success).toBe(true)
   })
 
-  it('refreshes the entitlements of all Workspaces when the seats of the plan are spent', async () => {
+  it('warns and refreshes the entitlements of all Workspaces when the seats of the plan are spent', async () => {
     mockAddSafeToSpace.mockResolvedValue({
       error: { status: 402, data: { code: 'QUOTA_EXCEEDED', feature: 'safe_seats', quota: 3, used: 3 } },
     })
@@ -92,10 +97,19 @@ describe('useAddSafeToSpace', () => {
     })
 
     expect(mockDispatch).toHaveBeenCalledWith({ type: 'cgwApi/invalidateTags', payload: ['entitlements'] })
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'notifications/add',
+      payload: {
+        message:
+          'Failed to add Safe to Workspace. Your plan covers 3 Safe accounts and this Workspace already holds 3. Remove one to add another, or upgrade your plan.',
+        variant: 'warning',
+        groupKey: 'add-safe-to-workspace-error',
+      },
+    })
     expect(success).toBe(false)
   })
 
-  it('does not refresh the entitlements for an error that is not about seats', async () => {
+  it('does not refresh the entitlements for an error that is not a quota refusal', async () => {
     mockAddSafeToSpace.mockResolvedValue({ error: { status: 500, data: { message: 'Server error' } } })
     const { result } = renderHook(() => useAddSafeToSpace())
 
@@ -323,79 +337,17 @@ describe('useAddSafeToSpace', () => {
     })
   })
 
-  describe('step-up return URL', () => {
-    const alphaUuid = '0b7a1c2e-4f3d-4e5a-9b6c-7d8e9f0a1b2c'
-    const alphaReturnUrl = `/home?safe=sep%3A0xSafe&spaceId=${alphaUuid}`
+  it('returns false without an error notification when the user cancels the verification', async () => {
+    mockAddSafeToSpace.mockResolvedValue({ error: { status: 403, data: { message: ELEVATION_REQUIRED_ERROR } } })
+    const { result } = renderHook(() => useAddSafeToSpace())
 
-    it('returns to the current Safe page in the chosen Workspace and keeps it when a step-up is required', async () => {
-      mockRouter.pathname = '/transactions/history'
-      mockAddSafeToSpace.mockResolvedValue({ error: { status: 403, data: { message: ELEVATION_REQUIRED_ERROR } } })
-      const { result } = renderHook(() => useAddSafeToSpace())
-
-      await act(async () => {
-        await result.current.addToSpace(alphaUuid)
-      })
-
-      const expectedUrl = `/transactions/history?safe=sep%3A0xSafe&spaceId=${alphaUuid}`
-      expect(mockDispatch).toHaveBeenCalledWith(stepUpReturnUrlSet(expectedUrl))
-      expect(mockDispatch).not.toHaveBeenCalledWith(stepUpReturnUrlCleared(expectedUrl))
-      expect(mockDispatch.mock.invocationCallOrder[0]).toBeLessThan(mockAddSafeToSpace.mock.invocationCallOrder[0])
+    let added: boolean | undefined
+    await act(async () => {
+      added = await result.current.addToSpace('space-1')
     })
 
-    it('replaces a spaceId already in the URL', async () => {
-      mockRouter.query = { safe: 'sep:0xSafe', spaceId: '42' }
-      const { result } = renderHook(() => useAddSafeToSpace())
-
-      await act(async () => {
-        await result.current.addToSpace(alphaUuid)
-      })
-
-      expect(mockDispatch).toHaveBeenCalledWith(stepUpReturnUrlSet(alphaReturnUrl))
-    })
-
-    it('clears the return URL when the Safe is added', async () => {
-      const { result } = renderHook(() => useAddSafeToSpace())
-
-      await act(async () => {
-        await result.current.addToSpace(alphaUuid)
-      })
-
-      expect(mockDispatch).toHaveBeenCalledWith(stepUpReturnUrlSet(alphaReturnUrl))
-      expect(mockDispatch).toHaveBeenCalledWith(stepUpReturnUrlCleared(alphaReturnUrl))
-    })
-
-    it('clears the return URL when the API returns an error', async () => {
-      mockAddSafeToSpace.mockResolvedValue({ error: { status: 500, data: {} } })
-      const { result } = renderHook(() => useAddSafeToSpace())
-
-      await act(async () => {
-        await result.current.addToSpace(alphaUuid)
-      })
-
-      expect(mockDispatch).toHaveBeenCalledWith(stepUpReturnUrlCleared(alphaReturnUrl))
-    })
-
-    it('clears the return URL when the mutation throws', async () => {
-      mockAddSafeToSpace.mockRejectedValue(new Error('Network error'))
-      const { result } = renderHook(() => useAddSafeToSpace())
-
-      await act(async () => {
-        await result.current.addToSpace(alphaUuid)
-      })
-
-      expect(mockDispatch).toHaveBeenCalledWith(stepUpReturnUrlCleared(alphaReturnUrl))
-    })
-
-    it('does not set a return URL when the Safe cannot be added', async () => {
-      mockUseCurrentChain.mockReturnValue(null)
-      const { result } = renderHook(() => useAddSafeToSpace())
-
-      await act(async () => {
-        await result.current.addToSpace(alphaUuid)
-      })
-
-      expect(mockDispatch).not.toHaveBeenCalled()
-    })
+    expect(added).toBe(false)
+    expect(mockDispatch).not.toHaveBeenCalled()
   })
 
   describe('Workspace in the URL', () => {
@@ -432,11 +384,23 @@ describe('useAddSafeToSpace', () => {
       )
     })
 
+    it('opens the Safe of the page in the Workspace when the router query is still empty', async () => {
+      mockRouter.query = {}
+
+      await addToAlpha()
+
+      expect(mockRouter.replace).toHaveBeenCalledWith(
+        { pathname: '/home', query: { safe: 'sep:0xSafe', spaceId: alphaUuid } },
+        undefined,
+        { shallow: true },
+      )
+    })
+
     it.each([
       ['the API returns an error', () => mockAddSafeToSpace.mockResolvedValue({ error: { status: 500, data: {} } })],
       ['the mutation throws', () => mockAddSafeToSpace.mockRejectedValue(new Error('Network error'))],
       [
-        'a step-up is required',
+        'the user cancels the verification',
         () =>
           mockAddSafeToSpace.mockResolvedValue({ error: { status: 403, data: { message: ELEVATION_REQUIRED_ERROR } } }),
       ],

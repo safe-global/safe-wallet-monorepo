@@ -74,6 +74,34 @@ describe('mergeMonotonic', () => {
     })
   })
 
+  describe('an open dispute', () => {
+    it.each([CheckStatus.UNAVAILABLE, CheckStatus.SUBMITTED, CheckStatus.IN_PROGRESS])(
+      'advances %s → DISPUTED',
+      (pinned) => {
+        expect(mergeMonotonic(pinned, CheckStatus.DISPUTED)).toBe(CheckStatus.DISPUTED)
+      },
+    )
+
+    it.each([CheckStatus.MALICIOUS, CheckStatus.TIMED_OUT, CheckStatus.BENIGN])(
+      'advances DISPUTED → %s once the dispute ends',
+      (next) => {
+        expect(mergeMonotonic(CheckStatus.DISPUTED, next)).toBe(next)
+      },
+    )
+
+    it.each([CheckStatus.MALICIOUS, CheckStatus.TIMED_OUT, CheckStatus.BENIGN, CheckStatus.VERIFICATION_FAILED])(
+      'never walks %s back to DISPUTED',
+      (pinned) => {
+        expect(mergeMonotonic(pinned, CheckStatus.DISPUTED)).toBe(pinned)
+      },
+    )
+
+    it('does not regress DISPUTED to IN_PROGRESS or SUBMITTED', () => {
+      expect(mergeMonotonic(CheckStatus.DISPUTED, CheckStatus.IN_PROGRESS)).toBe(CheckStatus.DISPUTED)
+      expect(mergeMonotonic(CheckStatus.DISPUTED, CheckStatus.SUBMITTED)).toBe(CheckStatus.DISPUTED)
+    })
+  })
+
   describe('a transient UNAVAILABLE never clobbers a known status', () => {
     it('keeps every real pinned status when next is UNAVAILABLE', () => {
       for (const pinned of ALL) {

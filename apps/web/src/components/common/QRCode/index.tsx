@@ -1,6 +1,6 @@
-import QRCodeReact from 'qrcode.react'
+import { QRCodeCanvas } from 'qrcode.react'
 import { lightPalette, darkPalette } from '@safe-global/theme/palettes'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import type { ReactElement } from 'react'
 
@@ -11,7 +11,7 @@ const QRCode = ({ value, size }: { value?: string; size: number }): ReactElement
   const palette = isDarkMode ? darkPalette : lightPalette
 
   return value ? (
-    <QRCodeReact
+    <QRCodeCanvas
       value={value}
       size={size}
       role="img"

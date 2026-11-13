@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { DrawerSection } from '@/components/common/Drawer'
-import type { PolicySpender } from '../../../types'
+import type { PolicySpender } from '@safe-global/views/features/spaces/components/Policies/types'
 import SpenderCard from './SpenderCard'
 
 export type SpendingLimitsProps = {

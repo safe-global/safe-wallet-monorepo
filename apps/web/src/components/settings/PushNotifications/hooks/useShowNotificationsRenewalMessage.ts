@@ -8,7 +8,10 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useIsNotificationsRenewalEnabled, useNotificationsTokenVersion } from './useNotificationsTokenVersion'
 import { useNotificationsRenewal } from './useNotificationsRenewal'
 import { NotificationsTokenVersion } from '@/services/push-notifications/preferences'
-import { RENEWAL_MESSAGE, RENEWAL_NOTIFICATION_KEY } from '../constants'
+import {
+  RENEWAL_MESSAGE,
+  RENEWAL_NOTIFICATION_KEY,
+} from '@safe-global/views/components/settings/PushNotifications/constants'
 
 /**
  * Hook to show a notification to renew the notifications token if needed.

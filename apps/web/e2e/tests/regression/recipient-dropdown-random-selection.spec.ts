@@ -8,19 +8,18 @@
  * recipient field to that entry's address — repeated across every entry so a
  * stale / wrong-value regression on re-selection is caught.
  *
- * Deterministic setup (ports Cypress `spaces_address_book_import.cy.js`'s
- * `setupSpacesAuth`): a SiWE session is faked via localStorage + a mocked
+ * Deterministic setup: a SiWE session is faked via localStorage + a mocked
  * `/v1/auth/me` (without that mock the session-expiry guard's probe 403s against
  * staging and clears the session — which is exactly why a plain seed fails). The
  * spaces endpoints are mocked to inject a workspace and its contacts; local
- * contacts are seeded via localStorage. The wallet (OWNER_4, owner of the Safe)
+ * contacts are seeded via localStorage. The wallet (Alice, owner of the Safe)
  * is connected so "New transaction" is enabled. No real sign-in, no real
  * workspace required.
  *
  * The per-contact assertion is data-driven: it reads each rendered option's
  * address from the dropdown and verifies the field matches after selection.
  *
- * Run: yarn workspace @safe-global/web pw:test recipient-dropdown-random-selection
+ * Run: SAFE_E2E_SPECS=recipient-dropdown-random-selection yarn workspace @safe-global/web e2e:env playwright
  * Tag: @regression — runs under the chromium project, on demand.
  */
 import { test, expect } from '../../src/fixtures/test.fixture'
@@ -29,7 +28,6 @@ import { HomePage } from '../../src/pages/home.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
 import type { Page } from '@playwright/test'
 import {
-  SAFES,
   CHAIN_IDS,
   LS_NAMESPACE,
   DROPDOWN_TEST_SPACE,
@@ -69,9 +67,9 @@ const WORKSPACE_ADDRESS_BOOK = {
 /**
  * Fakes an authenticated Spaces session and injects a deterministic workspace +
  * contacts by mocking the auth/users/spaces GET endpoints. Everything else
- * (chains, safe info) hits the real CGW. Mirrors Cypress `setupSpacesAuth`.
+ * (chains, safe info) hits the real CGW.
  */
-async function mockSpacesSession(page: Page): Promise<void> {
+async function mockSpacesSession(page: Page, safe: string): Promise<void> {
   await page.addInitScript(
     ({ ns, spaceId }) => {
       window.localStorage.setItem(
@@ -101,7 +99,7 @@ async function mockSpacesSession(page: Page): Promise<void> {
   )
   await page.route(/\/v1\/spaces\/[^/]+\/members(\?.*)?$/, (route) => route.fulfill({ json: SPACE.members }))
   await page.route(/\/v1\/spaces\/[^/]+\/safes(\?.*)?$/, (route) =>
-    route.fulfill({ json: { safes: { [CHAIN_IDS.sepolia]: [SAFES.SEP_OWNER_4_SAFE.split(':')[1]] } } }),
+    route.fulfill({ json: { safes: { [CHAIN_IDS.sepolia]: [safe.split(':')[1]] } } }),
   )
   await page.route(/\/v1\/spaces\/[^/]+(\?.*)?$/, (route) => route.fulfill({ json: SPACE }))
   await page.route(/\/v1\/spaces(\?.*)?$/, (route) => route.fulfill({ json: [SPACE] }))
@@ -111,17 +109,18 @@ test.describe('Recipient dropdown — selection updates the field', { tag: '@reg
   test('should set the recipient field to the chosen address for every workspace and local contact', async ({
     safePage,
     walletPage,
-    credentials,
+    owners,
+    safes,
   }) => {
-    await mockSpacesSession(safePage)
+    await mockSpacesSession(safePage, safes.transferForm)
 
     const home = new HomePage(safePage)
     const sendTokens = new SendTokensPage(safePage)
 
     // Open the Safe and connect the owner wallet (enables "New transaction").
-    await home.goto(SAFES.SEP_OWNER_4_SAFE, DROPDOWN_TEST_SPACE.id)
+    await home.goto(safes.transferForm, DROPDOWN_TEST_SPACE.id)
     await walletPage.acceptCookies()
-    await walletPage.connectWallet(credentials.OWNER_4_PRIVATE_KEY)
+    await walletPage.connectWallet(owners.alice.privateKey)
     await expect(walletPage.accountCenter).toBeVisible()
 
     // Open the Send-tokens flow.

@@ -12,11 +12,13 @@ import { SWAP_EVENTS } from './events/swaps'
 import { EXPLORE_POSSIBLE_EVENTS, OVERVIEW_EVENTS } from './events/overview'
 import { NESTED_SAFE_EVENTS } from './events/nested-safes'
 import { SAFE_SHIELD_EVENTS } from './events/safe-shield'
+import { SAFENET_EVENTS } from './events/safenet'
 import { HYPERNATIVE_EVENTS } from './events/hypernative'
 import { TX_EVENTS } from './events/transactions'
 import { SPACE_EVENTS } from './events/spaces'
 import { POLICY_EVENTS } from './events/policies'
 import { SAFE_PRO_EVENTS } from './events/safe-pro'
+import { ADDRESS_POISONING_EVENTS } from './events/addressPoisoning'
 
 // If an event is mapped here, it will be tracked in Mixpanel
 export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
@@ -31,6 +33,8 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [STAKE_EVENTS.STAKE_VIEWED.action]: MixpanelEvent.STAKE_VIEWED,
   [EARN_EVENTS.EARN_VIEWED.action]: MixpanelEvent.EARN_VIEWED,
   [WALLETCONNECT_EVENTS.CONNECTED.action]: MixpanelEvent.WC_CONNECTED,
+  [WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTED.action]: MixpanelEvent.WC_SAFE_APP_SUGGESTED,
+  [WALLETCONNECT_EVENTS.SAFE_APP_SUGGESTION_RESULT.action]: MixpanelEvent.WC_SAFE_APP_SUGGESTION_RESULT,
   [TX_LIST_EVENTS.CSV_EXPORT_CLICKED.action]: MixpanelEvent.CSV_TX_EXPORT_CLICKED,
   [TX_LIST_EVENTS.CSV_EXPORT_SUBMITTED.action]: MixpanelEvent.CSV_TX_EXPORT_SUBMITTED,
   [SWAP_EVENTS.OPEN_SWAPS.action]: MixpanelEvent.NATIVE_SWAP_VIEWED,
@@ -61,6 +65,8 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [SAFE_SHIELD_EVENTS.CONTRACT_DECODED.action]: MixpanelEvent.TRANSACTION_CONTRACT_DECODED,
   [SAFE_SHIELD_EVENTS.THREAT_ANALYZED.action]: MixpanelEvent.TRANSACTION_THREAT_ANALYZED,
   [SAFE_SHIELD_EVENTS.SIMULATED.action]: MixpanelEvent.TRANSACTION_SIMULATED,
+  [SAFENET_EVENTS.SUBMITTED.action]: MixpanelEvent.TRANSACTION_SAFENET_SUBMITTED,
+  [SAFENET_EVENTS.CHECKED.action]: MixpanelEvent.TRANSACTION_SAFENET_CHECKED,
   [TX_EVENTS.EXECUTE.action]: MixpanelEvent.TRANSACTION_EXECUTED,
   [TX_EVENTS.EXECUTE_VIA_PARENT.action]: MixpanelEvent.TRANSACTION_EXECUTED_VIA_PARENT,
   [TX_EVENTS.EXECUTE_IN_PARENT.action]: MixpanelEvent.TRANSACTION_EXECUTED_IN_PARENT,
@@ -92,6 +98,7 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [SPACE_EVENTS.WORKSPACE_SAFE_UNLINKED.action]: MixpanelEvent.WORKSPACE_SAFE_UNLINKED,
   [SPACE_EVENTS.ACCOUNTS_WIDGET_CLICKED.action]: MixpanelEvent.ACCOUNTS_WIDGET_CLICKED,
   [SPACE_EVENTS.PENDING_TX_WIDGET_CLICKED.action]: MixpanelEvent.PENDING_TX_WIDGET_CLICKED,
+  [SAFE_PRO_EVENTS.PLANS_CLICKED.action]: MixpanelEvent.SAFE_PRO_PLANS_CLICKED,
   [SPACE_EVENTS.WALLET_SWITCHED.action]: MixpanelEvent.WALLET_SWITCHED,
   [SPACE_EVENTS.WALLET_DISCONNECTED.action]: MixpanelEvent.WALLET_DISCONNECTED,
   [SPACE_EVENTS.WORKSPACE_CREATE_STARTED.action]: MixpanelEvent.WORKSPACE_CREATE_STARTED,
@@ -140,6 +147,9 @@ export const GA_TO_MIXPANEL_MAPPING: Record<string, string> = {
   [SAFE_PRO_EVENTS.FREE_ACCESS_REMINDER_VIEWED.action]: MixpanelEvent.FREE_ACCESS_REMINDER_VIEWED,
   [SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED.action]: MixpanelEvent.WORKSPACE_LOCKED_VIEWED,
   [SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED.action]: MixpanelEvent.UPGRADE_PROMPT_VIEWED,
+  [ADDRESS_POISONING_EVENTS.WARNING_SHOWN.action]: MixpanelEvent.LOOKALIKE_ADDRESS_WARNING_SHOWN,
+  [ADDRESS_POISONING_EVENTS.WARNING_CONTINUED.action]: MixpanelEvent.LOOKALIKE_ADDRESS_WARNING_CONTINUED,
+  [ADDRESS_POISONING_EVENTS.WARNING_DISMISSED.action]: MixpanelEvent.LOOKALIKE_ADDRESS_WARNING_DISMISSED,
 }
 
 // Maps GA labels (lowercase) to Mixpanel properties (Title Case)

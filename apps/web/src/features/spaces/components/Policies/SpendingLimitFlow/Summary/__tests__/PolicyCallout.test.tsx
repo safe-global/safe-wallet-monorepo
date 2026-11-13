@@ -1,11 +1,11 @@
 import { render, screen } from '@/tests/test-utils'
 import PolicyCallout from '../PolicyCallout'
-import { CALLOUT_DESCRIPTION_SINGULAR } from '../constants'
+import { CALLOUT_DESCRIPTION_SINGULAR } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
 import {
   limitSummaryBuilder,
   spendingLimitSummaryBuilder,
   spenderSummaryBuilder,
-} from '../SpendingLimitSummary.fixtures'
+} from '../SpendingLimitSummary.testData'
 
 describe('PolicyCallout', () => {
   it('renders the plain-language title and description for the policy', () => {

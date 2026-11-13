@@ -26,7 +26,7 @@ interface ReviewExecuteFooterProps {
   activeSigner: Signer | undefined
   executionMethod: ExecutionMethod
   isPaidFromSafe: boolean
-  isGtfEnabled: boolean
+  isPayFromSafeEnabled: boolean
   detailedExecutionInfo?: MultisigExecutionDetails
   totalFee: string
   isLoadingFees: boolean
@@ -46,7 +46,7 @@ export function ReviewExecuteFooter({
   activeSigner,
   executionMethod,
   isPaidFromSafe,
-  isGtfEnabled,
+  isPayFromSafeEnabled,
   detailedExecutionInfo,
   totalFee,
   isLoadingFees,
@@ -86,7 +86,7 @@ export function ReviewExecuteFooter({
           isPaidFromSafe={isPaidFromSafe}
         />
 
-        {isGtfEnabled && (
+        {isPayFromSafeEnabled && (
           <FeeRow
             label={
               <Text color="$textSecondaryLight" fontSize="$4">

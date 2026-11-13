@@ -5,15 +5,7 @@ const REPO_ROOT = path.resolve(__dirname, '../../../..')
 const WEB_ROOT = path.resolve(__dirname, '../..')
 const MANIFEST = 'apps/web/scripts/github/ci-env-manifest.json'
 
-const WORKFLOWS = [
-  'web-deploy-dev.yml',
-  'web-tag-release.yml',
-  'web-nextjs-bundle-analysis.yml',
-  'web-e2e-smoke.yml',
-  'web-e2e-full-ondemand.yml',
-  'web-e2e-hp-ondemand.yml',
-  'web-argos-e2e.yml',
-]
+const WORKFLOWS = ['web-deploy-dev.yml', 'web-tag-release.yml', 'web-nextjs-bundle-analysis.yml']
 
 const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'])
 const IGNORED_DIRS = new Set(['node_modules', 'dist', 'build', '.next', '__tests__', '__mocks__'])
@@ -153,7 +145,7 @@ describe('CI build env consistency', () => {
       const actual = buildStepSecrets(workflow)
       for (const [name, secret] of Object.entries(expected)) {
         if (actual.get(name) !== secret) {
-          problems.push(`${workflow} must pass \`${name}: \${{ secrets.${secret} }}\` on its build/cypress step`)
+          problems.push(`${workflow} must pass \`${name}: \${{ secrets.${secret} }}\` on its build step`)
         }
       }
       for (const [name, secret] of actual) {

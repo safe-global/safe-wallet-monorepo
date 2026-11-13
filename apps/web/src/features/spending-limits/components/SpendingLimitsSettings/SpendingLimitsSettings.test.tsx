@@ -13,9 +13,10 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 jest.mock('../../hooks/useIsSpendingLimitSupported', () => ({ __esModule: true, default: () => true }))
 
-const gate = (mustUpgradeToSafePro: boolean, isLoading = false) => ({
+const gate = (mustUpgradeToSafePro: boolean, isLoading = false, showProTag = false) => ({
   mustUpgradeToSafePro,
   isLoading,
+  showProTag,
   upgradeHref: '/spaces/plans',
 })
 
@@ -31,6 +32,15 @@ describe('SpendingLimitsSettings', () => {
     expect(mockUsePlanGate).toHaveBeenCalledWith(FEATURES.SPENDING_LIMIT_GATING)
     expect(screen.getByTestId('new-spending-limit')).toBeInTheDocument()
     expect(screen.queryByTestId('safe-pro-lock')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('pro-tag')).not.toBeInTheDocument()
+  })
+
+  it('marks the button with the Pro tag when the plan gate asks for it', () => {
+    mockUsePlanGate.mockReturnValue(gate(false, false, true))
+
+    render(<SpendingLimitsSettings />)
+
+    expect(screen.getByTestId('new-spending-limit')).toContainElement(screen.getByTestId('pro-tag'))
   })
 
   it('replaces the button with the Safe Pro lock while the plan gate blocks it', () => {
@@ -39,6 +49,7 @@ describe('SpendingLimitsSettings', () => {
     render(<SpendingLimitsSettings />)
 
     expect(screen.queryByTestId('new-spending-limit')).not.toBeInTheDocument()
+    expect(screen.getByTestId('safe-pro-lock')).toHaveTextContent('Adding spending limits requires Safe Pro')
     expect(screen.getByTestId('safe-pro-lock')).toHaveTextContent('Existing ones stay active.')
     expect(screen.getByRole('link', { name: 'Explore Safe Pro' })).toHaveAttribute('href', '/spaces/plans')
   })

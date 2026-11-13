@@ -1,35 +1,54 @@
 import type { ReactElement } from 'react'
 import { AuditRow, type ActionType } from '@/components/common/AuditLog'
-import ExternalLink from '@/components/common/ExternalLink'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { useChain } from '@/hooks/useChains'
 import {
   CheckStatus,
-  SAFENET_EXPLORER_URL,
-  verdictAttestation,
   type PublicCheckStatus,
+  type SafenetCheckSnapshot,
 } from '@safe-global/utils/features/safenet-checks'
-import { useSafenetDisplayStatus } from '../useSafenetDisplayStatus'
-import { STATUS_PRESENTATION } from '../statusPresentation'
-import { getExplorerLink } from '@safe-global/utils/utils/gateway'
+import { useSafenetDisplayStatus, type ShownUnavailableReason } from '../useSafenetDisplayStatus'
+import {
+  STATUS_PRESENTATION,
+  UNAVAILABLE_PRESENTATION,
+  WARNING_RISK_LABEL,
+  getSafenetExplorerUrl,
+} from '../statusPresentation'
+import { isWarningRisk, summariseRejection } from '../summariseRejection'
+import { SAFENET_EXPLORER_LINK_LABEL } from './SafenetLinks'
 
-const STEP_ICON: Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, ActionType> = {
+type VerdictStatus = Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>
+
+const STEP_ICON: Record<VerdictStatus, ActionType> = {
   [CheckStatus.SUBMITTED]: 'pending',
   [CheckStatus.IN_PROGRESS]: 'pending',
   [CheckStatus.BENIGN]: 'confirmed',
   [CheckStatus.MALICIOUS]: 'expired',
+  [CheckStatus.DISPUTED]: 'pending',
   [CheckStatus.TIMED_OUT]: 'expired',
 }
 
+/** Settled or contested checks name the explorer page as the actor; a check still running has nothing to link. */
+const EXPLORER_LINKED: ReadonlyArray<VerdictStatus> = [CheckStatus.MALICIOUS, CheckStatus.DISPUTED, CheckStatus.BENIGN]
+
 // Dark mode only — in light mode every status follows the sibling rows' default color.
-const DARK_STEP_COLOR: Record<Exclude<PublicCheckStatus, CheckStatus.UNAVAILABLE>, string> = {
+const DARK_STEP_COLOR: Record<VerdictStatus, string> = {
   [CheckStatus.SUBMITTED]: 'var(--color-text-secondary)',
   [CheckStatus.IN_PROGRESS]: 'var(--color-info-main)',
   [CheckStatus.BENIGN]: 'var(--color-primary-main)',
   [CheckStatus.MALICIOUS]: 'var(--color-error-main)',
+  [CheckStatus.DISPUTED]: 'var(--color-warning-main)',
   [CheckStatus.TIMED_OUT]: 'var(--color-warning-main)',
 }
 
+const DARK_WARNING_RISK_COLOR = 'var(--color-warning-main)'
+
+// Neutral in dark mode; light mode keeps the sibling rows' default color.
+const UNAVAILABLE_STEP_COLOR = 'var(--color-text-secondary)'
+
+// The row appears only once the chain read resolves; the entrance animation
+// softens the late insert instead of popping it in one frame.
+const STEP_ENTRANCE = 'animate-in fade-in slide-in-from-top-1 duration-300'
 export type SafenetAuditRowProps = {
   safeTxHash: string | undefined
   /** The Safe's home chain id — the Safenet explorer indexes checks by it. */
@@ -39,14 +58,82 @@ export type SafenetAuditRowProps = {
   isLast?: boolean
 }
 
-/**
- * Safenet step in the transaction audit log: "Simulating / No issues found /
- * Risk detected · By Safenet", where "Safenet" links the attestation
- * transaction once the check is verified. Renders nothing until a check has
- * been observed — most transactions never had one. Dated from the attested
- * block on the Safenet chain; the row stays in lifecycle position, so its
- * date may read later than Executed below it.
- */
+export type SafenetAuditRowViewProps = {
+  publicStatus: VerdictStatus
+  snapshot: SafenetCheckSnapshot
+  safeTxHash: string
+  chainId: string
+  timestampMs?: number | null
+  isLast?: boolean
+}
+
+/** Safenet audit-log step, dated from the attested or deadline block — can read later than Executed. */
+export const SafenetAuditRowView = ({
+  publicStatus,
+  snapshot,
+  safeTxHash,
+  chainId,
+  isLast,
+}: SafenetAuditRowViewProps): ReactElement => {
+  const isDarkMode = useDarkMode()
+  const isWarning = isWarningRisk(publicStatus, summariseRejection(snapshot.events))
+  const label = isWarning ? WARNING_RISK_LABEL : STATUS_PRESENTATION[publicStatus].label
+  const darkColor = isWarning ? DARK_WARNING_RISK_COLOR : DARK_STEP_COLOR[publicStatus]
+
+  const actor = EXPLORER_LINKED.includes(publicStatus) ? (
+    <ExternalLink
+      data-testid="safenet-explorer-link"
+      href={getSafenetExplorerUrl(chainId, safeTxHash)}
+      aria-label={SAFENET_EXPLORER_LINK_LABEL}
+      noIcon
+    >
+      Safenet
+    </ExternalLink>
+  ) : (
+    'Safenet'
+  )
+
+  return (
+    <div className={STEP_ENTRANCE}>
+      <AuditRow
+        label={label}
+        actionType={STEP_ICON[publicStatus]}
+        iconColor={isDarkMode ? darkColor : undefined}
+        actor={actor}
+        isLast={isLast}
+        // Null while running or when the header read failed — column stays empty.
+        timestamp={snapshot.attestedAtMs ?? snapshot.timedOutAtMs ?? null}
+      />
+    </div>
+  )
+}
+
+export type SafenetUnavailableAuditRowViewProps = {
+  reason: ShownUnavailableReason
+  isLast?: boolean
+}
+
+/** Audit-log step for a check that could not be read: no verdict, no date, no link. */
+export const SafenetUnavailableAuditRowView = ({
+  reason,
+  isLast,
+}: SafenetUnavailableAuditRowViewProps): ReactElement => {
+  const isDarkMode = useDarkMode()
+
+  return (
+    <div className={STEP_ENTRANCE}>
+      <AuditRow
+        label={UNAVAILABLE_PRESENTATION[reason].label}
+        actionType="pending"
+        iconColor={isDarkMode ? UNAVAILABLE_STEP_COLOR : undefined}
+        actor="Safenet"
+        isLast={isLast}
+      />
+    </div>
+  )
+}
+
+/** Renders nothing until a check is observed or its read fails — most transactions never had one. */
 export const SafenetAuditRow = ({
   safeTxHash,
   chainId,
@@ -54,49 +141,20 @@ export const SafenetAuditRow = ({
   isLast,
 }: SafenetAuditRowProps): ReactElement | null => {
   const display = useSafenetDisplayStatus(safeTxHash, timestampMs)
-  // The Safenet chain (the chain the attestation landed on), not the Safe's.
-  const safenetChain = useChain(display?.snapshot.chainId ?? '')
-  const isDarkMode = useDarkMode()
-
   if (!safeTxHash || !display) return null
-  const { publicStatus, snapshot } = display
-
-  // Point at the transaction that carried the attestation this verdict came
-  // from, on the Safenet chain's block explorer. The Safenet explorer's hash
-  // route is the fallback when the chain config is unavailable.
-  const attested = verdictAttestation(snapshot)
-  const attestationTxLink =
-    attested && safenetChain ? getExplorerLink(attested.transactionHash, safenetChain.blockExplorerUriTemplate) : null
-  const href = attestationTxLink?.href ?? `${SAFENET_EXPLORER_URL}/#/safeTx?chainId=${chainId}&safeTxHash=${safeTxHash}`
-
-  // A session-pinned BENIGN outlives the read that earned it, so the snapshot
-  // beside it may carry no attestation. Present the proof link only when the
-  // snapshot still carries one; the generic explorer route is not the proof.
-  const isVerified = publicStatus === CheckStatus.BENIGN && attested !== undefined
+  if (display.publicStatus === CheckStatus.UNAVAILABLE) {
+    return <SafenetUnavailableAuditRowView reason={display.unavailableReason} isLast={isLast} />
+  }
 
   return (
-    // The row appears only once the chain read resolves; the entrance
-    // animation softens the late insert instead of popping it in one frame.
-    <div className="animate-in fade-in slide-in-from-top-1 duration-300">
-      <AuditRow
-        label={STATUS_PRESENTATION[publicStatus].label}
-        actionType={STEP_ICON[publicStatus]}
-        iconColor={isDarkMode ? DARK_STEP_COLOR[publicStatus] : undefined}
-        actor={
-          // Theme-default link color, matching the sibling rows.
-          isVerified ? (
-            <ExternalLink data-testid="safenet-attestation-link" href={href} noIcon>
-              Safenet
-            </ExternalLink>
-          ) : (
-            'Safenet'
-          )
-        }
-        isLast={isLast}
-        // Null while running or when the header read failed — column stays empty.
-        timestamp={snapshot.attestedAtMs ?? null}
-      />
-    </div>
+    <SafenetAuditRowView
+      publicStatus={display.publicStatus}
+      snapshot={display.snapshot}
+      safeTxHash={safeTxHash}
+      chainId={chainId}
+      timestampMs={timestampMs}
+      isLast={isLast}
+    />
   )
 }
 

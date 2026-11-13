@@ -12,7 +12,7 @@ import { createContext, useCallback, useContext, useState } from 'react'
 import type { ReactNode, ReactElement, SetStateAction, Dispatch, ComponentType } from 'react'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
-import { useImmediatelyExecutable, useValidateNonce } from '@/components/tx/shared/hooks'
+import { useAlreadySigned, useImmediatelyExecutable, useValidateNonce } from '@/components/tx/shared/hooks'
 import { useAppSelector } from '@/store'
 import { selectSettings } from '@/store/settingsSlice'
 import {
@@ -32,9 +32,11 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
-import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
+import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
+import { isMultisigDetailedExecutionInfo, isOneSignatureShort } from '@/utils/transaction-guards'
 import type { GasPayer } from '@/utils/gasPayment'
+import { isSafeSigner, isSmartContractWallet } from '@/utils/wallets'
+import useAsync from '@safe-global/utils/hooks/useAsync'
 
 export type TxFlowContextType<T extends unknown = any> = {
   step: number
@@ -51,6 +53,7 @@ export type TxFlowContextType<T extends unknown = any> = {
     hideNonce?: boolean
     fixedNonce?: boolean
     hideProgress?: boolean
+    hideBack?: boolean
     isReplacement?: boolean
     isMessage?: boolean
   }
@@ -68,6 +71,9 @@ export type TxFlowContextType<T extends unknown = any> = {
   canExecute: boolean
   shouldExecute: boolean
   setShouldExecute: Dispatch<SetStateAction<boolean>>
+  isLastSignature: boolean
+  willSignBeforeExecute: boolean
+  continueToExecute: (txId: string) => void
 
   isSubmitLoading: boolean
   setIsSubmitLoading: Dispatch<SetStateAction<boolean>>
@@ -112,6 +118,9 @@ export const initialContext: TxFlowContextType = {
   canExecute: false,
   shouldExecute: false,
   setShouldExecute: () => {},
+  isLastSignature: false,
+  willSignBeforeExecute: false,
+  continueToExecute: () => {},
 
   isSubmitLoading: false,
   setIsSubmitLoading: () => {},
@@ -150,6 +159,7 @@ export type TxFlowProviderProps<T extends unknown> = {
   txLayoutProps?: TxFlowContextType['txLayoutProps']
   isBatch?: TxFlowContextType['isBatch']
   isBatchable?: TxFlowContextType['isBatchable']
+  onContinueToExecute?: (txId: string) => void
 }
 
 const TxFlowProvider = <T extends unknown>({
@@ -159,7 +169,7 @@ const TxFlowProvider = <T extends unknown>({
   nextStep,
   prevStep,
   progress = 0,
-  txId,
+  txId: initialTxId,
   txNonce,
   isExecutable = false,
   onlyExecute = initialContext.onlyExecute,
@@ -167,6 +177,7 @@ const TxFlowProvider = <T extends unknown>({
   isRejection = initialContext.isRejection,
   isBatch = initialContext.isBatch,
   isBatchable = initialContext.isBatchable,
+  onContinueToExecute,
 }: TxFlowProviderProps<T>): ReactElement => {
   const signer = useSigner()
   const isSafeOwner = useIsSafeOwner()
@@ -185,11 +196,13 @@ const TxFlowProvider = <T extends unknown>({
   const [txLayoutProps, setTxLayoutProps] = useState<TxFlowContextType['txLayoutProps']>(defaultTxLayoutProps)
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const isCounterfactualSafe = useIsCounterfactualSafe()
+  const [signedTxId, setSignedTxId] = useState<string>()
+  const txId = initialTxId ?? signedTxId
   const [txDetails, , txDetailsLoading] = useTxDetails(txId)
   const { needsRiskConfirmation, isRiskConfirmed } = useSafeShield()
   const isUntrustedSafeBlocked = needsRiskConfirmation && !isRiskConfirmed
 
-  const isCreation = !txId
+  const isCreation = !initialTxId
   const isNewExecutableTx = useImmediatelyExecutable() && isCreation
 
   const isProposing = !!isProposer && !isSafeOwner && isCreation
@@ -203,18 +216,48 @@ const TxFlowProvider = <T extends unknown>({
   const canExecuteThroughRole = !!allowingRole || (!!mostLikelyRole && !isSafeOwner)
   const preferThroughRole = canExecuteThroughRole && !isSafeOwner // execute through role if a non-owner role member wallet is connected
 
+  const signerChainId = signer?.chainId
+  const signerAddress = signer?.address
+  const viaSafe = !!signer && isSafeSigner(signer)
+  const [isSmartContractSigner = false] = useAsync(
+    () =>
+      signerChainId && signerAddress && !viaSafe ? isSmartContractWallet(signerChainId, signerAddress) : undefined,
+    [signerChainId, signerAddress, viaSafe],
+  )
+  const signatureCount = safeTx?.signatures.size ?? 0
+
+  // The last signer of an m/n Safe executes directly, with the implicit executor approval
+  const canApproveByExecuting = safe.threshold > 1 && !viaSafe
+
+  // On-chain signatures only count once indexed, so these signers can only execute fully signed txs
+  const isAwaitingOnChainSignatures =
+    (viaSafe || isSmartContractSigner) && !canApproveByExecuting && signatureCount < safe.threshold
+
   // If checkbox is checked and the transaction is executable, execute it, otherwise sign it
-  const canExecute = isCorrectNonce && (isExecutable || isNewExecutableTx)
+  const canExecute = isCorrectNonce && (isExecutable || isNewExecutableTx) && !isAwaitingOnChainSignatures
   const willExecute = (onlyExecute || shouldExecute) && canExecute && !preferThroughRole
   const willExecuteThroughRole =
     (onlyExecute || shouldExecute) && canExecuteThroughRole && (!canExecute || preferThroughRole)
+
+  const hasSigned = useAlreadySigned(safeTx)
+  const isLastSignature =
+    canExecute && !isProposing && !hasSigned && isOneSignatureShort(signatureCount, safe.threshold)
+  const willSignBeforeExecute = isLastSignature && !canApproveByExecuting
+
+  const continueToExecute = useCallback(
+    (txId: string) => {
+      setSignedTxId(txId)
+      onContinueToExecute?.(txId)
+    },
+    [onContinueToExecute],
+  )
 
   const updateTxLayoutProps = useCallback((props: TxFlowContextType['txLayoutProps']) => {
     setTxLayoutProps({ ...defaultTxLayoutProps, ...props })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
+  const isPayFromSafeChain = useHasFeature(FEATURES.GTF) ?? false
 
   const trackTxEvent = useCallback(
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {
@@ -224,10 +267,10 @@ const TxFlowProvider = <T extends unknown>({
         details && isMultisigDetailedExecutionInfo(details.detailedExecutionInfo)
           ? details.detailedExecutionInfo
           : undefined
-      const gasPaymentSource = !isGtfChain
+      const gasPaymentSource = !isPayFromSafeChain
         ? undefined
         : exec &&
-            isGtfSafePaid({
+            isPaidFromSafe({
               gasPrice: exec.gasPrice,
               baseGas: exec.baseGas,
               refundReceiver: exec.refundReceiver?.value,
@@ -240,7 +283,7 @@ const TxFlowProvider = <T extends unknown>({
       // Track tx event
       trackTxEvents(
         details,
-        !!isCreation,
+        isCreation && !signedTxId,
         isExecuted,
         isRoleExecution,
         isProposerCreation,
@@ -252,7 +295,18 @@ const TxFlowProvider = <T extends unknown>({
         isExecuted ? gasPaymentOption : undefined,
       )
     },
-    [chainId, isCreation, trigger, signer?.isSafe, txOrigin, data, safe.threshold, isGtfChain, gasPaymentOption],
+    [
+      chainId,
+      isCreation,
+      signedTxId,
+      trigger,
+      signer?.isSafe,
+      txOrigin,
+      data,
+      safe.threshold,
+      isPayFromSafeChain,
+      gasPaymentOption,
+    ],
   )
 
   const value = {
@@ -277,6 +331,9 @@ const TxFlowProvider = <T extends unknown>({
     willExecute,
     shouldExecute,
     setShouldExecute,
+    isLastSignature,
+    willSignBeforeExecute,
+    continueToExecute,
 
     isSubmitLoading,
     setIsSubmitLoading,

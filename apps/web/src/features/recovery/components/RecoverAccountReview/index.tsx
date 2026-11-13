@@ -1,9 +1,9 @@
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { Button } from '@/components/ui/button'
-import { Typography } from '@/components/ui/typography'
-import { Separator } from '@/components/ui/separator'
-import { Spinner } from '@/components/ui/spinner'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { useContext, useEffect, useState } from 'react'
 import type { ReactElement } from 'react'
 
@@ -12,8 +12,8 @@ import { getRecoveryProposalTransactions } from '../../services/transaction'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import TxCheckError from '@/components/tx/TxCheckError'
 import TxSubmitError from '@/components/tx/TxSubmitError'
-import ConfirmationTitle, { ConfirmationTitleTypes } from '@/components/tx/shared/ConfirmationTitle'
-import TxCard, { TxCardActions } from '@/components/tx-flow/common/TxCard'
+import ConfirmationTitle, { ConfirmationTitleTypes } from '@safe-global/views/components/tx/shared/ConfirmationTitle'
+import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import CheckWallet from '@/components/common/CheckWallet'
 import { dispatchRecoveryProposal } from '../../services/recovery-sender'
@@ -25,7 +25,7 @@ import useOnboard from '@/hooks/wallets/useOnboard'
 import { TxModalContext } from '@/components/tx-flow'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { trackError, Errors } from '@/services/exceptions'
-import { getPeriod } from '@safe-global/utils/utils/date'
+import { getDetailedPeriod } from '@safe-global/utils/utils/date'
 import useRecovery from '../../hooks/useRecovery'
 import { useIsValidRecoveryExecTransactionFromModule } from '../../hooks/useIsValidRecoveryExecution'
 import { isWalletRejection } from '@/utils/wallets'
@@ -60,7 +60,7 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
   const [data] = useRecovery()
   const recovery = data && selectDelayModifierByRecoverer(data, wallet?.address ?? '')
   const [, executionValidationError] = useIsValidRecoveryExecTransactionFromModule(recovery?.address, safeTx)
-  const [gasPrice] = useGasPrice()
+  const [gasPrice, gasPriceError] = useGasPrice()
   const chain = useCurrentChain()
 
   const [txPreview] = useTxPreview(safeTx?.data)
@@ -81,11 +81,15 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
     promise.then(setSafeTx).catch(setSafeTxError)
   }, [newThreshold, newOwners, safe, setSafeTx, setSafeTxError])
 
+  const submitContext =
+    recovery && onboard && wallet && safeTx && gasPrice ? { recovery, wallet, safeTx, gasPrice } : undefined
+
   // On modal submit
   const onSubmit = async () => {
-    if (!recovery || !onboard || !wallet || !safeTx || !gasPrice) {
+    if (!submitContext) {
       return
     }
+    const { recovery, wallet, safeTx, gasPrice } = submitContext
 
     setIsSubmittable(false)
     setSubmitError(undefined)
@@ -94,10 +98,10 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
     const isEIP1559 = chain && hasFeature(chain, FEATURES.EIP1559)
     const overrides = isEIP1559
       ? {
-          maxFeePerGas: gasPrice?.maxFeePerGas?.toString(),
-          maxPriorityFeePerGas: gasPrice?.maxPriorityFeePerGas?.toString(),
+          maxFeePerGas: gasPrice.maxFeePerGas?.toString(),
+          maxPriorityFeePerGas: gasPrice.maxPriorityFeePerGas?.toString(),
         }
-      : { gasPrice: gasPrice?.maxFeePerGas?.toString() }
+      : { gasPrice: gasPrice.maxFeePerGas?.toString() }
 
     try {
       await dispatchRecoveryProposal({
@@ -124,7 +128,7 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
     setTxFlow(undefined)
   }
 
-  const submitDisabled = !safeTx || !isSubmittable || !recovery
+  const submitDisabled = !submitContext || !isSubmittable
 
   return (
     <>
@@ -159,6 +163,8 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
 
         {safeTxError && <TxCheckError error={safeTxError} />}
 
+        {gasPriceError && <ErrorMessage error={gasPriceError}>Couldn&apos;t load the gas price</ErrorMessage>}
+
         {executionValidationError && <TxCheckError error={executionValidationError} />}
 
         {submitError && <TxSubmitError error={submitError} />}
@@ -168,8 +174,10 @@ function RecoverAccountReview({ threshold, owners }: RecoverAccountReviewProps):
         {recovery?.delay !== undefined && (
           <ErrorMessage level="info">
             Recovery will be{' '}
-            {recovery.delay === 0n ? 'immediately possible' : `possible in ${getPeriod(Number(recovery.delay))}`} after
-            this transaction is executed.
+            {recovery.delay === 0n
+              ? 'immediately possible'
+              : `possible in ${getDetailedPeriod(Number(recovery.delay))}`}{' '}
+            after this transaction is executed.
           </ErrorMessage>
         )}
 

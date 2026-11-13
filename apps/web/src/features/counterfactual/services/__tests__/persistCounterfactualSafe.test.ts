@@ -397,7 +397,7 @@ describe('persistCounterfactualSafe', () => {
     if (!result.ok) expect(result.error.message).toBe(getGenericErrorWithStatus(500))
   })
 
-  it('translates the gateway elevation marker instead of putting it in front of the user', async () => {
+  it('rolls back the user-level Safe and asks for the verification when the user cancels it', async () => {
     const dispatch = jest.fn((action) => {
       if (action.type === 'space-create-thunk') {
         return { error: { status: 403, data: { message: ELEVATION_REQUIRED_ERROR, statusCode: 403 } } }
@@ -417,6 +417,7 @@ describe('persistCounterfactualSafe', () => {
       expect(result.error.message).not.toContain(ELEVATION_REQUIRED_ERROR)
       expect(result.error.message).toBe(ELEVATION_REQUIRED_MESSAGE)
     }
+    expect(dispatch).toHaveBeenCalledWith({ type: 'user-delete-thunk' })
   })
 
   it('keeps the user-level safe and shows the backend message as a toast when the space POST fails with a 400 (stale-snapshot limit)', async () => {
@@ -436,7 +437,7 @@ describe('persistCounterfactualSafe', () => {
     expect(userDeleteInitiate).not.toHaveBeenCalled()
     expect(replayImpl).toHaveBeenCalled()
     expect(showNotificationImpl).toHaveBeenCalledWith(
-      expect.objectContaining({ variant: 'info', groupKey: 'cf-safe-space-limit', message: backendMessage }),
+      expect.objectContaining({ variant: 'warning', groupKey: 'cf-safe-space-limit', message: backendMessage }),
     )
     expect(result.ok).toBe(true)
   })
@@ -461,7 +462,7 @@ describe('persistCounterfactualSafe', () => {
     })
     expect(replayImpl).not.toHaveBeenCalled()
     expect(showNotificationImpl).toHaveBeenCalledWith(
-      expect.objectContaining({ variant: 'info', groupKey: 'cf-safe-space-limit', message: backendMessage }),
+      expect.objectContaining({ variant: 'warning', groupKey: 'cf-safe-space-limit', message: backendMessage }),
     )
     expect(result).toEqual({ ok: false, error: expect.any(Error) })
   })
@@ -567,7 +568,7 @@ describe('persistCounterfactualSafe', () => {
     expect(result.ok).toBe(true)
   })
 
-  it('skips the space POST and shows an info toast when the space is already at the safe limit', async () => {
+  it('skips the space POST and shows a warning toast when the space is already at the safe limit', async () => {
     const dispatch = jest.fn((action) => ({ ...action })) as unknown as AppDispatch
 
     const result = await persistCounterfactualSafe({
@@ -583,7 +584,7 @@ describe('persistCounterfactualSafe', () => {
     expect(userDeleteInitiate).not.toHaveBeenCalled()
     expect(replayImpl).toHaveBeenCalled()
     expect(showNotificationImpl).toHaveBeenCalledWith(
-      expect.objectContaining({ variant: 'info', groupKey: 'cf-safe-space-limit' }),
+      expect.objectContaining({ variant: 'warning', groupKey: 'cf-safe-space-limit' }),
     )
     expect(result.ok).toBe(true)
   })
@@ -620,7 +621,7 @@ describe('persistCounterfactualSafe', () => {
     expect(replayImpl).toHaveBeenCalled()
     expect(showNotificationImpl).toHaveBeenCalledWith(
       expect.objectContaining({
-        variant: 'info',
+        variant: 'warning',
         groupKey: 'cf-safe-space-limit',
         message:
           "Safe created in My accounts. The Workspace is at its limit of 20 Safe accounts, so it wasn't added there.",
@@ -722,7 +723,7 @@ describe('persistCounterfactualSafe', () => {
     expect(replayImpl).toHaveBeenCalled()
     expect(showNotificationImpl).toHaveBeenCalledWith(
       expect.objectContaining({
-        variant: 'info',
+        variant: 'warning',
         groupKey: 'cf-safe-space-limit',
         message:
           "Safe created in My accounts. The Workspace is at its limit of 20 Safe accounts, so it wasn't added there.",

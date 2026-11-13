@@ -30,6 +30,7 @@ const CONTACT = { address: ADDRESS, name: 'Nicole', chainIds: ['137'] }
 const workspaceContact = (chainIds: string[]): SpaceAddressBookItemDto => ({
   ...CONTACT,
   chainIds,
+  tagIds: [],
   createdBy: '',
   createdByUserId: 0,
   lastUpdatedBy: '',
@@ -59,7 +60,12 @@ const setup = ({
   jest.mocked(useIsInvited).mockReturnValue(isInvited)
   jest.mocked(useCurrentSpaceId).mockReturnValue(spaceId)
   jest.mocked(useUpsertWorkspaceSafeNames).mockReturnValue(upsert)
-  jest.mocked(useSpaceAddressBookState).mockReturnValue({ items: addressBook, isLoading: false, isError: false })
+  jest.mocked(useSpaceAddressBookState).mockReturnValue({
+    items: addressBook,
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  })
 
   const { result } = renderHook(() => useAddOrRequestWorkspaceContact(SOURCE))
   return { addOrRequest: result.current, upsert, createRequest: mockCreateRequest }

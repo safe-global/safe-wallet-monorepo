@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import { SpacesFeature, useFeatureFlagRedirect, useRedirectWhenOff } from '@/features/spaces'
+import { SpacesFeature, useRedirectWhenOff } from '@/features/spaces'
 import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -12,7 +12,6 @@ export default function SpacePlansPage() {
   const router = useRouter()
   const { spaceId } = router.query
   const spaces = useLoadFeature(SpacesFeature)
-  useFeatureFlagRedirect()
   const chain = useCurrentChain()
   const isAnnounced = useIsSafeProAnnouncementEnabled()
   const isSafePro = useIsSafeProEnabled()

@@ -2,10 +2,7 @@ import path from 'path'
 import withBundleAnalyzer from '@next/bundle-analyzer'
 import withPWAInit from '@ducanh2912/next-pwa'
 import remarkGfm from 'remark-gfm'
-import remarkHeadingId from 'remark-heading-id'
 import createMDX from '@next/mdx'
-import remarkFrontmatter from 'remark-frontmatter'
-import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import { readFile } from 'fs/promises'
 import { fileURLToPath } from 'url'
 import { execSync } from 'child_process'
@@ -84,12 +81,9 @@ const withPWA = withPWAInit({
 const isProd = process.env.NODE_ENV === 'production'
 const enableExperimentalOptimizations = process.env.ENABLE_EXPERIMENTAL_OPTIMIZATIONS === '1'
 
-let appVersion = pkg.version
-
 // Pin volatile values for visual regression builds to avoid Chromatic diffs
 if (process.env.VISUAL_REGRESSION_BUILD === 'true') {
   commitHash = 'vistest'
-  appVersion = 'istest' // UI prepends 'v' → displays 'vistest'
 }
 
 /** @type {import('next').NextConfig} */
@@ -111,8 +105,10 @@ const nextConfig = {
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
   reactStrictMode: false,
   productionBrowserSourceMaps: true,
-  eslint: {
-    dirs: ['src', 'cypress'],
+  agentRules: false,
+  logging: {
+    // Forwarding browser logs to the terminal makes the next-rspack dev server panic on client navigation.
+    browserToTerminal: false,
   },
   ...(isProd || enableExperimentalOptimizations
     ? {
@@ -121,7 +117,17 @@ const nextConfig = {
         },
       }
     : {}),
-  webpack(config, { dev }) {
+  webpack(config, { dev, isServer, webpack }) {
+    // The static export never uses the dev server render, so the dev server compiles every page as empty.
+    if (dev && isServer) {
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(
+          /[\\/]apps[\\/]web[\\/]src[\\/]pages[\\/](?!_document)/,
+          path.resolve(__dirname, 'scripts/dev-server-page-stub.js'),
+        ),
+      )
+    }
+
     config.module.rules.push({
       test: /\.svg$/i,
       issuer: { and: [/\.(js|ts|md)x?$/] },
@@ -168,7 +174,7 @@ const nextConfig = {
       config.optimization.minimize = false
     }
 
-    // Add SRI manifest plugin (production only, skip for Cypress tests)
+    // Add SRI manifest plugin (production only, skip for E2E test builds)
     if (!dev && process.env.NODE_ENV !== 'cypress') {
       config.plugins.push(new SriManifestWebpackPlugin())
     }
@@ -177,19 +183,15 @@ const nextConfig = {
   },
 }
 
-const isRspack = process.env.USE_RSPACK === '1'
 const enablePWA = process.env.ENABLE_PWA === '1'
 
-const withMDX = isRspack
-  ? createMDX({ extension: /\.(md|mdx)?$/, jsx: true, options: {} })
-  : createMDX({
-      extension: /\.(md|mdx)?$/,
-      jsx: true,
-      options: {
-        remarkPlugins: [remarkFrontmatter, [remarkMdxFrontmatter, { name: 'metadata' }], remarkHeadingId, remarkGfm],
-        rehypePlugins: [],
-      },
-    })
+const withMDX = createMDX({
+  extension: /\.(md|mdx)?$/,
+  jsx: true,
+  options: {
+    remarkPlugins: [remarkGfm],
+  },
+})
 
 const shouldEnablePWA = isProd || enablePWA
 let config = shouldEnablePWA ? withPWA(withMDX(nextConfig)) : withMDX(nextConfig)

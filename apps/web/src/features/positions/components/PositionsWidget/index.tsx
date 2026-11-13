@@ -1,12 +1,17 @@
 import usePositionsFiatTotal from '../../hooks/usePositionsFiatTotal'
 import React, { useMemo, type ReactElement } from 'react'
 import { AppRoutes } from '@/config/routes'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Separator } from '@/components/ui/separator'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Typography } from '@/components/ui/typography'
-import { cn } from '@/utils/cn'
-import { WidgetCard } from '@/components/dashboard/styled'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/views/components/ui/accordion'
+import { Separator } from '@safe-global/views/components/ui/separator'
+import { Skeleton } from '@safe-global/views/components/ui/skeleton'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
+import { WidgetCard } from '@safe-global/views/components/dashboard/styled'
 import css from './styles.module.css'
 import PositionsHeader from '../PositionsHeader'
 import { PositionGroup } from '../PositionGroup'

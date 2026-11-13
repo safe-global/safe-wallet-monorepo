@@ -17,12 +17,7 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   },
 }))
 
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: ({ alt }: { alt: string }) => <img alt={alt} />,
-}))
-
-jest.mock('@/components/ui/button', () => ({
+jest.mock('@safe-global/views/components/ui/button', () => ({
   Button: ({ children, className }: { children: ReactNode; className?: string }) => (
     <button type="button" className={className}>
       {children}
@@ -30,11 +25,11 @@ jest.mock('@/components/ui/button', () => ({
   ),
 }))
 
-jest.mock('@/components/ui/typography', () => ({
+jest.mock('@safe-global/views/components/ui/typography', () => ({
   Typography: ({ children }: { children: ReactNode }) => <span>{children}</span>,
 }))
 
-jest.mock('@/components/ui/dialog', () => ({
+jest.mock('@safe-global/views/components/ui/dialog', () => ({
   DialogClose: ({
     children,
     'aria-label': ariaLabel,
@@ -87,7 +82,7 @@ describe('AddToSpacePopupModal', () => {
     fireEvent.click(screen.getByRole('button', { name: /Create a Workspace/i }))
 
     expect(mockPush).toHaveBeenCalledWith({
-      pathname: AppRoutes.spaces.createSpace,
+      pathname: AppRoutes.welcome.createSpace,
       query: { safe: '1:0xdeadbeef' },
     })
   })

@@ -1,7 +1,7 @@
 import { type SyntheticEvent, type ReactElement, useCallback, useEffect, useMemo, useState, useContext } from 'react'
 import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import PagePlaceholder from '@/components/common/PagePlaceholder'
+import PagePlaceholder from '@safe-global/views/components/common/PagePlaceholder'
 import NftIcon from '@/public/images/common/nft.svg'
 import useCollectibles from '@/hooks/useCollectibles'
 import InfiniteScroll from '@/components/common/InfiniteScroll'

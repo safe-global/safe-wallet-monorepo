@@ -1,8 +1,8 @@
 import useGasPrice from '@/hooks/useGasPrice'
 import ModalDialog from '@/components/common/ModalDialog'
-import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
-import { Typography } from '@/components/ui/typography'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import RocketSpeedup from '@/public/images/common/ic-rocket-speedup.svg'
 import useWallet from '@/hooks/wallets/useWallet'
 import useOnboard from '@/hooks/wallets/useOnboard'
@@ -23,7 +23,7 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import { MODALS_EVENTS, trackEvent, MixpanelEventParams } from '@/services/analytics'
 import { TX_EVENTS } from '@/services/analytics/events/transactions'
 import { getTransactionTrackingType } from '@/services/analytics/tx-tracking'
-import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
+import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 import { trackError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
@@ -45,7 +45,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
   const [speedUpFee] = useGasPrice(true)
   const [waitingForConfirmation, setWaitingForConfirmation] = useState(false)
   const isEIP1559 = useHasFeature(FEATURES.EIP1559)
-  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
+  const isPayFromSafeChain = useHasFeature(FEATURES.GTF) ?? false
 
   const wallet = useWallet()
   const onboard = useOnboard()
@@ -98,7 +98,11 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
         )
         const { data: details } = await trigger({ chainId: chainInfo.chainId, id: txId })
         const txType = getTransactionTrackingType(details)
-        const gasPaymentSource = isGtfChain ? (isGtfSafePaid(safeTx.data) ? 'safe' : 'signing_wallet') : undefined
+        const gasPaymentSource = isPayFromSafeChain
+          ? isPaidFromSafe(safeTx.data)
+            ? 'safe'
+            : 'signing_wallet'
+          : undefined
         trackEvent(
           { ...TX_EVENTS.SPEED_UP, label: txType },
           gasPaymentSource ? { [MixpanelEventParams.GAS_PAYMENT_SOURCE]: gasPaymentSource } : undefined,
@@ -145,7 +149,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
     dispatch,
     gasLimit,
     handleClose,
-    isGtfChain,
+    isPayFromSafeChain,
     onboard,
     pendingTx,
     safeAddress,

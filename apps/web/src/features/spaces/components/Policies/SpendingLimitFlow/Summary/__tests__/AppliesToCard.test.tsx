@@ -1,7 +1,7 @@
 import { render, screen } from '@/tests/test-utils'
 import AppliesToCard from '../AppliesToCard'
-import { APPLIES_TO_LABEL } from '../constants'
-import { safeAccountOptionBuilder } from '../SpendingLimitSummary.fixtures'
+import { APPLIES_TO_LABEL } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
+import { safeAccountOptionBuilder } from '../SpendingLimitSummary.testData'
 
 jest.mock('@/components/common/ChainIndicator', () => {
   const Mock = ({ chainId }: { chainId: string }) => <img data-testid="chain-logo-img" alt={`chain-${chainId}`} />

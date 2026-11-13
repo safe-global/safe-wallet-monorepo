@@ -132,4 +132,30 @@ describe('PolicyCatalogue', () => {
       within(screen.getByTestId('policy-catalogue-tile-proposer')).getByTestId('policy-locked-icon'),
     ).toBeInTheDocument()
   })
+
+  describe('the recipient allowlist tile', () => {
+    it('is left out when no chain has the allowlist enabled', () => {
+      render(<PolicyCatalogue />)
+
+      expect(screen.queryByTestId('policy-catalogue-tile-recipient-allowlist')).not.toBeInTheDocument()
+    })
+
+    it('comes first, with the other tiles in two columns, when a chain has it enabled', () => {
+      render(<PolicyCatalogue isAllowlistAvailable />)
+
+      const buttons = screen.getAllByRole('button')
+      expect(buttons).toHaveLength(4)
+      expect(buttons[0]).toHaveAccessibleName('Set policy: Recipient allowlist')
+      expect(screen.getByTestId('policy-catalogue')).toHaveClass('md:grid-cols-2')
+    })
+
+    it('opens the allowlist flow', async () => {
+      const onSelect = jest.fn()
+      const { user } = renderWithUserEvent(<PolicyCatalogue isAllowlistAvailable onSelect={onSelect} />)
+
+      await user.click(screen.getByRole('button', { name: 'Set policy: Recipient allowlist' }))
+
+      expect(onSelect).toHaveBeenCalledWith('recipient-allowlist')
+    })
+  })
 })

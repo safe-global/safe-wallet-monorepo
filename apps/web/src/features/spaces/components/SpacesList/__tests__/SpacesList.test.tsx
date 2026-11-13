@@ -291,7 +291,7 @@ describe('SpacesList — auth/expiry state rendering', () => {
 
     const cta = screen.getByRole('link', { name: /create your first workspace/i })
     expect(cta).toHaveAttribute('href')
-    expect(cta).toHaveClass('[&_svg]:text-green-400')
+    expect(cta).toHaveClass('[&_svg]:text-icon-brand')
     await userEvent.click(cta)
     expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.WORKSPACE_CREATE_STARTED, {
       entry_point: WorkspaceCreateEntryPoint.EMPTY_STATE,

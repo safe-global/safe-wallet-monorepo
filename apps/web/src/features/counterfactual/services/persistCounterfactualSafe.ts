@@ -16,7 +16,7 @@ import { enqueuePendingCfDelete } from '../store/pendingCfDeletesSlice'
 import { removeUndeployedSafe } from '../store/undeployedSafesSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { isSpaceAtSafeLimit, type SafeLimit } from '@/utils/spaces'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 
 type PersistArgs = {
   chainId: string
@@ -53,10 +53,7 @@ type PersistArgs = {
   dispatch: AppDispatch
 }
 
-export type PersistResult =
-  | { ok: true; skipped?: 'already-deployed' }
-  /** `stepUpPending`: the step-up is taking over, so the caller shows nothing. */
-  | { ok: false; error: Error; stepUpPending?: true }
+export type PersistResult = { ok: true; skipped?: 'already-deployed' } | { ok: false; error: Error }
 
 /**
  * Single code path for creating a counterfactual safe: persist to backend
@@ -136,7 +133,7 @@ export const persistCounterfactualSafe = async ({
         // The plan has no seat left, so the Safe stays in My accounts (the chooser said so upfront).
         dispatch(
           showNotification({
-            variant: 'info',
+            variant: 'warning',
             groupKey: 'cf-safe-space-limit',
             message: seatLimitMessage(spaceSafeLimit),
           }),
@@ -149,25 +146,21 @@ export const persistCounterfactualSafe = async ({
           }),
         )
         if ('error' in spaceResult) {
-          // The user-level entry stays, so the replay after verification attaches a Safe that exists.
-          if (isElevationRequiredError(spaceResult.error)) {
-            return { ok: false, error: toSpaceError(spaceResult.error), stepUpPending: true }
-          }
           // Stale cached count (another admin filled the seats); seats are per address, so a 402 never splits a batch.
-          const quotaExceeded = getQuotaExceeded(spaceResult.error)
+          const quotaExceeded = getQuotaExceededError(spaceResult.error)
           if (quotaExceeded) {
             dispatch(
               showNotification({
-                variant: 'info',
+                variant: 'warning',
                 groupKey: 'cf-safe-space-limit',
-                message: seatLimitMessage(quotaExceeded.quota ?? spaceSafeLimit),
+                message: seatLimitMessage(quotaExceeded.quota || spaceSafeLimit),
               }),
             )
           } else if (isLimitRejection(spaceResult.error)) {
             // Legacy 400 from a space without a plan: the static cap counts rows, not seats.
             dispatch(
               showNotification({
-                variant: 'info',
+                variant: 'warning',
                 groupKey: 'cf-safe-space-limit',
                 message: toSpaceError(spaceResult.error).message,
               }),
@@ -248,14 +241,7 @@ function recoverAlreadyDeployed({
   return { ok: true, skipped: 'already-deployed' }
 }
 
-type BackendError = { status?: number; data?: { message?: string; code?: string; quota?: number } }
-
-/** CGW rejects an add over the plan's seat quota with a typed 402; returns its quota, or undefined for any other error. */
-function getQuotaExceeded(error: unknown): { quota: number | null } | undefined {
-  const { status, data } = (error as BackendError) ?? {}
-  if (status !== 402 || data?.code !== 'QUOTA_EXCEEDED') return undefined
-  return { quota: typeof data.quota === 'number' ? data.quota : null }
-}
+type BackendError = { status?: number; data?: { message?: string } }
 
 function seatLimitMessage(limit: SafeLimit): string {
   const seats = typeof limit === 'number' ? `limit of ${limit} Safe accounts` : 'seat limit'

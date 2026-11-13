@@ -1,6 +1,6 @@
 import NextLink from 'next/link'
 import { useRouter } from 'next/router'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import type { NavItem } from '@/components/common/NavTabs/navItemsConfig'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
@@ -16,7 +16,7 @@ const NavTabs = ({ tabs }: { tabs: NavItem[] }) => {
 
   return (
     <Tabs value={activeHref}>
-      <TabsList variant="underline" tone="brand">
+      <TabsList variant="underline" tone="brand" size="lg">
         {tabs.map((tab) => (
           <TabsTrigger
             key={tab.href}

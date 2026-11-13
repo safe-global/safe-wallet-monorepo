@@ -2,6 +2,8 @@ import type { LinkProps } from 'next/link'
 import { useHasFeature } from '@/hooks/useChains'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { AppRoutes } from '@/config/routes'
+import { useAppSelector } from '@/store'
+import { isAuthenticated } from '@/store/authSlice'
 import type { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSpaceEntitlements } from './billing/useSpaceEntitlements'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
@@ -14,6 +16,8 @@ export type PlanGate = {
   mustUpgradeToSafePro: boolean
   /** Neither the action nor the upsell may render yet. */
   isLoading: boolean
+  /** Mark the action as a Safe Pro feature for signed-in users. */
+  showProTag: boolean
   /** The Workspace's plans, or Workspaces when there is none. */
   upgradeHref: LinkProps['href']
 }
@@ -26,12 +30,14 @@ export const usePlanGate = (gatingFlag: FEATURES): PlanGate => {
   const isSafeProEnabled = useIsSafeProEnabled()
   const isGatingFlagEnabled = useHasFeature(gatingFlag) === true
   const isGateActive = isSafeProEnabled && isGatingFlagEnabled
+  const isSignedIn = useAppSelector(isAuthenticated)
   const activeSpaceId = useCurrentSpaceId()
   const { isEntitled, isLoading: isEntitlementsLoading } = useSpaceEntitlements(isGateActive ? activeSpaceId : null)
 
   return {
     mustUpgradeToSafePro: isGateActive && !isEntitlementsLoading && !isEntitled(POLICIES_ENTITLEMENT),
     isLoading: isGateActive && isEntitlementsLoading,
+    showProTag: isGateActive && isSignedIn,
     upgradeHref: activeSpaceId
       ? { pathname: AppRoutes.spaces.plans, query: { spaceId: activeSpaceId } }
       : AppRoutes.welcome.spaces,

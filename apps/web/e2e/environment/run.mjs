@@ -1,0 +1,327 @@
+import { execFile, spawn } from 'node:child_process'
+import { existsSync } from 'node:fs'
+import { readFile, rm } from 'node:fs/promises'
+import { randomUUID } from 'node:crypto'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath, pathToFileURL } from 'node:url'
+import { promisify } from 'node:util'
+import { assertProjectName, chainProfiles, localUrl } from './local-stack.mjs'
+import { playwrightSpecs } from './playwright-specs.mjs'
+
+const webRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
+const playwrightArtifacts = 'e2e/environment/artifacts/playwright'
+const walletActions = ['dev', 'build', 'playwright']
+const actions = new Set(['up', 'down', 'reset', 'status', 'logs', 'config', 'test', 'smoke', 'indexing', 'check'])
+for (const action of [...walletActions, 'plan', 'needs']) actions.add(action)
+
+// Each check gets its own project, so it never touches an interactive stack.
+const defaultProject = (action) => (action === 'check' ? `safe-e2e-${randomUUID()}` : 'safe-e2e-local')
+
+export function configuration(args, env = process.env) {
+  const [action = 'status', ...extra] = args
+  if (!actions.has(action) || extra.length) {
+    throw new Error(`Usage: e2e:env ${[...actions].join('|')}`)
+  }
+  const infrastructure = resolve(env.SAFE_INFRASTRUCTURE_PATH || resolve(webRoot, 'e2e/environment/infra'))
+  const project = assertProjectName(env.SAFE_E2E_PROJECT || defaultProject(action))
+  return { action, infrastructure, project, envFile: env.SAFE_E2E_ENV_FILE && resolve(env.SAFE_E2E_ENV_FILE) }
+}
+
+export function walletEnvironment(manifest, env = process.env) {
+  const gatewayUrl = localUrl(manifest.gatewayUrl, 'Isolated wallet gateway')
+  if (manifest.chainId !== 11155111 || !Number.isSafeInteger(manifest.forkBlock) || manifest.forkBlock <= 0) {
+    throw new Error('Unsupported fork identity')
+  }
+  const filtered = Object.fromEntries(
+    Object.entries(env).filter(
+      ([key]) => !key.startsWith('FORK_') && key !== 'SEPOLIA_FORK_RPC_URL' && key !== 'ELECTRON_RUN_AS_NODE',
+    ),
+  )
+  // Stacks started before the Ledger emulator existed have no URL for it; only the Ledger specs need one.
+  const ledger = manifest.ledgerEmulatorUrl
+    ? { NEXT_PUBLIC_LEDGER_EMULATOR_URL: localUrl(manifest.ledgerEmulatorUrl, 'Ledger emulator') }
+    : {}
+  const trezor = manifest.trezorEmulatorUrl
+    ? { TREZOR_EMULATOR_URL: localUrl(manifest.trezorEmulatorUrl, 'Trezor emulator') }
+    : {}
+  return {
+    ...filtered,
+    ...ledger,
+    ...trezor,
+    NEXT_PUBLIC_IS_PRODUCTION: 'false',
+    NEXT_PUBLIC_IS_TEST_E2E: 'true',
+    NEXT_PUBLIC_POLLING_INTERVAL: '2000',
+    NEXT_PUBLIC_CONFIG_SERVICE_KEY: 'WALLET_WEB',
+    NEXT_PUBLIC_GATEWAY_URL_STAGING: gatewayUrl,
+    NEXT_PUBLIC_GATEWAY_URL_PRODUCTION: gatewayUrl,
+    NEXT_PUBLIC_TENDERLY_SIMULATE_ENDPOINT_URL: 'http://localhost:4003/simulate',
+    NEXT_PUBLIC_TENDERLY_ORG_NAME: 'safe',
+    NEXT_PUBLIC_TENDERLY_PROJECT_NAME: 'safe-apps',
+    SAFE_CGW_BASE_URL: gatewayUrl,
+    VITE_GATEWAY_URL: gatewayUrl,
+  }
+}
+
+export async function readManifest(infrastructure, project) {
+  const path = resolve(infrastructure, '.test-runs', `${project}.json`)
+  try {
+    return JSON.parse(await readFile(path, 'utf8'))
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error
+    throw new Error(`No running stack for ${project}; start it with e2e:env up`, { cause: error })
+  }
+}
+
+export async function assertEnvironmentReady(manifest) {
+  const gateway = await fetch(`${manifest.gatewayUrl}/health/ready`, { signal: AbortSignal.timeout(5000) })
+  if (!gateway.ok) throw new Error('Local gateway is not ready')
+  if (!manifest.decoderUrl) {
+    throw new Error('Local manifest is missing the decoder URL; refresh it after upgrading the stack')
+  }
+  const decoderUrl = localUrl(manifest.decoderUrl, 'Decoder readiness URL')
+  const response = await fetch(`${decoderUrl}/health/ready`, { signal: AbortSignal.timeout(5000) })
+  if (!response.ok || !(await response.json()).ready) throw new Error('Local decoder is not ready')
+  await assertForkReady(manifest)
+  for (const chain of Object.values(manifest.chains ?? {})) await assertForkReady(chain)
+}
+
+async function forkIdentity(rpcUrl, forkBlock) {
+  const response = await fetch(rpcUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify([
+      { jsonrpc: '2.0', id: 1, method: 'eth_chainId', params: [] },
+      { jsonrpc: '2.0', id: 2, method: 'eth_getBlockByNumber', params: [`0x${forkBlock.toString(16)}`, false] },
+    ]),
+    signal: AbortSignal.timeout(5000),
+  })
+  if (!response.ok) throw new Error(`RPC answered ${response.status}`)
+  const results = await response.json()
+  if (!Array.isArray(results)) throw new Error('RPC answered without a batch')
+  return {
+    chainId: Number(results.find(({ id }) => id === 1)?.result),
+    blockHash: results.find(({ id }) => id === 2)?.result?.hash?.toLowerCase(),
+  }
+}
+
+async function assertForkReady(fork) {
+  const rpcUrl = localUrl(fork.rpcUrl, 'Anvil readiness RPC')
+  let identity
+  try {
+    identity = await forkIdentity(rpcUrl, fork.forkBlock)
+  } catch (error) {
+    const hint = 'inspect e2e:env status/logs and reset the whole stack after a crash'
+    throw new Error(`Local Anvil for chain ${fork.chainId} is not ready; ${hint}`, { cause: error })
+  }
+  if (
+    identity.chainId !== fork.chainId ||
+    !fork.forkBlockHash ||
+    identity.blockHash !== fork.forkBlockHash.toLowerCase()
+  ) {
+    throw new Error(`Local Anvil for chain ${fork.chainId} does not match the configured fork`)
+  }
+}
+
+/** The optional forks (by Compose profile) and device emulators that `specs` need */
+export function stackNeeds(specs, registry = playwrightSpecs) {
+  const required = (key) => [...new Set(specs.flatMap((spec) => registry[spec]?.[key] ?? []))]
+  return { chains: required('chains').map((chainId) => chainProfiles[chainId]), devices: required('devices') }
+}
+
+/** The commands that start the forks and device emulators that `specs` need and the stack does not run */
+export function missingStackCommands(specs, manifest, infrastructure, registry = playwrightSpecs) {
+  const up = `python3 ${infrastructure}/scripts/test_env.py up`
+  const running = Object.keys(manifest.chains ?? {}).map((chainId) => chainProfiles[chainId])
+  const { chains, devices } = stackNeeds(specs, registry)
+  return [
+    ...chains.filter((chain) => !running.includes(chain)).map((chain) => `${up} --chain ${chain}`),
+    ...devices.filter((device) => !manifest.devices?.includes(device)).map((device) => `${up} --device ${device}`),
+  ]
+}
+
+/** The commands that start what the specs of this shard need and the stack does not run */
+export async function missingShardCommands(env, manifest, infrastructure) {
+  return missingStackCommands(await shardSpecs(env), manifest, infrastructure)
+}
+
+/** The GitHub Actions matrix: one entry per Playwright shard, each on its own stack. */
+export function planMatrix(shardCount, env = process.env, registry = playwrightSpecs) {
+  if (!Number.isInteger(shardCount) || shardCount < 1) throw new Error('Shard count must be a positive integer')
+  // A sharded Playwright run that matches no test passes, so an unmatched filter must fail here.
+  if (!selectPlaywrightSpecs(env, registry).length) {
+    throw new Error(`SAFE_E2E_SPECS matches no registered Playwright spec: ${env.SAFE_E2E_SPECS}`)
+  }
+  return { include: Array.from({ length: shardCount }, (_, index) => ({ shard: index + 1 })) }
+}
+
+/** The spec files in a Playwright JSON report of `--list`, by path under e2e/tests */
+export function listedSpecs(report) {
+  const files = new Set()
+  const collect = (suite) => {
+    if (suite.file && suite.specs?.length) files.add(suite.file)
+    for (const child of suite.suites ?? []) collect(child)
+  }
+  for (const suite of report.suites ?? []) collect(suite)
+  return [...files]
+}
+
+/** The specs that this shard runs: Playwright assigns them to shards, so only its own list can tell */
+export async function shardSpecs(env) {
+  const listEnv = { ...env, SAFE_E2E_ISOLATED: 'true', PLAYWRIGHT_BASE_URL: webUrl(env) }
+  const args = [...playwrightRunArguments(env), '--list', '--reporter=json']
+  const { stdout } = await promisify(execFile)('yarn', args, { cwd: webRoot, env: listEnv, maxBuffer: 64 << 20 })
+  return listedSpecs(JSON.parse(stdout))
+}
+
+const webUrl = (env) => env.SAFE_E2E_WEB_URL || `http://localhost:${env.SAFE_E2E_WEB_PORT || '3080'}`
+
+const playwrightFilters = (env) => (env.SAFE_E2E_SPECS ? env.SAFE_E2E_SPECS.split(',').map((name) => name.trim()) : [])
+
+/**
+ * `SAFE_E2E_SPECS` filters the isolated Playwright specs by file name; unset runs them all.
+ * `SAFE_E2E_SHARD` (`current/total`) runs one Playwright shard of them.
+ */
+export function playwrightRunArguments(env = process.env) {
+  const shard = env.SAFE_E2E_SHARD ? ['--shard', env.SAFE_E2E_SHARD] : []
+  return ['playwright', 'test', '--config', 'e2e/playwright.isolated.config.ts', ...shard, ...playwrightFilters(env)]
+}
+
+/** The registered Playwright specs that the `SAFE_E2E_SPECS` filters select, as Playwright matches them */
+export function selectPlaywrightSpecs(env = process.env, registry = playwrightSpecs) {
+  const filters = playwrightFilters(env).map((filter) => new RegExp(filter))
+  return Object.keys(registry).filter((spec) => !filters.length || filters.some((filter) => filter.test(spec)))
+}
+
+/** What the Playwright run passes to its specs: the wallet environment plus the stack's service URLs. */
+export function stackEnvironment(project, manifest, walletEnv) {
+  return {
+    ...walletEnv,
+    SAFE_E2E_ISOLATED: 'true',
+    SAFE_E2E_PROJECT: project,
+    SAFE_TXS_BASE_URL: manifest.transactionServiceUrl,
+    SAFE_RPC_URL: manifest.rpcUrl,
+    SAFE_E2E_CHAINS: JSON.stringify(manifest.chains ?? {}),
+  }
+}
+
+export async function checkEnvironment(run, diagnostics = () => {}) {
+  let failure
+  try {
+    await run('up')
+    await run('test')
+    await run('smoke')
+  } catch (error) {
+    failure = error
+  } finally {
+    try {
+      await run('logs')
+    } catch (error) {
+      diagnostics(error)
+    }
+    try {
+      await run('reset')
+    } catch (error) {
+      if (!failure) failure = error
+      else diagnostics(error)
+    }
+  }
+  if (failure) throw failure
+}
+
+/** Runs child processes in their own process group, so SIGINT/SIGTERM stops the whole tree. */
+function createProcessRunner() {
+  let child
+  let interrupted = false
+  const stop = () => {
+    if (interrupted) return
+    interrupted = true
+    if (child?.pid) process.kill(-child.pid, 'SIGTERM')
+  }
+  process.on('SIGINT', stop)
+  process.on('SIGTERM', stop)
+  const execute = (command, args, options = {}) =>
+    new Promise((accept, reject) => {
+      child = spawn(command, args, { stdio: 'inherit', cwd: webRoot, detached: true, ...options })
+      child.once('error', reject)
+      child.once('exit', (code, signal) => {
+        child = undefined
+        if (code === 0) accept()
+        else reject(new Error(`${command} failed (${signal || code})`))
+      })
+    })
+  const dispose = () => {
+    process.off('SIGINT', stop)
+    process.off('SIGTERM', stop)
+  }
+  return { execute, isInterrupted: () => interrupted, dispose }
+}
+
+function stackRunner(config, runner) {
+  const script = resolve(config.infrastructure, 'scripts/test_env.py')
+  if (!existsSync(script)) {
+    throw new Error(
+      'Isolated backend scripts not found; check the environment/infra directory or SAFE_INFRASTRUCTURE_PATH',
+    )
+  }
+  const envFile = config.envFile ? ['--env-file', config.envFile] : []
+  return (action) => {
+    if (runner.isInterrupted() && !['logs', 'reset'].includes(action)) throw new Error('Environment run interrupted')
+    return runner.execute('python3', [script, action, '--project', config.project, ...envFile])
+  }
+}
+
+async function runPlaywright(config, runner, manifest, walletEnv) {
+  const missing = await missingShardCommands(process.env, manifest, config.infrastructure)
+  if (missing.length) {
+    throw new Error(
+      `Selected specs need forks or device emulators that are not running. Start them with:\n${missing.join('\n')}`,
+    )
+  }
+  const env = { ...stackEnvironment(config.project, manifest, walletEnv), PLAYWRIGHT_BASE_URL: webUrl(process.env) }
+  await rm(resolve(webRoot, playwrightArtifacts), { recursive: true, force: true })
+  await runner.execute('yarn', playwrightRunArguments(env), { env })
+}
+
+async function runWalletAction(config, runner) {
+  const manifest = await readManifest(config.infrastructure, config.project)
+  const env = { ...walletEnvironment(manifest), PORT: process.env.SAFE_E2E_WEB_PORT || '3080' }
+  await assertEnvironmentReady(manifest)
+  if (config.action === 'playwright') await runPlaywright(config, runner, manifest, env)
+  else await runner.execute('yarn', [config.action], { env })
+}
+
+async function runCheck(config, runner) {
+  if (process.env.SAFE_E2E_PROJECT) {
+    throw new Error('check creates its own project; unset SAFE_E2E_PROJECT to protect interactive stacks')
+  }
+  await checkEnvironment(stackRunner(config, runner), (error) => console.error(error.message))
+}
+
+async function main() {
+  const config = configuration(process.argv.slice(2))
+  if (config.action === 'plan') {
+    console.log(JSON.stringify(planMatrix(Number(process.env.SAFE_E2E_SHARDS || 1))))
+    return
+  }
+  // GitHub Actions step outputs for the stack of this shard
+  if (config.action === 'needs') {
+    const { chains, devices } = stackNeeds(await shardSpecs(process.env))
+    console.log(`chains=${chains.join(' ')}\ndevices=${devices.join(' ')}`)
+    return
+  }
+  const runner = createProcessRunner()
+  try {
+    if (config.action === 'check') await runCheck(config, runner)
+    else if (walletActions.includes(config.action)) await runWalletAction(config, runner)
+    else await stackRunner(config, runner)(config.action)
+  } finally {
+    runner.dispose()
+  }
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+  main().catch((error) => {
+    console.error(error.message)
+    process.exitCode = 1
+  })
+}

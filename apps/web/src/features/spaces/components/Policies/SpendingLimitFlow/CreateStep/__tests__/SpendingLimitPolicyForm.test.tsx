@@ -2,16 +2,30 @@ import { useFormContext } from 'react-hook-form'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
+import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
 import { buildSafeAccountId } from '../../../SafeAccountSelector/utils'
-import type { SafeAccountOption } from '../../../SafeAccountSelector/types'
-import { INELIGIBILITY_TEXT, SAFE_ACCOUNT_SELECTOR_LABEL } from '../../../SafeAccountSelector/constants'
-import { ADD_SPENDER_LABEL, CALLOUT_DISMISS_LABEL, CALLOUT_TITLE, NEXT_LABEL } from '../../constants'
-import { createDefaultFormValues, createEmptySpender } from '../../types'
+import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
+import {
+  INELIGIBILITY_TEXT,
+  SAFE_ACCOUNT_SELECTOR_LABEL,
+} from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
+import {
+  ADD_SPENDER_LABEL,
+  CALLOUT_DISMISS_LABEL,
+  CALLOUT_TITLE,
+  NEXT_LABEL,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
+import {
+  createDefaultFormValues,
+  createEmptySpender,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
-import { EditModeProvider } from '../../EditFlow/EditModeContext'
-import { DISCARD_CHANGES_LABEL, REMOVE_SPENDER_LABEL } from '../../constants'
+import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
+import {
+  DISCARD_CHANGES_LABEL,
+  REMOVE_SPENDER_LABEL,
+} from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import SpendingLimitPolicyForm, { type SpendingLimitPolicyFormProps } from '../SpendingLimitPolicyForm'
 
 const SAFE_A = '0xAAAAaaaaAAaaaaAAAaAAaaaAaAaaaaaAAAaaAAaA'

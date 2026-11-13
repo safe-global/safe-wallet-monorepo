@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react'
-import { Typography } from '@/components/ui/typography'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import type {
   ContractAnalysisResults,
   DeadlockAnalysisResults,
@@ -10,9 +10,6 @@ import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SEVERITY_COLORS } from '../constants'
 import type { ChecksCount } from '../utils/countChecks'
-import { useDelayedLoading } from '../hooks/useDelayedLoading'
-
-const headerVisibilityDelay = 500
 
 export const SafeShieldHeader = ({
   recipient = [{}, undefined, false],
@@ -37,15 +34,14 @@ export const SafeShieldHeader = ({
 
   const loading = recipientLoading || contractLoading || threatLoading || deadlockLoading
   const error = recipientError || contractError || threatError || deadlockError
-  const isLoadingVisible = useDelayedLoading(loading, headerVisibilityDelay)
 
   const headerBgColor =
-    !overallStatus || !overallStatus?.severity || isLoadingVisible
+    !overallStatus || !overallStatus?.severity || loading
       ? 'var(--color-background-default)'
       : SEVERITY_COLORS[overallStatus.severity].background
 
   const headerTextColor =
-    !overallStatus || !overallStatus?.severity || isLoadingVisible
+    !overallStatus || !overallStatus?.severity || loading
       ? 'var(--color-text-secondary)'
       : SEVERITY_COLORS[overallStatus.severity].main
 
@@ -53,7 +49,7 @@ export const SafeShieldHeader = ({
     overallStatus?.severity === Severity.OK && checks && checks.total > 0
       ? `${checks.passed} of ${checks.total} checks passed`
       : overallStatus?.title
-  const label = error ? 'Checks unavailable' : isLoadingVisible ? 'Analyzing...' : (okTitle ?? 'Copilot')
+  const label = error ? 'Checks unavailable' : loading ? 'Analyzing...' : (okTitle ?? 'Copilot')
 
   return (
     <div className="px-1 pt-1">

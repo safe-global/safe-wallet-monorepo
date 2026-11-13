@@ -260,6 +260,16 @@ describe('DatadogProvider', () => {
       expect(config.allowedTracingUrls).toHaveLength(2)
       expect(config.propagateTraceBaggage).toBe(false)
     })
+
+    it('should, when initialized, start without tracking consent', async () => {
+      mockEnabledDatadogConstants()
+      mockGetInitConfiguration.mockReturnValue(undefined)
+      const Provider = await importProvider()
+
+      await new Provider().init()
+
+      expect(getInitConfig().trackingConsent).toBe('not-granted')
+    })
   })
 
   describe('after initialization', () => {

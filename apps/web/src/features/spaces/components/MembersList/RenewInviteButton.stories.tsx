@@ -5,6 +5,8 @@ import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces
 import { createMockStory } from '@/stories/mocks'
 import RenewInviteButton from './RenewInviteButton'
 
+faker.seed(1)
+
 const baseMember: MemberDto = {
   id: 1,
   role: 'MEMBER',
@@ -20,7 +22,7 @@ const baseMember: MemberDto = {
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
+  authenticated: true,
   pathname: '/spaces/members',
   query: { spaceId: '1' },
   shadcn: true,

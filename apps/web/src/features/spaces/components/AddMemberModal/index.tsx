@@ -4,17 +4,15 @@ import ModalDialog from '@/components/common/ModalDialog'
 import DialogActions from '@/components/common/DialogActions'
 import memberIcon from '@/public/images/spaces/member.svg'
 import adminIcon from '@/public/images/spaces/admin.svg'
-import { Typography } from '@/components/ui/typography'
-import { Alert, AlertDescription, AlertSeverityIcon } from '@/components/ui/alert'
-import { cn } from '@/utils/cn'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
+import { cn } from '@safe-global/views/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import css from './styles.module.css'
 import { useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId, MemberRole } from '@/features/spaces'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import MemberInfoForm from './MemberInfoForm'
@@ -142,13 +140,6 @@ const AddMemberModal = ({ onClose }: { onClose: () => void }): ReactElement => {
       })
 
       if (response.data) {
-        response.data.forEach((invitation) => {
-          trackEvent(
-            { ...SPACE_EVENTS.WORKSPACE_MEMBER_INVITE_SENT, label: spaceId },
-            { workspace_id: spaceId, user_id: invitation.userId, role: invitation.role.toLowerCase() },
-          )
-        })
-
         if (router.pathname !== AppRoutes.spaces.members) {
           router.push({ pathname: AppRoutes.spaces.members, query: { spaceId } })
         }

@@ -1,5 +1,11 @@
 import Cookies from 'js-cookie'
-import { setAuthCookie, getAuthCookieData, clearAuthCookie } from '../cookieStorage'
+import {
+  setAuthCookie,
+  getAuthCookieData,
+  clearAuthCookie,
+  markRefreshAbandoned,
+  AUTH_COOKIE_CHANGE_EVENT,
+} from '../cookieStorage'
 
 // Mock js-cookie
 jest.mock('js-cookie', () => ({
@@ -10,12 +16,12 @@ jest.mock('js-cookie', () => ({
 
 describe('cookieStorage', () => {
   const mockCookiesSet = Cookies.set as jest.MockedFunction<typeof Cookies.set>
-  const mockCookiesGet = Cookies.get as jest.MockedFunction<typeof Cookies.get>
+  // Typed as the single-key overload; the overloaded original cannot take a string return value
+  const mockCookiesGet = Cookies.get as unknown as jest.Mock<string | undefined, [string]>
   const mockCookiesRemove = Cookies.remove as jest.MockedFunction<typeof Cookies.remove>
 
-  // Helper to properly type mock return values for Cookies.get
   const mockGetReturn = (value: string | undefined): void => {
-    ;(mockCookiesGet as unknown as jest.Mock<string | undefined>).mockReturnValue(value)
+    mockCookiesGet.mockReturnValue(value)
   }
 
   const originalDateNow = Date.now
@@ -40,7 +46,7 @@ describe('cookieStorage', () => {
       const tokenType = 'Bearer'
       const expiresIn = 3600 // 1 hour in seconds
 
-      setAuthCookie(token, tokenType, expiresIn)
+      setAuthCookie({ access_token: token, token_type: tokenType, expires_in: expiresIn })
 
       expect(mockCookiesSet).toHaveBeenCalledTimes(1)
       const [cookieKey, cookieValue, options] = mockCookiesSet.mock.calls[0]
@@ -69,7 +75,7 @@ describe('cookieStorage', () => {
       const now = 1000000000
       Date.now = jest.fn(() => now)
 
-      setAuthCookie(token, tokenType, expiresIn)
+      setAuthCookie({ access_token: token, token_type: tokenType, expires_in: expiresIn })
 
       const [, cookieValue] = mockCookiesSet.mock.calls[0]
       const parsedValue = JSON.parse(cookieValue as string)
@@ -78,7 +84,7 @@ describe('cookieStorage', () => {
     })
 
     it('should set secure flag to false on HTTP', () => {
-      setAuthCookie('test-token', 'Bearer', 3600)
+      setAuthCookie({ access_token: 'test-token', token_type: 'Bearer', expires_in: 3600 })
 
       const [, , options] = mockCookiesSet.mock.calls[0]
       expect(options?.secure).toBe(false)
@@ -87,7 +93,7 @@ describe('cookieStorage', () => {
     it('should calculate expires correctly from seconds to days', () => {
       const expiresIn = 86400 // 1 day in seconds
 
-      setAuthCookie('test-token', 'Bearer', expiresIn)
+      setAuthCookie({ access_token: 'test-token', token_type: 'Bearer', expires_in: expiresIn })
 
       const [, , options] = mockCookiesSet.mock.calls[0]
       expect(options?.expires).toBe(1) // 1 day
@@ -97,14 +103,14 @@ describe('cookieStorage', () => {
       // Remove window to simulate SSR
       delete (global as { window?: unknown }).window
 
-      setAuthCookie('test-token', 'Bearer', 3600)
+      setAuthCookie({ access_token: 'test-token', token_type: 'Bearer', expires_in: 3600 })
 
       const [, , options] = mockCookiesSet.mock.calls[0]
       expect(options?.secure).toBe(false) // Should default to false when window is undefined
     })
 
     it('should handle different token types', () => {
-      setAuthCookie('test-token', 'Custom', 3600)
+      setAuthCookie({ access_token: 'test-token', token_type: 'Custom', expires_in: 3600 })
 
       const [, cookieValue] = mockCookiesSet.mock.calls[0]
       const parsedValue = JSON.parse(cookieValue as string)
@@ -337,6 +343,233 @@ describe('cookieStorage', () => {
 
       expect(result).toBeDefined()
       expect(result?.tokenType).toBe('')
+    })
+  })
+
+  describe('refresh token support', () => {
+    it('should store the refresh token and set the cookie lifetime from the refresh window, not the access token', () => {
+      const now = 1000000000
+      Date.now = jest.fn(() => now)
+
+      setAuthCookie({
+        access_token: 'access-token',
+        token_type: 'Bearer',
+        expires_in: 300,
+        refresh_token: 'refresh-token',
+        refresh_expires_in: 2592000,
+      })
+
+      const [, cookieValue, options] = mockCookiesSet.mock.calls[0]
+      const parsedValue = JSON.parse(cookieValue as string)
+
+      expect(parsedValue.expiry).toBe(now + 300 * 1000)
+      expect(parsedValue.refreshToken).toBe('refresh-token')
+      expect(parsedValue.refreshExpiry).toBe(now + 2592000 * 1000)
+      expect(options?.expires).toBe(30) // cookie lives for the refresh window (30 days), not 5 minutes
+    })
+
+    it('should survive access-token expiry while the refresh window is still open', () => {
+      const now = 1000000000
+      Date.now = jest.fn(() => now)
+      const cookieValue = JSON.stringify({
+        token: 'stale-token',
+        tokenType: 'Bearer',
+        expiry: now - 1000, // access token already expired
+        refreshToken: 'refresh-token',
+        refreshExpiry: now + 2591000000, // refresh window still open
+      })
+
+      mockGetReturn(cookieValue)
+
+      const result = getAuthCookieData()
+
+      expect(result).toBeDefined()
+      expect(result?.token).toBe('stale-token')
+      expect(result?.refreshToken).toBe('refresh-token')
+      expect(mockCookiesRemove).not.toHaveBeenCalled()
+    })
+
+    it('should keep the cookie for the access token when the refresh token expires first', () => {
+      const now = 1000000000
+      Date.now = jest.fn(() => now)
+
+      setAuthCookie({
+        access_token: 'access-token',
+        token_type: 'Bearer',
+        expires_in: 300,
+        refresh_token: 'refresh-token',
+        refresh_expires_in: 60,
+      })
+
+      const [, cookieValue, options] = mockCookiesSet.mock.calls[0]
+      expect(options?.expires).toBe(300 / (24 * 60 * 60))
+
+      Date.now = jest.fn(() => now + 120_000)
+      mockGetReturn(cookieValue as string)
+      expect(getAuthCookieData()?.token).toBe('access-token')
+      expect(mockCookiesRemove).not.toHaveBeenCalled()
+    })
+
+    it('should clear the cookie once the refresh window itself has closed', () => {
+      const now = 1000000000
+      Date.now = jest.fn(() => now)
+      const cookieValue = JSON.stringify({
+        token: 'stale-token',
+        tokenType: 'Bearer',
+        expiry: now - 1000,
+        refreshToken: 'refresh-token',
+        refreshExpiry: now - 1,
+      })
+
+      mockGetReturn(cookieValue)
+
+      const result = getAuthCookieData()
+
+      expect(result).toBeUndefined()
+      expect(mockCookiesRemove).toHaveBeenCalledWith('hn_auth', { path: '/' })
+    })
+
+    it('should degrade a legacy cookie with no refreshToken to clearing on the access token expiry', () => {
+      const now = 1000000000
+      Date.now = jest.fn(() => now)
+      const cookieValue = JSON.stringify({ token: 'legacy-token', tokenType: 'Bearer', expiry: now - 1 })
+
+      mockGetReturn(cookieValue)
+
+      const result = getAuthCookieData()
+
+      expect(result).toBeUndefined()
+      expect(mockCookiesRemove).toHaveBeenCalledWith('hn_auth', { path: '/' })
+    })
+
+    it('should not set a refreshToken/refreshExpiry when no refresh args are given (legacy call sites)', () => {
+      setAuthCookie({ access_token: 'access-token', token_type: 'Bearer', expires_in: 300 })
+
+      const [, cookieValue] = mockCookiesSet.mock.calls[0]
+      const parsedValue = JSON.parse(cookieValue as string)
+
+      expect(parsedValue.refreshToken).toBeUndefined()
+      expect(parsedValue.refreshExpiry).toBeUndefined()
+    })
+  })
+
+  describe('abandoned refresh token', () => {
+    const now = 1000000000
+
+    const cookieWith = (overrides: Record<string, unknown> = {}) =>
+      JSON.stringify({
+        token: 'access-token',
+        tokenType: 'Bearer',
+        expiry: now + 30_000,
+        refreshToken: 'refresh-token',
+        refreshExpiry: now + 2592000 * 1000,
+        ...overrides,
+      })
+
+    beforeEach(() => {
+      Date.now = jest.fn(() => now)
+    })
+
+    it('should mark the refresh token abandoned in the cookie, keeping it for the access token lifetime', () => {
+      mockGetReturn(cookieWith())
+
+      markRefreshAbandoned('refresh-token')
+
+      expect(mockCookiesSet).toHaveBeenCalledTimes(1)
+      const [cookieKey, cookieValue, options] = mockCookiesSet.mock.calls[0]
+      expect(cookieKey).toBe('hn_auth')
+      expect(JSON.parse(cookieValue as string)).toEqual(JSON.parse(cookieWith({ refreshAbandoned: true })))
+      expect(options?.expires).toBe(30 / (24 * 60 * 60))
+    })
+
+    it('should not mark a cookie whose refresh token has already been rotated by someone else', () => {
+      mockGetReturn(cookieWith({ refreshToken: 'newer-refresh-token' }))
+
+      markRefreshAbandoned('refresh-token')
+
+      expect(mockCookiesSet).not.toHaveBeenCalled()
+    })
+
+    it('should keep an abandoned cookie while its access token is still valid', () => {
+      mockGetReturn(cookieWith({ refreshAbandoned: true }))
+
+      const result = getAuthCookieData()
+
+      expect(result?.token).toBe('access-token')
+      expect(result?.refreshAbandoned).toBe(true)
+      expect(mockCookiesRemove).not.toHaveBeenCalled()
+    })
+
+    it('should clear an abandoned cookie once its access token expires, since nothing can recover it', () => {
+      mockGetReturn(cookieWith({ refreshAbandoned: true, expiry: now - 1 }))
+
+      const result = getAuthCookieData()
+
+      expect(result).toBeUndefined()
+      expect(mockCookiesRemove).toHaveBeenCalledWith('hn_auth', { path: '/' })
+    })
+
+    it('should drop the abandoned flag when a new token pair is written', () => {
+      setAuthCookie({
+        access_token: 'access-token',
+        token_type: 'Bearer',
+        expires_in: 300,
+        refresh_token: 'fresh-refresh-token',
+        refresh_expires_in: 2592000,
+      })
+
+      const [, cookieValue] = mockCookiesSet.mock.calls[0]
+      expect(JSON.parse(cookieValue as string).refreshAbandoned).toBeUndefined()
+    })
+
+    it('should not write anything when there is no cookie', () => {
+      mockGetReturn(undefined)
+
+      markRefreshAbandoned('refresh-token')
+
+      expect(mockCookiesSet).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('change event', () => {
+    const listener = jest.fn()
+
+    beforeEach(() => {
+      window.addEventListener(AUTH_COOKIE_CHANGE_EVENT, listener)
+    })
+
+    afterEach(() => {
+      window.removeEventListener(AUTH_COOKIE_CHANGE_EVENT, listener)
+    })
+
+    it('should notify this tab when the cookie is written', () => {
+      setAuthCookie({ access_token: 'access-token', token_type: 'Bearer', expires_in: 300 })
+
+      expect(listener).toHaveBeenCalledTimes(1)
+    })
+
+    it('should notify this tab when the cookie is cleared', () => {
+      clearAuthCookie()
+
+      expect(listener).toHaveBeenCalledTimes(1)
+    })
+
+    it('should notify this tab when the refresh token is abandoned', () => {
+      const now = 1000000000
+      Date.now = jest.fn(() => now)
+      mockGetReturn(
+        JSON.stringify({
+          token: 'access-token',
+          tokenType: 'Bearer',
+          expiry: now + 30_000,
+          refreshToken: 'refresh-token',
+          refreshExpiry: now + 60_000,
+        }),
+      )
+
+      markRefreshAbandoned('refresh-token')
+
+      expect(listener).toHaveBeenCalledTimes(1)
     })
   })
 })

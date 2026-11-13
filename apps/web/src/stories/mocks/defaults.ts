@@ -1,8 +1,11 @@
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { QueuedItemPage, TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
+import { CookieAndTermType, cookiesAndTermsSlice, type CookiesAndTermsState } from '@/store/cookiesAndTermsSlice'
+import { version } from '@/markdown/terms/version'
 import type { StoreOverrides } from './types'
 import { createMockPendingTransactions, createMockHistoryTransactions } from './handlers'
+import { mockNow } from './now'
 
 /**
  * Creates default settings state for stories
@@ -91,12 +94,30 @@ export function createAuthState(isAuthenticated: boolean) {
     return {
       sessionExpiresAt: null,
       lastUsedSpaceId: null,
+      isStoreHydrated: true,
     }
   }
   // Set session to expire 1 hour from now
   return {
-    sessionExpiresAt: Date.now() + 60 * 60 * 1000,
+    sessionExpiresAt: mockNow() + 60 * 60 * 1000,
     lastUsedSpaceId: null,
+    isStoreHydrated: true,
+  }
+}
+
+/**
+ * Creates cookie consent state with everything accepted, so page stories render the
+ * consent-gated app chrome (What's new frame) and not the cookie banner
+ *
+ * @returns Cookies and terms slice initial state
+ */
+export function createCookiesAndTermsState(): CookiesAndTermsState {
+  return {
+    [CookieAndTermType.TERMS]: true,
+    [CookieAndTermType.NECESSARY]: true,
+    [CookieAndTermType.UPDATES]: true,
+    [CookieAndTermType.ANALYTICS]: true,
+    termsVersion: version,
   }
 }
 
@@ -138,6 +159,7 @@ export function createInitialState(options: {
     auth: createAuthState(isAuthenticated),
     txQueue: createTxQueueState(safeData),
     txHistory: createTxHistoryState(safeData),
+    [cookiesAndTermsSlice.name]: createCookiesAndTermsState(),
   }
 
   // Merge overrides

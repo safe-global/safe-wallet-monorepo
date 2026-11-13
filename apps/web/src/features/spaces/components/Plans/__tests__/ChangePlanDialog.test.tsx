@@ -4,7 +4,7 @@ import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 
 jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
-import type { PlanPick } from '../types'
+import type { PlanPick } from '@safe-global/views/features/spaces/components/Plans/types'
 
 const mockPreviewChange = jest.fn()
 const mockChangePlan = jest.fn()
@@ -320,7 +320,7 @@ describe('ChangePlanDialog', () => {
     expect(screen.getByTestId('change-plan-confirm')).toBeDisabled()
   })
 
-  it('explains the step-up redirect instead of reporting an error when elevation is required', () => {
+  it('asks for the verification again, not the gateway marker, when the user cancels it', () => {
     mockState = { preview, changeError: { status: 403, data: { message: 'elevation_required' } } }
     render(
       <ChangePlanDialog
@@ -333,7 +333,7 @@ describe('ChangePlanDialog', () => {
       />,
     )
 
-    expect(screen.getByText(/Verify your identity to confirm the plan change/)).toBeInTheDocument()
+    expect(screen.getByText('Verify your identity to continue with this action.')).toBeInTheDocument()
     expect(screen.queryByText('elevation_required')).not.toBeInTheDocument()
   })
 })

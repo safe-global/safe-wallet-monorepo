@@ -1,13 +1,19 @@
 import type { MultiSend, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { SyntheticEvent } from 'react'
 import { isEmptyHexData } from '@/utils/hex'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Card } from '@/components/ui/card'
-import { Typography } from '@/components/ui/typography'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@safe-global/views/components/ui/accordion'
+import { Card } from '@safe-global/views/components/ui/card'
+import { Typography } from '@safe-global/views/components/ui/typography'
 import { Code } from 'lucide-react'
 import css from './styles.module.css'
 import DecodedData from '@/components/transactions/TxDetails/TxData/DecodedData'
-import { cn } from '@/utils/cn'
+import ParsingErrorBoundary from '@/components/common/ObservabilityErrorBoundary/ParsingErrorBoundary'
+import { cn } from '@safe-global/views/utils/cn'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getSafeToL2MigrationDeployment } from '@safe-global/safe-deployments'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -28,6 +34,8 @@ type SingleTxDecodedProps = {
   onChange?: OnAccordionChange
   isExecuted?: boolean
   actions?: React.ReactNode
+  /** A status chip shown right after the row's summary. */
+  badge?: React.ReactNode
 }
 
 const SingleTxDecoded = ({
@@ -40,6 +48,7 @@ const SingleTxDecoded = ({
   onChange,
   isExecuted = false,
   actions,
+  badge,
 }: SingleTxDecodedProps) => {
   const chain = useCurrentChain()
   const isNativeTransfer = tx.value !== '0' && (!tx.data || isEmptyHexData(tx.data))
@@ -105,6 +114,7 @@ const SingleTxDecoded = ({
               <b>{method}</b>
             </Typography>
           )}
+          {badge}
         </div>
 
         {actions !== undefined && <div className={css.actions}>{actions}</div>}
@@ -112,7 +122,9 @@ const SingleTxDecoded = ({
 
       <AccordionContent className={cn('p-4', isGrouped && 'border-t border-border bg-card')}>
         <div className="flex flex-col gap-2">
-          <DecodedData txData={singleTxData} toInfo={{ value: tx.to }} isTxExecuted={isExecuted} />
+          <ParsingErrorBoundary>
+            <DecodedData txData={singleTxData} toInfo={{ value: tx.to }} isTxExecuted={isExecuted} />
+          </ParsingErrorBoundary>
         </div>
       </AccordionContent>
     </>

@@ -1,10 +1,10 @@
-import type { PolicyLock } from '../policyLock'
+import type { PolicyLock } from '@safe-global/views/features/spaces/components/Policies/policyLock'
 
 /** A workspace on a plan that does not include policies, as the Starter story and tests render it. */
 export const mockStarterPlan: Omit<PolicyLock, 'onUpgrade'> = {
   planName: 'Starter',
   workspaceName: 'Acme Inc',
-  lockedPolicies: ['spending-limit', 'proposer'],
+  lockedPolicies: ['spending-limit', 'proposer', 'recipient-allowlist'],
   accountCounts: {
     'spending-limit': { applied: 0, total: 6 },
     proposer: { applied: 0, total: 6 },

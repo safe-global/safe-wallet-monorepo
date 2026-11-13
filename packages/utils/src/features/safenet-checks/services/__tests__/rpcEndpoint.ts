@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw'
 import { Interface } from 'ethers'
-import { CONSENSUS_READ_ABI, COORDINATOR_READ_ABI } from '../../abi'
+import { CONSENSUS_READ_ABI, COORDINATOR_READ_ABI, ORACLE_READ_ABI } from '../../abi'
 import type { RawLog } from '../../utils/decodeLogs'
 
 /**
@@ -37,6 +37,8 @@ export type RpcConfig = {
   groupKey?: { x: string; y: string }
   /** `groupKey` calls revert (an epoch the coordinator has not seen). */
   failGroupKey?: boolean
+  /** `getRequest(requestId).progress.state`; a `getRequest` call is rejected while unset. */
+  requestState?: number
   /** Hold `eth_getLogs` responses until the returned gate releases them. */
   gateLogs?: boolean
 }
@@ -45,6 +47,10 @@ const hexToNum = (value: string): number => Number(BigInt(value))
 
 const consensusRead = new Interface([...CONSENSUS_READ_ABI])
 const coordinatorRead = new Interface([...COORDINATOR_READ_ABI])
+const oracleRead = new Interface([...ORACLE_READ_ABI])
+
+/** `getRequest(...).terms` of a frozen request on the Gnosis oracle (sponsor swapped for a placeholder). */
+const REQUEST_TERMS = [48_838_900, 0, 48_838_906, 800_000_000n, 0, '0x' + '5a'.repeat(20), 400_000n]
 
 const filterLogs = (logs: RawLog[], filter: GetLogsFilter): RawLog[] => {
   const topic0s = (Array.isArray(filter.topics[0]) ? filter.topics[0] : [filter.topics[0]]) as string[]
@@ -64,6 +70,7 @@ const filterLogs = (logs: RawLog[], filter: GetLogsFilter): RawLog[] => {
 export const makeEndpoint = (config: RpcConfig) => {
   const getLogsCalls: GetLogsFilter[] = []
   const methods: string[] = []
+  const requestReads: string[] = []
 
   const blockTimestamp = (number: number): number => {
     if (config.timestampAt) return config.timestampAt(number)
@@ -141,6 +148,12 @@ export const makeEndpoint = (config: RpcConfig) => {
           const gk = config.groupKey ?? { x: '1', y: '2' }
           return ok(coordinatorRead.encodeFunctionResult('groupKey', [[BigInt(gk.x), BigInt(gk.y)]]))
         }
+        if (selector === oracleRead.getFunction('getRequest')!.selector) {
+          requestReads.push(oracleRead.decodeFunctionData('getRequest', call.data)[0])
+          if (config.requestState === undefined) return err('unexpected eth_call')
+          const progress = [config.requestState, 400_000n, 49_322_741, 2, 2, 1, 1, 0]
+          return ok(oracleRead.encodeFunctionResult('getRequest', [[REQUEST_TERMS, progress]]))
+        }
 
         return err('unexpected eth_call')
       }
@@ -165,5 +178,11 @@ export const makeEndpoint = (config: RpcConfig) => {
     }
     return HttpResponse.json(response)
   })
-  return { handler, getLogsCalls, methods, gate: { logsArrived: arrival.promise, releaseLogs: release.resolve } }
+  return {
+    handler,
+    getLogsCalls,
+    methods,
+    requestReads,
+    gate: { logsArrived: arrival.promise, releaseLogs: release.resolve },
+  }
 }

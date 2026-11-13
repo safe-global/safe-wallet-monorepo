@@ -1,8 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useRouter } from 'next/router'
 import { useSpacesCreateV1Mutation, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { trackEvent } from '@/services/analytics'
-import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { AppRoutes } from '@/config/routes'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
@@ -42,10 +40,6 @@ const useSpaceSubmit = (
     [router, getSelectSafesQuery],
   )
 
-  const selectSafesUrl = createdSpaceId
-    ? `${AppRoutes.welcome.selectSafes}?${new URLSearchParams(getSelectSafesQuery(createdSpaceId))}`
-    : undefined
-
   const editSpace = async (name: string) => {
     const response = await updateSpace({ id: spaceId ?? '', updateSpaceDto: { name: sanitizeName(name) } })
 
@@ -62,11 +56,14 @@ const useSpaceSubmit = (
 
     if (response.data) {
       const newSpaceId = response.data.uuid
-      trackEvent({ ...SPACE_EVENTS.WORKSPACE_CREATED, label: newSpaceId }, { workspace_id: newSpaceId })
 
       if (isSafePro) {
         setCreatedSpaceId(newSpaceId)
         setIsSubmitting(false)
+        // The URL must name the Workspace: the router guard or Back from checkout can reload this step
+        void router.replace({ pathname: router.pathname, query: { ...router.query, spaceId: newSpaceId } }, undefined, {
+          shallow: true,
+        })
         return
       }
       goToSelectSafes(newSpaceId)
@@ -107,7 +104,6 @@ const useSpaceSubmit = (
     onSubmit,
     createdSpaceId,
     goToSelectSafes,
-    selectSafesUrl,
   }
 }
 

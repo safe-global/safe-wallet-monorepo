@@ -1,4 +1,3 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
 
 import AssetsTable from '@/components/balances/AssetsTable'
@@ -7,7 +6,7 @@ import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { useState, useRef } from 'react'
 import type { ManageTokensButtonHandle } from '@/components/balances/ManageTokensButton'
 
-import PagePlaceholder from '@/components/common/PagePlaceholder'
+import PagePlaceholder from '@safe-global/views/components/common/PagePlaceholder'
 import NoAssetsIcon from '@/public/images/balances/no-assets.svg'
 import CurrencySelect from '@/components/balances/CurrencySelect'
 import ManageTokensButton from '@/components/balances/ManageTokensButton'
@@ -19,7 +18,7 @@ import { StakeFeature, useIsStakingPromoBannerVisible, STAKING_PROMO_BANNER_HIDE
 import { useLoadFeature } from '@/features/__core__'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 
-const Balances: NextPage = () => {
+const Balances = () => {
   const { NoFeeCampaignBanner } = useLoadFeature(NoFeeCampaignFeature)
   const { StakingPromoBanner } = useLoadFeature(StakeFeature)
   const { balances, error } = useVisibleBalances()

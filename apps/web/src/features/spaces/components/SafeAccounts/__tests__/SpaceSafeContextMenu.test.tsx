@@ -190,6 +190,6 @@ describe('SpaceSafeContextMenu', () => {
 
     // Verify the RemoveSafeDialog is rendered
     expect(screen.getByTestId('remove-safe-dialog')).toBeInTheDocument()
-    expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.DELETE_ACCOUNT_MODAL)
+    expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.DELETE_ACCOUNT_MODAL, undefined)
   })
 })

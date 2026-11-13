@@ -4,18 +4,17 @@
  * Clicking the caret opens the address-book dropdown; clicking it again closes
  * it. The caret only renders when there are visible options, so a couple of local
  * contacts are seeded via localStorage (no workspace/auth needed). The wallet
- * (OWNER_4, owner of the Safe) is connected so "New transaction" is enabled.
+ * (Alice, owner of the Safe) is connected so "New transaction" is enabled.
  *
  * Open/closed state is read from the combobox's `aria-expanded`.
  *
- * Run: yarn workspace @safe-global/web pw:test recipient-dropdown-caret-toggle
+ * Run: SAFE_E2E_SPECS=recipient-dropdown-caret-toggle yarn workspace @safe-global/web e2e:env playwright
  * Tag: @regression — runs under the chromium project, on demand.
  */
 import { test, expect } from '../../src/fixtures/test.fixture'
 import { seedLocalAddressBook } from '../../src/fixtures/seed-address-book'
 import { HomePage } from '../../src/pages/home.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
-import { SAFES } from '../../src/data/constants'
 
 // Digit-only (checksum-neutral) local contacts so the dropdown has options.
 const LOCAL_CONTACTS = [
@@ -27,7 +26,8 @@ test.describe('Recipient dropdown — caret toggle', { tag: '@regression' }, () 
   test('should open the dropdown on caret click and close it on a second click', async ({
     safePage,
     walletPage,
-    credentials,
+    owners,
+    safes,
   }) => {
     // Seed local contacts so there are visible options (the caret only shows then).
     await seedLocalAddressBook(safePage, LOCAL_CONTACTS)
@@ -36,9 +36,9 @@ test.describe('Recipient dropdown — caret toggle', { tag: '@regression' }, () 
     const sendTokens = new SendTokensPage(safePage)
 
     // Open the Safe and connect the owner wallet (enables "New transaction").
-    await home.goto(SAFES.SEP_OWNER_4_SAFE)
+    await home.goto(safes.transferForm)
     await walletPage.acceptCookies()
-    await walletPage.connectWallet(credentials.OWNER_4_PRIVATE_KEY)
+    await walletPage.connectWallet(owners.alice.privateKey)
     await expect(walletPage.accountCenter).toBeVisible()
 
     // Open the Send-tokens flow.

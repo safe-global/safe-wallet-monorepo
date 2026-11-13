@@ -1,6 +1,6 @@
 import { type ReactNode, useRef } from 'react'
 import type { SessionTypes } from '@walletconnect/types'
-import Popup from '@/components/common/Popup'
+import Popup from '@safe-global/views/components/common/Popup'
 import WcIcon from './WcIcon'
 
 type WcHeaderWidgetProps = {
