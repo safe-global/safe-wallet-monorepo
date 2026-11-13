@@ -22,6 +22,7 @@ import { useBannerVisibility, BannerType, HnBannerForCarousel, HypernativeFeatur
 import { useLoadFeature } from '@/features/__core__'
 import { StakeFeature, useIsStakingPromoBannerVisible, STAKING_PROMO_BANNER_HIDE_KEY } from '@/features/stake'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { IdleCashNudge, useDefiV1 } from '@/features/earn'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
@@ -46,12 +47,15 @@ const Dashboard = (): ReactElement => {
   const [, setHideStakingPromoBanner] = useLocalStorage<boolean>(STAKING_PROMO_BANNER_HIDE_KEY)
 
   const noAssets = balancesLoaded && items.length === 0
+  const defiV1 = useDefiV1()
 
   return (
     <>
       <div className={css.dashboardGrid}>
         <div className={css.leftCol}>
           <Overview />
+
+          {defiV1?.nudge === 'home' && <IdleCashNudge config={defiV1} placement="home" />}
 
           {isStakingPromoBannerVisible && <StakingPromoBanner onDismiss={() => setHideStakingPromoBanner(true)} />}
 

@@ -10,6 +10,10 @@ export { isEligibleEarnToken } from './services'
 
 export { EARN_TITLE } from './constants'
 
+export { DefiV1Context, useDefiV1 } from './defiV1/context'
+export { IdleCashNudge } from './defiV1/components/IdleCashNudge'
+export type { DefiV1Config } from './defiV1/types'
+
 // Vault transaction components (used by external transaction flow components)
 export {
   VaultDepositTxDetails,
