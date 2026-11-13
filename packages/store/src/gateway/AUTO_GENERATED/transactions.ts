@@ -1113,7 +1113,7 @@ export type NestedTransactionDto = {
   notes?: string | null
 }
 export type DeclaredAttributionDto = {
-  /** Known values: native-transfer, native-batch, safe-app, wallet-connect, widget, direct. Truncated to 64 characters. */
+  /** Known values: NATIVE_TRANSFER, NATIVE_BATCH, SAFE_APP, WALLET_CONNECT, WIDGET, DIRECT, CLI, MCP. Truncated to 64 characters. */
   channel?: string | null
   /** App name. Truncated to 256 characters. */
   appName?: string | null
