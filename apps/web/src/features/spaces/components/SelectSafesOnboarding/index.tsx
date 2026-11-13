@@ -44,6 +44,7 @@ const SelectSafesOnboarding = (): ReactElement => {
   const {
     trustedSafes,
     ownedSafes,
+    allSafes,
     flaggedAddresses,
     trustedSimilarityGroups,
     ownedSimilarityGroups,
@@ -51,7 +52,6 @@ const SelectSafesOnboarding = (): ReactElement => {
     handleSearch,
     hasNoSafes,
   } = useOnboardingSafes()
-  const allSafes = useMemo<AllSafeItems>(() => [...trustedSafes, ...ownedSafes], [trustedSafes, ownedSafes])
   const {
     formMethods,
     onSubmit,
@@ -86,22 +86,25 @@ const SelectSafesOnboarding = (): ReactElement => {
 
   const nameByAddress = useMemo(() => deriveNameByAddress(allSafes), [allSafes])
 
+  // Workspace Safes last: lookups take the first match, so a trusted or owned entry wins.
+  const previewSafes = useMemo<AllSafeItems>(() => [...allSafes, ...spaceSafes], [allSafes, spaceSafes])
+
   // Form starts empty; fall back to persisted Space safes so the mockup isn't blank on back-nav.
   // Names typed in the naming step win, so the mockup previews the workspace as it will be.
   const sidePanelAccounts = useMemo(() => {
     const isFormInitialized = Object.keys(selectedSafes ?? {}).length > 0
     const accounts = isFormInitialized
-      ? deriveSidePanelAccounts(selectedSafes ?? {}, allSafes)
+      ? deriveSidePanelAccounts(selectedSafes ?? {}, previewSafes)
       : deriveSidePanelAccountsFromSpace(spaceSafes).map((a) => ({
           ...a,
           name: a.name?.trim() || nameByAddress.get(a.address.toLowerCase()),
         }))
     return accounts.map((a) => ({ ...a, name: typedNames?.[a.address.toLowerCase()]?.trim() || a.name }))
-  }, [selectedSafes, allSafes, spaceSafes, nameByAddress, typedNames])
+  }, [selectedSafes, previewSafes, spaceSafes, nameByAddress, typedNames])
 
   const balanceSafes = useMemo(
-    () => deriveSelectedBalanceSafes(selectedSafes ?? {}, allSafes, spaceSafes),
-    [selectedSafes, allSafes, spaceSafes],
+    () => deriveSelectedBalanceSafes(selectedSafes ?? {}, previewSafes, spaceSafes),
+    [selectedSafes, previewSafes, spaceSafes],
   )
 
   const noSearchResults = !hasNoSafes && trustedSafes.length === 0 && ownedSafes.length === 0
