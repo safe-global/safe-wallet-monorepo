@@ -58,6 +58,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   // container query the safe selector wraps onto its own row, doubling the topbar height.
   // A fixed reserve then lets the topbar overlap the page (WA: dashboard cards clipped).
   const setTopbarNode = useCssHeightVar('--topbar-height')
+  const setBreadcrumbsNode = useCssHeightVar('--breadcrumbs-height')
 
   // Hide sidebar when transaction flow is open
   const isSidebarVisible = isSidebarOpen && !txFlow
@@ -112,7 +113,11 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
 
         <div className={classnames(css.content, { [css.welcomeGlow]: isWelcomeListRoute })}>
           <SafeLoadingError>
-            {!hideHeader && parentSafe && <Breadcrumbs />}
+            {!hideHeader && parentSafe && (
+              <div ref={setBreadcrumbsNode}>
+                <Breadcrumbs />
+              </div>
+            )}
 
             {children}
           </SafeLoadingError>
