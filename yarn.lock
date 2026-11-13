@@ -14333,6 +14333,7 @@ __metadata:
     react-dropzone: "npm:^14.2.3"
     react-resizable-panels: "npm:^4.5.3"
     sonner: "npm:^2.0.7"
+    tabbable: "npm:^6.4.0"
     tailwind-merge: "npm:^3.4.0"
     typescript: "npm:~5.9.2"
     typescript-eslint: "npm:^8.72.1"
