@@ -17,7 +17,7 @@ import { flattenSafeItems } from '@/hooks/safes'
 import MemberInviteRow from './components/MemberInviteRow'
 import useInviteNavigation from './hooks/useInviteNavigation'
 import useInviteForm from './hooks/useInviteForm'
-import { MemberRole } from '../../hooks/useSpaceMembers'
+import { MemberRole } from '../../memberRole'
 
 const ONBOARDING_STEP = 3
 const FORM_ID = 'invite-members-form'

@@ -5,7 +5,7 @@ import {
   isEmailAddress,
   normalizeInviteeIdentifier,
 } from './utils'
-import { MemberRole } from '../../hooks/useSpaceMembers'
+import { MemberRole } from '../../memberRole'
 
 describe('AddMemberModal utils', () => {
   it('normalizes invitee identifiers by trimming whitespace', () => {
