@@ -33,6 +33,7 @@ import type SurveyOnboarding from './components/SurveyOnboarding'
 import type SelectSafeModal from './components/SelectSafeModal'
 import type SafeWorkspaceSignInDialog from './components/SafeWorkspaceSignInDialog'
 import type SafeWorkspaceChooserDialog from './components/SafeWorkspaceChooserDialog'
+import type WorkspaceTour from './components/WorkspaceTour'
 import type SecurityHubPage from './components/SecurityHub/Page'
 import type SpaceActivityLogPage from './components/SpaceActivityLog/Page'
 import type SpacePlansPage from './components/Plans/Page'
@@ -77,6 +78,7 @@ export interface SpacesContract {
   SelectSafeModal: typeof SelectSafeModal
   SafeWorkspaceSignInDialog: typeof SafeWorkspaceSignInDialog
   SafeWorkspaceChooserDialog: typeof SafeWorkspaceChooserDialog
+  WorkspaceTour: typeof WorkspaceTour
 
   // Onboarding page components (PascalCase) - stub renders null
   CreateSpaceOnboarding: typeof CreateSpaceOnboarding
