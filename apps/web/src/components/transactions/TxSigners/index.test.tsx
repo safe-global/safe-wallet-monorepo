@@ -1,19 +1,31 @@
-import { render } from '@/tests/test-utils'
-import { act, screen, within, fireEvent, waitFor } from '@testing-library/react'
-import TxSigners from './index'
-import {
-  transactionDetailsBuilder,
-  multisigExecutionDetailsBuilder,
-  multisigConfirmationBuilder,
-  moduleExecutionDetailsBuilder,
-} from '@/tests/builders/transactionDetails'
-import { safeTxSummaryBuilder, executionInfoBuilder } from '@/tests/builders/safeTx'
-import { addressExBuilder } from '@/tests/builders/safe'
-import { mockSafeInfo, mockWallet, mockCurrentChain } from '@/tests/mocks/hooks'
-import { TransactionStatus } from '@safe-global/store/gateway/types'
+import type { ComponentProps } from 'react'
 import { faker } from '@faker-js/faker'
-import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import type {
+  MultisigExecutionDetails,
+  TransactionDetails,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { TransactionStatus } from '@safe-global/store/gateway/types'
+import {
+  AttestationVerificationStatus,
+  CheckStatus,
+  type SafenetCheckSnapshot,
+} from '@safe-global/utils/features/safenet-checks'
+import { attestedEvent, buildBenignSnapshot, buildCheckView } from '@safe-global/utils/features/safenet-checks/builders'
+import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import useAddressBook from '@/hooks/useAddressBook'
+import { useChain, useHasFeature } from '@/hooks/useChains'
+import { addressExBuilder } from '@/tests/builders/safe'
+import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
+import {
+  moduleExecutionDetailsBuilder,
+  multisigConfirmationBuilder,
+  multisigExecutionDetailsBuilder,
+  transactionDetailsBuilder,
+} from '@/tests/builders/transactionDetails'
+import { mockCurrentChain, mockSafeInfo, mockWallet } from '@/tests/mocks/hooks'
+import { act, fakerChecksummedAddress, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
+import TxSigners from './index'
 
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/wallets/useWallet')
@@ -24,171 +36,159 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 jest.mock('@/hooks/useIsPending', () => jest.fn(() => false))
 jest.mock('@/hooks/useTransactionStatus', () => jest.fn(() => 'Awaiting confirmations'))
-jest.mock('@/hooks/useAddressBook', () => jest.fn(() => ({})))
+jest.mock('@/hooks/useAddressBook', () => jest.fn())
 
 const mockGetTransaction = jest.fn()
-const mockReadOnlyProvider = { getTransaction: mockGetTransaction }
+const mockStableReadOnlyProvider = { getTransaction: mockGetTransaction }
 jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
-  useWeb3ReadOnly: jest.fn(() => mockReadOnlyProvider),
+  useWeb3ReadOnly: jest.fn(() => mockStableReadOnlyProvider),
 }))
 
-jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => {
-  const actual = jest.requireActual('@safe-global/utils/features/safenet-checks/hooks')
-  const { CheckStatus } = jest.requireActual('@safe-global/utils/features/safenet-checks')
-  return {
-    ...actual,
-    // Default: no check observed — TxSigners subscribes unconditionally for
-    // its isLast math, so every render needs a well-formed view.
-    useSafenetCheck: jest.fn(() => ({
-      snapshot: undefined,
-      status: CheckStatus.UNAVAILABLE,
-      publicStatus: CheckStatus.UNAVAILABLE,
-      isLoading: false,
-      isFetching: false,
-      isStale: false,
-      refetch: jest.fn(),
-    })),
-  }
-})
+jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
+  ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks'),
+  useSafenetCheck: jest.fn(),
+}))
 
-// Avoid rendering nested share link wrapper logic
 jest.mock('@/components/transactions/TxShareLink/TxShareLink', () => ({
   __esModule: true,
   default: jest.fn(({ children }) => children),
 }))
 
-const ownerAddress = checksumAddress(faker.finance.ethereumAddress())
+const mockUseAddressBook = jest.mocked(useAddressBook)
+const mockUseHasFeature = jest.mocked(useHasFeature)
+const mockUseChain = jest.mocked(useChain)
+const mockUseSafenetCheck = jest.mocked(useSafenetCheck)
 
-const buildConfirmations = (count: number, required: number) => {
-  const signers = Array.from({ length: count }, () => addressExBuilder().build())
-  const confirmations = signers.map((signer) => multisigConfirmationBuilder().with({ signer }).build())
-  return { signers, confirmations, required }
-}
+const ownerAddress = fakerChecksummedAddress()
+const THRESHOLD_ALERT = 'Can be executed once the threshold is reached.'
+const PROPOSER_ALERT = 'This transaction was created by a proposer. Please review and either confirm or reject it.'
+const EXPIRED_WARNING = 'This order has expired. Reject this transaction and try again.'
+
+const confirmationsBy = (count: number) =>
+  Array.from({ length: count }, () =>
+    multisigConfirmationBuilder().with({ signer: addressExBuilder().build() }).build(),
+  )
+
+const queuedTx = (
+  signatures: number,
+  threshold: number,
+  details: Partial<MultisigExecutionDetails> = {},
+  tx: Partial<TransactionDetails> = {},
+): TransactionDetails =>
+  transactionDetailsBuilder()
+    .with({
+      detailedExecutionInfo: multisigExecutionDetailsBuilder()
+        .with({ confirmations: confirmationsBy(signatures), confirmationsRequired: threshold, ...details })
+        .build(),
+      txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+      ...tx,
+    })
+    .build()
+
+const executedTx = (signatures: number, threshold: number, txHash = faker.string.hexadecimal({ length: 64 })) =>
+  transactionDetailsBuilder()
+    .with({
+      detailedExecutionInfo: multisigExecutionDetailsBuilder()
+        .with({
+          confirmations: confirmationsBy(signatures),
+          confirmationsRequired: threshold,
+          executor: addressExBuilder().build(),
+        })
+        .build(),
+      txStatus: TransactionStatus.SUCCESS,
+      executedAt: faker.date.recent().getTime(),
+      txHash,
+    })
+    .build()
+
+const oneSignatureShortSummary = (safeNonce: number, missingSigner: string) =>
+  safeTxSummaryBuilder()
+    .with({
+      txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+      executionInfo: executionInfoBuilder()
+        .with({
+          nonce: safeNonce,
+          confirmationsSubmitted: 1,
+          confirmationsRequired: 2,
+          missingSigners: [{ value: missingSigner }],
+        })
+        .build(),
+    })
+    .build()
+
+const renderTxSigners = (txDetails: TransactionDetails, props: Partial<ComponentProps<typeof TxSigners>> = {}) =>
+  renderWithUserEvent(
+    <TxSigners
+      txDetails={txDetails}
+      txSummary={safeTxSummaryBuilder().with({ txStatus: txDetails.txStatus }).build()}
+      isTxFromProposer={false}
+      proposer={ownerAddress}
+      {...props}
+    />,
+  )
+
+const spyOnClipboard = () => jest.spyOn(navigator.clipboard, 'writeText').mockResolvedValue()
 
 describe('TxSigners (Audit Log)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockGetTransaction.mockReset()
+    mockUseAddressBook.mockReturnValue({})
+    mockUseHasFeature.mockReturnValue(false)
+    mockUseChain.mockReturnValue(undefined)
+    mockUseSafenetCheck.mockReturnValue(buildCheckView())
     mockSafeInfo({ threshold: 2, owners: [{ value: ownerAddress, name: null, logoUri: null }] })
     mockWallet({ address: ownerAddress })
     mockCurrentChain()
   })
 
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   it('returns null for transactions without execution info or executedAt', () => {
     const txDetails = transactionDetailsBuilder().with({ detailedExecutionInfo: undefined, executedAt: null }).build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    const { container } = render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+    const { container } = renderTxSigners(txDetails)
 
     expect(container.firstChild).toBeNull()
   })
 
   it('renders the "AUDIT LOG" header', () => {
-    const { confirmations } = buildConfirmations(1, 2)
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 2 })
-          .build(),
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder()
-      .with({
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-        executionInfo: executionInfoBuilder().with({ confirmationsSubmitted: 1, confirmationsRequired: 2 }).build(),
-      })
-      .build()
-
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    renderTxSigners(queuedTx(1, 2))
 
     expect(screen.getByText('Audit log')).toBeInTheDocument()
   })
 
   it('displays the confirmation count chip', () => {
-    const { confirmations } = buildConfirmations(2, 3)
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 3 })
-          .build(),
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder()
-      .with({
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-        executionInfo: executionInfoBuilder().with({ confirmationsSubmitted: 2, confirmationsRequired: 3 }).build(),
-      })
-      .build()
-
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    renderTxSigners(queuedTx(2, 3))
 
     expect(screen.getByText('2/3')).toBeInTheDocument()
   })
 
   it('shows "Created" label for owner-initiated transactions', () => {
-    const { confirmations } = buildConfirmations(1, 2)
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 2 })
-          .build(),
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
-
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    renderTxSigners(queuedTx(1, 2), { isTxFromProposer: false })
 
     expect(screen.getByText('Created')).toBeInTheDocument()
   })
 
   it('shows "Proposed" label for proposer-initiated transactions', () => {
-    const { confirmations } = buildConfirmations(1, 2)
-    const proposerAddr = checksumAddress(faker.finance.ethereumAddress())
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 2 })
-          .build(),
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
-
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={true} proposer={proposerAddr} />)
+    renderTxSigners(queuedTx(1, 2), { isTxFromProposer: true, proposer: fakerChecksummedAddress() })
 
     expect(screen.getByText('Proposed')).toBeInTheDocument()
   })
 
   describe('the name of the proposer', () => {
-    const mockUseAddressBook = jest.requireMock('@/hooks/useAddressBook') as jest.Mock
-    const proposerAddr = checksumAddress(faker.finance.ethereumAddress())
+    const proposerAddr = fakerChecksummedAddress()
 
-    afterEach(() => {
-      mockUseAddressBook.mockReturnValue({})
-    })
-
-    const renderProposedTx = (proposedByDelegateName: string | null) => {
-      const { confirmations } = buildConfirmations(0, 2)
-      const txDetails = transactionDetailsBuilder()
-        .with({
-          detailedExecutionInfo: multisigExecutionDetailsBuilder()
-            .with({
-              confirmations,
-              confirmationsRequired: 2,
-              proposer: { value: proposerAddr, name: null, logoUri: null },
-              proposedByDelegate: { value: proposerAddr, name: proposedByDelegateName, logoUri: null },
-            })
-            .build(),
-          txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-        })
-        .build()
-      const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
-
-      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={true} proposer={proposerAddr} />)
-    }
+    const renderProposedTx = (proposedByDelegateName: string | null) =>
+      renderTxSigners(
+        queuedTx(0, 2, {
+          proposer: { value: proposerAddr, name: null, logoUri: null },
+          proposedByDelegate: { value: proposerAddr, name: proposedByDelegateName, logoUri: null },
+        }),
+        { isTxFromProposer: true, proposer: proposerAddr },
+      )
 
     it('shows the name that the local address book gives the proposer', () => {
       mockUseAddressBook.mockReturnValue({ [proposerAddr]: 'Treasury proposer' })
@@ -207,349 +207,151 @@ describe('TxSigners (Audit Log)', () => {
   })
 
   it('renders "Signed (N/M)" labels for each confirmation', () => {
-    const { confirmations } = buildConfirmations(2, 3)
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 3 })
-          .build(),
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
-
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    renderTxSigners(queuedTx(2, 3))
 
     expect(screen.getByText('Signed (1/3)')).toBeInTheDocument()
     expect(screen.getByText('Signed (2/3)')).toBeInTheDocument()
   })
 
   it('shows "Executed" label when executor is present', () => {
-    const executor = addressExBuilder().build()
-    const { confirmations } = buildConfirmations(2, 2)
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 2, executor })
-          .build(),
-        txStatus: TransactionStatus.SUCCESS,
-        executedAt: Date.now(),
-        txHash: faker.string.hexadecimal({ length: 64 }),
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
-
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    renderTxSigners(executedTx(2, 2))
 
     expect(screen.getByText('Executed')).toBeInTheDocument()
   })
 
   it('shows info banner when below threshold', () => {
-    const { confirmations } = buildConfirmations(1, 3)
-    mockWallet(null) // No wallet connected so canExecute is false
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 3, executor: null })
-          .build(),
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+    renderTxSigners(queuedTx(1, 3))
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
-
-    expect(screen.getByText('Can be executed once the threshold is reached.')).toBeInTheDocument()
-    const alert = screen.getByText('Can be executed once the threshold is reached.').closest('[role="alert"]')
+    const alert = screen.getByText(THRESHOLD_ALERT).closest('[role="alert"]')
     expect(alert).toHaveClass('bg-[var(--color-info-background)]')
     expect(alert?.querySelector('svg.lucide-info')).toBeTruthy()
   })
 
   it('shows proposer review banner when proposer-submitted and below threshold', () => {
-    const { confirmations } = buildConfirmations(1, 3)
-    mockWallet(null)
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 3, executor: null })
-          .build(),
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+    renderTxSigners(queuedTx(1, 3), { isTxFromProposer: true, proposer: fakerChecksummedAddress() })
 
-    render(
-      <TxSigners
-        txDetails={txDetails}
-        txSummary={txSummary}
-        isTxFromProposer={true}
-        proposer={checksumAddress(faker.finance.ethereumAddress())}
-      />,
-    )
-
-    expect(
-      screen.getByText('This transaction was created by a proposer. Please review and either confirm or reject it.'),
-    ).toBeInTheDocument()
+    expect(screen.getByText(PROPOSER_ALERT)).toBeInTheDocument()
   })
 
   it('hides info banners once threshold is reached', () => {
-    const { confirmations } = buildConfirmations(2, 2)
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 2, executor: null })
-          .build(),
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+    renderTxSigners(queuedTx(2, 2))
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
-
-    expect(screen.queryByText('Can be executed once the threshold is reached.')).not.toBeInTheDocument()
+    expect(screen.queryByText(THRESHOLD_ALERT)).not.toBeInTheDocument()
   })
 
   it('shows the expired warning for a queued expired order', () => {
-    const { confirmations } = buildConfirmations(1, 2)
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 2, executor: null })
-          .build(),
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+    renderTxSigners(queuedTx(1, 2), { isExpired: true })
 
-    render(
-      <TxSigners
-        txDetails={txDetails}
-        txSummary={txSummary}
-        isTxFromProposer={false}
-        proposer={ownerAddress}
-        isExpired
-      />,
-    )
-
-    expect(screen.getByText('This order has expired. Reject this transaction and try again.')).toBeInTheDocument()
+    expect(screen.getByText(EXPIRED_WARNING)).toBeInTheDocument()
   })
 
   it('hides the expired warning once the transaction has been executed', () => {
-    const executor = addressExBuilder().build()
-    const { confirmations } = buildConfirmations(2, 2)
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 2, executor })
-          .build(),
-        txStatus: TransactionStatus.SUCCESS,
-        executedAt: Date.now(),
-        txHash: faker.string.hexadecimal({ length: 64 }),
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
+    renderTxSigners(executedTx(2, 2), { isExpired: true })
 
-    render(
-      <TxSigners
-        txDetails={txDetails}
-        txSummary={txSummary}
-        isTxFromProposer={false}
-        proposer={ownerAddress}
-        isExpired
-      />,
-    )
-
-    expect(screen.queryByText('This order has expired. Reject this transaction and try again.')).not.toBeInTheDocument()
+    expect(screen.queryByText(EXPIRED_WARNING)).not.toBeInTheDocument()
   })
 
-  it('shows proposer banner even after threshold is reached but not executed', () => {
-    const { confirmations } = buildConfirmations(2, 2)
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 2, executor: null })
-          .build(),
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+  it('shows proposer banner but no threshold banner once threshold is reached but not executed', () => {
+    renderTxSigners(queuedTx(2, 2), { isTxFromProposer: true, proposer: fakerChecksummedAddress() })
 
-    render(
-      <TxSigners
-        txDetails={txDetails}
-        txSummary={txSummary}
-        isTxFromProposer={true}
-        proposer={checksumAddress(faker.finance.ethereumAddress())}
-      />,
-    )
-
-    expect(
-      screen.getByText('This transaction was created by a proposer. Please review and either confirm or reject it.'),
-    ).toBeInTheDocument()
-    // Threshold alert should still be hidden since threshold is met
-    expect(screen.queryByText('Can be executed once the threshold is reached.')).not.toBeInTheDocument()
+    expect(screen.getByText(PROPOSER_ALERT)).toBeInTheDocument()
+    expect(screen.queryByText(THRESHOLD_ALERT)).not.toBeInTheDocument()
   })
 
-  it('shows alerts for the last signer who can execute', () => {
-    const { confirmations } = buildConfirmations(1, 2)
-    // Wallet is the last signer needed — canExecute would be true
+  it('keeps both banners for a connected owner whose signature would make the transaction executable', () => {
+    const safe = mockSafeInfo({ threshold: 2, owners: [{ value: ownerAddress, name: null, logoUri: null }] })
     mockWallet({ address: ownerAddress })
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 2, executor: null })
-          .build(),
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    render(
-      <TxSigners
-        txDetails={txDetails}
-        txSummary={txSummary}
-        isTxFromProposer={true}
-        proposer={checksumAddress(faker.finance.ethereumAddress())}
-      />,
-    )
+    renderTxSigners(queuedTx(1, 2), {
+      txSummary: oneSignatureShortSummary(safe.nonce, ownerAddress),
+      isTxFromProposer: true,
+      proposer: fakerChecksummedAddress(),
+    })
 
-    expect(screen.getByText('Can be executed once the threshold is reached.')).toBeInTheDocument()
-    expect(
-      screen.getByText('This transaction was created by a proposer. Please review and either confirm or reject it.'),
-    ).toBeInTheDocument()
+    expect(screen.getByText(THRESHOLD_ALERT)).toBeInTheDocument()
+    expect(screen.getByText(PROPOSER_ALERT)).toBeInTheDocument()
+  })
+
+  it('shows the pending execution step to a connected owner whose signature would make the transaction executable', () => {
+    const safe = mockSafeInfo({ threshold: 2, owners: [{ value: ownerAddress, name: null, logoUri: null }] })
+    mockWallet({ address: ownerAddress })
+
+    renderTxSigners(queuedTx(1, 2), { txSummary: oneSignatureShortSummary(safe.nonce, ownerAddress) })
+
+    expect(screen.getByText('Waiting')).toBeInTheDocument()
+  })
+
+  it('hides the execution step while signatures are missing and no wallet is connected', () => {
+    const safe = mockSafeInfo({ threshold: 2, owners: [{ value: ownerAddress, name: null, logoUri: null }] })
+    mockWallet(null)
+
+    renderTxSigners(queuedTx(1, 2), { txSummary: oneSignatureShortSummary(safe.nonce, ownerAddress) })
+
+    expect(screen.queryByText('Waiting')).not.toBeInTheDocument()
   })
 
   it('shows disabled explorer button with tooltip for queued transactions', () => {
-    const { confirmations } = buildConfirmations(1, 2)
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 2 })
-          .build(),
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-        txHash: null,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+    renderTxSigners(queuedTx(1, 2))
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
-
-    const actionsList = screen.getByTestId('transaction-actions-list')
-    const disabledButtons = within(actionsList).getAllByRole('button')
-    const disabledExplorerBtn = disabledButtons.find((btn) => btn.hasAttribute('disabled'))
-    expect(disabledExplorerBtn).toBeInTheDocument()
+    const actions = within(screen.getByTestId('transaction-actions-list'))
+    expect(actions.getByRole('button', { name: 'View on block explorer' })).toBeDisabled()
   })
 
   it('offers to copy the transaction link for a queued transaction', () => {
-    const { confirmations } = buildConfirmations(1, 2)
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 2 })
-          .build(),
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-        txHash: null,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
-
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    renderTxSigners(queuedTx(1, 2))
 
     expect(screen.getByRole('button', { name: 'Copy transaction link' })).toBeInTheDocument()
   })
 
-  it('uses consistent labels for cancellation transactions', () => {
-    const { confirmations } = buildConfirmations(1, 2)
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        txInfo: {
-          type: 'Custom' as const,
-          to: addressExBuilder().build(),
-          dataSize: '0',
-          value: '0',
-          isCancellation: true,
-          methodName: null,
-        },
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 2 })
-          .build(),
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+  it('uses the same labels for cancellation transactions as for other transactions', () => {
+    const cancellation = {
+      type: 'Custom' as const,
+      to: addressExBuilder().build(),
+      dataSize: '0',
+      value: '0',
+      isCancellation: true,
+      methodName: null,
+    }
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    renderTxSigners(queuedTx(1, 2, {}, { txInfo: cancellation }))
 
-    // Cancellation uses same labels as normal transactions
     expect(screen.getByText('Created')).toBeInTheDocument()
     expect(screen.getByText('Signed (1/2)')).toBeInTheDocument()
   })
 
   it('copies the transaction hash to clipboard via the hash button', async () => {
-    const writeTextMock = jest.fn().mockResolvedValue(undefined)
-    Object.assign(navigator, { clipboard: { writeText: writeTextMock } })
-
     const txHash = faker.string.hexadecimal({ length: 64 })
-    const executor = addressExBuilder().build()
-    const { confirmations } = buildConfirmations(2, 2)
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 2, executor })
-          .build(),
-        txStatus: TransactionStatus.SUCCESS,
-        executedAt: Date.now(),
-        txHash,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
+    const { user } = renderTxSigners(executedTx(2, 2, txHash))
+    const writeText = spyOnClipboard()
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    await user.click(screen.getByTestId('copy-tx-hash-btn'))
 
-    fireEvent.click(screen.getByTestId('copy-tx-hash-btn'))
+    expect(writeText).toHaveBeenCalledWith(txHash)
+  })
 
-    await waitFor(() => {
-      expect(writeTextMock).toHaveBeenCalledWith(txHash)
-    })
+  it('shows "Copied" when the pointer comes back to the hash button right after copying', async () => {
+    const { user } = renderTxSigners(executedTx(2, 2))
+    spyOnClipboard()
+    const hashButton = screen.getByTestId('copy-tx-hash-btn')
+
+    await user.click(hashButton)
+    await user.unhover(hashButton)
+    await user.hover(hashButton)
+
+    expect(await screen.findByText('Copied')).toBeInTheDocument()
   })
 
   it('disables the hash button when the transaction has no hash yet', () => {
-    const { confirmations } = buildConfirmations(1, 2)
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 2 })
-          .build(),
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-        txHash: null,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
-
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    renderTxSigners(queuedTx(1, 2))
 
     expect(screen.queryByTestId('copy-tx-hash-btn')).not.toBeInTheDocument()
   })
 
   it('anchors the "Available after execution" tooltips on a wrapper, not on the disabled button', async () => {
-    const { confirmations } = buildConfirmations(1, 2)
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 2 })
-          .build(),
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-        txHash: null,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
-
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    renderTxSigners(queuedTx(1, 2))
 
     const actionsList = screen.getByTestId('transaction-actions-list')
 
-    // A disabled control receives neither pointer nor focus events, so a tooltip anchored straight
-    // onto one can never open. jsdom does not reproduce that suppression, hence the structural check.
     for (const trigger of actionsList.querySelectorAll('[data-slot="tooltip-trigger"]')) {
       expect(trigger).not.toBeDisabled()
     }
@@ -566,83 +368,48 @@ describe('TxSigners (Audit Log)', () => {
     }
   })
 
-  it('copies address to clipboard on click', async () => {
-    const writeTextMock = jest.fn().mockResolvedValue(undefined)
-    Object.assign(navigator, { clipboard: { writeText: writeTextMock } })
+  it('copies the signer address when the signer is clicked', async () => {
+    const txDetails = queuedTx(1, 2)
+    const [signer] = (txDetails.detailedExecutionInfo as MultisigExecutionDetails).confirmations
+    const { user } = renderTxSigners(txDetails)
+    const writeText = spyOnClipboard()
 
-    const { confirmations } = buildConfirmations(1, 2)
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations, confirmationsRequired: 2 })
-          .build(),
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
+    await user.click(screen.getByRole('button', { name: `Copy address ${signer.signer.value}` }))
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
-
-    const copyButtons = screen.getAllByRole('button', { name: /^Copy address / })
-    fireEvent.click(copyButtons[0])
-
-    await waitFor(() => {
-      expect(writeTextMock).toHaveBeenCalledWith(expect.any(String))
-    })
+    expect(writeText).toHaveBeenCalledWith(signer.signer.value)
   })
 
   it('resolves address book names for actors', () => {
-    const namedAddress = checksumAddress(faker.finance.ethereumAddress())
-    const mockUseAddressBook = jest.requireMock('@/hooks/useAddressBook') as jest.Mock
+    const namedAddress = fakerChecksummedAddress()
     mockUseAddressBook.mockReturnValue({ [namedAddress]: 'Alice' })
-
     const confirmation = multisigConfirmationBuilder()
       .with({ signer: { value: namedAddress, name: null, logoUri: null } })
       .build()
-    const txDetails = transactionDetailsBuilder()
-      .with({
-        detailedExecutionInfo: multisigExecutionDetailsBuilder()
-          .with({ confirmations: [confirmation], confirmationsRequired: 2 })
-          .build(),
-        txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-      })
-      .build()
-    const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-    render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} proposer={ownerAddress} />)
+    renderTxSigners(queuedTx(0, 2, { confirmations: [confirmation] }))
 
-    expect(screen.getByText(/Alice/)).toBeInTheDocument()
+    expect(screen.getByText('By Alice')).toBeInTheDocument()
   })
 
   describe('Module-executed transactions', () => {
-    const buildModuleTxDetails = (moduleOverrides = {}, txOverrides = {}) =>
+    const moduleTx = () =>
       transactionDetailsBuilder()
         .with({
           detailedExecutionInfo: moduleExecutionDetailsBuilder()
-            .with({
-              address: {
-                value: checksumAddress(faker.finance.ethereumAddress()),
-                name: 'AllowanceModule',
-                logoUri: null,
-              },
-              ...moduleOverrides,
-            })
+            .with({ address: { value: fakerChecksummedAddress(), name: 'AllowanceModule', logoUri: null } })
             .build(),
           txStatus: TransactionStatus.SUCCESS,
-          executedAt: Date.now(),
+          executedAt: faker.date.recent().getTime(),
           txHash: faker.string.hexadecimal({ length: 64 }),
-          ...txOverrides,
         })
         .build()
 
     it('renders Created and Executed rows with initiator from on-chain lookup', async () => {
-      const initiatorAddr = checksumAddress(faker.finance.ethereumAddress())
+      const initiatorAddr = fakerChecksummedAddress()
       mockGetTransaction.mockResolvedValue({ from: initiatorAddr })
+      const txDetails = moduleTx()
 
-      const txDetails = buildModuleTxDetails()
-      const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
-
-      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+      renderTxSigners(txDetails)
 
       const initiator = await screen.findByRole('button', { name: `Copy address ${initiatorAddr}` })
       expect(initiator).toHaveTextContent(`By ${shortenAddress(initiatorAddr)}`)
@@ -658,23 +425,17 @@ describe('TxSigners (Audit Log)', () => {
     it('shows dash for Created row when RPC lookup has not resolved', () => {
       mockGetTransaction.mockReturnValue(new Promise(() => {}))
 
-      const txDetails = buildModuleTxDetails()
-      const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
-
-      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+      renderTxSigners(moduleTx())
 
       expect(screen.getByText('Created')).toBeInTheDocument()
       expect(screen.getByText('—')).toBeInTheDocument()
     })
 
     it('does not show confirmation chip for module transactions', async () => {
-      const initiatorAddr = checksumAddress(faker.finance.ethereumAddress())
+      const initiatorAddr = fakerChecksummedAddress()
       mockGetTransaction.mockResolvedValue({ from: initiatorAddr })
 
-      const txDetails = buildModuleTxDetails()
-      const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
-
-      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+      renderTxSigners(moduleTx())
 
       expect(await screen.findByRole('button', { name: `Copy address ${initiatorAddr}` })).toBeInTheDocument()
       expect(screen.queryByText(/\d\/\d/)).not.toBeInTheDocument()
@@ -683,19 +444,18 @@ describe('TxSigners (Audit Log)', () => {
 
   describe('Incoming/simple executed transactions', () => {
     it('renders audit log with Executed row for incoming transactions', async () => {
-      const senderAddr = checksumAddress(faker.finance.ethereumAddress())
+      const senderAddr = fakerChecksummedAddress()
       mockGetTransaction.mockResolvedValue({ from: senderAddr })
       const txDetails = transactionDetailsBuilder()
         .with({
           detailedExecutionInfo: undefined,
           txStatus: TransactionStatus.SUCCESS,
-          executedAt: Date.now(),
+          executedAt: faker.date.recent().getTime(),
           txHash: faker.string.hexadecimal({ length: 64 }),
         })
         .build()
-      const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.SUCCESS }).build()
 
-      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+      renderTxSigners(txDetails)
 
       const sender = await screen.findByRole('button', { name: `Copy address ${senderAddr}` })
       expect(sender).toHaveTextContent(`By ${shortenAddress(senderAddr)}`)
@@ -706,192 +466,133 @@ describe('TxSigners (Audit Log)', () => {
 
     it('returns null for transactions without executedAt', () => {
       const txDetails = transactionDetailsBuilder()
-        .with({
-          detailedExecutionInfo: undefined,
-          executedAt: null,
-          txHash: null,
-        })
+        .with({ detailedExecutionInfo: undefined, executedAt: null, txHash: null })
         .build()
-      const txSummary = safeTxSummaryBuilder().with({ txStatus: TransactionStatus.AWAITING_CONFIRMATIONS }).build()
 
-      const { container } = render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+      const { container } = renderTxSigners(txDetails)
 
       expect(container.firstChild).toBeNull()
     })
   })
 
   describe('Safenet audit step', () => {
-    const { useHasFeature, useChain } = jest.requireMock('@/hooks/useChains') as {
-      useHasFeature: jest.Mock
-      useChain: jest.Mock
-    }
-    const { useSafenetCheck } = jest.requireMock('@safe-global/utils/features/safenet-checks/hooks') as {
-      useSafenetCheck: jest.Mock
-    }
-    const safenetTxHash = `0x${'ab'.repeat(32)}`
+    const SAFENET_TX_HASH: `0x${string}` = `0x${'ab'.repeat(32)}`
+    const SUBMITTED_AT = 1_700_000_000_000
+    const LAZY_FEATURE_TIMEOUT_MS = 10_000
+    const SLOW_TEST_TIMEOUT_MS = 15_000
 
-    const buildSafenetTx = () => {
-      const { confirmations } = buildConfirmations(1, 1)
-      const txDetails = transactionDetailsBuilder()
-        .with({
-          detailedExecutionInfo: multisigExecutionDetailsBuilder()
-            .with({
-              confirmations,
-              confirmationsRequired: 1,
-              safeTxHash: safenetTxHash,
-              submittedAt: 1_700_000_000_000,
-            })
-            .build(),
-          txStatus: TransactionStatus.SUCCESS,
-        })
-        .build()
-      const txSummary = safeTxSummaryBuilder()
-        .with({
-          txStatus: TransactionStatus.SUCCESS,
-          executionInfo: executionInfoBuilder().with({ confirmationsSubmitted: 1, confirmationsRequired: 1 }).build(),
-        })
-        .build()
-      return { txDetails, txSummary }
-    }
+    const safenetTx = () => queuedTx(1, 2, { safeTxHash: SAFENET_TX_HASH, submittedAt: SUBMITTED_AT })
 
-    it('renders the step for THIS transaction hash with the flag on', async () => {
-      useHasFeature.mockReturnValue(true)
-      mockSafeInfo({ chainId: '1', threshold: 1, owners: [{ value: ownerAddress, name: null, logoUri: null }] })
-      const { CheckStatus } = jest.requireActual('@safe-global/utils/features/safenet-checks')
-      const { buildBenignSnapshot, attestedEvent } = jest.requireActual(
-        '@safe-global/utils/features/safenet-checks/builders',
+    const observeBenignCheck = (
+      snapshot: SafenetCheckSnapshot = buildBenignSnapshot({ safeTxHash: SAFENET_TX_HASH }),
+    ) => {
+      mockUseHasFeature.mockReturnValue(true)
+      mockSafeInfo({ chainId: '1', threshold: 2, owners: [{ value: ownerAddress, name: null, logoUri: null }] })
+      mockUseSafenetCheck.mockReturnValue(
+        buildCheckView({ snapshot, status: CheckStatus.BENIGN, publicStatus: CheckStatus.BENIGN }),
       )
-      const { AttestationVerificationStatus } = jest.requireActual('@safe-global/utils/features/safenet-checks')
-      const attested = attestedEvent({ safeTxHash: safenetTxHash })
-      useSafenetCheck.mockReturnValue({
-        snapshot: buildBenignSnapshot({
-          safeTxHash: safenetTxHash,
-          events: [attested],
-          attestation: {
-            status: AttestationVerificationStatus.VERIFIED,
-            signatureId: attested.signatureId,
-            message: null,
+    }
+
+    const waitForSafenetStep = () =>
+      waitFor(() => expect(screen.getByText('No issues found')).toBeInTheDocument(), {
+        timeout: LAZY_FEATURE_TIMEOUT_MS,
+      })
+
+    it(
+      'shows the Safenet result of this transaction with the flag on',
+      async () => {
+        observeBenignCheck()
+
+        renderTxSigners(safenetTx())
+
+        await waitForSafenetStep()
+        expect(screen.getByTestId('safenet-explorer-link')).toHaveTextContent('Safenet')
+      },
+      SLOW_TEST_TIMEOUT_MS,
+    )
+
+    it(
+      'watches the Safenet check of this transaction hash from its submission time',
+      async () => {
+        observeBenignCheck()
+
+        renderTxSigners(safenetTx())
+
+        await waitForSafenetStep()
+        expect(mockUseSafenetCheck).toHaveBeenCalledWith(
+          SAFENET_TX_HASH,
+          SUBMITTED_AT,
+          expect.objectContaining({ chainId: '1' }),
+        )
+      },
+      SLOW_TEST_TIMEOUT_MS,
+    )
+
+    it(
+      'links the Safenet step to the Safenet explorer even when the chain has a block explorer',
+      async () => {
+        const attested = attestedEvent({ safeTxHash: SAFENET_TX_HASH })
+        observeBenignCheck(
+          buildBenignSnapshot({
+            safeTxHash: SAFENET_TX_HASH,
+            events: [attested],
+            attestation: {
+              status: AttestationVerificationStatus.VERIFIED,
+              signatureId: attested.signatureId,
+              message: null,
+            },
+          }),
+        )
+        mockUseChain.mockReturnValue({
+          blockExplorerUriTemplate: {
+            txHash: 'https://gnosisscan.io/tx/{{txHash}}',
+            address: 'https://gnosisscan.io/address/{{address}}',
+            api: '',
           },
-        }),
-        status: CheckStatus.BENIGN,
-        publicStatus: CheckStatus.BENIGN,
-        isLoading: false,
-        isFetching: false,
-        isStale: false,
-        refetch: jest.fn(),
-      })
-      // A configured block explorer must not replace the Safenet explorer link.
-      useChain.mockReturnValue({
-        blockExplorerUriTemplate: {
-          txHash: 'https://gnosisscan.io/tx/{{txHash}}',
-          address: 'https://gnosisscan.io/address/{{address}}',
-          api: '',
-        },
-      })
-      const { txDetails, txSummary } = buildSafenetTx()
+        } as ReturnType<typeof useChain>)
 
-      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+        renderTxSigners(safenetTx())
 
-      // The feature loads lazily — the step appears once the chunk resolves.
-      // Cold CI runners can take seconds to transform the chunk's module graph.
-      await waitFor(() => expect(screen.getByTestId('safenet-explorer-link')).toHaveTextContent('Safenet'), {
-        timeout: 10_000,
-      })
-      expect(screen.getByText('No issues found')).toBeInTheDocument()
-      // The hook watches THIS transaction's hash, aimed at its submission time.
-      expect(useSafenetCheck).toHaveBeenCalledWith(
-        safenetTxHash,
-        1_700_000_000_000,
-        expect.objectContaining({ chainId: expect.any(String) }),
-      )
-      expect(screen.getByTestId('safenet-explorer-link')).toHaveAttribute(
-        'href',
-        expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${safenetTxHash}`),
-      )
-    }, 15_000)
+        await waitForSafenetStep()
+        expect(screen.getByTestId('safenet-explorer-link')).toHaveAttribute(
+          'href',
+          expect.stringContaining(`/#/safeTx?chainId=1&safeTxHash=${SAFENET_TX_HASH}`),
+        )
+      },
+      SLOW_TEST_TIMEOUT_MS,
+    )
 
     it('renders nothing and never watches a hash with the flag off', () => {
-      useHasFeature.mockReturnValue(false)
-      const { txDetails, txSummary } = buildSafenetTx()
+      mockUseHasFeature.mockReturnValue(false)
 
-      render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+      renderTxSigners(safenetTx())
 
       expect(screen.queryByText(/By Safenet|^Safenet$/)).not.toBeInTheDocument()
-      // TxSigners still calls the hook (isLast math) but with no hash — the
-      // hook's skip path, so the chain is never read.
-      for (const call of useSafenetCheck.mock.calls) {
-        expect(call[0]).toBeUndefined()
-      }
+      const watchedHashes = mockUseSafenetCheck.mock.calls.map(([hash]) => hash)
+      expect(watchedHashes.filter(Boolean)).toEqual([])
     })
 
-    const buildPendingSafenetTx = () => {
-      const { confirmations } = buildConfirmations(1, 2)
-      const txDetails = transactionDetailsBuilder()
-        .with({
-          detailedExecutionInfo: multisigExecutionDetailsBuilder()
-            .with({
-              confirmations,
-              confirmationsRequired: 2,
-              safeTxHash: safenetTxHash,
-              submittedAt: 1_700_000_000_000,
-            })
-            .build(),
-          txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-        })
-        .build()
-      const txSummary = safeTxSummaryBuilder()
-        .with({
-          txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
-          executionInfo: executionInfoBuilder().with({ confirmationsSubmitted: 1, confirmationsRequired: 2 }).build(),
-        })
-        .build()
-      return { txDetails, txSummary }
-    }
+    it(
+      'draws connectors below Created and Signed when a pending transaction shows a Safenet check',
+      async () => {
+        observeBenignCheck()
 
-    it('moves isLast off the signing row when a pending tx shows a check (connector stays unbroken)', async () => {
-      useHasFeature.mockReturnValue(true)
-      mockSafeInfo({ chainId: '1', threshold: 2, owners: [{ value: ownerAddress, name: null, logoUri: null }] })
-      const { CheckStatus } = jest.requireActual('@safe-global/utils/features/safenet-checks')
-      const { buildBenignSnapshot } = jest.requireActual('@safe-global/utils/features/safenet-checks/builders')
-      useSafenetCheck.mockReturnValue({
-        snapshot: buildBenignSnapshot({ safeTxHash: safenetTxHash }),
-        status: CheckStatus.BENIGN,
-        publicStatus: CheckStatus.BENIGN,
-        isLoading: false,
-        isFetching: false,
-        isStale: false,
-        refetch: jest.fn(),
-      })
-      const { txDetails, txSummary } = buildPendingSafenetTx()
+        const { container } = renderTxSigners(safenetTx())
 
-      const { container } = render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+        await waitForSafenetStep()
+        expect(screen.queryByText('Executed')).not.toBeInTheDocument()
+        expect(container.getElementsByClassName('timelineLine')).toHaveLength(2)
+      },
+      SLOW_TEST_TIMEOUT_MS,
+    )
 
-      await waitFor(() => expect(screen.getByText('No issues found')).toBeInTheDocument(), { timeout: 10_000 })
-      expect(screen.queryByText('Executed')).not.toBeInTheDocument()
-      // Created + Signed keep their connectors; the Safenet step is the last row.
-      expect(container.getElementsByClassName('timelineLine')).toHaveLength(2)
-    }, 15_000)
+    it('draws a connector only below Created when no Safenet check is observed', async () => {
+      mockUseHasFeature.mockReturnValue(true)
+      mockUseSafenetCheck.mockReturnValue(buildCheckView())
 
-    it('keeps isLast on the signing row when no check is observed', async () => {
-      useHasFeature.mockReturnValue(true)
-      mockSafeInfo({ chainId: '1', threshold: 2, owners: [{ value: ownerAddress, name: null, logoUri: null }] })
-      // mockReturnValue survives clearAllMocks — pin the no-check view explicitly.
-      const { CheckStatus } = jest.requireActual('@safe-global/utils/features/safenet-checks')
-      useSafenetCheck.mockReturnValue({
-        snapshot: undefined,
-        status: CheckStatus.UNAVAILABLE,
-        publicStatus: CheckStatus.UNAVAILABLE,
-        isLoading: false,
-        isFetching: false,
-        isStale: false,
-        refetch: jest.fn(),
-      })
-      const { txDetails, txSummary } = buildPendingSafenetTx()
-
-      const { container } = render(<TxSigners txDetails={txDetails} txSummary={txSummary} isTxFromProposer={false} />)
+      const { container } = renderTxSigners(safenetTx())
 
       await waitFor(() => expect(screen.getByText(/Signed/)).toBeInTheDocument())
-      // Created connects to Signed; Signed is the last visible row.
       expect(container.getElementsByClassName('timelineLine')).toHaveLength(1)
     })
   })
