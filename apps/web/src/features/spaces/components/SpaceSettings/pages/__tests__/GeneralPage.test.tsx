@@ -29,6 +29,11 @@ jest.mock('../../sections/DangerZoneSection', () => ({
   default: () => <div data-testid="danger-zone-section" />,
 }))
 
+jest.mock('../../../WorkspaceTour/WorkspaceTourSection', () => ({
+  __esModule: true,
+  default: () => <div data-testid="workspace-tour-section" />,
+}))
+
 jest.mock('@/features/oidc-auth', () => ({
   WorkspaceTwoFactorSection: ({
     members,
@@ -71,7 +76,16 @@ describe('GeneralPage', () => {
       'identity-section',
       'workspace-2fa-section',
       'appearance-section',
+      'workspace-tour-section',
       'danger-zone-section',
     ])
+  })
+
+  it('offers the workspace tour just above the danger zone', () => {
+    render(<GeneralPage />)
+
+    const tourSection = screen.getByTestId('workspace-tour-section')
+
+    expect(tourSection.nextElementSibling).toBe(screen.getByTestId('danger-zone-section'))
   })
 })

@@ -53,7 +53,7 @@ const SpaceAddressBookV2 = () => {
 
         <Tabs defaultValue="workspace">
           <TabsList variant="underline" className="mb-4 flex-wrap">
-            <TabsTrigger value="workspace" className="cursor-pointer">
+            <TabsTrigger value="workspace" className="cursor-pointer" data-testid="address-book-workspace-tab">
               <TabLabel
                 label={withCount('Workspace contacts', workspaceBook.items.length, isWorkspaceSettled)}
                 tooltip="Shared contacts visible to everyone in this Workspace"
@@ -61,7 +61,7 @@ const SpaceAddressBookV2 = () => {
             </TabsTrigger>
             {isPrivateAddressBookEnabled && (
               <>
-                <TabsTrigger value="mine" className="cursor-pointer">
+                <TabsTrigger value="mine" className="cursor-pointer" data-testid="address-book-local-tab">
                   <TabLabel
                     label={withCount('Local contacts', localContacts.length)}
                     tooltip="These contacts are in your local browser storage"

@@ -129,7 +129,7 @@ const SpaceAddressBook = () => {
           }}
         >
           <TabsList variant="underline" className="flex-wrap mb-4">
-            <TabsTrigger value="workspace" className="cursor-pointer">
+            <TabsTrigger value="workspace" className="cursor-pointer" data-testid="address-book-workspace-tab">
               <Tooltip>
                 <TooltipTrigger render={<span />}>
                   Workspace contacts{isAddressBookSettled ? ` (${addressBookItems.length})` : ''}
@@ -139,7 +139,7 @@ const SpaceAddressBook = () => {
             </TabsTrigger>
             {isPrivateAddressBookEnabled && (
               <>
-                <TabsTrigger value="mine" className="cursor-pointer">
+                <TabsTrigger value="mine" className="cursor-pointer" data-testid="address-book-local-tab">
                   <Tooltip>
                     <TooltipTrigger render={<span />}>Local contacts ({sortedLocalContacts.length})</TooltipTrigger>
                     <TooltipContent>These contacts are in your local browser storage</TooltipContent>

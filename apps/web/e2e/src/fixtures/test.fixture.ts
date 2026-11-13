@@ -68,6 +68,13 @@ export async function seedLocalStorage(page: Page): Promise<void> {
   )
 }
 
+/** The workspace tour's seen flag is keyed by user and workspace ids, so it can't be pre-seeded; skip it when it opens. */
+export async function dismissWorkspaceTour(page: Page): Promise<void> {
+  await page.addLocatorHandler(page.getByTestId('workspace-tour-welcome'), async () => {
+    await page.getByRole('button', { name: 'Skip for now' }).click()
+  })
+}
+
 // ---------------------------------------------------------------------------
 // CI debuggability — collect failure evidence
 // ---------------------------------------------------------------------------
@@ -204,6 +211,7 @@ export const test = base.extend<SafeFixtures>({
 
     // Seed localStorage via addInitScript — runs before page scripts, no extra navigation
     await seedLocalStorage(page)
+    await dismissWorkspaceTour(page)
     await provide(page)
 
     // After test: attach evidence if it failed

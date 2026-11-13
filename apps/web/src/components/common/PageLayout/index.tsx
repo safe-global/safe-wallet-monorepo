@@ -42,7 +42,8 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
   const { txFlow, setFullWidth } = useContext(TxModalContext)
   const { BatchSidebar } = useLoadFeature(BatchingFeature)
-  const { SelectSafeModal, SafeWorkspaceSignInDialog, SafeWorkspaceChooserDialog } = useLoadFeature(SpacesFeature)
+  const { SelectSafeModal, SafeWorkspaceSignInDialog, SafeWorkspaceChooserDialog, WorkspaceTour } =
+    useLoadFeature(SpacesFeature)
   const isStaticPage = STATIC_PAGE_ROUTES.includes(pathname)
   const hideHeader = NO_HEADER_ROUTES.includes(pathname)
   const isWelcomeListRoute = WELCOME_LIST_ROUTES.includes(pathname)
@@ -126,6 +127,7 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
       <SelectSafeModal />
       <SafeWorkspaceSignInDialog />
       <SafeWorkspaceChooserDialog />
+      <WorkspaceTour />
     </>
   )
 }

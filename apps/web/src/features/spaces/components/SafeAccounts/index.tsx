@@ -140,7 +140,7 @@ const SpaceSafeAccounts = () => {
           No Safe accounts match your search
         </Typography>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4" data-testid="space-safe-accounts-list">
           {similarAddresses.size > 0 && <SecurityBanner title="Verify before you trust" />}
           <SafeAccountsTable
             items={visibleSafes}

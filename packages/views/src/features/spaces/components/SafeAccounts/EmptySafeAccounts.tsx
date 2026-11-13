@@ -3,7 +3,7 @@ import SafeAccountsIcon from '@safe-global/views/assets/images/spaces/safe-accou
 
 const EmptySafeAccounts = () => {
   return (
-    <div className="rounded-xl bg-card p-10 text-center">
+    <div className="rounded-xl bg-card p-10 text-center" data-testid="safe-accounts-empty">
       <div className="flex justify-center">
         <SafeAccountsIcon />
       </div>
