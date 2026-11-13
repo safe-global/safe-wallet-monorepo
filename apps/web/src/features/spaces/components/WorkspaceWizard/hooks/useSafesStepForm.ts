@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 import type { AllSafeItems } from '@/hooks/safes'
@@ -8,7 +8,6 @@ import type { AddAccountsFormValues } from '../../../hooks/addAccounts.types'
 import { getSafesToName, hasAllNames, touchNames } from '../../NameAccounts/utils'
 import useOnboardingSelection from '../../SelectSafesOnboarding/hooks/useOnboardingSelection'
 import { getSelectedLeafKeys } from '../../SelectSafesOnboarding/utils/selection'
-import { useFormFromDraft } from './useFormFromDraft'
 import { useSafeFromUrl } from './useSafeFromUrl'
 
 type DraftChanges = Partial<WorkspaceDraftFields>
@@ -24,6 +23,8 @@ const toSafeNames = (names: Record<string, string>): Record<string, string> =>
   Object.fromEntries(Object.entries(names).map(([address, name]) => [address.toLowerCase(), sanitizeName(name)]))
 
 type Args = {
+  /** The ready draft the form starts from. */
+  draft: WorkspaceDraft
   allSafes: AllSafeItems
   flaggedAddresses: Set<string>
   limit: SafeLimit
@@ -31,25 +32,22 @@ type Args = {
   retreat: (changes: DraftChanges) => void
 }
 
+const toForm = (draft: WorkspaceDraft, safeFromUrl: string | undefined): AddAccountsFormValues => {
+  const keys = draft.safes.length > 0 ? draft.safes.map(toSafeKey) : safeFromUrl ? [safeFromUrl] : []
+  return { selectedSafes: Object.fromEntries(keys.map((key) => [key, true])), names: draft.safeNames }
+}
+
 /** The Safes step: pick Safes up to the plan's seats, then name the new ones, then save both to the draft. */
-export const useSafesStepForm = ({ allSafes, flaggedAddresses, limit, advance, retreat }: Args) => {
+export const useSafesStepForm = ({ draft, allSafes, flaggedAddresses, limit, advance, retreat }: Args) => {
   const safeFromUrl = useSafeFromUrl()
   const [subStep, setSubStep] = useState<'select' | 'name'>('select')
   const [safesToName, setSafesToName] = useState<AllSafeItems>([])
   const formMethods = useForm<AddAccountsFormValues>({
     mode: 'onChange',
-    defaultValues: { selectedSafes: {}, names: {} },
+    defaultValues: toForm(draft, safeFromUrl),
   })
-  const { control, setValue, getValues, reset, handleSubmit } = formMethods
+  const { control, setValue, getValues, handleSubmit } = formMethods
 
-  const toForm = useCallback(
-    (draft: WorkspaceDraft): AddAccountsFormValues => {
-      const keys = draft.safes.length > 0 ? draft.safes.map(toSafeKey) : safeFromUrl ? [safeFromUrl] : []
-      return { selectedSafes: Object.fromEntries(keys.map((key) => [key, true])), names: draft.safeNames }
-    },
-    [safeFromUrl],
-  )
-  const isReady = useFormFromDraft(reset, toForm)
   const selection = useOnboardingSelection({ items: allSafes, control, setValue, flaggedAddresses, limit })
 
   const selectedSafes = useWatch({ control, name: 'selectedSafes' })
@@ -86,7 +84,6 @@ export const useSafesStepForm = ({ allSafes, flaggedAddresses, limit, advance, r
     pickedSafes,
     isNameStep: subStep === 'name',
     safesToName,
-    isReady,
     onSubmit,
     onBack,
     onSkip,

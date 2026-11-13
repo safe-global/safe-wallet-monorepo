@@ -10,7 +10,10 @@ import { useWizardNavigation } from '../hooks/useWizardNavigation'
 
 let mockIsSafePro = false
 let mockIsSurveyEnabled = false
-jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockIsSafePro }))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({
+  useIsSafeProEnabled: () => mockIsSafePro,
+  useSafeProFlag: () => mockIsSafePro,
+}))
 jest.mock('@/hooks/useIsSurveyEnabled', () => ({ __esModule: true, default: () => mockIsSurveyEnabled }))
 
 const renderNavigation = (step: WizardStepId, query: Record<string, string> = {}) => {

@@ -17,7 +17,10 @@ jest.mock('@/utils/navigation')
 
 let mockIsSafePro = false
 let mockIsSurveyEnabled = false
-jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockIsSafePro }))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({
+  useIsSafeProEnabled: () => mockIsSafePro,
+  useSafeProFlag: () => mockIsSafePro,
+}))
 jest.mock('@/hooks/useIsSurveyEnabled', () => ({ __esModule: true, default: () => mockIsSurveyEnabled }))
 
 const renderStep = async (step: WizardStepId) => {
