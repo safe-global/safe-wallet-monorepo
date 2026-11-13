@@ -251,6 +251,7 @@ const injectedRtkApi = api
             conflicting: queryArg.conflicting,
             stale: queryArg.stale,
             search: queryArg.search,
+            limit: queryArg.limit,
           },
         }),
         providesTags: ['transactions'],
@@ -531,6 +532,8 @@ export type SpaceTransactionsGetTransactionQueueV1ApiArg = {
   stale?: boolean
   /** Keep the transactions whose Safe (address or Space address book name), network name, status, or a signer still to sign (address or name) contains this text, ignoring case. Unlike the filters, it narrows every count. At most 100 characters. */
   search?: string
+  /** Return only the first transactions of the queue, by nonce across every Safe (not by age), up to the transactions an unlimited request returns. Without a filter or `search`, only that many are read: `counts` cover only those, and a conflict group cut by the limit is returned in part. With a filter or `search`, the whole queue is read and filtered first, so `counts` cover the whole queue and a conflict group is kept whole, which can return a few more than `limit`. `count` is always the size of the whole queue. */
+  limit?: number
   /** Space UUID */
   spaceId: string
 }
@@ -1413,7 +1416,7 @@ export type SpaceQueuedItemPage = {
   }
   /** Space Safes whose queue is missing from this response because their Safe information could not be loaded or the Space exceeds the Safes one request can cover. */
   unavailableSafes: SpaceQueueSafe[]
-  /** Faceted counts of the queue read: the status counts apply the `safes` filter but not the status filters, and `safes` applies the status filters but not the `safes` filter */
+  /** Faceted counts of the queue read: each applies every filter but its own. The status counts skip the status filters (`status`, `conflicting`, `stale`); `safes`, `chains` and `signers` skip `safes`, `chainIds` and `signers`. The search narrows every count. */
   counts: SpaceQueueCounts
 }
 export type CreatePolicyConfigurationRequestResponse = {

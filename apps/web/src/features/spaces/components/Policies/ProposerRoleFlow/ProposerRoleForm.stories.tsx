@@ -14,6 +14,7 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import type { ChainInfo } from '@/features/spaces/types'
 import ProposerRoleForm from './ProposerRoleForm'
+import { mockNow } from '@/stories/mocks/now'
 
 const ETHEREUM = '1'
 const POLYGON = '137'
@@ -71,7 +72,7 @@ const localAddressBook = { [ETHEREUM]: { [PROPOSER]: PROPOSER_NAME, [LOCAL_CONTA
 const SPACE_ID = '1'
 
 /** `useGetSpaceAddressBook` skips without a live session and a Workspace in scope. */
-const spaceAuth = { sessionExpiresAt: Date.now() + 60 * 60 * 1000, lastUsedSpaceId: SPACE_ID }
+const spaceAuth = { sessionExpiresAt: mockNow() + 60 * 60 * 1000, lastUsedSpaceId: SPACE_ID }
 
 const spaceContact = (address: string, name: string): SpaceAddressBookItemDto => ({
   name,

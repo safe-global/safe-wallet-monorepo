@@ -16,16 +16,16 @@ export const _getUniqueQueuedTxs = (page?: QueuedItemPage) => {
   })
 }
 
+export const getQueuedNonces = (page?: QueuedItemPage): number[] => {
+  return _getUniqueQueuedTxs(page)
+    .map((tx) => (isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo.nonce : undefined))
+    .filter((nonce): nonce is number => nonce !== undefined)
+}
+
 const usePreviousNonces = () => {
   const { page } = useTxQueue()
 
-  const previousNonces = useMemo(() => {
-    return _getUniqueQueuedTxs(page)
-      .map((tx) => (isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo.nonce : undefined))
-      .filter((nonce): nonce is number => nonce !== undefined)
-  }, [page])
-
-  return previousNonces
+  return useMemo(() => getQueuedNonces(page), [page])
 }
 
 export default usePreviousNonces
