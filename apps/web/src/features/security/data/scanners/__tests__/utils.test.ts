@@ -176,7 +176,7 @@ describe('computeSummary', () => {
 
 describe('withScannerTimeout', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
   })
 
   afterEach(() => {

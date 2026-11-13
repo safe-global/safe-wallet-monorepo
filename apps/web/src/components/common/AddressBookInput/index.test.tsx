@@ -130,7 +130,7 @@ const setup = (
 
 describe('AddressBookInput', () => {
   beforeAll(() => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
   })
 
   afterAll(() => {

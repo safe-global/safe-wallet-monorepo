@@ -14,7 +14,7 @@ describe('CopyButton', () => {
   })
 
   it('swaps to a checkmark after clicking, then reverts', async () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
 
     const { getByTestId, queryByTestId } = render(<CopyButton text="0x123" />)
 

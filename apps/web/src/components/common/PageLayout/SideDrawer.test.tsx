@@ -51,7 +51,7 @@ const setupMatchMedia = () => {
 describe('SideDrawer', () => {
   const originalMatchMedia = window.matchMedia
 
-  beforeEach(() => jest.useFakeTimers())
+  beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))
   afterEach(() => {
     jest.useRealTimers()
     window.matchMedia = originalMatchMedia

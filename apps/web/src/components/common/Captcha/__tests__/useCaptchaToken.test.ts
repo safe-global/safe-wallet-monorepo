@@ -100,7 +100,7 @@ describe('useCaptchaToken', () => {
 
   describe('token callback', () => {
     it('sets token, updates shared ref, resolves captcha, and closes modal after delay', async () => {
-      jest.useFakeTimers()
+      jest.useFakeTimers({ advanceTimers: false })
 
       const { result } = renderHook(() => useCaptchaToken({ isScriptReady: true }))
       mountContainer(result)

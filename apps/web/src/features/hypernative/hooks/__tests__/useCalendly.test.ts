@@ -895,7 +895,7 @@ describe('useCalendly', () => {
 
   describe('error handling', () => {
     beforeEach(() => {
-      jest.useFakeTimers()
+      jest.useFakeTimers({ advanceTimers: false })
     })
 
     afterEach(() => {
@@ -1838,7 +1838,7 @@ describe('useCalendly', () => {
 
   describe('race conditions', () => {
     beforeEach(() => {
-      jest.useFakeTimers()
+      jest.useFakeTimers({ advanceTimers: false })
     })
 
     afterEach(() => {
@@ -1926,7 +1926,7 @@ describe('useCalendly', () => {
         }
       }).not.toThrow()
 
-      jest.useFakeTimers()
+      jest.useFakeTimers({ advanceTimers: false })
     })
 
     it('should handle rapid refresh calls without errors', async () => {
@@ -2143,7 +2143,7 @@ describe('useCalendly', () => {
     })
 
     it('should cleanup iframe event listeners on unmount', async () => {
-      jest.useFakeTimers()
+      jest.useFakeTimers({ advanceTimers: false })
 
       let iframe: HTMLIFrameElement | null = null
       const removeEventListenerSpy = jest.fn()
@@ -2206,7 +2206,7 @@ describe('useCalendly', () => {
     })
 
     it('should clear all timeouts on unmount', async () => {
-      jest.useFakeTimers()
+      jest.useFakeTimers({ advanceTimers: false })
       const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout')
 
       const initialReduxState: Partial<RootState> = {
@@ -2238,7 +2238,7 @@ describe('useCalendly', () => {
     })
 
     it('should clear all intervals on unmount during polling', async () => {
-      jest.useFakeTimers()
+      jest.useFakeTimers({ advanceTimers: false })
       const clearIntervalSpy = jest.spyOn(global, 'clearInterval')
 
       // Script exists but window.Calendly is not yet available
@@ -2276,7 +2276,7 @@ describe('useCalendly', () => {
     })
 
     it('should not leave orphaned DOM elements after unmount', async () => {
-      jest.useFakeTimers()
+      jest.useFakeTimers({ advanceTimers: false })
 
       const mockInitInlineWidget = jest.fn(() => {
         const iframe = document.createElement('iframe')

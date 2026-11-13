@@ -292,13 +292,13 @@ describe('DatePickerInput', () => {
 
   describe('calendar', () => {
     it('fills the input and closes the calendar on selection', async () => {
-      renderInput(new Date('2026-03-09T00:00:00'))
+      renderInput(new Date('2025-12-09T00:00:00'))
 
       await userEvent.click(screen.getByRole('button', { name: /start date/i }))
       const cell = await screen.findByRole('gridcell', { name: '11' })
       await userEvent.click(cell.querySelector('button') ?? cell)
 
-      expect(screen.getByLabelText('Start date')).toHaveValue('11/03/2026')
+      expect(screen.getByLabelText('Start date')).toHaveValue('11/12/2025')
       await waitFor(() => expect(screen.queryByRole('grid')).not.toBeInTheDocument())
     })
 

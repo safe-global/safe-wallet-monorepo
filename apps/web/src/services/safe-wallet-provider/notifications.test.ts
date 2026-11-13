@@ -75,7 +75,7 @@ describe('showNotification', () => {
   })
 
   it('should close the notification after 5 seconds', () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     jest.spyOn(global, 'setTimeout')
 
     Object.assign(global.Notification, {

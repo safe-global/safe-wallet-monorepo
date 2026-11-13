@@ -211,6 +211,17 @@ jsdom makes `window.location` non-configurable, so `Object.defineProperty(window
 - **Assert a redirect or reload:** production code calls `navigateTo` / `reloadPage` from `@/utils/navigation`; tests `jest.mock('@/utils/navigation')` and assert on those
 - **SSR (`typeof window === 'undefined'`):** a separate `*.ssr.test.ts` file with a `/** @jest-environment node */` docblock
 
+### Time and timers
+
+Every test runs on a fake clock (`fakeTimers` in `jest.config.cjs`). It starts at the same instant, `FAKE_CLOCK_START` in `jest.clock.cjs` (2026-01-15 10:30 UTC), and advances with real time, so `waitFor`, `findBy*` and `userEvent` work without setup.
+
+- **Set a date:** `jest.setSystemTime(...)`. Seed dates relative to the fixed start, not to today.
+- **Move time:** `jest.advanceTimersByTime(ms)` inside `act`, or `advanceClock(ms)` from `@/tests/test-utils`.
+- **On the default clock, do not assert at an exact boundary** such as `delay - 1` when an `await` sits between the steps: real time also moves the clock by a few milliseconds. Check at half the delay, then after it, or wait with `findBy*` / `waitFor`.
+- **For exact timing, give every test in the file a strict clock:** `beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))`. Without the option, `jest.useFakeTimers()` takes `advanceTimers: true` from the config.
+- **Do not switch clocks for a single test**, and do not call `jest.useRealTimers()` in a file whose other tests use the default clock. React and libraries keep the clock they saw first, and their timers stop firing.
+- **Each test starts at the same instant:** `jest.setup.js` sets the clock back to the start before every test, so `setSystemTime` and advances do not carry over. Pending timers are not cleared, because UI libraries keep timers across tests.
+
 ## Templates
 
 ### Utility / service test

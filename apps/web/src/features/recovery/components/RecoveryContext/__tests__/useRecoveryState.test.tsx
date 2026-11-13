@@ -41,8 +41,6 @@ describe('useRecoveryState', () => {
   })
 
   it('should not fetch is there is no provider', async () => {
-    jest.useFakeTimers()
-
     mockUseWeb3ReadOnly.mockReturnValue(undefined)
     const chain = chainBuilder().build()
     mockUseCurrentChain.mockReturnValue(chain)
@@ -79,8 +77,6 @@ describe('useRecoveryState', () => {
 
     expect(result.current).toEqual([undefined, undefined, false])
     expect(mockGetRecoveryState).not.toHaveBeenCalledTimes(1)
-
-    jest.useRealTimers()
   })
 
   it('should otherwise fetch', async () => {

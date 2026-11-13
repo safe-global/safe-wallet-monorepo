@@ -124,33 +124,28 @@ describe('CreateTokenTransfer', () => {
   // With `delayError`, react-hook-form parked the "Invalid address format" from the typed search text
   // in a form-wide timer that setValue never cancelled and that the blur of ANY field flushed.
   it('does not bring back the search-text validation error when another field blurs', async () => {
-    jest.useFakeTimers()
-    try {
-      const contact = '0x1111111111111111111111111111111111111111'
-      const { getByLabelText, getByText, queryByText, getByTestId } = renderCreateTokenTransfer(
-        {},
-        { initialReduxState: { addressBook: { '4': { [contact]: 'E2E Contact' } } } },
-      )
+    const contact = '0x1111111111111111111111111111111111111111'
+    const { getByLabelText, getByText, queryByText, getByTestId } = renderCreateTokenTransfer(
+      {},
+      { initialReduxState: { addressBook: { '4': { [contact]: 'E2E Contact' } } } },
+    )
 
-      // waitFor advances the fake timers, so the debounced labels settle deterministically.
-      fireEvent.input(getByLabelText('Recipient address', { exact: false }), { target: { value: 'E2E' } })
-      await waitFor(() => expect(getByText('Invalid address format')).toBeInTheDocument())
+    // waitFor advances the fake timers, so the debounced labels settle deterministically.
+    fireEvent.input(getByLabelText('Recipient address', { exact: false }), { target: { value: 'E2E' } })
+    await waitFor(() => expect(getByText('Invalid address format')).toBeInTheDocument())
 
-      fireEvent.click(getByText('E2E Contact'))
-      await waitFor(() => expect(getByTestId('address-book-recipient')).toBeInTheDocument())
-      await waitFor(() => expect(queryByText('Invalid address format')).not.toBeInTheDocument())
+    fireEvent.click(getByText('E2E Contact'))
+    await waitFor(() => expect(getByTestId('address-book-recipient')).toBeInTheDocument())
+    await waitFor(() => expect(queryByText('Invalid address format')).not.toBeInTheDocument())
 
-      // Real focus moves, not fireEvent.blur: React maps onBlur to focusout.
-      act(() => getByTestId('token-amount-field').focus())
-      act(() => getByTestId('max-btn').focus())
-      // A flushed stale error lands on the next tick; the label would show it after its 500ms
-      // display debounce, which is only scheduled once that first render has happened.
-      act(() => jest.advanceTimersByTime(100))
-      await act(async () => jest.advanceTimersByTime(1000))
-      expect(queryByText('Invalid address format')).not.toBeInTheDocument()
-    } finally {
-      jest.useRealTimers()
-    }
+    // Real focus moves, not fireEvent.blur: React maps onBlur to focusout.
+    act(() => getByTestId('token-amount-field').focus())
+    act(() => getByTestId('max-btn').focus())
+    // A flushed stale error lands on the next tick; the label would show it after its 500ms
+    // display debounce, which is only scheduled once that first render has happened.
+    act(() => jest.advanceTimersByTime(100))
+    await act(async () => jest.advanceTimersByTime(1000))
+    expect(queryByText('Invalid address format')).not.toBeInTheDocument()
   })
 
   const mockSpendingLimitToken = () => {

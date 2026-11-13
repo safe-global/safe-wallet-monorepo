@@ -41,7 +41,7 @@ describe('WcInput', () => {
   let walletConnect: WalletConnectWallet
 
   beforeEach(() => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     walletConnect = new WalletConnectWallet()
     jest.spyOn(walletConnect, 'connect').mockResolvedValue(pairing)
   })

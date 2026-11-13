@@ -6,7 +6,7 @@ import { waitFor } from '@testing-library/react'
 // Jest tests for the useAsync hook
 describe('useAsync hook', () => {
   beforeAll(() => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
   })
 
   it('should not set loading state to true when callback returns undefined', async () => {

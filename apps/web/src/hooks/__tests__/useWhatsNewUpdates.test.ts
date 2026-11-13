@@ -9,13 +9,13 @@ jest.mock('@/config/constants', () => ({
 }))
 
 describe('useWhatsNewUpdates', () => {
+  beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))
+
   afterEach(() => {
-    jest.useRealTimers()
     clearLocalStorageKey('whatsNewLastSeen')
   })
 
   it('should, when the user has not accepted updates cookies, not ask Beamer for updates', async () => {
-    jest.useFakeTimers()
     const requests = recordBeamerRequests(() => ({ number: 2 }))
 
     const { result } = renderHook(() => useWhatsNewUpdates(), withoutUpdatesConsent)

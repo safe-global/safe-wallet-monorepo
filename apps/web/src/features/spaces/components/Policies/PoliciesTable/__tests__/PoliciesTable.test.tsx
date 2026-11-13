@@ -139,7 +139,7 @@ describe('PoliciesTable', () => {
   })
 
   it('should, when hovering a pending status, say how many signatures are in', async () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
     render(<PoliciesTable policies={[mockPendingPolicy()]} />)
 

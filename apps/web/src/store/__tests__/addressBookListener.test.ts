@@ -119,7 +119,7 @@ describe('addressBookListener', () => {
     // The debounce runs on timers; fake them so the 300ms wait is deterministic
     // and instant instead of a real-clock sleep.
     beforeEach(() => {
-      jest.useFakeTimers()
+      jest.useFakeTimers({ advanceTimers: false })
     })
 
     afterEach(() => {

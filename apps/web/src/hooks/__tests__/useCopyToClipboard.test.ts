@@ -12,7 +12,7 @@ describe('useCopyToClipboard', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     Object.assign(navigator, { clipboard: { writeText } })
   })
 

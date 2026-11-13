@@ -269,7 +269,7 @@ describe('trackErrorSurfaced', () => {
       // user who retried a failing action twice inside the window and then gave
       // up had those two retries dropped when the entry expired.
       beforeEach(() => {
-        jest.useFakeTimers()
+        jest.useFakeTimers({ advanceTimers: false })
       })
 
       afterEach(() => {
