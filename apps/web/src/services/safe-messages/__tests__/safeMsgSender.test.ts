@@ -81,10 +81,10 @@ describe('safeMsgSender', () => {
     })
 
     it('should send the declared attribution with the message proposal', async () => {
-      let capturedBody: any
+      let capturedBody: Record<string, unknown> | undefined
       server.use(
         http.post(`${GATEWAY_URL}/v1/chains/:chainId/safes/:safeAddress/messages`, async ({ request }) => {
-          capturedBody = await request.json()
+          capturedBody = (await request.json()) as Record<string, unknown>
           return HttpResponse.json({})
         }),
       )
@@ -97,7 +97,7 @@ describe('safeMsgSender', () => {
 
       await dispatchSafeMsgProposal({ provider: MockEip1193Provider, safe, message: 'Hello', origin: '', declared })
 
-      expect(capturedBody.declared).toEqual(declared)
+      expect(capturedBody?.declared).toEqual(declared)
     })
 
     it('should normalize EIP712 messages', async () => {
