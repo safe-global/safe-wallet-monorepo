@@ -4,10 +4,15 @@ import useOnboardingExit from '../../CreateSpaceOnboarding/hooks/useOnboardingEx
 import type { WizardStep, WizardStepId } from '../steps'
 import { useEnabledWizardSteps } from './useEnabledWizardSteps'
 
-/** Back, Next and the step counter for one step, all derived from the step list. */
+/**
+ * Back, Next and the step counter for one step, all derived from the step list. Only for a step the wizard has
+ * mounted: the wizard waits until the steps are known.
+ */
 export const useWizardNavigation = (stepId: WizardStepId) => {
   const router = useRouter()
-  const steps = useEnabledWizardSteps()
+  const enabledSteps = useEnabledWizardSteps()
+  if (!enabledSteps) throw new Error('The onboarding steps are not known yet; mount the step below the wizard')
+  const steps = enabledSteps
   const { onExit, hasNoSpaces } = useOnboardingExit(false)
 
   const index = steps.findIndex((step) => step.id === stepId)
