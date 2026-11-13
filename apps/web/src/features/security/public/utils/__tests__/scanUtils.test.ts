@@ -175,6 +175,14 @@ describe('computeSummary', () => {
 })
 
 describe('withScannerTimeout', () => {
+  beforeEach(() => {
+    jest.useFakeTimers({ advanceTimers: false })
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
+  })
+
   it('resolves with the scanner result when it completes in time', async () => {
     const result = await withScannerTimeout(Promise.resolve('done'))
     expect(result).toBe('done')

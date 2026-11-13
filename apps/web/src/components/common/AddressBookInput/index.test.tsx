@@ -129,6 +129,14 @@ const setup = (
 }
 
 describe('AddressBookInput', () => {
+  beforeAll(() => {
+    jest.useFakeTimers({ advanceTimers: false })
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
+  })
+
   beforeEach(() => {
     jest.clearAllMocks()
     mockUseGetSpaceAddressBook.mockReturnValue([])

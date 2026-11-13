@@ -9,6 +9,8 @@ jest.mock('@/config/constants', () => ({
 }))
 
 describe('useWhatsNewUpdates', () => {
+  beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))
+
   afterEach(() => {
     clearLocalStorageKey('whatsNewLastSeen')
   })

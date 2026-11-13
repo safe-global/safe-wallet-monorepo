@@ -40,10 +40,15 @@ const setOnline = (isOnline: boolean) =>
 
 describe('useHypernativeTokenRefresh', () => {
   beforeEach(() => {
+    jest.useFakeTimers({ advanceTimers: false })
     mockCookieJar.clear()
     mockExchange.mockReset()
     mockExchange.mockResolvedValue(tokensFor(2))
     setOnline(true)
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
   })
 
   it('does nothing for a session without a refresh token', async () => {
@@ -59,10 +64,10 @@ describe('useHypernativeTokenRefresh', () => {
     setAuthCookie(tokensFor(1, 300))
 
     renderHook(() => useHypernativeTokenRefresh())
-    await advance(240_000 / 2)
+    await advance(240_000 - 1)
     expect(mockExchange).not.toHaveBeenCalled()
 
-    await advance(240_000 / 2)
+    await advance(1)
     expect(mockExchange).toHaveBeenCalledWith(refreshRequest('refresh-1'))
     expect(getAuthCookieData()).toMatchObject({ token: 'access-2', refreshToken: 'refresh-2' })
   })
@@ -129,9 +134,9 @@ describe('useHypernativeTokenRefresh', () => {
     expect(mockExchange).toHaveBeenCalledTimes(1)
 
     for (const [index, delayMs] of [1_000, 2_000, 4_000, 8_000].entries()) {
-      await advance(delayMs / 2)
+      await advance(delayMs - 1)
       expect(mockExchange).toHaveBeenCalledTimes(index + 1)
-      await advance(delayMs / 2)
+      await advance(1)
       expect(mockExchange).toHaveBeenCalledTimes(index + 2)
     }
 
@@ -149,7 +154,7 @@ describe('useHypernativeTokenRefresh', () => {
     renderHook(() => useHypernativeTokenRefresh())
     await advance(0)
     act(() => window.dispatchEvent(new Event('focus')))
-    await advance(500)
+    await advance(999)
 
     expect(mockExchange).toHaveBeenCalledTimes(1)
   })

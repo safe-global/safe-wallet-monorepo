@@ -894,8 +894,13 @@ describe('useCalendly', () => {
   })
 
   describe('error handling', () => {
+    beforeEach(() => {
+      jest.useFakeTimers({ advanceTimers: false })
+    })
+
     afterEach(() => {
       jest.runOnlyPendingTimers()
+      jest.useRealTimers()
     })
 
     it('should set error when script onerror is triggered', async () => {
@@ -1832,8 +1837,13 @@ describe('useCalendly', () => {
   })
 
   describe('race conditions', () => {
+    beforeEach(() => {
+      jest.useFakeTimers({ advanceTimers: false })
+    })
+
     afterEach(() => {
       jest.runOnlyPendingTimers()
+      jest.useRealTimers()
     })
 
     it('should handle script onload firing after component unmount', async () => {
@@ -1884,6 +1894,7 @@ describe('useCalendly', () => {
       }
 
       // We need real timers for this test to capture the message handler
+      jest.useRealTimers()
 
       renderHook(() => useCalendly(widgetRef, calendlyUrl, mockCallback), {
         initialReduxState,
@@ -1914,6 +1925,8 @@ describe('useCalendly', () => {
           })
         }
       }).not.toThrow()
+
+      jest.useFakeTimers({ advanceTimers: false })
     })
 
     it('should handle rapid refresh calls without errors', async () => {
@@ -2130,6 +2143,8 @@ describe('useCalendly', () => {
     })
 
     it('should cleanup iframe event listeners on unmount', async () => {
+      jest.useFakeTimers({ advanceTimers: false })
+
       let iframe: HTMLIFrameElement | null = null
       const removeEventListenerSpy = jest.fn()
       const mockInitInlineWidget = jest.fn(() => {
@@ -2187,9 +2202,11 @@ describe('useCalendly', () => {
       expect(removeEventListenerSpy).toHaveBeenCalledWith('error', expect.any(Function))
 
       script.remove()
+      jest.useRealTimers()
     })
 
     it('should clear all timeouts on unmount', async () => {
+      jest.useFakeTimers({ advanceTimers: false })
       const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout')
 
       const initialReduxState: Partial<RootState> = {
@@ -2217,9 +2234,11 @@ describe('useCalendly', () => {
       expect(clearTimeoutSpy).toHaveBeenCalled()
 
       clearTimeoutSpy.mockRestore()
+      jest.useRealTimers()
     })
 
     it('should clear all intervals on unmount during polling', async () => {
+      jest.useFakeTimers({ advanceTimers: false })
       const clearIntervalSpy = jest.spyOn(global, 'clearInterval')
 
       // Script exists but window.Calendly is not yet available
@@ -2253,9 +2272,12 @@ describe('useCalendly', () => {
 
       clearIntervalSpy.mockRestore()
       script.remove()
+      jest.useRealTimers()
     })
 
     it('should not leave orphaned DOM elements after unmount', async () => {
+      jest.useFakeTimers({ advanceTimers: false })
+
       const mockInitInlineWidget = jest.fn(() => {
         const iframe = document.createElement('iframe')
         iframe.src = 'https://calendly.com/test'
@@ -2297,6 +2319,7 @@ describe('useCalendly', () => {
       // The hook doesn't clear widget innerHTML on unmount - that's expected
 
       script.remove()
+      jest.useRealTimers()
     })
   })
 })

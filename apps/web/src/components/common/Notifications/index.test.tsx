@@ -15,8 +15,10 @@ const renderNotifications = (notification: Notification) =>
   render(<Notifications />, { initialReduxState: { notifications: [notification] } })
 
 describe('Notifications', () => {
+  beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))
   afterEach(() => {
     jest.runOnlyPendingTimers()
+    jest.useRealTimers()
   })
 
   it('auto-hides an info toast after 5s', () => {

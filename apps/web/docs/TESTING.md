@@ -215,11 +215,12 @@ jsdom makes `window.location` non-configurable, so `Object.defineProperty(window
 
 Every test runs on a fake clock (`fakeTimers` in `jest.config.cjs`). It starts at the same instant, 2026-01-15 10:30 UTC, and advances with real time, so `waitFor`, `findBy*` and `userEvent` work without setup.
 
-- **Do not call `jest.useFakeTimers()` or `jest.useRealTimers()`.** Either call replaces the clock that React and libraries captured when they loaded, and their timers stop firing.
 - **Set a date:** `jest.setSystemTime(...)`. Seed dates relative to the fixed start, not to today.
 - **Move time:** `jest.advanceTimersByTime(ms)` inside `act`, or `advanceClock(ms)` from `@/tests/test-utils`.
-- **Do not assert at an exact boundary** such as `delay - 1`: real time also moves the clock by a few milliseconds. Check at half the delay, then after it, or wait with `findBy*` / `waitFor`.
-- **Timers outlive a test** in the same file. A test that runs all timers clears the earlier ones first with `jest.clearAllTimers()`.
+- **On the default clock, do not assert at an exact boundary** such as `delay - 1` when an `await` sits between the steps: real time also moves the clock by a few milliseconds. Check at half the delay, then after it, or wait with `findBy*` / `waitFor`.
+- **For exact timing, give every test in the file a strict clock:** `beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))`. Without the option, `jest.useFakeTimers()` takes `advanceTimers: true` from the config.
+- **Do not switch clocks for a single test**, and do not call `jest.useRealTimers()` in a file whose other tests use the default clock. React and libraries keep the clock they saw first, and their timers stop firing.
+- **Timers outlive a test** on the default clock. A test that runs all timers clears the earlier ones first with `jest.clearAllTimers()`.
 
 ## Templates
 

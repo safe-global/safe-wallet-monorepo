@@ -14,7 +14,12 @@ const postMessage = (origin: string, data: string) =>
   })
 
 describe('useWhatsNewUpdateListener', () => {
+  beforeEach(() => {
+    jest.useFakeTimers({ advanceTimers: false })
+  })
+
   afterEach(() => {
+    jest.useRealTimers()
     jest.restoreAllMocks()
   })
 
@@ -56,10 +61,10 @@ describe('useWhatsNewUpdateListener', () => {
     await waitFor(() => expect(result.current.unreadCount).toBe(1))
 
     postMessage('https://app.getbeamer.com', 'updatesAvailable')
-    await act(() => jest.advanceTimersByTimeAsync(MAX_UPDATE_DELAY / 2))
+    await act(() => jest.advanceTimersByTimeAsync(MAX_UPDATE_DELAY - 1))
     expect(requests).toHaveLength(1)
 
-    await act(() => jest.advanceTimersByTimeAsync(MAX_UPDATE_DELAY / 2))
+    await act(() => jest.advanceTimersByTimeAsync(1))
     await waitFor(() => expect(result.current.unreadCount).toBe(2))
   })
 

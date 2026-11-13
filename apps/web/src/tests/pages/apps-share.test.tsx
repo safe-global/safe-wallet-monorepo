@@ -26,7 +26,7 @@ describe('Share Safe App Page', () => {
 
   beforeEach(() => {
     jest.restoreAllMocks()
-
+    jest.useFakeTimers({ advanceTimers: false })
     window.localStorage.clear()
 
     jest.spyOn(useChains, 'default').mockImplementation(() => ({

@@ -6,7 +6,12 @@ import * as guards from '@/utils/transaction-guards'
 
 describe('useIsExpiredSwap', () => {
   beforeEach(() => {
+    jest.useFakeTimers({ advanceTimers: false })
     jest.clearAllMocks()
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
   })
 
   it('returns false if txInfo is not a swap order', () => {

@@ -103,9 +103,10 @@ describe('useUnlockBodyScroll helpers', () => {
 })
 
 describe('useUnlockBodyScroll', () => {
+  beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))
   afterEach(() => {
     jest.runOnlyPendingTimers()
-
+    jest.useRealTimers()
     document.body.removeAttribute('style')
     document.body.innerHTML = ''
   })

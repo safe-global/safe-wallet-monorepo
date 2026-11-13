@@ -41,8 +41,13 @@ describe('WcInput', () => {
   let walletConnect: WalletConnectWallet
 
   beforeEach(() => {
+    jest.useFakeTimers({ advanceTimers: false })
     walletConnect = new WalletConnectWallet()
     jest.spyOn(walletConnect, 'connect').mockResolvedValue(pairing)
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
   })
 
   const renderInput = async () => {
@@ -60,10 +65,10 @@ describe('WcInput', () => {
   it('shows a timeout error when no proposal arrives in time', async () => {
     await renderInput()
 
-    act(() => jest.advanceTimersByTime(PROPOSAL_TIMEOUT / 2))
+    act(() => jest.advanceTimersByTime(PROPOSAL_TIMEOUT - 1))
     expect(screen.queryByText(TIMEOUT_MESSAGE)).not.toBeInTheDocument()
 
-    act(() => jest.advanceTimersByTime(PROPOSAL_TIMEOUT / 2))
+    act(() => jest.advanceTimersByTime(1))
     expect(screen.getByText(TIMEOUT_MESSAGE)).toBeInTheDocument()
   })
 

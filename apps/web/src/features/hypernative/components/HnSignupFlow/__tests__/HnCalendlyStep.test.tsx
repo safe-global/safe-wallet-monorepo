@@ -18,7 +18,7 @@ describe('HnCalendlyStep', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-
+    jest.useFakeTimers({ advanceTimers: false })
     mockUseCalendly.mockReturnValue({
       isLoaded: false,
       isSecondStep: false,
@@ -30,6 +30,7 @@ describe('HnCalendlyStep', () => {
 
   afterEach(() => {
     jest.runOnlyPendingTimers()
+    jest.useRealTimers()
   })
 
   it('should render the Calendly widget container', () => {

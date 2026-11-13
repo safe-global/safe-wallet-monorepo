@@ -111,6 +111,14 @@ const TEST_ADDRESS_A = '0x0000000000000000000000000000000000000000'
 const TEST_ADDRESS_B = '0x0000000000000000000000000000000000000001'
 
 describe('AddressInput tests', () => {
+  beforeAll(() => {
+    jest.useFakeTimers({ advanceTimers: false })
+  })
+
+  afterAll(() => {
+    jest.useRealTimers()
+  })
+
   beforeEach(() => {
     jest.clearAllMocks()
     ;(useCurrentChain as jest.Mock).mockImplementation(() => mockChain)
@@ -549,7 +557,9 @@ describe('AddressInput tests', () => {
       expect(utils.getByRole('textbox')).toHaveValue(TEST_ADDRESS_A)
     })
 
-    await userEvent.click(input)
+    act(() => {
+      userEvent.click(input)
+    })
 
     await waitFor(() => expect(utils.getByRole('textbox')).toHaveValue(TEST_ADDRESS_A))
   })
@@ -580,6 +590,8 @@ describe('AddressInput tests', () => {
       mockSavedContact()
       const { input, utils } = setup('')
 
+      // Assert synchronously: earlier tests leave un-awaited userEvent clicks whose fake-timer
+      // steps blur the active element as soon as a waitFor advances the clock.
       await act(async () => {
         input.focus()
         fireEvent.change(input, { target: { value: TEST_ADDRESS_A } })
