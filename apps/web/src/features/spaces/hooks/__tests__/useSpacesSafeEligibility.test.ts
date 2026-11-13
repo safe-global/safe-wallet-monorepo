@@ -125,7 +125,6 @@ describe('useSpacesSafeEligibility', () => {
   })
 
   it('stays loading and retries while the entitlements are rate limited', () => {
-    jest.useFakeTimers()
     const refetch = jest.fn()
     mockUseEntitlementsGetAllEntitlementsV1Query.mockReturnValue(queryResult({ error: { status: 429 }, refetch }))
 
@@ -134,7 +133,6 @@ describe('useSpacesSafeEligibility', () => {
 
     act(() => jest.advanceTimersByTime(1_000))
     expect(refetch).toHaveBeenCalledTimes(1)
-    jest.useRealTimers()
   })
 
   it('is not loading after a failure that is not a rate limit', () => {

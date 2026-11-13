@@ -41,7 +41,6 @@ describe('AssetsTable', () => {
     window.localStorage.clear()
     jest.clearAllMocks()
     jest.spyOn(useChainId, 'default').mockReturnValue('5')
-    jest.useFakeTimers()
   })
 
   test('select and deselect hidden assets', async () => {

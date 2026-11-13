@@ -5,9 +5,7 @@ import { waitFor } from '@testing-library/react'
 
 // Jest tests for the useAsync hook
 describe('useAsync hook', () => {
-  beforeAll(() => {
-    jest.useFakeTimers()
-  })
+  const RELOAD_DELAY_MS = 1_000
 
   it('should not set loading state to true when callback returns undefined', async () => {
     const { result } = renderHook(() => useAsync(() => undefined, []))
@@ -49,7 +47,7 @@ describe('useAsync hook', () => {
       useEffect(() => {
         setTimeout(() => {
           setTest('test 2')
-        }, 10)
+        }, RELOAD_DELAY_MS)
       }, [])
 
       useEffect(() => {
@@ -68,7 +66,7 @@ describe('useAsync hook', () => {
     expect(hookResult!.current.data).toEqual('test 1')
 
     await act(async () => {
-      jest.advanceTimersByTime(10)
+      jest.advanceTimersByTime(RELOAD_DELAY_MS)
     })
 
     expect(hookResult!.current.data).toEqual('test 2')
@@ -85,7 +83,7 @@ describe('useAsync hook', () => {
       useEffect(() => {
         setTimeout(() => {
           setTest('test 2')
-        }, 10)
+        }, RELOAD_DELAY_MS)
       }, [])
 
       useEffect(() => {
@@ -104,7 +102,7 @@ describe('useAsync hook', () => {
     expect(hookResult!.current.data).toEqual('test 1')
 
     await act(async () => {
-      jest.advanceTimersByTime(10)
+      jest.advanceTimersByTime(RELOAD_DELAY_MS)
     })
 
     expect(hookResult!.current.data).toEqual('test 2')

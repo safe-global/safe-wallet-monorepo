@@ -220,9 +220,6 @@ describe('usePolicyGuard', () => {
   })
 
   describe('re-reads', () => {
-    beforeEach(() => jest.useFakeTimers())
-    afterEach(() => jest.useRealTimers())
-
     it('retries a failed read after one polling interval', () => {
       mockSafe()
       const { refetch } = mockModuleGuard({ isError: true, error: new Error('rpc down') })

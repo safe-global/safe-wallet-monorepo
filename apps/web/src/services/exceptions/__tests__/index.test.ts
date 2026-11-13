@@ -133,10 +133,6 @@ describe('CodedException', () => {
   })
 
   describe('Throttling', () => {
-    afterEach(() => {
-      jest.useRealTimers()
-    })
-
     it('logs an identical failure once, however often it is reported inside the window', async () => {
       const { logError, Errors } = await import('..')
 
@@ -167,7 +163,6 @@ describe('CodedException', () => {
     })
 
     it('logs again once the window has passed', async () => {
-      jest.useFakeTimers()
       const { logError, Errors } = await import('..')
 
       logError(Errors._601, 'rpc down')
@@ -253,8 +248,6 @@ describe('CodedException', () => {
       })
 
       it('drops expired entries before evicting a live one', () => {
-        jest.useFakeTimers()
-
         fillTracker(Errors._601, MAX_THROTTLED_KEYS - 1)
 
         // One live entry, added a full window after the rest, fills the tracker.

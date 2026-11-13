@@ -49,7 +49,6 @@ jest.mock('@/hooks/useChains', () => {
 
 describe('useGasPrice', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
     jest.clearAllMocks()
     ;(useCurrentChain as jest.Mock).mockReturnValue(currentChain)
   })

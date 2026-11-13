@@ -41,7 +41,6 @@ describe('txMonitor', () => {
   let watchTxHashSpy = jest.spyOn(simpleTxWatcherInstance, 'watchTxHash')
 
   beforeEach(() => {
-    jest.useFakeTimers()
     jest.resetAllMocks()
 
     txDispatchSpy = jest.spyOn(txEvents, 'txDispatch')
