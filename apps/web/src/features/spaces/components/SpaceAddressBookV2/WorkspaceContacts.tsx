@@ -9,16 +9,17 @@ import AddressBookTable from '@safe-global/views/features/spaces/components/Addr
 import AddressBookToolbar from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookToolbar'
 import { searchContacts } from '@safe-global/views/features/spaces/components/AddressBookV2/search'
 import type { AddressBookContact } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
+import { CsvExportDialog } from '@/components/address-book/ExportDialog'
 import Track from '@/components/common/Track'
 import { useCurrentSpaceId, useMemberNameResolver } from '@/features/spaces'
 import useChains from '@/hooks/useChains'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { downloadCsv, spaceAddressBookToCsv } from '../../utils/addressBookCsv'
+import { spaceAddressBookToCsvRows } from '../../utils/addressBookCsv'
 import AddContact from '../SpaceAddressBook/AddContact'
 import DeleteContactDialog from '../SpaceAddressBook/DeleteContactDialog'
 import EditContactDialog from '../SpaceAddressBook/EditContactDialog'
-import ImportAddressBook from '../SpaceAddressBook/Import'
+import ImportWorkspaceCsv from './ImportWorkspaceCsv'
 import useAddressCellProps from './useAddressCellProps'
 import { toWorkspaceContacts } from './utils'
 
@@ -36,6 +37,7 @@ type WorkspaceContactsProps = {
 const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin, isInvited }: WorkspaceContactsProps) => {
   const [query, setQuery] = useState('')
   const [dialog, setDialog] = useState<OpenDialog>()
+  const [isExportOpen, setIsExportOpen] = useState(false)
   const { configs } = useChains()
   const addressCellProps = useAddressCellProps()
   const resolveMemberName = useMemberNameResolver()
@@ -62,8 +64,6 @@ const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin, isInv
     openDialog('delete', contact)
   }
 
-  const handleExport = () => downloadCsv(`workspace-${spaceId}-address-book.csv`, spaceAddressBookToCsv(items))
-
   if (isLoading) {
     return (
       <TableCard>
@@ -87,12 +87,10 @@ const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin, isInv
   )
 
   const exportButton = (
-    <Track {...SPACE_EVENTS.EXPORT_ADDRESS_BOOK}>
-      <Button variant="outline" size="action" onClick={handleExport}>
-        <Download aria-hidden="true" data-icon="inline-start" />
-        Export
-      </Button>
-    </Track>
+    <Button variant="outline" size="action" onClick={() => setIsExportOpen(true)}>
+      <Download aria-hidden="true" data-icon="inline-start" />
+      Export
+    </Button>
   )
 
   if (items.length === 0) {
@@ -104,7 +102,7 @@ const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin, isInv
           actions={
             isAdmin ? (
               <>
-                <ImportAddressBook />
+                <ImportWorkspaceCsv items={items} />
                 {addContact}
               </>
             ) : undefined
@@ -122,7 +120,7 @@ const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin, isInv
         actions={
           isAdmin ? (
             <>
-              <ImportAddressBook />
+              <ImportWorkspaceCsv items={items} />
               {exportButton}
               {addContact}
             </>
@@ -145,6 +143,14 @@ const WorkspaceContacts = ({ items, isLoading, isError, onReload, isAdmin, isInv
         )}
       </TableCard>
 
+      {isExportOpen && (
+        <CsvExportDialog
+          csvData={spaceAddressBookToCsvRows(items)}
+          filename={`workspace-${spaceId}-address-book`}
+          onExport={() => trackEvent(SPACE_EVENTS.EXPORT_ADDRESS_BOOK)}
+          handleClose={() => setIsExportOpen(false)}
+        />
+      )}
       {dialog?.type === 'edit' && <EditContactDialog entry={dialog.entry} onClose={() => setDialog(undefined)} />}
       {dialog?.type === 'delete' && (
         <DeleteContactDialog

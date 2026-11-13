@@ -4,10 +4,11 @@ import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GE
 const COLUMNS = ['address', 'name', 'chainId']
 
 /** One row per chain, in the `address,name,chainId` shape the address book importer reads back. */
+export const spaceAddressBookToCsvRows = (items: SpaceAddressBookItemDto[]) =>
+  items.flatMap((item) => item.chainIds.map((chainId) => ({ address: item.address, name: item.name, chainId })))
+
 export const spaceAddressBookToCsv = (items: SpaceAddressBookItemDto[]): string => {
-  const rows = items.flatMap((item) =>
-    item.chainIds.map((chainId) => ({ address: item.address, name: item.name, chainId })),
-  )
+  const rows = spaceAddressBookToCsvRows(items)
   // papaparse writes nothing for an empty list; the importer still wants the header.
   return rows.length === 0 ? COLUMNS.join(',') : jsonToCSV(rows, { columns: COLUMNS })
 }
