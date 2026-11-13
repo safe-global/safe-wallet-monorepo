@@ -19,6 +19,7 @@ import { isImitation, isTrustedTx } from '@/utils/transactions'
 import QueueTxDetails from './QueueTxDetails'
 import RowActionsMenu from './RowActionsMenu'
 import SignatureGauge from './SignatureGauge'
+import SignersTooltip from './SignersTooltip'
 import { getCounterparty, getNonce, type ConflictOption, type QueueStatus } from './utils'
 
 export const QUEUE_COLUMNS = ['Nonce', 'Transaction', 'To', 'Proposed', 'Signatures', 'Status', 'Action'] as const
@@ -171,13 +172,20 @@ const SpaceQueueRow = ({
 
       <TableCell className="py-1">
         {executionInfo && (
-          <span className="flex w-fit items-center gap-1.5 text-sm tabular-nums">
-            <SignatureGauge
-              count={executionInfo.confirmationsSubmitted}
-              threshold={executionInfo.confirmationsRequired}
-            />
-            {executionInfo.confirmationsSubmitted}/{executionInfo.confirmationsRequired}
-          </span>
+          <SignersTooltip
+            chainId={chainId}
+            txId={tx.id}
+            submitted={executionInfo.confirmationsSubmitted}
+            required={executionInfo.confirmationsRequired}
+          >
+            <span className="flex w-fit items-center gap-1.5 text-sm tabular-nums">
+              <SignatureGauge
+                count={executionInfo.confirmationsSubmitted}
+                threshold={executionInfo.confirmationsRequired}
+              />
+              {executionInfo.confirmationsSubmitted}/{executionInfo.confirmationsRequired}
+            </span>
+          </SignersTooltip>
         )}
       </TableCell>
 
