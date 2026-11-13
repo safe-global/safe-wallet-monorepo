@@ -1,12 +1,5 @@
 import { tz } from '@date-fns/tz'
-import {
-  differenceInHours,
-  format,
-  formatDistanceToNow,
-  formatDuration,
-  formatRelative,
-  intervalToDuration,
-} from 'date-fns'
+import { format, formatDistanceToNow, formatDuration, formatRelative, intervalToDuration } from 'date-fns'
 import { maybePlural } from './formatters'
 
 export const currentMinutes = (): number => Math.floor(Date.now() / (1000 * 60))
@@ -54,10 +47,6 @@ export const formatUtcDayTime = (seconds: number): string =>
 /** `Jun 24, 2026 · 03:35 UTC`. Takes unix SECONDS. */
 export const formatUtcDateTime = (seconds: number): string =>
   `${format(seconds * MS_PER_SECOND, 'MMM d, yyyy · HH:mm', IN_UTC)} UTC`
-
-/** Whole hours left, rounded up and at least 1, so a wait that just started reads `24`. Takes unix SECONDS. */
-export const hoursUntil = (at: number, nowMs: number): number =>
-  Math.max(1, differenceInHours(at * MS_PER_SECOND, nowMs, { roundingMethod: 'ceil' }))
 
 /** `23 hours 59 minutes`, `9 minutes`, or `less than a minute` once under a minute or past. Takes unix SECONDS. */
 export const formatTimeUntil = (until: number, nowMs: number): string =>
