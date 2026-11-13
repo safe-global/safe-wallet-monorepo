@@ -24,6 +24,8 @@ describe('useRecoveryDelayModifiers', () => {
   })
 
   it('should not fetch if the current chain does not support Delay Modifiers', async () => {
+    jest.useFakeTimers({ advanceTimers: false })
+
     mockUseHasFeature.mockReturnValue(false)
     const provider = {}
     mockUseWeb3ReadOnly.mockReturnValue(provider as any)
@@ -40,9 +42,13 @@ describe('useRecoveryDelayModifiers', () => {
 
     expect(result.current).toEqual([undefined, undefined, false])
     expect(mockGetRecoveryDelayModifiers).not.toHaveBeenCalledTimes(1)
+
+    jest.useRealTimers()
   })
 
   it('should not fetch is there is no provider', async () => {
+    jest.useFakeTimers({ advanceTimers: false })
+
     mockUseHasFeature.mockReturnValue(true)
     mockUseWeb3ReadOnly.mockReturnValue(undefined)
     const safe = safeInfoBuilder().build()
@@ -58,9 +64,13 @@ describe('useRecoveryDelayModifiers', () => {
 
     expect(result.current).toEqual([undefined, undefined, false])
     expect(mockGetRecoveryDelayModifiers).not.toHaveBeenCalledTimes(1)
+
+    jest.useRealTimers()
   })
 
   it('should not fetch if there is no Safe modules enabled', async () => {
+    jest.useFakeTimers({ advanceTimers: false })
+
     mockUseHasFeature.mockReturnValue(true)
     const provider = {}
     mockUseWeb3ReadOnly.mockReturnValue(provider as any)
@@ -77,9 +87,13 @@ describe('useRecoveryDelayModifiers', () => {
 
     expect(result.current).toEqual([undefined, undefined, false])
     expect(mockGetRecoveryDelayModifiers).not.toHaveBeenCalledTimes(1)
+
+    jest.useRealTimers()
   })
 
   it('should not fetch if only the spending limit is enabled', async () => {
+    jest.useFakeTimers({ advanceTimers: false })
+
     mockUseHasFeature.mockReturnValue(true)
     const provider = {}
     mockUseWeb3ReadOnly.mockReturnValue(provider as any)
@@ -99,6 +113,8 @@ describe('useRecoveryDelayModifiers', () => {
 
     expect(result.current).toEqual([undefined, undefined, false])
     expect(mockGetRecoveryDelayModifiers).not.toHaveBeenCalledTimes(1)
+
+    jest.useRealTimers()
   })
 
   it('should otherwise fetch', async () => {

@@ -74,6 +74,7 @@ describe('useCheckoutReturn', () => {
   })
 
   it('times out when the subscription never propagates', () => {
+    jest.useFakeTimers({ advanceTimers: false })
     mockSessionQuery.mockReturnValue(session('paid'))
     const { result } = renderHook(() => useCheckoutReturn())
 
@@ -87,6 +88,7 @@ describe('useCheckoutReturn', () => {
     expect(result.current.status).toBe('activating')
     act(() => jest.advanceTimersByTime(1_000))
     expect(result.current.status).toBe('timeout')
+    jest.useRealTimers()
   })
 
   it('surfaces a session error', () => {
@@ -137,6 +139,7 @@ describe('useCheckoutReturn', () => {
   })
 
   it('stops polling on timeout and resumes on retry', () => {
+    jest.useFakeTimers({ advanceTimers: false })
     mockSessionQuery.mockReturnValue(session('paid'))
     const { result } = renderHook(() => useCheckoutReturn())
 
@@ -145,9 +148,11 @@ describe('useCheckoutReturn', () => {
 
     act(() => result.current.retry())
     expect(mockSubscriptionsQuery).toHaveBeenLastCalledWith({ spaceId: SPACE_ID }, polling(3_000))
+    jest.useRealTimers()
   })
 
   it('shares the deadline between instances, so they time out and retry together', () => {
+    jest.useFakeTimers({ advanceTimers: false })
     mockSessionQuery.mockReturnValue(session('paid'))
     const first = renderHook(() => useCheckoutReturn())
     act(() => jest.advanceTimersByTime(30_000))
@@ -160,6 +165,7 @@ describe('useCheckoutReturn', () => {
     act(() => second.result.current.retry())
     expect(first.result.current.status).toBe('activating')
     expect(second.result.current.status).toBe('activating')
+    jest.useRealTimers()
   })
 
   it('tracks the outcome once per session, however many instances see it', () => {
@@ -199,11 +205,13 @@ describe('useCheckoutReturn', () => {
     })
 
     it('never times out', () => {
+      jest.useFakeTimers({ advanceTimers: false })
       mockSessionQuery.mockReturnValue(session('unpaid', 'open'))
       const { result } = renderHook(() => useCheckoutReturn())
 
       act(() => jest.advanceTimersByTime(60_000))
       expect(result.current.status).toBe('canceled')
+      jest.useRealTimers()
     })
 
     it('drops the session id once even with several mounted instances', () => {

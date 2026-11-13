@@ -268,9 +268,13 @@ describe('trackErrorSurfaced', () => {
       // The count used to be carried out only by the *next* occurrence, so a
       // user who retried a failing action twice inside the window and then gave
       // up had those two retries dropped when the entry expired.
+      beforeEach(() => {
+        jest.useFakeTimers({ advanceTimers: false })
+      })
 
       afterEach(() => {
         jest.runOnlyPendingTimers()
+        jest.useRealTimers()
       })
 
       it('flushes what it collapsed when the failure stops recurring', () => {

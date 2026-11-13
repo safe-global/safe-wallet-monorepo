@@ -3,7 +3,6 @@ import { showNotification } from './notifications'
 describe('showNotification', () => {
   beforeEach(() => {
     jest.resetAllMocks()
-    jest.clearAllTimers()
 
     Object.defineProperty(global, 'Notification', {
       value: jest.fn(),
@@ -76,6 +75,7 @@ describe('showNotification', () => {
   })
 
   it('should close the notification after 5 seconds', () => {
+    jest.useFakeTimers({ advanceTimers: false })
     jest.spyOn(global, 'setTimeout')
 
     Object.assign(global.Notification, {

@@ -35,6 +35,10 @@ describe('PoliciesTable', () => {
     mockResolveSafeName.mockReturnValue('')
   })
 
+  afterEach(() => {
+    jest.useRealTimers()
+  })
+
   it('should, when the Safe has a name in the space, show it in the Safe Account column', () => {
     mockResolveSafeName.mockImplementation((address: string) =>
       address === MOCK_SAFES.treasury.address ? 'Treasury' : '',
@@ -135,6 +139,7 @@ describe('PoliciesTable', () => {
   })
 
   it('should, when hovering a pending status, say how many signatures are in', async () => {
+    jest.useFakeTimers({ advanceTimers: false })
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
     render(<PoliciesTable policies={[mockPendingPolicy()]} />)
 

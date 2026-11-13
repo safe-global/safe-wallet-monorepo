@@ -100,6 +100,8 @@ describe('useCaptchaToken', () => {
 
   describe('token callback', () => {
     it('sets token, updates shared ref, resolves captcha, and closes modal after delay', async () => {
+      jest.useFakeTimers({ advanceTimers: false })
+
       const { result } = renderHook(() => useCaptchaToken({ isScriptReady: true }))
       mountContainer(result)
       await waitFor(() => expect(mockTurnstile.render).toHaveBeenCalled())
@@ -118,6 +120,8 @@ describe('useCaptchaToken', () => {
 
       act(() => jest.advanceTimersByTime(500))
       expect(result.current.isModalOpen).toBe(false)
+
+      jest.useRealTimers()
     })
   })
 
