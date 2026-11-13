@@ -14,8 +14,6 @@ import type {
 } from './hypernativeApi.dto'
 import { HYPERNATIVE_API_BASE_URL } from '@safe-global/utils/config/constants'
 
-export const addTagTypes = ['hypernative-oauth', 'hypernative-threat-analysis']
-
 const TRANSIENT_CLIENT_ERROR_STATUSES = new Set([408, 429])
 
 const isNonRetryableClientError = (error: FetchBaseQueryError): boolean => {
@@ -36,7 +34,6 @@ const failFastOnClientError: typeof rawBaseQuery = async (args, api, extraOption
 export const hypernativeApi = createApi({
   reducerPath: 'hypernativeApi',
   baseQuery: retry(failFastOnClientError, { maxRetries: 2 }),
-  tagTypes: addTagTypes,
   endpoints: (build) => ({
     exchangeToken: build.mutation<
       HypernativeTokenExchangeResponseDto['data'],
@@ -55,12 +52,8 @@ export const hypernativeApi = createApi({
       transformErrorResponse: (response: HypernativeQueryErrorDto) => response.data,
       // Both grants are single-use, so a silent retry can revoke the whole refresh chain
       extraOptions: { maxRetries: 0 },
-      invalidatesTags: ['hypernative-oauth'],
     }),
-    assessTransaction: build.mutation<
-      HypernativeAssessmentResponseDto['data'],
-      HypernativeAssessmentRequestWithAuthDto
-    >({
+    assessTransaction: build.query<HypernativeAssessmentResponseDto['data'], HypernativeAssessmentRequestWithAuthDto>({
       query: ({ authToken, ...request }) => ({
         url: '/safe/transaction/assessment',
         method: 'POST',
@@ -74,7 +67,7 @@ export const hypernativeApi = createApi({
       transformResponse: (response: HypernativeAssessmentResponseDto): HypernativeAssessmentResponseDto['data'] =>
         (response as HypernativeAssessmentResponseDto).data,
       transformErrorResponse: (response: HypernativeAssessmentResponseDto) => response.data,
-      invalidatesTags: ['hypernative-threat-analysis'],
+      keepUnusedDataFor: 0, // assess again each time a review opens
     }),
     getBatchAssessments: build.mutation<
       HypernativeBatchAssessmentResponseDto['data'],
@@ -94,9 +87,8 @@ export const hypernativeApi = createApi({
         response: HypernativeBatchAssessmentResponseDto,
       ): HypernativeBatchAssessmentResponseDto['data'] => (response as HypernativeBatchAssessmentResponseDto).data,
       transformErrorResponse: (response: HypernativeBatchAssessmentResponseDto) => response.data,
-      invalidatesTags: ['hypernative-threat-analysis'],
     }),
-    assessMessage: build.mutation<
+    assessMessage: build.query<
       HypernativeMessageAssessmentResponseDto['data'],
       HypernativeMessageAssessmentRequestWithAuthDto
     >({
@@ -114,7 +106,7 @@ export const hypernativeApi = createApi({
         response: HypernativeMessageAssessmentResponseDto,
       ): HypernativeMessageAssessmentResponseDto['data'] => response.data,
       transformErrorResponse: (response: HypernativeMessageAssessmentResponseDto) => response.data,
-      invalidatesTags: ['hypernative-threat-analysis'],
+      keepUnusedDataFor: 0, // assess again each time a review opens
     }),
   }),
 })

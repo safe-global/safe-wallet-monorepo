@@ -128,6 +128,8 @@ export const persistBlacklist = [
   // RTK Query cache or the pinned verdicts.
   safenetCheckSlice.name,
   safenetCheckApi.reducerPath,
+  // Its query args hold the Hypernative Authorization value
+  hypernativeApi.reducerPath,
 ]
 
 export const persistTransforms = [cgwClientFilter, sanitizePendingQueriesTransform]
