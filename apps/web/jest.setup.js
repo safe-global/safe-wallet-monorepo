@@ -4,6 +4,7 @@ import '@testing-library/jest-dom'
 import { configure } from '@testing-library/react'
 import { server } from '@/tests/server'
 import { faker } from '@faker-js/faker'
+import { FAKE_CLOCK_START } from './jest.clock.cjs'
 
 // Seed faker for deterministic test data
 faker.seed(123)
@@ -126,6 +127,13 @@ Object.defineProperty = (obj, prop, desc) => {
 
 beforeAll(() => {
   server.listen({ onUnhandledRequest: 'error' })
+})
+
+// Jest installs the fake clock once per file, so each test resets it to start where the config says
+beforeEach(() => {
+  if (!Object.prototype.hasOwnProperty.call(setTimeout, 'clock')) return
+  jest.clearAllTimers()
+  jest.setSystemTime(FAKE_CLOCK_START)
 })
 
 afterEach(() => server.resetHandlers())

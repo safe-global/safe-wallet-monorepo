@@ -1,5 +1,6 @@
 const path = require('path')
 const fs = require('fs')
+const { FAKE_CLOCK_START } = require('./jest.clock.cjs')
 
 // Set environment variables before modules are loaded
 if (!process.env.NEXT_PUBLIC_APP_VERSION || !process.env.NEXT_PUBLIC_APP_HOMEPAGE) {
@@ -21,7 +22,7 @@ const customJestConfig = {
   // CI runners are several times slower than a laptop; the 5 s default fails tests that pass locally
   testTimeout: process.env.CI ? 15_000 : 5_000,
   // Every test starts at the same instant, so results never depend on when the suite runs
-  fakeTimers: { enableGlobally: true, advanceTimers: true, now: Date.UTC(2026, 0, 15, 10, 30) },
+  fakeTimers: { enableGlobally: true, advanceTimers: true, now: FAKE_CLOCK_START },
   roots: ['<rootDir>', '<rootDir>/../../packages/views/src'],
 
   moduleNameMapper: {
