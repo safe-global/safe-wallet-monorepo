@@ -55,6 +55,7 @@ const contact = (address: string, name: string, source: ContactSource): Extended
   name,
   source,
   chainIds: [policy.safe.chainId],
+  tagIds: [],
   createdBy: '',
   createdByUserId: 0,
   lastUpdatedBy: '',
@@ -272,7 +273,7 @@ describe('a pending spending limit', () => {
 
     renderPending(mockPendingPolicy({ confirmationsSubmitted: 0, confirmationsRequired: 2 }))
 
-    expect(screen.getByText('1 of 2 signed')).toBeInTheDocument()
+    expect(screen.getByText('1 of 2 signatures')).toBeInTheDocument()
   })
 
   it('copies a link that opens the transaction on its Safe, without the Space', async () => {

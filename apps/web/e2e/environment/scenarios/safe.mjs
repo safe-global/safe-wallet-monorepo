@@ -1,28 +1,16 @@
 import Safe from '@safe-global/protocol-kit'
-import { NonceManager, Wallet, parseEther, randomBytes, hexlify } from 'ethers'
+import { getSafeL2SingletonDeployment, getSafeToL2SetupDeployment } from '@safe-global/safe-deployments'
+import { Interface, NonceManager, Wallet, parseEther, randomBytes, hexlify } from 'ethers'
 import { chainProfiles } from '../local-stack.mjs'
 import { FUNDED_BALANCE, SEPOLIA } from './chain.mjs'
 import { proposeToQueue } from './gateway.mjs'
 import { waitUntil } from './indexing.mjs'
 import { localProvider, sendAndConfirm } from './provider.mjs'
 
-/** Fresh wallets for the specs' OWNER_1 to OWNER_4 credentials; OWNER_4 proposes and deploys. */
+/** Fresh wallets for the four test owners. Alice proposes and deploys, and the wallet starts connected as her. */
 export function createOwners() {
-  const [owner1, owner2, owner3] = Array.from({ length: 3 }, () => Wallet.createRandom())
-  // Like staging OWNER_4 (0xC16D…), it sorts after the specs' recipient 0x6a56… in address order.
-  let owner4 = Wallet.createRandom()
-  while (!/^0x[7-9a-f]/i.test(owner4.address)) owner4 = Wallet.createRandom()
-  const wallets = { owner1, owner2, owner3, owner4 }
-  const credentials = Object.fromEntries(
-    Object.entries(wallets).flatMap(([name, wallet]) => {
-      const key = name.replace('owner', 'OWNER_')
-      return [
-        [`${key}_PRIVATE_KEY`, wallet.privateKey],
-        [`${key}_WALLET_ADDRESS`, wallet.address],
-      ]
-    }),
-  )
-  return { ...wallets, credentials }
+  const [alice, bob, carol, dave] = Array.from({ length: 4 }, () => Wallet.createRandom())
+  return { alice, bob, carol, dave }
 }
 
 /** Scenario environment for a forked chain; Sepolia is the default stack itself. */
@@ -50,15 +38,32 @@ async function assertForkChain(provider, env) {
 
 const randomSaltNonce = () => BigInt(hexlify(randomBytes(16))).toString()
 
-/** Deploys a Safe 1.4.1 L2 with `owners` and `threshold` and gives it 1 ETH; returns its address. */
-async function deploySafe(env, signer, { owners, threshold, saltNonce = randomSaltNonce() }) {
+const safeToL2Setup = new Interface(['function setupToL2(address l2Singleton)'])
+
+/** The setup call of a multichain Safe: it starts on the L1 singleton, which SafeToL2Setup swaps for L2 off Ethereum */
+function multichainSetup(safeVersion) {
+  const l2Singleton = getSafeL2SingletonDeployment({ version: safeVersion })?.deployments.canonical?.address
+  const setup = getSafeToL2SetupDeployment({ version: safeVersion })?.deployments.canonical?.address
+  if (!l2Singleton || !setup) throw new Error(`No canonical SafeToL2Setup deployment for Safe ${safeVersion}`)
+  return { to: setup, data: safeToL2Setup.encodeFunctionData('setupToL2', [l2Singleton]) }
+}
+
+/**
+ * Deploys a Safe L2 (1.4.1 by default) with `owners` and `threshold` and gives it 1 ETH; returns its address.
+ * `multichain` deploys it as the wallet creates Safes for several networks.
+ */
+async function deploySafe(
+  env,
+  signer,
+  { owners, threshold, saltNonce = randomSaltNonce(), safeVersion = '1.4.1', multichain = false },
+) {
   const predicted = await Safe.init({
     provider: env.SAFE_RPC_URL,
     signer: signer.privateKey,
-    isL1SafeSingleton: false,
+    isL1SafeSingleton: multichain,
     predictedSafe: {
-      safeAccountConfig: { owners, threshold },
-      safeDeploymentConfig: { safeVersion: '1.4.1', saltNonce },
+      safeAccountConfig: { owners, threshold, ...(multichain ? multichainSetup(safeVersion) : {}) },
+      safeDeploymentConfig: { safeVersion, saltNonce },
     },
   })
   const safeAddress = await predicted.getAddress()
@@ -69,20 +74,26 @@ async function deploySafe(env, signer, { owners, threshold, saltNonce = randomSa
 }
 
 /**
- * Deploys a Safe as `owners.owner4` and returns a context for SDK flows on it. Without `ownerAddresses` the
- * Safe belongs to OWNER_4 and OWNER_1; `waitForIndexing` waits until CGW serves it.
+ * Deploys a Safe as `owners.alice` and returns a context for SDK flows on it. Without `ownerAddresses` the
+ * Safe belongs to Alice and Bob; `waitForIndexing` waits until CGW serves it.
  */
 export async function createSafe(env, owners, options = {}) {
-  const { ownerAddresses, threshold = 2, saltNonce, waitForIndexing = true } = options
+  const { ownerAddresses, threshold = 2, saltNonce, waitForIndexing = true, safeVersion, multichain } = options
   const provider = localProvider(env.SAFE_RPC_URL)
   try {
     const chainId = await assertForkChain(provider, env)
-    for (const owner of [owners.owner4, owners.owner1, owners.owner2, owners.owner3]) {
+    for (const owner of [owners.alice, owners.bob, owners.carol, owners.dave]) {
       await provider.send('anvil_setBalance', [owner.address, FUNDED_BALANCE])
     }
-    const signer = owners.owner4.connect(provider)
-    const safeOwners = ownerAddresses ?? [signer.address, owners.owner1.address]
-    const safeAddress = await deploySafe(env, signer, { owners: safeOwners, threshold, saltNonce })
+    const signer = owners.alice.connect(provider)
+    const safeOwners = ownerAddresses ?? [signer.address, owners.bob.address]
+    const safeAddress = await deploySafe(env, signer, {
+      owners: safeOwners,
+      threshold,
+      saltNonce,
+      safeVersion,
+      multichain,
+    })
     const path = `${env.SAFE_CGW_BASE_URL}/v1/chains/${chainId}/safes/${safeAddress}`
     if (waitForIndexing) await waitUntil(env, path, (safe) => safe.threshold === threshold && safe.nonce === 0)
     const safe = await Safe.init({ provider: env.SAFE_RPC_URL, signer: signer.privateKey, safeAddress })

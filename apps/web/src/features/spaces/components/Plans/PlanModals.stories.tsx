@@ -9,12 +9,13 @@ import PlanChooserModal from './PlanChooserModal'
 import SelectAccountsStep from './SelectAccountsStep'
 import TrialEndingModal from './TrialEndingModal'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
-import { DAY, PAID_LINKS, PAID_PLANS, TRIAL_LINKS, billingHandlers, now, subscription } from './plans.fixtures'
+import { DAY, PAID_LINKS, PAID_PLANS, TRIAL_LINKS, billingHandlers, now, subscription } from './plans.storyData'
 
 const setup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true, safePro: true },
+  authenticated: true,
+  features: { safePro: true },
   pathname: '/spaces',
   query: { spaceId: MOCK_SPACE_ID },
   shadcn: true,

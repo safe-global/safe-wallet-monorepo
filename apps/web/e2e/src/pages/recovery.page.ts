@@ -16,7 +16,6 @@ export class RecoveryPage {
   readonly proposeButton: Locator
   /** The dashboard card that tells owners and the recoverer about a pending proposal and its review window */
   readonly inProgressCard: Locator
-  readonly actionRequiredToggle: Locator
   readonly goToQueueButton: Locator
   readonly queuedRecoveries: Locator
   readonly executeButton: Locator
@@ -37,7 +36,6 @@ export class RecoveryPage {
     this.startRecoveryButton = this.proposalCard.getByTestId('start-recovery')
     this.proposeButton = page.getByTestId('execute-btn')
     this.inProgressCard = page.getByTestId('recovery-in-progress-card')
-    this.actionRequiredToggle = page.getByTestId('action-required-panel-toggle')
     this.goToQueueButton = page.getByTestId('queue-btn')
     this.queuedRecoveries = page.getByTestId('recovery-item')
     this.executeButton = this.queuedRecoveries.getByTestId('execute-btn')
@@ -85,13 +83,6 @@ export class RecoveryPage {
     await this.proposeButton.click()
   }
 
-  /** Expand the "Action required" panel, which keeps its cards mounted while closed; Enter avoids toasts on top */
-  async openActionRequiredPanel(): Promise<void> {
-    if ((await this.actionRequiredToggle.getAttribute('aria-expanded')) !== 'true') {
-      await this.actionRequiredToggle.press('Enter')
-    }
-  }
-
   /** Leave the recovery modal for the queue; the modal closes only once the navigation is done */
   async goToQueue(): Promise<void> {
     await this.goToQueueButton.click()
@@ -101,6 +92,10 @@ export class RecoveryPage {
   /** Open the queued recovery and start its cancellation; the review opens */
   async cancel(): Promise<void> {
     await this.queuedRecoveries.click()
+    // A click while the panel still opens can land off the moving button, and nothing happens
+    await this.queuedRecoveries.getByTestId('accordion-details').evaluate(async (panel) => {
+      await Promise.all(panel.getAnimations().map((animation) => animation.finished))
+    })
     await this.cancelButton.click()
     await this.confirmCancelButton.click()
   }

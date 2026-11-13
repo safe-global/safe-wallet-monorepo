@@ -17,7 +17,6 @@ jest.mock('@/features/__core__', () => ({
 jest.mock('@/features/spaces', () => ({
   SpacesFeature: 'SpacesFeature',
   useCurrentSpaceId: jest.fn(),
-  useFeatureFlagRedirect: jest.fn(),
   useFeatureRedirect: jest.fn(),
 }))
 
@@ -43,7 +42,6 @@ describe('SpaceTransactionsPage (/spaces/transactions)', () => {
 
     render(<SpaceTransactionsPage />)
 
-    expect(spacesFeature.useFeatureFlagRedirect).toHaveBeenCalled()
     expect(spacesFeature.useFeatureRedirect).toHaveBeenCalledWith(FEATURES.SPACE_TRANSACTIONS, AppRoutes.spaces.index)
   })
 

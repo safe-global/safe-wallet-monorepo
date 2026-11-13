@@ -22,7 +22,7 @@ import {
   openDisputeSnapshot,
   rejectedSnapshot,
   timedOutDisputeSnapshot,
-} from './storyExamples'
+} from './safenetChecks.storyData'
 
 faker.seed(456)
 

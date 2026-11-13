@@ -2,7 +2,7 @@
 
 Guidance for the workspaces under `config/` (`test`, `eslint`, `tsconfig`). For monorepo-wide rules, see the root [AGENTS.md](../AGENTS.md). Most rules here concern `config/test` (`@safe-global/test`) — the shared test workspace with MSW handlers, fixture-based scenarios, faker factories, and the jest preset, consumed by **both** `apps/web` and `apps/mobile`.
 
-## Verifying config/ changes (IMPORTANT)
+## Verifying config/ changes
 
 `yarn verify:changed` only checks files under `apps/<workspace>/` — changed files under `config/` are **silently skipped**, so a green verify run says nothing about a config/ change. `@safe-global/test` has no test/lint/type-check scripts of its own; verify through its consumers instead:
 
@@ -12,15 +12,24 @@ yarn turbo run test --filter=@safe-global/web --filter=@safe-global/mobile --for
 
 `--force` is required: turbo's `test` task doesn't hash `config/test` files, so without it a cached green pass can hide a breaking change. A change here can break both platforms' test suites at once.
 
-## MSW fixtures are generated (never edit by hand)
+## MSW fixtures are mostly generated (never edit those by hand)
 
-The JSON files under `test/msw/fixtures/` are downloaded from the staging CGW by `test/msw/scripts/fetch-fixtures.ts` — treat them like `AUTO_GENERATED/` output. To refresh or add one:
+The JSON files under `test/msw/fixtures/` are downloaded from the staging CGW by `test/msw/scripts/fetch-fixtures.ts` — treat them like `AUTO_GENERATED/` output. Two are maintained by hand and the script never writes them: `safe-apps/mainnet.json` and `safes/sepolia.json`. Adding a key to `SAFES` writes a new `safes/<key>.json`: add an `Edit(...)` deny line for it in `.claude/settings.json`.
+
+The script also changes the responses before it saves them:
+
+- Each remote image becomes a local WebP file in `apps/web/.storybook/mock-assets/`; the script downloads only images that are not there yet. A logo that the host does not have (403 or 404) becomes `images/common/token-placeholder.svg`. Protocol `logoUrl` values become data URIs, because the schema requires an absolute URI.
+- The `vitalik` balances and portfolio keep only the tokens listed in `KEPT_TOKENS`, and their totals are recalculated.
+
+Commit the new images with the fixtures. To refresh or add a generated fixture:
 
 ```bash
-node config/test/msw/scripts/fetch-fixtures.ts [--safe=ef-safe | --group=transactions]
+node config/test/msw/scripts/fetch-fixtures.ts [--safe=ef-safe | --group=transactions | --group=swaps | --group=staking]
 ```
 
 Without `--safe=<key>` or `--group=<name>` it re-fetches and overwrites **all** fixtures. Both flags only accept the `=` form. The `transactions` group records the history of the Sepolia Safe `SEP_STATIC_SAFE_7` and the details of selected rows under `test/msw/fixtures/transactions/`; `createTransactionHandlersFromFixture` serves them and is not part of any default handler set.
+
+The `swaps` and `staking` groups save the list item and the details of each named transaction (CoW orders on Sepolia, native staking on mainnet) under `transactions/swaps/` and `transactions/staking/`, exported as `swapOrderFixtures` and `stakingFixtures`. A group fails when the gateway returns a `txInfo.type` other than the one it expects — staging decodes CoW orders only while the CoW API answers, so a `Custom` swap means record again later, not edit the JSON.
 
 ## Scenario names are a cross-workspace contract
 

@@ -69,7 +69,7 @@ const onboardingSurveyState: SurveyStateDto = {
 const baseSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
+  authenticated: true,
   pathname: '/welcome/survey',
   query: { spaceId: MOCK_SPACE_ID },
   shadcn: true,
@@ -99,7 +99,7 @@ export const Loading: Story = {
     ...createMockStory({
       scenario: 'efSafe',
       wallet: 'owner',
-      features: { spaces: true },
+      authenticated: true,
       pathname: '/welcome/survey',
       query: { spaceId: MOCK_SPACE_ID },
       shadcn: true,
@@ -119,7 +119,7 @@ export const Error: Story = {
     ...createMockStory({
       scenario: 'efSafe',
       wallet: 'owner',
-      features: { spaces: true },
+      authenticated: true,
       pathname: '/welcome/survey',
       query: { spaceId: MOCK_SPACE_ID },
       shadcn: true,

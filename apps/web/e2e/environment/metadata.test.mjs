@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { runInLocalService } from './scenarios/local-service.mjs'
 import { registerContract } from './scenarios/contracts.mjs'
-import { ensFixtureFiles, setEnsName } from './scenarios/ens.mjs'
+import { setEnsName } from './scenarios/ens.mjs'
 import { localAddress } from './scenarios/staging.mjs'
 
 test('metadata commands reject unrelated projects and services before accessing Docker', async () => {
@@ -37,18 +37,8 @@ test('ENS setup requires a .eth name and a valid address before accessing the fo
   }
 })
 
-test('the ENS fixture answers the mocked resolver call with the scenario address', async () => {
-  const address = '0x00000000000000000000000000000000000000ab'
-  const files = await ensFixtureFiles(address)
-  assert.equal(
-    files['ens_e2etestsafe.json']['0x8fade66b79cc9f707ab26799354482eb93a5b7dd'],
-    `0x${'0'.repeat(24)}${address.slice(2)}`,
-  )
-  await assert.rejects(ensFixtureFiles('invalid'), /requires an address/)
-})
-
 test('staging wallets that sign in tests map to generated owners and other addresses stay unchanged', () => {
-  const owners = { owner4: { address: '0x1' }, owner1: { address: '0x2' }, owner3: { address: '0x3' } }
+  const owners = { alice: { address: '0x1' }, bob: { address: '0x2' }, dave: { address: '0x3' } }
   assert.equal(localAddress(owners, '0xc16db0251654c0a72e91b190d81ead367d2c6fed'), '0x1')
   assert.equal(localAddress(owners, '0x8eeC30d6FB6eC104B7308a8847db5FF487152a3b'), '0x2')
   assert.equal(localAddress(owners, '0x4fe7164d7cA511Ab35520bb14065F1693240dC90'), '0x3')

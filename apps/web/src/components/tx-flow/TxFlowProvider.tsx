@@ -32,7 +32,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
+import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 import { isMultisigDetailedExecutionInfo, isOneSignatureShort } from '@/utils/transaction-guards'
 import type { GasPayer } from '@/utils/gasPayment'
 import { isSafeSigner, isSmartContractWallet } from '@/utils/wallets'
@@ -71,6 +71,7 @@ export type TxFlowContextType<T extends unknown = any> = {
   canExecute: boolean
   shouldExecute: boolean
   setShouldExecute: Dispatch<SetStateAction<boolean>>
+  isLastSignature: boolean
   willSignBeforeExecute: boolean
   continueToExecute: (txId: string) => void
 
@@ -117,6 +118,7 @@ export const initialContext: TxFlowContextType = {
   canExecute: false,
   shouldExecute: false,
   setShouldExecute: () => {},
+  isLastSignature: false,
   willSignBeforeExecute: false,
   continueToExecute: () => {},
 
@@ -224,8 +226,12 @@ const TxFlowProvider = <T extends unknown>({
   )
   const signatureCount = safeTx?.signatures.size ?? 0
 
+  // The last signer of an m/n Safe executes directly, with the implicit executor approval
+  const canApproveByExecuting = safe.threshold > 1 && !viaSafe
+
   // On-chain signatures only count once indexed, so these signers can only execute fully signed txs
-  const isAwaitingOnChainSignatures = (viaSafe || isSmartContractSigner) && signatureCount < safe.threshold
+  const isAwaitingOnChainSignatures =
+    (viaSafe || isSmartContractSigner) && !canApproveByExecuting && signatureCount < safe.threshold
 
   // If checkbox is checked and the transaction is executable, execute it, otherwise sign it
   const canExecute = isCorrectNonce && (isExecutable || isNewExecutableTx) && !isAwaitingOnChainSignatures
@@ -234,8 +240,9 @@ const TxFlowProvider = <T extends unknown>({
     (onlyExecute || shouldExecute) && canExecuteThroughRole && (!canExecute || preferThroughRole)
 
   const hasSigned = useAlreadySigned(safeTx)
-  const willSignBeforeExecute =
+  const isLastSignature =
     canExecute && !isProposing && !hasSigned && isOneSignatureShort(signatureCount, safe.threshold)
+  const willSignBeforeExecute = isLastSignature && !canApproveByExecuting
 
   const continueToExecute = useCallback(
     (txId: string) => {
@@ -250,7 +257,7 @@ const TxFlowProvider = <T extends unknown>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
+  const isPayFromSafeChain = useHasFeature(FEATURES.GTF) ?? false
 
   const trackTxEvent = useCallback(
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {
@@ -260,10 +267,10 @@ const TxFlowProvider = <T extends unknown>({
         details && isMultisigDetailedExecutionInfo(details.detailedExecutionInfo)
           ? details.detailedExecutionInfo
           : undefined
-      const gasPaymentSource = !isGtfChain
+      const gasPaymentSource = !isPayFromSafeChain
         ? undefined
         : exec &&
-            isGtfSafePaid({
+            isPaidFromSafe({
               gasPrice: exec.gasPrice,
               baseGas: exec.baseGas,
               refundReceiver: exec.refundReceiver?.value,
@@ -297,7 +304,7 @@ const TxFlowProvider = <T extends unknown>({
       txOrigin,
       data,
       safe.threshold,
-      isGtfChain,
+      isPayFromSafeChain,
       gasPaymentOption,
     ],
   )
@@ -324,6 +331,7 @@ const TxFlowProvider = <T extends unknown>({
     willExecute,
     shouldExecute,
     setShouldExecute,
+    isLastSignature,
     willSignBeforeExecute,
     continueToExecute,
 

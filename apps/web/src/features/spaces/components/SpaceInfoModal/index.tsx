@@ -12,8 +12,9 @@ import {
 } from '@safe-global/views/components/ui/dialog'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Button } from '@safe-global/views/components/ui/button'
-import Identicon from '@/components/common/Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { cn } from '@safe-global/views/utils/cn'
+import { useChain } from '@/hooks/useChains'
 import css from './styles.module.css'
 
 const SPACE_HELP_ARTICLE_LINK = 'https://help.safe.global/collections/1628654831-workspace?lang=en'
@@ -30,15 +31,12 @@ const BENEFITS: { icon: LucideIcon; title: string; desc: string }[] = [
   },
 ]
 
-const CHAIN_LOGO_URL = (chainId: number) =>
-  `https://safe-transaction-assets.safe.global/chains/${chainId}/chain_logo.png`
-
 const PREVIEW_ACCOUNTS: {
   name: string
   threshold: string
   address: string
+  chainId: string
   chainName: string
-  chainLogo: string
   value: string
   pending?: string
 }[] = [
@@ -46,8 +44,8 @@ const PREVIEW_ACCOUNTS: {
     name: 'Operations',
     threshold: '3/6',
     address: '0xa11ce0dd1f7c2b3e4f5a6b7c8d9e0f1a2b3c4d5e',
+    chainId: '1',
     chainName: 'Ethereum',
-    chainLogo: CHAIN_LOGO_URL(1),
     value: '$28.4M',
     pending: '2 pending',
   },
@@ -55,19 +53,35 @@ const PREVIEW_ACCOUNTS: {
     name: 'Payroll',
     threshold: '2/4',
     address: '0xbc7e9a2d01f3e4c5b6a7980d1e2f3a4b5c6d7e8f',
+    chainId: '8453',
     chainName: 'Base',
-    chainLogo: CHAIN_LOGO_URL(8453),
     value: '$12.1M',
   },
   {
     name: 'Grants',
     threshold: '4/7',
     address: '0xd4fa61e08c5b3a2917f6e4d0c1b2a3948576e5d2',
+    chainId: '56',
     chainName: 'BNB Smart Chain',
-    chainLogo: CHAIN_LOGO_URL(56),
     value: '$7.3M',
   },
 ]
+
+/** The chain's logo from the chain config, so it loads from wherever the config points */
+const PreviewChainLogo = ({ chainId, chainName }: { chainId: string; chainName: string }) => {
+  const logoUri = useChain(chainId)?.chainLogoUri
+  if (!logoUri) return null
+  return (
+    <img
+      src={logoUri}
+      alt={`${chainName} logo`}
+      width={22}
+      height={22}
+      loading="lazy"
+      className="size-[22px] shrink-0 rounded-full bg-white shadow-[0_0_0_2px_rgba(255,255,255,0.9)]"
+    />
+  )
+}
 
 const shortAddress = (address: string) => `${address.slice(0, 6)}…${address.slice(-4)}`
 
@@ -235,14 +249,7 @@ const SpaceInfoModal = ({ onClose }: { onClose: () => void }) => {
                     </div>
                     <div className="text-xs tabular-nums text-[#737373]">{shortAddress(account.address)}</div>
                   </div>
-                  <img
-                    src={account.chainLogo}
-                    alt={`${account.chainName} logo`}
-                    width={22}
-                    height={22}
-                    loading="lazy"
-                    className="size-[22px] shrink-0 rounded-full bg-white shadow-[0_0_0_2px_rgba(255,255,255,0.9)]"
-                  />
+                  <PreviewChainLogo chainId={account.chainId} chainName={account.chainName} />
                   <span className="text-sm font-semibold tabular-nums text-[#0a0a0a]">{account.value}</span>
                 </motion.div>
               ))}

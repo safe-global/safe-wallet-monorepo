@@ -271,7 +271,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                         sandbox="allow-scripts"
                         srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -459,7 +459,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -503,7 +503,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                             sandbox="allow-scripts"
                             srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -691,7 +691,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                             sandbox="allow-scripts"
                             srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -733,7 +733,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -1363,7 +1363,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0x06325440D014e39736583c165C2963BA99fAf14E.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="images/common/token-placeholder.svg" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -1407,7 +1407,7 @@ exports[`./TxSummary.stories AllTypesStacked 1`] = `
                             sandbox="allow-scripts"
                             srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0x83F20F44975D03b1b09e64809B757c47f942BEeA.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0x83F20F44975D03b1b09e64809B757c47f942BEeA.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -1785,7 +1785,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                         sandbox="allow-scripts"
                         srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -1973,7 +1973,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -2017,7 +2017,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                             sandbox="allow-scripts"
                             srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -2205,7 +2205,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                             sandbox="allow-scripts"
                             srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -2247,7 +2247,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -2877,7 +2877,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0x06325440D014e39736583c165C2963BA99fAf14E.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="images/common/token-placeholder.svg" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -2921,7 +2921,7 @@ exports[`./TxSummary.stories AllTypesStackedAt360 1`] = `
                             sandbox="allow-scripts"
                             srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0x83F20F44975D03b1b09e64809B757c47f942BEeA.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0x83F20F44975D03b1b09e64809B757c47f942BEeA.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -3299,7 +3299,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                         sandbox="allow-scripts"
                         srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -3487,7 +3487,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -3531,7 +3531,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                             sandbox="allow-scripts"
                             srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -3719,7 +3719,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                             sandbox="allow-scripts"
                             srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -3761,7 +3761,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -4391,7 +4391,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0x06325440D014e39736583c165C2963BA99fAf14E.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="images/common/token-placeholder.svg" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -4435,7 +4435,7 @@ exports[`./TxSummary.stories AllTypesStackedAt600 1`] = `
                             sandbox="allow-scripts"
                             srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0x83F20F44975D03b1b09e64809B757c47f942BEeA.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0x83F20F44975D03b1b09e64809B757c47f942BEeA.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -4813,7 +4813,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                         sandbox="allow-scripts"
                         srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -5001,7 +5001,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -5045,7 +5045,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                             sandbox="allow-scripts"
                             srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -5233,7 +5233,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                             sandbox="allow-scripts"
                             srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -5275,7 +5275,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -5905,7 +5905,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0x06325440D014e39736583c165C2963BA99fAf14E.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="images/common/token-placeholder.svg" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -5949,7 +5949,7 @@ exports[`./TxSummary.stories AllTypesStackedAt1000 1`] = `
                             sandbox="allow-scripts"
                             srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0x83F20F44975D03b1b09e64809B757c47f942BEeA.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0x83F20F44975D03b1b09e64809B757c47f942BEeA.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -6295,7 +6295,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                         sandbox="allow-scripts"
                         srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -6451,7 +6451,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -6495,7 +6495,7 @@ exports[`./TxSummary.stories AllTypesStackedHistory 1`] = `
                             sandbox="allow-scripts"
                             srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -7394,7 +7394,7 @@ exports[`./TxSummary.stories HistorySwapOrder 1`] = `
                         sandbox="allow-scripts"
                         srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -7438,7 +7438,7 @@ exports[`./TxSummary.stories HistorySwapOrder 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -7787,7 +7787,7 @@ exports[`./TxSummary.stories PendingNextToQueued 1`] = `
                             sandbox="allow-scripts"
                             srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -8574,7 +8574,7 @@ exports[`./TxSummary.stories SendErc20 1`] = `
                       sandbox="allow-scripts"
                       srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -9139,7 +9139,7 @@ exports[`./TxSummary.stories SwapAt360 1`] = `
                         sandbox="allow-scripts"
                         srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -9183,7 +9183,7 @@ exports[`./TxSummary.stories SwapAt360 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -9387,7 +9387,7 @@ exports[`./TxSummary.stories SwapAt600 1`] = `
                         sandbox="allow-scripts"
                         srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -9431,7 +9431,7 @@ exports[`./TxSummary.stories SwapAt600 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -9635,7 +9635,7 @@ exports[`./TxSummary.stories SwapAt1000 1`] = `
                         sandbox="allow-scripts"
                         srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -9679,7 +9679,7 @@ exports[`./TxSummary.stories SwapAt1000 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -9884,7 +9884,7 @@ exports[`./TxSummary.stories SwapBuyOrder 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -9926,7 +9926,7 @@ exports[`./TxSummary.stories SwapBuyOrder 1`] = `
                         sandbox="allow-scripts"
                         srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -10131,7 +10131,7 @@ exports[`./TxSummary.stories SwapOrderWithLongSymbols 1`] = `
                         sandbox="allow-scripts"
                         srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0x06325440D014e39736583c165C2963BA99fAf14E.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="images/common/token-placeholder.svg" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -10175,7 +10175,7 @@ exports[`./TxSummary.stories SwapOrderWithLongSymbols 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0x83F20F44975D03b1b09e64809B757c47f942BEeA.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0x83F20F44975D03b1b09e64809B757c47f942BEeA.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -10379,7 +10379,7 @@ exports[`./TxSummary.stories SwapSellOrder 1`] = `
                         sandbox="allow-scripts"
                         srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.png" alt="Safe App logo" height="26" width="auto" style="" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2.webp" alt="Safe App logo" height="26" width="auto" style="" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null
@@ -10423,7 +10423,7 @@ exports[`./TxSummary.stories SwapSellOrder 1`] = `
                           sandbox="allow-scripts"
                           srcdoc="
     <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
+      <img src="mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="26" width="auto" style="border-radius: 100%;" />
       <script>
         document.querySelector('img').onerror = (e) => {
           e.target.onerror = null

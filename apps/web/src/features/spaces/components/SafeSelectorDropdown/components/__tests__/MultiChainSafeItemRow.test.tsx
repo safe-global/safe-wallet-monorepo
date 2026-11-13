@@ -27,7 +27,7 @@ jest.mock('@/components/common/AccountRow/SafeInfoDisplay', () => {
   const Mock = ({ explorerLink, onRename }: { explorerLink?: { href: string }; onRename?: () => void }) => (
     <div data-testid="safe-info-display">
       {explorerLink && <a data-testid="summary-explorer-link" href={explorerLink.href} />}
-      {onRename && <button data-testid="rename-btn" onClick={onRename} />}
+      {onRename && <span role="button" data-testid="rename-btn" onClick={onRename} />}
     </div>
   )
   Mock.displayName = 'SafeInfoDisplay'
@@ -82,6 +82,15 @@ describe('MultiChainSafeItemRow rename gate', () => {
     render(<MultiChainSafeItemRow item={createItem(['1', '137'])} onRename={jest.fn()} />)
 
     expect(screen.getByTestId('rename-btn')).toBeInTheDocument()
+  })
+
+  it('offers rename for every network of the group', () => {
+    const onRename = jest.fn()
+    render(<MultiChainSafeItemRow item={createItem(['1', '137'])} onRename={onRename} />)
+
+    fireEvent.click(screen.getByTestId('rename-btn'))
+
+    expect(onRename).toHaveBeenCalledWith({ address: '0xaaa', name: 'Test Safe', chainIds: ['1', '137'] })
   })
 
   it('withholds rename from a member looking at a workspace Safe', () => {

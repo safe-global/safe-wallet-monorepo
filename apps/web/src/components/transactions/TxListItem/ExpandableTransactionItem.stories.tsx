@@ -51,11 +51,28 @@ const findHistoryItem = (txId: string) => {
 
 const summaryOf = (txDetails: TransactionDetails): Story => ({ args: { item: findHistoryItem(txDetails.txId) } })
 
+/** A history row that has no recorded details */
+const summaryById = (txId: string): Story => ({ args: { item: findHistoryItem(txId) } })
+
 const expandedOf = (txDetails: TransactionDetails): Story => ({
   args: { item: findHistoryItem(txDetails.txId), txDetails },
 })
 
 const { details } = transactionFixtures
+
+const SEND_ETH_ID = `multisig_${TX_HISTORY_SAFE.address}_0xcfbe040521dd80d43f408c7fd3ce7d80f21e8916a04a56ff0fe5cd14eb1a508f`
+const DELETE_ALLOWANCE_ID = `multisig_${TX_HISTORY_SAFE.address}_0x4380e4deadbd29fb0d098bdfe80572bc22985586e0b400732af8371a5595b84c`
+const RECEIVE_UNTRUSTED_ID = `transfer_${TX_HISTORY_SAFE.address}_e54e7e766b08d4210bc1cfcc84d84ca4782a0cc1efe9e7d9c032d305060ed2a7c3044`
+
+export const ReceiveToken = summaryOf(details.receiveQtrust)
+export const ReceiveTokenExpanded = expandedOf(details.receiveQtrust)
+
+/** The chain has the default token list, so the untrusted token shows the warning */
+export const ReceiveUntrustedToken = summaryById(RECEIVE_UNTRUSTED_ID)
+
+export const SendNativeToken = summaryById(SEND_ETH_ID)
+
+export const DeleteAllowance = summaryById(DELETE_ALLOWANCE_ID)
 
 export const OnChainRejection = summaryOf(details.onChainRejection)
 export const OnChainRejectionExpanded = expandedOf(details.onChainRejection)

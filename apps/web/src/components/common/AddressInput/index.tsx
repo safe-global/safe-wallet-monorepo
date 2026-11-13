@@ -19,8 +19,10 @@ import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
 import css from './styles.module.css'
-import Identicon from '../Identicon'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { useEnsHubProvider } from '@/hooks/useEnsHubProvider'
+
+export const ADDRESS_ERROR_DEBOUNCE_MS = 500
 
 export type AddressInputProps = {
   name: string
@@ -124,7 +126,7 @@ const AddressInput = ({
   const fieldError = resolverError || get(errors, name)
 
   // Debounce the field error unless there's no error or it's resolving a domain
-  let error = useDebounce(fieldError, 500)
+  let error = useDebounce(fieldError, ADDRESS_ERROR_DEBOUNCE_MS)
   if (resolverError) error = resolverError
   if (!fieldError || resolving) error = undefined
 

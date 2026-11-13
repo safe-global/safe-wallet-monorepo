@@ -37,21 +37,21 @@ export const AllVariants: Story = {
         >
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
             <Avatar size="default">
-              <AvatarImage src="https://github.com/shadcn.png" alt="Default" />
+              <AvatarImage src="mock-assets/github.com/shadcn.webp" alt="Default" />
               <AvatarFallback>DF</AvatarFallback>
             </Avatar>
             <span className="text-xs text-muted-foreground">default (40px)</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
             <Avatar size="sm">
-              <AvatarImage src="https://github.com/shadcn.png" alt="Small" />
+              <AvatarImage src="mock-assets/github.com/shadcn.webp" alt="Small" />
               <AvatarFallback>SM</AvatarFallback>
             </Avatar>
             <span className="text-xs text-muted-foreground">sm (32px)</span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
             <Avatar size="xs">
-              <AvatarImage src="https://github.com/shadcn.png" alt="Extra Small" />
+              <AvatarImage src="mock-assets/github.com/shadcn.webp" alt="Extra Small" />
               <AvatarFallback>XS</AvatarFallback>
             </Avatar>
             <span className="text-xs text-muted-foreground">xs (24px)</span>
@@ -117,21 +117,21 @@ export const AllVariants: Story = {
           }}
         >
           <Avatar size="default">
-            <AvatarImage src="https://github.com/shadcn.png" alt="Default" />
+            <AvatarImage src="mock-assets/github.com/shadcn.webp" alt="Default" />
             <AvatarFallback>DF</AvatarFallback>
             <AvatarBadge>
               <Check />
             </AvatarBadge>
           </Avatar>
           <Avatar size="sm">
-            <AvatarImage src="https://github.com/shadcn.png" alt="Small" />
+            <AvatarImage src="mock-assets/github.com/shadcn.webp" alt="Small" />
             <AvatarFallback>SM</AvatarFallback>
             <AvatarBadge>
               <Check />
             </AvatarBadge>
           </Avatar>
           <Avatar size="xs">
-            <AvatarImage src="https://github.com/shadcn.png" alt="Extra Small" />
+            <AvatarImage src="mock-assets/github.com/shadcn.webp" alt="Extra Small" />
             <AvatarFallback>XS</AvatarFallback>
             <AvatarBadge />
           </Avatar>
@@ -145,11 +145,11 @@ export const AllVariants: Story = {
             <span className="w-20 text-sm text-muted-foreground">Default</span>
             <AvatarGroup>
               <Avatar>
-                <AvatarImage src="https://github.com/shadcn.png" alt="User 1" />
+                <AvatarImage src="mock-assets/github.com/shadcn.webp" alt="User 1" />
                 <AvatarFallback>U1</AvatarFallback>
               </Avatar>
               <Avatar>
-                <AvatarImage src="https://github.com/vercel.png" alt="User 2" />
+                <AvatarImage src="mock-assets/github.com/vercel.webp" alt="User 2" />
                 <AvatarFallback>U2</AvatarFallback>
               </Avatar>
               <Avatar>
@@ -162,11 +162,11 @@ export const AllVariants: Story = {
             <span className="w-20 text-sm text-muted-foreground">Small</span>
             <AvatarGroup>
               <Avatar size="sm">
-                <AvatarImage src="https://github.com/shadcn.png" alt="User 1" />
+                <AvatarImage src="mock-assets/github.com/shadcn.webp" alt="User 1" />
                 <AvatarFallback>U1</AvatarFallback>
               </Avatar>
               <Avatar size="sm">
-                <AvatarImage src="https://github.com/vercel.png" alt="User 2" />
+                <AvatarImage src="mock-assets/github.com/vercel.webp" alt="User 2" />
                 <AvatarFallback>U2</AvatarFallback>
               </Avatar>
               <Avatar size="sm">
@@ -179,11 +179,11 @@ export const AllVariants: Story = {
             <span className="w-20 text-sm text-muted-foreground">Extra Small</span>
             <AvatarGroup>
               <Avatar size="xs">
-                <AvatarImage src="https://github.com/shadcn.png" alt="User 1" />
+                <AvatarImage src="mock-assets/github.com/shadcn.webp" alt="User 1" />
                 <AvatarFallback>U1</AvatarFallback>
               </Avatar>
               <Avatar size="xs">
-                <AvatarImage src="https://github.com/vercel.png" alt="User 2" />
+                <AvatarImage src="mock-assets/github.com/vercel.webp" alt="User 2" />
                 <AvatarFallback>U2</AvatarFallback>
               </Avatar>
               <Avatar size="xs">
@@ -196,11 +196,11 @@ export const AllVariants: Story = {
             <span className="w-20 text-sm text-muted-foreground">Icon count</span>
             <AvatarGroup>
               <Avatar>
-                <AvatarImage src="https://github.com/shadcn.png" alt="User 1" />
+                <AvatarImage src="mock-assets/github.com/shadcn.webp" alt="User 1" />
                 <AvatarFallback>U1</AvatarFallback>
               </Avatar>
               <Avatar>
-                <AvatarImage src="https://github.com/vercel.png" alt="User 2" />
+                <AvatarImage src="mock-assets/github.com/vercel.webp" alt="User 2" />
                 <AvatarFallback>U2</AvatarFallback>
               </Avatar>
               <AvatarGroupCount>

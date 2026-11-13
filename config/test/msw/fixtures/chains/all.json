@@ -7,7 +7,7 @@
       "chainId": "1",
       "chainName": "Ethereum",
       "description": "",
-      "chainLogoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.png",
+      "chainLogoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/chains/1/chain_logo.webp",
       "l2": false,
       "isTestnet": false,
       "zk": false,
@@ -15,7 +15,7 @@
         "name": "Ether",
         "symbol": "ETH",
         "decimals": 18,
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png"
+        "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.webp"
       },
       "transactionService": "https://api.5afe.dev/tx-service/eth",
       "blockExplorerUriTemplate": {
@@ -119,7 +119,7 @@
       "chainId": "560048",
       "chainName": "Hoodi Testnet",
       "description": "Hoodi Testnet",
-      "chainLogoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/560048/chain_logo.png",
+      "chainLogoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/chains/560048/chain_logo.webp",
       "l2": true,
       "isTestnet": true,
       "zk": false,
@@ -127,7 +127,7 @@
         "name": "Ether",
         "symbol": "ETH",
         "decimals": 18,
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/560048/currency_logo.png"
+        "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/chains/560048/currency_logo.webp"
       },
       "transactionService": "https://transaction-ethereum-hoodi.safe.protofire.io",
       "blockExplorerUriTemplate": {
@@ -208,7 +208,7 @@
       "chainId": "137",
       "chainName": "Polygon",
       "description": "Polygon",
-      "chainLogoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/137/chain_logo.png",
+      "chainLogoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/chains/137/chain_logo.webp",
       "l2": true,
       "isTestnet": false,
       "zk": false,
@@ -216,7 +216,7 @@
         "name": "Matic",
         "symbol": "MATIC",
         "decimals": 18,
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/137/currency_logo.png"
+        "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/chains/137/currency_logo.webp"
       },
       "transactionService": "https://api.5afe.dev/tx-service/pol",
       "blockExplorerUriTemplate": {
@@ -309,7 +309,7 @@
       "chainId": "11155111",
       "chainName": "Sepolia",
       "description": "Ethereum Testnet Sepolia",
-      "chainLogoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/11155111/chain_logo.png",
+      "chainLogoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/chains/11155111/chain_logo.webp",
       "l2": true,
       "isTestnet": true,
       "zk": false,
@@ -317,7 +317,7 @@
         "name": "Sepolia Ether",
         "symbol": "ETH",
         "decimals": 18,
-        "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/11155111/currency_logo.png"
+        "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/chains/11155111/currency_logo.webp"
       },
       "transactionService": "https://api.5afe.dev/tx-service/sep",
       "blockExplorerUriTemplate": {

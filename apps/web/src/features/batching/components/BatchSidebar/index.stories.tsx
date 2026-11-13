@@ -5,6 +5,7 @@ import { createMockStory } from '@/stories/mocks'
 import { SAFE_ADDRESSES } from '../../../../../../../config/test/msw/fixtures'
 import type { BatchTxsState, CallOnlyTxData } from '../../store/batchSlice'
 import BatchSidebar from './index'
+import { mockNow } from '@/stories/mocks/now'
 
 /**
  * BatchSidebar Stories
@@ -34,7 +35,7 @@ const tx = (to: string, value: string, data = '0x'): CallOnlyTxData => ({
 
 const draftItem = (id: string, txData: CallOnlyTxData) => ({
   id,
-  timestamp: Date.now(),
+  timestamp: mockNow(),
   txData,
 })
 
@@ -92,6 +93,21 @@ export const WithTransactions: Story = {
           tx('0x1234567890123456789012345678901234567890', '1000000000000000000'),
           tx('0xAbCdEf0000000000000000000000000000000001', '0'),
           tx('0xAbCdEf0000000000000000000000000000000002', '500000000000000000'),
+        ),
+      },
+    }).decorator,
+  ],
+}
+
+export const ManyTransactions: Story = {
+  decorators: [
+    createMockStory({
+      scenario: 'efSafe',
+      wallet: 'owner',
+      shadcn: true,
+      store: {
+        batch: batchState(
+          ...Array.from({ length: 20 }, () => tx('0x1234567890123456789012345678901234567890', '1000000000000000000')),
         ),
       },
     }).decorator,

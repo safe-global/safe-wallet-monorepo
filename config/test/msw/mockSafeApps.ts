@@ -40,7 +40,7 @@ export const ensSafeApp: SafeApp = {
   id: 3,
   url: 'https://app.ens.domains',
   name: 'ENS App',
-  iconUrl: 'https://app.ens.domains/android-chrome-144x144.png',
+  iconUrl: '',
   description: 'Decentralised naming for wallets, websites, & more.',
   chainIds: ['1', '4', '137'],
   accessControl: {
@@ -75,7 +75,7 @@ export const txBuilderShareApp: SafeApp = {
   id: 29,
   url: 'https://apps-portal.safe.global/tx-builder',
   name: 'Transaction Builder',
-  iconUrl: 'https://apps-portal.safe.global/tx-builder/tx-builder.png',
+  iconUrl: 'mock-assets/apps-portal.safe.global/tx-builder/tx-builder.webp',
   description: 'Compose custom contract interactions and batch them into a single transaction',
   chainIds: ['1', '5'],
   accessControl: {

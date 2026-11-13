@@ -1,13 +1,15 @@
-import { render } from '@/tests/test-utils'
+import { fakerChecksummedAddress, render, within } from '@/tests/test-utils'
 import ProposersList from '.'
 import { faker } from '@faker-js/faker'
 import useProposers from '@/hooks/useProposers'
-import { useHasFeature } from '@/hooks/useChains'
+import { useChain, useHasFeature } from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import { mockRole } from '@/tests/mocks/roles'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import * as walletUtils from '@/utils/wallets'
 
 const NOT_CONNECTED = 'Please connect your wallet'
 const NOT_OWNER = 'Your connected wallet is not a signer of this Safe account'
@@ -28,6 +30,8 @@ jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: jest.fn(() => ({ configs: [] })),
   useHasFeature: jest.fn(() => true),
+  useCurrentChain: jest.fn(),
+  useChain: jest.fn(),
 }))
 
 const mockUsePlanGate = jest.fn()
@@ -61,6 +65,9 @@ describe('ProposersList', () => {
     jest.clearAllMocks()
     mockRole('owner')
     mockUseNestedSafeOwners.mockReturnValue([])
+    ;(useChain as jest.MockedFunction<typeof useChain>).mockReturnValue(
+      chainBuilder().with({ chainId: '1', features: [] }).build(),
+    )
     mockUsePlanGate.mockReturnValue({ mustUpgradeToSafePro: false, isLoading: false, upgradeHref: '/spaces/plans' })
     ;(useHasFeature as jest.MockedFunction<typeof useHasFeature>).mockReturnValue(true)
     ;(useSafeInfo as jest.MockedFunction<typeof useSafeInfo>).mockReturnValue({
@@ -151,5 +158,57 @@ describe('ProposersList', () => {
 
     expect(queryByTestId('add-proposer-btn')).not.toBeInTheDocument()
     expect(queryByTestId('safe-pro-lock')).not.toBeInTheDocument()
+  })
+
+  describe('with existing proposers', () => {
+    beforeEach(() => {
+      jest.spyOn(walletUtils, 'isSmartContract').mockResolvedValue(false)
+      ;(useProposers as jest.MockedFunction<typeof useProposers>).mockReturnValue({
+        data: {
+          results: [
+            { delegate: faker.finance.ethereumAddress(), delegator: mockOwnerAddress, label: 'Proposer', safe: null },
+            { delegate: faker.finance.ethereumAddress(), delegator: mockOwnerAddress, label: 'Proposer', safe: null },
+          ],
+        },
+      } as unknown as ReturnType<typeof useProposers>)
+    })
+
+    it('shows the edit and delete actions of every proposer while the feature is on', async () => {
+      const { findAllByTestId, getAllByTestId } = render(<ProposersList />)
+
+      expect(await findAllByTestId('edit-proposer-btn')).toHaveLength(2)
+      expect(getAllByTestId('delete-proposer-btn')).toHaveLength(2)
+    })
+
+    it('shows the address book names of each proposer and of its creator', async () => {
+      const delegate = fakerChecksummedAddress()
+      const creator = fakerChecksummedAddress()
+      ;(useProposers as jest.MockedFunction<typeof useProposers>).mockReturnValue({
+        data: { results: [{ delegate, delegator: creator, label: 'Proposer', safe: null }] },
+      } as unknown as ReturnType<typeof useProposers>)
+
+      const { findAllByRole } = render(<ProposersList />, {
+        initialReduxState: { addressBook: { '1': { [delegate]: 'AD Proposer1', [creator]: 'Creator' } } },
+      })
+
+      const [, firstProposer] = await findAllByRole('row')
+      const [proposerCell, creatorCell] = within(firstProposer).getAllByRole('cell')
+      expect(proposerCell).toHaveTextContent('AD Proposer1')
+      expect(creatorCell).toHaveTextContent('Creator')
+    })
+
+    it('keeps listing the proposers but hides adding, editing and deleting while the feature is off', async () => {
+      ;(useHasFeature as jest.MockedFunction<typeof useHasFeature>).mockImplementation(
+        (feature) => feature !== FEATURES.PROPOSERS,
+      )
+
+      const { getByTestId, findAllByRole, queryByTestId } = render(<ProposersList />)
+
+      expect(await findAllByRole('row')).toHaveLength(3)
+      expect(getByTestId('proposer-section')).toBeInTheDocument()
+      expect(queryByTestId('add-proposer-btn')).not.toBeInTheDocument()
+      expect(queryByTestId('edit-proposer-btn')).not.toBeInTheDocument()
+      expect(queryByTestId('delete-proposer-btn')).not.toBeInTheDocument()
+    })
   })
 })

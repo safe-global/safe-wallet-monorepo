@@ -9,7 +9,7 @@ jest.mock('@/hooks/useMediaQuery', () => ({
   useMediaQuery: (query: string) => mockUseMediaQuery(query),
 }))
 
-jest.mock('@/components/common/Identicon', () => {
+jest.mock('@safe-global/views/components/common/Identicon', () => {
   const Identicon = ({ address }: { address: string }) => <span data-testid="identicon">{address}</span>
   return Identicon
 })
@@ -23,6 +23,7 @@ const contact = (overrides: Partial<ExtendedContact> = {}): ExtendedContact => (
   name: 'Alice signer',
   address: checksumAddress('0x1234567890123456789012345678901234567890'),
   chainIds: ['1'],
+  tagIds: [],
   createdBy: '',
   createdByUserId: 0,
   lastUpdatedBy: '',

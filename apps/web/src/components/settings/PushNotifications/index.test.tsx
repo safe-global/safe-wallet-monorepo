@@ -109,6 +109,22 @@ describe('PushNotifications', () => {
     expect(screen.getByText('Confirmation requests')).toBeInTheDocument()
   })
 
+  it('disables the switch for a Safe that is not deployed yet', () => {
+    ;(useSafeInfo as jest.MockedFunction<typeof useSafeInfo>).mockReturnValue({
+      safe: extendedSafeInfoBuilder()
+        .with({ address: { value: mockSafeAddress } })
+        .with({ chainId: '1' })
+        .with({ deployed: false })
+        .build(),
+      safeAddress: mockSafeAddress,
+      safeLoaded: true,
+    } as ReturnType<typeof useSafeInfo>)
+
+    render(<PushNotifications />)
+
+    expect(screen.getByTestId('notifications-switch')).toHaveAttribute('aria-disabled', 'true')
+  })
+
   it('registers the Safe when the switch is toggled on', async () => {
     ;(useNotificationPreferences as jest.MockedFunction<typeof useNotificationPreferences>).mockReturnValue({
       uuid: 'uuid',

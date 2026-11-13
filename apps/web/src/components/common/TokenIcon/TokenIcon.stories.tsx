@@ -22,8 +22,8 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const ETH_LOGO = 'https://assets.coingecko.com/coins/images/279/small/ethereum.png'
-const USDC_LOGO = 'https://assets.coingecko.com/coins/images/6319/small/usdc.png'
+const ETH_LOGO = 'mock-assets/assets.coingecko.com/coins/images/279/small/ethereum.webp'
+const USDC_LOGO = 'mock-assets/assets.coingecko.com/coins/images/6319/small/usdc.webp'
 
 export const Default: Story = {
   args: {
@@ -73,6 +73,6 @@ export const Fallback: Story = {
 export const CustomFallback: Story = {
   args: {
     tokenSymbol: 'CUSTOM',
-    fallbackSrc: 'https://via.placeholder.com/26',
+    fallbackSrc: '/images/common/safe-token.svg',
   },
 }

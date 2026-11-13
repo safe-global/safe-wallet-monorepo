@@ -50,7 +50,7 @@ const criticalResults = {
   pending_tx: mkResult({ status: 'clear' }),
 }
 
-const setup = createMockStory({ features: { spaces: true }, layout: 'paper' })
+const setup = createMockStory({ authenticated: true, layout: 'paper' })
 
 const meta = {
   title: 'Features/SecurityHub/WorkspaceHealthCard',

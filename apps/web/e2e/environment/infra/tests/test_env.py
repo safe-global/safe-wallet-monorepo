@@ -1,3 +1,4 @@
+import http.client
 import io
 import json
 import os
@@ -5,19 +6,20 @@ import socket
 import tempfile
 import unittest
 import urllib.error
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 from unittest.mock import Mock, patch
 
 from scripts.test_env import (
     chain_public_config, chain_step_commands, chain_storage_reset_commands, check_ports,
-    compose_command, fork_urls, parse_args, provider_urls, public_config, reset, run,
-    seed_fork_cache, show_logs, wait_ready,
+    compose_command, device_up, fork_urls, load_manifest, parse_args, provider_urls, public_config,
+    reset, run, seed_fork_cache, show_logs, wait_ready, write_images,
 )
 
 GATEWAY = "http://localhost:8000/cgw"
 DECODER = "http://localhost:8000/decoder"
 TXS = "http://localhost:8000/txs/api"
+LOGO = "http://localhost:8000/cfg/media/chains/170/chain_logo.png"
 SEPOLIA_PROVIDER = "https://sepolia.example/key"
 MAINNET_PROVIDER = "https://mainnet.example/key"
 
@@ -30,14 +32,14 @@ def manifest():
     }
 
 
-def fake_backend(failures=None, features=("DELETE_TX", "QUEUE_SERVICE")):
+def fake_backend(failures=None, features=("DELETE_TX", "QUEUE_SERVICE"), chain_logo=LOGO):
     """Answers readiness reads by RPC method or URL; `failures` lists errors to raise first."""
     responses = {
         "eth_chainId": {"result": "0xaa"},
         "eth_getBlockByNumber": {"result": {"hash": "0xabc"}},
         f"{GATEWAY}/health/ready": {},
         f"{DECODER}/health/ready": {"ready": True},
-        f"{GATEWAY}/v1/chains/170": {"chainId": 170},
+        f"{GATEWAY}/v1/chains/170": {"chainId": 170, "chainLogoUri": chain_logo},
         f"{GATEWAY}/v2/chains?serviceKey=WALLET_WEB": {
             "results": [{"chainId": "170", "features": list(features)}],
         },
@@ -52,6 +54,12 @@ def fake_backend(failures=None, features=("DELETE_TX", "QUEUE_SERVICE")):
         return responses[key]
 
     return Mock(side_effect=read)
+
+
+def stack_reads(backend, logo_type="image/png"):
+    """Patches the readiness reads: JSON by `backend`, the chain logo by its content type."""
+    logo = Mock(return_value=logo_type)
+    return patch.multiple("scripts.test_env", read_json=backend, read_content_type=logo)
 
 
 class FakeClock:
@@ -71,25 +79,64 @@ class EnvironmentTests(unittest.TestCase):
         backend = fake_backend({"eth_chainId": [socket.timeout("timed out")]})
         clock = FakeClock()
         ready = manifest()
-        with patch("scripts.test_env.read_json", backend), patch("scripts.test_env.time", clock):
+        with stack_reads(backend), patch("scripts.test_env.time", clock):
             wait_ready([], ready, 10)
         backend.assert_any_call(f"{DECODER}/health/ready")
         self.assertEqual(clock.now, 2)
         self.assertEqual(ready["forkBlockHash"], "0xabc")
 
     @patch("scripts.test_env.run", return_value="")
+    def test_readiness_retries_resets_while_the_proxy_starts(self, _docker):
+        backend = fake_backend({
+            f"{GATEWAY}/health/ready": [
+                ConnectionResetError(104, "Connection reset by peer"),
+                http.client.RemoteDisconnected("Remote end closed connection without response"),
+            ],
+        })
+        clock = FakeClock()
+        ready = manifest()
+        with stack_reads(backend), patch("scripts.test_env.time", clock):
+            wait_ready([], ready, 10)
+        self.assertEqual(clock.now, 4)
+        self.assertEqual(ready["forkBlockHash"], "0xabc")
+
+    @patch("scripts.test_env.run", return_value="")
     def test_readiness_timeout_reports_the_last_error(self, _docker):
         refused = [urllib.error.URLError("connection refused")] * 10
         backend = fake_backend({f"{GATEWAY}/health/ready": refused})
-        with patch("scripts.test_env.read_json", backend), patch("scripts.test_env.time", FakeClock()):
+        with stack_reads(backend), patch("scripts.test_env.time", FakeClock()):
             with self.assertRaisesRegex(RuntimeError, "after 6s.*URLError.*connection refused"):
                 wait_ready([], manifest(), 6)
 
     @patch("scripts.test_env.run", return_value="")
     def test_readiness_fails_when_the_chain_lacks_the_queue_service_feature(self, _docker):
         backend = fake_backend(features=("DELETE_TX",))
-        with patch("scripts.test_env.read_json", backend), patch("scripts.test_env.time", FakeClock()):
+        with stack_reads(backend), patch("scripts.test_env.time", FakeClock()):
             with self.assertRaisesRegex(RuntimeError, "QUEUE_SERVICE"):
+                wait_ready([], manifest(), 6)
+
+    @patch("scripts.test_env.run", return_value="")
+    def test_readiness_waits_for_the_chain_logo_and_reports_a_missing_one(self, _docker):
+        missing = urllib.error.HTTPError(LOGO, 404, "Not Found", {}, None)
+        logo = Mock(side_effect=[missing] * 10)
+        with patch.multiple("scripts.test_env", read_json=fake_backend(), read_content_type=logo):
+            with patch("scripts.test_env.time", FakeClock()):
+                with self.assertRaisesRegex(RuntimeError, "after 6s.*HTTPError.*404"):
+                    wait_ready([], manifest(), 6)
+
+    @patch("scripts.test_env.run", return_value="")
+    def test_readiness_fails_when_the_chain_logo_is_not_an_image(self, _docker):
+        backend = fake_backend()
+        with stack_reads(backend, logo_type="text/html"), patch("scripts.test_env.time", FakeClock()):
+            with self.assertRaisesRegex(RuntimeError, "returned text/html, not an image"):
+                wait_ready([], manifest(), 6)
+
+    @patch("scripts.test_env.run", return_value="")
+    def test_readiness_fails_when_the_chain_logo_uses_another_port(self, _docker):
+        backend = fake_backend(chain_logo=LOGO.replace(":8000", ":8300"))
+        with stack_reads(backend), patch("scripts.test_env.time", FakeClock()):
+            message = "not served by the stack at localhost:8000; check MEDIA_URL"
+            with self.assertRaisesRegex(RuntimeError, message):
                 wait_ready([], manifest(), 6)
 
     def test_occupied_port_fails_before_starting_services(self):
@@ -111,6 +158,40 @@ class EnvironmentTests(unittest.TestCase):
         self.assertLess(command.index(str(path)), command.index("-f"))
         self.assertIn("safe-e2e-test", command)
 
+    def test_project_images_load_after_the_pins_and_before_the_local_env_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            images = Path(directory) / "safe-e2e-test.images.env"
+            images.write_text("CGW_IMAGE=ghcr.io/safe-global/safe-client-gateway:main-1@sha256:a\n")
+            local = Path(__file__)
+            with patch("scripts.test_env.images_path", return_value=images):
+                command = compose_command("safe-e2e-test", local)
+        env_files = [command[index + 1] for index, part in enumerate(command) if part == "--env-file"]
+        self.assertEqual(
+            [Path(path).name for path in env_files], ["test-images.env", images.name, local.name],
+        )
+
+    def test_up_pins_the_resolved_images_for_the_later_commands_of_the_project(self):
+        resolved = {"CGW_IMAGE": "ghcr.io/safe-global/safe-client-gateway:main-1@sha256:a"}
+        with tempfile.TemporaryDirectory() as directory:
+            images = Path(directory) / "safe-e2e-t.images.env"
+            errors = io.StringIO()
+            with patch("scripts.test_env.images_path", return_value=images), \
+                    patch("scripts.test_env.resolve_images", return_value=(resolved, ["TXS moved"])) as resolve, \
+                    patch.dict(os.environ, {"GITHUB_ACTIONS": "true"}), \
+                    redirect_stdout(io.StringIO()), redirect_stderr(errors):
+                write_images("safe-e2e-t", "production")
+            self.assertEqual(images.read_text(), f'CGW_IMAGE={resolved["CGW_IMAGE"]}\n')
+        resolve.assert_called_once_with("production")
+        self.assertEqual(errors.getvalue(), "::warning::TXS moved\n")
+
+    def test_backend_comes_from_safe_e2e_backend_and_defaults_to_staging(self):
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertEqual(parse_args(["versions"]).backend, "staging")
+        with patch.dict(os.environ, {"SAFE_E2E_BACKEND": "production"}, clear=True):
+            self.assertEqual(parse_args(["up"]).backend, "production")
+        with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+            parse_args(["up", "--backend", "release"])
+
     def test_public_manifest_omits_upstream_provider_credentials(self):
         services = {
             "fork-rpc": {"environment": {"FORK_BLOCK_NUMBER": "100"}},
@@ -120,6 +201,7 @@ class EnvironmentTests(unittest.TestCase):
             },
             "nginx": {"ports": [{"published": "8000"}]},
             "ledger-emulator": {"ports": [{"published": "9555"}]},
+            "trezor-emulator": {"ports": [{"published": "9556"}, {"published": "21328"}]},
             "txs-init": {"environment": {"FORK_CHAIN_ID": "11155111"}},
         }
         for service in services.values():
@@ -128,6 +210,8 @@ class EnvironmentTests(unittest.TestCase):
         self.assertNotIn("secret", str(result))
         self.assertEqual(result["gatewayUrl"], GATEWAY)
         self.assertEqual(result["ledgerEmulatorUrl"], "http://localhost:9555")
+        self.assertEqual(result["trezorEmulatorUrl"], "http://localhost:9556")
+        self.assertEqual(result["trezorBridgeUrl"], "http://localhost:21328")
         self.assertEqual(result["forkBlock"], 100)
 
     @patch("scripts.test_env.subprocess.run")
@@ -243,6 +327,20 @@ class EnvironmentTests(unittest.TestCase):
         [(command, env)] = calls
         self.assertEqual(command[-2:], ["down", "--volumes"])
         self.assertTrue(env["SEPOLIA_FORK_RPC_URL"])
+        self.assertTrue(env["CGW_IMAGE"])
+
+    def test_reset_removes_the_pinned_images_of_the_project(self):
+        with tempfile.TemporaryDirectory() as directory:
+            images = Path(directory) / "safe-e2e-unit-test.images.env"
+            images.write_text("CGW_IMAGE=ghcr.io/safe-global/safe-client-gateway:main-1@sha256:a\n")
+            args = parse_args(["reset", "--project", "safe-e2e-unit-test"])
+            with patch("scripts.test_env.images_path", return_value=images), \
+                    patch("scripts.test_env.run", return_value="") as docker, \
+                    patch.dict(os.environ, {}, clear=True), redirect_stdout(io.StringIO()):
+                reset(args)
+            self.assertFalse(images.exists())
+        # Compose reads the pinned images from the file, so no placeholder may override them.
+        self.assertNotIn("CGW_IMAGE", docker.call_args.kwargs["env"])
 
     def test_seeds_the_committed_fork_cache_without_replacing_extended_files(self):
         with tempfile.TemporaryDirectory() as committed, tempfile.TemporaryDirectory() as cache:
@@ -275,6 +373,77 @@ class EnvironmentTests(unittest.TestCase):
         self.assertFalse(any("FLUSHALL" in command or "down" in command for command in commands))
         with self.assertRaises(ValueError):
             chain_storage_reset_commands(["compose"], "sepolia")
+
+    def test_device_start_waits_for_the_healthcheck_and_records_the_device(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state = Path(directory) / "stack.json"
+            state.write_text(json.dumps({"devices": ["ledger"]}))
+            commands = []
+            with patch("scripts.test_env.run", side_effect=lambda command: commands.append(command)), \
+                    redirect_stdout(io.StringIO()):
+                device_up(["compose"], "trezor", state, 120)
+            self.assertEqual(commands, [[
+                "compose", "up", "--detach", "--no-deps", "--wait", "--wait-timeout", "120", "trezor-emulator",
+            ]])
+            self.assertEqual(json.loads(state.read_text())["devices"], ["ledger", "trezor"])
+
+    def test_unhealthy_device_fails_with_its_logs_command_and_stays_unrecorded(self):
+        with tempfile.TemporaryDirectory() as directory:
+            state = Path(directory) / "stack.json"
+            state.write_text("{}")
+            failure = RuntimeError("`docker compose up` failed")
+            with patch("scripts.test_env.run", side_effect=failure), redirect_stdout(io.StringIO()):
+                with self.assertRaisesRegex(RuntimeError, "trezor emulator is not healthy.*logs trezor-emulator"):
+                    device_up(["compose"], "trezor", state, 120)
+            self.assertEqual(json.loads(state.read_text()), {})
+
+    def test_device_start_needs_a_running_stack(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with patch("scripts.test_env.run") as docker:
+                with self.assertRaisesRegex(RuntimeError, "Start the Sepolia stack"):
+                    device_up(["compose"], "ledger", Path(directory) / "missing.json", 120)
+            docker.assert_not_called()
+
+    def test_device_option_supports_only_up_without_a_chain(self):
+        self.assertEqual(parse_args(["up", "--device", "trezor"]).device, "trezor")
+        for argv in (["reset", "--device", "trezor"], ["up", "--device", "trezor", "--chain", "mainnet"]):
+            with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                parse_args(argv)
+
+    def test_manifest_has_the_device_urls_but_up_starts_no_device(self):
+        services = {
+            "fork-rpc": {"environment": {"FORK_BLOCK_NUMBER": "100"}},
+            "anvil": {"ports": [{"published": "8545"}]},
+            "nginx": {"ports": [{"published": "8000"}]},
+            "ledger-emulator": {"ports": [{"published": "9555"}]},
+            "trezor-emulator": {"ports": [{"published": "9556"}, {"published": "21328"}]},
+            "txs-init": {"environment": {"FORK_CHAIN_ID": "11155111"}},
+        }
+        for service in services.values():
+            service["image"] = "pinned-image"
+        configs = []
+
+        def docker(command):
+            configs.append(command)
+            return json.dumps({"services": services})
+
+        with patch("scripts.test_env.run", side_effect=docker):
+            compose, manifest = load_manifest(parse_args(["up", "--project", "safe-e2e-unit-test"]))
+        self.assertEqual(profiles(configs[0]), ["ledger", "trezor"])
+        self.assertEqual(profiles(compose), [])
+        self.assertEqual(manifest["trezorEmulatorUrl"], "http://localhost:9556")
+
+    def test_teardown_covers_every_optional_fork_and_device(self):
+        commands = []
+        args = parse_args(["reset", "--project", "safe-e2e-unit-test"])
+        with patch("scripts.test_env.run", side_effect=lambda command, env=None: commands.append(command)), \
+                redirect_stdout(io.StringIO()):
+            reset(args)
+        self.assertEqual(profiles(commands[0]), ["mainnet", "polygon", "ledger", "trezor"])
+
+
+def profiles(command):
+    return [command[index + 1] for index, part in enumerate(command) if part == "--profile"]
 
 
 if __name__ == "__main__":

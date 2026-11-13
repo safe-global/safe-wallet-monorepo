@@ -1,4 +1,5 @@
 import argparse
+import http.client
 import json
 import os
 import re
@@ -11,6 +12,11 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from pathlib import Path
+
+try:
+    from scripts.backend_versions import BACKENDS, SERVICES, resolve_images
+except ModuleNotFoundError:  # Run as a script, so the scripts folder is the import root.
+    from backend_versions import BACKENDS, SERVICES, resolve_images
 
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -32,6 +38,9 @@ CHAIN_STEPS = (
     ("start", ("txs-scheduler-{}", "txs-web-{}")),
     ("run", ("cfg-chain-{}", "decoder-chain-{}")),
 )
+# Device emulators by Compose profile; a stack starts one only with `up --device`, for the specs that use it.
+DEVICES = {"ledger": "ledger-emulator", "trezor": "trezor-emulator"}
+OPTIONAL_PROFILES = (*CHAINS, *DEVICES)
 INIT_JOBS = ("mock-keys", "anvil-init", "txs-init", "cfg-init", "decoder-init")
 # The Queue Service reads the chain list once per 30 minutes and never on a miss.
 QUEUE_SERVICES = ("queue-web", "queue-worker")
@@ -46,8 +55,11 @@ REDACTED = "<fork-provider>"
 STDERR_LINES = 20
 # Compose interpolates the whole file, so commands that start no fork still need a provider URL.
 UNUSED_PROVIDER = {"SEPOLIA_FORK_RPC_URL": "https://unused.invalid"}
+UNUSED_IMAGES = {variable: "unused.invalid/image" for variable in SERVICES}
+# A published port resets connections until the container behind it listens.
 RETRYABLE = (
-    urllib.error.URLError, TimeoutError, socket.timeout, KeyError, TypeError, json.JSONDecodeError,
+    urllib.error.URLError, TimeoutError, socket.timeout, ConnectionError, http.client.HTTPException,
+    KeyError, TypeError, json.JSONDecodeError,
 )
 
 
@@ -62,6 +74,9 @@ def compose_command(project, env_file, profiles=()):
         "docker", "compose", "--project-name", project,
         "--env-file", str(ROOT / "test-images.env"),
     ]
+    images = images_path(project)
+    if images.exists():
+        command.extend(["--env-file", str(images)])
     if env_file.exists():
         command.extend(["--env-file", str(env_file)])
     for profile in profiles:
@@ -113,6 +128,11 @@ def read_json(url, payload=None):
         return json.load(response)
 
 
+def read_content_type(url):
+    with urllib.request.urlopen(url, timeout=5) as response:
+        return response.headers.get_content_type()
+
+
 def public_config(config):
     services = config["services"]
     rpc = services["fork-rpc"]["environment"]
@@ -122,6 +142,7 @@ def public_config(config):
     rpc_port = services["anvil"]["ports"][0]["published"]
     api_port = services["nginx"]["ports"][0]["published"]
     ledger_port = services["ledger-emulator"]["ports"][0]["published"]
+    trezor_ports = [port["published"] for port in services["trezor-emulator"]["ports"]]
     init = services["txs-init"]["environment"]
     return {
         "forkBlock": block,
@@ -132,6 +153,8 @@ def public_config(config):
         "transactionServiceUrl": f"http://localhost:{api_port}/txs/api",
         "decoderUrl": f"http://localhost:{api_port}/decoder",
         "ledgerEmulatorUrl": f"http://localhost:{ledger_port}",
+        "trezorEmulatorUrl": f"http://localhost:{trezor_ports[0]}",
+        "trezorBridgeUrl": f"http://localhost:{trezor_ports[1]}",
         "images": {name: service["image"] for name, service in services.items()},
     }
 
@@ -201,7 +224,7 @@ def check_fork(manifest):
 
 
 def check_ports(manifest):
-    for key in ("rpcUrl", "gatewayUrl", "ledgerEmulatorUrl"):
+    for key in ("rpcUrl", "gatewayUrl", "ledgerEmulatorUrl", "trezorEmulatorUrl", "trezorBridgeUrl"):
         if key not in manifest:
             continue
         port = urllib.parse.urlparse(manifest[key]).port
@@ -211,7 +234,8 @@ def check_ports(manifest):
             except OSError as exc:
                 raise RuntimeError(
                     f"Local port {port} is already in use; "
-                    "choose distinct RPC_PORT, REVERSE_PROXY_PORT and LEDGER_EMULATOR_PORT"
+                    "choose distinct RPC_PORT, REVERSE_PROXY_PORT, LEDGER_EMULATOR_PORT, "
+                    "TREZOR_EMULATOR_PORT and TREZOR_BRIDGE_PORT; a running Trezor Suite holds 21328"
                 ) from exc
 
 
@@ -244,6 +268,20 @@ def check_gateway_chain(gateway_url, chain_id):
     chain_config = read_json(f"{gateway_url}/v1/chains/{chain_id}")
     if str(chain_config["chainId"]) != str(chain_id):
         raise RuntimeError("CGW returned a different chain")
+    check_chain_logo(gateway_url, chain_config["chainLogoUri"])
+
+
+# A broken media volume, nginx alias or MEDIA_URL breaks every logo the config service generated.
+def check_chain_logo(gateway_url, logo_url):
+    stack = urllib.parse.urlsplit(gateway_url)
+    logo = urllib.parse.urlsplit(logo_url)
+    if (logo.scheme, logo.netloc) != (stack.scheme, stack.netloc):
+        raise RuntimeError(
+            f"Chain logo {logo_url} is not served by the stack at {stack.netloc}; check MEDIA_URL"
+        )
+    content_type = read_content_type(logo_url)
+    if not content_type.startswith("image/"):
+        raise RuntimeError(f"Chain logo {logo_url} returned {content_type}, not an image")
 
 
 def check_stack(manifest):
@@ -362,24 +400,52 @@ def state_path(project):
     return ROOT / ".test-runs" / f"{project}.json"
 
 
+def images_path(project):
+    return ROOT / ".test-runs" / f"{project}.images.env"
+
+
+def warn(message):
+    prefix = "::warning::" if os.environ.get("GITHUB_ACTIONS") == "true" else "Warning: "
+    print(f"{prefix}{message}", file=sys.stderr)
+
+
+def resolve_backend(backend):
+    images, warnings = resolve_images(backend)
+    for warning in warnings:
+        warn(warning)
+    return images
+
+
+def write_images(project, backend):
+    """Pins the project's images, so every later command of the project uses the backend it started with."""
+    images = resolve_backend(backend)
+    path = images_path(project)
+    path.parent.mkdir(exist_ok=True)
+    path.write_text("".join(f"{variable}={image}\n" for variable, image in images.items()))
+    for variable, image in images.items():
+        print(f"{variable}={image}", flush=True)
+
+
 def load_config(compose):
     return json.loads(run(compose + ["config", "--format", "json"]))
 
 
 def load_manifest(args):
-    compose = project_compose(args)
-    return compose, public_config(load_config(compose))
+    # The manifest names the URL of every device, so the device profiles must be on to read their ports
+    return project_compose(args), public_config(load_config(project_compose(args, DEVICES)))
 
 
-def teardown_env():
-    return {**UNUSED_PROVIDER, **os.environ}
+def teardown_env(project):
+    unused_images = {} if images_path(project).exists() else UNUSED_IMAGES
+    return {**UNUSED_PROVIDER, **unused_images, **os.environ}
 
 
 def start(args):
-    compose, manifest = load_manifest(args)
     label = f"label=com.docker.compose.project={args.project}"
     if run(["docker", "volume", "ls", "--quiet", "--filter", label]).strip():
         raise RuntimeError("Project already has state; use status/logs, or reset before a fresh up")
+    write_images(args.project, args.backend)
+    compose, manifest = load_manifest(args)
     check_ports(manifest)
     print(f'Starting {args.project} at block {manifest["forkBlock"]}', flush=True)
     seed_fork_cache(anvil_cache_dir())
@@ -401,24 +467,30 @@ def show_config(args):
 
 
 def show_logs(args):
-    compose = project_compose(args, CHAINS)
+    compose = project_compose(args, OPTIONAL_PROFILES)
     secrets = fork_urls(load_config(compose))
     logs = run(compose + ["logs", "--no-color", "--tail", args.tail, *args.services])
     print(redact(logs, secrets))
 
 
+def show_images(args):
+    for variable, image in resolve_backend(args.backend).items():
+        print(f"{variable}={image}")
+
+
 def show_status(args):
-    print(run(project_compose(args, CHAINS) + ["ps", "--all"], env=teardown_env()))
+    print(run(project_compose(args, OPTIONAL_PROFILES) + ["ps", "--all"], env=teardown_env(args.project)))
 
 
 def stop(args):
-    run(project_compose(args, CHAINS) + ["down"], env=teardown_env())
+    run(project_compose(args, OPTIONAL_PROFILES) + ["down"], env=teardown_env(args.project))
     print("Environment stopped; reset before starting a new fork")
 
 
 def reset(args):
-    run(project_compose(args, CHAINS) + ["down", "--volumes"], env=teardown_env())
+    run(project_compose(args, OPTIONAL_PROFILES) + ["down", "--volumes"], env=teardown_env(args.project))
     state_path(args.project).unlink(missing_ok=True)
+    images_path(args.project).unlink(missing_ok=True)
     print("Environment stopped and owned volumes removed")
 
 
@@ -431,9 +503,29 @@ def reset_chain(args):
     chain_reset(project_compose(args, (args.chain,)), args.chain, state_path(args.project))
 
 
+def device_up(compose, name, state_file, timeout):
+    if not state_file.exists():
+        raise RuntimeError("Start the Sepolia stack with up before adding a device")
+    service = DEVICES[name]
+    print(f"Starting the {name} emulator", flush=True)
+    try:
+        run(compose + ["up", "--detach", "--no-deps", "--wait", "--wait-timeout", str(timeout), service])
+    except RuntimeError as error:
+        raise RuntimeError(f"The {name} emulator is not healthy; read its logs with: logs {service}") from error
+    manifest = json.loads(state_file.read_text())
+    manifest["devices"] = sorted({*manifest.get("devices", []), name})
+    write_state(state_file, manifest)
+    print(f"Ready: {name} emulator")
+
+
+def start_device(args):
+    device_up(project_compose(args, (args.device,)), args.device, state_path(args.project), args.timeout)
+
+
 ACTIONS = {
     "up": start, "down": stop, "reset": reset, "status": show_status, "logs": show_logs,
-    "config": show_config, **{action: run_txs_checks for action in TXS_CHECKS},
+    "config": show_config, "versions": show_images,
+    **{action: run_txs_checks for action in TXS_CHECKS},
 }
 CHAIN_ACTIONS = {"up": start_chain, "reset": reset_chain}
 
@@ -447,17 +539,27 @@ def parse_args(argv=None):
     parser.add_argument("--timeout", type=int, default=300)
     parser.add_argument("--tail", default="200", help="Log lines per service, or all")
     parser.add_argument("--chain", choices=tuple(CHAINS), help="Add or remove an optional fork")
+    parser.add_argument(
+        "--backend", choices=BACKENDS, default=os.environ.get("SAFE_E2E_BACKEND", "staging"),
+        help="Deployment whose service versions up and versions use; exported *_IMAGE variables win",
+    )
+    parser.add_argument("--device", choices=tuple(DEVICES), help="Start a device emulator")
     args = parser.parse_intermixed_args(argv)
     if args.services and args.action != "logs":
         parser.error("Service names are supported only by logs")
     if args.chain and args.action not in CHAIN_ACTIONS:
         parser.error("--chain supports only up and reset")
+    if args.device and (args.action != "up" or args.chain):
+        parser.error("--device supports only up, without --chain")
     return args
 
 
 def main():
     args = parse_args()
-    (CHAIN_ACTIONS if args.chain else ACTIONS)[args.action](args)
+    if args.device:
+        start_device(args)
+    else:
+        (CHAIN_ACTIONS if args.chain else ACTIONS)[args.action](args)
 
 
 if __name__ == "__main__":

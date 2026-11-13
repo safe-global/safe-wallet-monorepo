@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
-import { mswLoader } from 'msw-storybook-addon'
 import type { DelegatePage } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import { createMockStory } from '@/stories/mocks'
 import { PROPOSER_LABEL_PLACEHOLDER } from '@/features/proposers/constants'
@@ -33,7 +32,7 @@ const proposersPage: DelegatePage = {
   ],
 }
 
-const withProposersHandler = http.get(/\/v[12]\/chains\/\d+\/delegates$/, () => HttpResponse.json(proposersPage))
+const withProposersHandler = http.get(/\/v[123]\/chains\/\d+\/delegates$/, () => HttpResponse.json(proposersPage))
 
 // What a proposer added after names became device-local looks like from the API
 const placeholderProposersPage: DelegatePage = {
@@ -41,14 +40,13 @@ const placeholderProposersPage: DelegatePage = {
   results: proposersPage.results.map((proposer) => ({ ...proposer, label: PROPOSER_LABEL_PLACEHOLDER })),
 }
 
-const withPlaceholderProposersHandler = http.get(/\/v[12]\/chains\/\d+\/delegates$/, () =>
+const withPlaceholderProposersHandler = http.get(/\/v[123]\/chains\/\d+\/delegates$/, () =>
   HttpResponse.json(placeholderProposersPage),
 )
 
 const meta = {
   title: 'Features/Proposers/ProposersList',
   component: ProposersList,
-  loaders: [mswLoader],
   decorators: [setup.decorator],
   parameters: {
     layout: 'padded',

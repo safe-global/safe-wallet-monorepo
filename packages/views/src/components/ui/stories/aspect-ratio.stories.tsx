@@ -122,7 +122,7 @@ export const AllVariants: Story = {
           <div style={{ width: '300px' }}>
             <AspectRatio ratio={16 / 9}>
               <img
-                src="https://github.com/shadcn.png"
+                src="mock-assets/github.com/shadcn.webp"
                 alt="Sample"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
@@ -131,7 +131,7 @@ export const AllVariants: Story = {
           <div style={{ width: '300px' }}>
             <AspectRatio ratio={4 / 3}>
               <img
-                src="https://github.com/vercel.png"
+                src="mock-assets/github.com/vercel.webp"
                 alt="Sample"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />
@@ -140,7 +140,7 @@ export const AllVariants: Story = {
           <div style={{ width: '300px' }}>
             <AspectRatio ratio={1}>
               <img
-                src="https://github.com/shadcn.png"
+                src="mock-assets/github.com/shadcn.webp"
                 alt="Sample"
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
               />

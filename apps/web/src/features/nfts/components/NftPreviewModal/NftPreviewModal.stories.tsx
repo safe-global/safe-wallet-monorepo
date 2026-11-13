@@ -20,7 +20,7 @@ const nft: Collectible = {
   uri: null,
   name: 'Bored Ape #1234',
   description: 'A bored ape',
-  imageUri: 'https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png',
+  imageUri: 'mock-assets/safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.webp',
   metadata: null,
 }
 

@@ -2,12 +2,15 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { withMockProvider } from '@/storybook/decorators'
 import type { AllSafeItems } from '@/hooks/safes'
 import SafeAccountsTable from './index'
+import { createHandlers } from '@/stories/mocks'
+import { mockNow } from '@/stories/mocks/now'
 
 const meta = {
   title: 'Features/MyAccounts/SafeAccountsTable',
   component: SafeAccountsTable,
   decorators: [withMockProvider()],
   parameters: {
+    msw: { handlers: createHandlers() },
     layout: 'padded',
   },
   tags: ['autodocs'],
@@ -23,13 +26,13 @@ const singleAndMulti: AllSafeItems = [
     isPinned: true,
     chainId: '1',
     isReadOnly: false,
-    lastVisited: Date.now(),
+    lastVisited: mockNow(),
   },
   {
     name: 'Ops',
     address: '0xabcdef1234567890abcdef1234567890abcdef12',
     isPinned: true,
-    lastVisited: Date.now(),
+    lastVisited: mockNow(),
     safes: [
       {
         name: 'Ops',
@@ -37,7 +40,7 @@ const singleAndMulti: AllSafeItems = [
         chainId: '1',
         isReadOnly: false,
         isPinned: true,
-        lastVisited: Date.now(),
+        lastVisited: mockNow(),
       },
       {
         name: 'Ops',
@@ -45,7 +48,7 @@ const singleAndMulti: AllSafeItems = [
         chainId: '10',
         isReadOnly: false,
         isPinned: true,
-        lastVisited: Date.now(),
+        lastVisited: mockNow(),
       },
     ],
   },
@@ -104,8 +107,8 @@ const VAULT_B = addr('2222', 'b', '333333')
 
 // Cluster members deliberately interleaved to exercise the table's similarity ordering.
 const groupedItems: AllSafeItems = [
-  { name: 'Treasury', address: REAL, isPinned: true, chainId: '1', isReadOnly: false, lastVisited: Date.now() },
-  { name: 'Ops', address: OPS, isPinned: true, chainId: '1', isReadOnly: false, lastVisited: Date.now() },
+  { name: 'Treasury', address: REAL, isPinned: true, chainId: '1', isReadOnly: false, lastVisited: mockNow() },
+  { name: 'Ops', address: OPS, isPinned: true, chainId: '1', isReadOnly: false, lastVisited: mockNow() },
   { name: 'Treasury', address: IMPOSTOR_1, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },
   { name: 'Vault A', address: VAULT_A, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },
   { name: 'Treasury', address: IMPOSTOR_2, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },
@@ -152,7 +155,7 @@ const crossListItems: AllSafeItems = [
   { name: 'Treasury', address: IMPOSTOR_2, isPinned: false, chainId: '1', isReadOnly: true, lastVisited: 0 },
 ]
 const crossSimilarityGroups = new Map<string, string>([[IMPOSTOR_2, 'x1']])
-const crossWarnings = new Map([[IMPOSTOR_2, { trusted: [REAL], owned: [] }]])
+const crossWarnings = new Map([[IMPOSTOR_2, { trusted: [{ address: REAL, chainIds: ['1'] }], owned: [] }]])
 
 /** Cross-list warning: `IMPOSTOR_2` is a lone banded card with an inline ⚠️ (hover for the peer). */
 export const SimilarityCrossList: Story = {

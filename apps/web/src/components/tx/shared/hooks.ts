@@ -32,8 +32,8 @@ import { getSafeTxGas, getNonces } from '@/services/tx/tx-sender/recommendedNonc
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useLoadFeature } from '@/features/__core__'
-import { GTFFeature } from '@/features/gtf'
-import { mergeGtfFeeParams } from '@/features/gtf/services'
+import { FeePaymentFeature } from '@/features/fee-payment'
+import { mergePayFromSafeFeeParams } from '@/features/fee-payment/services'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -78,8 +78,8 @@ export const useTxActions = (): TxActions => {
   const wallet = useWallet()
   const chain = useCurrentChain()
   const dispatch = useAppDispatch()
-  const gtfFeature = useLoadFeature(GTFFeature)
-  const { gtfPaymentMode, gtfSelectedGasToken } = useContext(SafeTxContext)
+  const feePaymentFeature = useLoadFeature(FeePaymentFeature)
+  const { feePaymentMode, feeGasToken } = useContext(SafeTxContext)
   const currency = useAppSelector(selectCurrency)
   const { data: flowData } = useContext(TxFlowContext) as TxFlowContextType<{ nestedChildTx?: NestedTxEnvelope }>
   const nestedChildTx = flowData?.nestedChildTx
@@ -90,13 +90,13 @@ export const useTxActions = (): TxActions => {
     const safeAddress = scope?.safeAddress ?? safe.address.value
     const chainId = scope?.chainId ?? safe.chainId
 
-    const withGtfFeeParams = (safeTx: SafeTransaction) =>
-      mergeGtfFeeParams({
+    const withPayFromSafeFeeParams = (safeTx: SafeTransaction) =>
+      mergePayFromSafeFeeParams({
         safeTx,
         chain,
-        gtfPaymentMode,
-        gtfSelectedGasToken,
-        gtfFeature,
+        feePaymentMode,
+        feeGasToken,
+        feePaymentFeature,
         chainId,
         safeAddress,
         numberSignatures: safe.threshold,
@@ -136,12 +136,23 @@ export const useTxActions = (): TxActions => {
       return _propose(wallet?.address || safe.owners[0].value, safeTx, origin)
     }
 
+    const signRelayedTx = async (safeTx: SafeTransaction, txId?: string): Promise<SafeTransaction> => {
+      assertProvider(signer?.provider)
+
+      safeTx = await withPayFromSafeFeeParams(safeTx)
+
+      if (await isSmartContractWallet(signer.chainId, signer.address)) {
+        throw new Error('Cannot relay an unsigned transaction from a smart contract wallet')
+      }
+      return await dispatchTxSigning(safeTx, signer.provider, txId, scope)
+    }
+
     const signTx: TxActions['signTx'] = async (safeTx, txId, origin) => {
       assertTx(safeTx)
       assertProvider(signer?.provider)
       assertOnboard(onboard)
 
-      safeTx = await withGtfFeeParams(safeTx)
+      safeTx = await withPayFromSafeFeeParams(safeTx)
 
       // Smart contract wallets can't sign off-chain
       const viaSafe = isSafeSigner(signer)
@@ -221,13 +232,15 @@ export const useTxActions = (): TxActions => {
       await runExecutionPreChecks({ safeTx, safe, signerAddress: signer.address, scope })
 
       if (isRelayed) {
-        if (safeTx.signatures.size < safe.threshold) {
-          throw new Error('Cannot relay a transaction that is not fully signed')
+        // The relayer has no implicit approval, so the last signer of an m/n Safe signs before relaying
+        const needsSignature = safeTx.signatures.size < safe.threshold
+        if (needsSignature) {
+          safeTx = await signRelayedTx(safeTx, txId)
         }
 
         // Relayed txs must be known to the service
-        if (!txId) {
-          txId = (await _propose(signer.address, safeTx, origin)).txId
+        if (!txId || needsSignature) {
+          txId = await _proposeOrConfirm(signer.address, safeTx, txId, origin)
         }
         await dispatchTxRelay(
           safeTx,
@@ -279,9 +292,9 @@ export const useTxActions = (): TxActions => {
     onboard,
     chain,
     dispatch,
-    gtfFeature,
-    gtfPaymentMode,
-    gtfSelectedGasToken,
+    feePaymentFeature,
+    feePaymentMode,
+    feeGasToken,
     currency,
     nestedChildTx,
   ])

@@ -4,13 +4,14 @@ import { TxModalContext } from '@/components/tx-flow'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { usePolicyIntro } from './hooks/usePolicyIntro'
+import { useNewAllowlistIds } from './hooks/useNewAllowlistIds'
 import AddPolicyDialog from './AddPolicyDialog'
 import {
   ADD_POLICY_OPTIONS,
   RECIPIENT_ALLOWLIST_POLICY_OPTION,
   type AddPolicyId,
 } from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
-import { useIsAllowlistAvailableInSpace } from '@/features/policy-guard'
+import { useIsAllowlistActiveInSpace } from '@/features/policy-guard'
 import PoliciesList from './PoliciesList'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 import PolicyCatalogue from './PolicyCatalogue'
@@ -21,6 +22,7 @@ import RecipientAllowlistFlow from './RecipientAllowlistFlow'
 import RecipientAllowlistIntroDialog from './RecipientAllowlistIntroDialog'
 import { RECIPIENT_ALLOWLIST_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistIntroDialog/constants'
 import { PROPOSER_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/ProposerIntroDialog/constants'
+import AllowlistDetails from './AllowlistDetails'
 import ProposerDetails from './ProposerDetails'
 import ProposerRoleFlow from './ProposerRoleFlow'
 import SpendingLimitDetails from './SpendingLimitDetails'
@@ -35,6 +37,7 @@ import {
   REQUEST_POLICY_FORM_WIDTH,
 } from '@safe-global/views/features/spaces/components/Policies/constants'
 import {
+  isActiveAllowlistPolicy,
   isPendingPolicy,
   isProposerPolicy,
   isSpendingLimitPolicy,
@@ -84,17 +87,25 @@ const Policies = ({
   locked,
 }: PoliciesProps): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)
-  const isAllowlistAvailable = useIsAllowlistAvailableInSpace()
+  // Existing allowlists stay listed with the experimental toggle off; only creating one needs it on.
+  const canCreateAllowlist = useIsAllowlistActiveInSpace() === true
   const [isAddPolicyOpen, setIsAddPolicyOpen] = useState(false)
   const [openPolicy, setOpenPolicy] = useState<Policy | null>(null)
 
   const isSettled = !isLoading && !isError
+  const { newIds: newAllowlistIds, dismiss: dismissNewAllowlist } = useNewAllowlistIds(policies, isSettled)
 
   const selectPolicy = useCallback((policy: Policy) => {
-    if (isProposerPolicy(policy) || isSpendingLimitPolicy(policy)) setOpenPolicy(policy)
+    // Pending allowlists are not wired to CGW yet, so only an active one has a panel.
+    if (isProposerPolicy(policy) || isSpendingLimitPolicy(policy) || isActiveAllowlistPolicy(policy)) {
+      setOpenPolicy(policy)
+    }
   }, [])
 
-  const closeDetails = useCallback(() => setOpenPolicy(null), [])
+  const closeDetails = useCallback(() => {
+    if (openPolicy) dismissNewAllowlist(openPolicy.id)
+    setOpenPolicy(null)
+  }, [openPolicy, dismissNewAllowlist])
 
   // Read back from the list rather than freezing the row: a refetch reaches the open panel, and a
   // policy that leaves the response takes its panel with it. A pending one stays to report why it left.
@@ -153,7 +164,7 @@ const Policies = ({
           return
 
         case 'recipient-allowlist':
-          if (isAllowlistAvailable) allowlistIntro.request()
+          if (canCreateAllowlist) allowlistIntro.request()
           return
 
         // Not offered yet: ADD_POLICY_OPTIONS leaves it out.
@@ -167,7 +178,7 @@ const Policies = ({
         }
       }
     },
-    [spendingLimitIntro, proposerIntro, allowlistIntro, isAllowlistAvailable],
+    [spendingLimitIntro, proposerIntro, allowlistIntro, canCreateAllowlist],
   )
 
   const selectFromAddPolicyDialog = useCallback(
@@ -180,13 +191,13 @@ const Policies = ({
 
   const addPolicyOptions = useMemo(
     () =>
-      (isAllowlistAvailable ? [RECIPIENT_ALLOWLIST_POLICY_OPTION, ...ADD_POLICY_OPTIONS] : ADD_POLICY_OPTIONS).map(
+      (canCreateAllowlist ? [RECIPIENT_ALLOWLIST_POLICY_OPTION, ...ADD_POLICY_OPTIONS] : ADD_POLICY_OPTIONS).map(
         (option) =>
           locked?.lockedPolicies.some((lockedId) => lockedId === option.id)
             ? { ...option, disabled: true, disabledTooltip: 'Upgrade to Business to set up policies.' }
             : option,
       ),
-    [locked, isAllowlistAvailable],
+    [locked, canCreateAllowlist],
   )
 
   return (
@@ -226,7 +237,7 @@ const Policies = ({
               onSelectPolicy={onSelectPolicy ?? selectPolicy}
             />
           ) : (
-            <PolicyCatalogue onSelect={handleSelect} locked={locked} isAllowlistAvailable={isAllowlistAvailable} />
+            <PolicyCatalogue onSelect={handleSelect} locked={locked} isAllowlistAvailable={canCreateAllowlist} />
           )}
         </>
       )}
@@ -258,6 +269,15 @@ const Policies = ({
 
       {openedPolicy && isProposerPolicy(openedPolicy) && openedPolicy.data.proposers[0] && (
         <ProposerDetails policy={openedPolicy} proposer={openedPolicy.data.proposers[0]} onClose={closeDetails} />
+      )}
+
+      {openedPolicy && isActiveAllowlistPolicy(openedPolicy) && (
+        <AllowlistDetails
+          policy={openedPolicy}
+          policies={policies}
+          onClose={closeDetails}
+          justActivated={newAllowlistIds.has(openedPolicy.id)}
+        />
       )}
 
       {openedPolicy && isSpendingLimitPolicy(openedPolicy) && (

@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react'
-import Image from 'next/image'
 import { useRouter } from 'next/router'
 import { X, Check, Plus } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -18,7 +17,7 @@ export const AddToSpacePopupModal = (): ReactElement => {
   const router = useRouter()
   const safe = useSafeQueryParam()
   // eslint-disable-next-line no-restricted-syntax -- The Workspace to create does not exist yet
-  const createSpaceHref = { pathname: AppRoutes.spaces.createSpace, query: { safe } }
+  const createSpaceHref = { pathname: AppRoutes.welcome.createSpace, query: { safe } }
 
   return (
     <div className="flex flex-col w-full">
@@ -37,11 +36,10 @@ export const AddToSpacePopupModal = (): ReactElement => {
         </Typography>
 
         <div className="relative h-[140px] sm:h-[200px] w-full rounded-3xl bg-secondary overflow-hidden flex items-center justify-center shrink-0">
-          <Image
+          <img
             src="/images/spaces/empty_dashboard.png"
             alt="Add to Workspace illustration"
-            fill
-            className="object-contain"
+            className="absolute inset-0 h-full w-full object-contain"
           />
         </div>
 

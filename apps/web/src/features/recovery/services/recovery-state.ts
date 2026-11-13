@@ -1,7 +1,6 @@
 import { SENTINEL_ADDRESS } from '@safe-global/utils/utils/constants'
 import { getMultiSendCallOnlyDeployments } from '@safe-global/safe-deployments'
-import { getChainAgnosticAddress } from '@safe-global/utils/services/contracts/deployments'
-import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
+import { hasMatchingDeployment, TRUSTED_DEPLOYMENT_VERSIONS } from '@safe-global/utils/services/contracts/deployments'
 import type { Delay } from '@gnosis.pm/zodiac'
 import type { TransactionAddedEvent } from '@gnosis.pm/zodiac/dist/cjs/types/Delay'
 import { toBeHex, type JsonRpcProvider } from 'ethers'
@@ -35,17 +34,13 @@ export type RecoveryState = Array<RecoveryStateItem>
 
 export function _isMaliciousRecovery({
   chainId,
-  version,
   safeAddress,
   transaction,
 }: {
   chainId: string
-  version: SafeState['version']
   safeAddress: string
   transaction: Pick<AddedEvent['args'], 'to' | 'data'>
 }) {
-  const BASE_MULTI_SEND_CALL_ONLY_VERSION = '1.3.0'
-
   const isMultiSend = isMultiSendCalldata(transaction.data)
   const transactions = isMultiSend ? decodeMultiSendData(transaction.data) : [transaction]
 
@@ -54,21 +49,14 @@ export function _isMaliciousRecovery({
     return !sameAddress(transaction.to, safeAddress)
   }
 
-  const multiSendDeployment =
-    getMultiSendCallOnlyDeployments({ version: version ?? undefined }) ??
-    getMultiSendCallOnlyDeployments({ version: BASE_MULTI_SEND_CALL_ONLY_VERSION })
-
-  const multiSendAddress = getChainAgnosticAddress(multiSendDeployment, chainId)
-
-  if (!multiSendAddress) {
-    return true
-  }
-
-  // Calling official MultiSend contract with a batch of transactions to the Safe itself
-  return (
-    !sameAddress(transaction.to, multiSendAddress) ||
-    transactions.some((transaction) => !sameAddress(transaction.to, safeAddress))
+  const isOfficialMultiSend = hasMatchingDeployment(
+    getMultiSendCallOnlyDeployments,
+    transaction.to,
+    chainId,
+    TRUSTED_DEPLOYMENT_VERSIONS,
   )
+
+  return !isOfficialMultiSend || transactions.some((tx) => !sameAddress(tx.to, safeAddress))
 }
 
 export const _getRecoveryQueueItemTimestamps = async ({
@@ -351,7 +339,6 @@ const getRecoveryQueueItem = async ({
   expiry,
   provider,
   chainId,
-  version,
   safeAddress,
 }: {
   delayModifier: Delay
@@ -360,7 +347,6 @@ const getRecoveryQueueItem = async ({
   expiry: bigint
   provider: JsonRpcProvider
   chainId: string
-  version: SafeState['version']
   safeAddress: string
 }): Promise<RecoveryQueueItem> => {
   const [timestamps, receipt] = await Promise.all([
@@ -375,7 +361,6 @@ const getRecoveryQueueItem = async ({
 
   const isMalicious = _isMaliciousRecovery({
     chainId,
-    version,
     safeAddress,
     transaction: transactionAdded.args,
   })
@@ -428,7 +413,6 @@ type RecoveryStateQuery = {
   safeAddress: string
   provider: JsonRpcProvider
   chainId: string
-  version: SafeState['version']
 }
 
 export const _getRecoveryStateItem = async ({
@@ -436,7 +420,6 @@ export const _getRecoveryStateItem = async ({
   safeAddress,
   provider,
   chainId,
-  version,
 }: RecoveryStateQuery & { delayModifier: Delay }): Promise<RecoveryStateItem> => {
   const context: DelayModifierContext = {
     delayModifier,
@@ -457,7 +440,6 @@ export const _getRecoveryStateItem = async ({
         expiry: config.expiry,
         provider,
         chainId,
-        version,
         safeAddress,
       }),
     ),

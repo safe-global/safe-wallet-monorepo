@@ -1,11 +1,27 @@
 import React from 'react'
 import type { Decorator, StoryContext } from '@storybook/react'
+import { HttpHandler, matchRequestUrl, type RequestHandler } from 'msw'
 import { SAFE_ADDRESSES } from '../../../../../config/test/msw/fixtures'
 import { MockContextProvider } from './MockContextProvider'
 import { resolveWallet } from './wallets'
 import { createHandlers, getFixtureData } from './handlers'
 import { createInitialState } from './defaults'
+import { createChainData, createChainsPageDataV2 } from './chains'
 import type { MockStoryConfig, MockStoryResult } from './types'
+
+const CHAINS_URL = new URL('http://localhost/v2/chains')
+
+const answersChainsRequest = (handler: RequestHandler): boolean =>
+  handler instanceof HttpHandler &&
+  handler.info.method === 'GET' &&
+  matchRequestUrl(CHAINS_URL, handler.info.path).matches
+
+// msw-storybook-addon takes the handlers as one array or as named groups of arrays
+const mswHandlers = (parameters: StoryContext['parameters']): RequestHandler[] => {
+  const handlers: RequestHandler[] | Record<string, RequestHandler[]> | undefined = parameters?.msw?.handlers
+  if (!handlers) return []
+  return Array.isArray(handlers) ? handlers : Object.values(handlers).flat()
+}
 
 /**
  * Creates a complete mock story setup with decorator, handlers, and state
@@ -20,6 +36,7 @@ import type { MockStoryConfig, MockStoryResult } from './types'
  * - Data scenarios (efSafe, vitalik, empty, etc.)
  * - Layout wrappers (none, paper, fullPage)
  * - Redux store state
+ * - Sign-in state and Workspace mocks (`authenticated`)
  * - MSW request handlers
  *
  * IMPORTANT: Do not override feature flags unless testing a specific disabled feature.
@@ -68,6 +85,7 @@ export function createMockStory(config: MockStoryConfig = {}): MockStoryResult {
     pathname = '/home',
     query: customQuery = {},
     shadcn = false,
+    authenticated,
   } = config
 
   // Get fixture data for scenario
@@ -77,19 +95,30 @@ export function createMockStory(config: MockStoryConfig = {}): MockStoryResult {
   const safeAddressInfo = scenario === 'empty' ? SAFE_ADDRESSES.efSafe : SAFE_ADDRESSES[scenario]
   const safeAddress = safeAddressInfo.address
 
-  // Determine if user should be authenticated (required for spaces)
-  const isAuthenticated = features.spaces === true
+  const isAuthenticated = authenticated ?? false
 
   // Create all MSW handlers
   const handlers = createHandlers({
     scenario,
     features,
     handlers: customHandlers,
+    authenticated: isAuthenticated,
   })
+
+  // In the cache, the chain config is there in the first frame: the sidebar menu needs it and rendered after the
+  // story had finished
+  const chains = createChainsPageDataV2(createChainData(features), features).results
+  const defaultChainsHandler = handlers.find(
+    (handler) => answersChainsRequest(handler) && !customHandlers.includes(handler),
+  )
 
   // Create decorator function
   const decorator: Decorator = (Story, context: StoryContext) => {
     const isDarkMode = context.globals?.theme === 'dark'
+
+    // MSW answers with the first matching handler. A story that serves its own chain config (a loading screen, extra
+    // features), through the config or its parameters, keeps its request instead of the preloaded chains.
+    const servesDefaultChains = mswHandlers(context.parameters).find(answersChainsRequest) === defaultChainsHandler
 
     // Resolve wallet context
     const wallet = resolveWallet(walletPreset, safeData)
@@ -110,6 +139,7 @@ export function createMockStory(config: MockStoryConfig = {}): MockStoryResult {
         layout={layout}
         pathname={pathname}
         shadcn={shadcn}
+        chains={servesDefaultChains ? chains : undefined}
       >
         <Story />
       </MockContextProvider>

@@ -1,0 +1,51 @@
+name: Detect pull request changes
+description: >-
+  Says whether a pull request changes a file that matches one of the given paths, so that a workflow without a
+  paths filter can skip its checks and still report its required result. Other events always count as relevant.
+
+inputs:
+  paths:
+    description: Newline-separated globs, as in a paths filter; `*` and `**` both match across `/`
+    required: true
+  token:
+    description: Token that can read the pull request
+    default: ${{ github.token }}
+
+outputs:
+  relevant:
+    description: "'true' when the checks must run, else 'false'"
+    value: ${{ steps.detect.outputs.relevant }}
+
+runs:
+  using: composite
+  steps:
+    - name: Match changed files
+      id: detect
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        PATHS: ${{ inputs.paths }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: |
+        if [ -z "$PR_NUMBER" ]; then
+          echo "relevant=true" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        # A rename lists its old path too, so moving a file out of a covered path still counts.
+        files=$(gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" \
+          --jq '.[] | .filename, (.previous_filename // empty)')
+        relevant=false
+        # The API lists at most 3000 files, so a longer list may miss a match.
+        if [ "$(grep -c . <<< "$files" || true)" -ge 3000 ]; then
+          relevant=true
+        fi
+        while [ "$relevant" = false ] && read -r file; do
+          while read -r pattern; do
+            # shellcheck disable=SC2053 # The pattern must stay unquoted to match as a glob.
+            if [ -n "$pattern" ] && [[ "$file" == $pattern ]]; then
+              relevant=true
+              break
+            fi
+          done <<< "$PATHS"
+        done <<< "$files"
+        echo "relevant=$relevant" >> "$GITHUB_OUTPUT"

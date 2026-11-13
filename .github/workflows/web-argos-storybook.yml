@@ -1,20 +1,33 @@
 name: Web Argos Storybook
 
 # Visual regression for the web Storybook: builds it statically, screenshots every
-# story in light + dark via scripts/storybook/render-sweep.ts, and uploads the
-# screenshots to Argos (same service the Cypress visual E2E suite uses).
+# story in light + dark via scripts/storybook/render-sweep.ts, and uploads them to
+# Argos as sheets (one image per title, one per fullscreen story). The sweep runs in 4
+# parallel shards; the visual job joins their sheets and does the rest.
 #
-# Requires the ARGOS_TOKEN_STORYBOOK repo secret (a dedicated Argos project for
-# Storybook, separate from the E2E project's ARGOS_TOKEN_E2E).
+# Uploads to the Argos project that ARGOS_TOKEN_E2E names, under the build
+# name `storybook`.
+#
+# Pushes to dev record the sha256 of every sheet and upload a new baseline only when a sheet
+# changed since the previous dev commit; unchanged merges keep the last baseline, which is
+# still correct because their images are identical.
+#
+# Pull requests upload only the sheets that differ from their merge base on dev, as an Argos
+# subset build, and a skipped build when none differ. A subset build ignores removals, so a
+# removed sheet shows only in the job summary; the dev build after the merge drops it from the
+# baseline. Thus the Argos status `argos/safe-wallet-monorepo/storybook` reports on every PR
+# that is ready for review and can be a required check (docs/ci-required-checks.md). Drafts are
+# skipped; marking one ready runs it.
 
 on:
-  # ! Temporarily disabled — re-enable when Storybook Argos should run on every web PR again. !
-  # Runs automatically on web PRs so visual regressions surface in review instead of
-  # being discovered by hand. Fork PRs without ARGOS_TOKEN_STORYBOOK skip the upload step.
-  # pull_request:
-  #   paths:
-  #     - 'apps/web/**'
-  #     - 'packages/**'
+  # ready_for_review runs the drafts that the jobs below skip
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [dev]
+  # Weekly baseline on dev. Release checks are started by hand.
+  schedule:
+    - cron: '0 5 * * 1'
   workflow_dispatch:
     inputs:
       reference_branch:
@@ -31,28 +44,86 @@ on:
         type: string
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # One group per dev commit, so each merge records its manifest instead of cancelling the last one
+  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.sha || github.ref }}
   cancel-in-progress: true
 
 permissions: {}
 
 jobs:
-  storybook-visual:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
-    name: Storybook visual tests (Argos)
+  changes:
+    # Skipping this job skips the sweep, the Argos upload and the skip report of a draft
+    if: github.event.pull_request.draft != true
+    runs-on: ubuntu-26.04-arm
     permissions:
       contents: read
-
+      pull-requests: read
+    outputs:
+      relevant: ${{ steps.changes.outputs.relevant }}
     steps:
       - uses: actions/checkout@v7.0.1
+      - id: changes
+        uses: $/.github/actions/pr-changes
         with:
-          fetch-depth: 0
+          paths: |
+            apps/web/**
+            packages/**
+            yarn.lock
+            package.json
+            .yarnrc.yml
+            .yarn/patches/**
+            config/**
+            yarn.config.cjs
+            scripts/storybook/**
+            .github/workflows/web-argos-storybook.yml
+            .github/actions/yarn/**
+            .github/actions/corepack/**
+            .github/actions/pr-changes/**
+
+  # A PR that cannot change a story still needs a green Argos status to merge
+  skip:
+    needs: changes
+    if: needs.changes.outputs.relevant != 'true'
+    runs-on: ubuntu-26.04-arm
+    name: Storybook visual tests (Argos) skipped
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Report a skipped Argos build
+        run: npx --yes @argos-ci/cli skip --build-name storybook
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN_E2E }}
+
+  # Each shard sweeps whole titles, so its sheets are complete; the visual job joins them.
+  sweep:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 30
+    name: Storybook sweep (${{ matrix.shard }}/4)
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+
+    steps:
+      # The PR's own head, not GitHub's merge commit, so the sheets compare with its merge base
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - uses: $/.github/actions/yarn
         with:
           turbo-token: ${{ secrets.TURBO_TOKEN }}
           turbo-team: ${{ vars.TURBO_TEAM }}
+
+      # No --with-deps: it only adds fonts, and the stories and sheet labels render DM Sans
+      - name: Install Chromium headless shell
+        working-directory: apps/web
+        run: yarn exec playwright install --only-shell chromium
 
       - name: Build Storybook
         run: yarn workspace @safe-global/web build-storybook --output-dir storybook-static
@@ -70,34 +141,188 @@ jobs:
           echo "Storybook static server did not come up" >&2
           exit 1
 
-      - name: Screenshot all stories (light + dark)
-        id: sweep
-        # Broken stories (SB_ERROR) exit 1 — still upload what rendered, then fail below.
+      - name: Screenshot this shard's stories (light + dark)
+        # Broken stories (SB_ERROR) exit 1 — keep what rendered; the visual job reports them.
         continue-on-error: true
         working-directory: apps/web
         run: |
           yarn storybook:sweep \
             --base=http://localhost:4000 \
+            --shard=${{ matrix.shard }}/${{ strategy.job-total }} \
             --shots=argos-screenshots \
+            --manifest=sheets-manifest.json \
             --json=sweep-findings.json \
             --concurrency=6 \
             ${{ inputs.filter && format('--filter={0}', inputs.filter) || '' }}
 
-      - name: Upload to Argos
-        # Fork PRs have no access to ARGOS_TOKEN_STORYBOOK — skip the upload (the sweep's
-        # broken-story check below still runs and fails the job on render errors).
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-        working-directory: apps/web
-        run: npx --yes @argos-ci/cli upload argos-screenshots
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: storybook-sweep-${{ matrix.shard }}
+          path: |
+            apps/web/argos-screenshots/
+            apps/web/sheets-manifest.json
+            apps/web/sweep-findings.json
+          if-no-files-found: error
+          retention-days: 3
+
+  visual:
+    needs: sweep
+    runs-on: ubuntu-26.04-arm
+    timeout-minutes: 15
+    name: Storybook visual tests (Argos)
+    permissions:
+      contents: read
+      actions: read
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: $/.github/actions/yarn
+        with:
+          turbo-token: ${{ secrets.TURBO_TOKEN }}
+          turbo-team: ${{ vars.TURBO_TEAM }}
+
+      # With dev, not the PR's base branch: Argos compares every PR with dev, and only dev commits have a manifest
+      - name: Find the PR's merge base with dev
+        id: merge-base
+        if: github.event_name == 'pull_request'
         env:
-          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN_STORYBOOK }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: echo "sha=$(git merge-base origin/dev "$HEAD_SHA")" >> "$GITHUB_OUTPUT"
+
+      # Only a dev push run of the baseline commit itself gives a baseline; any other manifest could hide a change
+      - name: Find the baseline manifest
+        id: base-manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_SHA: ${{ steps.merge-base.outputs.sha || github.event.before || github.sha }}
+        run: |
+          run=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/web-argos-storybook.yml/runs?head_sha=$BASE_SHA&branch=dev&event=push&status=success" \
+            --jq '.workflow_runs[0].id // empty' || true)
+          if [ -n "$run" ] && gh run download "$run" --repo "$GITHUB_REPOSITORY" --name storybook-sheets-manifest --dir "$RUNNER_TEMP/base"; then
+            mv "$RUNNER_TEMP/base/sheets-manifest.json" apps/web/base-manifest.json
+            echo "sha=$BASE_SHA" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::No dev manifest for $BASE_SHA, so every sheet counts as changed"
+          fi
+
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          pattern: storybook-sweep-*
+          path: apps/web/shards
+
+      - name: Join the shards
+        working-directory: apps/web
+        run: |
+          mkdir argos-screenshots
+          cp shards/*/argos-screenshots/*.png argos-screenshots/
+          jq -s add shards/*/sheets-manifest.json > sheets-manifest.json
+          jq -s '{ total: (map(.total) | add), bad: (map(.bad) | add), findings: (map(.findings) | add) }' \
+            shards/*/sweep-findings.json > sweep-findings.json
+          sheets=$(find argos-screenshots -name '*.png' | wc -l)
+          hashed=$(jq length sheets-manifest.json)
+          # A title is never split, so two shards writing the same sheet means a bug in the split
+          if [ "$sheets" -ne "$hashed" ]; then
+            echo "::error::$sheets sheet files but $hashed manifest entries — two shards wrote the same sheet"
+            exit 1
+          fi
+
+      - name: Report changed sheets
+        id: diff
+        working-directory: apps/web
+        env:
+          BASE_SHA: ${{ steps.base-manifest.outputs.sha }}
+        run: |
+          report=$(npx tsx ../../scripts/storybook/diff-manifest.ts base-manifest.json sheets-manifest.json upload-list.txt)
+          {
+            echo "$report"
+            echo
+            echo "Baseline: \`${BASE_SHA:-none}\`"
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ -n "$BASE_SHA" ] && grep -q '^sheets changed: 0 of' <<< "$report"; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "to-upload=$(grep -c . upload-list.txt || true)" >> "$GITHUB_OUTPUT"
+          # Without a baseline every sheet counts as changed, so the full set goes up either way
+          if [ -z "$BASE_SHA" ]; then
+            echo "full=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "full=false" >> "$GITHUB_OUTPUT"
+          fi
+          # A subset build does not show removals; a full build only to show one cost every sheet on every push
+          if grep -q '^### Removed' <<< "$report"; then
+            echo "::notice::This PR removes sheets; Argos does not show removals in a subset build, see the job summary"
+          fi
+
+      # On dev, a merge that changed no sheet keeps the last baseline
+      - name: Upload to Argos
+        if: >-
+          (github.event_name != 'pull_request' && (github.event_name != 'push' || steps.diff.outputs.changed == 'true'))
+          || (github.event_name == 'pull_request' && steps.diff.outputs.full == 'true')
+        working-directory: apps/web
+        run: npx --yes @argos-ci/cli upload argos-screenshots --build-name storybook
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN_E2E }}
           ARGOS_REFERENCE_BRANCH: ${{ inputs.reference_branch || 'dev' }}
           ARGOS_REFERENCE_COMMIT: ${{ inputs.reference_commit || '' }}
 
-      - name: Report broken stories
-        if: steps.sweep.outcome == 'failure'
+      # Argos compares the subset with the dev baseline at the merge base and ignores the sheets left out
+      - name: Upload the changed sheets to Argos
+        if: github.event_name == 'pull_request' && steps.diff.outputs.full != 'true' && steps.diff.outputs.to-upload != '0'
         working-directory: apps/web
         run: |
-          echo "::error::render sweep flagged broken stories (SB_ERROR) — see sweep-findings.json"
-          node -e "const d=require('./sweep-findings.json'); for (const f of d.findings.filter(x=>x.issues.some(i=>i.startsWith('SB_ERROR')))) console.log(f.id, f.mode, f.issues[0])"
-          exit 1
+          mkdir argos-upload
+          while read -r sheet; do cp "argos-screenshots/$sheet" argos-upload/; done < upload-list.txt
+          npx --yes @argos-ci/cli upload argos-upload --build-name storybook --subset
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN_E2E }}
+          ARGOS_REFERENCE_BRANCH: dev
+
+      - name: Report a skipped Argos build
+        if: github.event_name == 'pull_request' && steps.diff.outputs.full != 'true' && steps.diff.outputs.to-upload == '0'
+        working-directory: apps/web
+        run: npx --yes @argos-ci/cli skip --build-name storybook
+        env:
+          ARGOS_TOKEN: ${{ secrets.ARGOS_TOKEN_E2E }}
+
+      # After the upload: a failed upload skips this, so the next dev merge still sees the change
+      # An artifact, not a cache entry: cache eviction removed manifests within hours
+      - name: Save the manifest for the next dev commit
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: storybook-sheets-manifest
+          path: apps/web/sheets-manifest.json
+          if-no-files-found: error
+          retention-days: 90
+          # A re-run of the job would otherwise fail on the manifest that its first attempt saved
+          overwrite: true
+
+      # A story broken on dev is already merged; warn on push runs instead of failing every later merge
+      - name: Report broken stories
+        working-directory: apps/web
+        env:
+          LEVEL: ${{ github.event_name == 'push' && 'warning' || 'error' }}
+        run: |
+          broken=$(jq -r '.findings[] | select(any(.issues[]; startswith("SB_ERROR"))) | "\(.id) \(.mode) \(.issues[0])"' sweep-findings.json)
+          [ -z "$broken" ] && exit 0
+          echo "$broken"
+          echo "::$LEVEL::render sweep flagged broken stories (SB_ERROR) — see the lines above"
+          [ "$LEVEL" = warning ] || exit 1
+
+  # Argos posts no status when the sweep or the upload fails, which leaves a PR waiting with no red check
+  result:
+    name: Storybook visual tests result
+    permissions: {}
+    if: ${{ !cancelled() && github.event.pull_request.draft != true }}
+    needs: [changes, sweep, visual]
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - uses: $/.github/actions/required-result
+        with:
+          needs: ${{ toJSON(needs) }}
+          relevant: ${{ needs.changes.outputs.relevant }}

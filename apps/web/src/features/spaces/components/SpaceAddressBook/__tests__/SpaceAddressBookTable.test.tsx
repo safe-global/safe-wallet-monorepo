@@ -21,7 +21,7 @@ jest.mock('@/components/common/EmailInfo', () => {
   const EmailInfo = ({ email }: { email: string }) => <span data-testid="email-info">{email}</span>
   return EmailInfo
 })
-jest.mock('@/components/common/Identicon', () => {
+jest.mock('@safe-global/views/components/common/Identicon', () => {
   const Identicon = () => <span data-testid="identicon" />
   return Identicon
 })

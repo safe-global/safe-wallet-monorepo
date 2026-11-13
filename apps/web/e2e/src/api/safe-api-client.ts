@@ -4,15 +4,19 @@
  * Rule: Use API for precondition checks and data verification.
  * Reserve Playwright for what only a browser can test.
  */
-import { CGW_BASE_URL, CHAIN_IDS } from '../data/constants'
+import { cgwBaseUrl, CHAIN_IDS } from '../data/constants'
 import type { SafeInfo, BalancesResponse } from '../types/safe.types'
 import type { CollectiblePage } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
+import type { DelegatesGetDelegatesV3ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 import type { Message } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
+import type { Portfolio } from '@safe-global/store/gateway/AUTO_GENERATED/portfolios'
 import type {
   QueuedItemPage,
+  Transaction,
   TransactionDetails,
   TransactionItemPage,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { transactionsIn } from './transaction-items'
 
 const REQUEST_TIMEOUT_MS = 10_000
 const RETRY_DELAY_MS = 1_000
@@ -26,7 +30,7 @@ export class SafeApiClient {
   private baseUrl: string
   private chainId: string
 
-  constructor(chainId: string = CHAIN_IDS.sepolia, baseUrl: string = CGW_BASE_URL) {
+  constructor(chainId: string = CHAIN_IDS.sepolia, baseUrl: string = cgwBaseUrl()) {
     this.baseUrl = baseUrl
     this.chainId = chainId
   }
@@ -63,14 +67,45 @@ export class SafeApiClient {
     return this.get<SafeInfo>(`/v1/chains/${this.chainId}/safes/${safeAddress}`)
   }
 
-  /** Get token balances for a Safe */
-  async getBalances(safeAddress: string, currency = 'usd'): Promise<BalancesResponse> {
-    return this.get<BalancesResponse>(`/v1/chains/${this.chainId}/safes/${safeAddress}/balances/${currency}`)
+  /** Get the nonce of the next transaction of the Safe */
+  async getNonce(safeAddress: string): Promise<number> {
+    return (await this.getSafeInfo(safeAddress)).nonce
+  }
+
+  /** Get the addresses of the Safes that `owner` (an account or a Safe) owns */
+  async getOwnedSafes(owner: string): Promise<string[]> {
+    return (await this.get<{ safes: string[] }>(`/v1/chains/${this.chainId}/owners/${owner}/safes`)).safes
+  }
+
+  /** Get token balances for a Safe; `trusted` limits them to the tokens the Transaction Service trusts */
+  async getBalances(
+    safeAddress: string,
+    currency = 'usd',
+    { trusted }: { trusted?: boolean } = {},
+  ): Promise<BalancesResponse> {
+    const query = trusted === undefined ? '' : `?trusted=${trusted}`
+    return this.get<BalancesResponse>(`/v1/chains/${this.chainId}/safes/${safeAddress}/balances/${currency}${query}`)
+  }
+
+  /** Get the portfolio (Zerion) of an address on this client's chain, as the wallet asks for its default token list */
+  async getPortfolio(address: string, fiatCode = 'USD'): Promise<Portfolio> {
+    const query = new URLSearchParams({ chainIds: this.chainId, fiatCode, trusted: 'true' })
+    return this.get<Portfolio>(`/v1/portfolio/${address}?${query}`)
   }
 
   /** Get queued transactions */
   async getQueuedTransactions(safeAddress: string): Promise<QueuedItemPage> {
     return this.get(`/v1/chains/${this.chainId}/safes/${safeAddress}/transactions/queued`)
+  }
+
+  /** Get the queued transactions, without the labels and conflict headers of the queue page */
+  async getQueued(safeAddress: string): Promise<Transaction[]> {
+    return transactionsIn(await this.getQueuedTransactions(safeAddress))
+  }
+
+  /** Get the proposers (delegates) of a Safe from the Queue Service */
+  async getDelegates(safeAddress: string): Promise<DelegatesGetDelegatesV3ApiResponse> {
+    return this.get(`/v3/chains/${this.chainId}/delegates?safe=${safeAddress}`)
   }
 
   /** Get transaction history */
@@ -99,15 +134,5 @@ export class SafeApiClient {
   /** Get supported chains */
   async getChains(): Promise<unknown> {
     return this.get('/v1/chains')
-  }
-
-  /** Health check — is the CGW reachable? */
-  async isHealthy(): Promise<boolean> {
-    try {
-      await this.get('/health/ready', 0) // No retry on health check
-      return true
-    } catch {
-      return false
-    }
   }
 }

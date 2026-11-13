@@ -81,4 +81,16 @@ describe('OwnerList', () => {
     expect(trackedButtons(REPLACE_OWNER)).toHaveLength(1)
     expect(trackedButtons(REMOVE_OWNER)).toHaveLength(0)
   })
+
+  it.each(['owner', 'disconnected'] as const)(
+    'names the Replace and Remove button of each signer for %s',
+    async (role) => {
+      mockRole(role)
+
+      await renderOwnerList()
+
+      expect(screen.getAllByRole('button', { name: 'Replace signer' })).toHaveLength(2)
+      expect(screen.getAllByRole('button', { name: 'Remove signer' })).toHaveLength(2)
+    },
+  )
 })

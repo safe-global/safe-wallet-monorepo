@@ -1,9 +1,8 @@
 import Analytics from '@/services/analytics/Analytics'
-import type { ReactNode } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import { type ReactElement } from 'react'
-import { type AppProps } from 'next/app'
 import Head from 'next/head'
-import dynamic from 'next/dynamic'
+import dynamic from '@/utils/dynamic'
 import { useRememberSpace } from '@/hooks/useRememberSpace'
 
 // Lazy-load Web3 initialization to keep viem/protocol-kit out of the main _app chunk
@@ -22,13 +21,11 @@ import useSafeNotifications from '@/hooks/useSafeNotifications'
 import useTxPendingStatuses from '@/hooks/useTxPendingStatuses'
 import { useInitSession } from '@/hooks/useInitSession'
 import { useRegisterServiceWorker } from '@/hooks/useRegisterServiceWorker'
-import Notifications from '@/components/common/Notifications'
-import CookieAndTermBanner from '@/components/common/CookieAndTermBanner'
+import AppChrome from '@/components/common/AppChrome'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useTxTracking } from '@/hooks/useTxTracking'
 import { useSafeMsgTracking } from '@/hooks/messages/useSafeMsgTracking'
 import useGtm from '@/services/analytics/useGtm'
-import useBeamer from '@/hooks/Beamer/useBeamer'
 import MetaTags from '@/components/common/MetaTags'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
 import useSafeMessageNotifications from '@/hooks/messages/useSafeMessageNotifications'
@@ -43,7 +40,6 @@ import { useInviteNotification, useSafeWorkspaceAttach, useSafeWorkspaceCheck } 
 import { RecoveryFeature } from '@/features/recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__'
-import { TargetedOutreachFeature } from '@/features/targeted-outreach'
 
 /**
  * Wrapper that lazy-loads Recovery via the feature system.
@@ -56,7 +52,7 @@ const RecoveryLoader = () => {
 /**
  * Wrapper that lazy-loads CounterfactualHooks via the feature system.
  * This ensures the entire counterfactual feature loads as a single chunk
- * through handle.ts rather than scattered next/dynamic imports.
+ * through handle.ts rather than scattered dynamic() imports.
  */
 const CounterfactualHooksLoader = () => {
   const { CounterfactualHooks } = useLoadFeature(CounterfactualFeature)
@@ -71,15 +67,6 @@ const SpendingLimitsLoaderWrapper = () => {
   return <SpendingLimitsLoader />
 }
 
-/**
- * Wrapper that lazy-loads OutreachPopup via the feature system.
- * This ensures the entire targeted-outreach feature loads as a single chunk.
- */
-const TargetedOutreachPopupLoader = () => {
-  const { OutreachPopup } = useLoadFeature(TargetedOutreachFeature)
-  return <OutreachPopup />
-}
-import PkModulePopup from '@/services/private-key-module/PkModulePopup'
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts'
 import { usePortfolioRefetchOnTxHistory } from '@/features/portfolio'
@@ -91,8 +78,8 @@ import { MixpanelTracingProvider } from '@/services/observability/providers/mixp
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { CaptchaProvider } from '@/components/common/Captcha'
-import { HnQueueAssessmentProvider } from '@/features/hypernative'
-import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
+import { HnQueueAssessmentProvider, useHypernativeTokenRefresh } from '@/features/hypernative'
+import { useOidcLoginCallback, useStepUpRecovery } from '@/features/oidc-auth'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
@@ -141,12 +128,12 @@ const InitApp = (): ReactElement | null => {
   useInitSession()
   useLoadableStores()
   useInitWeb3()
-  useBeamer()
   useVisitedSafes()
   useOidcLoginCallback()
-  useStepUpCallback()
+  useStepUpRecovery()
   useLogoutCallback()
   useSessionExpiryGuard()
+  useHypernativeTokenRefresh()
   useUnlockBodyScroll()
   useRegisterServiceWorker()
   useRememberSpace()
@@ -174,11 +161,10 @@ export const AppProviders = ({ children }: { children: ReactNode | ReactNode[] }
   return <ObservabilityErrorBoundary onError={captureRenderError}>{content}</ObservabilityErrorBoundary>
 }
 
-// Must render inside the Redux provider to read the step-up phase.
-const AppLaunchScreen = (): ReactElement | null => {
-  const stepUpCaption = useStepUpSplash()
-
-  return <LaunchScreen stepUpCaption={stepUpCaption} />
+type AppProps = {
+  Component: ComponentType<Record<string, unknown>>
+  pageProps: Record<string, unknown>
+  router: { pathname: string; query: Partial<Record<string, string | string[]>> }
 }
 
 const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement => {
@@ -200,25 +186,19 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
 
           <LazyWeb3Init />
 
-          <AppLaunchScreen />
+          <LaunchScreen />
 
           <PageLayout pathname={router.pathname}>
             <Component {...pageProps} key={safeKey} />
           </PageLayout>
 
-          <CookieAndTermBanner />
-
-          <TargetedOutreachPopupLoader />
-
-          <Notifications />
+          <AppChrome />
 
           <RecoveryLoader />
 
           <CounterfactualHooksLoader />
 
           <SpendingLimitsLoaderWrapper />
-
-          <PkModulePopup />
         </CaptchaProvider>
       </AppProviders>
     </Provider>

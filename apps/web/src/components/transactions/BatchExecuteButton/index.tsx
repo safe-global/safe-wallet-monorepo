@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo, useState } from 'react'
+import { useCallback, useContext, useState } from 'react'
 import { TriangleAlert } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
@@ -21,10 +21,7 @@ import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import useWallet from '@/hooks/wallets/useWallet'
 import useTxQueue from '@/hooks/useTxQueue'
 import { TxModalContext } from '@/components/tx-flow'
-import useChainId from '@/hooks/useChainId'
-import { useTransactionsGetMultipleTransactionDetailsQuery } from '@safe-global/store/gateway/transactions'
-import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
-import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
+import useBatchTxDetails, { type BatchTxDetailsStatus } from './useBatchTxDetails'
 
 const ALL_SAFE_PAID_TOOLTIP =
   "Bulk execution is not available when all ready transactions pay fees from the Safe. You'd pay gas twice, once from the Safe and once from your signer wallet."
@@ -34,6 +31,30 @@ const NOT_BATCHABLE_TOOLTIP =
 
 const BATCHABLE_TOOLTIP = 'All highlighted transactions will be included in the batch execution.'
 
+const DETAILS_LOADING_TOOLTIP = 'Loading the details of the ready transactions.'
+
+const DETAILS_ERROR_TOOLTIP = "Couldn't load the details of the ready transactions. Click to try again."
+
+const getTooltip = ({
+  isBatchable,
+  hasPendingTx,
+  hasWallet,
+  detailsStatus,
+  allSafePaid,
+}: {
+  isBatchable: boolean
+  hasPendingTx: boolean
+  hasWallet: boolean
+  detailsStatus: BatchTxDetailsStatus
+  allSafePaid: boolean
+}): string => {
+  if (!isBatchable || hasPendingTx || !hasWallet) return NOT_BATCHABLE_TOOLTIP
+  if (detailsStatus === 'loading') return DETAILS_LOADING_TOOLTIP
+  if (detailsStatus === 'error') return DETAILS_ERROR_TOOLTIP
+  if (allSafePaid) return ALL_SAFE_PAID_TOOLTIP
+  return BATCHABLE_TOOLTIP
+}
+
 const BatchExecuteButton = () => {
   const { setTxFlow } = useContext(TxModalContext)
   const pendingTxs = useAppSelector(selectPendingTxs)
@@ -41,45 +62,26 @@ const BatchExecuteButton = () => {
   const { page } = useTxQueue()
   const batchableTransactions = useBatchedTxs(page?.results || [])
   const wallet = useWallet()
-  const chainId = useChainId()
   const [showMixedWarning, setShowMixedWarning] = useState(false)
 
   const isBatchable = batchableTransactions.length > 1
   const hasPendingTx = batchableTransactions.some((tx) => pendingTxs[tx.transaction.id])
 
-  // Pre-fetch details so we can detect Safe-pays txs upfront (drives the disable / warn UX).
-  // RTK Query caches this — the modal reuses the same data when opened.
-  const { data: txsWithDetails } = useTransactionsGetMultipleTransactionDetailsQuery(
-    { chainId, txIds: batchableTransactions.map((tx) => tx.transaction.id) },
-    { skip: !isBatchable || !chainId },
-  )
+  const {
+    status: detailsStatus,
+    safePaidCount,
+    retry: retryDetails,
+  } = useBatchTxDetails(batchableTransactions, { skip: !isBatchable })
 
-  const safePaidCount = useMemo(() => {
-    if (!txsWithDetails) return 0
-    return txsWithDetails.filter((tx) => {
-      const exec = isMultisigDetailedExecutionInfo(tx.detailedExecutionInfo) ? tx.detailedExecutionInfo : null
-      return (
-        exec &&
-        isGtfSafePaid({
-          gasPrice: exec.gasPrice,
-          baseGas: exec.baseGas,
-          refundReceiver: exec.refundReceiver?.value,
-        })
-      )
-    }).length
-  }, [txsWithDetails])
-
-  const allSafePaid =
-    isBatchable && !!txsWithDetails && safePaidCount > 0 && safePaidCount === batchableTransactions.length
+  const allSafePaid = isBatchable && safePaidCount > 0 && safePaidCount === batchableTransactions.length
   const isMixed = isBatchable && safePaidCount > 0 && safePaidCount < batchableTransactions.length
 
-  // Until details load we can't tell all-Safe-paid / mixed apart — keep the button disabled so a
-  // fast click can't bypass the all-Safe-paid disable or the mixed-batch warning modal.
-  const detailsLoading = isBatchable && !!chainId && txsWithDetails === undefined
+  // A click before the details load could skip the all-Safe-paid block or the mixed-batch warning
+  const isDetailsLoading = detailsStatus === 'loading'
 
-  const isDisabled = !isBatchable || hasPendingTx || !wallet || allSafePaid || detailsLoading
+  const isDisabled = !isBatchable || hasPendingTx || !wallet || allSafePaid || isDetailsLoading
 
-  const tooltipTitle = allSafePaid ? ALL_SAFE_PAID_TOOLTIP : isDisabled ? NOT_BATCHABLE_TOOLTIP : BATCHABLE_TOOLTIP
+  const tooltip = getTooltip({ isBatchable, hasPendingTx, hasWallet: !!wallet, detailsStatus, allSafePaid })
 
   const handleOnMouseEnter = useCallback(() => {
     hoverContext.setActiveHover(batchableTransactions.map((tx) => tx.transaction.id))
@@ -98,7 +100,11 @@ const BatchExecuteButton = () => {
     setTxFlow(<ExecuteBatchFlow txs={batchableTransactions} />, undefined, false)
   }, [batchableTransactions, setTxFlow])
 
-  const handleOpenModal = () => {
+  const handleClick = () => {
+    if (detailsStatus === 'error') {
+      retryDetails()
+      return
+    }
     if (isMixed) {
       setShowMixedWarning(true)
       return
@@ -123,7 +129,7 @@ const BatchExecuteButton = () => {
                 variant="outline"
                 size="action"
                 disabled={isDisabled}
-                onClick={handleOpenModal}
+                onClick={handleClick}
               >
                 Bulk execute{isBatchable && ` ${batchableTransactions.length} transactions`}
               </Button>
@@ -131,7 +137,7 @@ const BatchExecuteButton = () => {
           }
         />
         <TooltipContent side="top" align="start">
-          {tooltipTitle}
+          {tooltip}
         </TooltipContent>
       </Tooltip>
 

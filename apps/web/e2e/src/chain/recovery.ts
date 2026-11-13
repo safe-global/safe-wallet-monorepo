@@ -7,6 +7,7 @@ const SENTINEL_ADDRESS = '0x0000000000000000000000000000000000000001'
 const PAGE_SIZE = 10
 const SAFE_ABI = [
   'function getOwners() view returns (address[])',
+  'function getThreshold() view returns (uint256)',
   'function getModulesPaginated(address start, uint256 pageSize) view returns (address[] array, address next)',
 ]
 const DELAY_MODIFIER_ABI = [
@@ -24,7 +25,7 @@ export function delayModifierAt(address: string, runner: ContractRunner): Contra
   return new Contract(address, DELAY_MODIFIER_ABI, runner)
 }
 
-export type SafeSetup = { owners: string[]; modules: string[] }
+export type SafeSetup = { owners: string[]; threshold: number; modules: string[] }
 
 export type DelayModifierState = {
   recoverers: string[]
@@ -35,15 +36,16 @@ export type DelayModifierState = {
   nextProposalHash: string
 }
 
-/** The owners and enabled modules of the Safe at `safeAddress`. */
+/** The owners, threshold and enabled modules of the Safe at `safeAddress`. */
 export function readSafeSetup(env: JourneyEnvironment, safeAddress: string): Promise<SafeSetup> {
   return readChain(env, async (provider) => {
     const safe = new Contract(safeAddress, SAFE_ABI, provider)
-    const [owners, [modules]] = await Promise.all([
+    const [owners, threshold, [modules]] = await Promise.all([
       safe.getOwners(),
+      safe.getThreshold(),
       safe.getModulesPaginated(SENTINEL_ADDRESS, PAGE_SIZE),
     ])
-    return { owners: [...owners], modules: [...modules] }
+    return { owners: [...owners], threshold: Number(threshold), modules: [...modules] }
   })
 }
 

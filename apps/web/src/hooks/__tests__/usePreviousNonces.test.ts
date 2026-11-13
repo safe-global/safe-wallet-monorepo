@@ -1,4 +1,4 @@
-import { _getUniqueQueuedTxs } from '@/hooks/usePreviousNonces'
+import { _getUniqueQueuedTxs, getQueuedNonces } from '@/hooks/usePreviousNonces'
 import { getMockTx } from '@/tests/mocks/transactions'
 import { ConflictType } from '@safe-global/store/gateway/types'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
@@ -52,5 +52,19 @@ describe('_getUniqueQueuedTxs', () => {
     expect(nonces).toContain(0)
     expect(nonces).toContain(1)
     expect(nonces).toContain(2)
+  })
+})
+
+describe('getQueuedNonces', () => {
+  it('returns no nonces when there is no queue page', () => {
+    expect(getQueuedNonces()).toEqual([])
+  })
+
+  it('returns each queued nonce once, in queue order', () => {
+    const mockPage = {
+      results: [getMockTx({ nonce: 4 }), getMockTx({ nonce: 5 }), getMockTx({ nonce: 5 })],
+    }
+
+    expect(getQueuedNonces(mockPage)).toEqual([4, 5])
   })
 })

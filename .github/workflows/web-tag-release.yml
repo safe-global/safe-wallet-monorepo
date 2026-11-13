@@ -22,7 +22,7 @@ jobs:
     permissions:
       actions: write
       contents: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     outputs:
       version: ${{ steps.version.outputs.version }}
       version_number: ${{ steps.version.outputs.version_number }}
@@ -102,7 +102,7 @@ jobs:
       contents: write
       id-token: write
       pull-requests: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
 
     steps:
       - name: Checkout
@@ -141,6 +141,9 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
       - uses: $/.github/actions/yarn
+        # This job holds the OIDC deploy credentials, so it must not run files from a cache.
+        with:
+          cache: 'false'
 
       - uses: $/.github/actions/build
         env:
@@ -198,6 +201,7 @@ jobs:
           NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL: ${{ secrets.NEXT_PUBLIC_ZODIAC_SECURITY_CHECK_URL }}
         with:
           prod: ${{ true }}
+          cache: 'false'
 
       - name: Add SRI to scripts
         run: node ./scripts/integrity-hashes.cjs
@@ -217,13 +221,13 @@ jobs:
         working-directory: apps/web
 
       - name: Upload archive as release asset
-        uses: shogo82148/actions-upload-release-asset@v1.10.6
+        uses: shogo82148/actions-upload-release-asset@v1.10.7
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}.tar.gz
 
       - name: Upload checksum as release asset
-        uses: shogo82148/actions-upload-release-asset@v1.10.6
+        uses: shogo82148/actions-upload-release-asset@v1.10.7
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: apps/web/${{ github.event.repository.name }}-${{ needs.tag.outputs.version }}-sha256-checksum.txt
@@ -247,7 +251,7 @@ jobs:
       - name: Generate production promotion token
         id: promotions_token
         continue-on-error: true
-        uses: actions/create-github-app-token@v3.2.0
+        uses: actions/create-github-app-token@v3.3.0
         with:
           app-id: ${{ secrets.PROMOTIONS_APP_ID }}
           private-key: ${{ secrets.PROMOTIONS_APP_PRIVATE_KEY }}
@@ -357,7 +361,7 @@ jobs:
         if: needs.tag.outputs.version && success()
         id: linear_complete
         continue-on-error: true
-        uses: linear/linear-release-action@v0.18.1
+        uses: linear/linear-release-action@v0.18.2
         with:
           access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
           command: complete

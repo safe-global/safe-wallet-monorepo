@@ -54,17 +54,19 @@ export const Default: Story = {}
 
 ### createMockStory options
 
-| Option     | Type                                                                                                                           | Default                                             | Description                                   |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------- | --------------------------------------------- |
-| `scenario` | `'efSafe' \| 'vitalik' \| 'empty' \| 'spamTokens' \| 'safeTokenHolder'`                                                        | `'efSafe'`                                          | Data fixture scenario                         |
-| `wallet`   | `'disconnected' \| 'connected' \| 'owner' \| 'nonOwner'`                                                                       | `'disconnected'`                                    | Wallet connection state                       |
-| `features` | `{ portfolio?, positions?, swaps?, recovery?, hypernative?, earn?, spaces?, oidcAuth?, switchAuthenticator?, spaceAuditLog? }` | `{ portfolio: true, positions: true, swaps: true }` | Chain feature flags (only specify to disable) |
-| `layout`   | `'none' \| 'paper' \| 'withSidebar' \| 'fullPage'`                                                                             | `'none'`                                            | Layout wrapper                                |
-| `store`    | `object`                                                                                                                       | `{}`                                                | Redux store overrides                         |
-| `handlers` | `RequestHandler[]`                                                                                                             | `[]`                                                | Additional MSW handlers                       |
-| `pathname` | `string`                                                                                                                       | `'/home'`                                           | Router pathname                               |
+| Option          | Type                                                                                                                                                           | Default                                             | Description                                   |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- | --------------------------------------------- |
+| `scenario`      | `'efSafe' \| 'vitalik' \| 'empty' \| 'spamTokens' \| 'safeTokenHolder'`                                                                                        | `'efSafe'`                                          | Data fixture scenario                         |
+| `wallet`        | `'disconnected' \| 'connected' \| 'owner' \| 'nonOwner'`                                                                                                       | `'disconnected'`                                    | Wallet connection state                       |
+| `features`      | `{ portfolio?, positions?, swaps?, recovery?, hypernative?, earn?, spaces?, oidcAuth?, switchAuthenticator?, spaceAuditLog?, safePro?, safeProAnnouncement? }` | `{ portfolio: true, positions: true, swaps: true }` | Chain feature flags (only specify to disable) |
+| `layout`        | `'none' \| 'paper' \| 'withSidebar' \| 'fullPage'`                                                                                                             | `'none'`                                            | Layout wrapper                                |
+| `store`         | `object`                                                                                                                                                       | `{}`                                                | Redux store overrides                         |
+| `handlers`      | `RequestHandler[]`                                                                                                                                             | `[]`                                                | Additional MSW handlers                       |
+| `authenticated` | `boolean`                                                                                                                                                      | `features.spaces === true`                          | Signs the user in to the gateway              |
+| `pathname`      | `string`                                                                                                                                                       | `'/home'`                                           | Router pathname                               |
 
 - **Do not override feature flags** unless testing a specific disabled state (e.g. `features: { swaps: false }`).
+- `fullPage` and `withSidebar` render `AppChrome` next to `PageLayout`, as the app shells do. The mock store accepts all cookies, so the banner stays closed; set `store: { cookies_terms: {...} }` to show it.
 - Escape hatch for custom composition — import the pieces the factory is built from: `MockContextProvider`, `createChainData`, `createInitialState`, `getFixtureData`, `resolveWallet`, `coreHandlers`, `balanceHandlers` (all from `@/stories/mocks`). `MockContextProvider` already covers the Wallet, SDK, and TxModal contexts.
 
 ## What preview.tsx already provides globally (don't re-add)
@@ -114,10 +116,12 @@ import { safeFixtures, chainFixtures, balancesFixtures, SAFE_ADDRESSES } from '@
 | Scenario          | Tokens | Positions           | Use case            |
 | ----------------- | ------ | ------------------- | ------------------- |
 | `efSafe`          | 32     | $142M (8 protocols) | DeFi heavy, default |
-| `vitalik`         | 1551   | $19M                | Whale, performance  |
+| `vitalik`         | 44     | $19M                | Large, pagination   |
 | `spamTokens`      | 26     | $1.7M               | Spam filtering      |
 | `safeTokenHolder` | 25     | $707 (15 protocols) | Protocol diversity  |
 | `empty`           | 0      | $0                  | Empty states        |
+
+Name a data file by what its data must do. `<Component>.storyData.ts` holds data that a story shows, so it must be the same in every run; tests can import it too. `<Component>.testData.ts` holds data for tests only, which can be random; stories never import it. Faker continues one sequence for the whole page, so a story or `.storyData.ts` file that imports faker or a test builder calls `faker.seed(<number>)` after its imports. ESLint enforces both rules. The recorded API data in `config/test/msw/fixtures` is fixed, and stories and tests both use it.
 
 ## Context error reference
 
@@ -158,12 +162,16 @@ _Status as of 2026-08 — re-verify against `src/stories/mocks/handlers.ts` befo
 
 ## Visual regression (Argos)
 
-`.github/workflows/web-argos-storybook.yml` builds the static Storybook, screenshots every story in **light and dark**, and uploads to Argos. **The workflow is currently `workflow_dispatch`-only — its `pull_request` trigger is temporarily disabled, so visual regression does NOT run automatically on PRs.** Verify UI changes yourself via the story (or live page), and run the sweep locally:
+`.github/workflows/web-argos-storybook.yml` builds the static Storybook, screenshots every story in **light and dark**, and uploads them to Argos as **sheets**: one image per title with every story as a row and light/dark side by side, and one image per fullscreen (page) story. A changed story shows up as a diff in its title's sheet. It runs on every merge to `dev` and uploads a new baseline only when a sheet's hash changed, every Monday as a safety net, and by hand (`workflow_dispatch`) before a release. On a PR it uploads only the sheets that differ from the PR's merge base on `dev`, or reports a skipped build when none differ; the PR cannot merge until someone approves the changes in Argos. To check a change before you push, run the sweep locally:
 
 ```bash
-yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>   # add --filter=<substr> to scope
+yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>   # add --filter=<substr>[,<substr>] to scope
 ```
 
+- CI splits the sweep into 4 shards (`--shard=k/n`, whole titles per shard). Locally, run it without `--shard`.
+- Screenshots are taken with animations disabled, once no request is open and two screenshots in a row match, with the GPU off and every external host unresolvable. Each story gets a new browser context (empty `localStorage`), a clock that starts at 2026-01-15 12:00 UTC and then runs, a seeded `Math.random` (for random IDs the app creates and never shows) and `prefers-reduced-motion`, so dates and `motion` animations are the same in every run. Storybook sets `VISUAL_REGRESSION_BUILD`, so generated Safe names take a fixed adjective. Because the clock runs, a mock date taken from `Date.now()` gets a different second in each run: build an absolute date that the story shows from `mockNow()` (`src/stories/mocks/now.ts`), which rounds to the minute. Keep `Date.now()` for an age that the component measures against its own clock ("10 seconds ago", a cooldown), because rounding would add up to 59 seconds to it. An embedded external page (stake, earn and bridge widgets) shows a fixed placeholder. Text anti-aliasing can still change a few pixels between runs. A sheet that changes on a commit that did not touch it is flaky — fix the story, as it triggers a needless baseline upload.
+- Stories, their mock data and `config/test` fixtures never point at remote images: they use relative `mock-assets/<host>/<path>.webp` paths to files in `.storybook/mock-assets/` (Storybook-only, never in the app build). A relative path also works in the deployed `/storybook/` and inside `IframeIcon`'s sandboxed iframe. To add one, resize it to at most 128 px and save it as WebP, e.g. `cwebp -resize 128 0 -q 82 logo.png -o logo.webp`; a logo that does not exist upstream is `images/common/token-placeholder.svg`. `fetch-fixtures.ts` does this for the fixtures, and `storybook-local-images.test.ts` enforces it.
+- Stories must not call live APIs: the sweep reports each unmocked call as `EXTERNAL_REQUEST: <host><path>`. `GET /v2/chains` has a global fallback (`.storybook/mockChains.ts`, the `config/test` chains fixture); mock anything else in the story.
 - Opt a story out of pixel snapshots with `tags: ['skip-visual-test']` (story- or meta-level) for flaky/animated stories. It is still render-checked — errors fail CI; only the snapshot is skipped.
 - Never ship a story that permanently renders skeletons/blank without a doc comment saying so — a broken story that "passes" is worse than no story.
 

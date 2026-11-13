@@ -26,20 +26,22 @@ jobs:
       (github.event_name == 'pull_request' &&
        contains(github.event.pull_request.labels.*.name, 'mobile-dev-release'))
     name: Install and build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - name: Checkout code
         uses: actions/checkout@v7.0.1
 
       - uses: $/.github/actions/yarn
+        # This job holds EXPO_TOKEN, so it must not run files from a cache.
         with:
           after-install: 'false'
+          cache: 'false'
 
       - name: Build expo plugins
         run: yarn workspace @safe-global/notification-service-ios build
 
       - name: Setup Expo and EAS
-        uses: expo/expo-github-action@9.0.0
+        uses: expo/expo-github-action@9.0.1
         with:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}

@@ -27,7 +27,6 @@ jest.mock('./hooks/useOnboardingExit', () => ({
 
 const mockGoToSelectSafes = jest.fn()
 let mockCreatedSpaceId: string | undefined
-const SELECT_SAFES_URL = '/welcome/select-safes?spaceId=space-new'
 jest.mock('./hooks/useSpaceSubmit', () => ({
   __esModule: true,
   default: () => ({
@@ -36,13 +35,7 @@ jest.mock('./hooks/useSpaceSubmit', () => ({
     onSubmit: jest.fn(),
     createdSpaceId: mockCreatedSpaceId,
     goToSelectSafes: mockGoToSelectSafes,
-    selectSafesUrl: mockCreatedSpaceId ? SELECT_SAFES_URL : undefined,
   }),
-}))
-
-const mockUseStepUpReturnUrl = jest.fn()
-jest.mock('@/features/oidc-auth', () => ({
-  useStepUpReturnUrl: (url: string | undefined) => mockUseStepUpReturnUrl(url),
 }))
 
 const mockPush = jest.fn()
@@ -103,21 +96,6 @@ describe('CreateSpaceOnboarding', () => {
     mockExistingSpace = { spaceId: undefined, isEditMode: false, isSpaceLoading: false, existingSpace: undefined }
     mockCreatedSpaceId = undefined
     mockUseWorkspaceLock.mockReturnValue({ isLocked: true, isResolving: false, reason: 'trial-offered' })
-  })
-
-  it('sends a step-up started from the trial offer on to the Safes step', () => {
-    mockCreatedSpaceId = 'space-new'
-    render(<CreateSpaceOnboarding />)
-
-    expect(mockUseStepUpReturnUrl).toHaveBeenLastCalledWith(SELECT_SAFES_URL)
-  })
-
-  it('keeps a step-up on this page while no trial is offered', () => {
-    mockCreatedSpaceId = 'space-new'
-    mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: false, reason: 'lapsed' })
-    render(<CreateSpaceOnboarding />)
-
-    expect(mockUseStepUpReturnUrl).toHaveBeenLastCalledWith(undefined)
   })
 
   it('offers the trial over the step once the Workspace exists; declining leaves for My accounts', () => {

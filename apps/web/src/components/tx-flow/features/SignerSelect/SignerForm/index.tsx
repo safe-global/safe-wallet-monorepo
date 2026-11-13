@@ -13,6 +13,7 @@ import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import SignerSelector from '@/components/common/SignerSelector'
 import TxSectionTitle from '@safe-global/views/components/tx-flow/common/TxSectionTitle'
+import ParentSafeNonce from '../ParentSafeNonce'
 
 export const SignerForm = ({ willExecute, txId }: { willExecute?: boolean; txId?: string }) => {
   const { signer, setSignerAddress, connectedWallet: wallet } = useWalletContext() ?? {}
@@ -110,6 +111,8 @@ export const SignerForm = ({ willExecute, txId }: { willExecute?: boolean; txId?
         isOptionDisabled={isOptionDisabled}
         disabledReason={() => 'Already signed'}
       />
+
+      {signer?.isSafe && <ParentSafeNonce key={signer.address} parentSafeAddress={signer.address} />}
     </>
   )
 }

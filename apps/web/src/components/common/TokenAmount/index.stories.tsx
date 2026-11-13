@@ -26,7 +26,7 @@ type Story = StoryObj<typeof meta>
 export const WithTokenLogo: Story = {
   args: {
     value: '100',
-    logoUri: 'https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png',
+    logoUri: 'mock-assets/safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.webp',
     tokenSymbol: 'ETH',
   },
 }

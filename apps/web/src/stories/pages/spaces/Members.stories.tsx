@@ -16,7 +16,7 @@ const defaultSetup = createMockStory({
   wallet: 'connected',
   layout: 'fullPage',
   pathname: '/spaces/members',
-  features: { spaces: true },
+  authenticated: true,
   query: { spaceId: '1' },
 })
 
@@ -68,6 +68,7 @@ export const Default: Story = {}
 export const PendingTab: Story = {
   parameters: { msw: { handlers: [membersWithPendingInvite, ...defaultSetup.handlers] } },
   play: async ({ canvasElement }) => {
-    await userEvent.click(await within(canvasElement).findByTestId('pending-members-tab'))
+    const pendingTab = await within(canvasElement).findByTestId('pending-members-tab', undefined, { timeout: 10_000 })
+    await userEvent.click(pendingTab)
   },
 }

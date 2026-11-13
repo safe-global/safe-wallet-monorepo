@@ -144,16 +144,6 @@
   background-repeat: no-repeat;
 }
 
-/* Onboarding flows: prevent flex descendants from forcing horizontal overflow on narrow viewports */
-.onboardingMotion {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
 .content main {
   padding: var(--space-3);
 }

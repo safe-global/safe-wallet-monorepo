@@ -1,14 +1,8 @@
 name: tx-builder Checks
 
 on:
+  # No paths filter: the required result job must report on every pull request.
   pull_request:
-    paths:
-      - apps/tx-builder/**
-      - packages/**
-      - yarn.lock
-      - package.json
-      - .yarnrc.yml
-      - .yarn/patches/**
   push:
     branches:
       - main
@@ -29,12 +23,42 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    runs-on: ubuntu-26.04-arm
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      relevant: ${{ steps.changes.outputs.relevant }}
+    steps:
+      - id: changes
+        uses: $/.github/actions/pr-changes
+        with:
+          paths: |
+            apps/tx-builder/**
+            packages/**
+            yarn.lock
+            package.json
+            .yarnrc.yml
+            .yarn/patches/**
+            config/**
+            yarn.config.cjs
+            .prettierrc
+            .prettierignore
+            .github/workflows/tx-builder-checks.yml
+            .github/actions/yarn/**
+            .github/actions/corepack/**
+            .github/actions/pr-changes/**
+            .github/actions/required-result/**
+
   lint:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     permissions:
       checks: write
       pull-requests: read
       statuses: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: $/.github/actions/yarn
@@ -42,11 +66,13 @@ jobs:
         run: yarn workspace @safe-global/tx-builder lint
 
   prettier:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     permissions:
       checks: write
       pull-requests: read
       statuses: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: $/.github/actions/yarn
@@ -54,11 +80,13 @@ jobs:
         run: yarn workspace @safe-global/tx-builder prettier
 
   type-check:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     permissions:
       checks: write
       pull-requests: read
       statuses: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: $/.github/actions/yarn
@@ -66,7 +94,9 @@ jobs:
         run: yarn workspace @safe-global/tx-builder type-check
 
   unit-tests:
-    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: $/.github/actions/yarn
@@ -79,7 +109,9 @@ jobs:
           fail_ci_if_error: false
 
   build:
-    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: $/.github/actions/yarn
@@ -91,3 +123,16 @@ jobs:
           name: tx-builder-build
           path: apps/tx-builder/build
           retention-days: 7
+
+  result:
+    # The one check that branch protection requires for this workflow.
+    name: tx-builder checks result
+    permissions: {}
+    if: ${{ !cancelled() }}
+    needs: [changes, lint, prettier, type-check, unit-tests, build]
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - uses: $/.github/actions/required-result
+        with:
+          needs: ${{ toJSON(needs) }}
+          relevant: ${{ needs.changes.outputs.relevant }}

@@ -7,12 +7,7 @@ export const formSchema = z.object({
   safeAddress: z
     .string()
     .nonempty('Safe address is required')
-    .refine(
-      (value) => {
-        return isValidAddress(parsePrefixedAddress(value).address)
-      },
-      {
-        message: 'Invalid address format',
-      },
-    ),
+    .refine((value) => {
+      return isValidAddress(parsePrefixedAddress(value).address)
+    }, 'Invalid address format'),
 })

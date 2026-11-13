@@ -77,14 +77,12 @@ describe('getLatestSpendingLimitAddress', () => {
     expect(getLatestSpendingLimitAddress(chainId)).toBeDefined()
   })
 
-  it('should return v0.1.0 address for Sepolia (chainId 11155111)', () => {
-    const v010 = getAllowanceModuleDeployment({ version: '0.1.0' })
-    const expectedAddress = v010?.networkAddresses['11155111']
-    expect(expectedAddress).toBeDefined()
+  it('should return the production v0.1.0 address for Sepolia (chainId 11155111)', () => {
+    expect(getLatestSpendingLimitAddress('11155111')).toBe('0xCFbFaC74C26F8647cBDb8c5caf80BB5b32E43134')
+  })
 
-    const result = getLatestSpendingLimitAddress('11155111')
-
-    expect(result).toBe(expectedAddress)
+  it('should return the production v0.1.1 address for Polygon (chainId 137)', () => {
+    expect(getLatestSpendingLimitAddress('137')).toBe('0xAA46724893dedD72658219405185Fb0Fc91e091C')
   })
 
   it('should return the v0.1.0 address on a chain where only v0.1.0 is deployed', () => {

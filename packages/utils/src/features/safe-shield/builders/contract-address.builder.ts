@@ -28,7 +28,7 @@ export class ContractAddressBuilder {
   }
   contractVerification(results: AnalysisResult<StatusGroupType<StatusGroup.CONTRACT_VERIFICATION>>[]): this {
     if (!this.parent['contract'][this.address]) {
-      this.parent['contract'][this.address] = DEFAULT_INFO
+      this.parent['contract'][this.address] = { ...DEFAULT_INFO }
     }
     this.parent['contract'][this.address][StatusGroup.CONTRACT_VERIFICATION] = results
     return this
@@ -36,7 +36,7 @@ export class ContractAddressBuilder {
 
   contractInteraction(results: AnalysisResult<StatusGroupType<StatusGroup.CONTRACT_INTERACTION>>[]): this {
     if (!this.parent['contract'][this.address]) {
-      this.parent['contract'][this.address] = DEFAULT_INFO
+      this.parent['contract'][this.address] = { ...DEFAULT_INFO }
     }
     this.parent['contract'][this.address][StatusGroup.CONTRACT_INTERACTION] = results
     return this
@@ -44,7 +44,7 @@ export class ContractAddressBuilder {
 
   delegatecall(results: AnalysisResult<StatusGroupType<StatusGroup.DELEGATECALL>>[]): this {
     if (!this.parent['contract'][this.address]) {
-      this.parent['contract'][this.address] = DEFAULT_INFO
+      this.parent['contract'][this.address] = { ...DEFAULT_INFO }
     }
     this.parent['contract'][this.address][StatusGroup.DELEGATECALL] = results
     return this
@@ -52,7 +52,7 @@ export class ContractAddressBuilder {
 
   fallbackHandler(results: FallbackHandlerAnalysisResult[]): this {
     if (!this.parent['contract'][this.address]) {
-      this.parent['contract'][this.address] = DEFAULT_INFO
+      this.parent['contract'][this.address] = { ...DEFAULT_INFO }
     }
     this.parent['contract'][this.address][StatusGroup.FALLBACK_HANDLER] = results
     return this
@@ -60,7 +60,7 @@ export class ContractAddressBuilder {
 
   failed(result: AnalysisResult<CommonSharedStatus.FAILED>): this {
     if (!this.parent['contract'][this.address]) {
-      this.parent['contract'][this.address] = DEFAULT_INFO
+      this.parent['contract'][this.address] = { ...DEFAULT_INFO }
     }
     this.parent['contract'][this.address][StatusGroup.CONTRACT_VERIFICATION] = [
       result as AnalysisResult<StatusGroupType<StatusGroup.CONTRACT_VERIFICATION>>,

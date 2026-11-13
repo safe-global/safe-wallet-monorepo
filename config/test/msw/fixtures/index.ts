@@ -18,7 +18,12 @@ import type { Protocol } from '@safe-global/store/gateway/AUTO_GENERATED/positio
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { Chain, ChainPage } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
-import type { TransactionDetails, TransactionItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type {
+  TransactionDetails,
+  TransactionItem,
+  TransactionItemPage,
+  QueuedItemPage,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 // Portfolio fixtures
 import portfolioEfSafe from './portfolio/ef-safe.json'
@@ -64,6 +69,26 @@ import txRemoveOwner from './transactions/details/remove-owner.json'
 import txDisableModule from './transactions/details/disable-module.json'
 import txChangeThreshold from './transactions/details/change-threshold.json'
 import txReceiveQtrust from './transactions/details/receive-qtrust.json'
+import queuePendingBatch from './transactions/queue/pending-batch.json'
+import txBatchAwaiting from './transactions/details/batch-awaiting.json'
+
+// Swap order and staking fixtures: the list item and the details of each transaction
+import swapSell1Action from './transactions/swaps/sell1Action.json'
+import swapBuy2actions from './transactions/swaps/buy2actions.json'
+import swapSafeAppSwapOrder from './transactions/swaps/safeAppSwapOrder.json'
+import swapSellLimitOrder from './transactions/swaps/sellLimitOrder.json'
+import swapWrapSwap from './transactions/swaps/wrapSwap.json'
+import swapSell3Actions from './transactions/swaps/sell3Actions.json'
+import swapSellCancelled from './transactions/swaps/sellCancelled.json'
+import swapSellLimitOrderFilled from './transactions/swaps/sellLimitOrderFilled.json'
+import swapPartiallyFilledLimit from './transactions/swaps/partiallyFilledLimit.json'
+import swapTwapPartial from './transactions/swaps/twapPartial.json'
+import swapTwapFilled from './transactions/swaps/twapFilled.json'
+import swapSellQLimitOrder from './transactions/swaps/sellQLimitOrder.json'
+import swapSellSwapQLimitOrder from './transactions/swaps/sellSwapQLimitOrder.json'
+import swapSellTwapQLimitOrder from './transactions/swaps/sellTwapQLimitOrder.json'
+import stakingStake from './transactions/staking/stake.json'
+import stakingWithdrawal from './transactions/staking/withdrawal.json'
 
 /**
  * Portfolio fixtures by scenario
@@ -71,7 +96,7 @@ import txReceiveQtrust from './transactions/details/receive-qtrust.json'
 export const portfolioFixtures = {
   /** EF Safe - DeFi heavy ($142M in positions, 8 apps) */
   efSafe: portfolioEfSafe as Portfolio,
-  /** Vitalik Safe - Whale with many tokens (1551 tokens, $675M) */
+  /** Vitalik Safe - Totals of a large portfolio ($695M) with its top 4 tokens; the token rows come from balances */
   vitalik: portfolioVitalik as Portfolio,
   /** Safe with spam tokens */
   spamTokens: portfolioSpamTokens as Portfolio,
@@ -87,7 +112,7 @@ export const portfolioFixtures = {
 export const balancesFixtures = {
   /** EF Safe - 32 tokens */
   efSafe: balancesEfSafe as Balances,
-  /** Vitalik Safe - 1551 tokens (many spam) */
+  /** Vitalik Safe - 44 valued tokens with known logos (spam and dust removed) */
   vitalik: balancesVitalik as Balances,
   /** Spam tokens Safe */
   spamTokens: balancesSpamTokens as Balances,
@@ -173,6 +198,49 @@ export const transactionFixtures = {
     changeThreshold: txChangeThreshold as TransactionDetails,
     receiveQtrust: txReceiveQtrust as TransactionDetails,
   },
+}
+
+/**
+ * Queue of the efSafe on Ethereum with a queued multiSend first (nonce 28, 1 of 3), and the details of that batch
+ */
+export const queueFixtures = {
+  pendingBatch: queuePendingBatch as QueuedItemPage,
+  // CGW sends `dataDecoded: null` for undecoded multiSend actions; the generated type only allows undefined
+  batchAwaiting: txBatchAwaiting as unknown as TransactionDetails,
+}
+
+export type RecordedTransaction = {
+  item: TransactionItem
+  details: TransactionDetails
+}
+
+/**
+ * CoW swap, limit and TWAP orders on Sepolia: executed ones from the history of their Safes,
+ * queued ones from the queue of SEP_STATIC_SAFE_34
+ */
+export const swapOrderFixtures = {
+  sell1Action: swapSell1Action as RecordedTransaction,
+  buy2actions: swapBuy2actions as RecordedTransaction,
+  safeAppSwapOrder: swapSafeAppSwapOrder as RecordedTransaction,
+  sellLimitOrder: swapSellLimitOrder as RecordedTransaction,
+  wrapSwap: swapWrapSwap as RecordedTransaction,
+  sell3Actions: swapSell3Actions as RecordedTransaction,
+  sellCancelled: swapSellCancelled as RecordedTransaction,
+  sellLimitOrderFilled: swapSellLimitOrderFilled as RecordedTransaction,
+  partiallyFilledLimit: swapPartiallyFilledLimit as RecordedTransaction,
+  twapPartial: swapTwapPartial as RecordedTransaction,
+  twapFilled: swapTwapFilled as RecordedTransaction,
+  sellQLimitOrder: swapSellQLimitOrder as RecordedTransaction,
+  sellSwapQLimitOrder: swapSellSwapQLimitOrder as RecordedTransaction,
+  sellTwapQLimitOrder: swapSellTwapQLimitOrder as RecordedTransaction,
+}
+
+/**
+ * A native stake and a withdraw request of a mainnet Safe
+ */
+export const stakingFixtures = {
+  stake: stakingStake as RecordedTransaction,
+  withdrawal: stakingWithdrawal as RecordedTransaction,
 }
 
 /**

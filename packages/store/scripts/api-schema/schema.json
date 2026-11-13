@@ -2330,7 +2330,7 @@
     },
     "/v1/spaces/{spaceId}/address-book": {
       "get": {
-        "description": "Retrieves all address book entries for a specific space. Address books help organize and label frequently used addresses.",
+        "description": "Retrieves all address book entries for a specific space, with the tags of each entry and every tag of the space. Address books help organize and label frequently used addresses.",
         "operationId": "addressBooksGetAddressBookItemsV1",
         "parameters": [
           {
@@ -2374,7 +2374,7 @@
         ]
       },
       "put": {
-        "description": "Creates or updates address book entries for a space. This allows adding labels and organizing frequently used addresses.",
+        "description": "Creates or updates address book entries for a space. This allows adding labels and organizing frequently used addresses. An entry that carries tags gets exactly those tags; an entry without tags keeps its current tags.",
         "operationId": "addressBooksUpsertAddressBookItemsV1",
         "parameters": [
           {
@@ -2411,7 +2411,7 @@
             }
           },
           "400": {
-            "description": "Address book items limit exceeded or invalid data provided"
+            "description": "Invalid space identifier, address book items limit exceeded, or space tag limit reached"
           },
           "401": {
             "description": "Authentication required - valid JWT token must be provided"
@@ -2421,9 +2421,260 @@
           },
           "404": {
             "description": "Space not found"
+          },
+          "422": {
+            "description": "Invalid body - an invalid address, name or chain ID, an invalid tag name, or more tags on an entry than allowed"
           }
         },
         "summary": "Update space address book",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/address-book/tags": {
+      "put": {
+        "description": "Replaces the tags of one or more address book entries. Any active member of the space may set tags. A tag name the space does not have yet creates the tag. The request is all or nothing: if one entry cannot be tagged, no entry changes.",
+        "operationId": "addressBooksSetContactTagsV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID containing the address book",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The entries to tag, each with its full set of tag names",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetContactTagsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tags set successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceAddressBookDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier, the space tag limit is reached, or more entries than the address book can hold"
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
+          },
+          "403": {
+            "description": "Access forbidden - user is not an active member of this space"
+          },
+          "404": {
+            "description": "Space not found, or an address is not in the address book"
+          },
+          "422": {
+            "description": "Invalid body - no entries, an address listed twice, an invalid address or tag name, or more tags on an entry than allowed"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Set address book entry tags",
+        "tags": [
+          "spaces"
+        ]
+      },
+      "post": {
+        "description": "Creates a tag of the space with no contacts, in a random unused colour. Any active member of the space may create tags.",
+        "operationId": "addressBooksCreateTagV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID containing the address book",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The tag name",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTagDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tag created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceAddressBookDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier, or the space already has 8 tags"
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
+          },
+          "403": {
+            "description": "Access forbidden - user is not an active member of this space"
+          },
+          "404": {
+            "description": "Space not found"
+          },
+          "409": {
+            "description": "The space has a tag with this name, ignoring case"
+          },
+          "422": {
+            "description": "Invalid tag name"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Create address book tag",
+        "tags": [
+          "spaces"
+        ]
+      }
+    },
+    "/v1/spaces/{spaceId}/address-book/tags/{tagId}": {
+      "patch": {
+        "description": "Renames a tag of the space; the tag keeps its colour. Renaming to the name of another tag of the space merges the two: the entries of the renamed tag move to the existing tag, which keeps its name and colour. Any active member of the space may rename tags.",
+        "operationId": "addressBooksRenameTagV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID containing the address book",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "tagId",
+            "required": true,
+            "in": "path",
+            "description": "ID of the tag to rename",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "The new tag name",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenameTagDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tag renamed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceAddressBookDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space or tag identifier"
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
+          },
+          "403": {
+            "description": "Access forbidden - user is not an active member of this space"
+          },
+          "404": {
+            "description": "Space not found, or the tag is not a tag of this space"
+          },
+          "422": {
+            "description": "Invalid tag name, or a tag identifier beyond the safe integer range"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "summary": "Rename address book tag",
+        "tags": [
+          "spaces"
+        ]
+      },
+      "delete": {
+        "description": "Deletes a tag of the space and removes it from every address book entry. Any active member of the space may delete tags.",
+        "operationId": "addressBooksDeleteTagV1",
+        "parameters": [
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID containing the address book",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "tagId",
+            "required": true,
+            "in": "path",
+            "description": "ID of the tag to delete",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Tag deleted successfully"
+          },
+          "400": {
+            "description": "Invalid space or tag identifier"
+          },
+          "401": {
+            "description": "Authentication required - valid JWT token must be provided"
+          },
+          "403": {
+            "description": "Access forbidden - user is not an active member of this space"
+          },
+          "404": {
+            "description": "Space not found, or the tag is not a tag of this space"
+          },
+          "422": {
+            "description": "A tag identifier beyond the safe integer range"
+          }
+        },
+        "summary": "Delete address book tag",
         "tags": [
           "spaces"
         ]
@@ -3959,6 +4210,104 @@
         ]
       }
     },
+    "/v1/spaces/{spaceId}/transactions/queued": {
+      "get": {
+        "description": "Retrieves the pending transactions of every Safe in a Space, across chains, in nonce order. Results are keyed by Safe address and then by chain ID. The queue is read up to a maximum number of queue service pages; `count` is the size of the whole queue. The filters narrow `results`; `counts` are faceted, each applying every filter but its own. A matching transaction is returned with the rest of its conflict group and its label.",
+        "operationId": "spaceTransactionsGetTransactionQueueV1",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Keep the transactions with one of these statuses, comma-separated. `sign` is a transaction one of the caller wallets still has to sign.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "safes",
+            "required": false,
+            "in": "query",
+            "description": "Keep the transactions of these Safes, comma-separated as `{chainId}:{safeAddress}`",
+            "schema": {
+              "example": "11155111:0x0000000000000000000000000000000000000000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "conflicting",
+            "required": false,
+            "in": "query",
+            "description": "Keep the transactions sharing their nonce with another",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "stale",
+            "required": false,
+            "in": "query",
+            "description": "Keep the transactions proposed more than 7 days ago",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Keep the transactions whose Safe (address or Space address book name), network name, status, or a signer still to sign (address or name) contains this text, ignoring case. Unlike the filters, it narrows every count. At most 100 characters.",
+            "schema": {
+              "example": "treasury",
+              "type": "string"
+            }
+          },
+          {
+            "name": "spaceId",
+            "required": true,
+            "in": "path",
+            "description": "Space UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Queue of the Safes in the Space",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SpaceQueuedItemPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid space identifier"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "description": "Not a member of this Space"
+          },
+          "404": {
+            "description": "Space not found"
+          },
+          "422": {
+            "description": "Unknown status, invalid CAIP-10 address, non-boolean flag or too long search"
+          }
+        },
+        "summary": "Get the transaction queue of a Space",
+        "tags": [
+          "transactions"
+        ]
+      }
+    },
     "/v1/spaces/{spaceId}/chains/{chainId}/safes/{safeAddress}/policies/requests": {
       "post": {
         "description": "Stores the `Configuration[]` behind a `requestConfiguration(root)`, which publishes only the hash on-chain, so that the configurations a later `applyConfiguration` needs survive the delay. Call it before requesting the configuration on-chain: the root is recomputed from the configurations and has to match, but it is not required to exist on-chain yet. Idempotent: storing the same root again is a no-op.",
@@ -4107,7 +4456,7 @@
     },
     "/v1/spaces/{spaceId}/policies/pending": {
       "get": {
-        "description": "Returns the spending-limit changes in the transaction queue of every Safe in the Space. Detects only direct AllowanceModule calls and calls found one level inside a MultiSend batch, and only against known AllowanceModule deployments (@safe-global/safe-modules-deployments) - a change made through a nested MultiSend, a custom batching contract, a Safe module bypassing the owner queue, or an unofficial AllowanceModule fork is not detected.",
+        "description": "Returns the pending policy changes of every Safe in the Space. Queued calls are detected only when made directly or one level inside a MultiSend batch, and only against known AllowanceModule and SafePolicyGuard deployments - a change made through a nested MultiSend, a custom batching contract, or a Safe module bypassing the owner queue is not detected.",
         "operationId": "spacePoliciesGetPendingPoliciesV1",
         "parameters": [
           {
@@ -4124,7 +4473,7 @@
             "name": "types",
             "required": true,
             "in": "query",
-            "description": "The policy types to report, comma-separated. Only `spending-limit` yields pending items today; other types are accepted and return none.",
+            "description": "The policy types to report, comma-separated. `spending-limit` returns queued AllowanceModule changes. A guard type (`allow`, `deny`, `cosigner`, `erc20-transfer`, `multisend`, `native-transfer`) returns the delayed `SafePolicyGuard` configurations that may set a policy of that type. `proposer` and `recovery` return none.",
             "schema": {
               "type": "array",
               "items": {
@@ -4143,6 +4492,17 @@
                 "type": "string"
               }
             }
+          },
+          {
+            "name": "include_guard_installation",
+            "required": false,
+            "in": "query",
+            "description": "Also report the queued `setGuard` and `setModuleGuard` calls that install, replace or remove a `SafePolicyGuard` on each Safe, as `guard-installation` items.",
+            "schema": {
+              "default": false,
+              "example": true,
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -4153,7 +4513,29 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/PendingPolicyDto"
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/PendingPolicyDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/PendingGuardInstallationDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/PendingImmediateGuardPoliciesDto"
+                      },
+                      {
+                        "$ref": "#/components/schemas/PendingDelayedGuardPoliciesDto"
+                      }
+                    ],
+                    "discriminator": {
+                      "propertyName": "kind",
+                      "mapping": {
+                        "queued-transaction": "#/components/schemas/PendingPolicyDto",
+                        "guard-installation": "#/components/schemas/PendingGuardInstallationDto",
+                        "immediate-guard-policies": "#/components/schemas/PendingImmediateGuardPoliciesDto",
+                        "delayed-guard-policies": "#/components/schemas/PendingDelayedGuardPoliciesDto"
+                      }
+                    }
                   }
                 }
               }
@@ -4166,7 +4548,7 @@
             "description": "Access forbidden - authentication missing or invalid, or user is not a member of this space"
           },
           "422": {
-            "description": "Invalid CAIP-10 address, a Safe outside this space, or a missing or unknown policy type"
+            "description": "Invalid CAIP-10 address, a Safe outside this space, a missing or unknown policy type, or an `include_guard_installation` value other than `true` or `false`"
           },
           "503": {
             "description": "The policy api is unavailable"
@@ -5998,6 +6380,109 @@
         ]
       }
     },
+    "/v1/chains/{chainId}/safes/{safeAddress}/outgoing-transfers": {
+      "get": {
+        "description": "Retrieves native, ERC-20 and ERC-721 transfers sent by a Safe. Unlike multisig-transactions, `to` matches the recipient of each transfer rather than the target of the Safe transaction. Token transfers made inside batches are included; native transfers made inside batches are not available on chains indexed from events (most L2s). Only the newest 1000 transfers per direction and transfer type can be reached, so narrow with filters for older history. A page can hold fewer items than requested, or none, once untrusted transfers are dropped: keep following `next` until it is null.",
+        "operationId": "transactionsGetOutgoingTransfersV1",
+        "parameters": [
+          {
+            "name": "chainId",
+            "required": true,
+            "in": "path",
+            "description": "Chain ID where the Safe is deployed",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "safeAddress",
+            "required": true,
+            "in": "path",
+            "description": "Safe contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "trusted",
+            "required": false,
+            "in": "query",
+            "description": "When true (default), ERC-20 transfers of untrusted tokens are omitted, since any token contract can emit a transfer the Safe never made. ERC-721 and native transfers are not filtered. ERC-20 transfers without value are always omitted.",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "execution_date__gte",
+            "required": false,
+            "in": "query",
+            "description": "Filter by execution date greater than or equal to (ISO 8601 UTC, e.g. 2024-01-01T00:00:00Z)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "execution_date__lte",
+            "required": false,
+            "in": "query",
+            "description": "Filter by execution date less than or equal to (ISO 8601 UTC, e.g. 2024-01-01T00:00:00Z)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Filter by transfer recipient address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "token_address",
+            "required": false,
+            "in": "query",
+            "description": "Filter by token contract address (0x prefixed hex string)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Pagination cursor for retrieving the next set of results",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of outgoing transfers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferTransactionItemPage"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Safe or chain not found"
+          },
+          "422": {
+            "description": "Invalid chain ID, address, date or trusted flag"
+          }
+        },
+        "summary": "Get outgoing transfers",
+        "tags": [
+          "transactions"
+        ]
+      }
+    },
     "/v1/chains/{chainId}/transactions/{safeAddress}/preview": {
       "post": {
         "description": "Simulates a transaction execution to preview its effects, including gas estimates, balance changes, and potential errors before actually proposing or executing it.",
@@ -7476,7 +7961,7 @@
   "info": {
     "title": "Safe Client Gateway",
     "description": "",
-    "version": "main-d9280df",
+    "version": "main-956e15d",
     "contact": {}
   },
   "tags": [],
@@ -7772,17 +8257,10 @@
             "nullable": true
           },
           "paymentMethod": {
-            "type": "string",
-            "enum": [
-              "fiat"
-            ]
+            "type": "string"
           },
           "currency": {
-            "type": "string",
-            "enum": [
-              "usd",
-              "eur"
-            ]
+            "type": "string"
           },
           "features": {
             "type": "array",
@@ -7792,19 +8270,10 @@
           },
           "billingCycle": {
             "type": "string",
-            "enum": [
-              "month",
-              "year"
-            ],
             "nullable": true
           },
           "type": {
-            "type": "string",
-            "enum": [
-              "standard",
-              "premium",
-              "enterprise"
-            ]
+            "type": "string"
           },
           "product": {
             "type": "string",
@@ -7960,17 +8429,10 @@
             "nullable": true
           },
           "paymentMethod": {
-            "type": "string",
-            "enum": [
-              "fiat"
-            ]
+            "type": "string"
           },
           "currency": {
-            "type": "string",
-            "enum": [
-              "usd",
-              "eur"
-            ]
+            "type": "string"
           },
           "features": {
             "type": "array",
@@ -7980,19 +8442,10 @@
           },
           "billingCycle": {
             "type": "string",
-            "enum": [
-              "month",
-              "year"
-            ],
             "nullable": true
           },
           "type": {
-            "type": "string",
-            "enum": [
-              "standard",
-              "premium",
-              "enterprise"
-            ]
+            "type": "string"
           },
           "product": {
             "$ref": "#/components/schemas/Product"
@@ -10805,6 +11258,13 @@
               "type": "string"
             }
           },
+          "tagIds": {
+            "description": "IDs of the workspace tags assigned to the contact",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
           "createdBy": {
             "type": "string",
             "description": "Email or wallet address of the creator, \"Unknown user\" if the user has no display identity, or \"Deleted user\""
@@ -10834,12 +11294,47 @@
           "name",
           "address",
           "chainIds",
+          "tagIds",
           "createdBy",
           "createdByUserId",
           "lastUpdatedBy",
           "lastUpdatedByUserId",
           "createdAt",
           "updatedAt"
+        ]
+      },
+      "SpaceAddressBookTagDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string",
+            "enum": [
+              "slate",
+              "clay",
+              "rose",
+              "lilac",
+              "iris",
+              "cobalt",
+              "sky",
+              "lagoon"
+            ]
+          },
+          "contactCount": {
+            "type": "number",
+            "description": "Number of contacts that have this tag"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "color",
+          "contactCount"
         ]
       },
       "SpaceAddressBookDto": {
@@ -10854,14 +11349,22 @@
             "items": {
               "$ref": "#/components/schemas/SpaceAddressBookItemDto"
             }
+          },
+          "tags": {
+            "description": "All tags defined in the workspace address book",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpaceAddressBookTagDto"
+            }
           }
         },
         "required": [
           "spaceUuid",
-          "data"
+          "data",
+          "tags"
         ]
       },
-      "AddressBookItem": {
+      "UpsertAddressBookItem": {
         "type": "object",
         "properties": {
           "name": {
@@ -10871,6 +11374,14 @@
             "type": "string"
           },
           "chainIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "tags": {
+            "maxItems": 3,
+            "description": "Tag names of the contact (replaces the current tags when provided; omit to leave them unchanged)",
             "type": "array",
             "items": {
               "type": "string"
@@ -10889,12 +11400,74 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AddressBookItem"
+              "$ref": "#/components/schemas/UpsertAddressBookItem"
             }
           }
         },
         "required": [
           "items"
+        ]
+      },
+      "SetContactTagsItem": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "tags": {
+            "maxItems": 3,
+            "description": "The full set of tag names for the contact. 'Workspace Safe' and 'Signer' aren't allowed, in any case",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "address",
+          "tags"
+        ]
+      },
+      "SetContactTagsDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SetContactTagsItem"
+            },
+            "minItems": 1,
+            "description": "At most as many entries as the address book can hold, each address at most once"
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "CreateTagDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 32,
+            "description": "'Workspace Safe' and 'Signer' aren't allowed, in any case"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "RenameTagDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 32,
+            "description": "'Workspace Safe' and 'Signer' aren't allowed, in any case"
+          }
+        },
+        "required": [
+          "name"
         ]
       },
       "AddressBookRequestItemDto": {
@@ -11202,7 +11775,11 @@
               "ADDRESS_BOOK_UPSERTED",
               "ADDRESS_BOOK_DELETED",
               "ADDRESS_BOOK_REQUEST_CREATED",
-              "ADDRESS_BOOK_REQUEST_REJECTED"
+              "ADDRESS_BOOK_REQUEST_REJECTED",
+              "ADDRESS_BOOK_TAGS_UPDATED",
+              "ADDRESS_BOOK_TAG_CREATED",
+              "ADDRESS_BOOK_TAG_RENAMED",
+              "ADDRESS_BOOK_TAG_DELETED"
             ]
           },
           "actorUserId": {
@@ -11291,6 +11868,28 @@
         "required": [
           "chainId",
           "address"
+        ]
+      },
+      "AddressBookItem": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "chainIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "address",
+          "chainIds"
         ]
       },
       "CreateSpaceSafesDto": {
@@ -12419,2367 +13018,40 @@
           "deadlock"
         ]
       },
-      "PolicyConfigurationDto": {
-        "type": "object",
-        "properties": {
-          "target": {
-            "type": "string",
-            "description": "Contract the guarded call targets"
-          },
-          "selector": {
-            "type": "string",
-            "description": "4-byte function selector",
-            "example": "0xa9059cbb"
-          },
-          "operation": {
-            "type": "number",
-            "enum": [
-              0,
-              1
-            ],
-            "description": "0 = CALL, 1 = DELEGATECALL"
-          },
-          "policy": {
-            "type": "string",
-            "description": "Policy contract to bind. The zero address removes the policy of this access."
-          },
-          "data": {
-            "type": "string",
-            "description": "Policy payload, abi-encoded as passed to the guard. At most 64 KiB (65,536 bytes)."
-          }
-        },
-        "required": [
-          "target",
-          "selector",
-          "operation",
-          "policy",
-          "data"
-        ]
-      },
-      "CreatePolicyConfigurationRequestDto": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "keccak256(abi.encode(Configuration[])), as requested on-chain"
-          },
-          "configurations": {
-            "minItems": 1,
-            "maxItems": 100,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PolicyConfigurationDto"
-            }
-          }
-        },
-        "required": [
-          "root",
-          "configurations"
-        ]
-      },
-      "CreatePolicyConfigurationRequestResponse": {
-        "type": "object",
-        "properties": {
-          "root": {
-            "type": "string",
-            "description": "The stored configuration root"
-          }
-        },
-        "required": [
-          "root"
-        ]
-      },
-      "ModuleEnforcementDto": {
-        "type": "object",
-        "properties": {
-          "via": {
-            "type": "string",
-            "enum": [
-              "module"
-            ]
-          },
-          "moduleAddress": {
-            "type": "string",
-            "description": "The module enforcing the policy"
-          }
-        },
-        "required": [
-          "via",
-          "moduleAddress"
-        ]
-      },
-      "PolicyContractsDto": {
-        "type": "object",
-        "properties": {
-          "policyContract": {
-            "type": "string",
-            "description": "The policy implementation the guard delegates to"
-          },
-          "safePolicyGuard": {
-            "type": "string",
-            "description": "The SafePolicyGuard deployment"
-          }
-        },
-        "required": [
-          "policyContract",
-          "safePolicyGuard"
-        ]
-      },
-      "GuardSlotsDto": {
-        "type": "object",
-        "properties": {
-          "transactionGuard": {
-            "$ref": "#/components/schemas/PolicyContractsDto"
-          },
-          "moduleGuard": {
-            "$ref": "#/components/schemas/PolicyContractsDto"
-          }
-        }
-      },
-      "PolicyAccessDto": {
-        "type": "object",
-        "properties": {
-          "target": {
-            "type": "string",
-            "description": "The contract the governed calls target"
-          },
-          "selector": {
-            "type": "string",
-            "description": "The 4-byte function selector of the governed calls"
-          },
-          "operation": {
-            "type": "string",
-            "enum": [
-              "CALL",
-              "DELEGATECALL"
-            ]
-          }
-        },
-        "required": [
-          "target",
-          "selector",
-          "operation"
-        ]
-      },
-      "GuardEnforcementDto": {
-        "type": "object",
-        "properties": {
-          "via": {
-            "type": "string",
-            "enum": [
-              "guard"
-            ]
-          },
-          "guards": {
-            "$ref": "#/components/schemas/GuardSlotsDto"
-          },
-          "access": {
-            "description": "The calls the guard applies the policy to",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PolicyAccessDto"
-              }
-            ]
-          }
-        },
-        "required": [
-          "via",
-          "guards",
-          "access"
-        ]
-      },
-      "OffChainEnforcementDto": {
-        "type": "object",
-        "properties": {
-          "via": {
-            "type": "string",
-            "enum": [
-              "offchain"
-            ],
-            "description": "Nothing on chain enforces the policy, so it is access rather than an audited restriction"
-          },
-          "source": {
-            "type": "string",
-            "enum": [
-              "delegates"
-            ],
-            "description": "Where the grant is held"
-          }
-        },
-        "required": [
-          "via",
-          "source"
-        ]
-      },
-      "NativeTokenMetadataDto": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "type": "string"
-          },
-          "decimals": {
-            "type": "number"
-          },
-          "logoUri": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "symbol": {
-            "type": "string"
-          },
-          "trusted": {
-            "type": "boolean",
-            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "NATIVE_TOKEN"
-            ]
-          }
-        },
-        "required": [
-          "address",
-          "decimals",
-          "logoUri",
-          "name",
-          "symbol",
-          "trusted",
-          "type"
-        ]
-      },
-      "Erc20TokenMetadataDto": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "type": "string"
-          },
-          "decimals": {
-            "type": "number"
-          },
-          "logoUri": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "symbol": {
-            "type": "string"
-          },
-          "trusted": {
-            "type": "boolean",
-            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "ERC20"
-            ]
-          }
-        },
-        "required": [
-          "address",
-          "decimals",
-          "logoUri",
-          "name",
-          "symbol",
-          "trusted",
-          "type"
-        ]
-      },
-      "SpendingLimitAllowanceDto": {
-        "type": "object",
-        "properties": {
-          "tokenAddress": {
-            "type": "string",
-            "description": "The token the limit applies to; zero address for native"
-          },
-          "tokenMetadata": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/NativeTokenMetadataDto"
-              },
-              {
-                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
-              }
-            ],
-            "discriminator": {
-              "propertyName": "type",
-              "mapping": {
-                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
-                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
-              }
-            },
-            "nullable": true,
-            "description": "Metadata of `tokenAddress`; null when it could not be resolved"
-          },
-          "amount": {
-            "type": "string",
-            "description": "Per-window ceiling, in base units"
-          },
-          "spent": {
-            "type": "string",
-            "description": "Spent in the current window, in base units"
-          },
-          "resetPeriodMinutes": {
-            "type": "number",
-            "description": "Window length in minutes; 0 never resets"
-          },
-          "resetsAtMinute": {
-            "type": "number",
-            "nullable": true,
-            "description": "Minutes since the epoch of the next reset, the unit the module counts windows in; null when it never resets"
-          },
-          "resetBoundaryIsExact": {
-            "type": "boolean",
-            "description": "False when the reset boundary could not be recovered exactly, so `resetsAtMinute` may be up to one period out. `amount` is unaffected."
-          },
-          "isDelegateActive": {
-            "type": "boolean",
-            "description": "False when the spender's delegate registration was removed: nothing is spendable now, but the allowance returns to effect if the delegate is re-added"
-          },
-          "createdAt": {
-            "type": "number",
-            "description": "Unix seconds this allowance was (re-)established"
-          },
-          "updatedAt": {
-            "type": "number",
-            "description": "Unix seconds of the last event that changed this allowance"
-          }
-        },
-        "required": [
-          "tokenAddress",
-          "tokenMetadata",
-          "amount",
-          "spent",
-          "resetPeriodMinutes",
-          "resetsAtMinute",
-          "resetBoundaryIsExact",
-          "isDelegateActive",
-          "createdAt",
-          "updatedAt"
-        ]
-      },
-      "SpendingLimitSpenderDto": {
-        "type": "object",
-        "properties": {
-          "spender": {
-            "type": "string",
-            "description": "Name resolved by the client, never carried here"
-          },
-          "isActive": {
-            "type": "boolean",
-            "description": "False when the spender is deregistered: nothing is spendable now, but the allowances survive and return if it is re-added"
-          },
-          "allowances": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SpendingLimitAllowanceDto"
-            }
-          }
-        },
-        "required": [
-          "spender",
-          "isActive",
-          "allowances"
-        ]
-      },
-      "SpendingLimitPolicyDataDto": {
-        "type": "object",
-        "properties": {
-          "module": {
-            "type": "string",
-            "description": "The allowance module holding this state"
-          },
-          "spenders": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SpendingLimitSpenderDto"
-            }
-          }
-        },
-        "required": [
-          "module",
-          "spenders"
-        ]
-      },
-      "ProposerGrantDto": {
-        "type": "object",
-        "properties": {
-          "delegator": {
-            "type": "string",
-            "description": "The owner that granted the proposer"
-          },
-          "label": {
-            "type": "string",
-            "description": "The label this owner gave the proposer; empty when unlabelled"
-          }
-        },
-        "required": [
-          "delegator",
-          "label"
-        ]
-      },
-      "ProposerDto": {
-        "type": "object",
-        "properties": {
-          "proposer": {
-            "type": "string",
-            "description": "The address allowed to propose transactions"
-          },
-          "delegatedBy": {
-            "description": "The owners that granted it, each with the label they gave. The label is stored per grant, so two owners can label the same proposer differently",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProposerGrantDto"
-            }
-          }
-        },
-        "required": [
-          "proposer",
-          "delegatedBy"
-        ]
-      },
-      "ProposerPolicyDataDto": {
-        "type": "object",
-        "properties": {
-          "proposers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProposerDto"
-            }
-          }
-        },
-        "required": [
-          "proposers"
-        ]
-      },
-      "Erc20TransferRecipientDto": {
-        "type": "object",
-        "properties": {
-          "account": {
-            "type": "string",
-            "description": "An address the Safe can send this token to"
-          },
-          "permission": {
-            "type": "string",
-            "enum": [
-              "ONCE",
-              "ALWAYS"
-            ]
-          }
-        },
-        "required": [
-          "account",
-          "permission"
-        ]
-      },
-      "Erc20TransferPolicyDataDto": {
-        "type": "object",
-        "properties": {
-          "tokenAddress": {
-            "type": "string",
-            "description": "The ERC20 token the allowlist applies to"
-          },
-          "recipients": {
-            "description": "The recipients of the token transfers the policy permits",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Erc20TransferRecipientDto"
-            }
-          }
-        },
-        "required": [
-          "tokenAddress",
-          "recipients"
-        ]
-      },
-      "CosignerPolicyDataDto": {
-        "type": "object",
-        "properties": {
-          "cosignerAddress": {
-            "type": "string",
-            "description": "The cosigner the policy enforces."
-          }
-        },
-        "required": [
-          "cosignerAddress"
-        ]
-      },
-      "StatelessPolicyDataDto": {
-        "type": "object",
-        "properties": {}
-      },
-      "SafeRefDto": {
-        "type": "object",
-        "properties": {
-          "chainId": {
-            "type": "string"
-          },
-          "address": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "chainId",
-          "address"
-        ]
-      },
-      "ActivePolicyDto": {
+      "ConflictHeaderQueuedItem": {
         "type": "object",
         "properties": {
           "type": {
             "type": "string",
             "enum": [
-              "spending-limit",
-              "recovery",
-              "proposer",
-              "erc20-transfer",
-              "cosigner",
-              "allow",
-              "native-transfer",
-              "deny",
-              "multisend"
+              "CONFLICT_HEADER"
             ]
-          },
-          "enforcement": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/ModuleEnforcementDto"
-              },
-              {
-                "$ref": "#/components/schemas/GuardEnforcementDto"
-              },
-              {
-                "$ref": "#/components/schemas/OffChainEnforcementDto"
-              }
-            ],
-            "discriminator": {
-              "propertyName": "via",
-              "mapping": {
-                "module": "#/components/schemas/ModuleEnforcementDto",
-                "guard": "#/components/schemas/GuardEnforcementDto",
-                "offchain": "#/components/schemas/OffChainEnforcementDto"
-              }
-            }
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "False when the policy is configured but not enforced"
-          },
-          "data": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/SpendingLimitPolicyDataDto"
-              },
-              {
-                "$ref": "#/components/schemas/ProposerPolicyDataDto"
-              },
-              {
-                "$ref": "#/components/schemas/Erc20TransferPolicyDataDto"
-              },
-              {
-                "$ref": "#/components/schemas/CosignerPolicyDataDto"
-              },
-              {
-                "$ref": "#/components/schemas/StatelessPolicyDataDto"
-              }
-            ]
-          },
-          "safe": {
-            "description": "The Safe the policy is in effect on",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SafeRefDto"
-              }
-            ]
-          }
-        },
-        "required": [
-          "type",
-          "enforcement",
-          "enabled",
-          "data",
-          "safe"
-        ]
-      },
-      "EnableModuleChangeDto": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "enable-module"
-            ]
-          }
-        },
-        "required": [
-          "kind"
-        ]
-      },
-      "AddDelegateChangeDto": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "add-delegate"
-            ]
-          },
-          "delegate": {
-            "type": "string",
-            "description": "The address being added as a delegate in AllowanceModule contract"
-          }
-        },
-        "required": [
-          "kind",
-          "delegate"
-        ]
-      },
-      "RemoveDelegateChangeDto": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "remove-delegate"
-            ]
-          },
-          "delegate": {
-            "type": "string",
-            "description": "The delegate being removed"
-          },
-          "removeAllowances": {
-            "type": "boolean",
-            "description": "Whether the delegate's allowances are deleted along with it"
-          }
-        },
-        "required": [
-          "kind",
-          "delegate",
-          "removeAllowances"
-        ]
-      },
-      "SetAllowanceChangeDto": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "set-allowance"
-            ]
-          },
-          "delegate": {
-            "type": "string"
-          },
-          "token": {
-            "type": "string",
-            "description": "The token the limit applies to; zero address for native"
-          },
-          "tokenMetadata": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/NativeTokenMetadataDto"
-              },
-              {
-                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
-              }
-            ],
-            "discriminator": {
-              "propertyName": "type",
-              "mapping": {
-                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
-                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
-              }
-            },
-            "nullable": true,
-            "description": "Metadata of `token`; null when it could not be resolved"
-          },
-          "amount": {
-            "type": "string",
-            "description": "Per-window ceiling, in base units"
-          },
-          "resetPeriodMinutes": {
-            "type": "number",
-            "description": "Window length in minutes; 0 never resets"
-          }
-        },
-        "required": [
-          "kind",
-          "delegate",
-          "token",
-          "tokenMetadata",
-          "amount",
-          "resetPeriodMinutes"
-        ]
-      },
-      "ResetAllowanceChangeDto": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "reset-allowance"
-            ]
-          },
-          "delegate": {
-            "type": "string"
-          },
-          "token": {
-            "type": "string"
-          },
-          "tokenMetadata": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/NativeTokenMetadataDto"
-              },
-              {
-                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
-              }
-            ],
-            "discriminator": {
-              "propertyName": "type",
-              "mapping": {
-                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
-                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
-              }
-            },
-            "nullable": true,
-            "description": "Metadata of `token`; null when it could not be resolved"
-          }
-        },
-        "required": [
-          "kind",
-          "delegate",
-          "token",
-          "tokenMetadata"
-        ]
-      },
-      "DeleteAllowanceChangeDto": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "delete-allowance"
-            ]
-          },
-          "delegate": {
-            "type": "string"
-          },
-          "token": {
-            "type": "string"
-          },
-          "tokenMetadata": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/NativeTokenMetadataDto"
-              },
-              {
-                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
-              }
-            ],
-            "discriminator": {
-              "propertyName": "type",
-              "mapping": {
-                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
-                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
-              }
-            },
-            "nullable": true,
-            "description": "Metadata of `token`; null when it could not be resolved"
-          }
-        },
-        "required": [
-          "kind",
-          "delegate",
-          "token",
-          "tokenMetadata"
-        ]
-      },
-      "PendingSpendingLimitDataDto": {
-        "type": "object",
-        "properties": {
-          "module": {
-            "type": "string",
-            "description": "The AllowanceModule deployment holding this state"
-          },
-          "changes": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/EnableModuleChangeDto"
-                },
-                {
-                  "$ref": "#/components/schemas/AddDelegateChangeDto"
-                },
-                {
-                  "$ref": "#/components/schemas/RemoveDelegateChangeDto"
-                },
-                {
-                  "$ref": "#/components/schemas/SetAllowanceChangeDto"
-                },
-                {
-                  "$ref": "#/components/schemas/ResetAllowanceChangeDto"
-                },
-                {
-                  "$ref": "#/components/schemas/DeleteAllowanceChangeDto"
-                }
-              ],
-              "discriminator": {
-                "propertyName": "kind",
-                "mapping": {
-                  "enable-module": "#/components/schemas/EnableModuleChangeDto",
-                  "add-delegate": "#/components/schemas/AddDelegateChangeDto",
-                  "remove-delegate": "#/components/schemas/RemoveDelegateChangeDto",
-                  "set-allowance": "#/components/schemas/SetAllowanceChangeDto",
-                  "reset-allowance": "#/components/schemas/ResetAllowanceChangeDto",
-                  "delete-allowance": "#/components/schemas/DeleteAllowanceChangeDto"
-                }
-              }
-            },
-            "description": "The AllowanceModule calls this transaction decodes to"
-          }
-        },
-        "required": [
-          "module",
-          "changes"
-        ]
-      },
-      "PendingPolicyDto": {
-        "type": "object",
-        "properties": {
-          "kind": {
-            "type": "string",
-            "enum": [
-              "queued-transaction"
-            ]
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "spending-limit"
-            ]
-          },
-          "enforcement": {
-            "$ref": "#/components/schemas/ModuleEnforcementDto"
-          },
-          "safeTxHash": {
-            "type": "string",
-            "description": "The queued transaction this change was found in"
           },
           "nonce": {
             "type": "number"
-          },
-          "confirmations": {
-            "type": "number"
-          },
-          "confirmationsRequired": {
-            "type": "number"
-          },
-          "proposedAt": {
-            "type": "number",
-            "description": "Unix seconds the transaction was proposed at"
-          },
-          "data": {
-            "$ref": "#/components/schemas/PendingSpendingLimitDataDto"
-          },
-          "safe": {
-            "description": "The Safe the change is queued on",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SafeRefDto"
-              }
-            ]
           }
         },
         "required": [
-          "kind",
           "type",
-          "enforcement",
-          "safeTxHash",
-          "nonce",
-          "confirmations",
-          "confirmationsRequired",
-          "proposedAt",
-          "data",
-          "safe"
+          "nonce"
         ]
       },
-      "SurveyOptionDto": {
+      "LabelQueuedItem": {
         "type": "object",
         "properties": {
-          "key": {
-            "type": "string"
+          "type": {
+            "type": "string",
+            "enum": [
+              "LABEL"
+            ]
           },
           "label": {
             "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "icon": {
-            "type": "string"
           }
         },
         "required": [
-          "key",
+          "type",
           "label"
-        ]
-      },
-      "SurveyPageDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "subtitle": {
-            "type": "string",
-            "nullable": true
-          },
-          "multiSelect": {
-            "type": "boolean"
-          },
-          "options": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SurveyOptionDto"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "title",
-          "subtitle",
-          "multiSelect",
-          "options"
-        ]
-      },
-      "SurveyContentDto": {
-        "type": "object",
-        "properties": {
-          "pages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SurveyPageDto"
-            }
-          }
-        },
-        "required": [
-          "pages"
-        ]
-      },
-      "SurveyDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "slug": {
-            "type": "string"
-          },
-          "version": {
-            "type": "number"
-          },
-          "title": {
-            "type": "string"
-          },
-          "subtitle": {
-            "type": "string",
-            "nullable": true
-          },
-          "surveyContent": {
-            "$ref": "#/components/schemas/SurveyContentDto"
-          }
-        },
-        "required": [
-          "id",
-          "slug",
-          "version",
-          "title",
-          "subtitle",
-          "surveyContent"
-        ]
-      },
-      "SpaceSurveyResponseDto": {
-        "type": "object",
-        "properties": {
-          "surveyVersion": {
-            "type": "number"
-          },
-          "selections": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "description": "Map from page id → selected option keys"
-          },
-          "submittedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "answeredByUserId": {
-            "type": "number",
-            "nullable": true
-          }
-        },
-        "required": [
-          "surveyVersion",
-          "selections",
-          "submittedAt",
-          "updatedAt",
-          "answeredByUserId"
-        ]
-      },
-      "SurveyStateDto": {
-        "type": "object",
-        "properties": {
-          "survey": {
-            "$ref": "#/components/schemas/SurveyDto"
-          },
-          "surveyResponse": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SpaceSurveyResponseDto"
-              }
-            ]
-          }
-        },
-        "required": [
-          "survey",
-          "surveyResponse"
-        ]
-      },
-      "SubmitSurveyResponseDto": {
-        "type": "object",
-        "properties": {
-          "selections": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "description": "Map from page id → selected option keys",
-            "example": {
-              "use_cases": [
-                "run_payments",
-                "hold_assets"
-              ]
-            }
-          }
-        },
-        "required": [
-          "selections"
-        ]
-      },
-      "SurveyResponseResultDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "spaceUuid": {
-            "type": "string",
-            "description": "Space UUID"
-          },
-          "surveySlug": {
-            "type": "string"
-          },
-          "surveyVersion": {
-            "type": "number"
-          },
-          "selections": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          "submittedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "updatedAt": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "answeredByUserId": {
-            "type": "number",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "spaceUuid",
-          "surveySlug",
-          "surveyVersion",
-          "selections",
-          "submittedAt",
-          "updatedAt",
-          "answeredByUserId"
-        ]
-      },
-      "FeatureKey": {
-        "type": "string",
-        "enum": [
-          "safe_seats",
-          "copilot_scans",
-          "sponsored_transactions",
-          "policies",
-          "safenet_checks"
-        ],
-        "description": "Feature key from the entitlements catalog."
-      },
-      "BinaryEntitlement": {
-        "type": "object",
-        "properties": {
-          "feature": {
-            "description": "Feature key from the entitlements catalog.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FeatureKey"
-              }
-            ]
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "Whether the plan grants the feature at all. A metered feature reports its quota and usage even when this is false."
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "binary"
-            ]
-          }
-        },
-        "required": [
-          "feature",
-          "enabled",
-          "type"
-        ]
-      },
-      "ValueEntitlement": {
-        "type": "object",
-        "properties": {
-          "feature": {
-            "description": "Feature key from the entitlements catalog.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FeatureKey"
-              }
-            ]
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "Whether the plan grants the feature at all. A metered feature reports its quota and usage even when this is false."
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "value"
-            ]
-          },
-          "value": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "feature",
-          "enabled",
-          "type",
-          "value"
-        ]
-      },
-      "MeteredEntitlement": {
-        "type": "object",
-        "properties": {
-          "feature": {
-            "description": "Feature key from the entitlements catalog.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/FeatureKey"
-              }
-            ]
-          },
-          "enabled": {
-            "type": "boolean",
-            "description": "Whether the plan grants the feature at all. A metered feature reports its quota and usage even when this is false."
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "metered"
-            ]
-          },
-          "quota": {
-            "type": "number",
-            "nullable": true,
-            "description": "The plan's quota, never inflated to match usage; null means unlimited."
-          },
-          "used": {
-            "type": "number",
-            "description": "May legally exceed `quota`."
-          },
-          "resetsAt": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true,
-            "description": "Null for stock-type features (seats) that have no reset window."
-          }
-        },
-        "required": [
-          "feature",
-          "enabled",
-          "type",
-          "quota",
-          "used",
-          "resetsAt"
-        ]
-      },
-      "EntitlementsPlanStatus": {
-        "type": "string",
-        "enum": [
-          "active",
-          "trialing"
-        ],
-        "description": "Status of the subscription the plan comes from"
-      },
-      "EntitlementsPlan": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "description": "Plan identifier in the billing service"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "cycleEndsAt": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true,
-            "description": "End of the current billing cycle"
-          },
-          "status": {
-            "description": "Status of the subscription the plan comes from",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/EntitlementsPlanStatus"
-              }
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "cycleEndsAt",
-          "status"
-        ]
-      },
-      "EntitlementsResponse": {
-        "type": "object",
-        "properties": {
-          "plan": {
-            "nullable": true,
-            "description": "Null when the workspace has no active subscription.",
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/EntitlementsPlan"
-              }
-            ]
-          },
-          "entitlements": {
-            "type": "array",
-            "description": "One entry per catalog feature. Which fields an entry carries is decided by `type`: a metered one always carries quota, usage and its reset window, and the others never do.",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/BinaryEntitlement"
-                },
-                {
-                  "$ref": "#/components/schemas/ValueEntitlement"
-                },
-                {
-                  "$ref": "#/components/schemas/MeteredEntitlement"
-                }
-              ],
-              "discriminator": {
-                "propertyName": "type",
-                "mapping": {
-                  "binary": "#/components/schemas/BinaryEntitlement",
-                  "value": "#/components/schemas/ValueEntitlement",
-                  "metered": "#/components/schemas/MeteredEntitlement"
-                }
-              }
-            }
-          }
-        },
-        "required": [
-          "plan",
-          "entitlements"
-        ]
-      },
-      "SpaceRelayDto": {
-        "type": "object",
-        "properties": {
-          "version": {
-            "type": "string"
-          },
-          "to": {
-            "type": "string"
-          },
-          "data": {
-            "type": "string"
-          },
-          "safeTxHash": {
-            "type": "string",
-            "description": "Safe transaction hash, forwarded to the relay provider for traceability. Not verified against the calldata on this route."
-          },
-          "acceptUnverifiedSimulation": {
-            "type": "boolean",
-            "description": "Set to true to proceed with the relay when a previous attempt returned INDETERMINATE_SIMULATION. The user has acknowledged the simulation could not be completed and accepts the risk."
-          }
-        },
-        "required": [
-          "version",
-          "to",
-          "data"
-        ]
-      },
-      "Relay": {
-        "type": "object",
-        "properties": {
-          "taskId": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "taskId"
-        ]
-      },
-      "GasPaymentOptionUnavailableResponse": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string",
-            "enum": [
-              "GAS_PAYMENT_OPTION_UNAVAILABLE"
-            ]
-          },
-          "message": {
-            "type": "string",
-            "description": "Human-readable description of the error. Informational only; do not parse."
-          },
-          "statusCode": {
-            "type": "number",
-            "example": 409
-          },
-          "requested": {
-            "type": "string",
-            "enum": [
-              "FREE_DAILY_LIMIT",
-              "SUBSCRIPTION",
-              "PAY_FROM_SAFE",
-              "NO_FEE_CAMPAIGN"
-            ],
-            "description": "The gas payment option the request needed."
-          },
-          "reason": {
-            "type": "string",
-            "enum": [
-              "NOT_LISTED",
-              "NO_RELAYER",
-              "NOT_A_WORKSPACE_SAFE",
-              "REFUNDING_TRANSACTION"
-            ],
-            "description": "NOT_LISTED: the chain does not list the option. NO_RELAYER: the chain has no relayer. NOT_A_WORKSPACE_SAFE: the Safe is not one the workspace holds. REFUNDING_TRANSACTION: the transaction would refund gas (`gasPrice` > 0)."
-          },
-          "available": {
-            "type": "array",
-            "description": "The options the chain lists; empty without a relayer.",
-            "items": {
-              "type": "string",
-              "enum": [
-                "FREE_DAILY_LIMIT",
-                "SUBSCRIPTION",
-                "PAY_FROM_SAFE",
-                "NO_FEE_CAMPAIGN"
-              ]
-            }
-          }
-        },
-        "required": [
-          "code",
-          "message",
-          "statusCode",
-          "requested",
-          "reason",
-          "available"
-        ]
-      },
-      "CreateSafenetCheckDto": {
-        "type": "object",
-        "properties": {
-          "safeTxHash": {
-            "type": "string",
-            "description": "Safe transaction hash"
-          }
-        },
-        "required": [
-          "safeTxHash"
-        ]
-      },
-      "SafeList": {
-        "type": "object",
-        "properties": {
-          "safes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "safes"
-        ]
-      },
-      "RelayDto": {
-        "type": "object",
-        "properties": {
-          "version": {
-            "type": "string"
-          },
-          "to": {
-            "type": "string"
-          },
-          "data": {
-            "type": "string"
-          },
-          "gasLimit": {
-            "type": "string",
-            "nullable": true,
-            "description": "Accepted for backward compatibility and validation; not forwarded to the relay provider."
-          },
-          "safeTxHash": {
-            "type": "string",
-            "description": "Safe transaction hash for relay-fee eligibility check"
-          },
-          "acceptUnverifiedSimulation": {
-            "type": "boolean",
-            "description": "Set to true to proceed with the relay when a previous attempt returned INDETERMINATE_SIMULATION. The user has acknowledged the simulation could not be completed and accepts the risk."
-          }
-        },
-        "required": [
-          "version",
-          "to",
-          "data"
-        ]
-      },
-      "RelayErrorResponse": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string",
-            "enum": [
-              "SIMULATION_FAILED",
-              "INDETERMINATE_SIMULATION"
-            ],
-            "description": "Stable identifier of the error condition. The frontend MUST branch on this value (not on `message`, which is informational and may change)."
-          },
-          "message": {
-            "type": "string",
-            "description": "Human-readable description of the error. Informational only; do not parse."
-          },
-          "statusCode": {
-            "type": "number",
-            "example": 422
-          }
-        },
-        "required": [
-          "code",
-          "message",
-          "statusCode"
-        ]
-      },
-      "RelayTaskStatusReceipt": {
-        "type": "object",
-        "properties": {
-          "transactionHash": {
-            "type": "string",
-            "example": "0x4e4bb4493b2183061c3a0106ea96604edcc84f83313dbc0ab718abb1523d1042"
-          }
-        },
-        "required": [
-          "transactionHash"
-        ]
-      },
-      "RelayTaskStatus": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "number",
-            "description": "Relay task status code: 100=Pending, 110=Submitted, 200=Included, 400=Rejected, 500=Reverted",
-            "enum": [
-              100,
-              110,
-              200,
-              400,
-              500
-            ],
-            "example": 200
-          },
-          "receipt": {
-            "description": "On-chain receipt. Only present when status is 200 (Included) or 500 (Reverted)",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/RelayTaskStatusReceipt"
-              }
-            ]
-          }
-        },
-        "required": [
-          "status"
-        ]
-      },
-      "RelaysRemaining": {
-        "type": "object",
-        "properties": {
-          "remaining": {
-            "type": "number"
-          },
-          "limit": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "remaining",
-          "limit"
-        ]
-      },
-      "SafeAppProvider": {
-        "type": "object",
-        "properties": {
-          "url": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "url",
-          "name"
-        ]
-      },
-      "SafeAppAccessControl": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string"
-          },
-          "value": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "type"
-        ]
-      },
-      "SafeAppSocialProfile": {
-        "type": "object",
-        "properties": {
-          "platform": {
-            "type": "string",
-            "enum": [
-              "DISCORD",
-              "GITHUB",
-              "TWITTER",
-              "TELEGRAM",
-              "UNKNOWN"
-            ]
-          },
-          "url": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "platform",
-          "url"
-        ]
-      },
-      "SafeApp": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "number"
-          },
-          "url": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "iconUrl": {
-            "type": "string",
-            "nullable": true
-          },
-          "description": {
-            "type": "string"
-          },
-          "chainIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "provider": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SafeAppProvider"
-              }
-            ]
-          },
-          "accessControl": {
-            "$ref": "#/components/schemas/SafeAppAccessControl"
-          },
-          "tags": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "features": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "developerWebsite": {
-            "type": "string",
-            "nullable": true
-          },
-          "socialProfiles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SafeAppSocialProfile"
-            }
-          },
-          "featured": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "id",
-          "url",
-          "name",
-          "description",
-          "chainIds",
-          "accessControl",
-          "tags",
-          "features",
-          "socialProfiles",
-          "featured"
-        ]
-      },
-      "SafeState": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "chainId": {
-            "type": "string"
-          },
-          "nonce": {
-            "type": "number"
-          },
-          "threshold": {
-            "type": "number"
-          },
-          "owners": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AddressInfo"
-            }
-          },
-          "implementation": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "modules": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AddressInfo"
-            }
-          },
-          "fallbackHandler": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AddressInfo"
-              }
-            ]
-          },
-          "guard": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/AddressInfo"
-              }
-            ]
-          },
-          "version": {
-            "type": "string",
-            "nullable": true
-          },
-          "implementationVersionState": {
-            "type": "string",
-            "enum": [
-              "UP_TO_DATE",
-              "OUTDATED",
-              "UNKNOWN"
-            ]
-          },
-          "collectiblesTag": {
-            "type": "string",
-            "nullable": true
-          },
-          "txQueuedTag": {
-            "type": "string",
-            "nullable": true
-          },
-          "txHistoryTag": {
-            "type": "string",
-            "nullable": true
-          },
-          "messagesTag": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "address",
-          "chainId",
-          "nonce",
-          "threshold",
-          "owners",
-          "implementation",
-          "implementationVersionState"
-        ]
-      },
-      "SafeNonces": {
-        "type": "object",
-        "properties": {
-          "currentNonce": {
-            "type": "number"
-          },
-          "recommendedNonce": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "currentNonce",
-          "recommendedNonce"
-        ]
-      },
-      "SafeOverview": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "$ref": "#/components/schemas/AddressInfo"
-          },
-          "chainId": {
-            "type": "string"
-          },
-          "threshold": {
-            "type": "number"
-          },
-          "owners": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AddressInfo"
-            }
-          },
-          "fiatTotal": {
-            "type": "string"
-          },
-          "queued": {
-            "type": "number"
-          },
-          "awaitingConfirmation": {
-            "type": "number",
-            "nullable": true
-          }
-        },
-        "required": [
-          "address",
-          "chainId",
-          "threshold",
-          "owners",
-          "fiatTotal",
-          "queued"
-        ]
-      },
-      "ThreatAnalysisRequestDto": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "description": "EIP-712 typed data to analyze for security threats. Contains domain, primaryType, types, and message fields following the EIP-712 standard for structured data signing.",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TypedData"
-              }
-            ]
-          },
-          "walletAddress": {
-            "type": "string",
-            "description": "Address of the transaction signer/wallet"
-          },
-          "origin": {
-            "type": "string",
-            "description": "Optional origin identifier for the request"
-          }
-        },
-        "required": [
-          "data",
-          "walletAddress"
-        ]
-      },
-      "ThreatAnalysisResultDto": {
-        "type": "object",
-        "properties": {
-          "severity": {
-            "type": "string",
-            "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ]
-          },
-          "type": {
-            "type": "string",
-            "description": "Threat status code",
-            "enum": [
-              "NO_THREAT",
-              "OWNERSHIP_CHANGE",
-              "MODULE_CHANGE"
-            ]
-          },
-          "title": {
-            "type": "string",
-            "description": "User-facing title of the finding"
-          },
-          "description": {
-            "type": "string",
-            "description": "Detailed description explaining the finding and its implications"
-          },
-          "error": {
-            "type": "string",
-            "description": "Error message for failed analysis"
-          }
-        },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description"
-        ]
-      },
-      "MasterCopyChangeThreatAnalysisResultDto": {
-        "type": "object",
-        "properties": {
-          "severity": {
-            "type": "string",
-            "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ]
-          },
-          "type": {
-            "type": "string",
-            "description": "Threat status code",
-            "enum": [
-              "MASTERCOPY_CHANGE"
-            ]
-          },
-          "title": {
-            "type": "string",
-            "description": "User-facing title of the finding"
-          },
-          "description": {
-            "type": "string",
-            "description": "Detailed description explaining the finding and its implications"
-          },
-          "error": {
-            "type": "string",
-            "description": "Error message for failed analysis"
-          },
-          "before": {
-            "type": "string",
-            "description": "Address of the old master copy/implementation contract"
-          },
-          "after": {
-            "type": "string",
-            "description": "Address of the new master copy/implementation contract"
-          }
-        },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description",
-          "before",
-          "after"
-        ]
-      },
-      "ThreatIssueDto": {
-        "type": "object",
-        "properties": {
-          "address": {
-            "type": "string",
-            "description": "Address involved in the issue, if applicable"
-          },
-          "description": {
-            "type": "string",
-            "description": "Issue description"
-          }
-        },
-        "required": [
-          "description"
-        ]
-      },
-      "MaliciousOrModerateThreatAnalysisResultDto": {
-        "type": "object",
-        "properties": {
-          "severity": {
-            "type": "string",
-            "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ]
-          },
-          "type": {
-            "type": "string",
-            "description": "Threat status code",
-            "enum": [
-              "MALICIOUS",
-              "MODERATE"
-            ]
-          },
-          "title": {
-            "type": "string",
-            "description": "User-facing title of the finding"
-          },
-          "description": {
-            "type": "string",
-            "description": "Detailed description explaining the finding and its implications"
-          },
-          "error": {
-            "type": "string",
-            "description": "Error message for failed analysis"
-          },
-          "issues": {
-            "type": "object",
-            "description": "A partial record of specific issues identified during threat analysis, grouped by severity.Record<Severity, ThreatIssue[]> - keys should be one of the Severity enum (OK | INFO | WARN | CRITICAL)",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/ThreatIssueDto"
-              }
-            },
-            "example": {
-              "CRITICAL": [
-                {
-                  "description": "Malicious contract interaction detected",
-                  "address": "0x0000000000000000000000000000000000000000"
-                }
-              ],
-              "WARN": [
-                {
-                  "description": "High gas price detected"
-                }
-              ]
-            }
-          }
-        },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description"
-        ]
-      },
-      "FailedThreatAnalysisResultDto": {
-        "type": "object",
-        "properties": {
-          "severity": {
-            "type": "string",
-            "description": "Severity level indicating the importance and risk",
-            "enum": [
-              "OK",
-              "INFO",
-              "WARN",
-              "CRITICAL"
-            ]
-          },
-          "type": {
-            "type": "string",
-            "description": "Threat status code",
-            "enum": [
-              "FAILED"
-            ]
-          },
-          "title": {
-            "type": "string",
-            "description": "User-facing title of the finding"
-          },
-          "description": {
-            "type": "string",
-            "description": "Detailed description explaining the finding and its implications"
-          },
-          "error": {
-            "type": "string",
-            "description": "Error message for failed analysis"
-          }
-        },
-        "required": [
-          "severity",
-          "type",
-          "title",
-          "description"
-        ]
-      },
-      "NativeAssetDetailsDto": {
-        "type": "object",
-        "properties": {
-          "symbol": {
-            "type": "string",
-            "description": "Token symbol (if available)"
-          },
-          "logo_url": {
-            "type": "string",
-            "description": "URL to asset logo (if available)",
-            "example": "https://example.com/logo.png"
-          },
-          "type": {
-            "type": "string",
-            "description": "Asset type",
-            "enum": [
-              "NATIVE"
-            ]
-          }
-        },
-        "required": [
-          "type"
-        ]
-      },
-      "TokenAssetDetailsDto": {
-        "type": "object",
-        "properties": {
-          "symbol": {
-            "type": "string",
-            "description": "Token symbol (if available)"
-          },
-          "logo_url": {
-            "type": "string",
-            "description": "URL to asset logo (if available)",
-            "example": "https://example.com/logo.png"
-          },
-          "type": {
-            "type": "string",
-            "description": "Asset type",
-            "enum": [
-              "ERC20",
-              "ERC721",
-              "ERC1155",
-              "NONERC"
-            ]
-          },
-          "address": {
-            "type": "string",
-            "description": "Token contract address"
-          }
-        },
-        "required": [
-          "type",
-          "address"
-        ]
-      },
-      "FungibleDiffDto": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "string",
-            "description": "Value change for fungible tokens",
-            "example": "1000000"
-          }
-        }
-      },
-      "NFTDiffDto": {
-        "type": "object",
-        "properties": {
-          "token_id": {
-            "type": "number",
-            "description": "Token ID for NFTs",
-            "example": 42
-          }
-        },
-        "required": [
-          "token_id"
-        ]
-      },
-      "BalanceChangeDto": {
-        "type": "object",
-        "properties": {
-          "asset": {
-            "description": "Asset details",
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/NativeAssetDetailsDto"
-              },
-              {
-                "$ref": "#/components/schemas/TokenAssetDetailsDto"
-              }
-            ]
-          },
-          "in": {
-            "type": "array",
-            "description": "Incoming asset changes",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/FungibleDiffDto"
-                },
-                {
-                  "$ref": "#/components/schemas/NFTDiffDto"
-                }
-              ]
-            },
-            "example": [
-              {
-                "value": "1000000"
-              }
-            ]
-          },
-          "out": {
-            "type": "array",
-            "description": "Outgoing asset changes",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/FungibleDiffDto"
-                },
-                {
-                  "$ref": "#/components/schemas/NFTDiffDto"
-                }
-              ]
-            },
-            "example": [
-              {
-                "value": "500000"
-              }
-            ]
-          }
-        },
-        "required": [
-          "asset",
-          "in",
-          "out"
-        ]
-      },
-      "ThreatAnalysisResponseDto": {
-        "type": "object",
-        "properties": {
-          "THREAT": {
-            "description": "Array of threat analysis results. Results are sorted by severity (CRITICAL first). May include malicious patterns, ownership changes, module changes, or master copy upgrades.",
-            "example": [
-              {
-                "severity": "OK",
-                "type": "NO_THREAT",
-                "title": "No threats detected",
-                "description": "Transaction analysis found no security threats"
-              }
-            ],
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ThreatAnalysisResultDto"
-                },
-                {
-                  "$ref": "#/components/schemas/MasterCopyChangeThreatAnalysisResultDto"
-                },
-                {
-                  "$ref": "#/components/schemas/MaliciousOrModerateThreatAnalysisResultDto"
-                },
-                {
-                  "$ref": "#/components/schemas/FailedThreatAnalysisResultDto"
-                }
-              ]
-            }
-          },
-          "BALANCE_CHANGE": {
-            "description": "Balance changes resulting from the transaction. Shows incoming and outgoing transfers for various asset types.",
-            "example": [
-              {
-                "asset": {
-                  "type": "ERC20",
-                  "symbol": "USDC",
-                  "address": "0x0000000000000000000000000000000000000000",
-                  "logo_url": "https://example.com/usdc-logo.png"
-                },
-                "in": [
-                  {
-                    "value": "1000000"
-                  }
-                ],
-                "out": [
-                  {
-                    "value": "500000"
-                  }
-                ]
-              }
-            ],
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BalanceChangeDto"
-            }
-          },
-          "request_id": {
-            "type": "string",
-            "description": "Blockaid request ID from x-request-id header. Used for reporting false positives/negatives via the report endpoint.",
-            "example": "11111111-1111-1111-1111-111111111111"
-          }
-        }
-      },
-      "ReportFalseResultRequestDto": {
-        "type": "object",
-        "properties": {
-          "event": {
-            "type": "string",
-            "enum": [
-              "FALSE_POSITIVE",
-              "FALSE_NEGATIVE"
-            ],
-            "description": "Type of report: FALSE_POSITIVE if flagged incorrectly, FALSE_NEGATIVE if should have been flagged"
-          },
-          "request_id": {
-            "type": "string",
-            "description": "The request_id from the original Blockaid scan response",
-            "example": "11111111-1111-1111-1111-111111111111"
-          },
-          "details": {
-            "type": "string",
-            "description": "Details about why this is a false result",
-            "maxLength": 1000,
-            "example": "This transaction was incorrectly flagged as malicious"
-          }
-        },
-        "required": [
-          "event",
-          "request_id",
-          "details"
-        ]
-      },
-      "ReportFalseResultResponseDto": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "description": "Whether the report was submitted successfully",
-            "example": true
-          }
-        },
-        "required": [
-          "success"
-        ]
-      },
-      "TargetedSafe": {
-        "type": "object",
-        "properties": {
-          "outreachId": {
-            "type": "number"
-          },
-          "address": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "outreachId",
-          "address"
-        ]
-      },
-      "Submission": {
-        "type": "object",
-        "properties": {
-          "outreachId": {
-            "type": "number"
-          },
-          "targetedSafeId": {
-            "type": "number"
-          },
-          "signerAddress": {
-            "type": "string"
-          },
-          "completionDate": {
-            "format": "date-time",
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "outreachId",
-          "targetedSafeId",
-          "signerAddress"
-        ]
-      },
-      "CreateSubmissionDto": {
-        "type": "object",
-        "properties": {
-          "completed": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "completed"
         ]
       },
       "TransactionInfo": {
@@ -16500,6 +14772,3014 @@
           "additionalRewards"
         ]
       },
+      "ModuleExecutionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "MODULE"
+            ]
+          },
+          "address": {
+            "$ref": "#/components/schemas/AddressInfo"
+          }
+        },
+        "required": [
+          "type",
+          "address"
+        ]
+      },
+      "MultisigExecutionInfo": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "MULTISIG"
+            ]
+          },
+          "nonce": {
+            "type": "number"
+          },
+          "confirmationsRequired": {
+            "type": "number"
+          },
+          "confirmationsSubmitted": {
+            "type": "number"
+          },
+          "missingSigners": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressInfo"
+            }
+          }
+        },
+        "required": [
+          "type",
+          "nonce",
+          "confirmationsRequired",
+          "confirmationsSubmitted"
+        ]
+      },
+      "Transaction": {
+        "type": "object",
+        "properties": {
+          "txInfo": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CreationTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/CustomTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/MultiSendTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SettingsChangeTransaction"
+              },
+              {
+                "$ref": "#/components/schemas/TransferTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SwapOrderTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/BridgeAndSwapTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SwapTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/SwapTransferTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/TwapOrderTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/NativeStakingDepositTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/NativeStakingValidatorsExitTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/NativeStakingWithdrawTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/VaultDepositTransactionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/VaultRedeemTransactionInfo"
+              }
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TransactionInfo"
+              }
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "txHash": {
+            "type": "string",
+            "nullable": true
+          },
+          "timestamp": {
+            "type": "number"
+          },
+          "txStatus": {
+            "type": "string",
+            "enum": [
+              "SUCCESS",
+              "FAILED",
+              "CANCELLED",
+              "AWAITING_CONFIRMATIONS",
+              "AWAITING_EXECUTION"
+            ]
+          },
+          "executionInfo": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MultisigExecutionInfo"
+              },
+              {
+                "$ref": "#/components/schemas/ModuleExecutionInfo"
+              }
+            ],
+            "nullable": true
+          },
+          "safeAppInfo": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeAppInfo"
+              }
+            ]
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "txInfo",
+          "id",
+          "timestamp",
+          "txStatus"
+        ]
+      },
+      "TransactionQueuedItem": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "TRANSACTION"
+            ]
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/Transaction"
+          },
+          "conflictType": {
+            "type": "string",
+            "enum": [
+              "None",
+              "HasNext",
+              "End"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "transaction",
+          "conflictType"
+        ]
+      },
+      "SpaceQueueSafe": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "safeAddress": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId",
+          "safeAddress"
+        ]
+      },
+      "SpaceQueueSafeCount": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "safeAddress": {
+            "type": "string"
+          },
+          "count": {
+            "type": "number",
+            "description": "Transactions of this Safe on this chain that match the status filters"
+          }
+        },
+        "required": [
+          "chainId",
+          "safeAddress",
+          "count"
+        ]
+      },
+      "SpaceQueueCounts": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "number",
+            "description": "Transactions of the selected Safes, the sum of execute, sign, blocked and waiting"
+          },
+          "execute": {
+            "type": "number",
+            "description": "Fully signed and next in line on their Safe and chain"
+          },
+          "sign": {
+            "type": "number",
+            "description": "Awaiting a signature from one of the caller wallets"
+          },
+          "blocked": {
+            "type": "number",
+            "description": "Fully signed but behind an earlier nonce"
+          },
+          "waiting": {
+            "type": "number",
+            "description": "Awaiting signatures from other owners only"
+          },
+          "conflicting": {
+            "type": "number",
+            "description": "Sharing their nonce with another transaction"
+          },
+          "stale": {
+            "type": "number",
+            "description": "Proposed more than 7 days ago"
+          },
+          "safes": {
+            "description": "Every Safe and chain of the queue read, with how many of its transactions match the status filters",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpaceQueueSafeCount"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "execute",
+          "sign",
+          "blocked",
+          "waiting",
+          "conflicting",
+          "stale",
+          "safes"
+        ]
+      },
+      "SpaceQueuedItemPage": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "nullable": true,
+            "description": "Size of the whole queue, which can exceed the items returned when the queue is longer than the pages read"
+          },
+          "next": {
+            "type": "string",
+            "nullable": true,
+            "description": "Always null: the queue is returned in one response"
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true,
+            "description": "Always null: the queue is returned in one response"
+          },
+          "results": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ConflictHeaderQueuedItem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/LabelQueuedItem"
+                    },
+                    {
+                      "$ref": "#/components/schemas/TransactionQueuedItem"
+                    }
+                  ]
+                }
+              }
+            },
+            "example": {
+              "{safeAddress}": {
+                "{chainId}": []
+              }
+            },
+            "description": "Queued items, keyed by Safe address and then by chain ID, each list in nonce order."
+          },
+          "unavailableSafes": {
+            "description": "Space Safes whose queue is missing from this response because their Safe information could not be loaded or the Space exceeds the Safes one request can cover.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpaceQueueSafe"
+            }
+          },
+          "counts": {
+            "description": "Faceted counts of the queue read: the status counts apply the `safes` filter but not the status filters, and `safes` applies the status filters but not the `safes` filter",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpaceQueueCounts"
+              }
+            ]
+          }
+        },
+        "required": [
+          "count",
+          "next",
+          "previous",
+          "results",
+          "unavailableSafes",
+          "counts"
+        ]
+      },
+      "PolicyConfigurationDto": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Contract the guarded call targets"
+          },
+          "selector": {
+            "type": "string",
+            "description": "4-byte function selector",
+            "example": "0xa9059cbb"
+          },
+          "operation": {
+            "type": "number",
+            "enum": [
+              0,
+              1
+            ],
+            "description": "0 = CALL, 1 = DELEGATECALL"
+          },
+          "policy": {
+            "type": "string",
+            "description": "Policy contract to bind. The zero address removes the policy of this access."
+          },
+          "data": {
+            "type": "string",
+            "description": "Policy payload, abi-encoded as passed to the guard. At most 64 KiB (65,536 bytes)."
+          }
+        },
+        "required": [
+          "target",
+          "selector",
+          "operation",
+          "policy",
+          "data"
+        ]
+      },
+      "CreatePolicyConfigurationRequestDto": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "keccak256(abi.encode(Configuration[])), as requested on-chain"
+          },
+          "configurations": {
+            "minItems": 1,
+            "maxItems": 100,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyConfigurationDto"
+            }
+          }
+        },
+        "required": [
+          "root",
+          "configurations"
+        ]
+      },
+      "CreatePolicyConfigurationRequestResponse": {
+        "type": "object",
+        "properties": {
+          "root": {
+            "type": "string",
+            "description": "The stored configuration root"
+          }
+        },
+        "required": [
+          "root"
+        ]
+      },
+      "ModuleEnforcementDto": {
+        "type": "object",
+        "properties": {
+          "via": {
+            "type": "string",
+            "enum": [
+              "module"
+            ]
+          },
+          "moduleAddress": {
+            "type": "string",
+            "description": "The module enforcing the policy"
+          }
+        },
+        "required": [
+          "via",
+          "moduleAddress"
+        ]
+      },
+      "PolicyContractsDto": {
+        "type": "object",
+        "properties": {
+          "policyContract": {
+            "type": "string",
+            "description": "The policy implementation the guard delegates to"
+          },
+          "safePolicyGuard": {
+            "type": "string",
+            "description": "The SafePolicyGuard deployment"
+          }
+        },
+        "required": [
+          "policyContract",
+          "safePolicyGuard"
+        ]
+      },
+      "GuardSlotsDto": {
+        "type": "object",
+        "properties": {
+          "transactionGuard": {
+            "$ref": "#/components/schemas/PolicyContractsDto"
+          },
+          "moduleGuard": {
+            "$ref": "#/components/schemas/PolicyContractsDto"
+          }
+        }
+      },
+      "PolicyAccessDto": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "The contract the governed calls target"
+          },
+          "selector": {
+            "type": "string",
+            "description": "The 4-byte function selector of the governed calls"
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "CALL",
+              "DELEGATECALL"
+            ]
+          }
+        },
+        "required": [
+          "target",
+          "selector",
+          "operation"
+        ]
+      },
+      "GuardEnforcementDto": {
+        "type": "object",
+        "properties": {
+          "via": {
+            "type": "string",
+            "enum": [
+              "guard"
+            ]
+          },
+          "guards": {
+            "$ref": "#/components/schemas/GuardSlotsDto"
+          },
+          "access": {
+            "description": "The calls the guard applies the policy to",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PolicyAccessDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "via",
+          "guards",
+          "access"
+        ]
+      },
+      "OffChainEnforcementDto": {
+        "type": "object",
+        "properties": {
+          "via": {
+            "type": "string",
+            "enum": [
+              "offchain"
+            ],
+            "description": "Nothing on chain enforces the policy, so it is access rather than an audited restriction"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "delegates"
+            ],
+            "description": "Where the grant is held"
+          }
+        },
+        "required": [
+          "via",
+          "source"
+        ]
+      },
+      "NativeTokenMetadataDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "NATIVE_TOKEN"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "logoUri",
+          "name",
+          "symbol",
+          "trusted",
+          "type"
+        ]
+      },
+      "Erc20TokenMetadataDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string"
+          },
+          "decimals": {
+            "type": "number"
+          },
+          "logoUri": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "symbol": {
+            "type": "string"
+          },
+          "trusted": {
+            "type": "boolean",
+            "description": "Whether the Transaction Service lists the token in one of its imported token lists"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ERC20"
+            ]
+          }
+        },
+        "required": [
+          "address",
+          "decimals",
+          "logoUri",
+          "name",
+          "symbol",
+          "trusted",
+          "type"
+        ]
+      },
+      "SpendingLimitAllowanceDto": {
+        "type": "object",
+        "properties": {
+          "tokenAddress": {
+            "type": "string",
+            "description": "The token the limit applies to; zero address for native"
+          },
+          "tokenMetadata": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeTokenMetadataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
+                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            },
+            "nullable": true,
+            "description": "Metadata of `tokenAddress`; null when it could not be resolved"
+          },
+          "amount": {
+            "type": "string",
+            "description": "Per-window ceiling, in base units"
+          },
+          "spent": {
+            "type": "string",
+            "description": "Spent in the current window, in base units"
+          },
+          "resetPeriodMinutes": {
+            "type": "number",
+            "description": "Window length in minutes; 0 never resets"
+          },
+          "resetsAtMinute": {
+            "type": "number",
+            "nullable": true,
+            "description": "Minutes since the epoch of the next reset, the unit the module counts windows in; null when it never resets"
+          },
+          "resetBoundaryIsExact": {
+            "type": "boolean",
+            "description": "False when the reset boundary could not be recovered exactly, so `resetsAtMinute` may be up to one period out. `amount` is unaffected."
+          },
+          "isDelegateActive": {
+            "type": "boolean",
+            "description": "False when the spender's delegate registration was removed: nothing is spendable now, but the allowance returns to effect if the delegate is re-added"
+          },
+          "createdAt": {
+            "type": "number",
+            "description": "Unix seconds this allowance was (re-)established"
+          },
+          "updatedAt": {
+            "type": "number",
+            "description": "Unix seconds of the last event that changed this allowance"
+          }
+        },
+        "required": [
+          "tokenAddress",
+          "tokenMetadata",
+          "amount",
+          "spent",
+          "resetPeriodMinutes",
+          "resetsAtMinute",
+          "resetBoundaryIsExact",
+          "isDelegateActive",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "SpendingLimitSpenderDto": {
+        "type": "object",
+        "properties": {
+          "spender": {
+            "type": "string",
+            "description": "Name resolved by the client, never carried here"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "False when the spender is deregistered: nothing is spendable now, but the allowances survive and return if it is re-added"
+          },
+          "allowances": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpendingLimitAllowanceDto"
+            }
+          }
+        },
+        "required": [
+          "spender",
+          "isActive",
+          "allowances"
+        ]
+      },
+      "SpendingLimitPolicyDataDto": {
+        "type": "object",
+        "properties": {
+          "module": {
+            "type": "string",
+            "description": "The allowance module holding this state"
+          },
+          "spenders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpendingLimitSpenderDto"
+            }
+          }
+        },
+        "required": [
+          "module",
+          "spenders"
+        ]
+      },
+      "ProposerGrantDto": {
+        "type": "object",
+        "properties": {
+          "delegator": {
+            "type": "string",
+            "description": "The owner that granted the proposer"
+          },
+          "label": {
+            "type": "string",
+            "description": "The label this owner gave the proposer; empty when unlabelled"
+          }
+        },
+        "required": [
+          "delegator",
+          "label"
+        ]
+      },
+      "ProposerDto": {
+        "type": "object",
+        "properties": {
+          "proposer": {
+            "type": "string",
+            "description": "The address allowed to propose transactions"
+          },
+          "delegatedBy": {
+            "description": "The owners that granted it, each with the label they gave. The label is stored per grant, so two owners can label the same proposer differently",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProposerGrantDto"
+            }
+          }
+        },
+        "required": [
+          "proposer",
+          "delegatedBy"
+        ]
+      },
+      "ProposerPolicyDataDto": {
+        "type": "object",
+        "properties": {
+          "proposers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProposerDto"
+            }
+          }
+        },
+        "required": [
+          "proposers"
+        ]
+      },
+      "Erc20TransferRecipientDto": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "type": "string",
+            "description": "An address the Safe can send this token to"
+          },
+          "permission": {
+            "type": "string",
+            "enum": [
+              "ONCE",
+              "ALWAYS"
+            ]
+          }
+        },
+        "required": [
+          "account",
+          "permission"
+        ]
+      },
+      "Erc20TransferPolicyDataDto": {
+        "type": "object",
+        "properties": {
+          "tokenAddress": {
+            "type": "string",
+            "description": "The ERC20 token the allowlist applies to"
+          },
+          "tokenMetadata": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeTokenMetadataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
+                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            },
+            "nullable": true,
+            "description": "Metadata of `tokenAddress`; null when it could not be resolved"
+          },
+          "recipients": {
+            "description": "The recipients of the token transfers the policy permits",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Erc20TransferRecipientDto"
+            }
+          }
+        },
+        "required": [
+          "tokenAddress",
+          "tokenMetadata",
+          "recipients"
+        ]
+      },
+      "CosignerPolicyDataDto": {
+        "type": "object",
+        "properties": {
+          "cosignerAddress": {
+            "type": "string",
+            "description": "The cosigner the policy enforces."
+          }
+        },
+        "required": [
+          "cosignerAddress"
+        ]
+      },
+      "StatelessPolicyDataDto": {
+        "type": "object",
+        "properties": {}
+      },
+      "SafeRefDto": {
+        "type": "object",
+        "properties": {
+          "chainId": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "chainId",
+          "address"
+        ]
+      },
+      "ActivePolicyDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "spending-limit",
+              "recovery",
+              "proposer",
+              "erc20-transfer",
+              "cosigner",
+              "allow",
+              "native-transfer",
+              "deny",
+              "multisend"
+            ]
+          },
+          "enforcement": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ModuleEnforcementDto"
+              },
+              {
+                "$ref": "#/components/schemas/GuardEnforcementDto"
+              },
+              {
+                "$ref": "#/components/schemas/OffChainEnforcementDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "via",
+              "mapping": {
+                "module": "#/components/schemas/ModuleEnforcementDto",
+                "guard": "#/components/schemas/GuardEnforcementDto",
+                "offchain": "#/components/schemas/OffChainEnforcementDto"
+              }
+            }
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "False when the policy is configured but not enforced"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SpendingLimitPolicyDataDto"
+              },
+              {
+                "$ref": "#/components/schemas/ProposerPolicyDataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TransferPolicyDataDto"
+              },
+              {
+                "$ref": "#/components/schemas/CosignerPolicyDataDto"
+              },
+              {
+                "$ref": "#/components/schemas/StatelessPolicyDataDto"
+              }
+            ]
+          },
+          "safe": {
+            "description": "The Safe the policy is in effect on",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "enforcement",
+          "enabled",
+          "data",
+          "safe"
+        ]
+      },
+      "EnableModuleChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "enable-module"
+            ]
+          }
+        },
+        "required": [
+          "kind"
+        ]
+      },
+      "AddDelegateChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "add-delegate"
+            ]
+          },
+          "delegate": {
+            "type": "string",
+            "description": "The address being added as a delegate in AllowanceModule contract"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate"
+        ]
+      },
+      "RemoveDelegateChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "remove-delegate"
+            ]
+          },
+          "delegate": {
+            "type": "string",
+            "description": "The delegate being removed"
+          },
+          "removeAllowances": {
+            "type": "boolean",
+            "description": "Whether the delegate's allowances are deleted along with it"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate",
+          "removeAllowances"
+        ]
+      },
+      "SetAllowanceChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "set-allowance"
+            ]
+          },
+          "delegate": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string",
+            "description": "The token the limit applies to; zero address for native"
+          },
+          "tokenMetadata": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeTokenMetadataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
+                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            },
+            "nullable": true,
+            "description": "Metadata of `token`; null when it could not be resolved"
+          },
+          "amount": {
+            "type": "string",
+            "description": "Per-window ceiling, in base units"
+          },
+          "resetPeriodMinutes": {
+            "type": "number",
+            "description": "Window length in minutes; 0 never resets"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate",
+          "token",
+          "tokenMetadata",
+          "amount",
+          "resetPeriodMinutes"
+        ]
+      },
+      "ResetAllowanceChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "reset-allowance"
+            ]
+          },
+          "delegate": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "tokenMetadata": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeTokenMetadataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
+                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            },
+            "nullable": true,
+            "description": "Metadata of `token`; null when it could not be resolved"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate",
+          "token",
+          "tokenMetadata"
+        ]
+      },
+      "DeleteAllowanceChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "delete-allowance"
+            ]
+          },
+          "delegate": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          },
+          "tokenMetadata": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeTokenMetadataDto"
+              },
+              {
+                "$ref": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            ],
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "NATIVE_TOKEN": "#/components/schemas/NativeTokenMetadataDto",
+                "ERC20": "#/components/schemas/Erc20TokenMetadataDto"
+              }
+            },
+            "nullable": true,
+            "description": "Metadata of `token`; null when it could not be resolved"
+          }
+        },
+        "required": [
+          "kind",
+          "delegate",
+          "token",
+          "tokenMetadata"
+        ]
+      },
+      "PendingSpendingLimitDataDto": {
+        "type": "object",
+        "properties": {
+          "module": {
+            "type": "string",
+            "description": "The AllowanceModule deployment holding this state"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/EnableModuleChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/AddDelegateChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/RemoveDelegateChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/SetAllowanceChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/ResetAllowanceChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/DeleteAllowanceChangeDto"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "kind",
+                "mapping": {
+                  "enable-module": "#/components/schemas/EnableModuleChangeDto",
+                  "add-delegate": "#/components/schemas/AddDelegateChangeDto",
+                  "remove-delegate": "#/components/schemas/RemoveDelegateChangeDto",
+                  "set-allowance": "#/components/schemas/SetAllowanceChangeDto",
+                  "reset-allowance": "#/components/schemas/ResetAllowanceChangeDto",
+                  "delete-allowance": "#/components/schemas/DeleteAllowanceChangeDto"
+                }
+              }
+            },
+            "description": "The AllowanceModule calls this transaction decodes to"
+          }
+        },
+        "required": [
+          "module",
+          "changes"
+        ]
+      },
+      "PendingPolicyDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "queued-transaction"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "spending-limit"
+            ]
+          },
+          "enforcement": {
+            "$ref": "#/components/schemas/ModuleEnforcementDto"
+          },
+          "safeTxHash": {
+            "type": "string",
+            "description": "The queued transaction this change was found in"
+          },
+          "nonce": {
+            "type": "number"
+          },
+          "confirmations": {
+            "type": "number"
+          },
+          "confirmationsRequired": {
+            "type": "number"
+          },
+          "proposedAt": {
+            "type": "number",
+            "description": "Unix seconds the transaction was proposed at"
+          },
+          "proposer": {
+            "type": "string",
+            "nullable": true,
+            "description": "The owner or delegate who proposed the transaction, if known"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PendingSpendingLimitDataDto"
+          },
+          "safe": {
+            "description": "The Safe the change is queued on",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "kind",
+          "type",
+          "enforcement",
+          "safeTxHash",
+          "nonce",
+          "confirmations",
+          "confirmationsRequired",
+          "proposedAt",
+          "proposer",
+          "data",
+          "safe"
+        ]
+      },
+      "SetGuardChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "set-guard"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "nullable": true,
+            "description": "The transaction guard before this call; null for none"
+          },
+          "to": {
+            "type": "string",
+            "nullable": true,
+            "description": "The transaction guard after this call; null removes it"
+          }
+        },
+        "required": [
+          "kind",
+          "from",
+          "to"
+        ]
+      },
+      "SetModuleGuardChangeDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "set-module-guard"
+            ]
+          },
+          "from": {
+            "type": "string",
+            "nullable": true,
+            "description": "The module guard before this call; null for none"
+          },
+          "to": {
+            "type": "string",
+            "nullable": true,
+            "description": "The module guard after this call; null removes it"
+          }
+        },
+        "required": [
+          "kind",
+          "from",
+          "to"
+        ]
+      },
+      "PendingTransactionDto": {
+        "type": "object",
+        "properties": {
+          "safeTxHash": {
+            "type": "string"
+          },
+          "nonce": {
+            "type": "number"
+          },
+          "confirmations": {
+            "type": "number"
+          },
+          "confirmationsRequired": {
+            "type": "number"
+          },
+          "proposedAt": {
+            "type": "number",
+            "description": "Unix seconds the transaction was proposed at"
+          },
+          "proposer": {
+            "type": "string",
+            "nullable": true,
+            "description": "The owner or delegate who proposed the transaction, if known"
+          }
+        },
+        "required": [
+          "safeTxHash",
+          "nonce",
+          "confirmations",
+          "confirmationsRequired",
+          "proposedAt",
+          "proposer"
+        ]
+      },
+      "PendingGuardInstallationDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "guard-installation"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "in-signing",
+              "ready"
+            ]
+          },
+          "safe": {
+            "description": "The Safe the transaction is queued on",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/SetGuardChangeDto"
+                },
+                {
+                  "$ref": "#/components/schemas/SetModuleGuardChangeDto"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "kind",
+                "mapping": {
+                  "set-guard": "#/components/schemas/SetGuardChangeDto",
+                  "set-module-guard": "#/components/schemas/SetModuleGuardChangeDto"
+                }
+              }
+            },
+            "description": "The guard installation calls of the transaction, in calldata order"
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/PendingTransactionDto"
+          }
+        },
+        "required": [
+          "kind",
+          "status",
+          "safe",
+          "changes",
+          "transaction"
+        ]
+      },
+      "PendingImmediateGuardPoliciesDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "immediate-guard-policies"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "in-signing",
+              "ready"
+            ]
+          },
+          "safe": {
+            "description": "The Safe the transaction is queued on",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          },
+          "guard": {
+            "type": "string",
+            "description": "The SafePolicyGuard the policies are bound on"
+          },
+          "configurations": {
+            "description": "The configurations configureImmediately binds",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyConfigurationDto"
+            }
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/PendingTransactionDto"
+          }
+        },
+        "required": [
+          "kind",
+          "status",
+          "safe",
+          "guard",
+          "configurations",
+          "transaction"
+        ]
+      },
+      "PendingDelayedGuardPoliciesDto": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "delayed-guard-policies"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "configuration-in-signing",
+              "pending-application",
+              "application-in-signing",
+              "application-ready",
+              "expired"
+            ],
+            "description": "draft: stored in CGW, no transaction in signing yet. configuration-in-signing: requestConfiguration is queued. pending-application: requested, waiting for or past readyAt. application-in-signing: applyConfiguration is queued and collecting signatures. application-ready: applyConfiguration is signed and can execute. expired: the application window has closed."
+          },
+          "safe": {
+            "description": "The Safe the configuration belongs to",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeRefDto"
+              }
+            ]
+          },
+          "guard": {
+            "type": "string",
+            "nullable": true,
+            "description": "The SafePolicyGuard of the root; null for a draft"
+          },
+          "root": {
+            "type": "string",
+            "description": "keccak256(abi.encode(Configuration[]))"
+          },
+          "configurations": {
+            "nullable": true,
+            "description": "The configurations behind the root; null when CGW does not know them",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PolicyConfigurationDto"
+            }
+          },
+          "readyAt": {
+            "type": "number",
+            "nullable": true,
+            "description": "Unix seconds applyConfiguration is valid from; null until the root is requested on-chain"
+          },
+          "expiresAt": {
+            "type": "number",
+            "nullable": true,
+            "description": "Unix seconds the application window closes; null until the root is requested on-chain"
+          },
+          "transaction": {
+            "nullable": true,
+            "description": "The queued request or apply transaction, if any",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PendingTransactionDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "number",
+            "nullable": true,
+            "description": "Unix seconds the change was first seen: when CGW stored its configurations, else when its queued transaction was proposed. Null for a root requested outside the wallet."
+          }
+        },
+        "required": [
+          "kind",
+          "status",
+          "safe",
+          "guard",
+          "root",
+          "configurations",
+          "readyAt",
+          "expiresAt",
+          "transaction",
+          "createdAt"
+        ]
+      },
+      "SurveyOptionDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "icon": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label"
+        ]
+      },
+      "SurveyPageDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "multiSelect": {
+            "type": "boolean"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SurveyOptionDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "subtitle",
+          "multiSelect",
+          "options"
+        ]
+      },
+      "SurveyContentDto": {
+        "type": "object",
+        "properties": {
+          "pages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SurveyPageDto"
+            }
+          }
+        },
+        "required": [
+          "pages"
+        ]
+      },
+      "SurveyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "version": {
+            "type": "number"
+          },
+          "title": {
+            "type": "string"
+          },
+          "subtitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "surveyContent": {
+            "$ref": "#/components/schemas/SurveyContentDto"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "version",
+          "title",
+          "subtitle",
+          "surveyContent"
+        ]
+      },
+      "SpaceSurveyResponseDto": {
+        "type": "object",
+        "properties": {
+          "surveyVersion": {
+            "type": "number"
+          },
+          "selections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Map from page id → selected option keys"
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "answeredByUserId": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "surveyVersion",
+          "selections",
+          "submittedAt",
+          "updatedAt",
+          "answeredByUserId"
+        ]
+      },
+      "SurveyStateDto": {
+        "type": "object",
+        "properties": {
+          "survey": {
+            "$ref": "#/components/schemas/SurveyDto"
+          },
+          "surveyResponse": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SpaceSurveyResponseDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "survey",
+          "surveyResponse"
+        ]
+      },
+      "SubmitSurveyResponseDto": {
+        "type": "object",
+        "properties": {
+          "selections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "description": "Map from page id → selected option keys",
+            "example": {
+              "use_cases": [
+                "run_payments",
+                "hold_assets"
+              ]
+            }
+          }
+        },
+        "required": [
+          "selections"
+        ]
+      },
+      "SurveyResponseResultDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "spaceUuid": {
+            "type": "string",
+            "description": "Space UUID"
+          },
+          "surveySlug": {
+            "type": "string"
+          },
+          "surveyVersion": {
+            "type": "number"
+          },
+          "selections": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "submittedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "answeredByUserId": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "spaceUuid",
+          "surveySlug",
+          "surveyVersion",
+          "selections",
+          "submittedAt",
+          "updatedAt",
+          "answeredByUserId"
+        ]
+      },
+      "FeatureKey": {
+        "type": "string",
+        "enum": [
+          "safe_seats",
+          "copilot_scans",
+          "sponsored_transactions",
+          "policies",
+          "safenet_checks"
+        ],
+        "description": "Feature key from the entitlements catalog."
+      },
+      "BinaryEntitlement": {
+        "type": "object",
+        "properties": {
+          "feature": {
+            "description": "Feature key from the entitlements catalog.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeatureKey"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the plan grants the feature at all. A metered feature reports its quota and usage even when this is false."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "binary"
+            ]
+          }
+        },
+        "required": [
+          "feature",
+          "enabled",
+          "type"
+        ]
+      },
+      "ValueEntitlement": {
+        "type": "object",
+        "properties": {
+          "feature": {
+            "description": "Feature key from the entitlements catalog.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeatureKey"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the plan grants the feature at all. A metered feature reports its quota and usage even when this is false."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "value"
+            ]
+          },
+          "value": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "feature",
+          "enabled",
+          "type",
+          "value"
+        ]
+      },
+      "MeteredEntitlement": {
+        "type": "object",
+        "properties": {
+          "feature": {
+            "description": "Feature key from the entitlements catalog.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeatureKey"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "Whether the plan grants the feature at all. A metered feature reports its quota and usage even when this is false."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "metered"
+            ]
+          },
+          "quota": {
+            "type": "number",
+            "nullable": true,
+            "description": "The plan's quota, never inflated to match usage; null means unlimited."
+          },
+          "used": {
+            "type": "number",
+            "description": "May legally exceed `quota`."
+          },
+          "resetsAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "Null for stock-type features (seats) that have no reset window."
+          }
+        },
+        "required": [
+          "feature",
+          "enabled",
+          "type",
+          "quota",
+          "used",
+          "resetsAt"
+        ]
+      },
+      "EntitlementsPlanStatus": {
+        "type": "string",
+        "enum": [
+          "active",
+          "trialing"
+        ],
+        "description": "Status of the subscription the plan comes from"
+      },
+      "EntitlementsPlan": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Plan identifier in the billing service"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "cycleEndsAt": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true,
+            "description": "End of the current billing cycle"
+          },
+          "status": {
+            "description": "Status of the subscription the plan comes from",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntitlementsPlanStatus"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "cycleEndsAt",
+          "status"
+        ]
+      },
+      "EntitlementsResponse": {
+        "type": "object",
+        "properties": {
+          "plan": {
+            "nullable": true,
+            "description": "Null when the workspace has no active subscription.",
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntitlementsPlan"
+              }
+            ]
+          },
+          "entitlements": {
+            "type": "array",
+            "description": "One entry per catalog feature. Which fields an entry carries is decided by `type`: a metered one always carries quota, usage and its reset window, and the others never do.",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/BinaryEntitlement"
+                },
+                {
+                  "$ref": "#/components/schemas/ValueEntitlement"
+                },
+                {
+                  "$ref": "#/components/schemas/MeteredEntitlement"
+                }
+              ],
+              "discriminator": {
+                "propertyName": "type",
+                "mapping": {
+                  "binary": "#/components/schemas/BinaryEntitlement",
+                  "value": "#/components/schemas/ValueEntitlement",
+                  "metered": "#/components/schemas/MeteredEntitlement"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "plan",
+          "entitlements"
+        ]
+      },
+      "SpaceRelayDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string"
+          },
+          "safeTxHash": {
+            "type": "string",
+            "description": "Safe transaction hash, forwarded to the relay provider for traceability. Not verified against the calldata on this route."
+          },
+          "acceptUnverifiedSimulation": {
+            "type": "boolean",
+            "description": "Set to true to proceed with the relay when a previous attempt returned INDETERMINATE_SIMULATION. The user has acknowledged the simulation could not be completed and accepts the risk."
+          }
+        },
+        "required": [
+          "version",
+          "to",
+          "data"
+        ]
+      },
+      "Relay": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "taskId"
+        ]
+      },
+      "GasPaymentOptionUnavailableResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "GAS_PAYMENT_OPTION_UNAVAILABLE"
+            ]
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable description of the error. Informational only; do not parse."
+          },
+          "statusCode": {
+            "type": "number",
+            "example": 409
+          },
+          "requested": {
+            "type": "string",
+            "enum": [
+              "FREE_DAILY_LIMIT",
+              "SUBSCRIPTION",
+              "PAY_FROM_SAFE",
+              "NO_FEE_CAMPAIGN"
+            ],
+            "description": "The gas payment option the request needed."
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "NOT_LISTED",
+              "NO_RELAYER",
+              "NOT_A_WORKSPACE_SAFE",
+              "REFUNDING_TRANSACTION"
+            ],
+            "description": "NOT_LISTED: the chain does not list the option. NO_RELAYER: the chain has no relayer. NOT_A_WORKSPACE_SAFE: the Safe is not one the workspace holds. REFUNDING_TRANSACTION: the transaction would refund gas (`gasPrice` > 0)."
+          },
+          "available": {
+            "type": "array",
+            "description": "The options the chain lists; empty without a relayer.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "FREE_DAILY_LIMIT",
+                "SUBSCRIPTION",
+                "PAY_FROM_SAFE",
+                "NO_FEE_CAMPAIGN"
+              ]
+            }
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "statusCode",
+          "requested",
+          "reason",
+          "available"
+        ]
+      },
+      "CreateSafenetCheckDto": {
+        "type": "object",
+        "properties": {
+          "safeTxHash": {
+            "type": "string",
+            "description": "Safe transaction hash"
+          }
+        },
+        "required": [
+          "safeTxHash"
+        ]
+      },
+      "SafeList": {
+        "type": "object",
+        "properties": {
+          "safes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "safes"
+        ]
+      },
+      "RelayDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "data": {
+            "type": "string"
+          },
+          "gasLimit": {
+            "type": "string",
+            "nullable": true,
+            "description": "Accepted for backward compatibility and validation; not forwarded to the relay provider."
+          },
+          "safeTxHash": {
+            "type": "string",
+            "description": "Safe transaction hash for relay-fee eligibility check"
+          },
+          "acceptUnverifiedSimulation": {
+            "type": "boolean",
+            "description": "Set to true to proceed with the relay when a previous attempt returned INDETERMINATE_SIMULATION. The user has acknowledged the simulation could not be completed and accepts the risk."
+          }
+        },
+        "required": [
+          "version",
+          "to",
+          "data"
+        ]
+      },
+      "RelayErrorResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "SIMULATION_FAILED",
+              "INDETERMINATE_SIMULATION"
+            ],
+            "description": "Stable identifier of the error condition. The frontend MUST branch on this value (not on `message`, which is informational and may change)."
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable description of the error. Informational only; do not parse."
+          },
+          "statusCode": {
+            "type": "number",
+            "example": 422
+          }
+        },
+        "required": [
+          "code",
+          "message",
+          "statusCode"
+        ]
+      },
+      "RelayTaskStatusReceipt": {
+        "type": "object",
+        "properties": {
+          "transactionHash": {
+            "type": "string",
+            "example": "0x4e4bb4493b2183061c3a0106ea96604edcc84f83313dbc0ab718abb1523d1042"
+          }
+        },
+        "required": [
+          "transactionHash"
+        ]
+      },
+      "RelayTaskStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "number",
+            "description": "Relay task status code: 100=Pending, 110=Submitted, 200=Included, 400=Rejected, 500=Reverted",
+            "enum": [
+              100,
+              110,
+              200,
+              400,
+              500
+            ],
+            "example": 200
+          },
+          "receipt": {
+            "description": "On-chain receipt. Only present when status is 200 (Included) or 500 (Reverted)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RelayTaskStatusReceipt"
+              }
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "RelaysRemaining": {
+        "type": "object",
+        "properties": {
+          "remaining": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "remaining",
+          "limit"
+        ]
+      },
+      "SafeAppProvider": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "name"
+        ]
+      },
+      "SafeAppAccessControl": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "value": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "SafeAppSocialProfile": {
+        "type": "object",
+        "properties": {
+          "platform": {
+            "type": "string",
+            "enum": [
+              "DISCORD",
+              "GITHUB",
+              "TWITTER",
+              "TELEGRAM",
+              "UNKNOWN"
+            ]
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "platform",
+          "url"
+        ]
+      },
+      "SafeApp": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "iconUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string"
+          },
+          "chainIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "provider": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SafeAppProvider"
+              }
+            ]
+          },
+          "accessControl": {
+            "$ref": "#/components/schemas/SafeAppAccessControl"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "developerWebsite": {
+            "type": "string",
+            "nullable": true
+          },
+          "socialProfiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SafeAppSocialProfile"
+            }
+          },
+          "featured": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "url",
+          "name",
+          "description",
+          "chainIds",
+          "accessControl",
+          "tags",
+          "features",
+          "socialProfiles",
+          "featured"
+        ]
+      },
+      "SafeState": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "chainId": {
+            "type": "string"
+          },
+          "nonce": {
+            "type": "number"
+          },
+          "threshold": {
+            "type": "number"
+          },
+          "owners": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressInfo"
+            }
+          },
+          "implementation": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "modules": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressInfo"
+            }
+          },
+          "fallbackHandler": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AddressInfo"
+              }
+            ]
+          },
+          "guard": {
+            "nullable": true,
+            "type": "object",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AddressInfo"
+              }
+            ]
+          },
+          "version": {
+            "type": "string",
+            "nullable": true
+          },
+          "implementationVersionState": {
+            "type": "string",
+            "enum": [
+              "UP_TO_DATE",
+              "OUTDATED",
+              "UNKNOWN"
+            ]
+          },
+          "collectiblesTag": {
+            "type": "string",
+            "nullable": true
+          },
+          "txQueuedTag": {
+            "type": "string",
+            "nullable": true
+          },
+          "txHistoryTag": {
+            "type": "string",
+            "nullable": true
+          },
+          "messagesTag": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "address",
+          "chainId",
+          "nonce",
+          "threshold",
+          "owners",
+          "implementation",
+          "implementationVersionState"
+        ]
+      },
+      "SafeNonces": {
+        "type": "object",
+        "properties": {
+          "currentNonce": {
+            "type": "number"
+          },
+          "recommendedNonce": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "currentNonce",
+          "recommendedNonce"
+        ]
+      },
+      "SafeOverview": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "$ref": "#/components/schemas/AddressInfo"
+          },
+          "chainId": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "number"
+          },
+          "owners": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressInfo"
+            }
+          },
+          "fiatTotal": {
+            "type": "string"
+          },
+          "queued": {
+            "type": "number"
+          },
+          "awaitingConfirmation": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "address",
+          "chainId",
+          "threshold",
+          "owners",
+          "fiatTotal",
+          "queued"
+        ]
+      },
+      "ThreatAnalysisRequestDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "EIP-712 typed data to analyze for security threats. Contains domain, primaryType, types, and message fields following the EIP-712 standard for structured data signing.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TypedData"
+              }
+            ]
+          },
+          "walletAddress": {
+            "type": "string",
+            "description": "Address of the transaction signer/wallet"
+          },
+          "origin": {
+            "type": "string",
+            "description": "Optional origin identifier for the request"
+          }
+        },
+        "required": [
+          "data",
+          "walletAddress"
+        ]
+      },
+      "ThreatAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": [
+              "OK",
+              "INFO",
+              "WARN",
+              "CRITICAL"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Threat status code",
+            "enum": [
+              "NO_THREAT",
+              "OWNERSHIP_CHANGE",
+              "MODULE_CHANGE"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
+          }
+        },
+        "required": [
+          "severity",
+          "type",
+          "title",
+          "description"
+        ]
+      },
+      "MasterCopyChangeThreatAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": [
+              "OK",
+              "INFO",
+              "WARN",
+              "CRITICAL"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Threat status code",
+            "enum": [
+              "MASTERCOPY_CHANGE"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
+          },
+          "before": {
+            "type": "string",
+            "description": "Address of the old master copy/implementation contract"
+          },
+          "after": {
+            "type": "string",
+            "description": "Address of the new master copy/implementation contract"
+          }
+        },
+        "required": [
+          "severity",
+          "type",
+          "title",
+          "description",
+          "before",
+          "after"
+        ]
+      },
+      "ThreatIssueDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Address involved in the issue, if applicable"
+          },
+          "description": {
+            "type": "string",
+            "description": "Issue description"
+          }
+        },
+        "required": [
+          "description"
+        ]
+      },
+      "MaliciousOrModerateThreatAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": [
+              "OK",
+              "INFO",
+              "WARN",
+              "CRITICAL"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Threat status code",
+            "enum": [
+              "MALICIOUS",
+              "MODERATE"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
+          },
+          "issues": {
+            "type": "object",
+            "description": "A partial record of specific issues identified during threat analysis, grouped by severity.Record<Severity, ThreatIssue[]> - keys should be one of the Severity enum (OK | INFO | WARN | CRITICAL)",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/ThreatIssueDto"
+              }
+            },
+            "example": {
+              "CRITICAL": [
+                {
+                  "description": "Malicious contract interaction detected",
+                  "address": "0x0000000000000000000000000000000000000000"
+                }
+              ],
+              "WARN": [
+                {
+                  "description": "High gas price detected"
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "severity",
+          "type",
+          "title",
+          "description"
+        ]
+      },
+      "FailedThreatAnalysisResultDto": {
+        "type": "object",
+        "properties": {
+          "severity": {
+            "type": "string",
+            "description": "Severity level indicating the importance and risk",
+            "enum": [
+              "OK",
+              "INFO",
+              "WARN",
+              "CRITICAL"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "description": "Threat status code",
+            "enum": [
+              "FAILED"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "User-facing title of the finding"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description explaining the finding and its implications"
+          },
+          "error": {
+            "type": "string",
+            "description": "Error message for failed analysis"
+          }
+        },
+        "required": [
+          "severity",
+          "type",
+          "title",
+          "description"
+        ]
+      },
+      "NativeAssetDetailsDto": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "description": "Token symbol (if available)"
+          },
+          "logo_url": {
+            "type": "string",
+            "description": "URL to asset logo (if available)",
+            "example": "https://example.com/logo.png"
+          },
+          "type": {
+            "type": "string",
+            "description": "Asset type",
+            "enum": [
+              "NATIVE"
+            ]
+          }
+        },
+        "required": [
+          "type"
+        ]
+      },
+      "TokenAssetDetailsDto": {
+        "type": "object",
+        "properties": {
+          "symbol": {
+            "type": "string",
+            "description": "Token symbol (if available)"
+          },
+          "logo_url": {
+            "type": "string",
+            "description": "URL to asset logo (if available)",
+            "example": "https://example.com/logo.png"
+          },
+          "type": {
+            "type": "string",
+            "description": "Asset type",
+            "enum": [
+              "ERC20",
+              "ERC721",
+              "ERC1155",
+              "NONERC"
+            ]
+          },
+          "address": {
+            "type": "string",
+            "description": "Token contract address"
+          }
+        },
+        "required": [
+          "type",
+          "address"
+        ]
+      },
+      "FungibleDiffDto": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "Value change for fungible tokens",
+            "example": "1000000"
+          }
+        }
+      },
+      "NFTDiffDto": {
+        "type": "object",
+        "properties": {
+          "token_id": {
+            "type": "number",
+            "description": "Token ID for NFTs",
+            "example": 42
+          }
+        },
+        "required": [
+          "token_id"
+        ]
+      },
+      "BalanceChangeDto": {
+        "type": "object",
+        "properties": {
+          "asset": {
+            "description": "Asset details",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NativeAssetDetailsDto"
+              },
+              {
+                "$ref": "#/components/schemas/TokenAssetDetailsDto"
+              }
+            ]
+          },
+          "in": {
+            "type": "array",
+            "description": "Incoming asset changes",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/FungibleDiffDto"
+                },
+                {
+                  "$ref": "#/components/schemas/NFTDiffDto"
+                }
+              ]
+            },
+            "example": [
+              {
+                "value": "1000000"
+              }
+            ]
+          },
+          "out": {
+            "type": "array",
+            "description": "Outgoing asset changes",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/FungibleDiffDto"
+                },
+                {
+                  "$ref": "#/components/schemas/NFTDiffDto"
+                }
+              ]
+            },
+            "example": [
+              {
+                "value": "500000"
+              }
+            ]
+          }
+        },
+        "required": [
+          "asset",
+          "in",
+          "out"
+        ]
+      },
+      "ThreatAnalysisResponseDto": {
+        "type": "object",
+        "properties": {
+          "THREAT": {
+            "description": "Array of threat analysis results. Results are sorted by severity (CRITICAL first). May include malicious patterns, ownership changes, module changes, or master copy upgrades.",
+            "example": [
+              {
+                "severity": "OK",
+                "type": "NO_THREAT",
+                "title": "No threats detected",
+                "description": "Transaction analysis found no security threats"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ThreatAnalysisResultDto"
+                },
+                {
+                  "$ref": "#/components/schemas/MasterCopyChangeThreatAnalysisResultDto"
+                },
+                {
+                  "$ref": "#/components/schemas/MaliciousOrModerateThreatAnalysisResultDto"
+                },
+                {
+                  "$ref": "#/components/schemas/FailedThreatAnalysisResultDto"
+                }
+              ]
+            }
+          },
+          "BALANCE_CHANGE": {
+            "description": "Balance changes resulting from the transaction. Shows incoming and outgoing transfers for various asset types.",
+            "example": [
+              {
+                "asset": {
+                  "type": "ERC20",
+                  "symbol": "USDC",
+                  "address": "0x0000000000000000000000000000000000000000",
+                  "logo_url": "https://example.com/usdc-logo.png"
+                },
+                "in": [
+                  {
+                    "value": "1000000"
+                  }
+                ],
+                "out": [
+                  {
+                    "value": "500000"
+                  }
+                ]
+              }
+            ],
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BalanceChangeDto"
+            }
+          },
+          "request_id": {
+            "type": "string",
+            "description": "Blockaid request ID from x-request-id header. Used for reporting false positives/negatives via the report endpoint.",
+            "example": "11111111-1111-1111-1111-111111111111"
+          }
+        }
+      },
+      "ReportFalseResultRequestDto": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "type": "string",
+            "enum": [
+              "FALSE_POSITIVE",
+              "FALSE_NEGATIVE"
+            ],
+            "description": "Type of report: FALSE_POSITIVE if flagged incorrectly, FALSE_NEGATIVE if should have been flagged"
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request_id from the original Blockaid scan response",
+            "example": "11111111-1111-1111-1111-111111111111"
+          },
+          "details": {
+            "type": "string",
+            "description": "Details about why this is a false result",
+            "maxLength": 1000,
+            "example": "This transaction was incorrectly flagged as malicious"
+          }
+        },
+        "required": [
+          "event",
+          "request_id",
+          "details"
+        ]
+      },
+      "ReportFalseResultResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the report was submitted successfully",
+            "example": true
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "TargetedSafe": {
+        "type": "object",
+        "properties": {
+          "outreachId": {
+            "type": "number"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "outreachId",
+          "address"
+        ]
+      },
+      "Submission": {
+        "type": "object",
+        "properties": {
+          "outreachId": {
+            "type": "number"
+          },
+          "targetedSafeId": {
+            "type": "number"
+          },
+          "signerAddress": {
+            "type": "string"
+          },
+          "completionDate": {
+            "format": "date-time",
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "outreachId",
+          "targetedSafeId",
+          "signerAddress"
+        ]
+      },
+      "CreateSubmissionDto": {
+        "type": "object",
+        "properties": {
+          "completed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "completed"
+        ]
+      },
       "TransactionData": {
         "type": "object",
         "properties": {
@@ -16849,166 +18129,6 @@
           "txStatus"
         ]
       },
-      "ModuleExecutionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "MODULE"
-            ]
-          },
-          "address": {
-            "$ref": "#/components/schemas/AddressInfo"
-          }
-        },
-        "required": [
-          "type",
-          "address"
-        ]
-      },
-      "MultisigExecutionInfo": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "MULTISIG"
-            ]
-          },
-          "nonce": {
-            "type": "number"
-          },
-          "confirmationsRequired": {
-            "type": "number"
-          },
-          "confirmationsSubmitted": {
-            "type": "number"
-          },
-          "missingSigners": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AddressInfo"
-            }
-          }
-        },
-        "required": [
-          "type",
-          "nonce",
-          "confirmationsRequired",
-          "confirmationsSubmitted"
-        ]
-      },
-      "Transaction": {
-        "type": "object",
-        "properties": {
-          "txInfo": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/CreationTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/CustomTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/MultiSendTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/SettingsChangeTransaction"
-              },
-              {
-                "$ref": "#/components/schemas/TransferTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/SwapOrderTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/BridgeAndSwapTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/SwapTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/SwapTransferTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/TwapOrderTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/NativeStakingDepositTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/NativeStakingValidatorsExitTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/NativeStakingWithdrawTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/VaultDepositTransactionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/VaultRedeemTransactionInfo"
-              }
-            ],
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/TransactionInfo"
-              }
-            ]
-          },
-          "id": {
-            "type": "string"
-          },
-          "txHash": {
-            "type": "string",
-            "nullable": true
-          },
-          "timestamp": {
-            "type": "number"
-          },
-          "txStatus": {
-            "type": "string",
-            "enum": [
-              "SUCCESS",
-              "FAILED",
-              "CANCELLED",
-              "AWAITING_CONFIRMATIONS",
-              "AWAITING_EXECUTION"
-            ]
-          },
-          "executionInfo": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/MultisigExecutionInfo"
-              },
-              {
-                "$ref": "#/components/schemas/ModuleExecutionInfo"
-              }
-            ],
-            "nullable": true
-          },
-          "safeAppInfo": {
-            "nullable": true,
-            "type": "object",
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/SafeAppInfo"
-              }
-            ]
-          },
-          "note": {
-            "type": "string",
-            "nullable": true
-          }
-        },
-        "required": [
-          "txInfo",
-          "id",
-          "timestamp",
-          "txStatus"
-        ]
-      },
       "MultisigTransaction": {
         "type": "object",
         "properties": {
@@ -17186,6 +18306,57 @@
           "results"
         ]
       },
+      "TransactionItem": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "TRANSACTION"
+            ]
+          },
+          "transaction": {
+            "$ref": "#/components/schemas/Transaction"
+          },
+          "conflictType": {
+            "type": "string",
+            "enum": [
+              "None"
+            ]
+          }
+        },
+        "required": [
+          "type",
+          "transaction",
+          "conflictType"
+        ]
+      },
+      "TransferTransactionItemPage": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "number",
+            "nullable": true
+          },
+          "next": {
+            "type": "string",
+            "nullable": true
+          },
+          "previous": {
+            "type": "string",
+            "nullable": true
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransactionItem"
+            }
+          }
+        },
+        "required": [
+          "results"
+        ]
+      },
       "PreviewTransactionDto": {
         "type": "object",
         "properties": {
@@ -17280,69 +18451,6 @@
           "txData"
         ]
       },
-      "ConflictHeaderQueuedItem": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "CONFLICT_HEADER"
-            ]
-          },
-          "nonce": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "type",
-          "nonce"
-        ]
-      },
-      "LabelQueuedItem": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "LABEL"
-            ]
-          },
-          "label": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "type",
-          "label"
-        ]
-      },
-      "TransactionQueuedItem": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "TRANSACTION"
-            ]
-          },
-          "transaction": {
-            "$ref": "#/components/schemas/Transaction"
-          },
-          "conflictType": {
-            "type": "string",
-            "enum": [
-              "None",
-              "HasNext",
-              "End"
-            ]
-          }
-        },
-        "required": [
-          "type",
-          "transaction",
-          "conflictType"
-        ]
-      },
       "QueuedItemPage": {
         "type": "object",
         "properties": {
@@ -17377,31 +18485,6 @@
         },
         "required": [
           "results"
-        ]
-      },
-      "TransactionItem": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "TRANSACTION"
-            ]
-          },
-          "transaction": {
-            "$ref": "#/components/schemas/Transaction"
-          },
-          "conflictType": {
-            "type": "string",
-            "enum": [
-              "None"
-            ]
-          }
-        },
-        "required": [
-          "type",
-          "transaction",
-          "conflictType"
         ]
       },
       "TransactionItemPage": {
