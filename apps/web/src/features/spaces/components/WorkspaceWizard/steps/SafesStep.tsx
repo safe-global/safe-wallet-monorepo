@@ -30,7 +30,14 @@ const SafesStep = (): ReactElement => {
 
   const pickedSize = getPickedSize(draft, { sizes })
   const limit = isSafePro ? pickedSize?.seats : null
-  const form = useSafesStepForm({ allSafes, flaggedAddresses: safes.flaggedAddresses, limit, advance, retreat })
+  const form = useSafesStepForm({
+    draft,
+    allSafes,
+    flaggedAddresses: safes.flaggedAddresses,
+    limit,
+    advance,
+    retreat,
+  })
   const { selection, pickedSafes, isNameStep } = form
   const limitError = validateStep('safes', { ...draft, safes: pickedSafes }, { sizes })
 
@@ -56,7 +63,7 @@ const SafesStep = (): ReactElement => {
               continueLabel="Next"
               continueType="submit"
               continueForm={FORM_ID}
-              continueDisabled={!form.isReady || pickedSafes.length === 0 || limitError !== null}
+              continueDisabled={pickedSafes.length === 0 || limitError !== null}
               continueTestId="select-safes-continue-button"
             />
             {!isNameStep && (
@@ -74,36 +81,33 @@ const SafesStep = (): ReactElement => {
       >
         <FormProvider {...form.formMethods}>
           <form id={FORM_ID} onSubmit={form.onSubmit} className="flex flex-col gap-6">
-            {/* Disabled until the draft fills the form: a selection made earlier would be replaced. */}
-            <fieldset disabled={!form.isReady} className="contents">
-              {isNameStep ? (
-                <NameAccountsFields items={form.safesToName} />
-              ) : (
-                <SafesPicker
-                  hint={wallet ? undefined : <ConnectWalletHint testId="select-safes-connect-wallet-button" />}
-                  hasNoSafes={safes.hasNoSafes}
-                  hasNoResults={!safes.hasNoSafes && allSafes.length === 0}
-                  seatCount={selection.seatCount}
-                  limit={limit}
-                  isAtLimit={selection.isAtLimit}
-                  onSearch={safes.handleSearch}
-                  list={
-                    <OnboardingSafesList
-                      trustedSafes={safes.trustedSafes}
-                      ownedSafes={safes.ownedSafes}
-                      flaggedAddresses={safes.flaggedAddresses}
-                      trustedSimilarityGroups={safes.trustedSimilarityGroups}
-                      ownedSimilarityGroups={safes.ownedSimilarityGroups}
-                      similarWarnings={safes.similarWarnings}
-                      selectedKeys={selection.selectedKeys}
-                      onToggle={selection.handleToggle}
-                      isAtLimit={selection.isSelectionLocked}
-                    />
-                  }
-                  error={limitError}
-                />
-              )}
-            </fieldset>
+            {isNameStep ? (
+              <NameAccountsFields items={form.safesToName} />
+            ) : (
+              <SafesPicker
+                hint={wallet ? undefined : <ConnectWalletHint testId="select-safes-connect-wallet-button" />}
+                hasNoSafes={safes.hasNoSafes}
+                hasNoResults={!safes.hasNoSafes && allSafes.length === 0}
+                seatCount={selection.seatCount}
+                limit={limit}
+                isAtLimit={selection.isAtLimit}
+                onSearch={safes.handleSearch}
+                list={
+                  <OnboardingSafesList
+                    trustedSafes={safes.trustedSafes}
+                    ownedSafes={safes.ownedSafes}
+                    flaggedAddresses={safes.flaggedAddresses}
+                    trustedSimilarityGroups={safes.trustedSimilarityGroups}
+                    ownedSimilarityGroups={safes.ownedSimilarityGroups}
+                    similarWarnings={safes.similarWarnings}
+                    selectedKeys={selection.selectedKeys}
+                    onToggle={selection.handleToggle}
+                    isAtLimit={selection.isSelectionLocked}
+                  />
+                }
+                error={limitError}
+              />
+            )}
           </form>
         </FormProvider>
       </WizardFrame>

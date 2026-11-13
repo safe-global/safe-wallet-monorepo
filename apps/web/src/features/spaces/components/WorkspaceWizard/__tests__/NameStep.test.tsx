@@ -8,8 +8,12 @@ import { fakeUserId, fakeWorkspaceName, workspaceDraftBuilder } from '@/tests/bu
 import { trialPlansHandler, userHandler, workspacesHandler } from '@/tests/msw/workspaceWizard'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import NameStep from '../steps/NameStep'
+import WizardReady from '../WizardReady'
 
-jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => true }))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({
+  useIsSafeProEnabled: () => true,
+  useSafeProFlag: () => true,
+}))
 jest.mock('@/hooks/useIsSurveyEnabled', () => ({ __esModule: true, default: () => false }))
 
 const renderNameStep = async (changes: Partial<WorkspaceDraft> = {}) => {
@@ -19,12 +23,16 @@ const renderNameStep = async (changes: Partial<WorkspaceDraft> = {}) => {
     .with({ ownerId, ...changes })
     .build()
   const push = jest.fn(() => Promise.resolve(true))
-  const view = renderWithUserEvent(<NameStep />, {
-    routerProps: { push },
-    initialReduxState: { auth: signedInAuthState(), workspaceDraft: draft },
-  })
-  const input = screen.getByRole('textbox', { name: 'Workspace name' })
-  await waitFor(() => expect(input).toBeEnabled())
+  const view = renderWithUserEvent(
+    <WizardReady>
+      <NameStep />
+    </WizardReady>,
+    {
+      routerProps: { push },
+      initialReduxState: { auth: signedInAuthState(), workspaceDraft: draft },
+    },
+  )
+  const input = await screen.findByRole('textbox', { name: 'Workspace name' })
   return { ...view, input, push }
 }
 

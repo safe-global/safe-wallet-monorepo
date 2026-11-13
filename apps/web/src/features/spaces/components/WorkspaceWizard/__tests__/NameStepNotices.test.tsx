@@ -10,18 +10,27 @@ import { userHandler, userLoaded, workspacesHandler } from '@/tests/msw/workspac
 import { renderWithUserEvent, screen } from '@/tests/test-utils'
 import { MemberRole } from '../../../memberRole'
 import NameStepNotices from '../NameStepNotices'
+import WizardReady from '../WizardReady'
 
-jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => false }))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({
+  useIsSafeProEnabled: () => false,
+  useSafeProFlag: () => false,
+}))
 jest.mock('@/hooks/useIsSurveyEnabled', () => ({ __esModule: true, default: () => false }))
 
 type ResumeOffer = 'unknown' | 'offer' | 'done'
 
 const renderNotices = (draft: WorkspaceDraft, resumeOffer: ResumeOffer, onStartOver = jest.fn()) => {
   const push = jest.fn(() => Promise.resolve(true))
-  const view = renderWithUserEvent(<NameStepNotices onStartOver={onStartOver} />, {
-    routerProps: { push },
-    initialReduxState: { auth: signedInAuthState(), workspaceDraft: draft, workspaceWizard: { resumeOffer } },
-  })
+  const view = renderWithUserEvent(
+    <WizardReady>
+      <NameStepNotices onStartOver={onStartOver} />
+    </WizardReady>,
+    {
+      routerProps: { push },
+      initialReduxState: { auth: signedInAuthState(), workspaceDraft: draft, workspaceWizard: { resumeOffer } },
+    },
+  )
   return { ...view, push }
 }
 

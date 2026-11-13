@@ -14,7 +14,7 @@ import TrialConfirmNote from '../TrialConfirmNote'
 import WizardFrame from '../WizardFrame'
 
 const SurveyStep = (): ReactElement => {
-  const { draft, isReady } = useWorkspaceDraft()
+  const { draft } = useWorkspaceDraft()
   const { stepNumber, totalSteps, advance, retreat, continueLabel, submitError, isSubmitting, isLastStep } =
     useStepAdvance('survey')
   const { data: survey, isLoading, error } = useSurveysGetActiveSurveyV1Query({ slug: ONBOARDING_SURVEY_SLUG })
@@ -47,7 +47,7 @@ const SurveyStep = (): ReactElement => {
           backDisabled={isSubmitting}
           continueLabel={continueLabel}
           onContinue={() => advance(answers())}
-          continueDisabled={!isReady || isSubmitting || (!hasNoSurvey && selected.size === 0)}
+          continueDisabled={isSubmitting || (!hasNoSurvey && selected.size === 0)}
           continueLoading={isSubmitting}
           continueTestId="survey-finish-button"
         />

@@ -54,7 +54,7 @@ const PlanPicker = ({
 }
 
 const PlanStep = (): ReactElement => {
-  const { draft, isReady } = useWorkspaceDraft()
+  const { draft } = useWorkspaceDraft()
   const { stepNumber, totalSteps, advance, retreat } = useStepAdvance('plan')
   const { sizes, trialPeriodDays, isError, refetch } = useTrialSizes()
   const [pickedLinkId, setPickedLinkId] = useState<string>()
@@ -82,7 +82,7 @@ const PlanStep = (): ReactElement => {
           onBack={onBack}
           continueLabel="Next"
           onContinue={onNext}
-          continueDisabled={!isReady || !size}
+          continueDisabled={!size}
           continueTestId="plan-step-continue-button"
         />
       }

@@ -6,6 +6,7 @@ import * as useWalletModule from '@/hooks/wallets/useWallet'
 import * as spacesQueries from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { AppRoutes } from '@/config/routes'
 import * as useIsSpaceRouteModule from '@/hooks/useIsSpaceRoute'
+import * as wizardFlag from '@/hooks/useIsWorkspaceWizardEnabled'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 const MOCK_SPACE_UUID_ALT = '22222222-2222-2222-2222-222222222222'
 
@@ -26,6 +27,10 @@ jest.mock('@/hooks/useIsSpaceRoute', () => ({
   useIsSpaceRoute: jest.fn(() => false),
 }))
 
+jest.mock('@/hooks/useIsWorkspaceWizardEnabled', () => ({
+  useIsWorkspaceWizardEnabled: jest.fn(() => undefined),
+}))
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -41,6 +46,7 @@ interface SetupOptions {
   isStoreHydrated?: boolean
   spaces?: Array<{ id: number; uuid: string; name: string }> | undefined
   isSpaceRoute?: boolean
+  isWorkspaceWizardEnabled?: boolean
 }
 
 const defaultSpaces = [
@@ -57,9 +63,11 @@ const setupMocks = ({
   isStoreHydrated = true,
   spaces = defaultSpaces,
   isSpaceRoute = false,
+  isWorkspaceWizardEnabled,
 }: SetupOptions = {}) => {
   ;(router.useRouter as jest.Mock).mockReturnValue({ pathname, query, isReady: true })
   ;(useIsSpaceRouteModule.useIsSpaceRoute as jest.Mock).mockReturnValue(isSpaceRoute)
+  ;(wizardFlag.useIsWorkspaceWizardEnabled as jest.Mock).mockReturnValue(isWorkspaceWizardEnabled)
 
   jest.spyOn(useWalletModule, 'default').mockReturnValue(wallet as ReturnType<typeof useWalletModule.default>)
   jest
@@ -449,6 +457,29 @@ describe('useFlowActivationGuard', () => {
   // -----------------------------------------------------------------------
   // Authenticated with spaces on onboarding routes
   // -----------------------------------------------------------------------
+
+  describe('plan step of the onboarding wizard', () => {
+    it('should redirect to create space when the wizard is off', async () => {
+      setupMocks({ pathname: AppRoutes.welcome.plan, isWorkspaceWizardEnabled: false })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.createSpace })
+    })
+
+    it.each([true, undefined])(
+      'should allow the plan step when the wizard flag is %s',
+      async (isWorkspaceWizardEnabled) => {
+        setupMocks({ pathname: AppRoutes.welcome.plan, isWorkspaceWizardEnabled })
+
+        const { result } = renderHook(() => useFlowActivationGuard())
+        const guardResult = await result.current.activationGuard()
+
+        expect(guardResult).toEqual({ success: true })
+      },
+    )
+  })
 
   describe('authenticated with spaces on onboarding routes', () => {
     it('should allow create space without spaceId so that the user can create another space', async () => {

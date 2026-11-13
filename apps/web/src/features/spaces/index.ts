@@ -76,7 +76,6 @@ export { useInviteNotification } from './hooks/useInviteNotification'
 export { useSafeWorkspaceCheck } from './hooks/useSafeWorkspaceCheck'
 export { useSafeWorkspaceAttach } from './hooks/useSafeWorkspaceAttach'
 export { useLandingSpaceId } from './hooks/useLandingSpaceId'
-export { useIsWorkspaceWizardEnabled } from './hooks/useIsWorkspaceWizardEnabled'
 export { useWorkspaceAddressBookLabel } from './hooks/useWorkspaceAddressBookLabel'
 export { useAddressBookWriteScope, type AddressBookWriteScope } from './hooks/useAddressBookWriteScope'
 export {

@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { useIsWorkspaceWizardEnabled } from '../../hooks/useIsWorkspaceWizardEnabled'
+import { useIsWorkspaceWizardEnabled } from '@/hooks/useIsWorkspaceWizardEnabled'
 import CreateSpaceOnboarding from '../CreateSpaceOnboarding'
 import InviteMembersOnboarding from '../InviteMembersOnboarding'
 import SelectSafesOnboarding from '../SelectSafesOnboarding'
