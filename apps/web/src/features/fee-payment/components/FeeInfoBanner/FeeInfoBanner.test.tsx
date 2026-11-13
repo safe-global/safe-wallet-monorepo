@@ -31,10 +31,10 @@ describe('FeeInfoBanner', () => {
     expect(container.innerHTML).toBe('')
   })
 
-  it('calls setDismissed when close button is clicked', () => {
+  it('calls setDismissed when the dismiss button is clicked', () => {
     render(<FeeInfoBanner />)
 
-    fireEvent.click(screen.getByLabelText('close'))
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss fee info' }))
 
     expect(mockSetDismissed).toHaveBeenCalledWith(true)
   })

@@ -222,7 +222,7 @@ export const useSafeShieldForAddressPoisoning = (addresses: Array<string | undef
 export const useSafeShieldForTxData = (txData: SafeTransaction | undefined) => {
   const { setSafeTx } = useSafeShield()
 
-  // Callers may pass a freshly-constructed SafeTransaction every render (e.g. GTF's previewed tx).
+  // Callers may pass a freshly-constructed SafeTransaction every render (e.g. Pay from Safe's previewed tx).
   const lastDataKeyRef = useRef<string | undefined>(undefined)
 
   useEffect(() => {

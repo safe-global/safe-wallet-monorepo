@@ -26,8 +26,7 @@ interface Props {
   showAuditLogFields?: boolean
 }
 
-// GTF (gas-token) fee breakdown for executed txs; the hook returns null when the
-// GTF feature is off, so this renders nothing on non-GTF chains.
+// Fee breakdown on any chain: from the signed payload when the Safe paid, from the receipt otherwise.
 const HistoryFees = ({ txDetails }: { txDetails: TransactionDetails }): ReactElement | null => {
   const { HistoryFeesAccordion } = useLoadFeature(FeePaymentFeature)
   const feesData = useHistoryFeesBreakdown(txDetails)

@@ -143,7 +143,7 @@ def chain_defaults(chain_id: int, chain_name: str, rpc_url: str, txs_url: str) -
         "relayer_safe_creation_sponsored": True,
         "relayer_safe_transaction_sponsored": True,
         # Staging lists SUBSCRIPTION and PAY_FROM_SAFE; existing relay specs need FREE_DAILY_LIMIT.
-        "relayer_gas_payment_options": ["FREE_DAILY_LIMIT", "SUBSCRIPTION"],
+        "relayer_gas_payment_options": ["FREE_DAILY_LIMIT", "SUBSCRIPTION", "PAY_FROM_SAFE"],
         "is_testnet": os.environ.get("TEST_CHAIN_IS_TESTNET", "true") == "true",
         "zk": False,
         **rpc_settings(rpc_url),

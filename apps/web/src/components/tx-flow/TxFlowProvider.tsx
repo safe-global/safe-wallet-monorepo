@@ -30,8 +30,7 @@ import { useIsCounterfactualSafe } from '@/features/counterfactual'
 import useTxDetails from '@/hooks/useTxDetails'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useIsPayFromSafeEnabled } from '@/features/fee-payment'
 import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 import { isMultisigDetailedExecutionInfo, isOneSignatureShort } from '@/utils/transaction-guards'
 import type { GasPayer } from '@/utils/gasPayment'
@@ -79,7 +78,6 @@ export type TxFlowContextType<T extends unknown = any> = {
   setIsSubmitLoading: Dispatch<SetStateAction<boolean>>
 
   isSubmitDisabled: boolean
-  setIsSubmitDisabled: Dispatch<SetStateAction<boolean>>
 
   submitError?: Error
   setSubmitError: Dispatch<SetStateAction<Error | undefined>>
@@ -126,7 +124,6 @@ export const initialContext: TxFlowContextType = {
   setIsSubmitLoading: () => {},
 
   isSubmitDisabled: false,
-  setIsSubmitDisabled: () => {},
 
   submitError: undefined,
   setSubmitError: () => {},
@@ -189,7 +186,6 @@ const TxFlowProvider = <T extends unknown>({
   const { transactionExecution } = useAppSelector(selectSettings)
   const [shouldExecute, setShouldExecute] = useState<boolean>(transactionExecution)
   const [isSubmitLoading, setIsSubmitLoading] = useState<boolean>(initialContext.isSubmitLoading)
-  const [isSubmitDisabled, setIsSubmitDisabled] = useState<boolean>(initialContext.isSubmitDisabled)
   const [submitError, setSubmitError] = useState<Error | undefined>(initialContext.submitError)
   const [isRejectedByUser, setIsRejectedByUser] = useState<boolean>(initialContext.isRejectedByUser)
   const [gasPaymentOption, setGasPaymentOption] = useState<GasPayer | undefined>(initialContext.gasPaymentOption)
@@ -197,7 +193,8 @@ const TxFlowProvider = <T extends unknown>({
   const [trigger] = useLazyTransactionsGetTransactionByIdV1Query()
   const isCounterfactualSafe = useIsCounterfactualSafe()
   const [signedTxId, setSignedTxId] = useState<string>()
-  const txId = initialTxId ?? signedTxId
+  // Signing a proposal with the Safe paying proposes a new tx, so the signed id wins over the one the flow opened.
+  const txId = signedTxId ?? initialTxId
   const [txDetails, , txDetailsLoading] = useTxDetails(txId)
   const { needsRiskConfirmation, isRiskConfirmed } = useSafeShield()
   const isUntrustedSafeBlocked = needsRiskConfirmation && !isRiskConfirmed
@@ -257,7 +254,7 @@ const TxFlowProvider = <T extends unknown>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const isPayFromSafeChain = useHasFeature(FEATURES.GTF) ?? false
+  const isPayFromSafeChain = useIsPayFromSafeEnabled() ?? false
 
   const trackTxEvent = useCallback(
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {
@@ -340,8 +337,7 @@ const TxFlowProvider = <T extends unknown>({
     isSubmitLoading,
     setIsSubmitLoading,
 
-    isSubmitDisabled: isSubmitDisabled || isSubmitLoading || isUntrustedSafeBlocked,
-    setIsSubmitDisabled,
+    isSubmitDisabled: isSubmitLoading || isUntrustedSafeBlocked,
 
     submitError,
     setSubmitError,

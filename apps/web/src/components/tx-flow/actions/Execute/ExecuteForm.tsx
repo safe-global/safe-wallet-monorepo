@@ -5,7 +5,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { Button } from '@safe-global/views/components/ui/button'
 import ModalDialog from '@/components/common/ModalDialog'
-import classNames from 'classnames'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import TxCheckError from '@/components/tx/TxCheckError'
 import { trackError, Errors } from '@/services/exceptions'
@@ -14,9 +13,8 @@ import { getTxOptions } from '@/utils/transactions'
 import useIsValidExecution from '@/hooks/useIsValidExecution'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useIsExecutionLoop, useTxActions } from '@/components/tx/shared/hooks'
-import { ExecutionMethod, ExecutionMethodSelector } from '@/components/tx/ExecutionMethodSelector'
 import { useGasPaymentOptions } from '@/hooks/useGasPaymentOptions'
-import { getGasPayment } from '@/utils/gasPayment'
+import type { GasPayer } from '@/utils/gasPayment'
 import { getGasPaymentRefusal } from '@/components/tx/gasPaymentRefusal'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
@@ -26,7 +24,6 @@ import useGasLimit from '@/hooks/useGasLimit'
 import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
-import css from './styles.module.css'
 import commonCss from '@safe-global/views/components/tx-flow/common/styles.module.css'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
@@ -36,6 +33,9 @@ import type { SlotComponentProps, SlotName } from '../../slots'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
+import { useLoadFeature } from '@/features/__core__'
+import { FeePaymentFeature, useGasFeeDetails, useGasPayerSelection } from '@/features/fee-payment'
+import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'
 
 export const ExecuteForm = ({
   safeTx,
@@ -83,11 +83,16 @@ export const ExecuteForm = ({
     setGasPaymentOption,
   } = useContext(TxFlowContext)
 
-  const { offer, showsProUpsell, exclude } = useGasPaymentOptions({ safeTx })
-  const [executionMethod, setExecutionMethod] = useState(ExecutionMethod.RELAY)
-  const { gasPayer, sponsorSpaceId } = getGasPayment(offer, executionMethod)
+  const { offer, exclude } = useGasPaymentOptions({ safeTx })
+
+  const { GasPayerSelector, $isReady: isPayFromSafeReady } = useLoadFeature(FeePaymentFeature)
+  const { GasTooHighBanner } = useLoadFeature(NoFeeCampaignFeature)
+  const selection = useGasPayerSelection({ safeTx, offer, step: 'execute' })
+  const isPayFromSafe = selection.isPayFromSafe
+  const isSponsored = selection.choice === 'SPONSORED' && !!offer && !offer.disabledReason
+  const gasPayer: GasPayer = isPayFromSafe ? 'PAY_FROM_SAFE' : isSponsored ? offer.option : 'WALLET'
+  const sponsorSpaceId = isSponsored && offer.option === 'SUBSCRIPTION' ? offer.spaceId : null
   const willRelay = gasPayer !== 'WALLET'
-  const showExecutionSelector = offer !== null || showsProUpsell
 
   useEffect(() => {
     setGasPaymentOption(gasPayer)
@@ -96,7 +101,17 @@ export const ExecuteForm = ({
 
   // Estimate gas limit
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)
-  const [advancedParams, setAdvancedParams] = useAdvancedParams(gasLimit)
+  const [advancedParams, setAdvancedParams, gasEstimate] = useAdvancedParams(gasLimit)
+
+  const isFeeCardShown = isPayFromSafeReady && !!selection.view
+  const { selection: feeCardSelection, gasFeeDetails } = useGasFeeDetails({
+    selection,
+    safeTx,
+    params: advancedParams,
+    estimate: gasEstimate,
+    onParamsChange: setAdvancedParams,
+    gasLimitError,
+  })
 
   const { executionValidationError } = useIsValidExecution(
     safeTx,
@@ -125,7 +140,8 @@ export const ExecuteForm = ({
     setRefusalMessage(undefined)
     setIsRejectedByUser(false)
 
-    const txOptions = getTxOptions(advancedParams, currentChain)
+    // With the Safe paying, the relay always gets the estimated gas limit, never an older manual edit.
+    const txOptions = getTxOptions(isPayFromSafe ? { ...advancedParams, gasLimit } : advancedParams, currentChain)
 
     onSubmit?.()
 
@@ -140,6 +156,7 @@ export const ExecuteForm = ({
         willRelay,
         acceptUnverifiedSimulation,
         sponsorSpaceId,
+        isPayFromSafe,
       ))
     } catch (_err) {
       const err = asError(_err)
@@ -190,6 +207,8 @@ export const ExecuteForm = ({
   const submitDisabled =
     !safeTx ||
     isSubmitDisabled ||
+    selection.isQuoteLoading ||
+    selection.hasQuoteError ||
     isSubmitLoading ||
     disableSubmit ||
     isExecutionLoop ||
@@ -200,32 +219,29 @@ export const ExecuteForm = ({
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <div className={classNames(commonCss.params, { [css.noBottomBorderRadius]: showExecutionSelector })}>
-          <AdvancedParams
-            willExecute
-            params={advancedParams}
-            recommendedGasLimit={gasLimit}
-            onFormSubmit={setAdvancedParams}
-            gasLimitError={gasLimitError}
-            willRelay={willRelay}
-            noFeeCampaign={
-              offer?.option === 'NO_FEE_CAMPAIGN' && gasPayer === 'NO_FEE_CAMPAIGN'
-                ? { isEligible: true, remaining: offer.remaining, limit: offer.limit }
-                : undefined
-            }
-          />
+        {!isFeeCardShown && (
+          <div className={commonCss.params}>
+            <AdvancedParams
+              willExecute
+              params={advancedParams}
+              recommendedGasLimit={gasLimit}
+              onFormSubmit={setAdvancedParams}
+              gasLimitError={gasLimitError}
+              willRelay={willRelay}
+              isReadOnly={isPayFromSafe}
+              feeLabel={isPayFromSafe ? 'Paid from Safe' : undefined}
+              noFeeCampaign={
+                offer?.option === 'NO_FEE_CAMPAIGN' && gasPayer === 'NO_FEE_CAMPAIGN'
+                  ? { isEligible: true, remaining: offer.remaining, limit: offer.limit }
+                  : undefined
+              }
+            />
+          </div>
+        )}
 
-          {showExecutionSelector && (
-            <div className={css.noTopBorder}>
-              <ExecutionMethodSelector
-                executionMethod={executionMethod}
-                setExecutionMethod={setExecutionMethod}
-                offer={offer}
-                showsProUpsell={showsProUpsell}
-              />
-            </div>
-          )}
-        </div>
+        {isFeeCardShown && <GasPayerSelector selection={feeCardSelection} gasFeeDetails={gasFeeDetails} />}
+
+        {offer?.option === 'NO_FEE_CAMPAIGN' && offer.disabledReason === 'GAS_TOO_HIGH' && <GasTooHighBanner />}
 
         {/* Error messages */}
         {cannotPropose ? (

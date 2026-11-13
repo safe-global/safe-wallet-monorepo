@@ -12,9 +12,18 @@ export class TxReviewPage {
   readonly signButton: Locator
   /** A proposer who is not a signer gets this button in place of the sign step */
   readonly proposeButton: Locator
+  /** The old execution method selector, still used by bulk execution */
   readonly connectedWalletMethod: Locator
-  readonly relayMethod: Locator
-  /** "<n> free transactions left today" next to the relay option */
+  /** The fee card of the execute step and its "Pay fees from" dropdown */
+  readonly feePayerCard: Locator
+  readonly feePayerSelector: Locator
+  readonly signerWalletOption: Locator
+  readonly sponsoredOption: Locator
+  readonly safeAccountOption: Locator
+  /** The payer that the fee card shows without a choice, e.g. "Safe account" once the signed payload carries the fees */
+  readonly lockedFeePayer: Locator
+  readonly gasFeeRow: Locator
+  /** "<n> free transactions left today" in the fee card */
   readonly remainingRelays: Locator
   /** The sponsored transactions left: the free daily ones, or "<left>/<quota>" of a Workspace plan */
   readonly sponsoredTxsCounter: Locator
@@ -54,9 +63,15 @@ export class TxReviewPage {
     this.signButton = page.getByTestId('combo-submit-sign')
     this.proposeButton = page.getByRole('button', { name: 'Propose transaction' })
     this.connectedWalletMethod = page.getByTestId('connected-wallet-execution-method')
-    this.relayMethod = page.getByTestId('relay-execution-method').first()
+    this.feePayerCard = page.getByTestId('gas-payer-selector')
+    this.feePayerSelector = page.getByTestId('fee-payer-selector')
+    this.signerWalletOption = page.getByTestId('fee-payer-signer')
+    this.sponsoredOption = page.getByTestId('fee-payer-sponsored')
+    this.safeAccountOption = page.getByTestId('fee-payer-safe')
+    this.lockedFeePayer = page.getByTestId('fee-payer-locked')
+    this.gasFeeRow = page.getByTestId('gas-fee-row')
     this.remainingRelays = page.getByText(/free transactions? left today/)
-    this.sponsoredTxsCounter = page.getByTestId('sponsored-txs-counter')
+    this.sponsoredTxsCounter = page.getByTestId('sponsored-txs-counter').or(page.getByTestId('sponsored-quota'))
     this.executeButton = page.getByTestId('combo-submit-execute')
     this.spendingLimitExecuteButton = page.getByRole('button', { name: 'Execute', exact: true })
     this.status = page.getByTestId('transaction-status')
@@ -95,6 +110,12 @@ export class TxReviewPage {
     await this.signButton.click()
   }
 
+  /** Pick the Safe account as the payer of the fees in the fee card of the review */
+  async payFeesFromSafe(): Promise<void> {
+    await this.feePayerSelector.click()
+    await this.safeAccountOption.click()
+  }
+
   /** Wait until the signer select shows `address`; it fills in once CGW returns the wallet's Safes */
   async waitForSigner(address: string): Promise<void> {
     await this.signerSelect.filter({ hasText: short(address) }).waitFor()
@@ -124,15 +145,20 @@ export class TxReviewPage {
     await this.waitForExecution()
   }
 
-  /** Execute a fully signed transaction with the relay, which pays the gas */
+  /** Execute a fully signed transaction with the relay, which pays the gas (Pro plan or Free transaction) */
   async executeWithRelay(): Promise<void> {
-    await this.relayMethod.click()
+    await this.feePayerSelector.click()
+    await this.sponsoredOption.click()
     await this.executeButton.click()
   }
 
-  /** Execute a fully signed transaction with the connected wallet, not the relay */
+  /** Execute a fully signed transaction with the connected wallet: picked when a sponsor is on offer, the only payer otherwise */
   async execute(): Promise<void> {
-    await this.connectedWalletMethod.click()
+    await this.feePayerCard.waitFor()
+    if (await this.feePayerSelector.isVisible()) {
+      await this.feePayerSelector.click()
+      await this.signerWalletOption.click()
+    }
     await this.executeButton.click()
   }
 

@@ -427,6 +427,7 @@ describe('getGasPaymentSource', () => {
 
   it.each([
     ['WALLET', 'signing_wallet'],
+    ['PAY_FROM_SAFE', 'safe'],
     ['FREE_DAILY_LIMIT', 'sponsored'],
     ['SUBSCRIPTION', 'sponsored'],
     ['NO_FEE_CAMPAIGN', 'sponsored'],

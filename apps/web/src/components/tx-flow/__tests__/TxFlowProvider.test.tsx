@@ -139,6 +139,17 @@ describe('TxFlowProvider', () => {
     expect(result.current.isCreation).toBe(false)
   })
 
+  it('executes the new transaction when signing an existing one proposed a new id', () => {
+    const proposalId = `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 64 })}`
+    const newTxId = `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 64 })}`
+    const { result } = renderContext({ txId: proposalId })
+
+    act(() => result.current.continueToExecute(newTxId))
+
+    expect(result.current.txId).toBe(newTxId)
+    expect(result.current.isCreation).toBe(false)
+  })
+
   describe('trackTxEvent', () => {
     const buildTxId = () => `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 64 })}`
     const isCreationArg = () => jest.mocked(trackTxEvents).mock.calls[0][1]

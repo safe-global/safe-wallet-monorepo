@@ -364,8 +364,6 @@ const overflowSafeTxContextValue: SafeTxContextParams = {
   setSafeTxGas: () => {},
   setTxOrigin: () => {},
   isReadOnly: false,
-  feePaymentMode: 'safe',
-  setFeePaymentMode: () => {},
   setFeeGasToken: () => {},
 }
 

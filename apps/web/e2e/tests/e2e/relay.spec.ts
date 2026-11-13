@@ -1,7 +1,6 @@
 import { Wallet, parseEther } from 'ethers'
 import type { Page } from '@playwright/test'
 import type { SafeApiClient } from '../../src/api/safe-api-client'
-import { nonceOf, transactionsIn } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
 import { sponsoredTransactionsUsed } from '../../src/fixtures/email-session'
 import { test, expect } from '../../src/fixtures/journey.fixture'
@@ -24,11 +23,7 @@ async function executorOfNonce(
   safeAddress: string,
   nonce: number,
 ): Promise<string | undefined> {
-  const executed = transactionsIn(await safeApiClient.getTransactionHistory(safeAddress)).find(
-    (tx) => nonceOf(tx) === nonce,
-  )
-  if (!executed) return undefined
-  const execution = (await safeApiClient.findTransaction(executed.id))?.detailedExecutionInfo
+  const execution = (await safeApiClient.findExecutedTransaction(safeAddress, nonce))?.detailedExecutionInfo
   return execution?.type === 'MULTISIG' ? execution.executor?.value.toLowerCase() : undefined
 }
 

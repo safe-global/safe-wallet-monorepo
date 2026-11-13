@@ -30,7 +30,7 @@ const mockChain = chainBuilder()
       safeCreationSponsored: false,
       safeTransactionSponsored: false,
       enableTenderlySimulationBeforeRelay: false,
-      gasPaymentOptions: ['SUBSCRIPTION'],
+      gasPaymentOptions: ['SUBSCRIPTION', 'PAY_FROM_SAFE'],
     },
   })
   .build()
@@ -143,7 +143,7 @@ describe('useResolvedGasToken', () => {
     expect(result.current.status).toBe('resolving')
   })
 
-  it('returns blocked without firing a single probe when the chain has no RELAY_FEE relayer', () => {
+  it('returns blocked without firing a single probe when the chain has no relayer', () => {
     jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(
       chainBuilder()
         .with({ ...mockChain, relayer: null })

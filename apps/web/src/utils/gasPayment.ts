@@ -7,7 +7,7 @@ export type SponsoredOption = Exclude<GasPaymentOption, 'PAY_FROM_SAFE'>
 
 export const SPONSORED_OPTIONS: SponsoredOption[] = ['NO_FEE_CAMPAIGN', 'FREE_DAILY_LIMIT', 'SUBSCRIPTION']
 
-export type GasPayer = SponsoredOption | 'WALLET'
+export type GasPayer = SponsoredOption | 'PAY_FROM_SAFE' | 'WALLET'
 
 export type SponsoredOffer =
   | {

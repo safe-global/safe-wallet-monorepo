@@ -3,11 +3,12 @@ import useTxStepper from './useTxStepper'
 import SafeTxProvider from './SafeTxProvider'
 import { TxInfoProvider } from './TxInfoProvider'
 import TxFlowProvider, { type TxFlowProviderProps, type TxFlowContextType } from './TxFlowProvider'
+import FeePayerProvider from './FeePayerProvider'
 import { TxFlowContent } from './common/TxFlowContent'
 import ReviewTransaction from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
 import { ExecuteTxStep } from '../tx/ExecuteTxStep'
-import { TxNote, SignerSelect, BalanceChanges, FeeInfoBanner, FeesPreview, RiskConfirmation } from './features'
+import { TxNote, SignerSelect, BalanceChanges, FeeInfoBanner, FeeCard, RiskConfirmation } from './features'
 import { Batching, ComboSubmit, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
 import { SlotProvider } from './slots'
 import { useTrackTimeSpent } from '@/components/tx/shared/tracking'
@@ -105,37 +106,39 @@ export const TxFlow = <T extends unknown>({
               isBatchable={isBatchable}
               onContinueToExecute={handleContinueToExecute}
             >
-              <TxFlowContent>
-                {...childrenArray}
+              <FeePayerProvider>
+                <TxFlowContent>
+                  {...childrenArray}
 
-                <ReviewTransactionComponent onSubmit={() => nextStep()}>
-                  <BalanceChanges />
-                  <FeesPreview />
-                  <FeeInfoBanner />
-                  <TxNote />
-                  <SignerSelect />
-                  <RiskConfirmation />
-                </ReviewTransactionComponent>
+                  <ReviewTransactionComponent onSubmit={() => nextStep()}>
+                    <BalanceChanges />
+                    <FeeCard />
+                    <FeeInfoBanner />
+                    <TxNote />
+                    <SignerSelect />
+                    <RiskConfirmation />
+                  </ReviewTransactionComponent>
 
-                {isReadyToExecute ? (
-                  <ExecuteTxStep />
-                ) : (
-                  <ConfirmTxReceipt onSubmit={handleFlowSubmit}>
-                    <Counterfactual />
+                  {isReadyToExecute ? (
+                    <ExecuteTxStep />
+                  ) : (
+                    <ConfirmTxReceipt onSubmit={handleFlowSubmit}>
+                      <Counterfactual />
 
-                    <ComboSubmit>
-                      <Sign />
-                      <Execute />
-                      <ExecuteThroughRole />
-                      <Batching />
-                    </ComboSubmit>
+                      <ComboSubmit>
+                        <Sign />
+                        <Execute />
+                        <ExecuteThroughRole />
+                        <Batching />
+                      </ComboSubmit>
 
-                    <Propose />
-                  </ConfirmTxReceipt>
-                )}
+                      <Propose />
+                    </ConfirmTxReceipt>
+                  )}
 
-                {signedTxId && <ExecuteTxStep afterSigning />}
-              </TxFlowContent>
+                  {signedTxId && <ExecuteTxStep afterSigning />}
+                </TxFlowContent>
+              </FeePayerProvider>
               <LedgerHashComparison />
             </TxFlowProvider>
           </SlotProvider>

@@ -16,7 +16,7 @@ import type {
   TransactionDetails,
   TransactionItemPage,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { transactionsIn } from './transaction-items'
+import { nonceOf, transactionsIn } from './transaction-items'
 
 const REQUEST_TIMEOUT_MS = 10_000
 const RETRY_DELAY_MS = 1_000
@@ -119,6 +119,13 @@ export class SafeApiClient {
     if (response.status === 404) return null
     if (!response.ok) throw await apiError(response)
     return response.json() as Promise<TransactionDetails>
+  }
+
+  /** Get the executed multisig transaction at `nonce`; null until the history lists it */
+  async findExecutedTransaction(safeAddress: string, nonce: number): Promise<TransactionDetails | null> {
+    const history = transactionsIn(await this.getTransactionHistory(safeAddress))
+    const executed = history.find((transaction) => nonceOf(transaction) === nonce)
+    return executed ? this.findTransaction(executed.id) : null
   }
 
   /** Get an off-chain message by its Safe message hash */

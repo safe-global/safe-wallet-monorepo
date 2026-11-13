@@ -1,7 +1,7 @@
 import GasParams from '@/components/tx/GasParams'
 import { useHasFeature } from '@/hooks/useChains'
 import { MODALS_EVENTS, trackEvent } from '@/services/analytics'
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import AdvancedParamsForm from './AdvancedParamsForm'
 import { type AdvancedParameters } from '@safe-global/views/components/tx/AdvancedParams/types'
 import { FEATURES } from '@safe-global/utils/utils/chains'
@@ -13,6 +13,8 @@ type Props = {
   onFormSubmit: (data: AdvancedParameters) => void
   gasLimitError?: Error
   willRelay?: boolean
+  isReadOnly?: boolean
+  feeLabel?: ReactNode
   noFeeCampaign?: {
     isEligible: boolean
     remaining: number
@@ -27,6 +29,8 @@ const AdvancedParams = ({
   onFormSubmit,
   gasLimitError,
   willRelay,
+  isReadOnly,
+  feeLabel,
   noFeeCampaign,
 }: Props) => {
   const [isEditing, setIsEditing] = useState<boolean>(false)
@@ -57,8 +61,9 @@ const AdvancedParams = ({
       isExecution={willExecute}
       isEIP1559={isEIP1559}
       gasLimitError={gasLimitError}
-      onEdit={onEditOpen}
+      onEdit={isReadOnly ? undefined : onEditOpen}
       willRelay={willRelay}
+      feeLabel={feeLabel}
       noFeeCampaign={noFeeCampaign}
     />
   )

@@ -26,7 +26,10 @@ export const getGasPaymentSource = ({
   isPayFromSafeChain: boolean
 }): GasPaymentSource | undefined => {
   if (isSafePaid) return 'safe'
-  if (isExecuted && gasPaymentOption) return gasPaymentOption === 'WALLET' ? 'signing_wallet' : 'sponsored'
+  if (isExecuted && gasPaymentOption) {
+    if (gasPaymentOption === 'PAY_FROM_SAFE') return 'safe'
+    return gasPaymentOption === 'WALLET' ? 'signing_wallet' : 'sponsored'
+  }
   return isPayFromSafeChain ? 'signing_wallet' : undefined
 }
 

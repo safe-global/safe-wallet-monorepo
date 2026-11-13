@@ -14,6 +14,7 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import { Operation } from '@safe-global/store/gateway/types'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { FeePayerContext } from '@/components/tx-flow/FeePayerContext'
 import { isPayFromSafeAvailable, usePayFromSafeFeePreview } from '@/features/fee-payment'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
@@ -58,7 +59,8 @@ export const Receipt = ({
 }: ReceiptProps) => {
   const chain = useCurrentChain()
   const { safe, safeAddress } = useSafeInfo()
-  const { safeTx, feePaymentMode, feeGasToken } = useContext(SafeTxContext)
+  const { safeTx, feeGasToken } = useContext(SafeTxContext)
+  const signStepPaysFromSafe = useContext(FeePayerContext)?.isPayFromSafe ?? false
   const { balances } = useBalances()
   const operation = Number(safeTxData.operation) as Operation
 
@@ -68,10 +70,7 @@ export const Receipt = ({
   }, [txDetails?.detailedExecutionInfo])
 
   const shouldPreviewPayFromSafe =
-    isPayFromSafeAvailable(chain) &&
-    (!safeTx || safeTx.signatures.size === 0) &&
-    feePaymentMode === 'safe' &&
-    !!feeGasToken
+    isPayFromSafeAvailable(chain) && (!safeTx || safeTx.signatures.size === 0) && signStepPaysFromSafe && !!feeGasToken
   const displayGasToken = shouldPreviewPayFromSafe ? feeGasToken : safeTxData.gasToken
   // Show which token actually pays the gas — the logo/symbol of the native currency or of the held
   // ERC-20 — beside the bare address, which on its own says nothing about what is being spent.
@@ -97,7 +96,7 @@ export const Receipt = ({
   const displayBaseGas = previewTxData?.baseGas ?? safeTxData.baseGas
   const displayGasPrice = previewTxData?.gasPrice ?? safeTxData.gasPrice
 
-  // The payload actually signed in Safe-pays carries the merged GTF fee fields. Build it once so the
+  // The payload actually signed in Safe-pays carries the merged Pay from Safe fee fields. Build it once so the
   // Data/JSON/Hashes tabs all reflect what the wallet will sign and not the bare pre-merge safeTx.
   const displaySafeTxData = useMemo(
     () => ({

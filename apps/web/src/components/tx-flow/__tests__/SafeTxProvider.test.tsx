@@ -4,7 +4,6 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { act, render, screen, waitFor } from '@/tests/test-utils'
 import SafeTxProvider, { SafeTxContext } from '../SafeTxProvider'
 import { getTxOrigin } from '@/utils/transactions'
-import { feePaymentSourcePreferenceSlice } from '@/features/fee-payment/store'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { Errors, logError } from '@/services/exceptions'
 import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
@@ -27,9 +26,10 @@ jest.mock('@/services/tx/tx-sender', () => {
 const mockedCreateTx = createTx as jest.MockedFunction<typeof createTx>
 
 const mockUseRecommendedNonce = jest.fn<number | undefined, []>(() => undefined)
+const mockUseSafeTxGas = jest.fn<string | undefined, []>(() => undefined)
 jest.mock('@/components/tx/shared/hooks', () => ({
   useRecommendedNonce: () => mockUseRecommendedNonce(),
-  useSafeTxGas: () => undefined,
+  useSafeTxGas: () => mockUseSafeTxGas(),
 }))
 
 const mockUseWallet = jest.fn<ConnectedWallet | null, []>(() => null)
@@ -40,20 +40,9 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   useWalletContext: () => null,
 }))
 
-const SIGNER_A = '0xAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAaAa'
-const SIGNER_B = '0xBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBbBb'
-
-const buildWallet = (address: string): ConnectedWallet =>
-  ({ address, chainId: '1', label: 'mock', provider: {} as never }) as unknown as ConnectedWallet
-
 const TestConsumer = () => {
   const { txOrigin } = useContext(SafeTxContext)
   return <div data-testid="origin">{txOrigin ?? 'undefined'}</div>
-}
-
-const PaymentModeReader = () => {
-  const { feePaymentMode } = useContext(SafeTxContext)
-  return <div data-testid="payment-mode">{feePaymentMode}</div>
 }
 
 /** Stands in for any of the ~20 review components that do `.catch(setSafeTxError)`. */
@@ -95,6 +84,7 @@ describe('SafeTxProvider', () => {
   beforeEach(() => {
     mockUseWallet.mockReturnValue(null)
     mockUseRecommendedNonce.mockReturnValue(undefined)
+    mockUseSafeTxGas.mockReturnValue(undefined)
     mockedLogError.mockClear()
     mockedCreateTx.mockClear()
   })
@@ -150,6 +140,44 @@ describe('SafeTxProvider', () => {
         transactions: [expect.objectContaining({ nonce: 5 })],
       })
       expect(screen.getByTestId('safe-tx-error')).toHaveTextContent('none')
+    })
+  })
+
+  describe('a payload the Safe pays for', () => {
+    it("keeps its safeTxGas and nonce, so a proposal's hash does not change before it is signed", async () => {
+      mockUseRecommendedNonce.mockReturnValue(22)
+      mockUseSafeTxGas.mockReturnValue('50000')
+      const tx = createMockSafeTransaction({ to: SCOPED_SAFE, data: '0x' })
+      tx.data.safeTxGas = '12983'
+      tx.data.baseGas = '72094'
+      tx.data.gasPrice = '1000018'
+      tx.data.refundReceiver = '0x53b3BDD8dB8352D9aB7bF39A527F9C24fC404DcD'
+
+      render(
+        <SafeTxProvider>
+          <BuiltFlow tx={tx} />
+        </SafeTxProvider>,
+      )
+      await act(async () => {
+        await Promise.resolve()
+      })
+
+      expect(mockedCreateTx).not.toHaveBeenCalled()
+    })
+
+    it('still rebuilds a signer-paid payload with the recommended safeTxGas', async () => {
+      mockUseSafeTxGas.mockReturnValue('50000')
+      const tx = createMockSafeTransaction({ to: SCOPED_SAFE, data: '0x' })
+
+      render(
+        <SafeTxProvider>
+          <BuiltFlow tx={tx} />
+        </SafeTxProvider>,
+      )
+
+      await waitFor(() =>
+        expect(mockedCreateTx).toHaveBeenCalledWith(expect.objectContaining({ safeTxGas: '50000' }), 0, undefined),
+      )
     })
   })
 
@@ -234,111 +262,6 @@ describe('SafeTxProvider', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('origin')).toHaveTextContent(safeAppOrigin)
-    })
-  })
-
-  describe('feePaymentMode persistence', () => {
-    it('defaults to "safe" when no preference is persisted', () => {
-      mockUseWallet.mockReturnValue(buildWallet(SIGNER_A))
-
-      render(
-        <SafeTxProvider>
-          <PaymentModeReader />
-        </SafeTxProvider>,
-      )
-
-      expect(screen.getByTestId('payment-mode')).toHaveTextContent('safe')
-    })
-
-    it('reflects the persisted preference for the connected signer', () => {
-      mockUseWallet.mockReturnValue(buildWallet(SIGNER_A))
-
-      render(
-        <SafeTxProvider>
-          <PaymentModeReader />
-        </SafeTxProvider>,
-        {
-          initialReduxState: {
-            [feePaymentSourcePreferenceSlice.name]: { [SIGNER_A.toLowerCase()]: 'signer' },
-          },
-        },
-      )
-
-      expect(screen.getByTestId('payment-mode')).toHaveTextContent('signer')
-    })
-
-    it('persists changes via setFeePaymentMode', async () => {
-      mockUseWallet.mockReturnValue(buildWallet(SIGNER_A))
-
-      const Toggle = () => {
-        const { feePaymentMode, setFeePaymentMode } = useContext(SafeTxContext)
-        return (
-          <>
-            <div data-testid="payment-mode">{feePaymentMode}</div>
-            <button onClick={() => setFeePaymentMode('signer')}>toggle</button>
-          </>
-        )
-      }
-
-      render(
-        <SafeTxProvider>
-          <Toggle />
-        </SafeTxProvider>,
-      )
-
-      expect(screen.getByTestId('payment-mode')).toHaveTextContent('safe')
-
-      act(() => {
-        screen.getByText('toggle').click()
-      })
-
-      await waitFor(() => {
-        expect(screen.getByTestId('payment-mode')).toHaveTextContent('signer')
-      })
-    })
-
-    it('re-reads the preference when the connected signer changes', () => {
-      mockUseWallet.mockReturnValue(buildWallet(SIGNER_A))
-
-      const { rerender } = render(
-        <SafeTxProvider>
-          <PaymentModeReader />
-        </SafeTxProvider>,
-        {
-          initialReduxState: {
-            [feePaymentSourcePreferenceSlice.name]: {
-              [SIGNER_A.toLowerCase()]: 'signer',
-              [SIGNER_B.toLowerCase()]: 'safe',
-            },
-          },
-        },
-      )
-
-      expect(screen.getByTestId('payment-mode')).toHaveTextContent('signer')
-
-      mockUseWallet.mockReturnValue(buildWallet(SIGNER_B))
-      rerender(
-        <SafeTxProvider>
-          <PaymentModeReader />
-        </SafeTxProvider>,
-      )
-
-      expect(screen.getByTestId('payment-mode')).toHaveTextContent('safe')
-    })
-
-    it('does not throw when no wallet is connected and the setter is invoked', () => {
-      const Toggle = () => {
-        const { setFeePaymentMode } = useContext(SafeTxContext)
-        return <button onClick={() => setFeePaymentMode('signer')}>toggle</button>
-      }
-
-      render(
-        <SafeTxProvider>
-          <Toggle />
-        </SafeTxProvider>,
-      )
-
-      expect(() => screen.getByText('toggle').click()).not.toThrow()
     })
   })
 })
