@@ -8,6 +8,17 @@ import { Popover, PopoverContent, PopoverTrigger } from '../popover'
 const CopyButton = () => <button type="button">Copy to clipboard</button>
 
 describe('popup initial focus', () => {
+  // jsdom has no layout, so tabbable would treat every element as hidden
+  beforeEach(() => {
+    jest
+      .spyOn(HTMLElement.prototype, 'getClientRects')
+      .mockReturnValue([new DOMRect(0, 0, 10, 10)] as unknown as DOMRectList)
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   describe.each([
     {
       name: 'DialogContent',
@@ -50,6 +61,17 @@ describe('popup initial focus', () => {
 
       await waitFor(() => expect(screen.getByRole('dialog')).toHaveFocus())
       expect(screen.getByRole('button', { name: 'Copy to clipboard' })).not.toHaveFocus()
+    })
+
+    it('starts in its first control when that is a text field', async () => {
+      render(
+        <Wrapper>
+          <input aria-label="Search" />
+          <CopyButton />
+        </Wrapper>,
+      )
+
+      await waitFor(() => expect(screen.getByRole('textbox', { name: 'Search' })).toHaveFocus())
     })
 
     it('focuses the element that initialFocus names', async () => {
