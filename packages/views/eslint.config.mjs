@@ -18,6 +18,7 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       'shadcn/no-raw-colors': 'error',
+      'shadcn/no-arbitrary-values': 'warn',
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules],
       'no-restricted-imports': [
         'error',
