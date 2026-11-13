@@ -1,7 +1,8 @@
 import { useIsSignedIn } from '@/hooks/useIsSignedIn'
 import useWallet from '@/hooks/wallets/useWallet'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { MemberRole, MemberStatus, useCurrentMemberProfile } from '../../hooks/useSpaceMembers'
+import { MemberStatus, useCurrentMemberProfile } from '../../hooks/useSpaceMembers'
+import { MemberRole } from '../../memberRole'
 import { getSidebarProfileInfo } from '@safe-global/views/features/spaces/components/HeaderNavigation/getSidebarProfileInfo'
 import { AccountInfo } from '../SpacesList/AccountInfo'
 

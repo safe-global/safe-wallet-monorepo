@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { MemberRole } from '../../../hooks/useSpaceMembers'
+import { MemberRole } from '../../../memberRole'
 import useInviteForm, { toInviteName } from './useInviteForm'
 
 const mockSpaceId = '11111111-1111-1111-1111-111111111111'
@@ -8,10 +8,6 @@ const mockOnSuccess = jest.fn()
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useMembersInviteUserV1Mutation: () => [mockInviteMembers],
-}))
-
-jest.mock('../../../hooks/useSpaceMembers', () => ({
-  MemberRole: { MEMBER: 'MEMBER', ADMIN: 'ADMIN' },
 }))
 
 const TestComponent = ({ spaceId }: { spaceId: string | undefined }) => {
