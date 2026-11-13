@@ -133,4 +133,41 @@ describe('WorkspaceWizard', () => {
 
     await waitFor(() => expect(selectIsResumeOffered(getStoreInstance().getState())).toBe(true))
   })
+
+  describe('leaving the wizard', () => {
+    const renderOnLaterStep = () => {
+      const handlers = new Map<string, (url: string) => void>()
+      const events = {
+        on: jest.fn((event: string, handler: (url: string) => void) => handlers.set(event, handler)),
+        off: jest.fn(),
+        emit: jest.fn(),
+      }
+      server.use(userHandler(fakeUserId()), workspacesHandler())
+      renderWithUserEvent(<WorkspaceWizard step="safes" />, {
+        routerProps: { events, query: {} },
+        initialReduxState: { auth: signedInAuthState() },
+      })
+      return (url: string) => handlers.get('routeChangeStart')?.(url)
+    }
+
+    const resumeOffer = () => getStoreInstance().getState().workspaceWizard.resumeOffer
+
+    it('makes the next visit a new start, so its first step offers the draft again', async () => {
+      const navigate = renderOnLaterStep()
+      await waitFor(() => expect(resumeOffer()).toBe('done'))
+
+      navigate(`${AppRoutes.spaces.index}?spaceId=${faker.string.uuid()}`)
+
+      expect(resumeOffer()).toBe('unknown')
+    })
+
+    it('keeps the answer while the user moves between steps', async () => {
+      const navigate = renderOnLaterStep()
+      await waitFor(() => expect(resumeOffer()).toBe('done'))
+
+      navigate(`${AppRoutes.welcome.createSpace}?spaceId=${faker.string.uuid()}`)
+
+      expect(resumeOffer()).toBe('done')
+    })
+  })
 })

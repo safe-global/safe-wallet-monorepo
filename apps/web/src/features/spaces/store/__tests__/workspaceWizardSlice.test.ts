@@ -1,5 +1,5 @@
 import { makeStore } from '@/store'
-import { resumeOfferAnswered, selectIsResumeOffered, wizardStepOpened } from '../workspaceWizardSlice'
+import { resumeOfferAnswered, selectIsResumeOffered, wizardLeft, wizardStepOpened } from '../workspaceWizardSlice'
 
 describe('workspaceWizardSlice', () => {
   it('offers the saved draft when the wizard opens on its first step', () => {
@@ -26,6 +26,17 @@ describe('workspaceWizardSlice', () => {
     store.dispatch(wizardStepOpened(true))
 
     expect(selectIsResumeOffered(store.getState())).toBe(false)
+  })
+
+  it('offers the saved draft again when the user comes back after leaving the wizard', () => {
+    const store = makeStore()
+    store.dispatch(wizardStepOpened(true))
+    store.dispatch(wizardStepOpened(false))
+
+    store.dispatch(wizardLeft())
+    store.dispatch(wizardStepOpened(true))
+
+    expect(selectIsResumeOffered(store.getState())).toBe(true)
   })
 
   it('ends the offer once the user answers it', () => {

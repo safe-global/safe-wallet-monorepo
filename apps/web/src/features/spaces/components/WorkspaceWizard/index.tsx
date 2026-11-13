@@ -6,14 +6,14 @@ import SetupProgress from '@safe-global/views/features/spaces/components/Workspa
 import { AppRoutes } from '@/config/routes'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { useAppDispatch } from '@/store'
-import { wizardStepOpened } from '@/features/spaces/store'
+import { wizardLeft, wizardStepOpened } from '@/features/spaces/store'
 import { CHECKOUT_SESSION_QUERY_PARAM } from '../../hooks/billing/returnUrl'
 import CheckoutReturnScreen from './CheckoutReturnScreen'
 import { useTrialSizes } from './hooks/useTrialSizes'
 import { useWizardNavigation } from './hooks/useWizardNavigation'
 import { useWorkspaceDraft } from './hooks/useWorkspaceDraft'
 import { fromSetup } from './setupRequest'
-import type { WizardStepId } from './steps'
+import { WIZARD_STEPS, type WizardStepId } from './steps'
 import { findFirstInvalidStep } from './validation'
 import InviteStep from './steps/InviteStep'
 import NameStep from './steps/NameStep'
@@ -30,6 +30,23 @@ const STEP_COMPONENTS: Record<WizardStepId, () => ReactElement> = {
 }
 
 const queryString = (value: string | string[] | undefined): string | null => (typeof value === 'string' ? value : null)
+
+const WIZARD_ROUTES = new Set(WIZARD_STEPS.map((step) => step.route))
+
+/** Leaving the wizard makes the next visit a new start, so its first step offers the saved draft again. */
+const useResumeOfferResetOnLeave = () => {
+  const router = useRouter()
+  const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    const onRouteChangeStart = (url: string) => {
+      const pathname = url.split(/[?#]/)[0]
+      if (!WIZARD_ROUTES.has(pathname)) dispatch(wizardLeft())
+    }
+    router.events.on('routeChangeStart', onRouteChangeStart)
+    return () => router.events.off('routeChangeStart', onRouteChangeStart)
+  }, [router.events, dispatch])
+}
 
 /** Loads the pending setup of the Workspace in the URL into the draft. */
 export const useResumeSetup = (spaceId: string | null, isReturning: boolean) => {
@@ -87,6 +104,7 @@ const WorkspaceWizard = ({ step }: { step: WizardStepId }): ReactElement => {
   const urlSpaceId = queryString(router.query.spaceId)
   const resume = useResumeSetup(urlSpaceId, sessionId !== null)
   useFirstInvalidStepRedirect(step, sessionId === null && !resume.isResuming)
+  useResumeOfferResetOnLeave()
 
   useEffect(() => {
     dispatch(wizardStepOpened(step === 'name'))

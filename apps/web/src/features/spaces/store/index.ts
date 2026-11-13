@@ -29,5 +29,6 @@ export {
   workspaceWizardSlice,
   wizardStepOpened,
   resumeOfferAnswered,
+  wizardLeft,
   selectIsResumeOffered,
 } from './workspaceWizardSlice'
