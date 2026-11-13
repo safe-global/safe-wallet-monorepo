@@ -26,9 +26,7 @@ import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { CopyDeeplinkLabels } from '@/services/analytics'
 import TxShareLinkWrapper from '@/components/transactions/TxShareLink/TxShareLink'
 import { useLoadFeature } from '@/features/__core__'
-import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
-import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
-import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
+import { SafenetChecksFeature, useIsSafenetChecksEnabled, useSafenetDisplayStatus } from '@/features/safenet-checks'
 import ExplorerButton from '@safe-global/views/components/common/ExplorerButton'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import useAsync from '@safe-global/utils/hooks/useAsync'
@@ -164,17 +162,12 @@ const TxSigners = ({
   const isMultisig = isMultisigDetailedExecutionInfo(detailedExecutionInfo)
   const isModule = isModuleDetailedExecutionInfo(detailedExecutionInfo)
 
-  // Subscribed here as well as inside the row (same cache entry, one chain
-  // read) so the sibling rows' isLast can account for the Safenet step. The
-  // undefined hash skips the read entirely while the flag is off.
+  // Same hook and cache entry as SafenetAuditRow's own render gate, so the
+  // sibling rows' isLast accounts for the Safenet step. The undefined hash
+  // skips the read entirely while the flag is off.
   const safenetHash = isSafenetEnabled && isMultisig ? detailedExecutionInfo.safeTxHash : undefined
-  const safenetCheck = useSafenetCheck(safenetHash, isMultisig ? detailedExecutionInfo.submittedAt : null, {
-    chainId: safe.chainId,
-    safeAddress: safe.address.value,
-  })
-  // Must mirror SafenetAuditRow's own render gate, or the connector math drifts.
-  const showsSafenetRow =
-    !!safenetHash && !!safenetCheck.snapshot && safenetCheck.publicStatus !== CheckStatus.UNAVAILABLE
+  const safenetDisplay = useSafenetDisplayStatus(safenetHash, isMultisig ? detailedExecutionInfo.submittedAt : null)
+  const showsSafenetRow = !!safenetHash && !!safenetDisplay
 
   // Lookup the EOA that submitted the transaction on-chain (for module and incoming txs)
   const readOnlyProvider = useWeb3ReadOnly()
