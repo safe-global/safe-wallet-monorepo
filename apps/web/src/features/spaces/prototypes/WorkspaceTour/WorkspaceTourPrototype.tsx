@@ -1,15 +1,19 @@
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 import {
+  ArrowRightLeft,
   ChevronRight,
   ChevronsUpDown,
   CircleHelp,
+  Coins,
   Landmark,
   Laptop,
   LayoutGrid,
   type LucideIcon,
+  Settings,
   ShieldCheck,
   Sparkles,
+  TrendingUp,
   UserRound,
   Users,
   UsersRound,
@@ -74,6 +78,8 @@ type TourStep = {
   title: string
   body: string
   tip?: string
+  /** What lives inside the highlighted thing, listed under the body. */
+  inside?: { icon: LucideIcon; label: string; description: string }[]
   /** Clicked once when the step opens, e.g. to switch to the tab being explained. */
   select?: string
 }
@@ -138,31 +144,21 @@ const TOUR_STEPS: TourStep[] = [
     tip: 'Not needed to look around.',
   },
   {
-    id: 'dashboard',
-    target: navTarget('dashboard'),
-    page: 'dashboard',
-    placement: 'right',
-    icon: LayoutGrid,
-    title: 'Dashboard',
-    body: 'Total balance across your Safes and what needs signing.',
-  },
-  {
-    id: 'safe-accounts',
-    target: navTarget('safe-accounts'),
-    page: 'safe-accounts',
-    placement: 'right',
-    icon: WalletCards,
-    title: 'Safe accounts',
-    body: 'Every Safe your team manages, on all networks.',
-  },
-  {
     id: 'safe-row',
     target: ['[data-testid="safe-accounts-table"] tbody tr', '[data-testid="safe-list-item"]'],
     page: 'safe-accounts',
     placement: 'bottom',
     icon: ChevronRight,
-    title: 'Open a Safe',
-    body: 'Click a Safe to see its assets, apps and settings.',
+    title: 'Open a Safe to work inside it',
+    body: 'The workspace is your overview. Everything for a single Safe lives inside that Safe:',
+    inside: [
+      { icon: Coins, label: 'Assets', description: 'Tokens and NFTs it holds' },
+      { icon: ArrowRightLeft, label: 'Transactions', description: 'Send, sign and execute' },
+      { icon: LayoutGrid, label: 'Apps', description: 'Connect dApps and build batches' },
+      { icon: TrendingUp, label: 'DeFi', description: 'Positions across protocols' },
+      { icon: Settings, label: 'Settings', description: 'Signers, threshold and modules' },
+    ],
+    tip: 'Click a Safe to open it. The sidebar then shows a way back to the workspace.',
   },
   {
     id: 'address-book-workspace',
@@ -185,15 +181,6 @@ const TOUR_STEPS: TourStep[] = [
     title: 'Local contacts',
     body: 'Only you see these, and only in this browser.',
     tip: 'Use "Add to Workspace" to share one.',
-  },
-  {
-    id: 'team',
-    target: navTarget('team'),
-    page: 'team',
-    placement: 'right',
-    icon: UsersRound,
-    title: 'Team',
-    body: 'Invite teammates and set their role.',
   },
   {
     id: 'replay',
@@ -510,6 +497,21 @@ const TourOverlay = ({ stepIndex, direction, onGoTo, onSkip, onFinish }: TourOve
                   <Typography variant="paragraph-small" color="muted">
                     {step.body}
                   </Typography>
+                  {step.inside && (
+                    <div className="flex flex-col gap-2">
+                      {step.inside.map(({ icon: Icon, label, description }) => (
+                        <div key={label} className="flex items-center gap-3">
+                          <StepIcon icon={Icon} />
+                          <div className="flex flex-col">
+                            <Typography variant="paragraph-small-medium">{label}</Typography>
+                            <Typography variant="paragraph-mini" color="muted">
+                              {description}
+                            </Typography>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   {step.tip && (
                     <Typography variant="paragraph-mini" color="muted">
                       {step.tip}
