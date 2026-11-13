@@ -31,6 +31,11 @@ const opportunity = (overrides: Partial<Opportunity> = {}): Opportunity => ({
   access: 'all',
   placement: 'base',
   onShelf: true,
+  tvl: faker.number.int({ min: 1_000_000, max: 1_000_000_000 }),
+  managementFee: 0,
+  protocolFee: faker.lorem.words(2),
+  yieldSource: faker.lorem.sentence(),
+  operators: faker.company.name(),
   ...overrides,
 })
 
@@ -155,6 +160,7 @@ describe('categoryHighlights', () => {
 
     const [cash] = categoryHighlights([slowHighRate, fastLowRate])
 
-    expect(cash).toEqual({ category: 'cash', bestApy: 0.05, exitLabel: 'Exit instantly', count: 2 })
+    expect(cash).toMatchObject({ category: 'cash', bestApy: 0.05, exitLabel: 'Exit instantly', count: 2 })
+    expect(cash.top).toBe(slowHighRate)
   })
 })

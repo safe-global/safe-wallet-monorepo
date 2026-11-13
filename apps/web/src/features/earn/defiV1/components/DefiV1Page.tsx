@@ -6,22 +6,30 @@ import { DEFI_V1_COPY } from '../copy'
 import { EXISTING_POSITIONS, OPPORTUNITIES, TREASURY_TOTAL } from '../opportunities'
 import {
   buildShelf,
+  categoryHighlights,
   filterOpportunities,
   isLocked,
   NUDGE_MAX_EXIT_HOURS,
-  categoryHighlights,
   summariseTreasury,
   type ListFilters,
 } from '../shelf'
-import type { DefiV1Config, Opportunity, OpportunityCategory } from '../types'
-import { DepositDialog, type DepositResult } from './DepositDialog'
-import { FactSheet } from './FactSheet'
-import { PolicyPanel } from './PolicyPanel'
-import { MORE_GROUP, TreasuryTable, type OpportunityGroup, type Position } from './TreasuryTables'
-import { TreasurySummary } from './TreasurySummary'
+import type { DefiV1Config, Opportunity } from '../types'
 import { CategoryCards } from './CategoryCards'
+import { DepositDialog, type DepositResult } from './DepositDialog'
+import { OpportunityDrawer } from './OpportunityDrawer'
+import { PolicyPanel } from './PolicyPanel'
+import { TreasurySummary } from './TreasurySummary'
+import {
+  InvestmentsTable,
+  MORE_GROUP,
+  OpportunitiesTable,
+  type OpportunityGroup,
+  type Position,
+} from './TreasuryTables'
 
 const ALL = 'all'
+
+type PageTab = 'opportunities' | 'investments'
 
 const initialPositions = (): Position[] =>
   EXISTING_POSITIONS.flatMap((existing) => {
@@ -76,17 +84,15 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const [selected, setSelected] = useState<Opportunity | null>(null)
   const [depositing, setDepositing] = useState<Opportunity | null>(null)
   const [positions, setPositions] = useState<Position[]>(initialPositions)
+  const [tab, setTab] = useState<PageTab>('opportunities')
   const [search, setSearch] = useState('')
   const [asset, setAsset] = useState(ALL)
   const [chain, setChain] = useState(ALL)
   const [exit, setExit] = useState(ALL)
-  const summary = summariseTreasury(TREASURY_TOTAL, positions)
-  const highlights = useMemo(() => categoryHighlights(OPPORTUNITIES), [])
-  const [focus, setFocus] = useState<{ id: string; nonce: number }>()
-  const focusCategory = (category: OpportunityCategory) =>
-    setFocus((current) => ({ id: category, nonce: (current?.nonce ?? 0) + 1 }))
   const isDefi = config.framing === 'defi'
   const locked = (item: Opportunity) => isLocked(item, config.model, config.plan)
+  const summary = summariseTreasury(TREASURY_TOTAL, positions)
+  const highlights = useMemo(() => categoryHighlights(OPPORTUNITIES), [])
 
   const groups = useMemo<OpportunityGroup[]>(() => {
     if (!isDefi) return treasuryGroups(search)
@@ -109,83 +115,96 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
 
   return (
     <div className="@container min-w-0 px-6 pb-8 pt-5" data-testid="defi-v1-page">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div className="flex min-w-0 flex-1 flex-col gap-4">
-          <div className="flex flex-col gap-1">
-            <Typography as="h1" variant="h3">
-              {DEFI_V1_COPY.tabName[config.framing]}
+      <div className="mb-6 flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <Typography as="h1" variant="h3">
+            {DEFI_V1_COPY.tabName[config.framing]}
+          </Typography>
+          {config.model === 'B' && config.plan === 'free' && (
+            <Typography variant="paragraph-mini" color="muted">
+              {DEFI_V1_COPY.plan.modelB} · {DEFI_V1_COPY.plan.feePlaceholder}
             </Typography>
-            {config.model === 'B' && config.plan === 'free' && (
-              <Typography variant="paragraph-mini" color="muted">
-                {DEFI_V1_COPY.plan.modelB} · {DEFI_V1_COPY.plan.feePlaceholder}
-              </Typography>
-            )}
-          </div>
-          {!isDefi && <CategoryCards highlights={highlights} onSelect={focusCategory} />}
-        </div>
-        <TreasurySummary summary={summary} footer={<PolicyPanel plan={config.plan} idle={summary.idle} />} />
-      </div>
-
-      <section aria-label="Treasury" className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <SearchInput
-            aria-label="Search opportunities"
-            placeholder="Search by name or asset"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            onClear={() => setSearch('')}
-            className="max-w-72"
-          />
-          {isDefi && (
-            <div className="flex flex-wrap items-center gap-2">
-              <FilterTabs
-                label="Asset"
-                value={asset}
-                onChange={setAsset}
-                options={[
-                  { value: ALL, label: 'All assets' },
-                  { value: 'USDC', label: 'USDC' },
-                  { value: 'ETH', label: 'ETH' },
-                ]}
-              />
-              <FilterTabs
-                label="Network"
-                value={chain}
-                onChange={setChain}
-                options={[
-                  { value: ALL, label: 'All networks' },
-                  { value: 'Ethereum', label: 'Ethereum' },
-                  { value: 'Base', label: 'Base' },
-                  { value: 'Arbitrum', label: 'Arbitrum' },
-                ]}
-              />
-              <FilterTabs
-                label="Exit time"
-                value={exit}
-                onChange={setExit}
-                options={[
-                  { value: ALL, label: 'Any exit time' },
-                  { value: 'day', label: 'Within a day' },
-                ]}
-              />
-            </div>
           )}
         </div>
-
-        <TreasuryTable
-          positions={positions}
-          groups={groups}
-          flat={isDefi}
-          focus={focus}
-          isLocked={locked}
-          onSelect={setSelected}
-          onDeposit={setDepositing}
+        <TreasurySummary
+          summary={summary}
+          footer={<PolicyPanel plan={config.plan} idle={summary.idle} />}
+          onSeeInvestments={() => setTab('investments')}
         />
-      </section>
+      </div>
 
-      <FactSheet
+      <Tabs value={tab} onValueChange={(next) => setTab(next as PageTab)} className="mb-4">
+        <TabsList aria-label="Treasury sections">
+          <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
+          <TabsTrigger value="investments">Investments ({positions.length})</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {tab === 'investments' ? (
+        <section aria-label="Investments">
+          <InvestmentsTable positions={positions} />
+        </section>
+      ) : (
+        <section aria-label="Opportunities" className="flex flex-col gap-4">
+          {!isDefi && <CategoryCards highlights={highlights} onSelect={(highlight) => setSelected(highlight.top)} />}
+          <div className="flex flex-wrap items-center gap-3">
+            <SearchInput
+              aria-label="Search opportunities"
+              placeholder="Search by name or asset"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              onClear={() => setSearch('')}
+              className="max-w-72"
+            />
+            {isDefi && (
+              <div className="flex flex-wrap items-center gap-2">
+                <FilterTabs
+                  label="Asset"
+                  value={asset}
+                  onChange={setAsset}
+                  options={[
+                    { value: ALL, label: 'All assets' },
+                    { value: 'USDC', label: 'USDC' },
+                    { value: 'ETH', label: 'ETH' },
+                  ]}
+                />
+                <FilterTabs
+                  label="Network"
+                  value={chain}
+                  onChange={setChain}
+                  options={[
+                    { value: ALL, label: 'All networks' },
+                    { value: 'Ethereum', label: 'Ethereum' },
+                    { value: 'Base', label: 'Base' },
+                    { value: 'Arbitrum', label: 'Arbitrum' },
+                  ]}
+                />
+                <FilterTabs
+                  label="Exit time"
+                  value={exit}
+                  onChange={setExit}
+                  options={[
+                    { value: ALL, label: 'Any exit time' },
+                    { value: 'day', label: 'Within a day' },
+                  ]}
+                />
+              </div>
+            )}
+          </div>
+          <OpportunitiesTable
+            groups={groups}
+            flat={isDefi}
+            isLocked={locked}
+            onSelect={setSelected}
+            onDeposit={setDepositing}
+          />
+        </section>
+      )}
+
+      <OpportunityDrawer
         opportunity={selected}
         locked={selected ? locked(selected) : false}
+        plan={config.plan}
         onClose={() => setSelected(null)}
         onDeposit={(item) => {
           setSelected(null)

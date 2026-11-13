@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState, type ReactNode } from 'react'
+import { Fragment, useState, type ReactNode } from 'react'
 import { ChevronDown, Clock, Lock } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -12,10 +12,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@safe-global/views/components/ui/dialog'
-import { Table, TableBody, TableCell, TableHead, TableRow } from '@safe-global/views/components/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@safe-global/views/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { cn } from '@safe-global/views/utils/cn'
-import { DEFI_V1_COPY, formatApy, formatCompactUsd, formatUsd } from '../copy'
+import { DEFI_V1_COPY, formatApy, formatUsd } from '../copy'
 import { CHAIN_IDS } from '../opportunities'
 import type { Opportunity } from '../types'
 
@@ -24,8 +24,6 @@ const COLUMN_WIDTHS = ['w-10', 'w-64', 'w-20', 'w-32', 'w-28', 'w-36', '', 'w-20
 const COLUMN_COUNT = COLUMN_WIDTHS.length
 const INVESTMENT_HEADERS = ['Position', 'Asset', 'Exit time', 'Deposited', 'Network', 'Earned', 'Rate']
 const OPPORTUNITY_HEADERS = ['Opportunity', 'Asset', 'Exit time', 'Risk', 'Access', 'Networks', 'Rate']
-const INVESTMENTS_SECTION = 'investments'
-const OPPORTUNITIES_SECTION = 'opportunities'
 
 export const MORE_GROUP = 'more'
 
@@ -48,7 +46,6 @@ const SectionBand = ({
   subtitle,
   aside,
   collapsed,
-  nested,
   onToggle,
 }: {
   id: string
@@ -56,7 +53,6 @@ const SectionBand = ({
   subtitle?: string
   aside: ReactNode
   collapsed: boolean
-  nested?: boolean
   onToggle: (id: string) => void
 }) => (
   <TableRow
@@ -68,11 +64,11 @@ const SectionBand = ({
     id={`band-${id}`}
     data-testid={`shelf-${id}`}
   >
-    <TableCell className={cn('rounded-l-lg', nested ? 'py-0!' : BAND_CELL)}>
+    <TableCell className={`rounded-l-lg ${BAND_CELL}`}>
       <Chevron collapsed={collapsed} />
     </TableCell>
-    <TableCell colSpan={COLUMN_COUNT - 1} className={cn('rounded-r-lg pr-3!', nested ? 'py-0!' : BAND_CELL)}>
-      <div className={cn('flex items-center gap-3', nested ? 'min-h-9' : 'min-h-11')}>
+    <TableCell colSpan={COLUMN_COUNT - 1} className={`rounded-r-lg pr-3! ${BAND_CELL}`}>
+      <div className="flex min-h-11 items-center gap-3">
         <span className="text-sm font-medium text-foreground">{title}</span>
         {subtitle && <span className="truncate text-xs text-muted-foreground">{subtitle}</span>}
         <span className="ml-auto flex shrink-0 items-center gap-2 text-xs text-muted-foreground">{aside}</span>
@@ -82,21 +78,23 @@ const SectionBand = ({
 )
 
 const ColumnHeaders = ({ labels }: { labels: string[] }) => (
-  <TableRow data-no-hover>
-    <TableHead />
-    {labels.map((label) => (
-      <TableHead key={label} className="text-xs text-muted-foreground">
-        {label}
+  <TableHeader>
+    <TableRow data-no-hover>
+      <TableHead />
+      {labels.map((label) => (
+        <TableHead key={label} className="text-xs text-muted-foreground">
+          {label}
+        </TableHead>
+      ))}
+      <TableHead>
+        <span className="sr-only">Action</span>
       </TableHead>
-    ))}
-    <TableHead>
-      <span className="sr-only">Action</span>
-    </TableHead>
-  </TableRow>
+    </TableRow>
+  </TableHeader>
 )
 
 // Mirrors the Tag in the pending queue prototype, which is not on dev yet.
-const Tag = ({ children, muted }: { children: ReactNode; muted?: boolean }) => (
+export const Tag = ({ children, muted }: { children: ReactNode; muted?: boolean }) => (
   <span
     className={cn(
       'inline-flex h-6 w-fit shrink-0 items-center gap-1 whitespace-nowrap rounded-[6px] px-2 text-[13px] leading-5 font-medium [&>svg]:size-3.5 [&>svg]:shrink-0',
@@ -104,6 +102,15 @@ const Tag = ({ children, muted }: { children: ReactNode; muted?: boolean }) => (
     )}
   >
     {children}
+  </span>
+)
+
+export const OpportunityMark = ({ opportunity }: { opportunity: Opportunity }) => (
+  <span
+    className="flex size-8 shrink-0 items-center justify-center rounded-md bg-foreground text-xs font-semibold text-background"
+    aria-hidden
+  >
+    {opportunity.mark}
   </span>
 )
 
@@ -117,12 +124,7 @@ const NameCell = ({ opportunity }: { opportunity: Opportunity }) => {
   const placement = PLACEMENT_TAG[opportunity.placement]
   return (
     <div className="flex min-w-0 items-center gap-3">
-      <span
-        className="flex size-8 shrink-0 items-center justify-center rounded-md bg-foreground text-xs font-semibold text-background"
-        aria-hidden
-      >
-        {opportunity.mark}
-      </span>
+      <OpportunityMark opportunity={opportunity} />
       <div className="flex min-w-0 flex-col">
         <span className="flex min-w-0 items-center gap-2">
           <span className="truncate font-medium text-foreground">{opportunity.name}</span>
@@ -147,7 +149,7 @@ const ExitCell = ({ opportunity }: { opportunity: Opportunity }) => (
   </Tooltip>
 )
 
-const ChainLogo = ({ chain }: { chain: string }) => (
+export const ChainLogo = ({ chain }: { chain: string }) => (
   <Avatar size="xs" className="size-4 ring-2 ring-card">
     {CHAIN_IDS[chain] && (
       <AvatarImage
@@ -300,128 +302,100 @@ const WithdrawDialog = ({ position, onClose }: { position: Position | null; onCl
   )
 }
 
-export const TreasuryTable = ({
-  positions,
+const TableCard = ({ label, children }: { label: string; children: ReactNode }) => (
+  <Card radius="xl" size="none">
+    <CardContent>
+      <Table aria-label={label} variant="panel" className="table-fixed min-w-[1040px] [&_td]:px-4 [&_th]:px-4">
+        <colgroup>
+          {COLUMN_WIDTHS.map((width, index) => (
+            <col key={index} className={width || undefined} />
+          ))}
+        </colgroup>
+        {children}
+      </Table>
+    </CardContent>
+  </Card>
+)
+
+export const OpportunitiesTable = ({
   groups,
   flat,
-  focus,
   isLocked,
   onSelect,
   onDeposit,
 }: {
-  positions: Position[]
-  focus?: { id: string; nonce: number }
   groups: OpportunityGroup[]
   flat?: boolean
   isLocked: (item: Opportunity) => boolean
   onSelect: (item: Opportunity) => void
   onDeposit: (item: Opportunity) => void
 }) => {
-  const [collapsed, setCollapsed] = useState<string[]>([INVESTMENTS_SECTION, MORE_GROUP])
-  const [withdrawing, setWithdrawing] = useState<Position | null>(null)
-  useEffect(() => {
-    if (!focus) return
-    setCollapsed((current) => current.filter((id) => id !== OPPORTUNITIES_SECTION && id !== focus.id))
-    requestAnimationFrame(() =>
-      document.getElementById(`band-${focus.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }),
-    )
-  }, [focus])
-
+  const [collapsed, setCollapsed] = useState<string[]>([MORE_GROUP])
   const toggle = (id: string) =>
     setCollapsed((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]))
-  const isCollapsed = (id: string) => collapsed.includes(id)
   const rowProps = { isLocked, onSelect, onDeposit }
-  const deposited = positions.reduce((sum, position) => sum + position.principal, 0)
-  const optionCount = groups.reduce((sum, group) => sum + group.items.length, 0)
-  const opportunitiesCollapsed = isCollapsed(OPPORTUNITIES_SECTION)
 
   return (
-    <Card radius="xl" size="none">
-      <CardContent>
-        <Table aria-label="Treasury" variant="panel" className="table-fixed min-w-[1040px] [&_td]:px-4 [&_th]:px-4">
-          <colgroup>
-            {COLUMN_WIDTHS.map((width, index) => (
-              <col key={index} className={width || undefined} />
+    <TableCard label="Opportunities">
+      <ColumnHeaders labels={OPPORTUNITY_HEADERS} />
+      {flat ? (
+        <TableBody>
+          {groups
+            .flatMap((group) => group.items)
+            .map((item) => (
+              <OpportunityRow key={item.id} opportunity={item} {...rowProps} />
             ))}
-          </colgroup>
+        </TableBody>
+      ) : (
+        groups.map((group) => (
+          <Fragment key={group.id}>
+            <TableBody>
+              <SectionBand
+                id={group.id}
+                title={group.title}
+                subtitle={group.subtitle}
+                collapsed={collapsed.includes(group.id)}
+                onToggle={toggle}
+                aside={<Badge variant="subtle">{group.items.length}</Badge>}
+              />
+            </TableBody>
+            <TableBody hidden={collapsed.includes(group.id)}>
+              {group.items.map((item) => (
+                <OpportunityRow key={item.id} opportunity={item} {...rowProps} />
+              ))}
+            </TableBody>
+          </Fragment>
+        ))
+      )}
+    </TableCard>
+  )
+}
 
-          <TableBody>
-            <SectionBand
-              id={INVESTMENTS_SECTION}
-              title="Investments"
-              collapsed={isCollapsed(INVESTMENTS_SECTION)}
-              onToggle={toggle}
-              aside={
-                <>
-                  <span>
-                    {positions.length} {positions.length === 1 ? 'investment' : 'investments'}
-                  </span>
-                  <Badge variant="subtle">{formatCompactUsd(deposited)}</Badge>
-                </>
-              }
-            />
-          </TableBody>
-          <TableBody hidden={isCollapsed(INVESTMENTS_SECTION)} data-testid="defi-positions">
-            {positions.length > 0 ? (
-              <>
-                <ColumnHeaders labels={INVESTMENT_HEADERS} />
-                {positions.map((position, index) => (
-                  <InvestmentRow
-                    key={`${position.opportunity.id}-${index}`}
-                    position={position}
-                    onWithdraw={setWithdrawing}
-                  />
-                ))}
-              </>
-            ) : (
-              <TableRow data-no-hover>
-                <TableCell colSpan={COLUMN_COUNT} className="py-6 text-center text-muted-foreground">
-                  No investments yet. Deposit from an opportunity below.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-
-          <TableBody>
-            <SectionBand
-              id={OPPORTUNITIES_SECTION}
-              title="Opportunities"
-              collapsed={opportunitiesCollapsed}
-              onToggle={toggle}
-              aside={<span>{optionCount} options</span>}
-            />
-          </TableBody>
-          <TableBody hidden={opportunitiesCollapsed}>
-            <ColumnHeaders labels={OPPORTUNITY_HEADERS} />
-            {flat &&
-              groups
-                .flatMap((group) => group.items)
-                .map((item) => <OpportunityRow key={item.id} opportunity={item} {...rowProps} />)}
-          </TableBody>
-          {!flat &&
-            groups.map((group) => (
-              <Fragment key={group.id}>
-                <TableBody hidden={opportunitiesCollapsed}>
-                  <SectionBand
-                    id={group.id}
-                    title={group.title}
-                    subtitle={group.subtitle}
-                    nested
-                    collapsed={isCollapsed(group.id)}
-                    onToggle={toggle}
-                    aside={<Badge variant="subtle">{group.items.length}</Badge>}
-                  />
-                </TableBody>
-                <TableBody hidden={opportunitiesCollapsed || isCollapsed(group.id)}>
-                  {group.items.map((item) => (
-                    <OpportunityRow key={item.id} opportunity={item} {...rowProps} />
-                  ))}
-                </TableBody>
-              </Fragment>
-            ))}
-        </Table>
-      </CardContent>
+export const InvestmentsTable = ({ positions }: { positions: Position[] }) => {
+  const [withdrawing, setWithdrawing] = useState<Position | null>(null)
+  return (
+    <>
+      <TableCard label="Investments">
+        <ColumnHeaders labels={INVESTMENT_HEADERS} />
+        <TableBody data-testid="defi-positions">
+          {positions.length > 0 ? (
+            positions.map((position, index) => (
+              <InvestmentRow
+                key={`${position.opportunity.id}-${index}`}
+                position={position}
+                onWithdraw={setWithdrawing}
+              />
+            ))
+          ) : (
+            <TableRow data-no-hover>
+              <TableCell colSpan={COLUMN_COUNT} className="py-6 text-center text-muted-foreground">
+                No investments yet. Deposit from the Opportunities tab.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </TableCard>
       <WithdrawDialog position={withdrawing} onClose={() => setWithdrawing(null)} />
-    </Card>
+    </>
   )
 }

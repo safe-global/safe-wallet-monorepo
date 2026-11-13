@@ -1,21 +1,20 @@
 import { ArrowRight, Clock } from 'lucide-react'
 import { DEFI_V1_COPY, formatApy } from '../copy'
 import type { CategoryHighlight } from '../shelf'
-import type { OpportunityCategory } from '../types'
 
 export const CategoryCards = ({
   highlights,
   onSelect,
 }: {
   highlights: CategoryHighlight[]
-  onSelect: (category: OpportunityCategory) => void
+  onSelect: (highlight: CategoryHighlight) => void
 }) => (
   <div className="grid gap-3 sm:grid-cols-3" data-testid="category-cards">
     {highlights.map((highlight) => (
       <button
         key={highlight.category}
         type="button"
-        onClick={() => onSelect(highlight.category)}
+        onClick={() => onSelect(highlight)}
         data-testid={`category-card-${highlight.category}`}
         className="group/card flex flex-col gap-2 rounded-xl border border-transparent bg-card p-4 text-left transition-colors hover:border-border"
       >

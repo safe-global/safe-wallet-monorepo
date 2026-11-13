@@ -26,6 +26,12 @@ export type Opportunity = {
   access: Access
   placement: Placement
   onShelf: boolean
+  tvl: number
+  /** Paid to the protocol or curator, already in the rate shown. */
+  managementFee: number
+  protocolFee: string
+  yieldSource: string
+  operators: string
   /** Safe is paid by this partner, so the fact sheet says so. */
   safeIsPaid?: boolean
 }

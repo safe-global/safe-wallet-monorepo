@@ -99,11 +99,19 @@ export const fastestExitLabel = (hours: number): string => {
   return 'Exit within days'
 }
 
-export type CategoryHighlight = { category: OpportunityCategory; bestApy: number; exitLabel: string; count: number }
+export type CategoryHighlight = {
+  category: OpportunityCategory
+  bestApy: number
+  exitLabel: string
+  count: number
+  /** The highest-rate option, opened when the card is clicked. */
+  top: Opportunity
+}
 
 export const categoryHighlights = (opportunities: Opportunity[]): CategoryHighlight[] =>
   buildShelf(opportunities).groups.map((group) => ({
     category: group.category,
+    top: group.items.reduce((best, item) => (item.apy > best.apy ? item : best)),
     bestApy: Math.max(...group.items.map((item) => item.apy)),
     exitLabel: fastestExitLabel(Math.min(...group.items.map((item) => item.exitHours))),
     count: group.items.length,
