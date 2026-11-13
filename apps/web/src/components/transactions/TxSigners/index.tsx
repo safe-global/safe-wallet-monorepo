@@ -1,11 +1,12 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { type ReactElement } from 'react'
+import { type ReactElement, useState } from 'react'
 import { Copy } from 'lucide-react'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import TxConfirmations from '@safe-global/views/components/transactions/TxConfirmations'
-import { AuditLog, AuditRow, AuditLogHeader, useCopyToClipboard } from '@/components/common/AuditLog'
+import { AuditLog, AuditRow, AuditLogHeader, COPIED_TOOLTIP_MS } from '@/components/common/AuditLog'
+import useCopyToClipboard from '@/hooks/useCopyToClipboard'
 
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsPending from '@/hooks/useIsPending'
@@ -50,7 +51,8 @@ type TxSignersProps = {
 }
 
 const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
-  const [copied, handleCopy] = useCopyToClipboard(txHash)
+  const { copied, copy } = useCopyToClipboard(COPIED_TOOLTIP_MS)
+  const [tooltipOpen, setTooltipOpen] = useState(false)
 
   if (!txHash) {
     return (
@@ -78,7 +80,7 @@ const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
   }
 
   return (
-    <Tooltip>
+    <Tooltip open={tooltipOpen || copied} onOpenChange={setTooltipOpen}>
       <TooltipTrigger
         render={
           <Button
@@ -86,7 +88,7 @@ const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
             variant="ghost"
             size="icon-xs"
             className="text-inherit"
-            onClick={handleCopy}
+            onClick={() => copy(txHash)}
             // MUI's Tooltip put its `title` on the child as an aria-label; Base UI's wires no ARIA at
             // all, so an icon-only trigger needs its own name or it announces as just "button".
             aria-label="Copy transaction hash"
