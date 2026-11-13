@@ -7,6 +7,10 @@ import { highlightSafePro } from '@safe-global/views/components/common/ProHighli
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { SafeProNoticeModal } from '@safe-global/views/features/spaces/components/SafeProModals'
+import useLogout from '@/hooks/useLogout'
+import useWallet from '@/hooks/wallets/useWallet'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { useCheckoutReturn, type CheckoutReturnStatus } from '../../hooks/billing/useCheckoutReturn'
 import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useWorkspaceLock, type WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
@@ -37,6 +41,9 @@ export const _memberCopy = (
   }
 }
 
+export const CONNECTED_WALLET_NOTE =
+  "Connecting a wallet doesn't change your Workspace access. To use another account, switch account."
+
 // Statuses in which the checkout modals give the screen back to the lock.
 const CHECKOUT_RELEASED_STATUSES: CheckoutReturnStatus[] = ['error', 'timeout', 'canceled']
 
@@ -59,15 +66,35 @@ const MemberLockedNotice = ({
 }) => {
   const isPlanLock = reason !== 'trial-offered'
   useTrackOnce(SAFE_PRO_EVENTS.WORKSPACE_LOCKED_VIEWED, undefined, isPlanLock)
+  const wallet = useWallet()
+  const { logout } = useLogout()
+
+  if (reason === 'lapsed') {
+    return (
+      <SafeProNoticeModal
+        open
+        title={title}
+        body={body}
+        onAction={onBack}
+        secondaryActionLabel="Create new Workspace"
+        secondaryActionHref={AppRoutes.welcome.spaces}
+      />
+    )
+  }
+
+  const switchAccount = () => {
+    trackEvent(SPACE_EVENTS.AUTH_LOGGED_OUT, { timestamp: new Date().toISOString() })
+    void logout()
+  }
 
   return (
     <SafeProNoticeModal
       open
       title={title}
-      body={body}
+      body={wallet ? `${body}\n${CONNECTED_WALLET_NOTE}` : body}
       onAction={onBack}
-      secondaryActionLabel={reason === 'lapsed' ? 'Create new Workspace' : undefined}
-      secondaryActionHref={reason === 'lapsed' ? AppRoutes.welcome.spaces : undefined}
+      secondaryActionLabel="Switch account"
+      onSecondaryAction={switchAccount}
     />
   )
 }

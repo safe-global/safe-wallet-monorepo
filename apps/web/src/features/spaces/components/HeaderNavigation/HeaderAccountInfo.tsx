@@ -18,7 +18,9 @@ const HeaderAccountInfo = () => {
   if (!isSignedIn) return null
 
   const { profileName, displayName, shortDisplayName } = getSidebarProfileInfo(membership, signerAddress, email)
-  const showConnectedWallet = Boolean(signerAddress) && !sameAddress(wallet?.address, signerAddress)
+  const hasIdentity = Boolean(signerAddress || email)
+  const showConnectedWallet =
+    !isLoading && hasIdentity && Boolean(wallet?.address) && !sameAddress(wallet?.address, signerAddress)
   const isMember = membership?.status === MemberStatus.ACTIVE && membership.role === MemberRole.MEMBER
 
   return (

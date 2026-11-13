@@ -103,6 +103,38 @@ describe('ProfilePopoverContent', () => {
     expect(screen.getAllByTestId('identicon').map((el) => el.getAttribute('data-address'))).toContain(CONNECTED)
   })
 
+  it('calls back when the wallet row disconnect is clicked', async () => {
+    const onDisconnectWallet = jest.fn()
+    const onSignOut = jest.fn()
+    render(
+      <ProfilePopoverContent
+        avatarName="alice@safe.global"
+        displayName="alice@safe.global"
+        connectedWallet={CONNECTED}
+        onSignOut={onSignOut}
+        onDisconnectWallet={onDisconnectWallet}
+      />,
+    )
+
+    await userEvent.click(screen.getByRole('button', { name: 'Disconnect wallet' }))
+
+    expect(onDisconnectWallet).toHaveBeenCalledTimes(1)
+    expect(onSignOut).not.toHaveBeenCalled()
+  })
+
+  it('hides the wallet row disconnect when no handler is passed', () => {
+    render(
+      <ProfilePopoverContent
+        avatarName="User"
+        displayName="0xB4F6...cF51"
+        connectedWallet={CONNECTED}
+        onSignOut={jest.fn()}
+      />,
+    )
+
+    expect(screen.queryByRole('button', { name: 'Disconnect wallet' })).not.toBeInTheDocument()
+  })
+
   it('hides the connected wallet section when no connected wallet is passed', () => {
     render(
       <ProfilePopoverContent
