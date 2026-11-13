@@ -15,8 +15,10 @@ import { MODULE_GUARD_STORAGE_SLOT } from '@/features/policy-guard/constants'
 import { getPolicyGuardAddress } from '@/features/policy-guard/services'
 import {
   ADDRESS_BOOK_TRIGGER_LABEL,
+  ALLOWLIST_GAPS_TITLE,
   RECIPIENT_NAME_LABEL,
   RECIPIENT_REMOVE_LABEL,
+  REVIEW_FALLBACK_ALLOW,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import RecipientAllowlistFlow from '.'
 
@@ -333,11 +335,14 @@ export const Create: Story = {
   play: ({ canvasElement }) => createAllowlist(canvasElement),
 }
 
-/** No guard yet: the review lists configureImmediately, setGuard and setModuleGuard. */
+/** No guard yet: the review lists configureImmediately, with the MultiSend bindings and fallbacks, then both setters. */
 export const Review: Story = {
   play: async ({ canvasElement }) => {
     await createAllowlist(canvasElement)
     await goToReview(canvasElement)
+    const canvas = within(canvasElement)
+    await expect(canvas.getByText(REVIEW_FALLBACK_ALLOW)).toBeVisible()
+    await expect(canvas.getByText(ALLOWLIST_GAPS_TITLE)).toBeVisible()
   },
 }
 

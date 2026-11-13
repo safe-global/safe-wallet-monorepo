@@ -1,7 +1,7 @@
 import { useState, type ReactElement, type ReactNode } from 'react'
 import classnames from 'classnames'
 import { Code } from 'lucide-react'
-import type { MetaTransactionData } from '@safe-global/types-kit'
+import { OperationType, type MetaTransactionData } from '@safe-global/types-kit'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import {
   Accordion,
@@ -12,9 +12,11 @@ import {
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import {
+  FALLBACK_TARGET_NAME,
   getRuleTitle,
   POLICY_GUARD_NAME,
   POLICY_LABELS,
+  RULE_DELEGATE_CALL_LABEL,
   RULE_POLICY_LABEL,
   RULE_RECIPIENTS_LABEL,
   RULE_TARGET_LABEL,
@@ -25,11 +27,13 @@ import MethodCall from '@/components/transactions/TxDetails/TxData/DecodedData/M
 import { MultisendActionsHeader } from '@/components/transactions/TxDetails/TxData/DecodedData/Multisend'
 import singleTxCss from '@/components/transactions/TxDetails/TxData/DecodedData/SingleTxDecoded/styles.module.css'
 import type { PolicyConfiguration, SetupCallDescription } from '@/features/policy-guard'
-import { NATIVE_TRANSFER_SELECTOR } from '@safe-global/utils/features/policy-guard/constants'
+import { isFallbackAccess } from '@/features/policy-guard/services'
+import { getRuleKind, type RuleKind } from './ruleKind'
 
 type AddressInfo = { name?: string; logoUri?: string }
 
 type AllowlistSetupActionsProps = {
+  chainId: string
   calls: MetaTransactionData[]
   configurations: PolicyConfiguration[]
   describeCall: (call: MetaTransactionData) => SetupCallDescription | undefined
@@ -94,14 +98,14 @@ const PolicyRuleRows = ({
   configuration,
   index,
   count,
-  isNative,
+  kind,
   decodeRecipients,
   getAddressInfo,
 }: {
   configuration: PolicyConfiguration
   index: number
   count: number
-  isNative: boolean
+  kind: RuleKind
   decodeRecipients: (data: string) => string[]
   getAddressInfo: (address: string) => AddressInfo
 }): ReactElement => (
@@ -112,22 +116,26 @@ const PolicyRuleRows = ({
 
     <TxDataRow title={RULE_POLICY_LABEL}>
       <Typography variant="paragraph-small" as="div" className="flex flex-wrap items-center gap-2">
-        {isNative ? POLICY_LABELS.native : POLICY_LABELS.erc20}
+        {POLICY_LABELS[kind]}
         <span className="text-muted-foreground">{shortenAddress(configuration.policy)}</span>
       </Typography>
     </TxDataRow>
 
     <TxDataRow title={RULE_TARGET_LABEL}>
       <div className="flex flex-col gap-0.5">
-        <RuleAddress address={configuration.target} info={getAddressInfo(configuration.target)} />
+        <RuleAddress
+          address={configuration.target}
+          info={isFallbackAccess(configuration) ? { name: FALLBACK_TARGET_NAME } : getAddressInfo(configuration.target)}
+        />
         {/* Indented past the 20px identicon and its gap, to the address text. */}
         <Typography variant="paragraph-small" color="muted" as="div" className="pl-7">
           <HexEncodedData hexData={configuration.selector} highlightFirstBytes={false} />
+          {configuration.operation === OperationType.DelegateCall && ` · ${RULE_DELEGATE_CALL_LABEL}`}
         </Typography>
       </div>
     </TxDataRow>
 
-    {!isNative && (
+    {kind === 'erc20' && (
       <TxDataRow title={RULE_RECIPIENTS_LABEL}>
         <div className="flex flex-col gap-1">
           {decodeRecipients(configuration.data).map((address) => (
@@ -141,6 +149,7 @@ const PolicyRuleRows = ({
 
 /** The app's Multisend rebuilt so the configuring call lists "Rule N of M", which the generic decoder can't. */
 const AllowlistSetupActions = ({
+  chainId,
   calls,
   configurations,
   describeCall,
@@ -178,11 +187,11 @@ const AllowlistSetupActions = ({
                       {CONFIGURING_METHODS.includes(method) &&
                         configurations.map((configuration, ruleIndex) => (
                           <PolicyRuleRows
-                            key={`${configuration.policy}-${configuration.target}`}
+                            key={`${configuration.target}-${configuration.selector}-${configuration.operation}`}
                             configuration={configuration}
                             index={ruleIndex}
                             count={configurations.length}
-                            isNative={configuration.selector.toLowerCase() === NATIVE_TRANSFER_SELECTOR}
+                            kind={getRuleKind(chainId, configuration)}
                             decodeRecipients={decodeRecipients}
                             getAddressInfo={getAddressInfo}
                           />

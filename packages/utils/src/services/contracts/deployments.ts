@@ -167,16 +167,20 @@ export const hasMatchingDeployment = (
   contractAddress: string,
   network: string,
   versions: SafeVersion[],
-): boolean => {
-  return versions.some((version) => {
-    const deployments = getDeployments({ version, network })
-    if (!deployments) {
-      return false
-    }
-    const deployedAddresses = toNetworkAddressList(deployments.networkAddresses[network] ?? [])
-    return deployedAddresses.some((deployedAddress) => sameAddress(deployedAddress, contractAddress))
-  })
-}
+): boolean =>
+  getDeploymentAddresses(getDeployments, network, versions).some((deployedAddress) =>
+    sameAddress(deployedAddress, contractAddress),
+  )
+
+/** Every address the deployments returned by `getDeployments` list on `network` for the given `versions`. */
+export const getDeploymentAddresses = (
+  getDeployments: (filter?: DeploymentFilter) => SingletonDeploymentV2 | undefined,
+  network: string,
+  versions: SafeVersion[],
+): string[] =>
+  versions.flatMap((version) =>
+    toNetworkAddressList(getDeployments({ version, network })?.networkAddresses[network] ?? []),
+  )
 
 export type OfficialFallbackHandlerType = 'compatibility' | 'extensible'
 
