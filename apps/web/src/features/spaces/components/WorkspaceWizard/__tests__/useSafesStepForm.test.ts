@@ -11,7 +11,7 @@ const renderSafesForm = (draft: WorkspaceDraft, query: Record<string, string> = 
   const advance = jest.fn()
   const retreat = jest.fn()
   const view = renderHook(
-    () => useSafesStepForm({ allSafes: [], flaggedAddresses: new Set(), limit: null, advance, retreat }),
+    () => useSafesStepForm({ draft, allSafes: [], flaggedAddresses: new Set(), limit: null, advance, retreat }),
     { routerProps: { query }, initialReduxState: { auth: signedInAuthState(), workspaceDraft: draft } },
   )
   return { ...view, advance, retreat }
@@ -51,7 +51,6 @@ describe('useSafesStepForm', () => {
 
   it('asks for the names of new Safes before it moves on', async () => {
     const { result, advance } = renderSafesForm(signedInDraft({ safes: [draftSafe()] }))
-    await waitFor(() => expect(result.current.isReady).toBe(true))
 
     await act(() => result.current.onSubmit())
 
@@ -62,7 +61,6 @@ describe('useSafesStepForm', () => {
   it('saves the picked Safes with their sanitized names, keyed in lower case', async () => {
     const safe = draftSafe()
     const { result, advance } = renderSafesForm(signedInDraft({ safes: [safe] }))
-    await waitFor(() => expect(result.current.isReady).toBe(true))
     await act(() => result.current.onSubmit())
 
     act(() => result.current.formMethods.setValue(`names.${safe.address.toLowerCase()}`, '  Payroll\u200b '))
@@ -73,7 +71,6 @@ describe('useSafesStepForm', () => {
 
   it('goes back from naming to the selection without leaving the step', async () => {
     const { result, retreat } = renderSafesForm(signedInDraft({ safes: [draftSafe()] }))
-    await waitFor(() => expect(result.current.isReady).toBe(true))
     await act(() => result.current.onSubmit())
 
     act(() => result.current.onBack())
@@ -94,7 +91,6 @@ describe('useSafesStepForm', () => {
 
   it('saves no Safes when the user skips the step', async () => {
     const { result, advance } = renderSafesForm(signedInDraft({ safes: [draftSafe()] }))
-    await waitFor(() => expect(result.current.isReady).toBe(true))
 
     act(() => result.current.onSkip())
 

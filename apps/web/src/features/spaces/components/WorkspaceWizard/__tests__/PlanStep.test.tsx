@@ -10,8 +10,12 @@ import { fakeUserId, fakeWorkspaceName, workspaceDraftBuilder } from '@/tests/bu
 import { trialPlansHandler, userHandler, workspacesHandler } from '@/tests/msw/workspaceWizard'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import PlanStep from '../steps/PlanStep'
+import WizardReady from '../WizardReady'
 
-jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => true }))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({
+  useIsSafeProEnabled: () => true,
+  useSafeProFlag: () => true,
+}))
 jest.mock('@/hooks/useIsSurveyEnabled', () => ({ __esModule: true, default: () => false }))
 
 const SMALL = trialPaymentLinkBuilder({ seats: 2 }).build()
@@ -24,10 +28,15 @@ const renderPlanStep = (changes: Partial<WorkspaceDraft> = {}) => {
     .with({ ownerId, name: fakeWorkspaceName(), ...changes })
     .build()
   const push = jest.fn(() => Promise.resolve(true))
-  const view = renderWithUserEvent(<PlanStep />, {
-    routerProps: { push },
-    initialReduxState: { auth: signedInAuthState(), workspaceDraft: draft },
-  })
+  const view = renderWithUserEvent(
+    <WizardReady>
+      <PlanStep />
+    </WizardReady>,
+    {
+      routerProps: { push },
+      initialReduxState: { auth: signedInAuthState(), workspaceDraft: draft },
+    },
+  )
   return { ...view, push }
 }
 

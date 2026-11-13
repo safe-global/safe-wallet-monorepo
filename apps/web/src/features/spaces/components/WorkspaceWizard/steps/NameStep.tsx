@@ -1,10 +1,9 @@
-import { useEffect, type ReactElement } from 'react'
+import type { ReactElement } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import OnboardingFooter from '@safe-global/views/components/common/OnboardingFooter'
 import { Input } from '@safe-global/views/components/ui/input'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 import type { WorkspaceDraft } from '@/features/spaces/store'
-import { useFormFromDraft } from '../hooks/useFormFromDraft'
 import { useStepAdvance } from '../hooks/useStepAdvance'
 import { useWorkspaceDraft } from '../hooks/useWorkspaceDraft'
 import NameStepNotices from '../NameStepNotices'
@@ -20,15 +19,10 @@ const toNameForm = (draft: WorkspaceDraft): NameForm => ({ name: draft.name })
 const NameStep = (): ReactElement => {
   const { draft } = useWorkspaceDraft()
   const { stepNumber, totalSteps, advance, retreat, onExit, hasNoSpaces } = useStepAdvance('name')
-  const { register, handleSubmit, reset, getValues, setValue, setFocus, control, formState } = useForm<NameForm>({
+  const { register, handleSubmit, reset, getValues, setValue, control, formState } = useForm<NameForm>({
     mode: 'onChange',
-    defaultValues: { name: '' },
+    defaultValues: toNameForm(draft),
   })
-  const isReady = useFormFromDraft(reset, toNameForm)
-
-  useEffect(() => {
-    if (isReady) setFocus('name')
-  }, [isReady, setFocus])
 
   const typedName = useWatch({ control, name: 'name' }) ?? ''
   const nameField = register('name', {
@@ -53,7 +47,7 @@ const NameStep = (): ReactElement => {
           continueLabel="Next"
           continueType="submit"
           continueForm={FORM_ID}
-          continueDisabled={!isReady || !formState.isValid}
+          continueDisabled={!formState.isValid}
           continueTestId="create-space-onboarding-continue-button"
         />
       }
@@ -69,7 +63,7 @@ const NameStep = (): ReactElement => {
             data-testid="space-name-input"
             placeholder="e.g. Treasury Ops, DeFi Team"
             autoComplete="off"
-            disabled={!isReady}
+            autoFocus
             variant="surface"
             // eslint-disable-next-line no-restricted-syntax -- bespoke 44px onboarding field (h-11, rounded-sm, px-4); between the lg/xl tiers, no size fits
             className="mt-2 h-11 rounded-sm px-4"

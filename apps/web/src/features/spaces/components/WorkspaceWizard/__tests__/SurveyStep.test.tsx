@@ -11,8 +11,12 @@ import { fakeUserId, fakeWorkspaceName, workspaceDraftBuilder } from '@/tests/bu
 import { createSetupHandler, userHandler, userLoaded, workspacesHandler } from '@/tests/msw/workspaceWizard'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import SurveyStep from '../steps/SurveyStep'
+import WizardReady from '../WizardReady'
 
-jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => false }))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({
+  useIsSafeProEnabled: () => false,
+  useSafeProFlag: () => false,
+}))
 jest.mock('@/hooks/useIsSurveyEnabled', () => ({ __esModule: true, default: () => true }))
 
 const surveyWithOneOption = (): SurveyDto => ({
@@ -44,10 +48,15 @@ const renderSurveyStep = () => {
   server.use(userHandler(ownerId), workspacesHandler())
   const draft = workspaceDraftBuilder().with({ ownerId, name: fakeWorkspaceName() }).build()
   const push = jest.fn(() => Promise.resolve(true))
-  const view = renderWithUserEvent(<SurveyStep />, {
-    routerProps: { push },
-    initialReduxState: { auth: signedInAuthState(), workspaceDraft: draft },
-  })
+  const view = renderWithUserEvent(
+    <WizardReady>
+      <SurveyStep />
+    </WizardReady>,
+    {
+      routerProps: { push },
+      initialReduxState: { auth: signedInAuthState(), workspaceDraft: draft },
+    },
+  )
   return { ...view, push }
 }
 

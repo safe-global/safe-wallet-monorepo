@@ -9,6 +9,7 @@ import { useAppDispatch } from '@/store'
 import { wizardLeft, wizardStepOpened } from '@/features/spaces/store'
 import { CHECKOUT_SESSION_QUERY_PARAM } from '../../hooks/billing/returnUrl'
 import CheckoutReturnScreen from './CheckoutReturnScreen'
+import WizardReady from './WizardReady'
 import { useTrialSizes } from './hooks/useTrialSizes'
 import { useWizardNavigation } from './hooks/useWizardNavigation'
 import { useWorkspaceDraft } from './hooks/useWorkspaceDraft'
@@ -33,10 +34,17 @@ const queryString = (value: string | string[] | undefined): string | null => (ty
 
 const WIZARD_ROUTES = new Set(WIZARD_STEPS.map((step) => step.route))
 
-/** Leaving the wizard makes the next visit a new start, so its first step offers the saved draft again. */
-const useResumeOfferResetOnLeave = () => {
+/**
+ * Whether the first step may offer the saved draft: opening a step updates the offer, and leaving the wizard makes the
+ * next visit a new start.
+ */
+const useResumeOffer = (step: WizardStepId) => {
   const router = useRouter()
   const dispatch = useAppDispatch()
+
+  useEffect(() => {
+    dispatch(wizardStepOpened(step === 'name'))
+  }, [dispatch, step])
 
   useEffect(() => {
     const onRouteChangeStart = (url: string) => {
@@ -77,8 +85,8 @@ export const useResumeSetup = (spaceId: string | null, isReturning: boolean) => 
 }
 
 /** A deep link or a resumed draft lands on the first earlier step that still misses data. */
-const useFirstInvalidStepRedirect = (step: WizardStepId, isActive: boolean) => {
-  const { draft, isReady } = useWorkspaceDraft()
+const useFirstInvalidStepRedirect = (step: WizardStepId) => {
+  const { draft } = useWorkspaceDraft()
   const { steps, goTo } = useWizardNavigation(step)
   const isSafePro = useIsSafeProEnabled()
   const { sizes } = useTrialSizes()
@@ -88,27 +96,28 @@ const useFirstInvalidStepRedirect = (step: WizardStepId, isActive: boolean) => {
   const checkedStep = useRef<WizardStepId>(undefined)
 
   useEffect(() => {
-    if (!isActive || !isReady || !isContextReady || checkedStep.current === step) return
+    if (!isContextReady || checkedStep.current === step) return
     checkedStep.current = step
     const index = steps.findIndex((candidate) => candidate.id === step)
     const invalid = index > 0 ? findFirstInvalidStep(steps.slice(0, index), draft, { sizes }) : undefined
     if (invalid) goTo(invalid, 'replace')
-  }, [isActive, isReady, isContextReady, step, steps, draft, sizes, goTo])
+  }, [isContextReady, step, steps, draft, sizes, goTo])
+}
+
+/** The step itself; mounted once the draft and the steps are known, so its form starts from the draft. */
+const WizardStepPage = ({ step }: { step: WizardStepId }): ReactElement => {
+  useFirstInvalidStepRedirect(step)
+  const Step = STEP_COMPONENTS[step]
+  return <Step />
 }
 
 const WorkspaceWizard = ({ step }: { step: WizardStepId }): ReactElement => {
   const router = useRouter()
-  const dispatch = useAppDispatch()
   const { draft } = useWorkspaceDraft()
   const sessionId = queryString(router.query[CHECKOUT_SESSION_QUERY_PARAM])
   const urlSpaceId = queryString(router.query.spaceId)
   const resume = useResumeSetup(urlSpaceId, sessionId !== null)
-  useFirstInvalidStepRedirect(step, sessionId === null && !resume.isResuming)
-  useResumeOfferResetOnLeave()
-
-  useEffect(() => {
-    dispatch(wizardStepOpened(step === 'name'))
-  }, [dispatch, step])
+  useResumeOffer(step)
 
   if (sessionId) return <CheckoutReturnScreen sessionId={sessionId} spaceId={urlSpaceId ?? draft.createdSpaceId} />
 
@@ -125,8 +134,11 @@ const WorkspaceWizard = ({ step }: { step: WizardStepId }): ReactElement => {
   }
   if (resume.isResuming) return <SetupProgress isWorking title="Loading your Workspace" />
 
-  const Step = STEP_COMPONENTS[step]
-  return <Step />
+  return (
+    <WizardReady>
+      <WizardStepPage step={step} />
+    </WizardReady>
+  )
 }
 
 export default WorkspaceWizard
