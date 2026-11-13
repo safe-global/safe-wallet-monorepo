@@ -19,6 +19,7 @@ const app = { name: 'Transaction Builder', iconUrl: faker.image.url() }
 const renderFlow = () =>
   render(
     <SafeAppsTxFlow
+      declared={{ channel: 'SAFE_APP' }}
       data={{
         app,
         requestId: faker.string.uuid(),

@@ -42,6 +42,7 @@ type SetupOptions = {
   deployed?: boolean
   features?: FEATURES[]
   tokenList?: TOKEN_LISTS
+  declaredSource?: Parameters<typeof useCustomAppCommunicator>[3]
 }
 
 const buildChain = (features: FEATURES[]): Chain =>
@@ -49,7 +50,12 @@ const buildChain = (features: FEATURES[]): Chain =>
     .with({ chainId: '1', features, rpcUri: { authentication: 'NO_AUTHENTICATION', value: RPC_URL } })
     .build()
 
-const setup = ({ deployed = true, features = [], tokenList = TOKEN_LISTS.TRUSTED }: SetupOptions = {}) => {
+const setup = ({
+  deployed = true,
+  features = [],
+  tokenList = TOKEN_LISTS.TRUSTED,
+  declaredSource = { channel: 'SAFE_APP' },
+}: SetupOptions = {}) => {
   const safe = extendedSafeInfoBuilder()
     .with({ chainId: '1', deployed, implementation: addressExBuilder().build() })
     .build()
@@ -65,7 +71,7 @@ const setup = ({ deployed = true, features = [], tokenList = TOKEN_LISTS.TRUSTED
     </TxModalContext.Provider>
   )
 
-  const { result } = renderHook(() => useCustomAppCommunicator(iframeRef, APP, buildChain(features)), {
+  const { result } = renderHook(() => useCustomAppCommunicator(iframeRef, APP, buildChain(features), declaredSource), {
     wrapper,
     initialReduxState: {
       safeInfo: { loading: false, loaded: true, data: safe },
@@ -199,6 +205,40 @@ describe('useCustomAppCommunicator', () => {
           { to: getAddress(contract), value: '0', data: '0x' },
         ],
       })
+    })
+
+    it('declares a listed Safe App with its id', async () => {
+      const { setTxFlow, request } = setup({ declaredSource: { channel: 'SAFE_APP', listedAppId: APP.id } })
+
+      await request(Methods.sendTransactions, { txs: sentTxs })
+
+      const flow = openedFlow<ComponentProps<typeof SafeAppsTxFlow>>(setTxFlow)
+      expect(flow.props.declared).toEqual({
+        channel: 'SAFE_APP',
+        appName: APP.name,
+        appUrl: APP.url,
+        appId: APP.id,
+      })
+    })
+
+    it('does not declare an app id for a Safe App that is not listed', async () => {
+      const { setTxFlow, request } = setup({ declaredSource: { channel: 'SAFE_APP' } })
+
+      await request(Methods.sendTransactions, { txs: sentTxs })
+
+      const flow = openedFlow<ComponentProps<typeof SafeAppsTxFlow>>(setTxFlow)
+      expect(flow.props.declared).toEqual(expect.objectContaining({ channel: 'SAFE_APP', appName: APP.name }))
+      expect(flow.props.declared).not.toHaveProperty('appId')
+    })
+
+    it('declares a native embed as a widget without an app id', async () => {
+      const { setTxFlow, request } = setup({ declaredSource: { channel: 'WIDGET', listedAppId: APP.id } })
+
+      await request(Methods.sendTransactions, { txs: sentTxs })
+
+      const flow = openedFlow<ComponentProps<typeof SafeAppsTxFlow>>(setTxFlow)
+      expect(flow.props.declared).toEqual(expect.objectContaining({ channel: 'WIDGET', appName: APP.name }))
+      expect(flow.props.declared).not.toHaveProperty('appId')
     })
 
     it('answers the app with the safeTxHash when the flow submits the transaction', async () => {

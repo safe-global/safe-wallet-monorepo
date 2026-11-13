@@ -31,11 +31,13 @@ import useBalances from '@/hooks/useBalances'
 import type { TypedData } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { useLazyBalancesGetBalancesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
+import { buildDeclared, type DeclaredChannel } from '@safe-global/utils/utils/declaredAttribution'
 
 export const useCustomAppCommunicator = (
   iframeRef: MutableRefObject<HTMLIFrameElement | null>,
   app: SafeAppData,
   chain: WebCoreChainInfo | undefined,
+  declaredSource: { channel: Extract<DeclaredChannel, 'SAFE_APP' | 'WIDGET'>; listedAppId?: number },
   overrideHandlers?: Partial<UseAppCommunicatorHandlers>,
 ): AppCommunicator | undefined => {
   const [currentRequestId, setCurrentRequestId] = useState<RequestId | undefined>()
@@ -51,6 +53,11 @@ export const useCustomAppCommunicator = (
     offChainSigning: true,
   })
   const appData = app
+  const declared = buildDeclared(declaredSource.channel, {
+    name: app.name,
+    url: app.url,
+    listedAppId: declaredSource.listedAppId,
+  })
   const onTxFlowClose = () => {
     setCurrentRequestId((prevId) => {
       if (prevId) {
@@ -76,7 +83,7 @@ export const useCustomAppCommunicator = (
 
       setCurrentRequestId(requestId)
       trackSafeAppEvent({ ...SAFE_APPS_EVENTS.OPEN_TRANSACTION_MODAL, label: appData.name })
-      setTxFlow(<SafeAppsTxFlow data={data} />, onTxFlowClose)
+      setTxFlow(<SafeAppsTxFlow data={data} declared={declared} />, onTxFlowClose)
     },
     onSignMessage: (
       message: string | EIP712TypedData,
@@ -109,6 +116,7 @@ export const useCustomAppCommunicator = (
               message,
               method,
             }}
+            declared={declared}
           />,
         )
       }
