@@ -707,3 +707,44 @@ jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
 ### Why
 
 The real hook returns the same provider across renders. A new object per render changes an effect dependency every time, so the real `useAsync` refetches in a loop and the test only passes because it ends after the first call.
+
+## E2E-02 — Wait for the result before waiting for the skeleton to go
+
+Source: PR #9651 (RL-20261111-006)
+
+### Avoid
+
+```ts
+await waitFor(() => expect(canvasElement.querySelector('[data-slot="skeleton"]')).toBeNull())
+```
+
+### Prefer
+
+```ts
+await expect(await canvas.findByText('New recipient')).toBeVisible()
+await waitFor(() => expect(canvasElement.querySelector('[data-slot="skeleton"]')).toBeNull())
+```
+
+### Why
+
+Before the analysis starts there is no skeleton, so the negative wait passes at once and the screenshot can still catch the skeleton when it shows up later.
+
+## TEST-07 — Measure ages from the component's clock
+
+Source: PR #9667 (RL-20261111-007)
+
+### Avoid
+
+```tsx
+<PortfolioRefreshHint _fulfilledTimeStamp={mockNow() - 10000} _isFetching={false} _freezeTime />
+```
+
+### Prefer
+
+```tsx
+<PortfolioRefreshHint _fulfilledTimeStamp={Date.now() - 10000} _isFetching={false} _freezeTime />
+```
+
+### Why
+
+The component compares the timestamp with its own `Date.now()`, while `mockNow()` rounds down to the minute, so later in the minute the 10-second-old cooldown reads as expired. Only absolute dates a story shows come from `mockNow()`.

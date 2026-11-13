@@ -1512,18 +1512,22 @@
     "title": "Import from package public entrypoints, not deep dist paths",
     "sourceWindowId": "CLOSED-20260414-20260421",
     "prNumbers": [
-      7617
+      7617,
+      9602
     ],
     "prState": "merged",
     "reviewCommentIds": [
       3073301833,
-      3093126562
+      3093126562,
+      4512062465,
+      4513039921
     ],
     "reviewIds": [],
     "issueCommentIds": [],
-    "learning": "Reaching into a dependency's `dist/src/...` paths is fragile across version bumps and produces awkward duplicated path segments (e.g. `utils/utils/...`). Import from the package's public entrypoint, and consolidate same-package imports into one statement.",
+    "learning": "Reaching into a dependency's `dist/src/...` paths is fragile across version bumps and produces awkward duplicated path segments (e.g. `utils/utils/...`). Import from the package's public entrypoint, and consolidate same-package imports into one statement. A story imported MSW fixtures through `../../../../../../config/test/msw/fixtures`; it now uses the `@safe-global/test/msw/fixtures` alias (#9602).",
     "ruleIds": [
-      "API-03"
+      "API-03",
+      "PKG-02"
     ]
   },
   {
@@ -2227,17 +2231,23 @@
     "title": "Use a synchronous ref guard, not a state flag, against double-submit",
     "sourceWindowId": "CLOSED-20260303-20260310",
     "prNumbers": [
-      7255
+      7255,
+      9597
     ],
     "prState": "merged",
     "reviewCommentIds": [
-      2877752670
+      2877752670,
+      4492967549,
+      4513036655
     ],
-    "reviewIds": [],
+    "reviewIds": [
+      5824898685
+    ],
     "issueCommentIds": [
-      3990746059
+      3990746059,
+      6740793116
     ],
-    "learning": "Submission guards based on `isSubmitting` state can be entered twice within a single render cycle (rapid taps). Use a `useRef` flag that is set synchronously before any await, and clear it only after completion, to make handlers re-entrant-safe.",
+    "learning": "Submission guards based on `isSubmitting` state can be entered twice within a single render cycle (rapid taps). Use a `useRef` flag that is set synchronously before any await, and clear it only after completion, to make handlers re-entrant-safe. The Drain Account port set `submitting` only after awaiting ENS resolution, so repeated clicks sent several batches; a ref now locks the submit before the lookup (#9597).",
     "ruleIds": [
       "STATE-03"
     ]
@@ -3097,17 +3107,20 @@
     "title": "permissions:{} workflows missing per-job contents:read break checkout",
     "sourceWindowId": "CLOSED-20260520-20260602",
     "prNumbers": [
-      7918
+      7918,
+      9609
     ],
     "prState": "merged",
     "reviewCommentIds": [
       3302841130,
       3302841160,
-      3302841184
+      3302841184,
+      4514459335,
+      4524137142
     ],
     "reviewIds": [],
     "issueCommentIds": [],
-    "learning": "Setting workflow-level `permissions: {}` (least privilege) removes the inherited `contents: read` scope, but every job that runs `actions/checkout` still needs it. Jobs that don't re-declare `contents: read` fail checkout with an insufficient-token-scope error. When tightening a workflow to `permissions: {}`, add an explicit minimal `permissions:` block (including `contents: read`) to each job that checks out the repo.",
+    "learning": "Setting workflow-level `permissions: {}` (least privilege) removes the inherited `contents: read` scope, but every job that runs `actions/checkout` still needs it. Jobs that don't re-declare `contents: read` fail checkout with an insufficient-token-scope error. When tightening a workflow to `permissions: {}`, add an explicit minimal `permissions:` block (including `contents: read`) to each job that checks out the repo. A new `changes` job that set only `pull-requests: read` under `permissions: {}` got `contents: read` for its checkout (#9609).",
     "ruleIds": [
       "CI-04"
     ]
@@ -3761,15 +3774,18 @@
     "title": "Counter: a port that restores old behaviour doesn't also fix pre-existing bugs",
     "sourceWindowId": "CLOSED-20260602-20260609",
     "prNumbers": [
-      7986
+      7986,
+      9597
     ],
     "prState": "merged",
     "reviewCommentIds": [
-      3347495061
+      3347495061,
+      4512221338,
+      4513036953
     ],
     "reviewIds": [],
     "issueCommentIds": [],
-    "learning": "A PR that ports or restores existing behaviour into a new target (e.g. an app migration) should keep behaviour parity; a bug in the ported logic found during review gets its own fix PR instead of being fixed in the port.",
+    "learning": "A PR that ports or restores existing behaviour into a new target (e.g. an app migration) should keep behaviour parity; a bug in the ported logic found during review gets its own fix PR instead of being fixed in the port. The Drain Account port kept its Cancel button, which only hides the spinner, as the old app had it, and left changing it to a separate PR (#9597).",
     "ruleIds": [
       "REVIEW-01"
     ]
@@ -7418,17 +7434,21 @@
     "sourceWindowId": "CLOSED-20260817-20260825",
     "prNumbers": [
       8532,
-      8547
+      8547,
+      9679
     ],
     "prState": "merged",
-    "reviewCommentIds": [],
+    "reviewCommentIds": [
+      4551414536,
+      4553262060
+    ],
     "reviewIds": [],
     "issueCommentIds": [
       5326107231,
       5394812739,
       5395034378
     ],
-    "learning": "After deleting a component or renaming a concept, sweep in the same change for exports, CSS classes and assets that now have no consumer, and for comments or JSDoc that still name the removed symbol.",
+    "learning": "After deleting a component or renaming a concept, sweep in the same change for exports, CSS classes and assets that now have no consumer, and for comments or JSDoc that still name the removed symbol. A story comment still named `mockData.ts` after the file became `ManageSigners.storyData.ts` (#9679).",
     "ruleIds": [
       "API-01"
     ]
@@ -8797,7 +8817,11 @@
     "prNumbers": [
       8816,
       8742,
-      8739
+      8739,
+      9643,
+      9633,
+      9658,
+      9609
     ],
     "prState": "merged",
     "reviewCommentIds": [
@@ -8807,11 +8831,21 @@
       4047575004,
       4048241196,
       4046647234,
-      4046667076
+      4046667076,
+      4529651809,
+      4530400667,
+      4525331959,
+      4526104829,
+      4538089000,
+      4538345908
     ],
-    "reviewIds": [],
-    "issueCommentIds": [],
-    "learning": "A change to a test framework version, a workspace script or the compiler updates the nearest AGENTS.md (the root one when it applies to every workspace) in the same change with the constraints it introduces, such as Jest 30's non-configurable `window.location`. Guidance about a tool states how it actually behaves: `verify` snapshots the changed-file list when it starts, so only a run started after the last edit counts.",
+    "reviewIds": [
+      5838848567
+    ],
+    "issueCommentIds": [
+      6765779829
+    ],
+    "learning": "A change to a test framework version, a workspace script or the compiler updates the nearest AGENTS.md (the root one when it applies to every workspace) in the same change with the constraints it introduces, such as Jest 30's non-configurable `window.location`. Guidance about a tool states how it actually behaves: `verify` snapshots the changed-file list when it starts, so only a run started after the last edit counts. Splitting the Storybook render sweep into modules, adding reduced motion and the external-page placeholder, and letting its clock run each updated `apps/web/.storybook/AGENTS.md` or the Storybook guide in the same PR, and putting Argos on PRs fixed the guide that said it never ran there (#9643, #9633, #9658, #9609).",
     "ruleIds": [
       "DOC-01"
     ]
@@ -9371,7 +9405,9 @@
       8759,
       8749,
       8746,
-      8619
+      8619,
+      9624,
+      9590
     ],
     "prState": "merged",
     "reviewCommentIds": [
@@ -9406,7 +9442,10 @@
       4063665340,
       4063674042,
       4063730857,
-      4070198216
+      4070198216,
+      4514613852,
+      4525591896,
+      4484882869
     ],
     "reviewIds": [
       5363932414
@@ -9416,7 +9455,7 @@
       5759378297,
       5761599021
     ],
-    "learning": "Reviewers keep cutting comments back to one line of non-obvious why: multi-line JSDoc that narrates what the code does, comments that cite a decision or ticket (`decision Q44`), and comments that explain a change to the reviewer are removed or condensed. The regression intent of a test moves into its test name instead of a comment above it. Ticket and decision traceability belongs in the PR description.",
+    "learning": "Reviewers keep cutting comments back to one line of non-obvious why: multi-line JSDoc that narrates what the code does, comments that cite a decision or ticket (`decision Q44`), and comments that explain a change to the reviewer are removed or condensed. The regression intent of a test moves into its test name instead of a comment above it. Ticket and decision traceability belongs in the PR description. In Playwright specs a timing comment in a test body was removed and a fee-quote comment became the constant `FEE_SERVICE_MOCK_QUOTE` (#9624, #9590).",
     "ruleIds": [
       "DOC-01"
     ]
@@ -9461,12 +9500,14 @@
     "sourceWindowId": "CLOSED-20260921-20261002",
     "prNumbers": [
       8868,
-      8789
+      8789,
+      8706
     ],
     "prState": "merged",
     "reviewCommentIds": [
       4154519915,
-      4154793288
+      4154793288,
+      4025690005
     ],
     "reviewIds": [
       5315562819
@@ -9475,7 +9516,7 @@
       5829600686,
       5830509435
     ],
-    "learning": "Edits to another surface whose design lands in a different PR (the policy catalogue tiles) are removed from a gating PR, and a tweak to a shared `ui/` primitive suggested in review (a muted description prop on `Alert`) goes into its own PR rather than the feature change that noticed it.",
+    "learning": "Edits to another surface whose design lands in a different PR (the policy catalogue tiles) are removed from a gating PR, and a tweak to a shared `ui/` primitive suggested in review (a muted description prop on `Alert`) goes into its own PR rather than the feature change that noticed it. A reviewer asked why a WalletConnect feature PR changed the `PageLayout` sidebar props; the merged diff no longer touches `PageLayout` (#8706).",
     "ruleIds": [
       "REVIEW-01"
     ]
@@ -10126,18 +10167,21 @@
     "sourceWindowId": "CLOSED-20261008-20261016",
     "prNumbers": [
       9075,
-      9065
+      9065,
+      9633
     ],
     "prState": "merged",
     "reviewCommentIds": [
       4261553698,
       4262019094,
       4258571152,
-      4260595985
+      4260595985,
+      4525331942,
+      4526104167
     ],
     "reviewIds": [],
     "issueCommentIds": [],
-    "learning": "A Playwright spec declared its own contact address and Sepolia chain ID instead of `TEST_ADDRESSES` and `CHAIN_IDS` from the shared E2E data module, and a sign-in fixture waited for `url.hostname === 'localhost'`, which times out when `SAFE_E2E_WEB_URL` points at another host. Both now read the shared source: the constants module, and the origin of the configured Playwright `baseURL`.",
+    "learning": "A Playwright spec declared its own contact address and Sepolia chain ID instead of `TEST_ADDRESSES` and `CHAIN_IDS` from the shared E2E data module, and a sign-in fixture waited for `url.hostname === 'localhost'`, which times out when `SAFE_E2E_WEB_URL` points at another host. Both now read the shared source: the constants module, and the origin of the configured Playwright `baseURL`. The Storybook render sweep likewise sent every non-`localhost` request to a placeholder and blocked other hosts in Chrome, so `--base=http://127.0.0.1:…` never rendered; both now use the origin and host of `--base` (#9633).",
     "ruleIds": [
       "DATA-04"
     ]
@@ -10964,7 +11008,9 @@
       9402,
       9413,
       9397,
-      9409
+      9409,
+      9603,
+      9602
     ],
     "prState": "merged",
     "reviewCommentIds": [
@@ -10991,14 +11037,16 @@
       5666454190,
       5694463526,
       5656034667,
-      5684693941
+      5684693941,
+      5826894596,
+      5826327677
     ],
     "issueCommentIds": [
       6475341130,
       6492324497,
       6475014471
     ],
-    "learning": "Deletions of Cypress checks were held until the replacement made every assertion the old test made: reward cells against the amount-and-fiat format instead of containing `ETH`, both sort directions, opening the token selector instead of starting on the token, the module address that reaches `createEnableModuleTx` instead of a call count, the Overview mounted on the dashboard, the message and Safe App name in the signing popup, an executed note rendered read-only, and the three-action swap, sidebar Bridge, Import button and disconnect paths that had no replacement. Reviewers proved each gap with a mutation that left the suite green.",
+    "learning": "Deletions of Cypress checks were held until the replacement made every assertion the old test made: reward cells against the amount-and-fiat format instead of containing `ETH`, both sort directions, opening the token selector instead of starting on the token, the module address that reaches `createEnableModuleTx` instead of a call count, the Overview mounted on the dashboard, the message and Safe App name in the signing popup, an executed note rendered read-only, and the three-action swap, sidebar Bridge, Import button and disconnect paths that had no replacement. Reviewers proved each gap with a mutation that left the suite green. Reviewers also flagged replacements that lost what Cypress showed: queue group labels left with only a screenshot, and queue batch stories with two ETH transfers instead of the Allowance module batch the deleted tests opened (#9603, #9602).",
     "ruleIds": [
       "TEST-04"
     ]
@@ -11171,14 +11219,23 @@
     "sourceWindowId": "CLOSED-20261022-20261030",
     "prNumbers": [
       9462,
-      9412
+      9412,
+      9625,
+      9609
     ],
     "prState": "merged",
     "reviewCommentIds": [
       4411699281,
       4411748009,
       4386093162,
-      4386292118
+      4386292118,
+      4514739032,
+      4515213476,
+      4514459347,
+      4522638715,
+      4524136774,
+      4522721881,
+      4524137478
     ],
     "reviewIds": [
       5665960883
@@ -11186,7 +11243,7 @@
     "issueCommentIds": [
       6473748326
     ],
-    "learning": "Once lint, type-check, unit-test and isolated E2E results became required, a skipped job read as a pass. Path lists missed `config/**`, root tooling (`.prettierrc`, `turbo.json`, `yarn.config.cjs`, `knip.json`) and `expo-plugins/**`; the change detector matched only a renamed file's new path; and a manual spec filter that matched nothing let every shard pass empty. The fixes add the inputs, match `previous_filename` too, and make the planner throw on an empty selection.",
+    "learning": "Once lint, type-check, unit-test and isolated E2E results became required, a skipped job read as a pass. Path lists missed `config/**`, root tooling (`.prettierrc`, `turbo.json`, `yarn.config.cjs`, `knip.json`) and `expo-plugins/**`; the change detector matched only a renamed file's new path; and a manual spec filter that matched nothing let every shard pass empty. The fixes add the inputs, match `previous_filename` too, and make the planner throw on an empty selection. The Argos visual check had three more ways to pass without the review: a PR that removed sheets uploaded with `--subset`, which ignores removals (it now uploads a full build); the upload list had no trailing newline, so `while read` dropped its last sheet; and a failed sweep posted no Argos status, so a `Storybook visual tests result` job now fails the run (#9625, #9609).",
     "ruleIds": [
       "CI-05"
     ]
@@ -12028,16 +12085,18 @@
     "title": "Shared test helper asserted an attribute no test was about",
     "sourceWindowId": "CLOSED-20261029-20261106",
     "prNumbers": [
-      9546
+      9546,
+      9590
     ],
     "prState": "merged",
     "reviewCommentIds": [
       4452761629,
-      4454996941
+      4454996941,
+      4484882848
     ],
     "reviewIds": [],
     "issueCommentIds": [],
-    "learning": "A `pickToken` action helper waited for `aria-expanded=\"true\"`, so a menu that failed to open was reported as an attribute failure in tests that never named it. The helper now clicks and waits for the option it picks, which only exists while the list is open.",
+    "learning": "A `pickToken` action helper waited for `aria-expanded=\"true\"`, so a menu that failed to open was reported as an attribute failure in tests that never named it. The helper now clicks and waits for the option it picks, which only exists while the list is open. An `executionOfNonce` helper held the `expect.poll` for the CGW execution, so a timeout failed inside the helper; the poll moved into each test and the helper only fetches (#9590).",
     "ruleIds": [
       "TEST-01"
     ]
@@ -12117,6 +12176,320 @@
     "learning": "The step-up popup returned to `/step-up-complete`, which only S3 served (the upload strips `.html`); `next dev` returned 404 and Vite served the app, so the popup never reported. `.html` was no fix either, since `serve` redirects it to the clean URL and drops the query with the challenge `error`. The page became `public/step-up-complete.htm`, which every server serves with its query.",
     "ruleIds": [
       "WEB-05"
+    ]
+  },
+  {
+    "id": "RL-20261106-001",
+    "title": "New WalletConnect suggestion flow shipped without a chain feature flag",
+    "sourceWindowId": "CLOSED-20261105-20261113",
+    "prNumbers": [
+      8706
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4023797485,
+      4248242798
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A new step in the WalletConnect connection flow showed whenever a Safe App registry match existed. It is now gated on the chain feature `WC_SAFE_APP_SUGGESTION` through `useHasFeature`; with the flag off the Safe App lookup is skipped and the connection flow is unchanged, so the feature has a per-chain kill switch.",
+    "ruleIds": [
+      "WEB-07"
+    ]
+  },
+  {
+    "id": "RL-20261106-002",
+    "title": "E2E preflight checked a different spec selection than the shard provisioned",
+    "sourceWindowId": "CLOSED-20261105-20261113",
+    "prNumbers": [
+      9588
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4481397638,
+      4481567599
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Each E2E shard's stack started only the forks and emulators its own specs need, but the preflight derived requirements from every selected spec and ignored the shard, so every shard failed before Playwright ran. The preflight now uses the same shard listing as the step that provisions the stack, and a test gives each shard exactly its own services.",
+    "ruleIds": [
+      "DATA-04"
+    ]
+  },
+  {
+    "id": "RL-20261109-001",
+    "title": "Manual release could be dispatched from any branch",
+    "sourceWindowId": "CLOSED-20261105-20261113",
+    "prNumbers": [
+      9598
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4492975186,
+      4513037630
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "The drain-safe release job ran on any `workflow_dispatch` with the release input, so picking another branch in GitHub's branch selector would tag, publish and promote unmerged code. The job now also requires `github.ref == 'refs/heads/dev'`, as the documented release procedure says.",
+    "ruleIds": [
+      "CI-02"
+    ]
+  },
+  {
+    "id": "RL-20261109-002",
+    "title": "A push to dev could cancel a running release",
+    "sourceWindowId": "CLOSED-20261105-20261113",
+    "prNumbers": [
+      9598
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5825049388
+    ],
+    "issueCommentIds": [
+      6740793554
+    ],
+    "learning": "Release dispatches and staging pushes both ran on `refs/heads/dev` and shared one `cancel-in-progress` concurrency group, so a merge during a release could stop it after the tag push and before the GitHub release, leaving a tag that a re-run trips over. Releases now get their own group and are never cancelled.",
+    "ruleIds": [
+      "CI-01"
+    ]
+  },
+  {
+    "id": "RL-20261109-003",
+    "title": "Checks that covered less than they claimed",
+    "sourceWindowId": "CLOSED-20261105-20261113",
+    "prNumbers": [
+      9599,
+      9605,
+      9604
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4513394611,
+      4522145626
+    ],
+    "reviewIds": [
+      5825152198,
+      5826722659
+    ],
+    "issueCommentIds": [
+      6740794026
+    ],
+    "learning": "A drain journey checked that the recipient got both ETH and USDC but that the Safe lost only its ETH; it now also asserts the Safe holds no USDC. A guard test that every Safe a spec reads comes from its scenarios matched only `safes,` on its own line, so specs that destructure `{ safes }` in a parameter list escaped it, and a local-images test scanned only `*.stories.tsx` while story data with remote URLs also lived in mock modules.",
+    "ruleIds": [
+      "TEST-01"
+    ]
+  },
+  {
+    "id": "RL-20261110-001",
+    "title": "Baseline marker saved before the upload it records",
+    "sourceWindowId": "CLOSED-20261105-20261113",
+    "prNumbers": [
+      9601
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4511284350,
+      4512148236
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "The Argos workflow cached the new sheet manifest for the next `dev` commit before uploading the sheets, so a failed upload left a baseline that made the next unchanged push skip Argos while the run passed. The cache save now runs after the upload, so a failed upload is redone by the next push.",
+    "ruleIds": [
+      "CI-02"
+    ]
+  },
+  {
+    "id": "RL-20261110-002",
+    "title": "Storybook setup changed in only one of its two configs",
+    "sourceWindowId": "CLOSED-20261105-20261113",
+    "prNumbers": [
+      9604
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4511283971,
+      4512148571
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Local mock assets, the MSW image handler and the `IframeIcon` swap were added to `.storybook` only, so the Vite Storybook kept loading remote CDNs. They now live in `.storybook-vite` too (through a resolve plugin, since a string alias misses a relative import), and the `/v2/chains` fallback was mirrored there as well.",
+    "ruleIds": [
+      "TEST-07"
+    ]
+  },
+  {
+    "id": "RL-20261110-003",
+    "title": "Fixture placeholder that fails the schema it stands in for",
+    "sourceWindowId": "CLOSED-20261105-20261113",
+    "prNumbers": [
+      9604
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4522339297
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "When a protocol logo download returns 403 or 404, the fixture script returns the relative placeholder `images/common/token-placeholder.svg` before the data-URI step, so `appInfo.logoUrl` gets a relative path where the schema requires an absolute URI. A fallback value has to pass the same schema as the value it replaces; the fix was left to a follow-up.",
+    "ruleIds": [
+      "DATA-03"
+    ]
+  },
+  {
+    "id": "RL-20261111-001",
+    "title": "Credential cookie expired with the shorter of two lifetimes",
+    "sourceWindowId": "CLOSED-20261105-20261113",
+    "prNumbers": [
+      9594
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4490640296,
+      4510663689
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "The Hypernative auth cookie took the refresh-window lifetime whenever a refresh token existed, so a rotation near the end of the window deleted a freshly issued, still-valid access token. The cookie now lives until the later of the two expiries, and a refresh token past its window is never sent, so its `invalid_grant` cannot sign the user out.",
+    "ruleIds": [
+      "SEC-02"
+    ]
+  },
+  {
+    "id": "RL-20261111-002",
+    "title": "Hand-dispatched RTK mutation kept every token response in the store",
+    "sourceWindowId": "CLOSED-20261105-20261113",
+    "prNumbers": [
+      9594
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4490640304,
+      4510664013
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "The silent token refresh dispatched `exchangeToken.initiate()` with default tracking and never reset it, so each rotation left another mutation entry, access and refresh tokens included, in Redux for the rest of the session. The refresh now uses the generated `useExchangeTokenMutation` hook, which resets the previous request when a new one starts and on unmount.",
+    "ruleIds": [
+      "RTK-01"
+    ]
+  },
+  {
+    "id": "RL-20261111-003",
+    "title": "Offline token refresh kept restarting its retries",
+    "sourceWindowId": "CLOSED-20261105-20261113",
+    "prNumbers": [
+      9594
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4490640309,
+      4510664257
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "After the refresh retries ran out offline, `finally` re-checked the auth state, found the token still inside its refresh margin and started another batch of failing requests; focus and visibility events could restart it too. A parked flag now stops all scheduling until the `online` event, and the test fires a focus event while parked and expects no request.",
+    "ruleIds": [
+      "PERF-02"
+    ]
+  },
+  {
+    "id": "RL-20261111-004",
+    "title": "Retry reachable only by hovering",
+    "sourceWindowId": "CLOSED-20261105-20261113",
+    "prNumbers": [
+      9642
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4527878376,
+      4528068459
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "When transaction details failed to load, the bulk execute button stayed disabled and retried on `mouseenter` of its wrapper, so keyboard users could never recover. The button now stays enabled after a failed load, and a click or Enter loads the details again instead of opening the flow; a test covers the keyboard path.",
+    "ruleIds": [
+      "A11Y-01"
+    ]
+  },
+  {
+    "id": "RL-20261111-005",
+    "title": "Safeguard removed without a check of the invariant that replaced it",
+    "sourceWindowId": "CLOSED-20261105-20261113",
+    "prNumbers": [
+      9643
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4529651823,
+      4530401111
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Splitting the render sweep dropped the wait for pending image frames and its `ICONS_NOT_LOADED` finding, relying on no story rendering a `srcdoc` iframe, but nothing checked that. The sweep now counts `iframe[srcdoc]` elements and reports `SRCDOC_IFRAME`, with a unit test, so the removed wait cannot be missed silently.",
+    "ruleIds": [
+      "TEST-04"
+    ]
+  },
+  {
+    "id": "RL-20261111-006",
+    "title": "Wait for removal passed before the element appeared",
+    "sourceWindowId": "CLOSED-20261105-20261113",
+    "prNumbers": [
+      9651
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4535905324,
+      4536060409
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A play function waited for the Safe Shield skeleton to be gone, but before the analysis started there was no skeleton, so the wait passed at once and the screenshot could still catch the skeleton. It now waits for the mocked \"New recipient\" result first, then for the skeleton to go.",
+    "ruleIds": [
+      "E2E-02"
+    ]
+  },
+  {
+    "id": "RL-20261111-007",
+    "title": "Story states that changed between runs",
+    "sourceWindowId": "CLOSED-20261105-20261113",
+    "prNumbers": [
+      9654,
+      9667
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4536853739,
+      4537022793,
+      4538770356,
+      4540871511
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Enabling the Safe Pro flag in the welcome stories made `SpaceRow` request `/v1/spaces/entitlements`, which no handler mocked, so MSW (`onUnhandledRequest: 'bypass'`) sent it to the live gateway; a handler now mocks it. Ages that a component measures against its own `Date.now()` moved to the minute-rounded `mockNow()` and could cross a threshold (a 10-second-old cooldown read as expired); relative ages went back to `Date.now()`, and only absolute dates a story shows use `mockNow()`.",
+    "ruleIds": [
+      "TEST-07"
+    ]
+  },
+  {
+    "id": "RL-20261112-001",
+    "title": "Untouched default passed on as the user's choice",
+    "sourceWindowId": "CLOSED-20261105-20261113",
+    "prNumbers": [
+      9653
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4536551795,
+      4537263122
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "The parent Safe nonce field wrote its default recommended nonce into the chosen-nonce getter, so signing skipped the force-refetched nonce and could propose a stale one when another parent transaction landed while the review was open. The field now hands on only a nonce the user picked; an untouched default stays undefined and `send()` fetches the recommended nonce when it creates the transaction.",
+    "ruleIds": [
+      "FORM-01"
     ]
   }
 ]

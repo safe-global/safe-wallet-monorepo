@@ -1038,13 +1038,13 @@ Hand-edited generated types vanish on the next codegen run, breaking every consu
 <a id="rtk-01"></a>
 ### `RTK-01` Handle RTK mutation results explicitly
 
-> **general** · state · 2 examples · ↩ `RL-20260407-004` · `RL-20260505-004` · `RL-20260527-001` · `RL-20260611-001` · `RL-20260909-007` · `RL-20260925-003`
+> **general** · state · 2 examples · ↩ `RL-20260407-004` · `RL-20260505-004` · `RL-20260527-001` · `RL-20260611-001` · `RL-20260909-007` · `RL-20260925-003` · `RL-20261111-002`
 
 **📜 Rule**\
-RTK mutation triggers resolve with a result object: `.unwrap()` or check `result.error` before showing success or updating local state. Until the post-mutation refetch settles the cache still holds the old value, so derive `dirty`/can-submit from a local saved baseline or an `awaitingCacheSync` flag, not the cache, or a duplicate submit re-enables.
+RTK mutation triggers resolve with a result object: `.unwrap()` or check `result.error` before showing success or updating local state. Until the post-mutation refetch settles the cache still holds the old value, so derive `dirty`/can-submit from a local saved baseline or an `awaitingCacheSync` flag, not the cache, or a duplicate submit re-enables. A mutation dispatched by hand (`endpoint.initiate()`) is `reset()` once read, or runs through the generated hook, so its results, tokens included, do not pile up in the store.
 
 **✅ Check**\
-> Did this call an RTK mutation? If yes, does success state happen only after confirmed success, and is derived dirty/can-submit state protected from re-enabling during the post-mutation refetch window?
+> Did this call an RTK mutation? If yes, does success state happen only after confirmed success, and is derived dirty/can-submit state protected from re-enabling during the post-mutation refetch window, and is a hand-dispatched mutation reset after use?
 
 <details>
 <summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/data-integrity.md</code> § <em>rtk-mutation-results</em></summary>
@@ -1430,13 +1430,13 @@ Counterfactual Safes can hold ERC-20s indexed by an off-chain aggregator (Zerion
 <a id="data-03"></a>
 ### `DATA-03` Preserve fallback data when adding new response shapes
 
-> **general** · data · 3 examples · ↩ `RL-20260310-011` · `RL-20260318-009` · `RL-20260409-001` · `RL-20260522-004` · `RL-20260526-002` · `RL-20260612-005` · `RL-20260610-003` · `RL-20260609-009`
+> **general** · data · 3 examples · ↩ `RL-20260310-011` · `RL-20260318-009` · `RL-20260409-001` · `RL-20260522-004` · `RL-20260526-002` · `RL-20260612-005` · `RL-20260610-003` · `RL-20260609-009` · `RL-20261110-003`
 
 **📜 Rule**\
-When upstream responses gain a new shape, merge field-by-field and preserve legacy fallback mappings for omitted optional sections, unless a cutover documented in the PR drops the legacy shape deliberately. Fallback/degraded results carry the same mode flags as the success branch.
+When upstream responses gain a new shape, merge field-by-field and preserve legacy fallback mappings for omitted optional sections, unless a cutover documented in the PR drops the legacy shape deliberately. Fallback/degraded results carry the same mode flags as the success branch and pass the same schema (no relative placeholder where an absolute URI is required).
 
 **✅ Check**\
-> Did this add support for a new response shape? If yes, do partial new payloads still preserve legacy data?
+> Did this add support for a new response shape? If yes, do partial new payloads still preserve legacy data, and do fallback values pass the same schema as real ones?
 
 <details>
 <summary><strong>💡 Example 1 of 3</strong> — <code>examples/general/data-integrity.md</code> § <em>fallback-preserving-maps</em></summary>
@@ -1578,7 +1578,7 @@ The original `positions: []` patch made portfolio errors look like known-empty; 
 <a id="data-04"></a>
 ### `DATA-04` Use the canonical helper, predicate, or constant
 
-> **general** · data · 4 examples · ↩ `RL-20260220-003` · `RL-20260331-002` · `RL-20260402-002` · `RL-20260416-001` · `RL-20260423-001` · `RL-20260605-012` · `RL-20260604-003` · `RL-20260608-007` · `RL-20260615-004` · `RL-20260612-004` · `RL-20260619-001` · `RL-20260713-004` · `RL-20260722-002` · `RL-20260812-001` · `RL-20260930-001` · `RL-20261008-002` · `RL-20261014-001` · `RL-20261020-005` · `RL-20261027-007` · `RL-20261103-003` · `RL-20261103-007`
+> **general** · data · 4 examples · ↩ `RL-20260220-003` · `RL-20260331-002` · `RL-20260402-002` · `RL-20260416-001` · `RL-20260423-001` · `RL-20260605-012` · `RL-20260604-003` · `RL-20260608-007` · `RL-20260615-004` · `RL-20260612-004` · `RL-20260619-001` · `RL-20260713-004` · `RL-20260722-002` · `RL-20260812-001` · `RL-20260930-001` · `RL-20261008-002` · `RL-20261014-001` · `RL-20261020-005` · `RL-20261027-007` · `RL-20261103-003` · `RL-20261103-007` · `RL-20261106-002`
 
 **📜 Rule**\
 Before adding a helper, constant, or route builder, search for the existing one (lodash `uniqWith`/`chunk`, shared formatters, `ROUTES`, E2E `TEST_ADDRESSES`/`CHAIN_IDS`) and use it; E2E helpers take hosts from the configured `baseURL`. Bounded or formatted values (tx origin, Safe version, `chainId:address`) go through their helper, not raw serialization or parsing. Domain classifications call the canonical predicate, never an inline copy or a field-presence check that legacy defaults (zero address, 0) fool, and every consumer of a shared check (submit gate, builder, summary) calls the same one. A call site that must bypass a helper keeps its fallbacks.
@@ -2080,7 +2080,7 @@ Each row also renders a mobile copy of the buttons that CSS hides on desktop. Co
 <a id="test-01"></a>
 ### `TEST-01` Assertions must fail on the regression they claim to cover
 
-> **general** · testing · 9 examples · ↩ `RL-20260217-001` · `RL-20260218-004` · `RL-20260303-010` · `RL-20260318-002` · `RL-20260331-005` · `RL-20260408-001` · `RL-20260408-002` · `RL-20260409-002` · `RL-20260423-002` · `RL-20260506-006` · `RL-20260608-005` · `RL-20260602-002` · `RL-20260609-001` · `RL-20260624-005` · `RL-20260803-003` · `RL-20260806-003` · `RL-20260820-008` · `RL-20260826-002` · `RL-20260911-002` · `RL-20260925-002` · `RL-20261002-003` · `RL-20261012-001` · `RL-20261022-006` · `RL-20261026-002` · `RL-20261029-005` · `RL-20261030-003` · `RL-20261102-001` · `RL-20261103-006` · `RL-20261103-008`
+> **general** · testing · 9 examples · ↩ `RL-20260217-001` · `RL-20260218-004` · `RL-20260303-010` · `RL-20260318-002` · `RL-20260331-005` · `RL-20260408-001` · `RL-20260408-002` · `RL-20260409-002` · `RL-20260423-002` · `RL-20260506-006` · `RL-20260608-005` · `RL-20260602-002` · `RL-20260609-001` · `RL-20260624-005` · `RL-20260803-003` · `RL-20260806-003` · `RL-20260820-008` · `RL-20260826-002` · `RL-20260911-002` · `RL-20260925-002` · `RL-20261002-003` · `RL-20261012-001` · `RL-20261022-006` · `RL-20261026-002` · `RL-20261029-005` · `RL-20261030-003` · `RL-20261102-001` · `RL-20261103-006` · `RL-20261103-008` · `RL-20261109-003`
 
 **📜 Rule**\
 Assertions and fixtures must fail loudly when the behavior or fixture data they rely on disappears, and only then: E2E and component-test helpers assert only what the user sees or the navigation that follows, not implementation details such as a link `href` or `aria-expanded`.
@@ -2581,13 +2581,13 @@ Re-declaring the capability shape in two places lets them drift the moment a new
 <a id="test-04"></a>
 ### `TEST-04` Moved behavior needs replacement coverage and matching mocks
 
-> **general** · testing · 5 examples · ↩ `RL-20260428-002` · `RL-20260428-003` · `RL-20260615-005` · `RL-20260623-002` · `RL-20260701-004` · `RL-20260714-002` · `RL-20260722-003` · `RL-20260806-001` · `RL-20260812-002` · `RL-20260921-010` · `RL-20261001-002` · `RL-20261009-002` · `RL-20261022-001` · `RL-20261023-001` · `RL-20261027-001` · `RL-20261027-002` · `RL-20261030-003` · `RL-20261102-001` · `RL-20261104-002`
+> **general** · testing · 5 examples · ↩ `RL-20260428-002` · `RL-20260428-003` · `RL-20260615-005` · `RL-20260623-002` · `RL-20260701-004` · `RL-20260714-002` · `RL-20260722-003` · `RL-20260806-001` · `RL-20260812-002` · `RL-20260921-010` · `RL-20261001-002` · `RL-20261009-002` · `RL-20261022-001` · `RL-20261023-001` · `RL-20261027-001` · `RL-20261027-002` · `RL-20261030-003` · `RL-20261102-001` · `RL-20261104-002` · `RL-20261111-005`
 
 **📜 Rule**\
-When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts. Mocks follow the code: they target the exact module specifier it imports (barrel vs deep path), return stable references where the real hook does, and mocks for dependencies it no longer uses are removed. A test that replaces deleted E2E coverage makes every assertion the deleted test made, drives the interaction instead of asserting presence, and covers each link the value crosses (prop, provider, context, persisted store and its hydration) with the wired child real or a mock that renders and acts on its props, never state set by hand; an embedded third-party widget's own UI is exempt, the params the wallet passes it are not. CI path filters and test or story discovery cover the new location.
+When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts; a removed safeguard (a wait, a guard) is replaced by a check of the invariant that made it redundant. Mocks follow the code: they target the exact module specifier it imports (barrel vs deep path), return stable references where the real hook does, and mocks for dependencies it no longer uses are removed. A test that replaces deleted E2E coverage makes every assertion the deleted test made, drives the interaction instead of asserting presence, and covers each link the value crosses (prop, provider, context, persisted store and its hydration) with the wired child real or a mock that renders and acts on its props, never state set by hand; an embedded third-party widget's own UI is exempt, the params the wallet passes it are not. CI path filters and test or story discovery cover the new location.
 
 **✅ Check**\
-> Did this move or remove a return field, prop, branch, or dependency, or replace E2E coverage with component tests? If yes, did equivalent tests move to the new owner, do the tests' mocks still match what the code imports, does the replacement keep every assertion and exercise each link and interaction the deleted test crossed, and do CI triggers still run them?
+> Did this move or remove a return field, prop, branch, safeguard, or dependency, or replace E2E coverage with component tests? If yes, did equivalent tests move to the new owner, do the tests' mocks still match what the code imports, does the replacement keep every assertion and exercise each link and interaction the deleted test crossed, and do CI triggers still run them?
 
 <details>
 <summary><strong>💡 Example 1 of 5</strong> — <code>examples/general/testing.md</code> § <em>test-04-extend-ci-path-filters-when-tests-or-stories-move</em></summary>
@@ -3030,16 +3030,16 @@ Repeated negative lookups that are expected and stable should be cached with cle
 <a id="ci-01"></a>
 ### `CI-01` Scope CI concurrency and generated labels to the real target
 
-> **general** · ci · 1 example · ↩ `RL-20260302-002` · `RL-20260318-008` · `RL-20260326-003` · `RL-20260407-002` · `RL-20260422-001` · `RL-20260612-002`
+> **general** · ci · 2 examples · ↩ `RL-20260302-002` · `RL-20260318-008` · `RL-20260326-003` · `RL-20260407-002` · `RL-20260422-001` · `RL-20260612-002` · `RL-20261109-002`
 
 **📜 Rule**\
-CI concurrency groups and generated deployment labels must include the branch/ref and any static suffixes that affect the real limit.
+CI concurrency groups and generated deployment labels must include the branch/ref and any static suffixes that affect the real limit. A release run gets its own group and is never cancelled, so a push to the same branch cannot stop it between the tag and the release.
 
 **✅ Check**\
-> Did this add or edit workflow concurrency, preview URLs, or DNS labels? If yes, is the real full label/ref scoped correctly?
+> Did this add or edit workflow concurrency, preview URLs, or DNS labels? If yes, is the real full label/ref scoped correctly, and can a push cancel a release halfway?
 
 <details>
-<summary><strong>💡 Example</strong> — <code>examples/general/api-and-packages.md</code> § <em>ci-01-same-repo-guard-for-pullrequesttarget-workflows</em></summary>
+<summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/api-and-packages.md</code> § <em>ci-01-same-repo-guard-for-pullrequesttarget-workflows</em></summary>
 
 <br>
 
@@ -3070,6 +3070,39 @@ if: >-
 `pull_request_target` runs with the base repo's secrets and write permissions. Without the same-repo check, a fork can open a PR with a `release/*` branch name and a malicious close to trigger the privileged job.
 
 <sub>Source: <a href="examples/general/api-and-packages.md#ci-01-same-repo-guard-for-pullrequesttarget-workflows">examples/general/api-and-packages.md#ci-01-same-repo-guard-for-pullrequesttarget-workflows</a></sub>
+
+</details>
+
+<details>
+<summary><strong>💡 Example 2 of 2</strong> — <code>examples/general/api-and-packages.md</code> § <em>ci-01-give-releases-their-own-concurrency-group</em></summary>
+
+<br>
+
+**CI-01 — Give releases their own concurrency group**
+
+Source: PR #9598 (RL-20261109-002)
+
+### Avoid
+
+```yaml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+```
+
+### Prefer
+
+```yaml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && 'release' || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+```
+
+### Why
+
+A release dispatched on `dev` and a staging push to `dev` share the ref, so a merge during a release cancels it after the tag push and before the GitHub release.
+
+<sub>Source: <a href="examples/general/api-and-packages.md#ci-01-give-releases-their-own-concurrency-group">examples/general/api-and-packages.md#ci-01-give-releases-their-own-concurrency-group</a></sub>
 
 </details>
 
@@ -3512,13 +3545,44 @@ Reviewer flagged a 143 KB main-bundle increase from the bundled SVG. CSS mask ke
 <a id="ci-02"></a>
 ### `CI-02` Release workflows must compute against the pre-change state
 
-> **general** · ci · ↩ `RL-20260326-002` · `RL-20260326-003` · `RL-20260327-001`
+> **general** · ci · 1 example · ↩ `RL-20260326-002` · `RL-20260326-003` · `RL-20260327-001` · `RL-20261109-001` · `RL-20261110-001`
 
 **📜 Rule**\
-Release workflows must read previous tags, changelog ranges, and duplicate namespaces before creating the new tag or artifact that changes those queries.
+Release workflows must read previous tags, changelog ranges, and duplicate namespaces before creating the new tag or artifact that changes those queries. A dispatched release runs only from its release branch (`github.ref == 'refs/heads/dev'`), and a marker that a step is done (a cached baseline manifest) is saved only after that step succeeds, so a failed run is redone.
 
 **✅ Check**\
-> Did this workflow create a tag, release, changelog, or artifact? If yes, are previous-state queries computed before the new state is created?
+> Did this workflow create a tag, release, changelog, baseline, or artifact? If yes, are previous-state queries computed before the new state is created, can a dispatch from another branch release, and is a done-marker saved only after its step succeeds?
+
+<details>
+<summary><strong>💡 Example</strong> — <code>examples/general/api-and-packages.md</code> § <em>ci-02-release-only-from-the-release-branch</em></summary>
+
+<br>
+
+**CI-02 — Release only from the release branch**
+
+Source: PR #9598 (RL-20261109-001)
+
+### Avoid
+
+```yaml
+prepare-release:
+  if: github.event_name == 'workflow_dispatch' && inputs.release
+```
+
+### Prefer
+
+```yaml
+prepare-release:
+  if: github.event_name == 'workflow_dispatch' && inputs.release && github.ref == 'refs/heads/dev'
+```
+
+### Why
+
+The dispatch form lets anyone pick any branch, so without the ref guard a wrong pick tags, publishes and promotes unmerged code.
+
+<sub>Source: <a href="examples/general/api-and-packages.md#ci-02-release-only-from-the-release-branch">examples/general/api-and-packages.md#ci-02-release-only-from-the-release-branch</a></sub>
+
+</details>
 
 ---
 
@@ -4611,16 +4675,16 @@ When the user picks 'Auto' for theme/appearance, forward that to the native API 
 <a id="e2e-02"></a>
 ### `E2E-02` Put E2E waits, timeouts, and failure hooks where they take effect
 
-> **web** · e2e · 1 example · ↩ `RL-20260218-001` · `RL-20260612-001` · `RL-20260918-001` · `RL-20261022-002` · `RL-20261022-003` · `RL-20261023-003` · `RL-20261030-001`
+> **web** · e2e · 2 examples · ↩ `RL-20260218-001` · `RL-20260612-001` · `RL-20260918-001` · `RL-20261022-002` · `RL-20261022-003` · `RL-20261023-003` · `RL-20261030-001` · `RL-20261111-006`
 
 **📜 Rule**\
-Cypress retries the command, not the chained assertion, so timeouts must go on `cy.get(..., { timeout })`/`cy.contains(..., { timeout })` — passing timeout into `should()` or `expect()` does nothing. A test's own time budget must cover the sum of its inner waits (`test.slow()` or an explicit test timeout). A journey opens a page only after every seeded value the page reads is indexed, polling the same request variant (query params) the page sends, Transaction Service first and then CGW, since CGW caches an early empty response. Failure-only diagnostics attach in fixture teardown or `afterEach`; inside the test body `testInfo.status` is still `passed`. The global step timeout stays tight: a step measured slower gets its own timeout with a one-line reason. Setup that runs on every page load (`addInitScript`) is registered once and reads switchable state, since several init scripts run in an undefined order.
+Cypress retries the command, not the chained assertion, so timeouts must go on `cy.get(..., { timeout })`/`cy.contains(..., { timeout })` — passing timeout into `should()` or `expect()` does nothing. A test's own time budget must cover the sum of its inner waits (`test.slow()` or an explicit test timeout). A journey opens a page only after every seeded value the page reads is indexed, polling the same request variant (query params) the page sends, Transaction Service first and then CGW, since CGW caches an early empty response. A wait for something to disappear first waits for a positive signal that it appeared or that the work finished, or it passes at once. Failure-only diagnostics attach in fixture teardown or `afterEach`; inside the test body `testInfo.status` is still `passed`. The global step timeout stays tight: a step measured slower gets its own timeout with a one-line reason. Setup that runs on every page load (`addInitScript`) is registered once and reads switchable state, since several init scripts run in an undefined order.
 
 **✅ Check**\
-> Did this E2E test add or raise a timeout, chain slow setup, seed data, or attach diagnostics on failure? Is the timeout on the retryable command, does the test budget cover its inner waits, does it wait for every seeded value before navigating, does the failure hook run where the final status is known, does a slow step carry its own timeout instead of a raised global one, and is per-load setup registered once?
+> Did this E2E test add or raise a timeout, chain slow setup, seed data, or attach diagnostics on failure? Is the timeout on the retryable command, does the test budget cover its inner waits, does it wait for every seeded value before navigating, does a wait for removal follow a positive signal, does the failure hook run where the final status is known, does a slow step carry its own timeout instead of a raised global one, and is per-load setup registered once?
 
 <details>
-<summary><strong>💡 Example</strong> — <code>examples/general/testing.md</code> § <em>cypress-retry-timeout-belongs-on-the-preceding-command</em></summary>
+<summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/testing.md</code> § <em>cypress-retry-timeout-belongs-on-the-preceding-command</em></summary>
 
 <br>
 
@@ -4645,6 +4709,36 @@ cy.window({ timeout: 10000 }).invoke('localStorage.getItem', key).should('equal'
 Cypress retries the chained command using the preceding command's timeout. The third argument of .should() is parsed as the failure message, so the intended retry budget silently degrades to the suite default.
 
 <sub>Source: <a href="examples/general/testing.md#cypress-retry-timeout-belongs-on-the-preceding-command">examples/general/testing.md#cypress-retry-timeout-belongs-on-the-preceding-command</a></sub>
+
+</details>
+
+<details>
+<summary><strong>💡 Example 2 of 2</strong> — <code>examples/general/testing.md</code> § <em>e2e-02-wait-for-the-result-before-waiting-for-the-skeleton-to-go</em></summary>
+
+<br>
+
+**E2E-02 — Wait for the result before waiting for the skeleton to go**
+
+Source: PR #9651 (RL-20261111-006)
+
+### Avoid
+
+```ts
+await waitFor(() => expect(canvasElement.querySelector('[data-slot="skeleton"]')).toBeNull())
+```
+
+### Prefer
+
+```ts
+await expect(await canvas.findByText('New recipient')).toBeVisible()
+await waitFor(() => expect(canvasElement.querySelector('[data-slot="skeleton"]')).toBeNull())
+```
+
+### Why
+
+Before the analysis starts there is no skeleton, so the negative wait passes at once and the screenshot can still catch the skeleton when it shows up later.
+
+<sub>Source: <a href="examples/general/testing.md#e2e-02-wait-for-the-result-before-waiting-for-the-skeleton-to-go">examples/general/testing.md#e2e-02-wait-for-the-result-before-waiting-for-the-skeleton-to-go</a></sub>
 
 </details>
 
@@ -4827,7 +4921,7 @@ Drift checks for generated code must (1) include `--include-untracked` so newly 
 <a id="web-07"></a>
 ### `WEB-07` Handle the loading tri-state of feature-flag hooks
 
-> **web** · auth · 1 example · ↩ `RL-20260521-001` · `RL-20260522-001` · `RL-20260604-002` · `RL-20260609-004` · `RL-20260818-003` · `RL-20260909-008` · `RL-20260930-005` · `RL-20261021-011`
+> **web** · auth · 1 example · ↩ `RL-20260521-001` · `RL-20260522-001` · `RL-20260604-002` · `RL-20260609-004` · `RL-20260818-003` · `RL-20260909-008` · `RL-20260930-005` · `RL-20261021-011` · `RL-20261106-001`
 
 **📜 Rule**\
 Flag and gate hooks return `undefined` while config loads; never coerce it with `?? false`. Treat it as still resolving (wait, show a loader, or allow until known), branch on `=== true`/`=== false`, and have callers consume the loading state. A gate escape hatch re-checks `isAuthenticated` so it cannot bypass the gate after sign-in. The flag-off path keeps pre-feature behaviour, and every visible change of an unlaunched feature sits behind its own flag.
@@ -5053,7 +5147,7 @@ A bare `['SafeOverviews']` tag matches every query of that type, so one mutation
 <a id="sec-02"></a>
 ### `SEC-02` Gate destructive operations on a confirmed cause
 
-> **general** · security · 2 examples · ↩ `RL-20260528-001` · `RL-20260720-003` · `RL-20260730-001` · `RL-20260828-001` · `RL-20260917-001` · `RL-20260930-004` · `RL-20260928-002`
+> **general** · security · 2 examples · ↩ `RL-20260528-001` · `RL-20260720-003` · `RL-20260730-001` · `RL-20260828-001` · `RL-20260917-001` · `RL-20260930-004` · `RL-20260928-002` · `RL-20261111-001`
 
 **📜 Rule**\
 Irreversible operations (deleting a key, wiping a signer, removing persisted data) run only on their specific confirmed cause, never on a falsy result or any caught error; a helper that returns `undefined` for both cancellation and true loss distinguishes them and keeps the error path for the ambiguous case. Existing data stays until its replacement is durably stored. A loading, failed, or skipped read (an empty config list, a `''` chainId) is unknown, not empty: wholesale writes and removals wait for a successful read, enforced in the shared write hook, and a terminal status (deleted) needs its definitive signal.
@@ -5220,13 +5314,13 @@ A top-level `permissions: {}` removes the inherited `contents: read` scope, so e
 <a id="a11y-01"></a>
 ### `A11Y-01` Keep interactive elements operable, unnested, and truly disabled
 
-> **web** · ui · 3 examples · ↩ `RL-20260605-002` · `RL-20260605-006` · `RL-20260624-002` · `RL-20260624-003` · `RL-20260729-003` · `RL-20260805-001` · `RL-20260811-003` · `RL-20260921-006` · `RL-20260929-003` · `RL-20261021-005` · `RL-20261028-003`
+> **web** · ui · 3 examples · ↩ `RL-20260605-002` · `RL-20260605-006` · `RL-20260624-002` · `RL-20260624-003` · `RL-20260729-003` · `RL-20260805-001` · `RL-20260811-003` · `RL-20260921-006` · `RL-20260929-003` · `RL-20261021-005` · `RL-20261028-003` · `RL-20261111-004`
 
 **📜 Rule**\
-Clickable elements are keyboard-operable (`<button type="button">`, or `role` + `tabIndex` + an Enter/Space handler) and never nested in another interactive element. Primitives that can render as links, and controls that must stay focusable for nested actions, disable with `aria-disabled` plus blocked pointer events. Repeated controls and indicators are named after their item, a state shown only as an icon carries visually hidden text rather than an `aria-label` on a non-interactive element, and a clickable row keeps its row role, uses a real button for focus, and ignores key events bubbled from nested controls. Controls inside a hover surface (copy buttons, links) live in a Popover with `openOnHover`, never a Tooltip, whose popup is outside the tab order.
+Clickable elements are keyboard-operable (`<button type="button">`, or `role` + `tabIndex` + an Enter/Space handler) and never nested in another interactive element; no action, a retry included, is reachable only on hover (`mouseenter`). Primitives that can render as links, and controls that must stay focusable for nested actions, disable with `aria-disabled` plus blocked pointer events. Repeated controls and indicators are named after their item, a state shown only as an icon carries visually hidden text rather than an `aria-label` on a non-interactive element, and a clickable row keeps its row role, uses a real button for focus, and ignores key events bubbled from nested controls. Controls inside a hover surface (copy buttons, links) live in a Popover with `openOnHover`, never a Tooltip, whose popup is outside the tab order.
 
 **✅ Check**\
-> Did this add or change a clickable element or shared interactive primitive? If yes, is it keyboard-operable and unnested, does its disabled state block and announce, does each repeated control have a distinct accessible name, and can the keyboard reach controls inside a hover surface?
+> Did this add or change a clickable element or shared interactive primitive? If yes, is it keyboard-operable and unnested with no hover-only action, does its disabled state block and announce, does each repeated control have a distinct accessible name, and can the keyboard reach controls inside a hover surface?
 
 <details>
 <summary><strong>💡 Example 1 of 3</strong> — <code>web/examples/feature-boundaries.md</code> § <em>disable-link-rendered-buttons-with-aria-disabled</em></summary>
@@ -5562,7 +5656,7 @@ Tests that assign to globals (`navigator`, `window`, `Date`, env) restore them, 
 <a id="pkg-02"></a>
 ### `PKG-02` Import only declared dependencies, through their public entrypoint
 
-> **general** · packages · ↩ `RL-20260610-001` · `RL-20260618-001` · `RL-20260629-001` · `RL-20260708-001` · `RL-20260729-001` · `RL-20260413-006` · `RL-20261009-001` · `RL-20261021-013` · `RL-20261029-006` · `RL-20261023-007`
+> **general** · packages · ↩ `RL-20260610-001` · `RL-20260618-001` · `RL-20260629-001` · `RL-20260708-001` · `RL-20260729-001` · `RL-20260413-006` · `RL-20261009-001` · `RL-20261021-013` · `RL-20261029-006` · `RL-20261023-007` · `RL-20260415-008`
 
 **📜 Rule**\
 App and package code imports only packages declared in its own `package.json`, through the package's public entrypoint (the same module tree its provider uses, React Native on mobile), and uses the repo's established library for a concern (e.g. ethers) rather than one present only transitively. A package, its tests and stories included, never imports from an app (`@/…`) and carries its own test utils. Presentational UI that needs no app module lives in `packages/views`; one that needs an app-only component stays in the app. `packages/views` holds presentation only: permission rules, status resolution, mapping gateway data to display values and form state stay in the app, and shared logic returns reason codes while the component that shows them owns the copy. A new package needs a reason existing dependencies cannot cover, and third-party versions never bypass the dependency age gate (`npmPreapprovedPackages` is for in-house `@safe-global/*` only).
@@ -5592,13 +5686,13 @@ Logs, error reports, and telemetry never include raw URIs, deep links, or payloa
 <a id="form-01"></a>
 ### `FORM-01` Form values track what inputs show and what they depend on
 
-> **general** · forms · 1 example · ↩ `RL-20260821-001` · `RL-20260818-004` · `RL-20260907-001` · `RL-20260930-007` · `RL-20261028-006`
+> **general** · forms · 1 example · ↩ `RL-20260821-001` · `RL-20260818-004` · `RL-20260907-001` · `RL-20260930-007` · `RL-20261028-006` · `RL-20261112-001`
 
 **📜 Rule**\
-An unfinished or invalid entry never maps to the empty form value; store an invalid sentinel or set a field error so submit stays blocked. When a field's dependency changes (selected token, signer list), clear it explicitly (RHF `resetField` restores the registered default) and give it a validation rule that re-runs. React to user edits in change handlers, since effects on a watched value also fire on `reset()`/`setValue`. A lookup-based `validate` fails on a miss, and edit-form options include every stored value. An edit whose target keeps entries it is not told to change loads the stored set and submits every removal explicitly.
+An unfinished or invalid entry never maps to the empty form value; store an invalid sentinel or set a field error so submit stays blocked. When a field's dependency changes (selected token, signer list), clear it explicitly (RHF `resetField` restores the registered default) and give it a validation rule that re-runs. React to user edits in change handlers, since effects on a watched value also fire on `reset()`/`setValue`. A lookup-based `validate` fails on a miss, and edit-form options include every stored value. An edit whose target keeps entries it is not told to change loads the stored set and submits every removal explicitly. A default the field shows but the user did not touch stays unset in the value handed on, so the consumer fetches it fresh when it acts.
 
 **✅ Check**\
-> Did this add or change a form field, a dependent field, or a reaction to a watched value? If yes, does the form value match what the input shows, is the dependent field cleared and revalidated, do edit reactions fire only on user input, do lookup validators fail on a miss and edit options include stored values, and does an edit submit its removals explicitly?
+> Did this add or change a form field, a dependent field, or a reaction to a watched value? If yes, does the form value match what the input shows, is the dependent field cleared and revalidated, do edit reactions fire only on user input, do lookup validators fail on a miss and edit options include stored values, does an edit submit its removals explicitly, and does an untouched default stay unset so the consumer re-fetches it?
 
 <details>
 <summary><strong>💡 Example</strong> — <code>examples/general/data-integrity.md</code> § <em>clear-dependent-form-fields-with-setvalue-not-resetfield</em></summary>
@@ -5640,16 +5734,16 @@ const onChangeToken = () => {
 <a id="test-07"></a>
 ### `TEST-07` Visual changes get a Storybook state
 
-> **web** · testing · 1 example · ↩ `RL-20260827-001` · `RL-20260911-005` · `RL-20260921-008` · `RL-20260930-012` · `RL-20261020-002` · `RL-20261023-004`
+> **web** · testing · 2 examples · ↩ `RL-20260827-001` · `RL-20260911-005` · `RL-20260921-008` · `RL-20260930-012` · `RL-20261020-002` · `RL-20261023-004` · `RL-20261110-002` · `RL-20261111-007`
 
 **📜 Rule**\
-A new visible component or state, and every visual or layout bug fix, gets a Storybook story rendering that state (error, long content, nesting, dismissed) so the visual-regression run catches a recurrence; class-string snapshots and DOM unit tests don't verify geometry. Stories rely on the global `mswLoader` from the preview and never register it locally, pass callbacks as `fn()`, and apply a scenario decorator once per story (meta and story decorators stack). A story seeds or clears every persisted value its state reads (consent, localStorage) and renders recorded fixtures in their own Safe and chain, so the named state looks the same on every run.
+A new visible component or state, and every visual or layout bug fix, gets a Storybook story rendering that state (error, long content, nesting, dismissed) so the visual-regression run catches a recurrence; class-string snapshots and DOM unit tests don't verify geometry. Stories rely on the global `mswLoader` from the preview and never register it locally, pass callbacks as `fn()`, and apply a scenario decorator once per story (meta and story decorators stack). A story seeds or clears every persisted value its state reads (consent, localStorage), mocks every request its flags turn on (MSW passes unhandled requests to the live gateway), and renders recorded fixtures in their own Safe and chain, so the named state looks the same on every run; shown dates come from `mockNow()`, but an age the component measures against its own clock starts from `Date.now()`. Storybook setup (static dirs, MSW handlers, aliases) changes in `.storybook` and `.storybook-vite` together.
 
 **✅ Check**\
-> Did this add a visible component or state, or fix a visual/layout bug? If yes, is there a story rendering exactly that state, including long, empty, and loading content, with one decorator per story, and does it render the same regardless of persisted state?
+> Did this add a visible component or state, or fix a visual/layout bug? If yes, is there a story rendering exactly that state, including long, empty, and loading content, with one decorator per story, does it render the same regardless of persisted state, network, and run time, and does a setup change reach both Storybook configs?
 
 <details>
-<summary><strong>💡 Example</strong> — <code>examples/general/testing.md</code> § <em>test-07-clear-persisted-state-a-storys-named-state-depends-on</em></summary>
+<summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/testing.md</code> § <em>test-07-clear-persisted-state-a-storys-named-state-depends-on</em></summary>
 
 <br>
 
@@ -5682,6 +5776,35 @@ The page reads consent from local storage, so once someone clicks Continue in St
 
 </details>
 
+<details>
+<summary><strong>💡 Example 2 of 2</strong> — <code>examples/general/testing.md</code> § <em>test-07-measure-ages-from-the-components-clock</em></summary>
+
+<br>
+
+**TEST-07 — Measure ages from the component's clock**
+
+Source: PR #9667 (RL-20261111-007)
+
+### Avoid
+
+```tsx
+<PortfolioRefreshHint _fulfilledTimeStamp={mockNow() - 10000} _isFetching={false} _freezeTime />
+```
+
+### Prefer
+
+```tsx
+<PortfolioRefreshHint _fulfilledTimeStamp={Date.now() - 10000} _isFetching={false} _freezeTime />
+```
+
+### Why
+
+The component compares the timestamp with its own `Date.now()`, while `mockNow()` rounds down to the minute, so later in the minute the 10-second-old cooldown reads as expired. Only absolute dates a story shows come from `mockNow()`.
+
+<sub>Source: <a href="examples/general/testing.md#test-07-measure-ages-from-the-components-clock">examples/general/testing.md#test-07-measure-ages-from-the-components-clock</a></sub>
+
+</details>
+
 ---
 
 ## 🌐 general › performance
@@ -5689,7 +5812,7 @@ The page reads consent from local storage, so once someone clicks Continue in St
 <a id="perf-02"></a>
 ### `PERF-02` Bound request fan-out and polling
 
-> **general** · performance · ↩ `RL-20260930-006` · `RL-20261002-008`
+> **general** · performance · ↩ `RL-20260930-006` · `RL-20261002-008` · `RL-20261111-003`
 
 **📜 Rule**\
 A list does not fire one query per row or Workspace on render: fetch when the item's menu or detail opens, or use a narrower lookup, and error fallbacks send no more requests than the happy path. Polling stops once the result settles or times out; polling a shared cache key re-polls for every subscriber, so rows read their slice through `selectFromResult`.
@@ -5771,10 +5894,10 @@ An unprefixed 64-character hex private key matches the pattern and would be copi
 > **general** · ci · 1 example · ↩ `RL-20261029-001` · `RL-20261029-002` · `RL-20261105-001`
 
 **📜 Rule**\
-A required check gated by a change filter reports a skip as a pass, so its path lists cover every input the job reads (shared `config/**`, root tooling such as `.prettierrc`, `turbo.json`, `yarn.config.cjs`), change detection matches every file type the job checks and a renamed file's old path (`previous_filename`) as well as its new one, and a spec filter or shard plan that selects nothing fails. A best-effort step (deploy events, notifications) cannot fail the run: GitHub runs `run:` steps with `bash -e`, so guard each command substitution (`|| VAR=""`) or `set +e` with a one-line why.
+A required check gated by a change filter reports a skip as a pass, so its path lists cover every input the job reads (shared `config/**`, root tooling such as `.prettierrc`, `turbo.json`, `yarn.config.cjs`), change detection matches every file type the job checks and a renamed file's old path (`previous_filename`) as well as its new one, and a spec filter or shard plan that selects nothing fails. An incremental upload (Argos `--subset`) becomes a full one when inputs were removed, since a subset ignores removals, and a required status an external service posts is backed by a `result` job that fails when the work behind it fails. A best-effort step (deploy events, notifications) cannot fail the run: GitHub runs `run:` steps with `bash -e`, so guard each command substitution (`|| VAR=""`) or `set +e` with a one-line why.
 
 **✅ Check**\
-> Did this add or change a path filter, change detector, test selection, or best-effort CI step? If yes, can a skipped or empty run report green, and can a best-effort failure turn the run red?
+> Did this add or change a path filter, change detector, test selection, or best-effort CI step? If yes, can a skipped, empty, or partial run report green or leave an external status pending, and can a best-effort failure turn the run red?
 
 <details>
 <summary><strong>💡 Example</strong> — <code>examples/general/api-and-packages.md</code> § <em>ci-05-match-a-renamed-files-old-path-too</em></summary>

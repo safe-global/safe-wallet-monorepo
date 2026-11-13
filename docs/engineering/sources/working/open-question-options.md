@@ -371,3 +371,36 @@ Option C — inline up to a fixed size (for example 5 lines without loops or
 functions); anything longer, branching more, or reused goes to a script.
 
 Decision Needed: pick A, B or C, then add it to a CI rule.
+
+### OQ-TEST-04 — Is an Argos screenshot enough to replace a deleted E2E check?
+
+Question: TEST-04 asks a replacement to make every assertion the deleted test
+made. When Cypress was deleted (#9603), a reviewer found that the queue's "Next"
+and "Queued - transaction with nonce N needs to be executed first" labels were
+then covered only by Queue stories, proved that removing the labels left every
+Jest test green, and proposed a `TxListItem` test. At the time Argos ran only
+weekly; #9609 later made it review changed sheets on every PR. The PR merged
+without the test.
+
+Evidence: [#9603 review 5826894596](https://github.com/safe-global/safe-wallet-monorepo/pull/9603#pullrequestreview-5826894596),
+[#9609 r4522721881](https://github.com/safe-global/safe-wallet-monorepo/pull/9609#discussion_r4522721881).
+
+Option A — a story whose sheet Argos reviews on the PR replaces a deleted visual
+check, text included:
+
+```tsx
+export const QueuedBatchExpanded: Story = { ...createMockStory({ pathname: '/transactions/queue' }) }
+```
+
+Option B — text and labels the deleted test read also get a Jest assertion, and
+the story covers layout only:
+
+```tsx
+renderLabel(LabelValue.Queued, 4)
+expect(screen.getByText('Queued - transaction with nonce 4 needs to be executed first')).toBeInTheDocument()
+```
+
+Option C — a screenshot is enough for static copy; anything computed (a nonce,
+an amount, a status) gets a Jest assertion.
+
+Decision Needed: pick A, B or C, then state it in TEST-04.

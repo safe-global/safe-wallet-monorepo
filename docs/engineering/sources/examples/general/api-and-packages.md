@@ -563,3 +563,49 @@ type AllowlistDto = PolicyDto & { type: Extract<PolicyDto['type'], 'erc20-transf
 ### Why
 
 Other guard-based policies share the enforcement shape, and any later policy with a `tokenAddress` field passes the presence check. Naming the accepted `type` members keeps new kinds out.
+
+## CI-01 — Give releases their own concurrency group
+
+Source: PR #9598 (RL-20261109-002)
+
+### Avoid
+
+```yaml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+```
+
+### Prefer
+
+```yaml
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'workflow_dispatch' && 'release' || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+```
+
+### Why
+
+A release dispatched on `dev` and a staging push to `dev` share the ref, so a merge during a release cancels it after the tag push and before the GitHub release.
+
+## CI-02 — Release only from the release branch
+
+Source: PR #9598 (RL-20261109-001)
+
+### Avoid
+
+```yaml
+prepare-release:
+  if: github.event_name == 'workflow_dispatch' && inputs.release
+```
+
+### Prefer
+
+```yaml
+prepare-release:
+  if: github.event_name == 'workflow_dispatch' && inputs.release && github.ref == 'refs/heads/dev'
+```
+
+### Why
+
+The dispatch form lets anyone pick any branch, so without the ref guard a wrong pick tags, publishes and promotes unmerged code.
