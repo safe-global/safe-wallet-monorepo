@@ -113,7 +113,6 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.hnStateSlice.name,
   slices.feePaymentSourcePreferenceSlice.name,
   slices.featureFlagOverridesSlice.name,
-  slices.spaceQueueViewSlice.name,
 ]
 
 export const getPersistedState = () => {

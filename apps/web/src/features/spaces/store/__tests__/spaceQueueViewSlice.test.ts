@@ -1,4 +1,4 @@
-import { makeStore, type RootState } from '@/store'
+import { getPersistedState, makeStore } from '@/store'
 import { HYDRATE_ACTION } from '@/store/useHydrateStore'
 import local from '@/services/local-storage/local'
 import { selectQueueGroupBy, setQueueGroupBy, spaceQueueViewSlice } from '../spaceQueueViewSlice'
@@ -14,32 +14,21 @@ describe('spaceQueueViewSlice', () => {
     expect(selectQueueGroupBy(store.getState())).toBe('status')
   })
 
-  it('keeps the picked grouping in localStorage', () => {
+  it('keeps the picked grouping for the session without saving it to localStorage', () => {
     const store = makeStore()
 
     store.dispatch(setQueueGroupBy('network'))
 
     expect(selectQueueGroupBy(store.getState())).toBe('network')
-    expect(local.getItem(spaceQueueViewSlice.name)).toEqual({ groupBy: 'network' })
+    expect(local.getItem(spaceQueueViewSlice.name)).toBeNull()
   })
 
-  it('restores the saved grouping when the app loads', () => {
-    const store = makeStore()
+  it('lists by status again after a reload', () => {
+    makeStore().dispatch(setQueueGroupBy('next'))
 
-    store.dispatch({ type: HYDRATE_ACTION, payload: { [spaceQueueViewSlice.name]: { groupBy: 'next' } } })
+    const reloaded = makeStore()
+    reloaded.dispatch({ type: HYDRATE_ACTION, payload: getPersistedState() })
 
-    expect(selectQueueGroupBy(store.getState())).toBe('next')
-  })
-
-  it('lists by status when the saved grouping is one the menu no longer offers', () => {
-    const store = makeStore()
-
-    store.dispatch({ type: HYDRATE_ACTION, payload: { [spaceQueueViewSlice.name]: { groupBy: 'priority' } } })
-
-    expect(selectQueueGroupBy(store.getState())).toBe('status')
-  })
-
-  it('lists by status when nothing was saved for the queue', () => {
-    expect(selectQueueGroupBy({} as RootState)).toBe('status')
+    expect(selectQueueGroupBy(reloaded.getState())).toBe('status')
   })
 })

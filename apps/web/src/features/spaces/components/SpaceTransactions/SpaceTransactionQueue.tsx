@@ -75,13 +75,7 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
   const dispatch = useAppDispatch()
   const groupBy = useAppSelector(selectQueueGroupBy)
   const tableGroupBy = useDeferredValue(groupBy)
-  // Each change is a localStorage write and a message to the other tabs, so an unchanged pick is not dispatched
-  const changeGroupBy = useCallback(
-    (next: QueueGroupBy) => {
-      if (next !== groupBy) dispatch(setQueueGroupBy(next))
-    },
-    [dispatch, groupBy],
-  )
+  const changeGroupBy = useCallback((next: QueueGroupBy) => dispatch(setQueueGroupBy(next)), [dispatch])
   // The toolbar shows a click at once; the table follows in a render that doesn't block it
   const queryFilters = useDeferredValue(filters)
   const querySearch = useDeferredValue(search)
