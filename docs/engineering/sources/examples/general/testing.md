@@ -656,3 +656,54 @@ export const fakerLookalikeAddress = (address: string) =>
 ### Why
 
 Mixed-case ends with a lowercase middle fail the EIP-55 checksum in most runs, so a test that types the value into a validated address field fails at random.
+
+## TEST-01 — Helpers wait for what they act on, not for an attribute
+
+Source: PR #9546 (RL-20261103-008)
+
+### Avoid
+
+```ts
+const pickToken = async (user: User, name: string) => {
+  const trigger = within(screen.getByTestId('token-selector')).getByRole('combobox')
+  await user.click(trigger)
+  await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'))
+```
+
+### Prefer
+
+```ts
+const pickToken = async (user: User, name: string) => {
+  const trigger = within(screen.getByTestId('token-selector')).getByRole('combobox')
+  await user.click(trigger)
+  await user.click(await screen.findByRole('option', { name }))
+```
+
+### Why
+
+The option only exists while the list is open, so a menu that fails to open still fails the test, on the option the test is about rather than on an attribute none of the tests name.
+
+## TEST-04 — Hook mocks return one stable object
+
+Source: PR #9501 (RL-20261102-001)
+
+### Avoid
+
+```ts
+jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
+  useWeb3ReadOnly: jest.fn(() => ({ getTransaction: mockGetTransaction })),
+}))
+```
+
+### Prefer
+
+```ts
+const mockReadOnlyProvider = { getTransaction: mockGetTransaction }
+jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
+  useWeb3ReadOnly: jest.fn(() => mockReadOnlyProvider),
+}))
+```
+
+### Why
+
+The real hook returns the same provider across renders. A new object per render changes an effect dependency every time, so the real `useAsync` refetches in a loop and the test only passes because it ends after the first call.

@@ -11740,5 +11740,383 @@
     "ruleIds": [
       "FORM-01"
     ]
+  },
+  {
+    "id": "RL-20261030-001",
+    "title": "Seed wait polled a different request variant than the page sends",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      9499
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4416019548,
+      4420910757
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A Workspace seed waited on `/v2/safes` without `trusted=false`, while the dashboard requests that variant. CGW caches each URL separately, so a ready default variant said nothing about the entry the page reads; the seed now polls the exact request the page sends.",
+    "ruleIds": [
+      "E2E-02"
+    ]
+  },
+  {
+    "id": "RL-20261030-002",
+    "title": "Expected ENS misses stored as query errors instead of cached absence",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      9500
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5708897164
+    ],
+    "issueCommentIds": [],
+    "learning": "An RTK `queryFn` returned `{ error }` for every resolver throw, including reverts the code itself classifies as an expected miss. A rejected entry is not a cached answer, so every new reader looked the address up again and briefly rendered as not resolving, which enabled the Next button for one render. Expected misses resolve to `{ data: null }`; only transport failures stay errors.",
+    "ruleIds": [
+      "CACHE-01"
+    ]
+  },
+  {
+    "id": "RL-20261030-003",
+    "title": "Mocks left behind after the code stopped importing them",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      9500,
+      9054
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5708897164,
+      5665960621
+    ],
+    "issueCommentIds": [],
+    "learning": "Tests kept mocking modules the code no longer used: a provider hook and an import after a refactor, and `next/dynamic` after the loader moved to `@/utils/dynamic`, which left the test failing only through a duplicate-React error. A query mock that ignored its argument let a test pass even if the hook skipped the lookup. Mocks target what the code imports now and check the arguments that decide the result.",
+    "ruleIds": [
+      "TEST-04",
+      "TEST-01"
+    ]
+  },
+  {
+    "id": "RL-20261031-001",
+    "title": "Fix to a shared primitive without a test that fails without it",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      9503
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4420794913,
+      4421550609
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "Adding `nativeButton` to the shared combobox trigger fixed its button semantics with no test. The author added a primitive test that renders the trigger and asserts a single native button with no warning, and confirmed it fails without the fix.",
+    "ruleIds": [
+      "TEST-02"
+    ]
+  },
+  {
+    "id": "RL-20261102-001",
+    "title": "Hook mock returned a fresh object per render and a module-wide mock hid the async work",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      9501
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4426134624,
+      4443440344,
+      4443444768
+    ],
+    "reviewIds": [
+      5715613384
+    ],
+    "issueCommentIds": [],
+    "learning": "A `useWeb3ReadOnly` mock built a new provider object on every render, so with the real `useAsync` the lookup re-ran in a loop; a module-level `useAsync` mock silenced the warnings by stubbing every consumer in the tree; and the test only checked that the lookup was called. The fix uses one stable mock object and the real hook, waits for the initiator to show, and asserts a single call.",
+    "ruleIds": [
+      "TEST-04",
+      "TEST-01"
+    ]
+  },
+  {
+    "id": "RL-20261102-002",
+    "title": "In-house replacement for next/dynamic changed failure and timing behaviour",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      9054
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5665960621
+    ],
+    "issueCommentIds": [],
+    "learning": "A `React.lazy` + `Suspense` helper with the `next/dynamic` call shape threw a failed chunk load into the app-root error boundary, where `next/dynamic` rendered nothing, and delayed each first reveal by React's 300 ms Suspense throttle. The helper now catches and logs the rejection, renders nothing, and loads without Suspense.",
+    "ruleIds": [
+      "API-01"
+    ]
+  },
+  {
+    "id": "RL-20261102-003",
+    "title": "Test and agent guidance claimed more than the suite and tools do",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      9490,
+      9491,
+      9492,
+      9054
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4414425372,
+      4414608715,
+      4414562265,
+      4414609179,
+      4414562278,
+      4414609617,
+      4414562292,
+      4414609985,
+      4414554605,
+      4414610433,
+      4414554623,
+      4414610851
+    ],
+    "reviewIds": [
+      5665960621
+    ],
+    "issueCommentIds": [],
+    "learning": "Rewritten E2E docs said the suite runs on every PR (path filters skip it), that every journey seeds its own Safe and registers with `{}` (some read scenario data or need another fork), required seeded-Safe details for tests that seed nothing, dropped the legacy Cypress folder from the selector search while that suite still runs, and set a test level that contradicted two other docs until the stacked PRs landed. In another PR, AGENTS.md still told contributors to keep `next/dynamic` after a lint rule banned it. Each was corrected to match the real behaviour.",
+    "ruleIds": [
+      "DOC-01"
+    ]
+  },
+  {
+    "id": "RL-20261103-001",
+    "title": "Footer component and effect took on unrelated jobs",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      9510
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5732489380
+    ],
+    "issueCommentIds": [],
+    "learning": "A ~170-line sidebar footer also took the What's new state, badge, drawer and corner card; one effect both listened for messages and built an iframe with `document.createElement`; and one parser repeated the same checks for two post types. The reviewer asked for a `WhatsNewButton`, a JSX frame component leaving the hook with only the listener, and `parseTopBar`/`parseCornerCard` with an `httpsOnly` helper; all were done.",
+    "ruleIds": [
+      "CODE-03"
+    ]
+  },
+  {
+    "id": "RL-20261103-002",
+    "title": "Names that describe the vendor or an old job instead of what the code does",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      9510
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5732489380
+    ],
+    "issueCommentIds": [],
+    "learning": "`handleBeamerClick` also opened What's new from the corner card, components named `WhatsNew*` imported `Beamer*` types, and `useBeamerUpdates` and `useBeamerLiveUpdates` looked alike while one read data and the other mounted a hidden iframe. The vendor name stayed inside the API module; elsewhere names became `openWhatsNew`, `useWhatsNewUpdates` and `useWhatsNewUpdateListener`.",
+    "ruleIds": [
+      "CODE-05"
+    ]
+  },
+  {
+    "id": "RL-20261103-003",
+    "title": "Origin constant declared twice and a JSON payload read by string match",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      9510
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5732489380
+    ],
+    "issueCommentIds": [],
+    "learning": "`BEAMER_ORIGIN` was defined in a hook and again in a drawer; it is now exported once next to the API URL. A message payload was read by matching the JSON text, so `\"immediate\": true` with a space fell back to the random delay; the prefix is now stripped and the rest parsed with `JSON.parse`.",
+    "ruleIds": [
+      "DATA-04"
+    ]
+  },
+  {
+    "id": "RL-20261103-004",
+    "title": "Unexplained query parameter",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      9510
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5732489380
+    ],
+    "issueCommentIds": [],
+    "learning": "A reviewer asked what `v: 1` in a third-party request meant. The merged code says in one line that the vendor's own script sends it, and why a fresh `t` goes with every request.",
+    "ruleIds": [
+      "DOC-01"
+    ]
+  },
+  {
+    "id": "RL-20261103-005",
+    "title": "Test setup copied across several test files",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      9510
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5732489380
+    ],
+    "issueCommentIds": [],
+    "learning": "The same `afterEach`, an MSW request recorder (8 copies) and a consent `initialReduxState` (6 copies) were repeated across hook and component tests. The reviewer drew the line at three copies, and the setup moved into one test util (`recordBeamerRequests`, `withUpdatesConsent`).",
+    "ruleIds": [
+      "CODE-01"
+    ]
+  },
+  {
+    "id": "RL-20261103-006",
+    "title": "Timer test passed by a numeric coincidence and slept on real time",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      9510
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5732489380
+    ],
+    "issueCommentIds": [],
+    "learning": "A test relied on `0.0005 × MAX_UPDATE_DELAY` happening to be 300 ms, so changing the delay would fail it for no behavioural reason, and `setTimeout` sleeps slowed the suite without proving the timing. The tests now use fake timers, pin `Math.random`, and advance by the exported delay.",
+    "ruleIds": [
+      "TEST-01"
+    ]
+  },
+  {
+    "id": "RL-20261103-007",
+    "title": "A component predicted whether another renders with its own copy of the rule",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      9554,
+      9191
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4455044432,
+      4457390394,
+      4466361753,
+      4467712648
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A reveal schedule treated the threat card as hidden when its findings were empty, but a failed check still renders a card, so later cards got the wrong slots; and `TxSigners` kept an old copy of when the Safenet row renders, so the row above it lost its connector line. Both now call the same predicate or hook the rendering component uses, with a test for the failure case.",
+    "ruleIds": [
+      "DATA-04"
+    ]
+  },
+  {
+    "id": "RL-20261103-008",
+    "title": "Shared test helper asserted an attribute no test was about",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      9546
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4452761629,
+      4454996941
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A `pickToken` action helper waited for `aria-expanded=\"true\"`, so a menu that failed to open was reported as an attribute failure in tests that never named it. The helper now clicks and waits for the option it picks, which only exists while the list is open.",
+    "ruleIds": [
+      "TEST-01"
+    ]
+  },
+  {
+    "id": "RL-20261104-001",
+    "title": "Explanatory comment at the top of an E2E spec",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      9560
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4463760184,
+      4463941960
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "A new spec opened with a comment explaining that checkout goes to the local billing service. The URL assertion already shows it, so the comment was removed.",
+    "ruleIds": [
+      "DOC-01"
+    ]
+  },
+  {
+    "id": "RL-20261104-002",
+    "title": "Replacement test checked the callback, not that the page closes the drawer",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      9486
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [],
+    "reviewIds": [
+      5700779273
+    ],
+    "issueCommentIds": [
+      6516542106
+    ],
+    "learning": "The deleted Cypress test closed the preview drawer and checked it was gone; the replacement only checked `onClose` was called, and replacing the page's handler with a no-op left every test green. A page test now closes the drawer and checks `data-state=\"closed\"`, since the drawer stays mounted for its exit animation in jsdom.",
+    "ruleIds": [
+      "TEST-04"
+    ]
+  },
+  {
+    "id": "RL-20261105-001",
+    "title": "Changed-file verification skipped the file types the new lint block covers",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      9587
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4481132667,
+      4481593337
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "An ESLint block for `.js`/`.mjs`/`.cjs` files never ran under `verify:changed`, whose changed-file regex matched only `ts|tsx|js|jsx`, so an edit to an `.mjs` config reported green. The regex now also matches `.mts`, `.cts`, `.mjs` and `.cjs`.",
+    "ruleIds": [
+      "CI-05"
+    ]
+  },
+  {
+    "id": "RL-20261105-002",
+    "title": "Auth popup callback page existed only on the production host",
+    "sourceWindowId": "CLOSED-20261029-20261106",
+    "prNumbers": [
+      8902
+    ],
+    "prState": "merged",
+    "reviewCommentIds": [
+      4335285605,
+      4479478361
+    ],
+    "reviewIds": [],
+    "issueCommentIds": [],
+    "learning": "The step-up popup returned to `/step-up-complete`, which only S3 served (the upload strips `.html`); `next dev` returned 404 and Vite served the app, so the popup never reported. `.html` was no fix either, since `serve` redirects it to the clean URL and drops the query with the challenge `error`. The page became `public/step-up-complete.htm`, which every server serves with its query.",
+    "ruleIds": [
+      "WEB-05"
+    ]
   }
 ]

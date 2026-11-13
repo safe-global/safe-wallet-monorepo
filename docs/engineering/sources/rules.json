@@ -71,7 +71,8 @@
       "RL-20261008-003",
       "RL-20261009-004",
       "RL-20261016-002",
-      "RL-20261027-008"
+      "RL-20261027-008",
+      "RL-20261103-005"
     ]
   },
   {
@@ -127,10 +128,11 @@
     "project": "general",
     "area": "api",
     "title": "Search consumers when removing or changing public exports",
-    "rule": "Removing or changing a public export, hook return field, endpoint, compatibility API, URL-served asset, or visible copy that tests assert requires updating all tests, E2E helpers, and consumers in the same change. Every prop, field, export, or branch a change adds has a consumer that can reach it; dead code is deleted, not commented out.",
-    "check": "Did this remove, rename, or change what an exported API or shared hook returns, or move a URL-served asset? If yes, were tests, namespace imports, dynamic access, generated consumers, and downstream apps searched, does each consumer's gating purpose still hold, and does everything the change adds have a reachable consumer?",
+    "rule": "Removing or changing a public export, hook return field, endpoint, compatibility API, URL-served asset, or visible copy that tests assert requires updating all tests, E2E helpers, and consumers in the same change. A drop-in replacement for a component or framework helper keeps the original's props, failure handling, and timing. Every prop, field, export, or branch a change adds has a consumer that can reach it; dead code is deleted, not commented out.",
+    "check": "Did this remove, rename, or change what an exported API or shared hook returns, move a URL-served asset, or replace a component or framework helper? If yes, does a replacement keep the original's failure and timing behaviour, were tests, namespace imports, dynamic access, generated consumers, and downstream apps searched, does each consumer's gating purpose still hold, and does everything the change adds have a reachable consumer?",
     "exampleRefs": [
-      "examples/general/api-and-packages.md#api-01-drop-in-replacements-preserve-the-original-prop-surface"
+      "examples/general/api-and-packages.md#api-01-drop-in-replacements-preserve-the-original-prop-surface",
+      "examples/general/api-and-packages.md#api-01-a-replacement-keeps-the-originals-failure-behaviour"
     ],
     "reviewLearningIds": [
       "RL-20260410-002",
@@ -149,7 +151,8 @@
       "RL-20261014-003",
       "RL-20261021-008",
       "RL-20261023-002",
-      "RL-20261027-010"
+      "RL-20261027-010",
+      "RL-20261102-002"
     ]
   },
   {
@@ -320,7 +323,9 @@
       "RL-20261008-002",
       "RL-20261014-001",
       "RL-20261020-005",
-      "RL-20261027-007"
+      "RL-20261027-007",
+      "RL-20261103-003",
+      "RL-20261103-007"
     ]
   },
   {
@@ -409,7 +414,7 @@
     "project": "general",
     "area": "testing",
     "title": "Assertions must fail on the regression they claim to cover",
-    "rule": "Assertions and fixtures must fail loudly when the behavior or fixture data they rely on disappears, and only then: E2E helpers assert what the user sees or the navigation that follows, not implementation details such as a link `href`.",
+    "rule": "Assertions and fixtures must fail loudly when the behavior or fixture data they rely on disappears, and only then: E2E and component-test helpers assert only what the user sees or the navigation that follows, not implementation details such as a link `href` or `aria-expanded`.",
     "check": "Did this add or update a test assertion? If yes, would it fail if the bug reappeared or fixture data vanished, and keep passing through a refactor that keeps the behavior?",
     "exampleRefs": [
       "examples/general/testing.md#negative-assertions",
@@ -419,7 +424,8 @@
       "examples/general/testing.md#overwriting-localstorage-fixtures-must-include-implicit-app-seeded-entries",
       "examples/general/testing.md#test-01-click-links-without-asserting-their-href",
       "examples/general/testing.md#test-01-check-a-value-is-complete-before-testing-containment",
-      "examples/general/testing.md#test-01-flush-async-work-before-a-positive-assertion"
+      "examples/general/testing.md#test-01-flush-async-work-before-a-positive-assertion",
+      "examples/general/testing.md#test-01-helpers-wait-for-what-they-act-on-not-for-an-attribute"
     ],
     "reviewLearningIds": [
       "RL-20260217-001",
@@ -446,7 +452,11 @@
       "RL-20261012-001",
       "RL-20261022-006",
       "RL-20261026-002",
-      "RL-20261029-005"
+      "RL-20261029-005",
+      "RL-20261030-003",
+      "RL-20261102-001",
+      "RL-20261103-006",
+      "RL-20261103-008"
     ]
   },
   {
@@ -485,7 +495,8 @@
       "RL-20261002-003",
       "RL-20261013-001",
       "RL-20261022-005",
-      "RL-20261023-006"
+      "RL-20261023-006",
+      "RL-20261031-001"
     ]
   },
   {
@@ -513,13 +524,14 @@
     "project": "general",
     "area": "testing",
     "title": "Moved behavior needs replacement coverage and matching mocks",
-    "rule": "When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts. Mocks follow the code: they target the exact module specifier it imports (barrel vs deep path), and mocks for dependencies it no longer uses are removed. A test that replaces deleted E2E coverage makes every assertion the deleted test made, drives the interaction instead of asserting presence, and covers each link the value crosses (prop, provider, context, persisted store and its hydration) with the wired child real or a mock that renders and acts on its props, never state set by hand; an embedded third-party widget's own UI is exempt, the params the wallet passes it are not. CI path filters and test or story discovery cover the new location.",
+    "rule": "When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts. Mocks follow the code: they target the exact module specifier it imports (barrel vs deep path), return stable references where the real hook does, and mocks for dependencies it no longer uses are removed. A test that replaces deleted E2E coverage makes every assertion the deleted test made, drives the interaction instead of asserting presence, and covers each link the value crosses (prop, provider, context, persisted store and its hydration) with the wired child real or a mock that renders and acts on its props, never state set by hand; an embedded third-party widget's own UI is exempt, the params the wallet passes it are not. CI path filters and test or story discovery cover the new location.",
     "check": "Did this move or remove a return field, prop, branch, or dependency, or replace E2E coverage with component tests? If yes, did equivalent tests move to the new owner, do the tests' mocks still match what the code imports, does the replacement keep every assertion and exercise each link and interaction the deleted test crossed, and do CI triggers still run them?",
     "exampleRefs": [
       "examples/general/testing.md#test-04-extend-ci-path-filters-when-tests-or-stories-move",
       "examples/general/testing.md#test-04-let-the-mocked-child-act-on-the-props-it-receives",
       "examples/general/testing.md#test-04-test-each-link-the-replaced-e2e-check-crossed",
-      "examples/general/testing.md#test-04-keep-the-deleted-tests-format-check"
+      "examples/general/testing.md#test-04-keep-the-deleted-tests-format-check",
+      "examples/general/testing.md#test-04-hook-mocks-return-one-stable-object"
     ],
     "reviewLearningIds": [
       "RL-20260428-002",
@@ -537,7 +549,10 @@
       "RL-20261022-001",
       "RL-20261023-001",
       "RL-20261027-001",
-      "RL-20261027-002"
+      "RL-20261027-002",
+      "RL-20261030-003",
+      "RL-20261102-001",
+      "RL-20261104-002"
     ]
   },
   {
@@ -628,7 +643,7 @@
     "rule": "Repeated negative lookups that are expected and stable should be cached with clear TTL/invalidation; transient failures must not be cached as permanent absence.",
     "check": "Did this resolver repeatedly query for absent data? If yes, is absence cached deliberately without making transient failures permanent?",
     "exampleRefs": [],
-    "reviewLearningIds": ["RL-20260420-003", "RL-20260825-005", "RL-20260921-004"]
+    "reviewLearningIds": ["RL-20260420-003", "RL-20260825-005", "RL-20260921-004", "RL-20261030-002"]
   },
   {
     "id": "CI-01",
@@ -696,7 +711,10 @@
       "RL-20261021-006",
       "RL-20261021-007",
       "RL-20261027-009",
-      "RL-20261023-005"
+      "RL-20261023-005",
+      "RL-20261102-003",
+      "RL-20261103-004",
+      "RL-20261104-001"
     ]
   },
   {
@@ -735,14 +753,14 @@
     "project": "web",
     "area": "auth",
     "title": "Sanitize auth redirects and outcomes",
-    "rule": "Auth redirect URLs must remove transient error/query state and validate externally supplied return targets before sending users through OIDC or callback flows.",
-    "check": "Did this add or change an auth redirect or callback? If yes, is the return URL sanitized and validated?",
+    "rule": "Auth redirect URLs must remove transient error/query state and validate externally supplied return targets before sending users through OIDC or callback flows. A callback page resolves at its path, with its query intact, on every server that serves the app (`next dev`, Vite, `serve`, S3).",
+    "check": "Did this add or change an auth redirect or callback? If yes, is the return URL sanitized and validated, and does the callback page load with its query on every server the app runs on?",
     "exampleRefs": [
       "examples/general/gateway-hooks.md#web-05-trigger-redirect-endpoints-via-top-level-navigation",
       "web/examples/feature-boundaries.md#branch-the-action-do-not-duplicate-the-match",
       "web/examples/feature-boundaries.md#validate-safe-app-urls-before-postmessage-origin-checks"
     ],
-    "reviewLearningIds": ["RL-20260220-001", "RL-20260312-004", "RL-20260325-001", "RL-20260407-003"]
+    "reviewLearningIds": ["RL-20260220-001", "RL-20260312-004", "RL-20260325-001", "RL-20260407-003", "RL-20261105-002"]
   },
   {
     "id": "UI-01",
@@ -916,7 +934,7 @@
     "rule": "A hook, handler, or component that does several things (fetch, resolve, and map; a multi-case switch; a long try/finally) splits into named hooks, functions, or one component per case. Helpers take at most 4 positional parameters: close over shared hook state in a local builder or pass one `deps` object, and group props that travel together into one object.",
     "check": "Did this add or grow a hook, handler, or component a reviewer must read top to bottom, or a helper with 5+ positional args? If yes, can its steps become named units and its arguments a closure or one object?",
     "exampleRefs": ["examples/general/api-and-packages.md#close-over-hook-deps-instead-of-threading-6-args"],
-    "reviewLearningIds": ["RL-20260311-005", "RL-20260929-002", "RL-20261016-003"],
+    "reviewLearningIds": ["RL-20260311-005", "RL-20260929-002", "RL-20261016-003", "RL-20261103-001"],
     "project": "general"
   },
   {
@@ -960,7 +978,8 @@
       "RL-20261014-005",
       "RL-20261021-010",
       "RL-20261027-005",
-      "RL-20261027-006"
+      "RL-20261027-006",
+      "RL-20261103-002"
     ],
     "project": "general"
   },
@@ -1071,7 +1090,7 @@
     "id": "E2E-02",
     "area": "e2e",
     "title": "Put E2E waits, timeouts, and failure hooks where they take effect",
-    "rule": "Cypress retries the command, not the chained assertion, so timeouts must go on `cy.get(..., { timeout })`/`cy.contains(..., { timeout })` — passing timeout into `should()` or `expect()` does nothing. A test's own time budget must cover the sum of its inner waits (`test.slow()` or an explicit test timeout). A journey opens a page only after every seeded value the page reads is indexed, Transaction Service first and then CGW, since CGW caches an early empty response. Failure-only diagnostics attach in fixture teardown or `afterEach`; inside the test body `testInfo.status` is still `passed`. The global step timeout stays tight: a step measured slower gets its own timeout with a one-line reason. Setup that runs on every page load (`addInitScript`) is registered once and reads switchable state, since several init scripts run in an undefined order.",
+    "rule": "Cypress retries the command, not the chained assertion, so timeouts must go on `cy.get(..., { timeout })`/`cy.contains(..., { timeout })` — passing timeout into `should()` or `expect()` does nothing. A test's own time budget must cover the sum of its inner waits (`test.slow()` or an explicit test timeout). A journey opens a page only after every seeded value the page reads is indexed, polling the same request variant (query params) the page sends, Transaction Service first and then CGW, since CGW caches an early empty response. Failure-only diagnostics attach in fixture teardown or `afterEach`; inside the test body `testInfo.status` is still `passed`. The global step timeout stays tight: a step measured slower gets its own timeout with a one-line reason. Setup that runs on every page load (`addInitScript`) is registered once and reads switchable state, since several init scripts run in an undefined order.",
     "check": "Did this E2E test add or raise a timeout, chain slow setup, seed data, or attach diagnostics on failure? Is the timeout on the retryable command, does the test budget cover its inner waits, does it wait for every seeded value before navigating, does the failure hook run where the final status is known, does a slow step carry its own timeout instead of a raised global one, and is per-load setup registered once?",
     "exampleRefs": ["examples/general/testing.md#cypress-retry-timeout-belongs-on-the-preceding-command"],
     "reviewLearningIds": [
@@ -1080,7 +1099,8 @@
       "RL-20260918-001",
       "RL-20261022-002",
       "RL-20261022-003",
-      "RL-20261023-003"
+      "RL-20261023-003",
+      "RL-20261030-001"
     ],
     "project": "web"
   },
@@ -1427,10 +1447,10 @@
     "project": "general",
     "area": "ci",
     "title": "A green check means the work ran; a best-effort step cannot fail the run",
-    "rule": "A required check gated by a change filter reports a skip as a pass, so its path lists cover every input the job reads (shared `config/**`, root tooling such as `.prettierrc`, `turbo.json`, `yarn.config.cjs`), change detection matches a renamed file's old path (`previous_filename`) as well as its new one, and a spec filter or shard plan that selects nothing fails. A best-effort step (deploy events, notifications) cannot fail the run: GitHub runs `run:` steps with `bash -e`, so guard each command substitution (`|| VAR=\"\"`) or `set +e` with a one-line why.",
+    "rule": "A required check gated by a change filter reports a skip as a pass, so its path lists cover every input the job reads (shared `config/**`, root tooling such as `.prettierrc`, `turbo.json`, `yarn.config.cjs`), change detection matches every file type the job checks and a renamed file's old path (`previous_filename`) as well as its new one, and a spec filter or shard plan that selects nothing fails. A best-effort step (deploy events, notifications) cannot fail the run: GitHub runs `run:` steps with `bash -e`, so guard each command substitution (`|| VAR=\"\"`) or `set +e` with a one-line why.",
     "check": "Did this add or change a path filter, change detector, test selection, or best-effort CI step? If yes, can a skipped or empty run report green, and can a best-effort failure turn the run red?",
     "exampleRefs": ["examples/general/api-and-packages.md#ci-05-match-a-renamed-files-old-path-too"],
-    "reviewLearningIds": ["RL-20261029-001", "RL-20261029-002"]
+    "reviewLearningIds": ["RL-20261029-001", "RL-20261029-002", "RL-20261105-001"]
   },
   {
     "id": "CI-06",

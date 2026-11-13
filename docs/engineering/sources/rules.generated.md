@@ -263,7 +263,7 @@ External callers go through the public barrel; internals stay relative. Self-imp
 <a id="code-01"></a>
 ### `CODE-01` Extract shared UI only when behavior is actually shared
 
-> **web** · abstractions · 4 examples · ↩ `RL-20260227-002` · `RL-20260318-011` · `RL-20260327-006` · `RL-20260331-006` · `RL-20260505-006` · `RL-20260505-011` · `RL-20260605-007` · `RL-20260611-004` · `RL-20260610-002` · `RL-20260622-001` · `RL-20260624-001` · `RL-20260701-003` · `RL-20260709-001` · `RL-20260716-001` · `RL-20260722-001` · `RL-20260731-002` · `RL-20260806-004` · `RL-20260828-003` · `RL-20260911-003` · `RL-20260916-004` · `RL-20260930-002` · `RL-20261008-003` · `RL-20261009-004` · `RL-20261016-002` · `RL-20261027-008`
+> **web** · abstractions · 4 examples · ↩ `RL-20260227-002` · `RL-20260318-011` · `RL-20260327-006` · `RL-20260331-006` · `RL-20260505-006` · `RL-20260505-011` · `RL-20260605-007` · `RL-20260611-004` · `RL-20260610-002` · `RL-20260622-001` · `RL-20260624-001` · `RL-20260701-003` · `RL-20260709-001` · `RL-20260716-001` · `RL-20260722-001` · `RL-20260731-002` · `RL-20260806-004` · `RL-20260828-003` · `RL-20260911-003` · `RL-20260916-004` · `RL-20260930-002` · `RL-20261008-003` · `RL-20261009-004` · `RL-20261016-002` · `RL-20261027-008` · `RL-20261103-005`
 
 **📜 Rule**\
 When two components share form, state, loading, and error flow, prefer one configurable component over near-duplicate implementations. Logic copied between call sites or between web and mobile moves once into a shared hook or `packages/utils`, and a helper peer modules share gets its own module rather than one peer importing it from another.
@@ -785,16 +785,16 @@ unauthenticated so they re-login.
 <a id="api-01"></a>
 ### `API-01` Search consumers when removing or changing public exports
 
-> **general** · api · 1 example · ↩ `RL-20260410-002` · `RL-20260428-003` · `RL-20260506-003` · `RL-20260611-009` · `RL-20260625-001` · `RL-20260702-006` · `RL-20260805-003` · `RL-20260820-007` · `RL-20260921-002` · `RL-20260930-009` · `RL-20260929-005` · `RL-20261008-008` · `RL-20261009-003` · `RL-20261014-003` · `RL-20261021-008` · `RL-20261023-002` · `RL-20261027-010`
+> **general** · api · 2 examples · ↩ `RL-20260410-002` · `RL-20260428-003` · `RL-20260506-003` · `RL-20260611-009` · `RL-20260625-001` · `RL-20260702-006` · `RL-20260805-003` · `RL-20260820-007` · `RL-20260921-002` · `RL-20260930-009` · `RL-20260929-005` · `RL-20261008-008` · `RL-20261009-003` · `RL-20261014-003` · `RL-20261021-008` · `RL-20261023-002` · `RL-20261027-010` · `RL-20261102-002`
 
 **📜 Rule**\
-Removing or changing a public export, hook return field, endpoint, compatibility API, URL-served asset, or visible copy that tests assert requires updating all tests, E2E helpers, and consumers in the same change. Every prop, field, export, or branch a change adds has a consumer that can reach it; dead code is deleted, not commented out.
+Removing or changing a public export, hook return field, endpoint, compatibility API, URL-served asset, or visible copy that tests assert requires updating all tests, E2E helpers, and consumers in the same change. A drop-in replacement for a component or framework helper keeps the original's props, failure handling, and timing. Every prop, field, export, or branch a change adds has a consumer that can reach it; dead code is deleted, not commented out.
 
 **✅ Check**\
-> Did this remove, rename, or change what an exported API or shared hook returns, or move a URL-served asset? If yes, were tests, namespace imports, dynamic access, generated consumers, and downstream apps searched, does each consumer's gating purpose still hold, and does everything the change adds have a reachable consumer?
+> Did this remove, rename, or change what an exported API or shared hook returns, move a URL-served asset, or replace a component or framework helper? If yes, does a replacement keep the original's failure and timing behaviour, were tests, namespace imports, dynamic access, generated consumers, and downstream apps searched, does each consumer's gating purpose still hold, and does everything the change adds have a reachable consumer?
 
 <details>
-<summary><strong>💡 Example</strong> — <code>examples/general/api-and-packages.md</code> § <em>api-01-drop-in-replacements-preserve-the-original-prop-surface</em></summary>
+<summary><strong>💡 Example 1 of 2</strong> — <code>examples/general/api-and-packages.md</code> § <em>api-01-drop-in-replacements-preserve-the-original-prop-surface</em></summary>
 
 <br>
 
@@ -841,6 +841,42 @@ implementation supported, otherwise call sites regress without any compiler
 signal.
 
 <sub>Source: <a href="examples/general/api-and-packages.md#api-01-drop-in-replacements-preserve-the-original-prop-surface">examples/general/api-and-packages.md#api-01-drop-in-replacements-preserve-the-original-prop-surface</a></sub>
+
+</details>
+
+<details>
+<summary><strong>💡 Example 2 of 2</strong> — <code>examples/general/api-and-packages.md</code> § <em>api-01-a-replacement-keeps-the-originals-failure-behaviour</em></summary>
+
+<br>
+
+**API-01 — A replacement keeps the original's failure behaviour**
+
+Source: PR #9054 (RL-20261102-002)
+
+### Avoid
+
+```tsx
+const LazyComponent = lazy(() => loader().then((loaded) => ('default' in loaded ? loaded : { default: loaded })))
+```
+
+### Prefer
+
+```tsx
+const LazyComponent = lazy(() =>
+  loader()
+    .then((loaded) => ('default' in loaded ? loaded : { default: loaded }))
+    .catch((error: unknown) => {
+      logError(Errors._906, error)
+      return { default: (() => null) as ComponentType<P> }
+    }),
+)
+```
+
+### Why
+
+`next/dynamic` kept a failed chunk load in state and rendered nothing. A bare `lazy` throws it to the nearest error boundary, which for most call sites is the app root, so one failed request replaced every page with the error screen.
+
+<sub>Source: <a href="examples/general/api-and-packages.md#api-01-a-replacement-keeps-the-originals-failure-behaviour">examples/general/api-and-packages.md#api-01-a-replacement-keeps-the-originals-failure-behaviour</a></sub>
 
 </details>
 
@@ -1542,7 +1578,7 @@ The original `positions: []` patch made portfolio errors look like known-empty; 
 <a id="data-04"></a>
 ### `DATA-04` Use the canonical helper, predicate, or constant
 
-> **general** · data · 4 examples · ↩ `RL-20260220-003` · `RL-20260331-002` · `RL-20260402-002` · `RL-20260416-001` · `RL-20260423-001` · `RL-20260605-012` · `RL-20260604-003` · `RL-20260608-007` · `RL-20260615-004` · `RL-20260612-004` · `RL-20260619-001` · `RL-20260713-004` · `RL-20260722-002` · `RL-20260812-001` · `RL-20260930-001` · `RL-20261008-002` · `RL-20261014-001` · `RL-20261020-005` · `RL-20261027-007`
+> **general** · data · 4 examples · ↩ `RL-20260220-003` · `RL-20260331-002` · `RL-20260402-002` · `RL-20260416-001` · `RL-20260423-001` · `RL-20260605-012` · `RL-20260604-003` · `RL-20260608-007` · `RL-20260615-004` · `RL-20260612-004` · `RL-20260619-001` · `RL-20260713-004` · `RL-20260722-002` · `RL-20260812-001` · `RL-20260930-001` · `RL-20261008-002` · `RL-20261014-001` · `RL-20261020-005` · `RL-20261027-007` · `RL-20261103-003` · `RL-20261103-007`
 
 **📜 Rule**\
 Before adding a helper, constant, or route builder, search for the existing one (lodash `uniqWith`/`chunk`, shared formatters, `ROUTES`, E2E `TEST_ADDRESSES`/`CHAIN_IDS`) and use it; E2E helpers take hosts from the configured `baseURL`. Bounded or formatted values (tx origin, Safe version, `chainId:address`) go through their helper, not raw serialization or parsing. Domain classifications call the canonical predicate, never an inline copy or a field-presence check that legacy defaults (zero address, 0) fool, and every consumer of a shared check (submit gate, builder, summary) calls the same one. A call site that must bypass a helper keeps its fallbacks.
@@ -2044,16 +2080,16 @@ Each row also renders a mobile copy of the buttons that CSS hides on desktop. Co
 <a id="test-01"></a>
 ### `TEST-01` Assertions must fail on the regression they claim to cover
 
-> **general** · testing · 8 examples · ↩ `RL-20260217-001` · `RL-20260218-004` · `RL-20260303-010` · `RL-20260318-002` · `RL-20260331-005` · `RL-20260408-001` · `RL-20260408-002` · `RL-20260409-002` · `RL-20260423-002` · `RL-20260506-006` · `RL-20260608-005` · `RL-20260602-002` · `RL-20260609-001` · `RL-20260624-005` · `RL-20260803-003` · `RL-20260806-003` · `RL-20260820-008` · `RL-20260826-002` · `RL-20260911-002` · `RL-20260925-002` · `RL-20261002-003` · `RL-20261012-001` · `RL-20261022-006` · `RL-20261026-002` · `RL-20261029-005`
+> **general** · testing · 9 examples · ↩ `RL-20260217-001` · `RL-20260218-004` · `RL-20260303-010` · `RL-20260318-002` · `RL-20260331-005` · `RL-20260408-001` · `RL-20260408-002` · `RL-20260409-002` · `RL-20260423-002` · `RL-20260506-006` · `RL-20260608-005` · `RL-20260602-002` · `RL-20260609-001` · `RL-20260624-005` · `RL-20260803-003` · `RL-20260806-003` · `RL-20260820-008` · `RL-20260826-002` · `RL-20260911-002` · `RL-20260925-002` · `RL-20261002-003` · `RL-20261012-001` · `RL-20261022-006` · `RL-20261026-002` · `RL-20261029-005` · `RL-20261030-003` · `RL-20261102-001` · `RL-20261103-006` · `RL-20261103-008`
 
 **📜 Rule**\
-Assertions and fixtures must fail loudly when the behavior or fixture data they rely on disappears, and only then: E2E helpers assert what the user sees or the navigation that follows, not implementation details such as a link `href`.
+Assertions and fixtures must fail loudly when the behavior or fixture data they rely on disappears, and only then: E2E and component-test helpers assert only what the user sees or the navigation that follows, not implementation details such as a link `href` or `aria-expanded`.
 
 **✅ Check**\
 > Did this add or update a test assertion? If yes, would it fail if the bug reappeared or fixture data vanished, and keep passing through a refactor that keeps the behavior?
 
 <details>
-<summary><strong>💡 Example 1 of 8</strong> — <code>examples/general/testing.md</code> § <em>negative-assertions</em></summary>
+<summary><strong>💡 Example 1 of 9</strong> — <code>examples/general/testing.md</code> § <em>negative-assertions</em></summary>
 
 <br>
 
@@ -2084,7 +2120,7 @@ renders with the new text.
 </details>
 
 <details>
-<summary><strong>💡 Example 2 of 8</strong> — <code>examples/general/testing.md</code> § <em>test-01-assert-the-specific-behavior-the-description-claims</em></summary>
+<summary><strong>💡 Example 2 of 9</strong> — <code>examples/general/testing.md</code> § <em>test-01-assert-the-specific-behavior-the-description-claims</em></summary>
 
 <br>
 
@@ -2127,7 +2163,7 @@ the description.
 </details>
 
 <details>
-<summary><strong>💡 Example 3 of 8</strong> — <code>examples/general/testing.md</code> § <em>test-01-mock-external-lookups-instead-of-relying-on-real-fixture-state</em></summary>
+<summary><strong>💡 Example 3 of 9</strong> — <code>examples/general/testing.md</code> § <em>test-01-mock-external-lookups-instead-of-relying-on-real-fixture-state</em></summary>
 
 <br>
 
@@ -2180,7 +2216,7 @@ to lock in current behavior.
 </details>
 
 <details>
-<summary><strong>💡 Example 4 of 8</strong> — <code>examples/general/testing.md</code> § <em>test-01-test-the-debounce-not-just-the-post-debounce-assertion</em></summary>
+<summary><strong>💡 Example 4 of 9</strong> — <code>examples/general/testing.md</code> § <em>test-01-test-the-debounce-not-just-the-post-debounce-assertion</em></summary>
 
 <br>
 
@@ -2221,7 +2257,7 @@ An assertion that holds on render zero never exercises the debounced behavior, s
 </details>
 
 <details>
-<summary><strong>💡 Example 5 of 8</strong> — <code>examples/general/testing.md</code> § <em>overwriting-localstorage-fixtures-must-include-implicit-app-seeded-entries</em></summary>
+<summary><strong>💡 Example 5 of 9</strong> — <code>examples/general/testing.md</code> § <em>overwriting-localstorage-fixtures-must-include-implicit-app-seeded-entries</em></summary>
 
 <br>
 
@@ -2262,7 +2298,7 @@ If the helper writes the whole key (not a merge), any state the app would popula
 </details>
 
 <details>
-<summary><strong>💡 Example 6 of 8</strong> — <code>examples/general/testing.md</code> § <em>test-01-click-links-without-asserting-their-href</em></summary>
+<summary><strong>💡 Example 6 of 9</strong> — <code>examples/general/testing.md</code> § <em>test-01-click-links-without-asserting-their-href</em></summary>
 
 <br>
 
@@ -2293,7 +2329,7 @@ The `href` check makes every spec that uses the helper depend on how the link en
 </details>
 
 <details>
-<summary><strong>💡 Example 7 of 8</strong> — <code>examples/general/testing.md</code> § <em>test-01-check-a-value-is-complete-before-testing-containment</em></summary>
+<summary><strong>💡 Example 7 of 9</strong> — <code>examples/general/testing.md</code> § <em>test-01-check-a-value-is-complete-before-testing-containment</em></summary>
 
 <br>
 
@@ -2324,7 +2360,7 @@ Every string contains `''`, so when the device shows no hash the first assertion
 </details>
 
 <details>
-<summary><strong>💡 Example 8 of 8</strong> — <code>examples/general/testing.md</code> § <em>test-01-flush-async-work-before-a-positive-assertion</em></summary>
+<summary><strong>💡 Example 8 of 9</strong> — <code>examples/general/testing.md</code> § <em>test-01-flush-async-work-before-a-positive-assertion</em></summary>
 
 <br>
 
@@ -2357,12 +2393,47 @@ The pre-check default already registers Execute, so a positive `waitFor` passes 
 
 </details>
 
+<details>
+<summary><strong>💡 Example 9 of 9</strong> — <code>examples/general/testing.md</code> § <em>test-01-helpers-wait-for-what-they-act-on-not-for-an-attribute</em></summary>
+
+<br>
+
+**TEST-01 — Helpers wait for what they act on, not for an attribute**
+
+Source: PR #9546 (RL-20261103-008)
+
+### Avoid
+
+```ts
+const pickToken = async (user: User, name: string) => {
+  const trigger = within(screen.getByTestId('token-selector')).getByRole('combobox')
+  await user.click(trigger)
+  await waitFor(() => expect(trigger).toHaveAttribute('aria-expanded', 'true'))
+```
+
+### Prefer
+
+```ts
+const pickToken = async (user: User, name: string) => {
+  const trigger = within(screen.getByTestId('token-selector')).getByRole('combobox')
+  await user.click(trigger)
+  await user.click(await screen.findByRole('option', { name }))
+```
+
+### Why
+
+The option only exists while the list is open, so a menu that fails to open still fails the test, on the option the test is about rather than on an attribute none of the tests name.
+
+<sub>Source: <a href="examples/general/testing.md#test-01-helpers-wait-for-what-they-act-on-not-for-an-attribute">examples/general/testing.md#test-01-helpers-wait-for-what-they-act-on-not-for-an-attribute</a></sub>
+
+</details>
+
 ---
 
 <a id="test-02"></a>
 ### `TEST-02` New branch logic needs branch-specific tests
 
-> **general** · testing · 1 example · ↩ `RL-20260318-001` · `RL-20260324-001` · `RL-20260327-004` · `RL-20260407-001` · `RL-20260417-001` · `RL-20260420-002` · `RL-20260428-002` · `RL-20260429-001` · `RL-20260430-001` · `RL-20260430-002` · `RL-20260504-001` · `RL-20260505-002` · `RL-20260505-006` · `RL-20260506-002` · `RL-20260605-009` · `RL-20260609-005` · `RL-20260624-006` · `RL-20260630-001` · `RL-20260806-008` · `RL-20260813-002` · `RL-20260820-006` · `RL-20260909-003` · `RL-20260921-005` · `RL-20261001-002` · `RL-20261002-003` · `RL-20261013-001` · `RL-20261022-005` · `RL-20261023-006`
+> **general** · testing · 1 example · ↩ `RL-20260318-001` · `RL-20260324-001` · `RL-20260327-004` · `RL-20260407-001` · `RL-20260417-001` · `RL-20260420-002` · `RL-20260428-002` · `RL-20260429-001` · `RL-20260430-001` · `RL-20260430-002` · `RL-20260504-001` · `RL-20260505-002` · `RL-20260505-006` · `RL-20260506-002` · `RL-20260605-009` · `RL-20260609-005` · `RL-20260624-006` · `RL-20260630-001` · `RL-20260806-008` · `RL-20260813-002` · `RL-20260820-006` · `RL-20260909-003` · `RL-20260921-005` · `RL-20261001-002` · `RL-20261002-003` · `RL-20261013-001` · `RL-20261022-005` · `RL-20261023-006` · `RL-20261031-001`
 
 **📜 Rule**\
 New skip, hydration, merge-priority, permission, compatibility, and conditional-rendering branches need focused tests that exercise the new branch, not only the happy path.
@@ -2510,16 +2581,16 @@ Re-declaring the capability shape in two places lets them drift the moment a new
 <a id="test-04"></a>
 ### `TEST-04` Moved behavior needs replacement coverage and matching mocks
 
-> **general** · testing · 4 examples · ↩ `RL-20260428-002` · `RL-20260428-003` · `RL-20260615-005` · `RL-20260623-002` · `RL-20260701-004` · `RL-20260714-002` · `RL-20260722-003` · `RL-20260806-001` · `RL-20260812-002` · `RL-20260921-010` · `RL-20261001-002` · `RL-20261009-002` · `RL-20261022-001` · `RL-20261023-001` · `RL-20261027-001` · `RL-20261027-002`
+> **general** · testing · 5 examples · ↩ `RL-20260428-002` · `RL-20260428-003` · `RL-20260615-005` · `RL-20260623-002` · `RL-20260701-004` · `RL-20260714-002` · `RL-20260722-003` · `RL-20260806-001` · `RL-20260812-002` · `RL-20260921-010` · `RL-20261001-002` · `RL-20261009-002` · `RL-20261022-001` · `RL-20261023-001` · `RL-20261027-001` · `RL-20261027-002` · `RL-20261030-003` · `RL-20261102-001` · `RL-20261104-002`
 
 **📜 Rule**\
-When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts. Mocks follow the code: they target the exact module specifier it imports (barrel vs deep path), and mocks for dependencies it no longer uses are removed. A test that replaces deleted E2E coverage makes every assertion the deleted test made, drives the interaction instead of asserting presence, and covers each link the value crosses (prop, provider, context, persisted store and its hydration) with the wired child real or a mock that renders and acts on its props, never state set by hand; an embedded third-party widget's own UI is exempt, the params the wallet passes it are not. CI path filters and test or story discovery cover the new location.
+When logic moves from one hook/component to another, removed tests must be replaced at the new owner and consumer mocks must match real prop contracts. Mocks follow the code: they target the exact module specifier it imports (barrel vs deep path), return stable references where the real hook does, and mocks for dependencies it no longer uses are removed. A test that replaces deleted E2E coverage makes every assertion the deleted test made, drives the interaction instead of asserting presence, and covers each link the value crosses (prop, provider, context, persisted store and its hydration) with the wired child real or a mock that renders and acts on its props, never state set by hand; an embedded third-party widget's own UI is exempt, the params the wallet passes it are not. CI path filters and test or story discovery cover the new location.
 
 **✅ Check**\
 > Did this move or remove a return field, prop, branch, or dependency, or replace E2E coverage with component tests? If yes, did equivalent tests move to the new owner, do the tests' mocks still match what the code imports, does the replacement keep every assertion and exercise each link and interaction the deleted test crossed, and do CI triggers still run them?
 
 <details>
-<summary><strong>💡 Example 1 of 4</strong> — <code>examples/general/testing.md</code> § <em>test-04-extend-ci-path-filters-when-tests-or-stories-move</em></summary>
+<summary><strong>💡 Example 1 of 5</strong> — <code>examples/general/testing.md</code> § <em>test-04-extend-ci-path-filters-when-tests-or-stories-move</em></summary>
 
 <br>
 
@@ -2557,7 +2628,7 @@ A PR that changes only the moved files no longer triggers the run, so their test
 </details>
 
 <details>
-<summary><strong>💡 Example 2 of 4</strong> — <code>examples/general/testing.md</code> § <em>test-04-let-the-mocked-child-act-on-the-props-it-receives</em></summary>
+<summary><strong>💡 Example 2 of 5</strong> — <code>examples/general/testing.md</code> § <em>test-04-let-the-mocked-child-act-on-the-props-it-receives</em></summary>
 
 <br>
 
@@ -2596,7 +2667,7 @@ A child mocked as `null` lets the parent stop passing the list or the delete han
 </details>
 
 <details>
-<summary><strong>💡 Example 3 of 4</strong> — <code>examples/general/testing.md</code> § <em>test-04-test-each-link-the-replaced-e2e-check-crossed</em></summary>
+<summary><strong>💡 Example 3 of 5</strong> — <code>examples/general/testing.md</code> § <em>test-04-test-each-link-the-replaced-e2e-check-crossed</em></summary>
 
 <br>
 
@@ -2636,7 +2707,7 @@ The deleted browser test ran the whole chain from the flow to the slot. Testing 
 </details>
 
 <details>
-<summary><strong>💡 Example 4 of 4</strong> — <code>examples/general/testing.md</code> § <em>test-04-keep-the-deleted-tests-format-check</em></summary>
+<summary><strong>💡 Example 4 of 5</strong> — <code>examples/general/testing.md</code> § <em>test-04-keep-the-deleted-tests-format-check</em></summary>
 
 <br>
 
@@ -2663,6 +2734,40 @@ expect(getFieldValue(details, 'Net annual rewards').textContent).toMatch(REWARD)
 The deleted Cypress test checked the amount and the fiat value. A cell that renders only the symbol still contains `ETH`, so the weaker check passes when both values disappear.
 
 <sub>Source: <a href="examples/general/testing.md#test-04-keep-the-deleted-tests-format-check">examples/general/testing.md#test-04-keep-the-deleted-tests-format-check</a></sub>
+
+</details>
+
+<details>
+<summary><strong>💡 Example 5 of 5</strong> — <code>examples/general/testing.md</code> § <em>test-04-hook-mocks-return-one-stable-object</em></summary>
+
+<br>
+
+**TEST-04 — Hook mocks return one stable object**
+
+Source: PR #9501 (RL-20261102-001)
+
+### Avoid
+
+```ts
+jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
+  useWeb3ReadOnly: jest.fn(() => ({ getTransaction: mockGetTransaction })),
+}))
+```
+
+### Prefer
+
+```ts
+const mockReadOnlyProvider = { getTransaction: mockGetTransaction }
+jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
+  useWeb3ReadOnly: jest.fn(() => mockReadOnlyProvider),
+}))
+```
+
+### Why
+
+The real hook returns the same provider across renders. A new object per render changes an effect dependency every time, so the real `useAsync` refetches in a loop and the test only passes because it ends after the first call.
+
+<sub>Source: <a href="examples/general/testing.md#test-04-hook-mocks-return-one-stable-object">examples/general/testing.md#test-04-hook-mocks-return-one-stable-object</a></sub>
 
 </details>
 
@@ -2910,7 +3015,7 @@ Nothing enforces the dispatch, so a caller that skips it sends the previous chec
 <a id="cache-01"></a>
 ### `CACHE-01` Cache stable negative lookups deliberately
 
-> **general** · cache · ↩ `RL-20260420-003` · `RL-20260825-005` · `RL-20260921-004`
+> **general** · cache · ↩ `RL-20260420-003` · `RL-20260825-005` · `RL-20260921-004` · `RL-20261030-002`
 
 **📜 Rule**\
 Repeated negative lookups that are expected and stable should be cached with clear TTL/invalidation; transient failures must not be cached as permanent absence.
@@ -2990,7 +3095,7 @@ User-controlled strings used as map keys must not index inherited object propert
 <a id="doc-01"></a>
 ### `DOC-01` Keep docs, comments, and agent guidance true to the code
 
-> **general** · docs · 2 examples · ↩ `RL-20260303-008` · `RL-20260318-012` · `RL-20260408-003` · `RL-20260430-003` · `RL-20260602-001` · `RL-20260615-003` · `RL-20260622-003` · `RL-20260702-003` · `RL-20260716-008` · `RL-20260803-002` · `RL-20260805-004` · `RL-20260820-001` · `RL-20260825-001` · `RL-20260909-002` · `RL-20260921-001` · `RL-20261001-001` · `RL-20261008-006` · `RL-20260415-001` · `RL-20260615-007` · `RL-20260928-001` · `RL-20261013-002` · `RL-20261014-002` · `RL-20261015-001` · `RL-20261020-004` · `RL-20261021-006` · `RL-20261021-007` · `RL-20261027-009` · `RL-20261023-005`
+> **general** · docs · 2 examples · ↩ `RL-20260303-008` · `RL-20260318-012` · `RL-20260408-003` · `RL-20260430-003` · `RL-20260602-001` · `RL-20260615-003` · `RL-20260622-003` · `RL-20260702-003` · `RL-20260716-008` · `RL-20260803-002` · `RL-20260805-004` · `RL-20260820-001` · `RL-20260825-001` · `RL-20260909-002` · `RL-20260921-001` · `RL-20261001-001` · `RL-20261008-006` · `RL-20260415-001` · `RL-20260615-007` · `RL-20260928-001` · `RL-20261013-002` · `RL-20261014-002` · `RL-20261015-001` · `RL-20261020-004` · `RL-20261021-006` · `RL-20261021-007` · `RL-20261027-009` · `RL-20261023-005` · `RL-20261102-003` · `RL-20261103-004` · `RL-20261104-001`
 
 **📜 Rule**\
 Moved or split docs keep every removed section or call it out. Comments next to a changed condition or contract change with it and give the non-obvious why in one line, without restating code, decision history, or ticket IDs (the dated change log in `components/ui` headers is deliberate: it keeps them in sync with Figma); a test states its regression intent in its name. Runbooks name real branches and fallback commands, processor disclosures match the integrated SDKs, and a framework, script, or tool change updates the nearest AGENTS.md with how the tool really behaves.
@@ -3187,13 +3292,13 @@ Expo Router layout files should define shell/navigation structure; business clea
 <a id="web-05"></a>
 ### `WEB-05` Sanitize auth redirects and outcomes
 
-> **web** · auth · 3 examples · ↩ `RL-20260220-001` · `RL-20260312-004` · `RL-20260325-001` · `RL-20260407-003`
+> **web** · auth · 3 examples · ↩ `RL-20260220-001` · `RL-20260312-004` · `RL-20260325-001` · `RL-20260407-003` · `RL-20261105-002`
 
 **📜 Rule**\
-Auth redirect URLs must remove transient error/query state and validate externally supplied return targets before sending users through OIDC or callback flows.
+Auth redirect URLs must remove transient error/query state and validate externally supplied return targets before sending users through OIDC or callback flows. A callback page resolves at its path, with its query intact, on every server that serves the app (`next dev`, Vite, `serve`, S3).
 
 **✅ Check**\
-> Did this add or change an auth redirect or callback? If yes, is the return URL sanitized and validated?
+> Did this add or change an auth redirect or callback? If yes, is the return URL sanitized and validated, and does the callback page load with its query on every server the app runs on?
 
 <details>
 <summary><strong>💡 Example 1 of 3</strong> — <code>examples/general/gateway-hooks.md</code> § <em>web-05-trigger-redirect-endpoints-via-top-level-navigation</em></summary>
@@ -3878,7 +3983,7 @@ Mixed-case ends with a lowercase middle fail the EIP-55 checksum in most runs, s
 <a id="code-03"></a>
 ### `CODE-03` Split multi-job code; close over shared arguments
 
-> **general** · abstractions · 1 example · ↩ `RL-20260311-005` · `RL-20260929-002` · `RL-20261016-003`
+> **general** · abstractions · 1 example · ↩ `RL-20260311-005` · `RL-20260929-002` · `RL-20261016-003` · `RL-20261103-001`
 
 **📜 Rule**\
 A hook, handler, or component that does several things (fetch, resolve, and map; a multi-case switch; a long try/finally) splits into named hooks, functions, or one component per case. Helpers take at most 4 positional parameters: close over shared hook state in a local builder or pass one `deps` object, and group props that travel together into one object.
@@ -4000,7 +4105,7 @@ Allocating the regex once and collapsing the two near-identical JSX branches rem
 <a id="code-05"></a>
 ### `CODE-05` Compute and name derived values before the return
 
-> **general** · abstractions · 4 examples · ↩ `RL-20260312-008` · `RL-20260608-004` · `RL-20260608-008` · `RL-20260612-008` · `RL-20260909-004` · `RL-20260930-011` · `RL-20260929-001` · `RL-20261008-005` · `RL-20260310-006` · `RL-20260604-005` · `RL-20260710-001` · `RL-20260716-005` · `RL-20260806-005` · `RL-20260911-001` · `RL-20261002-005` · `RL-20261014-005` · `RL-20261021-010` · `RL-20261027-005` · `RL-20261027-006`
+> **general** · abstractions · 4 examples · ↩ `RL-20260312-008` · `RL-20260608-004` · `RL-20260608-008` · `RL-20260612-008` · `RL-20260909-004` · `RL-20260930-011` · `RL-20260929-001` · `RL-20261008-005` · `RL-20260310-006` · `RL-20260604-005` · `RL-20260710-001` · `RL-20260716-005` · `RL-20260806-005` · `RL-20260911-001` · `RL-20261002-005` · `RL-20261014-005` · `RL-20261021-010` · `RL-20261027-005` · `RL-20261027-006` · `RL-20261103-002`
 
 **📜 Rule**\
 Derive values once before the return, not inline in JSX: a pure helper that reads no hook state lives at module scope, and `useMemo` (above every early return) is for expensive work or identity a consumer needs, not cheap primitives. Three or more `!==` checks on one value become `!DISALLOWED.includes(value)`, and reused conjunctions and multi-way JSX branches become named booleans. Guards return early, type guards list the members they accept, and names say what a value means at the call site (`pendingActions`, positively framed `signersOnly`).
@@ -4506,10 +4611,10 @@ When the user picks 'Auto' for theme/appearance, forward that to the native API 
 <a id="e2e-02"></a>
 ### `E2E-02` Put E2E waits, timeouts, and failure hooks where they take effect
 
-> **web** · e2e · 1 example · ↩ `RL-20260218-001` · `RL-20260612-001` · `RL-20260918-001` · `RL-20261022-002` · `RL-20261022-003` · `RL-20261023-003`
+> **web** · e2e · 1 example · ↩ `RL-20260218-001` · `RL-20260612-001` · `RL-20260918-001` · `RL-20261022-002` · `RL-20261022-003` · `RL-20261023-003` · `RL-20261030-001`
 
 **📜 Rule**\
-Cypress retries the command, not the chained assertion, so timeouts must go on `cy.get(..., { timeout })`/`cy.contains(..., { timeout })` — passing timeout into `should()` or `expect()` does nothing. A test's own time budget must cover the sum of its inner waits (`test.slow()` or an explicit test timeout). A journey opens a page only after every seeded value the page reads is indexed, Transaction Service first and then CGW, since CGW caches an early empty response. Failure-only diagnostics attach in fixture teardown or `afterEach`; inside the test body `testInfo.status` is still `passed`. The global step timeout stays tight: a step measured slower gets its own timeout with a one-line reason. Setup that runs on every page load (`addInitScript`) is registered once and reads switchable state, since several init scripts run in an undefined order.
+Cypress retries the command, not the chained assertion, so timeouts must go on `cy.get(..., { timeout })`/`cy.contains(..., { timeout })` — passing timeout into `should()` or `expect()` does nothing. A test's own time budget must cover the sum of its inner waits (`test.slow()` or an explicit test timeout). A journey opens a page only after every seeded value the page reads is indexed, polling the same request variant (query params) the page sends, Transaction Service first and then CGW, since CGW caches an early empty response. Failure-only diagnostics attach in fixture teardown or `afterEach`; inside the test body `testInfo.status` is still `passed`. The global step timeout stays tight: a step measured slower gets its own timeout with a one-line reason. Setup that runs on every page load (`addInitScript`) is registered once and reads switchable state, since several init scripts run in an undefined order.
 
 **✅ Check**\
 > Did this E2E test add or raise a timeout, chain slow setup, seed data, or attach diagnostics on failure? Is the timeout on the retryable command, does the test budget cover its inner waits, does it wait for every seeded value before navigating, does the failure hook run where the final status is known, does a slow step carry its own timeout instead of a raised global one, and is per-load setup registered once?
@@ -5663,10 +5768,10 @@ An unprefixed 64-character hex private key matches the pattern and would be copi
 <a id="ci-05"></a>
 ### `CI-05` A green check means the work ran; a best-effort step cannot fail the run
 
-> **general** · ci · 1 example · ↩ `RL-20261029-001` · `RL-20261029-002`
+> **general** · ci · 1 example · ↩ `RL-20261029-001` · `RL-20261029-002` · `RL-20261105-001`
 
 **📜 Rule**\
-A required check gated by a change filter reports a skip as a pass, so its path lists cover every input the job reads (shared `config/**`, root tooling such as `.prettierrc`, `turbo.json`, `yarn.config.cjs`), change detection matches a renamed file's old path (`previous_filename`) as well as its new one, and a spec filter or shard plan that selects nothing fails. A best-effort step (deploy events, notifications) cannot fail the run: GitHub runs `run:` steps with `bash -e`, so guard each command substitution (`|| VAR=""`) or `set +e` with a one-line why.
+A required check gated by a change filter reports a skip as a pass, so its path lists cover every input the job reads (shared `config/**`, root tooling such as `.prettierrc`, `turbo.json`, `yarn.config.cjs`), change detection matches every file type the job checks and a renamed file's old path (`previous_filename`) as well as its new one, and a spec filter or shard plan that selects nothing fails. A best-effort step (deploy events, notifications) cannot fail the run: GitHub runs `run:` steps with `bash -e`, so guard each command substitution (`|| VAR=""`) or `set +e` with a one-line why.
 
 **✅ Check**\
 > Did this add or change a path filter, change detector, test selection, or best-effort CI step? If yes, can a skipped or empty run report green, and can a best-effort failure turn the run red?

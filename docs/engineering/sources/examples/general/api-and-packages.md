@@ -46,6 +46,33 @@ changed behavior. A drop-in must accept and honor the props the previous
 implementation supported, otherwise call sites regress without any compiler
 signal.
 
+## API-01 — A replacement keeps the original's failure behaviour
+
+Source: PR #9054 (RL-20261102-002)
+
+### Avoid
+
+```tsx
+const LazyComponent = lazy(() => loader().then((loaded) => ('default' in loaded ? loaded : { default: loaded })))
+```
+
+### Prefer
+
+```tsx
+const LazyComponent = lazy(() =>
+  loader()
+    .then((loaded) => ('default' in loaded ? loaded : { default: loaded }))
+    .catch((error: unknown) => {
+      logError(Errors._906, error)
+      return { default: (() => null) as ComponentType<P> }
+    }),
+)
+```
+
+### Why
+
+`next/dynamic` kept a failed chunk load in state and rendered nothing. A bare `lazy` throws it to the nearest error boundary, which for most call sites is the app root, so one failed request replaced every page with the error screen.
+
 ## API-03 — Import from package public entrypoints, not deep dist paths
 
 Source: PR #7617 (RL-20260415-008)

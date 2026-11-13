@@ -33,6 +33,16 @@ Evidence: [#8816 r4119528870](https://github.com/safe-global/safe-wallet-monorep
 [r4119544905](https://github.com/safe-global/safe-wallet-monorepo/pull/8816#discussion_r4119544905),
 [r4119581352](https://github.com/safe-global/safe-wallet-monorepo/pull/8816#discussion_r4119581352).
 
+On #9510 another reviewer drew the line at three copies and asked for a test
+util for a repeated `afterEach`, an MSW request recorder and a consent
+`initialReduxState`; the author moved them into `apps/web/src/tests/whatsNew.ts`.
+On #9546 a shared action helper lost its `aria-expanded` assertion, since a
+helper that asserts reports failures the test never named. Both lean towards
+Option C for setup, with helpers that act and wait but do not assert.
+
+Evidence: [#9510 review 5732489380](https://github.com/safe-global/safe-wallet-monorepo/pull/9510#pullrequestreview-5732489380),
+[#9546 r4452761629](https://github.com/safe-global/safe-wallet-monorepo/pull/9546#discussion_r4452761629).
+
 Option A — inline in each test, so each test reads on its own:
 
 ```ts
@@ -328,3 +338,36 @@ const status = getPolicyStatus(policy)
 ```
 
 Decision Needed: pick A, B or C, then add the legacy case to PKG-02.
+
+### OQ-CI-01 — Inline `run:` scripts or a script file
+
+Question: when a workflow step needs a few lines of shell, does it stay inline
+in `run:` or move to a script file? On #9504 a reviewer found a 5-line inline
+block that picks the backend and writes `$GITHUB_OUTPUT` hard to read and asked
+for a bash script; the author kept it inline, since a reader would have to jump
+to another file for the same lines. The PR merged with the inline block after
+the reviewer approved.
+
+Evidence: [#9504 r4451984376](https://github.com/safe-global/safe-wallet-monorepo/pull/9504#discussion_r4451984376),
+[r4453625306](https://github.com/safe-global/safe-wallet-monorepo/pull/9504#discussion_r4453625306).
+
+Option A — keep short shell inline, so the workflow reads top to bottom:
+
+```yaml
+run: |
+  backend="${REQUESTED_BACKEND:-staging}"
+  if [ "$HEAD_REF" = release ] && [ "$BASE_REF" = main ]; then backend=production; fi
+  images=$(python3 apps/web/e2e/environment/infra/scripts/test_env.py versions --backend "$backend")
+```
+
+Option B — any multi-line logic goes to a script the step calls, so it can be
+read, linted and run locally:
+
+```yaml
+run: .github/scripts/plan-backend.sh
+```
+
+Option C — inline up to a fixed size (for example 5 lines without loops or
+functions); anything longer, branching more, or reused goes to a script.
+
+Decision Needed: pick A, B or C, then add it to a CI rule.
