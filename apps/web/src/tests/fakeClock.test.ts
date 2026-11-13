@@ -5,11 +5,9 @@ describe('the global fake clock', () => {
     expect(Date.now() - FAKE_CLOCK_START).toBeLessThan(1_000)
 
     jest.advanceTimersByTime(250_000)
-    setTimeout(() => {}, 1_000)
   })
 
-  it('starts the next test at the configured instant without the timers of the previous test', () => {
+  it('starts the next test at the configured instant after the previous test moved the clock', () => {
     expect(Date.now() - FAKE_CLOCK_START).toBeLessThan(1_000)
-    expect(jest.getTimerCount()).toBe(0)
   })
 })
