@@ -22,6 +22,7 @@ import { useBannerVisibility, BannerType, HnBannerForCarousel, HypernativeFeatur
 import { useLoadFeature } from '@/features/__core__'
 import { StakeFeature, useIsStakingPromoBannerVisible, STAKING_PROMO_BANNER_HIDE_KEY } from '@/features/stake'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { GnosisPayFeature } from '@/features/gnosispay'
 
 const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
@@ -44,6 +45,7 @@ const Dashboard = (): ReactElement => {
   const { StakingPromoBanner } = useLoadFeature(StakeFeature)
   const isStakingPromoBannerVisible = useIsStakingPromoBannerVisible()
   const [, setHideStakingPromoBanner] = useLocalStorage<boolean>(STAKING_PROMO_BANNER_HIDE_KEY)
+  const { GnosisPayBanner } = useLoadFeature(GnosisPayFeature)
 
   const noAssets = balancesLoaded && items.length === 0
 
@@ -51,6 +53,7 @@ const Dashboard = (): ReactElement => {
     <>
       <div className={css.dashboardGrid}>
         <div className={css.leftCol}>
+          <GnosisPayBanner />
           <Overview />
 
           {isStakingPromoBannerVisible && <StakingPromoBanner onDismiss={() => setHideStakingPromoBanner(true)} />}
