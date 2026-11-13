@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
@@ -14,6 +14,7 @@ import type SpaceQueueRowType from '../SpaceQueueRow'
 
 const mockChainNames: Record<string, string> = {}
 const mockScopeProps = jest.fn()
+const mockScopeMounts = jest.fn()
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: () => ({ configs: [], loading: false }),
@@ -25,16 +26,29 @@ jest.mock('@/hooks/useChains', () => ({
 jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
   SafeScopeProvider: (props: { initial: unknown; pollSafeInfo: boolean; children: ReactNode }) => {
     mockScopeProps({ initial: props.initial, pollSafeInfo: props.pollSafeInfo })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    useEffect(() => mockScopeMounts(props.initial), [])
     return <>{props.children}</>
   },
 }))
 jest.mock('../SpaceQueueRow', () => ({
   __esModule: true,
   ...jest.requireActual('../SpaceQueueRow'),
-  default: ({ item, status, chainId }: { item: TransactionQueuedItem; status: string; chainId: string }) => (
+  default: ({
+    item,
+    status,
+    chainId,
+    safeAddress,
+  }: {
+    item: TransactionQueuedItem
+    status: string
+    chainId: string
+    safeAddress?: string
+  }) => (
     <tr data-testid="space-queue-row">
       <td>
         {item.transaction.id} {status} {chainId}
+        {safeAddress && ` of ${safeAddress}`}
       </td>
     </tr>
   ),
@@ -87,10 +101,11 @@ describe('SpaceQueueTable', () => {
   beforeEach(() => {
     mockChainNames[chainId] = chainName
     mockChainNames[otherChainId] = otherChainName
+    mockScopeMounts.mockClear()
   })
 
   it('renders a band per Safe and its rows inside the Safe scope, without polling', () => {
-    render(<SpaceQueueTable sections={sections} />)
+    render(<SpaceQueueTable sections={sections} groupBy="safe" />)
 
     expect(screen.getByText(shortenAddress(safeA))).toBeInTheDocument()
     expect(screen.getByText(shortenAddress(safeB))).toBeInTheDocument()
@@ -101,20 +116,20 @@ describe('SpaceQueueTable', () => {
   })
 
   it('has a To column with a screen-reader-only header', () => {
-    render(<SpaceQueueTable sections={sections} />)
+    render(<SpaceQueueTable sections={sections} groupBy="safe" />)
 
     const header = screen.getByRole('columnheader', { name: 'To' })
     expect(header.querySelector('.sr-only')).toHaveTextContent('To')
   })
 
   it('has no Note column', () => {
-    render(<SpaceQueueTable sections={sections} />)
+    render(<SpaceQueueTable sections={sections} groupBy="safe" />)
 
     expect(screen.queryByRole('columnheader', { name: 'Note' })).not.toBeInTheDocument()
   })
 
   it("renders each chain of a multichain Safe in that chain's scope, with its own Next", () => {
-    render(<SpaceQueueTable sections={[multichain]} />)
+    render(<SpaceQueueTable sections={[multichain]} groupBy="safe" />)
 
     expect(screen.getByText(`${onChainA.transaction.id} execute ${chainId}`)).toBeInTheDocument()
     expect(screen.getByText(`${onChainB.transaction.id} execute ${otherChainId}`)).toBeInTheDocument()
@@ -126,20 +141,20 @@ describe('SpaceQueueTable', () => {
   })
 
   it('puts a header row per chain with the chain name and the nonce of its next transaction', () => {
-    render(<SpaceQueueTable sections={[multichain]} />)
+    render(<SpaceQueueTable sections={[multichain]} groupBy="safe" />)
 
     expect(screen.getByText(chainName).closest('tr')).toHaveTextContent(`${chainName}Next #7`)
     expect(screen.getByText(otherChainName).closest('tr')).toHaveTextContent(`${otherChainName}Next #2`)
   })
 
   it('omits the next nonce from a chain header when no transaction is next', () => {
-    render(<SpaceQueueTable sections={[section(safeA, [{ chainId, items: [queued] }])]} />)
+    render(<SpaceQueueTable sections={[section(safeA, [{ chainId, items: [queued] }])]} groupBy="safe" />)
 
     expect(screen.getByText(chainName).closest('tr')).not.toHaveTextContent('Next #')
   })
 
   it("collapses only that chain's rows from its header", () => {
-    render(<SpaceQueueTable sections={[multichain]} />)
+    render(<SpaceQueueTable sections={[multichain]} groupBy="safe" />)
 
     fireEvent.click(screen.getByRole('button', { name: `Collapse ${chainName}` }))
 
@@ -154,7 +169,7 @@ describe('SpaceQueueTable', () => {
   })
 
   it('hides every chain of a collapsed Safe, headers included', () => {
-    render(<SpaceQueueTable sections={[multichain]} />)
+    render(<SpaceQueueTable sections={[multichain]} groupBy="safe" />)
 
     fireEvent.click(screen.getByRole('button', { name: `Collapse ${shortenAddress(safeA)}` }))
 
@@ -164,7 +179,7 @@ describe('SpaceQueueTable', () => {
   })
 
   it('collapses one Safe and summarises its transactions in the band', () => {
-    render(<SpaceQueueTable sections={sections} />)
+    render(<SpaceQueueTable sections={sections} groupBy="safe" />)
 
     fireEvent.click(screen.getByRole('button', { name: `Collapse ${shortenAddress(safeA)}` }))
 
@@ -178,7 +193,7 @@ describe('SpaceQueueTable', () => {
   })
 
   it('collapses and expands every Safe from the column header', () => {
-    render(<SpaceQueueTable sections={sections} />)
+    render(<SpaceQueueTable sections={sections} groupBy="safe" />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Collapse all' }))
 
@@ -202,7 +217,7 @@ describe('SpaceQueueTable', () => {
       },
     ])
 
-    render(<SpaceQueueTable sections={[conflicting]} />)
+    render(<SpaceQueueTable sections={[conflicting]} groupBy="safe" />)
 
     expect(screen.getByText('Conflicting').closest('tr')).toHaveTextContent(/^5Conflicting/)
     expect(screen.getByText(/Only 1\/2 transactions can execute/)).toBeInTheDocument()
@@ -218,7 +233,7 @@ describe('SpaceQueueTable', () => {
       transactionItem('AWAITING_CONFIRMATIONS', nonce),
     )
 
-    render(<SpaceQueueTable sections={[section(safeA, [{ chainId, items }])]} />)
+    render(<SpaceQueueTable sections={[section(safeA, [{ chainId, items }])]} groupBy="safe" />)
 
     const rendered = renderedRows().length
     expect(rendered).toBeGreaterThan(0)
@@ -229,9 +244,88 @@ describe('SpaceQueueTable', () => {
   })
 
   it('has no Show more', () => {
-    render(<SpaceQueueTable sections={sections} />)
+    render(<SpaceQueueTable sections={sections} groupBy="safe" />)
 
     expect(screen.queryByRole('button', { name: 'Show more' })).not.toBeInTheDocument()
+  })
+
+  describe('grouped by status', () => {
+    const waitingOnB = transactionItem('AWAITING_CONFIRMATIONS', 9)
+    const interleaved = [
+      section(safeA, [
+        { chainId, items: [{ type: 'LABEL', label: 'Next' }, next, { type: 'LABEL', label: 'Queued' }, queued] },
+      ]),
+      section(safeB, [{ chainId, items: [{ type: 'LABEL', label: 'Next' }, waitingOnB] }]),
+    ]
+
+    it('lists the transactions by urgency without bands, each naming its Safe', () => {
+      render(<SpaceQueueTable sections={interleaved} groupBy="status" />)
+
+      expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument()
+      expect(renderedRows().map((row) => row.textContent)).toEqual([
+        `${next.transaction.id} execute ${chainId} of ${safeA}`,
+        `${waitingOnB.transaction.id} waiting ${chainId} of ${safeB}`,
+        `${queued.transaction.id} blocked ${chainId} of ${safeA}`,
+      ])
+    })
+
+    it("loads each Safe's scope once, however its rows interleave with another Safe's", () => {
+      render(<SpaceQueueTable sections={interleaved} groupBy="status" />)
+
+      expect(mockScopeMounts).toHaveBeenCalledTimes(2)
+      expect(mockScopeMounts).toHaveBeenCalledWith({ chainId, safeAddress: safeA })
+      expect(mockScopeMounts).toHaveBeenCalledWith({ chainId, safeAddress: safeB })
+    })
+
+    it('has nothing to collapse', () => {
+      render(<SpaceQueueTable sections={interleaved} groupBy="status" />)
+
+      expect(screen.queryByRole('button', { name: 'Collapse all' })).not.toBeInTheDocument()
+    })
+  })
+
+  describe('grouped by network', () => {
+    it('puts the rows of each network under a band with its name and transaction count', () => {
+      render(<SpaceQueueTable sections={[multichain]} groupBy="network" />)
+
+      expect(screen.getByText(chainName).closest('tr')).toHaveTextContent(`${chainName}1`)
+      expect(screen.getByText(otherChainName).closest('tr')).toHaveTextContent(`${otherChainName}1`)
+      expect(screen.getByText(`${onChainA.transaction.id} execute ${chainId} of ${safeA}`)).toBeInTheDocument()
+    })
+
+    it("collapses only that network's rows from its band", () => {
+      render(<SpaceQueueTable sections={[multichain]} groupBy="network" />)
+
+      fireEvent.click(screen.getByRole('button', { name: `Collapse ${chainName}` }))
+
+      expect(renderedRows().map((row) => row.textContent)).toEqual([
+        `${onChainB.transaction.id} execute ${otherChainId} of ${safeA}`,
+      ])
+      expect(screen.getByRole('button', { name: `Expand ${chainName}` })).toHaveAttribute('aria-expanded', 'false')
+    })
+
+    it('collapses and expands every network from the column header', () => {
+      render(<SpaceQueueTable sections={[multichain]} groupBy="network" />)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Collapse all' }))
+
+      expect(renderedRows()).toHaveLength(0)
+      expect(screen.getByRole('button', { name: 'Expand all' })).toHaveTextContent('Expand 2 networks')
+
+      fireEvent.click(screen.getByRole('button', { name: 'Expand all' }))
+
+      expect(renderedRows()).toHaveLength(2)
+    })
+  })
+
+  describe('grouped by up next', () => {
+    it("separates each Safe's next transaction from those behind it", () => {
+      render(<SpaceQueueTable sections={sections} groupBy="next" />)
+
+      expect(screen.getByText('Next in line').closest('tr')).toHaveTextContent('Next in line2')
+      expect(screen.getByText('Behind it').closest('tr')).toHaveTextContent('Behind it1')
+      expect(renderedRows().at(-1)).toHaveTextContent(`${queued.transaction.id} blocked ${chainId} of ${safeA}`)
+    })
   })
 
   describe('rows', () => {

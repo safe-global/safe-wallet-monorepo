@@ -9,11 +9,23 @@ import {
   getSectionRows,
   type ConflictOption,
   type QueueStatus,
+  type SignerWallets,
 } from '../utils'
+import { getChainKey, getGroupId, type QueueGroup, type QueueGroupKind, type QueueUnit } from './queueGroups'
 
 /** One table row of the queue, in display order */
 export type QueueListItem =
   | { kind: 'safe'; key: string; section: SpaceQueueSection; collapsed: boolean; summary: string }
+  | {
+      kind: 'group'
+      key: string
+      id: string
+      group: Exclude<QueueGroupKind, 'all'>
+      chainId?: string
+      /** Transactions in the group */
+      count: number
+      collapsed: boolean
+    }
   | {
       kind: 'chain'
       key: string
@@ -43,6 +55,8 @@ export type QueueListItem =
       nextNonce?: number
       conflict?: ConflictOption
       canReject: boolean
+      /** Where rows of several Safes share a list, the row names its Safe */
+      showSafe?: boolean
     }
 
 const SUMMARY_LABELS: Record<QueueStatus, string> = {
@@ -52,8 +66,6 @@ const SUMMARY_LABELS: Record<QueueStatus, string> = {
   blocked: 'blocked',
 }
 const SUMMARY_ORDER: QueueStatus[] = ['execute', 'sign', 'waiting', 'blocked']
-
-export const getChainKey = (safeAddress: string, chainId: string): string => `${getSafeKey(safeAddress)}:${chainId}`
 
 const getSummary = (statuses: QueueStatus[]): string =>
   SUMMARY_ORDER.flatMap((status) => {
@@ -69,7 +81,7 @@ export const buildQueueList = (args: {
   sections: SpaceQueueSection[]
   collapsedSafes: ReadonlySet<string>
   collapsedChains: ReadonlySet<string>
-  walletAddress?: string
+  signers: SignerWallets
 }): QueueListItem[] =>
   args.sections.flatMap((section) => {
     const safeKey = getSafeKey(section.safeAddress)
@@ -82,7 +94,7 @@ export const buildQueueList = (args: {
         nextNonce: getNextNonce(rows),
         rejectedNonces: getRejectedNonces(rows),
         statuses: rows.map((row) =>
-          row.kind === 'transaction' ? getQueueStatus(row.item.transaction, row.isNext, args.walletAddress) : undefined,
+          row.kind === 'transaction' ? getQueueStatus(row.item.transaction, row.isNext, args.signers) : undefined,
         ),
       }
     })
@@ -143,17 +155,47 @@ export const buildQueueList = (args: {
     ]
   })
 
-/** Consecutive items sharing a Safe and chain, so one scope can wrap the visible rows of each. */
-export const groupByScope = <T extends { item: QueueListItem }>(
-  entries: T[],
-): Array<{ scopeKey?: string; entries: T[] }> =>
-  entries.reduce<Array<{ scopeKey?: string; entries: T[] }>>((groups, entry) => {
-    const scopeKey = entry.item.kind === 'safe' ? undefined : entry.item.scopeKey
-    const last = groups.at(-1)
-    if (last && scopeKey !== undefined && last.scopeKey === scopeKey) {
-      last.entries.push(entry)
-    } else {
-      groups.push({ scopeKey, entries: [entry] })
+const toUnitRows = (unit: QueueUnit): QueueListItem[] => {
+  const { scopeKey, safeAddress, chainId, nextNonce, conflict } = unit
+  const header: QueueListItem[] = conflict
+    ? [{ kind: 'conflict', key: unit.key, scopeKey, safeAddress, chainId, nonce: conflict.nonce, size: conflict.size }]
+    : []
+  return [
+    ...header,
+    ...unit.transactions.map<QueueListItem>(({ item, status, conflict: option, canReject }) => ({
+      kind: 'transaction',
+      key: `tx-${item.transaction.id}`,
+      scopeKey,
+      safeAddress,
+      chainId,
+      item,
+      status,
+      nextNonce,
+      conflict: option,
+      canReject,
+      showSafe: true,
+    })),
+  ]
+}
+
+/** A grouping flattened into the rows the table renders: a band per group, then its rows. The Status list has no band. */
+export const buildGroupedQueueList = (args: {
+  groups: QueueGroup[]
+  collapsedGroups: ReadonlySet<string>
+}): QueueListItem[] =>
+  args.groups.flatMap((group) => {
+    const rows = group.units.flatMap(toUnitRows)
+    if (group.kind === 'all') return rows
+    const id = getGroupId(group)
+    const collapsed = args.collapsedGroups.has(id)
+    const band: QueueListItem = {
+      kind: 'group',
+      key: `group-${id}`,
+      id,
+      group: group.kind,
+      chainId: group.chainId,
+      count: group.units.reduce((count, unit) => count + unit.transactions.length, 0),
+      collapsed,
     }
-    return groups
-  }, [])
+    return collapsed ? [band] : [band, ...rows]
+  })

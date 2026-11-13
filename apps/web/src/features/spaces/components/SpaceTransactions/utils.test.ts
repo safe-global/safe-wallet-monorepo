@@ -333,18 +333,26 @@ describe('getSettingsSummary', () => {
 
 describe('getQueueStatus', () => {
   const wallet = checksumAddress(faker.finance.ethereumAddress())
+  const signers = new Set([wallet.toLowerCase()])
+  const noSigners = new Set<string>()
 
   it('is execute for the next transaction awaiting execution, blocked for a later one', () => {
     const tx = multisigTx('AWAITING_EXECUTION')
 
-    expect(getQueueStatus(tx, true, wallet)).toBe('execute')
-    expect(getQueueStatus(tx, false, wallet)).toBe('blocked')
+    expect(getQueueStatus(tx, true, signers)).toBe('execute')
+    expect(getQueueStatus(tx, false, signers)).toBe('blocked')
   })
 
-  it('is sign when the connected wallet is a missing signer, waiting otherwise', () => {
-    expect(getQueueStatus(multisigTx('AWAITING_CONFIRMATIONS', [wallet]), true, wallet)).toBe('sign')
-    expect(getQueueStatus(multisigTx('AWAITING_CONFIRMATIONS'), true, wallet)).toBe('waiting')
-    expect(getQueueStatus(multisigTx('AWAITING_CONFIRMATIONS', [wallet]), true, undefined)).toBe('waiting')
+  it("is sign when one of the caller's wallets is a missing signer, whatever the address case", () => {
+    expect(getQueueStatus(multisigTx('AWAITING_CONFIRMATIONS', [wallet]), true, signers)).toBe('sign')
+    expect(getQueueStatus(multisigTx('AWAITING_CONFIRMATIONS', [wallet.toLowerCase()]), false, signers)).toBe('sign')
+  })
+
+  it("is waiting when none of the caller's wallets is a missing signer", () => {
+    const otherSigner = checksumAddress(faker.finance.ethereumAddress())
+
+    expect(getQueueStatus(multisigTx('AWAITING_CONFIRMATIONS', [otherSigner]), true, signers)).toBe('waiting')
+    expect(getQueueStatus(multisigTx('AWAITING_CONFIRMATIONS', [wallet]), true, noSigners)).toBe('waiting')
   })
 })
 

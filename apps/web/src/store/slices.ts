@@ -65,4 +65,5 @@ export {
   spaceNavigationSlice,
   setLastUsedSpaceOrigin,
   selectLastUsedSpaceOrigin,
+  spaceQueueViewSlice,
 } from '@/features/spaces/store'

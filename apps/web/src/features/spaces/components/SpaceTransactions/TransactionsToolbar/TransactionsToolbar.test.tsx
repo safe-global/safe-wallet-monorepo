@@ -43,6 +43,8 @@ const renderToolbar = (filters: SpaceQueueFilters = NO_SPACE_QUEUE_FILTERS) => {
       filters={filters}
       onFiltersChange={onFiltersChange}
       onSearchChange={jest.fn()}
+      groupBy="status"
+      onGroupByChange={jest.fn()}
     />,
   )
   return onFiltersChange
@@ -212,6 +214,26 @@ describe('TransactionsToolbar', () => {
     expect(onFiltersChange).toHaveBeenLastCalledWith(NO_SPACE_QUEUE_FILTERS)
   })
 
+  it('passes the grouping picked in Group by on to the queue', () => {
+    const onGroupByChange = jest.fn()
+    render(
+      <TransactionsToolbar
+        spaceId={faker.string.uuid()}
+        counts={counts}
+        filters={NO_SPACE_QUEUE_FILTERS}
+        onFiltersChange={jest.fn()}
+        onSearchChange={jest.fn()}
+        groupBy="status"
+        onGroupByChange={onGroupByChange}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Group by Status' }))
+    fireEvent.click(screen.getByRole('menuitemradio', { name: /Up next/ }))
+
+    expect(onGroupByChange).toHaveBeenCalledWith('next')
+  })
+
   it('passes the search on to the queue', () => {
     const onSearchChange = jest.fn()
     render(
@@ -221,6 +243,8 @@ describe('TransactionsToolbar', () => {
         filters={NO_SPACE_QUEUE_FILTERS}
         onFiltersChange={jest.fn()}
         onSearchChange={onSearchChange}
+        groupBy="status"
+        onGroupByChange={jest.fn()}
       />,
     )
     const searchbox = screen.getByRole('searchbox', { name: 'Search transactions' })

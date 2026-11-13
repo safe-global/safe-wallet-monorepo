@@ -44,6 +44,8 @@ const meta = {
     filters: NO_SPACE_QUEUE_FILTERS,
     onFiltersChange: fn(),
     onSearchChange: fn(),
+    groupBy: 'status',
+    onGroupByChange: fn(),
   },
   parameters: { ...setup.parameters },
   decorators: [setup.decorator],

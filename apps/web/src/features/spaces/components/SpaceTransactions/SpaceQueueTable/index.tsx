@@ -2,17 +2,20 @@ import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState, type Rea
 import { useWindowVirtualizer } from '@tanstack/react-virtual'
 import { TableBody, TableHead, TableHeader, TableRow, tableVariants } from '@safe-global/views/components/ui/table'
 import { cn } from '@safe-global/views/utils/cn'
-import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
+import type { QueueGroupBy } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import { DeleteTxDialogProvider } from '../RowActionsMenu/DeleteTxDialog'
-import useWallet from '@/hooks/wallets/useWallet'
 import type { SpaceQueueSection } from '../../../store/spaceQueueApi'
+import { useSignerWallets } from '../../../hooks/useSignerWallets'
 import SpaceQueueRow, { QUEUE_COLUMNS } from '../SpaceQueueRow'
 import { getSafeKey } from '../utils'
 import ChainHeaderRow from './ChainHeaderRow'
 import CollapseAllButton from './CollapseAllButton'
 import ConflictHeaderRow from './ConflictHeaderRow'
-import { buildQueueList, groupByScope, type QueueListItem } from './queueList'
+import GroupHeaderRow from './GroupHeaderRow'
+import { getGroupId, getQueueGroups, getQueueUnits } from './queueGroups'
+import { buildGroupedQueueList, buildQueueList, type QueueListItem } from './queueList'
 import SafeBandRow from './SafeBandRow'
+import { createScopeStore, PooledScope, ScopePool, type ScopeStore, type ScopeTarget } from './scopePool'
 
 // Widths include the cell padding (8px a side, 16px on the outer cells); a wider table spreads its extra width across
 // all of them. The fixed ones add up to 968px; the table's 1128px floor leaves the To column 160px before it scrolls.
@@ -29,6 +32,7 @@ const COLUMN_WIDTHS: Record<(typeof QUEUE_COLUMNS)[number], string> = {
 // First guesses only: each row is measured once rendered
 const ESTIMATED_HEIGHTS: Record<QueueListItem['kind'], number> = {
   safe: 44,
+  group: 44,
   chain: 32,
   conflict: 36,
   transaction: 56,
@@ -74,23 +78,78 @@ const SpacerRow = ({ height }: { height: number }): ReactElement | null =>
     </tr>
   ) : null
 
+const COLLAPSE_UNITS: Record<QueueGroupBy, [string, string] | undefined> = {
+  status: undefined,
+  safe: ['Safe', 'Safes'],
+  network: ['network', 'networks'],
+  next: ['group', 'groups'],
+}
+
+type ScopedItem = Extract<QueueListItem, { kind: 'conflict' | 'transaction' }>
+
+const isScoped = (item: QueueListItem): item is ScopedItem => item.kind === 'conflict' || item.kind === 'transaction'
+
+const toTarget = ({ scopeKey, chainId, safeAddress }: ScopedItem): ScopeTarget => ({ scopeKey, chainId, safeAddress })
+
+/** The Safes and chains of the rendered rows, each once, in order */
+const getScopeTargets = (items: QueueListItem[]): ScopeTarget[] => {
+  const targets = new Map<string, ScopeTarget>()
+  for (const item of items) {
+    if (isScoped(item) && !targets.has(item.scopeKey)) targets.set(item.scopeKey, toTarget(item))
+  }
+  return [...targets.values()]
+}
+
 type VirtualRowProps = {
   item: QueueListItem
   index: number
+  scopeStore: ScopeStore
   measureRef: (element: Element | null) => void
   onToggleSafe: (safeAddress: string) => void
   onToggleChain: (scopeKey: string) => void
+  onToggleGroup: (id: string) => void
 }
+
+const ScopedRow = ({
+  item,
+  rowProps,
+}: {
+  item: ScopedItem
+  rowProps: { ref: (element: Element | null) => void; 'data-index': number }
+}): ReactElement =>
+  item.kind === 'conflict' ? (
+    <ConflictHeaderRow nonce={item.nonce} size={item.size} rowProps={rowProps} />
+  ) : (
+    <SpaceQueueRow
+      item={item.item}
+      chainId={item.chainId}
+      conflict={item.conflict}
+      status={item.status}
+      nextNonce={item.nextNonce}
+      canReject={item.canReject}
+      safeAddress={item.showSafe ? item.safeAddress : undefined}
+      rowProps={rowProps}
+    />
+  )
 
 // Memoized so a scroll re-renders only the rows that enter the window, not every row in it
 const VirtualRow = memo(function VirtualRow({
   item,
   index,
+  scopeStore,
   measureRef,
   onToggleSafe,
   onToggleChain,
+  onToggleGroup,
 }: VirtualRowProps): ReactElement {
   const rowProps = { ref: measureRef, 'data-index': index }
+  if (isScoped(item)) {
+    return (
+      <PooledScope target={toTarget(item)} store={scopeStore}>
+        <ScopedRow item={item} rowProps={rowProps} />
+      </PooledScope>
+    )
+  }
   switch (item.kind) {
     case 'safe':
       return (
@@ -112,33 +171,49 @@ const VirtualRow = memo(function VirtualRow({
           rowProps={rowProps}
         />
       )
-    case 'conflict':
-      return <ConflictHeaderRow nonce={item.nonce} size={item.size} rowProps={rowProps} />
-    case 'transaction':
+    case 'group':
       return (
-        <SpaceQueueRow
-          item={item.item}
+        <GroupHeaderRow
+          group={item.group}
           chainId={item.chainId}
-          conflict={item.conflict}
-          status={item.status}
-          nextNonce={item.nextNonce}
-          canReject={item.canReject}
+          count={item.count}
+          collapsed={item.collapsed}
+          onToggle={() => onToggleGroup(item.id)}
           rowProps={rowProps}
         />
       )
   }
 })
 
-const SpaceQueueTable = ({ sections }: { sections: SpaceQueueSection[] }): ReactElement => {
-  const wallet = useWallet()
+const SpaceQueueTable = ({
+  sections,
+  groupBy,
+}: {
+  sections: SpaceQueueSection[]
+  groupBy: QueueGroupBy
+}): ReactElement => {
+  const signers = useSignerWallets()
+  const [scopeStore] = useState(createScopeStore)
   const [collapsedSafes, setCollapsedSafes] = useState<ReadonlySet<string>>(new Set())
   const [collapsedChains, setCollapsedChains] = useState<ReadonlySet<string>>(new Set())
-  const allCollapsed = sections.every((section) => collapsedSafes.has(getSafeKey(section.safeAddress)))
+  const [collapsedGroups, setCollapsedGroups] = useState<ReadonlySet<string>>(new Set())
 
+  // Cached per response, signers and grouping: a poll that changes nothing, or a switch back, recomputes nothing
+  const groups = groupBy === 'safe' ? undefined : getQueueGroups(getQueueUnits(sections, signers), groupBy)
   const items = useMemo(
-    () => buildQueueList({ sections, collapsedSafes, collapsedChains, walletAddress: wallet?.address }),
-    [sections, collapsedSafes, collapsedChains, wallet?.address],
+    () =>
+      groups
+        ? buildGroupedQueueList({ groups, collapsedGroups })
+        : buildQueueList({ sections, collapsedSafes, collapsedChains, signers }),
+    [groups, sections, collapsedGroups, collapsedSafes, collapsedChains, signers],
   )
+
+  const collapsibleIds = groups
+    ? groups.filter((group) => group.kind !== 'all').map(getGroupId)
+    : sections.map((section) => getSafeKey(section.safeAddress))
+  const collapsedIds = groups ? collapsedGroups : collapsedSafes
+  const allCollapsed = collapsibleIds.every((id) => collapsedIds.has(id))
+  const collapseUnit = COLLAPSE_UNITS[groupBy]
 
   // The window scrolls the page, so the virtualizer needs where the rows start on it
   const bodyRef = useRef<HTMLTableSectionElement>(null)
@@ -169,32 +244,22 @@ const SpaceQueueTable = ({ sections }: { sections: SpaceQueueSection[] }): React
       ? virtualizer.getTotalSize() - (virtualItems[virtualItems.length - 1].end - scrollMargin)
       : 0
 
-  const toggleAll = () =>
-    setCollapsedSafes(allCollapsed ? new Set() : new Set(sections.map((section) => getSafeKey(section.safeAddress))))
+  const toggleAll = () => (groups ? setCollapsedGroups : setCollapsedSafes)(new Set(allCollapsed ? [] : collapsibleIds))
   const onToggleSafe = useCallback(
     (safeAddress: string) => setCollapsedSafes((prev) => toggle(prev, getSafeKey(safeAddress))),
     [],
   )
   const onToggleChain = useCallback((scopeKey: string) => setCollapsedChains((prev) => toggle(prev, scopeKey)), [])
+  const onToggleGroup = useCallback((id: string) => setCollapsedGroups((prev) => toggle(prev, id)), [])
 
-  const renderItem = (item: QueueListItem, index: number): ReactElement => (
-    <VirtualRow
-      key={item.key}
-      item={item}
-      index={index}
-      measureRef={virtualizer.measureElement}
-      onToggleSafe={onToggleSafe}
-      onToggleChain={onToggleChain}
-    />
-  )
-
-  const groups = groupByScope(virtualItems.map((virtualItem) => ({ virtualItem, item: items[virtualItem.index] })))
+  const scopeTargets = getScopeTargets(virtualItems.map((virtualItem) => items[virtualItem.index]))
 
   return (
     <DeleteTxDialogProvider>
       {/* Same panel surface as the Space accounts table (SafeAccountsTable with `bordered={false}`): it owns the
         horizontal scroll, and its 1px edge stays transparent so nothing shifts against that table */}
       <div className="w-full overflow-x-auto rounded-lg border border-transparent bg-[var(--color-background-paper)] pb-2">
+        <ScopePool targets={scopeTargets} store={scopeStore} />
         <table
           aria-label="Pending transactions"
           className={cn(tableVariants({ variant: 'panel' }), 'table-fixed min-w-[1128px]')}
@@ -222,7 +287,14 @@ const SpaceQueueTable = ({ sections }: { sections: SpaceQueueSection[] }): React
                   ) : label === 'Action' ? (
                     <span className="flex items-center justify-end">
                       <span className="sr-only">{label}</span>
-                      <CollapseAllButton allCollapsed={allCollapsed} count={sections.length} onToggle={toggleAll} />
+                      {collapseUnit && collapsibleIds.length > 0 && (
+                        <CollapseAllButton
+                          allCollapsed={allCollapsed}
+                          count={collapsibleIds.length}
+                          unit={collapseUnit}
+                          onToggle={toggleAll}
+                        />
+                      )}
                     </span>
                   ) : (
                     label
@@ -233,19 +305,19 @@ const SpaceQueueTable = ({ sections }: { sections: SpaceQueueSection[] }): React
           </TableHeader>
           <TableBody ref={bodyRef}>
             <SpacerRow height={paddingTop} />
-            {groups.map(({ scopeKey, entries }) => {
-              const rows = entries.map(({ virtualItem, item }) => renderItem(item, virtualItem.index))
-              const first = entries[0].item
-              if (!scopeKey || first.kind === 'safe') return rows
-              // One scope per visible run of a Safe's chain: each scope sets up its own provider and SDK
+            {virtualItems.map((virtualItem) => {
+              const item = items[virtualItem.index]
               return (
-                <SafeScopeProvider
-                  key={`scope-${scopeKey}`}
-                  initial={{ chainId: first.chainId, safeAddress: first.safeAddress }}
-                  pollSafeInfo={false}
-                >
-                  {rows}
-                </SafeScopeProvider>
+                <VirtualRow
+                  key={item.key}
+                  item={item}
+                  index={virtualItem.index}
+                  scopeStore={scopeStore}
+                  measureRef={virtualizer.measureElement}
+                  onToggleSafe={onToggleSafe}
+                  onToggleChain={onToggleChain}
+                  onToggleGroup={onToggleGroup}
+                />
               )
             })}
             <SpacerRow height={paddingBottom} />
