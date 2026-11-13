@@ -98,12 +98,22 @@ describe('SpaceRow', () => {
     expect(badge).not.toHaveTextContent('Business')
   })
 
+  it('marks a Workspace whose trial never started as not set up', async () => {
+    const requests = serveEntitlements({ [space.uuid]: null })
+    render(<SpaceRow space={{ ...space, setupStatus: 'pending' }} />, signedIn)
+
+    await waitFor(() => expect(requests.count).toBe(1))
+    expect(screen.getByTestId('space-row-setup-badge')).toHaveTextContent('Setup not finished')
+    expect(screen.queryByTestId('space-row-pro-badge')).not.toBeInTheDocument()
+  })
+
   it('does not show the PRO pill without a plan', async () => {
     const requests = serveEntitlements({ [space.uuid]: null })
     render(<SpaceRow space={space} />, signedIn)
 
     await waitFor(() => expect(requests.count).toBe(1))
     expect(screen.queryByTestId('space-row-pro-badge')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('space-row-setup-badge')).not.toBeInTheDocument()
   })
 
   it('labels every row from one entitlements request', async () => {

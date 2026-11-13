@@ -15,7 +15,7 @@ import { MixpanelEventParams, PlanLocation, PlanSelectionEntryPoint } from '@/se
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
-import type { WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
+import type { PlanLockReason } from '../../hooks/useWorkspaceLock'
 import { ENTERPRISE_TIER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { PlanCatalog } from './PlanCatalog'
 import { InfoTip } from './PlanStatusCard'
@@ -26,10 +26,7 @@ import type { PlanPick } from '@safe-global/views/features/spaces/components/Pla
 export const _LAPSED_DATA_NOTE =
   'Nothing was charged. Your paid subscription only starts once you add a payment method. Your Workspace data is kept for 90 days and your Safe accounts stay available in My accounts.'
 
-export const chooserCopy = (
-  reason: Exclude<WorkspaceLockReason, 'trial-offered'>,
-  endedAt: number | null,
-): { title: string; subtitle: string } => {
+export const chooserCopy = (reason: PlanLockReason, endedAt: number | null): { title: string; subtitle: string } => {
   if (reason === 'payment-failed') {
     return {
       title: 'Your last payment failed',
@@ -54,7 +51,7 @@ export default function PlanChooserModal({
   onBack,
 }: {
   spaceId: string
-  reason: Exclude<WorkspaceLockReason, 'trial-offered'>
+  reason: PlanLockReason
   endedAt: number | null
   onBack: () => void
 }) {

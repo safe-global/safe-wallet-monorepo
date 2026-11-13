@@ -13,9 +13,14 @@ jest.mock('../../../hooks/billing/useCheckoutReturn', () => ({
 const mockUseCurrentMembership = jest.fn()
 const mockUseIsAdmin = jest.fn()
 const mockPush = jest.fn()
+const mockReplace = jest.fn()
 let mockPathname = '/spaces'
 
-jest.mock('next/router', () => ({ useRouter: () => ({ push: mockPush, pathname: mockPathname }) }))
+jest.mock('next/router', () => ({
+  useRouter: () => ({ push: mockPush, replace: mockReplace, pathname: mockPathname }),
+}))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => true }))
+jest.mock('@/hooks/useIsSurveyEnabled', () => ({ __esModule: true, default: () => true }))
 jest.mock('../../../hooks/useWorkspaceLock', () => ({
   useWorkspaceLock: (spaceId?: string) => mockUseWorkspaceLock(spaceId),
 }))
@@ -96,6 +101,15 @@ describe('WorkspaceLockModal', () => {
     mockUseCheckoutReturn.mockReturnValue({ isReturning: true, status: 'timeout' })
     render(<WorkspaceLockModal spaceId={SPACE_ID} />)
     expect(screen.getByTestId('claim-trial-modal')).toBeInTheDocument()
+  })
+
+  it('sends the admin of a Workspace whose onboarding stopped at the checkout back to its last step', () => {
+    mockUseWorkspaceLock.mockReturnValue(lock({ reason: 'setup-pending' }))
+
+    const { container } = render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+
+    expect(container).toBeEmptyDOMElement()
+    expect(mockReplace).toHaveBeenCalledWith({ pathname: '/welcome/survey', query: { spaceId: SPACE_ID } })
   })
 
   it('shows the lock right away when the user came back from an abandoned checkout', () => {
