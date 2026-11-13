@@ -79,7 +79,6 @@ const PendingTxWidget = ({
               key={tx.transaction.id}
               href={href}
               onClick={tx.safeAddress ? () => onItemClick?.(tx.safeAddress!, tx.transaction.id) : undefined}
-              className={css.widgetItem}
               fixedActionWidth
               label={
                 <div className={css.widgetItemLabel}>
