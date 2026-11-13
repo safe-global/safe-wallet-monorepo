@@ -191,7 +191,7 @@
     "prettier": "^3.9.10",
     "react-refresh": "^0.19.0",
     "remark-gfm": "^4.0.1",
-    "shadcn": "^3.7.0",
+    "shadcn": "^4.23.0",
     "storybook": "^10.6.5",
     "ts-prune": "^0.10.3",
     "typechain": "^8.3.2",
