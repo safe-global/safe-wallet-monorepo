@@ -1,13 +1,23 @@
 import type { Middleware } from '@reduxjs/toolkit'
+import isPlainObject from 'lodash/isPlainObject'
 
 import local from '@/services/local-storage/local'
 import type { RootState } from '@/store'
 
-export const getPreloadedState = <K extends keyof RootState>(sliceNames: K[]): Partial<RootState> => {
+// Hydration merges the stored value into the initial state; a value of another kind (a primitive,
+// or an array for an object slice) replaces the slice and crashes the app on every load.
+// ponytail: top-level kind only; wrong nested shapes still need a per-slice migration.
+const isSameKind = (value: unknown, initial: unknown): boolean =>
+  Array.isArray(initial) ? Array.isArray(value) : isPlainObject(value)
+
+export const getPreloadedState = <K extends keyof RootState>(
+  sliceNames: K[],
+  initialState: Pick<RootState, K>,
+): Partial<RootState> => {
   return sliceNames.reduce<Partial<RootState>>((preloadedState, sliceName) => {
     const sliceState = local.getItem<RootState[K]>(sliceName as string)
 
-    if (sliceState) {
+    if (sliceState && isSameKind(sliceState, initialState[sliceName])) {
       preloadedState[sliceName] = sliceState
     }
 
