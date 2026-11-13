@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Lock, ShieldCheck } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
-import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -37,26 +36,14 @@ export const PolicyPanel = ({ plan }: { plan: DefiV1Plan }) => {
   const isPro = plan === 'pro'
 
   return (
-    <Card variant="muted" size="sm" data-testid="policy-panel">
-      <CardContent>
-        <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <ShieldCheck className="size-4" aria-hidden />
-            <Typography variant="paragraph-bold">{COPY.title}</Typography>
-            <Badge variant="brand">{DEFI_V1_COPY.proOnly}</Badge>
-            <Badge variant="warning">{DEFI_V1_COPY.deposit.comingSoon}</Badge>
-          </div>
-          <Typography variant="paragraph-small" color="muted">
-            {COPY.lead}
-          </Typography>
-          <div>
-            <Button variant="outline" size="sm" onClick={() => setIsOpen(true)}>
-              {!isPro && <Lock />}
-              {isPro ? COPY.cta : DEFI_V1_COPY.locked}
-            </Button>
-          </div>
-        </div>
-      </CardContent>
+    <span className="flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="policy-panel">
+      <ShieldCheck className="size-4" aria-hidden />
+      <span className="@max-[700px]:sr-only">{COPY.title}</span>
+      <Badge variant="warning">{DEFI_V1_COPY.deposit.comingSoon}</Badge>
+      <Button variant="outline" size="xs" onClick={() => setIsOpen(true)}>
+        {!isPro && <Lock />}
+        {isPro ? COPY.cta : DEFI_V1_COPY.locked}
+      </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent size="sm" data-testid="policy-dialog">
@@ -89,6 +76,6 @@ export const PolicyPanel = ({ plan }: { plan: DefiV1Plan }) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </Card>
+    </span>
   )
 }

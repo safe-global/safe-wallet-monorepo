@@ -1,5 +1,13 @@
 import { faker } from '@faker-js/faker'
-import { buildShelf, depositSteps, filterOpportunities, isLocked, MAX_SHELF, nudgeOptions } from './shelf'
+import {
+  buildShelf,
+  depositSteps,
+  filterOpportunities,
+  isLocked,
+  MAX_SHELF,
+  nudgeOptions,
+  summariseTreasury,
+} from './shelf'
 import type { Opportunity } from './types'
 
 const opportunity = (overrides: Partial<Opportunity> = {}): Opportunity => ({
@@ -110,5 +118,29 @@ describe('depositSteps', () => {
     const steps = depositSteps(vault, { asset: 'USDC', chain: 'Base' }, '1')
 
     expect(steps).toHaveLength(2)
+  })
+})
+
+describe('summariseTreasury', () => {
+  const position = (principal: number, earned: number, apy: number, pending = false) => ({
+    principal,
+    earned,
+    pending,
+    opportunity: { apy },
+  })
+
+  it('weights the blended rate by the amount in each position', () => {
+    const summary = summariseTreasury(1_000, [position(300, 5, 0.04), position(100, 1, 0.08)])
+
+    expect(summary.blendedApy).toBeCloseTo(0.05)
+    expect(summary.investedShare).toBeCloseTo(0.4)
+    expect(summary.earned).toBe(6)
+  })
+
+  it('counts a deposit still waiting for signatures as idle', () => {
+    const summary = summariseTreasury(1_000, [position(400, 0, 0.04, true)])
+
+    expect(summary.invested).toBe(0)
+    expect(summary.idle).toBe(1_000)
   })
 })

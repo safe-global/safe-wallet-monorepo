@@ -13,7 +13,7 @@ import {
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { DEFI_V1_COPY, formatApy, formatLiveFor } from '../copy'
 import type { Opportunity } from '../types'
-import { OpportunityBadges } from './OpportunityRow'
+import { OpportunityBadges } from './OpportunityBadges'
 
 const COPY = DEFI_V1_COPY.factSheet
 

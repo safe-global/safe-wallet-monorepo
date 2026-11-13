@@ -63,3 +63,31 @@ export const depositSteps = (
     `Deposit ${amount} ${opportunity.asset} into ${opportunity.name} on ${target}`,
   ]
 }
+
+export type TreasurySummary = {
+  total: number
+  invested: number
+  idle: number
+  investedShare: number
+  earned: number
+  blendedApy: number
+}
+
+/** Pending deposits still sit in the Safe, so they count as idle until signers approve them. */
+export const summariseTreasury = (
+  total: number,
+  positions: { principal: number; earned: number; pending: boolean; opportunity: Pick<Opportunity, 'apy'> }[],
+): TreasurySummary => {
+  const live = positions.filter((position) => !position.pending)
+  const invested = live.reduce((sum, position) => sum + position.principal, 0)
+  const earned = live.reduce((sum, position) => sum + position.earned, 0)
+  const weighted = live.reduce((sum, position) => sum + position.principal * position.opportunity.apy, 0)
+  return {
+    total,
+    invested,
+    idle: Math.max(total - invested, 0),
+    investedShare: total > 0 ? invested / total : 0,
+    earned,
+    blendedApy: invested > 0 ? weighted / invested : 0,
+  }
+}

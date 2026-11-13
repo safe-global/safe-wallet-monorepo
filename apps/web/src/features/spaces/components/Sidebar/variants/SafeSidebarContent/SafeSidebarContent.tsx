@@ -77,24 +77,27 @@ export const SafeSidebarContent = ({
     return pathname === item.href
   }, [])
 
-  // Filter visible items by geoblocking and chain features
-  const visibleMainNavigation = useMemo(() => {
-    return safeMainNavigation.filter((item) => {
-      if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) return false
-      return isRouteEnabled(item.href, chain)
-    })
-  }, [chain, isBlockedCountry])
-
   const defiV1 = useDefiV1()
   const earnLabel = defiV1 ? (defiV1.framing === 'treasury' ? 'Treasury' : 'DeFi') : undefined
 
+  // Filter visible items by geoblocking and chain features
+  const visibleMainNavigation = useMemo(() => {
+    const items = safeMainNavigation.filter((item) => {
+      if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) return false
+      return isRouteEnabled(item.href, chain)
+    })
+    const earn = safeDefiGroup.items.find((item) => item.href === AppRoutes.earn)
+    if (!earnLabel || !earn || !isRouteEnabled(earn.href, chain)) return items
+    const after = items.findIndex((item) => item.href === AppRoutes.transactions.history) + 1
+    return [...items.slice(0, after), { ...earn, label: earnLabel }, ...items.slice(after)]
+  }, [chain, isBlockedCountry, earnLabel])
+
   const visibleDefiGroup = useMemo(() => {
-    const filteredItems = safeDefiGroup.items
-      .filter((item) => {
-        if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) return false
-        return isRouteEnabled(item.href, chain)
-      })
-      .map((item) => (earnLabel && item.href === AppRoutes.earn ? { ...item, label: earnLabel } : item))
+    const filteredItems = safeDefiGroup.items.filter((item) => {
+      if (earnLabel && item.href === AppRoutes.earn) return false
+      if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) return false
+      return isRouteEnabled(item.href, chain)
+    })
     return { ...safeDefiGroup, items: filteredItems }
   }, [chain, isBlockedCountry, earnLabel])
   // tx queue badge

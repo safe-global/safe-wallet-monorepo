@@ -224,12 +224,12 @@ export const IDLE_CASH = {
   idleDays: 30,
 }
 
-export const EXISTING_POSITION = {
-  opportunityId: 'aave-usdc',
-  principal: 1_200_000,
-  earned: 18_450,
-  chain: 'Ethereum',
-}
+export const TREASURY_TOTAL = 6_700_000
+
+export const EXISTING_POSITIONS = [
+  { opportunityId: 'aave-usdc', principal: 1_200_000, earned: 18_450 },
+  { opportunityId: 'lido-steth', principal: 400_000, earned: 3_390 },
+]
 
 export const POLICY_PREVIEW = {
   name: 'Treasury cash',
