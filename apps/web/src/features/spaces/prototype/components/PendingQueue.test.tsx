@@ -1318,6 +1318,32 @@ describe('aligned Transaction column', () => {
     }
   })
 
+  it('folds the status into the signatures, the proposer into To and Blocked by into Go to', () => {
+    render(<PendingQueue />, { routerProps: { query: { align: 'fixed' } } })
+    const titles = screen.getAllByRole('columnheader').map((header) => header.textContent)
+    expect(titles).not.toContain('Signatures')
+    expect(titles.filter((title) => title === 'Status')).toHaveLength(1)
+    const toColumn = titles.indexOf('To')
+    for (const row of openRows()) {
+      const cells = within(row.closest('tr')!).getAllByRole('cell')
+      expect(
+        within(row.closest('tr')!).getByLabelText(
+          /^(Ready to execute|Ready to sign|Signing|Blocked by #\d+|Expired)\. \d+ of \d+ signatures/,
+        ),
+      ).toBeInTheDocument()
+      const proposer = within(row.closest('tr')!).queryByLabelText('Created by a proposer')
+      if (proposer) expect(cells[toColumn]).toContainElement(proposer)
+      // Green whenever you can sign or execute, even when a block stops execution.
+      const gauge = within(row.closest('tr')!)
+        .getByLabelText(/ signatures,/)
+        .querySelector('svg')
+      const canAct = within(row.closest('tr')!).queryByRole('button', { name: /^(Sign|Execute) / })
+      expect(gauge).toHaveClass(canAct ? 'text-success-strong' : 'text-warning-strong')
+    }
+    expect(allPending().queryAllByRole('button', { name: /^Go to #/ })).toHaveLength(0)
+    expect(allPending().getAllByRole('button', { name: /^Blocked by #\d+ / }).length).toBeGreaterThan(0)
+  })
+
   it('keeps the flowing layout by default', () => {
     render(<PendingQueue />)
     expect(screen.getByRole('tab', { name: 'Flowing' })).toHaveAttribute('aria-selected', 'true')

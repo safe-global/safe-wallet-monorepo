@@ -15,6 +15,7 @@ import {
   getSignatureCount,
   getSignerSummary,
   getRowState,
+  getState,
   getStepsStatus,
   getTransactionLabel,
   getWarnings,
@@ -173,54 +174,15 @@ export function QueueRow({
     </Tooltip>
   )
 
-  const signaturesContent = (
-    <span className="flex items-center gap-2">
-      <Tooltip delay={150}>
-        <TooltipTrigger
-          aria-label={`${signatureCount} of ${account.threshold} signatures, ${getSignerSummary(tx, persona)}`}
-          className="flex text-sm tabular-nums"
-          onClick={(event) => event.stopPropagation()}
-        >
-          <span className="flex items-center gap-1.5">
-            <SignatureGauge count={signatureCount} threshold={account.threshold} />
-            {/* Fixed width, up to 10/10, so the Safenet and proposer icons line up whatever the count */}
-            <span className="w-[5ch] text-left">
-              {signatureCount}/{account.threshold}
-            </span>
-          </span>
-        </TooltipTrigger>
-        <TooltipContent className={HINT_CLASS}>
-          <SignerList tx={tx} persona={persona} />
-        </TooltipContent>
-      </Tooltip>
-      {/* Production shows a Proposal chip here. We keep the count and mark who created it instead. */}
-      {signatureCount === 0 && (
-        <Tooltip delay={150}>
-          <TooltipTrigger
-            render={<span className="flex shrink-0 text-muted-foreground" />}
-            aria-label="Created by a proposer"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <UserPen className="size-4" strokeWidth={ICON_STROKE} aria-hidden="true" />
-          </TooltipTrigger>
-          <TooltipContent className={HINT_CLASS}>
-            <HintContent
-              title="Created by a proposer"
-              body={`No owner has signed yet, ${account.threshold} needed. Sign or reject it to proceed.`}
-            />
-          </TooltipContent>
-        </Tooltip>
-      )}
-      {!compact && !m1 && <SafenetMark tx={tx} />}
-    </span>
-  )
+  // Aligned: the everyday status is in the gauge, so only exceptions show here.
+  const plainStatus = aligned && !willBeReplaced && !parentApproval
   const statusContent = (
     <div className="flex flex-wrap items-center gap-1.5">
       {execution ? (
         <ExecutionChip execution={execution} now={now} />
       ) : lockedBy ? (
         <LockedChip by={lockedBy} />
-      ) : (
+      ) : plainStatus ? null : (
         <Tooltip delay={150}>
           <TooltipTrigger
             render={<span />}
@@ -264,6 +226,60 @@ export function QueueRow({
       {conflicts.length > 0 && groupSize < 2 && <Badge variant="warning">Conflicting</Badge>}
     </div>
   )
+  const rowState = getRowState(tx, persona)
+  // Aligned: the status moves into the gauge. Green when you can sign or execute now, even if a block stops
+  // execution. Yellow when you're waiting on others or on another transaction.
+  const canAct = rowState.tone === 'success' || (rowState.label !== 'Expired' && getState(tx, persona).canSign)
+  const gaugeTone = aligned ? (canAct ? 'success' : 'warning') : undefined
+  // Production shows a Proposal chip here. We keep the count and mark who created it instead.
+  const proposerMark = signatureCount === 0 && (
+    <Tooltip delay={150}>
+      <TooltipTrigger
+        render={<span className="flex shrink-0 text-muted-foreground" />}
+        aria-label="Created by a proposer"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <UserPen className="size-4" strokeWidth={ICON_STROKE} aria-hidden="true" />
+      </TooltipTrigger>
+      <TooltipContent className={HINT_CLASS}>
+        <HintContent
+          title="Created by a proposer"
+          body={`No owner has signed yet, ${account.threshold} needed. Sign or reject it to proceed.`}
+        />
+      </TooltipContent>
+    </Tooltip>
+  )
+  const signaturesContent = (
+    <span className="flex items-center gap-2">
+      <Tooltip delay={150}>
+        <TooltipTrigger
+          aria-label={`${aligned ? `${rowState.label}. ` : ''}${signatureCount} of ${account.threshold} signatures, ${getSignerSummary(tx, persona)}`}
+          className="flex text-sm tabular-nums"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <span className="flex items-center gap-1.5">
+            <SignatureGauge count={signatureCount} threshold={account.threshold} tone={gaugeTone} />
+            {/* Fixed width, up to 10/10, so the Safenet and proposer icons line up whatever the count */}
+            <span className="w-[5ch] text-left">
+              {signatureCount}/{account.threshold}
+            </span>
+          </span>
+        </TooltipTrigger>
+        <TooltipContent className={HINT_CLASS}>
+          {aligned && (
+            <span className="mb-2 block border-b border-background/15 pb-2">
+              <HintContent title={rowState.label} body={statusHint} />
+            </span>
+          )}
+          <SignerList tx={tx} persona={persona} />
+        </TooltipContent>
+      </Tooltip>
+      {!aligned && proposerMark}
+      {!compact && !m1 && <SafenetMark tx={tx} />}
+      {/* Aligned: only states the gauge can't show keep a chip, such as executing or locked. */}
+      {aligned && statusContent}
+    </span>
+  )
   const proposedContent = (
     <Tooltip delay={150}>
       <TooltipTrigger aria-label={`Proposed ${tx.age}`} onClick={(event) => event.stopPropagation()}>
@@ -289,6 +305,7 @@ export function QueueRow({
       onStartFlow={onStartFlow}
       onMenuAction={onMenuAction}
       onSpeedUp={onSpeedUp}
+      blockedLabel={aligned}
     />
   )
   const cells: Record<string, ReactNode> = {
@@ -406,7 +423,11 @@ export function QueueRow({
             <span className="flex w-40 min-w-0 shrink-0">
               <Counterparty tx={tx} inColumn tag={partyTags} />
             </span>
-            <span className="text-sm text-muted-foreground">{proposedContent}</span>
+            {/* Fixed width for the age, so the proposer icon lines up too. */}
+            <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <span className="w-16">{proposedContent}</span>
+              {proposerMark}
+            </span>
           </span>
         ) : (
           <Counterparty tx={tx} inColumn tag={partyTags} />
@@ -443,7 +464,13 @@ export function QueueRow({
     Status: <TableCell>{statusContent}</TableCell>,
     Proposed: <TableCell className="text-sm">{proposedContent}</TableCell>,
     Action: compact ? null : (
-      <TableCell className="sticky right-0 z-10 bg-card group-data-[overflow]/queue:shadow-[-12px_0_12px_-12px_rgba(0,0,0,0.25)]">
+      <TableCell
+        className={
+          aligned
+            ? undefined
+            : 'sticky right-0 z-10 bg-card group-data-[overflow]/queue:shadow-[-12px_0_12px_-12px_rgba(0,0,0,0.25)]'
+        }
+      >
         {actionContent}
       </TableCell>
     ),

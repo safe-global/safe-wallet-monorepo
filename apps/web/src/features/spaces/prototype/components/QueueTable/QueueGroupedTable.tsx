@@ -214,14 +214,18 @@ export function QueueGroupedTable({
           <Table
             aria-label="Pending transactions"
             variant="panel"
-            className={`table-fixed ${props.compact ? '[&_td]:px-2 [&_th]:px-2' : 'min-w-[1300px] [&_td]:px-4 [&_th]:px-4'}`}
+            className={`table-fixed ${props.compact ? '[&_td]:px-2 [&_th]:px-2' : `${props.aligned ? 'min-w-[1150px]' : 'min-w-[1300px]'} [&_td]:px-4 [&_th]:px-4`}`}
           >
             <colgroup>
               {columns.map((label) => (
                 <col key={label} className={widths[label]} />
               ))}
             </colgroup>
-            <QueueTableHead columns={columns} collapse={{ ...collapse, count: groups.length }} />
+            <QueueTableHead
+              columns={columns}
+              collapse={{ ...collapse, count: groups.length }}
+              aligned={props.aligned}
+            />
             {/* Safes that didn't load come first, so nobody misses them. */}
             {failedSafes?.accounts.map((account) => (
               <TableBody key={`failed-${account.id}`}>
@@ -318,6 +322,9 @@ const orderedWidths = (
   Network: partyTags ? 'w-20' : 'w-24',
   // Badges such as Blocked by #42 need the wider column.
   Status: partyTags ? 'w-48' : 'w-32',
+  // Aligned: every column has a width, so spare room spreads across them instead of pooling in one gap.
+  // Status fits an executing or locked chip after the count, Action fits "Blocked by #212".
+  ...(aligned ? { To: 'w-80', Signatures: 'w-36', Action: 'w-44' } : {}),
 })
 
 // Columns, the same in every grouping. Nonce leads, so conflicts draw the same bracket.
@@ -334,7 +341,8 @@ export const ORDERED_COLUMNS = (isWide: boolean, partyTags = false, compact = fa
         ...(aligned ? [] : ['Proposed']),
         ...(isWide ? ['Note'] : []),
         'Signatures',
-        'Status',
+        // Aligned: the status is the signature gauge's colour and tooltip.
+        ...(aligned ? [] : ['Status']),
         'Action',
       ]
 
@@ -357,7 +365,7 @@ export function QueueOrderedTable({ groups, groupBy, plain = false, ...props }: 
           <Table
             aria-label="Pending transactions"
             variant="panel"
-            className={`table-fixed ${props.compact ? '[&_td]:px-2 [&_th]:px-2' : 'min-w-[1300px] [&_td]:px-4 [&_th]:px-4'}`}
+            className={`table-fixed ${props.compact ? '[&_td]:px-2 [&_th]:px-2' : `${props.aligned ? 'min-w-[1150px]' : 'min-w-[1300px]'} [&_td]:px-4 [&_th]:px-4`}`}
           >
             <colgroup>
               {columns.map((column) => (
@@ -365,6 +373,7 @@ export function QueueOrderedTable({ groups, groupBy, plain = false, ...props }: 
               ))}
             </colgroup>
             <QueueTableHead
+              aligned={props.aligned}
               columns={columns}
               collapse={
                 plain

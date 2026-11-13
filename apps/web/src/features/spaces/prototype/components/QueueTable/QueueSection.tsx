@@ -282,7 +282,16 @@ export function useScrollOverflow(layoutKey: unknown) {
   return { scroller, overflowing }
 }
 
-export function QueueTableHead({ columns, collapse }: { columns: string[]; collapse?: CollapseAll }) {
+// `aligned`: the table fits without scrolling, so Action isn't pinned, and the gauge carries the status.
+export function QueueTableHead({
+  columns,
+  collapse,
+  aligned = false,
+}: {
+  columns: string[]
+  collapse?: CollapseAll
+  aligned?: boolean
+}) {
   return (
     <TableHeader>
       <TableRow data-no-hover className={collapse ? 'group/head' : undefined}>
@@ -290,7 +299,7 @@ export function QueueTableHead({ columns, collapse }: { columns: string[]; colla
           <TableHead
             key={label}
             scope="col"
-            className={`text-xs text-muted-foreground ${label === 'Nonce' ? 'px-0! text-center' : ''} ${index === 0 ? 'max-md:sticky max-md:left-0 max-md:z-20' : ''} ${label === 'Action' ? 'sticky right-0 z-20 group-data-[overflow]/queue:shadow-[-12px_0_12px_-12px_rgba(0,0,0,0.25)]' : ''}`}
+            className={`text-xs text-muted-foreground ${label === 'Nonce' ? 'px-0! text-center' : ''} ${index === 0 ? 'max-md:sticky max-md:left-0 max-md:z-20' : ''} ${label === 'Action' && !aligned ? 'sticky right-0 z-20 group-data-[overflow]/queue:shadow-[-12px_0_12px_-12px_rgba(0,0,0,0.25)]' : ''}`}
           >
             {label === 'Action' ? (
               <span className="flex items-center justify-end">
@@ -300,6 +309,8 @@ export function QueueTableHead({ columns, collapse }: { columns: string[]; colla
             ) : label === 'To' ? (
               // The names speak for themselves, so the title is for screen readers only.
               <span className="sr-only">{label}</span>
+            ) : aligned && label === 'Signatures' ? (
+              'Status'
             ) : (
               label
             )}

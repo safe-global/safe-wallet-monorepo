@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import { MoreHorizontal } from 'lucide-react'
+import { ArrowRight, MoreHorizontal } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
   DropdownMenu,
@@ -30,6 +30,8 @@ export type RowActionsProps = {
   filled?: boolean
   // Phones: the button fits its label instead of the table's fixed width.
   fit?: boolean
+  // Aligned table: Go to #N reads "Blocked by #N", since the row has no status badge.
+  blockedLabel?: boolean
   onReplaceHover?: (id: string | null) => void
   onReview: (tx: Proposal) => void
   onGoTo?: (tx: Proposal) => void
@@ -51,6 +53,7 @@ export function RowActions({
   hovered = false,
   filled = false,
   fit = false,
+  blockedLabel = false,
   onReplaceHover = () => undefined,
   onReview,
   onGoTo,
@@ -60,7 +63,8 @@ export function RowActions({
   onSpeedUp,
 }: RowActionsProps) {
   const m1 = milestone === 1
-  const width = fit ? undefined : 'w-20'
+  // Blocked by #N is longer, so the buttons keep a minimum width instead.
+  const width = fit ? undefined : blockedLabel ? 'min-w-20' : 'w-20'
   const execution = executions[tx.id]
   const lockedBy = execution ? undefined : getLockingTx(tx, items, executions)
   const conflicts = getConflicts(tx, items)
@@ -82,8 +86,9 @@ export function RowActions({
     else if (primaryAction.kind === 'remind') onRemind?.(primaryAction.target)
     else onReview(tx)
   }
+  const blocked = blockedLabel && primaryAction.kind === 'goTo'
   const primary = {
-    label: primaryAction.label,
+    label: blocked ? primaryAction.label.replace('Go to', 'Blocked by') : primaryAction.label,
     hint: 'hint' in primaryAction ? primaryAction.hint : undefined,
     onClick: stop(runPrimary),
   }
@@ -138,6 +143,7 @@ export function RowActions({
                 onClick={primary.onClick}
               >
                 {primaryLabel}
+                {blocked && <ArrowRight aria-hidden="true" />}
               </Button>
             }
           />
@@ -156,6 +162,7 @@ export function RowActions({
           onClick={primary.onClick}
         >
           {primaryLabel}
+          {blocked && <ArrowRight aria-hidden="true" />}
         </Button>
       )}
       <DropdownMenu>

@@ -11,16 +11,26 @@ const wedge = (ratio: number) => {
 }
 
 // A pie, not a segmented arc: arcs read as a loading spinner.
-export function SignatureGauge({ count, threshold }: { count: number; threshold: number }) {
+// `tone` carries the row's status: green when you can act on it now, yellow when you can't.
+export function SignatureGauge({
+  count,
+  threshold,
+  tone,
+}: {
+  count: number
+  threshold: number
+  tone?: 'success' | 'warning'
+}) {
   const ratio = threshold > 0 ? Math.min(count / threshold, 1) : 1
+  const color = tone
+    ? tone === 'success'
+      ? 'text-success-strong'
+      : 'text-warning-strong'
+    : ratio === 1
+      ? 'text-success-strong'
+      : 'text-foreground'
   return (
-    <svg
-      width={SIZE}
-      height={SIZE}
-      viewBox={`0 0 ${SIZE} ${SIZE}`}
-      className={`shrink-0 ${ratio === 1 ? 'text-success-strong' : 'text-foreground'}`}
-      aria-hidden="true"
-    >
+    <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} className={`shrink-0 ${color}`} aria-hidden="true">
       <circle cx={CENTER} cy={CENTER} r={OUTER} fill="none" strokeWidth={1.5} className="stroke-current" />
       {ratio === 1 ? (
         <circle cx={CENTER} cy={CENTER} r={INNER} className="fill-current" />
