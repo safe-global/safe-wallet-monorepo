@@ -3,6 +3,7 @@ export type Scenario =
   | '1-safe'
   | '5-safes'
   | '8-safes'
+  | '8-safes-all-types'
   | '10-safes'
   | '20-safes'
   | '50-safes'

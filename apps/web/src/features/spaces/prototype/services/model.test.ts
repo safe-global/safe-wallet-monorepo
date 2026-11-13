@@ -16,6 +16,8 @@ import {
   getOutstandingSigners,
   getConflicts,
   getScenario,
+  getScenarioAccounts,
+  TYPE_LABELS,
   getState,
   getPrimaryStatus,
   getRowState,
@@ -299,5 +301,16 @@ describe('matches the production queue', () => {
     const tx = byKind((item) => item.kind.type === 'nested')
     expect(getSummary(tx)).toBe('Approves a transaction')
     expect(getSummaryHint(tx)).not.toMatch(/#\d/)
+  })
+})
+
+describe('8 Safes, every type', () => {
+  it('has 18 transactions on all 8 Safes, with every type label', () => {
+    const items = getScenario('8-safes-all-types')
+    expect(items).toHaveLength(18)
+    expect(new Set(items.map((tx) => tx.account)).size).toBe(getScenarioAccounts('8-safes-all-types').length)
+    expect(getScenarioAccounts('8-safes-all-types')).toHaveLength(8)
+    expect(new Set(items.map(getTypeLabel))).toEqual(new Set(TYPE_LABELS))
+    expect(new Set(items.map((tx) => tx.id)).size).toBe(18)
   })
 })

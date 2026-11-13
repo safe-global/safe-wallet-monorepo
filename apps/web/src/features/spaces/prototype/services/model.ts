@@ -232,7 +232,7 @@ export const getScenarioAccounts = (scenario: Scenario) =>
     ? accounts.filter((account) => account.id === 'treasury')
     : scenario === '5-safes'
       ? [...accounts, ...pick(FIVE_SAFES)]
-      : scenario === '8-safes'
+      : scenario === '8-safes' || scenario === '8-safes-all-types'
         ? [...accounts, ...pick(TYPICAL_SAFES)]
         : scenario === '10-safes'
           ? [...accounts, ...pick(TEN_SAFES)]
@@ -306,6 +306,65 @@ const typicalProposals = (): Proposal[] => [
     note: { text: 'Parks idle USDC until the next rebalance.', author: 'Dev', date: '12 Nov, 10:05' },
   },
 ]
+// The typical 8 Safes with every transaction type the gateway sends, 18 in all, to check the columns hold.
+const allTypesProposals = (): Proposal[] => {
+  const [send, batch, contractor, , grantsSigner, grantsSend, rejection, swap, supply] = typicalProposals()
+  return [
+    send,
+    { ...batch, kind: { type: 'batch', actions: generateBatchActions(4), delegateCall: 'trusted' } },
+    queued('treasury', 44, 'LI.FI · 0x7e3a…b19d', '25 ETH', ['Ana'], '1h ago', {
+      type: 'bridge',
+      sell: '25 ETH',
+      destination: 'Base',
+      destinationChainId: '8453',
+      fees: '0.01 ETH',
+    }),
+    contractor,
+    queued('payroll', 18, 'Treasury Main · 0x8675…c3d2', '', [], '20m ago', {
+      type: 'nested',
+      parentSafe: 'Treasury Main',
+      parentNonce: 45,
+    }),
+    grantsSigner,
+    grantsSend,
+    rejection,
+    swap,
+    supply,
+    queued('marketing', 54, 'Marketing · 0x3f0a…b7c4', '0.5 ETH', ['Ana'], '3h ago', {
+      type: 'transfer',
+      toSelf: true,
+    }),
+    queued('marketing', 55, 'Unverified contract · 0x2c7e…f04d', '', ['Ana'], '50m ago', {
+      type: 'contract',
+      contract: 'Unverified contract',
+      method: '',
+      verified: false,
+    }),
+    queued('ecosystem-fund', 23, 'Ecosystem Fund', '', ['Ana'], '6h ago', {
+      type: 'settings',
+      change: { kind: 'changeThreshold', threshold: 3 },
+    }),
+    queued('ecosystem-fund', 24, 'AllowanceModule · 0x6a09…b1c4', '', [], '4h ago', {
+      type: 'settings',
+      change: { kind: 'enableModule', module: 'AllowanceModule' },
+    }),
+    queued('legal', 6, 'Legal & Compliance', '', ['Ana', 'Max'], '2d ago', {
+      type: 'settings',
+      change: { kind: 'updateVersion', from: '1.3.0', to: '1.4.1' },
+    }),
+    queued('vesting', 12, 'Kiln · 0x4f1d…a907', '64 ETH', ['Ana', 'Jonas'], '2h ago', {
+      type: 'staking',
+      action: 'stake',
+      validators: 2,
+    }),
+    queued('vesting', 13, 'Kiln · 0x4f1d…a907', '', ['Ana'], '5h ago', {
+      type: 'staking',
+      action: 'withdrawRequest',
+      validators: 3,
+    }),
+    queued('vesting', 14, 'Kiln · 0x4f1d…a907', '32.4 ETH', [], '1d ago', { type: 'staking', action: 'claim' }),
+  ]
+}
 // Threshold is 2 of 4. Two signatures at the next nonce is ready, Dev alone is waiting, a later nonce is blocked.
 const manySafesProposals = (): Proposal[] => [
   queued('market-making', 212, 'Litware Markets · 0x51c7…9a02', '1,500,000 USDC', ['Ana', 'Max'], '4h ago'),
@@ -1191,6 +1250,7 @@ export const getScenario = (scenario: Scenario): Proposal[] => {
       tx.id === 'market-making-213' ? { ...tx, signers: ['Ana', 'Max'] } : tx,
     )
   if (scenario === '8-safes') return typicalProposals()
+  if (scenario === '8-safes-all-types') return allTypesProposals()
   if (scenario === '10-safes') return [...realistic(), ...withSafes(TEN_SAFES)]
   if (scenario === '20-safes') return withMix(fleetProposals(), fleetAccounts)
   if (scenario === '50-safes') return withMix(protocolProposals(), protocolAccounts)

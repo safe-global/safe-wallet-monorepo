@@ -15,6 +15,7 @@ import { getPersonaAddress, getSignerStatus, getWorkspaceProfile } from '../serv
 export const SCENARIOS: { value: Scenario; label: string }[] = [
   { value: '1-safe', label: '1 Safe' },
   { value: '8-safes', label: '8 Safes · typical' },
+  { value: '8-safes-all-types', label: '8 Safes · every type' },
   { value: '5-safes', label: '5 Safes' },
   { value: '10-safes', label: '10 Safes' },
   { value: '20-safes', label: '20 Safes' },
