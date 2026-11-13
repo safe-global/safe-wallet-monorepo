@@ -7,10 +7,7 @@ const byTestId = (testId: string) => `[data-testid="${testId}"]`
 
 const sidebarItem = (label: string) => byTestId(getSidebarItemTestId(label))
 
-const selectedAddressBookTab = (tabTestId: string) =>
-  `main [data-slot="tabs"]:has(${byTestId(tabTestId)}[aria-selected="true"])`
-
-const ADDRESS_BOOK_EMPTY = byTestId('address-book-empty')
+const selectedTab = (testId: string) => `${byTestId(testId)}[aria-selected="true"]`
 
 export const SIDEBAR = byTestId('sidebar-container')
 
@@ -63,10 +60,9 @@ export const TOUR_STEPS: TourStep[] = [
     id: 'workspace-contacts',
     route: AppRoutes.spaces.addressBook,
     selectOnEnter: byTestId('address-book-workspace-tab'),
-    anchor: selectedAddressBookTab('address-book-workspace-tab'),
-    emptyState: ADDRESS_BOOK_EMPTY,
+    anchor: selectedTab('address-book-workspace-tab'),
     sidebarItem: sidebarItem('Address book'),
-    placement: { side: 'bottom', align: 'center' },
+    placement: { side: 'bottom', align: 'start' },
     title: 'Workspace contacts',
     body: 'Address book entries everyone in the workspace can see.',
     tip: 'Admins edit them. Members propose new ones.',
@@ -75,10 +71,9 @@ export const TOUR_STEPS: TourStep[] = [
     id: 'local-contacts',
     route: AppRoutes.spaces.addressBook,
     selectOnEnter: byTestId('address-book-local-tab'),
-    anchor: selectedAddressBookTab('address-book-local-tab'),
-    emptyState: ADDRESS_BOOK_EMPTY,
+    anchor: selectedTab('address-book-local-tab'),
     sidebarItem: sidebarItem('Address book'),
-    placement: { side: 'bottom', align: 'center' },
+    placement: { side: 'bottom', align: 'start' },
     title: 'Local contacts',
     body: 'Only you see these, and only in this browser.',
     tip: 'Use "Add to Workspace" to share one.',
