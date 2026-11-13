@@ -90,6 +90,8 @@ const mockSignerPaysTx = {
     refundReceiver: { value: ZERO_ADDRESS },
     executor: { value: OWNER },
     signers: [{ value: OWNER }],
+    // gasUsed 120000 × gasPrice 20 gwei = 0.0024 ETH
+    fee: '2400000000000000',
   },
 } as unknown as TransactionDetails
 
@@ -110,6 +112,21 @@ const buildProvider = (receipt: MockReceipt | null) =>
   ({
     getTransactionReceipt: jest.fn().mockResolvedValue(receipt && { logs: [], ...receipt }),
   }) as unknown as ReturnType<typeof web3Module.useWeb3ReadOnly> & { getTransactionReceipt: jest.Mock }
+
+// A provider whose receipt resolves only when the test says so, to assert after the fetch settles
+const buildDeferredProvider = (receipt: MockReceipt) => {
+  let resolve: () => void = () => {}
+  const fetched = new Promise<void>((res) => (resolve = res))
+  const provider = {
+    getTransactionReceipt: jest.fn(() => fetched.then(() => ({ logs: [], ...receipt }))),
+  } as unknown as ReturnType<typeof web3Module.useWeb3ReadOnly> & { getTransactionReceipt: jest.Mock }
+  const settle = () =>
+    act(async () => {
+      resolve()
+      await fetched
+    })
+  return { provider, settle }
+}
 
 const buildFailingProvider = (error: unknown) =>
   ({ getTransactionReceipt: jest.fn().mockRejectedValue(error) }) as unknown as ReturnType<
@@ -164,43 +181,94 @@ describe('useHistoryFeesBreakdown', () => {
   })
 
   describe('Signer-pays', () => {
-    it('reconstructs the gas fee from the on-chain receipt', async () => {
-      // gasUsed: 120000, gasPrice: 20 gwei → 2.4e15 wei = 0.0024 ETH
-      jest
-        .spyOn(web3Module, 'useWeb3ReadOnly')
-        .mockReturnValue(buildProvider({ gasUsed: 120_000n, gasPrice: 20_000_000_000n }))
+    it('takes the gas fee from the tx fee, without an RPC call', () => {
+      const provider = buildProvider(null)
+      jest.spyOn(web3Module, 'useWeb3ReadOnly').mockReturnValue(provider)
 
       const { result } = renderHook(() => useHistoryFeesBreakdown(mockSignerPaysTx))
 
-      await waitFor(() => expect(result.current).not.toBeNull())
+      expect(result.current?.paidFrom).toBe('signer')
       expect(result.current?.gasFee).toEqual(
         expect.objectContaining({ label: 'Max gas fee', currency: 'ETH', amount: '0.0024' }),
       )
       expect(result.current?.gasFee.fiatAmount).toBeDefined()
       expect(result.current?.executionFee).toEqual({ label: 'Execution fee', isFree: true })
+      expect(provider.getTransactionReceipt).not.toHaveBeenCalled()
     })
 
-    it('returns null when the on-chain receipt is unavailable', async () => {
-      jest.spyOn(web3Module, 'useWeb3ReadOnly').mockReturnValue(buildProvider(null))
+    it("shows no breakdown when CGW has no fee for the tx ('0')", () => {
+      const noFeeTx = {
+        ...mockSignerPaysTx,
+        detailedExecutionInfo: { ...mockSignerPaysTx.detailedExecutionInfo, fee: '0' },
+      } as unknown as TransactionDetails
 
-      const { result } = renderHook(() => useHistoryFeesBreakdown(mockSignerPaysTx))
+      const { result } = renderHook(() => useHistoryFeesBreakdown(noFeeTx))
 
-      await waitFor(() => expect(result.current).toBeNull())
+      expect(result.current).toBeNull()
     })
 
-    it('returns null when txHash is missing', async () => {
-      const noHashTx = { ...mockSignerPaysTx, txHash: undefined } as unknown as TransactionDetails
+    it('counts an executor who confirmed as the signer, even if no longer an owner', () => {
+      const removedOwnerTx = {
+        ...mockSignerPaysTx,
+        detailedExecutionInfo: {
+          ...mockSignerPaysTx.detailedExecutionInfo,
+          executor: { value: OTHER_ACCOUNT },
+          confirmations: [{ signer: { value: OTHER_ACCOUNT } }],
+        },
+      } as unknown as TransactionDetails
 
-      const { result } = renderHook(() => useHistoryFeesBreakdown(noHashTx))
+      const { result } = renderHook(() => useHistoryFeesBreakdown(removedOwnerTx))
 
-      await waitFor(() => expect(result.current).toBeNull())
+      expect(result.current?.paidFrom).toBe('signer')
+    })
+  })
+
+  describe('Sponsored', () => {
+    const relayerReceipt = { gasUsed: 77_692n, gasPrice: 1_000_019n }
+
+    it('marks a tx executed by the Rhinestone relayer as sponsored, without an RPC call', () => {
+      const provider = buildProvider(relayerReceipt)
+      jest.spyOn(web3Module, 'useWeb3ReadOnly').mockReturnValue(provider)
+
+      const { result } = renderHook(() => useHistoryFeesBreakdown(executedBy(RHINESTONE_RELAYER)))
+
+      expect(result.current?.paidFrom).toBe('sponsored')
+      expect(result.current?.gasFee).toEqual(
+        expect.objectContaining({ isFree: true, currency: 'ETH', amount: '0.0024' }),
+      )
+      expect(provider.getTransactionReceipt).not.toHaveBeenCalled()
+    })
+
+    it("marks a tx as sponsored from Rhinestone's IntentExecuted log when the executor is unknown", async () => {
+      jest
+        .spyOn(web3Module, 'useWeb3ReadOnly')
+        .mockReturnValue(buildProvider({ ...relayerReceipt, logs: [INTENT_EXECUTED_LOG] }))
+
+      const { result } = renderHook(() => useHistoryFeesBreakdown(executedBy(OTHER_ACCOUNT)))
+
+      await waitFor(() => expect(result.current?.paidFrom).toBe('sponsored'))
+      expect(result.current?.gasFee.amount).toBe('0.0024')
+    })
+
+    it('ignores an IntentExecuted log from any other contract', async () => {
+      const { provider, settle } = buildDeferredProvider({
+        ...relayerReceipt,
+        logs: [{ ...INTENT_EXECUTED_LOG, address: OTHER_ACCOUNT }],
+      })
+      jest.spyOn(web3Module, 'useWeb3ReadOnly').mockReturnValue(provider)
+
+      const { result } = renderHook(() => useHistoryFeesBreakdown(executedBy(OTHER_ACCOUNT)))
+      await settle()
+
+      expect(provider.getTransactionReceipt).toHaveBeenCalledTimes(1)
+      expect(result.current).toBeNull()
     })
 
     it('fetches the receipt once across balance-poll-induced re-renders', async () => {
-      const provider = buildProvider({ gasUsed: 120_000n, gasPrice: 20_000_000_000n })
+      const provider = buildProvider({ ...relayerReceipt, logs: [INTENT_EXECUTED_LOG] })
       jest.spyOn(web3Module, 'useWeb3ReadOnly').mockReturnValue(provider)
 
-      const { result, rerender } = renderHook(() => useHistoryFeesBreakdown(mockSignerPaysTx))
+      const { result, rerender } = renderHook(() => useHistoryFeesBreakdown(executedBy(OTHER_ACCOUNT)))
       await waitFor(() => expect(result.current).not.toBeNull())
 
       // Simulate balance polling — new items array reference, same underlying data.
@@ -214,70 +282,26 @@ describe('useHistoryFeesBreakdown', () => {
     })
   })
 
-  describe('Sponsored', () => {
-    const relayerReceipt = { gasUsed: 77_692n, gasPrice: 1_000_019n }
-
-    it('marks a tx executed by the Rhinestone relayer as sponsored, with its cost as free', async () => {
-      jest.spyOn(web3Module, 'useWeb3ReadOnly').mockReturnValue(buildProvider(relayerReceipt))
-
-      const { result } = renderHook(() => useHistoryFeesBreakdown(executedBy(RHINESTONE_RELAYER)))
-
-      await waitFor(() => expect(result.current?.paidFrom).toBe('sponsored'))
-      expect(result.current?.gasFee).toEqual(expect.objectContaining({ isFree: true, currency: 'ETH' }))
-      expect(result.current?.gasFee.amount).toBeDefined()
-    })
-
-    it("marks a tx as sponsored from Rhinestone's IntentExecuted log when the executor is unknown", async () => {
-      jest
-        .spyOn(web3Module, 'useWeb3ReadOnly')
-        .mockReturnValue(buildProvider({ ...relayerReceipt, logs: [INTENT_EXECUTED_LOG] }))
-
-      const { result } = renderHook(() => useHistoryFeesBreakdown(executedBy(OTHER_ACCOUNT)))
-
-      await waitFor(() => expect(result.current?.paidFrom).toBe('sponsored'))
-    })
-
-    it('ignores an IntentExecuted log from any other contract', async () => {
-      const provider = buildProvider({ ...relayerReceipt, logs: [{ ...INTENT_EXECUTED_LOG, address: OTHER_ACCOUNT }] })
-      jest.spyOn(web3Module, 'useWeb3ReadOnly').mockReturnValue(provider)
-
-      const { result } = renderHook(() => useHistoryFeesBreakdown(executedBy(OTHER_ACCOUNT)))
-
-      await waitFor(() => expect(provider.getTransactionReceipt).toHaveBeenCalled())
-      // Let useAsync store the receipt, so the assertion sees the decision and not the initial null
-      await act(async () => {})
-      expect(result.current).toBeNull()
-    })
-  })
-
-  it('counts an executor who confirmed as the signer, even if no longer an owner', async () => {
-    jest
-      .spyOn(web3Module, 'useWeb3ReadOnly')
-      .mockReturnValue(buildProvider({ gasUsed: 120_000n, gasPrice: 20_000_000_000n }))
-    const removedOwnerTx = {
-      ...mockSignerPaysTx,
-      detailedExecutionInfo: {
-        ...mockSignerPaysTx.detailedExecutionInfo,
-        executor: { value: OTHER_ACCOUNT },
-        confirmations: [{ signer: { value: OTHER_ACCOUNT } }],
-      },
-    } as unknown as TransactionDetails
-
-    const { result } = renderHook(() => useHistoryFeesBreakdown(removedOwnerTx))
-
-    await waitFor(() => expect(result.current?.paidFrom).toBe('signer'))
-  })
-
   it('shows no breakdown when an unknown account executed, as we cannot say who paid', async () => {
-    const provider = buildProvider({ gasUsed: 120_000n, gasPrice: 20_000_000_000n })
+    const { provider, settle } = buildDeferredProvider({ gasUsed: 120_000n, gasPrice: 20_000_000_000n })
     jest.spyOn(web3Module, 'useWeb3ReadOnly').mockReturnValue(provider)
 
     const { result } = renderHook(() => useHistoryFeesBreakdown(executedBy(OTHER_ACCOUNT)))
+    await settle()
 
-    await waitFor(() => expect(provider.getTransactionReceipt).toHaveBeenCalled())
-    // Let useAsync store the receipt, so the assertion sees the decision and not the initial null
-    await act(async () => {})
+    expect(provider.getTransactionReceipt).toHaveBeenCalledTimes(1)
     expect(result.current).toBeNull()
+  })
+
+  it('shows no breakdown for an unknown executor when the tx has no hash to fetch', () => {
+    const provider = buildProvider(null)
+    jest.spyOn(web3Module, 'useWeb3ReadOnly').mockReturnValue(provider)
+    const noHashTx = { ...executedBy(OTHER_ACCOUNT), txHash: undefined } as unknown as TransactionDetails
+
+    const { result } = renderHook(() => useHistoryFeesBreakdown(noHashTx))
+
+    expect(result.current).toBeNull()
+    expect(provider.getTransactionReceipt).not.toHaveBeenCalled()
   })
 
   it('never fetches the receipt for Safe-pays txs', async () => {
@@ -321,7 +345,7 @@ describe('useHistoryFeesBreakdown', () => {
         .spyOn(web3Module, 'useWeb3ReadOnly')
         .mockReturnValue(buildFailingProvider(new Error('HTTP request failed. Status: 500')))
 
-      const { result } = renderHook(() => useHistoryFeesBreakdown(mockSignerPaysTx))
+      const { result } = renderHook(() => useHistoryFeesBreakdown(executedBy(OTHER_ACCOUNT)))
 
       await waitFor(() => expect(mockLogError).toHaveBeenCalled())
       expect(mockLogError).toHaveBeenCalledWith(
@@ -343,11 +367,14 @@ describe('useHistoryFeesBreakdown', () => {
       } catch (error) {
         throttled = error
       }
-      jest.spyOn(web3Module, 'useWeb3ReadOnly').mockReturnValue(buildFailingProvider(throttled))
+      const provider = buildFailingProvider(throttled)
+      jest.spyOn(web3Module, 'useWeb3ReadOnly').mockReturnValue(provider)
 
-      const { result } = renderHook(() => useHistoryFeesBreakdown(mockSignerPaysTx))
+      const { result } = renderHook(() => useHistoryFeesBreakdown(executedBy(OTHER_ACCOUNT)))
 
-      await waitFor(() => expect(result.current).toBeNull())
+      await waitFor(() => expect(provider.getTransactionReceipt).toHaveBeenCalled())
+      await act(async () => {})
+      expect(result.current).toBeNull()
       expect(mockLogError).not.toHaveBeenCalled()
     })
   })
