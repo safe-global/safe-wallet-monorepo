@@ -236,6 +236,16 @@ describe('TokenSelector — address lookup', () => {
     expect(screen.queryByText(TOKEN_NOT_FOUND_TEXT)).not.toBeInTheDocument()
   })
 
+  it('replaces the selected token label when an address is pasted', async () => {
+    const { user } = renderSelector({ value: popularWbtc.address })
+    const input = await openSelector(user)
+
+    await user.paste(popularDai.address)
+
+    expect(input).toHaveValue(popularDai.address)
+    expect(screen.getByRole('option', { name: /DAI/ })).toBeInTheDocument()
+  })
+
   it('offers an ERC-20 the Transaction Service knows and keeps it once selected', async () => {
     const token = erc20TokenMetadataBuilder().with({ address: pasted, symbol: 'SAFE', trusted: true }).build()
     respondWith(() => HttpResponse.json(token))

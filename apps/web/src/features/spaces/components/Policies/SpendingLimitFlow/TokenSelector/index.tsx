@@ -182,6 +182,8 @@ const TokenSelector = ({
             autoComplete="off"
             spellCheck={false}
             aria-label={label}
+            // The field holds one token, so a paste replaces what is there instead of appending to it.
+            onPaste={(event) => event.currentTarget.select()}
             disabled={disabled || !hasSafe}
             className="w-full"
             data-testid={testId}
