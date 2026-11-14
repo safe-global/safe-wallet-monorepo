@@ -1,8 +1,5 @@
 import { useEffect, useMemo, useState, type ReactElement } from 'react'
-import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
-import type { SerializedError } from '@reduxjs/toolkit'
 import { useRouter } from 'next/router'
-import { ArrowLeftRight, BarChart3, FileCode, HelpCircle, Send, Shield, Sparkles, type LucideIcon } from 'lucide-react'
 import {
   useSurveysGetStateV1Query,
   useSurveysSubmitResponseV1Mutation,
@@ -23,6 +20,7 @@ import {
 } from '../OnboardingLayout'
 import { useSpaceSafes } from '../../hooks/useSpaceSafes'
 import { flattenSafeItems } from '@/hooks/safes'
+import { isSurveyNotFound, ONBOARDING_SURVEY_SLUG, surveyIcon } from './survey'
 import SurveyOptionCard from '@safe-global/views/features/spaces/components/SurveyOnboarding/SurveyOptionCard'
 
 const ONBOARDING_STEP = 4
@@ -31,33 +29,12 @@ const ONBOARDING_STEP = 4
 // which render regardless of the flag, derive their total from
 // useOnboardingStepCount() instead.
 const TOTAL_STEPS = 4
-const SURVEY_SLUG = 'onboarding'
-
-// Backend-issued icon keys → lucide icons. Unknown keys fall back to a
-// placeholder so the card never renders iconless.
-const ICON_MAP: Record<string, LucideIcon> = {
-  terminal: FileCode,
-  gift: Sparkles,
-  cash: Send,
-  sprout: BarChart3,
-  swap: ArrowLeftRight,
-  bank: Shield,
-}
-const FALLBACK_ICON: LucideIcon = HelpCircle
-
-// RTK Query surfaces FetchBaseQueryError | SerializedError. The first carries
-// the HTTP status; treat 404 as "no active survey" (admin turned it off via
-// surveys.is_active = false) rather than a real failure.
-const isNotFoundError = (err: FetchBaseQueryError | SerializedError | undefined): boolean => {
-  return err != null && 'status' in err && err.status === 404
-}
-
 const SurveyOnboarding = (): ReactElement | null => {
   const router = useRouter()
   const spaceId = router.query.spaceId as string | undefined
 
   const { data, isLoading, error } = useSurveysGetStateV1Query(
-    { spaceId: spaceId ?? '', slug: SURVEY_SLUG },
+    { spaceId: spaceId ?? '', slug: ONBOARDING_SURVEY_SLUG },
     { skip: !spaceId },
   )
   const { data: space } = useSpacesGetOneV1Query({ id: spaceId ?? '' }, { skip: !spaceId })
@@ -78,7 +55,7 @@ const SurveyOnboarding = (): ReactElement | null => {
   }, [router, spaceId])
 
   useEffect(() => {
-    if (isNotFoundError(error) && spaceId) {
+    if (isSurveyNotFound(error) && spaceId) {
       router.replace({ pathname: AppRoutes.spaces.index, query: { spaceId } })
     }
   }, [error, router, spaceId])
@@ -106,7 +83,7 @@ const SurveyOnboarding = (): ReactElement | null => {
     try {
       await submit({
         spaceId: spaceId ?? '',
-        slug: SURVEY_SLUG,
+        slug: ONBOARDING_SURVEY_SLUG,
         submitSurveyResponseDto: { selections: { [page.id]: selections } },
       }).unwrap()
       router.push({ pathname: AppRoutes.spaces.index, query: { spaceId } })
@@ -130,7 +107,7 @@ const SurveyOnboarding = (): ReactElement | null => {
 
       {isLoading && <Spinner />}
 
-      {error && !isNotFoundError(error) && (
+      {error && !isSurveyNotFound(error) && (
         <Alert variant="destructive">
           <AlertSeverityIcon variant="destructive" />
           <AlertDescription>Failed to load survey. Please refresh.</AlertDescription>
@@ -143,7 +120,7 @@ const SurveyOnboarding = (): ReactElement | null => {
             <SurveyOptionCard
               key={opt.key}
               option={opt}
-              Icon={opt.icon ? (ICON_MAP[opt.icon] ?? FALLBACK_ICON) : undefined}
+              Icon={surveyIcon(opt.icon)}
               isPressed={selected.has(opt.key)}
               onToggle={toggle}
             />
