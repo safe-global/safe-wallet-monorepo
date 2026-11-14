@@ -8,6 +8,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { TrialPlanCard } from '@safe-global/views/features/spaces/components/Plans/TrialPlanParts'
 import type { TrialSize } from '@safe-global/views/features/spaces/components/Plans/types'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
+import { trialFeaturesOf } from '../../Plans/planTiers'
 import { useStepAdvance } from '../hooks/useStepAdvance'
 import { useTrialSizes } from '../hooks/useTrialSizes'
 import { useWorkspaceDraft } from '../hooks/useWorkspaceDraft'
@@ -50,7 +51,15 @@ const PlanPicker = ({
       </Alert>
     )
   }
-  return <TrialPlanCard sizes={sizes} value={size} onChange={onPick} trialPeriodDays={trialPeriodDays} />
+  return (
+    <TrialPlanCard
+      sizes={sizes}
+      value={size}
+      onChange={onPick}
+      trialPeriodDays={trialPeriodDays}
+      features={trialFeaturesOf(size.planName)}
+    />
+  )
 }
 
 const PlanStep = (): ReactElement => {
