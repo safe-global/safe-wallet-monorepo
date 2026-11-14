@@ -6,7 +6,7 @@ import { server } from '@/tests/server'
 import { signedInAuthState } from '@/tests/builders/authState'
 import { trialPaymentLinkBuilder } from '@/tests/builders/trialPaymentLink'
 import { fakeUserId, fakeWorkspaceName, workspaceDraftBuilder } from '@/tests/builders/workspaceDraft'
-import { trialPlansHandler, userHandler, userLoaded, workspacesHandler } from '@/tests/msw/workspaceWizard'
+import { trialPlansHandler, userHandler, workspacesHandler } from '@/tests/msw/workspaceWizard'
 import { fakerChecksummedAddress, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { MemberRole } from '../../../memberRole'
 import { INVALID_IDENTIFIER_ERROR } from '../../AddMemberModal/utils'
@@ -63,7 +63,7 @@ describe('InviteStep', () => {
 
   it('shows why an identifier is invalid and does not go on', async () => {
     const { user, push } = renderInviteStep()
-    await userLoaded()
+    await screen.findByTestId('invite-identifier-input-0')
 
     await user.type(identifierInput(), 'not an invitee')
     await user.click(continueButton())
@@ -75,7 +75,7 @@ describe('InviteStep', () => {
   it('refuses an invite to the user’s own wallet and does not go on', async () => {
     const own = fakerChecksummedAddress()
     const { user, push } = renderInviteStep({}, [own])
-    await userLoaded()
+    await screen.findByTestId('invite-identifier-input-0')
 
     await user.type(identifierInput(), own)
     await waitFor(() => expect(continueButton()).toBeEnabled())

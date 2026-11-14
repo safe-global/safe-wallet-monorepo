@@ -6,8 +6,8 @@ import { server } from '@/tests/server'
 import { signedInAuthState } from '@/tests/builders/authState'
 import { spaceBuilder } from '@/tests/builders/space'
 import { fakeUserId, fakeWorkspaceName, workspaceDraftBuilder } from '@/tests/builders/workspaceDraft'
-import { userHandler, userLoaded, workspacesHandler } from '@/tests/msw/workspaceWizard'
-import { renderWithUserEvent, screen } from '@/tests/test-utils'
+import { userHandler, workspacesHandler } from '@/tests/msw/workspaceWizard'
+import { renderWithUserEvent, screen, waitForElementToBeRemoved } from '@/tests/test-utils'
 import { MemberRole } from '../../../memberRole'
 import NameStepNotices from '../NameStepNotices'
 import WizardReady from '../WizardReady'
@@ -62,7 +62,7 @@ describe('NameStepNotices', () => {
   ] as const)('offers nothing when %s', async (_, resumeOffer, changes) => {
     renderNotices(ownDraft(changes), resumeOffer)
 
-    await userLoaded()
+    await waitForElementToBeRemoved(() => screen.queryByText('Loading'))
 
     expect(screen.queryByText('Continue where you left off?')).not.toBeInTheDocument()
   })

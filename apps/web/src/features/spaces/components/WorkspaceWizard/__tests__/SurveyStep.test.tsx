@@ -8,7 +8,7 @@ import { getStoreInstance } from '@/store'
 import { server } from '@/tests/server'
 import { signedInAuthState } from '@/tests/builders/authState'
 import { fakeUserId, fakeWorkspaceName, workspaceDraftBuilder } from '@/tests/builders/workspaceDraft'
-import { createSetupHandler, userHandler, userLoaded, workspacesHandler } from '@/tests/msw/workspaceWizard'
+import { createSetupHandler, userHandler, workspacesHandler } from '@/tests/msw/workspaceWizard'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import SurveyStep from '../steps/SurveyStep'
 import WizardReady from '../WizardReady'
@@ -80,8 +80,7 @@ describe('SurveyStep', () => {
     const bodies: CreateSpaceSetupDto[] = []
     server.use(surveyHandler(null), createSetupHandler(bodies, { spaceId: faker.string.uuid(), checkoutUrl: null }))
     const { user } = renderSurveyStep()
-    await userLoaded()
-    const finish = screen.getByRole('button', { name: 'Create Workspace' })
+    const finish = await screen.findByRole('button', { name: 'Create Workspace' })
     await waitFor(() => expect(finish).toBeEnabled())
 
     await user.click(finish)
