@@ -171,3 +171,13 @@ export const holdingsFor = (positions: Position[], opportunityId: string): Holdi
     { invested: 0, pending: 0, earned: 0 },
   )
 }
+
+/** Mock monthly value of a position, from the amount put in to that amount plus earnings. Deterministic, so stories stay stable. */
+export const growthSeries = (invested: number, earned: number, points = 12): number[] =>
+  Array.from({ length: points }, (_, index) => {
+    const progress = index / (points - 1)
+    const wobble = index === 0 || index === points - 1 ? 0 : Math.sin(index * 1.7) * earned * 0.08
+    return invested + earned * progress + wobble
+  })
+
+export const growthShare = (invested: number, earned: number): number => (invested > 0 ? earned / invested : 0)

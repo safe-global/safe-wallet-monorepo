@@ -8,7 +8,9 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { Drawer, DrawerBody, DrawerSection } from '@/components/common/Drawer'
 import { DEFI_V1_COPY, formatApy, formatCompactUsd, formatLiveFor, formatUsd } from '../copy'
 import type { DefiV1Plan, DefiV1Signing, Holding, Opportunity } from '../types'
+import { growthSeries, growthShare } from '../shelf'
 import { ActionPanel, type ActionResult } from './ActionPanel'
+import { Sparkline } from './Sparkline'
 import { OpportunityMark, Tag } from './TreasuryTables'
 
 const COPY = DEFI_V1_COPY.drawer
@@ -214,6 +216,24 @@ export const OpportunityDrawer = ({
                 >
                   <Frame>
                     <Row label={COPY.deposited} value={formatUsd(holding.invested)} />
+                    {holding.invested > 0 && (
+                      <Row
+                        label={COPY.growth}
+                        value={
+                          <span className="flex items-center justify-end gap-2">
+                            <Sparkline
+                              values={growthSeries(holding.invested, holding.earned)}
+                              label={DEFI_V1_COPY.positions.trend(
+                                formatApy(growthShare(holding.invested, holding.earned)),
+                              )}
+                            />
+                            <span className="text-badge-dot-success">
+                              +{formatApy(growthShare(holding.invested, holding.earned))}
+                            </span>
+                          </span>
+                        }
+                      />
+                    )}
                     {holding.pending > 0 && (
                       <Row label={DEFI_V1_COPY.positions.pending} value={formatUsd(holding.pending)} />
                     )}

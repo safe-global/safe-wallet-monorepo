@@ -5,6 +5,8 @@ import {
   depositSteps,
   filterOpportunities,
   groupOpportunities,
+  growthSeries,
+  growthShare,
   holdingsFor,
   isLocked,
   NO_FILTERS,
@@ -223,5 +225,20 @@ describe('holdingsFor', () => {
 
   it('returns nothing for an opportunity without positions', () => {
     expect(holdingsFor([], 'none')).toBeUndefined()
+  })
+})
+
+describe('growthSeries', () => {
+  it('starts at the amount put in and ends with the earnings added', () => {
+    const series = growthSeries(1_000, 50, 6)
+
+    expect(series).toHaveLength(6)
+    expect(series[0]).toBe(1_000)
+    expect(series[5]).toBe(1_050)
+  })
+
+  it('reports growth as a share of the amount put in', () => {
+    expect(growthShare(1_000, 50)).toBe(0.05)
+    expect(growthShare(0, 50)).toBe(0)
   })
 })

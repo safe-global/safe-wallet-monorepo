@@ -8,12 +8,14 @@ import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@safe-global/views/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { cn } from '@safe-global/views/utils/cn'
-import { DEFI_V1_COPY, formatApy, formatCompactUsd } from '../copy'
+import { DEFI_V1_COPY, formatApy, formatCompactUsd, formatUsd } from '../copy'
+import { growthSeries, growthShare } from '../shelf'
 import { CHAIN_IDS } from '../opportunities'
 import type { Holding, Opportunity } from '../types'
+import { Sparkline } from './Sparkline'
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0!'
-const COLUMN_WIDTHS = ['w-10', 'w-64', 'w-20', 'w-32', 'w-28', 'w-36', '', 'w-20', 'w-32', 'w-32']
+const COLUMN_WIDTHS = ['w-10', 'w-64', 'w-20', 'w-32', 'w-28', 'w-36', '', 'w-20', 'w-48', 'w-32']
 const COLUMN_COUNT = COLUMN_WIDTHS.length
 const OPPORTUNITY_HEADERS = ['Opportunity', 'Asset', 'Exit time', 'Risk', 'Access', 'Networks', 'Rate', 'Invested']
 
@@ -142,9 +144,26 @@ const AccessTag = ({ opportunity, locked }: { opportunity: Opportunity; locked: 
 
 const InvestedCell = ({ holding }: { holding?: Holding }) => {
   if (!holding) return <span className="text-muted-foreground">—</span>
+  const growth = growthShare(holding.invested, holding.earned)
+  const series = growthSeries(holding.invested, holding.earned)
   return (
     <span className="flex min-w-0 flex-col">
-      {holding.invested > 0 && <span className="font-semibold tabular-nums">{formatCompactUsd(holding.invested)}</span>}
+      {holding.invested > 0 && (
+        <Tooltip delay={150}>
+          <TooltipTrigger render={<span className="flex min-w-0 items-center gap-2" />}>
+            <span className="font-semibold tabular-nums">{formatCompactUsd(holding.invested)}</span>
+            <Sparkline values={series} label={DEFI_V1_COPY.positions.trend(formatApy(growth))} />
+            <span className="text-xs tabular-nums text-badge-dot-success">+{formatApy(growth)}</span>
+          </TooltipTrigger>
+          <TooltipContent>
+            {DEFI_V1_COPY.positions.trendTooltip(
+              formatCompactUsd(series[0]),
+              formatCompactUsd(series[series.length - 1]),
+              formatUsd(holding.earned),
+            )}
+          </TooltipContent>
+        </Tooltip>
+      )}
       {holding.pending > 0 && (
         <span className="truncate text-xs text-muted-foreground tabular-nums">
           {DEFI_V1_COPY.positions.pendingAmount(formatCompactUsd(holding.pending))}
@@ -223,7 +242,7 @@ const OpportunityRow = ({
 const TableCard = ({ label, children }: { label: string; children: ReactNode }) => (
   <Card radius="xl" size="none">
     <CardContent>
-      <Table aria-label={label} variant="panel" className="table-fixed min-w-[1040px] [&_td]:px-4 [&_th]:px-4">
+      <Table aria-label={label} variant="panel" className="table-fixed min-w-[1200px] [&_td]:px-4 [&_th]:px-4">
         <colgroup>
           {COLUMN_WIDTHS.map((width, index) => (
             <col key={index} className={width || undefined} />
