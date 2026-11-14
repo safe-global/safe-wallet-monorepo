@@ -61,6 +61,7 @@ const SPACE = {
   memberCount: 1,
   safeCount: 1,
   experimentalFeatures: [],
+  setupStatus: null,
   members: [
     { role: 'ADMIN', name: 'Admin', status: 'ACTIVE', invitedBy: null, inviteExpiresAt: null, user: { id: 1 } },
   ],

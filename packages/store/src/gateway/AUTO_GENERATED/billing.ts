@@ -74,6 +74,10 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/billing/sessions/${queryArg.sessionId}` }),
         providesTags: ['billing'],
       }),
+      billingGetTrialPlansV1: build.query<BillingGetTrialPlansV1ApiResponse, BillingGetTrialPlansV1ApiArg>({
+        query: () => ({ url: `/v1/billing/trial-plans` }),
+        providesTags: ['billing'],
+      }),
     }),
     overrideExisting: false,
   })
@@ -128,6 +132,8 @@ export type BillingGetCheckoutSessionV1ApiResponse = /** status 200  */ Checkout
 export type BillingGetCheckoutSessionV1ApiArg = {
   sessionId: string
 }
+export type BillingGetTrialPlansV1ApiResponse = /** status 200  */ PaymentLink[]
+export type BillingGetTrialPlansV1ApiArg = void
 export type SubscriptionPlan = {
   id: string
   name?: string | null
@@ -262,4 +268,6 @@ export const {
   useBillingUpdateSubscriptionV1Mutation,
   useBillingGetCheckoutSessionV1Query,
   useLazyBillingGetCheckoutSessionV1Query,
+  useBillingGetTrialPlansV1Query,
+  useLazyBillingGetTrialPlansV1Query,
 } = injectedRtkApi

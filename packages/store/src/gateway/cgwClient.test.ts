@@ -67,6 +67,18 @@ describe('dynamicBaseQuery', () => {
     expect(result).toEqual({ data: 'objectResult' })
   })
 
+  it.each(['/v1/spaces/1/surveys/onboarding/state', '/v1/surveys/onboarding', '/v1/billing/trial-plans'])(
+    'sends the session cookie to %s, which needs a signed-in user',
+    async (url) => {
+      mockRawBaseQuery.mockResolvedValue({ data: {} })
+      cgwClient.setBaseUrl('http://example.com')
+
+      await cgwClient.dynamicBaseQuery(url, api, {})
+
+      expect(mockRawBaseQuery).toHaveBeenCalledWith(expect.objectContaining({ credentials: 'include' }), api, {})
+    },
+  )
+
   describe('404 as an empty list', () => {
     const subscriptionsUrl = '/v1/billing/spaces/e5bfa406-7b05-48fd-9b7e-88a1efb20495/subscriptions'
     const notFound = { error: { status: 404, data: { message: 'Not Found' } }, meta: { request: {}, response: {} } }
