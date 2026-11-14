@@ -1,10 +1,12 @@
 import { faker } from '@faker-js/faker'
 import {
+  activeFilterCount,
   buildShelf,
-  categoryHighlights,
   depositSteps,
   filterOpportunities,
+  groupOpportunities,
   isLocked,
+  NO_FILTERS,
   MAX_SHELF,
   nudgeOptions,
   summariseTreasury,
@@ -99,11 +101,57 @@ describe('isLocked', () => {
 })
 
 describe('filterOpportunities', () => {
-  it('keeps only options that exit within the chosen time', () => {
+  it('keeps only options that exit within a day', () => {
     const fast = opportunity({ exitHours: 0 })
     const slow = opportunity({ exitHours: 120 })
 
-    expect(filterOpportunities([fast, slow], { maxExitHours: 24 })).toEqual([fast])
+    expect(filterOpportunities([fast, slow], { ...NO_FILTERS, sameDay: true })).toEqual([fast])
+  })
+
+  it('matches any chosen value inside a filter and every filter together', () => {
+    const usdcBase = opportunity({ asset: 'USDC', chains: ['Base'] })
+    const ethBase = opportunity({ asset: 'ETH', chains: ['Base'] })
+    const usdcEthereum = opportunity({ asset: 'USDC', chains: ['Ethereum'] })
+
+    const filters = { ...NO_FILTERS, assets: ['USDC', 'DAI'], chains: ['Base'] }
+
+    expect(filterOpportunities([usdcBase, ethBase, usdcEthereum], filters)).toEqual([usdcBase])
+  })
+
+  it('treats a KYC listing as not open to all', () => {
+    const open = opportunity()
+    const kyc = opportunity({ kyc: true })
+
+    expect(filterOpportunities([open, kyc], { ...NO_FILTERS, openOnly: true })).toEqual([open])
+  })
+
+  it('counts each chosen value as one active filter', () => {
+    expect(activeFilterCount({ ...NO_FILTERS, assets: ['USDC', 'ETH'], sameDay: true })).toBe(3)
+  })
+})
+
+describe('groupOpportunities', () => {
+  it('returns one group in the input order when not grouping', () => {
+    const items = [opportunity(), opportunity()]
+
+    expect(groupOpportunities(items, 'none')).toEqual([{ key: 'all', items }])
+  })
+
+  it('orders risk groups from lower to higher and skips empty ones', () => {
+    const higher = opportunity({ risk: 'higher' })
+    const low = opportunity({ risk: 'low' })
+
+    expect(groupOpportunities([higher, low], 'risk').map((group) => group.key)).toEqual(['low', 'higher'])
+  })
+
+  it('orders asset groups by first appearance', () => {
+    const eth = opportunity({ asset: 'ETH' })
+    const usdc = opportunity({ asset: 'USDC' })
+
+    expect(groupOpportunities([eth, usdc, opportunity({ asset: 'ETH' })], 'asset').map((group) => group.key)).toEqual([
+      'ETH',
+      'USDC',
+    ])
   })
 })
 
@@ -150,17 +198,5 @@ describe('summariseTreasury', () => {
 
     expect(summary.invested).toBe(0)
     expect(summary.idle).toBe(1_000)
-  })
-})
-
-describe('categoryHighlights', () => {
-  it('shows the best rate and the fastest exit of each shelf category', () => {
-    const slowHighRate = opportunity({ apy: 0.05, exitHours: 24 })
-    const fastLowRate = opportunity({ apy: 0.03, exitHours: 0 })
-
-    const [cash] = categoryHighlights([slowHighRate, fastLowRate])
-
-    expect(cash).toMatchObject({ category: 'cash', bestApy: 0.05, exitLabel: 'Exit instantly', count: 2 })
-    expect(cash.top).toBe(slowHighRate)
   })
 })

@@ -1,4 +1,4 @@
-import type { DefiV1Model, DefiV1Plan, Opportunity, OpportunityCategory, RiskLevel } from './types'
+import type { DefiV1Model, DefiV1Plan, GroupBy, Opportunity, OpportunityCategory, RiskLevel } from './types'
 
 export const CATEGORY_ORDER: OpportunityCategory[] = ['cash', 'yield', 'staking']
 export const MAX_SHELF = 7
@@ -40,14 +40,57 @@ export const nudgeOptions = (opportunities: Opportunity[], model: DefiV1Model, p
     )
     .sort(byTrust)
 
-export type ListFilters = { asset?: string; chain?: string; maxExitHours?: number }
+export type ListFilters = {
+  assets: string[]
+  chains: string[]
+  risks: RiskLevel[]
+  sameDay: boolean
+  openOnly: boolean
+}
 
+export const NO_FILTERS: ListFilters = { assets: [], chains: [], risks: [], sameDay: false, openOnly: false }
+
+export const activeFilterCount = (filters: ListFilters): number =>
+  filters.assets.length +
+  filters.chains.length +
+  filters.risks.length +
+  Number(filters.sameDay) +
+  Number(filters.openOnly)
+
+/** Keeps the input order. Values inside one filter widen the match, separate filters narrow it. */
 export const filterOpportunities = (opportunities: Opportunity[], filters: ListFilters): Opportunity[] =>
-  opportunities
-    .filter((item) => !filters.asset || item.asset === filters.asset)
-    .filter((item) => !filters.chain || item.chains.includes(filters.chain))
-    .filter((item) => filters.maxExitHours === undefined || item.exitHours <= filters.maxExitHours)
-    .sort(byTrust)
+  opportunities.filter(
+    (item) =>
+      (filters.assets.length === 0 || filters.assets.includes(item.asset)) &&
+      (filters.chains.length === 0 || item.chains.some((chain) => filters.chains.includes(chain))) &&
+      (filters.risks.length === 0 || filters.risks.includes(item.risk)) &&
+      (!filters.sameDay || item.exitHours <= NUDGE_MAX_EXIT_HOURS) &&
+      (!filters.openOnly || (item.access === 'all' && !item.kyc)),
+  )
+
+const GROUP_KEY: Record<Exclude<GroupBy, 'none'>, (item: Opportunity) => string> = {
+  category: (item) => item.category,
+  risk: (item) => item.risk,
+  asset: (item) => item.asset,
+}
+
+const GROUP_ORDER: Partial<Record<GroupBy, string[]>> = {
+  category: CATEGORY_ORDER,
+  risk: Object.keys(RISK_ORDER),
+}
+
+/** Keeps the input order inside each group. Groups follow the category or risk order, or first appearance. */
+export const groupOpportunities = (
+  opportunities: Opportunity[],
+  groupBy: GroupBy,
+): { key: string; items: Opportunity[] }[] => {
+  if (groupBy === 'none') return [{ key: 'all', items: opportunities }]
+  const keyOf = GROUP_KEY[groupBy]
+  const keys = GROUP_ORDER[groupBy] ?? [...new Set(opportunities.map(keyOf))]
+  return keys
+    .map((key) => ({ key, items: opportunities.filter((item) => keyOf(item) === key) }))
+    .filter((group) => group.items.length > 0)
+}
 
 /** The calls one proposal bundles when the Safe holds the asset on another chain. */
 export const depositSteps = (
@@ -91,28 +134,3 @@ export const summariseTreasury = (
     blendedApy: invested > 0 ? weighted / invested : 0,
   }
 }
-
-export const fastestExitLabel = (hours: number): string => {
-  if (hours === 0) return 'Exit instantly'
-  if (hours <= 24) return 'Exit same day'
-  if (hours <= 72) return 'Exit within 3 days'
-  return 'Exit within days'
-}
-
-export type CategoryHighlight = {
-  category: OpportunityCategory
-  bestApy: number
-  exitLabel: string
-  count: number
-  /** The highest-rate option, opened when the card is clicked. */
-  top: Opportunity
-}
-
-export const categoryHighlights = (opportunities: Opportunity[]): CategoryHighlight[] =>
-  buildShelf(opportunities).groups.map((group) => ({
-    category: group.category,
-    top: group.items.reduce((best, item) => (item.apy > best.apy ? item : best)),
-    bestApy: Math.max(...group.items.map((item) => item.apy)),
-    exitLabel: fastestExitLabel(Math.min(...group.items.map((item) => item.exitHours))),
-    count: group.items.length,
-  }))

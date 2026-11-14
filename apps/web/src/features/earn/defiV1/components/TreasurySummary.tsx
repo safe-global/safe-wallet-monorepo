@@ -9,22 +9,20 @@ import type { TreasurySummary as Summary } from '../shelf'
 const percent = new Intl.NumberFormat('en-US', { style: 'percent', maximumFractionDigits: 0 })
 const COPY = DEFI_V1_COPY.summary
 
-export const StatCard = ({
+const StatCard = ({
   label,
   aside,
   value,
   valueClassName,
   children,
-  testId,
 }: {
   label: string
   aside?: ReactNode
   value: ReactNode
   valueClassName?: string
   children?: ReactNode
-  testId?: string
 }) => (
-  <div className="flex min-h-32 flex-col gap-2 rounded-xl bg-card p-4" data-testid={testId}>
+  <div className="flex min-h-32 flex-col gap-2 rounded-xl bg-card p-4">
     <span className="flex min-h-6 items-center justify-between gap-2 text-sm font-medium">
       {label}
       {aside}
@@ -34,16 +32,8 @@ export const StatCard = ({
   </div>
 )
 
-export const TreasurySummary = ({
-  summary,
-  policy,
-  onSeeInvestments,
-}: {
-  summary: Summary
-  policy: ReactNode
-  onSeeInvestments: () => void
-}) => (
-  <div className="grid gap-3 @xl:grid-cols-2 @5xl:grid-cols-4" data-testid="treasury-summary">
+export const TreasurySummary = ({ summary, onSeeInvestments }: { summary: Summary; onSeeInvestments: () => void }) => (
+  <div className="grid gap-3 @2xl:grid-cols-3" data-testid="treasury-summary">
     <StatCard
       label={COPY.invested}
       value={percent.format(summary.investedShare)}
@@ -60,7 +50,11 @@ export const TreasurySummary = ({
         indicatorClassName="bg-badge-dot-success"
       />
       <span className="tabular-nums">
-        {COPY.investedOf(formatCompactUsd(summary.invested), formatCompactUsd(summary.total))}
+        {COPY.investedOf(
+          formatCompactUsd(summary.invested),
+          formatCompactUsd(summary.total),
+          formatCompactUsd(summary.idle),
+        )}
       </span>
     </StatCard>
     <StatCard label={COPY.earned} value={`+${formatUsd(summary.earned)}`} valueClassName="text-badge-dot-success">
@@ -69,6 +63,5 @@ export const TreasurySummary = ({
     <StatCard label={COPY.apy} value={formatApy(summary.blendedApy)}>
       <span>{COPY.apyLead}</span>
     </StatCard>
-    {policy}
   </div>
 )

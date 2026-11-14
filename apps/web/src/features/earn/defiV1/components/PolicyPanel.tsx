@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Lock } from 'lucide-react'
+import { Lock, Repeat } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
@@ -12,11 +12,10 @@ import {
 } from '@safe-global/views/components/ui/dialog'
 import { Switch } from '@safe-global/views/components/ui/switch'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { DEFI_V1_COPY, formatCompactUsd, formatUsd } from '../copy'
+import { DEFI_V1_COPY, formatUsd } from '../copy'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { OPPORTUNITIES, POLICY_PREVIEW } from '../opportunities'
 import type { DefiV1Plan } from '../types'
-import { StatCard } from './TreasurySummary'
 
 const COPY = DEFI_V1_COPY.policy
 
@@ -29,7 +28,7 @@ const Row = ({ label, value }: { label: string; value: string }) => (
   </div>
 )
 
-export const PolicyPanel = ({ plan, idle }: { plan: DefiV1Plan; idle: number }) => {
+export const PolicyPanel = ({ plan }: { plan: DefiV1Plan }) => {
   const { safe } = useSafeInfo()
   const [isOpen, setIsOpen] = useState(false)
   const [sweep, setSweep] = useState(true)
@@ -38,23 +37,18 @@ export const PolicyPanel = ({ plan, idle }: { plan: DefiV1Plan; idle: number }) 
 
   return (
     <>
-      <StatCard
-        label={COPY.sweep}
-        aside={<Badge variant="warning">{DEFI_V1_COPY.deposit.comingSoon}</Badge>}
-        value={formatCompactUsd(idle)}
-        testId="policy-panel"
-      >
-        <span>{COPY.footerLead}</span>
-        <Button variant="outline" size="xs" className="self-start" onClick={() => setIsOpen(true)}>
-          {!isPro && <Lock />}
-          {isPro ? COPY.cta : DEFI_V1_COPY.proOnly}
-        </Button>
-      </StatCard>
+      <Button variant="outline" onClick={() => setIsOpen(true)} data-testid="policy-button">
+        {isPro ? <Repeat /> : <Lock />}
+        {COPY.cta}
+      </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent size="sm" data-testid="policy-dialog">
           <DialogHeader divided="subtle">
-            <DialogTitle>{COPY.dialogTitle}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              {COPY.dialogTitle}
+              <Badge variant="warning">{DEFI_V1_COPY.deposit.comingSoon}</Badge>
+            </DialogTitle>
             <DialogDescription>{COPY.lead}</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col px-4">

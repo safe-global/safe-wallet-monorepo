@@ -50,3 +50,5 @@ export type DefiV1Config = {
   model: DefiV1Model
   plan: DefiV1Plan
 }
+
+export type GroupBy = 'none' | 'category' | 'risk' | 'asset'

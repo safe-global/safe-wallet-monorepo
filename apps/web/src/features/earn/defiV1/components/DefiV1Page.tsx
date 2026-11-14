@@ -1,29 +1,28 @@
-import { useMemo, useState } from 'react'
-import { SearchInput } from '@safe-global/views/components/ui/search-input'
-import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
+import { useMemo, useRef, useState } from 'react'
+import { Badge } from '@safe-global/views/components/ui/badge'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { DEFI_V1_COPY } from '../copy'
+import { DEFI_V1_COPY, formatApy, formatCompactUsd, formatUsd } from '../copy'
 import { EXISTING_POSITIONS, OPPORTUNITIES, TREASURY_TOTAL } from '../opportunities'
 import {
   buildShelf,
-  categoryHighlights,
   filterOpportunities,
+  groupOpportunities,
   isLocked,
-  NUDGE_MAX_EXIT_HOURS,
+  NO_FILTERS,
   summariseTreasury,
   type ListFilters,
 } from '../shelf'
-import type { DefiV1Config, Opportunity } from '../types'
-import { CategoryCards } from './CategoryCards'
+import type { DefiV1Config, GroupBy, Opportunity, OpportunityCategory, RiskLevel } from '../types'
+import { CompareDialog } from './CompareDialog'
 import { DepositDialog, type DepositResult } from './DepositDialog'
 import { OpportunityDrawer } from './OpportunityDrawer'
+import { OpportunityToolbar } from './OpportunityToolbar'
 import { PolicyPanel } from './PolicyPanel'
+import { TreasurySection } from './TreasurySection'
 import { TreasurySummary } from './TreasurySummary'
-import { InvestmentsTable, OpportunitiesTable, type Position } from './TreasuryTables'
+import { InvestmentsTable, OpportunitiesTable, type OpportunityGroup, type Position } from './TreasuryTables'
 
-const ALL = 'all'
-
-type PageTab = 'opportunities' | 'investments'
+const MAX_COMPARE = 3
 
 const initialPositions = (): Position[] =>
   EXISTING_POSITIONS.flatMap((existing) => {
@@ -31,59 +30,56 @@ const initialPositions = (): Position[] =>
     return opportunity ? [{ opportunity, principal: existing.principal, earned: existing.earned, pending: false }] : []
   })
 
-const FilterTabs = ({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string
-  value: string
-  options: { value: string; label: string }[]
-  onChange: (value: string) => void
-}) => (
-  <Tabs value={value} onValueChange={(next) => onChange(String(next))}>
-    <TabsList aria-label={label}>
-      {options.map((option) => (
-        <TabsTrigger key={option.value} value={option.value}>
-          {option.label}
-        </TabsTrigger>
-      ))}
-    </TabsList>
-  </Tabs>
-)
+const RANKED = (() => {
+  const { groups, more } = buildShelf(OPPORTUNITIES)
+  return [...groups.flatMap((group) => group.items), ...more]
+})()
+const ASSETS = [...new Set(OPPORTUNITIES.map((item) => item.asset))]
+const CHAINS = [...new Set(OPPORTUNITIES.flatMap((item) => item.chains))]
 
 const matches = (item: Opportunity, search: string) =>
   !search || `${item.name} ${item.runBy} ${item.asset}`.toLowerCase().includes(search.toLowerCase())
 
-const treasuryList = (search: string): Opportunity[] => {
-  const { groups, more } = buildShelf(OPPORTUNITIES)
-  return [...groups.flatMap((group) => group.items), ...more].filter((item) => matches(item, search))
+const groupTitle = (groupBy: GroupBy, key: string): string | undefined => {
+  if (groupBy === 'category') return DEFI_V1_COPY.category[key as OpportunityCategory].title
+  if (groupBy === 'risk') return DEFI_V1_COPY.risk[key as RiskLevel]
+  if (groupBy === 'asset') return key
+  return undefined
 }
 
 export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const [selected, setSelected] = useState<Opportunity | null>(null)
   const [depositing, setDepositing] = useState<Opportunity | null>(null)
   const [positions, setPositions] = useState<Position[]>(initialPositions)
-  const [tab, setTab] = useState<PageTab>('opportunities')
+  const [investmentsOpen, setInvestmentsOpen] = useState(false)
+  const [opportunitiesOpen, setOpportunitiesOpen] = useState(true)
+  const investmentsRef = useRef<HTMLElement>(null)
   const [search, setSearch] = useState('')
-  const [asset, setAsset] = useState(ALL)
-  const [chain, setChain] = useState(ALL)
-  const [exit, setExit] = useState(ALL)
-  const isDefi = config.framing === 'defi'
+  const [groupBy, setGroupBy] = useState<GroupBy>('none')
+  const [filters, setFilters] = useState<ListFilters>(NO_FILTERS)
+  const [compareIds, setCompareIds] = useState<string[]>([])
+  const [isComparing, setIsComparing] = useState(false)
   const locked = (item: Opportunity) => isLocked(item, config.model, config.plan)
   const summary = summariseTreasury(TREASURY_TOTAL, positions)
-  const highlights = useMemo(() => categoryHighlights(OPPORTUNITIES), [])
 
-  const opportunities = useMemo<Opportunity[]>(() => {
-    if (!isDefi) return treasuryList(search)
-    const filters: ListFilters = {
-      asset: asset === ALL ? undefined : asset,
-      chain: chain === ALL ? undefined : chain,
-      maxExitHours: exit === ALL ? undefined : NUDGE_MAX_EXIT_HOURS,
-    }
-    return filterOpportunities(OPPORTUNITIES, filters).filter((item) => matches(item, search))
-  }, [isDefi, search, asset, chain, exit])
+  const visible = useMemo(
+    () => filterOpportunities(RANKED, filters).filter((item) => matches(item, search)),
+    [filters, search],
+  )
+  const groups = useMemo<OpportunityGroup[]>(
+    () => groupOpportunities(visible, groupBy).map((group) => ({ ...group, title: groupTitle(groupBy, group.key) })),
+    [visible, groupBy],
+  )
+  const topOpen = visible.find((item) => !locked(item))
+  const investedIds = positions.map((position) => position.opportunity.id)
+  const compareItems = RANKED.filter((item) => compareIds.includes(item.id))
+  const toggleCompare = (id: string) =>
+    setCompareIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]))
+
+  const seeInvestments = () => {
+    setInvestmentsOpen(true)
+    investmentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   const onDeposited = ({ opportunity, amount, pending }: DepositResult) =>
     setPositions((current) => [{ opportunity, principal: amount, earned: 0, pending }, ...current])
@@ -101,84 +97,87 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
             </Typography>
           )}
         </div>
-        <TreasurySummary
-          summary={summary}
-          policy={<PolicyPanel plan={config.plan} idle={summary.idle} />}
-          onSeeInvestments={() => setTab('investments')}
-        />
+        <TreasurySummary summary={summary} onSeeInvestments={seeInvestments} />
       </div>
 
-      <Tabs value={tab} onValueChange={(next) => setTab(next as PageTab)} className="mb-4">
-        <TabsList aria-label="Treasury sections">
-          <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
-          <TabsTrigger value="investments">Investments ({positions.length})</TabsTrigger>
-        </TabsList>
-      </Tabs>
-
-      {tab === 'investments' ? (
-        <section aria-label="Investments">
+      <div className="flex flex-col gap-6">
+        <TreasurySection
+          id="investments"
+          ref={investmentsRef}
+          title={DEFI_V1_COPY.sections.investments}
+          count={positions.length}
+          badge={
+            positions.length > 0 && (
+              <Badge variant="mint" size="status" shape="status">
+                {DEFI_V1_COPY.sections.investedBadge(formatCompactUsd(summary.invested))}
+              </Badge>
+            )
+          }
+          summary={DEFI_V1_COPY.sections.investmentsSummary(formatUsd(summary.earned), formatApy(summary.blendedApy))}
+          open={investmentsOpen}
+          onOpenChange={setInvestmentsOpen}
+        >
           <InvestmentsTable positions={positions} />
-        </section>
-      ) : (
-        <section aria-label="Opportunities" className="flex flex-col gap-4">
-          {!isDefi && <CategoryCards highlights={highlights} onSelect={(highlight) => setSelected(highlight.top)} />}
-          <div className="flex flex-wrap items-center gap-3">
-            <SearchInput
-              aria-label="Search opportunities"
-              placeholder="Search by name or asset"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              onClear={() => setSearch('')}
-              className="max-w-72"
+        </TreasurySection>
+
+        <TreasurySection
+          id="opportunities"
+          title={DEFI_V1_COPY.sections.opportunities}
+          count={visible.length}
+          open={opportunitiesOpen}
+          onOpenChange={setOpportunitiesOpen}
+        >
+          <div className="flex flex-col gap-4">
+            <OpportunityToolbar
+              search={search}
+              onSearch={setSearch}
+              groupBy={groupBy}
+              onGroupBy={setGroupBy}
+              filters={filters}
+              onFilters={setFilters}
+              assets={ASSETS}
+              chains={CHAINS}
+              compareCount={compareIds.length}
+              onCompare={() => setIsComparing(true)}
+              policy={<PolicyPanel plan={config.plan} />}
+              onDeposit={topOpen ? () => setSelected(topOpen) : undefined}
             />
-            {isDefi && (
-              <div className="flex flex-wrap items-center gap-2">
-                <FilterTabs
-                  label="Asset"
-                  value={asset}
-                  onChange={setAsset}
-                  options={[
-                    { value: ALL, label: 'All assets' },
-                    { value: 'USDC', label: 'USDC' },
-                    { value: 'ETH', label: 'ETH' },
-                  ]}
-                />
-                <FilterTabs
-                  label="Network"
-                  value={chain}
-                  onChange={setChain}
-                  options={[
-                    { value: ALL, label: 'All networks' },
-                    { value: 'Ethereum', label: 'Ethereum' },
-                    { value: 'Base', label: 'Base' },
-                    { value: 'Arbitrum', label: 'Arbitrum' },
-                  ]}
-                />
-                <FilterTabs
-                  label="Exit time"
-                  value={exit}
-                  onChange={setExit}
-                  options={[
-                    { value: ALL, label: 'Any exit time' },
-                    { value: 'day', label: 'Within a day' },
-                  ]}
-                />
-              </div>
-            )}
+            <OpportunitiesTable
+              groups={groups}
+              isLocked={locked}
+              onSelect={setSelected}
+              onDeposit={setDepositing}
+              selection={{ selected: compareIds, isFull: compareIds.length >= MAX_COMPARE, onToggle: toggleCompare }}
+              investedIds={investedIds}
+            />
           </div>
-          <OpportunitiesTable
-            opportunities={opportunities}
-            isLocked={locked}
-            onSelect={setSelected}
-            onDeposit={setDepositing}
-          />
-        </section>
-      )}
+        </TreasurySection>
+      </div>
+
+      <CompareDialog
+        items={compareItems}
+        investedIds={investedIds}
+        open={isComparing && compareItems.length > 1}
+        isLocked={locked}
+        onClose={() => setIsComparing(false)}
+        onSelect={(item) => {
+          setIsComparing(false)
+          setSelected(item)
+        }}
+        onDeposit={(item) => {
+          setIsComparing(false)
+          setDepositing(item)
+        }}
+      />
 
       <OpportunityDrawer
         opportunity={selected}
+        list={visible}
+        onNavigate={setSelected}
         locked={selected ? locked(selected) : false}
         plan={config.plan}
+        signing={config.plan === 'pro' ? config.signing : 'threshold'}
+        position={positions.find((position) => position.opportunity.id === selected?.id)}
         onClose={() => setSelected(null)}
         onDeposit={(item) => {
           setSelected(null)
