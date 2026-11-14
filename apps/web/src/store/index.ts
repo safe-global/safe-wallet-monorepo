@@ -30,9 +30,11 @@ import {
   workspaceTrackingListener,
   spaceSafesCacheListener,
   trialReminderListener,
+  workspaceDraftExpiryListener,
 } from './slices'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
+import { HYDRATE_ACTION } from './hydrateAction'
 import { ofacApi } from '@/store/api/ofac'
 import { safePassApi } from './api/safePass'
 import { beamerApi } from './api/beamer'
@@ -151,11 +153,12 @@ const listeners = [
   workspaceTrackingListener,
   spaceSafesCacheListener,
   trialReminderListener,
+  workspaceDraftExpiryListener,
   forbiddenSessionListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {
-  if (action.type === hydrate.HYDRATE_ACTION) {
+  if (action.type === HYDRATE_ACTION) {
     /**
      * When changing the schema of a Redux slice, previously stored data in LS might become incompatible.
      * To avoid this, we should always migrate the data on a case-by-case basis in the corresponding slice.

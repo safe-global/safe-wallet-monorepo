@@ -14,6 +14,7 @@ import {
   seatsLabel,
   _subscriptionToTier,
   toCurrentPlan,
+  trialFeaturesOf,
   trialSizes,
 } from '../planTiers'
 import type {
@@ -511,5 +512,22 @@ describe('trialSizes', () => {
     }
 
     expect(trialSizes([plan])).toEqual([])
+  })
+})
+
+describe('trialFeaturesOf', () => {
+  it('greys out the Business-only rows on Starter', () => {
+    const features = trialFeaturesOf('Starter')
+
+    expect(features.length).toBeGreaterThan(0)
+    expect(features.find((feature) => feature.label === 'Policies')).toEqual({ label: 'Policies', included: false })
+  })
+
+  it('includes every row on Business', () => {
+    expect(trialFeaturesOf('Business').every((feature) => feature.included)).toBe(true)
+  })
+
+  it('promises nothing for a plan the catalog does not describe', () => {
+    expect(trialFeaturesOf('Enterprise Plus')).toEqual([])
   })
 })

@@ -40,6 +40,17 @@ export const EMPTY_WORKSPACE_DRAFT: WorkspaceDraft = {
   createdSpaceId: null,
 }
 
+/** Saved more than `DRAFT_MAX_AGE_MS` ago: its Safes and invitees may no longer be right. */
+export const isExpiredDraft = (draft: WorkspaceDraft, now: number): boolean =>
+  draft.updatedAt !== null && now - draft.updatedAt >= DRAFT_MAX_AGE_MS
+
+/** A draft counts only for its owner and only while it is fresh; anything else reads as an empty form. */
+export const usableDraft = (draft: WorkspaceDraft, ownerId: number | undefined, now: number): WorkspaceDraft => {
+  const isOwn = ownerId !== undefined && draft.ownerId === ownerId
+  const isFresh = draft.updatedAt !== null && !isExpiredDraft(draft, now)
+  return isOwn && isFresh ? draft : EMPTY_WORKSPACE_DRAFT
+}
+
 type DraftChange = { ownerId: number; changes: Partial<WorkspaceDraftFields>; updatedAt: number }
 
 export const workspaceDraftSlice = createSlice({
@@ -48,7 +59,8 @@ export const workspaceDraftSlice = createSlice({
   reducers: {
     updateWorkspaceDraft: {
       reducer: (state, { payload }: PayloadAction<DraftChange>) => {
-        const base = state.ownerId === payload.ownerId ? state : EMPTY_WORKSPACE_DRAFT
+        // An expired draft or another user's is not continued: the change starts a new form.
+        const base = usableDraft(state, payload.ownerId, payload.updatedAt)
         return { ...base, ...payload.changes, ownerId: payload.ownerId, updatedAt: payload.updatedAt }
       },
       prepare: (ownerId: number, changes: Partial<WorkspaceDraftFields>) => ({
@@ -60,13 +72,6 @@ export const workspaceDraftSlice = createSlice({
 })
 
 export const { updateWorkspaceDraft, clearWorkspaceDraft } = workspaceDraftSlice.actions
-
-/** A draft counts only for its owner and only while it is fresh; anything else reads as an empty form. */
-export const usableDraft = (draft: WorkspaceDraft, ownerId: number | undefined, now: number): WorkspaceDraft => {
-  const isOwn = ownerId !== undefined && draft.ownerId === ownerId
-  const isFresh = draft.updatedAt !== null && now - draft.updatedAt < DRAFT_MAX_AGE_MS
-  return isOwn && isFresh ? draft : EMPTY_WORKSPACE_DRAFT
-}
 
 export const selectStoredWorkspaceDraft = (state: RootState): WorkspaceDraft =>
   state[workspaceDraftSlice.name] ?? EMPTY_WORKSPACE_DRAFT
