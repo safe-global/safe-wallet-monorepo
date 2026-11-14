@@ -34,6 +34,11 @@ const pendingSetup = (changes: Partial<SpaceSetupDto> = {}): SpaceSetupDto => ({
   ...changes,
 })
 
+const sessionHandler = (status: string) =>
+  http.get<{ sessionId: string }>(`${GATEWAY_URL}/v1/billing/sessions/:sessionId`, ({ params }) =>
+    HttpResponse.json({ id: params.sessionId, status }),
+  )
+
 const workspaceHandlers = (spaceId: string, name: string, setup: SpaceSetupDto) => [
   http.get(`${GATEWAY_URL}/v1/spaces/:id/setup`, () => HttpResponse.json(setup)),
   http.get(`${GATEWAY_URL}/v1/spaces/:id`, () =>
@@ -89,6 +94,24 @@ describe('WorkspaceWizard', () => {
     const { replace } = renderWizard('invite', { spaceId })
 
     await waitFor(() => expect(replace).toHaveBeenCalledWith({ pathname: AppRoutes.spaces.index, query: { spaceId } }))
+  })
+
+  it('waits for the setup after a completed checkout', async () => {
+    const spaceId = faker.string.uuid()
+    server.use(sessionHandler('complete'), ...workspaceHandlers(spaceId, fakeWorkspaceName(), pendingSetup()))
+
+    renderWizard('name', { spaceId, sessionId: `cs_${faker.string.alphanumeric(24)}` }, { createdSpaceId: spaceId })
+
+    expect(await screen.findByText('Setting up your Workspace')).toBeInTheDocument()
+  })
+
+  it('shows the form again after a cancelled checkout', async () => {
+    const spaceId = faker.string.uuid()
+    server.use(sessionHandler('open'))
+
+    renderWizard('name', { spaceId, sessionId: `cs_${faker.string.alphanumeric(24)}` }, { createdSpaceId: spaceId })
+
+    expect(await screen.findByText('Create a Workspace')).toBeInTheDocument()
   })
 
   it('offers a retry when the Workspace in the link cannot be loaded', async () => {

@@ -126,8 +126,8 @@ const CreateSpaceOnboarding = (): ReactElement => {
             autoComplete="off"
             disabled={isInputDisabled}
             variant="surface"
-            // eslint-disable-next-line no-restricted-syntax -- bespoke 44px onboarding field (h-11, rounded-sm, px-4); between the lg/xl tiers, no size fits
-            className="mt-2 h-11 rounded-sm px-4"
+            inputSize="lg"
+            className="mt-2"
             {...nameReg}
             onChange={(e) => {
               setHasUserEdited(true)

@@ -56,23 +56,6 @@ describe('CheckoutReturnScreen', () => {
     )
   })
 
-  it('drops the session from the URL after a cancelled checkout, so the form shows again', async () => {
-    server.use(sessionHandler('open'))
-    const replace = jest.fn(() => Promise.resolve(true))
-    const id = sessionId()
-    const spaceId = faker.string.uuid()
-
-    render(<CheckoutReturnScreen sessionId={id} spaceId={spaceId} />, {
-      routerProps: { replace, pathname: AppRoutes.welcome.survey, query: { spaceId, sessionId: id } },
-    })
-
-    await waitFor(() =>
-      expect(replace).toHaveBeenCalledWith({ pathname: AppRoutes.welcome.survey, query: { spaceId } }, undefined, {
-        shallow: true,
-      }),
-    )
-  })
-
   it('stops waiting after a minute and lets the user open the Workspace', async () => {
     jest.useFakeTimers()
     const setupPolled = jest.fn()

@@ -1,7 +1,12 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { sanitizeName } from '@safe-global/utils/validation/names'
-import type { AllSafeItems } from '@/hooks/safes'
+import {
+  getMultiChainSafeId,
+  getSafeId,
+} from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/utils/safeIds'
+import { isMultiChainSafeItem, type AllSafeItems } from '@/hooks/safes'
 import type { SafeLimit } from '@/utils/spaces'
 import type { DraftSafe, WorkspaceDraft, WorkspaceDraftFields } from '@/features/spaces/store'
 import type { AddAccountsFormValues } from '../../../hooks/addAccounts.types'
@@ -47,6 +52,19 @@ export const useSafesStepForm = ({ draft, allSafes, flaggedAddresses, limit, adv
     defaultValues: toForm(draft, safeFromUrl),
   })
   const { control, setValue, getValues, handleSubmit } = formMethods
+
+  // The linked Safe's multichain group arrives with the owned Safes, after mount; select the whole group once.
+  const isGroupPreselected = useRef(false)
+  useEffect(() => {
+    if (isGroupPreselected.current || draft.safes.length > 0 || !safeFromUrl) return
+    const { address } = fromSafeKey(safeFromUrl)
+    const group = allSafes.filter(isMultiChainSafeItem).find((item) => sameAddress(item.address, address))
+    if (!group) return
+    isGroupPreselected.current = true
+    const groupKeys = [getMultiChainSafeId(group), ...group.safes.map(getSafeId)]
+    const groupSelection = Object.fromEntries(groupKeys.map((key) => [key, true]))
+    setValue('selectedSafes', { ...getValues('selectedSafes'), ...groupSelection })
+  }, [allSafes, draft.safes.length, safeFromUrl, getValues, setValue])
 
   const selection = useOnboardingSelection({ items: allSafes, control, setValue, flaggedAddresses, limit })
 

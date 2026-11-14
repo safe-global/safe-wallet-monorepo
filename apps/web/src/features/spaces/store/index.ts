@@ -16,6 +16,7 @@ export { checkoutTrackingListener } from './checkoutTrackingListener'
 export { workspaceTrackingListener } from './workspaceTrackingListener'
 export { spaceSafesCacheListener } from './spaceSafesCacheListener'
 export { trialReminderListener } from './trialReminder'
+export { workspaceDraftExpiryListener } from './workspaceDraftExpiryListener'
 export {
   workspaceDraftSlice,
   updateWorkspaceDraft,
