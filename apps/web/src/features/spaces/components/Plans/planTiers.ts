@@ -9,7 +9,13 @@ import {
   getSubscriptionPlanName,
   getSubscriptionSeats,
 } from '../../hooks/billing/subscription'
-import { ENTERPRISE_TIER, PLAN_ORDER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
+import {
+  ENTERPRISE_TIER,
+  PLAN_ORDER,
+  trialFeatures,
+  type TrialFeature,
+  type TrialPlanName,
+} from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import type {
   CurrentPlan,
   PlanChangeDirection,
@@ -270,6 +276,14 @@ export const claimTiers = (trialPlans: PlanGroup[]): PlanTier[] =>
     .filter((tier) => tier.billingCycle === 'month')
     .map((tier) => ({ ...tier, features: [tier.options[0].label, ...tier.features] }))
     .sort((a, b) => rank(a.name) - rank(b.name))
+
+const TRIAL_PLAN_NAMES: readonly string[] = ['Starter', 'Business'] satisfies TrialPlanName[]
+
+const isTrialPlanName = (planName: string): planName is TrialPlanName => TRIAL_PLAN_NAMES.includes(planName)
+
+/** What a trial of the plan includes; nothing for a plan the catalog does not describe, so no feature is promised. */
+export const trialFeaturesOf = (planName: string): TrialFeature[] =>
+  isTrialPlanName(planName) ? trialFeatures(planName) : []
 
 /** Every monthly trial option with a link and a seat count, smallest first, so Starter leads. */
 export const trialSizes = (trialPlans: PlanGroup[]): TrialSize[] =>
