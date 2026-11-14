@@ -103,7 +103,7 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
         </div>
         <TreasurySummary
           summary={summary}
-          footer={<PolicyPanel plan={config.plan} idle={summary.idle} />}
+          policy={<PolicyPanel plan={config.plan} idle={summary.idle} />}
           onSeeInvestments={() => setTab('investments')}
         />
       </div>

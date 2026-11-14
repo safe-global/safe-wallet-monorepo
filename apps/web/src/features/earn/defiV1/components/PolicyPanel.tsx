@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Lock, Repeat } from 'lucide-react'
+import { Lock } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
@@ -16,6 +16,7 @@ import { DEFI_V1_COPY, formatCompactUsd, formatUsd } from '../copy'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { OPPORTUNITIES, POLICY_PREVIEW } from '../opportunities'
 import type { DefiV1Plan } from '../types'
+import { StatCard } from './TreasurySummary'
 
 const COPY = DEFI_V1_COPY.policy
 
@@ -36,19 +37,19 @@ export const PolicyPanel = ({ plan, idle }: { plan: DefiV1Plan; idle: number }) 
   const isPro = plan === 'pro'
 
   return (
-    <div className="flex items-center gap-3" data-testid="policy-panel">
-      <Repeat className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-      <div className="flex min-w-0 flex-col">
-        <span className="font-medium">{COPY.footerTitle(formatCompactUsd(idle))}</span>
-        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          {COPY.footerLead}
-          <Badge variant="warning">{DEFI_V1_COPY.deposit.comingSoon}</Badge>
-        </span>
-      </div>
-      <Button variant="outline" size="xs" className="ml-auto" onClick={() => setIsOpen(true)}>
-        {!isPro && <Lock />}
-        {isPro ? COPY.cta : DEFI_V1_COPY.proOnly}
-      </Button>
+    <>
+      <StatCard
+        label={COPY.sweep}
+        aside={<Badge variant="warning">{DEFI_V1_COPY.deposit.comingSoon}</Badge>}
+        value={formatCompactUsd(idle)}
+        testId="policy-panel"
+      >
+        <span>{COPY.footerLead}</span>
+        <Button variant="outline" size="xs" className="self-start" onClick={() => setIsOpen(true)}>
+          {!isPro && <Lock />}
+          {isPro ? COPY.cta : DEFI_V1_COPY.proOnly}
+        </Button>
+      </StatCard>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent size="sm" data-testid="policy-dialog">
@@ -81,6 +82,6 @@ export const PolicyPanel = ({ plan, idle }: { plan: DefiV1Plan; idle: number }) 
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   )
 }

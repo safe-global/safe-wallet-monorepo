@@ -1,66 +1,74 @@
 import type { ReactNode } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
-import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { Progress } from '@safe-global/views/components/ui/progress'
-import { Separator } from '@safe-global/views/components/ui/separator'
-import { formatApy, formatCompactUsd, formatUsd } from '../copy'
+import { cn } from '@safe-global/views/utils/cn'
+import { DEFI_V1_COPY, formatApy, formatCompactUsd, formatUsd } from '../copy'
 import type { TreasurySummary as Summary } from '../shelf'
 
 const percent = new Intl.NumberFormat('en-US', { style: 'percent', maximumFractionDigits: 0 })
+const COPY = DEFI_V1_COPY.summary
+
+export const StatCard = ({
+  label,
+  aside,
+  value,
+  valueClassName,
+  children,
+  testId,
+}: {
+  label: string
+  aside?: ReactNode
+  value: ReactNode
+  valueClassName?: string
+  children?: ReactNode
+  testId?: string
+}) => (
+  <div className="flex min-h-32 flex-col gap-2 rounded-xl bg-card p-4" data-testid={testId}>
+    <span className="flex min-h-6 items-center justify-between gap-2 text-sm font-medium">
+      {label}
+      {aside}
+    </span>
+    <span className={cn('text-xl font-semibold tabular-nums', valueClassName)}>{value}</span>
+    {children && <div className="mt-auto flex flex-col gap-2 text-xs text-muted-foreground">{children}</div>}
+  </div>
+)
 
 export const TreasurySummary = ({
   summary,
-  footer,
+  policy,
   onSeeInvestments,
 }: {
   summary: Summary
-  footer?: ReactNode
+  policy: ReactNode
   onSeeInvestments: () => void
 }) => (
-  <Card size="sm" className="w-full" data-testid="treasury-summary">
-    <CardContent>
-      <div className="flex flex-col gap-3 text-sm">
-        <div className="flex items-baseline justify-between gap-3">
-          <span>
-            <span className="font-semibold">{percent.format(summary.investedShare)}</span> of treasury invested
-          </span>
-          <span className="tabular-nums text-muted-foreground">
-            {formatCompactUsd(summary.invested)} of {formatCompactUsd(summary.total)}
-          </span>
-        </div>
-        <Progress
-          value={summary.investedShare * 100}
-          aria-label="Share of treasury invested"
-          indicatorClassName="bg-badge-dot-success"
-        />
-        <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <span className="size-2 rounded-full bg-badge-dot-success" aria-hidden />
-            Invested {formatCompactUsd(summary.invested)}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="size-2 rounded-full bg-muted-foreground/30" aria-hidden />
-            Idle {formatCompactUsd(summary.idle)}
-          </span>
-          <Button variant="ghost" size="xs" className="ml-auto" onClick={onSeeInvestments}>
-            See all investments
-            <ArrowRight />
-          </Button>
-        </div>
-        <Separator />
-        <div className="flex flex-wrap items-center gap-x-8 gap-y-3">
-          <span>
-            <span className="font-semibold text-badge-dot-success">+{formatUsd(summary.earned)}</span>{' '}
-            <span className="text-muted-foreground">earned YTD</span>
-          </span>
-          <span>
-            <span className="font-semibold tabular-nums">{formatApy(summary.blendedApy)}</span>{' '}
-            <span className="text-muted-foreground">blended APY</span>
-          </span>
-          {footer && <div className="min-w-[320px] flex-1 md:ml-auto md:max-w-[480px]">{footer}</div>}
-        </div>
-      </div>
-    </CardContent>
-  </Card>
+  <div className="grid gap-3 @xl:grid-cols-2 @5xl:grid-cols-4" data-testid="treasury-summary">
+    <StatCard
+      label={COPY.invested}
+      value={percent.format(summary.investedShare)}
+      aside={
+        <Button variant="ghost" size="xs" onClick={onSeeInvestments}>
+          {COPY.seeAll}
+          <ArrowRight />
+        </Button>
+      }
+    >
+      <Progress
+        value={summary.investedShare * 100}
+        aria-label="Share of treasury invested"
+        indicatorClassName="bg-badge-dot-success"
+      />
+      <span className="tabular-nums">
+        {COPY.investedOf(formatCompactUsd(summary.invested), formatCompactUsd(summary.total))}
+      </span>
+    </StatCard>
+    <StatCard label={COPY.earned} value={`+${formatUsd(summary.earned)}`} valueClassName="text-badge-dot-success">
+      <span>{COPY.earnedLead}</span>
+    </StatCard>
+    <StatCard label={COPY.apy} value={formatApy(summary.blendedApy)}>
+      <span>{COPY.apyLead}</span>
+    </StatCard>
+    {policy}
+  </div>
 )
