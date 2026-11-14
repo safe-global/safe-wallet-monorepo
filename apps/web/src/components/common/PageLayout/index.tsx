@@ -25,6 +25,7 @@ const STATIC_PAGE_ROUTES = [AppRoutes.licenses, AppRoutes.imprint, AppRoutes.coo
 const NO_HEADER_ROUTES = [
   AppRoutes.welcome.index,
   AppRoutes.welcome.createSpace,
+  AppRoutes.welcome.plan,
   AppRoutes.welcome.selectSafes,
   AppRoutes.welcome.inviteMembers,
   AppRoutes.welcome.survey,

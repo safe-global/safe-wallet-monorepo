@@ -34,6 +34,8 @@ import CreateSpaceOnboarding from './components/CreateSpaceOnboarding'
 import SelectSafesOnboarding from './components/SelectSafesOnboarding'
 import InviteMembersOnboarding from './components/InviteMembersOnboarding'
 import SurveyOnboarding from './components/SurveyOnboarding'
+import WorkspaceWizard from './components/WorkspaceWizard'
+import WorkspaceOnboardingStep from './components/WorkspaceWizard/WorkspaceOnboardingStep'
 import SelectSafeModal from './components/SelectSafeModal'
 import SafeWorkspaceSignInDialog from './components/SafeWorkspaceSignInDialog'
 import SafeWorkspaceChooserDialog from './components/SafeWorkspaceChooserDialog'
@@ -74,6 +76,8 @@ const feature: SpacesContract = {
   SelectSafesOnboarding,
   InviteMembersOnboarding,
   SurveyOnboarding,
+  WorkspaceWizard,
+  WorkspaceOnboardingStep,
 
   // Page components
   SpaceDashboardPage,

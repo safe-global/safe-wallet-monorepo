@@ -4,14 +4,14 @@ import { SpacesFeature } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
 
 const SelectSafesPage = () => {
-  const { SelectSafesOnboarding } = useLoadFeature(SpacesFeature)
+  const { WorkspaceOnboardingStep } = useLoadFeature(SpacesFeature)
   return (
     <>
       <Head>
         <title>{`${BRAND_NAME} – Select Safe accounts`}</title>
       </Head>
 
-      <SelectSafesOnboarding />
+      <WorkspaceOnboardingStep step="safes" />
     </>
   )
 }

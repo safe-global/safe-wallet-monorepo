@@ -4,14 +4,14 @@ import { SpacesFeature } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
 
 const InviteMembersPage = () => {
-  const { InviteMembersOnboarding } = useLoadFeature(SpacesFeature)
+  const { WorkspaceOnboardingStep } = useLoadFeature(SpacesFeature)
   return (
     <>
       <Head>
         <title>{`${BRAND_NAME} – Invite members`}</title>
       </Head>
 
-      <InviteMembersOnboarding />
+      <WorkspaceOnboardingStep step="invite" />
     </>
   )
 }

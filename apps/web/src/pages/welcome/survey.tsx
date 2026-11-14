@@ -9,7 +9,7 @@ import useIsSurveyEnabled from '@/hooks/useIsSurveyEnabled'
 
 const SurveyPage = () => {
   const router = useRouter()
-  const { SurveyOnboarding } = useLoadFeature(SpacesFeature)
+  const { WorkspaceOnboardingStep } = useLoadFeature(SpacesFeature)
   const isEnabled = useIsSurveyEnabled()
 
   // Dead-end safety net: only redirect once we have a definitive `false`.
@@ -31,7 +31,7 @@ const SurveyPage = () => {
         <title>{`${BRAND_NAME} – How will you use Safe?`}</title>
       </Head>
 
-      <SurveyOnboarding />
+      <WorkspaceOnboardingStep step="survey" />
     </>
   )
 }
