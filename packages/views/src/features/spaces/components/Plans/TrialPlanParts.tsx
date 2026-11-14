@@ -4,7 +4,7 @@ import { Separator } from '@safe-global/views/components/ui/separator'
 import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
-import { trialFeatures, type TrialFeature } from './planCatalog'
+import type { TrialFeature } from './planCatalog'
 import type { TrialSize } from './types'
 
 const formatPrice = (amount: number, currency: string): string =>
@@ -102,11 +102,13 @@ export const TrialPlanCard = ({
   value,
   onChange,
   trialPeriodDays,
+  features,
 }: {
   sizes: TrialSize[]
   value: TrialSize
   onChange: (size: TrialSize) => void
   trialPeriodDays: number | null
+  features: TrialFeature[]
 }) => (
   <Card selected size="offer" radius="lg-xl" className="w-full max-w-md" data-testid="trial-plan-card">
     <CardContent>
@@ -120,7 +122,7 @@ export const TrialPlanCard = ({
         <TrialPrice size={value} trialPeriodDays={trialPeriodDays} />
         <TrialSizeTabs sizes={sizes} value={value} onChange={onChange} />
         <Separator />
-        <TrialFeatureList features={trialFeatures(value.planName)} columns={2} />
+        <TrialFeatureList features={features} columns={2} />
       </div>
     </CardContent>
   </Card>
