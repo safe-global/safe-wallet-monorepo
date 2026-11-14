@@ -51,4 +51,11 @@ describe('DrawerList', () => {
 
     expect(container.querySelector('dl')).toBeEmptyDOMElement()
   })
+
+  it('stacks label above value on narrow screens only when mobileStack is set', () => {
+    const { rerender } = render(<DrawerList items={[{ label: 'Proposer', content: 'Marc' }]} />)
+    expect(screen.getByText('Proposer').closest('dt')?.parentElement).not.toHaveClass('flex-col')
+    rerender(<DrawerList mobileStack items={[{ label: 'Proposer', content: 'Marc' }]} />)
+    expect(screen.getByText('Proposer').closest('dt')?.parentElement).toHaveClass('flex-col', 'md:flex-row')
+  })
 })
