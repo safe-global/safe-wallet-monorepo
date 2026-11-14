@@ -6,12 +6,12 @@ import { formatCompactUsd } from '../copy'
 const TIERS = [
   {
     name: 'Base',
-    where: 'Listed under "More options" and in search',
+    where: 'Listed below the shelf options and in search',
     rule: 'Every option that passes the listing checks',
   },
   {
     name: 'Featured',
-    where: 'On the shelf in its category, labelled "Featured"',
+    where: 'On the shelf, labelled "Featured"',
     rule: 'Rank inside the category stays set by risk and exit time',
   },
   {

@@ -19,13 +19,7 @@ import { DepositDialog, type DepositResult } from './DepositDialog'
 import { OpportunityDrawer } from './OpportunityDrawer'
 import { PolicyPanel } from './PolicyPanel'
 import { TreasurySummary } from './TreasurySummary'
-import {
-  InvestmentsTable,
-  MORE_GROUP,
-  OpportunitiesTable,
-  type OpportunityGroup,
-  type Position,
-} from './TreasuryTables'
+import { InvestmentsTable, OpportunitiesTable, type Position } from './TreasuryTables'
 
 const ALL = 'all'
 
@@ -62,22 +56,9 @@ const FilterTabs = ({
 const matches = (item: Opportunity, search: string) =>
   !search || `${item.name} ${item.runBy} ${item.asset}`.toLowerCase().includes(search.toLowerCase())
 
-const treasuryGroups = (search: string): OpportunityGroup[] => {
+const treasuryList = (search: string): Opportunity[] => {
   const { groups, more } = buildShelf(OPPORTUNITIES)
-  return [
-    ...groups.map((group) => ({
-      id: group.category,
-      title: DEFI_V1_COPY.category[group.category].title,
-      subtitle: DEFI_V1_COPY.category[group.category].subtitle,
-      items: group.items.filter((item) => matches(item, search)),
-    })),
-    {
-      id: MORE_GROUP,
-      title: DEFI_V1_COPY.moreTitle,
-      subtitle: DEFI_V1_COPY.moreLead,
-      items: more.filter((item) => matches(item, search)),
-    },
-  ].filter((group) => group.items.length > 0)
+  return [...groups.flatMap((group) => group.items), ...more].filter((item) => matches(item, search))
 }
 
 export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
@@ -94,20 +75,14 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const summary = summariseTreasury(TREASURY_TOTAL, positions)
   const highlights = useMemo(() => categoryHighlights(OPPORTUNITIES), [])
 
-  const groups = useMemo<OpportunityGroup[]>(() => {
-    if (!isDefi) return treasuryGroups(search)
+  const opportunities = useMemo<Opportunity[]>(() => {
+    if (!isDefi) return treasuryList(search)
     const filters: ListFilters = {
       asset: asset === ALL ? undefined : asset,
       chain: chain === ALL ? undefined : chain,
       maxExitHours: exit === ALL ? undefined : NUDGE_MAX_EXIT_HOURS,
     }
-    return [
-      {
-        id: 'all',
-        title: DEFI_V1_COPY.tabName.defi,
-        items: filterOpportunities(OPPORTUNITIES, filters).filter((item) => matches(item, search)),
-      },
-    ]
+    return filterOpportunities(OPPORTUNITIES, filters).filter((item) => matches(item, search))
   }, [isDefi, search, asset, chain, exit])
 
   const onDeposited = ({ opportunity, amount, pending }: DepositResult) =>
@@ -192,8 +167,7 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
             )}
           </div>
           <OpportunitiesTable
-            groups={groups}
-            flat={isDefi}
+            opportunities={opportunities}
             isLocked={locked}
             onSelect={setSelected}
             onDeposit={setDepositing}

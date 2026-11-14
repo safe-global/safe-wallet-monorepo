@@ -1,5 +1,5 @@
-import { Fragment, useState, type ReactNode } from 'react'
-import { ChevronDown, Clock, Lock } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
+import { Clock, Lock } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
@@ -19,63 +19,12 @@ import { DEFI_V1_COPY, formatApy, formatUsd } from '../copy'
 import { CHAIN_IDS } from '../opportunities'
 import type { Opportunity } from '../types'
 
-const BAND_CELL = 'bg-foreground/[0.03] py-0! transition-colors group-hover/band:bg-foreground/[0.06]'
 const COLUMN_WIDTHS = ['w-10', 'w-64', 'w-20', 'w-32', 'w-28', 'w-36', '', 'w-20', 'w-36']
 const COLUMN_COUNT = COLUMN_WIDTHS.length
 const INVESTMENT_HEADERS = ['Position', 'Asset', 'Exit time', 'Deposited', 'Network', 'Earned', 'Rate']
 const OPPORTUNITY_HEADERS = ['Opportunity', 'Asset', 'Exit time', 'Risk', 'Access', 'Networks', 'Rate']
 
-export const MORE_GROUP = 'more'
-
 export type Position = { opportunity: Opportunity; principal: number; earned: number; pending: boolean }
-
-export type OpportunityGroup = { id: string; title: string; subtitle?: string; items: Opportunity[] }
-
-const Chevron = ({ collapsed }: { collapsed: boolean }) => (
-  <span className="flex justify-center">
-    <ChevronDown
-      className={cn('size-4! shrink-0 text-muted-foreground transition-transform', collapsed && '-rotate-90')}
-      aria-hidden
-    />
-  </span>
-)
-
-const SectionBand = ({
-  id,
-  title,
-  subtitle,
-  aside,
-  collapsed,
-  onToggle,
-}: {
-  id: string
-  title: string
-  subtitle?: string
-  aside: ReactNode
-  collapsed: boolean
-  onToggle: (id: string) => void
-}) => (
-  <TableRow
-    data-no-hover
-    data-no-divider
-    className="group/band cursor-pointer"
-    onClick={() => onToggle(id)}
-    aria-expanded={!collapsed}
-    id={`band-${id}`}
-    data-testid={`shelf-${id}`}
-  >
-    <TableCell className={`rounded-l-lg ${BAND_CELL}`}>
-      <Chevron collapsed={collapsed} />
-    </TableCell>
-    <TableCell colSpan={COLUMN_COUNT - 1} className={`rounded-r-lg pr-3! ${BAND_CELL}`}>
-      <div className="flex min-h-11 items-center gap-3">
-        <span className="text-sm font-medium text-foreground">{title}</span>
-        {subtitle && <span className="truncate text-xs text-muted-foreground">{subtitle}</span>}
-        <span className="ml-auto flex shrink-0 items-center gap-2 text-xs text-muted-foreground">{aside}</span>
-      </div>
-    </TableCell>
-  </TableRow>
-)
 
 const ColumnHeaders = ({ labels }: { labels: string[] }) => (
   <TableHeader>
@@ -318,58 +267,39 @@ const TableCard = ({ label, children }: { label: string; children: ReactNode }) 
 )
 
 export const OpportunitiesTable = ({
-  groups,
-  flat,
+  opportunities,
   isLocked,
   onSelect,
   onDeposit,
 }: {
-  groups: OpportunityGroup[]
-  flat?: boolean
+  opportunities: Opportunity[]
   isLocked: (item: Opportunity) => boolean
   onSelect: (item: Opportunity) => void
   onDeposit: (item: Opportunity) => void
-}) => {
-  const [collapsed, setCollapsed] = useState<string[]>([MORE_GROUP])
-  const toggle = (id: string) =>
-    setCollapsed((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]))
-  const rowProps = { isLocked, onSelect, onDeposit }
-
-  return (
-    <TableCard label="Opportunities">
-      <ColumnHeaders labels={OPPORTUNITY_HEADERS} />
-      {flat ? (
-        <TableBody>
-          {groups
-            .flatMap((group) => group.items)
-            .map((item) => (
-              <OpportunityRow key={item.id} opportunity={item} {...rowProps} />
-            ))}
-        </TableBody>
-      ) : (
-        groups.map((group) => (
-          <Fragment key={group.id}>
-            <TableBody>
-              <SectionBand
-                id={group.id}
-                title={group.title}
-                subtitle={group.subtitle}
-                collapsed={collapsed.includes(group.id)}
-                onToggle={toggle}
-                aside={<Badge variant="subtle">{group.items.length}</Badge>}
-              />
-            </TableBody>
-            <TableBody hidden={collapsed.includes(group.id)}>
-              {group.items.map((item) => (
-                <OpportunityRow key={item.id} opportunity={item} {...rowProps} />
-              ))}
-            </TableBody>
-          </Fragment>
+}) => (
+  <TableCard label="Opportunities">
+    <ColumnHeaders labels={OPPORTUNITY_HEADERS} />
+    <TableBody data-testid="defi-opportunities">
+      {opportunities.length > 0 ? (
+        opportunities.map((item) => (
+          <OpportunityRow
+            key={item.id}
+            opportunity={item}
+            isLocked={isLocked}
+            onSelect={onSelect}
+            onDeposit={onDeposit}
+          />
         ))
+      ) : (
+        <TableRow data-no-hover>
+          <TableCell colSpan={COLUMN_COUNT} className="py-6 text-center text-muted-foreground">
+            {DEFI_V1_COPY.noMatches}
+          </TableCell>
+        </TableRow>
       )}
-    </TableCard>
-  )
-}
+    </TableBody>
+  </TableCard>
+)
 
 export const InvestmentsTable = ({ positions }: { positions: Position[] }) => {
   const [withdrawing, setWithdrawing] = useState<Position | null>(null)

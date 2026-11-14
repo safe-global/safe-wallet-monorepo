@@ -90,7 +90,7 @@ export const AssetsNudge: Story = {
 export const TreasuryShelf: Story = {
   ...at('earn'),
   play: async ({ canvasElement }) => {
-    await within(canvasElement).findByTestId('shelf-cash')
+    await within(canvasElement).findByTestId('defi-opportunities')
   },
 }
 

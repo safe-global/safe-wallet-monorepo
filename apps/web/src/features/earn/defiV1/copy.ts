@@ -38,8 +38,7 @@ export const DEFI_V1_COPY = {
     staking: { title: 'Staking', subtitle: 'Earn on ETH the treasury plans to hold.' },
   } satisfies Record<OpportunityCategory, { title: string; subtitle: string }>,
   risk: { low: 'Lower risk', medium: 'Medium risk', higher: 'Higher risk' } satisfies Record<RiskLevel, string>,
-  moreTitle: 'More options',
-  moreLead: 'Options that passed the listing checks but are not on the shelf. Same facts, same format.',
+  noMatches: 'No opportunities match your search.',
   nudgeTitle: (value: string, asset: string, chain: string, days: number) =>
     `${value} ${asset} has been idle on ${chain} for ${days} days`,
   nudgeBody: (count: number) =>
