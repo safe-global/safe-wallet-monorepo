@@ -11,6 +11,10 @@ jest.mock('../billing/useSpaceSubscription', () => ({
   useSpaceSubscription: (spaceId?: string) => mockUseSpaceSubscription(spaceId),
 }))
 jest.mock('../billing/useSpaceOffers', () => ({ useSpaceOffers: (spaceId?: string) => mockUseSpaceOffers(spaceId) }))
+const mockUseSpace = jest.fn()
+jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
+  useSpacesGetOneV1Query: (args: unknown) => mockUseSpace(args),
+}))
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 const canceled = { status: 'canceled', createdAt: 1, cancelledAt: 1_765_000_000, currentPeriodEnd: null }
@@ -22,6 +26,32 @@ describe('useWorkspaceLock', () => {
     mockUseIsInvited.mockReturnValue(false)
     mockUseSpaceSubscription.mockReturnValue({ status: 'none', latestSubscription: undefined, isLoading: false })
     mockUseSpaceOffers.mockReturnValue({ trialPeriodDays: 60, isLoading: false })
+    mockUseSpace.mockReturnValue({ currentData: { setupStatus: null }, isLoading: false })
+  })
+
+  it('sends a Workspace whose onboarding stopped at the checkout back to finish it, before any trial offer', () => {
+    mockUseSpace.mockReturnValue({ currentData: { setupStatus: 'pending' }, isLoading: false })
+
+    expect(renderHook(() => useWorkspaceLock(SPACE_ID)).result.current).toMatchObject({
+      isLocked: true,
+      reason: 'setup-pending',
+    })
+  })
+
+  it('opens a live Workspace even while its setup is still being applied', () => {
+    mockUseSpace.mockReturnValue({ currentData: { setupStatus: 'pending' }, isLoading: false })
+    mockUseSpaceSubscription.mockReturnValue({ status: 'trialing', latestSubscription: undefined, isLoading: false })
+
+    expect(renderHook(() => useWorkspaceLock(SPACE_ID)).result.current.isLocked).toBe(false)
+  })
+
+  it('waits for the Workspace before it picks a reason', () => {
+    mockUseSpace.mockReturnValue({ currentData: undefined, isLoading: true })
+
+    expect(renderHook(() => useWorkspaceLock(SPACE_ID)).result.current).toMatchObject({
+      isLocked: false,
+      isResolving: true,
+    })
   })
 
   it.each(['none', 'canceled', 'pending'])('locks a lapsed Workspace whose plan status is %s', (status) => {

@@ -81,6 +81,11 @@ const SpaceRow = ({
                 {badgeLabel && `· ${badgeLabel}`}
               </Badge>
             )}
+            {!plan && space.setupStatus === 'pending' && (
+              <Badge variant="subtle" size="status" shape="status" data-testid="space-row-setup-badge">
+                Setup not finished
+              </Badge>
+            )}
           </Link>
         </Track>
 
