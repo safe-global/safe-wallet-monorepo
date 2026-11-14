@@ -13,15 +13,14 @@ const POLL_INTERVAL = 2_500
 const SETUP_TIMEOUT = 60_000
 
 /**
- * Back from Stripe on the last step. A completed checkout waits until the CGW has added the Safes and sent the
- * invites, then opens the Workspace; a cancelled one drops the session and shows the form again.
+ * Back from Stripe after a checkout: waits until the CGW has added the Safes and sent the invites, then opens the
+ * Workspace. The wizard shows the form instead once the checkout turns out to be cancelled.
  */
 const CheckoutReturnScreen = ({ sessionId, spaceId }: { sessionId: string; spaceId: string | null }): ReactElement => {
   const router = useRouter()
   const dispatch = useAppDispatch()
   const { data: session, isError: isSessionError, refetch } = useBillingGetCheckoutSessionV1Query({ sessionId })
   const isComplete = session?.status === 'complete'
-  const isCancelled = session !== undefined && !isComplete
 
   const [isSlow, setIsSlow] = useState(false)
   const hasOpened = useRef(false)
@@ -50,12 +49,6 @@ const CheckoutReturnScreen = ({ sessionId, spaceId }: { sessionId: string; space
     hasOpened.current = true
     openWorkspace()
   }, [isApplied, openWorkspace])
-
-  useEffect(() => {
-    if (!isCancelled) return
-    const { [CHECKOUT_SESSION_QUERY_PARAM]: _dropped, ...query } = router.query
-    void router.replace({ pathname: router.pathname, query }, undefined, { shallow: true })
-  }, [isCancelled, router])
 
   if (!spaceId) {
     return (
