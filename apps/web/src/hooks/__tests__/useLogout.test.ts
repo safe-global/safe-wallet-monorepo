@@ -1,7 +1,10 @@
 /**
  * @jest-environment-options {"url": "http://localhost:3000/"}
  */
-import { renderHook, act } from '@testing-library/react'
+import { act } from '@testing-library/react'
+import { renderHook } from '@/tests/test-utils'
+import local from '@/services/local-storage/local'
+import { EMPTY_WORKSPACE_DRAFT } from '@/features/spaces/store'
 import useLogout from '@/hooks/useLogout'
 import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
 import useOnboard from '@/hooks/wallets/useOnboard'
@@ -53,6 +56,17 @@ describe('useLogout', () => {
     appendChildSpy.mockRestore()
     removeChildSpy.mockRestore()
     window.history.replaceState(null, '', originalLocation.href)
+  })
+
+  it('clears the Workspace onboarding draft, so the next user starts with an empty form', async () => {
+    const draft = { ...EMPTY_WORKSPACE_DRAFT, ownerId: 1, updatedAt: Date.now(), name: 'Treasury Ops' }
+    const { result } = renderHook(() => useLogout(), { initialReduxState: { workspaceDraft: draft } })
+
+    await act(async () => {
+      await result.current.logout()
+    })
+
+    expect(local.getItem('workspaceDraft')).toEqual(EMPTY_WORKSPACE_DRAFT)
   })
 
   it('should write logging_out flag to sessionStorage before submitting', () => {
