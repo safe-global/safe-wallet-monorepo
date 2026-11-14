@@ -38,6 +38,22 @@ describe('workspaceDraftSlice', () => {
     expect(mine).toEqual({ ...EMPTY_WORKSPACE_DRAFT, ownerId: me, updatedAt: NOW, paymentLinkId })
   })
 
+  it('starts from an empty form when the owner’s draft has expired', () => {
+    const ownerId = fakeUserId()
+    const expired = workspaceDraftBuilder()
+      .with({
+        ownerId,
+        updatedAt: NOW - DRAFT_MAX_AGE_MS,
+        safes: [{ chainId: '1', address: fakerChecksummedAddress() }],
+      })
+      .build()
+    const name = fakeWorkspaceName()
+
+    const next = reducer(expired, updateWorkspaceDraft(ownerId, { name }))
+
+    expect(next).toEqual({ ...EMPTY_WORKSPACE_DRAFT, ownerId, updatedAt: NOW, name })
+  })
+
   it('empties the draft on clear', () => {
     const draft = reducer(EMPTY_WORKSPACE_DRAFT, updateWorkspaceDraft(fakeUserId(), { name: fakeWorkspaceName() }))
 

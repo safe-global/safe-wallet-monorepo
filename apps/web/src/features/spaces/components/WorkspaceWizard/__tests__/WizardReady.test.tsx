@@ -2,8 +2,9 @@ import { faker } from '@faker-js/faker'
 import { server } from '@/tests/server'
 import { signedInAuthState } from '@/tests/builders/authState'
 import { fakeUserId, workspaceDraftBuilder } from '@/tests/builders/workspaceDraft'
-import { userHandler, userLoaded } from '@/tests/msw/workspaceWizard'
+import { userHandler } from '@/tests/msw/workspaceWizard'
 import { render, screen } from '@/tests/test-utils'
+import { useWorkspaceDraft } from '../hooks/useWorkspaceDraft'
 import WizardReady from '../WizardReady'
 
 let mockSafeProFlag: boolean | undefined
@@ -13,14 +14,19 @@ jest.mock('@/hooks/useIsSafeProEnabled', () => ({
 }))
 jest.mock('@/hooks/useIsSurveyEnabled', () => ({ __esModule: true, default: () => false }))
 
+const UserProbe = () => (useWorkspaceDraft().isReady ? <p>The user is known</p> : null)
+
 const renderReady = () => {
   const ownerId = fakeUserId()
   server.use(userHandler(ownerId))
   const step = faker.lorem.words()
   render(
-    <WizardReady>
-      <p>{step}</p>
-    </WizardReady>,
+    <>
+      <UserProbe />
+      <WizardReady>
+        <p>{step}</p>
+      </WizardReady>
+    </>,
     {
       initialReduxState: {
         auth: signedInAuthState(),
@@ -46,7 +52,7 @@ describe('WizardReady', () => {
 
     const step = renderReady()
 
-    await userLoaded()
+    expect(await screen.findByText('The user is known')).toBeInTheDocument()
     expect(screen.getByText('Loading')).toBeInTheDocument()
     expect(screen.queryByText(step)).not.toBeInTheDocument()
   })

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
+import { trialFeatures, type TrialFeature } from './planCatalog'
 import { TrialPlanCard } from './TrialPlanParts'
 import type { TrialSize } from './types'
 
@@ -41,9 +42,22 @@ const SIZES: TrialSize[] = [
   },
 ]
 
+const FEATURES_BY_PLAN: Record<string, TrialFeature[]> = {
+  Starter: trialFeatures('Starter'),
+  Business: trialFeatures('Business'),
+}
+
 const Interactive = ({ initial }: { initial: TrialSize }) => {
   const [value, setValue] = useState(initial)
-  return <TrialPlanCard sizes={SIZES} value={value} onChange={setValue} trialPeriodDays={30} />
+  return (
+    <TrialPlanCard
+      sizes={SIZES}
+      value={value}
+      onChange={setValue}
+      trialPeriodDays={30}
+      features={FEATURES_BY_PLAN[value.planName] ?? []}
+    />
+  )
 }
 
 const meta = {

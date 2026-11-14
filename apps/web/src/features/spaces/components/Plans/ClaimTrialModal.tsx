@@ -14,13 +14,12 @@ import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { DismissAction, FreeAccessEntryPoint, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
-import { trialFeatures } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import {
   TrialFeatureList,
   TrialPriceLine,
   TrialSizeTabs,
 } from '@safe-global/views/features/spaces/components/Plans/TrialPlanParts'
-import { trialSizes } from './planTiers'
+import { trialFeaturesOf, trialSizes } from './planTiers'
 import SelectAccountsStep from './SelectAccountsStep'
 import { InfoTip } from './PlanStatusCard'
 import type { SafeRef } from '@safe-global/views/features/spaces/components/Plans/types'
@@ -124,7 +123,7 @@ export default function ClaimTrialModal({
                     value={size}
                     onChange={(picked) => setPickedLinkId(picked.paymentLinkId)}
                   />
-                  <TrialFeatureList features={trialFeatures(size.planName)} columns={2} />
+                  <TrialFeatureList features={trialFeaturesOf(size.planName)} columns={2} />
                 </>
               )}
 

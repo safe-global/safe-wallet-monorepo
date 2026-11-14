@@ -98,7 +98,10 @@ export const COMPARE_SECTIONS: CompareSection[] = [
 
 export type TrialFeature = { label: string; included: boolean }
 
-type TrialFeatureRow = { label: string | { Starter: string; Business: string }; isBusinessOnly?: boolean }
+/** The plans a trial is sold for. */
+export type TrialPlanName = 'Starter' | 'Business'
+
+type TrialFeatureRow = { label: string | Record<TrialPlanName, string>; isBusinessOnly?: boolean }
 
 const TRIAL_CARD_FEATURES: TrialFeatureRow[] = [
   { label: { Starter: '10 sponsored txs/month', Business: '50 sponsored txs/month' } },
@@ -113,19 +116,12 @@ const TRIAL_CARD_FEATURES: TrialFeatureRow[] = [
   { label: 'Guided onboarding', isBusinessOnly: true },
 ]
 
-const STARTER_PLAN = 'Starter'
-
-/**
- * One list for every trial size: on Starter the Business-only rows stay, greyed out, so switching shows what's
- * missing. Every other plan includes all rows.
- */
-export const trialFeatures = (planName: string): TrialFeature[] => {
-  const isStarter = planName === STARTER_PLAN
-  return TRIAL_CARD_FEATURES.map(({ label, isBusinessOnly }) => ({
-    label: typeof label === 'string' ? label : isStarter ? label.Starter : label.Business,
-    included: !(isStarter && isBusinessOnly),
+/** One list for both trial plans: on Starter the Business-only rows stay, greyed out, so switching shows what's missing. */
+export const trialFeatures = (plan: TrialPlanName): TrialFeature[] =>
+  TRIAL_CARD_FEATURES.map(({ label, isBusinessOnly }) => ({
+    label: typeof label === 'string' ? label : label[plan],
+    included: plan === 'Business' || !isBusinessOnly,
   }))
-}
 
 // TODO(safe-pro): Enterprise has no payment link; static card until sales flow is defined.
 export const ENTERPRISE_TIER: PlanTier = {

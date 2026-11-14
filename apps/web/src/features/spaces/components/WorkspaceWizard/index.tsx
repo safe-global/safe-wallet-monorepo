@@ -1,6 +1,7 @@
 import { useEffect, useRef, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { skipToken } from '@reduxjs/toolkit/query'
+import { useBillingGetCheckoutSessionV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import { useSpacesGetOneV1Query, useSpacesGetSetupV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SetupProgress from '@safe-global/views/features/spaces/components/WorkspaceWizard/SetupProgress'
 import { AppRoutes } from '@/config/routes'
@@ -116,10 +117,14 @@ const WorkspaceWizard = ({ step }: { step: WizardStepId }): ReactElement => {
   const { draft } = useWorkspaceDraft()
   const sessionId = queryString(router.query[CHECKOUT_SESSION_QUERY_PARAM])
   const urlSpaceId = queryString(router.query.spaceId)
-  const resume = useResumeSetup(urlSpaceId, sessionId !== null)
+  const { data: session } = useBillingGetCheckoutSessionV1Query(sessionId ? { sessionId } : skipToken)
+  // After a cancelled checkout the form shows again; the session stays in the URL until the next navigation.
+  const isCheckoutCancelled = session !== undefined && session.status !== 'complete'
+  const isReturning = sessionId !== null && !isCheckoutCancelled
+  const resume = useResumeSetup(urlSpaceId, isReturning)
   useResumeOffer(step)
 
-  if (sessionId) return <CheckoutReturnScreen sessionId={sessionId} spaceId={urlSpaceId ?? draft.createdSpaceId} />
+  if (isReturning) return <CheckoutReturnScreen sessionId={sessionId} spaceId={urlSpaceId ?? draft.createdSpaceId} />
 
   if (resume.isError) {
     return (
