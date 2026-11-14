@@ -1,4 +1,6 @@
+import { getMultiChainSafeId } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/utils/safeIds'
 import type { WorkspaceDraft } from '@/features/spaces/store'
+import type { AllSafeItems, MultiChainSafeItem, SafeItem } from '@/hooks/safes'
 import { server } from '@/tests/server'
 import { signedInAuthState } from '@/tests/builders/authState'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
@@ -7,12 +9,19 @@ import { userHandler } from '@/tests/msw/workspaceWizard'
 import { act, renderHook, waitFor } from '@/tests/test-utils'
 import { useSafesStepForm } from '../hooks/useSafesStepForm'
 
+const noSafes: AllSafeItems = []
+
 const renderSafesForm = (draft: WorkspaceDraft, query: Record<string, string> = {}) => {
   const advance = jest.fn()
   const retreat = jest.fn()
   const view = renderHook(
-    () => useSafesStepForm({ draft, allSafes: [], flaggedAddresses: new Set(), limit: null, advance, retreat }),
-    { routerProps: { query }, initialReduxState: { auth: signedInAuthState(), workspaceDraft: draft } },
+    ({ allSafes }: { allSafes: AllSafeItems }) =>
+      useSafesStepForm({ draft, allSafes, flaggedAddresses: new Set(), limit: null, advance, retreat }),
+    {
+      initialProps: { allSafes: noSafes },
+      routerProps: { query },
+      initialReduxState: { auth: signedInAuthState(), workspaceDraft: draft },
+    },
   )
   return { ...view, advance, retreat }
 }
@@ -29,6 +38,14 @@ const draftSafe = () => {
   const { chainId, address } = safeItemBuilder().build()
   return { chainId, address }
 }
+
+const multiChainGroup = (safes: SafeItem[]): MultiChainSafeItem => ({
+  address: safes[0].address,
+  safes,
+  isPinned: false,
+  lastVisited: 0,
+  name: undefined,
+})
 
 describe('useSafesStepForm', () => {
   beforeEach(() => localStorage.clear())
@@ -47,6 +64,36 @@ describe('useSafesStepForm', () => {
     const { result } = renderSafesForm(signedInDraft(), { safe: `${safe.chainId}:${safe.address}` })
 
     await waitFor(() => expect(result.current.pickedSafes).toEqual([safe]))
+  })
+
+  it('selects every chain of the linked Safe once its multichain group loads', async () => {
+    const mainnet = safeItemBuilder().with({ chainId: '1' }).build()
+    const gnosis = { ...mainnet, chainId: '100' }
+    const { result, rerender } = renderSafesForm(signedInDraft(), { safe: `1:${mainnet.address}` })
+    await waitFor(() => expect(result.current.pickedSafes).toHaveLength(1))
+
+    rerender({ allSafes: [multiChainGroup([mainnet, gnosis])] })
+
+    await waitFor(() => expect(result.current.pickedSafes).toHaveLength(2))
+    expect(result.current.pickedSafes).toEqual(
+      expect.arrayContaining([
+        { chainId: '1', address: mainnet.address },
+        { chainId: '100', address: mainnet.address },
+      ]),
+    )
+    expect(result.current.formMethods.getValues('selectedSafes')).toHaveProperty([getMultiChainSafeId(mainnet)], true)
+  })
+
+  it('keeps the Safes of the draft when the linked Safe turns out to be multichain', async () => {
+    const saved = draftSafe()
+    const mainnet = safeItemBuilder().with({ chainId: '1' }).build()
+    const { result, rerender } = renderSafesForm(signedInDraft({ safes: [saved] }), { safe: `1:${mainnet.address}` })
+    await waitFor(() => expect(result.current.pickedSafes).toEqual([saved]))
+
+    rerender({ allSafes: [multiChainGroup([mainnet, { ...mainnet, chainId: '100' }])] })
+
+    await act(async () => {})
+    expect(result.current.pickedSafes).toEqual([saved])
   })
 
   it('asks for the names of new Safes before it moves on', async () => {
