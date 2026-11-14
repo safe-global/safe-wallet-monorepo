@@ -136,6 +136,16 @@ export const OpportunityToolbar = ({
             {filterCount > 0 && <Badge variant="subtle">{filterCount}</Badge>}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="min-w-48">
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>{COPY.investments}</DropdownMenuLabel>
+              <DropdownMenuCheckboxItem
+                checked={filters.investedOnly}
+                onCheckedChange={(checked) => onFilters({ ...filters, investedOnly: checked })}
+              >
+                {COPY.investedOnly}
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
             <FilterGroup
               label={COPY.asset}
               options={assets}

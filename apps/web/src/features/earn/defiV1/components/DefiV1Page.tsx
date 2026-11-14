@@ -1,26 +1,25 @@
 import { useMemo, useRef, useState } from 'react'
-import { Badge } from '@safe-global/views/components/ui/badge'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { DEFI_V1_COPY, formatApy, formatCompactUsd, formatUsd } from '../copy'
+import { DEFI_V1_COPY } from '../copy'
 import { EXISTING_POSITIONS, OPPORTUNITIES, TREASURY_TOTAL } from '../opportunities'
 import {
   buildShelf,
   filterOpportunities,
   groupOpportunities,
+  holdingsFor,
   isLocked,
   NO_FILTERS,
   summariseTreasury,
   type ListFilters,
 } from '../shelf'
-import type { DefiV1Config, GroupBy, Opportunity, OpportunityCategory, RiskLevel } from '../types'
+import type { DefiV1Config, GroupBy, Opportunity, OpportunityCategory, Position, RiskLevel } from '../types'
+import type { ActionResult } from './ActionPanel'
 import { CompareDialog } from './CompareDialog'
-import { DepositDialog, type DepositResult } from './DepositDialog'
 import { OpportunityDrawer } from './OpportunityDrawer'
 import { OpportunityToolbar } from './OpportunityToolbar'
 import { PolicyPanel } from './PolicyPanel'
-import { TreasurySection } from './TreasurySection'
 import { TreasurySummary } from './TreasurySummary'
-import { InvestmentsTable, OpportunitiesTable, type OpportunityGroup, type Position } from './TreasuryTables'
+import { OpportunitiesTable, type OpportunityGroup } from './TreasuryTables'
 
 const MAX_COMPARE = 3
 
@@ -49,11 +48,8 @@ const groupTitle = (groupBy: GroupBy, key: string): string | undefined => {
 
 export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const [selected, setSelected] = useState<Opportunity | null>(null)
-  const [depositing, setDepositing] = useState<Opportunity | null>(null)
   const [positions, setPositions] = useState<Position[]>(initialPositions)
-  const [investmentsOpen, setInvestmentsOpen] = useState(false)
-  const [opportunitiesOpen, setOpportunitiesOpen] = useState(true)
-  const investmentsRef = useRef<HTMLElement>(null)
+  const tableRef = useRef<HTMLDivElement>(null)
   const [search, setSearch] = useState('')
   const [groupBy, setGroupBy] = useState<GroupBy>('none')
   const [filters, setFilters] = useState<ListFilters>(NO_FILTERS)
@@ -62,27 +58,39 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const locked = (item: Opportunity) => isLocked(item, config.model, config.plan)
   const summary = summariseTreasury(TREASURY_TOTAL, positions)
 
+  const investedIds = useMemo(() => [...new Set(positions.map((position) => position.opportunity.id))], [positions])
   const visible = useMemo(
-    () => filterOpportunities(RANKED, filters).filter((item) => matches(item, search)),
-    [filters, search],
+    () => filterOpportunities(RANKED, filters, investedIds).filter((item) => matches(item, search)),
+    [filters, search, investedIds],
   )
   const groups = useMemo<OpportunityGroup[]>(
     () => groupOpportunities(visible, groupBy).map((group) => ({ ...group, title: groupTitle(groupBy, group.key) })),
     [visible, groupBy],
   )
   const topOpen = visible.find((item) => !locked(item))
-  const investedIds = positions.map((position) => position.opportunity.id)
+  const holdingOf = (item: Opportunity) => holdingsFor(positions, item.id)
   const compareItems = RANKED.filter((item) => compareIds.includes(item.id))
   const toggleCompare = (id: string) =>
     setCompareIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]))
 
   const seeInvestments = () => {
-    setInvestmentsOpen(true)
-    investmentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    setFilters({ ...NO_FILTERS, investedOnly: true })
+    tableRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const onDeposited = ({ opportunity, amount, pending }: DepositResult) =>
+  const onDeposited = ({ opportunity, amount, pending }: ActionResult) =>
     setPositions((current) => [{ opportunity, principal: amount, earned: 0, pending }, ...current])
+
+  const onWithdrawn = ({ opportunity, amount, pending }: ActionResult) => {
+    if (pending) return
+    setPositions((current) =>
+      current.map((position) =>
+        position.opportunity.id === opportunity.id && !position.pending
+          ? { ...position, principal: Math.max(position.principal - amount, 0) }
+          : position,
+      ),
+    )
+  }
 
   return (
     <div className="@container min-w-0 px-6 pb-8 pt-5" data-testid="defi-v1-page">
@@ -100,59 +108,33 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
         <TreasurySummary summary={summary} onSeeInvestments={seeInvestments} />
       </div>
 
-      <div className="flex flex-col gap-6">
-        <TreasurySection
-          id="investments"
-          ref={investmentsRef}
-          title={DEFI_V1_COPY.sections.investments}
-          count={positions.length}
-          badge={
-            positions.length > 0 && (
-              <Badge variant="mint" size="status" shape="status">
-                {DEFI_V1_COPY.sections.investedBadge(formatCompactUsd(summary.invested))}
-              </Badge>
-            )
-          }
-          summary={DEFI_V1_COPY.sections.investmentsSummary(formatUsd(summary.earned), formatApy(summary.blendedApy))}
-          open={investmentsOpen}
-          onOpenChange={setInvestmentsOpen}
-        >
-          <InvestmentsTable positions={positions} />
-        </TreasurySection>
-
-        <TreasurySection
-          id="opportunities"
-          title={DEFI_V1_COPY.sections.opportunities}
-          count={visible.length}
-          open={opportunitiesOpen}
-          onOpenChange={setOpportunitiesOpen}
-        >
-          <div className="flex flex-col gap-4">
-            <OpportunityToolbar
-              search={search}
-              onSearch={setSearch}
-              groupBy={groupBy}
-              onGroupBy={setGroupBy}
-              filters={filters}
-              onFilters={setFilters}
-              assets={ASSETS}
-              chains={CHAINS}
-              compareCount={compareIds.length}
-              onCompare={() => setIsComparing(true)}
-              policy={<PolicyPanel plan={config.plan} />}
-              onDeposit={topOpen ? () => setSelected(topOpen) : undefined}
-            />
-            <OpportunitiesTable
-              groups={groups}
-              isLocked={locked}
-              onSelect={setSelected}
-              onDeposit={setDepositing}
-              selection={{ selected: compareIds, isFull: compareIds.length >= MAX_COMPARE, onToggle: toggleCompare }}
-              investedIds={investedIds}
-            />
-          </div>
-        </TreasurySection>
-      </div>
+      <section
+        ref={tableRef}
+        aria-label={DEFI_V1_COPY.sections.opportunities}
+        className="flex scroll-mt-6 flex-col gap-4"
+      >
+        <OpportunityToolbar
+          search={search}
+          onSearch={setSearch}
+          groupBy={groupBy}
+          onGroupBy={setGroupBy}
+          filters={filters}
+          onFilters={setFilters}
+          assets={ASSETS}
+          chains={CHAINS}
+          compareCount={compareIds.length}
+          onCompare={() => setIsComparing(true)}
+          policy={<PolicyPanel plan={config.plan} />}
+          onDeposit={topOpen ? () => setSelected(topOpen) : undefined}
+        />
+        <OpportunitiesTable
+          groups={groups}
+          isLocked={locked}
+          onSelect={setSelected}
+          selection={{ selected: compareIds, isFull: compareIds.length >= MAX_COMPARE, onToggle: toggleCompare }}
+          holdingOf={holdingOf}
+        />
+      </section>
 
       <CompareDialog
         items={compareItems}
@@ -166,7 +148,7 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
         }}
         onDeposit={(item) => {
           setIsComparing(false)
-          setDepositing(item)
+          setSelected(item)
         }}
       />
 
@@ -177,20 +159,10 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
         locked={selected ? locked(selected) : false}
         plan={config.plan}
         signing={config.plan === 'pro' ? config.signing : 'threshold'}
-        position={positions.find((position) => position.opportunity.id === selected?.id)}
+        holding={selected ? holdingOf(selected) : undefined}
         onClose={() => setSelected(null)}
-        onDeposit={(item) => {
-          setSelected(null)
-          setDepositing(item)
-        }}
-      />
-
-      <DepositDialog
-        key={depositing?.id ?? 'none'}
-        opportunity={depositing}
-        signing={config.plan === 'pro' ? config.signing : 'threshold'}
-        onClose={() => setDepositing(null)}
         onDeposited={onDeposited}
+        onWithdrawn={onWithdrawn}
       />
     </div>
   )

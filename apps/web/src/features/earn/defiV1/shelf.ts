@@ -1,4 +1,13 @@
-import type { DefiV1Model, DefiV1Plan, GroupBy, Opportunity, OpportunityCategory, RiskLevel } from './types'
+import type {
+  DefiV1Model,
+  DefiV1Plan,
+  GroupBy,
+  Holding,
+  Opportunity,
+  OpportunityCategory,
+  Position,
+  RiskLevel,
+} from './types'
 
 export const CATEGORY_ORDER: OpportunityCategory[] = ['cash', 'yield', 'staking']
 export const MAX_SHELF = 7
@@ -46,21 +55,35 @@ export type ListFilters = {
   risks: RiskLevel[]
   sameDay: boolean
   openOnly: boolean
+  investedOnly: boolean
 }
 
-export const NO_FILTERS: ListFilters = { assets: [], chains: [], risks: [], sameDay: false, openOnly: false }
+export const NO_FILTERS: ListFilters = {
+  assets: [],
+  chains: [],
+  risks: [],
+  sameDay: false,
+  openOnly: false,
+  investedOnly: false,
+}
 
 export const activeFilterCount = (filters: ListFilters): number =>
   filters.assets.length +
   filters.chains.length +
   filters.risks.length +
   Number(filters.sameDay) +
-  Number(filters.openOnly)
+  Number(filters.openOnly) +
+  Number(filters.investedOnly)
 
 /** Keeps the input order. Values inside one filter widen the match, separate filters narrow it. */
-export const filterOpportunities = (opportunities: Opportunity[], filters: ListFilters): Opportunity[] =>
+export const filterOpportunities = (
+  opportunities: Opportunity[],
+  filters: ListFilters,
+  investedIds: string[] = [],
+): Opportunity[] =>
   opportunities.filter(
     (item) =>
+      (!filters.investedOnly || investedIds.includes(item.id)) &&
       (filters.assets.length === 0 || filters.assets.includes(item.asset)) &&
       (filters.chains.length === 0 || item.chains.some((chain) => filters.chains.includes(chain))) &&
       (filters.risks.length === 0 || filters.risks.includes(item.risk)) &&
@@ -133,4 +156,18 @@ export const summariseTreasury = (
     earned,
     blendedApy: invested > 0 ? weighted / invested : 0,
   }
+}
+
+/** Adds up every position in one opportunity. Deposits awaiting signatures count as pending, not invested. */
+export const holdingsFor = (positions: Position[], opportunityId: string): Holding | undefined => {
+  const mine = positions.filter((position) => position.opportunity.id === opportunityId)
+  if (mine.length === 0) return undefined
+  return mine.reduce<Holding>(
+    (total, position) => ({
+      invested: total.invested + (position.pending ? 0 : position.principal),
+      pending: total.pending + (position.pending ? position.principal : 0),
+      earned: total.earned + position.earned,
+    }),
+    { invested: 0, pending: 0, earned: 0 },
+  )
 }

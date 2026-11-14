@@ -99,6 +99,7 @@ export const DEFI_V1_COPY = {
     exit: 'Exit time',
     withdraw: 'Withdraw',
     pending: 'Awaiting signatures',
+    pendingAmount: (amount: string) => `${amount} awaiting signatures`,
     withdrawTitle: (name: string) => `Withdraw from ${name}`,
     withdrawLead: 'Funds return to this Safe. Signers approve one proposal.',
   },
@@ -110,6 +111,8 @@ export const DEFI_V1_COPY = {
       string
     >,
     filters: 'Filter',
+    investments: 'Investments',
+    investedOnly: 'Invested only',
     clearFilters: 'Clear filters',
     asset: 'Asset',
     network: 'Network',
@@ -122,6 +125,23 @@ export const DEFI_V1_COPY = {
     deposit: 'Deposit',
   },
   invested: 'Invested',
+  action: {
+    modeLabel: 'Action',
+    deposit: 'Deposit',
+    withdraw: 'Withdraw',
+    max: 'Max',
+    tooMuch: (available: string) => `Only ${available} available`,
+    withdrawFrom: (available: string, exit: string) => `Up to ${available} · ${exit}`,
+    withdrawSteps: (amount: string, asset: string, name: string) => [
+      `Withdraw ${amount} ${asset} from ${name}`,
+      'Send it back to this Safe',
+    ],
+    stepCount: (count: number) => `${count} step${count === 1 ? '' : 's'}`,
+    perYear: 'About a year',
+    oneSigner: '1 signer',
+    submitPolicy: { deposit: 'Deposit now', withdraw: 'Withdraw now' },
+    doneTitle: { deposit: 'Deposited', withdraw: 'Withdrawn' },
+  },
   drawer: {
     previous: 'Previous',
     next: 'Next',
@@ -159,10 +179,7 @@ export const DEFI_V1_COPY = {
     lockedNote: 'Upgrade to Safe Pro to deposit into this option.',
   },
   sections: {
-    investments: 'Your investments',
     opportunities: 'Opportunities',
-    investedBadge: (amount: string) => `${amount} invested`,
-    investmentsSummary: (earned: string, apy: string) => `+${earned} earned YTD · ${apy} blended`,
   },
   compare: {
     title: 'Compare options',

@@ -1,15 +1,15 @@
 import { Children, Fragment, type ReactNode } from 'react'
-import { ChevronDown, ChevronUp, FileText, Info, Lock, Maximize2, Minimize2, ShieldCheck, X } from 'lucide-react'
+import { ChevronDown, ChevronUp, FileText, Info, Maximize2, Minimize2, ShieldCheck, X } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Drawer, DrawerBody, DrawerSection } from '@/components/common/Drawer'
-import useSafeInfo from '@/hooks/useSafeInfo'
 import { DEFI_V1_COPY, formatApy, formatCompactUsd, formatLiveFor, formatUsd } from '../copy'
-import type { DefiV1Plan, DefiV1Signing, Opportunity } from '../types'
-import { OpportunityMark, Tag, type Position } from './TreasuryTables'
+import type { DefiV1Plan, DefiV1Signing, Holding, Opportunity } from '../types'
+import { ActionPanel, type ActionResult } from './ActionPanel'
+import { OpportunityMark, Tag } from './TreasuryTables'
 
 const COPY = DEFI_V1_COPY.drawer
 
@@ -85,13 +85,6 @@ const TextRow = ({ label, children }: { label: string; children: ReactNode }) =>
   </div>
 )
 
-const Fact = ({ label, value }: { label: string; value: ReactNode }) => (
-  <div className="flex min-w-0 flex-col gap-0.5">
-    <span className="text-xs text-muted-foreground">{label}</span>
-    <span className="truncate text-sm font-medium tabular-nums">{value}</span>
-  </div>
-)
-
 const accessLabel = (item: Opportunity) =>
   [item.access === 'pro' ? DEFI_V1_COPY.proOnly : DEFI_V1_COPY.toolbar.openOnly, item.kyc && 'KYC once']
     .filter(Boolean)
@@ -104,9 +97,10 @@ export const OpportunityDrawer = ({
   locked,
   plan,
   signing,
-  position,
+  holding,
   onClose,
-  onDeposit,
+  onDeposited,
+  onWithdrawn,
 }: {
   opportunity: Opportunity | null
   list: Opportunity[]
@@ -114,11 +108,11 @@ export const OpportunityDrawer = ({
   locked: boolean
   plan: DefiV1Plan
   signing: DefiV1Signing
-  position?: Position
+  holding?: Holding
   onClose: () => void
-  onDeposit: (opportunity: Opportunity) => void
+  onDeposited: (result: ActionResult) => void
+  onWithdrawn: (result: ActionResult) => void
 }) => {
-  const { safe } = useSafeInfo()
   const index = opportunity ? list.findIndex((item) => item.id === opportunity.id) : -1
   const safeFee = plan === 'pro' ? '0%' : SAFE_FEE_FREE
 
@@ -141,7 +135,7 @@ export const OpportunityDrawer = ({
                 <span className="truncate text-xs text-muted-foreground">
                   {opportunity.runBy} · {DEFI_V1_COPY.category[opportunity.category].title}
                 </span>
-                {position && (
+                {holding && (
                   <Badge variant="mint" size="status" shape="status">
                     {DEFI_V1_COPY.invested}
                   </Badge>
@@ -211,20 +205,23 @@ export const OpportunityDrawer = ({
                 </Frame>
               </DrawerSection>
 
-              {position && (
+              {holding && (
                 <DrawerSection
                   title={COPY.yourPosition}
-                  rightNode={formatUsd(position.principal)}
+                  rightNode={formatUsd(holding.invested + holding.pending)}
                   collapsible
                   defaultOpen
                 >
                   <Frame>
-                    <Row label={COPY.deposited} value={formatUsd(position.principal)} />
+                    <Row label={COPY.deposited} value={formatUsd(holding.invested)} />
+                    {holding.pending > 0 && (
+                      <Row label={DEFI_V1_COPY.positions.pending} value={formatUsd(holding.pending)} />
+                    )}
                     <Row
                       label={COPY.earned}
                       value={
                         <span className="text-badge-dot-success">
-                          {position.earned > 0 ? `+${formatUsd(position.earned)}` : '—'}
+                          {holding.earned > 0 ? `+${formatUsd(holding.earned)}` : '—'}
                         </span>
                       }
                     />
@@ -316,30 +313,16 @@ export const OpportunityDrawer = ({
             </div>
           </DrawerBody>
 
-          <footer
-            className="flex shrink-0 flex-col gap-4 border-t border-border bg-background p-6"
-            data-testid="drawer-action-summary"
-          >
-            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-              <Fact label={COPY.youEarn} value={formatApy(opportunity.apy)} />
-              <Fact label={COPY.exit} value={opportunity.exitShort} />
-              <Fact label={COPY.safeFee} value={safeFee} />
-              <Fact
-                label={COPY.approval}
-                value={signing === 'policy' ? COPY.policySigner : COPY.signers(safe.threshold, safe.owners.length)}
-              />
-            </div>
-            {locked && (
-              <Typography variant="paragraph-mini" color="muted" className="flex items-center gap-1.5">
-                <Lock className="size-3.5 shrink-0" aria-hidden />
-                {COPY.lockedNote}
-              </Typography>
-            )}
-            <Button size="lg" className="w-full" disabled={locked} onClick={() => onDeposit(opportunity)}>
-              {locked && <Lock />}
-              {locked ? DEFI_V1_COPY.locked : DEFI_V1_COPY.factSheet.deposit}
-            </Button>
-          </footer>
+          <ActionPanel
+            key={opportunity.id}
+            opportunity={opportunity}
+            holding={holding}
+            locked={locked}
+            plan={plan}
+            signing={signing}
+            onDeposited={onDeposited}
+            onWithdrawn={onWithdrawn}
+          />
         </>
       )}
     </Drawer>

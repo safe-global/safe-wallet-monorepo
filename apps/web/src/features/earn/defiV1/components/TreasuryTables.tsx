@@ -1,32 +1,21 @@
-import { Fragment, useState, type ReactNode } from 'react'
+import { Fragment, type ReactNode } from 'react'
 import { Clock, Lock } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@safe-global/views/components/ui/dialog'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@safe-global/views/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { cn } from '@safe-global/views/utils/cn'
-import { DEFI_V1_COPY, formatApy, formatUsd } from '../copy'
+import { DEFI_V1_COPY, formatApy, formatCompactUsd } from '../copy'
 import { CHAIN_IDS } from '../opportunities'
-import type { Opportunity } from '../types'
+import type { Holding, Opportunity } from '../types'
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0!'
-const COLUMN_WIDTHS = ['w-10', 'w-64', 'w-20', 'w-32', 'w-28', 'w-36', '', 'w-20', 'w-36']
+const COLUMN_WIDTHS = ['w-10', 'w-64', 'w-20', 'w-32', 'w-28', 'w-36', '', 'w-20', 'w-32', 'w-32']
 const COLUMN_COUNT = COLUMN_WIDTHS.length
-const INVESTMENT_HEADERS = ['Position', 'Asset', 'Exit time', 'Deposited', 'Network', 'Earned', 'Rate']
-const OPPORTUNITY_HEADERS = ['Opportunity', 'Asset', 'Exit time', 'Risk', 'Access', 'Networks', 'Rate']
-
-export type Position = { opportunity: Opportunity; principal: number; earned: number; pending: boolean }
+const OPPORTUNITY_HEADERS = ['Opportunity', 'Asset', 'Exit time', 'Risk', 'Access', 'Networks', 'Rate', 'Invested']
 
 export type OpportunityGroup = { key: string; title?: string; items: Opportunity[] }
 
@@ -86,7 +75,7 @@ const PLACEMENT_TAG: Partial<Record<Opportunity['placement'], string>> = {
   sponsored: DEFI_V1_COPY.sponsored,
 }
 
-const NameCell = ({ opportunity, invested }: { opportunity: Opportunity; invested?: boolean }) => {
+const NameCell = ({ opportunity }: { opportunity: Opportunity }) => {
   const placement = PLACEMENT_TAG[opportunity.placement]
   return (
     <div className="flex min-w-0 items-center gap-3">
@@ -95,11 +84,6 @@ const NameCell = ({ opportunity, invested }: { opportunity: Opportunity; investe
         <span className="flex min-w-0 items-center gap-2">
           <span className="truncate font-medium text-foreground">{opportunity.name}</span>
           {placement && <Badge variant={opportunity.placement === 'sponsored' ? 'warning' : 'info'}>{placement}</Badge>}
-          {invested && (
-            <Badge variant="mint" size="status" shape="status">
-              {DEFI_V1_COPY.invested}
-            </Badge>
-          )}
         </span>
         <span className="truncate text-xs text-muted-foreground">
           {opportunity.runBy}
@@ -156,20 +140,32 @@ const AccessTag = ({ opportunity, locked }: { opportunity: Opportunity; locked: 
   )
 }
 
+const InvestedCell = ({ holding }: { holding?: Holding }) => {
+  if (!holding) return <span className="text-muted-foreground">—</span>
+  return (
+    <span className="flex min-w-0 flex-col">
+      {holding.invested > 0 && <span className="font-semibold tabular-nums">{formatCompactUsd(holding.invested)}</span>}
+      {holding.pending > 0 && (
+        <span className="truncate text-xs text-muted-foreground tabular-nums">
+          {DEFI_V1_COPY.positions.pendingAmount(formatCompactUsd(holding.pending))}
+        </span>
+      )}
+    </span>
+  )
+}
+
 const OpportunityRow = ({
   opportunity,
   isLocked,
   onSelect,
-  onDeposit,
   selection,
-  invested,
+  holding,
 }: {
   opportunity: Opportunity
   isLocked: (item: Opportunity) => boolean
   onSelect: (item: Opportunity) => void
-  onDeposit: (item: Opportunity) => void
   selection: Selection
-  invested: boolean
+  holding?: Holding
 }) => {
   const locked = isLocked(opportunity)
   const checked = selection.selected.includes(opportunity.id)
@@ -188,7 +184,7 @@ const OpportunityRow = ({
         />
       </TableCell>
       <TableCell>
-        <NameCell opportunity={opportunity} invested={invested} />
+        <NameCell opportunity={opportunity} />
       </TableCell>
       <TableCell className="font-semibold">{opportunity.asset}</TableCell>
       <TableCell>
@@ -204,14 +200,16 @@ const OpportunityRow = ({
         <NetworksCell chains={opportunity.chains} />
       </TableCell>
       <TableCell className="font-semibold tabular-nums">{formatApy(opportunity.apy)}</TableCell>
+      <TableCell>
+        <InvestedCell holding={holding} />
+      </TableCell>
       <TableCell className="text-right">
         <Button
           variant="outline"
           size="xs"
           onClick={(event) => {
             event.stopPropagation()
-            if (locked) onSelect(opportunity)
-            else onDeposit(opportunity)
+            onSelect(opportunity)
           }}
         >
           {locked && <Lock />}
@@ -219,69 +217,6 @@ const OpportunityRow = ({
         </Button>
       </TableCell>
     </TableRow>
-  )
-}
-
-const InvestmentRow = ({ position, onWithdraw }: { position: Position; onWithdraw: (position: Position) => void }) => (
-  <TableRow data-testid={`position-${position.opportunity.id}`}>
-    <TableCell />
-    <TableCell>
-      <NameCell opportunity={position.opportunity} />
-    </TableCell>
-    <TableCell className="font-semibold">{position.opportunity.asset}</TableCell>
-    <TableCell>
-      <ExitCell opportunity={position.opportunity} />
-    </TableCell>
-    <TableCell className="tabular-nums">{formatUsd(position.principal)}</TableCell>
-    <TableCell>
-      <NetworksCell chains={position.opportunity.chains.slice(0, 1)} />
-    </TableCell>
-    <TableCell className="tabular-nums text-badge-dot-success">
-      {position.earned > 0 ? `+${formatUsd(position.earned)}` : '—'}
-    </TableCell>
-    <TableCell className="font-semibold tabular-nums">{formatApy(position.opportunity.apy)}</TableCell>
-    <TableCell className="text-right">
-      {position.pending ? (
-        <Badge variant="warning">{DEFI_V1_COPY.positions.pending}</Badge>
-      ) : (
-        <Button variant="outline" size="xs" onClick={() => onWithdraw(position)}>
-          {DEFI_V1_COPY.positions.withdraw}
-        </Button>
-      )}
-    </TableCell>
-  </TableRow>
-)
-
-const WithdrawDialog = ({ position, onClose }: { position: Position | null; onClose: () => void }) => {
-  const copy = DEFI_V1_COPY.positions
-  return (
-    <Dialog open={position !== null} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent size="sm">
-        {position && (
-          <>
-            <DialogHeader>
-              <DialogTitle>{copy.withdrawTitle(position.opportunity.name)}</DialogTitle>
-              <DialogDescription>{copy.withdrawLead}</DialogDescription>
-            </DialogHeader>
-            <div className="grid grid-cols-2 gap-4 px-4 text-sm">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-xs text-muted-foreground">{copy.principal}</span>
-                <span className="font-medium">{formatUsd(position.principal + position.earned)}</span>
-              </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="text-xs text-muted-foreground">{copy.exit}</span>
-                <span className="font-medium">{position.opportunity.exitLabel}</span>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button size="lg" onClick={onClose}>
-                {DEFI_V1_COPY.deposit.createProposal}
-              </Button>
-            </DialogFooter>
-          </>
-        )}
-      </DialogContent>
-    </Dialog>
   )
 }
 
@@ -304,16 +239,14 @@ export const OpportunitiesTable = ({
   groups,
   isLocked,
   onSelect,
-  onDeposit,
   selection,
-  investedIds,
+  holdingOf,
 }: {
   groups: OpportunityGroup[]
   isLocked: (item: Opportunity) => boolean
   onSelect: (item: Opportunity) => void
-  onDeposit: (item: Opportunity) => void
   selection: Selection
-  investedIds: string[]
+  holdingOf: (item: Opportunity) => Holding | undefined
 }) => {
   const isEmpty = groups.every((group) => group.items.length === 0)
   return (
@@ -336,43 +269,13 @@ export const OpportunitiesTable = ({
                 opportunity={item}
                 isLocked={isLocked}
                 onSelect={onSelect}
-                onDeposit={onDeposit}
                 selection={selection}
-                invested={investedIds.includes(item.id)}
+                holding={holdingOf(item)}
               />
             ))}
           </Fragment>
         ))}
       </TableBody>
     </TableCard>
-  )
-}
-
-export const InvestmentsTable = ({ positions }: { positions: Position[] }) => {
-  const [withdrawing, setWithdrawing] = useState<Position | null>(null)
-  return (
-    <>
-      <TableCard label="Investments">
-        <ColumnHeaders labels={INVESTMENT_HEADERS} />
-        <TableBody data-testid="defi-positions">
-          {positions.length > 0 ? (
-            positions.map((position, index) => (
-              <InvestmentRow
-                key={`${position.opportunity.id}-${index}`}
-                position={position}
-                onWithdraw={setWithdrawing}
-              />
-            ))
-          ) : (
-            <TableRow data-no-hover>
-              <TableCell colSpan={COLUMN_COUNT} className="py-6 text-center text-muted-foreground">
-                No investments yet. Deposit from the Opportunities tab.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </TableCard>
-      <WithdrawDialog position={withdrawing} onClose={() => setWithdrawing(null)} />
-    </>
   )
 }

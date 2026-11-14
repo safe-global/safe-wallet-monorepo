@@ -5,6 +5,7 @@ import {
   depositSteps,
   filterOpportunities,
   groupOpportunities,
+  holdingsFor,
   isLocked,
   NO_FILTERS,
   MAX_SHELF,
@@ -125,6 +126,13 @@ describe('filterOpportunities', () => {
     expect(filterOpportunities([open, kyc], { ...NO_FILTERS, openOnly: true })).toEqual([open])
   })
 
+  it('keeps only options the Safe has invested in', () => {
+    const held = opportunity()
+    const other = opportunity()
+
+    expect(filterOpportunities([held, other], { ...NO_FILTERS, investedOnly: true }, [held.id])).toEqual([held])
+  })
+
   it('counts each chosen value as one active filter', () => {
     expect(activeFilterCount({ ...NO_FILTERS, assets: ['USDC', 'ETH'], sameDay: true })).toBe(3)
   })
@@ -198,5 +206,22 @@ describe('summariseTreasury', () => {
 
     expect(summary.invested).toBe(0)
     expect(summary.idle).toBe(1_000)
+  })
+})
+
+describe('holdingsFor', () => {
+  it('adds up positions in one opportunity and keeps unsigned deposits apart', () => {
+    const item = opportunity()
+    const positions = [
+      { opportunity: item, principal: 1_000, earned: 20, pending: false },
+      { opportunity: item, principal: 500, earned: 0, pending: true },
+      { opportunity: opportunity(), principal: 9_000, earned: 90, pending: false },
+    ]
+
+    expect(holdingsFor(positions, item.id)).toEqual({ invested: 1_000, pending: 500, earned: 20 })
+  })
+
+  it('returns nothing for an opportunity without positions', () => {
+    expect(holdingsFor([], 'none')).toBeUndefined()
   })
 })
