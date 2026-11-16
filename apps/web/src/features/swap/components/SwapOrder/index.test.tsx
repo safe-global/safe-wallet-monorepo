@@ -7,7 +7,7 @@ import type { SwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_G
 import { render, screen } from '@/tests/test-utils'
 import { transactionDataBuilder } from '@/tests/builders/transactionDetails'
 import { swapOrderConfirmationViewBuilder } from '@/features/swap/helpers/swapOrderBuilder'
-import { COW_DEPLOYMENTS } from '@/features/swap/helpers/utils'
+import { COW_DEPLOYMENTS } from '@/features/swap/helpers/swapOrderCalls'
 import SwapOrder from '.'
 
 const SETTLEMENT_INTERFACE = new Interface(['function setPreSignature(bytes orderUid, bool signed)'])

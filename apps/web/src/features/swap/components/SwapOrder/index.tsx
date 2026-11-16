@@ -19,8 +19,8 @@ import css from './styles.module.css'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { SwapOrderExtraActionsWarning } from '@safe-global/views/features/swap/components/SwapOrderExtraActionsWarning'
+import { countNonSwapOrderCalls } from '../../helpers/swapOrderCalls'
 import {
-  countNonSwapOrderCalls,
   getExecutionPrice,
   getLimitPrice,
   getOrderClass,
