@@ -79,10 +79,10 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const toggleCompare = (id: string) =>
     setCompareIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]))
 
-  const seeInvestments = () => {
+  const showGrouped = (next: GroupBy) => {
     setFilters(NO_FILTERS)
     setSearch('')
-    setGroupBy('investments')
+    setGroupBy(next)
     tableRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
@@ -113,7 +113,11 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
             </Typography>
           )}
         </div>
-        <TreasurySummary summary={summary} onSeeInvestments={seeInvestments} />
+        <TreasurySummary
+          summary={summary}
+          onSeeInvestments={() => showGrouped('investments')}
+          onCompareByRisk={() => showGrouped('risk')}
+        />
       </div>
 
       <section

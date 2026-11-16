@@ -32,17 +32,27 @@ const StatCard = ({
   </div>
 )
 
-export const TreasurySummary = ({ summary, onSeeInvestments }: { summary: Summary; onSeeInvestments: () => void }) => (
+const CardLink = ({ label, onClick }: { label: string; onClick: () => void }) => (
+  <Button variant="ghost" size="xs" onClick={onClick}>
+    {label}
+    <ArrowRight />
+  </Button>
+)
+
+export const TreasurySummary = ({
+  summary,
+  onSeeInvestments,
+  onCompareByRisk,
+}: {
+  summary: Summary
+  onSeeInvestments: () => void
+  onCompareByRisk: () => void
+}) => (
   <div className="grid gap-3 @2xl:grid-cols-3" data-testid="treasury-summary">
     <StatCard
       label={COPY.invested}
       value={percent.format(summary.investedShare)}
-      aside={
-        <Button variant="ghost" size="xs" onClick={onSeeInvestments}>
-          {COPY.seeAll}
-          <ArrowRight />
-        </Button>
-      }
+      aside={<CardLink label={COPY.seeAll} onClick={onSeeInvestments} />}
     >
       <Progress
         value={summary.investedShare * 100}
@@ -57,10 +67,19 @@ export const TreasurySummary = ({ summary, onSeeInvestments }: { summary: Summar
         )}
       </span>
     </StatCard>
-    <StatCard label={COPY.earned} value={`+${formatUsd(summary.earned)}`} valueClassName="text-badge-dot-success">
+    <StatCard
+      label={COPY.earned}
+      value={`+${formatUsd(summary.earned)}`}
+      valueClassName="text-badge-dot-success"
+      aside={<CardLink label={COPY.seeEarnings} onClick={onSeeInvestments} />}
+    >
       <span>{COPY.earnedLead}</span>
     </StatCard>
-    <StatCard label={COPY.apy} value={formatApy(summary.blendedApy)}>
+    <StatCard
+      label={COPY.apy}
+      value={formatApy(summary.blendedApy)}
+      aside={<CardLink label={COPY.compareByRisk} onClick={onCompareByRisk} />}
+    >
       <span>{COPY.apyLead}</span>
     </StatCard>
   </div>

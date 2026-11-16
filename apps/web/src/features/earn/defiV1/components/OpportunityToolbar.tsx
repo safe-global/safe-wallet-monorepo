@@ -25,7 +25,7 @@ import { activeFilterCount, NO_FILTERS, type ListFilters } from '../shelf'
 import type { GroupBy, RiskLevel } from '../types'
 
 const COPY = DEFI_V1_COPY.toolbar
-const GROUP_OPTIONS = Object.keys(COPY.groupByOption) as GroupBy[]
+const GROUP_OPTIONS = Object.keys(COPY.groupByOption) as Exclude<GroupBy, 'none'>[]
 const RISKS = Object.keys(DEFI_V1_COPY.risk) as RiskLevel[]
 
 const toggle = <T,>(values: T[], value: T): T[] =>
@@ -113,14 +113,18 @@ export const OpportunityToolbar = ({
         <DropdownMenu>
           <DropdownMenuTrigger render={<Button variant="outline" data-testid="group-by" />}>
             <Rows3 />
-            {COPY.groupBy}: {COPY.groupByOption[groupBy]}
+            {groupBy === 'none' ? COPY.groupBy : `${COPY.groupBy}: ${COPY.groupByOption[groupBy]}`}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-64">
             <DropdownMenuGroup>
               <DropdownMenuLabel>{COPY.groupBy}</DropdownMenuLabel>
               <DropdownMenuRadioGroup value={groupBy} onValueChange={(value) => onGroupBy(value as GroupBy)}>
                 {GROUP_OPTIONS.map((option) => (
-                  <DropdownMenuRadioItem key={option} value={option}>
+                  <DropdownMenuRadioItem
+                    key={option}
+                    value={option}
+                    onClick={() => option === groupBy && onGroupBy('none')}
+                  >
                     {COPY.groupByOption[option]}
                   </DropdownMenuRadioItem>
                 ))}
