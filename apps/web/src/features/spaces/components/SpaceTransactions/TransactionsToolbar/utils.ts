@@ -5,10 +5,7 @@ import { SPACE_QUEUE_FLAGS, SPACE_QUEUE_STATUSES, type SpaceQueueStatusOption } 
 const withCounts = (options: readonly SpaceQueueStatusOption[], counts?: SpaceQueueCounts) =>
   options.map((option) => [option, counts?.[option] ?? 0] as const)
 
-/**
- * The counts of the Status filter options. The gateway counts statuses and flags apart while the filter
- * ANDs them, so one group's counts are hidden while an option of the other group is selected.
- */
+/** Status filter counts; the gateway counts statuses and flags apart while the filter ANDs them, so one group hides the other's */
 export const getStatusCounts = (
   counts: SpaceQueueCounts | undefined,
   selected: SpaceQueueStatusOption[],
