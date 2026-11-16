@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import type { SpaceQueueSection } from '../../../../store/spaceQueueApi'
+import type { SpaceQueueSection } from '../../../../hooks/useSpaceQueue'
 import { QUEUE_COLUMNS } from '../../SpaceQueueRow'
 import SafeTitle from '../SafeTitle'
 

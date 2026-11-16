@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
-import type { SpaceQueueSection } from '../../../../store/spaceQueueApi'
+import type { SpaceQueueSection } from '../../../../hooks/useSpaceQueue'
 import ChainLogo from '../ChainLogo'
 
 const SafeTitle = ({ section }: { section: SpaceQueueSection }): ReactElement => {

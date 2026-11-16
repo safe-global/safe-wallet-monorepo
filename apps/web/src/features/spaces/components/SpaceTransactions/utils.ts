@@ -30,7 +30,7 @@ import {
   isVaultDepositTxInfo,
   isVaultRedeemTxInfo,
 } from '@/utils/transaction-guards'
-import type { SpaceQueueItems } from '../../store/spaceQueueApi'
+import type { SpaceQueueItems } from '../../hooks/useSpaceQueue'
 
 export const getSafeKey = (safeAddress: string): string => safeAddress.toLowerCase()
 

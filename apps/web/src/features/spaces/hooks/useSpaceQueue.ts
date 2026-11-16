@@ -1,5 +1,10 @@
-import { cgwClient } from '@safe-global/store/gateway/cgwClient'
-import type { SpaceQueuedItemPage, SpaceQueueSafe } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useMemo } from 'react'
+import type { SkipToken, SubscriptionOptions } from '@reduxjs/toolkit/query'
+import {
+  useSpaceTransactionsGetTransactionQueueV1Query,
+  type SpaceQueuedItemPage,
+  type SpaceQueueSafe,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { isTransactionQueuedItem } from '@/utils/transaction-guards'
 
 export type SpaceQueueItems = SpaceQueuedItemPage['results'][string][string]
@@ -38,17 +43,10 @@ const toSpaceQueue = (page: SpaceQueuedItemPage): SpaceQueue => {
 
 type SpaceQueueArgs = { spaceId: string }
 
-// Built on cgwClient, not the generated spaces api, which many tests replace with a partial mock
-export const spaceQueueApi = cgwClient.enhanceEndpoints({ addTagTypes: ['transactions'] }).injectEndpoints({
-  endpoints: (build) => ({
-    getSpaceQueue: build.query<SpaceQueue, SpaceQueueArgs>({
-      query: (args) => ({
-        url: `/v1/spaces/${args.spaceId}/transactions/queued`,
-      }),
-      transformResponse: (page: SpaceQueuedItemPage) => toSpaceQueue(page),
-      providesTags: ['transactions'],
-    }),
-  }),
-})
-
-export const { useGetSpaceQueueQuery } = spaceQueueApi
+/** The Space queue grouped by Safe and chain, read through the generated queue endpoint */
+export const useSpaceQueue = (args: SpaceQueueArgs | SkipToken, options?: SubscriptionOptions) => {
+  const result = useSpaceTransactionsGetTransactionQueueV1Query(args, options)
+  const data = useMemo(() => result.data && toSpaceQueue(result.data), [result.data])
+  const currentData = useMemo(() => result.currentData && toSpaceQueue(result.currentData), [result.currentData])
+  return { ...result, data, currentData }
+}

@@ -4,7 +4,7 @@ import { TableBody, TableHead, TableHeader, TableRow, tableVariants } from '@saf
 import { cn } from '@safe-global/views/utils/cn'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import useWallet from '@/hooks/wallets/useWallet'
-import type { SpaceQueueSection } from '../../../store/spaceQueueApi'
+import type { SpaceQueueSection } from '../../../hooks/useSpaceQueue'
 import SpaceQueueRow, { QUEUE_COLUMNS } from '../SpaceQueueRow'
 import { getSafeKey } from '../utils'
 import ChainHeaderRow from './ChainHeaderRow'
