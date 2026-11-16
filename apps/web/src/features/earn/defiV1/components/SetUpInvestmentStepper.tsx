@@ -136,14 +136,7 @@ export const SetUpInvestmentStepper = ({
     },
     {
       heading: COPY.stepHeadings[4],
-      content: (
-        <>
-          <ReviewSummary form={form} />
-          <Typography variant="paragraph-small" color="muted">
-            {COPY.approveOnce(form.safe.threshold, form.owners.length)}
-          </Typography>
-        </>
-      ),
+      content: <ReviewSummary form={form} />,
       valid: form.isValid,
     },
   ]
