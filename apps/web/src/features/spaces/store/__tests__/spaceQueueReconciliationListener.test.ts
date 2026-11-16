@@ -129,6 +129,11 @@ const pollQueue = async (
   await store.dispatch(spacesApi.endpoints.spaceTransactionsGetTransactionQueueV1.initiate({ spaceId, ...params }))
 }
 
+const hasRequestedTxDetails = (store: TestStore) =>
+  Object.values(store.getState()[cgwClient.reducerPath].queries).some(
+    (query) => query?.endpointName === 'transactionsGetTransactionByIdV1',
+  )
+
 const processingTx = (nonce: number, safe = safeAddress): PendingProcessingTx => ({
   chainId,
   safeAddress: safe,
@@ -343,7 +348,15 @@ describe('spaceQueueReconciliationListener', () => {
     )
   })
 
-  it('should leave a pending tx untouched when a filtered queue leaves it out', async () => {
+  it.each<[string, Omit<SpaceTransactionsGetTransactionQueueV1ApiArg, 'spaceId'>]>([
+    ['a status', { status: ['sign'] }],
+    ['the conflicting flag', { conflicting: true }],
+    ['the stale flag', { stale: true }],
+    ['a Safe', { safes: `${chainId}:${safeAddress}` }],
+    ['a network', { chainIds: chainId }],
+    ['a signer', { signers: faker.finance.ethereumAddress() }],
+    ['a search', { search: faker.lorem.word() }],
+  ])('should leave a pending tx untouched when a queue narrowed by %s leaves it out', async (_, params) => {
     const store = makeTestStore()
     const id = txId()
     const pendingTx = processingTx(4)
@@ -353,10 +366,10 @@ describe('spaceQueueReconciliationListener', () => {
     respondWithQueue(page([results([queuedTx(txId(), 2)], faker.string.numeric(5))]))
     respondWithDetails(id, { txStatus: TransactionStatus.SUCCESS })
 
-    await pollQueue(store, { status: ['sign'] })
+    await pollQueue(store, params)
 
     expect(store.getState().pendingTxs[id]).toEqual(pendingTx)
-    expect(mockTxDispatch).not.toHaveBeenCalledWith(TxEvent.SUCCESS, expect.anything())
+    expect(hasRequestedTxDetails(store)).toBe(false)
   })
 
   it('should leave a pending tx untouched while its nonce is still queued', async () => {

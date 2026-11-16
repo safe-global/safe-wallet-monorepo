@@ -24,15 +24,16 @@ const POST_EXECUTION_STATES = [
 
 type ListenerApi = { getState: () => RootState; dispatch: ThunkDispatch<RootState, unknown, UnknownAction> }
 
-const isFiltered = ({
+const isNarrowed = ({
   status,
   safes,
   chainIds,
   signers,
   conflicting,
   stale,
-}: SpaceTransactionsGetTransactionQueueV1ApiArg) =>
-  !!(status?.length || safes || chainIds || signers || conflicting || stale)
+  search,
+}: SpaceTransactionsGetTransactionQueueV1ApiArg): boolean =>
+  !!(status?.length || safes || chainIds || signers || conflicting || stale || search)
 
 const isSameSafe = (a: SpaceQueueSafe, b: SpaceQueueSafe): boolean =>
   a.chainId === b.chainId && sameAddress(a.safeAddress, b.safeAddress)
@@ -137,10 +138,10 @@ export const spaceQueueReconciliationListener = (listenerMiddleware: typeof list
     matcher,
     effect: async (action, { getState, dispatch }) => {
       const args = action.meta.arg.originalArgs
-      const queue = toSpaceQueue(action.payload, isFiltered(args))
+      const queue = toSpaceQueue(action.payload, isNarrowed(args))
       reconcileSignatures(queue, getState)
-      // A filtered queue leaves out transactions on purpose, so it cannot tell that one left the queue
-      if (isFiltered(args)) return
+      // A filtered or searched queue leaves out transactions on purpose, so it cannot tell that one left the queue
+      if (isNarrowed(args)) return
 
       const settled = Object.entries(selectPendingTxs(getState())).filter(
         ([txId, pendingTx]) =>
