@@ -55,13 +55,18 @@ export const SafeSidebarContent = ({
     [spaceId, safeAddress, queueSize],
   )
 
+  const defiV1 = useDefiV1()
+  const earnLabel = defiV1 ? (defiV1.framing === 'treasury' ? 'Treasury' : 'DeFi') : undefined
+
   const isItemDisabled = useCallback(
     (item: SidebarItemConfig) => {
       if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) return true
       if (!safe.deployed && UNDEPLOYED_SAFE_BLOCKED_ROUTES.includes(item.href)) return true
+      if (earnLabel && item.href === AppRoutes.earn)
+        return !isRouteEnabled(AppRoutes.stake, chain) && !isRouteEnabled(item.href, chain)
       return !isRouteEnabled(item.href, chain)
     },
-    [isBlockedCountry, safe.deployed, chain],
+    [isBlockedCountry, safe.deployed, chain, earnLabel],
   )
 
   const isItemActive = useCallback((item: SidebarItemConfig, pathname: string) => {
@@ -77,9 +82,6 @@ export const SafeSidebarContent = ({
     return pathname === item.href
   }, [])
 
-  const defiV1 = useDefiV1()
-  const earnLabel = defiV1 ? (defiV1.framing === 'treasury' ? 'Treasury' : 'DeFi') : undefined
-
   // Filter visible items by geoblocking and chain features
   const visibleMainNavigation = useMemo(() => {
     const items = safeMainNavigation.filter((item) => {
@@ -87,7 +89,8 @@ export const SafeSidebarContent = ({
       return isRouteEnabled(item.href, chain)
     })
     const earn = safeDefiGroup.items.find((item) => item.href === AppRoutes.earn)
-    if (!earnLabel || !earn || !isRouteEnabled(earn.href, chain)) return items
+    const hasYield = isRouteEnabled(AppRoutes.earn, chain) || isRouteEnabled(AppRoutes.stake, chain)
+    if (!earnLabel || !earn || !hasYield || isBlockedCountry) return items
     const after = items.findIndex((item) => item.href === AppRoutes.transactions.history) + 1
     return [...items.slice(0, after), { ...earn, label: earnLabel }, ...items.slice(after)]
   }, [chain, isBlockedCountry, earnLabel])
@@ -98,7 +101,7 @@ export const SafeSidebarContent = ({
       if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) return false
       return isRouteEnabled(item.href, chain)
     })
-    return { ...safeDefiGroup, items: filteredItems }
+    return { ...safeDefiGroup, label: earnLabel ? 'Trade' : safeDefiGroup.label, items: filteredItems }
   }, [chain, isBlockedCountry, earnLabel])
   // tx queue badge
 
