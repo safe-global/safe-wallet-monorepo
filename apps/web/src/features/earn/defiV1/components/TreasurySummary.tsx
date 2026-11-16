@@ -22,13 +22,13 @@ const StatCard = ({
   valueClassName?: string
   children?: ReactNode
 }) => (
-  <div className="flex min-h-32 flex-col gap-2 rounded-xl bg-card p-4">
+  <div className="flex flex-col gap-1 rounded-xl bg-card px-4 py-3">
     <span className="flex min-h-6 items-center justify-between gap-2 text-sm font-medium">
       {label}
       {aside}
     </span>
     <span className={cn('text-xl font-semibold tabular-nums', valueClassName)}>{value}</span>
-    {children && <div className="mt-auto flex flex-col gap-2 text-xs text-muted-foreground">{children}</div>}
+    {children && <div className="mt-auto flex flex-col gap-1.5 text-xs text-muted-foreground">{children}</div>}
   </div>
 )
 
@@ -54,7 +54,13 @@ export const TreasurySummary = ({
     <StatCard
       label={COPY.invested}
       value={percent.format(summary.investedShare)}
-      aside={<CardLink label={COPY.seeAll} onClick={onSeeInvestments} />}
+      aside={
+        summary.idle > 0 ? (
+          <CardLink label={COPY.putIdleToWork} onClick={onExploreIdle} />
+        ) : (
+          <CardLink label={COPY.seeAll} onClick={onSeeInvestments} />
+        )
+      }
     >
       <Progress
         value={summary.investedShare * 100}
@@ -68,11 +74,6 @@ export const TreasurySummary = ({
           formatCompactUsd(summary.idle),
         )}
       </span>
-      {summary.idle > 0 && (
-        <span>
-          <CardLink label={COPY.putIdleToWork} onClick={onExploreIdle} />
-        </span>
-      )}
     </StatCard>
     <StatCard
       label={COPY.earned}
