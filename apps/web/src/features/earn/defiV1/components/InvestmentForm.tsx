@@ -8,6 +8,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from '@safe-global/views
 import { Label } from '@safe-global/views/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
@@ -246,8 +247,22 @@ export const WhereFields = ({ form, labelled = true }: { form: InvestmentForm; l
                   placeholder={dedicatedSafeName(form.investment)}
                   onChange={(event) => form.setName(event.target.value)}
                 />
+                <InputGroupAddon align="inline-end">
+                  <Tooltip delay={150}>
+                    <TooltipTrigger
+                      render={
+                        <span
+                          className="flex text-muted-foreground"
+                          aria-label={COPY.nameHint(form.executors.length)}
+                        />
+                      }
+                    >
+                      <Info className="size-4" aria-hidden />
+                    </TooltipTrigger>
+                    <TooltipContent className="max-w-64">{COPY.nameHint(form.executors.length)}</TooltipContent>
+                  </Tooltip>
+                </InputGroupAddon>
               </InputGroup>
-              <span className="text-xs text-muted-foreground">{COPY.nameHint(form.executors.length)}</span>
             </div>
           )}
         </ChoiceCard>
