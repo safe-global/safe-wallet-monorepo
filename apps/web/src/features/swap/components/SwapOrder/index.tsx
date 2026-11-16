@@ -31,6 +31,7 @@ import {
 import EthHashInfo from '@/components/common/EthHashInfo'
 import TokenAmount from '@/components/common/TokenAmount'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import useChainId from '@/hooks/useChainId'
 import { isSwapOrderTxInfo, isSwapTransferOrderTxInfo, isTwapOrderTxInfo } from '@/utils/transaction-guards'
 import { EmptyRow } from '@safe-global/views/components/common/Table/EmptyRow'
 import { PartDuration } from '@safe-global/views/features/swap/components/SwapOrder/rows/PartDuration'
@@ -269,6 +270,8 @@ export const TwapOrder = ({ order }: { order: SwapTwapOrder }) => {
 }
 
 const SwapOrder = ({ txInfo, txData }: SwapOrderProps): ReactElement | null => {
+  const chainId = useChainId()
+
   if (!txInfo) return null
 
   if (isTwapOrderTxInfo(txInfo)) {
@@ -276,7 +279,7 @@ const SwapOrder = ({ txInfo, txData }: SwapOrderProps): ReactElement | null => {
   }
 
   if (isSwapOrderTxInfo(txInfo)) {
-    const extraActionsCount = txData ? countNonSwapOrderCalls(txData, txInfo) : 0
+    const extraActionsCount = txData ? countNonSwapOrderCalls(txData, txInfo, chainId) : 0
     return (
       <>
         {extraActionsCount > 0 && <SwapOrderExtraActionsWarning count={extraActionsCount} />}

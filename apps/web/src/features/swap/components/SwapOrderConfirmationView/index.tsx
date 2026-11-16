@@ -27,6 +27,7 @@ import { PartSellAmount } from '@safe-global/views/features/swap/components/Swap
 import { PartBuyAmount } from '@safe-global/views/features/swap/components/SwapOrder/rows/PartBuyAmount'
 import { OrderFeeConfirmationView } from './OrderFeeConfirmationView'
 import { countNonSwapOrderCalls, isSettingTwapFallbackHandler } from '../../helpers/utils'
+import useChainId from '@/hooks/useChainId'
 import { TwapFallbackHandlerWarning } from '@safe-global/views/features/swap/components/TwapFallbackHandlerWarning'
 import { SwapOrderExtraActionsWarning } from '@safe-global/views/features/swap/components/SwapOrderExtraActionsWarning'
 
@@ -51,8 +52,9 @@ const SwapOrderConfirmation = ({ order, decodedData, settlementContract, txData 
   const isSellOrder = kind === 'sell'
   const isChangingFallbackHandler = decodedData && isSettingTwapFallbackHandler(decodedData)
   const explorerUrl = !isTwapOrder ? order.explorerUrl : undefined
+  const chainId = useChainId()
   const extraActionsCount =
-    order.type === TransactionInfoType.SWAP_ORDER && txData ? countNonSwapOrderCalls(txData, order) : 0
+    order.type === TransactionInfoType.SWAP_ORDER && txData ? countNonSwapOrderCalls(txData, order, chainId) : 0
 
   return (
     <>

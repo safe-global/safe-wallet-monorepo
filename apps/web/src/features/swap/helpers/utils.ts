@@ -9,6 +9,7 @@ import type { AnyAppDataDocVersion, cowAppDataLatestScheme as latest } from '@co
 import type { OnTradeParamsPayload } from '@cowprotocol/events'
 import type { BaseTransaction } from '@safe-global/safe-apps-sdk'
 import { decodeMultiSendData } from '@safe-global/protocol-kit'
+import { type SupportedChainId, WRAPPED_NATIVE_CURRENCIES } from '@cowprotocol/cow-sdk'
 import { OperationType } from '@safe-global/types-kit'
 import {
   APPROVAL_SIGNATURE_HASH,
@@ -298,16 +299,27 @@ const isApprovalTo = (data: string, spender: string): boolean => {
   }
 }
 
-const isPartOfSwapOrder = (call: BatchCall, order: DisplayedOrder, deployment?: CowDeployment): boolean => {
-  if (call.operation === OperationType.DelegateCall) return false
+const isCowSupportedChainId = (chainId: number): chainId is SupportedChainId => chainId in WRAPPED_NATIVE_CURRENCIES
+
+const getWrappedNativeAddress = (chainId: string): string | undefined => {
+  const id = Number(chainId)
+  return isCowSupportedChainId(id) ? WRAPPED_NATIVE_CURRENCIES[id].address : undefined
+}
+
+const isWrapOfSellToken = (call: BatchCall, order: DisplayedOrder, chainId: string): boolean => {
+  const wrappedNative = getWrappedNativeAddress(chainId)
+  return (
+    getSelector(call.data) === WRAP_SIGHASH &&
+    wrappedNative !== undefined &&
+    isSameAddress(call.to, wrappedNative) &&
+    isSameAddress(call.to, order.sellToken.address)
+  )
+}
+
+const isOrderCall = (call: BatchCall, order: DisplayedOrder, deployment?: CowDeployment): boolean => {
+  if (BigInt(call.value || '0') !== 0n || !deployment) return false
 
   const selector = getSelector(call.data)
-  const value = BigInt(call.value || '0')
-
-  if (selector === WRAP_SIGHASH) {
-    return isSameAddress(call.to, order.sellToken.address) && value <= BigInt(order.sellAmount)
-  }
-  if (value !== 0n || !deployment) return false
   if (selector === PRE_SIGN_SIGHASH) return isPresignatureOfOrder(call, deployment, order.uid)
   if (selector === APPROVAL_SIGNATURE_HASH) {
     return isSameAddress(call.to, order.sellToken.address) && isApprovalTo(call.data, deployment.vaultRelayer)
@@ -315,33 +327,45 @@ const isPartOfSwapOrder = (call: BatchCall, order: DisplayedOrder, deployment?: 
   return false
 }
 
-const countCallsOutsideOrder = (calls: BatchCall[], order: DisplayedOrder): number => {
+const countCallsOutsideOrder = (calls: BatchCall[], order: DisplayedOrder, chainId: string): number => {
   const deployment = COW_DEPLOYMENTS.find((item) => calls.some((call) => isPresignatureOfOrder(call, item, order.uid)))
-  return calls.filter((call) => !isPartOfSwapOrder(call, order, deployment)).length
+  let wrappedAmount = 0n
+
+  return calls.filter((call) => {
+    if (call.operation === OperationType.DelegateCall) return true
+
+    if (isWrapOfSellToken(call, order, chainId)) {
+      wrappedAmount += BigInt(call.value || '0')
+      return wrappedAmount > BigInt(order.sellAmount)
+    }
+
+    return !isOrderCall(call, order, deployment)
+  }).length
 }
 
 /**
  * Counts the calls of a swap order transaction that are not part of the displayed order: anything other than
- * its presignature, the sell token approval to the VaultRelayer of the same CoW deployment or a wrap of at most
- * the sell amount. A batch is only inspected when it is a delegate call to a trusted MultiSend, otherwise it counts
- * as one call.
+ * its presignature, the sell token approval to the VaultRelayer of the same CoW deployment, or wraps of the
+ * chain's wrapped native token (when it is the sell token) adding up to at most the sell amount.
+ * A batch is only inspected when it is a delegate call to a trusted MultiSend, otherwise it counts as one call.
  */
 export const countNonSwapOrderCalls = (
   txData: Pick<TransactionData, 'hexData' | 'to' | 'value' | 'operation' | 'trustedDelegateCallTarget'>,
   order: DisplayedOrder,
+  chainId: string,
 ): number => {
   const { hexData } = txData
   if (!hexData) return 0
 
   if (!isMultiSendCalldata(hexData)) {
     const call = { to: txData.to.value, value: txData.value ?? '0', data: hexData, operation: txData.operation }
-    return countCallsOutsideOrder([call], order)
+    return countCallsOutsideOrder([call], order, chainId)
   }
 
   if (txData.operation !== OperationType.DelegateCall || txData.trustedDelegateCallTarget !== true) return 1
 
   try {
-    return countCallsOutsideOrder(decodeMultiSendData(hexData), order)
+    return countCallsOutsideOrder(decodeMultiSendData(hexData), order, chainId)
   } catch {
     return 1
   }
