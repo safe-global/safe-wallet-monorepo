@@ -37,7 +37,7 @@
     font-weight: 600;
   }
 
-  /* Token logos in the label; the tx type icon is outside it */
+  /* Hides the token logos; !important beats IframeIcon's inline display: block */
   iframe,
   img {
     display: none !important;
