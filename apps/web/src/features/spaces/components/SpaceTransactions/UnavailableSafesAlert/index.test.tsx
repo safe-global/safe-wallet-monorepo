@@ -1,14 +1,13 @@
 import { faker } from '@faker-js/faker'
+import { http, HttpResponse } from 'msw'
+import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { GATEWAY_URL } from '@/config/gateway'
+import { server } from '@/tests/server'
 import { fireEvent, render, screen, within } from '@/tests/test-utils'
 import { chainBuilder } from '@/tests/builders/chains'
 import UnavailableSafesAlert, { countSafeAddresses, getUnavailableTitle, SPACE_QUEUE_MAX_SAFES } from '.'
-
-let mockSpaceSafes: { safes: Record<string, string[]> } = { safes: {} }
-jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
-  useSpaceSafesGetV1Query: () => ({ currentData: mockSpaceSafes }),
-}))
 
 const mockNames = new Map<string, string>()
 jest.mock('@/hooks/useAllAddressBooks', () => ({
@@ -22,7 +21,6 @@ const mockChains = [
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: () => ({ configs: mockChains }),
-  useChain: (chainId: string) => mockChains.find((chain) => chain.chainId === chainId),
 }))
 
 const address = () => checksumAddress(faker.finance.ethereumAddress())
@@ -36,17 +34,25 @@ describe('UnavailableSafesAlert', () => {
     { chainId: '137', safeAddress: unnamed },
   ]
 
+  const respondWithSpaceSafes = (spaceSafes: Record<string, string[]>) =>
+    server.use(http.get(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () => HttpResponse.json({ safes: spaceSafes })))
+
   beforeEach(() => {
-    mockSpaceSafes = { safes: { '1': [named], '137': [unnamed] } }
+    setBaseUrl(GATEWAY_URL)
+    respondWithSpaceSafes({ '1': [named], '137': [unnamed] })
     mockNames.clear()
     mockNames.set(named, 'Treasury')
   })
 
-  it('names each Safe account and its network once expanded', () => {
+  it('counts the unavailable Safe accounts in the title', () => {
     render(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={jest.fn()} />)
 
     expect(screen.getByText("2 Safe accounts couldn't be loaded")).toBeInTheDocument()
     expect(screen.queryByText('Treasury')).not.toBeInTheDocument()
+  })
+
+  it('names each Safe account and its network once expanded', () => {
+    render(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={jest.fn()} />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Show Safe accounts' }))
 
@@ -58,38 +64,44 @@ describe('UnavailableSafesAlert', () => {
     expect(items[1]).toHaveTextContent('on Polygon')
   })
 
-  it('explains the limit when the Workspace holds more Safe accounts than the queue reads', () => {
-    mockSpaceSafes = {
-      safes: { '1': Array.from({ length: SPACE_QUEUE_MAX_SAFES + 1 }, address) },
-    }
+  it('explains the limit when the Workspace holds more Safe accounts than the queue reads', async () => {
+    respondWithSpaceSafes({ '1': Array.from({ length: SPACE_QUEUE_MAX_SAFES + 1 }, address) })
 
     render(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={jest.fn()} />)
 
-    expect(screen.getByText(/covers up to 100 Safe accounts/)).toBeInTheDocument()
+    expect(await screen.findByText(/covers up to 100 Safe accounts/)).toBeInTheDocument()
+    expect(screen.getByText(/may not be deployed on that network yet/)).toBeInTheDocument()
   })
 
-  it('suggests why otherwise', () => {
+  it('suggests why when the Workspace is within the limit', async () => {
     render(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={jest.fn()} />)
 
-    expect(screen.getByText(/may not be deployed on that network yet/)).toBeInTheDocument()
+    expect(await screen.findByText(/may not be deployed on that network yet/)).toBeInTheDocument()
     expect(screen.queryByText(/covers up to/)).not.toBeInTheDocument()
   })
 
-  it('tries again, but not while a retry is running', () => {
+  it('tries again', () => {
     const onRetry = jest.fn()
-    const { rerender } = render(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={onRetry} />)
+    render(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={onRetry} />)
 
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
-    expect(onRetry).toHaveBeenCalledTimes(1)
 
-    rerender(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={onRetry} isRetrying />)
+    expect(onRetry).toHaveBeenCalledTimes(1)
+  })
+
+  it('disables trying again while a retry is running', () => {
+    render(<UnavailableSafesAlert spaceId={spaceId} safes={safes} onRetry={jest.fn()} isRetrying />)
+
     expect(screen.getByRole('button', { name: 'Try again' })).toBeDisabled()
   })
 })
 
 describe('getUnavailableTitle', () => {
-  it('counts one or many Safe accounts', () => {
+  it('uses the singular for one Safe account', () => {
     expect(getUnavailableTitle(1)).toBe("1 Safe account couldn't be loaded")
+  })
+
+  it('uses the plural for several Safe accounts', () => {
     expect(getUnavailableTitle(3)).toBe("3 Safe accounts couldn't be loaded")
   })
 })
@@ -99,6 +111,9 @@ describe('countSafeAddresses', () => {
     const safe = address()
 
     expect(countSafeAddresses({ '1': [safe], '137': [safe.toLowerCase()], '10': [address()] })).toBe(2)
+  })
+
+  it('counts nothing when the Workspace Safes are not loaded', () => {
     expect(countSafeAddresses(undefined)).toBe(0)
   })
 })

@@ -15,13 +15,7 @@ const useSetScopedTxFlow = (): TxModalContextType['setTxFlow'] => {
       const [txFlow, onClose, shouldWarn] = args
       if (!txFlow || !chainId || !safeAddress) return setTxFlow(...args)
 
-      setTxFlow(
-        <SafeScopeProvider initial={{ chainId, safeAddress }} pollSafeInfo={false}>
-          {txFlow}
-        </SafeScopeProvider>,
-        onClose,
-        shouldWarn,
-      )
+      setTxFlow(<SafeScopeProvider initial={{ chainId, safeAddress }}>{txFlow}</SafeScopeProvider>, onClose, shouldWarn)
     },
     [setTxFlow, chainId, safeAddress],
   )

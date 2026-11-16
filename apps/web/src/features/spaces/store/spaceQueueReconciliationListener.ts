@@ -1,6 +1,10 @@
 import type { ThunkDispatch, UnknownAction } from '@reduxjs/toolkit'
 import type { listenerMiddlewareInstance, RootState } from '@/store/index'
-import { cgwApi as spacesApi, type SpaceQueueSafe } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import {
+  cgwApi as spacesApi,
+  type SpaceQueueSafe,
+  type SpaceTransactionsGetTransactionQueueV1ApiArg,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { cgwApi as transactionsApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
@@ -8,7 +12,7 @@ import { PendingStatus, selectPendingTxs, type PendingTx } from '@/store/pending
 import { isMultisigExecutionInfo, isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
-import { hasSpaceQueueFilters, spaceQueueApi, type SpaceQueue } from './spaceQueueApi'
+import { toSpaceQueue, type SpaceQueue } from '../hooks/useSpaceQueue'
 
 const SIGNING_STATES = [PendingStatus.SIGNING, PendingStatus.NESTED_SIGNING]
 const POST_EXECUTION_STATES = [
@@ -19,6 +23,17 @@ const POST_EXECUTION_STATES = [
 ]
 
 type ListenerApi = { getState: () => RootState; dispatch: ThunkDispatch<RootState, unknown, UnknownAction> }
+
+const isNarrowed = ({
+  status,
+  safes,
+  chainIds,
+  signers,
+  conflicting,
+  stale,
+  search,
+}: SpaceTransactionsGetTransactionQueueV1ApiArg): boolean =>
+  !!(status?.length || safes || chainIds || signers || conflicting || stale || search)
 
 const isSameSafe = (a: SpaceQueueSafe, b: SpaceQueueSafe): boolean =>
   a.chainId === b.chainId && sameAddress(a.safeAddress, b.safeAddress)
@@ -127,23 +142,23 @@ const settleExecution = async (
  * signed or executed from the Space queue. This settles them from the polled Space queue.
  */
 export const spaceQueueReconciliationListener = (listenerMiddleware: typeof listenerMiddlewareInstance) => {
-  const matcher = spaceQueueApi?.endpoints?.getSpaceQueue?.matchFulfilled
+  const matcher = spacesApi?.endpoints?.spaceTransactionsGetTransactionQueueV1?.matchFulfilled
   // Tests that mock the spaces module leave no endpoint to watch.
   if (!matcher) return
 
   listenerMiddleware.startListening({
     matcher,
     effect: async (action, { getState, dispatch }) => {
-      const { spaceId, filters, search } = action.meta.arg.originalArgs
-      const queue = action.payload
+      const args = action.meta.arg.originalArgs
+      const queue = toSpaceQueue(action.payload, isNarrowed(args))
       reconcileSignatures(queue, getState)
       // A filtered or searched queue leaves out transactions on purpose, so it cannot tell that one left the queue
-      if (hasSpaceQueueFilters(filters) || search) return
+      if (isNarrowed(args)) return
 
       const settled = Object.entries(selectPendingTxs(getState())).filter(
         ([txId, pendingTx]) =>
           POST_EXECUTION_STATES.includes(pendingTx.status) &&
-          hasLeftQueue(queue, pendingTx, txId, isSpaceSafe(getState(), spaceId, pendingTx)),
+          hasLeftQueue(queue, pendingTx, txId, isSpaceSafe(getState(), args.spaceId, pendingTx)),
       )
 
       await Promise.all(settled.map(([txId, pendingTx]) => settleExecution(txId, pendingTx, { getState, dispatch })))

@@ -7,8 +7,17 @@ import { act, fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { chainBuilder } from '@/tests/builders/chains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import { trackEvent } from '@/services/analytics'
+import { REJECT_TX_EVENTS } from '@/services/analytics/events/reject-tx'
 import RowActionsMenu, { getTxLink } from '.'
 import { DeleteTxDialogProvider } from './DeleteTxDialog'
+
+jest.mock('@/services/analytics', () =>
+  (
+    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
+  ).createAnalyticsMock(),
+)
+const mockTrackEvent = trackEvent as jest.MockedFunction<typeof trackEvent>
 
 const mockSetTxFlow = jest.fn()
 jest.mock('@/components/tx-flow/safe-scope/useSetScopedTxFlow', () => ({
@@ -105,6 +114,7 @@ const openMenu = () => fireEvent.click(screen.getByRole('button', { name: /More 
 describe('RowActionsMenu', () => {
   beforeEach(() => {
     mockSetTxFlow.mockReset()
+    mockTrackEvent.mockClear()
     mockIsOk.current = true
     mockWallet.current = null
     mockIsNonceDeletable.mockReturnValue(true)
@@ -133,14 +143,54 @@ describe('RowActionsMenu', () => {
     renderMenu(tx(7), false)
     openMenu()
 
-    const reject = await screen.findByRole('menuitem', { name: 'Reject' })
-    expect(reject).toHaveAttribute('aria-disabled', 'true')
-    await userEvent.hover(reject.parentElement!)
-    expect(await screen.findByText('Transaction with nonce 7 already has a reject transaction')).toBeInTheDocument()
+    expect(await screen.findByRole('menuitem', { name: 'Reject' })).toHaveAttribute('aria-disabled', 'true')
     expect(screen.getByRole('menuitem', { name: 'Replace with a transfer' })).not.toHaveAttribute(
       'aria-disabled',
       'true',
     )
+  })
+
+  it('explains why a nonce cannot be rejected twice', async () => {
+    renderMenu(tx(7), false)
+    openMenu()
+
+    const item = await screen.findByRole('menuitem', { name: 'Reject' })
+    await userEvent.hover(item.parentElement!)
+    expect(await screen.findByText('Transaction with nonce 7 already has a reject transaction')).toBeInTheDocument()
+  })
+
+  it('explains a rejected nonce to a wallet that cannot sign', async () => {
+    mockIsOk.current = false
+    renderMenu(tx(7), false)
+    openMenu()
+
+    const item = await screen.findByRole('menuitem', { name: 'Reject' })
+    await userEvent.hover(item.parentElement!)
+    expect(await screen.findByText('Transaction with nonce 7 already has a reject transaction')).toBeInTheDocument()
+  })
+
+  it('tracks replacing the transaction', async () => {
+    renderMenu(tx(12))
+    openMenu()
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Replace with a transfer' }))
+
+    expect(mockTrackEvent).toHaveBeenCalledWith(REJECT_TX_EVENTS.REPLACE_TX_BUTTON, undefined)
+  })
+
+  it('tracks rejecting the transaction on-chain', async () => {
+    renderMenu(tx(7))
+    openMenu()
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Reject' }))
+
+    expect(mockTrackEvent).toHaveBeenCalledWith(REJECT_TX_EVENTS.REJECT_ONCHAIN_BUTTON, undefined)
+  })
+
+  it('does not track a disabled rejection', async () => {
+    renderMenu(tx(7), false)
+    openMenu()
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Reject' }))
+
+    expect(mockTrackEvent).not.toHaveBeenCalled()
   })
 
   it('disables replacing and rejecting for a wallet that cannot sign, but still copies the link', async () => {

@@ -30,14 +30,15 @@ import {
   isVaultDepositTxInfo,
   isVaultRedeemTxInfo,
 } from '@/utils/transaction-guards'
-import type { SpaceQueueItems } from '../../store/spaceQueueApi'
+import type { QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
+import type { SpaceQueueItems } from '../../hooks/useSpaceQueue'
 
 export const getSafeKey = (safeAddress: string): string => safeAddress.toLowerCase()
 
 export const getNonce = (tx: Transaction): number | undefined =>
   isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo.nonce : undefined
 
-export type QueueStatus = 'execute' | 'sign' | 'waiting' | 'blocked'
+export type { QueueStatus }
 
 export const getQueueStatus = (tx: Transaction, isNext: boolean, walletAddress?: string): QueueStatus => {
   if (isAwaitingExecution(tx.txStatus)) return isNext ? 'execute' : 'blocked'
@@ -99,8 +100,7 @@ export const getCounterparty = (txInfo: TransactionInfo): Counterparty | undefin
   if (isCancellationTxInfo(txInfo)) return undefined
   if (isMultiSendTxInfo(txInfo)) return { join: 'via', party: txInfo.to }
   if (isCustomTxInfo(txInfo)) {
-    // A migration is a delegate call that changes the Safe itself. Read `to` first: the migration guard claims every
-    // custom call, so txInfo is narrowed to never once it returns false
+    // Read `to` first: the migration guard narrows txInfo to never once it returns false
     const { to } = txInfo
     return isMigrateToL2TxInfo(txInfo) ? undefined : { join: 'on', party: to }
   }
