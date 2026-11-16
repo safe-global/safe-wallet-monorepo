@@ -68,7 +68,7 @@ export const OpportunityToolbar = ({
   chains,
   compareCount,
   onCompare,
-  operations,
+  invest,
   onDeposit,
 }: {
   search: string
@@ -81,7 +81,7 @@ export const OpportunityToolbar = ({
   chains: string[]
   compareCount: number
   onCompare: () => void
-  operations: ReactNode
+  invest: ReactNode
   onDeposit?: () => void
 }) => {
   const filterCount = activeFilterCount(filters)
@@ -202,10 +202,10 @@ export const OpportunityToolbar = ({
           {COPY.compare}
           {compareCount > 0 && <Badge variant="subtle">{compareCount}</Badge>}
         </Button>
-        {operations}
-        <Button size="action" disabled={!onDeposit} onClick={onDeposit} data-testid="toolbar-deposit">
+        <Button variant="outline" size="action" disabled={!onDeposit} onClick={onDeposit} data-testid="toolbar-deposit">
           {COPY.deposit}
         </Button>
+        {invest}
       </div>
     </div>
   )

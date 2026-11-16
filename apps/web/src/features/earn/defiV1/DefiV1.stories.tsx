@@ -53,7 +53,7 @@ const meta = {
     framing: { control: 'inline-radio', options: ['treasury', 'defi'] },
     nudge: { control: 'inline-radio', options: ['home', 'assets', 'off'] },
     plan: { control: 'inline-radio', options: ['free', 'pro'] },
-    setup: { control: 'inline-radio', options: ['dialog', 'drawer'] },
+    setup: { control: 'inline-radio', options: ['dialog', 'drawer', 'stepper'] },
   },
   render: ({ page }) => {
     const PageComponent = PAGES[page]
@@ -100,10 +100,12 @@ export const DefiList: Story = {
 export const TreasuryPro: Story = {
   ...at('earn', { plan: 'pro' }),
   play: async ({ canvasElement }) => {
-    await within(canvasElement).findByTestId('operations-button')
+    await within(canvasElement).findByTestId('invest-button')
   },
 }
 
 export const TreasuryProSetupDrawer: Story = at('earn', { plan: 'pro', setup: 'drawer' })
+
+export const TreasuryProSetupStepper: Story = at('earn', { plan: 'pro', setup: 'stepper' })
 
 export const Partner: Story = at('partner')

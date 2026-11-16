@@ -47,8 +47,8 @@ export type DefiV1Config = {
   setup: DefiV1Setup
 }
 
-/** How set up investment opens: one form in a dialog, or a stepper in a side panel. */
-export type DefiV1Setup = 'dialog' | 'drawer'
+/** How set up investment opens: one form in a dialog, a stepper in a side panel, or a stepper in a dialog. */
+export type DefiV1Setup = 'dialog' | 'drawer' | 'stepper'
 
 export type LiquidityBucket = 'operating' | 'reserves' | 'strategic'
 
