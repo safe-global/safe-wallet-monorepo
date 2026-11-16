@@ -62,6 +62,7 @@ const setup = ({
   jest.mocked(useUpsertWorkspaceSafeNames).mockReturnValue(upsert)
   jest.mocked(useSpaceAddressBookState).mockReturnValue({
     items: addressBook,
+    tags: [],
     isLoading: false,
     isError: false,
     refetch: jest.fn(),
