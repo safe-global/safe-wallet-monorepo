@@ -38,7 +38,7 @@ import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxConte
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
-import type { SignerWallet } from '@/components/common/WalletProvider'
+import type { SignerWallet } from '@/components/common/WalletProvider/WalletContext'
 import { supportsNestedTxEnvelope, type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
 
 // The in-app nested signer only ever proposes in its parent
