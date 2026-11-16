@@ -52,6 +52,31 @@ describe('FacetOptionList', () => {
     expect(onCreate).toHaveBeenCalledWith('Vendor')
   })
 
+  it('creates on Enter and clears the search once created', async () => {
+    const onCreate = jest.fn().mockResolvedValue(true)
+    render(
+      <FacetOptionList label="Role" options={options} value={[]} onChange={jest.fn()} searchable onCreate={onCreate} />,
+    )
+
+    await userEvent.type(screen.getByRole('searchbox'), 'Vendor{Enter}')
+
+    expect(onCreate).toHaveBeenCalledWith('Vendor')
+    await waitFor(() => expect(screen.getByRole('searchbox')).toHaveValue(''))
+  })
+
+  it('keeps the search text when the create is refused', async () => {
+    const onCreate = jest.fn().mockResolvedValue(false)
+    render(
+      <FacetOptionList label="Role" options={options} value={[]} onChange={jest.fn()} searchable onCreate={onCreate} />,
+    )
+
+    await userEvent.type(screen.getByRole('searchbox'), 'Vendor')
+    await userEvent.click(screen.getByRole('option', { name: /Create/ }))
+
+    await waitFor(() => expect(onCreate).toHaveBeenCalled())
+    expect(screen.getByRole('searchbox')).toHaveValue('Vendor')
+  })
+
   it('does not offer to create a value that already exists, ignoring case', async () => {
     render(
       <FacetOptionList

@@ -83,6 +83,7 @@ describe('TagPicker', () => {
     await open()
     await userEvent.type(screen.getByRole('searchbox'), 'EU2')
     await userEvent.click(screen.getByRole('option', { name: /Create/ }))
+    await userEvent.clear(screen.getByRole('searchbox'))
     await userEvent.click(screen.getByRole('option', { name: /Vendor/ }))
     finishCreate({ tag: created })
 

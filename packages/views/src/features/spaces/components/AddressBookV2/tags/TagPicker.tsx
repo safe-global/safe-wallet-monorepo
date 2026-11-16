@@ -4,8 +4,10 @@ import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { TagChips } from './TagChip'
 import TagMenu, { existingTagIds, type TagActions } from './TagMenu'
-import { CONTACT_TAG_LIMIT_MESSAGE, MAX_TAGS_PER_CONTACT } from './tagRules'
+import { CONTACT_TAG_LIMIT_MESSAGE, MAX_TAGS_PER_CONTACT } from '@safe-global/utils/validation/tags'
 import type { WorkspaceTag } from '../types'
+
+export const TAGS_DISCLAIMER = 'Tags are labels your team writes. They are not a verification.'
 
 export type TagPickerProps = {
   tags: WorkspaceTag[]
@@ -21,7 +23,8 @@ export type TagPickerProps = {
 /** A contact's tags in Edit tags and Add / Edit contact: up to 3, shown beside the button; a tag created here is ticked. */
 const TagPicker = ({ tags, value, onChange, actions, onLimitReached, disabled }: TagPickerProps) => {
   const selected = existingTagIds(value, tags)
-  const isFull = (count: number) => count > MAX_TAGS_PER_CONTACT
+  const selectedTags = selected.flatMap((id) => tags.find((tag) => tag.id === id) ?? [])
+  const exceedsTagLimit = (count: number) => count > MAX_TAGS_PER_CONTACT
   // A tick made while a create is in flight must survive it
   const latestSelected = useRef(selected)
   useEffect(() => {
@@ -30,7 +33,7 @@ const TagPicker = ({ tags, value, onChange, actions, onLimitReached, disabled }:
 
   const tickCreated = (tagId: number) => {
     const next = [...latestSelected.current, tagId]
-    if (!isFull(next.length)) onChange(next)
+    if (!exceedsTagLimit(next.length)) onChange(next)
   }
 
   return (
@@ -51,18 +54,18 @@ const TagPicker = ({ tags, value, onChange, actions, onLimitReached, disabled }:
         tags={tags}
         selected={selected}
         onSelect={(tagIds) => {
-          if (isFull(tagIds.length)) return CONTACT_TAG_LIMIT_MESSAGE
+          if (exceedsTagLimit(tagIds.length)) return CONTACT_TAG_LIMIT_MESSAGE
           onChange(tagIds)
           return undefined
         }}
-        onMerged={onChange}
+        onSelectionRemapped={onChange}
         clearLabel="Clear"
         actions={actions}
         onLimitReached={onLimitReached}
-        beforeCreate={() => (isFull(selected.length + 1) ? CONTACT_TAG_LIMIT_MESSAGE : undefined)}
+        beforeCreate={() => (exceedsTagLimit(selected.length + 1) ? CONTACT_TAG_LIMIT_MESSAGE : undefined)}
         onCreated={(tag) => tickCreated(tag.id)}
       />
-      <TagChips tags={selected.flatMap((id) => tags.find((tag) => tag.id === id) ?? [])} />
+      <TagChips tags={selectedTags} />
     </div>
   )
 }

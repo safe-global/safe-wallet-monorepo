@@ -1,11 +1,9 @@
-import { sanitizeName } from '@safe-global/utils/validation/names'
+import { sanitizeName } from './names'
 
-// Mirrors CGW's tag rules so a bad tag is explained before the request; CGW stays the authority.
+// Workspace address book tag rules, mirrored from CGW so a bad tag is explained before the request; CGW stays the authority.
 export const MAX_TAGS_PER_CONTACT = 3
 export const MAX_TAGS_PER_WORKSPACE = 8
 export const TAG_NAME_MAX_LENGTH = 32
-
-export const TAGS_DISCLAIMER = 'Tags are labels your team writes. They are not a verification.'
 
 export const CONTACT_TAG_LIMIT_MESSAGE = `A contact can have at most ${MAX_TAGS_PER_CONTACT} tags`
 export const WORKSPACE_TAG_LIMIT_MESSAGE = `Your workspace has ${MAX_TAGS_PER_WORKSPACE} tags. Rename or delete one to add another.`

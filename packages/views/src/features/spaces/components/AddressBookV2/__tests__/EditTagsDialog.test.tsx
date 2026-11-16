@@ -56,6 +56,27 @@ describe('EditTagsDialog', () => {
     expect(screen.getByTestId('save-tags-btn')).toBeDisabled()
   })
 
+  it('keeps Save disabled while a save is in flight', async () => {
+    renderDialog({ isSubmitting: true })
+
+    await userEvent.click(screen.getByRole('button', { name: /Tags/ }))
+    await waitFor(() => expect(screen.getByRole('listbox', { name: 'Tags' })).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('option', { name: /Internal/ }))
+    await userEvent.keyboard('{Escape}')
+
+    expect(screen.getByTestId('save-tags-btn')).toBeDisabled()
+  })
+
+  it('closes on Cancel without saving', async () => {
+    const onClose = jest.fn()
+    const { onSave } = renderDialog({ onClose })
+
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    expect(onClose).toHaveBeenCalled()
+    expect(onSave).not.toHaveBeenCalled()
+  })
+
   it('shows the error CGW returned', () => {
     renderDialog({ error: 'Your workspace has 8 tags. Rename or delete one to add another.' })
 

@@ -27,9 +27,10 @@ export type FacetOptionListProps<V extends string = string> = {
   emptyText?: string
   /**
    * Called with the current search text when no option matches it. When provided, a
-   * "Create '<text>'" row appears; used by the tag picker.
+   * "Create '<text>'" row appears; used by the tag picker. Resolves to whether the option was
+   * created; the search text stays when it was not.
    */
-  onCreate?: (text: string) => void
+  onCreate?: (text: string) => Promise<boolean> | boolean
   /** Whether the search text names an existing option, so no "Create" row is offered. Defaults to ignoring case. */
   isSameText?: (a: string, b: string) => boolean
   /**
@@ -44,12 +45,15 @@ export type FacetOptionListProps<V extends string = string> = {
 
 const SEARCHABLE_THRESHOLD = 8
 
+const OPTION_ROW =
+  'hover:bg-accent focus-visible:bg-accent flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none'
+
 const optionText = (option: FacetOption): string =>
   option.searchText ?? (typeof option.label === 'string' ? option.label : String(option.value))
 
 /**
  * The checkbox list of a facet: optional search, a count per option, optional create, rename and
- * delete. Used alone inside a popover with several sections, or through `FacetFilter`.
+ * delete. Used inside a popover with other sections.
  */
 export function FacetOptionList<V extends string = string>({
   label,
@@ -115,10 +119,9 @@ export function FacetOptionList<V extends string = string>({
     trimmedQuery.length > 0 &&
     !options.some((option) => isSameText(optionText(option), trimmedQuery))
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!canCreate || !onCreate) return
-    onCreate(trimmedQuery)
-    setQuery('')
+    if (await onCreate(trimmedQuery)) setQuery('')
   }
 
   return (
@@ -133,7 +136,7 @@ export function FacetOptionList<V extends string = string>({
           onKeyDown={(event) => {
             if (event.key === 'Enter' && canCreate) {
               event.preventDefault()
-              handleCreate()
+              void handleCreate()
             }
           }}
         />
@@ -220,9 +223,7 @@ export function FacetOptionList<V extends string = string>({
                 role="option"
                 aria-selected={isSelected}
                 onClick={() => toggle(option.value)}
-                className={cn(
-                  'hover:bg-accent focus-visible:bg-accent flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none',
-                )}
+                className={cn(OPTION_ROW, 'min-w-0 flex-1')}
               >
                 <Checkbox checked={isSelected} tabIndex={-1} className="pointer-events-none" />
                 <span className="min-w-0 flex-1 truncate">{option.label}</span>
@@ -269,8 +270,8 @@ export function FacetOptionList<V extends string = string>({
               type="button"
               role="option"
               aria-selected={false}
-              onClick={handleCreate}
-              className="hover:bg-accent focus-visible:bg-accent flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none"
+              onClick={() => void handleCreate()}
+              className={cn(OPTION_ROW, 'w-full')}
             >
               <span className="text-muted-foreground">Create</span>
               <span className="truncate">&lsquo;{trimmedQuery}&rsquo;</span>

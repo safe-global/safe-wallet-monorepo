@@ -1,7 +1,8 @@
+import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { sameTagName } from '@safe-global/utils/validation/tags'
 import { FacetOptionList, type FacetOption } from '@safe-global/views/components/common/FacetFilter'
 import { TagChip } from './TagChip'
 import type { TagColor } from './tagColor'
-import { sameTagName } from './tagRules'
 
 export type TagEditing<T> = {
   /** Resolves to an error message to keep the editor open, or `undefined` once renamed. */
@@ -22,16 +23,14 @@ type TagOptionListProps<T> = {
   options: TagOption<T>[]
   value: string[]
   onChange: (next: string[]) => void
-  /** Adds a "Create" row for a name no option has. */
-  onCreate?: (text: string) => void
+  /** Adds a "Create" row for a name no option has; resolves to whether the tag was created. */
+  onCreate?: (text: string) => Promise<boolean>
   /** Rename and delete; without it the tags are read-only. */
   tagEditing?: TagEditing<T>
 }
 
 const deleteConfirmation = (name: string, contactCount = 0): string =>
-  contactCount > 0
-    ? `Delete ‘${name}’ from ${contactCount} ${contactCount === 1 ? 'contact' : 'contacts'}?`
-    : `Delete ‘${name}’?`
+  contactCount > 0 ? `Delete ‘${name}’ from ${contactCount} contact${maybePlural(contactCount)}?` : `Delete ‘${name}’?`
 
 const SectionHeading = ({ children }: { children: string }) => (
   <p className="text-muted-foreground px-2 pt-2 pb-1 text-xs font-medium">{children}</p>

@@ -89,7 +89,7 @@ export const WithSelection: Story = {
 
 /** A long list gets a search box automatically; `onCreate` adds the "Create '…'" row of the tag picker. */
 export const SearchableWithCreate: Story = {
-  args: { label: 'Tags', options: tagOptions, value: [], onChange: () => {}, onCreate: () => {} },
+  args: { label: 'Tags', options: tagOptions, value: [], onChange: () => {}, onCreate: () => true },
   render: (args) => <Controlled {...args} initial={['Internal']} searchPlaceholder="Search or create a tag" />,
 }
 

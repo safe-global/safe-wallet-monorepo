@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Button } from '@safe-global/views/components/ui/button'
 import { buildSpaceAddressBookTags, spaceAddressBookTagBuilder } from '@/tests/builders/space'
-import TagMenu, { existingTagIds, type TagActions, type TagMenuProps } from '../TagMenu'
+import TagMenu, { existingTagIds, sameTagIds, type TagActions, type TagMenuProps } from '../TagMenu'
 
 const vendor = spaceAddressBookTagBuilder().with({ id: 1, name: 'Vendor', contactCount: 4 }).build()
 const internal = spaceAddressBookTagBuilder().with({ id: 2, name: 'Internal', contactCount: 0 }).build()
@@ -11,13 +11,13 @@ const tags = [vendor, internal]
 const buildActions = (overrides: Partial<TagActions> = {}): TagActions => ({
   onCreate: jest.fn().mockResolvedValue({}),
   onRename: jest.fn().mockResolvedValue({}),
-  onDelete: jest.fn().mockResolvedValue(undefined),
+  onDelete: jest.fn().mockResolvedValue(true),
   ...overrides,
 })
 
 const renderMenu = (props: Partial<TagMenuProps> = {}) => {
   const onSelect = jest.fn().mockReturnValue(undefined)
-  const onMerged = jest.fn()
+  const onSelectionRemapped = jest.fn()
   render(
     <TagMenu
       trigger={<Button />}
@@ -25,12 +25,12 @@ const renderMenu = (props: Partial<TagMenuProps> = {}) => {
       tags={tags}
       selected={[]}
       onSelect={onSelect}
-      onMerged={onMerged}
+      onSelectionRemapped={onSelectionRemapped}
       clearLabel="Clear"
       {...props}
     />,
   )
-  return { onSelect, onMerged }
+  return { onSelect, onSelectionRemapped }
 }
 
 const open = async () => {
@@ -52,6 +52,17 @@ const rename = async (from: string, to: string) => {
 describe('existingTagIds', () => {
   it('keeps only the ids the workspace still has, in order', () => {
     expect(existingTagIds([2, 99, 1], tags)).toEqual([2, 1])
+  })
+})
+
+describe('sameTagIds', () => {
+  it('ignores order', () => {
+    expect(sameTagIds([1, 2], [2, 1])).toBe(true)
+  })
+
+  it('tells sets of different size or content apart', () => {
+    expect(sameTagIds([1], [1, 2])).toBe(false)
+    expect(sameTagIds([1, 3], [1, 2])).toBe(false)
   })
 })
 
@@ -179,33 +190,69 @@ describe('TagMenu', () => {
   describe('rename and delete', () => {
     it('renames a tag and leaves the selection alone', async () => {
       const actions = buildActions()
-      const { onMerged } = renderMenu({ selected: [1], actions })
+      const { onSelectionRemapped } = renderMenu({ selected: [1], actions })
 
       await open()
       await rename('Vendor', 'Supplier')
 
       expect(actions.onRename).toHaveBeenCalledWith(vendor, 'Supplier')
-      expect(onMerged).not.toHaveBeenCalled()
+      expect(onSelectionRemapped).not.toHaveBeenCalled()
     })
 
     it('moves a ticked tag onto the tag a rename merged it into', async () => {
       const actions = buildActions({ onRename: jest.fn().mockResolvedValue({ mergedIntoId: 2 }) })
-      const { onMerged } = renderMenu({ selected: [1, 2], actions })
+      const { onSelectionRemapped } = renderMenu({ selected: [1, 2], actions })
 
       await open()
       await rename('Vendor', 'Internal')
 
-      expect(onMerged).toHaveBeenCalledWith([2])
+      expect(onSelectionRemapped).toHaveBeenCalledWith([2])
     })
 
     it('leaves the selection alone when an unticked tag is merged', async () => {
       const actions = buildActions({ onRename: jest.fn().mockResolvedValue({ mergedIntoId: 2 }) })
-      const { onMerged } = renderMenu({ selected: [2], actions })
+      const { onSelectionRemapped } = renderMenu({ selected: [2], actions })
 
       await open()
       await rename('Vendor', 'Internal')
 
-      expect(onMerged).not.toHaveBeenCalled()
+      expect(onSelectionRemapped).not.toHaveBeenCalled()
+    })
+
+    it('renames with the normalized name', async () => {
+      const actions = buildActions()
+      renderMenu({ actions })
+
+      await open()
+      await rename('Vendor', '  Key   vendors ')
+
+      expect(actions.onRename).toHaveBeenCalledWith(vendor, 'Key vendors')
+    })
+
+    it('explains an invalid name without a request', async () => {
+      const actions = buildActions()
+      renderMenu({ actions })
+
+      await open()
+      await rename('Vendor', 'Signer')
+
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        "'Signer' is added automatically and can't be used as a tag name",
+      )
+      expect(actions.onRename).not.toHaveBeenCalled()
+    })
+
+    it('cancels a rename on Escape and keeps the menu open', async () => {
+      const actions = buildActions()
+      renderMenu({ actions })
+
+      await open()
+      await userEvent.click(screen.getByRole('button', { name: 'Rename Vendor' }))
+      await userEvent.type(screen.getByTestId('facet-option-rename-input'), '{Escape}')
+
+      expect(screen.queryByTestId('facet-option-rename-input')).not.toBeInTheDocument()
+      expect(screen.getByRole('listbox', { name: 'Tags' })).toBeInTheDocument()
+      expect(actions.onRename).not.toHaveBeenCalled()
     })
 
     it('keeps the editor open with the error a rename was refused with', async () => {
@@ -228,6 +275,29 @@ describe('TagMenu', () => {
       await userEvent.click(screen.getByTestId('facet-option-confirm-delete'))
 
       expect(actions.onDelete).toHaveBeenCalledWith(vendor)
+    })
+
+    it('drops a deleted tag from the selection', async () => {
+      const actions = buildActions()
+      const { onSelectionRemapped } = renderMenu({ selected: [1, 2], actions })
+
+      await open()
+      await userEvent.click(screen.getByRole('button', { name: 'Delete Vendor' }))
+      await userEvent.click(screen.getByTestId('facet-option-confirm-delete'))
+
+      await waitFor(() => expect(onSelectionRemapped).toHaveBeenCalledWith([2]))
+    })
+
+    it('keeps the selection when the delete fails', async () => {
+      const actions = buildActions({ onDelete: jest.fn().mockResolvedValue(false) })
+      const { onSelectionRemapped } = renderMenu({ selected: [1, 2], actions })
+
+      await open()
+      await userEvent.click(screen.getByRole('button', { name: 'Delete Vendor' }))
+      await userEvent.click(screen.getByTestId('facet-option-confirm-delete'))
+
+      await waitFor(() => expect(actions.onDelete).toHaveBeenCalled())
+      expect(onSelectionRemapped).not.toHaveBeenCalled()
     })
   })
 })

@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { ChevronDown, ListFilter } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
-import TagMenu, { existingTagIds, type TagActions } from './TagMenu'
+import TagMenu, { existingTagIds, sameTagIds, type TagActions } from './TagMenu'
 import type { WorkspaceTag } from '../types'
 
 export type TagFilterDropdownProps = {
@@ -16,8 +16,6 @@ export type TagFilterDropdownProps = {
   /** When the dropdown closes after the user changed the filters; a rename or delete doesn't count. */
   onFiltersChanged?: (tagIds: number[]) => void
 }
-
-const sameIds = (a: number[], b: number[]) => a.length === b.length && a.every((id) => b.includes(id))
 
 /** The Filters dropdown: tick any number of tags; a tag created here isn't ticked, as it has no contacts yet. */
 const TagFilterDropdown = ({
@@ -36,7 +34,7 @@ const TagFilterDropdown = ({
     if (isOpen) {
       selectionAtOpen.current = selected
       isChangedByUser.current = false
-    } else if (isChangedByUser.current && !sameIds(selected, selectionAtOpen.current)) {
+    } else if (isChangedByUser.current && !sameTagIds(selected, selectionAtOpen.current)) {
       onFiltersChanged?.(selected)
     }
   }
@@ -63,7 +61,7 @@ const TagFilterDropdown = ({
         onChange(tagIds)
         return undefined
       }}
-      onMerged={onChange}
+      onSelectionRemapped={onChange}
       clearLabel="Clear filters"
       actions={actions}
       onLimitReached={onLimitReached}
