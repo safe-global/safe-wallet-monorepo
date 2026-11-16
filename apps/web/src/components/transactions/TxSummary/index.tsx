@@ -27,8 +27,6 @@ import {
 } from '@/features/hypernative'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import EthHashInfo from '@/components/common/EthHashInfo'
-import { useTxRowSafe } from './TxRowSafeContext'
 
 type TxSummaryProps = {
   isConflictGroup?: boolean
@@ -56,7 +54,6 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
   const assessment = useHnQueueAssessmentResult(safeTxHash)
   const { isAuthenticated } = useHypernativeOAuth()
   const showAssessment = useShowHypernativeAssessment() && isQueue
-  const rowSafe = useTxRowSafe()
 
   return (
     <div
@@ -69,7 +66,6 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
         [css.bulkGroup]: isBulkGroup,
         [css.untrusted]: showWarning,
         [css.withAssessment]: showAssessment,
-        [css.withSafe]: !!rowSafe,
       })}
       id={tx.id}
     >
@@ -83,21 +79,6 @@ const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): Reac
       {showWarning && (
         <div data-testid="warning" style={{ gridArea: 'nonce' }}>
           <MaliciousTxWarning withTooltip={!isImitationTransaction} />
-        </div>
-      )}
-
-      {rowSafe && (
-        <div data-testid="tx-safe" className={css.safe} style={{ gridArea: 'safe' }}>
-          <EthHashInfo
-            address={rowSafe.safeAddress}
-            chainId={rowSafe.chainId}
-            showName
-            showPrefix
-            shortAddress
-            showCopyButton={false}
-            hasExplorer={false}
-            avatarSize={20}
-          />
         </div>
       )}
 
