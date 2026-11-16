@@ -6,7 +6,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { getGasTokenAllowlistOrder, isAllowlistedGasToken } from '../constants/gasTokenAllowlist'
-import type { FeePreviewTx } from './useResolvedGasToken'
+import type { FeePreviewTx } from '../public/useResolvedGasToken'
 
 export type GasTokenCandidate = {
   address: string

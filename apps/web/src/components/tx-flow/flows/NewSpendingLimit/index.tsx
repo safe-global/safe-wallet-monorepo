@@ -3,9 +3,9 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { TxFlowType } from '@/services/analytics/types'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { SpendingLimitsFeature } from '@/features/spending-limits'
-import type { NewSpendingLimitFlowProps } from '@/features/spending-limits/types'
+import type { NewSpendingLimitFlowProps } from '@/features/spending-limits/public/types'
+import CreateSpendingLimit from '@/features/spending-limits/public/CreateSpendingLimit'
+import ReviewSpendingLimit from '@/features/spending-limits/public/ReviewSpendingLimit'
 
 const defaultValues: NewSpendingLimitFlowProps = {
   beneficiary: '',
@@ -15,8 +15,6 @@ const defaultValues: NewSpendingLimitFlowProps = {
 }
 
 const NewSpendingLimitFlow = () => {
-  const { CreateSpendingLimit, ReviewSpendingLimit } = useLoadFeature(SpendingLimitsFeature)
-
   return (
     <TxFlow
       icon={SaveAddressIcon}

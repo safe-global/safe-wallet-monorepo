@@ -9,7 +9,6 @@ import SideDrawer from './SideDrawer'
 import { useIsSidebarRoute } from '@/hooks/useIsSidebarRoute'
 import { TxModalContext } from '@/components/tx-flow'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { BatchingFeature } from '@/features/batching'
 import { SpacesFeature } from '@/features/spaces/SpacesFeature'
 import { AppRoutes } from '@/config/routes'
 import Breadcrumbs from '@/components/common/Breadcrumbs'
@@ -19,6 +18,7 @@ import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/
 import useKeyboardObserver from '@/hooks/useKeyboardObserver/useKeyboardObserver'
 import { useIsTopbarElevated, useIsTopbarAboveOverlay } from '@/hooks/useTopbarElevation'
 import { useCssHeightVar } from '@/hooks/useCssHeightVar'
+import BatchSidebar from '@/features/batching/public/BatchSidebar'
 
 const STATIC_PAGE_ROUTES = [AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
 
@@ -41,7 +41,6 @@ const PageLayout = ({ pathname, children }: { pathname: string; children: ReactE
   const [isSidebarExpanded, setSidebarExpanded] = useState<boolean>(true)
   const [isBatchOpen, setBatchOpen] = useState<boolean>(false)
   const { txFlow, setFullWidth } = useContext(TxModalContext)
-  const { BatchSidebar } = useLoadFeature(BatchingFeature)
   const { SelectSafeModal, SafeWorkspaceSignInDialog, SafeWorkspaceChooserDialog } = useLoadFeature(SpacesFeature)
   const isStaticPage = STATIC_PAGE_ROUTES.includes(pathname)
   const hideHeader = NO_HEADER_ROUTES.includes(pathname)

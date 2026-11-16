@@ -5,7 +5,7 @@ import { createMockStory } from '@/stories/mocks/createMockStory'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import SafeTxProvider from '@/components/tx-flow/SafeTxProvider'
 import { SafeShieldProvider } from '@/features/safe-shield/public/SafeShieldProvider'
-import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../types'
+import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../public/types'
 import CreateSpendingLimit from './index'
 
 // The component reads the current Safe, chain, and token balances from app

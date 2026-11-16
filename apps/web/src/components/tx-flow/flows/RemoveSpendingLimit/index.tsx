@@ -4,12 +4,9 @@ import { useMemo } from 'react'
 import { TxFlowType } from '@/services/analytics/types'
 import { TxFlow } from '../../TxFlow'
 import type ReviewTransaction from '@/components/tx/ReviewTransactionV2'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { SpendingLimitsFeature } from '@/features/spending-limits'
+import RemoveSpendingLimitReview from '@/features/spending-limits/public/RemoveSpendingLimitReview'
 
 const RemoveSpendingLimitFlow = ({ spendingLimit }: { spendingLimit: SpendingLimitState }) => {
-  const { RemoveSpendingLimitReview } = useLoadFeature(SpendingLimitsFeature)
-
   const ReviewTransactionComponent = useMemo<typeof ReviewTransaction>(
     () =>
       function ReviewRemoveSpendingLimit(props) {

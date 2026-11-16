@@ -24,7 +24,7 @@ import type {
   Transaction,
   TransferTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { TWAP_ORDER_TITLE } from '@/features/swap/constants'
+import { TWAP_ORDER_TITLE } from '@/features/swap/public/constants'
 import { getTransactionType } from '../useTransactionType'
 
 const multiSendTxInfo: MultiSendTransactionInfo = {

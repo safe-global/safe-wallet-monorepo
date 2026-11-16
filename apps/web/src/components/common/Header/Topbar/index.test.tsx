@@ -82,11 +82,11 @@ jest.mock('@reown/walletkit', () => ({
 }))
 
 const mockUseDraftBatch = jest.fn<unknown[], []>(() => [])
-jest.mock('@/features/batching/hooks/useDraftBatch', () => ({
-  ...jest.requireActual('@/features/batching/hooks/useDraftBatch'),
+jest.mock('@/features/batching/public/useDraftBatch', () => ({
+  ...jest.requireActual('@/features/batching/public/useDraftBatch'),
   useDraftBatch: () => mockUseDraftBatch(),
 }))
-jest.mock('@/features/batching/components/BatchTooltip', () => ({
+jest.mock('@/features/batching/public/BatchTooltip', () => ({
   __esModule: true,
   default: ({ children }: { children: ReactNode }) => children,
 }))

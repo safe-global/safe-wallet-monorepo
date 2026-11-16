@@ -4,9 +4,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import useBalances from '@/hooks/useBalances'
 import TokenAmount from '@/components/common/TokenAmount'
-import { SwapFeature } from '@/features/swap'
-import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import useIsSwapFeatureEnabled from '@/features/swap/public/useIsSwapFeatureEnabled'
 import { AppRoutes } from '@/config/routes'
 import { WidgetCard } from '@safe-global/views/components/dashboard/styled'
 import css from './styles.module.css'
@@ -16,18 +14,19 @@ import SendButton from '@/components/balances/AssetsTable/SendButton'
 import { FiatBalance } from '@/components/balances/AssetsTable/FiatBalance'
 import { type Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { FiatChange } from '@safe-global/views/components/balances/AssetsTable/FiatChange'
-import { isEligibleEarnToken } from '@/features/earn/services/utils'
-import { useIsEarnPromoEnabled } from '@/features/earn/hooks/useIsEarnFeatureEnabled'
-import EarnButton from '@/features/earn/components/EarnButton'
+import { isEligibleEarnToken } from '@/features/earn/public/utils'
+import { useIsEarnPromoEnabled } from '@/features/earn/public/useIsEarnFeatureEnabled'
+import EarnButton from '@/features/earn/public/EarnButton'
 import { EARN_LABELS } from '@/services/analytics/events/earn'
-import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
+import useIsStakingPromoEnabled from '@/features/stake/public/useIsStakingBannerEnabled'
 import useChainId from '@/hooks/useChainId'
 import TokenIcon from '@/components/common/TokenIcon'
 import { TokenType } from '@safe-global/store/gateway/types'
-import { StakeFeature } from '@/features/stake'
 import { STAKE_LABELS } from '@/services/analytics/events/stake'
 import NoAssetsIcon from '@/public/images/common/no-assets.svg'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
+import SwapButton from '@/features/swap/public/SwapButton'
+import StakeButton from '@/features/stake/public/StakeButton'
 
 const MAX_ASSETS = 4
 
@@ -69,9 +68,6 @@ const AssetRow = ({
   showEarn?: boolean
   showStake?: boolean
 }) => {
-  const stake = useLoadFeature(StakeFeature)
-  const { SwapButton } = useLoadFeature(SwapFeature)
-
   const assetButtonCount =
     1 + // SendButton always
     (showSwap ? 1 : 0) +
@@ -109,7 +105,7 @@ const AssetRow = ({
           )}
 
           {showStake && item.tokenInfo.type === TokenType.NATIVE_TOKEN && (
-            <stake.StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} onlyIcon />
+            <StakeButton tokenInfo={item.tokenInfo} trackingLabel={STAKE_LABELS.asset} onlyIcon />
           )}
         </div>
       </div>

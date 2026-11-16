@@ -2,7 +2,7 @@ import { getSpendingLimitInterface, getDeployedSpendingLimitModuleAddress } from
 import useChainId from '@/hooks/useChainId'
 import { type PropsWithChildren, useCallback, useContext, useEffect } from 'react'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
-import type { SpendingLimitState } from '../../types'
+import type { SpendingLimitState } from '../../public/types'
 import { trackEvent } from '@/services/analytics'
 import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
 import { createTx } from '@/services/tx/tx-sender/create'

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { createMockStory } from '@/stories/mocks/createMockStory'
-import type { SpendingLimitState } from '../../types'
+import type { SpendingLimitState } from '../../public/types'
 import SpendingLimitsSettings from './index'
 
 const spendingLimits: SpendingLimitState[] = [

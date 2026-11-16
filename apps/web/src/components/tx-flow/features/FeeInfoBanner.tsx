@@ -1,14 +1,11 @@
 import type { ReactElement } from 'react'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { FeePaymentFeature } from '@/features/fee-payment'
-import { useIsFeeCardSlotVisible } from '@/features/fee-payment/hooks/useIsFeeCardSlotVisible'
-import { IS_RELAYING_LIVE } from '@/features/fee-payment/constants'
+import { useIsFeeCardSlotVisible } from '@/features/fee-payment/public/useIsFeeCardSlotVisible'
+import { IS_RELAYING_LIVE } from '@/features/fee-payment/public/constants'
 import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { withSlot } from '@/components/tx-flow/slots/withSlot'
+import FeeInfoBannerComponent from '@/features/fee-payment/public/FeeInfoBanner'
 
 const FeeInfoBanner = (): ReactElement => {
-  const { FeeInfoBanner: FeeInfoBannerComponent } = useLoadFeature(FeePaymentFeature)
-
   return <FeeInfoBannerComponent />
 }
 

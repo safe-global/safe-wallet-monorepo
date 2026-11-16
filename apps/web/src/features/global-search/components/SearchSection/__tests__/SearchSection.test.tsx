@@ -7,7 +7,7 @@ let mockIsQualifiedSafe = false
 
 jest.mock('@/hooks/wallets/useWallet')
 
-jest.mock('@/features/swap/hooks/useIsSwapFeatureEnabled', () => ({
+jest.mock('@/features/swap/public/useIsSwapFeatureEnabled', () => ({
   __esModule: true,
   default: () => true,
 }))

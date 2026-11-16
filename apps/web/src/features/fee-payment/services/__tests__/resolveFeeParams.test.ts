@@ -5,7 +5,7 @@ import { createTx } from '@/services/tx/tx-sender/create'
 import { gatewayApi } from '@/store/api/gateway'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import type { AppDispatch } from '@/store'
-import { FEE_COLLECTORS } from '../../constants'
+import { FEE_COLLECTORS } from '../../public/constants'
 
 jest.mock('@/services/tx/tx-sender/create', () => ({
   ...jest.requireActual('@/services/tx/tx-sender/create'),

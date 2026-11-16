@@ -12,11 +12,9 @@ jest.mock('@/components/tx-flow/flows/TokenTransfer/ReviewTokenTransfer', () => 
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 
-jest.mock('@/features/__core__/useLoadFeature', () => ({
-  ...jest.requireActual('@/features/__core__/useLoadFeature'),
-  useLoadFeature: jest.fn(() => ({
-    ReviewSpendingLimitTx: () => <div>Spending limit review</div>,
-  })),
+jest.mock('@/features/spending-limits/public/ReviewSpendingLimitTx', () => ({
+  __esModule: true,
+  default: () => <div>Spending limit review</div>,
 }))
 
 const transferOfType = (type: TokenTransferType): MultiTokenTransferParams => ({

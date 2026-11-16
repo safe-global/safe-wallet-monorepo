@@ -20,7 +20,7 @@ import RecoveryPlus from '@safe-global/views/assets/images/common/recovery-plus.
 import SwapIcon from '@/public/images/common/swap.svg'
 import SafeLogo from '@safe-global/views/assets/images/logo-no-text.svg'
 import { Wrench } from 'lucide-react'
-import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
+import useIsSwapFeatureEnabled from '@/features/swap/public/useIsSwapFeatureEnabled'
 
 const FirstTxFlow = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const txBuilder = useTxBuilderApp()

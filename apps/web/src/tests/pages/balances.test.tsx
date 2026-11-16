@@ -50,20 +50,14 @@ jest.mock('@/features/portfolio/public/PortfolioRefreshHint', () => ({
   default: () => <div data-testid="portfolio-refresh-hint" />,
 }))
 
-jest.mock('@/features/stake', () => ({
-  StakeFeature: {},
+jest.mock('@/features/stake/public/StakingPromoBanner', () => ({
+  __esModule: true,
+  default: () => <div data-testid="staking-promo-banner" />,
 }))
-jest.mock('@/features/stake/hooks/useIsStakingPromoBannerVisible', () => ({
+jest.mock('@/features/stake/public/useIsStakingPromoBannerVisible', () => ({
   __esModule: true,
   default: () => false,
   STAKING_PROMO_BANNER_HIDE_KEY: 'hideStakingPromoBanner_v2',
-}))
-
-jest.mock('@/features/__core__/useLoadFeature', () => ({
-  ...jest.requireActual('@/features/__core__/useLoadFeature'),
-  useLoadFeature: () => ({
-    StakingPromoBanner: () => <div data-testid="staking-promo-banner" />,
-  }),
 }))
 
 const DEFAULT_SETTINGS = {

@@ -5,7 +5,7 @@ import { createTx } from '@/services/tx/tx-sender/create'
 import { gatewayApi } from '@/store/api/gateway'
 import { toSupportedFiatCode } from '@/store/api/gateway/payFromSafeFeePreview'
 import type { AppDispatch } from '@/store'
-import { FEE_COLLECTORS } from '../constants'
+import { FEE_COLLECTORS } from '../public/constants'
 import { trackError, Errors } from '@/services/exceptions'
 
 export type ResolveFeeParamsArgs = {

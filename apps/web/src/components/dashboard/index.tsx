@@ -23,12 +23,12 @@ import { useBannerVisibility } from '@/features/hypernative/public/useBannerVisi
 import { BannerType } from '@/features/hypernative/public/useBannerStorage'
 import { HnBannerForCarousel } from '@/features/hypernative/public/HnBannerForCarousel'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { StakeFeature } from '@/features/stake'
 import useIsStakingPromoBannerVisible, {
   STAKING_PROMO_BANNER_HIDE_KEY,
-} from '@/features/stake/hooks/useIsStakingPromoBannerVisible'
+} from '@/features/stake/public/useIsStakingPromoBannerVisible'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import HnPendingBanner from '@/features/hypernative/public/HnPendingBanner'
+import StakingPromoBanner from '@/features/stake/public/StakingPromoBanner'
 
 const PositionsWidget = dynamic(() => import('@/features/positions/public/PositionsWidget'))
 
@@ -45,7 +45,6 @@ const Dashboard = (): ReactElement => {
 
   const isPositionsFeatureEnabled = useIsPositionsFeatureEnabled()
   const { showBanner: showHnBanner } = useBannerVisibility(BannerType.Promo)
-  const { StakingPromoBanner } = useLoadFeature(StakeFeature)
   const isStakingPromoBannerVisible = useIsStakingPromoBannerVisible()
   const [, setHideStakingPromoBanner] = useLocalStorage<boolean>(STAKING_PROMO_BANNER_HIDE_KEY)
 

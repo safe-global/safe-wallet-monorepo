@@ -12,8 +12,8 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import {
   selectFeePaymentSourcePreference,
   setFeePaymentSourcePreference,
-} from '@/features/fee-payment/store/feePaymentSourcePreferenceSlice'
-import type { FeePaymentMode } from '@/features/fee-payment/types'
+} from '@/features/fee-payment/public/feePaymentSourcePreferenceSlice'
+import type { FeePaymentMode } from '@/features/fee-payment/public/types'
 import useWallet from '@/hooks/wallets/useWallet'
 
 export type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'

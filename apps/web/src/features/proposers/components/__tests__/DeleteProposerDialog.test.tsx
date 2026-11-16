@@ -33,8 +33,8 @@ jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: jest.fn(),
 }))
 
-jest.mock('@/features/spending-limits/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
-  ...jest.requireActual('@/features/spending-limits/hooks/useIsOnlySpendingLimitBeneficiary'),
+jest.mock('@/features/spending-limits/public/useIsOnlySpendingLimitBeneficiary', () => ({
+  ...jest.requireActual('@/features/spending-limits/public/useIsOnlySpendingLimitBeneficiary'),
   __esModule: true,
   default: jest.fn(),
 }))

@@ -36,11 +36,10 @@ import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiry
 import { useHypernativeTokenRefresh } from '@/features/hypernative/public/useHypernativeTokenRefresh'
 import { initObservability } from '@/services/observability'
 import Analytics from '@/services/analytics/Analytics'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import Recovery from '@/features/recovery/public/Recovery'
 import CounterfactualHooks from '@/features/counterfactual/public/CounterfactualHooks'
-import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLocation, useSearch } from '@tanstack/react-router'
+import SpendingLimitsLoader from '@/features/spending-limits/public/SpendingLimitsLoader'
 
 import '@/styles/globals.css'
 import '@/styles/shadcn.css'
@@ -58,7 +57,6 @@ setStoreInstance(reduxStore)
 const LazyWeb3Init = lazy(() => import('@/components/common/LazyWeb3Init'))
 
 const SpendingLimitsLoaderWrapper = () => {
-  const { SpendingLimitsLoader } = useLoadFeature(SpendingLimitsFeature)
   return <SpendingLimitsLoader />
 }
 

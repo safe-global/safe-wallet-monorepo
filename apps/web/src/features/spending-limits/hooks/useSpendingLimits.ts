@@ -2,14 +2,14 @@ import { useEffect, useMemo } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { Errors, logError } from '@/services/exceptions'
-import type { SpendingLimitState } from '../types'
+import type { SpendingLimitState } from '../public/types'
 import useChainId from '@/hooks/useChainId'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import useBalances from '@/hooks/useBalances'
-import { loadSpendingLimits } from '../services/spendingLimitLoader'
+import { loadSpendingLimits } from '../public/spendingLimitLoader'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { selectSpendingLimits, spendingLimitSlice } from '../store/spendingLimitsSlice'
+import { selectSpendingLimits, spendingLimitSlice } from '../public/spendingLimitsSlice'
 
 /**
  * Hook for loading spending limits data.
