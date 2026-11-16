@@ -81,7 +81,8 @@ Each feature exposes a **handle** with two parts:
 The `useLoadFeature()` hook combines flag check + lazy loading in one step:
 
 ```typescript
-import { WalletConnectFeature, useWcUri } from '@/features/walletconnect'
+import { WalletConnectFeature } from '@/features/walletconnect'
+import { useWcUri } from '@/features/walletconnect/hooks/useWcUri'
 import { useLoadFeature } from '@/features/__core__'
 
 // Components can render before ready (stub renders null)
@@ -176,9 +177,8 @@ export function useMyHook() {
   return data
 }
 
-// index.ts - Export hook directly
+// index.ts - the feature handle only
 export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
-export { useMyHook } from './hooks/useMyHook' // Direct export, always loaded
 
 // contract.ts - NO hooks
 import type MyComponent from './components/MyComponent'
@@ -205,7 +205,8 @@ export default {
 
 ```typescript
 // Consumer - direct import
-import { MyFeature, useMyHook } from '@/features/myfeature'
+import { MyFeature } from '@/features/myfeature'
+import { useMyHook } from '@/features/myfeature/hooks/useMyHook'
 import { useLoadFeature } from '@/features/__core__'
 
 function MyComponent() {
@@ -392,9 +393,8 @@ export interface MyFeatureContract {
   myService: typeof myService
 }
 
-// index.ts - hooks exported separately
+// index.ts - the feature handle only; hooks stay in their own files
 export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
-export { useMyHook } from './hooks/useMyHook' // Always loaded
 ```
 
 **Why this matters:**
@@ -435,9 +435,8 @@ export interface GoodContract {
   MyComponent: typeof MyComponent
 }
 
-// index.ts - hooks exported separately
+// index.ts - the feature handle only; hooks stay in their own files
 export const MyFeature = createFeatureHandle<GoodContract>('my-feature')
-export { useMyHook } from './hooks/useMyHook' // Always loaded
 ```
 
 ### Example Contracts
@@ -476,8 +475,7 @@ export interface MultichainContract {
 
 // src/features/multichain/index.ts
 export const MultichainFeature = createFeatureHandle<MultichainContract>('multichain')
-// Hooks exported directly (always loaded, not in contract)
-export { useIsMultichainSafe } from './hooks/useIsMultichainSafe'
+// Hooks are not re-exported: consumers import them from their own files
 ```
 
 **Note:** Hooks are NOT in the contract. They are exported directly from `index.ts` (always loaded) to avoid Rules of Hooks violations. See the "Hooks Pattern" section.
@@ -504,9 +502,7 @@ export interface WalletConnectContract {
 
 // src/features/walletconnect/index.ts
 export const WalletConnectFeature = createFeatureHandle<WalletConnectContract>('walletconnect')
-// Hooks exported directly (always loaded, not in contract)
-export { useWcUri } from './hooks/useWcUri'
-export { useWalletConnectSearchParamUri } from './hooks/useWalletConnectSearchParamUri'
+// Hooks are not re-exported: consumers import them from their own files
 ```
 
 ## Feature Handles
@@ -624,7 +620,7 @@ export const walletConnectHandle: FeatureHandle<WalletConnectImplementation> = {
 ```typescript
 // src/features/walletconnect/index.ts
 // Export the handle as {FeatureName}Feature for use with useLoadFeature()
-export { walletConnectHandle as WalletConnectFeature } from './handle'
+export const WalletConnectFeature = createFeatureHandle<WalletConnectContract>('walletconnect')
 export type { WalletConnectContract } from './contract'
 ```
 
@@ -705,7 +701,7 @@ export interface MyFeatureContract {
   myService: typeof myService
 }
 
-// handle.ts
+// index.ts
 export const MyFeatureHandle: FeatureHandle<MyFeatureContract> = {
   name: 'my-feature',
   useIsEnabled: () => useHasFeature(FEATURES.MY_FEATURE),
@@ -718,11 +714,9 @@ import { myService } from './services/myService'
 
 export default { MyComponent, myService } satisfies MyFeatureContract
 
-// index.ts
-export { MyFeatureHandle } from './handle'
+// index.ts (continued)
 export type { MyFeatureContract } from './contract'
-// Hooks exported directly (lightweight wrappers)
-export { useMyThing } from './hooks/useMyThing'
+// Hooks are not re-exported: consumers import them from their own files
 ```
 
 **Simplified approach (3 files - use factory):**
@@ -749,8 +743,7 @@ import type { MyFeatureContract } from './contract'
 
 export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
 export type * from './types'
-// Hooks exported directly (always loaded, not in contract)
-export { useMyThing } from './hooks/useMyThing'
+// Hooks are not re-exported: consumers import them from their own files
 ```
 
 **Reduction: 4 files → 3 files (removes handle.ts, ~15 lines saved)**
@@ -989,8 +982,7 @@ export default {
   // NO HOOKS HERE - export hooks directly from index.ts
 }
 
-// Hooks exported separately in index.ts:
-// export { useMyThing } from './hooks/useMyThing'
+// Hooks stay in their own files; consumers import './hooks/useMyThing' directly
 ```
 
 **Naming conventions determine stub behavior:**
@@ -1052,7 +1044,8 @@ export default {
 ### Benefits of This Pattern
 
 ```typescript
-import { WalletConnectFeature, useWcUri } from '@/features/walletconnect'
+import { WalletConnectFeature } from '@/features/walletconnect'
+import { useWcUri } from '@/features/walletconnect/hooks/useWcUri'
 import { useLoadFeature } from '@/features/__core__'
 
 const wc = useLoadFeature(WalletConnectFeature)
@@ -1098,8 +1091,7 @@ export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
 // Export contract type
 export type { MyFeatureContract } from './contract'
 
-// Export hooks directly (always loaded, not in contract)
-export { useMyHook } from './hooks/useMyHook'
+// Hooks are not re-exported: consumers import them from their own files
 
 // Export public types (if any)
 export type * from './types'
@@ -1107,12 +1099,12 @@ export type * from './types'
 
 ### Allowed Exports
 
-| Export Type    | Example                                 | Notes                         |
-| -------------- | --------------------------------------- | ----------------------------- |
-| Feature handle | `export const MyFeature = ...`          | For use with useLoadFeature   |
-| Contract type  | `export type { MyFeatureContract }`     | TypeScript interface          |
-| Hooks          | `export { useMyHook } from './hooks'`   | Direct exports, always loaded |
-| Public types   | `export type { MyData } from './types'` | Types needed by consumers     |
+| Export Type    | Example                                 | Notes                       |
+| -------------- | --------------------------------------- | --------------------------- |
+| Feature handle | `export const MyFeature = ...`          | For use with useLoadFeature |
+| Contract type  | `export type { MyFeatureContract }`     | TypeScript interface        |
+| Hooks          | not re-exported                         | Import from the hook's file |
+| Public types   | `export type { MyData } from './types'` | Types needed by consumers   |
 
 ### What NOT to Export
 
@@ -1140,7 +1132,8 @@ const status = useSelector(selectTransactionStatus(id))
 Features access other features' **capabilities** through handles:
 
 ```typescript
-import { WalletConnectFeature, useWcUri } from '@/features/walletconnect'
+import { WalletConnectFeature } from '@/features/walletconnect'
+import { useWcUri } from '@/features/walletconnect/hooks/useWcUri'
 import { useLoadFeature } from '@/features/__core__'
 
 function MyComponent() {
@@ -1171,16 +1164,16 @@ function MyComponent() {
 
 ### Communication Patterns Summary
 
-| Need                               | Pattern            | Example                                               |
-| ---------------------------------- | ------------------ | ----------------------------------------------------- |
-| Get feature                        | `useLoadFeature()` | `const wc = useLoadFeature(WalletConnectFeature)`     |
-| Check if ready                     | Meta property      | `if (wc.$isReady) ...`                                |
-| Render another feature's component | Feature handle     | `<wc.Widget />`                                       |
-| Use another feature's hook         | Direct import      | `import { useWcUri } from '@/features/walletconnect'` |
-| Call another feature's service     | Feature handle     | `if (wc.$isReady) wc.doY()`                           |
-| Read shared state                  | Redux selector     | `useSelector(selectSafeInfo)`                         |
-| Write shared state                 | Redux action       | `dispatch(setSafeInfo(data))`                         |
-| Share types                        | Direct import      | `import type { X } from '@/features/y/types'`         |
+| Need                               | Pattern            | Example                                                              |
+| ---------------------------------- | ------------------ | -------------------------------------------------------------------- |
+| Get feature                        | `useLoadFeature()` | `const wc = useLoadFeature(WalletConnectFeature)`                    |
+| Check if ready                     | Meta property      | `if (wc.$isReady) ...`                                               |
+| Render another feature's component | Feature handle     | `<wc.Widget />`                                                      |
+| Use another feature's hook         | Direct import      | `import { useWcUri } from '@/features/walletconnect/hooks/useWcUri'` |
+| Call another feature's service     | Feature handle     | `if (wc.$isReady) wc.doY()`                                          |
+| Read shared state                  | Redux selector     | `useSelector(selectSafeInfo)`                                        |
+| Write shared state                 | Redux action       | `dispatch(setSafeInfo(data))`                                        |
+| Share types                        | Direct import      | `import type { X } from '@/features/y/types'`                        |
 
 ## Common Mistakes & Anti-Patterns
 
@@ -1582,8 +1575,7 @@ function SafeShieldScanner() {
 ```typescript
 // src/features/hypernative/index.ts
 export const HypernativeFeature = createFeatureHandle<HypernativeContract>('hypernative')
-// Hook exported directly (always loaded)
-export { useHypernativeScanner } from './hooks/useHypernativeScanner'
+// Hooks are not re-exported: consumers import them from their own files
 
 // src/features/hypernative/contract.ts (NO hooks)
 import type Banner from './components/Banner'
@@ -1608,7 +1600,8 @@ export function useHypernativeScanner() {
 }
 
 // src/features/safe-shield/components/SafeShieldScanner.tsx
-import { HypernativeFeature, useHypernativeScanner } from '@/features/hypernative'
+import { HypernativeFeature } from '@/features/hypernative'
+import { useHypernativeScanner } from '@/features/hypernative/hooks/useHypernativeScanner'
 import { useLoadFeature } from '@/features/__core__'
 
 function SafeShieldScanner() {
@@ -1654,11 +1647,11 @@ function SafeShieldScannerWithStates() {
 - [ ] Created `contract.ts` with **flat structure** (components and services only, NO hooks)
 - [ ] **Used `typeof` pattern in contract for IDE navigation**
 - [ ] Created `index.ts` with `{FeatureName}Feature` export
-- [ ] **Moved hooks out of contract** - export directly from `index.ts`
+- [ ] **Moved hooks out of contract** - they stay in their own files, not re-exported from `index.ts`
 - [ ] **Kept hooks lightweight** - minimal imports (moved heavy imports to services if needed)
 - [ ] **`feature.ts` uses direct imports and flat structure** (NO hooks)
 - [ ] Organized internals in `components/`, `hooks/`, `services/`, `store/`
-- [ ] Updated consumers to import hooks directly (e.g., `import { useMyHook } from '@/features/myfeature'`)
+- [ ] Updated consumers to import hooks from their files (e.g., `import { useMyHook } from '@/features/myfeature/hooks/useMyHook'`)
 - [ ] Removed null checks where proxy stubs suffice (for components)
 - [ ] Verified no ESLint warnings
 - [ ] Tests pass
@@ -1666,7 +1659,7 @@ function SafeShieldScannerWithStates() {
 ### For Feature Consumers
 
 - [ ] Using `useLoadFeature()` hook with feature handle for components/services
-- [ ] **Importing hooks directly from feature index** (e.g., `import { useMyHook } from '@/features/myfeature'`)
+- [ ] **Importing hooks from their own files** (e.g., `import { useMyHook } from '@/features/myfeature/hooks/useMyHook'`)
 - [ ] **No optional chaining** - feature always returns an object (proxy stubs for components)
 - [ ] Using **flat access**: `feature.MyComponent`, `feature.myService` (no nested `.components.`)
 - [ ] Using meta properties (`$isDisabled`, `$isReady`, `$error`) for explicit state handling
@@ -1710,7 +1703,8 @@ The handle is imported at app startup, but it's tiny (~100 bytes). The actual fe
 2. **Meta properties** (`$isDisabled`, `$isReady`, `$error`)
 
 ```typescript
-import { WalletConnectFeature, useWcUri } from '@/features/walletconnect'
+import { WalletConnectFeature } from '@/features/walletconnect'
+import { useWcUri } from '@/features/walletconnect/hooks/useWcUri'
 import { useLoadFeature } from '@/features/__core__'
 
 const wc = useLoadFeature(WalletConnectFeature)
@@ -1770,7 +1764,6 @@ export default {
 ```typescript
 // index.ts
 export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
-export { useMyHook } from './hooks/useMyHook' // Always loaded
 ```
 
 **Do NOT use `lazy()` inside `feature.ts`** - the file is already lazy-loaded. Adding more `lazy()` calls creates unnecessary chunks and complexity. See the "Lazy Loading: One Dynamic Import" section above.
@@ -1793,7 +1786,8 @@ export default {
 Consumers use flat access:
 
 ```typescript
-import { MyFeature, useMyHook } from '@/features/myfeature'
+import { MyFeature } from '@/features/myfeature'
+import { useMyHook } from '@/features/myfeature/hooks/useMyHook'
 
 const feature = useLoadFeature(MyFeature)
 const data = useMyHook()  // Direct import, always safe
