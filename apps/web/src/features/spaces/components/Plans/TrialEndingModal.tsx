@@ -78,13 +78,7 @@ const TrialEndingChooser = ({
   return (
     <>
       <Dialog open={!isChanged} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent
-          size="lg"
-          surface="card"
-          padding="sm"
-          // eslint-disable-next-line no-restricted-syntax -- 1rem side gutter below the size cap, no size token
-          className="flex max-h-[90vh] w-[calc(100vw-2rem)] flex-col"
-        >
+        <DialogContent size="lg" surface="card" padding="sm" className="flex max-h-[90vh] flex-col">
           <div className="flex min-h-0 flex-col gap-6 pt-5">
             <div className="flex flex-col gap-1">
               <Typography variant="h3" as={DialogTitle}>
