@@ -37,7 +37,7 @@ export const useQueueFilterOptions = (
     status: {
       statuses: SPACE_QUEUE_STATUSES,
       flags: SPACE_QUEUE_FLAGS,
-      counts: getStatusCounts(counts),
+      counts: getStatusCounts(counts, filters.statuses),
       selected: filters.statuses,
       onToggle: (option) => onFiltersChange({ ...filters, statuses: toggleValue(option, filters.statuses) }),
     },

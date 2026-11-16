@@ -2,9 +2,24 @@ import type { SpaceQueueCounts, SpaceQueueSafe } from '@safe-global/store/gatewa
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { SPACE_QUEUE_FLAGS, SPACE_QUEUE_STATUSES, type SpaceQueueStatusOption } from '../../../hooks/useSpaceQueue'
 
-/** Every option of the Status filter with its count */
-export const getStatusCounts = (counts?: SpaceQueueCounts): Partial<Record<SpaceQueueStatusOption, number>> =>
-  Object.fromEntries([...SPACE_QUEUE_STATUSES, ...SPACE_QUEUE_FLAGS].map((option) => [option, counts?.[option] ?? 0]))
+const withCounts = (options: readonly SpaceQueueStatusOption[], counts?: SpaceQueueCounts) =>
+  options.map((option) => [option, counts?.[option] ?? 0] as const)
+
+/**
+ * The counts of the Status filter options. The gateway counts statuses and flags apart while the filter
+ * ANDs them, so one group's counts are hidden while an option of the other group is selected.
+ */
+export const getStatusCounts = (
+  counts: SpaceQueueCounts | undefined,
+  selected: SpaceQueueStatusOption[],
+): Partial<Record<SpaceQueueStatusOption, number>> => {
+  const isAnyFlagSelected = selected.some((option) => (SPACE_QUEUE_FLAGS as readonly string[]).includes(option))
+  const isAnyStatusSelected = selected.some((option) => (SPACE_QUEUE_STATUSES as readonly string[]).includes(option))
+  return Object.fromEntries([
+    ...(isAnyFlagSelected ? [] : withCounts(SPACE_QUEUE_STATUSES, counts)),
+    ...(isAnyStatusSelected ? [] : withCounts(SPACE_QUEUE_FLAGS, counts)),
+  ])
+}
 
 /** One Safe of the Safe filter: every chain it has a queue on, and its transactions matching the Status filter. */
 export type SafeOption = { safeAddress: string; chainIds: string[]; count: number }

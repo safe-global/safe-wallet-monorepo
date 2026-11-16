@@ -3,6 +3,7 @@ import { checksumAddress, sameAddress } from '@safe-global/utils/utils/addresses
 import {
   getSafeOptions,
   getSelectedSafeAddresses,
+  getStatusCounts,
   isSafeOptionSelected,
   sortByCount,
   toggleSafeOption,
@@ -102,6 +103,55 @@ describe('TransactionsToolbar utils', () => {
 
     it('compares signers in any address case', () => {
       expect(toggleValue(safeA, [safeA.toLowerCase(), safeB], sameAddress)).toEqual([safeB])
+    })
+  })
+
+  describe('getStatusCounts', () => {
+    const counts = {
+      total: 9,
+      execute: 1,
+      sign: 2,
+      blocked: 3,
+      waiting: 3,
+      conflicting: 4,
+      stale: 5,
+      safes: [],
+      chains: [],
+      signers: [],
+    }
+
+    it('counts every status and flag without a selection', () => {
+      expect(getStatusCounts(counts, [])).toEqual({
+        execute: 1,
+        sign: 2,
+        blocked: 3,
+        waiting: 3,
+        conflicting: 4,
+        stale: 5,
+      })
+    })
+
+    it('hides the flag counts while a status is selected', () => {
+      expect(getStatusCounts(counts, ['sign'])).toEqual({ execute: 1, sign: 2, blocked: 3, waiting: 3 })
+    })
+
+    it('hides the status counts while a flag is selected', () => {
+      expect(getStatusCounts(counts, ['stale'])).toEqual({ conflicting: 4, stale: 5 })
+    })
+
+    it('hides every count while a status and a flag are selected', () => {
+      expect(getStatusCounts(counts, ['sign', 'conflicting'])).toEqual({})
+    })
+
+    it('counts zero for every option before the counts load', () => {
+      expect(getStatusCounts(undefined, [])).toEqual({
+        execute: 0,
+        sign: 0,
+        blocked: 0,
+        waiting: 0,
+        conflicting: 0,
+        stale: 0,
+      })
     })
   })
 })

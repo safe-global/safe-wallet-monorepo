@@ -48,13 +48,12 @@ const renderToolbar = (filters: SpaceQueueFilters = NO_SPACE_QUEUE_FILTERS) => {
 }
 
 describe('TransactionsToolbar', () => {
-  it('lists every status with its count and adds the one picked to the filters', () => {
-    const onFiltersChange = renderToolbar({ statuses: ['execute'], safes: [], chainIds: [], signers: [] })
+  it('lists every status and flag with its count', () => {
+    renderToolbar()
 
     fireEvent.click(screen.getByRole('button', { name: 'Status' }))
-    const options = screen.getAllByRole('menuitemcheckbox')
 
-    expect(options.map((option) => option.textContent)).toEqual([
+    expect(screen.getAllByRole('menuitemcheckbox').map((option) => option.textContent)).toEqual([
       'Execute1',
       'Sign10',
       'Blocked7',
@@ -62,16 +61,24 @@ describe('TransactionsToolbar', () => {
       'Conflicting2',
       'Stale 7 days0',
     ])
-    expect(options[0]).toHaveAttribute('aria-checked', 'true')
+  })
 
+  it('checks the selected statuses', () => {
+    renderToolbar({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['execute'] })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
+
+    expect(screen.getByRole('menuitemcheckbox', { name: /Execute/ })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('menuitemcheckbox', { name: /Sign/ })).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('adds a status that is picked to the filters', () => {
+    const onFiltersChange = renderToolbar({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['execute'] })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
     fireEvent.click(screen.getByRole('menuitemcheckbox', { name: /Sign/ }))
 
-    expect(onFiltersChange).toHaveBeenCalledWith({
-      statuses: ['execute', 'sign'],
-      safes: [],
-      chainIds: [],
-      signers: [],
-    })
+    expect(onFiltersChange).toHaveBeenCalledWith({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['execute', 'sign'] })
   })
 
   it('shows each status with its icon, statuses on a tinted tile and flags muted', () => {
@@ -101,6 +108,36 @@ describe('TransactionsToolbar', () => {
     expect(icons[3]?.parentElement).toHaveClass('bg-warning-subtle', 'text-warning-strong')
     expect(icons[4]).toHaveClass('text-muted-foreground')
     expect(icons[5]).toHaveClass('text-muted-foreground')
+  })
+
+  it('hides the flag counts in the Status menu while a status is selected', () => {
+    renderToolbar({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['sign'] })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
+
+    expect(screen.getAllByRole('menuitemcheckbox').map((option) => option.textContent)).toEqual([
+      'Execute1',
+      'Sign10',
+      'Blocked7',
+      'Waiting1',
+      'Conflicting',
+      'Stale 7 days',
+    ])
+  })
+
+  it('hides the status counts in the Status menu while a flag is selected', () => {
+    renderToolbar({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['conflicting'] })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
+
+    expect(screen.getAllByRole('menuitemcheckbox').map((option) => option.textContent)).toEqual([
+      'Execute',
+      'Sign',
+      'Blocked',
+      'Waiting',
+      'Conflicting2',
+      'Stale 7 days0',
+    ])
   })
 
   it('removes a status that is picked again', () => {
