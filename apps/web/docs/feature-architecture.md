@@ -39,6 +39,8 @@ export default RecoveryList
 
 `gatedDynamic` renders nothing while the chain has the flag off, so the component's chunk downloads only when it renders with the flag on. The consumer does not check the flag.
 
+A public component that must render while the current chain has the flag off uses `dynamic` from `@/utils/dynamic` instead, with a one-line comment that gives the reason. Examples are in `features/multichain/public/`: those components check the flags of each target chain, or warn about the Safe itself.
+
 ## Public hooks are the exception
 
 A hook cannot be lazy or gated: it runs in its caller on every chain. Across features, prefer a gated component. Make a hook public only for a cheap value that the caller needs as data, such as a boolean. A public hook must:
