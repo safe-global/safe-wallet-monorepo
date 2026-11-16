@@ -103,7 +103,7 @@ const batchWithTransfer = encodeMultiSendData([
 
 export const BatchedWithOtherActions: Story = {
   args: {
-    order: Order.build(),
+    order: Order.with({ uid: FIXED_ORDER_UID }).build(),
     settlementContract: FIXED_MULTISEND,
     txData: {
       to: { value: FIXED_MULTISEND },

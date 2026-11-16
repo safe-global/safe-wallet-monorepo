@@ -52,7 +52,7 @@ const SwapOrderConfirmation = ({ order, decodedData, settlementContract, txData 
   const isChangingFallbackHandler = decodedData && isSettingTwapFallbackHandler(decodedData)
   const explorerUrl = !isTwapOrder ? order.explorerUrl : undefined
   const extraActionsCount =
-    order.type === TransactionInfoType.SWAP_ORDER && txData ? countNonSwapOrderCalls(txData, sellToken.address) : 0
+    order.type === TransactionInfoType.SWAP_ORDER && txData ? countNonSwapOrderCalls(txData, order) : 0
 
   return (
     <>

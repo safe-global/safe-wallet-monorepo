@@ -276,7 +276,7 @@ const SwapOrder = ({ txInfo, txData }: SwapOrderProps): ReactElement | null => {
   }
 
   if (isSwapOrderTxInfo(txInfo)) {
-    const extraActionsCount = txData ? countNonSwapOrderCalls(txData, txInfo.sellToken.address) : 0
+    const extraActionsCount = txData ? countNonSwapOrderCalls(txData, txInfo) : 0
     return (
       <>
         {extraActionsCount > 0 && <SwapOrderExtraActionsWarning count={extraActionsCount} />}

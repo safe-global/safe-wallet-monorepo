@@ -4,7 +4,7 @@ import type {
   TransactionData,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
-import { formatUnits, id } from 'ethers'
+import { formatUnits, id, Interface } from 'ethers'
 import type { AnyAppDataDocVersion, cowAppDataLatestScheme as latest } from '@cowprotocol/sdk-app-data'
 import type { OnTradeParamsPayload } from '@cowprotocol/events'
 import type { BaseTransaction } from '@safe-global/safe-apps-sdk'
@@ -258,57 +258,84 @@ const UNWRAP_SIGHASH = id('withdraw(uint256)').slice(0, 10)
 const CREATE_WITH_CONTEXT_SIGHASH = id('createWithContext((address,bytes32,bytes),address,bytes,bool)').slice(0, 10)
 const CANCEL_ORDER_SIGHASH = id('invalidateOrder(bytes)').slice(0, 10)
 
-// CoW Protocol deploys these at the same address on every chain
-export const COW_SETTLEMENT_CONTRACT = '0x9008D19f58AAbD9eD0D60971565AA8510560ab41'
-export const COW_VAULT_RELAYER = '0xC92E8bdf79f0507f65a392b0ab4667716BFE0110'
+// CoW Protocol uses the same addresses on every chain, with a separate set for its staging environment
+export const COW_SETTLEMENT_CONTRACTS = [
+  '0x9008D19f58AAbD9eD0D60971565AA8510560ab41',
+  '0xf553d092b50bdcbddeD1A99aF2cA29FBE5E2CB13',
+]
+export const COW_VAULT_RELAYERS = [
+  '0xC92E8bdf79f0507f65a392b0ab4667716BFE0110',
+  '0xC7242d167563352E2BCA4d71C043fbe542DB8FB2',
+]
+
+const SETTLEMENT_INTERFACE = new Interface(['function setPreSignature(bytes orderUid, bool signed)'])
 
 type BatchCall = { to: string; value: string; data: string; operation?: OperationType }
+type DisplayedOrder = Pick<SwapOrderTransactionInfo, 'uid' | 'sellToken' | 'sellAmount'>
 
 const isSameAddress = (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
+const isOneOf = (address: string, addresses: string[]) => addresses.some((item) => isSameAddress(item, address))
 
-const isApprovalToVaultRelayer = (data: string): boolean => {
+const isPresignatureOfOrder = (data: string, orderUid: string): boolean => {
   try {
-    const [spender] = ERC20_INTERFACE.decodeFunctionData('approve', data)
-    return isSameAddress(spender, COW_VAULT_RELAYER)
+    const [uid, signed] = SETTLEMENT_INTERFACE.decodeFunctionData('setPreSignature', data)
+    return signed === true && String(uid).toLowerCase() === orderUid.toLowerCase()
   } catch {
     return false
   }
 }
 
-const isPartOfSwapOrder = (call: BatchCall, sellTokenAddress: string): boolean => {
+const isApprovalToVaultRelayer = (data: string): boolean => {
+  try {
+    const [spender] = ERC20_INTERFACE.decodeFunctionData('approve', data)
+    return isOneOf(spender, COW_VAULT_RELAYERS)
+  } catch {
+    return false
+  }
+}
+
+const isPartOfSwapOrder = (call: BatchCall, order: DisplayedOrder): boolean => {
   if (call.operation === OperationType.DelegateCall) return false
 
   const selector = call.data.slice(0, 10).toLowerCase()
+  const value = BigInt(call.value || '0')
 
-  if (selector === WRAP_SIGHASH) return isSameAddress(call.to, sellTokenAddress)
-  if (BigInt(call.value || '0') !== 0n) return false
-  if (selector === PRE_SIGN_SIGHASH) return isSameAddress(call.to, COW_SETTLEMENT_CONTRACT)
+  if (selector === WRAP_SIGHASH) {
+    return isSameAddress(call.to, order.sellToken.address) && value <= BigInt(order.sellAmount)
+  }
+  if (value !== 0n) return false
+  if (selector === PRE_SIGN_SIGHASH) {
+    return isOneOf(call.to, COW_SETTLEMENT_CONTRACTS) && isPresignatureOfOrder(call.data, order.uid)
+  }
   if (selector === APPROVAL_SIGNATURE_HASH) {
-    return isSameAddress(call.to, sellTokenAddress) && isApprovalToVaultRelayer(call.data)
+    return isSameAddress(call.to, order.sellToken.address) && isApprovalToVaultRelayer(call.data)
   }
   return false
 }
 
 /**
- * Counts the calls of a swap order transaction that are not part of the order itself,
- * i.e. anything other than the presignature, the sell token approval to the VaultRelayer or the wrap of the sell token.
+ * Counts the calls of a swap order transaction that are not part of the displayed order: anything other than
+ * its presignature, the sell token approval to the VaultRelayer or a wrap of at most the sell amount.
+ * A batch is only inspected when it is a delegate call to a trusted MultiSend, otherwise it counts as one call.
  */
 export const countNonSwapOrderCalls = (
-  txData: Pick<TransactionData, 'hexData' | 'to' | 'value' | 'operation'>,
-  sellTokenAddress: string,
+  txData: Pick<TransactionData, 'hexData' | 'to' | 'value' | 'operation' | 'trustedDelegateCallTarget'>,
+  order: DisplayedOrder,
 ): number => {
   const { hexData } = txData
   if (!hexData) return 0
 
   if (!isMultiSendCalldata(hexData)) {
     const call = { to: txData.to.value, value: txData.value ?? '0', data: hexData, operation: txData.operation }
-    return isPartOfSwapOrder(call, sellTokenAddress) ? 0 : 1
+    return isPartOfSwapOrder(call, order) ? 0 : 1
   }
 
+  if (txData.operation !== OperationType.DelegateCall || txData.trustedDelegateCallTarget !== true) return 1
+
   try {
-    return decodeMultiSendData(hexData).filter((call) => !isPartOfSwapOrder(call, sellTokenAddress)).length
+    return decodeMultiSendData(hexData).filter((call) => !isPartOfSwapOrder(call, order)).length
   } catch {
-    return 0
+    return 1
   }
 }
 

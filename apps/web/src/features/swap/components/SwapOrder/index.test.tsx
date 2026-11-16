@@ -7,17 +7,21 @@ import type { SwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_G
 import { render, screen } from '@/tests/test-utils'
 import { transactionDataBuilder } from '@/tests/builders/transactionDetails'
 import { swapOrderConfirmationViewBuilder } from '@/features/swap/helpers/swapOrderBuilder'
-import { COW_SETTLEMENT_CONTRACT } from '@/features/swap/helpers/utils'
+import { COW_SETTLEMENT_CONTRACTS } from '@/features/swap/helpers/utils'
 import SwapOrder from '.'
 
 const SETTLEMENT_INTERFACE = new Interface(['function setPreSignature(bytes orderUid, bool signed)'])
 const MULTISEND_INTERFACE = Multi_send__factory.createInterface()
 const ERC20_INTERFACE = ERC20__factory.createInterface()
 
+const order = swapOrderConfirmationViewBuilder()
+  .with({ uid: faker.string.hexadecimal({ length: 112, casing: 'lower' }) })
+  .build() as SwapOrderTransactionInfo
+
 const presign = {
-  to: COW_SETTLEMENT_CONTRACT,
+  to: COW_SETTLEMENT_CONTRACTS[0],
   value: '0',
-  data: SETTLEMENT_INTERFACE.encodeFunctionData('setPreSignature', [faker.string.hexadecimal({ length: 112 }), true]),
+  data: SETTLEMENT_INTERFACE.encodeFunctionData('setPreSignature', [order.uid, true]),
   operation: OperationType.Call,
 }
 
@@ -33,12 +37,11 @@ const batchTxData = (calls: Array<typeof presign>) =>
     .with({
       hexData: MULTISEND_INTERFACE.encodeFunctionData('multiSend', [encodeMultiSendData(calls)]),
       operation: OperationType.DelegateCall,
+      trustedDelegateCallTarget: true,
     })
     .build()
 
 describe('SwapOrder', () => {
-  const order = swapOrderConfirmationViewBuilder().build() as SwapOrderTransactionInfo
-
   it('warns when the swap order is batched with other actions', () => {
     render(<SwapOrder txInfo={order} txData={batchTxData([tokenTransfer, tokenTransfer, presign])} />)
 

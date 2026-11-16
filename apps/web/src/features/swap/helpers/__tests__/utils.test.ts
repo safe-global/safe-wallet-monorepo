@@ -8,8 +8,8 @@ import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { OperationType, type MetaTransactionData } from '@safe-global/types-kit'
 import { ERC20__factory, Multi_send__factory } from '@safe-global/utils/types/contracts'
 import {
-  COW_SETTLEMENT_CONTRACT,
-  COW_VAULT_RELAYER,
+  COW_SETTLEMENT_CONTRACTS,
+  COW_VAULT_RELAYERS,
   countNonSwapOrderCalls,
   getExecutionPrice,
   getFilledPercentage,
@@ -475,34 +475,40 @@ describe('Swap helpers', () => {
     const MULTISEND_INTERFACE = Multi_send__factory.createInterface()
     const SETTLEMENT_INTERFACE = new Interface(['function setPreSignature(bytes orderUid, bool signed)'])
     const WETH_INTERFACE = new Interface(['function deposit()'])
+    const [SETTLEMENT, STAGING_SETTLEMENT] = COW_SETTLEMENT_CONTRACTS
+    const [VAULT_RELAYER, STAGING_VAULT_RELAYER] = COW_VAULT_RELAYERS
 
     const randomAddress = () => getAddress(faker.finance.ethereumAddress())
     const randomAmount = () => faker.number.bigInt({ min: 1n, max: 10n ** 18n }).toString()
+    const randomUid = () => faker.string.hexadecimal({ length: 112, casing: 'lower' })
 
-    const presign = (overrides: Partial<MetaTransactionData> = {}): MetaTransactionData => ({
-      to: COW_SETTLEMENT_CONTRACT,
+    const order = {
+      uid: randomUid(),
+      sellToken: { address: randomAddress() },
+      sellAmount: randomAmount(),
+    } as SwapOrderTransactionInfo
+
+    const presign = (overrides: Partial<MetaTransactionData> = {}, uid = order.uid, signed = true) => ({
+      to: SETTLEMENT,
       value: '0',
-      data: SETTLEMENT_INTERFACE.encodeFunctionData('setPreSignature', [
-        faker.string.hexadecimal({ length: 112 }),
-        true,
-      ]),
+      data: SETTLEMENT_INTERFACE.encodeFunctionData('setPreSignature', [uid, signed]),
       operation: OperationType.Call,
       ...overrides,
     })
-    const approve = (token: string, spender = COW_VAULT_RELAYER): MetaTransactionData => ({
+    const approve = (token = order.sellToken.address, spender = VAULT_RELAYER): MetaTransactionData => ({
       to: token,
       value: '0',
       data: ERC20_INTERFACE.encodeFunctionData('approve', [spender, randomAmount()]),
       operation: OperationType.Call,
     })
-    const wrap = (to: string): MetaTransactionData => ({
+    const wrap = (to = order.sellToken.address, value = order.sellAmount): MetaTransactionData => ({
       to,
-      value: randomAmount(),
+      value,
       data: WETH_INTERFACE.encodeFunctionData('deposit'),
       operation: OperationType.Call,
     })
-    const erc20Transfer = (token: string): MetaTransactionData => ({
-      to: token,
+    const erc20Transfer = (): MetaTransactionData => ({
+      to: order.sellToken.address,
       value: '0',
       data: ERC20_INTERFACE.encodeFunctionData('transfer', [randomAddress(), randomAmount()]),
       operation: OperationType.Call,
@@ -519,59 +525,90 @@ describe('Swap helpers', () => {
       value: call.value,
       hexData: call.data,
       operation: call.operation ?? OperationType.Call,
+      trustedDelegateCallTarget: null,
     })
-    const batch = (calls: MetaTransactionData[]) => ({
+    const batch = (calls: MetaTransactionData[], overrides = {}) => ({
       to: { value: randomAddress() },
       value: '0',
       hexData: MULTISEND_INTERFACE.encodeFunctionData('multiSend', [encodeMultiSendData(calls)]),
       operation: OperationType.DelegateCall,
+      trustedDelegateCallTarget: true,
+      ...overrides,
     })
 
-    const sellToken = randomAddress()
-
-    it('returns 0 for a presignature sent to the settlement contract', () => {
-      expect(countNonSwapOrderCalls(singleCall(presign()), sellToken)).toBe(0)
+    it('returns 0 for the presignature of the order sent to the settlement contract', () => {
+      expect(countNonSwapOrderCalls(singleCall(presign()), order)).toBe(0)
     })
 
     it('returns 0 for a batch of sell token approval to the VaultRelayer and presignature', () => {
-      expect(countNonSwapOrderCalls(batch([approve(sellToken), presign()]), sellToken)).toBe(0)
+      expect(countNonSwapOrderCalls(batch([approve(), presign()]), order)).toBe(0)
     })
 
-    it('returns 0 for a batch that wraps, approves and presigns the sell token', () => {
-      expect(countNonSwapOrderCalls(batch([wrap(sellToken), approve(sellToken), presign()]), sellToken)).toBe(0)
+    it('returns 0 for a batch that wraps the sell amount, approves and presigns', () => {
+      expect(countNonSwapOrderCalls(batch([wrap(), approve(), presign()]), order)).toBe(0)
+    })
+
+    it('returns 0 for an order made against the staging contracts', () => {
+      const calls = [approve(order.sellToken.address, STAGING_VAULT_RELAYER), presign({ to: STAGING_SETTLEMENT })]
+      expect(countNonSwapOrderCalls(batch(calls), order)).toBe(0)
     })
 
     it('returns 0 when there is no transaction data', () => {
-      expect(countNonSwapOrderCalls({ ...singleCall(presign()), hexData: undefined }, sellToken)).toBe(0)
+      expect(countNonSwapOrderCalls({ ...singleCall(presign()), hexData: undefined }, order)).toBe(0)
     })
 
     it('counts token and native transfers batched with the order', () => {
-      const calls = [erc20Transfer(sellToken), nativeTransfer(), presign()]
-      expect(countNonSwapOrderCalls(batch(calls), sellToken)).toBe(2)
+      expect(countNonSwapOrderCalls(batch([erc20Transfer(), nativeTransfer(), presign()]), order)).toBe(2)
+    })
+
+    it('counts the presignature of another order', () => {
+      expect(countNonSwapOrderCalls(batch([presign(), presign({}, randomUid())]), order)).toBe(1)
+    })
+
+    it('counts the cancellation of a presignature', () => {
+      expect(countNonSwapOrderCalls(batch([presign(), presign({}, order.uid, false)]), order)).toBe(1)
     })
 
     it('counts an approval to a spender other than the VaultRelayer', () => {
-      expect(countNonSwapOrderCalls(batch([approve(sellToken, randomAddress()), presign()]), sellToken)).toBe(1)
+      expect(countNonSwapOrderCalls(batch([approve(order.sellToken.address, randomAddress()), presign()]), order)).toBe(
+        1,
+      )
     })
 
     it('counts an approval of a token other than the sell token', () => {
-      expect(countNonSwapOrderCalls(batch([approve(randomAddress()), presign()]), sellToken)).toBe(1)
+      expect(countNonSwapOrderCalls(batch([approve(randomAddress()), presign()]), order)).toBe(1)
     })
 
     it('counts a wrap sent to an address other than the sell token', () => {
-      expect(countNonSwapOrderCalls(batch([wrap(randomAddress()), presign()]), sellToken)).toBe(1)
+      expect(countNonSwapOrderCalls(batch([wrap(randomAddress()), presign()]), order)).toBe(1)
+    })
+
+    it('counts a wrap of more than the sell amount', () => {
+      const value = (BigInt(order.sellAmount) + 1n).toString()
+      expect(countNonSwapOrderCalls(batch([wrap(order.sellToken.address, value), presign()]), order)).toBe(1)
     })
 
     it('counts a presignature sent to an address other than the settlement contract', () => {
-      expect(countNonSwapOrderCalls(singleCall(presign({ to: randomAddress() })), sellToken)).toBe(1)
+      expect(countNonSwapOrderCalls(singleCall(presign({ to: randomAddress() })), order)).toBe(1)
     })
 
     it('counts a presignature that sends value', () => {
-      expect(countNonSwapOrderCalls(singleCall(presign({ value: randomAmount() })), sellToken)).toBe(1)
+      expect(countNonSwapOrderCalls(singleCall(presign({ value: randomAmount() })), order)).toBe(1)
     })
 
     it('counts a presignature made with a delegate call', () => {
-      expect(countNonSwapOrderCalls(batch([presign({ operation: OperationType.DelegateCall })]), sellToken)).toBe(1)
+      expect(countNonSwapOrderCalls(batch([presign({ operation: OperationType.DelegateCall })]), order)).toBe(1)
+    })
+
+    it('counts a batch sent to an untrusted delegate call target as one call', () => {
+      expect(countNonSwapOrderCalls(batch([presign()], { trustedDelegateCallTarget: false }), order)).toBe(1)
+    })
+
+    it('counts a batch that is not a delegate call as one call', () => {
+      const calls = [presign()]
+      expect(
+        countNonSwapOrderCalls(batch(calls, { operation: OperationType.Call, trustedDelegateCallTarget: null }), order),
+      ).toBe(1)
     })
   })
 })
