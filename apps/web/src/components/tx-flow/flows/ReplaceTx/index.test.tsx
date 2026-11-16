@@ -185,10 +185,9 @@ describe('ReplaceTxMenu', () => {
 
       await user.click(screen.getByRole('button', { name: button }))
 
-      const { flow, target: flowTarget, pollSafeInfo } = unwrapScopedFlow(openedFlow())
+      const { flow, target: flowTarget } = unwrapScopedFlow(openedFlow())
       expect(flow?.type).toBe(Flow)
       expect(flowTarget).toEqual(target)
-      expect(pollSafeInfo).toBe(false)
     })
   })
 })

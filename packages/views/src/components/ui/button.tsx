@@ -18,9 +18,9 @@ import { cn } from '@safe-global/views/utils/cn'
  *
  * @remarks
  * Key Props:
- * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'ghost-muted' | 'destructive' | 'surface')
+ * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'ghost-muted' | 'destructive' | 'surface' | 'row-hover-primary')
  *   `ghost-muted`: the Figma Ghost, muted at rest; `ghost` keeps the foreground
- * - `size` ('default' | '2xs' | 'xs' | 'sm' |'lg' | 'action' | 'submit' | 'xl' | 'icon' | 'icon-xs' | 'icon-sm')
+ * - `size` ('default' | '2xs' | 'xs' | 'sm' | 'lg' | 'action' | 'submit' | 'xl' | 'icon' | 'icon-xs' | 'icon-sm')
  * - `weight` ('medium' | 'semibold')
  * - `accentIcon` (boolean): brand-green icon on a primary CTA
  * - `render`
@@ -66,6 +66,9 @@ const buttonVariants = cva(
         // Add-funds style). Same border+shadow as outline, filled with the `card` token
         // instead of the page background. Replaces per-call `bg-card`/`bg-[--color-background-paper]`.
         surface: 'border-border bg-card text-card-foreground hover:bg-muted hover:text-foreground shadow-xs',
+        // A table row's main action inside a `group/transaction` row: outline at rest, the filled primary while the row is hovered.
+        'row-hover-primary':
+          'border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground shadow-xs group-hover/transaction:enabled:border-transparent group-hover/transaction:enabled:bg-primary group-hover/transaction:enabled:text-primary-foreground group-hover/transaction:enabled:shadow-none group-hover/transaction:enabled:hover:bg-primary/80',
       },
       size: {
         default:

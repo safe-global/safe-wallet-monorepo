@@ -14,7 +14,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
 import { useSafeNameResolver } from '@/hooks/useAllAddressBooks'
 import useChains from '@/hooks/useChains'
-import ChainLogo from '../SpaceQueueTable/ChainLogo'
+import ChainLogos from '@safe-global/views/features/spaces/components/AddressBookV2/ChainLogos'
 
 /** The gateway reads the queue of this many distinct Safe addresses at most */
 export const SPACE_QUEUE_MAX_SAFES = 100
@@ -45,12 +45,15 @@ const UnavailableSafesAlert = ({ spaceId, safes, onRetry, isRetrying }: Unavaila
 
   const rows = useMemo(
     () =>
-      safes.map(({ chainId, safeAddress }) => ({
-        key: `${chainId}:${safeAddress}`,
-        chainId,
-        name: getName(safeAddress, chainId) || shortenAddress(safeAddress),
-        network: configs.find((chain) => chain.chainId === chainId)?.chainName ?? `Chain ${chainId}`,
-      })),
+      safes.map(({ chainId, safeAddress }) => {
+        const chain = configs.find((config) => config.chainId === chainId)
+        return {
+          key: `${chainId}:${safeAddress}`,
+          chain,
+          name: getName(safeAddress, chainId) || shortenAddress(safeAddress),
+          network: chain?.chainName ?? `Chain ${chainId}`,
+        }
+      }),
     [safes, getName, configs],
   )
 
@@ -77,7 +80,7 @@ const UnavailableSafesAlert = ({ spaceId, safes, onRetry, isRetrying }: Unavaila
             <ul className="mt-1 flex flex-col gap-1.5" aria-label="Safe accounts that couldn't be loaded">
               {rows.map((row) => (
                 <li key={row.key} className="flex items-center gap-2 text-sm text-foreground">
-                  <ChainLogo chainId={row.chainId} />
+                  {row.chain && <ChainLogos chains={[row.chain]} size="sm" />}
                   <span className="truncate">{row.name}</span>
                   <span className="shrink-0 text-muted-foreground">on {row.network}</span>
                 </li>
