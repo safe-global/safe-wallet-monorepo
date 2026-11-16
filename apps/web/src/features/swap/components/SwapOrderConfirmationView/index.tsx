@@ -2,6 +2,7 @@ import { TransactionInfoType } from '@safe-global/store/gateway/types'
 import type {
   DataDecoded,
   SwapOrderTransactionInfo,
+  TransactionData,
   SwapTransferTransactionInfo,
   TwapOrderTransactionInfo,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
@@ -25,16 +26,18 @@ import { PartDuration } from '@safe-global/views/features/swap/components/SwapOr
 import { PartSellAmount } from '@safe-global/views/features/swap/components/SwapOrder/rows/PartSellAmount'
 import { PartBuyAmount } from '@safe-global/views/features/swap/components/SwapOrder/rows/PartBuyAmount'
 import { OrderFeeConfirmationView } from './OrderFeeConfirmationView'
-import { isSettingTwapFallbackHandler } from '../../helpers/utils'
+import { countNonSwapOrderCalls, isSettingTwapFallbackHandler } from '../../helpers/utils'
 import { TwapFallbackHandlerWarning } from '@safe-global/views/features/swap/components/TwapFallbackHandlerWarning'
+import { SwapOrderExtraActionsWarning } from '@safe-global/views/features/swap/components/SwapOrderExtraActionsWarning'
 
 type SwapOrderProps = {
   order: SwapOrderTransactionInfo | SwapTransferTransactionInfo | TwapOrderTransactionInfo
   settlementContract: string
   decodedData?: DataDecoded | null
+  txData?: TransactionData | null
 }
 
-const SwapOrderConfirmation = ({ order, decodedData, settlementContract }: SwapOrderProps): ReactElement => {
+const SwapOrderConfirmation = ({ order, decodedData, settlementContract, txData }: SwapOrderProps): ReactElement => {
   const { owner, kind, validUntil, sellToken, buyToken, sellAmount, buyAmount, receiver } = order
 
   const isTwapOrder = order.type === TransactionInfoType.TWAP_ORDER
@@ -48,10 +51,13 @@ const SwapOrderConfirmation = ({ order, decodedData, settlementContract }: SwapO
   const isSellOrder = kind === 'sell'
   const isChangingFallbackHandler = decodedData && isSettingTwapFallbackHandler(decodedData)
   const explorerUrl = !isTwapOrder ? order.explorerUrl : undefined
+  const extraActionsCount =
+    order.type === TransactionInfoType.SWAP_ORDER && txData ? countNonSwapOrderCalls(txData, sellToken.address) : 0
 
   return (
     <>
       {isChangingFallbackHandler && <TwapFallbackHandlerWarning />}
+      {extraActionsCount > 0 && <SwapOrderExtraActionsWarning count={extraActionsCount} />}
 
       <DataTable
         header="Order details"

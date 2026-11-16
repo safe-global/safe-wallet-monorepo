@@ -18,7 +18,9 @@ import { compareAsc } from 'date-fns'
 import css from './styles.module.css'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
+import { SwapOrderExtraActionsWarning } from '@safe-global/views/features/swap/components/SwapOrderExtraActionsWarning'
 import {
+  countNonSwapOrderCalls,
   getExecutionPrice,
   getLimitPrice,
   getOrderClass,
@@ -266,14 +268,24 @@ export const TwapOrder = ({ order }: { order: SwapTwapOrder }) => {
   )
 }
 
-const SwapOrder = ({ txInfo }: SwapOrderProps): ReactElement | null => {
+const SwapOrder = ({ txInfo, txData }: SwapOrderProps): ReactElement | null => {
   if (!txInfo) return null
 
   if (isTwapOrderTxInfo(txInfo)) {
     return <TwapOrder order={txInfo} />
   }
 
-  if (isSwapOrderTxInfo(txInfo) || isSwapTransferOrderTxInfo(txInfo)) {
+  if (isSwapOrderTxInfo(txInfo)) {
+    const extraActionsCount = txData ? countNonSwapOrderCalls(txData, txInfo.sellToken.address) : 0
+    return (
+      <>
+        {extraActionsCount > 0 && <SwapOrderExtraActionsWarning count={extraActionsCount} />}
+        <SellOrder order={txInfo} />
+      </>
+    )
+  }
+
+  if (isSwapTransferOrderTxInfo(txInfo)) {
     return <SellOrder order={txInfo} />
   }
   return null

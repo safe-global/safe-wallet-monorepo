@@ -2,7 +2,15 @@ import type { SwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_G
 import type { DataDecoded, TwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { OnTradeParamsPayload } from '@cowprotocol/events'
 import { UiOrderType } from '@safe-global/utils/features/swap/types'
+import { faker } from '@faker-js/faker'
+import { Interface, getAddress } from 'ethers'
+import { encodeMultiSendData } from '@safe-global/protocol-kit'
+import { OperationType, type MetaTransactionData } from '@safe-global/types-kit'
+import { ERC20__factory, Multi_send__factory } from '@safe-global/utils/types/contracts'
 import {
+  COW_SETTLEMENT_CONTRACT,
+  COW_VAULT_RELAYER,
+  countNonSwapOrderCalls,
   getExecutionPrice,
   getFilledPercentage,
   getLimitPrice,
@@ -459,6 +467,111 @@ describe('Swap helpers', () => {
       expect(parseCowTradeParams(makePayload({})).sellAsset).toBe('')
       expect(parseCowTradeParams(makePayload({})).buyAsset).toBe('')
       expect(parseCowTradeParams(makePayload({ sellToken: {} })).sellAsset).toBe('')
+    })
+  })
+
+  describe('countNonSwapOrderCalls', () => {
+    const ERC20_INTERFACE = ERC20__factory.createInterface()
+    const MULTISEND_INTERFACE = Multi_send__factory.createInterface()
+    const SETTLEMENT_INTERFACE = new Interface(['function setPreSignature(bytes orderUid, bool signed)'])
+    const WETH_INTERFACE = new Interface(['function deposit()'])
+
+    const randomAddress = () => getAddress(faker.finance.ethereumAddress())
+    const randomAmount = () => faker.number.bigInt({ min: 1n, max: 10n ** 18n }).toString()
+
+    const presign = (overrides: Partial<MetaTransactionData> = {}): MetaTransactionData => ({
+      to: COW_SETTLEMENT_CONTRACT,
+      value: '0',
+      data: SETTLEMENT_INTERFACE.encodeFunctionData('setPreSignature', [
+        faker.string.hexadecimal({ length: 112 }),
+        true,
+      ]),
+      operation: OperationType.Call,
+      ...overrides,
+    })
+    const approve = (token: string, spender = COW_VAULT_RELAYER): MetaTransactionData => ({
+      to: token,
+      value: '0',
+      data: ERC20_INTERFACE.encodeFunctionData('approve', [spender, randomAmount()]),
+      operation: OperationType.Call,
+    })
+    const wrap = (to: string): MetaTransactionData => ({
+      to,
+      value: randomAmount(),
+      data: WETH_INTERFACE.encodeFunctionData('deposit'),
+      operation: OperationType.Call,
+    })
+    const erc20Transfer = (token: string): MetaTransactionData => ({
+      to: token,
+      value: '0',
+      data: ERC20_INTERFACE.encodeFunctionData('transfer', [randomAddress(), randomAmount()]),
+      operation: OperationType.Call,
+    })
+    const nativeTransfer = (): MetaTransactionData => ({
+      to: randomAddress(),
+      value: randomAmount(),
+      data: '0x',
+      operation: OperationType.Call,
+    })
+
+    const singleCall = (call: MetaTransactionData) => ({
+      to: { value: call.to },
+      value: call.value,
+      hexData: call.data,
+      operation: call.operation ?? OperationType.Call,
+    })
+    const batch = (calls: MetaTransactionData[]) => ({
+      to: { value: randomAddress() },
+      value: '0',
+      hexData: MULTISEND_INTERFACE.encodeFunctionData('multiSend', [encodeMultiSendData(calls)]),
+      operation: OperationType.DelegateCall,
+    })
+
+    const sellToken = randomAddress()
+
+    it('returns 0 for a presignature sent to the settlement contract', () => {
+      expect(countNonSwapOrderCalls(singleCall(presign()), sellToken)).toBe(0)
+    })
+
+    it('returns 0 for a batch of sell token approval to the VaultRelayer and presignature', () => {
+      expect(countNonSwapOrderCalls(batch([approve(sellToken), presign()]), sellToken)).toBe(0)
+    })
+
+    it('returns 0 for a batch that wraps, approves and presigns the sell token', () => {
+      expect(countNonSwapOrderCalls(batch([wrap(sellToken), approve(sellToken), presign()]), sellToken)).toBe(0)
+    })
+
+    it('returns 0 when there is no transaction data', () => {
+      expect(countNonSwapOrderCalls({ ...singleCall(presign()), hexData: undefined }, sellToken)).toBe(0)
+    })
+
+    it('counts token and native transfers batched with the order', () => {
+      const calls = [erc20Transfer(sellToken), nativeTransfer(), presign()]
+      expect(countNonSwapOrderCalls(batch(calls), sellToken)).toBe(2)
+    })
+
+    it('counts an approval to a spender other than the VaultRelayer', () => {
+      expect(countNonSwapOrderCalls(batch([approve(sellToken, randomAddress()), presign()]), sellToken)).toBe(1)
+    })
+
+    it('counts an approval of a token other than the sell token', () => {
+      expect(countNonSwapOrderCalls(batch([approve(randomAddress()), presign()]), sellToken)).toBe(1)
+    })
+
+    it('counts a wrap sent to an address other than the sell token', () => {
+      expect(countNonSwapOrderCalls(batch([wrap(randomAddress()), presign()]), sellToken)).toBe(1)
+    })
+
+    it('counts a presignature sent to an address other than the settlement contract', () => {
+      expect(countNonSwapOrderCalls(singleCall(presign({ to: randomAddress() })), sellToken)).toBe(1)
+    })
+
+    it('counts a presignature that sends value', () => {
+      expect(countNonSwapOrderCalls(singleCall(presign({ value: randomAmount() })), sellToken)).toBe(1)
+    })
+
+    it('counts a presignature made with a delegate call', () => {
+      expect(countNonSwapOrderCalls(batch([presign({ operation: OperationType.DelegateCall })]), sellToken)).toBe(1)
     })
   })
 })

@@ -1,10 +1,20 @@
-import type { DataDecoded, SwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type {
+  DataDecoded,
+  SwapOrderTransactionInfo,
+  TransactionData,
+} from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { formatUnits, id } from 'ethers'
 import type { AnyAppDataDocVersion, cowAppDataLatestScheme as latest } from '@cowprotocol/sdk-app-data'
 import type { OnTradeParamsPayload } from '@cowprotocol/events'
 import type { BaseTransaction } from '@safe-global/safe-apps-sdk'
-import { APPROVAL_SIGNATURE_HASH } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
+import { decodeMultiSendData } from '@safe-global/protocol-kit'
+import { OperationType } from '@safe-global/types-kit'
+import {
+  APPROVAL_SIGNATURE_HASH,
+  ERC20_INTERFACE,
+} from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
+import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 
 import { TradeType, UiOrderType } from '@safe-global/utils/features/swap/types'
 import { LIMIT_ORDER_TITLE, SWAP_ORDER_TITLE, TWAP_ORDER_TITLE } from '../constants'
@@ -247,6 +257,60 @@ const WRAP_SIGHASH = id('deposit()').slice(0, 10)
 const UNWRAP_SIGHASH = id('withdraw(uint256)').slice(0, 10)
 const CREATE_WITH_CONTEXT_SIGHASH = id('createWithContext((address,bytes32,bytes),address,bytes,bool)').slice(0, 10)
 const CANCEL_ORDER_SIGHASH = id('invalidateOrder(bytes)').slice(0, 10)
+
+// CoW Protocol deploys these at the same address on every chain
+export const COW_SETTLEMENT_CONTRACT = '0x9008D19f58AAbD9eD0D60971565AA8510560ab41'
+export const COW_VAULT_RELAYER = '0xC92E8bdf79f0507f65a392b0ab4667716BFE0110'
+
+type BatchCall = { to: string; value: string; data: string; operation?: OperationType }
+
+const isSameAddress = (a: string, b: string) => a.toLowerCase() === b.toLowerCase()
+
+const isApprovalToVaultRelayer = (data: string): boolean => {
+  try {
+    const [spender] = ERC20_INTERFACE.decodeFunctionData('approve', data)
+    return isSameAddress(spender, COW_VAULT_RELAYER)
+  } catch {
+    return false
+  }
+}
+
+const isPartOfSwapOrder = (call: BatchCall, sellTokenAddress: string): boolean => {
+  if (call.operation === OperationType.DelegateCall) return false
+
+  const selector = call.data.slice(0, 10).toLowerCase()
+
+  if (selector === WRAP_SIGHASH) return isSameAddress(call.to, sellTokenAddress)
+  if (BigInt(call.value || '0') !== 0n) return false
+  if (selector === PRE_SIGN_SIGHASH) return isSameAddress(call.to, COW_SETTLEMENT_CONTRACT)
+  if (selector === APPROVAL_SIGNATURE_HASH) {
+    return isSameAddress(call.to, sellTokenAddress) && isApprovalToVaultRelayer(call.data)
+  }
+  return false
+}
+
+/**
+ * Counts the calls of a swap order transaction that are not part of the order itself,
+ * i.e. anything other than the presignature, the sell token approval to the VaultRelayer or the wrap of the sell token.
+ */
+export const countNonSwapOrderCalls = (
+  txData: Pick<TransactionData, 'hexData' | 'to' | 'value' | 'operation'>,
+  sellTokenAddress: string,
+): number => {
+  const { hexData } = txData
+  if (!hexData) return 0
+
+  if (!isMultiSendCalldata(hexData)) {
+    const call = { to: txData.to.value, value: txData.value ?? '0', data: hexData, operation: txData.operation }
+    return isPartOfSwapOrder(call, sellTokenAddress) ? 0 : 1
+  }
+
+  try {
+    return decodeMultiSendData(hexData).filter((call) => !isPartOfSwapOrder(call, sellTokenAddress)).length
+  } catch {
+    return 0
+  }
+}
 
 export const getSwapTitle = (tradeType: SwapState['tradeType'], txs: BaseTransaction[] | undefined) => {
   const hashToLabel: Record<string, string> = {
