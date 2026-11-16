@@ -38,7 +38,7 @@ export type TourStepPopoverProps = {
 }
 
 const TourStepPopover = ({ anchor, placement, content, progress, onBack, onNext, onClose }: TourStepPopoverProps) => (
-  <Popover open onOpenChange={onClose}>
+  <Popover open onOpenChange={(_open, { reason }) => reason === 'escape-key' && onClose()}>
     <PopoverContent
       anchor={anchor}
       side={placement.side}

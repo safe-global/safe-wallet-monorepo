@@ -23,11 +23,12 @@ type TourStopProps = {
 
 const TourStop = ({ step, progress, onBack, onNext, onClose, onMissingAnchor }: TourStopProps) => {
   const portalContainer = usePortalContainerElement() ?? document.body
-  const anchor = useAnchorElement(step.anchor)
+  const isOnStepRoute = useRouteToStep(step)
+  const anchor = useAnchorElement(isOnStepRoute ? step.anchor : undefined)
   const sidebarItem = useAnchorElement(step.sidebarItem)
   const sidebar = useAnchorElement(step.sidebarItem ? SIDEBAR : undefined)
   const emptyState = useAnchorElement(anchor.element ? step.emptyState : undefined)
-  const controlToSelect = useAnchorElement(step.selectOnEnter)
+  const controlToSelect = useAnchorElement(isOnStepRoute ? step.selectOnEnter : undefined)
   const target = step.anchor ? anchor : sidebarItem
   const layout = toStopLayout({
     anchor: useElementRect(anchor.element),
@@ -36,14 +37,13 @@ const TourStop = ({ step, progress, onBack, onNext, onClose, onMissingAnchor }: 
     sidebar: useElementRect(sidebar.element),
   })
 
-  useRouteToStep(step)
-
   useEffect(() => {
     if (target.isMissing) onMissingAnchor()
   }, [target.isMissing, onMissingAnchor])
 
   useEffect(() => {
-    if (controlToSelect.element instanceof HTMLElement) controlToSelect.element.click()
+    const control = controlToSelect.element
+    if (control instanceof HTMLElement && control.getAttribute('aria-selected') !== 'true') control.click()
   }, [controlToSelect.element])
 
   useEffect(() => {
