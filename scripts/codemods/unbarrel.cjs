@@ -18,12 +18,16 @@ const LAZY_MOCK_FILES = new Set([
 ])
 const ts = require(path.join(ROOT, 'node_modules/typescript'))
 
-const parsed = ts.getParsedCommandLineOfConfigFile(path.join(WEB, 'tsconfig.json'), {}, {
-  ...ts.sys,
-  onUnRecoverableConfigFileDiagnostic: (d) => {
-    throw new Error(ts.flattenDiagnosticMessageText(d.messageText, '\n'))
+const parsed = ts.getParsedCommandLineOfConfigFile(
+  path.join(WEB, 'tsconfig.json'),
+  {},
+  {
+    ...ts.sys,
+    onUnRecoverableConfigFileDiagnostic: (d) => {
+      throw new Error(ts.flattenDiagnosticMessageText(d.messageText, '\n'))
+    },
   },
-})
+)
 const tanstackFiles = ts.sys.readDirectory(TANSTACK_SRC, ['.ts', '.tsx'], ['**/node_modules/**'])
 const program = ts.createProgram({
   rootNames: [...parsed.fileNames, ...tanstackFiles],
@@ -177,14 +181,24 @@ function splitNamespaceImport(sf, stmt, barrel) {
   let unsupported = false
   let typeQuery = false
   ts.forEachChild(sf, function walk(node) {
-    if (ts.isIdentifier(node) && node !== nsNode && node.text === nsNode.text && checker.getSymbolAtLocation(node) === nsSym) {
+    if (
+      ts.isIdentifier(node) &&
+      node !== nsNode &&
+      node.text === nsNode.text &&
+      checker.getSymbolAtLocation(node) === nsSym
+    ) {
       const parent = node.parent
       const args = ts.isCallExpression(parent) ? parent.arguments : []
       if (ts.isPropertyAccessExpression(parent) && parent.expression === node) {
         uses.push({ node, prop: parent.name.text, nameNode: parent.name })
       } else if (ts.isQualifiedName(parent) && parent.left === node) {
         uses.push({ node, prop: parent.right.text, nameNode: parent.right })
-      } else if (args[0] === node && args[1] && ts.isStringLiteral(args[1]) && /^jest\.(spyOn|replaceProperty)$/.test(textOf(sf, parent.expression))) {
+      } else if (
+        args[0] === node &&
+        args[1] &&
+        ts.isStringLiteral(args[1]) &&
+        /^jest\.(spyOn|replaceProperty)$/.test(textOf(sf, parent.expression))
+      ) {
         uses.push({ node, prop: args[1].text, nameNode: args[1], literal: true })
       } else if (ts.isTypeQueryNode(parent)) {
         typeQuery = true
@@ -213,7 +227,10 @@ function splitNamespaceImport(sf, stmt, barrel) {
   const nameFor = (spec) => {
     const keepsOriginal = !typeQuery && (specs.length === 1 || spec === originalSpec)
     if (keepsOriginal) return nsNode.text
-    const base = spec.split('/').pop().replace(/[^A-Za-z0-9]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
+    const base = spec
+      .split('/')
+      .pop()
+      .replace(/[^A-Za-z0-9]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ''))
     const candidates = [base, `${nsNode.text}${base[0].toUpperCase()}${base.slice(1)}`]
     const used = new Set(aliasBySpec.values())
     const free = candidates.find((c) => /^[A-Za-z_$]/.test(c) && !taken.has(c) && !used.has(c))
@@ -259,7 +276,12 @@ function visitImports(sf) {
       fullyUsed.add(barrel)
       continue
     }
-    addEdit(sf.fileName, stmt.getStart(sf), stmt.getEnd(), rewriteDeclaration(stmt, barrel, isImport ? 'import' : 'export'))
+    addEdit(
+      sf.fileName,
+      stmt.getStart(sf),
+      stmt.getEnd(),
+      rewriteDeclaration(stmt, barrel, isImport ? 'import' : 'export'),
+    )
     stats.importsRewritten++
   }
   ts.forEachChild(sf, function walk(node) {
@@ -289,8 +311,10 @@ function visitKeepOnly(sf) {
 }
 
 const isJestRequireCall = (sf, expr, fns) =>
-  ts.isCallExpression(expr) && new RegExp(`^jest\\.(${fns})$`).test(textOf(sf, expr.expression)) &&
-  expr.arguments[0] && ts.isStringLiteral(expr.arguments[0])
+  ts.isCallExpression(expr) &&
+  new RegExp(`^jest\\.(${fns})$`).test(textOf(sf, expr.expression)) &&
+  expr.arguments[0] &&
+  ts.isStringLiteral(expr.arguments[0])
 const isRequireActualCall = (sf, expr) => isJestRequireCall(sf, expr, 'requireActual')
 const isRequireActualOrMockCall = (sf, expr) => isJestRequireCall(sf, expr, 'requireActual|requireMock')
 
@@ -305,7 +329,8 @@ function requireActualEdits(sf, node) {
         const moved = declaringModule(exportsOf(barrel).get(n.name.text), n.name.text, barrel)
         if (moved) {
           out.push({ start: arg.getStart(sf), end: arg.getEnd(), text: `'${moved.spec}'` })
-          if (moved.name !== n.name.text) out.push({ start: n.name.getStart(sf), end: n.name.getEnd(), text: moved.name })
+          if (moved.name !== n.name.text)
+            out.push({ start: n.name.getStart(sf), end: n.name.getEnd(), text: moved.name })
         } else {
           keptNames.get(barrel).add(n.name.text)
         }
@@ -341,7 +366,12 @@ function filesMockedIn(sf) {
   if (mockedFilesCache.has(sf.fileName)) return mockedFilesCache.get(sf.fileName)
   const files = new Set()
   ts.forEachChild(sf, function walk(n) {
-    if (ts.isCallExpression(n) && /^jest\.(mock|doMock)$/.test(textOf(sf, n.expression)) && n.arguments[0] && ts.isStringLiteral(n.arguments[0])) {
+    if (
+      ts.isCallExpression(n) &&
+      /^jest\.(mock|doMock)$/.test(textOf(sf, n.expression)) &&
+      n.arguments[0] &&
+      ts.isStringLiteral(n.arguments[0])
+    ) {
       const file = resolveSpec(n.arguments[0].text, sf.fileName)
       if (file) files.add(file)
     }
@@ -423,7 +453,9 @@ function splitJestMock(sf, call, barrel) {
     if (key === '__esModule') continue
     const isWholeMember = !ts.isShorthandPropertyAssignment(p) && !ts.isPropertyAssignment(p)
     const valueNode = ts.isPropertyAssignment(p) ? p.initializer : p
-    const value = ts.isShorthandPropertyAssignment(p) ? key : textWithEdits(sf, valueNode, requireActualEdits(sf, valueNode))
+    const value = ts.isShorthandPropertyAssignment(p)
+      ? key
+      : textWithEdits(sf, valueNode, requireActualEdits(sf, valueNode))
     const moved = declaringModule(barrelExports.get(key), key, barrel)
     if (!moved) keptNames.get(barrel).add(key)
     const target = moved?.spec ?? spec
@@ -441,7 +473,9 @@ function splitJestMock(sf, call, barrel) {
     if (owner) owner.spreadsOwnActual = true
     return !owner
   })
-  const hasOtherSpreads = otherSpreads.some((p) => !(isRequireActualCall(sf, p.expression) && p.expression.arguments[0].text === spec))
+  const hasOtherSpreads = otherSpreads.some(
+    (p) => !(isRequireActualCall(sf, p.expression) && p.expression.arguments[0].text === spec),
+  )
   if (hasOtherSpreads && !groups.has(spec)) groups.set(spec, { props: [] })
   const lines = [...groups].map(([target, { file, props, spreadsOwnActual }]) => {
     const isBarrel = target === spec
@@ -450,7 +484,8 @@ function splitJestMock(sf, call, barrel) {
     const missing = file && !spreadActual ? valueExportNames(file).filter((n) => !props.some((x) => x.name === n)) : []
     const spread = spreadActual || spreadsOwnActual || (missing.length > 0 && !LAZY_MOCK_FILES.has(target))
     if (spread && !isBarrel) parts.push(`...jest.requireActual('${target}')`)
-    if (props.some((x) => x.name === 'default') || (!spread && missing.includes('default'))) parts.push('__esModule: true')
+    if (props.some((x) => x.name === 'default') || (!spread && missing.includes('default')))
+      parts.push('__esModule: true')
     if (!spread) {
       for (const n of missing) parts.push(`get ${n}() {\n    return jest.requireActual('${target}').${n}\n  }`)
     }
@@ -468,8 +503,11 @@ function splitJestMock(sf, call, barrel) {
 
 function visitJestMocks(sf) {
   ts.forEachChild(sf, function walk(node) {
-    const isMockCall = ts.isCallExpression(node) && /^jest\.(mock|doMock)$/.test(textOf(sf, node.expression)) &&
-      node.arguments[0] && ts.isStringLiteral(node.arguments[0])
+    const isMockCall =
+      ts.isCallExpression(node) &&
+      /^jest\.(mock|doMock)$/.test(textOf(sf, node.expression)) &&
+      node.arguments[0] &&
+      ts.isStringLiteral(node.arguments[0])
     if (isMockCall) {
       const barrel = resolveSpec(node.arguments[0].text, sf.fileName)
       if (barrel && targets.has(barrel) && splitJestMock(sf, node, barrel)) return
@@ -505,7 +543,7 @@ function nonStarExportNames(sf) {
 
 // A barrel that keeps its `export *` lines needs everything behind them.
 function markStarDependencies() {
-  for (let changed = true; changed; ) {
+  for (let changed = true; changed;) {
     changed = false
     for (const barrel of targets) {
       const sf = program.getSourceFile(barrel)
@@ -577,5 +615,7 @@ markStarDependencies()
 pruneReexports()
 if (!DRY) writeEdits()
 
-console.log(JSON.stringify({ barrels: targets.size, keptWhole: fullyUsed.size, filesChanged: edits.size, ...stats }, null, 2))
+console.log(
+  JSON.stringify({ barrels: targets.size, keptWhole: fullyUsed.size, filesChanged: edits.size, ...stats }, null, 2),
+)
 if (manual.length) console.log(`\nFix by hand (${manual.length}):\n${manual.join('\n')}`)

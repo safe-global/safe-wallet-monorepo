@@ -122,7 +122,6 @@ describe('SetupWidget', () => {
       return [{}, mockSetDismissedSpaces]
     })
 
-
     ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([])
     ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [] })
     ;(useSpaceMembersByStatus as jest.Mock).mockReturnValue({ activeMembers: [], invitedMembers: [] })
@@ -177,7 +176,6 @@ describe('SetupWidget', () => {
   })
 
   it('sorts completed steps before incomplete ones', () => {
-
     ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([{ name: 'Alice', address: '0x1' }])
     ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [{ address: '0x2', chainId: '1' }] })
     ;(useSpaceMembersByStatus as jest.Mock).mockReturnValue({ activeMembers: [], invitedMembers: [] })
@@ -210,7 +208,6 @@ describe('SetupWidget', () => {
   })
 
   it('marks the space as completed when Explore Spaces modal is closed and all steps are done', () => {
-
     ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([{ name: 'Alice', address: '0x1' }])
     ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [{ address: '0x2', chainId: '1' }] })
     ;(useSpaceMembersByStatus as jest.Mock).mockReturnValue({
@@ -259,7 +256,6 @@ describe('SetupWidget', () => {
   })
 
   it('disables click on completed steps', () => {
-
     ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([{ name: 'Alice', address: '0x1' }])
     ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [{ address: '0x2', chainId: '1' }] })
 

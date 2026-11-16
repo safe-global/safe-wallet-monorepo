@@ -20,13 +20,7 @@ import {
   dispatchTxRelay,
 } from '@/services/tx/tx-sender/dispatch'
 import * as sdk from '../sdk'
-import {
-  BrowserProvider,
-  concat,
-  type TransactionReceipt,
-  zeroPadValue,
-  type JsonRpcSigner,
-} from 'ethers'
+import { BrowserProvider, concat, type TransactionReceipt, zeroPadValue, type JsonRpcSigner } from 'ethers'
 import { encodeNestedTxPayload } from '../../nestedTxEnvelope'
 import * as safeContracts from '@/services/contracts/safeContracts'
 
