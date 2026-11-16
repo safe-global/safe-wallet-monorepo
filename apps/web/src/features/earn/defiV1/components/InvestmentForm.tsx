@@ -133,11 +133,13 @@ export const ChoiceCard = ({
   title,
   description,
   badge,
+  children,
 }: {
   value: string
   title: string
   description?: string
   badge?: ReactNode
+  children?: ReactNode
 }) => (
   <FieldLabel>
     <Field orientation="horizontal">
@@ -148,6 +150,7 @@ export const ChoiceCard = ({
           {badge}
         </FieldTitle>
         {description && <FieldDescription className="text-xs">{description}</FieldDescription>}
+        {children}
       </FieldContent>
     </Field>
   </FieldLabel>
@@ -229,25 +232,27 @@ export const WhereFields = ({ form, labelled = true }: { form: InvestmentForm; l
           title={COPY.dedicated}
           badge={<Badge variant="success">{COPY.recommended}</Badge>}
           description={COPY.dedicatedHint(form.safeName)}
-        />
+        >
+          {form.where === 'nested' && form.investment && (
+            <div className="mt-2 flex flex-col gap-1.5">
+              <InputGroup>
+                <InputGroupAddon align="inline-start">
+                  <InitialsAvatar name={form.safeName} size="xsmall" rounded />
+                </InputGroupAddon>
+                <InputGroupInput
+                  aria-label={COPY.name}
+                  value={form.name}
+                  maxLength={40}
+                  placeholder={dedicatedSafeName(form.investment)}
+                  onChange={(event) => form.setName(event.target.value)}
+                />
+              </InputGroup>
+              <span className="text-xs text-muted-foreground">{COPY.nameHint(form.executors.length)}</span>
+            </div>
+          )}
+        </ChoiceCard>
       </RadioGroup>
     </Section>
-    {form.where === 'nested' && form.investment && (
-      <Section label={COPY.name} htmlFor="investment-name" hint={COPY.nameHint(form.executors.length)}>
-        <InputGroup>
-          <InputGroupAddon align="inline-start">
-            <InitialsAvatar name={form.safeName} size="xsmall" rounded />
-          </InputGroupAddon>
-          <InputGroupInput
-            id="investment-name"
-            value={form.name}
-            maxLength={40}
-            placeholder={dedicatedSafeName(form.investment)}
-            onChange={(event) => form.setName(event.target.value)}
-          />
-        </InputGroup>
-      </Section>
-    )}
   </>
 )
 
