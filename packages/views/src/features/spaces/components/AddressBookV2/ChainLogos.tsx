@@ -8,7 +8,7 @@ const LOGO_SIZES = { sm: 'size-4', md: 'size-5' } as const
 
 type LogoSize = keyof typeof LOGO_SIZES
 
-const ChainLogo = ({ chain, size }: { chain: ChainInfo; size: LogoSize }) =>
+export const ChainLogo = ({ chain, size }: { chain: ChainInfo; size: LogoSize }) =>
   chain.chainLogoUri ? (
     <img
       src={chain.chainLogoUri}
