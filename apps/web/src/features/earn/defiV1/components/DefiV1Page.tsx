@@ -5,7 +5,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { AppRoutes } from '@/config/routes'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { DEFI_V1_COPY } from '../copy'
-import { EXISTING_POSITIONS, OPPORTUNITIES, TREASURY_TOTAL } from '../opportunities'
+import { EXISTING_POSITIONS, OPERATIONS, OPPORTUNITIES, TREASURY_TOTAL } from '../opportunities'
 import {
   activeFilterCount,
   buildShelf,
@@ -16,15 +16,17 @@ import {
   holdingsFor,
   isLocked,
   NO_FILTERS,
+  operationsFor,
   summariseTreasury,
   type ListFilters,
 } from '../shelf'
-import type { DefiV1Config, GroupBy, LiquidityBucket, Opportunity, Position } from '../types'
+import type { DefiV1Config, GroupBy, LiquidityBucket, Operation, Opportunity, Position } from '../types'
 import type { ActionResult } from './ActionPanel'
 import { CompareDialog } from './CompareDialog'
 import { OpportunityDrawer } from './OpportunityDrawer'
 import { OpportunityToolbar } from './OpportunityToolbar'
-import { PolicyPanel } from './PolicyPanel'
+import { NewOperationDialog } from './NewOperationDialog'
+import { OperationsRow } from './OperationsRow'
 import { TreasurySummary } from './TreasurySummary'
 import { OpportunitiesTable, type OpportunityGroup } from './TreasuryTables'
 
@@ -63,6 +65,8 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const [compareIds, setCompareIds] = useState<string[]>([])
   const [isComparing, setIsComparing] = useState(false)
   const [showAll, setShowAll] = useState(false)
+  const [operations, setOperations] = useState<Operation[]>(OPERATIONS)
+  const [isCreating, setIsCreating] = useState(false)
   const router = useRouter()
   const locked = (item: Opportunity) => isLocked(item, config.plan)
   const goTo = (pathname: string) => router.push({ pathname, query: router.query })
@@ -104,8 +108,13 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
     tableRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  const onDeposited = ({ opportunity, amount, pending }: ActionResult) =>
+  const onDeposited = ({ opportunity, amount, pending, operationId }: ActionResult) => {
     setPositions((current) => [{ opportunity, principal: amount, earned: 0, pending }, ...current])
+    if (operationId && !pending)
+      setOperations((current) =>
+        current.map((item) => (item.id === operationId ? { ...item, invested: item.invested + amount } : item)),
+      )
+  }
 
   const onWithdrawn = ({ opportunity, amount, pending }: ActionResult) => {
     if (pending) return
@@ -140,6 +149,7 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
           summary={summary}
           onExploreIdle={() => showGrouped('none', { ...NO_FILTERS, sameDay: true, openOnly: true })}
         />
+        <OperationsRow operations={operations} plan={config.plan} onNew={() => setIsCreating(true)} />
       </div>
 
       <section
@@ -158,7 +168,6 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
           chains={CHAINS}
           compareCount={compareIds.length}
           onCompare={() => setIsComparing(true)}
-          policy={<PolicyPanel plan={config.plan} />}
           onDeposit={topOpen ? () => setSelected(topOpen) : undefined}
         />
         <OpportunitiesTable
@@ -198,12 +207,19 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
         }}
       />
 
+      <NewOperationDialog
+        open={isCreating}
+        options={RANKED.filter((item) => !locked(item))}
+        onClose={() => setIsCreating(false)}
+        onCreate={(operation) => setOperations((current) => [...current, operation])}
+      />
+
       <OpportunityDrawer
         opportunity={selected}
         list={listed}
         onNavigate={setSelected}
         locked={selected ? locked(selected) : false}
-        signing={config.plan === 'pro' ? config.signing : 'threshold'}
+        operations={config.plan === 'pro' && selected ? operationsFor(operations, selected.id) : []}
         holding={selected ? holdingOf(selected) : undefined}
         onClose={() => setSelected(null)}
         onDeposited={onDeposited}

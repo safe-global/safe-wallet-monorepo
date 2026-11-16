@@ -38,13 +38,11 @@ export type Opportunity = {
 
 export type DefiV1Framing = 'treasury' | 'defi'
 export type DefiV1Nudge = 'home' | 'assets' | 'off'
-export type DefiV1Signing = 'threshold' | 'policy'
 export type DefiV1Plan = 'free' | 'pro'
 
 export type DefiV1Config = {
   framing: DefiV1Framing
   nudge: DefiV1Nudge
-  signing: DefiV1Signing
   plan: DefiV1Plan
 }
 
@@ -53,5 +51,16 @@ export type LiquidityBucket = 'operating' | 'reserves' | 'strategic'
 export type GroupBy = 'none' | 'investments' | 'liquidity' | 'asset'
 
 export type Position = { opportunity: Opportunity; principal: number; earned: number; pending: boolean }
+
+/** A separate Safe with its own budget and signers, so investing never touches the main Safe. */
+export type Operation = {
+  id: string
+  name: string
+  budget: number
+  invested: number
+  threshold: number
+  owners: number
+  opportunityIds: string[]
+}
 
 export type Holding = { invested: number; pending: number; earned: number }

@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker'
 import {
   activeFilterCount,
+  budgetLeft,
   buildShelf,
   depositSteps,
   filterOpportunities,
@@ -12,6 +13,7 @@ import {
   isLocked,
   liquidityBucket,
   NO_FILTERS,
+  operationsFor,
   MAX_SHELF,
   nudgeOptions,
   summariseTreasury,
@@ -193,6 +195,25 @@ describe('investedFirst', () => {
     const [first, second, held] = [opportunity(), opportunity(), opportunity()]
 
     expect(investedFirst([first, second, held], [held.id])).toEqual([held, first, second])
+  })
+})
+
+describe('operations', () => {
+  const operation = { budget: 1_000, invested: 400, opportunityIds: ['a'] }
+
+  it('reports what an operation can still invest', () => {
+    expect(budgetLeft(operation)).toBe(600)
+  })
+
+  it('never reports a negative budget', () => {
+    expect(budgetLeft({ budget: 100, invested: 300 })).toBe(0)
+  })
+
+  it('lists only operations approved for the option', () => {
+    const allowed = { ...operation, id: 'one', name: 'One', threshold: 1, owners: 3 }
+    const other = { ...allowed, id: 'two', opportunityIds: ['b'] }
+
+    expect(operationsFor([allowed, other], 'a')).toEqual([allowed])
   })
 })
 

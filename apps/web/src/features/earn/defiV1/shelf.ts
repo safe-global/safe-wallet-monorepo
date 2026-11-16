@@ -1,4 +1,13 @@
-import type { DefiV1Plan, GroupBy, Holding, Opportunity, LiquidityBucket, OpportunityCategory, Position } from './types'
+import type {
+  DefiV1Plan,
+  GroupBy,
+  Holding,
+  LiquidityBucket,
+  Operation,
+  Opportunity,
+  OpportunityCategory,
+  Position,
+} from './types'
 
 export const CATEGORY_ORDER: OpportunityCategory[] = ['cash', 'yield', 'staking']
 export const MAX_SHELF = 7
@@ -118,6 +127,14 @@ export const investedFirst = (opportunities: Opportunity[], investedIds: string[
   ...opportunities.filter((item) => investedIds.includes(item.id)),
   ...opportunities.filter((item) => !investedIds.includes(item.id)),
 ]
+
+/** What an operation can still invest before the main Safe tops it up. */
+export const budgetLeft = (operation: Pick<Operation, 'budget' | 'invested'>): number =>
+  Math.max(operation.budget - operation.invested, 0)
+
+/** Operations allowed to invest in this option. */
+export const operationsFor = (operations: Operation[], opportunityId: string): Operation[] =>
+  operations.filter((operation) => operation.opportunityIds.includes(opportunityId))
 
 /** The calls one proposal bundles when the Safe holds the asset on another chain. */
 export const depositSteps = (

@@ -1,4 +1,4 @@
-import type { Opportunity } from './types'
+import type { Operation, Opportunity } from './types'
 
 // Mock figures for the prototype, rounded from public sources; not live rates.
 export const OPPORTUNITIES: Opportunity[] = [
@@ -310,10 +310,23 @@ export const EXISTING_POSITIONS = [
   { opportunityId: 'lido-steth', principal: 400_000, earned: 3_390 },
 ]
 
-export const POLICY_PREVIEW = {
-  name: 'Treasury cash',
-  opportunityIds: ['aave-usdc', 'tbill-fund'],
-  cap: 1_000_000,
-  executors: 1,
-  keepLiquid: 250_000,
-}
+export const OPERATIONS: Operation[] = [
+  {
+    id: 'operating-cash',
+    name: 'Operating cash',
+    budget: 1_500_000,
+    invested: 1_200_000,
+    threshold: 1,
+    owners: 3,
+    opportunityIds: ['aave-usdc', 'spark-savings', 'compound-usdc', 'tbill-fund'],
+  },
+  {
+    id: 'reserves',
+    name: 'Reserves',
+    budget: 1_000_000,
+    invested: 400_000,
+    threshold: 2,
+    owners: 3,
+    opportunityIds: ['lido-steth', 'kiln-eth', 'credit-fund'],
+  },
+]

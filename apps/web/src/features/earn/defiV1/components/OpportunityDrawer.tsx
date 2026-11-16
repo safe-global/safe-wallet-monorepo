@@ -7,7 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Drawer, DrawerBody, DrawerSection } from '@/components/common/Drawer'
 import { DEFI_V1_COPY, formatApy, formatCompactUsd, formatLiveFor, formatUsd } from '../copy'
-import type { DefiV1Signing, Holding, Opportunity } from '../types'
+import type { Holding, Operation, Opportunity } from '../types'
 import { growthSeries, growthShare, liquidityBucket } from '../shelf'
 import { ActionPanel, type ActionResult } from './ActionPanel'
 import { Sparkline } from './Sparkline'
@@ -96,7 +96,7 @@ export const OpportunityDrawer = ({
   list,
   onNavigate,
   locked,
-  signing,
+  operations,
   holding,
   onClose,
   onDeposited,
@@ -106,7 +106,7 @@ export const OpportunityDrawer = ({
   list: Opportunity[]
   onNavigate: (opportunity: Opportunity) => void
   locked: boolean
-  signing: DefiV1Signing
+  operations: Operation[]
   holding?: Holding
   onClose: () => void
   onDeposited: (result: ActionResult) => void
@@ -317,7 +317,7 @@ export const OpportunityDrawer = ({
             opportunity={opportunity}
             holding={holding}
             locked={locked}
-            signing={signing}
+            operations={operations}
             onDeposited={onDeposited}
             onWithdrawn={onWithdrawn}
           />
