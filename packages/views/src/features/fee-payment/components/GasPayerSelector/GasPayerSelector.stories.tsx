@@ -20,12 +20,13 @@ const USDC = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
 const ETH = {
   address: ZERO,
   symbol: 'ETH',
-  logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
+  logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
 }
 const USDC_TOKEN = {
   address: USDC,
   symbol: 'USDC',
-  logoUri: 'https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+  logoUri:
+    'mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp',
   fiatBalance: '1200',
 }
 
