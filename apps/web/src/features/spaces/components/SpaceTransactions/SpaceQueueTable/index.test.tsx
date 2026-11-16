@@ -1,6 +1,13 @@
 import { faker } from '@faker-js/faker'
 import { useEffect, type ReactNode } from 'react'
-import { fireEvent, render, screen } from '@/tests/test-utils'
+import { http, HttpResponse } from 'msw'
+import { GATEWAY_URL } from '@/config/gateway'
+import * as useWallet from '@/hooks/wallets/useWallet'
+import type { RootState } from '@/store'
+import { connectedWalletBuilder } from '@/tests/builders/wallet'
+import { server } from '@/tests/server'
+import { fakerChecksummedAddress, fireEvent, render, screen } from '@/tests/test-utils'
+import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
@@ -57,10 +64,20 @@ jest.mock('../SpaceQueueRow', () => ({
 jest.mock('@/hooks/useSafeDisplayName', () => ({ useSafeDisplayName: () => '' }))
 jest.mock('@/components/transactions/TxSummary/QueueActions', () => ({ __esModule: true, default: () => null }))
 
+const signedIn: RootState['auth'] = {
+  sessionExpiresAt: Date.now() + 60 * 60 * 1000,
+  landingSpaceHint: null,
+  isStoreHydrated: true,
+  cfSafeSynced: false,
+  isOidcLoginPending: false,
+  isSessionCheckPending: false,
+}
+
 const transactionItem = (
   txStatus: Transaction['txStatus'],
   nonce: number,
   conflictType: TransactionQueuedItem['conflictType'] = 'None',
+  missingSigners: string[] = [],
 ): TransactionQueuedItem => ({
   type: 'TRANSACTION',
   conflictType,
@@ -68,7 +85,9 @@ const transactionItem = (
     .with({
       txStatus,
       timestamp: faker.date.past().getTime(),
-      executionInfo: executionInfoBuilder().with({ nonce, missingSigners: [] }).build(),
+      executionInfo: executionInfoBuilder()
+        .with({ nonce, missingSigners: missingSigners.map((value) => ({ value })) })
+        .build(),
     })
     .build(),
 })
@@ -287,6 +306,58 @@ describe('SpaceQueueTable', () => {
       render(<SpaceQueueTable sections={interleaved} groupBy="status" />)
 
       expect(screen.queryByRole('button', { name: 'Collapse all' })).not.toBeInTheDocument()
+    })
+
+    describe('to sign', () => {
+      const awaitingSignature = (signer: string) =>
+        transactionItem('AWAITING_CONFIRMATIONS', faker.number.int({ max: 100 }), 'None', [signer])
+      const queueOf = (waiting: TransactionQueuedItem, toSign: TransactionQueuedItem) => [
+        section(safeB, [{ chainId, items: [{ type: 'LABEL', label: 'Next' }, waiting] }]),
+        section(safeA, [{ chainId, items: [{ type: 'LABEL', label: 'Next' }, toSign] }]),
+      ]
+
+      beforeEach(() => {
+        setBaseUrl(GATEWAY_URL)
+      })
+
+      it("lists first a transaction a wallet linked to the signed-in user still has to sign, while it isn't connected", async () => {
+        const linked = fakerChecksummedAddress()
+        server.use(
+          http.get(`${GATEWAY_URL}/v1/users`, () =>
+            HttpResponse.json({
+              id: faker.number.int(),
+              status: 1,
+              wallets: [{ id: faker.number.int(), address: linked }],
+            }),
+          ),
+        )
+        const waiting = awaitingSignature(fakerChecksummedAddress())
+        const toSign = awaitingSignature(linked)
+
+        render(<SpaceQueueTable sections={queueOf(waiting, toSign)} groupBy="status" />, {
+          initialReduxState: { auth: signedIn },
+        })
+
+        expect(await screen.findByText(`${toSign.transaction.id} sign ${chainId} of ${safeA}`)).toBeInTheDocument()
+        expect(renderedRows().map((row) => row.textContent)).toEqual([
+          `${toSign.transaction.id} sign ${chainId} of ${safeA}`,
+          `${waiting.transaction.id} waiting ${chainId} of ${safeB}`,
+        ])
+      })
+
+      it("lists first a transaction the connected wallet still has to sign, while it isn't linked", () => {
+        const connected = fakerChecksummedAddress()
+        jest.spyOn(useWallet, 'default').mockReturnValue(connectedWalletBuilder().with({ address: connected }).build())
+        const waiting = awaitingSignature(fakerChecksummedAddress())
+        const toSign = awaitingSignature(connected)
+
+        render(<SpaceQueueTable sections={queueOf(waiting, toSign)} groupBy="status" />)
+
+        expect(renderedRows().map((row) => row.textContent)).toEqual([
+          `${toSign.transaction.id} sign ${chainId} of ${safeA}`,
+          `${waiting.transaction.id} waiting ${chainId} of ${safeB}`,
+        ])
+      })
     })
   })
 
