@@ -15,7 +15,7 @@ import { useSpaceSafesDeleteV1Mutation } from '@safe-global/store/gateway/AUTO_G
 import { useState } from 'react'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/elevation'
 
 function getToBeDeletedSafeAccounts(safeItem: SafeItem | MultiChainSafeItem) {
   if (isMultiChainSafeItem(safeItem)) {

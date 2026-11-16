@@ -135,7 +135,7 @@ jest.mock('@/features/counterfactual/public/undeployedSafesSlice', () => ({
   selectUndeployedSafes: jest.fn(),
 }))
 
-jest.mock('@/features/myAccounts/components/SafeAccountsTable', () => ({
+jest.mock('@/features/myAccounts/public/SafeAccountsTable', () => ({
   __esModule: true,
   default: ({ items }: { items: Array<{ name?: string; address: string; chainId?: string }> }) => (
     <div data-testid="safe-accounts-table">

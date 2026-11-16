@@ -7,8 +7,8 @@ import { useIsWalletProposer } from '@/hooks/useProposers'
 import { selectAddressBookByChain } from '@/store/addressBookSlice'
 import { OVERVIEW_EVENTS, TRUSTED_SAFE_LABELS } from '@/services/analytics/events/overview'
 import { trackEvent } from '@/services/analytics'
-import { useTrustSafe } from './useTrustSafe'
-import useSimilarAddressDetection from './useSimilarAddressDetection'
+import { useTrustSafe } from '../public/useTrustSafe'
+import useSimilarAddressDetection from '../public/useSimilarAddressDetection'
 import type { SafeUserRole, NonPinnedWarningState } from './useNonPinnedSafeWarning.types'
 
 /**

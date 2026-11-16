@@ -8,7 +8,7 @@ import { highlightSafePro } from '@safe-global/views/components/common/ProHighli
 import { ScrollArea } from '@safe-global/views/components/ui/scroll-area'
 import { SearchInput } from '@safe-global/views/components/ui/search-input'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import SafeAccountsTable from '@/features/myAccounts/components/SafeAccountsTable'
+import SafeAccountsTable from '@/features/myAccounts/public/SafeAccountsTable'
 import type { SafeAccountColumnId } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
 import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 import { useSafesSearch } from '@/hooks/safes/useSafesSearch'

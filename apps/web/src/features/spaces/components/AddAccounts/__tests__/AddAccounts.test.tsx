@@ -14,7 +14,7 @@ jest.mock('../AddManually', () => ({
 }))
 
 // The heavy accounts table is exercised in its own suite; here we only need to observe the items it receives.
-jest.mock('@/features/myAccounts/components/SafeAccountsTable', () => ({
+jest.mock('@/features/myAccounts/public/SafeAccountsTable', () => ({
   __esModule: true,
   default: (props: {
     items: Array<{ chainId: string; address: string; safes?: unknown[] }>

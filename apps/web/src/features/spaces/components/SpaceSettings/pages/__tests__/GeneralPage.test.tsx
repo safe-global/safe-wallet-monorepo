@@ -67,7 +67,7 @@ jest.mock('../../sections/DangerZoneSection', () => ({
   default: () => <div data-testid="danger-zone-section" />,
 }))
 
-jest.mock('@/features/oidc-auth/components/WorkspaceTwoFactorSection', () => ({
+jest.mock('@/features/oidc-auth/public/WorkspaceTwoFactorSection', () => ({
   __esModule: true,
   default: ({ members, spaceId, isAdmin }: { members: { id: number }[]; spaceId?: string; isAdmin?: boolean }) => (
     <div data-testid="workspace-2fa-section">{`${members.length}:${spaceId}:${isAdmin}`}</div>

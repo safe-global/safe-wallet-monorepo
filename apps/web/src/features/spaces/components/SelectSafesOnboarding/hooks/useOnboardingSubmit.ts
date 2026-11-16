@@ -36,7 +36,7 @@ import {
   getMultiChainSafeId,
 } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/utils/safeIds'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/constants'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/elevation'
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
 import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 

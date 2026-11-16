@@ -16,7 +16,7 @@ import useSimilarityClusters from '@/features/address-poisoning/public/useSimila
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { useIsInvited, useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
-import SafeAccountsTable from '@/features/myAccounts/components/SafeAccountsTable'
+import SafeAccountsTable from '@/features/myAccounts/public/SafeAccountsTable'
 import SafeListSortToggle from '@/components/common/SafeListSortToggle'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { TriangleAlert, RotateCw, Search } from 'lucide-react'

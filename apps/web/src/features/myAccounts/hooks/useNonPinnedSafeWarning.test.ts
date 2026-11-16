@@ -38,7 +38,7 @@ jest.mock('@/hooks/safes/useAllSafes', () => ({
 }))
 
 // Similarity detection has its own dedicated test; isolate it here.
-jest.mock('./useSimilarAddressDetection', () => ({
+jest.mock('../public/useSimilarAddressDetection', () => ({
   __esModule: true,
   default: jest.fn(() => ({ hasSimilarAddress: false, similarAddresses: [] })),
 }))

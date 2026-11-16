@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
-import SafeAccountsTable from '@/features/myAccounts/components/SafeAccountsTable'
+import SafeAccountsTable from '@/features/myAccounts/public/SafeAccountsTable'
 import type { AccountLine } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/types'
 import type { SafeAccountColumnId } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
 import type { SimilarWarning } from '@/features/address-poisoning/public/crossListClusters'

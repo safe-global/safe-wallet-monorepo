@@ -5,7 +5,7 @@ import IdentitySection from '../IdentitySection'
 import { spaceBuilder } from '@/tests/builders/space'
 import { DISALLOWED_CHARACTER_MESSAGE } from '@safe-global/utils/validation/names'
 import { SPACE_NAME_MAX_LENGTH } from '@safe-global/utils/validation/names'
-import { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/utils/elevation'
+import { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/public/elevation'
 
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 

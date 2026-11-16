@@ -8,7 +8,7 @@ import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import { useIsAllowlistAvailableInSpace } from '@/features/policy-guard/public/useAllowlistAvailability'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/elevation'
 import { useSpacesGetOneV1Query, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { SpaceExperimentalFeature } from '@safe-global/store/gateway/types'
 import ExperimentalSection, {

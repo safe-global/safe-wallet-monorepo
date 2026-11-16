@@ -1,7 +1,7 @@
 import userEvent from '@testing-library/user-event'
 
 import { render, screen } from '@/tests/test-utils'
-import AccountItemLink from '../AccountItemLink'
+import AccountItemLink from '../../../public/AccountItemLink'
 
 jest.mock('@/components/common/Track', () => ({
   __esModule: true,

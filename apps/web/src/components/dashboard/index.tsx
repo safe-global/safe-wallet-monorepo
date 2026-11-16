@@ -11,7 +11,6 @@ import { useHasFeature } from '@/hooks/useChains'
 import css from './styles.module.css'
 import InconsistentSignerSetupWarning from '@/features/multichain/public/InconsistentSignerSetupWarning'
 import MastercopyWarning from '@/features/multichain/public/MastercopyWarning'
-import { MyAccountsFeature } from '@/features/myAccounts'
 import { ActionRequiredPanel } from '@/components/dashboard/ActionRequiredPanel/ActionRequiredPanel'
 import { VulnerableModuleWarning } from './ActionRequiredPanel/VulnerableModuleWarning'
 import { useVulnerableSafe } from '@/features/security/public/useVulnerableModules'
@@ -22,19 +21,18 @@ import useIsPositionsFeatureEnabled from '@/features/positions/public/useIsPosit
 import { useBannerVisibility } from '@/features/hypernative/public/useBannerVisibility'
 import { BannerType } from '@/features/hypernative/public/useBannerStorage'
 import { HnBannerForCarousel } from '@/features/hypernative/public/HnBannerForCarousel'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import useIsStakingPromoBannerVisible, {
   STAKING_PROMO_BANNER_HIDE_KEY,
 } from '@/features/stake/public/useIsStakingPromoBannerVisible'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import HnPendingBanner from '@/features/hypernative/public/HnPendingBanner'
 import StakingPromoBanner from '@/features/stake/public/StakingPromoBanner'
+import NonPinnedWarning from '@/features/myAccounts/public/NonPinnedWarning'
 
 const PositionsWidget = dynamic(() => import('@/features/positions/public/PositionsWidget'))
 
 const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
-  const { NonPinnedWarning } = useLoadFeature(MyAccountsFeature)
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
   const isVulnerableSafe = useVulnerableSafe()
 

@@ -6,7 +6,7 @@ import {
   SELECT_COLUMN,
   type SafeAccountColumn,
 } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
-import type { AccountLine } from '../useSafeAccountRows'
+import type { AccountLine } from '../../../public/useSafeAccountRows'
 
 // Keep the heavy per-cell widgets out of the way; this suite covers row-level link/selection wiring.
 // Stub the lazy overview fetch — its own suite covers it (and it needs an IntersectionObserver). The
@@ -19,7 +19,7 @@ jest.mock('@safe-global/views/components/common/Identicon', () => ({
   __esModule: true,
   default: () => <div data-testid="identicon" />,
 }))
-jest.mock('../../AccountItem', () => ({
+jest.mock('../../../public/AccountItem', () => ({
   AccountItem: { Icon: () => null, ChainBadge: () => null, ContextMenu: () => null },
 }))
 jest.mock('@safe-global/views/components/common/AccountBadges', () => ({

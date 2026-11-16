@@ -1,1 +1,1 @@
-export type { StepUpStatus } from './stepUpSlice'
+export type { StepUpStatus } from '../public/stepUpSlice'

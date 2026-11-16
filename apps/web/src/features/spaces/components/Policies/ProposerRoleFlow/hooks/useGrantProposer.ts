@@ -8,12 +8,12 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { sanitizeName } from '@safe-global/utils/validation/names'
-import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
+import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/public/constants'
 import {
   addressIsNotSmartContract,
   usesV1DelegateEndpoint,
   signProposerDelegation,
-} from '@/features/proposers/utils/utils'
+} from '@/features/proposers/public/utils'
 import { useDelegateMutations } from '@safe-global/utils/hooks/useDelegateMutations'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useChainId from '@/hooks/useChainId'

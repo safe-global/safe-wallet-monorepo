@@ -30,7 +30,7 @@ import {
 } from './utils'
 import AddMemberInput from './AddMemberInput'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/elevation'
 
 export const RoleMenuItem = ({
   role,

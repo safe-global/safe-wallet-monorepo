@@ -7,7 +7,7 @@ import {
   getSafeUnavailableMessage,
   SAFE_UNAVAILABLE_MESSAGE,
 } from './rtkQuery'
-import { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/utils/elevation'
+import { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/public/elevation'
 
 describe('getRtkQueryErrorMessage', () => {
   it('returns a friendly message for a network failure instead of the raw JS error', () => {

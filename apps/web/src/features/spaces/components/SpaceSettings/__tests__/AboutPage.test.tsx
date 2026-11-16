@@ -9,7 +9,7 @@ import { selectCookieBanner } from '@/store/popupSlice'
 import { CookieAndTermType } from '@/store/cookiesAndTermsSlice'
 import { useHasFeature } from '@/hooks/useChains'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
-import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/hooks/useIsSafeProAnnouncementEnabled'
+import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 
 const mockSupportChatDrawer = jest.fn()
@@ -30,7 +30,7 @@ jest.mock('@/hooks/useIsOfficialHost', () => ({
   useIsOfficialHost: jest.fn(),
 }))
 
-jest.mock('@/features/safe-pro-announcement/hooks/useIsSafeProAnnouncementEnabled', () => ({
+jest.mock('@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled', () => ({
   useIsSafeProAnnouncementEnabled: jest.fn(),
 }))
 

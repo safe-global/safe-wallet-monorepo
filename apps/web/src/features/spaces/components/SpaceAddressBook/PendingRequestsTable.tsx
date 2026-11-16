@@ -24,7 +24,7 @@ import { Check, X } from 'lucide-react'
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
 import { cn } from '@safe-global/views/utils/cn'
 import AddressCell from './AddressCell'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/elevation'
 
 type PendingRequestsTableProps = {
   requests: AddressBookRequestItemDto[]

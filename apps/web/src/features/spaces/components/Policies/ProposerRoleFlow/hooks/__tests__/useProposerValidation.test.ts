@@ -1,8 +1,8 @@
 import type { JsonRpcProvider } from 'ethers'
 import { renderHook } from '@/tests/test-utils'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
-import { addressIsNotSmartContract } from '@/features/proposers/utils/utils'
+import { SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/public/constants'
+import { addressIsNotSmartContract } from '@/features/proposers/public/utils'
 import useChainId from '@/hooks/useChainId'
 import useProposers from '@/hooks/useProposers'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -22,8 +22,8 @@ jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/useChainId')
 jest.mock('@/hooks/useProposers')
 jest.mock('@/hooks/wallets/web3ReadOnly')
-jest.mock('@/features/proposers/utils/utils', () => ({
-  ...jest.requireActual('@/features/proposers/utils/utils'),
+jest.mock('@/features/proposers/public/utils', () => ({
+  ...jest.requireActual('@/features/proposers/public/utils'),
   addressIsNotSmartContract: jest.fn(),
 }))
 

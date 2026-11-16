@@ -48,7 +48,7 @@ jest.mock('@/hooks/useSafeInfo', () => ({
   })),
 }))
 
-jest.mock('@/features/myAccounts/hooks/useTrustSafe', () => ({
+jest.mock('@/features/myAccounts/public/useTrustSafe', () => ({
   useTrustSafe: jest.fn(() => ({ trustSafe: jest.fn() })),
 }))
 

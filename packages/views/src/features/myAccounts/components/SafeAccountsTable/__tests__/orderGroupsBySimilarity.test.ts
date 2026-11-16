@@ -1,5 +1,5 @@
 import { orderGroupsBySimilarity } from '../orderGroupsBySimilarity'
-import type { AccountGroup } from '@/features/myAccounts/components/SafeAccountsTable/useSafeAccountRows'
+import type { AccountGroup } from '@/features/myAccounts/public/useSafeAccountRows'
 
 // Minimal AccountGroup — orderGroupsBySimilarity only reads `group.parent.address`.
 const g = (address: string) => ({ parent: { address } }) as unknown as AccountGroup

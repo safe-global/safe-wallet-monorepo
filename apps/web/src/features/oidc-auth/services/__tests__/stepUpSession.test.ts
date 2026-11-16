@@ -5,7 +5,7 @@ import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { GATEWAY_URL } from '@/config/gateway'
 import { makeStore } from '@/store'
 import { server } from '@/tests/server'
-import { ELEVATION_REQUIRED_ERROR } from '../../utils/elevation'
+import { ELEVATION_REQUIRED_ERROR } from '../../public/elevation'
 import { registerStepUpRecovery, requestStepUp, settleStepUp } from '../stepUpSession'
 
 const spaceId = faker.string.uuid()

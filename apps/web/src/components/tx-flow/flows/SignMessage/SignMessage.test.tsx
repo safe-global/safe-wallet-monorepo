@@ -38,7 +38,7 @@ import { initialState as initialSettings } from '@/store/settingsSlice'
 import { AppRoutes } from '@/config/routes'
 
 import * as useIsPinnedSafeHook from '@/hooks/useIsPinnedSafe'
-import * as useTrustSafeHook from '@/features/myAccounts/hooks/useTrustSafe'
+import * as useTrustSafeHook from '@/features/myAccounts/public/useTrustSafe'
 
 jest.mock('@/components/tx/ApprovalEditor/hooks/useApprovalInfos', () => ({
   useApprovalInfos: jest.fn(() => [[], undefined, false]),

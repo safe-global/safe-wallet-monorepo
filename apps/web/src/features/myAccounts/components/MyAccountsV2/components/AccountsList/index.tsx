@@ -13,7 +13,7 @@ import { trackEvent } from '@/services/analytics'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { Typography } from '@safe-global/views/components/ui/typography'
 
-import SafeAccountsTable from '../../../SafeAccountsTable'
+import SafeAccountsTable from '../../../../public/SafeAccountsTable'
 
 type AccountsListProps = {
   searchQuery: string

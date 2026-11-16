@@ -15,7 +15,7 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getContactRemovedMessage } from '@/utils/addressBookNotifications'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/elevation'
 
 type DeleteContactDialogProps = {
   name: string

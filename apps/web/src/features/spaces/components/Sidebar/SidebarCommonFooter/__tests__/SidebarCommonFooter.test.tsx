@@ -127,21 +127,22 @@ jest.mock('@/features/spaces/components/Sidebar/ApiCtaSidebar/ApiCtaSidebar', ()
 let mockIsSafeProAnnouncementEnabled = false
 let mockIsSafeProBannerDismissed = false
 const mockDismissSafeProBanner = jest.fn()
-jest.mock('@/features/safe-pro-announcement', () => ({
-  SafeProFeature: { name: 'safe-pro-announcement' },
-}))
-jest.mock('@/features/safe-pro-announcement/hooks/useIsSafeProAnnouncementEnabled', () => ({
+jest.mock('@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled', () => ({
   useIsSafeProAnnouncementEnabled: () => mockIsSafeProAnnouncementEnabled,
 }))
-jest.mock('@/features/safe-pro-announcement/hooks/useSafeProSidebarBannerDismissed', () => ({
-  ...jest.requireActual('@/features/safe-pro-announcement/hooks/useSafeProSidebarBannerDismissed'),
+jest.mock('@/features/safe-pro-announcement/public/useSafeProSidebarBannerDismissed', () => ({
+  ...jest.requireActual('@/features/safe-pro-announcement/public/useSafeProSidebarBannerDismissed'),
   useSafeProSidebarBannerDismissed: () => [mockIsSafeProBannerDismissed, mockDismissSafeProBanner],
 }))
 
 let mockIsTwoFactorBannerEnabled = false
+let mockIsOidcAuthEnabled = true
 const mockTwoFactorBannerFlag = FEATURES.TWO_FACTOR_AWARENESS_BANNER
+const mockOidcAuthFlag = FEATURES.OIDC_AUTH
 jest.mock('@/hooks/useChains', () => ({
-  useHasFeature: (feature: string) => feature === mockTwoFactorBannerFlag && mockIsTwoFactorBannerEnabled,
+  useHasFeature: (feature: string) =>
+    (feature === mockTwoFactorBannerFlag && mockIsTwoFactorBannerEnabled) ||
+    (feature === mockOidcAuthFlag && mockIsOidcAuthEnabled),
 }))
 
 let mockIsSafeProEnabled = false
@@ -156,48 +157,26 @@ jest.mock('../../../../hooks/useCurrentSpaceId', () => ({
 
 let mockIsTwoFactorCardDismissed = false
 const mockDismissTwoFactorCard = jest.fn()
-jest.mock('@/features/oidc-auth', () => ({
-  OidcAuthFeature: { name: 'oidc-auth' },
-}))
-jest.mock('@/features/oidc-auth/hooks/useTwoFactorAwarenessDismissed', () => ({
-  ...jest.requireActual('@/features/oidc-auth/hooks/useTwoFactorAwarenessDismissed'),
+jest.mock('@/features/oidc-auth/public/useTwoFactorAwarenessDismissed', () => ({
+  ...jest.requireActual('@/features/oidc-auth/public/useTwoFactorAwarenessDismissed'),
   useTwoFactorAwarenessDismissed: () => [mockIsTwoFactorCardDismissed, mockDismissTwoFactorCard],
 }))
 
-let mockIsSafeProLoaded = true
-let mockSafeProError: Error | undefined = undefined
-let mockIsTwoFactorCardLoaded = true
-let mockTwoFactorCardError: Error | undefined = undefined
-jest.mock('@/features/__core__/useLoadFeature', () => ({
-  ...jest.requireActual('@/features/__core__/useLoadFeature'),
-  useLoadFeature: (handle: { name: string }) =>
-    handle.name === 'oidc-auth'
-      ? {
-          $isReady: mockIsTwoFactorCardLoaded,
-          $error: mockTwoFactorCardError,
-          WorkspaceTwoFactorAwarenessCard: ({
-            className,
-            spaceId,
-            onDismiss,
-          }: {
-            className?: string
-            spaceId?: string
-            onDismiss: () => void
-          }) => (
-            <div data-testid="workspace-2fa-awareness-card" data-space-id={spaceId} className={className}>
-              <button onClick={onDismiss}>Dismiss</button>
-            </div>
-          ),
-        }
-      : {
-          $isReady: mockIsSafeProLoaded,
-          $error: mockSafeProError,
-          SafeProSidebarBanner: ({ className, onDismiss }: { className?: string; onDismiss?: () => void }) => (
-            <div data-testid="safe-pro-sidebar-banner" className={className}>
-              <button onClick={onDismiss}>Dismiss Safe Pro</button>
-            </div>
-          ),
-        },
+jest.mock('@/features/oidc-auth/public/WorkspaceTwoFactorAwarenessCard', () => ({
+  __esModule: true,
+  default: ({ className, spaceId, onDismiss }: { className?: string; spaceId?: string; onDismiss: () => void }) => (
+    <div data-testid="workspace-2fa-awareness-card" data-space-id={spaceId} className={className}>
+      <button onClick={onDismiss}>Dismiss</button>
+    </div>
+  ),
+}))
+jest.mock('@/features/safe-pro-announcement/public/SafeProSidebarBanner', () => ({
+  __esModule: true,
+  default: ({ className, onDismiss }: { className?: string; onDismiss?: () => void }) => (
+    <div data-testid="safe-pro-sidebar-banner" className={className}>
+      <button onClick={onDismiss}>Dismiss Safe Pro</button>
+    </div>
+  ),
 }))
 
 jest.mock('@/features/spaces/components/Sidebar/SidebarIndexingStatus/SidebarIndexingStatus', () => ({
@@ -222,11 +201,8 @@ describe('SidebarCommonFooter', () => {
     mockIsSafeProAnnouncementEnabled = false
     mockIsSafeProEnabled = false
     mockIsSafeProBannerDismissed = false
-    mockIsSafeProLoaded = true
-    mockSafeProError = undefined
-    mockIsTwoFactorCardLoaded = true
-    mockTwoFactorCardError = undefined
     mockIsTwoFactorBannerEnabled = false
+    mockIsOidcAuthEnabled = true
     mockIsTwoFactorCardDismissed = false
     mockSpaceId = 'space-uuid'
     mockPathname = '/spaces'
@@ -241,6 +217,14 @@ describe('SidebarCommonFooter', () => {
     })
 
     it('hides the card when the flag is off', () => {
+      render(<SidebarCommonFooter />)
+
+      expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
+    })
+
+    it('hides the card when OIDC auth is off on the chain', () => {
+      mockIsTwoFactorBannerEnabled = true
+      mockIsOidcAuthEnabled = false
       render(<SidebarCommonFooter />)
 
       expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
@@ -323,52 +307,6 @@ describe('SidebarCommonFooter', () => {
 
       expect(screen.getByTestId('safe-pro-sidebar-banner')).toHaveClass('invisible')
       expect(screen.getByTestId('workspace-2fa-awareness-card')).not.toHaveClass('invisible')
-    })
-
-    it('leaves the slot out of the layout while the Safe Pro banner is still loading', () => {
-      mockIsTwoFactorBannerEnabled = true
-      mockIsSafeProAnnouncementEnabled = true
-      mockIsSafeProLoaded = false
-      render(<SidebarCommonFooter />)
-
-      expect(screen.queryByTestId('safe-pro-sidebar-banner')).not.toBeInTheDocument()
-      expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
-    })
-
-    it('gives the slot to the 2FA card when the Safe Pro banner fails to load', () => {
-      mockIsTwoFactorBannerEnabled = true
-      mockIsSafeProAnnouncementEnabled = true
-      mockIsSafeProLoaded = false
-      mockSafeProError = new Error('chunk load failed')
-      render(<SidebarCommonFooter />)
-
-      expect(screen.getByTestId('workspace-2fa-awareness-card')).not.toHaveClass('invisible')
-    })
-
-    it('keeps showing the 2FA card while Safe Pro loads, when Safe Pro was already dismissed', () => {
-      mockIsTwoFactorBannerEnabled = true
-      mockIsSafeProAnnouncementEnabled = true
-      mockIsSafeProBannerDismissed = true
-      mockIsSafeProLoaded = false
-      render(<SidebarCommonFooter />)
-
-      expect(screen.getByTestId('workspace-2fa-awareness-card')).not.toHaveClass('invisible')
-    })
-
-    it('leaves the slot out of the layout while the 2FA card is still loading', () => {
-      mockIsTwoFactorBannerEnabled = true
-      mockIsTwoFactorCardLoaded = false
-      render(<SidebarCommonFooter />)
-
-      expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
-    })
-
-    it('drops the 2FA card when its chunk fails to load', () => {
-      mockIsTwoFactorBannerEnabled = true
-      mockTwoFactorCardError = new Error('chunk load failed')
-      render(<SidebarCommonFooter />)
-
-      expect(screen.queryByTestId('workspace-2fa-awareness-card')).not.toBeInTheDocument()
     })
 
     it('gives the slot to the 2FA card once Safe Pro is live', () => {

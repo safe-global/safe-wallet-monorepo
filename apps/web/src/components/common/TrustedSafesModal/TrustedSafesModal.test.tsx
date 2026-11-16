@@ -19,7 +19,7 @@ const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
 
 // The list is rendered by the shared accounts table (covered by its own suite). Stub it to a row per
 // item that surfaces the selection toggle so we can assert the modal wiring.
-jest.mock('@/features/myAccounts/components/SafeAccountsTable', () => ({
+jest.mock('@/features/myAccounts/public/SafeAccountsTable', () => ({
   __esModule: true,
   default: ({
     items,

@@ -5,7 +5,7 @@ import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { useSpaceMembersByStatus, useIsInvited } from '@/features/spaces/hooks/useSpaceMembers'
 import { useSpacePendingTransactions } from '@/features/spaces/hooks/useSpacePendingTransactions'
-import useSpaceAccountsData from '@/features/myAccounts/hooks/useSpaceAccountsData'
+import useSpaceAccountsData from '@/features/myAccounts/public/useSpaceAccountsData'
 import type { ReactNode } from 'react'
 
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => false }))
@@ -97,10 +97,7 @@ jest.mock('@/features/spaces/SpacesFeature', () => ({
   SpacesFeature: { name: 'spaces' },
 }))
 
-jest.mock('@/features/myAccounts', () => ({
-  MyAccountsFeature: { name: 'myAccounts' },
-}))
-jest.mock('@/features/myAccounts/hooks/useSpaceAccountsData', () => ({
+jest.mock('@/features/myAccounts/public/useSpaceAccountsData', () => ({
   __esModule: true,
   default: jest.fn(() => ({ accounts: [], isLoading: false, error: null, refetch: jest.fn() })),
 }))
@@ -119,11 +116,12 @@ jest.mock('../../../hooks/useWorkspaceLock', () => ({
 }))
 jest.mock('../../Plans/CheckoutReturnModals', () => ({ __esModule: true, default: () => null }))
 
-jest.mock('@/features/safe-pro-announcement', () => ({
-  SafeProFeature: { name: 'safe-pro-announcement' },
+jest.mock('@/features/safe-pro-announcement/public/SafeProAnnouncementModal', () => ({
+  __esModule: true,
+  default: () => null,
 }))
-jest.mock('@/features/safe-pro-announcement/hooks/useSafeProAnnouncementModal', () => ({
-  ...jest.requireActual('@/features/safe-pro-announcement/hooks/useSafeProAnnouncementModal'),
+jest.mock('@/features/safe-pro-announcement/public/useSafeProAnnouncementModal', () => ({
+  ...jest.requireActual('@/features/safe-pro-announcement/public/useSafeProAnnouncementModal'),
   useSafeProAnnouncementModal: () => ({ isOpen: false, setIsOpen: jest.fn() }),
 }))
 
@@ -153,18 +151,21 @@ jest.mock('@/features/spaces/components/AddAccountsChooser', () => ({
   ),
 }))
 
-const MOCK_SPACE_ID = '42'
+jest.mock('@/features/myAccounts/public/AccountsWidget', () => ({
+  __esModule: true,
+  default: (props: { onViewAll?: () => void; totalCount?: number; emptyStateAction?: ReactNode }) => (
+    <div data-testid="accounts-widget">
+      {props.onViewAll && (
+        <button data-testid="view-all-slot" onClick={props.onViewAll}>
+          View all {props.totalCount}
+        </button>
+      )}
+      {props.emptyStateAction && <div data-testid="empty-state-action-slot">{props.emptyStateAction}</div>}
+    </div>
+  ),
+}))
 
-const AccountsWidgetStub = (props: { onViewAll?: () => void; totalCount?: number; emptyStateAction?: ReactNode }) => (
-  <div data-testid="accounts-widget">
-    {props.onViewAll && (
-      <button data-testid="view-all-slot" onClick={props.onViewAll}>
-        View all {props.totalCount}
-      </button>
-    )}
-    {props.emptyStateAction && <div data-testid="empty-state-action-slot">{props.emptyStateAction}</div>}
-  </div>
-)
+const MOCK_SPACE_ID = '42'
 
 const restoreDefaultMocks = (safes: Array<{ address: string; chainId: string }>) => {
   ;(useCurrentSpaceId as jest.Mock).mockReturnValue(MOCK_SPACE_ID)
@@ -186,23 +187,14 @@ const restoreDefaultMocks = (safes: Array<{ address: string; chainId: string }>)
   })
 }
 
-const stubAccountsWidget = () => {
-  ;(useLoadFeature as jest.Mock).mockImplementation((feature: { name: string }) => {
-    if (feature.name === 'myAccounts') {
-      return { AccountsWidget: AccountsWidgetStub, $isReady: true }
-    }
-    return {
-      PendingTxWidget: () => null,
-      SafeProAnnouncementModal: () => null,
-      $isReady: true,
-    }
-  })
+const stubSpacesFeature = () => {
+  ;(useLoadFeature as jest.Mock).mockReturnValue({ PendingTxWidget: () => null, $isReady: true })
 }
 
 describe('SpaceDashboard – accounts widget header actions', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    stubAccountsWidget()
+    stubSpacesFeature()
   })
 
   it('wires a "View all" action carrying the total Safe-account count', () => {

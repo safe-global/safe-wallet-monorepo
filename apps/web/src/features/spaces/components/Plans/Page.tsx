@@ -5,8 +5,6 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { cn } from '@safe-global/views/utils/cn'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { SafeProFeature } from '@/features/safe-pro-announcement'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { BillingPeriod, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -23,6 +21,7 @@ import { useStartCheckout } from '../../hooks/billing/useStartCheckout'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
 import ChangePlanFlow from './ChangePlanFlow'
 import type { CurrentPlan, PlanPick, PlanTier } from '@safe-global/views/features/spaces/components/Plans/types'
+import SafeProAnnouncement from '@/features/safe-pro-announcement/public/SafeProAnnouncement'
 
 const PlansSkeleton = () => (
   <div className="flex flex-col gap-6" data-testid="plans-skeleton">
@@ -40,7 +39,6 @@ const defaultSeats = (tiers: PlanTier[], currentPlan: CurrentPlan | undefined): 
 export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const isDarkMode = useDarkMode()
   const isSafePro = useIsSafeProEnabled()
-  const { SafeProAnnouncement } = useLoadFeature(SafeProFeature)
   const {
     plan,
     seats,

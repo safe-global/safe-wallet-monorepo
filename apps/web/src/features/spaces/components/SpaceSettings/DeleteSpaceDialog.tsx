@@ -17,7 +17,7 @@ import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/c
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/elevation'
 
 type Consequence = { variant: 'danger' | 'success'; text: string }
 

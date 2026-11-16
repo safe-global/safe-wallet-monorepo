@@ -39,7 +39,7 @@ jest.mock('@/hooks/safes/useSafesSearch', () => ({
     query ? items.filter((item) => (item as { name: string }).name.toLowerCase().includes(query.toLowerCase())) : items,
 }))
 
-jest.mock('@/features/myAccounts/components/SafeAccountsTable', () => ({
+jest.mock('@/features/myAccounts/public/SafeAccountsTable', () => ({
   __esModule: true,
   default: ({
     items,

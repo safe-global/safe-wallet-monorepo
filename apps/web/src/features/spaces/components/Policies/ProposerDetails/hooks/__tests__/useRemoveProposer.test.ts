@@ -39,8 +39,8 @@ jest.mock('@/services/tx/tx-sender/sdk', () => ({
   getAssertedChainSigner: async () => SIGNER,
 }))
 
-jest.mock('@/features/proposers/utils/utils', () => ({
-  ...jest.requireActual('@/features/proposers/utils/utils'),
+jest.mock('@/features/proposers/public/utils', () => ({
+  ...jest.requireActual('@/features/proposers/public/utils'),
   signProposerDelegation: (...args: unknown[]) => mockSignDelegation(...args),
 }))
 

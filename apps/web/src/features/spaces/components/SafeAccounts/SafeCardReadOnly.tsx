@@ -1,7 +1,7 @@
 import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 import type { SafeItem, MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { AccountItem } from '@/features/myAccounts/components/AccountItem'
+import { AccountItem } from '@/features/myAccounts/public/AccountItem'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'

@@ -7,7 +7,7 @@ import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { useSpaceMembersByStatus, useIsInvited } from '@/features/spaces/hooks/useSpaceMembers'
 import { useSpacePendingTransactions } from '@/features/spaces/hooks/useSpacePendingTransactions'
-import useSpaceAccountsData from '@/features/myAccounts/hooks/useSpaceAccountsData'
+import useSpaceAccountsData from '@/features/myAccounts/public/useSpaceAccountsData'
 import SpaceDashboard from '../index'
 
 const MOCK_SPACE_ID = '42'
@@ -117,10 +117,11 @@ jest.mock('@/features/spaces/SpacesFeature', () => ({
   SpacesFeature: { name: 'spaces' },
 }))
 
-jest.mock('@/features/myAccounts', () => ({
-  MyAccountsFeature: { name: 'myAccounts' },
+jest.mock('@/features/myAccounts/public/AccountsWidget', () => ({
+  __esModule: true,
+  default: () => null,
 }))
-jest.mock('@/features/myAccounts/hooks/useSpaceAccountsData', () => ({
+jest.mock('@/features/myAccounts/public/useSpaceAccountsData', () => ({
   __esModule: true,
   default: jest.fn(() => ({ accounts: [], isLoading: false, error: null, refetch: jest.fn() })),
 }))
@@ -132,11 +133,12 @@ jest.mock('@/features/__core__/useLoadFeature', () => ({
 
 const mockUseSafeProAnnouncementModal = jest.fn()
 
-jest.mock('@/features/safe-pro-announcement', () => ({
-  SafeProFeature: { name: 'safe-pro-announcement' },
+jest.mock('@/features/safe-pro-announcement/public/SafeProAnnouncementModal', () => ({
+  __esModule: true,
+  default: ({ open }: { open: boolean }) => (open ? <div data-testid="safe-pro-announcement-modal" /> : null),
 }))
-jest.mock('@/features/safe-pro-announcement/hooks/useSafeProAnnouncementModal', () => ({
-  ...jest.requireActual('@/features/safe-pro-announcement/hooks/useSafeProAnnouncementModal'),
+jest.mock('@/features/safe-pro-announcement/public/useSafeProAnnouncementModal', () => ({
+  ...jest.requireActual('@/features/safe-pro-announcement/public/useSafeProAnnouncementModal'),
   useSafeProAnnouncementModal: (...args: unknown[]) => mockUseSafeProAnnouncementModal(...args),
 }))
 
@@ -201,9 +203,6 @@ const makeMockPendingTxWidget = (txEntries: Array<{ safeAddress: string; txId: s
 function setupUseLoadFeature(txEntries: Array<{ safeAddress: string; txId: string }> = []) {
   ;(useLoadFeature as jest.Mock).mockReturnValue({
     PendingTxWidget: makeMockPendingTxWidget(txEntries),
-    AccountsWidget: () => null,
-    SafeProAnnouncementModal: ({ open }: { open: boolean }) =>
-      open ? <div data-testid="safe-pro-announcement-modal" /> : null,
     $isReady: true,
   })
 }

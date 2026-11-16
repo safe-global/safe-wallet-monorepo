@@ -48,7 +48,7 @@ jest.mock('@/features/safe-shield/hooks/useThreatAnalysis', () => ({
 // An untrusted Safe would require risk confirmation on its own, without any poisoning
 jest.mock('@/hooks/useIsTrustedSafe', () => ({ __esModule: true, default: () => true }))
 
-jest.mock('@/features/myAccounts/hooks/useTrustSafe', () => ({
+jest.mock('@/features/myAccounts/public/useTrustSafe', () => ({
   useTrustSafe: () => ({ trustSafe: jest.fn() }),
 }))
 

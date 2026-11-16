@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { AccountItem } from './index'
+import { AccountItem } from '../../public/AccountItem'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 

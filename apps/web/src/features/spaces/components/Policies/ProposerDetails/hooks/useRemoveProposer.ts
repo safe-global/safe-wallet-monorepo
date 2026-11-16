@@ -3,7 +3,7 @@ import { useDelegatesDeleteDelegateV1Mutation } from '@safe-global/store/gateway
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { WORKSPACE_CONFIRMATION_HIDE_MS } from '@/features/spaces/constants'
-import { usesV1DelegateEndpoint, signProposerDelegation } from '@/features/proposers/utils/utils'
+import { usesV1DelegateEndpoint, signProposerDelegation } from '@/features/proposers/public/utils'
 import { useDelegateMutations } from '@safe-global/utils/hooks/useDelegateMutations'
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import { useChain } from '@/hooks/useChains'

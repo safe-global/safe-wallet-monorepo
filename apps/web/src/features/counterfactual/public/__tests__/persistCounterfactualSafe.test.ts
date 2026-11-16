@@ -3,7 +3,7 @@ import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactu
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import type { AppDispatch } from '@/store'
 import { addOrUpdateSafe } from '@/store/addedSafesSlice'
-import { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/utils/elevation'
+import { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/public/elevation'
 import { getGenericErrorWithStatus } from '@/utils/rtkQuery'
 import { removeUndeployedSafe } from '../undeployedSafesSlice'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'

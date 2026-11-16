@@ -5,7 +5,7 @@ import { type InviteUsersDto, useMembersInviteUserV1Mutation } from '@safe-globa
 import { MemberRole } from '../../../hooks/useSpaceMembers'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { buildInviteUserPayload, isEmailAddress } from '../../AddMemberModal/utils'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/elevation'
 
 interface MemberInvite {
   // Can be a wallet address, ENS name, or email.

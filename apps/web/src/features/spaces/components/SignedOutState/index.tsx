@@ -1,7 +1,7 @@
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
 import css from '../Dashboard/styles.module.css'
 import SignInOptions from '../SignInOptions'
-import { OidcAuthFeature } from '@/features/oidc-auth'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'
@@ -12,7 +12,7 @@ interface SignedOutStateProps {
 }
 
 const SignedOutState = ({ afterSignIn, redirectLoading = false }: SignedOutStateProps) => {
-  const { $isDisabled } = useLoadFeature(OidcAuthFeature)
+  const isOidcDisabled = useHasFeature(FEATURES.OIDC_AUTH) === false
   const isDarkMode = useDarkMode()
 
   return (
@@ -27,7 +27,7 @@ const SignedOutState = ({ afterSignIn, redirectLoading = false }: SignedOutState
             <Typography color="muted" className="mb-4">
               To view and interact with Workspaces, you need to sign in with the wallet, that is a member of the
               Workspace
-              {!$isDisabled && ', or sign in with email'}. Sign in to continue.
+              {!isOidcDisabled && ', or sign in with email'}. Sign in to continue.
             </Typography>
 
             <SignInOptions afterSignIn={afterSignIn ?? (() => {})} redirectLoading={redirectLoading} />

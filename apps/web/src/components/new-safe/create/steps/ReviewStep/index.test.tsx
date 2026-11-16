@@ -24,7 +24,7 @@ import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactu
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import { useSpaceSafeCount } from '@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit'
 import { useSpaceSafeLimit } from '@/features/spaces/hooks/useSpaceSafeLimit'
-import { ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/utils/elevation'
+import { ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/public/elevation'
 
 // The feature barrel cannot be spread (circular import at init), so the source hook modules are mocked instead.
 // Render the component itself, not the lazy wrapper, so every test sees it on the first render

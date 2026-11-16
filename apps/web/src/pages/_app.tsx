@@ -50,7 +50,7 @@ const SpendingLimitsLoaderWrapper = () => {
 }
 
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
-import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
+import { useVisitedSafes } from '@/features/myAccounts/public/useVisitedSafes'
 import usePortfolioRefetchOnTxHistory from '@/features/portfolio/public/usePortfolioRefetchOnTxHistory'
 import useInvalidateOverviewsOnTx from '@/hooks/useInvalidateOverviewsOnTx'
 import { GATEWAY_URL } from '@/config/gateway'
@@ -62,8 +62,8 @@ import { AddressBookSourceProvider } from '@/components/common/AddressBookSource
 import { CaptchaProvider } from '@/components/common/Captcha/CaptchaProvider'
 import { HnQueueAssessmentProvider } from '@/features/hypernative/public/HnQueueAssessmentProvider'
 import { useHypernativeTokenRefresh } from '@/features/hypernative/public/useHypernativeTokenRefresh'
-import { useOidcLoginCallback } from '@/features/oidc-auth/hooks/useOidcLoginCallback'
-import { useStepUpRecovery } from '@/features/oidc-auth/hooks/useStepUpRecovery'
+import { useOidcLoginCallback } from '@/features/oidc-auth/public/useOidcLoginCallback'
+import { useStepUpRecovery } from '@/features/oidc-auth/public/useStepUpRecovery'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'

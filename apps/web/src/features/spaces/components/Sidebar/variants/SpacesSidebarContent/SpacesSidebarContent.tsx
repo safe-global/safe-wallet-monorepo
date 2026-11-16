@@ -10,7 +10,7 @@ import type {
 import { SpacesSidebarVariant } from '@/features/spaces/components/Sidebar/variants/SpacesSidebarVariant/SpacesSidebarVariant'
 import { useHasFeature } from '@/hooks/useChains'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
-import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/hooks/useIsSafeProAnnouncementEnabled'
+import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
 

@@ -1,11 +1,11 @@
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
-import AccountsWidget from '../AccountsWidget'
+import AccountsWidget from '../../../public/AccountsWidget'
 
 // The widget delegates row rendering to the shared SafeAccountsTable (covered by its own tests).
 // Here we stub it to a lightweight list so we can assert the widget's own chrome and wiring.
-jest.mock('../../SafeAccountsTable', () => ({
+jest.mock('../../../public/SafeAccountsTable', () => ({
   __esModule: true,
   default: ({
     items,
