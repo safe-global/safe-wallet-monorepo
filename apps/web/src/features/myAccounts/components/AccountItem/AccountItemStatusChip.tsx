@@ -1,6 +1,6 @@
 import { Chip } from '@safe-global/views/components/ui/chip'
 import { EyeIcon, CircleAlertIcon } from 'lucide-react'
-import { LoopIcon } from '@/features/counterfactual/components/CounterfactualStatusButton'
+import { LoopIcon } from '@/components/common/LoopIcon'
 import css from './styles.module.css'
 import { cn } from '@safe-global/views/utils/cn'
 
