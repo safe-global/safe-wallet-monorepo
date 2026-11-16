@@ -5,14 +5,14 @@ import { EXISTING_POSITIONS, OPPORTUNITIES, TREASURY_TOTAL } from '../opportunit
 import {
   buildShelf,
   filterOpportunities,
-  groupOpportunities,
   holdingsFor,
   isLocked,
   NO_FILTERS,
+  splitByInvestment,
   summariseTreasury,
   type ListFilters,
 } from '../shelf'
-import type { DefiV1Config, GroupBy, Opportunity, OpportunityCategory, Position, RiskLevel } from '../types'
+import type { DefiV1Config, Opportunity, Position } from '../types'
 import type { ActionResult } from './ActionPanel'
 import { CompareDialog } from './CompareDialog'
 import { OpportunityDrawer } from './OpportunityDrawer'
@@ -36,24 +36,15 @@ const RANKED = (() => {
 const ASSETS = [...new Set(OPPORTUNITIES.map((item) => item.asset))]
 const CHAINS = [...new Set(OPPORTUNITIES.flatMap((item) => item.chains))]
 
-const matches = (item: Opportunity, search: string) =>
-  !search || `${item.name} ${item.runBy} ${item.asset}`.toLowerCase().includes(search.toLowerCase())
-
-const groupTitle = (groupBy: GroupBy, key: string): string | undefined => {
-  if (groupBy === 'investments')
-    return key === 'invested' ? DEFI_V1_COPY.sections.investments : DEFI_V1_COPY.sections.opportunities
-  if (groupBy === 'category') return DEFI_V1_COPY.category[key as OpportunityCategory].title
-  if (groupBy === 'risk') return DEFI_V1_COPY.risk[key as RiskLevel]
-  if (groupBy === 'asset') return key
-  return undefined
+const SECTION_TITLE = {
+  invested: DEFI_V1_COPY.sections.investments,
+  opportunities: DEFI_V1_COPY.sections.opportunities,
 }
 
 export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const [selected, setSelected] = useState<Opportunity | null>(null)
   const [positions, setPositions] = useState<Position[]>(initialPositions)
   const tableRef = useRef<HTMLDivElement>(null)
-  const [search, setSearch] = useState('')
-  const [groupBy, setGroupBy] = useState<GroupBy>('none')
   const [filters, setFilters] = useState<ListFilters>(NO_FILTERS)
   const [compareIds, setCompareIds] = useState<string[]>([])
   const [isComparing, setIsComparing] = useState(false)
@@ -61,28 +52,19 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const summary = summariseTreasury(TREASURY_TOTAL, positions)
 
   const investedIds = useMemo(() => [...new Set(positions.map((position) => position.opportunity.id))], [positions])
-  const visible = useMemo(
-    () => filterOpportunities(RANKED, filters, investedIds).filter((item) => matches(item, search)),
-    [filters, search, investedIds],
-  )
-  const groups = useMemo<OpportunityGroup[]>(
-    () =>
-      groupOpportunities(visible, groupBy, investedIds).map((group) => ({
-        ...group,
-        title: groupTitle(groupBy, group.key),
-      })),
-    [visible, groupBy, investedIds],
-  )
+  const visible = useMemo(() => filterOpportunities(RANKED, filters, investedIds), [filters, investedIds])
+  const groups = useMemo<OpportunityGroup[]>(() => {
+    const sections = splitByInvestment(visible, investedIds)
+    return sections.map((group) => ({ ...group, title: sections.length > 1 ? SECTION_TITLE[group.key] : undefined }))
+  }, [visible, investedIds])
   const topOpen = visible.find((item) => !locked(item))
   const holdingOf = (item: Opportunity) => holdingsFor(positions, item.id)
   const compareItems = RANKED.filter((item) => compareIds.includes(item.id))
   const toggleCompare = (id: string) =>
     setCompareIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]))
 
-  const showGrouped = (next: GroupBy, nextFilters: ListFilters = NO_FILTERS) => {
+  const showFiltered = (nextFilters: ListFilters) => {
     setFilters(nextFilters)
-    setSearch('')
-    setGroupBy(next)
     tableRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
@@ -115,9 +97,7 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
         </div>
         <TreasurySummary
           summary={summary}
-          onSeeInvestments={() => showGrouped('investments')}
-          onCompareByRisk={() => showGrouped('risk')}
-          onExploreIdle={() => showGrouped('none', { ...NO_FILTERS, sameDay: true, openOnly: true })}
+          onExploreIdle={() => showFiltered({ ...NO_FILTERS, sameDay: true, openOnly: true })}
         />
       </div>
 
@@ -127,10 +107,6 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
         className="flex scroll-mt-6 flex-col gap-4"
       >
         <OpportunityToolbar
-          search={search}
-          onSearch={setSearch}
-          groupBy={groupBy}
-          onGroupBy={setGroupBy}
           filters={filters}
           onFilters={setFilters}
           assets={ASSETS}

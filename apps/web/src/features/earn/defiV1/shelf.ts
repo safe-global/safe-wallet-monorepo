@@ -1,13 +1,4 @@
-import type {
-  DefiV1Model,
-  DefiV1Plan,
-  GroupBy,
-  Holding,
-  Opportunity,
-  OpportunityCategory,
-  Position,
-  RiskLevel,
-} from './types'
+import type { DefiV1Model, DefiV1Plan, Holding, Opportunity, OpportunityCategory, Position, RiskLevel } from './types'
 
 export const CATEGORY_ORDER: OpportunityCategory[] = ['cash', 'yield', 'staking']
 export const MAX_SHELF = 7
@@ -91,34 +82,15 @@ export const filterOpportunities = (
       (!filters.openOnly || (item.access === 'all' && !item.kyc)),
   )
 
-const GROUP_KEY: Record<Exclude<GroupBy, 'none' | 'investments'>, (item: Opportunity) => string> = {
-  category: (item) => item.category,
-  risk: (item) => item.risk,
-  asset: (item) => item.asset,
-}
-
-const GROUP_ORDER: Partial<Record<GroupBy, string[]>> = {
-  investments: ['invested', 'opportunities'],
-  category: CATEGORY_ORDER,
-  risk: Object.keys(RISK_ORDER),
-}
-
-/** Keeps the input order inside each group. Investments come first; other groups follow the category or risk order, or first appearance. */
-export const groupOpportunities = (
+/** Investments first, then everything else, each in the input order. Empty sections are skipped. */
+export const splitByInvestment = (
   opportunities: Opportunity[],
-  groupBy: GroupBy,
-  investedIds: string[] = [],
-): { key: string; items: Opportunity[] }[] => {
-  if (groupBy === 'none') return [{ key: 'all', items: opportunities }]
-  const keyOf =
-    groupBy === 'investments'
-      ? (item: Opportunity) => (investedIds.includes(item.id) ? 'invested' : 'opportunities')
-      : GROUP_KEY[groupBy]
-  const keys = GROUP_ORDER[groupBy] ?? [...new Set(opportunities.map(keyOf))]
-  return keys
-    .map((key) => ({ key, items: opportunities.filter((item) => keyOf(item) === key) }))
-    .filter((group) => group.items.length > 0)
-}
+  investedIds: string[],
+): { key: 'invested' | 'opportunities'; items: Opportunity[] }[] =>
+  [
+    { key: 'invested' as const, items: opportunities.filter((item) => investedIds.includes(item.id)) },
+    { key: 'opportunities' as const, items: opportunities.filter((item) => !investedIds.includes(item.id)) },
+  ].filter((group) => group.items.length > 0)
 
 /** The calls one proposal bundles when the Safe holds the asset on another chain. */
 export const depositSteps = (

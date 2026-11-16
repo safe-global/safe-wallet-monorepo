@@ -193,8 +193,6 @@ export const OpportunityDrawer = ({
                   <Tag key={chain}>{chain}</Tag>
                 ))}
                 {opportunity.placement === 'sponsored' && <Badge variant="warning">{DEFI_V1_COPY.sponsored}</Badge>}
-                {opportunity.placement === 'featured' && <Badge variant="info">{DEFI_V1_COPY.featured}</Badge>}
-                {opportunity.placement === 'premium' && <Badge variant="info">{DEFI_V1_COPY.premium}</Badge>}
               </div>
 
               <DrawerSection title={COPY.overview} collapsible defaultOpen>

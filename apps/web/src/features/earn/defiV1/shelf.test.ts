@@ -4,7 +4,6 @@ import {
   buildShelf,
   depositSteps,
   filterOpportunities,
-  groupOpportunities,
   growthSeries,
   growthShare,
   holdingsFor,
@@ -13,6 +12,7 @@ import {
   MAX_SHELF,
   nudgeOptions,
   summariseTreasury,
+  splitByInvestment,
 } from './shelf'
 import type { Opportunity } from './types'
 
@@ -140,38 +140,21 @@ describe('filterOpportunities', () => {
   })
 })
 
-describe('groupOpportunities', () => {
-  it('returns one group in the input order when not grouping', () => {
-    const items = [opportunity(), opportunity()]
-
-    expect(groupOpportunities(items, 'none')).toEqual([{ key: 'all', items }])
-  })
-
-  it('orders risk groups from lower to higher and skips empty ones', () => {
-    const higher = opportunity({ risk: 'higher' })
-    const low = opportunity({ risk: 'low' })
-
-    expect(groupOpportunities([higher, low], 'risk').map((group) => group.key)).toEqual(['low', 'higher'])
-  })
-
+describe('splitByInvestment', () => {
   it('puts investments above the other opportunities', () => {
     const open = opportunity({ id: 'open' })
     const held = opportunity({ id: 'held' })
 
-    expect(groupOpportunities([open, held], 'investments', ['held'])).toEqual([
+    expect(splitByInvestment([open, held], ['held'])).toEqual([
       { key: 'invested', items: [held] },
       { key: 'opportunities', items: [open] },
     ])
   })
 
-  it('orders asset groups by first appearance', () => {
-    const eth = opportunity({ asset: 'ETH' })
-    const usdc = opportunity({ asset: 'USDC' })
+  it('skips the investments section when nothing is invested', () => {
+    const items = [opportunity(), opportunity()]
 
-    expect(groupOpportunities([eth, usdc, opportunity({ asset: 'ETH' })], 'asset').map((group) => group.key)).toEqual([
-      'ETH',
-      'USDC',
-    ])
+    expect(splitByInvestment(items, [])).toEqual([{ key: 'opportunities', items }])
   })
 })
 

@@ -15,20 +15,9 @@ import type { Holding, Opportunity } from '../types'
 import { Sparkline } from './Sparkline'
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0!'
-const COLUMN_WIDTHS = ['w-10', 'w-64', 'w-20', 'w-32', 'w-28', 'w-36', '', 'w-20', 'w-28', 'w-24', 'w-32', 'w-32']
+const COLUMN_WIDTHS = ['w-10', '', 'w-20', 'w-24', 'w-32', 'w-28', 'w-28', 'w-28', 'w-36', 'w-24']
 const COLUMN_COUNT = COLUMN_WIDTHS.length
-const OPPORTUNITY_HEADERS = [
-  'Opportunity',
-  'Asset',
-  'Exit time',
-  'Risk',
-  'Access',
-  'Networks',
-  'Rate',
-  'Invested',
-  'Earned',
-  'Trend',
-]
+const OPPORTUNITY_HEADERS = ['Opportunity', 'Asset', 'Net APY', 'Category', 'Exit time', 'Risk', 'Invested', 'Earned']
 
 export type OpportunityGroup = { key: string; title?: string; items: Opportunity[] }
 
@@ -82,30 +71,23 @@ export const OpportunityMark = ({ opportunity }: { opportunity: Opportunity }) =
   </span>
 )
 
-const PLACEMENT_TAG: Partial<Record<Opportunity['placement'], string>> = {
-  featured: DEFI_V1_COPY.featured,
-  premium: DEFI_V1_COPY.premium,
-  sponsored: DEFI_V1_COPY.sponsored,
-}
-
-const NameCell = ({ opportunity }: { opportunity: Opportunity }) => {
-  const placement = PLACEMENT_TAG[opportunity.placement]
-  return (
-    <div className="flex min-w-0 items-center gap-3">
-      <OpportunityMark opportunity={opportunity} />
-      <div className="flex min-w-0 flex-col">
-        <span className="flex min-w-0 items-center gap-2">
-          <span className="truncate font-medium text-foreground">{opportunity.name}</span>
-          {placement && <Badge variant={opportunity.placement === 'sponsored' ? 'warning' : 'info'}>{placement}</Badge>}
+const NameCell = ({ opportunity }: { opportunity: Opportunity }) => (
+  <div className="flex min-w-0 items-center gap-3">
+    <OpportunityMark opportunity={opportunity} />
+    <div className="flex min-w-0 flex-col">
+      <span className="flex min-w-0 items-center gap-2">
+        <span className="truncate font-medium text-foreground">{opportunity.name}</span>
+        {opportunity.placement === 'sponsored' && <Badge variant="warning">{DEFI_V1_COPY.sponsored}</Badge>}
+      </span>
+      <span className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+        <NetworkLogos chains={opportunity.chains} />
+        <span className="truncate">
+          {[opportunity.runBy, opportunity.curator, opportunity.kyc && 'KYC'].filter(Boolean).join(' · ')}
         </span>
-        <span className="truncate text-xs text-muted-foreground">
-          {opportunity.runBy}
-          {opportunity.curator ? ` · ${opportunity.curator}` : ''}
-        </span>
-      </div>
+      </span>
     </div>
-  )
-}
+  </div>
+)
 
 const ExitCell = ({ opportunity }: { opportunity: Opportunity }) => (
   <Tooltip delay={150}>
@@ -129,29 +111,16 @@ export const ChainLogo = ({ chain }: { chain: string }) => (
   </Avatar>
 )
 
-const NetworksCell = ({ chains }: { chains: string[] }) => (
+const NetworkLogos = ({ chains }: { chains: string[] }) => (
   <Tooltip delay={150}>
-    <TooltipTrigger render={<span className="flex min-w-0 items-center gap-2" />}>
-      <span className="flex shrink-0 -space-x-1">
-        {chains.map((chain) => (
-          <ChainLogo key={chain} chain={chain} />
-        ))}
-      </span>
-      <span className="truncate">{chains.length > 1 ? `${chains.length} networks` : chains[0]}</span>
+    <TooltipTrigger render={<span className="flex shrink-0 -space-x-1" />}>
+      {chains.map((chain) => (
+        <ChainLogo key={chain} chain={chain} />
+      ))}
     </TooltipTrigger>
     <TooltipContent>{chains.join(', ')}</TooltipContent>
   </Tooltip>
 )
-
-const AccessTag = ({ opportunity, locked }: { opportunity: Opportunity; locked: boolean }) => {
-  if (opportunity.access === 'all' && !opportunity.kyc) return <Tag muted>Open to all</Tag>
-  return (
-    <Tag>
-      {locked && <Lock aria-hidden />}
-      {[opportunity.access === 'pro' && DEFI_V1_COPY.proOnly, opportunity.kyc && 'KYC'].filter(Boolean).join(' · ')}
-    </Tag>
-  )
-}
 
 const Empty = () => <span className="text-muted-foreground">—</span>
 
@@ -169,22 +138,15 @@ const InvestedCell = ({ holding }: { holding?: Holding }) => {
   )
 }
 
-const EarnedCell = ({ holding }: { holding?: Holding }) =>
-  holding && holding.invested > 0 ? (
-    <span className="font-medium tabular-nums">+{formatUsd(holding.earned)}</span>
-  ) : (
-    <Empty />
-  )
-
-const TrendCell = ({ holding }: { holding?: Holding }) => {
+const EarnedCell = ({ holding }: { holding?: Holding }) => {
   if (!holding || holding.invested <= 0) return <Empty />
   const growth = growthShare(holding.invested, holding.earned)
   const series = growthSeries(holding.invested, holding.earned)
   return (
     <Tooltip delay={150}>
       <TooltipTrigger render={<span className="flex w-fit min-w-0 items-center gap-2" />}>
+        <span className="font-medium tabular-nums">+{formatCompactUsd(holding.earned)}</span>
         <Sparkline values={series} label={DEFI_V1_COPY.positions.trend(formatApy(growth))} />
-        <span className="text-xs tabular-nums text-badge-dot-success">+{formatApy(growth)}</span>
       </TooltipTrigger>
       <TooltipContent>
         {DEFI_V1_COPY.positions.trendTooltip(
@@ -230,6 +192,8 @@ const OpportunityRow = ({
         <NameCell opportunity={opportunity} />
       </TableCell>
       <TableCell className="font-semibold">{opportunity.asset}</TableCell>
+      <TableCell className="font-semibold tabular-nums">{formatApy(opportunity.apy)}</TableCell>
+      <TableCell className="truncate">{DEFI_V1_COPY.category[opportunity.category].title}</TableCell>
       <TableCell>
         <ExitCell opportunity={opportunity} />
       </TableCell>
@@ -237,20 +201,10 @@ const OpportunityRow = ({
         <Tag>{DEFI_V1_COPY.risk[opportunity.risk]}</Tag>
       </TableCell>
       <TableCell>
-        <AccessTag opportunity={opportunity} locked={locked} />
-      </TableCell>
-      <TableCell>
-        <NetworksCell chains={opportunity.chains} />
-      </TableCell>
-      <TableCell className="font-semibold tabular-nums">{formatApy(opportunity.apy)}</TableCell>
-      <TableCell>
         <InvestedCell holding={holding} />
       </TableCell>
       <TableCell>
         <EarnedCell holding={holding} />
-      </TableCell>
-      <TableCell>
-        <TrendCell holding={holding} />
       </TableCell>
       <TableCell className="text-right">
         <Button
@@ -272,7 +226,7 @@ const OpportunityRow = ({
 const TableCard = ({ label, children }: { label: string; children: ReactNode }) => (
   <Card radius="xl" size="none">
     <CardContent>
-      <Table aria-label={label} variant="panel" className="table-fixed min-w-[1360px] [&_td]:px-4 [&_th]:px-4">
+      <Table aria-label={label} variant="panel" className="table-fixed min-w-[1120px] [&_td]:px-4 [&_th]:px-4">
         <colgroup>
           {COLUMN_WIDTHS.map((width, index) => (
             <col key={index} className={width || undefined} />

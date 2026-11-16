@@ -6,7 +6,7 @@ import { formatCompactUsd } from '../copy'
 const TIERS = [
   {
     name: 'Base',
-    where: 'Listed below the shelf options and in search',
+    where: 'Listed in the opportunities table',
     rule: 'Every option that passes the listing checks',
   },
   {
@@ -28,7 +28,7 @@ const ATTRIBUTION = {
   medianDeposit: 250_000,
   bySurface: [
     { surface: 'Shelf', share: 0.46 },
-    { surface: 'Fact sheet from search', share: 0.21 },
+    { surface: 'Fact sheet from the table', share: 0.21 },
     { surface: 'Category from idle-cash prompt', share: 0.24 },
     { surface: 'Policy sweep', share: 0.09 },
   ],

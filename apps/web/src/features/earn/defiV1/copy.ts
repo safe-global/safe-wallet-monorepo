@@ -1,4 +1,4 @@
-import type { DefiV1Framing, GroupBy, OpportunityCategory, RiskLevel } from './types'
+import type { DefiV1Framing, OpportunityCategory, RiskLevel } from './types'
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 const compactUsd = new Intl.NumberFormat('en-US', {
@@ -38,7 +38,7 @@ export const DEFI_V1_COPY = {
     staking: { title: 'Staking', subtitle: 'Earn on ETH the treasury plans to hold.' },
   } satisfies Record<OpportunityCategory, { title: string; subtitle: string }>,
   risk: { low: 'Lower risk', medium: 'Medium risk', higher: 'Higher risk' } satisfies Record<RiskLevel, string>,
-  noMatches: 'No opportunities match your search.',
+  noMatches: 'No opportunities match these filters.',
   nudgeTitle: (value: string, asset: string, chain: string, days: number) =>
     `${value} ${asset} has been idle on ${chain} for ${days} days`,
   nudgeBody: (count: number) =>
@@ -49,8 +49,6 @@ export const DEFI_V1_COPY = {
   proOnly: 'Safe Pro',
   kyc: 'KYC once',
   sponsored: 'Sponsored',
-  featured: 'Featured',
-  premium: 'Partner',
   locked: 'Available with Safe Pro',
   apyLabel: 'Current rate',
   exitLabel: 'Exit time',
@@ -106,14 +104,6 @@ export const DEFI_V1_COPY = {
     withdrawLead: 'Funds return to this Safe. Signers approve one proposal.',
   },
   toolbar: {
-    searchPlaceholder: 'Search opportunities, assets, and providers…',
-    groupBy: 'Group by',
-    groupByOption: {
-      investments: 'Investments',
-      category: 'Category',
-      risk: 'Risk',
-      asset: 'Asset',
-    } satisfies Record<Exclude<GroupBy, 'none'>, string>,
     filters: 'Filter',
     investments: 'Investments',
     investedOnly: 'Invested only',
@@ -213,9 +203,6 @@ export const DEFI_V1_COPY = {
       investedBadge: (amount: string) => `${amount} invested`,
       investmentsSummary: (earned: string, apy: string) => `+${earned} earned YTD · ${apy} blended`,
     },
-    seeAll: 'See all',
-    seeEarnings: 'See earnings',
-    compareByRisk: 'Compare by risk',
     putIdleToWork: 'Put idle cash to work',
     investedOf: (invested: string, total: string, idle: string) => `${invested} of ${total} · ${idle} idle`,
     earned: 'Earned YTD',
