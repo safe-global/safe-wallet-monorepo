@@ -7,6 +7,7 @@ import prettier from 'eslint-config-prettier'
 import storybook from 'eslint-plugin-storybook'
 import { designSystemSyntaxRules } from '../../packages/views/eslint-design-system.mjs'
 import noExplicitAny from '../../config/eslint/no-explicit-any.mjs'
+import { featurePublicImportPatterns } from '../../config/eslint/feature-public-imports.mjs'
 
 // A Safe link without `spaceId` opens the Safe outside the Workspace of the current page. Matches a
 // `query` property or variable that holds such an object, directly or in a conditional.
@@ -146,6 +147,7 @@ const config = [
               message: 'Use a plain <img>. Images are served unoptimized, so next/image adds nothing.',
             },
           ],
+          patterns: featurePublicImportPatterns,
         },
       ],
 
@@ -164,6 +166,15 @@ const config = [
     files: ['src/features/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules, ...noReexportRules],
+    },
+  },
+  {
+    files: ['src/features/*/public/**/index.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        { selector: 'Program', message: 'No index files in public/: name the file after what it exports.' },
+      ],
     },
   },
   // The isolated-stack mocks run in Node with their own compiler settings, which the main tsconfig excludes.
