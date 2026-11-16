@@ -1,0 +1,138 @@
+name: drain-safe Checks
+
+on:
+  # No paths filter: the required result job must report on every pull request.
+  pull_request:
+  push:
+    branches:
+      - main
+      - dev
+    paths:
+      - apps/drain-safe/**
+      - packages/**
+      - yarn.lock
+      - package.json
+      - .yarnrc.yml
+      - .yarn/patches/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    runs-on: ubuntu-26.04-arm
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      relevant: ${{ steps.changes.outputs.relevant }}
+    steps:
+      - id: changes
+        uses: $/.github/actions/pr-changes
+        with:
+          paths: |
+            apps/drain-safe/**
+            packages/**
+            yarn.lock
+            package.json
+            .yarnrc.yml
+            .yarn/patches/**
+            config/**
+            yarn.config.cjs
+            .prettierrc
+            .prettierignore
+            .github/workflows/drain-safe-checks.yml
+            .github/actions/yarn/**
+            .github/actions/corepack/**
+            .github/actions/pr-changes/**
+            .github/actions/required-result/**
+
+  lint:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
+    permissions:
+      checks: write
+      pull-requests: read
+      statuses: write
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: $/.github/actions/yarn
+      - name: Run ESLint
+        run: yarn workspace @safe-global/drain-safe lint
+
+  prettier:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
+    permissions:
+      checks: write
+      pull-requests: read
+      statuses: write
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: $/.github/actions/yarn
+      - name: Run Prettier check
+        run: yarn workspace @safe-global/drain-safe prettier
+
+  type-check:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
+    permissions:
+      checks: write
+      pull-requests: read
+      statuses: write
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: $/.github/actions/yarn
+      - name: Type check
+        run: yarn workspace @safe-global/drain-safe type-check
+
+  unit-tests:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: $/.github/actions/yarn
+      - name: Run unit tests
+        run: yarn workspace @safe-global/drain-safe test --ci --coverage
+      - name: Upload coverage
+        uses: codecov/codecov-action@v7.1.1
+        with:
+          flags: drain-safe
+          fail_ci_if_error: false
+
+  build:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: $/.github/actions/yarn
+      - name: Build
+        run: yarn workspace @safe-global/drain-safe build
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: drain-safe-build
+          path: apps/drain-safe/build
+          retention-days: 7
+
+  result:
+    # The one check that branch protection requires for this workflow.
+    name: drain-safe checks result
+    permissions: {}
+    if: ${{ !cancelled() }}
+    needs: [changes, lint, prettier, type-check, unit-tests, build]
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - uses: $/.github/actions/required-result
+        with:
+          needs: ${{ toJSON(needs) }}
+          relevant: ${{ needs.changes.outputs.relevant }}

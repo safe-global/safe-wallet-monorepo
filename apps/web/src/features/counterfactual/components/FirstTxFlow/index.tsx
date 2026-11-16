@@ -1,6 +1,6 @@
 import { AppRoutes } from '@/config/routes'
 import { useIsRecoverySupported, useRecovery } from '@/features/recovery'
-import dynamic from 'next/dynamic'
+import dynamic from '@/utils/dynamic'
 import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
 import { useRouter } from 'next/router'
 import { useContext } from 'react'

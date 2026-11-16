@@ -2,7 +2,7 @@
 
 Guidance for shared libraries under `packages/` (`store`, `theme`, `utils`) consumed by both `apps/web/` and `apps/mobile/`. `views` is web only and has its own guide: [views/AGENTS.md](views/AGENTS.md). For monorepo-wide rules, see the root [AGENTS.md](../AGENTS.md).
 
-## Verifying packages/ changes (IMPORTANT)
+## Verifying packages/ changes
 
 `yarn verify:changed` / `verify:changed:web` only checks files under `apps/<workspace>/` — changed files under `packages/` are **silently skipped** (`scripts/verify.mjs` filters on the `apps/<ws>/` prefix), so a green verify run says nothing about a packages/ change. Run the package's own checks instead:
 
@@ -18,7 +18,7 @@ To also cover dependents, use the turbo `--filter` command from the root AGENTS.
 - Env vars: web injects `NEXT_PUBLIC_*`, mobile `EXPO_PUBLIC_*` — check for both prefixes in package code.
 - New dependencies must work under both bundlers (Next.js/Vite and Metro). `utils` declares `@safe-global/protocol-kit`, `@safe-global/store`, `@safe-global/types-kit` as peerDependencies.
 
-## Auto-generated files (never edit by hand)
+## Auto-generated files
 
 - `packages/store/src/gateway/AUTO_GENERATED/` — generated from the committed `packages/store/scripts/api-schema/schema.json`.
   - Offline regen: `yarn workspace @safe-global/store generate-api && yarn workspace @safe-global/store write-schema-hash`

@@ -6,7 +6,7 @@ const iterate = (folderName, parentRoute, root) => {
   const items = fs.readdirSync(folderName)
 
   items
-    .sort((a, b) => (isFile(a) ? -1 : 1))
+    .sort((a) => (isFile(a) ? -1 : 1))
     .forEach((item) => {
       // Skip service files
       if (/_app|_document/.test(item)) return

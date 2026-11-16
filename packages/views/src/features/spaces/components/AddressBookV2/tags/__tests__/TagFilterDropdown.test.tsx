@@ -79,6 +79,29 @@ describe('TagFilterDropdown', () => {
     expect(onFiltersChanged).toHaveBeenCalledWith([1])
   })
 
+  it('reports nothing when the user ticks and unticks the same tag', async () => {
+    const onFiltersChanged = jest.fn()
+    const Controlled = () => {
+      const [value, setValue] = useState<number[]>([])
+      return (
+        <TagFilterDropdown
+          tags={[vendor, internal]}
+          value={value}
+          onChange={setValue}
+          onFiltersChanged={onFiltersChanged}
+        />
+      )
+    }
+    render(<Controlled />)
+
+    await open()
+    await userEvent.click(screen.getByRole('option', { name: /Vendor/ }))
+    await userEvent.click(screen.getByRole('option', { name: /Vendor/ }))
+    await userEvent.keyboard('{Escape}')
+
+    expect(onFiltersChanged).not.toHaveBeenCalled()
+  })
+
   it('reports nothing when a rename or delete changed the filters', async () => {
     const onFiltersChanged = jest.fn()
     const { rerender, onChange } = renderDropdown({ value: [1], onFiltersChanged })

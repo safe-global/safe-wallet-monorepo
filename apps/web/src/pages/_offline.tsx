@@ -1,11 +1,10 @@
 import { WifiOff } from 'lucide-react'
-import type { NextPage } from 'next'
 import Head from 'next/head'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { BRAND_NAME } from '@/config/constants'
 import SafeLogo from '@/components/common/SafeLogo'
 
-const Offline: NextPage = () => {
+const Offline = () => {
   return (
     <>
       <Head>

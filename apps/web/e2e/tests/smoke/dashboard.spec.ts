@@ -2,7 +2,7 @@
  * Dashboard smoke tests — critical path, runs every PR.
  *
  * These are read-only tests: they verify the dashboard loads correctly
- * for a known static Safe on Sepolia staging. No mutations, no wallet.
+ * for the `basic` and `queue` Safes of the spec. No mutations, no wallet.
  */
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { test, expect } from '../../src/fixtures/test.fixture'
@@ -35,7 +35,7 @@ test.describe('Dashboard', { tag: '@smoke' }, () => {
 
   test.beforeEach(async ({ safePage, safes }) => {
     homePage = new HomePage(safePage)
-    await homePage.goto(safes.SEP_STATIC_SAFE_1)
+    await homePage.goto(safes.basic)
   })
 
   test('should load the dashboard and show Safe header info', async () => {
@@ -64,7 +64,7 @@ test.describe('Dashboard pending transactions', { tag: '@smoke' }, () => {
     safeApiClient,
     safes,
   }) => {
-    const queue = await safeApiClient.getQueued(safeAddress(safes.SEP_QUEUE_SAFE))
+    const queue = await safeApiClient.getQueued(safeAddress(safes.queue))
     const expected = latestProposalPerNonce(queue).slice(0, WIDGET_ROWS)
     const shownNonces = new Set(expected.map(nonceOf))
     const olderProposals = queue.filter(
@@ -73,11 +73,11 @@ test.describe('Dashboard pending transactions', { tag: '@smoke' }, () => {
     // Precondition: a nonce that the widget shows has conflicting proposals, so the widget must leave the older out.
     expect(
       olderProposals.length,
-      `${safes.SEP_QUEUE_SAFE} has no conflicting proposals among the nonces the widget shows`,
+      `${safes.queue} has no conflicting proposals among the nonces the widget shows`,
     ).toBeGreaterThan(0)
 
     const home = new HomePage(safePage)
-    await home.goto(safes.SEP_QUEUE_SAFE)
+    await home.goto(safes.queue)
 
     await expect(home.pendingTxRows).toHaveCount(expected.length)
     for (const [index, transaction] of expected.entries()) {

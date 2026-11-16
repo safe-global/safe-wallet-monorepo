@@ -1,4 +1,14 @@
-import { memo, type CSSProperties, type ReactElement, useContext, useMemo, useState, useEffect } from 'react'
+import {
+  memo,
+  type CSSProperties,
+  type ReactElement,
+  type ReactNode,
+  useContext,
+  useMemo,
+  useState,
+  useEffect,
+} from 'react'
+import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { RotateCcw } from 'lucide-react'
 import { Controller, useForm } from 'react-hook-form'
 
@@ -29,9 +39,14 @@ import usePreviousNonces from '@/hooks/usePreviousNonces'
 import css from './styles.module.css'
 import classNames from 'classnames'
 
-const NonceFormOption = memo(function NonceFormOption({ nonce }: { nonce: string }): ReactElement {
+export const NonceOptionLabel = memo(function NonceOptionLabel({
+  nonce,
+  transactions,
+}: {
+  nonce: string
+  transactions: QueuedItemPage['results']
+}): ReactElement {
   const addressBook = useAddressBook()
-  const transactions = useQueuedTxByNonce(Number(nonce))
 
   const txLabel = useMemo(() => {
     const latestTransactions = getLatestTransactions(transactions)
@@ -56,6 +71,13 @@ const NonceFormOption = memo(function NonceFormOption({ nonce }: { nonce: string
   )
 })
 
+const NonceFormOption = ({ nonce }: { nonce: string }): ReactElement => {
+  const transactions = useQueuedTxByNonce(Number(nonce))
+  return <NonceOptionLabel nonce={nonce} transactions={transactions} />
+}
+
+const renderNonceFormOption = (nonce: string) => <NonceFormOption nonce={nonce} />
+
 const getFieldMinWidth = (value: string): string => {
   const MIN_CHARS = 5
   const MAX_WIDTH = '200px'
@@ -78,16 +100,30 @@ enum ErrorMessages {
 
 const MAX_NONCE_DIFFERENCE = 100
 
-const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNonce: string }) => {
-  const { safeTx, setNonce } = useContext(SafeTxContext)
-  const { isRejection } = useContext(TxFlowContext)
-  const previousNonces = usePreviousNonces().map((nonce) => nonce.toString())
-  const { safe } = useSafeInfo()
+type TxNonceFormProps = {
+  nonce: string
+  recommendedNonce: string
+  // The Safe's on-chain nonce, the lowest valid value
+  currentNonce: number
+  queuedNonces: number[]
+  readOnly: boolean
+  onNonceChange: (nonce: number) => void
+  renderOption: (nonce: string) => ReactNode
+}
+
+export const TxNonceForm = ({
+  nonce,
+  recommendedNonce,
+  currentNonce,
+  queuedNonces,
+  readOnly,
+  onNonceChange,
+  renderOption,
+}: TxNonceFormProps) => {
+  const queuedNonceOptions = queuedNonces.map((nonce) => nonce.toString())
   const [warning, setWarning] = useState<string>('')
 
   const showRecommendedNonceButton = recommendedNonce !== nonce
-  const isEditable = !safeTx || safeTx?.signatures.size === 0
-  const readOnly = !isEditable || isRejection
 
   const formMethods = useForm({
     defaultValues: {
@@ -100,7 +136,7 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
   })
 
   const resetNonce = () => {
-    // shouldValidate re-runs the `validate` rule, which propagates the value to SafeTxContext
+    // shouldValidate re-runs the `validate` rule, which propagates the value through onNonceChange
     formMethods.setValue(TxNonceFormFieldNames.NONCE, recommendedNonce, { shouldValidate: true })
   }
 
@@ -111,14 +147,14 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
       message = ErrorMessages.NONCE_GT_RECOMMENDED
     }
 
-    if (Number(nonce) >= safe.nonce + MAX_NONCE_DIFFERENCE) {
+    if (Number(nonce) >= currentNonce + MAX_NONCE_DIFFERENCE) {
       message = ErrorMessages.NONCE_TOO_FAR
     }
 
     setWarning(message)
-  }, [nonce, recommendedNonce, safe.nonce])
+  }, [nonce, recommendedNonce, currentNonce])
 
-  const options = [recommendedNonce, ...previousNonces]
+  const options = [recommendedNonce, ...queuedNonceOptions]
 
   return (
     <Controller
@@ -137,8 +173,8 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
             return ErrorMessages.NONCE_MUST_BE_NUMBER
           }
 
-          if (newNonce < safe.nonce) {
-            return ErrorMessages.NONCE_TOO_LOW.replace('%%nonce%%', safe.nonce.toString())
+          if (newNonce < currentNonce) {
+            return ErrorMessages.NONCE_TOO_LOW.replace('%%nonce%%', currentNonce.toString())
           }
 
           if (newNonce >= Number.MAX_SAFE_INTEGER) {
@@ -149,8 +185,7 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
             return ErrorMessages.NONCE_MUST_BE_INTEGER
           }
 
-          // Update context with valid nonce
-          setNonce(newNonce)
+          onNonceChange(newNonce)
         },
       }}
       render={({ field, fieldState }) => {
@@ -227,19 +262,19 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
                   <ComboboxCollection>
                     {(option: string) => (
                       <ComboboxItem key={option} value={option}>
-                        <NonceFormOption nonce={option} />
+                        {renderOption(option)}
                       </ComboboxItem>
                     )}
                   </ComboboxCollection>
                 </ComboboxGroup>
 
-                {previousNonces.length > 0 && (
-                  <ComboboxGroup items={previousNonces}>
+                {queuedNonceOptions.length > 0 && (
+                  <ComboboxGroup items={queuedNonceOptions}>
                     <ComboboxLabel className="pt-3">Replace existing</ComboboxLabel>
                     <ComboboxCollection>
                       {(option: string) => (
                         <ComboboxItem key={option} value={option}>
-                          <NonceFormOption nonce={option} />
+                          {renderOption(option)}
                         </ComboboxItem>
                       )}
                     </ComboboxCollection>
@@ -254,28 +289,56 @@ const TxNonceForm = ({ nonce, recommendedNonce }: { nonce: string; recommendedNo
   )
 }
 
+const SafeTxNonceForm = ({ nonce, recommendedNonce }: { nonce: number; recommendedNonce: number }) => {
+  const { safeTx, setNonce } = useContext(SafeTxContext)
+  const { isRejection } = useContext(TxFlowContext)
+  const queuedNonces = usePreviousNonces()
+  const { safe } = useSafeInfo()
+  const isEditable = !safeTx || safeTx.signatures.size === 0
+
+  return (
+    <TxNonceForm
+      nonce={nonce.toString()}
+      recommendedNonce={recommendedNonce.toString()}
+      currentNonce={safe.nonce}
+      queuedNonces={queuedNonces}
+      readOnly={!isEditable || isRejection}
+      onNonceChange={setNonce}
+      renderOption={renderNonceFormOption}
+    />
+  )
+}
+
 const skeletonMinWidth = getFieldMinWidth('')
+
+// h-9 matches the ComboboxInput/SelectTrigger it stands in for, so the row doesn't shift on load
+export const NonceSkeleton = () => <Skeleton style={{ width: skeletonMinWidth }} className="h-9" />
+
+export const NonceRow = ({ label, testId, children }: { label: string; testId: string; children: ReactNode }) => (
+  <div data-testid={testId} className={classNames('flex items-center gap-2', css.nonce)}>
+    {label}{' '}
+    <Typography variant="paragraph-bold" className="inline">
+      #
+    </Typography>
+    {children}
+  </div>
+)
 
 const TxNonce = ({ canEdit = true }: { canEdit?: boolean } = {}) => {
   const { nonce, recommendedNonce, isReadOnly } = useContext(SafeTxContext)
 
   return (
-    <div data-testid="nonce-fld" className={classNames('flex items-center gap-2', css.nonce)}>
-      Nonce{' '}
-      <Typography variant="paragraph-bold" className="inline">
-        #
-      </Typography>
+    <NonceRow label="Nonce" testId="nonce-fld">
       {nonce === undefined || recommendedNonce === undefined ? (
-        // h-9 matches the ComboboxInput/SelectTrigger it stands in for, so the row doesn't shift on load
-        <Skeleton style={{ width: skeletonMinWidth }} className="h-9" />
+        <NonceSkeleton />
       ) : canEdit && !isReadOnly ? (
-        <TxNonceForm nonce={nonce.toString()} recommendedNonce={recommendedNonce.toString()} />
+        <SafeTxNonceForm nonce={nonce} recommendedNonce={recommendedNonce} />
       ) : (
         <Typography variant="paragraph-bold" className="-ml-2">
           {nonce}
         </Typography>
       )}
-    </div>
+    </NonceRow>
   )
 }
 

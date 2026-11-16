@@ -5,9 +5,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import GroupedAddress from './GroupedAddress'
-import TagPicker from './tags/TagPicker'
-import { existingTagIds, type TagActions } from './tags/TagMenu'
-import { TAGS_DISCLAIMER } from './tags/tagRules'
+import TagPicker, { TAGS_DISCLAIMER } from './tags/TagPicker'
+import { existingTagIds, sameTagIds, type TagActions } from './tags/TagMenu'
 import type { WorkspaceTag } from './types'
 
 type EditTagsDialogProps = {
@@ -36,7 +35,7 @@ const EditTagsDialog = ({
   const [tagIds, setTagIds] = useState<number[]>(contact.tagIds)
   const selected = existingTagIds(tagIds, workspaceTags)
   const saved = existingTagIds(contact.tagIds, workspaceTags)
-  const isUnchanged = selected.length === saved.length && selected.every((id) => saved.includes(id))
+  const isUnchanged = sameTagIds(selected, saved)
 
   return (
     <Dialog open onOpenChange={(isOpen) => !isOpen && onClose()}>

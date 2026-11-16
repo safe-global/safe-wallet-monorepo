@@ -23,7 +23,7 @@
       "value": "1000000000000000000000",
       "tokenName": "QATRUSTED",
       "tokenSymbol": "QTRUST",
-      "logoUri": "https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0x7CB180dE9BE0d8935EbAAc9b4fc533952Df128Ae.png",
+      "logoUri": "images/common/token-placeholder.svg",
       "decimals": 18,
       "trusted": true,
       "imitation": false

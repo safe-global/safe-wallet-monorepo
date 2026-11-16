@@ -24,8 +24,6 @@ module.exports = {
     '^next/link$': '<rootDir>/src/compat/next-link.tsx',
     '^next/head$': '<rootDir>/src/compat/next-head.tsx',
     '^next/dynamic$': '<rootDir>/src/compat/next-dynamic.tsx',
-    '^next/image$': '<rootDir>/src/compat/next-image.tsx',
-    '^next/app$': '<rootDir>/src/compat/next-app.ts',
     '^next/navigation$': '<rootDir>/src/compat/next-navigation.tsx',
     '^next/dist/client/resolve-href$': '<rootDir>/src/compat/next-resolve-href.ts',
     // Jest 30 adds the "node" export condition to require(), which picks TanStack's server build
@@ -41,12 +39,6 @@ module.exports = {
     '!<rootDir>/src/**/*.stories.tsx',
   ],
   coverageReporters: ['text-summary', 'json', 'lcov', 'html'],
-  // plugins/ has its own node:test suite; cypress + dist are not unit tests
-  testPathIgnorePatterns: [
-    '<rootDir>/node_modules',
-    '<rootDir>/dist',
-    '<rootDir>/e2e',
-    '<rootDir>/cypress',
-    '<rootDir>/plugins',
-  ],
+  // plugins/ has its own node:test suite; dist holds no unit tests
+  testPathIgnorePatterns: ['<rootDir>/node_modules', '<rootDir>/dist', '<rootDir>/e2e', '<rootDir>/plugins'],
 }

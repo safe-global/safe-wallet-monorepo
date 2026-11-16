@@ -9,7 +9,7 @@
         "decimals": 18,
         "symbol": "SAFE",
         "name": "Safe Token",
-        "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png",
+        "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -25,7 +25,7 @@
         "decimals": 18,
         "symbol": "OETH",
         "name": "Origin Ether",
-        "logoUri": "https://cdn.zerion.io/0x856c4efb76c1d1ae02e20ceb03a2a6a08b0b8dc3.png",
+        "logoUri": "mock-assets/cdn.zerion.io/0x856c4efb76c1d1ae02e20ceb03a2a6a08b0b8dc3.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -41,7 +41,7 @@
         "decimals": 18,
         "symbol": "WETH",
         "name": "Wrapped Ether",
-        "logoUri": "https://cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png",
+        "logoUri": "mock-assets/cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -57,7 +57,7 @@
         "decimals": 18,
         "symbol": "ETH",
         "name": "Ethereum",
-        "logoUri": "https://cdn.zerion.io/eth.png",
+        "logoUri": "mock-assets/cdn.zerion.io/eth.webp",
         "chainId": "1",
         "trusted": true,
         "type": "NATIVE_TOKEN"
@@ -73,7 +73,7 @@
         "decimals": 18,
         "symbol": "USDe",
         "name": "USDe",
-        "logoUri": "https://cdn.zerion.io/9b76c9cf-ae65-417c-aa37-c544e9248725.png",
+        "logoUri": "mock-assets/cdn.zerion.io/9b76c9cf-ae65-417c-aa37-c544e9248725.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -89,7 +89,7 @@
         "decimals": 18,
         "symbol": "LINK",
         "name": "Chainlink",
-        "logoUri": "https://cdn.zerion.io/0x514910771af9ca656af840dff83e8264ecf986ca.png",
+        "logoUri": "mock-assets/cdn.zerion.io/0x514910771af9ca656af840dff83e8264ecf986ca.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -105,7 +105,7 @@
         "decimals": 18,
         "symbol": "DAI",
         "name": "Dai Stablecoin",
-        "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png",
+        "logoUri": "mock-assets/cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -121,7 +121,7 @@
         "decimals": 18,
         "symbol": "UNI",
         "name": "Uniswap",
-        "logoUri": "https://cdn.zerion.io/0x1f9840a85d5af5bf1d1762f925bdaddc4201f984.png",
+        "logoUri": "mock-assets/cdn.zerion.io/0x1f9840a85d5af5bf1d1762f925bdaddc4201f984.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -153,7 +153,7 @@
         "decimals": 6,
         "symbol": "USDC",
         "name": "USDC",
-        "logoUri": "https://cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
+        "logoUri": "mock-assets/cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -169,7 +169,7 @@
         "decimals": 6,
         "symbol": "USDT",
         "name": "Tether USD",
-        "logoUri": "https://cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.png",
+        "logoUri": "mock-assets/cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -185,7 +185,7 @@
         "decimals": 18,
         "symbol": "MKR",
         "name": "Maker",
-        "logoUri": "https://cdn.zerion.io/0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2.png",
+        "logoUri": "mock-assets/cdn.zerion.io/0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -201,7 +201,7 @@
         "decimals": 18,
         "symbol": "sUSDe",
         "name": "Staked USDe",
-        "logoUri": "https://cdn.zerion.io/99f02205-a6c6-4a4e-a2a2-9759393ac3f0.png",
+        "logoUri": "mock-assets/cdn.zerion.io/99f02205-a6c6-4a4e-a2a2-9759393ac3f0.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -217,7 +217,7 @@
         "decimals": 18,
         "symbol": "osETH",
         "name": "Staked ETH",
-        "logoUri": "https://cdn.zerion.io/98831c9d-1f69-4602-9d5e-40847f7cd83e.png",
+        "logoUri": "mock-assets/cdn.zerion.io/98831c9d-1f69-4602-9d5e-40847f7cd83e.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -233,7 +233,7 @@
         "decimals": 18,
         "symbol": "AAVE",
         "name": "Aave",
-        "logoUri": "https://cdn.zerion.io/0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9.png",
+        "logoUri": "mock-assets/cdn.zerion.io/0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -249,7 +249,7 @@
         "decimals": 18,
         "symbol": "SNX",
         "name": "Synthetix Network Token",
-        "logoUri": "https://cdn.zerion.io/0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f.png",
+        "logoUri": "mock-assets/cdn.zerion.io/0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -265,7 +265,7 @@
         "decimals": 18,
         "symbol": "SUSHI",
         "name": "SushiToken",
-        "logoUri": "https://cdn.zerion.io/0x6b3595068778dd592e39a122f4f5a5cf09c90fe2.png",
+        "logoUri": "mock-assets/cdn.zerion.io/0x6b3595068778dd592e39a122f4f5a5cf09c90fe2.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -281,7 +281,7 @@
         "decimals": 18,
         "symbol": "BASED",
         "name": "Based Coin",
-        "logoUri": "https://cdn.zerion.io/7339c931-5e2b-4d51-9111-c03991a4baff.png",
+        "logoUri": "mock-assets/cdn.zerion.io/7339c931-5e2b-4d51-9111-c03991a4baff.webp",
         "chainId": "8453",
         "trusted": true,
         "type": "ERC20"
@@ -297,7 +297,7 @@
         "decimals": 18,
         "symbol": "sUSD",
         "name": "Synth sUSD",
-        "logoUri": "https://cdn.zerion.io/0x57ab1ec28d129707052df4df418d58a2d46d5f51.png",
+        "logoUri": "mock-assets/cdn.zerion.io/0x57ab1ec28d129707052df4df418d58a2d46d5f51.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -313,7 +313,7 @@
         "decimals": 18,
         "symbol": "BAL",
         "name": "Balancer",
-        "logoUri": "https://cdn.zerion.io/0xba100000625a3754423978a60c9317c58a424e3d.png",
+        "logoUri": "mock-assets/cdn.zerion.io/0xba100000625a3754423978a60c9317c58a424e3d.webp",
         "chainId": "1",
         "trusted": true,
         "type": "ERC20"
@@ -398,7 +398,7 @@
     {
       "appInfo": {
         "name": "Safe Factory",
-        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/gnosis-safe-factory.jpg",
+        "logoUrl": "data:image/webp;base64,UklGRnYCAABXRUJQVlA4IGoCAACQEACdASpAAEAAPmkqk0WkIqIZ+zVUQAaEtgBhtuid1/YPxm57ThPwBh531L7d/cx/gPYB4m3936ifmc/V39qvex6QD+if3T0gOsA8sH2M/2l/aP2VSZhRbb79Vt69vuvS61LSUCjZPXeNm7bNlnWIXSEJ0Dj5gQC4+tgfvC0PzGMIU6HFQs30c2UzIQAA/vAM/7gCwzFN/5T95T95T9yhXkflyleMY4iXvcOWjSIJr3/A27n7gSIgV1VkNs3YBHCPn9ahp+McQXJ+09W2AtOABHP5+A9oN7I0F5J4iOhj2Y5VHJfFW1PicydA/3+1l1d3z+Jao2FDpY4E9pkvP6Mh0emtZOmS0VUHwvkz4T2IGEv+TuTKAl6cotSdT8jIv/A/nXKf5C+C0l2o/LQ6fqlfJAmOYtbOptlc+r8eTdUPx5yJaBM7N2yl5jLeh3K1QZn1OMvyYg130bqmsI+HP+UlXeOKJ8O/XhOmoRIr7ywCvyyA0hycAOsaEtWhkXKU22xrvCFDv3vZsTwxV2Dim/5SV8YzrykBJmNHaDl49JZ81En5f7EaGvpQnRGgByoC0SuPDMxYJ14frzSp0L6VThP1oAHvAdenf9lalbHiAJxJ0qjIp+pex1GoWZwZusbRx7V/e1PzUzayD+T46P+IMNV4OZ/7mXBq1jdTpRMNVedWjmB3uzT3wxWVyy2aPiRxQnU9MTCPmXbeygnPaMs4SXX+TuIhbsaH38xzva6v7pMZOj6Y/rET0GSx/YAwmj+dU5KtkeSHbhv07dcThTxjvwDk1OF9nSaJVDOwLNO7Dzubrqu2s7aqW3toAAA=",
         "url": "https://gnosis.io/"
       },
       "balanceFiat": "651.888206114658",
@@ -416,7 +416,7 @@
                 "decimals": 18,
                 "symbol": "SAFE",
                 "name": "Safe Token",
-                "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -436,7 +436,7 @@
                 "decimals": 18,
                 "symbol": "SAFE",
                 "name": "Safe Token",
-                "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -461,7 +461,7 @@
                 "decimals": 18,
                 "symbol": "SAFE",
                 "name": "Safe Token",
-                "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -481,7 +481,7 @@
                 "decimals": 18,
                 "symbol": "SAFE",
                 "name": "Safe Token",
-                "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -506,7 +506,7 @@
                 "decimals": 18,
                 "symbol": "SAFE",
                 "name": "Safe Token",
-                "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -531,7 +531,7 @@
                 "decimals": 18,
                 "symbol": "SAFE",
                 "name": "Safe Token",
-                "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -556,7 +556,7 @@
                 "decimals": 18,
                 "symbol": "SAFE",
                 "name": "Safe Token",
-                "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -573,7 +573,7 @@
     {
       "appInfo": {
         "name": "Compound V2",
-        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/compound-v2.jpg",
+        "logoUrl": "data:image/webp;base64,UklGRiICAABXRUJQVlA4IBYCAACwDgCdASpAAEAAPm0skkakIiGhLhbaqIANiWQAxlfAG0q74B/RP7p1gHoAeV5+x3wX/s96OZ2gXBDmsfJT2R9A3SNPNtrOES3ASPD2Qa9PYRBdm8ovWd7Q2BECgvp7kwrwck9iHB/dFv/FglrPZ+C2iRvNjgfzikd9AQhWUQAA/v85yq8Goir+BF3NwU/aV7J2N5cHWnQTfuvymPHQQl6zhU4Hfk+l7luFguO7r6al1OPR5WYS0Ws88CuB0i0m8JDRNLdw+5hM+y8eEAb9Tq7jS/bv2kBN1Wuw8Px5w6zyQf9RosoJYIUuOn9ABZiknhUAf6tTyaqcxvbHS6qqr0CCCMBAGUm5LLq1lZvuc5FkvKkAQ/vfET8jkzLf9/sqNsU0SH1jvdVQveK4aew7nGnNS/1HyzfYA0HBYjggfC/wQ4P6haXyzjZM/QjpMXfvAhV+Hpny/m0jYW+rSu1o66sM/s32nzyZEM52Al7IFvcbe86phpE5/+s/B5imUrR+gqf++6ifA3k/wOP0EQDZhIHBuNUdzYLeAaJwoC/rWmtu1An2yywEJzng77zfBv10w6OE4G62uSRJx1/W8gVuhr2hSc2SFj0n8FdxfRI/v/VTqcvSo7jGvrE6Vc0Hexy0ZO/J2pL71EpJYsg1dIvFK5HL4NBRYE5yv4n7deFOzA8Nv0bD33F7QI5s1TOKxihtxrqD/BbQYAA=",
         "url": "https://app.compound.finance"
       },
       "balanceFiat": "13.898714317344604",
@@ -591,7 +591,7 @@
                 "decimals": 18,
                 "symbol": "DAI",
                 "name": "Dai Stablecoin",
-                "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -611,7 +611,7 @@
                 "decimals": 18,
                 "symbol": "ETH",
                 "name": "Ethereum",
-                "logoUri": "https://cdn.zerion.io/eth.png",
+                "logoUri": "mock-assets/cdn.zerion.io/eth.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "NATIVE_TOKEN"
@@ -631,7 +631,7 @@
                 "decimals": 6,
                 "symbol": "USDC",
                 "name": "USDC",
-                "logoUri": "https://cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -651,7 +651,7 @@
                 "decimals": 18,
                 "symbol": "COMP",
                 "name": "Compound",
-                "logoUri": "https://cdn.zerion.io/0xc00e94cb662c3520282e6f5717214004a7f26888.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0xc00e94cb662c3520282e6f5717214004a7f26888.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -668,7 +668,7 @@
     {
       "appInfo": {
         "name": "StakeWise",
-        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/stakewise.jpg",
+        "logoUrl": "data:image/webp;base64,UklGRjoBAABXRUJQVlA4IC4BAACQCACdASpAAEAAPm0sj0WkIqEZ+zSsQAbEsoBoZsWW3UmYtXy1alQ5qfyxHeIuQeLAk6zQSkNiYvvyNeQHSwynX6VqqQ8Dnj1G/+R34AD++kXLlNuVz6tvtm33Xf0Jd/jPEYITUzPdqloyGlqnXNB8QWFHLWkCFqXnynHXUM3+HhFPQHLQIK+OQVTcNHGa29MBAKBv6XvlEtg1uCCwo7lDHAlF+PJnC1xBhqEyogo2RtGpbErf2Rg/ineQ2X7GZ+hG83GoHRQYKaZHqFKPsR7sdKs6mm8XzDHZhdPU6mHXiLVo+EI7xnjWIDcKNcE/BcDvhmsFX4u+RN3/uA15y6uVqLRYuB2GQGTaWBvh7rpbjKVtviTXhakMOPCYYWGzndWSf8H/DkFQ80qTpCDAAA==",
         "url": "https://app.stakewise.io/"
       },
       "balanceFiat": "4.24014133450775",
@@ -686,7 +686,7 @@
                 "decimals": 18,
                 "symbol": "ETH",
                 "name": "Ethereum",
-                "logoUri": "https://cdn.zerion.io/eth.png",
+                "logoUri": "mock-assets/cdn.zerion.io/eth.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "NATIVE_TOKEN"
@@ -706,7 +706,7 @@
                 "decimals": 18,
                 "symbol": "osETH",
                 "name": "Staked ETH",
-                "logoUri": "https://cdn.zerion.io/98831c9d-1f69-4602-9d5e-40847f7cd83e.png",
+                "logoUri": "mock-assets/cdn.zerion.io/98831c9d-1f69-4602-9d5e-40847f7cd83e.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -723,7 +723,7 @@
     {
       "appInfo": {
         "name": "Yearn V2",
-        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/yearn-v2.jpg",
+        "logoUrl": "data:image/webp;base64,UklGRoADAABXRUJQVlA4IHQDAABQFACdASpAAEAAPm0skkYkIqGhLBVeYIANiWwAwyeB/AfjN+KvyY1j+8YvX4V+a/737dO0B4n/SR8wH2ze8R/Sf0z9wHoAfzL/b9Yt6Fflq/tV8HP7Zfsz7REVgps/xdcmgBDL/HX9MdLl6yf2Z9gBUHzMVpW0FHR2qGLT/g1MVBEnUnJIIqKrxV02nXKFWU+fPL+wMmLjW4KQKnRo8QqJLiZxTXDCXTpAMAAA/vFNr/+IWfiFn4hZ/CPP/6ks1E9/J1iIVfwrb9NinkkraYesP5HfqrwRM8e77Dq5DD0pbjAGU8A407jojpNCXz6/Z1csbLdOZH3V6LzcKp7mYfWd+e1PfDgbRTigLW5QvBPTEESvdR8NHfDrn5otm+0cYU1e2e1WaW3yUSMwzYy/mWgFaFhYxZ9ceRYH3j9dHfPRPXw80aHdnSpZgk20KKYu9llYXKd8fZJ/xMIfqVGaGjmqJe7q4FQGFko9/20Ppy/AKcJ1kwhW++XI5dG8LQLnOoqYL/YWssTURv7zvk8wqlALPLU2k/n6TEzLxzxGP37H/mn6ILCsJFMDHatmaLEw66Y9XLiCPwXJUr4XusS6ajWKqTLKNrxhIznJqaO7eeiIVNvZ+gH0/oJmTnK2oP8Yk3STBpVeM265yZ1/QpwtgquyrhxTV4RdksPkXcxAg4qZADUaD6SGZ+es7WKpdTz+7uq+iwOYTkU78+ircJZP1dg4YceeMfUMcDTW8eZxmw/AeV6GgzU/tFbDNLN327MYLatSzp1B15fWSDUOvrhjckz6C2AwVSXgEuSKa9X9R0nXOCQA6GM6lp7aZ9VUh4tkeFnLGxUXb0uemj+pphByEpy7qVtpUvQAf9R0izcT7K7r7I9ZCys4KvZq+yR5fovgplzM3dvduQ+oaq5aQKJcNmPV2WHQWSLm3nhuvPjHLrfQdrmCjLEMtOHoQG+jGgVtrSdxy12M/RKkFNHkUr5vm7M2y2TcAjxwNXXz5j342u80/f5B+ggtePpizbmGNquXjTRA593KTpzRnueefmJOgii4sSrOsIDHlK0CGx5vtwg5eRCfpmuAVTOiutbXOm1S35/6K564mU8r0T37Wl75956OJYm3nEycMlHlflcjohW9Xoide11rSxiwIEpCoil4J/8kWjck7ZKRFs/+MTQCnm32gnAAAA==",
         "url": "https://yearn.fi/"
       },
       "balanceFiat": "5.49810558777546",
@@ -741,7 +741,7 @@
                 "decimals": 6,
                 "symbol": "USDT",
                 "name": "Tether USD",
-                "logoUri": "https://cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -758,7 +758,7 @@
     {
       "appInfo": {
         "name": "Maple",
-        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/maple.jpg",
+        "logoUrl": "data:image/webp;base64,UklGRl4EAABXRUJQVlA4IFIEAADQFACdASpAAEAAPm0sk0ekIiGhLBK7MIANiWwAsSVBVF4N/ifNoqr9p/AnAwGwr8eo7xUvNu9QHmA/Wb9lvfA9A3+h9QD+7dQB6AHltezF+zvpoXed9ix4/hOIvaN3lwmDIXVBDMPIG9v/Yr2OzyNe+3Vx/+8Ymzc4KjkKNxw/RzbaadK3GD+bK4rZbQmtCF+O/uyPvZcjd6u2Vyf0FJcdXwf8ToGjC5Znm8wpSZPQAP7/OdKyWpFHdYJp63XgrS6zBwx9VrTG6eGnYrYkZ5TuPpzmon/O9CoVHBJhKulKVSOHdX3OP8NAOD0je3+HrG1z3O0Kz2TQdDnVQKc3BSZ3pOXcjovc90R8AkRHiD0FNxMXMtni4CKn/a5VDNOF+a4KdGWtI80FC9c2wAO01Bhp99oCmvBA/gmWMTCbgMQyom13i/favEO4o/1EOs3v7XIc8lC4R87sRBFN0U8CIZLaSXbTeqnvMDyfVpT3/Ne0OjKuO8ALErrjvbEW4B8djxpgc3qjdwN4e6tCGhzYuEXzKU/ohwPq5+vzK+jIoA4h7HSM/kmNl9v15DM6Pu58Y/3W+wlVZC/de8gMkWyYaLz/8qDeRpHe4Qjd8Mq83dcUrnvYZnj+wZaAeZs8AGPu6g96P8c5BKjdK61LjmD3lEbpk57+r23k33v6A+7kNmQX8Lw8Zmh0z3Ki9I4DIiicYHZa3ZKytl/ZgwF+eOURoo+QEL1Y0+3ebb3yFdFnu+MmZgE7zxKpTV/+6NY6gNxL/u4R4tL+/qinzFl/x1XBzhd+ZTpiRsBCkZoCp/Gm8/NWtADbrFgkFccSy4AfGJ6Mj+J3OiNc4SlkOW2zH4jVBLpAL78RDSZaf4KpZ+rH+Io95xW438YfvzHTP3n3mmVf7H2kpu6Oz8K1Tvjr/+TVmq0cTpXt2fIjrNzD8Jt5kkZq9uJ53oRsbODTtWjUFXS6Ok+N5M91vCzgCt3bwI2JshrBQ0a01rer82oZy32QEKO7TvPwTTvPba137ETtkF+ReH7OlgjBgeJ1/luusUw2Jh36FD6z4UPzoEKBV8IVc95uhjTN8g5MdocNVrODBZZZ+xiuDZKUECAPsK373cXoZSVS3hJj6beS31tIQuDcd9so4QVQef7ouxolehzIU+Yl7dgSM39/aCoj2AWmb8KHIPffFwucdStkVgSluPk9fQVUXWgpRc1Dtg/ij7eEKK9dXeesGXY4wH450yVDkBc3lQF+GB3vxPkoT6ehbSE7uD7CYGdS9Eu2DQFQChH0jun+XCSkVxPjrUjAOTQZuWuzS77UQ+SR6V1kljKb36iaQQHkmw6eI5mQlSOen0q1ZVwjPrxWShpPgRJurLQIcVzrynuBuebv+nhoVwegUlhYH/u9bGie4HeilXMeYomo4Km1/w6zYR1CRb0QZnyM5t7QgB1wXnWfP9XdSu29SrqIQ3gExCdv0StPbyX/SOVLJnwn4PAAAA==",
         "url": "https://app.maple.finance"
       },
       "balanceFiat": "4.89362043106782",
@@ -776,7 +776,7 @@
                 "decimals": 6,
                 "symbol": "USDT",
                 "name": "Tether USD",
-                "logoUri": "https://cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -793,7 +793,7 @@
     {
       "appInfo": {
         "name": "AAVE V3",
-        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/aave-pool-v3.jpg",
+        "logoUrl": "data:image/webp;base64,UklGRv4BAABXRUJQVlA4IPIBAAAwDACdASpAAEAAPmksk0WkIqIZ+Z1UQAaEtABoQdxWltAP9vvlfoAdLEvwVrcszSBM9IgkG/CHZP8/+11902zlK5axwXA2YYAPd5WgE8zhQSf6GgeMSJWU9ePujIYPW/5o5bNpY/tm64c2AP7nAOV6aiuC9czG+//0JP/4JP/4JPmJFoHFfxUcddGeKgFTW0z1td8hkgSRvBdlSNsJwCC0BvHl6dz9k8YVTc6EraOjv2JQbr8kFGUX3hP55cNfctEGZIHuJVKlw7Ou/nJWsSXvWj21kwn52XIJyTeJp3UVb86iw778JfWPu9NOzyFf7f7IFM/1NiRY7aYgjM06z7fO4vsb5cvshgfIZDGfmGfdkOOjkfBNHebLjSgZRMjC8vv/4uif3u7X0lFhZNk0pUo3bLLk8/D9uXn/H+qwNT1J2Xkutfy4PhdSK5OII6JJSLW5hoNIUAniqyiODf1ut5f6nDbjoyyKo1wfnaNx0QZIYB9jYTDy1d3pFR/plF/ahwfOU8mFWl4fXcH3z6OjkjITp70j9I1YHe+5qH1T5SxNPuJnYofgJDaaTknuU5vDYoDLctZQWGFYQBAP/NNV71dzn5BAImq1opbXCiXNZS/lh7Lca69+4VDKEPdmHYaVvvXM5qm5zx0DF7ZYhvipEdAAAAA=",
         "url": "https://app.aave.com"
       },
       "balanceFiat": "7.934406339573686",
@@ -811,7 +811,7 @@
                 "decimals": 18,
                 "symbol": "UNI",
                 "name": "Uniswap",
-                "logoUri": "https://cdn.zerion.io/0x1f9840a85d5af5bf1d1762f925bdaddc4201f984.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x1f9840a85d5af5bf1d1762f925bdaddc4201f984.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -831,7 +831,7 @@
                 "decimals": 6,
                 "symbol": "USDT",
                 "name": "Tether USD",
-                "logoUri": "https://cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -848,7 +848,7 @@
     {
       "appInfo": {
         "name": "Swell",
-        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/swell.jpg",
+        "logoUrl": "data:image/webp;base64,UklGRuQCAABXRUJQVlA4INgCAACwDwCdASpAAEAAPm0wk0akIyGhKBgMqIANiWwA0ett+q8W6//AU8S3+3dRjzFfaB79HRGdQBvKP7c+hy8hwYHZXcV/oXEbpApmfjl+ovYHXP+YZMnaa0G6gbamfxw3sP1UC+IiYqbfg2j0KFvGgfHpcYqNN/+7aZQb/4txfQo3NMFK5TuYAAD+/hSlUHiSCzfnQX49K14Yb9HY4fE6aBSGIorWSmp0Tjg8sUwCKeMl4X09bkSaopOLYXcLZUnvI0EZB8pBl7U2C6BDp2ft0HD/h/0C/+3+iU6v6/TP6hS9MfvgkkEvGH6xQZOVRSTuhbbfgf1LzhkuoMOAe5DDL1wwDkFxXG8wqS8UtWL+S6KLjUtyKSJjkMhUI4Ru0AaE+OjhjW9096yDBXvM7cOT6VkZiy2/wk42d9mvrGkUVfqR5OUuHvPoyZydjCzid0mWzMw7dT36IGhzq+T+9O5t2g2uhO2kxeLWD/2sAkI/z/F7tkuHWZFqKyY+aLt1hSEjmeJxsURRJCZXF9FwIznu72yWN97kpQddryFnXNy92xhQqH1t1zdIoNM2CtFICLrW/ZVn+MejkfQzx4+uvc9si+SMbLYmpqn/+kSI6RenQHzomtVFfkUlLcl9087kYmvke4NO3QMoXo6JzPVoKoNAPKFYGuloXjdAMKAXSEWlVRVkV/SQXdsU1QmRNSyOqN0qQ8W+Xy+vbhb/761Te+rKt6kXzLNj5rZufXX+yiMSUMP1jv5nAqNeVYIjjBjH+m5JQdYbvS6JK+xB5APrXx7Sr7OhhECNphA0LdjX923smYwJLrzTM0pz9dH5DsosZpp73s9eR7XdDr0SwkqdAMNxKc1rivBVfDnsCm5dJKLDMnS5s1mNSFqiW0YyDy5nsgNjK+FAjZuZpFRCfLLK5jemcQMDn4Dyr8ebX4E/m7rJK3/IFY98NeqxQuna/GCSiC+RImAXrxh7/IAAAA==",
         "url": "https://app.swellnetwork.io/"
       },
       "balanceFiat": "5.83703892344781",
@@ -866,7 +866,7 @@
                 "decimals": 18,
                 "symbol": "ETH",
                 "name": "Ethereum",
-                "logoUri": "https://cdn.zerion.io/eth.png",
+                "logoUri": "mock-assets/cdn.zerion.io/eth.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "NATIVE_TOKEN"
@@ -908,7 +908,7 @@
     {
       "appInfo": {
         "name": "Gearbox",
-        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/gearbox.jpg",
+        "logoUrl": "data:image/webp;base64,UklGRuQDAABXRUJQVlA4INgDAACwEwCdASpAAEAAPm0wkUakIyGhLBqrMIANiWoAzfAfK3+v6IDzXeLcIB5gOg35N3WNegB+0fpleyp5QFMTfHY9P96/JfkZ2AN4Ity409IFhd+njnP+nP+t7g35b9fr9dPYe/Xdp+hZ0bUFYLrkuykIuM3yoELTye61FePl7wQ2evcReg63K+ieQoN3DvQEkme83PwMgNSOvNmdmwrEzvN6nj6osZ8wAP79PgLCVBXYdPl+sa7xMrPCbw440XJd8G4sRCm9NeKzSlPfiUA1NbfMX8t+T7/6YVN2y9LPlEvOuPLzpCATHf+5JfWMLwMobq2hocINBHRdVOQ/PfgskKtRsXfXvnf4/wz/foH62vGsf+vP+Jh7//A1NV37Tj89B04MQj31YkL/jdL2mzVo4a2aj82UjyHlqAcpcrHL7/RQDcjcrckM4zBtll78qy+rT890M8U5ZWXnqwzhIB3JKt/52OGQmH8gfLAIfThs0Rf3fxZ5NNUd6gfrCsy7/jc8X1mIw4zQCi5ocUpVysf8qUXNnA7VpDaJRYFMr8ySX0oL6/9NLs+EnodI9Wz/JBqZWWUzAQ/yCFps+n2b7dgMz9j4AMV7P/+CECdNjN2hxHwwtifTt+MrwFmXHJf/BuafBw8PDauXSsnV3od/tr8vy60Lgjwsxf05v/wWfqL+F9+7jjL+F/VfVNCY6J98PFMqFJgy1ZXEKbeyPRYO0NjMJs/LwFRlju4KdfjipqzxURe34gp9Kx0IdM/g50p3LAkWYgSZP4jh674knd/lq/gMSCUm8Kzj/RcHBfH1/8yk1gG9Nn/TQa8yhIsZB5ivZaY9OC/Fbl4i0JPQnuisSZC7aMK2RvQpjn/+Pdhhqfm7ZU3v3kcjoroHgnzlZaO63gX+sdj5iKQl58GvtGhtX+1agu8tK4mvYd/RQMxorDc+Qv+lS8Tk0U9NAL8yE0W8owwOJSMuN14AAUrNzRi2X1FuNGyKr/0O78xtzHFx/Fl2Iacadfdt76joY2tDmm3JHyeDF38WeJY00TZ3TyH5L0s7nxYfQeQ3rW5V9hO5vJRCux8qpL5vsj+rH2bIAYGGMCPRCuluMP6Qk8x/F5iPRvurNAafBZZavVsc2J79Y/SnWXI+xilTqwdrL64zZ+Z4SwmfxDEkz8ZNTrWw2q5wFgE1AFng2bInHxXR37dVQHgDsVXiyVz0bYNm8lLWUmicYklRcTjbHUseNO8P6kdI3mhzS0+3/Hy/rofjsRIzVZbWTKY37eyasnvFvBHD5LiCvrEAzpn9U/k45EKhs7/meUvIzFwWuQAMiLAAAAA=",
         "url": "https://app.gearbox.finance/"
       },
       "balanceFiat": "4.152578802380801",
@@ -926,7 +926,7 @@
                 "decimals": 6,
                 "symbol": "USDC",
                 "name": "USDC",
-                "logoUri": "https://cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -943,7 +943,7 @@
     {
       "appInfo": {
         "name": "Kiln",
-        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/kiln.jpg",
+        "logoUrl": "data:image/webp;base64,UklGRrYCAABXRUJQVlA4IKoCAABwEQCdASpAAEAAPm0ukkakIqGhKBgN+IANiWYA1LTeeQcCeQLpxnAeIB0gPMBugHSAbx3+zP7TTUvGAe2zsV2ld2SGCmRfrX5oPqb2BP1Y9I71zfs57IH65I99uMgdMDhDcE8pEhRWToY0B19jpY5ghCyyS4YOK867TPGDRTmDmYsTlTEeMNJjQxcus3bTI33MefwAAP789Bt691DIrP/bQPxXLGA8u3kNzKtop84K/Z/H8eVwf68iSriOqTvbSV5uTRp3KV5kEAxenbbuaVe8l5yOedc+rd5GgdMbd8Y44Mal3RW4+XwVjT++gKK6u39CFNqP6B87FrXvz//4PP8Vu/wypWzG9CM1EzI/culf3RNoPZI7o7UC44+tO7b3cwQ/ywHeqxXK0yx76p5zxTMfsqG0PPW1AoEBo0NYd8KTTUNHYf5mBQ0fayl6/mgzOq6F6Hwj46UEb/6G60D/NzlBCmbzHBOwUPWtbiK+Pd3dpsIW7cfqZzLckBoOpSzz0qn96lhwUX3PGd/ixZwmWr/4fvTHMW/7FOmFZV6SRgLiv/pxsQWwe8YTfvKkrOdI+W8HRUMEYaN4jsfM//Nv/cP6X3Ja/3+L8io+FF+EdxOEINBeAuKck1TM5/nYYb5e/QcehIslAl81k4EGm5C376zzfNAprM/oc21RcGUeIgS14ckdhHLYg55x8pek4lGYxbePo92w5EoQIPdtJ24FnvVSFOz3ELiUtYz51vQ8JPk17EH99UKyOxe409nipP4nDPt2/4ZSclbfYBF4FNVIuv19hxU2CCxaVjoTviLR3E1Z8cAi2CCZ7XZivu2hYMC9xBqO7z0CIVxtIW9tynAvev9egO+CKCyPUu3FgOuZQo2CHH2J4epDiOqjWpjUcCNdXdyx/munjEn6AAAA",
         "url": "https://www.kiln.fi/"
       },
       "balanceFiat": "4.11628719314979",
@@ -961,7 +961,7 @@
                 "decimals": 6,
                 "symbol": "USDT",
                 "name": "Tether USD",
-                "logoUri": "https://cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -986,7 +986,7 @@
                 "decimals": 8,
                 "symbol": "WBTC",
                 "name": "Wrapped BTC",
-                "logoUri": "https://cdn.zerion.io/0x2260fac5e5542a773aa44fbcfedf7c193bc2c599.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x2260fac5e5542a773aa44fbcfedf7c193bc2c599.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1003,7 +1003,7 @@
     {
       "appInfo": {
         "name": "Balancer",
-        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/balancer.jpg",
+        "logoUrl": "data:image/webp;base64,UklGRgACAABXRUJQVlA4IPQBAABwDACdASpAAEAAPmUqkkWkIqIZ/AYAQAZEtIAJy1Xfb4O0B/O94I4z/Nv8BbApkv/Y8tf0t7Bf6rdYf0a1qpzDeOH2R9EnT5WvOm789l+G20yIyi7waH5ZhNdNjEW1NgQyHx8iwBXTke3HQAAA/vz0DhtalG/Eia7JlBj9beH+m8dWLlaTNoiOCYagaD0V71e5FitZLF9zmmPugiR2SSBqDQ/ABpD8a/pMGNvwXvEGhQAzV2jSTtgbw7Aqp5PGr3QcC9Z5/ivzTGPM4GBiPiyJ8CCPUNXrgIKXDpb+dXTsz39OR/PQ9gherf3kqnC+qhm4KmKyTevxQ3O+xcH0NZlPBSWj6CyG1AOtypiJ7L3ArpwWDxfoh3Yc0QAEWrLW713yoIeZvcrCUmIvqZ3fwzA8HJX426b8Z5+VbGpgC4ggVIbvnL95hg/+MVXNhdXLntQLhgqOW0pxtVbY/z6fVBO14p9IVGem8bAu0Ai/cPNMUP+pwXus0Pl8MCZHwXMY/JaWCLCO/0n618Je/qn5f2WHK7nulX7u7pu96jF4PqHRAftklSn4CMGtnD0tvIZf9+zOu/s0QMjf/2B9EprV9kB1HU+fotabqmE5a9KMXjq42BzFmb0LrJAY75nOAuNUu6SQVut4Je/2I2fLYcuLENiAlAAAAA==",
         "url": "https://balancer.fi/"
       },
       "balanceFiat": "3.880576962165708",
@@ -1021,7 +1021,7 @@
                 "decimals": 8,
                 "symbol": "WBTC",
                 "name": "Wrapped BTC",
-                "logoUri": "https://cdn.zerion.io/0x2260fac5e5542a773aa44fbcfedf7c193bc2c599.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x2260fac5e5542a773aa44fbcfedf7c193bc2c599.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1041,7 +1041,7 @@
                 "decimals": 18,
                 "symbol": "WETH",
                 "name": "Wrapped Ether",
-                "logoUri": "https://cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1066,7 +1066,7 @@
                 "decimals": 18,
                 "symbol": "MKR",
                 "name": "Maker",
-                "logoUri": "https://cdn.zerion.io/0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1086,7 +1086,7 @@
                 "decimals": 18,
                 "symbol": "WETH",
                 "name": "Wrapped Ether",
-                "logoUri": "https://cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1111,7 +1111,7 @@
                 "decimals": 18,
                 "symbol": "WETH",
                 "name": "Wrapped Ether",
-                "logoUri": "https://cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1131,7 +1131,7 @@
                 "decimals": 18,
                 "symbol": "DAI",
                 "name": "Dai Stablecoin",
-                "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1156,7 +1156,7 @@
                 "decimals": 18,
                 "symbol": "mUSD",
                 "name": "mStable USD",
-                "logoUri": "https://cdn.zerion.io/0xe2f2a5c287993345a840db3b0845fbc70f5935a5.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0xe2f2a5c287993345a840db3b0845fbc70f5935a5.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1176,7 +1176,7 @@
                 "decimals": 6,
                 "symbol": "USDC",
                 "name": "USDC",
-                "logoUri": "https://cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1201,7 +1201,7 @@
                 "decimals": 18,
                 "symbol": "YFI",
                 "name": "yearn.finance",
-                "logoUri": "https://cdn.zerion.io/0x0bc529c00c6401aef6d220be8c6ea1667f6ad93e.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x0bc529c00c6401aef6d220be8c6ea1667f6ad93e.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1218,7 +1218,7 @@
     {
       "appInfo": {
         "name": "Balancer V2",
-        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/balancer-v2.jpg",
+        "logoUrl": "data:image/webp;base64,UklGRgACAABXRUJQVlA4IPQBAABwDACdASpAAEAAPmUqkkWkIqIZ/AYAQAZEtIAJy1Xfb4O0B/O94I4z/Nv8BbApkv/Y8tf0t7Bf6rdYf0a1qpzDeOH2R9EnT5WvOm789l+G20yIyi7waH5ZhNdNjEW1NgQyHx8iwBXTke3HQAAA/vz0DhtalG/Eia7JlBj9beH+m8dWLlaTNoiOCYagaD0V71e5FitZLF9zmmPugiR2SSBqDQ/ABpD8a/pMGNvwXvEGhQAzV2jSTtgbw7Aqp5PGr3QcC9Z5/ivzTGPM4GBiPiyJ8CCPUNXrgIKXDpb+dXTsz39OR/PQ9gherf3kqnC+qhm4KmKyTevxQ3O+xcH0NZlPBSWj6CyG1AOtypiJ7L3ArpwWDxfoh3Yc0QAEWrLW713yoIeZvcrCUmIvqZ3fwzA8HJX426b8Z5+VbGpgC4ggVIbvnL95hg/+MVXNhdXLntQLhgqOW0pxtVbY/z6fVBO14p9IVGem8bAu0Ai/cPNMUP+pwXus0Pl8MCZHwXMY/JaWCLCO/0n618Je/qn5f2WHK7nulX7u7pu96jF4PqHRAftklSn4CMGtnD0tvIZf9+zOu/s0QMjf/2B9EprV9kB1HU+fotabqmE5a9KMXjq42BzFmb0LrJAY75nOAuNUu6SQVut4Je/2I2fLYcuLENiAlAAAAA==",
         "url": "https://balancer.fi/"
       },
       "balanceFiat": "0.8547229855433052",
@@ -1236,7 +1236,7 @@
                 "decimals": 18,
                 "symbol": "STG",
                 "name": "StargateToken",
-                "logoUri": "https://cdn.zerion.io/0xaf5191b0de278c7286d6c7cc6ab6bb8a73ba2cd6.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0xaf5191b0de278c7286d6c7cc6ab6bb8a73ba2cd6.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1256,7 +1256,7 @@
                 "decimals": 6,
                 "symbol": "USDC",
                 "name": "USDC",
-                "logoUri": "https://cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1273,7 +1273,7 @@
     {
       "appInfo": {
         "name": "YEarn",
-        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/yearn.jpg",
+        "logoUrl": "data:image/webp;base64,UklGRoADAABXRUJQVlA4IHQDAABQFACdASpAAEAAPm0skkYkIqGhLBVeYIANiWwAwyeB/AfjN+KvyY1j+8YvX4V+a/737dO0B4n/SR8wH2ze8R/Sf0z9wHoAfzL/b9Yt6Fflq/tV8HP7Zfsz7REVgps/xdcmgBDL/HX9MdLl6yf2Z9gBUHzMVpW0FHR2qGLT/g1MVBEnUnJIIqKrxV02nXKFWU+fPL+wMmLjW4KQKnRo8QqJLiZxTXDCXTpAMAAA/vFNr/+IWfiFn4hZ/CPP/6ks1E9/J1iIVfwrb9NinkkraYesP5HfqrwRM8e77Dq5DD0pbjAGU8A407jojpNCXz6/Z1csbLdOZH3V6LzcKp7mYfWd+e1PfDgbRTigLW5QvBPTEESvdR8NHfDrn5otm+0cYU1e2e1WaW3yUSMwzYy/mWgFaFhYxZ9ceRYH3j9dHfPRPXw80aHdnSpZgk20KKYu9llYXKd8fZJ/xMIfqVGaGjmqJe7q4FQGFko9/20Ppy/AKcJ1kwhW++XI5dG8LQLnOoqYL/YWssTURv7zvk8wqlALPLU2k/n6TEzLxzxGP37H/mn6ILCsJFMDHatmaLEw66Y9XLiCPwXJUr4XusS6ajWKqTLKNrxhIznJqaO7eeiIVNvZ+gH0/oJmTnK2oP8Yk3STBpVeM265yZ1/QpwtgquyrhxTV4RdksPkXcxAg4qZADUaD6SGZ+es7WKpdTz+7uq+iwOYTkU78+ircJZP1dg4YceeMfUMcDTW8eZxmw/AeV6GgzU/tFbDNLN327MYLatSzp1B15fWSDUOvrhjckz6C2AwVSXgEuSKa9X9R0nXOCQA6GM6lp7aZ9VUh4tkeFnLGxUXb0uemj+pphByEpy7qVtpUvQAf9R0izcT7K7r7I9ZCys4KvZq+yR5fovgplzM3dvduQ+oaq5aQKJcNmPV2WHQWSLm3nhuvPjHLrfQdrmCjLEMtOHoQG+jGgVtrSdxy12M/RKkFNHkUr5vm7M2y2TcAjxwNXXz5j342u80/f5B+ggtePpizbmGNquXjTRA593KTpzRnueefmJOgii4sSrOsIDHlK0CGx5vtwg5eRCfpmuAVTOiutbXOm1S35/6K564mU8r0T37Wl75956OJYm3nEycMlHlflcjohW9Xoide11rSxiwIEpCoil4J/8kWjck7ZKRFs/+MTQCnm32gnAAAA==",
         "url": "https://yearn.fi/"
       },
       "balanceFiat": "0.1576385047409806",
@@ -1291,7 +1291,7 @@
                 "decimals": 18,
                 "symbol": "DAI",
                 "name": "Dai Stablecoin",
-                "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1308,7 +1308,7 @@
     {
       "appInfo": {
         "name": "Aave V2",
-        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/aave-v2.jpg",
+        "logoUrl": "data:image/webp;base64,UklGRv4BAABXRUJQVlA4IPIBAAAwDACdASpAAEAAPmksk0WkIqIZ+Z1UQAaEtABoQdxWltAP9vvlfoAdLEvwVrcszSBM9IgkG/CHZP8/+11902zlK5axwXA2YYAPd5WgE8zhQSf6GgeMSJWU9ePujIYPW/5o5bNpY/tm64c2AP7nAOV6aiuC9czG+//0JP/4JP/4JPmJFoHFfxUcddGeKgFTW0z1td8hkgSRvBdlSNsJwCC0BvHl6dz9k8YVTc6EraOjv2JQbr8kFGUX3hP55cNfctEGZIHuJVKlw7Ou/nJWsSXvWj21kwn52XIJyTeJp3UVb86iw778JfWPu9NOzyFf7f7IFM/1NiRY7aYgjM06z7fO4vsb5cvshgfIZDGfmGfdkOOjkfBNHebLjSgZRMjC8vv/4uif3u7X0lFhZNk0pUo3bLLk8/D9uXn/H+qwNT1J2Xkutfy4PhdSK5OII6JJSLW5hoNIUAniqyiODf1ut5f6nDbjoyyKo1wfnaNx0QZIYB9jYTDy1d3pFR/plF/ahwfOU8mFWl4fXcH3z6OjkjITp70j9I1YHe+5qH1T5SxNPuJnYofgJDaaTknuU5vDYoDLctZQWGFYQBAP/NNV71dzn5BAImq1opbXCiXNZS/lh7Lca69+4VDKEPdmHYaVvvXM5qm5zx0DF7ZYhvipEdAAAAA=",
         "url": "https://app.aave.com/?marketName=proto_mainnet"
       },
       "balanceFiat": "0.30594962901896017",
@@ -1326,7 +1326,7 @@
                 "decimals": 18,
                 "symbol": "AAVE",
                 "name": "Aave",
-                "logoUri": "https://cdn.zerion.io/0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1346,7 +1346,7 @@
                 "decimals": 18,
                 "symbol": "AAVE",
                 "name": "Aave",
-                "logoUri": "https://cdn.zerion.io/0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1371,7 +1371,7 @@
                 "decimals": 18,
                 "symbol": "DAI",
                 "name": "Dai Stablecoin",
-                "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1388,7 +1388,7 @@
     {
       "appInfo": {
         "name": "Aave V1",
-        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/aave-v1.jpg",
+        "logoUrl": "data:image/webp;base64,UklGRv4BAABXRUJQVlA4IPIBAAAwDACdASpAAEAAPmksk0WkIqIZ+Z1UQAaEtABoQdxWltAP9vvlfoAdLEvwVrcszSBM9IgkG/CHZP8/+11902zlK5axwXA2YYAPd5WgE8zhQSf6GgeMSJWU9ePujIYPW/5o5bNpY/tm64c2AP7nAOV6aiuC9czG+//0JP/4JP/4JPmJFoHFfxUcddGeKgFTW0z1td8hkgSRvBdlSNsJwCC0BvHl6dz9k8YVTc6EraOjv2JQbr8kFGUX3hP55cNfctEGZIHuJVKlw7Ou/nJWsSXvWj21kwn52XIJyTeJp3UVb86iw778JfWPu9NOzyFf7f7IFM/1NiRY7aYgjM06z7fO4vsb5cvshgfIZDGfmGfdkOOjkfBNHebLjSgZRMjC8vv/4uif3u7X0lFhZNk0pUo3bLLk8/D9uXn/H+qwNT1J2Xkutfy4PhdSK5OII6JJSLW5hoNIUAniqyiODf1ut5f6nDbjoyyKo1wfnaNx0QZIYB9jYTDy1d3pFR/plF/ahwfOU8mFWl4fXcH3z6OjkjITp70j9I1YHe+5qH1T5SxNPuJnYofgJDaaTknuU5vDYoDLctZQWGFYQBAP/NNV71dzn5BAImq1opbXCiXNZS/lh7Lca69+4VDKEPdmHYaVvvXM5qm5zx0DF7ZYhvipEdAAAAA=",
         "url": "https://app.aave.com"
       },
       "balanceFiat": "0.11015391718361021",
@@ -1406,7 +1406,7 @@
                 "decimals": 18,
                 "symbol": "DAI",
                 "name": "Dai Stablecoin",
-                "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1426,7 +1426,7 @@
                 "decimals": 18,
                 "symbol": "DAI",
                 "name": "Dai Stablecoin",
-                "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1443,7 +1443,7 @@
     {
       "appInfo": {
         "name": "Merkl",
-        "logoUrl": "https://protocol-icons.s3.amazonaws.com/icons/merkl.jpg",
+        "logoUrl": "data:image/webp;base64,UklGRmoBAABXRUJQVlA4IF4BAABwCACdASpAAEAAPm00l0ekIyIhKBgIqIANiWkAERdx6P7TnAJqQ1B/9w9Gf/G8tikV3oiERr/ElwnIayTPxzZZaIwpW1FpQgvb3tCAAP76idutEErxccfj0nrM+5/2K6367thlDF0cI+MumlX4ViXccS+WDH0AgasoyDf35IO21u9JmzOn7+1bOczZp9vv+5Q//8zqlW9YR4aNr5LGqXP4QucDNYLf8ISV8nmd47n5bwE6mbeTO8r/WTN42E6BdjMV9jAr18l/dPsHfcl6aShH56SNEqr/7rMclXv0PAro+jd6HMS0K//l8Hc92xxKv1S1nr8kzfW+gvYsjbvFjMqOJL1NvryFm0PJ8T6p1JvzwEEo8z4fYCB0bFt/Pc7dZtnL1DzvWPLAKxqeFW0KaRKnfalP/RhEdHuerNWVze/vmFexhSG1/3298XNUgbmZfbvqGvJqem407ihipsgAAA==",
         "url": "https://app.merkl.xyz/"
       },
       "balanceFiat": "0.00492068288995449",
@@ -1461,7 +1461,7 @@
                 "decimals": 18,
                 "symbol": "MORPHO",
                 "name": "Morpho",
-                "logoUri": "https://cdn.zerion.io/38f1c334-bbe0-4d99-aef4-e6d0a3a4207b.png",
+                "logoUri": "mock-assets/cdn.zerion.io/38f1c334-bbe0-4d99-aef4-e6d0a3a4207b.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"
@@ -1481,7 +1481,7 @@
                 "decimals": 18,
                 "symbol": "GEAR",
                 "name": "Gearbox",
-                "logoUri": "https://cdn.zerion.io/0xba3335588d9403515223f109edc4eb7269a9ab5d.png",
+                "logoUri": "mock-assets/cdn.zerion.io/0xba3335588d9403515223f109edc4eb7269a9ab5d.webp",
                 "chainId": "1",
                 "trusted": true,
                 "type": "ERC20"

@@ -1,6 +1,5 @@
 import React from 'react'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import Image from 'next/image'
 import css from './styles.module.css'
 import Link from 'next/link'
 import { useNoFeeCampaignEligibility, useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign'
@@ -48,7 +47,7 @@ const NoFeeCampaignTransactionCard = () => {
         <div className={css.card}>
           <div className="flex flex-row items-center gap-6">
             <div className={css.iconContainer}>
-              <Image
+              <img
                 src="/images/common/no-fee-campaign/Cards_USDe.svg"
                 alt="USDe Logo"
                 width={48}
@@ -92,7 +91,7 @@ const NoFeeCampaignTransactionCard = () => {
                   Enjoy Free January
                 </Typography>
                 <div className={css.eligibilityTag}>
-                  <Image
+                  <img
                     src="/images/common/no-fee-campaign/check-icon.svg"
                     alt="Eligible"
                     width={16}
@@ -121,7 +120,7 @@ const NoFeeCampaignTransactionCard = () => {
 
             {/* Coins illustration */}
             <div className={css.coinsContainer}>
-              <Image
+              <img
                 src="/images/common/no-fee-campaign/Cards_USDe.svg"
                 alt="USDe Logo"
                 width={58}

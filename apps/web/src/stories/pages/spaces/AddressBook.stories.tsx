@@ -17,7 +17,7 @@ const defaultSetup = createMockStory({
   wallet: 'connected',
   layout: 'fullPage',
   pathname: '/spaces/address-book',
-  features: { spaces: true },
+  authenticated: true,
   query: { spaceId: '1' },
 })
 
@@ -52,12 +52,12 @@ const contact = (name: string, address: string, chainIds: string[]) => ({
 
 const addressBook: SpaceAddressBookDto = {
   spaceUuid: MOCK_SPACE_ID,
-  tags: [],
   data: [
     contact('Treasury', '0xA77DE01e157f9f57C7c4A326eeEaf0BDD2CFcD01', ['1', '137']),
     contact('Payroll', '0xB63F3D0a4a7eFd1d0c08A9ef17C5e5d3DbBDE867', ['1']),
     contact('Exchange deposit', '0x5eD8Cee6b63b1c6AFce3AD7c92f4fD7E1B8fAd9F', ['1']),
   ],
+  tags: [],
 }
 
 const spaceAddressBookHandler = http.get(/\/v1\/spaces\/[^/]+\/address-book$/, () => HttpResponse.json(addressBook))

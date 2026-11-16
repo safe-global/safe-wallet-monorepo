@@ -11,12 +11,8 @@ exports[`./NoFeeCampaignBanner.stories Default 1`] = `
     <img
       alt="USDe logo"
       class="bannerImage"
-      data-nimg="1"
-      decoding="async"
       height="95"
-      loading="lazy"
       src="/images/common/no-fee-campaign/Cards_USDe.svg"
-      style="color: transparent;"
       width="95"
     />
     <div

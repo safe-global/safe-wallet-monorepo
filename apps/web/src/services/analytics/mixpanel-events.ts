@@ -121,6 +121,8 @@ export enum MixpanelEvent {
   LOOKALIKE_ADDRESS_WARNING_SHOWN = 'Look-alike Address Warning Shown',
   LOOKALIKE_ADDRESS_WARNING_CONTINUED = 'Look-alike Address Warning Continued',
   LOOKALIKE_ADDRESS_WARNING_DISMISSED = 'Look-alike Address Warning Dismissed',
+  WC_SAFE_APP_SUGGESTED = 'WC Safe App Suggested',
+  WC_SAFE_APP_SUGGESTION_RESULT = 'WC Safe App Suggestion Result',
 }
 
 export enum WorkspaceCreateEntryPoint {
@@ -322,6 +324,8 @@ export enum MixpanelEventParams {
   SENTINELS_FLAGGED = 'Sentinels Flagged',
   SIGNER_ROLE = 'Signer Role',
   SAFE_TX_HASH = 'Safe Tx Hash',
+  SAFE_APP_AVAILABLE = 'Safe App Available',
+  REMEMBER_CHOICE = 'Remember Choice',
 }
 
 export enum AuthLoginMethod {
@@ -333,6 +337,7 @@ export enum AuthLoginMethod {
 export enum SafeAppLaunchLocation {
   PREVIEW_DRAWER = 'Preview Drawer',
   SAFE_APPS_LIST = 'Safe Apps List',
+  WC_PROPOSAL = 'WalletConnect Proposal',
 }
 
 export const ADDRESS_PROPERTIES = new Set([

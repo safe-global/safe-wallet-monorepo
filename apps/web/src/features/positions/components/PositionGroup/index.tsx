@@ -36,8 +36,9 @@ export const PositionGroup = ({ group, isLast = false, protocolIconUrl }: Positi
     { id: 'value', label: 'Value', width: '40%', align: 'right', disableSort: true },
   ]
 
-  const rows = group.items.map((position) => ({
-    key: `${position.tokenInfo.address}-${position.position_type}`,
+  // A group can hold the same token and type twice (e.g. two Aave WETH deposits) and positions carry no id
+  const rows = group.items.map((position, index) => ({
+    key: `${position.tokenInfo.address}-${position.position_type}-${index}`,
     cells: {
       name: {
         content: (

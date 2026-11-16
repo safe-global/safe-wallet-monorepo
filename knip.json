@@ -18,15 +18,7 @@
         "src/components/ui/**",
         ".storybook/mocks/querystring.ts"
       ],
-      "ignoreDependencies": [
-        "@storybook/*",
-        "storybook",
-        "cypress",
-        "jest",
-        "@testing-library/*",
-        "msw",
-        "@faker-js/faker"
-      ]
+      "ignoreDependencies": ["@storybook/*", "storybook", "jest", "@testing-library/*", "msw", "@faker-js/faker"]
     },
     "apps/web-tanstack": {
       "entry": [

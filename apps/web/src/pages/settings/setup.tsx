@@ -1,4 +1,3 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
@@ -16,7 +15,7 @@ import { BRAND_NAME } from '@/config/constants'
 import { NestedSafesList } from '@/components/settings/NestedSafesList'
 import { FeeTokenPreference } from '@/components/settings/FeeTokenPreference'
 
-const Setup: NextPage = () => {
+const Setup = () => {
   const { safe, safeLoaded } = useSafeInfo()
   const { SpendingLimitsSettings } = useLoadFeature(SpendingLimitsFeature)
   const nonce = safe.nonce

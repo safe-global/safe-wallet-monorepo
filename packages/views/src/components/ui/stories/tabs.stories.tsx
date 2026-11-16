@@ -148,3 +148,26 @@ export const AllVariants: Story = {
     </div>
   ),
 }
+
+export const BrandUnderlineSizes: Story = {
+  name: 'Brand underline sizes',
+  render: () => (
+    <div className="flex flex-col gap-8">
+      {(['default', 'lg'] as const).map((size) => (
+        <div key={size}>
+          <h3 className="mb-2 text-sm text-muted-foreground">
+            underline · tone=brand · size={size}
+            {size === 'lg' && ' (text-width)'}
+          </h3>
+          <Tabs defaultValue="queue">
+            <TabsList variant="underline" tone="brand" size={size}>
+              <TabsTrigger value="queue">Queue</TabsTrigger>
+              <TabsTrigger value="history">History</TabsTrigger>
+              <TabsTrigger value="messages">Messages</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+      ))}
+    </div>
+  ),
+}

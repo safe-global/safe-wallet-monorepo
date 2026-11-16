@@ -5,6 +5,7 @@ import { OperationType } from '@safe-global/types-kit'
 import { createMockStory } from '@/stories/mocks'
 import type { CallOnlyTxData } from '../../store/batchSlice'
 import BatchTxItem from './BatchTxItem'
+import { mockNow } from '@/stories/mocks/now'
 
 const RECIPIENT = '0x1234567890123456789012345678901234567890'
 const TOKEN_ADDRESS = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
@@ -84,7 +85,7 @@ type Story = StoryObj<typeof meta>
 export const TokenTransfer: Story = {
   args: {
     id: 'tx-1',
-    timestamp: Date.now(),
+    timestamp: mockNow(),
     count: 1,
     txData: transferTxData,
     txDecoded: transferTxDecoded,
@@ -101,7 +102,7 @@ export const TokenTransfer: Story = {
 export const NamedContractInteraction: Story = {
   args: {
     id: 'tx-2',
-    timestamp: Date.now(),
+    timestamp: mockNow(),
     count: 3,
     txData: contractTxData,
     txDecoded: contractTxDecoded,
@@ -118,7 +119,7 @@ export const NamedContractInteraction: Story = {
 export const Loading: Story = {
   args: {
     id: 'tx-3',
-    timestamp: Date.now(),
+    timestamp: mockNow(),
     count: 2,
     txData: transferTxData,
     txDecoded: undefined,

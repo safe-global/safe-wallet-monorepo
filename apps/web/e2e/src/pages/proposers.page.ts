@@ -6,9 +6,6 @@
 import { type Page, type Locator } from '@playwright/test'
 import { ROUTES } from '../data/constants'
 
-// The section renders only once the delegates request answers, which can take long on a loaded stack
-const SECTION_LOAD_TIMEOUT_MS = 30_000
-
 export class ProposersPage {
   readonly section: Locator
   readonly addButton: Locator
@@ -30,7 +27,7 @@ export class ProposersPage {
   /** Opens the settings inside the Workspace, whose plan decides whether proposers can be added */
   async goto(safe: string, workspaceId: string): Promise<void> {
     await this.page.goto(`${ROUTES.settingsSetup}?safe=${safe}&spaceId=${workspaceId}`)
-    await this.section.waitFor({ timeout: SECTION_LOAD_TIMEOUT_MS })
+    await this.section.waitFor()
   }
 
   /** The table row of a proposer, found by the explorer link of its address */

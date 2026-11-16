@@ -162,6 +162,19 @@ describe('getAuditEventDescription', () => {
       'changed the tags of 2 contacts',
     ],
     [
+      'ADDRESS_BOOK_TAGS_UPDATED (missing changes)',
+      { eventType: 'ADDRESS_BOOK_TAGS_UPDATED' as const },
+      'changed the tags of contacts',
+    ],
+    [
+      'ADDRESS_BOOK_TAGS_UPDATED (missing address)',
+      {
+        eventType: 'ADDRESS_BOOK_TAGS_UPDATED' as const,
+        payload: { changes: [{ oldTags: [], newTags: ['Vendor'] }] },
+      },
+      'changed the tags of a contact from no tags to Vendor',
+    ],
+    [
       'ADDRESS_BOOK_TAG_CREATED',
       { eventType: 'ADDRESS_BOOK_TAG_CREATED' as const, payload: { name: 'Vendor', color: 'cobalt' } },
       'created the tag Vendor',
@@ -194,6 +207,7 @@ describe('getAuditEventDescription', () => {
       { eventType: 'ADDRESS_BOOK_TAG_DELETED' as const, payload: { name: 'Vendor', contactCount: 0 } },
       'deleted the tag Vendor',
     ],
+    ['ADDRESS_BOOK_TAG_DELETED (missing name)', { eventType: 'ADDRESS_BOOK_TAG_DELETED' as const }, 'deleted a tag'],
     [
       'ADDRESS_BOOK_DELETED (with address)',
       {

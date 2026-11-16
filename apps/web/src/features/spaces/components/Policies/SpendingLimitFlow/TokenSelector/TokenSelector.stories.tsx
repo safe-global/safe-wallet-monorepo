@@ -20,7 +20,7 @@ const popularToken = (address: string, symbol: string, name: string, decimals: n
   symbol,
   name,
   decimals,
-  logoUri: `https://safe-transaction-assets.safe.global/tokens/logos/${address}.png`,
+  logoUri: `mock-assets/safe-transaction-assets.safe.global/tokens/logos/${address}.webp`,
   trusted: true,
   type: 'ERC20',
 })
@@ -87,7 +87,7 @@ const degradedBalances: Balances = {
       tokenInfo: {
         address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         decimals: 6,
-        logoUri: 'https://assets.smold.app/api/token/1/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo-128.png',
+        logoUri: 'mock-assets/assets.smold.app/api/token/1/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo-128.webp',
         name: 'USD Coin',
         symbol: 'USDC',
         type: 'ERC20',

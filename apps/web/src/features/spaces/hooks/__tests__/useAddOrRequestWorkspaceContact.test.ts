@@ -30,8 +30,8 @@ const CONTACT = { address: ADDRESS, name: 'Nicole', chainIds: ['137'] }
 const workspaceContact = (chainIds: string[]): SpaceAddressBookItemDto => ({
   ...CONTACT,
   chainIds,
-  createdBy: '',
   tagIds: [],
+  createdBy: '',
   createdByUserId: 0,
   lastUpdatedBy: '',
   lastUpdatedByUserId: 0,
