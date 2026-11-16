@@ -1,4 +1,4 @@
-import { createRef, useRef, type ReactNode, type RefObject } from 'react'
+import { createRef, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '../dialog'
@@ -163,6 +163,49 @@ describe('popup initial focus', () => {
       await user.keyboard('{Enter}')
 
       await waitFor(() => expect(screen.getByRole('button', { name: 'Copy to clipboard' })).toHaveFocus())
+    })
+  })
+
+  describe('DialogContent opened by a plain button that sets open', () => {
+    const PlainOpener = () => {
+      const [open, setOpen] = useState(false)
+      return (
+        <>
+          <button type="button" onClick={() => setOpen(true)}>
+            Open
+          </button>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogContent showCloseButton={false}>
+              <DialogTitle>Title</DialogTitle>
+              <CopyButton />
+            </DialogContent>
+          </Dialog>
+        </>
+      )
+    }
+
+    it('focuses its first control when opened from the keyboard', async () => {
+      // jsdom has no input modality; a browser marks the focused element :focus-visible after keyboard use
+      const matches = Element.prototype.matches
+      jest.spyOn(Element.prototype, 'matches').mockImplementation(function (this: Element, selector: string) {
+        return selector === ':focus-visible' ? this === document.activeElement : matches.call(this, selector)
+      })
+      const user = userEvent.setup()
+      render(<PlainOpener />)
+
+      await user.tab()
+      await user.keyboard('{Enter}')
+
+      await waitFor(() => expect(screen.getByRole('button', { name: 'Copy to clipboard' })).toHaveFocus())
+    })
+
+    it('focuses the popup itself when opened by a mouse click', async () => {
+      const user = userEvent.setup()
+      render(<PlainOpener />)
+
+      await user.click(screen.getByRole('button', { name: 'Open' }))
+
+      await waitFor(() => expect(screen.getByRole('dialog')).toHaveFocus())
     })
   })
 })
