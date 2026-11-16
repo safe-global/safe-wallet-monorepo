@@ -57,10 +57,7 @@ jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible', () => ({
   })),
 }))
 
-jest.mock('@/features/ledger', () => {
-  const actual = jest.requireActual('@/features/ledger')
-  return { __esModule: true, ...actual, LedgerFeature: { ...actual.LedgerFeature, useIsEnabled: () => false } }
-})
+jest.mock('@/features/ledger/public/LedgerHashComparison', () => ({ __esModule: true, default: () => null }))
 
 // Mock the SpendingLimitRowWrapper component with the same "Send as" label as the real component
 jest.mock('@/components/tx-flow/flows/TokenTransfer/SpendingLimitRow', () => ({

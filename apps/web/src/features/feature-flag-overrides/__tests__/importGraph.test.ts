@@ -8,8 +8,8 @@ const SIDEBAR_DIR = path.resolve(__dirname, '../../spaces/components/Sidebar')
 const USE_CHAINS = path.resolve(__dirname, '../../../hooks/useChains.ts')
 
 const ALLOWED_SPECIFIERS = [
-  '@/features/feature-flag-overrides/FeatureFlagEditorDialogLoader',
-  '@/features/feature-flag-overrides/store/featureFlagOverridesSlice',
+  '@/features/feature-flag-overrides/public/FeatureFlagEditorDialogLoader',
+  '@/features/feature-flag-overrides/public/featureFlagOverridesSlice',
 ]
 
 const collectSourceFiles = (dir: string): Array<string> =>
@@ -58,6 +58,6 @@ describe('useChains', () => {
   it('reaches the feature only through the override hooks', () => {
     const featureSpecifiers = readSpecifiers(USE_CHAINS).filter((s) => s.includes('features/feature-flag-overrides'))
 
-    expect(featureSpecifiers).toEqual(['@/features/feature-flag-overrides/hooks/useChainOverrides'])
+    expect(featureSpecifiers).toEqual(['@/features/feature-flag-overrides/public/useChainOverrides'])
   })
 })

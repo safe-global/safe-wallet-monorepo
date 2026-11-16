@@ -41,12 +41,11 @@ import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics/events/modals'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
-import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'
-import { useNoFeeCampaignEligibility } from '@/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility'
-import { useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import { useNoFeeCampaignEligibility } from '@/features/no-fee-campaign/public/useNoFeeCampaignEligibility'
+import { useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign/public/useIsNoFeeCampaignEnabled'
 import { useSafeShieldForRecipients } from '@/features/safe-shield/public/useSafeShield'
 import uniq from 'lodash/uniq'
+import NoFeeCampaignTransactionCard from '@/features/no-fee-campaign/public/NoFeeCampaignTransactionCard'
 
 export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balance: string }): ReactElement => (
   <div className="flex items-center gap-2">
@@ -71,7 +70,6 @@ export type CreateTokenTransferProps = {
 }
 
 const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElement => {
-  const { NoFeeCampaignTransactionCard } = useLoadFeature(NoFeeCampaignFeature)
   const disableSpendingLimit = txNonce !== undefined
   const [csvAirdropModalOpen, setCsvAirdropModalOpen] = useState<boolean>(false)
   const [maxRecipientsInfo, setMaxRecipientsInfo] = useState<boolean>(false)

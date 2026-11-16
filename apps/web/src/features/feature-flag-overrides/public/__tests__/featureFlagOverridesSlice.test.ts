@@ -7,7 +7,7 @@ import {
   selectFeatureFlagOverrides,
   selectOverrideCount,
   type FeatureFlagOverridesState,
-} from './featureFlagOverridesSlice'
+} from '../featureFlagOverridesSlice'
 import type { RootState } from '@/store'
 
 describe('featureFlagOverridesSlice', () => {

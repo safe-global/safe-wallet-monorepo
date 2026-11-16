@@ -107,7 +107,7 @@ jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   },
 }))
 
-jest.mock('@/features/feature-flag-overrides/FeatureFlagEditorDialogLoader', () => ({
+jest.mock('@/features/feature-flag-overrides/public/FeatureFlagEditorDialogLoader', () => ({
   FeatureFlagEditorDialogLoader: ({ open }: { open: boolean }) =>
     open ? <div data-testid="feature-flag-editor-dialog" /> : null,
 }))

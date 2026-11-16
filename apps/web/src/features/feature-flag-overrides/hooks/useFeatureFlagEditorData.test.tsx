@@ -5,7 +5,7 @@ import * as gateway from '@safe-global/store/gateway'
 import * as store from '@/store'
 import type { RootState } from '@/store'
 import * as useChainIdModule from '@/hooks/useChainId'
-import { selectOverrideCount } from '@/features/feature-flag-overrides/store/featureFlagOverridesSlice'
+import { selectOverrideCount } from '../public/featureFlagOverridesSlice'
 import { useFeatureFlagEditorData } from './useFeatureFlagEditorData'
 
 const chain = (chainId: string, features: FEATURES[]): Chain => ({ chainId, features }) as unknown as Chain

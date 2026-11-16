@@ -1,11 +1,12 @@
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
 import { useState, useCallback, type ReactElement } from 'react'
 import { HelpCircle, MessageCircle, ExternalLink } from 'lucide-react'
 import { Popover, PopoverContent } from '@safe-global/views/components/ui/popover'
 import { Button } from '@safe-global/views/components/ui/button'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { SupportChatFeature } from '@/features/support-chat'
-import { useSupportChat } from '@/features/support-chat/hooks/useSupportChat'
+import { useSupportChat } from '@/features/support-chat/public/useSupportChat'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
+import SupportChatDrawer from '@/features/support-chat/public/SupportChatDrawer'
 
 const HELP_CENTER_URL = 'https://help.safe.global'
 
@@ -16,12 +17,12 @@ type HelpMenuProps = {
 
 const HelpMenu = ({ anchorEl, onClose }: HelpMenuProps): ReactElement | null => {
   const [isSupportOpen, setSupportOpen] = useState(false)
-  const { SupportChatDrawer, $isDisabled } = useLoadFeature(SupportChatFeature)
+  const isSupportChatDisabled = useHasFeature(FEATURES.SUPPORT_CHAT) === false
   const { config, user } = useSupportChat()
   const isOfficialHost = useIsOfficialHost()
 
   const isMenuOpen = Boolean(anchorEl)
-  const showSupport = !$isDisabled && isOfficialHost
+  const showSupport = !isSupportChatDisabled && isOfficialHost
 
   const handleHelpCenterClick = useCallback(() => {
     window.open(HELP_CENTER_URL, '_blank', 'noopener,noreferrer')

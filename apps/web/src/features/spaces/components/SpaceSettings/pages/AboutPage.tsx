@@ -1,3 +1,5 @@
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
 import {
   ActivityIcon,
   ArrowUpRight,
@@ -22,9 +24,7 @@ import { HELP_CENTER_URL, PRIVACY_URL, TERMS_URL } from '@safe-global/utils/conf
 import { Button } from '@safe-global/views/components/ui/button'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { SupportChatFeature } from '@/features/support-chat'
-import { useSupportChat } from '@/features/support-chat/hooks/useSupportChat'
+import { useSupportChat } from '@/features/support-chat/public/useSupportChat'
 import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/hooks/useIsSafeProAnnouncementEnabled'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
@@ -32,6 +32,7 @@ import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import SpaceSettingsSection, {
   SpaceSettingsSectionTitle,
 } from '@safe-global/views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
+import SupportChatDrawer from '@/features/support-chat/public/SupportChatDrawer'
 
 const STATUS_PAGE_URL = 'https://status.safe.global'
 const RELEASE_URL = `${APP_HOMEPAGE}/releases/tag/web-v${APP_VERSION}`
@@ -144,10 +145,10 @@ const LinkRow = ({
 const AboutPage = () => {
   const dispatch = useAppDispatch()
   const [isSupportOpen, setSupportOpen] = useState(false)
-  const { SupportChatDrawer, $isDisabled } = useLoadFeature(SupportChatFeature)
+  const isSupportChatDisabled = useHasFeature(FEATURES.SUPPORT_CHAT) === false
   const { config, user } = useSupportChat()
   const isOfficialHost = useIsOfficialHost()
-  const showSupport = !$isDisabled && isOfficialHost
+  const showSupport = !isSupportChatDisabled && isOfficialHost
   const isAnnounced = useIsSafeProAnnouncementEnabled()
   const isSafePro = useIsSafeProEnabled()
   const showSafeProLinks = isAnnounced || isSafePro

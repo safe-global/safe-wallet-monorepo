@@ -54,7 +54,7 @@ const SpendingLimitsLoaderWrapper = () => {
 
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts/hooks/useVisitedSafes'
-import usePortfolioRefetchOnTxHistory from '@/features/portfolio/hooks/usePortfolioRefetchOnTxHistory'
+import usePortfolioRefetchOnTxHistory from '@/features/portfolio/public/usePortfolioRefetchOnTxHistory'
 import useInvalidateOverviewsOnTx from '@/hooks/useInvalidateOverviewsOnTx'
 import { GATEWAY_URL } from '@/config/gateway'
 import { captureRenderError, initObservability } from '@/services/observability'

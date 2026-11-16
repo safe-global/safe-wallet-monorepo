@@ -18,13 +18,13 @@ const mockUseGasTooHigh = jest.fn<boolean, []>()
 jest.mock('@/features/spaces/hooks/useSafeSponsoredTxs', () => ({
   useSafeSponsoredTxs: () => mockUseSafeSponsoredTxs(),
 }))
-jest.mock('@/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility', () => ({
+jest.mock('@/features/no-fee-campaign/public/useNoFeeCampaignEligibility', () => ({
   useNoFeeCampaignEligibility: () => mockUseNoFeeCampaignEligibility(),
 }))
-jest.mock('@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled', () => ({
+jest.mock('@/features/no-fee-campaign/public/useIsNoFeeCampaignEnabled', () => ({
   useIsNoFeeCampaignEnabled: () => mockUseIsNoFeeCampaignEnabled(),
 }))
-jest.mock('@/features/no-fee-campaign/hooks/useGasTooHigh', () => ({
+jest.mock('@/features/no-fee-campaign/public/useGasTooHigh', () => ({
   useGasTooHigh: () => mockUseGasTooHigh(),
 }))
 

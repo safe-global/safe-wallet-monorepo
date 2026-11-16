@@ -6,9 +6,9 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { useRelaysBySafe } from '@/hooks/useRemainingRelays'
 import useWalletCanRelay from '@/hooks/useWalletCanRelay'
 import { useSafeSponsoredTxs } from '@/features/spaces/hooks/useSafeSponsoredTxs'
-import { useGasTooHigh } from '@/features/no-fee-campaign/hooks/useGasTooHigh'
-import { useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'
-import { useNoFeeCampaignEligibility } from '@/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility'
+import { useGasTooHigh } from '@/features/no-fee-campaign/public/useGasTooHigh'
+import { useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign/public/useIsNoFeeCampaignEnabled'
+import { useNoFeeCampaignEligibility } from '@/features/no-fee-campaign/public/useNoFeeCampaignEligibility'
 import { selectSponsoredOffer, type SponsoredOffer, type SponsoredOption } from '@/utils/gasPayment'
 
 export type GasPaymentOptions = {

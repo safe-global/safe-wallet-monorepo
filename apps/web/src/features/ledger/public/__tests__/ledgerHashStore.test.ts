@@ -1,5 +1,5 @@
-import { showLedgerHashComparison, hideLedgerHashComparison } from '@/features/ledger/store/ledgerHashStore'
-import ledgerHashStore from './ledgerHashStore'
+import { showLedgerHashComparison, hideLedgerHashComparison } from '../ledgerHashStore'
+import ledgerHashStore from '../ledgerHashStore'
 
 describe('ledgerHashStore', () => {
   afterEach(() => {

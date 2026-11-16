@@ -1,3 +1,5 @@
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
 import {
   Accordion,
   AccordionContent,
@@ -5,22 +7,21 @@ import {
   AccordionTrigger,
 } from '@safe-global/views/components/ui/accordion'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import PositionsHeader from './components/PositionsHeader'
-import { PositionGroup } from './components/PositionGroup'
-import usePositions from './hooks/usePositions'
-import PositionsEmpty from './components/PositionsEmpty'
-import usePositionsFiatTotal from './hooks/usePositionsFiatTotal'
+import PositionsHeader from '../components/PositionsHeader'
+import { PositionGroup } from '../components/PositionGroup'
+import usePositions from '../hooks/usePositions'
+import PositionsEmpty from '../components/PositionsEmpty'
+import usePositionsFiatTotal from '../hooks/usePositionsFiatTotal'
 import React from 'react'
 import PositionsUnavailable from '@safe-global/views/features/positions/components/PositionsUnavailable'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import PositionsSkeleton from '@safe-global/views/features/positions/components/PositionsSkeleton'
-import { PortfolioFeature } from '@/features/portfolio'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import PortfolioRefreshHint from '@/features/portfolio/public/PortfolioRefreshHint'
 
 const Positions = () => {
   const positionsFiatTotal = usePositionsFiatTotal()
   const { data: protocols, error, isLoading } = usePositions()
-  const portfolio = useLoadFeature(PortfolioFeature)
+  const isPortfolioDisabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) === false
 
   if (isLoading) {
     return <PositionsSkeleton />
@@ -38,10 +39,10 @@ const Positions = () => {
         <TotalAssetValue
           fiatTotal={positionsFiatTotal}
           title="Total positions value"
-          action={<portfolio.PortfolioRefreshHint entryPoint="Positions" />}
+          action={<PortfolioRefreshHint entryPoint="Positions" />}
         />
 
-        {portfolio.$isDisabled && (
+        {isPortfolioDisabled && (
           <Typography variant="paragraph-mini" className="mt-4 block text-[var(--color-text-secondary)]">
             Position balances are not included in the total asset value.
           </Typography>
