@@ -56,6 +56,7 @@ export {
   spaceSafesCacheListener,
   trialReminderListener,
   workspaceDraftExpiryListener,
+  workspaceDraftCompletionListener,
   safeActionsModalSlice,
   ESafeAction,
   openSafeActionsModal,

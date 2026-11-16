@@ -111,9 +111,19 @@ describe('NameStepNotices', () => {
   it('points to another Workspace whose trial never started, next to the empty form', async () => {
     const pending = spaceBuilder().with({ setupStatus: 'pending' }).build()
 
-    renderNotices(ownDraft({}, [pending]), 'unknown')
+    renderNotices(ownDraft({}, [pending]), 'offer')
 
     expect(await screen.findByText(`You have not finished setting up ${pending.name}`)).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Create a new Workspace' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Create a new Workspace' })).toBeInTheDocument()
+  })
+
+  it('shows no notice once the user creates a new Workspace instead', async () => {
+    const pending = spaceBuilder().with({ setupStatus: 'pending' }).build()
+    const draft = ownDraft({ name: pending.name, createdSpaceId: pending.uuid }, [pending])
+    const { user } = renderNotices(draft, 'offer')
+
+    await user.click(await screen.findByRole('button', { name: 'Create a new Workspace' }))
+
+    expect(screen.queryByTestId('unfinished-setup-notice')).not.toBeInTheDocument()
   })
 })
