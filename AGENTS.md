@@ -33,6 +33,8 @@ Workspace-scoped scripts (`pw:*`, `test:scaffold`, `css-vars`, `storybook`, …)
 
 Root `lint`, `type-check` and `test` run through Turborepo, cached by input hash in `.turbo/` (tasks in `turbo.json`; remote cache: [docs/turbo-remote-cache.md](docs/turbo-remote-cache.md)).
 
+A task's hash does not include the files of the workspaces it imports. A workspace that compiles, lints or tests another package's source lists it in its own `turbo.json` (`"extends": ["//"]`, inputs `["$TURBO_EXTENDS$", "$TURBO_ROOT$/packages/<name>/src/**"]`), never in the root one, so other workspaces keep their cache.
+
 ```bash
 yarn type-check                                        # all workspaces (cached)
 yarn turbo run type-check --filter=@safe-global/web    # scoped

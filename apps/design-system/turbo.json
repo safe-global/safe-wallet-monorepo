@@ -3,13 +3,38 @@
   "extends": ["//"],
   "tasks": {
     "type-check": {
-      "inputs": ["$TURBO_EXTENDS$", "content/**", "registry.json", "source.config.ts", "next.config.mjs"]
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "content/**",
+        "registry.json",
+        "source.config.ts",
+        "next.config.mjs",
+        "$TURBO_ROOT$/packages/ui/src/**",
+        "$TURBO_ROOT$/packages/ui/eslint/**",
+        "$TURBO_ROOT$/packages/ui/package.json"
+      ]
     },
     "lint": {
-      "inputs": ["$TURBO_EXTENDS$", "content/**", "registry.json", "source.config.ts", "next.config.mjs"]
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "content/**",
+        "registry.json",
+        "source.config.ts",
+        "next.config.mjs",
+        "$TURBO_ROOT$/packages/ui/eslint/**"
+      ]
     },
     "test": {
-      "inputs": ["$TURBO_EXTENDS$", "content/**", "registry.json", "source.config.ts", "next.config.mjs"]
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "content/**",
+        "registry.json",
+        "source.config.ts",
+        "next.config.mjs",
+        "$TURBO_ROOT$/packages/ui/src/**",
+        "$TURBO_ROOT$/packages/ui/eslint/**",
+        "$TURBO_ROOT$/packages/ui/package.json"
+      ]
     }
   }
 }
