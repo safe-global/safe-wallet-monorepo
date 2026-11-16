@@ -50,7 +50,7 @@ describe('useSetScopedTxFlow', () => {
     expect(setTxFlow.mock.calls).toEqual([[flow, undefined, false]])
   })
 
-  it('wraps the flow in a non-polling SafeScopeProvider for the scoped Safe', () => {
+  it('wraps the flow in a polling SafeScopeProvider for the scoped Safe', () => {
     const { setScopedTxFlow, setTxFlow } = renderWith(safeScopeContextFor(target))
     const flow = <Flow />
     const onClose = jest.fn()
@@ -58,7 +58,7 @@ describe('useSetScopedTxFlow', () => {
     setScopedTxFlow(flow, onClose, false)
 
     const [wrapped, passedOnClose, shouldWarn] = setTxFlow.mock.calls[0]
-    expect(unwrapScopedFlow(wrapped)).toEqual({ flow, target, pollSafeInfo: false })
+    expect(unwrapScopedFlow(wrapped)).toEqual({ flow, target })
     expect(passedOnClose).toBe(onClose)
     expect(shouldWarn).toBe(false)
   })
