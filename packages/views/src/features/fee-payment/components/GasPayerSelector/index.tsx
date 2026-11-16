@@ -56,7 +56,7 @@ const LOCKED_TOOLTIP: Record<GasPayerChoice, string> = {
 const gasTokenLockTooltip = (reason: GasTokenLockReason | undefined, token?: GasTokenOption): string | undefined => {
   if (reason === 'SET_AT_SIGNING') return LOCKED_TOOLTIP.PAY_FROM_SAFE
   if (reason === 'SPONSORED') return LOCKED_TOOLTIP.SPONSORED
-  if (reason === 'NATIVE_ONLY') return `Fees are paid in ${token?.symbol} for now. More tokens are coming soon.`
+  if (reason === 'ONLY_TOKEN') return `${token?.symbol} is the only token in this Safe account that can pay fees.`
   return undefined
 }
 

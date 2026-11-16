@@ -154,7 +154,7 @@ export const useGasPayerSelection = ({
           tokens,
           selected: fees.selectedGasToken ?? nativeToken?.address ?? ZERO_ADDRESS,
           locked: isLocked,
-          lockedReason: isLocked ? 'SET_AT_SIGNING' : 'NATIVE_ONLY',
+          lockedReason: isLocked ? 'SET_AT_SIGNING' : 'ONLY_TOKEN',
         }
       : {
           tokens: nativeToken ? [nativeToken] : [],
