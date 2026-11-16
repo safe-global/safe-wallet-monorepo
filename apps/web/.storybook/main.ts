@@ -177,6 +177,13 @@ const config: StorybookConfig = {
       ],
     })
 
+    // Every story is its own lazy chunk. Webpack's default cap of 30 shared chunks per request copies modules that
+    // many stories import into each story chunk instead, and the extra copies run the CI build out of memory.
+    config.optimization = {
+      ...config.optimization,
+      splitChunks: { ...config.optimization?.splitChunks, maxAsyncRequests: 100, maxInitialRequests: 100 },
+    }
+
     return config
   },
 
