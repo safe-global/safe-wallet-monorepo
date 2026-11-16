@@ -40,6 +40,8 @@ const matches = (item: Opportunity, search: string) =>
   !search || `${item.name} ${item.runBy} ${item.asset}`.toLowerCase().includes(search.toLowerCase())
 
 const groupTitle = (groupBy: GroupBy, key: string): string | undefined => {
+  if (groupBy === 'investments')
+    return key === 'invested' ? DEFI_V1_COPY.sections.investments : DEFI_V1_COPY.sections.opportunities
   if (groupBy === 'category') return DEFI_V1_COPY.category[key as OpportunityCategory].title
   if (groupBy === 'risk') return DEFI_V1_COPY.risk[key as RiskLevel]
   if (groupBy === 'asset') return key
@@ -64,8 +66,12 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
     [filters, search, investedIds],
   )
   const groups = useMemo<OpportunityGroup[]>(
-    () => groupOpportunities(visible, groupBy).map((group) => ({ ...group, title: groupTitle(groupBy, group.key) })),
-    [visible, groupBy],
+    () =>
+      groupOpportunities(visible, groupBy, investedIds).map((group) => ({
+        ...group,
+        title: groupTitle(groupBy, group.key),
+      })),
+    [visible, groupBy, investedIds],
   )
   const topOpen = visible.find((item) => !locked(item))
   const holdingOf = (item: Opportunity) => holdingsFor(positions, item.id)
@@ -74,7 +80,9 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
     setCompareIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]))
 
   const seeInvestments = () => {
-    setFilters({ ...NO_FILTERS, investedOnly: true })
+    setFilters(NO_FILTERS)
+    setSearch('')
+    setGroupBy('investments')
     tableRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 

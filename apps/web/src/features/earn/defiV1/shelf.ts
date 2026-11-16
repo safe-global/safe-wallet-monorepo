@@ -91,24 +91,29 @@ export const filterOpportunities = (
       (!filters.openOnly || (item.access === 'all' && !item.kyc)),
   )
 
-const GROUP_KEY: Record<Exclude<GroupBy, 'none'>, (item: Opportunity) => string> = {
+const GROUP_KEY: Record<Exclude<GroupBy, 'none' | 'investments'>, (item: Opportunity) => string> = {
   category: (item) => item.category,
   risk: (item) => item.risk,
   asset: (item) => item.asset,
 }
 
 const GROUP_ORDER: Partial<Record<GroupBy, string[]>> = {
+  investments: ['invested', 'opportunities'],
   category: CATEGORY_ORDER,
   risk: Object.keys(RISK_ORDER),
 }
 
-/** Keeps the input order inside each group. Groups follow the category or risk order, or first appearance. */
+/** Keeps the input order inside each group. Investments come first; other groups follow the category or risk order, or first appearance. */
 export const groupOpportunities = (
   opportunities: Opportunity[],
   groupBy: GroupBy,
+  investedIds: string[] = [],
 ): { key: string; items: Opportunity[] }[] => {
   if (groupBy === 'none') return [{ key: 'all', items: opportunities }]
-  const keyOf = GROUP_KEY[groupBy]
+  const keyOf =
+    groupBy === 'investments'
+      ? (item: Opportunity) => (investedIds.includes(item.id) ? 'invested' : 'opportunities')
+      : GROUP_KEY[groupBy]
   const keys = GROUP_ORDER[groupBy] ?? [...new Set(opportunities.map(keyOf))]
   return keys
     .map((key) => ({ key, items: opportunities.filter((item) => keyOf(item) === key) }))

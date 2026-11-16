@@ -108,10 +108,13 @@ export const DEFI_V1_COPY = {
   toolbar: {
     searchPlaceholder: 'Search opportunities, assets, and providers…',
     groupBy: 'Group by',
-    groupByOption: { none: 'None', category: 'Category', risk: 'Risk', asset: 'Asset' } satisfies Record<
-      GroupBy,
-      string
-    >,
+    groupByOption: {
+      none: 'None',
+      investments: 'Investments',
+      category: 'Category',
+      risk: 'Risk',
+      asset: 'Asset',
+    } satisfies Record<GroupBy, string>,
     filters: 'Filter',
     investments: 'Investments',
     investedOnly: 'Invested only',
@@ -182,6 +185,7 @@ export const DEFI_V1_COPY = {
     lockedNote: 'Upgrade to Safe Pro to deposit into this option.',
   },
   sections: {
+    investments: 'Your investments',
     opportunities: 'Opportunities',
   },
   compare: {

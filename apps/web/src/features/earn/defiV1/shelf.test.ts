@@ -154,6 +154,16 @@ describe('groupOpportunities', () => {
     expect(groupOpportunities([higher, low], 'risk').map((group) => group.key)).toEqual(['low', 'higher'])
   })
 
+  it('puts investments above the other opportunities', () => {
+    const open = opportunity({ id: 'open' })
+    const held = opportunity({ id: 'held' })
+
+    expect(groupOpportunities([open, held], 'investments', ['held'])).toEqual([
+      { key: 'invested', items: [held] },
+      { key: 'opportunities', items: [open] },
+    ])
+  })
+
   it('orders asset groups by first appearance', () => {
     const eth = opportunity({ asset: 'ETH' })
     const usdc = opportunity({ asset: 'USDC' })
