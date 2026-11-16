@@ -30,14 +30,13 @@ import {
   isVaultDepositTxInfo,
   isVaultRedeemTxInfo,
 } from '@/utils/transaction-guards'
-import type { SpaceQueueItems } from '../../store/spaceQueueApi'
+import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
+import type { SpaceQueueItems } from '../../hooks/useSpaceQueue'
 
 export const getSafeKey = (safeAddress: string): string => safeAddress.toLowerCase()
 
 export const getNonce = (tx: Transaction): number | undefined =>
   isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo.nonce : undefined
-
-export type QueueStatus = 'execute' | 'sign' | 'waiting' | 'blocked'
 
 export const getQueueStatus = (tx: Transaction, isNext: boolean, walletAddress?: string): QueueStatus => {
   if (isAwaitingExecution(tx.txStatus)) return isNext ? 'execute' : 'blocked'
@@ -47,9 +46,6 @@ export const getQueueStatus = (tx: Transaction, isNext: boolean, walletAddress?:
 export type QueueRowData =
   | { kind: 'conflict'; nonce: number | undefined; size: number }
   | { kind: 'transaction'; item: TransactionQueuedItem; isNext: boolean; conflict?: ConflictOption }
-
-/** A transaction's place among those sharing its nonce, `option` counting from 1. */
-export type ConflictOption = { option: number; size: number }
 
 /** The table rows of one Safe on one chain: its transactions, with a header row before each group sharing a nonce. */
 export const getSectionRows = (items: SpaceQueueItems): QueueRowData[] => {
@@ -99,8 +95,7 @@ export const getCounterparty = (txInfo: TransactionInfo): Counterparty | undefin
   if (isCancellationTxInfo(txInfo)) return undefined
   if (isMultiSendTxInfo(txInfo)) return { join: 'via', party: txInfo.to }
   if (isCustomTxInfo(txInfo)) {
-    // A migration is a delegate call that changes the Safe itself. Read `to` first: the migration guard claims every
-    // custom call, so txInfo is narrowed to never once it returns false
+    // Read `to` before the migration guard, which narrows txInfo to never when it returns false
     const { to } = txInfo
     return isMigrateToL2TxInfo(txInfo) ? undefined : { join: 'on', party: to }
   }

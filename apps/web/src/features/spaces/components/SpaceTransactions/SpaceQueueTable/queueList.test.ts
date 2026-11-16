@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import type { SpaceQueueSection } from '../../../store/spaceQueueApi'
+import type { SpaceQueueSection } from '../../../hooks/useSpaceQueue'
 import { buildQueueList, getChainKey, groupByScope } from './queueList'
 
 const transactionItem = (nonce: number, conflictType: TransactionQueuedItem['conflictType'] = 'None') =>

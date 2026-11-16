@@ -1,7 +1,6 @@
 import type { ComponentProps, ReactElement } from 'react'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { TransactionInfo } from '@safe-global/store/gateway/types'
-import { Badge, BadgeDot } from '@safe-global/views/components/ui/badge'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import MaliciousTxWarning from '@safe-global/views/components/transactions/MaliciousTxWarning'
@@ -10,49 +9,20 @@ import { formatDateTime, formatTimeInWords } from '@safe-global/utils/utils/date
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import QueueActions from '@/components/transactions/TxSummary/QueueActions'
 import { SwapFeature, useIsExpiredSwap } from '@/features/swap'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import { useLoadFeature } from '@/features/__core__'
 import { useHasFeature } from '@/hooks/useChains'
 import useIsPending from '@/hooks/useIsPending'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
 import QueueTxDetails from './QueueTxDetails'
+import ConflictBracket from '@safe-global/views/features/spaces/components/SpaceQueue/ConflictBracket'
+import SignatureGauge from '@safe-global/views/features/spaces/components/SpaceQueue/SignatureGauge'
+import StatusChip from '@safe-global/views/features/spaces/components/SpaceQueue/StatusChip'
+import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import RowActionsMenu from './RowActionsMenu'
-import SignatureGauge from './SignatureGauge'
 import SignersTooltip from './SignersTooltip'
-import { getCounterparty, getNonce, type ConflictOption, type QueueStatus } from './utils'
-
-export const QUEUE_COLUMNS = ['Nonce', 'Transaction', 'To', 'Proposed', 'Signatures', 'Status', 'Action'] as const
-
-// The outline Sign/Execute action turns into the filled primary button while its row is hovered, as in the design
-const ROW_HOVER_PRIMARY_ACTION = [
-  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled]:border-transparent',
-  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled]:bg-primary',
-  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled]:text-primary-foreground',
-  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled]:shadow-none',
-  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled:hover]:bg-primary/80',
-].join(' ')
-
-const STATUS_TONES: Record<QueueStatus, 'success' | 'warning'> = {
-  execute: 'success',
-  sign: 'success',
-  waiting: 'warning',
-  blocked: 'warning',
-}
-
-const getStatusLabel = (status: QueueStatus, nextNonce: number | undefined): string => {
-  if (status === 'execute') return 'Execute'
-  if (status === 'sign') return 'Sign'
-  if (status === 'waiting') return 'Waiting'
-  return nextNonce === undefined ? 'Blocked' : `Blocked by #${nextNonce}`
-}
-
-export const StatusChip = ({ status, nextNonce }: { status: QueueStatus; nextNonce?: number }): ReactElement => (
-  <Badge variant={STATUS_TONES[status]} size="status" shape="status">
-    <BadgeDot />
-    {getStatusLabel(status, nextNonce)}
-  </Badge>
-)
+import { getCounterparty, getNonce } from './utils'
 
 const Counterparty = ({ txInfo, chainId }: { txInfo: TransactionInfo; chainId: string }): ReactElement | null => {
   const counterparty = getCounterparty(txInfo)
@@ -82,31 +52,6 @@ const Counterparty = ({ txInfo, chainId }: { txInfo: TransactionInfo; chainId: s
           />
         )}
       </span>
-    </span>
-  )
-}
-
-// The options sharing a nonce hang off one line from the group header, so the nonce shows once, in the header.
-const ConflictBracket = ({ option, size, nonce }: ConflictOption & { nonce?: number }): ReactElement => {
-  const isLast = option === size
-  return (
-    <span aria-label={`Option ${option} of ${size} at nonce ${nonce}`} role="img" className="block h-6">
-      <span
-        aria-hidden="true"
-        className={`absolute left-1/2 w-3 border-l-[1.5px] border-[var(--warning-accent)] ${
-          isLast
-            ? 'top-[-30px] h-[calc(50%+30px)] rounded-bl-md border-b-[1.5px]'
-            : option === 1
-              ? 'top-[-22px] bottom-[-8px]'
-              : 'top-[-30px] bottom-[-8px]'
-        }`}
-      />
-      {!isLast && (
-        <span
-          aria-hidden="true"
-          className="absolute top-1/2 left-1/2 w-3 border-b-[1.5px] border-[var(--warning-accent)]"
-        />
-      )}
     </span>
   )
 }
@@ -200,7 +145,7 @@ const SpaceQueueRow = ({
       </TableCell>
 
       <TableCell>
-        <div className={`flex items-center justify-end gap-1 ${ROW_HOVER_PRIMARY_ACTION}`}>
+        <div className="flex items-center justify-end gap-1">
           {!expiredSwap && <QueueActions tx={tx} dense />}
           <RowActionsMenu tx={tx} canReject={canReject} />
         </div>
