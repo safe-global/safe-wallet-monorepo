@@ -35,4 +35,7 @@ export const TAG_COLOR_CLASSES: Record<TagColor, { chip: string; dot: string }> 
   },
 }
 
+/** The colours CGW assigns, in the order of the map above. */
+export const TAG_COLORS = Object.keys(TAG_COLOR_CLASSES) as TagColor[]
+
 export type TagLabel = { name: string; color: TagColor }

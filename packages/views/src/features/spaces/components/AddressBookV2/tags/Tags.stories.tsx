@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { TagChip, TagChips } from './TagChip'
+import { TAG_COLORS } from './tagColor'
 
 const meta = {
   title: 'Features/Spaces/AddressBookV2/Tags',
@@ -17,7 +18,7 @@ export const Chip: Story = {}
 export const AllColours: Story = {
   render: () => (
     <TagChips
-      tags={(['slate', 'clay', 'rose', 'lilac', 'iris', 'cobalt', 'sky', 'lagoon'] as const).map((color) => ({
+      tags={TAG_COLORS.map((color) => ({
         name: color.charAt(0).toUpperCase() + color.slice(1),
         color,
       }))}

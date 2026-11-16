@@ -126,6 +126,33 @@ describe('AddressBookTable', () => {
     expect(onDelete).not.toHaveBeenCalled()
   })
 
+  it('hands the row contact to Edit tags', async () => {
+    const onEditTags = jest.fn()
+    render(<AddressBookTable contacts={[treasury, payroll]} onEditTags={onEditTags} />)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Actions for Payroll' }))
+    await waitFor(() => expect(screen.getByRole('menu')).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('menuitem', { name: 'Edit tags' }))
+
+    expect(onEditTags).toHaveBeenCalledWith(payroll)
+  })
+
+  it('sorts by the first tag name ignoring case, untagged contacts last', async () => {
+    const untagged = { ...treasury, address: ADDRESSES.usdc, name: 'Untagged', tags: [] }
+    const lowercase = { ...atlas, name: 'Lowercase', tags: [{ id: 99, name: 'acme', color: 'slate' as const }] }
+    render(<AddressBookTable contacts={[untagged, payroll, lowercase]} />)
+
+    await userEvent.click(screen.getByRole('button', { name: /^Tags/ }))
+
+    expect(
+      screen.getAllByTestId('table-row').map((row) => within(row).getByTestId('table-cell-contact').textContent),
+    ).toEqual([
+      expect.stringContaining('Lowercase'),
+      expect.stringContaining('Payroll'),
+      expect.stringContaining('Untagged'),
+    ])
+  })
+
   it('renders the row action of each contact', () => {
     render(
       <AddressBookTable

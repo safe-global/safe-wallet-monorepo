@@ -1,20 +1,20 @@
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
+import { WORKSPACE_TAG_LIMIT_MESSAGE } from '@safe-global/utils/validation/tags'
 import { WORKSPACE_TAGS } from '../mocks/fixtures'
 import type { WorkspaceTag } from '../types'
 import TagFilterDropdown from './TagFilterDropdown'
 import type { TagActions } from './TagMenu'
 import TagPicker from './TagPicker'
-
-const COLORS: WorkspaceTag['color'][] = ['slate', 'clay', 'rose', 'lilac', 'iris', 'cobalt', 'sky', 'lagoon']
+import { TAG_COLORS } from './tagColor'
 
 /** Keeps the tags in memory, as CGW would: a new tag gets a free colour and no contacts. */
 const useInMemoryTags = (initialTags: WorkspaceTag[]) => {
   const [tags, setTags] = useState(initialTags)
   const actions: TagActions = {
     onCreate: async (name) => {
-      const color = COLORS.find((candidate) => !tags.some((tag) => tag.color === candidate))
-      if (!color) return { error: 'Your workspace has 8 tags. Rename or delete one to add another.' }
+      const color = TAG_COLORS.find((candidate) => !tags.some((tag) => tag.color === candidate))
+      if (!color) return { error: WORKSPACE_TAG_LIMIT_MESSAGE }
       const tag = { id: Math.max(0, ...tags.map((t) => t.id)) + 1, name, color, contactCount: 0 }
       setTags((current) => [...current, tag])
       return { tag }
@@ -23,7 +23,10 @@ const useInMemoryTags = (initialTags: WorkspaceTag[]) => {
       setTags((current) => current.map((item) => (item.id === tag.id ? { ...item, name } : item)))
       return {}
     },
-    onDelete: async (tag) => setTags((current) => current.filter((item) => item.id !== tag.id)),
+    onDelete: async (tag) => {
+      setTags((current) => current.filter((item) => item.id !== tag.id))
+      return true
+    },
   }
   return { tags, actions }
 }

@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { normalizeTagName, sameTagName, validateTagName } from '../tagRules'
+import { normalizeTagName, sameTagName, validateTagName } from './tags'
 
 describe('validateTagName', () => {
   it('accepts letters, numbers, spaces and - _ & /', () => {
@@ -14,6 +14,8 @@ describe('validateTagName', () => {
     ['an empty name', '   ', 'Tags cannot be empty'],
     ['a name over 32 characters', 'a'.repeat(33), 'Tags must be at most 32 characters long'],
     ['a name starting with =', '=SUM(1)', 'Tags cannot start with =, +, - or @'],
+    ['a name starting with +', '+1', 'Tags cannot start with =, +, - or @'],
+    ['a name starting with -', '-x', 'Tags cannot start with =, +, - or @'],
     ['a name starting with @', '@team', 'Tags cannot start with =, +, - or @'],
     ['a disallowed character', 'Vendor!', 'Tags can only contain letters, numbers, spaces and the characters - _ & /'],
   ])('rejects %s', (_, name, message) => {
