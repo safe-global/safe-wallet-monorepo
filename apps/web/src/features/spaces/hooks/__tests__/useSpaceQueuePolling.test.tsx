@@ -3,10 +3,10 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { type ReactNode } from 'react'
 import { Provider } from 'react-redux'
 import { http, HttpResponse } from 'msw'
-import { cgwApi as spacesApi, type SpaceQueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { SpaceQueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionListItemType, TransactionStatus } from '@safe-global/store/gateway/types'
-import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
+import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { GATEWAY_URL } from '@/config/gateway'
 import { AppRoutes } from '@/config/routes'
@@ -160,9 +160,10 @@ describe('useSpaceQueuePolling', () => {
   })
 
   const fulfilledRequestId = (store: ReturnType<typeof makeStore>) => {
-    const select = spacesApi.endpoints.spaceTransactionsGetTransactionQueueV1.select({ spaceId })
-    const entry = select(store.getState() as Parameters<typeof select>[0])
-    return entry.status === 'fulfilled' ? entry.requestId : undefined
+    const entry = Object.values(store.getState()[cgwClient.reducerPath].queries).find(
+      (query) => query?.endpointName === 'spaceTransactionsGetTransactionQueueV1',
+    )
+    return entry?.status === 'fulfilled' ? entry.requestId : undefined
   }
 
   const renderAfterFirstQueue = async (store = makeStore()) => {
