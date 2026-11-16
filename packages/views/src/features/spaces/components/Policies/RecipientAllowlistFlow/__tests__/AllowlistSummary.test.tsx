@@ -2,7 +2,7 @@ import { cloneElement, type ReactElement, type ReactNode } from 'react'
 import { render, screen } from '@/tests/test-utils'
 import AllowlistSummary from '../AllowlistSummary'
 
-jest.mock('@safe-global/ui/tooltip', () => ({
+jest.mock('@safe-global/ui/primitives/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({ children, render }: { children: ReactNode; render: ReactElement }) =>
     cloneElement(render, {}, children),

@@ -108,14 +108,10 @@ interface ImportBinding {
   specifier: string
 }
 
-/** A deprecated flat key (`./button`) that points at the same file as its canonical `./primitives/button` */
-const isLegacyAlias = (key: string, target: string): boolean =>
-  target.startsWith('./src/primitives/') && !key.startsWith('./primitives/')
-
 const exportKeyByFile = (root: string): Map<string, string> => {
   const map = new Map<string, string>()
   for (const [key, target] of Object.entries(readUiExports(root))) {
-    if (key.includes('*') || isLegacyAlias(key, target)) continue
+    if (key.includes('*')) continue
     map.set(path.join(root, target).replace(/\.(tsx?|mjs)$/, ''), `@safe-global/ui/${key.slice(2)}`)
   }
   return map

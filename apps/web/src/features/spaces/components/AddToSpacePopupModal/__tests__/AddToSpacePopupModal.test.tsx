@@ -17,7 +17,7 @@ jest.mock('@/hooks/useSafeAddressFromUrl', () => ({
   },
 }))
 
-jest.mock('@safe-global/ui/button', () => ({
+jest.mock('@safe-global/ui/primitives/button', () => ({
   Button: ({ children, className }: { children: ReactNode; className?: string }) => (
     <button type="button" className={className}>
       {children}
@@ -25,11 +25,11 @@ jest.mock('@safe-global/ui/button', () => ({
   ),
 }))
 
-jest.mock('@safe-global/ui/typography', () => ({
+jest.mock('@safe-global/ui/primitives/typography', () => ({
   Typography: ({ children }: { children: ReactNode }) => <span>{children}</span>,
 }))
 
-jest.mock('@safe-global/ui/dialog', () => ({
+jest.mock('@safe-global/ui/primitives/dialog', () => ({
   DialogClose: ({
     children,
     'aria-label': ariaLabel,

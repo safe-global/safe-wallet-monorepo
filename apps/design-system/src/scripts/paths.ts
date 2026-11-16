@@ -31,7 +31,7 @@ export interface ComponentEntry {
 
 const LAYER_PREFIX: Record<Layer, string> = { primitive: './primitives/', component: './components/' }
 
-/** Canonical component keys (`./primitives/button`, `./components/data-table`); the deprecated flat aliases are ignored */
+/** Component keys (`./primitives/button`, `./components/data-table`) */
 export const componentEntries = (root: string = uiDir): ComponentEntry[] =>
   Object.keys(readUiExports(root))
     .flatMap((key): ComponentEntry[] =>

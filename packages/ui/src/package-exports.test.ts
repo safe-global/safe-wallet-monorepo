@@ -6,62 +6,6 @@ const { exports: exportMap } = JSON.parse(readFileSync(path.join(root, 'package.
   exports: Record<string, string>
 }
 
-/** Deprecated flat keys (`@safe-global/ui/button`), frozen until Phase 2 removes them; never add to this list */
-const LEGACY_FLAT_KEYS = [
-  'accordion',
-  'alert-dialog',
-  'alert',
-  'aspect-ratio',
-  'avatar',
-  'badge',
-  'breadcrumb',
-  'button',
-  'calendar',
-  'card',
-  'checkbox',
-  'chip',
-  'collapsible',
-  'combobox',
-  'context-menu',
-  'dialog',
-  'drawer',
-  'dropdown-menu',
-  'empty',
-  'field',
-  'hover-card',
-  'input-group',
-  'input-otp',
-  'input',
-  'kbd',
-  'label',
-  'link',
-  'list',
-  'navigation-menu',
-  'overlay',
-  'pagination',
-  'popover',
-  'progress',
-  'radio-group',
-  'resizable',
-  'scroll-area',
-  'search-input',
-  'select',
-  'separator',
-  'sheet',
-  'sidebar',
-  'skeleton',
-  'slider',
-  'sonner',
-  'spinner',
-  'switch',
-  'table',
-  'tabs',
-  'textarea',
-  'toggle',
-  'tooltip',
-  'typography',
-]
-
 const SHARED_KEYS = [
   './utils',
   './hooks/*',
@@ -110,11 +54,9 @@ describe('package exports', () => {
     },
   )
 
-  it('keeps the deprecated flat keys frozen, each an alias of its primitive', () => {
-    const canonical = new Set(['primitives', 'components'].flatMap((layer) => keysUnder(`./${layer}/`)))
-    const flat = Object.keys(exportMap).filter((key) => !canonical.has(key) && !SHARED_KEYS.includes(key))
-    expect(flat.map((key) => key.slice(2)).sort()).toEqual([...LEGACY_FLAT_KEYS].sort())
-    for (const name of LEGACY_FLAT_KEYS) expect(exportMap[`./${name}`]).toBe(exportMap[`./primitives/${name}`])
+  it('has no keys outside the two layers and the shared keys', () => {
+    const canonical = new Set(LAYERS.flatMap((layer) => keysUnder(`./${layer}/`)))
+    expect(Object.keys(exportMap).filter((key) => !canonical.has(key) && !SHARED_KEYS.includes(key))).toEqual([])
   })
 
   it('never gives a primitive and a Safe component the same name', () => {

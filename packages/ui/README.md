@@ -22,8 +22,6 @@ import { ShadcnProvider } from '@safe-global/ui/provider'
 
 The package is private for now and consumed from source inside the monorepo: its `exports` point at the `.tsx` files, and each app compiles them. The wallet still imports through the re-exports in `packages/views/src/components/ui` until it migrates.
 
-The flat keys of the first release (`@safe-global/ui/button`, …) are **deprecated** aliases of `@safe-global/ui/primitives/<name>`. They stay, frozen to today's 52 names, until the wallet migrates (Phase 2), because wallet tests mock them. New code uses the canonical subpaths, and no flat key is ever added.
-
 ## Styles
 
 The package ships its CSS. Tailwind CSS v4 is a peer dependency, and the app keeps the `tailwindcss` import and the `@source` lines, because only the app knows where its `node_modules` is:

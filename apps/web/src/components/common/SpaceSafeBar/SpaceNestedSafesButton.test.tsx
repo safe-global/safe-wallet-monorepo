@@ -53,7 +53,7 @@ jest.mock('@/components/common/Track', () => {
   return { __esModule: true, default: MockTrack }
 })
 
-jest.mock('@safe-global/ui/tooltip', () => ({
+jest.mock('@safe-global/ui/primitives/tooltip', () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   TooltipTrigger: ({ children, render }: { children: React.ReactNode; render: React.ReactElement }) => (
     <div>
