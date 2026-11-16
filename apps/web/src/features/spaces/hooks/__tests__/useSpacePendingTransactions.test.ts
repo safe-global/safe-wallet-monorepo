@@ -1,27 +1,28 @@
 import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
 import type { SpaceQueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
 import { act, renderHook, waitFor } from '@/tests/test-utils'
-import { useHasFeature } from '@/hooks/useChains'
+import { multisigTransactionBuilder, queuedTransactionItem } from '@/tests/builders/queuedTransaction'
 import { useSpacePendingTransactions } from '../useSpacePendingTransactions'
-import { usePerSafePendingTransactions } from '../usePerSafePendingTransactions'
 
 jest.mock('@/hooks/useChains', () => ({
   useHasFeature: jest.fn(),
 }))
-jest.mock('../usePerSafePendingTransactions', () => ({
-  usePerSafePendingTransactions: jest.fn(),
+jest.mock('../useSpaceSafesWithQueue', () => ({
+  useSpaceSafesWithQueue: jest.fn(),
 }))
 
-const mockUseHasFeature = useHasFeature as jest.Mock
-const mockUsePerSafePendingTransactions = usePerSafePendingTransactions as jest.Mock
+const mockUseHasFeature = jest.requireMock('@/hooks/useChains').useHasFeature as jest.Mock
+const mockUseSpaceSafesWithQueue = jest.requireMock('../useSpaceSafesWithQueue').useSpaceSafesWithQueue as jest.Mock
 
 const spaceId = faker.string.uuid()
 const SAFE_1 = faker.finance.ethereumAddress()
 const SAFE_2 = faker.finance.ethereumAddress()
+const CHAIN_1 = faker.string.numeric({ length: 3, allowLeadingZeros: false })
+const CHAIN_2 = faker.string.numeric({ length: 4, allowLeadingZeros: false })
 
 const signedInAuth = {
   sessionExpiresAt: Date.now() + 60_000,
@@ -32,34 +33,8 @@ const signedInAuth = {
   isSessionCheckPending: false,
 }
 
-const createQueuedItem = (
-  timestamp: number,
-  conflictType: TransactionQueuedItem['conflictType'] = 'None',
-): TransactionQueuedItem => ({
-  type: 'TRANSACTION',
-  transaction: {
-    id: faker.string.uuid(),
-    txHash: null,
-    timestamp,
-    txStatus: 'AWAITING_CONFIRMATIONS',
-    txInfo: {
-      type: 'Custom',
-      to: { value: faker.finance.ethereumAddress() },
-      methodName: null,
-      dataSize: '0',
-      isCancellation: false,
-      humanDescription: null,
-    },
-    executionInfo: {
-      type: 'MULTISIG',
-      nonce: faker.number.int({ min: 1, max: 100 }),
-      confirmationsRequired: 2,
-      confirmationsSubmitted: 1,
-      missingSigners: [],
-    },
-  },
-  conflictType,
-})
+const queuedItemAt = (timestamp: number, conflictType?: Parameters<typeof queuedTransactionItem>[1]) =>
+  queuedTransactionItem(multisigTransactionBuilder().with({ timestamp }).build(), conflictType)
 
 const createPage = (results: SpaceQueuedItemPage['results']): SpaceQueuedItemPage => ({
   count: null,
@@ -92,40 +67,49 @@ const respondWithQueue = (page: SpaceQueuedItemPage | null) => {
   return requests
 }
 
+const respondWithSafeQueues = (results: QueuedItemPage['results'] = []) => {
+  const requests: URL[] = []
+  server.use(
+    http.get(`${GATEWAY_URL}/v1/chains/:chainId/safes/:address/transactions/queued`, ({ request }) => {
+      requests.push(new URL(request.url))
+      return HttpResponse.json<QueuedItemPage>({ count: results.length, next: null, previous: null, results })
+    }),
+  )
+  return requests
+}
+
 const renderInSpace = (limit?: number, sessionExpiresAt: number | null = signedInAuth.sessionExpiresAt) =>
   renderHook(() => useSpacePendingTransactions(limit), {
     routerProps: { query: { spaceId } },
     initialReduxState: { auth: { ...signedInAuth, sessionExpiresAt } },
   })
 
-const perSafeResult = {
-  transactions: [],
-  count: 0,
-  isLoading: false,
-  error: undefined,
-  refetch: jest.fn(),
-}
+const settle = () => act(() => new Promise((resolve) => setTimeout(resolve, 50)))
 
 describe('useSpacePendingTransactions', () => {
   beforeEach(() => {
+    jest.clearAllMocks()
     mockUseHasFeature.mockReturnValue(true)
-    mockUsePerSafePendingTransactions.mockReturnValue(perSafeResult)
+    mockUseSpaceSafesWithQueue.mockReturnValue({
+      safesWithQueue: [{ chainId: CHAIN_1, address: SAFE_1 }],
+      isLoading: false,
+    })
   })
 
-  it('requests the Space queue with the limit as a query parameter', async () => {
+  it('requests the Space queue without a limit query parameter', async () => {
     const requests = respondWithQueue(createPage({}))
 
     renderInSpace(4)
 
     await waitFor(() => expect(requests).toHaveLength(1))
-    expect(requests[0].searchParams.get('limit')).toBe('4')
+    expect(requests[0].searchParams.has('limit')).toBe(false)
   })
 
   it('returns the oldest transactions across Safes and chains, up to the limit', async () => {
     respondWithQueue(
       createPage({
-        [SAFE_1]: { '1': [createQueuedItem(3000)], '137': [createQueuedItem(1000)] },
-        [SAFE_2]: { '1': [createQueuedItem(2000), createQueuedItem(4000)] },
+        [SAFE_1]: { [CHAIN_1]: [queuedItemAt(3000)], [CHAIN_2]: [queuedItemAt(1000)] },
+        [SAFE_2]: { [CHAIN_1]: [queuedItemAt(2000), queuedItemAt(4000)] },
       }),
     )
 
@@ -133,20 +117,37 @@ describe('useSpacePendingTransactions', () => {
 
     await waitFor(() => expect(result.current.transactions).toHaveLength(3))
     expect(result.current.transactions.map((tx) => [tx.transaction.timestamp, tx.safeAddress, tx.chainId])).toEqual([
-      [1000, SAFE_1, '137'],
-      [2000, SAFE_2, '1'],
-      [3000, SAFE_1, '1'],
+      [1000, SAFE_1, CHAIN_2],
+      [2000, SAFE_2, CHAIN_1],
+      [3000, SAFE_1, CHAIN_1],
     ])
     expect(result.current.count).toBe(3)
     expect(result.current.isLoading).toBe(false)
   })
 
-  it('keeps only the latest transaction of a conflict group', async () => {
-    const latest = createQueuedItem(2000, 'HasNext')
+  it('orders the latest transaction of each conflict group by age, not by nonce', async () => {
+    const latestOfLowerNonce = queuedItemAt(5000, 'HasNext')
+    const higherNonce = queuedItemAt(1000)
     respondWithQueue(
       createPage({
         [SAFE_1]: {
-          '1': [{ type: 'CONFLICT_HEADER', nonce: 1 }, latest, createQueuedItem(1000, 'End')],
+          [CHAIN_1]: [{ type: 'CONFLICT_HEADER', nonce: 1 }, latestOfLowerNonce, queuedItemAt(500, 'End'), higherNonce],
+        },
+      }),
+    )
+
+    const { result } = renderInSpace(1)
+
+    await waitFor(() => expect(result.current.transactions).toHaveLength(1))
+    expect(result.current.transactions[0].transaction.id).toBe(higherNonce.transaction.id)
+  })
+
+  it('keeps only the latest transaction of a conflict group', async () => {
+    const latest = queuedItemAt(2000, 'HasNext')
+    respondWithQueue(
+      createPage({
+        [SAFE_1]: {
+          [CHAIN_1]: [{ type: 'CONFLICT_HEADER', nonce: 1 }, latest, queuedItemAt(1000, 'End')],
         },
       }),
     )
@@ -183,29 +184,37 @@ describe('useSpacePendingTransactions', () => {
     const { result } = renderInSpace(4, null)
 
     await act(async () => result.current.refetch())
-    await act(() => new Promise((resolve) => setTimeout(resolve, 50)))
+    await settle()
     expect(requests).toHaveLength(0)
     expect(result.current.transactions).toEqual([])
   })
 
-  it('skips the per-Safe queues when the Space queue is enabled', async () => {
-    respondWithQueue(createPage({}))
+  it('does not request the per-Safe queues when the Space queue is enabled', async () => {
+    const spaceRequests = respondWithQueue(createPage({}))
+    const safeRequests = respondWithSafeQueues()
 
     renderInSpace(4)
 
-    expect(mockUsePerSafePendingTransactions).toHaveBeenCalledWith(4, true)
+    await waitFor(() => expect(spaceRequests).toHaveLength(1))
+    await settle()
+    expect(safeRequests).toHaveLength(0)
   })
 
-  it('falls back to the per-Safe queues when the Space queue is disabled', async () => {
+  it('returns the per-Safe queues when the Space queue is disabled', async () => {
     mockUseHasFeature.mockReturnValue(false)
-    const requests = respondWithQueue(createPage({}))
+    const spaceRequests = respondWithQueue(createPage({}))
+    const pending = queuedItemAt(1000)
+    respondWithSafeQueues([pending])
 
     const { result } = renderInSpace(4)
 
-    await act(() => new Promise((resolve) => setTimeout(resolve, 50)))
-    expect(requests).toHaveLength(0)
-    expect(mockUsePerSafePendingTransactions).toHaveBeenCalledWith(4, false)
-    expect(result.current).toBe(perSafeResult)
+    await waitFor(() => expect(result.current.transactions).toHaveLength(1))
+    expect(result.current.transactions[0]).toMatchObject({
+      transaction: { id: pending.transaction.id },
+      safeAddress: SAFE_1,
+      chainId: CHAIN_1,
+    })
+    expect(spaceRequests).toHaveLength(0)
   })
 
   it('reports loading until the chains config tells whether the Space queue is enabled', () => {
@@ -214,6 +223,5 @@ describe('useSpacePendingTransactions', () => {
     const { result } = renderInSpace()
 
     expect(result.current.isLoading).toBe(true)
-    expect(mockUsePerSafePendingTransactions).toHaveBeenCalledWith(3, true)
   })
 })

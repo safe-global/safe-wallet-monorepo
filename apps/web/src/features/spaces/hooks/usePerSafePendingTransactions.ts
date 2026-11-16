@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback } from 'react'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { getTransactionQueue } from '@/services/transactions'
 import { getLatestTransactions } from '@/utils/tx-list'
-import type { SpacePendingTxItem } from '../store/spacePendingTransactionsApi'
 import { useSpaceSafesWithQueue } from './useSpaceSafesWithQueue'
 
+export type SpacePendingTxItem = TransactionQueuedItem & { safeAddress: string; chainId: string }
 type SafeQueueResult = { chainId: string; address: string; transactions: TransactionQueuedItem[] }
 
 const BATCH_SIZE = 3
