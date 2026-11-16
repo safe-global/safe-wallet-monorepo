@@ -416,20 +416,22 @@ describe('SpaceAddressBookV2', () => {
         expect(screen.getByTestId('export-summary')).toHaveTextContent('2 address book entries')
       })
 
-      it('exports the whole book as CSV, one row per chain', async () => {
+      it('exports the whole book as CSV, one row per chain, with its tags', async () => {
+        const ops = spaceAddressBookTagBuilder().with({ id: 1, name: 'Ops' }).build()
+        const vendor = spaceAddressBookTagBuilder().with({ id: 2, name: 'Vendor' }).build()
         const item = spaceAddressBookItemBuilder()
-          .with({ name: 'Treasury', chainIds: ['1', '100'] })
+          .with({ name: 'Treasury', chainIds: ['1', '100'], tagIds: [1, 2] })
           .build()
-        mockWorkspaceBook({ items: [item] })
+        mockWorkspaceBook({ items: [item], tags: [ops, vendor] })
 
         renderAddressBook()
         await exportBook()
 
         const csv = (await createObjectURL.mock.calls[0][0].text()).trim()
         expect(csv.split(/\r?\n/)).toEqual([
-          'address,name,chainId',
-          `${item.address},Treasury,1`,
-          `${item.address},Treasury,100`,
+          'address,name,chainId,tags',
+          `${item.address},Treasury,1,Ops;Vendor`,
+          `${item.address},Treasury,100,Ops;Vendor`,
         ])
         const anchor = anchorClick.mock.contexts[0] as HTMLAnchorElement
         expect(anchor.getAttribute('download')).toMatch(new RegExp(`^workspace-${SPACE_ID}-address-book`))

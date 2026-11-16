@@ -4,6 +4,7 @@ import type { SerializedError } from '@reduxjs/toolkit'
 import {
   useAddressBooksUpsertAddressBookItemsV1Mutation,
   type SpaceAddressBookItemDto,
+  type SpaceAddressBookTagDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Button } from '@safe-global/views/components/ui/button'
 import ImportDialog, { type AddressBookCSVRow } from '@/components/address-book/ImportDialog'
@@ -23,8 +24,13 @@ import { toWorkspaceImport, validateWorkspaceRows } from './csvImport'
 
 const NOTHING_TO_IMPORT = 'Every contact in this file is already in the address book'
 
-/** Imports a CSV into the workspace address book: new contacts are added, saved ones only gain chains. */
-const ImportWorkspaceCsv = ({ items }: { items: SpaceAddressBookItemDto[] }) => {
+type ImportWorkspaceCsvProps = {
+  items: SpaceAddressBookItemDto[]
+  tags: SpaceAddressBookTagDto[]
+}
+
+/** Imports a CSV into the workspace address book: new contacts are added, saved ones only gain chains and tags. */
+const ImportWorkspaceCsv = ({ items, tags }: ImportWorkspaceCsvProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const { configs } = useChains()
   const spaceId = useCurrentSpaceId()
@@ -34,13 +40,13 @@ const ImportWorkspaceCsv = ({ items }: { items: SpaceAddressBookItemDto[] }) => 
 
   const validateRows = (rows: AddressBookCSVRow[]) => {
     const supportedChainIds = configs.map((chain) => chain.chainId)
-    const rowError = validateWorkspaceRows(rows, items, supportedChainIds)
+    const rowError = validateWorkspaceRows(rows, items, tags, supportedChainIds)
     if (rowError) return rowError
-    return toWorkspaceImport(rows, items).items.length === 0 ? NOTHING_TO_IMPORT : undefined
+    return toWorkspaceImport(rows, items, tags).items.length === 0 ? NOTHING_TO_IMPORT : undefined
   }
 
   const onImport = async (rows: AddressBookCSVRow[]) => {
-    const { items: contacts, newCount, updatedCount } = toWorkspaceImport(rows, items)
+    const { items: contacts, newCount, updatedCount } = toWorkspaceImport(rows, items, tags)
     // Skipping look-alikes can leave nothing to send
     if (contacts.length === 0) return
 
@@ -59,6 +65,7 @@ const ImportWorkspaceCsv = ({ items }: { items: SpaceAddressBookItemDto[] }) => 
     trackEvent(SPACE_EVENTS.IMPORT_ADDRESS_BOOK_SUBMIT, {
       [MixpanelEventParams.ENTRY_COUNT]: newCount,
       [MixpanelEventParams.UPDATED_COUNT]: updatedCount,
+      [MixpanelEventParams.WITH_TAGS]: contacts.some((contact) => contact.tags?.length),
     })
   }
 

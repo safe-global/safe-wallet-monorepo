@@ -3,12 +3,12 @@ import userEvent from '@testing-library/user-event'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import * as spacesRTK from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import type { SpaceAddressBookItemDto, SpaceAddressBookTagDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { getStoreInstance } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
-import { Builder } from '@/tests/Builder'
+import { spaceAddressBookItemBuilder, spaceAddressBookTagBuilder } from '@/tests/builders/space'
 import { render, screen, waitFor } from '@/tests/test-utils'
 import ImportWorkspaceCsv from '../ImportWorkspaceCsv'
 
@@ -36,30 +36,26 @@ jest
     typeof spacesRTK.useAddressBooksUpsertAddressBookItemsV1Mutation
   >)
 
-const itemBuilder = () =>
-  Builder.new<SpaceAddressBookItemDto>().with({
-    name: faker.person.fullName(),
-    address: checksumAddress(faker.finance.ethereumAddress()),
-    chainIds: ['1'],
-    createdBy: faker.internet.email(),
-    createdByUserId: faker.number.int(),
-    lastUpdatedBy: faker.internet.email(),
-    lastUpdatedByUserId: faker.number.int(),
-    createdAt: faker.date.past().toISOString(),
-    updatedAt: faker.date.recent().toISOString(),
-  })
-
 const newAddress = () => checksumAddress(faker.finance.ethereumAddress())
 
-const csvFile = (rows: string[]) =>
-  new File([['address,name,chainId', ...rows].join('\n')], 'contacts.csv', { type: 'text/csv' })
+const csvFile = (rows: string[], header = 'address,name,chainId') =>
+  new File([[header, ...rows].join('\n')], 'contacts.csv', { type: 'text/csv' })
 
-const openAndUpload = async (items: SpaceAddressBookItemDto[], rows: string[]) => {
+const openAndUpload = async (
+  items: SpaceAddressBookItemDto[],
+  rows: string[],
+  { tags = [], header }: { tags?: SpaceAddressBookTagDto[]; header?: string } = {},
+) => {
   const user = userEvent.setup()
-  render(<ImportWorkspaceCsv items={items} />)
+  render(<ImportWorkspaceCsv items={items} tags={tags} />)
   await user.click(screen.getByRole('button', { name: 'Import' }))
-  await user.upload(document.body.querySelector('input[type="file"]') as HTMLInputElement, csvFile(rows))
+  await user.upload(document.body.querySelector('input[type="file"]') as HTMLInputElement, csvFile(rows, header))
   return user
+}
+
+const importFile = async (user: ReturnType<typeof userEvent.setup>) => {
+  await waitFor(() => expect(screen.getByTestId('import-btn')).toBeEnabled())
+  await user.click(screen.getByTestId('import-btn'))
 }
 
 const importMessages = () =>
@@ -74,7 +70,7 @@ describe('ImportWorkspaceCsv', () => {
   })
 
   it('sends new contacts and the chains a saved contact gains, in one request', async () => {
-    const saved = itemBuilder()
+    const saved = spaceAddressBookItemBuilder()
       .with({ chainIds: ['1'] })
       .build()
     const address = newAddress()
@@ -99,7 +95,7 @@ describe('ImportWorkspaceCsv', () => {
   })
 
   it('closes, confirms and tracks the new and updated counts after a successful import', async () => {
-    const saved = itemBuilder()
+    const saved = spaceAddressBookItemBuilder()
       .with({ chainIds: ['1'] })
       .build()
 
@@ -112,7 +108,47 @@ describe('ImportWorkspaceCsv', () => {
     expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.IMPORT_ADDRESS_BOOK_SUBMIT, {
       [MixpanelEventParams.ENTRY_COUNT]: 1,
       [MixpanelEventParams.UPDATED_COUNT]: 1,
+      [MixpanelEventParams.WITH_TAGS]: false,
     })
+  })
+
+  it('merges the file tags into the saved ones and tracks the import as one with tags', async () => {
+    const team = spaceAddressBookTagBuilder().with({ name: 'Team' }).build()
+    const saved = spaceAddressBookItemBuilder()
+      .with({ chainIds: ['1'], tagIds: [team.id] })
+      .build()
+    const address = newAddress()
+
+    const user = await openAndUpload(
+      [saved],
+      [`${saved.address},${saved.name},1,Ops`, `${address},Treasury,1,Ops;Vendor`],
+      { tags: [team], header: 'address,name,chainId,tags' },
+    )
+    await importFile(user)
+
+    await waitFor(() => expect(upsert).toHaveBeenCalledTimes(1))
+    expect(upsert).toHaveBeenCalledWith({
+      spaceId: SPACE_ID,
+      upsertAddressBookItemsDto: {
+        items: [
+          { address: saved.address, name: saved.name, chainIds: ['1'], tags: ['Team', 'Ops'] },
+          { address, name: 'Treasury', chainIds: ['1'], tags: ['Ops', 'Vendor'] },
+        ],
+      },
+    })
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith(
+        SPACE_EVENTS.IMPORT_ADDRESS_BOOK_SUBMIT,
+        expect.objectContaining({ [MixpanelEventParams.WITH_TAGS]: true }),
+      ),
+    )
+  })
+
+  it('blocks a file with a tag the workspace rejects', async () => {
+    await openAndUpload([], [`${newAddress()},Treasury,1,=Ops`], { header: 'address,name,chainId,tags' })
+
+    expect(await screen.findByText('Row 2: Tags cannot start with =, +, - or @')).toBeInTheDocument()
+    expect(screen.getByTestId('import-btn')).toBeDisabled()
   })
 
   it('shows the gateway error and keeps the dialog open', async () => {
@@ -136,7 +172,7 @@ describe('ImportWorkspaceCsv', () => {
   })
 
   it('blocks a file whose contacts are all saved already', async () => {
-    const saved = itemBuilder()
+    const saved = spaceAddressBookItemBuilder()
       .with({ chainIds: ['1', '100'] })
       .build()
 

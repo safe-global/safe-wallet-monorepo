@@ -150,7 +150,7 @@ const WorkspaceContacts = ({
           actions={
             isAdmin ? (
               <>
-                <ImportWorkspaceCsv items={items} />
+                <ImportWorkspaceCsv items={items} tags={tags} />
                 {addContact}
               </>
             ) : undefined
@@ -180,7 +180,7 @@ const WorkspaceContacts = ({
         actions={
           isAdmin ? (
             <>
-              <ImportWorkspaceCsv items={items} />
+              <ImportWorkspaceCsv items={items} tags={tags} />
               {exportButton}
               {addContact}
             </>
@@ -212,7 +212,7 @@ const WorkspaceContacts = ({
 
       {isExportOpen && (
         <CsvExportDialog
-          csvData={spaceAddressBookToCsvRows(items)}
+          csvData={spaceAddressBookToCsvRows(items, tags)}
           filename={`workspace-${spaceId}-address-book`}
           onExport={() => trackEvent(SPACE_EVENTS.EXPORT_ADDRESS_BOOK)}
           handleClose={() => setIsExportOpen(false)}
