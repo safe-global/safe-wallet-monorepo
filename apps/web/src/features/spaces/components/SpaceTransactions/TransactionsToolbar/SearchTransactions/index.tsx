@@ -3,6 +3,7 @@ import useDebounce from '@safe-global/utils/hooks/useDebounce'
 import { SearchInput } from '@safe-global/views/components/ui/search-input'
 
 const SEARCH_DEBOUNCE_MS = 300
+const MAX_SEARCH_LENGTH = 100 // the gateway rejects longer searches
 
 type SearchTransactionsProps = {
   /** Called with the trimmed text once typing pauses, and at once when cleared */
@@ -32,6 +33,7 @@ const SearchTransactions = ({ onSearch }: SearchTransactionsProps): ReactElement
       aria-label="Search transactions"
       placeholder="Search Safes, networks, status, and signers…"
       value={value}
+      maxLength={MAX_SEARCH_LENGTH}
       onChange={(event) => setValue(event.target.value)}
       onClear={handleClear}
       className="min-w-0 flex-1"

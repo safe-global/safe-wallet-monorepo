@@ -83,4 +83,10 @@ describe('SearchTransactions', () => {
     expect(onSearch).toHaveBeenCalledTimes(1)
     expect(onSearch).toHaveBeenCalledWith('')
   })
+
+  it('accepts at most 100 characters, the gateway limit', () => {
+    render(<SearchTransactions onSearch={jest.fn()} />)
+
+    expect(searchbox()).toHaveAttribute('maxLength', '100')
+  })
 })
