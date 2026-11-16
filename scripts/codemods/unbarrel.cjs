@@ -18,7 +18,7 @@ const ONLY = process.argv.includes('--only')
 // Mocked files whose real module cannot load while a mock factory runs: an import cycle reads their exports
 // before they are initialized, or a test's other mocks break their imports. Their real exports are read lazily.
 const LAZY_MOCK_FILES = new Set([
-  '@/features/multichain/utils/utils',
+  '@/features/multichain/public/utils',
   '@/features/spaces/hooks/useSpaceMembers',
   '@/features/spaces/components/Sidebar/variants/SpaceSelectorDropdown/SpaceSelectorDropdown',
 ])
