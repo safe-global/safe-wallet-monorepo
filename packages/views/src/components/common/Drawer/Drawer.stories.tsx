@@ -109,6 +109,14 @@ export const Sections: Story = {
             <DrawerSection title="Details">
               <Typography variant="paragraph-small">A section with no trailing note.</Typography>
             </DrawerSection>
+            <DrawerSection collapsible title="Collapsible" rightNode="Starts open">
+              <div className="rounded-lg bg-muted p-3">
+                <Typography variant="paragraph-small">The title toggles this content.</Typography>
+              </div>
+            </DrawerSection>
+            <DrawerSection collapsible defaultOpen={false} title="Collapsed by default">
+              <Typography variant="paragraph-small">Hidden until the title is clicked.</Typography>
+            </DrawerSection>
           </div>
         </DrawerBody>
       </>
@@ -209,4 +217,58 @@ export const SizeLg: Story = {
       </>
     ),
   },
+}
+
+export const Resizable: Story = {
+  args: { resizable: true, size: 'lg', ariaLabel: 'Resizable drawer' },
+  render: (args) => (
+    <Drawer {...args}>
+      <DrawerHeader>
+        <DrawerTitle>Resizable panel</DrawerTitle>
+      </DrawerHeader>
+      <DrawerBody>
+        <Paragraphs count={12} />
+      </DrawerBody>
+      <DrawerFooter>
+        <Button>Review transaction</Button>
+      </DrawerFooter>
+    </Drawer>
+  ),
+}
+
+export const Responsive: Story = {
+  ...Resizable,
+  args: { ...Resizable.args, mobileFullScreen: true, ariaLabel: 'Responsive drawer' },
+}
+
+export const Mobile: Story = {
+  ...Responsive,
+  parameters: { viewport: { defaultViewport: 'mobile1' } },
+}
+
+export const CustomHeader: Story = {
+  args: { resizable: true, ariaLabel: 'Drawer with its own header' },
+  render: (args) => (
+    <Drawer
+      {...args}
+      header={({ fullScreen, toggleFullScreen, close }) => (
+        <div className="flex items-center gap-3 px-6 pt-6">
+          <DrawerTitle>Custom header</DrawerTitle>
+          <span className="flex-1" />
+          {toggleFullScreen && (
+            <Button variant="outline" size="sm" onClick={toggleFullScreen}>
+              {fullScreen ? 'Restore' : 'Expand'}
+            </Button>
+          )}
+          <Button variant="outline" size="sm" onClick={close}>
+            Close
+          </Button>
+        </div>
+      )}
+    >
+      <DrawerBody>
+        <Paragraphs count={6} />
+      </DrawerBody>
+    </Drawer>
+  ),
 }
