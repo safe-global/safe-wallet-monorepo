@@ -7,5 +7,3 @@ export const FeePaymentFeature = createFeatureHandle<FeePaymentContract>('fee-pa
 export type { FeePaymentContract } from './contract'
 
 export type { ResolvedGasTokenState, FeePreviewTx } from './hooks/useResolvedGasToken'
-
-export { IS_RELAYING_LIVE } from './constants'

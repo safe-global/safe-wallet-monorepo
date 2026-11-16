@@ -17,8 +17,6 @@ import PositionsSkeleton from '@safe-global/views/features/positions/components/
 import { PortfolioFeature } from '@/features/portfolio'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
-export { default as useIsPositionsFeatureEnabled } from './hooks/useIsPositionsFeatureEnabled'
-
 const Positions = () => {
   const positionsFiatTotal = usePositionsFiatTotal()
   const { data: protocols, error, isLoading } = usePositions()
