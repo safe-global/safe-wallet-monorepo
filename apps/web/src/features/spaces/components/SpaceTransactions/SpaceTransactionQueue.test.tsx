@@ -280,8 +280,31 @@ describe('SpaceTransactionQueue', () => {
 
       typeSearch('no such safe')
 
-      expect(await screen.findByText('No proposals match these filters')).toBeInTheDocument()
+      expect(await screen.findByText('No proposals match your search')).toBeInTheDocument()
       expect(screen.queryByText('Pending transactions of your Safe accounts will appear here')).not.toBeInTheDocument()
+    })
+
+    it('tells that nothing matches the filters when a search narrows them too', async () => {
+      respondBySearch()
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-safe')
+
+      fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+      typeSearch('no such safe')
+
+      expect(await screen.findByText('No proposals match these filters')).toBeInTheDocument()
+    })
+
+    it('clears the search from the no-match state', async () => {
+      respondBySearch()
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-safe')
+      typeSearch('no such safe')
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Clear search' }))
+
+      expect(await screen.findByTestId('space-queue-safe')).toBeInTheDocument()
+      expect(screen.getByRole('textbox', { name: 'Search' })).toHaveValue('')
     })
   })
 

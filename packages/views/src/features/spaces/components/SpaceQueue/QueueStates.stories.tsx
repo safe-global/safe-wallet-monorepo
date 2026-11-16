@@ -11,7 +11,11 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const NoMatches: Story = {
-  render: () => <QueueNoMatches onClear={fn()} />,
+  render: () => <QueueNoMatches hasFilters isSearching={false} onClear={fn()} />,
+}
+
+export const NoSearchMatches: Story = {
+  render: () => <QueueNoMatches hasFilters={false} isSearching onClear={fn()} />,
 }
 
 export const LoadError: Story = {

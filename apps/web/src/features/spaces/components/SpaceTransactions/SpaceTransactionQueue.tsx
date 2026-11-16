@@ -35,7 +35,6 @@ const QueueBody = memo(function QueueBody({
   onClearFilters: () => void
 }): ReactElement {
   const { sections } = queue
-  const isNarrowed = isFiltered || isSearching
 
   return (
     <>
@@ -47,8 +46,8 @@ const QueueBody = memo(function QueueBody({
 
       {sections.length > 0 ? (
         <SpaceQueueTable sections={sections} />
-      ) : isNarrowed ? (
-        <QueueNoMatches onClear={onClearFilters} />
+      ) : isFiltered || isSearching ? (
+        <QueueNoMatches hasFilters={isFiltered} isSearching={isSearching} onClear={onClearFilters} />
       ) : (
         <PagePlaceholder
           img={<NoTransactionsIcon />}
