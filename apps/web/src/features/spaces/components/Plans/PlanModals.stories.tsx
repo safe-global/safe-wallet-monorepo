@@ -9,7 +9,7 @@ import PlanChooserModal from './PlanChooserModal'
 import SelectAccountsStep from './SelectAccountsStep'
 import TrialEndingModal from './TrialEndingModal'
 import { buildPlanTiers, toCurrentPlan } from './planTiers'
-import { DAY, PAID_LINKS, PAID_PLANS, TRIAL_LINKS, billingHandlers, now, subscription } from './plans.fixtures'
+import { DAY, PAID_LINKS, PAID_PLANS, TRIAL_LINKS, billingHandlers, now, subscription } from './plans.storyData'
 
 const setup = createMockStory({
   scenario: 'efSafe',

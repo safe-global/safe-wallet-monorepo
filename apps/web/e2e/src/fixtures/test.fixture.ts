@@ -37,13 +37,16 @@ const COOKIE_STATE = JSON.stringify({
  */
 export async function seedLocalStorage(page: Page): Promise<void> {
   await page.addInitScript(
-    ({ cookiesKey, safeLabsKey, outreachKey, cookieState }) => {
+    ({ cookiesKey, safeLabsKey, outreachKey, stakingBannerKey, cookieState }) => {
       // Cookie + terms consent
       window.localStorage.setItem(cookiesKey, cookieState)
       window.localStorage.setItem(safeLabsKey, 'true')
 
       // Suppress outreach popup
       window.sessionStorage.setItem(outreachKey, String(Date.now()))
+
+      // The staking promo banner appears once balances load and moves the controls below it
+      window.localStorage.setItem(stakingBannerKey, 'true')
 
       // Suppress Beamer (product updates widget).
       // KNOWN GAP: Beamer reads these keys suffixed with its PRODUCT_ID, so these unsuffixed
@@ -59,6 +62,7 @@ export async function seedLocalStorage(page: Page): Promise<void> {
       cookiesKey: LS_KEYS.cookiesTerms,
       safeLabsKey: LS_KEYS.safeLabsTerms,
       outreachKey: 'SAFE_v2__outreachPopup_session_v2',
+      stakingBannerKey: LS_KEYS.stakingPromoBannerHidden,
       cookieState: COOKIE_STATE,
     },
   )

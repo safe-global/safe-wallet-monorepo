@@ -2,7 +2,7 @@ import { useFormContext } from 'react-hook-form'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
+import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
 import { buildSafeAccountId } from '../../../SafeAccountSelector/utils'
 import type { SafeAccountOption } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 import {

@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker'
 import {
   AttestationVerificationStatus,
   CheckStatus,
@@ -13,6 +14,8 @@ import {
   requestCreatedEvent,
   sentinelRevealedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
+
+faker.seed(1)
 
 export const STORY_SAFE_TX_HASH = `0x${'cd'.repeat(32)}` as const
 export const STORY_CHAIN_ID = '1'

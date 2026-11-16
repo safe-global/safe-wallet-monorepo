@@ -5,6 +5,8 @@ import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces
 import { createMockStory } from '@/stories/mocks'
 import MembersList from './index'
 
+faker.seed(1)
+
 const PAST = faker.date.past().toISOString()
 const FUTURE = faker.date.future().toISOString()
 

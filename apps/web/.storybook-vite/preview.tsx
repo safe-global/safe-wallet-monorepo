@@ -3,10 +3,14 @@ import React, { useEffect } from 'react'
 
 import { initialize, mswLoader } from 'msw-storybook-addon'
 import { MotionGlobalConfig } from 'motion/react'
+import { configure } from 'storybook/test'
 
 import '../src/styles/globals.css'
 import { ShadcnProvider } from '../.storybook/shadcn'
 import { mockChainHandlers } from '../.storybook/mockChains'
+
+// Play functions wait for forms and pages to settle; on the CI runner that can take longer than the 1s default
+configure({ asyncUtilTimeout: 10000 })
 
 // The visual sweep asks for reduced motion; motion ignores it, so render its animations at their end state
 if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
