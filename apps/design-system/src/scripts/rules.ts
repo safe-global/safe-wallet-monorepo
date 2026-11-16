@@ -47,9 +47,11 @@ const splitTopLevel = (text: string): string[] => {
   return parts
 }
 
+const unescapeRegex = (alternative: string): string => alternative.replace(/\\(.)/g, '$1')
+
 /** `h-` → `h-*`, `text-(xs|sm)` → `text-xs|sm`, `w-\[` → `w-[…]` */
 const displayPrefix = (alternative: string): string => {
-  const unescaped = alternative.replace(/\\\\/g, '\\').replace(/\\\[/g, '[')
+  const unescaped = unescapeRegex(alternative)
   if (unescaped.endsWith('[')) return `${unescaped}…]`
   const group = unescaped.match(/^(.*)\((.*)\)$/)
   if (group) return `${group[1]}${group[2]}`
@@ -57,7 +59,7 @@ const displayPrefix = (alternative: string): string => {
 }
 
 const sampleClass = (alternative: string): string => {
-  const unescaped = alternative.replace(/\\\\/g, '\\').replace(/\\\[/g, '[')
+  const unescaped = unescapeRegex(alternative)
   const group = unescaped.match(/^(.*)\(([^|)]*)/)
   if (group) return `${group[1]}${group[2]}`
   return SAMPLE_VALUES[unescaped] ?? `${unescaped}2`

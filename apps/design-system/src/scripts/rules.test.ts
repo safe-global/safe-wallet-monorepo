@@ -12,6 +12,16 @@ describe('rules', () => {
     }
   })
 
+  it('unescapes each backslash escape once', () => {
+    const parsed = parseRule({
+      selector:
+        "JSXOpeningElement[name.name='Box'] > JSXAttribute[name.name='className'] Literal[value=/(?:^|\\s)(w-\\[|a\\\\[)/]",
+      message: "Don't style <Box>",
+    })
+    assert.deepEqual(parsed.classPrefixes, ['w-[…]', 'a\\[…]'])
+    assert.equal(parsed.example, '<Box className="w-[480px] a\\[2">')
+  })
+
   it('throws on a selector in an unknown shape', () => {
     assert.throws(() => parseRule({ selector: 'JSXAttribute[name.name="x"]', message: 'x' }))
   })

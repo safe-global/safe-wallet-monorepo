@@ -124,7 +124,7 @@ describe('package exports', () => {
 
   it('resolves the hooks pattern', () => {
     for (const hook of ['use-mobile', 'use-tablet']) {
-      expect(existsSync(path.join(root, exportMap['./hooks/*'].replace('*', hook)))).toBe(true)
+      expect(existsSync(path.join(root, exportMap['./hooks/*'].replaceAll('*', hook)))).toBe(true)
     }
   })
 })
