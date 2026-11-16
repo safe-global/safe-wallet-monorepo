@@ -1,5 +1,6 @@
 import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
+import { OfflineWorkspaceFeature } from '@/features/offline-workspace'
 import { SafeProFeature, useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement'
 import SpaceRow from './SpaceRow'
 import SignInOptions from '../SignInOptions'
@@ -12,6 +13,8 @@ import { isAuthenticated, selectIsStoreHydrated } from '@/store/authSlice'
 import { ArrowRight, Check, ExternalLink as ExternalLinkIcon } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Card } from '@safe-global/views/components/ui/card'
+import { Checkbox } from '@safe-global/views/components/ui/checkbox'
+import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { Link } from '@safe-global/views/components/ui/link'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -102,6 +105,8 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
   // The Safe Pro terms only apply once Safe Pro is live.
   const isSafePro = useIsSafeProEnabled()
   const { SafeProBanner } = useLoadFeature(SafeProFeature)
+  const { OfflineWorkspaceSetup } = useLoadFeature(OfflineWorkspaceFeature)
+  const [isOfflineChosen, setIsOfflineChosen] = useState(false)
 
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
@@ -131,11 +136,11 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
                 )}
               </div>
 
-              <Typography variant="h3" className={cn('text-center', isSafePro ? 'mb-4' : 'mb-6')}>
-                Sign in to your Workspace
+              <Typography variant="h3" className={cn('text-center', isSafePro && !isOfflineChosen ? 'mb-4' : 'mb-6')}>
+                {isOfflineChosen ? 'Open an offline Workspace' : 'Sign in to your Workspace'}
               </Typography>
 
-              {isSafePro && (
+              {isSafePro && !isOfflineChosen && (
                 <p className="mb-6 text-center text-xs leading-[18px] text-muted-foreground">
                   By continuing you accept the{' '}
                   <Link
@@ -160,7 +165,21 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
                 </p>
               )}
 
-              <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+              {isOfflineChosen ? (
+                <OfflineWorkspaceSetup onEnter={afterSignIn} />
+              ) : (
+                <SignInOptions afterSignIn={afterSignIn} redirectLoading={redirectLoading} />
+              )}
+
+              <Field orientation="horizontal" className="mt-6 border-t border-border pt-4">
+                <Checkbox
+                  id="offline-workspaces"
+                  checked={isOfflineChosen}
+                  onCheckedChange={setIsOfflineChosen}
+                  data-testid="offline-mode-checkbox"
+                />
+                <FieldLabel htmlFor="offline-workspaces">Use Workspaces in offline mode only</FieldLabel>
+              </Field>
             </div>
           </div>
 

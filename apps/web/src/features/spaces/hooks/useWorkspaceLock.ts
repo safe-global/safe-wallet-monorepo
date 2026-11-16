@@ -1,4 +1,5 @@
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
+import { useIsOfflineWorkspace } from '@/features/offline-workspace'
 import { useIsInvited } from './useSpaceMembers'
 import { useSpaceSubscription } from './billing/useSpaceSubscription'
 import { useSpaceOffers } from './billing/useSpaceOffers'
@@ -13,7 +14,9 @@ export const useWorkspaceLock = (spaceId?: string | null) => {
   const isInvited = useIsInvited()
   const subscription = useSpaceSubscription(spaceId)
   const offers = useSpaceOffers(spaceId)
-  const applies = isSafePro && !isInvited
+  const isOffline = useIsOfflineWorkspace()
+  // An offline Workspace has no plan to check: it stays open and paid features stay off
+  const applies = isSafePro && !isInvited && !isOffline
   // An uninitialized query reads as "no plan, no offers"; resolving keeps the lock from firing on stale emptiness.
   const isResolving =
     applies &&

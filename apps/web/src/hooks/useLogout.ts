@@ -4,6 +4,9 @@ import { AppRoutes } from '@/config/routes'
 import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import useWallet from '@/hooks/wallets/useWallet'
+import { useAppDispatch } from '@/store'
+import { useIsOfflineWorkspace } from '@/features/offline-workspace'
+import { setOfflineMode } from '@/features/offline-workspace/store'
 
 const LOGOUT_REDIRECT_PATH = '/v1/auth/logout/redirect'
 
@@ -23,8 +26,17 @@ const LOGOUT_REDIRECT_PATH = '/v1/auth/logout/redirect'
 const useLogout = () => {
   const onboard = useOnboard()
   const wallet = useWallet()
+  const dispatch = useAppDispatch()
+  const isOffline = useIsOfflineWorkspace()
 
   const logout = useCallback(async () => {
+    // Offline mode has no CGW session: leaving it keeps the stored Workspaces and the wallet
+    if (isOffline) {
+      dispatch(setOfflineMode(false))
+      window.location.assign(AppRoutes.welcome.spaces)
+      return
+    }
+
     if (onboard && wallet) {
       await onboard.disconnectWallet({ label: wallet.label })
     }
@@ -48,7 +60,7 @@ const useLogout = () => {
     document.body.appendChild(form)
     form.submit()
     document.body.removeChild(form)
-  }, [onboard, wallet])
+  }, [onboard, wallet, dispatch, isOffline])
 
   return { logout }
 }
