@@ -317,7 +317,7 @@ describe('SpaceSelectorDropdown', () => {
       expect.objectContaining({ action: 'Workspace create started' }),
       expect.objectContaining({ entry_point: 'sidebar' }),
     )
-    expect(mockPush).toHaveBeenCalledWith(AppRoutes.spaces.createSpace)
+    expect(mockPush).toHaveBeenCalledWith(AppRoutes.welcome.createSpace)
   })
 
   it('includes safe query param in create space navigation when safe is in the URL', () => {
@@ -329,7 +329,7 @@ describe('SpaceSelectorDropdown', () => {
     fireEvent.click(screen.getByText('Add new Workspace'))
 
     expect(mockPush).toHaveBeenCalledWith({
-      pathname: AppRoutes.spaces.createSpace,
+      pathname: AppRoutes.welcome.createSpace,
       query: { safe: '1:0xdeadbeef' },
     })
   })

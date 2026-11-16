@@ -232,18 +232,12 @@
   --radius-infinite: 9999px;
 }
 
-/*
- * Scoped Tailwind Preflight
- *
- * Since we can't import tailwindcss/preflight.css globally (it would break MUI),
- * we scope the relevant subset of preflight resets to .shadcn-scope.
- * Derived from: node_modules/tailwindcss/preflight.css
- *
- * Intentionally omitted (document-level, handled by MUI CssBaseline):
- *   - html/:host line-height, font-family, tap-highlight
- *   - [hidden] display:none
- */
 @layer base {
+  /* Any author `display` (e.g. the iframe reset below, or `flex`) beats the browser's own [hidden] rule. */
+  .shadcn-scope [hidden]:where(:not([hidden='until-found'])) {
+    display: none !important;
+  }
+
   /* 1. Box model reset  2. Remove default margins/padding  3. Reset borders */
   .shadcn-scope,
   .shadcn-scope *,

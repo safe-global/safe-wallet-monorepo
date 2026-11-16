@@ -17,6 +17,11 @@ import { useIsWalletProposer } from '@/hooks/useProposers'
 import { useTxActions } from '@/components/tx/shared/hooks'
 import { getTxOrigin } from '@/utils/transactions'
 
+jest.mock('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks', () => ({
+  ...jest.requireActual('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'),
+  useRoles: jest.fn(() => []),
+}))
+
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: jest.fn(() => ({ configs: [] })),
@@ -83,9 +88,9 @@ const safeTxContext: SafeTxContextParams = {
   txOrigin: TX_ORIGIN,
   setTxOrigin: jest.fn(),
   isReadOnly: false,
-  gtfPaymentMode: 'safe',
-  setGtfPaymentMode: jest.fn(),
-  setGtfSelectedGasToken: jest.fn(),
+  feePaymentMode: 'safe',
+  setFeePaymentMode: jest.fn(),
+  setFeeGasToken: jest.fn(),
 }
 
 describe('Propose slot', () => {

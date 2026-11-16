@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import SecurityEmptyState from './SecurityEmptyState'
 import { createMockStory } from '@/stories/mocks'
 
-const setup = createMockStory({ features: { spaces: true }, layout: 'paper', shadcn: true })
+const setup = createMockStory({ authenticated: true, layout: 'paper', shadcn: true })
 
 const meta = {
   title: 'Features/SecurityHub/SecurityEmptyState',

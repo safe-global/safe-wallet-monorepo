@@ -18,7 +18,7 @@ import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import * as useChainsModule from '@/hooks/useChains'
-import { tokenOptionBuilder } from '../../utils/tokenOptions.fixtures'
+import { tokenOptionBuilder } from '../../utils/tokenOptions.testData'
 import useSpendingLimitTokenOptions from '../../hooks/useSpendingLimitTokenOptions'
 import { useExistingSpendingLimits } from '../../ExistingSpendingLimitsProvider'
 import {
@@ -137,9 +137,9 @@ const safeTxContext = (overrides: Partial<SafeTxContextParams> = {}): SafeTxCont
   setSafeTxGas: jest.fn(),
   setTxOrigin: jest.fn(),
   isReadOnly: false,
-  gtfPaymentMode: 'safe',
-  setGtfPaymentMode: jest.fn(),
-  setGtfSelectedGasToken: jest.fn(),
+  feePaymentMode: 'safe',
+  setFeePaymentMode: jest.fn(),
+  setFeeGasToken: jest.fn(),
   ...overrides,
 })
 

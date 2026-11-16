@@ -77,7 +77,7 @@ function getMergeBase() {
   return ''
 }
 
-const SOURCE_EXT_RE = /\.(ts|tsx|js|jsx)$/
+const SOURCE_EXT_RE = /\.(ts|tsx|mts|cts|js|jsx|mjs|cjs)$/
 
 function getChangedFiles(ws, { quiet = false } = {}) {
   const mergeBase = getMergeBase()

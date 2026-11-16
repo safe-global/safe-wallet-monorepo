@@ -1,7 +1,7 @@
 import { ExecutionMethod } from '@/src/features/HowToExecuteSheet/types'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
+import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 import { isMultisigDetailedExecutionInfo } from '@/src/utils/transaction-guards'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { FeeParams } from '@/src/hooks/useFeeParams/useFeeParams'
@@ -13,7 +13,7 @@ export const txRequiresRelay = (txDetails?: TransactionDetails): boolean => {
   if (!info || !isMultisigDetailedExecutionInfo(info)) {
     return false
   }
-  return isGtfSafePaid({
+  return isPaidFromSafe({
     gasPrice: info.gasPrice,
     baseGas: info.baseGas,
     refundReceiver: info.refundReceiver?.value,
@@ -37,7 +37,7 @@ export const getExecutionMethod = (
 ): ExecutionMethod => {
   const isRelayEnabled = !!chain && hasFeature(chain, FEATURES.RELAYING)
 
-  // GTF Safe-pays txs MUST relay, the Safe reimburses the relayer regardless of who executes, so a
+  // Pay from Safe txs MUST relay, the Safe reimburses the relayer regardless of who executes, so a
   // signer-EOA route would double-pay. Force relay (bypassing the daily quota) whenever the chain
   // supports relaying. The "relay not available" case is handled by the caller as a terminal state.
   if (requiresRelay && isRelayEnabled) {

@@ -4,6 +4,9 @@ import { JsonRpcProvider, toBeHex } from 'ethers'
 import Safe, { getSafeContract, getSafeProxyFactoryContract } from '@safe-global/protocol-kit'
 import { initSafeSDK } from '../safeCoreSDK'
 import { isValidSafeVersion } from '@safe-global/utils/services/contracts/utils'
+import { faker } from '@faker-js/faker'
+
+const NON_SAFE_BYTECODE = '0x6080'
 
 jest.mock('@/services/contracts/safeContracts', () => {
   return {
@@ -42,6 +45,14 @@ jest.mock('@safe-global/utils/types/contracts', () => {
 })
 
 describe('safeCoreSDK', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
   describe('isValidSafeVersion', () => {
     it('should return true for valid versions', () => {
       expect(isValidSafeVersion('1.3.0')).toBe(true)
@@ -106,7 +117,7 @@ describe('safeCoreSDK', () => {
         const chainId = '1'
         const version = '1.3.0'
 
-        const mockProvider = new JsonRpcProvider()
+        const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
 
         await initSafeSDK({
@@ -125,7 +136,7 @@ describe('safeCoreSDK', () => {
         const chainId = '1'
         const version = '1.3.0'
 
-        const mockProvider = new JsonRpcProvider()
+        const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
 
         await initSafeSDK({
@@ -148,7 +159,7 @@ describe('safeCoreSDK', () => {
         const chainId = '137' // Polygon
         const version = '1.3.0'
 
-        const mockProvider = new JsonRpcProvider()
+        const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
 
         await initSafeSDK({
@@ -171,7 +182,7 @@ describe('safeCoreSDK', () => {
         const chainId = '137' // Polygon
         const version = '1.0.0'
 
-        const mockProvider = new JsonRpcProvider()
+        const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
 
         await initSafeSDK({
@@ -194,7 +205,7 @@ describe('safeCoreSDK', () => {
         const chainId = '10' // Optimism mainnet
         const version = '1.3.0'
 
-        const mockProvider = new JsonRpcProvider()
+        const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
 
         await initSafeSDK({
@@ -219,8 +230,10 @@ describe('safeCoreSDK', () => {
       it('should retrieve the Safe version from the contract if not provided', async () => {
         const chainId = '1'
 
-        const mockProvider = new JsonRpcProvider()
+        const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
+        const safeContract = Gnosis_safe__factory.connect(MAINNET_MASTER_COPY, mockProvider)
+        jest.mocked(safeContract.VERSION).mockResolvedValueOnce('1.3.0')
 
         await initSafeSDK({
           provider: mockProvider,
@@ -231,14 +244,16 @@ describe('safeCoreSDK', () => {
           implementationVersionState: ImplementationVersionState.UNKNOWN,
         })
 
-        expect(Gnosis_safe__factory.connect(MAINNET_MASTER_COPY, mockProvider).VERSION).toHaveBeenCalled()
+        expect(safeContract.VERSION).toHaveBeenCalled()
       })
 
       it('should return an L1 SDK instance for L1 contracts not deployed on mainnet', async () => {
         const chainId = '137' // Polygon
 
-        const mockProvider = new JsonRpcProvider()
+        const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
+        const safeContract = Gnosis_safe__factory.connect(MAINNET_MASTER_COPY, mockProvider)
+        jest.mocked(safeContract.VERSION).mockResolvedValueOnce('1.3.0')
 
         await initSafeSDK({
           provider: mockProvider,
@@ -259,19 +274,25 @@ describe('safeCoreSDK', () => {
       it('should return undefined for unsupported mastercopies', async () => {
         const chainId = '1'
 
-        const mockProvider = new JsonRpcProvider()
+        const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
         mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
+        mockProvider.getCode = jest.fn().mockResolvedValue(NON_SAFE_BYTECODE)
+        const unknownMasterCopy = faker.finance.ethereumAddress()
+        const warn = jest.spyOn(console, 'warn')
 
         const sdk = await initSafeSDK({
           provider: mockProvider,
           chainId,
           address: MAINNET_MASTER_COPY,
           version: null,
-          implementation: '0xinvalid',
+          implementation: unknownMasterCopy,
           implementationVersionState: ImplementationVersionState.UNKNOWN,
         })
 
         expect(sdk).toBeUndefined()
+        expect(warn).toHaveBeenCalledWith(
+          `[SafeSDK] Mastercopy at ${unknownMasterCopy} is not a recognized L2 mastercopy`,
+        )
       })
     })
 
@@ -279,7 +300,7 @@ describe('safeCoreSDK', () => {
       const chainId = '1'
       const safeChainId = '100'
 
-      const mockProvider = new JsonRpcProvider()
+      const mockProvider = new JsonRpcProvider(undefined, undefined, { staticNetwork: true })
       mockProvider.getNetwork = jest.fn().mockReturnValue({ chainId: BigInt(chainId) })
 
       const sdk = await initSafeSDK({

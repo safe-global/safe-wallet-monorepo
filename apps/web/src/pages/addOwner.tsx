@@ -1,4 +1,3 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useContext, useEffect } from 'react'
@@ -7,7 +6,7 @@ import { AddOwnerFlow } from '@/components/tx-flow/flows'
 import { AppRoutes } from '@/config/routes'
 import { BRAND_NAME } from '@/config/constants'
 
-const AddOwner: NextPage = () => {
+const AddOwner = () => {
   const router = useRouter()
   const { address } = router.query
   const ownerAddress = Array.isArray(address) ? address[0] : address

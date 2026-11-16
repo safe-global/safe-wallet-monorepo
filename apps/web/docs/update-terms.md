@@ -19,6 +19,4 @@ We rely on the version number from `version.js`. When the Redux store is rehydra
 the store against the version in `version.js`. If they differ, we reset the accepted terms, forcing the user to accept
 the new version.
 
-For Cypress, `cypress.config.js` reads the version from `version.js` and passes it as the
-`CURRENT_COOKIE_TERMS_VERSION` environment variable. The Playwright fixtures and the Jest tests import `version.js`
-directly.
+The Playwright fixtures and the Jest tests import `version.js` directly.

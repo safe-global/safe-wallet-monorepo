@@ -12,7 +12,7 @@ import type {
   ResolvedSidebarNavItem,
   ResolvedSidebarGroup,
 } from '@safe-global/views/features/spaces/components/Sidebar/types'
-import { MOCK_SPACE_ID } from '@/stories/mocks'
+import { MOCK_SPACE_ID, createHandlers } from '@/stories/mocks'
 
 const mockSpaceId = '1'
 
@@ -138,6 +138,7 @@ const meta = {
   component: SpacesSidebarVariant,
   decorators: [withMockProvider({ shadcn: true })],
   parameters: {
+    msw: { handlers: createHandlers() },
     layout: 'fullscreen',
   },
 } satisfies Meta<typeof SpacesSidebarVariant>

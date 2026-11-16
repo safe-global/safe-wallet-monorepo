@@ -10,7 +10,7 @@ const OPERATIONS = '22222222-2222-2222-2222-222222222222'
 const setup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
+  authenticated: true,
   pathname: '/home',
   layout: 'none',
   shadcn: true,

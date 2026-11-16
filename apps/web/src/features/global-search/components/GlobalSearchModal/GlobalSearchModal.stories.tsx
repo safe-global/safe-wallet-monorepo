@@ -28,7 +28,7 @@ const safeLevelSetup = createMockStory({
 const spaceLevelSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
+  authenticated: true,
   pathname: '/spaces/settings',
   query: { spaceId: '1' },
   store: openStore,

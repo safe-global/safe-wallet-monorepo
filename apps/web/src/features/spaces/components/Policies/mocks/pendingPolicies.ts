@@ -40,7 +40,7 @@ export const mockEthMetadata = (): NativeTokenMetadataDto => ({
   address: '0x0000000000000000000000000000000000000000',
   symbol: 'ETH',
   decimals: 18,
-  logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
+  logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
   name: 'Ether',
   trusted: true,
 })

@@ -5,6 +5,8 @@ import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces
 import { createMockStory } from '@/stories/mocks'
 import MembersList from './index'
 
+faker.seed(1)
+
 const PAST = faker.date.past().toISOString()
 const FUTURE = faker.date.future().toISOString()
 
@@ -24,7 +26,8 @@ const member = (overrides: Omit<Partial<MemberDto>, 'user'> & { user?: Partial<M
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true, switchAuthenticator: true },
+  authenticated: true,
+  features: { switchAuthenticator: true },
   pathname: '/spaces/members',
   query: { spaceId: '1' },
   shadcn: true,

@@ -178,10 +178,9 @@ const TxSigners = ({
 
   // Lookup the EOA that submitted the transaction on-chain (for module and incoming txs)
   const readOnlyProvider = useWeb3ReadOnly()
-  const [onChainFrom] = useAsync(async () => {
+  const [onChainFrom] = useAsync(() => {
     if (isMultisig || !txDetails.txHash || !readOnlyProvider) return undefined
-    const tx = await readOnlyProvider.getTransaction(txDetails.txHash)
-    return tx?.from
+    return readOnlyProvider.getTransaction(txDetails.txHash).then((tx) => tx?.from)
   }, [isMultisig, txDetails.txHash, readOnlyProvider])
 
   const explorerLink = chain && txDetails.txHash ? getBlockExplorerLink(chain, txDetails.txHash) : undefined

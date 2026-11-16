@@ -23,7 +23,7 @@ import {
 } from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import { SafeTxContext } from '../tx-flow/SafeTxProvider'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { trackTxEvents } from '@/components/tx/shared/tracking'
+import { getGasPaymentSource, trackTxEvents } from '@/components/tx/shared/tracking'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useChainId from '@/hooks/useChainId'
 import { useIsCounterfactualSafe } from '@/features/counterfactual'
@@ -32,7 +32,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { isGtfSafePaid } from '@safe-global/utils/utils/isGtfSafePaid'
+import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 import { isMultisigDetailedExecutionInfo, isOneSignatureShort } from '@/utils/transaction-guards'
 import type { GasPayer } from '@/utils/gasPayment'
 import { isSafeSigner, isSmartContractWallet } from '@/utils/wallets'
@@ -257,7 +257,7 @@ const TxFlowProvider = <T extends unknown>({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const isGtfChain = useHasFeature(FEATURES.GTF) ?? false
+  const isPayFromSafeChain = useHasFeature(FEATURES.GTF) ?? false
 
   const trackTxEvent = useCallback(
     async (txId: string, isExecuted = false, isRoleExecution = false, isProposerCreation = false) => {
@@ -267,16 +267,18 @@ const TxFlowProvider = <T extends unknown>({
         details && isMultisigDetailedExecutionInfo(details.detailedExecutionInfo)
           ? details.detailedExecutionInfo
           : undefined
-      const gasPaymentSource = !isGtfChain
-        ? undefined
-        : exec &&
-            isGtfSafePaid({
-              gasPrice: exec.gasPrice,
-              baseGas: exec.baseGas,
-              refundReceiver: exec.refundReceiver?.value,
-            })
-          ? 'safe'
-          : 'signing_wallet'
+      const gasPaymentSource = getGasPaymentSource({
+        isSafePaid:
+          !!exec &&
+          isPaidFromSafe({
+            gasPrice: exec.gasPrice,
+            baseGas: exec.baseGas,
+            refundReceiver: exec.refundReceiver?.value,
+          }),
+        isExecuted,
+        gasPaymentOption,
+        isPayFromSafeChain,
+      })
       // Compute isMassPayout from data (recipients.length > 1)
       const recipients = (data as { recipients?: unknown[] } | undefined)?.recipients
       const isMassPayout = Array.isArray(recipients) && recipients.length > 1
@@ -304,7 +306,7 @@ const TxFlowProvider = <T extends unknown>({
       txOrigin,
       data,
       safe.threshold,
-      isGtfChain,
+      isPayFromSafeChain,
       gasPaymentOption,
     ],
   )

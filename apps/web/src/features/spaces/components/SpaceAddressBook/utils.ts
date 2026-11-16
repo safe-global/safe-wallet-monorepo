@@ -31,7 +31,7 @@ export const createContactItems = (data: ImportContactsFormValues) => {
         name: sanitizeName(name),
       }
     })
-    .filter(Boolean) as UpsertAddressBookItem[]
+    .filter((item): item is UpsertAddressBookItem => !!item)
 }
 
 export const getSelectedAddresses = (contacts: ImportContactsFormValues['contacts']) => {

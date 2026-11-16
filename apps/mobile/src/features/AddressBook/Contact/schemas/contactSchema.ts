@@ -7,25 +7,18 @@ export const contactSchema = z.object({
     .string()
     .min(1, 'Name is required')
     .max(50, 'Name is too long')
-    .refine((value) => value.trim().length > 0, {
-      message: 'Name cannot be empty or only whitespace',
-    }),
+    .refine((value) => value.trim().length > 0, 'Name cannot be empty or only whitespace'),
   address: z
     .string()
     .min(1, 'Address is required')
-    .refine(
-      (value) => {
-        try {
-          const { address } = parsePrefixedAddress(value)
-          return isValidAddress(address)
-        } catch {
-          return false
-        }
-      },
-      {
-        message: 'Invalid Ethereum address format',
-      },
-    ),
+    .refine((value) => {
+      try {
+        const { address } = parsePrefixedAddress(value)
+        return isValidAddress(address)
+      } catch {
+        return false
+      }
+    }, 'Invalid Ethereum address format'),
 })
 
 export type ContactFormData = z.infer<typeof contactSchema>

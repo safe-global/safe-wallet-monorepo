@@ -22,6 +22,7 @@ import type {
   TransactionDetails,
   TransactionItem,
   TransactionItemPage,
+  QueuedItemPage,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
 // Portfolio fixtures
@@ -68,6 +69,8 @@ import txRemoveOwner from './transactions/details/remove-owner.json'
 import txDisableModule from './transactions/details/disable-module.json'
 import txChangeThreshold from './transactions/details/change-threshold.json'
 import txReceiveQtrust from './transactions/details/receive-qtrust.json'
+import queuePendingBatch from './transactions/queue/pending-batch.json'
+import txBatchAwaiting from './transactions/details/batch-awaiting.json'
 
 // Swap order and staking fixtures: the list item and the details of each transaction
 import swapSell1Action from './transactions/swaps/sell1Action.json'
@@ -93,7 +96,7 @@ import stakingWithdrawal from './transactions/staking/withdrawal.json'
 export const portfolioFixtures = {
   /** EF Safe - DeFi heavy ($142M in positions, 8 apps) */
   efSafe: portfolioEfSafe as Portfolio,
-  /** Vitalik Safe - Whale with many tokens (1551 tokens, $675M) */
+  /** Vitalik Safe - Totals of a large portfolio ($695M) with its top 4 tokens; the token rows come from balances */
   vitalik: portfolioVitalik as Portfolio,
   /** Safe with spam tokens */
   spamTokens: portfolioSpamTokens as Portfolio,
@@ -109,7 +112,7 @@ export const portfolioFixtures = {
 export const balancesFixtures = {
   /** EF Safe - 32 tokens */
   efSafe: balancesEfSafe as Balances,
-  /** Vitalik Safe - 1551 tokens (many spam) */
+  /** Vitalik Safe - 44 valued tokens with known logos (spam and dust removed) */
   vitalik: balancesVitalik as Balances,
   /** Spam tokens Safe */
   spamTokens: balancesSpamTokens as Balances,
@@ -195,6 +198,15 @@ export const transactionFixtures = {
     changeThreshold: txChangeThreshold as TransactionDetails,
     receiveQtrust: txReceiveQtrust as TransactionDetails,
   },
+}
+
+/**
+ * Queue of the efSafe on Ethereum with a queued multiSend first (nonce 28, 1 of 3), and the details of that batch
+ */
+export const queueFixtures = {
+  pendingBatch: queuePendingBatch as QueuedItemPage,
+  // CGW sends `dataDecoded: null` for undecoded multiSend actions; the generated type only allows undefined
+  batchAwaiting: txBatchAwaiting as unknown as TransactionDetails,
 }
 
 export type RecordedTransaction = {

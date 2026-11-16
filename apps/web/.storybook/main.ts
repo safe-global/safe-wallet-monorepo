@@ -71,9 +71,10 @@ const config: StorybookConfig = {
       'mocks/useBytecodeComparison.ts',
     )
 
-    // Mock next/image to bypass the image loader stub that fails on static imports
-    // This resolves the "unsupported file type: undefined" error when building Storybook
-    ;(config.resolve.alias as Record<string, string>)['next/image'] = path.resolve(__dirname, 'mocks/nextImage.js')
+    // Token logos without their sandboxed iframe, which painted too late for the visual sweep
+    // Keyed by the resolved path: '@/' imports reach the resolver as absolute paths
+    ;(config.resolve.alias as Record<string, string>)[path.resolve(__dirname, '../src/components/common/IframeIcon')] =
+      path.resolve(__dirname, 'mocks/iframeIcon.tsx')
 
     // Replace the live CoW Swap iframe with a fixed placeholder so swap stories are deterministic
     ;(config.resolve.alias as Record<string, string>)['@cowprotocol/widget-react$'] = path.resolve(
@@ -179,7 +180,8 @@ const config: StorybookConfig = {
     return config
   },
 
-  staticDirs: ['../public'],
+  // Images that stories and config/test fixtures reference; outside public/ so they never ship with the app
+  staticDirs: ['../public', { from: './mock-assets', to: '/mock-assets' }],
 
   env: (config) => ({
     ...config,
@@ -188,6 +190,10 @@ const config: StorybookConfig = {
     NEXT_PUBLIC_APP_HOMEPAGE: process.env.NEXT_PUBLIC_APP_HOMEPAGE || packageJson.homepage,
     // Enable official host features (logo, branding) in Storybook
     NEXT_PUBLIC_IS_OFFICIAL_HOST: 'true',
+    // Generated Safe names ("Ecstatic Ethereum Safe") take the first adjective instead of a random one
+    VISUAL_REGRESSION_BUILD: 'true',
+    // Any non-empty ID mounts the What's new frame; the sweep blocks the Beamer host
+    NEXT_PUBLIC_BEAMER_ID: 'storybook',
   }),
 
   typescript: {
