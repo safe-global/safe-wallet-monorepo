@@ -4,14 +4,16 @@ import SkeletonTxList from '@safe-global/views/components/common/PaginatedTxns/S
 import { QueueEmpty, QueueLoadError, QueueNoMatches, QueueTruncatedNotice } from './QueueStates'
 
 const meta = {
-  title: 'Features/Spaces/SpaceQueue/QueueStates',
+  title: 'Features/Spaces/Transactions/QueueStates',
   parameters: { layout: 'padded' },
 } satisfies Meta
 
 export default meta
 type Story = StoryObj<typeof meta>
 
+/** Always skeletons: the queue shows them until its first answer arrives */
 export const Loading: Story = {
+  tags: ['skip-visual-test'],
   render: () => <SkeletonTxList />,
 }
 

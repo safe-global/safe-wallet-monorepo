@@ -15,20 +15,19 @@ const token = (symbol: string, decimals = 18): TokenInfo => ({
   trusted: true,
 })
 
-const tx = (txInfo: object, nonce = 12): Transaction =>
-  ({
-    id: `multisig_${SAFE}_${nonce}`,
-    timestamp: 1_767_225_600_000,
-    txStatus: 'AWAITING_CONFIRMATIONS',
-    txInfo,
-    executionInfo: {
-      type: 'MULTISIG',
-      nonce,
-      confirmationsRequired: 2,
-      confirmationsSubmitted: 1,
-      missingSigners: [],
-    },
-  }) as unknown as Transaction
+const tx = (txInfo: Transaction['txInfo'], nonce = 12): Transaction => ({
+  id: `multisig_${SAFE}_${nonce}`,
+  timestamp: 1_767_225_600_000,
+  txStatus: 'AWAITING_CONFIRMATIONS',
+  txInfo,
+  executionInfo: {
+    type: 'MULTISIG',
+    nonce,
+    confirmationsRequired: 2,
+    confirmationsSubmitted: 1,
+    missingSigners: [],
+  },
+})
 
 const VARIANTS: Array<[string, Transaction]> = [
   [
@@ -38,18 +37,35 @@ const VARIANTS: Array<[string, Transaction]> = [
       direction: 'OUTGOING',
       sender: { value: SAFE },
       recipient: { value: RECIPIENT },
-      transferInfo: { type: 'ERC20', tokenAddress: RECIPIENT, value: '1000000', tokenSymbol: 'USDC', decimals: 6 },
+      transferInfo: {
+        type: 'ERC20',
+        tokenAddress: RECIPIENT,
+        value: '1000000',
+        tokenSymbol: 'USDC',
+        decimals: 6,
+        imitation: false,
+      },
     }),
   ],
   [
     'Sell order',
     tx({
       type: 'SwapOrder',
+      uid: '0x1',
+      status: 'open',
       kind: 'sell',
+      orderClass: 'market',
+      validUntil: 1_767_225_600,
       sellAmount: '2000000000000000000',
       buyAmount: '6000000000',
+      executedSellAmount: '0',
+      executedBuyAmount: '0',
       sellToken: token('WETH'),
       buyToken: token('USDC', 6),
+      explorerUrl: 'https://explorer.cow.fi',
+      executedFee: '0',
+      executedFeeToken: token('WETH'),
+      owner: SAFE,
     }),
   ],
   [
@@ -93,7 +109,16 @@ const VARIANTS: Array<[string, Transaction]> = [
   ],
   [
     'Staking exit',
-    tx({ type: 'NativeStakingValidatorsExit', numValidators: 2, validators: [], tokenInfo: token('ETH') }),
+    tx({
+      type: 'NativeStakingValidatorsExit',
+      status: 'ACTIVE',
+      estimatedExitTime: 0,
+      estimatedWithdrawalTime: 0,
+      value: '64000000000000000000',
+      numValidators: 2,
+      validators: [],
+      tokenInfo: token('ETH'),
+    }),
   ],
   [
     'Undecoded call',

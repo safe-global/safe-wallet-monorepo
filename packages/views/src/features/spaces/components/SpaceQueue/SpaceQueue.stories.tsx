@@ -24,7 +24,7 @@ const InTable = ({ children }: { children: ReactNode }) => (
 )
 
 const meta = {
-  title: 'Features/Spaces/SpaceQueue/Rows',
+  title: 'Features/Spaces/Transactions/QueueRows',
   parameters: { layout: 'padded' },
 } satisfies Meta
 
