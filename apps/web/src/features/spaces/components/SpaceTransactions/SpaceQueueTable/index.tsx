@@ -170,7 +170,6 @@ const SpaceQueueTable = ({
   const [collapsedChains, setCollapsedChains] = useState<ReadonlySet<string>>(new Set())
   const [collapsedGroups, setCollapsedGroups] = useState<ReadonlySet<string>>(new Set())
 
-  // Cached per response, signers and grouping: a poll that changes nothing, or a switch back, recomputes nothing
   const groups = groupBy === 'safe' ? undefined : getQueueGroups(getQueueUnits(sections, signers), groupBy)
   const items = useMemo(
     () =>
