@@ -174,7 +174,7 @@ export const getFieldValue = (container: HTMLElement, title: string): HTMLElemen
   return valueCell
 }
 
-// re-export everything
+// eslint-disable-next-line no-restricted-syntax -- tests import Testing Library and these wrappers from one module
 export * from '@testing-library/react'
 
 // override render method
