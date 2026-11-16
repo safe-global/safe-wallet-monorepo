@@ -28,8 +28,8 @@ jest.mock('@/features/__core__/useLoadFeature', () => ({
 }))
 
 // Mock PKCE utilities
-jest.mock('@/features/hypernative', () => {
-  const actual = jest.requireActual('@/features/hypernative')
+jest.mock('@/features/hypernative/hooks/useHypernativeOAuth', () => {
+  const actual = jest.requireActual('@/features/hypernative/hooks/useHypernativeOAuth')
   return {
     ...actual,
     readPkce: jest.fn(),

@@ -20,8 +20,8 @@ jest.mock('@/services/exceptions', () => ({
 
 const mockedLogError = logError as jest.MockedFunction<typeof logError>
 
-jest.mock('@/services/tx/tx-sender', () => {
-  const actual = jest.requireActual('@/services/tx/tx-sender')
+jest.mock('@/services/tx/tx-sender/create', () => {
+  const actual = jest.requireActual('@/services/tx/tx-sender/create')
   return { ...actual, createTx: jest.fn(actual.createTx) }
 })
 

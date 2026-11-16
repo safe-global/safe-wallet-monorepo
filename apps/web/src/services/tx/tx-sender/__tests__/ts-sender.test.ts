@@ -25,14 +25,12 @@ import {
   concat,
   type TransactionReceipt,
   zeroPadValue,
-  type JsonRpcProvider,
   type JsonRpcSigner,
 } from 'ethers'
 import { encodeNestedTxPayload } from '../../nestedTxEnvelope'
 import * as safeContracts from '@/services/contracts/safeContracts'
 
 import * as web3 from '@/hooks/wallets/web3'
-import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
@@ -106,7 +104,6 @@ describe('txSender', () => {
     )
 
     jest.spyOn(web3, 'createWeb3').mockImplementation(() => mockBrowserProvider)
-    jest.spyOn(web3ReadOnly, 'getWeb3ReadOnly').mockReturnValue({} as unknown as JsonRpcProvider)
 
     setSafeSDK(mockSafeSDK)
 

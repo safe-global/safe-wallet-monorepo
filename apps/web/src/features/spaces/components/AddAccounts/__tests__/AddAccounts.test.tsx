@@ -76,14 +76,13 @@ const mockUseAllOwnedSafes = jest.fn<readonly [Record<string, string[]>, boolean
   mockAllOwned,
   false,
 ])
-jest.mock('@/hooks/safes', () => {
-  const actual = jest.requireActual('@/hooks/safes')
-  return {
-    ...actual,
-    useAllOwnedSafes: (address: string) => mockUseAllOwnedSafes(address),
-    useSafesSearch: (safes: unknown) => safes,
-  }
-})
+jest.mock('@/hooks/safes/useAllOwnedSafes', () => ({
+  __esModule: true,
+  default: (address: string) => mockUseAllOwnedSafes(address),
+}))
+jest.mock('@/hooks/safes/useSafesSearch', () => ({
+  useSafesSearch: (safes: unknown) => safes,
+}))
 
 let mockIsAdmin = true
 let mockSpaceSafes: Array<{ chainId: string; address: string }> = []

@@ -54,7 +54,10 @@ jest.mock('@/services/analytics', () => ({
 }))
 jest.mock('@/services/analytics/events/overview', () => ({
   ...jest.requireActual('@/services/analytics/events/overview'),
-  OVERVIEW_EVENTS: { SIDEBAR_CLICKED: { action: 'Sidebar clicked' } },
+  OVERVIEW_EVENTS: {
+    ...jest.requireActual('@/services/analytics/events/overview').OVERVIEW_EVENTS,
+    SIDEBAR_CLICKED: { action: 'Sidebar clicked' },
+  },
 }))
 jest.mock('@/services/analytics/mixpanel-events', () => ({
   ...jest.requireActual('@/services/analytics/mixpanel-events'),

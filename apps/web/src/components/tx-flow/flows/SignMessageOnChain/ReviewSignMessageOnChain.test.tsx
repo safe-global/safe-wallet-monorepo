@@ -1,12 +1,10 @@
 import { SafeAppAccessPolicyTypes } from '@safe-global/store/gateway/types'
 import type { TransactionPreview } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { Methods } from '@safe-global/safe-apps-sdk'
-import * as web3 from '@/hooks/wallets/web3ReadOnly'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import { render, screen } from '@/tests/test-utils'
 import * as execThroughRoleHooks from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
 import ReviewSignMessageOnChain from '@/components/tx-flow/flows/SignMessageOnChain/ReviewSignMessageOnChain'
-import { JsonRpcProvider } from 'ethers'
 import { act } from '@testing-library/react'
 import { faker } from '@faker-js/faker'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
@@ -28,7 +26,6 @@ describe('ReviewSignMessageOnChain', () => {
       undefined,
       false,
     ])
-    jest.spyOn(web3, 'getWeb3ReadOnly').mockImplementation(() => new JsonRpcProvider())
     const safeAddress = faker.finance.ethereumAddress()
     jest.spyOn(useSafeInfo, 'default').mockReturnValue({
       safeAddress,

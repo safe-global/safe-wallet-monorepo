@@ -135,7 +135,7 @@ describe('useSpaceSafes', () => {
 
     renderHook(() => useSpaceSafes())
 
-    const { _buildSafeItems } = jest.requireMock('@/hooks/safes') as { _buildSafeItems: jest.Mock }
+    const { _buildSafeItems } = jest.requireMock('@/hooks/safes/useAllSafesGrouped') as { _buildSafeItems: jest.Mock }
     expect(_buildSafeItems).toHaveBeenCalledWith(
       { '1': ['0xA'] },
       expect.objectContaining({ '1': { '0xA': 'Local Name' } }),
@@ -159,7 +159,7 @@ describe('useSpaceSafes', () => {
 
     renderHook(() => useSpaceSafes())
 
-    const { _buildSafeItems } = jest.requireMock('@/hooks/safes') as { _buildSafeItems: jest.Mock }
+    const { _buildSafeItems } = jest.requireMock('@/hooks/safes/useAllSafesGrouped') as { _buildSafeItems: jest.Mock }
     expect(_buildSafeItems).toHaveBeenCalledWith(
       { '1': ['0xA'] },
       expect.anything(),

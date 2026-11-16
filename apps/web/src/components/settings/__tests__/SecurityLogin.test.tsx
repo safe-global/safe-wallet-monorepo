@@ -30,13 +30,14 @@ jest.mock('@/features/hypernative/hooks/useBannerStorage', () => ({
   useBannerStorage: (...args: unknown[]) => mockUseBannerStorage(...args),
 }))
 
-// Mock HnBannerForSettings from the public API with simulated HOC behavior
-jest.mock('@/features/hypernative', () => {
-  const actual = jest.requireActual('@/features/hypernative')
+// Mock HnBannerForSettings with simulated HOC behavior
+jest.mock('@/features/hypernative/components/HnBanner', () => {
+  const actual = jest.requireActual('@/features/hypernative/components/HnBanner')
+  const { useBannerVisibility, BannerType } = jest.requireActual('@/features/hypernative/hooks/useBannerVisibility')
   return {
     ...actual,
     HnBannerForSettings: () => {
-      const { showBanner, loading } = actual.useBannerVisibility(actual.BannerType.Settings)
+      const { showBanner, loading } = useBannerVisibility(BannerType.Settings)
       if (loading || !showBanner) return null
       return <div data-testid="hn-banner-for-settings">HnBannerForSettings</div>
     },
