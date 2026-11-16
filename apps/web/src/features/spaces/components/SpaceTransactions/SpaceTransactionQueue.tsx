@@ -1,18 +1,27 @@
-import { memo, useCallback, useDeferredValue, useState, type ReactElement } from 'react'
+import { memo, useCallback, useDeferredValue, useEffect, useState, type ReactElement } from 'react'
 import PagePlaceholder from '@safe-global/views/components/common/PagePlaceholder'
 import SkeletonTxList from '@safe-global/views/components/common/PaginatedTxns/SkeletonTxList'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import NoTransactionsIcon from '@/public/images/transactions/no-transactions.svg'
+import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import {
   hasSpaceQueueFilters,
   NO_SPACE_QUEUE_FILTERS,
-  useGetSpaceQueueQuery,
+  useSpaceQueue,
   type SpaceQueue,
   type SpaceQueueFilters,
-} from '../../store/spaceQueueApi'
-import { QueueLoadError, QueueNoMatches } from './QueueStates'
+} from '../../hooks/useSpaceQueue'
+import { QueueLoadError, QueueNoMatches } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueStates'
 import SpaceQueueTable from './SpaceQueueTable'
 import TransactionsToolbar from './TransactionsToolbar'
+
+const REFETCH_EVENTS = [
+  TxEvent.PROPOSED,
+  TxEvent.SIGNATURE_PROPOSED,
+  TxEvent.PROCESSED,
+  TxEvent.SUCCESS,
+  TxEvent.DELETED,
+] as const
 
 const QueueBody = memo(function QueueBody({
   queue,
@@ -59,11 +68,12 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
   const queryFilters = useDeferredValue(filters)
   const querySearch = useDeferredValue(search)
   // `data` keeps the last answer while a new filter loads, so the menus keep their counts
-  const { data, currentData, isError, refetch } = useGetSpaceQueueQuery({
-    spaceId,
-    filters: queryFilters,
-    ...(querySearch && { search: querySearch }),
-  })
+  const { data, currentData, isError, refetch } = useSpaceQueue({ spaceId, filters: queryFilters, search: querySearch })
+
+  useEffect(() => {
+    const unsubscribers = REFETCH_EVENTS.map((event) => txSubscribe(event, () => refetch()))
+    return () => unsubscribers.forEach((unsubscribe) => unsubscribe())
+  }, [refetch])
 
   const clearFilters = useCallback(() => {
     setFilters(NO_SPACE_QUEUE_FILTERS)

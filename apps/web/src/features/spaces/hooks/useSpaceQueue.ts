@@ -1,8 +1,11 @@
-import { cgwClient } from '@safe-global/store/gateway/cgwClient'
-import type {
-  SpaceQueueCounts,
-  SpaceQueuedItemPage,
-  SpaceQueueSafe,
+import { useMemo } from 'react'
+import { skipToken, type SkipToken, type SubscriptionOptions } from '@reduxjs/toolkit/query'
+import {
+  useSpaceTransactionsGetTransactionQueueV1Query,
+  type SpaceQueueCounts,
+  type SpaceQueuedItemPage,
+  type SpaceQueueSafe,
+  type SpaceTransactionsGetTransactionQueueV1ApiArg,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { isTransactionQueuedItem } from '@/utils/transaction-guards'
 
@@ -31,18 +34,17 @@ export const hasSpaceQueueFilters = (filters?: SpaceQueueFilters): boolean =>
 
 export type SpaceQueue = {
   sections: SpaceQueueSection[]
-  unavailableSafes: SpaceQueueSafe[]
   /** Faceted: the status counts follow the Safe filter, `counts.safes` follows the Status filter */
   counts: SpaceQueueCounts
   /** Transactions in `sections` */
   shownCount: number
   /** Transactions in the whole queue, more than `shownCount` when the gateway capped the pages it read */
   totalCount: number
-  /** Whether `sections` hold the whole queue; only known without filters, which narrow it on purpose */
+  /** Whether `sections` hold the whole queue; only known without filters or a search, which narrow it on purpose */
   isComplete: boolean
 }
 
-const toSpaceQueue = (page: SpaceQueuedItemPage, filters?: SpaceQueueFilters, search?: string): SpaceQueue => {
+const toSpaceQueue = (page: SpaceQueuedItemPage, isNarrowed: boolean): SpaceQueue => {
   const sections = Object.entries(page.results).map(([safeAddress, chainItems]) => ({
     safeAddress,
     chains: Object.entries(chainItems).map(([chainId, items]) => ({ chainId, items })),
@@ -54,11 +56,10 @@ const toSpaceQueue = (page: SpaceQueuedItemPage, filters?: SpaceQueueFilters, se
 
   return {
     sections,
-    unavailableSafes: page.unavailableSafes,
     counts: page.counts,
     shownCount,
     totalCount,
-    isComplete: hasSpaceQueueFilters(filters) || !!search || shownCount >= totalCount,
+    isComplete: isNarrowed || shownCount >= totalCount,
   }
 }
 
@@ -66,32 +67,31 @@ type SpaceQueueArgs = { spaceId: string; filters?: SpaceQueueFilters; search?: s
 
 const joinOrOmit = (values: string[]): string | undefined => (values.length > 0 ? values.join(',') : undefined)
 
-const toParams = ({ filters, search }: SpaceQueueArgs) => {
-  if (!filters || !hasSpaceQueueFilters(filters)) return search ? { search } : undefined
+const toQueryArgs = ({ spaceId, filters = NO_SPACE_QUEUE_FILTERS, search }: SpaceQueueArgs) => {
   const statuses = filters.statuses.filter((option) => (SPACE_QUEUE_STATUSES as readonly string[]).includes(option))
   return {
-    search,
-    status: joinOrOmit(statuses),
+    spaceId,
+    status: statuses.length > 0 ? statuses : undefined,
     conflicting: filters.statuses.includes('conflicting') || undefined,
     stale: filters.statuses.includes('stale') || undefined,
     safes: joinOrOmit(filters.safes.map(({ chainId, safeAddress }) => `${chainId}:${safeAddress}`)),
     chainIds: joinOrOmit(filters.chainIds),
     signers: joinOrOmit(filters.signers),
-  }
+    search: search || undefined,
+  } satisfies SpaceTransactionsGetTransactionQueueV1ApiArg
 }
 
-// Built on cgwClient, not the generated spaces api, which many tests replace with a partial mock
-export const spaceQueueApi = cgwClient.enhanceEndpoints({ addTagTypes: ['transactions'] }).injectEndpoints({
-  endpoints: (build) => ({
-    getSpaceQueue: build.query<SpaceQueue, SpaceQueueArgs>({
-      query: (args) => ({
-        url: `/v1/spaces/${args.spaceId}/transactions/queued`,
-        params: toParams(args),
-      }),
-      transformResponse: (page: SpaceQueuedItemPage, _meta, { filters, search }) => toSpaceQueue(page, filters, search),
-      providesTags: ['transactions'],
-    }),
-  }),
-})
-
-export const { useGetSpaceQueueQuery } = spaceQueueApi
+/** The Space queue grouped by Safe and chain, read through the generated queue endpoint */
+export const useSpaceQueue = (args: SpaceQueueArgs | SkipToken, options?: SubscriptionOptions) => {
+  const result = useSpaceTransactionsGetTransactionQueueV1Query(
+    args === skipToken ? skipToken : toQueryArgs(args),
+    options,
+  )
+  const isNarrowed = args !== skipToken && (hasSpaceQueueFilters(args.filters) || !!args.search)
+  const data = useMemo(() => result.data && toSpaceQueue(result.data, isNarrowed), [result.data, isNarrowed])
+  const currentData = useMemo(
+    () => result.currentData && toSpaceQueue(result.currentData, isNarrowed),
+    [result.currentData, isNarrowed],
+  )
+  return { ...result, data, currentData }
+}

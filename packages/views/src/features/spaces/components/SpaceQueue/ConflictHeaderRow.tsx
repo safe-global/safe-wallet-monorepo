@@ -3,7 +3,7 @@ import { Badge } from '@safe-global/views/components/ui/badge'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import { QUEUE_COLUMNS } from '../../SpaceQueueRow'
+import { QUEUE_COLUMNS } from './columns'
 
 const ConflictHeaderRow = ({
   nonce,

@@ -1,16 +1,21 @@
 import type { SpaceQueueCounts, SpaceQueueSafe } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { SpaceQueueStatusOption } from '../../../store/spaceQueueApi'
+import { SPACE_QUEUE_FLAGS, SPACE_QUEUE_STATUSES, type SpaceQueueStatusOption } from '../../../hooks/useSpaceQueue'
 
-type StatusOptionLabels = { menu: string; chip: string }
+const withCounts = (options: readonly SpaceQueueStatusOption[], counts?: SpaceQueueCounts) =>
+  options.map((option) => [option, counts?.[option] ?? 0] as const)
 
-export const STATUS_OPTION_LABELS: Record<SpaceQueueStatusOption, StatusOptionLabels> = {
-  execute: { menu: 'Execute', chip: 'Ready to execute' },
-  sign: { menu: 'Sign', chip: 'Ready to sign' },
-  blocked: { menu: 'Blocked', chip: 'Blocked' },
-  waiting: { menu: 'Waiting', chip: 'Waiting on others' },
-  conflicting: { menu: 'Conflicting', chip: 'Conflicting' },
-  stale: { menu: 'Stale 7 days', chip: 'Stale 7 days' },
+/** Status filter counts; the gateway counts statuses and flags apart while the filter ANDs them, so one group hides the other's */
+export const getStatusCounts = (
+  counts: SpaceQueueCounts | undefined,
+  selected: SpaceQueueStatusOption[],
+): Partial<Record<SpaceQueueStatusOption, number>> => {
+  const isAnyFlagSelected = selected.some((option) => (SPACE_QUEUE_FLAGS as readonly string[]).includes(option))
+  const isAnyStatusSelected = selected.some((option) => (SPACE_QUEUE_STATUSES as readonly string[]).includes(option))
+  return Object.fromEntries([
+    ...(isAnyFlagSelected ? [] : withCounts(SPACE_QUEUE_STATUSES, counts)),
+    ...(isAnyStatusSelected ? [] : withCounts(SPACE_QUEUE_FLAGS, counts)),
+  ])
 }
 
 /** One Safe of the Safe filter: every chain it has a queue on, and its transactions matching the Status filter. */
@@ -55,13 +60,11 @@ export const sortByCount = <T extends { count: number }>(options: T[]): T[] =>
   [...options].sort((a, b) => b.count - a.count)
 
 /** The selection with `value` added or, when it was selected, removed. */
-export const toggleValue = (
-  value: string,
-  selected: string[],
+export const toggleValue = <T extends string>(
+  value: T,
+  selected: T[],
   isSame: (a: string, b: string) => boolean = (a, b) => a === b,
-): string[] =>
+): T[] =>
   selected.some((other) => isSame(other, value))
     ? selected.filter((other) => !isSame(other, value))
     : [...selected, value]
-
-export const isSameSigner = (a: string, b: string): boolean => sameAddress(a, b)
