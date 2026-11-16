@@ -173,9 +173,10 @@ export function generateIndexTemplate(config: FeatureConfig): string {
   lines.push(` * ## Usage`)
   lines.push(` *`)
   lines.push(` * \`\`\`typescript`)
-  lines.push(
-    ` * import { ${featureNamePascal}Feature${hasHooks ? ', ' + publicAPI.hooks[0] : ''} } from '@/features/${featureName}'`,
-  )
+  lines.push(` * import { ${featureNamePascal}Feature } from '@/features/${featureName}'`)
+  if (hasHooks) {
+    lines.push(` * import { ${publicAPI.hooks[0]} } from '@/features/${featureName}/hooks/${publicAPI.hooks[0]}'`)
+  }
   lines.push(` * import { useLoadFeature } from '@/features/__core__'`)
   lines.push(` *`)
   lines.push(` * function MyComponent() {`)
@@ -222,27 +223,10 @@ export function generateIndexTemplate(config: FeatureConfig): string {
   lines.push(`export type { ${featureNamePascal}Contract } from './contract'`)
   lines.push(``)
 
-  // Export hooks directly (always loaded, not lazy)
-  if (hasHooks) {
-    lines.push(`// Hooks exported directly (always loaded, not in contract)`)
-    lines.push(`// Keep hooks lightweight - minimal imports, heavy logic in services if needed`)
-    for (const hook of publicAPI.hooks) {
-      lines.push(`export { ${hook} } from './hooks/${hook}'`)
-    }
-    lines.push(``)
-  }
-
   // Export public types
   if (publicAPI.types && publicAPI.types.length > 0) {
     lines.push(`// Public types (compile-time only, no runtime cost)`)
     lines.push(`export type { ${publicAPI.types.join(', ')} } from './types'`)
-    lines.push(``)
-  }
-
-  // Export constants
-  if (publicAPI.constants && publicAPI.constants.length > 0) {
-    lines.push(`// Lightweight constants`)
-    lines.push(`export { ${publicAPI.constants.join(', ')} } from './constants'`)
     lines.push(``)
   }
 
