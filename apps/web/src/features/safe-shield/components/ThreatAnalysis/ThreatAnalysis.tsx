@@ -15,7 +15,6 @@ import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHype
 import { HnViewMoreOnHypernativeRow } from '@/features/hypernative/components/HnViewMoreOnHypernativeRow'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { AnalysisGroupCardDisabled } from '@safe-global/views/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled'
-// eslint-disable-next-line no-restricted-imports -- re-exporting this hook from the hypernative barrel closes a hypernative<->safe-shield<->tx-flow module-init cycle (TDZ)
 import { useSafeShieldAssessmentUrl } from '@/features/hypernative/hooks/useSafeShieldAssessmentUrl'
 
 const VISIBLE_CAP = 3

@@ -1,6 +1,5 @@
 import type { ComponentProps, ReactElement } from 'react'
 import { Chip } from '@safe-global/views/components/ui/chip'
-// eslint-disable-next-line no-restricted-imports -- deep import keeps this lazy chunk from pulling the whole safe-shield barrel
 import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import type { CheckStatus, PublicCheckStatus } from '@safe-global/utils/features/safenet-checks'

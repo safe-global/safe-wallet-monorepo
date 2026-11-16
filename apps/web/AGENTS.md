@@ -38,7 +38,7 @@ import { useMyHook } from '@/features/myfeature/hooks/useMyHook'
 import { someSlice } from '@/features/myfeature/store/someSlice'
 ```
 
-Components and heavy services are still reached through `useLoadFeature()`, so they stay lazy.
+Components and heavy services are still reached through `useLoadFeature()`, so they stay lazy. ESLint blocks imports of `@/features/*/components` from outside `src/features` (except tests and stories); files that imported them before the rule are on an allow list in `eslint.config.mjs`.
 
 **Using a feature:**
 
