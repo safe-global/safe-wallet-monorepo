@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { CheckCircle2, Circle } from 'lucide-react'
+import { CheckCircle2, Circle, Info } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from '@safe-global/views/components/ui/field'
@@ -75,7 +75,17 @@ export const useInvestmentForm = (opportunity: Opportunity | null, options: Oppo
       ]
     : []
 
+  const reviewSteps = investment
+    ? [
+        ...(where === 'nested'
+          ? [COPY.reviewStep.create(safeName), COPY.reviewStep.move(formatAmount(amount), investment.asset)]
+          : []),
+        COPY.reviewStep.deposit(investment.name),
+      ]
+    : []
+
   return {
+    reviewSteps,
     safe,
     owners,
     opportunity,
@@ -303,19 +313,53 @@ export const ScheduleFields = ({ form }: { form: InvestmentForm }) => (
   </Section>
 )
 
+/** The proposal in plain steps, with one note on what is at risk. */
 export const StepsSummary = ({ form }: { form: InvestmentForm }) =>
   form.investment ? (
-    <Section label={COPY.steps}>
-      <ol className="flex list-decimal flex-col gap-1 rounded-lg bg-card py-2 pr-3 pl-8 text-sm">
-        {form.steps.map((step) => (
-          <li key={step}>{step}</li>
+    <div className="flex flex-col gap-3">
+      <span className="text-sm font-medium">{COPY.oneProposal(form.reviewSteps.length)}</span>
+      <ol className="flex flex-col gap-2.5">
+        {form.reviewSteps.map((step, index) => (
+          <li key={step} className="flex items-center gap-3 text-sm">
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
+              {index + 1}
+            </span>
+            {step}
+          </li>
         ))}
       </ol>
-      <span className="text-xs text-muted-foreground">
-        {COPY.allowedActions}: {COPY.allowedValue(form.investment.name)}. {COPY.guardNote}
-      </span>
-    </Section>
+      <p className="flex items-start gap-2 text-sm text-muted-foreground">
+        <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
+        {COPY.riskNote}
+      </p>
+    </div>
   ) : null
+
+/** Every answer in one card, then the proposal steps. */
+export const ReviewSummary = ({ form }: { form: InvestmentForm }) => {
+  if (!form.investment) return null
+  const asset = form.investment.asset
+  const rows: [string, string][] = [
+    [COPY.firstDeposit, `${formatAmount(form.amount)} ${asset}`],
+    [COPY.whereItRuns, form.where === 'nested' ? form.safeName : COPY.thisSafe],
+    [COPY.who, form.who === 'any' ? COPY.anySigner : COPY.short.signers(form.executors.length)],
+    [COPY.budgetLabel, `${formatAmount(form.budgetAmount)} ${asset}`],
+    [COPY.schedule, form.scheduleText],
+  ]
+  return (
+    <div className="flex flex-col gap-5">
+      <dl className="flex flex-col divide-y divide-border rounded-lg bg-card">
+        {rows.map(([label, value]) => (
+          <div key={label} className="flex items-center justify-between gap-4 px-3 py-2.5 text-sm">
+            <dt className="text-muted-foreground">{label}</dt>
+            <dd className="truncate text-right font-medium">{value}</dd>
+          </div>
+        ))}
+      </dl>
+      <StepsSummary form={form} />
+    </div>
+  )
+}
 
 export const ProposedView = ({ form }: { form: InvestmentForm }) => (
   <div className="flex flex-col gap-4" data-testid="investment-proposed">

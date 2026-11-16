@@ -295,6 +295,13 @@ export const DEFI_V1_COPY = {
     budgetAndSchedule: 'Budget and schedule',
     review: 'Review',
     next: 'Continue',
+    oneProposal: (count: number) => `Signers approve one proposal with ${count} step${count === 1 ? '' : 's'}`,
+    reviewStep: {
+      create: (name: string) => `Create ${name}`,
+      move: (amount: string, asset: string) => `Move ${amount} ${asset} into it`,
+      deposit: (name: string) => `Deposit into ${name}`,
+    },
+    riskNote: 'Only the budget is at risk. Limits to deposit and withdraw come with the Policy Engine.',
     back: 'Back',
     stepperSteps: ['Amount', 'Runs in', 'Signers', 'Budget', 'Review'],
     stepHeadings: [

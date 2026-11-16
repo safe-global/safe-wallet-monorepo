@@ -11,7 +11,7 @@ import {
   BudgetFields,
   ProposedView,
   ScheduleFields,
-  StepsSummary,
+  ReviewSummary,
   useInvestmentForm,
   WhereFields,
   WhoFields,
@@ -92,7 +92,7 @@ export const SetUpInvestmentDrawer = ({
     {
       title: COPY.review,
       summary: () => '',
-      content: <StepsSummary form={form} />,
+      content: <ReviewSummary form={form} />,
       valid: form.isValid,
     },
   ]

@@ -18,7 +18,7 @@ import {
   BudgetFields,
   ProposedView,
   ScheduleFields,
-  StepsSummary,
+  ReviewSummary,
   useInvestmentForm,
   WhereFields,
   WhoFields,
@@ -28,6 +28,8 @@ import { OpportunityMark } from './TreasuryTables'
 
 const COPY = DEFI_V1_COPY.operations
 const STEPS = COPY.stepperSteps
+/** Fixed so the dialog never changes size between steps; long lists scroll inside it. */
+const BODY_HEIGHT = 'h-[min(26rem,60vh)]'
 
 type StepState = 'done' | 'current' | 'upcoming'
 
@@ -53,7 +55,7 @@ const Stepper = ({
   labels: string[]
   onJump: (index: number) => void
 }) => (
-  <ol className="flex items-start px-4 pt-4" data-testid="investment-stepper">
+  <ol className="flex items-start pb-1" data-testid="investment-stepper">
     {STEPS.map((title, index) => {
       const state: StepState = index === current ? 'current' : index <= reached ? 'done' : 'upcoming'
       const canJump = state === 'done'
@@ -66,25 +68,25 @@ const Stepper = ({
               onClick={() => onJump(index)}
               aria-current={state === 'current' ? 'step' : undefined}
               className={cn(
-                'flex size-7 items-center justify-center rounded-full text-xs font-semibold transition-colors',
+                'flex size-5 items-center justify-center rounded-full text-[10px] font-semibold transition-colors',
                 state === 'done' && 'cursor-pointer bg-foreground text-background hover:opacity-80',
-                state === 'current' && 'bg-background text-foreground ring-2 ring-foreground',
+                state === 'current' && 'bg-background text-foreground ring-[1.5px] ring-foreground',
                 state === 'upcoming' && 'bg-muted text-muted-foreground',
               )}
             >
-              {state === 'done' ? <Check className="size-3.5" /> : index + 1}
+              {state === 'done' ? <Check className="size-3" /> : index + 1}
             </button>
             <span
-              className={cn('text-xs font-medium', state === 'upcoming' ? 'text-muted-foreground' : 'text-foreground')}
+              className={cn('text-sm font-medium', state === 'upcoming' ? 'text-muted-foreground' : 'text-foreground')}
             >
               {title}
             </span>
-            <span className="min-h-4 max-w-full truncate text-[11px] leading-4 text-muted-foreground">
+            <span className="min-h-4 max-w-full truncate text-xs leading-4 text-muted-foreground">
               {state === 'done' ? labels[index] : ''}
             </span>
           </li>
           {index < STEPS.length - 1 && (
-            <span className={cn('mt-3.5 h-px flex-1', index < reached ? 'bg-foreground' : 'bg-border')} aria-hidden />
+            <span className={cn('mt-2.5 h-px flex-1', index < reached ? 'bg-foreground' : 'bg-border')} aria-hidden />
           )}
         </Fragment>
       )
@@ -132,7 +134,18 @@ export const SetUpInvestmentStepper = ({
       ),
       valid: form.budgetAmount >= form.amount,
     },
-    { heading: COPY.stepHeadings[4], content: <StepsSummary form={form} />, valid: form.isValid },
+    {
+      heading: COPY.stepHeadings[4],
+      content: (
+        <>
+          <ReviewSummary form={form} />
+          <Typography variant="paragraph-small" color="muted">
+            {COPY.approveOnce(form.safe.threshold, form.owners.length)}
+          </Typography>
+        </>
+      ),
+      valid: form.isValid,
+    },
   ]
   const view = views[current]
   const isLast = current === views.length - 1
@@ -172,15 +185,16 @@ export const SetUpInvestmentStepper = ({
         </DialogHeader>
 
         {proposed ? (
-          <div className="px-4 py-4">
+          <div className={cn(BODY_HEIGHT, 'overflow-y-auto px-4 py-4')}>
             <ProposedView form={form} />
           </div>
         ) : (
           <>
-            <Stepper current={current} reached={reached} labels={summaries(form)} onJump={setCurrent} />
-            <div className="flex max-h-[55vh] min-h-64 flex-col gap-4 overflow-y-auto px-4 pt-2 pb-4">
-              <Typography variant="paragraph-bold">{view.heading}</Typography>
-              {view.content}
+            <div className={cn(BODY_HEIGHT, 'flex flex-col gap-4 px-4 pt-4')}>
+              <Typography variant="paragraph-bold" className="shrink-0">
+                {view.heading}
+              </Typography>
+              <div className="-mx-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">{view.content}</div>
             </div>
           </>
         )}
@@ -192,11 +206,7 @@ export const SetUpInvestmentStepper = ({
             </Button>
           ) : (
             <>
-              {isLast && (
-                <Typography variant="paragraph-small" color="muted" align="center">
-                  {COPY.approveOnce(form.safe.threshold, form.owners.length)}
-                </Typography>
-              )}
+              <Stepper current={current} reached={reached} labels={summaries(form)} onJump={setCurrent} />
               <div className="flex gap-2">
                 <Button
                   variant="outline"
