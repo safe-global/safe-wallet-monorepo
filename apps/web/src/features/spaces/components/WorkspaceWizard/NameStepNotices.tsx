@@ -69,23 +69,23 @@ const NameStepNotices = ({ onStartOver }: { onStartOver: () => void }): ReactEle
     goTo(target)
   }
 
-  // The draft is the setup of a Workspace that already exists: continue that one, or start a new one from scratch.
-  if (isResumeOffered && draft.createdSpaceId !== null) {
-    const spaceId = draft.createdSpaceId
-    return (
-      <WizardNotice
-        testId="unfinished-setup-notice"
-        title={`You have not finished setting up ${draft.name}`}
-        body="Its trial has not started yet."
-        primaryLabel="Finish setup"
-        onPrimary={() => finishSetup(spaceId)}
-        secondaryLabel="Create a new Workspace"
-        onSecondary={startOver}
-      />
-    )
-  }
+  // Once answered, the offer is gone: the user chose to continue or to start over.
+  if (!isResumeOffered) return null
 
-  if (isResumeOffered && hasContent(draft)) {
+  const unfinishedSetupNotice = (spaceId: string, name: string) => (
+    <WizardNotice
+      testId="unfinished-setup-notice"
+      title={`You have not finished setting up ${name}`}
+      primaryLabel="Finish setup"
+      onPrimary={() => finishSetup(spaceId)}
+      secondaryLabel="Create a new Workspace"
+      onSecondary={startOver}
+    />
+  )
+
+  if (draft.createdSpaceId !== null) return unfinishedSetupNotice(draft.createdSpaceId, draft.name)
+
+  if (hasContent(draft)) {
     return (
       <WizardNotice
         testId="resume-draft-notice"
@@ -99,18 +99,8 @@ const NameStepNotices = ({ onStartOver }: { onStartOver: () => void }): ReactEle
     )
   }
 
-  const unfinished = spaces?.find((space) => space.setupStatus === 'pending' && space.uuid !== draft.createdSpaceId)
-  if (!unfinished) return null
-
-  return (
-    <WizardNotice
-      testId="unfinished-setup-notice"
-      title={`You have not finished setting up ${unfinished.name}`}
-      body="Its trial has not started yet. You can finish it, or create a new Workspace below."
-      primaryLabel="Finish setup"
-      onPrimary={() => finishSetup(unfinished.uuid)}
-    />
-  )
+  const unfinished = spaces?.find((space) => space.setupStatus === 'pending')
+  return unfinished ? unfinishedSetupNotice(unfinished.uuid, unfinished.name) : null
 }
 
 export default NameStepNotices

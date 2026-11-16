@@ -3,7 +3,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 
 type WizardNoticeProps = {
   title: string
-  body: string
+  body?: string
   primaryLabel: string
   onPrimary: () => void
   secondaryLabel?: string
@@ -25,8 +25,8 @@ const WizardNotice = ({
     <AlertSeverityIcon variant="info" />
     <AlertTitle>{title}</AlertTitle>
     <AlertDescription>
-      <p>{body}</p>
-      <div className="mt-3 flex gap-2">
+      {body && <p>{body}</p>}
+      <div className={body ? 'mt-3 flex gap-2' : 'flex gap-2'}>
         <Button size="sm" onClick={onPrimary}>
           {primaryLabel}
         </Button>
