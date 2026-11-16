@@ -1,4 +1,4 @@
-import { memo, useLayoutEffect, useSyncExternalStore, type ReactElement, type ReactNode } from 'react'
+import { memo, useLayoutEffect, useMemo, useSyncExternalStore, type ReactElement, type ReactNode } from 'react'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import { SafeScopeContext, useSafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import type { SafeScopeContextValue } from '@safe-global/views/components/tx-flow/safe-scope/types'
@@ -8,8 +8,8 @@ export type ScopeTarget = { scopeKey: string; chainId: string; safeAddress: stri
 
 const noop = () => {}
 
-// What a provider shows before its first render: the Safe, still loading
-const loadingScope = ({ chainId, safeAddress }: ScopeTarget): SafeScopeContextValue => ({
+// What a row shows before its provider publishes: the Safe, still loading
+const loadingScope = (chainId: string, safeAddress: string): SafeScopeContextValue => ({
   scope: {
     chainId,
     safeAddress,
@@ -24,18 +24,11 @@ const loadingScope = ({ chainId, safeAddress }: ScopeTarget): SafeScopeContextVa
 /** The scope of each Safe and chain the table shows, published by its provider and read by its rows. */
 export const createScopeStore = () => {
   const published = new Map<string, SafeScopeContextValue>()
-  const loading = new Map<string, SafeScopeContextValue>()
   const listeners = new Set<() => void>()
   const notify = () => listeners.forEach((listener) => listener())
 
   return {
-    read: (target: ScopeTarget): SafeScopeContextValue => {
-      const value = published.get(target.scopeKey)
-      if (value) return value
-      const placeholder = loading.get(target.scopeKey) ?? loadingScope(target)
-      loading.set(target.scopeKey, placeholder)
-      return placeholder
-    },
+    get: (scopeKey: string): SafeScopeContextValue | undefined => published.get(scopeKey),
     publish: (scopeKey: string, value: SafeScopeContextValue) => {
       published.set(scopeKey, value)
       notify()
@@ -83,7 +76,7 @@ export const ScopePool = memo(
 )
 
 export const PooledScope = ({
-  target,
+  target: { scopeKey, chainId, safeAddress },
   store,
   children,
 }: {
@@ -91,7 +84,8 @@ export const PooledScope = ({
   store: ScopeStore
   children: ReactNode
 }): ReactElement => {
-  const read = () => store.read(target)
+  const placeholder = useMemo(() => loadingScope(chainId, safeAddress), [chainId, safeAddress])
+  const read = () => store.get(scopeKey) ?? placeholder
   const value = useSyncExternalStore(store.subscribe, read, read)
   return <SafeScopeContext.Provider value={value}>{children}</SafeScopeContext.Provider>
 }
