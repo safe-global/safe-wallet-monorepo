@@ -37,6 +37,15 @@ const noTestDataInStories = {
 
 const storyDataRules = [seedFakerInStoryData, noTestDataInStories]
 
+// Type-only re-exports are erased at build time, so only value re-exports count.
+const noReexportRules = [
+  "ExportAllDeclaration[exportKind='value']",
+  "ExportNamedDeclaration[source][exportKind='value']:has(ExportSpecifier[exportKind='value'])",
+].map((selector) => ({
+  selector,
+  message: 'Do not re-export from another module. Import the name from the file that declares it.',
+}))
+
 const config = [
   {
     ignores: [
@@ -125,20 +134,6 @@ const config = [
         },
       ],
 
-      // Feature architecture: Prevent importing feature internals from outside the feature
-      // This enforces that features expose a clean public API through their index.ts barrel file
-      //
-      // ALLOWED imports:
-      //   @/features/myfeature              - main barrel (components via useLoadFeature, types, lightweight hooks)
-      //   @/features/myfeature/store        - Redux store (slice, selectors, actions) - needed at store init
-      //   @/features/myfeature/services     - services barrel (lightweight utilities only)
-      //
-      // FORBIDDEN imports (will cause bundle bloat):
-      //   @/features/myfeature/components/* - use useLoadFeature() instead
-      //   @/features/myfeature/hooks/*      - export through feature barrel if lightweight
-      //   @/features/myfeature/services/*   - heavy services should be in contract, accessed via useLoadFeature()
-      //
-      // See apps/web/docs/feature-architecture.md for details
       'no-restricted-imports': [
         'error',
         {
@@ -151,46 +146,6 @@ const config = [
               message: 'Use a plain <img>. Images are served unoptimized, so next/image adds nothing.',
             },
           ],
-          patterns: [
-            // Block deep imports into feature components (defeats lazy loading)
-            {
-              group: ['@/features/*/components', '@/features/*/components/**'],
-              message:
-                'Do not import components directly. Use useLoadFeature() to access lazy-loaded components. See docs/feature-architecture.md',
-            },
-            // Block deep imports into feature hooks (should go through barrel)
-            {
-              group: ['@/features/*/hooks', '@/features/*/hooks/**'],
-              message: 'Import hooks from the feature barrel (@/features/myfeature) not from hooks folder directly.',
-            },
-            // Block deep imports into services internal files (barrel is OK for lightweight utils)
-            {
-              group: ['@/features/*/services/*', '!@/features/*/services/index'],
-              message:
-                'Import from @/features/myfeature/services (barrel) for lightweight utils, or use useLoadFeature() for heavy services.',
-            },
-            // Block deep imports into store internal files (barrel is OK)
-            {
-              group: ['@/features/*/store/*', '!@/features/*/store/index'],
-              message: 'Import from @/features/myfeature/store (barrel) not from internal store files.',
-            },
-            // Block internal file imports (handle.ts is internal, only index.ts is public)
-            {
-              group: ['@/features/*/handle'],
-              message: 'Import from feature index file only. The handle is internal - use @/features/{name} instead.',
-            },
-            // Same patterns for relative imports
-            {
-              // Same for relative imports
-              group: [
-                '../features/*/components',
-                '../features/*/components/**',
-                '../../features/*/components',
-                '../../features/*/components/**',
-              ],
-              message: 'Do not import components directly. Use useLoadFeature() instead.',
-            },
-          ],
         },
       ],
 
@@ -201,6 +156,32 @@ const config = [
       // to components/ui/button.tsx. See the UI/Button story + apps/web/AGENTS.md
       // ("Component variants over custom styling").
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules],
+    },
+  },
+  // No new barrels in features: a re-export makes every importer depend on every re-exported file, which ties
+  // features into one import cycle and makes `jest --findRelatedTests` select most of the suite.
+  // The ignored files still re-export; remove them from this list as they go.
+  {
+    files: ['src/features/**/*.{ts,tsx}'],
+    ignores: [
+      'src/features/actions-tray/index.ts',
+      'src/features/address-poisoning/index.ts',
+      'src/features/earn/index.ts',
+      'src/features/fee-payment/index.ts',
+      'src/features/hypernative/index.ts',
+      'src/features/hypernative/services/index.ts',
+      'src/features/ledger/index.ts',
+      'src/features/multichain/index.ts',
+      'src/features/multichain/utils/index.ts',
+      'src/features/positions/index.tsx',
+      'src/features/safe-shield/index.tsx',
+      'src/features/spaces/components/OnboardingLayout/index.tsx',
+      'src/features/spaces/components/Policies/components/SafeIdentity/index.ts',
+      'src/features/spaces/index.ts',
+      'src/features/spending-limits/services/index.ts',
+    ],
+    rules: {
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules, ...noReexportRules],
     },
   },
   // The isolated-stack mocks run in Node with their own compiler settings, which the main tsconfig excludes.
