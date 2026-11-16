@@ -2,17 +2,8 @@ import assert from 'node:assert/strict'
 import { verify } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import { describe, it } from 'node:test'
-import {
-  Billing,
-  PAYMENT_LINKS,
-  PLANS,
-  PRODUCT_ID,
-  dispatch,
-  es256Signer,
-  serviceToken,
-  subscriptionEvent,
-} from './billing-api.ts'
-import type { EventType, Subscription } from './billing-api.ts'
+import { Billing, PLANS, PRODUCT_ID, dispatch, es256Signer, serviceToken, subscriptionEvent } from './billing-api.ts'
+import type { EventType, PAYMENT_LINKS, Subscription } from './billing-api.ts'
 import type { Reply } from './http.ts'
 
 const BUSINESS_PRICE = PLANS.business.price.id

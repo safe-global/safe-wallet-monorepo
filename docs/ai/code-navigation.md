@@ -57,3 +57,19 @@ operation=workspaceSymbol filePath=<any .ts file>                     line=1  ch
 ```
 
 **Cost note:** `workspaceSymbol` with an empty/broad query returns tens of thousands of entries (1.7 MB+) and will be truncated to a persisted file — use it with a specific query, or prefer `findReferences` / `goToDefinition` starting from a known site.
+
+## Key entry points
+
+Stable architectural landmarks for fast orientation:
+
+| Area           | Path                                         | Purpose                                              |
+| -------------- | -------------------------------------------- | ---------------------------------------------------- |
+| Web app entry  | `apps/web/src/pages/_app.tsx`                | Next.js app bootstrap, providers, `InitApp`          |
+| Redux store    | `apps/web/src/store/index.ts`                | `makeStore()`, middleware, RTK Query APIs            |
+| RTK Query APIs | `apps/web/src/store/api/gateway/`            | CGW API endpoints (balances, transactions, etc.)     |
+| Feature system | `apps/web/src/features/__core__/`            | `createFeatureHandle`, `useLoadFeature`, proxy stubs |
+| Page layout    | `apps/web/src/components/common/PageLayout/` | Main app layout, sidebar, header                     |
+| Safe info hook | `apps/web/src/hooks/useSafeInfo.ts`          | Current Safe address, owners, threshold              |
+| Chain config   | `packages/store/src/gateway/chains/`         | RTK Query chains endpoint with retry logic           |
+| Theme package  | `packages/theme/src/`                        | Palettes, spacing, typography tokens                 |
+| Mobile entry   | `apps/mobile/src/app/_layout.tsx`            | Expo Router root layout                              |

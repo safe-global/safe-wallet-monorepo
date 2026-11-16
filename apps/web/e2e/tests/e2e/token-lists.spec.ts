@@ -16,17 +16,17 @@ test.describe('Token lists', { tag: '@e2e' }, () => {
     safes,
   }) => {
     const mainnetApi = new SafeApiClient(CHAIN_IDS.ethereum)
-    const address = safeAddress(safes.ETH_TOKEN_LIST_SAFE)
+    const address = safeAddress(safes.tokenLists)
     const symbolsOf = async (trusted: boolean) =>
       (await mainnetApi.getBalances(address, 'usd', { trusted })).items.map(({ tokenInfo }) => tokenInfo.symbol)
     const trusted = await symbolsOf(true)
     const all = await symbolsOf(false)
     const untrusted = all.filter((symbol) => !trusted.includes(symbol))
     // Precondition: the lists only differ when the Safe holds a token that the Transaction Service does not trust.
-    expect(untrusted.length, `${safes.ETH_TOKEN_LIST_SAFE} holds no untrusted token`).toBeGreaterThan(0)
+    expect(untrusted.length, `${safes.tokenLists} holds no untrusted token`).toBeGreaterThan(0)
 
     const assets = new AssetsPage(safePage)
-    await assets.goto(safes.ETH_TOKEN_LIST_SAFE)
+    await assets.goto(safes.tokenLists)
     await assets.setHideSmallBalances(false)
 
     await assets.setShowAllTokens(false)

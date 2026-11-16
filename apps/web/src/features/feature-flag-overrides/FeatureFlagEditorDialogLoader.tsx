@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import dynamic from 'next/dynamic'
+import dynamic from '@/utils/dynamic'
 import type { FeatureFlagEditorDialogProps } from './components/FeatureFlagEditorDialog'
 
 // The dialog is referenced ONLY through this guarded dynamic import so its whole module

@@ -17,12 +17,12 @@ test.describe('Create a Safe on several networks', { tag: '@e2e' }, () => {
   }) => {
     // Each activation waits until the gateway indexes the deployment
     test.slow()
-    const { owner3, owner4 } = journey.owners
+    const { dave, alice } = journey.owners
     const create = new CreateSafePage(safePage)
     const networkSelector = new NetworkSelector(safePage)
 
     const address = getAddress(
-      await create.createMultichainPayLaterSafe(Object.keys(NETWORKS), { owners: [owner3.address], threshold: 2 }),
+      await create.createMultichainPayLaterSafe(Object.keys(NETWORKS), { owners: [dave.address], threshold: 2 }),
     )
     journey.recordSafe({ prefixedAddress: `sep:${address}` })
     await create.activate()
@@ -34,7 +34,7 @@ test.describe('Create a Safe on several networks', { tag: '@e2e' }, () => {
         const env = forkEnvironment(journey.env, chainId)
         const { owners, threshold } = await readSafeSetup(env, address)
         expect({ owners: sorted(owners), threshold }).toEqual({
-          owners: sorted([owner4.address, owner3.address]),
+          owners: sorted([alice.address, dave.address]),
           threshold: 2,
         })
         const { version, singleton } = await readSingleton(env, address)

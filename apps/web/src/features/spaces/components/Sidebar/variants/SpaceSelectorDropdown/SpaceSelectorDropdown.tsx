@@ -110,7 +110,7 @@ export const SpaceSelectorDropdown = ({
 
   const handleCreateSpace = () => {
     // eslint-disable-next-line no-restricted-syntax -- The Workspace to create does not exist yet
-    router.push(safe ? { pathname: AppRoutes.spaces.createSpace, query: { safe } } : AppRoutes.spaces.createSpace)
+    router.push(safe ? { pathname: AppRoutes.welcome.createSpace, query: { safe } } : AppRoutes.welcome.createSpace)
   }
 
   const isAdminOfSpace = (space: SpaceItem) => isUserActiveAdmin(space.members ?? [], currentUser?.id)

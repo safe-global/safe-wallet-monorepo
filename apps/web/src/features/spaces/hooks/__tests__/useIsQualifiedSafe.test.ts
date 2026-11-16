@@ -21,9 +21,6 @@ jest.mock('@/hooks/useChainId', () => ({
   __esModule: true,
   default: jest.fn(),
 }))
-jest.mock('@/hooks/useChains', () => ({
-  useHasFeature: jest.fn(),
-}))
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
@@ -45,7 +42,6 @@ import { useCurrentSpaceId } from '../useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import useChainId from '@/hooks/useChainId'
-import { useHasFeature } from '@/hooks/useChains'
 import { useRouter } from 'next/router'
 
 const baseRouterPath = '/safes/1/0xSafe1'
@@ -57,7 +53,6 @@ describe('useIsQualifiedSafe', () => {
     ;(useAppSelector as jest.Mock).mockReturnValue(true)
     ;(useSafeAddressFromUrl as jest.Mock).mockReturnValue('0xSafe1')
     ;(useChainId as jest.Mock).mockReturnValue('1')
-    ;(useHasFeature as jest.Mock).mockReturnValue(true)
     ;(useRouter as jest.Mock).mockReturnValue({ pathname: baseRouterPath })
     jest.spyOn(spacesQueries, 'useSpacesGetOneV1Query').mockReturnValue({
       currentData: spaceBuilder().with({ uuid: MOCK_SPACE_UUID, name: 'My space' }).build(),
@@ -88,12 +83,6 @@ describe('useIsQualifiedSafe', () => {
 
   it('returns false when user is on a space route', () => {
     ;(useRouter as jest.Mock).mockReturnValue({ pathname: '/spaces?spaceId=1' })
-    const { result } = renderHook(() => useIsQualifiedSafe())
-    expect(result.current).toBe(false)
-  })
-
-  it('returns false when the Spaces feature flag is disabled', () => {
-    ;(useHasFeature as jest.Mock).mockReturnValue(false)
     const { result } = renderHook(() => useIsQualifiedSafe())
     expect(result.current).toBe(false)
   })

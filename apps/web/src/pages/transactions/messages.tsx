@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import type { NextPage } from 'next'
 
 import PaginatedMsgs from '@/components/safe-messages/PaginatedMsgs'
 import TxHeader from '@/components/transactions/TxHeader'
@@ -11,7 +10,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 
-const Messages: NextPage = () => {
+const Messages = () => {
   const chain = useCurrentChain()
   const router = useRouter()
 

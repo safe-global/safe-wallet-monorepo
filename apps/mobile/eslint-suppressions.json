@@ -1,0 +1,27 @@
+{
+  "src/features/ConfirmTx/components/ReviewAndConfirm/ReviewAndConfirmView.tsx": {
+    "@eslint-community/eslint-comments/no-restricted-disable": {
+      "count": 1
+    }
+  },
+  "src/features/ConfirmTx/components/SignTransaction/hooks/useTransactionSigning.test.ts": {
+    "@eslint-community/eslint-comments/no-restricted-disable": {
+      "count": 1
+    }
+  },
+  "src/features/Send/services/prepareSendDraft.test.ts": {
+    "@eslint-community/eslint-comments/no-restricted-disable": {
+      "count": 1
+    }
+  },
+  "src/hooks/useBiometrics.ts": {
+    "@eslint-community/eslint-comments/no-restricted-disable": {
+      "count": 1
+    }
+  },
+  "src/services/contracts/safeContracts.ts": {
+    "@eslint-community/eslint-comments/no-restricted-disable": {
+      "count": 1
+    }
+  }
+}

@@ -1,0 +1,75 @@
+# Required CI checks
+
+Branch protection can require a check only if it reports on every pull request. A workflow with a `pull_request` `paths` filter does not run on unrelated pull requests, so its required check stays pending and blocks the merge. A required workflow therefore has no `paths` filter on `pull_request` and uses two shared actions:
+
+- [`pr-changes`](../.github/actions/pr-changes/action.yml) says whether the pull request changes a file that matches the given globs. Other events, such as `push`, always count as relevant, so a `paths` filter on `push` can stay.
+- [`required-result`](../.github/actions/required-result/action.yml) fails unless every needed job succeeded. A skipped job passes only when nothing relevant changed.
+
+Require the result job, not the jobs it checks: its name stays the same when jobs are added, renamed or sharded.
+
+The result job runs `if: ${{ !cancelled() }}`, not `if: always()`: when a newer push cancels a run, its result job is cancelled too, and the run that replaced it reports the check. With `always()` the replaced run reports a failure.
+
+```yaml
+on:
+  pull_request:
+  push:
+    branches: [dev]
+    paths: [apps/web/**]
+
+jobs:
+  changes:
+    runs-on: ubuntu-26.04-arm
+    permissions:
+      pull-requests: read
+    outputs:
+      relevant: ${{ steps.changes.outputs.relevant }}
+    steps:
+      - id: changes
+        uses: $/.github/actions/pr-changes
+        with:
+          paths: |
+            apps/web/**
+            packages/**
+            yarn.lock
+
+  lint:
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
+    # ...
+
+  result:
+    name: Web lint result
+    permissions: {}
+    if: ${{ !cancelled() }}
+    needs: [changes, lint]
+    runs-on: ubuntu-26.04-arm
+    steps:
+      - uses: $/.github/actions/required-result
+        with:
+          needs: ${{ toJSON(needs) }}
+          relevant: ${{ needs.changes.outputs.relevant }}
+```
+
+List in `needs` of the result job only the jobs that must pass; leave out jobs that skip on purpose, such as push-only steps. [`web-isolated-e2e-backend.yml`](../.github/workflows/web-isolated-e2e-backend.yml) uses this pattern and also fails fork pull requests, which get no secrets for its backend.
+
+## Checks to require
+
+Set these job names as required status checks in branch protection for `dev`:
+
+| Check                                  | Workflow                                                           | Runs when the pull request changes                                                   |
+| -------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| `Web checks result`                    | `web-checks.yml` (lint, prettier, type-check, unused exports)      | `apps/web`, `apps/web-tanstack`, `packages`, `config`, dependencies                  |
+| `Web unit tests result`                | `web-unit-tests.yml`                                               | `apps/web`, `packages`, `config`, dependencies                                       |
+| `Web TanStack checks result`           | `web-tanstack-checks.yml` (build, verify)                          | `apps/web-tanstack`, `apps/web`, `packages`, `config`, dependencies                  |
+| `Mobile checks result`                 | `mobile-checks.yml` (lint, prettier, type-check)                   | `apps/mobile`, `packages`, `expo-plugins`, `config`, dependencies                    |
+| `Mobile unit tests result`             | `mobile-unit-tests.yml`                                            | `apps/mobile`, `packages`, `expo-plugins`, `config`, dependencies                    |
+| `tx-builder checks result`             | `tx-builder-checks.yml` (lint, prettier, type-check, tests, build) | `apps/tx-builder`, `packages`, `config`, dependencies                                |
+| `drain-safe checks result`             | `drain-safe-checks.yml` (lint, prettier, type-check, tests, build) | `apps/drain-safe`, `packages`, `config`, dependencies                                |
+| `Utils unit tests result`              | `package-utils-unit-tests.yml`                                     | `packages/utils`, `packages/store`, `config`, dependencies                           |
+| `Isolated E2E result`                  | `web-isolated-e2e-backend.yml`                                     | `apps/web`, `apps/tx-builder`, `apps/drain-safe`, `packages`, `config`, dependencies |
+| `Storybook visual tests result`        | `web-argos-storybook.yml` (Storybook sweep and upload)             | `apps/web`, `packages`, `config`, dependencies                                       |
+| `argos/safe-wallet-monorepo/storybook` | `web-argos-storybook.yml` (Storybook visual review in Argos)       | `apps/web`, `packages`, `config`, dependencies                                       |
+
+`argos/safe-wallet-monorepo/storybook` is a commit status that Argos posts, not a job; Argos adds the project name because several Argos projects share this repository. The workflow uploads the PR's changed Storybook sheets, and the status stays failed until someone approves the changes in Argos. A PR that changes nothing relevant, or no sheet, gets a skipped Argos build, which reports success. Argos posts no status when the sweep or the upload fails, so `Storybook visual tests result` is required too: it fails when a sweep, the upload or the check for broken stories fails.
+
+"Dependencies" means `yarn.lock`, `package.json`, `.yarnrc.yml`, `yarn.config.cjs` and `.yarn/patches`. Workflows that run prettier, turbo, knip or `scripts/verify.mjs` also list their config files. Each workflow also runs when its own file or the shared actions it uses change. The `pr-changes` step of each workflow holds the exact list.

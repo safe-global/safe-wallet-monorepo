@@ -1,11 +1,10 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import LoadSafe, { loadSafeDefaultData } from '@/components/new-safe/load'
 import { BRAND_NAME } from '@/config/constants'
 import SafeLogo from '@/components/common/SafeLogo'
 
-const Load: NextPage = () => {
+const Load = () => {
   const router = useRouter()
   const { address = '' } = router.query
   const safeAddress = Array.isArray(address) ? address[0] : address

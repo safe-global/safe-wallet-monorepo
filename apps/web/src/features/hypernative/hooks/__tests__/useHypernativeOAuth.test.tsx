@@ -160,7 +160,7 @@ describe('useHypernativeOAuth', () => {
 
     it('should return authenticated state when token exists', async () => {
       // Pre-populate cookie with auth token
-      setAuthCookie('test-token', 'Bearer', 3600)
+      setAuthCookie({ access_token: 'test-token', token_type: 'Bearer', expires_in: 3600 })
 
       const { result } = renderHook(() => useHypernativeOAuth())
 
@@ -170,7 +170,7 @@ describe('useHypernativeOAuth', () => {
       })
 
       // Cleanup
-      clearAuthCookie()
+      act(() => clearAuthCookie())
     })
   })
 
@@ -226,7 +226,7 @@ describe('useHypernativeOAuth', () => {
       expect(result.current.isAuthenticated).toBe(true)
 
       // Cleanup
-      clearAuthCookie()
+      act(() => clearAuthCookie())
     })
 
     it('should not open popup in mock mode', async () => {
@@ -271,7 +271,7 @@ describe('useHypernativeOAuth', () => {
       expect(result.current.isAuthenticated).toBe(true)
 
       // Cleanup
-      clearAuthCookie()
+      act(() => clearAuthCookie())
     })
 
     it('should use correct expiry time for mock tokens', async () => {
@@ -297,7 +297,7 @@ describe('useHypernativeOAuth', () => {
       }
 
       // Cleanup
-      clearAuthCookie()
+      act(() => clearAuthCookie())
     })
   })
 
@@ -453,7 +453,7 @@ describe('useHypernativeOAuth', () => {
   describe('logout', () => {
     it('should clear auth token', async () => {
       // Pre-populate cookie with auth token
-      setAuthCookie('test-token', 'Bearer', 3600)
+      setAuthCookie({ access_token: 'test-token', token_type: 'Bearer', expires_in: 3600 })
 
       const { result } = renderHook(() => useHypernativeOAuth())
 
@@ -500,11 +500,11 @@ describe('useHypernativeOAuth', () => {
       expect(Cookies.get('hn_auth')).toBeUndefined()
 
       // Cleanup
-      clearAuthCookie()
+      act(() => clearAuthCookie())
     })
 
     it('should detect valid tokens', async () => {
-      setAuthCookie('valid-token', 'Bearer', 3600)
+      setAuthCookie({ access_token: 'valid-token', token_type: 'Bearer', expires_in: 3600 })
 
       const { result } = renderHook(() => useHypernativeOAuth())
 
@@ -514,11 +514,11 @@ describe('useHypernativeOAuth', () => {
       })
 
       // Cleanup
-      clearAuthCookie()
+      act(() => clearAuthCookie())
     })
 
     it('should handle tokens with different token types', async () => {
-      setAuthCookie('custom-token', 'Custom', 3600)
+      setAuthCookie({ access_token: 'custom-token', token_type: 'Custom', expires_in: 3600 })
 
       const { result } = renderHook(() => useHypernativeOAuth())
 
@@ -536,7 +536,7 @@ describe('useHypernativeOAuth', () => {
       }
 
       // Cleanup
-      clearAuthCookie()
+      act(() => clearAuthCookie())
     })
   })
 
@@ -610,7 +610,7 @@ describe('useHypernativeOAuth', () => {
       })
 
       // Cleanup
-      clearAuthCookie()
+      act(() => clearAuthCookie())
     })
 
     it('should handle empty tokenType', async () => {
@@ -628,7 +628,7 @@ describe('useHypernativeOAuth', () => {
       })
 
       // Cleanup
-      clearAuthCookie()
+      act(() => clearAuthCookie())
     })
   })
 })

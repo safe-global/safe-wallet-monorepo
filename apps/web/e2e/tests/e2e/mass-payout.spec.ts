@@ -17,7 +17,7 @@ test.describe('Mass payout', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const payouts = AMOUNTS.map((amount) => ({ recipient: Wallet.createRandom().address, amount }))
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
 
     const sendTokens = new SendTokensPage(safePage)
     const review = new TxReviewPage(safePage)

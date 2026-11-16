@@ -4,7 +4,7 @@
  * Rule: Use API for precondition checks and data verification.
  * Reserve Playwright for what only a browser can test.
  */
-import { CGW_BASE_URL, CHAIN_IDS } from '../data/constants'
+import { cgwBaseUrl, CHAIN_IDS } from '../data/constants'
 import type { SafeInfo, BalancesResponse } from '../types/safe.types'
 import type { CollectiblePage } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
 import type { DelegatesGetDelegatesV3ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
@@ -30,7 +30,7 @@ export class SafeApiClient {
   private baseUrl: string
   private chainId: string
 
-  constructor(chainId: string = CHAIN_IDS.sepolia, baseUrl: string = CGW_BASE_URL) {
+  constructor(chainId: string = CHAIN_IDS.sepolia, baseUrl: string = cgwBaseUrl()) {
     this.baseUrl = baseUrl
     this.chainId = chainId
   }

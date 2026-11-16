@@ -1,0 +1,7 @@
+{
+  "src/components/forms/SolidityForm.tsx": {
+    "@eslint-community/eslint-comments/no-restricted-disable": {
+      "count": 1
+    }
+  }
+}
