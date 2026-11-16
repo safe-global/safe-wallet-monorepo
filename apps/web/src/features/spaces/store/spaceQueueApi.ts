@@ -1,5 +1,8 @@
-import { cgwClient } from '@safe-global/store/gateway/cgwClient'
-import type { SpaceQueuedItemPage, SpaceQueueSafe } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { useMemo } from 'react'
+import {
+  useSpaceTransactionsGetTransactionQueueV1Query,
+  type SpaceQueuedItemPage,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { isTransactionQueuedItem } from '@/utils/transaction-guards'
 
 export type SpaceQueueItems = SpaceQueuedItemPage['results'][string][string]
@@ -8,7 +11,6 @@ export type SpaceQueueSection = { safeAddress: string; chains: SpaceQueueChain[]
 
 export type SpaceQueue = {
   sections: SpaceQueueSection[]
-  unavailableSafes: SpaceQueueSafe[]
   /** Transactions in `sections` */
   shownCount: number
   /** Transactions in the whole queue, more than `shownCount` when the gateway capped the pages it read */
@@ -17,7 +19,7 @@ export type SpaceQueue = {
   isComplete: boolean
 }
 
-const toSpaceQueue = (page: SpaceQueuedItemPage): SpaceQueue => {
+export const toSpaceQueue = (page: SpaceQueuedItemPage): SpaceQueue => {
   const sections = Object.entries(page.results).map(([safeAddress, chainItems]) => ({
     safeAddress,
     chains: Object.entries(chainItems).map(([chainId, items]) => ({ chainId, items })),
@@ -27,28 +29,11 @@ const toSpaceQueue = (page: SpaceQueuedItemPage): SpaceQueue => {
     .reduce((count, chain) => count + chain.items.filter(isTransactionQueuedItem).length, 0)
   const totalCount = Math.max(page.count ?? shownCount, shownCount)
 
-  return {
-    sections,
-    unavailableSafes: page.unavailableSafes,
-    shownCount,
-    totalCount,
-    isComplete: shownCount >= totalCount,
-  }
+  return { sections, shownCount, totalCount, isComplete: shownCount >= totalCount }
 }
 
-type SpaceQueueArgs = { spaceId: string }
-
-// Built on cgwClient, not the generated spaces api, which many tests replace with a partial mock
-export const spaceQueueApi = cgwClient.enhanceEndpoints({ addTagTypes: ['transactions'] }).injectEndpoints({
-  endpoints: (build) => ({
-    getSpaceQueue: build.query<SpaceQueue, SpaceQueueArgs>({
-      query: (args) => ({
-        url: `/v1/spaces/${args.spaceId}/transactions/queued`,
-      }),
-      transformResponse: (page: SpaceQueuedItemPage) => toSpaceQueue(page),
-      providesTags: ['transactions'],
-    }),
-  }),
-})
-
-export const { useGetSpaceQueueQuery } = spaceQueueApi
+export const useSpaceQueue = (spaceId: string) => {
+  const { currentData, isError, refetch } = useSpaceTransactionsGetTransactionQueueV1Query({ spaceId })
+  const queue = useMemo(() => (currentData ? toSpaceQueue(currentData) : undefined), [currentData])
+  return { queue, isError, refetch }
+}

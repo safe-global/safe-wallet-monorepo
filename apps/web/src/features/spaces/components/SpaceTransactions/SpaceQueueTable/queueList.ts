@@ -1,13 +1,7 @@
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { SpaceQueueSection } from '../../../store/spaceQueueApi'
-import {
-  getNextNonce,
-  getQueueStatus,
-  getSafeKey,
-  getSectionRows,
-  type ConflictOption,
-  type QueueStatus,
-} from '../utils'
+import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
+import { getNextNonce, getQueueStatus, getSafeKey, getSectionRows } from '../utils'
 
 /** One table row of the queue, in display order */
 export type QueueListItem =
@@ -58,10 +52,7 @@ const getSummary = (statuses: QueueStatus[]): string =>
     return count ? [`${count} ${SUMMARY_LABELS[status]}`] : []
   }).join(' · ')
 
-/**
- * The queue flattened into the rows a virtualized table renders: a band per Safe, a header per chain,
- * a header per conflict group, and the transactions. Collapsed Safes and chains leave their rows out.
- */
+/** The queue as the virtualized table's rows, in order; collapsed Safes and chains leave their rows out. */
 export const buildQueueList = (args: {
   sections: SpaceQueueSection[]
   collapsedSafes: ReadonlySet<string>

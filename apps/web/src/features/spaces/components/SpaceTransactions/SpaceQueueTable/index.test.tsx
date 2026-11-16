@@ -15,7 +15,10 @@ const mockChainNames: Record<string, string> = {}
 const mockScopeProps = jest.fn()
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
-  default: () => ({ configs: [], loading: false }),
+  default: () => ({
+    configs: Object.entries(mockChainNames).map(([chainId, chainName]) => ({ chainId, chainName, shortName: chainId })),
+    loading: false,
+  }),
   useCurrentChain: () => undefined,
   useHasFeature: () => false,
   useChain: (chainId: string) =>
@@ -208,7 +211,6 @@ describe('SpaceQueueTable', () => {
   })
 
   it('renders only the rows near the viewport of a long queue', () => {
-    // jsdom lays nothing out: give every row a real height so the virtualizer can measure it
     const rect = jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockReturnValue({ height: 56, width: 1240, top: 0, left: 0, right: 1240, bottom: 56, x: 0, y: 0 } as DOMRect)
@@ -221,7 +223,6 @@ describe('SpaceQueueTable', () => {
     const rendered = renderedRows().length
     expect(rendered).toBeGreaterThan(0)
     expect(rendered).toBeLessThan(60)
-    // The rows below the window are skeleton placeholders until they render
     expect(screen.getByTestId('space-queue-skeleton')).toBeInTheDocument()
     rect.mockRestore()
   })
