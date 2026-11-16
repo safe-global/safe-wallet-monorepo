@@ -59,29 +59,16 @@ const mockWalletConnectInstance = {
   updateSessions: jest.fn().mockResolvedValue(undefined),
 }
 
-// Mock useLoadFeature to return the WalletConnect feature (flat structure)
-jest.mock('@/features/__core__/useLoadFeature', () => ({
-  ...jest.requireActual('@/features/__core__/useLoadFeature'),
-  useLoadFeature: jest.fn(() => ({
-    wcPopupStore: mockWcPopupStore,
-    wcChainSwitchStore: mockWcChainSwitchStore,
-    walletConnectInstance: mockWalletConnectInstance,
-  })),
-}))
-jest.mock('@/features/__core__/createFeatureHandle', () => ({
-  createFeatureHandle: jest.fn((name: string) => ({
-    name,
-    useIsEnabled: () => true,
-    load: jest.fn(),
-  })),
-}))
-
-// Mock the feature handle export (not used directly, but imported)
-jest.mock('@/features/walletconnect', () => ({
-  WalletConnectFeature: {
-    name: 'walletconnect',
-    useIsEnabled: () => true,
-    load: jest.fn(),
+jest.mock('@/features/walletconnect/public/walletConnectServices', () => ({
+  walletConnectServices: {
+    get wcPopupStore() {
+      return mockWcPopupStore
+    },
+    get wcChainSwitchStore() {
+      return mockWcChainSwitchStore
+    },
+    updateSessions: (chainId: string, safeAddress: string) =>
+      mockWalletConnectInstance.updateSessions(chainId, safeAddress),
   },
 }))
 
@@ -122,6 +109,7 @@ describe('useSafeWalletProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     updateSessionsMock.mockClear()
+    jest.spyOn(chainHooks, 'useHasFeature').mockReturnValue(true)
 
     jest.spyOn(chainHooks, 'default').mockImplementation(() => ({
       configs: [

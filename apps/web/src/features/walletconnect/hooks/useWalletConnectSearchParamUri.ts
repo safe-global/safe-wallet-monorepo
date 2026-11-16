@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router'
 import { useCallback } from 'react'
-import { WC_URI_SEARCH_PARAM } from '../constants'
+import { WC_URI_SEARCH_PARAM } from '../public/constants'
 
 export function useWalletConnectSearchParamUri(): [string | null, (wcUri: string | null) => void] {
   const router = useRouter()

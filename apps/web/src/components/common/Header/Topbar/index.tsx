@@ -6,16 +6,12 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { AppRoutes } from '@/config/routes'
 import { HeaderNavigation } from '@/features/spaces/components/HeaderNavigation/HeaderNavigation'
 import HeaderAccountInfo from '@/features/spaces/components/HeaderNavigation/HeaderAccountInfo'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { WalletFeature } from '@/features/wallet'
-import useWalletPopover from '@/features/wallet/hooks/useWalletPopover'
-import { GlobalSearchFeature } from '@/features/global-search'
-import { WalletConnectFeature } from '@/features/walletconnect'
+import useWalletPopover from '@/features/wallet/public/useWalletPopover'
 import { useDraftBatch } from '@/features/batching/hooks/useDraftBatch'
 import { useIsBelowMd } from '@/hooks/useMediaQuery'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectCenterNotifications } from '@/store/notificationsSlice'
-import { openGlobalSearch } from '@/features/global-search/store/globalSearchSlice'
+import { openGlobalSearch } from '@/features/global-search/public/globalSearchSlice'
 import { useWalletName } from '@/hooks/wallets/useWalletName'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
@@ -33,6 +29,10 @@ import SafenetStakingButton from './SafenetStakingButton'
 import { useSafeTokenEnabled } from '@/hooks/useSafeTokenEnabled'
 import { TxModalContext } from '@/components/tx-flow'
 import { cn } from '@safe-global/views/utils/cn'
+import WalletPopover from '@/features/wallet/public/WalletPopover'
+import WalletConnectWidget from '@/features/walletconnect/public/WalletConnectWidget'
+import GlobalSearchModal from '@/features/global-search/public/GlobalSearchModal'
+import GlobalSearchInput from '@/features/global-search/public/GlobalSearchInput'
 
 export const SEARCH_CONTEXT_HEIGHT = 'h-14'
 export const SAFE_BAR_CONTEXT_HEIGHT = 'min-h-14'
@@ -55,9 +55,6 @@ const Topbar = ({ onMenuToggle, onBatchToggle }: TopbarProps): ReactElement => {
     handleClose: handleWalletClose,
   } = useWalletPopover()
   const walletName = useWalletName(wallet)
-  const { WalletPopover } = useLoadFeature(WalletFeature)
-  const { GlobalSearchModal, GlobalSearchInput } = useLoadFeature(GlobalSearchFeature)
-  const { WalletConnectWidget } = useLoadFeature(WalletConnectFeature)
   const notificationsRef = useRef<NotificationsPopoverRef>(null)
   const notifications = useAppSelector(selectCenterNotifications)
   const spaceId = useCurrentSpaceId()
