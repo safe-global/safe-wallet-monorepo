@@ -3,7 +3,7 @@ import { act, renderHook, waitFor } from '@testing-library/react'
 import { type ReactNode } from 'react'
 import { Provider } from 'react-redux'
 import { http, HttpResponse } from 'msw'
-import type { SpaceQueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { cgwApi as spacesApi, type SpaceQueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionListItemType, TransactionStatus } from '@safe-global/store/gateway/types'
 import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
@@ -39,6 +39,8 @@ jest.mock('@/store/authSlice', () => ({
   isAuthenticated: () => mockIsAuthenticated(),
 }))
 
+// The store notifies its subscribers on the next animation frame
+const ANIMATION_FRAME_MS = 16
 const chainId = '1'
 const safeAddress = faker.finance.ethereumAddress()
 const wallet = faker.finance.ethereumAddress()
@@ -176,21 +178,59 @@ describe('useSpaceQueuePolling', () => {
     expect(requests).toHaveLength(0)
   })
 
-  it('toasts once for a new transaction the wallet can sign', async () => {
-    queue = [queuedTx([wallet])]
-    const { store } = renderPolling()
-    await waitFor(() => expect(messages(store)).toHaveLength(1))
+  const fulfilledRequestId = (store: ReturnType<typeof makeStore>) => {
+    const select = spacesApi.endpoints.spaceTransactionsGetTransactionQueueV1.select({ spaceId })
+    const entry = select(store.getState() as Parameters<typeof select>[0])
+    return entry.status === 'fulfilled' ? entry.requestId : undefined
+  }
 
+  const renderAfterFirstQueue = async (store = makeStore()) => {
+    const utils = renderPolling(store)
+    await waitFor(() => expect(fulfilledRequestId(store)).toBeDefined())
+    await act(() => jest.advanceTimersByTimeAsync(ANIMATION_FRAME_MS))
+    return utils
+  }
+
+  const pollWith = async (store: ReturnType<typeof makeStore>, items: TransactionQueuedItem[]) => {
+    queue = items
+    const previous = fulfilledRequestId(store)
     await act(() => jest.advanceTimersByTimeAsync(POLLING_INTERVAL))
+    await waitFor(() => expect(fulfilledRequestId(store)).not.toEqual(previous))
+    await waitFor(() => expect(fulfilledRequestId(store)).toBeDefined())
+    await act(() => jest.advanceTimersByTimeAsync(ANIMATION_FRAME_MS))
+  }
+
+  it('does not toast for the transactions of the first queue', async () => {
+    queue = [queuedTx([wallet])]
+
+    const { store } = await renderAfterFirstQueue()
+
+    expect(messages(store)).toEqual([])
+  })
+
+  it('toasts a transaction the wallet can sign that appears in a later poll', async () => {
+    const { store } = await renderAfterFirstQueue()
+
+    await pollWith(store, [queuedTx([wallet])])
 
     expect(messages(store)).toEqual(['A transaction requires your confirmation.'])
   })
 
-  it('links the toast to the queue of the Space', async () => {
-    queue = [queuedTx([wallet])]
-    const { store } = renderPolling()
+  it('does not toast again for the same transaction at the next poll', async () => {
+    const tx = queuedTx([wallet])
+    const { store } = await renderAfterFirstQueue()
+    await pollWith(store, [tx])
 
-    await waitFor(() => expect(messages(store)).toHaveLength(1))
+    await pollWith(store, [tx])
+
+    expect(messages(store)).toHaveLength(1)
+  })
+
+  it('links the toast to the queue of the Space', async () => {
+    const { store } = await renderAfterFirstQueue()
+
+    await pollWith(store, [queuedTx([wallet])])
+
     expect(selectNotifications(store.getState())[0].link).toEqual({
       href: { pathname: AppRoutes.spaces.transactions, query: { spaceId } },
       title: 'View transactions',
@@ -198,49 +238,44 @@ describe('useSpaceQueuePolling', () => {
   })
 
   it('does not toast again for the same transaction after a remount', async () => {
-    queue = [queuedTx([wallet])]
+    const tx = queuedTx([wallet])
     const store = makeStore()
-    const { unmount } = renderPolling(store)
-    await waitFor(() => expect(messages(store)).toHaveLength(1))
+    const { unmount } = await renderAfterFirstQueue(store)
+    await pollWith(store, [tx])
     unmount()
 
     renderPolling(store)
-    await act(() => jest.advanceTimersByTimeAsync(POLLING_INTERVAL))
+    await pollWith(store, [tx])
 
     expect(messages(store)).toHaveLength(1)
   })
 
   it('aggregates several new signable transactions into one toast', async () => {
-    queue = [queuedTx([wallet]), queuedTx([wallet])]
+    const { store } = await renderAfterFirstQueue()
 
-    const { store } = renderPolling()
+    await pollWith(store, [queuedTx([wallet]), queuedTx([wallet])])
 
-    await waitFor(() => expect(messages(store)).toEqual(['2 transactions require your confirmation.']))
+    expect(messages(store)).toEqual(['2 transactions require your confirmation.'])
   })
 
   it('does not toast for a transaction the wallet cannot sign', async () => {
-    queue = [queuedTx([faker.finance.ethereumAddress()])]
+    const { store } = await renderAfterFirstQueue()
 
-    const { store } = renderPolling()
-    await waitFor(() => expect(requests).toHaveLength(1))
-    await act(() => jest.advanceTimersByTimeAsync(0))
+    await pollWith(store, [queuedTx([faker.finance.ethereumAddress()])])
 
     expect(messages(store)).toEqual([])
   })
 
   it('does not toast for a transaction awaiting execution', async () => {
-    queue = [queuedTx([wallet], TransactionStatus.AWAITING_EXECUTION)]
+    const { store } = await renderAfterFirstQueue()
 
-    const { store } = renderPolling()
-    await waitFor(() => expect(requests).toHaveLength(1))
-    await act(() => jest.advanceTimersByTimeAsync(0))
+    await pollWith(store, [queuedTx([wallet], TransactionStatus.AWAITING_EXECUTION)])
 
     expect(messages(store)).toEqual([])
   })
 
   it('does not toast for a pending transaction', async () => {
     const tx = queuedTx([wallet])
-    queue = [tx]
     const store = makeStore()
     store.dispatch(
       setPendingTx({
@@ -252,10 +287,9 @@ describe('useSpaceQueuePolling', () => {
         signerAddress: wallet,
       }),
     )
+    await renderAfterFirstQueue(store)
 
-    renderPolling(store)
-    await waitFor(() => expect(requests).toHaveLength(1))
-    await act(() => jest.advanceTimersByTimeAsync(0))
+    await pollWith(store, [tx])
 
     expect(messages(store)).toEqual([])
   })

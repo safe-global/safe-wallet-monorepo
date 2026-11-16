@@ -26,6 +26,8 @@ const REFETCH_EVENTS = [
 
 // Module scope: Space pages each mount their own AuthState, and a page change must not toast again
 const notifiedTxIds = new Set<string>()
+// The first queue of a Space and wallet is the backlog, which is not news
+const seenQueues = new Set<string>()
 
 const getTxIdsAwaitingSignature = (queue: SpaceQueue, walletAddress: string, pendingTxs: PendingTxsState): string[] =>
   queue.sections
@@ -67,8 +69,14 @@ export const useSpaceQueuePolling = (): void => {
     const newKeys = getTxIdsAwaitingSignature(currentData, walletAddress, pendingTxs)
       .map((txId) => `${walletAddress}:${txId}`)
       .filter((key) => !notifiedTxIds.has(key))
-    if (newKeys.length === 0) return
     newKeys.forEach((key) => notifiedTxIds.add(key))
+
+    const queueKey = `${spaceId}:${walletAddress}`
+    if (!seenQueues.has(queueKey)) {
+      seenQueues.add(queueKey)
+      return
+    }
+    if (newKeys.length === 0) return
 
     dispatch(
       showNotification({
