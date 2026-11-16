@@ -4,6 +4,7 @@ import postcss from 'postcss'
 import ts from 'typescript'
 import { appDir, componentEntries, componentFile, readUiPackage, uiDir } from './paths.ts'
 import { readDeclarations, readThemeInline, stylesDir } from './tokens.ts'
+import { isMainModule } from './is-main-module.ts'
 
 export const REGISTRY_NAME = 'safe'
 export const NAMESPACE = '@safe'
@@ -252,4 +253,4 @@ export const main = (): void => {
   console.log(`registry: ${registry.items.length} items`)
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main()
+if (isMainModule(import.meta.url)) main()

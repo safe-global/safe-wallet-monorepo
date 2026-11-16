@@ -3,6 +3,7 @@ import path from 'node:path'
 import ts from 'typescript'
 import type { StoryEntry, StoryIndex, StorySource } from '../lib/types.ts'
 import { appDir, componentEntries, componentFile, generatedDir, readUiExports, uiDir, type Layer } from './paths.ts'
+import { isMainModule } from './is-main-module.ts'
 
 export const HIDDEN_TAG = 'docs-hidden'
 
@@ -434,4 +435,4 @@ export const main = (): void => {
   console.log(`stories: ${index.length} files, ${count} stories`)
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main()
+if (isMainModule(import.meta.url)) main()

@@ -3,6 +3,7 @@ import path from 'node:path'
 import { registryItemSchema } from 'shadcn/schema'
 import { appDir, INTERNAL_REFERENCE } from './paths.ts'
 import type { Registry } from './registry.ts'
+import { isMainModule } from './is-main-module.ts'
 
 export const outputDir = path.join(appDir, 'public/r')
 
@@ -35,7 +36,7 @@ export const checkRegistry = (dir: string = outputDir): string[] => {
   return errors
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (isMainModule(import.meta.url)) {
   const errors = checkRegistry()
   if (errors.length) {
     console.error(errors.join('\n'))

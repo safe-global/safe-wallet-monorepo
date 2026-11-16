@@ -3,6 +3,7 @@ import path from 'node:path'
 import postcss from 'postcss'
 import type { ThemeMapping, TokenEntry, TokenGroup, TokensDoc } from '../lib/types.ts'
 import { generatedDir, uiDir } from './paths.ts'
+import { isMainModule } from './is-main-module.ts'
 
 export const stylesDir = (root: string = uiDir): string => path.join(root, 'src/styles')
 
@@ -88,4 +89,4 @@ export const main = (): void => {
   console.log(`tokens: ${doc.tokens.length} variables, ${doc.theme.length} theme mappings`)
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main()
+if (isMainModule(import.meta.url)) main()

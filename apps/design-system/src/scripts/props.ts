@@ -4,6 +4,7 @@ import ts from 'typescript'
 import docgen from 'react-docgen-typescript'
 import type { ComponentPropsDoc, CvaVariantsDoc, PropDoc, PropsDoc } from '../lib/types.ts'
 import { componentFile, componentNames, generatedDir, uiDir } from './paths.ts'
+import { isMainModule } from './is-main-module.ts'
 
 const KEEP_FROM_REACT = new Set(['className', 'children', 'render', 'asChild'])
 
@@ -175,4 +176,4 @@ export const main = (): void => {
   console.log(`props: ${docs.length} files in ${((Date.now() - started) / 1000).toFixed(1)}s`)
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main()
+if (isMainModule(import.meta.url)) main()

@@ -3,6 +3,7 @@ import path from 'node:path'
 import ts from 'typescript'
 import type { IconList } from '../lib/types.ts'
 import { componentFile, componentNames, generatedDir, uiDir } from './paths.ts'
+import { isMainModule } from './is-main-module.ts'
 
 export const lucideImports = (file: string): string[] => {
   const sourceFile = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true)
@@ -38,4 +39,4 @@ export const main = (): void => {
   console.log(`icons: ${icons.length} lucide icons`)
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main()
+if (isMainModule(import.meta.url)) main()

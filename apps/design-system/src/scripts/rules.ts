@@ -4,6 +4,7 @@ import { designSystemSyntaxRules } from '@safe-global/ui/eslint'
 import type { RuleDoc } from '../lib/types.ts'
 import { componentFile, componentNames, generatedDir, uiDir } from './paths.ts'
 import { exportedNames } from './props.ts'
+import { isMainModule } from './is-main-module.ts'
 
 export interface SyntaxRule {
   selector: string
@@ -112,4 +113,4 @@ export const main = (): void => {
   console.log(`rules: ${rules.length} rules, ${rules.filter((rule) => rule.component).length} mapped to pages`)
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main()
+if (isMainModule(import.meta.url)) main()

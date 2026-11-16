@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { componentEntries, contentDir, type ComponentEntry } from './paths.ts'
+import { isMainModule } from './is-main-module.ts'
 
 export const componentsContentDir = path.join(contentDir, 'components')
 
@@ -78,4 +79,4 @@ export const main = (): void => {
   console.log(created.length ? `scaffold: created ${created.join(', ')}` : 'scaffold: every component has a page')
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) main()
+if (isMainModule(import.meta.url)) main()
