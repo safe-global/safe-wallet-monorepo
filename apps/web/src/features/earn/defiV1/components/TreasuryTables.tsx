@@ -13,9 +13,9 @@ import { CHAIN_IDS } from '../opportunities'
 import type { Holding, Opportunity } from '../types'
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0!'
-const COLUMN_WIDTHS = ['w-10', '', 'w-24', 'w-24', 'w-28', 'w-32', 'w-32']
+const COLUMN_WIDTHS = ['w-10', '', 'w-24', 'w-24', 'w-28', 'w-24', 'w-32', 'w-32']
 const COLUMN_COUNT = COLUMN_WIDTHS.length
-const OPPORTUNITY_HEADERS = ['Opportunity', 'Net APY', 'Category', 'Exit time', 'Your position']
+const OPPORTUNITY_HEADERS = ['Opportunity', 'Net APY', 'Category', 'Exit time', 'Networks', 'Your position']
 
 export type OpportunityGroup = { key: string; title?: string; items: Opportunity[] }
 
@@ -77,13 +77,10 @@ const NameCell = ({ opportunity }: { opportunity: Opportunity }) => (
         <span className="truncate font-medium text-foreground">{opportunity.name}</span>
         {opportunity.placement === 'sponsored' && <Badge variant="warning">{DEFI_V1_COPY.sponsored}</Badge>}
       </span>
-      <span className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
-        <NetworkLogos chains={opportunity.chains} />
-        <span className="truncate">
-          <span className="font-medium text-foreground">{opportunity.asset}</span>
-          {' · '}
-          {[opportunity.runBy, opportunity.curator, opportunity.kyc && 'KYC'].filter(Boolean).join(' · ')}
-        </span>
+      <span className="truncate text-xs text-muted-foreground">
+        <span className="font-medium text-foreground">{opportunity.asset}</span>
+        {' · '}
+        {[opportunity.runBy, opportunity.curator, opportunity.kyc && 'KYC'].filter(Boolean).join(' · ')}
       </span>
     </div>
   </div>
@@ -183,6 +180,9 @@ const OpportunityRow = ({
         <ExitCell opportunity={opportunity} />
       </TableCell>
       <TableCell>
+        <NetworkLogos chains={opportunity.chains} />
+      </TableCell>
+      <TableCell>
         <PositionCell holding={holding} />
       </TableCell>
       <TableCell className="text-right">
@@ -205,7 +205,7 @@ const OpportunityRow = ({
 const TableCard = ({ label, children }: { label: string; children: ReactNode }) => (
   <Card radius="xl" size="none">
     <CardContent>
-      <Table aria-label={label} variant="panel" className="table-fixed min-w-[880px] [&_td]:px-4 [&_th]:px-4">
+      <Table aria-label={label} variant="panel" className="table-fixed min-w-[960px] [&_td]:px-4 [&_th]:px-4">
         <colgroup>
           {COLUMN_WIDTHS.map((width, index) => (
             <col key={index} className={width || undefined} />
