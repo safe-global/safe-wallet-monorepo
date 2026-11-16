@@ -36,7 +36,7 @@ const OperationItem = ({ operation }: { operation: Operation }) => (
   </li>
 )
 
-/** One toolbar button that opens the list of dedicated Safes, so the page itself stays calm. */
+/** One toolbar button that opens the list of nested Safes, so the page itself stays calm. */
 export const OperationsButton = ({
   operations,
   plan,

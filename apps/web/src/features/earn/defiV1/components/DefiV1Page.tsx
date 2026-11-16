@@ -155,7 +155,10 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
         </div>
         <TreasurySummary
           summary={summary}
+          investmentCount={investedIds.length}
           onExploreIdle={() => showGrouped('none', { ...NO_FILTERS, sameDay: true, openOnly: true })}
+          onSeeInvestments={() => showGrouped('investments')}
+          onGroupByLiquidity={() => showGrouped('liquidity')}
         />
       </div>
 
