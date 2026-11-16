@@ -4,7 +4,8 @@ import { cgwApi as usersApi } from '@safe-global/store/gateway/AUTO_GENERATED/us
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { sameTagName } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/tagRules'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { sameTagName } from '@safe-global/utils/validation/tags'
 
 type TagChangeLocation = 'row_menu' | 'add_contact' | 'edit_contact'
 
@@ -181,7 +182,7 @@ export const workspaceTrackingListener = (listenerMiddleware: typeof listenerMid
     const workspaceTags = book?.tags ?? []
     items.forEach(({ address, tags }) => {
       if (!tags) return
-      const contact = book?.data.find((item) => item.address.toLowerCase() === address.toLowerCase())
+      const contact = book?.data.find((item) => sameAddress(item.address, address))
       const oldNames = workspaceTags.filter((tag) => contact?.tagIds.includes(tag.id)).map((tag) => tag.name)
       trackEvent(SPACE_EVENTS.CONTACT_TAGS_UPDATED, {
         [MixpanelEventParams.LOCATION]: locationOf(!contact),

@@ -6,11 +6,7 @@ import {
   useAddressBooksRenameTagV1Mutation,
   useAddressBooksSetContactTagsV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import {
-  normalizeTagName,
-  sameTagName,
-  validateTagName,
-} from '@safe-global/views/features/spaces/components/AddressBookV2/tags/tagRules'
+import { normalizeTagName, sameTagName, validateTagName } from '@safe-global/utils/validation/tags'
 import type { WorkspaceTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import type { TagActions } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagMenu'
 import { useCurrentSpaceId } from '@/features/spaces'
@@ -19,13 +15,11 @@ import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
-type Outcome = { error?: unknown }
+type Outcome = { error?: FetchBaseQueryError | SerializedError }
 
-/** Undefined when the request went through or is waiting for step-up, which redirects on its own. */
+/** Undefined when the request went through or the user cancelled the step-up, which shows its own dialog. */
 const errorMessageOf = ({ error }: Outcome): string | undefined =>
-  error && !isElevationRequiredError(error)
-    ? getRtkQueryErrorMessage(error as FetchBaseQueryError | SerializedError)
-    : undefined
+  error && !isElevationRequiredError(error) ? getRtkQueryErrorMessage(error) : undefined
 
 const useTagActions = () => {
   const spaceId = useCurrentSpaceId() ?? ''
@@ -65,15 +59,16 @@ const useTagActions = () => {
     return { mergedIntoId: result.data.tags.find((candidate) => sameTagName(candidate.name, name))?.id }
   }
 
-  const deleteTag = async (tag: WorkspaceTag): Promise<void> => {
+  const deleteTag = async (tag: WorkspaceTag): Promise<boolean> => {
     const result = await deleteTagMutation({ spaceId, tagId: tag.id })
     const message = errorMessageOf(result)
     if (message) dispatch(showNotification({ message, variant: 'error', groupKey: 'delete-tag-error' }))
+    return !result.error
   }
 
   const tagActions: TagActions = { onCreate: createTag, onRename: renameTag, onDelete: deleteTag }
 
-  return { saveContactTags, isSavingContactTags, createTag, renameTag, deleteTag, tagActions }
+  return { saveContactTags, isSavingContactTags, tagActions }
 }
 
 export default useTagActions

@@ -27,7 +27,7 @@ import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { getContactUpdatedMessage } from '@/utils/addressBookNotifications'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 import type { WorkspaceTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
-import { existingTagIds } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagMenu'
+import { existingTagIds, sameTagIds } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagMenu'
 import { tagNamesOf } from '../SpaceAddressBookV2/utils'
 import TagsField from './TagsField'
 
@@ -79,7 +79,7 @@ const EditContactDialog = ({ entry, onClose, workspaceTags, onTagLimitReached }:
   const watchedNetworks = watch('networks')
   const watchedTags = watch('tags')
   const currentTags = workspaceTags ? existingTagIds(watchedTags, workspaceTags) : []
-  const tagsChanged = currentTags.length !== defaultTags.length || currentTags.some((id) => !defaultTags.includes(id))
+  const tagsChanged = !sameTagIds(currentTags, defaultTags)
 
   // Check if any changes were made
   const hasChanges = useMemo(() => {

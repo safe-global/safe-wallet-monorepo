@@ -1,7 +1,6 @@
 import { Controller, useFormContext } from 'react-hook-form'
-import TagPicker from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagPicker'
+import TagPicker, { TAGS_DISCLAIMER } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagPicker'
 import type { WorkspaceTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
-import { TAGS_DISCLAIMER } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/tagRules'
 import useTagActions from '../SpaceAddressBookV2/useTagActions'
 import type { ContactField } from './AddContactDialog'
 

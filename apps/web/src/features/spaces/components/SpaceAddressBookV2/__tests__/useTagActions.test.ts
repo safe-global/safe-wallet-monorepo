@@ -71,19 +71,19 @@ describe('useTagActions', () => {
     })
   })
 
-  describe('createTag', () => {
+  describe('onCreate', () => {
     it('creates the tag with the normalized name and returns it', async () => {
       const created = spaceAddressBookTagBuilder().with({ name: 'Key vendors', contactCount: 0 }).build()
       mockCreateTag.mockResolvedValue({ data: { spaceUuid: SPACE_ID, data: [], tags: [vendor, created] } })
 
-      const result = await setup().createTag('  Key   vendors ')
+      const result = await setup().tagActions.onCreate('  Key   vendors ')
 
       expect(mockCreateTag).toHaveBeenCalledWith({ spaceId: SPACE_ID, createTagDto: { name: 'Key vendors' } })
       expect(result).toEqual({ tag: created })
     })
 
     it('explains an invalid name without a request', async () => {
-      expect(await setup().createTag('=SUM(1)')).toEqual({ error: 'Tags cannot start with =, +, - or @' })
+      expect(await setup().tagActions.onCreate('=SUM(1)')).toEqual({ error: 'Tags cannot start with =, +, - or @' })
       expect(mockCreateTag).not.toHaveBeenCalled()
     })
 
@@ -92,33 +92,33 @@ describe('useTagActions', () => {
         error: { status: 409, data: { message: 'A tag with this name already exists.' } },
       })
 
-      expect(await setup().createTag('Vendor')).toEqual({ error: 'A tag with this name already exists.' })
+      expect(await setup().tagActions.onCreate('Vendor')).toEqual({ error: 'A tag with this name already exists.' })
     })
 
     it('shows no error while the request waits for step-up', async () => {
       mockCreateTag.mockResolvedValue({ error: elevationRequired })
 
-      expect(await setup().createTag('Vendor')).toEqual({ error: undefined })
+      expect(await setup().tagActions.onCreate('Vendor')).toEqual({ error: undefined })
     })
   })
 
-  describe('renameTag', () => {
+  describe('onRename', () => {
     it('explains an invalid name without a request', async () => {
-      expect(await setup().renameTag(vendor, 'Signer')).toEqual({
+      expect(await setup().tagActions.onRename(vendor, 'Signer')).toEqual({
         error: "'Signer' is added automatically and can't be used as a tag name",
       })
       expect(mockRenameTag).not.toHaveBeenCalled()
     })
 
     it('sends nothing when the name is unchanged', async () => {
-      expect(await setup().renameTag(vendor, '  Vendor ')).toEqual({})
+      expect(await setup().tagActions.onRename(vendor, '  Vendor ')).toEqual({})
       expect(mockRenameTag).not.toHaveBeenCalled()
     })
 
     it('sends the name as CGW stores it', async () => {
       mockRenameTag.mockResolvedValue({ data: { tags: [{ ...vendor, name: 'Key vendors' }, internal] } })
 
-      expect(await setup().renameTag(vendor, ' Key   vendors ')).toEqual({})
+      expect(await setup().tagActions.onRename(vendor, ' Key   vendors ')).toEqual({})
       expect(mockRenameTag).toHaveBeenCalledWith({
         spaceId: SPACE_ID,
         tagId: vendor.id,
@@ -129,21 +129,21 @@ describe('useTagActions', () => {
     it('names the tag a rename merged into', async () => {
       mockRenameTag.mockResolvedValue({ data: { tags: [internal] } })
 
-      expect(await setup().renameTag(vendor, 'internal')).toEqual({ mergedIntoId: internal.id })
+      expect(await setup().tagActions.onRename(vendor, 'internal')).toEqual({ mergedIntoId: internal.id })
     })
 
     it('returns the error CGW gave', async () => {
       mockRenameTag.mockResolvedValue({ error: { status: 404, data: { message: 'Tag not found' } } })
 
-      expect(await setup().renameTag(vendor, 'Supplier')).toEqual({ error: 'Tag not found' })
+      expect(await setup().tagActions.onRename(vendor, 'Supplier')).toEqual({ error: 'Tag not found' })
     })
   })
 
-  describe('deleteTag', () => {
+  describe('onDelete', () => {
     it('deletes the tag by id', async () => {
       mockDeleteTag.mockResolvedValue({ data: undefined })
 
-      await setup().deleteTag(vendor)
+      expect(await setup().tagActions.onDelete(vendor)).toBe(true)
 
       expect(mockDeleteTag).toHaveBeenCalledWith({ spaceId: SPACE_ID, tagId: vendor.id })
       expect(mockDispatch).not.toHaveBeenCalled()
@@ -152,7 +152,7 @@ describe('useTagActions', () => {
     it('reports a failed delete', async () => {
       mockDeleteTag.mockResolvedValue({ error: { status: 500, data: { message: 'Server error' } } })
 
-      await setup().deleteTag(vendor)
+      expect(await setup().tagActions.onDelete(vendor)).toBe(false)
 
       expect(mockDispatch).toHaveBeenCalledWith(
         expect.objectContaining({ payload: expect.objectContaining({ message: 'Server error', variant: 'error' }) }),

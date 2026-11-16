@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Download } from 'lucide-react'
 import type { SpaceAddressBookItemDto, SpaceAddressBookTagDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import TableCard from '@safe-global/views/components/common/TableCard'
@@ -9,6 +9,7 @@ import AddressBookTable from '@safe-global/views/features/spaces/components/Addr
 import AddressBookToolbar from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookToolbar'
 import TagFilterDropdown from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagFilterDropdown'
 import EditTagsDialog from '@safe-global/views/features/spaces/components/AddressBookV2/EditTagsDialog'
+import { existingTagIds } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagMenu'
 import { filterByTags, searchContacts } from '@safe-global/views/features/spaces/components/AddressBookV2/search'
 import type { AddressBookContact } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import Track from '@/components/common/Track'
@@ -26,7 +27,8 @@ import useAddressCellProps from './useAddressCellProps'
 import useTagActions from './useTagActions'
 import { tagNamesOf, toWorkspaceContacts } from './utils'
 
-type OpenDialog = { type: 'edit' | 'delete' | 'tags'; entry: SpaceAddressBookItemDto }
+// The entry is read from `items` on each render, so a tag renamed, merged or deleted in a dialog shows at once
+type OpenDialog = { type: 'edit' | 'delete' | 'tags'; address: string }
 
 const trackTagLimitReached = (location: 'filters' | 'row_menu' | 'add_contact' | 'edit_contact') =>
   trackEvent(SPACE_EVENTS.TAG_LIMIT_REACHED, { [MixpanelEventParams.LOCATION]: location })
@@ -65,19 +67,20 @@ const WorkspaceContacts = ({
     [items, tags, configs, resolveMemberName],
   )
   // A deleted tag drops out of the filters
-  const activeTagIds = useMemo(
-    () => selectedTagIds.filter((id) => tags.some((tag) => tag.id === id)),
-    [selectedTagIds, tags],
-  )
+  const activeTagIds = useMemo(() => existingTagIds(selectedTagIds, tags), [selectedTagIds, tags])
   const visibleContacts = useMemo(
     () => filterByTags(searchContacts(contacts, query), activeTagIds),
     [contacts, query, activeTagIds],
   )
 
-  const openDialog = (type: OpenDialog['type'], contact: AddressBookContact) => {
-    const entry = items.find((item) => item.address === contact.address)
-    if (entry) setDialog({ type, entry })
-  }
+  const dialogEntry = dialog && items.find((item) => item.address === dialog.address)
+  // A contact deleted elsewhere closes its dialog for good, so re-adding it doesn't reopen it
+  useEffect(() => {
+    if (dialog && !dialogEntry) setDialog(undefined)
+  }, [dialog, dialogEntry])
+
+  const openDialog = (type: OpenDialog['type'], contact: AddressBookContact) =>
+    setDialog({ type, address: contact.address })
 
   const handleEdit = (contact: AddressBookContact) => {
     trackEvent(SPACE_EVENTS.EDIT_ADDRESS)
@@ -95,6 +98,7 @@ const WorkspaceContacts = ({
   }
 
   const handleSaveTags = async (entry: SpaceAddressBookItemDto, tagIds: number[]) => {
+    setTagsError(undefined)
     const { saved, error } = await saveContactTags(entry.address, tagNamesOf(tagIds, tags))
     setTagsError(error)
     if (saved) setDialog(undefined)
@@ -208,19 +212,19 @@ const WorkspaceContacts = ({
         )}
       </TableCard>
 
-      {dialog?.type === 'edit' && (
+      {dialog?.type === 'edit' && dialogEntry && (
         <EditContactDialog
-          entry={dialog.entry}
+          entry={dialogEntry}
           workspaceTags={tags}
           onTagLimitReached={() => trackTagLimitReached('edit_contact')}
           onClose={() => setDialog(undefined)}
         />
       )}
-      {dialog?.type === 'tags' && (
+      {dialog?.type === 'tags' && dialogEntry && (
         <EditTagsDialog
-          contact={dialog.entry}
+          contact={dialogEntry}
           workspaceTags={tags}
-          onSave={(tagIds) => handleSaveTags(dialog.entry, tagIds)}
+          onSave={(tagIds) => handleSaveTags(dialogEntry, tagIds)}
           onClose={() => setDialog(undefined)}
           onLimitReached={() => trackTagLimitReached('row_menu')}
           tagActions={memberTagActions}
@@ -228,11 +232,11 @@ const WorkspaceContacts = ({
           error={tagsError}
         />
       )}
-      {dialog?.type === 'delete' && (
+      {dialog?.type === 'delete' && dialogEntry && (
         <DeleteContactDialog
-          name={dialog.entry.name}
-          address={dialog.entry.address}
-          networks={dialog.entry.chainIds}
+          name={dialogEntry.name}
+          address={dialogEntry.address}
+          networks={dialogEntry.chainIds}
           onClose={() => setDialog(undefined)}
         />
       )}

@@ -1,7 +1,7 @@
 import type * as ReactHookForm from 'react-hook-form'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { spaceAddressBookTagBuilder } from '@/tests/builders/space'
+import { buildSpaceAddressBookTags, spaceAddressBookTagBuilder } from '@/tests/builders/space'
 import AddContactDialog from '../AddContactDialog'
 
 const mockDispatch = jest.fn()
@@ -276,6 +276,43 @@ describe('AddContactDialog', () => {
       openDialog()
 
       expect(screen.queryByTestId('tag-picker')).not.toBeInTheDocument()
+    })
+
+    it('sends no tags when none is picked', async () => {
+      const vendor = spaceAddressBookTagBuilder().with({ name: 'Vendor' }).build()
+      const submit = jest.fn().mockResolvedValue({})
+      render(<AddContactDialog {...baseProps} submit={submit} workspaceTags={[vendor]} />)
+      openDialog()
+      fillRequiredFields()
+
+      const submitButton = screen.getByRole('button', { name: 'Add contact' })
+      await waitFor(() => expect(submitButton).not.toBeDisabled())
+      fireEvent.click(submitButton)
+
+      await waitFor(() =>
+        expect(submit).toHaveBeenCalledWith({ name: 'Alice', address: '0xabc', chainIds: ['1', '137'] }, '42'),
+      )
+    })
+
+    it('reports the workspace tag limit from the Tags field', async () => {
+      const onTagLimitReached = jest.fn()
+      render(
+        <AddContactDialog
+          {...baseProps}
+          submit={jest.fn()}
+          workspaceTags={buildSpaceAddressBookTags(8)}
+          onTagLimitReached={onTagLimitReached}
+        />,
+      )
+      openDialog()
+
+      await userEvent.click(screen.getByTestId('tag-picker'))
+      await waitFor(() => expect(screen.getByRole('listbox', { name: 'Tags' })).toBeInTheDocument())
+      await userEvent.type(screen.getByRole('searchbox'), 'One too many')
+      await userEvent.click(screen.getByRole('option', { name: /Create/ }))
+
+      expect(onTagLimitReached).toHaveBeenCalled()
+      expect(mockCreateTag).not.toHaveBeenCalled()
     })
 
     it('submits the picked tags with the new contact', async () => {

@@ -211,5 +211,21 @@ describe('EditContactDialog', () => {
       await waitFor(() => expect(mockUpsertAddressBook).toHaveBeenCalled())
       expect(sentItem()).toEqual(expect.objectContaining({ tags: ['Vendor', 'Internal'] }))
     })
+
+    it('sends no tags once the last one is removed', async () => {
+      mockUpsertAddressBook.mockResolvedValue({ data: {} })
+      render(<EditContactDialog entry={entry} onClose={jest.fn()} workspaceTags={[vendor, internal]} />)
+
+      await userEvent.click(screen.getByTestId('tag-picker'))
+      await waitFor(() => expect(screen.getByRole('listbox', { name: 'Tags' })).toBeInTheDocument())
+      await userEvent.click(screen.getByRole('option', { name: /Vendor/ }))
+      await userEvent.keyboard('{Escape}')
+      const submitButton = screen.getByRole('button', { name: 'Save' })
+      await waitFor(() => expect(submitButton).not.toBeDisabled())
+      fireEvent.click(submitButton)
+
+      await waitFor(() => expect(mockUpsertAddressBook).toHaveBeenCalled())
+      expect(sentItem()).toEqual(expect.objectContaining({ tags: [] }))
+    })
   })
 })
