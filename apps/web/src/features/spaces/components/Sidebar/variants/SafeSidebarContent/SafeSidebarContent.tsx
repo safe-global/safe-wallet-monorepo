@@ -97,7 +97,7 @@ export const SafeSidebarContent = ({
 
   const visibleDefiGroup = useMemo(() => {
     const filteredItems = safeDefiGroup.items.filter((item) => {
-      if (earnLabel && item.href === AppRoutes.earn) return false
+      if (earnLabel && (item.href === AppRoutes.earn || item.href === AppRoutes.stake)) return false
       if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) return false
       return isRouteEnabled(item.href, chain)
     })

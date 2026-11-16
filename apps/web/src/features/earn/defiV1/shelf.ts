@@ -1,53 +1,52 @@
-import type {
-  DefiV1Model,
-  DefiV1Plan,
-  GroupBy,
-  Holding,
-  Opportunity,
-  OpportunityCategory,
-  Position,
-  RiskLevel,
-} from './types'
+import type { DefiV1Plan, GroupBy, Holding, Opportunity, LiquidityBucket, OpportunityCategory, Position } from './types'
 
 export const CATEGORY_ORDER: OpportunityCategory[] = ['cash', 'yield', 'staking']
 export const MAX_SHELF = 7
 export const NUDGE_MAX_EXIT_HOURS = 24
+const RESERVES_MAX_EXIT_HOURS = 72
 
-const RISK_ORDER: Record<RiskLevel, number> = { low: 0, medium: 1, higher: 2 }
+/** Rank by how fast the money comes back. Placement and APY never move an item up. */
+export const byExitTime = (a: Opportunity, b: Opportunity): number =>
+  a.exitHours - b.exitHours || a.name.localeCompare(b.name)
 
-/** Rank by risk, then exit time. Placement and APY never move an item up. */
-export const byTrust = (a: Opportunity, b: Opportunity): number =>
-  RISK_ORDER[a.risk] - RISK_ORDER[b.risk] || a.exitHours - b.exitHours || a.name.localeCompare(b.name)
+export const LIQUIDITY_ORDER: LiquidityBucket[] = ['operating', 'reserves', 'strategic']
 
-export const isLocked = (opportunity: Opportunity, model: DefiV1Model, plan: DefiV1Plan): boolean =>
-  model === 'A' && plan === 'free' && opportunity.access === 'pro'
+/** Buckets come from exit time only, so they state a fact rather than advice. */
+export const liquidityBucket = (item: Pick<Opportunity, 'exitHours'>): LiquidityBucket => {
+  if (item.exitHours <= NUDGE_MAX_EXIT_HOURS) return 'operating'
+  if (item.exitHours <= RESERVES_MAX_EXIT_HOURS) return 'reserves'
+  return 'strategic'
+}
+
+export const isLocked = (opportunity: Opportunity, plan: DefiV1Plan): boolean =>
+  plan === 'free' && opportunity.access === 'pro'
 
 export type ShelfGroup = { category: OpportunityCategory; items: Opportunity[] }
 
 export const buildShelf = (opportunities: Opportunity[]): { groups: ShelfGroup[]; more: Opportunity[] } => {
   const shelf = opportunities
     .filter((item) => item.onShelf)
-    .sort(byTrust)
+    .sort(byExitTime)
     .slice(0, MAX_SHELF)
   const groups = CATEGORY_ORDER.map((category) => ({
     category,
     items: shelf.filter((item) => item.category === category),
   })).filter((group) => group.items.length > 0)
-  const more = opportunities.filter((item) => !shelf.includes(item)).sort(byTrust)
+  const more = opportunities.filter((item) => !shelf.includes(item)).sort(byExitTime)
   return { groups, more }
 }
 
 /** What the idle-cash prompt may point to: cash-like, same-day exit, open to this Safe, and never a paid slot. */
-export const nudgeOptions = (opportunities: Opportunity[], model: DefiV1Model, plan: DefiV1Plan): Opportunity[] =>
+export const nudgeOptions = (opportunities: Opportunity[], plan: DefiV1Plan): Opportunity[] =>
   opportunities
     .filter(
       (item) =>
         item.category === 'cash' &&
         item.exitHours <= NUDGE_MAX_EXIT_HOURS &&
         item.placement === 'base' &&
-        !isLocked(item, model, plan),
+        !isLocked(item, plan),
     )
-    .sort(byTrust)
+    .sort(byExitTime)
 
 export type ListFilters = {
   assets: string[]
@@ -88,16 +87,16 @@ export const filterOpportunities = (
   )
 
 const GROUP_KEY: Record<Exclude<GroupBy, 'none' | 'investments'>, (item: Opportunity) => string> = {
-  category: (item) => item.category,
+  liquidity: (item) => liquidityBucket(item),
   asset: (item) => item.asset,
 }
 
 const GROUP_ORDER: Partial<Record<GroupBy, string[]>> = {
   investments: ['invested', 'opportunities'],
-  category: CATEGORY_ORDER,
+  liquidity: LIQUIDITY_ORDER,
 }
 
-/** Keeps the input order inside each group. Investments come first; categories follow the shelf order, assets their first appearance. */
+/** Keeps the input order inside each group. Investments come first; liquidity buckets go from fastest exit, assets their first appearance. */
 export const groupOpportunities = (
   opportunities: Opportunity[],
   groupBy: GroupBy,
@@ -141,25 +140,27 @@ export type TreasurySummary = {
   idle: number
   investedShare: number
   earned: number
-  blendedApy: number
+  sameDay: number
 }
 
 /** Pending deposits still sit in the Safe, so they count as idle until signers approve them. */
 export const summariseTreasury = (
   total: number,
-  positions: { principal: number; earned: number; pending: boolean; opportunity: Pick<Opportunity, 'apy'> }[],
+  positions: { principal: number; earned: number; pending: boolean; opportunity: Pick<Opportunity, 'exitHours'> }[],
 ): TreasurySummary => {
   const live = positions.filter((position) => !position.pending)
   const invested = live.reduce((sum, position) => sum + position.principal, 0)
   const earned = live.reduce((sum, position) => sum + position.earned, 0)
-  const weighted = live.reduce((sum, position) => sum + position.principal * position.opportunity.apy, 0)
+  const sameDay = live
+    .filter((position) => liquidityBucket(position.opportunity) === 'operating')
+    .reduce((sum, position) => sum + position.principal, 0)
   return {
     total,
     invested,
     idle: Math.max(total - invested, 0),
     investedShare: total > 0 ? invested / total : 0,
     earned,
-    blendedApy: invested > 0 ? weighted / invested : 0,
+    sameDay,
   }
 }
 

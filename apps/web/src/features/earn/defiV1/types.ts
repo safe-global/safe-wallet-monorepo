@@ -39,19 +39,18 @@ export type Opportunity = {
 export type DefiV1Framing = 'treasury' | 'defi'
 export type DefiV1Nudge = 'home' | 'assets' | 'off'
 export type DefiV1Signing = 'threshold' | 'policy'
-/** A: Pro gets KYC and partner listings. B: everything open, Pro pays lower fees. */
-export type DefiV1Model = 'A' | 'B'
 export type DefiV1Plan = 'free' | 'pro'
 
 export type DefiV1Config = {
   framing: DefiV1Framing
   nudge: DefiV1Nudge
   signing: DefiV1Signing
-  model: DefiV1Model
   plan: DefiV1Plan
 }
 
-export type GroupBy = 'none' | 'investments' | 'category' | 'asset'
+export type LiquidityBucket = 'operating' | 'reserves' | 'strategic'
+
+export type GroupBy = 'none' | 'investments' | 'liquidity' | 'asset'
 
 export type Position = { opportunity: Opportunity; principal: number; earned: number; pending: boolean }
 

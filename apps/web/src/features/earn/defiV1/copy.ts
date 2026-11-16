@@ -1,4 +1,4 @@
-import type { DefiV1Framing, GroupBy, OpportunityCategory } from './types'
+import type { DefiV1Framing, GroupBy, LiquidityBucket } from './types'
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 const compactUsd = new Intl.NumberFormat('en-US', {
@@ -31,16 +31,16 @@ export const DEFI_V1_COPY = {
       'A short list of vetted options, grouped by what your treasury needs. Exit time and who runs it come first.',
     defi: 'Lending, staking and tokenised funds you can use from this Safe. Filter by asset, network and exit time.',
   } satisfies Record<DefiV1Framing, string>,
+  liquidity: {
+    operating: { title: 'Operating cash', short: 'Operating', hint: 'Back within a day' },
+    reserves: { title: 'Reserves', short: 'Reserves', hint: 'Back within 3 days' },
+    strategic: { title: 'Strategic', short: 'Strategic', hint: 'Longer exits, like staking queues and cooldowns' },
+  } satisfies Record<LiquidityBucket, { title: string; short: string; hint: string }>,
   bestRate: (rate: string) => `Up to ${rate}`,
-  category: {
-    cash: { title: 'Cash-like', short: 'Cash', subtitle: 'Exit within a day. For cash you may need soon.' },
-    yield: {
-      title: 'Enhanced yield',
-      short: 'Yield',
-      subtitle: 'A bit more yield for cash you can leave for a while.',
-    },
-    staking: { title: 'Staking', short: 'Staking', subtitle: 'Earn on ETH the treasury plans to hold.' },
-  } satisfies Record<OpportunityCategory, { title: string; short: string; subtitle: string }>,
+  showAll: (count: number) => `Show all ${count} opportunities`,
+  moreInApps: 'Looking for something else? Browse DeFi apps',
+  swap: 'Swap',
+  bridge: 'Bridge',
   noMatches: 'No opportunities match your search or filters.',
   nudgeTitle: (value: string, asset: string, chain: string, days: number) =>
     `${value} ${asset} has been idle on ${chain} for ${days} days`,
@@ -112,7 +112,7 @@ export const DEFI_V1_COPY = {
     groupBy: 'Group by',
     groupByOption: {
       investments: 'Investments',
-      category: 'Category',
+      liquidity: 'Liquidity',
       asset: 'Asset',
     } satisfies Record<Exclude<GroupBy, 'none'>, string>,
     filters: 'Filter',
@@ -164,10 +164,8 @@ export const DEFI_V1_COPY = {
     growth: 'Growth, 12 months',
     earned: 'Earned',
     fees: 'Fees',
-    safeFee: 'Safe fee',
-    freePlan: 'On the Free plan',
     providerFee: (runBy: string) => `${runBy} fee, already in net APY`,
-    feeNote: 'Taken from rewards as they accrue. No deposit or withdrawal fee. Mock values.',
+    feeNote: 'Already in the net APY, so you get the same rate as going direct. Safe adds no fee. Mock values.',
     apyBreakdown: 'APY breakdown',
     publishedApy: 'Published APY',
     managementFee: 'Management fee',
@@ -216,8 +214,8 @@ export const DEFI_V1_COPY = {
     investedOf: (invested: string, total: string, idle: string) => `${invested} of ${total} · ${idle} idle`,
     earned: 'Earned YTD',
     earnedLead: 'Across all investments',
-    apy: 'Blended APY',
-    apyLead: 'Weighted by amount invested',
+    sameDay: 'Back within a day',
+    sameDayOf: (sameDay: string, invested: string) => `${sameDay} of ${invested} invested`,
   },
   policy: {
     title: 'Investment policy',
@@ -233,9 +231,5 @@ export const DEFI_V1_COPY = {
     sweepValue: (value: string) => `Keep ${value} liquid, invest the rest every week`,
     approveOnce: (threshold: number, owners: number) => `Signers approve this once (${threshold} of ${owners})`,
     approve: 'Propose policy',
-  },
-  plan: {
-    modelB: 'Safe Pro: lower fees on every deposit',
-    feePlaceholder: 'Fee levels to be confirmed',
   },
 } as const

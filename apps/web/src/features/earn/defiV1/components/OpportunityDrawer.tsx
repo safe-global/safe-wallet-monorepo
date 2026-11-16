@@ -7,8 +7,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Drawer, DrawerBody, DrawerSection } from '@/components/common/Drawer'
 import { DEFI_V1_COPY, formatApy, formatCompactUsd, formatLiveFor, formatUsd } from '../copy'
-import type { DefiV1Plan, DefiV1Signing, Holding, Opportunity } from '../types'
-import { growthSeries, growthShare } from '../shelf'
+import type { DefiV1Signing, Holding, Opportunity } from '../types'
+import { growthSeries, growthShare, liquidityBucket } from '../shelf'
 import { ActionPanel, type ActionResult } from './ActionPanel'
 import { Sparkline } from './Sparkline'
 import { OpportunityMark, Tag } from './TreasuryTables'
@@ -16,7 +16,6 @@ import { OpportunityMark, Tag } from './TreasuryTables'
 const COPY = DEFI_V1_COPY.drawer
 
 // Mock Safe fee for the Free vs Pro comparison; real fees are not set yet.
-const SAFE_FEE_FREE = '5% of rewards'
 
 type HeaderAction = { id: string; label: string; icon: ReactNode; onClick?: () => void; disabled?: boolean }
 
@@ -97,7 +96,6 @@ export const OpportunityDrawer = ({
   list,
   onNavigate,
   locked,
-  plan,
   signing,
   holding,
   onClose,
@@ -108,7 +106,6 @@ export const OpportunityDrawer = ({
   list: Opportunity[]
   onNavigate: (opportunity: Opportunity) => void
   locked: boolean
-  plan: DefiV1Plan
   signing: DefiV1Signing
   holding?: Holding
   onClose: () => void
@@ -116,7 +113,6 @@ export const OpportunityDrawer = ({
   onWithdrawn: (result: ActionResult) => void
 }) => {
   const index = opportunity ? list.findIndex((item) => item.id === opportunity.id) : -1
-  const safeFee = plan === 'pro' ? '0%' : SAFE_FEE_FREE
 
   return (
     <Drawer
@@ -135,7 +131,7 @@ export const OpportunityDrawer = ({
               </Typography>
               <div className="flex min-w-0 items-center gap-2">
                 <span className="truncate text-xs text-muted-foreground">
-                  {opportunity.runBy} · {DEFI_V1_COPY.category[opportunity.category].title}
+                  {opportunity.runBy} · {DEFI_V1_COPY.liquidity[liquidityBucket(opportunity)].title}
                 </span>
                 {holding && (
                   <Badge variant="mint" size="status" shape="status">
@@ -246,23 +242,9 @@ export const OpportunityDrawer = ({
                 </DrawerSection>
               )}
 
-              <DrawerSection title={COPY.fees} rightNode={`${COPY.safeFee} ${safeFee}`} collapsible defaultOpen={false}>
+              <DrawerSection title={COPY.fees} rightNode={opportunity.protocolFee} collapsible defaultOpen={false}>
                 <Frame>
                   <Row label={COPY.providerFee(opportunity.runBy)} value={opportunity.protocolFee} />
-                  <Row
-                    label={COPY.safeFee}
-                    value={
-                      plan === 'pro' ? (
-                        <span className="flex items-center justify-end gap-1.5">
-                          <span className="text-badge-dot-success">0%</span>
-                          <Badge variant="brand">{DEFI_V1_COPY.proOnly}</Badge>
-                        </span>
-                      ) : (
-                        SAFE_FEE_FREE
-                      )
-                    }
-                  />
-                  <Row label={COPY.freePlan} value={<span className="text-muted-foreground">{SAFE_FEE_FREE}</span>} />
                 </Frame>
                 <Typography variant="paragraph-mini" color="muted" className="flex items-center gap-1.5">
                   <Info className="size-3.5 shrink-0" aria-hidden />
@@ -335,7 +317,6 @@ export const OpportunityDrawer = ({
             opportunity={opportunity}
             holding={holding}
             locked={locked}
-            plan={plan}
             signing={signing}
             onDeposited={onDeposited}
             onWithdrawn={onWithdrawn}

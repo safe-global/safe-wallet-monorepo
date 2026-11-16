@@ -12,7 +12,7 @@ import type { DefiV1Config } from '../types'
 
 export const IdleCashNudge = ({ config, placement }: { config: DefiV1Config; placement: 'home' | 'assets' }) => {
   const safeLinkQuery = useSafeLinkQuery()
-  const options = nudgeOptions(OPPORTUNITIES, config.model, config.plan)
+  const options = nudgeOptions(OPPORTUNITIES, config.plan)
   const href = { pathname: AppRoutes.earn, query: { ...safeLinkQuery, category: 'cash' } }
   const value = formatCompactUsd(IDLE_CASH.amount)
 

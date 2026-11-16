@@ -17,12 +17,11 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { DEFI_V1_COPY, formatAmount, formatCompactUsd, formatUsd } from '../copy'
 import { IDLE_CASH, POLICY_PREVIEW } from '../opportunities'
 import { depositSteps } from '../shelf'
-import type { DefiV1Plan, DefiV1Signing, Holding, Opportunity } from '../types'
+import type { DefiV1Signing, Holding, Opportunity } from '../types'
 
 const COPY = DEFI_V1_COPY.action
 
 // Mock Safe fee for the Free vs Pro comparison; real fees are not set yet.
-const SAFE_FEE_FREE = '5% of rewards'
 
 type Mode = 'deposit' | 'withdraw'
 
@@ -39,7 +38,6 @@ export const ActionPanel = ({
   opportunity,
   holding,
   locked,
-  plan,
   signing,
   onDeposited,
   onWithdrawn,
@@ -47,7 +45,6 @@ export const ActionPanel = ({
   opportunity: Opportunity
   holding?: Holding
   locked: boolean
-  plan: DefiV1Plan
   signing: DefiV1Signing
   onDeposited: (result: ActionResult) => void
   onWithdrawn: (result: ActionResult) => void
@@ -167,12 +164,8 @@ export const ActionPanel = ({
       </DrawerSection>
 
       <div className="grid grid-cols-3 gap-3">
-        {mode === 'deposit' ? (
-          <Fact label={COPY.perYear} value={formatUsd(amount * opportunity.apy)} />
-        ) : (
-          <Fact label={DEFI_V1_COPY.drawer.exit} value={opportunity.exitShort} />
-        )}
-        <Fact label={DEFI_V1_COPY.drawer.safeFee} value={plan === 'pro' ? '0%' : SAFE_FEE_FREE} />
+        {mode === 'deposit' && <Fact label={COPY.perYear} value={formatUsd(amount * opportunity.apy)} />}
+        <Fact label={DEFI_V1_COPY.drawer.exit} value={opportunity.exitShort} />
         <Fact
           label={DEFI_V1_COPY.drawer.approval}
           value={

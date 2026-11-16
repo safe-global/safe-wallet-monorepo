@@ -3,7 +3,7 @@ import { ArrowRight } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Progress } from '@safe-global/views/components/ui/progress'
 import { cn } from '@safe-global/views/utils/cn'
-import { DEFI_V1_COPY, formatApy, formatCompactUsd, formatUsd } from '../copy'
+import { DEFI_V1_COPY, formatCompactUsd, formatUsd } from '../copy'
 import type { TreasurySummary as Summary } from '../shelf'
 
 const percent = new Intl.NumberFormat('en-US', { style: 'percent', maximumFractionDigits: 0 })
@@ -62,8 +62,10 @@ export const TreasurySummary = ({ summary, onExploreIdle }: { summary: Summary; 
     <StatCard label={COPY.earned} value={`+${formatUsd(summary.earned)}`} valueClassName="text-badge-dot-success">
       <span>{COPY.earnedLead}</span>
     </StatCard>
-    <StatCard label={COPY.apy} value={formatApy(summary.blendedApy)}>
-      <span>{COPY.apyLead}</span>
+    <StatCard label={COPY.sameDay} value={formatCompactUsd(summary.sameDay)}>
+      <span className="tabular-nums">
+        {COPY.sameDayOf(formatCompactUsd(summary.sameDay), formatCompactUsd(summary.invested))}
+      </span>
     </StatCard>
   </div>
 )

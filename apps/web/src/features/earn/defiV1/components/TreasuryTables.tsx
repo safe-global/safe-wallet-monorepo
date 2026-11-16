@@ -10,12 +10,13 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { cn } from '@safe-global/views/utils/cn'
 import { DEFI_V1_COPY, formatApy, formatCompactUsd } from '../copy'
 import { CHAIN_IDS } from '../opportunities'
+import { liquidityBucket } from '../shelf'
 import type { Holding, Opportunity } from '../types'
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0!'
 const COLUMN_WIDTHS = ['w-10', '', 'w-24', 'w-24', 'w-28', 'w-24', 'w-32', 'w-32']
 const COLUMN_COUNT = COLUMN_WIDTHS.length
-const OPPORTUNITY_HEADERS = ['Opportunity', 'Net APY', 'Category', 'Exit time', 'Networks', 'Your position']
+const OPPORTUNITY_HEADERS = ['Opportunity', 'Net APY', 'Liquidity', 'Exit time', 'Networks', 'Your position']
 
 export type OpportunityGroup = { key: string; title?: string; items: Opportunity[] }
 
@@ -173,8 +174,8 @@ const OpportunityRow = ({
         <NameCell opportunity={opportunity} />
       </TableCell>
       <TableCell className="font-semibold tabular-nums">{formatApy(opportunity.apy)}</TableCell>
-      <TableCell className="truncate" title={DEFI_V1_COPY.category[opportunity.category].title}>
-        {DEFI_V1_COPY.category[opportunity.category].short}
+      <TableCell className="truncate" title={DEFI_V1_COPY.liquidity[liquidityBucket(opportunity)].hint}>
+        {DEFI_V1_COPY.liquidity[liquidityBucket(opportunity)].short}
       </TableCell>
       <TableCell>
         <ExitCell opportunity={opportunity} />

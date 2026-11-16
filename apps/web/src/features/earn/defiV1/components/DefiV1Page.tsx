@@ -1,9 +1,15 @@
 import { useMemo, useRef, useState } from 'react'
+import { useRouter } from 'next/router'
+import { Orbit, Repeat2 } from 'lucide-react'
+import { Button } from '@safe-global/views/components/ui/button'
+import { AppRoutes } from '@/config/routes'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { DEFI_V1_COPY } from '../copy'
 import { EXISTING_POSITIONS, OPPORTUNITIES, TREASURY_TOTAL } from '../opportunities'
 import {
+  activeFilterCount,
   buildShelf,
+  byExitTime,
   filterOpportunities,
   groupOpportunities,
   investedFirst,
@@ -13,7 +19,7 @@ import {
   summariseTreasury,
   type ListFilters,
 } from '../shelf'
-import type { DefiV1Config, GroupBy, Opportunity, OpportunityCategory, Position } from '../types'
+import type { DefiV1Config, GroupBy, LiquidityBucket, Opportunity, Position } from '../types'
 import type { ActionResult } from './ActionPanel'
 import { CompareDialog } from './CompareDialog'
 import { OpportunityDrawer } from './OpportunityDrawer'
@@ -30,10 +36,9 @@ const initialPositions = (): Position[] =>
     return opportunity ? [{ opportunity, principal: existing.principal, earned: existing.earned, pending: false }] : []
   })
 
-const RANKED = (() => {
-  const { groups, more } = buildShelf(OPPORTUNITIES)
-  return [...groups.flatMap((group) => group.items), ...more]
-})()
+const { groups: SHELF_GROUPS, more: MORE } = buildShelf(OPPORTUNITIES)
+const SHELF_IDS = SHELF_GROUPS.flatMap((group) => group.items.map((item) => item.id))
+const RANKED = [...SHELF_GROUPS.flatMap((group) => group.items), ...MORE].sort(byExitTime)
 const ASSETS = [...new Set(OPPORTUNITIES.map((item) => item.asset))]
 const CHAINS = [...new Set(OPPORTUNITIES.flatMap((item) => item.chains))]
 
@@ -43,7 +48,7 @@ const matches = (item: Opportunity, search: string) =>
 const groupTitle = (groupBy: GroupBy, key: string): string | undefined => {
   if (groupBy === 'investments')
     return key === 'invested' ? DEFI_V1_COPY.sections.investments : DEFI_V1_COPY.sections.opportunities
-  if (groupBy === 'category') return DEFI_V1_COPY.category[key as OpportunityCategory].title
+  if (groupBy === 'liquidity') return DEFI_V1_COPY.liquidity[key as LiquidityBucket].title
   if (groupBy === 'asset') return key
   return undefined
 }
@@ -57,7 +62,10 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const [filters, setFilters] = useState<ListFilters>(NO_FILTERS)
   const [compareIds, setCompareIds] = useState<string[]>([])
   const [isComparing, setIsComparing] = useState(false)
-  const locked = (item: Opportunity) => isLocked(item, config.model, config.plan)
+  const [showAll, setShowAll] = useState(false)
+  const router = useRouter()
+  const locked = (item: Opportunity) => isLocked(item, config.plan)
+  const goTo = (pathname: string) => router.push({ pathname, query: router.query })
   const summary = summariseTreasury(TREASURY_TOTAL, positions)
 
   const investedIds = useMemo(() => [...new Set(positions.map((position) => position.opportunity.id))], [positions])
@@ -68,15 +76,22 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
       ),
     [filters, search, investedIds],
   )
+  const isBrowsing = showAll || search !== '' || groupBy !== 'none' || activeFilterCount(filters) > 0
+  const listed = useMemo(
+    () =>
+      isBrowsing ? visible : visible.filter((item) => SHELF_IDS.includes(item.id) || investedIds.includes(item.id)),
+    [isBrowsing, visible, investedIds],
+  )
+  const hiddenCount = visible.length - listed.length
   const groups = useMemo<OpportunityGroup[]>(
     () =>
-      groupOpportunities(visible, groupBy, investedIds).map((group) => ({
+      groupOpportunities(listed, groupBy, investedIds).map((group) => ({
         ...group,
         title: groupTitle(groupBy, group.key),
       })),
-    [visible, groupBy, investedIds],
+    [listed, groupBy, investedIds],
   )
-  const topOpen = visible.find((item) => !locked(item))
+  const topOpen = listed.find((item) => !locked(item))
   const holdingOf = (item: Opportunity) => holdingsFor(positions, item.id)
   const compareItems = RANKED.filter((item) => compareIds.includes(item.id))
   const toggleCompare = (id: string) =>
@@ -106,15 +121,20 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   return (
     <div className="@container min-w-0 px-6 pb-8 pt-5" data-testid="defi-v1-page">
       <div className="mb-6 flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <Typography as="h1" variant="h3">
             {DEFI_V1_COPY.tabName[config.framing]}
           </Typography>
-          {config.model === 'B' && config.plan === 'free' && (
-            <Typography variant="paragraph-mini" color="muted">
-              {DEFI_V1_COPY.plan.modelB} · {DEFI_V1_COPY.plan.feePlaceholder}
-            </Typography>
-          )}
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => goTo(AppRoutes.swap)}>
+              <Repeat2 />
+              {DEFI_V1_COPY.swap}
+            </Button>
+            <Button variant="outline" onClick={() => goTo(AppRoutes.bridge)}>
+              <Orbit />
+              {DEFI_V1_COPY.bridge}
+            </Button>
+          </div>
         </div>
         <TreasurySummary
           summary={summary}
@@ -148,6 +168,18 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
           selection={{ selected: compareIds, isFull: compareIds.length >= MAX_COMPARE, onToggle: toggleCompare }}
           holdingOf={holdingOf}
         />
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          {hiddenCount > 0 ? (
+            <Button variant="ghost" size="sm" onClick={() => setShowAll(true)}>
+              {DEFI_V1_COPY.showAll(visible.length)}
+            </Button>
+          ) : (
+            <span />
+          )}
+          <Button variant="ghost-muted" size="sm" onClick={() => goTo(AppRoutes.apps.index)}>
+            {DEFI_V1_COPY.moreInApps}
+          </Button>
+        </div>
       </section>
 
       <CompareDialog
@@ -168,10 +200,9 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
 
       <OpportunityDrawer
         opportunity={selected}
-        list={visible}
+        list={listed}
         onNavigate={setSelected}
         locked={selected ? locked(selected) : false}
-        plan={config.plan}
         signing={config.plan === 'pro' ? config.signing : 'threshold'}
         holding={selected ? holdingOf(selected) : undefined}
         onClose={() => setSelected(null)}

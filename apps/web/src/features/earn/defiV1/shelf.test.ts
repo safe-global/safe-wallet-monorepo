@@ -10,6 +10,7 @@ import {
   holdingsFor,
   investedFirst,
   isLocked,
+  liquidityBucket,
   NO_FILTERS,
   MAX_SHELF,
   nudgeOptions,
@@ -55,9 +56,9 @@ describe('buildShelf', () => {
     expect(more).toHaveLength(3)
   })
 
-  it('ranks a premium high-APY listing below a lower-risk base listing in the same category', () => {
-    const premium = opportunity({ risk: 'medium', placement: 'premium', apy: 0.09 })
-    const base = opportunity({ risk: 'low', placement: 'base', apy: 0.02 })
+  it('ranks a premium high-APY listing below a faster-exit base listing in the same category', () => {
+    const premium = opportunity({ exitHours: 72, placement: 'premium', apy: 0.09 })
+    const base = opportunity({ exitHours: 0, placement: 'base', apy: 0.02 })
 
     const { groups } = buildShelf([premium, base])
 
@@ -78,29 +79,40 @@ describe('nudgeOptions', () => {
     const paid = (['featured', 'premium', 'sponsored'] as const).map((placement) => opportunity({ placement }))
     const base = opportunity()
 
-    expect(nudgeOptions([...paid, base], 'A', 'pro')).toEqual([base])
+    expect(nudgeOptions([...paid, base], 'pro')).toEqual([base])
   })
 
   it('leaves out options that take longer than a day to exit', () => {
     const slow = opportunity({ exitHours: 72 })
 
-    expect(nudgeOptions([slow], 'A', 'pro')).toEqual([])
+    expect(nudgeOptions([slow], 'pro')).toEqual([])
   })
 
-  it('leaves out Pro-only options for a free Safe under model A', () => {
+  it('leaves out Pro-only options for a free Safe', () => {
     const proOnly = opportunity({ access: 'pro' })
 
-    expect(nudgeOptions([proOnly], 'A', 'free')).toEqual([])
+    expect(nudgeOptions([proOnly], 'free')).toEqual([])
   })
 })
 
 describe('isLocked', () => {
-  it('locks a Pro-only listing for a free Safe under model A', () => {
-    expect(isLocked(opportunity({ access: 'pro' }), 'A', 'free')).toBe(true)
+  it('locks a Pro-only listing for a free Safe', () => {
+    expect(isLocked(opportunity({ access: 'pro' }), 'free')).toBe(true)
   })
 
-  it('opens every listing under model B', () => {
-    expect(isLocked(opportunity({ access: 'pro' }), 'B', 'free')).toBe(false)
+  it('opens Pro-only listings on Safe Pro', () => {
+    expect(isLocked(opportunity({ access: 'pro' }), 'pro')).toBe(false)
+  })
+})
+
+describe('liquidityBucket', () => {
+  it.each([
+    [0, 'operating'],
+    [24, 'operating'],
+    [72, 'reserves'],
+    [168, 'strategic'],
+  ])('puts a %i hour exit in %s', (exitHours, bucket) => {
+    expect(liquidityBucket({ exitHours })).toBe(bucket)
   })
 })
 
@@ -148,11 +160,11 @@ describe('groupOpportunities', () => {
     expect(groupOpportunities(items, 'none')).toEqual([{ key: 'all', items }])
   })
 
-  it('orders category groups by the shelf order and skips empty ones', () => {
-    const staking = opportunity({ category: 'staking' })
-    const cash = opportunity({ category: 'cash' })
+  it('orders liquidity groups from fastest exit and skips empty ones', () => {
+    const slow = opportunity({ exitHours: 168 })
+    const fast = opportunity({ exitHours: 0 })
 
-    expect(groupOpportunities([staking, cash], 'category').map((group) => group.key)).toEqual(['cash', 'staking'])
+    expect(groupOpportunities([slow, fast], 'liquidity').map((group) => group.key)).toEqual(['operating', 'strategic'])
   })
 
   it('puts investments above the other opportunities', () => {
@@ -207,23 +219,23 @@ describe('depositSteps', () => {
 })
 
 describe('summariseTreasury', () => {
-  const position = (principal: number, earned: number, apy: number, pending = false) => ({
+  const position = (principal: number, earned: number, exitHours: number, pending = false) => ({
     principal,
     earned,
     pending,
-    opportunity: { apy },
+    opportunity: { exitHours },
   })
 
-  it('weights the blended rate by the amount in each position', () => {
-    const summary = summariseTreasury(1_000, [position(300, 5, 0.04), position(100, 1, 0.08)])
+  it('counts only positions that exit within a day as same-day', () => {
+    const summary = summariseTreasury(1_000, [position(300, 5, 0), position(100, 1, 120)])
 
-    expect(summary.blendedApy).toBeCloseTo(0.05)
+    expect(summary.sameDay).toBe(300)
     expect(summary.investedShare).toBeCloseTo(0.4)
     expect(summary.earned).toBe(6)
   })
 
   it('counts a deposit still waiting for signatures as idle', () => {
-    const summary = summariseTreasury(1_000, [position(400, 0, 0.04, true)])
+    const summary = summariseTreasury(1_000, [position(400, 0, 0, true)])
 
     expect(summary.invested).toBe(0)
     expect(summary.idle).toBe(1_000)
