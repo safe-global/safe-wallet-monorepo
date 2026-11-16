@@ -17,6 +17,7 @@ export { workspaceTrackingListener } from './workspaceTrackingListener'
 export { spaceSafesCacheListener } from './spaceSafesCacheListener'
 export { trialReminderListener } from './trialReminder'
 export { workspaceDraftExpiryListener } from './workspaceDraftExpiryListener'
+export { workspaceDraftCompletionListener } from './workspaceDraftCompletionListener'
 export {
   workspaceDraftSlice,
   updateWorkspaceDraft,

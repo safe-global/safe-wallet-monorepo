@@ -31,6 +31,7 @@ import {
   spaceSafesCacheListener,
   trialReminderListener,
   workspaceDraftExpiryListener,
+  workspaceDraftCompletionListener,
 } from './slices'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
@@ -154,6 +155,7 @@ const listeners = [
   spaceSafesCacheListener,
   trialReminderListener,
   workspaceDraftExpiryListener,
+  workspaceDraftCompletionListener,
   forbiddenSessionListener,
 ]
 
