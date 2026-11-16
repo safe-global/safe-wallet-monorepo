@@ -4,17 +4,18 @@ import { TableBody, TableHead, TableHeader, TableRow, tableVariants } from '@saf
 import { cn } from '@safe-global/views/utils/cn'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import useWallet from '@/hooks/wallets/useWallet'
-import type { SpaceQueueSection } from '../../../store/spaceQueueApi'
-import SpaceQueueRow, { QUEUE_COLUMNS } from '../SpaceQueueRow'
+import type { SpaceQueueSection } from '../../../hooks/useSpaceQueue'
+import CollapseAllButton from '@safe-global/views/features/spaces/components/SpaceQueue/CollapseAllButton'
+import { QUEUE_COLUMNS } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
+import ConflictHeaderRow from '@safe-global/views/features/spaces/components/SpaceQueue/ConflictHeaderRow'
+import SafeBandRow from '@safe-global/views/features/spaces/components/SpaceQueue/SafeBandRow'
+import SpaceQueueRow from '../SpaceQueueRow'
 import { getSafeKey } from '../utils'
 import ChainHeaderRow from './ChainHeaderRow'
-import CollapseAllButton from './CollapseAllButton'
-import ConflictHeaderRow from './ConflictHeaderRow'
 import { buildQueueList, groupByScope, type QueueListItem } from './queueList'
-import SafeBandRow from './SafeBandRow'
+import SafeTitle from './SafeTitle'
 
-// Widths include the cell padding (8px a side, 16px on the outer cells); a wider table spreads its extra width across
-// all of them. The fixed ones add up to 968px; the table's 1128px floor leaves the To column 160px before it scrolls.
+// Widths include the cell padding; the fixed ones add up to 968px, leaving To 160px of the 1128px floor
 const COLUMN_WIDTHS: Record<(typeof QUEUE_COLUMNS)[number], string> = {
   Nonce: 'w-16',
   Transaction: 'w-[21.5rem]',
@@ -62,8 +63,7 @@ const SKELETON_STYLE = {
   backgroundRepeat: 'repeat-y',
 }
 
-// Stands in for the rows outside the rendered window: one painted cell of skeleton rows, so a fast
-// scroll shows placeholders, not a gap, until the real rows render
+// Paints skeleton rows for the rows outside the window, so a fast scroll shows placeholders, not a gap
 const SpacerRow = ({ height }: { height: number }): ReactElement | null =>
   height > 0 ? (
     <tr aria-hidden="true" data-no-hover data-no-divider data-testid="space-queue-skeleton">
@@ -94,7 +94,8 @@ const VirtualRow = memo(function VirtualRow({
     case 'safe':
       return (
         <SafeBandRow
-          section={item.section}
+          safeAddress={item.section.safeAddress}
+          title={<SafeTitle section={item.section} />}
           collapsed={item.collapsed}
           summary={item.summary}
           onToggle={() => onToggleSafe(item.section.safeAddress)}
@@ -190,8 +191,7 @@ const SpaceQueueTable = ({ sections }: { sections: SpaceQueueSection[] }): React
   const groups = groupByScope(virtualItems.map((virtualItem) => ({ virtualItem, item: items[virtualItem.index] })))
 
   return (
-    // Same panel surface as the Space accounts table (SafeAccountsTable with `bordered={false}`): it owns the
-    // horizontal scroll, and its 1px edge stays transparent so nothing shifts against that table
+    // The Space accounts table's panel surface; its transparent 1px edge keeps the two tables aligned
     <div className="w-full overflow-x-auto rounded-lg border border-transparent bg-[var(--color-background-paper)] pb-2">
       <table
         aria-label="Pending transactions"

@@ -12,9 +12,9 @@ import { isAuthenticated } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { selectPendingTxs, type PendingTxsState } from '@/store/pendingTxsSlice'
 import { isSignableBy, isTransactionQueuedItem } from '@/utils/transaction-guards'
-import { useGetSpaceQueueQuery, type SpaceQueue } from '../store/spaceQueueApi'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useIsActiveMember } from './useSpaceMembers'
+import { useSpaceQueue, type SpaceQueue } from './useSpaceQueue'
 
 const REFETCH_EVENTS = [
   TxEvent.PROPOSED,
@@ -50,7 +50,7 @@ export const useSpaceQueuePolling = (): void => {
 
   const isActive = !!spaceId && isSignedIn && isActiveMember && !!isEnabled
   // The same arguments as the queue page, so the page and this poll share one request
-  const { currentData, refetch } = useGetSpaceQueueQuery(isActive ? { spaceId } : skipToken, {
+  const { currentData, refetch } = useSpaceQueue(isActive ? { spaceId } : skipToken, {
     pollingInterval: POLLING_INTERVAL,
     skipPollingIfUnfocused: true,
   })

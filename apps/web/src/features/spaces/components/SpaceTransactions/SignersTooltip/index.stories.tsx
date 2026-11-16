@@ -3,7 +3,7 @@ import { http, HttpResponse } from 'msw'
 import { expect, userEvent, within } from 'storybook/test'
 import type { AddressInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { createMockStory, getFixtureData } from '@/stories/mocks'
-import SignatureGauge from '../SignatureGauge'
+import SignatureGauge from '@safe-global/views/features/spaces/components/SpaceQueue/SignatureGauge'
 import SignersTooltip from '.'
 
 const { safeData } = getFixtureData('efSafe')

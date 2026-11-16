@@ -5,7 +5,11 @@ import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
 import { waitFor } from '@/tests/test-utils'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
-import { cgwApi as spacesApi, type SpaceQueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import {
+  cgwApi as spacesApi,
+  type SpaceQueuedItemPage,
+  type SpaceTransactionsGetTransactionQueueV1ApiArg,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionListItemType, TransactionStatus } from '@safe-global/store/gateway/types'
 import type { RootState } from '@/store'
@@ -20,7 +24,6 @@ import {
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { transactionDetailsBuilder } from '@/tests/builders/transactionDetails'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
-import { spaceQueueApi, type SpaceQueueFilters } from '../spaceQueueApi'
 import { spaceQueueReconciliationListener } from '../spaceQueueReconciliationListener'
 
 jest.mock('@/services/tx/txEvents', () => ({
@@ -119,8 +122,11 @@ const respondWithDetails = (
 const respondWithSpaceSafes = (safes: Record<string, string[]>) =>
   server.use(http.get(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () => HttpResponse.json({ safes })))
 
-const pollQueue = async (store: TestStore, filters?: SpaceQueueFilters) => {
-  await store.dispatch(spaceQueueApi.endpoints.getSpaceQueue.initiate({ spaceId, filters }))
+const pollQueue = async (
+  store: TestStore,
+  params: Omit<SpaceTransactionsGetTransactionQueueV1ApiArg, 'spaceId'> = {},
+) => {
+  await store.dispatch(spacesApi.endpoints.spaceTransactionsGetTransactionQueueV1.initiate({ spaceId, ...params }))
 }
 
 const processingTx = (nonce: number, safe = safeAddress): PendingProcessingTx => ({
@@ -347,7 +353,7 @@ describe('spaceQueueReconciliationListener', () => {
     respondWithQueue(page([results([queuedTx(txId(), 2)], faker.string.numeric(5))]))
     respondWithDetails(id, { txStatus: TransactionStatus.SUCCESS })
 
-    await pollQueue(store, { statuses: ['sign'], safes: [], chainIds: [], signers: [] })
+    await pollQueue(store, { status: ['sign'] })
 
     expect(store.getState().pendingTxs[id]).toEqual(pendingTx)
     expect(mockTxDispatch).not.toHaveBeenCalledWith(TxEvent.SUCCESS, expect.anything())

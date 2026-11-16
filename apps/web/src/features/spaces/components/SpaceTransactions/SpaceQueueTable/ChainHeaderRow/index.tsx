@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import { useChain } from '@/hooks/useChains'
-import { QUEUE_COLUMNS } from '../../SpaceQueueRow'
+import { QUEUE_COLUMNS } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
 
 const ChainHeaderRow = ({
   chainId,

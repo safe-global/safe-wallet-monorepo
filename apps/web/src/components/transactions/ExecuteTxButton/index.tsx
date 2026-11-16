@@ -64,7 +64,7 @@ const ExecuteTxButton = ({
               onClick={onClick}
               onMouseEnter={onMouseEnter}
               onMouseLeave={onMouseLeave}
-              variant={dense ? 'outline' : 'default'}
+              variant={dense ? 'row-hover-primary' : 'default'}
               disabled={!isOk || isDisabled}
               // `default` rather than `sm` in a queue row: this is the row's primary action, so it gets
               // the app's standard 36px control height instead of the 32px small one.
