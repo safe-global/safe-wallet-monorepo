@@ -329,6 +329,15 @@ describe('TxSigners (Audit Log)', () => {
     expect(writeText).toHaveBeenCalledWith(txHash)
   })
 
+  it('keeps "Copied" open after a mouse click on the hash button, without the pointer leaving it', async () => {
+    const { user } = renderTxSigners(executedTx(2, 2))
+    spyOnClipboard()
+
+    await user.click(screen.getByTestId('copy-tx-hash-btn'))
+
+    expect(await screen.findByText('Copied')).toBeInTheDocument()
+  })
+
   it('shows "Copied" when the pointer comes back to the hash button right after copying', async () => {
     const { user } = renderTxSigners(executedTx(2, 2))
     spyOnClipboard()

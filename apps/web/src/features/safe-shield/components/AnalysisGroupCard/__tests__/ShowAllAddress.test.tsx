@@ -316,4 +316,20 @@ describe('ShowAllAddress', () => {
       expect(screen.queryByText(initialAddresses[0].address)).not.toBeInTheDocument()
     })
   })
+
+  describe('Copy feedback', () => {
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
+
+    it('keeps "Copied to clipboard" open after a mouse click, without the pointer leaving the address', async () => {
+      jest.spyOn(navigator.clipboard, 'writeText').mockResolvedValue()
+      const { user } = renderWithUserEvent(<ShowAllAddress addresses={mockAddresses} />)
+      await user.click(screen.getByText('Show all'))
+
+      await user.click(screen.getByText(mockAddresses[0].address))
+
+      expect(await screen.findByText('Copied to clipboard')).toBeInTheDocument()
+    })
+  })
 })
