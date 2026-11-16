@@ -30,6 +30,7 @@ import {
   isVaultDepositTxInfo,
   isVaultRedeemTxInfo,
 } from '@/utils/transaction-guards'
+import type { QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import type { SpaceQueueItems } from '../../hooks/useSpaceQueue'
 
 export const getSafeKey = (safeAddress: string): string => safeAddress.toLowerCase()
@@ -37,7 +38,7 @@ export const getSafeKey = (safeAddress: string): string => safeAddress.toLowerCa
 export const getNonce = (tx: Transaction): number | undefined =>
   isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo.nonce : undefined
 
-export type QueueStatus = 'execute' | 'sign' | 'waiting' | 'blocked'
+export type { QueueStatus }
 
 export const getQueueStatus = (tx: Transaction, isNext: boolean, walletAddress?: string): QueueStatus => {
   if (isAwaitingExecution(tx.txStatus)) return isNext ? 'execute' : 'blocked'

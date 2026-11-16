@@ -4,7 +4,7 @@ import SkeletonTxList from '@safe-global/views/components/common/PaginatedTxns/S
 import { Typography } from '@safe-global/views/components/ui/typography'
 import NoTransactionsIcon from '@/public/images/transactions/no-transactions.svg'
 import { useSpaceQueue, type SpaceQueue } from '../../hooks/useSpaceQueue'
-import { QueueLoadError } from './QueueStates'
+import { QueueLoadError } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueStates'
 import SpaceQueueTable from './SpaceQueueTable'
 
 const QueueBody = ({ queue }: { queue: SpaceQueue }): ReactElement => {

@@ -5,13 +5,15 @@ import { cn } from '@safe-global/views/utils/cn'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import useWallet from '@/hooks/wallets/useWallet'
 import type { SpaceQueueSection } from '../../../hooks/useSpaceQueue'
-import SpaceQueueRow, { QUEUE_COLUMNS } from '../SpaceQueueRow'
+import CollapseAllButton from '@safe-global/views/features/spaces/components/SpaceQueue/CollapseAllButton'
+import { QUEUE_COLUMNS } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
+import ConflictHeaderRow from '@safe-global/views/features/spaces/components/SpaceQueue/ConflictHeaderRow'
+import SafeBandRow from '@safe-global/views/features/spaces/components/SpaceQueue/SafeBandRow'
+import SpaceQueueRow from '../SpaceQueueRow'
 import { getSafeKey } from '../utils'
 import ChainHeaderRow from './ChainHeaderRow'
-import CollapseAllButton from './CollapseAllButton'
-import ConflictHeaderRow from './ConflictHeaderRow'
 import { buildQueueList, groupByScope, type QueueListItem } from './queueList'
-import SafeBandRow from './SafeBandRow'
+import SafeTitle from './SafeTitle'
 
 // Widths include the cell padding (8px a side, 16px on the outer cells); a wider table spreads its extra width across
 // all of them. The fixed ones add up to 968px; the table's 1128px floor leaves the To column 160px before it scrolls.
@@ -94,7 +96,8 @@ const VirtualRow = memo(function VirtualRow({
     case 'safe':
       return (
         <SafeBandRow
-          section={item.section}
+          safeAddress={item.section.safeAddress}
+          title={<SafeTitle section={item.section} />}
           collapsed={item.collapsed}
           summary={item.summary}
           onToggle={() => onToggleSafe(item.section.safeAddress)}
