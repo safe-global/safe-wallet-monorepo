@@ -1,16 +1,16 @@
 import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState, type ReactElement } from 'react'
 import { useWindowVirtualizer } from '@tanstack/react-virtual'
-import { TableBody, TableHead, TableHeader, TableRow, tableVariants } from '@safe-global/views/components/ui/table'
+import { TableBody, tableVariants } from '@safe-global/views/components/ui/table'
 import { cn } from '@safe-global/views/utils/cn'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import { DeleteTxDialogProvider } from '../RowActionsMenu/DeleteTxDialog'
 import useWallet from '@/hooks/wallets/useWallet'
 import type { SpaceQueueSection } from '../../../hooks/useSpaceQueue'
 import ChainHeaderRow from '@safe-global/views/features/spaces/components/SpaceQueue/ChainHeaderRow'
-import CollapseAllButton from '@safe-global/views/features/spaces/components/SpaceQueue/CollapseAllButton'
 import ConflictHeaderRow from '@safe-global/views/features/spaces/components/SpaceQueue/ConflictHeaderRow'
 import SafeBandRow from '@safe-global/views/features/spaces/components/SpaceQueue/SafeBandRow'
-import { QUEUE_COLUMNS, type QueueColumn } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
+import QueueSkeletonRow from '@safe-global/views/features/spaces/components/SpaceQueue/QueueSkeletonRow'
+import QueueTableHeader from '@safe-global/views/features/spaces/components/SpaceQueue/QueueTableHeader'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useChains from '@/hooks/useChains'
 import { toChainInfos } from '../../../utils'
@@ -18,17 +18,6 @@ import SpaceQueueRow from '../SpaceQueueRow'
 import { getSafeKey } from '../utils'
 import { buildQueueList, groupByScope, type QueueListItem } from './queueList'
 import SafeTitle from './SafeTitle'
-
-// The fixed widths (cell padding included) add up to 968px, so the 1128px floor leaves the To column 160px
-const COLUMN_WIDTHS: Record<QueueColumn, string> = {
-  Nonce: 'w-16',
-  Transaction: 'w-[21.5rem]',
-  To: '',
-  Proposed: 'w-36',
-  Signatures: 'w-28',
-  Status: 'w-40',
-  Action: 'w-36',
-}
 
 // First guesses only: each row is measured once rendered
 const ESTIMATED_HEIGHTS: Record<QueueListItem['kind'], number> = {
@@ -46,36 +35,6 @@ const toggle = (set: ReadonlySet<string>, id: string): Set<string> => {
   if (!next.delete(id)) next.add(id)
   return next
 }
-
-// A transaction row's placeholder bars: [left offset, width], laid out like the columns
-const SKELETON_BARS: Array<[string, number]> = [
-  ['20px', 24],
-  ['72px', 180],
-  ['416px', 140],
-  ['calc(100% - 552px)', 72],
-  ['calc(100% - 408px)', 40],
-  ['calc(100% - 296px)', 64],
-  ['calc(100% - 120px)', 72],
-]
-const ROW_HEIGHT = ESTIMATED_HEIGHTS.transaction
-const BAR_TOP = (ROW_HEIGHT - 12) / 2
-const bar = `linear-gradient(to bottom, transparent ${BAR_TOP}px, var(--muted) ${BAR_TOP}px, var(--muted) ${BAR_TOP + 12}px, transparent ${BAR_TOP + 12}px)`
-const SKELETON_STYLE = {
-  backgroundImage: SKELETON_BARS.map(() => bar).join(', '),
-  backgroundSize: SKELETON_BARS.map(([, width]) => `${width}px ${ROW_HEIGHT}px`).join(', '),
-  backgroundPosition: SKELETON_BARS.map(([left]) => `${left} 0`).join(', '),
-  backgroundRepeat: 'repeat-y',
-}
-
-// Paints skeleton rows in place of those outside the rendered window, so a fast scroll shows no gap
-const SpacerRow = ({ height }: { height: number }): ReactElement | null =>
-  height > 0 ? (
-    <tr aria-hidden="true" data-no-hover data-no-divider data-testid="space-queue-skeleton">
-      <td colSpan={QUEUE_COLUMNS.length} className="p-0!">
-        <div className="animate-pulse" style={{ height, ...SKELETON_STYLE }} />
-      </td>
-    </tr>
-  ) : null
 
 type VirtualRowProps = {
   item: QueueListItem
@@ -214,40 +173,9 @@ const SpaceQueueTable = ({ sections }: { sections: SpaceQueueSection[] }): React
           aria-label="Pending transactions"
           className={cn(tableVariants({ variant: 'panel' }), 'table-fixed min-w-[1128px]')}
         >
-          <colgroup>
-            {QUEUE_COLUMNS.map((label) => (
-              <col key={label} className={COLUMN_WIDTHS[label]} />
-            ))}
-          </colgroup>
-          <TableHeader>
-            <TableRow data-no-hover className="group/head">
-              {QUEUE_COLUMNS.map((label) => (
-                <TableHead
-                  key={label}
-                  scope="col"
-                  className={cn(
-                    'px-2 py-2.5',
-                    label === 'Nonce' && 'px-0! text-center',
-                    // The collapse-all button is taller than a label: keep the bar at its 40px height
-                    label === 'Action' && 'py-0',
-                  )}
-                >
-                  {label === 'To' ? (
-                    <span className="sr-only">{label}</span>
-                  ) : label === 'Action' ? (
-                    <span className="flex items-center justify-end">
-                      <span className="sr-only">{label}</span>
-                      <CollapseAllButton allCollapsed={allCollapsed} count={sections.length} onToggle={toggleAll} />
-                    </span>
-                  ) : (
-                    label
-                  )}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
+          <QueueTableHeader allCollapsed={allCollapsed} safeCount={sections.length} onToggleAll={toggleAll} />
           <TableBody ref={bodyRef}>
-            <SpacerRow height={paddingTop} />
+            <QueueSkeletonRow height={paddingTop} rowHeight={ESTIMATED_HEIGHTS.transaction} />
             {groups.map(({ scopeKey, entries }) => {
               const rows = entries.map(({ virtualItem, item }) => renderItem(item, virtualItem.index))
               const first = entries[0].item
@@ -262,7 +190,7 @@ const SpaceQueueTable = ({ sections }: { sections: SpaceQueueSection[] }): React
                 </SafeScopeProvider>
               )
             })}
-            <SpacerRow height={paddingBottom} />
+            <QueueSkeletonRow height={paddingBottom} rowHeight={ESTIMATED_HEIGHTS.transaction} />
           </TableBody>
         </table>
       </div>
