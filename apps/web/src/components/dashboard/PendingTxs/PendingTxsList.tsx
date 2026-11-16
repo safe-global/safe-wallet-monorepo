@@ -14,9 +14,9 @@ import css from '@safe-global/views/components/dashboard/PendingTxs/styles.modul
 import { isSignableBy, isExecutable } from '@/utils/transaction-guards'
 import useWallet from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useRecoveryQueue } from '@/features/recovery'
+import { useRecoveryQueue } from '@/features/recovery/hooks/useRecoveryQueue'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import type { RecoveryQueueItem } from '@/features/recovery'
+import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 import { PanelCounter } from '@safe-global/views/components/dashboard/PanelCounter'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 

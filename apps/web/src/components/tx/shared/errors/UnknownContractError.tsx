@@ -6,7 +6,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { isSafeMigrationCall } from '@/utils/safe-migrations'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import { useMastercopyMigration } from '@/features/multichain'
+import { useMastercopyMigration } from '@/features/multichain/hooks/useMastercopyMigration'
 
 const UnknownContractError = ({ txData }: { txData: TransactionData | undefined }): ReactElement | null => {
   const { safeAddress } = useSafeInfo()

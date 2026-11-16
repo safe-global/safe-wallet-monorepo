@@ -9,7 +9,7 @@ import css from './styles.module.css'
 import ExplorerButton from '@safe-global/views/components/common/ExplorerButton'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { useCurrentChain } from '@/hooks/useChains'
-import { getOrderClass } from '@/features/swap'
+import { getOrderClass } from '@/features/swap/helpers/utils'
 import { Layers } from 'lucide-react'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 

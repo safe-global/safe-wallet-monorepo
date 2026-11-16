@@ -15,7 +15,7 @@ import {
   type AnyResults,
 } from '@/utils/transaction-guards'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { RecoveryQueueItem } from '@/features/recovery'
+import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 
 export type AnyListItem = AnyResults
 

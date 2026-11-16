@@ -4,14 +4,14 @@ import Positions from '../index'
 
 jest.mock('../hooks/usePositions')
 jest.mock('../hooks/usePositionsFiatTotal')
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
+jest.mock('@/features/__core__/useLoadFeature', () => ({
+  ...jest.requireActual('@/features/__core__/useLoadFeature'),
   useLoadFeature: jest.fn(),
 }))
 
 const mockUsePositions = jest.requireMock('../hooks/usePositions').default as jest.Mock
 const mockUsePositionsFiatTotal = jest.requireMock('../hooks/usePositionsFiatTotal').default as jest.Mock
-const mockUseLoadFeature = jest.requireMock('@/features/__core__').useLoadFeature as jest.Mock
+const mockUseLoadFeature = jest.requireMock('@/features/__core__/useLoadFeature').useLoadFeature as jest.Mock
 
 const protocols = positionsFixtures.efSafe
 const NOT_IN_TOTAL = 'Position balances are not included in the total asset value.'

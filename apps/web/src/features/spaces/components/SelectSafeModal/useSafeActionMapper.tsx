@@ -1,12 +1,12 @@
 import { useCallback, useContext, useMemo } from 'react'
 import { useRouter } from 'next/router'
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { TxModalContext } from '@/components/tx-flow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows'
 import { AppRoutes } from '@/config/routes'
 import useChains from '@/hooks/useChains'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
-import { ESafeAction } from '@/features/spaces/store'
+import { ESafeAction } from '@/features/spaces/store/safeActionsModalSlice'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 type SafeActionHandler = (safe: SafeItem) => Promise<void>

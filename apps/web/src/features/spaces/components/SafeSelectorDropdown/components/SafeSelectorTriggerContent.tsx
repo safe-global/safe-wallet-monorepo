@@ -4,21 +4,19 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import SafeBalanceBlock from './SafeBalanceBlock'
 import { ThresholdBadge } from '@safe-global/views/components/common/AccountBadges'
-import {
-  CopyAddressButton,
-  ExplorerLinkButton,
-  FullAddress,
-  TruncatedText,
-  getInitials,
-  getSafeDisplayInfo,
-} from '@/components/common/AccountRow'
+import CopyAddressButton from '@/components/common/AccountRow/CopyAddressButton'
+import ExplorerLinkButton from '@safe-global/views/components/common/AccountRow/ExplorerLinkButton'
+import FullAddress from '@safe-global/views/components/common/AccountRow/FullAddress'
+import TruncatedText from '@safe-global/views/components/common/AccountRow/TruncatedText'
+import { getInitials, getSafeDisplayInfo } from '@safe-global/views/components/common/AccountRow/utils'
 import NotActivatedBadge from '@safe-global/views/components/common/NotActivatedBadge'
 import type { SafeItemData } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import { HypernativeFeature, useIsHypernativeGuard } from '@/features/hypernative'
-import { useLoadFeature } from '@/features/__core__'
+import { HypernativeFeature } from '@/features/hypernative'
+import { useIsHypernativeGuard } from '@/features/hypernative/hooks/useIsHypernativeGuard'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 export interface SafeSelectorTriggerContentProps {
   selectedItem: SafeItemData

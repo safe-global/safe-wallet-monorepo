@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { RecoveryFeature } from '@/features/recovery'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import type { RecoverAccountFlowProps } from '.'
 import { RecoverAccountFlowFields } from '.'
 

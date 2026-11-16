@@ -65,7 +65,3 @@ export const trackSafeAppEvent = (
 }
 
 export const trackMixpanelEvent = mixpanelTrack
-
-export * from './types'
-export * from './events'
-export * from './mixpanel-events'

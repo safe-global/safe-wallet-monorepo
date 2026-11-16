@@ -38,8 +38,30 @@ jest.mock('@/hooks/useChains', () => ({
   useChain: jest.fn(),
 }))
 jest.mock('@/store', () => ({ useAppSelector: jest.fn() }))
-jest.mock('@/store/slices', () => ({ selectCurrency: jest.fn(), selectUndeployedSafes: jest.fn() }))
-jest.mock('@/features/multichain/utils', () => ({
+jest.mock('@/store/settingsSlice', () => ({
+  ...jest.requireActual('@/store/settingsSlice'),
+  selectCurrency: jest.fn(),
+}))
+jest.mock('@/features/counterfactual/store/undeployedSafesSlice', () => ({
+  ...jest.requireActual('@/features/counterfactual/store/undeployedSafesSlice'),
+  selectUndeployedSafes: jest.fn(),
+}))
+jest.mock('@/features/multichain/utils/utils', () => ({
+  get isMultiChainSafeItem() {
+    return jest.requireActual('@/features/multichain/utils/utils').isMultiChainSafeItem
+  },
+  get predictSafeAddress() {
+    return jest.requireActual('@/features/multichain/utils/utils').predictSafeAddress
+  },
+  get predictAddressBasedOnReplayData() {
+    return jest.requireActual('@/features/multichain/utils/utils').predictAddressBasedOnReplayData
+  },
+  get hasMultiChainCreationFeatures() {
+    return jest.requireActual('@/features/multichain/utils/utils').hasMultiChainCreationFeatures
+  },
+  get hasMultiChainAddNetworkFeature() {
+    return jest.requireActual('@/features/multichain/utils/utils').hasMultiChainAddNetworkFeature
+  },
   getSafeSetups: jest.fn(),
   getSharedSetup: jest.fn(),
   getDeviatingSetups: jest.fn(),

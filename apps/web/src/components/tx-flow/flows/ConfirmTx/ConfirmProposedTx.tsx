@@ -1,10 +1,10 @@
 import { type ReactElement, useContext, useEffect } from 'react'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import useChainId from '@/hooks/useChainId'
-import { createExistingTx } from '@/services/tx/tx-sender'
+import { createExistingTx } from '@/services/tx/tx-sender/create'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import type { ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 
 const SIGN_TEXT = 'Sign this transaction.'

@@ -1,5 +1,6 @@
 import { type ReactElement } from 'react'
-import { trackEvent, MODALS_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { MODALS_EVENTS } from '@/services/analytics/events/modals'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setTransactionExecution } from '@/store/settingsSlice'
 import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'

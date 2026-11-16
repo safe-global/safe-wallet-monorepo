@@ -2,7 +2,7 @@ import { screen } from '@testing-library/react'
 import { render } from '@/tests/test-utils'
 import { ContractVersion } from './index'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
-import type { MastercopyMigration } from '@/features/multichain'
+import type { MastercopyMigration } from '@/features/multichain/hooks/useMastercopyMigration'
 
 const GNOSIS_REPO = 'https://github.com/gnosis/safe-contracts/releases'
 
@@ -10,16 +10,18 @@ jest.mock('@/hooks/useSafeInfo')
 // Stub MastercopyWarning capturing its `variant` prop. ContractVersion owns only the
 // version chrome and the delegation; the settings Alert / cards it renders are asserted
 // end-to-end in MastercopyWarning.test.tsx.
-jest.mock('@/features/multichain', () => ({
-  __esModule: true,
+jest.mock('@/features/multichain/hooks/useMastercopyMigration', () => ({
   useMastercopyMigration: jest.fn(),
+}))
+jest.mock('@/features/multichain', () => ({
   MastercopyWarning: ({ variant }: { variant?: string }) => (
     <div data-testid="mock-mastercopy-warning" data-variant={variant ?? 'dashboard'} />
   ),
 }))
 
 const mockUseSafeInfo = jest.requireMock('@/hooks/useSafeInfo').default as jest.Mock
-const mockUseMastercopyMigration = jest.requireMock('@/features/multichain').useMastercopyMigration as jest.Mock
+const mockUseMastercopyMigration = jest.requireMock('@/features/multichain/hooks/useMastercopyMigration')
+  .useMastercopyMigration as jest.Mock
 
 const migration = (overrides: Partial<MastercopyMigration> = {}): MastercopyMigration => ({
   state: ImplementationVersionState.UP_TO_DATE,

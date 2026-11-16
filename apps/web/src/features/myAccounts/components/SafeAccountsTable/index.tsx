@@ -9,7 +9,7 @@ import {
   tableVariants,
 } from '@safe-global/views/components/ui/table'
 import tableCss from './styles.module.css'
-import type { AllSafeItems } from '@/hooks/safes'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import { cn } from '@safe-global/views/utils/cn'
 import {
   SAFE_ACCOUNT_COLUMNS,
@@ -30,9 +30,9 @@ import ReorderableBody, { toggleExpanded } from './ReorderableBody'
 import { bandHeaderAt } from './SimilarityBand'
 import { orderGroupsBySimilarity } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/orderGroupsBySimilarity'
 import { weaveReorderedKeys } from '@/utils/reorder'
-import type { SimilarWarning } from '@/features/address-poisoning'
+import type { SimilarWarning } from '@/features/address-poisoning/utils/crossListClusters'
 import EntryDialog from '@/components/address-book/EntryDialog'
-import { useAddressBookWriteScope } from '@/features/spaces'
+import { useAddressBookWriteScope } from '@/features/spaces/hooks/useAddressBookWriteScope'
 
 /** Renaming a safe = editing its address-book entry across every chain it lives on. */
 type RenameTarget = { name: string; address: string; chainIds: string[] }

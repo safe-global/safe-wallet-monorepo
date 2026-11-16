@@ -1,4 +1,4 @@
-import { createFeatureHandle } from '@/features/__core__'
+import { createFeatureHandle } from '@/features/__core__/createFeatureHandle'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { PolicyGuardContract } from './contract'
 
@@ -17,7 +17,5 @@ export type {
   AllowlistIneligibilityReason,
   PolicyGuardTarget,
 } from './types'
-export { usePolicyGuard } from './hooks/usePolicyGuard'
+
 export type { UsePolicyGuardResult } from './hooks/usePolicyGuard'
-export { useIsAllowlistEnabled, useIsAllowlistAvailableInSpace } from './hooks/useAllowlistAvailability'
-export { useIsAllowlistActiveInSpace } from './hooks/useIsAllowlistActiveInSpace'

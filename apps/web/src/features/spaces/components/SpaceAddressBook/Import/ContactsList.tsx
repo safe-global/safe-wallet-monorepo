@@ -6,7 +6,7 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form'
 import type { ImportContactsFormValues } from './ImportAddressBookDialog'
 import { getSelectedAddresses, getContactId, validateContactName, getRenameContactTooltip } from '../utils'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { useGetSpaceAddressBook } from '@/features/spaces'
+import useGetSpaceAddressBook from '@/features/spaces/hooks/useGetSpaceAddressBook'
 import { cn } from '@safe-global/views/utils/cn'
 
 export type ContactItem = {

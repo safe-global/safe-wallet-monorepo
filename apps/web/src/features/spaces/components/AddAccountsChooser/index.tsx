@@ -8,13 +8,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@safe-global/v
 import { cn } from '@safe-global/views/utils/cn'
 import { ChooserRow } from '@safe-global/views/components/common/ChooserRow'
 import AddAccounts from '../AddAccounts'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import {
-  useCurrentSpaceId,
   useCurrentSpaceSafeCount,
-  useIsAdmin,
   useIsCurrentSpaceAtSafeLimit,
-  useSpaceSafeLimit,
-} from '@/features/spaces'
+} from '@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit'
+import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { useSpaceSafeLimit } from '@/features/spaces/hooks/useSpaceSafeLimit'
 import SeatLimitBanner from '../SafeAccounts/SeatLimitBanner'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'

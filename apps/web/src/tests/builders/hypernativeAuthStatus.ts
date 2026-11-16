@@ -1,4 +1,4 @@
-import type { HypernativeAuthStatus } from '@/features/hypernative'
+import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
 import { Builder } from '../Builder'
 
 export const hypernativeAuthStatusBuilder = () =>

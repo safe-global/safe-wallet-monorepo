@@ -5,7 +5,7 @@ import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import OverviewSkeleton from '@safe-global/views/components/dashboard/Overview/OverviewSkeleton'
 import { PortfolioFeature } from '@/features/portfolio'
 import { ActionsTrayFeature } from '@/features/actions-tray'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 const Overview = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()

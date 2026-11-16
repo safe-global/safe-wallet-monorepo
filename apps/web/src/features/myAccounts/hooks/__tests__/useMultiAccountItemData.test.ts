@@ -4,7 +4,7 @@ import { safeItemBuilder } from '@/tests/builders/safeItem'
 import { chainBuilder } from '@/tests/builders/chains'
 import { AppRoutes } from '@/config/routes'
 import type { RootState } from '@/store'
-import type { MultiChainSafeItem } from '@/hooks/safes'
+import type { MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
 import * as gatewayApi from '@/store/api/gateway'
 
 const mockChains = [

@@ -9,7 +9,10 @@ import type { CurrentPlan, PlanSummary } from '@safe-global/views/features/space
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 const offer = (planName: string, paymentLinkId: string, price: number, billingCycle: 'month' | 'year') => ({
   paymentLinkId,

@@ -1,10 +1,10 @@
 import userEvent from '@testing-library/user-event'
 import { render, screen, within } from '@/tests/test-utils'
-import * as coreFeatures from '@/features/__core__'
+import * as coreFeatures from '@/features/__core__/useLoadFeature'
 import * as useBalancesModule from '@/hooks/useBalances'
 import * as useChains from '@/hooks/useChains'
 import * as useSafeInfoModule from '@/hooks/useSafeInfo'
-import * as hypernative from '@/features/hypernative'
+import * as hypernative from '@/features/hypernative/hooks/useBannerVisibility'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { chainBuilder } from '@/tests/builders/chains'
 import { balancesBuilder, balanceBuilder } from '@/tests/builders/balances'
@@ -20,13 +20,16 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/services/analytics')
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
+jest.mock('@/features/__core__/useLoadFeature', () => ({
+  ...jest.requireActual('@/features/__core__/useLoadFeature'),
   useLoadFeature: jest.fn(),
 }))
-jest.mock('@/features/hypernative', () => ({
-  ...jest.requireActual('@/features/hypernative'),
+jest.mock('@/features/hypernative/hooks/useBannerVisibility', () => ({
+  ...jest.requireActual('@/features/hypernative/hooks/useBannerVisibility'),
   useBannerVisibility: jest.fn(),
+}))
+jest.mock('@/features/hypernative/components/HnDashboardBanner', () => ({
+  ...jest.requireActual('@/features/hypernative/components/HnDashboardBanner'),
   HnDashboardBannerWithNoBalanceCheck: () => <div data-testid="hn-banner" />,
 }))
 // jsdom has no canvas, so the QR code shows the value it encodes as an attribute

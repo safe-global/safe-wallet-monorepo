@@ -8,9 +8,15 @@ let mockHasBeamerConsent = true
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
+}))
+jest.mock('@/services/analytics/events/overview', () => ({
+  ...jest.requireActual('@/services/analytics/events/overview'),
   OVERVIEW_EVENTS: {
     WHATS_NEW: { action: "Open What's New" },
   },
+}))
+jest.mock('@/services/analytics/mixpanel-events', () => ({
+  ...jest.requireActual('@/services/analytics/mixpanel-events'),
   MixpanelEventParams: { SIDEBAR_ELEMENT: 'sidebarElement' },
 }))
 
@@ -62,13 +68,14 @@ jest.mock('@/hooks/useWhatsNewUpdates', () => ({
   useWhatsNewUpdates: () => ({ unreadCount: mockUnreadCount, markAsSeen: mockMarkAsSeen }),
 }))
 
-jest.mock('../../WhatsNewCornerCard', () => ({
+jest.mock('@/features/spaces/components/Sidebar/WhatsNewCornerCard/WhatsNewCornerCard', () => ({
+  ...jest.requireActual('@/features/spaces/components/Sidebar/WhatsNewCornerCard/WhatsNewCornerCard'),
   WhatsNewCornerCard: ({ onOpen }: { onOpen: () => void }) => (
     <button data-testid="whats-new-corner-card" onClick={onOpen} />
   ),
 }))
 
-jest.mock('../../WhatsNewDrawer', () => ({
+jest.mock('@/features/spaces/components/Sidebar/WhatsNewDrawer/WhatsNewDrawer', () => ({
   WhatsNewDrawer: ({ productId, open }: { productId: string; open: boolean }) =>
     open ? <div data-testid="whats-new-drawer" data-product-id={productId} /> : null,
 }))

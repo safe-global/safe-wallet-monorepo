@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import type { DraftBatchItem } from '@/features/batching/store'
+import type { DraftBatchItem } from '@/features/batching/store/batchSlice'
 import { OperationType } from '@safe-global/types-kit'
 
 faker.seed(1)

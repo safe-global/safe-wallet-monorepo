@@ -1,8 +1,9 @@
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import AddAccounts from '../index'
 
-jest.mock('@/features/address-poisoning', () => ({
-  useSimilarityClusters: () => ({ flagged: new Set<string>(), groupIdByAddress: new Map<string, string>() }),
+jest.mock('@/features/address-poisoning/hooks/useSimilarityClusters', () => ({
+  __esModule: true,
+  default: () => ({ flagged: new Set<string>(), groupIdByAddress: new Map<string, string>() }),
 }))
 
 jest.mock('../AddManually', () => ({
@@ -13,9 +14,9 @@ jest.mock('../AddManually', () => ({
 }))
 
 // The heavy accounts table is exercised in its own suite; here we only need to observe the items it receives.
-jest.mock('@/features/myAccounts', () => ({
+jest.mock('@/features/myAccounts/components/SafeAccountsTable', () => ({
   __esModule: true,
-  SafeAccountsTable: (props: {
+  default: (props: {
     items: Array<{ chainId: string; address: string; safes?: unknown[] }>
     selection?: { onToggle: (line: unknown, next: boolean) => void; isAtLimit?: boolean }
   }) => (
@@ -100,22 +101,78 @@ let mockSpaceAddressBook: Array<{ address: string; name: string; chainIds: strin
 let mockAddressBookError = false
 const mockUpsertWorkspaceNames = jest.fn().mockResolvedValue({})
 const mockPrepareNames = jest.fn<{ items?: unknown[]; error?: string }, [unknown[]]>((items) => ({ items }))
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '1',
+}))
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+  get MemberStatus() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MemberStatus
+  },
+  get MemberRole() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MemberRole
+  },
+  get MEMBER_ALIAS_MAX_LENGTH() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+  },
+  get getMemberDisplayName() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').getMemberDisplayName
+  },
+  get sanitizeMemberAlias() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').sanitizeMemberAlias
+  },
+  get isAdmin() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isAdmin
+  },
+  get isActiveAdmin() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isActiveAdmin
+  },
+  get isInviteExpired() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isInviteExpired
+  },
+  get useSpaceMembersByStatus() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useSpaceMembersByStatus
+  },
+  get useCurrentMembership() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useCurrentMembership
+  },
+  get useCurrentMemberProfile() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useCurrentMemberProfile
+  },
+  get useIsActiveMember() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useIsActiveMember
+  },
+  get useIsInvited() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useIsInvited
+  },
   useIsAdmin: () => mockIsAdmin,
+}))
+jest.mock('@/features/spaces/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => ({ allSafes: mockSpaceSafes, isLoading: mockSpaceSafesLoading }),
-  useIsQualifiedSafe: () => false,
+}))
+jest.mock('@/features/spaces/hooks/useIsQualifiedSafe', () => ({
+  __esModule: true,
+  default: () => false,
+}))
+jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
+  ...jest.requireActual('@/features/spaces/hooks/useGetSpaceAddressBook'),
   useSpaceAddressBookState: () => ({ items: mockSpaceAddressBook, isLoading: false, isError: mockAddressBookError }),
+}))
+jest.mock('@/features/spaces/hooks/useUpsertWorkspaceSafeName', () => ({
+  ...jest.requireActual('@/features/spaces/hooks/useUpsertWorkspaceSafeName'),
   useUpsertWorkspaceSafeNames: () => mockUpsertWorkspaceNames,
   usePrepareWorkspaceSafeNames: () => mockPrepareNames,
+}))
+jest.mock('@/features/spaces/utils', () => ({
+  ...jest.requireActual('@/features/spaces/utils'),
   getChainIdsParam: () => '',
 }))
 
 // The naming fields are covered by their own suite; this stub enters a name through the shared form.
 let mockEnteredName = 'Treasury'
-jest.mock('../../NameAccounts', () => ({
-  ...jest.requireActual('../../NameAccounts'),
-  NameAccountsFields: ({ items }: { items: Array<{ address: string }> }) => {
+jest.mock('@/features/spaces/components/NameAccounts/NameAccountsFields', () => ({
+  ...jest.requireActual('@/features/spaces/components/NameAccounts/NameAccountsFields'),
+  __esModule: true,
+  default: ({ items }: { items: Array<{ address: string }> }) => {
     const { useEffect } = require('react')
     const { useFormContext } = require('react-hook-form')
     const { setValue } = useFormContext()

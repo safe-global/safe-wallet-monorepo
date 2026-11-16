@@ -3,8 +3,8 @@ import { renderHook, act } from '@testing-library/react'
 import useSafeActionMapper from '../useSafeActionMapper'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { AppRoutes } from '@/config/routes'
-import { ESafeAction } from '@/features/spaces/store'
-import type { SafeItem } from '@/hooks/safes'
+import { ESafeAction } from '@/features/spaces/store/safeActionsModalSlice'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 
 const mockReplace = jest.fn()
 const mockPush = jest.fn()

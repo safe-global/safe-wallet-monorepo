@@ -62,10 +62,10 @@ jest.mock('@/store', () => ({
 }))
 
 // useLoadFeature needs Redux/chain context; return the resolved feature synchronously.
-jest.mock('@/features/__core__', () => {
+jest.mock('@/features/__core__/useLoadFeature', () => {
   const securityFeatureImpl = require('@/features/security/feature').default
   return {
-    ...jest.requireActual('@/features/__core__'),
+    ...jest.requireActual('@/features/__core__/useLoadFeature'),
     useLoadFeature: () => ({
       ...securityFeatureImpl,
       $isReady: true,

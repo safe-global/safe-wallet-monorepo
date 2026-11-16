@@ -67,7 +67,7 @@ jest.mock('../../../config', () => {
 
 const mockSafeSidebarVariant = jest.fn()
 
-jest.mock('../../SafeSidebarVariant', () => ({
+jest.mock('@/features/spaces/components/Sidebar/variants/SafeSidebarVariant/SafeSidebarVariant', () => ({
   SafeSidebarVariant: (props: SafeSidebarVariantProps) => {
     mockSafeSidebarVariant(props)
     return <div>Safe sidebar</div>

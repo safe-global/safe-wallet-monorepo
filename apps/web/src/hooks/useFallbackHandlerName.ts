@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useTWAPFallbackHandlerAddress } from '@/features/swap'
+import { useTWAPFallbackHandlerAddress } from '@/features/swap/hooks/useIsTWAPFallbackHandler'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { identifyOfficialFallbackHandler } from '@safe-global/utils/services/contracts/deployments'
 

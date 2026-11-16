@@ -7,6 +7,4 @@ export const WalletFeature: FeatureHandle<WalletContract> = {
   load: () => import(/* webpackMode: "lazy" */ './feature') as Promise<{ default: WalletContract }>,
 }
 
-export { default as useWalletPopover } from './hooks/useWalletPopover'
-
 export type * from './types'

@@ -1,4 +1,4 @@
-import { SpacesEnhancedSidebar } from '@/features/spaces'
+import { SpacesEnhancedSidebar } from '@/features/spaces/components/Sidebar/SpacesEnhancedSidebar/SpacesEnhancedSidebar'
 import { useRouter } from 'next/router'
 import { useEffect, type ReactElement } from 'react'
 import { ChevronsLeft, ChevronsRight } from 'lucide-react'

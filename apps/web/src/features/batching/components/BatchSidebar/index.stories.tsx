@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { OperationType } from '@safe-global/types-kit'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { SAFE_ADDRESSES } from '../../../../../../../config/test/msw/fixtures'
 import type { BatchTxsState, CallOnlyTxData } from '../../store/batchSlice'
 import BatchSidebar from './index'

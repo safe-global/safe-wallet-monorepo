@@ -1,14 +1,14 @@
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { render } from '@/tests/test-utils'
 
 import OnboardingSafesList from '../OnboardingSafesList'
-import type { SimilarWarning } from '@/features/address-poisoning'
+import type { SimilarWarning } from '@/features/address-poisoning/utils/crossListClusters'
 
 // Stub the (MUI) accounts table so these tests stay focused on section/flag wiring.
 // The barrel is replaced wholesale (not spread) to avoid a circular-init crash when required.
-jest.mock('@/features/myAccounts', () => ({
+jest.mock('@/features/myAccounts/components/SafeAccountsTable', () => ({
   __esModule: true,
-  SafeAccountsTable: ({
+  default: ({
     items,
     similarWarnings,
     similarityGroups,

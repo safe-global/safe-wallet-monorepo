@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { expect, userEvent, within } from 'storybook/test'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import GlobalSearchModal from './GlobalSearchModal'
 
 // GlobalSearchModal is driven entirely by Redux + the Next router: it renders

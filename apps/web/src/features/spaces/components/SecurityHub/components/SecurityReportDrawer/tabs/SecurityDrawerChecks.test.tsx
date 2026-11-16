@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { render, screen, within } from '@testing-library/react'
 import { AppRoutes } from '@/config/routes'
-import { createMockContext } from '@/features/security/testing'
+import { createMockContext } from '@/features/security/data/scanners/test-helpers'
 import type { ScanResult } from '@/features/security/types'
 import SecurityDrawerChecks from './SecurityDrawerChecks'
 
@@ -15,10 +15,10 @@ jest.mock('next/link', () => {
   return { __esModule: true, default: MockLink }
 })
 
-jest.mock('@/features/__core__', () => {
+jest.mock('@/features/__core__/useLoadFeature', () => {
   const securityFeatureImpl = require('@/features/security/feature').default
   return {
-    ...jest.requireActual('@/features/__core__'),
+    ...jest.requireActual('@/features/__core__/useLoadFeature'),
     useLoadFeature: () => ({
       ...securityFeatureImpl,
       $isReady: true,

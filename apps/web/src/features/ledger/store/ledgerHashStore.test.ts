@@ -1,4 +1,4 @@
-import { showLedgerHashComparison, hideLedgerHashComparison } from './index'
+import { showLedgerHashComparison, hideLedgerHashComparison } from '@/features/ledger/store/ledgerHashStore'
 import ledgerHashStore from './ledgerHashStore'
 
 describe('ledgerHashStore', () => {

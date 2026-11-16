@@ -1,38 +1,35 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
-import {
-  type SafeItem,
-  type SafeItems,
-  type AllSafeItems,
-  flattenSafeItems,
-  useSafesSearch,
-  getComparator,
-  _groupAndSort,
-  _buildSafeItem,
-  useAllOwnedSafes,
-} from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
+import type { SafeItems } from '@/hooks/safes/useAllSafes'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { flattenSafeItems, _groupAndSort } from '@/hooks/safes/useAllSafesGrouped'
+import { useSafesSearch } from '@/hooks/safes/useSafesSearch'
+import { getComparator } from '@/hooks/safes/comparators'
+import { _buildSafeItem } from '@/hooks/safes/useAllSafes'
+import useAllOwnedSafes from '@/hooks/safes/useAllOwnedSafes'
 import AddManually, { type AddManuallyFormValues } from './AddManually'
 import { getSafeId } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/utils/safeIds'
 import { applySafeSelectionToggle, getSelectedLeafKeys } from '../SelectSafesOnboarding/utils/selection'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
-import { useSimilarityClusters } from '@/features/address-poisoning'
+import useSimilarityClusters from '@/features/address-poisoning/hooks/useSimilarityClusters'
 import {
   ADDRESS_BOOK_UNAVAILABLE,
-  getChainIdsParam,
-  useCurrentSpaceId,
-  useSpaceAddressBookState,
-  useIsAdmin,
-  useSpaceSafes,
   usePrepareWorkspaceSafeNames,
-} from '@/features/spaces'
+} from '@/features/spaces/hooks/useUpsertWorkspaceSafeName'
+import { getChainIdsParam } from '@/features/spaces/utils'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useSpaceAddressBookState } from '@/features/spaces/hooks/useGetSpaceAddressBook'
+import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import NameAccountsFields from '@/features/spaces/components/NameAccounts/NameAccountsFields'
 import {
-  NameAccountsFields,
   buildWorkspaceSafeNames,
   getSafesToName,
   hasAllNames,
   touchNames,
   withWorkspaceNames,
-} from '../NameAccounts'
+} from '@/features/spaces/components/NameAccounts/utils'
 import { AdminOnlyWorkspaceTooltip } from '@safe-global/views/features/spaces/components/AdminOnlyWorkspaceTooltip'
 import {
   useSpaceSafesCreateV1Mutation,
@@ -45,13 +42,17 @@ import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import { selectAllAddedSafes } from '@/store/addedSafesSlice'
-import { selectAllAddressBooks, selectAllVisitedSafes, selectUndeployedSafes } from '@/store/slices'
+import { selectAllAddressBooks } from '@/store/addressBookSlice'
+import { selectAllVisitedSafes } from '@/store/visitedSafesSlice'
+import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
 import { ArrowLeft, Info, Plus, Settings2, Loader2 } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { SearchInput } from '@safe-global/views/components/ui/search-input'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
-import { SafeAccountsTable, type AccountLine, type SafeAccountColumnId } from '@/features/myAccounts'
+import SafeAccountsTable from '@/features/myAccounts/components/SafeAccountsTable'
+import type { AccountLine } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/types'
+import type { SafeAccountColumnId } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
 import ManageTrustedSafesContent from '@/components/common/TrustedSafesModal/ManageTrustedSafesContent'
 import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import Track from '@/components/common/Track'

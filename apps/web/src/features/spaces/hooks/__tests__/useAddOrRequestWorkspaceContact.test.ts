@@ -16,7 +16,10 @@ const mockCreateRequest = jest.fn()
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useAddressBookRequestsCreateRequestV1Mutation: () => [mockCreateRequest],
 }))
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 jest.mock('../useCurrentSpaceId', () => ({ useCurrentSpaceId: jest.fn() }))
 jest.mock('../useGetSpaceAddressBook', () => ({ __esModule: true, useSpaceAddressBookState: jest.fn() }))
 jest.mock('../useSpaceMembers', () => ({ useIsAdmin: jest.fn(), useIsInvited: jest.fn() }))

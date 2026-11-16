@@ -9,7 +9,7 @@ import { addressBookSlice, selectAllAddressBooks } from '@/store/addressBookSlic
 import { addedSafesSlice, selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { safeAppsSlice, selectSafeApps } from '@/store/safeAppsSlice'
 import { selectSettings, settingsSlice } from '@/store/settingsSlice'
-import { selectUndeployedSafes, undeployedSafesSlice } from '@/features/counterfactual/store'
+import { selectUndeployedSafes, undeployedSafesSlice } from '@/features/counterfactual/store/undeployedSafesSlice'
 import { ImportFileUpload } from '@/components/settings/DataManagement/ImportFileUpload'
 import { ImportDialog } from '@/components/settings/DataManagement/ImportDialog'
 import { SAFE_EXPORT_VERSION } from '@/components/settings/DataManagement/useGlobalImportFileParser'
@@ -18,7 +18,7 @@ import { selectAllVisitedSafes, visitedSafesSlice } from '@/store/visitedSafesSl
 
 import css from './styles.module.css'
 import Track from '@/components/common/Track'
-import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
+import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
 import { ClearPendingTxs } from '../ClearPendingTxs'
 import SettingsCard from '@safe-global/views/components/settings/SettingsCard'
 

@@ -1,6 +1,6 @@
 import { UpdateSafeReview } from './UpdateSafeReview'
 import SettingsIcon from '@safe-global/views/assets/images/sidebar/settings.svg'
-import { TxFlowType } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics/types'
 import { TxFlow } from '../../TxFlow'
 
 const UpdateSafeFlow = () => {

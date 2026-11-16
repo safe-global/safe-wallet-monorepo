@@ -1,10 +1,11 @@
 import { useMemo } from 'react'
-import { useSpaceSafes } from '@/features/spaces'
+import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { useAppSelector } from '@/store'
-import { selectUndeployedSafes, selectCurrency } from '@/store/slices'
+import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { selectCurrency } from '@/store/settingsSlice'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
-import type { useLoadFeature } from '@/features/__core__'
-import type { SecurityContract } from '@/features/security'
+import type { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import type { SecurityContract } from '@/features/security/contract'
 import { flattenSafes, getDeployedEntries, reconcileDeployedSafes, toSafeItems } from '../utils'
 import type {
   BalanceMap,

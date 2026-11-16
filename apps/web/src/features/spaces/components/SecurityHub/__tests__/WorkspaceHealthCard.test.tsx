@@ -4,10 +4,10 @@ import { scanKey } from '@/features/security/data/scanners/utils'
 import type { ScanResult } from '@/features/security/types'
 import type { SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
-jest.mock('@/features/__core__', () => {
+jest.mock('@/features/__core__/useLoadFeature', () => {
   const securityFeatureImpl = require('@/features/security/feature').default
   return {
-    ...jest.requireActual('@/features/__core__'),
+    ...jest.requireActual('@/features/__core__/useLoadFeature'),
     useLoadFeature: () => ({
       ...securityFeatureImpl,
       $isReady: true,

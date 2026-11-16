@@ -6,11 +6,10 @@ import { BannerType } from '../../hooks/useBannerStorage'
 import { HnBannerWithDismissal } from './HnBannerWithDismissal'
 
 // Export the original pure component for tests and stories
-export { HnBanner } from './HnBanner'
+
 export type { HnBannerProps } from './HnBanner'
 
 // Export the carousel-compatible version
-export { HnBannerForCarousel } from './HnBannerForCarousel'
 
 // Export the composed HOC as default for use in Carousel (uses Promo banner type)
 // Apply withHnSignupFlow first (inner), then withHnBannerConditions, then withHnFeature (outer)

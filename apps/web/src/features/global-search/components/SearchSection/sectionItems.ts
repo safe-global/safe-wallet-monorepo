@@ -1,9 +1,9 @@
 import type { ComponentType } from 'react'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
-import { AccountsSection } from './sections/Accounts'
-import { NavigateToSection } from './sections/NavigateTo'
-import { TrustedSafesSection } from './sections/TrustedSafes'
-import { useIsQualifiedSafe } from '@/features/spaces'
+import AccountsSection from '@/features/global-search/components/SearchSection/sections/Accounts/AccountsSection'
+import NavigateToSection from '@/features/global-search/components/SearchSection/sections/NavigateTo/NavigateToSection'
+import TrustedSafesSection from '@/features/global-search/components/SearchSection/sections/TrustedSafes/TrustedSafesSection'
+import useIsQualifiedSafe from '@/features/spaces/hooks/useIsQualifiedSafe'
 
 export interface SectionItemProps {
   query: string

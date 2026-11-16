@@ -13,9 +13,9 @@ import {
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { areOwnersMatching } from '@safe-global/utils/utils/safe-setup-comparison'
 import { Safe_proxy_factory__factory } from '@safe-global/utils/types/contracts'
-import { extractCounterfactualSafeSetup } from '@/features/counterfactual/services'
+import { extractCounterfactualSafeSetup } from '@/features/counterfactual/services/typeGuards'
 import { encodeSafeSetupCall } from '@/components/new-safe/create/logic'
-import { type SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { MIN_SAFE_VERSION_FOR_MULTICHAIN } from '../constants'
@@ -23,7 +23,6 @@ import { MIN_SAFE_VERSION_FOR_MULTICHAIN } from '../constants'
 // Re-export from shared hooks for backward compatibility. Import the guard from its leaf module
 // (not the `@/hooks/safes` barrel) so this feature file doesn't re-enter the barrel during module
 // init — that cycle crashed Storybook's webpack module evaluation.
-export { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 
 export const getSafeSetups = (
   safes: SafeItem[],

@@ -1,7 +1,7 @@
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import Track from '@/components/common/Track'
-import { SETTINGS_EVENTS } from '@/services/analytics'
+import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
 import { ChangeThresholdFlow } from '@/components/tx-flow/flows'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useContext } from 'react'

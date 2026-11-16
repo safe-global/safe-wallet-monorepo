@@ -1,5 +1,5 @@
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
-import type { RecoveryQueueItem } from '@/features/recovery'
+import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { isExecutable, isSignableBy } from '@/utils/transaction-guards'

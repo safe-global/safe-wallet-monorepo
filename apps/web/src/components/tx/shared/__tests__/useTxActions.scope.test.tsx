@@ -6,14 +6,14 @@ import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { chainBuilder } from '@/tests/builders/chains'
 import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import { buildSafeScopeKey } from '@safe-global/views/components/tx-flow/safe-scope/utils'
-import * as txSender from '@/services/tx/tx-sender'
+import * as txSender from '@/services/tx/tx-sender/dispatch'
 import * as useWalletHooks from '@/hooks/wallets/useWallet'
 import * as useOnboardHooks from '@/hooks/wallets/useOnboard'
 import * as useChains from '@/hooks/useChains'
 import { useTxActions } from '../hooks'
 
-jest.mock('@/services/tx/tx-sender', () => ({
-  ...jest.requireActual('@/services/tx/tx-sender'),
+jest.mock('@/services/tx/tx-sender/dispatch', () => ({
+  ...jest.requireActual('@/services/tx/tx-sender/dispatch'),
   dispatchTxProposal: jest.fn(),
   dispatchTxSigning: jest.fn(),
   dispatchTxRelay: jest.fn(),

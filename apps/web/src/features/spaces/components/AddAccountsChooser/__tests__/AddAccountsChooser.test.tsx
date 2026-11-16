@@ -3,12 +3,58 @@ import AddAccountsChooser from '../index'
 
 let mockIsAdmin = true
 let mockIsAtSafeLimit = false
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '1',
+}))
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+  get MemberStatus() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MemberStatus
+  },
+  get MemberRole() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MemberRole
+  },
+  get MEMBER_ALIAS_MAX_LENGTH() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+  },
+  get getMemberDisplayName() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').getMemberDisplayName
+  },
+  get sanitizeMemberAlias() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').sanitizeMemberAlias
+  },
+  get isAdmin() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isAdmin
+  },
+  get isActiveAdmin() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isActiveAdmin
+  },
+  get isInviteExpired() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isInviteExpired
+  },
+  get useSpaceMembersByStatus() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useSpaceMembersByStatus
+  },
+  get useCurrentMembership() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useCurrentMembership
+  },
+  get useCurrentMemberProfile() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useCurrentMemberProfile
+  },
+  get useIsActiveMember() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useIsActiveMember
+  },
+  get useIsInvited() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useIsInvited
+  },
   useIsAdmin: () => mockIsAdmin,
+}))
+jest.mock('@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit', () => ({
+  ...jest.requireActual('@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit'),
   useIsCurrentSpaceAtSafeLimit: () => mockIsAtSafeLimit,
-  useSpaceSafeLimit: () => ({ limit: 40, isLoading: false }),
   useCurrentSpaceSafeCount: () => 40,
+}))
+jest.mock('@/features/spaces/hooks/useSpaceSafeLimit', () => ({
+  useSpaceSafeLimit: () => ({ limit: 40, isLoading: false }),
 }))
 jest.mock('../../../hooks/useSeatUpsell', () => ({
   useSeatUpsell: () => ({

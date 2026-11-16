@@ -1,4 +1,4 @@
-import { useIsOutreachSafe } from '@/features/targeted-features'
+import { useIsOutreachSafe } from '@/features/targeted-features/hooks/useIsOutreachSafe'
 import { useIsHypernativeGuard } from './useIsHypernativeGuard'
 import { useIsHypernativeFeature } from './useIsHypernativeFeature'
 import { HYPERNATIVE_ALLOWLIST_OUTREACH_ID } from '../constants'

@@ -1,11 +1,14 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import type { AccountLine } from '@/features/myAccounts'
+import type { AccountLine } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/types'
 import { Dialog, DialogContent } from '@safe-global/views/components/ui/dialog'
 import SelectAccountsStep, { _initialSelection } from '../SelectAccountsStep'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 const safe = (address: string, name: string, chainId = '1') => ({
   chainId,
@@ -36,8 +39,9 @@ jest.mock('@/hooks/safes/useSafesSearch', () => ({
     query ? items.filter((item) => (item as { name: string }).name.toLowerCase().includes(query.toLowerCase())) : items,
 }))
 
-jest.mock('@/features/myAccounts', () => ({
-  SafeAccountsTable: ({
+jest.mock('@/features/myAccounts/components/SafeAccountsTable', () => ({
+  __esModule: true,
+  default: ({
     items,
     selection,
   }: {

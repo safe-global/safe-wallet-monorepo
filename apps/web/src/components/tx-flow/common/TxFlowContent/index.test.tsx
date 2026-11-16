@@ -1,7 +1,7 @@
 import { render, screen } from '@/tests/test-utils'
 import { TxFlowContent } from '.'
 import { initialContext, TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import { SlotProvider } from '@/components/tx-flow/slots'
+import { SlotProvider } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 
 jest.mock('@/features/safe-shield', () => ({
   __esModule: true,

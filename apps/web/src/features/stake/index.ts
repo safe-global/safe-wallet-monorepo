@@ -22,7 +22,7 @@
  * }
  * ```
  */
-import { createFeatureHandle } from '@/features/__core__'
+import { createFeatureHandle } from '@/features/__core__/createFeatureHandle'
 import type { StakeContract } from './contract'
 
 // ─────────────────────────────────────────────────────────────────
@@ -40,24 +40,13 @@ export type { StakeContract } from './contract'
 // ─────────────────────────────────────────────────────────────────
 
 // Feature flag hooks
-export { default as useIsStakingFeatureEnabled } from './hooks/useIsStakingFeatureEnabled'
-export { default as useIsStakingBannerEnabled } from './hooks/useIsStakingBannerEnabled'
-export {
-  default as useIsStakingPromoBannerVisible,
-  STAKING_PROMO_BANNER_HIDE_KEY,
-} from './hooks/useIsStakingPromoBannerVisible'
 
 // Stake widget URL hook
-export { useGetStakeWidgetUrl } from './hooks/useGetStakeWidgetUrl'
 
 // ─────────────────────────────────────────────────────────────────
 // CONSTANTS
 // ─────────────────────────────────────────────────────────────────
 
-export * from './constants'
-
 // ─────────────────────────────────────────────────────────────────
 // HELPER UTILITIES (direct exports for consumers)
 // ─────────────────────────────────────────────────────────────────
-
-export { getStakeTitle } from './helpers/utils'

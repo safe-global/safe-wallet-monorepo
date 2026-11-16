@@ -9,9 +9,15 @@ const mockTrackEvent = jest.fn()
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
+}))
+jest.mock('@/services/analytics/events/overview', () => ({
+  ...jest.requireActual('@/services/analytics/events/overview'),
   OVERVIEW_EVENTS: {
     HELP_CENTER: { action: 'Open Help Center' },
   },
+}))
+jest.mock('@/services/analytics/mixpanel-events', () => ({
+  ...jest.requireActual('@/services/analytics/mixpanel-events'),
   MixpanelEventParams: { SIDEBAR_ELEMENT: 'sidebarElement' },
 }))
 
@@ -114,7 +120,7 @@ jest.mock('../../config', () => ({
   },
 }))
 
-jest.mock('../../ApiCtaSidebar', () => ({
+jest.mock('@/features/spaces/components/Sidebar/ApiCtaSidebar/ApiCtaSidebar', () => ({
   ApiCtaSidebar: () => <div data-testid="api-cta-sidebar" />,
 }))
 
@@ -123,7 +129,12 @@ let mockIsSafeProBannerDismissed = false
 const mockDismissSafeProBanner = jest.fn()
 jest.mock('@/features/safe-pro-announcement', () => ({
   SafeProFeature: { name: 'safe-pro-announcement' },
+}))
+jest.mock('@/features/safe-pro-announcement/hooks/useIsSafeProAnnouncementEnabled', () => ({
   useIsSafeProAnnouncementEnabled: () => mockIsSafeProAnnouncementEnabled,
+}))
+jest.mock('@/features/safe-pro-announcement/hooks/useSafeProSidebarBannerDismissed', () => ({
+  ...jest.requireActual('@/features/safe-pro-announcement/hooks/useSafeProSidebarBannerDismissed'),
   useSafeProSidebarBannerDismissed: () => [mockIsSafeProBannerDismissed, mockDismissSafeProBanner],
 }))
 
@@ -147,6 +158,9 @@ let mockIsTwoFactorCardDismissed = false
 const mockDismissTwoFactorCard = jest.fn()
 jest.mock('@/features/oidc-auth', () => ({
   OidcAuthFeature: { name: 'oidc-auth' },
+}))
+jest.mock('@/features/oidc-auth/hooks/useTwoFactorAwarenessDismissed', () => ({
+  ...jest.requireActual('@/features/oidc-auth/hooks/useTwoFactorAwarenessDismissed'),
   useTwoFactorAwarenessDismissed: () => [mockIsTwoFactorCardDismissed, mockDismissTwoFactorCard],
 }))
 
@@ -154,7 +168,8 @@ let mockIsSafeProLoaded = true
 let mockSafeProError: Error | undefined = undefined
 let mockIsTwoFactorCardLoaded = true
 let mockTwoFactorCardError: Error | undefined = undefined
-jest.mock('@/features/__core__', () => ({
+jest.mock('@/features/__core__/useLoadFeature', () => ({
+  ...jest.requireActual('@/features/__core__/useLoadFeature'),
   useLoadFeature: (handle: { name: string }) =>
     handle.name === 'oidc-auth'
       ? {
@@ -185,7 +200,7 @@ jest.mock('@/features/__core__', () => ({
         },
 }))
 
-jest.mock('../../SidebarIndexingStatus', () => ({
+jest.mock('@/features/spaces/components/Sidebar/SidebarIndexingStatus/SidebarIndexingStatus', () => ({
   SidebarIndexingStatus: () => <div data-testid="indexing-status" />,
 }))
 
@@ -194,7 +209,7 @@ jest.mock('next/router', () => ({
   useRouter: () => ({ pathname: mockPathname }),
 }))
 
-jest.mock('../../WhatsNewButton', () => ({
+jest.mock('@/features/spaces/components/Sidebar/WhatsNewButton/WhatsNewButton', () => ({
   WhatsNewButton: () => <button data-testid="list-item-whats-new" />,
 }))
 

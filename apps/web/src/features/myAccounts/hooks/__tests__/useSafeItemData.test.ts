@@ -2,11 +2,11 @@ import { renderHook } from '@/tests/test-utils'
 import { useSafeItemData } from '../useSafeItemData'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
 import { chainBuilder } from '@/tests/builders/chains'
-import { OVERVIEW_LABELS } from '@/services/analytics'
+import { OVERVIEW_LABELS } from '@/services/analytics/events/overview'
 import { AppRoutes } from '@/config/routes'
 import type { RootState } from '@/store'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import * as slices from '@/store/slices'
+import * as slices from '@/store/api/gateway'
 
 const mockChain = chainBuilder().with({ chainId: '1' }).build()
 
@@ -34,7 +34,7 @@ jest.mock('@/hooks/useOnceVisible', () => ({
   default: jest.fn(() => true),
 }))
 
-jest.mock('@/hooks/safes', () => ({
+jest.mock('@/hooks/safes/useGetHref', () => ({
   useGetHref: jest.fn(() => (chain: Chain, address: string) => `/${chain.shortName}:${address}`),
 }))
 

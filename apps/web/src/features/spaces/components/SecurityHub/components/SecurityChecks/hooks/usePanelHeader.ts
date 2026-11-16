@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import type { ScanResult, ScoreBandDef } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 /**
  * Three states the header can be in:

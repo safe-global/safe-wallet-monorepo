@@ -9,7 +9,7 @@ import { Separator } from '@safe-global/views/components/ui/separator'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
@@ -20,7 +20,7 @@ import ErrorMessage from '../ErrorMessage'
 import useTxPreview from '../confirmation-views/useTxPreview'
 import useChainId from '@/hooks/useChainId'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
-import { createExistingTx } from '@/services/tx/tx-sender'
+import { createExistingTx } from '@/services/tx/tx-sender/create'
 
 const EXECUTE_OPTIONS = [{ id: 'execute', label: 'Execute' }]
 

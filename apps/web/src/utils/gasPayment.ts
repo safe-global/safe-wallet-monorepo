@@ -1,7 +1,7 @@
 import type { RelaysRemaining } from '@safe-global/store/gateway/AUTO_GENERATED/relay'
 import type { GasPaymentOption } from '@safe-global/utils/utils/gasPaymentOptions'
 import type { ExecutionMethod } from '@/components/tx/ExecutionMethodSelector'
-import type { SafeSponsoredTxs } from '@/features/spaces'
+import type { SafeSponsoredTxs } from '@/features/spaces/hooks/useSafeSponsoredTxs'
 
 export type SponsoredOption = Exclude<GasPaymentOption, 'PAY_FROM_SAFE'>
 

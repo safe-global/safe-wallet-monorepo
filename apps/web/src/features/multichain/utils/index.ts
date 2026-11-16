@@ -1,5 +1,5 @@
+export { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 export {
-  isMultiChainSafeItem,
   getSafeSetups,
   getSharedSetup,
   getDeviatingSetups,

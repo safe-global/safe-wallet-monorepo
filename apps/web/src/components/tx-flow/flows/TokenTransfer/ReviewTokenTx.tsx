@@ -1,7 +1,8 @@
 import { useContext, type ReactElement, type PropsWithChildren } from 'react'
-import { type MultiTokenTransferParams, TokenTransferType } from '@/components/tx-flow/flows/TokenTransfer/index'
+import type { MultiTokenTransferParams } from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
+import { TokenTransferType } from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
 import ReviewTokenTransfer from '@/components/tx-flow/flows/TokenTransfer/ReviewTokenTransfer'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
 

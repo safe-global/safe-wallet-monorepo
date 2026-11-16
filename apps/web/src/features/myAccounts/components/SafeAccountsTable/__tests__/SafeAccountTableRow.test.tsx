@@ -1,7 +1,7 @@
 import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import SafeAccountTableRow, { type RowCheckbox } from '../SafeAccountTableRow'
-import { useAddressBookWriteScope } from '@/features/spaces'
+import { useAddressBookWriteScope } from '@/features/spaces/hooks/useAddressBookWriteScope'
 import {
   SELECT_COLUMN,
   type SafeAccountColumn,

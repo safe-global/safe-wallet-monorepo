@@ -1,6 +1,6 @@
 import { render, screen } from '@/tests/test-utils'
 import { AppRoutes } from '@/config/routes'
-import type { SecurityContract } from '@/features/security'
+import type { SecurityContract } from '@/features/security/contract'
 import type { ScanResult } from '@/features/security/types'
 import { EvidenceList, makeBuildCta } from '../primitives'
 

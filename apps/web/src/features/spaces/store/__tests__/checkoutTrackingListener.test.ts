@@ -8,7 +8,10 @@ import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
 import { PAID_LINKS } from '../../components/Plans/plans.storyData'
 import { checkoutTrackingListener } from '../checkoutTrackingListener'
 
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 const checkout = (requestStatus: 'fulfilled' | 'rejected', paymentLinkId: string) => ({
   type: `${billingApi.reducerPath}/executeQuery/${requestStatus}`,

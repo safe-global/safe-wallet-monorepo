@@ -26,7 +26,7 @@ import type AccountItemQueueActions from './components/AccountItem/AccountItemQu
 import type AccountItemContent from '@safe-global/views/features/myAccounts/components/AccountItem/AccountItemContent'
 import type SafesList from './components/SafesList'
 import type AccountsNavigation from './components/AccountsNavigation'
-import type MyAccountsV2 from './components/MyAccountsV2'
+import type MyAccountsV2 from '@/features/myAccounts/components/MyAccountsV2/MyAccountsV2'
 import type NonPinnedWarning from './components/NonPinnedWarning'
 import type AccountsWidget from './components/AccountsWidget/AccountsWidget'
 

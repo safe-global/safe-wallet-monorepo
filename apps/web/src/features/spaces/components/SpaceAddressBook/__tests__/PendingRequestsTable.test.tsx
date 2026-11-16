@@ -8,10 +8,55 @@ const mockUseIsMobile = jest.fn(() => false)
 jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 jest.mock('@/hooks/useChains', () => () => ({ configs: [] }))
 const mockUseGetSpaceAddressBook = jest.fn((): { address: string }[] => [])
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '1',
+}))
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+  get MemberStatus() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MemberStatus
+  },
+  get MemberRole() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MemberRole
+  },
+  get MEMBER_ALIAS_MAX_LENGTH() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+  },
+  get getMemberDisplayName() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').getMemberDisplayName
+  },
+  get sanitizeMemberAlias() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').sanitizeMemberAlias
+  },
+  get isAdmin() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isAdmin
+  },
+  get isActiveAdmin() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isActiveAdmin
+  },
+  get isInviteExpired() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isInviteExpired
+  },
+  get useSpaceMembersByStatus() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useSpaceMembersByStatus
+  },
+  get useCurrentMembership() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useCurrentMembership
+  },
+  get useCurrentMemberProfile() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useCurrentMemberProfile
+  },
+  get useIsActiveMember() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useIsActiveMember
+  },
+  get useIsInvited() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useIsInvited
+  },
   useIsAdmin: () => true,
-  useGetSpaceAddressBook: () => mockUseGetSpaceAddressBook(),
+}))
+jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
+  ...jest.requireActual('@/features/spaces/hooks/useGetSpaceAddressBook'),
+  __esModule: true,
+  default: () => mockUseGetSpaceAddressBook(),
 }))
 const mockApprove = jest.fn()
 const mockReject = jest.fn()
@@ -52,7 +97,10 @@ jest.mock('@/features/multichain', () => ({
       {trigger}
     </span>
   ),
-  NetworkLogosPill: ({ networks }: { networks: { chainId: string }[] }) => (
+}))
+jest.mock('@/features/multichain/components/NetworkLogosPill', () => ({
+  __esModule: true,
+  default: ({ networks }: { networks: { chainId: string }[] }) => (
     <span data-testid="network-logos-pill" data-count={networks.length} />
   ),
 }))

@@ -8,8 +8,9 @@ import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { cn } from '@safe-global/views/utils/cn'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import Track from '@/components/common/Track'
-import { OVERVIEW_EVENTS, OVERVIEW_LABELS, BATCH_EVENTS } from '@/services/analytics'
-import { BatchTooltip } from '@/features/batching'
+import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
+import { BATCH_EVENTS } from '@/services/analytics/events/batching'
+import BatchTooltip from '@/features/batching/components/BatchTooltip'
 
 export interface HeaderNavigationProps {
   /**

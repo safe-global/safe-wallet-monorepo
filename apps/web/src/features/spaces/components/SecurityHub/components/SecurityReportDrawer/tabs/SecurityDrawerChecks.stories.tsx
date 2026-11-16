@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import SecurityDrawerChecks from './SecurityDrawerChecks'
-import { createMockStory } from '@/stories/mocks'
-import { createMockContext } from '@/features/security/testing'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import { createMockContext } from '@/features/security/data/scanners/test-helpers'
 import type { ScanResult } from '@/features/security/types'
 
 const SAFE_QUERY = 'eth:0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6'

@@ -3,7 +3,7 @@ import { composeStories } from '@storybook/react'
 import { render, screen } from '@testing-library/react'
 
 import * as stories from './SecurityReportDrawer.stories'
-import type { useSecurityScan } from '@/features/security'
+import type useSecurityScan from '@/features/security/hooks/useSecurityScan'
 
 jest.mock('@/features/security/hooks/useSecurityScan', () => ({
   __esModule: true,

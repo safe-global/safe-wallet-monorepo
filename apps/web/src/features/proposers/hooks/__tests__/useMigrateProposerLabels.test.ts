@@ -5,7 +5,7 @@ import * as useChainIdModule from '@/hooks/useChainId'
 import * as useIsSafeOwnerModule from '@/hooks/useIsSafeOwner'
 import * as useIsNestedSafeOwnerModule from '@/hooks/useIsNestedSafeOwner'
 import * as useProposersModule from '@/hooks/useProposers'
-import * as spacesModule from '@/features/spaces'
+import * as spacesModule from '@/features/spaces/hooks/useGetSpaceAddressBook'
 import { getStoreInstance } from '@/store'
 import type { Delegate } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 
@@ -32,7 +32,7 @@ describe('useMigrateProposerLabels', () => {
     jest.spyOn(useChainIdModule, 'default').mockReturnValue(chainId)
     jest.spyOn(useIsSafeOwnerModule, 'default').mockReturnValue(true)
     jest.spyOn(useIsNestedSafeOwnerModule, 'useIsNestedSafeOwner').mockReturnValue(false)
-    jest.spyOn(spacesModule, 'useGetSpaceAddressBook').mockReturnValue([])
+    jest.spyOn(spacesModule, 'default').mockReturnValue([])
   })
 
   it('copies a server-held name into the local address book for a signer', () => {

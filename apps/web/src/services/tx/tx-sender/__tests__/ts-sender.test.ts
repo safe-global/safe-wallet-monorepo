@@ -7,10 +7,8 @@ import type Safe from '@safe-global/protocol-kit'
 import type { MultiSendCallOnlyContractImplementationType } from '@safe-global/protocol-kit'
 import extractTxInfo from '../../extractTxInfo'
 import * as txEvents from '../../txEvents'
+import { createTx, createExistingTx, createRejectTx } from '@/services/tx/tx-sender/create'
 import {
-  createTx,
-  createExistingTx,
-  createRejectTx,
   dispatchNestedTxCreation,
   dispatchOnChainSigning,
   dispatchTxConfirmation,
@@ -20,7 +18,7 @@ import {
   dispatchProposerTxSigning,
   dispatchBatchExecutionRelay,
   dispatchTxRelay,
-} from '..'
+} from '@/services/tx/tx-sender/dispatch'
 import * as sdk from '../sdk'
 import {
   BrowserProvider,
@@ -34,6 +32,7 @@ import { encodeNestedTxPayload } from '../../nestedTxEnvelope'
 import * as safeContracts from '@/services/contracts/safeContracts'
 
 import * as web3 from '@/hooks/wallets/web3'
+import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
@@ -43,8 +42,8 @@ import { EthSafeSignature, generatePreValidatedSignature } from '@safe-global/pr
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
-import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
-import { requestSafenetCheck } from '@/features/safenet-checks/services'
+import { SimpleTxWatcher } from '@safe-global/utils/services/SimpleTxWatcher'
+import { requestSafenetCheck } from '@/features/safenet-checks/services/requestSafenetCheck'
 
 const SIGNER_ADDRESS = '0x1234567890123456789012345678901234567890'
 const TX_HASH = '0x1234567890'
@@ -57,7 +56,9 @@ jest.mock('../../extractTxInfo', () => ({
     signatures: [],
   })),
 }))
-jest.mock('@/features/safenet-checks/services', () => ({ requestSafenetCheck: jest.fn() }))
+jest.mock('@/features/safenet-checks/services/requestSafenetCheck', () => ({
+  requestSafenetCheck: jest.fn(),
+}))
 
 // Mock Safe SDK
 const mockSafeSDK = {
@@ -105,7 +106,7 @@ describe('txSender', () => {
     )
 
     jest.spyOn(web3, 'createWeb3').mockImplementation(() => mockBrowserProvider)
-    jest.spyOn(web3, 'getWeb3ReadOnly').mockReturnValue({} as unknown as JsonRpcProvider)
+    jest.spyOn(web3ReadOnly, 'getWeb3ReadOnly').mockReturnValue({} as unknown as JsonRpcProvider)
 
     setSafeSDK(mockSafeSDK)
 

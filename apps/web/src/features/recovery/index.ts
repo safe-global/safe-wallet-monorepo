@@ -38,7 +38,7 @@
  * - camelCase → service (undefined when not ready)
  */
 
-import { createFeatureHandle } from '@/features/__core__'
+import { createFeatureHandle } from '@/features/__core__/createFeatureHandle'
 import type { RecoveryContract } from './contract'
 
 // Feature handle - uses semantic mapping
@@ -49,10 +49,7 @@ export type { RecoveryContract } from './contract'
 
 // Hooks exported directly (always loaded, not in contract)
 // Keep hooks lightweight - minimal imports, heavy logic in services if needed
-export { useIsRecoverer } from './hooks/useIsRecoverer'
-export { useIsRecoverySupported } from './hooks/useIsRecoverySupported'
-export { default as useRecovery } from './hooks/useRecovery'
-export { useRecoveryQueue } from './hooks/useRecoveryQueue'
+
 // NOTE: useIsValidRecoveryExecTransactionFromModule is NOT exported here because it
 // imports @gnosis.pm/zodiac which is heavy. Import directly from hooks file if needed.
 

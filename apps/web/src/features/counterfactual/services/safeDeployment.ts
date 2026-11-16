@@ -90,7 +90,6 @@ export const deploySafeAndExecuteTx = async (
 }
 
 // Re-export lightweight balance getter (extracted to separate file to reduce bundle size)
-export { getCounterfactualBalance } from './getCounterfactualBalance'
 
 export const replayCounterfactualSafeDeployment = (
   chainId: string,
@@ -269,7 +268,6 @@ export const checkSafeActionViaRelay = (taskId: string, safeAddress: string, typ
 }
 
 // Re-export lightweight utilities for backwards compatibility within the feature
-export { isReplayedSafeProps, isPredictedSafeProps, extractCounterfactualSafeSetup } from './typeGuards'
 
 export const activateReplayedSafe = async (
   chain: Chain,

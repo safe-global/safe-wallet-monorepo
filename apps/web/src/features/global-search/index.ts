@@ -23,7 +23,7 @@
  * - camelCase -> service (undefined when not ready)
  */
 
-import type { FeatureHandle } from '@/features/__core__'
+import type { FeatureHandle } from '@/features/__core__/types'
 import type { GlobalSearchContract } from './contract'
 
 // Core feature: always enabled, not gated by a CGW feature flag.

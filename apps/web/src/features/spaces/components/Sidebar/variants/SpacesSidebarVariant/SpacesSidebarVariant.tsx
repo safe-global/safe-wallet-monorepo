@@ -15,9 +15,9 @@ import type {
   ResolvedSidebarNavItem,
   ResolvedSidebarGroup,
 } from '@safe-global/views/features/spaces/components/Sidebar/types'
-import { NavItem } from '../NavItem'
-import { SidebarDeveloperGroup } from '../SidebarDeveloperGroup'
-import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
+import { NavItem } from '@/features/spaces/components/Sidebar/variants/NavItem/NavItem'
+import { SidebarDeveloperGroup } from '@/features/spaces/components/Sidebar/variants/SidebarDeveloperGroup/SidebarDeveloperGroup'
+import { SpaceSelectorDropdown } from '@/features/spaces/components/Sidebar/variants/SpaceSelectorDropdown/SpaceSelectorDropdown'
 import { containerVariants, itemVariants } from '@safe-global/views/features/spaces/components/Sidebar/constants'
 
 interface SpacesSidebarVariantProps extends SpaceSelectorProps {

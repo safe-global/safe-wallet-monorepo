@@ -4,7 +4,7 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { getCommonAffixLengths } from '@safe-global/utils/utils/addressSimilarity'
 import { bandHeaderAt, SimilarityWarningIcon } from '../SimilarityBand'
-import type { SimilarWarning } from '@/features/address-poisoning'
+import type { SimilarWarning } from '@/features/address-poisoning/utils/crossListClusters'
 
 jest.mock('@/hooks/useChains')
 const mockUseChains = jest.requireMock('@/hooks/useChains').default as jest.Mock

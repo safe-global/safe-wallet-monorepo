@@ -1,6 +1,6 @@
 import ModalDialog from '@/components/common/ModalDialog'
 import { useMembersRemoveUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import DialogActions from '@/components/common/DialogActions'
 import { Typography } from '@safe-global/views/components/ui/typography'

@@ -15,12 +15,12 @@
  * }
  * ```
  */
-import type { FeatureHandle } from '@/features/__core__'
+import type { FeatureHandle } from '@/features/__core__/types'
 import type { ActionsTrayContract } from './contract'
 
 export type { ActionsTrayContract } from './contract'
 
-export { default as ActionsTray } from './components/ActionsTray'
+export { default as ActionsTray } from '@/features/actions-tray/components/ActionsTray/ActionsTray'
 
 export const ActionsTrayFeature: FeatureHandle<ActionsTrayContract> = {
   name: 'actions-tray',

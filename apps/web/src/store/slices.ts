@@ -1,19 +1,4 @@
-export * from './safeInfoSlice'
-export * from './sessionSlice'
-export * from './txHistorySlice'
-export * from './txQueueSlice'
-export * from './addressBookSlice'
-export * from './notificationsSlice'
-export * from './pendingTxsSlice'
-export * from './addedSafesSlice'
-export * from './settingsSlice'
-export * from './cookiesAndTermsSlice'
-export * from './popupSlice'
-export * from '@/features/spending-limits/store'
-export * from './safeAppsSlice'
-export { safeMessagesListener } from './safeMessagesSlice'
-export * from './pendingSafeMessagesSlice'
-export { batchSlice, addTx, removeTx, selectBatchBySafe } from '@/features/batching/store'
+export { batchSlice, addTx, removeTx, selectBatchBySafe } from '@/features/batching/store/batchSlice'
 export {
   undeployedSafesSlice,
   addUndeployedSafe,
@@ -22,40 +7,32 @@ export {
   selectUndeployedSafes,
   selectUndeployedSafe,
   selectIsUndeployedSafe,
+} from '@/features/counterfactual/store/undeployedSafesSlice'
+export {
   pendingCfDeletesSlice,
   enqueuePendingCfDelete,
   removePendingCfDelete,
   clearPendingCfDeletes,
   selectPendingCfDeletes,
-  counterfactualSyncListener,
-} from '@/features/counterfactual/store'
-export * from '@/features/swap/store'
-export * from './swapOrderSlice'
-export * from './api/gateway'
-export * from './api/gateway/safeOverviews'
-export * from './visitedSafesSlice'
-export * from './orderByPreferenceSlice'
-export * from './authSlice'
-export * from '@/features/hypernative/store'
-export * from '@/features/fee-payment/store'
-export * from '@/features/address-poisoning/store'
-export * from '@/features/feature-flag-overrides/store'
+} from '@/features/counterfactual/store/pendingCfDeletesSlice'
+export { counterfactualSyncListener } from '@/features/counterfactual/store/counterfactualSyncListener'
+
 export {
   globalSearchSlice,
   openGlobalSearch,
   closeGlobalSearch,
   toggleGlobalSearch,
   selectGlobalSearchOpen,
-} from '@/features/global-search/store'
-export { stepUpSlice } from '@/features/oidc-auth/store'
+} from '@/features/global-search/store/globalSearchSlice'
+export { stepUpSlice } from '@/features/oidc-auth/store/stepUpSlice'
+export { spaceSafesEntitlementsListener } from '@/features/spaces/store/spaceSafesEntitlementsListener'
+export { planChangeSyncListener } from '@/features/spaces/store/planChangeSyncListener'
+export { checkoutTrackingListener } from '@/features/spaces/store/checkoutTrackingListener'
+export { workspaceTrackingListener } from '@/features/spaces/store/workspaceTrackingListener'
+export { spaceSafesCacheListener } from '@/features/spaces/store/spaceSafesCacheListener'
+export { addressBookTagsCacheListener } from '@/features/spaces/store/addressBookTagsCacheListener'
+export { trialReminderListener } from '@/features/spaces/store/trialReminder'
 export {
-  spaceSafesEntitlementsListener,
-  planChangeSyncListener,
-  checkoutTrackingListener,
-  workspaceTrackingListener,
-  spaceSafesCacheListener,
-  addressBookTagsCacheListener,
-  trialReminderListener,
   safeActionsModalSlice,
   ESafeAction,
   openSafeActionsModal,
@@ -63,7 +40,9 @@ export {
   selectSafeActionsModal,
   selectSafeActionsModalOpen,
   selectSafeActionsModalType,
+} from '@/features/spaces/store/safeActionsModalSlice'
+export {
   spaceNavigationSlice,
   setLastUsedSpaceOrigin,
   selectLastUsedSpaceOrigin,
-} from '@/features/spaces/store'
+} from '@/features/spaces/store/spaceNavigationSlice'

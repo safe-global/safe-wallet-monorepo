@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { SpacesFeature } from '../../SpacesFeature'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { BRAND_NAME } from '@/config/constants'
 
 const SpacesLogin = () => {

@@ -1,12 +1,12 @@
 import { faker } from '@faker-js/faker'
 import { render, screen } from '@/tests/test-utils'
 import SecurityLogin from '../SecurityLogin'
-import * as useIsRecoverySupportedHook from '@/features/recovery'
+import * as useIsRecoverySupportedHook from '@/features/recovery/hooks/useIsRecoverySupported'
 import * as useIsSafeOwnerHook from '@/hooks/useIsSafeOwner'
 import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
-import * as useIsOutreachSafeHook from '@/features/targeted-features'
+import * as useIsOutreachSafeHook from '@/features/targeted-features/hooks/useIsOutreachSafe'
 import * as useWalletHook from '@/hooks/wallets/useWallet'
-import * as featureCore from '@/features/__core__'
+import * as featureCore from '@/features/__core__/useLoadFeature'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 
 // Mock the hypernative hooks at their source modules so internal (relative-import) callers
@@ -44,8 +44,8 @@ jest.mock('@/features/hypernative', () => {
 })
 
 // Mock useLoadFeature to return HnActivatedSettingsBanner with simulated HOC behavior
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
+jest.mock('@/features/__core__/useLoadFeature', () => ({
+  ...jest.requireActual('@/features/__core__/useLoadFeature'),
   useLoadFeature: jest.fn(),
 }))
 

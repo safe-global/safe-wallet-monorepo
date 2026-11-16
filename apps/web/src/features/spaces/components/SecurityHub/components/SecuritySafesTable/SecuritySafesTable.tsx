@@ -2,7 +2,7 @@ import { type ReactElement, useState, useCallback, useEffect, useMemo, useRef } 
 import { AnimatePresence, motion } from 'framer-motion'
 import type { ScanResult, SafeGrade } from '@/features/security/types'
 import { SecurityFeature } from '@/features/security'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { cn } from '@safe-global/views/utils/cn'

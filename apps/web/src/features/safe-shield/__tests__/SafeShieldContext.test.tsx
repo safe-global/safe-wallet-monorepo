@@ -6,26 +6,33 @@ import {
   DeadlockAnalysisResultBuilder,
 } from '@safe-global/utils/features/safe-shield/builders'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { safeSignatureBuilder, safeTxBuilder } from '@/tests/builders/safeTx'
 import type { ReactNode } from 'react'
 import { getAddress } from 'ethers'
 import { SafeScopeContext, type SafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 
-jest.mock('../hooks', () => ({
+jest.mock('@/features/safe-shield/hooks/useRecipientAnalysis', () => ({
   useRecipientAnalysis: jest.fn(() => undefined),
+}))
+jest.mock('@/features/safe-shield/hooks/useCounterpartyAnalysis', () => ({
   useCounterpartyAnalysis: jest.fn(() => ({
     recipient: [undefined, undefined, false],
     contract: [undefined, undefined, false],
     deadlock: [undefined, undefined, false],
   })),
+}))
+jest.mock('@/features/safe-shield/hooks/useThreatAnalysis', () => ({
   useThreatAnalysis: jest.fn(),
-  // Pass-through by default (set in beforeEach); the overlay is covered by its own suite
+}))
+jest.mock('@/features/safe-shield/hooks/useRecipientAnalysisWithPoisoning', () => ({
   useRecipientAnalysisWithPoisoning: jest.fn(),
 }))
 
 const mockUseSafeProAccess = jest.fn(() => ({ hasProFeatures: true, isLoading: false }))
-jest.mock('@/features/spaces', () => ({ useSafeProAccess: () => mockUseSafeProAccess() }))
+jest.mock('@/features/spaces/hooks/useSafeProAccess', () => ({
+  useSafeProAccess: () => mockUseSafeProAccess(),
+}))
 // Mock new dependencies for untrusted Safe check
 jest.mock('@/hooks/useIsTrustedSafe', () => ({
   __esModule: true,
@@ -40,7 +47,7 @@ jest.mock('@/hooks/useSafeInfo', () => ({
   })),
 }))
 
-jest.mock('@/features/myAccounts', () => ({
+jest.mock('@/features/myAccounts/hooks/useTrustSafe', () => ({
   useTrustSafe: jest.fn(() => ({ trustSafe: jest.fn() })),
 }))
 
@@ -62,10 +69,16 @@ const mockSafeTxContextValue = {
   setFeeGasToken: jest.fn(),
 }
 
-const mockUseThreatAnalysis = jest.requireMock('../hooks').useThreatAnalysis
-const mockUseRecipientAnalysis = jest.requireMock('../hooks').useRecipientAnalysis
-const mockUseCounterpartyAnalysis = jest.requireMock('../hooks').useCounterpartyAnalysis
-const mockUseRecipientAnalysisWithPoisoning = jest.requireMock('../hooks').useRecipientAnalysisWithPoisoning
+const mockUseThreatAnalysis = jest.requireMock('@/features/safe-shield/hooks/useThreatAnalysis').useThreatAnalysis
+const mockUseRecipientAnalysis = jest.requireMock(
+  '@/features/safe-shield/hooks/useRecipientAnalysis',
+).useRecipientAnalysis
+const mockUseCounterpartyAnalysis = jest.requireMock(
+  '@/features/safe-shield/hooks/useCounterpartyAnalysis',
+).useCounterpartyAnalysis
+const mockUseRecipientAnalysisWithPoisoning = jest.requireMock(
+  '@/features/safe-shield/hooks/useRecipientAnalysisWithPoisoning',
+).useRecipientAnalysisWithPoisoning
 
 const buildSafeTransaction = (data: string): SafeTransaction => ({
   addSignature: jest.fn(),

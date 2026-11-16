@@ -37,7 +37,7 @@
  * - camelCase → service (undefined when not ready)
  */
 
-import { createFeatureHandle } from '@/features/__core__'
+import { createFeatureHandle } from '@/features/__core__/createFeatureHandle'
 import type { TargetedOutreachContract } from './contract'
 
 // Feature handle - uses semantic mapping

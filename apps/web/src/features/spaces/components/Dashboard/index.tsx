@@ -1,23 +1,22 @@
 import { useEffect, useState } from 'react'
-import { flattenSafeItems } from '@/hooks/safes'
-import {
-  useSpaceSafes,
-  useCurrentSpaceId,
-  useSpaceMembersByStatus,
-  useIsInvited,
-  useTrackSpace,
-  useSpacePendingTransactions,
-  SpacesFeature,
-} from '@/features/spaces'
+import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useSpaceMembersByStatus, useIsInvited } from '@/features/spaces/hooks/useSpaceMembers'
+import useTrackSpace from '@/features/spaces/hooks/useTrackSpace'
+import { useSpacePendingTransactions } from '@/features/spaces/hooks/useSpacePendingTransactions'
+import { SpacesFeature } from '@/features/spaces/SpacesFeature'
 import { AppRoutes } from '@/config/routes'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
-import { MyAccountsFeature, useSpaceAccountsData } from '@/features/myAccounts'
-import { SafeProFeature, useSafeProAnnouncementModal } from '@/features/safe-pro-announcement'
-import { useLoadFeature } from '@/features/__core__'
+import { MyAccountsFeature } from '@/features/myAccounts'
+import useSpaceAccountsData from '@/features/myAccounts/hooks/useSpaceAccountsData'
+import { SafeProFeature } from '@/features/safe-pro-announcement'
+import { useSafeProAnnouncementModal } from '@/features/safe-pro-announcement/hooks/useSafeProAnnouncementModal'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import AddAccountsChooser from '../AddAccountsChooser'
 import { useRouter } from 'next/router'
 import AggregatedBalance from './AggregatedBalances'

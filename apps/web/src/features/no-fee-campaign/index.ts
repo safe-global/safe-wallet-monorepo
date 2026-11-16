@@ -1,4 +1,4 @@
-import { createFeatureHandle } from '@/features/__core__'
+import { createFeatureHandle } from '@/features/__core__/createFeatureHandle'
 import type { NoFeeCampaignContract } from './contract'
 
 /**
@@ -14,6 +14,3 @@ export type { NoFeeCampaignContract } from './contract'
 
 // Export hooks directly (always loaded, not in contract)
 // Hooks are never lazy-loaded to avoid Rules of Hooks violations
-export { useIsNoFeeCampaignEnabled } from './hooks/useIsNoFeeCampaignEnabled'
-export { useNoFeeCampaignEligibility } from './hooks/useNoFeeCampaignEligibility'
-export { useGasTooHigh } from './hooks/useGasTooHigh'

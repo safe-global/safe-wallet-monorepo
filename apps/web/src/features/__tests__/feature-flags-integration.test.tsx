@@ -229,7 +229,7 @@ describe('feature flag matrix', () => {
 
 const ALWAYS_ENABLED_FEATURES: Array<{ label: string; getHandle: () => FeatureHandle<FeatureImplementation> }> = [
   { label: 'batching', getHandle: () => jest.requireActual('@/features/batching').BatchingFeature },
-  { label: 'spaces', getHandle: () => jest.requireActual('@/features/spaces').SpacesFeature },
+  { label: 'spaces', getHandle: () => jest.requireActual('@/features/spaces/SpacesFeature').SpacesFeature },
   { label: 'myAccounts', getHandle: () => jest.requireActual('@/features/myAccounts').MyAccountsFeature },
   { label: 'global-search', getHandle: () => jest.requireActual('@/features/global-search').GlobalSearchFeature },
 ]

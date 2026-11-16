@@ -6,7 +6,7 @@ import * as useChainIdHook from '@/hooks/useChainId'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { trackEvent } from '@/services/analytics'
 import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
-import { MixpanelEventParams } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import type { RootState } from '@/store'
 import type { HnState } from '../../store/hnStateSlice'
 

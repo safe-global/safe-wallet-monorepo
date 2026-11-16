@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import RefreshPositionsButton from './index'
 import { toBeHex } from 'ethers'
-import { createHandlers } from '@/stories/mocks'
+import { createHandlers } from '@/stories/mocks/handlers'
 
 const SAFE_ADDRESS = toBeHex('0x1234', 20)
 

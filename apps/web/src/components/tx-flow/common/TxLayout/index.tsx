@@ -6,7 +6,6 @@ import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
 import TxLayoutBase from '../TxLayoutBase'
 
 // Re-exported for backwards compatibility; the header now lives with the shared chrome.
-export { TxLayoutHeader } from '../TxLayoutBase'
 
 type TxLayoutProps = {
   title: ReactNode

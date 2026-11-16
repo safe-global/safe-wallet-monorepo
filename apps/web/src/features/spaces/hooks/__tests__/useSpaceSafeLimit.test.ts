@@ -8,7 +8,9 @@ jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => moc
 jest.mock('../billing/useSpaceEntitlements', () => ({
   useSpaceEntitlements: (spaceId?: string) => mockUseSpaceEntitlements(spaceId),
 }))
-jest.mock('../../constants', () => ({ SAFE_ACCOUNTS_LIMIT: 40 }))
+jest.mock('../../constants', () => ({
+  SAFE_ACCOUNTS_LIMIT: 40,
+}))
 
 const entitlements = (overrides: Record<string, unknown>) => ({
   seats: { used: 6, quota: 10 },

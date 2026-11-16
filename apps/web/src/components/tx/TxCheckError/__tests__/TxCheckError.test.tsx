@@ -1,12 +1,12 @@
 import { render } from '@/tests/test-utils'
 import { chainBuilder } from '@/tests/builders/chains'
 import { GUARD_ERROR_CODES, HYPERNATIVE_APPROVAL_REQUIRED_MESSAGE } from '@/utils/transaction-errors'
-import { useSafeShieldAssessmentUrl } from '@/features/hypernative'
+import { useSafeShieldAssessmentUrl } from '@/features/hypernative/hooks/useSafeShieldAssessmentUrl'
 import { useCurrentChain } from '@/hooks/useChains'
 import TxCheckError from '..'
 
-jest.mock('@/features/hypernative', () => ({
-  ...jest.requireActual('@/features/hypernative'),
+jest.mock('@/features/hypernative/hooks/useSafeShieldAssessmentUrl', () => ({
+  ...jest.requireActual('@/features/hypernative/hooks/useSafeShieldAssessmentUrl'),
   useSafeShieldAssessmentUrl: jest.fn(),
 }))
 
