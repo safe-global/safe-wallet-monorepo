@@ -6,7 +6,6 @@ import { POLLING_INTERVAL } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
 import { useHasFeature } from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
-import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
@@ -15,14 +14,6 @@ import { isSignableBy, isTransactionQueuedItem } from '@/utils/transaction-guard
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useIsActiveMember } from './useSpaceMembers'
 import { useSpaceQueue, type SpaceQueue } from './useSpaceQueue'
-
-const REFETCH_EVENTS = [
-  TxEvent.PROPOSED,
-  TxEvent.SIGNATURE_PROPOSED,
-  TxEvent.PROCESSED,
-  TxEvent.SUCCESS,
-  TxEvent.DELETED,
-]
 
 // Module scope: Space pages each mount their own AuthState, and a page change must not toast again
 const notifiedTxIds = new Set<string>()
@@ -52,16 +43,10 @@ export const useSpaceQueuePolling = (): void => {
 
   const isActive = !!spaceId && isSignedIn && isActiveMember && !!isEnabled
   // The unfiltered queue page asks for the same args, so both share one cache entry and one request per poll
-  const { currentData, refetch } = useSpaceQueue(isActive ? { spaceId } : skipToken, {
+  const { currentData } = useSpaceQueue(isActive ? { spaceId } : skipToken, {
     pollingInterval: POLLING_INTERVAL,
     skipPollingIfUnfocused: true,
   })
-
-  useEffect(() => {
-    if (!isActive) return
-    const unsubscribers = REFETCH_EVENTS.map((event) => txSubscribe(event, () => refetch()))
-    return () => unsubscribers.forEach((unsub) => unsub())
-  }, [isActive, refetch])
 
   useEffect(() => {
     if (!isActive || !currentData || !walletAddress) return

@@ -1,9 +1,8 @@
-import { memo, useCallback, useDeferredValue, useEffect, useState, type ReactElement } from 'react'
+import { memo, useCallback, useDeferredValue, useState, type ReactElement } from 'react'
 import PagePlaceholder from '@safe-global/views/components/common/PagePlaceholder'
 import SkeletonTxList from '@safe-global/views/components/common/PaginatedTxns/SkeletonTxList'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import NoTransactionsIcon from '@/public/images/transactions/no-transactions.svg'
-import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import {
   hasSpaceQueueFilters,
   NO_SPACE_QUEUE_FILTERS,
@@ -15,14 +14,6 @@ import { QueueLoadError, QueueNoMatches } from '@safe-global/views/features/spac
 import SpaceQueueTable from './SpaceQueueTable'
 import TransactionsToolbar from './TransactionsToolbar'
 import UnavailableSafesAlert from './UnavailableSafesAlert'
-
-const REFETCH_EVENTS = [
-  TxEvent.PROPOSED,
-  TxEvent.SIGNATURE_PROPOSED,
-  TxEvent.PROCESSED,
-  TxEvent.SUCCESS,
-  TxEvent.DELETED,
-] as const
 
 const QueueBody = memo(function QueueBody({
   spaceId,
@@ -83,11 +74,6 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
     filters: queryFilters,
     search: querySearch,
   })
-
-  useEffect(() => {
-    const unsubscribers = REFETCH_EVENTS.map((event) => txSubscribe(event, () => refetch()))
-    return () => unsubscribers.forEach((unsubscribe) => unsubscribe())
-  }, [refetch])
 
   const clearFilters = useCallback(() => {
     setFilters(NO_SPACE_QUEUE_FILTERS)

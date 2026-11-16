@@ -194,19 +194,6 @@ describe('SpaceTransactionQueue', () => {
     await waitFor(() => expect(requests).toHaveLength(2))
   })
 
-  it.each([TxEvent.PROPOSED, TxEvent.SIGNATURE_PROPOSED, TxEvent.PROCESSED, TxEvent.SUCCESS, TxEvent.DELETED])(
-    'requests the queue again after a %s transaction event',
-    async (event) => {
-      const requests = respondWith(page({ [safeA]: { '1': transactions(1) } }))
-      render(<SpaceTransactionQueue spaceId={spaceId} />)
-      await screen.findByTestId('space-queue-safe')
-
-      ;(txDispatch as (event: TxEvent, detail: unknown) => void)(event, {})
-
-      await waitFor(() => expect(requests).toHaveLength(2))
-    },
-  )
-
   it('shows the queue returned after a transaction event', async () => {
     respondWith(page({ [safeA]: { '1': transactions(1) } }))
     render(<SpaceTransactionQueue spaceId={spaceId} />)
@@ -227,6 +214,19 @@ describe('SpaceTransactionQueue', () => {
 
     await waitFor(() => expect(requests).toHaveLength(2))
     expect(new URL(requests[1].url).searchParams.get('status')).toBe('sign')
+  })
+
+  it('requests the filtered queue again after a transaction event', async () => {
+    const requests = respondWith(page({ [safeA]: { '1': transactions(1) } }))
+    render(<SpaceTransactionQueue spaceId={spaceId} />)
+    await screen.findByTestId('space-queue-safe')
+    fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+    await waitFor(() => expect(requests).toHaveLength(2))
+
+    txDispatch(TxEvent.DELETED, { safeTxHash: faker.string.hexadecimal({ length: 64 }) })
+
+    await waitFor(() => expect(requests).toHaveLength(3))
+    expect(new URL(requests[2].url).searchParams.get('status')).toBe('sign')
   })
 
   it('passes the filters chosen in the toolbar back to the toolbar', async () => {

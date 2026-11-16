@@ -7,6 +7,8 @@ import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import type { SpaceQueuedItemPage, TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { TransactionListItemType } from '@safe-global/store/gateway/types'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
+import { txDispatch, TxEvent } from '@/services/tx/txEvents'
+import { skipToken } from '@reduxjs/toolkit/query'
 import { useSpaceQueue, type SpaceQueueFilters } from '../useSpaceQueue'
 
 const spaceId = faker.string.uuid()
@@ -140,6 +142,37 @@ describe('useSpaceQueue', () => {
     const { data } = await fetchQueue()
 
     expect(data?.unavailableSafes).toEqual(unavailableSafes)
+  })
+
+  const chainId = '1'
+  const txDetail = { txId: faker.string.uuid(), nonce: 1, chainId, safeAddress: faker.finance.ethereumAddress() }
+
+  it.each([
+    [TxEvent.PROPOSED, () => txDispatch(TxEvent.PROPOSED, txDetail)],
+    [
+      TxEvent.SIGNATURE_PROPOSED,
+      () => txDispatch(TxEvent.SIGNATURE_PROPOSED, { ...txDetail, signerAddress: faker.finance.ethereumAddress() }),
+    ],
+    [TxEvent.PROCESSED, () => txDispatch(TxEvent.PROCESSED, txDetail)],
+    [TxEvent.SUCCESS, () => txDispatch(TxEvent.SUCCESS, txDetail)],
+    [TxEvent.DELETED, () => txDispatch(TxEvent.DELETED, { safeTxHash: faker.string.hexadecimal({ length: 64 }) })],
+  ])('requests the queue again after a %s transaction event', async (_, dispatchEvent) => {
+    const urls = respondWith(page({ [safeA]: { '1': transactions(1) } }))
+    await fetchQueue()
+
+    dispatchEvent()
+
+    await waitFor(() => expect(urls).toHaveLength(2))
+  })
+
+  it('does not request the queue after a transaction event while skipped', async () => {
+    const urls = respondWith(page({}))
+    renderHook(() => useSpaceQueue(skipToken))
+
+    txDispatch(TxEvent.DELETED, { safeTxHash: faker.string.hexadecimal({ length: 64 }) })
+
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(urls).toHaveLength(0)
   })
 
   it('fails when the request fails', async () => {

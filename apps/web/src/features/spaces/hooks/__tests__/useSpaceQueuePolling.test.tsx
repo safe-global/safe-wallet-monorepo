@@ -149,25 +149,6 @@ describe('useSpaceQueuePolling', () => {
     expect(requests).toHaveLength(0)
   })
 
-  it.each([
-    [TxEvent.PROPOSED, () => txDispatch(TxEvent.PROPOSED, { txId: 'tx', nonce: 1, chainId, safeAddress })],
-    [
-      TxEvent.SIGNATURE_PROPOSED,
-      () =>
-        txDispatch(TxEvent.SIGNATURE_PROPOSED, { txId: 'tx', nonce: 1, chainId, safeAddress, signerAddress: wallet }),
-    ],
-    [TxEvent.PROCESSED, () => txDispatch(TxEvent.PROCESSED, { txId: 'tx', nonce: 1, chainId, safeAddress })],
-    [TxEvent.SUCCESS, () => txDispatch(TxEvent.SUCCESS, { txId: 'tx', nonce: 1, chainId, safeAddress })],
-    [TxEvent.DELETED, () => txDispatch(TxEvent.DELETED, { safeTxHash: '0x' })],
-  ])('requests the queue again on %s', async (_, dispatchEvent) => {
-    renderPolling()
-    await waitFor(() => expect(requests).toHaveLength(1))
-
-    act(() => dispatchEvent())
-
-    await waitFor(() => expect(requests).toHaveLength(2))
-  })
-
   it('does not request the queue on a transaction event while inactive', async () => {
     mockHasFeature.mockReturnValue(false)
     renderPolling()

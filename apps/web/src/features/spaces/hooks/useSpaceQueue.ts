@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { skipToken, type SkipToken, type SubscriptionOptions } from '@reduxjs/toolkit/query'
 import {
   useSpaceTransactionsGetTransactionQueueV1Query,
@@ -7,6 +7,7 @@ import {
   type SpaceQueueSafe,
   type SpaceTransactionsGetTransactionQueueV1ApiArg,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { isTransactionQueuedItem } from '@/utils/transaction-guards'
 
 export type SpaceQueueItems = SpaceQueuedItemPage['results'][string][string]
@@ -66,6 +67,14 @@ export const toSpaceQueue = (page: SpaceQueuedItemPage, isNarrowed: boolean): Sp
   }
 }
 
+const REFETCH_EVENTS = [
+  TxEvent.PROPOSED,
+  TxEvent.SIGNATURE_PROPOSED,
+  TxEvent.PROCESSED,
+  TxEvent.SUCCESS,
+  TxEvent.DELETED,
+] as const
+
 type SpaceQueueArgs = { spaceId: string; filters?: SpaceQueueFilters; search?: string }
 
 const joinOrOmit = (values: string[]): string | undefined => (values.length > 0 ? values.join(',') : undefined)
@@ -84,12 +93,22 @@ const toQueryArgs = ({ spaceId, filters = NO_SPACE_QUEUE_FILTERS, search }: Spac
   } satisfies SpaceTransactionsGetTransactionQueueV1ApiArg
 }
 
-/** The Space queue grouped by Safe and chain, read through the generated queue endpoint */
+/** The Space queue grouped by Safe and chain, read through the generated queue endpoint and refetched after a tx event */
 export const useSpaceQueue = (args: SpaceQueueArgs | SkipToken, options?: SubscriptionOptions) => {
   const result = useSpaceTransactionsGetTransactionQueueV1Query(
     args === skipToken ? skipToken : toQueryArgs(args),
     options,
   )
+  const isSkipped = args === skipToken
+  const { refetch } = result
+
+  // A second refetch of an entry already loading sends no request, so the page and the poller can both listen
+  useEffect(() => {
+    if (isSkipped) return
+    const unsubscribers = REFETCH_EVENTS.map((event) => txSubscribe(event, () => refetch()))
+    return () => unsubscribers.forEach((unsubscribe) => unsubscribe())
+  }, [isSkipped, refetch])
+
   const isNarrowed = args !== skipToken && (hasSpaceQueueFilters(args.filters) || !!args.search)
   const data = useMemo(() => result.data && toSpaceQueue(result.data, isNarrowed), [result.data, isNarrowed])
   const currentData = useMemo(
