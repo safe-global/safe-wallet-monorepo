@@ -20,7 +20,7 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxModalContext } from '@/components/tx-flow'
-import { SuccessScreenFlow } from '@/components/tx-flow/flows'
+import { SuccessScreenFlow } from '@/components/tx-flow/flows/SuccessScreenFlow'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 
 jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({

@@ -8,7 +8,7 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import Track from '@/components/common/Track'
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
-import { NewTxFlow } from '@/components/tx-flow/flows'
+import { NewTxFlow } from '@/components/tx-flow/flows/NewTxFlow'
 import { Button } from '@safe-global/views/components/ui/button'
 
 export const SidebarActionButton = (): ReactElement => {

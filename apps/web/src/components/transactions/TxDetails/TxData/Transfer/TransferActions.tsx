@@ -10,7 +10,7 @@ import {
 } from '@safe-global/views/components/ui/dropdown-menu'
 import useAddressBook from '@/hooks/useAddressBook'
 import EntryDialog from '@/components/address-book/EntryDialog'
-import { TokenTransferFlow } from '@/components/tx-flow/flows'
+import { TokenTransferFlow } from '@/components/tx-flow/flows/TokenTransferFlow'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { isERC20Transfer, isNativeTokenTransfer, isOutgoingTransfer } from '@/utils/transaction-guards'
 import { trackEvent } from '@/services/analytics'

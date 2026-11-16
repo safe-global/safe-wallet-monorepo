@@ -2,7 +2,7 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useContext, useEffect } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
-import { AddOwnerFlow } from '@/components/tx-flow/flows'
+import { AddOwnerFlow } from '@/components/tx-flow/flows/AddOwnerFlow'
 import { AppRoutes } from '@/config/routes'
 import { BRAND_NAME } from '@/config/constants'
 

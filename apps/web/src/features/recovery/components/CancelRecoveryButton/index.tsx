@@ -7,7 +7,7 @@ import type { SyntheticEvent, ReactElement } from 'react'
 
 import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
-import { CancelRecoveryFlow } from '@/components/tx-flow/flows'
+import { CancelRecoveryFlow } from '@/components/tx-flow/flows/CancelRecoveryFlow'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { dispatchRecoverySkipExpired } from '../../public/recovery-sender'
 import useSafeInfo from '@/hooks/useSafeInfo'

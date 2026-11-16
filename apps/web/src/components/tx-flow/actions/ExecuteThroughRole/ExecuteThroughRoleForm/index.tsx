@@ -13,7 +13,7 @@ import CheckWallet from '@/components/common/CheckWallet'
 
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
-import { SuccessScreenFlow } from '@/components/tx-flow/flows'
+import { SuccessScreenFlow } from '@/components/tx-flow/flows/SuccessScreenFlow'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import AdvancedParams from '../../../../tx/AdvancedParams'
 import { useAdvancedParams } from '@/components/tx/AdvancedParams/useAdvancedParams'

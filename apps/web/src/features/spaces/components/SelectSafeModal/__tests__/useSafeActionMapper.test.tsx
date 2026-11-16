@@ -38,7 +38,7 @@ jest.mock('@/hooks/safe-apps/useTxBuilderApp', () => ({
   }),
 }))
 
-jest.mock('@/components/tx-flow/flows', () => ({
+jest.mock('@/components/tx-flow/flows/TokenTransferFlow', () => ({
   TokenTransferFlow: () => null,
 }))
 
