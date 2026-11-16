@@ -13,9 +13,9 @@ import { CHAIN_IDS } from '../opportunities'
 import type { Holding, Opportunity } from '../types'
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0!'
-const COLUMN_WIDTHS = ['w-10', '', 'w-20', 'w-24', 'w-32', 'w-28', 'w-28', 'w-28', 'w-24']
+const COLUMN_WIDTHS = ['w-10', '', 'w-24', 'w-24', 'w-28', 'w-32', 'w-32']
 const COLUMN_COUNT = COLUMN_WIDTHS.length
-const OPPORTUNITY_HEADERS = ['Opportunity', 'Asset', 'Net APY', 'Category', 'Exit time', 'Invested', 'Earned']
+const OPPORTUNITY_HEADERS = ['Opportunity', 'Net APY', 'Category', 'Exit time', 'Your position']
 
 export type OpportunityGroup = { key: string; title?: string; items: Opportunity[] }
 
@@ -80,6 +80,8 @@ const NameCell = ({ opportunity }: { opportunity: Opportunity }) => (
       <span className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
         <NetworkLogos chains={opportunity.chains} />
         <span className="truncate">
+          <span className="font-medium text-foreground">{opportunity.asset}</span>
+          {' · '}
           {[opportunity.runBy, opportunity.curator, opportunity.kyc && 'KYC'].filter(Boolean).join(' · ')}
         </span>
       </span>
@@ -122,11 +124,16 @@ const NetworkLogos = ({ chains }: { chains: string[] }) => (
 
 const Empty = () => <span className="text-muted-foreground">—</span>
 
-const InvestedCell = ({ holding }: { holding?: Holding }) => {
+const PositionCell = ({ holding }: { holding?: Holding }) => {
   if (!holding) return <Empty />
   return (
     <span className="flex min-w-0 flex-col">
       {holding.invested > 0 && <span className="font-semibold tabular-nums">{formatCompactUsd(holding.invested)}</span>}
+      {holding.invested > 0 && (
+        <span className="truncate text-xs tabular-nums text-muted-foreground">
+          {DEFI_V1_COPY.positions.earnedAmount(formatCompactUsd(holding.earned))}
+        </span>
+      )}
       {holding.pending > 0 && (
         <span className="truncate text-xs text-muted-foreground tabular-nums">
           {DEFI_V1_COPY.positions.pendingAmount(formatCompactUsd(holding.pending))}
@@ -135,13 +142,6 @@ const InvestedCell = ({ holding }: { holding?: Holding }) => {
     </span>
   )
 }
-
-const EarnedCell = ({ holding }: { holding?: Holding }) =>
-  holding && holding.invested > 0 ? (
-    <span className="font-medium tabular-nums">+{formatCompactUsd(holding.earned)}</span>
-  ) : (
-    <Empty />
-  )
 
 const OpportunityRow = ({
   opportunity,
@@ -175,17 +175,15 @@ const OpportunityRow = ({
       <TableCell>
         <NameCell opportunity={opportunity} />
       </TableCell>
-      <TableCell className="font-semibold">{opportunity.asset}</TableCell>
       <TableCell className="font-semibold tabular-nums">{formatApy(opportunity.apy)}</TableCell>
-      <TableCell className="truncate">{DEFI_V1_COPY.category[opportunity.category].title}</TableCell>
+      <TableCell className="truncate" title={DEFI_V1_COPY.category[opportunity.category].title}>
+        {DEFI_V1_COPY.category[opportunity.category].short}
+      </TableCell>
       <TableCell>
         <ExitCell opportunity={opportunity} />
       </TableCell>
       <TableCell>
-        <InvestedCell holding={holding} />
-      </TableCell>
-      <TableCell>
-        <EarnedCell holding={holding} />
+        <PositionCell holding={holding} />
       </TableCell>
       <TableCell className="text-right">
         <Button
@@ -207,7 +205,7 @@ const OpportunityRow = ({
 const TableCard = ({ label, children }: { label: string; children: ReactNode }) => (
   <Card radius="xl" size="none">
     <CardContent>
-      <Table aria-label={label} variant="panel" className="table-fixed min-w-[1000px] [&_td]:px-4 [&_th]:px-4">
+      <Table aria-label={label} variant="panel" className="table-fixed min-w-[880px] [&_td]:px-4 [&_th]:px-4">
         <colgroup>
           {COLUMN_WIDTHS.map((width, index) => (
             <col key={index} className={width || undefined} />

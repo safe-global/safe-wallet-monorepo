@@ -33,10 +33,14 @@ export const DEFI_V1_COPY = {
   } satisfies Record<DefiV1Framing, string>,
   bestRate: (rate: string) => `Up to ${rate}`,
   category: {
-    cash: { title: 'Cash-like', subtitle: 'Exit within a day. For cash you may need soon.' },
-    yield: { title: 'Enhanced yield', subtitle: 'A bit more yield for cash you can leave for a while.' },
-    staking: { title: 'Staking', subtitle: 'Earn on ETH the treasury plans to hold.' },
-  } satisfies Record<OpportunityCategory, { title: string; subtitle: string }>,
+    cash: { title: 'Cash-like', short: 'Cash', subtitle: 'Exit within a day. For cash you may need soon.' },
+    yield: {
+      title: 'Enhanced yield',
+      short: 'Yield',
+      subtitle: 'A bit more yield for cash you can leave for a while.',
+    },
+    staking: { title: 'Staking', short: 'Staking', subtitle: 'Earn on ETH the treasury plans to hold.' },
+  } satisfies Record<OpportunityCategory, { title: string; short: string; subtitle: string }>,
   noMatches: 'No opportunities match your search or filters.',
   nudgeTitle: (value: string, asset: string, chain: string, days: number) =>
     `${value} ${asset} has been idle on ${chain} for ${days} days`,
@@ -98,6 +102,7 @@ export const DEFI_V1_COPY = {
     pending: 'Awaiting signatures',
     trend: (growth: string) => `Up ${growth} since you invested`,
     trendTooltip: (from: string, to: string, earned: string) => `${from} to ${to} over 12 months · +${earned} earned`,
+    earnedAmount: (amount: string) => `+${amount} earned`,
     pendingAmount: (amount: string) => `${amount} awaiting signatures`,
     withdrawTitle: (name: string) => `Withdraw from ${name}`,
     withdrawLead: 'Funds return to this Safe. Signers approve one proposal.',
