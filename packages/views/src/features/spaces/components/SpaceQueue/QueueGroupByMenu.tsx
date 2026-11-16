@@ -32,7 +32,7 @@ const QueueGroupByMenu = ({ value, onChange }: QueueGroupByMenuProps): ReactElem
         <Rows3 />
         Group by: {selected.label}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-64">
+      <DropdownMenuContent align="start" className="w-72">
         <DropdownMenuGroup>
           <DropdownMenuLabel>Group by</DropdownMenuLabel>
           <DropdownMenuRadioGroup value={value} onValueChange={(next) => onChange(next as QueueGroupBy)}>
