@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
-import type { Meta, StoryObj } from '@storybook/react'
+import type { Decorator, Meta, StoryObj } from '@storybook/react'
 import { Toaster } from './sonner'
-import { toast } from 'sonner'
+import { toast, type ToasterProps } from 'sonner'
 import { Button } from '../button/button'
 
 /**
@@ -17,7 +17,12 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const OpenDemo = () => {
+const withStorybookTheme: Decorator<ToasterProps> = (Story, { args, globals }) => {
+  const dark = globals.theme ? globals.theme === 'dark' : document.documentElement.classList.contains('dark')
+  return Story({ args: { ...args, theme: dark ? 'dark' : 'light' } })
+}
+
+const OpenDemo = (props: ToasterProps) => {
   useEffect(() => {
     toast.success('Success message', { duration: Infinity })
     toast.error('Error message', { duration: Infinity })
@@ -25,18 +30,20 @@ const OpenDemo = () => {
   }, [])
   return (
     <div className="min-h-80">
-      <Toaster position="bottom-right" />
+      <Toaster position="bottom-right" {...props} />
     </div>
   )
 }
 
 export const Open: Story = {
-  render: () => <OpenDemo />,
+  decorators: [withStorybookTheme],
+  render: (args) => <OpenDemo {...args} />,
 }
 
 export const AllVariants: Story = {
   tags: ['skip-visual-test'],
-  render: () => (
+  decorators: [withStorybookTheme],
+  render: (args) => (
     <div style={{ display: 'block' }}>
       <div style={{ marginBottom: '2rem' }}>
         <h3 className="mb-4 text-lg font-semibold">Toast Types</h3>
@@ -125,7 +132,7 @@ export const AllVariants: Story = {
           </Button>
         </div>
       </div>
-      <Toaster />
+      <Toaster {...args} />
     </div>
   ),
 }
