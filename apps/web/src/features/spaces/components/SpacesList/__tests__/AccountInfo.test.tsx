@@ -13,6 +13,19 @@ jest.mock('@/hooks/useLogout', () => ({
   default: () => ({ logout: mockLogout }),
 }))
 
+const mockDisconnectWallet = jest.fn()
+const mockWallet = jest.fn()
+
+jest.mock('@/hooks/wallets/useOnboard', () => ({
+  __esModule: true,
+  default: () => ({ disconnectWallet: mockDisconnectWallet }),
+}))
+
+jest.mock('@/hooks/wallets/useWallet', () => ({
+  __esModule: true,
+  default: () => mockWallet(),
+}))
+
 jest.mock('@/services/analytics', () => ({
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
 }))
@@ -116,5 +129,28 @@ describe('AccountInfo', () => {
 
     expect(mockTrackEvent).toHaveBeenCalledWith(SPACE_EVENTS.AUTH_LOGGED_OUT, expect.any(Object))
     expect(mockLogout).toHaveBeenCalledTimes(1)
+  })
+
+  it('disconnects only the wallet, keeping the session, from the connected wallet row', async () => {
+    mockWallet.mockReturnValue({ label: 'MetaMask', address: '0x481a0000000000000000000000000000000bFbc0' })
+    render(
+      <AccountInfo
+        profileName="alice@safe.global"
+        displayName="alice@safe.global"
+        connectedWallet="0x481a0000000000000000000000000000000bFbc0"
+      />,
+    )
+
+    await userEvent.click(screen.getByRole('button', { name: 'Disconnect wallet' }))
+
+    expect(mockDisconnectWallet).toHaveBeenCalledWith({ label: 'MetaMask' })
+    expect(mockLogout).not.toHaveBeenCalled()
+  })
+
+  it('offers no wallet disconnect when no connected wallet is shown', () => {
+    mockWallet.mockReturnValue({ label: 'MetaMask', address: '0xB4F6f4F0E0A1F0a2f0b3C4d5E6f7A8b9C0d1cF51' })
+    render(<AccountInfo profileName="User" displayName="0xB4F6...cF51" />)
+
+    expect(screen.queryByRole('button', { name: 'Disconnect wallet' })).not.toBeInTheDocument()
   })
 })

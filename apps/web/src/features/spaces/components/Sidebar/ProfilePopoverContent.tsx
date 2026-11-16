@@ -2,7 +2,8 @@ import type { ReactElement } from 'react'
 import { PopoverContent } from '@safe-global/views/components/ui/popover'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { LogOut } from 'lucide-react'
+import { Button } from '@safe-global/views/components/ui/button'
+import { LogOut, Unplug } from 'lucide-react'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import CopyAddressIconButton from '@/components/common/CopyAddressIconButton'
@@ -18,6 +19,7 @@ export interface ProfilePopoverContentProps {
   signerAddress?: string
   connectedWallet?: string
   onSignOut: () => void
+  onDisconnectWallet?: () => void
 }
 
 export const ProfilePopoverContent = ({
@@ -29,6 +31,7 @@ export const ProfilePopoverContent = ({
   signerAddress,
   connectedWallet,
   onSignOut,
+  onDisconnectWallet,
 }: ProfilePopoverContentProps): ReactElement => (
   <PopoverContent
     side="bottom"
@@ -80,6 +83,18 @@ export const ProfilePopoverContent = ({
               <TooltipContent side="top">{connectedWallet}</TooltipContent>
             </Tooltip>
             <CopyAddressIconButton address={connectedWallet} />
+            {onDisconnectWallet && (
+              <Button
+                variant="ghost"
+                size="icon-circle"
+                className="ml-auto"
+                onClick={onDisconnectWallet}
+                aria-label="Disconnect wallet"
+                data-testid="sidebar-profile-disconnect-wallet"
+              >
+                <Unplug aria-hidden="true" />
+              </Button>
+            )}
           </div>
 
           <span className={css.profileSectionCaption}>Signs and executes transactions.</span>

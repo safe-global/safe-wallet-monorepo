@@ -1,9 +1,15 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import WorkspaceLockModal, { _memberCopy, _PLAN_ERROR_COPY } from '../WorkspaceLockModal'
+import WorkspaceLockModal, { _memberCopy, _PLAN_ERROR_COPY, CONNECTED_WALLET_NOTE } from '../WorkspaceLockModal'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 
 jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+
+const mockLogout = jest.fn()
+const mockUseWallet = jest.fn()
+jest.mock('@/hooks/useLogout', () => ({ __esModule: true, default: () => ({ logout: mockLogout }) }))
+jest.mock('@/hooks/wallets/useWallet', () => ({ __esModule: true, default: () => mockUseWallet() }))
 
 const mockUseWorkspaceLock = jest.fn()
 const mockUseCheckoutReturn = jest.fn()
@@ -87,6 +93,7 @@ describe('WorkspaceLockModal', () => {
     mockUseCurrentMembership.mockReturnValue({ id: 1 })
     mockUseIsAdmin.mockReturnValue(true)
     mockUseCheckoutReturn.mockReturnValue({ isReturning: false, status: 'idle' })
+    mockUseWallet.mockReturnValue(null)
   })
 
   it('stays hidden while a Stripe return is still being confirmed, and comes back once it fails', () => {
@@ -164,6 +171,40 @@ describe('WorkspaceLockModal', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Back to My accounts' }))
     expect(mockPush).toHaveBeenCalledWith('/welcome/accounts')
     expect(trackEvent).not.toHaveBeenCalled()
+  })
+
+  it('lets a member switch account by signing out from the lock notice', () => {
+    mockUseIsAdmin.mockReturnValue(false)
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Switch account' }))
+
+    expect(mockLogout).toHaveBeenCalledTimes(1)
+    expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.AUTH_LOGGED_OUT, expect.any(Object))
+  })
+
+  it('tells a member that a connected wallet does not change Workspace access', () => {
+    mockUseIsAdmin.mockReturnValue(false)
+    mockUseWallet.mockReturnValue({ address: '0x481a0000000000000000000000000000000bFbc0', label: 'MetaMask' })
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+
+    expect(screen.getByTestId('locked-member-modal')).toHaveTextContent(CONNECTED_WALLET_NOTE)
+  })
+
+  it('leaves out the connected wallet note when no wallet is connected', () => {
+    mockUseIsAdmin.mockReturnValue(false)
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+
+    expect(screen.getByTestId('locked-member-modal')).not.toHaveTextContent(CONNECTED_WALLET_NOTE)
+  })
+
+  it('keeps Create new Workspace instead of Switch account once the plan has lapsed', () => {
+    mockUseIsAdmin.mockReturnValue(false)
+    mockUseWorkspaceLock.mockReturnValue(lock({ trialPeriodDays: null, reason: 'lapsed', endedAt: ENDED_AT }))
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+
+    expect(screen.getByRole('link', { name: 'Create new Workspace' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Switch account' })).not.toBeInTheDocument()
   })
 
   it('counts a member seeing a Workspace whose plan ended', () => {
