@@ -8,6 +8,7 @@ import type { SpaceQueuedItemPage, TransactionQueuedItem } from '@safe-global/st
 import { TransactionListItemType } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
+import { TxEvent, txDispatch } from '@/services/tx/txEvents'
 import type { SpaceQueueSection } from '../../hooks/useSpaceQueue'
 import SpaceTransactionQueue from './SpaceTransactionQueue'
 
@@ -140,5 +141,29 @@ describe('SpaceTransactionQueue', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
 
     await waitFor(() => expect(requests).toHaveLength(2))
+  })
+
+  it.each([TxEvent.PROPOSED, TxEvent.SIGNATURE_PROPOSED, TxEvent.PROCESSED, TxEvent.SUCCESS, TxEvent.DELETED])(
+    'requests the queue again after a %s transaction event',
+    async (event) => {
+      const requests = respondWith(page({ [safeA]: { '1': transactions(1) } }))
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-safe')
+
+      ;(txDispatch as (event: TxEvent, detail: unknown) => void)(event, {})
+
+      await waitFor(() => expect(requests).toHaveLength(2))
+    },
+  )
+
+  it('shows the queue returned after a transaction event', async () => {
+    respondWith(page({ [safeA]: { '1': transactions(1) } }))
+    render(<SpaceTransactionQueue spaceId={spaceId} />)
+    await screen.findByTestId('space-queue-safe')
+    respondWith(page({ [safeA]: { '1': transactions(1) }, [safeB]: { '137': transactions(1) } }))
+
+    txDispatch(TxEvent.DELETED, { safeTxHash: faker.string.hexadecimal({ length: 64 }) })
+
+    await waitFor(() => expect(screen.getAllByTestId('space-queue-safe')).toHaveLength(2))
   })
 })

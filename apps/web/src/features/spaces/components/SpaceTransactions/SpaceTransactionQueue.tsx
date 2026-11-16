@@ -1,12 +1,21 @@
-import type { ReactElement } from 'react'
+import { useEffect, type ReactElement } from 'react'
 import PagePlaceholder from '@safe-global/views/components/common/PagePlaceholder'
 import SkeletonTxList from '@safe-global/views/components/common/PaginatedTxns/SkeletonTxList'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import NoTransactionsIcon from '@/public/images/transactions/no-transactions.svg'
+import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { useSpaceQueue, type SpaceQueue } from '../../hooks/useSpaceQueue'
 import { QueueLoadError } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueStates'
 import SpaceQueueTable from './SpaceQueueTable'
 import TransactionsToolbar from './TransactionsToolbar'
+
+const REFETCH_EVENTS = [
+  TxEvent.PROPOSED,
+  TxEvent.SIGNATURE_PROPOSED,
+  TxEvent.PROCESSED,
+  TxEvent.SUCCESS,
+  TxEvent.DELETED,
+] as const
 
 const QueueBody = ({ queue }: { queue: SpaceQueue }): ReactElement => {
   const { sections } = queue
@@ -33,6 +42,11 @@ const QueueBody = ({ queue }: { queue: SpaceQueue }): ReactElement => {
 
 const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement => {
   const { currentData, isError, refetch } = useSpaceQueue({ spaceId })
+
+  useEffect(() => {
+    const unsubscribers = REFETCH_EVENTS.map((event) => txSubscribe(event, () => refetch()))
+    return () => unsubscribers.forEach((unsubscribe) => unsubscribe())
+  }, [refetch])
 
   return (
     <div className="flex flex-col gap-6">
