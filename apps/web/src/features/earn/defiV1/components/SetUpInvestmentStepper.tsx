@@ -205,9 +205,10 @@ export const SetUpInvestmentStepper = ({
                   variant="outline"
                   size="lg"
                   className="flex-1"
-                  onClick={() => (current === 0 ? close() : setCurrent(current - 1))}
+                  disabled={current === 0}
+                  onClick={() => setCurrent(current - 1)}
                 >
-                  {current === 0 ? COPY.cancel : COPY.back}
+                  {COPY.back}
                 </Button>
                 <Button size="lg" className="flex-1" disabled={!view.valid} onClick={next}>
                   {isLast ? COPY.submit : COPY.next}
