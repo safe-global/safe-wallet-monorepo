@@ -44,7 +44,11 @@ export type DefiV1Config = {
   framing: DefiV1Framing
   nudge: DefiV1Nudge
   plan: DefiV1Plan
+  setup: DefiV1Setup
 }
+
+/** How set up investment opens: one form in a dialog, or a stepper in a side panel. */
+export type DefiV1Setup = 'dialog' | 'drawer'
 
 export type LiquidityBucket = 'operating' | 'reserves' | 'strategic'
 

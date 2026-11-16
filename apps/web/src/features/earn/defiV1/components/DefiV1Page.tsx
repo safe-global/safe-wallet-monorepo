@@ -27,6 +27,7 @@ import { CompareDialog } from './CompareDialog'
 import { OpportunityDrawer } from './OpportunityDrawer'
 import { OpportunityToolbar } from './OpportunityToolbar'
 import { SetUpInvestmentDialog } from './SetUpInvestmentDialog'
+import { SetUpInvestmentDrawer } from './SetUpInvestmentDrawer'
 import { OperationsButton } from './OperationsButton'
 import { TreasurySummary } from './TreasurySummary'
 import { OpportunitiesTable, type OpportunityGroup } from './TreasuryTables'
@@ -100,7 +101,9 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const topOpen = listed.find((item) => !locked(item))
   const holdingOf = (item: Opportunity) => holdingsFor(positions, item.id)
   const heldInOf = (item: Opportunity) => (config.plan === 'pro' ? heldIn(operations, item.id) : undefined)
+  const SetUp = config.setup === 'drawer' ? SetUpInvestmentDrawer : SetUpInvestmentDialog
   const openSetup = (item: Opportunity | null) => {
+    if (config.setup === 'drawer') setSelected(null)
     setSetupFor(item)
     setIsCreating(true)
   }
@@ -219,7 +222,7 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
         }}
       />
 
-      <SetUpInvestmentDialog
+      <SetUp
         key={setupFor?.id ?? 'any'}
         open={isCreating}
         opportunity={setupFor}

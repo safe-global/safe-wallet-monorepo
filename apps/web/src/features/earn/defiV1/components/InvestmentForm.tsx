@@ -1,0 +1,358 @@
+import { useState, type ReactNode } from 'react'
+import { CheckCircle2, Circle } from 'lucide-react'
+import { Badge } from '@safe-global/views/components/ui/badge'
+import { Checkbox } from '@safe-global/views/components/ui/checkbox'
+import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from '@safe-global/views/components/ui/field'
+import { Input } from '@safe-global/views/components/ui/input'
+import { Label } from '@safe-global/views/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
+import { Typography } from '@safe-global/views/components/ui/typography'
+import { cn } from '@safe-global/views/utils/cn'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import InitialsAvatar from '@/components/common/InitialsAvatar'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import { DEFI_V1_COPY, formatAmount } from '../copy'
+import { IDLE_CASH } from '../opportunities'
+import { dedicatedSafeName } from '../shelf'
+import type { Frequency, Operation, Opportunity } from '../types'
+
+const COPY = DEFI_V1_COPY.operations
+const FREQUENCIES = Object.keys(COPY.frequencies) as Frequency[]
+
+type Where = 'nested' | 'this'
+type Who = 'any' | 'some'
+type Schedule = 'once' | 'recurring'
+
+const parseAmount = (value: string) => Number(value.replace(/[^0-9.]/g, '')) || 0
+
+/** Form state shared by the dialog and drawer versions of set up investment. */
+export const useInvestmentForm = (opportunity: Opportunity | null, options: Opportunity[]) => {
+  const { safe } = useSafeInfo()
+  const owners = safe.owners.map((owner) => owner.value)
+  const [pickedId, setPickedId] = useState(opportunity?.id ?? options[0]?.id ?? '')
+  const [first, setFirst] = useState(String(IDLE_CASH.amount))
+  const [where, setWhere] = useState<Where>('nested')
+  const [name, setName] = useState('')
+  const [who, setWho] = useState<Who>('any')
+  const [picked, setPicked] = useState<string[]>(owners.slice(0, 2))
+  const [budget, setBudget] = useState('1000000')
+  const [schedule, setSchedule] = useState<Schedule>('once')
+  const [each, setEach] = useState('100000')
+  const [frequency, setFrequency] = useState<Frequency>('month')
+  const investment = opportunity ?? options.find((item) => item.id === pickedId) ?? options[0]
+  const safeName = name.trim() || (investment ? dedicatedSafeName(investment) : '')
+  const amount = parseAmount(first)
+  const budgetAmount = parseAmount(budget)
+  const executors = who === 'any' ? owners : picked
+  const scheduleText =
+    schedule === 'once' ? COPY.oneTime : COPY.recurring(formatAmount(parseAmount(each)), COPY.frequencies[frequency])
+
+  const togglePicked = (address: string) =>
+    setPicked((current) =>
+      current.includes(address) ? current.filter((item) => item !== address) : [...current, address],
+    )
+
+  const toOperation = (): Operation | undefined =>
+    investment && where === 'nested'
+      ? {
+          id: `dedicated-${investment.id}-${Date.now()}`,
+          name: safeName,
+          budget: budgetAmount,
+          invested: 0,
+          threshold: 1,
+          owners: executors.length,
+          opportunityIds: [investment.id],
+          recurring: schedule === 'recurring' ? { amount: parseAmount(each), frequency } : undefined,
+        }
+      : undefined
+
+  const steps = investment
+    ? [
+        ...(where === 'nested'
+          ? [COPY.stepCreate(safeName, 1, executors.length), COPY.stepMove(formatAmount(amount), investment.asset)]
+          : []),
+        COPY.stepDeposit(formatAmount(amount), investment.asset, investment.name),
+      ]
+    : []
+
+  return {
+    safe,
+    owners,
+    opportunity,
+    options,
+    investment,
+    pickedId: investment?.id ?? pickedId,
+    setPickedId,
+    first,
+    setFirst,
+    amount,
+    where,
+    setWhere,
+    name,
+    setName,
+    safeName,
+    who,
+    setWho,
+    picked,
+    togglePicked,
+    executors,
+    budget,
+    setBudget,
+    budgetAmount,
+    schedule,
+    setSchedule,
+    each,
+    setEach,
+    frequency,
+    setFrequency,
+    scheduleText,
+    steps,
+    toOperation,
+    reset: () => setName(''),
+    isValid: Boolean(investment) && amount > 0 && executors.length > 0 && budgetAmount >= amount,
+  }
+}
+
+export type InvestmentForm = ReturnType<typeof useInvestmentForm>
+
+/** The library's choice card: a radio inside a bordered label that highlights when picked. */
+export const ChoiceCard = ({
+  value,
+  title,
+  description,
+  badge,
+}: {
+  value: string
+  title: string
+  description?: string
+  badge?: ReactNode
+}) => (
+  <FieldLabel>
+    <Field orientation="horizontal">
+      <RadioGroupItem value={value} />
+      <FieldContent>
+        <FieldTitle>
+          {title}
+          {badge}
+        </FieldTitle>
+        {description && <FieldDescription className="text-xs">{description}</FieldDescription>}
+      </FieldContent>
+    </Field>
+  </FieldLabel>
+)
+
+export const Section = ({
+  label,
+  hint,
+  htmlFor,
+  children,
+}: {
+  label?: string
+  hint?: string
+  htmlFor?: string
+  children: ReactNode
+}) => (
+  <div className="flex flex-col gap-1.5">
+    {label && (
+      <Label htmlFor={htmlFor} className="text-xs font-medium text-muted-foreground uppercase">
+        {label}
+      </Label>
+    )}
+    {children}
+    {hint && <span className="text-xs text-muted-foreground">{hint}</span>}
+  </div>
+)
+
+export const AmountFields = ({ form, labelled = true }: { form: InvestmentForm; labelled?: boolean }) => (
+  <>
+    {!form.opportunity && (
+      <Section label={labelled ? COPY.investment : undefined}>
+        <RadioGroup value={form.pickedId} onValueChange={(next) => form.setPickedId(String(next))} className="gap-2">
+          {form.options.map((option) => (
+            <ChoiceCard key={option.id} value={option.id} title={option.name} description={option.exitShort} />
+          ))}
+        </RadioGroup>
+      </Section>
+    )}
+    <Section
+      label={COPY.firstDeposit}
+      htmlFor="investment-amount"
+      hint={DEFI_V1_COPY.deposit.fromValue(IDLE_CASH.asset, IDLE_CASH.chain, formatAmount(IDLE_CASH.amount))}
+    >
+      <Input
+        id="investment-amount"
+        inputMode="decimal"
+        value={form.first}
+        onChange={(event) => form.setFirst(event.target.value)}
+      />
+    </Section>
+  </>
+)
+
+export const WhereFields = ({ form, labelled = true }: { form: InvestmentForm; labelled?: boolean }) => (
+  <>
+    <Section label={labelled ? COPY.madeFrom : undefined}>
+      <RadioGroup value={form.where} onValueChange={(next) => form.setWhere(next as Where)} className="gap-2">
+        <ChoiceCard
+          value="nested"
+          title={COPY.dedicated}
+          badge={<Badge variant="success">{COPY.recommended}</Badge>}
+          description={COPY.dedicatedHint(form.safeName)}
+        />
+        <ChoiceCard
+          value="this"
+          title={COPY.thisSafe}
+          badge={<Badge variant="warning">{COPY.later}</Badge>}
+          description={COPY.thisSafeCaveat}
+        />
+      </RadioGroup>
+    </Section>
+    {form.where === 'nested' && form.investment && (
+      <Section label={COPY.name} htmlFor="investment-name" hint={COPY.nameHint(form.executors.length)}>
+        <div className="flex items-center gap-2">
+          <InitialsAvatar name={form.safeName} size="xsmall" rounded />
+          <Input
+            id="investment-name"
+            value={form.name}
+            maxLength={40}
+            placeholder={dedicatedSafeName(form.investment)}
+            onChange={(event) => form.setName(event.target.value)}
+          />
+        </div>
+      </Section>
+    )}
+  </>
+)
+
+export const WhoFields = ({ form, labelled = true }: { form: InvestmentForm; labelled?: boolean }) => (
+  <Section label={labelled ? COPY.who : undefined}>
+    <RadioGroup value={form.who} onValueChange={(next) => form.setWho(next as Who)} className="gap-2">
+      <ChoiceCard value="any" title={COPY.anySigner} description={COPY.allSigners(form.owners.length)} />
+      <ChoiceCard value="some" title={COPY.specificSigners} description={COPY.specificHint} />
+    </RadioGroup>
+    {form.who === 'some' && (
+      <div className="flex flex-col gap-1 rounded-lg bg-card p-2">
+        {form.owners.map((address) => (
+          <label key={address} className="flex cursor-pointer items-center gap-2 px-1 py-1 text-sm">
+            <Checkbox checked={form.picked.includes(address)} onCheckedChange={() => form.togglePicked(address)} />
+            <span className="font-mono text-xs">{shortenAddress(address)}</span>
+          </label>
+        ))}
+      </div>
+    )}
+  </Section>
+)
+
+export const BudgetFields = ({ form }: { form: InvestmentForm }) => (
+  <Section
+    label={COPY.budgetLabel}
+    htmlFor="investment-budget"
+    hint={form.where === 'nested' ? COPY.budgetHint : COPY.capHint}
+  >
+    <Input
+      id="investment-budget"
+      inputMode="decimal"
+      value={form.budget}
+      onChange={(event) => form.setBudget(event.target.value)}
+    />
+  </Section>
+)
+
+export const ScheduleFields = ({ form }: { form: InvestmentForm }) => (
+  <Section label={COPY.schedule}>
+    <RadioGroup
+      value={form.schedule}
+      onValueChange={(next) => form.setSchedule(next as Schedule)}
+      className="grid-cols-2 gap-2"
+    >
+      <ChoiceCard value="once" title={COPY.oneTime} />
+      <ChoiceCard value="recurring" title={COPY.recurringLabel} badge={<Badge variant="warning">{COPY.later}</Badge>} />
+    </RadioGroup>
+    {form.schedule === 'recurring' && form.investment && (
+      <div className="flex flex-col gap-2 rounded-lg bg-card p-3">
+        <div className="flex items-center gap-2">
+          <Input
+            aria-label={COPY.addEach}
+            inputMode="decimal"
+            value={form.each}
+            onChange={(event) => form.setEach(event.target.value)}
+          />
+          <span className="shrink-0 text-sm text-muted-foreground">{COPY.every.toLowerCase()}</span>
+          <RadioGroup
+            value={form.frequency}
+            onValueChange={(next) => form.setFrequency(next as Frequency)}
+            className="flex shrink-0 gap-2"
+          >
+            {FREQUENCIES.map((item) => (
+              <label key={item} className="flex cursor-pointer items-center gap-1.5 text-sm">
+                <RadioGroupItem value={item} />
+                {COPY.frequencies[item].toLowerCase()}
+              </label>
+            ))}
+          </RadioGroup>
+        </div>
+        <span className="text-xs text-muted-foreground">
+          {COPY.recurringNote(
+            formatAmount(parseAmount(form.each)),
+            form.investment.asset,
+            COPY.frequencies[form.frequency],
+          )}
+        </span>
+      </div>
+    )}
+  </Section>
+)
+
+export const StepsSummary = ({ form }: { form: InvestmentForm }) =>
+  form.investment ? (
+    <Section label={COPY.steps}>
+      <ol className="flex list-decimal flex-col gap-1 rounded-lg bg-card py-2 pr-3 pl-8 text-sm">
+        {form.steps.map((step) => (
+          <li key={step}>{step}</li>
+        ))}
+      </ol>
+      <span className="text-xs text-muted-foreground">
+        {COPY.allowedActions}: {COPY.allowedValue(form.investment.name)}. {COPY.guardNote}
+      </span>
+    </Section>
+  ) : null
+
+export const ProposedView = ({ form }: { form: InvestmentForm }) => (
+  <div className="flex flex-col gap-4" data-testid="investment-proposed">
+    <div className="flex items-start gap-3">
+      <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-badge-dot-success" aria-hidden />
+      <div className="flex flex-col gap-0.5">
+        <Typography variant="paragraph-small-medium">{COPY.proposed}</Typography>
+        <Typography variant="paragraph-small" color="muted">
+          {COPY.proposedNext(
+            form.who === 'any' ? COPY.anySigner.toLowerCase() : COPY.signers(1, form.executors.length),
+            form.where === 'nested' ? form.safeName : COPY.thisSafe.toLowerCase(),
+          )}
+        </Typography>
+      </div>
+    </div>
+    <div className="flex flex-col rounded-lg bg-card">
+      <div className="flex items-center justify-between px-3 py-2 text-sm font-medium">
+        {COPY.waiting}
+        <Badge variant="subtle">{COPY.signers(1, form.safe.threshold)}</Badge>
+      </div>
+      {form.owners.map((address, index) => (
+        <div
+          key={address}
+          className={cn(
+            'flex items-center gap-2 border-t border-border px-3 py-2 text-sm',
+            index > 0 && 'text-muted-foreground',
+          )}
+        >
+          {index === 0 ? (
+            <CheckCircle2 className="size-4 text-badge-dot-success" aria-hidden />
+          ) : (
+            <Circle className="size-4" aria-hidden />
+          )}
+          <span className="font-mono text-xs">{shortenAddress(address)}</span>
+          <span className="ml-auto text-xs">{index === 0 ? COPY.youSigned : COPY.pending}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+)

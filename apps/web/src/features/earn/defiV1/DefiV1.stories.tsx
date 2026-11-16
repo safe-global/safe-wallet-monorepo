@@ -8,7 +8,7 @@ import Earn from '@/pages/earn'
 import { EARN_CONSENT_STORAGE_KEY } from '../constants'
 import { DefiV1Context } from './context'
 import { PartnerView } from './components/PartnerView'
-import type { DefiV1Framing, DefiV1Nudge, DefiV1Plan } from './types'
+import type { DefiV1Framing, DefiV1Nudge, DefiV1Plan, DefiV1Setup } from './types'
 
 type Page = 'home' | 'earn' | 'partner'
 type Args = {
@@ -16,6 +16,7 @@ type Args = {
   framing: DefiV1Framing
   nudge: DefiV1Nudge
   plan: DefiV1Plan
+  setup: DefiV1Setup
 }
 
 const PATHNAMES: Record<Page, string> = { home: '/home', earn: '/earn', partner: '/earn' }
@@ -31,7 +32,7 @@ const setup = createMockStory({
 })
 
 const withPrototype: Decorator<Args> = (Story, { args }) => (
-  <DefiV1Context.Provider value={{ framing: args.framing, nudge: args.nudge, plan: args.plan }}>
+  <DefiV1Context.Provider value={{ framing: args.framing, nudge: args.nudge, plan: args.plan, setup: args.setup }}>
     <Story />
   </DefiV1Context.Provider>
 )
@@ -46,12 +47,13 @@ const meta = {
   parameters: { layout: 'fullscreen', ...setup.parameters },
   decorators: [setup.decorator, withPrototype],
   beforeEach: () => localItem(EARN_CONSENT_STORAGE_KEY).set(true),
-  args: { page: 'earn', framing: 'treasury', nudge: 'home', plan: 'free' },
+  args: { page: 'earn', framing: 'treasury', nudge: 'home', plan: 'free', setup: 'dialog' },
   argTypes: {
     page: { control: 'inline-radio', options: ['home', 'earn', 'partner'] },
     framing: { control: 'inline-radio', options: ['treasury', 'defi'] },
     nudge: { control: 'inline-radio', options: ['home', 'assets', 'off'] },
     plan: { control: 'inline-radio', options: ['free', 'pro'] },
+    setup: { control: 'inline-radio', options: ['dialog', 'drawer'] },
   },
   render: ({ page }) => {
     const PageComponent = PAGES[page]
@@ -101,5 +103,7 @@ export const TreasuryPro: Story = {
     await within(canvasElement).findByTestId('operations-button')
   },
 }
+
+export const TreasuryProSetupDrawer: Story = at('earn', { plan: 'pro', setup: 'drawer' })
 
 export const Partner: Story = at('partner')
