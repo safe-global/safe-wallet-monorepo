@@ -82,6 +82,7 @@ const SpaceAddressBookV2 = () => {
           <TabsContent value="workspace">
             <WorkspaceContacts
               items={workspaceBook.items}
+              tags={workspaceBook.tags}
               isLoading={workspaceBook.isLoading}
               isError={workspaceBook.isError}
               onReload={workspaceBook.refetch}

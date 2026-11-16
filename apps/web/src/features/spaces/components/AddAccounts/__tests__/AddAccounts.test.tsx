@@ -171,7 +171,7 @@ let mockEnteredName = 'Treasury'
 jest.mock('@/features/spaces/components/NameAccounts/NameAccountsFields', () => ({
   ...jest.requireActual('@/features/spaces/components/NameAccounts/NameAccountsFields'),
   __esModule: true,
-  default: ({ items }: { items: Array<{ address: string }> }) => {
+  default: function NameAccountsFields({ items }: { items: Array<{ address: string }> }) {
     const { useEffect } = require('react')
     const { useFormContext } = require('react-hook-form')
     const { setValue } = useFormContext()

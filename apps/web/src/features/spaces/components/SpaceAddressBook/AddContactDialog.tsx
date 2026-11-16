@@ -21,17 +21,23 @@ import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import type { WorkspaceTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
+import { tagNamesOf } from '../SpaceAddressBookV2/utils'
+import TagsField from './TagsField'
 
 export type ContactField = {
   name: string
   address: string
   networks: Chain[]
+  /** Workspace tag ids. */
+  tags: number[]
 }
 
 export type AddContactItem = {
   name: string
   address: string
   chainIds: string[]
+  tags?: string[]
 }
 
 type AddContactDialogProps = {
@@ -45,6 +51,9 @@ type AddContactDialogProps = {
   onSubmitStart?: () => void
   onSuccess?: () => void
   validateCharset?: boolean
+  /** Shows the Tags field. */
+  workspaceTags?: WorkspaceTag[]
+  onTagLimitReached?: () => void
 }
 
 const AddContactDialog = ({
@@ -58,6 +67,8 @@ const AddContactDialog = ({
   onSubmitStart,
   onSuccess,
   validateCharset = false,
+  workspaceTags,
+  onTagLimitReached,
 }: AddContactDialogProps) => {
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string>()
@@ -74,6 +85,7 @@ const AddContactDialog = ({
     name: '',
     address: '',
     networks: allNetworks,
+    tags: [],
   }
 
   const methods = useForm<ContactField>({
@@ -103,6 +115,7 @@ const AddContactDialog = ({
       name: validateCharset ? sanitizeName(data.name) : data.name,
       address: data.address,
       chainIds: data.networks.map((network) => network.chainId),
+      ...(workspaceTags && data.tags.length > 0 && { tags: tagNamesOf(data.tags, workspaceTags) }),
     }
 
     try {
@@ -186,6 +199,8 @@ const AddContactDialog = ({
                       rules={{ required: true }}
                     />
                   </div>
+
+                  {workspaceTags && <TagsField workspaceTags={workspaceTags} onLimitReached={onTagLimitReached} />}
                 </div>
 
                 {error && (
