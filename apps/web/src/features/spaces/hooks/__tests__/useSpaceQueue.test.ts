@@ -7,7 +7,8 @@ import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import type { SpaceQueuedItemPage, TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { TransactionListItemType } from '@safe-global/store/gateway/types'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
-import { toSpaceQueue, useSpaceQueue, type SpaceQueueFilters } from '../spaceQueueApi'
+import { txDispatch, TxEvent } from '@/services/tx/txEvents'
+import { toSpaceQueue, useSpaceQueue, type SpaceQueueFilters } from '../useSpaceQueue'
 
 const spaceId = faker.string.uuid()
 const queueUrl = `${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`
@@ -134,8 +135,8 @@ const respondWith = (body: SpaceQueuedItemPage) => {
   return urls
 }
 
-const fetchQueue = async (query?: { filters?: SpaceQueueFilters; search?: string }) => {
-  const { result } = renderHook(() => useSpaceQueue(spaceId, query))
+const fetchQueue = async (filters?: SpaceQueueFilters, search?: string) => {
+  const { result } = renderHook(() => useSpaceQueue(spaceId, { filters, search }))
   await waitFor(() => expect(result.current.queue).toBeDefined())
   return result.current
 }
@@ -173,6 +174,37 @@ describe('useSpaceQueue', () => {
     expect(result.current.queue).toBeUndefined()
   })
 
+  const chainId = '1'
+  const txDetail = { txId: faker.string.uuid(), nonce: 1, chainId, safeAddress: faker.finance.ethereumAddress() }
+
+  it.each([
+    [TxEvent.PROPOSED, () => txDispatch(TxEvent.PROPOSED, txDetail)],
+    [
+      TxEvent.SIGNATURE_PROPOSED,
+      () => txDispatch(TxEvent.SIGNATURE_PROPOSED, { ...txDetail, signerAddress: faker.finance.ethereumAddress() }),
+    ],
+    [TxEvent.PROCESSED, () => txDispatch(TxEvent.PROCESSED, txDetail)],
+    [TxEvent.SUCCESS, () => txDispatch(TxEvent.SUCCESS, txDetail)],
+    [TxEvent.DELETED, () => txDispatch(TxEvent.DELETED, { safeTxHash: faker.string.hexadecimal({ length: 64 }) })],
+  ])('requests the queue again after a %s transaction event', async (_, dispatchEvent) => {
+    const urls = respondWith(page({ [safeA]: { '1': transactions(1) } }))
+    await fetchQueue()
+
+    dispatchEvent()
+
+    await waitFor(() => expect(urls).toHaveLength(2))
+  })
+
+  it('does not request the queue after a transaction event while skipped', async () => {
+    const urls = respondWith(page({}))
+    renderHook(() => useSpaceQueue(spaceId, {}, { skip: true }))
+
+    txDispatch(TxEvent.DELETED, { safeTxHash: faker.string.hexadecimal({ length: 64 }) })
+
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(urls).toHaveLength(0)
+  })
+
   it('returns the counts of the answer', async () => {
     const counts = { ...zeroCounts, total: 1, sign: 1 }
     respondWith(page({ [safeA]: { '1': transactions(1) } }, { count: 1, counts }))
@@ -190,12 +222,10 @@ describe('useSpaceQueue', () => {
     ]
 
     await fetchQueue({
-      filters: {
-        statuses: ['sign', 'conflicting', 'execute', 'stale'],
-        safes,
-        chainIds: ['1', '137'],
-        signers: [safeA, safeB],
-      },
+      statuses: ['sign', 'conflicting', 'execute', 'stale'],
+      safes,
+      chainIds: ['1', '137'],
+      signers: [safeA, safeB],
     })
 
     expect(Object.fromEntries(urls[0].searchParams)).toEqual({
@@ -211,7 +241,7 @@ describe('useSpaceQueue', () => {
   it('sends only the params of the filters in use', async () => {
     const urls = respondWith(page({}, { count: 0 }))
 
-    await fetchQueue({ filters: { statuses: ['conflicting'], safes: [], chainIds: [], signers: [] } })
+    await fetchQueue({ statuses: ['conflicting'], safes: [], chainIds: [], signers: [] })
 
     expect(Object.fromEntries(urls[0].searchParams)).toEqual({ conflicting: 'true' })
   })
@@ -219,7 +249,7 @@ describe('useSpaceQueue', () => {
   it('sends no params when no filter is chosen', async () => {
     const urls = respondWith(page({}, { count: 0 }))
 
-    await fetchQueue({ filters: { statuses: [], safes: [], chainIds: [], signers: [] } })
+    await fetchQueue({ statuses: [], safes: [], chainIds: [], signers: [] })
 
     expect(urls[0].search).toBe('')
   })
@@ -227,25 +257,39 @@ describe('useSpaceQueue', () => {
   it('does not flag a filtered queue as incomplete for holding fewer transactions than the count', async () => {
     respondWith(page({ [safeA]: { '1': transactions(1) } }, { count: 10 }))
 
-    const { queue } = await fetchQueue({ filters: { statuses: ['sign'], safes: [], chainIds: [], signers: [] } })
+    const { queue } = await fetchQueue({ statuses: ['sign'], safes: [], chainIds: [], signers: [] })
 
     expect(queue?.isComplete).toBe(true)
   })
 
-  it('sends the search alone or with the filters', async () => {
+  it('sends the search as a query param', async () => {
     const urls = respondWith(page({}, { count: 0 }))
 
-    await fetchQueue({ search: 'treasury' })
-    await fetchQueue({ filters: { statuses: ['sign'], safes: [], chainIds: [], signers: [] }, search: 'polygon' })
+    await fetchQueue(undefined, 'treasury')
 
     expect(Object.fromEntries(urls[0].searchParams)).toEqual({ search: 'treasury' })
-    expect(Object.fromEntries(urls[1].searchParams)).toEqual({ status: 'sign', search: 'polygon' })
+  })
+
+  it('sends the search with the filters', async () => {
+    const urls = respondWith(page({}, { count: 0 }))
+
+    await fetchQueue({ statuses: ['sign'], safes: [], chainIds: [], signers: [] }, 'polygon')
+
+    expect(Object.fromEntries(urls[0].searchParams)).toEqual({ status: 'sign', search: 'polygon' })
+  })
+
+  it('sends no search param for an empty search', async () => {
+    const urls = respondWith(page({}, { count: 0 }))
+
+    await fetchQueue(undefined, '')
+
+    expect(urls[0].search).toBe('')
   })
 
   it('does not flag a searched queue as incomplete for holding fewer transactions than the count', async () => {
     respondWith(page({ [safeA]: { '1': transactions(1) } }, { count: 10 }))
 
-    const { queue } = await fetchQueue({ search: 'treasury' })
+    const { queue } = await fetchQueue(undefined, 'treasury')
 
     expect(queue?.isComplete).toBe(true)
   })

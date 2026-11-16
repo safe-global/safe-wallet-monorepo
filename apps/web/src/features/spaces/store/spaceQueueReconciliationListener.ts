@@ -12,7 +12,7 @@ import { PendingStatus, selectPendingTxs, type PendingTx } from '@/store/pending
 import { isMultisigExecutionInfo, isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
-import { toSpaceQueue, type SpaceQueue } from './spaceQueueApi'
+import { toSpaceQueue, type SpaceQueue } from '../hooks/useSpaceQueue'
 
 const SIGNING_STATES = [PendingStatus.SIGNING, PendingStatus.NESTED_SIGNING]
 const POST_EXECUTION_STATES = [
@@ -21,6 +21,8 @@ const POST_EXECUTION_STATES = [
   PendingStatus.INDEXING,
   PendingStatus.SUBMITTING,
 ]
+
+type ListenerApi = { getState: () => RootState; dispatch: ThunkDispatch<RootState, unknown, UnknownAction> }
 
 const isNarrowed = ({
   status,
@@ -32,8 +34,6 @@ const isNarrowed = ({
   search,
 }: SpaceTransactionsGetTransactionQueueV1ApiArg): boolean =>
   !!(status?.length || safes || chainIds || signers || conflicting || stale || search)
-
-type ListenerApi = { getState: () => RootState; dispatch: ThunkDispatch<RootState, unknown, UnknownAction> }
 
 const isSameSafe = (a: SpaceQueueSafe, b: SpaceQueueSafe): boolean =>
   a.chainId === b.chainId && sameAddress(a.safeAddress, b.safeAddress)

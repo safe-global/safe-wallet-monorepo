@@ -108,9 +108,8 @@ describe('TransferActions', () => {
 
     const setTxFlow = await renderAndSendAgain(safeScopeContextFor(target))
 
-    const { flow, target: scopedTarget, pollSafeInfo } = unwrapScopedFlow(setTxFlow.mock.calls[0][0])
+    const { flow, target: scopedTarget } = unwrapScopedFlow(setTxFlow.mock.calls[0][0])
     expect(scopedTarget).toEqual(target)
-    expect(pollSafeInfo).toBe(false)
     expect(flow?.type).toBe(TokenTransferFlow)
   })
 

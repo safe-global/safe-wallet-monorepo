@@ -4,23 +4,21 @@ import SkeletonTxList from '@safe-global/views/components/common/PaginatedTxns/S
 import { QueueEmpty, QueueLoadError, QueueNoMatches, QueueTruncatedNotice } from './QueueStates'
 
 const meta = {
-  title: 'Features/Spaces/SpaceQueue/QueueStates',
+  title: 'Features/Spaces/Transactions/QueueStates',
   parameters: { layout: 'padded' },
 } satisfies Meta
 
 export default meta
 type Story = StoryObj<typeof meta>
 
+/** Always skeletons: the queue shows them until its first answer arrives */
 export const Loading: Story = {
+  tags: ['skip-visual-test'],
   render: () => <SkeletonTxList />,
 }
 
 export const Empty: Story = {
   render: () => <QueueEmpty />,
-}
-
-export const NoMatches: Story = {
-  render: () => <QueueNoMatches onClear={fn()} />,
 }
 
 export const LoadError: Story = {
@@ -30,4 +28,12 @@ export const LoadError: Story = {
 /** The gateway read only part of the queue */
 export const Truncated: Story = {
   render: () => <QueueTruncatedNotice shown={100} total={243} />,
+}
+
+export const NoMatches: Story = {
+  render: () => <QueueNoMatches hasFilters isSearching={false} onClear={fn()} />,
+}
+
+export const NoSearchMatches: Story = {
+  render: () => <QueueNoMatches hasFilters={false} isSearching onClear={fn()} />,
 }

@@ -1,5 +1,5 @@
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import type { SpaceQueueSection } from '../../../store/spaceQueueApi'
+import type { SpaceQueueSection } from '../../../hooks/useSpaceQueue'
 import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import { getNextNonce, getNonce, getQueueStatus, getRejectedNonces, getSafeKey, getSectionRows } from '../utils'
 

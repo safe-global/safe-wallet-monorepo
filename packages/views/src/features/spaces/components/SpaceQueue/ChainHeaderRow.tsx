@@ -3,6 +3,7 @@ import { ChevronDown } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import type { ChainInfo } from '@safe-global/views/features/spaces/types'
+import { ChainLogo } from '@safe-global/views/features/spaces/components/AddressBookV2/ChainLogos'
 import { QUEUE_COLUMNS } from './columns'
 
 const ChainHeaderRow = ({
@@ -33,7 +34,7 @@ const ChainHeaderRow = ({
     </TableCell>
     <TableCell colSpan={QUEUE_COLUMNS.length - 1} className="py-0! pr-3!">
       <div className="flex h-6 items-center gap-2 text-xs">
-        {chain.chainLogoUri && <img src={chain.chainLogoUri} alt="" className="size-4 rounded-full" />}
+        <ChainLogo chain={chain} size="sm" />
         <span className="font-medium">{chain.chainName}</span>
         {nextNonce !== undefined && <span className="font-mono text-muted-foreground">Next #{nextNonce}</span>}
       </div>

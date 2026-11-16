@@ -1,4 +1,5 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
+import type { SubscriptionOptions } from '@reduxjs/toolkit/query'
 import {
   useSpaceTransactionsGetTransactionQueueV1Query,
   type SpaceQueueCounts,
@@ -6,6 +7,7 @@ import {
   type SpaceQueueSafe,
   type SpaceTransactionsGetTransactionQueueV1ApiArg,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { isTransactionQueuedItem } from '@/utils/transaction-guards'
 
 export type SpaceQueueItems = SpaceQueuedItemPage['results'][string][string]
@@ -33,7 +35,6 @@ export const hasSpaceQueueFilters = (filters?: SpaceQueueFilters): boolean =>
 
 export type SpaceQueue = {
   sections: SpaceQueueSection[]
-  unavailableSafes: SpaceQueueSafe[]
   /** Faceted: the status counts follow the Safe filter, `counts.safes` follows the Status filter */
   counts: SpaceQueueCounts
   /** Transactions in `sections` */
@@ -42,6 +43,8 @@ export type SpaceQueue = {
   totalCount: number
   /** Whether `sections` hold the whole queue; only known without filters or a search, which narrow it on purpose */
   isComplete: boolean
+  /** Safes whose queue the gateway could not read, left out of `sections` */
+  unavailableSafes: SpaceQueueSafe[]
 }
 
 export const toSpaceQueue = (page: SpaceQueuedItemPage, isNarrowed = false): SpaceQueue => {
@@ -56,19 +59,27 @@ export const toSpaceQueue = (page: SpaceQueuedItemPage, isNarrowed = false): Spa
 
   return {
     sections,
-    unavailableSafes: page.unavailableSafes,
     counts: page.counts,
     shownCount,
     totalCount,
     isComplete: isNarrowed || shownCount >= totalCount,
+    unavailableSafes: page.unavailableSafes,
   }
 }
 
-const joinOrOmit = (values: string[]): string | undefined => (values.length > 0 ? values.join(',') : undefined)
+const REFETCH_EVENTS = [
+  TxEvent.PROPOSED,
+  TxEvent.SIGNATURE_PROPOSED,
+  TxEvent.PROCESSED,
+  TxEvent.SUCCESS,
+  TxEvent.DELETED,
+] as const
 
 type SpaceQueueQuery = { filters?: SpaceQueueFilters; search?: string }
 
-export const toQueryArgs = (spaceId: string, { filters = NO_SPACE_QUEUE_FILTERS, search }: SpaceQueueQuery) => {
+const joinOrOmit = (values: string[]): string | undefined => (values.length > 0 ? values.join(',') : undefined)
+
+const toQueryArgs = (spaceId: string, { filters = NO_SPACE_QUEUE_FILTERS, search }: SpaceQueueQuery) => {
   const statuses = filters.statuses.filter((option) => (SPACE_QUEUE_STATUSES as readonly string[]).includes(option))
   return {
     spaceId,
@@ -82,13 +93,25 @@ export const toQueryArgs = (spaceId: string, { filters = NO_SPACE_QUEUE_FILTERS,
   } satisfies SpaceTransactionsGetTransactionQueueV1ApiArg
 }
 
-type SpaceQueueOptions = Parameters<typeof useSpaceTransactionsGetTransactionQueueV1Query>[1]
-
-export const useSpaceQueue = (spaceId: string, query: SpaceQueueQuery = {}, options?: SpaceQueueOptions) => {
+/** The Space queue grouped by Safe and chain, refetched after a tx event */
+export const useSpaceQueue = (
+  spaceId: string,
+  query: SpaceQueueQuery = {},
+  options: SubscriptionOptions & { skip?: boolean } = {},
+) => {
   const { data, currentData, isError, isFetching, refetch } = useSpaceTransactionsGetTransactionQueueV1Query(
     toQueryArgs(spaceId, query),
     options,
   )
+  const { skip } = options
+
+  // A second refetch of an entry already loading sends no request, so the page and the poller can both listen
+  useEffect(() => {
+    if (skip) return
+    const unsubscribers = REFETCH_EVENTS.map((event) => txSubscribe(event, () => refetch()))
+    return () => unsubscribers.forEach((unsubscribe) => unsubscribe())
+  }, [skip, refetch])
+
   const isNarrowed = hasSpaceQueueFilters(query.filters) || !!query.search
   const queue = useMemo(
     () => (currentData ? toSpaceQueue(currentData, isNarrowed) : undefined),

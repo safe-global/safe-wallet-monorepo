@@ -31,7 +31,7 @@ import {
   isVaultRedeemTxInfo,
 } from '@/utils/transaction-guards'
 import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
-import type { SpaceQueueItems } from '../../store/spaceQueueApi'
+import type { SpaceQueueItems } from '../../hooks/useSpaceQueue'
 
 export const getSafeKey = (safeAddress: string): string => safeAddress.toLowerCase()
 

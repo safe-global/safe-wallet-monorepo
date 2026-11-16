@@ -5,6 +5,7 @@ import QueueTxDetails from '.'
 
 const SAFE = '0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6'
 const RECIPIENT = '0x6810e776880C02933D47DB1b9fc05908e5386b96'
+const OTHER_SAFE = '0x8675B754342754A30A2AeF474D114d8460bca19b'
 
 const token = (symbol: string, decimals = 18): TokenInfo => ({
   address: RECIPIENT,
@@ -14,20 +15,19 @@ const token = (symbol: string, decimals = 18): TokenInfo => ({
   trusted: true,
 })
 
-const tx = (txInfo: object, nonce = 12): Transaction =>
-  ({
-    id: `multisig_${SAFE}_${nonce}`,
-    timestamp: 1_767_225_600_000,
-    txStatus: 'AWAITING_CONFIRMATIONS',
-    txInfo,
-    executionInfo: {
-      type: 'MULTISIG',
-      nonce,
-      confirmationsRequired: 2,
-      confirmationsSubmitted: 1,
-      missingSigners: [],
-    },
-  }) as unknown as Transaction
+const tx = (txInfo: Transaction['txInfo'], nonce = 12): Transaction => ({
+  id: `multisig_${SAFE}_${nonce}`,
+  timestamp: 1_767_225_600_000,
+  txStatus: 'AWAITING_CONFIRMATIONS',
+  txInfo,
+  executionInfo: {
+    type: 'MULTISIG',
+    nonce,
+    confirmationsRequired: 2,
+    confirmationsSubmitted: 1,
+    missingSigners: [],
+  },
+})
 
 const VARIANTS: Array<[string, Transaction]> = [
   [
@@ -37,18 +37,35 @@ const VARIANTS: Array<[string, Transaction]> = [
       direction: 'OUTGOING',
       sender: { value: SAFE },
       recipient: { value: RECIPIENT },
-      transferInfo: { type: 'ERC20', tokenAddress: RECIPIENT, value: '1000000', tokenSymbol: 'USDC', decimals: 6 },
+      transferInfo: {
+        type: 'ERC20',
+        tokenAddress: RECIPIENT,
+        value: '1000000',
+        tokenSymbol: 'USDC',
+        decimals: 6,
+        imitation: false,
+      },
     }),
   ],
   [
     'Sell order',
     tx({
       type: 'SwapOrder',
+      uid: '0x1',
+      status: 'open',
       kind: 'sell',
+      orderClass: 'market',
+      validUntil: 1_767_225_600,
       sellAmount: '2000000000000000000',
       buyAmount: '6000000000',
+      executedSellAmount: '0',
+      executedBuyAmount: '0',
       sellToken: token('WETH'),
       buyToken: token('USDC', 6),
+      explorerUrl: 'https://explorer.cow.fi',
+      executedFee: '0',
+      executedFeeToken: token('WETH'),
+      owner: SAFE,
     }),
   ],
   [
@@ -60,12 +77,48 @@ const VARIANTS: Array<[string, Transaction]> = [
     }),
   ],
   [
+    'Nested',
+    tx({
+      type: 'Custom',
+      to: { value: OTHER_SAFE },
+      dataSize: '36',
+      value: '0',
+      isCancellation: false,
+      methodName: 'approveHash',
+    }),
+  ],
+  [
+    'Bridge',
+    tx({
+      type: 'SwapAndBridge',
+      fromToken: token('USDC', 6),
+      recipient: { value: SAFE },
+      explorerUrl: null,
+      status: 'AWAITING_EXECUTION',
+      substatus: 'AWAITING_EXECUTION',
+      fees: null,
+      fromAmount: '1500000000',
+      toChain: '137',
+      toToken: token('USDC', 6),
+      toAmount: '1490000000',
+    }),
+  ],
+  [
     'Rejection',
     tx({ type: 'Custom', to: { value: SAFE }, dataSize: '0', value: '0', isCancellation: true, methodName: null }),
   ],
   [
     'Staking exit',
-    tx({ type: 'NativeStakingValidatorsExit', numValidators: 2, validators: [], tokenInfo: token('ETH') }),
+    tx({
+      type: 'NativeStakingValidatorsExit',
+      status: 'ACTIVE',
+      estimatedExitTime: 0,
+      estimatedWithdrawalTime: 0,
+      value: '64000000000000000000',
+      numValidators: 2,
+      validators: [],
+      tokenInfo: token('ETH'),
+    }),
   ],
   [
     'Undecoded call',

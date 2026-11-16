@@ -13,7 +13,7 @@ import {
   useSpaceQueue,
   type SpaceQueue,
   type SpaceQueueFilters,
-} from '../../store/spaceQueueApi'
+} from '../../hooks/useSpaceQueue'
 import SpaceQueueTable from './SpaceQueueTable'
 import TransactionsToolbar from './TransactionsToolbar'
 import UnavailableSafesAlert from './UnavailableSafesAlert'
@@ -36,7 +36,6 @@ const QueueBody = memo(function QueueBody({
   onClearFilters: () => void
 }): ReactElement {
   const { sections, unavailableSafes } = queue
-  const isNarrowed = isFiltered || isSearching
 
   return (
     <>
@@ -48,8 +47,8 @@ const QueueBody = memo(function QueueBody({
 
       {sections.length > 0 ? (
         <SpaceQueueTable sections={sections} />
-      ) : isNarrowed ? (
-        <QueueNoMatches onClear={onClearFilters} />
+      ) : isFiltered || isSearching ? (
+        <QueueNoMatches hasFilters={isFiltered} isSearching={isSearching} onClear={onClearFilters} />
       ) : (
         <QueueEmpty />
       )}

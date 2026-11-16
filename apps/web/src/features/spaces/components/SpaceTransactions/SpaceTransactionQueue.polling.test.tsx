@@ -6,13 +6,14 @@ import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENE
 import { TransactionListItemType, TransactionStatus } from '@safe-global/store/gateway/types'
 import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { POLLING_INTERVAL } from '@/config/constants'
+import { txDispatch, TxEvent } from '@/services/tx/txEvents'
 import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
-import { render, screen } from '@/tests/test-utils'
+import { render, screen, waitFor } from '@/tests/test-utils'
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import * as useChains from '@/hooks/useChains'
-import type { SpaceQueueSection } from '../../store/spaceQueueApi'
+import type { SpaceQueueSection } from '../../hooks/useSpaceQueue'
 import { useSpaceQueuePolling } from '../../hooks/useSpaceQueuePolling'
 import SpaceTransactionQueue from './SpaceTransactionQueue'
 
@@ -127,5 +128,28 @@ describe('SpaceTransactionQueue live updates', () => {
     expect(await screen.findByText('2 of 3 signatures')).toBeInTheDocument()
     expect(requests).toHaveLength(2)
     expect(requests.every((url) => url.search === '')).toBe(true)
+  })
+
+  it('sends one request per transaction event with the page and the poller mounted', async () => {
+    const requests: URL[] = []
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`, ({ request }) => {
+        requests.push(new URL(request.url))
+        return HttpResponse.json(queuePage(1))
+      }),
+    )
+    render(
+      <>
+        <Poller />
+        <SpaceTransactionQueue spaceId={spaceId} />
+      </>,
+    )
+    expect(await screen.findByText('1 of 3 signatures')).toBeInTheDocument()
+
+    await act(async () => txDispatch(TxEvent.DELETED, { safeTxHash: faker.string.hexadecimal({ length: 64 }) }))
+    await waitFor(() => expect(requests).toHaveLength(2))
+    await act(() => jest.advanceTimersByTimeAsync(POLLING_INTERVAL - 1))
+
+    expect(requests).toHaveLength(2)
   })
 })
