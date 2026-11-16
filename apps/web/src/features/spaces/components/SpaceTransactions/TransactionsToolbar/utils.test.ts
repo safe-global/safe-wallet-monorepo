@@ -1,10 +1,9 @@
 import { faker } from '@faker-js/faker'
-import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { checksumAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import {
   getSafeOptions,
   getSelectedSafeAddresses,
   isSafeOptionSelected,
-  isSameSigner,
   sortByCount,
   toggleSafeOption,
   toggleValue,
@@ -102,7 +101,7 @@ describe('TransactionsToolbar utils', () => {
     })
 
     it('compares signers in any address case', () => {
-      expect(toggleValue(safeA, [safeA.toLowerCase(), safeB], isSameSigner)).toEqual([safeB])
+      expect(toggleValue(safeA, [safeA.toLowerCase(), safeB], sameAddress)).toEqual([safeB])
     })
   })
 })

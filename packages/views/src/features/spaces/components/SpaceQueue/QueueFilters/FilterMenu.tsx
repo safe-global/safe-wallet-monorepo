@@ -1,6 +1,5 @@
 import type { ReactElement } from 'react'
 import { ListFilter } from 'lucide-react'
-import type { SpaceQueueCounts } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
   DropdownMenu,
@@ -10,19 +9,29 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@safe-global/views/components/ui/dropdown-menu'
-import type { SpaceQueueFilters } from '../../../../hooks/useSpaceQueue'
-import NetworkOptions from '../NetworkOptions'
-import { SafeOptions } from '../SafeFilter'
-import SignerOptions from '../SignerOptions'
-import { StatusOptions } from '../StatusFilter'
+import NetworkOptions, {
+  type NetworkOptionsProps,
+} from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/NetworkOptions'
+import {
+  SafeOptions,
+  type SafeOptionsProps,
+} from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/SafeFilter'
+import SignerOptions, {
+  type SignerOptionsProps,
+} from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/SignerOptions'
+import {
+  StatusOptions,
+  type StatusOptionsProps,
+} from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/StatusFilter'
 
-type FilterMenuProps = {
-  counts?: SpaceQueueCounts
-  filters: SpaceQueueFilters
-  onChange: (filters: SpaceQueueFilters) => void
+export type FilterMenuProps = {
+  status: StatusOptionsProps
+  safe: SafeOptionsProps
+  network: NetworkOptionsProps
+  signer: SignerOptionsProps
 }
 
-const FilterMenu = ({ counts, filters, onChange }: FilterMenuProps): ReactElement => (
+const FilterMenu = ({ status, safe, network, signer }: FilterMenuProps): ReactElement => (
   <DropdownMenu>
     <DropdownMenuTrigger render={<Button variant="outline" />}>
       <ListFilter />
@@ -32,37 +41,25 @@ const FilterMenu = ({ counts, filters, onChange }: FilterMenuProps): ReactElemen
       <DropdownMenuSub>
         <DropdownMenuSubTrigger>Status</DropdownMenuSubTrigger>
         <DropdownMenuSubContent className="min-w-56">
-          <StatusOptions
-            counts={counts}
-            selected={filters.statuses}
-            onChange={(statuses) => onChange({ ...filters, statuses })}
-          />
+          <StatusOptions {...status} />
         </DropdownMenuSubContent>
       </DropdownMenuSub>
       <DropdownMenuSub>
         <DropdownMenuSubTrigger>Safe account</DropdownMenuSubTrigger>
         <DropdownMenuSubContent className="min-w-64">
-          <SafeOptions counts={counts} selected={filters.safes} onChange={(safes) => onChange({ ...filters, safes })} />
+          <SafeOptions {...safe} />
         </DropdownMenuSubContent>
       </DropdownMenuSub>
       <DropdownMenuSub>
         <DropdownMenuSubTrigger>Network</DropdownMenuSubTrigger>
         <DropdownMenuSubContent className="min-w-56">
-          <NetworkOptions
-            counts={counts}
-            selected={filters.chainIds}
-            onChange={(chainIds) => onChange({ ...filters, chainIds })}
-          />
+          <NetworkOptions {...network} />
         </DropdownMenuSubContent>
       </DropdownMenuSub>
       <DropdownMenuSub>
         <DropdownMenuSubTrigger>Signer</DropdownMenuSubTrigger>
         <DropdownMenuSubContent className="min-w-64">
-          <SignerOptions
-            counts={counts}
-            selected={filters.signers}
-            onChange={(signers) => onChange({ ...filters, signers })}
-          />
+          <SignerOptions {...signer} />
         </DropdownMenuSubContent>
       </DropdownMenuSub>
     </DropdownMenuContent>

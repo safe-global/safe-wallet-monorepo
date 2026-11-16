@@ -1,17 +1,10 @@
 import type { SpaceQueueCounts, SpaceQueueSafe } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { SpaceQueueStatusOption } from '../../../hooks/useSpaceQueue'
+import { SPACE_QUEUE_FLAGS, SPACE_QUEUE_STATUSES, type SpaceQueueStatusOption } from '../../../hooks/useSpaceQueue'
 
-type StatusOptionLabels = { menu: string; chip: string }
-
-export const STATUS_OPTION_LABELS: Record<SpaceQueueStatusOption, StatusOptionLabels> = {
-  execute: { menu: 'Execute', chip: 'Ready to execute' },
-  sign: { menu: 'Sign', chip: 'Ready to sign' },
-  blocked: { menu: 'Blocked', chip: 'Blocked' },
-  waiting: { menu: 'Waiting', chip: 'Waiting on others' },
-  conflicting: { menu: 'Conflicting', chip: 'Conflicting' },
-  stale: { menu: 'Stale 7 days', chip: 'Stale 7 days' },
-}
+/** Every option of the Status filter with its count */
+export const getStatusCounts = (counts?: SpaceQueueCounts): Partial<Record<SpaceQueueStatusOption, number>> =>
+  Object.fromEntries([...SPACE_QUEUE_STATUSES, ...SPACE_QUEUE_FLAGS].map((option) => [option, counts?.[option] ?? 0]))
 
 /** One Safe of the Safe filter: every chain it has a queue on, and its transactions matching the Status filter. */
 export type SafeOption = { safeAddress: string; chainIds: string[]; count: number }
@@ -55,13 +48,11 @@ export const sortByCount = <T extends { count: number }>(options: T[]): T[] =>
   [...options].sort((a, b) => b.count - a.count)
 
 /** The selection with `value` added or, when it was selected, removed. */
-export const toggleValue = (
-  value: string,
-  selected: string[],
+export const toggleValue = <T extends string>(
+  value: T,
+  selected: T[],
   isSame: (a: string, b: string) => boolean = (a, b) => a === b,
-): string[] =>
+): T[] =>
   selected.some((other) => isSame(other, value))
     ? selected.filter((other) => !isSame(other, value))
     : [...selected, value]
-
-export const isSameSigner = (a: string, b: string): boolean => sameAddress(a, b)
