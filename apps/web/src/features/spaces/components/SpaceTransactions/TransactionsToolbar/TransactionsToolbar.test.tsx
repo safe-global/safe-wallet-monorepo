@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import type { SpaceQueueCounts } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { act, fireEvent, render, screen, within } from '@/tests/test-utils'
-import { NO_SPACE_QUEUE_FILTERS, type SpaceQueueFilters } from '../../../hooks/useSpaceQueue'
+import { NO_SPACE_QUEUE_FILTERS, type SpaceQueueFilters } from '../../../store/spaceQueueApi'
 import TransactionsToolbar from '.'
 
 jest.mock('../NewTransactionButton', () => ({ __esModule: true, default: () => null }))

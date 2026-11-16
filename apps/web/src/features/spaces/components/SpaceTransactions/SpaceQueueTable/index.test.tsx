@@ -6,7 +6,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
-import type { SpaceQueueChain, SpaceQueueSection } from '../../../hooks/useSpaceQueue'
+import type { SpaceQueueChain, SpaceQueueSection } from '../../../store/spaceQueueApi'
 import SpaceQueueTable from '.'
 import { DeleteTxDialogProvider } from '../RowActionsMenu/DeleteTxDialog'
 import { Table, TableBody } from '@safe-global/views/components/ui/table'
@@ -16,7 +16,10 @@ const mockChainNames: Record<string, string> = {}
 const mockScopeProps = jest.fn()
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
-  default: () => ({ configs: [], loading: false }),
+  default: () => ({
+    configs: Object.entries(mockChainNames).map(([chainId, chainName]) => ({ chainId, chainName, shortName: chainId })),
+    loading: false,
+  }),
   useCurrentChain: () => undefined,
   useHasFeature: () => false,
   useChain: (chainId: string) =>

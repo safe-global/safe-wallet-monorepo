@@ -10,7 +10,7 @@ import { TransactionListItemType } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { TxEvent, txDispatch } from '@/services/tx/txEvents'
-import { NO_SPACE_QUEUE_FILTERS, type SpaceQueueFilters, type SpaceQueueSection } from '../../hooks/useSpaceQueue'
+import { NO_SPACE_QUEUE_FILTERS, type SpaceQueueFilters, type SpaceQueueSection } from '../../store/spaceQueueApi'
 import SpaceTransactionQueue from './SpaceTransactionQueue'
 
 const mockToolbarProps = jest.fn()

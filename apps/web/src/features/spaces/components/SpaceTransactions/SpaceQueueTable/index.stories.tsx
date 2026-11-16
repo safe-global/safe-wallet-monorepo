@@ -8,7 +8,7 @@ import {
   TransferDirection,
 } from '@safe-global/store/gateway/types'
 import { createMockStory } from '@/stories/mocks'
-import type { SpaceQueueSection } from '../../../hooks/useSpaceQueue'
+import type { SpaceQueueSection } from '../../../store/spaceQueueApi'
 import SpaceQueueTable from '.'
 
 const SAFE_A = '0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6'

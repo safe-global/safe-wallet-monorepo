@@ -8,8 +8,7 @@ import type { SpaceQueuedItemPage, TransactionQueuedItem } from '@safe-global/st
 import { TransactionListItemType } from '@safe-global/store/gateway/types'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
-import { skipToken } from '@reduxjs/toolkit/query'
-import { useSpaceQueue, type SpaceQueueFilters } from '../useSpaceQueue'
+import { toSpaceQueue, useSpaceQueue, type SpaceQueueFilters } from '../spaceQueueApi'
 
 const spaceId = faker.string.uuid()
 const queueUrl = `${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`
@@ -34,7 +33,10 @@ const zeroCounts: SpaceQueuedItemPage['counts'] = {
   signers: [],
 }
 
-const page = (results: SpaceQueuedItemPage['results'], overrides: Partial<SpaceQueuedItemPage> = {}) => ({
+const page = (
+  results: SpaceQueuedItemPage['results'],
+  overrides: Partial<SpaceQueuedItemPage> = {},
+): SpaceQueuedItemPage => ({
   count: null,
   next: null,
   previous: null,
@@ -44,41 +46,20 @@ const page = (results: SpaceQueuedItemPage['results'], overrides: Partial<SpaceQ
   ...overrides,
 })
 
-/** Answers with the given body, recording every request URL. */
-const respondWith = (body: SpaceQueuedItemPage | null, status = 200) => {
-  const urls: URL[] = []
-  server.use(
-    http.get(queueUrl, ({ request }) => {
-      urls.push(new URL(request.url))
-      return body ? HttpResponse.json(body) : new HttpResponse(null, { status })
-    }),
-  )
-  return urls
-}
-
-const fetchQueue = async (filters?: SpaceQueueFilters, search?: string) => {
-  const { result } = renderHook(() => useSpaceQueue({ spaceId, filters, search }))
-  await waitFor(() => expect(result.current.isLoading).toBe(false))
-  return result.current
-}
-
-describe('useSpaceQueue', () => {
+describe('toSpaceQueue', () => {
   const safeA = faker.finance.ethereumAddress()
   const safeB = faker.finance.ethereumAddress()
 
-  beforeEach(() => {
-    setBaseUrl(GATEWAY_URL)
-  })
-
-  it('turns the results into one section per Safe with one entry per chain', async () => {
+  it('turns the results into one section per Safe with one entry per chain', () => {
     const ethItems = transactions(2)
     const gnosisItems = transactions(1)
     const safeBItems = transactions(1)
-    respondWith(page({ [safeA]: { '1': ethItems, '100': gnosisItems }, [safeB]: { '1': safeBItems } }, { count: 4 }))
 
-    const { data } = await fetchQueue()
+    const queue = toSpaceQueue(
+      page({ [safeA]: { '1': ethItems, '100': gnosisItems }, [safeB]: { '1': safeBItems } }, { count: 4 }),
+    )
 
-    expect(data).toEqual({
+    expect(queue).toEqual({
       sections: [
         {
           safeAddress: safeA,
@@ -97,51 +78,100 @@ describe('useSpaceQueue', () => {
     })
   })
 
-  it('reads the whole queue in one request without a cursor', async () => {
-    const urls = respondWith(page({ [safeA]: { '1': transactions(1) } }, { count: 1 }))
-
-    await fetchQueue()
-
-    expect(urls).toHaveLength(1)
-    expect(urls[0].search).toBe('')
+  it('flags the queue as incomplete when the gateway returned fewer transactions than the count', () => {
+    expect(toSpaceQueue(page({ [safeA]: { '1': transactions(3) } }, { count: 10 }))).toMatchObject({
+      shownCount: 3,
+      totalCount: 10,
+      isComplete: false,
+    })
   })
 
-  it('flags the queue as incomplete when the gateway returned fewer transactions than the count', async () => {
-    respondWith(page({ [safeA]: { '1': transactions(3) } }, { count: 10 }))
-
-    const { data } = await fetchQueue()
-
-    expect(data).toMatchObject({ shownCount: 3, totalCount: 10, isComplete: false })
-  })
-
-  it('counts only transactions, not labels or conflict headers', async () => {
+  it('counts only transactions, not labels or conflict headers', () => {
     const items = [
       { type: TransactionListItemType.LABEL, label: 'Next' } as const,
       { type: TransactionListItemType.CONFLICT_HEADER, nonce: 1 } as const,
       ...transactions(2),
     ]
-    respondWith(page({ [safeA]: { '1': items } }, { count: 2 }))
 
-    const { data } = await fetchQueue()
-
-    expect(data).toMatchObject({ shownCount: 2, totalCount: 2, isComplete: true })
+    expect(toSpaceQueue(page({ [safeA]: { '1': items } }, { count: 2 }))).toMatchObject({
+      shownCount: 2,
+      totalCount: 2,
+      isComplete: true,
+    })
   })
 
-  it('treats a missing count as the transactions returned', async () => {
-    respondWith(page({ [safeA]: { '1': transactions(2) } }, { count: null }))
-
-    const { data } = await fetchQueue()
-
-    expect(data).toMatchObject({ shownCount: 2, totalCount: 2, isComplete: true })
+  it('treats a missing count as the transactions returned', () => {
+    expect(toSpaceQueue(page({ [safeA]: { '1': transactions(2) } }, { count: null }))).toMatchObject({
+      shownCount: 2,
+      totalCount: 2,
+      isComplete: true,
+    })
   })
 
-  it('passes the unavailable Safes through', async () => {
+  it('passes the unavailable Safes through', () => {
     const unavailableSafes = [{ chainId: '1', safeAddress: safeB }]
-    respondWith(page({ [safeA]: { '1': transactions(1) } }, { count: 1, unavailableSafes }))
 
-    const { data } = await fetchQueue()
+    const queue = toSpaceQueue(page({ [safeA]: { '1': transactions(1) } }, { count: 1, unavailableSafes }))
 
-    expect(data?.unavailableSafes).toEqual(unavailableSafes)
+    expect(queue.unavailableSafes).toEqual(unavailableSafes)
+  })
+
+  it('passes the counts through', () => {
+    const counts = { ...zeroCounts, total: 2, sign: 2, safes: [{ chainId: '1', safeAddress: safeA, count: 2 }] }
+
+    expect(toSpaceQueue(page({ [safeA]: { '1': transactions(2) } }, { count: 2, counts })).counts).toEqual(counts)
+  })
+})
+
+/** Answers with the given body, recording every request URL. */
+const respondWith = (body: SpaceQueuedItemPage) => {
+  const urls: URL[] = []
+  server.use(
+    http.get(queueUrl, ({ request }) => {
+      urls.push(new URL(request.url))
+      return HttpResponse.json(body)
+    }),
+  )
+  return urls
+}
+
+const fetchQueue = async (filters?: SpaceQueueFilters, search?: string) => {
+  const { result } = renderHook(() => useSpaceQueue(spaceId, { filters, search }))
+  await waitFor(() => expect(result.current.queue).toBeDefined())
+  return result.current
+}
+
+describe('useSpaceQueue', () => {
+  const safeA = faker.finance.ethereumAddress()
+  const safeB = faker.finance.ethereumAddress()
+
+  beforeEach(() => setBaseUrl(GATEWAY_URL))
+
+  it('reads the whole queue of the Space in one request, without filters', async () => {
+    const items = transactions(1)
+    const urls: URL[] = []
+    server.use(
+      http.get(queueUrl, ({ request }) => {
+        urls.push(new URL(request.url))
+        return HttpResponse.json(page({ [safeA]: { '1': items } }, { count: 1 }))
+      }),
+    )
+
+    const { result } = renderHook(() => useSpaceQueue(spaceId))
+
+    await waitFor(() => expect(result.current.queue).toBeDefined())
+    expect(result.current.queue?.sections).toEqual([{ safeAddress: safeA, chains: [{ chainId: '1', items }] }])
+    expect(urls).toHaveLength(1)
+    expect(urls[0].search).toBe('')
+  })
+
+  it('reports an error and no queue when the request fails', async () => {
+    server.use(http.get(queueUrl, () => new HttpResponse(null, { status: 500 })))
+
+    const { result } = renderHook(() => useSpaceQueue(spaceId))
+
+    await waitFor(() => expect(result.current.isError).toBe(true))
+    expect(result.current.queue).toBeUndefined()
   })
 
   const chainId = '1'
@@ -167,7 +197,7 @@ describe('useSpaceQueue', () => {
 
   it('does not request the queue after a transaction event while skipped', async () => {
     const urls = respondWith(page({}))
-    renderHook(() => useSpaceQueue(skipToken))
+    renderHook(() => useSpaceQueue(spaceId, {}, { skip: true }))
 
     txDispatch(TxEvent.DELETED, { safeTxHash: faker.string.hexadecimal({ length: 64 }) })
 
@@ -175,13 +205,13 @@ describe('useSpaceQueue', () => {
     expect(urls).toHaveLength(0)
   })
 
-  it('fails when the request fails', async () => {
-    respondWith(null, 500)
+  it('returns the counts of the answer', async () => {
+    const counts = { ...zeroCounts, total: 1, sign: 1 }
+    respondWith(page({ [safeA]: { '1': transactions(1) } }, { count: 1, counts }))
 
     const result = await fetchQueue()
 
-    expect(result.isError).toBe(true)
-    expect(result.data).toBeUndefined()
+    expect(result.counts).toEqual(counts)
   })
 
   it('sends the statuses, the flags, the Safes, the networks and the signers of the filters as query params', async () => {
@@ -224,21 +254,12 @@ describe('useSpaceQueue', () => {
     expect(urls[0].search).toBe('')
   })
 
-  it('passes the counts through', async () => {
-    const counts = { ...zeroCounts, total: 2, sign: 2, safes: [{ chainId: '1', safeAddress: safeA, count: 2 }] }
-    respondWith(page({ [safeA]: { '1': transactions(2) } }, { count: 2, counts }))
-
-    const { data } = await fetchQueue()
-
-    expect(data?.counts).toEqual(counts)
-  })
-
   it('does not flag a filtered queue as incomplete for holding fewer transactions than the count', async () => {
     respondWith(page({ [safeA]: { '1': transactions(1) } }, { count: 10 }))
 
-    const { data } = await fetchQueue({ statuses: ['sign'], safes: [], chainIds: [], signers: [] })
+    const { queue } = await fetchQueue({ statuses: ['sign'], safes: [], chainIds: [], signers: [] })
 
-    expect(data?.isComplete).toBe(true)
+    expect(queue?.isComplete).toBe(true)
   })
 
   it('sends the search as a query param', async () => {
@@ -268,8 +289,8 @@ describe('useSpaceQueue', () => {
   it('does not flag a searched queue as incomplete for holding fewer transactions than the count', async () => {
     respondWith(page({ [safeA]: { '1': transactions(1) } }, { count: 10 }))
 
-    const { data } = await fetchQueue(undefined, 'treasury')
+    const { queue } = await fetchQueue(undefined, 'treasury')
 
-    expect(data?.isComplete).toBe(true)
+    expect(queue?.isComplete).toBe(true)
   })
 })

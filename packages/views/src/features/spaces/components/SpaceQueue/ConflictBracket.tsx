@@ -1,14 +1,8 @@
 import type { ReactElement } from 'react'
-
-type ConflictBracketProps = {
-  /** 1-based position among the transactions sharing the nonce */
-  option: number
-  size: number
-  nonce?: number
-}
+import type { ConflictOption } from './types'
 
 // The options sharing a nonce hang off one line from the group header, so the nonce shows once, in the header.
-const ConflictBracket = ({ option, size, nonce }: ConflictBracketProps): ReactElement => {
+const ConflictBracket = ({ option, size, nonce }: ConflictOption & { nonce?: number }): ReactElement => {
   const isLast = option === size
   return (
     <span aria-label={`Option ${option} of ${size} at nonce ${nonce}`} role="img" className="block h-6">

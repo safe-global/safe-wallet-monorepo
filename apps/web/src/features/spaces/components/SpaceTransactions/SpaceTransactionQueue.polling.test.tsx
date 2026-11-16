@@ -13,7 +13,7 @@ import { render, screen, waitFor } from '@/tests/test-utils'
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import * as useChains from '@/hooks/useChains'
-import type { SpaceQueueSection } from '../../hooks/useSpaceQueue'
+import type { SpaceQueueSection } from '../../store/spaceQueueApi'
 import { useSpaceQueuePolling } from '../../hooks/useSpaceQueuePolling'
 import SpaceTransactionQueue from './SpaceTransactionQueue'
 

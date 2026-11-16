@@ -1,17 +1,19 @@
 import { memo, useCallback, useDeferredValue, useState, type ReactElement } from 'react'
-import PagePlaceholder from '@safe-global/views/components/common/PagePlaceholder'
 import SkeletonTxList from '@safe-global/views/components/common/PaginatedTxns/SkeletonTxList'
-import { Typography } from '@safe-global/views/components/ui/typography'
+import {
+  QueueEmpty,
+  QueueLoadError,
+  QueueNoMatches,
+  QueueTruncatedNotice,
+} from '@safe-global/views/features/spaces/components/SpaceQueue/QueueStates'
 import { POLLING_INTERVAL } from '@/config/constants'
-import NoTransactionsIcon from '@/public/images/transactions/no-transactions.svg'
 import {
   hasSpaceQueueFilters,
   NO_SPACE_QUEUE_FILTERS,
   useSpaceQueue,
   type SpaceQueue,
   type SpaceQueueFilters,
-} from '../../hooks/useSpaceQueue'
-import { QueueLoadError, QueueNoMatches } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueStates'
+} from '../../store/spaceQueueApi'
 import SpaceQueueTable from './SpaceQueueTable'
 import TransactionsToolbar from './TransactionsToolbar'
 import UnavailableSafesAlert from './UnavailableSafesAlert'
@@ -41,21 +43,14 @@ const QueueBody = memo(function QueueBody({
         <UnavailableSafesAlert spaceId={spaceId} safes={unavailableSafes} onRetry={onRetry} isRetrying={isFetching} />
       )}
 
-      {!queue.isComplete && (
-        <Typography variant="paragraph-small" color="muted">
-          Showing {queue.shownCount} of {queue.totalCount} pending transactions.
-        </Typography>
-      )}
+      {!queue.isComplete && <QueueTruncatedNotice shown={queue.shownCount} total={queue.totalCount} />}
 
       {sections.length > 0 ? (
         <SpaceQueueTable sections={sections} />
       ) : isFiltered || isSearching ? (
         <QueueNoMatches hasFilters={isFiltered} isSearching={isSearching} onClear={onClearFilters} />
       ) : (
-        <PagePlaceholder
-          img={<NoTransactionsIcon />}
-          text="Pending transactions of your Safe accounts will appear here"
-        />
+        <QueueEmpty />
       )}
     </>
   )
@@ -69,10 +64,10 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
   // The toolbar shows a click at once; the table follows in a render that doesn't block it
   const queryFilters = useDeferredValue(filters)
   const querySearch = useDeferredValue(search)
-  // `data` keeps the last answer while a new filter loads, so the menus keep their counts
   // Unfiltered, this is the same cache entry useSpaceQueuePolling polls; a filtered view polls its own
-  const { data, currentData, isError, isFetching, refetch } = useSpaceQueue(
-    { spaceId, filters: queryFilters, search: querySearch },
+  const { queue, counts, isError, isFetching, refetch } = useSpaceQueue(
+    spaceId,
+    { filters: queryFilters, search: querySearch },
     { pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true },
   )
 
@@ -87,16 +82,16 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
       <TransactionsToolbar
         key={toolbarKey}
         spaceId={spaceId}
-        counts={data?.counts}
+        counts={counts}
         filters={filters}
         onFiltersChange={setFilters}
         onSearchChange={setSearch}
       />
 
-      {currentData ? (
+      {queue ? (
         <QueueBody
           spaceId={spaceId}
-          queue={currentData}
+          queue={queue}
           isFetching={isFetching}
           isFiltered={hasSpaceQueueFilters(queryFilters)}
           isSearching={querySearch !== ''}

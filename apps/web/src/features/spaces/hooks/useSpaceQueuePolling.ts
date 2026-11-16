@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { skipToken } from '@reduxjs/toolkit/query'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { POLLING_INTERVAL } from '@/config/constants'
@@ -13,7 +12,7 @@ import { selectPendingTxs, type PendingTxsState } from '@/store/pendingTxsSlice'
 import { isSignableBy, isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useIsActiveMember } from './useSpaceMembers'
-import { useSpaceQueue, type SpaceQueue } from './useSpaceQueue'
+import { useSpaceQueue, type SpaceQueue } from '../store/spaceQueueApi'
 
 // Module scope: Space pages each mount their own AuthState, and a page change must not toast again
 const notifiedTxIds = new Set<string>()
@@ -43,15 +42,16 @@ export const useSpaceQueuePolling = (): void => {
 
   const isActive = !!spaceId && isSignedIn && isActiveMember && !!isEnabled
   // The unfiltered queue page asks for the same args, so both share one cache entry and one request per poll
-  const { currentData } = useSpaceQueue(isActive ? { spaceId } : skipToken, {
-    pollingInterval: POLLING_INTERVAL,
-    skipPollingIfUnfocused: true,
-  })
+  const { queue } = useSpaceQueue(
+    spaceId ?? '',
+    {},
+    { skip: !isActive, pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true },
+  )
 
   useEffect(() => {
-    if (!isActive || !currentData || !walletAddress) return
+    if (!isActive || !queue || !walletAddress) return
 
-    const newKeys = getTxIdsAwaitingSignature(currentData, walletAddress, pendingTxs)
+    const newKeys = getTxIdsAwaitingSignature(queue, walletAddress, pendingTxs)
       .map((txId) => `${walletAddress}:${txId}`)
       .filter((key) => !notifiedTxIds.has(key))
     newKeys.forEach((key) => notifiedTxIds.add(key))
@@ -77,5 +77,5 @@ export const useSpaceQueuePolling = (): void => {
         },
       }),
     )
-  }, [isActive, currentData, walletAddress, pendingTxs, spaceId, dispatch])
+  }, [isActive, queue, walletAddress, pendingTxs, spaceId, dispatch])
 }

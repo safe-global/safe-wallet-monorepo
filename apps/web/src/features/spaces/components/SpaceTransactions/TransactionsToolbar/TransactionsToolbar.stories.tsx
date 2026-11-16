@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
 import type { SpaceQueueCounts } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { createMockStory } from '@/stories/mocks'
-import { NO_SPACE_QUEUE_FILTERS } from '../../../hooks/useSpaceQueue'
+import { NO_SPACE_QUEUE_FILTERS } from '../../../store/spaceQueueApi'
 import TransactionsToolbar from './TransactionsToolbar'
 
 const SAFE_A = '0x2222222222222222222222222222222222222222'

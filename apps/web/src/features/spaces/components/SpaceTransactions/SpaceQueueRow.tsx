@@ -19,9 +19,10 @@ import QueueTxDetails from './QueueTxDetails'
 import ConflictBracket from '@safe-global/views/features/spaces/components/SpaceQueue/ConflictBracket'
 import SignatureGauge from '@safe-global/views/features/spaces/components/SpaceQueue/SignatureGauge'
 import StatusChip from '@safe-global/views/features/spaces/components/SpaceQueue/StatusChip'
+import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import RowActionsMenu from './RowActionsMenu'
 import SignersTooltip from './SignersTooltip'
-import { getCounterparty, getNonce, type ConflictOption, type QueueStatus } from './utils'
+import { getCounterparty, getNonce } from './utils'
 
 const Counterparty = ({ txInfo, chainId }: { txInfo: TransactionInfo; chainId: string }): ReactElement | null => {
   const counterparty = getCounterparty(txInfo)

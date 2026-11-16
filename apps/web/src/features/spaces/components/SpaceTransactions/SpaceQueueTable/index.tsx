@@ -5,19 +5,22 @@ import { cn } from '@safe-global/views/utils/cn'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import { DeleteTxDialogProvider } from '../RowActionsMenu/DeleteTxDialog'
 import useWallet from '@/hooks/wallets/useWallet'
-import type { SpaceQueueSection } from '../../../hooks/useSpaceQueue'
+import type { SpaceQueueSection } from '../../../store/spaceQueueApi'
+import ChainHeaderRow from '@safe-global/views/features/spaces/components/SpaceQueue/ChainHeaderRow'
 import CollapseAllButton from '@safe-global/views/features/spaces/components/SpaceQueue/CollapseAllButton'
-import { QUEUE_COLUMNS } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
 import ConflictHeaderRow from '@safe-global/views/features/spaces/components/SpaceQueue/ConflictHeaderRow'
 import SafeBandRow from '@safe-global/views/features/spaces/components/SpaceQueue/SafeBandRow'
+import { QUEUE_COLUMNS, type QueueColumn } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
+import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
+import useChains from '@/hooks/useChains'
+import { toChainInfos } from '../../SpaceAddressBookV2/utils'
 import SpaceQueueRow from '../SpaceQueueRow'
 import { getSafeKey } from '../utils'
-import ChainHeaderRow from './ChainHeaderRow'
 import { buildQueueList, groupByScope, type QueueListItem } from './queueList'
 import SafeTitle from './SafeTitle'
 
-// Widths include the cell padding; the fixed ones add up to 968px, leaving To 160px of the 1128px floor
-const COLUMN_WIDTHS: Record<(typeof QUEUE_COLUMNS)[number], string> = {
+// The fixed widths (cell padding included) add up to 968px, so the 1128px floor leaves the To column 160px
+const COLUMN_WIDTHS: Record<QueueColumn, string> = {
   Nonce: 'w-16',
   Transaction: 'w-[21.5rem]',
   To: '',
@@ -64,7 +67,7 @@ const SKELETON_STYLE = {
   backgroundRepeat: 'repeat-y',
 }
 
-// Paints skeleton rows for the rows outside the window, so a fast scroll shows placeholders, not a gap
+// Paints skeleton rows in place of those outside the rendered window, so a fast scroll shows no gap
 const SpacerRow = ({ height }: { height: number }): ReactElement | null =>
   height > 0 ? (
     <tr aria-hidden="true" data-no-hover data-no-divider data-testid="space-queue-skeleton">
@@ -78,6 +81,7 @@ type VirtualRowProps = {
   item: QueueListItem
   index: number
   measureRef: (element: Element | null) => void
+  chainConfigs: Chain[]
   onToggleSafe: (safeAddress: string) => void
   onToggleChain: (scopeKey: string) => void
 }
@@ -87,6 +91,7 @@ const VirtualRow = memo(function VirtualRow({
   item,
   index,
   measureRef,
+  chainConfigs,
   onToggleSafe,
   onToggleChain,
 }: VirtualRowProps): ReactElement {
@@ -96,7 +101,15 @@ const VirtualRow = memo(function VirtualRow({
       return (
         <SafeBandRow
           safeAddress={item.section.safeAddress}
-          title={<SafeTitle section={item.section} />}
+          title={
+            <SafeTitle
+              safeAddress={item.section.safeAddress}
+              chains={toChainInfos(
+                item.section.chains.map(({ chainId }) => chainId),
+                chainConfigs,
+              )}
+            />
+          }
           collapsed={item.collapsed}
           summary={item.summary}
           onToggle={() => onToggleSafe(item.section.safeAddress)}
@@ -106,7 +119,7 @@ const VirtualRow = memo(function VirtualRow({
     case 'chain':
       return (
         <ChainHeaderRow
-          chainId={item.chainId}
+          chain={toChainInfos([item.chainId], chainConfigs)[0]}
           nextNonce={item.nextNonce}
           collapsed={item.collapsed}
           onToggle={() => onToggleChain(item.scopeKey)}
@@ -132,6 +145,7 @@ const VirtualRow = memo(function VirtualRow({
 
 const SpaceQueueTable = ({ sections }: { sections: SpaceQueueSection[] }): ReactElement => {
   const wallet = useWallet()
+  const { configs } = useChains()
   const [collapsedSafes, setCollapsedSafes] = useState<ReadonlySet<string>>(new Set())
   const [collapsedChains, setCollapsedChains] = useState<ReadonlySet<string>>(new Set())
   const allCollapsed = sections.every((section) => collapsedSafes.has(getSafeKey(section.safeAddress)))
@@ -184,6 +198,7 @@ const SpaceQueueTable = ({ sections }: { sections: SpaceQueueSection[] }): React
       item={item}
       index={index}
       measureRef={virtualizer.measureElement}
+      chainConfigs={configs}
       onToggleSafe={onToggleSafe}
       onToggleChain={onToggleChain}
     />
@@ -193,7 +208,7 @@ const SpaceQueueTable = ({ sections }: { sections: SpaceQueueSection[] }): React
 
   return (
     <DeleteTxDialogProvider>
-      {/* The Space accounts table's panel surface; its transparent 1px edge keeps the two tables aligned */}
+      {/* Same panel surface as the Space accounts table, so the two line up */}
       <div className="w-full overflow-x-auto rounded-lg border border-transparent bg-[var(--color-background-paper)] pb-2">
         <table
           aria-label="Pending transactions"
@@ -237,7 +252,6 @@ const SpaceQueueTable = ({ sections }: { sections: SpaceQueueSection[] }): React
               const rows = entries.map(({ virtualItem, item }) => renderItem(item, virtualItem.index))
               const first = entries[0].item
               if (!scopeKey || first.kind === 'safe') return rows
-              // One scope per visible run of a Safe's chain: each scope sets up its own provider and SDK
               return (
                 <SafeScopeProvider
                   key={`scope-${scopeKey}`}

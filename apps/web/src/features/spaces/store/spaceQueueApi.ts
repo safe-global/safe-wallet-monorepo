@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react'
-import { skipToken, type SkipToken, type SubscriptionOptions } from '@reduxjs/toolkit/query'
+import type { SubscriptionOptions } from '@reduxjs/toolkit/query'
 import {
   useSpaceTransactionsGetTransactionQueueV1Query,
   type SpaceQueueCounts,
@@ -47,7 +47,7 @@ export type SpaceQueue = {
   unavailableSafes: SpaceQueueSafe[]
 }
 
-export const toSpaceQueue = (page: SpaceQueuedItemPage, isNarrowed: boolean): SpaceQueue => {
+export const toSpaceQueue = (page: SpaceQueuedItemPage, isNarrowed = false): SpaceQueue => {
   const sections = Object.entries(page.results).map(([safeAddress, chainItems]) => ({
     safeAddress,
     chains: Object.entries(chainItems).map(([chainId, items]) => ({ chainId, items })),
@@ -75,11 +75,11 @@ const REFETCH_EVENTS = [
   TxEvent.DELETED,
 ] as const
 
-type SpaceQueueArgs = { spaceId: string; filters?: SpaceQueueFilters; search?: string }
+type SpaceQueueQuery = { filters?: SpaceQueueFilters; search?: string }
 
 const joinOrOmit = (values: string[]): string | undefined => (values.length > 0 ? values.join(',') : undefined)
 
-const toQueryArgs = ({ spaceId, filters = NO_SPACE_QUEUE_FILTERS, search }: SpaceQueueArgs) => {
+const toQueryArgs = (spaceId: string, { filters = NO_SPACE_QUEUE_FILTERS, search }: SpaceQueueQuery) => {
   const statuses = filters.statuses.filter((option) => (SPACE_QUEUE_STATUSES as readonly string[]).includes(option))
   return {
     spaceId,
@@ -93,27 +93,30 @@ const toQueryArgs = ({ spaceId, filters = NO_SPACE_QUEUE_FILTERS, search }: Spac
   } satisfies SpaceTransactionsGetTransactionQueueV1ApiArg
 }
 
-/** The Space queue grouped by Safe and chain, read through the generated queue endpoint and refetched after a tx event */
-export const useSpaceQueue = (args: SpaceQueueArgs | SkipToken, options?: SubscriptionOptions) => {
-  const result = useSpaceTransactionsGetTransactionQueueV1Query(
-    args === skipToken ? skipToken : toQueryArgs(args),
+/** The Space queue grouped by Safe and chain, refetched after a tx event */
+export const useSpaceQueue = (
+  spaceId: string,
+  query: SpaceQueueQuery = {},
+  options: SubscriptionOptions & { skip?: boolean } = {},
+) => {
+  const { data, currentData, isError, isFetching, refetch } = useSpaceTransactionsGetTransactionQueueV1Query(
+    toQueryArgs(spaceId, query),
     options,
   )
-  const isSkipped = args === skipToken
-  const { refetch } = result
+  const { skip } = options
 
   // A second refetch of an entry already loading sends no request, so the page and the poller can both listen
   useEffect(() => {
-    if (isSkipped) return
+    if (skip) return
     const unsubscribers = REFETCH_EVENTS.map((event) => txSubscribe(event, () => refetch()))
     return () => unsubscribers.forEach((unsubscribe) => unsubscribe())
-  }, [isSkipped, refetch])
+  }, [skip, refetch])
 
-  const isNarrowed = args !== skipToken && (hasSpaceQueueFilters(args.filters) || !!args.search)
-  const data = useMemo(() => result.data && toSpaceQueue(result.data, isNarrowed), [result.data, isNarrowed])
-  const currentData = useMemo(
-    () => result.currentData && toSpaceQueue(result.currentData, isNarrowed),
-    [result.currentData, isNarrowed],
+  const isNarrowed = hasSpaceQueueFilters(query.filters) || !!query.search
+  const queue = useMemo(
+    () => (currentData ? toSpaceQueue(currentData, isNarrowed) : undefined),
+    [currentData, isNarrowed],
   )
-  return { ...result, data, currentData }
+  // The last answer's counts stay while a new filter loads, so the menus keep them
+  return { queue, counts: data?.counts, isError, isFetching, refetch }
 }
