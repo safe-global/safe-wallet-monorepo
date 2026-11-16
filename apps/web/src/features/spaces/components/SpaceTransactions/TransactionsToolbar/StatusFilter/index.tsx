@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@safe-global/views/components/ui/dropdown-menu'
-import { SPACE_QUEUE_FLAGS, SPACE_QUEUE_STATUSES, type SpaceQueueStatusOption } from '../../../../store/spaceQueueApi'
+import { SPACE_QUEUE_FLAGS, SPACE_QUEUE_STATUSES, type SpaceQueueStatusOption } from '../../../../hooks/useSpaceQueue'
 import { STATUS_OPTION_LABELS } from '../utils'
 
 const SUCCESS_TILE = 'bg-success-subtle text-success-strong'

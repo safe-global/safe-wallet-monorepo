@@ -1,6 +1,6 @@
 import type { SpaceQueueCounts, SpaceQueueSafe } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { SpaceQueueStatusOption } from '../../../store/spaceQueueApi'
+import type { SpaceQueueStatusOption } from '../../../hooks/useSpaceQueue'
 
 type StatusOptionLabels = { menu: string; chip: string }
 

@@ -1,8 +1,11 @@
-import { cgwClient } from '@safe-global/store/gateway/cgwClient'
-import type {
-  SpaceQueueCounts,
-  SpaceQueuedItemPage,
-  SpaceQueueSafe,
+import { useMemo } from 'react'
+import { skipToken, type SkipToken, type SubscriptionOptions } from '@reduxjs/toolkit/query'
+import {
+  useSpaceTransactionsGetTransactionQueueV1Query,
+  type SpaceQueueCounts,
+  type SpaceQueuedItemPage,
+  type SpaceQueueSafe,
+  type SpaceTransactionsGetTransactionQueueV1ApiArg,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { isTransactionQueuedItem } from '@/utils/transaction-guards'
 
@@ -31,7 +34,6 @@ export const hasSpaceQueueFilters = (filters?: SpaceQueueFilters): boolean =>
 
 export type SpaceQueue = {
   sections: SpaceQueueSection[]
-  unavailableSafes: SpaceQueueSafe[]
   /** Faceted: the status counts follow the Safe filter, `counts.safes` follows the Status filter */
   counts: SpaceQueueCounts
   /** Transactions in `sections` */
@@ -42,7 +44,7 @@ export type SpaceQueue = {
   isComplete: boolean
 }
 
-const toSpaceQueue = (page: SpaceQueuedItemPage, filters?: SpaceQueueFilters): SpaceQueue => {
+const toSpaceQueue = (page: SpaceQueuedItemPage, isFiltered: boolean): SpaceQueue => {
   const sections = Object.entries(page.results).map(([safeAddress, chainItems]) => ({
     safeAddress,
     chains: Object.entries(chainItems).map(([chainId, items]) => ({ chainId, items })),
@@ -54,11 +56,10 @@ const toSpaceQueue = (page: SpaceQueuedItemPage, filters?: SpaceQueueFilters): S
 
   return {
     sections,
-    unavailableSafes: page.unavailableSafes,
     counts: page.counts,
     shownCount,
     totalCount,
-    isComplete: hasSpaceQueueFilters(filters) || shownCount >= totalCount,
+    isComplete: isFiltered || shownCount >= totalCount,
   }
 }
 
@@ -66,31 +67,30 @@ type SpaceQueueArgs = { spaceId: string; filters?: SpaceQueueFilters }
 
 const joinOrOmit = (values: string[]): string | undefined => (values.length > 0 ? values.join(',') : undefined)
 
-const toParams = ({ filters }: SpaceQueueArgs) => {
-  if (!filters || !hasSpaceQueueFilters(filters)) return undefined
+const toQueryArgs = ({ spaceId, filters = NO_SPACE_QUEUE_FILTERS }: SpaceQueueArgs) => {
   const statuses = filters.statuses.filter((option) => (SPACE_QUEUE_STATUSES as readonly string[]).includes(option))
   return {
-    status: joinOrOmit(statuses),
+    spaceId,
+    status: statuses.length > 0 ? statuses : undefined,
     conflicting: filters.statuses.includes('conflicting') || undefined,
     stale: filters.statuses.includes('stale') || undefined,
     safes: joinOrOmit(filters.safes.map(({ chainId, safeAddress }) => `${chainId}:${safeAddress}`)),
     chainIds: joinOrOmit(filters.chainIds),
     signers: joinOrOmit(filters.signers),
-  }
+  } satisfies SpaceTransactionsGetTransactionQueueV1ApiArg
 }
 
-// Built on cgwClient, not the generated spaces api, which many tests replace with a partial mock
-export const spaceQueueApi = cgwClient.enhanceEndpoints({ addTagTypes: ['transactions'] }).injectEndpoints({
-  endpoints: (build) => ({
-    getSpaceQueue: build.query<SpaceQueue, SpaceQueueArgs>({
-      query: (args) => ({
-        url: `/v1/spaces/${args.spaceId}/transactions/queued`,
-        params: toParams(args),
-      }),
-      transformResponse: (page: SpaceQueuedItemPage, _meta, { filters }) => toSpaceQueue(page, filters),
-      providesTags: ['transactions'],
-    }),
-  }),
-})
-
-export const { useGetSpaceQueueQuery } = spaceQueueApi
+/** The Space queue grouped by Safe and chain, read through the generated queue endpoint */
+export const useSpaceQueue = (args: SpaceQueueArgs | SkipToken, options?: SubscriptionOptions) => {
+  const result = useSpaceTransactionsGetTransactionQueueV1Query(
+    args === skipToken ? skipToken : toQueryArgs(args),
+    options,
+  )
+  const isFiltered = args !== skipToken && hasSpaceQueueFilters(args.filters)
+  const data = useMemo(() => result.data && toSpaceQueue(result.data, isFiltered), [result.data, isFiltered])
+  const currentData = useMemo(
+    () => result.currentData && toSpaceQueue(result.currentData, isFiltered),
+    [result.currentData, isFiltered],
+  )
+  return { ...result, data, currentData }
+}

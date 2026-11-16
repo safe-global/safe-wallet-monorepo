@@ -10,7 +10,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@safe-global/views/components/ui/dropdown-menu'
-import type { SpaceQueueFilters } from '../../../../store/spaceQueueApi'
+import type { SpaceQueueFilters } from '../../../../hooks/useSpaceQueue'
 import NetworkOptions from '../NetworkOptions'
 import { SafeOptions } from '../SafeFilter'
 import SignerOptions from '../SignerOptions'

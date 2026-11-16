@@ -1,24 +1,16 @@
 import { faker } from '@faker-js/faker'
-import { combineReducers, configureStore } from '@reduxjs/toolkit'
 import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
-import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
+import { renderHook, waitFor } from '@/tests/test-utils'
+import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import type { SpaceQueuedItemPage, TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { TransactionListItemType } from '@safe-global/store/gateway/types'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
-import { spaceQueueApi, type SpaceQueueFilters } from '../spaceQueueApi'
+import { useSpaceQueue, type SpaceQueueFilters } from '../useSpaceQueue'
 
 const spaceId = faker.string.uuid()
 const queueUrl = `${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`
-
-const makeStore = () => {
-  setBaseUrl(GATEWAY_URL)
-  return configureStore({
-    reducer: combineReducers({ [cgwClient.reducerPath]: cgwClient.reducer }),
-    middleware: (getDefault) => getDefault({ serializableCheck: false }).concat(cgwClient.middleware),
-  })
-}
 
 const transactions = (count: number): TransactionQueuedItem[] =>
   Array.from({ length: count }, () => ({
@@ -62,12 +54,19 @@ const respondWith = (body: SpaceQueuedItemPage | null, status = 200) => {
   return urls
 }
 
-const fetchQueue = (store: ReturnType<typeof makeStore>, filters?: SpaceQueueFilters) =>
-  store.dispatch(spaceQueueApi.endpoints.getSpaceQueue.initiate({ spaceId, filters }))
+const fetchQueue = async (filters?: SpaceQueueFilters) => {
+  const { result } = renderHook(() => useSpaceQueue({ spaceId, filters }))
+  await waitFor(() => expect(result.current.isLoading).toBe(false))
+  return result.current
+}
 
-describe('spaceQueueApi.getSpaceQueue', () => {
+describe('useSpaceQueue', () => {
   const safeA = faker.finance.ethereumAddress()
   const safeB = faker.finance.ethereumAddress()
+
+  beforeEach(() => {
+    setBaseUrl(GATEWAY_URL)
+  })
 
   it('turns the results into one section per Safe with one entry per chain', async () => {
     const ethItems = transactions(2)
@@ -75,7 +74,7 @@ describe('spaceQueueApi.getSpaceQueue', () => {
     const safeBItems = transactions(1)
     respondWith(page({ [safeA]: { '1': ethItems, '100': gnosisItems }, [safeB]: { '1': safeBItems } }, { count: 4 }))
 
-    const { data } = await fetchQueue(makeStore())
+    const { data } = await fetchQueue()
 
     expect(data).toEqual({
       sections: [
@@ -88,7 +87,6 @@ describe('spaceQueueApi.getSpaceQueue', () => {
         },
         { safeAddress: safeB, chains: [{ chainId: '1', items: safeBItems }] },
       ],
-      unavailableSafes: [],
       counts: zeroCounts,
       shownCount: 4,
       totalCount: 4,
@@ -99,7 +97,7 @@ describe('spaceQueueApi.getSpaceQueue', () => {
   it('reads the whole queue in one request without a cursor', async () => {
     const urls = respondWith(page({ [safeA]: { '1': transactions(1) } }, { count: 1 }))
 
-    await fetchQueue(makeStore())
+    await fetchQueue()
 
     expect(urls).toHaveLength(1)
     expect(urls[0].search).toBe('')
@@ -108,7 +106,7 @@ describe('spaceQueueApi.getSpaceQueue', () => {
   it('flags the queue as incomplete when the gateway returned fewer transactions than the count', async () => {
     respondWith(page({ [safeA]: { '1': transactions(3) } }, { count: 10 }))
 
-    const { data } = await fetchQueue(makeStore())
+    const { data } = await fetchQueue()
 
     expect(data).toMatchObject({ shownCount: 3, totalCount: 10, isComplete: false })
   })
@@ -121,7 +119,7 @@ describe('spaceQueueApi.getSpaceQueue', () => {
     ]
     respondWith(page({ [safeA]: { '1': items } }, { count: 2 }))
 
-    const { data } = await fetchQueue(makeStore())
+    const { data } = await fetchQueue()
 
     expect(data).toMatchObject({ shownCount: 2, totalCount: 2, isComplete: true })
   })
@@ -129,24 +127,15 @@ describe('spaceQueueApi.getSpaceQueue', () => {
   it('treats a missing count as the transactions returned', async () => {
     respondWith(page({ [safeA]: { '1': transactions(2) } }, { count: null }))
 
-    const { data } = await fetchQueue(makeStore())
+    const { data } = await fetchQueue()
 
     expect(data).toMatchObject({ shownCount: 2, totalCount: 2, isComplete: true })
-  })
-
-  it('passes the unavailable Safes through', async () => {
-    const unavailableSafes = [{ chainId: '1', safeAddress: safeB }]
-    respondWith(page({}, { count: 0, unavailableSafes }))
-
-    const { data } = await fetchQueue(makeStore())
-
-    expect(data).toMatchObject({ sections: [], unavailableSafes, isComplete: true })
   })
 
   it('fails when the request fails', async () => {
     respondWith(null, 500)
 
-    const result = await fetchQueue(makeStore())
+    const result = await fetchQueue()
 
     expect(result.isError).toBe(true)
     expect(result.data).toBeUndefined()
@@ -159,7 +148,7 @@ describe('spaceQueueApi.getSpaceQueue', () => {
       { chainId: '100', safeAddress: safeB },
     ]
 
-    await fetchQueue(makeStore(), {
+    await fetchQueue({
       statuses: ['sign', 'conflicting', 'execute', 'stale'],
       safes,
       chainIds: ['1', '137'],
@@ -179,7 +168,7 @@ describe('spaceQueueApi.getSpaceQueue', () => {
   it('sends only the params of the filters in use', async () => {
     const urls = respondWith(page({}, { count: 0 }))
 
-    await fetchQueue(makeStore(), { statuses: ['conflicting'], safes: [], chainIds: [], signers: [] })
+    await fetchQueue({ statuses: ['conflicting'], safes: [], chainIds: [], signers: [] })
 
     expect(Object.fromEntries(urls[0].searchParams)).toEqual({ conflicting: 'true' })
   })
@@ -187,7 +176,7 @@ describe('spaceQueueApi.getSpaceQueue', () => {
   it('sends no params when no filter is chosen', async () => {
     const urls = respondWith(page({}, { count: 0 }))
 
-    await fetchQueue(makeStore(), { statuses: [], safes: [], chainIds: [], signers: [] })
+    await fetchQueue({ statuses: [], safes: [], chainIds: [], signers: [] })
 
     expect(urls[0].search).toBe('')
   })
@@ -196,7 +185,7 @@ describe('spaceQueueApi.getSpaceQueue', () => {
     const counts = { ...zeroCounts, total: 2, sign: 2, safes: [{ chainId: '1', safeAddress: safeA, count: 2 }] }
     respondWith(page({ [safeA]: { '1': transactions(2) } }, { count: 2, counts }))
 
-    const { data } = await fetchQueue(makeStore())
+    const { data } = await fetchQueue()
 
     expect(data?.counts).toEqual(counts)
   })
@@ -204,7 +193,7 @@ describe('spaceQueueApi.getSpaceQueue', () => {
   it('does not flag a filtered queue as incomplete for holding fewer transactions than the count', async () => {
     respondWith(page({ [safeA]: { '1': transactions(1) } }, { count: 10 }))
 
-    const { data } = await fetchQueue(makeStore(), { statuses: ['sign'], safes: [], chainIds: [], signers: [] })
+    const { data } = await fetchQueue({ statuses: ['sign'], safes: [], chainIds: [], signers: [] })
 
     expect(data?.isComplete).toBe(true)
   })

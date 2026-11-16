@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import type { SpaceQueueCounts } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import type { SpaceQueueFilters } from '../../../store/spaceQueueApi'
+import type { SpaceQueueFilters } from '../../../hooks/useSpaceQueue'
 import NewTransactionButton from '../NewTransactionButton'
 import FilterChips from './FilterChips'
 import FilterMenu from './FilterMenu'
