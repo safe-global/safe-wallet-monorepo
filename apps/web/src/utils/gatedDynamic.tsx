@@ -13,7 +13,7 @@ import dynamic from '@/utils/dynamic'
  */
 export function gatedDynamic<P extends object>(
   feature: FEATURES,
-  loader: () => Promise<{ default: ComponentType<P> }>,
+  loader: () => Promise<{ default: ComponentType<P> } | ComponentType<P>>,
 ): ComponentType<P> {
   const LazyComponent = dynamic(loader)
 
