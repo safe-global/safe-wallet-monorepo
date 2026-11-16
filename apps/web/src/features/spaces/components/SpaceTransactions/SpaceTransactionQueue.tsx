@@ -3,8 +3,8 @@ import PagePlaceholder from '@safe-global/views/components/common/PagePlaceholde
 import SkeletonTxList from '@safe-global/views/components/common/PaginatedTxns/SkeletonTxList'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import NoTransactionsIcon from '@/public/images/transactions/no-transactions.svg'
-import { useGetSpaceQueueQuery, type SpaceQueue } from '../../store/spaceQueueApi'
-import { QueueLoadError } from './QueueStates'
+import { useSpaceQueue, type SpaceQueue } from '../../hooks/useSpaceQueue'
+import { QueueLoadError } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueStates'
 import SpaceQueueTable from './SpaceQueueTable'
 import TransactionsToolbar from './TransactionsToolbar'
 
@@ -32,7 +32,7 @@ const QueueBody = ({ queue }: { queue: SpaceQueue }): ReactElement => {
 }
 
 const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement => {
-  const { currentData, isError, refetch } = useGetSpaceQueueQuery({ spaceId })
+  const { currentData, isError, refetch } = useSpaceQueue({ spaceId })
 
   return (
     <div className="flex flex-col gap-6">

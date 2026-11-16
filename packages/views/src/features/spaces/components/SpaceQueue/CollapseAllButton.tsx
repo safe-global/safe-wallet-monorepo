@@ -11,9 +11,9 @@ const CollapseAllButton = ({
   count: number
   onToggle: () => void
 }): ReactElement => (
-  // Chevrons always; the outline and the word show on header hover. The wrapper undoes the header's capitals.
-  <span className="normal-case [&>button]:border-transparent [&>button]:shadow-none group-hover/head:[&>button]:border-border group-hover/head:[&>button]:shadow-xs group-focus-within/head:[&>button]:border-border group-focus-within/head:[&>button]:shadow-xs">
-    <Button size="xs" variant="outline" aria-label={allCollapsed ? 'Expand all' : 'Collapse all'} onClick={onToggle}>
+  // The header sets its labels in capitals; the button's label is a sentence
+  <span className="normal-case">
+    <Button size="xs" variant="ghost" aria-label={allCollapsed ? 'Expand all' : 'Collapse all'} onClick={onToggle}>
       <span className="opacity-0 transition-opacity group-hover/head:opacity-100 group-focus-within/head:opacity-100">
         {allCollapsed ? 'Expand' : 'Collapse'} {count} {count === 1 ? 'Safe' : 'Safes'}
       </span>
