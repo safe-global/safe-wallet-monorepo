@@ -201,15 +201,11 @@ export const SetUpInvestmentStepper = ({
             <>
               <Stepper current={current} reached={reached} labels={summaries(form)} onJump={setCurrent} />
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="flex-1"
-                  disabled={current === 0}
-                  onClick={() => setCurrent(current - 1)}
-                >
-                  {COPY.back}
-                </Button>
+                {current > 0 && (
+                  <Button variant="outline" size="lg" className="flex-1" onClick={() => setCurrent(current - 1)}>
+                    {COPY.back}
+                  </Button>
+                )}
                 <Button size="lg" className="flex-1" disabled={!view.valid} onClick={next}>
                   {isLast ? COPY.submit : COPY.next}
                 </Button>
