@@ -49,7 +49,7 @@ jest.mock('@/store', () => ({
     selector({ featureFlagOverrides: {}, auth: {} }),
 }))
 
-jest.mock('@/features/counterfactual/hooks/useIsCounterfactualSafe', () => ({
+jest.mock('@/features/counterfactual/public/useIsCounterfactualSafe', () => ({
   __esModule: true,
   default: () => false,
 }))

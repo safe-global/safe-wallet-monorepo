@@ -70,14 +70,6 @@ const FEATURE_FLAG_MATRIX: Array<{
     },
   },
   {
-    label: 'counterfactual',
-    featureFlag: FEATURES.COUNTERFACTUAL,
-    getHandle: () => {
-      const { CounterfactualFeature } = jest.requireActual('@/features/counterfactual')
-      return CounterfactualFeature
-    },
-  },
-  {
     label: 'hypernative',
     featureFlag: FEATURES.HYPERNATIVE,
     getHandle: () => {

@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { useAppSelector } from '@/store'
-import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { selectUndeployedSafes } from '@/features/counterfactual/public/undeployedSafesSlice'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import type { useLoadFeature } from '@/features/__core__/useLoadFeature'

@@ -19,7 +19,7 @@ import { swapOrderListener, swapOrderStatusListener } from '@/store/swapOrderSli
 import { txHistoryListener } from '@/store/txHistorySlice'
 import { txQueueListener } from '@/store/txQueueSlice'
 import { authListener } from '@/store/authSlice'
-import { counterfactualSyncListener } from '@/features/counterfactual/store/counterfactualSyncListener'
+import { counterfactualSyncListener } from '@/features/counterfactual/public/counterfactualSyncListener'
 import { addressBookListener } from '@/store/addressBookSlice'
 import { spaceSafesEntitlementsListener } from '@/features/spaces/store/spaceSafesEntitlementsListener'
 import { planChangeSyncListener } from '@/features/spaces/store/planChangeSyncListener'

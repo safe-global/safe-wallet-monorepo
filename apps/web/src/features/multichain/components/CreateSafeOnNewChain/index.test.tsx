@@ -3,7 +3,7 @@ import { getStoreInstance } from '@/store'
 import * as useChains from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
 import { CreateSafeOnSpecificChain } from './index'
-import { persistCounterfactualSafe } from '@/features/counterfactual/services/persistCounterfactualSafe'
+import { persistCounterfactualSafe } from '@/features/counterfactual/public/persistCounterfactualSafe'
 import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import { useSpaceSafeCount } from '@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit'
 import { useSpaceSafeLimit } from '@/features/spaces/hooks/useSpaceSafeLimit'
@@ -14,7 +14,7 @@ import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactu
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { NextRouter } from 'next/router'
 
-jest.mock('@/features/counterfactual/services/persistCounterfactualSafe', () => ({
+jest.mock('@/features/counterfactual/public/persistCounterfactualSafe', () => ({
   persistCounterfactualSafe: jest.fn(),
 }))
 

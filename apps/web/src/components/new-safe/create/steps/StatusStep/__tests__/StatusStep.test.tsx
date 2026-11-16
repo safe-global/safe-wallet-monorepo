@@ -17,16 +17,16 @@ jest.mock('@/features/spaces/hooks/useAddNewSafeToUrlSpace', () => ({
   useAddNewSafeToUrlSpace: () => mockAddNewSafeToUrlSpace,
 }))
 
-jest.mock('@/features/counterfactual/hooks/safeCreationPendingStatuses', () => ({
+jest.mock('@/features/counterfactual/public/safeCreationPendingStatuses', () => ({
   safeCreationPendingStatuses: { SUCCESS: null },
 }))
 
-jest.mock('@/features/counterfactual/services/typeGuards', () => ({
-  ...jest.requireActual('@/features/counterfactual/services/typeGuards'),
+jest.mock('@/features/counterfactual/public/typeGuards', () => ({
+  ...jest.requireActual('@/features/counterfactual/public/typeGuards'),
   isPredictedSafeProps: () => false,
 }))
-jest.mock('@/features/counterfactual/services/safeCreationEvents', () => ({
-  ...jest.requireActual('@/features/counterfactual/services/safeCreationEvents'),
+jest.mock('@/features/counterfactual/public/safeCreationEvents', () => ({
+  ...jest.requireActual('@/features/counterfactual/public/safeCreationEvents'),
   safeCreationSubscribe: (event: string, listener: () => void) => {
     listeners.set(event, listener)
     return () => listeners.delete(event)

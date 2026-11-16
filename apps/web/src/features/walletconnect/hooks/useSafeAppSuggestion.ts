@@ -7,7 +7,7 @@ import useChains, { useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { useSanctionedAddress } from '@/hooks/useSanctionedAddress'
-import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import useIsCounterfactualSafe from '@/features/counterfactual/public/useIsCounterfactualSafe'
 import { getProposalRisk, needsConnectionForm } from '../services/proposalRisk'
 import { useMatchingSafeApp } from './useMatchingSafeApp'
 

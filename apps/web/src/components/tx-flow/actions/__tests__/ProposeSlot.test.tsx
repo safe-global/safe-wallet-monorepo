@@ -36,7 +36,7 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   useSigner: jest.fn(() => ({ address: '0x1234567890000000000000000000000000000009' })),
 }))
 
-jest.mock('@/features/counterfactual/hooks/useIsCounterfactualSafe', () => ({
+jest.mock('@/features/counterfactual/public/useIsCounterfactualSafe', () => ({
   __esModule: true,
   default: jest.fn(() => false),
 }))

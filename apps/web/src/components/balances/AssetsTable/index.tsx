@@ -1,5 +1,4 @@
-import { CounterfactualFeature } from '@/features/counterfactual'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import CheckBalance from '@/features/counterfactual/public/CheckBalance'
 import React, { type ReactElement } from 'react'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
@@ -84,15 +83,6 @@ const skeletonCells: EnhancedTableProps['rows'][0]['cells'] = {
 }
 
 const skeletonRows: EnhancedTableProps['rows'] = Array(3).fill({ cells: skeletonCells })
-
-/**
- * Wrapper component for counterfactual CheckBalance.
- * Extracted to reduce cyclomatic complexity in AssetsTable.
- */
-function CounterfactualCheckBalance(): ReactElement | null {
-  const { CheckBalance } = useLoadFeature(CounterfactualFeature)
-  return CheckBalance ? <CheckBalance /> : null
-}
 
 const AssetsTable = ({
   showHiddenAssets,
@@ -299,7 +289,7 @@ const AssetsTable = ({
         </Card>
       )}
 
-      <CounterfactualCheckBalance />
+      <CheckBalance />
     </>
   )
 }

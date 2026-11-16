@@ -2,7 +2,7 @@
  * Lightweight mapping of creation events to pending statuses.
  * Separated from usePendingSafeStatuses to prevent pulling in heavy dependencies.
  */
-import { SafeCreationEvent } from '../services/safeCreationEvents'
+import { SafeCreationEvent } from './safeCreationEvents'
 import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
 
 export const safeCreationPendingStatuses: Partial<Record<SafeCreationEvent, PendingSafeStatus | null>> = {

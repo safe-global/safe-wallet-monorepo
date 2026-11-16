@@ -1,13 +1,13 @@
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual/services/safeCreationEvents'
+import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual/public/safeCreationEvents'
 import {
   replayCounterfactualSafeDeployment,
   activateReplayedSafe,
-} from '@/features/counterfactual/services/safeDeployment'
-import { persistCounterfactualSafe } from '@/features/counterfactual/services/persistCounterfactualSafe'
-import { CF_TX_GROUP_KEY } from '@/features/counterfactual/constants'
-import PayNowPayLater from '@/features/counterfactual/components/PayNowPayLater'
+} from '@/features/counterfactual/public/safeDeployment'
+import { persistCounterfactualSafe } from '@/features/counterfactual/public/persistCounterfactualSafe'
+import { CF_TX_GROUP_KEY } from '@/features/counterfactual/public/constants'
+import PayNowPayLater from '@/features/counterfactual/public/PayNowPayLater'
 import NetworkLogosList from '@/components/common/NetworkLogosList'
 import { predictAddressBasedOnReplayData } from '@/features/multichain/public/utils'
 

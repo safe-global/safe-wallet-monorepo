@@ -8,19 +8,14 @@ import { SidebarActionButton } from '../SidebarActionButton'
 const mockSetTxFlow = jest.fn()
 const mockTrackEvent = jest.fn()
 const mockUseIsCounterfactualSafe = jest.fn()
-const mockUseLoadFeature = jest.fn()
 
-jest.mock('@/features/counterfactual/hooks/useIsCounterfactualSafe', () => ({
+jest.mock('@/features/counterfactual/public/useIsCounterfactualSafe', () => ({
   __esModule: true,
   default: () => mockUseIsCounterfactualSafe(),
 }))
-jest.mock('@/features/counterfactual', () => ({
-  CounterfactualFeature: 'counterfactual-feature',
-}))
-
-jest.mock('@/features/__core__/useLoadFeature', () => ({
-  ...jest.requireActual('@/features/__core__/useLoadFeature'),
-  useLoadFeature: () => mockUseLoadFeature(),
+jest.mock('@/features/counterfactual/public/ActivateAccountButton', () => ({
+  __esModule: true,
+  default: () => <button>Activate account</button>,
 }))
 
 jest.mock('@/services/analytics', () => ({
@@ -86,7 +81,6 @@ describe('SidebarActionButton', () => {
     mockRole('owner')
     mockSafeInfo({ deployed: true })
     mockUseIsCounterfactualSafe.mockReturnValue(false)
-    mockUseLoadFeature.mockReturnValue({ ActivateAccountButton: () => <button>Activate account</button> })
   })
 
   it('renders the New transaction button', () => {

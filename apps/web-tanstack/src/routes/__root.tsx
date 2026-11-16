@@ -38,7 +38,7 @@ import { initObservability } from '@/services/observability'
 import Analytics from '@/services/analytics/Analytics'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import Recovery from '@/features/recovery/public/Recovery'
-import { CounterfactualFeature } from '@/features/counterfactual'
+import CounterfactualHooks from '@/features/counterfactual/public/CounterfactualHooks'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLocation, useSearch } from '@tanstack/react-router'
 
@@ -57,10 +57,6 @@ setStoreInstance(reduxStore)
 // the SPA, so a plain React.lazy is equivalent.
 const LazyWeb3Init = lazy(() => import('@/components/common/LazyWeb3Init'))
 
-const CounterfactualHooksLoader = () => {
-  const { CounterfactualHooks } = useLoadFeature(CounterfactualFeature)
-  return <CounterfactualHooks />
-}
 const SpendingLimitsLoaderWrapper = () => {
   const { SpendingLimitsLoader } = useLoadFeature(SpendingLimitsFeature)
   return <SpendingLimitsLoader />
@@ -99,7 +95,7 @@ const MemoizedTree = memo(function MemoizedTree({ pathname, outlet }: { pathname
       <PageLayout pathname={pathname}>{outlet}</PageLayout>
       <AppChrome />
       <Recovery />
-      <CounterfactualHooksLoader />
+      <CounterfactualHooks />
       <SpendingLimitsLoaderWrapper />
     </>
   )

@@ -35,24 +35,14 @@ import useUnlockBodyScroll from '@/hooks/useUnlockBodyScroll'
 import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
-import { CounterfactualFeature } from '@/features/counterfactual'
-import useCounterfactualSafeSync from '@/features/counterfactual/hooks/useCounterfactualSafeSync'
+import CounterfactualHooks from '@/features/counterfactual/public/CounterfactualHooks'
+import useCounterfactualSafeSync from '@/features/counterfactual/public/useCounterfactualSafeSync'
 import { useInviteNotification } from '@/features/spaces/hooks/useInviteNotification'
 import { useSafeWorkspaceAttach } from '@/features/spaces/hooks/useSafeWorkspaceAttach'
 import { useSafeWorkspaceCheck } from '@/features/spaces/hooks/useSafeWorkspaceCheck'
 import Recovery from '@/features/recovery/public/Recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-
-/**
- * Wrapper that lazy-loads CounterfactualHooks via the feature system.
- * This ensures the entire counterfactual feature loads as a single chunk
- * through handle.ts rather than scattered dynamic() imports.
- */
-const CounterfactualHooksLoader = () => {
-  const { CounterfactualHooks } = useLoadFeature(CounterfactualFeature)
-  return <CounterfactualHooks />
-}
 
 /**
  * Wrapper that lazy-loads SpendingLimitsLoader via the feature system.
@@ -193,7 +183,7 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
 
           <Recovery />
 
-          <CounterfactualHooksLoader />
+          <CounterfactualHooks />
 
           <SpendingLimitsLoaderWrapper />
         </CaptchaProvider>
