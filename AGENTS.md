@@ -46,7 +46,7 @@ yarn turbo run test --filter=...@safe-global/utils     # package + dependents
 `type-check` scripts run the native TypeScript 7 compiler, installed at the root as `@typescript/native` because the pinned Yarn can't install it under its real name; workspaces keep `typescript@5.9` because typescript-eslint, ts-jest, ts-node and Next need a compiler API that TS 7.0 lacks.
 
 - `yarn workspace <name> tsc` is 5.9; `yarn workspace <name> type-check` is 7. Use the script.
-- tsconfigs must satisfy both: no `baseUrl`, `moduleResolution: node` or `downlevelIteration`; list `types` explicitly (TS 7 doesn't auto-include `node_modules/@types`).
+- tsconfigs must satisfy both: no `baseUrl`, `moduleResolution: node` or `downlevelIteration`; list `types` explicitly (TS 7 doesn't auto-include `node_modules/@types`). A `tsconfig.jest.json` read only by ts-jest (5.9) is exempt.
 - The editor uses 5.9 unless repointed, so a TS 7-only error shows green until `type-check` runs.
 
 ## Code search

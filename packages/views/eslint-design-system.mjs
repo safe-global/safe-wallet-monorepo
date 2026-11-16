@@ -1,1 +1,1 @@
-export * from '../ui/eslint/design-system.mjs'
+export * from '@safe-global/ui/eslint'
