@@ -25,7 +25,6 @@ const section = (safeAddress: string, chainIds: string[]): SpaceQueueSection => 
 
 const queue = (sections: SpaceQueueSection[], overrides: Partial<SpaceQueue> = {}): SpaceQueue => ({
   sections,
-  unavailableSafes: [],
   shownCount: 0,
   totalCount: 0,
   isComplete: true,
@@ -40,13 +39,12 @@ describe('SpaceTransactionQueue', () => {
 
   const refetch = jest.fn()
 
-  const mockQueue = (state: { currentData?: SpaceQueue; isError?: boolean; isLoading?: boolean }) => {
-    querySpy = jest.spyOn(spaceQueueApi, 'useGetSpaceQueueQuery').mockReturnValue({
-      currentData: state.currentData,
+  const mockQueue = (state: { queue?: SpaceQueue; isError?: boolean }) => {
+    querySpy = jest.spyOn(spaceQueueApi, 'useSpaceQueue').mockReturnValue({
+      queue: state.queue,
       isError: state.isError ?? false,
-      isLoading: state.isLoading ?? false,
       refetch,
-    } as unknown as ReturnType<typeof spaceQueueApi.useGetSpaceQueueQuery>)
+    } as unknown as ReturnType<typeof spaceQueueApi.useSpaceQueue>)
   }
 
   afterEach(() => {
@@ -54,11 +52,11 @@ describe('SpaceTransactionQueue', () => {
   })
 
   it('requests the queue of the Space and renders one section per Safe', () => {
-    mockQueue({ currentData: queue([section(safeA, ['1', '10']), section(safeB, ['137'])]) })
+    mockQueue({ queue: queue([section(safeA, ['1', '10']), section(safeB, ['137'])]) })
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(querySpy).toHaveBeenCalledWith({ spaceId })
+    expect(querySpy).toHaveBeenCalledWith(spaceId)
     const sections = screen.getAllByTestId('space-queue-safe')
     expect(sections).toHaveLength(2)
     expect(sections[0]).toHaveTextContent(`2 chains of ${safeA}`)
@@ -67,7 +65,7 @@ describe('SpaceTransactionQueue', () => {
 
   it('tells how many of the queued transactions are shown when the gateway capped the queue', () => {
     mockQueue({
-      currentData: queue([section(safeA, ['1'])], { shownCount: 500, totalCount: 742, isComplete: false }),
+      queue: queue([section(safeA, ['1'])], { shownCount: 500, totalCount: 742, isComplete: false }),
     })
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
@@ -76,7 +74,7 @@ describe('SpaceTransactionQueue', () => {
   })
 
   it('does not mention a cap when the whole queue was returned', () => {
-    mockQueue({ currentData: queue([section(safeA, ['1'])], { shownCount: 3, totalCount: 3 }) })
+    mockQueue({ queue: queue([section(safeA, ['1'])], { shownCount: 3, totalCount: 3 }) })
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
@@ -84,7 +82,7 @@ describe('SpaceTransactionQueue', () => {
   })
 
   it('shows the empty state when no Safe has pending transactions', () => {
-    mockQueue({ currentData: queue([]) })
+    mockQueue({ queue: queue([]) })
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
@@ -92,7 +90,7 @@ describe('SpaceTransactionQueue', () => {
   })
 
   it('shows skeletons while the first queue loads', () => {
-    mockQueue({ isLoading: true })
+    mockQueue({})
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
