@@ -8,7 +8,7 @@ import type { SpaceQueuedItemPage, TransactionQueuedItem } from '@safe-global/st
 import { TransactionListItemType } from '@safe-global/store/gateway/types'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
-import { toSpaceQueue, useSpaceQueue, type SpaceQueueFilters } from '../spaceQueueApi'
+import { toSpaceQueue, useSpaceQueue, type SpaceQueueFilters } from '../useSpaceQueue'
 
 const spaceId = faker.string.uuid()
 const queueUrl = `${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`

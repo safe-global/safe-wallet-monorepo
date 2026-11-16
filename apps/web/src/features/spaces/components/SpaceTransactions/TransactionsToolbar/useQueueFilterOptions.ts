@@ -8,7 +8,7 @@ import {
   SPACE_QUEUE_FLAGS,
   SPACE_QUEUE_STATUSES,
   type SpaceQueueFilters,
-} from '../../../store/spaceQueueApi'
+} from '../../../hooks/useSpaceQueue'
 import { useSignerNameResolver } from './useSignerNameResolver'
 import {
   getSafeOptions,

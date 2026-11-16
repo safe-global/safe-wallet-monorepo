@@ -1,6 +1,6 @@
 import type { SpaceQueueCounts, SpaceQueueSafe } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { SPACE_QUEUE_FLAGS, SPACE_QUEUE_STATUSES, type SpaceQueueStatusOption } from '../../../store/spaceQueueApi'
+import { SPACE_QUEUE_FLAGS, SPACE_QUEUE_STATUSES, type SpaceQueueStatusOption } from '../../../hooks/useSpaceQueue'
 
 const withCounts = (options: readonly SpaceQueueStatusOption[], counts?: SpaceQueueCounts) =>
   options.map((option) => [option, counts?.[option] ?? 0] as const)

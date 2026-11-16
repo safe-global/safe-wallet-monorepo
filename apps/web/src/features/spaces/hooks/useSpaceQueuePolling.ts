@@ -12,7 +12,7 @@ import { selectPendingTxs, type PendingTxsState } from '@/store/pendingTxsSlice'
 import { isSignableBy, isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useIsActiveMember } from './useSpaceMembers'
-import { useSpaceQueue, type SpaceQueue } from '../store/spaceQueueApi'
+import { useSpaceQueue, type SpaceQueue } from './useSpaceQueue'
 
 // Module scope: Space pages each mount their own AuthState, and a page change must not toast again
 const notifiedTxIds = new Set<string>()

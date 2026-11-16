@@ -13,7 +13,7 @@ import {
   useSpaceQueue,
   type SpaceQueue,
   type SpaceQueueFilters,
-} from '../../store/spaceQueueApi'
+} from '../../hooks/useSpaceQueue'
 import SpaceQueueTable from './SpaceQueueTable'
 import TransactionsToolbar from './TransactionsToolbar'
 import UnavailableSafesAlert from './UnavailableSafesAlert'

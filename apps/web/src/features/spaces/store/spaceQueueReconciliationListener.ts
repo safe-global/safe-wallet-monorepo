@@ -12,7 +12,7 @@ import { PendingStatus, selectPendingTxs, type PendingTx } from '@/store/pending
 import { isMultisigExecutionInfo, isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
-import { toSpaceQueue, type SpaceQueue } from './spaceQueueApi'
+import { toSpaceQueue, type SpaceQueue } from '../hooks/useSpaceQueue'
 
 const SIGNING_STATES = [PendingStatus.SIGNING, PendingStatus.NESTED_SIGNING]
 const POST_EXECUTION_STATES = [
