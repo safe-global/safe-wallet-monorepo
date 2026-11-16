@@ -51,7 +51,7 @@ export const useSpaceQueuePolling = (): void => {
   const walletAddress = useWallet()?.address
 
   const isActive = !!spaceId && isSignedIn && isActiveMember && !!isEnabled
-  // The same arguments as the queue page, so the page and this poll share one request
+  // The unfiltered queue page asks for the same args, so both share one cache entry and one request per poll
   const { currentData, refetch } = useSpaceQueue(isActive ? { spaceId } : skipToken, {
     pollingInterval: POLLING_INTERVAL,
     skipPollingIfUnfocused: true,
