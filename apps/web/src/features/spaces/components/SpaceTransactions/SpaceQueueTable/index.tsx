@@ -232,9 +232,14 @@ const SpaceQueueTable = ({
         <ScopePool targets={scopeTargets} store={scopeStore} />
         <table
           aria-label="Pending transactions"
-          className={cn(tableVariants({ variant: 'panel' }), 'table-fixed min-w-[1128px]')}
+          className={cn(
+            tableVariants({ variant: 'panel' }),
+            'table-fixed',
+            groups ? 'min-w-[1192px]' : 'min-w-[1128px]',
+          )}
         >
           <QueueTableHeader
+            namesSafes={!!groups}
             collapseAll={
               collapseUnit && collapsibleIds.length > 0
                 ? { allCollapsed, count: collapsibleIds.length, unit: collapseUnit, onToggle: toggleAll }

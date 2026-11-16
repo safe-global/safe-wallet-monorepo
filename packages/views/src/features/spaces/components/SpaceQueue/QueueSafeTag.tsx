@@ -6,7 +6,7 @@ import type { ChainInfo } from '@safe-global/views/features/spaces/types'
 /** The Safe a row belongs to, where rows of several Safes share a list. Grey until the row is hovered. */
 const QueueSafeTag = ({ address, name, chain }: { address: string; name: string; chain?: ChainInfo }): ReactElement => (
   <span
-    className="flex max-w-40 min-w-0 shrink-0 items-center gap-1.5 rounded-md bg-muted py-1 pr-2 pl-1 text-sm group-hover/transaction:bg-card"
+    className="flex max-w-38 min-w-0 shrink-0 items-center gap-1.5 rounded-md bg-muted py-1 pr-2 pl-1 text-sm group-hover/transaction:bg-card"
     title={chain ? `${name} on ${chain.chainName}` : name}
   >
     <span className="flex shrink-0 grayscale transition-[filter] group-hover/transaction:grayscale-0">
