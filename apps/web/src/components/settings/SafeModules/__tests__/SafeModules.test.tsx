@@ -4,9 +4,8 @@ import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { mockHasFeature, mockSafeInfo } from '@/tests/mocks/hooks'
 import { mockRole } from '@/tests/mocks/roles'
 import userEvent from '@testing-library/user-event'
-import { RecoveryFeature } from '@/features/recovery'
-import useRecovery from '@/features/recovery/hooks/useRecovery'
-import type { RecoveryStateItem } from '@/features/recovery/services/recovery-state'
+import useRecovery from '@/features/recovery/public/useRecovery'
+import type { RecoveryStateItem } from '@/features/recovery/public/types'
 import { TxModalContext } from '@/components/tx-flow'
 import { RemoveModuleFlow, RemoveRecoveryFlow } from '@/components/tx-flow/flows'
 import SafeModules from '..'
@@ -26,8 +25,8 @@ jest.mock('@/features/spending-limits/hooks/useIsOnlySpendingLimitBeneficiary', 
   default: jest.fn(),
 }))
 
-jest.mock('@/features/recovery/hooks/useRecovery', () => ({
-  ...jest.requireActual('@/features/recovery/hooks/useRecovery'),
+jest.mock('@/features/recovery/public/useRecovery', () => ({
+  ...jest.requireActual('@/features/recovery/public/useRecovery'),
   __esModule: true,
   default: jest.fn(() => [undefined, undefined, false]),
 }))
@@ -109,9 +108,6 @@ describe('SafeModules', () => {
   })
 
   describe('remove module button', () => {
-    // Warm the lazy recovery chunk so the first test's waitFor does not time out on its import
-    beforeAll(() => RecoveryFeature.load())
-
     beforeEach(() => {
       jest.clearAllMocks()
       mockSafeInfo({ deployed: true, modules: [{ value: MOCK_MODULE_1 }] })
@@ -120,6 +116,15 @@ describe('SafeModules', () => {
 
     it.each(['owner', 'proposer', 'nestedOwner'] as const)('is enabled for %s', async (role) => {
       mockRole(role)
+
+      render(<SafeModules />)
+
+      await waitFor(() => expect(screen.getByTestId('module-remove-btn')).toBeEnabled())
+    })
+
+    it('is enabled for an owner on a chain without recovery', async () => {
+      mockHasFeature(false)
+      mockRole('owner')
 
       render(<SafeModules />)
 
@@ -141,8 +146,6 @@ describe('SafeModules', () => {
   })
 
   describe('remove module flow', () => {
-    beforeAll(() => RecoveryFeature.load())
-
     beforeEach(() => {
       jest.clearAllMocks()
       mockSafeInfo({ deployed: true, modules: [{ value: MOCK_MODULE_1 }, { value: MOCK_MODULE_2 }] })

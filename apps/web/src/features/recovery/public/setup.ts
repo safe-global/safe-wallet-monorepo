@@ -6,7 +6,7 @@ import type { JsonRpcProvider } from 'ethers'
 import type { MetaTransactionData } from '@safe-global/types-kit'
 
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { MAX_RECOVERER_PAGE_SIZE } from './recovery-state'
+import { MAX_RECOVERER_PAGE_SIZE } from '../services/recovery-state'
 import type { UpsertRecoveryFlowProps } from '@/components/tx-flow/flows/UpsertRecovery'
 
 export async function _getRecoverySetupTransactions({

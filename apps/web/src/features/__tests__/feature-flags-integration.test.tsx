@@ -70,14 +70,6 @@ const FEATURE_FLAG_MATRIX: Array<{
     },
   },
   {
-    label: 'recovery',
-    featureFlag: FEATURES.RECOVERY,
-    getHandle: () => {
-      const { RecoveryFeature } = jest.requireActual('@/features/recovery')
-      return RecoveryFeature
-    },
-  },
-  {
     label: 'counterfactual',
     featureFlag: FEATURES.COUNTERFACTUAL,
     getHandle: () => {

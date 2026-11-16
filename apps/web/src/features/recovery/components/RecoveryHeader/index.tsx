@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import type { ReactElement } from 'react'
 
-import { useRecoveryQueue } from '../../hooks/useRecoveryQueue'
-import { useIsRecoverer } from '../../hooks/useIsRecoverer'
+import { useRecoveryQueue } from '../../public/useRecoveryQueue'
+import { useIsRecoverer } from '../../public/useIsRecoverer'
 import madProps from '@/utils/mad-props'
 import { RecoveryProposalCard } from '../RecoveryCards/RecoveryProposalCard'
 import { RecoveryInProgressCard } from '../RecoveryCards/RecoveryInProgressCard'
 import { RecoveryEvent, RecoveryTxType, recoverySubscribe } from '../../services/recoveryEvents'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import type { RecoveryQueueItem } from '../../public/types'
 
 function InternalRecoveryHeader({
   isProposalInProgress,

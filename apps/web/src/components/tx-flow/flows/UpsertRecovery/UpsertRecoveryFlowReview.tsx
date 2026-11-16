@@ -6,7 +6,7 @@ import { TxDataRow } from '@/components/transactions/TxDetails/Summary/TxDataRow
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
-import { getRecoveryUpsertTransactions } from '@/features/recovery/services/setup'
+import { getRecoveryUpsertTransactions } from '@/features/recovery/public/setup'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { createMultiSendCallOnlyTx, createTx } from '@/services/tx/tx-sender/create'
 import { TOOLTIP_TITLES } from '@safe-global/views/components/tx-flow/common/constants'

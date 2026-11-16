@@ -1,7 +1,6 @@
 import type { PropsWithChildren, ReactElement } from 'react'
-import { RecoveryFeature } from '@/features/recovery'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import CancelRecoveryReview from '@/features/recovery/public/CancelRecoveryReview'
+import type { RecoveryQueueItem } from '@/features/recovery/public/types'
 
 export function CancelRecoveryFlowReview({
   recovery,
@@ -11,8 +10,6 @@ export function CancelRecoveryFlowReview({
   recovery: RecoveryQueueItem
   onSubmit: () => void
 }>): ReactElement | null {
-  const { CancelRecoveryReview } = useLoadFeature(RecoveryFeature)
-
   return (
     <CancelRecoveryReview recovery={recovery} onSubmit={onSubmit}>
       {children}

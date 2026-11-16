@@ -4,11 +4,11 @@ import { render, screen } from '@/tests/test-utils'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { getRecoveredSafeInfo } from '../../services/transaction-list'
 import RecoveryDescription from '.'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import type { RecoveryQueueItem } from '../../public/types'
 
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('../../services/transaction-list')
-jest.mock('../../hooks/useIsRecoverer', () => ({ useIsRecoverer: () => false }))
+jest.mock('../../public/useIsRecoverer', () => ({ useIsRecoverer: () => false }))
 
 const mockUseSafeInfo = useSafeInfo as jest.MockedFunction<typeof useSafeInfo>
 const mockGetRecoveredSafeInfo = getRecoveredSafeInfo as jest.MockedFunction<typeof getRecoveredSafeInfo>

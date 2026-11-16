@@ -8,12 +8,12 @@ import { trackError, Errors } from '@/services/exceptions'
 import { RecoveryListItemContext } from '@safe-global/views/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
 import CancelRecoveryButton from '.'
 import { useClock } from '../../hooks/useClock'
-import { dispatchRecoverySkipExpired } from '../../services/recovery-sender'
-import { NOW, seedRecoveryScenario, type RecoveryScenarioName } from '../../test-helpers'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import { dispatchRecoverySkipExpired } from '../../public/recovery-sender'
+import { NOW, seedRecoveryScenario, type RecoveryScenarioName } from '../../public/test-helpers'
+import type { RecoveryQueueItem } from '../../public/types'
 
 jest.mock('../../hooks/useClock')
-jest.mock('../../services/recovery-sender')
+jest.mock('../../public/recovery-sender')
 jest.mock('@/services/analytics')
 jest.mock('@/services/exceptions', () => ({
   ...jest.requireActual('@/services/exceptions'),

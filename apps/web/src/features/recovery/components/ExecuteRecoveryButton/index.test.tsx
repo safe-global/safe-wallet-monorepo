@@ -5,8 +5,8 @@ import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { RecoveryAttemptFlow } from '@/components/tx-flow/flows'
 import ExecuteRecoveryButton from '.'
 import { useClock } from '../../hooks/useClock'
-import { NOW, seedRecoveryScenario, type RecoveryScenarioName } from '../../test-helpers'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import { NOW, seedRecoveryScenario, type RecoveryScenarioName } from '../../public/test-helpers'
+import type { RecoveryQueueItem } from '../../public/types'
 
 jest.mock('../../hooks/useClock')
 jest.mock('@/hooks/wallets/useWallet')

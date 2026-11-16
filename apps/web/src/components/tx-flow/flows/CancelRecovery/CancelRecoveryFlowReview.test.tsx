@@ -6,9 +6,8 @@ import { mockHasFeature } from '@/tests/mocks/hooks'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
 import { safeTxContextBuilder } from '@/tests/builders/safeTxContext'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
-import { RecoveryFeature } from '@/features/recovery'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
-import { seedRecoveryScenario } from '@/features/recovery/test-helpers'
+import type { RecoveryQueueItem } from '@/features/recovery/public/types'
+import { seedRecoveryScenario } from '@/features/recovery/public/test-helpers'
 import { createTx } from '@/services/tx/tx-sender/create'
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
@@ -56,9 +55,8 @@ const renderReview = (recovery: RecoveryQueueItem) => {
 }
 
 describe('CancelRecoveryFlowReview', () => {
-  beforeAll(async () => {
-    await RecoveryFeature.load()
-  })
+  // Warm the lazy chunk so the first findBy does not time out on its import
+  beforeAll(() => import('@/features/recovery/components/CancelRecoveryReview'))
 
   beforeEach(() => {
     jest.clearAllMocks()

@@ -4,17 +4,17 @@ import { useRouter } from 'next/router'
 import { ChevronRight } from 'lucide-react'
 import type { ReactElement } from 'react'
 
-import { RecoveryFeature } from '@/features/recovery'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import RecoveryInfo from '@safe-global/views/features/recovery/components/RecoveryInfo'
+import RecoveryType from '@safe-global/views/features/recovery/components/RecoveryType'
+import RecoveryStatus from '@/features/recovery/public/RecoveryStatus'
 import { AppRoutes } from '@/config/routes'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '@/features/recovery/public/types'
 
 import css from '@safe-global/views/components/dashboard/PendingTxs/styles.module.css'
 import classnames from 'classnames'
 
 function PendingRecoveryListItem({ transaction }: { transaction: RecoveryQueueItem }): ReactElement {
   const router = useRouter()
-  const { RecoveryType, RecoveryInfo, RecoveryStatus } = useLoadFeature(RecoveryFeature)
   const { isMalicious } = transaction
 
   const url = useMemo(

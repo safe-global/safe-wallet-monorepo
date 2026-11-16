@@ -9,13 +9,13 @@ import CheckWallet from '@/components/common/CheckWallet'
 import { TxModalContext } from '@/components/tx-flow'
 import { CancelRecoveryFlow } from '@/components/tx-flow/flows'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
-import { dispatchRecoverySkipExpired } from '../../services/recovery-sender'
+import { dispatchRecoverySkipExpired } from '../../public/recovery-sender'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { trackError, Errors } from '@/services/exceptions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
 import { RecoveryListItemContext } from '@safe-global/views/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import type { RecoveryQueueItem } from '../../public/types'
 
 export default function CancelRecoveryButton({
   recovery,

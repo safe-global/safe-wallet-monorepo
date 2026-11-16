@@ -1,4 +1,4 @@
-import { selectDelayModifierByRecoverer } from '../services/selectors'
+import { selectDelayModifierByRecoverer } from './selectors'
 import useWallet from '@/hooks/wallets/useWallet'
 import useRecovery from './useRecovery'
 

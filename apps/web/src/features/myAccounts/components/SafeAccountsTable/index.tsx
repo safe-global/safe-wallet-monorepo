@@ -155,7 +155,7 @@ export type SafeAccountsTableProps = {
 // readable even while its module is still initializing. The app (Rspack) tolerates the cycle
 // regardless. Must be `export default function` inline (not a trailing `export default X`) — the
 // latter compiles to a TDZ `__WEBPACK_DEFAULT_EXPORT__` temp that reintroduces the crash. See
-// docs/feature-architecture.md.
+// docs/feature-architecture-legacy.md.
 export default function SafeAccountsTable({
   items,
   columns,

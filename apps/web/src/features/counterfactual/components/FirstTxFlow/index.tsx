@@ -1,6 +1,6 @@
 import { AppRoutes } from '@/config/routes'
-import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
-import useRecovery from '@/features/recovery/hooks/useRecovery'
+import { useIsRecoverySupported } from '@/features/recovery/public/useIsRecoverySupported'
+import useRecovery from '@/features/recovery/public/useRecovery'
 import dynamic from '@/utils/dynamic'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { trackEvent } from '@/services/analytics'
