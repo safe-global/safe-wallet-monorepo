@@ -7,7 +7,7 @@ import type { SwapOrderTransactionInfo } from '@safe-global/store/gateway/AUTO_G
 import { render, screen } from '@/tests/test-utils'
 import { transactionDataBuilder } from '@/tests/builders/transactionDetails'
 import { swapOrderConfirmationViewBuilder } from '@/features/swap/helpers/swapOrderBuilder'
-import { COW_SETTLEMENT_CONTRACTS } from '@/features/swap/helpers/utils'
+import { COW_DEPLOYMENTS } from '@/features/swap/helpers/utils'
 import SwapOrder from '.'
 
 const SETTLEMENT_INTERFACE = new Interface(['function setPreSignature(bytes orderUid, bool signed)'])
@@ -19,7 +19,7 @@ const order = swapOrderConfirmationViewBuilder()
   .build() as SwapOrderTransactionInfo
 
 const presign = {
-  to: COW_SETTLEMENT_CONTRACTS[0],
+  to: COW_DEPLOYMENTS[0].settlement,
   value: '0',
   data: SETTLEMENT_INTERFACE.encodeFunctionData('setPreSignature', [order.uid, true]),
   operation: OperationType.Call,

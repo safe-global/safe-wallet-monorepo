@@ -8,8 +8,7 @@ import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { OperationType, type MetaTransactionData } from '@safe-global/types-kit'
 import { ERC20__factory, Multi_send__factory } from '@safe-global/utils/types/contracts'
 import {
-  COW_SETTLEMENT_CONTRACTS,
-  COW_VAULT_RELAYERS,
+  COW_DEPLOYMENTS,
   countNonSwapOrderCalls,
   getExecutionPrice,
   getFilledPercentage,
@@ -475,8 +474,10 @@ describe('Swap helpers', () => {
     const MULTISEND_INTERFACE = Multi_send__factory.createInterface()
     const SETTLEMENT_INTERFACE = new Interface(['function setPreSignature(bytes orderUid, bool signed)'])
     const WETH_INTERFACE = new Interface(['function deposit()'])
-    const [SETTLEMENT, STAGING_SETTLEMENT] = COW_SETTLEMENT_CONTRACTS
-    const [VAULT_RELAYER, STAGING_VAULT_RELAYER] = COW_VAULT_RELAYERS
+    const [
+      { settlement: SETTLEMENT, vaultRelayer: VAULT_RELAYER },
+      { settlement: STAGING_SETTLEMENT, vaultRelayer: STAGING_VAULT_RELAYER },
+    ] = COW_DEPLOYMENTS
 
     const randomAddress = () => getAddress(faker.finance.ethereumAddress())
     const randomAmount = () => faker.number.bigInt({ min: 1n, max: 10n ** 18n }).toString()
@@ -551,6 +552,15 @@ describe('Swap helpers', () => {
     it('returns 0 for an order made against the staging contracts', () => {
       const calls = [approve(order.sellToken.address, STAGING_VAULT_RELAYER), presign({ to: STAGING_SETTLEMENT })]
       expect(countNonSwapOrderCalls(batch(calls), order)).toBe(0)
+    })
+
+    it('counts an approval to the VaultRelayer of the other CoW deployment', () => {
+      const calls = [approve(order.sellToken.address, STAGING_VAULT_RELAYER), presign()]
+      expect(countNonSwapOrderCalls(batch(calls), order)).toBe(1)
+    })
+
+    it('counts an approval to the VaultRelayer when the batch has no presignature of the order', () => {
+      expect(countNonSwapOrderCalls(batch([approve(), presign({}, randomUid())]), order)).toBe(2)
     })
 
     it('returns 0 when there is no transaction data', () => {
