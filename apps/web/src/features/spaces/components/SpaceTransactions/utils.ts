@@ -100,8 +100,7 @@ export const getCounterparty = (txInfo: TransactionInfo): Counterparty | undefin
   if (isCancellationTxInfo(txInfo)) return undefined
   if (isMultiSendTxInfo(txInfo)) return { join: 'via', party: txInfo.to }
   if (isCustomTxInfo(txInfo)) {
-    // A migration is a delegate call that changes the Safe itself. Read `to` first: the migration guard claims every
-    // custom call, so txInfo is narrowed to never once it returns false
+    // Read `to` first: the migration guard narrows txInfo to never once it returns false
     const { to } = txInfo
     return isMigrateToL2TxInfo(txInfo) ? undefined : { join: 'on', party: to }
   }

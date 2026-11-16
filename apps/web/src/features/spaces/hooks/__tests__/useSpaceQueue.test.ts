@@ -87,7 +87,6 @@ describe('useSpaceQueue', () => {
         },
         { safeAddress: safeB, chains: [{ chainId: '1', items: safeBItems }] },
       ],
-      unavailableSafes: [],
       shownCount: 4,
       totalCount: 4,
       isComplete: true,
@@ -130,15 +129,6 @@ describe('useSpaceQueue', () => {
     const { data } = await fetchQueue()
 
     expect(data).toMatchObject({ shownCount: 2, totalCount: 2, isComplete: true })
-  })
-
-  it('passes the unavailable Safes through', async () => {
-    const unavailableSafes = [{ chainId: '1', safeAddress: safeB }]
-    respondWith(page({}, { count: 0, unavailableSafes }))
-
-    const { data } = await fetchQueue()
-
-    expect(data).toMatchObject({ sections: [], unavailableSafes, isComplete: true })
   })
 
   it('fails when the request fails', async () => {

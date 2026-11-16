@@ -3,7 +3,6 @@ import type { SkipToken, SubscriptionOptions } from '@reduxjs/toolkit/query'
 import {
   useSpaceTransactionsGetTransactionQueueV1Query,
   type SpaceQueuedItemPage,
-  type SpaceQueueSafe,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { isTransactionQueuedItem } from '@/utils/transaction-guards'
 
@@ -13,7 +12,6 @@ export type SpaceQueueSection = { safeAddress: string; chains: SpaceQueueChain[]
 
 export type SpaceQueue = {
   sections: SpaceQueueSection[]
-  unavailableSafes: SpaceQueueSafe[]
   /** Transactions in `sections` */
   shownCount: number
   /** Transactions in the whole queue, more than `shownCount` when the gateway capped the pages it read */
@@ -34,7 +32,6 @@ const toSpaceQueue = (page: SpaceQueuedItemPage): SpaceQueue => {
 
   return {
     sections,
-    unavailableSafes: page.unavailableSafes,
     shownCount,
     totalCount,
     isComplete: shownCount >= totalCount,
