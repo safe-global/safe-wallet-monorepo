@@ -26,8 +26,8 @@ export const TOUR_STEPS: TourStep[] = [
     anchor: byTestId('header-account-info'),
     placement: { side: 'bottom', align: 'end' },
     title: 'Signed in as',
-    body: 'Your Sign-In with Ethereum account. It sets which workspaces you see and your role.',
-    tip: 'Signing in can’t approve transactions.',
+    body: 'You log into your workspace with Sign-In with Ethereum or email. This controls your access and actions in the workspace.',
+    tip: 'It can’t sign any transactions.',
   },
   {
     id: 'wallet',

@@ -1,13 +1,6 @@
 import { ShieldCheck, Sparkles, UsersRound, WalletCards, type LucideIcon } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@safe-global/views/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import TourIconTile from '@safe-global/views/features/spaces/components/WorkspaceTour/TourIconTile'
 
@@ -28,9 +21,6 @@ const TourWelcomeDialog = ({ onStart, onSkip }: TourWelcomeDialogProps) => (
       <DialogHeader>
         <TourIconTile icon={Sparkles} />
         <DialogTitle>Welcome to your workspace</DialogTitle>
-        <DialogDescription>
-          Where your team runs its Safe accounts together. Here is a quick look around.
-        </DialogDescription>
       </DialogHeader>
       <ul className="flex flex-col gap-3 px-4">
         {HIGHLIGHTS.map(({ icon: Icon, text }) => (

@@ -3,6 +3,7 @@ import TourDoneDialog from '@safe-global/views/features/spaces/components/Worksp
 import TourWelcomeDialog from '@safe-global/views/features/spaces/components/WorkspaceTour/TourWelcomeDialog'
 import { useCurrentSpaceId } from '@/features/spaces'
 import { TOUR_NEXT_ACTIONS, TOUR_STEPS } from './constants'
+import { useArrowKeyNavigation } from './hooks/useArrowKeyNavigation'
 import { useTourNavigation } from './hooks/useTourNavigation'
 import TourStop from './TourStop'
 
@@ -10,6 +11,8 @@ const ActiveWorkspaceTour = ({ onClose }: { onClose: () => void }) => {
   const router = useRouter()
   const spaceId = useCurrentSpaceId()
   const tour = useTourNavigation(TOUR_STEPS)
+
+  useArrowKeyNavigation({ onNext: tour.next, onBack: tour.back })
 
   if (tour.isWelcome) return <TourWelcomeDialog onStart={tour.next} onSkip={onClose} />
 

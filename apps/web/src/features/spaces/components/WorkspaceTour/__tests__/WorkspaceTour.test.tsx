@@ -147,6 +147,27 @@ describe('WorkspaceTour', () => {
     expect(screen.getByTestId('workspace-tour-highlight')).toBeInTheDocument()
   })
 
+  it('moves forward with the right arrow key and back with the left arrow key', async () => {
+    addSpaceSelector()
+    renderTour()
+
+    fireEvent.keyDown(window, { key: 'ArrowRight' })
+    expect(await screen.findByText('1 of 7')).toBeInTheDocument()
+
+    fireEvent.keyDown(window, { key: 'ArrowLeft' })
+    expect(screen.getByText('Welcome to your workspace')).toBeInTheDocument()
+  })
+
+  it('ignores arrow keys while the member is typing', () => {
+    renderTour()
+    const input = document.createElement('input')
+    document.body.appendChild(input)
+
+    fireEvent.keyDown(input, { key: 'ArrowRight' })
+
+    expect(screen.getByText('Welcome to your workspace')).toBeInTheDocument()
+  })
+
   it('reopens from the Settings section after it was seen', () => {
     markTourSeen()
     renderTour()
