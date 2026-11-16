@@ -13,7 +13,7 @@ import SafeBandRow from '@safe-global/views/features/spaces/components/SpaceQueu
 import { QUEUE_COLUMNS, type QueueColumn } from '@safe-global/views/features/spaces/components/SpaceQueue/columns'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import useChains from '@/hooks/useChains'
-import { toChainInfos } from '../../SpaceAddressBookV2/utils'
+import { toChainInfos } from '../../../utils'
 import SpaceQueueRow from '../SpaceQueueRow'
 import { getSafeKey } from '../utils'
 import { buildQueueList, groupByScope, type QueueListItem } from './queueList'

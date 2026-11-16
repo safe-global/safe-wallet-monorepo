@@ -4,14 +4,7 @@ import type { SpaceAddressBookItemDto, SpaceAddressBookTagDto } from '@safe-glob
 import type { AddressBookContact, ContactTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import type { ChainInfo } from '@safe-global/views/features/spaces/types'
 import type { AddressBookState } from '@/store/addressBookSlice'
-
-export const toChainInfos = (chainIds: string[], configs: Chain[]): ChainInfo[] =>
-  chainIds.map((chainId) => {
-    const chain = configs.find((config) => config.chainId === chainId)
-    return chain
-      ? { chainId, chainName: chain.chainName, chainLogoUri: chain.chainLogoUri ?? null, shortName: chain.shortName }
-      : { chainId, chainName: chainId, chainLogoUri: null, shortName: chainId }
-  })
+import { toChainInfos } from '../../utils'
 
 export const toWorkspaceContacts = (
   items: SpaceAddressBookItemDto[],
