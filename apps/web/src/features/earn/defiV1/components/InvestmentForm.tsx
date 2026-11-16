@@ -4,6 +4,7 @@ import { Badge } from '@safe-global/views/components/ui/badge'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from '@safe-global/views/components/ui/field'
 import { Input } from '@safe-global/views/components/ui/input'
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@safe-global/views/components/ui/input-group'
 import { Label } from '@safe-global/views/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
@@ -218,31 +219,33 @@ export const WhereFields = ({ form, labelled = true }: { form: InvestmentForm; l
     <Section label={labelled ? COPY.madeFrom : undefined}>
       <RadioGroup value={form.where} onValueChange={(next) => form.setWhere(next as Where)} className="gap-2">
         <ChoiceCard
-          value="nested"
-          title={COPY.dedicated}
-          badge={<Badge variant="success">{COPY.recommended}</Badge>}
-          description={COPY.dedicatedHint(form.safeName)}
-        />
-        <ChoiceCard
           value="this"
           title={COPY.thisSafe}
           badge={<Badge variant="warning">{COPY.later}</Badge>}
           description={COPY.thisSafeCaveat}
         />
+        <ChoiceCard
+          value="nested"
+          title={COPY.dedicated}
+          badge={<Badge variant="success">{COPY.recommended}</Badge>}
+          description={COPY.dedicatedHint(form.safeName)}
+        />
       </RadioGroup>
     </Section>
     {form.where === 'nested' && form.investment && (
       <Section label={COPY.name} htmlFor="investment-name" hint={COPY.nameHint(form.executors.length)}>
-        <div className="flex items-center gap-2">
-          <InitialsAvatar name={form.safeName} size="xsmall" rounded />
-          <Input
+        <InputGroup>
+          <InputGroupAddon align="inline-start">
+            <InitialsAvatar name={form.safeName} size="xsmall" rounded />
+          </InputGroupAddon>
+          <InputGroupInput
             id="investment-name"
             value={form.name}
             maxLength={40}
             placeholder={dedicatedSafeName(form.investment)}
             onChange={(event) => form.setName(event.target.value)}
           />
-        </div>
+        </InputGroup>
       </Section>
     )}
   </>
