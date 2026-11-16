@@ -51,4 +51,13 @@ describe('SpaceTransactionsPage', () => {
 
     expect(screen.queryByText('Status:')).not.toBeInTheDocument()
   })
+
+  it('empties the search when switching to another Workspace', () => {
+    const { rerender } = render(<SpaceTransactionsPage spaceId={faker.string.uuid()} />)
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Search transactions' }), { target: { value: 'polygon' } })
+
+    rerender(<SpaceTransactionsPage spaceId={faker.string.uuid()} />)
+
+    expect(screen.getByRole('searchbox', { name: 'Search transactions' })).toHaveValue('')
+  })
 })

@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import type { SpaceQueueCounts } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
-import { fireEvent, render, screen, within } from '@/tests/test-utils'
+import { act, fireEvent, render, screen, within } from '@/tests/test-utils'
 import { NO_SPACE_QUEUE_FILTERS, type SpaceQueueFilters } from '../../../hooks/useSpaceQueue'
 import TransactionsToolbar from '.'
 
@@ -233,22 +233,33 @@ describe('TransactionsToolbar', () => {
     expect(onFiltersChange).toHaveBeenLastCalledWith(NO_SPACE_QUEUE_FILTERS)
   })
 
-  it('passes the search on to the queue', () => {
-    const onSearchChange = jest.fn()
-    render(
-      <TransactionsToolbar
-        spaceId={faker.string.uuid()}
-        counts={counts}
-        filters={NO_SPACE_QUEUE_FILTERS}
-        onFiltersChange={jest.fn()}
-        onSearchChange={onSearchChange}
-      />,
-    )
-    const searchbox = screen.getByRole('searchbox', { name: 'Search transactions' })
+  describe('search', () => {
+    beforeEach(() => {
+      jest.useFakeTimers()
+    })
 
-    expect(searchbox).toBeEnabled()
-    fireEvent.change(searchbox, { target: { value: 'polygon' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Clear search' }))
-    expect(onSearchChange).toHaveBeenLastCalledWith('')
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it('passes the search on to the queue once typing pauses', () => {
+      const onSearchChange = jest.fn()
+      render(
+        <TransactionsToolbar
+          spaceId={faker.string.uuid()}
+          counts={counts}
+          filters={NO_SPACE_QUEUE_FILTERS}
+          onFiltersChange={jest.fn()}
+          onSearchChange={onSearchChange}
+        />,
+      )
+
+      fireEvent.change(screen.getByRole('searchbox', { name: 'Search transactions' }), { target: { value: 'polygon' } })
+      act(() => {
+        jest.advanceTimersByTime(300)
+      })
+
+      expect(onSearchChange).toHaveBeenLastCalledWith('polygon')
+    })
   })
 })
