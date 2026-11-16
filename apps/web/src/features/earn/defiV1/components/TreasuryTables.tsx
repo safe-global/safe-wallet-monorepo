@@ -15,9 +15,20 @@ import type { Holding, Opportunity } from '../types'
 import { Sparkline } from './Sparkline'
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0!'
-const COLUMN_WIDTHS = ['w-10', 'w-64', 'w-20', 'w-32', 'w-28', 'w-36', '', 'w-20', 'w-48', 'w-32']
+const COLUMN_WIDTHS = ['w-10', 'w-64', 'w-20', 'w-32', 'w-28', 'w-36', '', 'w-20', 'w-28', 'w-24', 'w-32', 'w-32']
 const COLUMN_COUNT = COLUMN_WIDTHS.length
-const OPPORTUNITY_HEADERS = ['Opportunity', 'Asset', 'Exit time', 'Risk', 'Access', 'Networks', 'Rate', 'Invested']
+const OPPORTUNITY_HEADERS = [
+  'Opportunity',
+  'Asset',
+  'Exit time',
+  'Risk',
+  'Access',
+  'Networks',
+  'Rate',
+  'Invested',
+  'Earned',
+  'Trend',
+]
 
 export type OpportunityGroup = { key: string; title?: string; items: Opportunity[] }
 
@@ -142,34 +153,47 @@ const AccessTag = ({ opportunity, locked }: { opportunity: Opportunity; locked: 
   )
 }
 
+const Empty = () => <span className="text-muted-foreground">—</span>
+
 const InvestedCell = ({ holding }: { holding?: Holding }) => {
-  if (!holding) return <span className="text-muted-foreground">—</span>
-  const growth = growthShare(holding.invested, holding.earned)
-  const series = growthSeries(holding.invested, holding.earned)
+  if (!holding) return <Empty />
   return (
     <span className="flex min-w-0 flex-col">
-      {holding.invested > 0 && (
-        <Tooltip delay={150}>
-          <TooltipTrigger render={<span className="flex min-w-0 items-center gap-2" />}>
-            <span className="font-semibold tabular-nums">{formatCompactUsd(holding.invested)}</span>
-            <Sparkline values={series} label={DEFI_V1_COPY.positions.trend(formatApy(growth))} />
-            <span className="text-xs tabular-nums text-badge-dot-success">+{formatApy(growth)}</span>
-          </TooltipTrigger>
-          <TooltipContent>
-            {DEFI_V1_COPY.positions.trendTooltip(
-              formatCompactUsd(series[0]),
-              formatCompactUsd(series[series.length - 1]),
-              formatUsd(holding.earned),
-            )}
-          </TooltipContent>
-        </Tooltip>
-      )}
+      {holding.invested > 0 && <span className="font-semibold tabular-nums">{formatCompactUsd(holding.invested)}</span>}
       {holding.pending > 0 && (
         <span className="truncate text-xs text-muted-foreground tabular-nums">
           {DEFI_V1_COPY.positions.pendingAmount(formatCompactUsd(holding.pending))}
         </span>
       )}
     </span>
+  )
+}
+
+const EarnedCell = ({ holding }: { holding?: Holding }) =>
+  holding && holding.invested > 0 ? (
+    <span className="font-medium tabular-nums">+{formatUsd(holding.earned)}</span>
+  ) : (
+    <Empty />
+  )
+
+const TrendCell = ({ holding }: { holding?: Holding }) => {
+  if (!holding || holding.invested <= 0) return <Empty />
+  const growth = growthShare(holding.invested, holding.earned)
+  const series = growthSeries(holding.invested, holding.earned)
+  return (
+    <Tooltip delay={150}>
+      <TooltipTrigger render={<span className="flex w-fit min-w-0 items-center gap-2" />}>
+        <Sparkline values={series} label={DEFI_V1_COPY.positions.trend(formatApy(growth))} />
+        <span className="text-xs tabular-nums text-badge-dot-success">+{formatApy(growth)}</span>
+      </TooltipTrigger>
+      <TooltipContent>
+        {DEFI_V1_COPY.positions.trendTooltip(
+          formatCompactUsd(series[0]),
+          formatCompactUsd(series[series.length - 1]),
+          formatUsd(holding.earned),
+        )}
+      </TooltipContent>
+    </Tooltip>
   )
 }
 
@@ -222,6 +246,12 @@ const OpportunityRow = ({
       <TableCell>
         <InvestedCell holding={holding} />
       </TableCell>
+      <TableCell>
+        <EarnedCell holding={holding} />
+      </TableCell>
+      <TableCell>
+        <TrendCell holding={holding} />
+      </TableCell>
       <TableCell className="text-right">
         <Button
           variant="outline"
@@ -242,7 +272,7 @@ const OpportunityRow = ({
 const TableCard = ({ label, children }: { label: string; children: ReactNode }) => (
   <Card radius="xl" size="none">
     <CardContent>
-      <Table aria-label={label} variant="panel" className="table-fixed min-w-[1200px] [&_td]:px-4 [&_th]:px-4">
+      <Table aria-label={label} variant="panel" className="table-fixed min-w-[1360px] [&_td]:px-4 [&_th]:px-4">
         <colgroup>
           {COLUMN_WIDTHS.map((width, index) => (
             <col key={index} className={width || undefined} />
