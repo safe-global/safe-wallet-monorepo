@@ -216,6 +216,7 @@ export const DEFI_V1_COPY = {
     seeAll: 'See all',
     seeEarnings: 'See earnings',
     compareByRisk: 'Compare by risk',
+    putIdleToWork: 'Put idle cash to work',
     investedOf: (invested: string, total: string, idle: string) => `${invested} of ${total} · ${idle} idle`,
     earned: 'Earned YTD',
     earnedLead: 'Across all investments',

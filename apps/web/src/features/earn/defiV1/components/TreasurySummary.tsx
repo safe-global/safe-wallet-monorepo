@@ -43,10 +43,12 @@ export const TreasurySummary = ({
   summary,
   onSeeInvestments,
   onCompareByRisk,
+  onExploreIdle,
 }: {
   summary: Summary
   onSeeInvestments: () => void
   onCompareByRisk: () => void
+  onExploreIdle: () => void
 }) => (
   <div className="grid gap-3 @2xl:grid-cols-3" data-testid="treasury-summary">
     <StatCard
@@ -66,6 +68,11 @@ export const TreasurySummary = ({
           formatCompactUsd(summary.idle),
         )}
       </span>
+      {summary.idle > 0 && (
+        <span>
+          <CardLink label={COPY.putIdleToWork} onClick={onExploreIdle} />
+        </span>
+      )}
     </StatCard>
     <StatCard
       label={COPY.earned}
