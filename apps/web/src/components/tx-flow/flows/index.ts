@@ -1,31 +1,29 @@
-import dynamic from '@/utils/dynamic'
-
-export const AddOwnerFlow = dynamic(() => import('./AddOwner'))
-export const CancelRecoveryFlow = dynamic(() => import('./CancelRecovery'))
-export const ChangeThresholdFlow = dynamic(() => import('./ChangeThreshold'))
-export const ConfirmBatchFlow = dynamic(() => import('./ConfirmBatch'))
-export const ConfirmTxFlow = dynamic(() => import('./ConfirmTx'))
-export const CreateNestedSafeFlow = dynamic(() => import('./CreateNestedSafe'))
-export const ExecuteBatchFlow = dynamic(() => import('./ExecuteBatch'))
-export const ManageSignersFlow = dynamic(() => import('./ManagerSigners'))
-export const MigrateSafeL2Flow = dynamic(() => import('./MigrateSafeL2'))
-export const NestedTxSuccessScreenFlow = dynamic(() => import('./NestedTxSuccessScreen'))
-export const NewSpendingLimitFlow = dynamic(() => import('./NewSpendingLimit'))
-export const NewTxFlow = dynamic(() => import('./NewTx'))
-export const NftTransferFlow = dynamic(() => import('./NftTransfer'))
-export const RecoveryAttemptFlow = dynamic(() => import('./RecoveryAttempt'))
-export const RecoverAccountFlow = dynamic(() => import('./RecoverAccount'))
-export const RemoveGuardFlow = dynamic(() => import('./RemoveGuard'))
-export const RemoveModuleFlow = dynamic(() => import('./RemoveModule'))
-export const RemoveOwnerFlow = dynamic(() => import('./RemoveOwner'))
-export const RemoveRecoveryFlow = dynamic(() => import('./RemoveRecovery'))
-export const RemoveSpendingLimitFlow = dynamic(() => import('./RemoveSpendingLimit'))
-export const ReplaceOwnerFlow = dynamic(() => import('./ReplaceOwner'))
-export const ReplaceTxFlow = dynamic(() => import('./ReplaceTx'))
-export const SafeAppsTxFlow = dynamic(() => import('./SafeAppsTx'))
-export const SignMessageFlow = dynamic(() => import('./SignMessage'))
-export const SignMessageOnChainFlow = dynamic(() => import('./SignMessageOnChain'))
-export const SuccessScreenFlow = dynamic(() => import('./SuccessScreen'))
-export const TokenTransferFlow = dynamic(() => import('./TokenTransfer'))
-export const UpdateSafeFlow = dynamic(() => import('./UpdateSafe'))
-export const UpsertRecoveryFlow = dynamic(() => import('./UpsertRecovery'))
+export { AddOwnerFlow } from './AddOwnerFlow'
+export { CancelRecoveryFlow } from './CancelRecoveryFlow'
+export { ChangeThresholdFlow } from './ChangeThresholdFlow'
+export { ConfirmBatchFlow } from './ConfirmBatchFlow'
+export { ConfirmTxFlow } from './ConfirmTxFlow'
+export { CreateNestedSafeFlow } from './CreateNestedSafeFlow'
+export { ExecuteBatchFlow } from './ExecuteBatchFlow'
+export { ManageSignersFlow } from './ManageSignersFlow'
+export { MigrateSafeL2Flow } from './MigrateSafeL2Flow'
+export { NestedTxSuccessScreenFlow } from './NestedTxSuccessScreenFlow'
+export { NewSpendingLimitFlow } from './NewSpendingLimitFlow'
+export { NewTxFlow } from './NewTxFlow'
+export { NftTransferFlow } from './NftTransferFlow'
+export { RecoverAccountFlow } from './RecoverAccountFlow'
+export { RecoveryAttemptFlow } from './RecoveryAttemptFlow'
+export { RemoveGuardFlow } from './RemoveGuardFlow'
+export { RemoveModuleFlow } from './RemoveModuleFlow'
+export { RemoveOwnerFlow } from './RemoveOwnerFlow'
+export { RemoveRecoveryFlow } from './RemoveRecoveryFlow'
+export { RemoveSpendingLimitFlow } from './RemoveSpendingLimitFlow'
+export { ReplaceOwnerFlow } from './ReplaceOwnerFlow'
+export { ReplaceTxFlow } from './ReplaceTxFlow'
+export { SafeAppsTxFlow } from './SafeAppsTxFlow'
+export { SignMessageFlow } from './SignMessageFlow'
+export { SignMessageOnChainFlow } from './SignMessageOnChainFlow'
+export { SuccessScreenFlow } from './SuccessScreenFlow'
+export { TokenTransferFlow } from './TokenTransferFlow'
+export { UpdateSafeFlow } from './UpdateSafeFlow'
+export { UpsertRecoveryFlow } from './UpsertRecoveryFlow'
