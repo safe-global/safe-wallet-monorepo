@@ -96,8 +96,11 @@ describe('TransactionsToolbar utils', () => {
   })
 
   describe('toggleValue', () => {
-    it('adds a value that is not selected and removes one that is', () => {
+    it('adds a value that is not selected', () => {
       expect(toggleValue('137', ['1'])).toEqual(['1', '137'])
+    })
+
+    it('removes a value that is selected', () => {
       expect(toggleValue('1', ['1', '137'])).toEqual(['137'])
     })
 

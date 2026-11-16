@@ -174,13 +174,21 @@ describe('TransactionsToolbar', () => {
     expect(onFiltersChange).toHaveBeenCalledWith(NO_SPACE_QUEUE_FILTERS)
   })
 
-  it('shows a chip for the networks and one for the signers, each removing its own filter', () => {
+  it('removes the networks with the Network chip', () => {
+    const filters = { ...NO_SPACE_QUEUE_FILTERS, chainIds: ['1'], signers: [signerA] }
+    const onFiltersChange = renderToolbar(filters)
+
+    const networkChip = screen.getByText('Network:').parentElement as HTMLElement
+    fireEvent.click(within(networkChip).getByRole('button', { name: 'Remove' }))
+
+    expect(onFiltersChange).toHaveBeenLastCalledWith({ ...filters, chainIds: [] })
+  })
+
+  it('removes the signers with the Signer chip', () => {
     const filters = { ...NO_SPACE_QUEUE_FILTERS, chainIds: ['1'], signers: [signerA] }
     const onFiltersChange = renderToolbar(filters)
 
     const signerChip = screen.getByText('Signer:').parentElement as HTMLElement
-    expect(screen.getByText('Network:')).toBeInTheDocument()
-
     fireEvent.click(within(signerChip).getByRole('button', { name: 'Remove' }))
 
     expect(onFiltersChange).toHaveBeenLastCalledWith({ ...filters, signers: [] })
@@ -198,24 +206,29 @@ describe('TransactionsToolbar', () => {
     expect(screen.getByText('Status:').parentElement).toHaveTextContent('Status:Ready to sign, Ready to execute +2')
   })
 
-  it('removes one filter from its chip and every filter with Clear', () => {
-    const onFiltersChange = renderToolbar({
-      statuses: ['sign'],
+  it('removes the statuses with the Status chip', () => {
+    const filters = {
+      ...NO_SPACE_QUEUE_FILTERS,
+      statuses: ['sign' as const],
       safes: [{ chainId: '1', safeAddress: safeA }],
-      chainIds: [],
-      signers: [],
-    })
+    }
+    const onFiltersChange = renderToolbar(filters)
 
     const statusChip = screen.getByText('Status:').parentElement as HTMLElement
     fireEvent.click(within(statusChip).getByRole('button', { name: 'Remove' }))
-    expect(onFiltersChange).toHaveBeenLastCalledWith({
-      statuses: [],
+
+    expect(onFiltersChange).toHaveBeenLastCalledWith({ ...filters, statuses: [] })
+  })
+
+  it('removes every filter with Clear', () => {
+    const onFiltersChange = renderToolbar({
+      ...NO_SPACE_QUEUE_FILTERS,
+      statuses: ['sign'],
       safes: [{ chainId: '1', safeAddress: safeA }],
-      chainIds: [],
-      signers: [],
     })
 
     fireEvent.click(screen.getByRole('button', { name: 'Clear' }))
+
     expect(onFiltersChange).toHaveBeenLastCalledWith(NO_SPACE_QUEUE_FILTERS)
   })
 })
