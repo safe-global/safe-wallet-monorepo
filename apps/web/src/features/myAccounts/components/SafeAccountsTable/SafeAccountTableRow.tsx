@@ -21,7 +21,7 @@ import { useAddressBookWriteScope } from '@/features/spaces/hooks/useAddressBook
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { cn } from '@safe-global/views/utils/cn'
 import { AccountItem as BaseAccountItem } from '../AccountItem'
-import NetworkLogosPill from '@/features/multichain/components/NetworkLogosPill'
+import NetworkLogosPill from '@/components/common/NetworkLogosPill'
 import { getContextMenuChainIds, type AccountLine } from './useSafeAccountRows'
 import type { SafeAccountColumn } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
 import { PendingBadge, ThresholdBadge, formatPendingLabel } from '@safe-global/views/components/common/AccountBadges'

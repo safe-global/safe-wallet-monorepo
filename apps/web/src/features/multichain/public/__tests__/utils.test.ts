@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker/locale/af_ZA'
-import { getDeviatingSetups, getSafeSetups, getSharedSetup } from './utils'
+import { getDeviatingSetups, getSafeSetups, getSharedSetup } from '../utils'
 import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 import { PendingSafeStatus } from '@safe-global/utils/features/counterfactual/store/types'
 

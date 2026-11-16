@@ -8,7 +8,7 @@ import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
 import { useSpaceSafeCount } from '@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit'
 import { useSpaceSafeLimit } from '@/features/spaces/hooks/useSpaceSafeLimit'
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
+import { predictAddressBasedOnReplayData } from '../../public/utils'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
@@ -18,24 +18,24 @@ jest.mock('@/features/counterfactual/services/persistCounterfactualSafe', () => 
   persistCounterfactualSafe: jest.fn(),
 }))
 
-jest.mock('@/features/multichain/utils/utils', () => ({
+jest.mock('../../public/utils', () => ({
   get isMultiChainSafeItem() {
-    return jest.requireActual('@/features/multichain/utils/utils').isMultiChainSafeItem
+    return jest.requireActual('../../public/utils').isMultiChainSafeItem
   },
   get getSafeSetups() {
-    return jest.requireActual('@/features/multichain/utils/utils').getSafeSetups
+    return jest.requireActual('../../public/utils').getSafeSetups
   },
   get getSharedSetup() {
-    return jest.requireActual('@/features/multichain/utils/utils').getSharedSetup
+    return jest.requireActual('../../public/utils').getSharedSetup
   },
   get getDeviatingSetups() {
-    return jest.requireActual('@/features/multichain/utils/utils').getDeviatingSetups
+    return jest.requireActual('../../public/utils').getDeviatingSetups
   },
   get predictSafeAddress() {
-    return jest.requireActual('@/features/multichain/utils/utils').predictSafeAddress
+    return jest.requireActual('../../public/utils').predictSafeAddress
   },
   get hasMultiChainCreationFeatures() {
-    return jest.requireActual('@/features/multichain/utils/utils').hasMultiChainCreationFeatures
+    return jest.requireActual('../../public/utils').hasMultiChainCreationFeatures
   },
   predictAddressBasedOnReplayData: jest.fn(),
   hasMultiChainAddNetworkFeature: jest.fn(() => true),

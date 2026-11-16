@@ -2,8 +2,9 @@ import { render, screen } from '@/tests/test-utils'
 import AccountItemChainBadge from '../AccountItemChainBadge'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 
-jest.mock('@/features/multichain', () => ({
-  NetworkLogosTooltip: ({
+jest.mock('@/components/common/NetworkLogosTooltip', () => ({
+  __esModule: true,
+  default: ({
     networks,
     maxVisible,
     imageSize,

@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import NetworkLogosList from './index'
+import NetworkLogosList from './'
 
 jest.mock('@/components/common/ChainIndicator', () => {
   const ChainIndicator = ({ chainId }: { chainId: string }) => <span data-testid={`chain-${chainId}`} />

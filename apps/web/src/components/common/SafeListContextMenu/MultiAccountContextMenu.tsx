@@ -19,7 +19,7 @@ import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/ov
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
 import router from 'next/router'
-import { CreateSafeOnNewChain } from '@/features/multichain'
+import CreateSafeOnNewChain from '@/features/multichain/public/CreateSafeOnNewChain'
 
 enum ModalType {
   RENAME = 'rename',

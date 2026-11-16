@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import NetworkLogosTooltip from './index'
+import NetworkLogosTooltip from './'
 
 jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -10,7 +10,7 @@ jest.mock('@safe-global/views/components/ui/tooltip', () => ({
     </div>
   ),
 }))
-jest.mock('../NetworkLogosList', () => {
+jest.mock('@/components/common/NetworkLogosList', () => {
   const NetworkLogosList = ({ maxVisible }: { maxVisible?: number }) => (
     <span data-testid="network-logos" data-max-visible={maxVisible} />
   )

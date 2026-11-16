@@ -5,11 +5,11 @@ import { TxModalContext } from '@/components/tx-flow'
 import { MigrateSafeL2Flow } from '@/components/tx-flow/flows/MigrateSafeL2Flow'
 import { MastercopyWarning } from './MastercopyWarning'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
-import type { MastercopyMigration } from '../../hooks/useMastercopyMigration'
+import type { MastercopyMigration } from '../../public/useMastercopyMigration'
 
 const CHANGELOG = 'https://github.com/gnosis/safe-contracts/releases'
 
-jest.mock('../../hooks/useMastercopyMigration')
+jest.mock('../../public/useMastercopyMigration')
 jest.mock('@/hooks/useIsSafeOwner')
 jest.mock('@/components/tx-flow/flows/MigrateSafeL2Flow', () => ({
   MigrateSafeL2Flow: () => null,
@@ -22,7 +22,7 @@ jest.mock('@/components/common/CheckWallet', () => ({
   default: ({ children }: { children: (ok: boolean) => ReactNode }) => <>{children(true)}</>,
 }))
 
-const mockUseMastercopyMigration = jest.requireMock('../../hooks/useMastercopyMigration')
+const mockUseMastercopyMigration = jest.requireMock('../../public/useMastercopyMigration')
   .useMastercopyMigration as jest.Mock
 const mockUseIsSafeOwner = jest.requireMock('@/hooks/useIsSafeOwner').default as jest.Mock
 

@@ -1,5 +1,5 @@
 import ChainIndicator from '@/components/common/ChainIndicator'
-import { NetworkLogosTooltip } from '@/features/multichain'
+import NetworkLogosTooltip from '@/components/common/NetworkLogosTooltip'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { cn } from '@safe-global/views/utils/cn'
 

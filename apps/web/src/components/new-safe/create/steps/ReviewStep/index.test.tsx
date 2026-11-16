@@ -13,7 +13,7 @@ import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import { type SafeVersion } from '@safe-global/types-kit'
 import * as cfServicesPersistCounterfactualSafe from '@/features/counterfactual/services/persistCounterfactualSafe'
 import * as safeCreationEvents from '@/features/counterfactual/services/safeCreationEvents'
-import * as multichain from '@/features/multichain/utils/utils'
+import * as multichain from '@/features/multichain/public/utils'
 import * as createLogic from '@/components/new-safe/create/logic'
 import * as web3 from '@/hooks/wallets/web3'
 import * as analytics from '@/services/analytics'
@@ -27,9 +27,10 @@ import { useSpaceSafeLimit } from '@/features/spaces/hooks/useSpaceSafeLimit'
 import { ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/utils/elevation'
 
 // The feature barrel cannot be spread (circular import at init), so the source hook modules are mocked instead.
-jest.mock('@/features/multichain', () => ({
-  ...jest.requireActual('@/features/multichain'),
-  NetworkLogosList: jest.requireActual('@/features/multichain/components/NetworkLogosList').default,
+jest.mock('@/components/common/NetworkLogosList', () => ({
+  ...jest.requireActual('@/components/common/NetworkLogosList'),
+  __esModule: true,
+  default: jest.requireActual('@/components/common/NetworkLogosList').default,
 }))
 jest.mock('@/hooks/useGasPrice', () => ({ __esModule: true, default: jest.fn(() => [undefined, undefined, false]) }))
 jest.mock('@/hooks/useWalletCanPay', () => ({ __esModule: true, default: jest.fn(() => true) }))

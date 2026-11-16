@@ -1,7 +1,7 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeItem, MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
 import type { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
-import type { useSafeCreationData } from './hooks/useSafeCreationData'
+import type { useSafeCreationData } from './useSafeCreationData'
 
 export interface SafeSetup {
   owners: string[]

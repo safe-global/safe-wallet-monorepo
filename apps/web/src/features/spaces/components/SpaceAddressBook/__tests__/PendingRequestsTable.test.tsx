@@ -91,14 +91,15 @@ jest.mock('@safe-global/views/components/common/Identicon', () => {
   const Identicon = ({ address }: { address: string }) => <span data-testid="identicon" data-address={address} />
   return Identicon
 })
-jest.mock('@/features/multichain', () => ({
-  NetworkLogosTooltip: ({ networks, trigger }: { networks: { chainId: string }[]; trigger?: React.ReactNode }) => (
+jest.mock('@/components/common/NetworkLogosTooltip', () => ({
+  __esModule: true,
+  default: ({ networks, trigger }: { networks: { chainId: string }[]; trigger?: React.ReactNode }) => (
     <span data-testid="network-logos" data-count={networks.length}>
       {trigger}
     </span>
   ),
 }))
-jest.mock('@/features/multichain/components/NetworkLogosPill', () => ({
+jest.mock('@/components/common/NetworkLogosPill', () => ({
   __esModule: true,
   default: ({ networks }: { networks: { chainId: string }[] }) => (
     <span data-testid="network-logos-pill" data-count={networks.length} />
