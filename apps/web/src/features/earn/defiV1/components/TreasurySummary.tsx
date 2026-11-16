@@ -1,11 +1,11 @@
 import type { ReactNode } from 'react'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
+import { Progress } from '@safe-global/views/components/ui/progress'
 import { cn } from '@safe-global/views/utils/cn'
 import { DEFI_V1_COPY, formatCompactUsd, formatUsd } from '../copy'
 import type { TreasurySummary as Summary } from '../shelf'
 
-const percent = new Intl.NumberFormat('en-US', { style: 'percent', maximumFractionDigits: 0 })
 const COPY = DEFI_V1_COPY.summary
 
 const StatCard = ({
@@ -23,14 +23,16 @@ const StatCard = ({
   action: string
   onAction: () => void
 }) => (
-  <div className="flex flex-col gap-1 rounded-xl bg-card px-4 pt-3 pb-2">
-    <span className="text-sm font-medium">{title}</span>
+  <div className="flex flex-col gap-1 rounded-xl bg-card px-4 py-3">
+    <span className="flex min-h-6 items-center justify-between gap-2 text-sm font-medium">
+      {title}
+      <Button variant="ghost" size="xs" onClick={onAction}>
+        {action}
+        <ArrowRight />
+      </Button>
+    </span>
     <span className={cn('text-2xl font-semibold tabular-nums', statClassName)}>{stat}</span>
-    <span className="text-xs text-muted-foreground tabular-nums">{detail}</span>
-    <Button variant="ghost" size="xs" className="mt-2 -ml-2 self-start" onClick={onAction}>
-      {action}
-      <ArrowRight />
-    </Button>
+    <div className="mt-auto text-xs text-muted-foreground tabular-nums">{detail}</div>
   </div>
 )
 
@@ -51,7 +53,14 @@ export const TreasurySummary = ({
     <StatCard
       title={COPY.idle}
       stat={formatCompactUsd(summary.idle)}
-      detail={COPY.idleOf(percent.format(1 - summary.investedShare), formatCompactUsd(summary.total))}
+      detail={
+        <Progress
+          value={summary.investedShare * 100}
+          aria-label="Share of treasury invested"
+          indicatorClassName="bg-badge-dot-success"
+          className="mt-2"
+        />
+      }
       action={COPY.putIdleToWork}
       onAction={onExploreIdle}
     />
