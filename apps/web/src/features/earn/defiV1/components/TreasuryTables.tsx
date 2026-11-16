@@ -122,7 +122,7 @@ const NetworkLogos = ({ chains }: { chains: string[] }) => (
 
 const Empty = () => <span className="text-muted-foreground">—</span>
 
-const PositionCell = ({ holding }: { holding?: Holding }) => {
+const PositionCell = ({ holding, heldIn }: { holding?: Holding; heldIn?: string }) => {
   if (!holding) return <Empty />
   return (
     <span className="flex min-w-0 flex-col">
@@ -131,6 +131,9 @@ const PositionCell = ({ holding }: { holding?: Holding }) => {
         <span className="truncate text-xs tabular-nums text-muted-foreground">
           {DEFI_V1_COPY.positions.earnedAmount(formatCompactUsd(holding.earned))}
         </span>
+      )}
+      {heldIn && (
+        <span className="truncate text-xs text-muted-foreground">{DEFI_V1_COPY.operations.heldIn(heldIn)}</span>
       )}
       {holding.pending > 0 && (
         <span className="truncate text-xs text-muted-foreground tabular-nums">
@@ -147,12 +150,14 @@ const OpportunityRow = ({
   onSelect,
   selection,
   holding,
+  heldIn,
 }: {
   opportunity: Opportunity
   isLocked: (item: Opportunity) => boolean
   onSelect: (item: Opportunity) => void
   selection: Selection
   holding?: Holding
+  heldIn?: string
 }) => {
   const locked = isLocked(opportunity)
   const checked = selection.selected.includes(opportunity.id)
@@ -184,7 +189,7 @@ const OpportunityRow = ({
         <NetworkLogos chains={opportunity.chains} />
       </TableCell>
       <TableCell>
-        <PositionCell holding={holding} />
+        <PositionCell holding={holding} heldIn={heldIn} />
       </TableCell>
       <TableCell className="text-right">
         <Button
@@ -224,12 +229,14 @@ export const OpportunitiesTable = ({
   onSelect,
   selection,
   holdingOf,
+  heldInOf,
 }: {
   groups: OpportunityGroup[]
   isLocked: (item: Opportunity) => boolean
   onSelect: (item: Opportunity) => void
   selection: Selection
   holdingOf: (item: Opportunity) => Holding | undefined
+  heldInOf: (item: Opportunity) => string | undefined
 }) => {
   const isEmpty = groups.every((group) => group.items.length === 0)
   return (
@@ -254,6 +261,7 @@ export const OpportunitiesTable = ({
                 onSelect={onSelect}
                 selection={selection}
                 holding={holdingOf(item)}
+                heldIn={heldInOf(item)}
               />
             ))}
           </Fragment>

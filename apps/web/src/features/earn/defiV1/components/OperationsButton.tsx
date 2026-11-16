@@ -32,12 +32,11 @@ const OperationItem = ({ operation }: { operation: Operation }) => (
     />
     <span className="flex justify-between gap-2 text-xs text-muted-foreground tabular-nums">
       <span>{COPY.investedOf(formatCompactUsd(operation.invested), formatCompactUsd(operation.budget))}</span>
-      <span>{COPY.options(operation.opportunityIds.length)}</span>
     </span>
   </li>
 )
 
-/** One toolbar button that opens the operations list, so the page itself stays calm. */
+/** One toolbar button that opens the list of dedicated Safes, so the page itself stays calm. */
 export const OperationsButton = ({
   operations,
   plan,
@@ -82,7 +81,7 @@ export const OperationsButton = ({
                 data-testid="new-operation"
               >
                 <Plus />
-                {COPY.newOperation}
+                {COPY.newSafe}
               </Button>
             ) : (
               <Button size="lg">{COPY.seePro}</Button>

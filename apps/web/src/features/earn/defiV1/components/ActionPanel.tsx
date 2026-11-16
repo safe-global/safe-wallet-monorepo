@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { CheckCircle2, Lock, ShieldCheck } from 'lucide-react'
+import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
   InputGroup,
@@ -16,16 +17,47 @@ import { DrawerSection } from '@/components/common/Drawer'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { DEFI_V1_COPY, formatAmount, formatCompactUsd, formatUsd } from '../copy'
 import { IDLE_CASH } from '../opportunities'
-import { budgetLeft, depositSteps } from '../shelf'
+import { budgetLeft, dedicatedSafeName, depositSteps } from '../shelf'
 import type { Holding, Operation, Opportunity } from '../types'
 
 const COPY = DEFI_V1_COPY.action
 
 type Mode = 'deposit' | 'withdraw'
 
-export type ActionResult = { opportunity: Opportunity; amount: number; pending: boolean; operationId?: string }
+export type ActionResult = {
+  opportunity: Opportunity
+  amount: number
+  pending: boolean
+  operationId?: string
+  created?: Operation
+}
 
 const MAIN = 'main'
+const NEW = 'new'
+const OPS = DEFI_V1_COPY.operations
+
+const SourceOption = ({
+  value,
+  title,
+  detail,
+  badge,
+}: {
+  value: string
+  title: string
+  detail: string
+  badge?: string
+}) => (
+  <label className="flex cursor-pointer items-start gap-3 rounded-lg bg-card px-3 py-2">
+    <RadioGroupItem value={value} className="mt-0.5" />
+    <span className="flex min-w-0 flex-col">
+      <span className="flex items-center gap-2 text-sm font-medium">
+        {title}
+        {badge && <Badge variant="success">{badge}</Badge>}
+      </span>
+      <span className="text-xs text-muted-foreground tabular-nums">{detail}</span>
+    </span>
+  </label>
+)
 
 const Fact = ({ label, value }: { label: string; value: ReactNode }) => (
   <div className="flex min-w-0 flex-col gap-0.5">
@@ -39,6 +71,8 @@ export const ActionPanel = ({
   holding,
   locked,
   operations,
+  canCreate,
+  onCustomise,
   onDeposited,
   onWithdrawn,
 }: {
@@ -46,6 +80,8 @@ export const ActionPanel = ({
   holding?: Holding
   locked: boolean
   operations: Operation[]
+  canCreate: boolean
+  onCustomise: () => void
   onDeposited: (result: ActionResult) => void
   onWithdrawn: (result: ActionResult) => void
 }) => {
@@ -54,19 +90,30 @@ export const ActionPanel = ({
   const [value, setValue] = useState(String(IDLE_CASH.amount))
   const [done, setDone] = useState<{ mode: Mode; pending: boolean } | null>(null)
   const amount = Number(value.replace(/[^0-9.]/g, '')) || 0
-  const [from, setFrom] = useState(MAIN)
+  const [from, setFrom] = useState(canCreate ? (operations[0]?.id ?? NEW) : MAIN)
   const operation = mode === 'deposit' ? operations.find((item) => item.id === from) : undefined
+  const isNew = mode === 'deposit' && canCreate && from === NEW
+  const newName = dedicatedSafeName(opportunity)
+  const owners = safe.owners.length
   const signers = operation
     ? { threshold: operation.threshold, owners: operation.owners }
-    : { threshold: safe.threshold, owners: safe.owners.length }
+    : { threshold: safe.threshold, owners }
   const needsMore = signers.threshold > 1
   const available =
     mode === 'deposit' ? (operation ? budgetLeft(operation) : IDLE_CASH.amount) : (holding?.invested ?? 0)
   const tooMuch = amount > available
   const steps =
     mode === 'deposit'
-      ? depositSteps(opportunity, IDLE_CASH, formatAmount(amount))
+      ? [
+          ...(isNew ? [OPS.stepCreate(newName, 1, owners), OPS.stepMove(formatAmount(amount), opportunity.asset)] : []),
+          ...depositSteps(opportunity, IDLE_CASH, formatAmount(amount)),
+        ]
       : COPY.withdrawSteps(formatAmount(amount), opportunity.asset, opportunity.name)
+  const guardText = operation
+    ? OPS.dedicatedHint(operation.name)
+    : isNew
+      ? OPS.dedicatedHint(newName)
+      : DEFI_V1_COPY.deposit.returnRule
 
   const switchMode = (next: Mode) => {
     setMode(next)
@@ -80,7 +127,18 @@ export const ActionPanel = ({
   }
 
   const submit = () => {
-    const result = { opportunity, amount, pending: needsMore, operationId: operation?.id }
+    const created: Operation | undefined = isNew
+      ? {
+          id: `dedicated-${opportunity.id}-${Date.now()}`,
+          name: newName,
+          budget: amount,
+          invested: amount,
+          threshold: 1,
+          owners,
+          opportunityIds: [opportunity.id],
+        }
+      : undefined
+    const result = { opportunity, amount, pending: needsMore, operationId: operation?.id, created }
     setDone({ mode, pending: result.pending })
     if (mode === 'deposit') onDeposited(result)
     else onWithdrawn(result)
@@ -104,7 +162,15 @@ export const ActionPanel = ({
             </Typography>
           </div>
         </div>
-        <Button variant="outline" size="lg" className="w-full" onClick={() => setDone(null)}>
+        <Button
+          variant="outline"
+          size="lg"
+          className="w-full"
+          onClick={() => {
+            setDone(null)
+            setFrom(canCreate ? (operations[0]?.id ?? NEW) : MAIN)
+          }}
+        >
           {DEFI_V1_COPY.deposit.done}
         </Button>
       </footer>
@@ -129,27 +195,32 @@ export const ActionPanel = ({
         </Tabs>
       )}
 
-      {mode === 'deposit' && operations.length > 0 && !locked && (
+      {mode === 'deposit' && canCreate && !locked && (
         <div className="flex flex-col gap-1.5">
-          <Label>{DEFI_V1_COPY.operations.payFrom}</Label>
+          <div className="flex items-center justify-between gap-2">
+            <Label>{OPS.whereItRuns}</Label>
+            <Button variant="ghost" size="xs" onClick={onCustomise}>
+              {OPS.customise}
+            </Button>
+          </div>
           <RadioGroup value={from} onValueChange={(next) => pickSource(String(next))} className="gap-1.5">
-            {[{ id: MAIN, name: DEFI_V1_COPY.operations.mainSafe }, ...operations].map((source) => {
-              const picked = operations.find((item) => item.id === source.id)
-              return (
-                <label
-                  key={source.id}
-                  className="flex cursor-pointer items-center gap-3 rounded-lg bg-card px-3 py-2 text-sm"
-                >
-                  <RadioGroupItem value={source.id} />
-                  <span className="flex-1 font-medium">{source.name}</span>
-                  <span className="text-xs text-muted-foreground tabular-nums">
-                    {picked
-                      ? `${DEFI_V1_COPY.operations.signers(picked.threshold, picked.owners)} · ${DEFI_V1_COPY.operations.left(formatCompactUsd(budgetLeft(picked)))}`
-                      : DEFI_V1_COPY.operations.signers(safe.threshold, safe.owners.length)}
-                  </span>
-                </label>
-              )
-            })}
+            {operations.map((item) => (
+              <SourceOption
+                key={item.id}
+                value={item.id}
+                title={item.name}
+                detail={`${OPS.signers(item.threshold, item.owners)} · ${OPS.left(formatCompactUsd(budgetLeft(item)))}`}
+              />
+            ))}
+            {operations.length === 0 && (
+              <SourceOption
+                value={NEW}
+                title={OPS.dedicated}
+                badge={OPS.recommended}
+                detail={OPS.afterSetup(1, owners)}
+              />
+            )}
+            <SourceOption value={MAIN} title={OPS.thisSafe} detail={OPS.thisSafeHint(safe.threshold, owners)} />
           </RadioGroup>
         </div>
       )}
@@ -177,7 +248,7 @@ export const ActionPanel = ({
             ? COPY.tooMuch(formatAmount(available))
             : mode === 'deposit'
               ? operation
-                ? `${operation.name} · ${DEFI_V1_COPY.operations.left(formatAmount(available))}`
+                ? `${operation.name} · ${OPS.left(formatAmount(available))}`
                 : DEFI_V1_COPY.deposit.fromValue(IDLE_CASH.asset, IDLE_CASH.chain, formatAmount(IDLE_CASH.amount))
               : COPY.withdrawFrom(formatCompactUsd(available), opportunity.exitLabel)}
         </Typography>
@@ -198,7 +269,7 @@ export const ActionPanel = ({
         </ol>
         <Typography variant="paragraph-mini" color="muted" className="flex items-center gap-1.5">
           <ShieldCheck className="size-3.5 shrink-0" aria-hidden />
-          {operation ? DEFI_V1_COPY.operations.returnTo(operation.name) : DEFI_V1_COPY.deposit.returnRule}
+          {guardText}
         </Typography>
       </DrawerSection>
 

@@ -312,21 +312,21 @@ export const EXISTING_POSITIONS = [
 
 export const OPERATIONS: Operation[] = [
   {
-    id: 'operating-cash',
-    name: 'Operating cash',
+    id: 'dedicated-aave-usdc',
+    name: 'Aave USDC Safe',
     budget: 1_500_000,
     invested: 1_200_000,
     threshold: 1,
     owners: 3,
-    opportunityIds: ['aave-usdc', 'spark-savings', 'compound-usdc', 'tbill-fund'],
+    opportunityIds: ['aave-usdc'],
   },
   {
-    id: 'reserves',
-    name: 'Reserves',
-    budget: 1_000_000,
+    id: 'dedicated-lido-steth',
+    name: 'Lido staked ETH Safe',
+    budget: 400_000,
     invested: 400_000,
     threshold: 2,
     owners: 3,
-    opportunityIds: ['lido-steth', 'kiln-eth', 'credit-fund'],
+    opportunityIds: ['lido-steth'],
   },
 ]

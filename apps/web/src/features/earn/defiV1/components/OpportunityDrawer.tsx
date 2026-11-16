@@ -97,6 +97,8 @@ export const OpportunityDrawer = ({
   onNavigate,
   locked,
   operations,
+  canCreate,
+  onCustomise,
   holding,
   onClose,
   onDeposited,
@@ -107,6 +109,8 @@ export const OpportunityDrawer = ({
   onNavigate: (opportunity: Opportunity) => void
   locked: boolean
   operations: Operation[]
+  canCreate: boolean
+  onCustomise: () => void
   holding?: Holding
   onClose: () => void
   onDeposited: (result: ActionResult) => void
@@ -318,6 +322,8 @@ export const OpportunityDrawer = ({
             holding={holding}
             locked={locked}
             operations={operations}
+            canCreate={canCreate}
+            onCustomise={onCustomise}
             onDeposited={onDeposited}
             onWithdrawn={onWithdrawn}
           />

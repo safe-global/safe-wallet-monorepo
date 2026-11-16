@@ -136,6 +136,12 @@ export const budgetLeft = (operation: Pick<Operation, 'budget' | 'invested'>): n
 export const operationsFor = (operations: Operation[], opportunityId: string): Operation[] =>
   operations.filter((operation) => operation.opportunityIds.includes(opportunityId))
 
+export const dedicatedSafeName = (opportunity: Pick<Opportunity, 'name'>): string => `${opportunity.name} Safe`
+
+/** The dedicated Safe that already holds money in this option, if any. */
+export const heldIn = (operations: Operation[], opportunityId: string): Operation | undefined =>
+  operationsFor(operations, opportunityId).find((operation) => operation.invested > 0)
+
 /** The calls one proposal bundles when the Safe holds the asset on another chain. */
 export const depositSteps = (
   opportunity: Opportunity,

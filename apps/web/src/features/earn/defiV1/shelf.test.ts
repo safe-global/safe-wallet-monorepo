@@ -3,11 +3,13 @@ import {
   activeFilterCount,
   budgetLeft,
   buildShelf,
+  dedicatedSafeName,
   depositSteps,
   filterOpportunities,
   groupOpportunities,
   growthSeries,
   growthShare,
+  heldIn,
   holdingsFor,
   investedFirst,
   isLocked,
@@ -214,6 +216,26 @@ describe('operations', () => {
     const other = { ...allowed, id: 'two', opportunityIds: ['b'] }
 
     expect(operationsFor([allowed, other], 'a')).toEqual([allowed])
+  })
+
+  it('names a dedicated Safe after its investment', () => {
+    expect(dedicatedSafeName({ name: 'Aave USDC' })).toBe('Aave USDC Safe')
+  })
+
+  it('finds the dedicated Safe that holds money in an option', () => {
+    const empty = {
+      id: 'empty',
+      name: 'Empty',
+      budget: 100,
+      invested: 0,
+      threshold: 1,
+      owners: 3,
+      opportunityIds: ['a'],
+    }
+    const funded = { ...empty, id: 'funded', invested: 50 }
+
+    expect(heldIn([empty, funded], 'a')).toEqual(funded)
+    expect(heldIn([empty], 'a')).toBeUndefined()
   })
 })
 
