@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Columns3, ListFilter } from 'lucide-react'
+import { Columns3, ListFilter, Rows3, Search, X } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
@@ -9,15 +9,23 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@safe-global/views/components/ui/dropdown-menu'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from '@safe-global/views/components/ui/input-group'
 import { DEFI_V1_COPY } from '../copy'
 import { activeFilterCount, NO_FILTERS, type ListFilters } from '../shelf'
-import type { RiskLevel } from '../types'
+import type { GroupBy } from '../types'
 
 const COPY = DEFI_V1_COPY.toolbar
-const RISKS = Object.keys(DEFI_V1_COPY.risk) as RiskLevel[]
+const GROUP_OPTIONS = Object.keys(COPY.groupByOption) as Exclude<GroupBy, 'none'>[]
 
 const toggle = <T,>(values: T[], value: T): T[] =>
   values.includes(value) ? values.filter((item) => item !== value) : [...values, value]
@@ -50,6 +58,10 @@ const FilterGroup = <T extends string>({
 )
 
 export const OpportunityToolbar = ({
+  search,
+  onSearch,
+  groupBy,
+  onGroupBy,
   filters,
   onFilters,
   assets,
@@ -59,6 +71,10 @@ export const OpportunityToolbar = ({
   policy,
   onDeposit,
 }: {
+  search: string
+  onSearch: (value: string) => void
+  groupBy: GroupBy
+  onGroupBy: (value: GroupBy) => void
   filters: ListFilters
   onFilters: (value: ListFilters) => void
   assets: string[]
@@ -71,8 +87,51 @@ export const OpportunityToolbar = ({
   const filterCount = activeFilterCount(filters)
 
   return (
-    <div className="flex flex-wrap items-center justify-end gap-3" data-testid="opportunity-toolbar">
+    <div className="flex flex-wrap items-center gap-3" data-testid="opportunity-toolbar">
+      <InputGroup variant="search" className="min-w-48 flex-1 @max-[640px]:basis-full">
+        <InputGroupAddon align="inline-start">
+          <Search className="size-4" />
+        </InputGroupAddon>
+        <InputGroupInput
+          type="search"
+          aria-label="Search opportunities"
+          placeholder={COPY.searchPlaceholder}
+          value={search}
+          maxLength={100}
+          onChange={(event) => onSearch(event.target.value)}
+        />
+        {search && (
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton variant="ghost" size="icon-xs" aria-label="Clear search" onClick={() => onSearch('')}>
+              <X />
+            </InputGroupButton>
+          </InputGroupAddon>
+        )}
+      </InputGroup>
       <div className="flex flex-wrap items-center gap-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger render={<Button variant="outline" data-testid="group-by" />}>
+            <Rows3 />
+            {groupBy === 'none' ? COPY.groupBy : `${COPY.groupBy}: ${COPY.groupByOption[groupBy]}`}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-64">
+            <DropdownMenuGroup>
+              <DropdownMenuLabel>{COPY.groupBy}</DropdownMenuLabel>
+              <DropdownMenuRadioGroup value={groupBy} onValueChange={(value) => onGroupBy(value as GroupBy)}>
+                {GROUP_OPTIONS.map((option) => (
+                  <DropdownMenuRadioItem
+                    key={option}
+                    value={option}
+                    onClick={() => option === groupBy && onGroupBy('none')}
+                  >
+                    {COPY.groupByOption[option]}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
         <DropdownMenu>
           <DropdownMenuTrigger render={<Button variant="outline" data-testid="filters" />}>
             <ListFilter />
@@ -102,14 +161,6 @@ export const OpportunityToolbar = ({
               options={chains}
               selected={filters.chains}
               onChange={(next) => onFilters({ ...filters, chains: next })}
-            />
-            <DropdownMenuSeparator />
-            <FilterGroup
-              label={DEFI_V1_COPY.compare.risk}
-              options={RISKS}
-              selected={filters.risks}
-              format={(risk) => DEFI_V1_COPY.risk[risk]}
-              onChange={(next) => onFilters({ ...filters, risks: next })}
             />
             <DropdownMenuSeparator />
             <DropdownMenuGroup>

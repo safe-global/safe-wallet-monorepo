@@ -4,15 +4,16 @@ import {
   buildShelf,
   depositSteps,
   filterOpportunities,
+  groupOpportunities,
   growthSeries,
   growthShare,
   holdingsFor,
+  investedFirst,
   isLocked,
   NO_FILTERS,
   MAX_SHELF,
   nudgeOptions,
   summariseTreasury,
-  splitByInvestment,
 } from './shelf'
 import type { Opportunity } from './types'
 
@@ -140,21 +141,46 @@ describe('filterOpportunities', () => {
   })
 })
 
-describe('splitByInvestment', () => {
+describe('groupOpportunities', () => {
+  it('returns one group in the input order when not grouping', () => {
+    const items = [opportunity(), opportunity()]
+
+    expect(groupOpportunities(items, 'none')).toEqual([{ key: 'all', items }])
+  })
+
+  it('orders category groups by the shelf order and skips empty ones', () => {
+    const staking = opportunity({ category: 'staking' })
+    const cash = opportunity({ category: 'cash' })
+
+    expect(groupOpportunities([staking, cash], 'category').map((group) => group.key)).toEqual(['cash', 'staking'])
+  })
+
   it('puts investments above the other opportunities', () => {
     const open = opportunity({ id: 'open' })
     const held = opportunity({ id: 'held' })
 
-    expect(splitByInvestment([open, held], ['held'])).toEqual([
+    expect(groupOpportunities([open, held], 'investments', ['held'])).toEqual([
       { key: 'invested', items: [held] },
       { key: 'opportunities', items: [open] },
     ])
   })
 
-  it('skips the investments section when nothing is invested', () => {
-    const items = [opportunity(), opportunity()]
+  it('orders asset groups by first appearance', () => {
+    const eth = opportunity({ asset: 'ETH' })
+    const usdc = opportunity({ asset: 'USDC' })
 
-    expect(splitByInvestment(items, [])).toEqual([{ key: 'opportunities', items }])
+    expect(groupOpportunities([eth, usdc, opportunity({ asset: 'ETH' })], 'asset').map((group) => group.key)).toEqual([
+      'ETH',
+      'USDC',
+    ])
+  })
+})
+
+describe('investedFirst', () => {
+  it('moves investments to the top and keeps the rest in order', () => {
+    const [first, second, held] = [opportunity(), opportunity(), opportunity()]
+
+    expect(investedFirst([first, second, held], [held.id])).toEqual([held, first, second])
   })
 })
 

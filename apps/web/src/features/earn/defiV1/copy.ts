@@ -1,4 +1,4 @@
-import type { DefiV1Framing, OpportunityCategory, RiskLevel } from './types'
+import type { DefiV1Framing, GroupBy, OpportunityCategory } from './types'
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 const compactUsd = new Intl.NumberFormat('en-US', {
@@ -37,8 +37,7 @@ export const DEFI_V1_COPY = {
     yield: { title: 'Enhanced yield', subtitle: 'A bit more yield for cash you can leave for a while.' },
     staking: { title: 'Staking', subtitle: 'Earn on ETH the treasury plans to hold.' },
   } satisfies Record<OpportunityCategory, { title: string; subtitle: string }>,
-  risk: { low: 'Lower risk', medium: 'Medium risk', higher: 'Higher risk' } satisfies Record<RiskLevel, string>,
-  noMatches: 'No opportunities match these filters.',
+  noMatches: 'No opportunities match your search or filters.',
   nudgeTitle: (value: string, asset: string, chain: string, days: number) =>
     `${value} ${asset} has been idle on ${chain} for ${days} days`,
   nudgeBody: (count: number) =>
@@ -104,6 +103,13 @@ export const DEFI_V1_COPY = {
     withdrawLead: 'Funds return to this Safe. Signers approve one proposal.',
   },
   toolbar: {
+    searchPlaceholder: 'Search opportunities, assets, and providers…',
+    groupBy: 'Group by',
+    groupByOption: {
+      investments: 'Investments',
+      category: 'Category',
+      asset: 'Asset',
+    } satisfies Record<Exclude<GroupBy, 'none'>, string>,
     filters: 'Filter',
     investments: 'Investments',
     investedOnly: 'Invested only',
@@ -181,14 +187,12 @@ export const DEFI_V1_COPY = {
     title: 'Compare options',
     feature: 'Details',
     returns: 'Returns',
-    exitAndRisk: 'Exit and risk',
     trust: 'Track record',
     paidListing: 'Paid listing',
     kyc: 'KYC required',
     liveFor: 'Live for',
     rate: 'Net rate',
     exit: 'Exit time',
-    risk: 'Risk',
     access: 'Access',
     networks: 'Networks',
     tvl: 'TVL',

@@ -51,11 +51,8 @@ const SECTIONS: CompareSection[] = [
     ],
   },
   {
-    title: COPY.exitAndRisk,
-    rows: [
-      { feature: COPY.exit, value: (item) => item.exitLabel },
-      { feature: COPY.risk, value: (item) => DEFI_V1_COPY.risk[item.risk] },
-    ],
+    title: COPY.exit,
+    rows: [{ feature: COPY.exit, value: (item) => item.exitLabel }],
   },
   {
     title: COPY.access,

@@ -188,7 +188,6 @@ export const OpportunityDrawer = ({
             <div className="flex flex-col gap-6 pb-6" data-testid="fact-sheet">
               <div className="flex flex-wrap gap-1.5">
                 <Tag>{opportunity.asset}</Tag>
-                <Tag>{DEFI_V1_COPY.risk[opportunity.risk]}</Tag>
                 {opportunity.chains.map((chain) => (
                   <Tag key={chain}>{chain}</Tag>
                 ))}

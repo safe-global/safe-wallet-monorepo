@@ -1,4 +1,13 @@
-import type { DefiV1Model, DefiV1Plan, Holding, Opportunity, OpportunityCategory, Position, RiskLevel } from './types'
+import type {
+  DefiV1Model,
+  DefiV1Plan,
+  GroupBy,
+  Holding,
+  Opportunity,
+  OpportunityCategory,
+  Position,
+  RiskLevel,
+} from './types'
 
 export const CATEGORY_ORDER: OpportunityCategory[] = ['cash', 'yield', 'staking']
 export const MAX_SHELF = 7
@@ -43,7 +52,6 @@ export const nudgeOptions = (opportunities: Opportunity[], model: DefiV1Model, p
 export type ListFilters = {
   assets: string[]
   chains: string[]
-  risks: RiskLevel[]
   sameDay: boolean
   openOnly: boolean
   investedOnly: boolean
@@ -52,7 +60,6 @@ export type ListFilters = {
 export const NO_FILTERS: ListFilters = {
   assets: [],
   chains: [],
-  risks: [],
   sameDay: false,
   openOnly: false,
   investedOnly: false,
@@ -61,7 +68,6 @@ export const NO_FILTERS: ListFilters = {
 export const activeFilterCount = (filters: ListFilters): number =>
   filters.assets.length +
   filters.chains.length +
-  filters.risks.length +
   Number(filters.sameDay) +
   Number(filters.openOnly) +
   Number(filters.investedOnly)
@@ -77,20 +83,42 @@ export const filterOpportunities = (
       (!filters.investedOnly || investedIds.includes(item.id)) &&
       (filters.assets.length === 0 || filters.assets.includes(item.asset)) &&
       (filters.chains.length === 0 || item.chains.some((chain) => filters.chains.includes(chain))) &&
-      (filters.risks.length === 0 || filters.risks.includes(item.risk)) &&
       (!filters.sameDay || item.exitHours <= NUDGE_MAX_EXIT_HOURS) &&
       (!filters.openOnly || (item.access === 'all' && !item.kyc)),
   )
 
-/** Investments first, then everything else, each in the input order. Empty sections are skipped. */
-export const splitByInvestment = (
+const GROUP_KEY: Record<Exclude<GroupBy, 'none' | 'investments'>, (item: Opportunity) => string> = {
+  category: (item) => item.category,
+  asset: (item) => item.asset,
+}
+
+const GROUP_ORDER: Partial<Record<GroupBy, string[]>> = {
+  investments: ['invested', 'opportunities'],
+  category: CATEGORY_ORDER,
+}
+
+/** Keeps the input order inside each group. Investments come first; categories follow the shelf order, assets their first appearance. */
+export const groupOpportunities = (
   opportunities: Opportunity[],
-  investedIds: string[],
-): { key: 'invested' | 'opportunities'; items: Opportunity[] }[] =>
-  [
-    { key: 'invested' as const, items: opportunities.filter((item) => investedIds.includes(item.id)) },
-    { key: 'opportunities' as const, items: opportunities.filter((item) => !investedIds.includes(item.id)) },
-  ].filter((group) => group.items.length > 0)
+  groupBy: GroupBy,
+  investedIds: string[] = [],
+): { key: string; items: Opportunity[] }[] => {
+  if (groupBy === 'none') return [{ key: 'all', items: opportunities }]
+  const keyOf =
+    groupBy === 'investments'
+      ? (item: Opportunity) => (investedIds.includes(item.id) ? 'invested' : 'opportunities')
+      : GROUP_KEY[groupBy]
+  const keys = GROUP_ORDER[groupBy] ?? [...new Set(opportunities.map(keyOf))]
+  return keys
+    .map((key) => ({ key, items: opportunities.filter((item) => keyOf(item) === key) }))
+    .filter((group) => group.items.length > 0)
+}
+
+/** Moves investments to the top and keeps the input order otherwise. */
+export const investedFirst = (opportunities: Opportunity[], investedIds: string[]): Opportunity[] => [
+  ...opportunities.filter((item) => investedIds.includes(item.id)),
+  ...opportunities.filter((item) => !investedIds.includes(item.id)),
+]
 
 /** The calls one proposal bundles when the Safe holds the asset on another chain. */
 export const depositSteps = (

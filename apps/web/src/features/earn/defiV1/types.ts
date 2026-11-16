@@ -51,6 +51,8 @@ export type DefiV1Config = {
   plan: DefiV1Plan
 }
 
+export type GroupBy = 'none' | 'investments' | 'category' | 'asset'
+
 export type Position = { opportunity: Opportunity; principal: number; earned: number; pending: boolean }
 
 export type Holding = { invested: number; pending: number; earned: number }

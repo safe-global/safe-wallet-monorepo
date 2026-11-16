@@ -15,9 +15,9 @@ import type { Holding, Opportunity } from '../types'
 import { Sparkline } from './Sparkline'
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0!'
-const COLUMN_WIDTHS = ['w-10', '', 'w-20', 'w-24', 'w-32', 'w-28', 'w-28', 'w-28', 'w-36', 'w-24']
+const COLUMN_WIDTHS = ['w-10', '', 'w-20', 'w-24', 'w-32', 'w-28', 'w-28', 'w-36', 'w-24']
 const COLUMN_COUNT = COLUMN_WIDTHS.length
-const OPPORTUNITY_HEADERS = ['Opportunity', 'Asset', 'Net APY', 'Category', 'Exit time', 'Risk', 'Invested', 'Earned']
+const OPPORTUNITY_HEADERS = ['Opportunity', 'Asset', 'Net APY', 'Category', 'Exit time', 'Invested', 'Earned']
 
 export type OpportunityGroup = { key: string; title?: string; items: Opportunity[] }
 
@@ -198,9 +198,6 @@ const OpportunityRow = ({
         <ExitCell opportunity={opportunity} />
       </TableCell>
       <TableCell>
-        <Tag>{DEFI_V1_COPY.risk[opportunity.risk]}</Tag>
-      </TableCell>
-      <TableCell>
         <InvestedCell holding={holding} />
       </TableCell>
       <TableCell>
@@ -226,7 +223,7 @@ const OpportunityRow = ({
 const TableCard = ({ label, children }: { label: string; children: ReactNode }) => (
   <Card radius="xl" size="none">
     <CardContent>
-      <Table aria-label={label} variant="panel" className="table-fixed min-w-[1120px] [&_td]:px-4 [&_th]:px-4">
+      <Table aria-label={label} variant="panel" className="table-fixed min-w-[1000px] [&_td]:px-4 [&_th]:px-4">
         <colgroup>
           {COLUMN_WIDTHS.map((width, index) => (
             <col key={index} className={width || undefined} />
