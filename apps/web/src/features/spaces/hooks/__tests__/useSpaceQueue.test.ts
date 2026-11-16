@@ -133,6 +133,15 @@ describe('useSpaceQueue', () => {
     expect(data).toMatchObject({ shownCount: 2, totalCount: 2, isComplete: true })
   })
 
+  it('passes the unavailable Safes through', async () => {
+    const unavailableSafes = [{ chainId: '1', safeAddress: safeB }]
+    respondWith(page({ [safeA]: { '1': transactions(1) } }, { count: 1, unavailableSafes }))
+
+    const { data } = await fetchQueue()
+
+    expect(data?.unavailableSafes).toEqual(unavailableSafes)
+  })
+
   it('fails when the request fails', async () => {
     respondWith(null, 500)
 
