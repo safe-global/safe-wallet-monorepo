@@ -2,7 +2,6 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SpaceAddressBookItemDto, SpaceAddressBookTagDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { AddressBookContact, ContactTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
-import type { ChainInfo } from '@safe-global/views/features/spaces/types'
 import type { AddressBookState } from '@/store/addressBookSlice'
 import { toChainInfos } from '../../utils'
 
