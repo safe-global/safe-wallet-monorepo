@@ -1,8 +1,8 @@
 import { faker } from '@faker-js/faker'
 import type { SpaceQueueCounts } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
-import { fireEvent, render, screen, within } from '@/tests/test-utils'
-import { NO_SPACE_QUEUE_FILTERS, type SpaceQueueFilters } from '../../../store/spaceQueueApi'
+import { act, fireEvent, render, screen, within } from '@/tests/test-utils'
+import { NO_SPACE_QUEUE_FILTERS, type SpaceQueueFilters } from '../../../hooks/useSpaceQueue'
 import TransactionsToolbar from '.'
 
 jest.mock('../NewTransactionButton', () => ({ __esModule: true, default: () => null }))
@@ -49,13 +49,12 @@ const renderToolbar = (filters: SpaceQueueFilters = NO_SPACE_QUEUE_FILTERS) => {
 }
 
 describe('TransactionsToolbar', () => {
-  it('lists every status with its count and adds the one picked to the filters', () => {
-    const onFiltersChange = renderToolbar({ statuses: ['execute'], safes: [], chainIds: [], signers: [] })
+  it('lists every status and flag with its count', () => {
+    renderToolbar()
 
     fireEvent.click(screen.getByRole('button', { name: 'Status' }))
-    const options = screen.getAllByRole('menuitemcheckbox')
 
-    expect(options.map((option) => option.textContent)).toEqual([
+    expect(screen.getAllByRole('menuitemcheckbox').map((option) => option.textContent)).toEqual([
       'Execute1',
       'Sign10',
       'Blocked7',
@@ -63,45 +62,54 @@ describe('TransactionsToolbar', () => {
       'Conflicting2',
       'Stale 7 days0',
     ])
-    expect(options[0]).toHaveAttribute('aria-checked', 'true')
-
-    fireEvent.click(screen.getByRole('menuitemcheckbox', { name: /Sign/ }))
-
-    expect(onFiltersChange).toHaveBeenCalledWith({
-      statuses: ['execute', 'sign'],
-      safes: [],
-      chainIds: [],
-      signers: [],
-    })
   })
 
-  it('shows each status with its icon, statuses on a tinted tile and flags muted', () => {
-    renderToolbar()
+  it('checks the selected statuses', () => {
+    renderToolbar({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['execute'] })
 
     fireEvent.click(screen.getByRole('button', { name: 'Status' }))
-    const icons = screen.getAllByRole('menuitemcheckbox').map((option) => option.querySelector('svg.lucide'))
 
-    expect(
-      icons.map((icon) =>
-        icon
-          ?.getAttribute('class')
-          ?.match(/lucide-[a-z0-9-]+/g)
-          ?.at(-1),
-      ),
-    ).toEqual([
-      'lucide-circle-check',
-      'lucide-pen-line',
-      'lucide-clock-3',
-      'lucide-users',
-      'lucide-split',
-      'lucide-calendar-clock',
+    expect(screen.getByRole('menuitemcheckbox', { name: /Execute/ })).toHaveAttribute('aria-checked', 'true')
+    expect(screen.getByRole('menuitemcheckbox', { name: /Sign/ })).toHaveAttribute('aria-checked', 'false')
+  })
+
+  it('adds a status that is picked to the filters', () => {
+    const onFiltersChange = renderToolbar({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['execute'] })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
+    fireEvent.click(screen.getByRole('menuitemcheckbox', { name: /Sign/ }))
+
+    expect(onFiltersChange).toHaveBeenCalledWith({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['execute', 'sign'] })
+  })
+
+  it('hides the flag counts in the Status menu while a status is selected', () => {
+    renderToolbar({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['sign'] })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
+
+    expect(screen.getAllByRole('menuitemcheckbox').map((option) => option.textContent)).toEqual([
+      'Execute1',
+      'Sign10',
+      'Blocked7',
+      'Waiting1',
+      'Conflicting',
+      'Stale 7 days',
     ])
-    expect(icons[0]?.parentElement).toHaveClass('bg-success-subtle', 'text-success-strong')
-    expect(icons[1]?.parentElement).toHaveClass('bg-success-subtle', 'text-success-strong')
-    expect(icons[2]?.parentElement).toHaveClass('bg-warning-subtle', 'text-warning-strong')
-    expect(icons[3]?.parentElement).toHaveClass('bg-warning-subtle', 'text-warning-strong')
-    expect(icons[4]).toHaveClass('text-muted-foreground')
-    expect(icons[5]).toHaveClass('text-muted-foreground')
+  })
+
+  it('hides the status counts in the Status menu while a flag is selected', () => {
+    renderToolbar({ ...NO_SPACE_QUEUE_FILTERS, statuses: ['conflicting'] })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
+
+    expect(screen.getAllByRole('menuitemcheckbox').map((option) => option.textContent)).toEqual([
+      'Execute',
+      'Sign',
+      'Blocked',
+      'Waiting',
+      'Conflicting2',
+      'Stale 7 days0',
+    ])
   })
 
   it('removes a status that is picked again', () => {
@@ -167,13 +175,21 @@ describe('TransactionsToolbar', () => {
     expect(onFiltersChange).toHaveBeenCalledWith(NO_SPACE_QUEUE_FILTERS)
   })
 
-  it('shows a chip for the networks and one for the signers, each removing its own filter', () => {
+  it('removes the networks with the Network chip', () => {
+    const filters = { ...NO_SPACE_QUEUE_FILTERS, chainIds: ['1'], signers: [signerA] }
+    const onFiltersChange = renderToolbar(filters)
+
+    const networkChip = screen.getByText('Network:').parentElement as HTMLElement
+    fireEvent.click(within(networkChip).getByRole('button', { name: 'Remove' }))
+
+    expect(onFiltersChange).toHaveBeenLastCalledWith({ ...filters, chainIds: [] })
+  })
+
+  it('removes the signers with the Signer chip', () => {
     const filters = { ...NO_SPACE_QUEUE_FILTERS, chainIds: ['1'], signers: [signerA] }
     const onFiltersChange = renderToolbar(filters)
 
     const signerChip = screen.getByText('Signer:').parentElement as HTMLElement
-    expect(screen.getByText('Network:')).toBeInTheDocument()
-
     fireEvent.click(within(signerChip).getByRole('button', { name: 'Remove' }))
 
     expect(onFiltersChange).toHaveBeenLastCalledWith({ ...filters, signers: [] })
@@ -191,43 +207,59 @@ describe('TransactionsToolbar', () => {
     expect(screen.getByText('Status:').parentElement).toHaveTextContent('Status:Ready to sign, Ready to execute +2')
   })
 
-  it('removes one filter from its chip and every filter with Clear', () => {
-    const onFiltersChange = renderToolbar({
-      statuses: ['sign'],
+  it('removes the statuses with the Status chip', () => {
+    const filters = {
+      ...NO_SPACE_QUEUE_FILTERS,
+      statuses: ['sign' as const],
       safes: [{ chainId: '1', safeAddress: safeA }],
-      chainIds: [],
-      signers: [],
-    })
+    }
+    const onFiltersChange = renderToolbar(filters)
 
     const statusChip = screen.getByText('Status:').parentElement as HTMLElement
     fireEvent.click(within(statusChip).getByRole('button', { name: 'Remove' }))
-    expect(onFiltersChange).toHaveBeenLastCalledWith({
-      statuses: [],
+
+    expect(onFiltersChange).toHaveBeenLastCalledWith({ ...filters, statuses: [] })
+  })
+
+  it('removes every filter with Clear', () => {
+    const onFiltersChange = renderToolbar({
+      ...NO_SPACE_QUEUE_FILTERS,
+      statuses: ['sign'],
       safes: [{ chainId: '1', safeAddress: safeA }],
-      chainIds: [],
-      signers: [],
     })
 
     fireEvent.click(screen.getByRole('button', { name: 'Clear' }))
+
     expect(onFiltersChange).toHaveBeenLastCalledWith(NO_SPACE_QUEUE_FILTERS)
   })
 
-  it('passes the search on to the queue', () => {
-    const onSearchChange = jest.fn()
-    render(
-      <TransactionsToolbar
-        spaceId={faker.string.uuid()}
-        counts={counts}
-        filters={NO_SPACE_QUEUE_FILTERS}
-        onFiltersChange={jest.fn()}
-        onSearchChange={onSearchChange}
-      />,
-    )
-    const searchbox = screen.getByRole('searchbox', { name: 'Search transactions' })
+  describe('search', () => {
+    beforeEach(() => {
+      jest.useFakeTimers()
+    })
 
-    expect(searchbox).toBeEnabled()
-    fireEvent.change(searchbox, { target: { value: 'polygon' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Clear search' }))
-    expect(onSearchChange).toHaveBeenLastCalledWith('')
+    afterEach(() => {
+      jest.useRealTimers()
+    })
+
+    it('passes the search on to the queue once typing pauses', () => {
+      const onSearchChange = jest.fn()
+      render(
+        <TransactionsToolbar
+          spaceId={faker.string.uuid()}
+          counts={counts}
+          filters={NO_SPACE_QUEUE_FILTERS}
+          onFiltersChange={jest.fn()}
+          onSearchChange={onSearchChange}
+        />,
+      )
+
+      fireEvent.change(screen.getByRole('searchbox', { name: 'Search transactions' }), { target: { value: 'polygon' } })
+      act(() => {
+        jest.advanceTimersByTime(300)
+      })
+
+      expect(onSearchChange).toHaveBeenLastCalledWith('polygon')
+    })
   })
 })

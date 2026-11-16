@@ -6,11 +6,11 @@ import NoTransactionsIcon from '@/public/images/transactions/no-transactions.svg
 import {
   hasSpaceQueueFilters,
   NO_SPACE_QUEUE_FILTERS,
-  useGetSpaceQueueQuery,
+  useSpaceQueue,
   type SpaceQueue,
   type SpaceQueueFilters,
-} from '../../store/spaceQueueApi'
-import { QueueLoadError, QueueNoMatches } from './QueueStates'
+} from '../../hooks/useSpaceQueue'
+import { QueueLoadError, QueueNoMatches } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueStates'
 import SpaceQueueTable from './SpaceQueueTable'
 import TransactionsToolbar from './TransactionsToolbar'
 import UnavailableSafesAlert from './UnavailableSafesAlert'
@@ -33,7 +33,6 @@ const QueueBody = memo(function QueueBody({
   onClearFilters: () => void
 }): ReactElement {
   const { sections, unavailableSafes } = queue
-  const isNarrowed = isFiltered || isSearching
 
   return (
     <>
@@ -49,8 +48,8 @@ const QueueBody = memo(function QueueBody({
 
       {sections.length > 0 ? (
         <SpaceQueueTable sections={sections} />
-      ) : isNarrowed ? (
-        <QueueNoMatches onClear={onClearFilters} />
+      ) : isFiltered || isSearching ? (
+        <QueueNoMatches hasFilters={isFiltered} isSearching={isSearching} onClear={onClearFilters} />
       ) : (
         <PagePlaceholder
           img={<NoTransactionsIcon />}
@@ -70,10 +69,10 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
   const queryFilters = useDeferredValue(filters)
   const querySearch = useDeferredValue(search)
   // `data` keeps the last answer while a new filter loads, so the menus keep their counts
-  const { data, currentData, isError, isFetching, refetch } = useGetSpaceQueueQuery({
+  const { data, currentData, isError, isFetching, refetch } = useSpaceQueue({
     spaceId,
     filters: queryFilters,
-    ...(querySearch && { search: querySearch }),
+    search: querySearch,
   })
 
   const clearFilters = useCallback(() => {

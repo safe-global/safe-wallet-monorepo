@@ -1,4 +1,4 @@
-import { useCallback, useContext, useMemo, type ReactElement } from 'react'
+import { useCallback, useContext, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import type { SafeItem } from '@/hooks/safes'
 import { TxModalContext } from '@/components/tx-flow'
@@ -11,11 +11,6 @@ import { ESafeAction } from '@/features/spaces/store'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 type SafeActionHandler = (safe: SafeItem) => Promise<void>
-
-// Not via the URL: a step swapping the flow runs the previous onClose, which would strip the Safe mid-flow
-const withSafeScope = (safe: SafeItem, txFlow: ReactElement): ReactElement => (
-  <SafeScopeProvider initial={{ chainId: safe.chainId, safeAddress: safe.address }}>{txFlow}</SafeScopeProvider>
-)
 
 interface UseSafeActionMapperOptions {
   onReceiveComplete: () => void
@@ -58,7 +53,7 @@ const useSafeActionMapper = ({ onReceiveComplete }: UseSafeActionMapperOptions):
   )
 
   // Clears the safe/chain query params so the topbar drops the selected-safe context
-  // after the user closes the Receive QR modal, which still reads the Safe from the URL.
+  // after the user closes a space-level modal. Matches the SendTransactionButton pattern.
   const resetActiveSafe = useCallback(async () => {
     const { safe: _safe, chain: _chain, ...rest } = router.query
     await router.replace({
@@ -70,7 +65,8 @@ const useSafeActionMapper = ({ onReceiveComplete }: UseSafeActionMapperOptions):
   const actionMapper = useMemo<Record<ESafeAction, SafeActionHandler>>(
     () => ({
       [ESafeAction.Send]: async (safe) => {
-        setTxFlow(withSafeScope(safe, <TokenTransferFlow />), undefined, false)
+        await navigateToSafe(safe)
+        setTxFlow(<TokenTransferFlow />, resetActiveSafe, false)
       },
 
       [ESafeAction.Receive]: async (safe) => {
@@ -95,10 +91,17 @@ const useSafeActionMapper = ({ onReceiveComplete }: UseSafeActionMapperOptions):
       },
 
       [ESafeAction.NewTransaction]: async (safe) => {
-        setTxFlow(withSafeScope(safe, <NewTxFlow />), undefined, false)
+        // Not via the URL: a step swapping the flow runs the previous onClose, which would strip the Safe mid-flow
+        setTxFlow(
+          <SafeScopeProvider initial={{ chainId: safe.chainId, safeAddress: safe.address }}>
+            <NewTxFlow />
+          </SafeScopeProvider>,
+          undefined,
+          false,
+        )
       },
     }),
-    [router, setTxFlow, getSafeQueryParam, navigateToSafe, onReceiveComplete, txBuilderLink, spaceId],
+    [router, setTxFlow, getSafeQueryParam, navigateToSafe, onReceiveComplete, resetActiveSafe, txBuilderLink, spaceId],
   )
 
   return { actionMapper, resetActiveSafe }

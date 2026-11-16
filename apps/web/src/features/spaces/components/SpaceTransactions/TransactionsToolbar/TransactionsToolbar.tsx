@@ -1,12 +1,10 @@
 import type { ReactElement } from 'react'
 import type { SpaceQueueCounts } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import type { SpaceQueueFilters } from '../../../store/spaceQueueApi'
+import QueueToolbar from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/QueueToolbar'
+import type { SpaceQueueFilters } from '../../../hooks/useSpaceQueue'
 import NewTransactionButton from '../NewTransactionButton'
-import FilterChips from './FilterChips'
-import FilterMenu from './FilterMenu'
-import SafeFilter from './SafeFilter'
 import SearchTransactions from './SearchTransactions'
-import StatusFilter from './StatusFilter'
+import { useQueueFilterOptions } from './useQueueFilterOptions'
 
 type TransactionsToolbarProps = {
   spaceId: string
@@ -23,29 +21,13 @@ const TransactionsToolbar = ({
   onFiltersChange,
   onSearchChange,
 }: TransactionsToolbarProps): ReactElement => {
+  const options = useQueueFilterOptions(counts, filters, onFiltersChange)
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <SearchTransactions onSearch={onSearchChange} />
-        <StatusFilter
-          counts={counts}
-          selected={filters.statuses}
-          onChange={(statuses) => onFiltersChange({ ...filters, statuses })}
-        />
-        <SafeFilter
-          counts={counts}
-          selected={filters.safes}
-          onChange={(safes) => onFiltersChange({ ...filters, safes })}
-        />
-        <FilterMenu counts={counts} filters={filters} onChange={onFiltersChange} />
-        <NewTransactionButton spaceId={spaceId} />
-      </div>
-      <FilterChips
-        filters={filters}
-        chainIds={(counts?.chains ?? []).map(({ chainId }) => chainId)}
-        onChange={onFiltersChange}
-      />
-    </div>
+    <QueueToolbar
+      {...options}
+      search={<SearchTransactions onSearch={onSearchChange} />}
+      action={<NewTransactionButton spaceId={spaceId} />}
+    />
   )
 }
 

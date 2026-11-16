@@ -6,7 +6,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
-import type { SpaceQueueChain, SpaceQueueSection } from '../../../store/spaceQueueApi'
+import type { SpaceQueueChain, SpaceQueueSection } from '../../../hooks/useSpaceQueue'
 import SpaceQueueTable from '.'
 import { DeleteTxDialogProvider } from '../RowActionsMenu/DeleteTxDialog'
 import { Table, TableBody } from '@safe-global/views/components/ui/table'
@@ -61,6 +61,11 @@ const transactionItem = (
 const section = (safeAddress: string, chains: SpaceQueueChain[]): SpaceQueueSection => ({ safeAddress, chains })
 
 const renderedRows = () => screen.queryAllByTestId('space-queue-row')
+
+const stubRowHeights = () =>
+  jest
+    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+    .mockReturnValue({ height: 56, width: 1240, top: 0, left: 0, right: 1240, bottom: 56, x: 0, y: 0 } as DOMRect)
 
 describe('SpaceQueueTable', () => {
   const chainId = faker.string.numeric(3)
@@ -210,10 +215,7 @@ describe('SpaceQueueTable', () => {
   })
 
   it('renders only the rows near the viewport of a long queue', () => {
-    // jsdom lays nothing out: give every row a real height so the virtualizer can measure it
-    const rect = jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockReturnValue({ height: 56, width: 1240, top: 0, left: 0, right: 1240, bottom: 56, x: 0, y: 0 } as DOMRect)
+    const rect = stubRowHeights()
     const items: TransactionQueuedItem[] = Array.from({ length: 300 }, (_, nonce) =>
       transactionItem('AWAITING_CONFIRMATIONS', nonce),
     )
@@ -223,7 +225,6 @@ describe('SpaceQueueTable', () => {
     const rendered = renderedRows().length
     expect(rendered).toBeGreaterThan(0)
     expect(rendered).toBeLessThan(60)
-    // The rows below the window are skeleton placeholders until they render
     expect(screen.getByTestId('space-queue-skeleton')).toBeInTheDocument()
     rect.mockRestore()
   })

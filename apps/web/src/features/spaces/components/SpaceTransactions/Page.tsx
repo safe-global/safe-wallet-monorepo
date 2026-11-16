@@ -25,7 +25,7 @@ export default function SpaceTransactionsPage({ spaceId }: { spaceId: string }) 
           </TabsList>
 
           <TabsContent value="pending">
-            <SpaceTransactionQueue spaceId={spaceId} />
+            <SpaceTransactionQueue key={spaceId} spaceId={spaceId} />
           </TabsContent>
         </Tabs>
       </div>
