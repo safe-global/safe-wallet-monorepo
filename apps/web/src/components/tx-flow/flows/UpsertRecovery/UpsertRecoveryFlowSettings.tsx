@@ -9,7 +9,7 @@ import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/com
 import { useRecoveryPeriods } from './useRecoveryPeriods'
 import { UpsertRecoveryFlowFields, type UpsertRecoveryFlowProps } from '.'
 import AddressBookInput from '@/components/common/AddressBookInput'
-import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/public/useSafeShield'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { addressIsNotReserved } from '@safe-global/utils/utils/validation'
 import useSafeInfo from '@/hooks/useSafeInfo'

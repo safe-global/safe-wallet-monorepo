@@ -5,7 +5,7 @@ import { render, screen, fireEvent } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
-import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/public/useSafeShield'
 import {
   createDefaultAllowlistValues,
   type AllowlistFormRecipient,
@@ -30,7 +30,10 @@ const mockPush = jest.fn()
 
 jest.mock('../../hooks/useRecipientAllowlistSafeAccounts', () => ({ useRecipientAllowlistSafeAccounts: jest.fn() }))
 jest.mock('../../hooks/useGuardStatus', () => ({ useGuardStatus: jest.fn() }))
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({ useSafeShieldForAddressPoisoning: jest.fn() }))
+jest.mock('@/features/safe-shield/public/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/useSafeShield'),
+  useSafeShieldForAddressPoisoning: jest.fn(),
+}))
 
 jest.mock('../../hooks/useHeldTokenAddresses')
 jest.mock('@/hooks/useAllAddressBooks', () => ({

@@ -13,7 +13,7 @@ import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxConte
 import { createSafeTx } from '@/tests/builders/safeTx'
 import * as useTxPreviewHooks from '@/components/tx/confirmation-views/useTxPreview'
 import { SlotProvider } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
-import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import { SafeShieldProvider } from '@/features/safe-shield/public/SafeShieldProvider'
 
 jest.spyOn(execThroughRoleHooks, 'useRoles').mockReturnValue([])
 describe('ReviewSignMessageOnChain', () => {

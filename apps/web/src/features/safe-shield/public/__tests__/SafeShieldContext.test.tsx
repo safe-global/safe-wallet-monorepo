@@ -1,5 +1,6 @@
 import { renderHook, waitFor, act } from '@testing-library/react'
-import { SafeShieldProvider, useSafeShield, useSafeShieldForAddressPoisoning } from '../SafeShieldContext'
+import { SafeShieldProvider } from '../SafeShieldProvider'
+import { useSafeShield, useSafeShieldForAddressPoisoning } from '../useSafeShield'
 import { RecipientStatus, Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import {
   DeadlockAnalysisBuilder,
@@ -12,20 +13,20 @@ import type { ReactNode } from 'react'
 import { getAddress } from 'ethers'
 import { SafeScopeContext, type SafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 
-jest.mock('@/features/safe-shield/hooks/useRecipientAnalysis', () => ({
+jest.mock('../../hooks/useRecipientAnalysis', () => ({
   useRecipientAnalysis: jest.fn(() => undefined),
 }))
-jest.mock('@/features/safe-shield/hooks/useCounterpartyAnalysis', () => ({
+jest.mock('../../hooks/useCounterpartyAnalysis', () => ({
   useCounterpartyAnalysis: jest.fn(() => ({
     recipient: [undefined, undefined, false],
     contract: [undefined, undefined, false],
     deadlock: [undefined, undefined, false],
   })),
 }))
-jest.mock('@/features/safe-shield/hooks/useThreatAnalysis', () => ({
+jest.mock('../../hooks/useThreatAnalysis', () => ({
   useThreatAnalysis: jest.fn(),
 }))
-jest.mock('@/features/safe-shield/hooks/useRecipientAnalysisWithPoisoning', () => ({
+jest.mock('../../hooks/useRecipientAnalysisWithPoisoning', () => ({
   useRecipientAnalysisWithPoisoning: jest.fn(),
 }))
 
@@ -69,15 +70,11 @@ const mockSafeTxContextValue = {
   setFeeGasToken: jest.fn(),
 }
 
-const mockUseThreatAnalysis = jest.requireMock('@/features/safe-shield/hooks/useThreatAnalysis').useThreatAnalysis
-const mockUseRecipientAnalysis = jest.requireMock(
-  '@/features/safe-shield/hooks/useRecipientAnalysis',
-).useRecipientAnalysis
-const mockUseCounterpartyAnalysis = jest.requireMock(
-  '@/features/safe-shield/hooks/useCounterpartyAnalysis',
-).useCounterpartyAnalysis
+const mockUseThreatAnalysis = jest.requireMock('../../hooks/useThreatAnalysis').useThreatAnalysis
+const mockUseRecipientAnalysis = jest.requireMock('../../hooks/useRecipientAnalysis').useRecipientAnalysis
+const mockUseCounterpartyAnalysis = jest.requireMock('../../hooks/useCounterpartyAnalysis').useCounterpartyAnalysis
 const mockUseRecipientAnalysisWithPoisoning = jest.requireMock(
-  '@/features/safe-shield/hooks/useRecipientAnalysisWithPoisoning',
+  '../../hooks/useRecipientAnalysisWithPoisoning',
 ).useRecipientAnalysisWithPoisoning
 
 const buildSafeTransaction = (data: string): SafeTransaction => ({

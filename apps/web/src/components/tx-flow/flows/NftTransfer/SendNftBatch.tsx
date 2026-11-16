@@ -10,7 +10,7 @@ import ImageFallback from '@safe-global/views/components/common/ImageFallback'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { useContext, useMemo } from 'react'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
-import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
+import { useSafeShieldForRecipients } from '@/features/safe-shield/public/useSafeShield'
 
 enum Field {
   recipient = 'recipient',

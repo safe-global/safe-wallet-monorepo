@@ -9,7 +9,7 @@ import { server } from '@/tests/server'
 import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/config/gateway'
 import type { RootState } from '@/store'
-import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import { SafeShieldProvider } from '@/features/safe-shield/public/SafeShieldProvider'
 
 const mockTxPreview: TransactionPreview = {
   txInfo: {},

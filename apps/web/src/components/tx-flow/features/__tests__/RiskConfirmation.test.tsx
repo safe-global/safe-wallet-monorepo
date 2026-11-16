@@ -4,7 +4,7 @@ import { SlotProvider, SlotName } from '@safe-global/views/components/tx-flow/sl
 import { useSlotIds } from '@/components/tx-flow/slots/hooks/useSlotIds'
 import RiskConfirmationSlot, { RiskConfirmation } from '../RiskConfirmation'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
-import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { useSafeShield } from '@/features/safe-shield/public/useSafeShield'
 import { useHasFeature } from '@/hooks/useChains'
 
 jest.mock('@/hooks/useChains', () => ({
@@ -13,8 +13,8 @@ jest.mock('@/hooks/useChains', () => ({
   useHasFeature: jest.fn(() => false),
 }))
 
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
-  __esModule: true,
+jest.mock('@/features/safe-shield/public/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/useSafeShield'),
   useSafeShield: jest.fn(),
 }))
 

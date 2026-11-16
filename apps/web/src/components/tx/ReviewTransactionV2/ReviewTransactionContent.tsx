@@ -21,7 +21,7 @@ import { Separator } from '@safe-global/views/components/ui/separator'
 import CheckWallet from '@/components/common/CheckWallet'
 import { MODALS_EVENTS } from '@/services/analytics/events/modals'
 import { trackEvent } from '@/services/analytics'
-import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { useSafeShield } from '@/features/safe-shield/public/useSafeShield'
 
 export type ReviewTransactionContentProps = PropsWithChildren<{ onSubmit: SubmitCallback; withDecodedData?: boolean }>
 

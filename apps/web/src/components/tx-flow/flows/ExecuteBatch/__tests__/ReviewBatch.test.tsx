@@ -89,7 +89,8 @@ jest.mock('@/hooks/useChains')
 type RiskState = { needsRiskConfirmation: boolean; isRiskConfirmed: boolean; setIsRiskConfirmed: jest.Mock }
 const NO_RISK: RiskState = { needsRiskConfirmation: false, isRiskConfirmed: false, setIsRiskConfirmed: jest.fn() }
 const mockUseSafeShield = jest.fn<RiskState, []>(() => NO_RISK)
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
+jest.mock('@/features/safe-shield/public/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/useSafeShield'),
   useSafeShield: () => mockUseSafeShield(),
   useSafeShieldForTxData: () => undefined,
 }))

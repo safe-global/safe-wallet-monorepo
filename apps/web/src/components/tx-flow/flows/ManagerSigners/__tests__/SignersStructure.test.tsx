@@ -11,8 +11,8 @@ import { TxFlowContext, initialContext, type TxFlowContextType } from '@/compone
 import { SignersStructure } from '../SignersStructure'
 import type { ManageSignersForm } from '..'
 
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
-  __esModule: true,
+jest.mock('@/features/safe-shield/public/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/useSafeShield'),
   useSafeShieldForAddressPoisoning: () => undefined,
 }))
 

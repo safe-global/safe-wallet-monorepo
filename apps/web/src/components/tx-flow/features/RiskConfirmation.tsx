@@ -8,7 +8,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics/events/modals'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
-import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { useSafeShield } from '@/features/safe-shield/public/useSafeShield'
 
 type RiskConfirmationProps = {
   subject: 'transaction' | 'message'

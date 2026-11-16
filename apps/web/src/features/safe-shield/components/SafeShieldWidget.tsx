@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
-import { SafeShieldDisplay } from './components/SafeShieldDisplay'
-import { useSafeShield } from './SafeShieldContext'
+import { SafeShieldDisplay } from './SafeShieldDisplay'
+import { useSafeShield } from '../public/useSafeShield'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
@@ -47,5 +47,3 @@ const SafeShieldWidget = (): ReactElement => {
 }
 
 export default SafeShieldWidget
-
-export type { AnalysisGroupCardProps } from '@/features/safe-shield/components/AnalysisGroupCard/AnalysisGroupCard'

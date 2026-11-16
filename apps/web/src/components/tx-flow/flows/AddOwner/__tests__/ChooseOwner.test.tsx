@@ -8,8 +8,8 @@ import { getContractErrorMessage } from '@safe-global/utils/services/exceptions/
 import { ChooseOwner, ChooseOwnerMode } from '../ChooseOwner'
 import type { AddOwnerFlowProps } from '..'
 
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
-  __esModule: true,
+jest.mock('@/features/safe-shield/public/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/useSafeShield'),
   useSafeShieldForAddressPoisoning: () => undefined,
 }))
 
