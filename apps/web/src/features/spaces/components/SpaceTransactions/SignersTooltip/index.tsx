@@ -17,7 +17,10 @@ type SignersTooltipProps = {
 }
 
 const Signers = ({ chainId, txId, submitted, required }: Omit<SignersTooltipProps, 'children'>): ReactElement => {
-  const { data, isLoading } = useTransactionsGetTransactionByIdV1Query({ chainId, id: txId })
+  const { data, isLoading } = useTransactionsGetTransactionByIdV1Query(
+    { chainId, id: txId },
+    { refetchOnMountOrArgChange: true },
+  )
   const wallet = useWallet()
   const resolveName = useSafeNameResolver()
   const details = data?.detailedExecutionInfo?.type === 'MULTISIG' ? data.detailedExecutionInfo : undefined
