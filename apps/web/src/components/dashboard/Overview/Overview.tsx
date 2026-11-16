@@ -32,7 +32,7 @@ const Overview = (): ReactElement => {
       {/* Refresh hint pinned to the top, actions to the bottom so they line up with the balance,
           which keeps the hint from overlapping them when they wrap onto a second row. */}
       <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-stretch">
-        <div className="flex items-end">
+        <div className="flex w-full min-w-0 items-end md:w-auto md:flex-1">
           <TotalAssetValue fiatTotal={balances.fiatTotal} size="lg" title="Total balance" />
         </div>
 

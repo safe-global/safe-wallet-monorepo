@@ -43,6 +43,7 @@ export const InCard: Story = {
 }
 
 export const LargeValue: Story = {
+  parameters: { layout: 'padded' },
   args: {
     value: '$1,278,243,618.88',
   },

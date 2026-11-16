@@ -1,33 +1,37 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { cn } from '@safe-global/views/utils/cn'
 
 interface FitTextProps {
-  children: string
+  children: ReactNode
   maxFontSize: number
   minFontSize: number
   className?: string
 }
 
-/** Single-line text that shrinks to fit its parent's width; below `minFontSize` it ellipsizes and shows the full text on hover. */
+// Absorbs floating-point error so text that exactly fills its box is not stepped down
+const EPSILON = 1e-6
+
+/** Single-line text that shrinks to fit a parent of definite width (never grows inside a content-sized one); below `minFontSize` it ellipsizes with a hover title. */
 const FitText = ({ children, maxFontSize, minFontSize, className }: FitTextProps) => {
   const containerRef = useRef<HTMLSpanElement>(null)
   const textRef = useRef<HTMLSpanElement>(null)
   const fontSizeRef = useRef(maxFontSize)
   const [fontSize, setFontSize] = useState(maxFontSize)
-  const [isTruncated, setIsTruncated] = useState(false)
+  const [truncatedTitle, setTruncatedTitle] = useState<string>()
 
   const fit = useCallback(() => {
-    const available = containerRef.current?.clientWidth ?? 0
+    const available = containerRef.current?.getBoundingClientRect().width ?? 0
     const textWidth = textRef.current?.getBoundingClientRect().width ?? 0
     if (!available || !textWidth) return
 
     // Text width scales linearly with font size, so one measurement gives the fitting size
     const widthPerPx = textWidth / fontSizeRef.current
-    const next = Math.min(maxFontSize, Math.max(minFontSize, Math.floor(available / widthPerPx)))
+    const fitting = Math.floor(available / widthPerPx + EPSILON)
+    const next = Math.min(maxFontSize, Math.max(minFontSize, fitting))
 
     fontSizeRef.current = next
     setFontSize(next)
-    setIsTruncated(widthPerPx * next > available)
+    setTruncatedTitle(widthPerPx * next > available + EPSILON ? (textRef.current?.textContent ?? '') : undefined)
   }, [maxFontSize, minFontSize])
 
   useLayoutEffect(() => fit(), [fit, children])
@@ -51,7 +55,7 @@ const FitText = ({ children, maxFontSize, minFontSize, className }: FitTextProps
       ref={containerRef}
       className={cn('block min-w-0 max-w-full overflow-hidden text-ellipsis whitespace-nowrap', className)}
       style={{ fontSize }}
-      title={isTruncated ? children : undefined}
+      title={truncatedTitle}
     >
       <span ref={textRef}>{children}</span>
     </span>
