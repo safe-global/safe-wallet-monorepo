@@ -14,7 +14,7 @@ import { liquidityBucket } from '../shelf'
 import type { Holding, Opportunity } from '../types'
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0!'
-const COLUMN_WIDTHS = ['w-10', '', 'w-24', 'w-24', 'w-28', 'w-24', 'w-32', 'w-32']
+const COLUMN_WIDTHS = ['w-10', '', 'w-20', 'w-28', 'w-32', 'w-24', 'w-32', 'w-32']
 const COLUMN_COUNT = COLUMN_WIDTHS.length
 const OPPORTUNITY_HEADERS = ['Opportunity', 'Net APY', 'Liquidity', 'Exit time', 'Networks', 'Your position']
 

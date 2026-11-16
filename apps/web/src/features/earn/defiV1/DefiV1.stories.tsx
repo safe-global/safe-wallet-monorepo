@@ -81,7 +81,7 @@ export const AssetsNudge: Story = {
   },
 }
 
-export const TreasuryShelf: Story = {
+export const Treasury: Story = {
   ...at('earn'),
   play: async ({ canvasElement }) => {
     await within(canvasElement).findByTestId('defi-opportunities')
@@ -95,12 +95,10 @@ export const DefiList: Story = {
   },
 }
 
-export const ProShelf: Story = at('earn', { plan: 'pro' })
-
-export const Operations: Story = {
+export const TreasuryPro: Story = {
   ...at('earn', { plan: 'pro' }),
   play: async ({ canvasElement }) => {
-    await within(canvasElement).findByTestId('operation-operating-cash')
+    await within(canvasElement).findByTestId('operations-button')
   },
 }
 

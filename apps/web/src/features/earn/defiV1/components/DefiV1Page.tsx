@@ -26,7 +26,7 @@ import { CompareDialog } from './CompareDialog'
 import { OpportunityDrawer } from './OpportunityDrawer'
 import { OpportunityToolbar } from './OpportunityToolbar'
 import { NewOperationDialog } from './NewOperationDialog'
-import { OperationsRow } from './OperationsRow'
+import { OperationsButton } from './OperationsButton'
 import { TreasurySummary } from './TreasurySummary'
 import { OpportunitiesTable, type OpportunityGroup } from './TreasuryTables'
 
@@ -149,7 +149,6 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
           summary={summary}
           onExploreIdle={() => showGrouped('none', { ...NO_FILTERS, sameDay: true, openOnly: true })}
         />
-        <OperationsRow operations={operations} plan={config.plan} onNew={() => setIsCreating(true)} />
       </div>
 
       <section
@@ -168,6 +167,7 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
           chains={CHAINS}
           compareCount={compareIds.length}
           onCompare={() => setIsComparing(true)}
+          operations={<OperationsButton operations={operations} plan={config.plan} onNew={() => setIsCreating(true)} />}
           onDeposit={topOpen ? () => setSelected(topOpen) : undefined}
         />
         <OpportunitiesTable

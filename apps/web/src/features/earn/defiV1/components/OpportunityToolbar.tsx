@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Columns3, ListFilter, Rows3, Search, X } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -67,6 +68,7 @@ export const OpportunityToolbar = ({
   chains,
   compareCount,
   onCompare,
+  operations,
   onDeposit,
 }: {
   search: string
@@ -79,6 +81,7 @@ export const OpportunityToolbar = ({
   chains: string[]
   compareCount: number
   onCompare: () => void
+  operations: ReactNode
   onDeposit?: () => void
 }) => {
   const filterCount = activeFilterCount(filters)
@@ -199,6 +202,7 @@ export const OpportunityToolbar = ({
           {COPY.compare}
           {compareCount > 0 && <Badge variant="subtle">{compareCount}</Badge>}
         </Button>
+        {operations}
         <Button size="action" disabled={!onDeposit} onClick={onDeposit} data-testid="toolbar-deposit">
           {COPY.deposit}
         </Button>
