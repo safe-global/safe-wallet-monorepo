@@ -1,5 +1,5 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { type ReactElement, useState } from 'react'
+import { type ReactElement } from 'react'
 import { Copy } from 'lucide-react'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -52,7 +52,6 @@ type TxSignersProps = {
 
 const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
   const { copied, copy } = useCopyToClipboard(COPIED_TOOLTIP_MS)
-  const [tooltipOpen, setTooltipOpen] = useState(false)
 
   if (!txHash) {
     return (
@@ -80,7 +79,7 @@ const CopyTxHashButton = ({ txHash }: { txHash?: string | null }) => {
   }
 
   return (
-    <Tooltip open={tooltipOpen || copied} onOpenChange={setTooltipOpen}>
+    <Tooltip closeOnClick={false}>
       <TooltipTrigger
         render={
           <Button

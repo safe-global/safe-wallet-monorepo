@@ -1,4 +1,4 @@
-import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
+import { mockClipboard, render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { fireEvent } from '@testing-library/react'
 import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
 import { ThreatAnalysisResultBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis-result.builder'
@@ -128,7 +128,7 @@ describe('AnalysisIssuesDisplay', () => {
     })
 
     it('keeps "Copied to clipboard" open after a mouse click, without the pointer leaving the address', async () => {
-      Object.assign(navigator, { clipboard: { writeText: jest.fn().mockResolvedValue(undefined) } })
+      mockClipboard()
       const address = faker.finance.ethereumAddress()
       const result = ThreatAnalysisResultBuilder.moderate()
         .issues({ [Severity.WARN]: [{ description: 'Test description', address }] })

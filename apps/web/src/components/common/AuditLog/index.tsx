@@ -1,4 +1,4 @@
-import { type ComponentProps, type ReactElement, type ReactNode, useState, useCallback } from 'react'
+import { type ComponentProps, type ReactElement, type ReactNode, useCallback } from 'react'
 import { type LucideIcon, Plus, Check, PenLine, Clock, CircleAlert } from 'lucide-react'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
@@ -81,7 +81,6 @@ export const AuditRow = ({
 }: AuditRowProps): ReactElement => {
   const displayText = address ? name || shortenAddress(address) : undefined
   const { copied, copy } = useCopyToClipboard(COPIED_TOOLTIP_MS)
-  const [tooltipOpen, setTooltipOpen] = useState(false)
   const handleCopy = useCallback(() => {
     if (address) copy(address)
   }, [address, copy])
@@ -122,7 +121,7 @@ export const AuditRow = ({
       {(showActor || actor || showDash) && (
         <div className={css.actorRow}>
           {showActor ? (
-            <Tooltip open={tooltipOpen || copied} onOpenChange={setTooltipOpen}>
+            <Tooltip closeOnClick={false}>
               <TooltipTrigger
                 render={
                   <div

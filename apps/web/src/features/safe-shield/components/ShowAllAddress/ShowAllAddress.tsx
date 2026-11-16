@@ -20,7 +20,6 @@ interface ShowAllAddressProps {
 
 export const ShowAllAddress = ({ addresses, showImage }: ShowAllAddressProps) => {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const currentChain = useCurrentChain()
   const chainId = useChainId()
   const addressBook = useAddressBook(chainId)
@@ -55,15 +54,7 @@ export const ShowAllAddress = ({ addresses, showImage }: ShowAllAddressProps) =>
                   </Typography>
                 )}
                 <div className="leading-5" onClick={() => handleCopyToClipboard(item.address, index)}>
-                  <Tooltip
-                    open={hoveredIndex === index || copiedIndex === index}
-                    onOpenChange={(open) =>
-                      setHoveredIndex((current) => {
-                        if (open) return index
-                        return current === index ? null : current
-                      })
-                    }
-                  >
+                  <Tooltip closeOnClick={false}>
                     <TooltipTrigger render={<span className="inline-flex" />}>
                       <Typography
                         variant="paragraph-mini"
