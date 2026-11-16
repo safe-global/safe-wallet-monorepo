@@ -1,6 +1,6 @@
 // Design-system button-styling guard: flags size/skin utilities (owned by the
 // `size`/`variant` props) set via `className` on a <Button> or a closed button
-// preset. Matches the literal even inside cn(...). See apps/web/AGENTS.md.
+// preset. Matches the literal even inside cn(...).
 const dsButtonClassnameRule = (element, message) => ({
   selector: `JSXOpeningElement[name.name='${element}'] > JSXAttribute[name.name='className'] Literal[value=/(?:^|\\s)(h-|px-|py-|text-(xs|sm|base|lg)|rounded-|bg-)/]`,
   message,
@@ -58,7 +58,7 @@ const dsDialogClassnameRule = (element, message) => ({
 export const designSystemSyntaxRules = [
   dsButtonClassnameRule(
     'Button',
-    "Don't set size/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*) on <Button> — use a `size`/`variant` prop. See the UI/Button story and apps/web/AGENTS.md; add a variant/size to components/ui/button.tsx if none fits. The only sanctioned raw-styling escape is `// eslint-disable-next-line no-restricted-syntax -- <reason>`.",
+    "Don't set size/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*) on <Button> — use a `size`/`variant` prop. See the UI/Button story; add a variant/size to the Button primitive (packages/ui/src/primitives/button/button.tsx) if none fits. The only sanctioned raw-styling escape is `// eslint-disable-next-line no-restricted-syntax -- <reason>`.",
   ),
   dsButtonClassnameRule(
     'SubmitButton',
@@ -70,12 +70,12 @@ export const designSystemSyntaxRules = [
   ),
   dsButtonClassnameRule(
     'SelectTrigger',
-    "Don't set size/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*) on <SelectTrigger> — use `size` ('sm'|'default'|'lg' — match the height of the button/field on the same row) / `variant` ('default'|'ghost'). See the UI/Select story; add a variant to components/ui/select.tsx if none fits. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.",
+    "Don't set size/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*) on <SelectTrigger> — use `size` ('sm'|'default'|'lg' — match the height of the button/field on the same row) / `variant` ('default'|'ghost'). See the UI/Select story; add a variant to the Select primitive (packages/ui/src/primitives/select/select.tsx) if none fits. Escape hatch: `// eslint-disable-next-line no-restricted-syntax -- <reason>`.",
   ),
   ...['Card', 'CardHeader', 'CardContent', 'CardFooter', 'CardTitle', 'CardDescription', 'CardAction'].map((element) =>
     dsCardClassnameRule(
       element,
-      `Don't set spacing/surface/radius utilities (gap-*, p-*/px-*/py-*, rounded-*, bg-*, border, shadow-*, text-xs|sm|base|lg) on <${element}> — use the \`size\` ('sm'|'default'|'lg'|'none'), \`variant\` ('outlined'|'muted'), and \`radius\` props. \`className\` is layout-only (w-*, margins, flex/grid). See the UI/Card story; add a variant/size to components/ui/card.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
+      `Don't set spacing/surface/radius utilities (gap-*, p-*/px-*/py-*, rounded-*, bg-*, border, shadow-*, text-xs|sm|base|lg) on <${element}> — use the \`size\` ('sm'|'default'|'lg'|'none'), \`variant\` ('outlined'|'muted'), and \`radius\` props. \`className\` is layout-only (w-*, margins, flex/grid). See the UI/Card story; add a variant/size to the Card primitive (packages/ui/src/primitives/card/card.tsx) if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
     ),
   ),
   dsCardClassnameRule(
@@ -101,7 +101,7 @@ export const designSystemSyntaxRules = [
   ].map((element) =>
     dsInputClassnameRule(
       element,
-      `Don't set height/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*, border) on <${element}> — use \`inputSize\` ('sm'|'default'|'lg'|'hero', plus 'heroWrap' on InputGroup for a hero-height control whose content wraps — match the height of the button on the same row) / \`variant\` ('default'|'surface', plus 'search'|'outline' on InputGroup). \`className\` is layout-only (w-*, margins, flex/grid). See the UI/Input story; add a variant to components/ui/input.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
+      `Don't set height/skin utilities (h-*, px-*/py-*, text-xs|sm|base|lg, rounded-*, bg-*, border) on <${element}> — use \`inputSize\` ('sm'|'default'|'lg'|'hero', plus 'heroWrap' on InputGroup for a hero-height control whose content wraps — match the height of the button on the same row) / \`variant\` ('default'|'surface', plus 'search'|'outline' on InputGroup). \`className\` is layout-only (w-*, margins, flex/grid). See the UI/Input story; add a variant to the Input primitive (packages/ui/src/primitives/input/input.tsx) if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
     ),
   ),
   dsInputClassnameRule(
@@ -123,13 +123,13 @@ export const designSystemSyntaxRules = [
   ...['TabsList', 'TabsTrigger'].map((element) =>
     dsTabsClassnameRule(
       element,
-      `Don't set spacing/surface/radius utilities (gap-*, p-*/px-*/py-*, rounded-*, bg-*, border, shadow-*, text-xs|sm|base|lg) on <${element}> — use the TabsList \`variant\` ('underline'|'toggle', with tone/size). \`className\` is layout-only (w-*, margins, flex/grid). See the UI/Tabs story; add a variant to components/ui/tabs.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
+      `Don't set spacing/surface/radius utilities (gap-*, p-*/px-*/py-*, rounded-*, bg-*, border, shadow-*, text-xs|sm|base|lg) on <${element}> — use the TabsList \`variant\` ('underline'|'toggle', with tone/size). \`className\` is layout-only (w-*, margins, flex/grid). See the UI/Tabs story; add a variant to the Tabs primitive (packages/ui/src/primitives/tabs/tabs.tsx) if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
     ),
   ),
   ...['Badge', 'Chip'].map((element) =>
     dsBadgeClassnameRule(
       element,
-      `Don't set geometry/colour utilities (h-*, px-*/py-*, text-xs|sm|base|lg, text-[…], rounded-*, bg-*, border) on <${element}> — use the \`variant\`, \`size\` ('sm'|'default'|'lg'|'auto'), and \`shape\` ('pill'|'tag') props. \`className\` is layout-only (w-*, margins, flex/grid). See the UI/${element} story; add a variant to components/ui/${element.toLowerCase()}.tsx if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
+      `Don't set geometry/colour utilities (h-*, px-*/py-*, text-xs|sm|base|lg, text-[…], rounded-*, bg-*, border) on <${element}> — use the \`variant\`, \`size\` ('sm'|'default'|'lg'|'auto'), and \`shape\` ('pill'|'tag') props. \`className\` is layout-only (w-*, margins, flex/grid). See the UI/${element} story; add a variant to the ${element} primitive (packages/ui/src/primitives/${element.toLowerCase()}/${element.toLowerCase()}.tsx) if none fits. Escape hatch: \`// eslint-disable-next-line no-restricted-syntax -- <reason>\`.`,
     ),
   ),
   ...[

@@ -175,7 +175,7 @@ export const AllVariants: Story = {
  * The one rule that keeps buttons consistent: on `<Button>`, `className` is for LAYOUT ONLY
  * (w-full, margins, grid placement). Height, padding, font-size, radius, and background are owned
  * by the `size`/`variant` props — never re-declare them via className. If no size/variant fits a
- * recurring need, add one to `components/ui/button.tsx`. This is enforced by the `no-restricted-syntax`
+ * recurring need, add one to `primitives/button/button.tsx`. This is enforced by the `no-restricted-syntax`
  * ESLint rule and documented in `.storybook/AGENTS.md`.
  */
 export const Guidelines: Story = {
@@ -188,8 +188,8 @@ export const Guidelines: Story = {
           On <code>&lt;Button&gt;</code>, <code>className</code> is for <strong>layout only</strong> (
           <code>w-full</code>, margins, grid placement). Height, padding, font-size, radius and background belong to the{' '}
           <code>size</code>/<code>variant</code> props — never re-declare them via <code>className</code>. If no
-          size/variant fits a recurring need, add one to <code>components/ui/button.tsx</code> instead of overriding at
-          the call site.
+          size/variant fits a recurring need, add one to <code>primitives/button/button.tsx</code> instead of overriding
+          at the call site.
         </p>
       </div>
 

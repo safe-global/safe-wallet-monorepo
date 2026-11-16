@@ -14,12 +14,12 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '
 /**
  * Overlay (backdrop) Stories
  *
- * Every modal surface shares one scrim — `overlayVariants()` in `components/ui/overlay.ts`. These
+ * Every modal surface shares one scrim — `overlayVariants()` in `primitives/overlay/overlay.ts`. These
  * stories exist for the backdrop, not the popups: each one puts a surface over dense page content
  * so Argos can see the tint and the blur. A blank canvas cannot show either, which is how four
  * different scrims drifted apart unnoticed in the first place.
  *
- * @see components/ui/overlay.ts
+ * @see primitives/overlay/overlay.ts
  */
 const meta = {
   title: 'UI/Overlay',
