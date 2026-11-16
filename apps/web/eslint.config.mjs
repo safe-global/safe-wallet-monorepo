@@ -243,19 +243,25 @@ const config = [
   {
     files: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**', '**/*.stories.tsx', 'src/tests/**', 'src/stories/**'],
     rules: {
-      'no-restricted-syntax': ['error', ...designSystemSyntaxRules],
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...noReexportRules],
     },
   },
   {
     files: ['**/*.stories.tsx', '**/*.stories.ts', 'src/stories/**'],
     rules: {
-      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...storyDataRules],
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...storyDataRules, ...noReexportRules],
     },
   },
   {
     files: ['**/*.storyData.ts'],
     rules: {
-      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules, ...storyDataRules],
+      'no-restricted-syntax': [
+        'error',
+        ...designSystemSyntaxRules,
+        ...safeLinkWithoutSpaceIdRules,
+        ...storyDataRules,
+        ...noReexportRules,
+      ],
     },
   },
   // Override for story files: allow type-only imports from @storybook/react
