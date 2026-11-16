@@ -246,6 +246,8 @@ export const DEFI_V1_COPY = {
     investment: 'Investment',
     oneTime: 'One time',
     recurringLabel: 'Recurring',
+    oneTimeHint: 'Invest the first deposit only',
+    recurringHint: 'Add more from this Safe on a schedule',
     allSigners: (owners: number) => `All ${owners} signers of this Safe`,
     name: 'Name',
     thisSafeCaveat: 'Signers can move up to the budget out of this Safe.',

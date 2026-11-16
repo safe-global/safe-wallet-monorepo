@@ -4,7 +4,12 @@ import { Badge } from '@safe-global/views/components/ui/badge'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from '@safe-global/views/components/ui/field'
 import { Input } from '@safe-global/views/components/ui/input'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '@safe-global/views/components/ui/input-group'
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from '@safe-global/views/components/ui/input-group'
 import { Label } from '@safe-global/views/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
@@ -275,18 +280,23 @@ export const WhoFields = ({ form, labelled = true }: { form: InvestmentForm; lab
   <Section label={labelled ? COPY.who : undefined}>
     <RadioGroup value={form.who} onValueChange={(next) => form.setWho(next as Who)} className="gap-2">
       <ChoiceCard value="any" title={COPY.anySigner} description={COPY.allSigners(form.owners.length)} />
-      <ChoiceCard value="some" title={COPY.specificSigners} description={COPY.specificHint} />
+      <ChoiceCard value="some" title={COPY.specificSigners} description={COPY.specificHint}>
+        {form.who === 'some' && (
+          <div className="mt-2 flex flex-col gap-1 rounded-md bg-background p-2">
+            {form.owners.map((address) => (
+              <span key={address} className="flex items-center gap-2 px-1 py-1 text-sm">
+                <Checkbox
+                  checked={form.picked.includes(address)}
+                  onCheckedChange={() => form.togglePicked(address)}
+                  aria-label={shortenAddress(address)}
+                />
+                <span className="font-mono text-xs">{shortenAddress(address)}</span>
+              </span>
+            ))}
+          </div>
+        )}
+      </ChoiceCard>
     </RadioGroup>
-    {form.who === 'some' && (
-      <div className="flex flex-col gap-1 rounded-lg bg-card p-2">
-        {form.owners.map((address) => (
-          <label key={address} className="flex cursor-pointer items-center gap-2 px-1 py-1 text-sm">
-            <Checkbox checked={form.picked.includes(address)} onCheckedChange={() => form.togglePicked(address)} />
-            <span className="font-mono text-xs">{shortenAddress(address)}</span>
-          </label>
-        ))}
-      </div>
-    )}
   </Section>
 )
 
@@ -307,46 +317,57 @@ export const BudgetFields = ({ form }: { form: InvestmentForm }) => (
 
 export const ScheduleFields = ({ form }: { form: InvestmentForm }) => (
   <Section label={COPY.schedule}>
-    <RadioGroup
-      value={form.schedule}
-      onValueChange={(next) => form.setSchedule(next as Schedule)}
-      className="grid-cols-2 gap-2"
-    >
-      <ChoiceCard value="once" title={COPY.oneTime} />
-      <ChoiceCard value="recurring" title={COPY.recurringLabel} badge={<Badge variant="warning">{COPY.later}</Badge>} />
+    <RadioGroup value={form.schedule} onValueChange={(next) => form.setSchedule(next as Schedule)} className="gap-2">
+      <ChoiceCard value="once" title={COPY.oneTime} description={COPY.oneTimeHint} />
+      <ChoiceCard
+        value="recurring"
+        title={COPY.recurringLabel}
+        badge={<Badge variant="warning">{COPY.later}</Badge>}
+        description={COPY.recurringHint}
+      >
+        {form.schedule === 'recurring' && form.investment && (
+          <div className="mt-2 flex flex-col gap-1.5">
+            <div className="flex items-center gap-2">
+              <InputGroup className="flex-1">
+                <InputGroupInput
+                  aria-label={COPY.addEach}
+                  inputMode="decimal"
+                  value={form.each}
+                  onChange={(event) => form.setEach(event.target.value)}
+                />
+                <InputGroupAddon align="inline-end">
+                  <InputGroupText>{form.investment.asset}</InputGroupText>
+                </InputGroupAddon>
+              </InputGroup>
+              <span className="shrink-0 text-sm text-muted-foreground">{COPY.every.toLowerCase()}</span>
+              <Select
+                items={FREQUENCIES.map((item) => ({ value: item, label: COPY.frequencies[item].toLowerCase() }))}
+                value={form.frequency}
+                onValueChange={(next) => next && form.setFrequency(next as Frequency)}
+              >
+                <SelectTrigger aria-label={COPY.every} className="w-28">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FREQUENCIES.map((item) => (
+                    <SelectItem key={item} value={item}>
+                      {COPY.frequencies[item].toLowerCase()}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {COPY.recurringNote(
+                formatAmount(parseAmount(form.each)),
+                form.investment.asset,
+                COPY.frequencies[form.frequency],
+              )}
+            </span>
+          </div>
+        )}
+      </ChoiceCard>
     </RadioGroup>
-    {form.schedule === 'recurring' && form.investment && (
-      <div className="flex flex-col gap-2 rounded-lg bg-card p-3">
-        <div className="flex items-center gap-2">
-          <Input
-            aria-label={COPY.addEach}
-            inputMode="decimal"
-            value={form.each}
-            onChange={(event) => form.setEach(event.target.value)}
-          />
-          <span className="shrink-0 text-sm text-muted-foreground">{COPY.every.toLowerCase()}</span>
-          <RadioGroup
-            value={form.frequency}
-            onValueChange={(next) => form.setFrequency(next as Frequency)}
-            className="flex shrink-0 gap-2"
-          >
-            {FREQUENCIES.map((item) => (
-              <label key={item} className="flex cursor-pointer items-center gap-1.5 text-sm">
-                <RadioGroupItem value={item} />
-                {COPY.frequencies[item].toLowerCase()}
-              </label>
-            ))}
-          </RadioGroup>
-        </div>
-        <span className="text-xs text-muted-foreground">
-          {COPY.recurringNote(
-            formatAmount(parseAmount(form.each)),
-            form.investment.asset,
-            COPY.frequencies[form.frequency],
-          )}
-        </span>
-      </div>
-    )}
   </Section>
 )
 
