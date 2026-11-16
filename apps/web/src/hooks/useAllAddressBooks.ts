@@ -21,7 +21,6 @@ const mapLocalToContacts = (addressBook: AddressBook, chainId: string): Extended
     chainIds: [chainId],
     tagIds: [],
     createdBy: '',
-    tagIds: [],
     createdByUserId: 0,
     lastUpdatedBy: '',
     lastUpdatedByUserId: 0,

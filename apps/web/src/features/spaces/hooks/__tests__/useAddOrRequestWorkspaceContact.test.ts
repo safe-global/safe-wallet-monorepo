@@ -32,7 +32,6 @@ const workspaceContact = (chainIds: string[]): SpaceAddressBookItemDto => ({
   chainIds,
   tagIds: [],
   createdBy: '',
-  tagIds: [],
   createdByUserId: 0,
   lastUpdatedBy: '',
   lastUpdatedByUserId: 0,

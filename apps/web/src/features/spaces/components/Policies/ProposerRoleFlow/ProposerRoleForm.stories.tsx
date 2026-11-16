@@ -80,7 +80,6 @@ const spaceContact = (address: string, name: string): SpaceAddressBookItemDto =>
   chainIds: [ETHEREUM],
   tagIds: [],
   createdBy: '',
-  tagIds: [],
   createdByUserId: 0,
   lastUpdatedBy: '',
   lastUpdatedByUserId: 0,

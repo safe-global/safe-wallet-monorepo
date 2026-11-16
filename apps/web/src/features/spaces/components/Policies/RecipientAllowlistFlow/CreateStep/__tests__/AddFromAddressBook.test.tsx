@@ -23,7 +23,6 @@ const contact = (name: string, source: ContactSource, chainIds = [CHAIN_ID]): Ex
   chainIds,
   tagIds: [],
   source,
-  tagIds: [],
   createdBy: '',
   createdByUserId: 0,
   lastUpdatedBy: '',

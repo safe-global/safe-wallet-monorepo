@@ -71,7 +71,6 @@ const entry = (): AddressBookEntry => ({
   chainIds: ['1', '137'],
   tagIds: [],
   createdBy: '',
-  tagIds: [],
   createdByUserId: 0,
   lastUpdatedBy: '',
   lastUpdatedByUserId: 0,

@@ -25,7 +25,6 @@ const contact = (overrides: Partial<ExtendedContact> = {}): ExtendedContact => (
   chainIds: ['1'],
   tagIds: [],
   createdBy: '',
-  tagIds: [],
   createdByUserId: 0,
   lastUpdatedBy: '',
   lastUpdatedByUserId: 0,
