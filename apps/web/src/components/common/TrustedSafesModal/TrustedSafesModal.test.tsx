@@ -114,7 +114,6 @@ const mockModal: UseTrustedSafesModalReturn = {
   setSearchQuery: jest.fn(),
 }
 
-// The confirmation dialog takes the focus after it opens; waiting for that lets its last update settle
 const confirmationDialogHasFocus = (title: string) =>
   waitFor(() => expect(screen.getByRole('dialog', { name: title })).toHaveFocus())
 

@@ -8,13 +8,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '../popover'
 const CopyButton = () => <button type="button">Copy to clipboard</button>
 
 describe('popup initial focus', () => {
-  // jsdom has no layout, so tabbable would treat every element as hidden
-  beforeEach(() => {
-    jest
-      .spyOn(HTMLElement.prototype, 'getClientRects')
-      .mockReturnValue([new DOMRect(0, 0, 10, 10)] as unknown as DOMRectList)
-  })
-
   afterEach(() => {
     jest.restoreAllMocks()
   })
@@ -185,7 +178,6 @@ describe('popup initial focus', () => {
     }
 
     it('focuses its first control when opened from the keyboard', async () => {
-      // jsdom has no input modality; a browser marks the focused element :focus-visible after keyboard use
       const matches = Element.prototype.matches
       jest.spyOn(Element.prototype, 'matches').mockImplementation(function (this: Element, selector: string) {
         return selector === ':focus-visible' ? this === document.activeElement : matches.call(this, selector)
@@ -207,5 +199,22 @@ describe('popup initial focus', () => {
 
       await waitFor(() => expect(screen.getByRole('dialog')).toHaveFocus())
     })
+  })
+
+  it('focuses the popup and not a text field when opened by touch, so no virtual keyboard opens', async () => {
+    const user = userEvent.setup()
+    render(
+      <Popover>
+        <PopoverTrigger>Open</PopoverTrigger>
+        <PopoverContent>
+          <input aria-label="Search" />
+        </PopoverContent>
+      </Popover>,
+    )
+
+    await user.pointer({ keys: '[TouchA]', target: screen.getByRole('button', { name: 'Open' }) })
+
+    await waitFor(() => expect(screen.getByRole('dialog')).toHaveFocus())
+    expect(screen.getByRole('textbox', { name: 'Search' })).not.toHaveFocus()
   })
 })
