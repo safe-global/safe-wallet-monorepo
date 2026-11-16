@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactElement } from 'react'
+import { useMemo, useState, type ReactElement } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { BookUser, Check, ChevronRight, Rocket, UsersRound, WalletCards } from 'lucide-react'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -11,8 +11,8 @@ import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
-import { addDays } from 'date-fns'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { useSetupWidgetDismissal } from './useSetupWidgetDismissal'
 import ImportAddressBookDialog from '../SpaceAddressBook/Import/ImportAddressBookDialog'
 import AddAccounts from '../AddAccounts'
 import AddMemberModal from '../AddMemberModal'
@@ -54,9 +54,7 @@ const SETUP_STEPS: SetupStep[] = [
   { key: 'explore', label: 'Explore Workspaces', icon: Rocket },
 ]
 
-const DISMISS_STORAGE_KEY = 'setupWidgetDismissed'
 const COMPLETED_STORAGE_KEY = 'setupWidgetCompleted'
-const DISMISS_DAYS = 3
 
 interface SetupWidgetProps {
   onDismiss?: () => void
@@ -70,26 +68,12 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
   const [addAccountsOpen, setAddAccountsOpen] = useState(false)
   const [addMemberOpen, setAddMemberOpen] = useState(false)
   const [exploreOpen, setExploreOpen] = useState(false)
-  const [dismissedSpaces = {}, setDismissedSpaces] = useLocalStorage<Record<string, number>>(DISMISS_STORAGE_KEY)
-  const [completedSpaces = {}, setCompletedSpaces] = useLocalStorage<Record<string, boolean>>(COMPLETED_STORAGE_KEY)
+  const [completedSpaces = {}] = useLocalStorage<Record<string, boolean>>(COMPLETED_STORAGE_KEY)
   const spaceId = useCurrentSpaceId()
+  const { isDismissed: isDismissedForSpace, dismiss } = useSetupWidgetDismissal(spaceId)
   const addressBook = useGetSpaceAddressBook()
   const { allSafes } = useSpaceSafes()
   const { activeMembers, invitedMembers } = useSpaceMembersByStatus()
-
-  // Clean up expired dismissals on mount
-  useEffect(() => {
-    const now = Date.now()
-    const expired = Object.entries(dismissedSpaces).filter(([, expiry]) => expiry <= now)
-
-    if (expired.length > 0) {
-      setDismissedSpaces((prev = {}) => {
-        const updated = { ...prev }
-        expired.forEach(([key]) => delete updated[key])
-        return updated
-      })
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const deps: StepsDependencies = {
     addressBookCount: addressBook.length,
@@ -120,33 +104,16 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
 
   const allRequiredStepsCompleted = SETUP_STEPS.every((step) => !step.activeFn || step.activeFn(deps))
 
-  const handleExploreClose = () => {
-    setExploreOpen(false)
-
-    if (spaceId && allRequiredStepsCompleted) {
-      setCompletedSpaces((prev = {}) => ({
-        ...prev,
-        [spaceId]: true,
-      }))
-    }
-  }
-
   const handleDismiss = () => {
     setDismissed(true)
   }
 
   const persistDismiss = () => {
-    if (spaceId) {
-      setDismissedSpaces((prev = {}) => ({
-        ...prev,
-        [spaceId]: addDays(new Date(), DISMISS_DAYS).getTime(),
-      }))
-    }
+    dismiss()
     onDismiss?.()
   }
 
-  const isDismissedForSpace = spaceId ? (dismissedSpaces[spaceId] ?? 0) > Date.now() : false
-  const isCompletedForSpace = spaceId ? completedSpaces[spaceId] === true : false
+  const isCompletedForSpace = allRequiredStepsCompleted || (spaceId ? completedSpaces[spaceId] === true : false)
 
   if (loading || isDismissedForSpace || isCompletedForSpace) return null
 
@@ -227,7 +194,7 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
       {importOpen && <ImportAddressBookDialog handleClose={() => setImportOpen(false)} />}
       <AddAccounts externalOpen={addAccountsOpen} onExternalClose={() => setAddAccountsOpen(false)} />
       {addMemberOpen && <AddMemberModal onClose={() => setAddMemberOpen(false)} />}
-      {exploreOpen && <SpaceInfoModal onClose={handleExploreClose} />}
+      {exploreOpen && <SpaceInfoModal onClose={() => setExploreOpen(false)} />}
     </>
   )
 }
