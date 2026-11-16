@@ -28,38 +28,7 @@ import { workspaceTrackingListener } from '@/features/spaces/store/workspaceTrac
 import { spaceSafesCacheListener } from '@/features/spaces/store/spaceSafesCacheListener'
 import { addressBookTagsCacheListener } from '@/features/spaces/store/addressBookTagsCacheListener'
 import { trialReminderListener } from '@/features/spaces/store/trialReminder'
-import * as slicesSafeInfoSlice from '@/store/safeInfoSlice'
-import * as slicesSessionSlice from '@/store/sessionSlice'
-import * as slicesTxHistorySlice from '@/store/txHistorySlice'
-import * as slicesTxQueueSlice from '@/store/txQueueSlice'
-import * as slicesSwapOrderSlice from '@/store/swapOrderSlice'
-import * as slicesAddressBookSlice from '@/store/addressBookSlice'
-import * as slicesNotificationsSlice from '@/store/notificationsSlice'
-import * as slicesPendingTxsSlice from '@/store/pendingTxsSlice'
-import * as slicesAddedSafesSlice from '@/store/addedSafesSlice'
-import * as slicesSettingsSlice from '@/store/settingsSlice'
-import * as slicesCookiesAndTermsSlice from '@/store/cookiesAndTermsSlice'
-import * as slicesPopupSlice from '@/store/popupSlice'
-import * as spendingLimitsSlice from '@/features/spending-limits/store/spendingLimitsSlice'
-import * as slicesSafeAppsSlice from '@/store/safeAppsSlice'
-import * as slicesPendingSafeMessagesSlice from '@/store/pendingSafeMessagesSlice'
-import * as slicesBatchSlice from '@/features/batching/store/batchSlice'
-import * as slicesUndeployedSafesSlice from '@/features/counterfactual/store/undeployedSafesSlice'
-import * as slicesPendingCfDeletesSlice from '@/features/counterfactual/store/pendingCfDeletesSlice'
-import * as slicesSwapParamsSlice from '@/features/swap/store/swapParamsSlice'
-import * as slicesVisitedSafesSlice from '@/store/visitedSafesSlice'
-import * as slicesOrderByPreferenceSlice from '@/store/orderByPreferenceSlice'
-import * as slicesHnStateSlice from '@/features/hypernative/store/hnStateSlice'
-import * as slicesHnQueueAssessmentsSlice from '@/features/hypernative/store/hnQueueAssessmentsSlice'
-import * as slicesCalendlySlice from '@/features/hypernative/store/calendlySlice'
-import * as slicesGlobalSearchSlice from '@/features/global-search/store/globalSearchSlice'
-import * as slicesSafeActionsModalSlice from '@/features/spaces/store/safeActionsModalSlice'
-import * as slicesSpaceNavigationSlice from '@/features/spaces/store/spaceNavigationSlice'
-import * as slicesFeePaymentSourcePreferenceSlice from '@/features/fee-payment/store/feePaymentSourcePreferenceSlice'
-import * as slicesFeatureFlagOverridesSlice from '@/features/feature-flag-overrides/store/featureFlagOverridesSlice'
-import * as slicesStepUpSlice from '@/features/oidc-auth/store/stepUpSlice'
-import * as slicesGateway from '@/store/api/gateway'
-import * as slicesAuthSlice from '@/store/authSlice'
+import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
 import { ofacApi } from '@/store/api/ofac'
 import { safePassApi } from './api/safePass'
@@ -77,73 +46,68 @@ import { cgwErrorAlert } from './middleware/cgwErrorAlert'
 import { forbiddenSessionListener } from '@/services/sessionExpiry/forbiddenSessionListener'
 
 const rootReducer = combineReducers({
-  [slicesSafeInfoSlice.safeInfoSlice.name]: slicesSafeInfoSlice.safeInfoSlice.reducer,
-  [slicesSessionSlice.sessionSlice.name]: slicesSessionSlice.sessionSlice.reducer,
-  [slicesTxHistorySlice.txHistorySlice.name]: slicesTxHistorySlice.txHistorySlice.reducer,
-  [slicesTxQueueSlice.txQueueSlice.name]: slicesTxQueueSlice.txQueueSlice.reducer,
-  [slicesSwapOrderSlice.swapOrderSlice.name]: slicesSwapOrderSlice.swapOrderSlice.reducer,
-  [slicesAddressBookSlice.addressBookSlice.name]: slicesAddressBookSlice.addressBookSlice.reducer,
-  [slicesNotificationsSlice.notificationsSlice.name]: slicesNotificationsSlice.notificationsSlice.reducer,
-  [slicesPendingTxsSlice.pendingTxsSlice.name]: slicesPendingTxsSlice.pendingTxsSlice.reducer,
-  [slicesAddedSafesSlice.addedSafesSlice.name]: slicesAddedSafesSlice.addedSafesSlice.reducer,
-  [slicesSettingsSlice.settingsSlice.name]: slicesSettingsSlice.settingsSlice.reducer,
-  [slicesCookiesAndTermsSlice.cookiesAndTermsSlice.name]: slicesCookiesAndTermsSlice.cookiesAndTermsSlice.reducer,
-  [slicesPopupSlice.popupSlice.name]: slicesPopupSlice.popupSlice.reducer,
-  [spendingLimitsSlice.spendingLimitSlice.name]: spendingLimitsSlice.spendingLimitSlice.reducer,
-  [slicesSafeAppsSlice.safeAppsSlice.name]: slicesSafeAppsSlice.safeAppsSlice.reducer,
-  [slicesPendingSafeMessagesSlice.pendingSafeMessagesSlice.name]:
-    slicesPendingSafeMessagesSlice.pendingSafeMessagesSlice.reducer,
-  [slicesBatchSlice.batchSlice.name]: slicesBatchSlice.batchSlice.reducer,
-  [slicesUndeployedSafesSlice.undeployedSafesSlice.name]: slicesUndeployedSafesSlice.undeployedSafesSlice.reducer,
-  [slicesPendingCfDeletesSlice.pendingCfDeletesSlice.name]: slicesPendingCfDeletesSlice.pendingCfDeletesSlice.reducer,
-  [slicesSwapParamsSlice.swapParamsSlice.name]: slicesSwapParamsSlice.swapParamsSlice.reducer,
-  [slicesVisitedSafesSlice.visitedSafesSlice.name]: slicesVisitedSafesSlice.visitedSafesSlice.reducer,
-  [slicesOrderByPreferenceSlice.orderByPreferenceSlice.name]:
-    slicesOrderByPreferenceSlice.orderByPreferenceSlice.reducer,
-  [slicesHnStateSlice.hnStateSlice.name]: slicesHnStateSlice.hnStateSlice.reducer,
-  [slicesHnQueueAssessmentsSlice.hnQueueAssessmentsSlice.name]:
-    slicesHnQueueAssessmentsSlice.hnQueueAssessmentsSlice.reducer,
-  [slicesCalendlySlice.calendlySlice.name]: slicesCalendlySlice.calendlySlice.reducer,
-  [slicesGlobalSearchSlice.globalSearchSlice.name]: slicesGlobalSearchSlice.globalSearchSlice.reducer,
-  [slicesSafeActionsModalSlice.safeActionsModalSlice.name]: slicesSafeActionsModalSlice.safeActionsModalSlice.reducer,
-  [slicesSpaceNavigationSlice.spaceNavigationSlice.name]: slicesSpaceNavigationSlice.spaceNavigationSlice.reducer,
-  [slicesFeePaymentSourcePreferenceSlice.feePaymentSourcePreferenceSlice.name]:
-    slicesFeePaymentSourcePreferenceSlice.feePaymentSourcePreferenceSlice.reducer,
-  [slicesFeatureFlagOverridesSlice.featureFlagOverridesSlice.name]:
-    slicesFeatureFlagOverridesSlice.featureFlagOverridesSlice.reducer,
+  [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
+  [slices.sessionSlice.name]: slices.sessionSlice.reducer,
+  [slices.txHistorySlice.name]: slices.txHistorySlice.reducer,
+  [slices.txQueueSlice.name]: slices.txQueueSlice.reducer,
+  [slices.swapOrderSlice.name]: slices.swapOrderSlice.reducer,
+  [slices.addressBookSlice.name]: slices.addressBookSlice.reducer,
+  [slices.notificationsSlice.name]: slices.notificationsSlice.reducer,
+  [slices.pendingTxsSlice.name]: slices.pendingTxsSlice.reducer,
+  [slices.addedSafesSlice.name]: slices.addedSafesSlice.reducer,
+  [slices.settingsSlice.name]: slices.settingsSlice.reducer,
+  [slices.cookiesAndTermsSlice.name]: slices.cookiesAndTermsSlice.reducer,
+  [slices.popupSlice.name]: slices.popupSlice.reducer,
+  [slices.spendingLimitSlice.name]: slices.spendingLimitSlice.reducer,
+  [slices.safeAppsSlice.name]: slices.safeAppsSlice.reducer,
+  [slices.pendingSafeMessagesSlice.name]: slices.pendingSafeMessagesSlice.reducer,
+  [slices.batchSlice.name]: slices.batchSlice.reducer,
+  [slices.undeployedSafesSlice.name]: slices.undeployedSafesSlice.reducer,
+  [slices.pendingCfDeletesSlice.name]: slices.pendingCfDeletesSlice.reducer,
+  [slices.swapParamsSlice.name]: slices.swapParamsSlice.reducer,
+  [slices.visitedSafesSlice.name]: slices.visitedSafesSlice.reducer,
+  [slices.orderByPreferenceSlice.name]: slices.orderByPreferenceSlice.reducer,
+  [slices.hnStateSlice.name]: slices.hnStateSlice.reducer,
+  [slices.hnQueueAssessmentsSlice.name]: slices.hnQueueAssessmentsSlice.reducer,
+  [slices.calendlySlice.name]: slices.calendlySlice.reducer,
+  [slices.globalSearchSlice.name]: slices.globalSearchSlice.reducer,
+  [slices.safeActionsModalSlice.name]: slices.safeActionsModalSlice.reducer,
+  [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
+  [slices.feePaymentSourcePreferenceSlice.name]: slices.feePaymentSourcePreferenceSlice.reducer,
+  [slices.featureFlagOverridesSlice.name]: slices.featureFlagOverridesSlice.reducer,
   // Deliberately absent from `persistedSlices`: a restored dialog would wait for a request that is gone.
-  [slicesStepUpSlice.stepUpSlice.name]: slicesStepUpSlice.stepUpSlice.reducer,
+  [slices.stepUpSlice.name]: slices.stepUpSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
   [beamerApi.reducerPath]: beamerApi.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,
   [safenetCheckSlice.name]: safenetCheckSlice.reducer,
   [safenetCheckApi.reducerPath]: safenetCheckApi.reducer,
-  [slicesGateway.gatewayApi.reducerPath]: slicesGateway.gatewayApi.reducer,
+  [slices.gatewayApi.reducerPath]: slices.gatewayApi.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
-  [slicesAuthSlice.authSlice.reducerPath]: slicesAuthSlice.authSlice.reducer,
+  [slices.authSlice.reducerPath]: slices.authSlice.reducer,
 })
 
 const persistedSlices: (keyof Partial<RootState>)[] = [
-  slicesSessionSlice.sessionSlice.name,
-  slicesAddressBookSlice.addressBookSlice.name,
-  slicesPendingTxsSlice.pendingTxsSlice.name,
-  slicesAddedSafesSlice.addedSafesSlice.name,
-  slicesSettingsSlice.settingsSlice.name,
-  slicesCookiesAndTermsSlice.cookiesAndTermsSlice.name,
-  slicesSafeAppsSlice.safeAppsSlice.name,
-  slicesPendingSafeMessagesSlice.pendingSafeMessagesSlice.name,
-  slicesBatchSlice.batchSlice.name,
-  slicesUndeployedSafesSlice.undeployedSafesSlice.name,
-  slicesPendingCfDeletesSlice.pendingCfDeletesSlice.name,
-  slicesSwapParamsSlice.swapParamsSlice.name,
-  slicesSwapOrderSlice.swapOrderSlice.name,
-  slicesVisitedSafesSlice.visitedSafesSlice.name,
-  slicesOrderByPreferenceSlice.orderByPreferenceSlice.name,
-  slicesAuthSlice.authSlice.name,
-  slicesHnStateSlice.hnStateSlice.name,
-  slicesFeePaymentSourcePreferenceSlice.feePaymentSourcePreferenceSlice.name,
-  slicesFeatureFlagOverridesSlice.featureFlagOverridesSlice.name,
+  slices.sessionSlice.name,
+  slices.addressBookSlice.name,
+  slices.pendingTxsSlice.name,
+  slices.addedSafesSlice.name,
+  slices.settingsSlice.name,
+  slices.cookiesAndTermsSlice.name,
+  slices.safeAppsSlice.name,
+  slices.pendingSafeMessagesSlice.name,
+  slices.batchSlice.name,
+  slices.undeployedSafesSlice.name,
+  slices.pendingCfDeletesSlice.name,
+  slices.swapParamsSlice.name,
+  slices.swapOrderSlice.name,
+  slices.visitedSafesSlice.name,
+  slices.orderByPreferenceSlice.name,
+  slices.authSlice.name,
+  slices.hnStateSlice.name,
+  slices.feePaymentSourcePreferenceSlice.name,
+  slices.featureFlagOverridesSlice.name,
 ]
 
 export const getPersistedState = () => {
@@ -162,7 +126,7 @@ const middleware: Middleware<{}, RootState>[] = [
   beamerApi.middleware,
   hypernativeApi.middleware,
   safenetCheckApi.middleware,
-  slicesGateway.gatewayApi.middleware,
+  slices.gatewayApi.middleware,
 ]
 
 const listeners = [
@@ -206,17 +170,17 @@ export const _hydrationReducer: typeof rootReducer = (state, action) => {
     }
 
     // Migrate batchSlice txDetails to txData
-    if (nextState[slicesBatchSlice.batchSlice.name]) {
-      nextState[slicesBatchSlice.batchSlice.name] = migrateBatchTxs(nextState[slicesBatchSlice.batchSlice.name])
+    if (nextState[slices.batchSlice.name]) {
+      nextState[slices.batchSlice.name] = migrateBatchTxs(nextState[slices.batchSlice.name])
     }
 
     // One-time reset to the new default order (WA-2567 made "Name" / A→Z the default).
     // Guarded on the slice being present so it only touches a real store, not synthetic state.
-    const orderByState = nextState[slicesOrderByPreferenceSlice.orderByPreferenceSlice.name]
-    if (orderByState && orderByState.resetVersion !== slicesOrderByPreferenceSlice.ORDER_BY_RESET_VERSION) {
-      nextState[slicesOrderByPreferenceSlice.orderByPreferenceSlice.name] = {
-        orderBy: slicesOrderByPreferenceSlice.OrderByOption.NAME,
-        resetVersion: slicesOrderByPreferenceSlice.ORDER_BY_RESET_VERSION,
+    const orderByState = nextState[slices.orderByPreferenceSlice.name]
+    if (orderByState && orderByState.resetVersion !== slices.ORDER_BY_RESET_VERSION) {
+      nextState[slices.orderByPreferenceSlice.name] = {
+        orderBy: slices.OrderByOption.NAME,
+        resetVersion: slices.ORDER_BY_RESET_VERSION,
         // Only the default sort direction is reset — the user's custom drag order is preserved.
         manualOrder: orderByState.manualOrder ?? {},
       }
