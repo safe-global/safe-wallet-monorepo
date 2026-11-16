@@ -6,12 +6,13 @@ import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from '@
 import { Input } from '@safe-global/views/components/ui/input'
 import { Label } from '@safe-global/views/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { DEFI_V1_COPY, formatAmount } from '../copy'
+import { DEFI_V1_COPY, formatAmount, formatApy } from '../copy'
 import { IDLE_CASH } from '../opportunities'
 import { dedicatedSafeName } from '../shelf'
 import type { Frequency, Operation, Opportunity } from '../types'
@@ -173,15 +174,28 @@ export const Section = ({
   </div>
 )
 
-export const AmountFields = ({ form, labelled = true }: { form: InvestmentForm; labelled?: boolean }) => (
+const optionLabel = (option: Opportunity) => `${option.name} · ${formatApy(option.apy)} · ${option.exitShort}`
+
+export const AmountFields = ({ form }: { form: InvestmentForm }) => (
   <>
     {!form.opportunity && (
-      <Section label={labelled ? COPY.investment : undefined}>
-        <RadioGroup value={form.pickedId} onValueChange={(next) => form.setPickedId(String(next))} className="gap-2">
-          {form.options.map((option) => (
-            <ChoiceCard key={option.id} value={option.id} title={option.name} description={option.exitShort} />
-          ))}
-        </RadioGroup>
+      <Section label={COPY.investment}>
+        <Select
+          items={form.options.map((option) => ({ value: option.id, label: optionLabel(option) }))}
+          value={form.pickedId}
+          onValueChange={(next) => next && form.setPickedId(String(next))}
+        >
+          <SelectTrigger aria-label={COPY.investment} className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {form.options.map((option) => (
+              <SelectItem key={option.id} value={option.id}>
+                {optionLabel(option)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </Section>
     )}
     <Section

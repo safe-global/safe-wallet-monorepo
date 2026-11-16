@@ -63,7 +63,7 @@ export const SetUpInvestmentDrawer = ({
     {
       title: COPY.investment,
       summary: (f) => `${formatAmount(f.amount)} ${investment.asset}`,
-      content: <AmountFields form={form} labelled={false} />,
+      content: <AmountFields form={form} />,
       valid: form.amount > 0,
     },
     {
