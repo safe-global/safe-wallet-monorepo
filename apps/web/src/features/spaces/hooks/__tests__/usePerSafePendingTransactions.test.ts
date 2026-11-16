@@ -1,208 +1,154 @@
-import { renderHook, waitFor } from '@testing-library/react'
 import { faker } from '@faker-js/faker'
+import { http, HttpResponse } from 'msw'
+import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { GATEWAY_URL } from '@/config/gateway'
+import { server } from '@/tests/server'
+import { renderHook, waitFor } from '@/tests/test-utils'
+import { multisigTransactionBuilder, queuedTransactionItem } from '@/tests/builders/queuedTransaction'
 import { usePerSafePendingTransactions } from '../usePerSafePendingTransactions'
-import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import * as transactionsService from '@/services/transactions'
-import * as txList from '@/utils/tx-list'
 
 jest.mock('../useSpaceSafesWithQueue', () => ({
   useSpaceSafesWithQueue: jest.fn(),
 }))
-jest.mock('@/services/transactions', () => ({
-  getTransactionQueue: jest.fn(),
-}))
-jest.mock('@/utils/tx-list', () => ({
-  getLatestTransactions: jest.fn(),
-}))
 
-import { useSpaceSafesWithQueue } from '../useSpaceSafesWithQueue'
+const mockUseSpaceSafesWithQueue = jest.requireMock('../useSpaceSafesWithQueue').useSpaceSafesWithQueue as jest.Mock
 
-const createQueuedItem = (
-  timestamp: number,
-  overrides: Partial<TransactionQueuedItem> = {},
-): TransactionQueuedItem => ({
-  type: 'TRANSACTION',
-  transaction: {
-    id: faker.string.uuid(),
-    txHash: faker.string.hexadecimal({ length: 64 }),
-    timestamp,
-    txStatus: 'AWAITING_CONFIRMATIONS',
-    txInfo: {
-      type: 'Custom',
-      to: { value: faker.finance.ethereumAddress() },
-      methodName: null,
-      dataSize: '0',
-      isCancellation: false,
-      humanDescription: null,
-    },
-    executionInfo: {
-      type: 'MULTISIG',
-      nonce: faker.number.int({ min: 1, max: 100 }),
-      confirmationsRequired: 2,
-      confirmationsSubmitted: 1,
-      missingSigners: [],
-    },
-    ...overrides.transaction,
-  },
-  conflictType: 'None',
-  ...overrides,
-})
+const SAFE_1 = faker.finance.ethereumAddress()
+const SAFE_2 = faker.finance.ethereumAddress()
+const CHAIN_1 = faker.string.numeric({ length: 3, allowLeadingZeros: false })
+const CHAIN_2 = faker.string.numeric({ length: 4, allowLeadingZeros: false })
 
-const SAFE_ADDRESS_1 = faker.finance.ethereumAddress()
-const SAFE_ADDRESS_2 = faker.finance.ethereumAddress()
+const queuedItemAt = (timestamp: number) =>
+  queuedTransactionItem(multisigTransactionBuilder().with({ timestamp }).build())
+
+const respondWithSafeQueues = (queues: Record<string, QueuedItemPage['results']> | null) => {
+  const requests: URL[] = []
+  server.use(
+    http.get<{ chainId: string; address: string }>(
+      `${GATEWAY_URL}/v1/chains/:chainId/safes/:address/transactions/queued`,
+      ({ request, params }) => {
+        requests.push(new URL(request.url))
+        if (!queues) return new HttpResponse(null, { status: 500 })
+        const results = queues[`${params.chainId}:${params.address}`] ?? []
+        return HttpResponse.json<QueuedItemPage>({ count: results.length, next: null, previous: null, results })
+      },
+    ),
+  )
+  return requests
+}
 
 describe('usePerSafePendingTransactions', () => {
   beforeEach(() => {
-    jest.resetAllMocks()
-    ;(useSpaceSafesWithQueue as jest.Mock).mockReturnValue({
+    jest.clearAllMocks()
+    mockUseSpaceSafesWithQueue.mockReturnValue({
       safesWithQueue: [
-        { chainId: '1', address: SAFE_ADDRESS_1 },
-        { chainId: '137', address: SAFE_ADDRESS_2 },
+        { chainId: CHAIN_1, address: SAFE_1 },
+        { chainId: CHAIN_2, address: SAFE_2 },
       ],
       isLoading: false,
     })
   })
 
-  it('should return empty transactions when no safes have queued txs', async () => {
-    ;(useSpaceSafesWithQueue as jest.Mock).mockReturnValue({
-      safesWithQueue: [],
-      isLoading: false,
-    })
+  it('returns no transactions when no Safe has a queue', async () => {
+    mockUseSpaceSafesWithQueue.mockReturnValue({ safesWithQueue: [], isLoading: false })
 
     const { result } = renderHook(() => usePerSafePendingTransactions())
 
-    await waitFor(() => {
-      expect(result.current.transactions).toEqual([])
-      expect(result.current.count).toBe(0)
-      expect(result.current.isLoading).toBe(false)
-    })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
+    expect(result.current.transactions).toEqual([])
+    expect(result.current.count).toBe(0)
   })
 
-  it('should reflect loading state from useSpaceSafesWithQueue', () => {
-    ;(useSpaceSafesWithQueue as jest.Mock).mockReturnValue({
-      safesWithQueue: [],
-      isLoading: true,
-    })
+  it('reports loading while the Safes with a queue load', () => {
+    mockUseSpaceSafesWithQueue.mockReturnValue({ safesWithQueue: [], isLoading: true })
 
     const { result } = renderHook(() => usePerSafePendingTransactions())
 
     expect(result.current.isLoading).toBe(true)
   })
 
-  it('should fetch and merge transactions from multiple safes', async () => {
-    const tx1 = createQueuedItem(1000)
-    const tx2 = createQueuedItem(2000)
-
-    ;(transactionsService.getTransactionQueue as jest.Mock)
-      .mockResolvedValueOnce({ results: [tx1] })
-      .mockResolvedValueOnce({ results: [tx2] })
-    ;(txList.getLatestTransactions as jest.Mock).mockImplementation((results) =>
-      results.filter((r: TransactionQueuedItem) => r.type === 'TRANSACTION'),
-    )
+  it('merges the queues of every Safe', async () => {
+    respondWithSafeQueues({
+      [`${CHAIN_1}:${SAFE_1}`]: [queuedItemAt(1000)],
+      [`${CHAIN_2}:${SAFE_2}`]: [queuedItemAt(2000)],
+    })
 
     const { result } = renderHook(() => usePerSafePendingTransactions())
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-      expect(result.current.transactions).toHaveLength(2)
-      expect(result.current.count).toBe(2)
-    })
+    await waitFor(() => expect(result.current.transactions).toHaveLength(2))
+    expect(result.current.count).toBe(2)
+    expect(result.current.isLoading).toBe(false)
   })
 
-  it('should sort transactions by timestamp ascending (oldest first)', async () => {
-    const oldTx = createQueuedItem(1000)
-    const recentTx = createQueuedItem(3000)
-    const middleTx = createQueuedItem(2000)
-
-    ;(transactionsService.getTransactionQueue as jest.Mock)
-      .mockResolvedValueOnce({ results: [recentTx, oldTx] })
-      .mockResolvedValueOnce({ results: [middleTx] })
-    ;(txList.getLatestTransactions as jest.Mock).mockImplementation((results) =>
-      results.filter((r: TransactionQueuedItem) => r.type === 'TRANSACTION'),
-    )
+  it('returns the transactions oldest first', async () => {
+    respondWithSafeQueues({
+      [`${CHAIN_1}:${SAFE_1}`]: [queuedItemAt(3000), queuedItemAt(1000)],
+      [`${CHAIN_2}:${SAFE_2}`]: [queuedItemAt(2000)],
+    })
 
     const { result } = renderHook(() => usePerSafePendingTransactions())
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-      const timestamps = result.current.transactions.map((tx) => tx.transaction.timestamp)
-      expect(timestamps).toEqual([1000, 2000, 3000])
-    })
+    await waitFor(() => expect(result.current.transactions).toHaveLength(3))
+    expect(result.current.transactions.map((tx) => tx.transaction.timestamp)).toEqual([1000, 2000, 3000])
   })
 
-  it('should respect the limit parameter', async () => {
-    const tx1 = createQueuedItem(1000)
-    const tx2 = createQueuedItem(2000)
-    const tx3 = createQueuedItem(3000)
-
-    ;(transactionsService.getTransactionQueue as jest.Mock)
-      .mockResolvedValueOnce({ results: [tx1, tx2] })
-      .mockResolvedValueOnce({ results: [tx3] })
-    ;(txList.getLatestTransactions as jest.Mock).mockImplementation((results) =>
-      results.filter((r: TransactionQueuedItem) => r.type === 'TRANSACTION'),
-    )
+  it('returns no more transactions than the limit', async () => {
+    respondWithSafeQueues({
+      [`${CHAIN_1}:${SAFE_1}`]: [queuedItemAt(1000), queuedItemAt(2000)],
+      [`${CHAIN_2}:${SAFE_2}`]: [queuedItemAt(3000)],
+    })
 
     const { result } = renderHook(() => usePerSafePendingTransactions(2))
 
-    await waitFor(() => {
-      expect(result.current.transactions).toHaveLength(2)
-      expect(result.current.transactions[0].transaction.timestamp).toBe(1000)
-      expect(result.current.transactions[1].transaction.timestamp).toBe(2000)
-    })
+    await waitFor(() => expect(result.current.transactions).toHaveLength(2))
+    expect(result.current.transactions.map((tx) => tx.transaction.timestamp)).toEqual([1000, 2000])
   })
 
-  it('should attach safeAddress and chainId to each transaction', async () => {
-    const tx1 = createQueuedItem(1000)
-    const tx2 = createQueuedItem(2000)
-
-    ;(transactionsService.getTransactionQueue as jest.Mock)
-      .mockResolvedValueOnce({ results: [tx1] })
-      .mockResolvedValueOnce({ results: [tx2] })
-    ;(txList.getLatestTransactions as jest.Mock).mockImplementation((results) =>
-      results.filter((r: TransactionQueuedItem) => r.type === 'TRANSACTION'),
-    )
+  it('attaches the Safe address and chain ID to each transaction', async () => {
+    respondWithSafeQueues({
+      [`${CHAIN_1}:${SAFE_1}`]: [queuedItemAt(1000)],
+      [`${CHAIN_2}:${SAFE_2}`]: [queuedItemAt(2000)],
+    })
 
     const { result } = renderHook(() => usePerSafePendingTransactions())
 
-    await waitFor(() => {
-      expect(result.current.transactions[0]).toHaveProperty('safeAddress', SAFE_ADDRESS_1)
-      expect(result.current.transactions[0]).toHaveProperty('chainId', '1')
-      expect(result.current.transactions[1]).toHaveProperty('safeAddress', SAFE_ADDRESS_2)
-      expect(result.current.transactions[1]).toHaveProperty('chainId', '137')
-    })
+    await waitFor(() => expect(result.current.transactions).toHaveLength(2))
+    expect(result.current.transactions.map(({ safeAddress, chainId }) => [safeAddress, chainId])).toEqual([
+      [SAFE_1, CHAIN_1],
+      [SAFE_2, CHAIN_2],
+    ])
   })
 
-  it('should set error when fetching fails', async () => {
-    ;(transactionsService.getTransactionQueue as jest.Mock).mockRejectedValue(new Error('Network error'))
+  it('returns an error when a Safe queue fails to load', async () => {
+    respondWithSafeQueues(null)
 
     const { result } = renderHook(() => usePerSafePendingTransactions())
 
-    await waitFor(() => {
-      expect(result.current.error).toBe('Failed to load pending transactions')
-      expect(result.current.isLoading).toBe(false)
-      expect(result.current.transactions).toEqual([])
-    })
-  })
-
-  it('should not fetch the queues when skipped', async () => {
-    const { result } = renderHook(() => usePerSafePendingTransactions(3, true))
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false))
-    expect(transactionsService.getTransactionQueue).not.toHaveBeenCalled()
+    await waitFor(() => expect(result.current.error).toBe('Failed to load pending transactions'))
+    expect(result.current.isLoading).toBe(false)
     expect(result.current.transactions).toEqual([])
   })
 
-  it('should pass correct cursor with limit to getTransactionQueue', async () => {
-    ;(transactionsService.getTransactionQueue as jest.Mock).mockResolvedValue({ results: [] })
-    ;(txList.getLatestTransactions as jest.Mock).mockReturnValue([])
+  it('does not request the Safe queues when skipped', async () => {
+    const requests = respondWithSafeQueues({})
+
+    const { result } = renderHook(() => usePerSafePendingTransactions(3, true))
+
+    await new Promise((resolve) => setTimeout(resolve, 50))
+    expect(requests).toHaveLength(0)
+    expect(result.current.isLoading).toBe(false)
+    expect(result.current.transactions).toEqual([])
+  })
+
+  it('requests each trusted Safe queue with the limit in the cursor', async () => {
+    const requests = respondWithSafeQueues({})
 
     renderHook(() => usePerSafePendingTransactions(5))
 
-    await waitFor(() => {
-      expect(transactionsService.getTransactionQueue).toHaveBeenCalledWith('1', SAFE_ADDRESS_1, {
-        trusted: true,
-        cursor: 'limit=5&offset=0',
-      })
-    })
+    await waitFor(() => expect(requests).toHaveLength(2))
+    expect(requests.map((url) => [url.searchParams.get('trusted'), url.searchParams.get('cursor')])).toEqual([
+      ['true', 'limit=5&offset=0'],
+      ['true', 'limit=5&offset=0'],
+    ])
   })
 })
