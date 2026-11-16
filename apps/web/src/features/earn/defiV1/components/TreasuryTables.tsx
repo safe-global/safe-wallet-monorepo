@@ -8,14 +8,12 @@ import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@safe-global/views/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { cn } from '@safe-global/views/utils/cn'
-import { DEFI_V1_COPY, formatApy, formatCompactUsd, formatUsd } from '../copy'
-import { growthSeries, growthShare } from '../shelf'
+import { DEFI_V1_COPY, formatApy, formatCompactUsd } from '../copy'
 import { CHAIN_IDS } from '../opportunities'
 import type { Holding, Opportunity } from '../types'
-import { Sparkline } from './Sparkline'
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0!'
-const COLUMN_WIDTHS = ['w-10', '', 'w-20', 'w-24', 'w-32', 'w-28', 'w-28', 'w-36', 'w-24']
+const COLUMN_WIDTHS = ['w-10', '', 'w-20', 'w-24', 'w-32', 'w-28', 'w-28', 'w-28', 'w-24']
 const COLUMN_COUNT = COLUMN_WIDTHS.length
 const OPPORTUNITY_HEADERS = ['Opportunity', 'Asset', 'Net APY', 'Category', 'Exit time', 'Invested', 'Earned']
 
@@ -138,26 +136,12 @@ const InvestedCell = ({ holding }: { holding?: Holding }) => {
   )
 }
 
-const EarnedCell = ({ holding }: { holding?: Holding }) => {
-  if (!holding || holding.invested <= 0) return <Empty />
-  const growth = growthShare(holding.invested, holding.earned)
-  const series = growthSeries(holding.invested, holding.earned)
-  return (
-    <Tooltip delay={150}>
-      <TooltipTrigger render={<span className="flex w-fit min-w-0 items-center gap-2" />}>
-        <span className="font-medium tabular-nums">+{formatCompactUsd(holding.earned)}</span>
-        <Sparkline values={series} label={DEFI_V1_COPY.positions.trend(formatApy(growth))} />
-      </TooltipTrigger>
-      <TooltipContent>
-        {DEFI_V1_COPY.positions.trendTooltip(
-          formatCompactUsd(series[0]),
-          formatCompactUsd(series[series.length - 1]),
-          formatUsd(holding.earned),
-        )}
-      </TooltipContent>
-    </Tooltip>
+const EarnedCell = ({ holding }: { holding?: Holding }) =>
+  holding && holding.invested > 0 ? (
+    <span className="font-medium tabular-nums">+{formatCompactUsd(holding.earned)}</span>
+  ) : (
+    <Empty />
   )
-}
 
 const OpportunityRow = ({
   opportunity,
