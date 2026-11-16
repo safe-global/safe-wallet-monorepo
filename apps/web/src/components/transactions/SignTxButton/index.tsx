@@ -50,7 +50,7 @@ const SignTxButton = ({
             <Track {...TX_LIST_EVENTS.CONFIRM}>
               <Button
                 onClick={onClick}
-                variant={compact || dense ? 'outline' : 'default'}
+                variant={dense ? 'row-hover-primary' : compact ? 'outline' : 'default'}
                 disabled={!isOk || isDisabled}
                 // Matches ExecuteTxButton — both sit in the same queue row slot, so a different height
                 // here would make Confirm and Execute rows inconsistent.

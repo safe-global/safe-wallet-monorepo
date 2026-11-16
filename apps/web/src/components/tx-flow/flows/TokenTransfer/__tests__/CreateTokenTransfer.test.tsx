@@ -215,7 +215,7 @@ describe('CreateTokenTransfer', () => {
     expect(queryByText('Send as')).not.toBeInTheDocument()
   })
 
-  it('should not display a type selection in a Safe scope, whose spending limits are not loaded', async () => {
+  const renderInSafeScope = () => {
     jest
       .spyOn(tokenUtils, 'useTokenAmount')
       .mockReturnValue({ totalAmount: BigInt(1000), spendingLimitAmount: BigInt(500) })
@@ -242,8 +242,7 @@ describe('CreateTokenTransfer', () => {
       loading: false,
       error: undefined,
     })
-    // A scoped Safe is checked against the sanctions oracle on Ethereum
-    let sanctionsChecked = false
+    const sanctionsCheck = { done: false }
     server.use(
       http.post('https://ethereum.publicnode.com/', async ({ request }) => {
         const body = (await request.json()) as { id: number } | Array<{ id: number }>
@@ -252,7 +251,7 @@ describe('CreateTokenTransfer', () => {
           id,
           result: AbiCoder.defaultAbiCoder().encode(['bool'], [false]),
         })
-        sanctionsChecked = true
+        sanctionsCheck.done = true
         return HttpResponse.json(Array.isArray(body) ? body.map(answer) : answer(body))
       }),
     )
@@ -261,7 +260,7 @@ describe('CreateTokenTransfer', () => {
       safeAddress: faker.finance.ethereumAddress(),
     })
 
-    const { queryByText } = render(
+    const result = render(
       <SafeScopeContext.Provider value={scope}>
         <SafeShieldProvider>
           <TxFlowProvider step={0} data={mockParams} prevStep={() => {}} nextStep={jest.fn()}>
@@ -271,8 +270,19 @@ describe('CreateTokenTransfer', () => {
       </SafeScopeContext.Provider>,
     )
 
+    return { ...result, sanctionsCheck }
+  }
+
+  it('should not display a type selection in a Safe scope, whose spending limits are not loaded', () => {
+    const { queryByText } = renderInSafeScope()
+
     expect(queryByText('Send as')).not.toBeInTheDocument()
-    await waitFor(() => expect(sanctionsChecked).toBe(true))
+  })
+
+  it('should check a scoped Safe against the sanctions oracle', async () => {
+    const { sanctionsCheck } = renderInSafeScope()
+
+    await waitFor(() => expect(sanctionsCheck.done).toBe(true))
   })
 
   it('should preselect a specific token (USDC) when passed in data', () => {
