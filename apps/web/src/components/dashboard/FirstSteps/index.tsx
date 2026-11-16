@@ -27,9 +27,9 @@ import { Circle, CircleCheck, CircleCheckBig, Lightbulb, Plus } from 'lucide-rea
 import css from '@safe-global/views/components/dashboard/FirstSteps/styles.module.css'
 import { ProgressRing } from '@safe-global/views/components/dashboard/FirstSteps/ProgressRing'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
-import { useBannerVisibility } from '@/features/hypernative/hooks/useBannerVisibility'
-import { HnDashboardBannerWithNoBalanceCheck } from '@/features/hypernative/components/HnDashboardBanner'
+import { BannerType } from '@/features/hypernative/public/useBannerStorage'
+import { useBannerVisibility } from '@/features/hypernative/public/useBannerVisibility'
+import { HnDashboardBannerWithNoBalanceCheck } from '@/features/hypernative/public/HnDashboardBanner'
 import { calculateProgress } from '@safe-global/views/components/dashboard/FirstSteps/utils'
 
 const StatusCard = ({

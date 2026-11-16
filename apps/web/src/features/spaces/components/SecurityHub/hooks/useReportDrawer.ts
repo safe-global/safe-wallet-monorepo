@@ -1,8 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { ScanContext } from '@/features/security/types'
-import type { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import type { SecurityContract } from '@/features/security/contract'
+import type { ScanContext } from '@/features/security/public/types'
+import type { SecurityServices } from '@/features/security/public/securityServices'
 import useSafeScanContext from '../../../hooks/useSafeScanContext'
 import type {
   OverviewMap,
@@ -11,7 +10,7 @@ import type {
 } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 import { isSameSelection } from '../utils'
 
-type SecurityHandle = ReturnType<typeof useLoadFeature<SecurityContract>>
+type SecurityHandle = SecurityServices | undefined
 
 export type UseReportDrawerParams = {
   security: SecurityHandle
@@ -53,9 +52,7 @@ const useReportDrawer = ({ security, safes, overviewMap }: UseReportDrawerParams
   }, [safes, selectedSafe])
 
   const drawerOverview =
-    selectedSafe && security.$isReady
-      ? overviewMap[security.scanKey(selectedSafe.address, selectedSafe.chainId)]
-      : undefined
+    selectedSafe && security ? overviewMap[security.scanKey(selectedSafe.address, selectedSafe.chainId)] : undefined
 
   const scanContext = useSafeScanContext(selectedSafe, selectedEntry, drawerOverview)
 

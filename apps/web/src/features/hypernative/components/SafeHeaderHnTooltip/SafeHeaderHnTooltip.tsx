@@ -1,6 +1,6 @@
 import { type ReactElement } from 'react'
 
-import { HypernativeTooltip } from '@/features/hypernative/components/HypernativeTooltip/HypernativeTooltip'
+import { HypernativeTooltip } from '../HypernativeTooltip/HypernativeTooltip'
 import SafeShieldIconSvg from '@/public/images/safe-shield/safe-shield-logo-no-text.svg'
 
 import { safeShieldSvgClassName } from '@safe-global/views/features/hypernative/components/SafeHeaderHnTooltip/styles'

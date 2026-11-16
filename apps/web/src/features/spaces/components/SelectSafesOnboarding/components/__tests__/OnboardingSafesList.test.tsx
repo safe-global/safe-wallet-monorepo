@@ -2,7 +2,7 @@ import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { render } from '@/tests/test-utils'
 
 import OnboardingSafesList from '../OnboardingSafesList'
-import type { SimilarWarning } from '@/features/address-poisoning/utils/crossListClusters'
+import type { SimilarWarning } from '@/features/address-poisoning/public/crossListClusters'
 
 // Stub the (MUI) accounts table so these tests stay focused on section/flag wiring.
 // The barrel is replaced wholesale (not spread) to avoid a circular-init crash when required.

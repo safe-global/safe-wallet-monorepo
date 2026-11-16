@@ -44,7 +44,7 @@ import {
   getRelayLimitReachedError,
 } from '@safe-global/utils/services/gasPaymentErrors'
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
-import { requestSafenetCheck } from '@/features/safenet-checks/services/requestSafenetCheck'
+import { requestSafenetCheck } from '@/features/safenet-checks/public/requestSafenetCheck'
 
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-scope/types'

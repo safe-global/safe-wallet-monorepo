@@ -144,7 +144,7 @@
       "count": 3
     }
   },
-  "src/features/hypernative/components/HnSignupFlow/HnSignupFlow.test.tsx": {
+  "src/features/hypernative/public/__tests__/HnSignupFlow.test.tsx": {
     "@typescript-eslint/no-explicit-any": {
       "count": 2
     }
@@ -154,12 +154,12 @@
       "count": 4
     }
   },
-  "src/features/hypernative/hooks/__tests__/useBannerStorage.test.ts": {
+  "src/features/hypernative/public/__tests__/useBannerStorage.test.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 1
     }
   },
-  "src/features/hypernative/hooks/__tests__/useHypernativeOAuth.test.tsx": {
+  "src/features/hypernative/public/__tests__/useHypernativeOAuth.test.tsx": {
     "@typescript-eslint/no-explicit-any": {
       "count": 2
     }

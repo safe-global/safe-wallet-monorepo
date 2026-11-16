@@ -4,8 +4,7 @@ import { useAppSelector } from '@/store'
 import { selectUndeployedSafes } from '@/features/counterfactual/public/undeployedSafesSlice'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
-import type { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import type { SecurityContract } from '@/features/security/contract'
+import type { SecurityServices } from '@/features/security/public/securityServices'
 import { flattenSafes, getDeployedEntries, reconcileDeployedSafes, toSafeItems } from '../utils'
 import type {
   BalanceMap,
@@ -14,7 +13,7 @@ import type {
   SpaceSafeEntry,
 } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
-type SecurityHandle = ReturnType<typeof useLoadFeature<SecurityContract>>
+type SecurityHandle = SecurityServices | undefined
 
 export type ReconciledSpaceSafes = {
   isLoadingSpacesSafes: boolean
@@ -55,7 +54,7 @@ const useReconciledSpaceSafes = (security: SecurityHandle): ReconciledSpaceSafes
   const isLoadingOverviews = safeItems.length > 0 && !overviews && !isOverviewsError
 
   const { confirmedDeployedKeys, balanceMap, overviewMap } = useMemo(() => {
-    if (!security.$isReady || !overviews) {
+    if (!security || !overviews) {
       return { confirmedDeployedKeys: null, balanceMap: {} as BalanceMap, overviewMap: {} as OverviewMap }
     }
 
@@ -83,11 +82,11 @@ const useReconciledSpaceSafes = (security: SecurityHandle): ReconciledSpaceSafes
       balanceMap: bMap,
       overviewMap: oMap,
     }
-  }, [overviews, security.$isReady, security.scanKey])
+  }, [overviews, security])
 
   const safes = useMemo(
-    () => (security.$isReady ? reconcileDeployedSafes(rawSafes, confirmedDeployedKeys, security.scanKey) : rawSafes),
-    [rawSafes, confirmedDeployedKeys, security.$isReady, security.scanKey],
+    () => (security ? reconcileDeployedSafes(rawSafes, confirmedDeployedKeys, security.scanKey) : rawSafes),
+    [rawSafes, confirmedDeployedKeys, security],
   )
 
   const deployedEntries = useMemo(() => getDeployedEntries(safes), [safes])

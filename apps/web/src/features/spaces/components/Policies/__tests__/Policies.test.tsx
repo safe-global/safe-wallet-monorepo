@@ -60,7 +60,7 @@ jest.mock('@/services/local-storage/useLocalStorage', () => ({
 
 let mockIsAllowlistActive: boolean | undefined = false
 
-jest.mock('@/features/policy-guard/hooks/useIsAllowlistActiveInSpace', () => ({
+jest.mock('@/features/policy-guard/public/useIsAllowlistActiveInSpace', () => ({
   useIsAllowlistActiveInSpace: () => mockIsAllowlistActive,
 }))
 

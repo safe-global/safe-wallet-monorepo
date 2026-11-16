@@ -1,10 +1,9 @@
 import { useCallback, useMemo, useState } from 'react'
-import type { ScanResult } from '@/features/security/types'
-import type { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import type { SecurityContract } from '@/features/security/contract'
+import type { ScanResult } from '@/features/security/public/types'
+import type { SecurityServices } from '@/features/security/public/securityServices'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 
-type SecurityHandle = ReturnType<typeof useLoadFeature<SecurityContract>>
+type SecurityHandle = SecurityServices | undefined
 
 export type ScanResultsByKey = Record<string, Record<string, ScanResult>>
 export type ScanTimestampsByKey = Record<string, number>
@@ -44,12 +43,12 @@ const useScanResultsState = (security: SecurityHandle): ScanResultsState => {
 
   const handleScanComplete = useCallback(
     (address: string, chainId: string, timestamp: number, results: Record<string, ScanResult>) => {
-      if (!security.$isReady) return
+      if (!security) return
       const key = security.scanKey(address, chainId)
       setAllScanResults((prev) => ({ ...prev, [key]: results }))
       setScanTimestamps((prev) => ({ ...prev, [key]: timestamp }))
     },
-    [security.$isReady, security.scanKey],
+    [security],
   )
 
   const lastScannedAt = useMemo(() => {

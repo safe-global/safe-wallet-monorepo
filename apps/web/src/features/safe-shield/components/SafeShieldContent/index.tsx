@@ -24,11 +24,12 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { CARD_ORDER, PRO_CARD_ORDER, getRevealDelays } from '../../utils/revealDelays'
 import { hasThreatCardResults } from '../../utils/hasThreatCardResults'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
-import { HypernativeFeature } from '@/features/hypernative'
-import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
-import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import type { HypernativeAuthStatus } from '@/features/hypernative/public/useHypernativeOAuth'
+import { useIsSafenetChecksEnabled } from '@/features/safenet-checks/public/useIsSafenetChecksEnabled'
 import { ThreatAnalysis } from '../ThreatAnalysis/ThreatAnalysis'
+import SafenetChecksSection from '@/features/safenet-checks/public/SafenetChecksSection'
+import HnInfoCard from '@/features/hypernative/public/HnInfoCard'
+import HnCustomChecksCard from '@/features/hypernative/public/HnCustomChecksCard'
 
 export const SafeShieldContent = ({
   recipient,
@@ -63,8 +64,6 @@ export const SafeShieldContent = ({
   isSafePro?: boolean
   isOffchainMessage?: boolean
 }): ReactElement => {
-  const hn = useLoadFeature(HypernativeFeature)
-  const safenet = useLoadFeature(SafenetChecksFeature)
   const isSafenetEnabled = useIsSafenetChecksEnabled()
   const hasOwnTenderly = useHasOwnTenderly()
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
@@ -125,7 +124,7 @@ export const SafeShieldContent = ({
           keeps this curve concentric with the outer one. */}
       <div className="relative overflow-hidden rounded-b-md">
         {showHypernativeInfo && (
-          <hn.HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
+          <HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
         )}
 
         {loading && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={loading} />}
@@ -159,7 +158,7 @@ export const SafeShieldContent = ({
             hypernativeAuth={hypernativeAuth}
           />
 
-          <hn.HnCustomChecksCard
+          <HnCustomChecksCard
             threat={threat}
             delay={revealDelays.customChecks}
             highlightedSeverity={highlightedSeverity}
@@ -175,7 +174,7 @@ export const SafeShieldContent = ({
           )}
 
           {/* Safenet is the final check, including when the Pro rollout is off. */}
-          {!isSafePro && shouldShowContent && <safenet.SafenetChecksSection />}
+          {!isSafePro && shouldShowContent && <SafenetChecksSection />}
         </div>
 
         {showProSection && (
@@ -211,8 +210,7 @@ export const SafeShieldContent = ({
               )}
               {!hasProFeatures && !hasOwnTenderly && <TenderlySimulationLocked />}
 
-              {isSafenetEnabled &&
-                (hasProFeatures ? <safenet.SafenetChecksSection /> : <safenet.SafenetChecksSection locked />)}
+              {isSafenetEnabled && (hasProFeatures ? <SafenetChecksSection /> : <SafenetChecksSection locked />)}
             </div>
           </div>
         )}

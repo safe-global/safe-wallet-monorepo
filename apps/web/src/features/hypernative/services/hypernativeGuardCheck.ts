@@ -2,8 +2,8 @@ import { Interface, type FunctionFragment, type InterfaceAbi } from 'ethers'
 import type { JsonRpcProvider } from 'ethers'
 import memoize from 'lodash/memoize'
 import { logError, Errors } from '@/services/exceptions'
-import HypernativeGuardAbi from './HypernativeGuard.abi.json'
-import HypernativeGuardV2Abi from './HypernativeGuardV2.abi.json'
+import HypernativeGuardAbi from '../public/HypernativeGuard.abi.json'
+import HypernativeGuardV2Abi from '../public/HypernativeGuardV2.abi.json'
 
 /**
  * Array of all supported HypernativeGuard ABIs.

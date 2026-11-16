@@ -32,10 +32,11 @@ const MAINNET = '1'
 const POLYGON = '137'
 
 const mkSecurity = (isReady = true) =>
-  ({
-    $isReady: isReady,
-    scanKey: (address: string, chainId: string) => `${address}:${chainId}`,
-  }) as unknown as Parameters<typeof useReconciledSpaceSafes>[0]
+  isReady
+    ? ({
+        scanKey: (address: string, chainId: string) => `${address}:${chainId}`,
+      } as unknown as Parameters<typeof useReconciledSpaceSafes>[0])
+    : undefined
 
 const mkOverview = (address: string, chainId: string, fiatTotal = '1000', queued = 0) => ({
   address: { value: address },

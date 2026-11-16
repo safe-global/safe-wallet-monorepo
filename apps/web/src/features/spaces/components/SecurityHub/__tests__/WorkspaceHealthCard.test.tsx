@@ -1,21 +1,12 @@
 import { render, screen } from '@testing-library/react'
 import WorkspaceHealthCard from '../components/WorkspaceHealthCard/WorkspaceHealthCard'
-import { scanKey } from '@/features/security/data/scanners/utils'
-import type { ScanResult } from '@/features/security/types'
+import { scanKey } from '@/features/security/public/scanUtils'
+import type { ScanResult } from '@/features/security/public/types'
 import type { SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
-jest.mock('@/features/__core__/useLoadFeature', () => {
-  const securityFeatureImpl = require('@/features/security/feature').default
-  return {
-    ...jest.requireActual('@/features/__core__/useLoadFeature'),
-    useLoadFeature: () => ({
-      ...securityFeatureImpl,
-      $isReady: true,
-      $isDisabled: false,
-      $error: undefined,
-    }),
-  }
-})
+jest.mock('@/features/security/public/useSecurityServices', () => ({
+  useSecurityServices: () => jest.requireActual('@/features/security/public/securityServices').securityServices,
+}))
 
 const mkResult = (status: ScanResult['status'] = 'clear', severity: ScanResult['severity'] = 'Low'): ScanResult => ({
   status,

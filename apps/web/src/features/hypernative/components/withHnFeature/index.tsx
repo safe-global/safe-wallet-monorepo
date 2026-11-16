@@ -1,5 +1,5 @@
 import type { ComponentType, ReactElement } from 'react'
-import { useIsHypernativeFeature } from '../../hooks/useIsHypernativeFeature'
+import { useIsHypernativeFeature } from '../../public/useIsHypernativeFeature'
 
 /**
  * Higher-order component that checks if Hypernative features are enabled.

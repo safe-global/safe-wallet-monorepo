@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ComponentType } from 'react'
-import HnSignupFlow from '@/features/hypernative/components/HnSignupFlow/HnSignupFlow'
+import HnSignupFlow from '../../public/HnSignupFlow'
 import type { WithHnSignupFlowProps } from '@safe-global/views/features/hypernative/components/withHnSignupFlow/types'
 
 export type { WithHnSignupFlowProps } from '@safe-global/views/features/hypernative/components/withHnSignupFlow/types'

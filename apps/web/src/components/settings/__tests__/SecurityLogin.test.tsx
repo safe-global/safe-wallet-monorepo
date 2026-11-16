@@ -7,7 +7,6 @@ import * as useIsSafeOwnerHook from '@/hooks/useIsSafeOwner'
 import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
 import * as useIsOutreachSafeHook from '@/features/targeted-features/public/useIsOutreachSafe'
 import * as useWalletHook from '@/hooks/wallets/useWallet'
-import * as featureCore from '@/features/__core__/useLoadFeature'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 
 // Mock the hypernative hooks at their source modules so internal (relative-import) callers
@@ -16,25 +15,25 @@ const mockUseIsHypernativeFeature = jest.fn()
 const mockUseIsHypernativeGuard = jest.fn()
 const mockUseBannerStorage = jest.fn()
 
-jest.mock('@/features/hypernative/hooks/useIsHypernativeFeature', () => ({
-  ...jest.requireActual('@/features/hypernative/hooks/useIsHypernativeFeature'),
+jest.mock('@/features/hypernative/public/useIsHypernativeFeature', () => ({
+  ...jest.requireActual('@/features/hypernative/public/useIsHypernativeFeature'),
   useIsHypernativeFeature: () => mockUseIsHypernativeFeature(),
 }))
 
-jest.mock('@/features/hypernative/hooks/useIsHypernativeGuard', () => ({
-  ...jest.requireActual('@/features/hypernative/hooks/useIsHypernativeGuard'),
+jest.mock('@/features/hypernative/public/useIsHypernativeGuard', () => ({
+  ...jest.requireActual('@/features/hypernative/public/useIsHypernativeGuard'),
   useIsHypernativeGuard: () => mockUseIsHypernativeGuard(),
 }))
 
-jest.mock('@/features/hypernative/hooks/useBannerStorage', () => ({
-  ...jest.requireActual('@/features/hypernative/hooks/useBannerStorage'),
+jest.mock('@/features/hypernative/public/useBannerStorage', () => ({
+  ...jest.requireActual('@/features/hypernative/public/useBannerStorage'),
   useBannerStorage: (...args: unknown[]) => mockUseBannerStorage(...args),
 }))
 
 // Mock HnBannerForSettings with simulated HOC behavior
-jest.mock('@/features/hypernative/components/HnBanner', () => {
-  const actual = jest.requireActual('@/features/hypernative/components/HnBanner')
-  const { useBannerVisibility, BannerType } = jest.requireActual('@/features/hypernative/hooks/useBannerVisibility')
+jest.mock('@/features/hypernative/public/HnBanner', () => {
+  const actual = jest.requireActual('@/features/hypernative/public/HnBanner')
+  const { useBannerVisibility, BannerType } = jest.requireActual('@/features/hypernative/public/useBannerVisibility')
   return {
     ...actual,
     HnBannerForSettings: () => {
@@ -45,13 +44,11 @@ jest.mock('@/features/hypernative/components/HnBanner', () => {
   }
 })
 
-// Mock useLoadFeature to return HnActivatedSettingsBanner with simulated HOC behavior
-jest.mock('@/features/__core__/useLoadFeature', () => ({
-  ...jest.requireActual('@/features/__core__/useLoadFeature'),
-  useLoadFeature: jest.fn(),
+// The public banner renders the component below, which simulates the HOC behavior
+jest.mock('@/features/hypernative/public/HnActivatedSettingsBanner', () => ({
+  __esModule: true,
+  default: () => MockHnActivatedSettingsBanner(),
 }))
-
-const mockUseLoadFeature = featureCore.useLoadFeature as jest.Mock
 
 // Mock SecuritySettings to avoid rendering the full component
 jest.mock('../SecuritySettings', () => ({
@@ -82,13 +79,6 @@ describe('SecurityLogin', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-
-    // Setup useLoadFeature mock to return our mock component
-    mockUseLoadFeature.mockReturnValue({
-      $isDisabled: false,
-      $isReady: true,
-      HnActivatedSettingsBanner: MockHnActivatedSettingsBanner,
-    })
 
     // Default mocks - feature enabled, wallet connected, owner, sufficient balance, not targeted
     jest.spyOn(useChainsHooks, 'useHasFeature').mockReturnValue(false)

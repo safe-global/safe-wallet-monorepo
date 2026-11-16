@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { StoreDecorator } from '@/stories/storeDecorator'
-import HnSignupFlow from './HnSignupFlow'
+import HnSignupFlow from '../../public/HnSignupFlow'
 
 const meta = {
   component: HnSignupFlow,

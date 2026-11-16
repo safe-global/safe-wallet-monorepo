@@ -1,3 +1,5 @@
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
 import { useMemo, type ReactElement } from 'react'
 import {
   type ThreatAnalysisResults,
@@ -10,12 +12,11 @@ import { AnalysisGroupCard } from '../AnalysisGroupCard/AnalysisGroupCard'
 import { hasThreatCardResults } from '../../utils/hasThreatCardResults'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
-import { HypernativeFeature } from '@/features/hypernative'
-import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
-import { HnViewMoreOnHypernativeRow } from '@/features/hypernative/components/HnViewMoreOnHypernativeRow'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import type { HypernativeAuthStatus } from '@/features/hypernative/public/useHypernativeOAuth'
+import { HnViewMoreOnHypernativeRow } from '@/features/hypernative/public/HnViewMoreOnHypernativeRow'
 import { AnalysisGroupCardDisabled } from '@safe-global/views/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled'
-import { useSafeShieldAssessmentUrl } from '@/features/hypernative/hooks/useSafeShieldAssessmentUrl'
+import { useSafeShieldAssessmentUrl } from '@/features/hypernative/public/useSafeShieldAssessmentUrl'
+import HnAnalysisGroupCard from '@/features/hypernative/public/HnAnalysisGroupCard'
 
 const VISIBLE_CAP = 3
 
@@ -37,7 +38,7 @@ export const ThreatAnalysis = ({
   highlightedSeverity,
   hypernativeAuth,
 }: ThreatAnalysisProps): ReactElement | null => {
-  const hn = useLoadFeature(HypernativeFeature)
+  const isHypernativeEnabled = useHasFeature(FEATURES.HYPERNATIVE) === true
   const assessmentUrl = useSafeShieldAssessmentUrl()
   const requiresHypernativeLogin =
     hypernativeAuth !== undefined && (!hypernativeAuth.isAuthenticated || hypernativeAuth.isTokenExpired)
@@ -63,14 +64,14 @@ export const ThreatAnalysis = ({
     return null
   }
 
-  const isHnPath = Boolean(hypernativeAuth && hn.$isReady)
+  const isHnPath = Boolean(hypernativeAuth && isHypernativeEnabled)
 
   if (isHnPath) {
     const overflowRow =
       overflow > 0 ? <HnViewMoreOnHypernativeRow overflowCount={overflow} assessmentUrl={assessmentUrl} /> : undefined
 
     return (
-      <hn.HnAnalysisGroupCard
+      <HnAnalysisGroupCard
         data-testid="threat-analysis-group-card"
         data={threatData}
         delay={delay}

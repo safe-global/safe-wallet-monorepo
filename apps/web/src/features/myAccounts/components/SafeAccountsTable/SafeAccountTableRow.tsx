@@ -8,7 +8,7 @@ import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/saf
 import { useRowOverviews } from './useRowOverviews'
 import { GripVertical } from 'lucide-react'
 import { SimilarityWarningIcon } from './SimilarityBand'
-import type { SimilarWarning } from '@/features/address-poisoning/utils/crossListClusters'
+import type { SimilarWarning } from '@/features/address-poisoning/public/crossListClusters'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import SafeInfoDisplay from '@/components/common/AccountRow/SafeInfoDisplay'
 import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'

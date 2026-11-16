@@ -12,7 +12,7 @@ import { getSafeId } from '@safe-global/views/features/spaces/components/SelectS
 import { applySafeSelectionToggle, getSelectedLeafKeys } from '../SelectSafesOnboarding/utils/selection'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
-import useSimilarityClusters from '@/features/address-poisoning/hooks/useSimilarityClusters'
+import useSimilarityClusters from '@/features/address-poisoning/public/useSimilarityClusters'
 import {
   ADDRESS_BOOK_UNAVAILABLE,
   usePrepareWorkspaceSafeNames,

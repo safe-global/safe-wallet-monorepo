@@ -1,5 +1,5 @@
 import { factoryValidationScanner } from '../factoryValidation'
-import { createMockContext } from '../test-helpers'
+import { createMockContext } from '../../../public/test-helpers'
 
 describe('factoryValidationScanner', () => {
   it('returns inconclusive when creation data has not loaded yet', async () => {

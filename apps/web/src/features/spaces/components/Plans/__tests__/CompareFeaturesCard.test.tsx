@@ -7,7 +7,7 @@ jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),
 }))
-jest.mock('@/features/hypernative/components/HnSignupFlow/HnSignupFlow', () => ({
+jest.mock('@/features/hypernative/public/HnSignupFlow', () => ({
   __esModule: true,
   default: ({ open }: { open: boolean }) => (open ? <div data-testid="hn-signup-flow" /> : null),
 }))

@@ -5,7 +5,7 @@ import {
   type AllowlistRecipient,
   type PolicyTokenInfo,
 } from '@safe-global/views/features/spaces/components/Policies/types'
-import { getPolicyGuardAddress } from '@/features/policy-guard/services/policyEngineDeployments'
+import { getPolicyGuardAddress } from '@/features/policy-guard/public/policyEngineDeployments'
 import {
   mockErc20TransferDto,
   mockNativeTransferDto,

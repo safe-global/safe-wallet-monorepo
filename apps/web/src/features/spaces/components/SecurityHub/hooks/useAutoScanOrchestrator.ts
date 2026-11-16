@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react'
-import type { ScanResult } from '@/features/security/types'
-import type { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import type { SecurityContract } from '@/features/security/contract'
+import type { ScanResult } from '@/features/security/public/types'
+import type { SecurityServices } from '@/features/security/public/securityServices'
 import useAutoScan, { type AutoScanServices, type AutoScanState } from '../../../hooks/useAutoScan'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 import type {
@@ -10,7 +9,7 @@ import type {
   SpaceSafeEntry,
 } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
-type SecurityHandle = ReturnType<typeof useLoadFeature<SecurityContract>>
+type SecurityHandle = SecurityServices | undefined
 
 export type UseAutoScanOrchestratorParams = {
   security: SecurityHandle
@@ -38,7 +37,7 @@ const useAutoScanOrchestrator = ({
 }: UseAutoScanOrchestratorParams): AutoScanState => {
   const services = useMemo<AutoScanServices | null>(
     () =>
-      security.$isReady
+      security
         ? {
             scanners: security.scanners,
             scanKey: security.scanKey,
@@ -46,7 +45,7 @@ const useAutoScanOrchestrator = ({
             withScannerTimeout: security.withScannerTimeout,
           }
         : null,
-    [security.$isReady, security.scanners, security.scanKey, security.setCachedScan, security.withScannerTimeout],
+    [security],
   )
 
   const autoScan = useAutoScan(deployedEntries, safes, overviewMap, services, onScanComplete)
@@ -57,7 +56,7 @@ const useAutoScanOrchestrator = ({
   const lastScannedKeysRef = useRef<string>('')
 
   useEffect(() => {
-    if (isLoadingSpacesSafes || safes.length === 0 || !security.$isReady) return
+    if (isLoadingSpacesSafes || safes.length === 0 || !security) return
 
     // Page stays mounted across sidebar space switches. Force a fresh scan when the
     // space changes so two spaces with overlapping Safes still trigger a rescan.
@@ -74,15 +73,7 @@ const useAutoScanOrchestrator = ({
       lastScannedKeysRef.current = currentKeys
       startScan()
     }
-  }, [
-    isLoadingSpacesSafes,
-    safes.length,
-    deployedEntries,
-    startScan,
-    security.$isReady,
-    security.scanKey,
-    currentSpaceId,
-  ])
+  }, [isLoadingSpacesSafes, safes.length, deployedEntries, startScan, security, currentSpaceId])
 
   return autoScan
 }

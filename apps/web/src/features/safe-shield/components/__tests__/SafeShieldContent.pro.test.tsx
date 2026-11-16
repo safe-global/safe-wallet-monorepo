@@ -7,7 +7,7 @@ import {
 } from '@safe-global/utils/features/safe-shield/builders'
 import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
+import type { HypernativeAuthStatus } from '@/features/hypernative/public/useHypernativeOAuth'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 import { SafeShieldContent } from '../SafeShieldContent'
 
