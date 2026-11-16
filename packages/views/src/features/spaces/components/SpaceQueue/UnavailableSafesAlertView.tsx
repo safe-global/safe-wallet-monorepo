@@ -45,10 +45,10 @@ const UnavailableSafesAlertView = ({
       <AlertTitle>{title}</AlertTitle>
       <AlertDescription>
         <p>
-          Their pending transactions aren&apos;t shown.{' '}
-          {isOverLimit
-            ? `The pending queue covers up to ${maxSafes} Safe accounts, so the others in this Workspace aren't included.`
-            : 'They may not be deployed on that network yet, or the network may be unreachable.'}
+          Their pending transactions aren&apos;t shown. They may not be deployed on that network yet, or the network may
+          be unreachable.
+          {isOverLimit &&
+            ` The pending queue covers up to ${maxSafes} Safe accounts, so the others in this Workspace aren't included.`}
         </p>
         <Collapsible open={open} onOpenChange={setOpen}>
           <CollapsibleTrigger
