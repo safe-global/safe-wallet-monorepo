@@ -1,3 +1,20 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-settings.json"
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Edit(/packages/store/src/gateway/AUTO_GENERATED/**)",
+      "Edit(/packages/utils/src/types/contracts/**)",
+      "Edit(/apps/web/src/styles/vars.css)",
+      "Edit(/config/test/msw/fixtures/portfolio/**)",
+      "Edit(/config/test/msw/fixtures/balances/**)",
+      "Edit(/config/test/msw/fixtures/positions/**)",
+      "Edit(/config/test/msw/fixtures/chains/**)",
+      "Edit(/config/test/msw/fixtures/transactions/**)",
+      "Edit(/config/test/msw/fixtures/safes/ef-safe.json)",
+      "Edit(/config/test/msw/fixtures/safes/vitalik.json)",
+      "Edit(/config/test/msw/fixtures/safes/spam-tokens.json)",
+      "Edit(/config/test/msw/fixtures/safes/safe-token-holder.json)",
+      "Edit(/apps/web/.storybook/COVERAGE.md)"
+    ]
+  }
 }

@@ -24,7 +24,7 @@ test.describe('Replace a queued transaction', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const [recipient, newRecipient] = [Wallet.createRandom().address, Wallet.createRandom().address]
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
     const original = await seedQueuedTransfer(safe, { nonce: 0, recipient, amount: AMOUNT })
 
     const queue = new TxQueuePage(safePage)

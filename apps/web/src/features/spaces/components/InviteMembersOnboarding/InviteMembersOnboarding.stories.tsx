@@ -8,7 +8,7 @@ import InviteMembersOnboarding from '.'
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
+  authenticated: true,
   pathname: '/welcome/invite-members',
   query: { spaceId: MOCK_SPACE_ID },
   shadcn: true,

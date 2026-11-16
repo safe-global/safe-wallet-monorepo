@@ -17,8 +17,10 @@ jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
 
-const { history } = transactionFixtures
-const lastPage: TransactionItemPage = { ...history, next: null, results: history.results.slice(-6) }
+// Two short, disjoint slices of the recorded page keep the render well inside the test timeout
+const { history: recordedHistory } = transactionFixtures
+const history: TransactionItemPage = { ...recordedHistory, results: recordedHistory.results.slice(0, 8) }
+const lastPage: TransactionItemPage = { ...recordedHistory, next: null, results: recordedHistory.results.slice(-6) }
 const countTransactions = (page: TransactionItemPage) => page.results.filter(isTransactionListItem).length
 
 const historySafe = extendedSafeInfoBuilder()

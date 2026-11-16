@@ -37,7 +37,7 @@ export function ReviewAndExecuteContainer() {
   const { isBiometricsEnabled } = useBiometrics()
 
   const { requiresRelay, isRelayEnabled, isRelayAvailable, isLoadingRelays } = useRequiresRelay(txDetails)
-  const isGtfEnabled = chain ? hasFeature(chain, FEATURES.GTF) : false
+  const isPayFromSafeEnabled = chain ? hasFeature(chain, FEATURES.GTF) : false
   // Clear estimated fee values when screen is mounted
   useClearEstimatedFeeOnMount()
 
@@ -143,7 +143,7 @@ export function ReviewAndExecuteContainer() {
           activeSigner={activeSigner}
           executionMethod={executionMethod}
           isPaidFromSafe={requiresRelay}
-          isGtfEnabled={isGtfEnabled}
+          isPayFromSafeEnabled={isPayFromSafeEnabled}
           detailedExecutionInfo={
             isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)
               ? txDetails.detailedExecutionInfo

@@ -6,13 +6,18 @@ inputs:
   prod: # id of input
     description: 'Production build flag'
     required: false
+  cache:
+    description: "Restore and save the Next.js build cache; set to 'false' in jobs that hold deploy or publish credentials"
+    required: false
+    default: 'true'
 
 runs:
   using: 'composite'
 
   steps:
-    - name: Restore Next.js Build Cache & Cypress cache
+    - name: Restore Next.js Build Cache
       id: restore-nc
+      if: inputs.cache == 'true'
       uses: $/.github/actions/cache-deps
       with:
         mode: restore-nc
@@ -56,16 +61,17 @@ runs:
         COMMIT_SHA: ${{ github.sha }}
     - name: Generate SRI for static scripts
       shell: bash
-      # Skip SRI for Cypress test builds (NODE_ENV=cypress)
+      # Skip SRI for E2E test builds (NODE_ENV=cypress, the isolated Playwright stack)
       run: |
         if [ "$NODE_ENV" != "cypress" ]; then
           yarn workspace @safe-global/web integrity
         else
-          echo "Skipping SRI generation for Cypress test environment"
+          echo "Skipping SRI generation for the E2E test build"
         fi
 
-    - name: Save Next.js Build Cache & Cypress cache
-      if: steps.restore-nc.outputs.cache-hit-nc != 'true'
+    # A pull_request run saves to its own scope only; pull_request_target, workflow_run and issue_comment never save.
+    - name: Save Next.js Build Cache
+      if: ${{ inputs.cache == 'true' && contains(fromJSON('["pull_request", "push", "schedule", "workflow_dispatch"]'), github.event_name) && steps.restore-nc.outputs.cache-hit-nc != 'true' }}
       uses: $/.github/actions/cache-deps
       with:
         mode: save-nc

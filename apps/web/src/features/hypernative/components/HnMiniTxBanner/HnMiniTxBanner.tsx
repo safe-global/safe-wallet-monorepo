@@ -1,7 +1,6 @@
 import { X as CloseIcon } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import Image from 'next/image'
 import Track from '@/components/common/Track'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import css from './styles.module.css'
@@ -36,7 +35,7 @@ export const HnMiniTxBanner = ({ onHnSignupClick, onDismiss }: HnMiniTxBannerPro
     >
       <div className={css.banner} onClick={handleClick}>
         <div className={`flex flex-row items-center gap-3 ${css.bannerStack}`}>
-          <Image
+          <img
             className={css.bannerImage}
             src="/images/hypernative/guardian-badge.svg"
             alt="Guardian badge"

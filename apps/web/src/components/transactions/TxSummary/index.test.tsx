@@ -14,6 +14,10 @@ import TxSummary from '@/components/transactions/TxSummary/index'
 import * as pending from '@/hooks/useIsPending'
 import { render } from '@/tests/test-utils'
 
+jest.mock('@/features/hypernative/hooks/useShowHypernativeAssessment', () => ({
+  useShowHypernativeAssessment: jest.fn(() => false),
+}))
+
 const mockTransaction: MultisigTransaction = {
   type: TransactionListItemType.TRANSACTION,
   transaction: {

@@ -1,7 +1,7 @@
 name: Seed Yarn caches
 
-# Pull requests only restore the Yarn caches, so this workflow saves them on dev for every runner type that
-# pull requests use. The daily run puts back a cache that eviction removed.
+# Pull requests only restore the Yarn caches, so this workflow saves them on dev for the runner that pull
+# requests use. The daily run puts back a cache that eviction removed.
 on:
   push:
     branches:
@@ -27,12 +27,7 @@ concurrency:
 
 jobs:
   save:
-    name: save ${{ matrix.runner }}
-    strategy:
-      fail-fast: false
-      matrix:
-        runner: [ubuntu-latest, ubuntu-24.04-arm]
-    runs-on: ${{ matrix.runner }}
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7.0.1

@@ -2,19 +2,11 @@ import unusedImports from 'eslint-plugin-unused-imports'
 import typescriptEslint from '@typescript-eslint/eslint-plugin'
 import noOnlyTests from 'eslint-plugin-no-only-tests'
 import tsParser from '@typescript-eslint/parser'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-import js from '@eslint/js'
-import { FlatCompat } from '@eslint/eslintrc'
+import next from 'eslint-config-next'
+import prettier from 'eslint-config-prettier'
+import storybook from 'eslint-plugin-storybook'
 import { designSystemSyntaxRules } from '../../packages/views/eslint-design-system.mjs'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-})
+import noExplicitAny from '../../config/eslint/no-explicit-any.mjs'
 
 // A Safe link without `spaceId` opens the Safe outside the Workspace of the current page. Matches a
 // `query` property or variable that holds such an object, directly or in a conditional.
@@ -31,22 +23,39 @@ const safeLinkWithoutSpaceIdRules = [
     'A Safe link must keep `spaceId`: use `useSafeLinkQuery()`, or wrap the query in `withSpaceId(query, spaceId)`. If the link must leave the Workspace, add `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
 }))
 
-export default [
+// Faker continues one shared sequence, so story data is the same in every run only if the file seeds it first
+const seedFakerInStoryData = {
+  selector:
+    "Program:has(ImportDeclaration[source.value=/faker|builders/]):not(:has(CallExpression[callee.object.name='faker'][callee.property.name='seed']))",
+  message: 'Story data must be the same in every run: call faker.seed(<number>) after the imports.',
+}
+
+const noTestDataInStories = {
+  selector: 'ImportDeclaration[source.value=/\\.testData$/]',
+  message: 'testData files may be random and are for tests only. Move the data a story needs to a .storyData.ts file.',
+}
+
+const storyDataRules = [seedFakerInStoryData, noTestDataInStories]
+
+const config = [
   {
     ignores: [
       '**/node_modules/',
       '**/.next/',
       '**/.github/',
-      '**/cypress/',
-      '**/cypress.config.js',
       '**/src/types/contracts/',
       '**/.storybook/test-runner.mjs',
       '**/.storybook/mocks/*.js',
       '**/public/mockServiceWorker.js',
+      '**/public/step-up-complete.js',
     ],
   },
-  ...compat.extends('next', 'prettier', 'plugin:storybook/recommended'),
+  ...next,
+  prettier,
+  ...storybook.configs['flat/recommended'],
   {
+    // Same files as eslint-config-next, which registers the react-hooks plugin only for these.
+    files: ['**/*.{js,jsx,mjs,ts,tsx,mts,cts}'],
     plugins: {
       'unused-imports': unusedImports,
       '@typescript-eslint': typescriptEslint,
@@ -78,6 +87,7 @@ export default [
         {
           varsIgnorePattern: '^_',
           ignoreRestSiblings: true,
+          caughtErrors: 'none',
         },
       ],
 
@@ -87,6 +97,21 @@ export default [
           additionalHooks: 'useAsync',
         },
       ],
+      // React Compiler rules from eslint-plugin-react-hooks 7. The app does not use the compiler yet.
+      'react-hooks/config': 'off',
+      'react-hooks/error-boundaries': 'off',
+      'react-hooks/gating': 'off',
+      'react-hooks/globals': 'off',
+      'react-hooks/immutability': 'off',
+      'react-hooks/incompatible-library': 'off',
+      'react-hooks/preserve-manual-memoization': 'off',
+      'react-hooks/purity': 'off',
+      'react-hooks/refs': 'off',
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/set-state-in-render': 'off',
+      'react-hooks/static-components': 'off',
+      'react-hooks/unsupported-syntax': 'off',
+      'react-hooks/use-memo': 'off',
 
       'no-only-tests/no-only-tests': 'error',
       'object-shorthand': ['error', 'properties'],
@@ -117,6 +142,15 @@ export default [
       'no-restricted-imports': [
         'error',
         {
+          paths: [
+            { name: 'next', importNames: ['NextPage'], message: 'Type a page as a plain function component.' },
+            { name: 'next/dynamic', message: 'Import dynamic from @/utils/dynamic, which does not depend on Next.' },
+            { name: 'next/app', message: 'Type the app props yourself, as pages/_app.tsx does.' },
+            {
+              name: 'next/image',
+              message: 'Use a plain <img>. Images are served unoptimized, so next/image adds nothing.',
+            },
+          ],
           patterns: [
             // Block deep imports into feature components (defeats lazy loading)
             {
@@ -169,11 +203,35 @@ export default [
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules],
     },
   },
+  // The isolated-stack mocks run in Node with their own compiler settings, which the main tsconfig excludes.
+  {
+    files: ['e2e/environment/infra/mocks/*.ts'],
+    languageOptions: { parserOptions: { project: ['./e2e/environment/infra/mocks/tsconfig.json'] } },
+  },
+  // No tsconfig includes JavaScript, so these files get only the rules that need no type information.
+  {
+    files: ['**/*.{js,mjs,cjs}'],
+    languageOptions: { parserOptions: { project: null } },
+    rules: { '@typescript-eslint/await-thenable': 'off' },
+  },
+  noExplicitAny,
   // Tests build router mocks with a bare `safe` query, so only the design-system guards apply there.
   {
     files: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**', '**/*.stories.tsx', 'src/tests/**', 'src/stories/**'],
     rules: {
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules],
+    },
+  },
+  {
+    files: ['**/*.stories.tsx', '**/*.stories.ts', 'src/stories/**'],
+    rules: {
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...storyDataRules],
+    },
+  },
+  {
+    files: ['**/*.storyData.ts'],
+    rules: {
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules, ...storyDataRules],
     },
   },
   // Override for story files: allow type-only imports from @storybook/react
@@ -185,3 +243,5 @@ export default [
     },
   },
 ]
+
+export default config

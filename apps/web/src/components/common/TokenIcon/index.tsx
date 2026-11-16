@@ -1,5 +1,5 @@
 import { useMemo, type ReactElement } from 'react'
-import IframeIcon from '../IframeIcon'
+import IframeIcon from '@/components/common/IframeIcon'
 import css from './styles.module.css'
 import { upgradeCoinGeckoThumbToQuality } from '@safe-global/utils/utils/image'
 import classNames from 'classnames'

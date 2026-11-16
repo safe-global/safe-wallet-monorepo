@@ -45,6 +45,7 @@ describe('EthHashInfo', () => {
     jest.spyOn(useAllAddressBooks, 'useAddressBookItem').mockImplementation(() => ({
       name: 'Address book name',
       chainIds: [MOCK_CHAIN_ID],
+      tagIds: [],
       address: MOCK_SAFE_ADDRESS,
       createdBy: '0x123',
       createdByUserId: 0,

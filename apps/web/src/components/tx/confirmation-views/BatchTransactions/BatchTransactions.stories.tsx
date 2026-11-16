@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import BatchTransactions from './index'
-import { mockedDraftBatch } from './mockData'
+import { mockedDraftBatch } from './BatchTransactions.storyData'
 
 /**
  * `BatchTransactions` is the confirmation view for a queued draft batch. It decodes the

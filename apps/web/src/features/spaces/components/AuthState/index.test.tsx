@@ -4,7 +4,6 @@ import { SPACE_REFRESH_OPTIONS } from '../../hooks/refreshOptions'
 
 const mockUseSpacesGetOneV1Query = jest.fn()
 const mockUseUsersGetWithWalletsV1Query = jest.fn()
-const mockUseHasFeature = jest.fn()
 const mockDispatch = jest.fn()
 const mockReplace = jest.fn()
 const mockIsUnauthorized = jest.fn()
@@ -48,10 +47,6 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
   useUsersGetWithWalletsV1Query: (...args: unknown[]) => mockUseUsersGetWithWalletsV1Query(...args),
 }))
 
-jest.mock('@/hooks/useChains', () => ({
-  useHasFeature: () => mockUseHasFeature(),
-}))
-
 jest.mock('../UnauthorizedState', () => ({
   __esModule: true,
   default: () => <div data-testid="unauthorized" />,
@@ -91,7 +86,6 @@ describe('AuthState', () => {
     mockIsSessionCheckPending = false
     mockPathname = '/spaces/security'
     mockIsUnauthorized.mockReturnValue(false)
-    mockUseHasFeature.mockReturnValue(true)
     mockUseSpacesGetOneV1Query.mockReturnValue({
       currentData: { uuid: 'uuid-1', members: [{ user: { id: 'u1' }, status: 'ACTIVE' }] },
       error: undefined,

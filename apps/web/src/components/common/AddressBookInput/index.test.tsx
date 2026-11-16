@@ -26,6 +26,7 @@ const spaceContactBuilder = (overrides: Partial<SpaceAddressBookItemDto> = {}): 
   name: 'Server Contact',
   address: checksumAddress(faker.finance.ethereumAddress()),
   chainIds: ['4'],
+  tagIds: [],
   createdBy: '',
   createdByUserId: 0,
   lastUpdatedBy: '',
@@ -174,19 +175,19 @@ describe('AddressBookInput', () => {
     expect(input).toHaveAttribute('aria-expanded', 'true')
   })
 
-  it('should not reopen the list when the form is reset programmatically', () => {
+  it('should not reopen the list when the form is reset programmatically', async () => {
     const address = checksumAddress(faker.finance.ethereumAddress())
     const utils = render(<TestFormWithClear />, {
       initialReduxState: { addressBook: { [mockChain.chainId]: { [address]: 'Tim Testermann' } } },
     })
     const input = utils.getByLabelText('Recipient address', { exact: false }) as HTMLInputElement
 
-    act(() => {
+    await act(async () => {
       fireEvent.input(input, { target: { value: address.slice(30) } })
     })
     expect(input).toHaveAttribute('aria-expanded', 'true')
 
-    act(() => {
+    await act(async () => {
       fireEvent.pointerDown(utils.getByText('Clear'))
       fireEvent.click(utils.getByText('Clear'))
     })
@@ -195,14 +196,14 @@ describe('AddressBookInput', () => {
     expect(input).toHaveAttribute('aria-expanded', 'false')
   })
 
-  it('should open the suggestion list while typing, without clicking the field', () => {
+  it('should open the suggestion list while typing, without clicking the field', async () => {
     const address = checksumAddress(faker.finance.ethereumAddress())
     const { input, utils } = setup('', { [address]: 'Tim Testermann' })
 
     expect(input).toHaveAttribute('aria-expanded', 'false')
 
     // Mirrors the e2e flow: type only the tail of a known address and never click the input.
-    act(() => {
+    await act(async () => {
       fireEvent.input(input, { target: { value: address.slice(30) } })
     })
 
@@ -312,7 +313,7 @@ describe('AddressBookInput', () => {
     const { input, utils } = setup('', {}, undefined, true)
 
     const newAddress = checksumAddress(faker.finance.ethereumAddress())
-    act(() => {
+    await act(async () => {
       fireEvent.change(input, { target: { value: newAddress } })
       jest.advanceTimersByTime(1000)
     })
@@ -326,7 +327,7 @@ describe('AddressBookInput', () => {
     })
 
     const nameInput = utils.getByLabelText('Name', { exact: false })
-    act(() => {
+    await act(async () => {
       fireEvent.change(nameInput, { target: { value: 'Tim Testermann' } })
       fireEvent.submit(nameInput)
     })
@@ -338,7 +339,7 @@ describe('AddressBookInput', () => {
     const { input, utils } = setup('', {}, undefined, false)
 
     const newAddress = checksumAddress(faker.finance.ethereumAddress())
-    act(() => {
+    await act(async () => {
       fireEvent.change(input, { target: { value: newAddress } })
       jest.advanceTimersByTime(1000)
     })
@@ -361,7 +362,7 @@ describe('AddressBookInput', () => {
       })
 
     it('should say it is a signer instead of an unknown address', async () => {
-      const utils = renderWithSafeSigner({})
+      const utils = await act(async () => renderWithSafeSigner({}))
 
       await waitFor(() => expect(utils.getByText('This is a signer of this Safe', { exact: false })).toBeDefined())
       expect(utils.queryByText('This is an unknown address', { exact: false })).toBeNull()
@@ -369,7 +370,7 @@ describe('AddressBookInput', () => {
     })
 
     it('should show no hint when the signer is already in the address book', async () => {
-      const utils = renderWithSafeSigner({ [signer]: 'Alice' })
+      const utils = await act(async () => renderWithSafeSigner({ [signer]: 'Alice' }))
 
       await waitFor(() => expect(utils.getByText('Alice', { exact: false })).toBeDefined())
       expect(utils.queryByText('This is a signer of this Safe', { exact: false })).toBeNull()
@@ -499,12 +500,12 @@ describe('AddressBookInput', () => {
       const address = checksumAddress(faker.finance.ethereumAddress())
       const { input } = setup('', { [address]: 'Tim Testermann' })
 
-      act(() => {
+      await act(async () => {
         fireEvent.input(input, { target: { value: 'tim' } })
       })
       expect(input).toHaveAttribute('aria-expanded', 'true')
 
-      act(() => {
+      await act(async () => {
         fireEvent.mouseDown(input)
       })
       expect(input).toHaveAttribute('aria-expanded', 'true')
@@ -514,12 +515,12 @@ describe('AddressBookInput', () => {
       const address = checksumAddress(faker.finance.ethereumAddress())
       const { input } = setup('', { [address]: 'Tim Testermann' })
 
-      act(() => {
+      await act(async () => {
         fireEvent.input(input, { target: { value: address.slice(30).toLowerCase() } })
       })
       expect(input).toHaveAttribute('aria-expanded', 'true')
 
-      act(() => {
+      await act(async () => {
         fireEvent.mouseDown(input)
       })
       expect(input).toHaveAttribute('aria-expanded', 'true')
@@ -560,14 +561,14 @@ describe('AddressBookInput', () => {
    * the recipient address, which is exactly what the address book exists to avoid.
    */
   describe('editing a saved contact', () => {
-    it('offers every contact again when the chip is clicked', () => {
+    it('offers every contact again when the chip is clicked', async () => {
       const alice = checksumAddress(faker.finance.ethereumAddress())
       const bob = checksumAddress(faker.finance.ethereumAddress())
       const { input, utils } = setup(alice, { [alice]: 'Alice', [bob]: 'Bob' })
 
       expect(utils.getByTestId('address-book-recipient')).toBeInTheDocument()
 
-      act(() => {
+      await act(async () => {
         fireEvent.click(utils.getByRole('button', { name: /Alice/ }))
       })
 
@@ -579,12 +580,12 @@ describe('AddressBookInput', () => {
       expect(within(listbox).getByText('Bob')).toBeInTheDocument()
     })
 
-    it('does not suggest contacts for a complete address that is not saved', () => {
+    it('does not suggest contacts for a complete address that is not saved', async () => {
       const alice = checksumAddress(faker.finance.ethereumAddress())
       const unknown = checksumAddress(faker.finance.ethereumAddress())
       const { input, utils } = setup(unknown, { [alice]: 'Alice' })
 
-      act(() => {
+      await act(async () => {
         fireEvent.mouseDown(input)
         fireEvent.mouseUp(input)
       })
@@ -602,7 +603,7 @@ describe('AddressBookInput', () => {
     }
 
     const openListWithMouse = async (utils: ReturnType<typeof setup>['utils'], input: HTMLInputElement) => {
-      act(() => {
+      await act(async () => {
         fireEvent.mouseDown(input)
         fireEvent.mouseUp(input)
       })
@@ -677,7 +678,7 @@ describe('AddressBookInput', () => {
       const { addressBook } = twoContacts()
       const { input, utils } = setup('', addressBook)
 
-      act(() => {
+      await act(async () => {
         fireEvent.keyDown(input, { key: 'ArrowDown' })
       })
       await waitFor(() => expect(utils.getByRole('listbox')).toBeInTheDocument())
@@ -685,7 +686,7 @@ describe('AddressBookInput', () => {
       const activeAddress = activeOption(input)?.textContent?.match(/0x[a-fA-F0-9]{40}/)?.[0]
       expect(activeAddress).toBeDefined()
 
-      act(() => {
+      await act(async () => {
         fireEvent.keyDown(input, { key: 'Enter' })
         jest.advanceTimersByTime(1000)
       })
@@ -700,12 +701,12 @@ describe('AddressBookInput', () => {
       const { input, utils } = setup('', addressBook)
       utils.getByText('Submit').closest('form')?.addEventListener('submit', onSubmit)
 
-      act(() => {
+      await act(async () => {
         fireEvent.keyDown(input, { key: 'ArrowDown' })
       })
       await waitFor(() => expect(utils.getByRole('listbox')).toBeInTheDocument())
 
-      act(() => {
+      await act(async () => {
         fireEvent.keyDown(input, { key: 'Enter' })
       })
 
@@ -723,13 +724,13 @@ describe('AddressBookInput', () => {
 
       const option = utils.getAllByTestId('address-item')[0]
 
-      act(() => {
+      await act(async () => {
         fireEvent.pointerDown(option)
       })
 
       expect(utils.queryByRole('listbox')).toBeInTheDocument()
 
-      act(() => {
+      await act(async () => {
         fireEvent.click(option)
       })
 

@@ -1,10 +1,9 @@
 import { useEffect } from 'react'
-import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { AppRoutes } from '@/config/routes'
 import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
 
-const IndexPage: NextPage = () => {
+const IndexPage = () => {
   const router = useRouter()
   const { chain } = router.query
 

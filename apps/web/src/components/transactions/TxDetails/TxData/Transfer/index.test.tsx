@@ -25,6 +25,16 @@ jest.mock('@/hooks/useChains', () => ({
   }),
 }))
 
+jest.mock('@/components/common/NamedAddressInfo', () => ({
+  __esModule: true,
+  get useAddressName() {
+    return jest.requireActual('@/components/common/NamedAddressInfo').useAddressName
+  },
+  get default() {
+    return jest.requireActual('@/components/common/EthHashInfo').default
+  },
+}))
+
 const addr = (): `0x${string}` => faker.finance.ethereumAddress() as `0x${string}`
 const useTransferFiatValueSpy = jest.spyOn(useTransferFiatValueModule, 'default')
 

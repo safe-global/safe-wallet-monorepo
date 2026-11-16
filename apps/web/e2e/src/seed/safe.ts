@@ -17,7 +17,7 @@ export type SeededSafe = {
   address: string
   /** The `sep:0x…` form that wallet URLs take */
   prefixedAddress: string
-  /** Signs and proposes as the Safe's first owner that is a journey owner, or as OWNER_4 when it has none */
+  /** Signs and proposes as the Safe's first owner that is a journey owner, or as Alice when it has none */
   context: Awaited<ReturnType<typeof openSafe>>
 }
 
@@ -34,25 +34,28 @@ export type SafeSetup = {
   safeVersion?: '1.4.1' | '1.5.0'
   /** Deploys it as the wallet creates a Safe for several networks: on the L1 singleton, with SafeToL2Setup */
   multichain?: boolean
+  /** `false` keeps it out of the user's accounts, so Safe Shield asks to confirm the risk of an unknown Safe */
+  inAccounts?: boolean
 }
 
-/** Deploys a Safe with 1 ETH, waits until CGW serves it, and names it in the test report. */
+/** Deploys a Safe with 1 ETH, waits until CGW serves it, puts it in the user's accounts and names it in the report. */
 export async function seedSafe(
   journey: Journey,
-  { owners, threshold, safeVersion, multichain }: SafeSetup,
+  { owners, threshold, safeVersion, multichain, inAccounts = true }: SafeSetup,
 ): Promise<SeededSafe> {
   const { env } = journey
   const ownerAddresses = owners.map((owner) =>
     typeof owner === 'string' ? journey.owners[owner].address : owner.address,
   )
   const address = await createSafeAddress(env, journey.owners, { threshold, ownerAddresses, safeVersion, multichain })
-  const signer = owners.find((owner): owner is OwnerName => typeof owner === 'string') ?? 'owner4'
+  const signer = owners.find((owner): owner is OwnerName => typeof owner === 'string') ?? 'alice'
   const safe = {
     address,
     prefixedAddress: `${NETWORK_PREFIXES.sepolia}:${address}`,
     context: await openSafe(env, journey.owners[signer], address),
   }
   journey.recordSafe(safe)
+  if (inAccounts) await journey.addToAccounts(safe)
   return safe
 }
 
@@ -111,8 +114,8 @@ type NestedSafeSetup = {
 }
 
 /**
- * Deploys a parent Safe and a child Safe that the parent owns. Waits until CGW lists the parent among OWNER_4's
- * Safes, which makes an OWNER_4 of the parent a nested owner of the child.
+ * Deploys a parent Safe and a child Safe that the parent owns. Waits until CGW lists the parent among Alice's
+ * Safes, which makes an Alice of the parent a nested owner of the child.
  */
 export async function seedNestedSafe(
   journey: Journey,
@@ -126,7 +129,7 @@ export async function seedNestedSafe(
   const { env, chainId } = parent.context
   await waitUntil(
     env,
-    `${env.SAFE_CGW_BASE_URL}/v1/chains/${chainId}/owners/${journey.owners.owner4.address}/safes`,
+    `${env.SAFE_CGW_BASE_URL}/v1/chains/${chainId}/owners/${journey.owners.alice.address}/safes`,
     (result: OwnedSafes) => result.safes.includes(parent.address),
   )
   return { parent, child }

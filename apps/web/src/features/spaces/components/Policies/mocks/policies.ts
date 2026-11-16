@@ -32,13 +32,15 @@ export const MOCK_TOKENS = {
     address: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
     symbol: 'USDC',
     decimals: 6,
-    logoUri: 'https://safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.png',
+    logoUri:
+      'mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp',
   },
   usdt: {
     address: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
     symbol: 'USDT',
     decimals: 6,
-    logoUri: 'https://safe-transaction-assets.safe.global/tokens/logos/0xdAC17F958D2ee523a2206206994597C13D831ec7.png',
+    logoUri:
+      'mock-assets/safe-transaction-assets.safe.global/tokens/logos/0xdAC17F958D2ee523a2206206994597C13D831ec7.webp',
   },
   /** CGW can return a token it has no logo or full metadata for. */
   unknown: {

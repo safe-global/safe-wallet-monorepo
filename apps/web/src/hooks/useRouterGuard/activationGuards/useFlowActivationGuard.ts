@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import { type UseGuard } from '..'
 import { AppRoutes } from '@/config/routes'
@@ -66,19 +66,6 @@ const guardRules: GuardRule[] = [
     },
   },
 
-  // Authenticated with spaces but navigating to onboarding without a spaceId → spaces create page
-  {
-    match: ({ hasSpaces, isOnboardingRoute, query }) => {
-      const shouldRedirect = hasSpaces && isOnboardingRoute && !query.spaceId
-      return shouldRedirect
-    },
-    action: ({ query }) => {
-      const safe = typeof query.safe === 'string' ? query.safe : undefined
-      const target = AppRoutes.spaces.createSpace
-      return redirect(safe ? `${target}?safe=${encodeURIComponent(safe)}` : target)
-    },
-  },
-
   {
     match: ({ isWalletReady, isPartOfSpaceUrl, isOnboardingRoute, isPublicRoute }) => {
       const shouldRedirect = isWalletReady && !isPartOfSpaceUrl && !isOnboardingRoute && !isPublicRoute
@@ -94,6 +81,9 @@ const guardRules: GuardRule[] = [
 
 export const useFlowActivationGuard: UseGuard = () => {
   const { pathname, query, isReady } = useRouter()
+  // Next builds a new query object on every route render; the rules read only these values
+  const { safe, spaceId } = query
+  const guardQuery = useMemo(() => ({ safe, spaceId }), [safe, spaceId])
   const walletContext = useWalletContext()
   const isStoreHydrated = useAppSelector(selectIsStoreHydrated)
   const isWalletReady = (walletContext?.isReady ?? false) && isStoreHydrated
@@ -127,8 +117,8 @@ export const useFlowActivationGuard: UseGuard = () => {
         hasSpaces = !!spaces && spaces.length > 0
       }
 
-      if (query.spaceId) {
-        isPartOfSpaceUrl = hasSpaces && !!spaces && spaces.some((s) => s.uuid === query.spaceId)
+      if (spaceId) {
+        isPartOfSpaceUrl = hasSpaces && !!spaces && spaces.some((s) => s.uuid === spaceId)
       }
     }
 
@@ -138,7 +128,7 @@ export const useFlowActivationGuard: UseGuard = () => {
     return evaluateGuard(
       {
         pathname,
-        query,
+        query: guardQuery,
         isPublicRoute: !isOnboardingRoute && !isSpaceRoute && !isSpacesPath,
         isOnboardingRoute,
         isSpacesPath,
@@ -150,7 +140,17 @@ export const useFlowActivationGuard: UseGuard = () => {
       },
       guardRules,
     )
-  }, [pathname, query, isReady, isWalletReady, isSiweAuthenticated, isStoreHydrated, fetchSpaces, isSpaceRoute])
+  }, [
+    pathname,
+    guardQuery,
+    spaceId,
+    isReady,
+    isWalletReady,
+    isSiweAuthenticated,
+    isStoreHydrated,
+    fetchSpaces,
+    isSpaceRoute,
+  ])
 
   return {
     activationGuard,
