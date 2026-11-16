@@ -90,14 +90,42 @@ describe('HistoryFeesAccordion', () => {
     expect(screen.queryByText('$15.12')).not.toBeInTheDocument()
   })
 
-  it('shows "Paid from the signer" subtitle when paidFrom is signer', () => {
-    render(<HistoryFeesAccordion data={{ ...defaultData, paidFrom: 'signer' }} />)
-    expect(screen.getByText('Paid from the signer')).toBeInTheDocument()
+  it.each([
+    ['signer', 'Paid from signer wallet'],
+    ['safe', 'Paid from Safe account'],
+    ['sponsored', 'Sponsored'],
+  ] as const)('labels a %s-paid tx "%s"', (paidFrom, label) => {
+    render(<HistoryFeesAccordion data={{ ...defaultData, paidFrom }} />)
+    expect(screen.getByTestId('history-fees-paid-from')).toHaveTextContent(label)
   })
 
-  it('shows "Paid from the Safe" subtitle when paidFrom is safe', () => {
-    render(<HistoryFeesAccordion data={{ ...defaultData, paidFrom: 'safe' }} />)
-    expect(screen.getByText('Paid from the Safe')).toBeInTheDocument()
+  describe('sponsored', () => {
+    const sponsoredData: HistoryFeesData = {
+      ...defaultData,
+      totalFee: { amount: '0.0000000777', currency: 'ETH', fiatAmount: '$0.03' },
+      gasFee: { label: 'Max gas fee', amount: '0.0000000777', currency: 'ETH', fiatAmount: '$0.03', isFree: true },
+      paidFrom: 'sponsored',
+    }
+
+    it('shows only the struck-through cost in the header', () => {
+      render(<HistoryFeesAccordion data={sponsoredData} />)
+
+      const summary = screen.getByTestId('history-fees-summary')
+      expect(screen.getByText('0.0000000777 ETH').tagName).toBe('DEL')
+      expect(summary).not.toHaveTextContent('FREE')
+      expect(summary).not.toHaveTextContent('$0.03')
+    })
+
+    it('shows the gas fee as FREE over the struck-through amount in the breakdown', () => {
+      render(<HistoryFeesAccordion data={sponsoredData} />)
+      fireEvent.click(screen.getByTestId('history-fees-summary'))
+
+      const struck = screen.getAllByText((_, el) => el?.tagName === 'DEL').map((el) => el.textContent)
+      // Header and gas fee row; the fiat stays as is.
+      expect(struck.filter((text) => text === '0.0000000777 ETH')).toHaveLength(2)
+      expect(struck).not.toContain('$0.03')
+      expect(screen.getByText('$0.03').tagName).not.toBe('DEL')
+    })
   })
 
   it('renders non-free execution fee without FREE badge', () => {

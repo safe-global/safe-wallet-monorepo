@@ -1,6 +1,8 @@
 import { faker } from '@faker-js/faker'
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 
+faker.seed(1)
+
 /** Fixed Safe address shared with the stories: the version extractor only recognises the
  *  upgrade when the call targets the Safe itself. */
 export const MOCK_SAFE_ADDRESS = '0xE20e9C5Fb0FD24Ae4423Fc1eeD1088BCe1934630'

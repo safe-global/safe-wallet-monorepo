@@ -3,7 +3,7 @@ import { createMockStory } from '@/stories/mocks'
 import { AuditLog, AuditLogHeader, AuditRow } from '@/components/common/AuditLog'
 import { SafenetUnavailableAuditRowView } from './SafenetAuditRow'
 import { SafenetUnavailableCardView } from './SafenetDetailsCard'
-import { STORY_CHAIN_ID, STORY_SAFE_TX_HASH, STORY_SUBMITTED_AT } from './storyExamples'
+import { STORY_CHAIN_ID, STORY_SAFE_TX_HASH, STORY_SUBMITTED_AT } from './safenetChecks.storyData'
 
 const OWNER = '0x1234567890123456789012345678901234567890'
 

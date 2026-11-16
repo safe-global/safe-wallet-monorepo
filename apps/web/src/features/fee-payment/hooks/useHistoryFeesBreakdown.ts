@@ -18,6 +18,8 @@ import { Errors, logError } from '@/services/exceptions'
 import { isRateLimitError } from '@/utils/transaction-errors'
 import type { FeeRow, HistoryFeesData } from '@safe-global/views/features/fee-payment/types'
 import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
+import { RHINESTONE_RELAYER } from '../constants'
+import { isRelayedByRhinestone } from '../utils/isRelayedByRhinestone'
 
 export type { HistoryFeesData } from '@safe-global/views/features/fee-payment/types'
 
@@ -32,20 +34,24 @@ const buildFees = (
   amount: string,
   currency: string,
   fiatAmount: string | undefined,
-  paidFrom: 'safe' | 'signer',
+  paidFrom: HistoryFeesData['paidFrom'],
 ): HistoryFeesData => ({
   totalFee: { amount, currency, fiatAmount },
   executionFee: EXECUTION_FEE,
-  gasFee: { label: 'Max gas fee', amount, currency, fiatAmount },
+  gasFee: { label: 'Max gas fee', amount, currency, fiatAmount, isFree: paidFrom === 'sponsored' },
   paidFrom,
 })
 
 /**
  * Fee breakdown for executed multisig txs. Execution fee is always "Free" in Phase 2.
- * Max gas fee derives from:
- *   - Safe-pays → the signed payload (safeTxGas + baseGas × gasPrice) — deterministic.
- *   - Signer-pays → the on-chain tx receipt (gasUsed × gasPrice) — signer wallet's actual cost.
- * Deps are narrowed to scalars so polling `balances` doesn't re-trigger the receipt RPC.
+ * Who paid, in this order:
+ *   - Safe → the signed payload carries refund params; the gas fee is the `payment` the Safe made.
+ *   - Signer → the executor is an owner or confirmed the tx; the gas fee is the tx `fee` (gasUsed × gasPrice).
+ *   - Sponsored → Rhinestone relayed (its account executed, or its executor logged `IntentExecuted`);
+ *     the `fee` is shown struck through, as nobody in the Safe paid it.
+ *   - Anyone else → null: we can't say who paid, so no breakdown is shown.
+ * Only an executor we don't recognise needs the receipt (for Rhinestone's log). Deps are narrowed
+ * to scalars so polling `balances` doesn't re-trigger the receipt RPC.
  */
 export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryFeesData | null => {
   const isPayFromSafeEnabled = useHasFeature(FEATURES.GTF)
@@ -63,7 +69,17 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
   const gasTokenSymbol = exec?.gasTokenInfo?.symbol
   const gasTokenDecimals = exec?.gasTokenInfo?.decimals
   const payment = exec?.payment
+  const fee = exec?.fee
   const refundReceiver = exec?.refundReceiver?.value
+  const executor = exec?.executor?.value
+  // Current owners plus whoever confirmed: an owner removed after executing still confirmed the tx.
+  const executorSigned =
+    !!executor &&
+    [...(exec?.signers ?? []), ...(exec?.confirmations ?? []).map((confirmation) => confirmation.signer)].some(
+      (address) => sameAddress(address.value, executor),
+    )
+  // Who paid, when the executor alone tells us (no RPC call).
+  const knownPayer = executorSigned ? 'signer' : sameAddress(executor, RHINESTONE_RELAYER) ? 'sponsored' : null
   const { txHash, executedAt } = txDetails
 
   const isSafePaid = isPaidFromSafe({ gasPrice, baseGas, refundReceiver })
@@ -106,11 +122,11 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
     currency,
   ])
 
-  // Signer-pays: fetch receipt once per txHash. Deps are primitives so polling balances
-  // doesn't trigger a re-fetch.
+  // Only an unknown executor needs the receipt, to look for Rhinestone's log. Deps are primitives
+  // so polling balances doesn't trigger a re-fetch.
   const [receipt] = useAsync(async () => {
     if (!isPayFromSafeEnabled || !executedAt || !exec) return null
-    if (isSafePaid) return null
+    if (knownPayer || isSafePaid) return null
     if (!txHash || !provider) return null
     try {
       return await provider.getTransactionReceipt(txHash)
@@ -119,19 +135,35 @@ export const useHistoryFeesBreakdown = (txDetails: TransactionDetails): HistoryF
       if (!isRateLimitError(e)) logError(Errors._623, e, getRpcErrorContext(provider))
       throw e
     }
-  }, [isPayFromSafeEnabled, executedAt, !!exec, isSafePaid, txHash, provider])
+  }, [isPayFromSafeEnabled, executedAt, !!exec, knownPayer, isSafePaid, txHash, provider])
 
-  const signerPaidData = useMemo<HistoryFeesData | null>(() => {
-    if (!receipt) return null
+  const payer = knownPayer ?? (receipt && isRelayedByRhinestone(receipt) ? 'sponsored' : null)
+
+  const executorPaidData = useMemo<HistoryFeesData | null>(() => {
+    // No payer without a multisig executor or receipt, so `exec` needs no check of its own.
+    if (!isPayFromSafeEnabled || !executedAt || isSafePaid || !payer) return null
+    // CGW defaults `fee` to '0' when the Transaction Service has none.
+    if (!fee || fee === '0') return null
+
     const decimals = chain?.nativeCurrency.decimals ?? 18
     const symbol = chain?.nativeCurrency.symbol ?? 'ETH'
-    // Signer-pays: EOA paid the network in native gas — gasUsed × gasPrice from the tx receipt.
-    const gasFeeBaseUnits = receipt.gasUsed * receipt.gasPrice
-    const amount = formatVisualAmount(gasFeeBaseUnits, decimals)
-    const fiatAmount = formatFiat(gasFeeBaseUnits, decimals, fiatConversion, currency)
+    // Whoever executed paid the network in native gas: `fee` is gasUsed × gasPrice from the tx receipt.
+    const feeWei = BigInt(fee)
+    const amount = formatVisualAmount(feeWei, decimals)
+    const fiatAmount = formatFiat(feeWei, decimals, fiatConversion, currency)
 
-    return buildFees(amount, symbol, fiatAmount, 'signer')
-  }, [receipt, chain?.nativeCurrency.decimals, chain?.nativeCurrency.symbol, fiatConversion, currency])
+    return buildFees(amount, symbol, fiatAmount, payer)
+  }, [
+    isPayFromSafeEnabled,
+    executedAt,
+    isSafePaid,
+    payer,
+    fee,
+    chain?.nativeCurrency.decimals,
+    chain?.nativeCurrency.symbol,
+    fiatConversion,
+    currency,
+  ])
 
-  return safePaidData ?? signerPaidData ?? null
+  return safePaidData ?? executorPaidData ?? null
 }

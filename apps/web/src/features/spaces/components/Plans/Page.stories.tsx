@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
 import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
 import SpacePlansPage from './Page'
-import { DAY, billingHandlers, now, subscription } from './plans.fixtures'
+import { DAY, billingHandlers, now, subscription } from './plans.storyData'
 
 const setup = createMockStory({
   scenario: 'efSafe',
