@@ -37,7 +37,7 @@ const withIssues: Record<string, ScanResult> = {
   multichain_setup: mkResult({ status: 'not_applicable' }),
 }
 
-const setup = createMockStory({ features: { spaces: true }, layout: 'paper' })
+const setup = createMockStory({ authenticated: true, layout: 'paper' })
 
 const meta = {
   title: 'Features/SecurityHub/SecurityDrawerContent',

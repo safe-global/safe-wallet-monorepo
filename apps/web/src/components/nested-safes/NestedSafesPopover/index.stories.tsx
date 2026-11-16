@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { useEffect, useState, type ComponentProps } from 'react'
-import { fn } from 'storybook/test'
+import { expect, fn, waitFor, within } from 'storybook/test'
 import { createMockStory } from '@/stories/mocks'
 import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
 import { NestedSafesPopover } from './index'
@@ -99,6 +99,14 @@ export const Populated: Story = {
     allSafesWithStatus: ALL_SAFES,
     visibleSafes: CURATED_SAFES,
     hasCompletedCuration: true,
+  },
+  // The popover focuses its manage button once it opens, and the button's tooltip then lands wherever the opening
+  // animation has moved the button; a mouse user sees no tooltip
+  play: async () => {
+    const manage = await within(document.body).findByRole('button', { name: 'Manage nested Safes' })
+    await waitFor(() => expect(manage).toHaveFocus())
+    manage.blur()
+    await waitFor(() => expect(document.body.querySelector('[data-slot="tooltip-content"]')).toBeNull())
   },
 }
 

@@ -16,7 +16,7 @@ const addressBook = {
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
+  authenticated: true,
   shadcn: true,
   store: {
     addressBook: {

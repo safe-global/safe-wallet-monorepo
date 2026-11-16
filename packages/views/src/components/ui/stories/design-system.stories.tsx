@@ -170,19 +170,19 @@ const DEMO_TOKENS = [
     symbol: 'ETH',
     name: 'Ether',
     balance: '2.4',
-    logoUri: 'https://assets.smold.app/api/token/1/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE/logo-128.png',
+    logoUri: 'mock-assets/assets.smold.app/api/token/1/0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE/logo-128.webp',
   },
   {
     symbol: 'USDC',
     name: 'USD Coin',
     balance: '1,250.00',
-    logoUri: 'https://assets.smold.app/api/token/1/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo-128.png',
+    logoUri: 'mock-assets/assets.smold.app/api/token/1/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48/logo-128.webp',
   },
   {
     symbol: 'DAI',
     name: 'Dai Stablecoin',
     balance: '820.50',
-    logoUri: 'https://assets.smold.app/api/token/1/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo-128.png',
+    logoUri: 'mock-assets/assets.smold.app/api/token/1/0x6B175474E89094C44Da98b954EedeAC495271d0F/logo-128.webp',
   },
 ]
 

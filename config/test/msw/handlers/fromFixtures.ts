@@ -227,8 +227,8 @@ export const FIXTURE_SCENARIOS = {
   vitalik: {
     id: 'vitalik',
     name: 'Vitalik - Whale',
-    description: '1551 tokens, $675M in holdings. Tests large token lists and rendering performance.',
-    tokens: 1551,
+    description: '44 tokens, $675M in holdings. Tests whale-sized values and paginated token lists.',
+    tokens: 44,
     positions: '$19M',
     defiApps: 1,
   },
@@ -307,11 +307,9 @@ export const fixtureHandlers = {
   /**
    * Vitalik Safe - Whale
    *
-   * - 1551 tokens, $675M in holdings
+   * - 44 tokens, $675M in holdings
    * - Single DeFi protocol ($19M)
-   * - Best for: Testing large token lists, rendering performance, whale scenarios
-   *
-   * ⚠️ Large fixture (~540KB) - may impact story load time
+   * - Best for: Testing whale-sized values and paginated token lists
    */
   vitalik: (GATEWAY_URL: string) =>
     createHandlersFromFixture('vitalik', GATEWAY_URL, {

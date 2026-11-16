@@ -4,7 +4,7 @@
     "protocol_metadata": {
       "name": "Eth2",
       "icon": {
-        "url": "https://protocol-icons.s3.amazonaws.com/icons/eth2.jpg"
+        "url": "mock-assets/protocol-icons.s3.amazonaws.com/icons/eth2.webp"
       },
       "url": "https://launchpad.ethereum.org"
     },
@@ -21,7 +21,7 @@
               "decimals": 18,
               "symbol": "ETH",
               "name": "Ether",
-              "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png"
+              "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.webp"
             },
             "balance": "6976147709657000000000",
             "fiatBalance": "19642390.298695732",

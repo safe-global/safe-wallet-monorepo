@@ -5,6 +5,7 @@ import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
 import type { SpaceAuditLogEntryDto, SpaceAuditLogPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceActivityLog from './index'
 import type { MockStoryConfig } from '@/stories/mocks/types'
+import { mockNow } from '@/stories/mocks/now'
 
 const AUDIT_LOG_URL = /\/v1\/spaces\/[\w-]+\/audit-log$/
 const AUDIT_LOG_ACTORS_URL = /\/v1\/spaces\/[\w-]+\/audit-log\/actors$/
@@ -19,7 +20,7 @@ const events: SpaceAuditLogEntryDto[] = [
     actor: wallet,
     targetUser: null,
     payload: { created: [{ address: '0x1111111111111111111111111111111111111111', name: 'Vendor' }], updated: [] },
-    createdAt: new Date().toISOString(),
+    createdAt: new Date(mockNow()).toISOString(),
   },
   {
     id: '5',
@@ -28,7 +29,7 @@ const events: SpaceAuditLogEntryDto[] = [
     actor: wallet,
     targetUser: 'dana@example.com',
     payload: { targetUserId: 2, oldRole: 'MEMBER', newRole: 'ADMIN' },
-    createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+    createdAt: new Date(mockNow() - 60 * 60 * 1000).toISOString(),
   },
   {
     id: '4',
@@ -37,7 +38,7 @@ const events: SpaceAuditLogEntryDto[] = [
     actor: 'dana@example.com',
     targetUser: 'dana@example.com',
     payload: { targetUserId: 2 },
-    createdAt: new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString(),
+    createdAt: new Date(mockNow() - 25 * 60 * 60 * 1000).toISOString(),
   },
   {
     id: '3',
@@ -46,7 +47,7 @@ const events: SpaceAuditLogEntryDto[] = [
     actor: wallet,
     targetUser: 'dana@example.com',
     payload: { targetUserId: 2, role: 'MEMBER' },
-    createdAt: new Date(Date.now() - 26 * 60 * 60 * 1000).toISOString(),
+    createdAt: new Date(mockNow() - 26 * 60 * 60 * 1000).toISOString(),
   },
   {
     id: '2',
@@ -55,7 +56,7 @@ const events: SpaceAuditLogEntryDto[] = [
     actor: wallet,
     targetUser: null,
     payload: { safes: [{ chainId: '1', address: '0x2222222222222222222222222222222222222222' }] },
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: new Date(mockNow() - 3 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
     id: '1',
@@ -64,7 +65,7 @@ const events: SpaceAuditLogEntryDto[] = [
     actor: wallet,
     targetUser: null,
     payload: { name: 'Treasury Ops' },
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    createdAt: new Date(mockNow() - 3 * 24 * 60 * 60 * 1000).toISOString(),
   },
 ]
 
@@ -77,7 +78,7 @@ const actors = [
 const storyConfig = (handlers: MockStoryConfig['handlers']): MockStoryConfig => ({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
+  authenticated: true,
   pathname: '/spaces/activity',
   query: { spaceId: MOCK_SPACE_ID },
   shadcn: true,

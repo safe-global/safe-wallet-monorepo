@@ -9,7 +9,7 @@ import StakeButton from './index'
 const nativeToken: Balance['tokenInfo'] = {
   address: '0x0000000000000000000000000000000000000000',
   decimals: 18,
-  logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
+  logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
   name: 'Ether',
   symbol: 'ETH',
   type: TokenType.NATIVE_TOKEN,

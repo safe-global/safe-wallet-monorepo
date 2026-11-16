@@ -94,27 +94,11 @@ const FEATURE_FLAG_MATRIX: Array<{
     },
   },
   {
-    label: 'spaces',
-    featureFlag: FEATURES.SPACES,
-    getHandle: () => {
-      const { SpacesFeature } = jest.requireActual('@/features/spaces')
-      return SpacesFeature
-    },
-  },
-  {
     label: 'tx-notes',
     featureFlag: FEATURES.TX_NOTES,
     getHandle: () => {
       const { TxNotesFeature } = jest.requireActual('@/features/tx-notes')
       return TxNotesFeature
-    },
-  },
-  {
-    label: 'myAccounts',
-    featureFlag: FEATURES.MY_ACCOUNTS,
-    getHandle: () => {
-      const { MyAccountsFeature } = jest.requireActual('@/features/myAccounts')
-      return MyAccountsFeature
     },
   },
   {
@@ -241,18 +225,22 @@ describe('feature flag matrix', () => {
   })
 })
 
-// ── Batching feature (always enabled) ────────────────────────────
+// ── Always-enabled features ──────────────────────────────────────
 
-describe('batching feature (always enabled)', () => {
-  it('useIsEnabled returns true unconditionally', () => {
-    // Batching is hardcoded to always return true — no feature flag
-    const { BatchingFeature } = jest.requireActual('@/features/batching')
-    const { result } = renderHook(() => BatchingFeature.useIsEnabled())
+const ALWAYS_ENABLED_FEATURES: Array<{ label: string; getHandle: () => FeatureHandle<FeatureImplementation> }> = [
+  { label: 'batching', getHandle: () => jest.requireActual('@/features/batching').BatchingFeature },
+  { label: 'spaces', getHandle: () => jest.requireActual('@/features/spaces').SpacesFeature },
+  { label: 'myAccounts', getHandle: () => jest.requireActual('@/features/myAccounts').MyAccountsFeature },
+  { label: 'global-search', getHandle: () => jest.requireActual('@/features/global-search').GlobalSearchFeature },
+]
+
+describe('always-enabled features', () => {
+  it.each(ALWAYS_ENABLED_FEATURES)('$label: useIsEnabled returns true unconditionally', ({ getHandle }) => {
+    const { result } = renderHook(() => getHandle().useIsEnabled())
     expect(result.current).toBe(true)
   })
 
-  it('has correct name', () => {
-    const { BatchingFeature } = jest.requireActual('@/features/batching')
-    expect(BatchingFeature.name).toBe('batching')
+  it.each(ALWAYS_ENABLED_FEATURES)('$label: has correct name', ({ label, getHandle }) => {
+    expect(getHandle().name).toBe(label)
   })
 })

@@ -83,7 +83,7 @@ const atRiskWithUpdate = {
   pending_tx: mkResult({ status: 'issue', severity: 'High' }),
 }
 
-const setup = createMockStory({ features: { spaces: true }, layout: 'paper' })
+const setup = createMockStory({ authenticated: true, layout: 'paper' })
 
 const meta = {
   title: 'Features/SecurityHub/SecuritySafesTable',

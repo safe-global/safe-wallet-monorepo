@@ -315,7 +315,7 @@ export const useHypernativeOAuth = (): HypernativeAuthStatus => {
         await new Promise((resolve) => setTimeout(resolve, MOCK_AUTH_DELAY_MS))
 
         const mockToken = `mock-token-${Date.now()}`
-        setToken(mockToken, 'Bearer', MOCK_AUTH_TOKEN_EXPIRES_IN)
+        setToken({ access_token: mockToken, token_type: 'Bearer', expires_in: MOCK_AUTH_TOKEN_EXPIRES_IN })
         return
       }
 

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import { SpacesFeature, useFeatureFlagRedirect, useLandingSpaceId } from '@/features/spaces'
+import { SpacesFeature, useLandingSpaceId } from '@/features/spaces'
 import { useLoadFeature } from '@/features/__core__'
 import { AppRoutes } from '@/config/routes'
 import { parseSpaceId } from '@/hooks/useUrlSpaceId'
@@ -12,7 +12,6 @@ export default function SpacePage() {
   const spaceId = parseSpaceId(router.query.spaceId)
   const spaces = useLoadFeature(SpacesFeature)
   const landing = useLandingSpaceId()
-  useFeatureFlagRedirect()
 
   useEffect(() => {
     if (!router.isReady || spaceId || landing.isLoading) return

@@ -4,9 +4,6 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import svgr from 'vite-plugin-svgr'
 import mdx from '@mdx-js/rollup'
-import remarkFrontmatter from 'remark-frontmatter'
-import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
-import remarkHeadingId from 'remark-heading-id'
 import remarkGfm from 'remark-gfm'
 import path from 'node:path'
 import { execSync } from 'node:child_process'
@@ -187,7 +184,7 @@ export default defineConfig(({ mode }) => {
       // @mdx-js/loader. Must run BEFORE react() so React's JSX transform sees
       // the compiled MDX output.
       mdx({
-        remarkPlugins: [remarkFrontmatter, remarkMdxFrontmatter, remarkHeadingId, remarkGfm],
+        remarkPlugins: [remarkGfm],
       }),
       react(),
       svgr({

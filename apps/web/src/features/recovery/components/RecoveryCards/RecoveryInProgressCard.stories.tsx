@@ -3,6 +3,7 @@ import { mswLoader } from 'msw-storybook-addon'
 import { createMockStory } from '@/stories/mocks'
 import type { RecoveryQueueItem } from '../../services/recovery-state'
 import { RecoveryInProgressCard } from './RecoveryInProgressCard'
+import { mockNow } from '@/stories/mocks/now'
 
 const setup = createMockStory({
   scenario: 'efSafe',
@@ -16,7 +17,7 @@ const createRecoveryQueueItem = (validFrom: bigint, expiresAt: bigint | null): R
   const queueItem = {
     address: '0xd54895B1121A2eE3f37b502F507631FA1331BED6',
     transactionHash: '0x6f465f9d996728a4c34e8fb0e767bb87f884f5901f26fa933f60a4d40b0bbe7d',
-    timestamp: BigInt(Date.now()),
+    timestamp: BigInt(mockNow()),
     validFrom,
     expiresAt,
     isMalicious: false,
@@ -53,7 +54,7 @@ export const InProgress: Story = {
   args: {
     orientation: 'vertical',
     onClose: () => {},
-    recovery: createRecoveryQueueItem(BigInt(Date.now() + 2 * DAY_IN_SECONDS * 1_000), null),
+    recovery: createRecoveryQueueItem(BigInt(mockNow() + 2 * DAY_IN_SECONDS * 1_000), null),
   },
 }
 
@@ -61,7 +62,7 @@ export const Executable: Story = {
   args: {
     orientation: 'vertical',
     onClose: () => {},
-    recovery: createRecoveryQueueItem(BigInt(Date.now() - DAY_IN_SECONDS * 1_000), null),
+    recovery: createRecoveryQueueItem(BigInt(mockNow() - DAY_IN_SECONDS * 1_000), null),
   },
 }
 
@@ -70,8 +71,8 @@ export const Expired: Story = {
     orientation: 'vertical',
     onClose: () => {},
     recovery: createRecoveryQueueItem(
-      BigInt(Date.now() - 2 * DAY_IN_SECONDS * 1_000),
-      BigInt(Date.now() - DAY_IN_SECONDS * 1_000),
+      BigInt(mockNow() - 2 * DAY_IN_SECONDS * 1_000),
+      BigInt(mockNow() - DAY_IN_SECONDS * 1_000),
     ),
   },
 }
@@ -79,6 +80,6 @@ export const Expired: Story = {
 export const Horizontal: Story = {
   args: {
     orientation: 'horizontal',
-    recovery: createRecoveryQueueItem(BigInt(Date.now() + 2 * DAY_IN_SECONDS * 1_000), null),
+    recovery: createRecoveryQueueItem(BigInt(mockNow() + 2 * DAY_IN_SECONDS * 1_000), null),
   },
 }

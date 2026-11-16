@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { within } from 'storybook/test'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory, spacesHandlers } from '@/stories/mocks'
 import type { MockStoryConfig } from '@/stories/mocks/types'
 import Spaces from '@/pages/welcome/spaces'
 
@@ -26,8 +26,9 @@ const spacesStory = (config: MockStoryConfig): Story => {
   const setup = createMockStory({
     scenario: 'efSafe',
     pathname: '/welcome/spaces',
-    features: { spaces: true },
-    shadcn: true,
+    authenticated: true,
+    layout: 'fullPage',
+    features: { safePro: true, oidcAuth: true, safeProAnnouncement: true },
     ...config,
   })
   return { parameters: { ...setup.parameters }, decorators: [setup.decorator] }
@@ -36,7 +37,7 @@ const spacesStory = (config: MockStoryConfig): Story => {
 export const Default: Story = spacesStory({ wallet: 'connected' })
 
 export const SignedOut: Story = {
-  ...spacesStory({ wallet: 'disconnected', authenticated: false }),
+  ...spacesStory({ wallet: 'disconnected', authenticated: false, handlers: spacesHandlers() }),
   play: async ({ canvasElement }) => {
     await within(canvasElement).findByText('Sign in to your Workspace')
   },

@@ -20,7 +20,7 @@ const populatedSafes: GetSpaceSafeResponse = {
 const setup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
+  authenticated: true,
   pathname: '/home',
   query: { spaceId: MOCK_SPACE_ID },
   shadcn: true,

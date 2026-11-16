@@ -371,6 +371,7 @@ describe('ProposerRoleForm', () => {
       name: 'Workspace Alice',
       address: PROPOSER,
       chainIds: [CHAIN_ID],
+      tagIds: [],
       createdBy: '',
       createdByUserId: 0,
       lastUpdatedBy: '',

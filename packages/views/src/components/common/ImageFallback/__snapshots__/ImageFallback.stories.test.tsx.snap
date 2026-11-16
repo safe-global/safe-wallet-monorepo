@@ -10,7 +10,7 @@ exports[`./ImageFallback.stories LargeSize 1`] = `
     <img
       alt="Large image"
       height="96"
-      src="https://safe-transaction-assets.safe.global/chains/1/chain_logo.png"
+      src="mock-assets/safe-transaction-assets.safe.global/chains/1/chain_logo.webp"
       width="96"
     />
   </div>
@@ -27,7 +27,7 @@ exports[`./ImageFallback.stories SmallSize 1`] = `
     <img
       alt="Small image"
       height="24"
-      src="https://safe-transaction-assets.safe.global/chains/1/chain_logo.png"
+      src="mock-assets/safe-transaction-assets.safe.global/chains/1/chain_logo.webp"
       width="24"
     />
   </div>
@@ -78,7 +78,7 @@ exports[`./ImageFallback.stories WithValidImage 1`] = `
     <img
       alt="Ethereum logo"
       height="48"
-      src="https://safe-transaction-assets.safe.global/chains/1/chain_logo.png"
+      src="mock-assets/safe-transaction-assets.safe.global/chains/1/chain_logo.webp"
       width="48"
     />
   </div>

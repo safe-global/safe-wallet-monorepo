@@ -1,29 +1,10 @@
 import Head from 'next/head'
-import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
 import { useLoadFeature } from '@/features/__core__'
 import { MyAccountsFeature } from '@/features/myAccounts'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import { BRAND_NAME, CONFIG_SERVICE_KEY } from '@/config/constants'
-import { Spinner } from '@safe-global/views/components/ui/spinner'
+import { BRAND_NAME } from '@/config/constants'
 
 const Accounts = () => {
-  const { MyAccounts, MyAccountsV2 } = useLoadFeature(MyAccountsFeature)
-  const { isLoading } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
-  const isRedesignEnabled = useHasFeature(FEATURES.WELCOME_ACCOUNTS_REDESIGN)
-
-  const isFlagResolved = !isLoading && isRedesignEnabled !== undefined
-
-  const renderAccounts = () => {
-    if (!isFlagResolved) {
-      return (
-        <div className="flex w-full justify-center py-16">
-          <Spinner className="text-muted-foreground size-6" />
-        </div>
-      )
-    }
-    return isRedesignEnabled ? <MyAccountsV2 /> : <MyAccounts />
-  }
+  const { MyAccountsV2 } = useLoadFeature(MyAccountsFeature)
 
   return (
     <>
@@ -31,7 +12,7 @@ const Accounts = () => {
         <title>{`${BRAND_NAME} – My accounts`}</title>
       </Head>
 
-      {renderAccounts()}
+      <MyAccountsV2 />
     </>
   )
 }

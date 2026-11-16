@@ -64,7 +64,14 @@ const App = ({ initialPath }: { initialPath: string }): ReactElement => {
   }, [location])
 
   const wallet = useMemo(
-    () => ({ connectedWallet: null, signer: null, setSignerAddress: jest.fn(), isReady: isWalletReady }),
+    () => ({
+      connectedWallet: null,
+      signer: null,
+      setSignerAddress: jest.fn(),
+      setParentSafeNonce: jest.fn(),
+      clearParentSafeNonce: jest.fn(),
+      isReady: isWalletReady,
+    }),
     [isWalletReady],
   )
 
