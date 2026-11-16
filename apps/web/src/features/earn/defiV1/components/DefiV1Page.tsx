@@ -99,7 +99,7 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   )
   const topOpen = listed.find((item) => !locked(item))
   const holdingOf = (item: Opportunity) => holdingsFor(positions, item.id)
-  const heldInOf = (item: Opportunity) => (config.plan === 'pro' ? heldIn(operations, item.id)?.name : undefined)
+  const heldInOf = (item: Opportunity) => (config.plan === 'pro' ? heldIn(operations, item.id) : undefined)
   const openSetup = (item: Opportunity | null) => {
     setSetupFor(item)
     setIsCreating(true)

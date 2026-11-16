@@ -9,12 +9,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { cn } from '@safe-global/views/utils/cn'
 import { DEFI_V1_COPY, formatApy, formatCompactUsd } from '../copy'
-import { CHAIN_IDS } from '../opportunities'
-import { liquidityBucket } from '../shelf'
-import type { Holding, Opportunity } from '../types'
+import { CHAIN_IDS, IDLE_CASH } from '../opportunities'
+import { depositRoute, liquidityBucket } from '../shelf'
+import type { Holding, Operation, Opportunity } from '../types'
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0!'
-const COLUMN_WIDTHS = ['w-10', '', 'w-20', 'w-28', 'w-32', 'w-24', 'w-32', 'w-32']
+const COLUMN_WIDTHS = ['w-10', '', 'w-20', 'w-28', 'w-32', 'w-24', 'w-32', 'w-40']
 const COLUMN_COUNT = COLUMN_WIDTHS.length
 const OPPORTUNITY_HEADERS = ['Opportunity', 'Net APY', 'Liquidity', 'Exit time', 'Networks', 'Your position']
 
@@ -70,13 +70,18 @@ export const OpportunityMark = ({ opportunity }: { opportunity: Opportunity }) =
   </span>
 )
 
-const NameCell = ({ opportunity }: { opportunity: Opportunity }) => (
+const NameCell = ({ opportunity, operation }: { opportunity: Opportunity; operation?: Operation }) => (
   <div className="flex min-w-0 items-center gap-3">
     <OpportunityMark opportunity={opportunity} />
     <div className="flex min-w-0 flex-col">
       <span className="flex min-w-0 items-center gap-2">
         <span className="truncate font-medium text-foreground">{opportunity.name}</span>
         {opportunity.placement === 'sponsored' && <Badge variant="warning">{DEFI_V1_COPY.sponsored}</Badge>}
+        {operation && (
+          <Badge variant="success" title={DEFI_V1_COPY.operations.runsIn(operation.name)}>
+            {DEFI_V1_COPY.operations.ofSigners(operation.threshold, operation.owners)}
+          </Badge>
+        )}
       </span>
       <span className="truncate text-xs text-muted-foreground">
         <span className="font-medium text-foreground">{opportunity.asset}</span>
@@ -122,7 +127,7 @@ const NetworkLogos = ({ chains }: { chains: string[] }) => (
 
 const Empty = () => <span className="text-muted-foreground">—</span>
 
-const PositionCell = ({ holding, heldIn }: { holding?: Holding; heldIn?: string }) => {
+const PositionCell = ({ holding, operation }: { holding?: Holding; operation?: Operation }) => {
   if (!holding) return <Empty />
   return (
     <span className="flex min-w-0 flex-col">
@@ -132,8 +137,12 @@ const PositionCell = ({ holding, heldIn }: { holding?: Holding; heldIn?: string 
           {DEFI_V1_COPY.positions.earnedAmount(formatCompactUsd(holding.earned))}
         </span>
       )}
-      {heldIn && (
-        <span className="truncate text-xs text-muted-foreground">{DEFI_V1_COPY.operations.heldIn(heldIn)}</span>
+      {operation && (
+        <span className="truncate text-xs text-muted-foreground">
+          {DEFI_V1_COPY.operations.heldIn(operation.name)}
+          {operation.recurring &&
+            ` · ${DEFI_V1_COPY.operations.recurring(formatCompactUsd(operation.recurring.amount), DEFI_V1_COPY.operations.frequencies[operation.recurring.frequency])}`}
+        </span>
       )}
       {holding.pending > 0 && (
         <span className="truncate text-xs text-muted-foreground tabular-nums">
@@ -157,7 +166,7 @@ const OpportunityRow = ({
   onSelect: (item: Opportunity) => void
   selection: Selection
   holding?: Holding
-  heldIn?: string
+  heldIn?: Operation
 }) => {
   const locked = isLocked(opportunity)
   const checked = selection.selected.includes(opportunity.id)
@@ -176,7 +185,7 @@ const OpportunityRow = ({
         />
       </TableCell>
       <TableCell>
-        <NameCell opportunity={opportunity} />
+        <NameCell opportunity={opportunity} operation={heldIn} />
       </TableCell>
       <TableCell className="font-semibold tabular-nums">{formatApy(opportunity.apy)}</TableCell>
       <TableCell className="truncate" title={DEFI_V1_COPY.liquidity[liquidityBucket(opportunity)].hint}>
@@ -189,7 +198,7 @@ const OpportunityRow = ({
         <NetworkLogos chains={opportunity.chains} />
       </TableCell>
       <TableCell>
-        <PositionCell holding={holding} heldIn={heldIn} />
+        <PositionCell holding={holding} operation={heldIn} />
       </TableCell>
       <TableCell className="text-right">
         <Button
@@ -201,7 +210,7 @@ const OpportunityRow = ({
           }}
         >
           {locked && <Lock />}
-          {locked ? DEFI_V1_COPY.proOnly : DEFI_V1_COPY.factSheet.deposit}
+          {locked ? DEFI_V1_COPY.proOnly : DEFI_V1_COPY.action.rowLabel[depositRoute(opportunity, IDLE_CASH)]}
         </Button>
       </TableCell>
     </TableRow>
@@ -211,7 +220,7 @@ const OpportunityRow = ({
 const TableCard = ({ label, children }: { label: string; children: ReactNode }) => (
   <Card radius="xl" size="none">
     <CardContent>
-      <Table aria-label={label} variant="panel" className="table-fixed min-w-[960px] [&_td]:px-4 [&_th]:px-4">
+      <Table aria-label={label} variant="panel" className="table-fixed min-w-[992px] [&_td]:px-4 [&_th]:px-4">
         <colgroup>
           {COLUMN_WIDTHS.map((width, index) => (
             <col key={index} className={width || undefined} />
@@ -236,7 +245,7 @@ export const OpportunitiesTable = ({
   onSelect: (item: Opportunity) => void
   selection: Selection
   holdingOf: (item: Opportunity) => Holding | undefined
-  heldInOf: (item: Opportunity) => string | undefined
+  heldInOf: (item: Opportunity) => Operation | undefined
 }) => {
   const isEmpty = groups.every((group) => group.items.length === 0)
   return (

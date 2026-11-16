@@ -11,6 +11,7 @@ import type { Holding, Operation, Opportunity } from '../types'
 import { growthSeries, growthShare, liquidityBucket } from '../shelf'
 import { ActionPanel, type ActionResult } from './ActionPanel'
 import { Sparkline } from './Sparkline'
+import { SigningBlock } from './SigningBlock'
 import { OpportunityMark, Tag } from './TreasuryTables'
 
 const COPY = DEFI_V1_COPY.drawer
@@ -193,6 +194,8 @@ export const OpportunityDrawer = ({
                 ))}
                 {opportunity.placement === 'sponsored' && <Badge variant="warning">{DEFI_V1_COPY.sponsored}</Badge>}
               </div>
+
+              {canCreate && !locked && <SigningBlock operation={operations[0]} onSetUp={onCustomise} />}
 
               <DrawerSection title={COPY.overview} collapsible defaultOpen>
                 <Frame>

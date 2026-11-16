@@ -61,6 +61,9 @@ export type Operation = {
   threshold: number
   owners: number
   opportunityIds: string[]
+  recurring?: { amount: number; frequency: Frequency }
 }
+
+export type Frequency = 'week' | 'month' | 'quarter'
 
 export type Holding = { invested: number; pending: number; earned: number }

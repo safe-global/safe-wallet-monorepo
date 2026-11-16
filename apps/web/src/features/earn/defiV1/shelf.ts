@@ -142,6 +142,15 @@ export const dedicatedSafeName = (opportunity: Pick<Opportunity, 'name'>): strin
 export const heldIn = (operations: Operation[], opportunityId: string): Operation | undefined =>
   operationsFor(operations, opportunityId).find((operation) => operation.invested > 0)
 
+export type DepositRoute = 'deposit' | 'swap' | 'bridge'
+
+/** What the Safe has to do before it can deposit, which sets the row button label. */
+export const depositRoute = (opportunity: Opportunity, from: { asset: string; chain: string }): DepositRoute => {
+  if (from.asset !== opportunity.asset) return 'swap'
+  if (!opportunity.chains.includes(from.chain)) return 'bridge'
+  return 'deposit'
+}
+
 /** The calls one proposal bundles when the Safe holds the asset on another chain. */
 export const depositSteps = (
   opportunity: Opportunity,

@@ -4,6 +4,7 @@ import {
   budgetLeft,
   buildShelf,
   dedicatedSafeName,
+  depositRoute,
   depositSteps,
   filterOpportunities,
   groupOpportunities,
@@ -236,6 +237,24 @@ describe('operations', () => {
 
     expect(heldIn([empty, funded], 'a')).toEqual(funded)
     expect(heldIn([empty], 'a')).toBeUndefined()
+  })
+})
+
+describe('depositRoute', () => {
+  it('needs a swap when the Safe holds another asset', () => {
+    expect(depositRoute(opportunity({ asset: 'ETH' }), { asset: 'USDC', chain: 'Ethereum' })).toBe('swap')
+  })
+
+  it('needs a bridge when the asset sits on another chain', () => {
+    expect(depositRoute(opportunity({ asset: 'USDC', chains: ['Ethereum'] }), { asset: 'USDC', chain: 'Base' })).toBe(
+      'bridge',
+    )
+  })
+
+  it('deposits directly when asset and chain match', () => {
+    expect(depositRoute(opportunity({ asset: 'USDC', chains: ['Base'] }), { asset: 'USDC', chain: 'Base' })).toBe(
+      'deposit',
+    )
   })
 })
 

@@ -17,7 +17,7 @@ import { DrawerSection } from '@/components/common/Drawer'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { DEFI_V1_COPY, formatAmount, formatCompactUsd, formatUsd } from '../copy'
 import { IDLE_CASH } from '../opportunities'
-import { budgetLeft, dedicatedSafeName, depositSteps } from '../shelf'
+import { budgetLeft, dedicatedSafeName, depositRoute, depositSteps } from '../shelf'
 import type { Holding, Operation, Opportunity } from '../types'
 
 const COPY = DEFI_V1_COPY.action
@@ -267,6 +267,10 @@ export const ActionPanel = ({
             </li>
           ))}
         </ol>
+        <Typography variant="paragraph-mini" color="muted">
+          {mode === 'deposit' ? COPY.settles[depositRoute(opportunity, IDLE_CASH)] : COPY.settles.deposit}{' '}
+          {COPY.simulated}
+        </Typography>
         <Typography variant="paragraph-mini" color="muted" className="flex items-center gap-1.5">
           <ShieldCheck className="size-3.5 shrink-0" aria-hidden />
           {guardText}

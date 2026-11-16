@@ -319,6 +319,7 @@ export const OPERATIONS: Operation[] = [
     threshold: 1,
     owners: 3,
     opportunityIds: ['aave-usdc'],
+    recurring: { amount: 100_000, frequency: 'month' },
   },
   {
     id: 'dedicated-lido-steth',
