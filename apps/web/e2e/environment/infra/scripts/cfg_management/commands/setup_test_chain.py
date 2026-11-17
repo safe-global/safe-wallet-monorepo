@@ -22,6 +22,7 @@ def create_placeholder_image(color: str = "#B8AAF8") -> ContentFile:
 # Staging Sepolia features for WALLET_WEB, which the specs expect.
 # Left out: SECURITY_HUB stalls transaction signing in the local stack.
 # Added: QUEUE_SERVICE, because CGW runs with FF_SAFE_QUEUE_SERVICE and the wallet must sign for it.
+# Added: SPACE_TRANSACTIONS, which staging does not enable yet, for the Workspace Pending specs.
 DEFAULT_FEATURES = [
     "ADDRESS_POISONING_PROTECTION",
     "BATCHING",
@@ -64,6 +65,7 @@ DEFAULT_FEATURES = [
     "SAFE_STAKING",
     "SPACE_AUDIT_LOG",
     "SPACE_ONBOARDING_SURVEY",
+    "SPACE_TRANSACTIONS",
     "SPEED_UP_TX",
     "SPENDING_LIMIT",
     "SPENDING_LIMIT_GATING",

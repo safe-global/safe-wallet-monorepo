@@ -30,6 +30,7 @@ export const playwrightSpecs = {
   'e2e/owner-management.spec.ts': {},
   'e2e/policies.spec.ts': {},
   'e2e/workspace.spec.ts': {},
+  'e2e/workspace-pending.spec.ts': {},
   'e2e/positions.spec.ts': {
     scenarios: ['prepareZerionPositionsScenario'],
     chains: [1],
