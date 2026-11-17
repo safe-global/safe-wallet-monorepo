@@ -1,13 +1,14 @@
 import { id, Interface } from 'ethers'
 import { decodeMultiSendData } from '@safe-global/protocol-kit'
 import { OperationType, type SafeTransaction } from '@safe-global/types-kit'
-import { type SupportedChainId, WRAPPED_NATIVE_CURRENCIES } from '@cowprotocol/cow-sdk'
+import { getMultiSendCallOnlyDeployments, getMultiSendDeployments } from '@safe-global/safe-deployments'
 import {
   APPROVAL_SIGNATURE_HASH,
   ERC20_INTERFACE,
 } from '@safe-global/utils/components/tx/ApprovalEditor/utils/approvals'
 import { type AnalysisResult, Severity, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
+import { hasMatchingDeployment, TRUSTED_DEPLOYMENT_VERSIONS } from '@safe-global/utils/services/contracts/deployments'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 
 // CoW Protocol uses the same addresses on every chain, with a separate set for its staging environment
@@ -22,6 +23,21 @@ export const COW_DEPLOYMENTS = [
   },
 ]
 
+// WRAPPED_NATIVE_CURRENCIES of @cowprotocol/sdk-config, copied to keep the CoW SDK out of the global bundle
+export const WRAPPED_NATIVE_TOKENS: Record<string, string> = {
+  '1': '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+  '56': '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+  '100': '0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d',
+  '137': '0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
+  '8453': '0x4200000000000000000000000000000000000006',
+  '9745': '0x6100e367285b01f48d07953803a2d8dca5d19873',
+  '42161': '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',
+  '43114': '0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7',
+  '57073': '0x4200000000000000000000000000000000000006',
+  '59144': '0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f',
+  '11155111': '0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14',
+}
+
 const PRE_SIGN_SELECTOR = id('setPreSignature(bytes,bool)').slice(0, 10)
 const WRAP_SELECTOR = id('deposit()').slice(0, 10)
 const SETTLEMENT_INTERFACE = new Interface(['function setPreSignature(bytes orderUid, bool signed)'])
@@ -35,16 +51,18 @@ const isSameAddress = (a: string, b: string) => a.toLowerCase() === b.toLowerCas
 const getSelector = (data: string) => data.slice(0, 10).toLowerCase()
 const isPlainCall = (call: Call) => call.operation !== OperationType.DelegateCall && BigInt(call.value || '0') === 0n
 
-const isOrderPresignature = (call: Call, deployment: CowDeployment): boolean => {
-  if (!isPlainCall(call) || getSelector(call.data) !== PRE_SIGN_SELECTOR) return false
-  if (!isSameAddress(call.to, deployment.settlement)) return false
+const decodePresignature = (call: Call): { signed: boolean } | undefined => {
+  if (getSelector(call.data) !== PRE_SIGN_SELECTOR) return undefined
   try {
     const [, signed] = SETTLEMENT_INTERFACE.decodeFunctionData('setPreSignature', call.data)
-    return signed === true
+    return { signed: signed === true }
   } catch {
-    return false
+    return undefined
   }
 }
+
+const isOrderPresignature = (call: Call, deployment: CowDeployment): boolean =>
+  isPlainCall(call) && isSameAddress(call.to, deployment.settlement) && decodePresignature(call)?.signed === true
 
 const isApprovalTo = (call: Call, spender: string): boolean => {
   if (!isPlainCall(call) || getSelector(call.data) !== APPROVAL_SIGNATURE_HASH) return false
@@ -56,13 +74,15 @@ const isApprovalTo = (call: Call, spender: string): boolean => {
   }
 }
 
-const isCowSupportedChainId = (chainId: number): chainId is SupportedChainId => chainId in WRAPPED_NATIVE_CURRENCIES
-
 const isWrapOfNativeToken = (call: Call, chainId: string): boolean => {
-  const id = Number(chainId)
-  if (!isCowSupportedChainId(id) || call.operation === OperationType.DelegateCall) return false
-  return getSelector(call.data) === WRAP_SELECTOR && isSameAddress(call.to, WRAPPED_NATIVE_CURRENCIES[id].address)
+  const wrappedNativeToken = WRAPPED_NATIVE_TOKENS[chainId]
+  if (!wrappedNativeToken || call.operation === OperationType.DelegateCall) return false
+  return getSelector(call.data) === WRAP_SELECTOR && isSameAddress(call.to, wrappedNativeToken)
 }
+
+const isOfficialMultiSend = (address: string, chainId: string): boolean =>
+  hasMatchingDeployment(getMultiSendCallOnlyDeployments, address, chainId, TRUSTED_DEPLOYMENT_VERSIONS) ||
+  hasMatchingDeployment(getMultiSendDeployments, address, chainId, TRUSTED_DEPLOYMENT_VERSIONS)
 
 const decodeBatch = (data: string): Call[] | undefined => {
   try {
@@ -73,17 +93,18 @@ const decodeBatch = (data: string): Call[] | undefined => {
 }
 
 /**
- * The calls the transaction executes, and the calls to look for a presignature in. A MultiSend payload that is not
- * delegate called does not run as a batch, so it counts as a single call even when it carries a presignature.
+ * The calls the transaction executes, and the calls to look for a presignature in. A MultiSend payload only runs as a
+ * batch when an official MultiSend is delegate called; otherwise it counts as a single call, even with a presignature.
  */
-const getCalls = (safeTx: SafeTransaction): { executed: Call[]; inspected: Call[] } | undefined => {
+const getCalls = (safeTx: SafeTransaction, chainId: string): { executed: Call[]; inspected: Call[] } | undefined => {
   const { to, value, data, operation } = safeTx.data
   const outer = [{ to, value, data, operation }]
   if (!isMultiSendCalldata(data)) return { executed: outer, inspected: outer }
 
   const inner = decodeBatch(data)
   if (!inner) return undefined
-  return { executed: operation === OperationType.DelegateCall ? inner : outer, inspected: inner }
+  const isBatch = operation === OperationType.DelegateCall && isOfficialMultiSend(to, chainId)
+  return { executed: isBatch ? inner : outer, inspected: inner }
 }
 
 const countCallsOutsideOrder = (calls: Call[], chainId: string): number => {
@@ -111,8 +132,8 @@ export const getSwapWithOtherActionsResult = (
 ): SwapWithOtherActionsResult | undefined => {
   if (!safeTx?.data.data || !safeTx.data.data.toLowerCase().includes(PRE_SIGN_SELECTOR.slice(2))) return undefined
 
-  const calls = getCalls(safeTx)
-  if (!calls?.inspected.some((call) => getSelector(call.data) === PRE_SIGN_SELECTOR)) return undefined
+  const calls = getCalls(safeTx, chainId)
+  if (!calls?.inspected.some((call) => decodePresignature(call)?.signed)) return undefined
 
   const otherActions = countCallsOutsideOrder(calls.executed, chainId)
   if (otherActions === 0) return undefined

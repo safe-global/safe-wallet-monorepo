@@ -2,18 +2,21 @@ import { faker } from '@faker-js/faker'
 import { getAddress, Interface } from 'ethers'
 import { encodeMultiSendData } from '@safe-global/protocol-kit'
 import { OperationType, type MetaTransactionData, type SafeTransaction } from '@safe-global/types-kit'
-import { SupportedChainId, WRAPPED_NATIVE_CURRENCIES } from '@cowprotocol/cow-sdk'
+import { getMultiSendCallOnlyDeployments } from '@safe-global/safe-deployments'
 import { ERC20__factory, Multi_send__factory } from '@safe-global/utils/types/contracts'
 import { Severity, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
-import { COW_DEPLOYMENTS, getSwapWithOtherActionsResult } from '../swapWithOtherActions'
+import { COW_DEPLOYMENTS, getSwapWithOtherActionsResult, WRAPPED_NATIVE_TOKENS } from '../swapWithOtherActions'
 
 const ERC20_INTERFACE = ERC20__factory.createInterface()
 const MULTISEND_INTERFACE = Multi_send__factory.createInterface()
 const SETTLEMENT_INTERFACE = new Interface(['function setPreSignature(bytes orderUid, bool signed)'])
 const WETH_INTERFACE = new Interface(['function deposit()'])
 
-const CHAIN_ID = String(SupportedChainId.SEPOLIA)
-const WRAPPED_NATIVE = WRAPPED_NATIVE_CURRENCIES[SupportedChainId.SEPOLIA].address
+const CHAIN_ID = '11155111'
+const WRAPPED_NATIVE = WRAPPED_NATIVE_TOKENS[CHAIN_ID]
+const MULTI_SEND_CALL_ONLY = String(
+  getMultiSendCallOnlyDeployments({ network: CHAIN_ID, version: '1.4.1' })?.networkAddresses[CHAIN_ID],
+)
 const [PRODUCTION, STAGING] = COW_DEPLOYMENTS
 
 const randomAddress = () => getAddress(faker.finance.ethereumAddress())
@@ -53,10 +56,10 @@ const tokenTransfer = (): MetaTransactionData => ({
 })
 
 const singleCall = (call: MetaTransactionData) => ({ data: { ...call } }) as SafeTransaction
-const batch = (calls: MetaTransactionData[], operation = OperationType.DelegateCall) =>
+const batch = (calls: MetaTransactionData[], operation = OperationType.DelegateCall, to = MULTI_SEND_CALL_ONLY) =>
   ({
     data: {
-      to: randomAddress(),
+      to,
       value: '0',
       data: MULTISEND_INTERFACE.encodeFunctionData('multiSend', [encodeMultiSendData(calls)]),
       operation,
@@ -85,6 +88,10 @@ describe('getSwapWithOtherActionsResult', () => {
 
   it('returns nothing for an order made against the staging contracts', () => {
     expect(check(batch([approve(STAGING.vaultRelayer), presign({ to: STAGING.settlement })]))).toBeUndefined()
+  })
+
+  it('returns nothing for a cancellation of a presignature', () => {
+    expect(check(singleCall(presign({}, false)))).toBeUndefined()
   })
 
   it('warns about transfers batched with an order', () => {
@@ -136,5 +143,10 @@ describe('getSwapWithOtherActionsResult', () => {
 
   it('treats a batch that is not delegate called as a single call', () => {
     expect(check(batch([nativeTransfer(), presign()], OperationType.Call))?.description).toContain('1 other action ')
+  })
+
+  it('treats a batch delegate called on a contract other than an official MultiSend as a single call', () => {
+    const safeTx = batch([approve(), presign()], OperationType.DelegateCall, randomAddress())
+    expect(check(safeTx)?.description).toContain('1 other action ')
   })
 })
