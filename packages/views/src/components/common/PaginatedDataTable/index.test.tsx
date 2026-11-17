@@ -432,23 +432,6 @@ describe('PaginatedDataTable', () => {
       expect(onSelectionChange).toHaveBeenCalledWith(new Set())
     })
 
-    it('disables rows that isRowSelectable rejects and skips them in the header toggle', () => {
-      const rows = makeKeys(3)
-      const onSelectionChange = jest.fn()
-
-      render(
-        selectableTable(rows, {
-          selectedKeys: new Set(),
-          onSelectionChange,
-          isRowSelectable: (row) => row !== rows[0],
-        }),
-      )
-      fireEvent.click(screen.getByRole('checkbox', { name: 'Select all rows on this page' }))
-
-      expect(screen.getByRole('checkbox', { name: `Select ${rows[0]}` })).toHaveAttribute('aria-disabled', 'true')
-      expect(onSelectionChange).toHaveBeenCalledWith(new Set([rows[1], rows[2]]))
-    })
-
     it('does not fire onRowClick when a checkbox is clicked', () => {
       const rows = makeKeys(2)
       const onRowClick = jest.fn()

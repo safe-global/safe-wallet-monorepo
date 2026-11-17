@@ -1,13 +1,13 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { ADDRESS_BOOK_NAME_MAX_LENGTH } from '@safe-global/utils/validation/names'
 import type { SuggestedContact } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import type { SignedSafe, WorkspaceSigner } from '../../hooks/useWorkspaceSigners'
 import { toChainInfos } from './utils'
 
-export const safeLabel = ({ name, address }: SignedSafe): string =>
-  name || `Safe ${address.slice(0, 6)}...${address.slice(-4)}`
+export const safeLabel = ({ name, address }: SignedSafe): string => name || `Safe ${shortenAddress(address)}`
 
 export const suggestedSignerName = (safe: SignedSafe): string => {
   const suffix = ` signer ${safe.position}`

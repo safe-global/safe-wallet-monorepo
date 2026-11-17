@@ -88,8 +88,6 @@ type PaginatedDataTableProps<T> = {
   selectable?: boolean
   selectedKeys?: ReadonlySet<string>
   onSelectionChange?: (next: Set<string>) => void
-  /** Rows that return false render a disabled checkbox and are skipped by the header toggle. */
-  isRowSelectable?: (row: T) => boolean
   /** Accessible name for a row's checkbox, defaulting to "Select <row key>". */
   getSelectionLabel?: (row: T) => string
   /**
@@ -145,7 +143,6 @@ function PaginatedDataTable<T>({
   selectable = false,
   selectedKeys,
   onSelectionChange,
-  isRowSelectable,
   getSelectionLabel,
 }: PaginatedDataTableProps<T>) {
   const isMobile = useIsMobile()
@@ -212,10 +209,9 @@ function PaginatedDataTable<T>({
   const showDetailToggle = isCompact && Boolean(renderRowDetail)
   const totalColumns = visibleColumns.length + (showDetailToggle ? 1 : 0) + (selectable ? 1 : 0)
 
-  const canSelect = (row: T) => isRowSelectable?.(row) ?? true
-  const selectablePageKeys = selectable ? paginatedRows.filter(canSelect).map(getRowKey) : []
-  const selectedOnPage = selectablePageKeys.filter((key) => selectedKeys?.has(key) ?? false).length
-  const allPageSelected = selectablePageKeys.length > 0 && selectedOnPage === selectablePageKeys.length
+  const pageKeys = selectable ? paginatedRows.map(getRowKey) : []
+  const selectedOnPage = pageKeys.filter((key) => selectedKeys?.has(key) ?? false).length
+  const allPageSelected = pageKeys.length > 0 && selectedOnPage === pageKeys.length
   const somePageSelected = selectedOnPage > 0 && !allPageSelected
 
   const updateSelection = (mutate: (next: Set<string>) => void) => {
@@ -226,8 +222,8 @@ function PaginatedDataTable<T>({
 
   const togglePage = () =>
     updateSelection((next) => {
-      if (allPageSelected) selectablePageKeys.forEach((key) => next.delete(key))
-      else selectablePageKeys.forEach((key) => next.add(key))
+      if (allPageSelected) pageKeys.forEach((key) => next.delete(key))
+      else pageKeys.forEach((key) => next.add(key))
     })
 
   const toggleRow = (key: string) =>
@@ -257,7 +253,7 @@ function PaginatedDataTable<T>({
                   aria-label={allPageSelected ? 'Deselect all rows on this page' : 'Select all rows on this page'}
                   checked={allPageSelected}
                   indeterminate={somePageSelected}
-                  disabled={selectablePageKeys.length === 0}
+                  disabled={pageKeys.length === 0}
                   onCheckedChange={togglePage}
                   data-testid="select-all-checkbox"
                 />
@@ -327,7 +323,6 @@ function PaginatedDataTable<T>({
                       <Checkbox
                         aria-label={getSelectionLabel?.(row) ?? `Select ${key}`}
                         checked={selectedKeys?.has(key) ?? false}
-                        disabled={!canSelect(row)}
                         onCheckedChange={() => toggleRow(key)}
                         data-testid="row-checkbox"
                       />

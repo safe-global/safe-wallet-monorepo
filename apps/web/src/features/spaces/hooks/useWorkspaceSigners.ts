@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from 'react'
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -30,7 +31,7 @@ export const toWorkspaceSigners = (
       if (!signer.chainIds.includes(chainId)) signer.chainIds.push(chainId)
 
       const position = index + 1
-      const known = signer.safes.find((safe) => safe.address.toLowerCase() === safeAddress.toLowerCase())
+      const known = signer.safes.find((safe) => sameAddress(safe.address, safeAddress))
       if (!known) {
         signer.safes.push({ address: safeAddress, name: names.get(safeAddress.toLowerCase()), position })
       } else if (position < known.position) {
@@ -73,36 +74,47 @@ export const useWorkspaceSigners = (): {
     [currentData],
   )
 
+  const hasSafes = safeRefs.length > 0
   const {
-    data: overviews,
-    isLoading: isOverviewsLoading,
+    currentData: overviews,
     isError: isOverviewsError,
-  } = useGetMultipleSafeOverviewsQuery(safeRefs.length > 0 ? { safes: safeRefs, currency } : skipToken)
+    refetch: refetchOverviews,
+  } = useGetMultipleSafeOverviewsQuery(hasSafes ? { safes: safeRefs, currency } : skipToken)
+  // `currentData` is empty while a new set of Safes loads, so signers are never built from the previous set
+  const isOverviewsLoading = hasSafes && !overviews && !isOverviewsError
 
-  const signers = useMemo(() => {
+  const { signers, isEveryOverviewMissing } = useMemo(() => {
+    let deployedCount = 0
+    let missingCount = 0
     const owners = safeRefs.flatMap(({ chainId, address }) => {
-      const overview = overviews?.find(
-        (item) => item.chainId === chainId && item.address.value.toLowerCase() === address.toLowerCase(),
-      )
-      const cfOwners = Object.entries(undeployedSafes[chainId] ?? {}).find(
-        ([key]) => key.toLowerCase() === address.toLowerCase(),
-      )?.[1].props.safeAccountConfig.owners
+      const overview = overviews?.find((item) => item.chainId === chainId && sameAddress(item.address.value, address))
+      const cfOwners = Object.entries(undeployedSafes[chainId] ?? {}).find(([key]) => sameAddress(key, address))?.[1]
+        .props.safeAccountConfig.owners
+      if (!cfOwners) {
+        deployedCount += 1
+        if (!overview) missingCount += 1
+      }
       const safeOwners = overview ? overview.owners.map((owner) => owner.value) : cfOwners
       return safeOwners ? [{ chainId, safeAddress: address, owners: safeOwners }] : []
     })
-    return toWorkspaceSigners(owners, book.items)
+    return {
+      signers: toWorkspaceSigners(owners, book.items),
+      // The overviews endpoint drops Safes it failed to load, so none at all means the request failed
+      isEveryOverviewMissing: overviews !== undefined && deployedCount > 0 && missingCount === deployedCount,
+    }
   }, [safeRefs, overviews, undeployedSafes, book.items])
 
   const { refetch: refetchBook, isUninitialized: isBookUninitialized } = book
   const refetch = useCallback(() => {
     if (!isSafesUninitialized) refetchSafes()
     if (!isBookUninitialized) refetchBook()
-  }, [isSafesUninitialized, isBookUninitialized, refetchSafes, refetchBook])
+    if (hasSafes) refetchOverviews()
+  }, [isSafesUninitialized, isBookUninitialized, hasSafes, refetchSafes, refetchBook, refetchOverviews])
 
   return {
     signers,
     isLoading: isSafesLoading || isOverviewsLoading || book.isLoading,
-    isError: isSafesError || isOverviewsError || book.isError,
+    isError: isSafesError || isOverviewsError || isEveryOverviewMissing || book.isError,
     refetch,
   }
 }

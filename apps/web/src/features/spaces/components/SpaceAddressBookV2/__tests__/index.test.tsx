@@ -39,6 +39,8 @@ jest.mock('@/features/spaces', () => ({
   useAddressBookRequestsState: jest.fn(),
   useMemberNameResolver: jest.fn(),
   useCurrentSpaceId: jest.fn(() => SPACE_ID),
+  useUpsertWorkspaceSafeNames: jest.fn(() => jest.fn()),
+  useWorkspaceAddressBookLabel: jest.fn(() => 'Workspace address book'),
 }))
 jest.mock('../../../hooks/useWorkspaceSigners', () => ({ useWorkspaceSigners: jest.fn() }))
 jest.mock('@/hooks/useChains', () => ({
@@ -744,6 +746,50 @@ describe('SpaceAddressBookV2', () => {
       renderAddressBook()
 
       expect(screen.getByRole('tab', { name: 'Suggested' })).toBeInTheDocument()
+    })
+
+    it('reloads the suggestions after they failed to load', async () => {
+      const refetch = jest.fn()
+      mockSigners({ isError: true, refetch })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested' }))
+      await userEvent.click(within(screen.getByTestId('suggestions-error')).getByRole('button', { name: 'Reload' }))
+
+      expect(refetch).toHaveBeenCalledTimes(1)
+    })
+
+    it('offers admins to add a suggestion', async () => {
+      mockSigners({ signers: [signerBuilder().build()] })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested (1)' }))
+
+      expect(screen.getByRole('button', { name: 'Add to Workspace' })).toBeInTheDocument()
+    })
+
+    it('offers members a request instead of adding a suggestion', async () => {
+      const signer = signerBuilder().build()
+      mockRole('member')
+      mockSigners({ signers: [signer] })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested (1)' }))
+
+      expect(screen.getByRole('button', { name: `Request ${signer.safes[0].name} signer 1` })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Add to Workspace' })).not.toBeInTheDocument()
+    })
+
+    it('shows members which suggestions they already requested', async () => {
+      const signer = signerBuilder().build()
+      mockRole('member')
+      mockSigners({ signers: [signer] })
+      mockRequests({ items: [requestBuilder().with({ address: signer.address }).build()] })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested (1)' }))
+
+      expect(screen.getByRole('button', { name: `${signer.safes[0].name} signer 1 requested` })).toBeInTheDocument()
     })
 
     it('shows the pending requests', async () => {

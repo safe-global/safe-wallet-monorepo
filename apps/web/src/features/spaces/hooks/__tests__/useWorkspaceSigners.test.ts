@@ -122,6 +122,7 @@ describe('toWorkspaceSigners', () => {
 
 describe('useWorkspaceSigners', () => {
   const refetchSafes = jest.fn()
+  const refetchOverviews = jest.fn()
   const refetchBook = jest.fn()
 
   const mockSafes = (safes: Record<string, string[]> | undefined, state = {}) =>
@@ -133,11 +134,28 @@ describe('useWorkspaceSigners', () => {
       ...state,
     })
 
+  const mockOverviews = (overviews: SafeOverview[] | undefined, state = {}) =>
+    mockUseGetMultipleSafeOverviewsQuery.mockReturnValue({
+      currentData: overviews,
+      isError: false,
+      refetch: refetchOverviews,
+      ...state,
+    })
+
+  const mockBook = (state = {}) =>
+    mockUseSpaceAddressBookState.mockReturnValue({
+      items: [],
+      isLoading: false,
+      isError: false,
+      refetch: refetchBook,
+      ...state,
+    })
+
   beforeEach(() => {
     jest.clearAllMocks()
     mockUndeployedSafes = {}
-    mockUseGetMultipleSafeOverviewsQuery.mockReturnValue({ data: [], isLoading: false, isError: false })
-    mockUseSpaceAddressBookState.mockReturnValue({ items: [], isLoading: false, isError: false, refetch: refetchBook })
+    mockOverviews([])
+    mockBook()
     mockSafes({})
   })
 
@@ -146,11 +164,7 @@ describe('useWorkspaceSigners', () => {
     const safeB = randomAddress()
     const owner = randomAddress()
     mockSafes({ '1': [safeA, safeB] })
-    mockUseGetMultipleSafeOverviewsQuery.mockReturnValue({
-      data: [buildOverview('1', safeA, [owner])],
-      isLoading: false,
-      isError: false,
-    })
+    mockOverviews([buildOverview('1', safeA, [owner])])
 
     const { result } = renderHook(() => useWorkspaceSigners())
 
@@ -163,6 +177,69 @@ describe('useWorkspaceSigners', () => {
     })
     expect(result.current.signers).toHaveLength(1)
     expect(result.current.signers[0].safes.map((safe) => safe.address)).toEqual([safeA])
+    expect(result.current.isError).toBe(false)
+  })
+
+  it('uses the overview of the matching chain when the same Safe address is on two chains', () => {
+    const safe = randomAddress()
+    const mainnetOwner = randomAddress()
+    const optimismOwner = randomAddress()
+    mockSafes({ '1': [safe], '10': [safe] })
+    mockOverviews([buildOverview('10', safe, [optimismOwner]), buildOverview('1', safe, [mainnetOwner])])
+
+    const { result } = renderHook(() => useWorkspaceSigners())
+
+    expect(result.current.signers.map(({ address, chainIds }) => ({ address, chainIds }))).toEqual([
+      { address: mainnetOwner, chainIds: ['1'] },
+      { address: optimismOwner, chainIds: ['10'] },
+    ])
+  })
+
+  it('reports an error when no deployed Safe has an overview', () => {
+    mockSafes({ '1': [randomAddress(), randomAddress()] })
+    mockOverviews([])
+
+    const { result } = renderHook(() => useWorkspaceSigners())
+
+    expect(result.current.isError).toBe(true)
+  })
+
+  it('reports an error when the overviews request fails', () => {
+    mockSafes({ '1': [randomAddress()] })
+    mockOverviews(undefined, { isError: true })
+
+    const { result } = renderHook(() => useWorkspaceSigners())
+
+    expect(result.current.isError).toBe(true)
+    expect(result.current.isLoading).toBe(false)
+  })
+
+  it('reports an error when the address book request fails', () => {
+    mockBook({ isError: true })
+
+    const { result } = renderHook(() => useWorkspaceSigners())
+
+    expect(result.current.isError).toBe(true)
+  })
+
+  it('does not report an error for a workspace with only undeployed Safes', () => {
+    const safe = randomAddress()
+    mockSafes({ '1': [safe] })
+    mockUndeployedSafes = { '1': { [safe]: { props: { safeAccountConfig: { owners: [randomAddress()] } } } } }
+
+    const { result } = renderHook(() => useWorkspaceSigners())
+
+    expect(result.current.isError).toBe(false)
+  })
+
+  it('reports loading instead of the previous overviews while a new set of Safes loads', () => {
+    mockSafes({ '1': [randomAddress()] })
+    mockOverviews(undefined)
+
+    const { result } = renderHook(() => useWorkspaceSigners())
+
+    expect(result.current.isLoading).toBe(true)
+    expect(result.current.signers).toEqual([])
   })
 
   it('reads owners of an undeployed workspace Safe from the local counterfactual config', () => {
@@ -185,18 +262,19 @@ describe('useWorkspaceSigners', () => {
   })
 
   it('reports loading until the space Safes, overviews and book have loaded', () => {
+    const safe = randomAddress()
     mockSafes({}, { isLoading: true })
     expect(renderHook(() => useWorkspaceSigners()).result.current.isLoading).toBe(true)
 
-    mockSafes({})
-    mockUseGetMultipleSafeOverviewsQuery.mockReturnValue({ data: undefined, isLoading: true, isError: false })
+    mockSafes({ '1': [safe] })
+    mockOverviews(undefined)
     expect(renderHook(() => useWorkspaceSigners()).result.current.isLoading).toBe(true)
 
-    mockUseGetMultipleSafeOverviewsQuery.mockReturnValue({ data: [], isLoading: false, isError: false })
-    mockUseSpaceAddressBookState.mockReturnValue({ items: [], isLoading: true, isError: false, refetch: refetchBook })
+    mockOverviews([buildOverview('1', safe, [randomAddress()])])
+    mockBook({ isLoading: true })
     expect(renderHook(() => useWorkspaceSigners()).result.current.isLoading).toBe(true)
 
-    mockUseSpaceAddressBookState.mockReturnValue({ items: [], isLoading: false, isError: false, refetch: refetchBook })
+    mockBook()
     expect(renderHook(() => useWorkspaceSigners()).result.current.isLoading).toBe(false)
   })
 
@@ -208,29 +286,26 @@ describe('useWorkspaceSigners', () => {
     expect(result.current.isError).toBe(true)
   })
 
-  it('refetches the space Safes and the book', () => {
+  it('refetches the space Safes, the overviews and the book', () => {
+    mockSafes({ '1': [randomAddress()] })
     const { result } = renderHook(() => useWorkspaceSigners())
 
     result.current.refetch()
 
     expect(refetchSafes).toHaveBeenCalledTimes(1)
+    expect(refetchOverviews).toHaveBeenCalledTimes(1)
     expect(refetchBook).toHaveBeenCalledTimes(1)
   })
 
   it('does not refetch while the queries are skipped', () => {
     mockSafes(undefined, { isUninitialized: true })
-    mockUseSpaceAddressBookState.mockReturnValue({
-      items: [],
-      isLoading: false,
-      isError: false,
-      isUninitialized: true,
-      refetch: refetchBook,
-    })
+    mockBook({ isUninitialized: true })
     const { result } = renderHook(() => useWorkspaceSigners())
 
     result.current.refetch()
 
     expect(refetchSafes).not.toHaveBeenCalled()
+    expect(refetchOverviews).not.toHaveBeenCalled()
     expect(refetchBook).not.toHaveBeenCalled()
   })
 })
