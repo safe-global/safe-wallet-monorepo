@@ -7,17 +7,25 @@ import SpacePlansPage from '@/pages/spaces/plans'
 import SpaceSafeAccounts from '@/pages/spaces/safe-accounts'
 import MyAccountsPage from '@/pages/welcome/accounts'
 import CreateSpacePage from '@/pages/spaces/create-space'
+import SpaceAddressBook from '@/pages/spaces/address-book'
 import ClaimTrialModal from '../ClaimTrialModal'
+import { TRIAL_FLOW_PARAM, WORKSPACE_FIRST } from './trialFlow'
 import { PLAN_STATES, SAFE_COUNTS, scenarioHandlers, type PlanState, type Region } from './scenario'
 
-type Page = 'home' | 'accounts' | 'plans'
+type Page = 'home' | 'accounts' | 'plans' | 'address-book'
 type Args = { plan: PlanState; safes: number; region: Region; page: Page }
 
-const PATHNAMES: Record<Page, string> = { home: '/spaces', accounts: '/spaces/safe-accounts', plans: '/spaces/plans' }
+const PATHNAMES: Record<Page, string> = {
+  home: '/spaces',
+  accounts: '/spaces/safe-accounts',
+  plans: '/spaces/plans',
+  'address-book': '/spaces/address-book',
+}
 const PAGES: Record<Page, ComponentType> = {
   home: SpaceDashboard,
   accounts: SpaceSafeAccounts,
   plans: SpacePlansPage,
+  'address-book': SpaceAddressBook,
 }
 
 const setup = createMockStory({
@@ -65,10 +73,12 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const at = (page: Page, args: Partial<Args> = {}): Story => ({
+const at = (page: Page, args: Partial<Args> = {}, query: Record<string, string> = {}): Story => ({
   args: { page, ...args },
-  parameters: { nextjs: { router: { pathname: PATHNAMES[page], query: { spaceId: MOCK_SPACE_ID } } } },
+  parameters: { nextjs: { router: { pathname: PATHNAMES[page], query: { spaceId: MOCK_SPACE_ID, ...query } } } },
 })
+
+const workspaceFirst = { [TRIAL_FLOW_PARAM]: WORKSPACE_FIRST }
 
 export const PreTrial = at('home', { plan: 'pre-trial' })
 export const Trial = at('home')
@@ -96,3 +106,9 @@ export const CreateWorkspace: Story = {
     </>
   ),
 }
+
+/** Variant B: before the trial the Workspace opens as usual, with a quiet offer instead of a blocking modal. */
+export const PreTrialWorkspaceFirst = at('home', { plan: 'pre-trial' }, workspaceFirst)
+
+/** Variant B: the first Pro feature opened asks for the trial, straight on the details form. */
+export const PreTrialProFeature = at('address-book', { plan: 'pre-trial' }, workspaceFirst)

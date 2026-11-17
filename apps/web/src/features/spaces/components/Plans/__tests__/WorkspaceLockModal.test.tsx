@@ -15,7 +15,7 @@ const mockUseIsAdmin = jest.fn()
 const mockPush = jest.fn()
 let mockPathname = '/spaces'
 
-jest.mock('next/router', () => ({ useRouter: () => ({ push: mockPush, pathname: mockPathname }) }))
+jest.mock('next/router', () => ({ useRouter: () => ({ push: mockPush, pathname: mockPathname, query: {} }) }))
 jest.mock('../../../hooks/useWorkspaceLock', () => ({
   useWorkspaceLock: (spaceId?: string) => mockUseWorkspaceLock(spaceId),
 }))

@@ -19,6 +19,30 @@ export const PRO_TRIAL_COPY = {
   trialStatus: (until: string) => `Your trial includes every Pro feature until ${until}.`,
   planName: (plan: string, seats: number | null | undefined) => (seats ? `${plan} ${seats}` : plan),
 
+  trialDetails: {
+    title: 'Start your free trial',
+    featureTitle: (feature: string) => `Start your free trial to use ${feature}`,
+    email: 'Work email',
+    emailHint: "We'll use this email for trial reminders. No card needed.",
+    emailError: 'Enter a valid email address',
+    name: 'Full name',
+    nameError: 'Enter your name',
+    company: 'Company',
+    optional: '(optional)',
+    terms: 'I agree to the Safe Pro terms',
+    termsError: 'Accept the terms to start your trial',
+    submit: 'Start free trial',
+    starting: 'Starting your trial…',
+    back: 'Back',
+    notNow: 'Not now',
+    error: 'We couldn’t start your trial. Please try again.',
+  },
+
+  preTrial: {
+    status: 'Try every Pro feature free for 30 days. No card needed.',
+    start: 'Start free trial',
+  },
+
   handoff: {
     price: (price: string) => `${price}/mo for this Workspace, billed monthly.`,
     noCharge: "You'll confirm the payment on Stripe. Nothing is charged until you do.",
