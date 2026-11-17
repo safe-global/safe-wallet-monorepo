@@ -7,6 +7,7 @@ import {
 } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueStates'
 import { useSpaceQueue, type SpaceQueue } from '../../store/spaceQueueApi'
 import SpaceQueueTable from './SpaceQueueTable'
+import TransactionsToolbar from './TransactionsToolbar'
 
 const QueueBody = ({ queue }: { queue: SpaceQueue }): ReactElement => (
   <>
@@ -20,6 +21,8 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
 
   return (
     <div className="flex flex-col gap-6">
+      <TransactionsToolbar spaceId={spaceId} />
+
       {queue ? <QueueBody queue={queue} /> : isError ? <QueueLoadError onRetry={refetch} /> : <SkeletonTxList />}
     </div>
   )
