@@ -39,22 +39,6 @@ const adminActions = (
   </>
 )
 
-export const Admin: Story = { args: { actions: adminActions } }
-
-/** Members can only export. */
-export const Member: Story = {
-  args: {
-    actions: (
-      <ButtonGroup>
-        <Button variant="outline" size="lg">
-          <Download aria-hidden="true" data-icon="inline-start" />
-          Export
-        </Button>
-      </ButtonGroup>
-    ),
-  },
-}
-
 const filters = (
   <Button variant="outline" size="lg">
     <ListFilter aria-hidden="true" data-icon="inline-start" />
@@ -62,7 +46,24 @@ const filters = (
   </Button>
 )
 
-/** The Workspace contacts toolbar: its search also matches tags. */
+/** Local contacts: no tags, so no Filters. */
+export const Admin: Story = { args: { actions: adminActions } }
+
+/** Workspace contacts as a member: Search, Filters and Export only. */
+export const Member: Story = {
+  args: {
+    searchScope: 'name, address or tag',
+    filters,
+    actions: (
+      <Button variant="outline" size="lg">
+        <Download aria-hidden="true" data-icon="inline-start" />
+        Export
+      </Button>
+    ),
+  },
+}
+
+/** Workspace contacts as an admin: the search also matches tags. */
 export const WithFilters: Story = {
   args: { searchScope: 'name, address or tag', actions: adminActions, filters },
 }

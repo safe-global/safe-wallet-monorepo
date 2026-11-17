@@ -189,7 +189,7 @@ const WorkspaceContacts = ({
         actions={
           isAdmin ? (
             <>
-              <ButtonGroup>
+              <ButtonGroup aria-label="Import and export">
                 <ImportWorkspaceCsv items={items} tags={tags} size="lg" />
                 {exportButton}
               </ButtonGroup>

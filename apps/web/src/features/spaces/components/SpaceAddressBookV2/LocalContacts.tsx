@@ -125,7 +125,7 @@ const LocalContacts = ({
         onQueryChange={setQuery}
         actions={
           <>
-            <ButtonGroup>
+            <ButtonGroup aria-label="Import and export">
               <LocalContactsCsvActions hasContacts size="lg" />
             </ButtonGroup>
             <AddLocalContact size="lg" />
