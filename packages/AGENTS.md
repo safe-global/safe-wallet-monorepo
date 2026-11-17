@@ -18,7 +18,7 @@ To also cover dependents, use the turbo `--filter` command from the root AGENTS.
 - Env vars: web injects `NEXT_PUBLIC_*`, mobile `EXPO_PUBLIC_*` — check for both prefixes in package code.
 - New dependencies must work under both bundlers (Next.js/Vite and Metro). `utils` declares `@safe-global/protocol-kit`, `@safe-global/store`, `@safe-global/types-kit` as peerDependencies.
 
-## Auto-generated files (never edit by hand)
+## Auto-generated files
 
 - `packages/store/src/gateway/AUTO_GENERATED/` — generated from the committed `packages/store/scripts/api-schema/schema.json`.
   - Offline regen: `yarn workspace @safe-global/store generate-api && yarn workspace @safe-global/store write-schema-hash`

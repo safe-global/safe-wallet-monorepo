@@ -23,9 +23,9 @@ const createWrapper = (safeTx?: SafeTransaction) => {
     setSafeTxGas: () => {},
     setTxOrigin: () => {},
     isReadOnly: false,
-    gtfPaymentMode: 'safe',
-    setGtfPaymentMode: () => {},
-    setGtfSelectedGasToken: () => {},
+    feePaymentMode: 'safe',
+    setFeePaymentMode: () => {},
+    setFeeGasToken: () => {},
   }
   return function Wrapper({ children }: { children: ReactNode }) {
     return <SafeTxContext.Provider value={value}>{children}</SafeTxContext.Provider>

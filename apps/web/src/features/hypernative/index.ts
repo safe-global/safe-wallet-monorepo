@@ -68,6 +68,9 @@ export { useSafeShieldAssessmentUrl } from './hooks/useSafeShieldAssessmentUrl'
 // Auth token hook (used by safe-shield context)
 export { useAuthToken } from './hooks/useAuthToken'
 
+// Token refresh loop (mounted once in the app root)
+export { useHypernativeTokenRefresh } from './hooks/useHypernativeTokenRefresh'
+
 // Banner visibility hooks (used by dashboard)
 export { useBannerVisibility, BannerType } from './hooks/useBannerVisibility'
 

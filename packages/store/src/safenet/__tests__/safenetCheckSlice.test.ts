@@ -6,8 +6,10 @@ import {
 import {
   checkKey,
   pinVerdict,
+  recordCheckRequest,
   safenetCheckInitialState,
   safenetCheckSlice,
+  selectCheckRequestedAtMs,
   selectPinnedVerdict,
   type SafenetCheckSliceState,
 } from '../safenetCheckSlice'
@@ -24,7 +26,7 @@ const B = { safeTxHash: HASH_B, chainId: '100', safeAddress: SAFE }
 
 describe('safenetCheckSlice', () => {
   it('starts empty', () => {
-    expect(safenetCheckInitialState).toEqual({ pinned: {} })
+    expect(safenetCheckInitialState).toEqual({ pinned: {}, requested: {} })
   })
 
   it('pins a verdict keyed by the check identity', () => {
@@ -67,6 +69,23 @@ describe('safenetCheckSlice', () => {
     const root = { [safenetCheckSlice.name]: state }
     expect(selectPinnedVerdict(root, A)?.status).toBe(CheckStatus.BENIGN)
     expect(selectPinnedVerdict(root, B)).toBeUndefined()
+  })
+
+  it('records when a check was requested, per check identity', () => {
+    const state = reduce(safenetCheckInitialState, recordCheckRequest({ ...A, requestedAtMs: 1_000 }))
+    const root = { [safenetCheckSlice.name]: state }
+
+    expect(selectCheckRequestedAtMs(root, A)).toBe(1_000)
+    expect(selectCheckRequestedAtMs(root, B)).toBeUndefined()
+    expect(selectCheckRequestedAtMs(root, { ...A, chainId: '1' })).toBeUndefined()
+    expect(selectCheckRequestedAtMs(root, { ...A, safeAddress: SAFE.toUpperCase().replace('0X', '0x') })).toBe(1_000)
+  })
+
+  it('keeps the latest request time of a check', () => {
+    let state = reduce(safenetCheckInitialState, recordCheckRequest({ ...A, requestedAtMs: 1_000 }))
+    state = reduce(state, recordCheckRequest({ ...A, requestedAtMs: 5_000 }))
+
+    expect(selectCheckRequestedAtMs({ [safenetCheckSlice.name]: state }, A)).toBe(5_000)
   })
 
   describe('identity', () => {

@@ -6,6 +6,7 @@ import next from 'eslint-config-next'
 import prettier from 'eslint-config-prettier'
 import storybook from 'eslint-plugin-storybook'
 import { designSystemSyntaxRules } from '../../packages/views/eslint-design-system.mjs'
+import noExplicitAny from '../../config/eslint/no-explicit-any.mjs'
 
 // A Safe link without `spaceId` opens the Safe outside the Workspace of the current page. Matches a
 // `query` property or variable that holds such an object, directly or in a conditional.
@@ -22,18 +23,31 @@ const safeLinkWithoutSpaceIdRules = [
     'A Safe link must keep `spaceId`: use `useSafeLinkQuery()`, or wrap the query in `withSpaceId(query, spaceId)`. If the link must leave the Workspace, add `// eslint-disable-next-line no-restricted-syntax -- <reason>`.',
 }))
 
-export default [
+// Faker continues one shared sequence, so story data is the same in every run only if the file seeds it first
+const seedFakerInStoryData = {
+  selector:
+    "Program:has(ImportDeclaration[source.value=/faker|builders/]):not(:has(CallExpression[callee.object.name='faker'][callee.property.name='seed']))",
+  message: 'Story data must be the same in every run: call faker.seed(<number>) after the imports.',
+}
+
+const noTestDataInStories = {
+  selector: 'ImportDeclaration[source.value=/\\.testData$/]',
+  message: 'testData files may be random and are for tests only. Move the data a story needs to a .storyData.ts file.',
+}
+
+const storyDataRules = [seedFakerInStoryData, noTestDataInStories]
+
+const config = [
   {
     ignores: [
       '**/node_modules/',
       '**/.next/',
       '**/.github/',
-      '**/cypress/',
-      '**/cypress.config.js',
       '**/src/types/contracts/',
       '**/.storybook/test-runner.mjs',
       '**/.storybook/mocks/*.js',
       '**/public/mockServiceWorker.js',
+      '**/public/step-up-complete.js',
     ],
   },
   ...next,
@@ -129,7 +143,9 @@ export default [
         'error',
         {
           paths: [
+            { name: 'next', importNames: ['NextPage'], message: 'Type a page as a plain function component.' },
             { name: 'next/dynamic', message: 'Import dynamic from @/utils/dynamic, which does not depend on Next.' },
+            { name: 'next/app', message: 'Type the app props yourself, as pages/_app.tsx does.' },
             {
               name: 'next/image',
               message: 'Use a plain <img>. Images are served unoptimized, so next/image adds nothing.',
@@ -187,11 +203,35 @@ export default [
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules],
     },
   },
+  // The isolated-stack mocks run in Node with their own compiler settings, which the main tsconfig excludes.
+  {
+    files: ['e2e/environment/infra/mocks/*.ts'],
+    languageOptions: { parserOptions: { project: ['./e2e/environment/infra/mocks/tsconfig.json'] } },
+  },
+  // No tsconfig includes JavaScript, so these files get only the rules that need no type information.
+  {
+    files: ['**/*.{js,mjs,cjs}'],
+    languageOptions: { parserOptions: { project: null } },
+    rules: { '@typescript-eslint/await-thenable': 'off' },
+  },
+  noExplicitAny,
   // Tests build router mocks with a bare `safe` query, so only the design-system guards apply there.
   {
     files: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**', '**/*.stories.tsx', 'src/tests/**', 'src/stories/**'],
     rules: {
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules],
+    },
+  },
+  {
+    files: ['**/*.stories.tsx', '**/*.stories.ts', 'src/stories/**'],
+    rules: {
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...storyDataRules],
+    },
+  },
+  {
+    files: ['**/*.storyData.ts'],
+    rules: {
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules, ...storyDataRules],
     },
   },
   // Override for story files: allow type-only imports from @storybook/react
@@ -203,3 +243,5 @@ export default [
     },
   },
 ]
+
+export default config

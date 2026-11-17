@@ -30,7 +30,7 @@
     "jest-environment-jsdom": "^30.5.2",
     "prettier": "^3.9.10",
     "typescript": "~5.9.2",
-    "typescript-eslint": "^8.72.0"
+    "typescript-eslint": "^8.72.1"
   },
   "dependencies": {
     "jest-fixed-jsdom": "^0.0.11",

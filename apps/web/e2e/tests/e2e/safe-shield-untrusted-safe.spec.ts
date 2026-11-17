@@ -15,7 +15,7 @@ test.describe('Safe Shield untrusted Safe check', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const recipient = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1, inAccounts: false })
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1, inAccounts: false })
 
     const sendTokens = new SendTokensPage(safePage)
     const safeShield = new SafeShieldPage(safePage)

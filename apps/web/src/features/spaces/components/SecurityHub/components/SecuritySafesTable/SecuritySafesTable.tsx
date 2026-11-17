@@ -104,7 +104,6 @@ const SecuritySafesTable = ({
 
   // Gate remaining render on feature load. Utilities are synchronous call-site primitives —
   // pulling them via useLoadFeature means we must wait for the module to resolve.
-  // Since FEATURES.SPACES is already enabled on this page, this is a very brief state.
   if (!security.$isReady) return <></>
 
   return (

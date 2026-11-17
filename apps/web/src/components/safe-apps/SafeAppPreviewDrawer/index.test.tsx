@@ -3,7 +3,7 @@ import { SafeAppFeatures, SafeAppAccessPolicyTypes } from '@safe-global/store/ga
 import { type SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
 import SafeAppPreviewDrawer from '@/components/safe-apps/SafeAppPreviewDrawer'
-import { render, screen, waitFor } from '@/tests/test-utils'
+import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 
 jest.mock('@/features/multichain', () => ({
   NetworkLogosTooltip: ({ networks, maxVisible }: { networks: { chainId: string }[]; maxVisible?: number }) => (
@@ -129,5 +129,14 @@ describe('SafeAppPreviewDrawer', () => {
     render(<SafeAppPreviewDrawer isOpen safeApp={safeAppMock} onClose={jest.fn()} />)
 
     expect(await screen.findByRole('dialog')).toHaveAccessibleDescription(safeAppMock.description)
+  })
+
+  it('calls onClose when the close button is clicked', async () => {
+    const onClose = jest.fn()
+    render(<SafeAppPreviewDrawer isOpen safeApp={safeAppMock} onClose={onClose} />)
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Close Transaction Builder preview' }))
+
+    expect(onClose).toHaveBeenCalledTimes(1)
   })
 })

@@ -67,5 +67,7 @@ export const SidebarCollapsed: Story = {
   ...balancesSetup(),
   play: async ({ canvasElement }) => {
     await userEvent.click(await within(canvasElement).findByTestId('sidebar-trigger'))
+    // A synthetic click leaves a keyboard-style focus ring, or sometimes no focus; a mouse user sees no ring
+    ;(document.activeElement as HTMLElement | null)?.blur()
   },
 }

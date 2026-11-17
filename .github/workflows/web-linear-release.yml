@@ -45,7 +45,7 @@ concurrency:
 
 jobs:
   linear-release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     permissions:
       contents: read
 
@@ -69,7 +69,7 @@ jobs:
           echo "Linear release version: $VERSION"
 
       - name: Run Linear release (${{ inputs.command }})
-        uses: linear/linear-release-action@v0.18.1
+        uses: linear/linear-release-action@v0.18.2
         with:
           access_key: ${{ secrets.LINEAR_ACCESS_KEY_WEB }}
           command: ${{ inputs.command }}

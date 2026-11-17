@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   analyze:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@v7.0.1
 

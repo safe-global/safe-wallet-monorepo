@@ -273,7 +273,7 @@ describe('useFlowActivationGuard', () => {
 
     it('should preserve ?safe= in the welcome/spaces redirect when unauthenticated on a spaces path', async () => {
       setupMocks({
-        pathname: AppRoutes.spaces.createSpace,
+        pathname: AppRoutes.spaces.members,
         query: { safe: '1:0xdeadbeef' },
         wallet: { address: '0x123' },
         walletContext: { isReady: true },
@@ -293,7 +293,7 @@ describe('useFlowActivationGuard', () => {
     it('should preserve ?spaceId= with ?safe= in the welcome/spaces redirect when unauthenticated', async () => {
       const spaceId = '11111111-1111-1111-1111-111111111111'
       setupMocks({
-        pathname: AppRoutes.spaces.createSpace,
+        pathname: AppRoutes.spaces.members,
         query: { safe: '1:0xdeadbeef', spaceId },
         wallet: { address: '0x123' },
         walletContext: { isReady: true },
@@ -332,7 +332,7 @@ describe('useFlowActivationGuard', () => {
 
     it('should not append ?safe= when safe query param is not a string', async () => {
       setupMocks({
-        pathname: AppRoutes.spaces.createSpace,
+        pathname: AppRoutes.spaces.members,
         query: { safe: ['a', 'b'] } as unknown as Record<string, string>,
         wallet: { address: '0x123' },
         walletContext: { isReady: true },
@@ -352,10 +352,6 @@ describe('useFlowActivationGuard', () => {
   // -----------------------------------------------------------------------
 
   describe('authenticated but no spaces', () => {
-    it('should redirect to create space when user has no spaces', async () => {
-      setupMocks({ pathname: AppRoutes.spaces.index, spaces: [], isSpaceRoute: true })
-    })
-
     it('should allow access to home when user has no spaces (home is a public route)', async () => {
       setupMocks({ pathname: '/home', spaces: [] })
 
@@ -385,7 +381,7 @@ describe('useFlowActivationGuard', () => {
 
     it('should preserve ?safe= when redirecting to create space onboarding', async () => {
       setupMocks({
-        pathname: AppRoutes.spaces.createSpace,
+        pathname: AppRoutes.spaces.index,
         query: { safe: '1:0xdeadbeef' },
         spaces: [],
         isSpaceRoute: true,
@@ -400,9 +396,9 @@ describe('useFlowActivationGuard', () => {
       })
     })
 
-    it('should not append ?safe= to onboarding redirect when safe param is absent', async () => {
+    it('should redirect to create space without ?safe= when the user has no spaces', async () => {
       setupMocks({
-        pathname: AppRoutes.spaces.createSpace,
+        pathname: AppRoutes.spaces.index,
         query: {},
         spaces: [],
         isSpaceRoute: true,
@@ -436,24 +432,11 @@ describe('useFlowActivationGuard', () => {
   })
 
   // -----------------------------------------------------------------------
-  // Authenticated with spaces but navigating to onboarding without spaceId
+  // Authenticated with spaces on onboarding routes
   // -----------------------------------------------------------------------
 
   describe('authenticated with spaces on onboarding routes', () => {
-    it('should redirect to spaces create page when navigating to onboarding without spaceId', async () => {
-      setupMocks({
-        pathname: AppRoutes.welcome.createSpace,
-        query: {},
-        spaces: defaultSpaces,
-      })
-
-      const { result } = renderHook(() => useFlowActivationGuard())
-      const guardResult = await result.current.activationGuard()
-
-      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.spaces.createSpace })
-    })
-
-    it('should preserve ?safe= when redirecting to spaces create page', async () => {
+    it('should allow create space without spaceId so that the user can create another space', async () => {
       setupMocks({
         pathname: AppRoutes.welcome.createSpace,
         query: { safe: '1:0xdeadbeef' },
@@ -463,10 +446,20 @@ describe('useFlowActivationGuard', () => {
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()
 
-      expect(guardResult).toEqual({
-        success: false,
-        redirectTo: `${AppRoutes.spaces.createSpace}?safe=1%3A0xdeadbeef`,
+      expect(guardResult).toEqual({ success: true })
+    })
+
+    it('should allow select safes without spaceId because the step returns to create space itself', async () => {
+      setupMocks({
+        pathname: AppRoutes.welcome.selectSafes,
+        query: {},
+        spaces: defaultSpaces,
       })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: true })
     })
 
     it('should allow onboarding route when spaceId is present', async () => {

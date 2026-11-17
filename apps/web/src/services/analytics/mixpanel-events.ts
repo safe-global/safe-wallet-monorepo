@@ -85,6 +85,12 @@ export enum MixpanelEvent {
   WORKSPACE_ADDRESS_REQUEST_APPROVED = 'Workspace Address Request Approved',
   WORKSPACE_ADDRESS_REQUEST_REJECTED = 'Workspace Address Request Rejected',
   WORKSPACE_LOCAL_CONTACT_ADDED = 'Workspace Local Contact Added',
+  WORKSPACE_CONTACT_TAGS_UPDATED = 'Workspace Contact Tags Updated',
+  WORKSPACE_TAG_CREATED = 'Workspace Tag Created',
+  WORKSPACE_TAG_RENAMED = 'Workspace Tag Renamed',
+  WORKSPACE_TAG_DELETED = 'Workspace Tag Deleted',
+  WORKSPACE_CONTACTS_FILTERED = 'Workspace Contacts Filtered',
+  WORKSPACE_TAG_LIMIT_REACHED = 'Workspace Tag Limit Reached',
   SECURITY_HUB_VIEWED = 'Security Hub Viewed',
   SECURITY_REPORT_OPENED = 'Security Report Opened',
   ACTIVITY_LOG_VIEWED = 'Activity Log Viewed',
@@ -115,6 +121,8 @@ export enum MixpanelEvent {
   LOOKALIKE_ADDRESS_WARNING_SHOWN = 'Look-alike Address Warning Shown',
   LOOKALIKE_ADDRESS_WARNING_CONTINUED = 'Look-alike Address Warning Continued',
   LOOKALIKE_ADDRESS_WARNING_DISMISSED = 'Look-alike Address Warning Dismissed',
+  WC_SAFE_APP_SUGGESTED = 'WC Safe App Suggested',
+  WC_SAFE_APP_SUGGESTION_RESULT = 'WC Safe App Suggestion Result',
 }
 
 export enum WorkspaceCreateEntryPoint {
@@ -300,6 +308,11 @@ export enum MixpanelEventParams {
   FROM_SEATS = 'From Seats',
   TO_SEATS = 'To Seats',
   TO_PLAN = 'To Plan',
+  TAGS_ADDED = 'Tags Added',
+  TAGS_REMOVED = 'Tags Removed',
+  MERGED = 'Merged',
+  CONTACT_COUNT = 'Contact Count',
+  TAG_COUNT = 'Tag Count',
   AMOUNT_DUE = 'Amount Due',
   OUTCOME = 'Outcome',
   FEATURE = 'Feature',
@@ -311,6 +324,8 @@ export enum MixpanelEventParams {
   SENTINELS_FLAGGED = 'Sentinels Flagged',
   SIGNER_ROLE = 'Signer Role',
   SAFE_TX_HASH = 'Safe Tx Hash',
+  SAFE_APP_AVAILABLE = 'Safe App Available',
+  REMEMBER_CHOICE = 'Remember Choice',
 }
 
 export enum AuthLoginMethod {
@@ -322,6 +337,7 @@ export enum AuthLoginMethod {
 export enum SafeAppLaunchLocation {
   PREVIEW_DRAWER = 'Preview Drawer',
   SAFE_APPS_LIST = 'Safe Apps List',
+  WC_PROPOSAL = 'WalletConnect Proposal',
 }
 
 export const ADDRESS_PROPERTIES = new Set([

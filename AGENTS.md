@@ -10,10 +10,10 @@ This monorepo uses nested AGENTS.md files. Agents working in a subtree automatic
 | ---------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `apps/web/`            | [apps/web/AGENTS.md](apps/web/AGENTS.md)                       | Main Next.js app: feature architecture, variants/styling, web testing, web pitfalls                                            |
 | `apps/web/e2e/`        | [apps/web/e2e/AGENTS.md](apps/web/e2e/AGENTS.md)               | **Playwright E2E — all new tests go here**                                                                                     |
-| `apps/web/cypress/`    | [apps/web/cypress/AGENTS.md](apps/web/cypress/AGENTS.md)       | Cypress E2E (legacy — maintenance only)                                                                                        |
 | `apps/web/.storybook/` | [apps/web/.storybook/AGENTS.md](apps/web/.storybook/AGENTS.md) | Storybook config; story authoring: [storybook-guide](apps/web/docs/storybook-guide.md)                                         |
 | `apps/web-tanstack/`   | [apps/web-tanstack/AGENTS.md](apps/web-tanstack/AGENTS.md)     | Second runtime (TanStack Router + Vite) for the same code — reuses `apps/web/src` via Vite aliases                             |
 | `apps/tx-builder/`     | [apps/tx-builder/AGENTS.md](apps/tx-builder/AGENTS.md)         | Safe App (iframe), **MUI v6 + Vite — web styling rules do not apply**                                                          |
+| `apps/drain-safe/`     | [apps/drain-safe/AGENTS.md](apps/drain-safe/AGENTS.md)         | Drain Account Safe App (iframe), **MUI v6 + Vite + viem — web styling rules do not apply**                                     |
 | `apps/mobile/`         | [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md)                 | Expo/React Native + Tamagui                                                                                                    |
 | `packages/`            | [packages/AGENTS.md](packages/AGENTS.md)                       | `store`, `theme`, `utils`, shared by web **and** mobile: verification, codegen, dual env vars, theme workflow                  |
 | `packages/views/`      | [packages/views/AGENTS.md](packages/views/AGENTS.md)           | Web-only presentation and shadcn/ui primitives, shared by `apps/web` and `apps/web-tanstack`; no app imports or business logic |
@@ -39,10 +39,10 @@ yarn turbo run test --filter=...@safe-global/utils     # package + dependents
 
 ### Two TypeScript compilers
 
-`type-check` scripts run the native TypeScript 7 compiler, installed at the root as `@typescript/native` because the pinned Yarn can't install it under its real name; workspaces keep `typescript@5.9` because typescript-eslint, ts-jest, ts-node, Next and Cypress need a compiler API that TS 7.0 lacks.
+`type-check` scripts run the native TypeScript 7 compiler, installed at the root as `@typescript/native` because the pinned Yarn can't install it under its real name; workspaces keep `typescript@5.9` because typescript-eslint, ts-jest, ts-node and Next need a compiler API that TS 7.0 lacks.
 
 - `yarn workspace <name> tsc` is 5.9; `yarn workspace <name> type-check` is 7. Use the script.
-- tsconfigs must satisfy both: no `baseUrl`, `moduleResolution: node` or `downlevelIteration`; list `types` explicitly (TS 7 doesn't auto-include `node_modules/@types`). Only `apps/web/cypress/tsconfig.json` keeps `baseUrl` (Cypress bundler).
+- tsconfigs must satisfy both: no `baseUrl`, `moduleResolution: node` or `downlevelIteration`; list `types` explicitly (TS 7 doesn't auto-include `node_modules/@types`).
 - The editor uses 5.9 unless repointed, so a TS 7-only error shows green until `type-check` runs.
 
 ## Code search
@@ -55,7 +55,6 @@ Use the `LSP` tool (`findReferences`, `goToDefinition`) for "who uses this symbo
 
 ## General Principles
 
-- Don't use the `any` type.
 - **Comments are tech debt — default to writing none.** This codebase already carries too many long comments. Write a comment only for what the code cannot express (a non-obvious why, an invariant, a workaround and its reason) and keep it to one line — never narrate what the next line does, restate the diff, justify a change to the reviewer, or write multi-paragraph comment blocks.
 - **Use sentence case for UI text** – Buttons, headings, labels, warnings, and other UI copy should use sentence case (e.g., "Add new owner") not Title Case (e.g., "Add New Owner")
 - **Extract a function only for a reason** – reuse, a dedicated test, or isolating a responsibility; never just to name a single built-in call. Full rules: [docs/ai/when-to-extract-a-function.md](docs/ai/when-to-extract-a-function.md)
@@ -74,7 +73,7 @@ Every behavioral change must include tests — each platform defines its matrix 
 Run the repo's `verify` scripts before committing — they type-check, lint, prettier-check and test changed files:
 
 - **apps/web:** `yarn verify:changed` (scoped), then `yarn verify:web` (full) before committing. `verify:changed` defaults to web and silently skips files outside `apps/<workspace>/`, so other workspaces get a false green.
-- **Other apps:** `node scripts/verify.mjs --changed --workspace=mobile|web-tanstack|tx-builder`.
+- **Other apps:** `node scripts/verify.mjs --changed --workspace=mobile|web-tanstack|tx-builder|drain-safe`.
 - **packages/ and config/:** see [packages/AGENTS.md](packages/AGENTS.md) and [config/AGENTS.md](config/AGENTS.md).
 - **Test scaffolding:** `yarn workspace @safe-global/web test:scaffold <file>`.
 - `SKIP_VERIFY=1` skips verify entirely — only with the user's explicit say-so.
@@ -94,6 +93,8 @@ Before writing code for any non-trivial change (beyond a typo, doc tweak or sing
 
 A workflow that branch protection requires has no `pull_request` `paths` filter; it detects changes with the `pr-changes` action and reports one result job with `required-result`. See [docs/ci-required-checks.md](docs/ci-required-checks.md).
 
+Every job runs on `ubuntu-26.04-arm`: the Yarn and Next.js cache keys include the runner architecture, so a job on another runner restores nothing and saves a second copy.
+
 ### Commit and PR conventions
 
 Before committing, pushing, opening a PR, or reviewing one, read [docs/ai/git-conventions.md](docs/ai/git-conventions.md) first — the pre-commit hook, commit-message prefixes, how to fill the PR template, the required visual summary, and PR citation rules live there. Read it before you commit or open a PR, and work through its "Before you open a PR" list (Claude Code skill: `pre-pr`).
@@ -111,6 +112,5 @@ Safe is a smart contract wallet requiring M-of-N owner signatures (the **thresho
 Cross-cutting mistakes to avoid. Web-specific pitfalls live in [apps/web/AGENTS.md](apps/web/AGENTS.md#web-specific-common-pitfalls); mobile-specific ones in [apps/mobile/AGENTS.md](apps/mobile/AGENTS.md#mobile-specific-common-pitfalls).
 
 1. **Breaking mobile when changing shared code** – `packages/**` affects both web and mobile, and app verify scripts don't cover it — see [packages/AGENTS.md](packages/AGENTS.md).
-2. **Modifying generated files** – never hand-edit generated files under `packages/` (contract types, `AUTO_GENERATED/`); regeneration commands in [packages/AGENTS.md](packages/AGENTS.md).
-3. **Not handling chain-specific logic** – Always consider multi-chain scenarios.
-4. **Incomplete error handling** – Always handle loading, error, and empty states in UI components.
+2. **Not handling chain-specific logic** – Always consider multi-chain scenarios.
+3. **Incomplete error handling** – Always handle loading, error, and empty states in UI components.

@@ -5,7 +5,6 @@ declare global {
     isDesktop?: boolean
     dataLayer?: any[]
     gtag?: (...args: any[]) => void
-    Cypress?
     hbspt?: {
       forms: {
         create: (options: {

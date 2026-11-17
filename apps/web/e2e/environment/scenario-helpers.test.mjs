@@ -8,6 +8,7 @@ import { creationCode } from './scenarios/dashboard.mjs'
 import { LEDGER_TEST_MNEMONIC, ledgerOwner } from './scenarios/ledger.mjs'
 import { poll } from './scenarios/indexing.mjs'
 import { approvedHashSignatures } from './scenarios/staging.mjs'
+import { TREZOR_TEST_MNEMONIC, trezorOwner } from './scenarios/trezor.mjs'
 
 const safe = '0x1111111111111111111111111111111111111111'
 const other = '0x2222222222222222222222222222222222222222'
@@ -61,4 +62,11 @@ test('derives the Ledger owner from the seed of the emulator in Compose', () => 
   const compose = readFileSync(new URL('./infra/docker-compose.test.yml', import.meta.url), 'utf8')
   assert.equal(/LEDGER_SEED: (.+)/.exec(compose)?.[1], LEDGER_TEST_MNEMONIC)
   assert.equal(ledgerOwner.address, '0x70f4aC46DC07075f1a4D4D3c767e863021449c95')
+})
+
+test('derives the Trezor owner from the seed of the emulator in Compose', () => {
+  const compose = readFileSync(new URL('./infra/docker-compose.test.yml', import.meta.url), 'utf8')
+  assert.equal(/TREZOR_SEED: (.+)/.exec(compose)?.[1], TREZOR_TEST_MNEMONIC)
+  // The address that the emulated Trezor shows for its first Trezor Live account
+  assert.equal(trezorOwner.address, '0x73d0385F4d8E00C5e6504C6030F47BF6212736A8')
 })

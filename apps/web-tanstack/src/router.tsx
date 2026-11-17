@@ -41,7 +41,6 @@ import { Route as SettingsSetupRoute } from './routes/settings/setup'
 // Group C — /spaces/*
 import { Route as SpacesIndexRoute } from './routes/spaces'
 import { Route as SpacesAddressBookRoute } from './routes/spaces/address-book'
-import { Route as SpacesCreateSpaceRoute } from './routes/spaces/create-space'
 import { Route as SpacesMembersRoute } from './routes/spaces/members'
 import { Route as SpacesSafeAccountsRoute } from './routes/spaces/safe-accounts'
 import { Route as SpacesSecurityRoute } from './routes/spaces/security'
@@ -117,7 +116,6 @@ const routeTree = RootRoute.addChildren([
   // Group C
   SpacesIndexRoute,
   SpacesAddressBookRoute,
-  SpacesCreateSpaceRoute,
   SpacesMembersRoute,
   SpacesSafeAccountsRoute,
   SpacesSecurityRoute,

@@ -5,6 +5,7 @@ import { createMockStory } from '@/stories/mocks'
 import { SAFE_ADDRESSES } from '../../../../../../../config/test/msw/fixtures'
 import type { BatchTxsState, CallOnlyTxData } from '../../store/batchSlice'
 import BatchSidebar from './index'
+import { mockNow } from '@/stories/mocks/now'
 
 /**
  * BatchSidebar Stories
@@ -34,7 +35,7 @@ const tx = (to: string, value: string, data = '0x'): CallOnlyTxData => ({
 
 const draftItem = (id: string, txData: CallOnlyTxData) => ({
   id,
-  timestamp: Date.now(),
+  timestamp: mockNow(),
   txData,
 })
 

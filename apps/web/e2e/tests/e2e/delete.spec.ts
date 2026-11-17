@@ -11,7 +11,7 @@ test.describe('Delete a queued transaction', { tag: '@e2e' }, () => {
     journey,
   }) => {
     const recipient = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 2 })
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 2 })
     await seedQueuedTransfer(safe, { nonce: 0, recipient, amount: '0.001' })
     const last = await seedQueuedTransfer(safe, { nonce: 1, recipient, amount: '0.001' })
 

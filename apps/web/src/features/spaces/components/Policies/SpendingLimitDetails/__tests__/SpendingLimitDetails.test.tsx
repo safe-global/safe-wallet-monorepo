@@ -55,6 +55,7 @@ const contact = (address: string, name: string, source: ContactSource): Extended
   name,
   source,
   chainIds: [policy.safe.chainId],
+  tagIds: [],
   createdBy: '',
   createdByUserId: 0,
   lastUpdatedBy: '',

@@ -2,7 +2,7 @@
  * A dApp connects to a Safe over WalletConnect and sends it requests, through the hosted relay.
  *
  * The test plays the dApp with a real WalletConnect client in the Playwright process, so it reads the responses
- * that a real dApp gets. Each test pairs its own dApp with its own 1/1 Safe of OWNER_4.
+ * that a real dApp gets. Each test pairs its own dApp with its own 1/1 Safe of Alice.
  */
 import { Wallet, hashMessage, parseEther, toQuantity } from 'ethers'
 import { HomePage } from '../../src/pages/home.page'
@@ -24,7 +24,7 @@ type WalletConnectFixtures = {
 
 const test = base.extend<WalletConnectFixtures>({
   safe: async ({ journey }, provide) => {
-    await provide(await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 }))
+    await provide(await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 }))
   },
 
   dapp: async ({ safePage, safe }, provide, testInfo) => {

@@ -16,8 +16,13 @@ module.exports = {
   testMatch: ['<rootDir>/**/*.(spec|test).[jt]s?(x)'],
   // setupFilesAfterEnv: ['<rootDir>/../../config/jest-presets/jest/setup.js'],
 
+  transform: {
+    '^.+\\.tsx?$': 'ts-jest',
+    // faker v10 is ESM-only
+    '/@faker-js/faker/.+\\.js$': ['ts-jest', { tsconfig: { allowJs: true }, isolatedModules: true }],
+  },
   transformIgnorePatterns: [
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|native-base|react-native-svg|react-redux|moti/.*|@safe-global/safe-apps-sdk|ethereum-cryptography|@safe-global/protocol-kit|@reduxjs/toolkit|immer)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|native-base|react-native-svg|react-redux|moti/.*|@safe-global/safe-apps-sdk|ethereum-cryptography|@safe-global/protocol-kit|@reduxjs/toolkit|immer|@faker-js/faker)',
   ],
   coverageDirectory: '<rootDir>/coverage',
   coverageReporters: ['json', 'lcov', 'html'],

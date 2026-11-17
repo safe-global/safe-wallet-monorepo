@@ -2,7 +2,6 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { isolatedEnvironment } from './isolated-environment.mjs'
 import { createOwners } from './scenarios/safe.mjs'
-import { Wallet, verifyMessage } from 'ethers'
 
 const local = {
   SAFE_E2E_ISOLATED: 'true',
@@ -11,21 +10,10 @@ const local = {
   SAFE_RPC_URL: 'http://localhost:8545/',
 }
 
-test('browser credentials sign for the generated scenario owners', async () => {
-  const { owner1, owner2, owner3, owner4, credentials } = createOwners()
-  const message = 'isolated-owner-role'
-  const signature = await new Wallet(credentials.OWNER_4_PRIVATE_KEY).signMessage(message)
-  assert.equal(verifyMessage(message, signature), owner4.address)
-  assert.equal(new Set([owner1, owner2, owner3, owner4].map(({ address }) => address)).size, 4)
-  for (const [key, wallet] of [
-    ['OWNER_1', owner1],
-    ['OWNER_2', owner2],
-    ['OWNER_3', owner3],
-    ['OWNER_4', owner4],
-  ]) {
-    assert.equal(new Wallet(credentials[`${key}_PRIVATE_KEY`]).address, wallet.address)
-    assert.equal(credentials[`${key}_WALLET_ADDRESS`], wallet.address)
-  }
+test('creates four distinct owners', () => {
+  const owners = createOwners()
+  assert.deepEqual(Object.keys(owners), ['alice', 'bob', 'carol', 'dave'])
+  assert.equal(new Set(Object.values(owners).map(({ address }) => address)).size, 4)
 })
 
 test('preserves path prefixes and excludes remote credentials in the isolated config', () => {
@@ -33,13 +21,13 @@ test('preserves path prefixes and excludes remote credentials in the isolated co
     ...local,
     FORK_RPC_URL: 'secret',
     SEPOLIA_FORK_RPC_URL: 'sepolia-secret',
-    CYPRESS_WALLET_CREDENTIALS: 'remote-secret',
+    WALLET_CREDENTIALS: 'remote-secret',
   })
   assert.equal(result.SAFE_CGW_BASE_URL, 'http://localhost:8000/cgw')
   assert.equal(result.SAFE_TXS_BASE_URL, 'http://localhost:8000/txs/api')
   assert.equal(result.FORK_RPC_URL, undefined)
   assert.equal(result.SEPOLIA_FORK_RPC_URL, undefined)
-  assert.equal(result.CYPRESS_WALLET_CREDENTIALS, undefined)
+  assert.equal(result.WALLET_CREDENTIALS, undefined)
 })
 
 test('rejects partial or remote configuration before starting isolated tests', () => {

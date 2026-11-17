@@ -12,13 +12,13 @@ import { TxReviewPage } from '../../src/pages/tx-review.page'
 
 const AMOUNT = '0.001'
 
-/** A 1/1 Safe of OWNER_4 and OWNER_1 with OWNER_3 as its proposer, opened by OWNER_3 */
+/** A 1/1 Safe of Alice and Bob with Dave as its proposer, opened by Dave */
 async function seedProposerSafe(journey: Journey, safePage: Page): Promise<SeededSafe> {
-  const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
-  await seedProposer(safe, { delegate: journey.owners.owner3, delegator: journey.owners.owner4 })
+  const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
+  await seedProposer(safe, { delegate: journey.owners.dave, delegator: journey.owners.alice })
   await waitForNativeBalance(safe)
 
-  await journey.connectAs('owner3')
+  await journey.connectAs('dave')
   await new HomePage(safePage).goto(safe.prefixedAddress)
   return safe
 }
@@ -44,10 +44,10 @@ test.describe('Proposer', { tag: '@e2e' }, () => {
     const [{ id: txId }] = await safeApiClient.getQueued(safe.address)
     const details = await safeApiClient.findTransaction(txId)
     const execution = details?.detailedExecutionInfo
-    expect(execution?.type === 'MULTISIG' && execution.proposedByDelegate?.value).toBe(journey.owners.owner3.address)
+    expect(execution?.type === 'MULTISIG' && execution.proposedByDelegate?.value).toBe(journey.owners.dave.address)
     expect(execution?.type === 'MULTISIG' && execution.confirmations).toEqual([])
 
-    await journey.connectAs('owner4')
+    await journey.connectAs('alice')
     await queue.goto(safe.prefixedAddress)
     await queue.confirm(0)
     await review.signAndExecute()

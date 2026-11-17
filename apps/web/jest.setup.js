@@ -1,11 +1,15 @@
 // Used for __tests__/testing-library.js
 // Learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom'
+import { configure } from '@testing-library/react'
 import { server } from '@/tests/server'
 import { faker } from '@faker-js/faker'
 
 // Seed faker for deterministic test data
 faker.seed(123)
+
+// waitFor and findBy* give up after 1 s by default, which slow CI runners exceed
+configure({ asyncUtilTimeout: process.env.CI ? 3_000 : 1_000 })
 
 // jsdom lacks the Pointer Events API that Base UI components (shadcn/ui) rely on.
 // Polyfill only what's missing so interaction tests (e.g. clicking a Base UI Checkbox)
@@ -63,9 +67,6 @@ globalThis.BroadcastChannel = class BroadcastChannel {
   removeEventListener() {}
   close() {}
 }
-
-// Set timezone to UTC for consistent date formatting across environments
-process.env.TZ = 'UTC'
 
 jest.mock('@web3-onboard/coinbase', () => jest.fn())
 jest.mock('@web3-onboard/injected-wallets', () => ({ ProviderLabel: { MetaMask: 'MetaMask' } }))

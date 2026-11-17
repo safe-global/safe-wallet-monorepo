@@ -1,6 +1,6 @@
 # Web App AI Contributor Guidelines
 
-Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide rules, see the root [AGENTS.md](../../AGENTS.md). For E2E, see [e2e/AGENTS.md](e2e/AGENTS.md) (Playwright — all new tests) and [cypress/AGENTS.md](cypress/AGENTS.md) (legacy maintenance). For story authoring, see [docs/storybook-guide.md](docs/storybook-guide.md).
+Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide rules, see the root [AGENTS.md](../../AGENTS.md). For E2E, see [e2e/AGENTS.md](e2e/AGENTS.md) (Playwright). For story authoring, see [docs/storybook-guide.md](docs/storybook-guide.md).
 
 ## Web-specific principles
 
@@ -15,7 +15,7 @@ Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide r
 - **Prefer a component's variant/size prop over one-off `className` overrides.** See [Component variants over custom styling](#component-variants-over-custom-styling) below.
 - **Errors are logged imperatively at the catch site, never from render (component body, `useMemo`, `useEffect`).** See [Error logging](#error-logging) below.
 - **Tracking stays out of component logic.** A "viewed" event is `useTrackOnce` from `src/services/analytics/useTrackOnce.ts` (pass `ready` when the data arrives after mount); a pure click event wraps the control in `components/common/Track`; an event that mirrors an API result is sent by a store listener on the endpoint's `matchFulfilled`, with props from the request args, the response or the RTK cache (see `features/spaces/store/workspaceTrackingListener.ts`). Call `trackEvent` from a handler only when the handler also does something for the event, such as storing state.
-- **Don't add `next/*` imports that have a plain replacement; we are migrating away from Next.** Use `<img>` instead of `next/image`, `<a>` instead of `next/link` for external links, `dynamic` from `@/utils/dynamic` instead of `next/dynamic` (it renders nothing on the server, so the module does not load during the static export), and a plain function component instead of the `NextPage` type. Routing and document APIs (`next/router`, `next/navigation`, `next/link` for internal routes, `next/head`, `next/app`, `next/document`) have no replacement yet, so keep using them.
+- **Don't add `next/*` imports that have a plain replacement; we are migrating away from Next.** Use `<a>` instead of `next/link` for external links. Routing and document APIs (`next/router`, `next/navigation`, `next/link` for internal routes, `next/head`, `next/document`) have no replacement yet, so keep using them.
 
 ## Component variants over custom styling
 
@@ -75,7 +75,7 @@ Report an error where it is caught, imperatively — never from the render layer
 
 Before writing or changing any test, read [docs/ai/testing-conventions.md](../../docs/ai/testing-conventions.md) (cross-cutting) and [docs/TESTING.md](docs/TESTING.md) (web): choosing the test level, the test decision matrix, what not to test, mock patterns and templates, including how to set or assert `window.location` (non-configurable in jsdom 26).
 
-- **E2E:** all new E2E tests are Playwright — `e2e/` ([e2e/AGENTS.md](e2e/AGENTS.md); canonical rules in [e2e/docs/README.md](e2e/docs/README.md); answer the 4 questions in [e2e/docs/AI_TEST_OUTPUT_FORMAT.md](e2e/docs/AI_TEST_OUTPUT_FORMAT.md) before writing any test). Cypress is legacy, no new tests: [cypress/AGENTS.md](cypress/AGENTS.md).
+- **E2E:** E2E tests are Playwright — `e2e/` ([e2e/AGENTS.md](e2e/AGENTS.md); canonical rules in [e2e/docs/README.md](e2e/docs/README.md); answer the 4 questions in [e2e/docs/AI_TEST_OUTPUT_FORMAT.md](e2e/docs/AI_TEST_OUTPUT_FORMAT.md) before writing any test).
 - **Write each test at the lowest level that can show the behaviour.** Playwright only for what needs a real browser or several real services together; everything else goes in Jest. A Playwright test does not make up for missing unit and component tests. Levels, examples and when to mock: [docs/TESTING.md](docs/TESTING.md#choose-the-test-level).
 
 ## Storybook
@@ -97,14 +97,14 @@ export const Default: Story = { parameters: { ...setup.parameters }, decorators:
 
 Don't add `loaders: [mswLoader]` — it is global in `preview.tsx`. Don't override feature flags unless testing a disabled state.
 
-**Visual regression (Argos) doesn't run on PRs** — the workflow runs weekly on `dev` and by hand before a release. Verify UI changes via the story (or live page) yourself; run `yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>` locally. Opt flaky/animated stories out of snapshots with `tags: ['skip-visual-test']` (still render-checked).
+**Visual regression (Argos) runs on every PR** — it uploads the Storybook sheets that differ from the merge base on `dev`, and the PR cannot merge until someone approves them in Argos. To check a change before you push, run `yarn workspace @safe-global/web storybook:sweep -- --shots=<dir>` locally. Opt flaky/animated stories out of snapshots with `tags: ['skip-visual-test']` (still render-checked).
 
 ## Web-specific common pitfalls
 
 1. **Never use `lazy()`/`dynamic()` anywhere inside a feature** – the whole feature is already lazy via `createFeatureHandle` (see [Feature Architecture Import Rules](#feature-architecture-import-rules) above).
 2. **CSS-module padding silently beaten by variant utilities** – shadcn primitives ship group-data variant utilities (e.g. Card's `group-data-[size=none]/card:px-0`) whose two-class selectors outrank a single CSS-module class. If a module style "mysteriously doesn't apply", check for a competing variant utility before adding more CSS (see ISSUE-050: every tx-flow card lost its horizontal padding this way). Prefer utility classes at the call site; when a module must win, document the `!important`.
 3. **`<img height={24}>` doesn't size images** – Tailwind's preflight sets `img { height: auto }`, which overrides the HTML `height` attribute. Always size raster images with classes (`className="h-6 w-auto"`), never attributes.
-4. **Unit tests don't see layout** – 6,600 green tests said nothing while the send-tokens form rendered with zero padding (ISSUE-050). Any UI-affecting change must be verified visually: check the component's story (or the live page) yourself — Argos does not auto-run on PRs (see [Storybook](#storybook) above). Never ship a story that permanently renders skeletons/blank without a doc comment saying so — a broken story that "passes" is worse than no story.
+4. **Unit tests don't see layout** – 6,600 green tests said nothing while the send-tokens form rendered with zero padding (ISSUE-050). Any UI-affecting change must be verified visually: check the component's story (or the live page) yourself, and review its Argos diff on the PR (see [Storybook](#storybook) above). Never ship a story that permanently renders skeletons/blank without a doc comment saying so — a broken story that "passes" is worse than no story.
 5. **Don't rebuild field chrome out of raw divs + CSS modules** – `NumberField`/`Field`/`InputGroup` already provide the label (with error coloring), the outline, focus ring, and inline-start/end adornment slots. The migrated amount field hand-rolled its own outline box, floating label, and adornment layout around a `NumberField` — producing a double border and an overlapping MAX button (ISSUE-052). The variant lint cannot catch this: raw `div`s contain no design-system component to flag. If a field needs something the primitives lack, extend the primitive, don't wrap it.
 6. **`packages/views/src/components/ui/` primitives are managed via the shadcn CLI** – read [packages/views/src/components/ui/README.md](../../packages/views/src/components/ui/README.md) before hand-editing them.
 7. **`next dev` and `next build` need `--webpack`** – Next 16 uses Turbopack by default, and Turbopack ignores the `webpack()` config in `next.config.mjs` (SVGR, SRI, the dev page stub). The `dev`, `dev:full`, `start` and `build` scripts pass the flag; keep it when adding a script.

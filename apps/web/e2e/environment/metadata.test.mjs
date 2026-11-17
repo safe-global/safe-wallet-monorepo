@@ -38,7 +38,7 @@ test('ENS setup requires a .eth name and a valid address before accessing the fo
 })
 
 test('staging wallets that sign in tests map to generated owners and other addresses stay unchanged', () => {
-  const owners = { owner4: { address: '0x1' }, owner1: { address: '0x2' }, owner3: { address: '0x3' } }
+  const owners = { alice: { address: '0x1' }, bob: { address: '0x2' }, dave: { address: '0x3' } }
   assert.equal(localAddress(owners, '0xc16db0251654c0a72e91b190d81ead367d2c6fed'), '0x1')
   assert.equal(localAddress(owners, '0x8eeC30d6FB6eC104B7308a8847db5FF487152a3b'), '0x2')
   assert.equal(localAddress(owners, '0x4fe7164d7cA511Ab35520bb14065F1693240dC90'), '0x3')

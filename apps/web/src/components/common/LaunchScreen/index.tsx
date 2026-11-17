@@ -17,7 +17,7 @@ const EXIT_DURATION_MS = 300
  *
  * @see {@link useLaunchScreen} for when it hides.
  */
-function LaunchScreen({ stepUpCaption }: { stepUpCaption?: string }): ReactElement | null {
+function LaunchScreen(): ReactElement | null {
   const { visible } = useLaunchScreen()
   const [rendered, setRendered] = useState(true)
   const [stepIndex, setStepIndex] = useState(0)
@@ -37,11 +37,9 @@ function LaunchScreen({ stepUpCaption }: { stepUpCaption?: string }): ReactEleme
     return () => clearTimeout(id)
   }, [visible])
 
-  const heldForStepUp = Boolean(stepUpCaption)
+  if (!rendered) return null
 
-  if (!rendered && !heldForStepUp) return null
-
-  const exiting = !visible && !heldForStepUp
+  const exiting = !visible
   const { progress, caption } = LAUNCH_STEPS[stepIndex]
 
   return (
@@ -49,7 +47,7 @@ function LaunchScreen({ stepUpCaption }: { stepUpCaption?: string }): ReactEleme
       role="status"
       aria-busy={!exiting}
       aria-live="polite"
-      aria-label={stepUpCaption ?? 'Loading Safe{Wallet}'}
+      aria-label="Loading Safe{Wallet}"
       data-testid="launch-screen"
       className={cn(
         'fixed inset-0 z-[1401] flex flex-col items-center justify-center gap-8 bg-background transition-opacity duration-300',
@@ -65,16 +63,14 @@ function LaunchScreen({ stepUpCaption }: { stepUpCaption?: string }): ReactEleme
       </div>
 
       <div className="flex flex-col items-center gap-4">
-        {!heldForStepUp && (
-          <div className="h-1 w-40 overflow-hidden rounded-full bg-secondary">
-            <div
-              data-testid="launch-progress-bar"
-              className={cn('h-full rounded-full', css.bar)}
-              style={{ width: `${exiting ? 100 : progress}%`, backgroundColor: 'var(--color-static-text-brand)' }}
-            />
-          </div>
-        )}
-        <p className="min-h-5 text-sm text-muted-foreground">{stepUpCaption ?? caption}</p>
+        <div className="h-1 w-40 overflow-hidden rounded-full bg-secondary">
+          <div
+            data-testid="launch-progress-bar"
+            className={cn('h-full rounded-full', css.bar)}
+            style={{ width: `${exiting ? 100 : progress}%`, backgroundColor: 'var(--color-static-text-brand)' }}
+          />
+        </div>
+        <p className="min-h-5 text-sm text-muted-foreground">{caption}</p>
       </div>
     </div>
   )

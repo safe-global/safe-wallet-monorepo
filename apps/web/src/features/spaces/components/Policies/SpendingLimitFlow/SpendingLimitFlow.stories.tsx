@@ -40,7 +40,7 @@ const emptyPopularTokensHandler = http.get(/\/v1\/chains\/\d+\/tokens(\?|$)/, ()
 const setup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true },
+  authenticated: true,
   layout: 'fullPage',
   shadcn: true,
   pathname: '/spaces/policies',

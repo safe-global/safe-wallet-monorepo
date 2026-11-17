@@ -3,7 +3,7 @@ import SecurityDrawerDetails from './SecurityDrawerDetails'
 import { createMockStory } from '@/stories/mocks'
 import { createMockContext } from '@/features/security/testing'
 
-const setup = createMockStory({ features: { spaces: true }, layout: 'paper' })
+const setup = createMockStory({ authenticated: true, layout: 'paper' })
 
 const meta = {
   title: 'Features/SecurityHub/SecurityDrawerDetails',

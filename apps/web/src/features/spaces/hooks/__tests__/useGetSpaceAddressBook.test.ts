@@ -1,6 +1,7 @@
 import { renderHook } from '@testing-library/react'
 import useGetSpaceAddressBook, { useSpaceAddressBookState } from '../useGetSpaceAddressBook'
 import { SPACE_REFRESH_OPTIONS } from '../refreshOptions'
+import { spaceAddressBookItemBuilder, spaceAddressBookTagBuilder } from '@/tests/builders/space'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockUseCurrentSpaceId = jest.fn()
@@ -148,5 +149,31 @@ describe('useSpaceAddressBookState', () => {
     const { result } = renderHook(() => useSpaceAddressBookState())
 
     expect(result.current).toMatchObject({ items, isLoading: false })
+  })
+
+  it('returns the workspace tags with the contacts', () => {
+    mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
+    const tag = spaceAddressBookTagBuilder().build()
+    const item = spaceAddressBookItemBuilder()
+      .with({ tagIds: [tag.id] })
+      .build()
+    mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({
+      currentData: { spaceUuid: MOCK_SPACE_UUID, data: [item], tags: [tag] },
+      refetch: jest.fn(),
+    })
+
+    const { result } = renderHook(() => useSpaceAddressBookState())
+
+    expect(result.current.items).toEqual([item])
+    expect(result.current.tags).toEqual([tag])
+  })
+
+  it('returns no tags before the book is read', () => {
+    mockUseCurrentSpaceId.mockReturnValue(MOCK_SPACE_UUID)
+    mockUseAddressBooksGetAddressBookItemsV1Query.mockReturnValue({ currentData: undefined, refetch: jest.fn() })
+
+    const { result } = renderHook(() => useSpaceAddressBookState())
+
+    expect(result.current.tags).toEqual([])
   })
 })

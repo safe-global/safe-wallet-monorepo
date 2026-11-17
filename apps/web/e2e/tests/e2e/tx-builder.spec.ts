@@ -33,7 +33,7 @@ test.describe('Transaction Builder', { tag: '@e2e' }, () => {
   }) => {
     const newValue = Wallet.createRandom().address
     await seedTransactionBuilderContracts(journey)
-    const safe = await seedSafe(journey, { owners: ['owner4'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
 
     const builder = new TxBuilderPage(safePage)
     const review = new TxReviewPage(safePage)
@@ -44,5 +44,26 @@ test.describe('Transaction Builder', { tag: '@e2e' }, () => {
     await expect
       .poll(() => executedCall(safeApiClient, safe.address, 0))
       .toEqual({ to: BASIC_TYPES_TEST_CONTRACT, method: 'testAddressValue', argument: newValue })
+  })
+
+  test('should ask a new user for address book access and continue to the review when the user accepts', async ({
+    safePage,
+    journey,
+  }) => {
+    await seedTransactionBuilderContracts(journey)
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+
+    const builder = new TxBuilderPage(safePage)
+    const review = new TxReviewPage(safePage)
+    await builder.openWithoutPermissions(safe.prefixedAddress)
+    await builder.clickAddressField()
+
+    await expect(builder.permissionsPrompt).toContainText('Access to your address book')
+    await builder.acceptPermissionsRequest()
+    await expect(builder.permissionsPrompt).toBeHidden()
+
+    const newValue = Wallet.createRandom().address
+    await builder.sendCall({ contract: BASIC_TYPES_TEST_CONTRACT, method: 'testAddressValue', argument: newValue })
+    await expect(review.continueButton).toBeVisible()
   })
 })
