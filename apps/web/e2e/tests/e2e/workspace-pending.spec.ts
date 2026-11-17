@@ -1,7 +1,9 @@
 import type { Page } from '@playwright/test'
+import type { SpaceQueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Wallet, parseEther, parseUnits } from 'ethers'
 import { confirmationsOf } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
+import { gatewayRequest, type EmailSession } from '../../src/fixtures/email-session'
 import { test, expect, type Journey } from '../../src/fixtures/journey.fixture'
 import { HomePage } from '../../src/pages/home.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
@@ -36,11 +38,11 @@ const ETH = {
   proposed: '0.0016',
 }
 const USDC = { treasury: '5', reserve: '6', grants: '7' }
-// The page polls the Workspace queue every 15 s, on top of the refetch after the user's own signature
-const POLLED_UPDATE = { timeout: 35_000 }
+const AFTER_ONE_POLL = { timeout: 35_000 }
 
 type PendingWorkspace = {
   id: string
+  session: EmailSession
   recipient: string
   treasury: SeededSafe
   payroll: SeededSafe
@@ -129,14 +131,22 @@ async function seedPendingWorkspace(journey: Journey, page: Page): Promise<Pendi
       usdc: USDC.grants,
     }),
   ])
-  const { id } = await seedBusinessWorkspace(page, {
+  const { id, session } = await seedBusinessWorkspace(page, {
     Treasury: sepolia.treasury,
     Payroll: sepolia.payroll,
     Operations: sepolia.operations,
     Reserve: reserve,
     Grants: grants,
   })
-  return { id, recipient, ...sepolia }
+  return { id, session, recipient, ...sepolia }
+}
+
+/** The IDs of the transactions in the Workspace queue that CGW serves its members */
+async function workspaceQueueTxIds({ id, session }: PendingWorkspace): Promise<string[]> {
+  const queue = (await gatewayRequest(session, 'GET', `/v1/spaces/${id}/transactions/queued`)) as SpaceQueuedItemPage
+  return Object.values(queue.results)
+    .flatMap((chains) => Object.values(chains).flat())
+    .flatMap((item) => ('transaction' in item ? [item.transaction.id] : []))
 }
 
 test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
@@ -151,9 +161,9 @@ test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
     const pending = new WorkspaceTransactionsPage(safePage)
     await pending.goto(workspace.id)
 
-    await expect(pending.networkSection('Sepolia')).toBeVisible()
-    await expect(pending.networkSection('Ethereum')).toBeVisible()
-    await expect(pending.networkSection('Polygon')).toBeVisible()
+    await expect(pending.networkSection('Sepolia')).toHaveCount(2)
+    await expect(pending.networkSection('Ethereum')).toHaveCount(1)
+    await expect(pending.networkSection('Polygon')).toHaveCount(1)
     await expect(pending.rows).toHaveCount(9)
     await expect(pending.rows.filter({ hasText: 'USDC' })).toHaveCount(3)
     await expect(pending.rows.filter({ hasText: 'Batch' })).toHaveCount(1)
@@ -183,6 +193,8 @@ test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
     await expect
       .poll(async () => (await safeApiClient.getQueued(workspace.operations.address)).map(confirmationsOf))
       .toEqual([0])
+    const [{ id: proposedTxId }] = await safeApiClient.getQueued(workspace.operations.address)
+    await expect.poll(() => workspaceQueueTxIds(workspace)).toContain(proposedTxId)
     await pending.goto(workspace.id)
     const proposed = pending.rows.filter({ hasText: ETH.proposed })
     await expect(pending.rows).toHaveCount(10)
@@ -214,7 +226,7 @@ test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
     await expect
       .poll(async () => (await safeApiClient.getQueued(workspace.treasury.address)).map(confirmationsOf))
       .toEqual([2, 1])
-    await expect(transfer).toContainText('2/3', POLLED_UPDATE)
+    await expect(transfer).toContainText('2/3', AFTER_ONE_POLL)
     await expect(transfer).toContainText('Waiting')
     await expect(pending.rows).toHaveCount(9)
 
@@ -227,7 +239,7 @@ test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
     await expect
       .poll(async () => (await safeApiClient.getQueued(workspace.treasury.address)).map(confirmationsOf))
       .toEqual([3, 1])
-    await expect(transfer).toContainText('3/3', POLLED_UPDATE)
+    await expect(transfer).toContainText('3/3', AFTER_ONE_POLL)
     await expect(transfer.getByTestId('execute-tx-btn')).toBeVisible()
     await expect(pending.rows).toHaveCount(9)
     await expect(pending.rows.filter({ hasText: '1/3' })).toHaveCount(1)
@@ -253,8 +265,7 @@ test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
 
     await expect.poll(() => safeApiClient.getNonce(workspace.payroll.address)).toBe(1)
     expect(await balanceOf(journey.env, workspace.recipient)).toBe(parseEther(ETH.payroll))
-    await pending.goto(workspace.id)
-    await expect(pending.rows).toHaveCount(8)
+    await expect(pending.rows).toHaveCount(8, AFTER_ONE_POLL)
     await expect(transfer).toHaveCount(0)
     await expect(batch).not.toContainText('Blocked')
     await expect(batch.getByTestId('execute-tx-btn')).toBeVisible()

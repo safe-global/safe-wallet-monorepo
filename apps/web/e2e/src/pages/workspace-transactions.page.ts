@@ -21,7 +21,7 @@ export class WorkspaceTransactionsPage {
     await this.page.goto(`${ROUTES.spacesTransactions}?spaceId=${workspaceId}`)
   }
 
-  /** The header that groups the rows of one network, by its name in the chain config */
+  /** The headers that group the rows of one network, one per Safe, by the network's name in the chain config */
   networkSection(chainName: string): Locator {
     return this.queueTable.getByRole('button', { name: new RegExp(`^(Collapse|Expand) ${chainName}$`) })
   }
