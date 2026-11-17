@@ -8,8 +8,7 @@ import { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook, useCurr
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { flattenSafeItems } from '@/hooks/safes'
-import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import { useSetupWidgetDismissal } from './useSetupWidgetDismissal'
+import { useSetupWidgetDismissal } from '../../hooks/useSetupWidgetDismissal'
 import ImportAddressBookDialog from '../SpaceAddressBook/Import/ImportAddressBookDialog'
 import AddAccounts from '../AddAccounts'
 import AddMemberModal from '../AddMemberModal'
@@ -51,8 +50,6 @@ const SETUP_STEPS: SetupStep[] = [
   { key: 'explore', label: 'Explore Workspaces', icon: Rocket },
 ]
 
-const COMPLETED_STORAGE_KEY = 'setupWidgetCompleted'
-
 interface SetupWidgetProps {
   onDismiss?: () => void
   horizontal?: boolean
@@ -65,9 +62,8 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
   const [addAccountsOpen, setAddAccountsOpen] = useState(false)
   const [addMemberOpen, setAddMemberOpen] = useState(false)
   const [exploreOpen, setExploreOpen] = useState(false)
-  const [completedSpaces = {}] = useLocalStorage<Record<string, boolean>>(COMPLETED_STORAGE_KEY)
   const spaceId = useCurrentSpaceId()
-  const { isDismissed: isDismissedForSpace, dismiss } = useSetupWidgetDismissal(spaceId)
+  const { isHidden, dismiss } = useSetupWidgetDismissal(spaceId)
   const addressBook = useGetSpaceAddressBook()
   const { allSafes } = useSpaceSafes()
   const { activeMembers, invitedMembers } = useSpaceMembersByStatus()
@@ -110,9 +106,7 @@ const SetupWidget = ({ onDismiss, horizontal, loading }: SetupWidgetProps): Reac
     onDismiss?.()
   }
 
-  const isCompletedForSpace = allRequiredStepsCompleted || (spaceId ? completedSpaces[spaceId] === true : false)
-
-  if (loading || isDismissedForSpace || isCompletedForSpace) return null
+  if (loading || isHidden || allRequiredStepsCompleted) return null
 
   return (
     <>
