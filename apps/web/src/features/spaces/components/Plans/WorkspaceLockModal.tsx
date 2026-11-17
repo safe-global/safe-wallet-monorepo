@@ -10,10 +10,10 @@ import { SafeProNoticeModal } from '@safe-global/views/features/spaces/component
 import { useCheckoutReturn, type CheckoutReturnStatus } from '../../hooks/billing/useCheckoutReturn'
 import { useCurrentMembership, useIsAdmin } from '../../hooks/useSpaceMembers'
 import { useWorkspaceLock, type WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
-import { claimCopy } from './ClaimTrialModal'
 import ClaimTrialModal from './ClaimTrialModal'
 import PlanChooserModal, { chooserCopy } from './PlanChooserModal'
 import TrialEndedModal from './proTrial/TrialEndedModal'
+import { PRO_TRIAL_COPY } from './proTrial/copy'
 
 export const _memberCopy = (
   reason: WorkspaceLockReason,
@@ -23,7 +23,7 @@ export const _memberCopy = (
 ): { title: string; body: string } => {
   if (reason === 'trial-offered') {
     return {
-      title: claimCopy(trialPeriodDays).title,
+      title: PRO_TRIAL_COPY.trialStart.title(trialPeriodDays),
       body: `${spaceName} is locked until an admin claims free access. Your Safe accounts remain available in My accounts.`,
     }
   }
