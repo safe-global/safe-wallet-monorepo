@@ -8,6 +8,7 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import RowActionsMenu, { getTxLink } from '.'
+import { DeleteTxDialogProvider } from './DeleteTxDialog'
 
 const mockSetTxFlow = jest.fn()
 jest.mock('@/components/tx-flow/safe-scope/useSetScopedTxFlow', () => ({
@@ -39,6 +40,20 @@ jest.mock('@/components/tx-flow/flows/ReplaceTx/DeleteTxModal', () => ({
     <div>
       delete modal {props.safeTxHash}
       <button onClick={props.onClose}>close delete modal</button>
+    </div>
+  ),
+}))
+
+jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
+  SafeScopeProvider: ({
+    initial,
+    children,
+  }: {
+    initial: { chainId: string; safeAddress: string }
+    children: ReactElement
+  }) => (
+    <div data-testid="delete-scope" data-chain-id={initial.chainId} data-safe-address={initial.safeAddress}>
+      {children}
     </div>
   ),
 }))
@@ -78,6 +93,13 @@ const tx = (nonce: number): Transaction =>
     executionInfo: { type: 'MULTISIG', nonce, confirmationsRequired: 2, confirmationsSubmitted: 1 },
   }) as Transaction
 
+const renderMenu = (transaction: Transaction, canReject = true) =>
+  render(
+    <DeleteTxDialogProvider>
+      <RowActionsMenu tx={transaction} canReject={canReject} />
+    </DeleteTxDialogProvider>,
+  )
+
 const openMenu = () => fireEvent.click(screen.getByRole('button', { name: /More actions/ }))
 
 describe('RowActionsMenu', () => {
@@ -90,7 +112,7 @@ describe('RowActionsMenu', () => {
   })
 
   it('opens a transfer with the same nonce to replace the transaction', async () => {
-    render(<RowActionsMenu tx={tx(12)} canReject />)
+    renderMenu(tx(12))
     openMenu()
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Replace with a transfer' }))
 
@@ -99,7 +121,7 @@ describe('RowActionsMenu', () => {
   })
 
   it('opens an on-chain rejection of the nonce', async () => {
-    render(<RowActionsMenu tx={tx(7)} canReject />)
+    renderMenu(tx(7))
     openMenu()
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Reject' }))
 
@@ -108,10 +130,13 @@ describe('RowActionsMenu', () => {
   })
 
   it('does not offer a second rejection of a nonce', async () => {
-    render(<RowActionsMenu tx={tx(7)} canReject={false} />)
+    renderMenu(tx(7), false)
     openMenu()
 
-    expect(await screen.findByRole('menuitem', { name: 'Reject' })).toHaveAttribute('aria-disabled', 'true')
+    const reject = await screen.findByRole('menuitem', { name: 'Reject' })
+    expect(reject).toHaveAttribute('aria-disabled', 'true')
+    await userEvent.hover(reject.parentElement!)
+    expect(await screen.findByText('Transaction with nonce 7 already has a reject transaction')).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Replace with a transfer' })).not.toHaveAttribute(
       'aria-disabled',
       'true',
@@ -120,7 +145,7 @@ describe('RowActionsMenu', () => {
 
   it('disables replacing and rejecting for a wallet that cannot sign, but still copies the link', async () => {
     mockIsOk.current = false
-    render(<RowActionsMenu tx={tx(7)} canReject />)
+    renderMenu(tx(7))
     openMenu()
 
     expect(await screen.findByRole('menuitem', { name: 'Replace with a transfer' })).toHaveAttribute(
@@ -136,7 +161,7 @@ describe('RowActionsMenu', () => {
     Object.assign(navigator, { clipboard: { writeText } })
     const transaction = tx(7)
 
-    render(<RowActionsMenu tx={transaction} canReject />)
+    renderMenu(transaction)
     openMenu()
     await act(async () => {
       fireEvent.click(await screen.findByRole('menuitem', { name: 'Copy link' }))
@@ -168,7 +193,7 @@ describe('RowActionsMenu delete', () => {
 
   it('lets the proposer delete the transaction from the scoped Safe, after the other actions', async () => {
     const transaction = tx(9)
-    render(<RowActionsMenu tx={transaction} canReject />)
+    renderMenu(transaction)
     openMenu()
 
     const deleteItem = await screen.findByRole('menuitem', { name: 'Delete from queue' })
@@ -184,19 +209,33 @@ describe('RowActionsMenu delete', () => {
 
     fireEvent.click(deleteItem)
     expect(await screen.findByText(`delete modal ${safeTxHash}`)).toBeInTheDocument()
+    expect(screen.getByTestId('delete-scope')).toHaveAttribute('data-chain-id', '137')
+    expect(screen.getByTestId('delete-scope')).toHaveAttribute('data-safe-address', mockSafeAddress)
 
     fireEvent.click(screen.getByRole('button', { name: 'close delete modal' }))
     expect(screen.queryByText(/delete modal/)).not.toBeInTheDocument()
   })
 
+  it('keeps the delete confirmation open when the row leaves the list', async () => {
+    const transaction = tx(9)
+    const { rerender } = renderMenu(transaction)
+    openMenu()
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Delete from queue' }))
+    expect(await screen.findByText(`delete modal ${safeTxHash}`)).toBeInTheDocument()
+
+    rerender(<DeleteTxDialogProvider>{null}</DeleteTxDialogProvider>)
+
+    expect(screen.getByText(`delete modal ${safeTxHash}`)).toBeInTheDocument()
+  })
+
   it('loads the details only once the menu is opened', () => {
-    render(<RowActionsMenu tx={tx(9)} canReject />)
+    renderMenu(tx(9))
     expect(mockGetTxDetails).not.toHaveBeenCalled()
   })
 
   it('lets a proposer whose wallet cannot sign still delete', async () => {
     mockIsOk.current = false
-    render(<RowActionsMenu tx={tx(9)} canReject />)
+    renderMenu(tx(9))
     openMenu()
 
     expect(await screen.findByRole('menuitem', { name: 'Delete from queue' })).not.toHaveAttribute(
@@ -214,7 +253,7 @@ describe('RowActionsMenu delete', () => {
 
   it('explains why a transaction that would leave a nonce gap cannot be deleted', async () => {
     mockIsNonceDeletable.mockReturnValue(false)
-    render(<RowActionsMenu tx={tx(9)} canReject />)
+    renderMenu(tx(9))
     openMenu()
 
     await expectBlockedWithReason('Delete the later transactions first, or replace this one.')
@@ -222,7 +261,7 @@ describe('RowActionsMenu delete', () => {
 
   it('shows deleting as disabled to a wallet that did not propose the transaction', async () => {
     mockGetTxDetails.mockReturnValue(details(checksumAddress(faker.finance.ethereumAddress())))
-    render(<RowActionsMenu tx={tx(9)} canReject />)
+    renderMenu(tx(9))
     openMenu()
 
     await expectBlockedWithReason('Only the person who proposed it can delete it.')
@@ -230,7 +269,7 @@ describe('RowActionsMenu delete', () => {
 
   it('shows deleting as disabled and skips loading the details without a connected wallet', async () => {
     mockWallet.current = null
-    render(<RowActionsMenu tx={tx(9)} canReject />)
+    renderMenu(tx(9))
     openMenu()
 
     await expectBlockedWithReason('Only the person who proposed it can delete it.')
