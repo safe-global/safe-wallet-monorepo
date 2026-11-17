@@ -102,7 +102,17 @@ const isCycleSwitch = (pick: PlanPick, current: CurrentPlan): boolean =>
   pick.tier.billingCycle !== current.billingCycle &&
   pick.option.label === current.seatsLabel
 
+const isTrialSize = (pick: PlanPick, current: CurrentPlan): boolean =>
+  pick.tier.name === current.name &&
+  pick.tier.billingCycle === current.billingCycle &&
+  pick.option.label === current.seatsLabel
+
 export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): PlanCta => {
+  if (current?.isTrialing && isTrialSize(pick, current)) {
+    return current.hasPaymentMethod
+      ? { kind: 'current', label: 'Current plan' }
+      : { kind: 'billing', label: 'Add payment method' }
+  }
   if (isSalesLedOption(pick.option) && !pick.tier.isCurrent) return { kind: 'sales', label: PRO_TRIAL_COPY.talkToUs }
   if (pick.tier.isCurrent) {
     const isAwaitingPaymentMethod = Boolean(current?.isTrialing && !current.hasPaymentMethod)
@@ -136,8 +146,8 @@ export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): Pl
   }
   // The same plan on the other billing cycle is a resize too, so it is worded by seats like the current card.
   const target = current.isTrialing ? planName : pick.tier.name === current.name ? pick.option.label : pick.tier.name
-  // A trial is not a plan the user picked, so every move off it is an upgrade to the named plan.
-  const isUpgrade = direction === 'upgrade' || current.isTrialing
+  // Nobody pays during a trial yet, so every move off it is a switch.
+  const isUpgrade = direction === 'upgrade' && !current.isTrialing
   return {
     kind: 'change',
     direction,

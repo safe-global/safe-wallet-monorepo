@@ -354,6 +354,33 @@ describe('getPlanCta on a card', () => {
     })
   })
 
+  it('words every move off a trial as a switch to the named size', () => {
+    const business = tier({
+      options: [
+        option({ priceId: 'price_b5m', paymentLinkId: 'pl_b5m', label: '5 Safe accounts', seats: 5, price: 669 }),
+        option({ priceId: 'price_b10m', paymentLinkId: 'pl_b10m', label: '10 Safe accounts', seats: 10, price: 999 }),
+        option(),
+      ],
+    })
+    const trial = currentPlan({ isTrialing: true, seatsLabel: '20 Safe accounts' })
+    const labelOf = (index: number) => getPlanCta({ tier: business, option: business.options[index] }, trial).label
+
+    expect(labelOf(0)).toBe('Switch to Business 5')
+    expect(labelOf(1)).toBe('Switch to Business 10')
+  })
+
+  it('offers no switch to the size a trial is already on', () => {
+    const trialSize = { tier: tier(), option: option() }
+
+    expect(getPlanCta(trialSize, currentPlan({ isTrialing: true, seatsLabel: '20 Safe accounts' }))).toEqual({
+      kind: 'billing',
+      label: 'Add payment method',
+    })
+    expect(
+      getPlanCta(trialSize, currentPlan({ isTrialing: true, hasPaymentMethod: true, seatsLabel: '20 Safe accounts' })),
+    ).toEqual({ kind: 'current', label: 'Current plan' })
+  })
+
   it('words a move to the other billing cycle at the same Safe count by the cycle', () => {
     const yearly = tier({
       id: 'Business-year',
