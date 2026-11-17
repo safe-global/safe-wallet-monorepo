@@ -8,8 +8,9 @@ import { apiSliceWithChainsConfig, chainsAdapter, chainsInitialState } from '@sa
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { chainBuilder } from '@/tests/builders/chains'
-import { initialState as initialSettings, TOKEN_LISTS } from '@/store/settingsSlice'
+import { initialState as initialSettings, setTokenList, TOKEN_LISTS } from '@/store/settingsSlice'
 import { makeStore, setStoreInstance } from '@/store'
+import { waitFor } from '@/tests/test-utils'
 import { gatewayApi } from '../api/gateway'
 import { CHAINS_WAIT_CAP_MS, SAFE_OVERVIEWS_BATCH_WINDOW_MS } from '../api/gateway/safeOverviews'
 
@@ -39,11 +40,7 @@ const recordSafesRequests = () => {
   return requests
 }
 
-const requestOverviews = async (
-  chains: Chain[],
-  safes: Array<{ chainId: string; address: string }>,
-  tokenList = TOKEN_LISTS.TRUSTED,
-) => {
+const makeStoreWithChains = async (chains: Chain[], tokenList = TOKEN_LISTS.TRUSTED) => {
   const store = makeStore({ settings: { ...initialSettings, tokenList } })
   setStoreInstance(store)
   await store.dispatch(
@@ -53,6 +50,15 @@ const requestOverviews = async (
       chainsAdapter.setAll(chainsInitialState, chains),
     ),
   )
+  return store
+}
+
+const requestOverviews = async (
+  chains: Chain[],
+  safes: Array<{ chainId: string; address: string }>,
+  tokenList = TOKEN_LISTS.TRUSTED,
+) => {
+  const store = await makeStoreWithChains(chains, tokenList)
   const query = store.dispatch(gatewayApi.endpoints.getMultipleSafeOverviews.initiate({ currency: 'usd', safes }))
   await query
   query.unsubscribe()
@@ -224,6 +230,72 @@ describe('safeOverviews trusted param', () => {
         expect(elapsed).toBeLessThan(CHAINS_WAIT_CAP_MS * 2)
         expect(requests.map((params) => params.get('trusted'))).toEqual(['false'])
       })
+    })
+  })
+
+  describe('single Safe overview', () => {
+    const requestOverview = async (chain: Chain) => {
+      const store = await makeStoreWithChains([chain])
+      const query = store.dispatch(
+        gatewayApi.endpoints.getSafeOverview.initiate({
+          chainId: chain.chainId,
+          safeAddress: fakerChecksummedAddress(),
+        }),
+      )
+      await query
+      query.unsubscribe()
+    }
+
+    it('sends the trusted value of the default token list on a chain with PORTFOLIO_SUMMARIES', async () => {
+      const requests = recordSafesRequests()
+
+      await requestOverview(
+        chainBuilder()
+          .with({ features: [...TRUSTED_TOKENLIST, FEATURES.PORTFOLIO_SUMMARIES] })
+          .build(),
+      )
+
+      expect(requests.map((params) => params.get('trusted'))).toEqual(['true'])
+    })
+
+    it('sends trusted=false on a chain without PORTFOLIO_SUMMARIES', async () => {
+      const requests = recordSafesRequests()
+
+      await requestOverview(chainBuilder().with({ features: TRUSTED_TOKENLIST }).build())
+
+      expect(requests.map((params) => params.get('trusted'))).toEqual(['false'])
+    })
+  })
+
+  describe('after the token list changes', () => {
+    const subscribeOverviews = async (chain: Chain) => {
+      const store = await makeStoreWithChains([chain])
+      const args = { currency: 'usd', safes: [{ chainId: chain.chainId, address: fakerChecksummedAddress() }] }
+      await store.dispatch(gatewayApi.endpoints.getMultipleSafeOverviews.initiate(args))
+      return { store, args }
+    }
+
+    it('refetches cached overviews with the new trusted value on a chain with PORTFOLIO_SUMMARIES', async () => {
+      const requests = recordSafesRequests()
+      const { store } = await subscribeOverviews(
+        chainBuilder()
+          .with({ features: [...TRUSTED_TOKENLIST, FEATURES.PORTFOLIO_SUMMARIES] })
+          .build(),
+      )
+
+      store.dispatch(setTokenList(TOKEN_LISTS.ALL))
+
+      await waitFor(() => expect(requests.map((params) => params.get('trusted'))).toEqual(['true', 'false']))
+    })
+
+    it('keeps cached overviews when no chain has PORTFOLIO_SUMMARIES', async () => {
+      const requests = recordSafesRequests()
+      const { store, args } = await subscribeOverviews(chainBuilder().with({ features: TRUSTED_TOKENLIST }).build())
+
+      store.dispatch(setTokenList(TOKEN_LISTS.ALL))
+      await store.dispatch(gatewayApi.endpoints.getMultipleSafeOverviews.initiate(args))
+
+      expect(requests).toHaveLength(1)
     })
   })
 })

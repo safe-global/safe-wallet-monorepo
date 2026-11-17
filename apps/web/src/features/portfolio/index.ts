@@ -5,6 +5,7 @@
  * using the Zerion portfolio endpoint with Transaction Service fallback.
  *
  * @feature FEATURES.PORTFOLIO_ENDPOINT - Controls whether the portfolio endpoint is enabled
+ * @feature FEATURES.PORTFOLIO_SUMMARIES - Gates the summaries hooks per chain, independently of the handle's flag
  * @since v3 feature architecture migration (2026)
  *
  * ## Usage

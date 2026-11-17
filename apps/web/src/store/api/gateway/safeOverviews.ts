@@ -49,6 +49,16 @@ const getOverviewTrusted = (state: unknown, chainId: string): boolean => {
   return isTrustedTokenList(chain, selectTokenList(rootState))
 }
 
+/** Whether any chain sends a token-list-dependent `trusted` with its overviews. */
+export const hasPortfolioSummariesChain = (state: unknown): boolean => {
+  const { data } = selectChains(state as never)
+  if (!data) return false
+  return chainsAdapter
+    .getSelectors()
+    .selectAll(data)
+    .some((chain) => hasFeature(chain, FEATURES.PORTFOLIO_SUMMARIES))
+}
+
 class SafeOverviewFetcher {
   private requestQueue: SafeOverviewQueueItem[] = []
 

@@ -9,7 +9,7 @@ import useChains from '@/hooks/useChains'
 import { TxEvent, txDispatch } from '@/services/tx/txEvents'
 import { portfolioSnapshotBuilder, portfolioSummaryBuilder } from '@/tests/builders/portfolioSummary'
 import { getStoreInstance } from '@/store'
-import { setCurrency } from '@/store/settingsSlice'
+import { setCurrency, setTokenList, TOKEN_LISTS } from '@/store/settingsSlice'
 import useClearPortfolioOnTx, { SETTLE_REFETCH_DELAY_MS, SETTLE_WINDOW_MAX_MS } from '../useClearPortfolioOnTx'
 
 jest.mock('@/hooks/useChains', () => ({
@@ -22,14 +22,15 @@ const OTHER_CHAIN = '137'
 
 const recordRequests = (clearStatus = 204) => {
   const clears: Array<{ address: string; chainId: string | null }> = []
-  const summaries: Array<string | null> = []
+  const summaries: Array<{ safes: string | null; currency: string | null; trusted: string | null }> = []
   server.use(
     http.delete<{ address: string }>(`${GATEWAY_URL}/v1/portfolio/:address`, ({ request, params }) => {
       clears.push({ address: params.address, chainId: new URL(request.url).searchParams.get('chainId') })
       return new HttpResponse(null, { status: clearStatus })
     }),
     http.get(`${GATEWAY_URL}/v2/portfolio/summaries`, ({ request }) => {
-      summaries.push(new URL(request.url).searchParams.get('safes'))
+      const params = new URL(request.url).searchParams
+      summaries.push({ safes: params.get('safes'), currency: params.get('currency'), trusted: params.get('trusted') })
       return HttpResponse.json([])
     }),
   )
@@ -48,7 +49,10 @@ describe('useClearPortfolioOnTx', () => {
     jest.mocked(useChains).mockReturnValue({
       configs: [
         chainBuilder()
-          .with({ chainId: SUMMARIES_CHAIN, features: [FEATURES.PORTFOLIO_SUMMARIES] })
+          .with({
+            chainId: SUMMARIES_CHAIN,
+            features: [FEATURES.PORTFOLIO_SUMMARIES, FEATURES.PORTFOLIO_ENDPOINT, FEATURES.DEFAULT_TOKENLIST],
+          })
           .build(),
         chainBuilder().with({ chainId: OTHER_CHAIN, features: [] }).build(),
       ],
@@ -59,11 +63,32 @@ describe('useClearPortfolioOnTx', () => {
     const { clears, summaries } = recordRequests()
     const safe = fakerChecksummedAddress()
     renderHook(() => useClearPortfolioOnTx())
+    act(() => {
+      getStoreInstance().dispatch(setCurrency('usd'))
+    })
 
     dispatchSuccess(SUMMARIES_CHAIN, safe)
 
-    await waitFor(() => expect(summaries).toEqual([`${SUMMARIES_CHAIN}:${safe}`]))
+    await waitFor(() =>
+      expect(summaries).toEqual([{ safes: `${SUMMARIES_CHAIN}:${safe}`, currency: 'usd', trusted: 'true' }]),
+    )
     expect(clears).toEqual([{ address: safe, chainId: SUMMARIES_CHAIN }])
+  })
+
+  it('refetches with trusted=false when the user shows all tokens', async () => {
+    const { summaries } = recordRequests()
+    const safe = fakerChecksummedAddress()
+    renderHook(() => useClearPortfolioOnTx())
+    act(() => {
+      getStoreInstance().dispatch(setCurrency('usd'))
+      getStoreInstance().dispatch(setTokenList(TOKEN_LISTS.ALL))
+    })
+
+    dispatchSuccess(SUMMARIES_CHAIN, safe)
+
+    await waitFor(() =>
+      expect(summaries).toEqual([{ safes: `${SUMMARIES_CHAIN}:${safe}`, currency: 'usd', trusted: 'false' }]),
+    )
   })
 
   it('does not refetch the summary when the clear fails', async () => {
@@ -111,7 +136,7 @@ describe('useClearPortfolioOnTx', () => {
       jest.useRealTimers()
     })
 
-    const serveSnapshots = (lifetimeMs: number, serverOffsetMs = 0) => {
+    const serveSnapshots = (lifetimeMs: number, serverOffsetMs = 0, expiresAt?: string) => {
       const summaries: Array<{ safe: string; currency: string | null }> = []
       server.use(
         http.delete(`${GATEWAY_URL}/v1/portfolio/:address`, () => new HttpResponse(null, { status: 204 })),
@@ -123,7 +148,7 @@ describe('useClearPortfolioOnTx', () => {
           const snapshot = portfolioSnapshotBuilder()
             .with({
               updatedAt: new Date(updatedAt).toISOString(),
-              expiresAt: new Date(updatedAt + lifetimeMs).toISOString(),
+              expiresAt: expiresAt ?? new Date(updatedAt + lifetimeMs).toISOString(),
             })
             .build()
           return HttpResponse.json([portfolioSummaryBuilder().with({ chainId, address: safe, snapshot }).build()])
@@ -229,6 +254,59 @@ describe('useClearPortfolioOnTx', () => {
       act(() => {
         getStoreInstance().dispatch(setCurrency('eur'))
       })
+      await advanceClock(SETTLE_LIFETIME_MS + SETTLE_REFETCH_DELAY_MS)
+
+      expect(summaries).toHaveLength(1)
+    })
+
+    it.each([
+      ['re-reads once when the snapshot lives exactly the longest settle window', SETTLE_WINDOW_MAX_MS, 2],
+      ['does not re-read when the snapshot outlives the settle window', SETTLE_WINDOW_MAX_MS + 1, 1],
+      ['does not re-read when the snapshot lifetime is zero', 0, 1],
+      ['does not re-read when the snapshot expires before it was updated', -SETTLE_LIFETIME_MS, 1],
+    ])('%s', async (_name, lifetimeMs, expectedReads) => {
+      const summaries = serveSnapshots(lifetimeMs)
+      renderHook(() => useClearPortfolioOnTx())
+
+      await executeTx(fakerChecksummedAddress())
+      await advanceClock(SETTLE_WINDOW_MAX_MS + SETTLE_REFETCH_DELAY_MS)
+
+      expect(summaries).toHaveLength(expectedReads)
+    })
+
+    it('does not re-read when the snapshot expiry is not a date', async () => {
+      const summaries = serveSnapshots(SETTLE_LIFETIME_MS, 0, 'not-a-date')
+      renderHook(() => useClearPortfolioOnTx())
+
+      await executeTx(fakerChecksummedAddress())
+      await advanceClock(REGULAR_LIFETIME_MS)
+
+      expect(summaries).toHaveLength(1)
+    })
+
+    it('does not arm a re-read when the currency changes while the clear is in flight', async () => {
+      const summaries = serveSnapshots(SETTLE_LIFETIME_MS)
+      let releaseClear = () => {}
+      const clearReleased = new Promise<void>((resolve) => {
+        releaseClear = resolve
+      })
+      server.use(
+        http.delete(`${GATEWAY_URL}/v1/portfolio/:address`, async () => {
+          await clearReleased
+          return new HttpResponse(null, { status: 204 })
+        }),
+      )
+      renderHook(() => useClearPortfolioOnTx())
+      act(() => {
+        getStoreInstance().dispatch(setCurrency('usd'))
+      })
+
+      dispatchSuccess(SUMMARIES_CHAIN, fakerChecksummedAddress())
+      act(() => {
+        getStoreInstance().dispatch(setCurrency('eur'))
+      })
+      releaseClear()
+      await advanceClock(0)
       await advanceClock(SETTLE_LIFETIME_MS + SETTLE_REFETCH_DELAY_MS)
 
       expect(summaries).toHaveLength(1)

@@ -208,14 +208,44 @@ describe('useRefetchBalances', () => {
       expect(requests).toEqual([{ safes: `${CHAIN_ID}:${SAFE_ADDRESS}`, currency: 'USD', trusted: 'true' }])
     })
 
-    it('refetches the current Safe summary without the portfolio endpoint', async () => {
+    it('refetches the current Safe summary after its balances without the portfolio endpoint', async () => {
+      mockFeatures([FEATURES.POSITIONS, FEATURES.PORTFOLIO_SUMMARIES])
+      const requests = recordSummaryRequests()
+      const { result } = renderHook(() => useRefetchBalances())
+
+      await act(() => result.current.refetch())
+
+      expect(mockRefetch).toHaveBeenCalled()
+      expect(requests).toEqual([{ safes: `${CHAIN_ID}:${SAFE_ADDRESS}`, currency: 'USD', trusted: 'true' }])
+    })
+
+    it('sends trusted=false when the user shows all tokens', async () => {
       mockFeatures([FEATURES.PORTFOLIO_SUMMARIES])
+      jest.spyOn(useLoadBalances, 'useTokenListSetting').mockReturnValue(false)
       const requests = recordSummaryRequests()
       const { result } = renderHook(() => useRefetchBalances())
 
       await act(() => result.current.refetchSummary())
 
-      expect(requests).toHaveLength(1)
+      expect(requests).toEqual([{ safes: `${CHAIN_ID}:${SAFE_ADDRESS}`, currency: 'USD', trusted: 'false' }])
+    })
+
+    it('does not refetch the summary of a Safe that is not deployed yet', async () => {
+      mockFeatures([FEATURES.PORTFOLIO_SUMMARIES])
+      jest.spyOn(useSafeInfo, 'default').mockReturnValue({
+        safe: { ...mockSafe, deployed: false },
+        safeAddress: SAFE_ADDRESS,
+        safeLoaded: true,
+        safeLoading: false,
+        safeError: undefined,
+      })
+      const requests = recordSummaryRequests()
+      const { result } = renderHook(() => useRefetchBalances())
+
+      await act(() => result.current.refetch())
+
+      expect(mockRefetch).toHaveBeenCalled()
+      expect(requests).toEqual([])
     })
 
     it('does not refetch summaries when the chain has the flag off', async () => {
