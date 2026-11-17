@@ -114,6 +114,22 @@ const injectedRtkApi = api
         query: () => ({ url: `/v1/spaces` }),
         providesTags: ['spaces'],
       }),
+      spacesCreateSetupV1: build.mutation<SpacesCreateSetupV1ApiResponse, SpacesCreateSetupV1ApiArg>({
+        query: (queryArg) => ({ url: `/v1/spaces/setup`, method: 'POST', body: queryArg.createSpaceSetupDto }),
+        invalidatesTags: ['spaces'],
+      }),
+      spacesGetSetupV1: build.query<SpacesGetSetupV1ApiResponse, SpacesGetSetupV1ApiArg>({
+        query: (queryArg) => ({ url: `/v1/spaces/${queryArg.id}/setup` }),
+        providesTags: ['spaces'],
+      }),
+      spacesUpdateSetupV1: build.mutation<SpacesUpdateSetupV1ApiResponse, SpacesUpdateSetupV1ApiArg>({
+        query: (queryArg) => ({
+          url: `/v1/spaces/${queryArg.id}/setup`,
+          method: 'PUT',
+          body: queryArg.createSpaceSetupDto,
+        }),
+        invalidatesTags: ['spaces'],
+      }),
       spacesGetOneV1: build.query<SpacesGetOneV1ApiResponse, SpacesGetOneV1ApiArg>({
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.id}` }),
         providesTags: ['spaces'],
@@ -130,12 +146,12 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/v1/spaces/${queryArg.spaceId}/audit-log`,
           params: {
+            cursor: queryArg.cursor,
             event_type: queryArg.eventType,
             actor_user_id: queryArg.actorUserId,
             created_at__gte: queryArg.createdAtGte,
             created_at__lte: queryArg.createdAtLte,
             sort_direction: queryArg.sortDirection,
-            cursor: queryArg.cursor,
           },
         }),
         providesTags: ['spaces'],
@@ -384,6 +400,21 @@ export type SpacesCreateV1ApiArg = {
 }
 export type SpacesGetV1ApiResponse = /** status 200 User spaces retrieved successfully */ GetSpaceResponse[]
 export type SpacesGetV1ApiArg = void
+export type SpacesCreateSetupV1ApiResponse = /** status 201  */ SpaceSetupCheckoutDto
+export type SpacesCreateSetupV1ApiArg = {
+  createSpaceSetupDto: CreateSpaceSetupDto
+}
+export type SpacesGetSetupV1ApiResponse = /** status 200  */ SpaceSetupDto
+export type SpacesGetSetupV1ApiArg = {
+  /** Space UUID */
+  id: string
+}
+export type SpacesUpdateSetupV1ApiResponse = /** status 200  */ SpaceSetupCheckoutDto
+export type SpacesUpdateSetupV1ApiArg = {
+  /** Space UUID */
+  id: string
+  createSpaceSetupDto: CreateSpaceSetupDto
+}
 export type SpacesGetOneV1ApiResponse = /** status 200 Space information retrieved successfully */ GetSpaceResponse
 export type SpacesGetOneV1ApiArg = {
   /** Space UUID */
@@ -405,6 +436,8 @@ export type SpaceAuditGetAuditLogV1ApiResponse = /** status 200 Paginated audit 
 export type SpaceAuditGetAuditLogV1ApiArg = {
   /** Space UUID */
   spaceId: string
+  /** Pagination cursor for retrieving the next set of results */
+  cursor?: string
   /** Comma-separated list of event types to filter by */
   eventType?: string
   /** Filter by acting user id */
@@ -415,8 +448,6 @@ export type SpaceAuditGetAuditLogV1ApiArg = {
   createdAtLte?: string
   /** Sort direction over (created_at, id). Defaults to desc. */
   sortDirection?: 'asc' | 'desc'
-  /** Pagination cursor for retrieving the next set of results */
-  cursor?: string
 }
 export type SpaceAuditGetAuditLogActorsV1ApiResponse =
   /** status 200 Distinct audit log actors */ SpaceAuditLogActorDto[]
@@ -701,6 +732,62 @@ export type GetSpaceResponse = {
   safeCount: number
   /** Experimental features this Workspace has opted into. */
   experimentalFeatures: 'POLICY_RECIPIENT_ALLOWLIST'[]
+  /** Status of the onboarding setup, or null for a Workspace created without one. Pending until the trial starts and the setup is applied. */
+  setupStatus: ('pending' | 'applied') | null
+}
+export type SpaceSetupCheckoutDto = {
+  /** Space UUID */
+  spaceId: string
+  /** The checkout to redirect to. Null when no plan was given: the setup is applied already. */
+  checkoutUrl: string | null
+}
+export type SpaceSafeDto = {
+  chainId: string
+  address: string
+}
+export type AddressBookItem = {
+  name: string
+  address: string
+  chainIds: string[]
+}
+export type WalletInviteUserDto = {
+  type: 'wallet'
+  address: string
+  role: 'ADMIN' | 'MEMBER'
+  name: string
+}
+export type EmailInviteUserDto = {
+  type: 'email'
+  email: string
+  role: 'ADMIN' | 'MEMBER'
+  name: string
+}
+export type SpaceSetupSurveyDto = {
+  slug: string
+  /** Map from page id to selected option keys */
+  selections: {
+    [key: string]: string[]
+  }
+}
+export type CreateSpaceSetupDto = {
+  name: string
+  /** The picked trial plan; its checkout starts the trial. Null applies the setup at once, which is refused once billing is enforced. */
+  paymentLinkId: string | null
+  /** Safes to add when the trial starts. One seat per address, however many chains. */
+  safes: SpaceSafeDto[]
+  addressBookItems: AddressBookItem[]
+  invites: (WalletInviteUserDto | EmailInviteUserDto)[]
+  survey: SpaceSetupSurveyDto | null
+  /** Where the checkout returns to. Must be on an allowed redirect domain. */
+  returnUrl: string
+}
+export type SpaceSetupDto = {
+  status: 'pending' | 'applied'
+  paymentLinkId: string | null
+  safes: SpaceSafeDto[]
+  addressBookItems: AddressBookItem[]
+  invites: (WalletInviteUserDto | EmailInviteUserDto)[]
+  survey: SpaceSetupSurveyDto | null
 }
 export type UpdateSpaceResponse = {
   /** Space UUID */
@@ -757,15 +844,6 @@ export type SpaceAuditLogActorDto = {
   /** Resolved (and masked) display string of the actor. */
   actor: string
 }
-export type SpaceSafeDto = {
-  chainId: string
-  address: string
-}
-export type AddressBookItem = {
-  name: string
-  address: string
-  chainIds: string[]
-}
 export type CreateSpaceSafesDto = {
   safes: SpaceSafeDto[]
   /** Address book entries to upsert for the added Safes, in the same transaction: if either write fails, neither is kept. */
@@ -794,18 +872,6 @@ export type Invitation = {
   role: 'ADMIN' | 'MEMBER'
   status: 'INVITED' | 'ACTIVE' | 'DECLINED'
   invitedBy: number | null
-}
-export type WalletInviteUserDto = {
-  type: 'wallet'
-  address: string
-  role: 'ADMIN' | 'MEMBER'
-  name: string
-}
-export type EmailInviteUserDto = {
-  type: 'email'
-  email: string
-  role: 'ADMIN' | 'MEMBER'
-  name: string
 }
 export type InviteUsersDto = {
   users: (WalletInviteUserDto | EmailInviteUserDto)[]
@@ -1820,6 +1886,10 @@ export const {
   useSpacesCreateV1Mutation,
   useSpacesGetV1Query,
   useLazySpacesGetV1Query,
+  useSpacesCreateSetupV1Mutation,
+  useSpacesGetSetupV1Query,
+  useLazySpacesGetSetupV1Query,
+  useSpacesUpdateSetupV1Mutation,
   useSpacesGetOneV1Query,
   useLazySpacesGetOneV1Query,
   useSpacesUpdateV1Mutation,
