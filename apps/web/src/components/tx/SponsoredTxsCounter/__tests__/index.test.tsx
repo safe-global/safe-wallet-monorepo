@@ -82,4 +82,30 @@ describe('SponsoredTxsCounter', () => {
 
     expect(screen.getByText('Unlimited sponsored transactions')).toBeInTheDocument()
   })
+
+  it('explains running out and opens the upgrade in place when given onUpgrade', () => {
+    const onUpgrade = jest.fn()
+    render(
+      <SponsoredTxsCounter
+        left={0}
+        quota={5}
+        resetsAt={null}
+        isSubscription={false}
+        isPro={false}
+        onUpgrade={onUpgrade}
+      />,
+    )
+
+    expect(screen.getByTestId('sponsored-txs-out')).toHaveTextContent("You've used today's free transactions.")
+    expect(screen.getByTestId('sponsored-txs-upgrade')).not.toHaveAttribute('href')
+    fireEvent.click(screen.getByTestId('sponsored-txs-upgrade'))
+    expect(onUpgrade).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps the link and leaves out the line without onUpgrade', () => {
+    render(<SponsoredTxsCounter left={0} quota={5} resetsAt={null} isSubscription={false} isPro={false} />)
+
+    expect(screen.queryByTestId('sponsored-txs-out')).not.toBeInTheDocument()
+    expect(screen.getByTestId('sponsored-txs-upgrade')).toHaveAttribute('href', '/welcome/spaces')
+  })
 })

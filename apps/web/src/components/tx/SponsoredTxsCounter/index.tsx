@@ -39,6 +39,7 @@ const SponsoredTxsCounter = ({
   resetsAt,
   isSubscription,
   isPro,
+  onUpgrade,
 }: {
   /** Null reads as unlimited. */
   left: number | null
@@ -49,45 +50,55 @@ const SponsoredTxsCounter = ({
   isSubscription: boolean
   /** Shows the Pro chip instead of the upgrade button; null (plan unknown, or Pro does not apply as in Safe creation) shows neither. */
   isPro: boolean | null
+  /** Opens the upgrade in place instead of leaving for the Workspaces page. */
+  onUpgrade?: () => void
 }): ReactElement => {
   const resets = _formatResetsAt(resetsAt)
+  const isOutOfFreeTxs = Boolean(onUpgrade) && isPro === false && !isSubscription && left === 0
   useTrackOnce(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT, !isPro)
 
   return (
     <div className="flex items-center justify-between gap-3 bg-muted px-4 py-2" data-testid="sponsored-txs-counter">
-      <Typography variant="paragraph-small" className="flex flex-wrap items-baseline gap-1">
-        {left === null ? (
-          <span>Unlimited sponsored transactions</span>
-        ) : isSubscription && quota !== null ? (
-          <span>
-            <span className="font-semibold" data-testid="sponsored-txs-left">
-              {left}
+      <div className="flex flex-col gap-0.5">
+        <Typography variant="paragraph-small" className="flex flex-wrap items-baseline gap-1">
+          {left === null ? (
+            <span>Unlimited sponsored transactions</span>
+          ) : isSubscription && quota !== null ? (
+            <span>
+              <span className="font-semibold" data-testid="sponsored-txs-left">
+                {left}
+              </span>
+              <span className="text-muted-foreground">/{quota} sponsored transactions left</span>
             </span>
-            <span className="text-muted-foreground">/{quota} sponsored transactions left</span>
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1">
-            <span data-testid="sponsored-txs-left">
-              <span className="font-semibold">{left}</span> free transactions left today
+          ) : (
+            <span className="inline-flex items-center gap-1">
+              <span data-testid="sponsored-txs-left">
+                <span className="font-semibold">{left}</span> free transactions left today
+              </span>
+              {quota !== null && (
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <span className="leading-none" data-testid="sponsored-txs-info">
+                        <Info className="size-4 text-muted-foreground" />
+                      </span>
+                    }
+                  />
+                  <TooltipContent>
+                    {quota} transaction{maybePlural(quota)} per day for free
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </span>
-            {quota !== null && (
-              <Tooltip>
-                <TooltipTrigger
-                  render={
-                    <span className="leading-none" data-testid="sponsored-txs-info">
-                      <Info className="size-4 text-muted-foreground" />
-                    </span>
-                  }
-                />
-                <TooltipContent>
-                  {quota} transaction{maybePlural(quota)} per day for free
-                </TooltipContent>
-              </Tooltip>
-            )}
-          </span>
+          )}
+          {resets && <span className="text-xs text-muted-foreground">· Resets {resets}</span>}
+        </Typography>
+        {isOutOfFreeTxs && (
+          <Typography variant="paragraph-small" color="muted" data-testid="sponsored-txs-out">
+            You&apos;ve used today&apos;s free transactions. Safe Pro includes 50 a month.
+          </Typography>
         )}
-        {resets && <span className="text-xs text-muted-foreground">· Resets {resets}</span>}
-      </Typography>
+      </div>
 
       {isPro === null ? (
         <span className="block h-5 w-8 shrink-0" aria-hidden />
@@ -104,7 +115,8 @@ const SponsoredTxsCounter = ({
           <Button
             variant="outline"
             size="xs"
-            render={<NextLink href={AppRoutes.welcome.spaces} />}
+            render={onUpgrade ? undefined : <NextLink href={AppRoutes.welcome.spaces} />}
+            onClick={onUpgrade}
             data-testid="sponsored-txs-upgrade"
           >
             Upgrade to

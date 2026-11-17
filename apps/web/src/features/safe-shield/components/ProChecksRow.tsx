@@ -14,7 +14,14 @@ const PROMPT = {
   [MixpanelEventParams.LOCATION]: UpgradeLocation.TX_FLOW_SAFE_SHIELD,
 }
 
-export const ProChecksRow = ({ hasProFeatures }: { hasProFeatures: boolean }): ReactElement => {
+export const ProChecksRow = ({
+  hasProFeatures,
+  onUpgrade,
+}: {
+  hasProFeatures: boolean
+  /** Opens the upgrade in place instead of leaving for the plans page. */
+  onUpgrade?: () => void
+}): ReactElement => {
   const { spaceId } = useSafeProAccess()
   const href = spaceId ? { pathname: AppRoutes.spaces.plans, query: { spaceId } } : AppRoutes.welcome.spaces
   useTrackOnce(SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED, PROMPT, !hasProFeatures)
@@ -28,14 +35,15 @@ export const ProChecksRow = ({ hasProFeatures }: { hasProFeatures: boolean }): R
         <Button
           variant="outline"
           size="xs"
-          render={<NextLink href={href} />}
+          render={onUpgrade ? undefined : <NextLink href={href} />}
           data-testid="pro-upgrade-link"
-          onClick={() =>
+          onClick={() => {
             trackPlanSelectionStarted({
               [MixpanelEventParams.ENTRY_POINT]: PlanSelectionEntryPoint.UPGRADE_PROMPT,
               ...PROMPT,
             })
-          }
+            onUpgrade?.()
+          }}
         >
           Upgrade
           <ArrowRight data-icon="inline-end" className="text-badge-dot-success" />
