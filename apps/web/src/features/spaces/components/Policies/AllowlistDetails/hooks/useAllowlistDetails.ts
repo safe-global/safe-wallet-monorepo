@@ -1,4 +1,6 @@
 import { useMemo } from 'react'
+import { skipToken } from '@reduxjs/toolkit/query'
+import { useGetSafeOverviewQuery } from '@/store/api/gateway'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { usePolicyDetailsBase, type PolicyDetailsBase } from '../../hooks/usePolicyDetailsBase'
 import { getAllowlistRecipients } from '@safe-global/views/features/spaces/components/Policies/utils/allowlistRecipients'
@@ -15,6 +17,8 @@ export type AllowlistDetailsContent = PolicyDetailsBase & {
   overview: { enforcedBy: string }
   /** Counted per spender and token. */
   uncoveredSpendingLimitCount?: number
+  /** Only read while a delayed change waits to be applied, whose banner names them. */
+  signatures?: { threshold: number; owners: number }
 }
 
 export const useAllowlistDetails = (policy: ActiveAllowlistPolicy, policies: Policy[]): AllowlistDetailsContent => {
@@ -37,9 +41,17 @@ export const useAllowlistDetails = (policy: ActiveAllowlistPolicy, policies: Pol
     return count
   }, [policy.spendingLimitsCovered, policies, chainId, safeAddress])
 
+  const { currentData: safeOverview } = useGetSafeOverviewQuery(
+    policy.scheduledChange ? { chainId, safeAddress } : skipToken,
+  )
+  const signatures = safeOverview
+    ? { threshold: safeOverview.threshold, owners: safeOverview.owners.length }
+    : undefined
+
   return {
     ...base,
     overview: { enforcedBy: ENFORCED_BY },
     uncoveredSpendingLimitCount,
+    signatures,
   }
 }

@@ -9,7 +9,13 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowType } from '@/services/analytics'
 
-const ConfirmTxFlow = ({ txSummary }: { txSummary: Transaction }) => {
+type ConfirmTxFlowProps = {
+  txSummary: Transaction
+  /** A flow that decodes its transaction itself, such as an allowlist setup, passes its own review. */
+  ReviewTransactionComponent?: typeof ConfirmProposedTx
+}
+
+const ConfirmTxFlow = ({ txSummary, ReviewTransactionComponent = ConfirmProposedTx }: ConfirmTxFlowProps) => {
   const { text } = useTransactionType(txSummary)
   const isSwapOrder = isSwapOrderTxInfo(txSummary.txInfo)
   const isRejection = isCancellationTxInfo(txSummary.txInfo)
@@ -31,7 +37,7 @@ const ConfirmTxFlow = ({ txSummary }: { txSummary: Transaction }) => {
       onlyExecute={!canSign}
       isRejection={isRejection}
       txSummary={txSummary}
-      ReviewTransactionComponent={ConfirmProposedTx}
+      ReviewTransactionComponent={ReviewTransactionComponent}
       eventCategory={TxFlowType.CONFIRM_TX}
     />
   )

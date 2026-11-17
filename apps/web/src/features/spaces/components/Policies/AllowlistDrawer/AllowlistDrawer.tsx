@@ -1,5 +1,4 @@
 import type { ReactElement } from 'react'
-import type { LinkProps } from 'next/link'
 import { Drawer, DrawerBody } from '@/components/common/Drawer'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@/utils/chains'
@@ -76,7 +75,8 @@ type PendingAllowlistDrawerProps = AllowlistDrawerBaseProps & {
   /** A failed row from the table can be passed as is: the drawer reads the outcome from its status. */
   policy: QueuedAllowlistPolicy | FailedAllowlistPolicy
   transactionLink?: string
-  reviewTransactionHref?: LinkProps['href']
+  /** Opens the queued transaction's review; absent until the transaction has loaded. */
+  onReviewTransaction?: () => void
   /** Set once the queued transaction has left the queue: the panel reports why instead of offering a CTA. */
   outcome?: AllowlistTxOutcome
 }
@@ -124,7 +124,7 @@ const AllowlistDrawer = (props: AllowlistDrawerProps): ReactElement => {
   const isRemoved = 'operation' in state && state.operation === 'remove'
   const recipients = getAllowlistRecipients(policy.data)
   const actions = isPendingDrawer(props)
-    ? { transactionLink: props.transactionLink, reviewTransactionHref: props.reviewTransactionHref }
+    ? { transactionLink: props.transactionLink, onReviewTransaction: props.onReviewTransaction }
     : {
         onEdit: props.onEdit,
         onRemove: props.onRemove,

@@ -1,4 +1,7 @@
 import { renderHook } from '@testing-library/react'
+import { faker } from '@faker-js/faker'
+import { AbiCoder } from 'ethers'
+import type { PendingImmediateGuardPoliciesDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { isAllowlistPolicy } from '@safe-global/views/features/spaces/components/Policies/types'
@@ -59,6 +62,35 @@ jest.mock('@/hooks/useChains', () => ({
 jest.mock('../useActivatingPolicies', () => ({
   useActivatingPolicies: (...args: unknown[]) => mockUseActivatingPolicies(...args),
 }))
+
+const mockQueuedGuardSetup = (
+  status: PendingImmediateGuardPoliciesDto['status'],
+): PendingImmediateGuardPoliciesDto & { kind: 'immediate-guard-policies' } => ({
+  kind: 'immediate-guard-policies',
+  status,
+  safe: MOCK_SAFES.treasury,
+  guard: faker.finance.ethereumAddress(),
+  configurations: [
+    {
+      target: MOCK_TOKENS.usdc.address,
+      selector: '0xa9059cbb',
+      operation: 0,
+      policy: faker.finance.ethereumAddress(),
+      data: AbiCoder.defaultAbiCoder().encode(
+        ['tuple(address recipient, uint8 permission)[]'],
+        [[[faker.finance.ethereumAddress(), 2]]],
+      ),
+    },
+  ],
+  transaction: {
+    safeTxHash: faker.string.hexadecimal({ length: 64 }),
+    nonce: 0,
+    confirmations: status === 'ready' ? 2 : 1,
+    confirmationsRequired: 2,
+    proposedAt: 1_800_000_000,
+    proposer: null,
+  },
+})
 
 const idle = { currentData: undefined, isLoading: false, isFetching: false, isError: false, refetch: jest.fn() }
 
@@ -318,6 +350,39 @@ describe('useSpacePolicies', () => {
       const [policy] = result.current.policies.filter(isAllowlistPolicy)
 
       expect(policy.data.entries[0].token).toEqual(MOCK_TOKENS.usdc)
+    })
+
+    it('should, while a guard setup is queued, return a pending allowlist row for the next owner to sign', () => {
+      const setup = mockQueuedGuardSetup('in-signing')
+      mockPendingQuery.mockReturnValue({ ...idle, currentData: [setup] })
+
+      const { result } = renderHook(() => useSpacePolicies())
+
+      expect(result.current.policies).toEqual([
+        expect.objectContaining({
+          type: 'allowlist',
+          status: 'pending',
+          operation: 'create',
+          safeTxHash: setup.transaction.safeTxHash,
+          confirmationsSubmitted: 1,
+          confirmationsRequired: 2,
+        }),
+      ])
+      expect(mockPendingQuery).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.objectContaining({ pollingInterval: 0 }),
+      )
+    })
+
+    it('should, while a queued guard setup has all its signatures, poll for it leaving the queue', () => {
+      mockPendingQuery.mockReturnValue({ ...idle, currentData: [mockQueuedGuardSetup('ready')] })
+
+      renderHook(() => useSpacePolicies())
+
+      expect(mockPendingQuery).toHaveBeenLastCalledWith(
+        expect.anything(),
+        expect.objectContaining({ pollingInterval: POLLING_INTERVAL }),
+      )
     })
 
     it('should drop allowlists on a chain without the allowlist feature', () => {
