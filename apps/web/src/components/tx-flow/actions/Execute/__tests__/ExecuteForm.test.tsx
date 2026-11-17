@@ -22,7 +22,7 @@ import type {
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import { TxModalContext } from '@/components/tx-flow'
-import { SuccessScreenFlow } from '@/components/tx-flow/flows'
+import { NestedTxSuccessScreenFlow, SuccessScreenFlow } from '@/components/tx-flow/flows'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
 
@@ -460,6 +460,43 @@ describe('ExecuteForm', () => {
       await waitFor(() => expect(mockExecuteTx).toHaveBeenCalled())
       await waitFor(() => expect(setTxFlow).toHaveBeenCalled())
       expect(setTxFlow.mock.calls[0][0].props).toEqual({ txId: '0xexecuted', scope: undefined })
+    })
+
+    it('hands the selected Safe to the nested success screen when a parent Safe queued the execution', async () => {
+      mockUseSafeScope.mockReturnValue({
+        chainId: '11155111',
+        safeAddress: '0x0000000000000000000000000000000000000001',
+        scopeKey: '11155111:0x0000000000000000000000000000000000000001',
+        safeLoaded: true,
+        safeLoading: false,
+      })
+      const setTxFlow = jest.fn()
+      const mockExecuteTx = jest.fn().mockResolvedValue({ txId: '0xparent', isExecuted: false })
+      const { getByText } = render(
+        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
+          <ExecuteForm
+            {...defaultProps}
+            safeTx={safeTransaction}
+            txActions={{ ...defaultProps.txActions, executeTx: mockExecuteTx }}
+          />
+        </TxModalContext.Provider>,
+      )
+
+      fireEvent.click(getByText('Execute'))
+
+      await waitFor(() => {
+        expect(setTxFlow).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: NestedTxSuccessScreenFlow,
+            props: {
+              txId: '0xparent',
+              scope: { chainId: '11155111', safeAddress: '0x0000000000000000000000000000000000000001' },
+            },
+          }),
+          undefined,
+          false,
+        )
+      })
     })
   })
 

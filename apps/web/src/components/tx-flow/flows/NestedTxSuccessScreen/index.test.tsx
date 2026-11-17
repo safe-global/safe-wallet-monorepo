@@ -6,6 +6,20 @@ import { PendingStatus, type PendingTxsState } from '@/store/pendingTxsSlice'
 import * as useChainsHook from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
 
+jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
+  SafeScopeProvider: ({
+    initial,
+    children,
+  }: {
+    initial?: { chainId: string; safeAddress: string }
+    children: React.ReactNode
+  }) => (
+    <div data-testid="success-scope" data-chain={initial?.chainId} data-safe={initial?.safeAddress}>
+      {children}
+    </div>
+  ),
+}))
+
 const chain = chainBuilder()
   .with({
     chainId: '1',
@@ -77,6 +91,36 @@ describe('NestedTxSuccessScreen', () => {
 
     expect(getByText('execTransaction')).toBeInTheDocument()
     expect(getByText(/before this Safe's transaction runs/i)).toBeInTheDocument()
+  })
+
+  it("re-mounts the selected Safe's scope when a Space-level flow opened it", () => {
+    const pendingTxs: PendingTxsState = {
+      [TX_ID]: {
+        nonce: 1,
+        chainId: '1',
+        safeAddress: CHILD_SAFE,
+        status: PendingStatus.NESTED_SIGNING,
+        signerAddress: PARENT_SAFE,
+        txHashOrParentSafeTxHash: zeroPadValue('0x05', 32),
+        executed: false,
+        method: 'approveHash',
+      },
+    }
+    const { getByTestId } = render(
+      <NestedTxSuccessScreen txId={TX_ID} scope={{ chainId: '1', safeAddress: CHILD_SAFE }} />,
+      { initialReduxState: { pendingTxs } },
+    )
+
+    const scope = getByTestId('success-scope')
+    expect(scope).toHaveAttribute('data-chain', '1')
+    expect(scope).toHaveAttribute('data-safe', CHILD_SAFE)
+    expect(scope.querySelector('[data-testid="transaction-status"]')).toBeInTheDocument()
+  })
+
+  it('mounts no scope for a Safe-level flow', () => {
+    const { queryByTestId } = renderScreen(false, zeroPadValue('0x06', 32))
+
+    expect(queryByTestId('success-scope')).not.toBeInTheDocument()
   })
 
   it('shows an error when there is no nested pending tx', () => {
