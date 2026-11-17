@@ -169,7 +169,7 @@ export const ExecuteForm = ({
       isExecuted ? (
         <SuccessScreenFlow txId={executedTxId} scope={successScope} />
       ) : (
-        <NestedTxSuccessScreenFlow txId={executedTxId} />
+        <NestedTxSuccessScreenFlow txId={executedTxId} scope={successScope} />
       ),
       undefined,
       false,
