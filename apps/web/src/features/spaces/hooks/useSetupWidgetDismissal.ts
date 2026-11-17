@@ -2,14 +2,16 @@ import { useCallback, useEffect } from 'react'
 import { addDays } from 'date-fns'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
-export const DISMISS_STORAGE_KEY = 'setupWidgetDismissed'
+const DISMISS_STORAGE_KEY = 'setupWidgetDismissed'
 export const DISMISS_COUNT_STORAGE_KEY = 'setupWidgetDismissCount'
-export const DISMISS_DAYS = 3
-export const MAX_DISMISSALS = 3
+export const COMPLETED_STORAGE_KEY = 'setupWidgetCompleted'
+const DISMISS_DAYS = 3
+const MAX_DISMISSALS = 3
 
 export const useSetupWidgetDismissal = (spaceId: string | null | undefined) => {
   const [dismissedSpaces = {}, setDismissedSpaces] = useLocalStorage<Record<string, number>>(DISMISS_STORAGE_KEY)
   const [dismissCounts = {}, setDismissCounts] = useLocalStorage<Record<string, number>>(DISMISS_COUNT_STORAGE_KEY)
+  const [completedSpaces = {}] = useLocalStorage<Record<string, boolean>>(COMPLETED_STORAGE_KEY)
 
   useEffect(() => {
     const now = Date.now()
@@ -26,6 +28,7 @@ export const useSetupWidgetDismissal = (spaceId: string | null | undefined) => {
 
   const isTemporarilyDismissed = spaceId ? (dismissedSpaces[spaceId] ?? 0) > Date.now() : false
   const isPermanentlyDismissed = spaceId ? (dismissCounts[spaceId] ?? 0) >= MAX_DISMISSALS : false
+  const isMarkedCompleted = spaceId ? completedSpaces[spaceId] === true : false
 
   const dismiss = useCallback(() => {
     if (!spaceId) return
@@ -40,5 +43,5 @@ export const useSetupWidgetDismissal = (spaceId: string | null | undefined) => {
     }))
   }, [spaceId, setDismissedSpaces, setDismissCounts])
 
-  return { isDismissed: isTemporarilyDismissed || isPermanentlyDismissed, dismiss }
+  return { isHidden: isTemporarilyDismissed || isPermanentlyDismissed || isMarkedCompleted, dismiss }
 }
