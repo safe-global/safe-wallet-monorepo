@@ -88,7 +88,7 @@ describe('ClaimTrialModal', () => {
     jest.clearAllMocks()
     mockStartState = {}
     mockRemoveState = {}
-    mockUseSpaceOffers.mockReturnValue({ trialPlans: [BUSINESS], trialPeriodDays: 60, isLoading: false })
+    mockUseSpaceOffers.mockReturnValue({ paidPlans: [], trialPlans: [BUSINESS], trialPeriodDays: 60, isLoading: false })
     mockSpaceSafes.mockReturnValue({ safes: { '1': ['0xA', '0xB'] } })
     mockRemoveSafes.mockResolvedValue({ data: undefined })
     mockStartTrial.mockResolvedValue({ data: undefined })
@@ -102,17 +102,26 @@ describe('ClaimTrialModal', () => {
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Safe Pro 60-day free trial')
     expect(screen.getByText(/60 days instead of 30/)).toBeInTheDocument()
 
-    mockUseSpaceOffers.mockReturnValue({ trialPlans: [BUSINESS], trialPeriodDays: 30, isLoading: false })
+    mockUseSpaceOffers.mockReturnValue({ paidPlans: [], trialPlans: [BUSINESS], trialPeriodDays: 30, isLoading: false })
     rerender(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Safe Pro 30-day free trial')
     expect(screen.queryByText(/60 days instead of 30/)).not.toBeInTheDocument()
   })
 
-  it('lists the trial features without a price and says when the trial ends', () => {
+  it('lists the seats and features, prices from the cheapest plan rather than the trial plan, and says when it ends', () => {
+    mockUseSpaceOffers.mockReturnValue({
+      trialPlans: [BUSINESS],
+      paidPlans: [STARTER, BUSINESS],
+      trialPeriodDays: 60,
+      isLoading: false,
+    })
     render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
 
+    expect(screen.getByTestId('trial-features')).toHaveTextContent('20 Safe accounts')
     expect(screen.getByTestId('trial-features')).toHaveTextContent('Policy engine')
+    expect(screen.getByTestId('trial-price')).toHaveTextContent(/^Free\s*then from €149\/mo$/)
     expect(screen.queryByText(/€499/)).not.toBeInTheDocument()
+    expect(screen.getByTestId('trial-explore-plans')).toHaveAttribute('href', SAFE_PRO_PRICING_URL)
     expect(screen.getByText('No card. No charge. Trial ends on its own Dec 5, 2026.')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /see all features/ })).toHaveAttribute('href', SAFE_PRO_PRICING_URL)
     expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
@@ -122,7 +131,7 @@ describe('ClaimTrialModal', () => {
     const onBack = jest.fn()
     render(<ClaimTrialModal spaceId={SPACE_ID} onBack={onBack} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Go to My accounts' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
     expect(onBack).toHaveBeenCalled()
 
     fireEvent.click(screen.getByRole('button', { name: /Start free trial/ }))
@@ -152,7 +161,7 @@ describe('ClaimTrialModal', () => {
       'Free Access Length': 60,
     })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Go to My accounts' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
     expect(trackEvent).toHaveBeenCalledWith(SAFE_PRO_EVENTS.FREE_ACCESS_OFFER_DISMISSED, {
       ...LOGIN_ENTRY,
       'Dismiss Action': 'go_to_my_accounts',
@@ -172,7 +181,7 @@ describe('ClaimTrialModal', () => {
   })
 
   it('removes the Safes left out of the trial plan and then starts the trial', async () => {
-    mockUseSpaceOffers.mockReturnValue({ trialPlans: [STARTER], trialPeriodDays: 30, isLoading: false })
+    mockUseSpaceOffers.mockReturnValue({ paidPlans: [], trialPlans: [STARTER], trialPeriodDays: 30, isLoading: false })
     mockSpaceSafes.mockReturnValue({ safes: { '1': ['0xA', '0xB', '0xC'] } })
     render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
 
@@ -196,7 +205,7 @@ describe('ClaimTrialModal', () => {
   })
 
   it('stays on the accounts step and shows the error when removing Safes fails', async () => {
-    mockUseSpaceOffers.mockReturnValue({ trialPlans: [STARTER], trialPeriodDays: 30, isLoading: false })
+    mockUseSpaceOffers.mockReturnValue({ paidPlans: [], trialPlans: [STARTER], trialPeriodDays: 30, isLoading: false })
     mockSpaceSafes.mockReturnValue({ safes: { '1': ['0xA', '0xB', '0xC'] } })
     mockRemoveSafes.mockResolvedValue({ error: { status: 500, data: { message: 'Boom' } } })
     mockRemoveState = { error: { status: 500, data: { message: 'Boom' } } }
@@ -212,11 +221,11 @@ describe('ClaimTrialModal', () => {
   })
 
   it('shows a skeleton while the offers load and an empty state without a trial', () => {
-    mockUseSpaceOffers.mockReturnValue({ trialPlans: [], trialPeriodDays: null, isLoading: true })
+    mockUseSpaceOffers.mockReturnValue({ paidPlans: [], trialPlans: [], trialPeriodDays: null, isLoading: true })
     const { rerender } = render(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
     expect(screen.getByTestId('claim-trial-skeleton')).toBeInTheDocument()
 
-    mockUseSpaceOffers.mockReturnValue({ trialPlans: [], trialPeriodDays: null, isLoading: false })
+    mockUseSpaceOffers.mockReturnValue({ paidPlans: [], trialPlans: [], trialPeriodDays: null, isLoading: false })
     rerender(<ClaimTrialModal spaceId={SPACE_ID} onBack={jest.fn()} />)
     expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Safe Pro free trial')
     expect(screen.getByText('There is no trial available for this Workspace.')).toBeInTheDocument()
