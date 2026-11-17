@@ -15,11 +15,6 @@ jest.mock('../TokenTransfer', () => ({ __esModule: true, default: () => null }))
 
 jest.mock('@/components/common/ChainIndicator', () => ({ __esModule: true, default: () => null }))
 
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
-  useLoadFeature: () => ({ HnMiniTxBanner: () => null }),
-}))
-
 const renderFlow = (scope?: SafeScopeContextValue) => {
   const setTxFlow = mockSetTxFlow()
   render(
