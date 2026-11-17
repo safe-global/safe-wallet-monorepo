@@ -63,6 +63,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
 
 jest.mock('@/components/tx/shared/tracking', () => ({
   __esModule: true,
+  ...jest.requireActual('@/components/tx/shared/tracking'),
   trackTxEvents: jest.fn(),
 }))
 
@@ -178,6 +179,18 @@ describe('TxFlowProvider', () => {
       })
 
       await waitFor(() => expect(isCreationArg()).toBe(false))
+    })
+
+    it('reports a sponsored execution as sponsored, from the payer the user picked', async () => {
+      const gasPaymentSourceArg = () => jest.mocked(trackTxEvents).mock.calls[0][9]
+      const { result } = renderContext({})
+
+      act(() => result.current.setGasPaymentOption('FREE_DAILY_LIMIT'))
+      act(() => {
+        result.current.trackTxEvent(buildTxId(), true)
+      })
+
+      await waitFor(() => expect(gasPaymentSourceArg()).toBe('sponsored'))
     })
   })
 
