@@ -7,13 +7,13 @@ jest.mock('@/utils/transaction-errors', () => {
 
 describe('policy-guard bundle boundary', () => {
   it.each([
-    'allowlistAvailability',
+    'services/allowlistAvailability',
     'constants',
-    'policyEngineDeployments',
+    'services/policyEngineDeployments',
     'types',
-    'useAllowlistAvailability',
-    'useIsAllowlistActiveInSpace',
-    'usePolicyGuard',
+    'hooks/useAllowlistAvailability',
+    'hooks/useIsAllowlistActiveInSpace',
+    'hooks/usePolicyGuard',
   ])('keeps the RPC error helpers and their contract ABIs out of public/%s', (file) => {
     mockHeavyModulesLoaded = []
     jest.isolateModules(() => {
