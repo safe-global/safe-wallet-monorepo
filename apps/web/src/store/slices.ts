@@ -54,6 +54,7 @@ export {
   checkoutTrackingListener,
   workspaceTrackingListener,
   spaceSafesCacheListener,
+  addressBookTagsCacheListener,
   trialReminderListener,
   safeActionsModalSlice,
   ESafeAction,
