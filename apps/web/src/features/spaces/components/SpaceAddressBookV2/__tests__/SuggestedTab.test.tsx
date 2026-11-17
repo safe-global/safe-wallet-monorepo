@@ -108,7 +108,7 @@ const addSelected = async (suggestions: SuggestedContact[]) => {
   for (const suggestion of suggestions) {
     await userEvent.click(screen.getByRole('checkbox', { name: `Select ${suggestion.suggestedName}` }))
   }
-  await userEvent.click(screen.getByRole('button', { name: `Add ${suggestions.length} to workspace` }))
+  await userEvent.click(screen.getByRole('button', { name: `Add ${suggestions.length} to Workspace` }))
   return screen.findByRole('dialog')
 }
 
@@ -165,7 +165,7 @@ describe('SuggestedTab', () => {
     const suggestion = suggestionBuilder().build()
     renderTab({ suggestions: [suggestion] })
 
-    await userEvent.click(screen.getByRole('button', { name: 'Add to workspace' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Add to Workspace' }))
     await userEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Add 1 contact' }))
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
@@ -183,7 +183,7 @@ describe('SuggestedTab', () => {
     const suggestion = suggestionBuilder().build()
     renderTab({ suggestions: [suggestion] })
 
-    await userEvent.click(screen.getByRole('button', { name: 'Add to workspace' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Add to Workspace' }))
     await userEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Add 1 contact' }))
 
     expect(await within(screen.getByRole('dialog')).findByRole('alert')).toHaveTextContent(message)
@@ -197,7 +197,7 @@ describe('SuggestedTab', () => {
     )
     renderTab({ suggestions: [suggestionBuilder().build()] })
 
-    await userEvent.click(screen.getByRole('button', { name: 'Add to workspace' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Add to Workspace' }))
     const dialog = await screen.findByRole('dialog')
     await userEvent.click(within(dialog).getByRole('button', { name: 'Add 1 contact' }))
     await userEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }))
@@ -221,7 +221,7 @@ describe('SuggestedTab', () => {
       'suggested',
     )
     expect(screen.getByRole('button', { name: `${requested.suggestedName} requested` })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Add to workspace' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Add to Workspace' })).not.toBeInTheDocument()
   })
 
   it('shows members no action when private address books are off', () => {
@@ -229,7 +229,7 @@ describe('SuggestedTab', () => {
     renderTab({ suggestions: [suggestion], isAdmin: false, isPrivateAddressBookEnabled: false })
 
     expect(screen.queryByRole('button', { name: `Request ${suggestion.suggestedName}` })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Add to workspace' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Add to Workspace' })).not.toBeInTheDocument()
   })
 
   it('shows invited people no action', () => {
@@ -237,6 +237,6 @@ describe('SuggestedTab', () => {
     renderTab({ suggestions: [suggestion], isAdmin: false, isInvited: true })
 
     expect(screen.queryByRole('button', { name: `Request ${suggestion.suggestedName}` })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Add to workspace' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Add to Workspace' })).not.toBeInTheDocument()
   })
 })

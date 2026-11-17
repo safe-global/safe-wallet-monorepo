@@ -32,7 +32,7 @@ describe('SuggestedContacts', () => {
     render(<SuggestedContacts suggestions={[first, second]} canAdd onAdd={onAdd} />)
 
     const [row] = screen.getAllByTestId('table-row')
-    await userEvent.click(within(row).getByRole('button', { name: 'Add to workspace' }))
+    await userEvent.click(within(row).getByRole('button', { name: 'Add to Workspace' }))
 
     expect(onAdd).toHaveBeenCalledWith([first], 'row')
   })
@@ -43,7 +43,7 @@ describe('SuggestedContacts', () => {
     const onAdd = jest.fn()
     render(<SuggestedContacts suggestions={[suggestion]} canAdd onAdd={onAdd} />)
 
-    const button = screen.getByRole('button', { name: 'Add to workspace' })
+    const button = screen.getByRole('button', { name: 'Add to Workspace' })
     expect(button).toHaveTextContent('')
     await userEvent.click(button)
 
@@ -61,7 +61,7 @@ describe('SuggestedContacts', () => {
     const bar = screen.getByTestId('suggestions-bulk-bar')
     expect(within(bar).getByText('2 selected')).toBeInTheDocument()
 
-    await userEvent.click(within(bar).getByRole('button', { name: 'Add 2 to workspace' }))
+    await userEvent.click(within(bar).getByRole('button', { name: 'Add 2 to Workspace' }))
 
     expect(onAdd).toHaveBeenCalledWith([a, b], 'bulk')
   })
@@ -81,7 +81,7 @@ describe('SuggestedContacts', () => {
     render(<SuggestedContacts suggestions={[buildSuggestion(), buildSuggestion()]} canAdd={false} />)
 
     expect(screen.queryByRole('checkbox')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Add to workspace' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Add to Workspace' })).not.toBeInTheDocument()
   })
 
   it('renders the row action for members', () => {
@@ -98,9 +98,40 @@ describe('SuggestedContacts', () => {
     expect(screen.getByRole('button', { name: `${label} ${suggestion.suggestedName}` })).toBeInTheDocument()
   })
 
-  it('shows the reason for each suggestion', () => {
+  it('names the one Safe an address signs', () => {
+    render(<SuggestedContacts suggestions={[buildSuggestion(['Treasury'])]} canAdd />)
+
+    expect(screen.getByTestId('suggestion-reason')).toHaveTextContent('Signer of Treasury')
+  })
+
+  it('counts the Safes and lists them on hover', async () => {
     render(<SuggestedContacts suggestions={[buildSuggestion(['Treasury', 'Payroll'])]} canAdd />)
 
-    expect(screen.getByTestId('suggestion-reason')).toHaveTextContent('Signer of Treasury, Payroll')
+    const reason = screen.getByTestId('suggestion-reason')
+    expect(reason).toHaveTextContent('Signer of 2 Safes')
+
+    await userEvent.hover(reason)
+
+    expect(await screen.findByTestId('suggestion-reason-safes')).toHaveTextContent('Treasury, Payroll')
+  })
+
+  it('lists every Safe in the expanded row of the compact table', async () => {
+    mockIsMobile = true
+    render(<SuggestedContacts suggestions={[buildSuggestion(['Treasury', 'Payroll'])]} canAdd />)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Show details' }))
+
+    expect(screen.getByTestId('suggestion-reason')).toHaveTextContent('Signer of 2 Safes')
+    expect(screen.getByTestId('suggestion-reason-safes-list')).toHaveTextContent('Treasury, Payroll')
+  })
+
+  it('names the one Safe without a list in the expanded row', async () => {
+    mockIsMobile = true
+    render(<SuggestedContacts suggestions={[buildSuggestion(['Treasury'])]} canAdd />)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Show details' }))
+
+    expect(screen.getByTestId('suggestion-reason')).toHaveTextContent('Signer of Treasury')
+    expect(screen.queryByTestId('suggestion-reason-safes-list')).not.toBeInTheDocument()
   })
 })

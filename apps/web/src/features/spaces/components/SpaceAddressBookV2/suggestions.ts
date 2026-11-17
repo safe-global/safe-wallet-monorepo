@@ -18,8 +18,10 @@ export const suggestedSignerName = (safe: SignedSafe): string => {
   return `${label}${suffix}`
 }
 
+const byText = (a: string, b: string): number => a.localeCompare(b, undefined, { numeric: true })
+
 const bySafeLabel = (a: SignedSafe, b: SignedSafe): number =>
-  safeLabel(a).localeCompare(safeLabel(b)) || a.address.toLowerCase().localeCompare(b.address.toLowerCase())
+  byText(safeLabel(a), safeLabel(b)) || a.address.toLowerCase().localeCompare(b.address.toLowerCase())
 
 export const toSuggestedContacts = (
   signers: WorkspaceSigner[],
@@ -37,4 +39,4 @@ export const toSuggestedContacts = (
         reason: { kind: 'signer' as const, safes: safes.map(safeLabel) },
       }
     })
-    .sort((a, b) => a.suggestedName.localeCompare(b.suggestedName))
+    .sort((a, b) => byText(a.suggestedName, b.suggestedName))

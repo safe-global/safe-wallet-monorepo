@@ -7,15 +7,45 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
 import ChainLogos from './ChainLogos'
 import ContactCell from './ContactCell'
+import RowDetail from './RowDetail'
 import { describeSuggestion, type SuggestedContact, type SuggestionReason } from './types'
 
 export type SuggestionAddLocation = 'row' | 'bulk'
 
-const Reason = ({ reason }: { reason: SuggestionReason }) => (
+const ReasonText = ({ reason }: { reason: SuggestionReason }) => (
   <span className="inline-flex min-w-0 items-center gap-1.5 text-sm" data-testid="suggestion-reason">
     <PenLine aria-hidden="true" className="text-muted-foreground size-3.5 shrink-0" />
-    <span className="truncate">{describeSuggestion(reason)}</span>
+    <span className="min-w-0">{describeSuggestion(reason)}</span>
   </span>
+)
+
+const Reason = ({ reason }: { reason: SuggestionReason }) => {
+  if (reason.safes.length === 1) return <ReasonText reason={reason} />
+
+  return (
+    <Tooltip>
+      <TooltipTrigger render={<span className="inline-flex min-w-0" tabIndex={0} />}>
+        <ReasonText reason={reason} />
+      </TooltipTrigger>
+      <TooltipContent data-testid="suggestion-reason-safes">{reason.safes.join(', ')}</TooltipContent>
+    </Tooltip>
+  )
+}
+
+/** Phones have no hover, so the expanded row spells out every Safe. */
+const CompactReason = ({ reason }: { reason: SuggestionReason }) => (
+  <div className="flex min-w-0 flex-col gap-1">
+    <ReasonText reason={reason} />
+    {reason.safes.length > 1 && (
+      <Typography
+        variant="paragraph-small"
+        className="text-muted-foreground"
+        data-testid="suggestion-reason-safes-list"
+      >
+        {reason.safes.join(', ')}
+      </Typography>
+    )}
+  </div>
 )
 
 const AddButton = ({ isCompact, onClick }: { isCompact: boolean; onClick: () => void }) => {
@@ -23,7 +53,7 @@ const AddButton = ({ isCompact, onClick }: { isCompact: boolean; onClick: () => 
     return (
       <Button variant="outline" size="sm" onClick={onClick} data-testid="add-suggestion">
         <Plus aria-hidden="true" data-icon="inline-start" />
-        Add to workspace
+        Add to Workspace
       </Button>
     )
   }
@@ -34,14 +64,14 @@ const AddButton = ({ isCompact, onClick }: { isCompact: boolean; onClick: () => 
         <Button
           variant="outline"
           size="icon-sm"
-          aria-label="Add to workspace"
+          aria-label="Add to Workspace"
           onClick={onClick}
           data-testid="add-suggestion"
         >
           <Plus aria-hidden="true" className="size-4" />
         </Button>
       </TooltipTrigger>
-      <TooltipContent>Add to workspace</TooltipContent>
+      <TooltipContent>Add to Workspace</TooltipContent>
     </Tooltip>
   )
 }
@@ -105,6 +135,27 @@ const SuggestedContacts = ({
         }
       : undefined
 
+  const secondaryColumns: DataTableColumn<SuggestedContact>[] = [
+    {
+      id: 'chains',
+      header: 'Chains',
+      width: '10%',
+      priority: 'secondary',
+      minWidth: 90,
+      sortValue: (item) => item.chains.length,
+      cell: (item) => <ChainLogos chains={item.chains} />,
+    },
+    {
+      id: 'reason',
+      header: 'Why suggested',
+      priority: 'secondary',
+      minWidth: 200,
+      sortValue: (item) => describeSuggestion(item.reason).toLowerCase(),
+      cell: (item, { isCompact }) =>
+        isCompact ? <CompactReason reason={item.reason} /> : <Reason reason={item.reason} />,
+    },
+  ]
+
   const columns: DataTableColumn<SuggestedContact>[] = [
     {
       id: 'contact',
@@ -122,23 +173,7 @@ const SuggestedContacts = ({
         />
       ),
     },
-    {
-      id: 'chains',
-      header: 'Chains',
-      width: '10%',
-      priority: 'secondary',
-      minWidth: 90,
-      sortValue: (item) => item.chains.length,
-      cell: (item) => <ChainLogos chains={item.chains} />,
-    },
-    {
-      id: 'reason',
-      header: 'Why suggested',
-      priority: 'secondary',
-      minWidth: 200,
-      sortValue: (item) => describeSuggestion(item.reason).toLowerCase(),
-      cell: (item) => <Reason reason={item.reason} />,
-    },
+    ...secondaryColumns,
     ...(actionColumn ? [actionColumn] : []),
   ]
 
@@ -156,7 +191,7 @@ const SuggestedContacts = ({
           </Typography>
           <Button size="sm" onClick={() => onAdd?.(selectedSuggestions, 'bulk')}>
             <Plus aria-hidden="true" data-icon="inline-start" />
-            Add {selectedSuggestions.length} to workspace
+            Add {selectedSuggestions.length} to Workspace
           </Button>
           <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setSelected(new Set())}>
             Clear selection
@@ -167,12 +202,7 @@ const SuggestedContacts = ({
         columns={columns}
         rows={suggestions}
         getRowKey={(item) => item.address}
-        renderRowDetail={(item) => (
-          <div className="flex flex-col gap-2 text-sm">
-            <ChainLogos chains={item.chains} />
-            <Reason reason={item.reason} />
-          </div>
-        )}
+        renderRowDetail={(item) => <RowDetail row={item} columns={secondaryColumns} />}
         pageSize={pageSize}
         selectable={canAdd}
         selectedKeys={selected}

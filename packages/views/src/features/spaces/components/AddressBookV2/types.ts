@@ -26,4 +26,5 @@ export type SuggestedContact = {
   reason: SuggestionReason
 }
 
-export const describeSuggestion = (reason: SuggestionReason): string => `Signer of ${reason.safes.join(', ')}`
+export const describeSuggestion = (reason: SuggestionReason): string =>
+  reason.safes.length === 1 ? `Signer of ${reason.safes[0]}` : `Signer of ${reason.safes.length} Safes`

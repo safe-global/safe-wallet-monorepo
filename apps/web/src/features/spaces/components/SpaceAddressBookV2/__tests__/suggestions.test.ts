@@ -95,10 +95,23 @@ describe('toSuggestedContacts', () => {
 
     expect(contacts.map((contact) => contact.address)).toEqual([a.address, b.address])
   })
+
+  it('sorts owner positions as numbers', () => {
+    const eleventh = signer({ safes: [safe({ name: 'Treasury', position: 11 })] })
+    const second = signer({ safes: [safe({ name: 'Treasury', position: 2 })] })
+
+    const contacts = toSuggestedContacts([eleventh, second], [], [])
+
+    expect(contacts.map((contact) => contact.suggestedName)).toEqual(['Treasury signer 2', 'Treasury signer 11'])
+  })
 })
 
 describe('describeSuggestion', () => {
-  it('describes a signer suggestion', () => {
-    expect(describeSuggestion({ kind: 'signer', safes: ['Payroll', 'Treasury'] })).toBe('Signer of Payroll, Treasury')
+  it('names the Safe when the address signs one', () => {
+    expect(describeSuggestion({ kind: 'signer', safes: ['Payroll'] })).toBe('Signer of Payroll')
+  })
+
+  it('counts the Safes when the address signs several', () => {
+    expect(describeSuggestion({ kind: 'signer', safes: ['Payroll', 'Treasury', 'Ops'] })).toBe('Signer of 3 Safes')
   })
 })

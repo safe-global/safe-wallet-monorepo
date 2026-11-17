@@ -55,36 +55,43 @@ const SpaceAddressBookV2 = () => {
         </div>
 
         <Tabs defaultValue="workspace">
-          <TabsList variant="underline" className="mb-4 flex-wrap">
-            <TabsTrigger value="workspace" className="cursor-pointer">
-              <TabLabel
-                label={withCount('Workspace contacts', workspaceBook.items.length, isWorkspaceSettled)}
-                tooltip="Shared contacts visible to everyone in this Workspace"
-              />
-            </TabsTrigger>
-            <TabsTrigger value="suggested" className="cursor-pointer">
-              <TabLabel
-                label={withCount('Suggested', suggested.suggestions.length, !suggested.isLoading && !suggested.isError)}
-                tooltip="Addresses worth adding to the Workspace address book"
-              />
-            </TabsTrigger>
-            {isPrivateAddressBookEnabled && (
-              <>
-                <TabsTrigger value="mine" className="cursor-pointer">
-                  <TabLabel
-                    label={withCount('Local contacts', localContacts.length)}
-                    tooltip="These contacts are in your local browser storage"
-                  />
-                </TabsTrigger>
-                <TabsTrigger value="pending" className="cursor-pointer">
-                  <TabLabel
-                    label={withCount('Pending', requests.items.length, isRequestsSettled)}
-                    tooltip="Contacts you proposed to add to the Workspace"
-                  />
-                </TabsTrigger>
-              </>
-            )}
-          </TabsList>
+          {/* Scrolls sideways on phones; pb-1.5 keeps the underline (bottom -5px) inside the scroll box. */}
+          <div className="mb-2.5 overflow-x-auto overflow-y-hidden pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <TabsList variant="underline">
+              <TabsTrigger value="workspace" className="cursor-pointer">
+                <TabLabel
+                  label={withCount('Workspace contacts', workspaceBook.items.length, isWorkspaceSettled)}
+                  tooltip="Shared contacts visible to everyone in this Workspace"
+                />
+              </TabsTrigger>
+              <TabsTrigger value="suggested" className="cursor-pointer">
+                <TabLabel
+                  label={withCount(
+                    'Suggested',
+                    suggested.suggestions.length,
+                    !suggested.isLoading && !suggested.isError,
+                  )}
+                  tooltip="Addresses worth adding to the Workspace address book"
+                />
+              </TabsTrigger>
+              {isPrivateAddressBookEnabled && (
+                <>
+                  <TabsTrigger value="mine" className="cursor-pointer">
+                    <TabLabel
+                      label={withCount('Local contacts', localContacts.length)}
+                      tooltip="These contacts are in your local browser storage"
+                    />
+                  </TabsTrigger>
+                  <TabsTrigger value="pending" className="cursor-pointer">
+                    <TabLabel
+                      label={withCount('Pending', requests.items.length, isRequestsSettled)}
+                      tooltip="Contacts you proposed to add to the Workspace"
+                    />
+                  </TabsTrigger>
+                </>
+              )}
+            </TabsList>
+          </div>
 
           <TabsContent value="workspace">
             <WorkspaceContacts

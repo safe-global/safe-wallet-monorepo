@@ -55,12 +55,12 @@ const AddSuggestionsDialog = ({
       <DialogContent padding="none" size="md">
         <form onSubmit={submit} className="contents">
           <DialogHeader divided>
-            <DialogTitle className="text-xl font-bold">Add to workspace</DialogTitle>
+            <DialogTitle className="text-xl font-bold">Add to Workspace</DialogTitle>
           </DialogHeader>
 
           <div className="flex flex-col gap-3 px-6 py-4">
             <Typography variant="paragraph-small" className="text-muted-foreground">
-              Everyone in the workspace will see these names. Leave a name empty to keep the suggestion.
+              Everyone in the Workspace will see these names. Leave a name empty to keep the suggestion.
             </Typography>
 
             <ul className="border-border divide-border max-h-[min(24rem,50vh)] divide-y overflow-y-auto rounded-lg border">
