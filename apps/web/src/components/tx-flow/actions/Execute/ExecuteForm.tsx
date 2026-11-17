@@ -36,6 +36,17 @@ import type { SlotComponentProps, SlotName } from '../../slots'
 import { TxFlowContext } from '../../TxFlowProvider'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
+import { useLoadFeature } from '@/features/__core__'
+import { PolicyCosignerFeature, useCosignerState } from '@/features/policy-cosigner'
+import {
+  CosignerExecutionError,
+  getQueuedCosignerNotice,
+  isCosignerBlocking,
+  isCosignerWaiting,
+} from '@/features/policy-cosigner/services'
+import type { CosignerState } from '@/features/policy-cosigner/types'
+import { useAppDispatch } from '@/store'
+import { showNotification } from '@/store/notificationsSlice'
 
 export const ExecuteForm = ({
   safeTx,
@@ -94,17 +105,24 @@ export const ExecuteForm = ({
     return () => setGasPaymentOption(undefined)
   }, [gasPayer, setGasPaymentOption])
 
+  const { CosignerStatus } = useLoadFeature(PolicyCosignerFeature)
+  const { state: cosignerState, policyContext } = useCosignerState(safeTx, { isProposed: !!txId })
+  const dispatch = useAppDispatch()
+
   // Estimate gas limit
-  const { gasLimit, gasLimitError } = useGasLimit(safeTx)
+  const { gasLimit, gasLimitError } = useGasLimit(safeTx, policyContext)
   const [advancedParams, setAdvancedParams] = useAdvancedParams(gasLimit)
 
   const { executionValidationError } = useIsValidExecution(
     safeTx,
     advancedParams.gasLimit ? advancedParams.gasLimit : undefined,
+    policyContext,
   )
 
-  // Pre-execution check error (validity simulation or gas estimation).
-  const checkError = executionValidationError || gasLimitError
+  // Pre-execution check error (validity simulation or gas estimation). Without the co-signature the
+  // guard reverts both, so the co-signer status explains the failure instead.
+  const isCosignerUnresolved = isCosignerWaiting(cosignerState) || isCosignerBlocking(cosignerState)
+  const checkError = isCosignerUnresolved ? undefined : executionValidationError || gasLimitError
 
   // CGW pre-relay simulation outcome (SIMULATION_FAILED blocks; INDETERMINATE offers an override).
   const [relaySimError, setRelaySimError] = useState<RelaySimulationError | undefined>(undefined)
@@ -151,6 +169,16 @@ export const ExecuteForm = ({
       } else if (refusal) {
         exclude(refusal.excluded)
         setRefusalMessage(refusal.message)
+      } else if (err instanceof CosignerExecutionError && err.txId && !txId) {
+        // The new tx is queued now: re-submitting this flow would propose it a second time
+        const { variant, message } = getQueuedCosignerNotice(err.state)
+        dispatch(showNotification({ title: 'Transaction created', message, variant, groupKey: err.txId }))
+        onSubmitSuccess?.({ txId: err.txId, isExecuted: false })
+        setIsSubmitLoading(false)
+        setTxFlow(undefined)
+        return
+      } else if (err instanceof CosignerExecutionError) {
+        setSubmitError(err)
       } else {
         trackError(Errors._804, err)
         setSubmitError(err)
@@ -187,6 +215,12 @@ export const ExecuteForm = ({
 
   const cannotPropose = !isOwner && !onlyExecute
 
+  // Submitting a new tx proposes it, then waits for the co-signature before executing
+  const shownCosignerState: CosignerState | undefined =
+    isSubmitLoading && cosignerState?.status === 'notProposed'
+      ? { status: 'pending', cosigner: cosignerState.cosigner }
+      : cosignerState
+
   const submitDisabled =
     !safeTx ||
     isSubmitDisabled ||
@@ -195,6 +229,7 @@ export const ExecuteForm = ({
     isExecutionLoop ||
     cannotPropose ||
     relaySimError?.code === 'SIMULATION_FAILED' ||
+    isCosignerBlocking(cosignerState) ||
     (needsRiskConfirmation && !isRiskConfirmed)
 
   return (
@@ -226,6 +261,8 @@ export const ExecuteForm = ({
             </div>
           )}
         </div>
+
+        <CosignerStatus state={shownCosignerState} />
 
         {/* Error messages */}
         {cannotPropose ? (

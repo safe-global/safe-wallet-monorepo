@@ -2,11 +2,12 @@ import { useForm, FormProvider } from 'react-hook-form'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { selectSettings, setRpc, setTenderly } from '@/store/settingsSlice'
+import { selectSettings, setCosignerServiceUrl, setRpc, setTenderly } from '@/store/settingsSlice'
 import useChainId from '@/hooks/useChainId'
 import { SETTINGS_EVENTS, trackEvent } from '@/services/analytics'
 import RpcProviderSection from './RpcProviderSection'
 import TenderlySection from './TenderlySection'
+import CosignerSection from './CosignerSection'
 import SettingsCard from '@safe-global/views/components/settings/SettingsCard'
 import { reloadPage } from '@/utils/navigation'
 
@@ -14,12 +15,14 @@ export enum EnvVariablesField {
   rpc = 'rpc',
   tenderlyURL = 'tenderlyURL',
   tenderlyToken = 'tenderlyToken',
+  cosignerUrl = 'cosignerUrl',
 }
 
 export type EnvVariablesFormData = {
   [EnvVariablesField.rpc]: string
   [EnvVariablesField.tenderlyURL]: string
   [EnvVariablesField.tenderlyToken]: string
+  [EnvVariablesField.cosignerUrl]: string
 }
 
 const EnvironmentVariables = () => {
@@ -33,6 +36,7 @@ const EnvironmentVariables = () => {
       [EnvVariablesField.rpc]: settings.env?.rpc[chainId] ?? '',
       [EnvVariablesField.tenderlyURL]: settings.env?.tenderly.url ?? '',
       [EnvVariablesField.tenderlyToken]: settings.env?.tenderly.accessToken ?? '',
+      [EnvVariablesField.cosignerUrl]: settings.env?.cosigner?.[chainId] ?? '',
     },
   })
 
@@ -41,6 +45,7 @@ const EnvironmentVariables = () => {
   const rpc = watch(EnvVariablesField.rpc)
   const tenderlyURL = watch(EnvVariablesField.tenderlyURL)
   const tenderlyToken = watch(EnvVariablesField.tenderlyToken)
+  const cosignerUrl = watch(EnvVariablesField.cosignerUrl)
 
   const onSubmit = handleSubmit((data) => {
     trackEvent({ ...SETTINGS_EVENTS.ENV_VARIABLES.SAVE })
@@ -49,6 +54,13 @@ const EnvironmentVariables = () => {
       setRpc({
         chainId,
         rpc: data[EnvVariablesField.rpc],
+      }),
+    )
+
+    dispatch(
+      setCosignerServiceUrl({
+        chainId,
+        url: data[EnvVariablesField.cosignerUrl].trim().replace(/\/$/, ''),
       }),
     )
 
@@ -68,6 +80,7 @@ const EnvironmentVariables = () => {
     trigger(EnvVariablesField.tenderlyToken)
   }
   const onResetTenderlyToken = () => setValue(EnvVariablesField.tenderlyToken, '')
+  const onResetCosignerUrl = () => setValue(EnvVariablesField.cosignerUrl, '')
 
   return (
     <SettingsCard title="Environment variables" contentClassName="mb-4">
@@ -85,6 +98,8 @@ const EnvironmentVariables = () => {
             showResetUrlButton={!!tenderlyURL}
             showResetTokenButton={!!tenderlyToken}
           />
+
+          <CosignerSection onReset={onResetCosignerUrl} showResetButton={!!cosignerUrl} />
 
           <Button type="submit" className="mt-8">
             Save

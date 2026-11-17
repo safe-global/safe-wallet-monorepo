@@ -40,6 +40,8 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import type { SignerWallet } from '@/components/common/WalletProvider'
 import { supportsNestedTxEnvelope, type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
+import { CosignerExecutionError, waitForPolicyContext } from '@/features/policy-cosigner/services'
+import { getWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 
 // The in-app nested signer only ever proposes in its parent
 const executesImmediately = (signer: SignerWallet): boolean =>
@@ -102,6 +104,7 @@ export const useTxActions = (): TxActions => {
         numberSignatures: safe.threshold,
         currency,
         dispatch,
+        guard: safe.guard?.value,
       })
 
     const _propose = async (sender: string, safeTx: SafeTransaction, origin?: string) => {
@@ -129,6 +132,21 @@ export const useTxActions = (): TxActions => {
       }
       const proposedTx = await _propose(sender, safeTx, origin)
       return proposedTx.txId
+    }
+
+    // The co-signer service learns of a tx once it is proposed, so this runs after proposal. A failure
+    // carries the txId, as the tx now sits in the queue and must not be proposed again.
+    const _waitForPolicyContext = async (safeTx: SafeTransaction, txId?: string): Promise<string | undefined> => {
+      const provider = scope?.web3ReadOnly ?? getWeb3ReadOnly()
+      if (!provider) return undefined
+      try {
+        return await waitForPolicyContext(safe, safeTx.data, provider)
+      } catch (error) {
+        if (error instanceof CosignerExecutionError && txId) {
+          throw new CosignerExecutionError(error.state, txId)
+        }
+        throw error
+      }
     }
 
     const proposeTx: TxActions['proposeTx'] = async (safeTx, origin) => {
@@ -242,6 +260,7 @@ export const useTxActions = (): TxActions => {
         if (!txId || needsSignature) {
           txId = await _proposeOrConfirm(signer.address, safeTx, txId, origin)
         }
+        const policyContext = await _waitForPolicyContext(safeTx, txId)
         await dispatchTxRelay(
           safeTx,
           safe,
@@ -251,6 +270,7 @@ export const useTxActions = (): TxActions => {
           acceptUnverifiedSimulation,
           scope,
           sponsorSpaceId,
+          policyContext,
         )
         return { txId, isExecuted: true }
       }
@@ -262,6 +282,8 @@ export const useTxActions = (): TxActions => {
       if (!viaSafe && !txId) {
         txId = (await _propose(signer.address, safeTx, origin)).txId
       }
+
+      const policyContext = await _waitForPolicyContext(safeTx, txId)
 
       // Above threshold 1 a Safe executor only queues and gets back a safeTxHash
       const executed = executesImmediately(signer)
@@ -278,6 +300,7 @@ export const useTxActions = (): TxActions => {
         viaSafe,
         safe.version,
         scope,
+        policyContext,
       )
 
       return { txId: executedTxId, isExecuted: executed }

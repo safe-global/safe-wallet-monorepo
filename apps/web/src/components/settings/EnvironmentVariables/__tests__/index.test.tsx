@@ -231,6 +231,34 @@ describe('EnvironmentVariables', () => {
     })
   })
 
+  it('saves the co-signer service URL for the current chain without its trailing slash', async () => {
+    const cosignerUrl = faker.internet.url({ appendSlash: false })
+    const { store } = renderWithStore(<EnvironmentVariables />, { settings: settingsInitialState })
+
+    fireEvent.change(screen.getByTestId('cosigner-service-input'), { target: { value: `${cosignerUrl}/` } })
+    fireEvent.click(screen.getByText('Save'))
+
+    await waitFor(() => {
+      expect(store.getState().settings.env.cosigner).toEqual({ '1': cosignerUrl })
+    })
+  })
+
+  it('turns co-signing off on the chain when the saved co-signer URL is cleared', async () => {
+    const { store } = renderWithStore(<EnvironmentVariables />, {
+      settings: {
+        ...settingsInitialState,
+        env: { ...settingsInitialState.env, cosigner: { '1': faker.internet.url() } },
+      },
+    })
+
+    fireEvent.change(screen.getByTestId('cosigner-service-input'), { target: { value: '' } })
+    fireEvent.click(screen.getByText('Save'))
+
+    await waitFor(() => {
+      expect(store.getState().settings.env.cosigner).toEqual({})
+    })
+  })
+
   it('should track analytics event on save', async () => {
     render(<EnvironmentVariables />, {
       initialReduxState: {

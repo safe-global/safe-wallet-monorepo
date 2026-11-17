@@ -16,9 +16,11 @@ import {
   incrementByGasMultiplier,
   getGasLimitForZkSync as getGasLimitForZkSyncUtil,
 } from '@safe-global/utils/hooks/coreSDK/gasLimitUtils'
+import { withPolicyContext } from '@safe-global/utils/features/policy-cosigner/policyContext'
 
 const useGasLimit = (
   safeTx?: SafeTransaction,
+  policyContext?: string,
 ): {
   gasLimit?: bigint
   gasLimitError?: Error
@@ -40,7 +42,7 @@ const useGasLimit = (
 
     const encodedSafeTx = getEncodedSafeTx(
       safeSDK,
-      safeTx,
+      withPolicyContext(safeTx, policyContext),
       isOwner ? walletAddress : undefined,
       safeTx.signatures.size < threshold,
     )
@@ -79,6 +81,7 @@ const useGasLimit = (
     safeSDK,
     web3ReadOnly,
     safeTx,
+    policyContext,
     isOwner,
     currentChainId,
     hasSafeTxGas,

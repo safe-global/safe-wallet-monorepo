@@ -52,6 +52,8 @@ enum ErrorCodes {
   _652 = '652: Error requesting a Safenet check',
   _653 = '653: Error reading the Safe module guard',
   _654 = '654: Error loading the module guard reader',
+  _655 = '655: Error reading the policy co-signer requirement',
+  _656 = '656: Error fetching policy co-signatures',
 
   _700 = '700: Failed to read from local/session storage',
   _701 = '701: Failed to write to local/session storage',

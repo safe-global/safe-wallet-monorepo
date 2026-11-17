@@ -25,6 +25,7 @@ import { hasActiveScope } from '@safe-global/views/components/tx-flow/safe-scope
 import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import { logError } from '@/services/exceptions'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
+import { withPolicyContext } from '@safe-global/utils/features/policy-cosigner/policyContext'
 
 /**
  * The SDK for the Safe being transacted on.
@@ -193,6 +194,7 @@ export const prepareTxExecution = async (
   safeTransaction: SafeTransaction,
   provider: Eip1193Provider,
   scope?: TxSenderScope,
+  policyContext?: string,
 ) => {
   const sdk = await getSafeSDKWithSigner(provider, scope)
 
@@ -236,7 +238,7 @@ export const prepareTxExecution = async (
     }
   }
 
-  return sdk.getEncodedTransaction(signedSafeTransaction)
+  return sdk.getEncodedTransaction(withPolicyContext(signedSafeTransaction, policyContext))
 }
 
 // TODO: This is a duplication of sdk.approveTransactionHash but it returns the encoded tx instead of executing it.

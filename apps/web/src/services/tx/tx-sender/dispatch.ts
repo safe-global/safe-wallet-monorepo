@@ -50,6 +50,22 @@ import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 import type { TxSenderScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import { concat, dataLength } from 'ethers'
 import { encodeNestedTxPayload, supportsNestedTxEnvelope, type NestedTxEnvelope } from '../nestedTxEnvelope'
+import { withPolicyContext } from '@safe-global/utils/features/policy-cosigner/policyContext'
+
+// protocol-kit `executeTransaction` copies the tx and drops the policy context, so send the calldata ourselves
+const executeWithPolicyContext = async (
+  safeTx: SafeTransaction,
+  txOptions: TransactionOptions,
+  provider: Eip1193Provider,
+  safeAddress: string,
+  policyContext: string,
+  scope?: TxSenderScope,
+): Promise<TransactionResult> => {
+  const data = await prepareTxExecution(safeTx, provider, scope, policyContext)
+  const signer = await getUncheckedSigner(provider)
+  const transactionResponse = await signer.sendTransaction({ to: safeAddress, data, ...txOptions })
+  return { hash: transactionResponse.hash, transactionResponse }
+}
 
 /**
  * Propose a new transaction
@@ -355,6 +371,7 @@ export const dispatchSafeTxSpeedUp = async (
   signerAddress: string,
   safeAddress: string,
   nonce: number,
+  policyContext?: string,
 ) => {
   const sdk = await getSafeSDKWithSigner(provider)
   const eventParams = { txId, nonce, chainId, safeAddress }
@@ -368,7 +385,7 @@ export const dispatchSafeTxSpeedUp = async (
 
     // TODO: This is a workaround until there is a fix for unchecked transactions in the protocol-kit
     if (isSmartAccount) {
-      const encodedTx = await prepareTxExecution(safeTx, provider)
+      const encodedTx = await prepareTxExecution(safeTx, provider, undefined, policyContext)
       const txHash = await provider.request({
         method: 'eth_sendTransaction',
         params: [{ from: signerAddress, to: safeAddress, data: encodedTx }],
@@ -378,6 +395,8 @@ export const dispatchSafeTxSpeedUp = async (
         hash: txHash,
         transactionResponse: null,
       }
+    } else if (policyContext) {
+      result = await executeWithPolicyContext(safeTx, txOptions, provider, safeAddress, policyContext)
     } else {
       result = await sdk.executeTransaction(safeTx, txOptions)
     }
@@ -456,6 +475,7 @@ export const dispatchTxExecution = async (
   isSafeSigner = false,
   safeVersion?: SafeState['version'],
   scope?: TxSenderScope,
+  policyContext?: string,
 ): Promise<string> => {
   const sdk = await getSafeSDKWithSigner(provider, scope)
   // Never proposed to CGW, so derive the id CGW will assign
@@ -470,7 +490,7 @@ export const dispatchTxExecution = async (
   try {
     // TODO: This is a workaround until there is a fix for unchecked transactions in the protocol-kit
     if (isSmartAccount) {
-      let encodedTx = await prepareTxExecution(safeTx, provider, scope)
+      let encodedTx = await prepareTxExecution(safeTx, provider, scope, policyContext)
 
       // The parent proposes the child tx as `nestedTransaction`
       if (isSafeSigner && supportsNestedTxEnvelope(safeVersion)) {
@@ -492,6 +512,8 @@ export const dispatchTxExecution = async (
         hash: txHash,
         transactionResponse: null,
       }
+    } else if (policyContext) {
+      result = await executeWithPolicyContext(safeTx, txOptions, provider, safeAddress, policyContext, scope)
     } else {
       result = await sdk.executeTransaction(safeTx, txOptions)
     }
@@ -686,6 +708,7 @@ export const dispatchTxRelay = async (
   scope?: TxSenderScope,
   /** A Safe Pro Workspace paying for the relay out of its allowance; without it the chain's relayer policy applies. */
   sponsorSpaceId?: string | null,
+  policyContext?: string,
 ) => {
   const store = getStoreInstance()
   const readOnlySafeContract = await getReadOnlyCurrentGnosisSafeContract(safe, scope)
@@ -703,7 +726,7 @@ export const dispatchTxRelay = async (
     transactionToRelay.data.gasPrice,
     transactionToRelay.data.gasToken,
     transactionToRelay.data.refundReceiver,
-    transactionToRelay.encodedSignatures(),
+    withPolicyContext(transactionToRelay, policyContext).encodedSignatures(),
   ])
 
   try {

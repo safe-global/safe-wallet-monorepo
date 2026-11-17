@@ -81,6 +81,7 @@ export const initialState: SettingsState = {
       url: '',
       accessToken: '',
     },
+    cosigner: {},
   },
   signing: {
     onChainSigning: false,
@@ -146,6 +147,16 @@ export const settingsSlice = createSlice({
         delete state.env.rpc[chainId]
       }
     },
+    setCosignerServiceUrl: (state, { payload }: PayloadAction<{ chainId: string; url: string }>) => {
+      const { chainId, url } = payload
+      const cosigner = { ...state.env.cosigner }
+      if (url) {
+        cosigner[chainId] = url
+      } else {
+        delete cosigner[chainId]
+      }
+      state.env.cosigner = cosigner
+    },
     setTenderly: (state, { payload }: PayloadAction<EnvState['tenderly']>) => {
       state.env.tenderly = merge({}, state.env.tenderly, payload)
     },
@@ -174,6 +185,7 @@ export const {
   setHideDust,
   hideSuspiciousTransactions,
   setRpc,
+  setCosignerServiceUrl,
   setTenderly,
   setOnChainSigning,
   setTransactionExecution,
@@ -201,13 +213,25 @@ export const selectRpc = createSelector(selectSettings, (settings) => settings.e
 
 export const selectTenderly = createSelector(selectSettings, (settings) => settings.env.tenderly)
 
+const NO_COSIGNER_URLS: Record<string, string> = {}
+
+// Settings persisted before the co-signer field existed have no `cosigner` map
+export const selectCosignerServiceUrls = createSelector(
+  selectSettings,
+  (settings) => settings.env.cosigner ?? NO_COSIGNER_URLS,
+)
+
 /** The user brought their own Tenderly project (URL and access token in Settings › Environment variables). */
 export const selectHasOwnTenderly = createSelector(selectTenderly, (tenderly) =>
   Boolean(tenderly?.url && tenderly?.accessToken),
 )
 
 export const isEnvInitialState = createSelector([selectSettings, (_, chainId) => chainId], (settings, chainId) => {
-  return isEqual(settings.env.tenderly, initialState.env.tenderly) && !settings.env.rpc[chainId]
+  return (
+    isEqual(settings.env.tenderly, initialState.env.tenderly) &&
+    !settings.env.rpc[chainId] &&
+    !settings.env.cosigner?.[chainId]
+  )
 })
 
 export const selectOnChainSigning = createSelector(selectSettings, (settings) => settings.signing.onChainSigning)

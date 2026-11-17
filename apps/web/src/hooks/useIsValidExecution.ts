@@ -16,6 +16,7 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import { type NestedWallet } from '@/utils/nested-safe-wallet'
 import { assertProvider } from '@/utils/helpers'
+import { withPolicyContext } from '@safe-global/utils/features/policy-cosigner/policyContext'
 
 // Monkey patch the signerProvider to proxy requests to the "readonly" provider if on the wrong chain
 // This is ONLY used to check the validity of a transaction in `useIsValidExecution`
@@ -52,6 +53,7 @@ export const getPatchedSignerProvider = (
 const useIsValidExecution = (
   safeTx?: SafeTransaction,
   gasLimit?: bigint,
+  policyContext?: string,
 ): {
   isValidExecution?: boolean
   executionValidationError?: Error
@@ -89,7 +91,10 @@ const useIsValidExecution = (
        * @see https://github.com/safe-global/safe-core-sdk/blob/main/packages/safe-ethers-lib/src/contracts/GnosisSafe/GnosisSafeContractEthers.ts#L126
        * This also fixes the over-fetching issue of the monkey patched provider.
        */
-      return safeContract.isValidTransaction(safeTx, { from: wallet.address, gasLimit: gasLimit.toString() })
+      return safeContract.isValidTransaction(withPolicyContext(safeTx, policyContext), {
+        from: wallet.address,
+        gasLimit: gasLimit.toString(),
+      })
     } catch (_err) {
       const err = _err as EthersError
 
@@ -105,7 +110,7 @@ const useIsValidExecution = (
 
       throw err
     }
-  }, [safeTx, wallet, gasLimit, safe, readOnlyProvider, chain, gasTokenSymbol])
+  }, [safeTx, policyContext, wallet, gasLimit, safe, readOnlyProvider, chain, gasTokenSymbol])
 
   return { isValidExecution, executionValidationError, isValidExecutionLoading }
 }

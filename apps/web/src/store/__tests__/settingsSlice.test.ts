@@ -11,6 +11,7 @@ import {
   selectHasCompletedCuration,
   selectCuratedAddresses,
   selectAllCuratedNestedSafes,
+  selectCosignerServiceUrls,
 } from '../settingsSlice'
 import type { SettingsState } from '../settingsSlice'
 import type { RootState } from '..'
@@ -107,6 +108,51 @@ describe('settingsSlice', () => {
         url: '',
         accessToken: '',
       })
+    })
+  })
+
+  describe('setCosignerServiceUrl', () => {
+    it('saves the co-signer service URL for the chain', () => {
+      const url = faker.internet.url()
+
+      const state = settingsSlice.reducer(
+        initialState,
+        settingsSlice.actions.setCosignerServiceUrl({ chainId: '11155111', url }),
+      )
+
+      expect(selectCosignerServiceUrls({ settings: state } as unknown as RootState)).toEqual({ '11155111': url })
+    })
+
+    it('removes the saved URL of only that chain when cleared', () => {
+      const otherUrl = faker.internet.url()
+      const withUrls = {
+        ...initialState,
+        env: { ...initialState.env, cosigner: { '1': faker.internet.url(), '11155111': otherUrl } },
+      }
+
+      const state = settingsSlice.reducer(
+        withUrls,
+        settingsSlice.actions.setCosignerServiceUrl({ chainId: '1', url: '' }),
+      )
+
+      expect(state.env.cosigner).toEqual({ '11155111': otherUrl })
+    })
+
+    it('saves a URL into settings persisted before the co-signer field existed', () => {
+      const url = faker.internet.url()
+      const persisted = { ...initialState, env: { rpc: {}, tenderly: { url: '', accessToken: '' } } }
+
+      const state = settingsSlice.reducer(persisted, settingsSlice.actions.setCosignerServiceUrl({ chainId: '1', url }))
+
+      expect(state.env.cosigner).toEqual({ '1': url })
+    })
+
+    it('treats a saved co-signer URL on the chain as a changed environment', () => {
+      const state = {
+        settings: { ...initialState, env: { ...initialState.env, cosigner: { '1': faker.internet.url() } } },
+      } as unknown as RootState
+
+      expect(isEnvInitialState(state, '1')).toBe(false)
     })
   })
 
