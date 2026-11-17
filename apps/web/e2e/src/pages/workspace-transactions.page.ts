@@ -9,18 +9,30 @@ import { ROUTES } from '../data/constants'
 export class WorkspaceTransactionsPage {
   readonly queueTable: Locator
   readonly rows: Locator
+  readonly emptyQueue: Locator
 
   constructor(private readonly page: Page) {
     this.queueTable = page.getByRole('table', { name: 'Pending transactions' })
     this.rows = this.queueTable.getByTestId('space-queue-row')
+    this.emptyQueue = page.getByText('Pending transactions of your Safe accounts will appear here')
   }
 
   async goto(workspaceId: string): Promise<void> {
     await this.page.goto(`${ROUTES.spacesTransactions}?spaceId=${workspaceId}`)
   }
 
+  /** The header that groups the rows of one network, by its name in the chain config */
+  networkSection(chainName: string): Locator {
+    return this.queueTable.getByRole('button', { name: new RegExp(`^(Collapse|Expand) ${chainName}$`) })
+  }
+
   /** Sign the transaction in `row` from the Workspace; its review opens for the row's Safe */
   async sign(row: Locator): Promise<void> {
     await row.getByRole('button', { name: 'Sign' }).click()
+  }
+
+  /** Execute the fully signed transaction in `row` from the Workspace; its review opens for the row's Safe */
+  async execute(row: Locator): Promise<void> {
+    await row.getByTestId('execute-tx-btn').click()
   }
 }
