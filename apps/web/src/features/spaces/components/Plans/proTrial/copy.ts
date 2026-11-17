@@ -58,7 +58,11 @@ export const PRO_TRIAL_COPY = {
       endsOn ? `No card. No charge. Trial ends on its own ${endsOn}.` : 'No card. No charge. Trial ends on its own.',
     start: 'Start free trial',
     seeFeatures: 'see all features',
-    back: 'Go to My accounts',
+    free: 'Free',
+    /** After "Free", with the cheapest monthly plan, e.g. "then from €189/mo". */
+    afterTrial: (price: string) => `then from ${price}`,
+    explorePlans: 'Explore plans',
+    back: 'Back',
     unavailable: 'There is no trial available for this Workspace.',
   },
 } as const

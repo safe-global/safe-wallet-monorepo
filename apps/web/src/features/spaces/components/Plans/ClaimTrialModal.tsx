@@ -18,7 +18,8 @@ import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useSeatTrimCheckout } from '../../hooks/billing/useSeatTrimCheckout'
 import { RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import { FeatureCheck } from './FeatureCheck'
-import { _offersToTiers, claimTiers } from './planTiers'
+import { _offersToTiers, claimTiers, formatPlanPrice, priceSuffix, seatsLabel } from './planTiers'
+import type { PlanGroup } from '../../hooks/billing/types'
 import { PRO_TRIAL_COPY } from './proTrial/copy'
 import SelectAccountsStep from './SelectAccountsStep'
 import type { SafeRef } from '@safe-global/views/features/spaces/components/Plans/types'
@@ -28,6 +29,16 @@ const MIGRATED_TRIAL_DAYS = 60
 
 /** `existing` locks a Workspace that predates Safe Pro; `new` greets one the wizard just created. */
 export type ClaimTrialVariant = 'existing' | 'new'
+
+/** The cheapest monthly plan, so the trial says what Safe Pro costs without naming the trial's own size. */
+export const _lowestMonthlyPrice = (paidPlans: PlanGroup[]): string | null => {
+  const monthly = _offersToTiers(paidPlans).filter((tier) => tier.billingCycle === 'month')
+  const cheapest = monthly
+    .flatMap((tier) => tier.options.map((option) => ({ price: option.price, currency: tier.currency })))
+    .filter((offer): offer is { price: number; currency: string } => offer.price !== null)
+    .sort((a, b) => a.price - b.price)[0]
+  return cheapest ? `${formatPlanPrice(cheapest.price, cheapest.currency)}${priceSuffix('month')}` : null
+}
 
 /** The Safes left out are removed from the Workspace, not from the user's accounts. */
 export default function ClaimTrialModal({
@@ -42,23 +53,22 @@ export default function ClaimTrialModal({
   returnPathname?: string
   variant?: ClaimTrialVariant
 }) {
-  const { trialPlans, trialPeriodDays, isLoading } = useSpaceOffers(spaceId)
+  const { trialPlans, paidPlans, trialPeriodDays, isLoading } = useSpaceOffers(spaceId)
   const tiers = useMemo(() => claimTiers(trialPlans), [trialPlans])
   const { needsTrim, checkout, isBusy, error } = useSeatTrimCheckout(spaceId, returnPathname)
   const [step, setStep] = useState<'offer' | 'accounts'>('offer')
 
-  // The trial runs on the plan the CGW offers it on; the modal no longer shows which.
   const tier = tiers.find((candidate) => candidate.name === RECOMMENDED_PLAN) ?? tiers[0]
   const option = tier?.options[0]
-  // What the trial plan includes, as Stripe lists it, without its seat count or price.
-  const features = useMemo(
-    () =>
+  const seats = option?.seats ?? null
+  const features = useMemo(() => {
+    const listed =
       _offersToTiers(trialPlans).find(
         (candidate) => candidate.name === tier?.name && candidate.billingCycle === 'month',
-      )?.features ?? [],
-    [trialPlans, tier?.name],
-  )
-  const seats = option?.seats ?? null
+      )?.features ?? []
+    return seats === null ? listed : [seatsLabel(seats), ...listed]
+  }, [trialPlans, tier?.name, seats])
+  const fromPrice = useMemo(() => _lowestMonthlyPrice(paidPlans), [paidPlans])
   const endsOn = trialPeriodDays === null ? null : formatDate(Date.now() + trialPeriodDays * DAY_MS)
   const entry = {
     [MixpanelEventParams.ENTRY_POINT]:
@@ -134,14 +144,22 @@ export default function ClaimTrialModal({
                   <AlertDescription>{PRO_TRIAL_COPY.trialStart.unavailable}</AlertDescription>
                 </Alert>
               ) : (
-                <ul className="flex flex-col gap-3" data-testid="trial-features">
-                  {features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2">
-                      <FeatureCheck />
-                      <Typography variant="paragraph-small">{feature}</Typography>
-                    </li>
-                  ))}
-                </ul>
+                <div className="flex flex-col gap-4">
+                  {fromPrice && (
+                    <div className="flex items-baseline gap-1.5" data-testid="trial-price">
+                      <Typography variant="h4">{PRO_TRIAL_COPY.trialStart.free}</Typography>
+                      <Typography color="muted">{PRO_TRIAL_COPY.trialStart.afterTrial(fromPrice)}</Typography>
+                    </div>
+                  )}
+                  <ul className="flex flex-col gap-3" data-testid="trial-features">
+                    {features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-2">
+                        <FeatureCheck />
+                        <Typography variant="paragraph-small">{feature}</Typography>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
 
               {error && (
@@ -165,13 +183,24 @@ export default function ClaimTrialModal({
                     <ArrowRight data-icon="inline-end" />
                   </Button>
                 </Track>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  weight="semibold"
+                  className="w-full"
+                  render={<a href={SAFE_PRO_PRICING_URL} target="_blank" rel="noopener noreferrer" />}
+                  data-testid="trial-explore-plans"
+                >
+                  {PRO_TRIAL_COPY.trialStart.explorePlans}
+                  <ArrowUpRight data-icon="inline-end" />
+                </Button>
                 <Track
                   {...SAFE_PRO_EVENTS.FREE_ACCESS_OFFER_DISMISSED}
                   mixpanelParams={{ ...entry, [MixpanelEventParams.DISMISS_ACTION]: DismissAction.GO_TO_MY_ACCOUNTS }}
                   as="div"
                 >
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="lg"
                     weight="semibold"
                     className="w-full"
