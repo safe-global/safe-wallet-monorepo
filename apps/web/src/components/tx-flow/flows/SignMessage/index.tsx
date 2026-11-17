@@ -79,7 +79,7 @@ const SignMessageFlow = ({ message, ...props }: SignMessageProps) => {
       hideSafeShield={!isEip712}
     >
       <ObservabilityErrorBoundary fallback={<div>Error signing message</div>}>
-        <SignMessage message={message} {...props} />
+        <SignMessage key={props.requestId} message={message} {...props} />
       </ObservabilityErrorBoundary>
     </TxLayout>
   )
