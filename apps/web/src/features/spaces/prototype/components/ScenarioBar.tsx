@@ -4,7 +4,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@safe-global/views/components/ui/select'
 import { ALL_FAILED } from '../services/queue'
-import type { Persona, QueueState, QueueView, Scenario, Milestone, WalletState } from '../types'
+import type { Persona, QueueState, QueueView, Scenario, Milestone, TableLayout, WalletState } from '../types'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { FAMILY_LABELS, getPersonaLabel, PERSONAS } from '../services/personas'
 import { getScenario, getScenarioAccounts, shortAddress } from '../services/model'
@@ -49,6 +49,7 @@ const describeScenario = (scenario: Scenario) => {
 }
 
 export type Hypernative = 'in' | 'out' | 'none'
+export const TABLE_LAYOUTS: TableLayout[] = ['fixed', 'titled', 'stacked']
 
 const personas = (Object.keys(PERSONAS) as Persona[]).filter((value) => value !== 'guest')
 const PRIORITY_GROUPS = [
@@ -125,7 +126,7 @@ const UNDEPLOYED_LABELS = { '0': 'All deployed', '1': '1 not deployed', '2': '2 
 export function ScenarioBar({
   wallet,
   view,
-  aligned,
+  layout,
   scenario,
   state,
   hypernative,
@@ -144,8 +145,8 @@ export function ScenarioBar({
   wallet: WalletState
   // Phones only: the compact list or the table.
   view?: QueueView
-  // Wider screens: the Transaction column as it flows, or in fixed widths.
-  aligned?: boolean
+  // Wider screens: the Transaction column as it flows, or one of the A, B and C layouts.
+  layout?: TableLayout | 'flow'
   scenario: Scenario
   hypernative: Hypernative
   persona: Persona
@@ -171,11 +172,13 @@ export function ScenarioBar({
             <TabsTrigger value="2">M2</TabsTrigger>
           </TabsList>
         </Tabs>
-        {aligned !== undefined && (
-          <Tabs value={aligned ? 'fixed' : 'flow'} onValueChange={(value) => onChange({ align: String(value) })}>
+        {layout !== undefined && (
+          <Tabs value={layout} onValueChange={(value) => onChange({ align: String(value) })}>
             <TabsList aria-label="Transaction column">
               <TabsTrigger value="flow">Flowing</TabsTrigger>
               <TabsTrigger value="fixed">Aligned</TabsTrigger>
+              <TabsTrigger value="titled">B · Column titles</TabsTrigger>
+              <TabsTrigger value="stacked">C · Stacked</TabsTrigger>
             </TabsList>
           </Tabs>
         )}

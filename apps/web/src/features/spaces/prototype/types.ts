@@ -20,6 +20,8 @@ export type Milestone = 1 | 2
 export type WalletState = 'connected' | 'none'
 // Phones: the compact list with icons in place of most text, or the table.
 export type QueueView = 'table' | 'compact'
+// Wider screens: A lines the one Transaction column up, B splits it into titled columns, C stacks the Safe over the details.
+export type TableLayout = 'fixed' | 'titled' | 'stacked'
 export type Filter = 'sign' | 'ready' | 'waiting' | 'awaiting'
 // `guest`: whoever opens the queue with no wallet connected. Not in the persona picker.
 export type Persona = 'owner' | 'single' | 'security' | 'member' | 'admin' | 'guest'

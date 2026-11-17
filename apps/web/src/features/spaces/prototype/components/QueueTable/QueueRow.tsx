@@ -18,24 +18,35 @@ import {
   getGaugeTone,
   getStepsStatus,
   getTransactionLabel,
+  getTypeLabel,
   getWarnings,
   WARNING_LABELS,
 } from '../../services/model'
-import type { Persona, Proposal, Milestone } from '../../types'
+import type { Persona, Proposal, Milestone, TableLayout } from '../../types'
 import { SignatureGauge } from './SignatureGauge'
 import { getRiskFlags, RiskFlagBadge } from '../RiskFlag'
 import { NonceLabel, NonceMark } from './NonceCell'
 import { SignerList } from './SignerList'
 import { getStatusHint, type MenuAction } from '../../services/actions'
 import type { PreviewAction } from '../../services/queue'
-import { Counterparty, hasCounterparty, TransactionHead } from './TransactionLine'
+import { Counterparty, hasCounterparty, SummaryText, TransactionHead } from './TransactionLine'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import { CopyableParty } from '../CopyableParty'
 import { SafenetMark } from '../SafenetMark'
 import { ExecutionChip, LockedChip } from './ExecutionStatus'
 import { getLockingTx, type Executions } from '../../services/execution'
 import { RowActions } from './RowActions'
-import { ChainIcon, HINT_CLASS, HintContent, StatusChip, StepsStatusChip } from '../shared'
+import {
+  AppTag,
+  ChainIcon,
+  chainLogoUrl,
+  HINT_CLASS,
+  HintContent,
+  StatusChip,
+  StepsStatusChip,
+  TYPE_ICONS,
+  TypeTag,
+} from '../shared'
 
 export type QueueRowProps = {
   tx: Proposal
@@ -70,6 +81,7 @@ export type QueueRowProps = {
   safeTable?: boolean
   partyTags?: boolean
   aligned?: boolean
+  layout?: TableLayout
   compact?: boolean
   // M1 has no drawer: a row click does nothing, and Remind, the Safenet mark and Awaiting parent wait for M2
   milestone?: Milestone
@@ -102,11 +114,13 @@ export function QueueRow({
   safeTable = false,
   partyTags = false,
   aligned: alignedOption = false,
+  layout,
   compact = false,
   milestone = 2,
 }: QueueRowProps) {
   // Fixed widths only where the Transaction cell is one line.
   const aligned = alignedOption && !compact
+  const stacked = aligned && layout === 'stacked'
   const m1 = milestone === 1
   const [hovered, setHovered] = useState(false)
   const noteIcon = useRef<SVGSVGElement>(null)
@@ -122,6 +136,7 @@ export function QueueRow({
   const startsGroup = groupSize > 1 && sectionItems.find(sameNonce) === tx
   const willBeReplaced = !!replaceHover && conflicts.some((other) => other.id === replaceHover)
   const account = getAccount(tx)
+  const TypeIcon = TYPE_ICONS[getTypeLabel(tx)]
   const signatureCount = getSignatureCount(tx)
   const parentApproval = m1 ? undefined : getParentApproval(tx, items)
   const warnings = getWarnings(tx)
@@ -335,7 +350,38 @@ export function QueueRow({
         )}
       </TableCell>
     ),
-    Transaction: (
+    Transaction: stacked ? (
+      // C: the Safe's avatar large on the left, its name on top and what the transaction does below.
+      <TableCell className="py-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <span className="relative flex shrink-0">
+            <Identicon address={account.iconAddress} size={36} />
+            <img
+              src={chainLogoUrl(account.chainId)}
+              alt={`on ${account.network}`}
+              className="absolute -right-1 -bottom-1 size-4 rounded-full ring-2 ring-card"
+            />
+          </span>
+          <div className="flex min-w-0 flex-col gap-0.5">
+            <button
+              className={`truncate text-left text-sm font-medium focus-visible:outline-none focus-visible:underline ${willBeReplaced ? 'text-muted-foreground line-through' : ''}`}
+              onClick={openDetails}
+              aria-label={`Open ${getTransactionLabel(tx)}`}
+            >
+              {account.safeName ?? account.name}
+            </button>
+            <span className="flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground">
+              <TypeIcon className="size-3.5 shrink-0" strokeWidth={ICON_STROKE} aria-hidden="true" />
+              <span className="shrink-0">{tx.app?.name ?? getTypeLabel(tx)}</span>
+              <span aria-hidden="true">·</span>
+              <SummaryText tx={tx} />
+              {warningMarker}
+              {!isWide && noteButton}
+            </span>
+          </div>
+        </div>
+      </TableCell>
+    ) : (
       <TableCell className="py-2" colSpan={compact || spanTo ? 2 : undefined}>
         {/* min-h-10 matches the Policies table, so rows are the same height across Spaces. */}
         <div className={compact ? 'flex min-w-0 flex-col gap-1.5 py-1' : 'flex min-h-10 min-w-0 items-center gap-1.5'}>
@@ -404,6 +450,59 @@ export function QueueRow({
           <span className="truncate">
             {!columns.includes('Network') ? account.name : (account.safeName ?? account.name)}
           </span>
+        </span>
+      </TableCell>
+    ),
+    // B: the Safe tag, the type tag, what happens, the other party and the age, each under its own title.
+    ...(layout === 'titled' && {
+      Safe: (
+        <TableCell>
+          <span className="flex min-w-0">
+            <CopyableParty
+              name={account.safeName ?? account.name}
+              address={account.iconAddress}
+              network={{ chainId: account.chainId, name: account.network }}
+              tag
+            />
+          </span>
+        </TableCell>
+      ),
+      Type: (
+        <TableCell>
+          <span className="flex min-w-0">
+            {tx.app ? <AppTag app={tx.app} onRow truncate /> : <TypeTag type={getTypeLabel(tx)} onRow truncate />}
+          </span>
+        </TableCell>
+      ),
+      Details: (
+        <TableCell>
+          <div className="flex min-w-0 items-center gap-1.5">
+            <button
+              className={`flex min-w-0 text-left text-sm focus-visible:outline-none focus-visible:underline ${willBeReplaced ? 'text-muted-foreground line-through' : ''}`}
+              onClick={openDetails}
+              aria-label={`Open ${getTransactionLabel(tx)}`}
+            >
+              <SummaryText tx={tx} />
+            </button>
+            {warningMarker}
+            {!isWide && noteButton}
+          </div>
+        </TableCell>
+      ),
+    }),
+    // B and C: the other party without "to" or "via", since the column title says it, and the age.
+    With: (
+      <TableCell>
+        <span className="flex min-w-0">
+          <Counterparty tx={tx} inColumn tag={partyTags} plain />
+        </span>
+      </TableCell>
+    ),
+    Age: (
+      <TableCell className="text-sm text-muted-foreground">
+        <span className="flex items-center gap-1.5">
+          {proposedContent}
+          {proposerMark}
         </span>
       </TableCell>
     ),

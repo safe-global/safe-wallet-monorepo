@@ -67,10 +67,13 @@ export function Counterparty({
   tx,
   inColumn = false,
   tag = false,
+  plain = false,
 }: {
   tx: Proposal
   inColumn?: boolean
   tag?: boolean
+  // Under a "With" title: no "to" or "via" before the name.
+  plain?: boolean
 }) {
   const counterparty = getCounterpartyCell(tx)
   if (!hasCounterparty(tx)) return null
@@ -80,7 +83,7 @@ export function Counterparty({
   // Inline, the other party stops at 14rem so the action stays readable. Its tooltip has the full name.
   return (
     <span className={`flex min-w-0 items-center gap-2 ${inColumn ? '' : 'max-w-56'}`}>
-      {inColumn && !tag ? (
+      {plain ? null : inColumn && !tag ? (
         // Fixed width, so names line up whether the tag says To or Via.
         <span className={`flex w-10 shrink-0 ${ROW_TAG_FILL}`}>
           <Tag className="w-full justify-center">

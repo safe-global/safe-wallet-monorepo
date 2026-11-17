@@ -1344,6 +1344,35 @@ describe('aligned Transaction column', () => {
     expect(allPending().getAllByRole('button', { name: /^Blocked by #\d+ / }).length).toBeGreaterThan(0)
   })
 
+  it('B: splits the transaction into titled columns, with no "to" or "via" under With', () => {
+    render(<PendingQueue />, {
+      routerProps: { query: { align: 'titled', scenario: '8-safes-all-types', state: 'normal' } },
+    })
+    expect(screen.getByRole('tab', { name: 'B · Column titles' })).toHaveAttribute('aria-selected', 'true')
+    const titles = screen.getAllByRole('columnheader').map((header) => header.textContent)
+    expect(titles).toEqual(expect.arrayContaining(['Safe', 'Type', 'Details', 'With', 'Age', 'Status']))
+    expect(titles).not.toContain('Transaction')
+    const withColumn = titles.indexOf('With')
+    for (const row of openRows()) {
+      const cells = within(row.closest('tr')!).getAllByRole('cell')
+      expect(cells[withColumn].textContent).not.toMatch(/^(to|via|on)\b/)
+    }
+  })
+
+  it('C: stacks the Safe name over the type and details, next to a large avatar', () => {
+    render(<PendingQueue />, {
+      routerProps: { query: { align: 'stacked', scenario: '8-safes-all-types', state: 'normal' } },
+    })
+    const titles = screen.getAllByRole('columnheader').map((header) => header.textContent)
+    expect(titles).toEqual(expect.arrayContaining(['Transaction', 'With', 'Age', 'Status']))
+    expect(titles).not.toContain('Details')
+    const row = openRows()
+      .find((button) => button.textContent === 'Treasury Main')!
+      .closest('tr')!
+    expect(within(row).getByRole('img', { name: 'on Ethereum' })).toBeInTheDocument()
+    expect(within(row).getByText('Send')).toBeInTheDocument()
+  })
+
   it('keeps the flowing layout by default', () => {
     render(<PendingQueue />)
     expect(screen.getByRole('tab', { name: 'Flowing' })).toHaveAttribute('aria-selected', 'true')

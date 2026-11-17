@@ -5,7 +5,7 @@ import { Badge } from '@safe-global/views/components/ui/badge'
 import { TableHeader, TableHead, TableRow, TableCell } from '@safe-global/views/components/ui/table'
 import type { BulkBatch, PreviewAction } from '../../services/queue'
 import type { MenuAction } from '../../services/actions'
-import type { Account, Filter, Persona, Proposal, Milestone } from '../../types'
+import type { Account, Filter, Persona, Proposal, Milestone, TableLayout } from '../../types'
 import type { Executions } from '../../services/execution'
 import { SafeIdentity, STATUS_ORDER, chainLogoUrl } from '../shared'
 import { QueueRow } from './QueueRow'
@@ -67,6 +67,8 @@ export type QueueSectionProps = {
   partyTags?: boolean
   // Option: the Safe, type and summary get fixed widths, so they line up from row to row.
   aligned?: boolean
+  // B: Safe, type, details, other party and age in titled columns. C: the Safe stacked over the details.
+  layout?: TableLayout
   // Options D and E on a phone: Nonce, a two-line Transaction and Action, so nothing scrolls sideways.
   compact?: boolean
 }
@@ -357,6 +359,7 @@ export function QueueSectionRows({
   safeTable,
   partyTags,
   aligned,
+  layout,
   compact,
   milestone,
 }: QueueSectionRowsProps) {
@@ -400,6 +403,7 @@ export function QueueSectionRows({
           safeTable={safeTable}
           partyTags={partyTags}
           aligned={aligned}
+          layout={layout}
           compact={compact}
           milestone={milestone}
         />

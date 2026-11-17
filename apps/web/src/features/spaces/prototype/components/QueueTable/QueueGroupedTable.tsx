@@ -4,7 +4,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Table, TableBody, TableCell, TableRow } from '@safe-global/views/components/ui/table'
 import type { BulkBatch } from '../../services/queue'
 import { getAccount } from '../../services/model'
-import type { Account } from '../../types'
+import type { Account, TableLayout } from '../../types'
 import {
   getColumnWidths,
   QueueSectionRows,
@@ -45,8 +45,8 @@ export function QueueGroupedTable({
   ...props
 }: QueueGroupedTableProps) {
   const { isWide, showNoteText, persona, recoveries } = props
-  const columns = ORDERED_COLUMNS(isWide, props.partyTags, props.compact, props.aligned)
-  const widths = orderedWidths(showNoteText, props.partyTags, props.compact, props.aligned)
+  const columns = ORDERED_COLUMNS(isWide, props.partyTags, props.compact, props.aligned, props.layout)
+  const widths = orderedWidths(showNoteText, props.partyTags, props.compact, props.aligned, props.layout)
   const groups: SafeGroup[] = groupBySafe(sections)
   const { scroller, overflowing } = useScrollOverflow(sections.map((section) => isCollapsed(section.id)).join())
   const rows = (section: QueueSectionData, hidden: boolean) => (
@@ -313,6 +313,7 @@ const orderedWidths = (
   partyTags = false,
   compact = false,
   aligned = false,
+  layout?: TableLayout,
 ): Record<string, string | undefined> => ({
   ...getColumnWidths(showNoteText),
   Transaction: compact ? undefined : aligned ? 'w-[27rem]' : partyTags ? 'w-[24rem]' : 'w-72',
@@ -325,33 +326,54 @@ const orderedWidths = (
   // Aligned: every column has a width, so spare room spreads across them instead of pooling in one gap.
   // Status fits an executing or locked chip after the count, Action fits "Blocked by #212".
   ...(aligned ? { To: 'w-80', Signatures: 'w-36', Action: 'w-44' } : {}),
+  // B and C: the details take the slack, the rest fit their longest value.
+  ...(layout === 'titled'
+    ? { Safe: 'w-40', Type: 'w-32', Details: undefined, With: 'w-44', Age: 'w-28', Signatures: 'w-32' }
+    : {}),
+  ...(layout === 'stacked' ? { Transaction: undefined, With: 'w-56', Age: 'w-28' } : {}),
 })
 
 // Columns, the same in every grouping. Nonce leads, so conflicts draw the same bracket.
-export const ORDERED_COLUMNS = (isWide: boolean, partyTags = false, compact = false, aligned = false) =>
+export const ORDERED_COLUMNS = (
+  isWide: boolean,
+  partyTags = false,
+  compact = false,
+  aligned = false,
+  layout?: TableLayout,
+) =>
   compact
     ? ['Nonce', 'Transaction', 'Action']
-    : [
-        'Nonce',
-        'Transaction',
-        'To',
-        // The Safe tag shows the Safe and its network in the Safe tag.
-        ...(partyTags ? [] : ['Safe', 'Network']),
-        // Aligned: the age sits after the other party, in To.
-        ...(aligned ? [] : ['Proposed']),
-        ...(isWide ? ['Note'] : []),
-        'Signatures',
-        // Aligned: the status is the signature gauge's colour and tooltip.
-        ...(aligned ? [] : ['Status']),
-        'Action',
-      ]
+    : layout === 'titled' || layout === 'stacked'
+      ? [
+          'Nonce',
+          ...(layout === 'titled' ? ['Safe', 'Type', 'Details'] : ['Transaction']),
+          'With',
+          'Age',
+          ...(isWide ? ['Note'] : []),
+          'Signatures',
+          'Action',
+        ]
+      : [
+          'Nonce',
+          'Transaction',
+          'To',
+          // The Safe tag shows the Safe and its network in the Safe tag.
+          ...(partyTags ? [] : ['Safe', 'Network']),
+          // Aligned: the age sits after the other party, in To.
+          ...(aligned ? [] : ['Proposed']),
+          ...(isWide ? ['Note'] : []),
+          'Signatures',
+          // Aligned: the status is the signature gauge's colour and tooltip.
+          ...(aligned ? [] : ['Status']),
+          'Action',
+        ]
 
 // Rows grouped by network or next nonce. Each group collapses, and the header collapses them all.
 // The Status list (`plain`): the same rows in one list, with no group rows.
 export function QueueOrderedTable({ groups, groupBy, plain = false, ...props }: QueueOrderedTableProps) {
   const byNetwork = groupBy === 'network'
-  const columns = ORDERED_COLUMNS(props.isWide, props.partyTags, props.compact, props.aligned)
-  const widths = orderedWidths(props.showNoteText, props.partyTags, props.compact, props.aligned)
+  const columns = ORDERED_COLUMNS(props.isWide, props.partyTags, props.compact, props.aligned, props.layout)
+  const widths = orderedWidths(props.showNoteText, props.partyTags, props.compact, props.aligned, props.layout)
   const [collapsed, setCollapsed] = useState<string[]>([])
   const { scroller, overflowing } = useScrollOverflow(`${groups.length}:${collapsed.join()}`)
   const toggle = (id: string) =>

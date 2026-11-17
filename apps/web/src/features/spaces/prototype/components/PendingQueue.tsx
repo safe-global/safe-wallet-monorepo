@@ -39,7 +39,7 @@ import {
   type PreviewAction,
 } from '../services/queue'
 import { LoadStatusChip, NothingLoaded } from './LoadWarnings'
-import { FAILED_COUNTS, UNDEPLOYED_COUNTS } from './ScenarioBar'
+import { FAILED_COUNTS, TABLE_LAYOUTS, UNDEPLOYED_COUNTS } from './ScenarioBar'
 import { getOutsiders, getRemindable, type MenuAction } from '../services/actions'
 import {
   advanceExecution,
@@ -97,7 +97,8 @@ function PendingQueueView() {
   // Phones get the compact list. `?view=table` keeps the table there to compare. Wider screens always get the table.
   const view: QueueView = isMobile && router.query.view !== 'table' ? 'compact' : 'table'
   // Option: the Safe, type and summary line up in fixed widths.
-  const aligned = router.query.align === 'fixed'
+  const layout = TABLE_LAYOUTS.find((value) => value === router.query.align)
+  const aligned = !!layout
   // Without a wallet, nobody is "you": rows show what anyone can see, and no row asks for your signature.
   const persona: Persona = wallet === 'none' ? 'guest' : pickedPersona
   const hypernative: Hypernative = router.query.hn === 'out' || router.query.hn === 'none' ? router.query.hn : 'in'
@@ -559,6 +560,7 @@ function PendingQueueView() {
     // D and E share one row: the Safe tag (icon, name and network) and the other party as tags, no Safe column
     partyTags: true,
     aligned,
+    layout,
     compact: isMobile,
     milestone,
   }
@@ -770,7 +772,7 @@ function PendingQueueView() {
         <ScenarioBar
           wallet={wallet}
           view={isMobile ? view : undefined}
-          aligned={isMobile ? undefined : aligned}
+          layout={isMobile ? undefined : (layout ?? 'flow')}
           scenario={scenario}
           state={state}
           hypernative={hypernative}
