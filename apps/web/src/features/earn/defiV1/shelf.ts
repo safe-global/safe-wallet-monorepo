@@ -1,30 +1,50 @@
 import type {
+  AssetType,
   DefiV1Plan,
   GroupBy,
   Holding,
-  LiquidityBucket,
   Operation,
   Opportunity,
   OpportunityCategory,
   Position,
+  Sort,
 } from './types'
 
 export const CATEGORY_ORDER: OpportunityCategory[] = ['cash', 'yield', 'staking']
 export const MAX_SHELF = 7
 export const NUDGE_MAX_EXIT_HOURS = 24
-const RESERVES_MAX_EXIT_HOURS = 72
 
 /** Rank by how fast the money comes back. Placement and APY never move an item up. */
 export const byExitTime = (a: Opportunity, b: Opportunity): number =>
   a.exitHours - b.exitHours || a.name.localeCompare(b.name)
 
-export const LIQUIDITY_ORDER: LiquidityBucket[] = ['operating', 'reserves', 'strategic']
+export const ASSET_TYPE_ORDER: AssetType[] = ['lending', 'rwa', 'staking']
 
-/** Buckets come from exit time only, so they state a fact rather than advice. */
-export const liquidityBucket = (item: Pick<Opportunity, 'exitHours'>): LiquidityBucket => {
-  if (item.exitHours <= NUDGE_MAX_EXIT_HOURS) return 'operating'
-  if (item.exitHours <= RESERVES_MAX_EXIT_HOURS) return 'reserves'
-  return 'strategic'
+const SORT_VALUE: Record<
+  Sort['key'],
+  (item: Opportunity, positionOf: (item: Opportunity) => number) => number | string
+> = {
+  name: (item) => item.name.toLowerCase(),
+  apy: (item) => item.apy,
+  type: (item) => ASSET_TYPE_ORDER.indexOf(item.type),
+  exit: (item) => item.exitHours,
+  position: (item, positionOf) => positionOf(item),
+}
+
+/** Sorts a copy by one column. Ties keep the input order. */
+export const sortOpportunities = (
+  opportunities: Opportunity[],
+  sort: Sort,
+  positionOf: (item: Opportunity) => number = () => 0,
+): Opportunity[] => {
+  const value = (item: Opportunity) => SORT_VALUE[sort.key](item, positionOf)
+  const sign = sort.direction === 'asc' ? 1 : -1
+  return [...opportunities].sort((a, b) => {
+    const left = value(a)
+    const right = value(b)
+    if (left === right) return 0
+    return (left < right ? -1 : 1) * sign
+  })
 }
 
 export const isLocked = (opportunity: Opportunity, plan: DefiV1Plan): boolean =>
@@ -95,17 +115,7 @@ export const filterOpportunities = (
       (!filters.openOnly || (item.access === 'all' && !item.kyc)),
   )
 
-const GROUP_KEY: Record<Exclude<GroupBy, 'none' | 'investments'>, (item: Opportunity) => string> = {
-  liquidity: (item) => liquidityBucket(item),
-  asset: (item) => item.asset,
-}
-
-const GROUP_ORDER: Partial<Record<GroupBy, string[]>> = {
-  investments: ['invested', 'opportunities'],
-  liquidity: LIQUIDITY_ORDER,
-}
-
-/** Keeps the input order inside each group. Investments come first; liquidity buckets go from fastest exit, assets their first appearance. */
+/** Keeps the input order inside each group. Investments come first, assets in order of first appearance. */
 export const groupOpportunities = (
   opportunities: Opportunity[],
   groupBy: GroupBy,
@@ -115,8 +125,8 @@ export const groupOpportunities = (
   const keyOf =
     groupBy === 'investments'
       ? (item: Opportunity) => (investedIds.includes(item.id) ? 'invested' : 'opportunities')
-      : GROUP_KEY[groupBy]
-  const keys = GROUP_ORDER[groupBy] ?? [...new Set(opportunities.map(keyOf))]
+      : (item: Opportunity) => item.asset
+  const keys = groupBy === 'investments' ? ['invested', 'opportunities'] : [...new Set(opportunities.map(keyOf))]
   return keys
     .map((key) => ({ key, items: opportunities.filter((item) => keyOf(item) === key) }))
     .filter((group) => group.items.length > 0)
@@ -172,27 +182,22 @@ export type TreasurySummary = {
   idle: number
   investedShare: number
   earned: number
-  sameDay: number
 }
 
 /** Pending deposits still sit in the Safe, so they count as idle until signers approve them. */
 export const summariseTreasury = (
   total: number,
-  positions: { principal: number; earned: number; pending: boolean; opportunity: Pick<Opportunity, 'exitHours'> }[],
+  positions: { principal: number; earned: number; pending: boolean }[],
 ): TreasurySummary => {
   const live = positions.filter((position) => !position.pending)
   const invested = live.reduce((sum, position) => sum + position.principal, 0)
   const earned = live.reduce((sum, position) => sum + position.earned, 0)
-  const sameDay = live
-    .filter((position) => liquidityBucket(position.opportunity) === 'operating')
-    .reduce((sum, position) => sum + position.principal, 0)
   return {
     total,
     invested,
     idle: Math.max(total - invested, 0),
     investedShare: total > 0 ? invested / total : 0,
     earned,
-    sameDay,
   }
 }
 
@@ -210,12 +215,8 @@ export const holdingsFor = (positions: Position[], opportunityId: string): Holdi
   )
 }
 
-/** Mock monthly value of a position, from the amount put in to that amount plus earnings. Deterministic, so stories stay stable. */
-export const growthSeries = (invested: number, earned: number, points = 12): number[] =>
-  Array.from({ length: points }, (_, index) => {
-    const progress = index / (points - 1)
-    const wobble = index === 0 || index === points - 1 ? 0 : Math.sin(index * 1.7) * earned * 0.08
-    return invested + earned * progress + wobble
-  })
+export type IdleAsset = { asset: string; amount: number }
 
-export const growthShare = (invested: number, earned: number): number => (invested > 0 ? earned / invested : 0)
+/** Splits the idle total across assets by their share, so the breakdown always adds up to the total shown. */
+export const idleByAsset = (idle: number, mix: { asset: string; share: number }[]): IdleAsset[] =>
+  mix.map(({ asset, share }) => ({ asset, amount: idle * share })).sort((a, b) => b.amount - a.amount)

@@ -236,12 +236,7 @@ export const WhereFields = ({ form, labelled = true }: { form: InvestmentForm; l
   <>
     <Section label={labelled ? COPY.madeFrom : undefined}>
       <RadioGroup value={form.where} onValueChange={(next) => form.setWhere(next as Where)} className="gap-2">
-        <ChoiceCard
-          value="this"
-          title={COPY.thisSafe}
-          badge={<Badge variant="warning">{COPY.later}</Badge>}
-          description={COPY.thisSafeCaveat}
-        />
+        <ChoiceCard value="this" title={COPY.thisSafe} description={COPY.thisSafeCaveat} />
         <ChoiceCard
           value="nested"
           title={COPY.dedicated}
@@ -328,12 +323,7 @@ export const ScheduleFields = ({ form }: { form: InvestmentForm }) => (
   <Section label={COPY.schedule}>
     <RadioGroup value={form.schedule} onValueChange={(next) => form.setSchedule(next as Schedule)} className="gap-2">
       <ChoiceCard value="once" title={COPY.oneTime} description={COPY.oneTimeHint} />
-      <ChoiceCard
-        value="recurring"
-        title={COPY.recurringLabel}
-        badge={<Badge variant="warning">{COPY.later}</Badge>}
-        description={COPY.recurringHint}
-      >
+      <ChoiceCard value="recurring" title={COPY.recurringLabel} description={COPY.recurringHint}>
         {form.schedule === 'recurring' && form.investment && (
           <div className="mt-2 flex flex-col gap-1.5">
             <div className="flex items-center gap-2">

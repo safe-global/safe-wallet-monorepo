@@ -8,9 +8,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { Drawer, DrawerBody, DrawerSection } from '@/components/common/Drawer'
 import { DEFI_V1_COPY, formatApy, formatCompactUsd, formatLiveFor, formatUsd } from '../copy'
 import type { Holding, Operation, Opportunity } from '../types'
-import { growthSeries, growthShare, liquidityBucket } from '../shelf'
 import { ActionPanel, type ActionResult } from './ActionPanel'
-import { Sparkline } from './Sparkline'
 import { SigningBlock } from './SigningBlock'
 import { OpportunityMark, Tag } from './TreasuryTables'
 
@@ -88,7 +86,7 @@ const TextRow = ({ label, children }: { label: string; children: ReactNode }) =>
 )
 
 const accessLabel = (item: Opportunity) =>
-  [item.access === 'pro' ? DEFI_V1_COPY.proOnly : DEFI_V1_COPY.toolbar.openOnly, item.kyc && 'KYC once']
+  [item.access === 'pro' ? DEFI_V1_COPY.proOnly : DEFI_V1_COPY.openToAll, item.kyc && 'KYC once']
     .filter(Boolean)
     .join(' · ')
 
@@ -136,7 +134,7 @@ export const OpportunityDrawer = ({
               </Typography>
               <div className="flex min-w-0 items-center gap-2">
                 <span className="truncate text-xs text-muted-foreground">
-                  {opportunity.runBy} · {DEFI_V1_COPY.liquidity[liquidityBucket(opportunity)].title}
+                  {opportunity.runBy} · {DEFI_V1_COPY.assetType[opportunity.type].label}
                 </span>
                 {holding && (
                   <Badge variant="mint" size="status" shape="status">
@@ -218,24 +216,6 @@ export const OpportunityDrawer = ({
                 >
                   <Frame>
                     <Row label={COPY.deposited} value={formatUsd(holding.invested)} />
-                    {holding.invested > 0 && (
-                      <Row
-                        label={COPY.growth}
-                        value={
-                          <span className="flex items-center justify-end gap-2">
-                            <Sparkline
-                              values={growthSeries(holding.invested, holding.earned)}
-                              label={DEFI_V1_COPY.positions.trend(
-                                formatApy(growthShare(holding.invested, holding.earned)),
-                              )}
-                            />
-                            <span className="text-badge-dot-success">
-                              +{formatApy(growthShare(holding.invested, holding.earned))}
-                            </span>
-                          </span>
-                        }
-                      />
-                    )}
                     {holding.pending > 0 && (
                       <Row label={DEFI_V1_COPY.positions.pending} value={formatUsd(holding.pending)} />
                     )}
@@ -251,9 +231,10 @@ export const OpportunityDrawer = ({
                 </DrawerSection>
               )}
 
-              <DrawerSection title={COPY.fees} rightNode={opportunity.protocolFee} collapsible defaultOpen={false}>
+              <DrawerSection title={COPY.fees} rightNode={opportunity.protocolFee} collapsible defaultOpen>
                 <Frame>
                   <Row label={COPY.providerFee(opportunity.runBy)} value={opportunity.protocolFee} />
+                  <Row label={COPY.safeFee} value={COPY.noSafeFee} strong />
                 </Frame>
                 <Typography variant="paragraph-mini" color="muted" className="flex items-center gap-1.5">
                   <Info className="size-3.5 shrink-0" aria-hidden />

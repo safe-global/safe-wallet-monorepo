@@ -1,4 +1,6 @@
 export type OpportunityCategory = 'cash' | 'yield' | 'staking'
+/** What kind of product it is, shown as a column so it reads at a glance. */
+export type AssetType = 'rwa' | 'lending' | 'staking'
 export type RiskLevel = 'low' | 'medium' | 'higher'
 /** Paid tiers buy a labelled slot, never a better rank. */
 export type Placement = 'base' | 'featured' | 'premium' | 'sponsored'
@@ -12,6 +14,7 @@ export type Opportunity = {
   runBy: string
   curator?: string
   category: OpportunityCategory
+  type: AssetType
   risk: RiskLevel
   asset: string
   holds: string
@@ -50,9 +53,10 @@ export type DefiV1Config = {
 /** How set up investment opens: one form in a dialog, a stepper in a side panel, or a stepper in a dialog. */
 export type DefiV1Setup = 'dialog' | 'drawer' | 'stepper'
 
-export type LiquidityBucket = 'operating' | 'reserves' | 'strategic'
+export type SortKey = 'name' | 'apy' | 'type' | 'exit' | 'position'
+export type Sort = { key: SortKey; direction: 'asc' | 'desc' }
 
-export type GroupBy = 'none' | 'investments' | 'liquidity' | 'asset'
+export type GroupBy = 'none' | 'investments' | 'asset'
 
 export type Position = { opportunity: Opportunity; principal: number; earned: number; pending: boolean }
 

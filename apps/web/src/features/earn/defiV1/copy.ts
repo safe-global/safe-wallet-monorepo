@@ -1,4 +1,4 @@
-import type { DefiV1Framing, GroupBy, LiquidityBucket } from './types'
+import type { AssetType, DefiV1Framing, GroupBy } from './types'
 
 const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 })
 const compactUsd = new Intl.NumberFormat('en-US', {
@@ -31,17 +31,28 @@ export const DEFI_V1_COPY = {
       'A short list of vetted options, grouped by what your treasury needs. Exit time and who runs it come first.',
     defi: 'Lending, staking and tokenised funds you can use from this Safe. Filter by asset, network and exit time.',
   } satisfies Record<DefiV1Framing, string>,
-  liquidity: {
-    operating: { title: 'Operating cash', short: 'Operating', hint: 'Back within a day' },
-    reserves: { title: 'Reserves', short: 'Reserves', hint: 'Back within 3 days' },
-    strategic: { title: 'Strategic', short: 'Strategic', hint: 'Longer exits, like staking queues and cooldowns' },
-  } satisfies Record<LiquidityBucket, { title: string; short: string; hint: string }>,
+  assetType: {
+    rwa: { label: 'RWA', hint: 'Real-world assets, like tokenised funds' },
+    lending: { label: 'Lending', hint: 'Lent out to borrowers for interest' },
+    staking: { label: 'Staking', hint: 'Helps secure a network for rewards' },
+  } satisfies Record<AssetType, { label: string; hint: string }>,
+  columns: {
+    name: 'Opportunity',
+    apy: 'Net APY',
+    type: 'Asset type',
+    exit: 'Exit time',
+    networks: 'Networks',
+    position: 'Your position',
+  },
+  sortBy: (column: string) => `Sort by ${column.toLowerCase()}`,
+  manage: 'Manage',
+  openToAll: 'Open to all',
   bestRate: (rate: string) => `Up to ${rate}`,
   showAll: (count: number) => `Show all ${count} opportunities`,
   moreInApps: 'Looking for something else? Browse DeFi apps',
   swap: 'Swap',
   bridge: 'Bridge',
-  noMatches: 'No opportunities match your search or filters.',
+  noMatches: 'No opportunities match your search.',
   nudgeTitle: (value: string, asset: string, chain: string, days: number) =>
     `${value} ${asset} has been idle on ${chain} for ${days} days`,
   nudgeBody: (count: number) =>
@@ -99,8 +110,6 @@ export const DEFI_V1_COPY = {
     exit: 'Exit time',
     withdraw: 'Withdraw',
     pending: 'Awaiting signatures',
-    trend: (growth: string) => `Up ${growth} since you invested`,
-    trendTooltip: (from: string, to: string, earned: string) => `${from} to ${to} over 12 months · +${earned} earned`,
     pendingAmount: (amount: string) => `${amount} awaiting signatures`,
     withdrawTitle: (name: string) => `Withdraw from ${name}`,
     withdrawLead: 'Funds return to this Safe. Signers approve one proposal.',
@@ -110,22 +119,8 @@ export const DEFI_V1_COPY = {
     groupBy: 'Group',
     groupByOption: {
       investments: 'Investments',
-      liquidity: 'Liquidity',
       asset: 'Asset',
     } satisfies Record<Exclude<GroupBy, 'none'>, string>,
-    filters: 'Filter',
-    investments: 'Investments',
-    investedOnly: 'Invested only',
-    clearFilters: 'Clear filters',
-    asset: 'Asset',
-    network: 'Network',
-    exit: 'Exit time',
-    sameDay: 'Within a day',
-    access: 'Access',
-    openOnly: 'Open to all',
-    compare: 'Compare',
-    compareHint: 'Select 2 or 3 options to compare',
-    deposit: 'Deposit',
   },
   invested: 'Invested',
   action: {
@@ -164,11 +159,12 @@ export const DEFI_V1_COPY = {
     liveFor: 'Live for',
     yourPosition: 'Your position',
     deposited: 'Deposited',
-    growth: 'Growth, 12 months',
     earned: 'Earned',
     fees: 'Fees',
     providerFee: (runBy: string) => `${runBy} fee, already in net APY`,
-    feeNote: 'Already in the net APY, so you get the same rate as going direct. Safe adds no fee. Mock values.',
+    safeFee: 'Safe fee',
+    noSafeFee: 'None',
+    feeNote: 'Safe adds no fee. You get the same rate as going direct. Mock values.',
     apyBreakdown: 'APY breakdown',
     publishedApy: 'Published APY',
     managementFee: 'Management fee',
@@ -188,22 +184,6 @@ export const DEFI_V1_COPY = {
     investments: 'Your investments',
     opportunities: 'Opportunities',
   },
-  compare: {
-    title: 'Compare options',
-    feature: 'Details',
-    returns: 'Returns',
-    trust: 'Track record',
-    paidListing: 'Paid listing',
-    kyc: 'KYC required',
-    liveFor: 'Live for',
-    rate: 'Net rate',
-    exit: 'Exit time',
-    access: 'Access',
-    networks: 'Networks',
-    tvl: 'TVL',
-    fee: 'Management fee',
-    audits: 'Audits',
-  },
   summary: {
     invested: 'Invested',
     sections: {
@@ -214,13 +194,14 @@ export const DEFI_V1_COPY = {
     },
     idle: 'Idle cash',
     putIdleToWork: 'Invest idle cash',
-    investedShare: (amount: string, share: number) => `${amount} invested · ${share}%`,
+    idleBreakdown: 'Idle by asset',
     earned: 'Total earned',
     earnedFrom: (count: number) => `From ${count} investment${count === 1 ? '' : 's'}`,
     seeInvestments: 'See investments',
-    sameDay: 'Liquidity',
-    sameDayOf: (invested: string) => `Back within a day, of ${invested} invested`,
-    byLiquidity: 'Group by liquidity',
+    total: 'Total assets',
+    parts: { idle: 'Idle', invested: 'Invested', earned: 'Earned' },
+    chartLabel: (idle: string, invested: string, earned: string) =>
+      `Idle ${idle}, invested ${invested}, earned ${earned}`,
   },
   operations: {
     signers: (threshold: number, owners: number) => `${threshold} of ${owners} signers`,
@@ -249,9 +230,6 @@ export const DEFI_V1_COPY = {
     allSigners: (owners: number) => `All ${owners} signers of this Safe`,
     name: 'Name',
     thisSafeCaveat: 'Signers can move up to the budget out of this Safe.',
-    later: 'With Policy Engine',
-    guardNote:
-      'Limiting it to deposits and withdrawals comes with the Policy Engine. Until then, only the budget is at risk.',
     steps: 'What signers approve',
     stepCreate: (name: string, threshold: number, owners: number) =>
       `Create ${name} (${threshold} of ${owners} signers to invest)`,
@@ -283,8 +261,7 @@ export const DEFI_V1_COPY = {
     anySigner: 'Any signer',
     specificSigners: 'Specific signers',
     specificHint: 'Pick who runs treasury day to day',
-    nameHint: (count: number) =>
-      `${count} signer${count === 1 ? '' : 's'} from this Safe, 1 approval to invest. Limited to deposit and withdraw once the Policy Engine is live.`,
+    nameHint: (count: number) => `${count} signer${count === 1 ? '' : 's'} from this Safe, 1 approval to invest.`,
     cancel: 'Cancel',
     who: 'Who can invest',
     budgetAndSchedule: 'Budget and schedule',
@@ -297,7 +274,7 @@ export const DEFI_V1_COPY = {
       move: (amount: string, asset: string) => `Move ${amount} ${asset} into it`,
       deposit: (amount: string, asset: string, name: string) => `Deposit ${amount} ${asset} into ${name}`,
     },
-    riskNote: 'Only the budget is at risk until the Policy Engine adds limits.',
+    riskNote: 'Only the budget is at risk.',
     summary: {
       lead: (threshold: number, owners: number) =>
         `Creating the proposal sends it to the signers of this Safe. Nothing moves until ${threshold} of ${owners} approve.`,
@@ -321,7 +298,7 @@ export const DEFI_V1_COPY = {
       anyoneWho: 'any signer',
       someWho: (count: number) => (count === 1 ? 'the signer you picked' : `any of the ${count} signers you picked`),
       nestedRisk: (name: string) => `Only the funds in ${name} are exposed. Everything else stays in this Safe.`,
-      thisRisk: 'Running in this Safe needs the Policy Engine to enforce the budget and signer limits.',
+      thisRisk: 'Signers you pick can move up to the budget out of this Safe.',
     },
     signatures: (signed: number, threshold: number) => `${signed} of ${threshold} signatures`,
     projected: (amount: string, asset: string, apy: string) =>

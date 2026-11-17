@@ -8,6 +8,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     mark: 'Aa',
     runBy: 'Aave DAO',
     category: 'cash',
+    type: 'lending',
     risk: 'low',
     asset: 'USDC',
     holds: 'aUSDC, redeemable 1:1 for USDC',
@@ -34,6 +35,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     mark: 'T',
     runBy: 'Regulated fund manager',
     category: 'cash',
+    type: 'rwa',
     risk: 'low',
     asset: 'USDC',
     holds: 'Shares of a short-term US Treasury fund',
@@ -62,6 +64,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     runBy: 'Morpho',
     curator: 'Independent risk curator',
     category: 'yield',
+    type: 'lending',
     risk: 'medium',
     asset: 'USDC',
     holds: 'Vault shares backed by over-collateralised loans',
@@ -89,6 +92,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     mark: 'C',
     runBy: 'Regulated fund manager',
     category: 'yield',
+    type: 'rwa',
     risk: 'medium',
     asset: 'USDC',
     holds: 'Shares of a fund holding AAA-rated loan notes',
@@ -115,6 +119,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     mark: 'L',
     runBy: 'Lido DAO',
     category: 'staking',
+    type: 'staking',
     risk: 'low',
     asset: 'ETH',
     holds: 'stETH, which tracks staked ETH',
@@ -141,6 +146,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     mark: 'K',
     runBy: 'Kiln',
     category: 'staking',
+    type: 'staking',
     risk: 'low',
     asset: 'ETH',
     holds: 'Validators owned by this Safe',
@@ -167,6 +173,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     mark: 'Sp',
     runBy: 'Spark',
     category: 'cash',
+    type: 'lending',
     risk: 'low',
     asset: 'USDC',
     holds: 'sUSDC savings shares',
@@ -193,6 +200,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     mark: 'Co',
     runBy: 'Compound DAO',
     category: 'cash',
+    type: 'lending',
     risk: 'low',
     asset: 'USDC',
     holds: 'cUSDCv3 lending position',
@@ -219,6 +227,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     mark: 'e',
     runBy: 'ether.fi',
     category: 'staking',
+    type: 'staking',
     risk: 'medium',
     asset: 'ETH',
     holds: 'weETH, restaked ETH',
@@ -245,6 +254,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     mark: 'Et',
     runBy: 'Ethena',
     category: 'yield',
+    type: 'staking',
     risk: 'higher',
     asset: 'USDe',
     holds: 'sUSDe, backed by a delta-neutral strategy',
@@ -271,6 +281,7 @@ export const OPPORTUNITIES: Opportunity[] = [
     mark: 'N',
     runBy: 'Partner protocol',
     category: 'yield',
+    type: 'lending',
     risk: 'higher',
     asset: 'USDC',
     holds: 'Vault shares on a newer network',
@@ -304,6 +315,13 @@ export const IDLE_CASH = {
 export const CHAIN_IDS: Record<string, string> = { Ethereum: '1', Base: '8453', Arbitrum: '42161' }
 
 export const TREASURY_TOTAL = 6_700_000
+
+/** Mock split of idle funds by asset. */
+export const IDLE_MIX = [
+  { asset: 'USDC', share: 0.62 },
+  { asset: 'ETH', share: 0.26 },
+  { asset: 'USDT', share: 0.12 },
+]
 
 export const EXISTING_POSITIONS = [
   { opportunityId: 'aave-usdc', principal: 1_200_000, earned: 18_450 },

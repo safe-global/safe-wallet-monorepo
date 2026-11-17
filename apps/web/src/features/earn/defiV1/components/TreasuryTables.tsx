@@ -1,27 +1,32 @@
 import { Fragment, type MouseEvent, type ReactNode } from 'react'
-import { Clock, Coins, Lock, Repeat, Sprout } from 'lucide-react'
+import { ArrowDown, ArrowUp, ArrowUpDown, Clock, Coins, Lock, Repeat, Sprout } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
-import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@safe-global/views/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { cn } from '@safe-global/views/utils/cn'
 import { DEFI_V1_COPY, formatApy, formatCompactUsd } from '../copy'
 import { CHAIN_IDS, IDLE_CASH } from '../opportunities'
-import { depositRoute, liquidityBucket } from '../shelf'
-import type { Holding, Operation, Opportunity } from '../types'
+import { depositRoute } from '../shelf'
+import type { Holding, Operation, Opportunity, Sort, SortKey } from '../types'
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0!'
 const OPS = DEFI_V1_COPY.operations
-const COLUMN_WIDTHS = ['w-10', '', 'w-20', 'w-28', 'w-32', 'w-24', 'w-32 @6xl:w-44', 'w-40']
+const COLUMN_WIDTHS = ['', 'w-24', 'w-28', 'w-32', 'w-24', 'w-32 @6xl:w-44', 'w-40']
 const COLUMN_COUNT = COLUMN_WIDTHS.length
-const OPPORTUNITY_HEADERS = ['Opportunity', 'Net APY', 'Liquidity', 'Exit time', 'Networks', 'Your position']
+const COLUMNS = DEFI_V1_COPY.columns
+const HEADERS: { label: string; sortKey?: SortKey }[] = [
+  { label: COLUMNS.name, sortKey: 'name' },
+  { label: COLUMNS.apy, sortKey: 'apy' },
+  { label: COLUMNS.type, sortKey: 'type' },
+  { label: COLUMNS.exit, sortKey: 'exit' },
+  { label: COLUMNS.networks },
+  { label: COLUMNS.position, sortKey: 'position' },
+]
 
 export type OpportunityGroup = { key: string; title?: string; items: Opportunity[] }
-
-type Selection = { selected: string[]; isFull: boolean; onToggle: (id: string) => void }
 
 const GroupBand = ({ title, count }: { title: string; count: number }) => (
   <TableRow data-no-hover data-no-divider>
@@ -34,15 +39,41 @@ const GroupBand = ({ title, count }: { title: string; count: number }) => (
   </TableRow>
 )
 
-const ColumnHeaders = ({ labels }: { labels: string[] }) => (
+const SortIcon = ({ direction }: { direction?: Sort['direction'] }) => {
+  const Icon = direction === 'asc' ? ArrowUp : direction === 'desc' ? ArrowDown : ArrowUpDown
+  return <Icon className={cn('size-3.5', !direction && 'opacity-0 group-hover:opacity-100')} aria-hidden />
+}
+
+const ColumnHeaders = ({ sort, onSort }: { sort: Sort | null; onSort: (key: SortKey) => void }) => (
   <TableHeader>
     <TableRow data-no-hover>
-      <TableHead />
-      {labels.map((label) => (
-        <TableHead key={label} className="text-xs text-muted-foreground">
-          {label}
-        </TableHead>
-      ))}
+      {HEADERS.map(({ label, sortKey }) => {
+        const direction = sortKey && sort?.key === sortKey ? sort.direction : undefined
+        return (
+          <TableHead
+            key={label}
+            className="text-xs text-muted-foreground"
+            aria-sort={direction ? (direction === 'asc' ? 'ascending' : 'descending') : undefined}
+          >
+            {sortKey ? (
+              <button
+                type="button"
+                className={cn(
+                  'group -mx-1 inline-flex items-center gap-1 rounded px-1 hover:text-foreground',
+                  direction && 'text-foreground',
+                )}
+                onClick={() => onSort(sortKey)}
+                aria-label={DEFI_V1_COPY.sortBy(label)}
+              >
+                {label}
+                <SortIcon direction={direction} />
+              </button>
+            ) : (
+              label
+            )}
+          </TableHead>
+        )
+      })}
       <TableHead>
         <span className="sr-only">Action</span>
       </TableHead>
@@ -187,7 +218,6 @@ const OpportunityRow = ({
   isLocked,
   onSelect,
   onInvest,
-  selection,
   holding,
   heldIn,
 }: {
@@ -195,32 +225,28 @@ const OpportunityRow = ({
   isLocked: (item: Opportunity) => boolean
   onSelect: (item: Opportunity) => void
   onInvest?: (item: Opportunity) => void
-  selection: Selection
   holding?: Holding
   heldIn?: Operation
 }) => {
   const locked = isLocked(opportunity)
-  const checked = selection.selected.includes(opportunity.id)
+  const type = DEFI_V1_COPY.assetType[opportunity.type]
   return (
     <TableRow
       className={cn('cursor-pointer', locked && 'opacity-70')}
       onClick={() => onSelect(opportunity)}
       data-testid={`opportunity-${opportunity.id}`}
     >
-      <TableCell onClick={(event) => event.stopPropagation()}>
-        <Checkbox
-          checked={checked}
-          disabled={!checked && selection.isFull}
-          onCheckedChange={() => selection.onToggle(opportunity.id)}
-          aria-label={`Compare ${opportunity.name}`}
-        />
-      </TableCell>
       <TableCell>
         <NameCell opportunity={opportunity} operation={heldIn} invested={Boolean(holding)} />
       </TableCell>
       <TableCell className="font-semibold tabular-nums">{formatApy(opportunity.apy)}</TableCell>
-      <TableCell className="truncate" title={DEFI_V1_COPY.liquidity[liquidityBucket(opportunity)].hint}>
-        {DEFI_V1_COPY.liquidity[liquidityBucket(opportunity)].short}
+      <TableCell>
+        <Tooltip delay={150}>
+          <TooltipTrigger render={<span className="flex w-fit" />}>
+            <Tag>{type.label}</Tag>
+          </TooltipTrigger>
+          <TooltipContent>{type.hint}</TooltipContent>
+        </Tooltip>
       </TableCell>
       <TableCell>
         <ExitCell opportunity={opportunity} />
@@ -242,9 +268,9 @@ const OpportunityRow = ({
             variant="outline"
             size="xs"
             onClick={stop(() => onSelect(opportunity))}
-            data-testid={`deposit-${opportunity.id}`}
+            data-testid={`manage-${opportunity.id}`}
           >
-            {DEFI_V1_COPY.action.deposit}
+            {DEFI_V1_COPY.manage}
           </Button>
         ) : onInvest ? (
           <Button
@@ -285,7 +311,8 @@ export const OpportunitiesTable = ({
   isLocked,
   onSelect,
   onInvest,
-  selection,
+  sort,
+  onSort,
   holdingOf,
   heldInOf,
 }: {
@@ -293,14 +320,15 @@ export const OpportunitiesTable = ({
   isLocked: (item: Opportunity) => boolean
   onSelect: (item: Opportunity) => void
   onInvest?: (item: Opportunity) => void
-  selection: Selection
+  sort: Sort | null
+  onSort: (key: SortKey) => void
   holdingOf: (item: Opportunity) => Holding | undefined
   heldInOf: (item: Opportunity) => Operation | undefined
 }) => {
   const isEmpty = groups.every((group) => group.items.length === 0)
   return (
     <TableCard label="Opportunities">
-      <ColumnHeaders labels={OPPORTUNITY_HEADERS} />
+      <ColumnHeaders sort={sort} onSort={onSort} />
       <TableBody data-testid="defi-opportunities">
         {isEmpty && (
           <TableRow data-no-hover>
@@ -319,7 +347,6 @@ export const OpportunitiesTable = ({
                 isLocked={isLocked}
                 onSelect={onSelect}
                 onInvest={onInvest}
-                selection={selection}
                 holding={holdingOf(item)}
                 heldIn={heldInOf(item)}
               />

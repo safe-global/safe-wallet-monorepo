@@ -8,17 +8,16 @@ import {
   depositSteps,
   filterOpportunities,
   groupOpportunities,
-  growthSeries,
-  growthShare,
   heldIn,
   holdingsFor,
   investedFirst,
   isLocked,
-  liquidityBucket,
+  idleByAsset,
   NO_FILTERS,
   operationsFor,
   MAX_SHELF,
   nudgeOptions,
+  sortOpportunities,
   summariseTreasury,
 } from './shelf'
 import type { Opportunity } from './types'
@@ -29,6 +28,7 @@ const opportunity = (overrides: Partial<Opportunity> = {}): Opportunity => ({
   mark: 'X',
   runBy: faker.company.name(),
   category: 'cash',
+  type: 'lending',
   risk: 'low',
   asset: 'USDC',
   holds: faker.lorem.words(3),
@@ -110,14 +110,58 @@ describe('isLocked', () => {
   })
 })
 
-describe('liquidityBucket', () => {
-  it.each([
-    [0, 'operating'],
-    [24, 'operating'],
-    [72, 'reserves'],
-    [168, 'strategic'],
-  ])('puts a %i hour exit in %s', (exitHours, bucket) => {
-    expect(liquidityBucket({ exitHours })).toBe(bucket)
+describe('sortOpportunities', () => {
+  it('sorts by net APY, highest first', () => {
+    const low = opportunity({ apy: 0.02 })
+    const high = opportunity({ apy: 0.06 })
+
+    expect(sortOpportunities([low, high], { key: 'apy', direction: 'desc' })).toEqual([high, low])
+  })
+
+  it('sorts by asset type in a fixed order', () => {
+    const staking = opportunity({ type: 'staking' })
+    const lending = opportunity({ type: 'lending' })
+    const rwa = opportunity({ type: 'rwa' })
+
+    expect(sortOpportunities([staking, rwa, lending], { key: 'type', direction: 'asc' })).toEqual([
+      lending,
+      rwa,
+      staking,
+    ])
+  })
+
+  it('sorts by position size from the lookup', () => {
+    const small = opportunity({ id: 'small' })
+    const big = opportunity({ id: 'big' })
+    const sizes: Record<string, number> = { small: 10, big: 500 }
+
+    expect(sortOpportunities([small, big], { key: 'position', direction: 'desc' }, (item) => sizes[item.id])).toEqual([
+      big,
+      small,
+    ])
+  })
+
+  it('keeps ties in the input order and leaves the input untouched', () => {
+    const first = opportunity({ exitHours: 24 })
+    const second = opportunity({ exitHours: 24 })
+    const items = [first, second]
+
+    expect(sortOpportunities(items, { key: 'exit', direction: 'desc' })).toEqual([first, second])
+    expect(items).toEqual([first, second])
+  })
+})
+
+describe('idleByAsset', () => {
+  it('splits the idle total by share, largest first', () => {
+    expect(
+      idleByAsset(1_000, [
+        { asset: 'ETH', share: 0.3 },
+        { asset: 'USDC', share: 0.7 },
+      ]),
+    ).toEqual([
+      { asset: 'USDC', amount: 700 },
+      { asset: 'ETH', amount: 300 },
+    ])
   })
 })
 
@@ -163,13 +207,6 @@ describe('groupOpportunities', () => {
     const items = [opportunity(), opportunity()]
 
     expect(groupOpportunities(items, 'none')).toEqual([{ key: 'all', items }])
-  })
-
-  it('orders liquidity groups from fastest exit and skips empty ones', () => {
-    const slow = opportunity({ exitHours: 168 })
-    const fast = opportunity({ exitHours: 0 })
-
-    expect(groupOpportunities([slow, fast], 'liquidity').map((group) => group.key)).toEqual(['operating', 'strategic'])
   })
 
   it('puts investments above the other opportunities', () => {
@@ -281,23 +318,18 @@ describe('depositSteps', () => {
 })
 
 describe('summariseTreasury', () => {
-  const position = (principal: number, earned: number, exitHours: number, pending = false) => ({
-    principal,
-    earned,
-    pending,
-    opportunity: { exitHours },
-  })
+  const position = (principal: number, earned: number, pending = false) => ({ principal, earned, pending })
 
-  it('counts only positions that exit within a day as same-day', () => {
-    const summary = summariseTreasury(1_000, [position(300, 5, 0), position(100, 1, 120)])
+  it('adds up live positions into invested, idle and earned', () => {
+    const summary = summariseTreasury(1_000, [position(300, 5), position(100, 1)])
 
-    expect(summary.sameDay).toBe(300)
+    expect(summary.idle).toBe(600)
     expect(summary.investedShare).toBeCloseTo(0.4)
     expect(summary.earned).toBe(6)
   })
 
   it('counts a deposit still waiting for signatures as idle', () => {
-    const summary = summariseTreasury(1_000, [position(400, 0, 0, true)])
+    const summary = summariseTreasury(1_000, [position(400, 0, true)])
 
     expect(summary.invested).toBe(0)
     expect(summary.idle).toBe(1_000)
@@ -318,20 +350,5 @@ describe('holdingsFor', () => {
 
   it('returns nothing for an opportunity without positions', () => {
     expect(holdingsFor([], 'none')).toBeUndefined()
-  })
-})
-
-describe('growthSeries', () => {
-  it('starts at the amount put in and ends with the earnings added', () => {
-    const series = growthSeries(1_000, 50, 6)
-
-    expect(series).toHaveLength(6)
-    expect(series[0]).toBe(1_000)
-    expect(series[5]).toBe(1_050)
-  })
-
-  it('reports growth as a share of the amount put in', () => {
-    expect(growthShare(1_000, 50)).toBe(0.05)
-    expect(growthShare(0, 50)).toBe(0)
   })
 })
