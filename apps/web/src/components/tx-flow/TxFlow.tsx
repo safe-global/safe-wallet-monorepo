@@ -22,9 +22,9 @@ import Propose from '@/components/tx-flow/actions/Propose'
 import Sign from '@/components/tx-flow/actions/Sign'
 import { SlotProvider } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { useTrackTimeSpent } from '@/components/tx/shared/tracking'
-import { SafeShieldProvider } from '@/features/safe-shield/public/SafeShieldProvider'
+import { SafeShieldProvider } from '@/features/safe-shield/public/components/SafeShieldProvider'
 import type { SubmitCallback, SubmitCallbackProps } from '@safe-global/views/components/tx-flow/types'
-import LedgerHashComparison from '@/features/ledger/public/LedgerHashComparison'
+import LedgerHashComparison from '@/features/ledger/public/components/LedgerHashComparison'
 
 export type { SubmitCallback } from '@safe-global/views/components/tx-flow/types'
 export type SubmitCallbackWithData<T> = (args: SubmitCallbackProps & { data?: T }) => void

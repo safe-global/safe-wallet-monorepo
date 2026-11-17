@@ -11,7 +11,7 @@ jest.mock('./SecurityDrawerContent', () => ({
   ),
 }))
 
-jest.mock('@/features/hypernative/public/HnSignupFlow', () => ({
+jest.mock('@/features/hypernative/public/components/HnSignupFlow', () => ({
   __esModule: true,
   default: ({ open }: { open: boolean }) => (open ? <div>Hypernative signup</div> : null),
 }))

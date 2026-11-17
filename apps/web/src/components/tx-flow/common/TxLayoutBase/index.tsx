@@ -10,7 +10,7 @@ import { ProgressBar } from '@safe-global/views/components/common/ProgressBar'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import TxNonce from '../TxNonce'
 import TxStatusWidget from '../TxStatusWidget'
-import SafeShieldWidget from '@/features/safe-shield/public/SafeShieldWidget'
+import SafeShieldWidget from '@/features/safe-shield/public/components/SafeShieldWidget'
 import css from './styles.module.css'
 
 export const TxLayoutHeader = ({

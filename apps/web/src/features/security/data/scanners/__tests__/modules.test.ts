@@ -1,5 +1,5 @@
 import { modulesScanner } from '../modules'
-import { createMockContext } from '../../../public/test-helpers'
+import { createMockContext } from '../../../public/utils/test-helpers'
 import { isSafeAffectedByZodiacVulnerability } from '../../../services/vulnerableModules'
 
 jest.mock('../../../services/vulnerableModules', () => ({

@@ -1,7 +1,7 @@
 // Extract status handling into separate components
 import { PendingStatus, type PendingTx } from '@/store/pendingTxsSlice'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import SpeedUpMonitor from '@/features/speedup/public/SpeedUpMonitor'
+import SpeedUpMonitor from '@/features/speedup/public/components/SpeedUpMonitor'
 
 type Props = {
   txId: string

@@ -35,12 +35,12 @@ import useUnlockBodyScroll from '@/hooks/useUnlockBodyScroll'
 import { TxModalProvider } from '@/components/tx-flow'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
 import WalletProvider from '@/components/common/WalletProvider'
-import CounterfactualHooks from '@/features/counterfactual/public/CounterfactualHooks'
-import useCounterfactualSafeSync from '@/features/counterfactual/public/useCounterfactualSafeSync'
-import { useInviteNotification } from '@/features/spaces/public/useInviteNotification'
-import { useSafeWorkspaceAttach } from '@/features/spaces/public/useSafeWorkspaceAttach'
-import { useSafeWorkspaceCheck } from '@/features/spaces/public/useSafeWorkspaceCheck'
-import Recovery from '@/features/recovery/public/Recovery'
+import CounterfactualHooks from '@/features/counterfactual/public/components/CounterfactualHooks'
+import useCounterfactualSafeSync from '@/features/counterfactual/public/hooks/useCounterfactualSafeSync'
+import { useInviteNotification } from '@/features/spaces/public/hooks/useInviteNotification'
+import { useSafeWorkspaceAttach } from '@/features/spaces/public/hooks/useSafeWorkspaceAttach'
+import { useSafeWorkspaceCheck } from '@/features/spaces/public/hooks/useSafeWorkspaceCheck'
+import Recovery from '@/features/recovery/public/components/Recovery'
 
 /**
  * Wrapper that lazy-loads SpendingLimitsLoader via the feature system.
@@ -50,8 +50,8 @@ const SpendingLimitsLoaderWrapper = () => {
 }
 
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
-import { useVisitedSafes } from '@/features/myAccounts/public/useVisitedSafes'
-import usePortfolioRefetchOnTxHistory from '@/features/portfolio/public/usePortfolioRefetchOnTxHistory'
+import { useVisitedSafes } from '@/features/myAccounts/public/hooks/useVisitedSafes'
+import usePortfolioRefetchOnTxHistory from '@/features/portfolio/public/hooks/usePortfolioRefetchOnTxHistory'
 import useInvalidateOverviewsOnTx from '@/hooks/useInvalidateOverviewsOnTx'
 import { GATEWAY_URL } from '@/config/gateway'
 import { captureRenderError, initObservability } from '@/services/observability'
@@ -60,16 +60,16 @@ import { MixpanelTracingProvider } from '@/services/observability/providers/mixp
 import useMixpanel from '@/services/analytics/useMixpanel'
 import { AddressBookSourceProvider } from '@/components/common/AddressBookSourceProvider'
 import { CaptchaProvider } from '@/components/common/Captcha/CaptchaProvider'
-import { HnQueueAssessmentProvider } from '@/features/hypernative/public/HnQueueAssessmentProvider'
-import { useHypernativeTokenRefresh } from '@/features/hypernative/public/useHypernativeTokenRefresh'
-import { useOidcLoginCallback } from '@/features/oidc-auth/public/useOidcLoginCallback'
-import { useStepUpRecovery } from '@/features/oidc-auth/public/useStepUpRecovery'
+import { HnQueueAssessmentProvider } from '@/features/hypernative/public/components/HnQueueAssessmentProvider'
+import { useHypernativeTokenRefresh } from '@/features/hypernative/public/hooks/useHypernativeTokenRefresh'
+import { useOidcLoginCallback } from '@/features/oidc-auth/public/hooks/useOidcLoginCallback'
+import { useStepUpRecovery } from '@/features/oidc-auth/public/hooks/useStepUpRecovery'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import RenderAfterMount from '@/components/common/RenderAfterMount'
 import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
-import SpendingLimitsLoader from '@/features/spending-limits/public/SpendingLimitsLoader'
+import SpendingLimitsLoader from '@/features/spending-limits/public/components/SpendingLimitsLoader'
 
 // Initialize observability before React rendering starts
 // This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration

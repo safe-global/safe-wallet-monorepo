@@ -1,10 +1,10 @@
 import { useCallback } from 'react'
 import { useRouter } from 'next/router'
-import { useCurrentSpaceId } from '@/features/spaces/public/useCurrentSpaceId'
+import { useCurrentSpaceId } from '@/features/spaces/public/hooks/useCurrentSpaceId'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { selectLastUsedSpaceOrigin } from '@/features/spaces/public/spaceNavigationSlice'
+import { selectLastUsedSpaceOrigin } from '@/features/spaces/public/store/spaceNavigationSlice'
 import { AppRoutes } from '@/config/routes'
 
 export function useSpaceBackLink() {

@@ -1,5 +1,5 @@
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import SpendingLimitRow from '@/features/spending-limits/public/SpendingLimitRow'
+import SpendingLimitRow from '@/features/spending-limits/public/components/SpendingLimitRow'
 
 type SpendingLimitRowWrapperProps = {
   availableAmount: bigint

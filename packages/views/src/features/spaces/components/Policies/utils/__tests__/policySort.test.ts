@@ -7,12 +7,12 @@ import {
   mockRecoveryPolicy,
   mockSpendingLimitPolicy,
   mockUnenforcedPolicy,
-} from '@/features/spaces/public/policies'
+} from '@/features/spaces/public/utils/policies'
 import {
   mockActiveAllowlist,
   mockAllowlistChangePending,
   mockFailedAllowlist,
-} from '@/features/spaces/public/allowlistPolicies'
+} from '@/features/spaces/public/utils/allowlistPolicies'
 import { sortPolicies, type PolicySortContext } from '../policySort'
 import { getPolicyStatus } from '../../types'
 

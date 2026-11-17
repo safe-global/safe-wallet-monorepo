@@ -13,7 +13,7 @@ import {
   selectCalendlyHasScheduled,
   selectCalendlyHasError,
   selectCalendlyState,
-} from '../public/calendlySlice'
+} from '../public/store/calendlySlice'
 
 const CALENDLY_SCRIPT_URL = 'https://assets.calendly.com/assets/external/widget.js'
 const POLL_INTERVAL_MS = 100

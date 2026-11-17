@@ -1,5 +1,5 @@
 import { contractVersionScanner } from '../contractVersion'
-import { createMockContext } from '../../../public/test-helpers'
+import { createMockContext } from '../../../public/utils/test-helpers'
 
 jest.mock('@safe-global/utils/services/contracts/safeContracts', () => ({
   isValidMasterCopy: jest.fn(),

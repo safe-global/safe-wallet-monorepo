@@ -9,7 +9,7 @@ import {
   useMembersUpdateRoleV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
-import { useCurrentSpaceId } from '../../public/useCurrentSpaceId'
+import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
 import { useAdminCount } from '../../hooks/useIsLastActiveAdmin'
 import {
   useIsAdmin,
@@ -17,7 +17,7 @@ import {
   getMemberDisplayName,
   sanitizeMemberAlias,
   MEMBER_ALIAS_MAX_LENGTH,
-} from '../../public/useSpaceMembers'
+} from '../../public/hooks/useSpaceMembers'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import ErrorMessage from '@/components/tx/ErrorMessage'
@@ -29,7 +29,7 @@ import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { capitalize } from '@safe-global/utils/utils/formatters'
-import { isElevationRequiredError } from '@/features/oidc-auth/public/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/utils/elevation'
 
 type MemberField = {
   name: string

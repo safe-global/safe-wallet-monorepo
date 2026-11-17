@@ -29,7 +29,7 @@ import { getCreateCallContractDeployment } from '@safe-global/utils/services/con
 import useAllSafes from '@/hooks/safes/useAllSafes'
 import { useGetHref } from '@/hooks/safes/useGetHref'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
-import { walletConnectServices } from '@/features/walletconnect/public/walletConnectServices'
+import { walletConnectServices } from '@/features/walletconnect/public/services/walletConnectServices'
 import { withSpaceId } from '@/hooks/useUrlSpaceId'
 import { verifyAndStripNestedTxCalldata, type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
 import { asError } from '@safe-global/utils/services/exceptions/utils'

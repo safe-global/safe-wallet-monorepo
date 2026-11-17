@@ -2,10 +2,10 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import { useLandingSpaceId } from '@/features/spaces/public/useLandingSpaceId'
+import { useLandingSpaceId } from '@/features/spaces/public/hooks/useLandingSpaceId'
 import { AppRoutes } from '@/config/routes'
 import { parseSpaceId } from '@/hooks/useUrlSpaceId'
-import SpaceDashboardPage from '@/features/spaces/public/SpaceDashboardPage'
+import SpaceDashboardPage from '@/features/spaces/public/components/SpaceDashboardPage'
 
 export default function SpacePage() {
   const router = useRouter()

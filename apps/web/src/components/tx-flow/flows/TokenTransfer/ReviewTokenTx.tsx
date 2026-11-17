@@ -3,7 +3,7 @@ import type { MultiTokenTransferParams } from '@safe-global/views/components/tx-
 import { TokenTransferType } from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
 import ReviewTokenTransfer from '@/components/tx-flow/flows/TokenTransfer/ReviewTokenTransfer'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
-import ReviewSpendingLimitTx from '@/features/spending-limits/public/ReviewSpendingLimitTx'
+import ReviewSpendingLimitTx from '@/features/spending-limits/public/components/ReviewSpendingLimitTx'
 
 const ReviewTokenTx = (props: PropsWithChildren<{ onSubmit: () => void; txNonce?: number }>): ReactElement => {
   const { data } = useContext(TxFlowContext) as TxFlowContextType<MultiTokenTransferParams>

@@ -1,8 +1,8 @@
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import SignInButton from '../SignInButton'
-import EmailSignInButton from '@/features/oidc-auth/public/EmailSignInButton'
-import GoogleSignInButton from '@/features/oidc-auth/public/GoogleSignInButton'
+import EmailSignInButton from '@/features/oidc-auth/public/components/EmailSignInButton'
+import GoogleSignInButton from '@/features/oidc-auth/public/components/GoogleSignInButton'
 
 interface SignInOptionsProps {
   afterSignIn: () => void

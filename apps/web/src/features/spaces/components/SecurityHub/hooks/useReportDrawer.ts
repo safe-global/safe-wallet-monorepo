@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { ScanContext } from '@/features/security/public/types'
-import type { SecurityServices } from '@/features/security/public/securityServices'
+import type { SecurityServices } from '@/features/security/public/services/securityServices'
 import useSafeScanContext from '../../../hooks/useSafeScanContext'
 import type {
   OverviewMap,

@@ -2,7 +2,7 @@ import { type ReactNode, useMemo, useState } from 'react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { EvidenceItem, SafeGrade, ScanContext, ScanResult, SecurityGrade } from '@/features/security/public/types'
-import { useSecurityServices } from '@/features/security/public/useSecurityServices'
+import { useSecurityServices } from '@/features/security/public/hooks/useSecurityServices'
 import {
   EvidenceList,
   Row,

@@ -5,7 +5,7 @@ import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 const mockUseSpaceSafes = jest.fn()
 const mockUseIsAdmin = jest.fn()
 
-jest.mock('@/features/address-poisoning/public/useSimilarityClusters', () => ({
+jest.mock('@/features/address-poisoning/public/hooks/useSimilarityClusters', () => ({
   __esModule: true,
   default: () => ({ flagged: new Set<string>(), groupIdByAddress: new Map<string, string>() }),
 }))
@@ -25,50 +25,50 @@ jest.mock('@/components/common/Track', () => {
   return Track
 })
 
-jest.mock('../../../public/useSpaceSafes', () => ({
+jest.mock('../../../public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => mockUseSpaceSafes(),
 }))
-jest.mock('../../../public/useSpaceMembers', () => ({
+jest.mock('../../../public/hooks/useSpaceMembers', () => ({
   get MemberStatus() {
-    return jest.requireActual('../../../public/useSpaceMembers').MemberStatus
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberStatus
   },
   get MemberRole() {
-    return jest.requireActual('../../../public/useSpaceMembers').MemberRole
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberRole
   },
   get MEMBER_ALIAS_MAX_LENGTH() {
-    return jest.requireActual('../../../public/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
   },
   get getMemberDisplayName() {
-    return jest.requireActual('../../../public/useSpaceMembers').getMemberDisplayName
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').getMemberDisplayName
   },
   get sanitizeMemberAlias() {
-    return jest.requireActual('../../../public/useSpaceMembers').sanitizeMemberAlias
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').sanitizeMemberAlias
   },
   get isAdmin() {
-    return jest.requireActual('../../../public/useSpaceMembers').isAdmin
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isAdmin
   },
   get isActiveAdmin() {
-    return jest.requireActual('../../../public/useSpaceMembers').isActiveAdmin
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isActiveAdmin
   },
   get isInviteExpired() {
-    return jest.requireActual('../../../public/useSpaceMembers').isInviteExpired
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isInviteExpired
   },
   get useSpaceMembersByStatus() {
-    return jest.requireActual('../../../public/useSpaceMembers').useSpaceMembersByStatus
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useSpaceMembersByStatus
   },
   get useCurrentMembership() {
-    return jest.requireActual('../../../public/useSpaceMembers').useCurrentMembership
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useCurrentMembership
   },
   get useCurrentMemberProfile() {
-    return jest.requireActual('../../../public/useSpaceMembers').useCurrentMemberProfile
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useCurrentMemberProfile
   },
   get useIsActiveMember() {
-    return jest.requireActual('../../../public/useSpaceMembers').useIsActiveMember
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useIsActiveMember
   },
   useIsInvited: () => false,
   useIsAdmin: () => mockUseIsAdmin(),
 }))
-jest.mock('../../../public/useCurrentSpaceId', () => ({
+jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => 'space-1',
 }))
 
@@ -130,12 +130,12 @@ jest.mock('@/store/visitedSafesSlice', () => ({
   ...jest.requireActual('@/store/visitedSafesSlice'),
   selectAllVisitedSafes: jest.fn(),
 }))
-jest.mock('@/features/counterfactual/public/undeployedSafesSlice', () => ({
-  ...jest.requireActual('@/features/counterfactual/public/undeployedSafesSlice'),
+jest.mock('@/features/counterfactual/public/store/undeployedSafesSlice', () => ({
+  ...jest.requireActual('@/features/counterfactual/public/store/undeployedSafesSlice'),
   selectUndeployedSafes: jest.fn(),
 }))
 
-jest.mock('@/features/myAccounts/public/SafeAccountsTable', () => ({
+jest.mock('@/features/myAccounts/public/components/SafeAccountsTable', () => ({
   __esModule: true,
   default: ({ items }: { items: Array<{ name?: string; address: string; chainId?: string }> }) => (
     <div data-testid="safe-accounts-table">

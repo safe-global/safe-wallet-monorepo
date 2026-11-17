@@ -1,7 +1,7 @@
 import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 import type { SafeItem, MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
-import { useSafeItemData } from '@/features/myAccounts/public/useSafeItemData'
-import { useMultiAccountItemData } from '@/features/myAccounts/public/useMultiAccountItemData'
+import { useSafeItemData } from '@/features/myAccounts/public/hooks/useSafeItemData'
+import { useMultiAccountItemData } from '@/features/myAccounts/public/hooks/useMultiAccountItemData'
 
 const useSafeCardData = (safe: SafeItem | MultiChainSafeItem) => {
   const isMultiChain = isMultiChainSafeItem(safe)

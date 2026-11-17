@@ -1,10 +1,10 @@
 import ModalDialog from '@/components/common/ModalDialog'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import ChainIndicatorList from '@/features/multichain/public/ChainIndicatorList'
+import ChainIndicatorList from '@/features/multichain/public/components/ChainIndicatorList'
 import { useAddressBooksDeleteByAddressV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from '../../public/useCurrentSpaceId'
-import { useWorkspaceAddressBookLabel } from '../../public/useWorkspaceAddressBookLabel'
+import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
+import { useWorkspaceAddressBookLabel } from '../../public/hooks/useWorkspaceAddressBookLabel'
 import { useState } from 'react'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -15,7 +15,7 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getContactRemovedMessage } from '@/utils/addressBookNotifications'
-import { isElevationRequiredError } from '@/features/oidc-auth/public/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/utils/elevation'
 
 type DeleteContactDialogProps = {
   name: string

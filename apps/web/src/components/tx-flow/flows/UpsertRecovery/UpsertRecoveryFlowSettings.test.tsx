@@ -24,8 +24,8 @@ jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: () => ({ chainId: '1' }),
 }))
 
-jest.mock('@/features/safe-shield/public/useSafeShield', () => ({
-  ...jest.requireActual('@/features/safe-shield/public/useSafeShield'),
+jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/hooks/useSafeShield'),
   useSafeShieldForAddressPoisoning: () => undefined,
 }))
 

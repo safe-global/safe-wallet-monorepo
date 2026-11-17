@@ -1,4 +1,4 @@
-import { undeployedSafesSlice } from '@/features/counterfactual/public/undeployedSafesSlice'
+import { undeployedSafesSlice } from '@/features/counterfactual/public/store/undeployedSafesSlice'
 import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
 import type { ReactElement, Dispatch, SetStateAction } from 'react'

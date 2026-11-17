@@ -6,7 +6,7 @@ const mockUseIsInvited = jest.fn()
 const mockUseSpaceSubscription = jest.fn()
 const mockUseSpaceOffers = jest.fn()
 jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
-jest.mock('../../public/useSpaceMembers', () => ({ useIsInvited: () => mockUseIsInvited() }))
+jest.mock('../../public/hooks/useSpaceMembers', () => ({ useIsInvited: () => mockUseIsInvited() }))
 jest.mock('../billing/useSpaceSubscription', () => ({
   useSpaceSubscription: (spaceId?: string) => mockUseSpaceSubscription(spaceId),
 }))

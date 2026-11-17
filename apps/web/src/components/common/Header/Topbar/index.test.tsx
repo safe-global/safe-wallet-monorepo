@@ -12,26 +12,26 @@ import type { RootState } from '@/store'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
-import { wcPopupStore } from '@/features/walletconnect/public/wcPopupStore'
+import { wcPopupStore } from '@/features/walletconnect/public/store/wcPopupStore'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
 const mockWalletPopover = jest.fn()
 const mockGlobalSearchModal = jest.fn()
 const mockGlobalSearchInput = jest.fn()
 const mockWalletConnectWidget = jest.fn()
-jest.mock('@/features/wallet/public/WalletPopover', () => ({
+jest.mock('@/features/wallet/public/components/WalletPopover', () => ({
   __esModule: true,
   default: (props: object) => mockWalletPopover(props),
 }))
-jest.mock('@/features/global-search/public/GlobalSearchModal', () => ({
+jest.mock('@/features/global-search/public/components/GlobalSearchModal', () => ({
   __esModule: true,
   default: (props: object) => mockGlobalSearchModal(props),
 }))
-jest.mock('@/features/global-search/public/GlobalSearchInput', () => ({
+jest.mock('@/features/global-search/public/components/GlobalSearchInput', () => ({
   __esModule: true,
   default: (props: object) => mockGlobalSearchInput(props),
 }))
-jest.mock('@/features/walletconnect/public/WalletConnectWidget', () => ({
+jest.mock('@/features/walletconnect/public/components/WalletConnectWidget', () => ({
   __esModule: true,
   default: (props: object) => mockWalletConnectWidget(props),
 }))
@@ -63,7 +63,7 @@ jest.mock('@/hooks/useMediaQuery', () => ({
   useIsBelowMd: () => mockUseIsBelowMd(),
 }))
 
-jest.mock('@/features/wallet/public/useWalletPopover', () => ({
+jest.mock('@/features/wallet/public/hooks/useWalletPopover', () => ({
   __esModule: true,
   default: () => ({
     wallet: mockWallet,
@@ -82,11 +82,11 @@ jest.mock('@reown/walletkit', () => ({
 }))
 
 const mockUseDraftBatch = jest.fn<unknown[], []>(() => [])
-jest.mock('@/features/batching/public/useDraftBatch', () => ({
-  ...jest.requireActual('@/features/batching/public/useDraftBatch'),
+jest.mock('@/features/batching/public/hooks/useDraftBatch', () => ({
+  ...jest.requireActual('@/features/batching/public/hooks/useDraftBatch'),
   useDraftBatch: () => mockUseDraftBatch(),
 }))
-jest.mock('@/features/batching/public/BatchTooltip', () => ({
+jest.mock('@/features/batching/public/components/BatchTooltip', () => ({
   __esModule: true,
   default: ({ children }: { children: ReactNode }) => children,
 }))
@@ -158,15 +158,15 @@ jest.mock('@/services/analytics/events/spaces', () => ({
 }))
 
 const mockUseCurrentSpaceId = jest.fn<string | null, []>(() => 'space-42')
-jest.mock('@/features/spaces/public/useCurrentSpaceId', () => ({
+jest.mock('@/features/spaces/public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
 }))
-jest.mock('@/features/spaces/public/HeaderNavigation', () => ({
+jest.mock('@/features/spaces/public/components/HeaderNavigation', () => ({
   get HeaderNavigation() {
-    return jest.requireActual('@/features/spaces/public/HeaderNavigation').HeaderNavigation
+    return jest.requireActual('@/features/spaces/public/components/HeaderNavigation').HeaderNavigation
   },
 }))
-jest.mock('@/features/spaces/public/HeaderAccountInfo', () => ({
+jest.mock('@/features/spaces/public/components/HeaderAccountInfo', () => ({
   __esModule: true,
   default: () => <div data-testid="header-account-info" />,
 }))

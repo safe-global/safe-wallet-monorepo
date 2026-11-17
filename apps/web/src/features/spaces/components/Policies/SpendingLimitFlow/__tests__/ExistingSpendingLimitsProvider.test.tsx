@@ -16,7 +16,7 @@ jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
   ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
   useSafeScope: jest.fn(),
 }))
-jest.mock('@/features/spending-limits/public/spendingLimitLoader', () => ({
+jest.mock('@/features/spending-limits/public/services/spendingLimitLoader', () => ({
   loadSpendingLimits: (...args: unknown[]) => mockLoad(...args),
 }))
 jest.mock('@/services/exceptions', () => ({

@@ -12,11 +12,11 @@ import { AnalysisGroupCard } from '../AnalysisGroupCard/AnalysisGroupCard'
 import { hasThreatCardResults } from '../../utils/hasThreatCardResults'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
-import type { HypernativeAuthStatus } from '@/features/hypernative/public/useHypernativeOAuth'
-import { HnViewMoreOnHypernativeRow } from '@/features/hypernative/public/HnViewMoreOnHypernativeRow'
+import type { HypernativeAuthStatus } from '@/features/hypernative/public/hooks/useHypernativeOAuth'
+import { HnViewMoreOnHypernativeRow } from '@/features/hypernative/public/components/HnViewMoreOnHypernativeRow'
 import { AnalysisGroupCardDisabled } from '@safe-global/views/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled'
-import { useSafeShieldAssessmentUrl } from '@/features/hypernative/public/useSafeShieldAssessmentUrl'
-import HnAnalysisGroupCard from '@/features/hypernative/public/HnAnalysisGroupCard'
+import { useSafeShieldAssessmentUrl } from '@/features/hypernative/public/hooks/useSafeShieldAssessmentUrl'
+import HnAnalysisGroupCard from '@/features/hypernative/public/components/HnAnalysisGroupCard'
 
 const VISIBLE_CAP = 3
 

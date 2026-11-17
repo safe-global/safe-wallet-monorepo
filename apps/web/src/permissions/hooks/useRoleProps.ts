@@ -1,5 +1,5 @@
 import { useSelector } from 'react-redux'
-import { selectSpendingLimits } from '@/features/spending-limits/public/spendingLimitsSlice'
+import { selectSpendingLimits } from '@/features/spending-limits/public/store/spendingLimitsSlice'
 import { type RolePropsMap, Role } from '../config'
 
 /**

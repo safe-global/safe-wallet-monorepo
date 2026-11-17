@@ -2,15 +2,15 @@ import { render, screen } from '@testing-library/react'
 import SpaceSettingsExperimentalPage from '../../pages/spaces/settings/experimental'
 import { AppRoutes } from '@/config/routes'
 import * as router from 'next/router'
-import * as spacesFeatureUseCurrentSpaceId from '@/features/spaces/public/useCurrentSpaceId'
-import * as spacesFeatureUseFeatureRedirect from '@/features/spaces/public/useFeatureRedirect'
+import * as spacesFeatureUseCurrentSpaceId from '@/features/spaces/public/hooks/useCurrentSpaceId'
+import * as spacesFeatureUseFeatureRedirect from '@/features/spaces/public/hooks/useFeatureRedirect'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
-jest.mock('@/features/spaces/public/SpaceSettingsPage', () => ({
+jest.mock('@/features/spaces/public/components/SpaceSettingsPage', () => ({
   __esModule: true,
   default: ({ spaceId, activePage }: { spaceId: string; activePage: string }) => (
     <div data-testid="settings-page">
@@ -18,11 +18,11 @@ jest.mock('@/features/spaces/public/SpaceSettingsPage', () => ({
     </div>
   ),
 }))
-jest.mock('@/features/spaces/public/useCurrentSpaceId', () => ({
+jest.mock('@/features/spaces/public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(),
 }))
-jest.mock('@/features/spaces/public/useFeatureRedirect', () => ({
-  ...jest.requireActual('@/features/spaces/public/useFeatureRedirect'),
+jest.mock('@/features/spaces/public/hooks/useFeatureRedirect', () => ({
+  ...jest.requireActual('@/features/spaces/public/hooks/useFeatureRedirect'),
   __esModule: true,
   default: jest.fn(),
 }))

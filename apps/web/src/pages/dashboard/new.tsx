@@ -1,6 +1,6 @@
 import Head from 'next/head'
 
-import SafeOverview from '@/features/safe-overview/public/SafeOverview'
+import SafeOverview from '@/features/safe-overview/public/components/SafeOverview'
 import { BRAND_NAME } from '@/config/constants'
 
 const DashboardNew = () => {

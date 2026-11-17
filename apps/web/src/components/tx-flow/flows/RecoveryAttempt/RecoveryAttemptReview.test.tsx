@@ -11,15 +11,15 @@ import { safeTxContextBuilder } from '@/tests/builders/safeTxContext'
 import { COULD_NOT_SUBMIT_RETRY_MESSAGE } from '@/components/tx/TxSubmitError'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
-import { dispatchRecoveryExecution } from '@/features/recovery/public/recovery-sender'
-import { seedRecoveryScenario } from '@/features/recovery/public/test-helpers'
+import { dispatchRecoveryExecution } from '@/features/recovery/public/services/recovery-sender'
+import { seedRecoveryScenario } from '@/features/recovery/public/utils/test-helpers'
 import type { RecoveryQueueItem } from '@/features/recovery/public/types'
 import useGasPrice from '@/hooks/useGasPrice'
 import useChains from '@/hooks/useChains'
 import RecoveryAttemptReview from './RecoveryAttemptReview'
 
-jest.mock('@/features/recovery/public/recovery-sender', () => ({
-  ...jest.requireActual('@/features/recovery/public/recovery-sender'),
+jest.mock('@/features/recovery/public/services/recovery-sender', () => ({
+  ...jest.requireActual('@/features/recovery/public/services/recovery-sender'),
   dispatchRecoveryExecution: jest.fn(),
 }))
 jest.mock('@/features/recovery/hooks/useIsValidRecoveryExecution', () => ({
@@ -35,8 +35,8 @@ jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/useChains')
-jest.mock('@/features/spending-limits/public/useIsOnlySpendingLimitBeneficiary', () => ({
-  ...jest.requireActual('@/features/spending-limits/public/useIsOnlySpendingLimitBeneficiary'),
+jest.mock('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
+  ...jest.requireActual('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary'),
   __esModule: true,
   default: jest.fn(),
 }))

@@ -75,34 +75,34 @@ jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
 
 jest.mock('@/hooks/useAddressBook', () => ({ __esModule: true, default: () => ({}) }))
 
-jest.mock('@/features/multichain/public/utils', () => ({
+jest.mock('@/features/multichain/public/utils/utils', () => ({
   get isMultiChainSafeItem() {
-    return jest.requireActual('@/features/multichain/public/utils').isMultiChainSafeItem
+    return jest.requireActual('@/features/multichain/public/utils/utils').isMultiChainSafeItem
   },
   get getSafeSetups() {
-    return jest.requireActual('@/features/multichain/public/utils').getSafeSetups
+    return jest.requireActual('@/features/multichain/public/utils/utils').getSafeSetups
   },
   get getSharedSetup() {
-    return jest.requireActual('@/features/multichain/public/utils').getSharedSetup
+    return jest.requireActual('@/features/multichain/public/utils/utils').getSharedSetup
   },
   get getDeviatingSetups() {
-    return jest.requireActual('@/features/multichain/public/utils').getDeviatingSetups
+    return jest.requireActual('@/features/multichain/public/utils/utils').getDeviatingSetups
   },
   get predictSafeAddress() {
-    return jest.requireActual('@/features/multichain/public/utils').predictSafeAddress
+    return jest.requireActual('@/features/multichain/public/utils/utils').predictSafeAddress
   },
   get predictAddressBasedOnReplayData() {
-    return jest.requireActual('@/features/multichain/public/utils').predictAddressBasedOnReplayData
+    return jest.requireActual('@/features/multichain/public/utils/utils').predictAddressBasedOnReplayData
   },
   get hasMultiChainCreationFeatures() {
-    return jest.requireActual('@/features/multichain/public/utils').hasMultiChainCreationFeatures
+    return jest.requireActual('@/features/multichain/public/utils/utils').hasMultiChainCreationFeatures
   },
   hasMultiChainAddNetworkFeature: () => false,
 }))
-jest.mock('@/features/multichain/public/useSafeCreationData', () => ({
+jest.mock('@/features/multichain/public/hooks/useSafeCreationData', () => ({
   useSafeCreationData: () => [undefined, undefined, false],
 }))
-jest.mock('@/features/multichain/public/CreateSafeOnSpecificChain', () => ({
+jest.mock('@/features/multichain/public/components/CreateSafeOnSpecificChain', () => ({
   __esModule: true,
   default: () => null,
 }))

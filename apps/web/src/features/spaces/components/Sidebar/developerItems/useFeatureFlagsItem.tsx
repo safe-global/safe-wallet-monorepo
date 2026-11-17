@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { useAppSelector } from '@/store'
-import { selectOverrideCount } from '@/features/feature-flag-overrides/public/featureFlagOverridesSlice'
-import { FeatureFlagEditorDialogLoader } from '@/features/feature-flag-overrides/public/FeatureFlagEditorDialogLoader'
+import { selectOverrideCount } from '@/features/feature-flag-overrides/public/store/featureFlagOverridesSlice'
+import { FeatureFlagEditorDialogLoader } from '@/features/feature-flag-overrides/public/components/FeatureFlagEditorDialogLoader'
 import type { SidebarDeveloperItemState } from '@safe-global/views/features/spaces/components/Sidebar/types'
 
 /** Badges the active feature-flag overrides and opens the editor dialog. */

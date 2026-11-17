@@ -4,7 +4,7 @@ import EthHashInfo from '@/components/common/EthHashInfo'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { formatDate } from '../../utils'
 import type { SpaceAuditLogEntryDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useMemberNameResolver } from '../../public/useMemberNameResolver'
+import { useMemberNameResolver } from '../../public/hooks/useMemberNameResolver'
 import {
   getAuditEventDescription,
   getDefaultTargetDisplay,

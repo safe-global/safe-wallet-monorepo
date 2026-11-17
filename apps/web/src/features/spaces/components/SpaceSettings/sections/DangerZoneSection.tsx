@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { type GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useIsAdmin, useIsActiveMember } from '../../../public/useSpaceMembers'
+import { useIsAdmin, useIsActiveMember } from '../../../public/hooks/useSpaceMembers'
 import { useIsLastActiveAdmin } from '../../../hooks/useIsLastActiveAdmin'
 import { useSpaceDeletionGuard } from '../../../hooks/billing/useSpaceDeletionGuard'
 import Track from '@/components/common/Track'

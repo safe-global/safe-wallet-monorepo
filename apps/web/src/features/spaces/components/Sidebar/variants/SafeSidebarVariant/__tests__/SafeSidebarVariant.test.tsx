@@ -50,7 +50,7 @@ jest.mock('@/hooks/useSafeInfo', () => ({
   default: () => mockUseSafeInfo(),
 }))
 
-jest.mock('@/features/counterfactual/public/useIsCounterfactualSafe', () => ({
+jest.mock('@/features/counterfactual/public/hooks/useIsCounterfactualSafe', () => ({
   __esModule: true,
   default: () => mockUseIsCounterfactualSafe(),
 }))
@@ -71,7 +71,7 @@ jest.mock('@safe-global/utils/utils/chains', () => ({
   isNonCriticalUpdate: () => false,
 }))
 
-jest.mock('../../../../../public/useCurrentSpaceId', () => ({
+jest.mock('../../../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '42',
 }))
 

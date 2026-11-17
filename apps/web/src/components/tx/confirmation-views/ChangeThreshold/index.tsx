@@ -4,7 +4,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 
 import React from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import ChangeSignerSetupWarning from '@/features/multichain/public/ChangeSignerSetupWarning'
+import ChangeSignerSetupWarning from '@/features/multichain/public/components/ChangeSignerSetupWarning'
 import { isChangeThresholdView } from '../utils'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 

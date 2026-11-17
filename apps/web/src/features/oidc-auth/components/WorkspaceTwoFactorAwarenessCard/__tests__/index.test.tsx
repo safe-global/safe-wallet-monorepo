@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import WorkspaceTwoFactorAwarenessCard from '../../../public/WorkspaceTwoFactorAwarenessCard'
+import WorkspaceTwoFactorAwarenessCard from '../../../public/components/WorkspaceTwoFactorAwarenessCard'
 
 describe('WorkspaceTwoFactorAwarenessCard', () => {
   it('renders the headline and the supporting line', () => {

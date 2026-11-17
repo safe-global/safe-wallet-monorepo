@@ -7,19 +7,19 @@ let mockIsQualifiedSafe = false
 
 jest.mock('@/hooks/wallets/useWallet')
 
-jest.mock('@/features/swap/public/useIsSwapFeatureEnabled', () => ({
+jest.mock('@/features/swap/public/hooks/useIsSwapFeatureEnabled', () => ({
   __esModule: true,
   default: () => true,
 }))
 
-jest.mock('@/features/spaces/public/useIsQualifiedSafe', () => ({
+jest.mock('@/features/spaces/public/hooks/useIsQualifiedSafe', () => ({
   __esModule: true,
   default: () => mockIsQualifiedSafe,
 }))
-jest.mock('@/features/spaces/public/useCurrentSpaceId', () => ({
+jest.mock('@/features/spaces/public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => null,
 }))
-jest.mock('@/features/spaces/public/useSpaceSafes', () => ({
+jest.mock('@/features/spaces/public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => ({
     allSafes: [
       {
@@ -34,7 +34,7 @@ jest.mock('@/features/spaces/public/useSpaceSafes', () => ({
     isLoading: false,
   }),
 }))
-jest.mock('@/features/spaces/public/SafeCardReadOnly', () => ({
+jest.mock('@/features/spaces/public/components/SafeCardReadOnly', () => ({
   __esModule: true,
   default: () => null,
 }))

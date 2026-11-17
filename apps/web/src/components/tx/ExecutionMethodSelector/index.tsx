@@ -21,7 +21,7 @@ import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type { SponsoredOffer } from '@/utils/gasPayment'
-import GasTooHighBanner from '@/features/no-fee-campaign/public/GasTooHighBanner'
+import GasTooHighBanner from '@/features/no-fee-campaign/public/components/GasTooHighBanner'
 
 export const enum ExecutionMethod {
   RELAY = 'RELAY',

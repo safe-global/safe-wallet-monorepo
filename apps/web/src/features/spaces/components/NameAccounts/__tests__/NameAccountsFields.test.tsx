@@ -8,7 +8,7 @@ import NameAccountsFields from '../NameAccountsFields'
 import { touchNames } from '../utils'
 
 // The table has its own suite; here it only has to hand each row to the name cell.
-jest.mock('@/features/myAccounts/public/SafeAccountsTable', () => ({
+jest.mock('@/features/myAccounts/public/components/SafeAccountsTable', () => ({
   __esModule: true,
   default: ({
     items,

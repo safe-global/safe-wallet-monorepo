@@ -12,7 +12,7 @@ jest.mock('@/components/tx-flow/flows/TokenTransfer/ReviewTokenTransfer', () => 
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 
-jest.mock('@/features/spending-limits/public/ReviewSpendingLimitTx', () => ({
+jest.mock('@/features/spending-limits/public/components/ReviewSpendingLimitTx', () => ({
   __esModule: true,
   default: () => <div>Spending limit review</div>,
 }))

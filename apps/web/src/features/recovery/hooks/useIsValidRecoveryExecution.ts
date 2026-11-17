@@ -7,7 +7,7 @@ import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '../../../hooks/useSafeInfo'
 import { getPatchedSignerProvider } from '../../../hooks/useIsValidExecution'
 import { useRecoveryTxState } from './useRecoveryTxState'
-import { useIsRecoverer } from '../public/useIsRecoverer'
+import { useIsRecoverer } from '../public/hooks/useIsRecoverer'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { RecoveryQueueItem } from '../public/types'
 

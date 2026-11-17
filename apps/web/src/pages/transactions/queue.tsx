@@ -6,12 +6,12 @@ import TxHeader from '@/components/transactions/TxHeader'
 import BatchExecuteButton from '@/components/transactions/BatchExecuteButton'
 import { BatchExecuteHoverProvider } from '@safe-global/views/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
 import { usePendingTxsQueue, useShowUnsignedQueue } from '@/hooks/usePendingTxs'
-import RecoveryList from '@/features/recovery/public/RecoveryList'
+import RecoveryList from '@/features/recovery/public/components/RecoveryList'
 import { BRAND_NAME } from '@/config/constants'
-import { useIsHypernativeEligible } from '@/features/hypernative/public/useIsHypernativeEligible'
-import { useIsHypernativeQueueScanFeature } from '@/features/hypernative/public/useIsHypernativeQueueScanFeature'
-import { useHnQueueAssessment } from '@/features/hypernative/public/useHnQueueAssessment'
-import HnLoginCard from '@/features/hypernative/public/HnLoginCard'
+import { useIsHypernativeEligible } from '@/features/hypernative/public/hooks/useIsHypernativeEligible'
+import { useIsHypernativeQueueScanFeature } from '@/features/hypernative/public/hooks/useIsHypernativeQueueScanFeature'
+import { useHnQueueAssessment } from '@/features/hypernative/public/hooks/useHnQueueAssessment'
+import HnLoginCard from '@/features/hypernative/public/components/HnLoginCard'
 
 const Queue = () => {
   const showPending = useShowUnsignedQueue()

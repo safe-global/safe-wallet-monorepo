@@ -14,7 +14,7 @@ import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import Track from '@/components/common/Track'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
-import { trackPlanSelectionStarted } from '../../../public/planSelection'
+import { trackPlanSelectionStarted } from '../../../public/services/planSelection'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import type { PolicyLock } from '@safe-global/views/features/spaces/components/Policies/policyLock'
 

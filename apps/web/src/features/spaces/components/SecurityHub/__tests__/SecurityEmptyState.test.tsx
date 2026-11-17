@@ -2,7 +2,7 @@ import { render, screen } from '@/tests/test-utils'
 import { fireEvent } from '@testing-library/react'
 import SecurityEmptyState from '../components/SecurityEmptyState/SecurityEmptyState'
 
-jest.mock('@/features/hypernative/public/HnSignupFlow', () => ({
+jest.mock('@/features/hypernative/public/components/HnSignupFlow', () => ({
   __esModule: true,
   default: ({ open }: { open: boolean }) =>
     open ? <div data-testid="mock-hn-signup-flow">Hypernative signup</div> : null,

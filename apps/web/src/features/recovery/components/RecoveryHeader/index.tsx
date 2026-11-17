@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { ReactElement } from 'react'
 
-import { useRecoveryQueue } from '../../public/useRecoveryQueue'
-import { useIsRecoverer } from '../../public/useIsRecoverer'
+import { useRecoveryQueue } from '../../public/hooks/useRecoveryQueue'
+import { useIsRecoverer } from '../../public/hooks/useIsRecoverer'
 import madProps from '@/utils/mad-props'
 import { RecoveryProposalCard } from '../RecoveryCards/RecoveryProposalCard'
 import { RecoveryInProgressCard } from '../RecoveryCards/RecoveryInProgressCard'

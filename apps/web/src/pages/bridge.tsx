@@ -1,6 +1,6 @@
 import Head from 'next/head'
 
-import Bridge from '@/features/bridge/public/Bridge'
+import Bridge from '@/features/bridge/public/components/Bridge'
 import { BRAND_NAME } from '@/config/constants'
 
 const BridgePage = () => {

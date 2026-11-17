@@ -8,7 +8,7 @@ import type { RecoveryQueueItem } from '../../public/types'
 
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('../../services/transaction-list')
-jest.mock('../../public/useIsRecoverer', () => ({ useIsRecoverer: () => false }))
+jest.mock('../../public/hooks/useIsRecoverer', () => ({ useIsRecoverer: () => false }))
 
 const mockUseSafeInfo = useSafeInfo as jest.MockedFunction<typeof useSafeInfo>
 const mockGetRecoveredSafeInfo = getRecoveredSafeInfo as jest.MockedFunction<typeof getRecoveredSafeInfo>

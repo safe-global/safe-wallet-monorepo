@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactElement } from 'react'
 import { Chip } from '@safe-global/views/components/ui/chip'
-import { SeverityIcon } from '@/features/safe-shield/public/SeverityIcon'
+import { SeverityIcon } from '@/features/safe-shield/public/components/SeverityIcon'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import type { CheckStatus, PublicCheckStatus } from '@safe-global/utils/features/safenet-checks'
 import { CHIP_VARIANT, STATUS_PRESENTATION, WARNING_RISK_LABEL } from '../statusPresentation'

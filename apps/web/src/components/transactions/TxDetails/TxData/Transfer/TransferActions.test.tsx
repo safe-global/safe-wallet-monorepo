@@ -21,11 +21,11 @@ jest.mock('@/hooks/useChains', () => ({
   default: () => ({ loading: false, loaded: true, error: undefined, configs: [mockChain] }),
 }))
 
-jest.mock('@/features/spaces/public/useUpsertWorkspaceSafeName', () => ({
+jest.mock('@/features/spaces/public/hooks/useUpsertWorkspaceSafeName', () => ({
   useUpsertWorkspaceSafeName: jest.fn(),
 }))
 
-jest.mock('@/features/spaces/public/useWorkspaceAddressBookLabel', () => ({
+jest.mock('@/features/spaces/public/hooks/useWorkspaceAddressBookLabel', () => ({
   useWorkspaceAddressBookLabel: () => 'Acme address book',
 }))
 

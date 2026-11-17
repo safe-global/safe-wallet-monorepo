@@ -24,15 +24,15 @@ import { HELP_CENTER_URL, PRIVACY_URL, TERMS_URL } from '@safe-global/utils/conf
 import { Button } from '@safe-global/views/components/ui/button'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { useSupportChat } from '@/features/support-chat/public/useSupportChat'
-import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled'
+import { useSupportChat } from '@/features/support-chat/public/hooks/useSupportChat'
+import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/public/hooks/useIsSafeProAnnouncementEnabled'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
 import SpaceSettingsSection, {
   SpaceSettingsSectionTitle,
 } from '@safe-global/views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
-import SupportChatDrawer from '@/features/support-chat/public/SupportChatDrawer'
+import SupportChatDrawer from '@/features/support-chat/public/components/SupportChatDrawer'
 
 const STATUS_PAGE_URL = 'https://status.safe.global'
 const RELEASE_URL = `${APP_HOMEPAGE}/releases/tag/web-v${APP_VERSION}`

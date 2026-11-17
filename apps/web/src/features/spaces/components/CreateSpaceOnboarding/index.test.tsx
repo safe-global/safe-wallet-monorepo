@@ -64,7 +64,7 @@ jest.mock('../Plans/ClaimTrialModal', () => ({
   ),
 }))
 
-jest.mock('../../public/useSpaceSafes', () => ({
+jest.mock('../../public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => ({ allSafes: [] }),
 }))
 

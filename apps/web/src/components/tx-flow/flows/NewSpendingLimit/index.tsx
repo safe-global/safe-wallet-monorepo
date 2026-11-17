@@ -4,8 +4,8 @@ import { TxFlowType } from '@/services/analytics/types'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
 import type { NewSpendingLimitFlowProps } from '@/features/spending-limits/public/types'
-import CreateSpendingLimit from '@/features/spending-limits/public/CreateSpendingLimit'
-import ReviewSpendingLimit from '@/features/spending-limits/public/ReviewSpendingLimit'
+import CreateSpendingLimit from '@/features/spending-limits/public/components/CreateSpendingLimit'
+import ReviewSpendingLimit from '@/features/spending-limits/public/components/ReviewSpendingLimit'
 
 const defaultValues: NewSpendingLimitFlowProps = {
   beneficiary: '',

@@ -19,9 +19,9 @@ import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrust
 import TrustedSafesModal from '@/components/common/TrustedSafesModal'
 import WelcomeContentCard from '@/components/common/WelcomeContentCard'
 import { DataWidget } from '../DataWidget'
-import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled'
-import SafeProBanner from '@/features/safe-pro-announcement/public/SafeProBanner'
-import SafeProWorkspacesBanner from '@/features/safe-pro-announcement/public/SafeProWorkspacesBanner'
+import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/public/hooks/useIsSafeProAnnouncementEnabled'
+import SafeProBanner from '@/features/safe-pro-announcement/public/components/SafeProBanner'
+import SafeProWorkspacesBanner from '@/features/safe-pro-announcement/public/components/SafeProWorkspacesBanner'
 
 type MyAccountsProps = {
   safes: AllSafeItemsGrouped

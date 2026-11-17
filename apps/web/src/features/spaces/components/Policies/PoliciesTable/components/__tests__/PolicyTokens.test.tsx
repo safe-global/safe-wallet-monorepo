@@ -5,7 +5,7 @@ import {
   mockMultiSpenderPolicy,
   mockProposerPolicy,
   mockSpendingLimitPolicy,
-} from '../../../../../public/policies'
+} from '../../../../../public/utils/policies'
 import type { PolicyTokenInfo } from '@safe-global/views/features/spaces/components/Policies/types'
 import PolicyTokens from '../PolicyTokens'
 

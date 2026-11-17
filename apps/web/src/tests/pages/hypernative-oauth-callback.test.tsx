@@ -15,8 +15,8 @@ jest.mock('next/router', () => ({
 }))
 
 // Mock PKCE utilities
-jest.mock('@/features/hypernative/public/useHypernativeOAuth', () => {
-  const actual = jest.requireActual('@/features/hypernative/public/useHypernativeOAuth')
+jest.mock('@/features/hypernative/public/hooks/useHypernativeOAuth', () => {
+  const actual = jest.requireActual('@/features/hypernative/public/hooks/useHypernativeOAuth')
   return {
     ...actual,
     readPkce: jest.fn(),
@@ -25,8 +25,8 @@ jest.mock('@/features/hypernative/public/useHypernativeOAuth', () => {
 })
 
 // Mock OAuth config
-jest.mock('@/features/hypernative/public/oauth', () => {
-  const actual = jest.requireActual('@/features/hypernative/public/oauth')
+jest.mock('@/features/hypernative/public/services/oauth', () => {
+  const actual = jest.requireActual('@/features/hypernative/public/services/oauth')
   return {
     ...actual,
     HYPERNATIVE_OAUTH_CONFIG: {
@@ -46,8 +46,8 @@ jest.mock('@/services/analytics/events/hypernative', () => ({
   HYPERNATIVE_EVENTS: jest.requireActual('@/services/analytics/events/hypernative').HYPERNATIVE_EVENTS,
 }))
 
-import { readPkce, clearPkce } from '@/features/hypernative/public/useHypernativeOAuth'
-import { getRedirectUri } from '@/features/hypernative/public/oauth'
+import { readPkce, clearPkce } from '@/features/hypernative/public/hooks/useHypernativeOAuth'
+import { getRedirectUri } from '@/features/hypernative/public/services/oauth'
 
 describe('HypernativeOAuthCallback', () => {
   const mockRouterPush = jest.fn()

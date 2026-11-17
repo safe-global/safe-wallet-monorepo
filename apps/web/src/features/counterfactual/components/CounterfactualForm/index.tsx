@@ -1,6 +1,6 @@
 import { TxModalContext } from '@/components/tx-flow'
 import useDeployGasLimit from '../../hooks/useDeployGasLimit'
-import { deploySafeAndExecuteTx } from '../../public/safeDeployment'
+import { deploySafeAndExecuteTx } from '../../public/services/safeDeployment'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWalletCanPay from '@/hooks/useWalletCanPay'
@@ -35,7 +35,7 @@ import commonCss from '@safe-global/views/components/tx-flow/common/styles.modul
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
-import { useSafeShield } from '@/features/safe-shield/public/useSafeShield'
+import { useSafeShield } from '@/features/safe-shield/public/hooks/useSafeShield'
 import { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 
 export const CounterfactualForm = ({

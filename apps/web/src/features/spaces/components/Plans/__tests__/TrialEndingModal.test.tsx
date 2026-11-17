@@ -22,7 +22,7 @@ jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
 jest.mock('../../../hooks/billing/useBillingPortal', () => ({
   useBillingPortal: () => ({ openPortal: mockOpenPortal, isRedirecting: false }),
 }))
-jest.mock('../../../public/useSpaceMembers', () => ({
+jest.mock('../../../public/hooks/useSpaceMembers', () => ({
   useCurrentMembership: () => ({ id: 1 }),
   useIsAdmin: (spaceId?: string) => mockUseIsAdmin(spaceId),
 }))

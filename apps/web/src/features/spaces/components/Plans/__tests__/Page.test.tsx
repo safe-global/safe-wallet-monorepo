@@ -22,12 +22,12 @@ jest.mock('../../AuthState', () => ({
 }))
 jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
 jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
-jest.mock('@/features/safe-pro-announcement/public/SafeProAnnouncement', () => ({
+jest.mock('@/features/safe-pro-announcement/public/components/SafeProAnnouncement', () => ({
   __esModule: true,
   default: () => <div data-testid="safe-pro-announcement" />,
 }))
 jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: (spaceId?: string) => mockUseSpacePlan(spaceId) }))
-jest.mock('../../../public/useSpaceMembers', () => ({ useIsAdmin: () => mockIsAdmin }))
+jest.mock('../../../public/hooks/useSpaceMembers', () => ({ useIsAdmin: () => mockIsAdmin }))
 jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
   useSpaceOffers: (spaceId?: string) => mockUseSpaceOffers(spaceId),
 }))

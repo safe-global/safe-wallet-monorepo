@@ -1,7 +1,7 @@
 import type { SafeListProps } from '../SafesList'
-import { AccountItem } from '../../public/AccountItem'
-import { useSafeItemData } from '../../public/useSafeItemData'
-import { useMultiAccountItemData } from '../../public/useMultiAccountItemData'
+import { AccountItem } from '../../public/components/AccountItem'
+import { useSafeItemData } from '../../public/hooks/useSafeItemData'
+import { useMultiAccountItemData } from '../../public/hooks/useMultiAccountItemData'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useState } from 'react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
@@ -16,7 +16,7 @@ import { AddNetworkButton } from '../AddNetworkButton'
 import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 import { getOwnerAwaitingConfirmations } from '@/utils/transaction-guards'
-import SpaceSafeContextMenu from '@/features/spaces/public/SpaceSafeContextMenu'
+import SpaceSafeContextMenu from '@/features/spaces/public/components/SpaceSafeContextMenu'
 
 function MultiChainSubItem({
   safeItem,

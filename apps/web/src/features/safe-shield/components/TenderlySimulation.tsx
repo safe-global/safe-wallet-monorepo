@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { Typography } from '@safe-global/views/components/ui/typography'
 import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import UpdateIcon from '@/public/images/safe-shield/update.svg'
-import { SeverityIcon } from '../public/SeverityIcon'
+import { SeverityIcon } from '../public/components/SeverityIcon'
 import { TxInfoContext } from '@/components/tx-flow/TxInfoProvider'
 import { useCurrentChain } from '@/hooks/useChains'
 import {

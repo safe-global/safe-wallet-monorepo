@@ -14,12 +14,12 @@ jest.mock('@/services/analytics/mixpanel-events', () => ({
   },
 }))
 
-jest.mock('@/features/earn/public/useIsEarnFeatureEnabled', () => ({
-  ...jest.requireActual('@/features/earn/public/useIsEarnFeatureEnabled'),
+jest.mock('@/features/earn/public/hooks/useIsEarnFeatureEnabled', () => ({
+  ...jest.requireActual('@/features/earn/public/hooks/useIsEarnFeatureEnabled'),
   useIsEarnPromoEnabled: jest.fn(() => true),
 }))
 
-import { useIsEarnPromoEnabled } from '@/features/earn/public/useIsEarnFeatureEnabled'
+import { useIsEarnPromoEnabled } from '@/features/earn/public/hooks/useIsEarnFeatureEnabled'
 
 const mockTrackEvent = trackEvent as jest.MockedFunction<typeof trackEvent>
 const mockUseIsEarnFeatureEnabled = useIsEarnPromoEnabled as jest.MockedFunction<typeof useIsEarnPromoEnabled>

@@ -7,7 +7,7 @@ import CopyTooltip from '@/components/common/CopyTooltip'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { useChain } from '@/hooks/useChains'
-import { useSecurityServices } from '@/features/security/public/useSecurityServices'
+import { useSecurityServices } from '@/features/security/public/hooks/useSecurityServices'
 import type { ScanContext } from '@/features/security/public/types'
 import { cn } from '@safe-global/views/utils/cn'
 

@@ -14,7 +14,7 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import EditMemberDialog from './EditMemberDialog'
 import RemoveMemberDialog from './RemoveMemberDialog'
 import useRenewInvite from './useRenewInvite'
-import { getMemberDisplayName } from '../../public/useSpaceMembers'
+import { getMemberDisplayName } from '../../public/hooks/useSpaceMembers'
 
 type MemberRowActionsMenuProps = {
   member: MemberDto

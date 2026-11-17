@@ -19,7 +19,7 @@ import StepCounter from '../OnboardingLayout/StepCounter'
 import SafeAppMockup from '../OnboardingLayout/mockup/SafeAppMockup'
 import { deriveSidePanelAccountsFromSpace } from '../OnboardingLayout/mockup/deriveSidePanelAccountsFromSpace'
 import { useSafeNameLookup } from '../OnboardingLayout/mockup/useSafeNameLookup'
-import { useSpaceSafes } from '../../public/useSpaceSafes'
+import { useSpaceSafes } from '../../public/hooks/useSpaceSafes'
 import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import SurveyOptionCard from '@safe-global/views/features/spaces/components/SurveyOnboarding/SurveyOptionCard'
 

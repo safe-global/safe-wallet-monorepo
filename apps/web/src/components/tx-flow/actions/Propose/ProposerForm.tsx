@@ -15,7 +15,7 @@ import { Errors, trackError } from '@/services/exceptions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import madProps from '@/utils/mad-props'
 import { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
-import { useSafeShield } from '@/features/safe-shield/public/useSafeShield'
+import { useSafeShield } from '@/features/safe-shield/public/hooks/useSafeShield'
 
 export const ProposerForm = ({
   safeTx,

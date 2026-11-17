@@ -6,7 +6,7 @@ import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
 import type { ScanResult, SafeGrade, ScoreBandDef } from '@/features/security/public/types'
-import { useSecurityServices } from '@/features/security/public/useSecurityServices'
+import { useSecurityServices } from '@/features/security/public/hooks/useSecurityServices'
 import SafeGradeChip, {
   SAFE_GRADE_LABEL,
 } from '@safe-global/views/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip'

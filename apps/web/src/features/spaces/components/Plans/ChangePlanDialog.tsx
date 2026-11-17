@@ -15,7 +15,7 @@ import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
-import { useSpaceSafes } from '../../public/useSpaceSafes'
+import { useSpaceSafes } from '../../public/hooks/useSpaceSafes'
 import {
   removedSafesNote,
   summarizeRemovedSafes,

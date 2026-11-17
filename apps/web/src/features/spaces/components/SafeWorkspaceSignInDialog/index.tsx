@@ -3,7 +3,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Dialog, DialogContent, DialogTitle } from '@safe-global/views/components/ui/dialog'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import SignInOptions from '../SignInOptions'
-import { useRemoveUrlSpaceId, useSafeWorkspaceAction } from '../../public/useSafeWorkspaceCheck'
+import { useRemoveUrlSpaceId, useSafeWorkspaceAction } from '../../public/hooks/useSafeWorkspaceCheck'
 
 // Nothing to do here: useSafeWorkspaceCheck re-runs when the session changes
 const noop = () => {}

@@ -30,7 +30,7 @@ import type { JsonRpcSigner } from 'ethers'
 import { CGW_ERROR_FALLBACK, CGW_SAFE_UNAVAILABLE } from '@safe-global/utils/services/exceptions/gatewayErrors'
 import { mapLedgerError } from '@/services/onboard/ledger-errors'
 import type { Message } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { SafeShieldProvider } from '@/features/safe-shield/public/SafeShieldProvider'
+import { SafeShieldProvider } from '@/features/safe-shield/public/components/SafeShieldProvider'
 import type { ReactElement } from 'react'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
@@ -38,7 +38,7 @@ import { initialState as initialSettings } from '@/store/settingsSlice'
 import { AppRoutes } from '@/config/routes'
 
 import * as useIsPinnedSafeHook from '@/hooks/useIsPinnedSafe'
-import * as useTrustSafeHook from '@/features/myAccounts/public/useTrustSafe'
+import * as useTrustSafeHook from '@/features/myAccounts/public/hooks/useTrustSafe'
 
 jest.mock('@/components/tx/ApprovalEditor/hooks/useApprovalInfos', () => ({
   useApprovalInfos: jest.fn(() => [[], undefined, false]),
@@ -76,7 +76,7 @@ const renderWithSafeShield = (ui: ReactElement) => {
 }
 
 const mockSafeShield = ({ needsRiskConfirmation = false, isRiskConfirmed = false } = {}) =>
-  jest.spyOn(require('@/features/safe-shield/public/useSafeShield'), 'useSafeShield').mockReturnValue({
+  jest.spyOn(require('@/features/safe-shield/public/hooks/useSafeShield'), 'useSafeShield').mockReturnValue({
     needsRiskConfirmation,
     isRiskConfirmed,
     setIsRiskConfirmed: jest.fn(),

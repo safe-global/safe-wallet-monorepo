@@ -1,5 +1,5 @@
 import type { PropsWithChildren, ReactElement } from 'react'
-import CancelRecoveryReview from '@/features/recovery/public/CancelRecoveryReview'
+import CancelRecoveryReview from '@/features/recovery/public/components/CancelRecoveryReview'
 import type { RecoveryQueueItem } from '@/features/recovery/public/types'
 
 export function CancelRecoveryFlowReview({

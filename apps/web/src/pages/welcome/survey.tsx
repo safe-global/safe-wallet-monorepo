@@ -4,7 +4,7 @@ import { useRouter } from 'next/router'
 import { BRAND_NAME } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
 import useIsSurveyEnabled from '@/hooks/useIsSurveyEnabled'
-import SurveyOnboarding from '@/features/spaces/public/SurveyOnboarding'
+import SurveyOnboarding from '@/features/spaces/public/components/SurveyOnboarding'
 
 const SurveyPage = () => {
   const router = useRouter()

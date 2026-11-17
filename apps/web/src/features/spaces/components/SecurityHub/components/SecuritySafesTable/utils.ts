@@ -1,7 +1,7 @@
 import type { GradeSummary, SafeGrade, ScanResult } from '@/features/security/public/types'
 import type { SecurityGrade } from '@/features/security/public/types'
 import { SAFE_GRADE_RANK, SEVERITY_RANK } from '@/features/security/public/constants'
-import type { SecurityServices } from '@/features/security/public/securityServices'
+import type { SecurityServices } from '@/features/security/public/services/securityServices'
 import { AppRoutes } from '@/config/routes'
 import { buildSafeHref, type SafeHref } from '../../../../utils/safeHref'
 import { DASH } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'

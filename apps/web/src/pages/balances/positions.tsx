@@ -4,7 +4,7 @@ import AssetsHeader from '@/components/balances/AssetsHeader'
 import { BRAND_NAME } from '@/config/constants'
 import dynamic from '@/utils/dynamic'
 
-const DefiPositions = dynamic(() => import('@/features/positions/public/Positions'))
+const DefiPositions = dynamic(() => import('@/features/positions/public/components/Positions'))
 
 const Positions = () => {
   return (

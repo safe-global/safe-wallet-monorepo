@@ -9,7 +9,7 @@ import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { useSpacePlan } from '../../../hooks/useSpacePlan'
-import { useSafeSponsoredTxs } from '../../../public/useSafeSponsoredTxs'
+import { useSafeSponsoredTxs } from '../../../public/hooks/useSafeSponsoredTxs'
 
 export const SidebarTopBar = (): ReactElement => {
   const { state } = useSidebar()

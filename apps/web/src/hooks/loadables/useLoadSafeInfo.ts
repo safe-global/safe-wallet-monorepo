@@ -1,4 +1,4 @@
-import { removeUndeployedSafe, selectUndeployedSafe } from '@/features/counterfactual/public/undeployedSafesSlice'
+import { removeUndeployedSafe, selectUndeployedSafe } from '@/features/counterfactual/public/store/undeployedSafesSlice'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { useEffect, useMemo } from 'react'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
@@ -37,7 +37,7 @@ const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
      * This is the one place where we can't check for `safe.deployed` as we want to update that value
      * when the local storage is cleared, so we have to check undeployedSafe
      */
-    const { getUndeployedSafeInfo } = await import('@/features/counterfactual/public/safeDeployment')
+    const { getUndeployedSafeInfo } = await import('@/features/counterfactual/public/services/safeDeployment')
     return getUndeployedSafeInfo(undeployedSafe, address, chain)
   }, [undeployedSafe, address, chain, isCounterfactualEnabled])
 

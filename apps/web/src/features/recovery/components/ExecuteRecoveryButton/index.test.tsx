@@ -5,7 +5,7 @@ import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { RecoveryAttemptFlow } from '@/components/tx-flow/flows/RecoveryAttemptFlow'
 import ExecuteRecoveryButton from '.'
 import { useClock } from '../../hooks/useClock'
-import { NOW, seedRecoveryScenario, type RecoveryScenarioName } from '../../public/test-helpers'
+import { NOW, seedRecoveryScenario, type RecoveryScenarioName } from '../../public/utils/test-helpers'
 import type { RecoveryQueueItem } from '../../public/types'
 
 jest.mock('../../hooks/useClock')
@@ -17,8 +17,8 @@ jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/useChains')
-jest.mock('@/features/spending-limits/public/useIsOnlySpendingLimitBeneficiary', () => ({
-  ...jest.requireActual('@/features/spending-limits/public/useIsOnlySpendingLimitBeneficiary'),
+jest.mock('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
+  ...jest.requireActual('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary'),
   __esModule: true,
   default: jest.fn(),
 }))

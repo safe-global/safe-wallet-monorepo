@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { getRedirectUri } from '../../public/oauth'
+import { getRedirectUri } from '../../public/services/oauth'
 
 describe('getRedirectUri on the server', () => {
   it('should return the callback route', () => {

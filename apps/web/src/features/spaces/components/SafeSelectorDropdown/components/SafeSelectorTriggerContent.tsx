@@ -14,8 +14,8 @@ import type { SafeItemData } from '@safe-global/views/features/spaces/components
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import { useIsHypernativeGuard } from '@/features/hypernative/public/useIsHypernativeGuard'
-import SafeHeaderHnTooltip from '@/features/hypernative/public/SafeHeaderHnTooltip'
+import { useIsHypernativeGuard } from '@/features/hypernative/public/hooks/useIsHypernativeGuard'
+import SafeHeaderHnTooltip from '@/features/hypernative/public/components/SafeHeaderHnTooltip'
 
 export interface SafeSelectorTriggerContentProps {
   selectedItem: SafeItemData

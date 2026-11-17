@@ -11,7 +11,7 @@ import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-gl
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { ContactSource, useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useChainId from '@/hooks/useChainId'
-import { useIsAdmin } from '../../../public/useSpaceMembers'
+import { useIsAdmin } from '../../../public/hooks/useSpaceMembers'
 import ParentSafeWalletNotice, { type ParentSafeWalletNoticeProps } from '../components/ParentSafeWalletNotice'
 import SafeAccountSelector from '../SafeAccountSelector'
 import {

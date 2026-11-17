@@ -1,9 +1,9 @@
-import RecoverySettings from '@/features/recovery/public/RecoverySettings'
+import RecoverySettings from '@/features/recovery/public/components/RecoverySettings'
 import SecuritySettings from '../SecuritySettings'
 import { useRouter } from 'next/router'
-import { HnBannerForSettings } from '@/features/hypernative/public/HnBanner'
+import { HnBannerForSettings } from '@/features/hypernative/public/components/HnBanner'
 import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
-import HnActivatedSettingsBanner from '@/features/hypernative/public/HnActivatedSettingsBanner'
+import HnActivatedSettingsBanner from '@/features/hypernative/public/components/HnActivatedSettingsBanner'
 
 const SecurityLogin = () => {
   const router = useRouter()

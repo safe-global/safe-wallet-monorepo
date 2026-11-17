@@ -1,8 +1,8 @@
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import { setRecoverErrorHook } from '@safe-global/store/gateway/cgwClient'
 import type { AppDispatch } from '@/store'
-import { stepUpRequested, stepUpSettled } from '../public/stepUpSlice'
-import { isElevationRequiredError } from '../public/elevation'
+import { stepUpRequested, stepUpSettled } from '../public/store/stepUpSlice'
+import { isElevationRequiredError } from '../public/utils/elevation'
 
 let pending: { promise: Promise<boolean>; resolve: (isElevated: boolean) => void } | undefined
 

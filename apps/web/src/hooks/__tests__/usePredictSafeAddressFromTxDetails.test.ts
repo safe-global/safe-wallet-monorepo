@@ -1,7 +1,7 @@
 import type { DataDecoded, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { renderHook } from '@testing-library/react'
 
-import { predictSafeAddress } from '@/features/multichain/public/utils'
+import { predictSafeAddress } from '@/features/multichain/public/utils/utils'
 import { _getSetupFromDataDecoded, usePredictSafeAddressFromTxDetails } from '../usePredictSafeAddressFromTxDetails'
 
 // @see https://safe-client.safe.global/v1/chains/11155111/transactions/multisig_0x57c26D4d117c926A872814fa46C179691f580e84_0xd0d519d3ebd6efac7a9d7c591c0a311193b6acbbf5db970fab6a51e1d3509e72
@@ -248,27 +248,27 @@ describe('getSetupFromDataDecoded', () => {
   })
 })
 
-jest.mock('@/features/multichain/public/utils', () => ({
+jest.mock('@/features/multichain/public/utils/utils', () => ({
   get isMultiChainSafeItem() {
-    return jest.requireActual('@/features/multichain/public/utils').isMultiChainSafeItem
+    return jest.requireActual('@/features/multichain/public/utils/utils').isMultiChainSafeItem
   },
   get getSafeSetups() {
-    return jest.requireActual('@/features/multichain/public/utils').getSafeSetups
+    return jest.requireActual('@/features/multichain/public/utils/utils').getSafeSetups
   },
   get getSharedSetup() {
-    return jest.requireActual('@/features/multichain/public/utils').getSharedSetup
+    return jest.requireActual('@/features/multichain/public/utils/utils').getSharedSetup
   },
   get getDeviatingSetups() {
-    return jest.requireActual('@/features/multichain/public/utils').getDeviatingSetups
+    return jest.requireActual('@/features/multichain/public/utils/utils').getDeviatingSetups
   },
   get predictAddressBasedOnReplayData() {
-    return jest.requireActual('@/features/multichain/public/utils').predictAddressBasedOnReplayData
+    return jest.requireActual('@/features/multichain/public/utils/utils').predictAddressBasedOnReplayData
   },
   get hasMultiChainCreationFeatures() {
-    return jest.requireActual('@/features/multichain/public/utils').hasMultiChainCreationFeatures
+    return jest.requireActual('@/features/multichain/public/utils/utils').hasMultiChainCreationFeatures
   },
   get hasMultiChainAddNetworkFeature() {
-    return jest.requireActual('@/features/multichain/public/utils').hasMultiChainAddNetworkFeature
+    return jest.requireActual('@/features/multichain/public/utils/utils').hasMultiChainAddNetworkFeature
   },
   predictSafeAddress: jest.fn(),
 }))

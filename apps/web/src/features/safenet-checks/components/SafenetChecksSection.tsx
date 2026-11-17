@@ -4,7 +4,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-globa
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
-import { SeverityIcon } from '@/features/safe-shield/public/SeverityIcon'
+import { SeverityIcon } from '@/features/safe-shield/public/components/SeverityIcon'
 import { LockedCheckRow } from '@safe-global/views/features/safe-shield/components/LockedCheckRow'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import type { SafenetCheckView } from '@safe-global/utils/features/safenet-checks/hooks'

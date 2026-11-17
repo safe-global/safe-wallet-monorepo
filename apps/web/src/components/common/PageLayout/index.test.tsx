@@ -94,10 +94,16 @@ jest.mock('@/hooks/useIsSignedIn', () => ({
   useIsSignedIn: () => mockUseIsSignedIn(),
 }))
 
-jest.mock('@/features/batching/public/BatchSidebar', () => ({ __esModule: true, default: () => null }))
-jest.mock('@/features/spaces/public/SelectSafeModal', () => ({ __esModule: true, default: () => null }))
-jest.mock('@/features/spaces/public/SafeWorkspaceSignInDialog', () => ({ __esModule: true, default: () => null }))
-jest.mock('@/features/spaces/public/SafeWorkspaceChooserDialog', () => ({ __esModule: true, default: () => null }))
+jest.mock('@/features/batching/public/components/BatchSidebar', () => ({ __esModule: true, default: () => null }))
+jest.mock('@/features/spaces/public/components/SelectSafeModal', () => ({ __esModule: true, default: () => null }))
+jest.mock('@/features/spaces/public/components/SafeWorkspaceSignInDialog', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/features/spaces/public/components/SafeWorkspaceChooserDialog', () => ({
+  __esModule: true,
+  default: () => null,
+}))
 
 const STATIC_ROUTES = [AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
 

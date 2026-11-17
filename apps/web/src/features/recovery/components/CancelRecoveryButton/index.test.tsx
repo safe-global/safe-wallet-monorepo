@@ -8,12 +8,12 @@ import { trackError, Errors } from '@/services/exceptions'
 import { RecoveryListItemContext } from '@safe-global/views/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
 import CancelRecoveryButton from '.'
 import { useClock } from '../../hooks/useClock'
-import { dispatchRecoverySkipExpired } from '../../public/recovery-sender'
-import { NOW, seedRecoveryScenario, type RecoveryScenarioName } from '../../public/test-helpers'
+import { dispatchRecoverySkipExpired } from '../../public/services/recovery-sender'
+import { NOW, seedRecoveryScenario, type RecoveryScenarioName } from '../../public/utils/test-helpers'
 import type { RecoveryQueueItem } from '../../public/types'
 
 jest.mock('../../hooks/useClock')
-jest.mock('../../public/recovery-sender')
+jest.mock('../../public/services/recovery-sender')
 jest.mock('@/services/analytics')
 jest.mock('@/services/exceptions', () => ({
   ...jest.requireActual('@/services/exceptions'),
@@ -26,8 +26,8 @@ jest.mock('@/hooks/useProposers')
 jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
 jest.mock('@/hooks/useSafeInfo')
-jest.mock('@/features/spending-limits/public/useIsOnlySpendingLimitBeneficiary', () => ({
-  ...jest.requireActual('@/features/spending-limits/public/useIsOnlySpendingLimitBeneficiary'),
+jest.mock('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
+  ...jest.requireActual('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary'),
   __esModule: true,
   default: jest.fn(),
 }))

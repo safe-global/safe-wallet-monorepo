@@ -1,10 +1,10 @@
-import { mockActivatingPolicy, mockActiveSpendingLimit, mockPendingPolicy } from '../../../../public/policies'
+import { mockActivatingPolicy, mockActiveSpendingLimit, mockPendingPolicy } from '../../../../public/utils/policies'
 import {
   mockAllowlistChangePending,
   mockFailedAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
-} from '../../../../public/allowlistPolicies'
+} from '../../../../public/utils/allowlistPolicies'
 import { getPendingStatusDetail } from '../policyStatusDetail'
 
 describe('getPendingStatusDetail', () => {

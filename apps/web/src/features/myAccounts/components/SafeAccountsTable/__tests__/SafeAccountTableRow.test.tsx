@@ -1,12 +1,12 @@
 import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import SafeAccountTableRow, { type RowCheckbox } from '../SafeAccountTableRow'
-import { useAddressBookWriteScope } from '@/features/spaces/public/useAddressBookWriteScope'
+import { useAddressBookWriteScope } from '@/features/spaces/public/hooks/useAddressBookWriteScope'
 import {
   SELECT_COLUMN,
   type SafeAccountColumn,
 } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
-import type { AccountLine } from '../../../public/useSafeAccountRows'
+import type { AccountLine } from '../../../public/hooks/useSafeAccountRows'
 
 // Keep the heavy per-cell widgets out of the way; this suite covers row-level link/selection wiring.
 // Stub the lazy overview fetch — its own suite covers it (and it needs an IntersectionObserver). The
@@ -19,7 +19,7 @@ jest.mock('@safe-global/views/components/common/Identicon', () => ({
   __esModule: true,
   default: () => <div data-testid="identicon" />,
 }))
-jest.mock('../../../public/AccountItem', () => ({
+jest.mock('../../../public/components/AccountItem', () => ({
   AccountItem: { Icon: () => null, ChainBadge: () => null, ContextMenu: () => null },
 }))
 jest.mock('@safe-global/views/components/common/AccountBadges', () => ({
@@ -34,7 +34,7 @@ jest.mock('@/components/common/SafeListContextMenu/MultiAccountContextMenu', () 
 }))
 // Mock the module, not the barrel: the re-export picks this up while the rest of `@/features/spaces`
 // stays real. Import stays on the barrel — the deep path is a lint-restricted import from here.
-jest.mock('@/features/spaces/public/useAddressBookWriteScope', () => ({ useAddressBookWriteScope: jest.fn() }))
+jest.mock('@/features/spaces/public/hooks/useAddressBookWriteScope', () => ({ useAddressBookWriteScope: jest.fn() }))
 jest.mock('@/hooks/useChains', () => ({
   useChain: () => ({
     chainId: '1',

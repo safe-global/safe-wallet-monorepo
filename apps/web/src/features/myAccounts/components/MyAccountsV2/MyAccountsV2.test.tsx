@@ -47,14 +47,14 @@ jest.mock('@/components/common/TrustedSafesModal', () => ({
 jest.mock('../DataWidget', () => ({ DataWidget: () => <div data-testid="data-widget" /> }))
 
 const mockUseIsSafeProAnnouncementEnabled = jest.fn()
-jest.mock('@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled', () => ({
+jest.mock('@/features/safe-pro-announcement/public/hooks/useIsSafeProAnnouncementEnabled', () => ({
   useIsSafeProAnnouncementEnabled: () => mockUseIsSafeProAnnouncementEnabled(),
 }))
-jest.mock('@/features/safe-pro-announcement/public/SafeProBanner', () => ({
+jest.mock('@/features/safe-pro-announcement/public/components/SafeProBanner', () => ({
   __esModule: true,
   default: () => <div data-testid="safe-pro-banner" />,
 }))
-jest.mock('@/features/safe-pro-announcement/public/SafeProWorkspacesBanner', () => ({
+jest.mock('@/features/safe-pro-announcement/public/components/SafeProWorkspacesBanner', () => ({
   __esModule: true,
   default: () => <div data-testid="safe-pro-workspaces-banner" />,
 }))

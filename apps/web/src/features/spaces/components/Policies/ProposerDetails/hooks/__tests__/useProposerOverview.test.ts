@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import { asActivePolicy, MOCK_ADDRESSES, MOCK_SAFES, mockProposerPolicy } from '../../../../../public/policies'
+import { asActivePolicy, MOCK_ADDRESSES, MOCK_SAFES, mockProposerPolicy } from '../../../../../public/utils/policies'
 import { useProposerOverview } from '../useProposerOverview'
 
 const mockUseAddressBookItem = jest.fn()

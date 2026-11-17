@@ -13,7 +13,7 @@ import {
   addressIsNotSmartContract,
   usesV1DelegateEndpoint,
   signProposerDelegation,
-} from '@/features/proposers/public/utils'
+} from '@/features/proposers/public/utils/utils'
 import { useDelegateMutations } from '@safe-global/utils/hooks/useDelegateMutations'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useChainId from '@/hooks/useChainId'
@@ -34,7 +34,7 @@ import type { ProposerRoleFormValues } from '../ProposerRoleForm'
 import { WORKSPACE_CONFIRMATION_HIDE_MS } from '../../../../constants'
 import { formatContactLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
 import { useAddOrRequestWorkspaceContact } from '../../../../hooks/useAddOrRequestWorkspaceContact'
-import { useIsAdmin } from '../../../../public/useSpaceMembers'
+import { useIsAdmin } from '../../../../public/hooks/useSpaceMembers'
 
 export type GrantProposer = {
   grantProposerRole: (values: ProposerRoleFormValues, safeLabel?: string) => Promise<boolean>

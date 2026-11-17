@@ -41,11 +41,11 @@ import Track from '@/components/common/Track'
 import { MODALS_EVENTS } from '@/services/analytics/events/modals'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
-import { useNoFeeCampaignEligibility } from '@/features/no-fee-campaign/public/useNoFeeCampaignEligibility'
-import { useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign/public/useIsNoFeeCampaignEnabled'
-import { useSafeShieldForRecipients } from '@/features/safe-shield/public/useSafeShield'
+import { useNoFeeCampaignEligibility } from '@/features/no-fee-campaign/public/hooks/useNoFeeCampaignEligibility'
+import { useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign/public/hooks/useIsNoFeeCampaignEnabled'
+import { useSafeShieldForRecipients } from '@/features/safe-shield/public/hooks/useSafeShield'
 import uniq from 'lodash/uniq'
-import NoFeeCampaignTransactionCard from '@/features/no-fee-campaign/public/NoFeeCampaignTransactionCard'
+import NoFeeCampaignTransactionCard from '@/features/no-fee-campaign/public/components/NoFeeCampaignTransactionCard'
 
 export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balance: string }): ReactElement => (
   <div className="flex items-center gap-2">

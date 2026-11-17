@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
-import AccountItemButton from '../../../public/AccountItemButton'
+import AccountItemButton from '../../../public/components/AccountItemButton'
 
 describe('AccountItemButton', () => {
   it('fires onClick on click', () => {

@@ -32,8 +32,8 @@ import StakingTxDepositInfo from '@/components/transactions/TxInfo/Staking/Staki
 import StakingTxExitInfo from '@safe-global/views/components/transactions/TxInfo/Staking/StakingTxExitInfo'
 import StakingTxWithdrawInfo from '@/components/transactions/TxInfo/Staking/StakingTxWithdrawInfo'
 import css from './styles.module.css'
-import VaultDepositTxInfo from '@/features/earn/public/VaultDepositTxInfo'
-import VaultRedeemTxInfo from '@/features/earn/public/VaultRedeemTxInfo'
+import VaultDepositTxInfo from '@/features/earn/public/components/VaultDepositTxInfo'
+import VaultRedeemTxInfo from '@/features/earn/public/components/VaultRedeemTxInfo'
 import { SwapTx } from './SwapTx'
 
 export const TransferTx = ({

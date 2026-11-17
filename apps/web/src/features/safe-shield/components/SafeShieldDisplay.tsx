@@ -18,13 +18,13 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { getOverallStatus, getPrimaryResult } from '@safe-global/utils/features/safe-shield/utils'
 import { useCheckSimulation } from '../hooks/useCheckSimulation'
-import type { HypernativeAuthStatus } from '@/features/hypernative/public/useHypernativeOAuth'
+import type { HypernativeAuthStatus } from '@/features/hypernative/public/hooks/useHypernativeOAuth'
 import { useCurrentChain } from '@/hooks/useChains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { countChecks } from '../utils/countChecks'
 import { isContractCall } from '../utils/isContractCall'
-import { useIsSafenetChecksEnabled } from '@/features/safenet-checks/public/useIsSafenetChecksEnabled'
-import { useSafenetShieldState } from '@/features/safenet-checks/public/useSafenetShieldState'
+import { useIsSafenetChecksEnabled } from '@/features/safenet-checks/public/hooks/useIsSafenetChecksEnabled'
+import { useSafenetShieldState } from '@/features/safenet-checks/public/hooks/useSafenetShieldState'
 
 const shieldLogoOnHover = [
   'cursor-pointer',

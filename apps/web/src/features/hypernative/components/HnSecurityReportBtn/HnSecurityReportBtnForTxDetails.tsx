@@ -2,7 +2,7 @@ import type { HnSecurityReportBtnWithTxHashProps } from './HnSecurityReportBtnWi
 import { HnSecurityReportBtnWithTxHash } from './HnSecurityReportBtnWithTxHash'
 import { withHnFeature } from '../withHnFeature'
 import { withHnBannerConditions } from '../withHnBannerConditions'
-import { BannerType } from '../../public/useBannerStorage'
+import { BannerType } from '../../public/hooks/useBannerStorage'
 
 // Compose the HoCs: Feature check -> Banner conditions check -> Component with TxHash calculation
 // The button shows if banner conditions are met (with BannerType.TxReportButton) OR if Hypernative guard is active

@@ -6,7 +6,7 @@ import { Label } from '@safe-global/views/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
 
 import AddressBookInput from '@/components/common/AddressBookInput'
-import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/public/useSafeShield'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/public/hooks/useSafeShield'
 import useChainId from '@/hooks/useChainId'
 import { getResetTimeOptions } from '../../public/constants'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
@@ -17,7 +17,7 @@ import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFl
 import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../public/types'
 import useIsSpendingLimitSupported from '../../hooks/useIsSpendingLimitSupported'
 import SpendingLimitNotSupported from './SpendingLimitNotSupported'
-import { validateSpendingLimitAmount } from '../../public/spendingLimitValidation'
+import { validateSpendingLimitAmount } from '../../public/services/spendingLimitValidation'
 
 const CreateSpendingLimit = () => {
   const chainId = useChainId()

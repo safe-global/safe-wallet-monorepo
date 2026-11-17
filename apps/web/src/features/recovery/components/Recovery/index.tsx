@@ -1,5 +1,5 @@
 import dynamic from '@/utils/dynamic'
-import { useIsRecoverySupported } from '../../public/useIsRecoverySupported'
+import { useIsRecoverySupported } from '../../public/hooks/useIsRecoverySupported'
 
 // Lazy load the heavy recovery components to keep them out of the main bundle
 // This includes RecoveryContextHooks which imports @gnosis.pm/zodiac

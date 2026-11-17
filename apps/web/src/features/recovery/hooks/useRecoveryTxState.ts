@@ -1,5 +1,5 @@
 import { useClock } from './useClock'
-import { selectDelayModifierByTxHash } from '../public/selectors'
+import { selectDelayModifierByTxHash } from '../public/store/selectors'
 import recoveryStore from '../components/RecoveryContext'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { RecoveryQueueItem } from '../public/types'

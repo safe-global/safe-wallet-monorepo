@@ -171,7 +171,7 @@ export function ledgerModule(): WalletInit {
               const txHash = keccak256(transaction.unsignedSerialized)
 
               const { showLedgerHashComparison, hideLedgerHashComparison } =
-                await import('@/features/ledger/public/ledgerHashStore')
+                await import('@/features/ledger/public/store/ledgerHashStore')
               showLedgerHashComparison(txHash)
 
               try {

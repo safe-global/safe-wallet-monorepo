@@ -16,14 +16,14 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useAddressBooksRenameTagV1Mutation: () => [mockRenameTag],
   useAddressBooksDeleteTagV1Mutation: () => [mockDeleteTag],
 }))
-jest.mock('../../../public/useCurrentSpaceId', () => ({
+jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => SPACE_ID,
 }))
 jest.mock('@/store', () => ({ useAppDispatch: () => mockDispatch }))
 jest.mock('@/store/notificationsSlice', () => ({
   showNotification: (payload: unknown) => ({ type: 'notifications/show', payload }),
 }))
-jest.mock('@/features/oidc-auth/public/elevation', () => ({
+jest.mock('@/features/oidc-auth/public/utils/elevation', () => ({
   isElevationRequiredError: (error: unknown) => error === elevationRequired,
 }))
 jest.mock('@/utils/rtkQuery', () => ({

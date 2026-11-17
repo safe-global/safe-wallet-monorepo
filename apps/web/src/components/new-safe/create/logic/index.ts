@@ -26,7 +26,7 @@ import {
 } from '@safe-global/safe-deployments'
 import { ECOSYSTEM_ID_ADDRESS } from '@/config/constants'
 import type { ReplayedSafeProps, UndeployedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
-import { isPredictedSafeProps } from '@/features/counterfactual/public/typeGuards'
+import { isPredictedSafeProps } from '@/features/counterfactual/public/utils/typeGuards'
 import {
   getSafeContractDeployment,
   getChainAgnosticAddress,
@@ -38,7 +38,7 @@ import {
   Safe_to_l2_setup__factory,
 } from '@safe-global/utils/types/contracts'
 import { createWeb3 } from '@/hooks/wallets/web3'
-import { hasMultiChainCreationFeatures } from '@/features/multichain/public/utils'
+import { hasMultiChainCreationFeatures } from '@/features/multichain/public/utils/utils'
 
 // Type for the lazy-loaded activateReplayedSafe function
 export type ActivateReplayedSafeFn = (

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
 import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { HeaderNavigation } from '../../public/HeaderNavigation'
+import { HeaderNavigation } from '../../public/components/HeaderNavigation'
 
 /**
  * HeaderNavigation Component Stories

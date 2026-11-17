@@ -1,7 +1,7 @@
 import { TransactionListItemType } from '@safe-global/store/gateway/types'
 import { useQueuedTxsLength } from '../useTxQueue'
 import * as store from '@/store'
-import * as recoveryHooks from '@/features/recovery/public/useRecoveryQueue'
+import * as recoveryHooks from '@/features/recovery/public/hooks/useRecoveryQueue'
 import type { RecoveryQueueItem } from '@/features/recovery/public/types'
 
 describe('useQueuedTxsLength', () => {

@@ -8,12 +8,12 @@ import type { PortfolioBalances } from '@safe-global/utils/hooks/portfolioBalanc
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../public/types'
 import CreateSpendingLimit from './index'
-import { NO_TOKEN_SELECTED_ERROR } from '../../public/spendingLimitValidation'
+import { NO_TOKEN_SELECTED_ERROR } from '../../public/services/spendingLimitValidation'
 import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
 import * as useIsSpendingLimitSupportedHook from '../../hooks/useIsSpendingLimitSupported'
 
-jest.mock('@/features/safe-shield/public/useSafeShield', () => ({
-  ...jest.requireActual('@/features/safe-shield/public/useSafeShield'),
+jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/hooks/useSafeShield'),
   useSafeShieldForAddressPoisoning: jest.fn(),
 }))
 

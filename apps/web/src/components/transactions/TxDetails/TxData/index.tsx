@@ -38,14 +38,14 @@ import StakingTxWithdrawDetails from '@/components/transactions/TxDetails/TxData
 import { OnChainConfirmation } from './NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from './NestedTransaction/ExecTransaction'
 import SafeUpdate from './SafeUpdate'
-import VaultDepositTxDetails from '@/features/earn/public/VaultDepositTxDetails'
-import VaultRedeemTxDetails from '@/features/earn/public/VaultRedeemTxDetails'
+import VaultDepositTxDetails from '@/features/earn/public/components/VaultDepositTxDetails'
+import VaultRedeemTxDetails from '@/features/earn/public/components/VaultRedeemTxDetails'
 import DecodedData from './DecodedData'
 import ParsingErrorBoundary from '@/components/common/ObservabilityErrorBoundary/ParsingErrorBoundary'
 import Multisend from './DecodedData/Multisend'
 import BridgeTransaction from '@/components/tx/confirmation-views/BridgeTransaction'
 import { LifiSwapTransaction } from '@/components/tx/confirmation-views/LifiSwapTransaction'
-import SwapOrder from '@/features/swap/public/SwapOrder'
+import SwapOrder from '@/features/swap/public/components/SwapOrder'
 
 const TxData = ({
   txInfo,

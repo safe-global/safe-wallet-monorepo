@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { encodeEIP1271Signature } from '../public/utils'
+import { encodeEIP1271Signature } from '../public/utils/utils'
 import { useDelegateMutations } from '@safe-global/utils/hooks/useDelegateMutations'
 import { isTotpValid } from '../utils/totp'
 import { PROPOSER_LABEL_PLACEHOLDER } from '../public/constants'

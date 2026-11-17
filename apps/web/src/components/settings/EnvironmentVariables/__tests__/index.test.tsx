@@ -9,7 +9,7 @@ import { faker } from '@faker-js/faker'
 import { chainBuilder } from '@/tests/builders/chains'
 import * as analytics from '@/services/analytics'
 import { reloadPage } from '@/utils/navigation'
-import type { useSafeProAccess } from '@/features/spaces/public/useSafeProAccess'
+import type { useSafeProAccess } from '@/features/spaces/public/hooks/useSafeProAccess'
 import { TENDERLY_SETUP_GUIDE_URL, TENDERLY_SIMULATE_URL_PLACEHOLDER } from '../utils'
 
 // Mock chain data
@@ -35,7 +35,7 @@ const mockUseSafeProAccess = jest.fn<Partial<ReturnType<typeof useSafeProAccess>
   isLoading: false,
   spaceId: null,
 }))
-jest.mock('@/features/spaces/public/useSafeProAccess', () => ({
+jest.mock('@/features/spaces/public/hooks/useSafeProAccess', () => ({
   useSafeProAccess: () => mockUseSafeProAccess(),
 }))
 

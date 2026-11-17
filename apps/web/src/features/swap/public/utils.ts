@@ -8,7 +8,7 @@ import { APPROVAL_SIGNATURE_HASH } from '@safe-global/utils/components/tx/Approv
 
 import { TradeType, UiOrderType } from '@safe-global/utils/features/swap/types'
 import { LIMIT_ORDER_TITLE, SWAP_ORDER_TITLE, TWAP_ORDER_TITLE } from './constants'
-import type { SwapState } from './swapParamsSlice'
+import type { SwapState } from './store/swapParamsSlice'
 
 type Quantity = {
   amount: string | number | bigint

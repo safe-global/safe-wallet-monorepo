@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { ChevronRight, Plus, WalletCards } from 'lucide-react'
-import SafeWidget from '../../public/SafeWidget'
+import SafeWidget from '../../public/components/SafeWidget'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 

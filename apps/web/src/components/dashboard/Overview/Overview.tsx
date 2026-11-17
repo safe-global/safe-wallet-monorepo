@@ -5,8 +5,8 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import OverviewSkeleton from '@safe-global/views/components/dashboard/Overview/OverviewSkeleton'
-import ActionsTray from '@/features/actions-tray/public/ActionsTray'
-import PortfolioRefreshHint from '@/features/portfolio/public/PortfolioRefreshHint'
+import ActionsTray from '@/features/actions-tray/public/components/ActionsTray'
+import PortfolioRefreshHint from '@/features/portfolio/public/components/PortfolioRefreshHint'
 
 const Overview = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()

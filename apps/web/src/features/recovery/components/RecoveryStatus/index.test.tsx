@@ -1,7 +1,7 @@
 import { render } from '@/tests/test-utils'
 import RecoveryStatus from '.'
 import { useClock } from '../../hooks/useClock'
-import { NOW, seedRecoveryScenario, type RecoveryScenarioName } from '../../public/test-helpers'
+import { NOW, seedRecoveryScenario, type RecoveryScenarioName } from '../../public/utils/test-helpers'
 
 jest.mock('../../hooks/useClock')
 

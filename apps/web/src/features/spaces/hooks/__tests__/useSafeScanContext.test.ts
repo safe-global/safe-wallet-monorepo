@@ -42,25 +42,25 @@ jest.mock('@/store/settingsSlice', () => ({
   ...jest.requireActual('@/store/settingsSlice'),
   selectCurrency: jest.fn(),
 }))
-jest.mock('@/features/counterfactual/public/undeployedSafesSlice', () => ({
-  ...jest.requireActual('@/features/counterfactual/public/undeployedSafesSlice'),
+jest.mock('@/features/counterfactual/public/store/undeployedSafesSlice', () => ({
+  ...jest.requireActual('@/features/counterfactual/public/store/undeployedSafesSlice'),
   selectUndeployedSafes: jest.fn(),
 }))
-jest.mock('@/features/multichain/public/utils', () => ({
+jest.mock('@/features/multichain/public/utils/utils', () => ({
   get isMultiChainSafeItem() {
-    return jest.requireActual('@/features/multichain/public/utils').isMultiChainSafeItem
+    return jest.requireActual('@/features/multichain/public/utils/utils').isMultiChainSafeItem
   },
   get predictSafeAddress() {
-    return jest.requireActual('@/features/multichain/public/utils').predictSafeAddress
+    return jest.requireActual('@/features/multichain/public/utils/utils').predictSafeAddress
   },
   get predictAddressBasedOnReplayData() {
-    return jest.requireActual('@/features/multichain/public/utils').predictAddressBasedOnReplayData
+    return jest.requireActual('@/features/multichain/public/utils/utils').predictAddressBasedOnReplayData
   },
   get hasMultiChainCreationFeatures() {
-    return jest.requireActual('@/features/multichain/public/utils').hasMultiChainCreationFeatures
+    return jest.requireActual('@/features/multichain/public/utils/utils').hasMultiChainCreationFeatures
   },
   get hasMultiChainAddNetworkFeature() {
-    return jest.requireActual('@/features/multichain/public/utils').hasMultiChainAddNetworkFeature
+    return jest.requireActual('@/features/multichain/public/utils/utils').hasMultiChainAddNetworkFeature
   },
   getSafeSetups: jest.fn(),
   getSharedSetup: jest.fn(),

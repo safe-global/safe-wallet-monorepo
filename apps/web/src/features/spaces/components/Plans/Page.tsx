@@ -11,9 +11,9 @@ import { BillingPeriod, MixpanelEventParams } from '@/services/analytics/mixpane
 import AuthState from '../AuthState'
 import Plans from './index'
 import { RECOMMENDED_PLAN } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
-import { takePlansEntry } from '../../public/planSelection'
+import { takePlansEntry } from '../../public/services/planSelection'
 import { buildPlanTiers, pickSeatOption, toCurrentPlan } from './planTiers'
-import { useIsAdmin } from '../../public/useSpaceMembers'
+import { useIsAdmin } from '../../public/hooks/useSpaceMembers'
 import { useSpacePlan } from '../../hooks/useSpacePlan'
 import { useSpaceOffers } from '../../hooks/billing/useSpaceOffers'
 import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
@@ -21,7 +21,7 @@ import { useStartCheckout } from '../../hooks/billing/useStartCheckout'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
 import ChangePlanFlow from './ChangePlanFlow'
 import type { CurrentPlan, PlanPick, PlanTier } from '@safe-global/views/features/spaces/components/Plans/types'
-import SafeProAnnouncement from '@/features/safe-pro-announcement/public/SafeProAnnouncement'
+import SafeProAnnouncement from '@/features/safe-pro-announcement/public/components/SafeProAnnouncement'
 
 const PlansSkeleton = () => (
   <div className="flex flex-col gap-6" data-testid="plans-skeleton">

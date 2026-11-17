@@ -13,8 +13,8 @@ import DecoderLinks from '@safe-global/views/components/transactions/TxDetails/S
 import isEqual from 'lodash/isEqual'
 import Multisend from '../TxData/DecodedData/Multisend'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
-import { useHistoryFeesBreakdown } from '@/features/fee-payment/public/useHistoryFeesBreakdown'
-import HistoryFeesAccordion from '@/features/fee-payment/public/HistoryFeesAccordion'
+import { useHistoryFeesBreakdown } from '@/features/fee-payment/public/hooks/useHistoryFeesBreakdown'
+import HistoryFeesAccordion from '@/features/fee-payment/public/components/HistoryFeesAccordion'
 
 interface Props {
   safeTxData?: SafeTransactionData

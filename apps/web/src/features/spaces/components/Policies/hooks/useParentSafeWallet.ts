@@ -6,7 +6,7 @@ import { useChain } from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { isSmartContractWallet } from '@/utils/wallets'
-import { useSpaceSafes } from '../../../public/useSpaceSafes'
+import { useSpaceSafes } from '../../../public/hooks/useSpaceSafes'
 
 /** The flow signs as an EOA, so a wallet that is itself a Safe (e.g. a parent over WalletConnect) cannot grant here. */
 export const useParentSafeWallet = (chainId: string | undefined): string | undefined => {

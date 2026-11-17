@@ -49,7 +49,7 @@ jest.mock('@/services/analytics/events/spaces', () => ({
   },
 }))
 
-jest.mock('../../../../public/useSpaceSafes', () => ({
+jest.mock('../../../../public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => ({ allSafes: mockSpaceSafes }),
 }))
 
@@ -72,7 +72,7 @@ let mockSpaceAddressBook: Array<{ address: string; name: string; chainIds: strin
 let mockAddressBookError = false
 const mockPrepareNames = jest.fn<{ items?: unknown[]; error?: string }, [unknown[]]>((items) => ({ items }))
 
-jest.mock('../../../../public/useGetSpaceAddressBook', () => ({
+jest.mock('../../../../public/hooks/useGetSpaceAddressBook', () => ({
   __esModule: true,
   default: () => mockSpaceAddressBook,
   useSpaceAddressBookState: () => ({
@@ -82,8 +82,8 @@ jest.mock('../../../../public/useGetSpaceAddressBook', () => ({
   }),
 }))
 
-jest.mock('../../../../public/useUpsertWorkspaceSafeName', () => ({
-  ...jest.requireActual('../../../../public/useUpsertWorkspaceSafeName'),
+jest.mock('../../../../public/hooks/useUpsertWorkspaceSafeName', () => ({
+  ...jest.requireActual('../../../../public/hooks/useUpsertWorkspaceSafeName'),
   usePrepareWorkspaceSafeNames: () => mockPrepareNames,
 }))
 

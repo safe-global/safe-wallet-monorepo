@@ -1,7 +1,7 @@
 import { fireEvent, render, renderHook, waitFor } from '@/tests/test-utils'
 import { useState, type ReactNode } from 'react'
-import { SafeShieldProvider } from '../public/SafeShieldProvider'
-import { useSafeShield, useSafeShieldForAddressPoisoning } from '../public/useSafeShield'
+import { SafeShieldProvider } from '../public/components/SafeShieldProvider'
+import { useSafeShield, useSafeShieldForAddressPoisoning } from '../public/hooks/useSafeShield'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { StatusGroup } from '@safe-global/utils/features/safe-shield/types'
 
@@ -28,13 +28,13 @@ jest.mock('../hooks/useThreatAnalysis', () => ({
   useThreatAnalysis: jest.fn(() => [undefined, undefined, false]),
 }))
 jest.mock('@/hooks/useIsTrustedSafe', () => ({ __esModule: true, default: jest.fn(() => true) }))
-jest.mock('@/features/spaces/public/useSafeProAccess', () => ({
+jest.mock('@/features/spaces/public/hooks/useSafeProAccess', () => ({
   useSafeProAccess: () => ({ hasProFeatures: true, isLoading: false }),
 }))
-jest.mock('@/features/myAccounts/public/useTrustSafe', () => ({
+jest.mock('@/features/myAccounts/public/hooks/useTrustSafe', () => ({
   useTrustSafe: jest.fn(() => ({ trustSafe: jest.fn() })),
 }))
-jest.mock('@/features/hypernative/public/useAuthToken', () => ({
+jest.mock('@/features/hypernative/public/hooks/useAuthToken', () => ({
   useAuthToken: jest.fn(() => [{ token: undefined }]),
 }))
 

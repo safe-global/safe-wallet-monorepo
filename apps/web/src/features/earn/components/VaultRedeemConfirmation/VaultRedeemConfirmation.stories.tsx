@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { StoreDecorator } from '@/stories/storeDecorator'
-import VaultRedeemConfirmation from '../../public/VaultRedeemConfirmation'
+import VaultRedeemConfirmation from '../../public/components/VaultRedeemConfirmation'
 import {
   mockVaultRedeemTxInfo,
   mockVaultRedeemTxInfoWithoutAdditionalRewards,

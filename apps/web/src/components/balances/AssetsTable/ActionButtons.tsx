@@ -4,7 +4,7 @@ import SendButton from './SendButton'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import css from './styles.module.css'
-import SwapButton from '@/features/swap/public/SwapButton'
+import SwapButton from '@/features/swap/public/components/SwapButton'
 
 interface ActionButtonsProps {
   tokenInfo: Balance['tokenInfo']

@@ -1,6 +1,6 @@
 import { type ReactElement, useMemo } from 'react'
-import { useCurrentSpaceId } from '../../../../public/useCurrentSpaceId'
-import { useIsActiveMember } from '../../../../public/useSpaceMembers'
+import { useCurrentSpaceId } from '../../../../public/hooks/useCurrentSpaceId'
+import { useIsActiveMember } from '../../../../public/hooks/useSpaceMembers'
 import { spacesMainNavigation, spacesSetupGroup } from '../../config'
 import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
 import type {
@@ -10,7 +10,7 @@ import type {
 import { SpacesSidebarVariant } from '../SpacesSidebarVariant/SpacesSidebarVariant'
 import { useHasFeature } from '@/hooks/useChains'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
-import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled'
+import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/public/hooks/useIsSafeProAnnouncementEnabled'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
 

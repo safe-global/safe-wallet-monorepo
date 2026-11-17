@@ -1,6 +1,6 @@
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import type { NarrowConfirmationViewProps } from '../types'
-import SwapOrderConfirmation from '@/features/swap/public/SwapOrderConfirmation'
+import SwapOrderConfirmation from '@/features/swap/public/components/SwapOrderConfirmation'
 
 interface SwapOrderProps extends NarrowConfirmationViewProps {
   txInfo: OrderTransactionInfo

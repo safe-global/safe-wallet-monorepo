@@ -3,9 +3,9 @@ import { composeStories } from '@storybook/react'
 import { render, screen } from '@testing-library/react'
 
 import * as stories from './SecurityReportDrawer.stories'
-import type useSecurityScan from '@/features/security/public/useSecurityScan'
+import type useSecurityScan from '@/features/security/public/hooks/useSecurityScan'
 
-jest.mock('@/features/security/public/useSecurityScan', () => ({
+jest.mock('@/features/security/public/hooks/useSecurityScan', () => ({
   __esModule: true,
   default: jest.fn((): ReturnType<typeof useSecurityScan> => ({
     results: {},

@@ -1,10 +1,10 @@
 import { render, screen } from '@/tests/test-utils'
 import { HnAnalysisGroupCard } from './index'
-import type { AnalysisGroupCardProps } from '@/features/safe-shield/public/AnalysisGroupCard'
-import AnalysisGroupCard from '@/features/safe-shield/public/AnalysisGroupCard'
+import type { AnalysisGroupCardProps } from '@/features/safe-shield/public/components/AnalysisGroupCard'
+import AnalysisGroupCard from '@/features/safe-shield/public/components/AnalysisGroupCard'
 import React from 'react'
 
-jest.mock('@/features/safe-shield/public/AnalysisGroupCard', () => ({
+jest.mock('@/features/safe-shield/public/components/AnalysisGroupCard', () => ({
   __esModule: true,
   default: jest.fn(({ footer }: AnalysisGroupCardProps) => (
     <div data-testid="analysis-group-card">

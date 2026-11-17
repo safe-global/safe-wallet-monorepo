@@ -25,7 +25,7 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   useSigner: jest.fn(() => null),
 }))
 
-jest.mock('@/features/counterfactual/public/useIsCounterfactualSafe', () => ({
+jest.mock('@/features/counterfactual/public/hooks/useIsCounterfactualSafe', () => ({
   __esModule: true,
   default: jest.fn(() => false),
 }))

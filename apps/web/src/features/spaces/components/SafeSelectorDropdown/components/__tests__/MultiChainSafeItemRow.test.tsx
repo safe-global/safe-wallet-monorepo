@@ -19,7 +19,7 @@ jest.mock('@/hooks/useChains', () => ({
 // Surface the explorerLink the summary row is (or isn't) given — the multi-chain summary must never
 // receive one, since its chain would be arbitrary.
 const mockWriteScope: jest.Mock = jest.fn(() => ({ scope: 'local', canRename: true }))
-jest.mock('../../../../public/useAddressBookWriteScope', () => ({
+jest.mock('../../../../public/hooks/useAddressBookWriteScope', () => ({
   useAddressBookWriteScope: (...args: unknown[]) => mockWriteScope(...args),
 }))
 

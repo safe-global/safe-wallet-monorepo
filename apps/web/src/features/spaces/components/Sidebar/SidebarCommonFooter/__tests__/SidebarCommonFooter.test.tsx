@@ -127,11 +127,11 @@ jest.mock('../../ApiCtaSidebar/ApiCtaSidebar', () => ({
 let mockIsSafeProAnnouncementEnabled = false
 let mockIsSafeProBannerDismissed = false
 const mockDismissSafeProBanner = jest.fn()
-jest.mock('@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled', () => ({
+jest.mock('@/features/safe-pro-announcement/public/hooks/useIsSafeProAnnouncementEnabled', () => ({
   useIsSafeProAnnouncementEnabled: () => mockIsSafeProAnnouncementEnabled,
 }))
-jest.mock('@/features/safe-pro-announcement/public/useSafeProSidebarBannerDismissed', () => ({
-  ...jest.requireActual('@/features/safe-pro-announcement/public/useSafeProSidebarBannerDismissed'),
+jest.mock('@/features/safe-pro-announcement/public/hooks/useSafeProSidebarBannerDismissed', () => ({
+  ...jest.requireActual('@/features/safe-pro-announcement/public/hooks/useSafeProSidebarBannerDismissed'),
   useSafeProSidebarBannerDismissed: () => [mockIsSafeProBannerDismissed, mockDismissSafeProBanner],
 }))
 
@@ -151,18 +151,18 @@ jest.mock('@/hooks/useIsSafeProEnabled', () => ({
 }))
 
 let mockSpaceId: string | null = 'space-uuid'
-jest.mock('../../../../public/useCurrentSpaceId', () => ({
+jest.mock('../../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockSpaceId,
 }))
 
 let mockIsTwoFactorCardDismissed = false
 const mockDismissTwoFactorCard = jest.fn()
-jest.mock('@/features/oidc-auth/public/useTwoFactorAwarenessDismissed', () => ({
-  ...jest.requireActual('@/features/oidc-auth/public/useTwoFactorAwarenessDismissed'),
+jest.mock('@/features/oidc-auth/public/hooks/useTwoFactorAwarenessDismissed', () => ({
+  ...jest.requireActual('@/features/oidc-auth/public/hooks/useTwoFactorAwarenessDismissed'),
   useTwoFactorAwarenessDismissed: () => [mockIsTwoFactorCardDismissed, mockDismissTwoFactorCard],
 }))
 
-jest.mock('@/features/oidc-auth/public/WorkspaceTwoFactorAwarenessCard', () => ({
+jest.mock('@/features/oidc-auth/public/components/WorkspaceTwoFactorAwarenessCard', () => ({
   __esModule: true,
   default: ({ className, spaceId, onDismiss }: { className?: string; spaceId?: string; onDismiss: () => void }) => (
     <div data-testid="workspace-2fa-awareness-card" data-space-id={spaceId} className={className}>
@@ -170,7 +170,7 @@ jest.mock('@/features/oidc-auth/public/WorkspaceTwoFactorAwarenessCard', () => (
     </div>
   ),
 }))
-jest.mock('@/features/safe-pro-announcement/public/SafeProSidebarBanner', () => ({
+jest.mock('@/features/safe-pro-announcement/public/components/SafeProSidebarBanner', () => ({
   __esModule: true,
   default: ({ className, onDismiss }: { className?: string; onDismiss?: () => void }) => (
     <div data-testid="safe-pro-sidebar-banner" className={className}>

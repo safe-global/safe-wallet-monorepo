@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react'
 import useGetSpaceAuditLog from '../useGetSpaceAuditLog'
 import useGetSpaceAuditLogActors from '../useGetSpaceAuditLogActors'
-import { useCurrentSpaceId } from '../../public/useCurrentSpaceId'
+import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import {
   useSpaceAuditGetAuditLogV1Query,
@@ -11,7 +11,7 @@ import {
 jest.mock('@/store', () => ({
   useAppSelector: jest.fn(),
 }))
-jest.mock('../../public/useCurrentSpaceId', () => ({
+jest.mock('../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(),
 }))
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({

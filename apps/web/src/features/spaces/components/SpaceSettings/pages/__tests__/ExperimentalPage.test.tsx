@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { spaceBuilder } from '@/tests/builders/space'
-import { ELEVATION_REQUIRED_ERROR } from '@/features/oidc-auth/public/elevation'
+import { ELEVATION_REQUIRED_ERROR } from '@/features/oidc-auth/public/utils/elevation'
 import ExperimentalPage from '../ExperimentalPage'
 
 const SPACE_ID = 'space-uuid-1'
@@ -16,54 +16,54 @@ const mockUnwrap = jest.fn()
 const mockUpdateSpace = jest.fn(() => ({ unwrap: mockUnwrap }))
 const mockUseSpacesUpdateV1Mutation = jest.fn()
 
-jest.mock('../../../../public/useSpaceMembers', () => ({
+jest.mock('../../../../public/hooks/useSpaceMembers', () => ({
   get MemberStatus() {
-    return jest.requireActual('../../../../public/useSpaceMembers').MemberStatus
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').MemberStatus
   },
   get MemberRole() {
-    return jest.requireActual('../../../../public/useSpaceMembers').MemberRole
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').MemberRole
   },
   get MEMBER_ALIAS_MAX_LENGTH() {
-    return jest.requireActual('../../../../public/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
   },
   get getMemberDisplayName() {
-    return jest.requireActual('../../../../public/useSpaceMembers').getMemberDisplayName
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').getMemberDisplayName
   },
   get sanitizeMemberAlias() {
-    return jest.requireActual('../../../../public/useSpaceMembers').sanitizeMemberAlias
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').sanitizeMemberAlias
   },
   get isAdmin() {
-    return jest.requireActual('../../../../public/useSpaceMembers').isAdmin
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').isAdmin
   },
   get isActiveAdmin() {
-    return jest.requireActual('../../../../public/useSpaceMembers').isActiveAdmin
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').isActiveAdmin
   },
   get isInviteExpired() {
-    return jest.requireActual('../../../../public/useSpaceMembers').isInviteExpired
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').isInviteExpired
   },
   get useSpaceMembersByStatus() {
-    return jest.requireActual('../../../../public/useSpaceMembers').useSpaceMembersByStatus
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').useSpaceMembersByStatus
   },
   get useCurrentMembership() {
-    return jest.requireActual('../../../../public/useSpaceMembers').useCurrentMembership
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').useCurrentMembership
   },
   get useCurrentMemberProfile() {
-    return jest.requireActual('../../../../public/useSpaceMembers').useCurrentMemberProfile
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').useCurrentMemberProfile
   },
   get useIsActiveMember() {
-    return jest.requireActual('../../../../public/useSpaceMembers').useIsActiveMember
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').useIsActiveMember
   },
   get useIsInvited() {
-    return jest.requireActual('../../../../public/useSpaceMembers').useIsInvited
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').useIsInvited
   },
   useIsAdmin: () => mockUseIsAdmin(),
 }))
-jest.mock('../../../../public/useCurrentSpaceId', () => ({
+jest.mock('../../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => SPACE_ID,
 }))
 
-jest.mock('@/features/policy-guard/public/useAllowlistAvailability', () => ({
-  ...jest.requireActual('@/features/policy-guard/public/useAllowlistAvailability'),
+jest.mock('@/features/policy-guard/public/hooks/useAllowlistAvailability', () => ({
+  ...jest.requireActual('@/features/policy-guard/public/hooks/useAllowlistAvailability'),
   useIsAllowlistAvailableInSpace: () => mockUseIsAllowlistAvailableInSpace(),
 }))
 

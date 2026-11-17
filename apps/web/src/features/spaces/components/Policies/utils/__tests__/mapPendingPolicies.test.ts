@@ -7,7 +7,7 @@ import {
   asActivePolicy,
   mockPendingPolicy,
   mockSpendingLimitPolicy,
-} from '../../../../public/policies'
+} from '../../../../public/utils/policies'
 import { mapActivePolicies } from '../mapActivePolicies'
 import { getPendingTxId, isPendingChangeIndexed, mapPendingPolicies } from '../mapPendingPolicies'
 

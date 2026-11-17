@@ -12,8 +12,8 @@ jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
 jest.mock('@/hooks/useSafeInfo')
 
-jest.mock('../../public/useIsOnlySpendingLimitBeneficiary', () => ({
-  ...jest.requireActual('../../public/useIsOnlySpendingLimitBeneficiary'),
+jest.mock('../../public/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
+  ...jest.requireActual('../../public/hooks/useIsOnlySpendingLimitBeneficiary'),
   __esModule: true,
   default: jest.fn(),
 }))

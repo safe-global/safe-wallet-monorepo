@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef } from 'react'
 import type { ScanResult } from '@/features/security/public/types'
-import type { SecurityServices } from '@/features/security/public/securityServices'
+import type { SecurityServices } from '@/features/security/public/services/securityServices'
 import useAutoScan, { type AutoScanServices, type AutoScanState } from '../../../hooks/useAutoScan'
-import { useCurrentSpaceId } from '../../../public/useCurrentSpaceId'
+import { useCurrentSpaceId } from '../../../public/hooks/useCurrentSpaceId'
 import type {
   OverviewMap,
   SelectedSafe,

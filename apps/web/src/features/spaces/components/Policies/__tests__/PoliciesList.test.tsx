@@ -8,7 +8,7 @@ import {
   mockPolicies,
   mockProposerPolicy,
   mockUnenforcedPolicy,
-} from '../../../public/policies'
+} from '../../../public/utils/policies'
 import PoliciesList from '../PoliciesList'
 
 const mockResolveName = jest.fn()

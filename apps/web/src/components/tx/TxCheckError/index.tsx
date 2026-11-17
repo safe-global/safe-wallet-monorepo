@@ -14,7 +14,7 @@ import { ExternalLink as ExternalLinkIcon } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 import Track from '@/components/common/Track'
-import { useSafeShieldAssessmentUrl } from '@/features/hypernative/public/useSafeShieldAssessmentUrl'
+import { useSafeShieldAssessmentUrl } from '@/features/hypernative/public/hooks/useSafeShieldAssessmentUrl'
 
 export const TX_WILL_FAIL_MESSAGE =
   'This transaction will most likely fail. To save gas costs, reject this transaction.'

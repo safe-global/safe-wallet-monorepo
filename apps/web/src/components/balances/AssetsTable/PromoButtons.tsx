@@ -1,6 +1,6 @@
 import React, { type ReactElement } from 'react'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import EarnButton from '@/features/earn/public/EarnButton'
+import EarnButton from '@/features/earn/public/components/EarnButton'
 import { isEligibleEarnToken } from '@/features/earn/public/utils'
 import { EARN_LABELS } from '@/services/analytics/events/earn'
 import { isSafeToken } from '@/utils/safe-token'

@@ -14,11 +14,11 @@ jest.mock('next/router', () => ({
   useRouter: () => ({ query: { spaceId: '1' }, pathname: '/spaces', push: mockPush }),
 }))
 
-jest.mock('../../../../../public/useCurrentSpaceId', () => ({
+jest.mock('../../../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '1',
 }))
 
-jest.mock('../../../../../public/useSpaceMembers', () => ({
+jest.mock('../../../../../public/hooks/useSpaceMembers', () => ({
   useIsActiveMember: () => true,
 }))
 
@@ -103,7 +103,7 @@ jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   },
 }))
 
-jest.mock('@/features/feature-flag-overrides/public/FeatureFlagEditorDialogLoader', () => ({
+jest.mock('@/features/feature-flag-overrides/public/components/FeatureFlagEditorDialogLoader', () => ({
   FeatureFlagEditorDialogLoader: ({ open }: { open: boolean }) =>
     open ? <div data-testid="feature-flag-editor-dialog" /> : null,
 }))

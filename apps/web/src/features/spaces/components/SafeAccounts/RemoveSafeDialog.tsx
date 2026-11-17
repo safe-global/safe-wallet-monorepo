@@ -2,7 +2,7 @@ import ModalDialog from '@/components/common/ModalDialog'
 import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 import type { SafeItem, MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
 import { getChainIdsParam } from '../../utils'
-import { useCurrentSpaceId } from '../../public/useCurrentSpaceId'
+import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -15,7 +15,7 @@ import { useSpaceSafesDeleteV1Mutation } from '@safe-global/store/gateway/AUTO_G
 import { useState } from 'react'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
-import { isElevationRequiredError } from '@/features/oidc-auth/public/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/utils/elevation'
 
 function getToBeDeletedSafeAccounts(safeItem: SafeItem | MultiChainSafeItem) {
   if (isMultiChainSafeItem(safeItem)) {

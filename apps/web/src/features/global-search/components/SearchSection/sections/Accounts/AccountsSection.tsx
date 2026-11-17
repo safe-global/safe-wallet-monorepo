@@ -1,6 +1,6 @@
 import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
-import { useSpaceSafes } from '@/features/spaces/public/useSpaceSafes'
-import SafeCardReadOnly from '@/features/spaces/public/SafeCardReadOnly'
+import { useSpaceSafes } from '@/features/spaces/public/hooks/useSpaceSafes'
+import SafeCardReadOnly from '@/features/spaces/public/components/SafeCardReadOnly'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import type { SectionItemProps } from '../../sectionItems'
 import useGlobalSearchFilter from '../../../../hooks/useGlobalSearchFilter'

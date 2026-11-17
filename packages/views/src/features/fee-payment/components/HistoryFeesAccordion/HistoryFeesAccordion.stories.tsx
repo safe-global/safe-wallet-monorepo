@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import HistoryFeesAccordion from './index'
-import type { HistoryFeesData } from '@/features/fee-payment/public/useHistoryFeesBreakdown'
+import type { HistoryFeesData } from '@/features/fee-payment/public/hooks/useHistoryFeesBreakdown'
 
 const meta = {
   title: 'Features/FeePayment/HistoryFeesAccordion',

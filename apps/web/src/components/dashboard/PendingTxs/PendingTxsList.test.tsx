@@ -17,8 +17,8 @@ import PendingTxsList from './PendingTxsList'
 jest.mock('@/hooks/useTxQueue')
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/wallets/useWallet')
-jest.mock('@/features/recovery/public/useRecoveryQueue', () => ({
-  ...jest.requireActual('@/features/recovery/public/useRecoveryQueue'),
+jest.mock('@/features/recovery/public/hooks/useRecoveryQueue', () => ({
+  ...jest.requireActual('@/features/recovery/public/hooks/useRecoveryQueue'),
   useRecoveryQueue: jest.fn(),
 }))
 // The rows' own content has its tests in PendingTxListItem.test.tsx; these stand-ins need no address book.
@@ -36,7 +36,7 @@ const mockUseTxQueue = jest.requireMock('@/hooks/useTxQueue').default as jest.Mo
 const mockUseQueuedTxsLength = jest.requireMock('@/hooks/useTxQueue').useQueuedTxsLength as jest.Mock
 const mockUseSafeInfo = jest.requireMock('@/hooks/useSafeInfo').default as jest.Mock
 const mockUseWallet = jest.requireMock('@/hooks/wallets/useWallet').default as jest.Mock
-const mockUseRecoveryQueue = jest.requireMock('@/features/recovery/public/useRecoveryQueue')
+const mockUseRecoveryQueue = jest.requireMock('@/features/recovery/public/hooks/useRecoveryQueue')
   .useRecoveryQueue as jest.Mock
 
 const SAFE_ADDRESS = '0x1111111111111111111111111111111111111111'

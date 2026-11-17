@@ -4,7 +4,7 @@ import { useMemo } from 'react'
 import { TxFlowType } from '@/services/analytics/types'
 import { TxFlow } from '../../TxFlow'
 import type ReviewTransaction from '@/components/tx/ReviewTransactionV2'
-import RemoveSpendingLimitReview from '@/features/spending-limits/public/RemoveSpendingLimitReview'
+import RemoveSpendingLimitReview from '@/features/spending-limits/public/components/RemoveSpendingLimitReview'
 
 const RemoveSpendingLimitFlow = ({ spendingLimit }: { spendingLimit: SpendingLimitState }) => {
   const ReviewTransactionComponent = useMemo<typeof ReviewTransaction>(

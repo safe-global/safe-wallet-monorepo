@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
-import { useSpaceSafes } from '../../../public/useSpaceSafes'
+import { useSpaceSafes } from '../../../public/hooks/useSpaceSafes'
 import { useAppSelector } from '@/store'
-import { selectUndeployedSafes } from '@/features/counterfactual/public/undeployedSafesSlice'
+import { selectUndeployedSafes } from '@/features/counterfactual/public/store/undeployedSafesSlice'
 import { selectCurrency } from '@/store/settingsSlice'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
-import type { SecurityServices } from '@/features/security/public/securityServices'
+import type { SecurityServices } from '@/features/security/public/services/securityServices'
 import { flattenSafes, getDeployedEntries, reconcileDeployedSafes, toSafeItems } from '../utils'
 import type {
   BalanceMap,

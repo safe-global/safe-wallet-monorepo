@@ -9,7 +9,7 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import NewTxIcon from '@/public/images/transactions/new-tx.svg'
 
 import css from './styles.module.css'
-import HnMiniTxBanner from '@/features/hypernative/public/HnMiniTxBanner'
+import HnMiniTxBanner from '@/features/hypernative/public/components/HnMiniTxBanner'
 
 const NewTxFlow = () => {
   const { setTxFlow } = useContext(TxModalContext)

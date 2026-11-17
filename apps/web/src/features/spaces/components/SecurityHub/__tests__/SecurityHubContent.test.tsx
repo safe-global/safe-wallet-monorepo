@@ -9,7 +9,7 @@ jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
 
-jest.mock('@/features/security/public/useSecurityServices', () => ({
+jest.mock('@/features/security/public/hooks/useSecurityServices', () => ({
   useSecurityServices: () => ({
     scanKey: (address: string, chainId: string) => `${chainId}:${address}`,
     getSafeGrade: (results: { grade: string }) => results.grade,

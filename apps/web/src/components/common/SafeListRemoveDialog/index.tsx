@@ -11,7 +11,7 @@ import { AppRoutes } from '@/config/routes'
 import router from 'next/router'
 import { removeAddressBookEntry } from '@/store/addressBookSlice'
 import { removeSafe } from '@/store/addedSafesSlice'
-import { removeUndeployedSafe } from '@/features/counterfactual/public/undeployedSafesSlice'
+import { removeUndeployedSafe } from '@/features/counterfactual/public/store/undeployedSafesSlice'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useChainId from '@/hooks/useChainId'
 

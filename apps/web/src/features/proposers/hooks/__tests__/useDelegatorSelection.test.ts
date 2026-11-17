@@ -10,7 +10,7 @@ import * as useWalletModule from '@/hooks/wallets/useWallet'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import * as useSafeInfoModule from '@/hooks/useSafeInfo'
 import * as useNestedSafeOwnersModule from '@/hooks/useNestedSafeOwners'
-import * as useParentSafeThresholdModule from '../../public/useParentSafeThreshold'
+import * as useParentSafeThresholdModule from '../../public/hooks/useParentSafeThreshold'
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 

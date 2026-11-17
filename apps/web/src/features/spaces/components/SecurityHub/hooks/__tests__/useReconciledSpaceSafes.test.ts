@@ -5,7 +5,7 @@ const useSpaceSafesMock = jest.fn()
 const useGetMultipleSafeOverviewsQueryMock = jest.fn()
 const useAppSelectorMock = jest.fn()
 
-jest.mock('../../../../public/useSpaceSafes', () => ({
+jest.mock('../../../../public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => useSpaceSafesMock(),
 }))
 
@@ -13,8 +13,8 @@ jest.mock('@/store', () => ({
   useAppSelector: (selector: unknown) => useAppSelectorMock(selector),
 }))
 
-jest.mock('@/features/counterfactual/public/undeployedSafesSlice', () => ({
-  ...jest.requireActual('@/features/counterfactual/public/undeployedSafesSlice'),
+jest.mock('@/features/counterfactual/public/store/undeployedSafesSlice', () => ({
+  ...jest.requireActual('@/features/counterfactual/public/store/undeployedSafesSlice'),
   selectUndeployedSafes: 'selectUndeployedSafes',
 }))
 jest.mock('@/store/settingsSlice', () => ({

@@ -7,18 +7,18 @@ import { mockWallet } from '@/tests/mocks/hooks'
 jest.mock('@/hooks/wallets/useWallet')
 
 const mockUseIsSwapFeatureEnabled = jest.fn().mockReturnValue(true)
-jest.mock('@/features/swap/public/useIsSwapFeatureEnabled', () => ({
+jest.mock('@/features/swap/public/hooks/useIsSwapFeatureEnabled', () => ({
   __esModule: true,
   default: () => mockUseIsSwapFeatureEnabled(),
 }))
 
-jest.mock('@/features/spaces/public/useSpaceSafes', () => ({
+jest.mock('@/features/spaces/public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => ({ allSafes: [], isLoading: false }),
 }))
-jest.mock('@/features/spaces/public/useCurrentSpaceId', () => ({
+jest.mock('@/features/spaces/public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => null,
 }))
-jest.mock('@/features/spaces/public/useIsQualifiedSafe', () => ({
+jest.mock('@/features/spaces/public/hooks/useIsQualifiedSafe', () => ({
   __esModule: true,
   default: () => false,
 }))

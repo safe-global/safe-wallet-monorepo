@@ -59,7 +59,7 @@ jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),
 }))
-jest.mock('@/features/spending-limits/public/spendingLimitExecution', () => ({
+jest.mock('@/features/spending-limits/public/services/spendingLimitExecution', () => ({
   createSpendingLimitsTx: (...args: unknown[]) => mockCreate(...args),
   createSpendingLimitEditTx: (...args: unknown[]) => mockCreateEdit(...args),
 }))

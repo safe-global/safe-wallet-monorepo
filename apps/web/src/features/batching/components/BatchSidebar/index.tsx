@@ -5,7 +5,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { Sheet, SheetContent } from '@safe-global/views/components/ui/sheet'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { useDraftBatch, useUpdateBatch } from '../../public/useDraftBatch'
+import { useDraftBatch, useUpdateBatch } from '../../public/hooks/useDraftBatch'
 import css from './styles.module.css'
 import { NewTxFlow } from '@/components/tx-flow/flows/NewTxFlow'
 import { TxModalContext } from '@/components/tx-flow'
@@ -15,7 +15,7 @@ import { BATCH_EVENTS } from '@/services/analytics/events/batching'
 import CheckWallet from '@/components/common/CheckWallet'
 import PlusIcon from '@/public/images/common/plus.svg'
 import EmptyBatch from '@safe-global/views/features/batching/components/BatchSidebar/EmptyBatch'
-import BatchTxList from '../../public/BatchTxList'
+import BatchTxList from '../../public/components/BatchTxList'
 
 const BatchSidebar = ({ isOpen, onToggle }: { isOpen: boolean; onToggle: (open: boolean) => void }) => {
   const { txFlow, setTxFlow } = useContext(TxModalContext)

@@ -12,7 +12,7 @@ import {
   mockProposerPolicy,
   mockRecoveryPolicy,
   mockUnenforcedPolicy,
-} from '../../public/policies'
+} from '../../public/utils/policies'
 import {
   mockActivatingAllowlist,
   mockAllowlistChangePending,
@@ -21,7 +21,7 @@ import {
   mockFailedAllowlist,
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
-} from '../../public/allowlistPolicies'
+} from '../../public/utils/allowlistPolicies'
 import PoliciesList from './PoliciesList'
 
 const meta = {

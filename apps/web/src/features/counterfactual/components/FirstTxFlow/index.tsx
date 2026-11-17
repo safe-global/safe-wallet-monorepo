@@ -1,6 +1,6 @@
 import { AppRoutes } from '@/config/routes'
-import { useIsRecoverySupported } from '@/features/recovery/public/useIsRecoverySupported'
-import useRecovery from '@/features/recovery/public/useRecovery'
+import { useIsRecoverySupported } from '@/features/recovery/public/hooks/useIsRecoverySupported'
+import useRecovery from '@/features/recovery/public/hooks/useRecovery'
 import dynamic from '@/utils/dynamic'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { trackEvent } from '@/services/analytics'
@@ -20,7 +20,7 @@ import RecoveryPlus from '@safe-global/views/assets/images/common/recovery-plus.
 import SwapIcon from '@/public/images/common/swap.svg'
 import SafeLogo from '@safe-global/views/assets/images/logo-no-text.svg'
 import { Wrench } from 'lucide-react'
-import useIsSwapFeatureEnabled from '@/features/swap/public/useIsSwapFeatureEnabled'
+import useIsSwapFeatureEnabled from '@/features/swap/public/hooks/useIsSwapFeatureEnabled'
 
 const FirstTxFlow = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const txBuilder = useTxBuilderApp()

@@ -4,7 +4,7 @@ import { Input } from '@safe-global/views/components/ui/input'
 import { Label } from '@safe-global/views/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
 import useGetSpaceAuditLogActors from '../../hooks/useGetSpaceAuditLogActors'
-import { useMemberNameResolver } from '../../public/useMemberNameResolver'
+import { useMemberNameResolver } from '../../public/hooks/useMemberNameResolver'
 import {
   getDateFilterValidation,
   toDateInputValue,

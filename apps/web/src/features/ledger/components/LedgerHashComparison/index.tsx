@@ -5,7 +5,7 @@ import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/c
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
 import CopyButton from '@/components/common/CopyButton'
 import DialogActions from '@/components/common/DialogActions'
-import ledgerHashStore from '../../public/ledgerHashStore'
+import ledgerHashStore from '../../public/store/ledgerHashStore'
 import {
   DIALOG_TITLE,
   DIALOG_DESCRIPTION,

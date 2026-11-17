@@ -31,13 +31,13 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   useSigner: jest.fn(() => undefined),
 }))
 
-jest.mock('@/features/counterfactual/public/useIsCounterfactualSafe', () => ({
+jest.mock('@/features/counterfactual/public/hooks/useIsCounterfactualSafe', () => ({
   __esModule: true,
   default: jest.fn(() => false),
 }))
 
-jest.mock('@/features/safe-shield/public/useSafeShield', () => ({
-  ...jest.requireActual('@/features/safe-shield/public/useSafeShield'),
+jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/hooks/useSafeShield'),
   useSafeShield: jest.fn(() => ({ needsRiskConfirmation: false, isRiskConfirmed: false })),
 }))
 

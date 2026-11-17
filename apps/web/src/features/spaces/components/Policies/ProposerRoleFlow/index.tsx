@@ -4,7 +4,7 @@ import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProv
 import { parseSafeScopeKey, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
 import TxLayoutBase from '@/components/tx-flow/common/TxLayoutBase'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import { getProposerErrorText } from '@/features/proposers/public/proposerErrors'
+import { getProposerErrorText } from '@/features/proposers/public/utils/proposerErrors'
 import { useParentSafeWalletNotice } from '../hooks/useParentSafeWalletNotice'
 import { useEligibleSafeAccounts } from '../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { findSafeAccount } from '../SafeAccountSelector/utils'

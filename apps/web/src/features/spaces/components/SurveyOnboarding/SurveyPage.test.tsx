@@ -27,7 +27,7 @@ jest.mock('@/config/routes', () => ({
   },
 }))
 
-jest.mock('@/features/spaces/public/SurveyOnboarding', () => ({
+jest.mock('../../public/components/SurveyOnboarding', () => ({
   __esModule: true,
   default: () => <div data-testid="survey-onboarding" />,
 }))

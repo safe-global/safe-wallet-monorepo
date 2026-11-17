@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 import type { ScanResult } from '@/features/security/public/types'
-import type { SecurityServices } from '@/features/security/public/securityServices'
-import { useCurrentSpaceId } from '../../../public/useCurrentSpaceId'
+import type { SecurityServices } from '@/features/security/public/services/securityServices'
+import { useCurrentSpaceId } from '../../../public/hooks/useCurrentSpaceId'
 
 type SecurityHandle = SecurityServices | undefined
 

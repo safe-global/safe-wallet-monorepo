@@ -3,7 +3,7 @@ import { OperationType } from '@safe-global/types-kit'
 import { type ReactElement } from 'react'
 import * as zodiacRoles from 'zodiac-roles-deployments'
 import { fireEvent, render, waitFor, mockWeb3Provider } from '@/tests/test-utils'
-import { SafeShieldProvider } from '@/features/safe-shield/public/SafeShieldProvider'
+import { SafeShieldProvider } from '@/features/safe-shield/public/components/SafeShieldProvider'
 
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'

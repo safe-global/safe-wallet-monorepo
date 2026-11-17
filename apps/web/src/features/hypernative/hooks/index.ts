@@ -1,3 +1,3 @@
-export type { HypernativeGuardCheckResult } from '../public/useIsHypernativeGuard'
+export type { HypernativeGuardCheckResult } from '../public/hooks/useIsHypernativeGuard'
 
-export type { BannerVisibilityResult } from '../public/useBannerVisibility'
+export type { BannerVisibilityResult } from '../public/hooks/useBannerVisibility'

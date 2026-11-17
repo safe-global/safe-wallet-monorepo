@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
-import { asActivePolicy, MOCK_ADDRESSES, MOCK_SAFES, mockProposerPolicy } from '../../../../public/policies'
+import { asActivePolicy, MOCK_ADDRESSES, MOCK_SAFES, mockProposerPolicy } from '../../../../public/utils/policies'
 import ProposerDetails from '../index'
 
 const mockUseWallet = jest.fn()

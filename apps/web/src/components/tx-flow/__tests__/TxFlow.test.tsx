@@ -9,7 +9,7 @@ jest.mock('../SafeTxProvider', () => ({
   default: ({ children }: PropsWithChildren) => <>{children}</>,
 }))
 jest.mock('../TxInfoProvider', () => ({ TxInfoProvider: ({ children }: PropsWithChildren) => <>{children}</> }))
-jest.mock('@/features/safe-shield/public/SafeShieldProvider', () => ({
+jest.mock('@/features/safe-shield/public/components/SafeShieldProvider', () => ({
   SafeShieldProvider: ({ children }: PropsWithChildren) => <>{children}</>,
 }))
 jest.mock('@safe-global/views/components/tx-flow/slots/SlotProvider', () => ({

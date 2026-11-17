@@ -24,7 +24,7 @@ import { SafeSidebarWorkspaceHeader } from '../SafeSidebarWorkspaceHeader/SafeSi
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { isNonCriticalUpdate } from '@safe-global/utils/utils/chains'
-import useIsCounterfactualSafe from '@/features/counterfactual/public/useIsCounterfactualSafe'
+import useIsCounterfactualSafe from '@/features/counterfactual/public/hooks/useIsCounterfactualSafe'
 import { useIsHydrated } from '@/hooks/useIsHydrated'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { containerVariants, itemVariants } from '@safe-global/views/features/spaces/components/Sidebar/constants'

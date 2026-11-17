@@ -45,7 +45,7 @@ jest.mock('@/services/analytics', () => ({
 }))
 
 // Forward expandedGroups + overflowRow to data attributes / children for assertions
-jest.mock('@/features/hypernative/public/HnAnalysisGroupCard', () => ({
+jest.mock('@/features/hypernative/public/components/HnAnalysisGroupCard', () => ({
   __esModule: true,
   default: jest.fn(
     ({
@@ -75,12 +75,12 @@ jest.mock('@/features/hypernative/public/HnAnalysisGroupCard', () => ({
 }))
 
 // Mock useSafeShieldAssessmentUrl
-jest.mock('@/features/hypernative/public/useSafeShieldAssessmentUrl', () => ({
+jest.mock('@/features/hypernative/public/hooks/useSafeShieldAssessmentUrl', () => ({
   useSafeShieldAssessmentUrl: jest.fn(() => 'https://hn.example/report'),
 }))
 
 // Mock HnViewMoreOnHypernativeRow so we can assert its presence and props
-jest.mock('@/features/hypernative/public/HnViewMoreOnHypernativeRow', () => ({
+jest.mock('@/features/hypernative/public/components/HnViewMoreOnHypernativeRow', () => ({
   HnViewMoreOnHypernativeRow: jest.fn(({ overflowCount, assessmentUrl }) => (
     <div data-testid="overflow-row" data-overflow-count={overflowCount} data-assessment-url={assessmentUrl ?? ''}>
       +{overflowCount}
@@ -468,7 +468,7 @@ describe('ThreatAnalysis', () => {
       it('renders HnViewMoreOnHypernativeRow with assessmentUrl=null when URL is null and 5 threats', () => {
         // Override the mock to return null for this test
         const { useSafeShieldAssessmentUrl } = jest.requireMock(
-          '@/features/hypernative/public/useSafeShieldAssessmentUrl',
+          '@/features/hypernative/public/hooks/useSafeShieldAssessmentUrl',
         ) as { useSafeShieldAssessmentUrl: jest.Mock }
         useSafeShieldAssessmentUrl.mockReturnValueOnce(null)
 
