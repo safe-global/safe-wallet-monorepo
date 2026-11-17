@@ -6,6 +6,7 @@ import {
   ACTIVITY_THRESHOLD_LOW,
   LowActivityAnalysisResult,
   MAX_ACTIVITY_CHECK_ADDRESSES,
+  SkippedActivityAnalysisResult,
 } from '../config'
 import type { AnalysisResult, StatusGroup, StatusGroupType } from '../../../types'
 import { ErrorType, getErrorInfo } from '../../../utils/errors'
@@ -51,7 +52,7 @@ const fetchActivityInChunks = async (web3ReadOnly: JsonRpcProvider, addresses: s
 
 /**
  * React hook to analyze activity for multiple addresses.
- * Above MAX_ACTIVITY_CHECK_ADDRESSES addresses no lookup is made and every address resolves to `undefined`.
+ * Above MAX_ACTIVITY_CHECK_ADDRESSES addresses no lookup is made and every address resolves to the skipped check result.
  * A failed lookup resolves to the recipient analysis error result.
  * @param addresses - Array of Ethereum addresses to analyze
  * @returns Object containing activity results for each address, loading state, and error.
@@ -129,9 +130,10 @@ export const useAddressActivity = (
     [addresses.length, web3ReadOnly, overCap, results, error],
   )
 
-  // Over the cap every address resolves to undefined, as if checked without a finding
+  // Over the cap the check is reported as failed, so the skipped lookups never read as passed
   const skippedResults = useMemo(
-    () => (overCap ? Object.fromEntries(addresses.map((address) => [address, undefined])) : undefined),
+    () =>
+      overCap ? Object.fromEntries(addresses.map((address) => [address, SkippedActivityAnalysisResult])) : undefined,
     [overCap, addresses],
   )
 
