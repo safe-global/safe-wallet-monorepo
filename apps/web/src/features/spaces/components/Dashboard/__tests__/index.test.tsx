@@ -12,6 +12,7 @@ import {
 } from '@/features/spaces'
 import { useSpaceAccountsData } from '@/features/myAccounts'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { COMPLETED_STORAGE_KEY } from '../../../hooks/useSetupWidgetDismissal'
 import SpaceDashboard from '../index'
 
 const MOCK_SPACE_ID = '42'
@@ -477,7 +478,7 @@ describe('SpaceDashboard – setup widget slot', () => {
 
   it('shows pending transactions when the Workspace was marked completed before', () => {
     ;(useLocalStorage as jest.Mock).mockImplementation((key: string) =>
-      key === 'setupWidgetCompleted' ? [{ [MOCK_SPACE_ID]: true }, jest.fn()] : [{}, jest.fn()],
+      key === COMPLETED_STORAGE_KEY ? [{ [MOCK_SPACE_ID]: true }, jest.fn()] : [{}, jest.fn()],
     )
 
     render(<SpaceDashboard />)
