@@ -506,7 +506,7 @@ describe('SpaceDashboard – setup widget slot', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     restoreDefaultMocks()
-    setupUseLoadFeature([{ safeAddress: MOCK_SAFE_ADDRESS, txId: MOCK_TX_ID }])
+    setPendingTxEntries([{ safeAddress: MOCK_SAFE_ADDRESS, txId: MOCK_TX_ID }])
     ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [], isLoading: false })
   })
 
