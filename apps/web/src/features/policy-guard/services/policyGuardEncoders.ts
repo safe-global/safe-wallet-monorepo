@@ -1,4 +1,4 @@
-import { AbiCoder, Interface, keccak256 } from 'ethers'
+import { AbiCoder, Interface, keccak256, type Result } from 'ethers'
 import type { MetaTransactionData } from '@safe-global/types-kit'
 import { Safe__factory } from '@safe-global/utils/types/contracts/factories/@safe-global/safe-deployments/dist/assets/v1.5.0/Safe__factory'
 import type { PolicyConfiguration, SetupCallDescription } from '../types'
@@ -77,3 +77,31 @@ export const createApplyConfigurationTx = (
 
 export const getConfigurationRoot = (configurations: PolicyConfiguration[]): string =>
   keccak256(AbiCoder.defaultAbiCoder().encode([`${CONFIGURATION_TUPLE}[]`], [configurations]))
+
+const toPolicyConfiguration = (configuration: Result): PolicyConfiguration => {
+  const { target, selector, operation, policy, data } = configuration.toObject()
+  return { target, selector, operation: Number(operation) === 1 ? 1 : 0, policy, data }
+}
+
+/**
+ * The configurations a guard call sets, read from its calldata. A request carries only their root, so it returns
+ * `requested` only when that hashes to the root.
+ */
+export const getCallConfigurations = (
+  { data }: Pick<MetaTransactionData, 'data'>,
+  requested?: PolicyConfiguration[],
+): PolicyConfiguration[] | undefined => {
+  const fragment = policyGuardInterface.getFunction(data.slice(0, 10))
+  if (!fragment) return undefined
+
+  let decoded: Result
+  try {
+    decoded = policyGuardInterface.decodeFunctionData(fragment, data)
+  } catch {
+    return undefined
+  }
+
+  const [arg] = decoded
+  if (fragment.name !== 'requestConfiguration') return Array.from(arg, toPolicyConfiguration)
+  return requested && getConfigurationRoot(requested) === String(arg).toLowerCase() ? requested : undefined
+}

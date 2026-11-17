@@ -3,6 +3,7 @@ import type {
   createFirstSetupTxs,
   createRequestConfigurationTx,
   describeSetupCall,
+  getCallConfigurations,
   getConfigurationRoot,
 } from './services/policyGuardEncoders'
 
@@ -14,6 +15,7 @@ export interface PolicyGuardContract {
   createRequestConfigurationTx: typeof createRequestConfigurationTx
   createApplyConfigurationTx: typeof createApplyConfigurationTx
   getConfigurationRoot: typeof getConfigurationRoot
+  getCallConfigurations: typeof getCallConfigurations
   describeSetupCall: typeof describeSetupCall
   buildAllowlistConfigurations: typeof buildAllowlistConfigurations
   decodeErc20TransferPolicyData: typeof decodeErc20TransferPolicyData

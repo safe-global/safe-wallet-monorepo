@@ -10,6 +10,7 @@ import {
   createSetGuardTx,
   createSetModuleGuardTx,
   describeSetupCall,
+  getCallConfigurations,
   getConfigurationRoot,
 } from '../policyGuardEncoders'
 
@@ -144,5 +145,47 @@ describe('describeSetupCall', () => {
     expect(
       describeSetupCall({ data: Safe__factory.createInterface().encodeFunctionData('changeThreshold', [1]) }),
     ).toBeUndefined()
+  })
+})
+
+describe('getCallConfigurations', () => {
+  const decoded = configurations.map((configuration) => ({
+    ...configuration,
+    target: getAddress(configuration.target),
+    policy: getAddress(configuration.policy),
+  }))
+
+  it('should read the configurations from the calldata, when the call configures immediately', () => {
+    const [configure] = createFirstSetupTxs({ safeAddress, guardAddress, configurations })
+
+    expect(getCallConfigurations(configure)).toEqual(decoded)
+  })
+
+  it('should read the configurations from the calldata, when the call applies them', () => {
+    expect(getCallConfigurations(createApplyConfigurationTx(guardAddress, configurations))).toEqual(decoded)
+  })
+
+  it('should return the requested configurations, when they hash to the root of the request', () => {
+    const request = createRequestConfigurationTx(guardAddress, getConfigurationRoot(configurations))
+
+    expect(getCallConfigurations(request, configurations)).toBe(configurations)
+  })
+
+  it('should return nothing, when the requested configurations do not hash to the root of the request', () => {
+    const request = createRequestConfigurationTx(guardAddress, getConfigurationRoot(configurations))
+
+    expect(getCallConfigurations(request, [{ ...configurations[0], data: '0x' }])).toBeUndefined()
+    expect(getCallConfigurations(request)).toBeUndefined()
+  })
+
+  it('should return nothing, when the call is not a configuring call', () => {
+    expect(getCallConfigurations(createSetGuardTx(safeAddress, guardAddress))).toBeUndefined()
+    expect(getCallConfigurations({ data: '0x' })).toBeUndefined()
+  })
+
+  it('should return nothing, when the calldata of a configuring call is malformed', () => {
+    const { data } = createApplyConfigurationTx(guardAddress, configurations)
+
+    expect(getCallConfigurations({ data: data.slice(0, 20) })).toBeUndefined()
   })
 })
