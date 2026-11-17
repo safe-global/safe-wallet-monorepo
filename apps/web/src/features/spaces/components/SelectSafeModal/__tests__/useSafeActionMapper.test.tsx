@@ -5,6 +5,7 @@ import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { AppRoutes } from '@/config/routes'
 import { ESafeAction } from '@/features/spaces/store/safeActionsModalSlice'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
+import { unwrapScopedFlow } from '@/tests/mocks/safeScope'
 
 const mockReplace = jest.fn()
 const mockPush = jest.fn()
@@ -40,6 +41,9 @@ jest.mock('@/hooks/safe-apps/useTxBuilderApp', () => ({
 
 jest.mock('@/components/tx-flow/flows/TokenTransferFlow', () => ({
   TokenTransferFlow: () => null,
+}))
+jest.mock('@/components/tx-flow/flows/NewTxFlow', () => ({
+  NewTxFlow: () => null,
 }))
 
 const mockSafe: SafeItem = {
@@ -85,6 +89,7 @@ describe('useSafeActionMapper', () => {
     expect(typeof result.current.actionMapper[ESafeAction.Receive]).toBe('function')
     expect(typeof result.current.actionMapper[ESafeAction.Swap]).toBe('function')
     expect(typeof result.current.actionMapper[ESafeAction.BuildTransaction]).toBe('function')
+    expect(typeof result.current.actionMapper[ESafeAction.NewTransaction]).toBe('function')
   })
 
   describe(ESafeAction.Send, () => {
@@ -203,6 +208,25 @@ describe('useSafeActionMapper', () => {
         pathname: '/apps/open',
         query: { appUrl: 'https://tx-builder.example', safe: `eth:${mockSafe.address}` },
       })
+    })
+  })
+
+  describe(ESafeAction.NewTransaction, () => {
+    it('opens the new transaction flow scoped to the picked Safe without touching the URL', async () => {
+      const { result, setTxFlow } = renderMapper()
+
+      await act(async () => {
+        await result.current.actionMapper[ESafeAction.NewTransaction]({ ...mockSafe, chainId: '137' })
+      })
+
+      expect(mockReplace).not.toHaveBeenCalled()
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      const [txFlow, onClose, shouldWarn] = setTxFlow.mock.calls[0] as [React.ReactElement, unknown, boolean]
+      const { flow, target } = unwrapScopedFlow(txFlow)
+      expect(flow?.type).toBe(jest.requireMock('@/components/tx-flow/flows/NewTxFlow').NewTxFlow)
+      expect(target).toEqual({ chainId: '137', safeAddress: mockSafe.address })
+      expect(onClose).toBeUndefined()
+      expect(shouldWarn).toBe(false)
     })
   })
 
