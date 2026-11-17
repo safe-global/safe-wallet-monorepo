@@ -3,6 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { TxModalContext, TxModalProvider } from '..'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import { WalletContext, type WalletContextType } from '@/components/common/WalletProvider'
 
 jest.mock('@/hooks/useTopbarElevation', () => ({
   useTopbarElevation: jest.fn(),
@@ -225,4 +226,51 @@ it('uses plain outbound arrows only within the transaction dialog', async () => 
   expect(flowLink.querySelector('.lucide-arrow-up-right')).toBeInTheDocument()
   expect(flowLink.querySelector('.lucide-external-link')).not.toBeInTheDocument()
   expect(screen.getByText('Page link').querySelector('.lucide-external-link')).toBeInTheDocument()
+})
+
+describe('TxModalProvider parent Safe nonce', () => {
+  const FlowThatEnds = () => {
+    const { setTxFlow } = useContext(TxModalContext)
+    const walletContext = useContext(WalletContext)
+    return (
+      <>
+        <button onClick={() => walletContext?.setParentSafeNonce(7)}>choose nonce</button>
+        <button onClick={() => setTxFlow(undefined)}>add to batch</button>
+      </>
+    )
+  }
+
+  const FlowOpener = () => {
+    const { setTxFlow } = useContext(TxModalContext)
+    return <button onClick={() => setTxFlow(<FlowThatEnds />, undefined, false)}>open</button>
+  }
+
+  it('drops the chosen parent Safe nonce when a flow ends without creating the parent tx', async () => {
+    const user = userEvent.setup()
+    let nonce: number | undefined
+    const walletContext = {
+      setSignerAddress: jest.fn(),
+      setParentSafeNonce: (chosen: number) => {
+        nonce = chosen
+      },
+      clearParentSafeNonce: () => {
+        nonce = undefined
+      },
+    } as unknown as WalletContextType
+    render(
+      <WalletContext.Provider value={walletContext}>
+        <TxModalProvider>
+          <FlowOpener />
+        </TxModalProvider>
+      </WalletContext.Provider>,
+    )
+    await user.click(screen.getByRole('button', { name: 'open' }))
+    await user.click(await screen.findByRole('button', { name: 'choose nonce' }))
+    expect(nonce).toBe(7)
+
+    await user.click(screen.getByRole('button', { name: 'add to batch' }))
+
+    await waitFor(() => expect(screen.queryByRole('button', { name: 'add to batch' })).not.toBeInTheDocument())
+    expect(nonce).toBeUndefined()
+  })
 })

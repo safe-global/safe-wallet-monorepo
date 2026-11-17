@@ -35,7 +35,7 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
   const [fullWidth, setFullWidth] = useState<boolean>(false)
   const shouldWarn = useRef<boolean>(true)
   const onClose = useRef<() => void>(noop)
-  const { setSignerAddress } = useWalletContext() ?? {}
+  const { setSignerAddress, clearParentSafeNonce } = useWalletContext() ?? {}
 
   /* What to run if the user confirms the discard. Non-null is also what opens the dialog, so there
      is no separate `open` flag to keep in step. */
@@ -74,8 +74,10 @@ export const TxModalProvider = ({ children }: { children: ReactNode }): ReactEle
       onClose.current = newOnClose ?? noop
       shouldWarn.current = newShouldWarn ?? true
       setFlow(newTxFlow)
+      // A parent Safe nonce is chosen for one flow, and a flow can end without creating the parent tx
+      clearParentSafeNonce?.()
     },
-    [],
+    [clearParentSafeNonce],
   )
 
   // Open a new tx flow, close the previous one if any
