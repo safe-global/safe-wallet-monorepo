@@ -21,7 +21,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { DEFI_V1_COPY, formatAmount, formatApy, formatCompactUsd } from '../copy'
+import { DEFI_V1_COPY, formatAmount, formatApy } from '../copy'
 import { IDLE_CASH } from '../opportunities'
 import { dedicatedSafeName } from '../shelf'
 import type { Frequency, Operation, Opportunity } from '../types'
@@ -522,12 +522,17 @@ export const ProposedView = ({ form }: { form: InvestmentForm }) => {
           <Typography variant="h4">{COPY.proposed}</Typography>
           <Typography variant="paragraph-small" color="muted">
             {SUMMARY.investment(formatAmount(form.amount), investment.asset, investment.name)} ·{' '}
-            {formatApy(investment.apy)} net APY
+            {COPY.variableApy(formatApy(investment.apy))}
           </Typography>
         </div>
-        <span className="rounded-full bg-badge-dot-success/10 px-3 py-1 text-sm font-medium text-badge-dot-success">
-          {COPY.projected(formatCompactUsd(form.amount * investment.apy))}
-        </span>
+        <div className="flex flex-col gap-0.5">
+          <Typography variant="paragraph-small-medium">
+            {COPY.projected(formatAmount(form.amount * investment.apy), investment.asset, formatApy(investment.apy))}
+          </Typography>
+          <Typography variant="paragraph-mini" color="muted">
+            {COPY.notGuaranteed}
+          </Typography>
+        </div>
       </div>
 
       <SetupCard form={form} />
