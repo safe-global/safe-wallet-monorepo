@@ -3,6 +3,7 @@ import { Severity, StatusGroup, RecipientStatus, ContractStatus, CommonSharedSta
 import { ErrorType, getErrorInfo } from '../errors'
 import type { GroupedAnalysisResults, RecipientAnalysisResults, ContractAnalysisResults } from '../../types'
 import { RecipientAnalysisResultBuilder, ContractAnalysisResultBuilder } from '../../builders'
+import { MAX_ACTIVITY_CHECK_ADDRESSES, SkippedActivityAnalysisResult } from '../../hooks/address-analysis/config'
 import { faker } from '@faker-js/faker'
 
 describe('mapConsolidatedAnalysisResults', () => {
@@ -529,6 +530,25 @@ describe('mapConsolidatedAnalysisResults', () => {
       expect(result).toHaveLength(1)
       expect(result[0].type).toBe(CommonSharedStatus.FAILED)
       expect(result[0].addresses?.map(({ address }) => address).sort()).toEqual([...failedAddresses].sort())
+    })
+
+    it('should keep the skipped check description for every recipient above the cap', () => {
+      const addresses = Array.from({ length: MAX_ACTIVITY_CHECK_ADDRESSES + 1 }, () => faker.finance.ethereumAddress())
+
+      const result = consolidate(
+        addresses.map((address): [string, GroupedAnalysisResults] => [
+          address,
+          { [StatusGroup.RECIPIENT_ACTIVITY]: [SkippedActivityAnalysisResult] },
+        ]),
+      )
+
+      expect(result).toHaveLength(1)
+      expect(result[0]).toMatchObject({
+        type: CommonSharedStatus.FAILED,
+        title: SkippedActivityAnalysisResult.title,
+        description: SkippedActivityAnalysisResult.description,
+      })
+      expect(result[0].addresses).toHaveLength(MAX_ACTIVITY_CHECK_ADDRESSES + 1)
     })
 
     it.each<[string, (CommonSharedStatus | RecipientStatus)[]]>([
