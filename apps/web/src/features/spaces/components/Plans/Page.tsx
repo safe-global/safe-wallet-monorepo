@@ -23,6 +23,7 @@ import { useBillingPortal } from '../../hooks/billing/useBillingPortal'
 import { useStartCheckout } from '../../hooks/billing/useStartCheckout'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
 import ChangePlanFlow from './ChangePlanFlow'
+import UpgradeHandoffModal from './proTrial/UpgradeHandoffModal'
 import type { CurrentPlan, PlanPick, PlanTier } from '@safe-global/views/features/spaces/components/Plans/types'
 
 const PlansSkeleton = () => (
@@ -57,6 +58,7 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
   const { canChange } = useChangePlan(spaceId)
   const isAdmin = useIsAdmin(spaceId)
   const [pick, setPick] = useState<PlanPick>()
+  const [handoff, setHandoff] = useState<PlanPick>()
 
   const currentPlan = useMemo(
     () => (canChange && subscription && plan ? toCurrentPlan(subscription, plan, isTrialing, seats?.quota) : undefined),
@@ -117,7 +119,9 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
             isManaging={isRedirecting}
             canManage={plan?.status === 'active' || (plan === null && subscription !== undefined)}
             onSubscribe={(picked) => {
-              if (canChange) setPick(picked)
+              // A trial without a card upgrades through Stripe Checkout, reached only from the named upgrade.
+              if (isTrialing && !subscription?.hasPaymentMethod) setHandoff(picked)
+              else if (canChange) setPick(picked)
               else if (picked.option.paymentLinkId) {
                 void startCheckout(picked.option.paymentLinkId)
               }
@@ -127,6 +131,8 @@ export default function SpacePlansPage({ spaceId }: { spaceId: string }) {
             readOnly={!isAdmin}
           />
         )}
+
+        <UpgradeHandoffModal spaceId={spaceId} pick={handoff} onClose={() => setHandoff(undefined)} />
 
         {pick && currentPlan && (
           <ChangePlanFlow

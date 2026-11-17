@@ -13,8 +13,8 @@ import { MemberStatus } from '@/features/spaces'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
-import TrialEndingModal from '../Plans/TrialEndingModal'
 import WorkspaceLockModal from '../Plans/WorkspaceLockModal'
+import TrialBanner from '../Plans/proTrial/TrialBanner'
 
 const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode }) => {
   const router = useRouter()
@@ -62,9 +62,10 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
   // A Workspace without a live plan keeps its pages underneath a blocking modal instead of bouncing elsewhere.
   return (
     <>
+      {/* Prototype: the named trial banner replaces the last-week reminder modal (TrialEndingModal). */}
+      <TrialBanner spaceId={spaceId} />
       {children}
       <WorkspaceLockModal spaceId={spaceId} />
-      <TrialEndingModal spaceId={spaceId} />
     </>
   )
 }

@@ -96,6 +96,10 @@ export const scenarioHandlers = (scenario: ProTrialScenario) => {
   return [
     http.get(/\/v1\/billing\/spaces\/[^/]+\/subscriptions/, () => HttpResponse.json(subscriptions)),
     http.get(/\/v1\/billing\/spaces\/[^/]+\/payment-links$/, () => HttpResponse.json(links)),
+    // Stripe Checkout is mocked: the hand-off "navigates" to a hash, so the story stays on its step.
+    http.get(/\/v1\/billing\/spaces\/[^/]+\/payment-links\/[^/]+\/checkout-url$/, () =>
+      HttpResponse.json({ url: '#mock-stripe-checkout' }),
+    ),
     http.get(/\/v1\/spaces\/[^/]+\/entitlements$/, () =>
       HttpResponse.json({
         plan: live
