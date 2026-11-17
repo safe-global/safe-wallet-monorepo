@@ -64,6 +64,7 @@ export {
   selectSafeActionsModalOpen,
   selectSafeActionsModalType,
   spaceNavigationSlice,
+  spaceQueueViewSlice,
   setLastUsedSpaceOrigin,
   selectLastUsedSpaceOrigin,
 } from '@/features/spaces/store'

@@ -1,11 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { fn, screen, userEvent, within } from 'storybook/test'
-import SafeFilter from './SafeFilter'
+import { fn, screen } from 'storybook/test'
+import SafeOptions from './SafeOptions'
+import { InOpenMenu } from './storyDecorators'
 
 const meta = {
-  title: 'Features/Spaces/Transactions/QueueFilters/SafeFilter',
-  component: SafeFilter,
+  title: 'Features/Spaces/Transactions/QueueFilters/SafeOptions',
+  component: SafeOptions,
   parameters: { layout: 'centered' },
+  decorators: [InOpenMenu],
   args: {
     options: [
       { safeAddress: '0x1111111111111111111111111111111111111111', name: 'Treasury', count: 11, checked: true },
@@ -13,22 +15,21 @@ const meta = {
     ],
     onToggle: fn(),
   },
-  play: async ({ canvasElement }) => {
-    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Safe' }))
-    await screen.findByText('Sorted by number of transactions')
-  },
-} satisfies Meta<typeof SafeFilter>
+} satisfies Meta<typeof SafeOptions>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 /** A named Safe and an unnamed one, shown by its address. */
-export const Default: Story = {}
+export const Default: Story = {
+  play: async () => {
+    await screen.findByText('Sorted by number of transactions')
+  },
+}
 
 export const NoSafes: Story = {
   args: { options: [] },
-  play: async ({ canvasElement }) => {
-    await userEvent.click(within(canvasElement).getByRole('button', { name: 'Safe' }))
+  play: async () => {
     await screen.findByText('No Safe accounts')
   },
 }

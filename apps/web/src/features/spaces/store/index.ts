@@ -10,6 +10,7 @@ export {
 
 export { spaceNavigationSlice, setLastUsedSpaceOrigin, selectLastUsedSpaceOrigin } from './spaceNavigationSlice'
 export type { SpaceNavigationOrigin } from './spaceNavigationSlice'
+export { spaceQueueViewSlice, setQueueGroupBy, selectQueueGroupBy } from './spaceQueueViewSlice'
 export { spaceSafesEntitlementsListener } from './spaceSafesEntitlementsListener'
 export { planChangeSyncListener } from './planChangeSyncListener'
 export { checkoutTrackingListener } from './checkoutTrackingListener'
