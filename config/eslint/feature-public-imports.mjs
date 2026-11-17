@@ -1,47 +1,7 @@
-// Features that follow the public/ convention. Other code may import them only through their public/ folder.
-const PUBLIC_FOLDER_FEATURES = [
-  'actions-tray',
-  'address-poisoning',
-  'assets',
-  'batching',
-  'bridge',
-  'counterfactual',
-  'earn',
-  'feature-flag-overrides',
-  'fee-payment',
-  'global-search',
-  'hypernative',
-  'ledger',
-  'multichain',
-  'myAccounts',
-  'nfts',
-  'no-fee-campaign',
-  'oidc-auth',
-  'policy-guard',
-  'portfolio',
-  'positions',
-  'proposers',
-  'recovery',
-  'safe-overview',
-  'safe-pro-announcement',
-  'safe-shield',
-  'safenet-checks',
-  'security',
-  'spaces',
-  'speedup',
-  'spending-limits',
-  'stake',
-  'support-chat',
-  'swap',
-  'targeted-features',
-  'targeted-outreach',
-  'transactions',
-  'tx-notes',
-  'wallet',
-  'walletconnect',
+// Other code may import a feature only through its public/ folder.
+export const featurePublicImportPatterns = [
+  {
+    regex: '^@/features/[^/]+(/(?!public/).*)?$',
+    message: 'Import feature code only from @/features/<feature>/public/. Inside the feature, use relative imports.',
+  },
 ]
-
-export const featurePublicImportPatterns = PUBLIC_FOLDER_FEATURES.map((feature) => ({
-  regex: `^@/features/${feature}(/(?!public/).*)?$`,
-  message: `Import ${feature} code only from @/features/${feature}/public/. Inside the feature, use relative imports.`,
-}))

@@ -35,7 +35,7 @@ Each feature's `public/` folder is its only entry point. Import the one file you
 - **Public components** are gated and lazy: `gatedDynamic(FEATURES.X, () => import('../components/Y'))` from `@/utils/gatedDynamic`. Consumers do not check the flag. A component that must render with the current chain's flag off uses `dynamic()` with a one-line reason.
 - **Public hooks** run on every chain, so make one public only for a cheap value. It returns a neutral value (`false`, `[]`, `undefined`) when its flag is off, loads heavy libraries inside its async step, and has a flag-off test if it reads a flag.
 
-ESLint enforces the `public/` boundary for the features listed in `config/eslint/feature-public-imports.mjs`, and blocks imports of any feature's `components/` from outside `src/features` (tests and stories excepted; older importers are on an allow list in `eslint.config.mjs`). The other features still use feature handles (`useLoadFeature`, see [docs/feature-architecture-legacy.md](docs/feature-architecture-legacy.md)); do not add new handles. Full guide, including how to move a feature: [docs/feature-architecture.md](docs/feature-architecture.md).
+ESLint enforces the `public/` boundary for every feature (`config/eslint/feature-public-imports.mjs`). Full guide: [docs/feature-architecture.md](docs/feature-architecture.md).
 
 ## Error logging
 

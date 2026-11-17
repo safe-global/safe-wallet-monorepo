@@ -114,30 +114,14 @@ Supported versions:
 
 ```
 src/features/spending-limits/
-├── index.ts                 # Public API exports
-├── contract.ts              # TypeScript interface
-├── feature.ts               # Lazy-loaded implementation
-├── types.ts                 # Type definitions
-├── constants.ts             # Reset time options
-├── components/
-│   ├── SpendingLimitsSettings/  # Settings page UI
-│   ├── SpendingLimitRow/        # Transaction type selector
-│   ├── CreateSpendingLimit/     # New limit form
-│   ├── ReviewSpendingLimit/     # Review new limit
-│   ├── RemoveSpendingLimitReview/
-│   └── ReviewSpendingLimitTx/   # Spending limit execution
-├── hooks/
-│   ├── useSpendingLimits.ts     # useLoadSpendingLimits (used by SpendingLimitsLoader)
-│   ├── useSpendingLimit.ts      # Get limit for token
-│   ├── useSpendingLimitGas.ts   # Gas estimation
-│   └── useIsOnlySpendingLimitBeneficiary.ts
-├── services/
-│   ├── spendingLimitContracts.ts
-│   ├── spendingLimitParams.ts
-│   ├── spendingLimitLoader.ts
-│   └── spendingLimitExecution.ts
-└── store/
-    └── spendingLimitsSlice.ts
+├── public/                  # Entry point for other code: gated components, hooks, slice, services
+│   ├── SpendingLimitsSettings.tsx
+│   ├── SpendingLimitsLoader.tsx
+│   ├── spendingLimitsSlice.ts
+│   └── ...
+├── components/              # Private UI
+├── hooks/                   # Private hooks
+└── services/                # Private services
 ```
 
 ### Data Loading
@@ -154,7 +138,7 @@ This keeps the heavy fetching logic lazy-loaded while making data available to a
 **How to read spending limits:**
 
 ```typescript
-import { selectSpendingLimits } from '@/features/spending-limits'
+import { selectSpendingLimits } from '@/features/spending-limits/public/spendingLimitsSlice'
 import { useAppSelector } from '@/store'
 
 // Read data from store (loaded on app start)
@@ -165,17 +149,11 @@ const spendingLimits = useAppSelector(selectSpendingLimits)
 
 This feature is controlled by the `SPENDING_LIMIT` feature flag, configured per-chain in the CGW API.
 
+`public/SpendingLimitsSettings` and the other public components render nothing while the flag is off, so consumers do not check it:
+
 ```typescript
-import { SpendingLimitsFeature } from '@/features/spending-limits'
-import { useLoadFeature } from '@/features/__core__'
+import SpendingLimitsSettings from '@/features/spending-limits/public/SpendingLimitsSettings'
 
-const { SpendingLimitsSettings, $isDisabled, $isReady } = useLoadFeature(SpendingLimitsFeature)
-
-// Check feature status
-if ($isDisabled) return null
-if (!$isReady) return <Skeleton />
-
-// Use components
 <SpendingLimitsSettings />
 ```
 
