@@ -6,6 +6,7 @@ import { AppRoutes } from '@/config/routes'
 import { useHasFeature } from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useAppDispatch, useAppSelector } from '@/store'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { isAuthenticated } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { selectPendingTxs, type PendingTxsState } from '@/store/pendingTxsSlice'
@@ -74,6 +75,10 @@ export const useSpaceQueuePolling = (): void => {
         link: {
           href: { pathname: AppRoutes.spaces.transactions, query: { spaceId } },
           title: 'View transactions',
+          track: {
+            event: SPACE_EVENTS.QUEUE_NOTIFICATION_CLICKED,
+            params: { workspace_id: spaceId, transactions: newKeys.length },
+          },
         },
       }),
     )

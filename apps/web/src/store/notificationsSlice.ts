@@ -2,6 +2,7 @@ import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolki
 import type { AppThunk, RootState } from '@/store'
 import type { LinkProps } from 'next/link'
 import type { ReactNode } from 'react'
+import type { AnalyticsEvent } from '@/services/analytics/types'
 
 export type AlertColor = 'success' | 'info' | 'warning' | 'error'
 
@@ -15,7 +16,9 @@ export type Notification = {
   timestamp: number
   isDismissed?: boolean
   isRead?: boolean
-  link?: { href: LinkProps['href']; title: string } | { onClick: () => void; title: string }
+  link?:
+    | { href: LinkProps['href']; title: string; track?: { event: AnalyticsEvent; params?: Record<string, unknown> } }
+    | { onClick: () => void; title: string }
   icon?: ReactNode
   onClose?: () => void
   // Override the variant's default auto-hide: a number sets the duration (ms),

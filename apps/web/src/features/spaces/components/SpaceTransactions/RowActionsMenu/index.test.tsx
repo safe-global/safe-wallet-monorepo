@@ -9,6 +9,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { trackEvent } from '@/services/analytics'
 import { REJECT_TX_EVENTS } from '@/services/analytics/events/reject-tx'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import RowActionsMenu, { getTxLink } from '.'
 import { DeleteTxDialogProvider } from './DeleteTxDialog'
 
@@ -102,12 +103,18 @@ const tx = (nonce: number): Transaction =>
     executionInfo: { type: 'MULTISIG', nonce, confirmationsRequired: 2, confirmationsSubmitted: 1 },
   }) as Transaction
 
+const spaceId = faker.string.uuid()
+
 const renderMenu = (transaction: Transaction, canReject = true) =>
   render(
     <DeleteTxDialogProvider>
       <RowActionsMenu tx={transaction} canReject={canReject} />
     </DeleteTxDialogProvider>,
+    { routerProps: { query: { spaceId } } },
   )
+
+const workspaceStarts = () =>
+  mockTrackEvent.mock.calls.filter(([event]) => event.action === SPACE_EVENTS.TRANSACTION_INITIATED.action)
 
 const openMenu = () => fireEvent.click(screen.getByRole('button', { name: /More actions/ }))
 
@@ -183,6 +190,32 @@ describe('RowActionsMenu', () => {
     fireEvent.click(await screen.findByRole('menuitem', { name: 'Reject' }))
 
     expect(mockTrackEvent).toHaveBeenCalledWith(REJECT_TX_EVENTS.REJECT_ONCHAIN_BUTTON, undefined)
+  })
+
+  it('tracks replacing the transaction once as a transaction started from the Workspace', async () => {
+    renderMenu(tx(12))
+    openMenu()
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Replace with a transfer' }))
+
+    expect(workspaceStarts()).toEqual([
+      [
+        SPACE_EVENTS.TRANSACTION_INITIATED,
+        { workspace_id: spaceId, action: 'replace', entry_point: 'space_transactions' },
+      ],
+    ])
+  })
+
+  it('tracks rejecting the transaction once as a transaction started from the Workspace', async () => {
+    renderMenu(tx(7))
+    openMenu()
+    fireEvent.click(await screen.findByRole('menuitem', { name: 'Reject' }))
+
+    expect(workspaceStarts()).toEqual([
+      [
+        SPACE_EVENTS.TRANSACTION_INITIATED,
+        { workspace_id: spaceId, action: 'reject', entry_point: 'space_transactions' },
+      ],
+    ])
   })
 
   it('does not track a disabled rejection', async () => {

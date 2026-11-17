@@ -61,19 +61,29 @@ export const NotificationLink = ({
     'href' in link &&
     (typeof link.href === 'string' ? !isRelativeUrl(link.href) : !!(link.href.host || link.href.hostname))
 
+  const anchor = (
+    <LinkWrapper>
+      <Link
+        className={css.link}
+        variant="inherit"
+        onClick={handleClick}
+        {...(isExternal && { target: '_blank', rel: 'noopener noreferrer' })}
+      >
+        {link.title}
+        <ChevronRight />
+      </Link>
+    </LinkWrapper>
+  )
+
   return (
     <Track {...OVERVIEW_EVENTS.NOTIFICATION_INTERACTION} label={link.title} as="span">
-      <LinkWrapper>
-        <Link
-          className={css.link}
-          variant="inherit"
-          onClick={handleClick}
-          {...(isExternal && { target: '_blank', rel: 'noopener noreferrer' })}
-        >
-          {link.title}
-          <ChevronRight />
-        </Link>
-      </LinkWrapper>
+      {'track' in link && link.track ? (
+        <Track {...link.track.event} mixpanelParams={link.track.params} as="span">
+          {anchor}
+        </Track>
+      ) : (
+        anchor
+      )}
     </Track>
   )
 }

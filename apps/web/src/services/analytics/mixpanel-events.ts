@@ -95,6 +95,8 @@ export enum MixpanelEvent {
   SECURITY_REPORT_OPENED = 'Security Report Opened',
   ACTIVITY_LOG_VIEWED = 'Activity Log Viewed',
   ACTIVITY_LOG_FILTERED = 'Activity Log Filtered',
+  WORKSPACE_TRANSACTIONS_VIEWED = 'Workspace Transactions Viewed',
+  WORKSPACE_QUEUE_NOTIFICATION_CLICKED = 'Workspace Queue Notification Clicked',
   POLICY_CATALOGUE_TILE_CLICKED = 'Policy Catalogue Tile Clicked',
   POLICY_UPSELL_UPGRADE_CLICKED = 'Policy Upsell Upgrade Clicked',
   ADD_POLICY_DIALOG_CLOSED = 'Add Policy Dialog Closed',

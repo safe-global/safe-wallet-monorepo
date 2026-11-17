@@ -25,11 +25,13 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { useUrlSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
 import { trackEvent } from '@/services/analytics'
 import { REJECT_TX_EVENTS } from '@/services/analytics/events/reject-tx'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { Errors, logError } from '@/services/exceptions'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { isMultisigDetailedExecutionInfo } from '@/utils/transaction-guards'
-import { getNonce } from '../utils'
+import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
+import { getNonce, SPACE_TRANSACTIONS_ENTRY_POINT } from '../utils'
 import { useOpenDeleteTxDialog } from './DeleteTxDialog'
 
 export const getTxLink = (args: {
@@ -62,9 +64,15 @@ const TRACKED_EVENTS: Record<TrackedRowAction, { category: string; action: strin
   reject: REJECT_TX_EVENTS.REJECT_ONCHAIN_BUTTON,
 }
 
-const trackItem = (action: TrackedRowAction, item: ReactElement): ReactElement => (
-  <Track {...TRACKED_EVENTS[action]} as="div">
-    {item}
+const trackItem = (spaceId: string | null, action: TrackedRowAction, item: ReactElement): ReactElement => (
+  <Track
+    {...SPACE_EVENTS.TRANSACTION_INITIATED}
+    mixpanelParams={{ workspace_id: spaceId, action, entry_point: SPACE_TRANSACTIONS_ENTRY_POINT }}
+    as="div"
+  >
+    <Track {...TRACKED_EVENTS[action]} as="div">
+      {item}
+    </Track>
   </Track>
 )
 
@@ -128,6 +136,7 @@ const RowActionsMenu = ({ tx, canReject }: RowActionsMenuProps): ReactElement =>
   const isPending = useIsPending(tx.id)
   const link = useTxLink(tx.id)
   const nonce = getNonce(tx)
+  const spaceId = useCurrentSpaceId()
 
   const copyLink = async () => {
     if (!link) return
@@ -159,7 +168,7 @@ const RowActionsMenu = ({ tx, canReject }: RowActionsMenuProps): ReactElement =>
             onReplace={() => nonce !== undefined && setTxFlow(<TokenTransferFlow txNonce={nonce} />)}
             onReject={() => nonce !== undefined && setTxFlow(<RejectTxFlow txNonce={nonce} />)}
             onCopyLink={copyLink}
-            wrapItem={trackItem}
+            wrapItem={(action, item) => trackItem(spaceId, action, item)}
           />
         )
       }}

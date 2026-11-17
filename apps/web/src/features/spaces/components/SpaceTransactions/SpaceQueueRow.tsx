@@ -6,13 +6,15 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import MaliciousTxWarning from '@safe-global/views/components/transactions/MaliciousTxWarning'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { formatDateTime, formatTimeInWords } from '@safe-global/utils/utils/date'
+import Track from '@/components/common/Track'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import QueueActions from '@/components/transactions/TxSummary/QueueActions'
 import { SwapFeature, useIsExpiredSwap } from '@/features/swap'
 import { useLoadFeature } from '@/features/__core__'
 import { useHasFeature } from '@/hooks/useChains'
 import useIsPending from '@/hooks/useIsPending'
-import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { isAwaitingExecution, isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
 import QueueTxDetails from './QueueTxDetails'
@@ -22,7 +24,8 @@ import StatusChip from '@safe-global/views/features/spaces/components/SpaceQueue
 import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import RowActionsMenu from './RowActionsMenu'
 import SignersTooltip from './SignersTooltip'
-import { getCounterparty, getNonce } from './utils'
+import { useCurrentSpaceId } from '../../hooks/useCurrentSpaceId'
+import { getCounterparty, getNonce, SPACE_TRANSACTIONS_ENTRY_POINT } from './utils'
 
 const Counterparty = ({ txInfo, chainId }: { txInfo: TransactionInfo; chainId: string }): ReactElement | null => {
   const counterparty = getCounterparty(txInfo)
@@ -81,6 +84,7 @@ const SpaceQueueRow = ({
   const tx = item.transaction
   const isPending = useIsPending(tx.id)
   const expiredSwap = useIsExpiredSwap(tx.txInfo)
+  const spaceId = useCurrentSpaceId()
 
   const nonce = getNonce(tx)
   const executionInfo = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo : undefined
@@ -146,7 +150,21 @@ const SpaceQueueRow = ({
 
       <TableCell>
         <div className="flex items-center justify-end gap-1">
-          {!expiredSwap && <QueueActions tx={tx} dense />}
+          {!expiredSwap &&
+            (isPending ? (
+              <QueueActions tx={tx} dense />
+            ) : (
+              <Track
+                {...SPACE_EVENTS.TRANSACTION_INITIATED}
+                mixpanelParams={{
+                  workspace_id: spaceId,
+                  action: isAwaitingExecution(tx.txStatus) ? 'execute' : 'confirm',
+                  entry_point: SPACE_TRANSACTIONS_ENTRY_POINT,
+                }}
+              >
+                <QueueActions tx={tx} dense />
+              </Track>
+            ))}
           <RowActionsMenu tx={tx} canReject={canReject} />
         </div>
       </TableCell>

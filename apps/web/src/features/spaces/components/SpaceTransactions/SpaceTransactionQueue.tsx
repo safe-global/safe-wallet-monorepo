@@ -7,6 +7,8 @@ import {
   QueueTruncatedNotice,
 } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueStates'
 import { POLLING_INTERVAL } from '@/config/constants'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import {
   hasSpaceQueueFilters,
   NO_SPACE_QUEUE_FILTERS,
@@ -57,6 +59,7 @@ const QueueBody = memo(function QueueBody({
 })
 
 const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement => {
+  useTrackOnce(SPACE_EVENTS.TRANSACTIONS_PAGE_VIEWED, { workspace_id: spaceId })
   const [filters, setFilters] = useState<SpaceQueueFilters>(NO_SPACE_QUEUE_FILTERS)
   const [search, setSearch] = useState('')
   // Remounts the toolbar so the search box, which holds its own text, empties too
