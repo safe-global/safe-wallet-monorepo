@@ -35,7 +35,12 @@ const TX_ID = 'multisig_0xchild_0xhash'
 const PARENT_SAFE = faker.finance.ethereumAddress()
 const CHILD_SAFE = faker.finance.ethereumAddress()
 
-const renderScreen = (executed: boolean, hash: string, method: 'approveHash' | 'execTransaction' = 'approveHash') => {
+const renderScreen = (
+  executed: boolean,
+  hash: string,
+  method: 'approveHash' | 'execTransaction' = 'approveHash',
+  scope?: { chainId: string; safeAddress: string },
+) => {
   const pendingTxs: PendingTxsState = {
     [TX_ID]: {
       nonce: 1,
@@ -48,7 +53,7 @@ const renderScreen = (executed: boolean, hash: string, method: 'approveHash' | '
       method,
     },
   }
-  return render(<NestedTxSuccessScreen txId={TX_ID} />, { initialReduxState: { pendingTxs } })
+  return render(<NestedTxSuccessScreen txId={TX_ID} scope={scope} />, { initialReduxState: { pendingTxs } })
 }
 
 describe('NestedTxSuccessScreen', () => {
@@ -94,22 +99,10 @@ describe('NestedTxSuccessScreen', () => {
   })
 
   it("re-mounts the selected Safe's scope when a Space-level flow opened it", () => {
-    const pendingTxs: PendingTxsState = {
-      [TX_ID]: {
-        nonce: 1,
-        chainId: '1',
-        safeAddress: CHILD_SAFE,
-        status: PendingStatus.NESTED_SIGNING,
-        signerAddress: PARENT_SAFE,
-        txHashOrParentSafeTxHash: zeroPadValue('0x05', 32),
-        executed: false,
-        method: 'approveHash',
-      },
-    }
-    const { getByTestId } = render(
-      <NestedTxSuccessScreen txId={TX_ID} scope={{ chainId: '1', safeAddress: CHILD_SAFE }} />,
-      { initialReduxState: { pendingTxs } },
-    )
+    const { getByTestId } = renderScreen(false, zeroPadValue('0x05', 32), 'approveHash', {
+      chainId: '1',
+      safeAddress: CHILD_SAFE,
+    })
 
     const scope = getByTestId('success-scope')
     expect(scope).toHaveAttribute('data-chain', '1')

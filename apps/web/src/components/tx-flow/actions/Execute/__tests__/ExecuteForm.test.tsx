@@ -414,9 +414,9 @@ describe('ExecuteForm', () => {
   })
 
   describe('success screen scope', () => {
-    const renderWithModal = () => {
+    const renderWithModal = (result = { txId: '0xexecuted', isExecuted: true }) => {
       const setTxFlow = jest.fn()
-      const mockExecuteTx = jest.fn().mockResolvedValue({ txId: '0xexecuted', isExecuted: true })
+      const mockExecuteTx = jest.fn().mockResolvedValue(result)
       const view = render(
         <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
           <ExecuteForm
@@ -463,35 +463,26 @@ describe('ExecuteForm', () => {
     })
 
     it('hands the selected Safe to the nested success screen when a parent Safe queued the execution', async () => {
+      const chainId = faker.string.numeric(5)
+      const safeAddress = faker.finance.ethereumAddress()
+      const parentTxId = faker.string.hexadecimal({ length: 64 })
       mockUseSafeScope.mockReturnValue({
-        chainId: '11155111',
-        safeAddress: '0x0000000000000000000000000000000000000001',
-        scopeKey: '11155111:0x0000000000000000000000000000000000000001',
+        chainId,
+        safeAddress,
+        scopeKey: `${chainId}:${safeAddress}`,
         safeLoaded: true,
         safeLoading: false,
       })
-      const setTxFlow = jest.fn()
-      const mockExecuteTx = jest.fn().mockResolvedValue({ txId: '0xparent', isExecuted: false })
-      const { getByText } = render(
-        <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
-          <ExecuteForm
-            {...defaultProps}
-            safeTx={safeTransaction}
-            txActions={{ ...defaultProps.txActions, executeTx: mockExecuteTx }}
-          />
-        </TxModalContext.Provider>,
-      )
+      const { getByText, setTxFlow, mockExecuteTx } = renderWithModal({ txId: parentTxId, isExecuted: false })
 
       fireEvent.click(getByText('Execute'))
 
+      await waitFor(() => expect(mockExecuteTx).toHaveBeenCalled())
       await waitFor(() => {
         expect(setTxFlow).toHaveBeenCalledWith(
           expect.objectContaining({
             type: NestedTxSuccessScreenFlow,
-            props: {
-              txId: '0xparent',
-              scope: { chainId: '11155111', safeAddress: '0x0000000000000000000000000000000000000001' },
-            },
+            props: { txId: parentTxId, scope: { chainId, safeAddress } },
           }),
           undefined,
           false,
