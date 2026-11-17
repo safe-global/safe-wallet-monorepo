@@ -8,9 +8,8 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { formatDateTime, formatTimeInWords } from '@safe-global/utils/utils/date'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import QueueActions from '@/components/transactions/TxSummary/QueueActions'
-import { SwapFeature } from '@/features/swap'
-import useIsExpiredSwap from '@/features/swap/hooks/useIsExpiredSwap'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import StatusLabel from '@/features/swap/public/StatusLabel'
+import useIsExpiredSwap from '@/features/swap/public/useIsExpiredSwap'
 import { useHasFeature } from '@/hooks/useChains'
 import useIsPending from '@/hooks/useIsPending'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
@@ -77,7 +76,6 @@ const SpaceQueueRow = ({
   canReject = true,
   rowProps,
 }: SpaceQueueRowProps): ReactElement => {
-  const { StatusLabel } = useLoadFeature(SwapFeature)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const tx = item.transaction
   const isPending = useIsPending(tx.id)
