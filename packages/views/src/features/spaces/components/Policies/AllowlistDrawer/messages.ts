@@ -141,17 +141,6 @@ export const EXPIRED_HELPER: Record<ApplyOperation, string> = {
   update: 'To make these changes, edit the allowlist again.',
 }
 
-export const SCHEDULED_BANNER_TITLE = 'Change pending'
-
-export const SCHEDULED_BANNER_LINE: Record<'create' | 'update', string> = {
-  create: "Until then, transactions aren't checked against it.",
-  update: 'Any signer can cancel it before then.',
-}
-
-export const CANCEL_CONNECT_HELPER = 'Connect a signer wallet to cancel the change.'
-
-export const CANCEL_NOT_A_SIGNER_HELPER = 'Only signers of this Safe account can cancel this change.'
-
 const MS_PER_SECOND = 1_000
 
 const isLastDay = (until: number, nowMs: number): boolean => differenceInDays(until * MS_PER_SECOND, nowMs, IN_UTC) < 1
