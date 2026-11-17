@@ -43,6 +43,8 @@ import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { FEATURES, getLatestSafeVersion, hasFeature } from '@safe-global/utils/utils/chains'
 import { useSafeShield, useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
 import type { SafeTransaction } from '@safe-global/types-kit'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
+import { waitForPolicyContext } from '@/features/policy-cosigner/services'
 import { fetchRecommendedParams } from '@/services/tx/tx-sender/recommendedNonce'
 import { useMultiSendContract } from './useMultiSendContract'
 
@@ -96,6 +98,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
   const latestSafeVersion = getLatestSafeVersion(chain)
   const wallet = useWallet()
   const safeSDK = useSafeSDK()
+  const web3ReadOnly = useWeb3ReadOnly()
 
   const { gasPayer, sponsorSpaceId } = getGasPayment(offer, executionMethod)
   const willRelay = gasPayer !== 'WALLET'
@@ -123,10 +126,18 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
 
   const { multiSendContract, multiSendContractAddress } = useMultiSendContract(safe)
 
-  const [multiSendTxs] = useAsync(async () => {
-    if (!txsWithDetails || !chain || !safe.version) return
-    return getMultiSendTxs(txsWithDetails, chain, safe.address.value, safe.version)
-  }, [chain, safe.address.value, safe.version, txsWithDetails])
+  const { chainId, address: safeAddressInfo, guard, version } = safe
+  // Queued txs are already known to the co-signer service, so check once rather than wait
+  const [multiSendTxs, cosignerError] = useAsync(async () => {
+    if (!txsWithDetails || !chain || !version) return
+    const getPolicyContext = web3ReadOnly
+      ? (txParams: SafeTransaction['data']) =>
+          waitForPolicyContext({ chainId, address: safeAddressInfo, guard, version }, txParams, web3ReadOnly, {
+            timeoutMs: 0,
+          })
+      : undefined
+    return getMultiSendTxs(txsWithDetails, chain, safeAddressInfo.value, version, getPolicyContext)
+  }, [chain, chainId, safeAddressInfo, guard, version, web3ReadOnly, txsWithDetails])
 
   const multiSendTxData = useMemo(() => {
     if (!txsWithDetails || !multiSendTxs) return
@@ -277,7 +288,7 @@ export const ReviewBatch = ({ params }: { params: ExecuteBatchFlowProps }) => {
 
         <BatchErrorMessages
           refusalMessage={refusalMessage}
-          estimationError={error}
+          estimationError={error ?? cosignerError}
           submitError={submitError}
           isRejectedByUser={isRejectedByUser}
         />

@@ -32,12 +32,22 @@ import * as loadFeature from '@/features/__core__/useLoadFeature'
 import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
+import type { JsonRpcProvider } from 'ethers'
+import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
+import { CosignerExecutionError, waitForPolicyContext } from '@/features/policy-cosigner/services'
 
 const chainInfo = chainBuilder().with({ chainId: '1' }).build()
 
 // The GS026 pre-checks have their own suite (services/tx/__tests__/executionPreChecks.test.ts);
 // these tests exercise the dispatch orchestration, where the mocked wallet is not
 // an owner of the mocked Safe and would otherwise be blocked by NOT_SIGNER.
+jest.mock('@/features/policy-cosigner/services', () => ({
+  ...jest.requireActual('@/features/policy-cosigner/services'),
+  waitForPolicyContext: jest.fn(() => Promise.resolve(undefined)),
+}))
+
+const mockWaitForPolicyContext = waitForPolicyContext as jest.MockedFunction<typeof waitForPolicyContext>
+
 jest.mock('@/services/tx/executionPreChecks', () => ({
   ...jest.requireActual('@/services/tx/executionPreChecks'),
   runExecutionPreChecks: jest.fn(() => Promise.resolve()),
@@ -776,6 +786,57 @@ describe('SignOrExecute hooks', () => {
       expect(id.txId).toEqual('123')
     })
 
+    describe('with a policy co-signer', () => {
+      const cosigner = faker.finance.ethereumAddress()
+      let safeInfoSpy: jest.SpyInstance
+
+      beforeEach(() => {
+        safeInfoSpy = jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
+          safe: { ...extendedSafeInfo, version: '1.5.0', threshold: 1, chainId: '1' },
+          safeAddress: extendedSafeInfo.address.value,
+          safeError: undefined,
+          safeLoading: false,
+          safeLoaded: true,
+        }))
+        jest.spyOn(web3ReadOnly, 'getWeb3ReadOnly').mockReturnValueOnce({} as JsonRpcProvider)
+      })
+
+      afterEach(() => {
+        safeInfoSpy.mockRestore()
+      })
+
+      it('executes a new tx with the co-signature the co-signer gave after it was proposed', async () => {
+        const policyContext = faker.string.hexadecimal({ length: 130, casing: 'lower' })
+        mockWaitForPolicyContext.mockResolvedValueOnce(policyContext)
+        jest
+          .spyOn(txSender, 'dispatchTxProposal')
+          .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+        const executeSpy = jest
+          .spyOn(txSender, 'dispatchTxExecution')
+          .mockImplementation((_chainId, _safeTx, _txOptions, txId) => Promise.resolve(txId ?? 'derived_id'))
+        const { result } = renderHook(() => useTxActions())
+
+        await result.current.executeTx({ gasPrice: 1 }, createSafeTx())
+
+        expect(executeSpy.mock.calls[0].at(-1)).toBe(policyContext)
+      })
+
+      it('reports the queued txId and does not execute when the co-signer has not signed the new tx', async () => {
+        mockWaitForPolicyContext.mockRejectedValueOnce(new CosignerExecutionError({ status: 'pending', cosigner }))
+        const proposeSpy = jest
+          .spyOn(txSender, 'dispatchTxProposal')
+          .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
+        const executeSpy = jest.spyOn(txSender, 'dispatchTxExecution')
+        const { result } = renderHook(() => useTxActions())
+
+        const execution = result.current.executeTx({ gasPrice: 1 }, createSafeTx())
+
+        await expect(execution).rejects.toMatchObject({ txId: '123', state: { status: 'pending' } })
+        expect(proposeSpy).toHaveBeenCalledTimes(1)
+        expect(executeSpy).not.toHaveBeenCalled()
+      })
+    })
+
     it('should NOT propose to CGW when a Safe executor executes without a txId', async () => {
       jest.spyOn(wallet, 'useSigner').mockReturnValue({
         chainId: '1',
@@ -825,6 +886,7 @@ describe('SignOrExecute hooks', () => {
         false,
         true,
         '1.3.0',
+        undefined,
         undefined,
       )
       expect(id).toEqual({ txId: 'derived_id', isExecuted: false })
@@ -876,6 +938,7 @@ describe('SignOrExecute hooks', () => {
         true,
         '1.3.0',
         undefined,
+        undefined,
       )
       expect(id).toEqual({ txId: 'derived_id', isExecuted: false })
     })
@@ -925,6 +988,7 @@ describe('SignOrExecute hooks', () => {
         true,
         true,
         '1.3.0',
+        undefined,
         undefined,
       )
       expect(id).toEqual({ txId: 'derived_id', isExecuted: true })

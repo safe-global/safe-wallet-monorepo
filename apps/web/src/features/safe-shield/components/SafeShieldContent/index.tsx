@@ -26,6 +26,7 @@ import { hasThreatCardResults } from '../../utils/hasThreatCardResults'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
 import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hypernative'
 import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
+import { PolicyCosignerFeature } from '@/features/policy-cosigner'
 import { useLoadFeature } from '@/features/__core__'
 import { ThreatAnalysis } from '../ThreatAnalysis'
 
@@ -64,6 +65,7 @@ export const SafeShieldContent = ({
 }): ReactElement => {
   const hn = useLoadFeature(HypernativeFeature)
   const safenet = useLoadFeature(SafenetChecksFeature)
+  const cosigner = useLoadFeature(PolicyCosignerFeature)
   const isSafenetEnabled = useIsSafenetChecksEnabled()
   const hasOwnTenderly = useHasOwnTenderly()
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
@@ -172,6 +174,8 @@ export const SafeShieldContent = ({
               highlightedSeverity={highlightedSeverity}
             />
           )}
+
+          {shouldShowContent && !isOffchainMessage && <cosigner.CosignerShieldRow safeTx={safeTx} />}
 
           {/* Safenet is the final check, including when the Pro rollout is off. */}
           {!isSafePro && shouldShowContent && <safenet.SafenetChecksSection />}

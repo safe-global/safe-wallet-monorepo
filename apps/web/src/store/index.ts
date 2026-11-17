@@ -39,6 +39,7 @@ import { safePassApi } from './api/safePass'
 import { beamerApi } from './api/beamer'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { safenetCheckApi } from '@safe-global/store/safenet/safenetCheckApi'
+import { cosignerApi } from '@safe-global/store/cosigner/cosignerApi'
 import { safenetCheckSlice } from '@safe-global/store/safenet/safenetCheckSlice'
 import { version as termsVersion } from '@/markdown/terms/version'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
@@ -87,6 +88,7 @@ const rootReducer = combineReducers({
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,
   [safenetCheckSlice.name]: safenetCheckSlice.reducer,
   [safenetCheckApi.reducerPath]: safenetCheckApi.reducer,
+  [cosignerApi.reducerPath]: cosignerApi.reducer,
   [slices.gatewayApi.reducerPath]: slices.gatewayApi.reducer,
   [cgwClient.reducerPath]: cgwClient.reducer,
   [slices.authSlice.reducerPath]: slices.authSlice.reducer,
@@ -130,6 +132,7 @@ const middleware: Middleware<{}, RootState>[] = [
   beamerApi.middleware,
   hypernativeApi.middleware,
   safenetCheckApi.middleware,
+  cosignerApi.middleware,
   slices.gatewayApi.middleware,
 ]
 

@@ -30,6 +30,9 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
+import { waitForPolicyContext } from '@/features/policy-cosigner/services'
 
 type Props = {
   open: boolean
@@ -51,6 +54,8 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
   const onboard = useOnboard()
   const chainInfo = useCurrentChain()
   const safeAddress = useSafeAddress()
+  const { safe } = useSafeInfo()
+  const web3ReadOnly = useWeb3ReadOnly()
   const isWrongChain = useIsWrongChain()
   // Sole authorization: a replacement needs the original (from, nonce), so only the submitter can send one
   const hasActions = signerAddress && signerAddress === wallet?.address
@@ -87,6 +92,8 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
       setWaitingForConfirmation(true)
 
       if (pendingTx.txType === PendingTxType.SAFE_TX) {
+        // The replacement must carry the same co-signature as the tx it replaces
+        const policyContext = web3ReadOnly ? await waitForPolicyContext(safe, safeTx.data, web3ReadOnly) : undefined
         await dispatchSafeTxSpeedUp(
           txOptions as Omit<TransactionOptions, 'nonce'> & { nonce: number },
           txId,
@@ -95,6 +102,7 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
           wallet.address,
           safeAddress,
           safeTx.data.nonce,
+          policyContext,
         )
         const { data: details } = await trigger({ chainId: chainInfo.chainId, id: txId })
         const txType = getTransactionTrackingType(details)
@@ -153,6 +161,8 @@ const SpeedUpModal = ({ open, handleClose, pendingTx, txId, txHash, signerAddres
     onboard,
     pendingTx,
     safeAddress,
+    safe,
+    web3ReadOnly,
     signerNonce,
     speedUpFee,
     txHash,

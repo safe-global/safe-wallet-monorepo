@@ -33,7 +33,13 @@ import {
 import { getReadOnlyGnosisSafeContract } from '@/services/contracts/safeContracts'
 import extractTxInfo from '@/services/tx/extractTxInfo'
 import type { AdvancedParameters } from '@/components/tx/AdvancedParams'
-import type { SafeTransaction, TransactionOptions, MetaTransactionData } from '@safe-global/types-kit'
+import type {
+  SafeTransaction,
+  SafeTransactionData,
+  TransactionOptions,
+  MetaTransactionData,
+} from '@safe-global/types-kit'
+import { appendPolicyContext } from '@safe-global/utils/features/policy-cosigner/policyContext'
 import { OperationType } from '@safe-global/types-kit'
 import uniqBy from 'lodash/uniqBy'
 import { Errors, logError } from '@/services/exceptions'
@@ -426,15 +432,17 @@ export const getMultiSendTxs = async (
   chain: Chain,
   safeAddress: string,
   safeVersion: string,
+  getPolicyContext?: (txParams: SafeTransactionData) => Promise<string | undefined>,
 ): Promise<MetaTransactionData[]> => {
   const readOnlySafeContract = await getReadOnlyGnosisSafeContract(chain, safeVersion)
 
-  return txs
-    .map((tx) => {
+  const multiSendTxs = await Promise.all(
+    txs.map(async (tx) => {
       if (!isMultisigDetailedExecutionInfo(tx.detailedExecutionInfo)) return
 
       const args = extractTxInfo(tx)
-      const sigs = getSignatures(args.signatures)
+      const policyContext = await getPolicyContext?.(args.txParams)
+      const sigs = appendPolicyContext(getSignatures(args.signatures), policyContext ?? '0x')
 
       // @ts-ignore
       const data = readOnlySafeContract.encode('execTransaction', [
@@ -456,8 +464,10 @@ export const getMultiSendTxs = async (
         value: '0',
         data,
       }
-    })
-    .filter(Boolean) as MetaTransactionData[]
+    }),
+  )
+
+  return multiSendTxs.filter(Boolean) as MetaTransactionData[]
 }
 
 export const getTxOptions = (params: AdvancedParameters, currentChain: Chain | undefined): TransactionOptions => {

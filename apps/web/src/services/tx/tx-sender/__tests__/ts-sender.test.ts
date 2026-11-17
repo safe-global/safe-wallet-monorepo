@@ -39,6 +39,7 @@ import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { toBeHex } from 'ethers'
 import { faker } from '@faker-js/faker'
+import { appendPolicyContext } from '@safe-global/utils/features/policy-cosigner/policyContext'
 import { EthSafeSignature, generatePreValidatedSignature } from '@safe-global/protocol-kit'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { createMockSafeTransaction } from '@/tests/transactions'
@@ -613,6 +614,37 @@ describe('txSender', () => {
   })
 
   describe('dispatchTxExecution', () => {
+    it('sends a co-signed tx as its own calldata because protocol-kit execution drops the policy context', async () => {
+      const policyContext = faker.string.hexadecimal({ length: 130, casing: 'lower' })
+      const prepareTxExecution = jest.spyOn(sdk, 'prepareTxExecution').mockResolvedValue('0xexecdata')
+      const sendTransaction = jest.fn().mockResolvedValue({ hash: zeroPadValue('0x07', 32) })
+      jest
+        .spyOn(sdk, 'getUncheckedSigner')
+        .mockResolvedValue({ sendTransaction } as unknown as Awaited<ReturnType<typeof sdk.getUncheckedSigner>>)
+      const safeAddress = toBeHex('0x123', 20)
+      const safeTx = await createTx({ to: '0x123', value: '1', data: '0x0', nonce: 1 })
+
+      await dispatchTxExecution(
+        '1',
+        safeTx,
+        { nonce: 1 },
+        'tx_id_123',
+        MockEip1193Provider,
+        SIGNER_ADDRESS,
+        safeAddress,
+        false,
+        true,
+        false,
+        '1.5.0',
+        undefined,
+        policyContext,
+      )
+
+      expect(prepareTxExecution).toHaveBeenCalledWith(safeTx, MockEip1193Provider, undefined, policyContext)
+      expect(sendTransaction).toHaveBeenCalledWith({ to: safeAddress, data: '0xexecdata', nonce: 1 })
+      expect(mockSafeSDK.executeTransaction).not.toHaveBeenCalled()
+    })
+
     it('should execute a tx', async () => {
       const simpleTxWatcherInstance = SimpleTxWatcher.getInstance()
       let watchTxHashSpy = jest.spyOn(simpleTxWatcherInstance, 'watchTxHash')
@@ -734,6 +766,42 @@ describe('txSender', () => {
   })
 
   describe('dispatchTxRelay', () => {
+    it('relays the co-signature after the owner signatures', async () => {
+      const safeAddress = toBeHex('0x789', 20)
+      const safeTx = createMockSafeTransaction({ to: safeAddress, data: '0x', value: '0', operation: 0 })
+      const safe = {
+        address: { value: safeAddress },
+        chainId: '5',
+        version: '1.5.0',
+      } as unknown as Parameters<typeof dispatchTxRelay>[1]
+      const chain = {} as unknown as Parameters<typeof dispatchTxRelay>[3]
+      const encode = jest.fn(() => '0xabcd')
+      jest
+        .spyOn(safeContracts, 'getReadOnlyCurrentGnosisSafeContract')
+        .mockResolvedValue({ encode } as unknown as Awaited<
+          ReturnType<typeof safeContracts.getReadOnlyCurrentGnosisSafeContract>
+        >)
+      server.use(http.post(`${GATEWAY_URL}/v1/chains/5/relay`, () => HttpResponse.json({ taskId: '0xtask' })))
+      const policyContext = faker.string.hexadecimal({ length: 130, casing: 'lower' })
+
+      await dispatchTxRelay(
+        safeTx,
+        safe,
+        'multisig_0x1',
+        chain,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        policyContext,
+      )
+
+      expect(encode).toHaveBeenCalledWith(
+        'execTransaction',
+        expect.arrayContaining([appendPolicyContext(safeTx.encodedSignatures(), policyContext)]),
+      )
+    })
+
     it('passes the computed safeTxHash to the relay endpoint', async () => {
       const safeAddress = toBeHex('0x789', 20)
       const safeTx = createMockSafeTransaction({

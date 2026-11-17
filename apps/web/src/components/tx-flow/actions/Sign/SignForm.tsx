@@ -18,6 +18,8 @@ import SplitMenuButton from '@safe-global/views/components/common/SplitMenuButto
 import type { SlotComponentProps, SlotName } from '../../slots'
 import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
+import { useLoadFeature } from '@/features/__core__'
+import { PolicyCosignerFeature, useCosignerState } from '@/features/policy-cosigner'
 
 export const SignForm = ({
   safeTx,
@@ -58,6 +60,8 @@ export const SignForm = ({
   } = useContext(TxFlowContext)
   const { needsRiskConfirmation, isRiskConfirmed } = txSecurity
   const hasSigned = useAlreadySigned(safeTx)
+  const { CosignerStatus } = useLoadFeature(PolicyCosignerFeature)
+  const { state: cosignerState } = useCosignerState(safeTx, { isProposed: !!txId })
 
   const handleOptionChange = (option: string) => {
     onChange?.(option)
@@ -122,6 +126,8 @@ export const SignForm = ({
       {hasSigned && <ErrorMessage level="warning">You have already signed this transaction.</ErrorMessage>}
 
       {cannotPropose && <NonOwnerError />}
+
+      <CosignerStatus state={cosignerState} />
 
       <div>
         <Separator bleed="6" />

@@ -4,6 +4,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { AppDispatch } from '@/store'
 import type { FeePaymentContract } from '../contract'
 import { isPayFromSafeAvailable } from '../utils/isPayFromSafeAvailable'
+import { isKnownPolicyGuard } from '@safe-global/utils/features/policy-guard/constants'
 
 type FeePaymentFeatureSurface = Pick<FeePaymentContract, 'resolveFeeParams'> & { $isReady: boolean }
 
@@ -18,6 +19,7 @@ export type PayFromSafeMergeContext = {
   numberSignatures: number
   currency?: string
   dispatch: AppDispatch
+  guard?: string | null
 }
 
 /**
@@ -35,8 +37,11 @@ export const mergePayFromSafeFeeParams = async ({
   numberSignatures,
   currency,
   dispatch,
+  guard,
 }: PayFromSafeMergeContext): Promise<SafeTransaction> => {
   if (safeTx.signatures.size > 0) return safeTx
+  // A policy guard rejects a non-zero gasPrice, and a co-signature only covers zero gas fields
+  if (isKnownPolicyGuard(guard)) return safeTx
   if (!isPayFromSafeAvailable(chain)) return safeTx
   if (feePaymentMode !== 'safe' || !feeGasToken) return safeTx
   if (!feePaymentFeature.$isReady || !feePaymentFeature.resolveFeeParams) return safeTx

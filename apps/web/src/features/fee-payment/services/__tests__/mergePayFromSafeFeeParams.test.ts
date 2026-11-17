@@ -4,6 +4,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { mergePayFromSafeFeeParams } from '../mergePayFromSafeFeeParams'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import type { AppDispatch } from '@/store'
+import { SAFE_POLICY_GUARD_BY_DELAY } from '@safe-global/utils/features/policy-guard/constants'
 
 const RELAY_FEE_RELAYER = {
   type: 'RELAY_FEE',
@@ -67,6 +68,20 @@ describe('mergePayFromSafeFeeParams', () => {
     const result = await mergePayFromSafeFeeParams({
       ...baseArgs(safeTx),
       chain: buildChain(['GTF'], null),
+      feePaymentFeature: feature,
+    })
+
+    expect(result).toBe(safeTx)
+    expect(feature.resolveFeeParams).not.toHaveBeenCalled()
+  })
+
+  it('bails out for a Safe behind a policy guard, which rejects a non-zero gasPrice', async () => {
+    const safeTx = createSafeTx()
+    const feature = buildFeature()
+
+    const result = await mergePayFromSafeFeeParams({
+      ...baseArgs(safeTx),
+      guard: SAFE_POLICY_GUARD_BY_DELAY['60s'],
       feePaymentFeature: feature,
     })
 

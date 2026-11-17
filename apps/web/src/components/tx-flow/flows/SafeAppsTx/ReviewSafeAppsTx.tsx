@@ -11,6 +11,8 @@ import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 import { type ReviewTransactionContentProps } from '@/components/tx/ReviewTransactionV2/ReviewTransactionContent'
 import { getTxOrigin } from '@/utils/transactions'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
+import useSafeInfo from '@/hooks/useSafeInfo'
+import { isKnownPolicyGuard } from '@safe-global/utils/features/policy-guard/constants'
 
 type ReviewSafeAppsTxProps = {
   safeAppsTx: SafeAppsTxParams
@@ -25,6 +27,8 @@ const ReviewSafeAppsTx = ({
 }: ReviewSafeAppsTxProps): ReactElement => {
   const { setSafeTx, safeTxError, setSafeTxError, setTxOrigin } = useContext(SafeTxContext)
   const safeSDK = useSafeSDK()
+  const { safe } = useSafeInfo()
+  const isPolicyGuarded = isKnownPolicyGuard(safe.guard?.value)
 
   useHighlightHiddenTab()
 
@@ -36,7 +40,8 @@ const ReviewSafeAppsTx = ({
       const isMultiSend = txs.length > 1
       const tx = isMultiSend ? await createMultiSendCallOnlyTx(txs) : await createTx(txs[0])
 
-      if (params?.safeTxGas !== undefined && !Number.isNaN(params.safeTxGas)) {
+      // A policy guard rejects a non-zero safeTxGas
+      if (params?.safeTxGas !== undefined && !Number.isNaN(params.safeTxGas) && !isPolicyGuarded) {
         tx.data.safeTxGas = String(params.safeTxGas)
       }
 
@@ -49,7 +54,7 @@ const ReviewSafeAppsTx = ({
         setTxOrigin(getTxOrigin(app))
       })
       .catch(setSafeTxError)
-  }, [safeSDK, txs, setSafeTx, setSafeTxError, setTxOrigin, app, params?.safeTxGas])
+  }, [safeSDK, txs, setSafeTx, setSafeTxError, setTxOrigin, app, params?.safeTxGas, isPolicyGuarded])
 
   const error = !isTxValid(txs)
 

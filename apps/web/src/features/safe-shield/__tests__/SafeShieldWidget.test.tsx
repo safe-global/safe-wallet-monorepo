@@ -38,6 +38,7 @@ jest.mock('@/features/__core__', () => ({
     }) => (hypernativeAuth && showActiveStatus ? <span>Hypernative Guardian is active</span> : null),
     HnCustomChecksCard: () => null,
     SafenetChecksSection: () => null,
+    CosignerShieldRow: () => null,
   })),
 }))
 

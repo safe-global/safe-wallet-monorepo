@@ -19,6 +19,7 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { useGasTokenCandidates, type GasTokenCandidate } from './useGasTokenCandidates'
 import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
 import { isPayFromSafeAvailable } from '../utils/isPayFromSafeAvailable'
+import { isKnownPolicyGuard } from '@safe-global/utils/features/policy-guard/constants'
 import { IS_RELAYING_LIVE } from '../constants'
 import {
   computeTotalOutgoing,
@@ -145,7 +146,8 @@ export const useFeesPreview = (): FeesPreviewData => {
   // Chains without a RELAY_FEE relayer can't quote Safe-pays fees at all
   // — render the signer-pays variant: free execution fee, no
   // gas-token selector, and no call to the preview endpoint.
-  const feePreviewAvailable = isPayFromSafeAvailable(chain)
+  // A policy guard rejects a non-zero gasPrice, so its Safes can't pay their own fees
+  const feePreviewAvailable = isPayFromSafeAvailable(chain) && !isKnownPolicyGuard(safe.guard?.value)
   const isSignerMode =
     !isConfirmation &&
     (!IS_RELAYING_LIVE || !feePreviewAvailable || feePaymentMode === 'signer' || candidates.length === 0)
