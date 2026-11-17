@@ -162,6 +162,16 @@ export class TxReviewPage {
     await this.executeButton.click()
   }
 
+  /**
+   * Execute with the connected wallet where a sponsor is sure to be on offer. The offer arrives after the fee card
+   * and makes itself the payer, so this waits for its selector; `execute` reads the card once and can miss it.
+   */
+  async executeDecliningSponsor(): Promise<void> {
+    await this.feePayerSelector.click()
+    await this.signerWalletOption.click()
+    await this.executeButton.click()
+  }
+
   /** Continue from the review and add the transaction to the batch instead of signing it */
   async addToBatch(): Promise<void> {
     await this.continueButton.click()
@@ -180,6 +190,12 @@ export class TxReviewPage {
   async continueAndExecute(): Promise<void> {
     await this.continueButton.click()
     await this.execute()
+  }
+
+  /** Continue from the review and execute with the connected wallet where a sponsor is sure to be on offer */
+  async continueAndExecuteDecliningSponsor(): Promise<void> {
+    await this.continueButton.click()
+    await this.executeDecliningSponsor()
   }
 
   /** Continue from the review and execute with the relay, which pays the gas */
