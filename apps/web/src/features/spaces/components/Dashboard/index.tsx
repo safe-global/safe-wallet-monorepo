@@ -18,7 +18,7 @@ import AddAccountsChooser from '../AddAccountsChooser'
 import { useRouter } from 'next/router'
 import AggregatedBalance from './AggregatedBalances'
 import SetupWidget from '../SetupWidget'
-import { useSetupWidgetDismissal } from '../SetupWidget/useSetupWidgetDismissal'
+import { useSetupWidgetDismissal } from '../../hooks/useSetupWidgetDismissal'
 import CheckoutReturnModals from '../Plans/CheckoutReturnModals'
 import { useWorkspaceLock } from '../../hooks/useWorkspaceLock'
 import { useSpacePlanState } from '../../public/useSpacePlanState'
@@ -52,7 +52,7 @@ const SpaceDashboard = () => {
     refetch: refetchPendingTxs,
   } = useSpacePendingTransactions(PENDING_TX_DISPLAY_LIMIT)
   const [setupDismissed, setSetupDismissed] = useState(false)
-  const { isDismissed: isSetupDismissedForSpace } = useSetupWidgetDismissal(spaceId)
+  const { isHidden: isSetupHidden } = useSetupWidgetDismissal(spaceId)
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
   // The lock modal is mounted by AuthState; the announcement must wait until the lock is known so both never stack.
@@ -117,7 +117,7 @@ const SpaceDashboard = () => {
     )
   }
 
-  const showSetupWidget = safeItems.length === 0 && !isSafesLoading && !setupDismissed && !isSetupDismissedForSpace
+  const showSetupWidget = safeItems.length === 0 && !isSafesLoading && !setupDismissed && !isSetupHidden
 
   const checkoutModal = <CheckoutReturnModals />
 
