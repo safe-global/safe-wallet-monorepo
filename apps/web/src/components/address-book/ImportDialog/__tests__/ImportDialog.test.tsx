@@ -4,6 +4,7 @@ import { fakerChecksummedAddress, fakerLookalikeAddress, render, screen, waitFor
 import * as useChains from '@/hooks/useChains'
 import { ADDRESS_POISONING_EVENTS, MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { getStoreInstance } from '@/store'
+import { RTK_QUERY_ERROR_MESSAGES } from '@/utils/rtkQuery'
 import ImportDialog from '..'
 
 jest.mock('@/services/analytics')
@@ -258,7 +259,7 @@ describe('ImportDialog with its own import', () => {
 
   it('hands the rows to onImport instead of the local address book, then closes', async () => {
     const address = fakerChecksummedAddress()
-    const onImport = jest.fn().mockResolvedValue(undefined)
+    const onImport = jest.fn().mockResolvedValue({ done: true })
     const { handleClose, input } = renderWithImport({ onImport })
 
     await uploadAndImport(input, csvFile([`${address},Treasury,${CHAIN_ID}`]))
@@ -269,7 +270,10 @@ describe('ImportDialog with its own import', () => {
   })
 
   it('shows the error onImport returns and lets the user try again', async () => {
-    const onImport = jest.fn().mockResolvedValueOnce('The import failed').mockResolvedValueOnce(undefined)
+    const onImport = jest
+      .fn()
+      .mockResolvedValueOnce({ done: false, error: 'The import failed' })
+      .mockResolvedValueOnce({ done: true })
     const { handleClose, input } = renderWithImport({ onImport })
 
     await uploadAndImport(input, csvFile([`${fakerChecksummedAddress()},Treasury,${CHAIN_ID}`]))
@@ -280,6 +284,29 @@ describe('ImportDialog with its own import', () => {
     await userEvent.setup().click(screen.getByTestId('import-btn'))
 
     await waitFor(() => expect(handleClose).toHaveBeenCalled())
+  })
+
+  it('stays open with the file and no error when onImport is not done', async () => {
+    const onImport = jest.fn().mockResolvedValue({ done: false })
+    const { handleClose, input } = renderWithImport({ onImport })
+
+    await uploadAndImport(input, csvFile([`${fakerChecksummedAddress()},Treasury,${CHAIN_ID}`]))
+
+    await waitFor(() => expect(screen.getByTestId('import-btn')).toBeEnabled())
+    expect(handleClose).not.toHaveBeenCalled()
+    expect(screen.getByTestId('summary-message')).toBeInTheDocument()
+    expect(screen.queryByText(RTK_QUERY_ERROR_MESSAGES.generic)).not.toBeInTheDocument()
+  })
+
+  it('shows a generic error and lets the user try again when onImport throws', async () => {
+    const onImport = jest.fn().mockRejectedValue(new Error('toWorkspaceImport broke'))
+    const { handleClose, input } = renderWithImport({ onImport })
+
+    await uploadAndImport(input, csvFile([`${fakerChecksummedAddress()},Treasury,${CHAIN_ID}`]))
+
+    expect(await screen.findByText(RTK_QUERY_ERROR_MESSAGES.generic)).toBeInTheDocument()
+    expect(screen.getByTestId('import-btn')).toBeEnabled()
+    expect(handleClose).not.toHaveBeenCalled()
   })
 
   it('blocks the file with the reason validateRows gives', async () => {

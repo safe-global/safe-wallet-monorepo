@@ -113,6 +113,7 @@ describe('toWorkspaceImport', () => {
       items: [{ address, name: 'Treasury', chainIds: ['1', '100'] }],
       newCount: 1,
       updatedCount: 0,
+      networkCount: 2,
     })
   })
 
@@ -136,6 +137,7 @@ describe('toWorkspaceImport', () => {
       items: [{ address: saved.address, name: saved.name, chainIds: ['1', '100'] }],
       newCount: 0,
       updatedCount: 1,
+      networkCount: 1,
     })
   })
 
@@ -146,7 +148,12 @@ describe('toWorkspaceImport', () => {
       .build()
     const rows: AddressBookCSVRow[] = [[saved.address, faker.person.fullName(), '100', tag.name.toLowerCase()]]
 
-    expect(toWorkspaceImport(rows, [saved], [tag])).toEqual({ items: [], newCount: 0, updatedCount: 0 })
+    expect(toWorkspaceImport(rows, [saved], [tag])).toEqual({
+      items: [],
+      newCount: 0,
+      updatedCount: 0,
+      networkCount: 0,
+    })
   })
 
   it("gives a new contact the file's tags from all its rows", () => {
@@ -189,6 +196,20 @@ describe('toWorkspaceImport', () => {
       ],
       newCount: 0,
       updatedCount: 2,
+      networkCount: 1,
     })
+  })
+
+  it('counts only the networks the import adds contacts to', () => {
+    const tag = spaceAddressBookTagBuilder().build()
+    const tagOnly = spaceAddressBookItemBuilder()
+      .with({ chainIds: ['1', '10', '137'] })
+      .build()
+    const rows: AddressBookCSVRow[] = [
+      [tagOnly.address, tagOnly.name, '1', tag.name],
+      [newAddress(), 'Treasury', '100'],
+    ]
+
+    expect(toWorkspaceImport(rows, [tagOnly], [tag]).networkCount).toBe(1)
   })
 })

@@ -4,12 +4,14 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import * as spacesRTK from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { SpaceAddressBookItemDto, SpaceAddressBookTagDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { ELEVATION_REQUIRED_ERROR } from '@/features/oidc-auth/utils/elevation'
 import { MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { getStoreInstance } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { spaceAddressBookItemBuilder, spaceAddressBookTagBuilder } from '@/tests/builders/space'
 import { render, screen, waitFor } from '@/tests/test-utils'
+import { RTK_QUERY_ERROR_MESSAGES } from '@/utils/rtkQuery'
 import ImportWorkspaceCsv from '../ImportWorkspaceCsv'
 
 const SPACE_ID = '7'
@@ -162,6 +164,32 @@ describe('ImportWorkspaceCsv', () => {
     expect(await screen.findByText(message)).toBeInTheDocument()
     expect(screen.getByText('Import address book')).toBeInTheDocument()
     expect(screen.getByTestId('import-btn')).toBeEnabled()
+  })
+
+  it('keeps the dialog and its file open, with no error, when the step-up is cancelled', async () => {
+    upsert.mockResolvedValue({ error: { status: 403, data: { message: ELEVATION_REQUIRED_ERROR } } })
+
+    const user = await openAndUpload([], [`${newAddress()},Treasury,1`])
+    await importFile(user)
+
+    await waitFor(() => expect(screen.getByTestId('import-btn')).toBeEnabled())
+    expect(screen.getByText('Import address book')).toBeInTheDocument()
+    expect(screen.getByTestId('summary-message')).toBeInTheDocument()
+    expect(screen.queryByText(RTK_QUERY_ERROR_MESSAGES.generic)).not.toBeInTheDocument()
+    expect(importMessages()).toEqual([])
+  })
+
+  it('counts no networks in the toast for a contact that only gains tags', async () => {
+    const saved = spaceAddressBookItemBuilder()
+      .with({ chainIds: ['1', '100'] })
+      .build()
+
+    const user = await openAndUpload([saved], [`${saved.address},${saved.name},1,Ops`], {
+      header: 'address,name,chainId,tags',
+    })
+    await importFile(user)
+
+    await waitFor(() => expect(importMessages()).toEqual(['1 contact imported to the Workspace address book']))
   })
 
   it('blocks a file with a row on an unsupported chain', async () => {

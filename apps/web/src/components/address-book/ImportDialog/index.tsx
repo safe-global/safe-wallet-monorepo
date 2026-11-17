@@ -24,6 +24,7 @@ import { useAddressPoisoningBatchCheck } from '@/features/address-poisoning'
 import { abCsvReaderValidator, abOnUploadValidator } from './validation'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { Errors, logError } from '@/services/exceptions'
+import { RTK_QUERY_ERROR_MESSAGES } from '@/utils/rtkQuery'
 import FileUpload, { FileTypes, type FileInfo } from '@safe-global/views/components/common/FileUpload'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { BRAND_NAME } from '@/config/constants'
@@ -31,12 +32,15 @@ import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
 export type AddressBookCSVRow = [address: string, name: string, chainId: string, ...tags: string[]]
 
+/** `done` closes the dialog. Otherwise it stays open, showing `error` if there is one. */
+export type ImportOutcome = { done: boolean; error?: string }
+
 type ImportDialogProps = {
   handleClose: () => void
   /** Returns the reason the rows can't be imported, for checks beyond the file format. */
   validateRows?: (rows: AddressBookCSVRow[]) => string | undefined
-  /** Imports somewhere other than the local address book; resolves to an error to show, if any. */
-  onImport?: (rows: AddressBookCSVRow[]) => Promise<string | undefined>
+  /** Imports somewhere other than the local address book. */
+  onImport?: (rows: AddressBookCSVRow[]) => Promise<ImportOutcome>
 }
 
 // https://react-papaparse.js.org/docs#errors
@@ -96,13 +100,18 @@ const ImportDialog = ({ handleClose, validateRows, onImport }: ImportDialogProps
     setIsConfirmOpen(false)
     setImportError(undefined)
     setIsImporting(true)
-    const failure = await importRows(rows)
-    setIsImporting(false)
-
-    if (failure) {
-      setImportError(failure)
-    } else {
-      handleClose()
+    try {
+      const { done, error } = await importRows(rows)
+      if (done) {
+        handleClose()
+      } else {
+        setImportError(error)
+      }
+    } catch (thrown) {
+      logError(Errors._703, thrown)
+      setImportError(RTK_QUERY_ERROR_MESSAGES.generic)
+    } finally {
+      setIsImporting(false)
     }
   }
 

@@ -26,6 +26,8 @@ export type WorkspaceImport = {
   items: UpsertAddressBookItem[]
   newCount: number
   updatedCount: number
+  /** Networks the import adds contacts to; a contact that only gains tags adds none. */
+  networkCount: number
 }
 
 const findSaved = (savedItems: SpaceAddressBookItemDto[], address: string) =>
@@ -119,12 +121,14 @@ export const toWorkspaceImport = (
     })
   }
 
-  const result: WorkspaceImport = { items: [], newCount: 0, updatedCount: 0 }
+  const result: WorkspaceImport = { items: [], newCount: 0, updatedCount: 0, networkCount: 0 }
+  const addedNetworks = new Set<string>()
   for (const { tags, ...contact } of fromFile.values()) {
     const saved = findSaved(savedItems, contact.address)
     if (!saved) {
       result.items.push(tags.length > 0 ? { ...contact, tags } : contact)
       result.newCount++
+      contact.chainIds.forEach((chainId) => addedNetworks.add(chainId))
       continue
     }
 
@@ -141,7 +145,9 @@ export const toWorkspaceImport = (
         ...(gainsTags && { tags: mergedTags }),
       })
       result.updatedCount++
+      addedChainIds.forEach((chainId) => addedNetworks.add(chainId))
     }
   }
+  result.networkCount = addedNetworks.size
   return result
 }

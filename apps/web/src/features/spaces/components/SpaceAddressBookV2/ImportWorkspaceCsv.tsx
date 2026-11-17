@@ -1,13 +1,11 @@
 import { useState } from 'react'
-import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
-import type { SerializedError } from '@reduxjs/toolkit'
 import {
   useAddressBooksUpsertAddressBookItemsV1Mutation,
   type SpaceAddressBookItemDto,
   type SpaceAddressBookTagDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Button } from '@safe-global/views/components/ui/button'
-import ImportDialog, { type AddressBookCSVRow } from '@/components/address-book/ImportDialog'
+import ImportDialog, { type AddressBookCSVRow, type ImportOutcome } from '@/components/address-book/ImportDialog'
 import Track from '@/components/common/Track'
 import { useCurrentSpaceId, useWorkspaceAddressBookLabel } from '@/features/spaces'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
@@ -45,16 +43,16 @@ const ImportWorkspaceCsv = ({ items, tags }: ImportWorkspaceCsvProps) => {
     return toWorkspaceImport(rows, items, tags).items.length === 0 ? NOTHING_TO_IMPORT : undefined
   }
 
-  const onImport = async (rows: AddressBookCSVRow[]) => {
-    const { items: contacts, newCount, updatedCount } = toWorkspaceImport(rows, items, tags)
+  const onImport = async (rows: AddressBookCSVRow[]): Promise<ImportOutcome> => {
+    const { items: contacts, newCount, updatedCount, networkCount } = toWorkspaceImport(rows, items, tags)
     // Skipping look-alikes can leave nothing to send
-    if (contacts.length === 0) return
+    if (contacts.length === 0) return { done: true }
 
     const result = await upsertAddressBook({ spaceId: spaceId ?? '', upsertAddressBookItemsDto: { items: contacts } })
-    if (isElevationRequiredError(result.error)) return
-    if (result.error) return getRtkQueryErrorMessage(result.error as FetchBaseQueryError | SerializedError)
+    // A cancelled step-up keeps the dialog and its file, with no error
+    if (isElevationRequiredError(result.error)) return { done: false }
+    if (result.error) return { done: false, error: getRtkQueryErrorMessage(result.error) }
 
-    const networkCount = new Set(contacts.flatMap((contact) => contact.chainIds)).size
     dispatch(
       showNotification({
         message: getImportSuccessMessage({ count: contacts.length, networkCount, bookLabel, showsEveryNetwork: true }),
@@ -67,6 +65,7 @@ const ImportWorkspaceCsv = ({ items, tags }: ImportWorkspaceCsvProps) => {
       [MixpanelEventParams.UPDATED_COUNT]: updatedCount,
       [MixpanelEventParams.WITH_TAGS]: contacts.some((contact) => contact.tags?.length),
     })
+    return { done: true }
   }
 
   return (
