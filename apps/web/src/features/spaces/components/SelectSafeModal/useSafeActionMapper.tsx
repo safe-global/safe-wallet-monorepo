@@ -2,7 +2,9 @@ import { useCallback, useContext, useMemo } from 'react'
 import { useRouter } from 'next/router'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { TxModalContext } from '@/components/tx-flow'
+import { NewTxFlow } from '@/components/tx-flow/flows/NewTxFlow'
 import { TokenTransferFlow } from '@/components/tx-flow/flows/TokenTransferFlow'
+import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import { AppRoutes } from '@/config/routes'
 import useChains from '@/hooks/useChains'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
@@ -87,6 +89,17 @@ const useSafeActionMapper = ({ onReceiveComplete }: UseSafeActionMapperOptions):
           pathname: txBuilderLink.pathname,
           query: { ...(txBuilderLink.query as Record<string, string>), safe: safeParam },
         })
+      },
+
+      [ESafeAction.NewTransaction]: async (safe) => {
+        // Not via the URL: a step swapping the flow runs the previous onClose, which would strip the Safe mid-flow
+        setTxFlow(
+          <SafeScopeProvider initial={{ chainId: safe.chainId, safeAddress: safe.address }}>
+            <NewTxFlow />
+          </SafeScopeProvider>,
+          undefined,
+          false,
+        )
       },
     }),
     [router, setTxFlow, getSafeQueryParam, navigateToSafe, onReceiveComplete, resetActiveSafe, txBuilderLink, spaceId],

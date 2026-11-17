@@ -1,4 +1,5 @@
-import { AnalysisResult, RecipientStatus, Severity } from '../../types'
+import { AnalysisResult, CommonSharedStatus, RecipientStatus, Severity } from '../../types'
+import { ErrorType, getErrorInfo } from '../../utils/errors'
 
 // Address check messages
 export const AddressCheckMessages = {
@@ -23,4 +24,11 @@ export const LowActivityAnalysisResult: AnalysisResult<RecipientStatus.LOW_ACTIV
   severity: Severity.WARN,
   title: 'Low activity recipient',
   description: 'This address has few transactions.',
+}
+
+export const SkippedActivityAnalysisResult: AnalysisResult<CommonSharedStatus.FAILED> = {
+  ...getErrorInfo(ErrorType.RECIPIENT),
+  description:
+    'Too many recipients, so their activity was not checked. ' +
+    `This check runs for up to ${MAX_ACTIVITY_CHECK_ADDRESSES} recipients.`,
 }
