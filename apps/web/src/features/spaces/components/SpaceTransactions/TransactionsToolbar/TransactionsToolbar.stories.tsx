@@ -43,6 +43,7 @@ const meta = {
     counts: COUNTS,
     filters: NO_SPACE_QUEUE_FILTERS,
     onFiltersChange: fn(),
+    onSearchChange: fn(),
   },
   parameters: { ...setup.parameters },
   decorators: [setup.decorator],

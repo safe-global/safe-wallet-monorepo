@@ -134,8 +134,8 @@ const respondWith = (body: SpaceQueuedItemPage) => {
   return urls
 }
 
-const fetchQueue = async (filters?: SpaceQueueFilters) => {
-  const { result } = renderHook(() => useSpaceQueue(spaceId, filters))
+const fetchQueue = async (query?: { filters?: SpaceQueueFilters; search?: string }) => {
+  const { result } = renderHook(() => useSpaceQueue(spaceId, query))
   await waitFor(() => expect(result.current.queue).toBeDefined())
   return result.current
 }
@@ -190,10 +190,12 @@ describe('useSpaceQueue', () => {
     ]
 
     await fetchQueue({
-      statuses: ['sign', 'conflicting', 'execute', 'stale'],
-      safes,
-      chainIds: ['1', '137'],
-      signers: [safeA, safeB],
+      filters: {
+        statuses: ['sign', 'conflicting', 'execute', 'stale'],
+        safes,
+        chainIds: ['1', '137'],
+        signers: [safeA, safeB],
+      },
     })
 
     expect(Object.fromEntries(urls[0].searchParams)).toEqual({
@@ -209,7 +211,7 @@ describe('useSpaceQueue', () => {
   it('sends only the params of the filters in use', async () => {
     const urls = respondWith(page({}, { count: 0 }))
 
-    await fetchQueue({ statuses: ['conflicting'], safes: [], chainIds: [], signers: [] })
+    await fetchQueue({ filters: { statuses: ['conflicting'], safes: [], chainIds: [], signers: [] } })
 
     expect(Object.fromEntries(urls[0].searchParams)).toEqual({ conflicting: 'true' })
   })
@@ -217,7 +219,7 @@ describe('useSpaceQueue', () => {
   it('sends no params when no filter is chosen', async () => {
     const urls = respondWith(page({}, { count: 0 }))
 
-    await fetchQueue({ statuses: [], safes: [], chainIds: [], signers: [] })
+    await fetchQueue({ filters: { statuses: [], safes: [], chainIds: [], signers: [] } })
 
     expect(urls[0].search).toBe('')
   })
@@ -225,7 +227,25 @@ describe('useSpaceQueue', () => {
   it('does not flag a filtered queue as incomplete for holding fewer transactions than the count', async () => {
     respondWith(page({ [safeA]: { '1': transactions(1) } }, { count: 10 }))
 
-    const { queue } = await fetchQueue({ statuses: ['sign'], safes: [], chainIds: [], signers: [] })
+    const { queue } = await fetchQueue({ filters: { statuses: ['sign'], safes: [], chainIds: [], signers: [] } })
+
+    expect(queue?.isComplete).toBe(true)
+  })
+
+  it('sends the search alone or with the filters', async () => {
+    const urls = respondWith(page({}, { count: 0 }))
+
+    await fetchQueue({ search: 'treasury' })
+    await fetchQueue({ filters: { statuses: ['sign'], safes: [], chainIds: [], signers: [] }, search: 'polygon' })
+
+    expect(Object.fromEntries(urls[0].searchParams)).toEqual({ search: 'treasury' })
+    expect(Object.fromEntries(urls[1].searchParams)).toEqual({ status: 'sign', search: 'polygon' })
+  })
+
+  it('does not flag a searched queue as incomplete for holding fewer transactions than the count', async () => {
+    respondWith(page({ [safeA]: { '1': transactions(1) } }, { count: 10 }))
+
+    const { queue } = await fetchQueue({ search: 'treasury' })
 
     expect(queue?.isComplete).toBe(true)
   })

@@ -40,7 +40,7 @@ export type SpaceQueue = {
   shownCount: number
   /** Transactions in the whole queue, more than `shownCount` when the gateway capped the pages it read */
   totalCount: number
-  /** Whether `sections` hold the whole queue; only known without filters, which narrow it on purpose */
+  /** Whether `sections` hold the whole queue; only known without filters or a search, which narrow it on purpose */
   isComplete: boolean
 }
 
@@ -66,7 +66,9 @@ export const toSpaceQueue = (page: SpaceQueuedItemPage, isNarrowed = false): Spa
 
 const joinOrOmit = (values: string[]): string | undefined => (values.length > 0 ? values.join(',') : undefined)
 
-const toQueryArgs = (spaceId: string, filters: SpaceQueueFilters = NO_SPACE_QUEUE_FILTERS) => {
+type SpaceQueueQuery = { filters?: SpaceQueueFilters; search?: string }
+
+const toQueryArgs = (spaceId: string, { filters = NO_SPACE_QUEUE_FILTERS, search }: SpaceQueueQuery) => {
   const statuses = filters.statuses.filter((option) => (SPACE_QUEUE_STATUSES as readonly string[]).includes(option))
   return {
     spaceId,
@@ -76,14 +78,15 @@ const toQueryArgs = (spaceId: string, filters: SpaceQueueFilters = NO_SPACE_QUEU
     safes: joinOrOmit(filters.safes.map(({ chainId, safeAddress }) => `${chainId}:${safeAddress}`)),
     chainIds: joinOrOmit(filters.chainIds),
     signers: joinOrOmit(filters.signers),
+    search: search || undefined,
   } satisfies SpaceTransactionsGetTransactionQueueV1ApiArg
 }
 
-export const useSpaceQueue = (spaceId: string, filters?: SpaceQueueFilters) => {
+export const useSpaceQueue = (spaceId: string, query: SpaceQueueQuery = {}) => {
   const { data, currentData, isError, refetch } = useSpaceTransactionsGetTransactionQueueV1Query(
-    toQueryArgs(spaceId, filters),
+    toQueryArgs(spaceId, query),
   )
-  const isNarrowed = hasSpaceQueueFilters(filters)
+  const isNarrowed = hasSpaceQueueFilters(query.filters) || !!query.search
   const queue = useMemo(
     () => (currentData ? toSpaceQueue(currentData, isNarrowed) : undefined),
     [currentData, isNarrowed],
