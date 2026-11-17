@@ -7,7 +7,8 @@ import { waitUntil } from '../../environment/scenarios/indexing.mjs'
 import { openSafe } from '../../environment/scenarios/safe.mjs'
 import { confirmationsOf, transactionsIn } from '../api/transaction-items'
 import type { Journey } from '../fixtures/journey.fixture'
-import { seedQueuedTransfer, seedSafe, type QueuedTransaction, type SeededSafe } from './safe'
+import type { MetaTransactionData } from '@safe-global/types-kit'
+import { seedQueuedTransaction, seedQueuedTransfer, seedSafe, type QueuedTransaction, type SeededSafe } from './safe'
 
 const hasConfirmations = (queue: QueuedItemPage, txId: string, count: number): boolean =>
   transactionsIn(queue).some((tx) => tx.id === txId && confirmationsOf(tx) === count)
@@ -18,9 +19,24 @@ export async function seedSignedTransfer(
   safe: SeededSafe,
   transfer: { nonce: number; recipient: string; amount: string },
 ): Promise<QueuedTransaction> {
-  const queued = await seedQueuedTransfer(safe, transfer)
+  return confirmAsBob(journey, safe, await seedQueuedTransfer(safe, transfer))
+}
+
+/**
+ * Proposes `transactions` signed by the Safe's context signer and Bob, and waits until the CGW queue shows both
+ * signatures. Several transactions make one MultiSend.
+ */
+export async function seedSignedTransaction(
+  journey: Journey,
+  safe: SeededSafe,
+  transaction: { nonce: number; transactions: MetaTransactionData[] },
+): Promise<QueuedTransaction> {
+  return confirmAsBob(journey, safe, await seedQueuedTransaction(safe, transaction))
+}
+
+async function confirmAsBob(journey: Journey, safe: SeededSafe, queued: QueuedTransaction): Promise<QueuedTransaction> {
   const { context } = safe
-  const bob = await openSafe(journey.env, journey.owners.bob, safe.address)
+  const bob = await openSafe(context.env, journey.owners.bob, safe.address)
   const signature = await bob.safe.signHash(queued.safeTxHash)
   await confirmInQueue(context, queued.safeTxHash, signature.data)
   await waitUntil(context.env, `${context.path}/transactions/queued`, (queue: QueuedItemPage) =>

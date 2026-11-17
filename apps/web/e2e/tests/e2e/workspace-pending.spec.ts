@@ -1,162 +1,264 @@
+import type { Page } from '@playwright/test'
 import { Wallet, parseEther, parseUnits } from 'ethers'
 import { confirmationsOf, nonceOf } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
-import { ROUTES } from '../../src/data/constants'
-import {
-  addWorkspaceSafes,
-  createEmailSession,
-  createWorkspace,
-  gatewayRequest,
-  signInWithEmail,
-  uniqueEmail,
-} from '../../src/fixtures/email-session'
-import { test, expect } from '../../src/fixtures/journey.fixture'
+import { test, expect, type Journey } from '../../src/fixtures/journey.fixture'
 import { HomePage } from '../../src/pages/home.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
 import { TxQueuePage } from '../../src/pages/tx-queue.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
 import { WorkspaceTransactionsPage } from '../../src/pages/workspace-transactions.page'
 import { seedProposer } from '../../src/seed/proposers'
-import { seedQueuedTokenTransfer, seedQueuedTransaction, seedQueuedTransfer, seedSafe } from '../../src/seed/safe'
-import { seedSignedTransfer } from '../../src/seed/signatures'
-import { POLYGON_USDC, SEPOLIA_USDC, seedTokenBalance, waitForNativeBalance } from '../../src/seed/tokens'
+import {
+  seedQueuedTokenTransfer,
+  seedQueuedTransfer,
+  seedSafe,
+  type SeededSafe,
+  type SafeSetup,
+} from '../../src/seed/safe'
+import { seedSignedTransaction, seedSignedTransfer } from '../../src/seed/signatures'
+import {
+  ETHEREUM_USDC,
+  POLYGON_USDC,
+  SEPOLIA_USDC,
+  seedTokenBalance,
+  waitForNativeBalance,
+  type SeedToken,
+} from '../../src/seed/tokens'
 import { seedBusinessWorkspace } from '../../src/seed/workspace'
 
-const AMOUNT = '0.001'
-const USDC_AMOUNT = parseUnits('5', 6)
+const ETH = {
+  treasury: '0.0011',
+  payroll: '0.0012',
+  payrollBatchItem: '0.0001',
+  payrollLater: '0.0013',
+  reserve: '0.0014',
+  grants: '0.0015',
+  proposed: '0.0016',
+}
+const USDC = { treasury: '5', reserve: '6', grants: '7' }
 // The page polls the Workspace queue every 15 s, on top of the refetch after the user's own signature
 const POLLED_UPDATE = { timeout: 35_000 }
 
-const ethTransfer = (recipient: string) => ({ to: recipient, value: parseEther(AMOUNT).toString(), data: '0x' })
+type PendingWorkspace = {
+  id: string
+  recipient: string
+  treasury: SeededSafe
+  payroll: SeededSafe
+  operations: SeededSafe
+}
+
+const ethTransfer = (recipient: string, amount: string) => ({
+  to: recipient,
+  value: parseEther(amount).toString(),
+  data: '0x',
+})
+
+async function seedSafeWithUsdc(journey: Journey, setup: SafeSetup, token: SeedToken, amount: string) {
+  const safe = await seedSafe(journey, setup)
+  await seedTokenBalance(safe, { token, amount: parseUnits(amount, token.decimals) })
+  return safe
+}
+
+async function seedSepoliaSafes(journey: Journey, recipient: string) {
+  const treasury = await seedSafeWithUsdc(
+    journey,
+    { owners: ['carol', 'alice', 'bob'], threshold: 3 },
+    SEPOLIA_USDC,
+    USDC.treasury,
+  )
+  await seedQueuedTransfer(treasury, { nonce: 0, recipient, amount: ETH.treasury })
+  await seedQueuedTokenTransfer(treasury, {
+    nonce: 1,
+    token: SEPOLIA_USDC.address,
+    recipient,
+    amount: parseUnits(USDC.treasury, SEPOLIA_USDC.decimals),
+  })
+
+  const payroll = await seedSafe(journey, { owners: ['alice', 'bob', 'carol'], threshold: 2 })
+  await seedSignedTransfer(journey, payroll, { nonce: 0, recipient, amount: ETH.payroll })
+  await seedSignedTransaction(journey, payroll, {
+    nonce: 1,
+    transactions: [ethTransfer(recipient, ETH.payrollBatchItem), ethTransfer(recipient, ETH.payrollBatchItem)],
+  })
+  await seedQueuedTransfer(payroll, { nonce: 2, recipient, amount: ETH.payrollLater })
+
+  const operations = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 2 })
+  await seedProposer(operations, { delegate: journey.owners.dave, delegator: journey.owners.alice })
+  await waitForNativeBalance(operations)
+
+  return { treasury, payroll, operations }
+}
+
+async function seedSafeOn(
+  journey: Journey,
+  setup: SafeSetup,
+  token: SeedToken,
+  transfers: { recipient: string; eth: string; usdc: string },
+) {
+  const safe = await seedSafeWithUsdc(journey, setup, token, transfers.usdc)
+  await seedQueuedTransfer(safe, { nonce: 0, recipient: transfers.recipient, amount: transfers.eth })
+  await seedQueuedTokenTransfer(safe, {
+    nonce: 1,
+    token: token.address,
+    recipient: transfers.recipient,
+    amount: parseUnits(transfers.usdc, token.decimals),
+  })
+  return safe
+}
+
+/**
+ * The pre-set-up Workspace of the QA plan, with 9 pending transactions:
+ * - Sepolia `Treasury` (Carol, Alice, Bob; 3 of 3): #0 ETH signed by Carol, #1 USDC signed by Carol
+ * - Sepolia `Payroll` (Alice, Bob, Carol; 2 of 3): #0 ETH and #1 MultiSend signed by Alice and Bob, #2 ETH signed by Alice
+ * - Sepolia `Operations` (Alice, Bob; 2 of 2): nothing queued, Dave is its proposer
+ * - Ethereum `Reserve` (Alice; 1 of 1): #0 ETH and #1 USDC signed by Alice
+ * - Polygon `Grants` (Alice, Bob; 2 of 2): #0 ETH and #1 USDC signed by Alice
+ */
+async function seedPendingWorkspace(journey: Journey, page: Page): Promise<PendingWorkspace> {
+  const recipient = Wallet.createRandom().address
+  const [sepolia, reserve, grants] = await Promise.all([
+    seedSepoliaSafes(journey, recipient),
+    seedSafeOn(journey, { owners: ['alice'], threshold: 1, network: 'ethereum' }, ETHEREUM_USDC, {
+      recipient,
+      eth: ETH.reserve,
+      usdc: USDC.reserve,
+    }),
+    seedSafeOn(journey, { owners: ['alice', 'bob'], threshold: 2, network: 'polygon' }, POLYGON_USDC, {
+      recipient,
+      eth: ETH.grants,
+      usdc: USDC.grants,
+    }),
+  ])
+  const { id } = await seedBusinessWorkspace(page, {
+    Treasury: sepolia.treasury,
+    Payroll: sepolia.payroll,
+    Operations: sepolia.operations,
+    Reserve: reserve,
+    Grants: grants,
+  })
+  return { id, recipient, ...sepolia }
+}
 
 test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
-  test('should list the ERC-20, ETH and MultiSend transactions queued on Sepolia, Ethereum and Polygon Safes of the Workspace', async ({
+  test.describe.configure({ timeout: 300_000 })
+
+  test('should list the ETH, USDC and MultiSend transactions queued on the Sepolia, Ethereum and Polygon Safes of the Workspace', async ({
     safePage,
     journey,
   }) => {
-    test.slow()
-    const recipient = Wallet.createRandom().address
-    const treasury = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 2 })
-    const operations = await seedSafe(journey, { owners: ['alice'], threshold: 1, network: 'ethereum' })
-    const grants = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 2, network: 'polygon' })
-    await seedTokenBalance(treasury, { token: SEPOLIA_USDC, amount: USDC_AMOUNT })
-    await seedTokenBalance(grants, { token: POLYGON_USDC, amount: USDC_AMOUNT })
-    await seedQueuedTokenTransfer(treasury, { nonce: 0, token: SEPOLIA_USDC.address, recipient, amount: USDC_AMOUNT })
-    await seedQueuedTransaction(treasury, { nonce: 1, transactions: [ethTransfer(recipient), ethTransfer(recipient)] })
-    await seedQueuedTransfer(operations, { nonce: 0, recipient, amount: AMOUNT })
-    await seedQueuedTransfer(grants, { nonce: 0, recipient, amount: AMOUNT })
-    await seedQueuedTokenTransfer(grants, { nonce: 1, token: POLYGON_USDC.address, recipient, amount: USDC_AMOUNT })
-    const { id: workspaceId } = await seedBusinessWorkspace(safePage, {
-      Treasury: treasury,
-      Operations: operations,
-      Grants: grants,
-    })
+    const workspace = await seedPendingWorkspace(journey, safePage)
 
     const pending = new WorkspaceTransactionsPage(safePage)
-    await pending.goto(workspaceId)
+    await pending.goto(workspace.id)
 
     await expect(pending.networkSection('Sepolia')).toBeVisible()
     await expect(pending.networkSection('Ethereum')).toBeVisible()
     await expect(pending.networkSection('Polygon')).toBeVisible()
-    await expect(pending.rows).toHaveCount(5)
-    await expect(pending.queueTable).toContainText('Treasury')
-    await expect(pending.queueTable).toContainText('Operations')
-    await expect(pending.queueTable).toContainText('Grants')
-    await expect(pending.rows.filter({ hasText: 'USDC' })).toHaveCount(2)
+    await expect(pending.rows).toHaveCount(9)
+    await expect(pending.rows.filter({ hasText: 'USDC' })).toHaveCount(3)
     await expect(pending.rows.filter({ hasText: 'Batch' })).toHaveCount(1)
-    await expect(pending.rows.filter({ hasText: '1/2' })).toHaveCount(4)
-    await expect(pending.rows.filter({ hasText: '1/1' })).toHaveCount(1)
+    await expect(pending.rows.filter({ hasText: '1/3' })).toHaveCount(2)
+    await expect(pending.rows.filter({ hasText: '2/2' })).toHaveCount(2)
+    await expect(pending.rows.filter({ hasText: '1/2' })).toHaveCount(3)
+    await expect(pending.rows.filter({ hasText: '1/1' })).toHaveCount(2)
   })
 
-  test('should show a transaction that a proposer proposed as waiting for signatures, and as signable by an owner', async ({
+  test('should add a transaction that a proposer creates to the Workspace queue as waiting, and as signable by an owner', async ({
     safePage,
     safeApiClient,
     journey,
   }) => {
-    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 2 })
-    await seedProposer(safe, { delegate: journey.owners.dave, delegator: journey.owners.alice })
-    await waitForNativeBalance(safe)
-    const { id: workspaceId } = await seedBusinessWorkspace(safePage, { Treasury: safe })
+    const workspace = await seedPendingWorkspace(journey, safePage)
 
     const sendTokens = new SendTokensPage(safePage)
     const review = new TxReviewPage(safePage)
     const pending = new WorkspaceTransactionsPage(safePage)
     await journey.connectAs('dave')
-    await new HomePage(safePage).goto(safe.prefixedAddress)
+    await new HomePage(safePage).goto(workspace.operations.prefixedAddress)
     await sendTokens.open()
-    await sendTokens.fillTransfer({ recipient: Wallet.createRandom().address, amount: AMOUNT })
+    await sendTokens.fillTransfer({ recipient: workspace.recipient, amount: ETH.proposed })
     await sendTokens.nextButton.click()
     await review.propose()
 
-    await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(confirmationsOf)).toEqual([0])
-    await pending.goto(workspaceId)
-    const row = pending.rows.first()
-    await expect(pending.rows).toHaveCount(1)
-    await expect(row).toContainText('0/2')
-    await expect(row).toContainText('Waiting')
+    await expect
+      .poll(async () => (await safeApiClient.getQueued(workspace.operations.address)).map(confirmationsOf))
+      .toEqual([0])
+    await pending.goto(workspace.id)
+    const proposed = pending.rows.filter({ hasText: ETH.proposed })
+    await expect(pending.rows).toHaveCount(10)
+    await expect(proposed).toContainText('0/2')
+    await expect(proposed).toContainText('Waiting')
 
     await journey.connectAs('alice')
 
-    await expect(row).toContainText('0/2')
-    await expect(row).not.toContainText('Waiting')
-    await expect(row.getByRole('button', { name: 'Sign' })).toBeVisible()
+    await expect(pending.rows).toHaveCount(10)
+    await expect(proposed).not.toContainText('Waiting')
+    await expect(proposed.getByRole('button', { name: 'Sign' })).toBeVisible()
   })
 
-  test('should update the signature count and status of a row after each of two owners signs from the Workspace', async ({
+  test('should update the signature count and status in the Workspace queue after each of two owners signs', async ({
     safePage,
     safeApiClient,
     journey,
   }) => {
-    const safe = await seedSafe(journey, { owners: ['carol', 'alice', 'bob'], threshold: 3 })
-    await seedQueuedTransfer(safe, { nonce: 0, recipient: Wallet.createRandom().address, amount: AMOUNT })
-    const { id: workspaceId } = await seedBusinessWorkspace(safePage, { Treasury: safe })
+    const workspace = await seedPendingWorkspace(journey, safePage)
 
     const pending = new WorkspaceTransactionsPage(safePage)
     const review = new TxReviewPage(safePage)
-    await pending.goto(workspaceId)
-    const row = pending.rows.first()
-    await expect(row).toContainText('1/3')
-    await pending.sign(row)
+    await pending.goto(workspace.id)
+    const transfer = pending.rows.filter({ hasText: ETH.treasury })
+    await expect(transfer).toContainText('1/3')
+    await pending.sign(transfer)
     await review.sign()
 
-    await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(confirmationsOf)).toEqual([2])
-    await expect(row).toContainText('2/3', POLLED_UPDATE)
-    await expect(row).toContainText('Waiting')
+    await expect
+      .poll(async () => (await safeApiClient.getQueued(workspace.treasury.address)).map(confirmationsOf))
+      .toEqual([2, 1])
+    await expect(transfer).toContainText('2/3', POLLED_UPDATE)
+    await expect(transfer).toContainText('Waiting')
+    await expect(pending.rows).toHaveCount(9)
 
     await journey.connectAs('bob')
-    await expect(row).toContainText('2/3')
-    await pending.sign(row)
+    await expect(transfer).toContainText('2/3')
+    await pending.sign(transfer)
     await review.continueAndChooseSign()
     await review.signButton.click()
 
-    await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(confirmationsOf)).toEqual([3])
-    await expect(row).toContainText('3/3', POLLED_UPDATE)
-    await expect(row.getByTestId('execute-tx-btn')).toBeVisible()
+    await expect
+      .poll(async () => (await safeApiClient.getQueued(workspace.treasury.address)).map(confirmationsOf))
+      .toEqual([3, 1])
+    await expect(transfer).toContainText('3/3', POLLED_UPDATE)
+    await expect(transfer.getByTestId('execute-tx-btn')).toBeVisible()
+    await expect(pending.rows).toHaveCount(9)
+    await expect(pending.rows.filter({ hasText: '1/3' })).toHaveCount(1)
   })
 
-  test('should remove a fully signed transaction from the Workspace queue once an owner executes it from its row', async ({
+  test('should remove an executed transaction from the Workspace queue and make the next one of its Safe executable', async ({
     safePage,
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
-    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 2 })
-    await seedSignedTransfer(journey, safe, { nonce: 0, recipient, amount: AMOUNT })
-    const { id: workspaceId } = await seedBusinessWorkspace(safePage, { Treasury: safe })
+    const workspace = await seedPendingWorkspace(journey, safePage)
 
     const pending = new WorkspaceTransactionsPage(safePage)
     const review = new TxReviewPage(safePage)
-    await pending.goto(workspaceId)
-    const row = pending.rows.first()
-    await expect(row).toContainText('2/2')
-    await pending.execute(row)
+    await pending.goto(workspace.id)
+    const transfer = pending.rows.filter({ hasText: ETH.payroll })
+    const batch = pending.rows.filter({ hasText: 'Batch' })
+    await expect(transfer).toContainText('2/2')
+    await expect(batch).toContainText('Blocked')
+    await pending.execute(transfer)
     await review.continueAndExecute()
     await review.waitForExecution()
 
-    await expect.poll(() => safeApiClient.getNonce(safe.address)).toBe(1)
-    expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
-    await pending.goto(workspaceId)
-    await expect(pending.emptyQueue).toBeVisible()
+    await expect.poll(() => safeApiClient.getNonce(workspace.payroll.address)).toBe(1)
+    expect(await balanceOf(journey.env, workspace.recipient)).toBe(parseEther(ETH.payroll))
+    await pending.goto(workspace.id)
+    await expect(pending.rows).toHaveCount(8)
+    await expect(transfer).toHaveCount(0)
+    await expect(batch).not.toContainText('Blocked')
+    await expect(batch.getByTestId('execute-tx-btn')).toBeVisible()
   })
 
   test('should keep only the unexecuted transactions in the Workspace queue after an owner bulk executes on one Safe', async ({
@@ -164,45 +266,25 @@ test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
     safeApiClient,
     journey,
   }) => {
-    const recipient = Wallet.createRandom().address
-    const treasury = await seedSafe(journey, { owners: ['alice', 'bob', 'carol'], threshold: 2 })
-    const payroll = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 2 })
-    await seedSignedTransfer(journey, treasury, { nonce: 0, recipient, amount: AMOUNT })
-    await seedSignedTransfer(journey, treasury, { nonce: 1, recipient, amount: AMOUNT })
-    await seedQueuedTransfer(treasury, { nonce: 2, recipient, amount: AMOUNT })
-    await seedQueuedTransfer(payroll, { nonce: 0, recipient, amount: AMOUNT })
-    const { id: workspaceId } = await seedBusinessWorkspace(safePage, { Treasury: treasury, Payroll: payroll })
+    const workspace = await seedPendingWorkspace(journey, safePage)
 
     const pending = new WorkspaceTransactionsPage(safePage)
     const queue = new TxQueuePage(safePage)
     const review = new TxReviewPage(safePage)
-    await pending.goto(workspaceId)
-    await expect(pending.rows).toHaveCount(4)
-    await queue.goto(treasury.prefixedAddress)
+    await queue.goto(workspace.payroll.prefixedAddress)
+    await expect(queue.bulkExecuteButton).toHaveText('Bulk execute 2 transactions')
     await queue.bulkExecuteButton.click()
     await review.executeBulk()
 
-    await expect.poll(() => safeApiClient.getNonce(treasury.address)).toBe(2)
-    await expect.poll(async () => (await safeApiClient.getQueued(treasury.address)).map(nonceOf)).toEqual([2])
-    await pending.goto(workspaceId)
-    await expect(pending.rows).toHaveCount(2)
-    await expect(pending.rows.filter({ hasText: '2/2' })).toHaveCount(0)
-    await expect(pending.rows.filter({ hasText: '1/2' })).toHaveCount(2)
-  })
-
-  test('should not show the Workspace queue to a signed-in user who is not a member', async ({ safePage, journey }) => {
-    const treasury = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
-    await seedQueuedTransfer(treasury, { nonce: 0, recipient: Wallet.createRandom().address, amount: AMOUNT })
-    const owner = await createEmailSession(uniqueEmail('workspace-owner'))
-    const { uuid: workspaceId } = await createWorkspace(owner, 'Pending workspace')
-    await addWorkspaceSafes(owner, workspaceId, [treasury.address])
-    const outsider = await signInWithEmail(safePage, uniqueEmail('outsider'))
-
-    await new WorkspaceTransactionsPage(safePage).goto(workspaceId)
-
-    await expect(safePage).toHaveURL((url) => url.pathname === ROUTES.welcomeSpaces)
-    await expect(gatewayRequest(outsider, 'GET', `/v1/spaces/${workspaceId}/transactions/queued`)).rejects.toThrow(
-      /returned 40[134]/,
+    await expect.poll(() => safeApiClient.getNonce(workspace.payroll.address)).toBe(2)
+    await expect.poll(async () => (await safeApiClient.getQueued(workspace.payroll.address)).map(nonceOf)).toEqual([2])
+    expect(await balanceOf(journey.env, workspace.recipient)).toBe(
+      parseEther(ETH.payroll) + 2n * parseEther(ETH.payrollBatchItem),
     )
+    await pending.goto(workspace.id)
+    await expect(pending.rows).toHaveCount(7)
+    await expect(pending.rows.filter({ hasText: ETH.payroll })).toHaveCount(0)
+    await expect(pending.rows.filter({ hasText: 'Batch' })).toHaveCount(0)
+    await expect(pending.rows.filter({ hasText: ETH.payrollLater })).toContainText('1/2')
   })
 })
