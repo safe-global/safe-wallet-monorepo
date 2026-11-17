@@ -1,5 +1,5 @@
 import { Fragment, type MouseEvent, type ReactNode } from 'react'
-import { Clock, Lock } from 'lucide-react'
+import { Clock, Lock, Repeat } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
@@ -14,7 +14,8 @@ import { depositRoute, liquidityBucket } from '../shelf'
 import type { Holding, Operation, Opportunity } from '../types'
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0!'
-const COLUMN_WIDTHS = ['w-10', '', 'w-20', 'w-28', 'w-32', 'w-24', 'w-32', 'w-40']
+const OPS = DEFI_V1_COPY.operations
+const COLUMN_WIDTHS = ['w-10', '', 'w-20', 'w-28', 'w-32', 'w-24', 'w-32 @6xl:w-44', 'w-40']
 const COLUMN_COUNT = COLUMN_WIDTHS.length
 const OPPORTUNITY_HEADERS = ['Opportunity', 'Net APY', 'Liquidity', 'Exit time', 'Networks', 'Your position']
 
@@ -78,9 +79,12 @@ const NameCell = ({ opportunity, operation }: { opportunity: Opportunity; operat
         <span className="truncate font-medium text-foreground">{opportunity.name}</span>
         {opportunity.placement === 'sponsored' && <Badge variant="warning">{DEFI_V1_COPY.sponsored}</Badge>}
         {operation && (
-          <Badge variant="success" title={DEFI_V1_COPY.operations.runsIn(operation.name)}>
-            {DEFI_V1_COPY.operations.ofSigners(operation.threshold, operation.owners)}
-          </Badge>
+          <Tooltip delay={150}>
+            <TooltipTrigger render={<span className="flex shrink-0" />}>
+              <Badge variant="success">{OPS.ofSigners(operation.threshold, operation.owners)}</Badge>
+            </TooltipTrigger>
+            <TooltipContent>{OPS.runsIn(operation.name)}</TooltipContent>
+          </Tooltip>
         )}
       </span>
       <span className="truncate text-xs text-muted-foreground">
@@ -131,17 +135,23 @@ const PositionCell = ({ holding, operation }: { holding?: Holding; operation?: O
   if (!holding) return <Empty />
   return (
     <span className="flex min-w-0 flex-col">
-      {holding.invested > 0 && <span className="font-semibold tabular-nums">{formatCompactUsd(holding.invested)}</span>}
       {holding.invested > 0 && (
-        <span className="truncate text-xs tabular-nums text-muted-foreground">
-          {DEFI_V1_COPY.positions.earnedAmount(formatCompactUsd(holding.earned))}
-        </span>
-      )}
-      {operation && (
-        <span className="truncate text-xs text-muted-foreground">
-          {DEFI_V1_COPY.operations.heldIn(operation.name)}
-          {operation.recurring &&
-            ` · ${DEFI_V1_COPY.operations.recurring(formatCompactUsd(operation.recurring.amount), DEFI_V1_COPY.operations.frequencies[operation.recurring.frequency])}`}
+        <span className="flex flex-wrap items-center gap-x-2 tabular-nums">
+          <span className="font-semibold">{formatCompactUsd(holding.invested)}</span>
+          <span className="text-xs text-badge-dot-success">+{formatCompactUsd(holding.earned)}</span>
+          {operation?.recurring && (
+            <Tooltip delay={150}>
+              <TooltipTrigger render={<span className="flex text-muted-foreground" />}>
+                <Repeat className="size-3.5" aria-label={OPS.recurringLabel} />
+              </TooltipTrigger>
+              <TooltipContent>
+                {OPS.recurring(
+                  formatCompactUsd(operation.recurring.amount),
+                  OPS.frequencies[operation.recurring.frequency],
+                )}
+              </TooltipContent>
+            </Tooltip>
+          )}
         </span>
       )}
       {holding.pending > 0 && (

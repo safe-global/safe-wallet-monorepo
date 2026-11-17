@@ -54,12 +54,14 @@ export const TreasurySummary = ({
       title={COPY.idle}
       stat={formatCompactUsd(summary.idle)}
       detail={
-        <Progress
-          value={summary.investedShare * 100}
-          aria-label="Share of treasury invested"
-          indicatorClassName="bg-badge-dot-success"
-          className="mt-2"
-        />
+        <div className="mt-2 flex flex-col gap-1.5">
+          <Progress
+            value={summary.investedShare * 100}
+            aria-label="Share of treasury invested"
+            indicatorClassName="bg-badge-dot-success"
+          />
+          {COPY.investedShare(formatCompactUsd(summary.invested), Math.round(summary.investedShare * 100))}
+        </div>
       }
       action={COPY.putIdleToWork}
       onAction={onExploreIdle}

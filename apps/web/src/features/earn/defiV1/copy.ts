@@ -101,7 +101,6 @@ export const DEFI_V1_COPY = {
     pending: 'Awaiting signatures',
     trend: (growth: string) => `Up ${growth} since you invested`,
     trendTooltip: (from: string, to: string, earned: string) => `${from} to ${to} over 12 months · +${earned} earned`,
-    earnedAmount: (amount: string) => `+${amount} earned`,
     pendingAmount: (amount: string) => `${amount} awaiting signatures`,
     withdrawTitle: (name: string) => `Withdraw from ${name}`,
     withdrawLead: 'Funds return to this Safe. Signers approve one proposal.',
@@ -215,6 +214,7 @@ export const DEFI_V1_COPY = {
     },
     idle: 'Idle cash',
     putIdleToWork: 'Invest idle cash',
+    investedShare: (amount: string, share: number) => `${amount} invested · ${share}%`,
     earned: 'Total earned',
     earnedFrom: (count: number) => `From ${count} investment${count === 1 ? '' : 's'}`,
     seeInvestments: 'See investments',
@@ -241,7 +241,6 @@ export const DEFI_V1_COPY = {
     afterSetup: (threshold: number, owners: number) =>
       `After setup, ${threshold} of ${owners} signers can invest and withdraw in it.`,
     customise: 'Customise setup',
-    heldIn: (name: string) => `in ${name}`,
     investment: 'Investment',
     oneTime: 'One time',
     recurringLabel: 'Recurring',
