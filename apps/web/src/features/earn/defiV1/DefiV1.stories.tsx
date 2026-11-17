@@ -47,7 +47,7 @@ const meta = {
   parameters: { layout: 'fullscreen', ...setup.parameters },
   decorators: [setup.decorator, withPrototype],
   beforeEach: () => localItem(EARN_CONSENT_STORAGE_KEY).set(true),
-  args: { page: 'earn', framing: 'treasury', nudge: 'home', plan: 'free', setup: 'dialog' },
+  args: { page: 'earn', framing: 'treasury', nudge: 'home', plan: 'free', setup: 'stepper' },
   argTypes: {
     page: { control: 'inline-radio', options: ['home', 'earn', 'partner'] },
     framing: { control: 'inline-radio', options: ['treasury', 'defi'] },

@@ -191,6 +191,7 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
           groups={groups}
           isLocked={locked}
           onSelect={setSelected}
+          onInvest={config.plan === 'pro' ? openSetup : undefined}
           selection={{ selected: compareIds, isFull: compareIds.length >= MAX_COMPARE, onToggle: toggleCompare }}
           holdingOf={holdingOf}
           heldInOf={heldInOf}

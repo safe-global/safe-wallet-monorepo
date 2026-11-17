@@ -136,7 +136,7 @@ export const SetUpInvestmentStepper = ({
     },
     {
       heading: COPY.stepHeadings[4],
-      content: <ReviewSummary form={form} />,
+      content: <ReviewSummary form={form} onEdit={setCurrent} />,
       valid: form.isValid,
     },
   ]

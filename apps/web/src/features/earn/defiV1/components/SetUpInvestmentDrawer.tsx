@@ -92,7 +92,7 @@ export const SetUpInvestmentDrawer = ({
     {
       title: COPY.review,
       summary: () => '',
-      content: <ReviewSummary form={form} />,
+      content: <ReviewSummary form={form} onEdit={setCurrent} />,
       valid: form.isValid,
     },
   ]

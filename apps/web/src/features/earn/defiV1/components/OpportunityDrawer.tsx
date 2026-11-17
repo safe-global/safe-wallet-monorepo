@@ -195,7 +195,9 @@ export const OpportunityDrawer = ({
                 {opportunity.placement === 'sponsored' && <Badge variant="warning">{DEFI_V1_COPY.sponsored}</Badge>}
               </div>
 
-              {canCreate && !locked && <SigningBlock operation={operations[0]} onSetUp={onCustomise} />}
+              {canCreate && !locked && (holding || operations[0]) && (
+                <SigningBlock operation={operations[0]} onSetUp={onCustomise} />
+              )}
 
               <DrawerSection title={COPY.overview} collapsible defaultOpen>
                 <Frame>

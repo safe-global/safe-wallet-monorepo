@@ -11,7 +11,6 @@ import {
 } from '@safe-global/views/components/ui/input-group'
 import { Label } from '@safe-global/views/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@safe-global/views/components/ui/radio-group'
-import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { DrawerSection } from '@/components/common/Drawer'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -87,6 +86,7 @@ export const ActionPanel = ({
 }) => {
   const { safe } = useSafeInfo()
   const [mode, setMode] = useState<Mode>('deposit')
+  const [isChoosing, setIsChoosing] = useState(Boolean(holding))
   const [value, setValue] = useState(String(IDLE_CASH.amount))
   const [done, setDone] = useState<{ mode: Mode; pending: boolean } | null>(null)
   const amount = Number(value.replace(/[^0-9.]/g, '')) || 0
@@ -115,9 +115,10 @@ export const ActionPanel = ({
       ? OPS.dedicatedHint(newName)
       : DEFI_V1_COPY.deposit.returnRule
 
-  const switchMode = (next: Mode) => {
+  const choose = (next: Mode) => {
     setMode(next)
     setValue(String(next === 'deposit' ? IDLE_CASH.amount : (holding?.invested ?? 0)))
+    setIsChoosing(false)
   }
 
   const pickSource = (next: string) => {
@@ -168,10 +169,40 @@ export const ActionPanel = ({
           className="w-full"
           onClick={() => {
             setDone(null)
+            setIsChoosing(Boolean(holding))
             setFrom(canCreate ? (operations[0]?.id ?? NEW) : MAIN)
           }}
         >
           {DEFI_V1_COPY.deposit.done}
+        </Button>
+      </footer>
+    )
+  }
+
+  if (!holding && canCreate && !locked) {
+    return (
+      <footer className="flex shrink-0 flex-col border-t border-border bg-background p-6" data-testid="action-panel">
+        <Button size="lg" className="w-full" onClick={onCustomise} data-testid="drawer-invest">
+          {OPS.invest}
+        </Button>
+      </footer>
+    )
+  }
+
+  if (isChoosing) {
+    return (
+      <footer className="flex shrink-0 gap-2 border-t border-border bg-background p-6" data-testid="action-panel">
+        <Button
+          variant="outline"
+          size="lg"
+          className="flex-1"
+          disabled={!holding?.invested}
+          onClick={() => choose('withdraw')}
+        >
+          {COPY.withdraw}
+        </Button>
+        <Button size="lg" className="flex-1" onClick={() => choose('deposit')}>
+          {COPY.deposit}
         </Button>
       </footer>
     )
@@ -182,19 +213,6 @@ export const ActionPanel = ({
       className="flex shrink-0 flex-col gap-4 border-t border-border bg-background p-6"
       data-testid="action-panel"
     >
-      {holding && holding.invested > 0 && (
-        <Tabs value={mode} onValueChange={(next) => switchMode(next as Mode)}>
-          <TabsList aria-label={COPY.modeLabel} className="w-full">
-            <TabsTrigger value="deposit" className="flex-1">
-              {COPY.deposit}
-            </TabsTrigger>
-            <TabsTrigger value="withdraw" className="flex-1">
-              {COPY.withdraw}
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      )}
-
       {mode === 'deposit' && canCreate && !locked && (
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between gap-2">
@@ -293,10 +311,17 @@ export const ActionPanel = ({
         </Typography>
       )}
 
-      <Button size="lg" className="w-full" disabled={locked || amount <= 0 || tooMuch} onClick={submit}>
-        {locked && <Lock />}
-        {locked ? DEFI_V1_COPY.locked : !needsMore ? COPY.submitNow[mode] : DEFI_V1_COPY.deposit.createProposal}
-      </Button>
+      <div className="flex gap-2">
+        {holding && (
+          <Button variant="outline" size="lg" className="flex-1" onClick={() => setIsChoosing(true)}>
+            {OPS.back}
+          </Button>
+        )}
+        <Button size="lg" className="flex-1" disabled={locked || amount <= 0 || tooMuch} onClick={submit}>
+          {locked && <Lock />}
+          {locked ? DEFI_V1_COPY.locked : !needsMore ? COPY.submitNow[mode] : DEFI_V1_COPY.deposit.createProposal}
+        </Button>
+      </div>
     </footer>
   )
 }

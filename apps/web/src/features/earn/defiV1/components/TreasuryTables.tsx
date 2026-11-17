@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from 'react'
+import { Fragment, type MouseEvent, type ReactNode } from 'react'
 import { Clock, Lock } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -153,10 +153,16 @@ const PositionCell = ({ holding, operation }: { holding?: Holding; operation?: O
   )
 }
 
+const stop = (action: () => void) => (event: MouseEvent) => {
+  event.stopPropagation()
+  action()
+}
+
 const OpportunityRow = ({
   opportunity,
   isLocked,
   onSelect,
+  onInvest,
   selection,
   holding,
   heldIn,
@@ -164,6 +170,7 @@ const OpportunityRow = ({
   opportunity: Opportunity
   isLocked: (item: Opportunity) => boolean
   onSelect: (item: Opportunity) => void
+  onInvest?: (item: Opportunity) => void
   selection: Selection
   holding?: Holding
   heldIn?: Operation
@@ -201,17 +208,34 @@ const OpportunityRow = ({
         <PositionCell holding={holding} operation={heldIn} />
       </TableCell>
       <TableCell className="text-right">
-        <Button
-          variant="outline"
-          size="xs"
-          onClick={(event) => {
-            event.stopPropagation()
-            onSelect(opportunity)
-          }}
-        >
-          {locked && <Lock />}
-          {locked ? DEFI_V1_COPY.proOnly : DEFI_V1_COPY.action.rowLabel[depositRoute(opportunity, IDLE_CASH)]}
-        </Button>
+        {locked ? (
+          <Button variant="outline" size="xs" onClick={stop(() => onSelect(opportunity))}>
+            <Lock />
+            {DEFI_V1_COPY.proOnly}
+          </Button>
+        ) : holding ? (
+          <Button
+            variant="outline"
+            size="xs"
+            onClick={stop(() => onSelect(opportunity))}
+            data-testid={`deposit-${opportunity.id}`}
+          >
+            {DEFI_V1_COPY.action.deposit}
+          </Button>
+        ) : onInvest ? (
+          <Button
+            variant="outline"
+            size="xs"
+            onClick={stop(() => onInvest(opportunity))}
+            data-testid={`invest-${opportunity.id}`}
+          >
+            {DEFI_V1_COPY.operations.invest}
+          </Button>
+        ) : (
+          <Button variant="outline" size="xs" onClick={stop(() => onSelect(opportunity))}>
+            {DEFI_V1_COPY.action.rowLabel[depositRoute(opportunity, IDLE_CASH)]}
+          </Button>
+        )}
       </TableCell>
     </TableRow>
   )
@@ -236,6 +260,7 @@ export const OpportunitiesTable = ({
   groups,
   isLocked,
   onSelect,
+  onInvest,
   selection,
   holdingOf,
   heldInOf,
@@ -243,6 +268,7 @@ export const OpportunitiesTable = ({
   groups: OpportunityGroup[]
   isLocked: (item: Opportunity) => boolean
   onSelect: (item: Opportunity) => void
+  onInvest?: (item: Opportunity) => void
   selection: Selection
   holdingOf: (item: Opportunity) => Holding | undefined
   heldInOf: (item: Opportunity) => Operation | undefined
@@ -268,6 +294,7 @@ export const OpportunitiesTable = ({
                 opportunity={item}
                 isLocked={isLocked}
                 onSelect={onSelect}
+                onInvest={onInvest}
                 selection={selection}
                 holding={holdingOf(item)}
                 heldIn={heldInOf(item)}

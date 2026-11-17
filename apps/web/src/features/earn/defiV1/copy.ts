@@ -130,7 +130,6 @@ export const DEFI_V1_COPY = {
   },
   invested: 'Invested',
   action: {
-    modeLabel: 'Action',
     deposit: 'Deposit',
     withdraw: 'Withdraw',
     max: 'Max',
@@ -305,8 +304,35 @@ export const DEFI_V1_COPY = {
       deposit: (amount: string, asset: string, name: string) => `Deposit ${amount} ${asset} into ${name}`,
     },
     riskNote: 'Only the budget is at risk until the Policy Engine adds limits.',
+    summary: {
+      lead: (threshold: number, owners: number) =>
+        `Creating the proposal sends it to the signers of this Safe. Nothing moves until ${threshold} of ${owners} approve.`,
+      setup: 'Your setup',
+      rows: { investment: 'Investment', safe: 'Safe', who: 'Who can invest', budget: 'Budget', schedule: 'Schedule' },
+      investment: (amount: string, asset: string, name: string) => `${amount} ${asset} into ${name}`,
+      nested: (name: string) => `${name} (new nested Safe)`,
+      anyone: 'Any signer, 1 approval',
+      some: (count: number) => `${count} signer${count === 1 ? '' : 's'}, 1 approval`,
+      budget: (amount: string, asset: string) => `Up to ${amount} ${asset}`,
+      onApprove: (threshold: number, owners: number) => `Once ${threshold} of ${owners} signers approve`,
+      create: (name: string, count: number) => `Create ${name} with ${count} signer${count === 1 ? '' : 's'}`,
+      allow: (count: number, amount: string, asset: string) =>
+        `Let ${count} signer${count === 1 ? '' : 's'} invest up to ${amount} ${asset} from this Safe`,
+      move: (amount: string, asset: string) => `Move ${amount} ${asset} from this Safe into it`,
+      deposit: (amount: string, asset: string, name: string) => `Deposit ${amount} ${asset} into ${name}`,
+      repeat: (amount: string, asset: string, frequency: string) =>
+        `Add ${amount} ${asset} every ${frequency.toLowerCase()}`,
+      after: (who: string, amount: string, asset: string) =>
+        `After that, ${who} can invest up to ${amount} ${asset} without waiting on everyone.`,
+      anyoneWho: 'any signer',
+      inThisSafe: 'this Safe',
+      someWho: (count: number) => (count === 1 ? 'the signer you picked' : `any of the ${count} signers you picked`),
+      nestedRisk: (name: string) => `Only the funds in ${name} are exposed. Everything else stays in this Safe.`,
+      thisRisk: 'Running in this Safe needs the Policy Engine to enforce the budget and signer limits.',
+    },
+    signatures: (signed: number, threshold: number) => `${signed} of ${threshold} signatures`,
     back: 'Back',
-    stepperSteps: ['Amount', 'Runs in', 'Signers', 'Budget', 'Review'],
+    stepperSteps: ['Amount', 'Safe', 'Signers', 'Budget', 'Review'],
     stepHeadings: [
       'How much do you want to invest?',
       'Where should it run?',

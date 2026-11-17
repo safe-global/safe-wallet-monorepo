@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { CheckCircle2, Circle, Info } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
+import { Button } from '@safe-global/views/components/ui/button'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { Field, FieldContent, FieldDescription, FieldLabel, FieldTitle } from '@safe-global/views/components/ui/field'
 import { Input } from '@safe-global/views/components/ui/input'
@@ -25,6 +26,7 @@ import { dedicatedSafeName } from '../shelf'
 import type { Frequency, Operation, Opportunity } from '../types'
 
 const COPY = DEFI_V1_COPY.operations
+const SUMMARY = COPY.summary
 const FREQUENCIES = Object.keys(COPY.frequencies) as Frequency[]
 
 type Where = 'nested' | 'this'
@@ -398,8 +400,92 @@ export const StepsSummary = ({ form }: { form: InvestmentForm }) =>
     </div>
   ) : null
 
-/** The stepper already shows every answer, so the review only shows what signers will approve. */
-export const ReviewSummary = StepsSummary
+const SummaryRow = ({ label, value, onEdit }: { label: string; value: string; onEdit?: () => void }) => (
+  <div className="flex min-h-11 items-center gap-3 border-t border-border px-3 py-1.5 text-sm first:border-t-0">
+    <span className="w-28 shrink-0 text-muted-foreground">{label}</span>
+    <span className="min-w-0 flex-1 truncate font-medium">{value}</span>
+    {onEdit && (
+      <Button variant="ghost" size="xs" onClick={onEdit}>
+        {COPY.edit}
+      </Button>
+    )}
+  </div>
+)
+
+/** Every answer from the earlier steps, then what happens once signers approve the proposal. */
+export const ReviewSummary = ({ form, onEdit }: { form: InvestmentForm; onEdit?: (step: number) => void }) => {
+  const { investment } = form
+  if (!investment) return null
+  const asset = investment.asset
+  const amount = formatAmount(form.amount)
+  const budget = formatAmount(form.budgetAmount)
+  const count = form.executors.length
+  const isNested = form.where === 'nested'
+  const edit = (step: number) => (onEdit ? () => onEdit(step) : undefined)
+  const outcomes = [
+    isNested ? SUMMARY.create(form.safeName, count) : SUMMARY.allow(count, budget, asset),
+    ...(isNested ? [SUMMARY.move(amount, asset)] : []),
+    SUMMARY.deposit(amount, asset, investment.name),
+    ...(form.schedule === 'recurring'
+      ? [SUMMARY.repeat(formatAmount(parseAmount(form.each)), asset, COPY.frequencies[form.frequency])]
+      : []),
+  ]
+
+  return (
+    <div className="flex flex-col gap-4" data-testid="investment-review">
+      <p className="text-sm text-muted-foreground">{SUMMARY.lead(form.safe.threshold, form.owners.length)}</p>
+
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium">{SUMMARY.setup}</span>
+        <div className="flex flex-col rounded-lg border border-border">
+          <SummaryRow
+            label={SUMMARY.rows.investment}
+            value={SUMMARY.investment(amount, asset, investment.name)}
+            onEdit={edit(0)}
+          />
+          <SummaryRow
+            label={SUMMARY.rows.safe}
+            value={isNested ? SUMMARY.nested(form.safeName) : COPY.thisSafe}
+            onEdit={edit(1)}
+          />
+          <SummaryRow
+            label={SUMMARY.rows.who}
+            value={form.who === 'any' ? SUMMARY.anyone : SUMMARY.some(count)}
+            onEdit={edit(2)}
+          />
+          <SummaryRow label={SUMMARY.rows.budget} value={SUMMARY.budget(budget, asset)} onEdit={edit(3)} />
+          <SummaryRow
+            label={SUMMARY.rows.schedule}
+            value={form.schedule === 'once' ? COPY.oneTime : form.scheduleText}
+            onEdit={edit(3)}
+          />
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium">{SUMMARY.onApprove(form.safe.threshold, form.owners.length)}</span>
+        <ol className="flex flex-col gap-2.5 rounded-lg bg-card px-3 py-3">
+          {outcomes.map((step, index) => (
+            <li key={step} className="flex items-center gap-3 text-sm">
+              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-background text-xs font-medium">
+                {index + 1}
+              </span>
+              {step}
+            </li>
+          ))}
+        </ol>
+        <p className="text-sm text-muted-foreground">
+          {SUMMARY.after(form.who === 'any' ? SUMMARY.anyoneWho : SUMMARY.someWho(count), budget, asset)}
+        </p>
+      </div>
+
+      <p className="flex items-start gap-2 text-sm text-muted-foreground">
+        <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
+        {isNested ? SUMMARY.nestedRisk(form.safeName) : SUMMARY.thisRisk}
+      </p>
+    </div>
+  )
+}
 
 export const ProposedView = ({ form }: { form: InvestmentForm }) => (
   <div className="flex flex-col gap-4" data-testid="investment-proposed">
@@ -409,8 +495,8 @@ export const ProposedView = ({ form }: { form: InvestmentForm }) => (
         <Typography variant="paragraph-small-medium">{COPY.proposed}</Typography>
         <Typography variant="paragraph-small" color="muted">
           {COPY.proposedNext(
-            form.who === 'any' ? COPY.anySigner.toLowerCase() : COPY.signers(1, form.executors.length),
-            form.where === 'nested' ? form.safeName : COPY.thisSafe.toLowerCase(),
+            form.who === 'any' ? SUMMARY.anyoneWho : SUMMARY.someWho(form.executors.length),
+            form.where === 'nested' ? form.safeName : SUMMARY.inThisSafe,
           )}
         </Typography>
       </div>
@@ -418,7 +504,7 @@ export const ProposedView = ({ form }: { form: InvestmentForm }) => (
     <div className="flex flex-col rounded-lg bg-card">
       <div className="flex items-center justify-between px-3 py-2 text-sm font-medium">
         {COPY.waiting}
-        <Badge variant="subtle">{COPY.signers(1, form.safe.threshold)}</Badge>
+        <Badge variant="subtle">{COPY.signatures(1, form.safe.threshold)}</Badge>
       </div>
       {form.owners.map((address, index) => (
         <div
