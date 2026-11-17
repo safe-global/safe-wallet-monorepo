@@ -33,6 +33,9 @@ import {
 import type { ConflictOption, QueueStatus } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import type { SpaceQueueItems } from '../../hooks/useSpaceQueue'
 
+/** The `entry_point` of the Workspace transactions started from the Transactions page */
+export const SPACE_TRANSACTIONS_ENTRY_POINT = 'space_transactions'
+
 export const getSafeKey = (safeAddress: string): string => safeAddress.toLowerCase()
 
 export const getNonce = (tx: Transaction): number | undefined =>

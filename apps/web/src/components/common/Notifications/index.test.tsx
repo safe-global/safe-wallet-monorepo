@@ -1,6 +1,17 @@
-import { act, render, screen } from '@/tests/test-utils'
+import { faker } from '@faker-js/faker'
+import { act, fireEvent, render, screen } from '@/tests/test-utils'
+import { trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import type { Notification } from '@/store/notificationsSlice'
 import Notifications from './index'
+
+jest.mock('@/services/analytics', () =>
+  (
+    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
+  ).createAnalyticsMock(),
+)
+const mockTrackEvent = trackEvent as jest.MockedFunction<typeof trackEvent>
 
 const makeNotification = (overrides: Partial<Notification> = {}): Notification => ({
   id: 'n1',
@@ -78,5 +89,28 @@ describe('Notifications', () => {
     act(() => jest.advanceTimersByTime(60_000))
 
     expect(screen.getByText('Awaiting confirmations')).toBeInTheDocument()
+  })
+
+  it('tracks the event of a link once on click, next to the notification interaction', () => {
+    mockTrackEvent.mockClear()
+    const params = { workspace_id: faker.string.uuid(), transactions: 1 }
+    renderNotifications(
+      makeNotification({
+        link: {
+          href: '/spaces/transactions',
+          title: 'View transactions',
+          track: { event: SPACE_EVENTS.QUEUE_NOTIFICATION_CLICKED, params },
+        },
+      }),
+    )
+
+    fireEvent.click(screen.getByText('View transactions'))
+
+    expect(mockTrackEvent).toHaveBeenCalledTimes(2)
+    expect(mockTrackEvent).toHaveBeenCalledWith(SPACE_EVENTS.QUEUE_NOTIFICATION_CLICKED, params)
+    expect(mockTrackEvent).toHaveBeenCalledWith(
+      { ...OVERVIEW_EVENTS.NOTIFICATION_INTERACTION, label: 'View transactions' },
+      undefined,
+    )
   })
 })

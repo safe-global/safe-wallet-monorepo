@@ -10,6 +10,7 @@ import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
 import { POLLING_INTERVAL } from '@/config/constants'
 import { GATEWAY_URL } from '@/config/gateway'
 import { AppRoutes } from '@/config/routes'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { makeStore } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { PendingStatus, setPendingTx } from '@/store/pendingTxsSlice'
@@ -216,6 +217,7 @@ describe('useSpaceQueuePolling', () => {
     expect(selectNotifications(store.getState())[0].link).toEqual({
       href: { pathname: AppRoutes.spaces.transactions, query: { spaceId } },
       title: 'View transactions',
+      track: { event: SPACE_EVENTS.QUEUE_NOTIFICATION_CLICKED, params: { workspace_id: spaceId, transactions: 1 } },
     })
   })
 

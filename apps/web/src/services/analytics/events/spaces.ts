@@ -301,6 +301,14 @@ export const SPACE_EVENTS = {
     action: 'Activity log filtered',
     category: SPACE_CATEGORY,
   },
+  TRANSACTIONS_PAGE_VIEWED: {
+    action: 'Transactions page viewed',
+    category: SPACE_CATEGORY,
+  },
+  QUEUE_NOTIFICATION_CLICKED: {
+    action: 'Queue notification clicked',
+    category: SPACE_CATEGORY,
+  },
   ADDRESS_REQUEST_SENT: {
     action: 'Address request sent',
     category: SPACE_CATEGORY,

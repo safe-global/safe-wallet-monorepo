@@ -5,6 +5,7 @@ import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { useAppDispatch } from '@/store'
 import { ESafeAction, openSafeActionsModal } from '../../../store'
+import { SPACE_TRANSACTIONS_ENTRY_POINT } from '../utils'
 
 const NewTransactionButton = ({ spaceId }: { spaceId: string }): ReactElement => {
   const dispatch = useAppDispatch()
@@ -13,7 +14,7 @@ const NewTransactionButton = ({ spaceId }: { spaceId: string }): ReactElement =>
     trackEvent(SPACE_EVENTS.TRANSACTION_INITIATED, {
       workspace_id: spaceId,
       action: 'new_transaction',
-      entry_point: 'space_transactions',
+      entry_point: SPACE_TRANSACTIONS_ENTRY_POINT,
     })
     dispatch(openSafeActionsModal({ type: ESafeAction.NewTransaction }))
   }

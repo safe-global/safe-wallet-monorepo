@@ -10,8 +10,16 @@ import { TransactionListItemType } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { TxEvent, txDispatch } from '@/services/tx/txEvents'
+import { trackEvent } from '@/services/analytics'
+import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { NO_SPACE_QUEUE_FILTERS, type SpaceQueueFilters, type SpaceQueueSection } from '../../hooks/useSpaceQueue'
 import SpaceTransactionQueue from './SpaceTransactionQueue'
+
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
+const mockTrackEvent = trackEvent as jest.MockedFunction<typeof trackEvent>
 
 const mockToolbarProps = jest.fn()
 jest.mock('./TransactionsToolbar', () => ({
@@ -115,6 +123,17 @@ describe('SpaceTransactionQueue', () => {
     expect(sections).toHaveLength(2)
     expect(sections[0]).toHaveTextContent(`2 chains of ${safeA}`)
     expect(sections[1]).toHaveTextContent(`1 chains of ${safeB}`)
+  })
+
+  it('tracks one view of the page with the Workspace id across re-renders', async () => {
+    mockTrackEvent.mockClear()
+    respondWith(page({ [safeA]: { '1': transactions(1) } }))
+
+    const { rerender } = render(<SpaceTransactionQueue spaceId={spaceId} />)
+    await screen.findByTestId('space-queue-safe')
+    rerender(<SpaceTransactionQueue spaceId={spaceId} />)
+
+    expect(mockTrackEvent.mock.calls).toEqual([[SPACE_EVENTS.TRANSACTIONS_PAGE_VIEWED, { workspace_id: spaceId }]])
   })
 
   it('tells how many of the queued transactions are shown when the gateway capped the queue', async () => {
