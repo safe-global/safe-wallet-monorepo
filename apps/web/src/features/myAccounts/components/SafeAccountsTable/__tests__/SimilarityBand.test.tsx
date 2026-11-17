@@ -1,4 +1,4 @@
-import { render, screen, fakerChecksummedAddress, fakerLookalikeAddress } from '@/tests/test-utils'
+import { render, screen, waitFor, fakerChecksummedAddress, fakerLookalikeAddress } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { chainBuilder } from '@/tests/builders/chains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
@@ -85,7 +85,7 @@ describe('SimilarityWarningIcon', () => {
     await user.keyboard('{Enter}')
     await screen.findByText('Similar accounts from owned safes:')
 
-    expect(screen.getByRole('button', { name: 'Copy address' })).toHaveFocus()
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Copy address' })).toHaveFocus())
   })
 
   it('swallows clicks so the selectable/navigable row underneath does not react', async () => {

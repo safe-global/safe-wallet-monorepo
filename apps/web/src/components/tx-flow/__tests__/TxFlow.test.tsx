@@ -40,6 +40,7 @@ jest.mock('../actions', () => ({
   Counterfactual: () => null,
   Execute: () => null,
   ExecuteThroughRole: () => null,
+  GnosisPay: () => null,
   Propose: () => null,
   Sign: () => null,
 }))

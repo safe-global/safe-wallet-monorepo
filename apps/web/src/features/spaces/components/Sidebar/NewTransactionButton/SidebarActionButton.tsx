@@ -19,7 +19,7 @@ export const SidebarActionButton = (): ReactElement => {
   }
 
   return (
-    <CheckWallet allowSpendingLimit>
+    <CheckWallet allowSpendingLimit allowGnosisPaySafe>
       {(isOk) => (
         <Track
           {...OVERVIEW_EVENTS.NEW_TRANSACTION}
