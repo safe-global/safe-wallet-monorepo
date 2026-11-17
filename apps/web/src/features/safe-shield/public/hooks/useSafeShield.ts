@@ -9,7 +9,7 @@ import type {
   SafeAnalysisResult,
 } from '@safe-global/utils/features/safe-shield/types'
 
-export type SafeShieldContextType = {
+type SafeShieldContextType = {
   setRecipientAddresses: Dispatch<SetStateAction<string[] | undefined>>
   setPoisoningAddresses: Dispatch<SetStateAction<string[] | undefined>>
   setSafeTx: Dispatch<SetStateAction<SafeTransaction | undefined>>

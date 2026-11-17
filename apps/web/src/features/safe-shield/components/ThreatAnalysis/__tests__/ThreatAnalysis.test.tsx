@@ -244,6 +244,19 @@ describe('ThreatAnalysis', () => {
       expect(screen.queryByText('AnalysisGroupCardDisabled')).not.toBeInTheDocument()
     })
 
+    it('should render AnalysisGroupCard, not HnAnalysisGroupCard, when hypernativeAuth is set but the flag is off', () => {
+      jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
+      const threat: AsyncResult<ThreatAnalysisResults> = [createThreatResults(), undefined, false]
+      const hypernativeAuth = hypernativeAuthStatusBuilder()
+        .with({ isAuthenticated: true, isTokenExpired: false })
+        .build()
+
+      render(<ThreatAnalysis threat={threat} hypernativeAuth={hypernativeAuth} />)
+
+      expect(screen.getByText('AnalysisGroupCard')).toBeInTheDocument()
+      expect(screen.queryByText('HnAnalysisGroupCard')).not.toBeInTheDocument()
+    })
+
     it('should filter out BALANCE_CHANGE and CUSTOM_CHECKS from threatData', () => {
       const threat: AsyncResult<ThreatAnalysisResults> = [
         {

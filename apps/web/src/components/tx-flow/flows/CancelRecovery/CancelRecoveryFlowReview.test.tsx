@@ -54,10 +54,12 @@ const renderReview = (recovery: RecoveryQueueItem) => {
   return { ...result, context, onSubmit }
 }
 
-describe('CancelRecoveryFlowReview', () => {
-  // Warm the lazy chunk so the first findBy does not time out on its import
-  beforeAll(() => import('@/features/recovery/components/CancelRecoveryReview'))
+// Render the component itself, not the lazy wrapper, so every test sees it on the first render
+jest.mock('@/features/recovery/public/components/CancelRecoveryReview', () =>
+  jest.requireActual('@/features/recovery/components/CancelRecoveryReview'),
+)
 
+describe('CancelRecoveryFlowReview', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockHasFeature({ [FEATURES.RECOVERY]: true })

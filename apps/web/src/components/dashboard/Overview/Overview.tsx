@@ -1,5 +1,3 @@
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import { useHasFeature } from '@/hooks/useChains'
 import { type ReactElement, useMemo } from 'react'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
@@ -11,7 +9,6 @@ import PortfolioRefreshHint from '@/features/portfolio/public/components/Portfol
 const Overview = (): ReactElement => {
   const { safe, safeLoading, safeLoaded } = useSafeInfo()
   const { balances, loaded: balancesLoaded, loading: balancesLoading } = useVisibleBalances()
-  const isPortfolioDisabled = useHasFeature(FEATURES.PORTFOLIO_ENDPOINT) === false
   const isInitialState = !safeLoaded && !safeLoading
   const isLoading = safeLoading || balancesLoading || isInitialState
 
@@ -36,7 +33,7 @@ const Overview = (): ReactElement => {
         </div>
 
         <div className="flex flex-col items-start gap-4 md:items-end">
-          {!isPortfolioDisabled && <PortfolioRefreshHint entryPoint="Dashboard" />}
+          <PortfolioRefreshHint entryPoint="Dashboard" />
 
           {/* `mt-auto` rather than a `justify-between` on the column: that only reaches the bottom
               while the hint above is also rendered, and the hint is conditional — with the actions

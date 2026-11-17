@@ -56,10 +56,6 @@ setStoreInstance(reduxStore)
 // the SPA, so a plain React.lazy is equivalent.
 const LazyWeb3Init = lazy(() => import('@/components/common/LazyWeb3Init'))
 
-const SpendingLimitsLoaderWrapper = () => {
-  return <SpendingLimitsLoader />
-}
-
 const InitApp = (): ReactElement => {
   useHydrateStore(reduxStore)
   useInitChains()
@@ -94,7 +90,7 @@ const MemoizedTree = memo(function MemoizedTree({ pathname, outlet }: { pathname
       <AppChrome />
       <Recovery />
       <CounterfactualHooks />
-      <SpendingLimitsLoaderWrapper />
+      <SpendingLimitsLoader />
     </>
   )
 })

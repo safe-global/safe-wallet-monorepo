@@ -7,7 +7,10 @@ import prettier from 'eslint-config-prettier'
 import storybook from 'eslint-plugin-storybook'
 import { designSystemSyntaxRules } from '../../packages/views/eslint-design-system.mjs'
 import noExplicitAny from '../../config/eslint/no-explicit-any.mjs'
-import { featurePublicImportPatterns } from '../../config/eslint/feature-public-imports.mjs'
+import {
+  featurePublicImportExpressionRules,
+  featurePublicImportPatterns,
+} from '../../config/eslint/feature-public-imports.mjs'
 
 // A Safe link without `spaceId` opens the Safe outside the Workspace of the current page. Matches a
 // `query` property or variable that holds such an object, directly or in a conditional.
@@ -156,7 +159,12 @@ const config = [
       // makes buttons drift out of sync. If no size/variant fits a recurring need, add one
       // to components/ui/button.tsx. See the UI/Button story + apps/web/AGENTS.md
       // ("Component variants over custom styling").
-      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules],
+      'no-restricted-syntax': [
+        'error',
+        ...designSystemSyntaxRules,
+        ...safeLinkWithoutSpaceIdRules,
+        ...featurePublicImportExpressionRules,
+      ],
     },
   },
   // No barrels in features: a re-export makes every importer depend on every re-exported file, which ties
@@ -164,7 +172,13 @@ const config = [
   {
     files: ['src/features/**/*.{ts,tsx}'],
     rules: {
-      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules, ...noReexportRules],
+      'no-restricted-syntax': [
+        'error',
+        ...designSystemSyntaxRules,
+        ...safeLinkWithoutSpaceIdRules,
+        ...noReexportRules,
+        ...featurePublicImportExpressionRules,
+      ],
     },
   },
   {
@@ -173,24 +187,6 @@ const config = [
       'no-restricted-syntax': [
         'error',
         { selector: 'Program', message: 'No index files in public/: name the file after what it exports.' },
-      ],
-    },
-  },
-  // public/ mirrors the private layout: only the feature-root files sit at its top level.
-  {
-    files: ['src/features/*/public/*.{ts,tsx}', 'src/features/*/public/*/**/*.{ts,tsx}'],
-    ignores: [
-      'src/features/*/public/{types,constants,utils}.ts',
-      'src/features/*/public/{components,hooks,store,services,utils,__tests__}/**',
-    ],
-    rules: {
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector: 'Program',
-          message:
-            'Put public files in components/, hooks/, store/, services/ or utils/. Only types.ts, constants.ts and utils.ts sit at the top of public/.',
-        },
       ],
     },
   },
@@ -210,13 +206,24 @@ const config = [
   {
     files: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**', '**/*.stories.tsx', 'src/tests/**', 'src/stories/**'],
     rules: {
-      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...noReexportRules],
+      'no-restricted-syntax': [
+        'error',
+        ...designSystemSyntaxRules,
+        ...noReexportRules,
+        ...featurePublicImportExpressionRules,
+      ],
     },
   },
   {
     files: ['**/*.stories.tsx', '**/*.stories.ts', 'src/stories/**'],
     rules: {
-      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...storyDataRules, ...noReexportRules],
+      'no-restricted-syntax': [
+        'error',
+        ...designSystemSyntaxRules,
+        ...storyDataRules,
+        ...noReexportRules,
+        ...featurePublicImportExpressionRules,
+      ],
     },
   },
   {
@@ -228,6 +235,7 @@ const config = [
         ...safeLinkWithoutSpaceIdRules,
         ...storyDataRules,
         ...noReexportRules,
+        ...featurePublicImportExpressionRules,
       ],
     },
   },
@@ -237,6 +245,24 @@ const config = [
     files: ['**/*.stories.tsx', '**/*.stories.ts'],
     rules: {
       'storybook/no-renderer-packages': 'off',
+    },
+  },
+  // Last, so no later block replaces it. public/ mirrors the private layout: only the feature-root files sit at its top level.
+  {
+    files: ['src/features/*/public/*.{ts,tsx}', 'src/features/*/public/*/**/*.{ts,tsx}'],
+    ignores: [
+      'src/features/*/public/{types,constants,utils}.ts',
+      'src/features/*/public/{components,hooks,store,services,utils,__tests__}/**',
+    ],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'Program',
+          message:
+            'Put public files in components/, hooks/, store/, services/ or utils/. Only types.ts, constants.ts and utils.ts sit at the top of public/.',
+        },
+      ],
     },
   },
 ]

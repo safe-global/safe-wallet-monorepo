@@ -7,7 +7,10 @@ import react from 'eslint-plugin-react'
 import prettier from 'eslint-config-prettier'
 import js from '@eslint/js'
 import noExplicitAny from '../../config/eslint/no-explicit-any.mjs'
-import { featurePublicImportPatterns } from '../../config/eslint/feature-public-imports.mjs'
+import {
+  featurePublicImportExpressionRules,
+  featurePublicImportPatterns,
+} from '../../config/eslint/feature-public-imports.mjs'
 
 // Mirrors apps/web/eslint.config.mjs rule-by-rule, minus the framework
 // extends (`next`, `plugin:storybook/recommended`) which aren't applicable
@@ -58,6 +61,7 @@ export default [
       'react-hooks/exhaustive-deps': ['warn', { additionalHooks: 'useAsync' }],
       'no-only-tests/no-only-tests': 'error',
       'no-restricted-imports': ['error', { patterns: featurePublicImportPatterns }],
+      'no-restricted-syntax': ['error', ...featurePublicImportExpressionRules],
       'object-shorthand': ['error', 'properties'],
       'jsx-quotes': ['error', 'prefer-double'],
       'react/jsx-curly-brace-presence': ['error', { props: 'never', children: 'never' }],

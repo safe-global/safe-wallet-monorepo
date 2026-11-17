@@ -1,5 +1,3 @@
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import { useHasFeature } from '@/hooks/useChains'
 import { useMemo, type ReactElement } from 'react'
 import {
   type ThreatAnalysisResults,
@@ -17,6 +15,7 @@ import { HnViewMoreOnHypernativeRow } from '@/features/hypernative/public/compon
 import { AnalysisGroupCardDisabled } from '@safe-global/views/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled'
 import { useSafeShieldAssessmentUrl } from '@/features/hypernative/public/hooks/useSafeShieldAssessmentUrl'
 import HnAnalysisGroupCard from '@/features/hypernative/public/components/HnAnalysisGroupCard'
+import { useIsHypernativeFeature } from '@/features/hypernative/public/hooks/useIsHypernativeFeature'
 
 const VISIBLE_CAP = 3
 
@@ -38,7 +37,7 @@ export const ThreatAnalysis = ({
   highlightedSeverity,
   hypernativeAuth,
 }: ThreatAnalysisProps): ReactElement | null => {
-  const isHypernativeEnabled = useHasFeature(FEATURES.HYPERNATIVE) === true
+  const isHypernativeEnabled = useIsHypernativeFeature()
   const assessmentUrl = useSafeShieldAssessmentUrl()
   const requiresHypernativeLogin =
     hypernativeAuth !== undefined && (!hypernativeAuth.isAuthenticated || hypernativeAuth.isTokenExpired)

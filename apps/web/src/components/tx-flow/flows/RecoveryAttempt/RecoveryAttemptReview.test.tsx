@@ -69,18 +69,18 @@ const renderReview = (item: RecoveryQueueItem) => {
   return { ...result, setTxFlow, safeTxContext }
 }
 
+// Render the components themselves, not the lazy wrappers, so every test sees them on the first render
+jest.mock('@/features/recovery/public/components/RecoveryDescription', () =>
+  jest.requireActual('@/features/recovery/components/RecoveryDescription'),
+)
+jest.mock('@/features/recovery/public/components/RecoveryValidationErrors', () =>
+  jest.requireActual('@/features/recovery/components/RecoveryValidationErrors'),
+)
+
 describe('RecoveryAttemptReview', () => {
   const oldOwner = ownerAddress()
   const newOwner = ownerAddress()
   let chainId: string
-
-  // Warm the lazy chunks so the first findBy does not time out on their import
-  beforeAll(() =>
-    Promise.all([
-      import('@/features/recovery/components/RecoveryDescription'),
-      import('@/features/recovery/components/RecoveryValidationErrors'),
-    ]),
-  )
 
   beforeEach(() => {
     jest.clearAllMocks()

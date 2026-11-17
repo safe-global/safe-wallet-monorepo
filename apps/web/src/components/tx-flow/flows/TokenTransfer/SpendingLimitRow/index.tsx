@@ -6,11 +6,7 @@ type SpendingLimitRowWrapperProps = {
   selectedToken: Balance['tokenInfo'] | undefined
 }
 
-/**
- * Wrapper component that lazy-loads SpendingLimitRow from the spending-limits feature.
- * This component should only be rendered when the user can create spending limit transactions,
- * to avoid unnecessary feature loading and render cycles for non-SL Safes.
- */
+// Render only when the user can create spending limit transactions.
 const SpendingLimitRowWrapper = ({ availableAmount, selectedToken }: SpendingLimitRowWrapperProps) => {
   return <SpendingLimitRow availableAmount={availableAmount} selectedToken={selectedToken} />
 }

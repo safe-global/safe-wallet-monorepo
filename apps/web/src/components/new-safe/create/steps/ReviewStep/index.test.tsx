@@ -26,16 +26,10 @@ import { useSpaceSafeCount } from '@/features/spaces/public/hooks/useIsCurrentSp
 import { useSpaceSafeLimit } from '@/features/spaces/public/hooks/useSpaceSafeLimit'
 import { ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/public/utils/elevation'
 
-// The feature barrel cannot be spread (circular import at init), so the source hook modules are mocked instead.
 // Render the component itself, not the lazy wrapper, so every test sees it on the first render
 jest.mock('@/features/counterfactual/public/components/PayNowPayLater', () => ({
   __esModule: true,
   default: jest.requireActual('@/features/counterfactual/components/PayNowPayLater').default,
-}))
-jest.mock('@/components/common/NetworkLogosList', () => ({
-  ...jest.requireActual('@/components/common/NetworkLogosList'),
-  __esModule: true,
-  default: jest.requireActual('@/components/common/NetworkLogosList').default,
 }))
 jest.mock('@/hooks/useGasPrice', () => ({ __esModule: true, default: jest.fn(() => [undefined, undefined, false]) }))
 jest.mock('@/hooks/useWalletCanPay', () => ({ __esModule: true, default: jest.fn(() => true) }))

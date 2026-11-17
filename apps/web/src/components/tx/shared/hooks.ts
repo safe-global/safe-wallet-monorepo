@@ -1,4 +1,3 @@
-import { FEATURES } from '@safe-global/utils/utils/chains'
 /**
  * Shared transaction hooks for the tx-flow system
  *
@@ -31,7 +30,7 @@ import { useHasPendingTxs } from '@/hooks/usePendingTxs'
 import { runExecutionPreChecks } from '@/services/tx/executionPreChecks'
 import { getSafeTxGas, getNonces } from '@/services/tx/tx-sender/recommendedNonce'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
+import { useCurrentChain } from '@/hooks/useChains'
 import { mergePayFromSafeFeeParams } from '@/features/fee-payment/public/services/mergePayFromSafeFeeParams'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
@@ -77,7 +76,6 @@ export const useTxActions = (): TxActions => {
   const wallet = useWallet()
   const chain = useCurrentChain()
   const dispatch = useAppDispatch()
-  const isFeePaymentEnabled = useHasFeature(FEATURES.GTF) === true
   const { feePaymentMode, feeGasToken } = useContext(SafeTxContext)
   const currency = useAppSelector(selectCurrency)
   const { data: flowData } = useContext(TxFlowContext) as TxFlowContextType<{ nestedChildTx?: NestedTxEnvelope }>
@@ -95,7 +93,6 @@ export const useTxActions = (): TxActions => {
         chain,
         feePaymentMode,
         feeGasToken,
-        isFeePaymentEnabled,
         chainId,
         safeAddress,
         numberSignatures: safe.threshold,
@@ -283,20 +280,7 @@ export const useTxActions = (): TxActions => {
     }
 
     return { signTx, executeTx, signProposerTx, proposeTx }
-  }, [
-    safe,
-    scope,
-    wallet,
-    signer,
-    onboard,
-    chain,
-    dispatch,
-    isFeePaymentEnabled,
-    feePaymentMode,
-    feeGasToken,
-    currency,
-    nestedChildTx,
-  ])
+  }, [safe, scope, wallet, signer, onboard, chain, dispatch, feePaymentMode, feeGasToken, currency, nestedChildTx])
 }
 
 export const useValidateNonce = (safeTx: SafeTransaction | undefined): boolean => {
