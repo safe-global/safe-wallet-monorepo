@@ -7,6 +7,7 @@ import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import type { AppDispatch } from '@/src/store'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
+import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
 
 interface ProposeNewTransactionParams {
   chainId: string
@@ -15,6 +16,7 @@ interface ProposeNewTransactionParams {
   signedTx: SafeTransaction
   safeTxHash: string
   dispatch: AppDispatch
+  declared: DeclaredAttribution
   origin?: string
 }
 
@@ -22,6 +24,7 @@ function buildProposeDto(
   signedTx: SafeTransaction,
   safeTxHash: string,
   sender: string,
+  declared: DeclaredAttribution,
   origin?: string,
 ): ProposeTransactionDto {
   const signatures = signedTx.signatures.size > 0 ? signedTx.encodedSignatures() : undefined
@@ -42,6 +45,7 @@ function buildProposeDto(
     sender,
     signature: signatures,
     origin,
+    declared,
   }
 }
 
@@ -52,9 +56,10 @@ const proposeNewTransaction = async ({
   signedTx,
   safeTxHash,
   dispatch,
+  declared,
   origin,
 }: ProposeNewTransactionParams): Promise<TransactionDetails> => {
-  const proposeTransactionDto = buildProposeDto(signedTx, safeTxHash, sender, origin)
+  const proposeTransactionDto = buildProposeDto(signedTx, safeTxHash, sender, declared, origin)
 
   const result = await dispatch(
     cgwApi.endpoints.transactionsProposeTransactionV1.initiate({

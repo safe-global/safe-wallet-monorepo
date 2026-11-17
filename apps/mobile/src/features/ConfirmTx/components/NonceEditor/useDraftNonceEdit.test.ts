@@ -43,6 +43,7 @@ const buildDraft = (): DraftTx => ({
   buildParams: { to: faker.finance.ethereumAddress(), value: '0', data: '0x', nonce: 7 },
   safeTxHash: DRAFT_HASH,
   txDetails: { txId: DRAFT_HASH, detailedExecutionInfo: executionInfo } as TransactionDetails,
+  declared: { channel: 'NATIVE_TRANSFER' },
 })
 
 const renderDraftNonceEdit = () => {

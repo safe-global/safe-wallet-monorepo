@@ -5,6 +5,7 @@ import { Interface } from 'ethers'
 import { getVerifiedSafeSDK, previewAndStashDraft } from '@/src/services/tx/draft'
 import { getCreateCallContractDeployment } from '@safe-global/utils/services/contracts/deployments'
 import type { AppDispatch } from '@/src/store'
+import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
 
 // dApp call shape per EIP-5792 / WC. Contract deployments omit `to` and provide `data` only.
 export type DappCall = {
@@ -20,6 +21,7 @@ export type ComposeSafeTxDraftInput = {
   safe: SafeState
   chain: Chain
   dispatch: AppDispatch
+  declared: DeclaredAttribution
 }
 
 // dApps send value as hex, but protocol-kit/ethers want decimal (else a misleading
@@ -75,6 +77,7 @@ export const composeSafeTxDraft = async ({
   safe,
   chain,
   dispatch,
+  declared,
 }: ComposeSafeTxDraftInput): Promise<string> => {
   if (calls.length === 0) {
     throw new Error('composeSafeTxDraft: empty calls array')
@@ -84,5 +87,5 @@ export const composeSafeTxDraft = async ({
   const metaTxs: MetaTransactionData[] = calls.map((c) => toMetaTx(c, chain, safe.version))
   const safeTx = await safeSDK.createTransaction({ transactions: metaTxs })
 
-  return previewAndStashDraft({ safeSDK, safeTx, chainId, safeAddress, safe, dispatch })
+  return previewAndStashDraft({ safeSDK, safeTx, chainId, safeAddress, safe, dispatch, declared })
 }

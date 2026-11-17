@@ -5,6 +5,7 @@ import { getVerifiedSafeSDK, previewAndStashDraft } from '@/src/services/tx/draf
 import { createTokenTransferParams } from './tokenTransferParams'
 import type { SendTransactionParams } from '../types'
 import type { AppDispatch } from '@/src/store'
+import { buildDeclared } from '@safe-global/utils/utils/declaredAttribution'
 
 interface PrepareSendDraftArgs extends Omit<SendTransactionParams, 'sender'> {
   dispatch: AppDispatch
@@ -42,5 +43,13 @@ export const prepareSendDraft = async ({
   const txData = createTokenTransferParams(getAddress(recipient), amount, decimals, getAddress(tokenAddress))
   const safeTx = await createTx(txData, nonce)
 
-  return previewAndStashDraft({ safeSDK, safeTx, chainId, safeAddress, safe, dispatch })
+  return previewAndStashDraft({
+    safeSDK,
+    safeTx,
+    chainId,
+    safeAddress,
+    safe,
+    dispatch,
+    declared: buildDeclared('NATIVE_TRANSFER'),
+  })
 }

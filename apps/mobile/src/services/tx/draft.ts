@@ -7,6 +7,7 @@ import { rekeyOutstandingRequest } from '@/src/features/WalletConnect/Wallet/sto
 import { synthesizeDraftTxDetails } from '@/src/features/ConfirmTx/utils/synthesizeDraftTxDetails'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import type { AppDispatch } from '@/src/store'
+import type { DeclaredAttribution } from '@safe-global/utils/utils/declaredAttribution'
 
 type SafeSDK = NonNullable<ReturnType<typeof getSafeSDK>>
 
@@ -35,6 +36,7 @@ export type PreviewAndStashDraftArgs = {
   safeAddress: string
   safe: Pick<SafeState, 'owners' | 'threshold'>
   dispatch: AppDispatch
+  declared: DeclaredAttribution
 }
 
 /**
@@ -49,6 +51,7 @@ export const previewAndStashDraft = async ({
   safeAddress,
   safe,
   dispatch,
+  declared,
 }: PreviewAndStashDraftArgs): Promise<string> => {
   const safeTxHash = await safeSDK.getTransactionHash(safeTx)
 
@@ -92,6 +95,7 @@ export const previewAndStashDraft = async ({
     buildParams: safeTx.data,
     safeTxHash,
     txDetails,
+    declared,
   }
 
   dispatch(setDraft(draft))

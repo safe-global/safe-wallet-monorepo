@@ -48,6 +48,7 @@ const buildDraft = (executionInfo?: object): DraftTx => ({
     txId: DRAFT_HASH,
     detailedExecutionInfo: executionInfo ?? { type: 'MULTISIG', nonce: 7, signers: owners, confirmationsRequired: 1 },
   } as TransactionDetails,
+  declared: { channel: 'NATIVE_TRANSFER' },
 })
 
 const createStoreWithDraft = () =>

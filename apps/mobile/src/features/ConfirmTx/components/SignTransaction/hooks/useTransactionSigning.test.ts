@@ -9,6 +9,7 @@ import type { RootState } from '@/src/tests/test-utils'
 import { addSignaturesToTx, createTx } from '@/src/services/tx/tx-sender/create'
 import proposeNewTransaction from '@/src/services/tx/proposeNewTransaction'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
+import { generateDeclaredAttribution } from '@/src/tests/factories/declaredAttribution'
 
 // Mock only external dependencies that can't be mocked through Redux state
 jest.mock('@/src/hooks/useSign/useSign')
@@ -360,6 +361,8 @@ describe('useTransactionSigning', () => {
 
     const draftSafeTxHash = '0xdraft-hash'
 
+    const draftDeclared = generateDeclaredAttribution()
+
     const buildDraftState = () => {
       const baseState = createMockState()
       return {
@@ -372,6 +375,7 @@ describe('useTransactionSigning', () => {
               buildParams: { to: '0xRecipient', value: '0', data: '0x', nonce: 0 },
               safeTxHash: draftSafeTxHash,
               txDetails: { txId: draftSafeTxHash } as TransactionDetails,
+              declared: draftDeclared,
             },
           },
         },
@@ -414,6 +418,7 @@ describe('useTransactionSigning', () => {
           sender: '0x456',
           signedTx: fakeSafeTx,
           safeTxHash: mockSignedTx.safeTransactionHash,
+          declared: draftDeclared,
         }),
       )
       expect(mockAddConfirmation).not.toHaveBeenCalled()

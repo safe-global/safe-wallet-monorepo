@@ -15,6 +15,7 @@ import type { DraftTx } from '@/src/store/draftTxSlice'
 import type { AppDispatch } from '@/src/store'
 import { getVerifiedSafeSDK, previewAndStashDraft } from './draft'
 import { rebuildDraftWithApproval } from './rebuildDraftWithApproval'
+import { generateDeclaredAttribution } from '@/src/tests/factories/declaredAttribution'
 
 jest.mock('./draft', () => ({
   getVerifiedSafeSDK: jest.fn(),
@@ -48,6 +49,7 @@ const buildDraft = (buildParams: Partial<DraftTx['buildParams']>): DraftTx => ({
   buildParams: { to: tokenAddress, value: '0', data: '0x', nonce: 7, ...buildParams },
   safeTxHash: '0xoldhash',
   txDetails: { txId: '0xoldhash' } as TransactionDetails,
+  declared: generateDeclaredAttribution(),
 })
 
 describe('rebuildDraftWithApproval', () => {
@@ -83,7 +85,13 @@ describe('rebuildDraftWithApproval', () => {
       options: { nonce: 7 },
     })
     expect(mockPreviewAndStashDraft).toHaveBeenCalledWith(
-      expect.objectContaining({ chainId: draft.chainId, safeAddress: draft.safeAddress, safe, dispatch }),
+      expect.objectContaining({
+        chainId: draft.chainId,
+        safeAddress: draft.safeAddress,
+        safe,
+        dispatch,
+        declared: draft.declared,
+      }),
     )
   })
 

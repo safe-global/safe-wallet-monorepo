@@ -12,6 +12,7 @@ import { selectChainById } from '@/src/store/chains'
 import { setActiveSigner } from '@/src/store/activeSignerSlice'
 import { getSafeSDK } from '@/src/hooks/coreSDK/safeCoreSDK'
 import { composeSafeTxDraft } from '@/src/features/WalletConnect/Wallet/services/composeSafeTxDraft'
+import { buildDeclared } from '@safe-global/utils/utils/declaredAttribution'
 import { draftEditorsE2eState } from './draftEditorsE2eState'
 import { mockedActiveAccount } from './mockData'
 import { onboardAndNavigate, resetReduxForE2E, setupSigner } from './setupHelpers'
@@ -75,6 +76,7 @@ export const setupApprovalDraft = async (dispatch: Dispatch, router: Router) => 
       safe,
       chain,
       dispatch: store.dispatch,
+      declared: buildDeclared('WALLET_CONNECT'),
     })
     router.push({ pathname: '/confirm-transaction', params: { txId } })
     draftEditorsE2eState.set({ setupStatus: 'ready' })
