@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
-exports[`./index.stories BatchedWithOtherActions 1`] = `
+exports[`./index.stories CustomRecipient 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 1rem;"
 >
@@ -10,27 +10,6 @@ exports[`./index.stories BatchedWithOtherActions 1`] = `
     <div
       class="bg-background rounded-lg p-4"
     >
-      <div
-        class="grid gap-0.5 rounded-md border px-4 py-4 text-left text-sm has-data-[slot=alert-action]:relative has-data-[slot=alert-action]:pr-14 has-[>svg]:grid-cols-[auto_minmax(0,1fr)] has-[>svg]:gap-x-3 *:[svg]:row-span-2 *:[svg]:translate-y-0.5 *:[svg:not([class*='size-'])]:size-4 w-full relative group/alert text-foreground *:data-[slot=alert-description]:text-muted-foreground *:[svg]:text-warning-accent bg-warning-subtle border-transparent mb-2"
-        data-slot="alert"
-        data-testid="swap-extra-actions-warning"
-        role="alert"
-      >
-        <mock-icon />
-        <div
-          class="text-muted-foreground text-sm font-normal break-words min-w-0 text-balance md:text-pretty [&_p:not(:last-child)]:mb-4 [&_a:not([data-slot=button])]:hover:text-foreground [&_a:not([data-slot=button])]:underline [&_a:not([data-slot=button])]:underline-offset-3"
-          data-slot="alert-description"
-        >
-          <b>
-            This transaction does more than this swap.
-          </b>
-           
-          It also contains 
-          1
-           other action
-           that may move funds, such as transfers. Review every action before you sign.
-        </div>
-      </div>
       <div
         class="flex flex-col gap-1"
       >
@@ -287,7 +266,7 @@ exports[`./index.stories BatchedWithOtherActions 1`] = `
                 class="flex flex-row"
               >
                 <span>
-                  03a5d561
+                  170e4a48
                 </span>
                 <span
                   aria-label="Copy to clipboard"
@@ -399,7 +378,7 @@ exports[`./index.stories BatchedWithOtherActions 1`] = `
                 >
                   <div
                     class="icon"
-                    style="background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjg3IDQzJSA3NCUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCg1NCA3NiUgODclKSIgZD0iTTAsMWgxdjFoLTF6TTcsMWgxdjFoLTF6TTIsMmgxdjFoLTF6TTUsMmgxdjFoLTF6TTMsM2gxdjFoLTF6TTQsM2gxdjFoLTF6TTAsNGgxdjFoLTF6TTcsNGgxdjFoLTF6TTAsNWgxdjFoLTF6TTcsNWgxdjFoLTF6TTIsNmgxdjFoLTF6TTUsNmgxdjFoLTF6TTMsNmgxdjFoLTF6TTQsNmgxdjFoLTF6TTAsN2gxdjFoLTF6TTcsN2gxdjFoLTF6Ii8+PHBhdGggZmlsbD0iaHNsKDg0IDU4JSA3NiUpIiBkPSJNMSwxaDF2MWgtMXpNNiwxaDF2MWgtMXpNMCwzaDF2MWgtMXpNNywzaDF2MWgtMXpNMyw3aDF2MWgtMXpNNCw3aDF2MWgtMXoiLz48L3N2Zz4="); width: 24px; height: 24px;"
+                    style="background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjUwIDg5JSA3NSUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgzNDggNjglIDMxJSkiIGQ9Ik0wLDFoMXYxaC0xek03LDFoMXYxaC0xek0yLDFoMXYxaC0xek01LDFoMXYxaC0xek0zLDFoMXYxaC0xek00LDFoMXYxaC0xek0wLDJoMXYxaC0xek03LDJoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0xLDNoMXYxaC0xek02LDNoMXYxaC0xek0yLDNoMXYxaC0xek01LDNoMXYxaC0xek0xLDRoMXYxaC0xek02LDRoMXYxaC0xek0zLDRoMXYxaC0xek00LDRoMXYxaC0xek0wLDVoMXYxaC0xek03LDVoMXYxaC0xek0zLDVoMXYxaC0xek00LDVoMXYxaC0xek0xLDZoMXYxaC0xek02LDZoMXYxaC0xek0zLDZoMXYxaC0xek00LDZoMXYxaC0xek0zLDdoMXYxaC0xek00LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCg3NiA2OSUgNjclKSIgZD0iTTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6Ii8+PC9zdmc+"); width: 24px; height: 24px;"
                   />
                 </div>
                 <div
@@ -422,441 +401,6 @@ exports[`./index.stories BatchedWithOtherActions 1`] = `
                           :
                         </b>
                         <span>
-                          0x40A2aCCbd92BCA938b02010E17A5b8929b49130D
-                        </span>
-                      </span>
-                    </div>
-                    <div
-                      class="text-[var(--color-border-main)]"
-                    >
-                      <a
-                        aria-label="View on rinkeby.etherscan.io"
-                        class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
-                        data-slot="tooltip-trigger"
-                        data-testid="explorer-btn"
-                        href="https://rinkeby.etherscan.io/address/0x40A2aCCbd92BCA938b02010E17A5b8929b49130D"
-                        id="base-ui-_r_d_"
-                        rel="noreferrer"
-                        target="_blank"
-                      >
-                        <mock-icon
-                          class="size-4"
-                        />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-`;
-
-exports[`./index.stories CustomRecipient 1`] = `
-<div
-  style="background-color: rgb(255, 255, 255); padding: 1rem;"
->
-  <div
-    class="shadcn-scope"
-  >
-    <div
-      class="bg-background rounded-lg p-4"
-    >
-      <div
-        class="flex flex-col gap-1"
-      >
-        <p
-          class="m-0 text-base leading-6 font-semibold"
-          data-slot="typography"
-          data-variant="paragraph-bold"
-        >
-          Order details
-        </p>
-        <div
-          class="amount"
-        >
-          <div
-            class="flex flex-row gap-2"
-          >
-            <div
-              class="relative flex w-1/2 flex-row flex-wrap items-center rounded-md bg-[var(--color-border-background)] px-6 py-4"
-            >
-              <div
-                class="mr-4 w-10"
-              >
-                <div
-                  class="relative"
-                >
-                  <iframe
-                    height="40"
-                    loading="lazy"
-                    referrerpolicy="strict-origin"
-                    sandbox="allow-scripts"
-                    srcdoc="
-    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="mock-assets/safe-transaction-assets.staging.5afe.dev/tokens/logos/0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48.webp" alt="Safe App logo" height="40" width="auto" style="border-radius: 100%;" />
-      <script>
-        document.querySelector('img').onerror = (e) => {
-          e.target.onerror = null
-          e.target.src = "/images/common/token-placeholder.svg"
-        }
-      </script>
-    </body>
-  "
-                    style="pointer-events: none; border: 0px; display: block;"
-                    tabindex="-1"
-                    title="USDC"
-                    width="40"
-                  />
-                </div>
-              </div>
-              <div
-                class="flex-1"
-                data-testid="block-label"
-              >
-                <span
-                  class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)]"
-                  data-slot="typography"
-                  data-variant="paragraph-small"
-                >
-                  Sell
-                </span>
-                <h4
-                  class="m-0 scroll-m-20 text-xl font-semibold leading-6 tracking-normal"
-                  data-slot="typography"
-                  data-variant="h4"
-                >
-                  <span
-                    class="container"
-                    data-slot="tooltip-trigger"
-                    id="base-ui-_r_f_"
-                  >
-                    <b
-                      class="tokenText"
-                    >
-                      10
-                       
-                      USDC
-                    </b>
-                  </span>
-                </h4>
-              </div>
-              <div
-                class="absolute top-1/2 right-[-20px] z-[2] flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--color-background-paper)] p-2"
-              >
-                <svg
-                  aria-hidden="true"
-                  class="lucide lucide-arrow-right size-4"
-                  fill="none"
-                  height="24"
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M5 12h14"
-                  />
-                  <path
-                    d="m12 5 7 7-7 7"
-                  />
-                </svg>
-              </div>
-            </div>
-            <div
-              class="relative flex w-1/2 flex-row flex-wrap items-center rounded-md bg-[var(--color-border-background)] px-6 py-4"
-            >
-              <div
-                class="mr-4 w-10"
-              >
-                <div
-                  class="relative"
-                >
-                  <iframe
-                    height="40"
-                    loading="lazy"
-                    referrerpolicy="strict-origin"
-                    sandbox="allow-scripts"
-                    srcdoc="
-    <body style="margin: 0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-      <img src="https://safe-transaction-assets.staging.5afe.dev/tokens/logos/0xfFf9976782d46CC05630D1f6eBAb18b2324d6B14.png" alt="Safe App logo" height="40" width="auto" style="border-radius: 100%;" />
-      <script>
-        document.querySelector('img').onerror = (e) => {
-          e.target.onerror = null
-          e.target.src = "/images/common/token-placeholder.svg"
-        }
-      </script>
-    </body>
-  "
-                    style="pointer-events: none; border: 0px; display: block;"
-                    tabindex="-1"
-                    title="NPR"
-                    width="40"
-                  />
-                </div>
-              </div>
-              <div
-                class="flex-1"
-                data-testid="block-label"
-              >
-                <span
-                  class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)]"
-                  data-slot="typography"
-                  data-variant="paragraph-small"
-                >
-                  For at least
-                </span>
-                <h4
-                  class="m-0 scroll-m-20 text-xl font-semibold leading-6 tracking-normal"
-                  data-slot="typography"
-                  data-variant="h4"
-                >
-                  <span
-                    class="container"
-                    data-slot="tooltip-trigger"
-                    id="base-ui-_r_h_"
-                  >
-                    <b
-                      class="tokenText"
-                    >
-                      0
-                       
-                      NPR
-                    </b>
-                  </span>
-                </h4>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          class="flex flex-wrap gap-2 xl:flex-nowrap"
-          data-testid="limit-price"
-        >
-          <div
-            class="break-words min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
-            data-testid="tx-row-title"
-          >
-            <span
-              class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)]"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Limit price
-            </span>
-          </div>
-          <div
-            class="max-w-full flex-1 xl:min-w-0"
-            data-testid="tx-data-row"
-          >
-            <div
-              class="text-base leading-6 font-normal"
-            >
-              1 
-              NPR
-               = 
-              0
-               
-              USDC
-            </div>
-          </div>
-        </div>
-        <div
-          class="flex flex-wrap gap-2 xl:flex-nowrap"
-          data-testid=""
-        >
-          <div
-            class="break-words min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
-            data-testid="tx-row-title"
-          >
-            <span
-              class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)]"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Expiry
-            </span>
-          </div>
-          <div
-            class="max-w-full flex-1 xl:min-w-0"
-            data-testid="tx-data-row"
-          >
-            <div
-              class="text-base leading-6 font-normal"
-            >
-              Dec 24, 2024 - 12:54:40 AM
-            </div>
-          </div>
-        </div>
-        <div
-          class="flex flex-wrap gap-2 xl:flex-nowrap"
-          data-testid="order-id"
-        >
-          <div
-            class="break-words min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
-            data-testid="tx-row-title"
-          >
-            <span
-              class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)]"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Order ID
-            </span>
-          </div>
-          <div
-            class="max-w-full flex-1 xl:min-w-0"
-            data-testid="tx-data-row"
-          >
-            <div
-              class="text-base leading-6 font-normal"
-            >
-              <div
-                class="flex flex-row"
-              >
-                <span>
-                  170e4a48
-                </span>
-                <span
-                  aria-label="Copy to clipboard"
-                  class="inline-flex cursor-pointer"
-                  data-slot="tooltip-trigger"
-                  id="base-ui-_r_j_"
-                >
-                  <button
-                    aria-label="Copy to clipboard"
-                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3"
-                    data-slot="button"
-                    tabindex="0"
-                    type="button"
-                  >
-                    <mock-icon
-                      class="size-4 text-[var(--color-border-main)]"
-                      data-testid="copy-btn-icon"
-                    />
-                  </button>
-                </span>
-                <div
-                  class="text-[var(--color-border-main)]"
-                >
-                  <a
-                    aria-label="View on explorer"
-                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
-                    data-slot="tooltip-trigger"
-                    data-testid="explorer-btn"
-                    href="https://explorer.cow.fi/orders/0x03a5d561ad2452d719a0d075573f4bed68217c696b52f151122c30e3e4426f1b05e6b5eb1d0e6aabab082057d5bb91f2ee6d11be66223d88"
-                    id="base-ui-_r_l_"
-                    rel="noreferrer"
-                    target="_blank"
-                  >
-                    <mock-icon
-                      class="size-4"
-                    />
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          class="flex flex-wrap gap-2 xl:flex-nowrap"
-          data-testid="widget-fee"
-        >
-          <div
-            class="break-words min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
-            data-testid="tx-row-title"
-          >
-            <span
-              class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)]"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Widget fee
-               
-              <span
-                data-slot="tooltip-trigger"
-                id="base-ui-_r_n_"
-              >
-                <mock-icon
-                  class="ml-1 inline size-5 align-middle text-[var(--color-border-main)]"
-                />
-              </span>
-            </span>
-          </div>
-          <div
-            class="max-w-full flex-1 xl:min-w-0"
-            data-testid="tx-data-row"
-          >
-            <div
-              class="text-base leading-6 font-normal"
-            >
-              0.5
-               %
-            </div>
-          </div>
-        </div>
-        <div
-          class="flex flex-wrap gap-2 xl:flex-nowrap"
-          data-testid="interact-wth"
-        >
-          <div
-            class="break-words min-w-[100px] basis-auto lg:basis-[170px] xl:basis-1/4 xl:flex-nowrap"
-            data-testid="tx-row-title"
-          >
-            <span
-              class="m-0 text-sm leading-5 font-normal text-[var(--color-primary-light)]"
-              data-slot="typography"
-              data-variant="paragraph-small"
-            >
-              Interact with
-            </span>
-          </div>
-          <div
-            class="max-w-full flex-1 xl:min-w-0"
-            data-testid="tx-data-row"
-          >
-            <div
-              class="text-base leading-6 font-normal"
-            >
-              <div
-                class="container"
-              >
-                <div
-                  class="avatarContainer"
-                  style="width: 24px; height: 24px;"
-                >
-                  <div
-                    class="icon"
-                    style="background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4IDgiIHNoYXBlLXJlbmRlcmluZz0ib3B0aW1pemVTcGVlZCIgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0Ij48cGF0aCBmaWxsPSJoc2woMjUwIDg5JSA3NSUpIiBkPSJNMCwwSDhWOEgweiIvPjxwYXRoIGZpbGw9ImhzbCgzNDggNjglIDMxJSkiIGQ9Ik0wLDFoMXYxaC0xek03LDFoMXYxaC0xek0yLDFoMXYxaC0xek01LDFoMXYxaC0xek0zLDFoMXYxaC0xek00LDFoMXYxaC0xek0wLDJoMXYxaC0xek03LDJoMXYxaC0xek0xLDJoMXYxaC0xek02LDJoMXYxaC0xek0xLDNoMXYxaC0xek02LDNoMXYxaC0xek0yLDNoMXYxaC0xek01LDNoMXYxaC0xek0xLDRoMXYxaC0xek02LDRoMXYxaC0xek0zLDRoMXYxaC0xek00LDRoMXYxaC0xek0wLDVoMXYxaC0xek03LDVoMXYxaC0xek0zLDVoMXYxaC0xek00LDVoMXYxaC0xek0xLDZoMXYxaC0xek02LDZoMXYxaC0xek0zLDZoMXYxaC0xek00LDZoMXYxaC0xek0zLDdoMXYxaC0xek00LDdoMXYxaC0xeiIvPjxwYXRoIGZpbGw9ImhzbCg3NiA2OSUgNjclKSIgZD0iTTEsMGgxdjFoLTF6TTYsMGgxdjFoLTF6TTEsMWgxdjFoLTF6TTYsMWgxdjFoLTF6TTIsNWgxdjFoLTF6TTUsNWgxdjFoLTF6Ii8+PC9zdmc+"); width: 24px; height: 24px;"
-                  />
-                </div>
-                <div
-                  class="gap-1 overflow-hidden inline"
-                >
-                  <div
-                    class="addressContainer inline"
-                  >
-                    <div
-                      class="overflow-hidden text-ellipsis font-[weight:inherit] text-[length:inherit]"
-                    >
-                      <span
-                        aria-label="Copy to clipboard"
-                        class="inline-flex cursor-pointer"
-                        data-slot="tooltip-trigger"
-                        id="base-ui-_r_p_"
-                      >
-                        <b>
-                          rin
-                          :
-                        </b>
-                        <span>
                           0x9008D19f58AAbD9eD0D60971565AA8510560ab41
                         </span>
                       </span>
@@ -870,7 +414,7 @@ exports[`./index.stories CustomRecipient 1`] = `
                         data-slot="tooltip-trigger"
                         data-testid="explorer-btn"
                         href="https://rinkeby.etherscan.io/address/0x9008D19f58AAbD9eD0D60971565AA8510560ab41"
-                        id="base-ui-_r_r_"
+                        id="base-ui-_r_d_"
                         rel="noreferrer"
                         target="_blank"
                       >
@@ -933,7 +477,7 @@ exports[`./index.stories CustomRecipient 1`] = `
                         aria-label="Copy to clipboard"
                         class="inline-flex cursor-pointer"
                         data-slot="tooltip-trigger"
-                        id="base-ui-_r_t_"
+                        id="base-ui-_r_f_"
                       >
                         <b>
                           rin
@@ -953,7 +497,7 @@ exports[`./index.stories CustomRecipient 1`] = `
                         data-slot="tooltip-trigger"
                         data-testid="explorer-btn"
                         href="https://rinkeby.etherscan.io/address/0x1234567890123456789012345678901234567890"
-                        id="base-ui-_r_v_"
+                        id="base-ui-_r_h_"
                         rel="noreferrer"
                         target="_blank"
                       >
@@ -1081,7 +625,7 @@ exports[`./index.stories Default 1`] = `
                   <span
                     class="container"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_11_"
+                    id="base-ui-_r_j_"
                   >
                     <b
                       class="tokenText"
@@ -1169,7 +713,7 @@ exports[`./index.stories Default 1`] = `
                   <span
                     class="container"
                     data-slot="tooltip-trigger"
-                    id="base-ui-_r_13_"
+                    id="base-ui-_r_l_"
                   >
                     <b
                       class="tokenText"
@@ -1276,7 +820,7 @@ exports[`./index.stories Default 1`] = `
                   aria-label="Copy to clipboard"
                   class="inline-flex cursor-pointer"
                   data-slot="tooltip-trigger"
-                  id="base-ui-_r_15_"
+                  id="base-ui-_r_n_"
                 >
                   <button
                     aria-label="Copy to clipboard"
@@ -1300,7 +844,7 @@ exports[`./index.stories Default 1`] = `
                     data-slot="tooltip-trigger"
                     data-testid="explorer-btn"
                     href="https://explorer.cow.fi/orders/0x03a5d561ad2452d719a0d075573f4bed68217c696b52f151122c30e3e4426f1b05e6b5eb1d0e6aabab082057d5bb91f2ee6d11be66223d88"
-                    id="base-ui-_r_17_"
+                    id="base-ui-_r_p_"
                     rel="noreferrer"
                     target="_blank"
                   >
@@ -1330,7 +874,7 @@ exports[`./index.stories Default 1`] = `
                
               <span
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_19_"
+                id="base-ui-_r_r_"
               >
                 <mock-icon
                   class="ml-1 inline size-5 align-middle text-[var(--color-border-main)]"
@@ -1398,7 +942,7 @@ exports[`./index.stories Default 1`] = `
                         aria-label="Copy to clipboard"
                         class="inline-flex cursor-pointer"
                         data-slot="tooltip-trigger"
-                        id="base-ui-_r_1b_"
+                        id="base-ui-_r_t_"
                       >
                         <b>
                           rin
@@ -1418,7 +962,7 @@ exports[`./index.stories Default 1`] = `
                         data-slot="tooltip-trigger"
                         data-testid="explorer-btn"
                         href="https://rinkeby.etherscan.io/address/0x9008D19f58AAbD9eD0D60971565AA8510560ab41"
-                        id="base-ui-_r_1d_"
+                        id="base-ui-_r_v_"
                         rel="noreferrer"
                         target="_blank"
                       >

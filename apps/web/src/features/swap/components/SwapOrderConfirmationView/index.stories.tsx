@@ -4,10 +4,6 @@ import CowOrderConfirmationView from './index'
 import { swapOrderConfirmationViewBuilder } from '@/features/swap/helpers/swapOrderBuilder'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { RouterDecorator } from '@/stories/routerDecorator'
-import { Interface } from 'ethers'
-import { encodeMultiSendData } from '@safe-global/protocol-kit'
-import { OperationType } from '@safe-global/types-kit'
-import { Multi_send__factory } from '@safe-global/utils/types/contracts'
 
 // Fixed settlement contract address for deterministic tests
 const FIXED_SETTLEMENT_CONTRACT = '0x9008D19f58AAbD9eD0D60971565AA8510560ab41'
@@ -80,40 +76,6 @@ export const CustomRecipient: Story = {
     design: {
       type: 'figma',
       url: 'https://www.figma.com/file/VyA38zUPbJ2zflzCIYR6Nu/Swap?type=design&node-id=5752-17758&mode=design&t=0Hnp94dhQMroAAnr-4',
-    },
-  },
-}
-
-const FIXED_MULTISEND = '0x40A2aCCbd92BCA938b02010E17A5b8929b49130D'
-const FIXED_ORDER_UID =
-  '0x03a5d561ad2452d719a0d075573f4bed68217c696b52f151122c30e3e4426f1b05e6b5eb1d0e6aabab082057d5bb91f2ee6d11be66223d88'
-
-const batchWithTransfer = encodeMultiSendData([
-  { to: FIXED_RECEIVER, value: '500000000000000', data: '0x', operation: OperationType.Call },
-  {
-    to: FIXED_SETTLEMENT_CONTRACT,
-    value: '0',
-    data: new Interface(['function setPreSignature(bytes,bool)']).encodeFunctionData('setPreSignature', [
-      FIXED_ORDER_UID,
-      true,
-    ]),
-    operation: OperationType.Call,
-  },
-])
-
-export const BatchedWithOtherActions: Story = {
-  args: {
-    order: Order.with({ uid: FIXED_ORDER_UID }).build(),
-    settlementContract: FIXED_MULTISEND,
-    txData: {
-      to: { value: FIXED_MULTISEND },
-      value: '0',
-      hexData: Multi_send__factory.createInterface().encodeFunctionData('multiSend', [batchWithTransfer]),
-      dataDecoded: null,
-      operation: OperationType.DelegateCall,
-      trustedDelegateCallTarget: true,
-      addressInfoIndex: null,
-      tokenInfoIndex: null,
     },
   },
 }

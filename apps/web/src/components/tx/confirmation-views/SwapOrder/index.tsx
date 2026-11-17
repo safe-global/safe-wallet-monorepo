@@ -14,7 +14,6 @@ function SwapOrder({ txInfo, txData }: SwapOrderProps) {
     <SwapOrderConfirmation
       order={txInfo}
       decodedData={txData?.dataDecoded}
-      txData={txData}
       settlementContract={txData?.to?.value ?? ''}
     />
   )

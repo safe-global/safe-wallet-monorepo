@@ -18,8 +18,6 @@ import { compareAsc } from 'date-fns'
 import css from './styles.module.css'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
-import { SwapOrderExtraActionsWarning } from '@safe-global/views/features/swap/components/SwapOrderExtraActionsWarning'
-import { countNonSwapOrderCalls } from '../../helpers/swapOrderCalls'
 import {
   getExecutionPrice,
   getLimitPrice,
@@ -31,7 +29,6 @@ import {
 import EthHashInfo from '@/components/common/EthHashInfo'
 import TokenAmount from '@/components/common/TokenAmount'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import useChainId from '@/hooks/useChainId'
 import { isSwapOrderTxInfo, isSwapTransferOrderTxInfo, isTwapOrderTxInfo } from '@/utils/transaction-guards'
 import { EmptyRow } from '@safe-global/views/components/common/Table/EmptyRow'
 import { PartDuration } from '@safe-global/views/features/swap/components/SwapOrder/rows/PartDuration'
@@ -269,26 +266,14 @@ export const TwapOrder = ({ order }: { order: SwapTwapOrder }) => {
   )
 }
 
-const SwapOrder = ({ txInfo, txData }: SwapOrderProps): ReactElement | null => {
-  const chainId = useChainId()
-
+const SwapOrder = ({ txInfo }: SwapOrderProps): ReactElement | null => {
   if (!txInfo) return null
 
   if (isTwapOrderTxInfo(txInfo)) {
     return <TwapOrder order={txInfo} />
   }
 
-  if (isSwapOrderTxInfo(txInfo)) {
-    const extraActionsCount = txData ? countNonSwapOrderCalls(txData, txInfo, chainId) : 0
-    return (
-      <>
-        {extraActionsCount > 0 && <SwapOrderExtraActionsWarning count={extraActionsCount} />}
-        <SellOrder order={txInfo} />
-      </>
-    )
-  }
-
-  if (isSwapTransferOrderTxInfo(txInfo)) {
+  if (isSwapOrderTxInfo(txInfo) || isSwapTransferOrderTxInfo(txInfo)) {
     return <SellOrder order={txInfo} />
   }
   return null

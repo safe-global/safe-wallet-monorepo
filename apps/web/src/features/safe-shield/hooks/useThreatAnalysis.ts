@@ -15,6 +15,7 @@ import { useNestedTransaction } from '../components/useNestedTransaction'
 import { useCurrentChain } from '@/hooks/useChains'
 import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import { useNestedThreatAnalysis } from './useNestedThreatAnalysis'
+import { getSwapWithOtherActionsResult } from '../utils/swapWithOtherActions'
 
 export function useThreatAnalysis(
   overrideSafeTx?: SafeTransaction,
@@ -103,5 +104,16 @@ export function useThreatAnalysis(
     ? { safeTx: nestedSafeTx, safeAddress: nestedSafeInfo?.address.value, safeVersion: nestedSafeInfo?.version }
     : { safeTx: safeTxToCheck, safeAddress, safeVersion: version }
 
-  return useFinalizedThreatAnalysis(combinedThreatAnalysis, { ...guardCheckParams, web3ReadOnly })
+  const swapWithOtherActions = useMemo(
+    () => getSwapWithOtherActionsResult(guardCheckParams.safeTx, chainId),
+    [guardCheckParams.safeTx, chainId],
+  )
+
+  const threatWithLocalChecks = useMemo((): AsyncResult<ThreatAnalysisResults> => {
+    if (!swapWithOtherActions) return combinedThreatAnalysis
+    const [result, error, loading] = combinedThreatAnalysis
+    return [{ ...result, THREAT: [swapWithOtherActions, ...(result?.THREAT ?? [])] }, error, loading]
+  }, [combinedThreatAnalysis, swapWithOtherActions])
+
+  return useFinalizedThreatAnalysis(threatWithLocalChecks, { ...guardCheckParams, web3ReadOnly })
 }
