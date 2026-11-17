@@ -10,6 +10,10 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import type { HypernativeAuthStatus } from '@/features/hypernative'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 import { SafeShieldContent } from '../SafeShieldContent'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
+
+jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
 
 let mockHasOwnTenderly = false
 jest.mock('../../hooks/useHasOwnTenderly', () => ({ useHasOwnTenderly: () => mockHasOwnTenderly }))
@@ -56,6 +60,52 @@ const renderContent = (hasProFeatures: boolean, hypernativeAuth?: HypernativeAut
 describe('SafeShieldContent Safe Pro gating', () => {
   beforeEach(() => {
     mockHasOwnTenderly = false
+  })
+
+  describe('while Pro access loads', () => {
+    const renderLoading = (hasProFeatures: boolean, isProAccessLoading: boolean) => (
+      <SafeShieldContent
+        recipient={emptyAnalysis}
+        contract={emptyAnalysis}
+        threat={emptyAnalysis}
+        deadlock={emptyAnalysis}
+        safeTx={contractCallTx}
+        hasProFeatures={hasProFeatures}
+        isProAccessLoading={isProAccessLoading}
+      />
+    )
+    const upgradeViews = () =>
+      jest.mocked(trackEvent).mock.calls.filter(([event]) => event === SAFE_PRO_EVENTS.UPGRADE_PROMPT_VIEWED)
+
+    beforeEach(() => jest.mocked(trackEvent).mockClear())
+
+    it('shows no PRO block, locked rows or upgrade prompt, and tracks no view', () => {
+      render(renderLoading(false, true))
+
+      expect(screen.queryByTestId('pro-checks-section')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('pro-upgrade-link')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('recipient-analysis-locked')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('contract-analysis-locked')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('tenderly-simulation-locked')).not.toBeInTheDocument()
+      expect(upgradeViews()).toHaveLength(0)
+    })
+
+    it('tracks one upgrade prompt view once it resolves to the free state', () => {
+      const { rerender } = render(renderLoading(false, true))
+      rerender(renderLoading(false, false))
+
+      expect(screen.getByTestId('pro-upgrade-link')).toBeInTheDocument()
+      expect(upgradeViews()).toHaveLength(1)
+    })
+
+    it('tracks no upgrade prompt view once it resolves to Safe Pro', () => {
+      const { rerender } = render(renderLoading(false, true))
+      rerender(renderLoading(true, false))
+
+      expect(screen.getByTestId('pro-checks-section')).toBeInTheDocument()
+      expect(screen.queryByTestId('pro-upgrade-link')).not.toBeInTheDocument()
+      expect(upgradeViews()).toHaveLength(0)
+    })
   })
 
   it('keeps the pre-Pro layout while SAFE_PRO is off: counterparty checks among the open ones, simulation by hand, no PRO block', () => {

@@ -277,6 +277,21 @@ describe('EnvironmentVariables', () => {
     expect(screen.queryByText('Read more')).not.toBeInTheDocument()
   })
 
+  it('waits for Pro access to load before offering the plans link', () => {
+    mockUseSafeProAccess.mockReturnValue({ hasProFeatures: false, isLoading: true, spaceId: null })
+    render(<EnvironmentVariables />, {
+      initialReduxState: {
+        settings: {
+          ...settingsInitialState,
+          env: { rpc: {}, tenderly: { url: '', accessToken: '' } },
+        },
+      },
+    })
+
+    expect(screen.getByRole('link', { name: /View setup guide/ })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'See plans' })).not.toBeInTheDocument()
+  })
+
   it('hides the plans link for Safe Pro users', () => {
     mockUseSafeProAccess.mockReturnValue({ hasProFeatures: true, isLoading: false, spaceId: 'space-1' })
     render(<EnvironmentVariables />, {

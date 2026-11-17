@@ -46,6 +46,7 @@ export const SafeShieldDisplay = ({
   safeAnalysis,
   onAddToTrustedList,
   hasProFeatures = true,
+  isProAccessLoading = false,
   isSafePro = true,
   isOffchainMessage = false,
 }: {
@@ -60,6 +61,7 @@ export const SafeShieldDisplay = ({
   safeAnalysis?: SafeAnalysisResult | null
   onAddToTrustedList?: () => void
   hasProFeatures?: boolean
+  isProAccessLoading?: boolean
   /** While SAFE_PRO is off the widget keeps its pre-Pro layout: no PRO block, simulation run by hand. */
   isSafePro?: boolean
   isOffchainMessage?: boolean
@@ -157,6 +159,7 @@ export const SafeShieldDisplay = ({
           safeAnalysis={safeAnalysis}
           onAddToTrustedList={onAddToTrustedList}
           hasProFeatures={hasProFeatures}
+          isProAccessLoading={isProAccessLoading}
           isSafePro={isSafePro}
           isOffchainMessage={isOffchainMessage}
         />

@@ -76,6 +76,7 @@ describe('SafeShieldWidget', () => {
       safeAnalysis: null,
       addToTrustedList: jest.fn(),
       hasProFeatures: true,
+      isProAccessLoading: false,
       isSafePro: true,
       isOffchainMessage: false,
     })

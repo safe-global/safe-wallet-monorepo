@@ -15,6 +15,7 @@ const SafeShieldWidget = (): ReactElement => {
     safeAnalysis,
     addToTrustedList,
     hasProFeatures,
+    isProAccessLoading,
     isSafePro,
     isOffchainMessage,
   } = useSafeShield()
@@ -39,6 +40,7 @@ const SafeShieldWidget = (): ReactElement => {
       safeAnalysis={safeAnalysis}
       onAddToTrustedList={addToTrustedList}
       hasProFeatures={hasProFeatures}
+      isProAccessLoading={isProAccessLoading}
       isSafePro={isSafePro}
       isOffchainMessage={isOffchainMessage}
     />

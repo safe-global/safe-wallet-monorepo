@@ -42,6 +42,7 @@ export const SafeShieldContent = ({
   safeAnalysis,
   onAddToTrustedList,
   hasProFeatures = true,
+  isProAccessLoading = false,
   isSafePro = true,
   isOffchainMessage = false,
 }: {
@@ -58,6 +59,7 @@ export const SafeShieldContent = ({
   onAddToTrustedList?: () => void
   /** Without Safe Pro the simulation only runs on the user's own Tenderly project, if they set one up; else it is locked. */
   hasProFeatures?: boolean
+  isProAccessLoading?: boolean
   /** Off: the pre-Pro layout, with the counterparty checks among the open ones and the simulation run by hand. */
   isSafePro?: boolean
   isOffchainMessage?: boolean
@@ -93,7 +95,8 @@ export const SafeShieldContent = ({
 
   const hasProContent = !recipientEmpty || !contractEmpty || !deadlockEmpty || !!safeTx
 
-  const showProSection = isSafePro && shouldShowContent && !isOffchainMessage && (!hasProFeatures || hasProContent)
+  const showProSection =
+    isSafePro && shouldShowContent && !isOffchainMessage && !isProAccessLoading && (!hasProFeatures || hasProContent)
 
   // Contract and deadlock checks come from the counterparty analysis, a Safe Pro feature like the recipient check
   const contractCard = (

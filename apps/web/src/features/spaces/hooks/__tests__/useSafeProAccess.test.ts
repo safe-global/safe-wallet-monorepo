@@ -26,7 +26,7 @@ describe('useSafeProAccess', () => {
     mockIsSignedIn.mockReturnValue(true)
     mockUseSpaceSafesGetV1Query.mockReturnValue({
       currentData: { safes: { '1': [SAFE.toLowerCase()] } },
-      isLoading: false,
+      isFetching: false,
     })
     mockUseSpacePlan.mockReturnValue({ status: 'trialing', isLoading: false })
   })
@@ -56,13 +56,13 @@ describe('useSafeProAccess', () => {
       () =>
         mockUseSpaceSafesGetV1Query.mockReturnValue({
           currentData: { safes: { '1': ['0x00000000000000000000000000000000000000aa'] } },
-          isLoading: false,
+          isFetching: false,
         }),
     ],
     ['the user is signed out', () => mockIsSignedIn.mockReturnValue(false)],
   ])('withholds them when %s', (_, arrange) => {
     arrange()
-    if (!mockIsSignedIn()) mockUseSpaceSafesGetV1Query.mockReturnValue({ currentData: undefined, isLoading: false })
+    if (!mockIsSignedIn()) mockUseSpaceSafesGetV1Query.mockReturnValue({ currentData: undefined, isFetching: false })
 
     expect(renderHook(() => useSafeProAccess()).result.current.hasProFeatures).toBe(false)
   })
@@ -70,7 +70,7 @@ describe('useSafeProAccess', () => {
   it('names no Workspace to upgrade when the current one does not hold the Safe', () => {
     mockUseSpaceSafesGetV1Query.mockReturnValue({
       currentData: { safes: { '1': ['0x00000000000000000000000000000000000000aa'] } },
-      isLoading: false,
+      isFetching: false,
     })
 
     expect(renderHook(() => useSafeProAccess()).result.current.spaceId).toBeNull()
@@ -85,6 +85,41 @@ describe('useSafeProAccess', () => {
       isLoading: true,
       spaceId: SPACE_ID,
     })
+  })
+
+  it('reports loading while another Workspace refetches its safes without data', () => {
+    mockUseSpaceSafesGetV1Query.mockReturnValue({ currentData: undefined, isFetching: true })
+
+    expect(renderHook(() => useSafeProAccess()).result.current).toMatchObject({
+      hasProFeatures: false,
+      isLoading: true,
+    })
+  })
+
+  it('stays settled while the same Workspace refetches the safes it already has', () => {
+    mockUseSpaceSafesGetV1Query.mockReturnValue({
+      currentData: { safes: { '1': [SAFE.toLowerCase()] } },
+      isFetching: true,
+    })
+
+    expect(renderHook(() => useSafeProAccess()).result.current).toMatchObject({
+      hasProFeatures: true,
+      isLoading: false,
+    })
+  })
+
+  it.each([
+    ['Pro features', 'trialing', true],
+    ['the free state', 'none', false],
+  ])('settles on %s only once loading ends', (_, status, hasProFeatures) => {
+    mockUseSpacePlan.mockReturnValue({ status: 'none', isLoading: true })
+    const { result, rerender } = renderHook(() => useSafeProAccess())
+    expect(result.current).toMatchObject({ hasProFeatures: false, isLoading: true })
+
+    mockUseSpacePlan.mockReturnValue({ status, isLoading: false })
+    rerender()
+
+    expect(result.current).toMatchObject({ hasProFeatures, isLoading: false })
   })
 
   it('keeps everything open while SAFE_PRO is off, without asking for the Workspace safes', () => {

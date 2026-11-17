@@ -46,7 +46,7 @@ const TenderlySection = ({
     getValues,
     formState: { errors },
   } = useFormContext<EnvVariablesFormData>()
-  const { hasProFeatures, spaceId } = useSafeProAccess()
+  const { hasProFeatures, isLoading: isProAccessLoading, spaceId } = useSafeProAccess()
   const [isTokenVisible, setIsTokenVisible] = useState(false)
   const tokenVisibilityLabel = isTokenVisible ? 'Hide access token' : 'Show access token'
   const urlError = errors[EnvVariablesField.tenderlyURL]
@@ -66,7 +66,7 @@ const TenderlySection = ({
         <AlertDescription>
           Transaction simulation is included in Safe Pro. You can also connect your own Tenderly project.{' '}
           <ExternalLink href={TENDERLY_SETUP_GUIDE_URL}>View setup guide</ExternalLink>
-          {!hasProFeatures && (
+          {!hasProFeatures && !isProAccessLoading && (
             <span className="mt-2 flex">
               <Button variant="surface" size="sm" weight="semibold" render={<NextLink href={plansHref} />}>
                 See plans
