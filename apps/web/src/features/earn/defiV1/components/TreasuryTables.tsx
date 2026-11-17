@@ -1,5 +1,5 @@
 import { Fragment, type MouseEvent, type ReactNode } from 'react'
-import { Clock, Lock, Repeat, TrendingUp, Vault } from 'lucide-react'
+import { Clock, Coins, Lock, Repeat, Sprout } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
@@ -63,7 +63,7 @@ export const Tag = ({ children, muted }: { children: ReactNode; muted?: boolean 
 )
 
 export const OpportunityMark = ({ invested = false }: { invested?: boolean }) => {
-  const Icon = invested ? TrendingUp : Vault
+  const Icon = invested ? Coins : Sprout
   return (
     <span
       className={cn(
