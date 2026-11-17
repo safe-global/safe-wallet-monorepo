@@ -6,7 +6,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
-import type { SpaceQueueChain, SpaceQueueSection } from '../../../store/spaceQueueApi'
+import type { SpaceQueueChain, SpaceQueueSection } from '../../../hooks/useSpaceQueue'
 import SpaceQueueTable from '.'
 import { DeleteTxDialogProvider } from '../RowActionsMenu/DeleteTxDialog'
 import { Table, TableBody } from '@safe-global/views/components/ui/table'
@@ -22,8 +22,7 @@ jest.mock('@/hooks/useChains', () => ({
   }),
   useCurrentChain: () => undefined,
   useHasFeature: () => false,
-  useChain: (chainId: string) =>
-    mockChainNames[chainId] ? { chainId, chainName: mockChainNames[chainId] } : undefined,
+  useChain: () => undefined,
 }))
 jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
   SafeScopeProvider: (props: { initial: unknown; pollSafeInfo: boolean; children: ReactNode }) => {
@@ -33,7 +32,6 @@ jest.mock('@/components/tx-flow/safe-scope/SafeScopeProvider', () => ({
 }))
 jest.mock('../SpaceQueueRow', () => ({
   __esModule: true,
-  ...jest.requireActual('../SpaceQueueRow'),
   default: ({ item, status, chainId }: { item: TransactionQueuedItem; status: string; chainId: string }) => (
     <tr data-testid="space-queue-row">
       <td>
@@ -65,6 +63,12 @@ const section = (safeAddress: string, chains: SpaceQueueChain[]): SpaceQueueSect
 
 const renderedRows = () => screen.queryAllByTestId('space-queue-row')
 
+const stubRowHeights = (): void => {
+  jest
+    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+    .mockReturnValue({ height: 56, width: 1240, top: 0, left: 0, right: 1240, bottom: 56, x: 0, y: 0 } as DOMRect)
+}
+
 describe('SpaceQueueTable', () => {
   const chainId = faker.string.numeric(3)
   const otherChainId = faker.string.numeric(4)
@@ -90,6 +94,10 @@ describe('SpaceQueueTable', () => {
   beforeEach(() => {
     mockChainNames[chainId] = chainName
     mockChainNames[otherChainId] = otherChainName
+  })
+
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   it('renders a band per Safe and its rows inside the Safe scope, without polling', () => {
@@ -213,9 +221,7 @@ describe('SpaceQueueTable', () => {
   })
 
   it('renders only the rows near the viewport of a long queue', () => {
-    const rect = jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockReturnValue({ height: 56, width: 1240, top: 0, left: 0, right: 1240, bottom: 56, x: 0, y: 0 } as DOMRect)
+    stubRowHeights()
     const items: TransactionQueuedItem[] = Array.from({ length: 300 }, (_, nonce) =>
       transactionItem('AWAITING_CONFIRMATIONS', nonce),
     )
@@ -226,7 +232,6 @@ describe('SpaceQueueTable', () => {
     expect(rendered).toBeGreaterThan(0)
     expect(rendered).toBeLessThan(60)
     expect(screen.getByTestId('space-queue-skeleton')).toBeInTheDocument()
-    rect.mockRestore()
   })
 
   it('has no Show more', () => {

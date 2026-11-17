@@ -24,15 +24,6 @@ import RowActionsMenu from './RowActionsMenu'
 import SignersTooltip from './SignersTooltip'
 import { getCounterparty, getNonce } from './utils'
 
-// The outline Sign/Execute action turns into the filled primary button while its row is hovered, as in the design
-const ROW_HOVER_PRIMARY_ACTION = [
-  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled]:border-transparent',
-  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled]:bg-primary',
-  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled]:text-primary-foreground',
-  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled]:shadow-none',
-  'group-hover/transaction:[&_[data-testid=tx-actions]>span_button:enabled:hover]:bg-primary/80',
-].join(' ')
-
 const Counterparty = ({ txInfo, chainId }: { txInfo: TransactionInfo; chainId: string }): ReactElement | null => {
   const counterparty = getCounterparty(txInfo)
   if (!counterparty) return null
@@ -154,7 +145,7 @@ const SpaceQueueRow = ({
       </TableCell>
 
       <TableCell>
-        <div className={`flex items-center justify-end gap-1 ${ROW_HOVER_PRIMARY_ACTION}`}>
+        <div className="flex items-center justify-end gap-1">
           {!expiredSwap && <QueueActions tx={tx} dense />}
           <RowActionsMenu tx={tx} canReject={canReject} />
         </div>

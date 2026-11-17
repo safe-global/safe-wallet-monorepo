@@ -5,26 +5,19 @@ import { POLLING_INTERVAL } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
 import { useHasFeature } from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
-import { TxEvent, txSubscribe } from '@/services/tx/txEvents'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { selectPendingTxs, type PendingTxsState } from '@/store/pendingTxsSlice'
 import { isSignableBy, isTransactionQueuedItem } from '@/utils/transaction-guards'
-import { useSpaceQueue, type SpaceQueue } from '../store/spaceQueueApi'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useIsActiveMember } from './useSpaceMembers'
-
-const REFETCH_EVENTS = [
-  TxEvent.PROPOSED,
-  TxEvent.SIGNATURE_PROPOSED,
-  TxEvent.PROCESSED,
-  TxEvent.SUCCESS,
-  TxEvent.DELETED,
-]
+import { useSpaceQueue, type SpaceQueue } from './useSpaceQueue'
 
 // Module scope: Space pages each mount their own AuthState, and a page change must not toast again
 const notifiedTxIds = new Set<string>()
+// The first queue of a Space and wallet is the backlog, which is not news
+const seenQueues = new Set<string>()
 
 const getTxIdsAwaitingSignature = (queue: SpaceQueue, walletAddress: string, pendingTxs: PendingTxsState): string[] =>
   queue.sections
@@ -48,18 +41,12 @@ export const useSpaceQueuePolling = (): void => {
   const walletAddress = useWallet()?.address
 
   const isActive = !!spaceId && isSignedIn && isActiveMember && !!isEnabled
-  // The same arguments as the unfiltered queue page, so the page and this poll share one request
-  const { queue, refetch } = useSpaceQueue(
+  // The unfiltered queue page asks for the same args, so both share one cache entry and one request per poll
+  const { queue } = useSpaceQueue(
     spaceId ?? '',
     {},
     { skip: !isActive, pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true },
   )
-
-  useEffect(() => {
-    if (!isActive) return
-    const unsubscribers = REFETCH_EVENTS.map((event) => txSubscribe(event, () => refetch()))
-    return () => unsubscribers.forEach((unsub) => unsub())
-  }, [isActive, refetch])
 
   useEffect(() => {
     if (!isActive || !queue || !walletAddress) return
@@ -67,8 +54,14 @@ export const useSpaceQueuePolling = (): void => {
     const newKeys = getTxIdsAwaitingSignature(queue, walletAddress, pendingTxs)
       .map((txId) => `${walletAddress}:${txId}`)
       .filter((key) => !notifiedTxIds.has(key))
-    if (newKeys.length === 0) return
     newKeys.forEach((key) => notifiedTxIds.add(key))
+
+    const queueKey = `${spaceId}:${walletAddress}`
+    if (!seenQueues.has(queueKey)) {
+      seenQueues.add(queueKey)
+      return
+    }
+    if (newKeys.length === 0) return
 
     dispatch(
       showNotification({

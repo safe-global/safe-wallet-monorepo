@@ -13,9 +13,11 @@ import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-sco
 import type { SafeScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import { chainBuilder } from '@/tests/builders/chains'
 import { mapLedgerError } from '@/services/onboard/ledger-errors'
+import { useHasFeature } from '@/hooks/useChains'
 
 jest.mock('@/services/tx/tx-sender', () => ({ createExistingTx: jest.fn() }))
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: jest.fn(() => '1') }))
+jest.mock('@/hooks/useChains', () => ({ ...jest.requireActual('@/hooks/useChains'), useHasFeature: jest.fn() }))
 jest.mock('@/components/tx/confirmation-views/useTxPreview', () => ({
   __esModule: true,
   default: jest.fn(() => [undefined, undefined, false]),
@@ -32,6 +34,7 @@ jest.mock('@/components/tx-flow/actions/Execute', () => ({
 }))
 
 const mockCreateExistingTx = createExistingTx as jest.MockedFunction<typeof createExistingTx>
+const mockUseHasFeature = useHasFeature as jest.MockedFunction<typeof useHasFeature>
 
 const SafeTxState = ({
   safeTx,
@@ -259,7 +262,24 @@ describe('ExecuteTxStep', () => {
     expect(mockCreateExistingTx).not.toHaveBeenCalled()
   })
 
+  it('opens the queue of the selected Safe when executing later from a Workspace-level flow without the Workspace queue', async () => {
+    mockUseHasFeature.mockReturnValue(false)
+    mockCreateExistingTx.mockResolvedValue(reloadedTx)
+    const spaceId = faker.string.uuid()
+    const scope = buildScope({} as Safe)
+
+    const { push } = renderStep({ afterSigning: true, spaceId, scope })
+
+    fireEvent.click(await screen.findByTestId('execute-later-btn'))
+
+    expect(push).toHaveBeenCalledWith({
+      pathname: AppRoutes.transactions.queue,
+      query: { safe: `${scope.chain?.shortName}:${scope.safeAddress}`, spaceId },
+    })
+  })
+
   it('returns to the Workspace Pending list when executing later from a Workspace-level flow', async () => {
+    mockUseHasFeature.mockReturnValue(true)
     mockCreateExistingTx.mockResolvedValue(reloadedTx)
     const spaceId = faker.string.uuid()
 
@@ -272,6 +292,7 @@ describe('ExecuteTxStep', () => {
   })
 
   it('only closes the flow when executing later from the Workspace Pending list itself', async () => {
+    mockUseHasFeature.mockReturnValue(true)
     mockCreateExistingTx.mockResolvedValue(reloadedTx)
 
     const { setTxFlow, push } = renderStep({

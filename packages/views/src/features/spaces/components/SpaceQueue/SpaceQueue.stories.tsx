@@ -6,6 +6,8 @@ import type { ChainInfo } from '@safe-global/views/features/spaces/types'
 import ChainHeaderRow from './ChainHeaderRow'
 import CollapseAllButton from './CollapseAllButton'
 import ConflictHeaderRow from './ConflictHeaderRow'
+import QueueSkeletonRow from './QueueSkeletonRow'
+import QueueTableHeader from './QueueTableHeader'
 import SafeBandRow from './SafeBandRow'
 import SafeTitle from './SafeTitle'
 import SignatureGauge from './SignatureGauge'
@@ -22,7 +24,7 @@ const InTable = ({ children }: { children: ReactNode }) => (
 )
 
 const meta = {
-  title: 'Features/Spaces/SpaceQueue/Rows',
+  title: 'Features/Spaces/Transactions/QueueRows',
   parameters: { layout: 'padded' },
 } satisfies Meta
 
@@ -112,6 +114,26 @@ export const CollapseAll: Story = {
           </TableHead>
         </TableRow>
       </TableHeader>
+    </Table>
+  ),
+}
+
+export const TableHeaderRow: Story = {
+  render: () => (
+    <Table className="table-fixed min-w-[1128px]">
+      <QueueTableHeader allCollapsed={false} safeCount={3} onToggleAll={fn()} />
+    </Table>
+  ),
+}
+
+/** Always skeletons: these rows stand in for the ones outside the rendered window */
+export const SkeletonRows: Story = {
+  tags: ['skip-visual-test'],
+  render: () => (
+    <Table className="table-fixed min-w-[1128px]">
+      <TableBody>
+        <QueueSkeletonRow height={168} rowHeight={56} />
+      </TableBody>
     </Table>
   ),
 }

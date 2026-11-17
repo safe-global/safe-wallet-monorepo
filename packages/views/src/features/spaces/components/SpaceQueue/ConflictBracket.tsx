@@ -8,7 +8,7 @@ const ConflictBracket = ({ option, size, nonce }: ConflictOption & { nonce?: num
     <span aria-label={`Option ${option} of ${size} at nonce ${nonce}`} role="img" className="block h-6">
       <span
         aria-hidden="true"
-        className={`absolute left-1/2 w-3 border-l-[1.5px] border-[var(--warning-accent)] ${
+        className={`absolute left-1/2 w-3 border-l-[1.5px] border-warning-accent ${
           isLast
             ? 'top-[-30px] h-[calc(50%+30px)] rounded-bl-md border-b-[1.5px]'
             : option === 1
@@ -17,10 +17,7 @@ const ConflictBracket = ({ option, size, nonce }: ConflictOption & { nonce?: num
         }`}
       />
       {!isLast && (
-        <span
-          aria-hidden="true"
-          className="absolute top-1/2 left-1/2 w-3 border-b-[1.5px] border-[var(--warning-accent)]"
-        />
+        <span aria-hidden="true" className="absolute top-1/2 left-1/2 w-3 border-b-[1.5px] border-warning-accent" />
       )}
     </span>
   )

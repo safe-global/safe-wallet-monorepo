@@ -6,13 +6,14 @@ import {
   QueueNoMatches,
   QueueTruncatedNotice,
 } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueStates'
+import { POLLING_INTERVAL } from '@/config/constants'
 import {
   hasSpaceQueueFilters,
   NO_SPACE_QUEUE_FILTERS,
   useSpaceQueue,
   type SpaceQueue,
   type SpaceQueueFilters,
-} from '../../store/spaceQueueApi'
+} from '../../hooks/useSpaceQueue'
 import SpaceQueueTable from './SpaceQueueTable'
 import TransactionsToolbar from './TransactionsToolbar'
 import UnavailableSafesAlert from './UnavailableSafesAlert'
@@ -35,7 +36,6 @@ const QueueBody = memo(function QueueBody({
   onClearFilters: () => void
 }): ReactElement {
   const { sections, unavailableSafes } = queue
-  const isNarrowed = isFiltered || isSearching
 
   return (
     <>
@@ -47,8 +47,8 @@ const QueueBody = memo(function QueueBody({
 
       {sections.length > 0 ? (
         <SpaceQueueTable sections={sections} />
-      ) : isNarrowed ? (
-        <QueueNoMatches onClear={onClearFilters} />
+      ) : isFiltered || isSearching ? (
+        <QueueNoMatches hasFilters={isFiltered} isSearching={isSearching} onClear={onClearFilters} />
       ) : (
         <QueueEmpty />
       )}
@@ -64,10 +64,12 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
   // The toolbar shows a click at once; the table follows in a render that doesn't block it
   const queryFilters = useDeferredValue(filters)
   const querySearch = useDeferredValue(search)
-  const { queue, counts, isError, isFetching, refetch } = useSpaceQueue(spaceId, {
-    filters: queryFilters,
-    search: querySearch,
-  })
+  // Unfiltered, this is the same cache entry useSpaceQueuePolling polls; a filtered view polls its own
+  const { queue, counts, isError, isFetching, refetch } = useSpaceQueue(
+    spaceId,
+    { filters: queryFilters, search: querySearch },
+    { pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true },
+  )
 
   const clearFilters = useCallback(() => {
     setFilters(NO_SPACE_QUEUE_FILTERS)

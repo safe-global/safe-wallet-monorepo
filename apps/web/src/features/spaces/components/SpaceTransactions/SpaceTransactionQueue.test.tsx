@@ -1,8 +1,16 @@
 import { faker } from '@faker-js/faker'
-import { fireEvent, render, screen } from '@/tests/test-utils'
+import { delay, http, HttpResponse } from 'msw'
+import { POLLING_INTERVAL } from '@/config/constants'
+import { GATEWAY_URL } from '@/config/gateway'
+import { server } from '@/tests/server'
+import { act, fireEvent, render, screen, waitFor } from '@/tests/test-utils'
+import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
+import type { SpaceQueuedItemPage, TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import { TransactionListItemType } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
-import * as spaceQueueApi from '../../store/spaceQueueApi'
-import type { SpaceQueue, SpaceQueueFilters, SpaceQueueSection } from '../../store/spaceQueueApi'
+import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
+import { TxEvent, txDispatch } from '@/services/tx/txEvents'
+import { NO_SPACE_QUEUE_FILTERS, type SpaceQueueFilters, type SpaceQueueSection } from '../../hooks/useSpaceQueue'
 import SpaceTransactionQueue from './SpaceTransactionQueue'
 
 const mockToolbarProps = jest.fn()
@@ -41,17 +49,22 @@ jest.mock('./SpaceQueueTable', () => ({
   ),
 }))
 
-const section = (safeAddress: string, chainIds: string[]): SpaceQueueSection => ({
-  safeAddress,
-  chains: chainIds.map((chainId) => ({ chainId, items: [] })),
-})
+const transactions = (count: number): TransactionQueuedItem[] =>
+  Array.from({ length: count }, () => ({
+    type: TransactionListItemType.TRANSACTION,
+    conflictType: 'None',
+    transaction: safeTxSummaryBuilder().build(),
+  }))
 
-const queue = (sections: SpaceQueueSection[], overrides: Partial<SpaceQueue> = {}): SpaceQueue => ({
-  sections,
+const page = (
+  results: SpaceQueuedItemPage['results'],
+  overrides: Partial<SpaceQueuedItemPage> = {},
+): SpaceQueuedItemPage => ({
+  count: null,
+  next: null,
+  previous: null,
+  results,
   unavailableSafes: [],
-  shownCount: 0,
-  totalCount: 0,
-  isComplete: true,
   counts: {
     total: 0,
     execute: 0,
@@ -69,84 +82,87 @@ const queue = (sections: SpaceQueueSection[], overrides: Partial<SpaceQueue> = {
 
 describe('SpaceTransactionQueue', () => {
   const spaceId = faker.string.uuid()
+  const queueUrl = `${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`
   const safeA = checksumAddress(faker.finance.ethereumAddress())
   const safeB = checksumAddress(faker.finance.ethereumAddress())
-  let querySpy: jest.SpyInstance
 
-  const refetch = jest.fn()
-
-  const mockQueue = (state: { queue?: SpaceQueue; counts?: SpaceQueue['counts']; isError?: boolean }) => {
-    querySpy = jest.spyOn(spaceQueueApi, 'useSpaceQueue').mockReturnValue({
-      queue: state.queue,
-      counts: state.counts ?? state.queue?.counts,
-      isError: state.isError ?? false,
-      isFetching: false,
-      refetch,
-    } as unknown as ReturnType<typeof spaceQueueApi.useSpaceQueue>)
+  const respondWith = (body: SpaceQueuedItemPage | null, status = 200) => {
+    const requests: Request[] = []
+    server.use(
+      http.get(queueUrl, ({ request }) => {
+        requests.push(request)
+        return body ? HttpResponse.json(body) : new HttpResponse(null, { status })
+      }),
+    )
+    return requests
   }
 
-  afterEach(() => {
-    jest.restoreAllMocks()
+  beforeEach(() => {
+    setBaseUrl(GATEWAY_URL)
+    server.use(http.get(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () => HttpResponse.json({ safes: {} })))
   })
 
-  it('requests the queue of the Space and renders one section per Safe', () => {
-    mockQueue({ queue: queue([section(safeA, ['1', '10']), section(safeB, ['137'])]) })
+  afterEach(() => {
+    jest.useRealTimers()
+  })
+
+  it('requests the queue of the Space and renders one section per Safe', async () => {
+    respondWith(page({ [safeA]: { '1': transactions(1), '10': transactions(1) }, [safeB]: { '137': transactions(1) } }))
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(querySpy).toHaveBeenCalledWith(spaceId, {
-      filters: { statuses: [], safes: [], chainIds: [], signers: [] },
-      search: '',
-    })
-    const sections = screen.getAllByTestId('space-queue-safe')
+    const sections = await screen.findAllByTestId('space-queue-safe')
     expect(sections).toHaveLength(2)
     expect(sections[0]).toHaveTextContent(`2 chains of ${safeA}`)
     expect(sections[1]).toHaveTextContent(`1 chains of ${safeB}`)
   })
 
-  it('tells how many of the queued transactions are shown when the gateway capped the queue', () => {
-    mockQueue({
-      queue: queue([section(safeA, ['1'])], { shownCount: 500, totalCount: 742, isComplete: false }),
-    })
+  it('tells how many of the queued transactions are shown when the gateway capped the queue', async () => {
+    respondWith(page({ [safeA]: { '1': transactions(3) } }, { count: 742 }))
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(screen.getByText('Showing 500 of 742 pending transactions.')).toBeInTheDocument()
+    expect(await screen.findByText('Showing 3 of 742 pending transactions.')).toBeInTheDocument()
   })
 
-  it('does not mention a cap when the whole queue was returned', () => {
-    mockQueue({ queue: queue([section(safeA, ['1'])], { shownCount: 3, totalCount: 3 }) })
+  it('does not mention a cap when the whole queue was returned', async () => {
+    respondWith(page({ [safeA]: { '1': transactions(3) } }, { count: 3 }))
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
+    await screen.findByTestId('space-queue-safe')
     expect(screen.queryByText(/^Showing/)).not.toBeInTheDocument()
   })
 
-  it('shows the empty state when no Safe has pending transactions', () => {
-    mockQueue({ queue: queue([]) })
+  it('shows the empty state when no Safe has pending transactions', async () => {
+    respondWith(page({}, { count: 0 }))
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(screen.getByText('Pending transactions of your Safe accounts will appear here')).toBeInTheDocument()
+    expect(await screen.findByText('Pending transactions of your Safe accounts will appear here')).toBeInTheDocument()
   })
 
-  it('tells how many Safes could not be loaded next to the queue of the others', () => {
-    mockQueue({
-      queue: queue([section(safeA, ['137'])], {
-        unavailableSafes: [
-          { chainId: '1', safeAddress: safeA },
-          { chainId: '1', safeAddress: safeB },
-        ],
-      }),
-    })
+  it('tells how many Safes could not be loaded next to the queue of the others', async () => {
+    respondWith(
+      page(
+        { [safeA]: { '137': transactions(1) } },
+        {
+          unavailableSafes: [
+            { chainId: '1', safeAddress: safeA },
+            { chainId: '1', safeAddress: safeB },
+          ],
+        },
+      ),
+    )
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(screen.getByText("2 Safe accounts couldn't be loaded")).toBeInTheDocument()
+    expect(await screen.findByText("2 Safe accounts couldn't be loaded")).toBeInTheDocument()
+    expect(screen.getByTestId('space-queue-safe')).toBeInTheDocument()
   })
 
   it('shows skeletons while the first queue loads', () => {
-    mockQueue({})
+    respondWith(page({ [safeA]: { '1': transactions(1) } }))
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
@@ -154,64 +170,116 @@ describe('SpaceTransactionQueue', () => {
     expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument()
   })
 
-  it('shows an error with a retry when the queue fails to load', () => {
-    mockQueue({ isError: true })
+  it('shows an error when the queue fails to load', async () => {
+    respondWith(null, 500)
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(screen.getByText("Couldn't load the queue")).toBeInTheDocument()
+    expect(await screen.findByText("Couldn't load the queue")).toBeInTheDocument()
     expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
-    expect(refetch).toHaveBeenCalled()
   })
 
-  it('shows the empty state with the unavailable Safes when none of them could be loaded', () => {
-    mockQueue({ queue: queue([], { unavailableSafes: [{ chainId: '1', safeAddress: safeA }] }) })
+  it('shows the empty state with the unavailable Safes when none of them could be loaded', async () => {
+    respondWith(page({}, { unavailableSafes: [{ chainId: '1', safeAddress: safeA }] }))
 
     render(<SpaceTransactionQueue spaceId={spaceId} />)
 
-    expect(screen.queryByText("Couldn't load the queue")).not.toBeInTheDocument()
+    expect(await screen.findByText("1 Safe account couldn't be loaded")).toBeInTheDocument()
     expect(screen.getByText('Pending transactions of your Safe accounts will appear here')).toBeInTheDocument()
-    expect(screen.getByText("1 Safe account couldn't be loaded")).toBeInTheDocument()
+    expect(screen.queryByText("Couldn't load the queue")).not.toBeInTheDocument()
   })
 
-  it('requests the queue again with the filters chosen in the toolbar', () => {
-    mockQueue({ queue: queue([section(safeA, ['1'])]) })
-
+  it('requests the queue again on retry', async () => {
+    const requests = respondWith(null, 500)
     render(<SpaceTransactionQueue spaceId={spaceId} />)
+    await screen.findByText("Couldn't load the queue")
+
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }))
+
+    await waitFor(() => expect(requests).toHaveLength(2))
+  })
+
+  it('shows the queue returned after a transaction event', async () => {
+    respondWith(page({ [safeA]: { '1': transactions(1) } }))
+    render(<SpaceTransactionQueue spaceId={spaceId} />)
+    await screen.findByTestId('space-queue-safe')
+    respondWith(page({ [safeA]: { '1': transactions(1) }, [safeB]: { '137': transactions(1) } }))
+
+    txDispatch(TxEvent.DELETED, { safeTxHash: faker.string.hexadecimal({ length: 64 }) })
+
+    await waitFor(() => expect(screen.getAllByTestId('space-queue-safe')).toHaveLength(2))
+  })
+
+  it('requests the queue again with the filters chosen in the toolbar', async () => {
+    const requests = respondWith(page({ [safeA]: { '1': transactions(1) } }))
+    render(<SpaceTransactionQueue spaceId={spaceId} />)
+    await screen.findByTestId('space-queue-safe')
+
     fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
 
-    expect(querySpy).toHaveBeenLastCalledWith(spaceId, {
-      filters: { statuses: ['sign'], safes: [], chainIds: [], signers: [] },
-      search: '',
-    })
+    await waitFor(() => expect(requests).toHaveLength(2))
+    expect(new URL(requests[1].url).searchParams.get('status')).toBe('sign')
+  })
+
+  it('requests the filtered queue again after a transaction event', async () => {
+    const requests = respondWith(page({ [safeA]: { '1': transactions(1) } }))
+    render(<SpaceTransactionQueue spaceId={spaceId} />)
+    await screen.findByTestId('space-queue-safe')
+    fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+    await waitFor(() => expect(requests).toHaveLength(2))
+
+    txDispatch(TxEvent.DELETED, { safeTxHash: faker.string.hexadecimal({ length: 64 }) })
+
+    await waitFor(() => expect(requests).toHaveLength(3))
+    expect(new URL(requests[2].url).searchParams.get('status')).toBe('sign')
+  })
+
+  it('polls the filtered queue it shows', async () => {
+    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate', 'queueMicrotask'] })
+    const requests = respondWith(page({ [safeA]: { '1': transactions(1) } }))
+    render(<SpaceTransactionQueue spaceId={spaceId} />)
+    await screen.findByTestId('space-queue-safe')
+    fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+    await waitFor(() => expect(requests).toHaveLength(2))
+
+    await act(() => jest.advanceTimersByTimeAsync(POLLING_INTERVAL))
+
+    await waitFor(() => expect(requests).toHaveLength(3))
+    expect(new URL(requests[2].url).searchParams.get('status')).toBe('sign')
+  })
+
+  it('passes the filters chosen in the toolbar back to the toolbar', async () => {
+    respondWith(page({ [safeA]: { '1': transactions(1) } }))
+    render(<SpaceTransactionQueue spaceId={spaceId} />)
+    await screen.findByTestId('space-queue-safe')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+
     expect(mockToolbarProps).toHaveBeenLastCalledWith(
       expect.objectContaining({ filters: { statuses: ['sign'], safes: [], chainIds: [], signers: [] } }),
     )
   })
 
-  it('tells that nothing matches the filters instead of the empty queue state', () => {
-    mockQueue({ queue: queue([]) })
-
+  it('tells that nothing matches the filters instead of the empty queue state', async () => {
+    respondWith(page({}, { count: 0 }))
     render(<SpaceTransactionQueue spaceId={spaceId} />)
+    await screen.findByText('Pending transactions of your Safe accounts will appear here')
+
     fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
 
-    expect(screen.getByText('No proposals match these filters')).toBeInTheDocument()
+    expect(await screen.findByText('No proposals match these filters')).toBeInTheDocument()
     expect(screen.queryByText('Pending transactions of your Safe accounts will appear here')).not.toBeInTheDocument()
   })
 
-  it('clears the filters and the search from the no-match state', () => {
-    mockQueue({ queue: queue([]) })
-
+  it('clears the filters and the search from the no-match state', async () => {
+    respondWith(page({}, { count: 0 }))
     render(<SpaceTransactionQueue spaceId={spaceId} />)
     fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
     fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value: 'treasury' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Clear filters' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Clear filters' }))
 
-    expect(querySpy.mock.lastCall).toEqual([
-      spaceId,
-      { filters: { statuses: [], safes: [], chainIds: [], signers: [] }, search: '' },
-    ])
+    expect(await screen.findByText('Pending transactions of your Safe accounts will appear here')).toBeInTheDocument()
+    expect(mockToolbarProps).toHaveBeenLastCalledWith(expect.objectContaining({ filters: NO_SPACE_QUEUE_FILTERS }))
     expect(screen.getByRole('textbox', { name: 'Search' })).toHaveValue('')
   })
 
@@ -219,78 +287,109 @@ describe('SpaceTransactionQueue', () => {
     const typeSearch = (value: string) =>
       fireEvent.change(screen.getByRole('textbox', { name: 'Search' }), { target: { value } })
 
-    it('requests the queue with the search from the toolbar', () => {
-      mockQueue({ queue: queue([section(safeA, ['1'])]) })
+    const respondBySearch = () => {
+      const requests: Request[] = []
+      server.use(
+        http.get(queueUrl, ({ request }) => {
+          requests.push(request)
+          const isSearched = new URL(request.url).searchParams.has('search')
+          return HttpResponse.json(isSearched ? page({}, { count: 0 }) : page({ [safeA]: { '1': transactions(1) } }))
+        }),
+      )
+      return requests
+    }
 
+    it('requests the queue with the search from the toolbar', async () => {
+      const requests = respondBySearch()
       render(<SpaceTransactionQueue spaceId={spaceId} />)
-
-      expect(querySpy).toHaveBeenLastCalledWith(spaceId, {
-        filters: { statuses: [], safes: [], chainIds: [], signers: [] },
-        search: '',
-      })
+      await screen.findByTestId('space-queue-safe')
 
       typeSearch('treasury')
 
-      expect(querySpy).toHaveBeenLastCalledWith(spaceId, {
-        filters: { statuses: [], safes: [], chainIds: [], signers: [] },
-        search: 'treasury',
-      })
+      await waitFor(() => expect(requests).toHaveLength(2))
+      expect(new URL(requests[1].url).searchParams.get('search')).toBe('treasury')
     })
 
-    it('requests the queue without a search once it is cleared', () => {
-      mockQueue({ queue: queue([section(safeA, ['1'])]) })
-
+    it('shows the whole queue again once the search is cleared', async () => {
+      respondBySearch()
       render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-safe')
       typeSearch('treasury')
+      await waitFor(() => expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument())
+
       typeSearch('')
 
-      expect(querySpy.mock.lastCall).toEqual([
-        spaceId,
-        { filters: { statuses: [], safes: [], chainIds: [], signers: [] }, search: '' },
-      ])
+      expect(await screen.findByTestId('space-queue-safe')).toBeInTheDocument()
     })
 
-    it('tells that nothing matches the search instead of the empty queue state', () => {
-      mockQueue({ queue: queue([]) })
-
+    it('tells that nothing matches the search instead of the empty queue state', async () => {
+      respondBySearch()
       render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-safe')
+
       typeSearch('no such safe')
 
-      expect(screen.getByText('No proposals match these filters')).toBeInTheDocument()
+      expect(await screen.findByText('No proposals match your search')).toBeInTheDocument()
       expect(screen.queryByText('Pending transactions of your Safe accounts will appear here')).not.toBeInTheDocument()
     })
 
-    it('tells that nothing matches the search, not a load error, when some Safes are unavailable', () => {
-      mockQueue({ queue: queue([], { unavailableSafes: [{ chainId: '1', safeAddress: safeA }] }) })
-
+    it('tells that nothing matches the filters when a search narrows them too', async () => {
+      respondBySearch()
       render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-safe')
+
+      fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
       typeSearch('no such safe')
 
-      expect(screen.getByText('No proposals match these filters')).toBeInTheDocument()
+      expect(await screen.findByText('No proposals match these filters')).toBeInTheDocument()
+    })
+
+    it('clears the search from the no-match state', async () => {
+      respondBySearch()
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-safe')
+      typeSearch('no such safe')
+
+      fireEvent.click(await screen.findByRole('button', { name: 'Clear search' }))
+
+      expect(await screen.findByTestId('space-queue-safe')).toBeInTheDocument()
+      expect(screen.getByRole('textbox', { name: 'Search' })).toHaveValue('')
+    })
+
+    it('tells that nothing matches the search, not a load error, when some Safes are unavailable', async () => {
+      server.use(
+        http.get(queueUrl, ({ request }) =>
+          HttpResponse.json(
+            new URL(request.url).searchParams.has('search')
+              ? page({}, { count: 0, unavailableSafes: [{ chainId: '1', safeAddress: safeA }] })
+              : page({ [safeA]: { '1': transactions(1) } }),
+          ),
+        ),
+      )
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-safe')
+
+      typeSearch('no such safe')
+
+      expect(await screen.findByText('No proposals match your search')).toBeInTheDocument()
       expect(screen.queryByText("Couldn't load the queue")).not.toBeInTheDocument()
     })
   })
 
-  it('keeps the last counts in the toolbar while a filtered queue loads', () => {
-    const previous = queue([section(safeA, ['1'])], {
-      counts: {
-        total: 3,
-        execute: 1,
-        sign: 2,
-        blocked: 0,
-        waiting: 0,
-        conflicting: 0,
-        stale: 0,
-        safes: [],
-        chains: [],
-        signers: [],
-      },
-    })
-    mockQueue({ queue: undefined, counts: previous.counts })
-
+  it('keeps the last counts in the toolbar while a filtered queue loads', async () => {
+    const counts = { ...page({}).counts, total: 3, execute: 1, sign: 2 }
+    server.use(
+      http.get(queueUrl, async ({ request }) => {
+        if (new URL(request.url).searchParams.has('status')) await delay('infinite')
+        return HttpResponse.json(page({ [safeA]: { '1': transactions(3) } }, { count: 3, counts }))
+      }),
+    )
     render(<SpaceTransactionQueue spaceId={spaceId} />)
+    await screen.findByTestId('space-queue-safe')
 
-    expect(mockToolbarProps).toHaveBeenLastCalledWith(expect.objectContaining({ counts: previous.counts }))
-    expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Filter by sign' }))
+
+    await waitFor(() => expect(screen.queryByTestId('space-queue-safe')).not.toBeInTheDocument())
+    expect(mockToolbarProps).toHaveBeenLastCalledWith(expect.objectContaining({ counts }))
   })
 })

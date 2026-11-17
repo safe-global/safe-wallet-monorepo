@@ -5,7 +5,11 @@ import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
 import { waitFor } from '@/tests/test-utils'
 import { cgwClient, setBaseUrl } from '@safe-global/store/gateway/cgwClient'
-import { cgwApi as spacesApi, type SpaceQueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
+import {
+  cgwApi as spacesApi,
+  type SpaceQueuedItemPage,
+  type SpaceTransactionsGetTransactionQueueV1ApiArg,
+} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { TransactionListItemType, TransactionStatus } from '@safe-global/store/gateway/types'
 import type { RootState } from '@/store'
@@ -20,7 +24,6 @@ import {
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { transactionDetailsBuilder } from '@/tests/builders/transactionDetails'
 import { txDispatch, TxEvent } from '@/services/tx/txEvents'
-import { toQueryArgs, type SpaceQueueFilters } from '../spaceQueueApi'
 import { spaceQueueReconciliationListener } from '../spaceQueueReconciliationListener'
 
 jest.mock('@/services/tx/txEvents', () => ({
@@ -119,11 +122,17 @@ const respondWithDetails = (
 const respondWithSpaceSafes = (safes: Record<string, string[]>) =>
   server.use(http.get(`${GATEWAY_URL}/v1/spaces/${spaceId}/safes`, () => HttpResponse.json({ safes })))
 
-const pollQueue = async (store: TestStore, filters?: SpaceQueueFilters) => {
-  await store.dispatch(
-    spacesApi.endpoints.spaceTransactionsGetTransactionQueueV1.initiate(toQueryArgs(spaceId, { filters })),
-  )
+const pollQueue = async (
+  store: TestStore,
+  params: Omit<SpaceTransactionsGetTransactionQueueV1ApiArg, 'spaceId'> = {},
+) => {
+  await store.dispatch(spacesApi.endpoints.spaceTransactionsGetTransactionQueueV1.initiate({ spaceId, ...params }))
 }
+
+const hasRequestedTxDetails = (store: TestStore) =>
+  Object.values(store.getState()[cgwClient.reducerPath].queries).some(
+    (query) => query?.endpointName === 'transactionsGetTransactionByIdV1',
+  )
 
 const processingTx = (nonce: number, safe = safeAddress): PendingProcessingTx => ({
   chainId,
@@ -212,21 +221,30 @@ describe('spaceQueueReconciliationListener', () => {
     )
   })
 
-  it.each([TransactionStatus.CANCELLED, TransactionStatus.FAILED])(
-    'should clear the pending tx when its details are %s',
-    async (txStatus) => {
-      const store = makeTestStore()
-      const id = txId()
-      store.dispatch(setPendingTx({ txId: id, ...processingTx(4) }))
-      respondWithQueue(page([results([queuedTx(txId(), 5)])]))
-      respondWithDetails(id, { txStatus })
+  it.each([
+    [TransactionStatus.CANCELLED, 'Another transaction with the same nonce was executed instead.'],
+    [TransactionStatus.FAILED, 'The transaction failed on-chain.'],
+  ])('should report a failed execution when its details are %s', async (txStatus, reason) => {
+    const store = makeTestStore()
+    const id = txId()
+    const pendingTx = processingTx(4)
+    store.dispatch(setPendingTx({ txId: id, ...pendingTx }))
+    respondWithQueue(page([results([queuedTx(txId(), 5)])]))
+    respondWithDetails(id, { txStatus })
 
-      await pollQueue(store)
+    await pollQueue(store)
 
-      await waitFor(() => expect(store.getState().pendingTxs[id]).toBeUndefined())
-      expect(mockTxDispatch).not.toHaveBeenCalled()
-    },
-  )
+    await waitFor(() =>
+      expect(mockTxDispatch).toHaveBeenCalledWith(TxEvent.FAILED, {
+        txId: id,
+        chainId,
+        safeAddress,
+        nonce: 4,
+        groupKey: pendingTx.groupKey,
+        error: new Error(reason),
+      }),
+    )
+  })
 
   it('should do nothing when the entry is gone before the details arrive', async () => {
     const store = makeTestStore()
@@ -339,7 +357,15 @@ describe('spaceQueueReconciliationListener', () => {
     )
   })
 
-  it('should leave a pending tx untouched when a filtered queue leaves it out', async () => {
+  it.each<[string, Omit<SpaceTransactionsGetTransactionQueueV1ApiArg, 'spaceId'>]>([
+    ['a status', { status: ['sign'] }],
+    ['the conflicting flag', { conflicting: true }],
+    ['the stale flag', { stale: true }],
+    ['a Safe', { safes: `${chainId}:${safeAddress}` }],
+    ['a network', { chainIds: chainId }],
+    ['a signer', { signers: faker.finance.ethereumAddress() }],
+    ['a search', { search: faker.lorem.word() }],
+  ])('should leave a pending tx untouched when a queue narrowed by %s leaves it out', async (_, params) => {
     const store = makeTestStore()
     const id = txId()
     const pendingTx = processingTx(4)
@@ -349,10 +375,10 @@ describe('spaceQueueReconciliationListener', () => {
     respondWithQueue(page([results([queuedTx(txId(), 2)], faker.string.numeric(5))]))
     respondWithDetails(id, { txStatus: TransactionStatus.SUCCESS })
 
-    await pollQueue(store, { statuses: ['sign'], safes: [], chainIds: [], signers: [] })
+    await pollQueue(store, params)
 
     expect(store.getState().pendingTxs[id]).toEqual(pendingTx)
-    expect(mockTxDispatch).not.toHaveBeenCalledWith(TxEvent.SUCCESS, expect.anything())
+    expect(hasRequestedTxDetails(store)).toBe(false)
   })
 
   it('should leave a pending tx untouched while its nonce is still queued', async () => {
