@@ -1344,19 +1344,24 @@ describe('aligned Transaction column', () => {
     expect(allPending().getAllByRole('button', { name: /^Blocked by #\d+ / }).length).toBeGreaterThan(0)
   })
 
-  it('B: splits the transaction into titled columns, with no "to" or "via" under With', () => {
+  it('B: titles the columns Safe, Transaction and Details, with the other party and age under Details', () => {
     render(<PendingQueue />, {
       routerProps: { query: { align: 'titled', scenario: '8-safes-all-types', state: 'normal' } },
     })
     expect(screen.getByRole('tab', { name: 'B · Column titles' })).toHaveAttribute('aria-selected', 'true')
     const titles = screen.getAllByRole('columnheader').map((header) => header.textContent)
-    expect(titles).toEqual(expect.arrayContaining(['Safe', 'Type', 'Details', 'With', 'Age', 'Status']))
-    expect(titles).not.toContain('Transaction')
-    const withColumn = titles.indexOf('With')
+    expect(titles).toEqual(expect.arrayContaining(['Safe', 'Transaction', 'Details', 'Status']))
+    for (const gone of ['Type', 'With', 'Age', 'To']) expect(titles).not.toContain(gone)
+    const [transactionColumn, detailsColumn] = [titles.indexOf('Transaction'), titles.indexOf('Details')]
     for (const row of openRows()) {
       const cells = within(row.closest('tr')!).getAllByRole('cell')
-      expect(cells[withColumn].textContent).not.toMatch(/^(to|via|on)\b/)
+      expect(cells[transactionColumn]).toContainElement(row)
+      expect(within(cells[detailsColumn]).getByLabelText(/^Proposed /)).toBeInTheDocument()
     }
+    const send = openRows()
+      .find((button) => button.textContent === '250,000 USDC')!
+      .closest('tr')!
+    expect(within(send).getAllByRole('cell')[detailsColumn]).toHaveTextContent(/^to\s*Northwind\s*5h ago/)
   })
 
   it('C: stacks the Safe name over the type and details, next to a large avatar', () => {
@@ -1364,13 +1369,19 @@ describe('aligned Transaction column', () => {
       routerProps: { query: { align: 'stacked', scenario: '8-safes-all-types', state: 'normal' } },
     })
     const titles = screen.getAllByRole('columnheader').map((header) => header.textContent)
-    expect(titles).toEqual(expect.arrayContaining(['Transaction', 'With', 'Age', 'Status']))
+    expect(titles).toEqual(expect.arrayContaining(['Transaction', 'Status']))
     expect(titles).not.toContain('Details')
+    expect(titles).not.toContain('With')
     const row = openRows()
       .find((button) => button.textContent === 'Treasury Main')!
       .closest('tr')!
     expect(within(row).getByRole('img', { name: 'on Ethereum' })).toBeInTheDocument()
+    // Send · 250,000 USDC · to · Northwind · 5h ago, on one line under the Safe
     expect(within(row).getByText('Send')).toBeInTheDocument()
+    expect(within(row).getByText('250,000 USDC')).toBeInTheDocument()
+    expect(within(row).getByText('to')).toBeInTheDocument()
+    expect(within(row).getByText('Northwind')).toBeInTheDocument()
+    expect(within(row).getByLabelText('Proposed 5h ago')).toBeInTheDocument()
   })
 
   it('keeps the flowing layout by default', () => {

@@ -3,6 +3,7 @@ import { StickyNote, TriangleAlert, UserPen } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { TableRow, TableCell } from '@safe-global/views/components/ui/table'
+import { Tag } from '@safe-global/views/components/ui/tag'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
@@ -42,9 +43,9 @@ import {
   chainLogoUrl,
   HINT_CLASS,
   HintContent,
+  ROW_TAG_FILL,
   StatusChip,
   StepsStatusChip,
-  TYPE_ICONS,
   TypeTag,
 } from '../shared'
 
@@ -136,7 +137,6 @@ export function QueueRow({
   const startsGroup = groupSize > 1 && sectionItems.find(sameNonce) === tx
   const willBeReplaced = !!replaceHover && conflicts.some((other) => other.id === replaceHover)
   const account = getAccount(tx)
-  const TypeIcon = TYPE_ICONS[getTypeLabel(tx)]
   const signatureCount = getSignatureCount(tx)
   const parentApproval = m1 ? undefined : getParentApproval(tx, items)
   const warnings = getWarnings(tx)
@@ -370,12 +370,20 @@ export function QueueRow({
             >
               {account.safeName ?? account.name}
             </button>
-            <span className="flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground">
-              <TypeIcon className="size-3.5 shrink-0" strokeWidth={ICON_STROKE} aria-hidden="true" />
-              <span className="shrink-0">{tx.app?.name ?? getTypeLabel(tx)}</span>
-              <span aria-hidden="true">·</span>
-              <SummaryText tx={tx} />
+            {/* One sentence: type, details, "to" or "via", the other party, then the age. Only the joining word and the age are plain text. */}
+            <span className="flex min-w-0 items-center gap-2 text-sm">
+              {tx.app ? <AppTag app={tx.app} onRow /> : <TypeTag type={getTypeLabel(tx)} onRow />}
+              <span className={`flex min-w-0 shrink ${ROW_TAG_FILL}`}>
+                <Tag className="min-w-0">
+                  <SummaryText tx={tx} />
+                </Tag>
+              </span>
+              <Counterparty tx={tx} tag />
               {warningMarker}
+              <span className="flex shrink-0 items-center gap-1.5 text-muted-foreground">
+                {proposedContent}
+                {proposerMark}
+              </span>
               {!isWide && noteButton}
             </span>
           </div>
@@ -453,7 +461,7 @@ export function QueueRow({
         </span>
       </TableCell>
     ),
-    // B: the Safe tag, the type tag, what happens, the other party and the age, each under its own title.
+    // B: Safe, Transaction (type and what happens) and Details (who it goes to and when), each under its own title.
     ...(layout === 'titled' && {
       Safe: (
         <TableCell>
@@ -467,16 +475,13 @@ export function QueueRow({
           </span>
         </TableCell>
       ),
-      Type: (
+      // Fixed-width type tag, so the amounts start at the same place on every row.
+      Transaction: (
         <TableCell>
-          <span className="flex min-w-0">
-            {tx.app ? <AppTag app={tx.app} onRow truncate /> : <TypeTag type={getTypeLabel(tx)} onRow truncate />}
-          </span>
-        </TableCell>
-      ),
-      Details: (
-        <TableCell>
-          <div className="flex min-w-0 items-center gap-1.5">
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="flex w-32 min-w-0 shrink-0">
+              {tx.app ? <AppTag app={tx.app} onRow truncate /> : <TypeTag type={getTypeLabel(tx)} onRow truncate />}
+            </span>
             <button
               className={`flex min-w-0 text-left text-sm focus-visible:outline-none focus-visible:underline ${willBeReplaced ? 'text-muted-foreground line-through' : ''}`}
               onClick={openDetails}
@@ -489,23 +494,21 @@ export function QueueRow({
           </div>
         </TableCell>
       ),
+      // "to" or "via", the other party in a fixed width so the age lines up, then the age.
+      Details: (
+        <TableCell>
+          <span className="flex items-center gap-3">
+            <span className="flex w-44 min-w-0 shrink-0">
+              <Counterparty tx={tx} inColumn tag={partyTags} />
+            </span>
+            <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <span className="w-16">{proposedContent}</span>
+              {proposerMark}
+            </span>
+          </span>
+        </TableCell>
+      ),
     }),
-    // B and C: the other party without "to" or "via", since the column title says it, and the age.
-    With: (
-      <TableCell>
-        <span className="flex min-w-0">
-          <Counterparty tx={tx} inColumn tag={partyTags} plain />
-        </span>
-      </TableCell>
-    ),
-    Age: (
-      <TableCell className="text-sm text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          {proposedContent}
-          {proposerMark}
-        </span>
-      </TableCell>
-    ),
     // Options D and E: the network gets its own column, next to the Safe. Its name is in the logo's tooltip.
     Network: (
       <TableCell>

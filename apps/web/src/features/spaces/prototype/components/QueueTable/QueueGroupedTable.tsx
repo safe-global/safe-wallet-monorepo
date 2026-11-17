@@ -326,11 +326,10 @@ const orderedWidths = (
   // Aligned: every column has a width, so spare room spreads across them instead of pooling in one gap.
   // Status fits an executing or locked chip after the count, Action fits "Blocked by #212".
   ...(aligned ? { To: 'w-80', Signatures: 'w-36', Action: 'w-44' } : {}),
-  // B and C: the details take the slack, the rest fit their longest value.
-  ...(layout === 'titled'
-    ? { Safe: 'w-40', Type: 'w-32', Details: undefined, With: 'w-44', Age: 'w-28', Signatures: 'w-32' }
-    : {}),
-  ...(layout === 'stacked' ? { Transaction: undefined, With: 'w-56', Age: 'w-28' } : {}),
+  // B: the transaction truncates at a fixed width, and Details, which ends with the age, takes the slack.
+  ...(layout === 'titled' ? { Safe: 'w-40', Transaction: 'w-[20rem]', Details: undefined, Signatures: 'w-32' } : {}),
+  // C: the whole transaction reads as one line under the Safe, so it takes the slack.
+  ...(layout === 'stacked' ? { Transaction: undefined } : {}),
 })
 
 // Columns, the same in every grouping. Nonce leads, so conflicts draw the same bracket.
@@ -346,9 +345,7 @@ export const ORDERED_COLUMNS = (
     : layout === 'titled' || layout === 'stacked'
       ? [
           'Nonce',
-          ...(layout === 'titled' ? ['Safe', 'Type', 'Details'] : ['Transaction']),
-          'With',
-          'Age',
+          ...(layout === 'titled' ? ['Safe', 'Transaction', 'Details'] : ['Transaction']),
           ...(isWide ? ['Note'] : []),
           'Signatures',
           'Action',
