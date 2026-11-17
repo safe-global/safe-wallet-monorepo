@@ -88,8 +88,9 @@ export const useWorkspaceSigners = (): {
     let missingCount = 0
     const owners = safeRefs.flatMap(({ chainId, address }) => {
       const overview = overviews?.find((item) => item.chainId === chainId && sameAddress(item.address.value, address))
-      const cfOwners = Object.entries(undeployedSafes[chainId] ?? {}).find(([key]) => sameAddress(key, address))?.[1]
-        .props.safeAccountConfig.owners
+      const [, undeployedSafe] =
+        Object.entries(undeployedSafes[chainId] ?? {}).find(([key]) => sameAddress(key, address)) ?? []
+      const cfOwners = undeployedSafe?.props.safeAccountConfig.owners
       if (!cfOwners) {
         deployedCount += 1
         if (!overview) missingCount += 1

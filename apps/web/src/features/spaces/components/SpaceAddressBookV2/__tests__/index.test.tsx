@@ -5,6 +5,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import {
   useAddressBookRequestsState,
+  useCurrentSpaceId,
   useIsAdmin,
   useIsInvited,
   useMemberNameResolver,
@@ -247,6 +248,7 @@ describe('SpaceAddressBookV2', () => {
     mockRequests()
     mockSigners()
     ;(useMemberNameResolver as jest.Mock).mockReturnValue(() => undefined)
+    ;(useCurrentSpaceId as jest.Mock).mockReturnValue(SPACE_ID)
     ;(useCurrentChain as jest.Mock).mockReturnValue(currentChain)
   })
 
@@ -757,6 +759,19 @@ describe('SpaceAddressBookV2', () => {
       await userEvent.click(within(screen.getByTestId('suggestions-error')).getByRole('button', { name: 'Reload' }))
 
       expect(refetch).toHaveBeenCalledTimes(1)
+    })
+
+    it('closes an open add dialog when the Workspace changes', async () => {
+      mockSigners({ signers: [signerBuilder().build()] })
+      const { rerender } = renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested (1)' }))
+      await userEvent.click(screen.getByRole('button', { name: 'Add to Workspace' }))
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+
+      ;(useCurrentSpaceId as jest.Mock).mockReturnValue(faker.string.numeric(3))
+      rerender(<SpaceAddressBookV2 />)
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     })
 
     it('offers admins to add a suggestion', async () => {

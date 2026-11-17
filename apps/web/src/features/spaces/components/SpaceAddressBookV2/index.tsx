@@ -5,7 +5,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@safe-global/views/com
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
-import { useAddressBookRequestsState, useIsAdmin, useIsInvited, useSpaceAddressBookState } from '@/features/spaces'
+import {
+  useAddressBookRequestsState,
+  useCurrentSpaceId,
+  useIsAdmin,
+  useIsInvited,
+  useSpaceAddressBookState,
+} from '@/features/spaces'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import useChains, { useHasFeature } from '@/hooks/useChains'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
@@ -26,6 +32,7 @@ const TabLabel = ({ label, tooltip }: { label: string; tooltip: string }) => (
 const withCount = (label: string, count: number, isSettled = true) => (isSettled ? `${label} (${count})` : label)
 
 const SpaceAddressBookV2 = () => {
+  const spaceId = useCurrentSpaceId()
   const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
   const isPrivateAddressBookEnabled = useHasFeature(FEATURES.PRIVATE_ADDRESS_BOOK) ?? false
@@ -54,7 +61,8 @@ const SpaceAddressBookV2 = () => {
           </Typography>
         </div>
 
-        <Tabs defaultValue="workspace">
+        {/* Keyed by Workspace, so open dialogs, selections and search never carry over to another one */}
+        <Tabs key={spaceId} defaultValue="workspace">
           {/* Scrolls sideways on phones; pb-1.5 keeps the underline (bottom -5px) inside the scroll box. */}
           <div className="mb-2.5 overflow-x-auto overflow-y-hidden pb-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <TabsList variant="underline">
