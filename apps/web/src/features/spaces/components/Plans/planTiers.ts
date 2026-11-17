@@ -9,6 +9,8 @@ import {
   getSubscriptionPlanName,
   getSubscriptionSeats,
 } from '../../hooks/billing/subscription'
+import { PRO_TRIAL_COPY } from './proTrial/copy'
+import { isSalesLed } from './proTrial/recommendPlan'
 import { ENTERPRISE_TIER, PLAN_ORDER } from '@safe-global/views/features/spaces/components/Plans/planCatalog'
 import type {
   CurrentPlan,
@@ -100,7 +102,18 @@ const isCycleSwitch = (pick: PlanPick, current: CurrentPlan): boolean =>
   pick.tier.billingCycle !== current.billingCycle &&
   pick.option.label === current.seatsLabel
 
+const isTrialSize = (pick: PlanPick, current: CurrentPlan): boolean =>
+  pick.tier.name === current.name &&
+  pick.tier.billingCycle === current.billingCycle &&
+  pick.option.label === current.seatsLabel
+
 export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): PlanCta => {
+  if (current?.isTrialing && isTrialSize(pick, current)) {
+    return current.hasPaymentMethod
+      ? { kind: 'current', label: 'Current plan' }
+      : { kind: 'billing', label: 'Add payment method' }
+  }
+  if (isSalesLedOption(pick.option) && !pick.tier.isCurrent) return { kind: 'sales', label: PRO_TRIAL_COPY.talkToUs }
   if (pick.tier.isCurrent) {
     const isAwaitingPaymentMethod = Boolean(current?.isTrialing && !current.hasPaymentMethod)
     if (pick.tier.name === ENTERPRISE_TIER.name && !isAwaitingPaymentMethod) {
@@ -119,8 +132,9 @@ export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): Pl
       label: direction === 'upgrade' ? `Upgrade to ${pick.option.label}` : `Switch to ${pick.option.label}`,
     }
   }
-  if (!pick.option.paymentLinkId) return { kind: 'sales', label: 'Talk to sales' }
-  if (!current) return { kind: 'subscribe', label: `Continue with ${pick.tier.name}` }
+  if (!pick.option.paymentLinkId) return { kind: 'sales', label: PRO_TRIAL_COPY.talkToUs }
+  const planName = PRO_TRIAL_COPY.planName(pick.tier.name, pick.tier.options.length > 1 ? pick.option.seats : undefined)
+  if (!current) return { kind: 'subscribe', label: PRO_TRIAL_COPY.upgradeTo(planName) }
 
   const direction = getChangeDirection(current, pick)
   if (isCycleSwitch(pick, current)) {
@@ -131,11 +145,13 @@ export const getPlanCta = (pick: PlanPick, current: CurrentPlan | undefined): Pl
     }
   }
   // The same plan on the other billing cycle is a resize too, so it is worded by seats like the current card.
-  const target = pick.tier.name === current.name ? pick.option.label : pick.tier.name
+  const target = current.isTrialing ? planName : pick.tier.name === current.name ? pick.option.label : pick.tier.name
+  // Nobody pays during a trial yet, so every move off it is a switch.
+  const isUpgrade = direction === 'upgrade' && !current.isTrialing
   return {
     kind: 'change',
     direction,
-    label: direction === 'upgrade' ? `Upgrade to ${target}` : `Switch to ${target}`,
+    label: isUpgrade ? PRO_TRIAL_COPY.upgradeTo(target) : `Switch to ${target}`,
   }
 }
 
@@ -248,7 +264,8 @@ export const buildPlanTiers = (
 }
 
 export const pickSeatOption = (tier: PlanTier, currentPlan?: CurrentPlan, seatsLabel?: string) => {
-  const isCurrentPlan = tier.isCurrent || currentPlan?.name === tier.name
+  // A trial's size is ours, not the user's pick, so the card opens on the size that fits instead.
+  const isCurrentPlan = tier.isCurrent || (currentPlan?.name === tier.name && !currentPlan.isTrialing)
   return (
     tier.options.find((candidate) => candidate.label === seatsLabel) ??
     tier.options.find((candidate) => candidate.priceId === tier.currentPriceId) ??
@@ -282,8 +299,9 @@ export const getPlanPrice = (tier: PlanTier, option: PlanSeatOption): { headline
       suffix: 'Annual term',
     }
   }
+  const price = formatPlanPrice(option.price, tier.currency)
   return {
-    headline: formatPlanPrice(option.price, tier.currency),
+    headline: isSalesLedOption(option) ? PRO_TRIAL_COPY.fromPrice(price) : price,
     suffix: priceSuffix(tier.billingCycle),
   }
 }
@@ -310,3 +328,7 @@ export const getCardSaving = (
   const saved = twelveMonths - yearly
   return { amount: formatPlanPrice(saved, tier.currency), percent: percentFormat.format(saved / twelveMonths) }
 }
+
+/** A seat size above the self-serve threshold: "from" pricing and a sales conversation instead of checkout. */
+export const isSalesLedOption = (option: Pick<PlanSeatOption, 'paymentLinkId' | 'seats'>): boolean =>
+  option.paymentLinkId !== null && option.seats != null && isSalesLed(option.seats)

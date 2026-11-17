@@ -2,11 +2,10 @@ import { ArrowRight, ArrowUpRight, Check } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
-import { Input } from '@safe-global/views/components/ui/input'
 import { Link } from '@safe-global/views/components/ui/link'
 import { List, ListItem } from '@safe-global/views/components/ui/list'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
 import { Separator } from '@safe-global/views/components/ui/separator'
+import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { CONTACT_SALES_URL } from '@/features/spaces/constants'
 import Track from '@/components/common/Track'
@@ -23,7 +22,16 @@ import type {
   PlanTier,
 } from '@safe-global/views/features/spaces/components/Plans/types'
 import { FeatureCheck } from './FeatureCheck'
-import { getCardSaving, getPlanCta, getPlanPrice, pickProps, pickSeatOption, plansClickParams } from './planTiers'
+import { PRO_TRIAL_COPY } from './proTrial/copy'
+import {
+  getCardSaving,
+  getPlanCta,
+  getPlanPrice,
+  isSalesLedOption,
+  pickProps,
+  pickSeatOption,
+  plansClickParams,
+} from './planTiers'
 
 const CTA_KIND: Partial<Record<PlanCtaKindOf['kind'], PlanCtaKind>> = {
   billing: PlanCtaKind.ADD_PAYMENT_METHOD,
@@ -39,6 +47,7 @@ const SUPPORT_HIGHLIGHT_CLASSES = [
 
 const optionKey = (option: PlanSeatOption) => option.priceId ?? option.paymentLinkId ?? option.label
 
+/** Every size in view, so the price visibly follows the pick; a single size is just stated. */
 const Seats = ({
   options,
   value,
@@ -46,32 +55,36 @@ const Seats = ({
   label,
 }: {
   options: PlanSeatOption[]
-  value: PlanSeatOption
+  /** Null until the user picks a size: no size, and no price, is shown by default. */
+  value: PlanSeatOption | null
   onChange: (option: PlanSeatOption) => void
   label?: string
 }) =>
   options.length > 1 ? (
-    <Select
-      value={optionKey(value)}
+    <Tabs
+      value={value ? optionKey(value) : null}
       onValueChange={(key) => {
         const next = options.find((option) => optionKey(option) === key)
         if (next) onChange(next)
       }}
     >
-      <SelectTrigger className="w-full" aria-label={label}>
-        {/* The closed trigger would otherwise print the raw value, the price id. */}
-        <SelectValue>{value.label}</SelectValue>
-      </SelectTrigger>
-      <SelectContent>
+      <TabsList aria-label={label} className="w-full" data-testid="plan-seats-switch">
         {options.map((option) => (
-          <SelectItem key={optionKey(option)} value={optionKey(option)}>
-            {option.label}
-          </SelectItem>
+          <TabsTrigger key={optionKey(option)} value={optionKey(option)} aria-label={option.label}>
+            {option.seats ? PRO_TRIAL_COPY.seatsShort(option.seats) : option.label}
+          </TabsTrigger>
         ))}
-      </SelectContent>
-    </Select>
+      </TabsList>
+    </Tabs>
   ) : (
-    <Input readOnly value={value.label} aria-label={label} />
+    // Same track as the size switch, without a field or a pill, so a fixed size reads as a fact, not an input.
+    <div
+      className="flex h-9 items-center justify-center rounded-md bg-muted text-sm font-medium text-muted-foreground"
+      aria-label={label}
+      data-testid="plan-seats-fixed"
+    >
+      {PRO_TRIAL_COPY.seatsFixed((value ?? options[0])?.label ?? '')}
+    </div>
   )
 
 export type PlanCardActions = {
@@ -89,11 +102,13 @@ const SalesCta = ({
   kind,
   location,
   onClick,
+  isPrimary = false,
 }: {
   label: string
   kind: 'sales' | 'account-team'
   location: PlanLocation
   onClick?: () => void
+  isPrimary?: boolean
 }) => {
   const trackLabel = kind === 'sales' ? SAFE_PRO_PLANS_LABELS.talk_to_sales : SAFE_PRO_PLANS_LABELS.account_team
   return (
@@ -104,7 +119,7 @@ const SalesCta = ({
       as="div"
     >
       <Button
-        variant="outline"
+        variant={isPrimary ? 'default' : 'outline'}
         size="lg"
         weight="semibold"
         className="w-full"
@@ -132,7 +147,15 @@ const PlanCta = ({
 
   switch (cta.kind) {
     case 'sales':
-      return <SalesCta label={cta.label} kind={cta.kind} location={location} onClick={() => onCta?.(pick, cta)} />
+      return (
+        <SalesCta
+          label={cta.label}
+          kind={cta.kind}
+          location={location}
+          isPrimary={isPrimary}
+          onClick={() => onCta?.(pick, cta)}
+        />
+      )
     case 'account-team':
       return <SalesCta label={cta.label} kind={cta.kind} location={location} />
     case 'current':
@@ -193,28 +216,43 @@ export const PlanCard = ({
   const isPrimary = tier.name === RECOMMENDED_PLAN
   const isCurrentPlan = Boolean(tier.isCurrent)
   const option = pickSeatOption(tier, actions.currentPlan, seatsLabel)
-  const price = option ? getPlanPrice(tier, option) : undefined
+  // A multi-size plan shows no size and no price until the user picks one, so a trial's size never anchors the price.
+  const hasPicked = tier.options.length < 2 || seatsLabel !== undefined || isCurrentPlan
+  const price = !option ? undefined : hasPicked ? getPlanPrice(tier, option) : PRO_TRIAL_COPY.unpickedPrice
   const isYearly = tier.billingCycle === 'year'
-  const saving = getCardSaving(tier, option, counterpartTier)
+  const saving = hasPicked ? getCardSaving(tier, option, counterpartTier) : undefined
+  const talkToUs = (primary: boolean) =>
+    option && (
+      <SalesCta
+        label={PRO_TRIAL_COPY.talkToUs}
+        kind="sales"
+        location={actions.location}
+        isPrimary={primary}
+        onClick={() => actions.onCta?.({ tier, option }, { kind: 'sales', label: PRO_TRIAL_COPY.talkToUs })}
+      />
+    )
   const features = option?.features?.length ? option.features : tier.features
+
+  // Business takes the current card's look whenever no paid plan is current, as it does today during a trial.
+  const isFeatured = isCurrentPlan || (isPrimary && (!actions.currentPlan || actions.currentPlan.isTrialing))
 
   // Always render all five rows so the subgrid lines up across cards.
   return (
     <Card
-      variant={isCurrentPlan ? 'default' : 'muted-secondary'}
-      bordered={!isCurrentPlan}
-      selected={isCurrentPlan || undefined}
-      shadowOnHover={isCurrentPlan}
-      highlightOnHover={!isCurrentPlan}
+      variant={isFeatured ? 'default' : 'muted-secondary'}
+      bordered={!isFeatured}
+      selected={isFeatured || undefined}
+      shadowOnHover={isFeatured}
+      highlightOnHover={!isFeatured}
       size="offer"
       radius="lg-xl"
       className={cn(
         'group/plan min-w-0 @4xl:row-span-5 @4xl:grid @4xl:grid-rows-subgrid',
-        // The current card goes grey while another card is hovered.
-        isCurrentPlan && 'group-has-[[data-hover-plan]:hover]/plans:bg-muted-secondary',
+        // The featured card goes grey while another card is hovered.
+        isFeatured && 'group-has-[[data-hover-plan]:hover]/plans:bg-muted-secondary',
       )}
       data-testid={tier.isCurrent ? 'current-plan-card' : 'plan-card'}
-      data-hover-plan={!isCurrentPlan || undefined}
+      data-hover-plan={!isFeatured || undefined}
     >
       <CardContent className="flex min-w-0 flex-col @2xl:@max-4xl:grid @2xl:@max-4xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] @2xl:@max-4xl:grid-rows-[auto_1fr_auto_auto_auto] @2xl:@max-4xl:gap-x-10 @4xl:row-span-5 @4xl:grid @4xl:grid-cols-[minmax(0,1fr)] @4xl:grid-rows-subgrid">
         <div className="flex flex-col gap-1.5 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-1">
@@ -260,6 +298,18 @@ export const PlanCard = ({
               </Link>
             </Typography>
           )}
+          {!hasPicked && !isYearly && onSwitchToYearly && (
+            <Typography variant="paragraph-small">
+              <Link
+                render={<button type="button" />}
+                variant="muted"
+                data-testid="plan-yearly-saving"
+                onClick={onSwitchToYearly}
+              >
+                {PRO_TRIAL_COPY.unpickedSaving}
+              </Link>
+            </Typography>
+          )}
         </div>
 
         <div className="mt-5 flex flex-col gap-2.5 @2xl:@max-4xl:col-start-1 @2xl:@max-4xl:row-start-4">
@@ -267,20 +317,22 @@ export const PlanCard = ({
             <>
               <Seats
                 options={tier.options}
-                value={option}
+                value={hasPicked ? option : null}
                 onChange={(next) => onSeatsChange?.(next.label)}
                 label={`Safe accounts for ${tier.name}`}
               />
               {!actions.readOnly && (
-                <div className="flex flex-wrap gap-2 *:min-w-max *:flex-1 *:basis-0" data-testid="plan-ctas">
-                  <PlanCta pick={{ tier, option }} isPrimary={isPrimary} {...actions} />
-                  {isPrimary && (
-                    <SalesCta
-                      label="Talk to sales"
-                      kind="sales"
-                      location={actions.location}
-                      onClick={() => actions.onCta?.({ tier, option }, { kind: 'sales', label: 'Talk to sales' })}
-                    />
+                <div
+                  className={cn('flex gap-2', isPrimary ? 'flex-col' : 'flex-wrap *:min-w-max *:flex-1 *:basis-0')}
+                  data-testid="plan-ctas"
+                >
+                  {hasPicked ? (
+                    <>
+                      <PlanCta pick={{ tier, option }} isPrimary={isPrimary} {...actions} />
+                      {isPrimary && !isSalesLedOption(option) && talkToUs(false)}
+                    </>
+                  ) : (
+                    talkToUs(isPrimary)
                   )}
                 </div>
               )}
