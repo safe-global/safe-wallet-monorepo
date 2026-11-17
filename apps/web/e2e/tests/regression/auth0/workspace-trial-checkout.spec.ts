@@ -21,9 +21,8 @@ test.describe('Trial checkout from the Workspace creation wizard', { tag: '@regr
     await safePage.goto('/welcome/create-space')
     await workspace.nameInput.fill(WORKSPACE_NAME)
     await workspace.continueButton.click()
-    const offer = safePage.getByRole('dialog', { name: 'Workspaces run on Safe Pro' })
-    await offer.getByRole('radio', { name: /^Starter/ }).click()
-    await offer.getByRole('button', { name: 'Claim free access' }).click()
+    const offer = safePage.getByRole('dialog', { name: /^Safe Pro .*free trial$/ })
+    await offer.getByRole('button', { name: 'Start free trial' }).click()
     await expect(safePage).toHaveURL(/\/billing\/checkout\/cs_e2e_\d+$/)
     await safePage.goBack()
 
