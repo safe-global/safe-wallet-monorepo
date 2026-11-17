@@ -70,6 +70,7 @@ test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
 
   test('should show a transaction that a proposer proposed as waiting for signatures, and as signable by an owner', async ({
     safePage,
+    safeApiClient,
     journey,
   }) => {
     const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 2 })
@@ -86,10 +87,11 @@ test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
     await sendTokens.fillTransfer({ recipient: Wallet.createRandom().address, amount: AMOUNT })
     await sendTokens.nextButton.click()
     await review.propose()
+
+    await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(confirmationsOf)).toEqual([0])
     await pending.goto(workspaceId)
     const row = pending.rows.first()
-
-    await expect(pending.rows).toHaveCount(1, POLLED_UPDATE)
+    await expect(pending.rows).toHaveCount(1)
     await expect(row).toContainText('0/2')
     await expect(row).toContainText('Waiting')
 
