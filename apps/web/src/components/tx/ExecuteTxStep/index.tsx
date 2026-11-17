@@ -19,6 +19,8 @@ import { Receipt } from '../ConfirmTxDetails/Receipt'
 import ErrorMessage from '../ErrorMessage'
 import useTxPreview from '../confirmation-views/useTxPreview'
 import useChainId from '@/hooks/useChainId'
+import { useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 import { createExistingTx } from '@/services/tx/tx-sender'
 
@@ -39,6 +41,7 @@ export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean
   const safeLinkQuery = useSafeLinkQuery()
   const [txPreview] = useTxPreview(safeTx?.data)
   const [isReloaded, setIsReloaded] = useState(false)
+  const isSpaceQueueEnabled = useHasFeature(FEATURES.SPACE_TRANSACTIONS)
 
   const scopeSafeAddress = scope?.safeAddress
   const scopeSdk = scope?.sdk
@@ -62,6 +65,12 @@ export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean
 
   const executeLater = () => {
     setTxFlow(undefined)
+    if (scope && safeLinkQuery.spaceId && isSpaceQueueEnabled) {
+      if (router.pathname !== AppRoutes.spaces.transactions) {
+        router.push({ pathname: AppRoutes.spaces.transactions, query: { spaceId: safeLinkQuery.spaceId } })
+      }
+      return
+    }
     const query = scopedSafeQuery ? { ...safeLinkQuery, safe: scopedSafeQuery } : safeLinkQuery
     router.push({ pathname: AppRoutes.transactions.queue, query })
   }

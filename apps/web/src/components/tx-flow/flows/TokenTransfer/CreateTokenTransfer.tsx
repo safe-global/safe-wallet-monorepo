@@ -1,4 +1,5 @@
 import { useVisibleTokens } from '@/components/tx-flow/flows/TokenTransfer/utils'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import { type ReactElement, useContext, useEffect, useMemo, useState } from 'react'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import { FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form'
@@ -74,7 +75,9 @@ export type CreateTokenTransferProps = {
 
 const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElement => {
   const { NoFeeCampaignTransactionCard } = useLoadFeature(NoFeeCampaignFeature)
-  const disableSpendingLimit = txNonce !== undefined
+  const scope = useSafeScope()
+  // Spending limits are loaded for the Safe in the URL, not for a scoped one
+  const disableSpendingLimit = txNonce !== undefined || !!scope
   const [csvAirdropModalOpen, setCsvAirdropModalOpen] = useState<boolean>(false)
   const [maxRecipientsInfo, setMaxRecipientsInfo] = useState<boolean>(false)
   const canCreateStandardTx = useHasPermission(Permission.CreateTransaction)

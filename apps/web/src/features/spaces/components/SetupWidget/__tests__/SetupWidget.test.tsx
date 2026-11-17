@@ -10,15 +10,10 @@ jest.mock('@/features/spaces', () => ({
 }))
 
 const mockDismiss = jest.fn()
-const mockUseSetupWidgetDismissal = jest.fn(() => ({ isDismissed: false, dismiss: mockDismiss }))
+const mockUseSetupWidgetDismissal = jest.fn(() => ({ isHidden: false, dismiss: mockDismiss }))
 
-jest.mock('../useSetupWidgetDismissal', () => ({
+jest.mock('../../../hooks/useSetupWidgetDismissal', () => ({
   useSetupWidgetDismissal: () => mockUseSetupWidgetDismissal(),
-}))
-
-jest.mock('@/services/local-storage/useLocalStorage', () => ({
-  __esModule: true,
-  default: jest.fn(() => [{}, jest.fn()]),
 }))
 
 jest.mock('@/hooks/safes', () => ({
@@ -72,10 +67,7 @@ const setStepData = ({
 describe('SetupWidget', () => {
   beforeEach(() => {
     mockDismiss.mockClear()
-    mockUseSetupWidgetDismissal.mockReturnValue({ isDismissed: false, dismiss: mockDismiss })
-
-    const useLocalStorage = jest.requireMock<{ default: jest.Mock }>('@/services/local-storage/useLocalStorage')
-    useLocalStorage.default.mockImplementation(() => [{}, jest.fn()])
+    mockUseSetupWidgetDismissal.mockReturnValue({ isHidden: false, dismiss: mockDismiss })
 
     setStepData({})
   })
@@ -101,24 +93,28 @@ describe('SetupWidget', () => {
     expect(screen.getByText('Dismiss')).toBeInTheDocument()
   })
 
-  it('hides the widget and records the dismissal when dismiss is clicked', async () => {
+  it('hides the widget when dismiss is clicked', async () => {
+    render(<SetupWidget />)
+
+    fireEvent.click(screen.getByText('Dismiss'))
+
+    await waitFor(() => expect(screen.queryByText('Set up your Workspace')).not.toBeInTheDocument(), {
+      timeout: 3000,
+    })
+  })
+
+  it('records the dismissal once the widget has faded out', async () => {
     const onDismiss = jest.fn()
     render(<SetupWidget onDismiss={onDismiss} />)
 
     fireEvent.click(screen.getByText('Dismiss'))
 
-    await waitFor(
-      () => {
-        expect(screen.queryByText('Set up your Workspace')).not.toBeInTheDocument()
-      },
-      { timeout: 3000 },
-    )
-    await waitFor(() => expect(mockDismiss).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(mockDismiss).toHaveBeenCalledTimes(1), { timeout: 3000 })
     expect(onDismiss).toHaveBeenCalledTimes(1)
   })
 
   it('does not render when dismissed for the space', () => {
-    mockUseSetupWidgetDismissal.mockReturnValue({ isDismissed: true, dismiss: mockDismiss })
+    mockUseSetupWidgetDismissal.mockReturnValue({ isHidden: true, dismiss: mockDismiss })
 
     render(<SetupWidget />)
 
@@ -187,17 +183,6 @@ describe('SetupWidget', () => {
     render(<SetupWidget />)
 
     expect(screen.getByText('Set up your Workspace')).toBeInTheDocument()
-  })
-
-  it('does not render when the space was marked completed before', () => {
-    const useLocalStorage = jest.requireMock<{ default: jest.Mock }>('@/services/local-storage/useLocalStorage')
-    useLocalStorage.default.mockImplementation((key: string) =>
-      key === 'setupWidgetCompleted' ? [{ '1': true }, jest.fn()] : [{}, jest.fn()],
-    )
-
-    render(<SetupWidget />)
-
-    expect(screen.queryByText('Set up your Workspace')).not.toBeInTheDocument()
   })
 
   it('disables click on completed steps', () => {
