@@ -326,8 +326,8 @@ const orderedWidths = (
   // Aligned: every column has a width, so spare room spreads across them instead of pooling in one gap.
   // Status fits an executing or locked chip after the count, Action fits "Blocked by #212".
   ...(aligned ? { To: 'w-80', Signatures: 'w-36', Action: 'w-44' } : {}),
-  // B: the transaction truncates at a fixed width, and Details, which ends with the age, takes the slack.
-  ...(layout === 'titled' ? { Safe: 'w-40', Transaction: 'w-[20rem]', Details: undefined, Signatures: 'w-32' } : {}),
+  // B: Transaction is the type tag alone. Details, from the amount to the age, takes the slack.
+  ...(layout === 'titled' ? { Safe: 'w-40', Transaction: 'w-40', Details: undefined, Signatures: 'w-32' } : {}),
   // C: the whole transaction reads as one line under the Safe, so it takes the slack.
   ...(layout === 'stacked' ? { Transaction: undefined } : {}),
 })

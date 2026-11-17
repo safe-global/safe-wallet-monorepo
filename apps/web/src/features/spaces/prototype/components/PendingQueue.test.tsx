@@ -1344,7 +1344,7 @@ describe('aligned Transaction column', () => {
     expect(allPending().getAllByRole('button', { name: /^Blocked by #\d+ / }).length).toBeGreaterThan(0)
   })
 
-  it('B: titles the columns Safe, Transaction and Details, with the other party and age under Details', () => {
+  it('B: titles the columns Safe, Transaction and Details, with the amount, other party and age under Details', () => {
     render(<PendingQueue />, {
       routerProps: { query: { align: 'titled', scenario: '8-safes-all-types', state: 'normal' } },
     })
@@ -1355,13 +1355,16 @@ describe('aligned Transaction column', () => {
     const [transactionColumn, detailsColumn] = [titles.indexOf('Transaction'), titles.indexOf('Details')]
     for (const row of openRows()) {
       const cells = within(row.closest('tr')!).getAllByRole('cell')
-      expect(cells[transactionColumn]).toContainElement(row)
+      expect(cells[detailsColumn]).toContainElement(row)
+      expect(within(cells[transactionColumn]).queryByRole('button', { name: /^Open / })).toBeNull()
       expect(within(cells[detailsColumn]).getByLabelText(/^Proposed /)).toBeInTheDocument()
     }
     const send = openRows()
       .find((button) => button.textContent === '250,000 USDC')!
       .closest('tr')!
-    expect(within(send).getAllByRole('cell')[detailsColumn]).toHaveTextContent(/^to\s*Northwind\s*5h ago/)
+    expect(within(send).getAllByRole('cell')[detailsColumn]).toHaveTextContent(
+      /^250,000 USDC\s*to\s*Northwind\s*5h ago/,
+    )
   })
 
   it('C: stacks the Safe name over the type and details, next to a large avatar', () => {

@@ -475,29 +475,28 @@ export function QueueRow({
           </span>
         </TableCell>
       ),
-      // Fixed-width type tag, so the amounts start at the same place on every row.
       Transaction: (
         <TableCell>
-          <div className="flex min-w-0 items-center gap-2">
-            <span className="flex w-32 min-w-0 shrink-0">
-              {tx.app ? <AppTag app={tx.app} onRow truncate /> : <TypeTag type={getTypeLabel(tx)} onRow truncate />}
-            </span>
-            <button
-              className={`flex min-w-0 text-left text-sm focus-visible:outline-none focus-visible:underline ${willBeReplaced ? 'text-muted-foreground line-through' : ''}`}
-              onClick={openDetails}
-              aria-label={`Open ${getTransactionLabel(tx)}`}
-            >
-              <SummaryText tx={tx} />
-            </button>
-            {warningMarker}
-            {!isWide && noteButton}
-          </div>
+          <span className="flex min-w-0">
+            {tx.app ? <AppTag app={tx.app} onRow truncate /> : <TypeTag type={getTypeLabel(tx)} onRow truncate />}
+          </span>
         </TableCell>
       ),
-      // "to" or "via", the other party in a fixed width so the age lines up, then the age.
+      // What happens, "to" or "via", the other party, then the age. Fixed widths, so each part lines up row to row.
       Details: (
         <TableCell>
           <span className="flex items-center gap-3">
+            <span className="flex w-40 min-w-0 shrink-0 items-center gap-1.5">
+              <button
+                className={`flex min-w-0 text-left text-sm focus-visible:outline-none focus-visible:underline ${willBeReplaced ? 'text-muted-foreground line-through' : ''}`}
+                onClick={openDetails}
+                aria-label={`Open ${getTransactionLabel(tx)}`}
+              >
+                <SummaryText tx={tx} />
+              </button>
+              {warningMarker}
+              {!isWide && noteButton}
+            </span>
             <span className="flex w-44 min-w-0 shrink-0">
               <Counterparty tx={tx} inColumn tag={partyTags} />
             </span>
