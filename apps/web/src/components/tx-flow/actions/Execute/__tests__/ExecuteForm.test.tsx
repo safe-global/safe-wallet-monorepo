@@ -135,6 +135,7 @@ describe('ExecuteForm', () => {
       safeAnalysis: null,
       addToTrustedList: jest.fn(),
       hasProFeatures: true,
+      isProAccessLoading: false,
       isSafePro: true,
       isOffchainMessage: false,
     },

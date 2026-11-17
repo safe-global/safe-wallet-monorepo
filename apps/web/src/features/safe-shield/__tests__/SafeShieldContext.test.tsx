@@ -145,6 +145,20 @@ describe('SafeShieldContext', () => {
       expect(mockUseThreatAnalysis).toHaveBeenCalled()
     })
 
+    it('reports Pro access as loading until it resolves, but not while a Workspace-level flow picks its Safe', () => {
+      mockUseSafeProAccess.mockReturnValue({ hasProFeatures: false, isLoading: true })
+      const { result } = renderHook(() => useSafeShield(), { wrapper })
+      expect(result.current.isProAccessLoading).toBe(true)
+
+      const pickingWrapper = ({ children }: { children: ReactNode }) => (
+        <SafeScopeContext.Provider value={{ scope: undefined, setScope: jest.fn(), clearScope: jest.fn() }}>
+          {wrapper({ children })}
+        </SafeScopeContext.Provider>
+      )
+      const picking = renderHook(() => useSafeShield(), { wrapper: pickingWrapper })
+      expect(picking.result.current.isProAccessLoading).toBe(false)
+    })
+
     it('locks nothing in a Workspace-level flow until it picks a Safe, then gates on Safe Pro', () => {
       mockUseSafeProAccess.mockReturnValue({ hasProFeatures: false, isLoading: false })
       mockUseThreatAnalysis.mockReturnValue(buildThreatResult(Severity.OK))

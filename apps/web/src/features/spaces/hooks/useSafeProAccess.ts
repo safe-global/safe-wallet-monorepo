@@ -22,7 +22,7 @@ export const useSafeProAccess = (): {
   const spaceId = useCurrentSpaceId()
   const chainId = useChainId()
   const safeAddress = useSafeAddress()
-  const { currentData: spaceSafes, isLoading: isSafesLoading } = useSpaceSafesGetV1Query(
+  const { currentData: spaceSafes, isFetching: isSafesFetching } = useSpaceSafesGetV1Query(
     { spaceId: spaceId ?? '' },
     { skip: !isSafePro || !isSignedIn || !spaceId },
   )
@@ -38,7 +38,8 @@ export const useSafeProAccess = (): {
   return {
     hasProFeatures: isSafeInSpace && isLivePlanStatus(status),
     isSafePro,
-    isLoading: isSafesLoading || isPlanLoading,
+    // `currentData` clears when the Workspace changes, so a refetch without data is still loading.
+    isLoading: (isSafesFetching && !spaceSafes) || isPlanLoading,
     // The Workspace an upgrade would apply to: the current one, and only while it holds this Safe.
     spaceId: isSafeInSpace ? spaceId : null,
   }

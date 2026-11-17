@@ -51,6 +51,8 @@ type SafeShieldContextType = {
   addToTrustedList: () => void
   /** Recipient/counterparty analysis and simulation are Safe Pro features; threat analysis (Blockaid) always runs. */
   hasProFeatures: boolean
+  /** Pro access is still resolving, so neither the Pro checks nor the upgrade prompt can be shown yet. */
+  isProAccessLoading: boolean
   isSafePro: boolean
   isOffchainMessage: boolean
 }
@@ -88,11 +90,12 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
   const [poisoningAddresses, setPoisoningAddresses] = useState<string[] | undefined>(undefined)
   const [safeTx, setSafeTx] = useState<SafeTransaction | undefined>(undefined)
 
-  const { hasProFeatures: hasProAccess, isSafePro } = useSafeProAccess()
+  const { hasProFeatures: hasProAccess, isSafePro, isLoading: isProAccessResolving } = useSafeProAccess()
   const scopeContext = useSafeScopeContext()
   // A Workspace-level flow picks its Safe in step 1; until then nothing can be checked, so nothing is locked.
   const isPickingSafe = scopeContext !== undefined && scopeContext.scope === undefined
   const hasProFeatures = hasProAccess || isPickingSafe
+  const isProAccessLoading = isProAccessResolving && !hasProFeatures
   const recipientOnlyAnalysis = useRecipientAnalysis(hasProFeatures ? recipientAddresses : undefined)
   const counterpartyAnalysis = useCounterpartyAnalysis(safeTx, hasProFeatures)
   const [{ token: hypernativeAuthToken }] = useAuthToken()
@@ -160,6 +163,7 @@ export const SafeShieldProvider = ({ children }: { children: ReactNode }) => {
         safeAnalysis,
         addToTrustedList,
         hasProFeatures,
+        isProAccessLoading,
         isSafePro,
         isOffchainMessage,
       }}
