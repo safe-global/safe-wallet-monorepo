@@ -23,7 +23,7 @@ import { useRouter } from 'next/router'
 import AggregatedBalance from './AggregatedBalances'
 import SafeWidget from '../SafeWidget'
 import SetupWidget from '../SetupWidget'
-import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { useSetupWidgetDismissal } from '../SetupWidget/useSetupWidgetDismissal'
 import CheckoutReturnModals from '../Plans/CheckoutReturnModals'
 import { useWorkspaceLock } from '../../hooks/useWorkspaceLock'
 import { useSpacePlanState } from '../../hooks/useSpacePlanState'
@@ -56,8 +56,7 @@ const SpaceDashboard = () => {
     refetch: refetchPendingTxs,
   } = useSpacePendingTransactions(PENDING_TX_DISPLAY_LIMIT)
   const [setupDismissed, setSetupDismissed] = useState(false)
-  const [dismissedSpaces = {}] = useLocalStorage<Record<string, number>>('setupWidgetDismissed')
-  const isSetupDismissedForSpace = spaceId ? (dismissedSpaces[spaceId] ?? 0) > Date.now() : false
+  const { isDismissed: isSetupDismissedForSpace } = useSetupWidgetDismissal(spaceId)
   useTrackSpace(safes, activeMembers)
   const router = useRouter()
   // The lock modal is mounted by AuthState; the announcement must wait until the lock is known so both never stack.
