@@ -13,7 +13,7 @@ jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   SidebarSeparator: ({ className }: { className?: string }) => <hr className={className} />,
 }))
 
-jest.mock('@/features/spaces/components/Sidebar/variants/NavItem/NavItem', () => ({
+jest.mock('../../NavItem/NavItem', () => ({
   NavItem: ({
     item,
     isLoading,

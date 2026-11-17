@@ -18,8 +18,8 @@ import {
   isInviteExpired,
   MemberStatus,
   getMemberDisplayName,
-} from '@/features/spaces/hooks/useSpaceMembers'
-import { useAdminCount } from '@/features/spaces/hooks/useIsLastActiveAdmin'
+} from '../../public/useSpaceMembers'
+import { useAdminCount } from '../../hooks/useIsLastActiveAdmin'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'

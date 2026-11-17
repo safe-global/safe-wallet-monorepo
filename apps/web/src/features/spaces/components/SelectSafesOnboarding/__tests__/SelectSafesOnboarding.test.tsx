@@ -3,15 +3,15 @@ import SelectSafesOnboarding from '../index'
 import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import useIsSurveyEnabled from '@/hooks/useIsSurveyEnabled'
 
-jest.mock('@/features/spaces/constants', () => ({
-  ...jest.requireActual('@/features/spaces/constants'),
+jest.mock('../../../constants', () => ({
+  ...jest.requireActual('../../../constants'),
   SAFE_ACCOUNTS_LIMIT: 10,
 }))
 
 jest.mock('@/hooks/useIsSurveyEnabled')
 let mockSafeLimit: { limit: number | null | undefined; isError: boolean } = { limit: 10, isError: false }
 const mockRetryLimit = jest.fn()
-jest.mock('../../../hooks/useSpaceSafeLimit', () => ({
+jest.mock('../../../public/useSpaceSafeLimit', () => ({
   useSpaceSafeLimit: () => ({ ...mockSafeLimit, isLoading: false, retry: mockRetryLimit }),
 }))
 const mockedUseIsSurveyEnabled = useIsSurveyEnabled as jest.MockedFunction<typeof useIsSurveyEnabled>
@@ -83,8 +83,8 @@ jest.mock('../hooks/useOnboardingSubmit', () => ({
   },
 }))
 
-jest.mock('@/features/spaces/components/NameAccounts/NameAccountsFields', () => ({
-  ...jest.requireActual('@/features/spaces/components/NameAccounts/NameAccountsFields'),
+jest.mock('../../NameAccounts/NameAccountsFields', () => ({
+  ...jest.requireActual('../../NameAccounts/NameAccountsFields'),
   __esModule: true,
   default: ({ items }: { items: unknown[] }) => <div data-testid="name-accounts-fields" data-count={items.length} />,
 }))

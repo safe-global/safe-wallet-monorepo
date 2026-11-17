@@ -12,7 +12,7 @@ const mockUnwrap = jest.fn()
 const mockUpdateSpace = jest.fn(() => ({ unwrap: mockUnwrap }))
 const mockUseIsAdmin = jest.fn()
 
-jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+jest.mock('../../../public/useSpaceMembers', () => ({
   useIsAdmin: jest.fn(() => mockUseIsAdmin()),
 }))
 

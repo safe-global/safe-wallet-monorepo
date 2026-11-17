@@ -1,7 +1,7 @@
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
-import { useCurrentSpaceId } from '../useCurrentSpaceId'
+import { useCurrentSpaceId } from '../../public/useCurrentSpaceId'
 
 /** The space the billing queries may run for, or null while they must stay skipped (flag off, signed out, no space). */
 export const useBillingSpaceId = (spaceId?: string | null): string | null => {

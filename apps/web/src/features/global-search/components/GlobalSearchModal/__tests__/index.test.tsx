@@ -12,13 +12,13 @@ jest.mock('@/features/swap/public/useIsSwapFeatureEnabled', () => ({
   default: () => mockUseIsSwapFeatureEnabled(),
 }))
 
-jest.mock('@/features/spaces/hooks/useSpaceSafes', () => ({
+jest.mock('@/features/spaces/public/useSpaceSafes', () => ({
   useSpaceSafes: () => ({ allSafes: [], isLoading: false }),
 }))
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('@/features/spaces/public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => null,
 }))
-jest.mock('@/features/spaces/hooks/useIsQualifiedSafe', () => ({
+jest.mock('@/features/spaces/public/useIsQualifiedSafe', () => ({
   __esModule: true,
   default: () => false,
 }))

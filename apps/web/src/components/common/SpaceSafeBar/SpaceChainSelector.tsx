@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import ChainSelectorBlock from '@/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock'
+import ChainSelectorBlock from '@/features/spaces/public/ChainSelectorBlock'
 import CreateSafeOnNewChain from '@/features/multichain/public/CreateSafeOnNewChain'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'
 import { useIsSafeBarControlDisabled } from '@/hooks/useIsSafeBarControlDisabled'

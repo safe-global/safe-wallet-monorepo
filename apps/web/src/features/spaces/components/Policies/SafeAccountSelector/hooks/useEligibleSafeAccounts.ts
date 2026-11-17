@@ -9,9 +9,9 @@ import { useAppSelector } from '@/store'
 import { useGetMultipleSafeOverviewsQuery, useGetProposerSafesQuery } from '@/store/api/gateway'
 import { selectUndeployedSafes } from '@/features/counterfactual/public/undeployedSafesSlice'
 import { selectCurrency } from '@/store/settingsSlice'
-import { useSpaceSafes } from '../../../../hooks/useSpaceSafes'
+import { useSpaceSafes } from '../../../../public/useSpaceSafes'
 import { buildSafeAccountId, groupSafeAccounts } from '../utils'
-import type { ChainInfo } from '@/features/spaces/types'
+import type { ChainInfo } from '../../../../public/types'
 import type {
   SafeAccountEligibility,
   SafeAccountEntry,

@@ -6,8 +6,8 @@ import { withMockProvider } from '@/storybook/decorators'
 import { PROPOSER_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/ProposerIntroDialog/constants'
 import { SPENDING_LIMIT_INTRO_SEEN_KEY } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitIntroDialog/constants'
 import { mockStarterPlan } from './mocks/plan'
-import { mockPolicies } from './mocks/policies'
-import { mockCgwAllowlist, mockFullySignedPendingAllowlist, mockPendingAllowlist } from './mocks/allowlistPolicies'
+import { mockPolicies } from '../../public/policies'
+import { mockCgwAllowlist, mockFullySignedPendingAllowlist, mockPendingAllowlist } from '../../public/allowlistPolicies'
 import Policies from './index'
 
 const meta = {

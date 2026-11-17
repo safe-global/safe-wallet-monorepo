@@ -55,7 +55,7 @@ jest.mock('@safe-global/utils/services/exceptions/ErrorCodes', () => ({
   default: { _640: '_640' },
 }))
 
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('../../public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '42',
 }))
 

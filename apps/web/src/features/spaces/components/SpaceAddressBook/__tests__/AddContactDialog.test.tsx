@@ -17,7 +17,7 @@ jest.mock('@/store/notificationsSlice', () => ({
 
 jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))
 
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('../../../public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '42',
 }))
 

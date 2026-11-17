@@ -3,7 +3,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import SpendingLimitsSettings from './index'
 
 const mockUsePlanGate = jest.fn()
-jest.mock('@/features/spaces/hooks/usePlanGate', () => ({
+jest.mock('@/features/spaces/public/usePlanGate', () => ({
   usePlanGate: (...args: unknown[]) => mockUsePlanGate(...args),
 }))
 jest.mock('@/hooks/useChains', () => ({

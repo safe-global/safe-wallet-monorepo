@@ -14,7 +14,7 @@ import { ADDRESS_POISONING_EVENTS } from '@/services/analytics/events/addressPoi
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import type { RootState } from '@/store'
 import EntryDialog from './index'
-import { useUpsertWorkspaceSafeName } from '@/features/spaces/hooks/useUpsertWorkspaceSafeName'
+import { useUpsertWorkspaceSafeName } from '@/features/spaces/public/useUpsertWorkspaceSafeName'
 import * as addressBookSlice from '@/store/addressBookSlice'
 import { getStoreInstance } from '@/store'
 import { chainBuilder } from '@/tests/builders/chains'
@@ -47,11 +47,11 @@ jest.mock('@/components/common/AddressInput/useNameResolver', () => ({
   }),
 }))
 
-jest.mock('@/features/spaces/hooks/useUpsertWorkspaceSafeName', () => ({
+jest.mock('@/features/spaces/public/useUpsertWorkspaceSafeName', () => ({
   useUpsertWorkspaceSafeName: jest.fn(),
 }))
 
-jest.mock('@/features/spaces/hooks/useWorkspaceAddressBookLabel', () => ({
+jest.mock('@/features/spaces/public/useWorkspaceAddressBookLabel', () => ({
   useWorkspaceAddressBookLabel: () => 'Acme address book',
 }))
 

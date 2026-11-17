@@ -51,7 +51,7 @@ jest.mock('../LocalContactActions', () => {
 })
 
 const mockResolveMemberName = jest.fn()
-jest.mock('../../../hooks/useMemberNameResolver', () => ({
+jest.mock('../../../public/useMemberNameResolver', () => ({
   useMemberNameResolver: () => mockResolveMemberName,
 }))
 

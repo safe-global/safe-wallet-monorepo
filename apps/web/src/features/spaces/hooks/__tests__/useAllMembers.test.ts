@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import { useSpaceMembersByStatus, useCurrentMembership } from '../useSpaceMembers'
+import { useSpaceMembersByStatus, useCurrentMembership } from '../../public/useSpaceMembers'
 import { SPACE_REFRESH_OPTIONS } from '../refreshOptions'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 const MOCK_SPACE_UUID_ALT = '22222222-2222-2222-2222-222222222222'
@@ -8,7 +8,7 @@ const mockUseCurrentSpaceId = jest.fn()
 const mockUseMembersGetUsersV1Query = jest.fn()
 let mockIsAuthenticated = true
 
-jest.mock('../useCurrentSpaceId', () => ({
+jest.mock('../../public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
 }))
 

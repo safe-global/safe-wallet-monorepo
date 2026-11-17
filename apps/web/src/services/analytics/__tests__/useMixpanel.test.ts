@@ -9,7 +9,7 @@ import * as useIsSpaceRouteHook from '@/hooks/useIsSpaceRoute'
 import * as useMixpanelUserPropertiesHook from '../useMixpanelUserProperties'
 import * as useChainHook from '@/hooks/useChains'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
-import * as useCurrentSpaceIdHook from '@/features/spaces/hooks/useCurrentSpaceId'
+import * as useCurrentSpaceIdHook from '@/features/spaces/public/useCurrentSpaceId'
 import { CookieAndTermType, cookiesAndTermsSlice, cookiesAndTermsInitialState } from '@/store/cookiesAndTermsSlice'
 import { DeviceType } from '../types'
 import { MixpanelUserProperty } from '../mixpanel-events'
@@ -58,14 +58,14 @@ jest.mock('@/hooks/useSafeInfo', () => ({
   default: jest.fn(),
 }))
 
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('@/features/spaces/public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(),
 }))
 
 const mockUseSpacePlanState = jest.fn<{ status: string; tier: string; role: string } | null, [string | null]>(
   () => null,
 )
-jest.mock('@/features/spaces/hooks/useSpacePlanState', () => ({
+jest.mock('@/features/spaces/public/useSpacePlanState', () => ({
   useSpacePlanState: (id: string | null) => mockUseSpacePlanState(id),
 }))
 

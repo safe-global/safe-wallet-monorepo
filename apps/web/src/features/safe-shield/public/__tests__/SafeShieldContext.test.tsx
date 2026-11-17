@@ -31,7 +31,7 @@ jest.mock('../../hooks/useRecipientAnalysisWithPoisoning', () => ({
 }))
 
 const mockUseSafeProAccess = jest.fn(() => ({ hasProFeatures: true, isLoading: false }))
-jest.mock('@/features/spaces/hooks/useSafeProAccess', () => ({
+jest.mock('@/features/spaces/public/useSafeProAccess', () => ({
   useSafeProAccess: () => mockUseSafeProAccess(),
 }))
 // Mock new dependencies for untrusted Safe check

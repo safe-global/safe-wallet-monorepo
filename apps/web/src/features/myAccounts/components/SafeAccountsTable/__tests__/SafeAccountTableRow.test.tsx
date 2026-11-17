@@ -1,7 +1,7 @@
 import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd'
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import SafeAccountTableRow, { type RowCheckbox } from '../SafeAccountTableRow'
-import { useAddressBookWriteScope } from '@/features/spaces/hooks/useAddressBookWriteScope'
+import { useAddressBookWriteScope } from '@/features/spaces/public/useAddressBookWriteScope'
 import {
   SELECT_COLUMN,
   type SafeAccountColumn,
@@ -34,7 +34,7 @@ jest.mock('@/components/common/SafeListContextMenu/MultiAccountContextMenu', () 
 }))
 // Mock the module, not the barrel: the re-export picks this up while the rest of `@/features/spaces`
 // stays real. Import stays on the barrel — the deep path is a lint-restricted import from here.
-jest.mock('@/features/spaces/hooks/useAddressBookWriteScope', () => ({ useAddressBookWriteScope: jest.fn() }))
+jest.mock('@/features/spaces/public/useAddressBookWriteScope', () => ({ useAddressBookWriteScope: jest.fn() }))
 jest.mock('@/hooks/useChains', () => ({
   useChain: () => ({
     chainId: '1',

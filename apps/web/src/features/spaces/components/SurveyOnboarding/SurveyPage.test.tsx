@@ -27,15 +27,9 @@ jest.mock('@/config/routes', () => ({
   },
 }))
 
-jest.mock('@/features/__core__/useLoadFeature', () => ({
-  ...jest.requireActual('@/features/__core__/useLoadFeature'),
-  useLoadFeature: () => ({
-    SurveyOnboarding: () => <div data-testid="survey-onboarding" />,
-  }),
-}))
-
-jest.mock('@/features/spaces/SpacesFeature', () => ({
-  SpacesFeature: { name: 'spaces' },
+jest.mock('@/features/spaces/public/SurveyOnboarding', () => ({
+  __esModule: true,
+  default: () => <div data-testid="survey-onboarding" />,
 }))
 
 describe('SurveyPage (chains-config flag gate)', () => {

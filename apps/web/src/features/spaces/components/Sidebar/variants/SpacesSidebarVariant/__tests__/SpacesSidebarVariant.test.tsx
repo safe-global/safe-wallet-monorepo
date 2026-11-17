@@ -8,7 +8,7 @@ import type {
   SpaceItem,
 } from '@safe-global/views/features/spaces/components/Sidebar/types'
 
-jest.mock('@/features/spaces/components/Sidebar/variants/SidebarDeveloperGroup/SidebarDeveloperGroup', () => ({
+jest.mock('../../SidebarDeveloperGroup/SidebarDeveloperGroup', () => ({
   SidebarDeveloperGroup: ({ isLoading }: { isLoading?: boolean }) => (
     <div data-testid="developer-group" data-loading={isLoading}>
       Developer group
@@ -60,16 +60,12 @@ jest.mock('next/link', () => {
   return Link
 })
 
-jest.mock('@/features/spaces/components/Sidebar/variants/SpaceSelectorDropdown/SpaceSelectorDropdown', () => ({
+jest.mock('../../SpaceSelectorDropdown/SpaceSelectorDropdown', () => ({
   get SAFE_ALREADY_IN_WORKSPACE_TOOLTIP() {
-    return jest.requireActual(
-      '@/features/spaces/components/Sidebar/variants/SpaceSelectorDropdown/SpaceSelectorDropdown',
-    ).SAFE_ALREADY_IN_WORKSPACE_TOOLTIP
+    return jest.requireActual('../../SpaceSelectorDropdown/SpaceSelectorDropdown').SAFE_ALREADY_IN_WORKSPACE_TOOLTIP
   },
   get NO_PLAN_TOOLTIP() {
-    return jest.requireActual(
-      '@/features/spaces/components/Sidebar/variants/SpaceSelectorDropdown/SpaceSelectorDropdown',
-    ).NO_PLAN_TOOLTIP
+    return jest.requireActual('../../SpaceSelectorDropdown/SpaceSelectorDropdown').NO_PLAN_TOOLTIP
   },
   SpaceSelectorDropdown: ({ selectedSpace, spaces }: { selectedSpace?: SpaceItem; spaces?: SpaceItem[] }) => (
     <div>

@@ -46,30 +46,30 @@ jest.mock('@/components/common/Track', () => ({
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 
-jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+jest.mock('../../public/useSpaceMembers', () => ({
   get MemberRole() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MemberRole
+    return jest.requireActual('../../public/useSpaceMembers').MemberRole
   },
   get MEMBER_ALIAS_MAX_LENGTH() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+    return jest.requireActual('../../public/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
   },
   get sanitizeMemberAlias() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').sanitizeMemberAlias
+    return jest.requireActual('../../public/useSpaceMembers').sanitizeMemberAlias
   },
   get useSpaceMembersByStatus() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useSpaceMembersByStatus
+    return jest.requireActual('../../public/useSpaceMembers').useSpaceMembersByStatus
   },
   get useCurrentMembership() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useCurrentMembership
+    return jest.requireActual('../../public/useSpaceMembers').useCurrentMembership
   },
   get useCurrentMemberProfile() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useCurrentMemberProfile
+    return jest.requireActual('../../public/useSpaceMembers').useCurrentMemberProfile
   },
   get useIsActiveMember() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useIsActiveMember
+    return jest.requireActual('../../public/useSpaceMembers').useIsActiveMember
   },
   get useIsInvited() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useIsInvited
+    return jest.requireActual('../../public/useSpaceMembers').useIsInvited
   },
   useIsAdmin: () => true,
   getMemberDisplayName: (member: { alias?: string | null; name: string }) => member.alias || member.name,
@@ -85,8 +85,8 @@ jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
     DECLINED: 'DECLINED',
   },
 }))
-jest.mock('@/features/spaces/hooks/useIsLastActiveAdmin', () => ({
-  ...jest.requireActual('@/features/spaces/hooks/useIsLastActiveAdmin'),
+jest.mock('../../hooks/useIsLastActiveAdmin', () => ({
+  ...jest.requireActual('../../hooks/useIsLastActiveAdmin'),
   useAdminCount: () => 2,
 }))
 

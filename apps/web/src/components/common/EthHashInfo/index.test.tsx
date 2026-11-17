@@ -19,16 +19,6 @@ jest.mock('@/hooks/useAllAddressBooks')
 jest.mock('@/hooks/useChainId')
 jest.mock('@/hooks/useChains')
 jest.mock('@/hooks/useDarkMode')
-jest.mock('@/features/__core__/useLoadFeature', () => ({
-  ...jest.requireActual('@/features/__core__/useLoadFeature'),
-  useLoadFeature: jest.fn(() => ({
-    $isReady: true,
-    $isDisabled: false,
-    HypernativeTooltip: ({ children }: { children: React.ReactNode }) => (
-      <span style={{ display: 'flex' }}>{children}</span>
-    ),
-  })),
-}))
 
 describe('EthHashInfo', () => {
   beforeEach(() => {

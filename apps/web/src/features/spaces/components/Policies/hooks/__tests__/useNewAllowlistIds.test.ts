@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react'
 import type { Policy } from '@safe-global/views/features/spaces/components/Policies/types'
-import { asActivePolicy, mockSpendingLimitPolicy } from '../../mocks/policies'
-import { mockActiveAllowlist, mockUnenforcedAllowlist } from '../../mocks/allowlistPolicies'
+import { asActivePolicy, mockSpendingLimitPolicy } from '../../../../public/policies'
+import { mockActiveAllowlist, mockUnenforcedAllowlist } from '../../../../public/allowlistPolicies'
 import { useNewAllowlistIds } from '../useNewAllowlistIds'
 
 type Props = { policies: Policy[]; isSettled: boolean }

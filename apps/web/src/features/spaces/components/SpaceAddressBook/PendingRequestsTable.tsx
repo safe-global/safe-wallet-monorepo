@@ -14,9 +14,9 @@ import {
   useAddressBookRequestsApproveRequestV1Mutation,
   useAddressBookRequestsRejectRequestV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
-import useGetSpaceAddressBook from '@/features/spaces/hooks/useGetSpaceAddressBook'
-import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { useCurrentSpaceId } from '../../public/useCurrentSpaceId'
+import useGetSpaceAddressBook from '../../public/useGetSpaceAddressBook'
+import { useIsAdmin } from '../../public/useSpaceMembers'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'

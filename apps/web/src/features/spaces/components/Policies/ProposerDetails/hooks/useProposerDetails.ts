@@ -1,5 +1,5 @@
 import { ProposerStatus } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/variants/types'
-import type { ProposerDrawerContentProps } from '@/features/spaces/components/Policies/ProposerDrawer/ProposerDrawer'
+import type { ProposerDrawerContentProps } from '../../ProposerDrawer/ProposerDrawer'
 import type { ProposerPolicy } from '@safe-global/views/features/spaces/components/Policies/types'
 import { useActiveProposer } from './useActiveProposer'
 import type { ProposerDetailsArgs } from '@safe-global/views/features/spaces/components/Policies/ProposerDetails/hooks/types'

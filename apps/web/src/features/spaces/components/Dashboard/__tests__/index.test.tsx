@@ -2,11 +2,10 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
-import { useSpaceMembersByStatus, useIsInvited } from '@/features/spaces/hooks/useSpaceMembers'
-import { useSpacePendingTransactions } from '@/features/spaces/hooks/useSpacePendingTransactions'
+import { useCurrentSpaceId } from '../../../public/useCurrentSpaceId'
+import { useSpaceSafes } from '../../../public/useSpaceSafes'
+import { useSpaceMembersByStatus, useIsInvited } from '../../../public/useSpaceMembers'
+import { useSpacePendingTransactions } from '../../../hooks/useSpacePendingTransactions'
 import useSpaceAccountsData from '@/features/myAccounts/public/useSpaceAccountsData'
 import SpaceDashboard from '../index'
 
@@ -55,66 +54,83 @@ jest.mock('@/services/analytics/mixpanel-events', () => ({
   },
 }))
 
-jest.mock('@/features/spaces/hooks/useSpaceSafes', () => ({
+jest.mock('../../../public/useSpaceSafes', () => ({
   useSpaceSafes: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('../../../public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+jest.mock('../../../public/useSpaceMembers', () => ({
   get MemberStatus() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MemberStatus
+    return jest.requireActual('../../../public/useSpaceMembers').MemberStatus
   },
   get MemberRole() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MemberRole
+    return jest.requireActual('../../../public/useSpaceMembers').MemberRole
   },
   get MEMBER_ALIAS_MAX_LENGTH() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+    return jest.requireActual('../../../public/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
   },
   get getMemberDisplayName() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').getMemberDisplayName
+    return jest.requireActual('../../../public/useSpaceMembers').getMemberDisplayName
   },
   get sanitizeMemberAlias() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').sanitizeMemberAlias
+    return jest.requireActual('../../../public/useSpaceMembers').sanitizeMemberAlias
   },
   get isAdmin() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isAdmin
+    return jest.requireActual('../../../public/useSpaceMembers').isAdmin
   },
   get isActiveAdmin() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isActiveAdmin
+    return jest.requireActual('../../../public/useSpaceMembers').isActiveAdmin
   },
   get isInviteExpired() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isInviteExpired
+    return jest.requireActual('../../../public/useSpaceMembers').isInviteExpired
   },
   get useCurrentMembership() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useCurrentMembership
+    return jest.requireActual('../../../public/useSpaceMembers').useCurrentMembership
   },
   get useCurrentMemberProfile() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useCurrentMemberProfile
+    return jest.requireActual('../../../public/useSpaceMembers').useCurrentMemberProfile
   },
   get useIsActiveMember() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useIsActiveMember
+    return jest.requireActual('../../../public/useSpaceMembers').useIsActiveMember
   },
   get useIsAdmin() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useIsAdmin
+    return jest.requireActual('../../../public/useSpaceMembers').useIsAdmin
   },
   useSpaceMembersByStatus: jest.fn(),
   useIsInvited: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useTrackSpace', () => ({
+jest.mock('../../../hooks/useTrackSpace', () => ({
   __esModule: true,
   default: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useSpacePendingTransactions', () => ({
+jest.mock('../../../hooks/useSpacePendingTransactions', () => ({
   useSpacePendingTransactions: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
-  ...jest.requireActual('@/features/spaces/hooks/useGetSpaceAddressBook'),
+jest.mock('../../../public/useGetSpaceAddressBook', () => ({
+  ...jest.requireActual('../../../public/useGetSpaceAddressBook'),
   __esModule: true,
   default: jest.fn(() => []),
 }))
-jest.mock('@/features/spaces/SpacesFeature', () => ({
-  SpacesFeature: { name: 'spaces' },
+// The dashboard loads the widget with dynamic(), which keeps the first loaded component, so the stub
+// reads its rows from a variable each test sets.
+let mockPendingTxEntries: Array<{ safeAddress: string; txId: string }> = []
+jest.mock('../PendingTxWidget', () => ({
+  __esModule: true,
+  default: ({ onItemClick }: { onItemClick?: (safeAddress: string, txId: string) => void }) => (
+    <>
+      {mockPendingTxEntries.map(({ safeAddress, txId }) => (
+        <div
+          key={txId}
+          data-testid={`pending-tx-row-${txId}`}
+          role="button"
+          onClick={() => onItemClick?.(safeAddress, txId)}
+        >
+          Pending Tx {txId}
+        </div>
+      ))}
+    </>
+  ),
 }))
 
 jest.mock('@/features/myAccounts/public/AccountsWidget', () => ({
@@ -124,11 +140,6 @@ jest.mock('@/features/myAccounts/public/AccountsWidget', () => ({
 jest.mock('@/features/myAccounts/public/useSpaceAccountsData', () => ({
   __esModule: true,
   default: jest.fn(() => ({ accounts: [], isLoading: false, error: null, refetch: jest.fn() })),
-}))
-
-jest.mock('@/features/__core__/useLoadFeature', () => ({
-  ...jest.requireActual('@/features/__core__/useLoadFeature'),
-  useLoadFeature: jest.fn(),
 }))
 
 const mockUseSafeProAnnouncementModal = jest.fn()
@@ -149,7 +160,7 @@ const mockUseWorkspaceLock = jest.fn()
 const mockUseCheckoutReturn = jest.fn()
 const mockUseSpacePlanState = jest.fn()
 jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockUseSpacePlan() }))
-jest.mock('../../../hooks/useSpacePlanState', () => ({ useSpacePlanState: () => mockUseSpacePlanState() }))
+jest.mock('../../../public/useSpacePlanState', () => ({ useSpacePlanState: () => mockUseSpacePlanState() }))
 jest.mock('../../../hooks/useWorkspaceLock', () => ({ useWorkspaceLock: () => mockUseWorkspaceLock() }))
 jest.mock('../../../hooks/billing/useCheckoutReturn', () => ({ useCheckoutReturn: () => mockUseCheckoutReturn() }))
 jest.mock('../../Plans/CheckoutReturnModals', () => ({ __esModule: true, default: () => null }))
@@ -170,7 +181,7 @@ jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
 jest.mock('../AddAccountsCard', () => () => null)
 jest.mock('../AggregatedBalances', () => () => null)
 jest.mock('../../InviteBanner/PreviewInvite', () => () => null)
-jest.mock('@/features/spaces/components/AddAccounts', () => () => null)
+jest.mock('../../AddAccounts', () => () => null)
 jest.mock('../../SetupWidget', () => () => null)
 jest.mock('@/components/common/Track', () => {
   const Track = ({ children }: { children: React.ReactNode }) => <>{children}</>
@@ -180,31 +191,8 @@ jest.mock('@/components/common/Track', () => {
 
 // ---- Helpers ----
 
-/** A minimal PendingTxWidget stub that exposes one clickable row per tx entry */
-const makeMockPendingTxWidget = (txEntries: Array<{ safeAddress: string; txId: string }>) => {
-  const MockPendingTxWidget = ({ onItemClick }: { onItemClick?: (safeAddress: string, txId: string) => void }) => (
-    <>
-      {txEntries.map(({ safeAddress, txId }) => (
-        <div
-          key={txId}
-          data-testid={`pending-tx-row-${txId}`}
-          role="button"
-          onClick={() => onItemClick?.(safeAddress, txId)}
-        >
-          Pending Tx {txId}
-        </div>
-      ))}
-    </>
-  )
-  MockPendingTxWidget.displayName = 'MockPendingTxWidget'
-  return MockPendingTxWidget
-}
-
-function setupUseLoadFeature(txEntries: Array<{ safeAddress: string; txId: string }> = []) {
-  ;(useLoadFeature as jest.Mock).mockReturnValue({
-    PendingTxWidget: makeMockPendingTxWidget(txEntries),
-    $isReady: true,
-  })
+const setPendingTxEntries = (txEntries: Array<{ safeAddress: string; txId: string }> = []) => {
+  mockPendingTxEntries = txEntries
 }
 
 const getCallsForEvent = (action: string) =>
@@ -244,7 +232,7 @@ describe('SpaceDashboard – WORKSPACE_DASHBOARD_VIEWED tracking', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     restoreDefaultMocks()
-    setupUseLoadFeature()
+    setPendingTxEntries()
   })
 
   it('fires WORKSPACE_DASHBOARD_VIEWED once on mount', () => {
@@ -338,35 +326,37 @@ describe('SpaceDashboard – PENDING_TX_WIDGET_CLICKED tracking', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     restoreDefaultMocks()
-    setupUseLoadFeature([{ safeAddress: MOCK_SAFE_ADDRESS, txId: MOCK_TX_ID }])
+    setPendingTxEntries([{ safeAddress: MOCK_SAFE_ADDRESS, txId: MOCK_TX_ID }])
   })
 
-  it('fires PENDING_TX_WIDGET_CLICKED exactly once when a pending tx row is clicked', () => {
+  it('fires PENDING_TX_WIDGET_CLICKED exactly once when a pending tx row is clicked', async () => {
     render(<SpaceDashboard />)
-    fireEvent.click(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`))
+    fireEvent.click(await screen.findByTestId(`pending-tx-row-${MOCK_TX_ID}`))
 
     const calls = getCallsForEvent(SPACE_EVENTS.PENDING_TX_WIDGET_CLICKED.action)
     expect(calls).toHaveLength(1)
   })
 
-  it('does not fire PENDING_TX_WIDGET_CLICKED before any row is clicked', () => {
+  it('does not fire PENDING_TX_WIDGET_CLICKED before any row is clicked', async () => {
     render(<SpaceDashboard />)
+    await screen.findByTestId(`pending-tx-row-${MOCK_TX_ID}`)
 
     const calls = getCallsForEvent(SPACE_EVENTS.PENDING_TX_WIDGET_CLICKED.action)
     expect(calls).toHaveLength(0)
   })
 
-  it('does not fire PENDING_TX_WIDGET_CLICKED on re-renders without a click', () => {
+  it('does not fire PENDING_TX_WIDGET_CLICKED on re-renders without a click', async () => {
     const { rerender } = render(<SpaceDashboard />)
+    await screen.findByTestId(`pending-tx-row-${MOCK_TX_ID}`)
     rerender(<SpaceDashboard />)
 
     const calls = getCallsForEvent(SPACE_EVENTS.PENDING_TX_WIDGET_CLICKED.action)
     expect(calls).toHaveLength(0)
   })
 
-  it('fires PENDING_TX_WIDGET_CLICKED with the correct GA parameters (event action + spaceId as label)', () => {
+  it('fires PENDING_TX_WIDGET_CLICKED with the correct GA parameters (event action + spaceId as label)', async () => {
     render(<SpaceDashboard />)
-    fireEvent.click(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`))
+    fireEvent.click(await screen.findByTestId(`pending-tx-row-${MOCK_TX_ID}`))
 
     expect(trackEvent).toHaveBeenCalledWith(
       { ...SPACE_EVENTS.PENDING_TX_WIDGET_CLICKED, label: MOCK_SPACE_ID },
@@ -374,9 +364,9 @@ describe('SpaceDashboard – PENDING_TX_WIDGET_CLICKED tracking', () => {
     )
   })
 
-  it('fires PENDING_TX_WIDGET_CLICKED with the correct Mixpanel parameters (spaceId, safeAddress, txId)', () => {
+  it('fires PENDING_TX_WIDGET_CLICKED with the correct Mixpanel parameters (spaceId, safeAddress, txId)', async () => {
     render(<SpaceDashboard />)
-    fireEvent.click(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`))
+    fireEvent.click(await screen.findByTestId(`pending-tx-row-${MOCK_TX_ID}`))
 
     expect(trackEvent).toHaveBeenCalledWith(expect.anything(), {
       spaceId: MOCK_SPACE_ID,
@@ -385,9 +375,9 @@ describe('SpaceDashboard – PENDING_TX_WIDGET_CLICKED tracking', () => {
     })
   })
 
-  it('fires PENDING_TX_WIDGET_CLICKED with full correct signature – GA label + Mixpanel params', () => {
+  it('fires PENDING_TX_WIDGET_CLICKED with full correct signature – GA label + Mixpanel params', async () => {
     render(<SpaceDashboard />)
-    fireEvent.click(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`))
+    fireEvent.click(await screen.findByTestId(`pending-tx-row-${MOCK_TX_ID}`))
 
     expect(trackEvent).toHaveBeenCalledWith(
       { ...SPACE_EVENTS.PENDING_TX_WIDGET_CLICKED, label: MOCK_SPACE_ID },
@@ -399,18 +389,18 @@ describe('SpaceDashboard – PENDING_TX_WIDGET_CLICKED tracking', () => {
     )
   })
 
-  it('fires a separate event for each distinct row clicked, with correct per-row params', () => {
+  it('fires a separate event for each distinct row clicked, with correct per-row params', async () => {
     const secondTxId = 'multisig_0xcccc_456'
     const secondSafeAddress = '0xdddd567890abcdef1234567890abcdef12345678'
-    setupUseLoadFeature([
+    setPendingTxEntries([
       { safeAddress: MOCK_SAFE_ADDRESS, txId: MOCK_TX_ID },
       { safeAddress: secondSafeAddress, txId: secondTxId },
     ])
 
     render(<SpaceDashboard />)
 
-    fireEvent.click(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`))
-    fireEvent.click(screen.getByTestId(`pending-tx-row-${secondTxId}`))
+    fireEvent.click(await screen.findByTestId(`pending-tx-row-${MOCK_TX_ID}`))
+    fireEvent.click(await screen.findByTestId(`pending-tx-row-${secondTxId}`))
 
     const calls = getCallsForEvent(SPACE_EVENTS.PENDING_TX_WIDGET_CLICKED.action)
     expect(calls).toHaveLength(2)
@@ -437,7 +427,7 @@ describe('SpaceDashboard – Safe Pro announcement', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     restoreDefaultMocks()
-    setupUseLoadFeature()
+    setPendingTxEntries()
   })
 
   it('does not show the announcement while the hook keeps it closed', () => {
@@ -475,14 +465,14 @@ describe('SpaceDashboard – locked Workspace (SAFE_PRO)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     restoreDefaultMocks()
-    setupUseLoadFeature([{ safeAddress: MOCK_SAFE_ADDRESS, txId: MOCK_TX_ID }])
+    setPendingTxEntries([{ safeAddress: MOCK_SAFE_ADDRESS, txId: MOCK_TX_ID }])
     mockUseWorkspaceLock.mockReturnValue({ isLocked: true, isResolving: false, trialPeriodDays: 60 })
   })
 
-  it('keeps rendering the dashboard under the lock modal and silences the announcement', () => {
+  it('keeps rendering the dashboard under the lock modal and silences the announcement', async () => {
     render(<SpaceDashboard />)
 
-    expect(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`)).toBeInTheDocument()
+    expect(await screen.findByTestId(`pending-tx-row-${MOCK_TX_ID}`)).toBeInTheDocument()
     expect(mockUseSafeProAnnouncementModal).toHaveBeenCalledWith(false)
   })
 
@@ -494,12 +484,12 @@ describe('SpaceDashboard – locked Workspace (SAFE_PRO)', () => {
     expect(mockUseSafeProAnnouncementModal).toHaveBeenCalledWith(true)
   })
 
-  it('holds the announcement back while the lock is still resolving', () => {
+  it('holds the announcement back while the lock is still resolving', async () => {
     mockUseWorkspaceLock.mockReturnValue({ isLocked: false, isResolving: true, trialPeriodDays: null })
 
     render(<SpaceDashboard />)
 
-    expect(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`)).toBeInTheDocument()
+    expect(await screen.findByTestId(`pending-tx-row-${MOCK_TX_ID}`)).toBeInTheDocument()
     expect(mockUseSafeProAnnouncementModal).toHaveBeenCalledWith(false)
   })
 })

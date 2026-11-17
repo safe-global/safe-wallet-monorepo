@@ -9,7 +9,7 @@ import { _getSimulationIcon, _getSimulationStatusText, _isSimulationSuccessful, 
 const mockUseSafeProAccess = jest.fn()
 const mockSimulateTransaction = jest.fn()
 let mockSimulationRequestStatus: FETCH_STATUS = FETCH_STATUS.NOT_ASKED
-jest.mock('@/features/spaces/hooks/useSafeProAccess', () => ({
+jest.mock('@/features/spaces/public/useSafeProAccess', () => ({
   useSafeProAccess: () => mockUseSafeProAccess(),
 }))
 jest.mock('@safe-global/utils/components/tx/security/tenderly/utils', () => ({

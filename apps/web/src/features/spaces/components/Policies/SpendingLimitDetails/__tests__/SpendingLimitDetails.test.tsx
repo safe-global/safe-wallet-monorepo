@@ -10,7 +10,7 @@ import { act, mockClipboard, render, renderWithUserEvent, screen, waitFor } from
 import { chainBuilder } from '@/tests/builders/chains'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
 import { mockWallet } from '@/tests/mocks/hooks'
-import { useSpaceSafes } from '../../../../hooks/useSpaceSafes'
+import { useSpaceSafes } from '../../../../public/useSpaceSafes'
 import {
   asActivePolicy,
   mockActiveSpendingLimit,
@@ -19,14 +19,14 @@ import {
   mockPendingPolicy,
   mockPendingRemoval,
   mockPendingUpdate,
-} from '../../mocks/policies'
+} from '../../../../public/policies'
 import type { PendingSpendingLimitPolicy } from '@safe-global/views/features/spaces/components/Policies/types'
 import { getPendingTxId } from '../../utils/mapPendingPolicies'
 import { usePendingPolicyTransaction, type PendingPolicyTransaction } from '../hooks/usePendingPolicyTransaction'
 import SpendingLimitDetails from '..'
 
 jest.mock('@/hooks/wallets/useWallet')
-jest.mock('../../../../hooks/useSpaceSafes')
+jest.mock('../../../../public/useSpaceSafes')
 jest.mock('../hooks/usePendingPolicyTransaction')
 jest.mock('@/components/common/ConnectWallet/useConnectWallet')
 jest.mock('@/hooks/useChains', () => ({

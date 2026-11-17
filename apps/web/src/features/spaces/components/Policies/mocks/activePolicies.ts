@@ -3,7 +3,7 @@ import type {
   Erc20TokenMetadataDto,
   GuardSlotsDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS } from './policies'
+import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS } from '../../../public/policies'
 
 /** Shaped like the CGW `policies/active` response. */
 

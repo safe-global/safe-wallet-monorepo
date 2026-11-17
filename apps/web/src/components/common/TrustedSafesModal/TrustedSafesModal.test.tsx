@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@/tests/test-utils'
 import TrustedSafesModal from './index'
 import type { UseTrustedSafesModalReturn } from './useTrustedSafesModal'
 import { useRouter } from 'next/router'
-import useIsQualifiedSafe from '@/features/spaces/hooks/useIsQualifiedSafe'
+import useIsQualifiedSafe from '@/features/spaces/public/useIsQualifiedSafe'
 import { OrderByOption, ORDER_BY_RESET_VERSION, TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
 import { getStoreInstance } from '@/store'
 
@@ -10,7 +10,7 @@ jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
-jest.mock('@/features/spaces/hooks/useIsQualifiedSafe', () => ({
+jest.mock('@/features/spaces/public/useIsQualifiedSafe', () => ({
   __esModule: true,
   default: jest.fn(() => false),
 }))

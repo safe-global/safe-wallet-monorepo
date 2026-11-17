@@ -5,7 +5,7 @@ import type { MultiChainSafeItem } from '@/hooks/safes/useAllSafesGrouped'
 
 // ── mocks ──────────────────────────────────────────────────────────────
 
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('@/features/spaces/public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(() => '42'),
 }))
 
@@ -54,7 +54,7 @@ jest.mock('@/config/routes', () => ({
   AppRoutes: { home: '/home' },
 }))
 
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '@/features/spaces/public/useCurrentSpaceId'
 import { useSafeBarSafes } from '../useSafeBarSafes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'

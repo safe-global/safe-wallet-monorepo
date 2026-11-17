@@ -2,8 +2,6 @@ import type { SafeListProps } from '../SafesList'
 import { AccountItem } from '../../public/AccountItem'
 import { useSafeItemData } from '../../public/useSafeItemData'
 import { useMultiAccountItemData } from '../../public/useMultiAccountItemData'
-import { SpacesFeature } from '@/features/spaces/SpacesFeature'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useState } from 'react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
@@ -18,6 +16,7 @@ import { AddNetworkButton } from '../AddNetworkButton'
 import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 import { getOwnerAwaitingConfirmations } from '@/utils/transaction-guards'
+import SpaceSafeContextMenu from '@/features/spaces/public/SpaceSafeContextMenu'
 
 function MultiChainSubItem({
   safeItem,
@@ -91,7 +90,6 @@ type MultiAccountItemProps = {
 }
 
 const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = false }: MultiAccountItemProps) => {
-  const spaces = useLoadFeature(SpacesFeature)
   const {
     address,
     name,
@@ -164,7 +162,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
                 {isSpaceSafe ? (
                   <>
                     <div className="w-10" />
-                    <spaces.SpaceSafeContextMenu safeItem={multiSafeAccountItem} />
+                    <SpaceSafeContextMenu safeItem={multiSafeAccountItem} />
                   </>
                 ) : (
                   <MultiAccountContextMenu

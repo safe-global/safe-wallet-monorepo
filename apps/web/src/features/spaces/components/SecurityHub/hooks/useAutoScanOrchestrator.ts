@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import type { ScanResult } from '@/features/security/public/types'
 import type { SecurityServices } from '@/features/security/public/securityServices'
 import useAutoScan, { type AutoScanServices, type AutoScanState } from '../../../hooks/useAutoScan'
-import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '../../../public/useCurrentSpaceId'
 import type {
   OverviewMap,
   SelectedSafe,

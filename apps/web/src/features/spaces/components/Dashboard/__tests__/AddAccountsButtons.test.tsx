@@ -1,10 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import SpaceDashboard from '../index'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
-import { useSpaceMembersByStatus, useIsInvited } from '@/features/spaces/hooks/useSpaceMembers'
-import { useSpacePendingTransactions } from '@/features/spaces/hooks/useSpacePendingTransactions'
+import { useCurrentSpaceId } from '../../../public/useCurrentSpaceId'
+import { useSpaceSafes } from '../../../public/useSpaceSafes'
+import { useSpaceMembersByStatus, useIsInvited } from '../../../public/useSpaceMembers'
+import { useSpacePendingTransactions } from '../../../hooks/useSpacePendingTransactions'
 import useSpaceAccountsData from '@/features/myAccounts/public/useSpaceAccountsData'
 import type { ReactNode } from 'react'
 
@@ -35,82 +34,75 @@ jest.mock('@/services/analytics/mixpanel-events', () => ({
   MixpanelEventParams: { SAFE_ADDRESS: 'Safe Address', TX_ID: 'TX ID' },
 }))
 
-jest.mock('@/features/spaces/hooks/useSpaceSafes', () => ({
+jest.mock('../../../public/useSpaceSafes', () => ({
   useSpaceSafes: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('../../../public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+jest.mock('../../../public/useSpaceMembers', () => ({
   get MemberStatus() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MemberStatus
+    return jest.requireActual('../../../public/useSpaceMembers').MemberStatus
   },
   get MemberRole() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MemberRole
+    return jest.requireActual('../../../public/useSpaceMembers').MemberRole
   },
   get MEMBER_ALIAS_MAX_LENGTH() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+    return jest.requireActual('../../../public/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
   },
   get getMemberDisplayName() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').getMemberDisplayName
+    return jest.requireActual('../../../public/useSpaceMembers').getMemberDisplayName
   },
   get sanitizeMemberAlias() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').sanitizeMemberAlias
+    return jest.requireActual('../../../public/useSpaceMembers').sanitizeMemberAlias
   },
   get isAdmin() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isAdmin
+    return jest.requireActual('../../../public/useSpaceMembers').isAdmin
   },
   get isActiveAdmin() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isActiveAdmin
+    return jest.requireActual('../../../public/useSpaceMembers').isActiveAdmin
   },
   get isInviteExpired() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isInviteExpired
+    return jest.requireActual('../../../public/useSpaceMembers').isInviteExpired
   },
   get useCurrentMembership() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useCurrentMembership
+    return jest.requireActual('../../../public/useSpaceMembers').useCurrentMembership
   },
   get useCurrentMemberProfile() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useCurrentMemberProfile
+    return jest.requireActual('../../../public/useSpaceMembers').useCurrentMemberProfile
   },
   get useIsActiveMember() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useIsActiveMember
+    return jest.requireActual('../../../public/useSpaceMembers').useIsActiveMember
   },
   get useIsAdmin() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useIsAdmin
+    return jest.requireActual('../../../public/useSpaceMembers').useIsAdmin
   },
   useSpaceMembersByStatus: jest.fn(),
   useIsInvited: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useTrackSpace', () => ({
+jest.mock('../../../hooks/useTrackSpace', () => ({
   __esModule: true,
   default: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useSpacePendingTransactions', () => ({
+jest.mock('../../../hooks/useSpacePendingTransactions', () => ({
   useSpacePendingTransactions: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
-  ...jest.requireActual('@/features/spaces/hooks/useGetSpaceAddressBook'),
+jest.mock('../../../public/useGetSpaceAddressBook', () => ({
+  ...jest.requireActual('../../../public/useGetSpaceAddressBook'),
   __esModule: true,
   default: jest.fn(() => []),
 }))
-jest.mock('@/features/spaces/SpacesFeature', () => ({
-  SpacesFeature: { name: 'spaces' },
-}))
+jest.mock('../PendingTxWidget', () => ({ __esModule: true, default: () => null }))
 
 jest.mock('@/features/myAccounts/public/useSpaceAccountsData', () => ({
   __esModule: true,
   default: jest.fn(() => ({ accounts: [], isLoading: false, error: null, refetch: jest.fn() })),
 }))
 
-jest.mock('@/features/__core__/useLoadFeature', () => ({
-  ...jest.requireActual('@/features/__core__/useLoadFeature'),
-  useLoadFeature: jest.fn(),
-}))
-
 jest.mock('../../../hooks/useSpacePlan', () => ({
   useSpacePlan: () => ({ plan: null, status: 'none', isLoading: false, refetch: jest.fn() }),
 }))
-jest.mock('../../../hooks/useSpacePlanState', () => ({ useSpacePlanState: () => null }))
+jest.mock('../../../public/useSpacePlanState', () => ({ useSpacePlanState: () => null }))
 jest.mock('../../../hooks/useWorkspaceLock', () => ({
   useWorkspaceLock: () => ({ isLocked: false, isResolving: false, trialPeriodDays: null }),
 }))
@@ -142,7 +134,7 @@ jest.mock('@/components/common/Track', () => {
   return Track
 })
 
-jest.mock('@/features/spaces/components/AddAccountsChooser', () => ({
+jest.mock('../../AddAccountsChooser', () => ({
   __esModule: true,
   default: ({ buttonLabel, entryPoint }: { buttonLabel?: string; entryPoint?: string }) => (
     <button data-testid="add-accounts-chooser" data-entry-point={entryPoint}>
@@ -187,14 +179,9 @@ const restoreDefaultMocks = (safes: Array<{ address: string; chainId: string }>)
   })
 }
 
-const stubSpacesFeature = () => {
-  ;(useLoadFeature as jest.Mock).mockReturnValue({ PendingTxWidget: () => null, $isReady: true })
-}
-
 describe('SpaceDashboard – accounts widget header actions', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    stubSpacesFeature()
   })
 
   it('wires a "View all" action carrying the total Safe-account count', () => {

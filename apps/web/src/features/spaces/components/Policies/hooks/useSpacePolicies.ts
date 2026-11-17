@@ -17,7 +17,7 @@ import {
 import useChains from '@/hooks/useChains'
 import { isAllowlistEnabled } from '@/features/policy-guard/public/allowlistAvailability'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '../../../public/useCurrentSpaceId'
 import { SPACE_REFRESH_OPTIONS } from '../../../hooks/refreshOptions'
 import { mapActivePolicies, type Erc20TokenResolver, type NativeTokenResolver } from '../utils/mapActivePolicies'
 import { mapPendingPolicies } from '../utils/mapPendingPolicies'

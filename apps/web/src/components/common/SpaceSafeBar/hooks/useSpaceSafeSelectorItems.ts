@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from 'react'
 import { useRouter } from 'next/router'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '@/features/spaces/public/useCurrentSpaceId'
 import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import type { SafeItem, MultiChainSafeItem } from '@safe-global/views/hooks/safes/types'
@@ -27,7 +27,7 @@ import type {
   SafeItemData,
   SafeItemDataChain,
 } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
-import type { ChainInfo } from '@/features/spaces/types'
+import type { ChainInfo } from '@/features/spaces/public/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useSafeBarSafes } from './useSafeBarSafes'

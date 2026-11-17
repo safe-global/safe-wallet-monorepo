@@ -17,8 +17,8 @@ import {
   useAddressBooksUpsertAddressBookItemsV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { showNotification } from '@/store/notificationsSlice'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
-import { useWorkspaceAddressBookLabel } from '@/features/spaces/hooks/useWorkspaceAddressBookLabel'
+import { useCurrentSpaceId } from '../../public/useCurrentSpaceId'
+import { useWorkspaceAddressBookLabel } from '../../public/useWorkspaceAddressBookLabel'
 import { useAppDispatch } from '@/store'
 import { cn } from '@safe-global/views/utils/cn'
 import { useDarkMode } from '@/hooks/useDarkMode'

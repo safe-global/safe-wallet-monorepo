@@ -32,7 +32,7 @@ import { orderGroupsBySimilarity } from '@safe-global/views/features/myAccounts/
 import { weaveReorderedKeys } from '@/utils/reorder'
 import type { SimilarWarning } from '@/features/address-poisoning/public/crossListClusters'
 import EntryDialog from '@/components/address-book/EntryDialog'
-import { useAddressBookWriteScope } from '@/features/spaces/hooks/useAddressBookWriteScope'
+import { useAddressBookWriteScope } from '@/features/spaces/public/useAddressBookWriteScope'
 
 /** Renaming a safe = editing its address-book entry across every chain it lives on. */
 type RenameTarget = { name: string; address: string; chainIds: string[] }

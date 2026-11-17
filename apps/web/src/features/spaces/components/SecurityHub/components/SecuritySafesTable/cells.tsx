@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import type { GradeSummary } from '@/features/security/public/types'
-import type { SafeHref } from '@/features/spaces/utils/safeHref'
+import type { SafeHref } from '../../../../utils/safeHref'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { DASH } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
 import { formatBalance } from './utils'

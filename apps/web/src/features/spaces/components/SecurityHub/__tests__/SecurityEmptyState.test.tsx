@@ -8,7 +8,7 @@ jest.mock('@/features/hypernative/public/HnSignupFlow', () => ({
     open ? <div data-testid="mock-hn-signup-flow">Hypernative signup</div> : null,
 }))
 
-jest.mock('@/features/spaces/components/AddAccounts', () => {
+jest.mock('../../AddAccounts', () => {
   const MockAddAccounts = ({ buttonLabel }: { buttonLabel?: string }) => (
     <button data-testid="mock-add-accounts">{buttonLabel ?? 'Add Accounts'}</button>
   )

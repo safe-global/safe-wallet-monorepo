@@ -1,5 +1,5 @@
 import type { NativeTokenMetadataDto, PendingPolicyDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { MOCK_SAFES } from './policies'
+import { MOCK_SAFES } from '../../../public/policies'
 
 /** Shaped like the CGW `policies/pending` response. */
 

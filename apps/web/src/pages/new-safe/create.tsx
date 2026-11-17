@@ -4,7 +4,7 @@ import CreateSafe from '@/components/new-safe/create'
 import { BRAND_NAME } from '@/config/constants'
 import SafeLogo from '@/components/common/SafeLogo'
 import { AppRoutes } from '@/config/routes'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '@/features/spaces/public/useCurrentSpaceId'
 
 const Open = () => {
   const spaceId = useCurrentSpaceId()

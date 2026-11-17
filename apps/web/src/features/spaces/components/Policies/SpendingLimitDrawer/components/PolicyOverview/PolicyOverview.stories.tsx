@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_SAFE_NAME } from '../../../mocks/policies'
+import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_SAFE_NAME } from '../../../../../public/policies'
 import { createMockStory } from '@/stories/mocks/createMockStory'
 import PolicyOverview from './PolicyOverview'
 

@@ -58,16 +58,13 @@ jest.mock('@/hooks/useIsHydrated', () => ({
   useIsHydrated: () => true,
 }))
 
-jest.mock('@/features/spaces/components/Sidebar/NewTransactionButton/SidebarActionButton', () => ({
+jest.mock('../../../NewTransactionButton/SidebarActionButton', () => ({
   SidebarActionButton: () => <button type="button">New transaction</button>,
 }))
 
-jest.mock(
-  '@/features/spaces/components/Sidebar/variants/SafeSidebarWorkspaceHeader/SafeSidebarWorkspaceHeader',
-  () => ({
-    SafeSidebarWorkspaceHeader: () => null,
-  }),
-)
+jest.mock('../../SafeSidebarWorkspaceHeader/SafeSidebarWorkspaceHeader', () => ({
+  SafeSidebarWorkspaceHeader: () => null,
+}))
 
 const mockTrackEvent = jest.fn()
 

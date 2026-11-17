@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import AccountIdentity from '@/features/spaces/components/Policies/components/AccountIdentity/AccountIdentity'
+import AccountIdentity from '../../../components/AccountIdentity/AccountIdentity'
 import type { SignatureSafeInfo } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/components/SafeSignatureInfo/types'
 
 export type { SignatureSafeInfo } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/components/SafeSignatureInfo/types'

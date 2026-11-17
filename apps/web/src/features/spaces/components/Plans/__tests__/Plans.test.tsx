@@ -1,6 +1,6 @@
 import { fireEvent, render, renderWithUserEvent, screen, within } from '@/tests/test-utils'
 import type { Subscription } from '@safe-global/store/gateway/AUTO_GENERATED/billing'
-import { CONTACT_SALES_URL } from '@/features/spaces/constants'
+import { CONTACT_SALES_URL } from '../../../constants'
 import type { PlanGroup } from '../../../hooks/billing/types'
 import Plans from '../index'
 import PlanStatusCard, { getCurrentBadge, _remaining, seatsTooltip } from '../PlanStatusCard'

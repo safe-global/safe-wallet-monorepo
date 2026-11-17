@@ -1,6 +1,6 @@
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '@/features/spaces/public/useCurrentSpaceId'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 
 const useWorkspaceName = (): string | undefined => {

@@ -11,7 +11,7 @@ import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 let mockCurrency = 'usd'
 
 const mockUseSpaceSafes = jest.fn()
-jest.mock('../useSpaceSafes', () => ({
+jest.mock('../../public/useSpaceSafes', () => ({
   useSpaceSafes: () => mockUseSpaceSafes(),
 }))
 

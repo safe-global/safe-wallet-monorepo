@@ -25,7 +25,7 @@ jest.mock('@safe-global/utils/components/tx/security/tenderly/utils', () => ({
 }))
 jest.mock('../useNestedTransaction', () => ({ useNestedTransaction: () => ({ isNested: false }) }))
 let mockProSpaceId: string | null = null
-jest.mock('@/features/spaces/hooks/useSafeProAccess', () => ({
+jest.mock('@/features/spaces/public/useSafeProAccess', () => ({
   useSafeProAccess: () => ({ hasProFeatures: false, isLoading: false, spaceId: mockProSpaceId }),
 }))
 jest.mock('@/hooks/useSafeInfo', () => ({

@@ -6,7 +6,7 @@ import type { SpaceSafeEntry, SelectedSafe } from '../../components/SecurityHub'
 // useSafeScanContext is mocked to return the value we inject via `mockScanContext`
 // so these tests stay focused on queue/scanner orchestration, not the context builder.
 let mockScanContext: ScanContext | null = null
-jest.mock('@/features/spaces/hooks/useSafeScanContext', () => ({
+jest.mock('../useSafeScanContext', () => ({
   __esModule: true,
   default: () => mockScanContext,
 }))

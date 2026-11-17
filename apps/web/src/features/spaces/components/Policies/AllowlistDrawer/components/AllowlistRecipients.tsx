@@ -6,7 +6,7 @@ import { DrawerSection } from '@safe-global/views/components/common/Drawer/compo
 import { Avatar, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import AccountIdentity from '@/features/spaces/components/Policies/components/AccountIdentity/AccountIdentity'
+import AccountIdentity from '../../components/AccountIdentity/AccountIdentity'
 import ExpandableCard from './ExpandableCard'
 import RemovedBadge from './RemovedBadge'
 

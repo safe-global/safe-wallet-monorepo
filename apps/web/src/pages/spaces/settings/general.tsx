@@ -1,15 +1,12 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { BRAND_NAME } from '@/config/constants'
-import { SpacesFeature } from '@/features/spaces/SpacesFeature'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import { useCurrentSpaceId } from '@/features/spaces/public/useCurrentSpaceId'
+import SpaceSettingsPage from '@/features/spaces/public/SpaceSettingsPage'
 
 export default function SpaceSettingsGeneralPage() {
   const router = useRouter()
   const spaceId = useCurrentSpaceId()
-  const spaces = useLoadFeature(SpacesFeature)
-
   if (!router.isReady || !spaceId) return null
 
   return (
@@ -19,7 +16,7 @@ export default function SpaceSettingsGeneralPage() {
       </Head>
 
       <main>
-        <spaces.SpaceSettingsPage spaceId={spaceId} activePage="general" />
+        <SpaceSettingsPage spaceId={spaceId} activePage="general" />
       </main>
     </>
   )

@@ -1,7 +1,7 @@
 import { useAddressBookItem } from '@/hooks/useAllAddressBooks'
 import { useChain } from '@/hooks/useChains'
 import { AppRoutes } from '@/config/routes'
-import { buildSafeHref } from '@/features/spaces/utils/safeHref'
+import { buildSafeHref } from '../../../../utils/safeHref'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import type { ProposerOverviewProps } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/components/ProposerOverview/types'
 import type { ProposerRef } from '@safe-global/views/features/spaces/components/Policies/ProposerDetails/hooks/types'

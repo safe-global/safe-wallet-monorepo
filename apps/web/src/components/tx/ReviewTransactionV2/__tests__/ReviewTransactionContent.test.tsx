@@ -33,7 +33,7 @@ jest.mock('@/features/safe-shield/hooks/useUntrustedSafeAnalysis', () => ({
   default: () => ({ safeAnalysis: null, addToTrustedList: jest.fn() }),
 }))
 
-jest.mock('@/features/spaces/hooks/useSafeProAccess', () => ({
+jest.mock('@/features/spaces/public/useSafeProAccess', () => ({
   useSafeProAccess: () => ({ hasProFeatures: true, isSafePro: true, isLoading: false }),
 }))
 

@@ -2,8 +2,7 @@ import { render, screen } from '@testing-library/react'
 import SpacePlansPage from '../../pages/spaces/plans'
 import { AppRoutes } from '@/config/routes'
 import * as router from 'next/router'
-import * as featureModule from '@/features/__core__/useLoadFeature'
-import * as spacesFeature from '@/features/spaces/hooks/useFeatureRedirect'
+import * as spacesFeature from '@/features/spaces/public/useFeatureRedirect'
 import { chainBuilder } from '@/tests/builders/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
@@ -15,16 +14,12 @@ jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
-jest.mock('@/features/__core__/useLoadFeature', () => ({
-  ...jest.requireActual('@/features/__core__/useLoadFeature'),
-  useLoadFeature: jest.fn(),
+jest.mock('@/features/spaces/public/SpacePlansPage', () => ({
+  __esModule: true,
+  default: ({ spaceId }: { spaceId: string }) => <div data-testid="plans">plans {spaceId}</div>,
 }))
-
-jest.mock('@/features/spaces/SpacesFeature', () => ({
-  SpacesFeature: 'SpacesFeature',
-}))
-jest.mock('@/features/spaces/hooks/useFeatureRedirect', () => ({
-  ...jest.requireActual('@/features/spaces/hooks/useFeatureRedirect'),
+jest.mock('@/features/spaces/public/useFeatureRedirect', () => ({
+  ...jest.requireActual('@/features/spaces/public/useFeatureRedirect'),
   useRedirectWhenOff: jest.fn(),
 }))
 
@@ -42,8 +37,6 @@ jest.mock('@/hooks/useChains', () => ({
 
 const SPACE_ID = 'space-uuid-1'
 
-const SpacePlansPageMock = ({ spaceId }: { spaceId: string }) => <div data-testid="plans">plans {spaceId}</div>
-
 const setup = ({
   isAnnounced,
   isSafePro,
@@ -54,7 +47,6 @@ const setup = ({
   isChainLoaded?: boolean
 }) => {
   ;(router.useRouter as jest.Mock).mockReturnValue({ isReady: true, query: { spaceId: SPACE_ID } })
-  ;(featureModule.useLoadFeature as jest.Mock).mockReturnValue({ SpacePlansPage: SpacePlansPageMock })
   mockUseIsSafeProAnnouncementEnabled.mockReturnValue(isAnnounced)
   mockUseIsSafeProEnabled.mockReturnValue(isSafePro)
   mockUseCurrentChain.mockReturnValue(isChainLoaded ? chainBuilder().build() : undefined)

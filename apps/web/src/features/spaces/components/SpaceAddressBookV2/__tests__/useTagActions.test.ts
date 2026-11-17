@@ -16,7 +16,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useAddressBooksRenameTagV1Mutation: () => [mockRenameTag],
   useAddressBooksDeleteTagV1Mutation: () => [mockDeleteTag],
 }))
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('../../../public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => SPACE_ID,
 }))
 jest.mock('@/store', () => ({ useAppDispatch: () => mockDispatch }))

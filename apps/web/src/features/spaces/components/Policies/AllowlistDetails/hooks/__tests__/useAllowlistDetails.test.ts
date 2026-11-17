@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import { usePolicyDetailsBase } from '../../../hooks/usePolicyDetailsBase'
-import { mockActiveAllowlist, mockAllowlistPolicy } from '../../../mocks/allowlistPolicies'
+import { mockActiveAllowlist, mockAllowlistPolicy } from '../../../../../public/allowlistPolicies'
 import {
   MOCK_ADDRESSES,
   MOCK_SAFES,
@@ -8,7 +8,7 @@ import {
   mockMultiSpenderPolicy,
   mockPendingPolicy,
   mockSpendingLimitPolicy,
-} from '../../../mocks/policies'
+} from '../../../../../public/policies'
 import { useAllowlistDetails } from '../useAllowlistDetails'
 
 jest.mock('../../../hooks/usePolicyDetailsBase')

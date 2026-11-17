@@ -9,7 +9,7 @@ import {
 import { normalizeTagName, sameTagName, validateTagName } from '@safe-global/utils/validation/tags'
 import type { WorkspaceTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import type { TagActions } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagMenu'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '../../public/useCurrentSpaceId'
 import { isElevationRequiredError } from '@/features/oidc-auth/public/elevation'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'

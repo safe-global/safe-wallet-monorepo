@@ -20,12 +20,12 @@ import {
   mockPolicies,
   mockProposerPolicy,
   mockUnenforcedPolicy,
-} from '../mocks/policies'
-import { mockActiveAllowlist, mockPendingAllowlist } from '../mocks/allowlistPolicies'
+} from '../../../public/policies'
+import { mockActiveAllowlist, mockPendingAllowlist } from '../../../public/allowlistPolicies'
 import { usePendingPolicyTransaction } from '../SpendingLimitDetails/hooks/usePendingPolicyTransaction'
 import ProposerRoleFlow from '../ProposerRoleFlow'
 import { mockWallet } from '@/tests/mocks/hooks'
-import { useSpaceSafes } from '../../../hooks/useSpaceSafes'
+import { useSpaceSafes } from '../../../public/useSpaceSafes'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
 import EditSpendingLimitFlow from '../SpendingLimitFlow/EditFlow'
 import Policies from '../index'
@@ -86,7 +86,7 @@ jest.mock('../SpendingLimitFlow/EditFlow', () => ({
   default: () => <div data-testid="edit-spending-limit-flow" />,
 }))
 
-jest.mock('../../../hooks/useSpaceSafes', () => ({ useSpaceSafes: jest.fn() }))
+jest.mock('../../../public/useSpaceSafes', () => ({ useSpaceSafes: jest.fn() }))
 
 const mockUseLocalStorage = jest.mocked(useLocalStorage)
 const mockUseSpaceSafes = useSpaceSafes as jest.MockedFunction<typeof useSpaceSafes>

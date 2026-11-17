@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
 import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
-import { useSpaceMembersByStatus, useIsInvited } from '@/features/spaces/hooks/useSpaceMembers'
-import useTrackSpace from '@/features/spaces/hooks/useTrackSpace'
-import { useSpacePendingTransactions } from '@/features/spaces/hooks/useSpacePendingTransactions'
-import { SpacesFeature } from '@/features/spaces/SpacesFeature'
+import { useSpaceSafes } from '../../public/useSpaceSafes'
+import { useCurrentSpaceId } from '../../public/useCurrentSpaceId'
+import { useSpaceMembersByStatus, useIsInvited } from '../../public/useSpaceMembers'
+import useTrackSpace from '../../hooks/useTrackSpace'
+import { useSpacePendingTransactions } from '../../hooks/useSpacePendingTransactions'
+import dynamic from '@/utils/dynamic'
 import { AppRoutes } from '@/config/routes'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
@@ -14,7 +14,6 @@ import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
 import useSpaceAccountsData from '@/features/myAccounts/public/useSpaceAccountsData'
 import { useSafeProAnnouncementModal } from '@/features/safe-pro-announcement/public/useSafeProAnnouncementModal'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import AddAccountsChooser from '../AddAccountsChooser'
 import { useRouter } from 'next/router'
 import AggregatedBalance from './AggregatedBalances'
@@ -22,9 +21,11 @@ import SetupWidget from '../SetupWidget'
 import { useSetupWidgetDismissal } from '../SetupWidget/useSetupWidgetDismissal'
 import CheckoutReturnModals from '../Plans/CheckoutReturnModals'
 import { useWorkspaceLock } from '../../hooks/useWorkspaceLock'
-import { useSpacePlanState } from '../../hooks/useSpacePlanState'
+import { useSpacePlanState } from '../../public/useSpacePlanState'
 import AccountsWidget from '@/features/myAccounts/public/AccountsWidget'
 import SafeProAnnouncementModal from '@/features/safe-pro-announcement/public/SafeProAnnouncementModal'
+
+const PendingTxWidget = dynamic(() => import('./PendingTxWidget'))
 
 const EmptyStateAddAction = () => {
   return (
@@ -38,7 +39,6 @@ const DASHBOARD_LIST_DISPLAY_LIMIT = 5
 const PENDING_TX_DISPLAY_LIMIT = 4
 
 const SpaceDashboard = () => {
-  const { PendingTxWidget } = useLoadFeature(SpacesFeature)
   const { allSafes: safes, isLoading: isSafesLoading } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()

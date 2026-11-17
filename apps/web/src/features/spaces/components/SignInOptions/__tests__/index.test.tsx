@@ -17,7 +17,7 @@ jest.mock('@/services/siwe/useSiwe', () => ({
   useSiwe: () => ({ signIn: jest.fn(), loading: false }),
 }))
 
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('../../../public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => null,
 }))
 

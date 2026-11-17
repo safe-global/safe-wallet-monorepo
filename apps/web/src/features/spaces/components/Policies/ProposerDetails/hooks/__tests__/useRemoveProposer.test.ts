@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { chainBuilder } from '@/tests/builders/chains'
-import { asActivePolicy, MOCK_ADDRESSES, MOCK_SAFES, mockProposerPolicy } from '../../../mocks/policies'
+import { asActivePolicy, MOCK_ADDRESSES, MOCK_SAFES, mockProposerPolicy } from '../../../../../public/policies'
 import { useRemoveProposer } from '../useRemoveProposer'
 
 const mockDeleteV1 = jest.fn()

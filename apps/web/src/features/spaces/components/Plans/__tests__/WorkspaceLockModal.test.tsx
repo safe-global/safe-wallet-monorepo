@@ -22,7 +22,7 @@ jest.mock('next/router', () => ({ useRouter: () => ({ push: mockPush, pathname: 
 jest.mock('../../../hooks/useWorkspaceLock', () => ({
   useWorkspaceLock: (spaceId?: string) => mockUseWorkspaceLock(spaceId),
 }))
-jest.mock('../../../hooks/useSpaceMembers', () => ({
+jest.mock('../../../public/useSpaceMembers', () => ({
   useCurrentMembership: (spaceId?: string) => mockUseCurrentMembership(spaceId),
   useIsAdmin: (spaceId?: string) => mockUseIsAdmin(spaceId),
 }))

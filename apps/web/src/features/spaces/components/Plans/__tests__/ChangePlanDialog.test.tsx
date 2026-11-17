@@ -38,7 +38,7 @@ let mockAllSafes: unknown[] = [
   { address: '0xB', name: 'Payroll', isPinned: false, lastVisited: 0, safes: [leaf('1', '0xB'), leaf('10', '0xB')] },
   leaf('1', '0xC'),
 ]
-jest.mock('../../../hooks/useSpaceSafes', () => ({
+jest.mock('../../../public/useSpaceSafes', () => ({
   useSpaceSafes: () => ({ allSafes: mockAllSafes, isLoading: false }),
 }))
 

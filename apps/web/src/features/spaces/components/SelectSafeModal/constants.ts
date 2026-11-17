@@ -1,4 +1,4 @@
-import { ESafeAction } from '@/features/spaces/store/safeActionsModalSlice'
+import { ESafeAction } from '../../public/safeActionsModalSlice'
 
 export const safeModalTitles: Record<ESafeAction, string> = {
   [ESafeAction.Send]: 'Send from',

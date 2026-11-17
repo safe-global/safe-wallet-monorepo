@@ -1,5 +1,5 @@
 import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
-import { MOCK_ADDRESSES, MOCK_VIEWERS } from '../../mocks/policies'
+import { MOCK_ADDRESSES, MOCK_VIEWERS } from '../../../../public/policies'
 import {
   mockActivatingAllowlist,
   mockActiveAllowlist,
@@ -10,7 +10,7 @@ import {
   mockPendingAllowlistRemoval,
   mockPendingAllowlistUpdate,
   mockUnenforcedAllowlist,
-} from '../../mocks/allowlistPolicies'
+} from '../../../../public/allowlistPolicies'
 import type { Viewer } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import type { AllowlistDrawerPolicy } from '../resolveState'
 import AllowlistDrawer from '../AllowlistDrawer'

@@ -27,6 +27,7 @@ const PUBLIC_FOLDER_FEATURES = [
   'safe-shield',
   'safenet-checks',
   'security',
+  'spaces',
   'speedup',
   'spending-limits',
   'stake',

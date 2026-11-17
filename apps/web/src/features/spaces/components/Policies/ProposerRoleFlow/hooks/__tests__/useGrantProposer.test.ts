@@ -23,10 +23,10 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import { useGrantProposer } from '../useGrantProposer'
 import * as addOrRequestContactModule from '../../../../../hooks/useAddOrRequestWorkspaceContact'
-import { useIsAdmin } from '../../../../../hooks/useSpaceMembers'
+import { useIsAdmin } from '../../../../../public/useSpaceMembers'
 
-jest.mock('../../../../../hooks/useSpaceMembers', () => ({
-  ...jest.requireActual('../../../../../hooks/useSpaceMembers'),
+jest.mock('../../../../../public/useSpaceMembers', () => ({
+  ...jest.requireActual('../../../../../public/useSpaceMembers'),
   useIsAdmin: jest.fn(() => true),
 }))
 

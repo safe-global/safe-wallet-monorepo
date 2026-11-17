@@ -6,10 +6,10 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { getStoreInstance } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { useAddOrRequestWorkspaceContact } from '../useAddOrRequestWorkspaceContact'
-import { useCurrentSpaceId } from '../useCurrentSpaceId'
-import { useSpaceAddressBookState } from '../useGetSpaceAddressBook'
-import { useIsAdmin, useIsInvited } from '../useSpaceMembers'
-import { useUpsertWorkspaceSafeNames } from '../useUpsertWorkspaceSafeName'
+import { useCurrentSpaceId } from '../../public/useCurrentSpaceId'
+import { useSpaceAddressBookState } from '../../public/useGetSpaceAddressBook'
+import { useIsAdmin, useIsInvited } from '../../public/useSpaceMembers'
+import { useUpsertWorkspaceSafeNames } from '../../public/useUpsertWorkspaceSafeName'
 
 const mockCreateRequest = jest.fn()
 
@@ -20,10 +20,10 @@ jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),
 }))
-jest.mock('../useCurrentSpaceId', () => ({ useCurrentSpaceId: jest.fn() }))
-jest.mock('../useGetSpaceAddressBook', () => ({ __esModule: true, useSpaceAddressBookState: jest.fn() }))
-jest.mock('../useSpaceMembers', () => ({ useIsAdmin: jest.fn(), useIsInvited: jest.fn() }))
-jest.mock('../useUpsertWorkspaceSafeName', () => ({ useUpsertWorkspaceSafeNames: jest.fn() }))
+jest.mock('../../public/useCurrentSpaceId', () => ({ useCurrentSpaceId: jest.fn() }))
+jest.mock('../../public/useGetSpaceAddressBook', () => ({ __esModule: true, useSpaceAddressBookState: jest.fn() }))
+jest.mock('../../public/useSpaceMembers', () => ({ useIsAdmin: jest.fn(), useIsInvited: jest.fn() }))
+jest.mock('../../public/useUpsertWorkspaceSafeName', () => ({ useUpsertWorkspaceSafeNames: jest.fn() }))
 
 const SPACE_ID = 'space-uuid'
 const SOURCE = SPACE_LABELS.proposer_role_flow

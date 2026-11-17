@@ -1,5 +1,5 @@
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
-import { useIsInvited } from './useSpaceMembers'
+import { useIsInvited } from '../public/useSpaceMembers'
 import { useSpaceSubscription } from './billing/useSpaceSubscription'
 import { useSpaceOffers } from './billing/useSpaceOffers'
 import { getSubscriptionEndedAt } from './billing/subscription'

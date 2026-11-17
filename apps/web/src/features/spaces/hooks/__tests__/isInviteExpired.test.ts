@@ -1,5 +1,5 @@
 import { memberBuilder } from '@/tests/builders/member'
-import { isInviteExpired } from '../useSpaceMembers'
+import { isInviteExpired } from '../../public/useSpaceMembers'
 
 describe('isInviteExpired', () => {
   it('returns true for an INVITED member whose inviteExpiresAt is in the past', () => {

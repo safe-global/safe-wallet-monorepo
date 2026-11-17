@@ -13,7 +13,7 @@ import {
   mockSpendingLimitDto,
 } from '../../mocks/activePolicies'
 import { mockPendingDto } from '../../mocks/pendingPolicies'
-import { MOCK_SAFES, MOCK_TOKENS, mockActivatingPolicy } from '../../mocks/policies'
+import { MOCK_SAFES, MOCK_TOKENS, mockActivatingPolicy } from '../../../../public/policies'
 import { PENDING_POLICY_TYPES, TABLE_POLICY_TYPES, useSpacePolicies } from '../useSpacePolicies'
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
@@ -35,7 +35,7 @@ const mainnet = chainBuilder()
 const polygonWithoutAllowlist = chainBuilder().with({ chainId: MOCK_SAFES.payroll.chainId, features: [] }).build()
 const mockChains = [mainnet, polygonWithoutAllowlist]
 
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('../../../../public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
 }))
 

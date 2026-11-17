@@ -3,9 +3,9 @@ import { AccountItem } from '../../public/AccountItem'
 import { useSafeItemData } from '../../public/useSafeItemData'
 import css from '@safe-global/views/features/myAccounts/components/AccountItems/styles.module.css'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
-import { SpacesFeature } from '@/features/spaces/SpacesFeature'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { getOwnerAwaitingConfirmations } from '@/utils/transaction-guards'
+import SendTransactionButton from '@/features/spaces/public/SendTransactionButton'
+import SpaceSafeContextMenu from '@/features/spaces/public/SpaceSafeContextMenu'
 
 export interface SafeListItemProps {
   safeItem: SafeItem
@@ -14,7 +14,6 @@ export interface SafeListItemProps {
 }
 
 export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: SafeListItemProps) => {
-  const spaces = useLoadFeature(SpacesFeature)
   const isMobile = useIsBelowSm()
 
   const {
@@ -78,8 +77,8 @@ export const SafeListItem = ({ safeItem, onLinkClick, isSpaceSafe = false }: Saf
       {!isSpaceSafe && <AccountItem.PinButton safeItem={safeItem} threshold={threshold} owners={owners} name={name} />}
       {isSpaceSafe ? (
         <>
-          {safeOverview && <spaces.SendTransactionButton safe={safeOverview} />}
-          <spaces.SpaceSafeContextMenu safeItem={safeItem} />
+          {safeOverview && <SendTransactionButton safe={safeOverview} />}
+          <SpaceSafeContextMenu safeItem={safeItem} />
         </>
       ) : (
         <AccountItem.ContextMenu

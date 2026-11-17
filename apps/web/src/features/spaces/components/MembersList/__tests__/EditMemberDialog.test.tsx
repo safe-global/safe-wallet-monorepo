@@ -27,40 +27,40 @@ jest.mock('@/store/notificationsSlice', () => ({
   showNotification: (payload: unknown) => ({ type: 'notifications/show', payload }),
 }))
 
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('../../../public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '42',
 }))
-jest.mock('@/features/spaces/hooks/useIsLastActiveAdmin', () => ({
-  ...jest.requireActual('@/features/spaces/hooks/useIsLastActiveAdmin'),
+jest.mock('../../../hooks/useIsLastActiveAdmin', () => ({
+  ...jest.requireActual('../../../hooks/useIsLastActiveAdmin'),
   useAdminCount: () => mockAdminCount(),
 }))
-jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+jest.mock('../../../public/useSpaceMembers', () => ({
   get MemberStatus() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MemberStatus
+    return jest.requireActual('../../../public/useSpaceMembers').MemberStatus
   },
   get MemberRole() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MemberRole
+    return jest.requireActual('../../../public/useSpaceMembers').MemberRole
   },
   get isAdmin() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isAdmin
+    return jest.requireActual('../../../public/useSpaceMembers').isAdmin
   },
   get isInviteExpired() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isInviteExpired
+    return jest.requireActual('../../../public/useSpaceMembers').isInviteExpired
   },
   get useSpaceMembersByStatus() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useSpaceMembersByStatus
+    return jest.requireActual('../../../public/useSpaceMembers').useSpaceMembersByStatus
   },
   get useCurrentMembership() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useCurrentMembership
+    return jest.requireActual('../../../public/useSpaceMembers').useCurrentMembership
   },
   get useCurrentMemberProfile() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useCurrentMemberProfile
+    return jest.requireActual('../../../public/useSpaceMembers').useCurrentMemberProfile
   },
   get useIsActiveMember() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useIsActiveMember
+    return jest.requireActual('../../../public/useSpaceMembers').useIsActiveMember
   },
   get useIsInvited() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useIsInvited
+    return jest.requireActual('../../../public/useSpaceMembers').useIsInvited
   },
   useIsAdmin: () => mockIsAdmin(),
   isActiveAdmin: (member: { role: string; status: string }) => member.role === 'ADMIN' && member.status === 'ACTIVE',

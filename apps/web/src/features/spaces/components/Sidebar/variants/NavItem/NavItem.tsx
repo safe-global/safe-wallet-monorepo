@@ -17,7 +17,7 @@ import { STAKE_EVENTS, STAKE_LABELS } from '@/services/analytics/events/stake'
 import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
 import { AppRoutes } from '@/config/routes'
 import { PlanSelectionEntryPoint } from '@/services/analytics/mixpanel-events'
-import { trackPlanSelectionStarted } from '../../../Plans/planSelection'
+import { trackPlanSelectionStarted } from '../../../../public/planSelection'
 
 const customNavEvents: Record<
   string,

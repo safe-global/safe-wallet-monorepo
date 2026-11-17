@@ -37,9 +37,9 @@ import { useNotificationTracking } from '@/components/settings/PushNotifications
 import WalletProvider from '@/components/common/WalletProvider'
 import CounterfactualHooks from '@/features/counterfactual/public/CounterfactualHooks'
 import useCounterfactualSafeSync from '@/features/counterfactual/public/useCounterfactualSafeSync'
-import { useInviteNotification } from '@/features/spaces/hooks/useInviteNotification'
-import { useSafeWorkspaceAttach } from '@/features/spaces/hooks/useSafeWorkspaceAttach'
-import { useSafeWorkspaceCheck } from '@/features/spaces/hooks/useSafeWorkspaceCheck'
+import { useInviteNotification } from '@/features/spaces/public/useInviteNotification'
+import { useSafeWorkspaceAttach } from '@/features/spaces/public/useSafeWorkspaceAttach'
+import { useSafeWorkspaceCheck } from '@/features/spaces/public/useSafeWorkspaceCheck'
 import Recovery from '@/features/recovery/public/Recovery'
 
 /**

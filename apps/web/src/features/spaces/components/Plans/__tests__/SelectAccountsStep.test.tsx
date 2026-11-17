@@ -31,7 +31,7 @@ const multi = {
 const allSafes = [treasury, payroll, grants]
 
 let mockAllSafes: unknown[] = allSafes
-jest.mock('../../../hooks/useSpaceSafes', () => ({
+jest.mock('../../../public/useSpaceSafes', () => ({
   useSpaceSafes: () => ({ allSafes: mockAllSafes, isLoading: false }),
 }))
 jest.mock('@/hooks/safes/useSafesSearch', () => ({
