@@ -65,8 +65,8 @@ jest.mock('@/features/hypernative/public/hooks/useIsHypernativeEligible', () => 
 
 jest.mock('@/features/ledger/public/components/LedgerHashComparison', () => ({ __esModule: true, default: () => null }))
 
-// Mock the SpendingLimitRowWrapper component with the same "Send as" label as the real component
-jest.mock('@/components/tx-flow/flows/TokenTransfer/SpendingLimitRow', () => ({
+// Mock SpendingLimitRow with the same "Send as" label as the real component
+jest.mock('@/features/spending-limits/public/components/SpendingLimitRow', () => ({
   __esModule: true,
   default: () => (
     <div data-testid="spending-limit-row">

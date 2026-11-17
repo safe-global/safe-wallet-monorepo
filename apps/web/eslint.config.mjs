@@ -8,6 +8,7 @@ import storybook from 'eslint-plugin-storybook'
 import { designSystemSyntaxRules } from '../../packages/views/eslint-design-system.mjs'
 import noExplicitAny from '../../config/eslint/no-explicit-any.mjs'
 import {
+  crossFeatureRelativeImportPatterns,
   featurePublicImportExpressionRules,
   featurePublicImportPatterns,
 } from '../../config/eslint/feature-public-imports.mjs'
@@ -172,6 +173,13 @@ const config = [
   {
     files: ['src/features/**/*.{ts,tsx}'],
     rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: nextImportRestrictions,
+          patterns: [...featurePublicImportPatterns, ...crossFeatureRelativeImportPatterns],
+        },
+      ],
       'no-restricted-syntax': [
         'error',
         ...designSystemSyntaxRules,

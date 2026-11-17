@@ -53,7 +53,8 @@ A small component that other code renders inline or in a fixed slot, such as an 
 
 A hook cannot be lazy or gated: it runs in its caller on every chain. Across features, prefer a gated component. Make a hook public only for a cheap value that the caller needs as data, such as a boolean. A public hook must:
 
-- if it reads its feature's flag, return a neutral value (`false`, `[]`, `undefined`) when the flag is off, pass the flag to any expensive work, for example `skip: !isEnabled`, and have a test that shows the neutral value with the flag off;
+- pass its feature's flag to any expensive work, for example `skip: !isEnabled`, so a hook that fetches always reads the flag;
+- if it reads its feature's flag, return a neutral value (`false`, `[]`, `undefined`) when the flag is off and have a test that shows the neutral value with the flag off;
 - load heavy libraries inside its async step (`await import(...)`), not at the top of the file.
 
 A hook that reports a fact about the Safe or the store, such as `useIsCounterfactualSafe`, reads no flag: the fact stays true when the flag is off.
