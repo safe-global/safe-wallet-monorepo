@@ -33,6 +33,7 @@ export type WalletContextType = {
   signer: SignerWallet | null
   setSignerAddress: (address: string | undefined) => void
   // Nonce of the tx the in-app parent Safe signer creates; without one it uses the recommended nonce
+  getParentSafeNonce: () => number | undefined
   setParentSafeNonce: (nonce: number) => void
   clearParentSafeNonce: () => void
   isReady: boolean
@@ -49,9 +50,20 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
   const onboardWallets = onboard?.state.get().wallets || []
   const [wallet, setWallet] = useState<ConnectedWallet | null>(getConnectedWallet(onboardWallets))
 
-  const [signerAddress, setSignerAddress] = useState<string>()
-  // A ref, so a nonce edit doesn't rebuild the signer object
+  const [signerAddress, setSelectedSignerAddress] = useState<string>()
+  // Refs, so a nonce edit doesn't rebuild the signer object
+  const selectedSignerAddress = useRef<string | undefined>(undefined)
   const parentSafeNonce = useRef<number | undefined>(undefined)
+
+  // The parent Safe nonce lives as long as the signer selection, not as long as a tx flow step
+  const setSignerAddress = useCallback((address: string | undefined) => {
+    if (!sameAddress(address, selectedSignerAddress.current)) {
+      parentSafeNonce.current = undefined
+    }
+    selectedSignerAddress.current = address
+    setSelectedSignerAddress(address)
+  }, [])
+  const getParentSafeNonce = useCallback(() => parentSafeNonce.current, [])
   const setParentSafeNonce = useCallback((nonce: number) => {
     parentSafeNonce.current = nonce
   }, [])
@@ -90,13 +102,16 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
 
   const signer = useMemo(() => {
     if (wallet && nestedSafeInfo && web3ReadOnly) {
-      return getNestedWallet(wallet, nestedSafeInfo, web3ReadOnly, router, () => parentSafeNonce.current)
+      return getNestedWallet(wallet, nestedSafeInfo, web3ReadOnly, router, {
+        get: getParentSafeNonce,
+        clear: clearParentSafeNonce,
+      })
     }
     if (wallet && connectedSafeInfo) {
       return { ...wallet, isConnectedSafe: true as const, threshold: connectedSafeInfo.threshold }
     }
     return wallet
-  }, [wallet, nestedSafeInfo, connectedSafeInfo, web3ReadOnly, router])
+  }, [wallet, nestedSafeInfo, connectedSafeInfo, web3ReadOnly, router, getParentSafeNonce, clearParentSafeNonce])
 
   return (
     <WalletContext.Provider
@@ -104,6 +119,7 @@ const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => 
         connectedWallet: wallet,
         signer,
         setSignerAddress,
+        getParentSafeNonce,
         setParentSafeNonce,
         clearParentSafeNonce,
         isReady: !!walletReady,

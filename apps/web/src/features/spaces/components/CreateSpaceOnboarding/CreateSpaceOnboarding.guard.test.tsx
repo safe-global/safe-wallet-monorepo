@@ -68,6 +68,7 @@ const App = ({ initialPath }: { initialPath: string }): ReactElement => {
       connectedWallet: null,
       signer: null,
       setSignerAddress: jest.fn(),
+      getParentSafeNonce: () => undefined,
       setParentSafeNonce: jest.fn(),
       clearParentSafeNonce: jest.fn(),
       isReady: isWalletReady,
