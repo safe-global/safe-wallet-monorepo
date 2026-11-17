@@ -237,8 +237,8 @@ describe('useInviteForm verification cancel', () => {
     })
     fireEvent.click(screen.getByTestId('submit'))
 
+    await waitFor(() => expect(mockInviteMembers).toHaveBeenCalled())
     await waitFor(() => expect(screen.getByTestId('is-submitting')).toHaveTextContent('false'))
-    expect(mockInviteMembers).toHaveBeenCalled()
     expect(mockOnSuccess).not.toHaveBeenCalled()
   })
 })

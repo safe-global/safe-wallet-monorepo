@@ -42,7 +42,7 @@ describe('useBytecodeComparison caching', () => {
 
   it('serves the cached result on remount without a second getCode', async () => {
     const first = renderHook(() => useBytecodeComparison())
-    await waitFor(() => expect(getCode).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(first.result.current.result).toEqual({ isMatch: false }))
     first.unmount()
 
     const second = renderHook(() => useBytecodeComparison())

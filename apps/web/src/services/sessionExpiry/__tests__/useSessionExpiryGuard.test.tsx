@@ -58,7 +58,7 @@ const renderGuardWithStore = (
 
 describe('useSessionExpiryGuard', () => {
   beforeEach(() => {
-    jest.useFakeTimers().setSystemTime(new Date('2026-05-07T12:00:00Z'))
+    jest.useFakeTimers({ advanceTimers: false }).setSystemTime(new Date('2026-05-07T12:00:00Z'))
     mockUnwrap.mockReset()
     mockUnsubscribe.mockReset()
     mockInitiate.mockReset()

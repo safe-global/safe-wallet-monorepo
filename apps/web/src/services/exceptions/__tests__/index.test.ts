@@ -167,7 +167,7 @@ describe('CodedException', () => {
     })
 
     it('logs again once the window has passed', async () => {
-      jest.useFakeTimers()
+      jest.useFakeTimers({ advanceTimers: false })
       const { logError, Errors } = await import('..')
 
       logError(Errors._601, 'rpc down')
@@ -253,7 +253,7 @@ describe('CodedException', () => {
       })
 
       it('drops expired entries before evicting a live one', () => {
-        jest.useFakeTimers()
+        jest.useFakeTimers({ advanceTimers: false })
 
         fillTracker(Errors._601, MAX_THROTTLED_KEYS - 1)
 

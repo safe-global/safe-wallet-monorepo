@@ -29,7 +29,7 @@ describe('getMultipleSafeOverviews cache key (serializeQueryArgs)', () => {
   beforeEach(() => {
     // Cache keys are created synchronously on dispatch; fake timers keep the batched fetcher's 300ms
     // timer from firing (and leaking) after the assertions — this test never resolves the fetch.
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     mockedInitiate.mockReset()
     mockedInitiate.mockImplementation(jest.fn())
   })

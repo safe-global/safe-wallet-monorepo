@@ -127,7 +127,6 @@ describe('ImportAddressBookDialog', () => {
   })
 
   it('disables the Import button and delays closing after a successful import', async () => {
-    jest.useFakeTimers()
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
     upsertionSpyFn.mockResolvedValue({ data: {} })
 
@@ -148,8 +147,6 @@ describe('ImportAddressBookDialog', () => {
 
     act(() => jest.advanceTimersByTime(500))
     expect(handleClose).toHaveBeenCalledTimes(1)
-
-    jest.useRealTimers()
   })
 
   it('shows a single-network success notification with the contact count', async () => {
@@ -246,7 +243,6 @@ describe('ImportAddressBookDialog', () => {
   })
 
   it('filters the contact list based on the search input', async () => {
-    jest.useFakeTimers()
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime.bind(jest) })
 
     mockedUseAllAddressBooks.mockReturnValue({
@@ -268,7 +264,5 @@ describe('ImportAddressBookDialog', () => {
       expect(screen.queryByText('Bob')).not.toBeInTheDocument()
     })
     expect(screen.getByText('Alice')).toBeInTheDocument()
-
-    jest.useRealTimers()
   })
 })

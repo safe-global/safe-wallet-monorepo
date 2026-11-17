@@ -18,7 +18,7 @@ describe('HnCalendlyStep', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     mockUseCalendly.mockReturnValue({
       isLoaded: false,
       isSecondStep: false,

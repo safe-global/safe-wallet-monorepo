@@ -15,7 +15,7 @@ const renderNotifications = (notification: Notification) =>
   render(<Notifications />, { initialReduxState: { notifications: [notification] } })
 
 describe('Notifications', () => {
-  beforeEach(() => jest.useFakeTimers())
+  beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))
   afterEach(() => {
     jest.runOnlyPendingTimers()
     jest.useRealTimers()

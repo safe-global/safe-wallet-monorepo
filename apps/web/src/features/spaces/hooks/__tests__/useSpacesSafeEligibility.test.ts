@@ -123,7 +123,7 @@ describe('useSpacesSafeEligibility', () => {
   })
 
   it('stays loading and retries while the entitlements are rate limited', () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     const refetch = jest.fn()
     mockUseEntitlementsGetAllEntitlementsV1Query.mockReturnValue(queryResult({ error: { status: 429 }, refetch }))
 

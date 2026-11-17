@@ -220,7 +220,7 @@ describe('usePolicyGuard', () => {
   })
 
   describe('re-reads', () => {
-    beforeEach(() => jest.useFakeTimers())
+    beforeEach(() => jest.useFakeTimers({ advanceTimers: false }))
     afterEach(() => jest.useRealTimers())
 
     it('retries a failed read after one polling interval', () => {

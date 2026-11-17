@@ -7,7 +7,7 @@ const setVisibility = (state: 'visible' | 'hidden') => {
 
 describe('scheduleWhileVisible', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     setVisibility('visible')
   })
 

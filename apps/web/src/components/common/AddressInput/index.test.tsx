@@ -112,7 +112,7 @@ const TEST_ADDRESS_B = '0x0000000000000000000000000000000000000001'
 
 describe('AddressInput tests', () => {
   beforeAll(() => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
   })
 
   afterAll(() => {

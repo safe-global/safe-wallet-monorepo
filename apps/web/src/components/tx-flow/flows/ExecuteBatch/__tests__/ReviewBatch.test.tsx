@@ -293,15 +293,15 @@ describe('ReviewBatch', () => {
     it('builds the MultiSend transaction once the Safe SDK is ready', async () => {
       mockRiskState(false)
       mockUseSafeSDK.mockReturnValue(undefined)
-      const review = <ReviewBatch params={{ txs: [getMockTx({ nonce: 1 }), getMockTx({ nonce: 2 })] }} />
-      const { rerender } = render(review)
+      const params = { txs: [getMockTx({ nonce: 1 }), getMockTx({ nonce: 2 })] }
+      const { rerender } = render(<ReviewBatch params={params} />)
 
       await screen.findByText('Data')
       expect(mockCreateMultiSendCallOnlyTx).not.toHaveBeenCalled()
       expect(screen.queryByTestId('risk-confirmation-checkbox')).not.toBeInTheDocument()
 
       mockUseSafeSDK.mockReturnValue({})
-      rerender(review)
+      rerender(<ReviewBatch params={params} />)
 
       expect(
         await screen.findByText('I understand the risks and would like to proceed with this transaction.'),

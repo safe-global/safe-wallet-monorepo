@@ -6,7 +6,7 @@ import * as guards from '@/utils/transaction-guards'
 
 describe('useIsExpiredSwap', () => {
   beforeEach(() => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     jest.clearAllMocks()
   })
 

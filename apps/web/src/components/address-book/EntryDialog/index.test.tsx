@@ -137,8 +137,8 @@ describe('EntryDialog scope', () => {
     renderDialog()
     typeName('')
 
-    await waitFor(() => expect(screen.getByTestId('save-btn')).toBeDisabled())
-    expect(screen.getByTestId('name-input')).toHaveAttribute('aria-invalid', 'true')
+    await waitFor(() => expect(screen.getByTestId('name-input')).toHaveAttribute('aria-invalid', 'true'))
+    expect(screen.getByTestId('save-btn')).toBeDisabled()
   })
 
   it('writes to the workspace address book when scoped to workspace', async () => {

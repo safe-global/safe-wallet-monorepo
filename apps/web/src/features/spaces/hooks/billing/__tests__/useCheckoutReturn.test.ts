@@ -74,7 +74,7 @@ describe('useCheckoutReturn', () => {
   })
 
   it('times out when the subscription never propagates', () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     mockSessionQuery.mockReturnValue(session('paid'))
     const { result } = renderHook(() => useCheckoutReturn())
 
@@ -139,7 +139,7 @@ describe('useCheckoutReturn', () => {
   })
 
   it('stops polling on timeout and resumes on retry', () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     mockSessionQuery.mockReturnValue(session('paid'))
     const { result } = renderHook(() => useCheckoutReturn())
 
@@ -152,7 +152,7 @@ describe('useCheckoutReturn', () => {
   })
 
   it('shares the deadline between instances, so they time out and retry together', () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
     mockSessionQuery.mockReturnValue(session('paid'))
     const first = renderHook(() => useCheckoutReturn())
     act(() => jest.advanceTimersByTime(30_000))
@@ -205,7 +205,7 @@ describe('useCheckoutReturn', () => {
     })
 
     it('never times out', () => {
-      jest.useFakeTimers()
+      jest.useFakeTimers({ advanceTimers: false })
       mockSessionQuery.mockReturnValue(session('unpaid', 'open'))
       const { result } = renderHook(() => useCheckoutReturn())
 

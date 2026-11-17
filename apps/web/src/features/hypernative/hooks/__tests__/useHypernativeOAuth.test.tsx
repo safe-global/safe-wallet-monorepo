@@ -177,7 +177,7 @@ describe('useHypernativeOAuth', () => {
   describe('initiateLogin - mock mode', () => {
     beforeEach(() => {
       mockAuthEnabled = true
-      jest.useFakeTimers()
+      jest.useFakeTimers({ advanceTimers: false })
     })
 
     afterEach(() => {
@@ -542,7 +542,7 @@ describe('useHypernativeOAuth', () => {
 
   describe('cleanup', () => {
     it('should cleanup timers on unmount', async () => {
-      jest.useFakeTimers()
+      jest.useFakeTimers({ advanceTimers: false })
       const mockPopup = { closed: false, close: jest.fn() }
       mockWindowOpen.mockReturnValue(mockPopup)
 
@@ -570,7 +570,7 @@ describe('useHypernativeOAuth', () => {
     })
 
     it('should cleanup polling interval on unmount', async () => {
-      jest.useFakeTimers()
+      jest.useFakeTimers({ advanceTimers: false })
       const clearIntervalSpy = jest.spyOn(global, 'clearInterval')
 
       const { unmount } = renderHook(() => useHypernativeOAuth())

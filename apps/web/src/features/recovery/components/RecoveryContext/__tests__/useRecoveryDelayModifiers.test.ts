@@ -24,7 +24,7 @@ describe('useRecoveryDelayModifiers', () => {
   })
 
   it('should not fetch if the current chain does not support Delay Modifiers', async () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
 
     mockUseHasFeature.mockReturnValue(false)
     const provider = {}
@@ -47,7 +47,7 @@ describe('useRecoveryDelayModifiers', () => {
   })
 
   it('should not fetch is there is no provider', async () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
 
     mockUseHasFeature.mockReturnValue(true)
     mockUseWeb3ReadOnly.mockReturnValue(undefined)
@@ -69,7 +69,7 @@ describe('useRecoveryDelayModifiers', () => {
   })
 
   it('should not fetch if there is no Safe modules enabled', async () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
 
     mockUseHasFeature.mockReturnValue(true)
     const provider = {}
@@ -92,7 +92,7 @@ describe('useRecoveryDelayModifiers', () => {
   })
 
   it('should not fetch if only the spending limit is enabled', async () => {
-    jest.useFakeTimers()
+    jest.useFakeTimers({ advanceTimers: false })
 
     mockUseHasFeature.mockReturnValue(true)
     const provider = {}

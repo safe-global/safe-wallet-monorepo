@@ -75,6 +75,7 @@ describe('UntrustedSafeWarning', () => {
     await waitFor(() => expect(screen.getByTestId('safe-name-input')).toBeInTheDocument())
     expect(screen.getByTestId('safe-name-input')).toHaveValue('Treasury')
 
+    await waitFor(() => expect(screen.getByTestId('confirm-add-trusted-safe-button')).toBeEnabled())
     fireEvent.click(screen.getByTestId('confirm-add-trusted-safe-button'))
 
     await waitFor(() => expect(onAddToTrustedList).toHaveBeenCalled())

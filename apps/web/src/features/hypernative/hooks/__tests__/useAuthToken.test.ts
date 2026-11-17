@@ -210,7 +210,7 @@ describe('useAuthToken', () => {
     })
 
     it('should maintain consistent state after clearToken when polling triggers', async () => {
-      jest.useFakeTimers()
+      jest.useFakeTimers({ advanceTimers: false })
 
       mockGetAuthCookieData.mockReturnValue({
         token: 'existing-token',
@@ -251,7 +251,7 @@ describe('useAuthToken', () => {
 
   describe('polling behavior', () => {
     beforeEach(() => {
-      jest.useFakeTimers()
+      jest.useFakeTimers({ advanceTimers: false })
     })
 
     afterEach(() => {
@@ -391,7 +391,7 @@ describe('useAuthToken', () => {
 
   describe('cleanup', () => {
     beforeEach(() => {
-      jest.useFakeTimers()
+      jest.useFakeTimers({ advanceTimers: false })
     })
 
     afterEach(() => {

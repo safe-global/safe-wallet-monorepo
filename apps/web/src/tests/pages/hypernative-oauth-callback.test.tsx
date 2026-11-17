@@ -114,10 +114,6 @@ describe('HypernativeOAuthCallback', () => {
     ] as ReturnType<typeof hypernativeApi.useExchangeTokenMutation>)
   })
 
-  afterEach(() => {
-    jest.useRealTimers()
-  })
-
   it('should show loading state initially', () => {
     render(<HypernativeOAuthCallback />)
 

@@ -14,7 +14,7 @@ const mockUseActors = useGetSpaceAuditLogActors as jest.MockedFunction<typeof us
 describe('ActivityLogFilters', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    jest.useFakeTimers().setSystemTime(new Date('2026-06-24T12:00:00'))
+    jest.useFakeTimers({ advanceTimers: false }).setSystemTime(new Date('2026-06-24T12:00:00'))
 
     mockResolveMemberName.mockReturnValue(undefined)
     // Includes a former/deleted member — the dropdown is fed from the audit
