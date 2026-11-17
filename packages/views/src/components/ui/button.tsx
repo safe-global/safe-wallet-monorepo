@@ -18,9 +18,9 @@ import { cn } from '@safe-global/views/utils/cn'
  *
  * @remarks
  * Key Props:
- * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'ghost-muted' | 'destructive' | 'surface')
+ * - `variant` ('default' | 'outline' | 'secondary' | 'ghost' | 'ghost-muted' | 'destructive' | 'surface' | 'row-hover-primary')
  *   `ghost-muted`: the Figma Ghost, muted at rest; `ghost` keeps the foreground
- * - `size` ('default' | 'xs' | 'sm' | 'lg' | 'action' | 'submit' | 'xl' | 'icon' | 'icon-xs' | 'icon-sm')
+ * - `size` ('default' | '2xs' | 'xs' | 'sm' | 'lg' | 'action' | 'submit' | 'xl' | 'icon' | 'icon-xs' | 'icon-sm')
  * - `weight` ('medium' | 'semibold')
  * - `accentIcon` (boolean): brand-green icon on a primary CTA
  * - `render`
@@ -66,6 +66,9 @@ const buttonVariants = cva(
         // Add-funds style). Same border+shadow as outline, filled with the `card` token
         // instead of the page background. Replaces per-call `bg-card`/`bg-[--color-background-paper]`.
         surface: 'border-border bg-card text-card-foreground hover:bg-muted hover:text-foreground shadow-xs',
+        // A table row's main action inside a `group/transaction` row: outline at rest, the filled primary while the row is hovered.
+        'row-hover-primary':
+          'border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground shadow-xs group-hover/transaction:enabled:border-transparent group-hover/transaction:enabled:bg-primary group-hover/transaction:enabled:text-primary-foreground group-hover/transaction:enabled:shadow-none group-hover/transaction:enabled:hover:bg-primary/80',
       },
       size: {
         default:
@@ -74,6 +77,8 @@ const buttonVariants = cva(
         // `sm`'s box with the 12px label scale: for secondary controls that sit beside body text
         // (a section header's "Expand all"/"Collapse all") and should not compete with it.
         xs: "h-8 gap-1 px-4 text-xs in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3",
+        // 24px with the 12px label: a persistent per-row action in a dense table that must not outweigh the row.
+        '2xs': "h-6 gap-1 px-2.5 text-xs in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3",
         lg: 'h-10 gap-1.5 px-4 has-data-[icon=inline-end]:pr-3 has-data-[icon=inline-start]:pl-3',
         // Prominent call-to-action pill: use for the main action(s) of a surface
         // (Send/Receive/Swap, Confirm/Execute, Save settings, Filter/Export). Pair
