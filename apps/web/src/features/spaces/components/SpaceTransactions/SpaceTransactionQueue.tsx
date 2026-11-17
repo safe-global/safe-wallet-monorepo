@@ -15,23 +15,34 @@ import {
 } from '../../store/spaceQueueApi'
 import SpaceQueueTable from './SpaceQueueTable'
 import TransactionsToolbar from './TransactionsToolbar'
+import UnavailableSafesAlert from './UnavailableSafesAlert'
 
 const QueueBody = memo(function QueueBody({
+  spaceId,
   queue,
   isFiltered,
   isSearching,
+  isFetching,
+  onRetry,
   onClearFilters,
 }: {
+  spaceId: string
   queue: SpaceQueue
   isFiltered: boolean
   isSearching: boolean
+  isFetching: boolean
+  onRetry: () => void
   onClearFilters: () => void
 }): ReactElement {
-  const { sections } = queue
+  const { sections, unavailableSafes } = queue
   const isNarrowed = isFiltered || isSearching
 
   return (
     <>
+      {unavailableSafes.length > 0 && (
+        <UnavailableSafesAlert spaceId={spaceId} safes={unavailableSafes} onRetry={onRetry} isRetrying={isFetching} />
+      )}
+
       {!queue.isComplete && <QueueTruncatedNotice shown={queue.shownCount} total={queue.totalCount} />}
 
       {sections.length > 0 ? (
@@ -53,7 +64,10 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
   // The toolbar shows a click at once; the table follows in a render that doesn't block it
   const queryFilters = useDeferredValue(filters)
   const querySearch = useDeferredValue(search)
-  const { queue, counts, isError, refetch } = useSpaceQueue(spaceId, { filters: queryFilters, search: querySearch })
+  const { queue, counts, isError, isFetching, refetch } = useSpaceQueue(spaceId, {
+    filters: queryFilters,
+    search: querySearch,
+  })
 
   const clearFilters = useCallback(() => {
     setFilters(NO_SPACE_QUEUE_FILTERS)
@@ -74,9 +88,12 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
 
       {queue ? (
         <QueueBody
+          spaceId={spaceId}
           queue={queue}
+          isFetching={isFetching}
           isFiltered={hasSpaceQueueFilters(queryFilters)}
           isSearching={querySearch !== ''}
+          onRetry={refetch}
           onClearFilters={clearFilters}
         />
       ) : isError ? (

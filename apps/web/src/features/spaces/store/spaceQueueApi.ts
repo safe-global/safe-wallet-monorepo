@@ -83,7 +83,7 @@ const toQueryArgs = (spaceId: string, { filters = NO_SPACE_QUEUE_FILTERS, search
 }
 
 export const useSpaceQueue = (spaceId: string, query: SpaceQueueQuery = {}) => {
-  const { data, currentData, isError, refetch } = useSpaceTransactionsGetTransactionQueueV1Query(
+  const { data, currentData, isError, isFetching, refetch } = useSpaceTransactionsGetTransactionQueueV1Query(
     toQueryArgs(spaceId, query),
   )
   const isNarrowed = hasSpaceQueueFilters(query.filters) || !!query.search
@@ -92,5 +92,5 @@ export const useSpaceQueue = (spaceId: string, query: SpaceQueueQuery = {}) => {
     [currentData, isNarrowed],
   )
   // The last answer's counts stay while a new filter loads, so the menus keep them
-  return { queue, counts: data?.counts, isError, refetch }
+  return { queue, counts: data?.counts, isError, isFetching, refetch }
 }
