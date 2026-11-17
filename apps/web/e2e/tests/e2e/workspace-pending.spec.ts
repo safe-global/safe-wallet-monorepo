@@ -56,7 +56,8 @@ test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
     await expect(row).toContainText('1/2')
 
     await pending.sign(row)
-    await review.sign()
+    await review.continueAndChooseSign()
+    await review.signButton.click()
 
     await expect.poll(async () => (await safeApiClient.getQueued(treasury.address)).map(confirmationsOf)).toEqual([2])
     await expect(row).toContainText('2/2', POLLED_UPDATE)
