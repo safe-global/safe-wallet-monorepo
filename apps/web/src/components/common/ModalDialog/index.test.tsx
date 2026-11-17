@@ -37,4 +37,18 @@ describe('ModalDialog', () => {
     expect(overlay).toHaveClass('z-[1451]')
     expect(overlay).not.toHaveClass('z-[var(--z-overlay)]')
   })
+
+  it('dims a parent dialog and keeps overlayClassName when forceBackdrop is set', () => {
+    render(
+      <ModalDialog open>
+        <ModalDialog open forceBackdrop overlayClassName="z-[1451]">
+          <p>Nested</p>
+        </ModalDialog>
+      </ModalDialog>,
+    )
+
+    const overlays = document.querySelectorAll('[data-slot="dialog-overlay"]')
+    expect(overlays).toHaveLength(2)
+    expect(overlays[1]).toHaveClass('z-[1451]')
+  })
 })

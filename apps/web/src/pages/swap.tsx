@@ -1,4 +1,3 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -17,7 +16,7 @@ const adjustEthAddress = (address: string) => {
   return address
 }
 
-const SwapPage: NextPage = () => {
+const SwapPage = () => {
   const router = useRouter()
   const { token, amount } = router.query
   const isFeatureEnabled = useHasFeature(FEATURES.NATIVE_SWAPS)

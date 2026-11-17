@@ -5,7 +5,7 @@ import {
   limitSummaryBuilder,
   spendingLimitSummaryBuilder,
   spenderSummaryBuilder,
-} from '../SpendingLimitSummary.fixtures'
+} from '../SpendingLimitSummary.testData'
 
 describe('PolicyCallout', () => {
   it('renders the plain-language title and description for the policy', () => {

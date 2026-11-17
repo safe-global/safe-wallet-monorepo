@@ -69,6 +69,7 @@ const entry = (): AddressBookEntry => ({
   name: 'Local signer',
   address: checksumAddress('0x1234567890123456789012345678901234567890'),
   chainIds: ['1', '137'],
+  tagIds: [],
   createdBy: '',
   createdByUserId: 0,
   lastUpdatedBy: '',

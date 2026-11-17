@@ -1,14 +1,19 @@
 import { userEvent } from '@testing-library/user-event'
 import React, { act } from 'react'
+import { http, HttpResponse } from 'msw'
 import { SafeAppAccessPolicyTypes } from '@safe-global/store/gateway/types'
+import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 import {
   transactionBuilderSafeApp,
   compoundSafeApp,
   ensSafeApp,
   synthetixSafeApp,
+  defaultMockSafeApps,
 } from '@safe-global/test/msw/mockSafeApps'
 
 import { render, screen, waitFor, fireEvent, getByRole, getByText, within, createAppNameRegex } from '../test-utils'
+import { server } from '../server'
+import { GATEWAY_URL } from '@/config/gateway'
 import AppsPage from '@/pages/apps'
 import CustomSafeAppsPage from '@/pages/apps/custom'
 import * as safeAppsService from '@/services/safe-apps/manifest'
@@ -87,6 +92,17 @@ describe('AppsPage', () => {
         // open app button should be present
         expect(getByText(safeAppPreviewDrawer, 'Open Safe App'))
       })
+    })
+
+    it('closes the Safe app details with the close button of the drawer', async () => {
+      renderAppsPage()
+      fireEvent.click(await screen.findByRole('link', { name: 'Open Transaction Builder' }))
+      await screen.findByRole('dialog')
+
+      fireEvent.click(screen.getByRole('button', { name: 'Close Transaction Builder preview' }))
+
+      // vaul keeps the drawer mounted for an exit animation that jsdom never finishes
+      await waitFor(() => expect(screen.getByRole('dialog')).toHaveAttribute('data-state', 'closed'))
     })
   })
 
@@ -189,6 +205,63 @@ describe('AppsPage', () => {
         expect(getByText(safeAppPreviewDrawer, 'Open Safe App'))
       })
     })
+
+    it('pins a Safe app from the list of all apps', async () => {
+      renderAppsPage()
+      await screen.findByText('Transaction Builder', { selector: '[data-variant="paragraph-bold"]' })
+      expect(screen.queryByRole('heading', { name: /My pinned apps/ })).not.toBeInTheDocument()
+
+      fireEvent.click(getBookmarkButton('Transaction Builder'))
+
+      const pinnedApps = getAppListBelow(await screen.findByRole('heading', { name: 'My pinned apps (1)' }))
+      expectSafeAppIn(pinnedApps, 'Transaction Builder')
+    })
+
+    it('removes the pinned section when the last pinned app is unpinned', async () => {
+      storePinnedSafeApps([transactionBuilderSafeAppMock.id])
+      renderAppsPage()
+      await screen.findByRole('heading', { name: 'My pinned apps (1)' })
+
+      fireEvent.click(getBookmarkButton('Transaction Builder'))
+
+      await waitFor(() => expect(screen.queryByRole('heading', { name: /My pinned apps/ })).not.toBeInTheDocument())
+    })
+  })
+
+  describe('Featured Safe apps', () => {
+    beforeEach(() => {
+      serveSafeApps(
+        defaultMockSafeApps.map((app) =>
+          app.id === transactionBuilderSafeAppMock.id ? { ...app, featured: true } : app,
+        ),
+      )
+    })
+
+    it('shows the featured apps in their own section', async () => {
+      renderAppsPage()
+
+      const featuredApps = getAppListBelow(await screen.findByRole('heading', { name: 'Featured apps (1)' }))
+      expectSafeAppIn(featuredApps, 'Transaction Builder')
+    })
+
+    it('hides the featured section while a search query is active', async () => {
+      renderAppsPage()
+      await screen.findByRole('heading', { name: 'Featured apps (1)' })
+
+      fireEvent.change(screen.getByPlaceholderText('Search by name or category'), { target: { value: 'Transaction' } })
+
+      await waitFor(() => expect(screen.queryByRole('heading', { name: /Featured apps/ })).not.toBeInTheDocument())
+    })
+
+    it('shows a pinned featured app in both the pinned and the featured section', async () => {
+      storePinnedSafeApps([transactionBuilderSafeAppMock.id])
+      renderAppsPage()
+
+      const pinnedApps = getAppListBelow(await screen.findByRole('heading', { name: 'My pinned apps (1)' }))
+      const featuredApps = getAppListBelow(screen.getByRole('heading', { name: 'Featured apps (1)' }))
+      expectSafeAppIn(pinnedApps, 'Transaction Builder')
+      expectSafeAppIn(featuredApps, 'Transaction Builder')
+    })
   })
 
   describe('Custom Safe apps Page', () => {
@@ -274,7 +347,9 @@ describe('AppsPage', () => {
       await waitFor(() => expect(screen.queryByLabelText(/Safe App URL/)).not.toBeInTheDocument())
 
       // custom safe app is present in the list
+      expect(screen.getByRole('heading', { name: 'Custom apps (1)' })).toBeInTheDocument()
       expect(screen.queryByText('Custom test Safe app')).toBeInTheDocument()
+      expect(screen.getByText('Custom Safe app description')).toBeInTheDocument()
 
       // shows safe app description drawer is not present
       expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -842,6 +917,30 @@ const expectBookmarkTooltip = async (appName: string, expected: string): Promise
   await userEvent.hover(getBookmarkButton(appName))
   await screen.findByText(expected, { selector: '[data-slot="tooltip-content"]' })
   await userEvent.unhover(getBookmarkButton(appName))
+}
+
+const renderAppsPage = () =>
+  render(<AppsPage />, {
+    routerProps: { pathname: '/apps', query: { safe: 'matic:0x0000000000000000000000000000000000000000' } },
+  })
+
+const storePinnedSafeApps = (safeAppIds: number[]): void => {
+  window.localStorage.setItem(`${LS_NAMESPACE}safeApps`, JSON.stringify({ 137: { pinned: safeAppIds } }))
+}
+
+const serveSafeApps = (safeApps: SafeApp[]): void => {
+  server.use(http.get(`${GATEWAY_URL}/v1/chains/:chainId/safe-apps`, () => HttpResponse.json(safeApps)))
+}
+
+// Each section is a list header followed by the list of its app cards.
+const getAppListBelow = (sectionHeading: HTMLElement): HTMLElement => {
+  const list = sectionHeading.nextElementSibling
+  if (!(list instanceof HTMLElement)) throw new Error(`No app list below: ${sectionHeading.textContent}`)
+  return list
+}
+
+const expectSafeAppIn = (appList: HTMLElement, appName: string): void => {
+  expect(within(appList).getByText(appName, { selector: '[data-variant="paragraph-bold"]' })).toBeInTheDocument()
 }
 
 // Using centralized mock data from @safe-global/test/msw/mockSafeApps

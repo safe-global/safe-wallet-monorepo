@@ -36,6 +36,8 @@ export enum MixpanelEvent {
   TRANSACTION_EXECUTED_IN_PARENT = 'Transaction Executed In Parent',
   TRANSACTION_EXECUTED_VIA_ROLE = 'Transaction Executed Via Role',
   TRANSACTION_SUBMITTED = 'Transaction Submitted',
+  TRANSACTION_SAFENET_SUBMITTED = 'Transaction Safenet Submitted',
+  TRANSACTION_SAFENET_CHECKED = 'Transaction Safenet Checked',
   TRUSTED_SAFE_ADDED = 'Trusted Safe Added',
   TRUSTED_SAFE_REMOVED = 'Trusted Safe Removed',
   HYPERNATIVE_LOGIN_CLICKED = 'Hypernative Login Clicked',
@@ -83,6 +85,12 @@ export enum MixpanelEvent {
   WORKSPACE_ADDRESS_REQUEST_APPROVED = 'Workspace Address Request Approved',
   WORKSPACE_ADDRESS_REQUEST_REJECTED = 'Workspace Address Request Rejected',
   WORKSPACE_LOCAL_CONTACT_ADDED = 'Workspace Local Contact Added',
+  WORKSPACE_CONTACT_TAGS_UPDATED = 'Workspace Contact Tags Updated',
+  WORKSPACE_TAG_CREATED = 'Workspace Tag Created',
+  WORKSPACE_TAG_RENAMED = 'Workspace Tag Renamed',
+  WORKSPACE_TAG_DELETED = 'Workspace Tag Deleted',
+  WORKSPACE_CONTACTS_FILTERED = 'Workspace Contacts Filtered',
+  WORKSPACE_TAG_LIMIT_REACHED = 'Workspace Tag Limit Reached',
   WORKSPACE_SUGGESTED_CONTACTS_ADDED = 'Workspace Suggested Contacts Added',
   SECURITY_HUB_VIEWED = 'Security Hub Viewed',
   SECURITY_REPORT_OPENED = 'Security Report Opened',
@@ -111,6 +119,11 @@ export enum MixpanelEvent {
   FREE_ACCESS_REMINDER_VIEWED = 'Free Access Reminder Viewed',
   WORKSPACE_LOCKED_VIEWED = 'Workspace Locked Viewed',
   UPGRADE_PROMPT_VIEWED = 'Upgrade Prompt Viewed',
+  LOOKALIKE_ADDRESS_WARNING_SHOWN = 'Look-alike Address Warning Shown',
+  LOOKALIKE_ADDRESS_WARNING_CONTINUED = 'Look-alike Address Warning Continued',
+  LOOKALIKE_ADDRESS_WARNING_DISMISSED = 'Look-alike Address Warning Dismissed',
+  WC_SAFE_APP_SUGGESTED = 'WC Safe App Suggested',
+  WC_SAFE_APP_SUGGESTION_RESULT = 'WC Safe App Suggestion Result',
 }
 
 export enum WorkspaceCreateEntryPoint {
@@ -141,6 +154,13 @@ export enum UpgradeFeature {
   SAFE_ACCOUNTS_LIMIT = 'safe_accounts_limit',
 }
 
+/** Where a look-alike address warning was shown. */
+export enum LookalikeWarningLocation {
+  ADDRESS_BOOK_ENTRY = 'address_book_entry',
+  ADDRESS_BOOK_IMPORT = 'address_book_import',
+  ADD_SAFE = 'add_safe',
+}
+
 export enum UpgradeLocation {
   POLICIES_PAGE = 'policies_page',
   SETTINGS_SETUP = 'settings_setup',
@@ -158,6 +178,8 @@ export enum PlanLocation {
 
 export enum DismissAction {
   GO_TO_MY_ACCOUNTS = 'go_to_my_accounts',
+  CANCEL = 'cancel',
+  SKIP = 'skip',
 }
 
 export enum PlanCtaKind {
@@ -174,6 +196,19 @@ export enum BillingPeriod {
 export enum CheckoutOutcome {
   SUCCESS = 'success',
   CANCELLED = 'cancelled',
+}
+
+export enum SafenetCheckResult {
+  NO_ISSUES = 'no_issues',
+  RISK_DETECTED = 'risk_detected',
+  UNAVAILABLE = 'unavailable',
+  NO_RULING = 'no_ruling',
+}
+
+export enum SafenetSignerRole {
+  FIRST_SIGNER = 'first_signer',
+  CO_SIGNER = 'co_signer',
+  EXECUTOR = 'executor',
 }
 
 export enum WorkspaceCreateStep {
@@ -275,6 +310,11 @@ export enum MixpanelEventParams {
   FROM_SEATS = 'From Seats',
   TO_SEATS = 'To Seats',
   TO_PLAN = 'To Plan',
+  TAGS_ADDED = 'Tags Added',
+  TAGS_REMOVED = 'Tags Removed',
+  MERGED = 'Merged',
+  CONTACT_COUNT = 'Contact Count',
+  TAG_COUNT = 'Tag Count',
   AMOUNT_DUE = 'Amount Due',
   OUTCOME = 'Outcome',
   FEATURE = 'Feature',
@@ -282,6 +322,12 @@ export enum MixpanelEventParams {
   SPONSORED_QUOTA = 'Sponsored Quota',
   DEFAULT_SEATS = 'Default Seats',
   DEFAULT_BILLING_PERIOD = 'Default Billing Period',
+  RULES_FLAGGED = 'Rules Flagged',
+  SENTINELS_FLAGGED = 'Sentinels Flagged',
+  SIGNER_ROLE = 'Signer Role',
+  SAFE_TX_HASH = 'Safe Tx Hash',
+  SAFE_APP_AVAILABLE = 'Safe App Available',
+  REMEMBER_CHOICE = 'Remember Choice',
 }
 
 export enum AuthLoginMethod {
@@ -293,6 +339,7 @@ export enum AuthLoginMethod {
 export enum SafeAppLaunchLocation {
   PREVIEW_DRAWER = 'Preview Drawer',
   SAFE_APPS_LIST = 'Safe Apps List',
+  WC_PROPOSAL = 'WalletConnect Proposal',
 }
 
 export const ADDRESS_PROPERTIES = new Set([

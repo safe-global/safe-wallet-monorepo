@@ -23,12 +23,15 @@
  * - camelCase -> service (undefined when not ready)
  */
 
-import { createFeatureHandle } from '@/features/__core__'
-import { FEATURES } from '@safe-global/utils/utils/chains'
+import type { FeatureHandle } from '@/features/__core__'
 import type { GlobalSearchContract } from './contract'
 
-// Feature handle - uses SPACES flag since global search is part of the spaces experience
-export const GlobalSearchFeature = createFeatureHandle<GlobalSearchContract>('global-search', FEATURES.SPACES)
+// Core feature: always enabled, not gated by a CGW feature flag.
+export const GlobalSearchFeature: FeatureHandle<GlobalSearchContract> = {
+  name: 'global-search',
+  useIsEnabled: () => true,
+  load: () => import(/* webpackMode: "lazy" */ './feature') as Promise<{ default: GlobalSearchContract }>,
+}
 
 // Contract type (for type annotations if needed)
 export type { GlobalSearchContract } from './contract'

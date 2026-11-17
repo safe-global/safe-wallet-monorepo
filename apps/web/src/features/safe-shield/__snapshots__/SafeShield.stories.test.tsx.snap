@@ -48,10 +48,11 @@ exports[`./SafeShield.stories BridgeDifferentSetup 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -173,10 +174,11 @@ exports[`./SafeShield.stories BridgeDifferentSetup 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -257,10 +259,11 @@ exports[`./SafeShield.stories BridgeDifferentSetup 1`] = `
                       </div>
                     </div>
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -423,10 +426,11 @@ exports[`./SafeShield.stories BridgeIncompatibleSafe 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -548,10 +552,11 @@ exports[`./SafeShield.stories BridgeIncompatibleSafe 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -632,10 +637,11 @@ exports[`./SafeShield.stories BridgeIncompatibleSafe 1`] = `
                       </div>
                     </div>
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -798,10 +804,11 @@ exports[`./SafeShield.stories BridgeMissingOwnership 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -923,10 +930,11 @@ exports[`./SafeShield.stories BridgeMissingOwnership 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -1007,10 +1015,11 @@ exports[`./SafeShield.stories BridgeMissingOwnership 1`] = `
                       </div>
                     </div>
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -1173,10 +1182,11 @@ exports[`./SafeShield.stories BridgeUnsupportedNetwork 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -1298,10 +1308,11 @@ exports[`./SafeShield.stories BridgeUnsupportedNetwork 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -1382,10 +1393,11 @@ exports[`./SafeShield.stories BridgeUnsupportedNetwork 1`] = `
                       </div>
                     </div>
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -1548,10 +1560,11 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -1673,10 +1686,11 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -1757,10 +1771,11 @@ exports[`./SafeShield.stories ChecksPassed 1`] = `
                       </div>
                     </div>
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -2010,10 +2025,11 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -2115,10 +2131,11 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -2199,10 +2216,11 @@ exports[`./SafeShield.stories FailedThreatAnalysis 1`] = `
                       </div>
                     </div>
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -2365,10 +2383,11 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 200ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -2470,10 +2489,11 @@ exports[`./SafeShield.stories HypernativeCustomCheckFailed 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -2636,10 +2656,11 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 200ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -2741,10 +2762,11 @@ exports[`./SafeShield.stories HypernativeGuardActive 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -2907,10 +2929,11 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 200ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -3012,7 +3035,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                           class="text-[var(--color-text-secondary)]"
                                         >
                                           <a
-                                            aria-label=""
+                                            aria-label="View on explorer"
                                             class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                             data-slot="tooltip-trigger"
                                             data-testid="explorer-btn"
@@ -3067,7 +3090,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                           class="text-[var(--color-text-secondary)]"
                                         >
                                           <a
-                                            aria-label=""
+                                            aria-label="View on explorer"
                                             class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                             data-slot="tooltip-trigger"
                                             data-testid="explorer-btn"
@@ -3122,7 +3145,7 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                                           class="text-[var(--color-text-secondary)]"
                                         >
                                           <a
-                                            aria-label=""
+                                            aria-label="View on explorer"
                                             class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                             data-slot="tooltip-trigger"
                                             data-testid="explorer-btn"
@@ -3229,10 +3252,11 @@ exports[`./SafeShield.stories HypernativeMaliciousThreat 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -3456,10 +3480,11 @@ exports[`./SafeShield.stories HypernativeNotLoggedIn 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -3802,10 +3827,11 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -3907,7 +3933,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                           class="text-[var(--color-text-secondary)]"
                                         >
                                           <a
-                                            aria-label=""
+                                            aria-label="View on explorer"
                                             class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                             data-slot="tooltip-trigger"
                                             data-testid="explorer-btn"
@@ -3962,7 +3988,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                           class="text-[var(--color-text-secondary)]"
                                         >
                                           <a
-                                            aria-label=""
+                                            aria-label="View on explorer"
                                             class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                             data-slot="tooltip-trigger"
                                             data-testid="explorer-btn"
@@ -4017,7 +4043,7 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                                           class="text-[var(--color-text-secondary)]"
                                         >
                                           <a
-                                            aria-label=""
+                                            aria-label="View on explorer"
                                             class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                             data-slot="tooltip-trigger"
                                             data-testid="explorer-btn"
@@ -4124,10 +4150,11 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -4208,10 +4235,11 @@ exports[`./SafeShield.stories MaliciousThreat 1`] = `
                       </div>
                     </div>
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -4374,10 +4402,11 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -4515,10 +4544,11 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -4599,10 +4629,11 @@ exports[`./SafeShield.stories MastercopyChange 1`] = `
                       </div>
                     </div>
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -4765,10 +4796,11 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -4890,10 +4922,11 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -4974,10 +5007,11 @@ exports[`./SafeShield.stories ModerateThreat 1`] = `
                       </div>
                     </div>
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -5140,10 +5174,11 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -5245,10 +5280,11 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -5329,10 +5365,11 @@ exports[`./SafeShield.stories ModulesChange 1`] = `
                       </div>
                     </div>
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -5495,10 +5532,11 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -5620,10 +5658,11 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -5775,7 +5814,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                 class="text-[var(--color-text-secondary)]"
                                               >
                                                 <a
-                                                  aria-label=""
+                                                  aria-label="View on explorer"
                                                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                                   data-slot="tooltip-trigger"
                                                   data-testid="explorer-btn"
@@ -5894,7 +5933,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                 class="text-[var(--color-text-secondary)]"
                                               >
                                                 <a
-                                                  aria-label=""
+                                                  aria-label="View on explorer"
                                                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                                   data-slot="tooltip-trigger"
                                                   data-testid="explorer-btn"
@@ -6013,7 +6052,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                 class="text-[var(--color-text-secondary)]"
                                               >
                                                 <a
-                                                  aria-label=""
+                                                  aria-label="View on explorer"
                                                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                                   data-slot="tooltip-trigger"
                                                   data-testid="explorer-btn"
@@ -6056,7 +6095,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                 class="text-[var(--color-text-secondary)]"
                                               >
                                                 <a
-                                                  aria-label=""
+                                                  aria-label="View on explorer"
                                                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                                   data-slot="tooltip-trigger"
                                                   data-testid="explorer-btn"
@@ -6175,7 +6214,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                 class="text-[var(--color-text-secondary)]"
                                               >
                                                 <a
-                                                  aria-label=""
+                                                  aria-label="View on explorer"
                                                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                                   data-slot="tooltip-trigger"
                                                   data-testid="explorer-btn"
@@ -6218,7 +6257,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                 class="text-[var(--color-text-secondary)]"
                                               >
                                                 <a
-                                                  aria-label=""
+                                                  aria-label="View on explorer"
                                                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                                   data-slot="tooltip-trigger"
                                                   data-testid="explorer-btn"
@@ -6246,10 +6285,11 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                       </div>
                     </div>
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -6413,7 +6453,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                 class="text-[var(--color-text-secondary)]"
                                               >
                                                 <a
-                                                  aria-label=""
+                                                  aria-label="View on explorer"
                                                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                                   data-slot="tooltip-trigger"
                                                   data-testid="explorer-btn"
@@ -6468,7 +6508,7 @@ exports[`./SafeShield.stories MultipleCounterparties 1`] = `
                                                 class="text-[var(--color-text-secondary)]"
                                               >
                                                 <a
-                                                  aria-label=""
+                                                  aria-label="View on explorer"
                                                   class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none hover:bg-muted dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-6 in-data-[slot=button-group]:rounded-sm [&_svg:not([class*='size-'])]:size-3 text-inherit hover:text-inherit"
                                                   data-slot="tooltip-trigger"
                                                   data-testid="explorer-btn"
@@ -6578,10 +6618,11 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -6683,10 +6724,11 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -6827,10 +6869,11 @@ exports[`./SafeShield.stories MultipleIssues 1`] = `
                       </div>
                     </div>
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -7047,10 +7090,11 @@ exports[`./SafeShield.stories NewRecipient 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -7172,10 +7216,11 @@ exports[`./SafeShield.stories NewRecipient 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -7256,10 +7301,11 @@ exports[`./SafeShield.stories NewRecipient 1`] = `
                       </div>
                     </div>
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -7422,10 +7468,11 @@ exports[`./SafeShield.stories OverflowFindings 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -7687,10 +7734,11 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -7792,10 +7840,11 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -7876,10 +7925,11 @@ exports[`./SafeShield.stories OwnershipChange 1`] = `
                       </div>
                     </div>
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -8042,10 +8092,11 @@ exports[`./SafeShield.stories RecurringRecipient 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -8167,10 +8218,11 @@ exports[`./SafeShield.stories RecurringRecipient 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -8251,10 +8303,11 @@ exports[`./SafeShield.stories RecurringRecipient 1`] = `
                       </div>
                     </div>
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -8417,10 +8470,11 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -8585,10 +8639,11 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -8669,10 +8724,11 @@ exports[`./SafeShield.stories ThreatAnalysisWithError 1`] = `
                       </div>
                     </div>
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -8835,10 +8891,11 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 400ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -8960,10 +9017,11 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -9044,10 +9102,11 @@ exports[`./SafeShield.stories UnableToVerifyContract 1`] = `
                       </div>
                     </div>
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                      style="animation-delay: 600ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -9210,10 +9269,11 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                   data-testid="open-checks-list"
                 >
                   <div
+                    class="reveal"
                     data-closed=""
                     data-slot="collapsible"
                     data-testid="threat-analysis-group-card"
-                    style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                    style="animation-delay: 300ms;"
                   >
                     <div
                       aria-expanded="false"
@@ -9335,10 +9395,11 @@ exports[`./SafeShield.stories UnofficialFallbackHandler 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 500ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -9559,10 +9620,11 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
                     class="flex flex-col gap-1 px-1 pb-1 [&>*]:rounded-md [&>*]:bg-muted-secondary"
                   >
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="recipient-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 300ms;"
+                      style="animation-delay: 300ms;"
                     >
                       <div
                         aria-expanded="false"
@@ -9643,10 +9705,11 @@ exports[`./SafeShield.stories UnverifiedContract 1`] = `
                       </div>
                     </div>
                     <div
+                      class="reveal"
                       data-closed=""
                       data-slot="collapsible"
                       data-testid="contract-analysis-group-card"
-                      style="overflow: hidden; opacity: 0; max-height: 0; transition: opacity 0.6s ease-in-out, max-height 0.6s ease-in-out; transition-delay: 700ms;"
+                      style="animation-delay: 450ms;"
                     >
                       <div
                         aria-expanded="false"

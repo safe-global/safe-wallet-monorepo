@@ -14,7 +14,6 @@ const FEATURE_FLAG_MAPPING: Record<string, FEATURES> = {
   speedup: FEATURES.SPEED_UP_TX,
   portfolio: FEATURES.PORTFOLIO_ENDPOINT,
   'targeted-outreach': FEATURES.TARGETED_SURVEY,
-  myAccounts: FEATURES.MY_ACCOUNTS,
 }
 
 /**

@@ -60,6 +60,18 @@ describe('SafeAppsInfoModal', () => {
     ])
   })
 
+  it('shows the disclaimer before the consent is accepted', () => {
+    render(<SafeAppsInfoModal {...defaultProps} isConsentAccepted={false} />)
+
+    expect(screen.getByRole('heading', { name: 'Disclaimer' })).toBeInTheDocument()
+  })
+
+  it('skips the disclaimer once the consent is accepted', () => {
+    render(<SafeAppsInfoModal {...defaultProps} isConsentAccepted />)
+
+    expect(screen.queryByRole('heading', { name: 'Disclaimer' })).not.toBeInTheDocument()
+  })
+
   it('does not render the features slide once the permissions review is completed', () => {
     render(<SafeAppsInfoModal {...defaultProps} isPermissionsReviewCompleted={true} />)
 

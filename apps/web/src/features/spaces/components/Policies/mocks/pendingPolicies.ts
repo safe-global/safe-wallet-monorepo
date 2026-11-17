@@ -16,6 +16,7 @@ export const mockPendingDto = (overrides: Partial<PendingPolicyDto> = {}): Pendi
   confirmations: 1,
   confirmationsRequired: 2,
   proposedAt: 1_790_342_985,
+  proposer: null,
   data: {
     module: ALLOWANCE_MODULE,
     changes: [
@@ -39,7 +40,7 @@ export const mockEthMetadata = (): NativeTokenMetadataDto => ({
   address: '0x0000000000000000000000000000000000000000',
   symbol: 'ETH',
   decimals: 18,
-  logoUri: 'https://safe-transaction-assets.safe.global/chains/1/currency_logo.png',
+  logoUri: 'mock-assets/safe-transaction-assets.safe.global/chains/1/currency_logo.webp',
   name: 'Ether',
   trusted: true,
 })

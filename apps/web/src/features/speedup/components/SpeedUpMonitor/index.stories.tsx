@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import { mswLoader } from 'msw-storybook-addon'
+import { within } from 'storybook/test'
 import { createMockStory, createChainData, createChainsPageData } from '@/stories/mocks'
 import { createChainsPageDataV2 } from '@/stories/mocks/chains'
 import { PendingStatus, PendingTxType, type PendingProcessingTx } from '@/store/pendingTxsSlice'
@@ -61,15 +62,19 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
+// The component renders nothing until the pending-time counter first ticks, after 1s
+const COUNTER_TICK_WAIT = { timeout: 3000 }
+
 // Warning alert shown next to a pending transaction in the queue.
-// Note: the component appears after ~1 second (the pending-time counter ticks
-// on a 1s interval before the threshold check passes).
 export const AlertBox: Story = {
   loaders: [mswLoader],
   args: {
     txId: 'multisig_0x123_0xabc1',
     pendingTx,
     modalTrigger: 'alertBox',
+  },
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByText('Taking too long?', {}, COUNTER_TICK_WAIT)
   },
 }
 
@@ -80,5 +85,8 @@ export const AlertButton: Story = {
     txId: 'multisig_0x123_0xabc1',
     pendingTx,
     modalTrigger: 'alertButton',
+  },
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByRole('button', { name: 'Speed up' }, COUNTER_TICK_WAIT)
   },
 }

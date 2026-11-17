@@ -5,6 +5,7 @@ import { getNestedWallet } from '../nested-safe-wallet'
 import * as safeCoreSDK from '@/hooks/coreSDK/safeCoreSDK'
 import * as wallets from '@/utils/wallets'
 import * as txSenderSdk from '@/services/tx/tx-sender/sdk'
+import * as transactions from '@/utils/transactions'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type Safe from '@safe-global/protocol-kit'
 import type { SafeTransaction } from '@safe-global/types-kit'
@@ -60,7 +61,12 @@ const actualWallet = {
 describe('getNestedWallet send', () => {
   const mockCreateTransaction = jest.fn<
     SafeTransaction,
-    [{ transactions: { to: string; value: string; data: string; operation: number }[] }]
+    [
+      {
+        transactions: { to: string; value: string; data: string; operation: number }[]
+        options?: { nonce?: number }
+      },
+    ]
   >(() => ({ data: { nonce: 1 }, signatures: new Map(), addSignature: jest.fn() }) as unknown as SafeTransaction)
 
   const mockConnectedSdk = {
@@ -70,8 +76,14 @@ describe('getNestedWallet send', () => {
     executeTransaction: jest.fn(() => Promise.resolve({ hash: '0xhash' })),
   } as unknown as Safe
 
-  const sendTransaction = async (data: string) => {
-    const nestedWallet = getNestedWallet(actualWallet, safeInfo, {} as JsonRpcProvider, {} as NextRouter)
+  const sendTransaction = async (data: string, parentSafeNonce?: number) => {
+    const nestedWallet = getNestedWallet(
+      actualWallet,
+      safeInfo,
+      {} as JsonRpcProvider,
+      {} as NextRouter,
+      () => parentSafeNonce,
+    )
     return nestedWallet.provider?.request({
       method: 'eth_sendTransaction',
       params: [{ from: PARENT_SAFE, to: CHILD_SAFE, value: '0x0', data }],
@@ -88,6 +100,34 @@ describe('getNestedWallet send', () => {
     } as unknown as Safe)
     jest.spyOn(wallets, 'isSmartContractWallet').mockResolvedValue(true)
     jest.spyOn(txSenderSdk, 'tryOffChainTxSigning').mockResolvedValue({} as SafeTransaction)
+    jest.spyOn(transactions, 'getNonces').mockResolvedValue({ currentNonce: 51, recommendedNonce: 51 })
+  })
+
+  it('queues the nested Safe tx after its pending txs instead of reusing the on-chain nonce', async () => {
+    jest.spyOn(transactions, 'getNonces').mockResolvedValue({ currentNonce: 51, recommendedNonce: 52 })
+
+    await sendTransaction(concat([APPROVE_HASH_SELECTOR, keccak256('0x01')]))
+
+    expect(mockCreateTransaction.mock.calls[0][0].options?.nonce).toBe(52)
+    expect(transactions.getNonces).toHaveBeenCalledWith(safeInfo.chainId, PARENT_SAFE)
+  })
+
+  it('uses the nonce the user chose for the parent Safe tx instead of the recommended one', async () => {
+    jest.spyOn(transactions, 'getNonces').mockResolvedValue({ currentNonce: 51, recommendedNonce: 52 })
+
+    await sendTransaction(concat([APPROVE_HASH_SELECTOR, keccak256('0x01')]), 51)
+
+    expect(mockCreateTransaction.mock.calls[0][0].options?.nonce).toBe(51)
+    expect(transactions.getNonces).not.toHaveBeenCalled()
+  })
+
+  it('creates no tx when the recommended nonce cannot be fetched', async () => {
+    const proposeTxMock = jest.requireMock('@/services/tx/proposeTransaction').default as jest.Mock
+    jest.spyOn(transactions, 'getNonces').mockRejectedValue(new Error('Gateway unavailable'))
+
+    await expect(sendTransaction('0xdeadbeef')).rejects.toThrow('Gateway unavailable')
+    expect(mockCreateTransaction).not.toHaveBeenCalled()
+    expect(proposeTxMock).not.toHaveBeenCalled()
   })
 
   it('passes non-approveHash calldata through unchanged', async () => {
@@ -233,6 +273,7 @@ describe('getNestedWallet send', () => {
       { ...safeInfo, threshold: 1 },
       {} as JsonRpcProvider,
       {} as NextRouter,
+      () => undefined,
     )
     const result = await nestedWallet.provider?.request({
       method: 'eth_sendTransaction',

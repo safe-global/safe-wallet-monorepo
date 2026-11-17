@@ -2,6 +2,7 @@ import type { PropsWithChildren } from 'react'
 import { render, screen } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import { TxFlow } from '../TxFlow'
+import TxFlowProvider from '../TxFlowProvider'
 
 jest.mock('../SafeTxProvider', () => ({
   __esModule: true,
@@ -14,7 +15,7 @@ jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
 jest.mock('../slots', () => ({ SlotProvider: ({ children }: PropsWithChildren) => <>{children}</> }))
 jest.mock('../TxFlowProvider', () => ({
   __esModule: true,
-  default: ({ children }: PropsWithChildren) => <>{children}</>,
+  default: jest.fn(({ children }: PropsWithChildren) => <>{children}</>),
 }))
 jest.mock('../common/TxFlowContent', () => ({
   TxFlowContent: ({ children }: PropsWithChildren) => <>{children}</>,
@@ -57,6 +58,12 @@ jest.mock('@/components/tx/ExecuteTxStep', () => ({
 
 describe('TxFlow', () => {
   const txId = `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 64 })}`
+
+  it.each([true, false])('passes isBatchable=%s to the flow provider', (isBatchable) => {
+    render(<TxFlow isBatchable={isBatchable} />)
+
+    expect(jest.mocked(TxFlowProvider).mock.lastCall?.[0]).toMatchObject({ isBatchable })
+  })
 
   it('renders the signing receipt for a new transaction', () => {
     render(<TxFlow />)

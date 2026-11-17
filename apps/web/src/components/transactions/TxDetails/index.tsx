@@ -183,6 +183,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
               chainId={safe.chainId}
               timestampMs={safenetInfo.submittedAt}
               isQueued={isQueue}
+              executionInfo={safenetInfo}
             />
           )}
           <ParsingErrorBoundary>

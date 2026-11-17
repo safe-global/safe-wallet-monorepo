@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react'
 import { faker } from '@faker-js/faker'
-import { render, fakerChecksummedAddress } from '@/tests/test-utils'
+import { advanceClock, render, fakerChecksummedAddress } from '@/tests/test-utils'
 import {
   PROPOSER_LABEL_PLACEHOLDER,
   SMART_CONTRACT_PROPOSER_ERROR,
@@ -25,6 +25,7 @@ import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
+import { ADDRESS_ERROR_DEBOUNCE_MS } from '@/components/common/AddressInput'
 
 jest.mock('@/hooks/wallets/useWallet')
 jest.mock('../hooks/useDelegatorSelection')
@@ -361,7 +362,10 @@ describe('AddProposer signing logic', () => {
 
       useDelegatesPostDelegateV3Mutation.mockReturnValue([addDelegateV3, {}])
       useDelegatesPostDelegateV1Mutation.mockReturnValue([jest.fn(), {}])
+      jest.useFakeTimers()
     })
+
+    afterEach(() => jest.useRealTimers())
 
     it.each([
       ['the zero address', ZERO_ADDRESS],
@@ -371,16 +375,37 @@ describe('AddProposer signing logic', () => {
       // to reach the backend as "Error adding proposer" (WA-3005 Bucket A)
       jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
 
-      const { getByLabelText, getByTestId, findByText } = render(
+      const { getByLabelText, getByTestId, getByText } = render(
         <AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
       )
 
-      act(() => {
+      await act(async () => {
         fireEvent.change(getByLabelText(/Address/i), { target: { value: reservedAddress } })
         fireEvent.change(getByLabelText(/Name/i), { target: { value: 'Reserved' } })
       })
+      await advanceClock(ADDRESS_ERROR_DEBOUNCE_MS)
 
-      expect(await findByText('This proposer address is not valid')).toBeInTheDocument()
+      expect(getByText('This proposer address is not valid')).toBeInTheDocument()
+      expect(getByTestId('submit-proposer-btn')).toBeDisabled()
+      expect(addDelegateV3).not.toHaveBeenCalled()
+    })
+
+    it('rejects the Safe itself as its own proposer', async () => {
+      jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(false)
+      const safe = extendedSafeInfoBuilder().build()
+
+      const { getByLabelText, getByTestId, getByText } = render(
+        <AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
+        { initialReduxState: { safeInfo: { data: safe, loaded: true, loading: false } } },
+      )
+
+      await act(async () => {
+        fireEvent.change(getByLabelText(/Address/i), { target: { value: safe.address.value } })
+        fireEvent.change(getByLabelText(/Name/i), { target: { value: 'The Safe' } })
+      })
+      await advanceClock(ADDRESS_ERROR_DEBOUNCE_MS)
+
+      expect(getByText('Cannot add Safe account itself as proposer')).toBeInTheDocument()
       expect(getByTestId('submit-proposer-btn')).toBeDisabled()
       expect(addDelegateV3).not.toHaveBeenCalled()
     })
@@ -388,16 +413,17 @@ describe('AddProposer signing logic', () => {
     it('shows an error and keeps submit disabled when the address is a smart contract', async () => {
       jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(true)
 
-      const { getByLabelText, getByTestId, findByText } = render(
+      const { getByLabelText, getByTestId, getByText } = render(
         <AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
       )
 
-      act(() => {
+      await act(async () => {
         fireEvent.change(getByLabelText(/Address/i), { target: { value: fakerChecksummedAddress() } })
         fireEvent.change(getByLabelText(/Name/i), { target: { value: 'My other Safe' } })
       })
+      await advanceClock(ADDRESS_ERROR_DEBOUNCE_MS)
 
-      await findByText(SMART_CONTRACT_PROPOSER_ERROR, {}, { timeout: 3000 })
+      expect(getByText(SMART_CONTRACT_PROPOSER_ERROR)).toBeInTheDocument()
       expect(getByTestId('submit-proposer-btn')).toBeDisabled()
       expect(addDelegateV3).not.toHaveBeenCalled()
     })
@@ -409,26 +435,30 @@ describe('AddProposer signing logic', () => {
         <AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
       )
 
-      act(() => {
+      await act(async () => {
         fireEvent.change(getByLabelText(/Address/i), { target: { value: fakerChecksummedAddress() } })
         fireEvent.change(getByLabelText(/Name/i), { target: { value: 'An EOA' } })
       })
 
       await waitFor(() => expect(getByTestId('submit-proposer-btn')).not.toBeDisabled())
+      await advanceClock(ADDRESS_ERROR_DEBOUNCE_MS)
       expect(queryByText(SMART_CONTRACT_PROPOSER_ERROR)).toBeNull()
     })
 
     it('explains on the disabled button why a smart contract cannot be a proposer', async () => {
       jest.spyOn(walletUtils, 'isSmartContractWallet').mockResolvedValue(true)
 
-      const { getByLabelText, findByText } = render(<AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />)
+      const { getByLabelText, getByText, findByText } = render(
+        <AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
+      )
 
-      act(() => {
+      await act(async () => {
         fireEvent.change(getByLabelText(/Address/i), { target: { value: fakerChecksummedAddress() } })
         fireEvent.change(getByLabelText(/Name/i), { target: { value: 'My other Safe' } })
       })
+      await advanceClock(ADDRESS_ERROR_DEBOUNCE_MS)
 
-      await findByText(SMART_CONTRACT_PROPOSER_ERROR, {}, { timeout: 3000 })
+      expect(getByText(SMART_CONTRACT_PROPOSER_ERROR)).toBeInTheDocument()
       expect(await findByText(SMART_CONTRACT_PROPOSER_INFO)).toBeInTheDocument()
     })
 
@@ -439,12 +469,13 @@ describe('AddProposer signing logic', () => {
         <AddProposer onClose={jest.fn()} onSuccess={jest.fn()} />,
       )
 
-      act(() => {
+      await act(async () => {
         fireEvent.change(getByLabelText(/Address/i), { target: { value: fakerChecksummedAddress() } })
         fireEvent.change(getByLabelText(/Name/i), { target: { value: 'An EOA' } })
       })
 
       await waitFor(() => expect(getByTestId('submit-proposer-btn')).not.toBeDisabled())
+      await advanceClock(ADDRESS_ERROR_DEBOUNCE_MS)
       expect(queryByText(SMART_CONTRACT_PROPOSER_INFO)).toBeNull()
     })
   })

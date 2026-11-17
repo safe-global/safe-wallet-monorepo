@@ -23,7 +23,7 @@ export async function registerZerionPositions(env, address, rows) {
  */
 export async function prepareZerionPortfolioScenario(env, owners) {
   const context = await createSafe(onChain(env, MAINNET), owners, {
-    ownerAddresses: [owners.owner4.address],
+    ownerAddresses: [owners.alice.address],
     threshold: 1,
   })
   try {
@@ -61,7 +61,7 @@ export async function prepareZerionPortfolioScenario(env, owners) {
         app: { name: 'Aave V3', url: 'https://app.aave.com' },
       },
     ])
-    return { safes: { static: { ETH_ZERION_SAFE: `eth:${context.safeAddress}` } } }
+    return { safes: { portfolio: `eth:${context.safeAddress}` } }
   } finally {
     context.provider.destroy()
   }
@@ -87,7 +87,7 @@ const DAI = {
  */
 export async function prepareZerionPositionsScenario(env, owners) {
   const context = await createSafe(onChain(env, MAINNET), owners, {
-    ownerAddresses: [owners.owner4.address],
+    ownerAddresses: [owners.alice.address],
     threshold: 1,
   })
   try {
@@ -114,7 +114,7 @@ export async function prepareZerionPositionsScenario(env, owners) {
         name: 'Compound V2 Lending',
       },
     ])
-    return { safes: { static: { ETH_ZERION_POSITIONS_SAFE: `eth:${context.safeAddress}` } } }
+    return { safes: { positions: `eth:${context.safeAddress}` } }
   } finally {
     context.provider.destroy()
   }

@@ -30,7 +30,9 @@
 }
 
 .widgetItem {
-  iframe {
+  /* Token logos: whichever element renders them */
+  iframe,
+  img {
     display: none !important;
   }
 }

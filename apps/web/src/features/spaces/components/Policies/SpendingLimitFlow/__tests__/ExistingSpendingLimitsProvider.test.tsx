@@ -8,7 +8,7 @@ import type { SafeScope } from '@safe-global/views/components/tx-flow/safe-scope
 import { Errors, logError } from '@/services/exceptions'
 import { addressExBuilder, extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
-import { tokenOptionBuilder } from '../utils/tokenOptions.fixtures'
+import { tokenOptionBuilder } from '../utils/tokenOptions.testData'
 import useSpendingLimitTokenOptions from '../hooks/useSpendingLimitTokenOptions'
 import { ExistingSpendingLimitsProvider, useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 

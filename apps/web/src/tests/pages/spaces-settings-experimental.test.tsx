@@ -17,7 +17,6 @@ jest.mock('@/features/__core__', () => ({
 jest.mock('@/features/spaces', () => ({
   SpacesFeature: 'SpacesFeature',
   useCurrentSpaceId: jest.fn(),
-  useFeatureFlagRedirect: jest.fn(),
   useFeatureRedirect: jest.fn(),
 }))
 
@@ -48,13 +47,6 @@ describe('SpaceSettingsExperimentalPage (/spaces/settings/experimental)', () => 
       FEATURES.WORKSPACES_EXPERIMENTAL_FEATURES,
       AppRoutes.spaces.settingsGeneral,
     )
-  })
-
-  it('keeps the Spaces feature-flag redirect', () => {
-    setup()
-    render(<SpaceSettingsExperimentalPage />)
-
-    expect(spacesFeature.useFeatureFlagRedirect).toHaveBeenCalled()
   })
 
   it('renders the settings page on the experimental tab', () => {

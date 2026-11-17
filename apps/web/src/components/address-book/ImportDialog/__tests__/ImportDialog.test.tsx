@@ -1,6 +1,8 @@
 import { faker } from '@faker-js/faker'
 import userEvent from '@testing-library/user-event'
-import { fakerChecksummedAddress, render, screen, waitFor } from '@/tests/test-utils'
+import { fakerChecksummedAddress, fakerLookalikeAddress, render, screen, waitFor, within } from '@/tests/test-utils'
+import * as useChains from '@/hooks/useChains'
+import { ADDRESS_POISONING_EVENTS, MixpanelEventParams, trackEvent } from '@/services/analytics'
 import { getStoreInstance } from '@/store'
 import ImportDialog from '..'
 
@@ -91,5 +93,141 @@ describe('ImportDialog', () => {
 
     expect(await screen.findByText('File type must be text/csv', { exact: false })).toBeInTheDocument()
     expect(screen.getByTestId('import-btn')).toBeDisabled()
+  })
+})
+
+describe('ImportDialog look-alike check', () => {
+  const contact = fakerChecksummedAddress()
+  const contactName = faker.person.fullName()
+  const lookalike = fakerLookalikeAddress(contact)
+  const clean = fakerChecksummedAddress()
+  const initialReduxState = { addressBook: { [CHAIN_ID]: { [contact]: contactName } } }
+  const rows = (...addresses: string[]) =>
+    addresses.map((address) => `${address},${faker.person.firstName()},${CHAIN_ID}`)
+
+  const savedAddresses = () => Object.keys(getStoreInstance().getState().addressBook[CHAIN_ID] ?? {})
+  const confirmDialog = () => screen.findByRole('dialog', { name: 'Similar addresses detected' })
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    // An imported look-alike is persisted and would be hydrated back as a saved address in the next test.
+    localStorage.clear()
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+  })
+
+  it('says how many addresses in the file look like other addresses', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await userEvent.setup().upload(input, csvFile(rows(lookalike, clean)))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      '1 address in this file looks similar to other addresses.',
+    )
+  })
+
+  it('asks the user to verify instead of import when look-alikes are found', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await userEvent.setup().upload(input, csvFile(rows(lookalike, clean)))
+
+    await waitFor(() => expect(screen.getByTestId('import-btn')).toHaveTextContent('Verify'))
+  })
+
+  it('keeps the Import label when no address looks like another', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await userEvent.setup().upload(input, csvFile(rows(clean)))
+
+    await waitFor(() => expect(screen.getByTestId('import-btn')).toBeEnabled())
+    expect(screen.getByTestId('import-btn')).toHaveTextContent('Import')
+  })
+
+  it('skips the look-alike rows when the user chooses to skip them', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await uploadAndImport(input, csvFile(rows(lookalike, clean)))
+    await userEvent.setup().click(within(await confirmDialog()).getByText('No, skip similar addresses'))
+
+    await waitFor(() => expect(savedAddresses()).toEqual([contact, clean]))
+  })
+
+  it('imports every row when the user includes the look-alikes', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await uploadAndImport(input, csvFile(rows(lookalike, clean)))
+    await userEvent.setup().click(within(await confirmDialog()).getByText('Yes, import them anyway'))
+
+    await waitFor(() => expect(savedAddresses()).toEqual([contact, lookalike, clean]))
+  })
+
+  it('imports straight away when no address looks like another', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await uploadAndImport(input, csvFile(rows(clean)))
+
+    await waitFor(() => expect(savedAddresses()).toEqual([contact, clean]))
+    expect(screen.queryByRole('dialog', { name: 'Similar addresses detected' })).not.toBeInTheDocument()
+  })
+
+  it('keeps a saved address in the file when skipping the look-alike that imitates it', async () => {
+    const renamed = faker.person.firstName()
+    const { input } = renderDialog({ initialReduxState })
+
+    await uploadAndImport(input, csvFile([`${contact},${renamed},${CHAIN_ID}`, ...rows(lookalike)]))
+    await userEvent.setup().click(within(await confirmDialog()).getByText('No, skip similar addresses'))
+
+    await waitFor(() => expect(getStoreInstance().getState().addressBook[CHAIN_ID]).toEqual({ [contact]: renamed }))
+  })
+
+  it('imports straight away when the ADDRESS_POISONING_PROTECTION flag is off', async () => {
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
+    const { input } = renderDialog({ initialReduxState })
+
+    await uploadAndImport(input, csvFile(rows(lookalike, clean)))
+
+    await waitFor(() => expect(savedAddresses()).toEqual([contact, lookalike, clean]))
+    expect(screen.queryByRole('dialog', { name: 'Similar addresses detected' })).not.toBeInTheDocument()
+  })
+
+  it('tracks the warning and the decision to import anyway', async () => {
+    const params = { [MixpanelEventParams.LOCATION]: 'address_book_import' }
+    const { input } = renderDialog({ initialReduxState })
+
+    await uploadAndImport(input, csvFile(rows(lookalike, clean)))
+    expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_SHOWN, params)
+
+    await userEvent.setup().click(within(await confirmDialog()).getByText('Yes, import them anyway'))
+
+    await waitFor(() => expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, params))
+    expect(trackEvent).not.toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, expect.anything())
+  })
+
+  it('tracks the decision to skip the look-alikes', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await uploadAndImport(input, csvFile(rows(lookalike, clean)))
+    await userEvent.setup().click(within(await confirmDialog()).getByText('No, skip similar addresses'))
+
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, {
+        [MixpanelEventParams.LOCATION]: 'address_book_import',
+        [MixpanelEventParams.DISMISS_ACTION]: 'skip',
+      }),
+    )
+  })
+
+  it('tracks the decision to close the confirmation', async () => {
+    const { input } = renderDialog({ initialReduxState })
+
+    await uploadAndImport(input, csvFile(rows(lookalike, clean)))
+    await userEvent.setup().click(within(await confirmDialog()).getByRole('button', { name: 'Close' }))
+
+    await waitFor(() =>
+      expect(trackEvent).toHaveBeenCalledWith(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, {
+        [MixpanelEventParams.LOCATION]: 'address_book_import',
+        [MixpanelEventParams.DISMISS_ACTION]: 'cancel',
+      }),
+    )
+    expect(savedAddresses()).toEqual([contact])
   })
 })

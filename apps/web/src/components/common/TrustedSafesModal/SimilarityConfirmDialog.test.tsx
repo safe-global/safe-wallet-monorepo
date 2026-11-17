@@ -1,4 +1,8 @@
+import { faker } from '@faker-js/faker'
 import { render, screen, fireEvent } from '@/tests/test-utils'
+import { chainBuilder } from '@/tests/builders/chains'
+import * as useChains from '@/hooks/useChains'
+import { Dialog, DialogContent } from '@safe-global/views/components/ui/dialog'
 import SimilarityConfirmDialog from './SimilarityConfirmDialog'
 import type { SelectableSafe } from './useTrustedSafesModal.types'
 
@@ -23,6 +27,7 @@ describe('SimilarityConfirmDialog', () => {
 
   beforeEach(() => {
     jest.clearAllMocks()
+    jest.spyOn(useChains, 'useChain').mockReturnValue(undefined)
   })
 
   it('should render dialog when open', () => {
@@ -63,5 +68,55 @@ describe('SimilarityConfirmDialog', () => {
     render(<SimilarityConfirmDialog {...defaultProps} open={false} />)
 
     expect(screen.queryByText('Similar address detected')).not.toBeInTheDocument()
+  })
+
+  it('shows the address without a chain prefix', () => {
+    jest.spyOn(useChains, 'useChain').mockReturnValue(chainBuilder().with({ shortName: 'eth' }).build())
+
+    render(<SimilarityConfirmDialog {...defaultProps} />)
+
+    expect(screen.queryAllByText('eth:')).toHaveLength(0)
+  })
+
+  it('bolds the first and last four hex characters of the address', () => {
+    render(<SimilarityConfirmDialog {...defaultProps} />)
+
+    const bold = Array.from(screen.getByRole('dialog').querySelectorAll('b')).map((b) => b.textContent)
+    expect(bold).toEqual([mockSafe.address.slice(2, 6), mockSafe.address.slice(-4)])
+  })
+
+  it('shows a backdrop when opened from inside another dialog', () => {
+    render(
+      <Dialog open>
+        <DialogContent>
+          <SimilarityConfirmDialog {...defaultProps} />
+        </DialogContent>
+      </Dialog>,
+    )
+
+    expect(document.querySelectorAll('[data-slot="dialog-overlay"]')).toHaveLength(2)
+  })
+
+  it('uses the given description, address label and hint', () => {
+    const copy = {
+      description: faker.lorem.sentence(),
+      addressLabel: faker.lorem.words(2),
+      hint: faker.lorem.sentence(),
+    }
+
+    render(<SimilarityConfirmDialog {...defaultProps} {...copy} />)
+
+    expect(screen.getByText(copy.description)).toBeInTheDocument()
+    expect(screen.getByText(copy.addressLabel)).toBeInTheDocument()
+    expect(screen.getByText(copy.hint)).toBeInTheDocument()
+    expect(screen.queryByText('Selected safe')).not.toBeInTheDocument()
+  })
+
+  it('routes the caller stacking classes to the popup and the backdrop', () => {
+    render(<SimilarityConfirmDialog {...defaultProps} className="popup-marker" overlayClassName="overlay-marker" />)
+
+    const overlays = Array.from(document.querySelectorAll('[data-slot="dialog-overlay"]'))
+    expect(screen.getByRole('dialog')).toHaveClass('popup-marker')
+    expect(overlays.some((overlay) => overlay.classList.contains('overlay-marker'))).toBe(true)
   })
 })

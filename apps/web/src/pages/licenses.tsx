@@ -1,4 +1,3 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Table, TableBody, TableRow, TableCell, TableHeader, TableHead } from '@safe-global/views/components/ui/table'
@@ -476,7 +475,7 @@ const SafeLicenses = () => (
   </>
 )
 
-const Licenses: NextPage = () => {
+const Licenses = () => {
   const isOfficialHost = useIsOfficialHost()
 
   return (

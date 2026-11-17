@@ -22,11 +22,7 @@ const defaultTokens = [
 export async function prepareBalancesEndpointsScenario(env, owners) {
   const mainnet = onChain(env, 1)
   await registerTokens(mainnet, curatedTokens)
-  const safes = await rebuildStagingSafes(env, owners, ['ETH_STATIC_SAFE_15'])
+  const { ETH_STATIC_SAFE_15: tokenLists } = await rebuildStagingSafes(env, owners, ['ETH_STATIC_SAFE_15'])
   await trustTokens(mainnet, defaultTokens)
-  return { safes: { static: safes } }
-}
-
-export async function prepareCopilotScenario(env, owners) {
-  return { safes: { static: await rebuildStagingSafes(env, owners, ['MATIC_STATIC_SAFE_30']) } }
+  return { safes: { tokenLists } }
 }

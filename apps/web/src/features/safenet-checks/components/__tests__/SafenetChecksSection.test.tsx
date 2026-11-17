@@ -2,7 +2,12 @@ import { renderWithUserEvent, screen } from '@/tests/test-utils'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import type { TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { DetailedExecutionInfoType } from '@safe-global/store/gateway/types'
-import { CheckStatus, type PublicCheckStatus } from '@safe-global/utils/features/safenet-checks'
+import {
+  CheckStatus,
+  type Hex,
+  type PublicCheckStatus,
+  type SafenetCheckSnapshot,
+} from '@safe-global/utils/features/safenet-checks'
 import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
 import {
   buildCheckView,
@@ -10,11 +15,19 @@ import {
   sentinelRevealedEvent,
 } from '@safe-global/utils/features/safenet-checks/builders'
 import { SafenetChecksSection } from '../SafenetChecksSection'
+import {
+  MixpanelEventParams,
+  SAFENET_EVENTS,
+  SafenetCheckResult,
+  SafenetSignerRole,
+  trackEvent,
+} from '@/services/analytics'
 
 jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
   ...jest.requireActual('@safe-global/utils/features/safenet-checks/hooks'),
   useSafenetCheck: jest.fn(),
 }))
+jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
 
 const mockUseSafenetCheck = useSafenetCheck as jest.MockedFunction<typeof useSafenetCheck>
 
@@ -242,5 +255,113 @@ describe('SafenetChecksSection', () => {
     await user.tab()
     expect(await screen.findByRole('link', { name: /Learn more/ })).toBeInTheDocument()
     expect(screen.getByText(/The check starts after you sign/)).toBeInTheDocument()
+  })
+})
+
+describe('SafenetChecksSection Mixpanel tracking', () => {
+  let hashCount = 0
+  const newHash = (): Hex => `0x${(++hashCount).toString(16).padStart(64, '0')}`
+  const flowOf = (hash: string, over: Partial<TxFlowContextType> = {}): Partial<TxFlowContextType> => ({
+    txId: `multisig_${SAFE}_${hash}`,
+    txDetails,
+    ...over,
+  })
+  const show = (hash: Hex, status: PublicCheckStatus, events: SafenetCheckSnapshot['events'] = []) =>
+    mockUseSafenetCheck.mockReturnValue(
+      buildCheckView({ snapshot: buildSnapshot({ safeTxHash: hash, status, events }), status, publicStatus: status }),
+    )
+
+  beforeEach(() => jest.clearAllMocks())
+
+  it('tracks a risk with its rules, the sentinel tally and the signer role', () => {
+    const hash = newHash()
+    show(hash, CheckStatus.MALICIOUS, [
+      sentinelRevealedEvent({ approved: false, reason: 'R-4.5' }),
+      sentinelRevealedEvent({ approved: false, reason: 'R-4.4' }),
+      sentinelRevealedEvent({ approved: true, reason: '' }),
+    ])
+
+    renderInFlow(flowOf(hash))
+
+    expect(trackEvent).toHaveBeenCalledTimes(1)
+    expect(trackEvent).toHaveBeenCalledWith(SAFENET_EVENTS.CHECKED, {
+      [MixpanelEventParams.SAFE_TX_HASH]: hash,
+      [MixpanelEventParams.RESULT]: SafenetCheckResult.RISK_DETECTED,
+      [MixpanelEventParams.RULES_FLAGGED]: ['R-4.4', 'R-4.5'],
+      [MixpanelEventParams.SENTINELS_FLAGGED]: '2 of 3',
+      [MixpanelEventParams.SIGNER_ROLE]: SafenetSignerRole.CO_SIGNER,
+    })
+  })
+
+  it.each([
+    ['creates the transaction', { isCreation: true }, SafenetSignerRole.FIRST_SIGNER],
+    ['signs an existing transaction', {}, SafenetSignerRole.CO_SIGNER],
+    ['signs and executes', { willExecute: true }, SafenetSignerRole.EXECUTOR],
+    ['only executes', { onlyExecute: true }, SafenetSignerRole.EXECUTOR],
+  ])('tracks no rules for a check without issues when the user %s', (_title, flow, role) => {
+    const hash = newHash()
+    show(hash, CheckStatus.BENIGN, [sentinelRevealedEvent({ approved: false, reason: 'R-4.4' })])
+
+    renderInFlow(flowOf(hash, flow))
+
+    expect(trackEvent).toHaveBeenCalledWith(SAFENET_EVENTS.CHECKED, {
+      [MixpanelEventParams.SAFE_TX_HASH]: hash,
+      [MixpanelEventParams.RESULT]: SafenetCheckResult.NO_ISSUES,
+      [MixpanelEventParams.RULES_FLAGGED]: [],
+      [MixpanelEventParams.SENTINELS_FLAGGED]: '1 of 1',
+      [MixpanelEventParams.SIGNER_ROLE]: role,
+    })
+  })
+
+  it('tracks a failed read as unavailable, without a snapshot', () => {
+    const hash = newHash()
+    mockUseSafenetCheck.mockReturnValue(buildCheckView({ unavailableReason: 'READ_FAILED' }))
+    renderInFlow(flowOf(hash))
+
+    expect(trackEvent).toHaveBeenCalledWith(SAFENET_EVENTS.CHECKED, {
+      [MixpanelEventParams.SAFE_TX_HASH]: hash,
+      [MixpanelEventParams.RESULT]: SafenetCheckResult.UNAVAILABLE,
+      [MixpanelEventParams.RULES_FLAGGED]: [],
+      [MixpanelEventParams.SENTINELS_FLAGGED]: '0 of 0',
+      [MixpanelEventParams.SIGNER_ROLE]: SafenetSignerRole.CO_SIGNER,
+    })
+  })
+
+  it('tracks nothing while the check is in progress', () => {
+    const hash = newHash()
+    show(hash, CheckStatus.IN_PROGRESS)
+    renderInFlow(flowOf(hash))
+
+    expect(trackEvent).not.toHaveBeenCalled()
+  })
+
+  it('tracks nothing for a verdict whose snapshot is not on screen', () => {
+    mockUseSafenetCheck.mockReturnValue(
+      buildCheckView({ status: CheckStatus.MALICIOUS, publicStatus: CheckStatus.MALICIOUS }),
+    )
+    renderInFlow(flowOf(newHash()))
+
+    expect(trackEvent).not.toHaveBeenCalled()
+  })
+
+  it('tracks once per result across remounts and again when the result changes', () => {
+    const hash = newHash()
+    const flow = flowOf(hash)
+    show(hash, CheckStatus.DISPUTED)
+    renderInFlow(flow).unmount()
+    const { rerender } = renderInFlow(flow)
+    expect(trackEvent).toHaveBeenCalledTimes(1)
+
+    show(hash, CheckStatus.MALICIOUS)
+    rerender(
+      <TxFlowContext.Provider value={flow as TxFlowContextType}>
+        <SafenetChecksSection />
+      </TxFlowContext.Provider>,
+    )
+
+    expect(jest.mocked(trackEvent).mock.calls.map(([, params]) => params?.[MixpanelEventParams.RESULT])).toEqual([
+      SafenetCheckResult.NO_RULING,
+      SafenetCheckResult.RISK_DETECTED,
+    ])
   })
 })

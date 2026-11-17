@@ -25,9 +25,9 @@ import { createExistingTx } from '@/services/tx/tx-sender'
 const EXECUTE_OPTIONS = [{ id: 'execute', label: 'Execute' }]
 
 /**
- * Execute step for a fully signed transaction: after the signature that completes the threshold, or
- * straight from the queue. The transaction is reloaded from the gateway so gas is estimated against
- * the real signatures before executing.
+ * Execute step for a fully signed transaction: after the sign step of a 1/n Safe, or straight from
+ * the queue. The transaction is reloaded from the gateway so gas is estimated against the real
+ * signatures before executing.
  */
 export const ExecuteTxStep = ({ afterSigning = false }: { afterSigning?: boolean }) => {
   const chainId = useChainId()

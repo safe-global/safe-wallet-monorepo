@@ -128,6 +128,17 @@ export const basicTypesActions = (contract = checksumAddress(faker.finance.ether
   }))
 }
 
+export const setFallbackHandlerAction = (handler: string): DecodedAction => ({
+  operation: Operation.CALL,
+  to: checksumAddress(faker.finance.ethereumAddress()),
+  value: '0',
+  data: faker.string.hexadecimal({ length: SELECTOR_HEX_LENGTH + WORD_HEX_LENGTH, casing: 'lower' }),
+  dataDecoded: {
+    method: 'setFallbackHandler',
+    parameters: [{ name: 'handler', type: 'address', value: handler }],
+  },
+})
+
 export const multiSendTxInfo = (actionCount: number): MultiSendTransactionInfo => ({
   type: TransactionInfoType.CUSTOM,
   humanDescription: null,

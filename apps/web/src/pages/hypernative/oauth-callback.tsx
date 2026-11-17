@@ -1,4 +1,3 @@
-import type { NextPage } from 'next'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
@@ -27,7 +26,7 @@ import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
  * - This page exchanges code for token and notifies parent window
  * - Popup closes automatically after successful token exchange
  */
-const HypernativeOAuthCallback: NextPage = () => {
+const HypernativeOAuthCallback = () => {
   const router = useRouter()
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [errorMessage, setErrorMessage] = useState<string>('')
@@ -105,7 +104,7 @@ const HypernativeOAuthCallback: NextPage = () => {
         }
 
         // Step 6: Store token in cookie
-        setToken(tokenResponse.access_token, tokenResponse.token_type, tokenResponse.expires_in)
+        setToken(tokenResponse)
 
         // Step 7: Clean up sessionStorage
         clearPkce()

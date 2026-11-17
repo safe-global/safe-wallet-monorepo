@@ -6,6 +6,7 @@ import { createMockStory, createNonOwnerWallet } from '@/stories/mocks'
 import { buildDelegationOrigin } from '../services/delegationMessages'
 import { getCurrentTotp } from '../utils/totp'
 import PendingDelegationsList from './PendingDelegationsList'
+import { mockNow } from '@/stories/mocks/now'
 
 const efSafe = safeFixtures.efSafe
 const parentSafeAddress = efSafe.owners[1].value
@@ -33,8 +34,8 @@ const delegationMessage = (
     primaryType: 'Delegate',
     message: { delegateAddress, totp: getCurrentTotp() },
   },
-  creationTimestamp: Date.now(),
-  modifiedTimestamp: Date.now(),
+  creationTimestamp: mockNow(),
+  modifiedTimestamp: mockNow(),
   confirmationsSubmitted,
   confirmationsRequired: 2,
   proposedBy: parentSigner,

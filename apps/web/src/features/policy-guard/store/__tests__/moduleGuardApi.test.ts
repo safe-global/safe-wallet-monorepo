@@ -3,10 +3,10 @@ import { apiSliceWithChainsConfig, chainsAdapter, chainsInitialState } from '@sa
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { makeStore } from '@/store'
 import { chainBuilder } from '@/tests/builders/chains'
-import { getReadOnlyProvider } from '../../services/getReadOnlyProvider'
+import { getReadOnlyProvider } from '@/hooks/wallets/getReadOnlyProvider'
 import { moduleGuardApi } from '../moduleGuardApi'
 
-jest.mock('../../services/getReadOnlyProvider', () => ({ getReadOnlyProvider: jest.fn() }))
+jest.mock('@/hooks/wallets/getReadOnlyProvider', () => ({ getReadOnlyProvider: jest.fn() }))
 jest.mock('@/services/exceptions', () => ({ logError: jest.fn() }))
 
 const mockGetProvider = getReadOnlyProvider as jest.MockedFunction<typeof getReadOnlyProvider>

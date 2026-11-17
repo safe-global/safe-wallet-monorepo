@@ -4,14 +4,17 @@ import { isAuthenticated } from '@/store/authSlice'
 import {
   useAddressBooksGetAddressBookItemsV1Query,
   type SpaceAddressBookItemDto,
+  type SpaceAddressBookTagDto,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 
 const EMPTY_ADDRESS_BOOK: SpaceAddressBookItemDto[] = []
+const EMPTY_TAGS: SpaceAddressBookTagDto[] = []
 
 /** The workspace address book, with its query state, so an empty book is distinguishable from an unread one. */
 export const useSpaceAddressBookState = (): {
   items: SpaceAddressBookItemDto[]
+  tags: SpaceAddressBookTagDto[]
   isLoading: boolean
   isError: boolean
   isUninitialized: boolean
@@ -30,7 +33,14 @@ export const useSpaceAddressBookState = (): {
     { skip: !isUserSignedIn || !spaceId, ...SPACE_REFRESH_OPTIONS },
   )
 
-  return { items: addressBook?.data ?? EMPTY_ADDRESS_BOOK, isLoading, isError, isUninitialized, refetch }
+  return {
+    items: addressBook?.data ?? EMPTY_ADDRESS_BOOK,
+    tags: addressBook?.tags ?? EMPTY_TAGS,
+    isLoading,
+    isError,
+    isUninitialized,
+    refetch,
+  }
 }
 
 const useGetSpaceAddressBook = (): SpaceAddressBookItemDto[] => useSpaceAddressBookState().items

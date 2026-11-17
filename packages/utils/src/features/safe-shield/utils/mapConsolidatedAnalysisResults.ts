@@ -2,11 +2,10 @@ import type {
   AnalysisResult,
   AnyStatus,
   GroupedAnalysisResults,
-  StatusGroup,
   FallbackHandlerDetails,
   ContractDetails,
 } from '../types'
-import { ContractStatus } from '../types'
+import { CommonSharedStatus, ContractStatus, StatusGroup } from '../types'
 import { MULTI_RESULT_DESCRIPTION } from '../constants'
 import { getPrimaryResult, sortBySeverity } from './analysisUtils'
 import { RecipientAnalysisResults, ContractAnalysisResults, ThreatAnalysisResults } from '../types'
@@ -17,6 +16,18 @@ interface ConsolidatedAnalysisResult<T extends AnyStatus = AnyStatus> extends Om
 
 type ConsolidatedResults<T extends AnyStatus = AnyStatus> = {
   [group in StatusGroup]?: { [type in T]?: ConsolidatedAnalysisResult<T>[] }
+}
+
+/** A failed activity lookup wins a severity tie over low activity, so it is never hidden by address order. */
+const getPrimaryGroupResult = (group: StatusGroup, results: AnalysisResult[]): AnalysisResult | null => {
+  if (group !== StatusGroup.RECIPIENT_ACTIVITY) {
+    return getPrimaryResult(results)
+  }
+
+  const failedFirst = [...results].sort(
+    (a, b) => Number(b.type === CommonSharedStatus.FAILED) - Number(a.type === CommonSharedStatus.FAILED),
+  )
+  return getPrimaryResult(failedFirst)
 }
 
 /**
@@ -55,7 +66,7 @@ export const mapConsolidatedAnalysisResults = (
     {},
   )
 
-  for (const groupResults of Object.values(consolidatedResults)) {
+  for (const [group, groupResults] of Object.entries(consolidatedResults)) {
     const currentGroupResults = [] as AnalysisResult[]
 
     for (const [type, typeResults] of Object.entries(groupResults)) {
@@ -102,7 +113,7 @@ export const mapConsolidatedAnalysisResults = (
       }
     }
 
-    const primaryGroupResult = getPrimaryResult(currentGroupResults)
+    const primaryGroupResult = getPrimaryGroupResult(group as StatusGroup, currentGroupResults)
     if (primaryGroupResult) {
       results.push(primaryGroupResult)
     }

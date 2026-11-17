@@ -5,7 +5,7 @@ import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { logError } from '@/services/exceptions'
 import type { RootState } from '@/store'
 import { gatewayApi } from '@/store/api/gateway'
-import { getReadOnlyProvider } from '../services/getReadOnlyProvider'
+import { getReadOnlyProvider } from '@/hooks/wallets/getReadOnlyProvider'
 
 // Loaded on first read: its RPC error helpers pull contract ABIs that the always-loaded hook must not
 const loadReadModuleGuard = () =>

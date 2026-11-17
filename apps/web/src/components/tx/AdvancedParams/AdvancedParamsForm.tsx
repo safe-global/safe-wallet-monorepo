@@ -85,7 +85,7 @@ const AdvancedParamsForm = ({ params, ...props }: AdvancedParamsFormProps) => {
                   disabled={props.willRelay}
                   label={errors.userNonce?.message || 'Wallet nonce'}
                   error={!!errors.userNonce}
-                  {...register(AdvancedField.userNonce)}
+                  {...register(AdvancedField.userNonce, { valueAsNumber: true })}
                 />
               </div>
 

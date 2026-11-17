@@ -133,7 +133,7 @@ describe('helpers', () => {
         },
       }) as unknown as TransactionDetails
 
-    it('returns true for a GTF Safe-pays payload', () => {
+    it('returns true for a Pay from Safe payload', () => {
       expect(txRequiresRelay(makeTx({}))).toBe(true)
     })
 

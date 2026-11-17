@@ -10,8 +10,6 @@ import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATE
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { SPACE_REFRESH_OPTIONS } from '../../hooks/refreshOptions'
 import { MemberStatus } from '@/features/spaces'
-import { useHasFeature } from '@/hooks/useChains'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
 import TrialEndingModal from '../Plans/TrialEndingModal'
 import WorkspaceLockModal from '../Plans/WorkspaceLockModal'
@@ -25,7 +23,6 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
     { id: spaceId },
     { skip: !isUserSignedIn || !spaceId, ...SPACE_REFRESH_OPTIONS },
   )
-  const isSpacesFeatureEnabled = useHasFeature(FEATURES.SPACES)
   const isOidcLoginPending = useAppSelector(selectIsOidcLoginPending)
   const isSessionCheckPending = useAppSelector(selectIsSessionCheckPending)
 
@@ -47,8 +44,6 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
       router.replace(AppRoutes.welcome.spaces)
     }
   }, [hasLostAccess, isInactiveMember, isFetching, router])
-
-  if (!isSpacesFeatureEnabled) return null
 
   if (isLoadingState) return <LoadingState />
 

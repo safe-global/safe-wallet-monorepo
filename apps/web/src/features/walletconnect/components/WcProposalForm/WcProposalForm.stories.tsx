@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { mswLoader } from 'msw-storybook-addon'
 import type { WalletKitTypes } from '@reown/walletkit'
 import { createMockStory } from '@/stories/mocks'
+import { withWcPopupFrame } from '../withWcPopupFrame'
 import WcProposalForm from './index'
 
 const setup = createMockStory({
@@ -62,10 +62,9 @@ const createProposal = ({
 const meta = {
   title: 'Features/WalletConnect/WcProposalForm',
   component: WcProposalForm,
-  loaders: [mswLoader],
-  decorators: [setup.decorator],
+  decorators: [withWcPopupFrame, setup.decorator],
   parameters: {
-    layout: 'padded',
+    layout: 'centered',
     ...setup.parameters,
   },
   args: {
@@ -83,7 +82,7 @@ export const Default: Story = {
     proposal: createProposal({
       name: 'Uniswap Interface',
       url: 'https://app.uniswap.org',
-      icon: 'https://app.uniswap.org/favicon.png',
+      icon: 'mock-assets/app.uniswap.org/favicon.webp',
       chains: ['eip155:1'],
       validation: 'VALID',
     }),

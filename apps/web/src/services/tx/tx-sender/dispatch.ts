@@ -87,7 +87,7 @@ export const dispatchTxProposal = async ({
   // Unsigned txs are proposed only temporarily and won't appear in the queue
   if (safeTx.signatures.size > 0) {
     txDispatch(TxEvent.PROPOSED, { txId: proposedTx.txId, nonce: safeTx.data.nonce, chainId, safeAddress })
-    void requestSafenetCheck({ chainId, safeAddress, safeTxHash })
+    void requestSafenetCheck({ chainId, safeAddress, safeTxHash, isFirstSignature: true })
   }
 
   return proposedTx
@@ -134,7 +134,7 @@ export const dispatchTxConfirmation = async ({
     chainId,
     safeAddress,
   })
-  void requestSafenetCheck({ chainId, safeAddress, safeTxHash })
+  void requestSafenetCheck({ chainId, safeAddress, safeTxHash, isFirstSignature: false })
 
   return confirmedTx
 }

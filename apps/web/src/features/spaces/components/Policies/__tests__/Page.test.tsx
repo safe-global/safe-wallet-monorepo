@@ -36,11 +36,11 @@ jest.mock('../../AuthState', () => ({
   default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }))
 
-let mockIsAllowlistAvailable = false
+let mockIsAllowlistActive: boolean | undefined = false
 
 jest.mock('@/features/policy-guard', () => ({
   ...jest.requireActual('@/features/policy-guard'),
-  useIsAllowlistAvailableInSpace: () => mockIsAllowlistAvailable,
+  useIsAllowlistActiveInSpace: () => mockIsAllowlistActive,
 }))
 
 jest.mock('../SpendingLimitFlow', () => ({
@@ -56,7 +56,7 @@ const lockedGate = { mustUpgradeToSafePro: true, isLoading: false, upgradeHref: 
 describe('SpacePoliciesPage', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockIsAllowlistAvailable = false
+    mockIsAllowlistActive = false
     mockUseSpacePolicies.mockReturnValue(settled)
     mockUsePlanGate.mockReturnValue(openGate)
     mockUseSpacePlan.mockReturnValue({ tierName: 'Starter', isLoading: false })
@@ -162,7 +162,7 @@ describe('SpacePoliciesPage', () => {
 
   it('should, when the plan does not include policies, lock the recipient allowlist tile too', () => {
     mockUsePlanGate.mockReturnValue(lockedGate)
-    mockIsAllowlistAvailable = true
+    mockIsAllowlistActive = true
 
     render(<SpacePoliciesPage spaceId="space-1" />)
 
