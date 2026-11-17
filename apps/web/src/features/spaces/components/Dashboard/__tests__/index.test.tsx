@@ -8,6 +8,8 @@ import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
 import { useSpaceMembersByStatus, useIsInvited } from '@/features/spaces/hooks/useSpaceMembers'
 import { useSpacePendingTransactions } from '@/features/spaces/hooks/useSpacePendingTransactions'
 import useSpaceAccountsData from '@/features/myAccounts/hooks/useSpaceAccountsData'
+import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import { COMPLETED_STORAGE_KEY } from '../../../hooks/useSetupWidgetDismissal'
 import SpaceDashboard from '../index'
 
 const MOCK_SPACE_ID = '42'
@@ -169,7 +171,13 @@ jest.mock('../AddAccountsCard', () => () => null)
 jest.mock('../AggregatedBalances', () => () => null)
 jest.mock('../../InviteBanner/PreviewInvite', () => () => null)
 jest.mock('@/features/spaces/components/AddAccounts', () => () => null)
-jest.mock('../../SetupWidget', () => () => null)
+jest.mock(
+  '../../SetupWidget',
+  () =>
+    function MockSetupWidget() {
+      return <div data-testid="setup-widget" />
+    },
+)
 jest.mock('@/components/common/Track', () => {
   const Track = ({ children }: { children: React.ReactNode }) => <>{children}</>
   Track.displayName = 'Track'
@@ -502,5 +510,36 @@ describe('SpaceDashboard – locked Workspace (SAFE_PRO)', () => {
 
     expect(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`)).toBeInTheDocument()
     expect(mockUseSafeProAnnouncementModal).toHaveBeenCalledWith(false)
+  })
+})
+
+describe('SpaceDashboard – setup widget slot', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    restoreDefaultMocks()
+    setupUseLoadFeature([{ safeAddress: MOCK_SAFE_ADDRESS, txId: MOCK_TX_ID }])
+    ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [], isLoading: false })
+  })
+
+  afterEach(() => {
+    ;(useLocalStorage as jest.Mock).mockImplementation(() => [{}, jest.fn()])
+  })
+
+  it('shows the setup widget instead of pending transactions for a Workspace without Safes', () => {
+    render(<SpaceDashboard />)
+
+    expect(screen.getByTestId('setup-widget')).toBeInTheDocument()
+    expect(screen.queryByTestId(`pending-tx-row-${MOCK_TX_ID}`)).not.toBeInTheDocument()
+  })
+
+  it('shows pending transactions when the Workspace was marked completed before', () => {
+    ;(useLocalStorage as jest.Mock).mockImplementation((key: string) =>
+      key === COMPLETED_STORAGE_KEY ? [{ [MOCK_SPACE_ID]: true }, jest.fn()] : [{}, jest.fn()],
+    )
+
+    render(<SpaceDashboard />)
+
+    expect(screen.getByTestId(`pending-tx-row-${MOCK_TX_ID}`)).toBeInTheDocument()
+    expect(screen.queryByTestId('setup-widget')).not.toBeInTheDocument()
   })
 })
