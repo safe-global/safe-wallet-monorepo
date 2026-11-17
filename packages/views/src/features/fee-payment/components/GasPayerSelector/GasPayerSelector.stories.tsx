@@ -50,7 +50,7 @@ const safeTokens: FeePayerView['gasToken'] = {
   tokens: [ETH, USDC_TOKEN],
   selected: ZERO,
   locked: false,
-  lockedReason: 'NATIVE_ONLY',
+  lockedReason: 'ONLY_TOKEN',
 }
 const nativeLocked = { tokens: [ETH], selected: ZERO, locked: true }
 const base = { executionFee: {}, sponsored: false, sponsorKind: 'plan' as const }

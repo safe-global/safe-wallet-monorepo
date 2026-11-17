@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
+import { skipToken } from '@reduxjs/toolkit/query'
 
 import { useTrustedTokenBalances } from '@/hooks/loadables/useTrustedTokenBalances'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import { useGetGasTokensQuery } from '@/store/api/gateway'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { getGasTokenAllowlistOrder, isAllowlistedGasToken } from '../constants/gasTokenAllowlist'
-import { NATIVE_GAS_TOKEN_ONLY } from '../constants'
 import type { FeePreviewTx } from './useResolvedGasToken'
 
 export type GasTokenCandidate = {
@@ -22,36 +22,43 @@ export type GasTokenCandidatesResult = {
   defaultAddress?: string
 }
 
+const toFiat = (fiatBalance: string): number => {
+  const value = Number(fiatBalance)
+  return Number.isFinite(value) ? value : 0
+}
+
 /**
- * Tokens the Safe holds that are accepted as Pay from Safe gas tokens on the current chain.
+ * Tokens the Safe holds that the fee service accepts as Pay from Safe gas tokens on this chain.
  *
- * Source of truth: the hardcoded allowlist in `constants/gasTokenAllowlist.ts` (PLA-1412).
- * This is an interim implementation; PLA-1389 will replace the allowlist with an HTTP-fetched
- * config. Until then, no `/fees/preview` probes are needed — allowlist membership is decided
- * synchronously off the chain config + balances.
+ * The accepted ERC-20s come from the CGW (`/fees/gas-tokens`), which serves the Config Service
+ * list the fee service itself checks against — so the selector can't offer a token the quote
+ * would reject. No `/fees/preview` probes are needed.
  *
- * The native gas token is always included when held, regardless of allowlist membership, so the
- * flow still works on chains not yet in the allowlist (native-only).
+ * The native gas token is always included when held: the fee service accepts it everywhere and
+ * it is not part of the list, so the flow still works on chains with no ERC-20 gas tokens.
+ *
+ * Order: native first, then the held tokens by fiat value, so the ones that can actually cover
+ * the fee come first.
  */
-export const useGasTokenCandidates = (
-  tx: FeePreviewTx | undefined,
-  { nativeOnly = NATIVE_GAS_TOKEN_ONLY }: { nativeOnly?: boolean } = {},
-): GasTokenCandidatesResult => {
+export const useGasTokenCandidates = (tx: FeePreviewTx | undefined): GasTokenCandidatesResult => {
   const [balances] = useTrustedTokenBalances()
   const { safe } = useSafeInfo()
   const chain = useCurrentChain()
 
+  const { data: gasTokens } = useGetGasTokensQuery(chain?.chainId ? { chainId: chain.chainId } : skipToken)
+
   const candidates = useMemo<GasTokenCandidate[]>(() => {
     if (!tx || !balances?.items || !chain?.chainId || safe.threshold <= 0) return []
+
+    const isNative = (address: string, type: string) => type === 'NATIVE_TOKEN' || sameAddress(address, ZERO_ADDRESS)
 
     return balances.items
       .filter((b) => BigInt(b.balance) > 0n)
       .filter((b) => {
-        // Native always passes — required for chains absent from the allowlist,
-        // where POL is returned with a non-ZERO address and would otherwise be filtered out.
-        if (b.tokenInfo.type === 'NATIVE_TOKEN' || sameAddress(b.tokenInfo.address, ZERO_ADDRESS)) return true
-        if (nativeOnly) return false
-        return isAllowlistedGasToken(chain.chainId, b.tokenInfo.address)
+        // Native always passes — the fee service accepts it on every chain, and it is returned
+        // with a non-ZERO address on some chains (e.g. POL), where it would otherwise be filtered out.
+        if (isNative(b.tokenInfo.address, b.tokenInfo.type)) return true
+        return (gasTokens ?? []).some((gasToken) => sameAddress(gasToken.address, b.tokenInfo.address))
       })
       .map((b) => ({
         address: b.tokenInfo.address,
@@ -59,23 +66,19 @@ export const useGasTokenCandidates = (
         logoUri:
           // Prefer the chain config's native logo — TX Service per-chain currency_logo URL can
           // fail to load through the IframeIcon sandbox.
-          b.tokenInfo.type === 'NATIVE_TOKEN' || sameAddress(b.tokenInfo.address, ZERO_ADDRESS)
+          isNative(b.tokenInfo.address, b.tokenInfo.type)
             ? (chain.nativeCurrency.logoUri ?? b.tokenInfo.logoUri)
             : b.tokenInfo.logoUri,
         decimals: b.tokenInfo.decimals,
         fiatBalance: b.fiatBalance,
+        isNative: isNative(b.tokenInfo.address, b.tokenInfo.type),
       }))
       .sort((a, z) => {
-        // Native and listed ERC-20s ordered by allowlist position; everything else (held native
-        // on chains absent from the allowlist) goes last.
-        const aOrder = getGasTokenAllowlistOrder(chain.chainId, a.address)
-        const zOrder = getGasTokenAllowlistOrder(chain.chainId, z.address)
-        if (aOrder === -1 && zOrder === -1) return 0
-        if (aOrder === -1) return 1
-        if (zOrder === -1) return -1
-        return aOrder - zOrder
+        if (a.isNative !== z.isNative) return a.isNative ? -1 : 1
+        return toFiat(z.fiatBalance) - toFiat(a.fiatBalance)
       })
-  }, [tx, balances, chain?.chainId, chain?.nativeCurrency.logoUri, safe.threshold, nativeOnly])
+      .map(({ isNative: _isNative, ...candidate }) => candidate)
+  }, [tx, balances, chain?.chainId, chain?.nativeCurrency.logoUri, safe.threshold, gasTokens])
 
   return { candidates, defaultAddress: candidates[0]?.address }
 }

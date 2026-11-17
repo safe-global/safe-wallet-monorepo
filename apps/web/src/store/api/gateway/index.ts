@@ -3,6 +3,7 @@ import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { safeOverviewEndpoints } from './safeOverviews'
 import { payFromSafeFeePreviewEndpoints } from './payFromSafeFeePreview'
+import { gasTokensEndpoints } from './gasTokens'
 import { proposerSafesEndpoints } from './proposerSafes'
 
 async function _buildQueryFn<T>(fn: () => Promise<T>) {
@@ -28,6 +29,7 @@ export const gatewayApi = createApi({
   endpoints: (builder) => ({
     ...safeOverviewEndpoints(builder),
     ...payFromSafeFeePreviewEndpoints(builder),
+    ...gasTokensEndpoints(builder),
     ...proposerSafesEndpoints(builder),
   }),
 })
@@ -36,5 +38,6 @@ export const {
   useGetSafeOverviewQuery,
   useGetMultipleSafeOverviewsQuery,
   useGetPayFromSafeFeePreviewQuery,
+  useGetGasTokensQuery,
   useGetProposerSafesQuery,
 } = gatewayApi
