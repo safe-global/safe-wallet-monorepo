@@ -17,6 +17,7 @@ import { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCa
 import SplitMenuButton from '@safe-global/views/components/common/SplitMenuButton'
 import type { SlotComponentProps, SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { useSafeShield } from '@/features/safe-shield/public/hooks/useSafeShield'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 
 export const SignForm = ({
   safeTx,
@@ -45,6 +46,7 @@ export const SignForm = ({
   // Hooks
   const { signTx } = txActions
   const { setTxFlow } = useContext(TxModalContext)
+  const scope = useSafeScope()
   const {
     isSubmitDisabled,
     isSubmitLoading,
@@ -99,7 +101,8 @@ export const SignForm = ({
     }
 
     if (isNestedSigning) {
-      setTxFlow(<NestedTxSuccessScreenFlow txId={resultTxId} />, undefined, false)
+      const successScope = scope ? { chainId: scope.chainId, safeAddress: scope.safeAddress } : undefined
+      setTxFlow(<NestedTxSuccessScreenFlow txId={resultTxId} scope={successScope} />, undefined, false)
     } else {
       setTxFlow(undefined)
     }
