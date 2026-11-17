@@ -1,5 +1,5 @@
 import { Fragment, type MouseEvent, type ReactNode } from 'react'
-import { Clock, Lock, Repeat } from 'lucide-react'
+import { Clock, Lock, Repeat, TrendingUp, Vault } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
@@ -62,18 +62,32 @@ export const Tag = ({ children, muted }: { children: ReactNode; muted?: boolean 
   </span>
 )
 
-export const OpportunityMark = ({ opportunity }: { opportunity: Opportunity }) => (
-  <span
-    className="flex size-8 shrink-0 items-center justify-center rounded-md bg-foreground text-xs font-semibold text-background"
-    aria-hidden
-  >
-    {opportunity.mark}
-  </span>
-)
+export const OpportunityMark = ({ invested = false }: { invested?: boolean }) => {
+  const Icon = invested ? TrendingUp : Vault
+  return (
+    <span
+      className={cn(
+        'flex size-8 shrink-0 items-center justify-center rounded-md',
+        invested ? 'bg-badge-dot-success/15 text-badge-dot-success' : 'bg-muted text-muted-foreground',
+      )}
+      aria-hidden
+    >
+      <Icon className="size-4" />
+    </span>
+  )
+}
 
-const NameCell = ({ opportunity, operation }: { opportunity: Opportunity; operation?: Operation }) => (
+const NameCell = ({
+  opportunity,
+  operation,
+  invested,
+}: {
+  opportunity: Opportunity
+  operation?: Operation
+  invested: boolean
+}) => (
   <div className="flex min-w-0 items-center gap-3">
-    <OpportunityMark opportunity={opportunity} />
+    <OpportunityMark invested={invested} />
     <div className="flex min-w-0 flex-col">
       <span className="flex min-w-0 items-center gap-2">
         <span className="truncate font-medium text-foreground">{opportunity.name}</span>
@@ -202,7 +216,7 @@ const OpportunityRow = ({
         />
       </TableCell>
       <TableCell>
-        <NameCell opportunity={opportunity} operation={heldIn} />
+        <NameCell opportunity={opportunity} operation={heldIn} invested={Boolean(holding)} />
       </TableCell>
       <TableCell className="font-semibold tabular-nums">{formatApy(opportunity.apy)}</TableCell>
       <TableCell className="truncate" title={DEFI_V1_COPY.liquidity[liquidityBucket(opportunity)].hint}>

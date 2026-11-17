@@ -129,7 +129,7 @@ export const OpportunityDrawer = ({
       header={({ fullScreen, toggleFullScreen, close }) =>
         opportunity && (
           <header className="flex items-center gap-3 px-6 pt-6">
-            <OpportunityMark opportunity={opportunity} />
+            <OpportunityMark invested={Boolean(holding)} />
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
               <Typography as="h2" variant="paragraph-bold" className="truncate leading-tight">
                 {opportunity.name}

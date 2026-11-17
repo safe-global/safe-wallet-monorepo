@@ -171,7 +171,7 @@ export const SetUpInvestmentStepper = ({
       <DialogContent size="sm" data-testid="set-up-investment-stepper">
         <DialogHeader divided="subtle">
           <div className="flex items-center gap-3">
-            <OpportunityMark opportunity={investment} />
+            <OpportunityMark />
             <div className="flex min-w-0 flex-col">
               <DialogTitle>{COPY.newSafe}</DialogTitle>
               <DialogDescription>
