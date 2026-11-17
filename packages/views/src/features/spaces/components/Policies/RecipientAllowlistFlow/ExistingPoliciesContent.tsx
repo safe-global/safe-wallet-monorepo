@@ -1,4 +1,4 @@
-import { useId, type ReactElement } from 'react'
+import { useId, type ReactElement, type ReactNode } from 'react'
 import StatusAlert, { type StatusAlertTone } from '@safe-global/views/components/common/StatusAlert'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
@@ -9,8 +9,13 @@ import { getSpendingLimitsGroupTitle, SPENDING_LIMITS_ACKNOWLEDGEMENT_LABEL } fr
 
 export type ExistingPoliciesContentProps = {
   safeName: string
-  /** What the allowlist does to the spending limits: a warning when it blocks any of them. */
-  banner: { title: string; description: string; tone: Extract<StatusAlertTone, 'warning' | 'info'> }
+  /** What the allowlist does to the spending limits (a warning when it blocks any of them), or why they couldn't be loaded. */
+  banner: {
+    title: string
+    description?: string
+    tone: Extract<StatusAlertTone, 'warning' | 'info' | 'error' | 'loading'>
+    action?: ReactNode
+  }
   rows: (SpendingLimitImpactRowProps & { key: string })[]
   acknowledged: boolean
   onAcknowledgedChange: (acknowledged: boolean) => void
@@ -30,14 +35,16 @@ const ExistingPoliciesContent = ({
     <>
       <StatusAlert {...banner} />
 
-      <Card variant="muted" size="none" radius="xl">
-        <div className="flex flex-col gap-3 p-4">
-          <Typography variant="paragraph-small-medium">{getSpendingLimitsGroupTitle(safeName)}</Typography>
-          {rows.map(({ key, ...row }) => (
-            <SpendingLimitImpactRow key={key} {...row} />
-          ))}
-        </div>
-      </Card>
+      {rows.length > 0 && (
+        <Card variant="muted" size="none" radius="xl">
+          <div className="flex flex-col gap-3 p-4">
+            <Typography variant="paragraph-small-medium">{getSpendingLimitsGroupTitle(safeName)}</Typography>
+            {rows.map(({ key, ...row }) => (
+              <SpendingLimitImpactRow key={key} {...row} />
+            ))}
+          </div>
+        </Card>
+      )}
 
       <div className="flex items-start gap-3">
         <Checkbox

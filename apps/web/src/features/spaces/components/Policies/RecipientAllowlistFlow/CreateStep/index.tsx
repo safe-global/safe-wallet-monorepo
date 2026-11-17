@@ -1,4 +1,4 @@
-import { useContext, useState, type ReactElement } from 'react'
+import { useContext, useMemo, useState, type ReactElement } from 'react'
 import { useRouter } from 'next/router'
 import { parseSafeScopeKey, useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxModalContext } from '@/components/tx-flow'
@@ -16,6 +16,7 @@ import { useRecipientAllowlistSafeAccounts } from '../hooks/useRecipientAllowlis
 import { useGuardStatus } from '../hooks/useGuardStatus'
 import useHeldTokenAddresses from '../hooks/useHeldTokenAddresses'
 import { getAllowlistSafeLabel, isAllowlistGuardEnabled } from '../utils/allowlistDisplay'
+import { useSpendingLimitImpacts } from '../hooks/useSpendingLimitImpacts'
 import RecipientAllowlistForm, { type CalloutSection } from './RecipientAllowlistForm'
 import {
   createDefaultAllowlistValues,
@@ -45,11 +46,14 @@ const READY_GUARD_STATES: GuardStatus['status'][] = ['none', 'known', 'partial']
 export type CreateRecipientAllowlistPolicyProps = {
   dismissedCallouts: Record<CalloutSection, boolean>
   onDismissCallout: (section: CalloutSection) => void
+  /** Called on Next with whether the allowlist affects a spending limit, which adds the Existing policies step. */
+  onSpendingLimitImpact?: (affectsSpendingLimits: boolean) => void
 }
 
 const CreateRecipientAllowlistPolicy = ({
   dismissedCallouts,
   onDismissCallout,
+  onSpendingLimitImpact,
 }: CreateRecipientAllowlistPolicyProps): ReactElement => {
   const { data, onNext } = useContext<TxFlowContextType<RecipientAllowlistFlowData>>(TxFlowContext)
   const { setTxFlow } = useContext(TxModalContext)
@@ -81,9 +85,16 @@ const CreateRecipientAllowlistPolicy = ({
     setValues(createDefaultAllowlistValues())
   }
 
+  const rules = useMemo(() => buildAllowlistRules(heldTokens.addresses, values), [heldTokens.addresses, values])
+  const spendingLimits = useSpendingLimitImpacts(rules)
+
   const canContinue = guard !== undefined && READY_GUARD_STATES.includes(guard.status)
   const canGoNext =
-    canContinue && !heldTokens.isLoading && !heldTokens.isError && isAllowlistComplete(heldTokens.addresses, values)
+    canContinue &&
+    !heldTokens.isLoading &&
+    !heldTokens.isError &&
+    !spendingLimits.isLoading &&
+    isAllowlistComplete(heldTokens.addresses, values)
 
   const isSettled = !isLoading && !isError
   const settingsHref = selectedSafe?.chain
@@ -170,7 +181,11 @@ const CreateRecipientAllowlistPolicy = ({
             type="button"
             size="submit"
             disabled={!canGoNext}
-            onClick={() => onNext({ ...values, rules: buildAllowlistRules(heldTokens.addresses, values) })}
+            onClick={() => {
+              // A failed load shows the step with its error rather than skipping the warning.
+              onSpendingLimitImpact?.(spendingLimits.isError || spendingLimits.impacts.length > 0)
+              onNext({ ...values, rules })
+            }}
             data-testid="next-btn"
           >
             {NEXT_LABEL}

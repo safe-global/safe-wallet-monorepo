@@ -1,11 +1,16 @@
 import { useState, type ReactElement } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
+import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import {
   getBlockedSpendingLimitDescription,
   getBlockedSpendingLimitsTitle,
   getRestrictedSpendingLimitsTitle,
+  getSpendingLimitsLoadErrorTitle,
   RESTRICTED_SPENDING_LIMITS_DESCRIPTION,
+  RETRY_LABEL,
+  SPENDING_LIMITS_LOAD_ERROR_DESCRIPTION,
+  SPENDING_LIMITS_LOADING_TITLE,
 } from './constants'
 import ExistingPoliciesContent, { type ExistingPoliciesContentProps } from './ExistingPoliciesContent'
 
@@ -78,5 +83,26 @@ export const AllRestricted: Story = {
       description: RESTRICTED_SPENDING_LIMITS_DESCRIPTION,
     },
     rows: [RESTRICTED_ROW, { ...RESTRICTED_ROW, key: 'treasury-bot-usdc', spender: spender('Treasury bot') }],
+  },
+}
+
+export const Loading: Story = {
+  args: { banner: { tone: 'loading', title: SPENDING_LIMITS_LOADING_TITLE }, rows: [] },
+}
+
+/** The spending limits couldn't be loaded, so the step stays until a retry loads them. */
+export const LoadError: Story = {
+  args: {
+    banner: {
+      tone: 'error',
+      title: getSpendingLimitsLoadErrorTitle('Payments'),
+      description: SPENDING_LIMITS_LOAD_ERROR_DESCRIPTION,
+      action: (
+        <Button type="button" variant="outline" size="sm">
+          {RETRY_LABEL}
+        </Button>
+      ),
+    },
+    rows: [],
   },
 }
