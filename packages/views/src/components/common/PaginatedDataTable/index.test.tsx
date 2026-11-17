@@ -37,7 +37,7 @@ describe('PaginatedDataTable', () => {
       expect(screen.queryByText('extra-cell')).not.toBeInTheDocument()
     })
 
-    it('drops secondary columns when the container is narrower than the column minimums', () => {
+    const mockContainerWidth = () => {
       let notify: ((width: number) => void) | undefined
       class ResizeObserverMock {
         constructor(callback: ResizeObserverCallback) {
@@ -50,20 +50,48 @@ describe('PaginatedDataTable', () => {
       }
       const globalWithObserver = globalThis as { ResizeObserver?: typeof ResizeObserver }
       globalWithObserver.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver
+      return {
+        setWidth: (width: number) => act(() => notify?.(width)),
+        restore: () => delete globalWithObserver.ResizeObserver,
+      }
+    }
+
+    it('drops secondary columns when the container is narrower than the column minimums', () => {
+      const container = mockContainerWidth()
 
       try {
         render(<PaginatedDataTable columns={columnsWithSecondary} rows={['a']} getRowKey={(row) => row} />)
         expect(screen.getByText('Extra')).toBeInTheDocument()
 
-        // Below the 330px column-minimum floor → compact
-        act(() => notify?.(300))
+        container.setWidth(300)
         expect(screen.queryByText('Extra')).not.toBeInTheDocument()
 
-        // Wide enough again → full column set returns
-        act(() => notify?.(400))
+        container.setWidth(400)
         expect(screen.getByText('Extra')).toBeInTheDocument()
       } finally {
-        delete globalWithObserver.ResizeObserver
+        container.restore()
+      }
+    })
+
+    it('counts the checkbox column when deciding whether the columns fit', () => {
+      const container = mockContainerWidth()
+
+      try {
+        render(
+          <PaginatedDataTable
+            columns={columnsWithSecondary}
+            rows={['a']}
+            getRowKey={(row) => row}
+            selectable
+            selectedKeys={new Set()}
+            onSelectionChange={jest.fn()}
+          />,
+        )
+        container.setWidth(350)
+
+        expect(screen.queryByText('Extra')).not.toBeInTheDocument()
+      } finally {
+        container.restore()
       }
     })
   })

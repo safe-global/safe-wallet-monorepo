@@ -79,6 +79,8 @@ type SortDirection = 'asc' | 'desc'
 type SortState = { id: string; direction: SortDirection }
 
 const DEFAULT_PAGE_SIZE = 25
+// The checkbox column's `w-10`
+const SELECTION_COLUMN_WIDTH = 40
 
 const NESTED_CONTROLS = 'a, button, [role="button"], [role="checkbox"], input, [role="menuitem"]'
 
@@ -199,7 +201,8 @@ function PaginatedDataTable<T>({
 
   // Fixed table layout ignores `min-width` on cells, so below this floor the full column set
   // cannot render without columns overlapping.
-  const tableMinWidth = columns.reduce((total, column) => total + (column.minWidth ?? 0), 0)
+  const tableMinWidth =
+    columns.reduce((total, column) => total + (column.minWidth ?? 0), 0) + (selectable ? SELECTION_COLUMN_WIDTH : 0)
 
   // Compact = the full column set doesn't fit: render the mobile presentation
   // — secondary columns fold into the row detail.

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { PenLine, Plus, Sparkles } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@safe-global/views/components/ui/empty'
@@ -99,6 +99,14 @@ const SuggestedContacts = ({
 }: SuggestedContactsProps) => {
   const [selected, setSelected] = useState<Set<string>>(() => new Set())
   const selectedSuggestions = suggestions.filter((item) => selected.has(item.address))
+
+  // Rows that leave the list (e.g. once added) drop out of the selection
+  useEffect(() => {
+    setSelected((current) => {
+      const kept = new Set([...current].filter((key) => suggestions.some((item) => item.address === key)))
+      return kept.size === current.size ? current : kept
+    })
+  }, [suggestions])
 
   if (suggestions.length === 0) {
     return (

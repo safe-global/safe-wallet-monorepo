@@ -34,9 +34,9 @@ const AddSuggestionsDialog = ({
   const [names, setNames] = useState<Record<string, string>>({})
   const idPrefix = useId()
 
-  const typedName = (address: string) => names[address]?.trim() ?? ''
-  const nameError = (address: string) => (typedName(address) ? validateName(typedName(address)) : undefined)
-  const hasInvalidName = suggestions.some((item) => nameError(item.address))
+  const nameToSave = (item: SuggestedContact) => names[item.address]?.trim() || item.suggestedName
+  const nameError = (item: SuggestedContact) => validateName(nameToSave(item))
+  const hasInvalidName = suggestions.some((item) => nameError(item))
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
@@ -44,7 +44,7 @@ const AddSuggestionsDialog = ({
     onAdd(
       suggestions.map((item) => ({
         address: item.address,
-        name: typedName(item.address) || item.suggestedName,
+        name: nameToSave(item),
         chainIds: item.chains.map((chain) => chain.chainId),
       })),
     )
@@ -66,7 +66,7 @@ const AddSuggestionsDialog = ({
             <ul className="border-border divide-border max-h-[min(24rem,50vh)] divide-y overflow-y-auto rounded-lg border">
               {suggestions.map((item) => {
                 const reason = describeSuggestion(item.reason)
-                const message = nameError(item.address)
+                const message = nameError(item)
                 const errorId = `${idPrefix}-${item.address}-error`
                 return (
                   <li key={item.address} className="flex flex-col gap-1 px-3 py-2.5">

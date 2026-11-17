@@ -73,6 +73,17 @@ describe('AddSuggestionsDialog', () => {
     expect(onAdd).not.toHaveBeenCalled()
   })
 
+  it('blocks an empty field whose suggested name is not valid', () => {
+    const suggestion = { ...buildSuggestion(), suggestedName: faker.string.alpha(51) }
+    const message = validateContactName(suggestion.suggestedName)
+
+    renderDialog([suggestion])
+
+    expect(message).toBeDefined()
+    expect(screen.getByText(message as string)).toBeInTheDocument()
+    expect(screen.getByTestId('add-suggestions-btn')).toBeDisabled()
+  })
+
   it('submits when Enter is pressed in a name field', async () => {
     const suggestion = buildSuggestion()
     const typed = faker.string.alpha(8)

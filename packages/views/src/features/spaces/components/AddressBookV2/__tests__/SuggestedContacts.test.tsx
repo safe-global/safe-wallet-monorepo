@@ -66,6 +66,17 @@ describe('SuggestedContacts', () => {
     expect(onAdd).toHaveBeenCalledWith([a, b], 'bulk')
   })
 
+  it('does not keep a row selected after it leaves the list and comes back', async () => {
+    const [a, b] = [buildSuggestion(), buildSuggestion()]
+    const { rerender } = render(<SuggestedContacts suggestions={[a, b]} canAdd />)
+    await userEvent.click(screen.getByRole('checkbox', { name: `Select ${a.suggestedName}` }))
+
+    rerender(<SuggestedContacts suggestions={[b]} canAdd />)
+    rerender(<SuggestedContacts suggestions={[a, b]} canAdd />)
+
+    expect(screen.getByRole('checkbox', { name: `Select ${a.suggestedName}` })).not.toBeChecked()
+  })
+
   it('clears the selection', async () => {
     const suggestion = buildSuggestion()
     render(<SuggestedContacts suggestions={[suggestion]} canAdd />)
