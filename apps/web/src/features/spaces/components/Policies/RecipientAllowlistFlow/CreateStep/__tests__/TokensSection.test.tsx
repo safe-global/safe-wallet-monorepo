@@ -262,7 +262,9 @@ describe('TokensSection', () => {
   it('shows the callout and dismisses it', async () => {
     const { onDismissCallout } = setup()
 
-    expect(screen.getByText('Only transactions of the tokens selected below will be allowed.')).toBeInTheDocument()
+    expect(
+      screen.getByText('The tokens selected below can only be sent to the recipients on this allowlist.'),
+    ).toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
 
     expect(onDismissCallout).toHaveBeenCalled()

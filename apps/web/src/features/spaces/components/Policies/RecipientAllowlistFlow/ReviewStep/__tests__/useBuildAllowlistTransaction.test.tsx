@@ -17,6 +17,8 @@ import { useBuildAllowlistTransaction } from '../useBuildAllowlistTransaction'
 
 const mockServices = jest.requireActual('@/features/policy-guard/services/allowlistConfigurations')
 const mockSetup = jest.requireActual('@/features/policy-guard/services/createAllowlistSetupTxs')
+const { withFirstSetupDefaults } = jest.requireActual('@/features/policy-guard/services/firstSetupDefaults')
+const { getConfigurationRoot } = jest.requireActual('@/features/policy-guard/services/policyGuardEncoders')
 
 jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
   ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
@@ -78,9 +80,18 @@ describe('useBuildAllowlistTransaction', () => {
     expect(sentBatch()).toHaveLength(3)
     expect(createMultiSendCallOnlyTx).toHaveBeenCalledWith(expect.any(Array), scope)
     expect(result.current.guardState).toEqual({ status: 'none' })
-    expect(result.current.configurations).toHaveLength(1)
-    expect(result.current.root).toMatch(/^0x[0-9a-f]{64}$/)
+    const installed = withFirstSetupDefaults(CHAIN_ID, mockServices.buildAllowlistConfigurations(CHAIN_ID, erc20Rules))
+    expect(result.current.configurations).toEqual(installed)
+    expect(result.current.root).toBe(getConfigurationRoot(installed))
     expect(result.current.txs).toEqual(sentBatch())
+  })
+
+  it('returns only the allowlist configurations when the guard is already known', async () => {
+    mockGuard({ state: { status: 'known' } })
+    const { result } = renderHook(() => useBuildAllowlistTransaction(erc20Rules), { wrapper })
+
+    await waitFor(() => expect(result.current.configurations).toBeDefined())
+    expect(result.current.configurations).toEqual(mockServices.buildAllowlistConfigurations(CHAIN_ID, erc20Rules))
   })
 
   it('sets a single call to the guard when it is already known', async () => {

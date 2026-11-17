@@ -26,7 +26,7 @@ describe('AllowlistSummary', () => {
         'To create an allowlist policy on Payments on Sepolia, select at least one token and one recipient.',
       ),
     ).toBeInTheDocument()
-    expect(screen.getByText('Anything you leave out will be blocked.')).toBeInTheDocument()
+    expect(screen.getByText('Transfers of these tokens to anyone else will be blocked.')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'When this takes effect' })).toBeInTheDocument()
   })
 
@@ -35,14 +35,14 @@ describe('AllowlistSummary', () => {
       <AllowlistSummary accountLabel="Payments on Sepolia" tokenSymbols={['A', 'B', 'C']} recipientNames={['Alice']} />,
     )
 
-    expect(screen.getByText('Payments on Sepolia will only be able to send A, B and C to Alice.')).toBeInTheDocument()
+    expect(screen.getByText('Payments on Sepolia will be able to send A, B and C only to Alice.')).toBeInTheDocument()
   })
 
   it('uses a single symbol as is and counts four tokens and several recipients', () => {
     const { rerender } = render(
       <AllowlistSummary accountLabel="Payments on Sepolia" tokenSymbols={['A']} recipientNames={['Alice']} />,
     )
-    expect(screen.getByText('Payments on Sepolia will only be able to send A to Alice.')).toBeInTheDocument()
+    expect(screen.getByText('Payments on Sepolia will be able to send A only to Alice.')).toBeInTheDocument()
 
     rerender(
       <AllowlistSummary
@@ -52,7 +52,7 @@ describe('AllowlistSummary', () => {
       />,
     )
     expect(
-      screen.getByText('Payments on Sepolia will only be able to send 4 tokens to 2 recipients.'),
+      screen.getByText('Payments on Sepolia will be able to send 4 tokens only to 2 recipients.'),
     ).toBeInTheDocument()
   })
 
@@ -65,13 +65,13 @@ describe('AllowlistSummary', () => {
       />,
     )
 
-    expect(screen.getByText('Payments on Sepolia will only be able to send 2 tokens to Alice.')).toBeInTheDocument()
+    expect(screen.getByText('Payments on Sepolia will be able to send 2 tokens only to Alice.')).toBeInTheDocument()
   })
 
   it('joins two tokens with "and"', () => {
     render(<AllowlistSummary accountLabel="Payments on Sepolia" tokenSymbols={['A', 'B']} recipientNames={['Alice']} />)
 
-    expect(screen.getByText('Payments on Sepolia will only be able to send A and B to Alice.')).toBeInTheDocument()
+    expect(screen.getByText('Payments on Sepolia will be able to send A and B only to Alice.')).toBeInTheDocument()
   })
 
   it('says the changes apply on execution when the policy guard is not enabled yet', () => {
@@ -101,6 +101,6 @@ describe('AllowlistSummary', () => {
     )
 
     expect(screen.getByText('Check the details below before you sign.')).toBeInTheDocument()
-    expect(screen.queryByText('Anything you leave out will be blocked.')).not.toBeInTheDocument()
+    expect(screen.queryByText('Transfers of these tokens to anyone else will be blocked.')).not.toBeInTheDocument()
   })
 })

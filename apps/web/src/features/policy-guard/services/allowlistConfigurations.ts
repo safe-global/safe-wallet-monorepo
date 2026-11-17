@@ -25,7 +25,7 @@ export const encodeErc20TransferPolicyData = (recipients: string[]): string =>
     [recipients.map((recipient) => [recipient, PERMISSION_ALWAYS])],
   )
 
-const requirePolicy = (chainId: string, contract: PolicyEngineContract): string => {
+export const requirePolicy = (chainId: string, contract: PolicyEngineContract): string => {
   const policy = getPolicyEngineAddress(chainId, contract)
   if (!policy) throw new Error(ALLOWLIST_UNAVAILABLE_ERROR)
   return policy
