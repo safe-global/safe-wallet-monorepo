@@ -10,6 +10,7 @@ import { Separator } from '@safe-global/views/components/ui/separator'
 import ReviewRecipientRow from './ReviewRecipientRow'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 
 const ReviewTokenTransfer = ({
   params,
@@ -23,6 +24,7 @@ const ReviewTokenTransfer = ({
 }>) => {
   const { setSafeTx, setSafeTxError, setNonce } = useContext(SafeTxContext)
   const [balances] = useTrustedTokenBalances()
+  const scope = useSafeScope()
 
   const recipients = useMemo(() => params?.recipients || [], [params?.recipients])
 
@@ -32,6 +34,7 @@ const ReviewTokenTransfer = ({
     }
 
     if (!balances) return
+    if (scope && !scope.sdk) return
 
     const calls = recipients
       .map((recipient) => {
@@ -48,8 +51,8 @@ const ReviewTokenTransfer = ({
       })
       .filter((transfer): transfer is MetaTransactionData => !!transfer)
 
-    createMultiSendCallOnlyTx(calls).then(setSafeTx).catch(setSafeTxError)
-  }, [recipients, txNonce, setNonce, balances, setSafeTx, setSafeTxError])
+    createMultiSendCallOnlyTx(calls, scope).then(setSafeTx).catch(setSafeTxError)
+  }, [recipients, txNonce, setNonce, balances, scope, setSafeTx, setSafeTxError])
 
   return (
     <ReviewTransaction onSubmit={onSubmit}>
