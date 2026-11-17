@@ -152,4 +152,76 @@ describe('SpaceTransactionQueue live updates', () => {
 
     expect(requests).toHaveLength(2)
   })
+
+  describe('when the service is busy', () => {
+    const SECOND = 1_000
+    let status: number
+    let requestTimes: number[]
+
+    const serveQueue = () => {
+      status = 200
+      requestTimes = []
+      server.use(
+        http.get(`${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`, () => {
+          requestTimes.push(Date.now())
+          return status === 200 ? HttpResponse.json(queuePage(1)) : new HttpResponse(null, { status })
+        }),
+      )
+    }
+
+    const renderQueue = async () => {
+      render(
+        <>
+          <Poller />
+          <SpaceTransactionQueue spaceId={spaceId} />
+        </>,
+      )
+      await screen.findByText('1 of 3 signatures')
+    }
+
+    const runPolls = async (count: number) => {
+      const target = requestTimes.length + count
+      while (requestTimes.length < target) {
+        await act(() => jest.advanceTimersByTimeAsync(SECOND))
+      }
+      await act(() => jest.advanceTimersByTimeAsync(0))
+    }
+
+    const gapsInSeconds = (times: number[]) => times.slice(1).map((time, i) => Math.round((time - times[i]) / SECOND))
+
+    beforeEach(serveQueue)
+
+    it.each([429, 503])('keeps the last queue and shows a notice when a poll gets a %i', async (failure) => {
+      await renderQueue()
+
+      status = failure
+      await runPolls(1)
+
+      expect(await screen.findByText("Couldn't refresh the queue")).toBeInTheDocument()
+      expect(screen.getByText('1 of 3 signatures')).toBeInTheDocument()
+      expect(screen.queryByText("Couldn't load the queue")).not.toBeInTheDocument()
+    })
+
+    it('doubles the wait after each failed poll, from 15s up to 5 minutes', async () => {
+      await renderQueue()
+
+      status = 503
+      await runPolls(8)
+
+      expect(gapsInSeconds(requestTimes)).toEqual([15, 30, 60, 120, 240, 300, 300, 300])
+    })
+
+    it('hides the notice and polls every 15s again after a successful poll', async () => {
+      await renderQueue()
+      status = 503
+      await runPolls(3)
+      await screen.findByText("Couldn't refresh the queue")
+
+      status = 200
+      await runPolls(3)
+
+      await waitFor(() => expect(screen.queryByText("Couldn't refresh the queue")).not.toBeInTheDocument())
+      expect(gapsInSeconds(requestTimes.slice(-3))).toEqual([15, 15])
+    })
+  })
 })

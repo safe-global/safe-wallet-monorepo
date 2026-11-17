@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { TransactionStatus } from '@safe-global/store/gateway/types'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { POLLING_INTERVAL } from '@/config/constants'
 import { AppRoutes } from '@/config/routes'
 import { useHasFeature } from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
@@ -42,11 +41,7 @@ export const useSpaceQueuePolling = (): void => {
 
   const isActive = !!spaceId && isSignedIn && isActiveMember && !!isEnabled
   // The unfiltered queue page asks for the same args, so both share one cache entry and one request per poll
-  const { queue } = useSpaceQueue(
-    spaceId ?? '',
-    {},
-    { skip: !isActive, pollingInterval: POLLING_INTERVAL, skipPollingIfUnfocused: true },
-  )
+  const { queue } = useSpaceQueue(spaceId ?? '', {}, { skip: !isActive, poll: true })
 
   useEffect(() => {
     if (!isActive || !queue || !walletAddress) return
