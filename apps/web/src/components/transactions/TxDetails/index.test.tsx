@@ -21,7 +21,6 @@ jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
   useSafenetCheck: jest.fn(),
 }))
 
-// The real hook always returns a view; default to the no-check state
 beforeEach(() => {
   jest.mocked(useSafenetCheck).mockReturnValue(buildCheckView())
 })

@@ -162,9 +162,7 @@ const TxSigners = ({
   const isMultisig = isMultisigDetailedExecutionInfo(detailedExecutionInfo)
   const isModule = isModuleDetailedExecutionInfo(detailedExecutionInfo)
 
-  // Same hook and cache entry as SafenetAuditRow's own render gate, so the
-  // sibling rows' isLast accounts for the Safenet step. The undefined hash
-  // skips the read entirely while the flag is off.
+  // SafenetAuditRow renders from this hook too; an undefined hash skips the read while the flag is off.
   const safenetHash = isSafenetEnabled && isMultisig ? detailedExecutionInfo.safeTxHash : undefined
   const safenetDisplay = useSafenetDisplayStatus(safenetHash, isMultisig ? detailedExecutionInfo.submittedAt : null)
   const showsSafenetRow = !!safenetHash && !!safenetDisplay
