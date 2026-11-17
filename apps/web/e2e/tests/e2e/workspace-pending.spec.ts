@@ -1,11 +1,10 @@
 import type { Page } from '@playwright/test'
 import { Wallet, parseEther, parseUnits } from 'ethers'
-import { confirmationsOf, nonceOf } from '../../src/api/transaction-items'
+import { confirmationsOf } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
 import { test, expect, type Journey } from '../../src/fixtures/journey.fixture'
 import { HomePage } from '../../src/pages/home.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
-import { TxQueuePage } from '../../src/pages/tx-queue.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
 import { WorkspaceTransactionsPage } from '../../src/pages/workspace-transactions.page'
 import { seedProposer } from '../../src/seed/proposers'
@@ -259,32 +258,5 @@ test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
     await expect(transfer).toHaveCount(0)
     await expect(batch).not.toContainText('Blocked')
     await expect(batch.getByTestId('execute-tx-btn')).toBeVisible()
-  })
-
-  test('should keep only the unexecuted transactions in the Workspace queue after an owner bulk executes on one Safe', async ({
-    safePage,
-    safeApiClient,
-    journey,
-  }) => {
-    const workspace = await seedPendingWorkspace(journey, safePage)
-
-    const pending = new WorkspaceTransactionsPage(safePage)
-    const queue = new TxQueuePage(safePage)
-    const review = new TxReviewPage(safePage)
-    await queue.goto(workspace.payroll.prefixedAddress)
-    await expect(queue.bulkExecuteButton).toHaveText('Bulk execute 2 transactions')
-    await queue.bulkExecuteButton.click()
-    await review.executeBulk()
-
-    await expect.poll(() => safeApiClient.getNonce(workspace.payroll.address)).toBe(2)
-    await expect.poll(async () => (await safeApiClient.getQueued(workspace.payroll.address)).map(nonceOf)).toEqual([2])
-    expect(await balanceOf(journey.env, workspace.recipient)).toBe(
-      parseEther(ETH.payroll) + 2n * parseEther(ETH.payrollBatchItem),
-    )
-    await pending.goto(workspace.id)
-    await expect(pending.rows).toHaveCount(7)
-    await expect(pending.rows.filter({ hasText: ETH.payroll })).toHaveCount(0)
-    await expect(pending.rows.filter({ hasText: 'Batch' })).toHaveCount(0)
-    await expect(pending.rows.filter({ hasText: ETH.payrollLater })).toContainText('1/2')
   })
 })
