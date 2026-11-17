@@ -22,6 +22,7 @@ import type {
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import { TxModalContext } from '@/components/tx-flow'
+import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows/NestedTxSuccessScreenFlow'
 import { SuccessScreenFlow } from '@/components/tx-flow/flows/SuccessScreenFlow'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
@@ -414,9 +415,9 @@ describe('ExecuteForm', () => {
   })
 
   describe('success screen scope', () => {
-    const renderWithModal = () => {
+    const renderWithModal = (result = { txId: '0xexecuted', isExecuted: true }) => {
       const setTxFlow = jest.fn()
-      const mockExecuteTx = jest.fn().mockResolvedValue({ txId: '0xexecuted', isExecuted: true })
+      const mockExecuteTx = jest.fn().mockResolvedValue(result)
       const view = render(
         <TxModalContext.Provider value={{ txFlow: undefined, setTxFlow, setFullWidth: jest.fn() }}>
           <ExecuteForm
@@ -460,6 +461,34 @@ describe('ExecuteForm', () => {
       await waitFor(() => expect(mockExecuteTx).toHaveBeenCalled())
       await waitFor(() => expect(setTxFlow).toHaveBeenCalled())
       expect(setTxFlow.mock.calls[0][0].props).toEqual({ txId: '0xexecuted', scope: undefined })
+    })
+
+    it('hands the selected Safe to the nested success screen when a parent Safe queued the execution', async () => {
+      const chainId = faker.string.numeric(5)
+      const safeAddress = faker.finance.ethereumAddress()
+      const parentTxId = faker.string.hexadecimal({ length: 64 })
+      mockUseSafeScope.mockReturnValue({
+        chainId,
+        safeAddress,
+        scopeKey: `${chainId}:${safeAddress}`,
+        safeLoaded: true,
+        safeLoading: false,
+      })
+      const { getByText, setTxFlow, mockExecuteTx } = renderWithModal({ txId: parentTxId, isExecuted: false })
+
+      fireEvent.click(getByText('Execute'))
+
+      await waitFor(() => expect(mockExecuteTx).toHaveBeenCalled())
+      await waitFor(() => {
+        expect(setTxFlow).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: NestedTxSuccessScreenFlow,
+            props: { txId: parentTxId, scope: { chainId, safeAddress } },
+          }),
+          undefined,
+          false,
+        )
+      })
     })
   })
 
