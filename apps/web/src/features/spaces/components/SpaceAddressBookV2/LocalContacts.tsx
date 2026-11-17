@@ -3,6 +3,7 @@ import { Check } from 'lucide-react'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import TableCard from '@safe-global/views/components/common/TableCard'
 import { Badge } from '@safe-global/views/components/ui/badge'
+import { ButtonGroup } from '@safe-global/views/components/ui/button-group'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import AddressBookEmptyState from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookEmptyState'
 import AddressBookTable from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookTable'
@@ -124,15 +125,17 @@ const LocalContacts = ({
         onQueryChange={setQuery}
         actions={
           <>
-            <LocalContactsCsvActions hasContacts />
-            <AddLocalContact />
+            <ButtonGroup>
+              <LocalContactsCsvActions hasContacts size="lg" />
+            </ButtonGroup>
+            <AddLocalContact size="lg" />
           </>
         }
       />
 
       <TableCard>
         {visibleContacts.length === 0 ? (
-          <AddressBookEmptyState kind="no-results" onClearSearch={() => setQuery('')} />
+          <AddressBookEmptyState kind="no-results" book="local" onClear={() => setQuery('')} />
         ) : (
           <AddressBookTable
             contacts={visibleContacts}

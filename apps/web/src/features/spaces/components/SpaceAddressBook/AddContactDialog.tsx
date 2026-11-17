@@ -40,8 +40,12 @@ export type AddContactItem = {
   tags?: string[]
 }
 
+/** `lg` in the v2 address book toolbar; the v1 page keeps `action`. */
+export type TriggerSize = 'action' | 'lg'
+
 type AddContactDialogProps = {
   triggerLabel: string
+  triggerSize?: TriggerSize
   dialogTitle: string
   submitLabel?: string
   intro?: ReactNode
@@ -58,6 +62,7 @@ type AddContactDialogProps = {
 
 const AddContactDialog = ({
   triggerLabel,
+  triggerSize = 'action',
   dialogTitle,
   submitLabel = 'Add contact',
   intro,
@@ -154,7 +159,7 @@ const AddContactDialog = ({
 
   return (
     <>
-      <Button size="action" onClick={handleOpen}>
+      <Button size={triggerSize} onClick={handleOpen}>
         <Plus className="size-4 mr-1 text-green-500" />
         {triggerLabel}
       </Button>

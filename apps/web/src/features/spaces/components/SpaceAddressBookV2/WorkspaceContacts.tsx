@@ -3,6 +3,7 @@ import { Download } from 'lucide-react'
 import type { SpaceAddressBookItemDto, SpaceAddressBookTagDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import TableCard from '@safe-global/views/components/common/TableCard'
 import { Button } from '@safe-global/views/components/ui/button'
+import { ButtonGroup } from '@safe-global/views/components/ui/button-group'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 import AddressBookEmptyState from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookEmptyState'
 import AddressBookTable from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookTable'
@@ -124,10 +125,12 @@ const WorkspaceContacts = ({
     )
   }
 
-  const addContact = (
+  // `lg` in the toolbar; the empty state keeps the smaller size
+  const renderAddContact = (size: 'action' | 'lg') => (
     <Track {...SPACE_EVENTS.ADD_ADDRESS}>
       <AddContact
         label="Add contact"
+        size={size}
         workspaceTags={tags}
         onTagLimitReached={() => trackTagLimitReached('add_contact')}
       />
@@ -135,7 +138,7 @@ const WorkspaceContacts = ({
   )
 
   const exportButton = (
-    <Button variant="outline" size="action" onClick={() => setIsExportOpen(true)}>
+    <Button variant="outline" size="lg" onClick={() => setIsExportOpen(true)}>
       <Download aria-hidden="true" data-icon="inline-start" />
       Export
     </Button>
@@ -151,7 +154,7 @@ const WorkspaceContacts = ({
             isAdmin ? (
               <>
                 <ImportWorkspaceCsv items={items} tags={tags} />
-                {addContact}
+                {renderAddContact('action')}
               </>
             ) : undefined
           }
@@ -160,11 +163,17 @@ const WorkspaceContacts = ({
     )
   }
 
+  const clearFilters = () => {
+    setQuery('')
+    setSelectedTagIds([])
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <AddressBookToolbar
         query={query}
         onQueryChange={setQuery}
+        searchScope="name, address or tag"
         filters={
           <TagFilterDropdown
             tags={tags}
@@ -180,9 +189,11 @@ const WorkspaceContacts = ({
         actions={
           isAdmin ? (
             <>
-              <ImportWorkspaceCsv items={items} tags={tags} />
-              {exportButton}
-              {addContact}
+              <ButtonGroup>
+                <ImportWorkspaceCsv items={items} tags={tags} size="lg" />
+                {exportButton}
+              </ButtonGroup>
+              {renderAddContact('lg')}
             </>
           ) : isInvited ? undefined : (
             exportButton
@@ -192,13 +203,7 @@ const WorkspaceContacts = ({
 
       <TableCard>
         {visibleContacts.length === 0 ? (
-          <AddressBookEmptyState
-            kind="no-results"
-            onClearSearch={() => {
-              setQuery('')
-              setSelectedTagIds([])
-            }}
-          />
+          <AddressBookEmptyState kind="no-results" book="workspace" onClear={clearFilters} />
         ) : (
           <AddressBookTable
             contacts={visibleContacts}

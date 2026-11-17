@@ -41,16 +41,13 @@ describe('LocalContactsCsvActions', () => {
     render(<LocalContactsCsvActions hasContacts />)
 
     await userEvent.click(screen.getByRole('button', { name: 'Import' }))
-    expect(trackEvent).toHaveBeenCalledWith(
-      { ...ADDRESS_BOOK_EVENTS.IMPORT_BUTTON, label: 'workspace_local_contacts' },
-      undefined,
-    )
+    expect(trackEvent).toHaveBeenCalledWith({ ...ADDRESS_BOOK_EVENTS.IMPORT_BUTTON, label: 'workspace_local_contacts' })
 
     await userEvent.click(screen.getByTestId('cancel-btn'))
     await userEvent.click(screen.getByRole('button', { name: 'Export' }))
-    expect(trackEvent).toHaveBeenCalledWith(
-      { ...ADDRESS_BOOK_EVENTS.DOWNLOAD_BUTTON, label: 'workspace_local_contacts' },
-      undefined,
-    )
+    expect(trackEvent).toHaveBeenCalledWith({
+      ...ADDRESS_BOOK_EVENTS.DOWNLOAD_BUTTON,
+      label: 'workspace_local_contacts',
+    })
   })
 })

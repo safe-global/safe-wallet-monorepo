@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { FileUp } from 'lucide-react'
 import {
   useAddressBooksUpsertAddressBookItemsV1Mutation,
   type SpaceAddressBookItemDto,
@@ -6,11 +7,9 @@ import {
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { Button } from '@safe-global/views/components/ui/button'
 import ImportDialog, { type AddressBookCSVRow, type ImportOutcome } from '@/components/address-book/ImportDialog'
-import Track from '@/components/common/Track'
 import { useCurrentSpaceId, useWorkspaceAddressBookLabel } from '@/features/spaces'
 import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
 import useChains from '@/hooks/useChains'
-import ImportIcon from '@/public/images/common/import.svg'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -25,10 +24,12 @@ const NOTHING_TO_IMPORT = 'Every contact in this file is already in the address 
 type ImportWorkspaceCsvProps = {
   items: SpaceAddressBookItemDto[]
   tags: SpaceAddressBookTagDto[]
+  /** `lg` in the toolbar; the empty state keeps `action`. */
+  size?: 'action' | 'lg'
 }
 
 /** Imports a CSV into the workspace address book: new contacts are added, saved ones only gain chains and tags. */
-const ImportWorkspaceCsv = ({ items, tags }: ImportWorkspaceCsvProps) => {
+const ImportWorkspaceCsv = ({ items, tags, size = 'action' }: ImportWorkspaceCsvProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const { configs } = useChains()
   const spaceId = useCurrentSpaceId()
@@ -70,12 +71,18 @@ const ImportWorkspaceCsv = ({ items, tags }: ImportWorkspaceCsvProps) => {
 
   return (
     <>
-      <Track {...SPACE_EVENTS.IMPORT_ADDRESS_BOOK}>
-        <Button variant="outline" size="action" onClick={() => setIsOpen(true)}>
-          <ImportIcon className="size-4" />
-          Import
-        </Button>
-      </Track>
+      {/* Tracked on click, not with <Track>: its wrapper would break a ButtonGroup's corners */}
+      <Button
+        variant="outline"
+        size={size}
+        onClick={() => {
+          trackEvent(SPACE_EVENTS.IMPORT_ADDRESS_BOOK)
+          setIsOpen(true)
+        }}
+      >
+        <FileUp aria-hidden="true" data-icon="inline-start" />
+        Import
+      </Button>
       {isOpen && <ImportDialog handleClose={() => setIsOpen(false)} validateRows={validateRows} onImport={onImport} />}
     </>
   )
