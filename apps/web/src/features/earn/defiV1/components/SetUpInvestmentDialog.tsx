@@ -10,16 +10,18 @@ import {
 } from '@safe-global/views/components/ui/dialog'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { DEFI_V1_COPY, formatApy } from '../copy'
-import type { Operation, Opportunity } from '../types'
+import type { Opportunity } from '../types'
 import {
   AmountFields,
   BudgetFields,
+  ProposedActions,
   ProposedView,
   ScheduleFields,
   StepsSummary,
   useInvestmentForm,
   WhereFields,
   WhoFields,
+  type CreatedInvestment,
 } from './InvestmentForm'
 import { OpportunityMark } from './TreasuryTables'
 
@@ -32,12 +34,14 @@ export const SetUpInvestmentDialog = ({
   options,
   onClose,
   onCreate,
+  onView,
 }: {
   open: boolean
   opportunity: Opportunity | null
   options: Opportunity[]
   onClose: () => void
-  onCreate: (operation: Operation) => void
+  onCreate: (created: CreatedInvestment) => void
+  onView: (opportunity: Opportunity) => void
 }) => {
   const form = useInvestmentForm(opportunity, options)
   const [proposed, setProposed] = useState(false)
@@ -52,8 +56,8 @@ export const SetUpInvestmentDialog = ({
   }
 
   const submit = () => {
-    const operation = form.toOperation()
-    if (operation) onCreate(operation)
+    const created = form.toCreated()
+    if (created) onCreate(created)
     setProposed(true)
   }
 
@@ -89,9 +93,13 @@ export const SetUpInvestmentDialog = ({
 
         <DialogFooter divided="subtle">
           {proposed ? (
-            <Button size="lg" onClick={close}>
-              {COPY.done}
-            </Button>
+            <ProposedActions
+              onClose={close}
+              onView={() => {
+                close()
+                onView(investment)
+              }}
+            />
           ) : (
             <>
               <Typography variant="paragraph-small" color="muted" align="center">

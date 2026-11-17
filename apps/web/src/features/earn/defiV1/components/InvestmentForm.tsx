@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { CheckCircle2, Circle, Info } from 'lucide-react'
+import { Check, CheckCircle2, Info } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
@@ -18,9 +18,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { DEFI_V1_COPY, formatAmount, formatApy } from '../copy'
+import { DEFI_V1_COPY, formatAmount, formatApy, formatCompactUsd } from '../copy'
 import { IDLE_CASH } from '../opportunities'
 import { dedicatedSafeName } from '../shelf'
 import type { Frequency, Operation, Opportunity } from '../types'
@@ -32,6 +33,8 @@ const FREQUENCIES = Object.keys(COPY.frequencies) as Frequency[]
 type Where = 'nested' | 'this'
 type Who = 'any' | 'some'
 type Schedule = 'once' | 'recurring'
+
+export type CreatedInvestment = { operation?: Operation; opportunity: Opportunity; amount: number }
 
 const parseAmount = (value: string) => Number(value.replace(/[^0-9.]/g, '')) || 0
 
@@ -75,6 +78,9 @@ export const useInvestmentForm = (opportunity: Opportunity | null, options: Oppo
           recurring: schedule === 'recurring' ? { amount: parseAmount(each), frequency } : undefined,
         }
       : undefined
+
+  const toCreated = (): CreatedInvestment | undefined =>
+    investment ? { operation: toOperation(), opportunity: investment, amount } : undefined
 
   const steps = investment
     ? [
@@ -128,6 +134,7 @@ export const useInvestmentForm = (opportunity: Opportunity | null, options: Oppo
     scheduleText,
     steps,
     toOperation,
+    toCreated,
     reset: () => setName(''),
     isValid: Boolean(investment) && amount > 0 && executors.length > 0 && budgetAmount >= amount,
   }
@@ -412,6 +419,42 @@ const SummaryRow = ({ label, value, onEdit }: { label: string; value: string; on
   </div>
 )
 
+/** One row per answer; with onEdit each row links back to its step. */
+const SetupCard = ({ form, onEdit }: { form: InvestmentForm; onEdit?: (step: number) => void }) => {
+  if (!form.investment) return null
+  const asset = form.investment.asset
+  const edit = (step: number) => (onEdit ? () => onEdit(step) : undefined)
+  return (
+    <div className="flex flex-col rounded-lg border border-border">
+      <SummaryRow
+        label={SUMMARY.rows.investment}
+        value={SUMMARY.investment(formatAmount(form.amount), asset, form.investment.name)}
+        onEdit={edit(0)}
+      />
+      <SummaryRow
+        label={SUMMARY.rows.safe}
+        value={form.where === 'nested' ? SUMMARY.nested(form.safeName) : COPY.thisSafe}
+        onEdit={edit(1)}
+      />
+      <SummaryRow
+        label={SUMMARY.rows.who}
+        value={form.who === 'any' ? SUMMARY.anyone : SUMMARY.some(form.executors.length)}
+        onEdit={edit(2)}
+      />
+      <SummaryRow
+        label={SUMMARY.rows.budget}
+        value={SUMMARY.budget(formatAmount(form.budgetAmount), asset)}
+        onEdit={edit(3)}
+      />
+      <SummaryRow
+        label={SUMMARY.rows.schedule}
+        value={form.schedule === 'once' ? COPY.oneTime : form.scheduleText}
+        onEdit={edit(3)}
+      />
+    </div>
+  )
+}
+
 /** Every answer from the earlier steps, then what happens once signers approve the proposal. */
 export const ReviewSummary = ({ form, onEdit }: { form: InvestmentForm; onEdit?: (step: number) => void }) => {
   const { investment } = form
@@ -421,7 +464,6 @@ export const ReviewSummary = ({ form, onEdit }: { form: InvestmentForm; onEdit?:
   const budget = formatAmount(form.budgetAmount)
   const count = form.executors.length
   const isNested = form.where === 'nested'
-  const edit = (step: number) => (onEdit ? () => onEdit(step) : undefined)
   const outcomes = [
     isNested ? SUMMARY.create(form.safeName, count) : SUMMARY.allow(count, budget, asset),
     ...(isNested ? [SUMMARY.move(amount, asset)] : []),
@@ -437,29 +479,7 @@ export const ReviewSummary = ({ form, onEdit }: { form: InvestmentForm; onEdit?:
 
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium">{SUMMARY.setup}</span>
-        <div className="flex flex-col rounded-lg border border-border">
-          <SummaryRow
-            label={SUMMARY.rows.investment}
-            value={SUMMARY.investment(amount, asset, investment.name)}
-            onEdit={edit(0)}
-          />
-          <SummaryRow
-            label={SUMMARY.rows.safe}
-            value={isNested ? SUMMARY.nested(form.safeName) : COPY.thisSafe}
-            onEdit={edit(1)}
-          />
-          <SummaryRow
-            label={SUMMARY.rows.who}
-            value={form.who === 'any' ? SUMMARY.anyone : SUMMARY.some(count)}
-            onEdit={edit(2)}
-          />
-          <SummaryRow label={SUMMARY.rows.budget} value={SUMMARY.budget(budget, asset)} onEdit={edit(3)} />
-          <SummaryRow
-            label={SUMMARY.rows.schedule}
-            value={form.schedule === 'once' ? COPY.oneTime : form.scheduleText}
-            onEdit={edit(3)}
-          />
-        </div>
+        <SetupCard form={form} onEdit={onEdit} />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -487,42 +507,71 @@ export const ReviewSummary = ({ form, onEdit }: { form: InvestmentForm; onEdit?:
   )
 }
 
-export const ProposedView = ({ form }: { form: InvestmentForm }) => (
-  <div className="flex flex-col gap-4" data-testid="investment-proposed">
-    <div className="flex items-start gap-3">
-      <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-badge-dot-success" aria-hidden />
-      <div className="flex flex-col gap-0.5">
-        <Typography variant="paragraph-small-medium">{COPY.proposed}</Typography>
-        <Typography variant="paragraph-small" color="muted">
-          {COPY.proposedNext(
-            form.who === 'any' ? SUMMARY.anyoneWho : SUMMARY.someWho(form.executors.length),
-            form.where === 'nested' ? form.safeName : SUMMARY.inThisSafe,
-          )}
-        </Typography>
-      </div>
-    </div>
-    <div className="flex flex-col rounded-lg bg-card">
-      <div className="flex items-center justify-between px-3 py-2 text-sm font-medium">
-        {COPY.waiting}
-        <Badge variant="subtle">{COPY.signatures(1, form.safe.threshold)}</Badge>
-      </div>
-      {form.owners.map((address, index) => (
-        <div
-          key={address}
-          className={cn(
-            'flex items-center gap-2 border-t border-border px-3 py-2 text-sm',
-            index > 0 && 'text-muted-foreground',
-          )}
-        >
-          {index === 0 ? (
-            <CheckCircle2 className="size-4 text-badge-dot-success" aria-hidden />
-          ) : (
-            <Circle className="size-4" aria-hidden />
-          )}
-          <span className="font-mono text-xs">{shortenAddress(address)}</span>
-          <span className="ml-auto text-xs">{index === 0 ? COPY.youSigned : COPY.pending}</span>
+/** The moment after proposing: what was set up, what it should earn, and who still needs to sign. */
+export const ProposedView = ({ form }: { form: InvestmentForm }) => {
+  const { investment } = form
+  if (!investment) return null
+  const threshold = form.safe.threshold
+  return (
+    <div className="flex flex-col gap-5" data-testid="investment-proposed">
+      <div className="flex flex-col items-center gap-3 pt-2 text-center">
+        <span className="flex size-12 items-center justify-center rounded-full bg-badge-dot-success/15">
+          <Check className="size-6 text-badge-dot-success" aria-hidden />
+        </span>
+        <div className="flex flex-col gap-1">
+          <Typography variant="h4">{COPY.proposed}</Typography>
+          <Typography variant="paragraph-small" color="muted">
+            {SUMMARY.investment(formatAmount(form.amount), investment.asset, investment.name)} ·{' '}
+            {formatApy(investment.apy)} net APY
+          </Typography>
         </div>
-      ))}
+        <span className="rounded-full bg-badge-dot-success/10 px-3 py-1 text-sm font-medium text-badge-dot-success">
+          {COPY.projected(formatCompactUsd(form.amount * investment.apy))}
+        </span>
+      </div>
+
+      <SetupCard form={form} />
+
+      <div className="flex items-center justify-between gap-3 rounded-lg bg-card px-3 py-3">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-sm font-medium">{COPY.signatures(1, threshold)}</span>
+          <span className="text-xs text-muted-foreground">{COPY.moreToApprove(Math.max(threshold - 1, 0))}</span>
+        </div>
+        <div className="flex -space-x-1.5">
+          {form.owners.map((address, index) => (
+            <Tooltip key={address} delay={150}>
+              <TooltipTrigger
+                render={
+                  <span className={cn('relative flex rounded-full ring-2 ring-card', index > 0 && 'opacity-40')} />
+                }
+              >
+                <Identicon address={address} size={24} />
+                {index === 0 && (
+                  <CheckCircle2
+                    className="absolute -right-1 -bottom-1 size-3.5 rounded-full bg-card text-badge-dot-success"
+                    aria-hidden
+                  />
+                )}
+              </TooltipTrigger>
+              <TooltipContent>
+                {shortenAddress(address)} · {index === 0 ? COPY.youSignedShort : COPY.pending}
+              </TooltipContent>
+            </Tooltip>
+          ))}
+        </div>
+      </div>
     </div>
+  )
+}
+
+/** Close, or jump straight to the investment that was just proposed. */
+export const ProposedActions = ({ onClose, onView }: { onClose: () => void; onView: () => void }) => (
+  <div className="flex w-full gap-2">
+    <Button variant="outline" size="lg" className="flex-1" onClick={onClose}>
+      {COPY.close}
+    </Button>
+    <Button size="lg" className="flex-1" onClick={onView} data-testid="view-investment">
+      {COPY.viewInvestment}
+    </Button>
   </div>
 )

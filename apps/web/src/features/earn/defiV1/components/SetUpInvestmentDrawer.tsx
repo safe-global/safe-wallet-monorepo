@@ -5,16 +5,18 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
 import { Drawer, DrawerBody, DrawerFooter } from '@/components/common/Drawer'
 import { DEFI_V1_COPY, formatAmount, formatApy } from '../copy'
-import type { Operation, Opportunity } from '../types'
+import type { Opportunity } from '../types'
 import {
   AmountFields,
   BudgetFields,
+  ProposedActions,
   ProposedView,
   ScheduleFields,
   ReviewSummary,
   useInvestmentForm,
   WhereFields,
   WhoFields,
+  type CreatedInvestment,
   type InvestmentForm,
 } from './InvestmentForm'
 import { OpportunityMark } from './TreasuryTables'
@@ -44,12 +46,14 @@ export const SetUpInvestmentDrawer = ({
   options,
   onClose,
   onCreate,
+  onView,
 }: {
   open: boolean
   opportunity: Opportunity | null
   options: Opportunity[]
   onClose: () => void
-  onCreate: (operation: Operation) => void
+  onCreate: (created: CreatedInvestment) => void
+  onView: (opportunity: Opportunity) => void
 }) => {
   const form = useInvestmentForm(opportunity, options)
   const [current, setCurrent] = useState(0)
@@ -108,8 +112,8 @@ export const SetUpInvestmentDrawer = ({
 
   const next = () => {
     if (isLast) {
-      const operation = form.toOperation()
-      if (operation) onCreate(operation)
+      const created = form.toCreated()
+      if (created) onCreate(created)
       setProposed(true)
       return
     }
@@ -195,9 +199,13 @@ export const SetUpInvestmentDrawer = ({
       </DrawerBody>
       <DrawerFooter>
         {proposed ? (
-          <Button size="lg" className="w-full" onClick={close}>
-            {COPY.done}
-          </Button>
+          <ProposedActions
+            onClose={close}
+            onView={() => {
+              close()
+              onView(investment)
+            }}
+          />
         ) : (
           <div className="flex flex-col gap-2 border-t border-border pt-4">
             <Typography variant="paragraph-small" color="muted" align="center">

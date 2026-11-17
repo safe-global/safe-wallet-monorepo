@@ -232,7 +232,14 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
         opportunity={setupFor}
         options={RANKED.filter((item) => !locked(item))}
         onClose={() => setIsCreating(false)}
-        onCreate={(operation) => setOperations((current) => [...current, operation])}
+        onCreate={({ operation, opportunity, amount }) => {
+          if (operation) setOperations((current) => [...current, operation])
+          setPositions((current) => [{ opportunity, principal: amount, earned: 0, pending: true }, ...current])
+        }}
+        onView={(item) => {
+          setIsCreating(false)
+          setSelected(item)
+        }}
       />
 
       <OpportunityDrawer
