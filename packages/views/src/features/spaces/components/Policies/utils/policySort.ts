@@ -27,6 +27,7 @@ const STATUS_ORDER = {
   unenforced: 2,
   'not-activated': 2,
   failed: 2,
+  expired: 2,
   active: 3,
 } as const
 

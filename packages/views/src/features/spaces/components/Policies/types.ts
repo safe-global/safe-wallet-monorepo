@@ -108,12 +108,16 @@ export type AllowlistPolicyData = {
   entries: AllowlistEntry[]
 }
 
-/** An executed change waiting out the guard's 24-hour delay. `create`: the allowlist is not enforced until then. */
+/** An executed change waiting out the guard's delay. `create`: the allowlist is not enforced until then. */
 // Placeholder: CGW has no field for this yet, so the shape follows the design until the API defines it.
 export type AllowlistScheduledChange = {
   operation: 'create' | 'update'
-  /** Unix SECONDS. */
+  /** Unix SECONDS `applyConfiguration` is valid from (CGW `readyAt`). */
   appliesAt: number
+  /** Unix SECONDS the apply window closes (CGW `expiresAt`); unset when unknown. */
+  expiresAt?: number
+  /** Unix SECONDS the wallet first stored the change (CGW `createdAt`); unset for a root requested elsewhere. */
+  requestedAt?: number
 }
 
 type PolicyBase = {
@@ -176,7 +180,7 @@ export type QueuedAllowlistPolicy = PendingAllowlistPolicy & { status: 'pending'
 export type FailedAllowlistPolicy = PendingAllowlistPolicy & { status: 'failed' }
 
 export type PolicyStatus =
-  'active' | 'pending' | 'activating' | 'unenforced' | 'not-activated' | 'failed' | 'change-pending'
+  'active' | 'pending' | 'activating' | 'unenforced' | 'not-activated' | 'failed' | 'change-pending' | 'expired'
 
 /** One table row: an active or a pending policy. */
 export type Policy = (ActivePolicy & { status: 'active' }) | PendingPolicy
