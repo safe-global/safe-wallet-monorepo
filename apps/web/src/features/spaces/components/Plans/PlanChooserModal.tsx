@@ -78,21 +78,29 @@ export default function PlanChooserModal({
 
   return (
     <Dialog open onOpenChange={(open) => !open && trimming && setPick(undefined)}>
-      <DialogContent size={trimming ? 'md' : 'lg'} surface="card" padding="sm" showCloseButton={Boolean(trimming)}>
-        <div className="flex flex-col gap-6 pt-5">
+      <DialogContent
+        size={trimming ? 'md' : 'lg'}
+        surface="card"
+        padding="sm"
+        showCloseButton={Boolean(trimming)}
+        className="flex max-h-[90vh] flex-col"
+      >
+        <div className="flex min-h-0 flex-col gap-6 pt-5">
           {trimming ? (
-            <SelectAccountsStep
-              limit={trimming.option.seats as number}
-              planName={trimming.tier.name}
-              onBack={() => setPick(undefined)}
-              onContinue={(removed) => {
-                if (trimming.option.paymentLinkId) {
-                  void checkout(trimming.option.paymentLinkId, removed)
-                }
-              }}
-              isSubmitting={isBusy}
-              error={error}
-            />
+            <div className="-mx-1 min-h-0 overflow-y-auto px-1">
+              <SelectAccountsStep
+                limit={trimming.option.seats as number}
+                planName={trimming.tier.name}
+                onBack={() => setPick(undefined)}
+                onContinue={(removed) => {
+                  if (trimming.option.paymentLinkId) {
+                    void checkout(trimming.option.paymentLinkId, removed)
+                  }
+                }}
+                isSubmitting={isBusy}
+                error={error}
+              />
+            </div>
           ) : (
             <>
               <div className="flex flex-col gap-1">
@@ -105,38 +113,40 @@ export default function PlanChooserModal({
                 </div>
               </div>
 
-              {reason === 'payment-failed' ? (
-                <Track
-                  {...SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED}
-                  mixpanelParams={entry}
-                  as="div"
-                  className="self-start"
-                >
-                  <Button size="lg" accentIcon disabled={isOpeningPortal} onClick={() => void openPortal()}>
-                    Update billing details
-                    <ArrowRight />
-                  </Button>
-                </Track>
-              ) : isLoading ? (
-                <div className="flex gap-4" data-testid="plan-chooser-skeleton">
-                  <Skeleton className="h-105 flex-1 rounded-lg-xl" />
-                  <Skeleton className="h-105 flex-1 rounded-lg-xl" />
-                </div>
-              ) : tiers.length === 0 ? (
-                <Alert variant="info">
-                  <AlertSeverityIcon variant="info" />
-                  <AlertDescription>There is no plan available for this Workspace right now.</AlertDescription>
-                </Alert>
-              ) : (
-                <PlanCatalog
-                  embedded
-                  tiers={tiers}
-                  onSubscribe={subscribe}
-                  isBusy={isBusy}
-                  location={PlanLocation.LOCKED_MODAL}
-                  onCta={start}
-                />
-              )}
+              <div className="-mx-1 min-h-0 overflow-y-auto px-1">
+                {reason === 'payment-failed' ? (
+                  <Track
+                    {...SAFE_PRO_EVENTS.PLAN_SELECTION_STARTED}
+                    mixpanelParams={entry}
+                    as="div"
+                    className="self-start"
+                  >
+                    <Button size="lg" accentIcon disabled={isOpeningPortal} onClick={() => void openPortal()}>
+                      Update billing details
+                      <ArrowRight />
+                    </Button>
+                  </Track>
+                ) : isLoading ? (
+                  <div className="flex gap-4" data-testid="plan-chooser-skeleton">
+                    <Skeleton className="h-105 flex-1 rounded-lg-xl" />
+                    <Skeleton className="h-105 flex-1 rounded-lg-xl" />
+                  </div>
+                ) : tiers.length === 0 ? (
+                  <Alert variant="info">
+                    <AlertSeverityIcon variant="info" />
+                    <AlertDescription>There is no plan available for this Workspace right now.</AlertDescription>
+                  </Alert>
+                ) : (
+                  <PlanCatalog
+                    embedded
+                    tiers={tiers}
+                    onSubscribe={subscribe}
+                    isBusy={isBusy}
+                    location={PlanLocation.LOCKED_MODAL}
+                    onCta={start}
+                  />
+                )}
+              </div>
 
               {error && (
                 <Alert variant="destructive">
