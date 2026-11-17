@@ -8,6 +8,9 @@ import { OperationType } from '@safe-global/types-kit'
 import { fireEvent, waitFor } from '@testing-library/react'
 import { initialContext, TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { TxModalContext } from '@/components/tx-flow'
+import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows/NestedTxSuccessScreenFlow'
+import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
+import { faker } from '@faker-js/faker'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type {
   RecipientAnalysisResults,
@@ -23,6 +26,12 @@ jest.mock('@/components/common/CheckWallet', () => ({
     return children(true)
   },
 }))
+
+jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
+  ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
+  useSafeScope: jest.fn(),
+}))
+const mockUseSafeScope = useSafeScope as jest.MockedFunction<typeof useSafeScope>
 
 const setTxFlow = jest.fn()
 
@@ -81,6 +90,7 @@ describe('SignForm', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     jest.spyOn(useValidateTxData, 'useValidateTxData').mockReturnValue([undefined, undefined, false])
+    mockUseSafeScope.mockReturnValue(undefined)
   })
 
   it('displays a warning if connected wallet already signed the tx', () => {
@@ -226,6 +236,66 @@ describe('SignForm', () => {
       expect(continueToExecute).toHaveBeenCalledWith(signedTxId)
     })
     expect(setTxFlow).not.toHaveBeenCalled()
+  })
+
+  describe('nested signing success screen', () => {
+    const signedTxId = 'multisig_0x1_0x2'
+
+    const renderNestedSigning = () =>
+      render(
+        <SignForm
+          {...defaultProps}
+          safeTx={safeTransaction}
+          txActions={{
+            ...defaultProps.txActions,
+            signTx: jest.fn().mockResolvedValue({ txId: signedTxId, isNestedSigning: true }),
+          }}
+        />,
+        { willSignBeforeExecute: false },
+      )
+
+    it('hands the selected Safe to the nested success screen when a Space-level scope is active', async () => {
+      const chainId = faker.string.numeric(5)
+      const safeAddress = faker.finance.ethereumAddress()
+      mockUseSafeScope.mockReturnValue({
+        chainId,
+        safeAddress,
+        scopeKey: `${chainId}:${safeAddress}`,
+        safeLoaded: true,
+        safeLoading: false,
+      })
+      const { getByText } = renderNestedSigning()
+
+      fireEvent.click(getByText('Sign'))
+
+      await waitFor(() => {
+        expect(setTxFlow).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: NestedTxSuccessScreenFlow,
+            props: { txId: signedTxId, scope: { chainId, safeAddress } },
+          }),
+          undefined,
+          false,
+        )
+      })
+    })
+
+    it('opens the nested success screen without a scope on a Safe-level route', async () => {
+      const { getByText } = renderNestedSigning()
+
+      fireEvent.click(getByText('Sign'))
+
+      await waitFor(() => {
+        expect(setTxFlow).toHaveBeenCalledWith(
+          expect.objectContaining({
+            type: NestedTxSuccessScreenFlow,
+            props: { txId: signedTxId, scope: undefined },
+          }),
+          undefined,
+          false,
+        )
+      })
+    })
   })
 
   describe('shows a disabled submit button if', () => {
