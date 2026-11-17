@@ -43,6 +43,19 @@ export const createTokenTransferParams = (
       }
 }
 
+type TransferRecipient = { recipient: string; amount: string; tokenAddress: string }
+type TransferToken = { tokenInfo: { address: string; decimals?: number | null } }
+
+/** Transfer params per recipient; recipients whose token is not in `tokens` are skipped. */
+export const createMultiTokenTransferParams = (
+  recipients: TransferRecipient[],
+  tokens: TransferToken[],
+): MetaTransactionData[] =>
+  recipients.flatMap(({ recipient, amount, tokenAddress }) => {
+    const token = tokens.find((item) => sameAddress(item.tokenInfo.address, tokenAddress))
+    return token ? [createTokenTransferParams(recipient, amount, token.tokenInfo.decimals, tokenAddress)] : []
+  })
+
 export const createNftTransferParams = (
   from: string,
   to: string,

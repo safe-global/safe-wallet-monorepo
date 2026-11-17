@@ -80,6 +80,21 @@ export const getKnownCustomError = (selector: string): KnownCustomError | undefi
 // rejects LONGER hex blobs (addresses, hashes, calldata) — not those.
 const MESSAGE_SELECTOR_RE = /(?:custom error|following signature:?)[\s'"]*(0x[0-9a-f]{8})(?![0-9a-f])/i
 
+/** The raw revert bytes an ethers `CALL_EXCEPTION` or a viem revert carries, if any. */
+export const extractRevertData = (error: unknown): string | undefined => {
+  if (isCallException(error as Error)) {
+    const data = (error as { data?: unknown }).data
+    if (typeof data === 'string' && data.startsWith('0x')) return data
+  }
+
+  // viem wraps the revert bytes in a ContractFunctionRevertedError cause
+  if (error instanceof ViemBaseError) {
+    const reverted = error.walk((e) => e instanceof ContractFunctionRevertedError) as
+      ContractFunctionRevertedError | undefined
+    if (typeof reverted?.raw === 'string') return reverted.raw
+  }
+}
+
 /**
  * Extract the 4-byte selector of the revert data carried by an error, if any.
  * Prefers structured fields (ethers `CALL_EXCEPTION` data, viem revert cause)
@@ -89,22 +104,9 @@ const MESSAGE_SELECTOR_RE = /(?:custom error|following signature:?)[\s'"]*(0x[0-
 export const extractRevertSelector = (error: unknown): string | undefined => {
   if (!error) return undefined
 
-  // ethers CALL_EXCEPTION carries the raw revert bytes in `data`
-  if (isCallException(error as Error)) {
-    const data = (error as { data?: unknown }).data
-    if (typeof data === 'string' && data.startsWith('0x') && data.length >= 10) {
-      return data.slice(0, 10).toLowerCase()
-    }
-  }
-
-  // viem wraps the revert bytes in a ContractFunctionRevertedError cause
-  if (error instanceof ViemBaseError) {
-    const reverted = error.walk((e) => e instanceof ContractFunctionRevertedError) as
-      ContractFunctionRevertedError | undefined
-    const raw = reverted?.raw
-    if (typeof raw === 'string' && raw.length >= 10) {
-      return raw.slice(0, 10).toLowerCase()
-    }
+  const data = extractRevertData(error)
+  if (data && data.length >= 10) {
+    return data.slice(0, 10).toLowerCase()
   }
 
   // Message fallback, only when the selector is explicitly framed as one

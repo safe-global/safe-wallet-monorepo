@@ -47,7 +47,11 @@ import {
   useIsNoFeeCampaignEnabled,
 } from '@/features/no-fee-campaign'
 import { useLoadFeature } from '@/features/__core__'
-import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
+import { useSafeShieldForDraftTx, useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
+import { createMultiTokenTransferParams } from '@/services/tx/tokenTransferParams'
+import { createMultiSendCallOnlyTx } from '@/services/tx/tx-sender'
+import useAsync from '@safe-global/utils/hooks/useAsync'
+import { isAddress } from 'ethers'
 import uniq from 'lodash/uniq'
 
 export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balance: string }): ReactElement => (
@@ -172,6 +176,18 @@ const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElemen
   )
 
   useSafeShieldForRecipients(recipientAddresses)
+
+  const transfers = useMemo(
+    () =>
+      createMultiTokenTransferParams(
+        recipientsWatched.filter((recipient) => isAddress(recipient.recipient) && Number(recipient.amount) > 0),
+        balancesItems,
+      ),
+    [recipientsWatched, balancesItems],
+  )
+  const [draftTx] = useAsync(() => (transfers.length ? createMultiSendCallOnlyTx(transfers) : undefined), [transfers])
+
+  useSafeShieldForDraftTx(draftTx)
 
   return (
     <TxCard>

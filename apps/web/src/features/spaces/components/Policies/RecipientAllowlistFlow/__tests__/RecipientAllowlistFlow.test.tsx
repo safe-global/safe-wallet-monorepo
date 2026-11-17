@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from '@/tests/test-utils'
 import { TxFlow } from '@/components/tx-flow/TxFlow'
 import { TxFlowType } from '@/services/analytics'
 import { createDefaultAllowlistValues } from '../types'
+import ReviewRecipientAllowlist from '../ReviewStep'
 import RecipientAllowlistFlow from '..'
 
 jest.mock('@/components/tx-flow/TxFlow', () => ({
@@ -45,6 +46,12 @@ describe('RecipientAllowlistFlow', () => {
     render(<RecipientAllowlistFlow />)
 
     expect(mockTxFlow.mock.calls[0][0]).toMatchObject({ eventCategory: TxFlowType.SETUP_SPACE_RECIPIENT_ALLOWLIST })
+  })
+
+  it('reviews through the allowlist review step', () => {
+    render(<RecipientAllowlistFlow />)
+
+    expect(mockTxFlow.mock.calls[0][0].ReviewTransactionComponent).toBe(ReviewRecipientAllowlist)
   })
 
   it('seeds the flow with an empty allowlist form', () => {

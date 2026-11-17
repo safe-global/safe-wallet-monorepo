@@ -19,10 +19,9 @@ import { isAllowlistEnabled } from '@/features/policy-guard/services'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 import { SPACE_REFRESH_OPTIONS } from '../../../hooks/refreshOptions'
-import { mapActivePolicies, type Erc20TokenResolver, type NativeTokenResolver } from '../utils/mapActivePolicies'
+import { mapActivePolicies, type NativeTokenResolver } from '../utils/mapActivePolicies'
 import { mapPendingPolicies } from '../utils/mapPendingPolicies'
 import { useActivatingPolicies } from './useActivatingPolicies'
-import { useAllowlistTokenResolver } from './useAllowlistTokenResolver'
 import { useRefetchOnTxEvents } from './useRefetchOnTxEvents'
 import { isAllowlistPolicy, type Policy } from '@safe-global/views/features/spaces/components/Policies/types'
 
@@ -63,10 +62,10 @@ const toNativeTokenResolver = (chains: Chain[]): NativeTokenResolver => {
   }
 }
 
-const toActiveRows = (dtos: ActivePolicyDto[], chains: Chain[], resolveErc20Token: Erc20TokenResolver): Policy[] => {
+const toActiveRows = (dtos: ActivePolicyDto[], chains: Chain[]): Policy[] => {
   const allowlistChainIds = new Set(chains.filter(isAllowlistEnabled).map((chain) => chain.chainId))
 
-  return mapActivePolicies(dtos, toNativeTokenResolver(chains), resolveErc20Token).filter(
+  return mapActivePolicies(dtos, toNativeTokenResolver(chains)).filter(
     (policy) => !isAllowlistPolicy(policy) || allowlistChainIds.has(policy.safe.chainId),
   )
 }
@@ -118,8 +117,7 @@ export const useSpacePolicies = (): SpacePoliciesResult => {
     setHasExecutable(pendingDtos.some((dto) => dto.confirmations >= dto.confirmationsRequired))
   }, [pendingDtos])
 
-  const resolveErc20Token = useAllowlistTokenResolver(dtos)
-  const activeRows = useMemo(() => toActiveRows(dtos, chains, resolveErc20Token), [dtos, chains, resolveErc20Token])
+  const activeRows = useMemo(() => toActiveRows(dtos, chains), [dtos, chains])
   const pendingRows = useMemo(() => mapPendingPolicies(pendingDtos, activeRows), [pendingDtos, activeRows])
   const activatingRows = useActivatingPolicies(pendingRows, activeRows, {
     refetchActive: active.refetch,

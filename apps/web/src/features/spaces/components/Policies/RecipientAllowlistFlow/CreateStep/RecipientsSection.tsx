@@ -1,6 +1,6 @@
 import { useState, type ReactElement } from 'react'
 import { Plus } from 'lucide-react'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
+import { spenderDisplayName } from '../../SpendingLimitFlow/Summary/describePolicy'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
@@ -8,13 +8,10 @@ import {
   AllowlistSection,
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/AllowlistSection'
 import DismissibleCallout from '@safe-global/views/components/common/DismissibleCallout'
-import ShortAddress from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/ShortAddress'
 import SelectableChip from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/SelectableChip'
 import {
   ADD_RECIPIENT_LABEL,
   ADDRESS_BOOK_TRIGGER_LABEL,
-  IDENTICON_SIZE,
-  IN_ADDRESS_BOOK_LABEL,
   RECIPIENTS_CALLOUT_DESCRIPTION,
   RECIPIENTS_CALLOUT_TITLE,
   RECIPIENTS_EMPTY_TEXT,
@@ -22,9 +19,8 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/constants'
 import { addAllowlistRecipients } from '../utils/allowlistForm'
 import type { AllowlistFormRecipient, RecipientAllowlistFormValues } from '../types'
-import Identicon from '@safe-global/views/components/common/Identicon'
-import AddressBookIcon from '@/public/images/sidebar/address-book.svg'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
+import RecipientIdentity from '../components/RecipientIdentity'
 import AddFromAddressBook from './AddFromAddressBook'
 import RecipientDraftRow from './RecipientDraftRow'
 
@@ -92,7 +88,7 @@ const RecipientsSection = ({
           {recipients.length > 0 && (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(10rem,1fr))] gap-2">
               {recipients.map((recipient) => {
-                const label = recipient.name || shortenAddress(recipient.address)
+                const label = spenderDisplayName(recipient)
                 return (
                   <SelectableChip
                     key={recipient.address}
@@ -101,19 +97,11 @@ const RecipientsSection = ({
                     aria-label={`Allow ${label}`}
                     className="h-auto w-full min-w-0 justify-start py-[7px] pl-2.5"
                   >
-                    <Identicon address={recipient.address} size={IDENTICON_SIZE} />
-                    <span className="flex min-w-0 flex-1 flex-col items-start gap-1 text-left">
-                      <span className="flex w-full min-w-0 items-center gap-1">
-                        <span className="truncate">{label}</span>
-                        {isInAddressBook(recipient) && (
-                          <AddressBookIcon
-                            className="size-4 shrink-0 text-muted-foreground"
-                            aria-label={IN_ADDRESS_BOOK_LABEL}
-                          />
-                        )}
-                      </span>
-                      <ShortAddress address={recipient.address} />
-                    </span>
+                    <RecipientIdentity
+                      address={recipient.address}
+                      name={recipient.name}
+                      isInAddressBook={isInAddressBook(recipient)}
+                    />
                   </SelectableChip>
                 )
               })}
