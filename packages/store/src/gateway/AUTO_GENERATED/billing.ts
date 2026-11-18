@@ -15,6 +15,10 @@ const injectedRtkApi = api
         }),
         providesTags: ['billing'],
       }),
+      billingGetTrialPlansV1: build.query<BillingGetTrialPlansV1ApiResponse, BillingGetTrialPlansV1ApiArg>({
+        query: () => ({ url: `/v1/billing/trial-plans` }),
+        providesTags: ['billing'],
+      }),
       billingGetPlanV1: build.query<BillingGetPlanV1ApiResponse, BillingGetPlanV1ApiArg>({
         query: (queryArg) => ({ url: `/v1/billing/plans/${queryArg.planId}` }),
         providesTags: ['billing'],
@@ -74,10 +78,6 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/v1/billing/sessions/${queryArg.sessionId}` }),
         providesTags: ['billing'],
       }),
-      billingGetTrialPlansV1: build.query<BillingGetTrialPlansV1ApiResponse, BillingGetTrialPlansV1ApiArg>({
-        query: () => ({ url: `/v1/billing/trial-plans` }),
-        providesTags: ['billing'],
-      }),
     }),
     overrideExisting: false,
   })
@@ -88,6 +88,8 @@ export type BillingGetSubscriptionsV1ApiArg = {
   /** Space UUID */
   spaceId: string
 }
+export type BillingGetTrialPlansV1ApiResponse = /** status 200  */ PaymentLink[]
+export type BillingGetTrialPlansV1ApiArg = void
 export type BillingGetPlanV1ApiResponse = /** status 200  */ Plan
 export type BillingGetPlanV1ApiArg = {
   planId: string
@@ -132,8 +134,6 @@ export type BillingGetCheckoutSessionV1ApiResponse = /** status 200  */ Checkout
 export type BillingGetCheckoutSessionV1ApiArg = {
   sessionId: string
 }
-export type BillingGetTrialPlansV1ApiResponse = /** status 200  */ PaymentLink[]
-export type BillingGetTrialPlansV1ApiArg = void
 export type SubscriptionPlan = {
   id: string
   name?: string | null
@@ -163,6 +163,15 @@ export type Subscription = {
   /** Whether the subscription has a default payment method, or its customer does as a fallback */
   hasPaymentMethod?: boolean
 }
+export type PaymentLink = {
+  id: string
+  active: boolean
+  metadata: object
+  customText?: object
+  afterCompletion?: object
+  lineItems?: object[]
+  trialPeriodDays?: number | null
+}
 export type MarketingFeature = {
   name: string
 }
@@ -189,15 +198,6 @@ export type Plan = {
 }
 export type UrlResponse = {
   url: string
-}
-export type PaymentLink = {
-  id: string
-  active: boolean
-  metadata: object
-  customText?: object
-  afterCompletion?: object
-  lineItems?: object[]
-  trialPeriodDays?: number | null
 }
 export type CheckoutSessionResult = {
   sessionId: string
@@ -255,6 +255,8 @@ export type CheckoutSession = {
 export const {
   useBillingGetSubscriptionsV1Query,
   useLazyBillingGetSubscriptionsV1Query,
+  useBillingGetTrialPlansV1Query,
+  useLazyBillingGetTrialPlansV1Query,
   useBillingGetPlanV1Query,
   useLazyBillingGetPlanV1Query,
   useBillingGetSessionUrlV1Query,
@@ -268,6 +270,4 @@ export const {
   useBillingUpdateSubscriptionV1Mutation,
   useBillingGetCheckoutSessionV1Query,
   useLazyBillingGetCheckoutSessionV1Query,
-  useBillingGetTrialPlansV1Query,
-  useLazyBillingGetTrialPlansV1Query,
 } = injectedRtkApi
