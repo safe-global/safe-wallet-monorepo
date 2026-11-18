@@ -11,6 +11,7 @@ import { TxReviewPage } from '../../src/pages/tx-review.page'
 import { WorkspaceTransactionsPage } from '../../src/pages/workspace-transactions.page'
 import { seedProposer } from '../../src/seed/proposers'
 import {
+  ethTransfer,
   seedQueuedTokenTransfer,
   seedQueuedTransfer,
   seedSafe,
@@ -38,7 +39,6 @@ const ETH = {
   proposed: '0.0016',
 }
 const USDC = { treasury: '5', reserve: '6', grants: '7' }
-const AFTER_ONE_POLL = { timeout: 35_000 }
 
 type PendingWorkspace = {
   id: string
@@ -49,31 +49,29 @@ type PendingWorkspace = {
   operations: SeededSafe
 }
 
-const ethTransfer = (recipient: string, amount: string) => ({
-  to: recipient,
-  value: parseEther(amount).toString(),
-  data: '0x',
-})
-
-async function seedSafeWithUsdc(journey: Journey, setup: SafeSetup, token: SeedToken, amount: string) {
+async function seedSafeOn(
+  journey: Journey,
+  setup: SafeSetup,
+  token: SeedToken,
+  transfers: { recipient: string; eth: string; usdc: string },
+) {
   const safe = await seedSafe(journey, setup)
-  await seedTokenBalance(safe, { token, amount: parseUnits(amount, token.decimals) })
+  await seedTokenBalance(safe, { token, amount: parseUnits(transfers.usdc, token.decimals) })
+  await seedQueuedTransfer(safe, { nonce: 0, recipient: transfers.recipient, amount: transfers.eth })
+  await seedQueuedTokenTransfer(safe, {
+    nonce: 1,
+    token: token.address,
+    recipient: transfers.recipient,
+    amount: parseUnits(transfers.usdc, token.decimals),
+  })
   return safe
 }
 
 async function seedSepoliaSafes(journey: Journey, recipient: string) {
-  const treasury = await seedSafeWithUsdc(
-    journey,
-    { owners: ['carol', 'alice', 'bob'], threshold: 3 },
-    SEPOLIA_USDC,
-    USDC.treasury,
-  )
-  await seedQueuedTransfer(treasury, { nonce: 0, recipient, amount: ETH.treasury })
-  await seedQueuedTokenTransfer(treasury, {
-    nonce: 1,
-    token: SEPOLIA_USDC.address,
+  const treasury = await seedSafeOn(journey, { owners: ['carol', 'alice', 'bob'], threshold: 3 }, SEPOLIA_USDC, {
     recipient,
-    amount: parseUnits(USDC.treasury, SEPOLIA_USDC.decimals),
+    eth: ETH.treasury,
+    usdc: USDC.treasury,
   })
 
   const payroll = await seedSafe(journey, { owners: ['alice', 'bob', 'carol'], threshold: 2 })
@@ -89,23 +87,6 @@ async function seedSepoliaSafes(journey: Journey, recipient: string) {
   await waitForNativeBalance(operations)
 
   return { treasury, payroll, operations }
-}
-
-async function seedSafeOn(
-  journey: Journey,
-  setup: SafeSetup,
-  token: SeedToken,
-  transfers: { recipient: string; eth: string; usdc: string },
-) {
-  const safe = await seedSafeWithUsdc(journey, setup, token, transfers.usdc)
-  await seedQueuedTransfer(safe, { nonce: 0, recipient: transfers.recipient, amount: transfers.eth })
-  await seedQueuedTokenTransfer(safe, {
-    nonce: 1,
-    token: token.address,
-    recipient: transfers.recipient,
-    amount: parseUnits(transfers.usdc, token.decimals),
-  })
-  return safe
 }
 
 /** The pre-set-up Workspace of the QA plan: 9 pending transactions on 5 Safes across Sepolia, Ethereum and Polygon */
@@ -134,6 +115,8 @@ async function seedPendingWorkspace(journey: Journey, page: Page): Promise<Pendi
   return { id, session, recipient, ...sepolia }
 }
 
+const rowsWithout = (rows: string[], text: string): string[] => rows.filter((row) => !row.includes(text)).sort()
+
 /** The IDs of the transactions in the Workspace queue that CGW serves its members */
 async function workspaceQueueTxIds({ id, session }: PendingWorkspace): Promise<string[]> {
   const queue = (await gatewayRequest(session, 'GET', `/v1/spaces/${id}/transactions/queued`)) as SpaceQueuedItemPage
@@ -144,6 +127,7 @@ async function workspaceQueueTxIds({ id, session }: PendingWorkspace): Promise<s
 
 test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
   test.slow()
+  // The queue table is virtualized: a tall viewport renders every row, so row counts are the queue length
   test.use({ viewport: { width: 1280, height: 1600 } })
 
   test('should add a transaction that a proposer creates from the Workspace to its queue as waiting, and as signable by an owner', async ({
@@ -172,7 +156,7 @@ test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
     const [{ id: proposedTxId }] = await safeApiClient.getQueued(workspace.operations.address)
     await expect.poll(() => workspaceQueueTxIds(workspace)).toContain(proposedTxId)
     const proposed = pending.rows.filter({ hasText: ETH.proposed })
-    await expect(pending.rows).toHaveCount(10, AFTER_ONE_POLL)
+    await expect(pending.rows).toHaveCount(10)
     await expect(proposed).toContainText('0/2')
     await expect(proposed).toContainText('Waiting')
 
@@ -194,17 +178,19 @@ test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
     const review = new TxReviewPage(safePage)
     await pending.goto(workspace.id)
     const transfer = pending.rows.filter({ hasText: ETH.treasury })
+    await expect(pending.rows).toHaveCount(9)
     await expect(transfer).toContainText('1/3')
+    const othersBefore = rowsWithout(await pending.rowStates(), ETH.treasury)
     await pending.sign(transfer)
     await review.sign()
 
     await expect
       .poll(async () => (await safeApiClient.getQueued(workspace.treasury.address)).map(confirmationsOf))
       .toEqual([2, 1])
-    await expect(transfer).toContainText('2/3', AFTER_ONE_POLL)
+    await expect(transfer).toContainText('2/3')
     await expect(transfer).toContainText('Waiting')
     await expect(pending.rows).toHaveCount(9)
-    await expect(pending.rows.filter({ hasText: '1/3' })).toHaveCount(1)
+    await expect.poll(async () => rowsWithout(await pending.rowStates(), ETH.treasury)).toEqual(othersBefore)
   })
 
   test('should remove an executed transaction from the Workspace queue and make the next one of its Safe executable', async ({
@@ -219,8 +205,11 @@ test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
     await pending.goto(workspace.id)
     const transfer = pending.rows.filter({ hasText: ETH.payroll })
     const batch = pending.rows.filter({ hasText: 'Batch' })
+    await expect(pending.rows).toHaveCount(9)
     await expect(transfer).toContainText('2/2')
     await expect(batch).toContainText('Blocked')
+    await expect(batch.getByTestId('execute-tx-btn')).toBeDisabled()
+    const othersBefore = rowsWithout(await pending.rowStates(), 'Payroll')
     await pending.execute(transfer)
     await review.continueAndExecute()
     await review.waitForExecution()
@@ -228,9 +217,10 @@ test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
 
     await expect.poll(() => safeApiClient.getNonce(workspace.payroll.address)).toBe(1)
     expect(await balanceOf(journey.env, workspace.recipient)).toBe(parseEther(ETH.payroll))
-    await expect(pending.rows).toHaveCount(8, AFTER_ONE_POLL)
+    await expect(pending.rows).toHaveCount(8)
     await expect(transfer).toHaveCount(0)
     await expect(batch).not.toContainText('Blocked')
-    await expect(batch.getByTestId('execute-tx-btn')).toBeVisible()
+    await expect(batch.getByTestId('execute-tx-btn')).toBeEnabled()
+    await expect.poll(async () => rowsWithout(await pending.rowStates(), 'Payroll')).toEqual(othersBefore)
   })
 })

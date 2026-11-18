@@ -1,7 +1,7 @@
 import { Interface, parseEther } from 'ethers'
 import type { MetaTransactionData } from '@safe-global/types-kit'
 import { getSafeMigrationDeployment } from '@safe-global/safe-deployments'
-import { DELEGATE_CALL } from '../../environment/scenarios/chain.mjs'
+import { DELEGATE_CALL, erc20 } from '../../environment/scenarios/chain.mjs'
 import { waitForQueued, waitUntil } from '../../environment/scenarios/indexing.mjs'
 import {
   createSafeAddress,
@@ -65,10 +65,7 @@ export async function seedSafe(
   return safe
 }
 
-/**
- * Proposes `transactions` signed by the Safe's context signer, and waits until it is in the CGW queue. Several
- * transactions make one MultiSend.
- */
+/** Proposes `transactions`, as one MultiSend when there are several, signed by the context signer, and waits until queued. */
 export async function seedQueuedTransaction(
   safe: SeededSafe,
   { nonce, transactions }: { nonce: number; transactions: MetaTransactionData[] },
@@ -80,18 +77,19 @@ export async function seedQueuedTransaction(
   return { safeTxHash: hash, txId: `multisig_${safe.address}_${hash}` }
 }
 
+export const ethTransfer = (recipient: string, amount: string): MetaTransactionData => ({
+  to: recipient,
+  value: parseEther(amount).toString(),
+  data: '0x',
+})
+
 /** Proposes an ETH transfer signed by the Safe's context signer, and waits until it is in the CGW queue. */
 export function seedQueuedTransfer(
   safe: SeededSafe,
   { nonce, recipient, amount }: { nonce: number; recipient: string; amount: string },
 ): Promise<QueuedTransaction> {
-  return seedQueuedTransaction(safe, {
-    nonce,
-    transactions: [{ to: recipient, value: parseEther(amount).toString(), data: '0x' }],
-  })
+  return seedQueuedTransaction(safe, { nonce, transactions: [ethTransfer(recipient, amount)] })
 }
-
-const erc20 = new Interface(['function transfer(address to, uint256 amount)'])
 
 /** Proposes a transfer of `amount` base units of `token`, signed by the context signer, and waits until it is queued. */
 export function seedQueuedTokenTransfer(
@@ -111,7 +109,7 @@ export async function seedExecutedTransfer(
 ): Promise<void> {
   const { context } = safe
   const transfer = await context.safe.createTransaction({
-    transactions: [{ to: recipient, value: parseEther(amount).toString(), data: '0x' }],
+    transactions: [ethTransfer(recipient, amount)],
   })
   await readChain(context.env, (provider) => executeTransaction({ ...context, provider }, transfer))
 }

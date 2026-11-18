@@ -27,6 +27,16 @@ export class WorkspaceTransactionsPage {
     await this.page.getByRole('dialog').getByTestId('safe-list-item').filter({ hasText: safeName }).click()
   }
 
+  /** Each row's nonce, Safe and summary, signatures and status, without the relative time, which changes on its own */
+  rowStates(): Promise<string[]> {
+    return this.rows.evaluateAll((rows) =>
+      rows.map((row) => {
+        const cells = row.querySelectorAll('td')
+        return [0, 1, 4, 5].map((cell) => cells[cell]?.innerText.trim() ?? '').join(' | ')
+      }),
+    )
+  }
+
   /** Sign the transaction in `row` from the Workspace; its review opens for the row's Safe */
   async sign(row: Locator): Promise<void> {
     await row.getByRole('button', { name: 'Sign' }).click()
