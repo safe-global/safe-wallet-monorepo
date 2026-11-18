@@ -17,6 +17,7 @@ export const useSpaceAddressBookState = (): {
   tags: SpaceAddressBookTagDto[]
   isLoading: boolean
   isError: boolean
+  isUninitialized: boolean
   refetch: () => void
 } => {
   const spaceId = useCurrentSpaceId()
@@ -25,6 +26,7 @@ export const useSpaceAddressBookState = (): {
     currentData: addressBook,
     isLoading,
     isError,
+    isUninitialized,
     refetch,
   } = useAddressBooksGetAddressBookItemsV1Query(
     { spaceId: spaceId ?? '' },
@@ -36,6 +38,7 @@ export const useSpaceAddressBookState = (): {
     tags: addressBook?.tags ?? EMPTY_TAGS,
     isLoading,
     isError,
+    isUninitialized,
     refetch,
   }
 }
