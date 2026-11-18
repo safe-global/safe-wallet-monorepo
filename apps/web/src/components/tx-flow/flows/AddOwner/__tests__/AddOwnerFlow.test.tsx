@@ -60,7 +60,7 @@ jest.mock('@/features/hypernative/public/useIsHypernativeEligible', () => ({
   useIsHypernativeEligible: () => ({ isHypernativeEligible: false, isHypernativeGuard: false, loading: false }),
 }))
 
-jest.mock('@/features/spaces/hooks/useSafeProAccess', () => ({
+jest.mock('@/features/spaces/public/useSafeProAccess', () => ({
   useSafeProAccess: () => ({ hasProFeatures: true, isSafePro: true, isLoading: false, spaceId: null }),
 }))
 

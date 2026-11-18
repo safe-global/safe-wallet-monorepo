@@ -68,14 +68,14 @@ jest.mock('@/hooks/useWhatsNewUpdates', () => ({
   useWhatsNewUpdates: () => ({ unreadCount: mockUnreadCount, markAsSeen: mockMarkAsSeen }),
 }))
 
-jest.mock('@/features/spaces/components/Sidebar/WhatsNewCornerCard/WhatsNewCornerCard', () => ({
-  ...jest.requireActual('@/features/spaces/components/Sidebar/WhatsNewCornerCard/WhatsNewCornerCard'),
+jest.mock('../../WhatsNewCornerCard/WhatsNewCornerCard', () => ({
+  ...jest.requireActual('../../WhatsNewCornerCard/WhatsNewCornerCard'),
   WhatsNewCornerCard: ({ onOpen }: { onOpen: () => void }) => (
     <button data-testid="whats-new-corner-card" onClick={onOpen} />
   ),
 }))
 
-jest.mock('@/features/spaces/components/Sidebar/WhatsNewDrawer/WhatsNewDrawer', () => ({
+jest.mock('../../WhatsNewDrawer/WhatsNewDrawer', () => ({
   WhatsNewDrawer: ({ productId, open }: { productId: string; open: boolean }) =>
     open ? <div data-testid="whats-new-drawer" data-product-id={productId} /> : null,
 }))

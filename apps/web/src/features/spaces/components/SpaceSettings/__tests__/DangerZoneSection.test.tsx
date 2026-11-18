@@ -4,58 +4,58 @@ import { Provider } from 'react-redux'
 import { makeStore } from '@/store'
 import DangerZoneSection from '../sections/DangerZoneSection'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useIsAdmin, useIsActiveMember } from '@/features/spaces/hooks/useSpaceMembers'
-import { useIsLastActiveAdmin } from '@/features/spaces/hooks/useIsLastActiveAdmin'
-import { useSpaceDeletionGuard } from '@/features/spaces/hooks/billing/useSpaceDeletionGuard'
+import { useIsAdmin, useIsActiveMember } from '../../../public/useSpaceMembers'
+import { useIsLastActiveAdmin } from '../../../hooks/useIsLastActiveAdmin'
+import { useSpaceDeletionGuard } from '../../../hooks/billing/useSpaceDeletionGuard'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 const MOCK_SPACE_UUID_ALT = '22222222-2222-2222-2222-222222222222'
 
-jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+jest.mock('../../../public/useSpaceMembers', () => ({
   get MemberStatus() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MemberStatus
+    return jest.requireActual('../../../public/useSpaceMembers').MemberStatus
   },
   get MemberRole() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MemberRole
+    return jest.requireActual('../../../public/useSpaceMembers').MemberRole
   },
   get MEMBER_ALIAS_MAX_LENGTH() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+    return jest.requireActual('../../../public/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
   },
   get getMemberDisplayName() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').getMemberDisplayName
+    return jest.requireActual('../../../public/useSpaceMembers').getMemberDisplayName
   },
   get sanitizeMemberAlias() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').sanitizeMemberAlias
+    return jest.requireActual('../../../public/useSpaceMembers').sanitizeMemberAlias
   },
   get isAdmin() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isAdmin
+    return jest.requireActual('../../../public/useSpaceMembers').isAdmin
   },
   get isActiveAdmin() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isActiveAdmin
+    return jest.requireActual('../../../public/useSpaceMembers').isActiveAdmin
   },
   get isInviteExpired() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isInviteExpired
+    return jest.requireActual('../../../public/useSpaceMembers').isInviteExpired
   },
   get useSpaceMembersByStatus() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useSpaceMembersByStatus
+    return jest.requireActual('../../../public/useSpaceMembers').useSpaceMembersByStatus
   },
   get useCurrentMembership() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useCurrentMembership
+    return jest.requireActual('../../../public/useSpaceMembers').useCurrentMembership
   },
   get useCurrentMemberProfile() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useCurrentMemberProfile
+    return jest.requireActual('../../../public/useSpaceMembers').useCurrentMemberProfile
   },
   get useIsInvited() {
-    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useIsInvited
+    return jest.requireActual('../../../public/useSpaceMembers').useIsInvited
   },
   useIsAdmin: jest.fn(() => false),
   useIsActiveMember: jest.fn(() => false),
 }))
-jest.mock('@/features/spaces/hooks/useIsLastActiveAdmin', () => ({
-  ...jest.requireActual('@/features/spaces/hooks/useIsLastActiveAdmin'),
+jest.mock('../../../hooks/useIsLastActiveAdmin', () => ({
+  ...jest.requireActual('../../../hooks/useIsLastActiveAdmin'),
   useIsLastActiveAdmin: jest.fn(() => false),
 }))
-jest.mock('@/features/spaces/hooks/billing/useSpaceDeletionGuard', () => ({
-  ...jest.requireActual('@/features/spaces/hooks/billing/useSpaceDeletionGuard'),
+jest.mock('../../../hooks/billing/useSpaceDeletionGuard', () => ({
+  ...jest.requireActual('../../../hooks/billing/useSpaceDeletionGuard'),
   useSpaceDeletionGuard: jest.fn(() => ({ isDeletionBlocked: false })),
 }))
 

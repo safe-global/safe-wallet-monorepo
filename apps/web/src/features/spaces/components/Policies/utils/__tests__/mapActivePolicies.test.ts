@@ -13,7 +13,7 @@ import {
   mockSpendingLimitDto,
   mockTreasuryAllowlistDtos,
 } from '../../mocks/activePolicies'
-import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS } from '../../mocks/policies'
+import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS } from '../../../../public/policies'
 import { mapActivePolicies, type Erc20TokenResolver, type NativeTokenResolver } from '../mapActivePolicies'
 
 describe('mapActivePolicies', () => {

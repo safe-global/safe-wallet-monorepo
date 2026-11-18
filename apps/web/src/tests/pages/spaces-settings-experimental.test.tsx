@@ -2,44 +2,36 @@ import { render, screen } from '@testing-library/react'
 import SpaceSettingsExperimentalPage from '../../pages/spaces/settings/experimental'
 import { AppRoutes } from '@/config/routes'
 import * as router from 'next/router'
-import * as featureModule from '@/features/__core__/useLoadFeature'
-import * as spacesFeatureUseCurrentSpaceId from '@/features/spaces/hooks/useCurrentSpaceId'
-import * as spacesFeatureUseFeatureRedirect from '@/features/spaces/hooks/useFeatureRedirect'
+import * as spacesFeatureUseCurrentSpaceId from '@/features/spaces/public/useCurrentSpaceId'
+import * as spacesFeatureUseFeatureRedirect from '@/features/spaces/public/useFeatureRedirect'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
-jest.mock('@/features/__core__/useLoadFeature', () => ({
-  ...jest.requireActual('@/features/__core__/useLoadFeature'),
-  useLoadFeature: jest.fn(),
+jest.mock('@/features/spaces/public/SpaceSettingsPage', () => ({
+  __esModule: true,
+  default: ({ spaceId, activePage }: { spaceId: string; activePage: string }) => (
+    <div data-testid="settings-page">
+      {activePage} {spaceId}
+    </div>
+  ),
 }))
-
-jest.mock('@/features/spaces/SpacesFeature', () => ({
-  SpacesFeature: 'SpacesFeature',
-}))
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('@/features/spaces/public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useFeatureRedirect', () => ({
-  ...jest.requireActual('@/features/spaces/hooks/useFeatureRedirect'),
+jest.mock('@/features/spaces/public/useFeatureRedirect', () => ({
+  ...jest.requireActual('@/features/spaces/public/useFeatureRedirect'),
   __esModule: true,
   default: jest.fn(),
 }))
 
 const SPACE_ID = 'space-uuid-1'
 
-const SpaceSettingsPageMock = ({ spaceId, activePage }: { spaceId: string; activePage: string }) => (
-  <div data-testid="settings-page">
-    {activePage} {spaceId}
-  </div>
-)
-
 const setup = ({ isReady = true, spaceId = SPACE_ID }: { isReady?: boolean; spaceId?: string | null } = {}) => {
   ;(router.useRouter as jest.Mock).mockReturnValue({ isReady, query: { spaceId } })
   ;(spacesFeatureUseCurrentSpaceId.useCurrentSpaceId as jest.Mock).mockReturnValue(spaceId)
-  ;(featureModule.useLoadFeature as jest.Mock).mockReturnValue({ SpaceSettingsPage: SpaceSettingsPageMock })
 }
 
 describe('SpaceSettingsExperimentalPage (/spaces/settings/experimental)', () => {

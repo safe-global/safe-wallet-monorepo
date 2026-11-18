@@ -5,7 +5,7 @@ import * as useChainIdModule from '@/hooks/useChainId'
 import * as useIsSafeOwnerModule from '@/hooks/useIsSafeOwner'
 import * as useIsNestedSafeOwnerModule from '@/hooks/useIsNestedSafeOwner'
 import * as useProposersModule from '@/hooks/useProposers'
-import * as spacesModule from '@/features/spaces/hooks/useGetSpaceAddressBook'
+import * as spacesModule from '@/features/spaces/public/useGetSpaceAddressBook'
 import { getStoreInstance } from '@/store'
 import type { Delegate } from '@safe-global/store/gateway/AUTO_GENERATED/delegates'
 

@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
-import { ActiveProposer } from '@/features/spaces/components/Policies/ProposerDrawer/variants/ActiveProposer/ActiveProposer'
-import { NotActivatedProposer } from '@/features/spaces/components/Policies/ProposerDrawer/variants/NotActivatedProposer/NotActivatedProposer'
-import { PendingProposer } from '@/features/spaces/components/Policies/ProposerDrawer/variants/PendingProposer/PendingProposer'
+import { ActiveProposer } from './ActiveProposer/ActiveProposer'
+import { NotActivatedProposer } from './NotActivatedProposer/NotActivatedProposer'
+import { PendingProposer } from './PendingProposer/PendingProposer'
 import {
   ProposerStatus,
   type ProposerVariantContentProps,

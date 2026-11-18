@@ -14,11 +14,11 @@ import { closeGlobalSearch } from '../../../../public/globalSearchSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsSwapFeatureEnabled from '@/features/swap/public/useIsSwapFeatureEnabled'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
-import { ESafeAction, openSafeActionsModal } from '@/features/spaces/store/safeActionsModalSlice'
+import { ESafeAction, openSafeActionsModal } from '@/features/spaces/public/safeActionsModalSlice'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '@/features/spaces/public/useCurrentSpaceId'
 
 interface NavigationItem {
   icon: ReactNode

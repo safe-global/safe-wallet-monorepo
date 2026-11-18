@@ -5,7 +5,7 @@ import { DrawerList } from '@safe-global/views/components/common/Drawer/componen
 import { DrawerSection } from '@safe-global/views/components/common/Drawer/components/DrawerSection'
 import type { DrawerListItem } from '@safe-global/views/components/common/Drawer/components/DrawerList'
 import { Link } from '@safe-global/views/components/ui/link'
-import AccountIdentity from '@/features/spaces/components/Policies/components/AccountIdentity/AccountIdentity'
+import AccountIdentity from '../../../components/AccountIdentity/AccountIdentity'
 import type { AccountIdentityProps } from '@safe-global/views/features/spaces/components/Policies/components/AccountIdentity/types'
 
 export type PolicyOverviewProps = {

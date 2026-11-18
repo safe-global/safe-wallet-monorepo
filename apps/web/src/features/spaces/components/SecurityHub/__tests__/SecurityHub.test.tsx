@@ -2,7 +2,7 @@ import { render } from '@testing-library/react'
 import SecurityHub from '../index'
 
 const useCurrentSpaceIdMock = jest.fn<string | null, []>()
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('../../../public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => useCurrentSpaceIdMock(),
 }))
 

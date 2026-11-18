@@ -28,7 +28,7 @@ jest.mock('@/store', () => ({
   useAppDispatch: () => mockDispatch,
 }))
 
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('@/features/spaces/public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '42',
 }))
 

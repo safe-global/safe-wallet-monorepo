@@ -2,16 +2,14 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import { SpacesFeature } from '@/features/spaces/SpacesFeature'
-import { useLandingSpaceId } from '@/features/spaces/hooks/useLandingSpaceId'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import { useLandingSpaceId } from '@/features/spaces/public/useLandingSpaceId'
 import { AppRoutes } from '@/config/routes'
 import { parseSpaceId } from '@/hooks/useUrlSpaceId'
+import SpaceDashboardPage from '@/features/spaces/public/SpaceDashboardPage'
 
 export default function SpacePage() {
   const router = useRouter()
   const spaceId = parseSpaceId(router.query.spaceId)
-  const spaces = useLoadFeature(SpacesFeature)
   const landing = useLandingSpaceId()
 
   useEffect(() => {
@@ -34,7 +32,7 @@ export default function SpacePage() {
       </Head>
 
       <main className="!pt-0">
-        <spaces.SpaceDashboardPage spaceId={spaceId} />
+        <SpaceDashboardPage spaceId={spaceId} />
       </main>
     </>
   )

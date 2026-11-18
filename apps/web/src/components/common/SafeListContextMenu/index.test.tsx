@@ -16,7 +16,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/owners', () => ({
 }))
 
 const mockWriteScope: jest.Mock = jest.fn(() => ({ scope: 'local', canRename: true }))
-jest.mock('@/features/spaces/hooks/useAddressBookWriteScope', () => ({
+jest.mock('@/features/spaces/public/useAddressBookWriteScope', () => ({
   useAddressBookWriteScope: (...args: unknown[]) => mockWriteScope(...args),
 }))
 

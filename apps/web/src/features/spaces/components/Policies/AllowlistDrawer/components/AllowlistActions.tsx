@@ -3,8 +3,8 @@ import type { LinkProps } from 'next/link'
 import { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'
 import { Button } from '@safe-global/views/components/ui/button'
 import type { AllowlistDrawerState } from '../resolveState'
-import PolicyDrawerActions from '@/features/spaces/components/Policies/components/PolicyDrawerActions/PolicyDrawerActions'
-import CopyTransactionLink from '@/features/spaces/components/Policies/SpendingLimitDrawer/components/CopyTransactionLink/CopyTransactionLink'
+import PolicyDrawerActions from '../../components/PolicyDrawerActions/PolicyDrawerActions'
+import CopyTransactionLink from '../../SpendingLimitDrawer/components/CopyTransactionLink/CopyTransactionLink'
 
 export type AllowlistActionsProps = {
   state: AllowlistDrawerState

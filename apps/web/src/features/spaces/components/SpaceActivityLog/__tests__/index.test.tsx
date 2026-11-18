@@ -4,7 +4,7 @@ import SpaceActivityLog from '../index'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import useGetSpaceAuditLog from '../../../hooks/useGetSpaceAuditLog'
-import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '../../../public/useCurrentSpaceId'
 
 jest.mock('@/store', () => ({
   useAppSelector: jest.fn(() => true),
@@ -14,11 +14,11 @@ jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
 jest.mock('../../../hooks/useGetSpaceAuditLog')
-jest.mock('../../../hooks/useCurrentSpaceId', () => ({
+jest.mock('../../../public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(() => 'space-uuid-1'),
 }))
 const mockResolveMemberName = jest.fn()
-jest.mock('../../../hooks/useMemberNameResolver', () => ({
+jest.mock('../../../public/useMemberNameResolver', () => ({
   useMemberNameResolver: () => mockResolveMemberName,
 }))
 // The filter bar is exercised through its callback; its controls have their own test file.

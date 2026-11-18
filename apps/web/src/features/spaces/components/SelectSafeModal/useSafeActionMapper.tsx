@@ -8,7 +8,7 @@ import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProv
 import { AppRoutes } from '@/config/routes'
 import useChains from '@/hooks/useChains'
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
-import { ESafeAction } from '@/features/spaces/store/safeActionsModalSlice'
+import { ESafeAction } from '../../public/safeActionsModalSlice'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
 
 type SafeActionHandler = (safe: SafeItem) => Promise<void>

@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@/tests/test-utils'
 import MultiAccountContextMenu from './MultiAccountContextMenu'
 
 const mockWriteScope: jest.Mock = jest.fn(() => ({ scope: 'local', canRename: true }))
-jest.mock('@/features/spaces/hooks/useAddressBookWriteScope', () => ({
+jest.mock('@/features/spaces/public/useAddressBookWriteScope', () => ({
   useAddressBookWriteScope: (...args: unknown[]) => mockWriteScope(...args),
 }))
 

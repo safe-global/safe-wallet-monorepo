@@ -12,7 +12,7 @@ import {
   type SafeAccountEntry,
   type SafeAccountOption,
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
-import type { ChainInfo } from '@/features/spaces/types'
+import type { ChainInfo } from '../../../public/types'
 import ProposerRoleForm from './ProposerRoleForm'
 import { mockNow } from '@/stories/mocks/now'
 

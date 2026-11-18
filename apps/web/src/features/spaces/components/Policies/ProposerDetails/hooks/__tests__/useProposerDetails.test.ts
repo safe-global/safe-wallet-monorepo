@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react'
-import { asActivePolicy, mockProposerPolicy } from '../../../mocks/policies'
+import { asActivePolicy, mockProposerPolicy } from '../../../../../public/policies'
 import { ProposerStatus } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/variants/types'
 import { getProposerStatus, useProposerDetails } from '../useProposerDetails'
 

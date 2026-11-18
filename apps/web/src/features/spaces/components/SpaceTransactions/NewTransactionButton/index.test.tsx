@@ -7,7 +7,7 @@ import {
   ESafeAction,
   selectSafeActionsModalOpen,
   selectSafeActionsModalType,
-} from '../../../store/safeActionsModalSlice'
+} from '../../../public/safeActionsModalSlice'
 import NewTransactionButton from '.'
 
 jest.mock('@/services/analytics', () =>

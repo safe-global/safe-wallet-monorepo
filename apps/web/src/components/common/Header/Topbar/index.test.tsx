@@ -158,15 +158,15 @@ jest.mock('@/services/analytics/events/spaces', () => ({
 }))
 
 const mockUseCurrentSpaceId = jest.fn<string | null, []>(() => 'space-42')
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('@/features/spaces/public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
 }))
-jest.mock('@/features/spaces/components/HeaderNavigation/HeaderNavigation', () => ({
+jest.mock('@/features/spaces/public/HeaderNavigation', () => ({
   get HeaderNavigation() {
-    return jest.requireActual('@/features/spaces/components/HeaderNavigation/HeaderNavigation').HeaderNavigation
+    return jest.requireActual('@/features/spaces/public/HeaderNavigation').HeaderNavigation
   },
 }))
-jest.mock('@/features/spaces/components/HeaderNavigation/HeaderAccountInfo', () => ({
+jest.mock('@/features/spaces/public/HeaderAccountInfo', () => ({
   __esModule: true,
   default: () => <div data-testid="header-account-info" />,
 }))

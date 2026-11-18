@@ -3,8 +3,8 @@ import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
 import { ChevronRight, Settings2, UserRoundPlus, Wallet } from 'lucide-react'
 import { AppRoutes } from '@/config/routes'
-import SafeSelectorDropdown from '@/features/spaces/components/SafeSelectorDropdown'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import SafeSelectorDropdown from '@/features/spaces/public/SafeSelectorDropdown'
+import { useCurrentSpaceId } from '@/features/spaces/public/useCurrentSpaceId'
 import type {
   SafeItemData,
   SafeRenameTarget,
@@ -19,7 +19,7 @@ import {
   TRUSTED_ORDER_SCOPE,
 } from '@/store/orderByPreferenceSlice'
 import EntryDialog from '@/components/address-book/EntryDialog'
-import { useAddressBookWriteScope } from '@/features/spaces/hooks/useAddressBookWriteScope'
+import { useAddressBookWriteScope } from '@/features/spaces/public/useAddressBookWriteScope'
 import TrustedSafesModal from '@/components/common/TrustedSafesModal'
 import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrustedSafesModal'
 import { Button } from '@safe-global/views/components/ui/button'

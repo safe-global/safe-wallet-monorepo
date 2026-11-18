@@ -15,7 +15,7 @@ import Track from '@/components/common/Track'
 import { TxModalContext } from '@/components/tx-flow'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useAppSelector } from '@/store'
-import { usePlanGate } from '@/features/spaces/hooks/usePlanGate'
+import { usePlanGate } from '@/features/spaces/public/usePlanGate'
 import { selectSpendingLimits, selectSpendingLimitsLoading } from '../../public/spendingLimitsSlice'
 import useIsSpendingLimitSupported from '../../hooks/useIsSpendingLimitSupported'
 

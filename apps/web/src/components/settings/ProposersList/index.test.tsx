@@ -36,7 +36,7 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 
 const mockUsePlanGate = jest.fn()
-jest.mock('@/features/spaces/hooks/usePlanGate', () => ({
+jest.mock('@/features/spaces/public/usePlanGate', () => ({
   usePlanGate: (...args: unknown[]) => mockUsePlanGate(...args),
 }))
 

@@ -13,7 +13,7 @@ const spaceId = faker.string.uuid()
 
 jest.mock('next/router', () => ({ useRouter: () => ({ push: mockPush, query: {} }) }))
 
-jest.mock('@/features/spaces/hooks/useAddNewSafeToUrlSpace', () => ({
+jest.mock('@/features/spaces/public/useAddNewSafeToUrlSpace', () => ({
   useAddNewSafeToUrlSpace: () => mockAddNewSafeToUrlSpace,
 }))
 

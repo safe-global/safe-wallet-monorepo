@@ -59,7 +59,7 @@ jest.mock('@/hooks/useIsHydrated', () => ({
   useIsHydrated: () => mockUseSidebarHydrated(),
 }))
 
-jest.mock('@/features/spaces/components/Sidebar/NewTransactionButton/SidebarActionButton', () => ({
+jest.mock('../../../NewTransactionButton/SidebarActionButton', () => ({
   SidebarActionButton: () => (
     <button type="button" data-testid="new-tx-btn">
       New transaction
@@ -71,7 +71,7 @@ jest.mock('@safe-global/utils/utils/chains', () => ({
   isNonCriticalUpdate: () => false,
 }))
 
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('../../../../../public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '42',
 }))
 
@@ -83,7 +83,7 @@ jest.mock('@/utils/colors', () => ({
   getDeterministicColor: (name: string) => `color-${name}`,
 }))
 
-jest.mock('@/features/spaces/components/Sidebar/variants/NavItem/NavItem', () => ({
+jest.mock('../../NavItem/NavItem', () => ({
   NavItem: ({ item }: { item: ResolvedSidebarItem | null }) =>
     item ? (
       <div data-testid={item.testId ?? `sidebar-item-${item.label.toLowerCase()}`} data-active={item.isActive}>
@@ -163,7 +163,7 @@ jest.mock('../../../config', () => ({
   },
 }))
 
-jest.mock('@/features/spaces/components/Sidebar/variants/SidebarDeveloperGroup/SidebarDeveloperGroup', () => ({
+jest.mock('../../SidebarDeveloperGroup/SidebarDeveloperGroup', () => ({
   SidebarDeveloperGroup: ({ isLoading }: { isLoading?: boolean }) => (
     <div data-testid="developer-group" data-loading={isLoading}>
       Developer group
@@ -171,16 +171,12 @@ jest.mock('@/features/spaces/components/Sidebar/variants/SidebarDeveloperGroup/S
   ),
 }))
 
-jest.mock('@/features/spaces/components/Sidebar/variants/SpaceSelectorDropdown/SpaceSelectorDropdown', () => ({
+jest.mock('../../SpaceSelectorDropdown/SpaceSelectorDropdown', () => ({
   get SAFE_ALREADY_IN_WORKSPACE_TOOLTIP() {
-    return jest.requireActual(
-      '@/features/spaces/components/Sidebar/variants/SpaceSelectorDropdown/SpaceSelectorDropdown',
-    ).SAFE_ALREADY_IN_WORKSPACE_TOOLTIP
+    return jest.requireActual('../../SpaceSelectorDropdown/SpaceSelectorDropdown').SAFE_ALREADY_IN_WORKSPACE_TOOLTIP
   },
   get NO_PLAN_TOOLTIP() {
-    return jest.requireActual(
-      '@/features/spaces/components/Sidebar/variants/SpaceSelectorDropdown/SpaceSelectorDropdown',
-    ).NO_PLAN_TOOLTIP
+    return jest.requireActual('../../SpaceSelectorDropdown/SpaceSelectorDropdown').NO_PLAN_TOOLTIP
   },
   SpaceSelectorDropdown: ({ triggerVariant }: { triggerVariant?: 'default' | 'addToWorkspace' }) =>
     triggerVariant === 'addToWorkspace' ? (

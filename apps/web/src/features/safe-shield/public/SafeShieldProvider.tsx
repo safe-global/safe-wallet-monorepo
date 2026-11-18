@@ -17,7 +17,7 @@ import {
 import { getPrimaryResult, isSeverityHigherOrEqual } from '@safe-global/utils/features/safe-shield/utils'
 import { useAuthToken } from '@/features/hypernative/public/useAuthToken'
 import { useSafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
-import { useSafeProAccess } from '@/features/spaces/hooks/useSafeProAccess'
+import { useSafeProAccess } from '@/features/spaces/public/useSafeProAccess'
 
 const isCritical = <T extends { severity: Severity }>(result: T | null | undefined): result is T =>
   isSeverityHigherOrEqual(result?.severity, Severity.CRITICAL)

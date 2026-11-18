@@ -1,7 +1,7 @@
 import { AppRoutes } from '@/config/routes'
 import Link from 'next/link'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useIsAdmin } from '../../hooks/useSpaceMembers'
+import { useIsAdmin } from '../../public/useSpaceMembers'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { getDeterministicColor } from '@/utils/colors'
 import { Card } from '@safe-global/views/components/ui/card'

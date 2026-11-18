@@ -8,7 +8,7 @@ import {
   mockPolicies,
   mockProposerPolicy,
   mockSpendingLimitPolicy,
-} from '../../mocks/policies'
+} from '../../../../public/policies'
 import type { Policy } from '@safe-global/views/features/spaces/components/Policies/types'
 
 const mockChains = [

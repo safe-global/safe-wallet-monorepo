@@ -120,7 +120,7 @@ jest.mock('../../config', () => ({
   },
 }))
 
-jest.mock('@/features/spaces/components/Sidebar/ApiCtaSidebar/ApiCtaSidebar', () => ({
+jest.mock('../../ApiCtaSidebar/ApiCtaSidebar', () => ({
   ApiCtaSidebar: () => <div data-testid="api-cta-sidebar" />,
 }))
 
@@ -151,7 +151,7 @@ jest.mock('@/hooks/useIsSafeProEnabled', () => ({
 }))
 
 let mockSpaceId: string | null = 'space-uuid'
-jest.mock('../../../../hooks/useCurrentSpaceId', () => ({
+jest.mock('../../../../public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockSpaceId,
 }))
 
@@ -179,7 +179,7 @@ jest.mock('@/features/safe-pro-announcement/public/SafeProSidebarBanner', () => 
   ),
 }))
 
-jest.mock('@/features/spaces/components/Sidebar/SidebarIndexingStatus/SidebarIndexingStatus', () => ({
+jest.mock('../../SidebarIndexingStatus/SidebarIndexingStatus', () => ({
   SidebarIndexingStatus: () => <div data-testid="indexing-status" />,
 }))
 
@@ -188,7 +188,7 @@ jest.mock('next/router', () => ({
   useRouter: () => ({ pathname: mockPathname }),
 }))
 
-jest.mock('@/features/spaces/components/Sidebar/WhatsNewButton/WhatsNewButton', () => ({
+jest.mock('../../WhatsNewButton/WhatsNewButton', () => ({
   WhatsNewButton: () => <button data-testid="list-item-whats-new" />,
 }))
 

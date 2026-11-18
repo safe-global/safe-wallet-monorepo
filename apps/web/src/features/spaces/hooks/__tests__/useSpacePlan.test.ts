@@ -16,7 +16,7 @@ const mockIsSignedIn = jest.fn()
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockUseHasFeature() }))
 jest.mock('@/store', () => ({ useAppSelector: () => mockIsSignedIn() }))
 jest.mock('@/store/authSlice', () => ({ isAuthenticated: jest.fn() }))
-jest.mock('../useCurrentSpaceId', () => ({ useCurrentSpaceId: () => SPACE_ID }))
+jest.mock('../../public/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => SPACE_ID }))
 
 const SPACE_ID = '11111111-1111-1111-1111-111111111111'
 const OTHER_SPACE_ID = '22222222-2222-2222-2222-222222222222'

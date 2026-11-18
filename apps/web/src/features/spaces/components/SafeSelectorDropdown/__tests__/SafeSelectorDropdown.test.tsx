@@ -8,7 +8,7 @@ import { AppRoutes } from '@/config/routes'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import useChains from '@/hooks/useChains'
-import SafeSelectorDropdown from '../index'
+import SafeSelectorDropdown from '../../../public/SafeSelectorDropdown'
 import type { SafeItemData } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 /**

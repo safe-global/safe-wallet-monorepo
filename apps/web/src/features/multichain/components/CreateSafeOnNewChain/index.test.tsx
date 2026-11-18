@@ -4,9 +4,9 @@ import * as useChains from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
 import { CreateSafeOnSpecificChain } from './index'
 import { persistCounterfactualSafe } from '@/features/counterfactual/public/persistCounterfactualSafe'
-import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
-import { useSpaceSafeCount } from '@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit'
-import { useSpaceSafeLimit } from '@/features/spaces/hooks/useSpaceSafeLimit'
+import { useIsAdmin } from '@/features/spaces/public/useSpaceMembers'
+import { useSpaceSafeCount } from '@/features/spaces/public/useIsCurrentSpaceAtSafeLimit'
+import { useSpaceSafeLimit } from '@/features/spaces/public/useSpaceSafeLimit'
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { predictAddressBasedOnReplayData } from '../../public/utils'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
@@ -46,15 +46,15 @@ jest.mock('@/hooks/wallets/web3', () => ({
 }))
 
 // The feature barrel cannot be spread (circular import at init), so the source hook modules are mocked instead.
-jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
-  ...jest.requireActual('@/features/spaces/hooks/useSpaceMembers'),
+jest.mock('@/features/spaces/public/useSpaceMembers', () => ({
+  ...jest.requireActual('@/features/spaces/public/useSpaceMembers'),
   useIsAdmin: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit', () => ({
-  ...jest.requireActual('@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit'),
+jest.mock('@/features/spaces/public/useIsCurrentSpaceAtSafeLimit', () => ({
+  ...jest.requireActual('@/features/spaces/public/useIsCurrentSpaceAtSafeLimit'),
   useSpaceSafeCount: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useSpaceSafeLimit', () => ({
+jest.mock('@/features/spaces/public/useSpaceSafeLimit', () => ({
   useSpaceSafeLimit: jest.fn(),
 }))
 

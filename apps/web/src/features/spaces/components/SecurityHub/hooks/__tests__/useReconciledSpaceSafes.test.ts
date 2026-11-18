@@ -5,7 +5,7 @@ const useSpaceSafesMock = jest.fn()
 const useGetMultipleSafeOverviewsQueryMock = jest.fn()
 const useAppSelectorMock = jest.fn()
 
-jest.mock('@/features/spaces/hooks/useSpaceSafes', () => ({
+jest.mock('../../../../public/useSpaceSafes', () => ({
   useSpaceSafes: () => useSpaceSafesMock(),
 }))
 

@@ -6,7 +6,7 @@ import {
   mockActiveSpendingLimit,
   mockPendingPolicy,
   mockUnenforcedPolicy,
-} from '../../mocks/policies'
+} from '../../../../public/policies'
 import * as useChains from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
 import type {

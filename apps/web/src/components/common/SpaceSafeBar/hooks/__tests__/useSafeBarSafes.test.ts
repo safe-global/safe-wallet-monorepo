@@ -9,14 +9,14 @@ const mockUseIsQualifiedSafe = jest.fn(() => false)
 const mockSpaceSafes: AllSafeItems = []
 const mockUseSpaceSafes = jest.fn(() => ({ allSafes: mockSpaceSafes }))
 
-jest.mock('@/features/spaces/hooks/useIsQualifiedSafe', () => ({
+jest.mock('@/features/spaces/public/useIsQualifiedSafe', () => ({
   __esModule: true,
   default: () => mockUseIsQualifiedSafe(),
 }))
-jest.mock('@/features/spaces/hooks/useSpaceSafes', () => ({
+jest.mock('@/features/spaces/public/useSpaceSafes', () => ({
   useSpaceSafes: () => mockUseSpaceSafes(),
 }))
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('@/features/spaces/public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => null,
 }))
 

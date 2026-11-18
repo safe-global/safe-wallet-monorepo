@@ -4,12 +4,12 @@ import { SidebarMenuButton } from '@safe-global/views/components/ui/sidebar'
 import { Dialog, DialogContent, DialogTrigger } from '@safe-global/views/components/ui/dialog'
 import css from '../../styles.module.css'
 import type { SafeWorkspaceHeaderProps } from '@safe-global/views/features/spaces/components/Sidebar/types'
-import { SpaceSelectorDropdown } from '@/features/spaces/components/Sidebar/variants/SpaceSelectorDropdown/SpaceSelectorDropdown'
-import { BackToSpaceButton } from '@/features/spaces/components/Sidebar/BackToSpaceButton/BackToSpaceButton'
+import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown/SpaceSelectorDropdown'
+import { BackToSpaceButton } from '../../BackToSpaceButton/BackToSpaceButton'
 import { AddToSpacePopupModal } from '../../../AddToSpacePopupModal/AddToSpacePopupModal'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '../../../../public/useCurrentSpaceId'
 
 export interface SafeSidebarWorkspaceHeaderProps {
   workspaceHeader: SafeWorkspaceHeaderProps

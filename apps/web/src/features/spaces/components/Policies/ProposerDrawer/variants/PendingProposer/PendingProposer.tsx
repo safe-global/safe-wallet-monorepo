@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react'
 import { DrawerSection } from '@safe-global/views/components/common/Drawer/components/DrawerSection'
 import { Alert, AlertDescription, AlertSeverityIcon, AlertTitle } from '@safe-global/views/components/ui/alert'
-import ProposerOverview from '@/features/spaces/components/Policies/ProposerDrawer/components/ProposerOverview/ProposerOverview'
-import SafeSignatureInfo from '@/features/spaces/components/Policies/ProposerDrawer/components/SafeSignatureInfo/SafeSignatureInfo'
+import ProposerOverview from '../../components/ProposerOverview/ProposerOverview'
+import SafeSignatureInfo from '../../components/SafeSignatureInfo/SafeSignatureInfo'
 import type { PendingProposerProps } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/variants/types'
 
 export type { PendingProposerProps } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/variants/types'

@@ -1,14 +1,11 @@
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import { SpacesFeature } from '@/features/spaces/SpacesFeature'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import SpaceAddressBookContent from '@/features/spaces/public/SpaceAddressBookPage'
 
 export default function SpaceAddressBookPage() {
   const router = useRouter()
   const { spaceId } = router.query
-  const spaces = useLoadFeature(SpacesFeature)
-
   if (!router.isReady || !spaceId) return null
 
   return (
@@ -18,7 +15,7 @@ export default function SpaceAddressBookPage() {
       </Head>
 
       <main>
-        <spaces.SpaceAddressBookPage spaceId={spaceId as string} />
+        <SpaceAddressBookContent spaceId={spaceId as string} />
       </main>
     </>
   )

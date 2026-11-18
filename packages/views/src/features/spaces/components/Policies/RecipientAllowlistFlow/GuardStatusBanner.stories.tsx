@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
 import { Button } from '@safe-global/views/components/ui/button'
-import SafeIdentity from '@/features/spaces/components/Policies/components/SafeIdentity/SafeIdentity'
+import SafeIdentity from '@/features/spaces/public/SafeIdentity'
 import GuardStatusBanner from './GuardStatusBanner'
 
 const FOREIGN_GUARD = '0x4784e9bF408F649D04A0a3294e87B0c74C5A3020'

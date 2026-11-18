@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo, Suspense } from 'react'
 import dynamic from '@/utils/dynamic'
 import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import { useSpaceSafes } from '../../public/useSpaceSafes'
 import useSearchFilter from '@/hooks/useSearchFilter'
 import useMatchSafe from '@/hooks/useMatchSafe'
 import useChains from '@/hooks/useChains'
@@ -13,10 +13,10 @@ import {
   selectSafeActionsModalOpen,
   selectSafeActionsModalType,
   closeSafeActionsModal,
-} from '@/features/spaces/store/safeActionsModalSlice'
+} from '../../public/safeActionsModalSlice'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@safe-global/views/components/ui/dialog'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import SafeCardReadOnly from '../SafeAccounts/SafeCardReadOnly'
+import SafeCardReadOnly from '../../public/SafeCardReadOnly'
 import SafeSearch from './SafeSearch'
 import useSafeActionMapper from './useSafeActionMapper'
 import { safeModalTitles } from './constants'

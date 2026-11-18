@@ -12,8 +12,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@safe-global/views/components/ui/dialog'
-import { useSafePageWorkspacePick } from '../../hooks/useSafeWorkspaceAttach'
-import { useAddUrlSpaceId } from '../../hooks/useSafeWorkspaceCheck'
+import { useSafePageWorkspacePick } from '../../public/useSafeWorkspaceAttach'
+import { useAddUrlSpaceId } from '../../public/useSafeWorkspaceCheck'
 import type { SafeWorkspacePick } from '@/utils/spaces'
 
 /** The chooser for one visit to a Safe; it asks once, also when useSafeWorkspaceCheck removes the chosen id again. */

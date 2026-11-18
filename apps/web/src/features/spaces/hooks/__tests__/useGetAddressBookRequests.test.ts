@@ -8,7 +8,7 @@ const mockUseCurrentSpaceId = jest.fn()
 const mockUseAddressBookRequestsGetPendingRequestsV1Query = jest.fn()
 let mockIsAuthenticated = true
 
-jest.mock('../useCurrentSpaceId', () => ({
+jest.mock('../../public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
 }))
 

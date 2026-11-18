@@ -2,7 +2,7 @@ import { fireEvent, render, screen, within } from '@/tests/test-utils'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import * as useChainsHook from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
-import { MOCK_ADDRESSES, MOCK_SAFES, mockPolicies, mockProposerPolicy } from '../mocks/policies'
+import { MOCK_ADDRESSES, MOCK_SAFES, mockPolicies, mockProposerPolicy } from '../../../public/policies'
 import SpacePoliciesPage from '../Page'
 
 const mockUseSpacePolicies = jest.fn()
@@ -14,7 +14,7 @@ jest.mock('next/router', () => ({
   useRouter: () => ({ push: mockPush, query: { spaceId: 'space-1' } }),
 }))
 
-jest.mock('../../../hooks/usePlanGate', () => ({
+jest.mock('../../../public/usePlanGate', () => ({
   usePlanGate: (gatingFlag: FEATURES) => mockUsePlanGate(gatingFlag),
 }))
 

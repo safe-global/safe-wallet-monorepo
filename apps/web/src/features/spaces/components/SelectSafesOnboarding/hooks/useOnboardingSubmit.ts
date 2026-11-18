@@ -22,13 +22,13 @@ import useChains from '@/hooks/useChains'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { addOrUpdateSafe, selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
-import { useSpaceSafes } from '../../../hooks/useSpaceSafes'
-import { useSpaceAddressBookState } from '../../../hooks/useGetSpaceAddressBook'
+import { useSpaceSafes } from '../../../public/useSpaceSafes'
+import { useSpaceAddressBookState } from '../../../public/useGetSpaceAddressBook'
 import {
   ADDRESS_BOOK_UNAVAILABLE,
   usePrepareWorkspaceSafeNames,
   type WorkspaceSafeName,
-} from '../../../hooks/useUpsertWorkspaceSafeName'
+} from '../../../public/useUpsertWorkspaceSafeName'
 import { buildWorkspaceSafeNames, getSafesToName, hasAllNames, touchNames } from '../../NameAccounts/utils'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import {

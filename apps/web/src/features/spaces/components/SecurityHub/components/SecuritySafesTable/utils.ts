@@ -3,7 +3,7 @@ import type { SecurityGrade } from '@/features/security/public/types'
 import { SAFE_GRADE_RANK, SEVERITY_RANK } from '@/features/security/public/constants'
 import type { SecurityServices } from '@/features/security/public/securityServices'
 import { AppRoutes } from '@/config/routes'
-import { buildSafeHref, type SafeHref } from '@/features/spaces/utils/safeHref'
+import { buildSafeHref, type SafeHref } from '../../../../utils/safeHref'
 import { DASH } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
 import type { SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 

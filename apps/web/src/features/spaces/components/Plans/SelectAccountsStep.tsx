@@ -24,7 +24,7 @@ import {
   summarizeRemovedSafes,
 } from '@safe-global/views/features/spaces/components/Plans/removedSafes'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
-import { useSpaceSafes } from '../../hooks/useSpaceSafes'
+import { useSpaceSafes } from '../../public/useSpaceSafes'
 import SelectedCounter from '@safe-global/views/features/spaces/components/SelectedCounter'
 import useOnboardingSelection from '../SelectSafesOnboarding/hooks/useOnboardingSelection'
 import {

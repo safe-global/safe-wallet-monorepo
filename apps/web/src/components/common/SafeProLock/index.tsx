@@ -8,7 +8,7 @@ import { MixpanelEventParams, PlanSelectionEntryPoint, UpgradeLocation } from '@
 import type { UpgradeFeature } from '@/services/analytics/mixpanel-events'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
-import { trackPlanSelectionStarted } from '@/features/spaces/components/Plans/planSelection'
+import { trackPlanSelectionStarted } from '@/features/spaces/public/planSelection'
 
 /** Safe Pro upsell replacing an add-policy action (proposer, spending limit) when `usePlanGate` requires an upgrade. */
 const SafeProLock = ({ title, href, feature }: { title: string; href: LinkProps['href']; feature: UpgradeFeature }) => {

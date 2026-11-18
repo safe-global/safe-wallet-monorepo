@@ -27,7 +27,7 @@ jest.mock('@/features/safe-pro-announcement/public/SafeProAnnouncement', () => (
   default: () => <div data-testid="safe-pro-announcement" />,
 }))
 jest.mock('../../../hooks/useSpacePlan', () => ({ useSpacePlan: (spaceId?: string) => mockUseSpacePlan(spaceId) }))
-jest.mock('../../../hooks/useSpaceMembers', () => ({ useIsAdmin: () => mockIsAdmin }))
+jest.mock('../../../public/useSpaceMembers', () => ({ useIsAdmin: () => mockIsAdmin }))
 jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
   useSpaceOffers: (spaceId?: string) => mockUseSpaceOffers(spaceId),
 }))

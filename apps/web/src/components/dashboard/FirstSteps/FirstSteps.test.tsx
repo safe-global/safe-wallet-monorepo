@@ -1,6 +1,5 @@
 import userEvent from '@testing-library/user-event'
 import { render, screen, within } from '@/tests/test-utils'
-import * as coreFeatures from '@/features/__core__/useLoadFeature'
 import * as useBalancesModule from '@/hooks/useBalances'
 import * as useChains from '@/hooks/useChains'
 import * as useSafeInfoModule from '@/hooks/useSafeInfo'
@@ -20,10 +19,6 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/services/analytics')
-jest.mock('@/features/__core__/useLoadFeature', () => ({
-  ...jest.requireActual('@/features/__core__/useLoadFeature'),
-  useLoadFeature: jest.fn(),
-}))
 jest.mock('@/features/hypernative/public/useBannerVisibility', () => ({
   ...jest.requireActual('@/features/hypernative/public/useBannerVisibility'),
   useBannerVisibility: jest.fn(),
@@ -38,7 +33,6 @@ jest.mock('qrcode.react', () => ({
   QRCodeCanvas: ({ value }: { value: string }) => <canvas role="img" aria-label="QR code" data-value={value} />,
 }))
 
-const mockUseLoadFeature = coreFeatures.useLoadFeature as jest.Mock
 const mockUseBalances = useBalancesModule.default as jest.Mock
 const mockUseCurrentChain = useChains.useCurrentChain as jest.Mock
 const mockUseSafeInfo = useSafeInfoModule.default as jest.Mock
@@ -52,8 +46,6 @@ describe('FirstSteps', () => {
     jest.clearAllMocks()
     // The QR prefix setting is persisted, so the switch test would leak into later tests
     window.localStorage.clear()
-
-    mockUseLoadFeature.mockReturnValue({})
 
     mockUseCurrentChain.mockReturnValue(CHAIN)
 

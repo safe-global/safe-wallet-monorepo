@@ -1,4 +1,4 @@
-import { MOCK_VIEWERS } from '../../mocks/policies'
+import { MOCK_VIEWERS } from '../../../../public/policies'
 import {
   mockActivatingAllowlist,
   mockActiveAllowlist,
@@ -8,7 +8,7 @@ import {
   mockFullySignedPendingAllowlist,
   mockPendingAllowlist,
   mockUnenforcedAllowlist,
-} from '../../mocks/allowlistPolicies'
+} from '../../../../public/allowlistPolicies'
 import { inferAllowlistOutcome, resolveAllowlistDrawerState } from '../resolveState'
 
 describe('resolveAllowlistDrawerState', () => {

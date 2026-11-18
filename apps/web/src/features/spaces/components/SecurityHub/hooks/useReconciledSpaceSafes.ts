@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
+import { useSpaceSafes } from '../../../public/useSpaceSafes'
 import { useAppSelector } from '@/store'
 import { selectUndeployedSafes } from '@/features/counterfactual/public/undeployedSafesSlice'
 import { selectCurrency } from '@/store/settingsSlice'

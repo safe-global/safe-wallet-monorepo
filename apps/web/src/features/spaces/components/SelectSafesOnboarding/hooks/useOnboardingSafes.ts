@@ -9,7 +9,7 @@ import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
 import useSimilarityClusters from '@/features/address-poisoning/public/useSimilarityClusters'
 import { bandGroupsForList, buildSimilarWarnings } from '@/features/address-poisoning/public/crossListClusters'
-import useGetSpaceAddressBook from '../../../hooks/useGetSpaceAddressBook'
+import useGetSpaceAddressBook from '../../../public/useGetSpaceAddressBook'
 import { withWorkspaceNames } from '../../NameAccounts/utils'
 
 const useOnboardingSafes = () => {

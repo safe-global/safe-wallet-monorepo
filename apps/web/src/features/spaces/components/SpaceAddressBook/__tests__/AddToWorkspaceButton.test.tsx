@@ -16,15 +16,15 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useAddressBookRequestsCreateRequestV1Mutation: () => [jest.fn()],
 }))
 
-jest.mock('../../../hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => MOCK_SPACE_UUID }))
+jest.mock('../../../public/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => MOCK_SPACE_UUID }))
 
-jest.mock('../../../hooks/useGetSpaceAddressBook', () => ({
+jest.mock('../../../public/useGetSpaceAddressBook', () => ({
   __esModule: true,
   default: () => [],
   useSpaceAddressBookState: () => ({ items: [], isLoading: false, isError: false }),
 }))
 
-jest.mock('../../../hooks/useSpaceMembers', () => ({ useIsAdmin: () => IS_ADMIN, useIsInvited: () => false }))
+jest.mock('../../../public/useSpaceMembers', () => ({ useIsAdmin: () => IS_ADMIN, useIsInvited: () => false }))
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),

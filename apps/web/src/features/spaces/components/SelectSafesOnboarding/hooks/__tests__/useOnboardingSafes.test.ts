@@ -1,7 +1,7 @@
 import * as allOwnedSafes from '@/hooks/safes/useAllOwnedSafes'
 import * as useChains from '@/hooks/useChains'
 import * as useWallet from '@/hooks/wallets/useWallet'
-import * as useGetSpaceAddressBook from '../../../../hooks/useGetSpaceAddressBook'
+import * as useGetSpaceAddressBook from '../../../../public/useGetSpaceAddressBook'
 import { renderHook } from '@/tests/test-utils'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'

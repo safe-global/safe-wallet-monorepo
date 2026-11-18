@@ -19,7 +19,7 @@ const read = (...segments: string[]) =>
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/\/\/.*$/gm, '')
 
-const SELECTOR_SOURCE = read('..', '..', '..', 'features', 'spaces', 'components', 'SafeSelectorDropdown', 'index.tsx')
+const SELECTOR_SOURCE = read('..', '..', '..', 'features', 'spaces', 'public', 'SafeSelectorDropdown.tsx')
 const CHIP_SOURCES = {
   'nested safes': read('SpaceNestedSafesButton.tsx'),
   network: read('SpaceChainSelector.tsx'),

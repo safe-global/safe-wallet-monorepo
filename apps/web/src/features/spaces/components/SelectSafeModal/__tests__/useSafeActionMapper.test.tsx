@@ -3,7 +3,7 @@ import { renderHook, act } from '@testing-library/react'
 import useSafeActionMapper from '../useSafeActionMapper'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { AppRoutes } from '@/config/routes'
-import { ESafeAction } from '@/features/spaces/store/safeActionsModalSlice'
+import { ESafeAction } from '../../../public/safeActionsModalSlice'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { unwrapScopedFlow } from '@/tests/mocks/safeScope'
 

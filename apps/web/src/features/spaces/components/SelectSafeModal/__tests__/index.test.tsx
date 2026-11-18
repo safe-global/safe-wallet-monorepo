@@ -1,6 +1,6 @@
 import { render } from '@/tests/test-utils'
 import SelectSafeModal from '../index'
-import { ESafeAction } from '@/features/spaces/store/safeActionsModalSlice'
+import { ESafeAction } from '../../../public/safeActionsModalSlice'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 
@@ -27,7 +27,7 @@ const cfSafe: SafeItem = {
 
 const cardProps: Array<{ safe: SafeItem; disabled?: boolean; disabledTooltip?: string }> = []
 
-jest.mock('../../SafeAccounts/SafeCardReadOnly', () => ({
+jest.mock('../../../public/SafeCardReadOnly', () => ({
   __esModule: true,
   default: (props: { safe: SafeItem; disabled?: boolean; disabledTooltip?: string }) => {
     cardProps.push({ safe: props.safe, disabled: props.disabled, disabledTooltip: props.disabledTooltip })
@@ -41,7 +41,7 @@ jest.mock('../useSafeActionMapper', () => ({
 }))
 
 const mockUseSpaceSafes = jest.fn()
-jest.mock('@/features/spaces/hooks/useSpaceSafes', () => ({
+jest.mock('../../../public/useSpaceSafes', () => ({
   useSpaceSafes: () => mockUseSpaceSafes(),
 }))
 

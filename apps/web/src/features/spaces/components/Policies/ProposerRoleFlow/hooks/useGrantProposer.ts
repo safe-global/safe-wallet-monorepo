@@ -34,7 +34,7 @@ import type { ProposerRoleFormValues } from '../ProposerRoleForm'
 import { WORKSPACE_CONFIRMATION_HIDE_MS } from '../../../../constants'
 import { formatContactLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
 import { useAddOrRequestWorkspaceContact } from '../../../../hooks/useAddOrRequestWorkspaceContact'
-import { useIsAdmin } from '../../../../hooks/useSpaceMembers'
+import { useIsAdmin } from '../../../../public/useSpaceMembers'
 
 export type GrantProposer = {
   grantProposerRole: (values: ProposerRoleFormValues, safeLabel?: string) => Promise<boolean>

@@ -9,9 +9,9 @@ import { HardDrive } from 'lucide-react'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import SpaceAddressBookActions from './SpaceAddressBookActions'
 import LocalContactActions from './LocalContactActions'
-import { formatDate } from '@/features/spaces/utils'
+import { formatDate } from '../../utils'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
-import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
+import { useMemberNameResolver } from '../../public/useMemberNameResolver'
 import PaginatedDataTable, {
   type DataTableColumn,
   type ColumnWidth,

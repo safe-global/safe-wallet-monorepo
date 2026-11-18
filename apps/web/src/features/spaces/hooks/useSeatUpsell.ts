@@ -1,7 +1,7 @@
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { AppRoutes } from '@/config/routes'
 import { useSpaceOffers } from './billing/useSpaceOffers'
-import { useCurrentSpaceId } from './useCurrentSpaceId'
+import { useCurrentSpaceId } from '../public/useCurrentSpaceId'
 import { useSpacePlan } from './useSpacePlan'
 
 export const useSeatUpsell = (spaceId?: string | null) => {

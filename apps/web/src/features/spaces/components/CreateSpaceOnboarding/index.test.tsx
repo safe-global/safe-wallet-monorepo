@@ -64,7 +64,7 @@ jest.mock('../Plans/ClaimTrialModal', () => ({
   ),
 }))
 
-jest.mock('../../hooks/useSpaceSafes', () => ({
+jest.mock('../../public/useSpaceSafes', () => ({
   useSpaceSafes: () => ({ allSafes: [] }),
 }))
 
@@ -72,7 +72,7 @@ jest.mock('../../hooks/useOnboardingStepCount', () => ({
   useOnboardingStepCount: () => 2,
 }))
 
-jest.mock('@/features/spaces/components/OnboardingLayout/OnboardingLayout', () => ({
+jest.mock('../OnboardingLayout/OnboardingLayout', () => ({
   __esModule: true,
   default: ({ main, footer }: { main: React.ReactNode; footer: React.ReactNode }) => (
     <div>
@@ -81,18 +81,18 @@ jest.mock('@/features/spaces/components/OnboardingLayout/OnboardingLayout', () =
     </div>
   ),
 }))
-jest.mock('@/features/spaces/components/OnboardingLayout/StepCounter', () => ({
+jest.mock('../OnboardingLayout/StepCounter', () => ({
   __esModule: true,
   default: () => null,
 }))
-jest.mock('@/features/spaces/components/OnboardingLayout/mockup/SafeAppMockup', () => ({
+jest.mock('../OnboardingLayout/mockup/SafeAppMockup', () => ({
   __esModule: true,
   default: () => null,
 }))
-jest.mock('@/features/spaces/components/OnboardingLayout/mockup/deriveSidePanelAccountsFromSpace', () => ({
+jest.mock('../OnboardingLayout/mockup/deriveSidePanelAccountsFromSpace', () => ({
   deriveSidePanelAccountsFromSpace: () => [],
 }))
-jest.mock('@/features/spaces/components/OnboardingLayout/mockup/useSafeNameLookup', () => ({
+jest.mock('../OnboardingLayout/mockup/useSafeNameLookup', () => ({
   useSafeNameLookup: () => ({}),
 }))
 

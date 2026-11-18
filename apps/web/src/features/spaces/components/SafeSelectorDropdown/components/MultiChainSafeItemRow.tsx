@@ -7,7 +7,7 @@ import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/comp
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 import { useChain } from '@/hooks/useChains'
-import { useAddressBookWriteScope } from '../../../hooks/useAddressBookWriteScope'
+import { useAddressBookWriteScope } from '../../../public/useAddressBookWriteScope'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import ExplorerLinkButton from '@safe-global/views/components/common/AccountRow/ExplorerLinkButton'
 import { HOVER_ACTION_CLASS, TOOLTIP_DELAY_MS } from '@safe-global/views/components/common/AccountRow/utils'

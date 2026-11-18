@@ -6,7 +6,7 @@ import type { OverviewMap, SpaceSafeEntry } from '@safe-global/views/features/sp
 let mockScanContext: ScanContext | null = null
 const safeScanContextMock = jest.fn()
 
-jest.mock('@/features/spaces/hooks/useSafeScanContext', () => ({
+jest.mock('../../../../hooks/useSafeScanContext', () => ({
   __esModule: true,
   default: (...args: unknown[]) => {
     safeScanContextMock(...args)

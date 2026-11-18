@@ -4,7 +4,7 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { useAppDispatch } from '@/store'
-import { ESafeAction, openSafeActionsModal } from '../../../store/safeActionsModalSlice'
+import { ESafeAction, openSafeActionsModal } from '../../../public/safeActionsModalSlice'
 
 const NewTransactionButton = ({ spaceId }: { spaceId: string }): ReactElement => {
   const dispatch = useAppDispatch()

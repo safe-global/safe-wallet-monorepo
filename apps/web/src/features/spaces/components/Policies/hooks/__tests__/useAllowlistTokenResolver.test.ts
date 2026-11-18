@@ -5,7 +5,7 @@ import { renderHook, waitFor } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { mockErc20TransferDto, mockNativeTransferDto, mockUsdcMetadata } from '../../mocks/activePolicies'
-import { MOCK_SAFES, MOCK_TOKENS } from '../../mocks/policies'
+import { MOCK_SAFES, MOCK_TOKENS } from '../../../../public/policies'
 import { useAllowlistTokenResolver } from '../useAllowlistTokenResolver'
 
 const TOKENS_URL = `${GATEWAY_URL}/v1/chains/:chainId/tokens`

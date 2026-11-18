@@ -7,7 +7,7 @@ import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { SafeTxContext, type SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
-import { mockUnenforcedPolicy } from '../../../mocks/policies'
+import { mockUnenforcedPolicy } from '../../../../../public/policies'
 import {
   MODULE_ALREADY_ENABLED_ERROR,
   REVIEW_STEP_TITLE,

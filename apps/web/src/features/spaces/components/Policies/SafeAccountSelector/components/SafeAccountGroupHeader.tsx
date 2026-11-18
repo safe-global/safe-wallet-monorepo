@@ -1,6 +1,6 @@
 import { SelectLabel } from '@safe-global/views/components/ui/select'
 import SafeRowStats from '../../../SafeSelectorDropdown/components/SafeRowStats'
-import SafeIdentity from '@/features/spaces/components/Policies/components/SafeIdentity/SafeIdentity'
+import SafeIdentity from '../../../../public/SafeIdentity'
 import { AccountBalance, toStatChains } from './SafeAccountRow'
 import type { SafeAccountGroup } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
 

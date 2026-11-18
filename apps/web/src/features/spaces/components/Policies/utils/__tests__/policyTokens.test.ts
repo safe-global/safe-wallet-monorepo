@@ -1,5 +1,5 @@
-import { MOCK_TOKENS, mockActiveSpendingLimit } from '../../mocks/policies'
-import { mockActiveAllowlist } from '../../mocks/allowlistPolicies'
+import { MOCK_TOKENS, mockActiveSpendingLimit } from '../../../../public/policies'
+import { mockActiveAllowlist } from '../../../../public/allowlistPolicies'
 import { getPolicyTokens } from '../policyTokens'
 
 describe('getPolicyTokens', () => {

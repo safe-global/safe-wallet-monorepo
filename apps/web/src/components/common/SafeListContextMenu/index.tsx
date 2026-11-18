@@ -12,7 +12,7 @@ import {
 } from '@safe-global/views/components/ui/dropdown-menu'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { useAddressBookWriteScope } from '@/features/spaces/hooks/useAddressBookWriteScope'
+import { useAddressBookWriteScope } from '@/features/spaces/public/useAddressBookWriteScope'
 import SafeListRemoveDialog from '@/components/common/SafeListRemoveDialog'
 import NestedSafesIcon from '@safe-global/views/assets/images/sidebar/nested-safes-icon.svg'
 import EditIcon from '@safe-global/views/assets/images/common/edit.svg'

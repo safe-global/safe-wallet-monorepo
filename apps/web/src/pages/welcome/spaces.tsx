@@ -1,4 +1,4 @@
-import SpacesLogin from '@/features/spaces/components/SpacesLogin'
+import SpacesLogin from '@/features/spaces/public/SpacesLogin'
 
 const Spaces = () => <SpacesLogin />
 

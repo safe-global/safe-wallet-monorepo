@@ -1,4 +1,4 @@
-import { MOCK_ADDRESSES, MOCK_TOKENS } from '@/features/spaces/components/Policies/mocks/policies'
+import { MOCK_ADDRESSES, MOCK_TOKENS } from '@/features/spaces/public/policies'
 import { getAllowlistRecipients } from '../allowlistRecipients'
 
 describe('getAllowlistRecipients', () => {

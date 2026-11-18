@@ -3,7 +3,7 @@ import { useAppSelector } from '@/store'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { selectCurrency } from '@/store/settingsSlice'
 import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
-import { useSpaceSafes } from './useSpaceSafes'
+import { useSpaceSafes } from '../public/useSpaceSafes'
 
 type SafePair = { chainId: string; address: string }
 

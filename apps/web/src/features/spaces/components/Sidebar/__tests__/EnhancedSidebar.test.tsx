@@ -11,11 +11,11 @@ jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   SidebarHeader: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }))
 
-jest.mock('@/features/spaces/components/Sidebar/SidebarTopBar/SidebarTopBar', () => ({
+jest.mock('../SidebarTopBar/SidebarTopBar', () => ({
   SidebarTopBar: () => <div>Top Bar</div>,
 }))
 
-jest.mock('@/features/spaces/components/Sidebar/SidebarCommonFooter/SidebarCommonFooter', () => ({
+jest.mock('../SidebarCommonFooter/SidebarCommonFooter', () => ({
   SidebarCommonFooter: () => <div>Footer</div>,
 }))
 

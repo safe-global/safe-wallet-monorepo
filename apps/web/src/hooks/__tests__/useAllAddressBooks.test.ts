@@ -24,11 +24,11 @@ jest.mock('@/store', () => ({
     typeof selector === 'function' ? selector({}) : undefined,
 }))
 
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('@/features/spaces/public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useGetSpaceAddressBook', () => ({
-  ...jest.requireActual('@/features/spaces/hooks/useGetSpaceAddressBook'),
+jest.mock('@/features/spaces/public/useGetSpaceAddressBook', () => ({
+  ...jest.requireActual('@/features/spaces/public/useGetSpaceAddressBook'),
   __esModule: true,
   default: jest.fn(),
 }))
@@ -51,8 +51,8 @@ jest.mock('@/components/common/AddressBookSourceProvider', () => ({
 }))
 
 // Import the mocked hooks
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
-import useGetSpaceAddressBook from '@/features/spaces/hooks/useGetSpaceAddressBook'
+import { useCurrentSpaceId } from '@/features/spaces/public/useCurrentSpaceId'
+import useGetSpaceAddressBook from '@/features/spaces/public/useGetSpaceAddressBook'
 
 describe('useAllAddressBooks', () => {
   describe('useAllMergedAddressBooks', () => {

@@ -28,10 +28,6 @@ jest.mock('../useTxStepper', () => ({
   default: () => ({ step: 0, data: undefined, nextStep: jest.fn(), prevStep: jest.fn() }),
 }))
 jest.mock('@/components/tx/shared/tracking', () => ({ useTrackTimeSpent: () => jest.fn() }))
-jest.mock('@/features/__core__/useLoadFeature', () => ({
-  ...jest.requireActual('@/features/__core__/useLoadFeature'),
-  useLoadFeature: () => ({ LedgerHashComparison: () => null }),
-}))
 jest.mock('@/components/tx-flow/features/TxNote', () => ({
   __esModule: true,
   default: () => null,

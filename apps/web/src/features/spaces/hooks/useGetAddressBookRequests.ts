@@ -1,4 +1,4 @@
-import { useCurrentSpaceId } from './useCurrentSpaceId'
+import { useCurrentSpaceId } from '../public/useCurrentSpaceId'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import {

@@ -15,8 +15,8 @@ import EntryDialog from '@/components/address-book/EntryDialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
-import { useAddressBookWriteScope } from '@/features/spaces/hooks/useAddressBookWriteScope'
-import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
+import { useAddressBookWriteScope } from '../../public/useAddressBookWriteScope'
+import { useIsAdmin } from '../../public/useSpaceMembers'
 import { useSafeDisplayName } from '@/hooks/useSafeDisplayName'
 
 enum ModalType {

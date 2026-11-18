@@ -17,7 +17,7 @@ import NotActivatedBadge from '@safe-global/views/components/common/NotActivated
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { useChain } from '@/hooks/useChains'
-import { useAddressBookWriteScope } from '@/features/spaces/hooks/useAddressBookWriteScope'
+import { useAddressBookWriteScope } from '@/features/spaces/public/useAddressBookWriteScope'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { cn } from '@safe-global/views/utils/cn'
 import { AccountItem as BaseAccountItem } from '../../public/AccountItem'

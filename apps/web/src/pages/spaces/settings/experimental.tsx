@@ -1,17 +1,15 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { BRAND_NAME } from '@/config/constants'
-import { SpacesFeature } from '@/features/spaces/SpacesFeature'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
-import useFeatureRedirect from '@/features/spaces/hooks/useFeatureRedirect'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import { useCurrentSpaceId } from '@/features/spaces/public/useCurrentSpaceId'
+import useFeatureRedirect from '@/features/spaces/public/useFeatureRedirect'
 import { AppRoutes } from '@/config/routes'
 import { FEATURES } from '@safe-global/utils/utils/chains'
+import SpaceSettingsPage from '@/features/spaces/public/SpaceSettingsPage'
 
 export default function SpaceSettingsExperimentalPage() {
   const router = useRouter()
   const spaceId = useCurrentSpaceId()
-  const spaces = useLoadFeature(SpacesFeature)
   useFeatureRedirect(FEATURES.WORKSPACES_EXPERIMENTAL_FEATURES, AppRoutes.spaces.settingsGeneral)
 
   if (!router.isReady || !spaceId) return null
@@ -23,7 +21,7 @@ export default function SpaceSettingsExperimentalPage() {
       </Head>
 
       <main>
-        <spaces.SpaceSettingsPage spaceId={spaceId} activePage="experimental" />
+        <SpaceSettingsPage spaceId={spaceId} activePage="experimental" />
       </main>
     </>
   )

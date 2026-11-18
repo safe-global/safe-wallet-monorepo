@@ -15,11 +15,11 @@ const mockUseHasFeature = jest.fn()
 const mockUseIsSafeProAnnouncementEnabled = jest.fn<boolean, []>()
 const mockUseIsSafeProEnabled = jest.fn<boolean, []>()
 
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('../../../../../public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
 }))
 
-jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+jest.mock('../../../../../public/useSpaceMembers', () => ({
   useIsActiveMember: jest.fn((spaceId) => mockUseIsActiveMember(spaceId)),
 }))
 
@@ -87,7 +87,7 @@ jest.mock('../../../config', () => ({
   },
 }))
 
-jest.mock('@/features/spaces/components/Sidebar/variants/SpacesSidebarVariant/SpacesSidebarVariant', () => ({
+jest.mock('../../SpacesSidebarVariant/SpacesSidebarVariant', () => ({
   SpacesSidebarVariant: ({
     mainNavItems,
     setupGroup,

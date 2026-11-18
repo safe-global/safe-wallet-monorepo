@@ -13,23 +13,20 @@ import { applySafeSelectionToggle, getSelectedLeafKeys } from '../SelectSafesOnb
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { HELP_CENTER_URL } from '@safe-global/utils/config/constants'
 import useSimilarityClusters from '@/features/address-poisoning/public/useSimilarityClusters'
-import {
-  ADDRESS_BOOK_UNAVAILABLE,
-  usePrepareWorkspaceSafeNames,
-} from '@/features/spaces/hooks/useUpsertWorkspaceSafeName'
-import { getChainIdsParam } from '@/features/spaces/utils'
-import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
-import { useSpaceAddressBookState } from '@/features/spaces/hooks/useGetSpaceAddressBook'
-import { useIsAdmin } from '@/features/spaces/hooks/useSpaceMembers'
-import { useSpaceSafes } from '@/features/spaces/hooks/useSpaceSafes'
-import NameAccountsFields from '@/features/spaces/components/NameAccounts/NameAccountsFields'
+import { ADDRESS_BOOK_UNAVAILABLE, usePrepareWorkspaceSafeNames } from '../../public/useUpsertWorkspaceSafeName'
+import { getChainIdsParam } from '../../utils'
+import { useCurrentSpaceId } from '../../public/useCurrentSpaceId'
+import { useSpaceAddressBookState } from '../../public/useGetSpaceAddressBook'
+import { useIsAdmin } from '../../public/useSpaceMembers'
+import { useSpaceSafes } from '../../public/useSpaceSafes'
+import NameAccountsFields from '../NameAccounts/NameAccountsFields'
 import {
   buildWorkspaceSafeNames,
   getSafesToName,
   hasAllNames,
   touchNames,
   withWorkspaceNames,
-} from '@/features/spaces/components/NameAccounts/utils'
+} from '../NameAccounts/utils'
 import { AdminOnlyWorkspaceTooltip } from '@safe-global/views/features/spaces/components/AdminOnlyWorkspaceTooltip'
 import {
   useSpaceSafesCreateV1Mutation,
@@ -66,7 +63,7 @@ import useWallet from '@/hooks/wallets/useWallet'
 import { cn } from '@safe-global/views/utils/cn'
 import SelectedCounter, { safeLimitTooltip } from '@safe-global/views/features/spaces/components/SelectedCounter'
 import SafeLimitError from '@safe-global/views/features/spaces/components/SelectedCounter/SafeLimitError'
-import { useSpaceSafeLimit } from '../../hooks/useSpaceSafeLimit'
+import { useSpaceSafeLimit } from '../../public/useSpaceSafeLimit'
 import { addressOfSafeKey, countSeats, isSpaceAtSafeLimit } from '@/utils/spaces'
 import { useSeatUpsell } from '../../hooks/useSeatUpsell'
 import { Link } from '@safe-global/views/components/ui/link'

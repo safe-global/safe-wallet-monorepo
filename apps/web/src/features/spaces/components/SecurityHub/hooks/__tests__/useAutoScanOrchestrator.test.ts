@@ -9,7 +9,7 @@ import type {
 const autoScanMock = jest.fn()
 let lastServices: unknown = null
 
-jest.mock('@/features/spaces/hooks/useAutoScan', () => ({
+jest.mock('../../../../hooks/useAutoScan', () => ({
   __esModule: true,
   default: (
     queue: SelectedSafe[],
@@ -24,7 +24,7 @@ jest.mock('@/features/spaces/hooks/useAutoScan', () => ({
 }))
 
 const useCurrentSpaceIdMock = jest.fn<string | null, []>()
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('../../../../public/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => useCurrentSpaceIdMock(),
 }))
 
