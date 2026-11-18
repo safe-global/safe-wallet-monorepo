@@ -93,6 +93,17 @@ describe('DrawerHeader', () => {
     expect(screen.getByRole('dialog', { name: 'Allowlist' })).toBeInTheDocument()
   })
 
+  it("keeps the page's aria label over the title", () => {
+    render(
+      <Drawer open onClose={jest.fn()} ariaLabel="Send 1,250 USDC">
+        <DrawerHeader title="Operations Vault" />
+      </Drawer>,
+    )
+
+    expect(screen.getByRole('heading', { level: 2, name: 'Operations Vault' })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Send 1,250 USDC' })).toBeInTheDocument()
+  })
+
   it('shows key hints for previous and next only when the page passes them', () => {
     const navigation = { onPrevious: jest.fn(), onNext: jest.fn(), hasPrevious: true, hasNext: true }
     const { rerender } = render(<DrawerHeader title="Transaction" navigation={navigation} />)
