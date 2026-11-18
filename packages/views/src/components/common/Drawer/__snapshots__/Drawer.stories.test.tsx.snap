@@ -285,7 +285,7 @@ exports[`./Drawer.stories BackAndActions 1`] = `
 </div>
 `;
 
-exports[`./Drawer.stories Full 1`] = `
+exports[`./Drawer.stories Expandable 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 0px;"
 >
@@ -320,13 +320,392 @@ exports[`./Drawer.stories Full 1`] = `
         tabindex="0"
       />
       <div
-        aria-label="Full drawer"
+        aria-label="Transaction 3 of 12"
         class="outline-none data-closed:pointer-events-none data-open:animate-in data-closed:animate-out data-[side=right]:data-closed:slide-out-to-right-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=top]:data-closed:slide-out-to-top-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:fade-out-0 data-open:fade-in-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=bottom]:data-open:slide-in-from-bottom-10 fixed z-[var(--z-overlay)] flex flex-col gap-4 bg-clip-padding text-sm transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b inset-y-3! right-3! h-auto! max-w-[calc(100vw-24px)]! rounded-3xl border-0! shadow-xl overflow-hidden data-[side=left]:w-[440px] data-[side=right]:w-[440px] data-[side=left]:max-w-[calc(100vw-24px)] data-[side=right]:max-w-[calc(100vw-24px)] bg-muted-secondary dark:bg-[var(--color-background-main)] p-0"
         data-base-ui-focusable=""
         data-open=""
         data-side="right"
         data-slot="sheet-content"
         id="_r_b_"
+        role="dialog"
+        style="--nested-dialogs: 0;"
+        tabindex="-1"
+      >
+        <div
+          class="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
+        >
+          <header
+            class="flex items-center gap-3 px-6 pt-6"
+            data-slot="drawer-header"
+          >
+            <div
+              class="flex shrink-0 items-center"
+            >
+              <div
+                class="flex size-9 items-center justify-center rounded-md border border-border bg-card"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-list-checks size-4"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M13 5h8"
+                  />
+                  <path
+                    d="M13 12h8"
+                  />
+                  <path
+                    d="M13 19h8"
+                  />
+                  <path
+                    d="m3 17 2 2 4-4"
+                  />
+                  <path
+                    d="m3 7 2 2 4-4"
+                  />
+                </svg>
+              </div>
+            </div>
+            <div
+              class="flex min-w-0 flex-1 flex-col gap-0.5"
+            >
+              <div
+                class="m-0 text-base font-semibold min-w-0 leading-tight"
+                data-slot="typography"
+                data-variant="paragraph-bold"
+              >
+                <span
+                  class="block min-w-0 overflow-hidden whitespace-nowrap"
+                >
+                  Send 1,250 USDC
+                </span>
+              </div>
+              <div
+                class="flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums"
+              >
+                Nonce #42 · Ethereum
+              </div>
+            </div>
+            <span
+              aria-live="polite"
+              class="sr-only"
+            >
+              3 of 12
+            </span>
+            <div
+              aria-label="Drawer actions"
+              class="flex w-fit items-stretch *:focus-visible:relative *:focus-visible:z-10 has-[>[data-slot=button-group]]:gap-2 [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1 [&>*:not(:first-child)]:rounded-l-none [&>*:not(:first-child)]:border-l-0 [&>*:not(:last-child)]:rounded-r-none shrink-0"
+              data-orientation="horizontal"
+              data-slot="button-group"
+              role="group"
+            >
+              <button
+                aria-label="Previous"
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
+                data-slot="tooltip-trigger"
+                id="base-ui-_r_f_"
+                tabindex="0"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-chevron-up"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m18 15-6-6-6 6"
+                  />
+                </svg>
+              </button>
+              <button
+                aria-label="Next"
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
+                data-slot="tooltip-trigger"
+                id="base-ui-_r_h_"
+                tabindex="0"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-chevron-down"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m6 9 6 6 6-6"
+                  />
+                </svg>
+              </button>
+              <button
+                aria-label="Expand to full screen"
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
+                data-slot="tooltip-trigger"
+                id="base-ui-_r_j_"
+                tabindex="0"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-maximize2 lucide-maximize-2"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M15 3h6v6"
+                  />
+                  <path
+                    d="m21 3-7 7"
+                  />
+                  <path
+                    d="m3 21 7-7"
+                  />
+                  <path
+                    d="M9 21H3v-6"
+                  />
+                </svg>
+              </button>
+              <button
+                aria-label="Close"
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
+                data-slot="tooltip-trigger"
+                id="base-ui-_r_l_"
+                tabindex="0"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-x"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M18 6 6 18"
+                  />
+                  <path
+                    d="m6 6 12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+          </header>
+          <div
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
+          >
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              1
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              2
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              3
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              4
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              5
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              6
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              7
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              8
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              9
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              10
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              11
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              12
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+          </div>
+          <div
+            class="px-6 pb-6"
+          >
+            <button
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 w-full"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              Sign
+            </button>
+          </div>
+        </div>
+      </div>
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`./Drawer.stories Full 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      data-base-ui-portal=""
+      data-slot="sheet-portal"
+      id="_r_o_"
+    >
+      <div
+        aria-hidden="true"
+        data-base-ui-inert=""
+        role="presentation"
+        style="position: fixed; inset: 0; user-select: none;"
+      />
+      <div
+        aria-hidden="true"
+        class="bg-backdrop supports-backdrop-filter:backdrop-blur-xs fixed inset-0 z-[var(--z-overlay)] duration-100 data-open:animate-in data-closed:animate-out data-open:fade-in-0 data-closed:fade-out-0 data-starting-style:opacity-0 data-ending-style:opacity-0 data-closed:pointer-events-none"
+        data-base-ui-inert=""
+        data-open=""
+        data-slot="sheet-overlay"
+        role="presentation"
+        style="user-select: none;"
+      />
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+      <div
+        aria-label="Full drawer"
+        class="outline-none data-closed:pointer-events-none data-open:animate-in data-closed:animate-out data-[side=right]:data-closed:slide-out-to-right-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=top]:data-closed:slide-out-to-top-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:fade-out-0 data-open:fade-in-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=bottom]:data-open:slide-in-from-bottom-10 fixed z-[var(--z-overlay)] flex flex-col gap-4 bg-clip-padding text-sm transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b inset-y-3! right-3! h-auto! max-w-[calc(100vw-24px)]! rounded-3xl border-0! shadow-xl overflow-hidden data-[side=left]:w-[440px] data-[side=right]:w-[440px] data-[side=left]:max-w-[calc(100vw-24px)] data-[side=right]:max-w-[calc(100vw-24px)] bg-muted-secondary dark:bg-[var(--color-background-main)] p-0"
+        data-base-ui-focusable=""
+        data-open=""
+        data-side="right"
+        data-slot="sheet-content"
+        id="_r_m_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -376,7 +755,7 @@ exports[`./Drawer.stories Full 1`] = `
                 aria-label="Close"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_f_"
+                id="base-ui-_r_q_"
                 tabindex="0"
                 type="button"
               >
@@ -470,7 +849,7 @@ exports[`./Drawer.stories List 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_i_"
+      id="_r_t_"
     >
       <div
         aria-hidden="true"
@@ -501,7 +880,7 @@ exports[`./Drawer.stories List 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_g_"
+        id="_r_r_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -539,7 +918,7 @@ exports[`./Drawer.stories List 1`] = `
                 aria-label="Close"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_k_"
+                id="base-ui-_r_v_"
                 tabindex="0"
                 type="button"
               >
@@ -751,7 +1130,7 @@ exports[`./Drawer.stories LongContent 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_n_"
+      id="_r_12_"
     >
       <div
         aria-hidden="true"
@@ -782,7 +1161,7 @@ exports[`./Drawer.stories LongContent 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_l_"
+        id="_r_10_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -820,7 +1199,7 @@ exports[`./Drawer.stories LongContent 1`] = `
                 aria-label="Close"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_p_"
+                id="base-ui-_r_14_"
                 tabindex="0"
                 type="button"
               >
@@ -1157,7 +1536,7 @@ exports[`./Drawer.stories LongTitle 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_s_"
+      id="_r_17_"
     >
       <div
         aria-hidden="true"
@@ -1188,7 +1567,7 @@ exports[`./Drawer.stories LongTitle 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_q_"
+        id="_r_15_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -1279,7 +1658,7 @@ exports[`./Drawer.stories LongTitle 1`] = `
                 aria-label="Previous"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_u_"
+                id="base-ui-_r_19_"
                 tabindex="0"
                 type="button"
               >
@@ -1305,7 +1684,7 @@ exports[`./Drawer.stories LongTitle 1`] = `
                 aria-label="Next"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_10_"
+                id="base-ui-_r_1b_"
                 tabindex="0"
                 type="button"
               >
@@ -1331,7 +1710,7 @@ exports[`./Drawer.stories LongTitle 1`] = `
                 aria-label="Close"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_12_"
+                id="base-ui-_r_1d_"
                 tabindex="0"
                 type="button"
               >
@@ -1413,7 +1792,7 @@ exports[`./Drawer.stories Navigation 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_15_"
+      id="_r_1g_"
     >
       <div
         aria-hidden="true"
@@ -1444,7 +1823,7 @@ exports[`./Drawer.stories Navigation 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_13_"
+        id="_r_1e_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -1530,7 +1909,7 @@ exports[`./Drawer.stories Navigation 1`] = `
                 aria-label="Previous"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_17_"
+                id="base-ui-_r_1i_"
                 tabindex="0"
                 type="button"
               >
@@ -1558,7 +1937,7 @@ exports[`./Drawer.stories Navigation 1`] = `
                 data-disabled=""
                 data-slot="tooltip-trigger"
                 disabled=""
-                id="base-ui-_r_19_"
+                id="base-ui-_r_1k_"
                 tabindex="0"
                 type="button"
               >
@@ -1584,7 +1963,7 @@ exports[`./Drawer.stories Navigation 1`] = `
                 aria-label="Close"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_1b_"
+                id="base-ui-_r_1m_"
                 tabindex="0"
                 type="button"
               >
@@ -1666,7 +2045,7 @@ exports[`./Drawer.stories NoHeader 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_1e_"
+      id="_r_1p_"
     >
       <div
         aria-hidden="true"
@@ -1697,7 +2076,7 @@ exports[`./Drawer.stories NoHeader 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_1c_"
+        id="_r_1n_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -1788,7 +2167,7 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_1h_"
+      id="_r_1s_"
     >
       <div
         aria-hidden="true"
@@ -1819,7 +2198,7 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_1f_"
+        id="_r_1q_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -1857,7 +2236,7 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
                 aria-label="Close"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_1j_"
+                id="base-ui-_r_1u_"
                 tabindex="0"
                 type="button"
               >
@@ -1929,6 +2308,385 @@ exports[`./Drawer.stories OnlyTitle 1`] = `
 </div>
 `;
 
+exports[`./Drawer.stories Phone 1`] = `
+<div
+  style="background-color: rgb(255, 255, 255); padding: 0px;"
+>
+  <div
+    class="shadcn-scope"
+  >
+    <div
+      data-base-ui-portal=""
+      data-slot="sheet-portal"
+      id="_r_21_"
+    >
+      <div
+        aria-hidden="true"
+        data-base-ui-inert=""
+        role="presentation"
+        style="position: fixed; inset: 0; user-select: none;"
+      />
+      <div
+        aria-hidden="true"
+        class="bg-backdrop supports-backdrop-filter:backdrop-blur-xs fixed inset-0 z-[var(--z-overlay)] duration-100 data-open:animate-in data-closed:animate-out data-open:fade-in-0 data-closed:fade-out-0 data-starting-style:opacity-0 data-ending-style:opacity-0 data-closed:pointer-events-none"
+        data-base-ui-inert=""
+        data-open=""
+        data-slot="sheet-overlay"
+        role="presentation"
+        style="user-select: none;"
+      />
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+      <div
+        aria-label="Transaction 3 of 12"
+        class="outline-none data-closed:pointer-events-none data-open:animate-in data-closed:animate-out data-[side=right]:data-closed:slide-out-to-right-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=top]:data-closed:slide-out-to-top-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:fade-out-0 data-open:fade-in-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=bottom]:data-open:slide-in-from-bottom-10 fixed z-[var(--z-overlay)] flex flex-col gap-4 bg-clip-padding text-sm transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b inset-y-3! right-3! h-auto! max-w-[calc(100vw-24px)]! rounded-3xl border-0! shadow-xl overflow-hidden data-[side=left]:w-[440px] data-[side=right]:w-[440px] data-[side=left]:max-w-[calc(100vw-24px)] data-[side=right]:max-w-[calc(100vw-24px)] bg-muted-secondary dark:bg-[var(--color-background-main)] p-0"
+        data-base-ui-focusable=""
+        data-open=""
+        data-side="right"
+        data-slot="sheet-content"
+        id="_r_1v_"
+        role="dialog"
+        style="--nested-dialogs: 0;"
+        tabindex="-1"
+      >
+        <div
+          class="flex min-h-0 flex-1 flex-col gap-3 overflow-hidden"
+        >
+          <header
+            class="flex items-center gap-3 px-6 pt-6"
+            data-slot="drawer-header"
+          >
+            <div
+              class="flex shrink-0 items-center"
+            >
+              <div
+                class="flex size-9 items-center justify-center rounded-md border border-border bg-card"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-list-checks size-4"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M13 5h8"
+                  />
+                  <path
+                    d="M13 12h8"
+                  />
+                  <path
+                    d="M13 19h8"
+                  />
+                  <path
+                    d="m3 17 2 2 4-4"
+                  />
+                  <path
+                    d="m3 7 2 2 4-4"
+                  />
+                </svg>
+              </div>
+            </div>
+            <div
+              class="flex min-w-0 flex-1 flex-col gap-0.5"
+            >
+              <div
+                class="m-0 text-base font-semibold min-w-0 leading-tight"
+                data-slot="typography"
+                data-variant="paragraph-bold"
+              >
+                <span
+                  class="block min-w-0 overflow-hidden whitespace-nowrap"
+                >
+                  Send 1,250 USDC
+                </span>
+              </div>
+              <div
+                class="flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums"
+              >
+                Nonce #42 · Ethereum
+              </div>
+            </div>
+            <span
+              aria-live="polite"
+              class="sr-only"
+            >
+              3 of 12
+            </span>
+            <div
+              aria-label="Drawer actions"
+              class="flex w-fit items-stretch *:focus-visible:relative *:focus-visible:z-10 has-[>[data-slot=button-group]]:gap-2 [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1 [&>*:not(:first-child)]:rounded-l-none [&>*:not(:first-child)]:border-l-0 [&>*:not(:last-child)]:rounded-r-none shrink-0"
+              data-orientation="horizontal"
+              data-slot="button-group"
+              role="group"
+            >
+              <button
+                aria-label="Previous"
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
+                data-slot="tooltip-trigger"
+                id="base-ui-_r_23_"
+                tabindex="0"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-chevron-up"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m18 15-6-6-6 6"
+                  />
+                </svg>
+              </button>
+              <button
+                aria-label="Next"
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
+                data-slot="tooltip-trigger"
+                id="base-ui-_r_25_"
+                tabindex="0"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-chevron-down"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m6 9 6 6 6-6"
+                  />
+                </svg>
+              </button>
+              <button
+                aria-label="Expand to full screen"
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
+                data-slot="tooltip-trigger"
+                id="base-ui-_r_27_"
+                tabindex="0"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-maximize2 lucide-maximize-2"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M15 3h6v6"
+                  />
+                  <path
+                    d="m21 3-7 7"
+                  />
+                  <path
+                    d="m3 21 7-7"
+                  />
+                  <path
+                    d="M9 21H3v-6"
+                  />
+                </svg>
+              </button>
+              <button
+                aria-label="Close"
+                class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
+                data-slot="tooltip-trigger"
+                id="base-ui-_r_29_"
+                tabindex="0"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  class="lucide lucide-x"
+                  fill="none"
+                  height="24"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M18 6 6 18"
+                  />
+                  <path
+                    d="m6 6 12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+          </header>
+          <div
+            class="min-h-0 flex-1 overflow-y-auto overscroll-y-none [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border scrollFade flex flex-col px-6 last:pb-6"
+          >
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              1
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              2
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              3
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              4
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              5
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              6
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              7
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              8
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              9
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              10
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              11
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+            <span
+              class="m-0 text-sm leading-5 font-normal mb-4"
+              data-slot="typography"
+              data-variant="paragraph-small"
+            >
+              Paragraph 
+              12
+               — the drawer body scrolls once the content outgrows the panel.
+            </span>
+          </div>
+          <div
+            class="px-6 pb-6"
+          >
+            <button
+              class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:bg-muted disabled:text-muted-foreground aria-disabled:bg-muted aria-disabled:text-muted-foreground disabled:[&_svg]:text-muted-foreground aria-disabled:[&_svg]:text-muted-foreground dark:[&_svg]:text-black dark:disabled:bg-muted dark:disabled:text-muted-foreground dark:aria-disabled:bg-muted dark:aria-disabled:text-muted-foreground dark:disabled:[&_svg]:text-muted-foreground dark:aria-disabled:[&_svg]:text-muted-foreground h-9 gap-1.5 px-4 in-data-[slot=button-group]:rounded-md has-data-[icon=inline-end]:pr-2 has-data-[icon=inline-start]:pl-2 w-full"
+              data-slot="button"
+              tabindex="0"
+              type="button"
+            >
+              Sign
+            </button>
+          </div>
+        </div>
+      </div>
+      <span
+        data-base-ui-focus-guard=""
+        data-type="inside"
+        role="button"
+        style="clip-path: inset(50%); overflow: hidden; white-space: nowrap; border: 0px; padding: 0px; width: 1px; height: 1px; margin: -1px; position: fixed; top: 0px; left: 0px;"
+        tabindex="0"
+      />
+    </div>
+  </div>
+</div>
+`;
+
 exports[`./Drawer.stories Sections 1`] = `
 <div
   style="background-color: rgb(255, 255, 255); padding: 0px;"
@@ -1939,7 +2697,7 @@ exports[`./Drawer.stories Sections 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_1m_"
+      id="_r_2c_"
     >
       <div
         aria-hidden="true"
@@ -1970,7 +2728,7 @@ exports[`./Drawer.stories Sections 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_1k_"
+        id="_r_2a_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -2008,7 +2766,7 @@ exports[`./Drawer.stories Sections 1`] = `
                 aria-label="Close"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_1o_"
+                id="base-ui-_r_2e_"
                 tabindex="0"
                 type="button"
               >
@@ -2122,7 +2880,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_1r_"
+      id="_r_2h_"
     >
       <div
         aria-hidden="true"
@@ -2153,7 +2911,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_1p_"
+        id="_r_2f_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -2191,7 +2949,7 @@ exports[`./Drawer.stories SizeLg 1`] = `
                 aria-label="Close"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_1t_"
+                id="base-ui-_r_2j_"
                 tabindex="0"
                 type="button"
               >
@@ -2273,7 +3031,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
     <div
       data-base-ui-portal=""
       data-slot="sheet-portal"
-      id="_r_20_"
+      id="_r_2m_"
     >
       <div
         aria-hidden="true"
@@ -2304,7 +3062,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
         data-open=""
         data-side="right"
         data-slot="sheet-content"
-        id="_r_1u_"
+        id="_r_2k_"
         role="dialog"
         style="--nested-dialogs: 0;"
         tabindex="-1"
@@ -2391,7 +3149,7 @@ exports[`./Drawer.stories StatusHeader 1`] = `
                 aria-label="Close"
                 class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none border-border bg-transparent hover:bg-foreground/[0.06] hover:text-foreground dark:border-border aria-expanded:bg-foreground/[0.06] aria-expanded:text-foreground shadow-xs size-8 in-data-[slot=button-group]:rounded-sm"
                 data-slot="tooltip-trigger"
-                id="base-ui-_r_22_"
+                id="base-ui-_r_2o_"
                 tabindex="0"
                 type="button"
               >

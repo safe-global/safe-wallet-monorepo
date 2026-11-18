@@ -36,7 +36,7 @@ import { XIcon } from 'lucide-react'
  * @remarks
  * Key Props:
  * - SheetContent: `side` ('top' | 'right' | 'bottom' | 'left'), `variant` ('default' | 'floating'),
- *   `size` ('sm' | 'md' | 'lg' | 'auto'), `surface` ('card' | 'paper' | 'muted'), `padding` ('none' | 'md'), `showCloseButton`
+ *   `size` ('sm' | 'md' | 'lg' | 'auto' | 'full'), `surface` ('card' | 'paper' | 'muted'), `padding` ('none' | 'md'), `showCloseButton`
  * - SheetHeader / SheetFooter: `divided` (true = full border, 'subtle' = border-border/50)
  * - Root / Trigger / Close: see Base UI dialog
  *
@@ -65,6 +65,7 @@ const sheetContentVariants = cva(
         md: 'data-[side=left]:w-[440px] data-[side=right]:w-[440px] data-[side=left]:max-w-[calc(100vw-24px)] data-[side=right]:max-w-[calc(100vw-24px)]',
         lg: 'data-[side=left]:w-[700px] data-[side=right]:w-[700px] data-[side=left]:max-w-[100vw] data-[side=right]:max-w-[100vw]',
         auto: 'data-[side=left]:w-auto data-[side=right]:w-auto data-[side=left]:max-w-none data-[side=right]:max-w-none',
+        full: 'data-[side=left]:w-screen data-[side=right]:w-screen data-[side=left]:max-w-none data-[side=right]:max-w-none',
       },
       surface: {
         card: 'bg-card',
