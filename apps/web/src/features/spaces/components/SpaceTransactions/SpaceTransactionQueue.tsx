@@ -16,9 +16,9 @@ import {
   type SpaceQueue,
   type SpaceQueueFilters,
 } from '../../hooks/useSpaceQueue'
-import { selectQueueGroupBy, setQueueGroupBy } from '../../store/spaceQueueViewSlice'
+import { selectQueueGroupBy, setQueueGroupBy } from '../../public/store/spaceQueueViewSlice'
 import SpaceQueueTable from './SpaceQueueTable'
-import TransactionsToolbar from './TransactionsToolbar'
+import TransactionsToolbar from './TransactionsToolbar/TransactionsToolbar'
 import UnavailableSafesAlert from './UnavailableSafesAlert'
 
 const QueueBody = memo(function QueueBody({

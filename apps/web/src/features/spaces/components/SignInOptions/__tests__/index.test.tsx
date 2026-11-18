@@ -5,6 +5,9 @@ const mockAfterSignIn = jest.fn()
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
+}))
+jest.mock('@/services/analytics/types', () => ({
+  ...jest.requireActual('@/services/analytics/types'),
   EventType: { META: 'meta' },
 }))
 
@@ -12,84 +15,26 @@ jest.mock('@/services/siwe/useSiwe', () => ({
   useSiwe: () => ({ signIn: jest.fn(), loading: false }),
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => null,
 }))
 
-const MockEmailSignInButton = () => <button data-testid="email-login-btn">Continue with email</button>
-const MockGoogleSignInButton = () => <button data-testid="google-login-btn">Continue with Google</button>
-
-const mockUseLoadFeature = jest.fn()
-
-jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => mockUseLoadFeature(),
-  createFeatureHandle: () => ({}),
+jest.mock('@/features/oidc-auth/public/components/OidcSignInOptions', () => ({
+  __esModule: true,
+  default: () => <div data-testid="oidc-sign-in-options" />,
 }))
 
-const mockOidcAuthFeature = (isDisabled: boolean, isReady = !isDisabled) =>
-  mockUseLoadFeature.mockReturnValue({
-    EmailSignInButton: isDisabled ? () => null : MockEmailSignInButton,
-    GoogleSignInButton: isDisabled ? () => null : MockGoogleSignInButton,
-    $isDisabled: isDisabled,
-    $isReady: isReady,
-  })
-
 describe('SignInOptions', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
-  it('should render wallet, divider, Google, and email buttons when OIDC auth is enabled', () => {
-    mockOidcAuthFeature(false)
-
-    render(<SignInOptions afterSignIn={mockAfterSignIn} />)
-
-    expect(screen.getByTestId('connect-wallet-btn')).toBeInTheDocument()
-    expect(screen.getByText('OR')).toBeInTheDocument()
-    expect(screen.getByTestId('google-login-btn')).toBeInTheDocument()
-    expect(screen.getByTestId('email-login-btn')).toBeInTheDocument()
-  })
-
-  it('should render the wallet button first, above the divider and OIDC options', () => {
-    mockOidcAuthFeature(false)
-
+  it('renders the wallet button above the OIDC options', () => {
     render(<SignInOptions afterSignIn={mockAfterSignIn} />)
 
     const wallet = screen.getByTestId('connect-wallet-btn')
-    const divider = screen.getByText('OR')
-    const google = screen.getByTestId('google-login-btn')
-    const email = screen.getByTestId('email-login-btn')
+    const oidc = screen.getByTestId('oidc-sign-in-options')
 
-    expect(wallet.compareDocumentPosition(divider) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
-    expect(divider.compareDocumentPosition(google) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
-    expect(google.compareDocumentPosition(email) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
-  })
-
-  it('should render only wallet button when OIDC auth is disabled', () => {
-    mockOidcAuthFeature(true)
-
-    render(<SignInOptions afterSignIn={mockAfterSignIn} />)
-
-    expect(screen.queryByTestId('email-login-btn')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('google-login-btn')).not.toBeInTheDocument()
-    expect(screen.queryByText('OR')).not.toBeInTheDocument()
-    expect(screen.getByTestId('connect-wallet-btn')).toBeInTheDocument()
-  })
-
-  it('should render only wallet button while feature is loading', () => {
-    mockOidcAuthFeature(false, false)
-
-    render(<SignInOptions afterSignIn={mockAfterSignIn} />)
-
-    expect(screen.queryByTestId('email-login-btn')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('google-login-btn')).not.toBeInTheDocument()
-    expect(screen.queryByText('OR')).not.toBeInTheDocument()
-    expect(screen.getByTestId('connect-wallet-btn')).toBeInTheDocument()
+    expect(wallet.compareDocumentPosition(oidc) & Node.DOCUMENT_POSITION_FOLLOWING).not.toBe(0)
   })
 
   it('should show "Connect wallet" text on the wallet button', () => {
-    mockOidcAuthFeature(false)
-
     render(<SignInOptions afterSignIn={mockAfterSignIn} />)
 
     expect(screen.getByText('Connect wallet')).toBeInTheDocument()

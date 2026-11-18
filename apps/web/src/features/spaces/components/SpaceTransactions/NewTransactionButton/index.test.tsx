@@ -3,7 +3,11 @@ import { fireEvent, render, screen } from '@/tests/test-utils'
 import { getStoreInstance } from '@/store'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { ESafeAction, selectSafeActionsModalOpen, selectSafeActionsModalType } from '../../../store'
+import {
+  ESafeAction,
+  selectSafeActionsModalOpen,
+  selectSafeActionsModalType,
+} from '../../../public/store/safeActionsModalSlice'
 import NewTransactionButton from '.'
 
 jest.mock('@/services/analytics', () =>

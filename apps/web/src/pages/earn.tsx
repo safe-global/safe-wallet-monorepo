@@ -5,7 +5,7 @@ import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 
-const LazyEarnPage = dynamic(() => import('@/features/earn'), { ssr: false })
+const LazyEarnPage = dynamic(() => import('@/features/earn/public/components/EarnPage'), { ssr: false })
 
 const EarnPage = () => {
   const isFeatureEnabled = useHasFeature(FEATURES.EARN)

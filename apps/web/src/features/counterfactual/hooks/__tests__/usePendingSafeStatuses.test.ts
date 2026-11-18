@@ -1,12 +1,16 @@
 import { renderHook, waitFor } from '@/tests/test-utils'
 import usePendingSafeStatus from '../usePendingSafeStatuses'
-import { SafeCreationEvent, safeCreationDispatch, safeCreationSubscribe } from '../../services/safeCreationEvents'
+import {
+  SafeCreationEvent,
+  safeCreationDispatch,
+  safeCreationSubscribe,
+} from '../../public/services/safeCreationEvents'
 import { pollSafeInfo } from '@/components/new-safe/create/logic'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 
-jest.mock('../../services/safeCreationEvents', () => {
-  const actual = jest.requireActual('../../services/safeCreationEvents')
+jest.mock('../../public/services/safeCreationEvents', () => {
+  const actual = jest.requireActual('../../public/services/safeCreationEvents')
   return {
     ...actual,
     safeCreationSubscribe: jest.fn(),
@@ -38,7 +42,13 @@ jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
+}))
+jest.mock('@/services/analytics/events/createLoadSafe', () => ({
+  ...jest.requireActual('@/services/analytics/events/createLoadSafe'),
   CREATE_SAFE_EVENTS: {},
+}))
+jest.mock('@/services/analytics/mixpanel-events', () => ({
+  ...jest.requireActual('@/services/analytics/mixpanel-events'),
   MixpanelEventParams: {},
 }))
 

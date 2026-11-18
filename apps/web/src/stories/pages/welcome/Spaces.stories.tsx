@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { within } from 'storybook/test'
-import { createMockStory, spacesHandlers } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import { spacesHandlers } from '@/stories/mocks/handlers'
 import type { MockStoryConfig } from '@/stories/mocks/types'
 import Spaces from '@/pages/welcome/spaces'
 

@@ -3,7 +3,7 @@ import { id } from 'ethers'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { render, screen } from '@/tests/test-utils'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import type { RecoveryQueueItem } from '../../public/types'
 import GroupedRecoveryListItems from '.'
 
 jest.mock('@/components/transactions/TxListItem/ExpandableTransactionItem', () => ({

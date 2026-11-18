@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import { mswLoader } from 'msw-storybook-addon'
 import type { MessagePage } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import Messages from '@/pages/transactions/messages'
 
 /**

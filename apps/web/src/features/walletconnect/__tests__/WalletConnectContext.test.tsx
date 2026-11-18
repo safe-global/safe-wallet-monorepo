@@ -6,7 +6,7 @@ import type { SessionTypes } from '@walletconnect/types'
 import { act, fireEvent, render, waitFor } from '@/tests/test-utils'
 import { WalletConnectContext, WalletConnectProvider } from '../components/WalletConnectContext'
 import { WCLoadingState } from '../types'
-import { wcPopupStore } from '../store/wcPopupStore'
+import { wcPopupStore } from '../public/store/wcPopupStore'
 import WalletConnectWallet from '../services/WalletConnectWallet'
 import { safeInfoSlice } from '@/store/safeInfoSlice'
 import { useAppDispatch } from '@/store'
@@ -20,7 +20,7 @@ jest.mock('@reown/walletkit', () => jest.fn())
 
 jest.mock('@/services/safe-wallet-provider/useSafeWalletProvider')
 
-jest.mock('../store/wcPopupStore', () => ({
+jest.mock('../public/store/wcPopupStore', () => ({
   wcPopupStore: { useStore: jest.fn(), setStore: jest.fn() },
   openWalletConnect: jest.fn(),
 }))

@@ -6,8 +6,8 @@ import {
   mockProposerPolicy,
   mockRecoveryPolicy,
   mockSpendingLimitPolicy,
-} from '@/features/spaces/components/Policies/mocks/policies'
-import { mockActiveAllowlist } from '@/features/spaces/components/Policies/mocks/allowlistPolicies'
+} from '@/features/spaces/public/utils/policies'
+import { mockActiveAllowlist } from '@/features/spaces/public/utils/allowlistPolicies'
 import {
   formatAllowance,
   formatContactLabel,

@@ -11,7 +11,6 @@ export type {
   SimilarityGroup,
   SimilarityDetectionResult,
 } from '@safe-global/utils/utils/addressSimilarity.types'
-export { DEFAULT_SIMILARITY_CONFIG } from '@safe-global/utils/utils/addressSimilarity.types'
 
 // Non-pinned warning types
 export type { SafeUserRole, NonPinnedWarningState } from './hooks/useNonPinnedSafeWarning.types'

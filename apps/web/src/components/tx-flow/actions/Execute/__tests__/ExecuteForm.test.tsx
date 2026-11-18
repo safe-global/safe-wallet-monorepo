@@ -22,7 +22,8 @@ import type {
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import { TxModalContext } from '@/components/tx-flow'
-import { NestedTxSuccessScreenFlow, SuccessScreenFlow } from '@/components/tx-flow/flows'
+import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows/NestedTxSuccessScreenFlow'
+import { SuccessScreenFlow } from '@/components/tx-flow/flows/SuccessScreenFlow'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
 

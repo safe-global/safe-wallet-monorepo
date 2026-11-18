@@ -1,32 +1,29 @@
 import { useEffect, useState } from 'react'
-import { flattenSafeItems } from '@/hooks/safes'
-import {
-  useSpaceSafes,
-  useCurrentSpaceId,
-  useSpaceMembersByStatus,
-  useIsInvited,
-  useTrackSpace,
-  useSpacePendingTransactions,
-  SpacesFeature,
-} from '@/features/spaces'
+import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { useSpaceSafes } from '../../public/hooks/useSpaceSafes'
+import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
+import { useSpaceMembersByStatus, useIsInvited } from '../../public/hooks/useSpaceMembers'
+import useTrackSpace from '../../hooks/useTrackSpace'
+import { useSpacePendingTransactions } from '../../hooks/useSpacePendingTransactions'
 import { AppRoutes } from '@/config/routes'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import Track from '@/components/common/Track'
 import { trackEvent } from '@/services/analytics'
-import { MyAccountsFeature, useSpaceAccountsData } from '@/features/myAccounts'
-import { SafeProFeature, useSafeProAnnouncementModal } from '@/features/safe-pro-announcement'
-import { useLoadFeature } from '@/features/__core__'
+import useSpaceAccountsData from '@/features/myAccounts/public/hooks/useSpaceAccountsData'
+import { useSafeProAnnouncementModal } from '@/features/safe-pro-announcement/public/hooks/useSafeProAnnouncementModal'
 import AddAccountsChooser from '../AddAccountsChooser'
 import { useRouter } from 'next/router'
 import AggregatedBalance from './AggregatedBalances'
-import SafeWidget from '../SafeWidget'
 import SetupWidget from '../SetupWidget'
 import { useSetupWidgetDismissal } from '../../hooks/useSetupWidgetDismissal'
 import CheckoutReturnModals from '../Plans/CheckoutReturnModals'
 import { useWorkspaceLock } from '../../hooks/useWorkspaceLock'
-import { useSpacePlanState } from '../../hooks/useSpacePlanState'
+import { useSpacePlanState } from '../../public/hooks/useSpacePlanState'
+import PendingTxWidget from './PendingTxWidget'
+import AccountsWidget from '@/features/myAccounts/public/components/AccountsWidget'
+import SafeProAnnouncementModal from '@/features/safe-pro-announcement/public/components/SafeProAnnouncementModal'
 
 const EmptyStateAddAction = () => {
   return (
@@ -40,9 +37,6 @@ const DASHBOARD_LIST_DISPLAY_LIMIT = 5
 const PENDING_TX_DISPLAY_LIMIT = 4
 
 const SpaceDashboard = () => {
-  const { AccountsWidget, $isReady } = useLoadFeature(MyAccountsFeature)
-  const { PendingTxWidget } = useLoadFeature(SpacesFeature)
-  const { SafeProAnnouncementModal } = useLoadFeature(SafeProFeature)
   const { allSafes: safes, isLoading: isSafesLoading } = useSpaceSafes()
   const safeItems = flattenSafeItems(safes)
   const spaceId = useCurrentSpaceId()
@@ -139,33 +133,16 @@ const SpaceDashboard = () => {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
           <div data-testid="dashboard-safe-list" className="md:col-span-7">
-            {$isReady ? (
-              <AccountsWidget
-                items={safesToDisplay}
-                loading={isSafesLoading}
-                totalCount={safes.length}
-                onViewAll={handleViewAll}
-                onItemClick={handleItemClick}
-                emptyStateAction={<EmptyStateAddAction />}
-                error={error}
-                onRefresh={refetch}
-              />
-            ) : (
-              <SafeWidget
-                title="Accounts"
-                action={
-                  safes.length > 0 ? (
-                    <SafeWidget.ViewAll
-                      count={Math.max(0, safes.length - safesToDisplay.length)}
-                      onClick={handleViewAll}
-                    />
-                  ) : undefined
-                }
-                testId="space-dashboard-accounts-widget"
-              >
-                <div className="animate-pulse rounded-lg bg-muted" />
-              </SafeWidget>
-            )}
+            <AccountsWidget
+              items={safesToDisplay}
+              loading={isSafesLoading}
+              totalCount={safes.length}
+              onViewAll={handleViewAll}
+              onItemClick={handleItemClick}
+              emptyStateAction={<EmptyStateAddAction />}
+              error={error}
+              onRefresh={refetch}
+            />
           </div>
           <div className="md:col-span-5">
             {showSetupWidget ? (

@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
-import { flattenSafeItems } from '@/hooks/safes'
+import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useSpaceSafes } from '../../../hooks/useSpaceSafes'
+import { useSpaceSafes } from '../../../public/hooks/useSpaceSafes'
 
 export type PolicyDetailsBase = {
   viewer: { address?: string; isSigner: boolean }

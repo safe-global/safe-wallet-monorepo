@@ -5,8 +5,9 @@ import { type SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GEN
 import SafeAppPreviewDrawer from '@/components/safe-apps/SafeAppPreviewDrawer'
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 
-jest.mock('@/features/multichain', () => ({
-  NetworkLogosTooltip: ({ networks, maxVisible }: { networks: { chainId: string }[]; maxVisible?: number }) => (
+jest.mock('@/components/common/NetworkLogosTooltip', () => ({
+  __esModule: true,
+  default: ({ networks, maxVisible }: { networks: { chainId: string }[]; maxVisible?: number }) => (
     <div>
       <div
         data-testid="network-logos-list"

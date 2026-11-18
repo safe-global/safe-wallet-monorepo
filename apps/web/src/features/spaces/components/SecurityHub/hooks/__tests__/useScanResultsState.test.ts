@@ -1,9 +1,9 @@
 import { act, renderHook } from '@testing-library/react'
 import useScanResultsState from '../useScanResultsState'
-import type { ScanResult } from '@/features/security/types'
+import type { ScanResult } from '@/features/security/public/types'
 
 const useCurrentSpaceIdMock = jest.fn<string | null, []>()
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('../../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => useCurrentSpaceIdMock(),
 }))
 
@@ -22,10 +22,11 @@ const mkResult = (overrides: Partial<ScanResult> = {}): ScanResult => ({
 })
 
 const mkSecurity = (isReady = true) =>
-  ({
-    $isReady: isReady,
-    scanKey: (address: string, chainId: string) => `${address}:${chainId}`,
-  }) as unknown as Parameters<typeof useScanResultsState>[0]
+  isReady
+    ? ({
+        scanKey: (address: string, chainId: string) => `${address}:${chainId}`,
+      } as unknown as Parameters<typeof useScanResultsState>[0])
+    : undefined
 
 describe('useScanResultsState', () => {
   beforeEach(() => {

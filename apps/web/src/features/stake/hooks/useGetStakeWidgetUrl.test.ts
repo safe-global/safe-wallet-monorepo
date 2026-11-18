@@ -1,6 +1,6 @@
 import { renderHook } from '@/tests/test-utils'
 import { chainBuilder } from '@/tests/builders/chains'
-import { WIDGET_PRODUCTION_URL, WIDGET_TESTNET_URL } from '../constants'
+import { WIDGET_PRODUCTION_URL, WIDGET_TESTNET_URL } from '../public/constants'
 import { useGetStakeWidgetUrl } from './useGetStakeWidgetUrl'
 
 const mockUseDarkMode = jest.fn()

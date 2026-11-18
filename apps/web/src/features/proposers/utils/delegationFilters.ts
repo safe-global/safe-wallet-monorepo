@@ -1,4 +1,4 @@
-import type { PendingDelegation } from '@/features/proposers/types'
+import type { PendingDelegation } from '../types'
 import type { DelegationWithTimestamp } from './delegationParsing'
 
 /**

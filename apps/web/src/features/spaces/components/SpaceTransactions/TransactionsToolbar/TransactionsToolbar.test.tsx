@@ -3,7 +3,7 @@ import type { SpaceQueueCounts } from '@safe-global/store/gateway/AUTO_GENERATED
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { act, fireEvent, render, screen, within } from '@/tests/test-utils'
 import { NO_SPACE_QUEUE_FILTERS, type SpaceQueueFilters } from '../../../hooks/useSpaceQueue'
-import TransactionsToolbar from '.'
+import TransactionsToolbar from './TransactionsToolbar'
 
 jest.mock('../NewTransactionButton', () => ({ __esModule: true, default: () => null }))
 
