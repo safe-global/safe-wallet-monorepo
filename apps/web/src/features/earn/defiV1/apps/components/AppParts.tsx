@@ -58,7 +58,8 @@ export const PinButton = ({ row, pinned, onToggle }: { row: AppRow; pinned: bool
   <span
     className={cn(
       'flex transition-opacity',
-      !pinned && 'opacity-0 group-hover/row:opacity-100 group-has-[:focus-visible]/row:opacity-100',
+      !pinned &&
+        'opacity-0 group-hover/row:opacity-100 group-has-[:focus-visible]/row:opacity-100 pointer-coarse:opacity-100',
     )}
   >
     <Button
