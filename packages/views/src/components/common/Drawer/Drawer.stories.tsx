@@ -4,6 +4,7 @@ import { Drawer } from './Drawer'
 import { DrawerBody } from '@safe-global/views/components/common/Drawer/components/DrawerBody'
 import { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'
 import { DrawerHeader } from '@safe-global/views/components/common/Drawer/components/DrawerHeader'
+import { DrawerActions } from '@safe-global/views/components/common/Drawer/components/DrawerActions'
 import { DrawerList } from '@safe-global/views/components/common/Drawer/components/DrawerList'
 import { DrawerSection } from '@safe-global/views/components/common/Drawer/components/DrawerSection'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -308,4 +309,74 @@ export const Expandable: Story = {
 export const Phone: Story = {
   ...Expandable,
   parameters: { viewport: { defaultViewport: 'mobile' } },
+}
+
+const summaryRows = [
+  { label: 'Recipient', content: '0x8675...a19b' },
+  { label: 'Amount', content: '1,250 USDC' },
+  { label: 'Network', content: 'Ethereum' },
+]
+
+/** Sections fold from their title. A page can hold their state to expand all, or to keep them as it steps through items. */
+export const CollapsibleSections: Story = {
+  args: {
+    ariaLabel: 'Transaction',
+    children: (
+      <>
+        <DrawerHeader media={iconTile} title="Send 1,250 USDC" subtitle="Nonce #42 · Ethereum" />
+        <DrawerBody>
+          <div className="flex flex-col gap-6">
+            <DrawerSection title="Summary" rightNode="2 of 3 signed" collapsible>
+              <DrawerList items={summaryRows} mobileStack />
+            </DrawerSection>
+            <DrawerSection title="What it does" collapsible>
+              <Paragraphs count={2} />
+            </DrawerSection>
+            <DrawerSection title="Transaction data" collapsible defaultOpen={false}>
+              <Paragraphs count={2} />
+            </DrawerSection>
+          </div>
+        </DrawerBody>
+      </>
+    ),
+  },
+}
+
+/** A hint above the actions; a secondary and a primary split the row 1:2. */
+export const FooterActions: Story = {
+  args: {
+    ariaLabel: 'Transaction',
+    children: (
+      <>
+        <DrawerHeader media={iconTile} title="Send 1,250 USDC" subtitle="Nonce #42 · Ethereum" />
+        <DrawerBody>
+          <DrawerList items={summaryRows} />
+        </DrawerBody>
+        <DrawerFooter hint="Any signer can start this transaction.">
+          <DrawerActions
+            secondary={<Button variant="secondary">Reject</Button>}
+            primary={<Button>Review and sign</Button>}
+          />
+        </DrawerFooter>
+      </>
+    ),
+  },
+}
+
+/** One action fills the row; a disabled one says why in the hint. */
+export const FooterSingleAction: Story = {
+  args: {
+    ariaLabel: 'Allowlist',
+    children: (
+      <>
+        <DrawerHeader media={iconTile} title="Allowlist" subtitle="Treasury · Ethereum" />
+        <DrawerBody>
+          <DrawerList items={summaryRows} />
+        </DrawerBody>
+        <DrawerFooter hint="Only signers of this Safe can edit its policies.">
+          <DrawerActions primary={<Button disabled>Edit</Button>} />
+        </DrawerFooter>
+      </>
+    ),
+  },
 }

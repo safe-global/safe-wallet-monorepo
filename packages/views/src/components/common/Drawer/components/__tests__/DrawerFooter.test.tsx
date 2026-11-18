@@ -1,4 +1,4 @@
-import { render } from '@/tests/test-utils'
+import { render, screen } from '@/tests/test-utils'
 import { DrawerFooter } from '../DrawerFooter'
 
 describe('DrawerFooter', () => {
@@ -10,5 +10,17 @@ describe('DrawerFooter', () => {
     )
 
     expect(container.firstChild).toMatchSnapshot()
+  })
+
+  it('shows a hint above the actions', () => {
+    render(
+      <DrawerFooter hint="Any signer can start this transaction.">
+        <button>Review transaction</button>
+      </DrawerFooter>,
+    )
+
+    const hint = screen.getByText('Any signer can start this transaction.')
+
+    expect(hint.compareDocumentPosition(screen.getByRole('button'))).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
   })
 })
