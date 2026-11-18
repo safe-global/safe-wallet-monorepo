@@ -3,7 +3,8 @@ import userEvent from '@testing-library/user-event'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { SuggestedContact } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
-import { useUpsertWorkspaceSafeNames, useWorkspaceAddressBookLabel } from '@/features/spaces'
+import { useUpsertWorkspaceSafeNames } from '../../../public/hooks/useUpsertWorkspaceSafeName'
+import { useWorkspaceAddressBookLabel } from '../../../public/hooks/useWorkspaceAddressBookLabel'
 import { useCurrentChain } from '@/hooks/useChains'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -14,10 +15,11 @@ import { render, screen, waitFor, within } from '@/tests/test-utils'
 import SuggestedTab from '../SuggestedTab'
 
 jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => false }))
-jest.mock('@/features/spaces', () => ({
+jest.mock('../../../public/hooks/useUpsertWorkspaceSafeName', () => ({
+  ...jest.requireActual('../../../public/hooks/useUpsertWorkspaceSafeName'),
   useUpsertWorkspaceSafeNames: jest.fn(),
-  useWorkspaceAddressBookLabel: jest.fn(),
 }))
+jest.mock('../../../public/hooks/useWorkspaceAddressBookLabel', () => ({ useWorkspaceAddressBookLabel: jest.fn() }))
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: jest.fn(() => ({ configs: [] })),

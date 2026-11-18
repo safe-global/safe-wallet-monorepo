@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { makeStore } from '@/store'
 import { gatewayApi } from '../api/gateway'
 import { additionalSafesRtkApi } from '@safe-global/store/gateway/safes'
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 
 // Neutralize the inner batched fetch so the (timer-driven) network call never runs; this test only
 // inspects the OUTER getMultipleSafeOverviews cache key, which is created synchronously on dispatch.

@@ -9,7 +9,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import DialogActions from '@/components/common/DialogActions'
 import ModalDialog from '@/components/common/ModalDialog'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { NetworkLogosTooltip } from '@/features/multichain'
+import NetworkLogosTooltip from '@/components/common/NetworkLogosTooltip'
 import useChains from '@/hooks/useChains'
 import {
   useAddOrRequestWorkspaceContact,

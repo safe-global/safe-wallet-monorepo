@@ -9,7 +9,8 @@ import SuggestedContacts, {
   type SuggestionAddLocation,
 } from '@safe-global/views/features/spaces/components/AddressBookV2/SuggestedContacts'
 import type { SuggestedContact } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
-import { useUpsertWorkspaceSafeNames, useWorkspaceAddressBookLabel } from '@/features/spaces'
+import { useUpsertWorkspaceSafeNames } from '../../public/hooks/useUpsertWorkspaceSafeName'
+import { useWorkspaceAddressBookLabel } from '../../public/hooks/useWorkspaceAddressBookLabel'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'

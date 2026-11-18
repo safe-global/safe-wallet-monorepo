@@ -3,14 +3,11 @@ import userEvent from '@testing-library/user-event'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import {
-  useAddressBookRequestsState,
-  useCurrentSpaceId,
-  useIsAdmin,
-  useIsInvited,
-  useMemberNameResolver,
-  useSpaceAddressBookState,
-} from '@/features/spaces'
+import { useAddressBookRequestsState } from '../../../hooks/useGetAddressBookRequests'
+import { useCurrentSpaceId } from '../../../public/hooks/useCurrentSpaceId'
+import { useIsAdmin, useIsInvited } from '../../../public/hooks/useSpaceMembers'
+import { useMemberNameResolver } from '../../../public/hooks/useMemberNameResolver'
+import { useSpaceAddressBookState } from '../../../public/hooks/useGetSpaceAddressBook'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { Builder } from '@/tests/Builder'
@@ -33,14 +30,65 @@ const SPACE_ID = '7'
 
 const mockIsMobile = jest.fn(() => false)
 jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockIsMobile() }))
-jest.mock('@/features/spaces', () => ({
+jest.mock('../../../public/hooks/useSpaceMembers', () => ({
+  get MemberStatus() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberStatus
+  },
+  get MemberRole() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberRole
+  },
+  get MEMBER_ALIAS_MAX_LENGTH() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+  },
+  get getMemberDisplayName() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').getMemberDisplayName
+  },
+  get sanitizeMemberAlias() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').sanitizeMemberAlias
+  },
+  get isAdmin() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isAdmin
+  },
+  get isActiveAdmin() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isActiveAdmin
+  },
+  get isInviteExpired() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isInviteExpired
+  },
+  get useSpaceMembersByStatus() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useSpaceMembersByStatus
+  },
+  get useCurrentMembership() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useCurrentMembership
+  },
+  get useCurrentMemberProfile() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useCurrentMemberProfile
+  },
+  get useIsActiveMember() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useIsActiveMember
+  },
   useIsAdmin: jest.fn(),
   useIsInvited: jest.fn(),
+}))
+jest.mock('../../../public/hooks/useGetSpaceAddressBook', () => ({
+  ...jest.requireActual('../../../public/hooks/useGetSpaceAddressBook'),
   useSpaceAddressBookState: jest.fn(),
+}))
+jest.mock('../../../hooks/useGetAddressBookRequests', () => ({
+  ...jest.requireActual('../../../hooks/useGetAddressBookRequests'),
   useAddressBookRequestsState: jest.fn(),
+}))
+jest.mock('../../../public/hooks/useMemberNameResolver', () => ({
   useMemberNameResolver: jest.fn(),
+}))
+jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(() => SPACE_ID),
+}))
+jest.mock('../../../public/hooks/useUpsertWorkspaceSafeName', () => ({
+  ...jest.requireActual('../../../public/hooks/useUpsertWorkspaceSafeName'),
   useUpsertWorkspaceSafeNames: jest.fn(() => jest.fn()),
+}))
+jest.mock('../../../public/hooks/useWorkspaceAddressBookLabel', () => ({
   useWorkspaceAddressBookLabel: jest.fn(() => 'Workspace address book'),
 }))
 jest.mock('../../../hooks/useWorkspaceSigners', () => ({ useWorkspaceSigners: jest.fn() }))

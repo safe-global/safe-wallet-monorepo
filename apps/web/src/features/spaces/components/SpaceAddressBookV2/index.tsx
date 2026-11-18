@@ -5,13 +5,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@safe-global/views/com
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
-import {
-  useAddressBookRequestsState,
-  useCurrentSpaceId,
-  useIsAdmin,
-  useIsInvited,
-  useSpaceAddressBookState,
-} from '@/features/spaces'
+import { useAddressBookRequestsState } from '../../hooks/useGetAddressBookRequests'
+import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
+import { useIsAdmin, useIsInvited } from '../../public/hooks/useSpaceMembers'
+import { useSpaceAddressBookState } from '../../public/hooks/useGetSpaceAddressBook'
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import useChains, { useHasFeature } from '@/hooks/useChains'
 import PreviewInvite from '../InviteBanner/PreviewInvite'

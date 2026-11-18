@@ -1,4 +1,4 @@
-import { TokenTransferType } from '@/components/tx-flow/flows/TokenTransfer'
+import { TokenTransferType } from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
 import TokenTransferFlow from '@/components/tx-flow/flows/TokenTransfer'
 import CreateTokenTransfer, {
   type CreateTokenTransferProps,
@@ -10,12 +10,11 @@ import { render } from '@/tests/test-utils'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { TokenType } from '@safe-global/store/gateway/types'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
-import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
-import * as useRecipientAnalysis from '@/features/safe-shield'
+import { SafeShieldProvider } from '@/features/safe-shield/public/components/SafeShieldProvider'
 import * as useBalances from '@/hooks/useBalances'
 import * as useTrustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
 import * as chainHooks from '@/hooks/useChains'
-import * as payFromSafeHooks from '@/features/fee-payment'
+import * as payFromSafeHooks from '@/features/fee-payment/public/hooks/useResolvedGasToken'
 import * as sharedTxHooks from '@/components/tx/shared/hooks'
 import * as remoteSafeAppsHooks from '@/hooks/safe-apps/useRemoteSafeApps'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
@@ -30,15 +29,23 @@ import { safeScopeContextFor } from '@/tests/mocks/safeScope'
 import userEvent, { type UserEvent } from '@testing-library/user-event'
 import type { ReactElement } from 'react'
 
-jest.mock('@/features/safe-shield/hooks', () => ({
-  __esModule: true,
-  ...jest.requireActual('@/features/safe-shield/hooks'),
+jest.mock('@/features/safe-shield/hooks/useRecipientAnalysis', () => ({
+  ...jest.requireActual('@/features/safe-shield/hooks/useRecipientAnalysis'),
   useRecipientAnalysis: jest.fn(() => undefined),
+}))
+const useRecipientAnalysis = jest.requireMock<{ useRecipientAnalysis: jest.Mock }>(
+  '@/features/safe-shield/hooks/useRecipientAnalysis',
+)
+jest.mock('@/features/safe-shield/hooks/useCounterpartyAnalysis', () => ({
+  ...jest.requireActual('@/features/safe-shield/hooks/useCounterpartyAnalysis'),
   useCounterpartyAnalysis: jest.fn(() => ({
     recipient: [undefined, undefined, false],
     contract: [undefined, undefined, false],
     deadlock: [undefined, undefined, false],
   })),
+}))
+jest.mock('@/features/safe-shield/hooks/useThreatAnalysis', () => ({
+  ...jest.requireActual('@/features/safe-shield/hooks/useThreatAnalysis'),
   useThreatAnalysis: jest.fn(() => [undefined, undefined, false]),
 }))
 
@@ -47,7 +54,7 @@ jest.mock('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleFor
   useRoles: jest.fn(() => []),
 }))
 
-jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible', () => ({
+jest.mock('@/features/hypernative/public/hooks/useIsHypernativeEligible', () => ({
   useIsHypernativeEligible: jest.fn(() => ({
     isHypernativeEligible: false,
     isHypernativeGuard: false,
@@ -56,13 +63,10 @@ jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible', () => ({
   })),
 }))
 
-jest.mock('@/features/ledger', () => {
-  const actual = jest.requireActual('@/features/ledger')
-  return { __esModule: true, ...actual, LedgerFeature: { ...actual.LedgerFeature, useIsEnabled: () => false } }
-})
+jest.mock('@/features/ledger/public/components/LedgerHashComparison', () => ({ __esModule: true, default: () => null }))
 
-// Mock the SpendingLimitRowWrapper component with the same "Send as" label as the real component
-jest.mock('@/components/tx-flow/flows/TokenTransfer/SpendingLimitRow', () => ({
+// Mock SpendingLimitRow with the same "Send as" label as the real component
+jest.mock('@/features/spending-limits/public/components/SpendingLimitRow', () => ({
   __esModule: true,
   default: () => (
     <div data-testid="spending-limit-row">

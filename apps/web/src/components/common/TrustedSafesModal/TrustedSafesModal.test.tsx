@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from '@/tests/test-utils'
 import TrustedSafesModal from './index'
 import type { UseTrustedSafesModalReturn } from './useTrustedSafesModal'
 import { useRouter } from 'next/router'
-import { useIsQualifiedSafe } from '@/features/spaces'
+import useIsQualifiedSafe from '@/features/spaces/public/hooks/useIsQualifiedSafe'
 import { OrderByOption, ORDER_BY_RESET_VERSION, TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
 import { getStoreInstance } from '@/store'
 
@@ -10,7 +10,7 @@ jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
-jest.mock('@/features/spaces/hooks/useIsQualifiedSafe', () => ({
+jest.mock('@/features/spaces/public/hooks/useIsQualifiedSafe', () => ({
   __esModule: true,
   default: jest.fn(() => false),
 }))
@@ -19,9 +19,9 @@ const mockUseIsQualifiedSafe = useIsQualifiedSafe as jest.Mock
 
 // The list is rendered by the shared accounts table (covered by its own suite). Stub it to a row per
 // item that surfaces the selection toggle so we can assert the modal wiring.
-jest.mock('@/features/myAccounts', () => ({
+jest.mock('@/features/myAccounts/public/components/SafeAccountsTable', () => ({
   __esModule: true,
-  SafeAccountsTable: ({
+  default: ({
     items,
     selection,
     reorder,

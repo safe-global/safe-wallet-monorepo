@@ -11,7 +11,7 @@ import NftGrid from '../NftGrid'
 import NftSendForm from '../NftSendForm'
 import NftPreviewModal from '../NftPreviewModal'
 import { TxModalContext } from '@/components/tx-flow'
-import { NftTransferFlow } from '@/components/tx-flow/flows'
+import { NftTransferFlow } from '@/components/tx-flow/flows/NftTransferFlow'
 
 const NftCollections = (): ReactElement => {
   const { nfts, error, isInitialLoading, isFetchingNextPage, hasNextPage, loadMore } = useCollectibles()

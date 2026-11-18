@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import type { SuggestedContact } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
-import { useSpaceAddressBookState } from '@/features/spaces'
+import { useSpaceAddressBookState } from '../../public/hooks/useGetSpaceAddressBook'
 import useChains from '@/hooks/useChains'
 import { useWorkspaceSigners } from '../../hooks/useWorkspaceSigners'
 import { toSuggestedContacts } from './suggestions'

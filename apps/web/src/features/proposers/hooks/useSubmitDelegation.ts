@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { encodeEIP1271Signature } from '@/features/proposers/utils/utils'
+import { encodeEIP1271Signature } from '../public/utils/utils'
 import { useDelegateMutations } from '@safe-global/utils/hooks/useDelegateMutations'
-import { isTotpValid } from '@/features/proposers/utils/totp'
-import { PROPOSER_LABEL_PLACEHOLDER } from '@/features/proposers/constants'
+import { isTotpValid } from '../utils/totp'
+import { PROPOSER_LABEL_PLACEHOLDER } from '../public/constants'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
-import type { PendingDelegation } from '@/features/proposers/types'
+import type { PendingDelegation } from '../types'
 
 /**
  * Submits a confirmed delegation (threshold met) to the delegate API.

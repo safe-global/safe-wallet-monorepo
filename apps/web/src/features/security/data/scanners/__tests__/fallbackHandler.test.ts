@@ -1,5 +1,5 @@
 import { fallbackHandlerScanner } from '../fallbackHandler'
-import { createMockContext } from '../test-helpers'
+import { createMockContext } from '../../../public/utils/test-helpers'
 
 describe('fallbackHandlerScanner', () => {
   it('returns clear when no fallback handler is set', async () => {

@@ -7,8 +7,8 @@ import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { selectCurrency } from '@/store/settingsSlice'
 import { selectUndeployedSafes } from '@/store/slices'
-import { useCurrentSpaceId } from './useCurrentSpaceId'
-import { useSpaceAddressBookState } from './useGetSpaceAddressBook'
+import { useCurrentSpaceId } from '../public/hooks/useCurrentSpaceId'
+import { useSpaceAddressBookState } from '../public/hooks/useGetSpaceAddressBook'
 import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 
 export type SignedSafe = { address: string; name?: string; position: number }

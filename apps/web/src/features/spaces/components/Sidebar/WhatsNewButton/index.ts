@@ -1,1 +1,0 @@
-export { WhatsNewButton } from './WhatsNewButton'

@@ -28,9 +28,12 @@ import {
 } from '@/utils/transaction-guards'
 import { ellipsis, maybePlural, shortenAddress } from '@safe-global/utils/utils/formatters'
 import { useCurrentChain } from '@/hooks/useChains'
-import { StakingTxDepositInfo, StakingTxExitInfo, StakingTxWithdrawInfo } from './Staking'
+import StakingTxDepositInfo from '@/components/transactions/TxInfo/Staking/StakingTxDepositInfo'
+import StakingTxExitInfo from '@safe-global/views/components/transactions/TxInfo/Staking/StakingTxExitInfo'
+import StakingTxWithdrawInfo from '@/components/transactions/TxInfo/Staking/StakingTxWithdrawInfo'
 import css from './styles.module.css'
-import { VaultDepositTxInfo, VaultRedeemTxInfo } from '@/features/earn'
+import VaultDepositTxInfo from '@/features/earn/public/components/VaultDepositTxInfo'
+import VaultRedeemTxInfo from '@/features/earn/public/components/VaultRedeemTxInfo'
 import { SwapTx } from './SwapTx'
 
 export const TransferTx = ({

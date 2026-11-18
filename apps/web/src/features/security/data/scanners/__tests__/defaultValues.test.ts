@@ -8,7 +8,7 @@ import { modulesScanner } from '../modules'
 import { transactionScanningScanner } from '../transactionScanning'
 import { fallbackHandlerScanner } from '../fallbackHandler'
 import { factoryValidationScanner } from '../factoryValidation'
-import { createMockContext } from '../test-helpers'
+import { createMockContext } from '../../../public/utils/test-helpers'
 
 /**
  * These tests verify that scanners produce CORRECT results when given

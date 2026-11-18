@@ -1,7 +1,7 @@
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { TOOLTIP_DELAY_MS } from '@/components/common/AccountRow'
+import { TOOLTIP_DELAY_MS } from '@safe-global/views/components/common/AccountRow/utils'
 
 const MAX_VISIBLE_WORKSPACES = 2
 
