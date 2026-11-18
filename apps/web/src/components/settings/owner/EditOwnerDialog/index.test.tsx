@@ -5,6 +5,7 @@ import { EditOwnerDialog } from './index'
 
 const CHAIN_ID = '1'
 const CURRENT_NAME = 'Alice'
+const NEW_NAME = 'Bob'
 const MAX_NAME_LENGTH = 50
 
 const openEditOwnerDialog = async (address = fakerChecksummedAddress()) => {
@@ -28,7 +29,7 @@ describe('EditOwnerDialog', () => {
     const { user } = await openEditOwnerDialog()
 
     await user.clear(nameInput())
-    await user.type(nameInput(), 'Bob')
+    await user.type(nameInput(), NEW_NAME)
 
     expect(saveButton()).toBeEnabled()
   })
@@ -64,17 +65,17 @@ describe('EditOwnerDialog', () => {
     const { user } = await openEditOwnerDialog(address)
 
     await user.clear(nameInput())
-    await user.type(nameInput(), 'Bob')
+    await user.type(nameInput(), NEW_NAME)
     await user.click(saveButton())
 
-    expect(getStoreInstance().getState().addressBook[CHAIN_ID][address]).toBe('Bob')
+    expect(getStoreInstance().getState().addressBook[CHAIN_ID][address]).toBe(NEW_NAME)
   })
 
   it('closes the dialog after saving', async () => {
     const { user } = await openEditOwnerDialog()
 
     await user.clear(nameInput())
-    await user.type(nameInput(), 'Bob')
+    await user.type(nameInput(), NEW_NAME)
     await user.click(saveButton())
 
     expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument()
