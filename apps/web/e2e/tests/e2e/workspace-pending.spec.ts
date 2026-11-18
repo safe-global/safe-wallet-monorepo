@@ -144,7 +144,7 @@ async function workspaceQueueTxIds({ id, session }: PendingWorkspace): Promise<s
 
 test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
   test.slow()
-  test.use({ viewport: { width: 1280, height: 1600 } })
+  test.use({ viewport: { width: 1280, height: 1600 }, video: 'on' })
 
   test('should add a transaction that a proposer creates from the Workspace to its queue as waiting, and as signable by an owner', async ({
     safePage,
