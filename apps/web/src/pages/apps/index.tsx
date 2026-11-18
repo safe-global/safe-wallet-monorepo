@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { useCallback, useEffect, useMemo } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo } from 'react'
 import debounce from 'lodash/debounce'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
@@ -17,7 +17,10 @@ import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 import { useAppsV1 } from '@/features/earn/defiV1/apps/context'
-import { AppsV1View } from '@/features/earn/defiV1/apps/components/AppsV1View'
+
+const AppsV1View = lazy(() =>
+  import('@/features/earn/defiV1/apps/components/AppsV1View').then((module) => ({ default: module.AppsV1View })),
+)
 
 const SafeApps = () => {
   const router = useRouter()
@@ -90,18 +93,20 @@ const SafeApps = () => {
             />
 
             {appsV1 ? (
-              <AppsV1View
-                key={appsV1.view}
-                config={appsV1}
-                filteredApps={filteredApps}
-                customApps={[...customSafeApps, ...(appsV1.customApps ?? [])]}
-                query={query}
-                selectedCategories={selectedCategories}
-                batchOnly={optimizedWithBatchFilter}
-                pinnedIds={pinnedSafeAppIds}
-                onTogglePin={(appId) => togglePin(appId, SAFE_APPS_LABELS.apps_all)}
-                onRemoveCustom={(app) => removeCustomApp(app.id)}
-              />
+              <Suspense>
+                <AppsV1View
+                  key={appsV1.view}
+                  config={appsV1}
+                  filteredApps={filteredApps}
+                  customApps={[...customSafeApps, ...(appsV1.customApps ?? [])]}
+                  query={query}
+                  selectedCategories={selectedCategories}
+                  batchOnly={optimizedWithBatchFilter}
+                  pinnedIds={pinnedSafeAppIds}
+                  onTogglePin={(appId) => togglePin(appId, SAFE_APPS_LABELS.apps_all)}
+                  onRemoveCustom={(app) => removeCustomApp(app.id)}
+                />
+              </Suspense>
             ) : (
               <>
                 {/* Pinned apps */}
