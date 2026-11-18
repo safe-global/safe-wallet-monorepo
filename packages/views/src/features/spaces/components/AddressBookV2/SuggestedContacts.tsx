@@ -103,8 +103,7 @@ const SuggestedContacts = ({
   const suggestionsKey = suggestions.map((item) => item.address).join('\u0000')
   const [prevSuggestionsKey, setPrevSuggestionsKey] = useState(suggestionsKey)
 
-  // Rows that leave the list (e.g. once added) drop out of the selection. Adjusted during render,
-  // so a stale key is never committed.
+  // Rows that leave the list (e.g. once added) drop out of the selection
   if (suggestionsKey !== prevSuggestionsKey) {
     setPrevSuggestionsKey(suggestionsKey)
     if (selectedSuggestions.length !== selected.size) {
