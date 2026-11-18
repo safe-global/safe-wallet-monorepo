@@ -101,5 +101,23 @@ describe('useSafeAppRedirects', () => {
 
       expect(shouldShowApp).toBe(false)
     })
+
+    it('hides the app when no Safe is loaded', () => {
+      const { shouldShowApp } = renderRedirects(
+        { isSafeAppsEnabled: true, appUrl: faker.internet.url() },
+        { isReady: true, query: {} },
+      )
+
+      expect(shouldShowApp).toBe(false)
+    })
+
+    it('hides the app while the router is not ready', () => {
+      const { shouldShowApp } = renderRedirects(
+        { isSafeAppsEnabled: true, appUrl: faker.internet.url() },
+        { isReady: false, query: { safe: LOADED_SAFE } },
+      )
+
+      expect(shouldShowApp).toBe(false)
+    })
   })
 })

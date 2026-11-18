@@ -15,6 +15,7 @@ import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hook
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import useAddressBook from '@/hooks/useAddressBook'
 import { useChain, useHasFeature } from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 import { addressExBuilder } from '@/tests/builders/safe'
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import {
@@ -24,7 +25,15 @@ import {
   transactionDetailsBuilder,
 } from '@/tests/builders/transactionDetails'
 import { mockCurrentChain, mockSafeInfo, mockWallet } from '@/tests/mocks/hooks'
-import { act, fakerChecksummedAddress, renderWithUserEvent, screen, waitFor, within } from '@/tests/test-utils'
+import {
+  act,
+  fakerChecksummedAddress,
+  renderOnFakeClock,
+  renderWithUserEvent,
+  screen,
+  waitFor,
+  within,
+} from '@/tests/test-utils'
 import TxSigners from './index'
 
 jest.mock('@/hooks/useSafeInfo')
@@ -81,6 +90,7 @@ const queuedTx = (
         .with({ confirmations: confirmationsBy(signatures), confirmationsRequired: threshold, ...details })
         .build(),
       txStatus: TransactionStatus.AWAITING_CONFIRMATIONS,
+      txHash: null,
       ...tx,
     })
     .build()
@@ -116,8 +126,12 @@ const oneSignatureShortSummary = (safeNonce: number, missingSigner: string) =>
     })
     .build()
 
-const renderTxSigners = (txDetails: TransactionDetails, props: Partial<ComponentProps<typeof TxSigners>> = {}) =>
-  renderWithUserEvent(
+const renderTxSigners = (
+  txDetails: TransactionDetails,
+  props: Partial<ComponentProps<typeof TxSigners>> = {},
+  render: typeof renderWithUserEvent = renderWithUserEvent,
+) =>
+  render(
     <TxSigners
       txDetails={txDetails}
       txSummary={safeTxSummaryBuilder().with({ txStatus: txDetails.txStatus }).build()}
@@ -338,19 +352,29 @@ describe('TxSigners (Audit Log)', () => {
     expect(await screen.findByText('Copied')).toBeInTheDocument()
   })
 
-  it('shows "Copied" when the pointer comes back to the hash button right after copying', async () => {
-    const { user } = renderTxSigners(executedTx(2, 2))
-    spyOnClipboard()
-    const hashButton = screen.getByTestId('copy-tx-hash-btn')
+  describe('on a fake clock', () => {
+    beforeEach(() => {
+      jest.useFakeTimers({ advanceTimers: false })
+    })
 
-    await user.click(hashButton)
-    await user.unhover(hashButton)
-    await user.hover(hashButton)
+    afterEach(() => {
+      jest.useRealTimers()
+    })
 
-    expect(await screen.findByText('Copied')).toBeInTheDocument()
+    it('shows "Copied" when the pointer comes back to the hash button right after copying', async () => {
+      const { user } = renderTxSigners(executedTx(2, 2), {}, renderOnFakeClock)
+      spyOnClipboard()
+      const hashButton = screen.getByTestId('copy-tx-hash-btn')
+
+      await user.click(hashButton)
+      await user.unhover(hashButton)
+      await user.hover(hashButton)
+
+      expect(await screen.findByText('Copied')).toBeInTheDocument()
+    })
   })
 
-  it('disables the hash button when the transaction has no hash yet', () => {
+  it('does not render the copy hash button until the transaction has a hash', () => {
     renderTxSigners(queuedTx(1, 2))
 
     expect(screen.queryByTestId('copy-tx-hash-btn')).not.toBeInTheDocument()
@@ -552,13 +576,17 @@ describe('TxSigners (Audit Log)', () => {
             },
           }),
         )
-        mockUseChain.mockReturnValue({
-          blockExplorerUriTemplate: {
-            txHash: 'https://gnosisscan.io/tx/{{txHash}}',
-            address: 'https://gnosisscan.io/address/{{address}}',
-            api: '',
-          },
-        } as ReturnType<typeof useChain>)
+        mockUseChain.mockReturnValue(
+          chainBuilder()
+            .with({
+              blockExplorerUriTemplate: {
+                txHash: 'https://gnosisscan.io/tx/{{txHash}}',
+                address: 'https://gnosisscan.io/address/{{address}}',
+                api: '',
+              },
+            })
+            .build(),
+        )
 
         renderTxSigners(safenetTx())
 

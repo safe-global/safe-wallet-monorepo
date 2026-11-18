@@ -1,29 +1,18 @@
-import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
-import { SafeAppAccessPolicyTypes } from '@safe-global/store/gateway/types'
 import { GATEWAY_URL } from '@/config/gateway'
 import * as useChainIdHook from '@/hooks/useChainId'
 import { useSafeApps } from '@/hooks/safe-apps/useSafeApps'
+import { safeAppBuilder } from '@/tests/builders/walletConnect'
 import { server } from '@/tests/server'
 import { renderHook, waitFor } from '@/tests/test-utils'
 
 const CHAIN_ID = '1'
 
-const safeApp = (name: string, url: string): SafeApp => ({
-  id: faker.number.int(),
-  name,
-  url,
-  iconUrl: faker.image.url(),
-  description: faker.lorem.sentence(),
-  chainIds: [CHAIN_ID],
-  accessControl: { type: SafeAppAccessPolicyTypes.NoRestrictions },
-  tags: [],
-  features: [],
-  socialProfiles: [],
-  developerWebsite: '',
-  featured: false,
-})
+const safeApp = (name: string, url: string): SafeApp =>
+  safeAppBuilder()
+    .with({ name, url, chainIds: [CHAIN_ID] })
+    .build()
 
 const renderUseSafeAppsWith = async (remoteSafeApps: SafeApp[]) => {
   server.use(http.get(`${GATEWAY_URL}/v1/chains/:chainId/safe-apps`, () => HttpResponse.json(remoteSafeApps)))
