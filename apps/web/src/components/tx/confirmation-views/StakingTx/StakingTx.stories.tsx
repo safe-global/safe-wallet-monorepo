@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import StakingTx from './index'
-import { mockStakingDepositTxInfo, mockStakingExitTxInfo, mockStakingWithdrawTxInfo } from './mockData'
+import { mockStakingDepositTxInfo, mockStakingExitTxInfo, mockStakingWithdrawTxInfo } from './StakingTx.storyData'
 
 const meta = {
   title: 'Components/TxFlow/ConfirmationViews/StakingTx',
@@ -10,8 +10,7 @@ const meta = {
     (Story) => {
       return (
         <StoreDecorator
-          // The lazy StakeFeature only loads when the current chain (default: Sepolia in dev/storybook)
-          // has the STAKING flag.
+          // StakingConfirmationTx is gated on STAKING for the current chain (default: Sepolia in dev/storybook)
           initialState={{ chains: { data: [{ chainId: '11155111', chainName: 'Sepolia', features: ['STAKING'] }] } }}
         >
           <div className="rounded-lg bg-background p-4">

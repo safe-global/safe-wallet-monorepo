@@ -1,8 +1,9 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
-import { MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/public/hooks/useSafeShield'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { useSpendingLimitSafeAccounts } from '../../hooks/useSpendingLimitSafeAccounts'
 import {
@@ -17,7 +18,10 @@ const SAFE_A = '0xAAAAaaaaAAaaaaAAAaAAaaaAaAaaaaaAAAaaAAaA'
 const SPENDER = '0x1234567890123456789012345678901234567890'
 
 jest.mock('../../hooks/useSpendingLimitSafeAccounts', () => ({ useSpendingLimitSafeAccounts: jest.fn() }))
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({ useSafeShieldForAddressPoisoning: jest.fn() }))
+jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/hooks/useSafeShield'),
+  useSafeShieldForAddressPoisoning: jest.fn(),
+}))
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),

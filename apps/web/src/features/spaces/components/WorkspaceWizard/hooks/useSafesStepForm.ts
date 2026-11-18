@@ -6,9 +6,10 @@ import {
   getMultiChainSafeId,
   getSafeId,
 } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/utils/safeIds'
-import { isMultiChainSafeItem, type AllSafeItems } from '@/hooks/safes'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
+import { type AllSafeItems } from '@/hooks/safes'
 import type { SafeLimit } from '@/utils/spaces'
-import type { DraftSafe, WorkspaceDraft, WorkspaceDraftFields } from '@/features/spaces/store'
+import type { DraftSafe, WorkspaceDraft, WorkspaceDraftFields } from '../../../public/store/workspaceDraftSlice'
 import type { AddAccountsFormValues } from '../../../hooks/addAccounts.types'
 import { getSafesToName, hasAllNames, touchNames } from '../../NameAccounts/utils'
 import useOnboardingSelection from '../../SelectSafesOnboarding/hooks/useOnboardingSelection'

@@ -2,7 +2,7 @@ import EarnInfo from '../EarnInfo'
 import EarnWidget from '../EarnWidget'
 import { useRouter } from 'next/router'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import { hideEarnInfoStorageKey } from '../../constants'
+import { hideEarnInfoStorageKey } from '../../public/constants'
 
 const EarnView = () => {
   const [infoHidden = false, setInfoHidden] = useLocalStorage<boolean>(hideEarnInfoStorageKey)

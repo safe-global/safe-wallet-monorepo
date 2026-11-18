@@ -1,4 +1,4 @@
-import * as web3 from '@/hooks/wallets/web3'
+import * as web3 from '@/hooks/wallets/web3ReadOnly'
 import { getERC20TokenInfoOnChain } from '@/utils/tokens'
 import { faker } from '@faker-js/faker'
 import { mockWeb3Provider } from '@/tests/test-utils'

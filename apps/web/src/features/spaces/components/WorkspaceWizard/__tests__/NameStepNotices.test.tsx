@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { AppRoutes } from '@/config/routes'
-import { EMPTY_WORKSPACE_DRAFT, type WorkspaceDraft } from '@/features/spaces/store'
+import { EMPTY_WORKSPACE_DRAFT, type WorkspaceDraft } from '../../../public/store/workspaceDraftSlice'
 import { getStoreInstance } from '@/store'
 import { server } from '@/tests/server'
 import { signedInAuthState } from '@/tests/builders/authState'

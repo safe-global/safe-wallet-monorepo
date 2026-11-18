@@ -1,16 +1,16 @@
 import { type ReactElement, useMemo } from 'react'
-import { useCurrentSpaceId } from '../../../../hooks/useCurrentSpaceId'
-import { useIsActiveMember } from '../../../../hooks/useSpaceMembers'
+import { useCurrentSpaceId } from '../../../../public/hooks/useCurrentSpaceId'
+import { useIsActiveMember } from '../../../../public/hooks/useSpaceMembers'
 import { spacesMainNavigation, spacesSetupGroup } from '../../config'
 import { useResolvedSidebarNav } from '../../hooks/useResolvedSidebarNav'
 import type {
   SidebarItemConfig,
   SidebarVariantContentProps,
 } from '@safe-global/views/features/spaces/components/Sidebar/types'
-import { SpacesSidebarVariant } from '../SpacesSidebarVariant'
+import { SpacesSidebarVariant } from '../SpacesSidebarVariant/SpacesSidebarVariant'
 import { useHasFeature } from '@/hooks/useChains'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
-import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement'
+import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/public/hooks/useIsSafeProAnnouncementEnabled'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { AppRoutes } from '@/config/routes'
 

@@ -10,7 +10,7 @@ import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/saf
 import { multisigExecutionDetailsBuilder, transactionDetailsBuilder } from '@/tests/builders/transactionDetails'
 import { pendingTxBuilder } from '@/tests/builders/pendingTx'
 import { TxModalContext } from '@/components/tx-flow'
-import { ExecuteBatchFlow } from '@/components/tx-flow/flows'
+import { ExecuteBatchFlow } from '@/components/tx-flow/flows/ExecuteBatchFlow'
 import BatchExecuteButton from '.'
 
 jest.mock('@/hooks/useTxQueue')

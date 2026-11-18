@@ -6,7 +6,7 @@ import { useSpacesGetSetupV1Query } from '@safe-global/store/gateway/AUTO_GENERA
 import SetupProgress from '@safe-global/views/features/spaces/components/WorkspaceWizard/SetupProgress'
 import { AppRoutes } from '@/config/routes'
 import { useAppDispatch } from '@/store'
-import { clearWorkspaceDraft } from '@/features/spaces/store'
+import { clearWorkspaceDraft } from '../../public/store/workspaceDraftSlice'
 import { CHECKOUT_SESSION_QUERY_PARAM } from '../../hooks/billing/returnUrl'
 
 const POLL_INTERVAL = 2_500

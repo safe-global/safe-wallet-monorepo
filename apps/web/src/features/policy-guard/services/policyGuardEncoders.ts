@@ -1,6 +1,6 @@
 import { AbiCoder, Interface, keccak256 } from 'ethers'
 import type { MetaTransactionData } from '@safe-global/types-kit'
-import type { PolicyConfiguration } from '../types'
+import type { PolicyConfiguration } from '../public/types'
 
 // Hand-written from SafePolicyGuard.sol until the WA-3034 artifact package is published
 const CONFIGURATION_TUPLE = 'tuple(address target, bytes4 selector, uint8 operation, address policy, bytes data)'

@@ -3,7 +3,7 @@ import { act, render, renderHook, within } from '@testing-library/react'
 import type { NextRouter } from 'next/router'
 import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime'
 import { type RootState, makeStore, useHydrateStore, setStoreInstance } from '@/store'
-import * as web3 from '@/hooks/wallets/web3'
+import * as web3 from '@/hooks/wallets/web3ReadOnly'
 import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import { Provider } from 'react-redux'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
@@ -174,7 +174,7 @@ export const getFieldValue = (container: HTMLElement, title: string): HTMLElemen
   return valueCell
 }
 
-// re-export everything
+// eslint-disable-next-line no-restricted-syntax -- tests import Testing Library and these wrappers from one module
 export * from '@testing-library/react'
 
 // override render method

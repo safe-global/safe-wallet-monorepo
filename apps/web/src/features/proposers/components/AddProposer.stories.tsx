@@ -2,8 +2,9 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import { fn } from 'storybook/test'
 import { safeFixtures } from '@safe-global/test/msw/fixtures'
-import { createMockStory, createNonOwnerWallet } from '@/stories/mocks'
-import AddProposer from './AddProposer'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import { createNonOwnerWallet } from '@/stories/mocks/wallets'
+import AddProposer from '../public/components/AddProposer'
 
 const efSafe = safeFixtures.efSafe
 const parentSafeAddress = efSafe.owners[1].value

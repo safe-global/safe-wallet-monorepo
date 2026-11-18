@@ -3,7 +3,9 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import { _clearSharedReadOnlyProviders, getSharedReadOnlyProvider } from '../sharedReadOnlyProvider'
 
-jest.mock('@/hooks/wallets/web3', () => ({ createWeb3ReadOnly: jest.fn() }))
+jest.mock('@/hooks/wallets/web3', () => ({
+  createWeb3ReadOnly: jest.fn(),
+}))
 
 const mockCreate = createWeb3ReadOnly as jest.MockedFunction<typeof createWeb3ReadOnly>
 const chain = chainBuilder().with({ chainId: '11155111' }).build()

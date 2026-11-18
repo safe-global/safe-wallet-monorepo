@@ -5,13 +5,13 @@ import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shi
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import { useHypernativeOAuth } from '../../hooks/useHypernativeOAuth'
+import { useHypernativeOAuth } from '../../public/hooks/useHypernativeOAuth'
 import { useAssessmentUrl } from '../../hooks/useAssessmentUrl'
 import { useHnAssessmentSeverity } from '../../hooks/useHnAssessmentSeverity'
 import LockIcon from '@safe-global/views/assets/images/common/lock-small.svg'
-// eslint-disable-next-line no-restricted-imports -- routing SeverityIcon through the safe-shield barrel closes a hypernative<->safe-shield module-init cycle (TDZ)
-import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
-import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
+import { SeverityIcon } from '@/features/safe-shield/public/components/SeverityIcon'
+import { trackEvent } from '@/services/analytics'
+import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 

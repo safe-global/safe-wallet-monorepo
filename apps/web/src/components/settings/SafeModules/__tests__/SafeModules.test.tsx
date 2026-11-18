@@ -4,10 +4,11 @@ import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { mockHasFeature, mockSafeInfo } from '@/tests/mocks/hooks'
 import { mockRole } from '@/tests/mocks/roles'
 import userEvent from '@testing-library/user-event'
-import { RecoveryFeature, useRecovery } from '@/features/recovery'
-import type { RecoveryStateItem } from '@/features/recovery/services'
+import useRecovery from '@/features/recovery/public/hooks/useRecovery'
+import type { RecoveryStateItem } from '@/features/recovery/public/types'
 import { TxModalContext } from '@/components/tx-flow'
-import { RemoveModuleFlow, RemoveRecoveryFlow } from '@/components/tx-flow/flows'
+import { RemoveModuleFlow } from '@/components/tx-flow/flows/RemoveModuleFlow'
+import { RemoveRecoveryFlow } from '@/components/tx-flow/flows/RemoveRecoveryFlow'
 import SafeModules from '..'
 import { zeroPadValue } from 'ethers'
 
@@ -19,14 +20,16 @@ jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
 jest.mock('@/hooks/useSafeInfo')
 
-jest.mock('@/features/spending-limits', () => ({
-  ...jest.requireActual('@/features/spending-limits'),
-  useIsOnlySpendingLimitBeneficiary: jest.fn(),
+jest.mock('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
+  ...jest.requireActual('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary'),
+  __esModule: true,
+  default: jest.fn(),
 }))
 
-jest.mock('@/features/recovery', () => ({
-  ...jest.requireActual('@/features/recovery'),
-  useRecovery: jest.fn(() => [undefined, undefined, false]),
+jest.mock('@/features/recovery/public/hooks/useRecovery', () => ({
+  ...jest.requireActual('@/features/recovery/public/hooks/useRecovery'),
+  __esModule: true,
+  default: jest.fn(() => [undefined, undefined, false]),
 }))
 
 jest.mock('@/hooks/useChains', () => ({
@@ -106,9 +109,6 @@ describe('SafeModules', () => {
   })
 
   describe('remove module button', () => {
-    // Warm the lazy recovery chunk so the first test's waitFor does not time out on its import
-    beforeAll(() => RecoveryFeature.load())
-
     beforeEach(() => {
       jest.clearAllMocks()
       mockSafeInfo({ deployed: true, modules: [{ value: MOCK_MODULE_1 }] })
@@ -117,6 +117,15 @@ describe('SafeModules', () => {
 
     it.each(['owner', 'proposer', 'nestedOwner'] as const)('is enabled for %s', async (role) => {
       mockRole(role)
+
+      render(<SafeModules />)
+
+      await waitFor(() => expect(screen.getByTestId('module-remove-btn')).toBeEnabled())
+    })
+
+    it('is enabled for an owner on a chain without recovery', async () => {
+      mockHasFeature(false)
+      mockRole('owner')
 
       render(<SafeModules />)
 
@@ -138,8 +147,6 @@ describe('SafeModules', () => {
   })
 
   describe('remove module flow', () => {
-    beforeAll(() => RecoveryFeature.load())
-
     beforeEach(() => {
       jest.clearAllMocks()
       mockSafeInfo({ deployed: true, modules: [{ value: MOCK_MODULE_1 }, { value: MOCK_MODULE_2 }] })

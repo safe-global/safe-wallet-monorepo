@@ -15,8 +15,8 @@ import {
   mockSpendingLimitPolicy,
   mockUnenforcedPolicy,
   asActivePolicy,
-} from '../mocks/policies'
-import { createMockStory } from '@/stories/mocks'
+} from '../../../public/utils/policies'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import SpendingLimitDrawer from './SpendingLimitDrawer'
 
 const SAFE = { address: '0x8675B754342754A30A2AeF474D114d8460bca19b', name: MOCK_SAFE_NAME }
