@@ -13,6 +13,7 @@ import {
   investedFirst,
   isLocked,
   idleByAsset,
+  earnedByInvestment,
   NO_FILTERS,
   operationsFor,
   MAX_SHELF,
@@ -151,6 +152,25 @@ describe('sortOpportunities', () => {
   })
 })
 
+describe('earnedByInvestment', () => {
+  it('sums earnings per investment, largest first, skipping pending and zero', () => {
+    const aave = opportunity({ name: 'Aave' })
+    const lido = opportunity({ name: 'Lido' })
+    expect(
+      earnedByInvestment([
+        { opportunity: aave, earned: 10, pending: false },
+        { opportunity: lido, earned: 30, pending: false },
+        { opportunity: aave, earned: 5, pending: false },
+        { opportunity: lido, earned: 99, pending: true },
+        { opportunity: opportunity({ name: 'New' }), earned: 0, pending: false },
+      ]),
+    ).toEqual([
+      { label: 'Lido', value: 30 },
+      { label: 'Aave', value: 15 },
+    ])
+  })
+})
+
 describe('idleByAsset', () => {
   it('splits the idle total by share, largest first', () => {
     expect(
@@ -159,8 +179,8 @@ describe('idleByAsset', () => {
         { asset: 'USDC', share: 0.7 },
       ]),
     ).toEqual([
-      { asset: 'USDC', amount: 700 },
-      { asset: 'ETH', amount: 300 },
+      { label: 'USDC', value: 700 },
+      { label: 'ETH', value: 300 },
     ])
   })
 })

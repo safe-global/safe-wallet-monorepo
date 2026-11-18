@@ -193,15 +193,11 @@ export const DEFI_V1_COPY = {
       investmentsSummary: (earned: string, apy: string) => `+${earned} earned YTD · ${apy} blended`,
     },
     idle: 'Idle cash',
-    putIdleToWork: 'Invest idle cash',
     idleBreakdown: 'Idle by asset',
     earned: 'Total earned',
-    earnedFrom: (count: number) => `From ${count} investment${count === 1 ? '' : 's'}`,
-    seeInvestments: 'See investments',
+    earnedBreakdown: 'Earned by investment',
     total: 'Total assets',
     parts: { idle: 'Idle', invested: 'Invested', earned: 'Earned' },
-    chartLabel: (idle: string, invested: string, earned: string) =>
-      `Idle ${idle}, invested ${invested}, earned ${earned}`,
   },
   operations: {
     signers: (threshold: number, owners: number) => `${threshold} of ${owners} signers`,

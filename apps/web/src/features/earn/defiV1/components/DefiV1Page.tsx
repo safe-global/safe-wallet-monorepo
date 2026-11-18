@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/router'
 import { Orbit, Repeat2 } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -12,6 +12,7 @@ import {
   groupOpportunities,
   heldIn,
   holdingsFor,
+  earnedByInvestment,
   idleByAsset,
   investedFirst,
   isLocked,
@@ -69,7 +70,6 @@ const groupTitle = (groupBy: GroupBy, key: string): string | undefined => {
 export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const [selected, setSelected] = useState<Opportunity | null>(null)
   const [positions, setPositions] = useState<Position[]>(initialPositions)
-  const tableRef = useRef<HTMLDivElement>(null)
   const [search, setSearch] = useState('')
   const [groupBy, setGroupBy] = useState<GroupBy>('none')
   const [sort, setSort] = useState<Sort | null>(null)
@@ -116,11 +116,6 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
     setSetupFor(item)
     setIsCreating(true)
   }
-  const showGrouped = (next: GroupBy) => {
-    setSearch('')
-    setGroupBy(next)
-    tableRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
 
   const onDeposited = ({ opportunity, amount, pending, operationId, created }: ActionResult) => {
     setPositions((current) => [{ opportunity, principal: amount, earned: 0, pending }, ...current])
@@ -163,17 +158,11 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
         <TreasurySummary
           summary={summary}
           idleAssets={idleByAsset(summary.idle, IDLE_MIX)}
-          investmentCount={investedIds.length}
-          onInvestIdle={config.plan === 'pro' ? () => openSetup(null) : () => showGrouped('none')}
-          onSeeInvestments={() => showGrouped('investments')}
+          earnedBy={earnedByInvestment(positions)}
         />
       </div>
 
-      <section
-        ref={tableRef}
-        aria-label={DEFI_V1_COPY.sections.opportunities}
-        className="flex scroll-mt-6 flex-col gap-4"
-      >
+      <section aria-label={DEFI_V1_COPY.sections.opportunities} className="flex flex-col gap-4">
         <OpportunityToolbar
           search={search}
           onSearch={setSearch}

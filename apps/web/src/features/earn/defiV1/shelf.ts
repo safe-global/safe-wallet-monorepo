@@ -215,8 +215,22 @@ export const holdingsFor = (positions: Position[], opportunityId: string): Holdi
   )
 }
 
-export type IdleAsset = { asset: string; amount: number }
+export type Slice = { label: string; value: number }
+
+const byValue = (a: Slice, b: Slice) => b.value - a.value
 
 /** Splits the idle total across assets by their share, so the breakdown always adds up to the total shown. */
-export const idleByAsset = (idle: number, mix: { asset: string; share: number }[]): IdleAsset[] =>
-  mix.map(({ asset, share }) => ({ asset, amount: idle * share })).sort((a, b) => b.amount - a.amount)
+export const idleByAsset = (idle: number, mix: { asset: string; share: number }[]): Slice[] =>
+  mix.map(({ asset, share }) => ({ label: asset, value: idle * share })).sort(byValue)
+
+/** Earnings per investment, live positions only, so the slices add up to the earned total. */
+export const earnedByInvestment = (
+  positions: { opportunity: { name: string }; earned: number; pending: boolean }[],
+): Slice[] => {
+  const totals = new Map<string, number>()
+  for (const { opportunity, earned, pending } of positions) {
+    if (pending || earned <= 0) continue
+    totals.set(opportunity.name, (totals.get(opportunity.name) ?? 0) + earned)
+  }
+  return [...totals].map(([label, value]) => ({ label, value })).sort(byValue)
+}
