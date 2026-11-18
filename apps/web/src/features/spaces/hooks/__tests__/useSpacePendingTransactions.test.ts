@@ -96,13 +96,13 @@ describe('useSpacePendingTransactions', () => {
     })
   })
 
-  it('requests the Space queue without a limit query parameter', async () => {
+  it('requests as many transactions from the Space queue as it shows', async () => {
     const requests = respondWithQueue(createPage({}))
 
     renderInSpace(4)
 
     await waitFor(() => expect(requests).toHaveLength(1))
-    expect(requests[0].searchParams.has('limit')).toBe(false)
+    expect(requests[0].searchParams.get('limit')).toBe('4')
   })
 
   it('returns the oldest transactions across Safes and chains, up to the limit', async () => {

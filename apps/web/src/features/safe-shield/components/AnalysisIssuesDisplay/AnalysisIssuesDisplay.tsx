@@ -61,7 +61,7 @@ export const AnalysisIssuesDisplay = ({ result, issueBackgroundColor }: Analysis
               {issue.address && (
                 <div className="p-2">
                   <div className="leading-5" onClick={() => handleCopyToClipboard(issue.address!, globalIndex)}>
-                    <Tooltip>
+                    <Tooltip closeOnClick={false}>
                       <TooltipTrigger render={<span className="inline-flex" />}>
                         <Typography
                           variant="paragraph-mini"

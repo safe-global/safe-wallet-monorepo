@@ -1,4 +1,4 @@
-import { render, screen, renderWithUserEvent } from '@/tests/test-utils'
+import { mockClipboard, render, screen, renderWithUserEvent, waitFor } from '@/tests/test-utils'
 import { ShowAllAddress } from '../../ShowAllAddress/ShowAllAddress'
 import { faker } from '@faker-js/faker'
 
@@ -314,6 +314,30 @@ describe('ShowAllAddress', () => {
 
       // Old address should not be present
       expect(screen.queryByText(initialAddresses[0].address)).not.toBeInTheDocument()
+    })
+  })
+
+  describe('Copy feedback', () => {
+    it('keeps "Copied to clipboard" open after a mouse click, without the pointer leaving the address', async () => {
+      mockClipboard()
+      const { user } = renderWithUserEvent(<ShowAllAddress addresses={mockAddresses} />)
+      await user.click(screen.getByText('Show all'))
+
+      await user.click(screen.getByText(mockAddresses[0].address))
+
+      expect(await screen.findByText('Copied to clipboard')).toBeInTheDocument()
+    })
+
+    it('closes "Copied to clipboard" when the list is hidden right after a copy', async () => {
+      mockClipboard()
+      const { user } = renderWithUserEvent(<ShowAllAddress addresses={mockAddresses} />)
+      await user.click(screen.getByText('Show all'))
+      await user.click(screen.getByText(mockAddresses[0].address))
+      await screen.findByText('Copied to clipboard')
+
+      await user.click(screen.getByText('Hide all'))
+
+      await waitFor(() => expect(screen.queryByText('Copied to clipboard')).not.toBeInTheDocument(), { timeout: 500 })
     })
   })
 })
