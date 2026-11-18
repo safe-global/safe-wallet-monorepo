@@ -3,7 +3,7 @@ import { getAllowanceModuleDeployment } from '@safe-global/safe-modules-deployme
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { SecurityScanner } from './types'
-import { getSeverityFromScore } from './constants'
+import { getSeverityFromScore } from '../../public/constants'
 import { isSafeAffectedByZodiacVulnerability } from '../../services/vulnerableModules'
 
 /**

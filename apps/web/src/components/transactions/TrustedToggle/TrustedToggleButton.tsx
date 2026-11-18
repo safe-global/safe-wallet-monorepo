@@ -2,7 +2,7 @@ import { type ReactElement } from 'react'
 import { Switch } from '@safe-global/views/components/ui/switch'
 import { Field } from '@safe-global/views/components/ui/field'
 import { Label } from '@safe-global/views/components/ui/label'
-import { TX_LIST_EVENTS } from '@/services/analytics'
+import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import Track from '@/components/common/Track'
 
 const _TrustedToggleButton = ({

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { ScanResult, SecurityScanner } from '@/features/security/types'
-import type { SecurityContract } from '@/features/security'
+import type { ScanResult, SecurityScanner } from '@/features/security/public/types'
+import type { SecurityServices } from '@/features/security/public/services/securityServices'
 import useSafeScanContext, { type OverviewData } from './useSafeScanContext'
 import type { SpaceSafeEntry, SelectedSafe } from '../components/SecurityHub'
 import { scheduleWhileVisible } from '@/utils/visibility'
@@ -18,14 +18,14 @@ const SCAN_CONTEXT_BAIL_MS = 5_000
 const MIN_RESCAN_VISIBLE_MS = 1_000
 
 /**
- * Services this hook needs from the security feature. Callers obtain these via
- * useLoadFeature and pass them in once the feature is $isReady.
+ * Services this hook needs from the security feature. Callers obtain these from
+ * useSecurityServices and pass them in while it returns them.
  */
 export type AutoScanServices = {
   scanners: SecurityScanner[]
-  scanKey: SecurityContract['scanKey']
-  setCachedScan: SecurityContract['setCachedScan']
-  withScannerTimeout: SecurityContract['withScannerTimeout']
+  scanKey: SecurityServices['scanKey']
+  setCachedScan: SecurityServices['setCachedScan']
+  withScannerTimeout: SecurityServices['withScannerTimeout']
 }
 
 export type AutoScanState = {

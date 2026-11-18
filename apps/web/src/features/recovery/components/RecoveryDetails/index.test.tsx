@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker'
 import { render } from '@/tests/test-utils'
 import { dateString } from '@safe-global/utils/utils/formatters'
 import RecoveryDetails from '.'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import type { RecoveryQueueItem } from '../../public/types'
 
 jest.mock('../RecoverySigners', () => ({
   __esModule: true,

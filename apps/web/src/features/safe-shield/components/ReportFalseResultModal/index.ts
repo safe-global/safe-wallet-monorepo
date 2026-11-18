@@ -1,1 +1,0 @@
-export { ReportFalseResultModal } from './ReportFalseResultModal'

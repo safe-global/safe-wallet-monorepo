@@ -2,7 +2,6 @@ import { render, waitFor } from '@testing-library/react'
 import SpacePage from '../../pages/spaces/index'
 import { AppRoutes } from '@/config/routes'
 import * as router from 'next/router'
-import * as featureModule from '@/features/__core__'
 
 const mockReplace = jest.fn()
 
@@ -10,17 +9,14 @@ jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
-jest.mock('@/features/__core__', () => ({
-  useLoadFeature: jest.fn(),
-}))
-
 let mockLanding: { spaceId: string | null; isLoading: boolean } = { spaceId: null, isLoading: false }
-jest.mock('@/features/spaces', () => ({
-  SpacesFeature: 'SpacesFeature',
+jest.mock('@/features/spaces/public/components/SpaceDashboardPage', () => ({
+  __esModule: true,
+  default: ({ spaceId }: { spaceId: string }) => <div data-testid="dash">space {spaceId}</div>,
+}))
+jest.mock('@/features/spaces/public/hooks/useLandingSpaceId', () => ({
   useLandingSpaceId: () => mockLanding,
 }))
-
-const SpaceDashboardPageMock = ({ spaceId }: { spaceId: string }) => <div data-testid="dash">space {spaceId}</div>
 
 const setup = ({
   isReady = true,
@@ -36,7 +32,6 @@ const setup = ({
     query: query ?? (spaceId !== undefined ? { spaceId } : {}),
     replace: mockReplace,
   })
-  ;(featureModule.useLoadFeature as jest.Mock).mockReturnValue({ SpaceDashboardPage: SpaceDashboardPageMock })
 }
 
 describe('SpacePage (/spaces)', () => {

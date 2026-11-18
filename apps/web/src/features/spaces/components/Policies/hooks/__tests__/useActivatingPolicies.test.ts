@@ -1,5 +1,10 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
-import { MOCK_SAFES, asActivePolicy, mockPendingPolicy, mockSpendingLimitPolicy } from '../../mocks/policies'
+import {
+  MOCK_SAFES,
+  asActivePolicy,
+  mockPendingPolicy,
+  mockSpendingLimitPolicy,
+} from '../../../../public/utils/policies'
 import type { PendingSpendingLimitPolicy, Policy } from '@safe-global/views/features/spaces/components/Policies/types'
 import { useActivatingPolicies } from '../useActivatingPolicies'
 

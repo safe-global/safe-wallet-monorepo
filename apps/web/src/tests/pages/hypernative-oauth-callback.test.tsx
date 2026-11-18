@@ -6,26 +6,17 @@ import { render } from '@/tests/test-utils'
 import { useRouter } from 'next/router'
 import HypernativeOAuthCallback from '../../pages/hypernative/oauth-callback'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
-import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 
 // Mock Next.js router
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
-// Mock @/features/__core__ to prevent circular dependency issues
-jest.mock('@/features/__core__', () => ({
-  createFeatureHandle: jest.fn((name) => ({ name, __type: 'FeatureHandle' })),
-  useLoadFeature: jest.fn(() => ({
-    $isReady: true,
-    $isLoading: false,
-    $isDisabled: false,
-  })),
-}))
-
 // Mock PKCE utilities
-jest.mock('@/features/hypernative', () => {
-  const actual = jest.requireActual('@/features/hypernative')
+jest.mock('@/features/hypernative/public/hooks/useHypernativeOAuth', () => {
+  const actual = jest.requireActual('@/features/hypernative/public/hooks/useHypernativeOAuth')
   return {
     ...actual,
     readPkce: jest.fn(),
@@ -34,8 +25,8 @@ jest.mock('@/features/hypernative', () => {
 })
 
 // Mock OAuth config
-jest.mock('@/features/hypernative/config/oauth', () => {
-  const actual = jest.requireActual('@/features/hypernative/config/oauth')
+jest.mock('@/features/hypernative/public/services/oauth', () => {
+  const actual = jest.requireActual('@/features/hypernative/public/services/oauth')
   return {
     ...actual,
     HYPERNATIVE_OAUTH_CONFIG: {
@@ -49,11 +40,14 @@ jest.mock('@/features/hypernative/config/oauth', () => {
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
-  HYPERNATIVE_EVENTS: jest.requireActual('@/services/analytics').HYPERNATIVE_EVENTS,
+}))
+jest.mock('@/services/analytics/events/hypernative', () => ({
+  ...jest.requireActual('@/services/analytics/events/hypernative'),
+  HYPERNATIVE_EVENTS: jest.requireActual('@/services/analytics/events/hypernative').HYPERNATIVE_EVENTS,
 }))
 
-import { readPkce, clearPkce } from '@/features/hypernative'
-import { getRedirectUri } from '@/features/hypernative/config/oauth'
+import { readPkce, clearPkce } from '@/features/hypernative/public/hooks/useHypernativeOAuth'
+import { getRedirectUri } from '@/features/hypernative/public/services/oauth'
 
 describe('HypernativeOAuthCallback', () => {
   const mockRouterPush = jest.fn()

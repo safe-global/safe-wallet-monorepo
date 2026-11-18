@@ -4,7 +4,9 @@ import { useRouter } from 'next/router'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
-import { type AllSafeItems, flattenSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 import type { AddAccountsFormValues } from '../../../hooks/addAccounts.types'
 import {
   type AddressBookItem,
@@ -20,13 +22,13 @@ import useChains from '@/hooks/useChains'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { addOrUpdateSafe, selectAllAddedSafes } from '@/store/addedSafesSlice'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
-import { useSpaceSafes } from '../../../hooks/useSpaceSafes'
-import { useSpaceAddressBookState } from '../../../hooks/useGetSpaceAddressBook'
+import { useSpaceSafes } from '../../../public/hooks/useSpaceSafes'
+import { useSpaceAddressBookState } from '../../../public/hooks/useGetSpaceAddressBook'
 import {
   ADDRESS_BOOK_UNAVAILABLE,
   usePrepareWorkspaceSafeNames,
   type WorkspaceSafeName,
-} from '../../../hooks/useUpsertWorkspaceSafeName'
+} from '../../../public/hooks/useUpsertWorkspaceSafeName'
 import { buildWorkspaceSafeNames, getSafesToName, hasAllNames, touchNames } from '../../NameAccounts/utils'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import {
@@ -34,7 +36,7 @@ import {
   getMultiChainSafeId,
 } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/utils/safeIds'
 import { MULTICHAIN_SAFE_KEY_PREFIX } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/constants'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/utils/elevation'
 import { refreshSpaceEntitlements } from '@/services/entitlements/refreshSpaceEntitlements'
 import { getQuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 

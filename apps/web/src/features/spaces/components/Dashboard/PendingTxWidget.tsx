@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react'
 import { Users } from 'lucide-react'
-import SafeWidget from '../SafeWidget'
+import SafeWidget from '../../public/components/SafeWidget'
 import { Badge } from '@safe-global/views/components/ui/badge'
-import { getTxStatus } from '@/features/transactions/utils'
+import { getTxStatus } from '@/features/transactions/public/utils'
 import { formatTimeInWords } from '@safe-global/utils/utils/date'
 import { TxTypeIcon, TxTypeText } from '@/components/transactions/TxType'
 import TxInfo from '@/components/transactions/TxInfo'
@@ -79,7 +79,6 @@ const PendingTxWidget = ({
               key={tx.transaction.id}
               href={href}
               onClick={tx.safeAddress ? () => onItemClick?.(tx.safeAddress!, tx.transaction.id) : undefined}
-              className={css.widgetItem}
               fixedActionWidth
               label={
                 <div className={css.widgetItemLabel}>

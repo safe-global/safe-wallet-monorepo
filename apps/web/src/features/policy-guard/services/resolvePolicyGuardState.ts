@@ -1,6 +1,6 @@
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import type { ForeignGuard, GuardSlot, PolicyGuardState } from '../types'
+import type { ForeignGuard, GuardSlot, PolicyGuardState } from '../public/types'
 
 export const resolvePolicyGuardState = ({
   txGuard,

@@ -23,10 +23,11 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 jest.mock('@/hooks/useSafeInfo', () => ({ __esModule: true, default: jest.fn() }))
 jest.mock('@/hooks/useVisibleBalances', () => ({ useVisibleBalances: jest.fn() }))
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
-  useLoadFeature: () => ({ PortfolioRefreshHint: () => null, ActionsTray: () => null }),
+jest.mock('@/features/portfolio/public/components/PortfolioRefreshHint', () => ({
+  __esModule: true,
+  default: () => null,
 }))
+jest.mock('@/features/actions-tray/public/components/ActionsTray', () => ({ __esModule: true, default: () => null }))
 
 const normalize = (text: string | null | undefined) => text?.replace(/\s/g, ' ')
 

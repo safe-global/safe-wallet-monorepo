@@ -1,6 +1,6 @@
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { PortfolioSummaries, SafeRef } from '@/features/portfolio'
+import type { PortfolioSummaries, SafeRef } from '@/features/portfolio/public/hooks/usePortfolioSummaries'
 
 type Summaries = Pick<PortfolioSummaries, 'isEnabled' | 'getSummary'>
 

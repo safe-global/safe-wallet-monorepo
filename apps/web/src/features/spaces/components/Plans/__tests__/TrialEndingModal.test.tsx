@@ -1,10 +1,13 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import { CONTACT_SALES_URL } from '@/features/spaces/constants'
+import { CONTACT_SALES_URL } from '../../../constants'
 import TrialEndingModal, { _endsIn } from '../TrialEndingModal'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 const mockUseSpacePlan = jest.fn()
 const mockUseSpaceOffers = jest.fn()
@@ -19,7 +22,7 @@ jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
 jest.mock('../../../hooks/billing/useBillingPortal', () => ({
   useBillingPortal: () => ({ openPortal: mockOpenPortal, isRedirecting: false }),
 }))
-jest.mock('../../../hooks/useSpaceMembers', () => ({
+jest.mock('../../../public/hooks/useSpaceMembers', () => ({
   useCurrentMembership: () => ({ id: 1 }),
   useIsAdmin: (spaceId?: string) => mockUseIsAdmin(spaceId),
 }))

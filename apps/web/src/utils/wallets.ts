@@ -6,7 +6,7 @@ const EMPTY_DATA = '0x'
 import memoize from 'lodash/memoize'
 import { PRIVATE_KEY_MODULE_LABEL } from '@/services/private-key-module/constants'
 import { type Eip1193Provider, type JsonRpcProvider } from 'ethers'
-import type { SignerWallet } from '@/components/common/WalletProvider'
+import type { SignerWallet } from '@/components/common/WalletProvider/WalletContext'
 
 const WALLETCONNECT = 'WalletConnect'
 const WC_LEDGER = 'Ledger Wallet'

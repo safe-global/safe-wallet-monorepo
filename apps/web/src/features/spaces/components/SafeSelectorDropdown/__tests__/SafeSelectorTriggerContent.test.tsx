@@ -1,14 +1,14 @@
 import { render } from '@/tests/test-utils'
 import SafeSelectorTriggerContent from '../components/SafeSelectorTriggerContent'
-import * as useIsHypernativeGuard from '@/features/hypernative'
-import * as coreFeatures from '@/features/__core__'
-import { SafeHeaderHnTooltip } from '@/features/hypernative'
+import * as useIsHypernativeGuard from '@/features/hypernative/public/hooks/useIsHypernativeGuard'
 import type { SafeItemData } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
-jest.mock('@/features/hypernative/hooks/useIsHypernativeGuard')
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
-  useLoadFeature: jest.fn(),
+jest.mock('@/features/hypernative/public/hooks/useIsHypernativeGuard')
+// Render the real tooltip, not the lazy wrapper
+jest.mock('@/features/hypernative/public/components/SafeHeaderHnTooltip', () => ({
+  __esModule: true,
+  default: jest.requireActual('@/features/hypernative/components/SafeHeaderHnTooltip/SafeHeaderHnTooltip')
+    .SafeHeaderHnTooltip,
 }))
 
 jest.mock('@/hooks/useChains', () => ({
@@ -29,8 +29,6 @@ jest.mock('@safe-global/views/components/common/AccountRow/ExplorerLinkButton', 
 }))
 jest.mock('@/components/settings/EnvironmentVariables/EnvHintButton', () => ({ __esModule: true, default: () => null }))
 
-const mockUseLoadFeature = coreFeatures.useLoadFeature as jest.Mock
-
 const SELECTED_CHAIN_ID = '1'
 
 const selectedItem: SafeItemData = {
@@ -50,12 +48,6 @@ describe('SafeSelectorTriggerContent', () => {
     jest.spyOn(useIsHypernativeGuard, 'useIsHypernativeGuard').mockReturnValue({
       isHypernativeGuard: false,
       loading: false,
-    })
-
-    mockUseLoadFeature.mockReturnValue({
-      SafeHeaderHnTooltip,
-      $isDisabled: false,
-      $isReady: true,
     })
   })
 

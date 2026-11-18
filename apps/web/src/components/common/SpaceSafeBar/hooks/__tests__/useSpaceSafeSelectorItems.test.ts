@@ -5,7 +5,7 @@ import type { MultiChainSafeItem } from '@/hooks/safes/useAllSafesGrouped'
 
 // ── mocks ──────────────────────────────────────────────────────────────
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(),
 }))
 
@@ -34,8 +34,9 @@ jest.mock('@/hooks/useChains', () => ({
 jest.mock('@/store/api/gateway', () => ({
   useGetMultipleSafeOverviewsQuery: jest.fn(),
 }))
-jest.mock('@/features/portfolio', () => ({
-  usePortfolioSummaries: jest.fn(),
+jest.mock('@/features/portfolio/public/hooks/usePortfolioSummaries', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }))
 jest.mock('@/store', () => ({
   useAppSelector: jest.fn(),
@@ -64,7 +65,7 @@ jest.mock('@/config/routes', () => ({
   },
 }))
 
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '@/features/spaces/public/hooks/useCurrentSpaceId'
 import { useSafeBarSafes } from '../useSafeBarSafes'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
@@ -74,9 +75,9 @@ import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
-import { usePortfolioSummaries } from '@/features/portfolio'
+import usePortfolioSummaries from '@/features/portfolio/public/hooks/usePortfolioSummaries'
 import { useAppSelector } from '@/store'
-import { selectUndeployedSafes } from '@/features/counterfactual/store'
+import { selectUndeployedSafes } from '@/features/counterfactual/public/store/undeployedSafesSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useRouter } from 'next/router'
 

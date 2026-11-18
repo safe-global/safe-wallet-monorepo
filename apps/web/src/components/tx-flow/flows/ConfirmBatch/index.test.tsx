@@ -3,12 +3,19 @@ import { faker } from '@faker-js/faker'
 import { OperationType } from '@safe-global/types-kit'
 import { fakerChecksummedAddress, render } from '@/tests/test-utils'
 import { TxModalContext } from '@/components/tx-flow'
-import { useDraftBatch, type DraftBatchItem } from '@/features/batching'
+import { useDraftBatch } from '@/features/batching/public/hooks/useDraftBatch'
+import type { DraftBatchItem } from '@/features/batching/public/store/batchSlice'
 import type { ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import ConfirmBatchFlow from '.'
 
-jest.mock('@/features/batching', () => ({ useDraftBatch: jest.fn() }))
-jest.mock('@/services/tx/tx-sender', () => ({ createMultiSendCallOnlyTx: jest.fn(() => new Promise(() => {})) }))
+jest.mock('@/features/batching/public/hooks/useDraftBatch', () => ({
+  ...jest.requireActual('@/features/batching/public/hooks/useDraftBatch'),
+  useDraftBatch: jest.fn(),
+}))
+jest.mock('@/services/tx/tx-sender/create', () => ({
+  ...jest.requireActual('@/services/tx/tx-sender/create'),
+  createMultiSendCallOnlyTx: jest.fn(() => new Promise(() => {})),
+}))
 jest.mock('@/components/tx/ReviewTransactionV2', () => ({ __esModule: true, default: () => null }))
 jest.mock('../../TxFlow', () => ({
   TxFlow: ({ ReviewTransactionComponent }: { ReviewTransactionComponent: ComponentType<ReviewTransactionProps> }) => (

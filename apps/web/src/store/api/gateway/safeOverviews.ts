@@ -5,7 +5,7 @@ import { apiSliceWithChainsConfig, chainsAdapter } from '@safe-global/store/gate
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { selectCurrency, selectTokenList } from '../../settingsSlice'
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { isTrustedTokenList } from '@/utils/tokenList'
 import { asError } from '@safe-global/utils/services/exceptions/utils'

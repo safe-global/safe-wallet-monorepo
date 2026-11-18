@@ -4,7 +4,7 @@ import { selectCurrency, selectSettings, TOKEN_LISTS } from '@/store/settingsSli
 import { useCurrentChain, useHasFeature } from '../useChains'
 import useSafeInfo from '../useSafeInfo'
 import { POLLING_INTERVAL } from '@/config/constants'
-import { useCounterfactualBalances } from '@/features/counterfactual'
+import { useCounterfactualBalances } from '@/features/counterfactual/public/hooks/useCounterfactualBalances'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { isTrustedTokenList } from '@/utils/tokenList'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
@@ -13,7 +13,6 @@ import type { PortfolioBalances } from '@safe-global/utils/hooks/portfolioBalanc
 
 // Re-export shared types and helpers for backward compatibility
 export type { PortfolioBalances } from '@safe-global/utils/hooks/portfolioBalances'
-export { initialBalancesState, createPortfolioBalances } from '@safe-global/utils/hooks/portfolioBalances'
 
 export const useTokenListSetting = (): boolean | undefined => {
   const chain = useCurrentChain()

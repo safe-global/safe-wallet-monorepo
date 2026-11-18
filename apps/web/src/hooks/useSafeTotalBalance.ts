@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
-import { useSafePortfolioSummary } from '@/features/portfolio'
+import useSafePortfolioSummary from '@/features/portfolio/public/hooks/useSafePortfolioSummary'
 
 /** The current Safe's total: its CGW summary with PORTFOLIO_SUMMARIES, otherwise its balances (Assets keeps its token-list total then). */
 const useSafeTotalBalance = () => {

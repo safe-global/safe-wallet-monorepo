@@ -4,14 +4,15 @@ import type { PortfolioSummary } from '@safe-global/store/gateway/AUTO_GENERATED
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import { balanceBuilder } from '@/tests/builders/balances'
 import { portfolioSummaryBuilder } from '@/tests/builders/portfolioSummary'
-import { useSafePortfolioSummary } from '@/features/portfolio'
+import useSafePortfolioSummary from '@/features/portfolio/public/hooks/useSafePortfolioSummary'
 import useSafeTotalBalance from '../useSafeTotalBalance'
 
 jest.mock('@/hooks/useVisibleBalances', () => ({
   useVisibleBalances: jest.fn(),
 }))
-jest.mock('@/features/portfolio', () => ({
-  useSafePortfolioSummary: jest.fn(),
+jest.mock('@/features/portfolio/public/hooks/useSafePortfolioSummary', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }))
 
 const VISIBLE_TOTAL = faker.finance.amount()

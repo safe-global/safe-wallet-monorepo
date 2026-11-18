@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import MemberTwoFactorBadge from './index'
+import MemberTwoFactorBadge from '../../public/components/MemberTwoFactorBadge'
 
 const member = (overrides: Omit<Partial<MemberDto>, 'user'> & { user?: Partial<MemberDto['user']> }): MemberDto => ({
   id: 1,

@@ -1,6 +1,6 @@
-import { calculateFeePercentageInBps } from '@/features/swap/helpers/fee'
+import { calculateFeePercentageInBps } from '../fee'
 import { type OnTradeParamsPayload } from '@cowprotocol/events'
-import { stableCoinAddresses } from '@/features/swap/helpers/data/stablecoins'
+import { stableCoinAddresses } from '../data/stablecoins'
 
 describe('calculateFeePercentageInBps', () => {
   it('returns correct fee for non-stablecoin and sell order', () => {

@@ -1,1 +1,1 @@
-export { default as SpendingLimits, type SpendingLimitsProps } from './SpendingLimits'
+export { type SpendingLimitsProps } from './SpendingLimits'

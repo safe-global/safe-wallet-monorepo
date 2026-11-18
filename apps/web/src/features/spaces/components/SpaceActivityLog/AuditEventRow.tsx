@@ -2,9 +2,9 @@ import { isAddress } from 'ethers'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
-import { formatDate } from '@/features/spaces/utils'
+import { formatDate } from '../../utils'
 import type { SpaceAuditLogEntryDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useMemberNameResolver } from '../../hooks/useMemberNameResolver'
+import { useMemberNameResolver } from '../../public/hooks/useMemberNameResolver'
 import {
   getAuditEventDescription,
   getDefaultTargetDisplay,

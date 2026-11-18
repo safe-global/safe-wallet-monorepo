@@ -12,20 +12,21 @@ import CurrencySelect from '@/components/balances/CurrencySelect'
 import ManageTokensButton from '@/components/balances/ManageTokensButton'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { BRAND_NAME } from '@/config/constants'
-import { NoFeeCampaignFeature, useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign'
-import { PortfolioFeature } from '@/features/portfolio'
-import { StakeFeature, useIsStakingPromoBannerVisible, STAKING_PROMO_BANNER_HIDE_KEY } from '@/features/stake'
-import { useLoadFeature } from '@/features/__core__'
+import { useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign/public/hooks/useIsNoFeeCampaignEnabled'
+import useIsStakingPromoBannerVisible, {
+  STAKING_PROMO_BANNER_HIDE_KEY,
+} from '@/features/stake/public/hooks/useIsStakingPromoBannerVisible'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import useSafeTotalBalance from '@/hooks/useSafeTotalBalance'
+import PortfolioRefreshHint from '@/features/portfolio/public/components/PortfolioRefreshHint'
+import NoFeeCampaignBanner from '@/features/no-fee-campaign/public/components/NoFeeCampaignBanner'
+import StakingPromoBanner from '@/features/stake/public/components/StakingPromoBanner'
 
 const TOKENS_ONLY_TOOLTIP =
   'Total from this list only. Portfolio total includes positions and may use other token data.'
 const SUMMARY_TOOLTIP = "Includes positions and tokens you've hidden. Same total as on Home."
 
 const Balances = () => {
-  const { NoFeeCampaignBanner } = useLoadFeature(NoFeeCampaignFeature)
-  const { StakingPromoBanner } = useLoadFeature(StakeFeature)
   const { balances, error } = useVisibleBalances()
   const [showHiddenAssets, setShowHiddenAssets] = useState(false)
   const toggleShowHiddenAssets = () => setShowHiddenAssets((prev) => !prev)
@@ -36,7 +37,6 @@ const Balances = () => {
   )
   const isStakingPromoBannerVisible = useIsStakingPromoBannerVisible()
   const [, setHideStakingPromoBanner] = useLocalStorage<boolean>(STAKING_PROMO_BANNER_HIDE_KEY)
-  const portfolio = useLoadFeature(PortfolioFeature)
   const safeTotal = useSafeTotalBalance()
 
   const tokensFiatTotal = balances.tokensFiatTotal ? Number(balances.tokensFiatTotal) : undefined
@@ -75,7 +75,7 @@ const Balances = () => {
             />
 
             <div className="flex flex-col items-end gap-1">
-              <portfolio.PortfolioRefreshHint entryPoint="Assets" />
+              <PortfolioRefreshHint entryPoint="Assets" />
               <div className="flex flex-row items-center gap-2">
                 <ManageTokensButton ref={manageTokensButtonRef} onHideTokens={toggleShowHiddenAssets} />
                 <CurrencySelect />
