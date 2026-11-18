@@ -44,6 +44,19 @@ describe('workspaceDraftCompletionListener', () => {
     expect(store.getState().workspaceDraft).toEqual(draft)
   })
 
+  it.each(['past_due', 'incomplete', 'canceled'] as const)(
+    'keeps the draft while its Workspace plan is %s',
+    async (status) => {
+      const spaceId = faker.string.uuid()
+      const draft = draftOf(spaceId)
+      server.use(subscriptionsHandler([subscriptionBuilder().with({ status }).build()]))
+
+      const store = await loadSubscriptions(draft, spaceId)
+
+      expect(store.getState().workspaceDraft).toEqual(draft)
+    },
+  )
+
   it('keeps the draft when another Workspace has a plan', async () => {
     const draft = draftOf(faker.string.uuid())
     server.use(subscriptionsHandler([subscriptionBuilder().build()]))

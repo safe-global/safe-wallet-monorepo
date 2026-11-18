@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 import type { MemberRole } from '../../memberRole'
 import type { RootState } from '@/store'
+import { setUnauthenticated } from '@/store/authSlice'
 
 export const DRAFT_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
 
@@ -69,6 +70,8 @@ export const workspaceDraftSlice = createSlice({
     },
     clearWorkspaceDraft: () => EMPTY_WORKSPACE_DRAFT,
   },
+  // A signed-out or expired session leaves no invitee emails behind on a shared machine.
+  extraReducers: (builder) => builder.addCase(setUnauthenticated, () => EMPTY_WORKSPACE_DRAFT),
 })
 
 export const { updateWorkspaceDraft, clearWorkspaceDraft } = workspaceDraftSlice.actions

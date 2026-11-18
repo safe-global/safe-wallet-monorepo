@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker'
+import { setUnauthenticated } from '@/store/authSlice'
 import { fakerChecksummedAddress } from '@/tests/test-utils'
 import { fakeUserId, fakeWorkspaceName, workspaceDraftBuilder } from '@/tests/builders/workspaceDraft'
 import {
@@ -52,6 +53,12 @@ describe('workspaceDraftSlice', () => {
     const next = reducer(expired, updateWorkspaceDraft(ownerId, { name }))
 
     expect(next).toEqual({ ...EMPTY_WORKSPACE_DRAFT, ownerId, updatedAt: NOW, name })
+  })
+
+  it('empties the draft once the session ends, so no invitee emails stay on the machine', () => {
+    const draft = reducer(EMPTY_WORKSPACE_DRAFT, updateWorkspaceDraft(fakeUserId(), { name: fakeWorkspaceName() }))
+
+    expect(reducer(draft, setUnauthenticated())).toEqual(EMPTY_WORKSPACE_DRAFT)
   })
 
   it('empties the draft on clear', () => {
