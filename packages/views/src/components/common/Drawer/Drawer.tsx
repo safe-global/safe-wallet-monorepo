@@ -5,6 +5,12 @@ import { Sheet, SheetContent } from '@safe-global/views/components/ui/sheet'
 import { useIsMobile } from '@safe-global/views/hooks/use-mobile'
 import { cn } from '@safe-global/views/utils/cn'
 import { DrawerContext } from '@safe-global/views/components/common/Drawer/components/DrawerContext'
+import { DrawerResizeHandle } from '@safe-global/views/components/common/Drawer/components/DrawerResizeHandle'
+
+const WIDTHS = { md: 440, lg: 700 } as const
+const MIN_WIDTH = 360
+// Matches the floating panel's 12px inset on each side
+const VIEWPORT_GUTTER = 24
 
 export type DrawerProps = {
   open: boolean
@@ -12,6 +18,8 @@ export type DrawerProps = {
   size?: 'md' | 'lg'
   /** Adds an expand button to the header that fills the screen. Phones are always full screen. */
   expandable?: boolean
+  /** Adds a drag handle on the left edge. The width resets when the drawer closes. */
+  resizable?: boolean
   ariaLabel?: string
   children?: ReactNode
 }
@@ -21,21 +29,29 @@ export const Drawer = ({
   onClose,
   size = 'md',
   expandable = false,
+  resizable = false,
   ariaLabel,
   children,
 }: DrawerProps): ReactElement => {
   const isMobile = useIsMobile()
   const [headerCount, setHeaderCount] = useState(0)
   const [expanded, setExpanded] = useState(false)
+  const [width, setWidth] = useState<number | null>(null)
 
   // Reset on the next open, so the layout holds while the drawer slides out
   const [wasOpen, setWasOpen] = useState(open)
   if (open !== wasOpen) {
     setWasOpen(open)
-    if (open) setExpanded(false)
+    if (open) {
+      setExpanded(false)
+      setWidth(null)
+    }
   }
 
   const fullScreen = isMobile || expanded
+  const showResizeHandle = resizable && !fullScreen
+  const maxWidth = typeof window === 'undefined' ? WIDTHS.lg : Math.max(MIN_WIDTH, window.innerWidth - VIEWPORT_GUTTER)
+  const currentWidth = Math.min(width ?? WIDTHS[size], maxWidth)
   const canExpand = expandable && !isMobile
 
   const registerHeader = useCallback(() => {
@@ -72,7 +88,12 @@ export const Drawer = ({
         showCloseButton={false}
         aria-label={ariaLabel}
         data-full-screen={fullScreen || undefined}
+        style={showResizeHandle && width !== null ? { width } : undefined}
       >
+        {showResizeHandle && (
+          <DrawerResizeHandle width={currentWidth} min={MIN_WIDTH} max={maxWidth} onResize={setWidth} />
+        )}
+
         <DrawerContext.Provider value={context}>
           <div
             className={cn(

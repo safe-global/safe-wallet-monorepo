@@ -233,4 +233,84 @@ describe('Drawer', () => {
       expect(screen.queryByRole('button', { name: 'Expand to full screen' })).not.toBeInTheDocument()
     })
   })
+
+  describe('resize', () => {
+    const renderResizable = (props: { open?: boolean; resizable?: boolean; expandable?: boolean } = {}) => {
+      const { open = true, resizable = true, expandable = false } = props
+      return (
+        <Drawer open={open} onClose={jest.fn()} resizable={resizable} expandable={expandable} ariaLabel="Transaction">
+          <DrawerHeader title="Send 1,250 USDC" />
+        </Drawer>
+      )
+    }
+
+    beforeEach(() => {
+      jest.mocked(useIsMobile).mockReturnValue(false)
+    })
+
+    it('has no handle unless the drawer is resizable', () => {
+      render(renderResizable({ resizable: false }))
+
+      expect(screen.queryByRole('separator', { name: 'Resize panel' })).not.toBeInTheDocument()
+    })
+
+    it('widens and narrows with the arrow keys, never below the minimum', () => {
+      render(renderResizable())
+
+      const handle = screen.getByRole('separator', { name: 'Resize panel' })
+
+      expect(handle).toHaveAttribute('aria-valuenow', '440')
+
+      fireEvent.keyDown(handle, { key: 'ArrowLeft' })
+
+      expect(handle).toHaveAttribute('aria-valuenow', '480')
+      expect(screen.getByLabelText('Transaction')).toHaveStyle({ width: '480px' })
+
+      fireEvent.keyDown(handle, { key: 'ArrowRight' })
+      fireEvent.keyDown(handle, { key: 'ArrowRight' })
+      fireEvent.keyDown(handle, { key: 'ArrowRight' })
+      fireEvent.keyDown(handle, { key: 'ArrowRight' })
+
+      expect(handle).toHaveAttribute('aria-valuenow', '360')
+    })
+
+    it('follows a drag of its left edge', () => {
+      render(renderResizable())
+
+      const handle = screen.getByRole('separator', { name: 'Resize panel' })
+
+      fireEvent.pointerDown(handle, { button: 0, clientX: 600, pointerId: 1 })
+      fireEvent.pointerMove(handle, { clientX: 500, pointerId: 1 })
+      fireEvent.pointerUp(handle, { pointerId: 1 })
+      fireEvent.pointerMove(handle, { clientX: 300, pointerId: 1 })
+
+      expect(handle).toHaveAttribute('aria-valuenow', '540')
+    })
+
+    it('opens at its normal width again after closing', () => {
+      const { rerender } = render(renderResizable())
+
+      fireEvent.keyDown(screen.getByRole('separator', { name: 'Resize panel' }), { key: 'ArrowLeft' })
+
+      rerender(renderResizable({ open: false }))
+      rerender(renderResizable())
+
+      expect(screen.getByRole('separator', { name: 'Resize panel' })).toHaveAttribute('aria-valuenow', '440')
+      expect(screen.getByLabelText('Transaction').style.width).toBe('')
+    })
+
+    it('hides the handle while full screen and on phones', () => {
+      const { unmount } = render(renderResizable({ expandable: true }))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Expand to full screen' }))
+
+      expect(screen.queryByRole('separator', { name: 'Resize panel' })).not.toBeInTheDocument()
+
+      unmount()
+      jest.mocked(useIsMobile).mockReturnValue(true)
+      render(renderResizable())
+
+      expect(screen.queryByRole('separator', { name: 'Resize panel' })).not.toBeInTheDocument()
+    })
+  })
 })
