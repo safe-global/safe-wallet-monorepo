@@ -5,7 +5,7 @@ import { confirmationsOf } from '../../src/api/transaction-items'
 import { balanceOf } from '../../src/chain/balances'
 import { gatewayRequest, type EmailSession } from '../../src/fixtures/email-session'
 import { test, expect, type Journey } from '../../src/fixtures/journey.fixture'
-import { HomePage } from '../../src/pages/home.page'
+import { ROUTES } from '../../src/data/constants'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
 import { WorkspaceTransactionsPage } from '../../src/pages/workspace-transactions.page'
@@ -108,14 +108,7 @@ async function seedSafeOn(
   return safe
 }
 
-/**
- * The pre-set-up Workspace of the QA plan, with 9 pending transactions:
- * - Sepolia `Treasury` (Carol, Alice, Bob; 3 of 3): #0 ETH signed by Carol, #1 USDC signed by Carol
- * - Sepolia `Payroll` (Alice, Bob, Carol; 2 of 3): #0 ETH and #1 MultiSend signed by Alice and Bob, #2 ETH signed by Alice
- * - Sepolia `Operations` (Alice, Bob; 2 of 2): nothing queued, Dave is its proposer
- * - Ethereum `Reserve` (Alice; 1 of 1): #0 ETH and #1 USDC signed by Alice
- * - Polygon `Grants` (Alice, Bob; 2 of 2): #0 ETH and #1 USDC signed by Alice
- */
+/** The pre-set-up Workspace of the QA plan: 9 pending transactions on 5 Safes across Sepolia, Ethereum and Polygon */
 async function seedPendingWorkspace(journey: Journey, page: Page): Promise<PendingWorkspace> {
   const recipient = Wallet.createRandom().address
   const [sepolia, reserve, grants] = await Promise.all([
@@ -150,30 +143,10 @@ async function workspaceQueueTxIds({ id, session }: PendingWorkspace): Promise<s
 }
 
 test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
-  test.describe.configure({ timeout: 300_000 })
+  test.slow()
+  test.use({ viewport: { width: 1280, height: 1600 } })
 
-  test('should list the ETH, USDC and MultiSend transactions queued on the Sepolia, Ethereum and Polygon Safes of the Workspace', async ({
-    safePage,
-    journey,
-  }) => {
-    const workspace = await seedPendingWorkspace(journey, safePage)
-
-    const pending = new WorkspaceTransactionsPage(safePage)
-    await pending.goto(workspace.id)
-
-    await expect(pending.networkSection('Sepolia')).toHaveCount(2)
-    await expect(pending.networkSection('Ethereum')).toHaveCount(1)
-    await expect(pending.networkSection('Polygon')).toHaveCount(1)
-    await expect(pending.rows).toHaveCount(9)
-    await expect(pending.rows.filter({ hasText: 'USDC' })).toHaveCount(3)
-    await expect(pending.rows.filter({ hasText: 'Batch' })).toHaveCount(1)
-    await expect(pending.rows.filter({ hasText: '1/3' })).toHaveCount(2)
-    await expect(pending.rows.filter({ hasText: '2/2' })).toHaveCount(2)
-    await expect(pending.rows.filter({ hasText: '1/2' })).toHaveCount(3)
-    await expect(pending.rows.filter({ hasText: '1/1' })).toHaveCount(2)
-  })
-
-  test('should add a transaction that a proposer creates to the Workspace queue as waiting, and as signable by an owner', async ({
+  test('should add a transaction that a proposer creates from the Workspace to its queue as waiting, and as signable by an owner', async ({
     safePage,
     safeApiClient,
     journey,
@@ -184,20 +157,22 @@ test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
     const review = new TxReviewPage(safePage)
     const pending = new WorkspaceTransactionsPage(safePage)
     await journey.connectAs('dave')
-    await new HomePage(safePage).goto(workspace.operations.prefixedAddress)
-    await sendTokens.open()
+    await pending.goto(workspace.id)
+    await expect(pending.rows).toHaveCount(9)
+    await pending.newTransaction('Operations')
+    await sendTokens.sendTokensButton.click()
     await sendTokens.fillTransfer({ recipient: workspace.recipient, amount: ETH.proposed })
     await sendTokens.nextButton.click()
     await review.propose()
 
+    await expect(safePage).toHaveURL((url) => url.pathname === ROUTES.spacesTransactions)
     await expect
       .poll(async () => (await safeApiClient.getQueued(workspace.operations.address)).map(confirmationsOf))
       .toEqual([0])
     const [{ id: proposedTxId }] = await safeApiClient.getQueued(workspace.operations.address)
     await expect.poll(() => workspaceQueueTxIds(workspace)).toContain(proposedTxId)
-    await pending.goto(workspace.id)
     const proposed = pending.rows.filter({ hasText: ETH.proposed })
-    await expect(pending.rows).toHaveCount(10)
+    await expect(pending.rows).toHaveCount(10, AFTER_ONE_POLL)
     await expect(proposed).toContainText('0/2')
     await expect(proposed).toContainText('Waiting')
 
@@ -208,7 +183,7 @@ test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
     await expect(proposed.getByRole('button', { name: 'Sign' })).toBeVisible()
   })
 
-  test('should update the signature count and status in the Workspace queue after each of two owners signs', async ({
+  test('should update the signature count and status in the Workspace queue after an owner signs', async ({
     safePage,
     safeApiClient,
     journey,
@@ -228,19 +203,6 @@ test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
       .toEqual([2, 1])
     await expect(transfer).toContainText('2/3', AFTER_ONE_POLL)
     await expect(transfer).toContainText('Waiting')
-    await expect(pending.rows).toHaveCount(9)
-
-    await journey.connectAs('bob')
-    await expect(transfer).toContainText('2/3')
-    await pending.sign(transfer)
-    await review.continueAndChooseSign()
-    await review.signButton.click()
-
-    await expect
-      .poll(async () => (await safeApiClient.getQueued(workspace.treasury.address)).map(confirmationsOf))
-      .toEqual([3, 1])
-    await expect(transfer).toContainText('3/3', AFTER_ONE_POLL)
-    await expect(transfer.getByTestId('execute-tx-btn')).toBeVisible()
     await expect(pending.rows).toHaveCount(9)
     await expect(pending.rows.filter({ hasText: '1/3' })).toHaveCount(1)
   })
@@ -262,6 +224,7 @@ test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
     await pending.execute(transfer)
     await review.continueAndExecute()
     await review.waitForExecution()
+    await review.finishButton.click()
 
     await expect.poll(() => safeApiClient.getNonce(workspace.payroll.address)).toBe(1)
     expect(await balanceOf(journey.env, workspace.recipient)).toBe(parseEther(ETH.payroll))

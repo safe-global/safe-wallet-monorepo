@@ -9,21 +9,22 @@ import { ROUTES } from '../data/constants'
 export class WorkspaceTransactionsPage {
   readonly queueTable: Locator
   readonly rows: Locator
-  readonly emptyQueue: Locator
+  readonly newTransactionButton: Locator
 
   constructor(private readonly page: Page) {
     this.queueTable = page.getByRole('table', { name: 'Pending transactions' })
     this.rows = this.queueTable.getByTestId('space-queue-row')
-    this.emptyQueue = page.getByText('Pending transactions of your Safe accounts will appear here')
+    this.newTransactionButton = page.getByRole('button', { name: 'New transaction' })
   }
 
   async goto(workspaceId: string): Promise<void> {
     await this.page.goto(`${ROUTES.spacesTransactions}?spaceId=${workspaceId}`)
   }
 
-  /** The headers that group the rows of one network, one per Safe, by the network's name in the chain config */
-  networkSection(chainName: string): Locator {
-    return this.queueTable.getByRole('button', { name: new RegExp(`^(Collapse|Expand) ${chainName}$`) })
+  /** Start a new transaction from the Workspace for the Safe named `safeName`; the new-transaction flow opens */
+  async newTransaction(safeName: string): Promise<void> {
+    await this.newTransactionButton.click()
+    await this.page.getByRole('dialog').getByTestId('safe-list-item').filter({ hasText: safeName }).click()
   }
 
   /** Sign the transaction in `row` from the Workspace; its review opens for the row's Safe */

@@ -33,6 +33,8 @@ export class TxReviewPage {
   /** Submits a bulk execution, which has no sign step */
   readonly submitButton: Locator
   readonly closeButton: Locator
+  /** Closes the success screen of an executed transaction */
+  readonly finishButton: Locator
   readonly discardButton: Locator
   readonly signMessageButton: Locator
   /** Shown once a message has all its signatures; it hands the signature to the app that asked for it */
@@ -67,6 +69,7 @@ export class TxReviewPage {
     this.addToBatchButton = page.getByTestId('combo-submit-batching')
     this.submitButton = page.getByRole('button', { name: 'Submit', exact: true })
     this.closeButton = page.getByRole('dialog').getByRole('button', { name: 'close' })
+    this.finishButton = page.getByTestId('finish-transaction-btn')
     this.discardButton = page.getByRole('alertdialog').getByRole('button', { name: 'Discard' })
     this.signMessageButton = page.getByRole('button', { name: 'Sign', exact: true })
     this.signedMessageContinueButton = page.getByRole('button', { name: 'Continue', exact: true })
