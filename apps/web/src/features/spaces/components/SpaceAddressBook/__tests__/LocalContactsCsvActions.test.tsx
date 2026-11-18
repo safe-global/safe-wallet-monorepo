@@ -37,6 +37,17 @@ describe('LocalContactsCsvActions', () => {
     expect(screen.getByRole('button', { name: 'Export' })).toBeDisabled()
   })
 
+  it('uses the lucide icons in the v2 toolbar and keeps the SVGs on the v1 page', () => {
+    const { unmount } = render(<LocalContactsCsvActions hasContacts size="lg" />)
+    expect(screen.getByRole('button', { name: 'Import' }).querySelector('.lucide-file-up')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Export' }).querySelector('.lucide-download')).toBeInTheDocument()
+    unmount()
+
+    render(<LocalContactsCsvActions hasContacts />)
+    expect(screen.getByRole('button', { name: 'Import' }).querySelector('.lucide')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Export' }).querySelector('.lucide')).not.toBeInTheDocument()
+  })
+
   it('labels the button clicks as coming from the Workspace local contacts', async () => {
     render(<LocalContactsCsvActions hasContacts />)
 
