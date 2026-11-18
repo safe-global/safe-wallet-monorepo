@@ -228,8 +228,7 @@ export const DEFI_V1_COPY = {
     time: { swap: 'About 1 min after execution', bridge: '2 to 15 min' },
     approval: 'Approval',
     signers: (threshold: number, owners: number) => `${threshold} of ${owners} signers`,
-    disclaimer:
-      "Swaps and bridges run through third-party protocols. Safe doesn't own, control or audit them, and isn't liable for losses when you use them. Their own terms apply too.",
+    disclaimer: "Runs on third-party protocols Safe doesn't own, control or audit. Safe isn't liable for losses.",
     agree: 'I agree to the',
     terms: 'terms',
     agreed: 'Runs on third-party protocols. You agreed to the',

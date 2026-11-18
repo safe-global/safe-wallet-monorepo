@@ -117,7 +117,7 @@ const Leg = ({
   picker: ReactNode
   hint: ReactNode
 }) => (
-  <div className="flex flex-col gap-2 rounded-xl bg-muted px-4 py-3">
+  <div className="flex flex-col gap-1.5 rounded-xl bg-muted px-4 py-2.5">
     <span className="text-xs font-medium text-muted-foreground uppercase">{label}</span>
     <div className="flex items-center gap-3">
       <div className="min-w-0 flex-1">{amount}</div>
@@ -128,7 +128,7 @@ const Leg = ({
 )
 
 const Rows = ({ children }: { children: ReactNode }) => (
-  <div className="flex flex-col overflow-hidden rounded-lg border border-border">
+  <div className="flex shrink-0 flex-col overflow-hidden rounded-lg border border-border">
     {Children.toArray(children)
       .filter(Boolean)
       .map((row, index) => (
@@ -473,27 +473,6 @@ export const MoveFundsFlow = ({
       )}
 
       {amount > 0 && quoteRows}
-
-      {consented ? (
-        <p className="px-1 text-xs text-muted-foreground">
-          {COPY.agreed} {termsLink}
-        </p>
-      ) : (
-        <div className="flex flex-col gap-2 rounded-lg border border-border px-3 py-3 text-xs text-muted-foreground">
-          <p>{COPY.disclaimer}</p>
-          <label className="flex items-center gap-2 font-medium text-foreground">
-            <Checkbox
-              checked={agreed}
-              onCheckedChange={(next) =>
-                setAgreedTo((modes) => (next ? [...modes, mode] : modes.filter((item) => item !== mode)))
-              }
-            />
-            <span>
-              {COPY.agree} {termsLink}
-            </span>
-          </label>
-        </div>
-      )}
     </div>
   )
 
@@ -606,9 +585,28 @@ export const MoveFundsFlow = ({
 
       <DialogFooter divided="subtle">
         {step === 'details' && (
-          <Button size="lg" className="w-full" disabled={!canReview} onClick={goToReview}>
-            {tooMuch ? COPY.notEnough(from) : COPY.review[mode]}
-          </Button>
+          <div className="flex w-full flex-col gap-3">
+            {consented ? (
+              <p className="text-xs text-muted-foreground">
+                {COPY.agreed} {termsLink}
+              </p>
+            ) : (
+              <label className="flex items-start gap-2 text-xs text-muted-foreground">
+                <Checkbox
+                  checked={agreed}
+                  onCheckedChange={(next) =>
+                    setAgreedTo((modes) => (next ? [...modes, mode] : modes.filter((item) => item !== mode)))
+                  }
+                />
+                <span>
+                  {COPY.disclaimer} <span className="font-medium text-foreground">{COPY.agree}</span> {termsLink}
+                </span>
+              </label>
+            )}
+            <Button size="lg" className="w-full" disabled={!canReview} onClick={goToReview}>
+              {tooMuch ? COPY.notEnough(from) : COPY.review[mode]}
+            </Button>
+          </div>
         )}
         {step === 'review' && (
           <div className="flex w-full gap-2">
