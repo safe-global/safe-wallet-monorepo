@@ -82,7 +82,7 @@ export const useGrantProposer = (): GrantProposer => {
   const safeAddress = useSafeAddress()
   const provider = useWeb3ReadOnly()
   const dispatch = useAppDispatch()
-  const addOrRequestContact = useAddOrRequestWorkspaceContact(SPACE_LABELS.proposer_role_flow)
+  const addOrRequestContact = useAddOrRequestWorkspaceContact({ source: SPACE_LABELS.proposer_role_flow })
   const isAdmin = useIsAdmin()
   const { get: getContact } = useMergedAddressBooks(chainId)
   const [addDelegateV1] = useDelegatesPostDelegateV1Mutation()
