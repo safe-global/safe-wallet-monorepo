@@ -341,8 +341,9 @@ describe('SpaceAddressBookV2', () => {
 
       renderAddressBook()
 
-      expect(screen.getByRole('button', { name: 'Import' })).toBeInTheDocument()
-      expect(screen.getByRole('button', { name: 'Export' })).toBeInTheDocument()
+      const csvGroup = screen.getByRole('group', { name: 'Import and export' })
+      expect(within(csvGroup).getByRole('button', { name: 'Import' })).toBeInTheDocument()
+      expect(within(csvGroup).getByRole('button', { name: 'Export' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Add contact' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Actions for Treasury' })).toBeInTheDocument()
     })
@@ -925,9 +926,19 @@ describe('SpaceAddressBookV2', () => {
       renderAddressBook({ '1': { [hardwareWallet]: 'Hardware wallet' } })
       await openLocalTab()
 
+      const csvGroup = within(screen.getByTestId('address-book-toolbar')).getByRole('group', {
+        name: 'Import and export',
+      })
+      expect(within(csvGroup).getByRole('button', { name: 'Import' })).toBeEnabled()
+      expect(within(csvGroup).getByRole('button', { name: 'Export' })).toBeEnabled()
+      // Same lucide icons as the Workspace contacts tab
+      expect(
+        within(csvGroup).getByRole('button', { name: 'Import' }).querySelector('.lucide-file-up'),
+      ).toBeInTheDocument()
+      expect(
+        within(csvGroup).getByRole('button', { name: 'Export' }).querySelector('.lucide-download'),
+      ).toBeInTheDocument()
       const toolbar = screen.getByTestId('address-book-toolbar')
-      expect(within(toolbar).getByRole('button', { name: 'Import' })).toBeEnabled()
-      expect(within(toolbar).getByRole('button', { name: 'Export' })).toBeEnabled()
       expect(within(toolbar).getByRole('button', { name: 'Add local contact' })).toBeInTheDocument()
     })
 
@@ -938,6 +949,9 @@ describe('SpaceAddressBookV2', () => {
       const emptyState = screen.getByTestId('address-book-empty')
       expect(within(emptyState).getByRole('button', { name: 'Import' })).toBeEnabled()
       expect(within(emptyState).getByRole('button', { name: 'Export' })).toBeDisabled()
+      expect(
+        within(emptyState).getByRole('button', { name: 'Import' }).querySelector('.lucide-file-up'),
+      ).toBeInTheDocument()
     })
 
     it('merges a local contact saved on several chains into one row', async () => {
