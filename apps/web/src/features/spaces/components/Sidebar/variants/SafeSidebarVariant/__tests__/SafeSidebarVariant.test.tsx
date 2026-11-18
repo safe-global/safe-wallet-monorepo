@@ -50,7 +50,7 @@ jest.mock('@/hooks/useSafeInfo', () => ({
   default: () => mockUseSafeInfo(),
 }))
 
-jest.mock('@/features/counterfactual/hooks/useIsCounterfactualSafe', () => ({
+jest.mock('@/features/counterfactual/public/useIsCounterfactualSafe', () => ({
   __esModule: true,
   default: () => mockUseIsCounterfactualSafe(),
 }))

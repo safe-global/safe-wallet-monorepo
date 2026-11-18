@@ -130,8 +130,8 @@ jest.mock('@/store/visitedSafesSlice', () => ({
   ...jest.requireActual('@/store/visitedSafesSlice'),
   selectAllVisitedSafes: jest.fn(),
 }))
-jest.mock('@/features/counterfactual/store/undeployedSafesSlice', () => ({
-  ...jest.requireActual('@/features/counterfactual/store/undeployedSafesSlice'),
+jest.mock('@/features/counterfactual/public/undeployedSafesSlice', () => ({
+  ...jest.requireActual('@/features/counterfactual/public/undeployedSafesSlice'),
   selectUndeployedSafes: jest.fn(),
 }))
 

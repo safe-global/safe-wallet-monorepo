@@ -1,12 +1,12 @@
 import { renderHook, waitFor } from '@/tests/test-utils'
 import usePendingSafeStatus from '../usePendingSafeStatuses'
-import { SafeCreationEvent, safeCreationDispatch, safeCreationSubscribe } from '../../services/safeCreationEvents'
+import { SafeCreationEvent, safeCreationDispatch, safeCreationSubscribe } from '../../public/safeCreationEvents'
 import { pollSafeInfo } from '@/components/new-safe/create/logic'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 
-jest.mock('../../services/safeCreationEvents', () => {
-  const actual = jest.requireActual('../../services/safeCreationEvents')
+jest.mock('../../public/safeCreationEvents', () => {
+  const actual = jest.requireActual('../../public/safeCreationEvents')
   return {
     ...actual,
     safeCreationSubscribe: jest.fn(),

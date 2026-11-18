@@ -47,7 +47,7 @@ A hook cannot be lazy or gated: it runs in its caller on every chain. Across fea
 
 - return a neutral value (`false`, `[]`, `undefined`) when its flag is off, and pass the flag to any expensive work, for example `skip: !isEnabled`;
 - load heavy libraries inside its async step (`await import(...)`), not at the top of the file;
-- have a test that shows its neutral value with the flag off.
+- have a test that shows its neutral value with the flag off. A hook that reads no flag, for example one that only reads the store, needs no such test.
 
 ## Public functions and types
 
@@ -64,4 +64,4 @@ Ask whether the code still makes sense if the feature is deleted. If not, it bel
 2. Add a gated public component for each component that the feature handle exposed, and replace the `useLoadFeature` calls.
 3. Delete the feature's `index.ts`, `contract.ts` and `feature.ts`.
 4. Add the feature to `config/eslint/feature-public-imports.mjs`.
-5. Add the flag-off tests for the public hooks.
+5. Add the flag-off tests for the public hooks that read a flag.

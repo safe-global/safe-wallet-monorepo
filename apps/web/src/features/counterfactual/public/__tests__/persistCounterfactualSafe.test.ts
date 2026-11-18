@@ -5,7 +5,7 @@ import type { AppDispatch } from '@/store'
 import { addOrUpdateSafe } from '@/store/addedSafesSlice'
 import { ELEVATION_REQUIRED_ERROR, ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/utils/elevation'
 import { getGenericErrorWithStatus } from '@/utils/rtkQuery'
-import { removeUndeployedSafe } from '../../store/undeployedSafesSlice'
+import { removeUndeployedSafe } from '../undeployedSafesSlice'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const userInitiate = jest.fn()
@@ -27,7 +27,7 @@ jest.mock('@/store/notificationsSlice', () => ({
   },
 }))
 
-jest.mock('../../store/pendingCfDeletesSlice', () => ({
+jest.mock('../pendingCfDeletesSlice', () => ({
   enqueuePendingCfDelete: (payload: unknown) => {
     enqueueImpl(payload)
     return { type: 'enqueuePendingCfDelete', payload }

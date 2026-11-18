@@ -1,6 +1,6 @@
 import { TxModalContext } from '@/components/tx-flow'
 import useDeployGasLimit from '../../hooks/useDeployGasLimit'
-import { deploySafeAndExecuteTx } from '../../services/safeDeployment'
+import { deploySafeAndExecuteTx } from '../../public/safeDeployment'
 
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWalletCanPay from '@/hooks/useWalletCanPay'

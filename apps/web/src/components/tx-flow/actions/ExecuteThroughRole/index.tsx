@@ -2,7 +2,7 @@ import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxConte
 import { useCallback, useContext, useEffect } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
 import ExecuteThroughRoleForm from './ExecuteThroughRoleForm'
-import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import useIsCounterfactualSafe from '@/features/counterfactual/public/useIsCounterfactualSafe'
 import type { SlotComponentProps } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { withSlot } from '@/components/tx-flow/slots/withSlot'

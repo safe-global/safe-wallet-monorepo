@@ -8,8 +8,8 @@ import type {
   PredictedSafeProps,
   ReplayedSafeProps,
   PayMethod,
-} from '../types'
-import { PendingSafeStatus } from '../types'
+} from './types'
+import { PendingSafeStatus } from './types'
 
 const initialState: UndeployedSafesState = {}
 

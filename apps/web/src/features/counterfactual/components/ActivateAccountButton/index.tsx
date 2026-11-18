@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Rocket } from 'lucide-react'
 import { TxModalContext } from '@/components/tx-flow'
-import { selectUndeployedSafe } from '../../store/undeployedSafesSlice'
+import { selectUndeployedSafe } from '../../public/undeployedSafesSlice'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppSelector } from '@/store'
 import CheckWallet from '@/components/common/CheckWallet'

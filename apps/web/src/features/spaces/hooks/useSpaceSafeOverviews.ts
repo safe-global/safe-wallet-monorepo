@@ -5,7 +5,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
-import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { selectUndeployedSafes } from '@/features/counterfactual/public/undeployedSafesSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 

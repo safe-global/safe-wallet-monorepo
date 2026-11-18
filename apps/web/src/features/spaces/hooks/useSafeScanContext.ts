@@ -9,7 +9,7 @@ import { getLatestSafeVersion, isNonCriticalUpdate, hasFeature, FEATURES } from 
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
-import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { selectUndeployedSafes } from '@/features/counterfactual/public/undeployedSafesSlice'
 import { getSafeSetups, getSharedSetup, getDeviatingSetups } from '@/features/multichain/public/utils'
 import type { ScanContext } from '@/features/security/types'
 import type { SpaceSafeEntry, SelectedSafe } from '../components/SecurityHub'

@@ -95,12 +95,12 @@ jest.mock('@/store/authSlice', () => ({
   setCfSafeSynced: (payload: boolean) => ({ type: 'setCfSafeSynced', payload }),
 }))
 
-jest.mock('../../store/undeployedSafesSlice', () => ({
+jest.mock('../undeployedSafesSlice', () => ({
   addUndeployedSafe: (payload: unknown) => ({ type: 'addUndeployedSafe', payload }),
   selectUndeployedSafes: () => ({}),
 }))
 
-jest.mock('../../store/pendingCfDeletesSlice', () => ({
+jest.mock('../pendingCfDeletesSlice', () => ({
   removePendingCfDelete: (payload: unknown) => ({ type: 'removePendingCfDelete', payload }),
   selectPendingCfDeletes: (state: { pendingCfDeletes: unknown[] }) => state.pendingCfDeletes,
 }))

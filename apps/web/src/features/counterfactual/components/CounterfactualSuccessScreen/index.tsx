@@ -1,6 +1,6 @@
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { safeCreationPendingStatuses } from '../../hooks/safeCreationPendingStatuses'
-import { SafeCreationEvent, safeCreationSubscribe } from '../../services/safeCreationEvents'
+import { safeCreationPendingStatuses } from '../../public/safeCreationPendingStatuses'
+import { SafeCreationEvent, safeCreationSubscribe } from '../../public/safeCreationEvents'
 import { useChain, useCurrentChain } from '@/hooks/useChains'
 import { useEffect, useState } from 'react'
 import { Dialog, DialogContent } from '@safe-global/views/components/ui/dialog'

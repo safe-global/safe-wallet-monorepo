@@ -1,5 +1,5 @@
 import type { AllOwnedSafes } from '@safe-global/store/gateway/types'
-import { selectUndeployedSafes } from '@/features/counterfactual/store/undeployedSafesSlice'
+import { selectUndeployedSafes } from '@/features/counterfactual/public/undeployedSafesSlice'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { Button } from '@safe-global/views/components/ui/button'

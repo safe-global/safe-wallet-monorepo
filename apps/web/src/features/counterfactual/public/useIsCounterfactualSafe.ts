@@ -1,4 +1,4 @@
-import { selectIsUndeployedSafe } from '../store/undeployedSafesSlice'
+import { selectIsUndeployedSafe } from './undeployedSafesSlice'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppSelector } from '@/store'
 

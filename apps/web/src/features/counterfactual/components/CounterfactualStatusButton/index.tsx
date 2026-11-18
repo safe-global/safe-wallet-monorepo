@@ -1,16 +1,11 @@
-import { selectUndeployedSafe } from '../../store/undeployedSafesSlice'
+import { selectUndeployedSafe } from '../../public/undeployedSafesSlice'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import { useAppSelector } from '@/store'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Button } from '@safe-global/views/components/ui/button'
 import { cn } from '@safe-global/views/utils/cn'
-import { RotateCw } from 'lucide-react'
-import type { ComponentProps } from 'react'
-
-export const LoopIcon = ({ className, ...props }: ComponentProps<'svg'>) => {
-  return <RotateCw className={cn('animate-spin', className)} {...props} />
-}
+import { LoopIcon } from '@/components/common/LoopIcon'
 
 const CounterfactualStatusButton = () => {
   const { safe, safeAddress } = useSafeInfo()

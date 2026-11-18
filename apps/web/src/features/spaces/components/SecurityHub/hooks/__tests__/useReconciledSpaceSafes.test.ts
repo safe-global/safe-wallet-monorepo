@@ -13,8 +13,8 @@ jest.mock('@/store', () => ({
   useAppSelector: (selector: unknown) => useAppSelectorMock(selector),
 }))
 
-jest.mock('@/features/counterfactual/store/undeployedSafesSlice', () => ({
-  ...jest.requireActual('@/features/counterfactual/store/undeployedSafesSlice'),
+jest.mock('@/features/counterfactual/public/undeployedSafesSlice', () => ({
+  ...jest.requireActual('@/features/counterfactual/public/undeployedSafesSlice'),
   selectUndeployedSafes: 'selectUndeployedSafes',
 }))
 jest.mock('@/store/settingsSlice', () => ({

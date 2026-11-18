@@ -3,7 +3,7 @@
  * These have NO heavy dependencies and can be safely imported anywhere.
  */
 import type { SafeVersion } from '@safe-global/types-kit'
-import type { UndeployedSafe, UndeployedSafeProps, ReplayedSafeProps, PredictedSafeProps } from '../types'
+import type { UndeployedSafe, UndeployedSafeProps, ReplayedSafeProps, PredictedSafeProps } from './types'
 
 export const isReplayedSafeProps = (props: UndeployedSafeProps): props is ReplayedSafeProps =>
   'safeAccountConfig' in props && 'masterCopy' in props && 'factoryAddress' in props && 'saltNonce' in props

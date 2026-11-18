@@ -4,10 +4,10 @@ import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import ModalDialog from '@/components/common/ModalDialog'
 import QRCode from '@/components/common/QRCode'
 import Track from '@/components/common/Track'
-import { CounterfactualFeature } from '@/features/counterfactual'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { selectUndeployedSafe } from '@/features/counterfactual/store/undeployedSafesSlice'
-import { isReplayedSafeProps } from '@/features/counterfactual/services/typeGuards'
+import ActivateAccountButton from '@/features/counterfactual/public/ActivateAccountButton'
+import FirstTxFlow from '@/features/counterfactual/public/FirstTxFlow'
+import { selectUndeployedSafe } from '@/features/counterfactual/public/undeployedSafesSlice'
+import { isReplayedSafeProps } from '@/features/counterfactual/public/typeGuards'
 import useBalances from '@/hooks/useBalances'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -289,7 +289,6 @@ const FirstSteps = () => {
   const outgoingTransactions = useAppSelector(selectOutgoingTransactions)
   const chain = useCurrentChain()
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, safe.chainId, safeAddress))
-  const { ActivateAccountButton, FirstTxFlow } = useLoadFeature(CounterfactualFeature)
 
   // Check if banner should show (for conditional rendering of AccountReadyWidget)
   // Use NoBalanceCheck for undeployed safes as the banner should be shown for all non-active safes as well

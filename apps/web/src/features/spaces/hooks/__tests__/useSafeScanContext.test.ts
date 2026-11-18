@@ -42,8 +42,8 @@ jest.mock('@/store/settingsSlice', () => ({
   ...jest.requireActual('@/store/settingsSlice'),
   selectCurrency: jest.fn(),
 }))
-jest.mock('@/features/counterfactual/store/undeployedSafesSlice', () => ({
-  ...jest.requireActual('@/features/counterfactual/store/undeployedSafesSlice'),
+jest.mock('@/features/counterfactual/public/undeployedSafesSlice', () => ({
+  ...jest.requireActual('@/features/counterfactual/public/undeployedSafesSlice'),
   selectUndeployedSafes: jest.fn(),
 }))
 jest.mock('@/features/multichain/public/utils', () => ({

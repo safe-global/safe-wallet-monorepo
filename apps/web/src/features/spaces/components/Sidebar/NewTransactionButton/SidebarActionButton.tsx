@@ -1,8 +1,7 @@
 import { useContext, type ReactElement } from 'react'
 import { Plus } from 'lucide-react'
-import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
-import { CounterfactualFeature } from '@/features/counterfactual'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import useIsCounterfactualSafe from '@/features/counterfactual/public/useIsCounterfactualSafe'
+import ActivateAccountButton from '@/features/counterfactual/public/ActivateAccountButton'
 import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import Track from '@/components/common/Track'
@@ -14,7 +13,6 @@ import { Button } from '@safe-global/views/components/ui/button'
 export const SidebarActionButton = (): ReactElement => {
   const { setTxFlow } = useContext(TxModalContext)
   const isCounterfactualSafe = useIsCounterfactualSafe()
-  const { ActivateAccountButton } = useLoadFeature(CounterfactualFeature)
 
   if (isCounterfactualSafe) {
     return <ActivateAccountButton />
