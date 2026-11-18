@@ -15,6 +15,7 @@ import PendingRequestsTable from '../SpaceAddressBook/PendingRequestsTable'
 import LocalContacts from './LocalContacts'
 import WorkspaceContacts from './WorkspaceContacts'
 import { toLocalContacts } from './utils'
+import { TOUR_TARGETS } from '@safe-global/views/features/spaces/components/WorkspaceTour/tourTargets'
 
 const TabLabel = ({ label, tooltip }: { label: string; tooltip: string }) => (
   <Tooltip>
@@ -55,7 +56,7 @@ const SpaceAddressBookV2 = () => {
 
         <Tabs defaultValue="workspace">
           <TabsList variant="underline" className="mb-4 flex-wrap">
-            <TabsTrigger value="workspace" className="cursor-pointer" data-testid="address-book-workspace-tab">
+            <TabsTrigger value="workspace" className="cursor-pointer" data-tour={TOUR_TARGETS.workspaceContactsTab}>
               <TabLabel
                 label={withCount('Workspace contacts', workspaceBook.items.length, isWorkspaceSettled)}
                 tooltip="Shared contacts visible to everyone in this Workspace"
@@ -63,7 +64,7 @@ const SpaceAddressBookV2 = () => {
             </TabsTrigger>
             {isPrivateAddressBookEnabled && (
               <>
-                <TabsTrigger value="mine" className="cursor-pointer" data-testid="address-book-local-tab">
+                <TabsTrigger value="mine" className="cursor-pointer" data-tour={TOUR_TARGETS.localContactsTab}>
                   <TabLabel
                     label={withCount('Local contacts', localContacts.length)}
                     tooltip="These contacts are in your local browser storage"

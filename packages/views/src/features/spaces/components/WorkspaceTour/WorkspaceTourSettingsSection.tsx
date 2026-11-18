@@ -1,4 +1,5 @@
 import { Sparkles } from 'lucide-react'
+import { TOUR_TARGETS } from '@safe-global/views/features/spaces/components/WorkspaceTour/tourTargets'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import SpaceSettingsSection, {
@@ -16,7 +17,7 @@ const WorkspaceTourSettingsSection = ({ onStart }: WorkspaceTourSettingsSectionP
       <Typography variant="paragraph-small" color="muted">
         A one-minute look at what your workspace can do.
       </Typography>
-      <Button data-testid="settings-take-tour" variant="outline" onClick={onStart}>
+      <Button data-tour={TOUR_TARGETS.takeTour} variant="outline" onClick={onStart}>
         <Sparkles />
         Take the tour
       </Button>

@@ -5,12 +5,11 @@ import TourPlaceholderRow from '@safe-global/views/features/spaces/components/Wo
 import TourSpotlight from '@safe-global/views/features/spaces/components/WorkspaceTour/TourSpotlight'
 import TourStepPopover from '@safe-global/views/features/spaces/components/WorkspaceTour/TourStepPopover'
 import type { TourProgress } from '@safe-global/views/features/spaces/components/WorkspaceTour/types'
-import { SIDEBAR } from './constants'
-import { useAnchorElement } from './hooks/useAnchorElement'
-import { useElementRect } from './hooks/useElementRect'
-import { useRouteToStep } from './hooks/useRouteToStep'
+import { useSelectTabOnEnter } from './hooks/useSelectTabOnEnter'
+import { useStepRoute } from './hooks/useStepRoute'
+import { useStopLayout } from './hooks/useStopLayout'
 import type { TourStep } from './types'
-import { toStopLayout, toVirtualAnchor } from './utils'
+import { toVirtualAnchor } from './utils'
 
 type TourStopProps = {
   step: TourStep
@@ -23,34 +22,16 @@ type TourStopProps = {
 
 const TourStop = ({ step, progress, onBack, onNext, onClose, onMissingAnchor }: TourStopProps) => {
   const portalContainer = usePortalContainerElement() ?? document.body
-  const isOnStepRoute = useRouteToStep(step)
-  const anchor = useAnchorElement(isOnStepRoute ? step.anchor : undefined)
-  const sidebarItem = useAnchorElement(step.sidebarItem)
-  const sidebar = useAnchorElement(step.sidebarItem ? SIDEBAR : undefined)
-  const emptyState = useAnchorElement(anchor.element ? step.emptyState : undefined)
-  const controlToSelect = useAnchorElement(isOnStepRoute ? step.selectOnEnter : undefined)
-  const target = step.anchor ? anchor : sidebarItem
-  const layout = toStopLayout({
-    anchor: useElementRect(anchor.element),
-    emptyState: useElementRect(emptyState.element),
-    sidebarItem: useElementRect(sidebarItem.element),
-    sidebar: useElementRect(sidebar.element),
-  })
+  const isOnStepRoute = useStepRoute(step, onClose)
+  const { target, tabToClick, layout } = useStopLayout(step, isOnStepRoute, onMissingAnchor)
+
+  useSelectTabOnEnter(tabToClick)
 
   useEffect(() => {
-    if (target.isMissing) onMissingAnchor()
-  }, [target.isMissing, onMissingAnchor])
+    target?.scrollIntoView({ block: 'nearest' })
+  }, [target])
 
-  useEffect(() => {
-    const control = controlToSelect.element
-    if (control instanceof HTMLElement && control.getAttribute('aria-selected') !== 'true') control.click()
-  }, [controlToSelect.element])
-
-  useEffect(() => {
-    target.element?.scrollIntoView({ block: 'nearest' })
-  }, [target.element])
-
-  if (!target.element || !layout.popoverTarget) return null
+  if (!target || !layout.popoverTarget) return null
 
   return (
     <>

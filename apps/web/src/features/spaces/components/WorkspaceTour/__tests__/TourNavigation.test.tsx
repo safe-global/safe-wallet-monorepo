@@ -1,26 +1,25 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { NextRouter } from 'next/router'
 import { RouterContext } from 'next/dist/shared/lib/router-context.shared-runtime'
 import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
+import { TOUR_TARGETS } from '@safe-global/views/features/spaces/components/WorkspaceTour/tourTargets'
 import { AppRoutes } from '@/config/routes'
 import { act, render, screen } from '@/tests/test-utils'
 import { TOUR_STEPS } from '../constants'
-import { ANCHOR_TIMEOUT_MS } from '../hooks/useAnchorElement'
+import { ANCHOR_TIMEOUT_MS } from '../hooks/useStopLayout'
 import TourStop from '../TourStop'
 
 const WORKSPACE_CONTACTS_STEP = TOUR_STEPS.find(({ id }) => id === 'workspace-contacts')!
 const SLOWER_THAN_ANCHOR_WAIT_MS = ANCHOR_TIMEOUT_MS + 2000
 
-jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => '1' }))
-
 const AddressBookPage = () => (
   <main>
     <Tabs defaultValue="workspace">
       <TabsList>
-        <TabsTrigger value="workspace" data-testid="address-book-workspace-tab">
+        <TabsTrigger value="workspace" data-tour={TOUR_TARGETS.workspaceContactsTab}>
           Workspace contacts
         </TabsTrigger>
-        <TabsTrigger value="mine" data-testid="address-book-local-tab">
+        <TabsTrigger value="mine" data-tour={TOUR_TARGETS.localContactsTab}>
           Local contacts
         </TabsTrigger>
       </TabsList>
@@ -29,24 +28,21 @@ const AddressBookPage = () => (
 )
 
 type AppProps = {
-  pageLoadMs: number
-  push: jest.Mock
+  startOn: string
+  goTo: string
+  afterMs: number
+  onClose: jest.Mock
   onMissingAnchor: jest.Mock
-  renderCount?: number
 }
 
-const AppStartingOnSafeAccounts = ({ pageLoadMs, push, onMissingAnchor }: AppProps) => {
-  const [pathname, setPathname] = useState<string>(AppRoutes.spaces.safeAccounts)
-  const router = {
-    pathname,
-    query: { spaceId: '1' },
-    isReady: true,
-    push: (url: { pathname: string }) => {
-      push(url)
-      setTimeout(() => setPathname(url.pathname), pageLoadMs)
-      return Promise.resolve(true)
-    },
-  } as unknown as NextRouter
+const AppOnWorkspaceContactsStop = ({ startOn, goTo, afterMs, onClose, onMissingAnchor }: AppProps) => {
+  const [pathname, setPathname] = useState(startOn)
+  const router = { pathname, query: { spaceId: '1' }, isReady: true } as unknown as NextRouter
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setPathname(goTo), afterMs)
+    return () => clearTimeout(timeout)
+  }, [goTo, afterMs])
 
   return (
     <RouterContext.Provider value={router}>
@@ -56,7 +52,7 @@ const AppStartingOnSafeAccounts = ({ pageLoadMs, push, onMissingAnchor }: AppPro
         progress={{ current: 5, total: 7 }}
         onBack={jest.fn()}
         onNext={jest.fn()}
-        onClose={jest.fn()}
+        onClose={onClose}
         onMissingAnchor={onMissingAnchor}
       />
     </RouterContext.Provider>
@@ -73,11 +69,14 @@ describe('TourStop across a page change', () => {
   })
 
   it('shows the stop once its page loads, even when loading takes longer than the anchor wait', async () => {
+    const onClose = jest.fn()
     const onMissingAnchor = jest.fn()
     render(
-      <AppStartingOnSafeAccounts
-        pageLoadMs={SLOWER_THAN_ANCHOR_WAIT_MS}
-        push={jest.fn()}
+      <AppOnWorkspaceContactsStop
+        startOn={AppRoutes.spaces.safeAccounts}
+        goTo={AppRoutes.spaces.addressBook}
+        afterMs={SLOWER_THAN_ANCHOR_WAIT_MS}
+        onClose={onClose}
         onMissingAnchor={onMissingAnchor}
       />,
     )
@@ -86,17 +85,24 @@ describe('TourStop across a page change', () => {
     await act(async () => jest.advanceTimersByTime(100))
 
     expect(onMissingAnchor).not.toHaveBeenCalled()
+    expect(onClose).not.toHaveBeenCalled()
     expect(screen.getByText('Address book entries everyone in the workspace can see.')).toBeInTheDocument()
   })
 
-  it('navigates to the stop page only once while that page is loading', async () => {
-    const push = jest.fn()
-    const props = { pageLoadMs: SLOWER_THAN_ANCHOR_WAIT_MS, push, onMissingAnchor: jest.fn() }
-    const { rerender } = render(<AppStartingOnSafeAccounts {...props} renderCount={1} />)
+  it('closes the tour when the member leaves the stop page on their own', async () => {
+    const onClose = jest.fn()
+    render(
+      <AppOnWorkspaceContactsStop
+        startOn={AppRoutes.spaces.addressBook}
+        goTo={AppRoutes.spaces.safeAccounts}
+        afterMs={1000}
+        onClose={onClose}
+        onMissingAnchor={jest.fn()}
+      />,
+    )
 
-    rerender(<AppStartingOnSafeAccounts {...props} renderCount={2} />)
-    rerender(<AppStartingOnSafeAccounts {...props} renderCount={3} />)
+    await act(async () => jest.advanceTimersByTime(1000))
 
-    expect(push).toHaveBeenCalledTimes(1)
+    expect(onClose).toHaveBeenCalledTimes(1)
   })
 })

@@ -7,7 +7,7 @@ export type TourStep = TourStepContent &
   TourTarget & {
     id: string
     route: string
-    selectOnEnter?: string
+    tabToClick?: string
     emptyState?: string
     placement: TourPlacement
   }

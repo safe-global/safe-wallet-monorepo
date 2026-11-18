@@ -1,3 +1,4 @@
+import { TOUR_TARGETS } from '@safe-global/views/features/spaces/components/WorkspaceTour/tourTargets'
 import { TOUR_STEPS } from '../constants'
 
 const OPEN_SAFE_STEP = TOUR_STEPS.find(({ id }) => id === 'open-safe')!
@@ -9,7 +10,7 @@ describe('Open a Safe stop', () => {
 
   it('points at the first Safe row, not the address poisoning warning above it', () => {
     document.body.innerHTML = `
-      <div data-testid="space-safe-accounts-list">
+      <div data-tour="${TOUR_TARGETS.safeAccountsList}">
         <table>
           <tbody>
             <tr data-band-header=""><td>Address poisoning warning</td></tr>
@@ -24,7 +25,7 @@ describe('Open a Safe stop', () => {
   })
 
   it('points at the empty state when the workspace has no Safes', () => {
-    document.body.innerHTML = '<div data-testid="safe-accounts-empty">No Safes yet</div>'
+    document.body.innerHTML = `<div data-tour="${TOUR_TARGETS.safeAccountsEmpty}">No Safes yet</div>`
 
     const anchor = document.querySelector(OPEN_SAFE_STEP.anchor!)
 

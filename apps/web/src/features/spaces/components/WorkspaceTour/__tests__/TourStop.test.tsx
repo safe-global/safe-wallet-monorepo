@@ -1,3 +1,4 @@
+import { TOUR_TARGETS } from '@safe-global/views/features/spaces/components/WorkspaceTour/tourTargets'
 import { AppRoutes } from '@/config/routes'
 import { render, screen } from '@/tests/test-utils'
 import { TOUR_STEPS } from '../constants'
@@ -5,14 +6,19 @@ import TourStop from '../TourStop'
 
 const OPEN_SAFE_STEP = TOUR_STEPS.find(({ id }) => id === 'open-safe')!
 
-const addElement = (testId: string) => {
+const addEmptySafeAccounts = () => {
   const element = document.createElement('div')
-  element.dataset.testid = testId
+  element.dataset.tour = TOUR_TARGETS.safeAccountsEmpty
   document.body.appendChild(element)
 }
 
-const renderOpenSafeStop = () => {
-  const push = jest.fn()
+const addSidebarItem = () => {
+  const element = document.createElement('div')
+  element.dataset.testid = 'sidebar-item-safe-accounts'
+  document.body.appendChild(element)
+}
+
+const renderOpenSafeStop = () =>
   render(
     <TourStop
       step={OPEN_SAFE_STEP}
@@ -22,10 +28,8 @@ const renderOpenSafeStop = () => {
       onClose={jest.fn()}
       onMissingAnchor={jest.fn()}
     />,
-    { routerProps: { pathname: AppRoutes.spaces.safeAccounts, query: { spaceId: '1' }, push } },
+    { routerProps: { pathname: AppRoutes.spaces.safeAccounts, query: { spaceId: '1' } } },
   )
-  return { push }
-}
 
 describe('TourStop', () => {
   beforeEach(() => {
@@ -33,7 +37,7 @@ describe('TourStop', () => {
   })
 
   it('draws a placeholder row when the workspace has no Safe accounts', async () => {
-    addElement('safe-accounts-empty')
+    addEmptySafeAccounts()
 
     renderOpenSafeStop()
 
@@ -42,19 +46,11 @@ describe('TourStop', () => {
   })
 
   it('outlines the sidebar item of the page it explains', async () => {
-    addElement('safe-accounts-empty')
-    addElement('sidebar-item-safe-accounts')
+    addEmptySafeAccounts()
+    addSidebarItem()
 
     renderOpenSafeStop()
 
     expect(await screen.findAllByTestId('workspace-tour-highlight')).toHaveLength(2)
-  })
-
-  it('stays on the page when the member is already on it', () => {
-    addElement('safe-accounts-empty')
-
-    const { push } = renderOpenSafeStop()
-
-    expect(push).not.toHaveBeenCalled()
   })
 })

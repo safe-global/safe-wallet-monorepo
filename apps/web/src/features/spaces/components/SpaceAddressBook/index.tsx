@@ -29,6 +29,7 @@ import LocalContactsCsvActions from './LocalContactsCsvActions'
 import RequestToAddButton from './RequestToAddButton'
 import AddToWorkspaceButton from './AddToWorkspaceButton'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
+import { TOUR_TARGETS } from '@safe-global/views/features/spaces/components/WorkspaceTour/tourTargets'
 
 const SpaceAddressBook = () => {
   const [searchQuery, setSearchQuery] = useState('')
@@ -126,7 +127,7 @@ const SpaceAddressBook = () => {
           }}
         >
           <TabsList variant="underline" className="flex-wrap mb-4">
-            <TabsTrigger value="workspace" className="cursor-pointer" data-testid="address-book-workspace-tab">
+            <TabsTrigger value="workspace" className="cursor-pointer" data-tour={TOUR_TARGETS.workspaceContactsTab}>
               <Tooltip>
                 <TooltipTrigger render={<span />}>
                   Workspace contacts{isAddressBookSettled ? ` (${addressBookItems.length})` : ''}
@@ -136,7 +137,7 @@ const SpaceAddressBook = () => {
             </TabsTrigger>
             {isPrivateAddressBookEnabled && (
               <>
-                <TabsTrigger value="mine" className="cursor-pointer" data-testid="address-book-local-tab">
+                <TabsTrigger value="mine" className="cursor-pointer" data-tour={TOUR_TARGETS.localContactsTab}>
                   <Tooltip>
                     <TooltipTrigger render={<span />}>Local contacts ({sortedLocalContacts.length})</TooltipTrigger>
                     <TooltipContent>These contacts are in your local browser storage</TooltipContent>

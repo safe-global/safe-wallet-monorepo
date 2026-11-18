@@ -1,13 +1,16 @@
 import { ArrowRightLeft, Coins, LayoutGrid, Settings, TrendingUp, UsersRound, WalletCards } from 'lucide-react'
+import { TOUR_TARGETS, type TourTarget } from '@safe-global/views/features/spaces/components/WorkspaceTour/tourTargets'
 import { AppRoutes } from '@/config/routes'
 import { getSidebarItemTestId } from '../Sidebar/utils'
 import type { TourNextActionLink, TourStep } from './types'
 
 const byTestId = (testId: string) => `[data-testid="${testId}"]`
 
+const byTourTarget = (target: TourTarget) => `[data-tour="${target}"]`
+
 const sidebarItem = (label: string) => byTestId(getSidebarItemTestId(label))
 
-const selectedTab = (testId: string) => `${byTestId(testId)}[aria-selected="true"]`
+const selectedTab = (target: TourTarget) => `${byTourTarget(target)}[aria-selected="true"]`
 
 export const SIDEBAR = byTestId('sidebar-container')
 
@@ -41,8 +44,8 @@ export const TOUR_STEPS: TourStep[] = [
   {
     id: 'open-safe',
     route: AppRoutes.spaces.safeAccounts,
-    anchor: `${byTestId('space-safe-accounts-list')} ${byTestId('account-table-row')}, ${byTestId('safe-accounts-empty')}`,
-    emptyState: byTestId('safe-accounts-empty'),
+    anchor: `${byTourTarget(TOUR_TARGETS.safeAccountsList)} ${byTestId('account-table-row')}, ${byTourTarget(TOUR_TARGETS.safeAccountsEmpty)}`,
+    emptyState: byTourTarget(TOUR_TARGETS.safeAccountsEmpty),
     sidebarItem: sidebarItem('Safe accounts'),
     placement: { side: 'bottom', align: 'start' },
     title: 'Open a Safe to work inside it',
@@ -59,8 +62,8 @@ export const TOUR_STEPS: TourStep[] = [
   {
     id: 'workspace-contacts',
     route: AppRoutes.spaces.addressBook,
-    selectOnEnter: byTestId('address-book-workspace-tab'),
-    anchor: selectedTab('address-book-workspace-tab'),
+    tabToClick: byTourTarget(TOUR_TARGETS.workspaceContactsTab),
+    anchor: selectedTab(TOUR_TARGETS.workspaceContactsTab),
     sidebarItem: sidebarItem('Address book'),
     placement: { side: 'bottom', align: 'start' },
     title: 'Workspace contacts',
@@ -70,8 +73,8 @@ export const TOUR_STEPS: TourStep[] = [
   {
     id: 'local-contacts',
     route: AppRoutes.spaces.addressBook,
-    selectOnEnter: byTestId('address-book-local-tab'),
-    anchor: selectedTab('address-book-local-tab'),
+    tabToClick: byTourTarget(TOUR_TARGETS.localContactsTab),
+    anchor: selectedTab(TOUR_TARGETS.localContactsTab),
     sidebarItem: sidebarItem('Address book'),
     placement: { side: 'bottom', align: 'start' },
     title: 'Local contacts',
@@ -81,7 +84,7 @@ export const TOUR_STEPS: TourStep[] = [
   {
     id: 'replay',
     route: AppRoutes.spaces.settingsGeneral,
-    anchor: byTestId('settings-take-tour'),
+    anchor: byTourTarget(TOUR_TARGETS.takeTour),
     sidebarItem: sidebarItem('Settings'),
     placement: { side: 'bottom', align: 'end' },
     title: 'Take the tour again',
