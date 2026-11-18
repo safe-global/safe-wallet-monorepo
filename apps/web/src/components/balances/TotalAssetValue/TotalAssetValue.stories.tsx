@@ -25,3 +25,15 @@ export const Default: Story = {
 export const Loading: Story = {
   args: { fiatTotal: undefined, title: 'Total value' },
 }
+
+export const LargeValueInNarrowColumn: Story = {
+  parameters: { layout: 'padded' },
+  decorators: [
+    (Story) => (
+      <div style={{ width: 360 }}>
+        <Story />
+      </div>
+    ),
+  ],
+  args: { fiatTotal: '1278243618.88', title: 'Total balance', size: 'lg' },
+}

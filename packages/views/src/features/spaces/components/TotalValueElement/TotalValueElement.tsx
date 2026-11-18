@@ -1,5 +1,9 @@
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Typography } from '@safe-global/views/components/ui/typography'
+import { FitText } from '@safe-global/views/components/common/FitText'
+
+const MAX_FONT_SIZE = 30
+const MIN_FONT_SIZE = 18
 
 /**
  * TotalValueElement
@@ -16,7 +20,7 @@ interface TotalValueElementProps {
 
 const TotalValueElement = ({ value, loading }: TotalValueElementProps) => {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex min-w-0 flex-col gap-1">
       <Typography variant="paragraph-mini-medium" color="muted">
         Total value
       </Typography>
@@ -28,7 +32,9 @@ const TotalValueElement = ({ value, loading }: TotalValueElementProps) => {
           className="font-bold leading-[1] tracking-tight"
           data-testid="space-dashboard-total-value"
         >
-          {value}
+          <FitText maxFontSize={MAX_FONT_SIZE} minFontSize={MIN_FONT_SIZE}>
+            {value}
+          </FitText>
         </Typography>
       )}
     </div>
