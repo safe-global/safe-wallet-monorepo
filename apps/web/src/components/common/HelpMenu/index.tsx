@@ -4,9 +4,9 @@ import { useState, useCallback, type ReactElement } from 'react'
 import { HelpCircle, MessageCircle, ExternalLink } from 'lucide-react'
 import { Popover, PopoverContent } from '@safe-global/views/components/ui/popover'
 import { Button } from '@safe-global/views/components/ui/button'
-import { useSupportChat } from '@/features/support-chat/public/useSupportChat'
+import { useSupportChat } from '@/features/support-chat/public/hooks/useSupportChat'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
-import SupportChatDrawer from '@/features/support-chat/public/SupportChatDrawer'
+import SupportChatDrawer from '@/features/support-chat/public/components/SupportChatDrawer'
 
 const HELP_CENTER_URL = 'https://help.safe.global'
 

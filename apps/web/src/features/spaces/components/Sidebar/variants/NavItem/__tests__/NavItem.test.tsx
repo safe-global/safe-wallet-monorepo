@@ -22,7 +22,7 @@ jest.mock('@/services/analytics/mixpanel-events', () => ({
 }))
 
 const mockTrackPlanSelectionStarted = jest.fn()
-jest.mock('../../../../../public/planSelection', () => ({
+jest.mock('../../../../../public/services/planSelection', () => ({
   trackPlanSelectionStarted: (p: unknown) => mockTrackPlanSelectionStarted(p),
 }))
 

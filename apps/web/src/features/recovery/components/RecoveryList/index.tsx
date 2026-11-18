@@ -3,13 +3,13 @@ import type { ReactElement } from 'react'
 
 import { TxListGrid } from '@/components/transactions/TxList'
 import RecoveryListItem from '../RecoveryListItem'
-import { useRecoveryQueue } from '../../public/useRecoveryQueue'
+import { useRecoveryQueue } from '../../public/hooks/useRecoveryQueue'
 import { groupRecoveryTransactions } from '@/utils/tx-list'
 import useTxQueue from '@/hooks/useTxQueue'
 import GroupedRecoveryListItems from '../GroupedRecoveryListItems'
 import { isRecoveryQueueItem } from '@/utils/transaction-guards'
 import type { RecoveryQueueItem } from '../../public/types'
-import { useIsRecoverySupported } from '../../public/useIsRecoverySupported'
+import { useIsRecoverySupported } from '../../public/hooks/useIsRecoverySupported'
 
 import labelCss from '@/components/transactions/GroupLabel/styles.module.css'
 

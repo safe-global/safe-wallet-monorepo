@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import SecurityReportDrawer from './SecurityReportDrawer'
 import { createMockStory } from '@/stories/mocks/createMockStory'
-import { createMockContext } from '@/features/security/public/test-helpers'
+import { createMockContext } from '@/features/security/public/utils/test-helpers'
 import type { SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 const SAFE_A = '0xA77DE01e157f9f57C7c4A326eeE9C4874D0598b6'

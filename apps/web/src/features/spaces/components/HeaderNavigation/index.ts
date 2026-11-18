@@ -1,1 +1,1 @@
-export type { HeaderNavigationProps } from '../../public/HeaderNavigation'
+export type { HeaderNavigationProps } from '../../public/components/HeaderNavigation'

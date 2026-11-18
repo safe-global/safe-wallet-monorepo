@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import SpacePlansPage from '../../pages/spaces/plans'
 import { AppRoutes } from '@/config/routes'
 import * as router from 'next/router'
-import * as spacesFeature from '@/features/spaces/public/useFeatureRedirect'
+import * as spacesFeature from '@/features/spaces/public/hooks/useFeatureRedirect'
 import { chainBuilder } from '@/tests/builders/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
@@ -14,16 +14,16 @@ jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
-jest.mock('@/features/spaces/public/SpacePlansPage', () => ({
+jest.mock('@/features/spaces/public/components/SpacePlansPage', () => ({
   __esModule: true,
   default: ({ spaceId }: { spaceId: string }) => <div data-testid="plans">plans {spaceId}</div>,
 }))
-jest.mock('@/features/spaces/public/useFeatureRedirect', () => ({
-  ...jest.requireActual('@/features/spaces/public/useFeatureRedirect'),
+jest.mock('@/features/spaces/public/hooks/useFeatureRedirect', () => ({
+  ...jest.requireActual('@/features/spaces/public/hooks/useFeatureRedirect'),
   useRedirectWhenOff: jest.fn(),
 }))
 
-jest.mock('@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled', () => ({
+jest.mock('@/features/safe-pro-announcement/public/hooks/useIsSafeProAnnouncementEnabled', () => ({
   useIsSafeProAnnouncementEnabled: () => mockUseIsSafeProAnnouncementEnabled(),
 }))
 

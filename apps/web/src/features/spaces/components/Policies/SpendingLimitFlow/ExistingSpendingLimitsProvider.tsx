@@ -68,7 +68,7 @@ export const ExistingSpendingLimitsProvider = ({ children }: { children: ReactNo
       // No modules means no AllowanceModule, so nothing to ask the chain for.
       if (!modules?.length) return Promise.resolve([])
 
-      return import('@/features/spending-limits/public/spendingLimitLoader')
+      return import('@/features/spending-limits/public/services/spendingLimitLoader')
         .then(({ loadSpendingLimits }) =>
           loadSpendingLimits(provider, modules, scope.safeAddress, scope.chainId, tokenInfos),
         )

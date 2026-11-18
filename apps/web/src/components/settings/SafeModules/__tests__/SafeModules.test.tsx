@@ -4,7 +4,7 @@ import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { mockHasFeature, mockSafeInfo } from '@/tests/mocks/hooks'
 import { mockRole } from '@/tests/mocks/roles'
 import userEvent from '@testing-library/user-event'
-import useRecovery from '@/features/recovery/public/useRecovery'
+import useRecovery from '@/features/recovery/public/hooks/useRecovery'
 import type { RecoveryStateItem } from '@/features/recovery/public/types'
 import { TxModalContext } from '@/components/tx-flow'
 import { RemoveModuleFlow } from '@/components/tx-flow/flows/RemoveModuleFlow'
@@ -20,14 +20,14 @@ jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
 jest.mock('@/hooks/useSafeInfo')
 
-jest.mock('@/features/spending-limits/public/useIsOnlySpendingLimitBeneficiary', () => ({
-  ...jest.requireActual('@/features/spending-limits/public/useIsOnlySpendingLimitBeneficiary'),
+jest.mock('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
+  ...jest.requireActual('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary'),
   __esModule: true,
   default: jest.fn(),
 }))
 
-jest.mock('@/features/recovery/public/useRecovery', () => ({
-  ...jest.requireActual('@/features/recovery/public/useRecovery'),
+jest.mock('@/features/recovery/public/hooks/useRecovery', () => ({
+  ...jest.requireActual('@/features/recovery/public/hooks/useRecovery'),
   __esModule: true,
   default: jest.fn(() => [undefined, undefined, false]),
 }))

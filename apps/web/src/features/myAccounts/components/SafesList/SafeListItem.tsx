@@ -1,11 +1,11 @@
 import { useIsBelowSm } from '@/hooks/useMediaQuery'
-import { AccountItem } from '../../public/AccountItem'
-import { useSafeItemData } from '../../public/useSafeItemData'
+import { AccountItem } from '../../public/components/AccountItem'
+import { useSafeItemData } from '../../public/hooks/useSafeItemData'
 import css from '@safe-global/views/features/myAccounts/components/AccountItems/styles.module.css'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { getOwnerAwaitingConfirmations } from '@/utils/transaction-guards'
-import SendTransactionButton from '@/features/spaces/public/SendTransactionButton'
-import SpaceSafeContextMenu from '@/features/spaces/public/SpaceSafeContextMenu'
+import SendTransactionButton from '@/features/spaces/public/components/SendTransactionButton'
+import SpaceSafeContextMenu from '@/features/spaces/public/components/SpaceSafeContextMenu'
 
 export interface SafeListItemProps {
   safeItem: SafeItem

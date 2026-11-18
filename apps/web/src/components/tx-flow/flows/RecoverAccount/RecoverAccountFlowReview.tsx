@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import RecoverAccountReview from '@/features/recovery/public/RecoverAccountReview'
+import RecoverAccountReview from '@/features/recovery/public/components/RecoverAccountReview'
 import type { RecoverAccountFlowProps } from '.'
 import { RecoverAccountFlowFields } from '.'
 

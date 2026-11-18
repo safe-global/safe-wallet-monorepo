@@ -21,8 +21,8 @@ jest.mock('@/hooks/useProposers')
 jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
 
-jest.mock('@/features/spending-limits/public/useIsOnlySpendingLimitBeneficiary', () => ({
-  ...jest.requireActual('@/features/spending-limits/public/useIsOnlySpendingLimitBeneficiary'),
+jest.mock('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
+  ...jest.requireActual('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary'),
   __esModule: true,
   default: jest.fn(),
 }))
@@ -36,7 +36,7 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 
 const mockUsePlanGate = jest.fn()
-jest.mock('@/features/spaces/public/usePlanGate', () => ({
+jest.mock('@/features/spaces/public/hooks/usePlanGate', () => ({
   usePlanGate: (...args: unknown[]) => mockUsePlanGate(...args),
 }))
 

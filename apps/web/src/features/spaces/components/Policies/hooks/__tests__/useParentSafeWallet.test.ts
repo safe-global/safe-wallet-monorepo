@@ -25,7 +25,7 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   default: () => mockUseWallet(),
 }))
 
-jest.mock('../../../../public/useSpaceSafes', () => ({
+jest.mock('../../../../public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => mockUseSpaceSafes(),
 }))
 

@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { showLedgerHashComparison, hideLedgerHashComparison } from '../../public/ledgerHashStore'
+import { showLedgerHashComparison, hideLedgerHashComparison } from '../../public/store/ledgerHashStore'
 import LedgerHashComparison from './index'
 
 describe('LedgerHashComparison', () => {

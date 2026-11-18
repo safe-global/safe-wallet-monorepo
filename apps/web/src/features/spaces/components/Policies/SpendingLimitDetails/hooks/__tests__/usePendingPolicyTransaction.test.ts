@@ -10,7 +10,7 @@ import {
   multisigExecutionDetailsBuilder,
   transactionDetailsBuilder,
 } from '@/tests/builders/transactionDetails'
-import { mockPendingPolicy } from '../../../../../public/policies'
+import { mockPendingPolicy } from '../../../../../public/utils/policies'
 import { getPendingTxId } from '../../../utils/mapPendingPolicies'
 import { usePendingPolicyTransaction } from '../usePendingPolicyTransaction'
 

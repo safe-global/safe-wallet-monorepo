@@ -3,12 +3,12 @@ import { useAppDispatch, useAppSelector, type RootState } from '@/store'
 import { useStore } from 'react-redux'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { selectSafeHnState, setBannerEligibilityTracked } from '../public/hnStateSlice'
+import { selectSafeHnState, setBannerEligibilityTracked } from '../public/store/hnStateSlice'
 import { trackEvent } from '@/services/analytics'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
-import type { BannerVisibilityResult } from '../public/useBannerVisibility'
-import { BannerType } from '../public/useBannerStorage'
+import type { BannerVisibilityResult } from '../public/hooks/useBannerVisibility'
+import { BannerType } from '../public/hooks/useBannerStorage'
 
 //A shared Set across hook instances to prevent concurrent tracking for the same Safe
 export const activeTrackingSafes = new Set<string>()

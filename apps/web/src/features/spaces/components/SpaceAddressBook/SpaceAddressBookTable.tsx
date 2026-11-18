@@ -11,7 +11,7 @@ import SpaceAddressBookActions from './SpaceAddressBookActions'
 import LocalContactActions from './LocalContactActions'
 import { formatDate } from '../../utils'
 import InitialsAvatar from '@/components/common/InitialsAvatar'
-import { useMemberNameResolver } from '../../public/useMemberNameResolver'
+import { useMemberNameResolver } from '../../public/hooks/useMemberNameResolver'
 import PaginatedDataTable, {
   type DataTableColumn,
   type ColumnWidth,

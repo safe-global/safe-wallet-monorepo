@@ -3,7 +3,7 @@ import type { CreateMessageDto } from '@safe-global/store/gateway/AUTO_GENERATED
 import { cgwApi } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { parseDelegation, parseDelegationOrigin } from '../utils/delegationParsing'
-import { PendingDelegationConflictError } from '../public/proposerErrors'
+import { PendingDelegationConflictError } from '../public/utils/proposerErrors'
 import { normalizeDelegateTypedData } from '@safe-global/utils/services/delegates'
 import type { DelegateTypedData } from '@safe-global/utils/services/delegates'
 import type { AppDispatch } from '@/store'

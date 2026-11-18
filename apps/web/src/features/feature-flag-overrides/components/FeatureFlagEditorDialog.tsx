@@ -11,7 +11,7 @@ import {
 } from '@safe-global/views/components/ui/dialog'
 import { Button } from '@safe-global/views/components/ui/button'
 import { useAppDispatch } from '@/store'
-import { clearAllOverrides } from '../public/featureFlagOverridesSlice'
+import { clearAllOverrides } from '../public/store/featureFlagOverridesSlice'
 import { useFeatureFlagEditorData } from '../hooks/useFeatureFlagEditorData'
 import { FeatureFlagEditor } from './FeatureFlagEditor'
 

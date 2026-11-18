@@ -56,7 +56,7 @@ import CheckWallet from '@/components/common/CheckWallet'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
 import { getDomainHash, getSafeMessageMessageHash } from '@safe-global/utils/utils/safe-hashes'
 import type { SafeVersion } from '@safe-global/types-kit'
-import { useSafeShield } from '@/features/safe-shield/public/useSafeShield'
+import { useSafeShield } from '@/features/safe-shield/public/hooks/useSafeShield'
 import { RiskConfirmation } from '../../features/RiskConfirmation'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 

@@ -1,8 +1,8 @@
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
 import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
-import { isSpendingLimitFor } from '@/features/spending-limits/public/spendingLimitMatching'
-import { validateSpendingLimitAmount } from '@/features/spending-limits/public/spendingLimitValidation'
+import { isSpendingLimitFor } from '@/features/spending-limits/public/services/spendingLimitMatching'
+import { validateSpendingLimitAmount } from '@/features/spending-limits/public/services/spendingLimitValidation'
 import {
   DUPLICATE_SPENDER_ERROR,
   DUPLICATE_TOKEN_ERROR,

@@ -20,8 +20,8 @@ jest.mock('@/store', () => ({
 }))
 
 jest.mock('@/store/settingsSlice', () => ({ selectCurrency: 'selectCurrency' }))
-jest.mock('@/features/counterfactual/public/undeployedSafesSlice', () => ({
-  ...jest.requireActual('@/features/counterfactual/public/undeployedSafesSlice'),
+jest.mock('@/features/counterfactual/public/store/undeployedSafesSlice', () => ({
+  ...jest.requireActual('@/features/counterfactual/public/store/undeployedSafesSlice'),
   selectUndeployedSafes: 'selectUndeployedSafes',
 }))
 

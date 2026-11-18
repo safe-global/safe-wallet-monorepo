@@ -277,8 +277,8 @@ interface RecoveryStateItem {
 ## Usage example
 
 ```typescript
-import RecoveryStatus from '@/features/recovery/public/RecoveryStatus'
-import { useRecoveryQueue } from '@/features/recovery/public/useRecoveryQueue'
+import RecoveryStatus from '@/features/recovery/public/components/RecoveryStatus'
+import { useRecoveryQueue } from '@/features/recovery/public/hooks/useRecoveryQueue'
 
 function RecoveryProposals() {
   const queue = useRecoveryQueue() // [] while the chain has recovery off

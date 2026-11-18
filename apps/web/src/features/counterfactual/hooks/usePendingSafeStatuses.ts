@@ -1,9 +1,13 @@
 import { pollSafeInfo } from '@/components/new-safe/create/logic'
-import { safeCreationDispatch, SafeCreationEvent, safeCreationSubscribe } from '../public/safeCreationEvents'
-import { removeUndeployedSafe, selectUndeployedSafes, updateUndeployedSafeStatus } from '../public/undeployedSafesSlice'
-import { checkSafeActionViaRelay, checkSafeActivation } from '../public/safeDeployment'
-import { extractCounterfactualSafeSetup } from '../public/typeGuards'
-import { safeCreationPendingStatuses } from '../public/safeCreationPendingStatuses'
+import { safeCreationDispatch, SafeCreationEvent, safeCreationSubscribe } from '../public/services/safeCreationEvents'
+import {
+  removeUndeployedSafe,
+  selectUndeployedSafes,
+  updateUndeployedSafeStatus,
+} from '../public/store/undeployedSafesSlice'
+import { checkSafeActionViaRelay, checkSafeActivation } from '../public/services/safeDeployment'
+import { extractCounterfactualSafeSetup } from '../public/utils/typeGuards'
+import { safeCreationPendingStatuses } from '../public/utils/safeCreationPendingStatuses'
 import useChainId from '@/hooks/useChainId'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'

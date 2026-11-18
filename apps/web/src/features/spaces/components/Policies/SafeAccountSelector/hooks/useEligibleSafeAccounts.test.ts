@@ -26,7 +26,7 @@ const mockUseChains = jest.fn()
 type OverviewsQueryResult = ReturnType<typeof gatewayApi.useGetMultipleSafeOverviewsQuery>
 type ProposerSafesQueryResult = ReturnType<typeof gatewayApi.useGetProposerSafesQuery>
 
-jest.mock('../../../../public/useSpaceSafes', () => ({
+jest.mock('../../../../public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => mockUseSpaceSafes(),
 }))
 

@@ -9,39 +9,45 @@ ESLint enforces this for every feature ([`config/eslint/feature-public-imports.m
 ```
 features/recovery/
 ├── public/
-│   ├── RecoveryList.tsx      gated, lazy component
-│   ├── useRecoveryQueue.ts   cheap hook
-│   ├── selectors.ts          plain functions
+│   ├── components/
+│   │   └── RecoveryList.tsx      gated, lazy component
+│   ├── hooks/
+│   │   └── useRecoveryQueue.ts   cheap hook
+│   ├── store/
+│   │   └── selectors.ts
+│   ├── services/                 side effects: API calls, contracts, transactions
+│   ├── utils/                    pure functions
 │   └── types.ts
-├── components/               private
-├── hooks/                    private
-└── services/                 private
+├── components/                   private
+├── hooks/                        private
+└── services/                     private
 ```
 
-- Import the one file you need: `import RecoveryList from '@/features/recovery/public/RecoveryList'`.
+- Import the one file you need: `import RecoveryList from '@/features/recovery/public/components/RecoveryList'`.
 - No `index.ts` anywhere under `public/`, and no re-exports in `src/features`. A re-export makes every importer depend on every re-exported file, which ties features into one import cycle and makes `jest --findRelatedTests` select most of the test suite.
 - Inside a feature, use relative imports.
-- To make something public, move its file into `public/`. A large feature may group files in folders inside `public/`, for example `public/hooks/`.
+- `public/` uses the same folders as the private side: `components/`, `hooks/`, `store/`, `services/` and `utils/`. Only `types.ts`, `constants.ts` and `utils.ts` sit at its top level, as at the feature root. ESLint enforces this layout.
+- To make something public, move its file into the matching folder in `public/`.
 
 ## Public components are gated and lazy
 
 A public component is a gated wrapper around the private component:
 
 ```tsx
-// features/recovery/public/RecoveryList.tsx
+// features/recovery/public/components/RecoveryList.tsx
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { gatedDynamic } from '@/utils/gatedDynamic'
 
-const RecoveryList = gatedDynamic(FEATURES.RECOVERY, () => import('../components/RecoveryList'))
+const RecoveryList = gatedDynamic(FEATURES.RECOVERY, () => import('../../components/RecoveryList'))
 
 export default RecoveryList
 ```
 
 `gatedDynamic` renders nothing while the chain has the flag off, so the component's chunk downloads only when it renders with the flag on. The consumer does not check the flag.
 
-A public component that must render while the current chain has the flag off uses `dynamic` from `@/utils/dynamic` instead, with a one-line comment that gives the reason. Examples are in `features/multichain/public/`: those components check the flags of each target chain, or warn about the Safe itself.
+A public component that must render while the current chain has the flag off uses `dynamic` from `@/utils/dynamic` instead, with a one-line comment that gives the reason. Examples are in `features/multichain/public/components/`: those components check the flags of each target chain, or warn about the Safe itself.
 
-A small component that other code renders inline or in a fixed slot, such as an icon (`features/safe-shield/public/SeverityIcon.tsx`), a list-row part (`features/myAccounts/public/AccountItemInfo.tsx`) or a sidebar banner, may live in `public/` without a lazy wrapper: a lazy one would flicker or leave an empty slot. Its consumer checks the flag.
+A small component that other code renders inline or in a fixed slot, such as an icon (`features/safe-shield/public/components/SeverityIcon.tsx`), a list-row part (`features/myAccounts/public/components/AccountItemInfo.tsx`) or a sidebar banner, may live in `public/` without a lazy wrapper: a lazy one would flicker or leave an empty slot. Its consumer checks the flag.
 
 ## Public hooks are the exception
 

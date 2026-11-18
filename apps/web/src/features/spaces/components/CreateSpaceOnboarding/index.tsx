@@ -13,7 +13,7 @@ import { deriveSidePanelAccountsFromSpace } from '../OnboardingLayout/mockup/der
 import { useSafeNameLookup } from '../OnboardingLayout/mockup/useSafeNameLookup'
 import { useIsCheckingAccess } from '@/hooks/useRouterGuard'
 import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
-import { useSpaceSafes } from '../../public/useSpaceSafes'
+import { useSpaceSafes } from '../../public/hooks/useSpaceSafes'
 import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'

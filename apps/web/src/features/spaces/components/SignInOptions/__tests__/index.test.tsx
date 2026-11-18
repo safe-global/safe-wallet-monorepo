@@ -17,15 +17,15 @@ jest.mock('@/services/siwe/useSiwe', () => ({
   useSiwe: () => ({ signIn: jest.fn(), loading: false }),
 }))
 
-jest.mock('../../../public/useCurrentSpaceId', () => ({
+jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => null,
 }))
 
-jest.mock('@/features/oidc-auth/public/EmailSignInButton', () => ({
+jest.mock('@/features/oidc-auth/public/components/EmailSignInButton', () => ({
   __esModule: true,
   default: () => <button data-testid="email-login-btn">Continue with email</button>,
 }))
-jest.mock('@/features/oidc-auth/public/GoogleSignInButton', () => ({
+jest.mock('@/features/oidc-auth/public/components/GoogleSignInButton', () => ({
   __esModule: true,
   default: () => <button data-testid="google-login-btn">Continue with Google</button>,
 }))

@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import SpaceAddressBookContent from '@/features/spaces/public/SpaceAddressBookPage'
+import SpaceAddressBookContent from '@/features/spaces/public/components/SpaceAddressBookPage'
 
 export default function SpaceAddressBookPage() {
   const router = useRouter()

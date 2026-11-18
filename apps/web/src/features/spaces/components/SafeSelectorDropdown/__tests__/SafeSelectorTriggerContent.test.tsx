@@ -1,11 +1,11 @@
 import { render } from '@/tests/test-utils'
 import SafeSelectorTriggerContent from '../components/SafeSelectorTriggerContent'
-import * as useIsHypernativeGuard from '@/features/hypernative/public/useIsHypernativeGuard'
+import * as useIsHypernativeGuard from '@/features/hypernative/public/hooks/useIsHypernativeGuard'
 import type { SafeItemData } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
-jest.mock('@/features/hypernative/public/useIsHypernativeGuard')
+jest.mock('@/features/hypernative/public/hooks/useIsHypernativeGuard')
 // Render the real tooltip, not the lazy wrapper
-jest.mock('@/features/hypernative/public/SafeHeaderHnTooltip', () => ({
+jest.mock('@/features/hypernative/public/components/SafeHeaderHnTooltip', () => ({
   __esModule: true,
   default: jest.requireActual('@/features/hypernative/components/SafeHeaderHnTooltip/SafeHeaderHnTooltip')
     .SafeHeaderHnTooltip,

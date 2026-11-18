@@ -4,7 +4,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { Typography } from '@safe-global/views/components/ui/typography'
 import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shield/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { SeverityIcon as SeverityIconSafeShield } from '@/features/safe-shield/public/SeverityIcon'
+import { SeverityIcon as SeverityIconSafeShield } from '@/features/safe-shield/public/components/SeverityIcon'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import BlockIcon from '@/public/images/common/block2.svg'

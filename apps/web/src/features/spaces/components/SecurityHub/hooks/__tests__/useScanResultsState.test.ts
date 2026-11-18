@@ -3,7 +3,7 @@ import useScanResultsState from '../useScanResultsState'
 import type { ScanResult } from '@/features/security/public/types'
 
 const useCurrentSpaceIdMock = jest.fn<string | null, []>()
-jest.mock('../../../../public/useCurrentSpaceId', () => ({
+jest.mock('../../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => useCurrentSpaceIdMock(),
 }))
 

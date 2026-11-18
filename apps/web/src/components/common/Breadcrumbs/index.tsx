@@ -1,6 +1,6 @@
 import css from './styles.module.css'
 import { NestedSafeBreadcrumbs } from '@/components/common/NestedSafeBreadcrumbs'
-import SpaceBreadcrumbs from '@/features/spaces/public/SpaceBreadcrumbs'
+import SpaceBreadcrumbs from '@/features/spaces/public/components/SpaceBreadcrumbs'
 
 const Breadcrumbs = () => {
   return (

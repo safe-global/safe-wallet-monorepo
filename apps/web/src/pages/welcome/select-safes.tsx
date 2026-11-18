@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import SelectSafesOnboarding from '@/features/spaces/public/SelectSafesOnboarding'
+import SelectSafesOnboarding from '@/features/spaces/public/components/SelectSafesOnboarding'
 
 const SelectSafesPage = () => {
   return (

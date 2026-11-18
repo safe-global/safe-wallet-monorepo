@@ -1,11 +1,11 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { BRAND_NAME } from '@/config/constants'
-import { useCurrentSpaceId } from '@/features/spaces/public/useCurrentSpaceId'
-import useFeatureRedirect from '@/features/spaces/public/useFeatureRedirect'
+import { useCurrentSpaceId } from '@/features/spaces/public/hooks/useCurrentSpaceId'
+import useFeatureRedirect from '@/features/spaces/public/hooks/useFeatureRedirect'
 import { AppRoutes } from '@/config/routes'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import SpaceSettingsPage from '@/features/spaces/public/SpaceSettingsPage'
+import SpaceSettingsPage from '@/features/spaces/public/components/SpaceSettingsPage'
 
 export default function SpaceSettingsExperimentalPage() {
   const router = useRouter()

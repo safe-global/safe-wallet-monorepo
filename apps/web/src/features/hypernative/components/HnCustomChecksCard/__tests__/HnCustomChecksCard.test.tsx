@@ -32,12 +32,12 @@ jest.mock('@safe-global/views/features/safe-shield/components/ThreatAnalysis/Ana
 }))
 
 // Mock useSafeShieldAssessmentUrl
-jest.mock('../../../public/useSafeShieldAssessmentUrl', () => ({
+jest.mock('../../../public/hooks/useSafeShieldAssessmentUrl', () => ({
   useSafeShieldAssessmentUrl: jest.fn(() => 'https://hn.example/report'),
 }))
 
 // Mock HnViewMoreOnHypernativeRow so we can assert its presence and props
-jest.mock('../../../public/HnViewMoreOnHypernativeRow', () => ({
+jest.mock('../../../public/components/HnViewMoreOnHypernativeRow', () => ({
   HnViewMoreOnHypernativeRow: jest.fn(({ overflowCount, assessmentUrl }) => (
     <div data-testid="overflow-row" data-overflow-count={overflowCount} data-assessment-url={assessmentUrl ?? ''}>
       +{overflowCount}
@@ -270,7 +270,7 @@ describe('HnCustomChecksCard', () => {
     })
 
     it('renders overflow row with assessmentUrl=null when URL is null and 5 checks', () => {
-      const { useSafeShieldAssessmentUrl } = jest.requireMock('../../../public/useSafeShieldAssessmentUrl') as {
+      const { useSafeShieldAssessmentUrl } = jest.requireMock('../../../public/hooks/useSafeShieldAssessmentUrl') as {
         useSafeShieldAssessmentUrl: jest.Mock
       }
       useSafeShieldAssessmentUrl.mockReturnValueOnce(null)

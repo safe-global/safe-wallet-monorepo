@@ -9,17 +9,17 @@ import { selectCookieBanner } from '@/store/popupSlice'
 import { CookieAndTermType } from '@/store/cookiesAndTermsSlice'
 import { useHasFeature } from '@/hooks/useChains'
 import { useIsOfficialHost } from '@/hooks/useIsOfficialHost'
-import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled'
+import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/public/hooks/useIsSafeProAnnouncementEnabled'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 
 const mockSupportChatDrawer = jest.fn()
 
-jest.mock('@/features/support-chat/public/SupportChatDrawer', () => ({
+jest.mock('@/features/support-chat/public/components/SupportChatDrawer', () => ({
   __esModule: true,
   default: (props: { open: boolean }) => mockSupportChatDrawer(props),
 }))
 jest.mock('@/hooks/useChains')
-jest.mock('@/features/support-chat/public/useSupportChat', () => ({
+jest.mock('@/features/support-chat/public/hooks/useSupportChat', () => ({
   useSupportChat: () => ({
     config: { appId: 'test-app', chatUrl: 'https://chat.test', aliasDomain: 'test.local', allowedParents: [] },
     user: { email: 'guest@test.local', name: 'Safe{Wallet}' },
@@ -30,7 +30,7 @@ jest.mock('@/hooks/useIsOfficialHost', () => ({
   useIsOfficialHost: jest.fn(),
 }))
 
-jest.mock('@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled', () => ({
+jest.mock('@/features/safe-pro-announcement/public/hooks/useIsSafeProAnnouncementEnabled', () => ({
   useIsSafeProAnnouncementEnabled: jest.fn(),
 }))
 

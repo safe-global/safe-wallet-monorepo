@@ -3,7 +3,7 @@ import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import AccountsSection from './sections/Accounts/AccountsSection'
 import NavigateToSection from './sections/NavigateTo/NavigateToSection'
 import TrustedSafesSection from './sections/TrustedSafes/TrustedSafesSection'
-import useIsQualifiedSafe from '@/features/spaces/public/useIsQualifiedSafe'
+import useIsQualifiedSafe from '@/features/spaces/public/hooks/useIsQualifiedSafe'
 
 export interface SectionItemProps {
   query: string

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import type { ScanResult, ScoreBandDef } from '@/features/security/public/types'
-import { useSecurityServices } from '@/features/security/public/useSecurityServices'
+import { useSecurityServices } from '@/features/security/public/hooks/useSecurityServices'
 
 /**
  * Three states the header can be in:

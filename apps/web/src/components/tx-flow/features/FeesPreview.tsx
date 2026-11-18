@@ -1,11 +1,11 @@
 import { useContext, useEffect, type ReactElement } from 'react'
-import { useFeesPreview } from '@/features/fee-payment/public/useFeesPreview'
-import { useIsFeeCardSlotVisible } from '@/features/fee-payment/public/useIsFeeCardSlotVisible'
-import { useSafeShieldForTxData } from '@/features/safe-shield/public/useSafeShield'
+import { useFeesPreview } from '@/features/fee-payment/public/hooks/useFeesPreview'
+import { useIsFeeCardSlotVisible } from '@/features/fee-payment/public/hooks/useIsFeeCardSlotVisible'
+import { useSafeShieldForTxData } from '@/features/safe-shield/public/hooks/useSafeShield'
 import { TxFlowContext } from '../TxFlowProvider'
 import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { withSlot } from '@/components/tx-flow/slots/withSlot'
-import FeesPreviewComponent from '@/features/fee-payment/public/FeesPreview'
+import FeesPreviewComponent from '@/features/fee-payment/public/components/FeesPreview'
 
 const FeesPreview = (): ReactElement => {
   const feesData = useFeesPreview()

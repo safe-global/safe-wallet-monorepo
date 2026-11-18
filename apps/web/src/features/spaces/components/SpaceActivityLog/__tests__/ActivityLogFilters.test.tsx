@@ -5,7 +5,7 @@ import useGetSpaceAuditLogActors from '../../../hooks/useGetSpaceAuditLogActors'
 jest.mock('../../../hooks/useGetSpaceAuditLogActors')
 
 const mockResolveMemberName = jest.fn()
-jest.mock('../../../public/useMemberNameResolver', () => ({
+jest.mock('../../../public/hooks/useMemberNameResolver', () => ({
   useMemberNameResolver: () => mockResolveMemberName,
 }))
 

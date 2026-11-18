@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { SAFE_ADDRESSES } from '@safe-global/test/msw/fixtures'
 import { createMockStory } from '@/stories/mocks/createMockStory'
-import ChainSelectorBlock from '@/features/spaces/public/ChainSelectorBlock'
+import ChainSelectorBlock from '@/features/spaces/public/components/ChainSelectorBlock'
 
 const deployedChains = {
   single: [{ chainId: '1', chainName: 'Ethereum', chainLogoUri: undefined, shortName: 'eth' }],

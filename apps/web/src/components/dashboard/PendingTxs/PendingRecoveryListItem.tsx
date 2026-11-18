@@ -6,7 +6,7 @@ import type { ReactElement } from 'react'
 
 import RecoveryInfo from '@safe-global/views/features/recovery/components/RecoveryInfo'
 import RecoveryType from '@safe-global/views/features/recovery/components/RecoveryType'
-import RecoveryStatus from '@/features/recovery/public/RecoveryStatus'
+import RecoveryStatus from '@/features/recovery/public/components/RecoveryStatus'
 import { AppRoutes } from '@/config/routes'
 import type { RecoveryQueueItem } from '@/features/recovery/public/types'
 

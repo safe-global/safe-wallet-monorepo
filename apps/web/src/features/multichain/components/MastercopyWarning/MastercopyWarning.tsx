@@ -11,7 +11,7 @@ import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import Track from '@/components/common/Track'
 import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
-import { useMastercopyMigration } from '../../public/useMastercopyMigration'
+import { useMastercopyMigration } from '../../public/hooks/useMastercopyMigration'
 
 const CLI_LINK = 'https://github.com/5afe/safe-cli'
 

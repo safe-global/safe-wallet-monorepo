@@ -7,9 +7,9 @@ import { useSafesSearch } from '@/hooks/safes/useSafesSearch'
 import useAllSafes, { type SafeItem } from '@/hooks/safes/useAllSafes'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
-import useSimilarityClusters from '@/features/address-poisoning/public/useSimilarityClusters'
-import { bandGroupsForList, buildSimilarWarnings } from '@/features/address-poisoning/public/crossListClusters'
-import useGetSpaceAddressBook from '../../../public/useGetSpaceAddressBook'
+import useSimilarityClusters from '@/features/address-poisoning/public/hooks/useSimilarityClusters'
+import { bandGroupsForList, buildSimilarWarnings } from '@/features/address-poisoning/public/utils/crossListClusters'
+import useGetSpaceAddressBook from '../../../public/hooks/useGetSpaceAddressBook'
 import { withWorkspaceNames } from '../../NameAccounts/utils'
 
 const useOnboardingSafes = () => {

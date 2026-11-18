@@ -5,7 +5,7 @@ import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import Track from '@/components/common/Track'
 import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
 import useNonPinnedSafeWarning from '../../hooks/useNonPinnedSafeWarning'
-import AddTrustedSafeDialog from '../../public/AddTrustedSafeDialog'
+import AddTrustedSafeDialog from '../../public/components/AddTrustedSafeDialog'
 
 /**
  * Warning card displayed when user is viewing a non-pinned safe they own

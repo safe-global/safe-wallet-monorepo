@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { withMockProvider } from '@/storybook/decorators'
-import type { StepUpStatus } from '../../public/stepUpSlice'
-import StepUpDialog from '../../public/StepUpDialog'
+import type { StepUpStatus } from '../../public/store/stepUpSlice'
+import StepUpDialog from '../../public/components/StepUpDialog'
 
 const withStatus = (status: StepUpStatus) => ({
   decorators: [withMockProvider({ shadcn: true, initialState: { stepUp: { status } } })],

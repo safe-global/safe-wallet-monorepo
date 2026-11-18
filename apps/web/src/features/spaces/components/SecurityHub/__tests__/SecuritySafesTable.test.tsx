@@ -62,8 +62,9 @@ jest.mock('@/store', () => ({
   useAppSelector: () => 'usd',
 }))
 
-jest.mock('@/features/security/public/useSecurityServices', () => ({
-  useSecurityServices: () => jest.requireActual('@/features/security/public/securityServices').securityServices,
+jest.mock('@/features/security/public/hooks/useSecurityServices', () => ({
+  useSecurityServices: () =>
+    jest.requireActual('@/features/security/public/services/securityServices').securityServices,
 }))
 
 // ─── helpers ──────────────────────────────────────────────────────────────────

@@ -15,7 +15,7 @@ import {
   mockSpendingLimitPolicy,
   mockUnenforcedPolicy,
   asActivePolicy,
-} from '../../../public/policies'
+} from '../../../public/utils/policies'
 import { createMockStory } from '@/stories/mocks/createMockStory'
 import SpendingLimitDrawer from './SpendingLimitDrawer'
 

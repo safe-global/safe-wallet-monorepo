@@ -31,7 +31,7 @@ const multi = {
 const allSafes = [treasury, payroll, grants]
 
 let mockAllSafes: unknown[] = allSafes
-jest.mock('../../../public/useSpaceSafes', () => ({
+jest.mock('../../../public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => ({ allSafes: mockAllSafes, isLoading: false }),
 }))
 jest.mock('@/hooks/safes/useSafesSearch', () => ({
@@ -39,7 +39,7 @@ jest.mock('@/hooks/safes/useSafesSearch', () => ({
     query ? items.filter((item) => (item as { name: string }).name.toLowerCase().includes(query.toLowerCase())) : items,
 }))
 
-jest.mock('@/features/myAccounts/public/SafeAccountsTable', () => ({
+jest.mock('@/features/myAccounts/public/components/SafeAccountsTable', () => ({
   __esModule: true,
   default: ({
     items,

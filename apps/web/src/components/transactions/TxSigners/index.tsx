@@ -25,13 +25,13 @@ import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import { CopyDeeplinkLabels } from '@/services/analytics/events/txList'
 import TxShareLinkWrapper from '@/components/transactions/TxShareLink/TxShareLink'
-import { useIsSafenetChecksEnabled } from '@/features/safenet-checks/public/useIsSafenetChecksEnabled'
+import { useIsSafenetChecksEnabled } from '@/features/safenet-checks/public/hooks/useIsSafenetChecksEnabled'
 import { CheckStatus } from '@safe-global/utils/features/safenet-checks'
 import { useSafenetCheck } from '@safe-global/utils/features/safenet-checks/hooks'
 import ExplorerButton from '@safe-global/views/components/common/ExplorerButton'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import SafenetAuditRow from '@/features/safenet-checks/public/SafenetAuditRow'
+import SafenetAuditRow from '@/features/safenet-checks/public/components/SafenetAuditRow'
 
 const WAITING_STATUSES = new Set([
   'Awaiting confirmations',

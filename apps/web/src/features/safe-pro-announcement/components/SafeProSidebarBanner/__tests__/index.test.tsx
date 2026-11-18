@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from '@/tests/test-utils'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { SAFE_PRO_ANNOUNCEMENT_URL } from '@/config/constants'
-import SafeProSidebarBanner from '../../../public/SafeProSidebarBanner'
+import SafeProSidebarBanner from '../../../public/components/SafeProSidebarBanner'
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),

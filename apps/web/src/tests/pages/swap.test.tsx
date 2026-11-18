@@ -6,14 +6,14 @@ import { fakerChecksummedAddress, render, screen } from '@/tests/test-utils'
 
 jest.mock('@/hooks/useChains')
 
-jest.mock('@/features/swap/public/SwapWidget', () => ({
+jest.mock('@/features/swap/public/components/SwapWidget', () => ({
   __esModule: true,
   default: ({ sell }: { sell?: { asset: string; amount: string } }) => (
     <div data-testid="swap-widget" data-sell-asset={sell?.asset ?? ''} data-sell-amount={sell?.amount ?? ''} />
   ),
 }))
 
-jest.mock('@/features/swap/public/FallbackSwapWidget', () => ({
+jest.mock('@/features/swap/public/components/FallbackSwapWidget', () => ({
   __esModule: true,
   default: () => <div data-testid="fallback-swap-widget" />,
 }))

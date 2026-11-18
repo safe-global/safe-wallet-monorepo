@@ -2,7 +2,7 @@ import type { ComponentType } from 'react'
 import { withHnFeature } from '../withHnFeature'
 import { withHnBannerConditions, type WithHnBannerConditionsProps } from '../withHnBannerConditions'
 import { withHnSignupFlow } from '../withHnSignupFlow'
-import { BannerType } from '../../public/useBannerStorage'
+import { BannerType } from '../../public/hooks/useBannerStorage'
 import { HnPendingBannerWithDismissal } from './HnPendingBannerWithDismissal'
 
 // Export the original pure component for tests and stories

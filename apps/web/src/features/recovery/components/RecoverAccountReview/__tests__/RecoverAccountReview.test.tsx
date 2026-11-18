@@ -5,7 +5,7 @@ import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { mockCurrentChain, mockSafeInfo, mockWallet } from '@/tests/mocks/hooks'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
-import { dispatchRecoveryProposal } from '../../../public/recovery-sender'
+import { dispatchRecoveryProposal } from '../../../public/services/recovery-sender'
 import RecoverAccountReview from '../index'
 
 type GasPrice = { maxFeePerGas: bigint; maxPriorityFeePerGas: bigint }
@@ -13,15 +13,15 @@ const mockUseGasPrice = jest.fn<[GasPrice | undefined, Error | undefined, boolea
 jest.mock('@/hooks/useGasPrice', () => ({ __esModule: true, default: () => mockUseGasPrice() }))
 
 const DELAY_MODIFIER = faker.finance.ethereumAddress()
-jest.mock('../../../public/useRecovery', () => ({ __esModule: true, default: () => [[]] }))
-jest.mock('../../../public/selectors', () => ({
+jest.mock('../../../public/hooks/useRecovery', () => ({ __esModule: true, default: () => [[]] }))
+jest.mock('../../../public/store/selectors', () => ({
   selectDelayModifierByRecoverer: () => ({ address: DELAY_MODIFIER, delay: BigInt(0) }),
 }))
 jest.mock('../../../hooks/useIsValidRecoveryExecution', () => ({
   useIsValidRecoveryExecTransactionFromModule: () => [undefined, undefined],
 }))
-jest.mock('../../../public/recovery-sender', () => ({ dispatchRecoveryProposal: jest.fn() }))
-jest.mock('../../../public/transaction', () => ({ getRecoveryProposalTransactions: () => [] }))
+jest.mock('../../../public/services/recovery-sender', () => ({ dispatchRecoveryProposal: jest.fn() }))
+jest.mock('../../../public/services/transaction', () => ({ getRecoveryProposalTransactions: () => [] }))
 jest.mock('@/services/tx/tx-sender/create', () => ({
   ...jest.requireActual('@/services/tx/tx-sender/create'),
   createTx: jest.fn(() => new Promise(() => {})),

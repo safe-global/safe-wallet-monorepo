@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import { faker } from '@faker-js/faker'
-import { useCurrentMemberProfile } from '../../public/useSpaceMembers'
+import { useCurrentMemberProfile } from '../../public/hooks/useSpaceMembers'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockUseAuthGetMeV1Query = jest.fn()
@@ -21,7 +21,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
   useUsersGetWithWalletsV1Query: jest.fn(),
 }))
 
-jest.mock('../../public/useCurrentSpaceId', () => ({
+jest.mock('../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
 }))
 

@@ -13,7 +13,7 @@ export type {
   ScannerId,
   SafeGrade,
 } from '../data/scanners/types'
-export type { GradeSummary } from './scanUtils'
+export type { GradeSummary } from './utils/scanUtils'
 export type { ScoreBand, ScoreBandDef } from '../data/scoreBands'
 export type { SecurityGrade, CheckStatus, CheckResult } from '../data/securityTypes'
 export type { CheckDef, CheckCategory } from '../data/securityChecks'

@@ -4,7 +4,7 @@ import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvid
 import { withSlot } from '@/components/tx-flow/slots/withSlot'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { BalanceChanges } from '@/components/tx/security/BalanceChanges'
-import useIsCounterfactualSafe from '@/features/counterfactual/public/useIsCounterfactualSafe'
+import useIsCounterfactualSafe from '@/features/counterfactual/public/hooks/useIsCounterfactualSafe'
 
 const useShouldRegisterSlot = () => {
   const { isRejection } = useContext(TxFlowContext)

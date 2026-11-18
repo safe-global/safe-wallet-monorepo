@@ -10,11 +10,11 @@ jest.mock('next/router', () => ({
 }))
 
 let mockLanding: { spaceId: string | null; isLoading: boolean } = { spaceId: null, isLoading: false }
-jest.mock('@/features/spaces/public/SpaceDashboardPage', () => ({
+jest.mock('@/features/spaces/public/components/SpaceDashboardPage', () => ({
   __esModule: true,
   default: ({ spaceId }: { spaceId: string }) => <div data-testid="dash">space {spaceId}</div>,
 }))
-jest.mock('@/features/spaces/public/useLandingSpaceId', () => ({
+jest.mock('@/features/spaces/public/hooks/useLandingSpaceId', () => ({
   useLandingSpaceId: () => mockLanding,
 }))
 

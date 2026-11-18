@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react'
-import { MOCK_ADDRESSES } from '../../../../../public/policies'
+import { MOCK_ADDRESSES } from '../../../../../public/utils/policies'
 import { useNestedSafeGrantor } from '../useNestedSafeGrantor'
 
 const mockIsSmartContractWallet = jest.fn()

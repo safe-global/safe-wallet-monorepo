@@ -11,7 +11,7 @@ jest.mock('../../../constants', () => ({
 jest.mock('@/hooks/useIsSurveyEnabled')
 let mockSafeLimit: { limit: number | null | undefined; isError: boolean } = { limit: 10, isError: false }
 const mockRetryLimit = jest.fn()
-jest.mock('../../../public/useSpaceSafeLimit', () => ({
+jest.mock('../../../public/hooks/useSpaceSafeLimit', () => ({
   useSpaceSafeLimit: () => ({ ...mockSafeLimit, isLoading: false, retry: mockRetryLimit }),
 }))
 const mockedUseIsSurveyEnabled = useIsSurveyEnabled as jest.MockedFunction<typeof useIsSurveyEnabled>

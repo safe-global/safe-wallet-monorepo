@@ -15,11 +15,11 @@ const mockUseHasFeature = jest.fn()
 const mockUseIsSafeProAnnouncementEnabled = jest.fn<boolean, []>()
 const mockUseIsSafeProEnabled = jest.fn<boolean, []>()
 
-jest.mock('../../../../../public/useCurrentSpaceId', () => ({
+jest.mock('../../../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
 }))
 
-jest.mock('../../../../../public/useSpaceMembers', () => ({
+jest.mock('../../../../../public/hooks/useSpaceMembers', () => ({
   useIsActiveMember: jest.fn((spaceId) => mockUseIsActiveMember(spaceId)),
 }))
 
@@ -27,7 +27,7 @@ jest.mock('@/hooks/useChains', () => ({
   useHasFeature: jest.fn((feature) => mockUseHasFeature(feature)),
 }))
 
-jest.mock('@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled', () => ({
+jest.mock('@/features/safe-pro-announcement/public/hooks/useIsSafeProAnnouncementEnabled', () => ({
   useIsSafeProAnnouncementEnabled: () => mockUseIsSafeProAnnouncementEnabled(),
 }))
 

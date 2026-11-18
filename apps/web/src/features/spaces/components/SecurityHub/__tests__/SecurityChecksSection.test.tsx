@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { render, screen, fireEvent, within } from '@testing-library/react'
 import { AppRoutes } from '@/config/routes'
-import { createMockContext } from '@/features/security/public/test-helpers'
+import { createMockContext } from '@/features/security/public/utils/test-helpers'
 import type { ScanResult } from '@/features/security/public/types'
 import SecurityChecksSection from '../components/SecurityChecks/SecurityChecksSection'
 
@@ -17,8 +17,9 @@ jest.mock('next/link', () => {
 })
 
 // require() inside the factory since jest.mock is hoisted above ES imports.
-jest.mock('@/features/security/public/useSecurityServices', () => ({
-  useSecurityServices: () => jest.requireActual('@/features/security/public/securityServices').securityServices,
+jest.mock('@/features/security/public/hooks/useSecurityServices', () => ({
+  useSecurityServices: () =>
+    jest.requireActual('@/features/security/public/services/securityServices').securityServices,
 }))
 
 // ─── helpers ──────────────────────────────────────────────────────────────────

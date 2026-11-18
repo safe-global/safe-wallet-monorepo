@@ -11,10 +11,10 @@ import { FEATURES } from '@safe-global/store/gateway/types'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { AddressBook } from '@/store/addressBookSlice'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import useGetSpaceAddressBook from '@/features/spaces/public/useGetSpaceAddressBook'
+import useGetSpaceAddressBook from '@/features/spaces/public/hooks/useGetSpaceAddressBook'
 import { extendedSafeInfoBuilder, addressExBuilder } from '@/tests/builders/safe'
 
-jest.mock('@/features/spaces/public/useGetSpaceAddressBook', () => ({
+jest.mock('@/features/spaces/public/hooks/useGetSpaceAddressBook', () => ({
   __esModule: true,
   default: jest.fn((): SpaceAddressBookItemDto[] => []),
   useSpaceAddressBookState: jest.fn(() => ({ items: [], isLoading: false, isError: false })),

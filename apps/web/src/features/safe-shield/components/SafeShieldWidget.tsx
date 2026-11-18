@@ -1,10 +1,10 @@
 import { type ReactElement } from 'react'
 import { SafeShieldDisplay } from './SafeShieldDisplay'
-import { useSafeShield } from '../public/useSafeShield'
+import { useSafeShield } from '../public/hooks/useSafeShield'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
-import { useHypernativeOAuth } from '@/features/hypernative/public/useHypernativeOAuth'
-import { useIsHypernativeEligible } from '@/features/hypernative/public/useIsHypernativeEligible'
+import { useHypernativeOAuth } from '@/features/hypernative/public/hooks/useHypernativeOAuth'
+import { useIsHypernativeEligible } from '@/features/hypernative/public/hooks/useIsHypernativeEligible'
 
 const SafeShieldWidget = (): ReactElement => {
   const {

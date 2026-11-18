@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { ExternalLinkIcon } from '@safe-global/views/components/common/ExternalLink/ExternalLinkIcon'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import type { HypernativeAuthStatus } from '@/features/hypernative/public/useHypernativeOAuth'
+import type { HypernativeAuthStatus } from '@/features/hypernative/public/hooks/useHypernativeOAuth'
 import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 import { trackEvent } from '@/services/analytics'
 import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'

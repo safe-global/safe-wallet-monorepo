@@ -40,7 +40,7 @@ jest.mock('next/router', () => ({
   }),
 }))
 
-jest.mock('../../../../../public/useCurrentSpaceId', () => ({
+jest.mock('../../../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '42',
 }))
 

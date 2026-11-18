@@ -1,7 +1,7 @@
 import { type ReactElement, useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import type { ScanResult, SafeGrade } from '@/features/security/public/types'
-import { useSecurityServices } from '@/features/security/public/useSecurityServices'
+import { useSecurityServices } from '@/features/security/public/hooks/useSecurityServices'
 import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { cn } from '@safe-global/views/utils/cn'

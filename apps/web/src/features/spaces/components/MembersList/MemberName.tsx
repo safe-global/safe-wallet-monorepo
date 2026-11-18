@@ -8,7 +8,7 @@ import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_G
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { cn } from '@safe-global/views/utils/cn'
-import { getMemberDisplayName } from '../../public/useSpaceMembers'
+import { getMemberDisplayName } from '../../public/hooks/useSpaceMembers'
 
 const MemberName = ({ member, isCompact = false }: { member: MemberDto; isCompact?: boolean }) => {
   const isUserSignedIn = useAppSelector(isAuthenticated)

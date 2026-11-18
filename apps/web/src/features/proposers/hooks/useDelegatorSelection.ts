@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useParentSafeThreshold } from '../public/useParentSafeThreshold'
+import { useParentSafeThreshold } from '../public/hooks/useParentSafeThreshold'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import useWallet from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'

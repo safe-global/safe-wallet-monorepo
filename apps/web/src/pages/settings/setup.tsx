@@ -12,7 +12,7 @@ import ProposersList from '@/components/settings/ProposersList'
 import { BRAND_NAME } from '@/config/constants'
 import { NestedSafesList } from '@/components/settings/NestedSafesList'
 import { FeeTokenPreference } from '@/components/settings/FeeTokenPreference'
-import SpendingLimitsSettings from '@/features/spending-limits/public/SpendingLimitsSettings'
+import SpendingLimitsSettings from '@/features/spending-limits/public/components/SpendingLimitsSettings'
 
 const Setup = () => {
   const { safe, safeLoaded } = useSafeInfo()

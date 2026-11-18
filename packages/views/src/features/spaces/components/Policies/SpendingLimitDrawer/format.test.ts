@@ -1,4 +1,4 @@
-import { mockSpendingLimitPolicy } from '@/features/spaces/public/policies'
+import { mockSpendingLimitPolicy } from '@/features/spaces/public/utils/policies'
 import {
   formatAllowanceAmount,
   formatAwaitingSignatures,

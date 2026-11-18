@@ -15,8 +15,8 @@ import SingleTxDecoded from '@/components/transactions/TxDetails/TxData/DecodedD
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { useState } from 'react'
 import { MultisendActionsHeader } from '@/components/transactions/TxDetails/TxData/DecodedData/Multisend'
-import SafenetRiskChip from '@/features/safenet-checks/public/SafenetRiskChip'
-import SafenetBatchWarning from '@/features/safenet-checks/public/SafenetBatchWarning'
+import SafenetRiskChip from '@/features/safenet-checks/public/components/SafenetRiskChip'
+import SafenetBatchWarning from '@/features/safenet-checks/public/components/SafenetBatchWarning'
 
 const BatchTxRiskChip = ({ details }: { details: TransactionDetails }) => {
   const execution = details.detailedExecutionInfo

@@ -49,7 +49,7 @@ jest.mock('@/store', () => ({
     selector({ featureFlagOverrides: {}, auth: {} }),
 }))
 
-jest.mock('@/features/counterfactual/public/useIsCounterfactualSafe', () => ({
+jest.mock('@/features/counterfactual/public/hooks/useIsCounterfactualSafe', () => ({
   __esModule: true,
   default: () => false,
 }))
@@ -126,7 +126,7 @@ jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   },
 }))
 
-jest.mock('@/features/feature-flag-overrides/public/FeatureFlagEditorDialogLoader', () => ({
+jest.mock('@/features/feature-flag-overrides/public/components/FeatureFlagEditorDialogLoader', () => ({
   FeatureFlagEditorDialogLoader: ({ open }: { open: boolean }) =>
     open ? <div data-testid="feature-flag-editor-dialog" /> : null,
 }))

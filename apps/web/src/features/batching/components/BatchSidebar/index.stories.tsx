@@ -3,7 +3,7 @@ import { mswLoader } from 'msw-storybook-addon'
 import { OperationType } from '@safe-global/types-kit'
 import { createMockStory } from '@/stories/mocks/createMockStory'
 import { SAFE_ADDRESSES } from '../../../../../../../config/test/msw/fixtures'
-import type { BatchTxsState, CallOnlyTxData } from '../../public/batchSlice'
+import type { BatchTxsState, CallOnlyTxData } from '../../public/store/batchSlice'
 import BatchSidebar from './index'
 import { mockNow } from '@/stories/mocks/now'
 

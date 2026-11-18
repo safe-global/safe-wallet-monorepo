@@ -2,7 +2,7 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useContext, useEffect, useMemo } from 'react'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
-import type { DesiredAllowance } from '@/features/spending-limits/public/spendingLimitExecution'
+import type { DesiredAllowance } from '@/features/spending-limits/public/services/spendingLimitExecution'
 import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -92,8 +92,8 @@ export const useBuildPolicyTransaction = (formValues: SpendingLimitPolicyFormVal
     let isStale = false
     const build = isEditMode
       ? Promise.all([
-          import('@/features/spending-limits/public/spendingLimitExecution'),
-          import('@/features/spending-limits/public/spendingLimitEdit'),
+          import('@/features/spending-limits/public/services/spendingLimitExecution'),
+          import('@/features/spending-limits/public/services/spendingLimitEdit'),
         ]).then(([{ createSpendingLimitEditTx }, { buildSpendingLimitEdit }]) =>
           createSpendingLimitEditTx(
             buildSpendingLimitEdit(desired, existingLimits),
@@ -104,7 +104,7 @@ export const useBuildPolicyTransaction = (formValues: SpendingLimitPolicyFormVal
             scope,
           ),
         )
-      : import('@/features/spending-limits/public/spendingLimitExecution').then(({ createSpendingLimitsTx }) =>
+      : import('@/features/spending-limits/public/services/spendingLimitExecution').then(({ createSpendingLimitsTx }) =>
           createSpendingLimitsTx(desired, existingLimits, chainId, chain, safe.modules, safe.deployed, scope),
         )
 

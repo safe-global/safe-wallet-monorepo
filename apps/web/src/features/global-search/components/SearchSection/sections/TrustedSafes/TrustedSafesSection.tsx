@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 import { useAllSafesGrouped, flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
-import SafeCardReadOnly from '@/features/spaces/public/SafeCardReadOnly'
+import SafeCardReadOnly from '@/features/spaces/public/components/SafeCardReadOnly'
 import type { SectionItemProps } from '../../sectionItems'
 import useGlobalSearchFilter from '../../../../hooks/useGlobalSearchFilter'
 import useMatchSafe from '@/hooks/useMatchSafe'

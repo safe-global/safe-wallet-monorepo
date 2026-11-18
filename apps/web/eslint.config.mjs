@@ -176,6 +176,24 @@ const config = [
       ],
     },
   },
+  // public/ mirrors the private layout: only the feature-root files sit at its top level.
+  {
+    files: ['src/features/*/public/*.{ts,tsx}', 'src/features/*/public/*/**/*.{ts,tsx}'],
+    ignores: [
+      'src/features/*/public/{types,constants,utils}.ts',
+      'src/features/*/public/{components,hooks,store,services,utils,__tests__}/**',
+    ],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'Program',
+          message:
+            'Put public files in components/, hooks/, store/, services/ or utils/. Only types.ts, constants.ts and utils.ts sit at the top of public/.',
+        },
+      ],
+    },
+  },
   // The isolated-stack mocks run in Node with their own compiler settings, which the main tsconfig excludes.
   {
     files: ['e2e/environment/infra/mocks/*.ts'],

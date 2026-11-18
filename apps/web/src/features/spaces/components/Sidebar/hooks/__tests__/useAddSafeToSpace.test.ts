@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react'
-import { ELEVATION_REQUIRED_ERROR } from '@/features/oidc-auth/public/elevation'
+import { ELEVATION_REQUIRED_ERROR } from '@/features/oidc-auth/public/utils/elevation'
 import { Errors } from '@/services/exceptions'
 import { useAddSafeToSpace } from '../useAddSafeToSpace'
 

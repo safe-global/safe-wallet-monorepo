@@ -6,7 +6,7 @@ import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFl
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import ReviewTransaction, { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import ReviewTransactionSkeleton from '@/components/tx/ReviewTransactionV2/ReviewTransactionSkeleton'
-import { isAllowanceModuleAddress } from '@/features/spending-limits/public/spendingLimitDeployments'
+import { isAllowanceModuleAddress } from '@/features/spending-limits/public/services/spendingLimitDeployments'
 import useAddressBook from '@/hooks/useAddressBook'
 import { getAndValidateSafeSDK } from '@/services/tx/tx-sender/sdk'
 import type { PolicySafe, PolicySpender } from '@safe-global/views/features/spaces/components/Policies/types'

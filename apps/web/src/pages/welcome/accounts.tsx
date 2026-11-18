@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import MyAccountsV2 from '@/features/myAccounts/public/MyAccountsV2'
+import MyAccountsV2 from '@/features/myAccounts/public/components/MyAccountsV2'
 
 const Accounts = () => {
   return (

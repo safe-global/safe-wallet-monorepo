@@ -8,7 +8,7 @@ import { getTotalBridgeFee } from '@safe-global/utils/components/confirmation-vi
 import TokenAmount from '@/components/common/TokenAmount'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import css from './styles.module.css'
-import SwapTokens from '@/features/swap/public/SwapTokens'
+import SwapTokens from '@/features/swap/public/components/SwapTokens'
 
 const PreviewSwapAmount = ({ txInfo }: { txInfo: SwapTransactionInfo }) => {
   return (

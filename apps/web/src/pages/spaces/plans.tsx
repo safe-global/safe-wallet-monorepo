@@ -1,12 +1,12 @@
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import { useRedirectWhenOff } from '@/features/spaces/public/useFeatureRedirect'
-import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled'
+import { useRedirectWhenOff } from '@/features/spaces/public/hooks/useFeatureRedirect'
+import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/public/hooks/useIsSafeProAnnouncementEnabled'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { useCurrentChain } from '@/hooks/useChains'
 import { AppRoutes } from '@/config/routes'
-import SpacePlansContent from '@/features/spaces/public/SpacePlansPage'
+import SpacePlansContent from '@/features/spaces/public/components/SpacePlansPage'
 
 export default function SpacePlansPage() {
   const router = useRouter()

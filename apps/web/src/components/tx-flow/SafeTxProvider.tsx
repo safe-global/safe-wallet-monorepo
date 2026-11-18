@@ -12,7 +12,7 @@ import { useAppDispatch, useAppSelector } from '@/store'
 import {
   selectFeePaymentSourcePreference,
   setFeePaymentSourcePreference,
-} from '@/features/fee-payment/public/feePaymentSourcePreferenceSlice'
+} from '@/features/fee-payment/public/store/feePaymentSourcePreferenceSlice'
 import type { FeePaymentMode } from '@/features/fee-payment/public/types'
 import useWallet from '@/hooks/wallets/useWallet'
 

@@ -114,11 +114,11 @@ Supported versions:
 
 ```
 src/features/spending-limits/
-├── public/                  # Entry point for other code: gated components, hooks, slice, services
-│   ├── SpendingLimitsSettings.tsx
-│   ├── SpendingLimitsLoader.tsx
-│   ├── spendingLimitsSlice.ts
-│   └── ...
+├── public/                  # Entry point for other code
+│   ├── components/          # Gated components: SpendingLimitsSettings, SpendingLimitsLoader, ...
+│   ├── hooks/
+│   ├── services/
+│   └── store/               # spendingLimitsSlice
 ├── components/              # Private UI
 ├── hooks/                   # Private hooks
 └── services/                # Private services
@@ -138,7 +138,7 @@ This keeps the heavy fetching logic lazy-loaded while making data available to a
 **How to read spending limits:**
 
 ```typescript
-import { selectSpendingLimits } from '@/features/spending-limits/public/spendingLimitsSlice'
+import { selectSpendingLimits } from '@/features/spending-limits/public/store/spendingLimitsSlice'
 import { useAppSelector } from '@/store'
 
 // Read data from store (loaded on app start)
@@ -149,10 +149,10 @@ const spendingLimits = useAppSelector(selectSpendingLimits)
 
 This feature is controlled by the `SPENDING_LIMIT` feature flag, configured per-chain in the CGW API.
 
-`public/SpendingLimitsSettings` and the other public components render nothing while the flag is off, so consumers do not check it:
+`public/components/SpendingLimitsSettings` and the other public components render nothing while the flag is off, so consumers do not check it:
 
 ```typescript
-import SpendingLimitsSettings from '@/features/spending-limits/public/SpendingLimitsSettings'
+import SpendingLimitsSettings from '@/features/spending-limits/public/components/SpendingLimitsSettings'
 
 <SpendingLimitsSettings />
 ```

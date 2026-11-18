@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import SafeProSidebarBanner from '../../public/SafeProSidebarBanner'
+import SafeProSidebarBanner from '../../public/components/SafeProSidebarBanner'
 
 const meta = {
   component: SafeProSidebarBanner,

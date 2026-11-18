@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useContext, useState } from 'react'
 import FeesPreview from './index'
-import type { FeesPreviewData } from '../../public/useFeesPreview'
+import type { FeesPreviewData } from '../../public/hooks/useFeesPreview'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import type { FeePaymentMode } from '../../public/types'
 import { StoreDecorator } from '@/stories/storeDecorator'

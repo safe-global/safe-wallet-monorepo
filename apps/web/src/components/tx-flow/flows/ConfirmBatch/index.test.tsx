@@ -3,13 +3,13 @@ import { faker } from '@faker-js/faker'
 import { OperationType } from '@safe-global/types-kit'
 import { fakerChecksummedAddress, render } from '@/tests/test-utils'
 import { TxModalContext } from '@/components/tx-flow'
-import { useDraftBatch } from '@/features/batching/public/useDraftBatch'
-import type { DraftBatchItem } from '@/features/batching/public/batchSlice'
+import { useDraftBatch } from '@/features/batching/public/hooks/useDraftBatch'
+import type { DraftBatchItem } from '@/features/batching/public/store/batchSlice'
 import type { ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import ConfirmBatchFlow from '.'
 
-jest.mock('@/features/batching/public/useDraftBatch', () => ({
-  ...jest.requireActual('@/features/batching/public/useDraftBatch'),
+jest.mock('@/features/batching/public/hooks/useDraftBatch', () => ({
+  ...jest.requireActual('@/features/batching/public/hooks/useDraftBatch'),
   useDraftBatch: jest.fn(),
 }))
 jest.mock('@/services/tx/tx-sender/create', () => ({

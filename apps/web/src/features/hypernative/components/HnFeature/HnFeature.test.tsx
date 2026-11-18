@@ -1,8 +1,8 @@
 import { render, screen } from '@/tests/test-utils'
 import HnFeature from './HnFeature'
-import { BannerType } from '../../public/useBannerStorage'
-import * as useIsHypernativeFeatureHook from '../../public/useIsHypernativeFeature'
-import * as useBannerVisibilityHook from '../../public/useBannerVisibility'
+import { BannerType } from '../../public/hooks/useBannerStorage'
+import * as useIsHypernativeFeatureHook from '../../public/hooks/useIsHypernativeFeature'
+import * as useBannerVisibilityHook from '../../public/hooks/useBannerVisibility'
 
 describe('HnFeature', () => {
   const TestChild = () => <div>Test Content</div>

@@ -24,8 +24,8 @@ const mockHasFeature = jest.fn<boolean | undefined, []>()
 const mockWalletAddress = jest.fn<string | undefined, []>()
 const mockIsAuthenticated = jest.fn<boolean, []>()
 
-jest.mock('../../public/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => mockSpaceId() }))
-jest.mock('../../public/useSpaceMembers', () => ({ useIsActiveMember: () => mockIsActiveMember() }))
+jest.mock('../../public/hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => mockSpaceId() }))
+jest.mock('../../public/hooks/useSpaceMembers', () => ({ useIsActiveMember: () => mockIsActiveMember() }))
 jest.mock('@/hooks/useChains', () => ({ useHasFeature: () => mockHasFeature() }))
 jest.mock('@/hooks/wallets/useWallet', () => ({
   __esModule: true,

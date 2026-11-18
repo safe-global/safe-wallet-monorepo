@@ -5,7 +5,7 @@ const mockUseIsSafeProEnabled = jest.fn()
 const mockUseSpacePlan = jest.fn()
 const mockUseSpaceOffers = jest.fn()
 jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
-jest.mock('../../public/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => 'space-current' }))
+jest.mock('../../public/hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => 'space-current' }))
 jest.mock('../useSpacePlan', () => ({ useSpacePlan: (spaceId?: string) => mockUseSpacePlan(spaceId) }))
 jest.mock('../billing/useSpaceOffers', () => ({ useSpaceOffers: (spaceId?: string) => mockUseSpaceOffers(spaceId) }))
 

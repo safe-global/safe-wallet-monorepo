@@ -48,19 +48,19 @@ jest.mock('@/features/safe-shield/hooks/useThreatAnalysis', () => ({
 // An untrusted Safe would require risk confirmation on its own, without any poisoning
 jest.mock('@/hooks/useIsTrustedSafe', () => ({ __esModule: true, default: () => true }))
 
-jest.mock('@/features/myAccounts/public/useTrustSafe', () => ({
+jest.mock('@/features/myAccounts/public/hooks/useTrustSafe', () => ({
   useTrustSafe: () => ({ trustSafe: jest.fn() }),
 }))
 
-jest.mock('@/features/hypernative/public/useAuthToken', () => ({
+jest.mock('@/features/hypernative/public/hooks/useAuthToken', () => ({
   useAuthToken: () => [{ token: undefined }],
 }))
 
-jest.mock('@/features/hypernative/public/useIsHypernativeEligible', () => ({
+jest.mock('@/features/hypernative/public/hooks/useIsHypernativeEligible', () => ({
   useIsHypernativeEligible: () => ({ isHypernativeEligible: false, isHypernativeGuard: false, loading: false }),
 }))
 
-jest.mock('@/features/spaces/public/useSafeProAccess', () => ({
+jest.mock('@/features/spaces/public/hooks/useSafeProAccess', () => ({
   useSafeProAccess: () => ({ hasProFeatures: true, isSafePro: true, isLoading: false, spaceId: null }),
 }))
 

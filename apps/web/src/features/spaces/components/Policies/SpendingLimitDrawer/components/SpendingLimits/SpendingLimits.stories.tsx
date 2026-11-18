@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { mockMultiSpenderPolicy, mockPendingEdit, mockSpendingLimitPolicy } from '../../../../../public/policies'
+import { mockMultiSpenderPolicy, mockPendingEdit, mockSpendingLimitPolicy } from '../../../../../public/utils/policies'
 import SpendingLimits from './SpendingLimits'
 
 const meta = {

@@ -13,7 +13,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useMembersRenewInviteV1Mutation: () => [mockRenew, { isLoading: mockIsLoading }],
 }))
 
-jest.mock('../../public/useCurrentSpaceId', () => ({
+jest.mock('../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockSpaceId,
 }))
 

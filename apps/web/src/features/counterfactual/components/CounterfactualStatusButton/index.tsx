@@ -1,4 +1,4 @@
-import { selectUndeployedSafe } from '../../public/undeployedSafesSlice'
+import { selectUndeployedSafe } from '../../public/store/undeployedSafesSlice'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import { useAppSelector } from '@/store'

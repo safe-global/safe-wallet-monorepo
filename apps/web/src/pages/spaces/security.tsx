@@ -1,8 +1,8 @@
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import useSecurityHubFeatureRedirect from '@/features/security/public/useSecurityHubFeatureRedirect'
-import SecurityHubPage from '@/features/spaces/public/SecurityHubPage'
+import useSecurityHubFeatureRedirect from '@/features/security/public/hooks/useSecurityHubFeatureRedirect'
+import SecurityHubPage from '@/features/spaces/public/components/SecurityHubPage'
 
 export default function SpaceSecurityPage() {
   const router = useRouter()

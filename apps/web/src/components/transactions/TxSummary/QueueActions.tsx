@@ -4,7 +4,7 @@ import ExecuteTxButton from '../ExecuteTxButton'
 import SignTxButton from '../SignTxButton'
 import { useAppSelector } from '@/store'
 import { PendingStatus, selectPendingTxById } from '@/store/pendingTxsSlice'
-import SpeedUpMonitor from '@/features/speedup/public/SpeedUpMonitor'
+import SpeedUpMonitor from '@/features/speedup/public/components/SpeedUpMonitor'
 
 const QueueActions = ({ tx, dense = false }: { tx: Transaction; dense?: boolean }) => {
   const awaitingExecution = isAwaitingExecution(tx.txStatus)

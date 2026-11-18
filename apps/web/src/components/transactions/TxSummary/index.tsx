@@ -1,6 +1,6 @@
 import type { ModuleTransaction, MultisigTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import TxProposalChip from '@safe-global/views/features/proposers/components/TxProposalChip'
-import useIsExpiredSwap from '@/features/swap/public/useIsExpiredSwap'
+import useIsExpiredSwap from '@/features/swap/public/hooks/useIsExpiredSwap'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import type { ReactElement } from 'react'
 
@@ -19,12 +19,12 @@ import { useHasFeature } from '@/hooks/useChains'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { ellipsis } from '@safe-global/utils/utils/formatters'
-import { useHnQueueAssessmentResult } from '@/features/hypernative/public/useHnQueueAssessmentResult'
-import { useShowHypernativeAssessment } from '@/features/hypernative/public/useShowHypernativeAssessment'
-import { useHypernativeOAuth } from '@/features/hypernative/public/useHypernativeOAuth'
+import { useHnQueueAssessmentResult } from '@/features/hypernative/public/hooks/useHnQueueAssessmentResult'
+import { useShowHypernativeAssessment } from '@/features/hypernative/public/hooks/useShowHypernativeAssessment'
+import { useHypernativeOAuth } from '@/features/hypernative/public/hooks/useHypernativeOAuth'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
-import HnQueueAssessment from '@/features/hypernative/public/HnQueueAssessment'
-import StatusLabel from '@/features/swap/public/StatusLabel'
+import HnQueueAssessment from '@/features/hypernative/public/components/HnQueueAssessment'
+import StatusLabel from '@/features/swap/public/components/StatusLabel'
 
 type TxSummaryProps = {
   isConflictGroup?: boolean

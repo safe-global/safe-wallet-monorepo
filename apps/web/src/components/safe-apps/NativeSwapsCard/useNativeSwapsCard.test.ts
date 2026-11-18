@@ -1,9 +1,9 @@
 import { renderHook } from '@/tests/test-utils'
 import { useNativeSwapsCard, SWAPS_APP_CARD_STORAGE_KEY } from './useNativeSwapsCard'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import useIsSwapFeatureEnabled from '@/features/swap/public/useIsSwapFeatureEnabled'
+import useIsSwapFeatureEnabled from '@/features/swap/public/hooks/useIsSwapFeatureEnabled'
 
-jest.mock('@/features/swap/public/useIsSwapFeatureEnabled', () => ({
+jest.mock('@/features/swap/public/hooks/useIsSwapFeatureEnabled', () => ({
   __esModule: true,
   default: jest.fn(),
 }))

@@ -4,7 +4,7 @@ import {
   mockMultiSpenderPolicy,
   mockPendingEdit,
   mockSpendingLimitPolicy,
-} from '../../../../../../public/policies'
+} from '../../../../../../public/utils/policies'
 import SpendingLimits from '../SpendingLimits'
 
 const { spenders } = mockSpendingLimitPolicy().data

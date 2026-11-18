@@ -11,9 +11,9 @@ import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { act, fireEvent, screen } from '@testing-library/react'
 import { LATEST_SAFE_VERSION } from '@safe-global/utils/config/constants'
 import { type SafeVersion } from '@safe-global/types-kit'
-import * as cfServicesPersistCounterfactualSafe from '@/features/counterfactual/public/persistCounterfactualSafe'
-import * as safeCreationEvents from '@/features/counterfactual/public/safeCreationEvents'
-import * as multichain from '@/features/multichain/public/utils'
+import * as cfServicesPersistCounterfactualSafe from '@/features/counterfactual/public/services/persistCounterfactualSafe'
+import * as safeCreationEvents from '@/features/counterfactual/public/services/safeCreationEvents'
+import * as multichain from '@/features/multichain/public/utils/utils'
 import * as createLogic from '@/components/new-safe/create/logic'
 import * as web3 from '@/hooks/wallets/web3'
 import * as analytics from '@/services/analytics'
@@ -21,14 +21,14 @@ import * as createLoadSafe from '@/services/analytics/events/createLoadSafe'
 import * as notificationsSlice from '@/store/notificationsSlice'
 import { PayMethod } from '@safe-global/utils/features/counterfactual/types'
 import { type ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
-import { useIsAdmin } from '@/features/spaces/public/useSpaceMembers'
-import { useSpaceSafeCount } from '@/features/spaces/public/useIsCurrentSpaceAtSafeLimit'
-import { useSpaceSafeLimit } from '@/features/spaces/public/useSpaceSafeLimit'
-import { ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/public/elevation'
+import { useIsAdmin } from '@/features/spaces/public/hooks/useSpaceMembers'
+import { useSpaceSafeCount } from '@/features/spaces/public/hooks/useIsCurrentSpaceAtSafeLimit'
+import { useSpaceSafeLimit } from '@/features/spaces/public/hooks/useSpaceSafeLimit'
+import { ELEVATION_REQUIRED_MESSAGE } from '@/features/oidc-auth/public/utils/elevation'
 
 // The feature barrel cannot be spread (circular import at init), so the source hook modules are mocked instead.
 // Render the component itself, not the lazy wrapper, so every test sees it on the first render
-jest.mock('@/features/counterfactual/public/PayNowPayLater', () => ({
+jest.mock('@/features/counterfactual/public/components/PayNowPayLater', () => ({
   __esModule: true,
   default: jest.requireActual('@/features/counterfactual/components/PayNowPayLater').default,
 }))
@@ -39,15 +39,15 @@ jest.mock('@/components/common/NetworkLogosList', () => ({
 }))
 jest.mock('@/hooks/useGasPrice', () => ({ __esModule: true, default: jest.fn(() => [undefined, undefined, false]) }))
 jest.mock('@/hooks/useWalletCanPay', () => ({ __esModule: true, default: jest.fn(() => true) }))
-jest.mock('@/features/spaces/public/useSpaceMembers', () => ({
-  ...jest.requireActual('@/features/spaces/public/useSpaceMembers'),
+jest.mock('@/features/spaces/public/hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('@/features/spaces/public/hooks/useSpaceMembers'),
   useIsAdmin: jest.fn(),
 }))
-jest.mock('@/features/spaces/public/useIsCurrentSpaceAtSafeLimit', () => ({
-  ...jest.requireActual('@/features/spaces/public/useIsCurrentSpaceAtSafeLimit'),
+jest.mock('@/features/spaces/public/hooks/useIsCurrentSpaceAtSafeLimit', () => ({
+  ...jest.requireActual('@/features/spaces/public/hooks/useIsCurrentSpaceAtSafeLimit'),
   useSpaceSafeCount: jest.fn(),
 }))
-jest.mock('@/features/spaces/public/useSpaceSafeLimit', () => ({
+jest.mock('@/features/spaces/public/hooks/useSpaceSafeLimit', () => ({
   useSpaceSafeLimit: jest.fn(),
 }))
 jest.mock('@/components/common/ChainIndicator', () => {

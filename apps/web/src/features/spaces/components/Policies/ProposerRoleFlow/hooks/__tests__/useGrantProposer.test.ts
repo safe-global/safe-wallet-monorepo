@@ -6,7 +6,7 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/public/constants'
-import * as proposerUtils from '@/features/proposers/public/utils'
+import * as proposerUtils from '@/features/proposers/public/utils/utils'
 import * as useChainIdModule from '@/hooks/useChainId'
 import * as useChainsModule from '@/hooks/useChains'
 import * as useSafeAddressModule from '@/hooks/useSafeAddress'
@@ -23,10 +23,10 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import { useGrantProposer } from '../useGrantProposer'
 import * as addOrRequestContactModule from '../../../../../hooks/useAddOrRequestWorkspaceContact'
-import { useIsAdmin } from '../../../../../public/useSpaceMembers'
+import { useIsAdmin } from '../../../../../public/hooks/useSpaceMembers'
 
-jest.mock('../../../../../public/useSpaceMembers', () => ({
-  ...jest.requireActual('../../../../../public/useSpaceMembers'),
+jest.mock('../../../../../public/hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('../../../../../public/hooks/useSpaceMembers'),
   useIsAdmin: jest.fn(() => true),
 }))
 

@@ -1,5 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { MOCK_SAFES, MOCK_SAFE_NAME, mockPendingPolicy, mockFullySignedPending } from '../../../../../public/policies'
+import {
+  MOCK_SAFES,
+  MOCK_SAFE_NAME,
+  mockPendingPolicy,
+  mockFullySignedPending,
+} from '../../../../../public/utils/policies'
 import PendingSignatures from './PendingSignatures'
 
 const meta = {

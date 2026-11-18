@@ -10,11 +10,11 @@ import { render } from '@/tests/test-utils'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { TokenType } from '@safe-global/store/gateway/types'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
-import { SafeShieldProvider } from '@/features/safe-shield/public/SafeShieldProvider'
+import { SafeShieldProvider } from '@/features/safe-shield/public/components/SafeShieldProvider'
 import * as useBalances from '@/hooks/useBalances'
 import * as useTrustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
 import * as chainHooks from '@/hooks/useChains'
-import * as payFromSafeHooks from '@/features/fee-payment/public/useResolvedGasToken'
+import * as payFromSafeHooks from '@/features/fee-payment/public/hooks/useResolvedGasToken'
 import * as sharedTxHooks from '@/components/tx/shared/hooks'
 import * as remoteSafeAppsHooks from '@/hooks/safe-apps/useRemoteSafeApps'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
@@ -54,7 +54,7 @@ jest.mock('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleFor
   useRoles: jest.fn(() => []),
 }))
 
-jest.mock('@/features/hypernative/public/useIsHypernativeEligible', () => ({
+jest.mock('@/features/hypernative/public/hooks/useIsHypernativeEligible', () => ({
   useIsHypernativeEligible: jest.fn(() => ({
     isHypernativeEligible: false,
     isHypernativeGuard: false,
@@ -63,7 +63,7 @@ jest.mock('@/features/hypernative/public/useIsHypernativeEligible', () => ({
   })),
 }))
 
-jest.mock('@/features/ledger/public/LedgerHashComparison', () => ({ __esModule: true, default: () => null }))
+jest.mock('@/features/ledger/public/components/LedgerHashComparison', () => ({ __esModule: true, default: () => null }))
 
 // Mock the SpendingLimitRowWrapper component with the same "Send as" label as the real component
 jest.mock('@/components/tx-flow/flows/TokenTransfer/SpendingLimitRow', () => ({

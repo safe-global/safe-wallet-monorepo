@@ -3,7 +3,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
-import StakeContent from '@/features/stake/public/StakePage'
+import StakeContent from '@/features/stake/public/components/StakePage'
 
 const StakePage = () => {
   const isStakingEnabled = useHasFeature(FEATURES.STAKING)

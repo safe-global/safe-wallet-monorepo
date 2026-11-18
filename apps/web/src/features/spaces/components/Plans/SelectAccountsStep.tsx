@@ -8,7 +8,7 @@ import { highlightSafePro } from '@safe-global/views/components/common/ProHighli
 import { ScrollArea } from '@safe-global/views/components/ui/scroll-area'
 import { SearchInput } from '@safe-global/views/components/ui/search-input'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import SafeAccountsTable from '@/features/myAccounts/public/SafeAccountsTable'
+import SafeAccountsTable from '@/features/myAccounts/public/components/SafeAccountsTable'
 import type { SafeAccountColumnId } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
 import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 import { useSafesSearch } from '@/hooks/safes/useSafesSearch'
@@ -24,7 +24,7 @@ import {
   summarizeRemovedSafes,
 } from '@safe-global/views/features/spaces/components/Plans/removedSafes'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
-import { useSpaceSafes } from '../../public/useSpaceSafes'
+import { useSpaceSafes } from '../../public/hooks/useSpaceSafes'
 import SelectedCounter from '@safe-global/views/features/spaces/components/SelectedCounter'
 import useOnboardingSelection from '../SelectSafesOnboarding/hooks/useOnboardingSelection'
 import {

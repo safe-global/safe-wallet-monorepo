@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
 import { type GetSpaceResponse, useSpacesUpdateV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useIsAdmin } from '../../../public/useSpaceMembers'
+import { useIsAdmin } from '../../../public/hooks/useSpaceMembers'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
@@ -15,7 +15,7 @@ import { SPACE_NAME_MAX_LENGTH } from '@safe-global/utils/validation/names'
 import SpaceSettingsSection, {
   SpaceSettingsSectionTitle,
 } from '@safe-global/views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
-import { isElevationRequiredError } from '@/features/oidc-auth/public/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/utils/elevation'
 
 const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const dispatch = useAppDispatch()

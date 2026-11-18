@@ -12,7 +12,7 @@ jest.mock('./SafenetStakeButton', () => ({
 }))
 
 const mockIsEligibleEarnToken = jest.fn()
-jest.mock('@/features/earn/public/EarnButton', () => ({
+jest.mock('@/features/earn/public/components/EarnButton', () => ({
   __esModule: true,
   default: () => <button data-testid="earn-btn">Earn</button>,
 }))

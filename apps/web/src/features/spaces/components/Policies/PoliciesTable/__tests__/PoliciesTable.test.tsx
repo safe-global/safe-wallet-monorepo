@@ -13,12 +13,12 @@ import {
   mockPolygonSpendingLimitPolicy,
   mockProposerPolicy,
   mockUnenforcedPolicy,
-} from '../../../../public/policies'
+} from '../../../../public/utils/policies'
 import {
   mockActiveAllowlist,
   mockAllowlistChangePending,
   mockFailedAllowlist,
-} from '../../../../public/allowlistPolicies'
+} from '../../../../public/utils/allowlistPolicies'
 import PoliciesTable from '../index'
 
 const mockResolveSafeName = jest.fn()

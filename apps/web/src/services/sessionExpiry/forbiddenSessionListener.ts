@@ -4,7 +4,7 @@ import { cgwApi as authApi } from '@safe-global/store/gateway/AUTO_GENERATED/aut
 import type { cgwApi as safenetApi } from '@safe-global/store/gateway/AUTO_GENERATED/safenet'
 import type { listenerMiddlewareInstance, RootState } from '@/store'
 import { isAuthenticated, setSessionCheckPending } from '@/store/authSlice'
-import { isElevationRequiredError } from '@/features/oidc-auth/public/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/utils/elevation'
 import { expireSession, isForbidden } from './expireSession'
 
 const CGW_ACTION_PREFIX = `${cgwClient.reducerPath}/`

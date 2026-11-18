@@ -38,15 +38,15 @@ jest.mock('@/hooks/useDarkMode', () => ({
   useDarkMode: jest.fn(() => false),
 }))
 
-jest.mock('@/features/myAccounts/public/AccountsNavigation', () => ({
+jest.mock('@/features/myAccounts/public/components/AccountsNavigation', () => ({
   __esModule: true,
   default: () => <nav data-testid="accounts-nav" />,
 }))
-jest.mock('@/features/safe-pro-announcement/public/SafeProBanner', () => ({
+jest.mock('@/features/safe-pro-announcement/public/components/SafeProBanner', () => ({
   __esModule: true,
   default: () => <div data-testid="safe-pro-banner" />,
 }))
-jest.mock('@/features/safe-pro-announcement/public/SafeProWorkspacesBanner', () => ({
+jest.mock('@/features/safe-pro-announcement/public/components/SafeProWorkspacesBanner', () => ({
   __esModule: true,
   default: () => <div data-testid="safe-pro-workspaces-banner" />,
 }))
@@ -54,7 +54,7 @@ jest.mock('@/features/safe-pro-announcement/public/SafeProWorkspacesBanner', () 
 const mockUseIsSafeProAnnouncementEnabled = jest.fn()
 const mockUseIsSafeProEnabled = jest.fn()
 
-jest.mock('@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled', () => ({
+jest.mock('@/features/safe-pro-announcement/public/hooks/useIsSafeProAnnouncementEnabled', () => ({
   useIsSafeProAnnouncementEnabled: () => mockUseIsSafeProAnnouncementEnabled(),
 }))
 
@@ -64,45 +64,45 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/entitlements', () => ({
   useEntitlementsGetAllEntitlementsV1Query: () => ({ plan: undefined }),
 }))
 
-jest.mock('../../../public/useSpaceMembers', () => ({
+jest.mock('../../../public/hooks/useSpaceMembers', () => ({
   get MemberRole() {
-    return jest.requireActual('../../../public/useSpaceMembers').MemberRole
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberRole
   },
   get MEMBER_ALIAS_MAX_LENGTH() {
-    return jest.requireActual('../../../public/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
   },
   get getMemberDisplayName() {
-    return jest.requireActual('../../../public/useSpaceMembers').getMemberDisplayName
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').getMemberDisplayName
   },
   get sanitizeMemberAlias() {
-    return jest.requireActual('../../../public/useSpaceMembers').sanitizeMemberAlias
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').sanitizeMemberAlias
   },
   get isAdmin() {
-    return jest.requireActual('../../../public/useSpaceMembers').isAdmin
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isAdmin
   },
   get isActiveAdmin() {
-    return jest.requireActual('../../../public/useSpaceMembers').isActiveAdmin
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isActiveAdmin
   },
   get isInviteExpired() {
-    return jest.requireActual('../../../public/useSpaceMembers').isInviteExpired
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isInviteExpired
   },
   get useSpaceMembersByStatus() {
-    return jest.requireActual('../../../public/useSpaceMembers').useSpaceMembersByStatus
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useSpaceMembersByStatus
   },
   get useCurrentMembership() {
-    return jest.requireActual('../../../public/useSpaceMembers').useCurrentMembership
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useCurrentMembership
   },
   get useCurrentMemberProfile() {
-    return jest.requireActual('../../../public/useSpaceMembers').useCurrentMemberProfile
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useCurrentMemberProfile
   },
   get useIsActiveMember() {
-    return jest.requireActual('../../../public/useSpaceMembers').useIsActiveMember
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useIsActiveMember
   },
   get useIsAdmin() {
-    return jest.requireActual('../../../public/useSpaceMembers').useIsAdmin
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useIsAdmin
   },
   get useIsInvited() {
-    return jest.requireActual('../../../public/useSpaceMembers').useIsInvited
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useIsInvited
   },
   MemberStatus: { ACTIVE: 'ACTIVE', INVITED: 'INVITED', DECLINED: 'DECLINED' },
 }))

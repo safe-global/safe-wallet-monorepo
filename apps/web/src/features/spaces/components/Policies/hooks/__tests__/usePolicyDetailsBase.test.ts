@@ -3,13 +3,13 @@ import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet
 import { useMergedAddressBooks } from '@/hooks/useAllAddressBooks'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
 import { mockWallet } from '@/tests/mocks/hooks'
-import { useSpaceSafes } from '../../../../public/useSpaceSafes'
-import { MOCK_ADDRESSES, MOCK_SAFES } from '../../../../public/policies'
+import { useSpaceSafes } from '../../../../public/hooks/useSpaceSafes'
+import { MOCK_ADDRESSES, MOCK_SAFES } from '../../../../public/utils/policies'
 import { usePolicyDetailsBase } from '../usePolicyDetailsBase'
 
 jest.mock('@/hooks/wallets/useWallet')
 jest.mock('@/components/common/ConnectWallet/useConnectWallet')
-jest.mock('../../../../public/useSpaceSafes')
+jest.mock('../../../../public/hooks/useSpaceSafes')
 // Stubbed wholesale: this module sits in the spaces barrel import cycle.
 jest.mock('@/hooks/useAllAddressBooks', () => ({
   __esModule: true,

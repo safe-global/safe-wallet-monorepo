@@ -16,10 +16,10 @@ import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/
 import useKeyboardObserver from '@/hooks/useKeyboardObserver/useKeyboardObserver'
 import { useIsTopbarElevated, useIsTopbarAboveOverlay } from '@/hooks/useTopbarElevation'
 import { useCssHeightVar } from '@/hooks/useCssHeightVar'
-import BatchSidebar from '@/features/batching/public/BatchSidebar'
-import SelectSafeModal from '@/features/spaces/public/SelectSafeModal'
-import SafeWorkspaceSignInDialog from '@/features/spaces/public/SafeWorkspaceSignInDialog'
-import SafeWorkspaceChooserDialog from '@/features/spaces/public/SafeWorkspaceChooserDialog'
+import BatchSidebar from '@/features/batching/public/components/BatchSidebar'
+import SelectSafeModal from '@/features/spaces/public/components/SelectSafeModal'
+import SafeWorkspaceSignInDialog from '@/features/spaces/public/components/SafeWorkspaceSignInDialog'
+import SafeWorkspaceChooserDialog from '@/features/spaces/public/components/SafeWorkspaceChooserDialog'
 
 const STATIC_PAGE_ROUTES = [AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
 

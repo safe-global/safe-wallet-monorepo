@@ -1,5 +1,5 @@
 import { useAppDispatch } from '@/store'
-import { setPendingBannerDismissed } from '../../public/hnStateSlice'
+import { setPendingBannerDismissed } from '../../public/store/hnStateSlice'
 import useChainId from '@/hooks/useChainId'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'

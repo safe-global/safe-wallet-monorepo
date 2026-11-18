@@ -59,7 +59,7 @@ const mockWalletConnectInstance = {
   updateSessions: jest.fn().mockResolvedValue(undefined),
 }
 
-jest.mock('@/features/walletconnect/public/walletConnectServices', () => ({
+jest.mock('@/features/walletconnect/public/services/walletConnectServices', () => ({
   walletConnectServices: {
     get wcPopupStore() {
       return mockWcPopupStore

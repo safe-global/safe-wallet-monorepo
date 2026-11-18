@@ -1,5 +1,5 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import useIsExpiredSwap from '@/features/swap/public/useIsExpiredSwap'
+import useIsExpiredSwap from '@/features/swap/public/hooks/useIsExpiredSwap'
 import React, { type ReactElement, useEffect, useRef, useState, useMemo } from 'react'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 
@@ -45,10 +45,10 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
-import { useIsSafenetChecksEnabled } from '@/features/safenet-checks/public/useIsSafenetChecksEnabled'
-import TxNote from '@/features/tx-notes/public/TxNote'
-import SafenetDetailsCard from '@/features/safenet-checks/public/SafenetDetailsCard'
-import HnSecuritySection from '@/features/hypernative/public/HnSecuritySection'
+import { useIsSafenetChecksEnabled } from '@/features/safenet-checks/public/hooks/useIsSafenetChecksEnabled'
+import TxNote from '@/features/tx-notes/public/components/TxNote'
+import SafenetDetailsCard from '@/features/safenet-checks/public/components/SafenetDetailsCard'
+import HnSecuritySection from '@/features/hypernative/public/components/HnSecuritySection'
 
 export const NOT_AVAILABLE = 'n/a'
 

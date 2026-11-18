@@ -1,6 +1,6 @@
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
-import { ELEVATION_REQUIRED_MESSAGE, isElevationRequiredError } from '@/features/oidc-auth/public/elevation'
+import { ELEVATION_REQUIRED_MESSAGE, isElevationRequiredError } from '@/features/oidc-auth/public/utils/elevation'
 import { getQuotaExceededMessage } from '@/utils/quotaMessage'
 
 const HTTP_TOO_MANY_REQUESTS = 429

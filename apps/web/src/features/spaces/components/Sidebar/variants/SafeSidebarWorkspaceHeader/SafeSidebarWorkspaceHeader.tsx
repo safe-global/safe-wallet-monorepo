@@ -9,7 +9,7 @@ import { BackToSpaceButton } from '../../BackToSpaceButton/BackToSpaceButton'
 import { AddToSpacePopupModal } from '../../../AddToSpacePopupModal/AddToSpacePopupModal'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { useCurrentSpaceId } from '../../../../public/useCurrentSpaceId'
+import { useCurrentSpaceId } from '../../../../public/hooks/useCurrentSpaceId'
 
 export interface SafeSidebarWorkspaceHeaderProps {
   workspaceHeader: SafeWorkspaceHeaderProps

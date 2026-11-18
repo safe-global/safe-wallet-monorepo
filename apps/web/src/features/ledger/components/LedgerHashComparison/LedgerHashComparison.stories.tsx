@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useEffect } from 'react'
 import LedgerHashComparison from './index'
-import { showLedgerHashComparison, hideLedgerHashComparison } from '../../public/ledgerHashStore'
+import { showLedgerHashComparison, hideLedgerHashComparison } from '../../public/store/ledgerHashStore'
 
 const meta = {
   title: 'Features/Ledger/LedgerHashComparison',

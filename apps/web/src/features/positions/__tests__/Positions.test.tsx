@@ -1,11 +1,14 @@
 import { positionsFixtures } from '@safe-global/test/msw/fixtures'
 import { render, screen } from '@/tests/test-utils'
 import * as useChains from '@/hooks/useChains'
-import Positions from '../public/Positions'
+import Positions from '../public/components/Positions'
 
 jest.mock('../hooks/usePositions')
 jest.mock('../hooks/usePositionsFiatTotal')
-jest.mock('@/features/portfolio/public/PortfolioRefreshHint', () => ({ __esModule: true, default: () => null }))
+jest.mock('@/features/portfolio/public/components/PortfolioRefreshHint', () => ({
+  __esModule: true,
+  default: () => null,
+}))
 
 const mockUsePositions = jest.requireMock('../hooks/usePositions').default as jest.Mock
 const mockUsePositionsFiatTotal = jest.requireMock('../hooks/usePositionsFiatTotal').default as jest.Mock

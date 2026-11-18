@@ -1,8 +1,8 @@
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { BRAND_NAME } from '@/config/constants'
-import { useCurrentSpaceId } from '@/features/spaces/public/useCurrentSpaceId'
-import SpaceSettingsPage from '@/features/spaces/public/SpaceSettingsPage'
+import { useCurrentSpaceId } from '@/features/spaces/public/hooks/useCurrentSpaceId'
+import SpaceSettingsPage from '@/features/spaces/public/components/SpaceSettingsPage'
 
 export default function SpaceSettingsAccountPage() {
   const router = useRouter()

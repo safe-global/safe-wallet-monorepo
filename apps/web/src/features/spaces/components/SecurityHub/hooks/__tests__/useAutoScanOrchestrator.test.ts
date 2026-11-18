@@ -24,7 +24,7 @@ jest.mock('../../../../hooks/useAutoScan', () => ({
 }))
 
 const useCurrentSpaceIdMock = jest.fn<string | null, []>()
-jest.mock('../../../../public/useCurrentSpaceId', () => ({
+jest.mock('../../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => useCurrentSpaceIdMock(),
 }))
 

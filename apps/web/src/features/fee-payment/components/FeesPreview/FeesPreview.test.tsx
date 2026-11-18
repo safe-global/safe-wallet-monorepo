@@ -2,7 +2,7 @@ import { screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { render } from '@/tests/test-utils'
 import FeesPreview from './index'
-import type { FeesPreviewData } from '../../public/useFeesPreview'
+import type { FeesPreviewData } from '../../public/hooks/useFeesPreview'
 
 jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: () => ({ nativeCurrency: { symbol: 'ETH', logoUri: 'https://example/eth.svg' } }),

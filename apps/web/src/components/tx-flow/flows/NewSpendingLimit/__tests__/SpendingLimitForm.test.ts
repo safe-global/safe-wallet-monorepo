@@ -1,7 +1,7 @@
 import {
   NO_TOKEN_SELECTED_ERROR,
   validateSpendingLimitAmount,
-} from '@/features/spending-limits/public/spendingLimitValidation'
+} from '@/features/spending-limits/public/services/spendingLimitValidation'
 
 describe('CreateSpendingLimit', () => {
   describe('validateSpendingLimit', () => {

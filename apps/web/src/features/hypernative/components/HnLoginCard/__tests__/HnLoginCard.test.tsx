@@ -13,7 +13,7 @@ jest.mock('@/hooks/useIsSafeOwner', () => ({
   default: () => true,
 }))
 
-jest.mock('../../../public/useHypernativeOAuth', () => ({
+jest.mock('../../../public/hooks/useHypernativeOAuth', () => ({
   useHypernativeOAuth: () => ({
     isAuthenticated: false,
     isTokenExpired: false,

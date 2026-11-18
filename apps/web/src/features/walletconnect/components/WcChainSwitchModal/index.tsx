@@ -5,11 +5,11 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AppInfo } from '@/services/safe-wallet-provider'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
-import { useSafeItemData } from '@/features/myAccounts/public/useSafeItemData'
-import AccountItemButton from '@/features/myAccounts/public/AccountItemButton'
-import AccountItemIcon from '@/features/myAccounts/public/AccountItemIcon'
-import AccountItemInfo from '@/features/myAccounts/public/AccountItemInfo'
-import AccountItemBalance from '@/features/myAccounts/public/AccountItemBalance'
+import { useSafeItemData } from '@/features/myAccounts/public/hooks/useSafeItemData'
+import AccountItemButton from '@/features/myAccounts/public/components/AccountItemButton'
+import AccountItemIcon from '@/features/myAccounts/public/components/AccountItemIcon'
+import AccountItemInfo from '@/features/myAccounts/public/components/AccountItemInfo'
+import AccountItemBalance from '@/features/myAccounts/public/components/AccountItemBalance'
 
 type WcChainSwitchModalProps = {
   appInfo: AppInfo

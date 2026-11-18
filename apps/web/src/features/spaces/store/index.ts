@@ -1,1 +1,1 @@
-export type { SpaceNavigationOrigin } from '../public/spaceNavigationSlice'
+export type { SpaceNavigationOrigin } from '../public/store/spaceNavigationSlice'

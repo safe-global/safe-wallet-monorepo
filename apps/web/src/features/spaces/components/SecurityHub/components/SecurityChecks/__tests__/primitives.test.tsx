@@ -1,6 +1,6 @@
 import { render, screen } from '@/tests/test-utils'
 import { AppRoutes } from '@/config/routes'
-import type { SecurityServices } from '@/features/security/public/securityServices'
+import type { SecurityServices } from '@/features/security/public/services/securityServices'
 import type { ScanResult } from '@/features/security/public/types'
 import { EvidenceList, makeBuildCta } from '../primitives'
 

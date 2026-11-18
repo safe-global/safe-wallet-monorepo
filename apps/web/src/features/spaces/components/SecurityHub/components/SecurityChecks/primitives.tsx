@@ -9,7 +9,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import CopyButton from '@/components/common/CopyButton'
 import type { EvidenceItem, ScanResult, SecurityGrade } from '@/features/security/public/types'
 import { SEVERITY_RANK } from '@/features/security/public/constants'
-import type { SecurityServices } from '@/features/security/public/securityServices'
+import type { SecurityServices } from '@/features/security/public/services/securityServices'
 import {
   resolveStatusTone,
   SeverityIcon,

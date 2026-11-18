@@ -21,14 +21,14 @@ jest.mock('next/router', () => ({
   useRouter: jest.fn(() => ({ pathname: '/home' })),
 }))
 
-jest.mock('@/features/spaces/public/useIsQualifiedSafe', () => ({
+jest.mock('@/features/spaces/public/hooks/useIsQualifiedSafe', () => ({
   __esModule: true,
   default: jest.fn(() => false),
 }))
-jest.mock('@/features/spaces/public/useCurrentSpaceId', () => ({
+jest.mock('@/features/spaces/public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => undefined,
 }))
-jest.mock('@/features/spaces/public/useAddressBookWriteScope', () => ({
+jest.mock('@/features/spaces/public/hooks/useAddressBookWriteScope', () => ({
   useAddressBookWriteScope: () => ({ scope: 'local', canRename: true }),
 }))
 jest.mock('@safe-global/views/features/spaces/components/SafeSelectorDropdown/utils', () => ({
@@ -68,7 +68,7 @@ jest.mock('./SpaceChainSelector', () => {
   return { __esModule: true, default: MockSpaceChainSelector }
 })
 
-jest.mock('@/features/spaces/public/SafeSelectorDropdown', () => {
+jest.mock('@/features/spaces/public/components/SafeSelectorDropdown', () => {
   const MockSafeSelectorDropdown = (props: Record<string, unknown>) => {
     const footerFn = props.footer as ((close: () => void) => React.ReactNode) | undefined
     const emptyStateOverride = props.emptyStateOverride as React.ReactNode | ((close: () => void) => React.ReactNode)
@@ -158,7 +158,7 @@ jest.mock('@/store', () => ({
 import { usePathname } from 'next/navigation'
 import { useRouter } from 'next/router'
 import useConnectWallet from '@/components/common/ConnectWallet/useConnectWallet'
-import useIsQualifiedSafe from '@/features/spaces/public/useIsQualifiedSafe'
+import useIsQualifiedSafe from '@/features/spaces/public/hooks/useIsQualifiedSafe'
 import { useSafeAddressFromUrl } from '@/hooks/useSafeAddressFromUrl'
 import { useSpaceSafeSelectorItems } from './hooks/useSpaceSafeSelectorItems'
 import { useSpaceBackLink } from './hooks/useSpaceBackLink'

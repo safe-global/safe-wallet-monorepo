@@ -15,7 +15,7 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 
 const mockWriteScope: jest.Mock = jest.fn(() => ({ scope: 'local', canRename: true }))
-jest.mock('../../../../public/useAddressBookWriteScope', () => ({
+jest.mock('../../../../public/hooks/useAddressBookWriteScope', () => ({
   useAddressBookWriteScope: (...args: unknown[]) => mockWriteScope(...args),
 }))
 

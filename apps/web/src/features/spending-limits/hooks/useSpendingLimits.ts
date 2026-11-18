@@ -7,9 +7,9 @@ import useChainId from '@/hooks/useChainId'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import useBalances from '@/hooks/useBalances'
-import { loadSpendingLimits } from '../public/spendingLimitLoader'
+import { loadSpendingLimits } from '../public/services/spendingLimitLoader'
 import { useAppDispatch, useAppSelector } from '@/store'
-import { selectSpendingLimits, spendingLimitSlice } from '../public/spendingLimitsSlice'
+import { selectSpendingLimits, spendingLimitSlice } from '../public/store/spendingLimitsSlice'
 
 /**
  * Hook for loading spending limits data.

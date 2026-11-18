@@ -36,7 +36,7 @@ import SplitMenuButton from '@safe-global/views/components/common/SplitMenuButto
 import { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import type { SlotComponentProps, SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { TxFlowContext } from '../../TxFlowProvider'
-import { useSafeShield } from '@/features/safe-shield/public/useSafeShield'
+import { useSafeShield } from '@/features/safe-shield/public/hooks/useSafeShield'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 
 export const ExecuteForm = ({

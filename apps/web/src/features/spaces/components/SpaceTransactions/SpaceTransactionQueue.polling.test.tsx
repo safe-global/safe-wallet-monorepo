@@ -22,9 +22,9 @@ const chainId = '1'
 const safeAddress = faker.finance.ethereumAddress()
 const txId = `multisig_${safeAddress}_${faker.string.hexadecimal({ length: 64 })}`
 
-jest.mock('../../public/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => spaceId }))
-jest.mock('../../public/useSpaceMembers', () => ({
-  ...jest.requireActual('../../public/useSpaceMembers'),
+jest.mock('../../public/hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => spaceId }))
+jest.mock('../../public/hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('../../public/hooks/useSpaceMembers'),
   useIsActiveMember: () => true,
 }))
 jest.mock('@/hooks/wallets/useWallet', () => ({ __esModule: true, default: () => null }))

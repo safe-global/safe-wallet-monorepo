@@ -3,8 +3,8 @@ import NextLink from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { AppRoutes } from '@/config/routes'
-import { trackPlanSelectionStarted } from '@/features/spaces/public/planSelection'
-import { useSafeProAccess } from '@/features/spaces/public/useSafeProAccess'
+import { trackPlanSelectionStarted } from '@/features/spaces/public/services/planSelection'
+import { useSafeProAccess } from '@/features/spaces/public/hooks/useSafeProAccess'
 import {
   MixpanelEventParams,
   PlanSelectionEntryPoint,

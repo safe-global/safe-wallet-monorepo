@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import SpaceMembersContent from '@/features/spaces/public/SpaceMembersPage'
+import SpaceMembersContent from '@/features/spaces/public/components/SpaceMembersPage'
 
 export default function SpaceMembersPage() {
   const router = useRouter()

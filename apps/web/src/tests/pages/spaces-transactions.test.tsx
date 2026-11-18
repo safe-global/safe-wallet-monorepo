@@ -2,23 +2,23 @@ import { render, screen } from '@testing-library/react'
 import SpaceTransactionsPage from '../../pages/spaces/transactions'
 import { AppRoutes } from '@/config/routes'
 import * as router from 'next/router'
-import * as spacesFeatureUseCurrentSpaceId from '@/features/spaces/public/useCurrentSpaceId'
-import * as spacesFeatureUseFeatureRedirect from '@/features/spaces/public/useFeatureRedirect'
+import * as spacesFeatureUseCurrentSpaceId from '@/features/spaces/public/hooks/useCurrentSpaceId'
+import * as spacesFeatureUseFeatureRedirect from '@/features/spaces/public/hooks/useFeatureRedirect'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
-jest.mock('@/features/spaces/public/SpaceTransactionsPage', () => ({
+jest.mock('@/features/spaces/public/components/SpaceTransactionsPage', () => ({
   __esModule: true,
   default: ({ spaceId }: { spaceId: string }) => <div data-testid="space-transactions">transactions {spaceId}</div>,
 }))
-jest.mock('@/features/spaces/public/useCurrentSpaceId', () => ({
+jest.mock('@/features/spaces/public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(),
 }))
-jest.mock('@/features/spaces/public/useFeatureRedirect', () => ({
-  ...jest.requireActual('@/features/spaces/public/useFeatureRedirect'),
+jest.mock('@/features/spaces/public/hooks/useFeatureRedirect', () => ({
+  ...jest.requireActual('@/features/spaces/public/hooks/useFeatureRedirect'),
   __esModule: true,
   default: jest.fn(),
 }))

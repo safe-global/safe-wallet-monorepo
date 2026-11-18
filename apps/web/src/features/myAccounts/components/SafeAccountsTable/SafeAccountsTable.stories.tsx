@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { withMockProvider } from '@/storybook/decorators'
 import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
-import SafeAccountsTable from '../../public/SafeAccountsTable'
+import SafeAccountsTable from '../../public/components/SafeAccountsTable'
 import { createHandlers } from '@/stories/mocks/handlers'
 import { mockNow } from '@/stories/mocks/now'
 

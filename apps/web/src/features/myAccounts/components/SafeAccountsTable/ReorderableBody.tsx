@@ -7,10 +7,10 @@ import tableCss from './styles.module.css'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { reorderByKey } from '@/utils/reorder'
 import type { SafeAccountColumn } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
-import type { AccountGroup, AccountLine } from '../../public/useSafeAccountRows'
+import type { AccountGroup, AccountLine } from '../../public/hooks/useSafeAccountRows'
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
 import { bandHeaderAt } from './SimilarityBand'
-import type { SimilarWarning } from '@/features/address-poisoning/public/crossListClusters'
+import type { SimilarWarning } from '@/features/address-poisoning/public/utils/crossListClusters'
 
 type ReorderableBodyProps = {
   /** Top-level accounts in their current display order — each renders as one draggable row. */

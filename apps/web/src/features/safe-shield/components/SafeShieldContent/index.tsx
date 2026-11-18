@@ -24,12 +24,12 @@ import type { SafeTransaction } from '@safe-global/types-kit'
 import { CARD_ORDER, PRO_CARD_ORDER, getRevealDelays } from '../../utils/revealDelays'
 import { hasThreatCardResults } from '../../utils/hasThreatCardResults'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
-import type { HypernativeAuthStatus } from '@/features/hypernative/public/useHypernativeOAuth'
-import { useIsSafenetChecksEnabled } from '@/features/safenet-checks/public/useIsSafenetChecksEnabled'
+import type { HypernativeAuthStatus } from '@/features/hypernative/public/hooks/useHypernativeOAuth'
+import { useIsSafenetChecksEnabled } from '@/features/safenet-checks/public/hooks/useIsSafenetChecksEnabled'
 import { ThreatAnalysis } from '../ThreatAnalysis/ThreatAnalysis'
-import SafenetChecksSection from '@/features/safenet-checks/public/SafenetChecksSection'
-import HnInfoCard from '@/features/hypernative/public/HnInfoCard'
-import HnCustomChecksCard from '@/features/hypernative/public/HnCustomChecksCard'
+import SafenetChecksSection from '@/features/safenet-checks/public/components/SafenetChecksSection'
+import HnInfoCard from '@/features/hypernative/public/components/HnInfoCard'
+import HnCustomChecksCard from '@/features/hypernative/public/components/HnCustomChecksCard'
 
 export const SafeShieldContent = ({
   recipient,

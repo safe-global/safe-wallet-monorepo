@@ -3,13 +3,13 @@ import useLoadSafeInfo from '@/hooks/loadables/useLoadSafeInfo'
 import * as useChainId from '@/hooks/useChainId'
 import * as useChains from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
-import { getUndeployedSafeInfo } from '@/features/counterfactual/public/safeDeployment'
+import { getUndeployedSafeInfo } from '@/features/counterfactual/public/services/safeDeployment'
 import type { RootState } from '@/store'
 import * as useSafeAddressFromUrl from '@/hooks/useSafeAddressFromUrl'
 import * as safesQueries from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { toBeHex } from 'ethers'
 
-jest.mock('@/features/counterfactual/public/safeDeployment', () => ({
+jest.mock('@/features/counterfactual/public/services/safeDeployment', () => ({
   getUndeployedSafeInfo: jest.fn(),
 }))
 

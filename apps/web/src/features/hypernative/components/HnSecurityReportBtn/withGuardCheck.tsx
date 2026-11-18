@@ -1,5 +1,5 @@
 import type { ComponentType, ReactElement } from 'react'
-import { useIsHypernativeGuard } from '../../public/useIsHypernativeGuard'
+import { useIsHypernativeGuard } from '../../public/hooks/useIsHypernativeGuard'
 
 /**
  * Higher-order component that checks if the current Safe has a Hypernative guard installed.
