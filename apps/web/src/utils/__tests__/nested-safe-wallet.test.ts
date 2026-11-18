@@ -1,7 +1,7 @@
 import { concat, getAddress, keccak256, toBeHex, type JsonRpcProvider } from 'ethers'
 import type { NextRouter } from 'next/router'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import { getNestedWallet } from '../nested-safe-wallet'
+import { getNestedWallet, type ChosenParentSafeNonce } from '../nested-safe-wallet'
 import * as safeCoreSDK from '@/hooks/coreSDK/safeCoreSDK'
 import * as wallets from '@/utils/wallets'
 import * as txSenderSdk from '@/services/tx/tx-sender/sdk'
@@ -76,14 +76,18 @@ describe('getNestedWallet send', () => {
     executeTransaction: jest.fn(() => Promise.resolve({ hash: '0xhash' })),
   } as unknown as Safe
 
-  const sendTransaction = async (data: string, parentSafeNonce?: number) => {
-    const nestedWallet = getNestedWallet(
-      actualWallet,
-      safeInfo,
-      {} as JsonRpcProvider,
-      {} as NextRouter,
-      () => parentSafeNonce,
-    )
+  const chosenNonceOf = (initialNonce?: number): ChosenParentSafeNonce => {
+    let nonce = initialNonce
+    return {
+      get: () => nonce,
+      clear: () => {
+        nonce = undefined
+      },
+    }
+  }
+
+  const sendTransaction = async (data: string, chosenNonce = chosenNonceOf()) => {
+    const nestedWallet = getNestedWallet(actualWallet, safeInfo, {} as JsonRpcProvider, {} as NextRouter, chosenNonce)
     return nestedWallet.provider?.request({
       method: 'eth_sendTransaction',
       params: [{ from: PARENT_SAFE, to: CHILD_SAFE, value: '0x0', data }],
@@ -115,10 +119,30 @@ describe('getNestedWallet send', () => {
   it('uses the nonce the user chose for the parent Safe tx instead of the recommended one', async () => {
     jest.spyOn(transactions, 'getNonces').mockResolvedValue({ currentNonce: 51, recommendedNonce: 52 })
 
-    await sendTransaction(concat([APPROVE_HASH_SELECTOR, keccak256('0x01')]), 51)
+    await sendTransaction(concat([APPROVE_HASH_SELECTOR, keccak256('0x01')]), chosenNonceOf(51))
 
     expect(mockCreateTransaction.mock.calls[0][0].options?.nonce).toBe(51)
     expect(transactions.getNonces).not.toHaveBeenCalled()
+  })
+
+  it('uses the chosen parent Safe nonce for one tx only', async () => {
+    jest.spyOn(transactions, 'getNonces').mockResolvedValue({ currentNonce: 51, recommendedNonce: 52 })
+    const chosenNonce = chosenNonceOf(51)
+
+    await sendTransaction('0xdeadbeef', chosenNonce)
+    await sendTransaction('0xdeadbeef', chosenNonce)
+
+    expect(mockCreateTransaction.mock.calls.map(([args]) => args.options?.nonce)).toEqual([51, 52])
+  })
+
+  it('keeps the chosen parent Safe nonce for a retry when the parent tx cannot be proposed', async () => {
+    const proposeTxMock = jest.requireMock('@/services/tx/proposeTransaction').default as jest.Mock
+    proposeTxMock.mockRejectedValueOnce(new Error('Gateway unavailable'))
+    const chosenNonce = chosenNonceOf(51)
+
+    await expect(sendTransaction('0xdeadbeef', chosenNonce)).rejects.toThrow('Gateway unavailable')
+
+    expect(chosenNonce.get()).toBe(51)
   })
 
   it('creates no tx when the recommended nonce cannot be fetched', async () => {
@@ -273,7 +297,7 @@ describe('getNestedWallet send', () => {
       { ...safeInfo, threshold: 1 },
       {} as JsonRpcProvider,
       {} as NextRouter,
-      () => undefined,
+      chosenNonceOf(),
     )
     const result = await nestedWallet.provider?.request({
       method: 'eth_sendTransaction',
