@@ -121,7 +121,7 @@ export const CollapseAll: Story = {
 export const TableHeaderRow: Story = {
   render: () => (
     <Table className="table-fixed min-w-[1128px]">
-      <QueueTableHeader allCollapsed={false} safeCount={3} onToggleAll={fn()} />
+      <QueueTableHeader collapseAll={{ allCollapsed: false, count: 3, onToggle: fn() }} />
     </Table>
   ),
 }

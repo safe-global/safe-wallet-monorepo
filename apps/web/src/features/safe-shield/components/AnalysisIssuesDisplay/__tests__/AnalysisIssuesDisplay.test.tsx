@@ -1,4 +1,4 @@
-import { render, screen } from '@/tests/test-utils'
+import { mockClipboard, render, renderWithUserEvent, screen } from '@/tests/test-utils'
 import { fireEvent } from '@testing-library/react'
 import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
 import { ThreatAnalysisResultBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis-result.builder'
@@ -125,6 +125,21 @@ describe('AnalysisIssuesDisplay', () => {
       }
 
       expect(writeTextMock).toHaveBeenCalledWith(address)
+    })
+
+    it('keeps "Copied to clipboard" open after a mouse click, without the pointer leaving the address', async () => {
+      mockClipboard()
+      const address = faker.finance.ethereumAddress()
+      const result = ThreatAnalysisResultBuilder.moderate()
+        .issues({ [Severity.WARN]: [{ description: 'Test description', address }] })
+        .build()
+      const { user } = renderWithUserEvent(
+        <AnalysisIssuesDisplay result={result} issueBackgroundColor={SEVERITY_COLORS[Severity.WARN].background} />,
+      )
+
+      await user.click(screen.getByText(address))
+
+      expect(await screen.findByText('Copied to clipboard')).toBeInTheDocument()
     })
   })
 

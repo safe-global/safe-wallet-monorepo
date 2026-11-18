@@ -20,6 +20,7 @@ jest.mock('./TransactionsToolbar/TransactionsToolbar', () => ({
     filters: SpaceQueueFilters
     onFiltersChange: (filters: SpaceQueueFilters) => void
     onSearchChange: (search: string) => void
+    onGroupByChange: (groupBy: string) => void
   }) => {
     mockToolbarProps(props)
     return (
@@ -31,6 +32,9 @@ jest.mock('./TransactionsToolbar/TransactionsToolbar', () => ({
           Filter by sign
         </button>
         <input aria-label="Search" onChange={(event) => props.onSearchChange(event.target.value)} />
+        <button type="button" onClick={() => props.onGroupByChange('network')}>
+          Group by network
+        </button>
       </>
     )
   },
@@ -38,14 +42,14 @@ jest.mock('./TransactionsToolbar/TransactionsToolbar', () => ({
 
 jest.mock('./SpaceQueueTable', () => ({
   __esModule: true,
-  default: ({ sections }: { sections: SpaceQueueSection[] }) => (
-    <>
+  default: ({ sections, groupBy }: { sections: SpaceQueueSection[]; groupBy: string }) => (
+    <div data-testid="space-queue-table" data-group-by={groupBy}>
       {sections.map((section) => (
         <div key={section.safeAddress} data-testid="space-queue-safe">
           {section.chains.length} chains of {section.safeAddress}
         </div>
       ))}
-    </>
+    </div>
   ),
 }))
 
@@ -373,6 +377,48 @@ describe('SpaceTransactionQueue', () => {
 
       expect(await screen.findByText('No proposals match your search')).toBeInTheDocument()
       expect(screen.queryByText("Couldn't load the queue")).not.toBeInTheDocument()
+    })
+  })
+
+  describe('group by', () => {
+    it('lists the queue by status when no grouping was picked', async () => {
+      respondWith(page({ [safeA]: { '1': transactions(1) } }))
+
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+
+      expect(await screen.findByTestId('space-queue-table')).toHaveAttribute('data-group-by', 'status')
+    })
+
+    it('regroups the queue with the grouping picked in the toolbar', async () => {
+      respondWith(page({ [safeA]: { '1': transactions(1) } }))
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-table')
+
+      fireEvent.click(screen.getByRole('button', { name: 'Group by network' }))
+
+      await waitFor(() => expect(screen.getByTestId('space-queue-table')).toHaveAttribute('data-group-by', 'network'))
+    })
+
+    it('regroups the queue without requesting it again', async () => {
+      const requests = respondWith(page({ [safeA]: { '1': transactions(1) } }))
+      render(<SpaceTransactionQueue spaceId={spaceId} />)
+      await screen.findByTestId('space-queue-table')
+      const requestCount = requests.length
+
+      fireEvent.click(screen.getByRole('button', { name: 'Group by network' }))
+      await waitFor(() => expect(screen.getByTestId('space-queue-table')).toHaveAttribute('data-group-by', 'network'))
+
+      expect(requests).toHaveLength(requestCount)
+    })
+
+    it('opens the queue with the grouping picked earlier in the session', async () => {
+      respondWith(page({ [safeA]: { '1': transactions(1) } }))
+
+      render(<SpaceTransactionQueue spaceId={spaceId} />, {
+        initialReduxState: { spaceQueueView: { groupBy: 'next' } },
+      })
+
+      expect(await screen.findByTestId('space-queue-table')).toHaveAttribute('data-group-by', 'next')
     })
   })
 

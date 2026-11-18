@@ -5,7 +5,7 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { getStoreInstance } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
-import { useAddOrRequestWorkspaceContact } from '../useAddOrRequestWorkspaceContact'
+import { useAddOrRequestWorkspaceContact, type WorkspaceContactLocation } from '../useAddOrRequestWorkspaceContact'
 import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
 import { useSpaceAddressBookState } from '../../public/hooks/useGetSpaceAddressBook'
 import { useIsAdmin, useIsInvited } from '../../public/hooks/useSpaceMembers'
@@ -52,6 +52,7 @@ const setup = ({
   addressBook = [],
   upsertResult = {},
   requestResult = {},
+  location,
 }: {
   isAdmin?: boolean
   isInvited?: boolean
@@ -59,6 +60,7 @@ const setup = ({
   addressBook?: SpaceAddressBookItemDto[]
   upsertResult?: { error?: string }
   requestResult?: unknown
+  location?: WorkspaceContactLocation
 } = {}) => {
   const upsert = jest.fn().mockResolvedValue(upsertResult)
   mockCreateRequest.mockResolvedValue(requestResult)
@@ -71,10 +73,11 @@ const setup = ({
     tags: [],
     isLoading: false,
     isError: false,
+    isUninitialized: false,
     refetch: jest.fn(),
   })
 
-  const { result } = renderHook(() => useAddOrRequestWorkspaceContact(SOURCE))
+  const { result } = renderHook(() => useAddOrRequestWorkspaceContact({ source: SOURCE, location }))
   return { addOrRequest: result.current, upsert, createRequest: mockCreateRequest }
 }
 
@@ -117,6 +120,25 @@ describe('useAddOrRequestWorkspaceContact', () => {
     expect(createRequest).toHaveBeenCalledWith({ spaceId: SPACE_ID, createAddressBookRequestDto: CONTACT })
     expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ADDRESS_REQUEST_SENT, { [MixpanelEventParams.SOURCE]: SOURCE })
     expect(upsert).not.toHaveBeenCalled()
+  })
+
+  it('adds the location to the request event when given', async () => {
+    const { addOrRequest } = setup({ isAdmin: false, location: 'suggested' })
+
+    await addOrRequest(CONTACT)
+
+    expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ADDRESS_REQUEST_SENT, {
+      [MixpanelEventParams.SOURCE]: SOURCE,
+      [MixpanelEventParams.LOCATION]: 'suggested',
+    })
+  })
+
+  it('sends the request event without a location by default', async () => {
+    const { addOrRequest } = setup({ isAdmin: false })
+
+    await addOrRequest(CONTACT)
+
+    expect(trackEvent).toHaveBeenCalledWith(SPACE_EVENTS.ADDRESS_REQUEST_SENT, { [MixpanelEventParams.SOURCE]: SOURCE })
   })
 
   it.each([
