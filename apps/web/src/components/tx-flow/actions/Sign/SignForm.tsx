@@ -16,7 +16,7 @@ import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import SplitMenuButton from '@safe-global/views/components/common/SplitMenuButton'
 import type { SlotComponentProps, SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
-import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { useSafeShield } from '@/features/safe-shield/public/useSafeShield'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 
 export const SignForm = ({

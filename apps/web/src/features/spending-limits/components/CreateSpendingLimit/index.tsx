@@ -6,7 +6,7 @@ import { Label } from '@safe-global/views/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
 
 import AddressBookInput from '@/components/common/AddressBookInput'
-import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/SafeShieldContext'
+import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/public/useSafeShield'
 import useChainId from '@/hooks/useChainId'
 import { getResetTimeOptions } from '../../constants'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'

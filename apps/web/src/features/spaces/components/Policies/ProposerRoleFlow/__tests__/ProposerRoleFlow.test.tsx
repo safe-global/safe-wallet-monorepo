@@ -16,7 +16,7 @@ jest.mock('../../SafeAccountSelector/hooks/useEligibleSafeAccounts')
 jest.mock('../hooks/useProposerValidation', () => ({ useProposerValidation: () => async () => undefined }))
 jest.mock('../hooks/useGrantProposer', () => ({ useGrantProposer: jest.fn() }))
 jest.mock('../../hooks/useParentSafeWallet', () => ({ useParentSafeWallet: jest.fn() }))
-jest.mock('@/features/safe-shield', () => ({
+jest.mock('@/features/safe-shield/components/SafeShieldWidget', () => ({
   __esModule: true,
   default: () => <div data-testid="safe-shield-widget" />,
 }))

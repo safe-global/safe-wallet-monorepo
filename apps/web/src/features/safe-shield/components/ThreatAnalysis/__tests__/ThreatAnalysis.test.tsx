@@ -6,7 +6,7 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 
 // Mock AnalysisGroupCard — forward expandedGroups to a data attribute for assertions
-jest.mock('@/features/safe-shield/components/AnalysisGroupCard/AnalysisGroupCard', () => ({
+jest.mock('../../AnalysisGroupCard/AnalysisGroupCard', () => ({
   AnalysisGroupCard: jest.fn(
     ({ children, delay, highlightedSeverity, analyticsEvent, requestId, expandedGroups, 'data-testid': testId }) => (
       <div

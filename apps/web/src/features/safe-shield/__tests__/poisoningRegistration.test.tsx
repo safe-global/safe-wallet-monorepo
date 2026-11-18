@@ -1,10 +1,7 @@
 import { fireEvent, render, renderHook, waitFor } from '@/tests/test-utils'
 import { useState, type ReactNode } from 'react'
-import {
-  SafeShieldProvider,
-  useSafeShield,
-  useSafeShieldForAddressPoisoning,
-} from '@/features/safe-shield/SafeShieldContext'
+import { SafeShieldProvider } from '../public/SafeShieldProvider'
+import { useSafeShield, useSafeShieldForAddressPoisoning } from '../public/useSafeShield'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { StatusGroup } from '@safe-global/utils/features/safe-shield/types'
 
@@ -14,20 +11,20 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 
 // mock ONLY the sibling analyses (like the real create step: nothing registered)
-jest.mock('@/features/safe-shield/hooks/useRecipientAnalysis', () => ({
-  ...jest.requireActual('@/features/safe-shield/hooks/useRecipientAnalysis'),
+jest.mock('../hooks/useRecipientAnalysis', () => ({
+  ...jest.requireActual('../hooks/useRecipientAnalysis'),
   useRecipientAnalysis: jest.fn(() => undefined),
 }))
-jest.mock('@/features/safe-shield/hooks/useCounterpartyAnalysis', () => ({
-  ...jest.requireActual('@/features/safe-shield/hooks/useCounterpartyAnalysis'),
+jest.mock('../hooks/useCounterpartyAnalysis', () => ({
+  ...jest.requireActual('../hooks/useCounterpartyAnalysis'),
   useCounterpartyAnalysis: jest.fn(() => ({
     recipient: [undefined, undefined, false],
     contract: [undefined, undefined, false],
     deadlock: [undefined, undefined, false],
   })),
 }))
-jest.mock('@/features/safe-shield/hooks/useThreatAnalysis', () => ({
-  ...jest.requireActual('@/features/safe-shield/hooks/useThreatAnalysis'),
+jest.mock('../hooks/useThreatAnalysis', () => ({
+  ...jest.requireActual('../hooks/useThreatAnalysis'),
   useThreatAnalysis: jest.fn(() => [undefined, undefined, false]),
 }))
 jest.mock('@/hooks/useIsTrustedSafe', () => ({ __esModule: true, default: jest.fn(() => true) }))

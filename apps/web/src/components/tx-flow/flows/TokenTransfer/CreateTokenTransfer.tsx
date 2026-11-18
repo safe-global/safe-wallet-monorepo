@@ -46,7 +46,7 @@ import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'
 import { useNoFeeCampaignEligibility } from '@/features/no-fee-campaign/hooks/useNoFeeCampaignEligibility'
 import { useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
+import { useSafeShieldForRecipients } from '@/features/safe-shield/public/useSafeShield'
 import uniq from 'lodash/uniq'
 
 export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balance: string }): ReactElement => (

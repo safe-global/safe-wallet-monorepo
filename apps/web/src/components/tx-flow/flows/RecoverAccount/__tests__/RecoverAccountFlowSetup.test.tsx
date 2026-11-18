@@ -13,8 +13,8 @@ import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { RecoverAccountFlowFields, type RecoverAccountFlowProps } from '..'
 import { _isSameSetup, _validateNewOwner, RecoverAccountFlowSetup } from '../RecoverAccountFlowSetup'
 
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
-  __esModule: true,
+jest.mock('@/features/safe-shield/public/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/useSafeShield'),
   useSafeShieldForAddressPoisoning: () => undefined,
 }))
 

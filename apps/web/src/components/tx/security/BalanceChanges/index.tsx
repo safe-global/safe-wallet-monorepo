@@ -16,7 +16,7 @@ import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import css from './styles.module.css'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { useSafeShield } from '@/features/safe-shield/public/useSafeShield'
 import type {
   FungibleDiffDto,
   NftDiffDto,

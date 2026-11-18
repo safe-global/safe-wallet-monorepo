@@ -35,8 +35,8 @@ jest.mock('@/features/counterfactual/public/useIsCounterfactualSafe', () => ({
   default: jest.fn(() => false),
 }))
 
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
-  __esModule: true,
+jest.mock('@/features/safe-shield/public/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/useSafeShield'),
   useSafeShield: jest.fn(() => ({ needsRiskConfirmation: false, isRiskConfirmed: false })),
 }))
 

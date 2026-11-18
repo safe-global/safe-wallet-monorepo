@@ -6,7 +6,7 @@ import {
   StatusGroup,
 } from '@safe-global/utils/features/safe-shield/types'
 import { sliceTopBySeverity } from '@safe-global/utils/features/safe-shield/utils'
-import { AnalysisGroupCard } from '@/features/safe-shield/components/AnalysisGroupCard/AnalysisGroupCard'
+import { AnalysisGroupCard } from '../AnalysisGroupCard/AnalysisGroupCard'
 import { hasThreatCardResults } from '../../utils/hasThreatCardResults'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'

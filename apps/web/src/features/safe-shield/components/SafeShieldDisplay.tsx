@@ -22,7 +22,7 @@ import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHype
 import { useCurrentChain } from '@/hooks/useChains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { countChecks } from '../utils/countChecks'
-import { isContractCall } from '@/features/safe-shield/utils/isContractCall'
+import { isContractCall } from '../utils/isContractCall'
 import { useIsSafenetChecksEnabled } from '@/features/safenet-checks'
 import { useSafenetShieldState } from '@/features/safenet-checks/useSafenetShieldState'
 

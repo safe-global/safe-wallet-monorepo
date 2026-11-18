@@ -1,5 +1,5 @@
 import { render, screen } from '@/tests/test-utils'
-import SafeShieldWidget from '../index'
+import SafeShieldWidget from '../components/SafeShieldWidget'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type {
   ContractAnalysisResults,
@@ -7,7 +7,7 @@ import type {
   RecipientAnalysisResults,
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
-import { useSafeShield } from '../SafeShieldContext'
+import { useSafeShield } from '../public/useSafeShield'
 import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
 import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHypernativeEligible'
 import type { HypernativeAuthStatus } from '@/features/hypernative/hooks/useHypernativeOAuth'
@@ -15,7 +15,7 @@ import type { HypernativeEligibility } from '@/features/hypernative/hooks/useIsH
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 import { useCheckSimulation } from '../hooks/useCheckSimulation'
 
-jest.mock('../SafeShieldContext')
+jest.mock('../public/useSafeShield')
 jest.mock('@/features/hypernative/hooks/useHypernativeOAuth', () => ({
   ...jest.requireActual('@/features/hypernative/hooks/useHypernativeOAuth'),
   useHypernativeOAuth: jest.fn(),

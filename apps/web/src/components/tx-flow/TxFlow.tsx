@@ -24,7 +24,7 @@ import { SlotProvider } from '@safe-global/views/components/tx-flow/slots/SlotPr
 import { useTrackTimeSpent } from '@/components/tx/shared/tracking'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { LedgerFeature } from '@/features/ledger'
-import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import { SafeShieldProvider } from '@/features/safe-shield/public/SafeShieldProvider'
 import type { SubmitCallback, SubmitCallbackProps } from '@safe-global/views/components/tx-flow/types'
 
 export type { SubmitCallback } from '@safe-global/views/components/tx-flow/types'

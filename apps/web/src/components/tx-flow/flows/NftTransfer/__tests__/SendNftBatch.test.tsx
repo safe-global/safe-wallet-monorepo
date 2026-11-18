@@ -7,7 +7,8 @@ import SendNftBatch from '../SendNftBatch'
 
 const RECIPIENT = '0x2222222222222222222222222222222222222222'
 
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
+jest.mock('@/features/safe-shield/public/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/useSafeShield'),
   useSafeShieldForRecipients: jest.fn(),
   useSafeShieldForAddressPoisoning: jest.fn(),
 }))

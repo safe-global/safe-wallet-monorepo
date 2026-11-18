@@ -4,7 +4,7 @@ import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxConte
 import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { SlotProvider } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import RiskConfirmationSlot from '@/components/tx-flow/features/RiskConfirmation'
-import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import { SafeShieldProvider } from '@/features/safe-shield/public/SafeShieldProvider'
 import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import ReviewTransactionContent from '../ReviewTransactionContent'

@@ -12,7 +12,8 @@ import { NO_TOKEN_SELECTED_ERROR } from '../../services/spendingLimitValidation'
 import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
 import * as useIsSpendingLimitSupportedHook from '../../hooks/useIsSpendingLimitSupported'
 
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
+jest.mock('@/features/safe-shield/public/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/useSafeShield'),
   useSafeShieldForAddressPoisoning: jest.fn(),
 }))
 

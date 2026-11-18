@@ -6,7 +6,7 @@ import TxLayoutBase from '.'
 
 // The Safe Shield widget and the status rail pull in network/analytics-heavy hooks; stub them so
 // this test focuses on the shared layout logic (what renders, when) rather than their internals.
-jest.mock('@/features/safe-shield', () => ({
+jest.mock('@/features/safe-shield/components/SafeShieldWidget', () => ({
   __esModule: true,
   default: () => <div data-testid="safe-shield-widget">SafeShield</div>,
 }))

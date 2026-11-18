@@ -10,8 +10,7 @@ import { render } from '@/tests/test-utils'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { TokenType } from '@safe-global/store/gateway/types'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
-import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
-import * as useRecipientAnalysis from '@/features/safe-shield/hooks/useRecipientAnalysis'
+import { SafeShieldProvider } from '@/features/safe-shield/public/SafeShieldProvider'
 import * as useBalances from '@/hooks/useBalances'
 import * as useTrustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
 import * as chainHooks from '@/hooks/useChains'
@@ -34,6 +33,9 @@ jest.mock('@/features/safe-shield/hooks/useRecipientAnalysis', () => ({
   ...jest.requireActual('@/features/safe-shield/hooks/useRecipientAnalysis'),
   useRecipientAnalysis: jest.fn(() => undefined),
 }))
+const useRecipientAnalysis = jest.requireMock<{ useRecipientAnalysis: jest.Mock }>(
+  '@/features/safe-shield/hooks/useRecipientAnalysis',
+)
 jest.mock('@/features/safe-shield/hooks/useCounterpartyAnalysis', () => ({
   ...jest.requireActual('@/features/safe-shield/hooks/useCounterpartyAnalysis'),
   useCounterpartyAnalysis: jest.fn(() => ({

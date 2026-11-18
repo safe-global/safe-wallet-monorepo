@@ -11,7 +11,7 @@ import {
 } from '@safe-global/utils/features/safe-shield/types'
 import { mapVisibleAnalysisResults } from '@safe-global/utils/features/safe-shield/utils'
 import { getPrimaryAnalysisResult } from '@safe-global/utils/features/safe-shield/utils/getPrimaryAnalysisResult'
-import { SeverityIcon } from '../SeverityIcon'
+import { SeverityIcon } from '../../public/SeverityIcon'
 import { AnalysisGroupCardItem } from './AnalysisGroupCardItem'
 import { AddressPoisoningCardItem } from './AddressPoisoningCardItem'
 import { DelegateCallCardItem } from './DelegateCallCardItem'

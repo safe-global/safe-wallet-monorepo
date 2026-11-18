@@ -30,7 +30,7 @@ import type { JsonRpcSigner } from 'ethers'
 import { CGW_ERROR_FALLBACK, CGW_SAFE_UNAVAILABLE } from '@safe-global/utils/services/exceptions/gatewayErrors'
 import { mapLedgerError } from '@/services/onboard/ledger-errors'
 import type { Message } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
-import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import { SafeShieldProvider } from '@/features/safe-shield/public/SafeShieldProvider'
 import type { ReactElement } from 'react'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
@@ -76,7 +76,7 @@ const renderWithSafeShield = (ui: ReactElement) => {
 }
 
 const mockSafeShield = ({ needsRiskConfirmation = false, isRiskConfirmed = false } = {}) =>
-  jest.spyOn(require('@/features/safe-shield/SafeShieldContext'), 'useSafeShield').mockReturnValue({
+  jest.spyOn(require('@/features/safe-shield/public/useSafeShield'), 'useSafeShield').mockReturnValue({
     needsRiskConfirmation,
     isRiskConfirmed,
     setIsRiskConfirmed: jest.fn(),

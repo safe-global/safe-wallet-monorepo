@@ -35,7 +35,7 @@ import commonCss from '@safe-global/views/components/tx-flow/common/styles.modul
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 import { getTotalFeeFormatted } from '@safe-global/utils/hooks/useDefaultGasPrice'
-import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { useSafeShield } from '@/features/safe-shield/public/useSafeShield'
 import { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 
 export const CounterfactualForm = ({

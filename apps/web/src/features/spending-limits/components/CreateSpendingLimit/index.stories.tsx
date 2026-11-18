@@ -4,7 +4,7 @@ import { mswLoader } from 'msw-storybook-addon'
 import { createMockStory } from '@/stories/mocks/createMockStory'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import SafeTxProvider from '@/components/tx-flow/SafeTxProvider'
-import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import { SafeShieldProvider } from '@/features/safe-shield/public/SafeShieldProvider'
 import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../types'
 import CreateSpendingLimit from './index'
 
