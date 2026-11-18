@@ -10,6 +10,9 @@ jest.mock('@/components/settings/PushNotifications/hooks/useShowNotificationsRen
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
+}))
+jest.mock('@/services/analytics/events/overview', () => ({
+  ...jest.requireActual('@/services/analytics/events/overview'),
   OVERVIEW_EVENTS: { NOTIFICATION_CENTER: 'notification_center' },
 }))
 

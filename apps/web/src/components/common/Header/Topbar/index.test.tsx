@@ -5,7 +5,6 @@ import Topbar, {
   SEARCH_CONTEXT_WRAP,
 } from './index'
 import type { ReactNode } from 'react'
-import * as contracts from '@/features/__core__'
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import type { Notification } from '@/store/notificationsSlice'
@@ -13,14 +12,43 @@ import type { RootState } from '@/store'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
-import walletConnectFeature from '@/features/walletconnect/feature'
-import { wcPopupStore } from '@/features/walletconnect/store'
+import { wcPopupStore } from '@/features/walletconnect/public/store/wcPopupStore'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
-  useLoadFeature: jest.fn(),
+const mockWalletPopover = jest.fn()
+const mockGlobalSearchModal = jest.fn()
+const mockGlobalSearchInput = jest.fn()
+const mockWalletConnectWidget = jest.fn()
+jest.mock('@/features/wallet/public/components/WalletPopover', () => ({
+  __esModule: true,
+  default: (props: object) => mockWalletPopover(props),
 }))
+jest.mock('@/features/global-search/public/components/GlobalSearchModal', () => ({
+  __esModule: true,
+  default: (props: object) => mockGlobalSearchModal(props),
+}))
+jest.mock('@/features/global-search/public/components/GlobalSearchInput', () => ({
+  __esModule: true,
+  default: (props: object) => mockGlobalSearchInput(props),
+}))
+jest.mock('@/features/walletconnect/public/components/WalletConnectWidget', () => ({
+  __esModule: true,
+  default: (props: object) => mockWalletConnectWidget(props),
+}))
+
+type FeatureComponent = (props: never) => ReactNode
+
+const setFeatureComponents = (components: {
+  WalletPopover: FeatureComponent
+  GlobalSearchModal: FeatureComponent
+  GlobalSearchInput: FeatureComponent
+  WalletConnectWidget: FeatureComponent
+}) => {
+  mockWalletPopover.mockImplementation(components.WalletPopover)
+  mockGlobalSearchModal.mockImplementation(components.GlobalSearchModal)
+  mockGlobalSearchInput.mockImplementation(components.GlobalSearchInput)
+  mockWalletConnectWidget.mockImplementation(components.WalletConnectWidget)
+}
 
 const mockWallet = { address: '0x1234567890abcdef1234567890abcdef12345678', balance: '0' }
 
@@ -35,19 +63,15 @@ jest.mock('@/hooks/useMediaQuery', () => ({
   useIsBelowMd: () => mockUseIsBelowMd(),
 }))
 
-jest.mock('@/features/wallet', () => ({
-  WalletFeature: { name: 'wallet' },
-  useWalletPopover: () => ({
+jest.mock('@/features/wallet/public/hooks/useWalletPopover', () => ({
+  __esModule: true,
+  default: () => ({
     wallet: mockWallet,
     open: false,
     anchorEl: null,
     handleClick: jest.fn(),
     handleClose: jest.fn(),
   }),
-}))
-
-jest.mock('@/features/walletconnect', () => ({
-  WalletConnectFeature: { name: 'walletconnect' },
 }))
 
 jest.mock('@walletconnect/core', () => ({ Core: jest.fn() }))
@@ -58,9 +82,13 @@ jest.mock('@reown/walletkit', () => ({
 }))
 
 const mockUseDraftBatch = jest.fn<unknown[], []>(() => [])
-jest.mock('@/features/batching', () => ({
+jest.mock('@/features/batching/public/hooks/useDraftBatch', () => ({
+  ...jest.requireActual('@/features/batching/public/hooks/useDraftBatch'),
   useDraftBatch: () => mockUseDraftBatch(),
-  BatchTooltip: ({ children }: { children: ReactNode }) => children,
+}))
+jest.mock('@/features/batching/public/components/BatchTooltip', () => ({
+  __esModule: true,
+  default: ({ children }: { children: ReactNode }) => children,
 }))
 
 const mockUseSafeAddress = jest.fn<string, []>(() => '')
@@ -108,11 +136,17 @@ jest.mock('@/components/settings/PushNotifications/hooks/useShowNotificationsRen
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
+}))
+jest.mock('@/services/analytics/events/overview', () => ({
+  ...jest.requireActual('@/services/analytics/events/overview'),
   OVERVIEW_EVENTS: {
     NOTIFICATION_CENTER: 'notification_center',
     OPEN_ONBOARD: { action: 'Open wallet modal', category: 'overview' },
   },
   OVERVIEW_LABELS: { top_bar: 'top_bar' },
+}))
+jest.mock('@/services/analytics/events/batching', () => ({
+  ...jest.requireActual('@/services/analytics/events/batching'),
   BATCH_EVENTS: { BATCH_SIDEBAR_OPEN: { action: 'Batch sidebar open', category: 'batching' } },
 }))
 
@@ -124,12 +158,17 @@ jest.mock('@/services/analytics/events/spaces', () => ({
 }))
 
 const mockUseCurrentSpaceId = jest.fn<string | null, []>(() => 'space-42')
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => mockUseCurrentSpaceId(),
+}))
+jest.mock('@/features/spaces/public/components/HeaderNavigation', () => ({
   get HeaderNavigation() {
-    return jest.requireActual('@/features/spaces/components/HeaderNavigation').HeaderNavigation
+    return jest.requireActual('@/features/spaces/public/components/HeaderNavigation').HeaderNavigation
   },
-  HeaderAccountInfo: () => <div data-testid="header-account-info" />,
+}))
+jest.mock('@/features/spaces/public/components/HeaderAccountInfo', () => ({
+  __esModule: true,
+  default: () => <div data-testid="header-account-info" />,
 }))
 
 jest.mock(
@@ -151,8 +190,6 @@ const createNotification = (overrides: Partial<Notification> = {}): Notification
   ...overrides,
 })
 
-const mockUseLoadFeature = contracts.useLoadFeature as jest.Mock
-
 describe('Topbar', () => {
   beforeEach(() => {
     jest.clearAllMocks()
@@ -165,7 +202,7 @@ describe('Topbar', () => {
     mockUseSafeAddress.mockReturnValue('')
     mockUseIsSafeOwner.mockReturnValue(false)
     mockUseIsWalletProposer.mockReturnValue(false)
-    mockUseLoadFeature.mockReturnValue({
+    setFeatureComponents({
       WalletPopover: () => null,
       GlobalSearchModal: () => null,
       GlobalSearchInput: () => null,
@@ -191,11 +228,12 @@ describe('Topbar', () => {
       wcPopupStore.setStore(false)
       mockIsSpaceRoute.mockReturnValue(false)
       mockUseSafeAddress.mockReturnValue(safeInfo.address.value)
-      mockUseLoadFeature.mockReturnValue({
+      setFeatureComponents({
         WalletPopover: () => null,
         GlobalSearchModal: () => null,
         GlobalSearchInput: () => null,
-        WalletConnectWidget: walletConnectFeature.WalletConnectWidget,
+        // The real UI, not the gated lazy wrapper: it must render on the first pass, without NATIVE_WALLETCONNECT
+        WalletConnectWidget: jest.requireActual('@/features/walletconnect/components/WalletConnectUi').default,
       })
     })
 
@@ -328,7 +366,7 @@ describe('Topbar', () => {
     it('renders SafeLogo on the policies route, with neither the safe bar nor the search input', () => {
       mockIsSpaceRoute.mockReturnValue(true)
       mockUsePathname.mockReturnValue('/spaces/policies')
-      mockUseLoadFeature.mockReturnValue({
+      setFeatureComponents({
         WalletPopover: () => null,
         GlobalSearchModal: () => null,
         GlobalSearchInput: () => <div data-testid="global-search-input" />,
@@ -628,7 +666,7 @@ describe('Topbar', () => {
   describe('wallet tracking', () => {
     beforeEach(() => {
       mockUseCurrentSpaceId.mockReturnValue('space-42')
-      mockUseLoadFeature.mockReturnValue({
+      setFeatureComponents({
         WalletPopover: ({
           onWalletSwitch,
           onWalletDisconnect,

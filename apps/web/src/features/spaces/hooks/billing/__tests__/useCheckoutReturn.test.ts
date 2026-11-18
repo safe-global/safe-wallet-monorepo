@@ -4,7 +4,10 @@ import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { _resetCheckoutDeadlines, useCheckoutReturn } from '../useCheckoutReturn'
 
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 const mockReplace = jest.fn()
 let mockQuery: Record<string, string> = {}

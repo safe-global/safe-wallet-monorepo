@@ -16,3 +16,15 @@ export type AddressBookContact = {
   /** Workspace contacts only; local contacts have none. */
   tags?: ContactTag[]
 }
+
+export type SuggestionReason = { kind: 'signer'; safes: string[] }
+
+export type SuggestedContact = {
+  address: string
+  chains: ChainInfo[]
+  suggestedName: string
+  reason: SuggestionReason
+}
+
+export const describeSuggestion = (reason: SuggestionReason): string =>
+  reason.safes.length === 1 ? `Signer of ${reason.safes[0]}` : `Signer of ${reason.safes.length} Safes`

@@ -7,7 +7,7 @@ import ExecuteRecoveryButton from '../ExecuteRecoveryButton'
 import CancelRecoveryButton from '../CancelRecoveryButton'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
 import { formatAuditDateTime } from '@/components/common/AuditLog'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import type { RecoveryQueueItem } from '../../public/types'
 import { formatRecoveryTime } from '../../services/formatRecoveryTime'
 import useAddressBook from '@/hooks/useAddressBook'
 

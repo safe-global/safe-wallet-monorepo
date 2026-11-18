@@ -3,7 +3,7 @@ import SpendingLimitIcon from '@safe-global/views/features/spaces/components/Pol
 import TxCard from '@safe-global/views/components/tx-flow/common/TxCard'
 import TxLayoutBase from '@/components/tx-flow/common/TxLayoutBase'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import type { SpendingLimitState } from '@/features/spending-limits'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 import LoadError from '@safe-global/views/features/spaces/components/Policies/components/LoadError'
 import {
   EDIT_STEP_TITLE,

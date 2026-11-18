@@ -4,9 +4,12 @@ import { FormProvider, useForm } from 'react-hook-form'
 import { mswLoader } from 'msw-storybook-addon'
 import { parseUnits } from 'ethers'
 import type { Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import type { SpendingLimitState } from '@/features/spending-limits'
-import { createMockStory } from '@/stories/mocks'
-import { MultiTransfersFields, TokenTransferType } from '@/components/tx-flow/flows/TokenTransfer'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import {
+  MultiTransfersFields,
+  TokenTransferType,
+} from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
 import SpendingLimitRow from './index'
 
 // First owner of the `efSafe` fixture — this is the address the `owner` wallet

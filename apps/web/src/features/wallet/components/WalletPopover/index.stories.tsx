@@ -4,7 +4,7 @@ import { useEffect, useState, type ComponentProps } from 'react'
 import { fn } from 'storybook/test'
 import type { Eip1193Provider } from 'ethers'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import WalletPopover from './index'
 
 // The mock harness resolves the current Safe to the efSafe fixture, which lives on Ethereum

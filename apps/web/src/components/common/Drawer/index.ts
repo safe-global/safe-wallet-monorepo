@@ -1,11 +1,9 @@
-export { Drawer, type DrawerProps } from '@safe-global/views/components/common/Drawer/Drawer'
-export {
-  DrawerHeader,
-  DrawerTitle,
-  DrawerSubtitle,
-  DrawerSection,
-  DrawerList,
-  type DrawerListItem,
-  DrawerBody,
-  DrawerFooter,
-} from './components'
+export { type DrawerProps } from '@safe-global/views/components/common/Drawer/Drawer'
+export { DrawerHeader } from '@safe-global/views/components/common/Drawer/components/DrawerHeader'
+export { DrawerTitle } from '@safe-global/views/components/common/Drawer/components/DrawerTitle'
+export { DrawerSubtitle } from '@safe-global/views/components/common/Drawer/components/DrawerSubtitle'
+export { DrawerSection } from '@safe-global/views/components/common/Drawer/components/DrawerSection'
+export { DrawerList } from '@safe-global/views/components/common/Drawer/components/DrawerList'
+export type { DrawerListItem } from '@safe-global/views/components/common/Drawer/components/DrawerList'
+export { DrawerBody } from '@/components/common/Drawer/components/DrawerBody'
+export { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'

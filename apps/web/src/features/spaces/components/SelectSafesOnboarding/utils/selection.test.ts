@@ -1,6 +1,6 @@
 import type { UseFormSetValue } from 'react-hook-form'
-import type { AllSafeItems } from '@/hooks/safes'
-import type { AccountLine } from '@/features/myAccounts'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import type { AccountLine } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/types'
 import type { AddAccountsFormValues } from '../../../hooks/addAccounts.types'
 import { applySafeSelectionToggle, getSelectedLeafKeys } from './selection'
 

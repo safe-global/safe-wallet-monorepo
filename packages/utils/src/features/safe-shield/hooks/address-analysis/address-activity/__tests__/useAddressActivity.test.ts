@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker'
 import { renderHook, waitFor } from '@testing-library/react'
 import type { JsonRpcProvider } from 'ethers'
 import { useAddressActivity } from '../useAddressActivity'
-import { LowActivityAnalysisResult } from '../../config'
+import { LowActivityAnalysisResult, SkippedActivityAnalysisResult } from '../../config'
 import { CommonSharedStatus, Severity } from '../../../../types'
 import { ErrorType, getErrorInfo } from '../../../../utils/errors'
 import { useMemo } from 'react'
@@ -340,7 +340,7 @@ describe('useAddressActivity', () => {
   describe('large recipient sets', () => {
     const createAddresses = (count: number) => Array.from({ length: count }, () => faker.finance.ethereumAddress())
 
-    it('should not look up any address when there are more than 50', async () => {
+    it('should not look up any address and report the check as skipped when there are more than 50', async () => {
       const addresses = createAddresses(51)
       const getTransactionCount = jest.fn().mockResolvedValue(0)
       const provider = { getTransactionCount } as unknown as JsonRpcProvider
@@ -357,7 +357,7 @@ describe('useAddressActivity', () => {
       expect(getTransactionCount).not.toHaveBeenCalled()
       expect(error).toBeUndefined()
       expect(Object.keys(results ?? {}).sort()).toEqual([...addresses].sort())
-      expect(Object.values(results ?? {}).every((entry) => entry === undefined)).toBe(true)
+      expect(Object.values(results ?? {})).toEqual(addresses.map(() => SkippedActivityAnalysisResult))
     })
 
     it('should look up all 50 addresses with at most 5 lookups in flight', async () => {
@@ -387,7 +387,7 @@ describe('useAddressActivity', () => {
       expect(Object.keys(results ?? {})).toHaveLength(50)
     })
 
-    it('should drop a failed result when the recipient set grows beyond the cap', async () => {
+    it('should replace a failed result with the skipped check when the recipient set grows beyond the cap', async () => {
       const address = faker.finance.ethereumAddress()
       const getTransactionCount = jest.fn().mockRejectedValue(new Error('RPC error'))
       const provider = { getTransactionCount } as unknown as JsonRpcProvider
@@ -413,7 +413,7 @@ describe('useAddressActivity', () => {
 
       const [results, error] = result.current
       expect(error).toBeUndefined()
-      expect(results?.[address]).toBeUndefined()
+      expect(results?.[address]).toEqual(SkippedActivityAnalysisResult)
       expect(getTransactionCount).toHaveBeenCalledTimes(1)
 
       consoleErrorSpy.mockRestore()
@@ -447,7 +447,7 @@ describe('useAddressActivity', () => {
 
       const [results, error] = result.current
       expect(error).toBeUndefined()
-      expect(Object.values(results ?? {}).every((entry) => entry === undefined)).toBe(true)
+      expect(Object.values(results ?? {})).toEqual(oversized.map(() => SkippedActivityAnalysisResult))
 
       consoleErrorSpy.mockRestore()
     })

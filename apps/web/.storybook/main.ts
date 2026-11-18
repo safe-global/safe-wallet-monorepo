@@ -177,6 +177,27 @@ const config: StorybookConfig = {
       ],
     })
 
+    // Without fixed shared chunks, webpack copies a module that many stories import into each story's chunk,
+    // and the copies run the CI build out of memory. Modules used by 10+ stories go into one shared chunk instead.
+    const sharedChunk = (name: string, test: RegExp, priority: number) => ({
+      name,
+      test,
+      priority,
+      chunks: 'all' as const,
+      minChunks: 10,
+    })
+    config.optimization = {
+      ...config.optimization,
+      splitChunks: {
+        ...config.optimization?.splitChunks,
+        cacheGroups: {
+          vendors: sharedChunk('vendors', /[\\/]node_modules[\\/]/, -10),
+          packages: sharedChunk('packages', /[\\/]packages[\\/](views|utils|store|theme)[\\/]/, -15),
+          app: sharedChunk('app', /[\\/]apps[\\/]web[\\/]src[\\/]/, -20),
+        },
+      },
+    }
+
     return config
   },
 

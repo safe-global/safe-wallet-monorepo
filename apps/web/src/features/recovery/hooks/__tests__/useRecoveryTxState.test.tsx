@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker'
 import { useRecoveryTxState } from '../useRecoveryTxState'
 import { renderHook } from '@/tests/test-utils'
 import store, { type RecoveryContextType } from '../../components/RecoveryContext'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import type { RecoveryQueueItem } from '../../public/types'
 
 describe('useRecoveryTxState', () => {
   beforeEach(() => {

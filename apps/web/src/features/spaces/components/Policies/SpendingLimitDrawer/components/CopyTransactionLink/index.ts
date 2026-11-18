@@ -1,1 +1,1 @@
-export { default as CopyTransactionLink, type CopyTransactionLinkProps } from './CopyTransactionLink'
+export { type CopyTransactionLinkProps } from './CopyTransactionLink'

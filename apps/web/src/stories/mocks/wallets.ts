@@ -1,4 +1,4 @@
-import type { WalletContextType } from '@/components/common/WalletProvider'
+import type { WalletContextType } from '@/components/common/WalletProvider/WalletContext'
 import type { SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import type { WalletPreset } from './types'
 

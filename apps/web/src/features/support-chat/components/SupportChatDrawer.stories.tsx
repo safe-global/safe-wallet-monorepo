@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import SupportChatDrawer from './SupportChatDrawer'
-import type { SupportChatConfig, UserIdentity } from '../hooks/useSupportChat'
+import type { SupportChatConfig, UserIdentity } from '../public/hooks/useSupportChat'
 
 /**
  * SupportChatDrawer renders a fixed, bottom-left overlay that hosts the Safe Support chat

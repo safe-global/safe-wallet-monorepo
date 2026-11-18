@@ -2,7 +2,7 @@ import { renderHook } from '@testing-library/react'
 import { useSpaceSafesWithQueue } from '../useSpaceSafesWithQueue'
 import { faker } from '@faker-js/faker'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -11,7 +11,7 @@ import type { SafeItem } from '@/hooks/safes'
 let mockCurrency = 'usd'
 
 const mockUseSpaceSafes = jest.fn()
-jest.mock('../useSpaceSafes', () => ({
+jest.mock('../../public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => mockUseSpaceSafes(),
 }))
 
@@ -26,7 +26,8 @@ jest.mock('@/store', () => ({
   },
 }))
 
-jest.mock('@/hooks/safes', () => ({
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
+  ...jest.requireActual('@/hooks/safes/useAllSafesGrouped'),
   flattenSafeItems: (items: unknown[]) => items,
 }))
 

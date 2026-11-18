@@ -1,7 +1,7 @@
 import EnhancedTable from '@safe-global/views/components/common/EnhancedTable'
 import FiatValue from '@/components/common/FiatValue'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
-import { getReadablePositionType } from '@/features/positions/utils'
+import { getReadablePositionType } from '@safe-global/utils/features/positions/utils/getReadablePositionType'
 import TokenIcon from '@/components/common/TokenIcon'
 import { FiatChange } from '@safe-global/views/components/balances/AssetsTable/FiatChange'
 import { Typography } from '@safe-global/views/components/ui/typography'

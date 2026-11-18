@@ -4,7 +4,8 @@ import { fireEvent, render, screen } from '@/tests/test-utils'
 import SafeAppsTxFlow from '.'
 
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
-jest.mock('@/services/tx/tx-sender', () => ({
+jest.mock('@/services/tx/tx-sender/create', () => ({
+  ...jest.requireActual('@/services/tx/tx-sender/create'),
   createTx: jest.fn(),
   createMultiSendCallOnlyTx: jest.fn(),
 }))

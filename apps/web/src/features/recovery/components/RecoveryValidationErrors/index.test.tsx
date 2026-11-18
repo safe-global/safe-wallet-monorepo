@@ -5,7 +5,7 @@ import { COULD_NOT_SUBMIT_RETRY_MESSAGE } from '@/components/tx/TxSubmitError'
 import { RecoveryListItemContext } from '@safe-global/views/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
 import RecoveryValidationErrors from '.'
 import { useIsValidRecoveryExecuteNextTx, useIsValidRecoverySkipExpired } from '../../hooks/useIsValidRecoveryExecution'
-import { seedRecoveryScenario } from '../../test-helpers'
+import { seedRecoveryScenario } from '../../public/utils/test-helpers'
 
 jest.mock('../../hooks/useIsValidRecoveryExecution')
 jest.mock('@/hooks/useChains')

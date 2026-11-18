@@ -12,7 +12,7 @@ import {
   multisigTransactionBuilder,
   queuedTransactionItem,
 } from '@/tests/builders/queuedTransaction'
-import { WalletContext, type WalletContextType } from '@/components/common/WalletProvider'
+import { WalletContext, type WalletContextType } from '@/components/common/WalletProvider/WalletContext'
 import ParentSafeNonce from '..'
 
 jest.mock('@/hooks/useSafeInfo')

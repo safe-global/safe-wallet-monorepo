@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { TxModalContext, TxModalProvider } from '..'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
-import { WalletContext, type WalletContextType } from '@/components/common/WalletProvider'
+import { WalletContext, type WalletContextType } from '@/components/common/WalletProvider/WalletContext'
 
 jest.mock('@/hooks/useTopbarElevation', () => ({
   useTopbarElevation: jest.fn(),

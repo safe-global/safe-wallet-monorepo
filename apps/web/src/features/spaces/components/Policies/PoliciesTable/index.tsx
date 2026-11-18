@@ -14,7 +14,7 @@ import PolicyStatusChip from '@safe-global/views/features/spaces/components/Poli
 import { getPolicyLabel } from '@safe-global/views/features/spaces/components/Policies/utils/policyLabel'
 import { getPendingStatusDetail } from '../utils/policyStatusDetail'
 import { AppRoutes } from '@/config/routes'
-import { buildSafeHref } from '@/features/spaces/utils/safeHref'
+import { buildSafeHref } from '../../../utils/safeHref'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import {
   getPolicyStatus,

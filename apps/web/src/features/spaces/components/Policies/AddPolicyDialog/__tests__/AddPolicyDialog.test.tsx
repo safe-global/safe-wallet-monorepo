@@ -1,5 +1,6 @@
 import { renderWithUserEvent, screen } from '@/tests/test-utils'
-import { MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import AddPolicyDialog from '../index'
 import {
