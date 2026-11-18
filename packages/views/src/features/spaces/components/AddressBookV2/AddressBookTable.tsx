@@ -1,35 +1,12 @@
 import type { ReactNode } from 'react'
-import { isAddress } from 'ethers'
-import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
-import TruncatedText from '@safe-global/views/components/common/AccountRow/TruncatedText'
-import { getInitials } from '@safe-global/views/components/common/AccountRow/utils'
+import AddedBy, { EmptyCell } from './AddedBy'
 import ChainLogos from './ChainLogos'
 import ContactCell from './ContactCell'
 import ContactRowActions from './ContactRowActions'
 import RowDetail from './RowDetail'
 import { TagChips } from './tags/TagChip'
 import type { AddressBookContact } from './types'
-
-const EmptyCell = () => <span className="text-muted-foreground text-xs">&mdash;</span>
-
-const AddedBy = ({ name }: { name?: string }) =>
-  name ? (
-    <span className="inline-flex min-w-0 items-center gap-1.5">
-      <Avatar size="xs">
-        <AvatarFallback>{getInitials(name)}</AvatarFallback>
-      </Avatar>
-      <TruncatedText
-        variant="paragraph-small"
-        className="min-w-0"
-        text={isAddress(name) ? shortenAddress(name) : name}
-        fullText={isAddress(name) ? name : undefined}
-      />
-    </span>
-  ) : (
-    <EmptyCell />
-  )
 
 export type AddressBookTableProps = {
   contacts: AddressBookContact[]

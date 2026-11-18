@@ -1,6 +1,5 @@
 import { faker } from '@faker-js/faker'
 import userEvent from '@testing-library/user-event'
-import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { SuggestedContact } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import { useUpsertWorkspaceSafeNames } from '../../../public/hooks/useUpsertWorkspaceSafeName'
@@ -11,6 +10,7 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { getStoreInstance } from '@/store'
 import { Builder } from '@/tests/Builder'
 import { chainBuilder } from '@/tests/builders/chains'
+import { spaceAddressBookRequestBuilder } from '@/tests/builders/space'
 import { render, screen, waitFor, within } from '@/tests/test-utils'
 import SuggestedTab from '../SuggestedTab'
 
@@ -61,20 +61,6 @@ const suggestionBuilder = () =>
     chains: [CHAIN],
     suggestedName: faker.person.fullName(),
     reason: { kind: 'signer', safes: [faker.company.name()] },
-  })
-
-const requestBuilder = () =>
-  Builder.new<AddressBookRequestItemDto>().with({
-    id: faker.number.int(),
-    name: faker.person.fullName(),
-    address: checksumAddress(faker.finance.ethereumAddress()),
-    chainIds: [CHAIN.chainId],
-    requestedBy: faker.internet.email(),
-    requestedByUserId: faker.number.int(),
-    reviewedBy: null,
-    reviewedByUserId: null,
-    status: 'PENDING',
-    createdAt: faker.date.recent().toISOString(),
   })
 
 type Props = Parameters<typeof SuggestedTab>[0]
@@ -215,7 +201,7 @@ describe('SuggestedTab', () => {
     renderTab({
       suggestions: [open, requested],
       isAdmin: false,
-      pendingRequests: [requestBuilder().with({ address: requested.address.toLowerCase() }).build()],
+      pendingRequests: [spaceAddressBookRequestBuilder().with({ address: requested.address.toLowerCase() }).build()],
     })
 
     expect(screen.getByRole('button', { name: `Request ${open.suggestedName}` })).toHaveAttribute(
