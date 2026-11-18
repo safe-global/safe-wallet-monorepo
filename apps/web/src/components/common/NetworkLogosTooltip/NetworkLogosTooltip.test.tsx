@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import NetworkLogosTooltip from './'
+import NetworkLogosTooltip from './index'
 
 jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,

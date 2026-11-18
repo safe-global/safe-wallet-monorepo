@@ -114,8 +114,7 @@ jest.mock('../../../public/hooks/useGetSpaceAddressBook', () => ({
   __esModule: true,
   default: jest.fn(() => []),
 }))
-// The dashboard loads the widget with dynamic(), which keeps the first loaded component, so the stub
-// reads its rows from a variable each test sets.
+// Each test sets the rows that the stub renders.
 let mockPendingTxEntries: Array<{ safeAddress: string; txId: string }> = []
 jest.mock('../PendingTxWidget', () => ({
   __esModule: true,

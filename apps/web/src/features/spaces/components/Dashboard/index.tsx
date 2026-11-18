@@ -5,7 +5,6 @@ import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
 import { useSpaceMembersByStatus, useIsInvited } from '../../public/hooks/useSpaceMembers'
 import useTrackSpace from '../../hooks/useTrackSpace'
 import { useSpacePendingTransactions } from '../../hooks/useSpacePendingTransactions'
-import dynamic from '@/utils/dynamic'
 import { AppRoutes } from '@/config/routes'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
@@ -22,10 +21,9 @@ import { useSetupWidgetDismissal } from '../../hooks/useSetupWidgetDismissal'
 import CheckoutReturnModals from '../Plans/CheckoutReturnModals'
 import { useWorkspaceLock } from '../../hooks/useWorkspaceLock'
 import { useSpacePlanState } from '../../public/hooks/useSpacePlanState'
+import PendingTxWidget from './PendingTxWidget'
 import AccountsWidget from '@/features/myAccounts/public/components/AccountsWidget'
 import SafeProAnnouncementModal from '@/features/safe-pro-announcement/public/components/SafeProAnnouncementModal'
-
-const PendingTxWidget = dynamic(() => import('./PendingTxWidget'))
 
 const EmptyStateAddAction = () => {
   return (

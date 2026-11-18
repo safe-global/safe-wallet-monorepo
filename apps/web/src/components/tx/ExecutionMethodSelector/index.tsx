@@ -28,11 +28,6 @@ export const enum ExecutionMethod {
   WALLET = 'WALLET',
 }
 
-// Wrapper component to load GasTooHighBanner (follows React naming conventions)
-const GasTooHighBannerLoader = () => {
-  return <GasTooHighBanner />
-}
-
 const CampaignLabel = ({ offer }: { offer: Extract<SponsoredOffer, { option: 'NO_FEE_CAMPAIGN' }> }) => {
   if (offer.disabledReason) {
     return (
@@ -242,7 +237,7 @@ export const _ExecutionMethodSelector = ({
 
         {offer.option === 'NO_FEE_CAMPAIGN' && offer.disabledReason === 'GAS_TOO_HIGH' && (
           <div className={css.gasBannerWrapper}>
-            <GasTooHighBannerLoader />
+            <GasTooHighBanner />
           </div>
         )}
       </div>

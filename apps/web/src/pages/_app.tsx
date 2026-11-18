@@ -42,13 +42,6 @@ import { useSafeWorkspaceAttach } from '@/features/spaces/public/hooks/useSafeWo
 import { useSafeWorkspaceCheck } from '@/features/spaces/public/hooks/useSafeWorkspaceCheck'
 import Recovery from '@/features/recovery/public/components/Recovery'
 
-/**
- * Wrapper that lazy-loads SpendingLimitsLoader via the feature system.
- */
-const SpendingLimitsLoaderWrapper = () => {
-  return <SpendingLimitsLoader />
-}
-
 import GeoblockingProvider from '@/components/common/GeoblockingProvider'
 import { useVisitedSafes } from '@/features/myAccounts/public/hooks/useVisitedSafes'
 import usePortfolioRefetchOnTxHistory from '@/features/portfolio/public/hooks/usePortfolioRefetchOnTxHistory'
@@ -183,7 +176,7 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
 
           <CounterfactualHooks />
 
-          <SpendingLimitsLoaderWrapper />
+          <SpendingLimitsLoader />
         </CaptchaProvider>
       </AppProviders>
     </Provider>

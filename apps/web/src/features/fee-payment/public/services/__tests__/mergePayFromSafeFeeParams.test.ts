@@ -28,7 +28,6 @@ const baseArgs = (safeTx: SafeTransaction) => ({
   chain: buildChain(['GTF']),
   feePaymentMode: 'safe' as const,
   feeGasToken: '0xtoken',
-  isFeePaymentEnabled: true,
   chainId: '1',
   safeAddress: '0xsafe',
   numberSignatures: 2,
@@ -93,15 +92,6 @@ describe('mergePayFromSafeFeeParams', () => {
       ...baseArgs(safeTx),
       feeGasToken: undefined,
     })
-
-    expect(result).toBe(safeTx)
-    expect(mockResolveFeeParams).not.toHaveBeenCalled()
-  })
-
-  it('bails out when the fee-payment feature is disabled', async () => {
-    const safeTx = createSafeTx()
-
-    const result = await mergePayFromSafeFeeParams({ ...baseArgs(safeTx), isFeePaymentEnabled: false })
 
     expect(result).toBe(safeTx)
     expect(mockResolveFeeParams).not.toHaveBeenCalled()

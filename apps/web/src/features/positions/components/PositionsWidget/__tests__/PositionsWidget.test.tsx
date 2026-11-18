@@ -1,6 +1,6 @@
 import { positionsFixtures } from '@safe-global/test/msw/fixtures'
 import { render, screen } from '@/tests/test-utils'
-import PositionsWidget from '../../../public/components/PositionsWidget'
+import PositionsWidget from '../index'
 
 jest.mock('../../../hooks/usePositions')
 jest.mock('../../../hooks/usePositionsFiatTotal')

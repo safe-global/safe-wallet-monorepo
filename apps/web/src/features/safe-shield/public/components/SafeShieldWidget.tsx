@@ -1,6 +1,4 @@
-import dynamic from '@/utils/dynamic'
+import SafeShieldWidget from '../../components/SafeShieldWidget'
 
-// Not gated: Safe Shield runs on every chain, and its checks use their own flags
-const SafeShieldWidget = dynamic(() => import('../../components/SafeShieldWidget'))
-
+// Static: a failed chunk would hide the risk findings next to the risk confirmation, and tx-flow is lazy already
 export default SafeShieldWidget

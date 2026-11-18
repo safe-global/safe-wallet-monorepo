@@ -47,15 +47,17 @@ export default RecoveryList
 
 A public component that must render while the current chain has the flag off uses `dynamic` from `@/utils/dynamic` instead, with a one-line comment that gives the reason. Examples are in `features/multichain/public/components/`: those components check the flags of each target chain, or warn about the Safe itself.
 
-A small component that other code renders inline or in a fixed slot, such as an icon (`features/safe-shield/public/components/SeverityIcon.tsx`), a list-row part (`features/myAccounts/public/components/AccountItemInfo.tsx`) or a sidebar banner, may live in `public/` without a lazy wrapper: a lazy one would flicker or leave an empty slot. Its consumer checks the flag.
+A small component that other code renders inline or in a fixed slot, such as an icon (`features/safe-shield/public/components/SeverityIcon.tsx`), a list-row part (`features/myAccounts/public/components/AccountItemInfo.tsx`) or a sidebar banner, may live in `public/` without a lazy wrapper: a lazy one would flicker or leave an empty slot. Its consumer checks the flag. A context provider, such as `features/safe-shield/public/components/SafeShieldProvider.tsx`, is static for the same reason: a lazy provider would hold back the children it wraps. A component whose failed chunk would hide risk information before signing, such as `SafeShieldWidget` and `HnAnalysisGroupCard`, is static too.
 
 ## Public hooks are the exception
 
 A hook cannot be lazy or gated: it runs in its caller on every chain. Across features, prefer a gated component. Make a hook public only for a cheap value that the caller needs as data, such as a boolean. A public hook must:
 
-- return a neutral value (`false`, `[]`, `undefined`) when its flag is off, and pass the flag to any expensive work, for example `skip: !isEnabled`;
-- load heavy libraries inside its async step (`await import(...)`), not at the top of the file;
-- have a test that shows its neutral value with the flag off. A hook that reads no flag, for example one that only reads the store, needs no such test.
+- pass its feature's flag to any expensive work, for example `skip: !isEnabled`, so a hook that fetches always reads the flag;
+- if it reads its feature's flag, return a neutral value (`false`, `[]`, `undefined`) when the flag is off and have a test that shows the neutral value with the flag off;
+- load heavy libraries inside its async step (`await import(...)`), not at the top of the file.
+
+A hook that reports a fact about the Safe or the store, such as `useIsCounterfactualSafe`, reads no flag: the fact stays true when the flag is off.
 
 ## Public functions and types
 
@@ -68,5 +70,6 @@ Ask whether the code still makes sense if the feature is deleted. If not, it bel
 ## Adding a feature
 
 1. Create `src/features/<feature>/` with a `public/` folder for what other code uses.
-2. Give each public component a `gatedDynamic` wrapper, unless one of the exceptions above applies.
-3. Add the flag-off tests for the public hooks that read a flag.
+2. Add the feature's flag to `FEATURES` in `packages/utils/src/utils/chains.ts` and to the chain configs on the CGW API.
+3. Give each public component a `gatedDynamic` wrapper, unless one of the exceptions above applies.
+4. Add the flag-off tests for the public hooks that read a flag.

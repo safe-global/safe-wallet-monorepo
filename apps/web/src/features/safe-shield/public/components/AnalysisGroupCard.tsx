@@ -1,10 +1,6 @@
-import dynamic from '@/utils/dynamic'
+import { AnalysisGroupCard } from '../../components/AnalysisGroupCard/AnalysisGroupCard'
 
 export type { AnalysisGroupCardProps } from '../../components/AnalysisGroupCard/AnalysisGroupCard'
 
-// Not gated: Safe Shield runs on every chain, and its checks use their own flags
-const AnalysisGroupCard = dynamic(() =>
-  import('../../components/AnalysisGroupCard/AnalysisGroupCard').then((mod) => ({ default: mod.AnalysisGroupCard })),
-)
-
+// Static: it renders inside safe-shield's ThreatAnalysis, where this module is already loaded
 export default AnalysisGroupCard

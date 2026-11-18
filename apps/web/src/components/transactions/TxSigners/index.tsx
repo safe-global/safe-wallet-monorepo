@@ -295,7 +295,7 @@ const TxSigners = ({
       ))}
 
       {/* Safenet check step (PRD: between the signatures and execution). The
-          feature registry stubs this to null while the flag is off; the row
+          gated public wrapper renders nothing while the flag is off; the row
           itself renders nothing unless a check was observed for this hash. */}
       <SafenetAuditRow
         safeTxHash={multisigInfo.safeTxHash}

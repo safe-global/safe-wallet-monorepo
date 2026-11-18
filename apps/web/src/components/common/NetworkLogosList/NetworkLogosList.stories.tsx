@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import NetworkLogosList from './'
+import NetworkLogosList from './index'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
 const meta = {

@@ -9,7 +9,6 @@ export type PayFromSafeMergeContext = {
   chain: Chain | undefined
   feePaymentMode: 'safe' | 'signer' | undefined
   feeGasToken: string | undefined
-  isFeePaymentEnabled: boolean
   chainId: string
   safeAddress: string
   numberSignatures: number
@@ -26,7 +25,6 @@ export const mergePayFromSafeFeeParams = async ({
   chain,
   feePaymentMode,
   feeGasToken,
-  isFeePaymentEnabled,
   chainId,
   safeAddress,
   numberSignatures,
@@ -36,7 +34,6 @@ export const mergePayFromSafeFeeParams = async ({
   if (safeTx.signatures.size > 0) return safeTx
   if (!isPayFromSafeAvailable(chain)) return safeTx
   if (feePaymentMode !== 'safe' || !feeGasToken) return safeTx
-  if (!isFeePaymentEnabled) return safeTx
 
   const { resolveFeeParams } = await import('../../services/resolveFeeParams')
   return resolveFeeParams({

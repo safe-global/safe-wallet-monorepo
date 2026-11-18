@@ -348,7 +348,7 @@ SafeCardReadOnly
 
 ### Data Transformation Hooks
 
-#### `useSpaceSafes()` (apps/web/src/features/spaces/hooks/useSpaceSafes.tsx)
+#### `useSpaceSafes()` (apps/web/src/features/spaces/public/hooks/useSpaceSafes.tsx)
 
 **Purpose:** Fetch and group all safes in current space
 **Dependencies:**
