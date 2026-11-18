@@ -22,6 +22,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { spaceAddressBookToCsvRows } from '../../utils/addressBookCsv'
 import AddContact from '../SpaceAddressBook/AddContact'
+import type { TriggerSize } from '../SpaceAddressBook/AddContactDialog'
 import DeleteContactDialog from '../SpaceAddressBook/DeleteContactDialog'
 import EditContactDialog from '../SpaceAddressBook/EditContactDialog'
 import ImportWorkspaceCsv from './ImportWorkspaceCsv'
@@ -126,7 +127,7 @@ const WorkspaceContacts = ({
   }
 
   // `lg` in the toolbar; the empty state keeps the smaller size
-  const renderAddContact = (size: 'action' | 'lg') => (
+  const renderAddContact = (size: TriggerSize) => (
     <Track {...SPACE_EVENTS.ADD_ADDRESS}>
       <AddContact
         label="Add contact"

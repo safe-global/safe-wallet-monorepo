@@ -17,6 +17,7 @@ import { useAppDispatch } from '@/store'
 import { showNotification } from '@/store/notificationsSlice'
 import { getImportSuccessMessage } from '@/utils/addressBookNotifications'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
+import type { TriggerSize } from '../SpaceAddressBook/AddContactDialog'
 import { toWorkspaceImport, validateWorkspaceRows } from './csvImport'
 
 const NOTHING_TO_IMPORT = 'Every contact in this file is already in the address book'
@@ -24,8 +25,7 @@ const NOTHING_TO_IMPORT = 'Every contact in this file is already in the address 
 type ImportWorkspaceCsvProps = {
   items: SpaceAddressBookItemDto[]
   tags: SpaceAddressBookTagDto[]
-  /** `lg` in the toolbar; the empty state keeps `action`. */
-  size?: 'action' | 'lg'
+  size?: TriggerSize
 }
 
 /** Imports a CSV into the workspace address book: new contacts are added, saved ones only gain chains and tags. */

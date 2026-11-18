@@ -4,23 +4,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@safe-global/views/utils/cn'
 
-/**
- * ButtonGroup Component
- *
- * Joins adjacent buttons into one segmented control: inner corners are squared and the shared
- * borders collapse. Children must be the buttons themselves (no wrapper elements), or the
- * first/last-child selectors miss.
- *
- * @see https://ui.shadcn.com/docs/components/base/button-group
- *
- * @example
- * ```tsx
- * <ButtonGroup>
- *   <Button variant="outline">Import</Button>
- *   <Button variant="outline">Export</Button>
- * </ButtonGroup>
- * ```
- */
+// Children must be the buttons themselves, with no wrapper, or the corner selectors miss them
 const buttonGroupVariants = cva(
   "flex w-fit items-stretch *:focus-visible:relative *:focus-visible:z-10 has-[>[data-slot=button-group]]:gap-2 [&>[data-slot=select-trigger]:not([class*='w-'])]:w-fit [&>input]:flex-1",
   {
