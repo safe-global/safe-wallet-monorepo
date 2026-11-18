@@ -7,11 +7,22 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'outline', 'primary', 'warning', 'success', 'destructive', 'info', 'positive', 'negative'],
+      options: [
+        'default',
+        'outline',
+        'filter',
+        'primary',
+        'warning',
+        'success',
+        'destructive',
+        'info',
+        'positive',
+        'negative',
+      ],
     },
     size: {
       control: 'select',
-      options: ['sm', 'default', 'lg', 'auto'],
+      options: ['sm', 'default', 'lg', 'xl', 'auto'],
     },
     shape: {
       control: 'select',
@@ -40,6 +51,9 @@ export const AllVariants: Story = {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'center' }}>
           <Chip variant="default">Default</Chip>
           <Chip variant="outline">Outline</Chip>
+          <Chip variant="filter" size="xl" onDelete={() => {}}>
+            Status: Ready to sign
+          </Chip>
           <Chip variant="primary">Primary</Chip>
           <Chip variant="warning">Warning</Chip>
           <Chip variant="success">Success</Chip>
