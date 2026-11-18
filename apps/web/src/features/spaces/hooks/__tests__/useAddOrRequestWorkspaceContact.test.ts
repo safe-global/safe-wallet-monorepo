@@ -5,7 +5,7 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { getStoreInstance } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
-import { useAddOrRequestWorkspaceContact } from '../useAddOrRequestWorkspaceContact'
+import { useAddOrRequestWorkspaceContact, type WorkspaceContactLocation } from '../useAddOrRequestWorkspaceContact'
 import { useCurrentSpaceId } from '../useCurrentSpaceId'
 import { useSpaceAddressBookState } from '../useGetSpaceAddressBook'
 import { useIsAdmin, useIsInvited } from '../useSpaceMembers'
@@ -54,7 +54,7 @@ const setup = ({
   addressBook?: SpaceAddressBookItemDto[]
   upsertResult?: { error?: string }
   requestResult?: unknown
-  location?: string
+  location?: WorkspaceContactLocation
 } = {}) => {
   const upsert = jest.fn().mockResolvedValue(upsertResult)
   mockCreateRequest.mockResolvedValue(requestResult)
@@ -71,7 +71,7 @@ const setup = ({
     refetch: jest.fn(),
   })
 
-  const { result } = renderHook(() => useAddOrRequestWorkspaceContact(SOURCE, location))
+  const { result } = renderHook(() => useAddOrRequestWorkspaceContact({ source: SOURCE, location }))
   return { addOrRequest: result.current, upsert, createRequest: mockCreateRequest }
 }
 

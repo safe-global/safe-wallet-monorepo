@@ -11,7 +11,10 @@ import ModalDialog from '@/components/common/ModalDialog'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { NetworkLogosTooltip } from '@/features/multichain'
 import useChains from '@/hooks/useChains'
-import { useAddOrRequestWorkspaceContact } from '../../hooks/useAddOrRequestWorkspaceContact'
+import {
+  useAddOrRequestWorkspaceContact,
+  type WorkspaceContactLocation,
+} from '../../hooks/useAddOrRequestWorkspaceContact'
 import { validateContactName } from './utils'
 
 type RequestToAddButtonProps = {
@@ -20,7 +23,7 @@ type RequestToAddButtonProps = {
   chainIds: string[]
   alreadyRequested?: boolean
   isCompact?: boolean
-  location?: string
+  location?: WorkspaceContactLocation
 }
 
 const RequestToAddButton = ({
@@ -32,7 +35,7 @@ const RequestToAddButton = ({
   location,
 }: RequestToAddButtonProps) => {
   const chains = useChains()
-  const addOrRequestContact = useAddOrRequestWorkspaceContact(undefined, location)
+  const addOrRequestContact = useAddOrRequestWorkspaceContact({ location })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [requested, setRequested] = useState(false)
   const [open, setOpen] = useState(false)

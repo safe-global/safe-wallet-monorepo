@@ -41,13 +41,17 @@ const CONFIRMATIONS: Partial<Record<WorkspaceContactResult, Confirmation>> = {
   },
 }
 
+/** Where in the app a member sent the request from. */
+export type WorkspaceContactLocation = 'suggested'
+
+type TrackingOptions = { source?: SPACE_LABELS; location?: WorkspaceContactLocation }
+
 /**
  * Adds a contact to the Workspace address book for admins and requests it for members.
  */
-export const useAddOrRequestWorkspaceContact = (
-  source?: SPACE_LABELS,
-  location?: string,
-): ((contact: WorkspaceSafeName) => Promise<WorkspaceContactResult>) => {
+export const useAddOrRequestWorkspaceContact = ({ source, location }: TrackingOptions = {}): ((
+  contact: WorkspaceSafeName,
+) => Promise<WorkspaceContactResult>) => {
   const spaceId = useCurrentSpaceId()
   const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
