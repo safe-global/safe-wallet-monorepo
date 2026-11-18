@@ -281,6 +281,8 @@ export enum MixpanelEventParams {
   ERROR_OCCURRENCES = 'Error Occurrences',
   ACCOUNT_COUNT = 'Account Count',
   ENTRY_COUNT = 'Entry Count',
+  UPDATED_COUNT = 'Updated Count',
+  WITH_TAGS = 'With Tags',
   RENAMED_COUNT = 'Renamed Count',
   MEMBER_ROLE = 'Member Role',
   POLICY_TYPE = 'Policy Type',

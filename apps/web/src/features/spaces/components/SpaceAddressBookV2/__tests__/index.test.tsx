@@ -22,7 +22,6 @@ import type * as Store from '@/store'
 import type * as AddressBookSlice from '@/store/addressBookSlice'
 import { render, screen, waitFor, within } from '@/tests/test-utils'
 import type { AddressBookState } from '@/store/addressBookSlice'
-import { downloadCsv } from '../../../utils/addressBookCsv'
 import { useWorkspaceSigners, type WorkspaceSigner } from '../../../hooks/useWorkspaceSigners'
 import SpaceAddressBookV2 from '../index'
 
@@ -103,10 +102,6 @@ jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
 }))
-jest.mock('../../../utils/addressBookCsv', () => ({
-  ...jest.requireActual('../../../utils/addressBookCsv'),
-  downloadCsv: jest.fn(),
-}))
 jest.mock('@safe-global/views/components/common/Identicon', () => {
   const Identicon = () => <span data-testid="identicon" />
   return Identicon
@@ -124,9 +119,9 @@ jest.mock('../../SpaceAddressBook/AddContact', () => {
   )
   return AddContact
 })
-jest.mock('../../SpaceAddressBook/Import', () => {
-  const ImportAddressBook = () => <button>Import</button>
-  return ImportAddressBook
+jest.mock('../ImportWorkspaceCsv', () => {
+  const ImportWorkspaceCsv = () => <button>Import</button>
+  return ImportWorkspaceCsv
 })
 jest.mock('../../SpaceAddressBook/AddLocalContact', () => {
   const AddLocalContact = () => <button>Add local contact</button>
@@ -454,31 +449,70 @@ describe('SpaceAddressBookV2', () => {
       expect(within(screen.getByTestId('address-book-empty')).queryByRole('button')).not.toBeInTheDocument()
     })
 
-    it('exports the whole book as CSV, one row per chain', async () => {
-      const item = spaceAddressBookItemBuilder()
-        .with({ name: 'Treasury', chainIds: ['1', '100'] })
-        .build()
-      mockWorkspaceBook({ items: [item] })
+    describe('export', () => {
+      let createObjectURL: jest.Mock<string, [Blob]>
+      let anchorClick: jest.SpyInstance
 
-      renderAddressBook()
-      await userEvent.click(screen.getByRole('button', { name: 'Export' }))
+      beforeEach(() => {
+        createObjectURL = jest.fn<string, [Blob]>(() => 'blob:address-book')
+        window.URL.createObjectURL = createObjectURL
+        anchorClick = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+      })
 
-      const [fileName, csv] = (downloadCsv as jest.Mock).mock.calls[0]
-      expect(fileName).toBe(`workspace-${SPACE_ID}-address-book.csv`)
-      expect(csv.split(/\r?\n/)).toEqual([
-        'address,name,chainId',
-        `${item.address},Treasury,1`,
-        `${item.address},Treasury,100`,
-      ])
-    })
+      afterEach(() => anchorClick.mockRestore())
 
-    it('tracks the export', async () => {
-      mockWorkspaceBook({ items: [spaceAddressBookItemBuilder().build()] })
+      const exportBook = async () => {
+        await userEvent.click(screen.getByRole('button', { name: 'Export' }))
+        await userEvent.click(screen.getByTestId('export-modal-btn'))
+        await waitFor(() => expect(anchorClick).toHaveBeenCalled())
+      }
 
-      renderAddressBook()
-      await userEvent.click(screen.getByRole('button', { name: 'Export' }))
+      it('counts one entry per chain before exporting', async () => {
+        mockWorkspaceBook({
+          items: [
+            spaceAddressBookItemBuilder()
+              .with({ chainIds: ['1', '100'] })
+              .build(),
+          ],
+        })
 
-      expect(mockTrackEvent).toHaveBeenCalledWith(expect.objectContaining(SPACE_EVENTS.EXPORT_ADDRESS_BOOK), undefined)
+        renderAddressBook()
+        await userEvent.click(screen.getByRole('button', { name: 'Export' }))
+
+        expect(screen.getByTestId('export-summary')).toHaveTextContent('2 address book entries')
+      })
+
+      it('exports the whole book as CSV, one row per chain, with its tags', async () => {
+        const ops = spaceAddressBookTagBuilder().with({ id: 1, name: 'Ops' }).build()
+        const vendor = spaceAddressBookTagBuilder().with({ id: 2, name: 'Vendor' }).build()
+        const item = spaceAddressBookItemBuilder()
+          .with({ name: 'Treasury', chainIds: ['1', '100'], tagIds: [1, 2] })
+          .build()
+        mockWorkspaceBook({ items: [item], tags: [ops, vendor] })
+
+        renderAddressBook()
+        await exportBook()
+
+        const csv = (await createObjectURL.mock.calls[0][0].text()).trim()
+        expect(csv.split(/\r?\n/)).toEqual([
+          'address,name,chainId,tags',
+          `${item.address},Treasury,1,Ops;Vendor`,
+          `${item.address},Treasury,100,Ops;Vendor`,
+        ])
+        const anchor = anchorClick.mock.contexts[0] as HTMLAnchorElement
+        expect(anchor.getAttribute('download')).toMatch(new RegExp(`^workspace-${SPACE_ID}-address-book`))
+      })
+
+      it('tracks the export when the file is downloaded', async () => {
+        mockWorkspaceBook({ items: [spaceAddressBookItemBuilder().build()] })
+
+        renderAddressBook()
+        await userEvent.click(screen.getByRole('button', { name: 'Export' }))
+        expect(mockTrackEvent).not.toHaveBeenCalledWith(SPACE_EVENTS.EXPORT_ADDRESS_BOOK)
+        await userEvent.click(screen.getByTestId('export-modal-btn'))
+
+        expect(mockTrackEvent).toHaveBeenCalledWith(SPACE_EVENTS.EXPORT_ADDRESS_BOOK)
+      })
     })
   })
 
@@ -886,6 +920,25 @@ describe('SpaceAddressBookV2', () => {
 
   describe('local contacts', () => {
     const hardwareWallet = checksumAddress(faker.finance.ethereumAddress())
+
+    it('offers CSV import and export next to Add local contact', async () => {
+      renderAddressBook({ '1': { [hardwareWallet]: 'Hardware wallet' } })
+      await openLocalTab()
+
+      const toolbar = screen.getByTestId('address-book-toolbar')
+      expect(within(toolbar).getByRole('button', { name: 'Import' })).toBeEnabled()
+      expect(within(toolbar).getByRole('button', { name: 'Export' })).toBeEnabled()
+      expect(within(toolbar).getByRole('button', { name: 'Add local contact' })).toBeInTheDocument()
+    })
+
+    it('offers CSV import on an empty local book, with Export disabled', async () => {
+      renderAddressBook()
+      await openLocalTab()
+
+      const emptyState = screen.getByTestId('address-book-empty')
+      expect(within(emptyState).getByRole('button', { name: 'Import' })).toBeEnabled()
+      expect(within(emptyState).getByRole('button', { name: 'Export' })).toBeDisabled()
+    })
 
     it('merges a local contact saved on several chains into one row', async () => {
       renderAddressBook({
