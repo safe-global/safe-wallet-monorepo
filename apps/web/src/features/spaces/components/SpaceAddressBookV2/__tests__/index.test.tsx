@@ -4,6 +4,7 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useAddressBookRequestsState } from '../../../hooks/useGetAddressBookRequests'
+import { useCurrentSpaceId } from '../../../public/hooks/useCurrentSpaceId'
 import { useIsAdmin, useIsInvited } from '../../../public/hooks/useSpaceMembers'
 import { useMemberNameResolver } from '../../../public/hooks/useMemberNameResolver'
 import { useSpaceAddressBookState } from '../../../public/hooks/useGetSpaceAddressBook'
@@ -22,6 +23,7 @@ import type * as AddressBookSlice from '@/store/addressBookSlice'
 import { render, screen, waitFor, within } from '@/tests/test-utils'
 import type { AddressBookState } from '@/store/addressBookSlice'
 import { downloadCsv } from '../../../utils/addressBookCsv'
+import { useWorkspaceSigners, type WorkspaceSigner } from '../../../hooks/useWorkspaceSigners'
 import SpaceAddressBookV2 from '../index'
 
 const SPACE_ID = '7'
@@ -82,6 +84,14 @@ jest.mock('../../../public/hooks/useMemberNameResolver', () => ({
 jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(() => SPACE_ID),
 }))
+jest.mock('../../../public/hooks/useUpsertWorkspaceSafeName', () => ({
+  ...jest.requireActual('../../../public/hooks/useUpsertWorkspaceSafeName'),
+  useUpsertWorkspaceSafeNames: jest.fn(() => jest.fn()),
+}))
+jest.mock('../../../public/hooks/useWorkspaceAddressBookLabel', () => ({
+  useWorkspaceAddressBookLabel: jest.fn(() => 'Workspace address book'),
+}))
+jest.mock('../../../hooks/useWorkspaceSigners', () => ({ useWorkspaceSigners: jest.fn() }))
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
   default: jest.fn(() => ({ configs: [] })),
@@ -236,6 +246,17 @@ const mockRequests = (state: Partial<ReturnType<typeof useAddressBookRequestsSta
   ;(useAddressBookRequestsState as jest.Mock).mockReturnValue({ items: [], ...SETTLED, refetch: jest.fn(), ...state })
 }
 
+const mockSigners = (state: Partial<ReturnType<typeof useWorkspaceSigners>> = {}) => {
+  ;(useWorkspaceSigners as jest.Mock).mockReturnValue({ signers: [], ...SETTLED, refetch: jest.fn(), ...state })
+}
+
+const signerBuilder = () =>
+  Builder.new<WorkspaceSigner>().with({
+    address: checksumAddress(faker.finance.ethereumAddress()),
+    chainIds: ['1'],
+    safes: [{ address: checksumAddress(faker.finance.ethereumAddress()), name: faker.company.name(), position: 1 }],
+  })
+
 const mockRole = (role: 'admin' | 'member' | 'invited') => {
   ;(useIsAdmin as jest.Mock).mockReturnValue(role === 'admin')
   ;(useIsInvited as jest.Mock).mockReturnValue(role === 'invited')
@@ -273,7 +294,9 @@ describe('SpaceAddressBookV2', () => {
     mockPrivateAddressBook(true)
     mockWorkspaceBook()
     mockRequests()
+    mockSigners()
     ;(useMemberNameResolver as jest.Mock).mockReturnValue(() => undefined)
+    ;(useCurrentSpaceId as jest.Mock).mockReturnValue(SPACE_ID)
     ;(useCurrentChain as jest.Mock).mockReturnValue(currentChain)
   })
 
@@ -741,12 +764,95 @@ describe('SpaceAddressBookV2', () => {
   })
 
   describe('tabs', () => {
-    it('shows only the workspace contacts without the private address book', () => {
+    it('shows Workspace contacts and Suggested without the private address book', () => {
       mockPrivateAddressBook(false)
 
       renderAddressBook()
 
-      expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Workspace contacts (0)'])
+      expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
+        'Workspace contacts (0)',
+        'Suggested (0)',
+      ])
+    })
+
+    it('shows the Suggested tab with its count after Workspace contacts', () => {
+      const shared = signerBuilder().build()
+      mockWorkspaceBook({ items: [spaceAddressBookItemBuilder().with({ address: shared.address }).build()] })
+      mockSigners({ signers: [signerBuilder().build(), shared] })
+
+      renderAddressBook()
+
+      expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
+        'Workspace contacts (1)',
+        'Suggested (1)',
+        'Local contacts (0)',
+        'Pending (0)',
+      ])
+    })
+
+    it('hides the count until suggestions have loaded', () => {
+      mockSigners({ signers: [signerBuilder().build()], isLoading: true })
+
+      renderAddressBook()
+
+      expect(screen.getByRole('tab', { name: 'Suggested' })).toBeInTheDocument()
+    })
+
+    it('reloads the suggestions after they failed to load', async () => {
+      const refetch = jest.fn()
+      mockSigners({ isError: true, refetch })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested' }))
+      await userEvent.click(within(screen.getByTestId('suggestions-error')).getByRole('button', { name: 'Reload' }))
+
+      expect(refetch).toHaveBeenCalledTimes(1)
+    })
+
+    it('closes an open add dialog when the Workspace changes', async () => {
+      mockSigners({ signers: [signerBuilder().build()] })
+      const { rerender } = renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested (1)' }))
+      await userEvent.click(screen.getByRole('button', { name: 'Add to Workspace' }))
+      expect(screen.getByRole('dialog')).toBeInTheDocument()
+
+      ;(useCurrentSpaceId as jest.Mock).mockReturnValue(faker.string.numeric(3))
+      rerender(<SpaceAddressBookV2 />)
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+
+    it('offers admins to add a suggestion', async () => {
+      mockSigners({ signers: [signerBuilder().build()] })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested (1)' }))
+
+      expect(screen.getByRole('button', { name: 'Add to Workspace' })).toBeInTheDocument()
+    })
+
+    it('offers members a request instead of adding a suggestion', async () => {
+      const signer = signerBuilder().build()
+      mockRole('member')
+      mockSigners({ signers: [signer] })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested (1)' }))
+
+      expect(screen.getByRole('button', { name: `Request ${signer.safes[0].name} signer 1` })).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Add to Workspace' })).not.toBeInTheDocument()
+    })
+
+    it('shows members which suggestions they already requested', async () => {
+      const signer = signerBuilder().build()
+      mockRole('member')
+      mockSigners({ signers: [signer] })
+      mockRequests({ items: [requestBuilder().with({ address: signer.address }).build()] })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Suggested (1)' }))
+
+      expect(screen.getByRole('button', { name: `${signer.safes[0].name} signer 1 requested` })).toBeInTheDocument()
     })
 
     it('shows the pending requests', async () => {
