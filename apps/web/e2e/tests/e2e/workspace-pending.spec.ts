@@ -142,9 +142,11 @@ async function workspaceQueueTxIds({ id, session }: PendingWorkspace): Promise<s
     .flatMap((item) => ('transaction' in item ? [item.transaction.id] : []))
 }
 
+test.use({ video: 'on' })
+
 test.describe('Workspace Pending transactions', { tag: '@e2e' }, () => {
   test.slow()
-  test.use({ viewport: { width: 1280, height: 1600 }, video: 'on' })
+  test.use({ viewport: { width: 1280, height: 1600 } })
 
   test('should add a transaction that a proposer creates from the Workspace to its queue as waiting, and as signable by an owner', async ({
     safePage,
