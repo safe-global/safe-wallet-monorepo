@@ -41,7 +41,7 @@ export const TOUR_STEPS: TourStep[] = [
   {
     id: 'open-safe',
     route: AppRoutes.spaces.safeAccounts,
-    anchor: `${byTestId('space-safe-accounts-list')} tbody tr, ${byTestId('safe-accounts-empty')}`,
+    anchor: `${byTestId('space-safe-accounts-list')} ${byTestId('account-table-row')}, ${byTestId('safe-accounts-empty')}`,
     emptyState: byTestId('safe-accounts-empty'),
     sidebarItem: sidebarItem('Safe accounts'),
     placement: { side: 'bottom', align: 'start' },
