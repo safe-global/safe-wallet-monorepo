@@ -20,7 +20,7 @@ type CachedSummaries = { trusted: boolean; summaries: PortfolioSummary[]; fetche
 const toSortedSafeIds = (safes: SafeRef[]): string[] =>
   Array.from(new Set(safes.map((safe) => makeSafeTag(safe.chainId, safe.address)))).sort()
 
-// `trusted` is per request and per chain; each chain must send what its /v2/safes and /v1/portfolio send, or CGW pays Zerion again
+// The token list setting is global, but a chain without a default token list always loads all tokens, so one list of Safes can need both values
 const splitByTrusted = (safes: SafeRef[], enabledChains: Map<string, Chain>, tokenList: TOKEN_LISTS) => {
   const enabledSafes = safes.filter((safe) => enabledChains.has(safe.chainId))
   const isTrusted = (safe: SafeRef) => {
