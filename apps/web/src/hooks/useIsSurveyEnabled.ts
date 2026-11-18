@@ -1,6 +1,5 @@
-import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-import { useChain } from '@/hooks/useChains'
-import { DEFAULT_CHAIN_ID } from '@/config/constants'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useDefaultChainHasFeature } from '@/hooks/useDefaultChainHasFeature'
 
 /**
  * Whether the Space onboarding survey is enabled.
@@ -17,10 +16,6 @@ import { DEFAULT_CHAIN_ID } from '@/config/constants'
  * Returns `undefined` while the chains config is still loading so callers
  * can avoid redirecting before they know the answer.
  */
-export const useIsSurveyEnabled = (): boolean | undefined => {
-  const chain = useChain(String(DEFAULT_CHAIN_ID))
-  if (!chain) return undefined
-  return hasFeature(chain, FEATURES.SPACE_ONBOARDING_SURVEY)
-}
+export const useIsSurveyEnabled = (): boolean | undefined => useDefaultChainHasFeature(FEATURES.SPACE_ONBOARDING_SURVEY)
 
 export default useIsSurveyEnabled
