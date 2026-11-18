@@ -18,9 +18,9 @@ export const useSpacePendingTransactions = (limit = 3) => {
   const hasSpaceQueue = useHasFeature(FEATURES.SPACE_TRANSACTIONS)
   const skipSpaceQueue = hasSpaceQueue !== true || !isUserSignedIn || !spaceId
 
-  // No `limit`: the gateway would cut the queue by nonce, not by age
+  // The gateway cuts by nonce, so the list is still sorted by age below
   const spaceQueue = useSpaceTransactionsGetTransactionQueueV1Query(
-    { spaceId: spaceId ?? '' },
+    { spaceId: spaceId ?? '', limit },
     { skip: skipSpaceQueue, ...SPACE_REFRESH_OPTIONS },
   )
   const perSafe = usePerSafePendingTransactions(limit, hasSpaceQueue !== false)
