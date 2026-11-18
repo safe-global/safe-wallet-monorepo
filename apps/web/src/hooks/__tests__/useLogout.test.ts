@@ -5,6 +5,7 @@ import { act } from '@testing-library/react'
 import { renderHook } from '@/tests/test-utils'
 import local from '@/services/local-storage/local'
 import { EMPTY_WORKSPACE_DRAFT } from '@/features/spaces/public/store/workspaceDraftSlice'
+import { fakeUserId, fakeWorkspaceName, workspaceDraftBuilder } from '@/tests/builders/workspaceDraft'
 import useLogout from '@/hooks/useLogout'
 import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
 import useOnboard from '@/hooks/wallets/useOnboard'
@@ -59,7 +60,9 @@ describe('useLogout', () => {
   })
 
   it('clears the Workspace onboarding draft, so the next user starts with an empty form', async () => {
-    const draft = { ...EMPTY_WORKSPACE_DRAFT, ownerId: 1, updatedAt: Date.now(), name: 'Treasury Ops' }
+    const draft = workspaceDraftBuilder()
+      .with({ ownerId: fakeUserId(), updatedAt: Date.now(), name: fakeWorkspaceName() })
+      .build()
     const { result } = renderHook(() => useLogout(), { initialReduxState: { workspaceDraft: draft } })
 
     await act(async () => {
