@@ -100,6 +100,18 @@ describe('useStepAdvance', () => {
     expect(result.current.step.isSubmitting).toBe(false)
   })
 
+  it('leaves the last step to check its own answers, so an optional survey can be skipped', async () => {
+    mockIsSafePro = false
+    mockIsSurveyEnabled = true
+    const bodies: CreateSpaceSetupDto[] = []
+    server.use(createSetupHandler(bodies, { spaceId: faker.string.uuid(), checkoutUrl: null }))
+    const { result } = await renderStep('survey')
+
+    act(() => result.current.step.advance({ surveySelections: {} }))
+
+    await waitFor(() => expect(bodies).toHaveLength(1))
+  })
+
   it('creates nothing while the trial sizes that cap the Safes are still loading', async () => {
     mockIsSafePro = true
     mockIsSurveyEnabled = true
