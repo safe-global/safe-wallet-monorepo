@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { Rows3, Search, X } from 'lucide-react'
+import { Columns3, Rows3, Search, X } from 'lucide-react'
+import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
   DropdownMenu,
@@ -27,12 +28,18 @@ export const OpportunityToolbar = ({
   onSearch,
   groupBy,
   onGroupBy,
+  compareCount,
+  onCompare,
+  hasInvestments,
   invest,
 }: {
   search: string
   onSearch: (value: string) => void
   groupBy: GroupBy
   onGroupBy: (value: GroupBy) => void
+  compareCount: number
+  onCompare: () => void
+  hasInvestments: boolean
   invest: ReactNode
 }) => (
   <div className="flex flex-wrap items-center gap-3" data-testid="opportunity-toolbar">
@@ -57,6 +64,13 @@ export const OpportunityToolbar = ({
       )}
     </InputGroup>
     <div className="flex flex-wrap items-center gap-2">
+      {compareCount > 1 && (
+        <Button variant="outline" onClick={onCompare} data-testid="compare">
+          <Columns3 />
+          {COPY.compare}
+          <Badge variant="subtle">{compareCount}</Badge>
+        </Button>
+      )}
       <DropdownMenu>
         <DropdownMenuTrigger render={<Button variant="outline" data-testid="group-by" />}>
           <Rows3 />
@@ -66,6 +80,9 @@ export const OpportunityToolbar = ({
           <DropdownMenuGroup>
             <DropdownMenuLabel>{COPY.groupBy}</DropdownMenuLabel>
             <DropdownMenuRadioGroup value={groupBy} onValueChange={(value) => onGroupBy(value as GroupBy)}>
+              <DropdownMenuRadioItem value="none">
+                {hasInvestments ? DEFI_V1_COPY.sections.investments : DEFI_V1_COPY.sections.opportunities}
+              </DropdownMenuRadioItem>
               {GROUP_OPTIONS.map((option) => (
                 <DropdownMenuRadioItem
                   key={option}

@@ -103,6 +103,7 @@ export const DEFI_V1_COPY = {
     done: 'Done',
   },
   positions: {
+    earnedReturn: (percent: string) => `Earned so far, a ${percent} return`,
     title: 'Your positions',
     principal: 'Deposited',
     earned: 'Earned',
@@ -117,8 +118,11 @@ export const DEFI_V1_COPY = {
   toolbar: {
     searchPlaceholder: 'Search opportunities, assets, and providers…',
     groupBy: 'Group',
+    compare: 'Compare',
     groupByOption: {
       asset: 'Asset',
+      type: 'Asset type',
+      network: 'Network',
     } satisfies Record<Exclude<GroupBy, 'none'>, string>,
   },
   invested: 'Invested',
@@ -183,6 +187,24 @@ export const DEFI_V1_COPY = {
     investments: 'Investments',
     opportunities: 'Opportunities',
   },
+  compare: {
+    title: 'Compare options',
+    feature: 'Details',
+    returns: 'Returns',
+    trust: 'Track record',
+    paidListing: 'Paid listing',
+    kyc: 'KYC required',
+    liveFor: 'Live for',
+    rate: 'Net rate',
+    type: 'Asset type',
+    exit: 'Exit time',
+    access: 'Access',
+    networks: 'Networks',
+    tvl: 'TVL',
+    fee: 'Management fee',
+    audits: 'Audits',
+    select: (name: string) => `Compare ${name}`,
+  },
   summary: {
     invested: 'Invested',
     sections: {
@@ -239,6 +261,15 @@ export const DEFI_V1_COPY = {
     addEach: 'Add',
     every: 'Every',
     frequencies: { week: 'Week', month: 'Month', quarter: 'Quarter' },
+    cadence: { week: 'Weekly', month: 'Monthly', quarter: 'Quarterly' },
+    addsEvery: (amount: string, cadence: string) => `Adds ${amount} ${cadence.toLowerCase()}`,
+    alerts: {
+      needsSignatures: 'Needs signatures',
+      needsSignaturesDetail: (amount: string) => `${amount} is waiting for signers to approve`,
+      budgetUsed: 'Budget used',
+      budgetUsedDetail: 'Signers of this Safe raise the budget to keep investing',
+      budgetLow: 'Budget low',
+    },
     recurringNote: (amount: string, asset: string, frequency: string) =>
       `Moves ${amount} ${asset} in every ${frequency.toLowerCase()}, as long as the balance covers it. Stop it any time.`,
     allowedActions: 'Allowed actions',

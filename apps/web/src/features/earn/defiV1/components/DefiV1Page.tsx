@@ -20,8 +20,9 @@ import {
   sortOpportunities,
   summariseTreasury,
 } from '../shelf'
-import type { DefiV1Config, GroupBy, Operation, Opportunity, Position, Sort, SortKey } from '../types'
+import type { AssetType, DefiV1Config, GroupBy, Operation, Opportunity, Position, Sort, SortKey } from '../types'
 import type { ActionResult } from './ActionPanel'
+import { CompareDialog } from './CompareDialog'
 import { OpportunityDrawer } from './OpportunityDrawer'
 import { OpportunityToolbar } from './OpportunityToolbar'
 import { SetUpInvestmentDialog } from './SetUpInvestmentDialog'
@@ -53,6 +54,7 @@ const initialPositions = (): Position[] =>
     return opportunity ? [{ opportunity, principal: existing.principal, earned: existing.earned, pending: false }] : []
   })
 
+const MAX_COMPARE = 3
 const { groups: SHELF_GROUPS, more: MORE } = buildShelf(OPPORTUNITIES)
 const SHELF_IDS = SHELF_GROUPS.flatMap((group) => group.items.map((item) => item.id))
 const RANKED = [...SHELF_GROUPS.flatMap((group) => group.items), ...MORE].sort(byExitTime)
@@ -67,6 +69,8 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const [groupBy, setGroupBy] = useState<GroupBy>('none')
   const [sort, setSort] = useState<Sort | null>(null)
   const [showAll, setShowAll] = useState(false)
+  const [compareIds, setCompareIds] = useState<string[]>([])
+  const [isComparing, setIsComparing] = useState(false)
   const [operations, setOperations] = useState<Operation[]>(OPERATIONS)
   const [isCreating, setIsCreating] = useState(false)
   const [setupFor, setSetupFor] = useState<Opportunity | null>(null)
@@ -94,7 +98,11 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const hiddenCount = visible.length - listed.length
   const hasInvestments = groupBy === 'none' && listed.some((item) => investedIds.includes(item.id))
   const groups = useMemo<OpportunityGroup[]>(() => {
-    if (groupBy === 'asset') return groupOpportunities(listed, groupBy).map((group) => ({ ...group, title: group.key }))
+    if (groupBy !== 'none')
+      return groupOpportunities(listed, groupBy).map((group) => ({
+        ...group,
+        title: groupBy === 'type' ? DEFI_V1_COPY.assetType[group.key as AssetType].label : group.key,
+      }))
     const others = listed.filter((item) => !investedIds.includes(item.id))
     if (!hasInvestments) return [{ key: 'opportunities', items: others }]
     return [
@@ -112,7 +120,11 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
     setIsCreating(true)
   }
 
+  const compareItems = RANKED.filter((item) => compareIds.includes(item.id))
+  const toggleCompare = (id: string) =>
+    setCompareIds((current) => (current.includes(id) ? current.filter((item) => item !== id) : [...current, id]))
   const tableProps = {
+    selection: { selected: compareIds, isFull: compareIds.length >= MAX_COMPARE, onToggle: toggleCompare },
     isLocked: locked,
     onSelect: setSelected,
     onInvest: config.plan === 'pro' ? openSetup : undefined,
@@ -173,6 +185,9 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
           onSearch={setSearch}
           groupBy={groupBy}
           onGroupBy={setGroupBy}
+          compareCount={compareIds.length}
+          onCompare={() => setIsComparing(true)}
+          hasInvestments={investedIds.length > 0}
           invest={<InvestButton plan={config.plan} onInvest={() => openSetup(null)} />}
         />
         <OpportunitiesTable
@@ -193,6 +208,26 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
           </Button>
         </div>
       </section>
+
+      <CompareDialog
+        items={compareItems}
+        investedIds={investedIds}
+        open={isComparing && compareItems.length > 1}
+        isLocked={locked}
+        onClose={() => setIsComparing(false)}
+        onSelect={(item) => {
+          setIsComparing(false)
+          setSelected(item)
+        }}
+        onDeposit={(item) => {
+          setIsComparing(false)
+          setSelected(item)
+        }}
+        onInvest={(item) => {
+          setIsComparing(false)
+          openSetup(item)
+        }}
+      />
 
       <SetUp
         key={setupFor?.id ?? 'any'}

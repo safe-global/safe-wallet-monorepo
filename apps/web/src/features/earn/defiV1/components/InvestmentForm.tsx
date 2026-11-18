@@ -63,7 +63,7 @@ export const useInvestmentForm = (opportunity: Opportunity | null, options: Oppo
   const [schedule, setSchedule] = useState<Schedule>('once')
   const [each, setEach] = useState('100000')
   const [frequency, setFrequency] = useState<Frequency>('month')
-  const investment = opportunity ?? options.find((item) => item.id === pickedId) ?? options[0]
+  const investment = options.find((item) => item.id === pickedId) ?? opportunity ?? options[0]
   const safeName = name.trim() || (investment ? dedicatedSafeName(investment) : '')
   const amount = parseAmount(first)
   const budgetAmount = parseAmount(budget)
@@ -248,7 +248,7 @@ export const AmountFields = ({ form, cards }: { form: InvestmentForm; cards?: bo
     return (
       <>
         <AmountInput form={form} />
-        {!form.opportunity && <InvestmentCards form={form} />}
+        <InvestmentCards form={form} />
       </>
     )
   return (

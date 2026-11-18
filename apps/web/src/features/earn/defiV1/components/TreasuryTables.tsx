@@ -1,15 +1,16 @@
 import { Fragment, type MouseEvent, type ReactNode } from 'react'
-import { ArrowDown, ArrowUp, ArrowUpDown, Clock, Coins, Lock, Repeat, Sprout } from 'lucide-react'
+import { ArrowDown, ArrowUp, ArrowUpDown, Clock, Coins, Lock, Sprout } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
+import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@safe-global/views/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { cn } from '@safe-global/views/utils/cn'
 import { DEFI_V1_COPY, formatApy, formatCompactUsd } from '../copy'
 import { CHAIN_IDS, IDLE_CASH } from '../opportunities'
-import { depositRoute } from '../shelf'
+import { budgetLeft, depositRoute } from '../shelf'
 import type { Holding, Operation, Opportunity, Sort, SortKey } from '../types'
 
 const BAND_CELL = 'bg-foreground/[0.03] py-0!'
@@ -25,6 +26,8 @@ const HEADERS: { label: string; sortKey?: SortKey }[] = [
   { label: COLUMNS.networks },
   { label: COLUMNS.position, sortKey: 'position' },
 ]
+
+export type Selection = { selected: string[]; isFull: boolean; onToggle: (id: string) => void }
 
 export type OpportunityGroup = { key: string; title?: string; showColumns?: boolean; items: Opportunity[] }
 
@@ -144,38 +147,105 @@ export const OpportunityMark = ({ invested = false }: { invested?: boolean }) =>
   )
 }
 
+const SelectMark = ({
+  opportunity,
+  invested,
+  selection,
+}: {
+  opportunity: Opportunity
+  invested: boolean
+  selection: Selection
+}) => {
+  const checked = selection.selected.includes(opportunity.id)
+  const always = selection.selected.length > 0
+  return (
+    <span className="relative flex size-8 shrink-0">
+      <span
+        className={cn(
+          'transition-opacity',
+          always ? 'opacity-0' : 'group-hover/row:opacity-0 group-has-[:focus-visible]/row:opacity-0',
+        )}
+      >
+        <OpportunityMark invested={invested} />
+      </span>
+      <span
+        className={cn(
+          'absolute inset-0 flex items-center justify-center transition-opacity',
+          always ? 'opacity-100' : 'opacity-0 group-hover/row:opacity-100 focus-within:opacity-100',
+        )}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <Checkbox
+          checked={checked}
+          disabled={!checked && selection.isFull}
+          onCheckedChange={() => selection.onToggle(opportunity.id)}
+          aria-label={DEFI_V1_COPY.compare.select(opportunity.name)}
+        />
+      </span>
+    </span>
+  )
+}
+
+/** A badge only when someone needs to act: unsigned deposits first, then a budget that can't cover the next top-up. */
+const alertFor = (holding?: Holding, operation?: Operation): { label: string; detail: string } | undefined => {
+  if (holding && holding.pending > 0)
+    return {
+      label: OPS.alerts.needsSignatures,
+      detail: OPS.alerts.needsSignaturesDetail(formatCompactUsd(holding.pending)),
+    }
+  if (!operation) return undefined
+  const left = budgetLeft(operation)
+  if (left === 0) return { label: OPS.alerts.budgetUsed, detail: OPS.alerts.budgetUsedDetail }
+  if (operation.recurring && left < operation.recurring.amount)
+    return { label: OPS.alerts.budgetLow, detail: OPS.budgetLeft(formatCompactUsd(left)) }
+  return undefined
+}
+
 const NameCell = ({
   opportunity,
   operation,
-  invested,
+  holding,
+  selection,
 }: {
   opportunity: Opportunity
   operation?: Operation
-  invested: boolean
-}) => (
-  <div className="flex min-w-0 items-center gap-3">
-    <OpportunityMark invested={invested} />
-    <div className="flex min-w-0 flex-col">
-      <span className="flex min-w-0 items-center gap-2">
-        <span className="truncate font-medium text-foreground">{opportunity.name}</span>
-        {opportunity.placement === 'sponsored' && <Badge variant="warning">{DEFI_V1_COPY.sponsored}</Badge>}
-        {operation && (
-          <Tooltip delay={150}>
-            <TooltipTrigger render={<span className="flex shrink-0" />}>
-              <Badge variant="success">{OPS.ofSigners(operation.threshold, operation.owners)}</Badge>
-            </TooltipTrigger>
-            <TooltipContent>{OPS.runsIn(operation.name)}</TooltipContent>
-          </Tooltip>
-        )}
-      </span>
-      <span className="truncate text-xs text-muted-foreground">
-        <span className="font-medium text-foreground">{opportunity.asset}</span>
-        {' · '}
-        {[opportunity.runBy, opportunity.curator, opportunity.kyc && 'KYC'].filter(Boolean).join(' · ')}
-      </span>
+  holding?: Holding
+  selection: Selection
+}) => {
+  const alert = alertFor(holding, operation)
+  return (
+    <div className="flex min-w-0 items-center gap-3">
+      <SelectMark opportunity={opportunity} invested={Boolean(holding)} selection={selection} />
+      <div className="flex min-w-0 flex-col">
+        <span className="flex min-w-0 items-center gap-2">
+          <span className="truncate font-medium text-foreground">{opportunity.name}</span>
+          {opportunity.placement === 'sponsored' && <Badge variant="warning">{DEFI_V1_COPY.sponsored}</Badge>}
+          {alert && (
+            <Tooltip delay={150}>
+              <TooltipTrigger render={<span className="flex shrink-0" />}>
+                <Badge variant="warning">{alert.label}</Badge>
+              </TooltipTrigger>
+              <TooltipContent>{alert.detail}</TooltipContent>
+            </Tooltip>
+          )}
+        </span>
+        <span className="truncate text-xs text-muted-foreground">
+          <span className="font-medium text-foreground">{opportunity.asset}</span>
+          {' · '}
+          {[
+            opportunity.runBy,
+            opportunity.curator,
+            opportunity.kyc && 'KYC',
+            operation?.recurring &&
+              OPS.addsEvery(formatCompactUsd(operation.recurring.amount), OPS.cadence[operation.recurring.frequency]),
+          ]
+            .filter(Boolean)
+            .join(' · ')}
+        </span>
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 const ExitCell = ({ opportunity }: { opportunity: Opportunity }) => (
   <Tooltip delay={150}>
@@ -212,31 +282,27 @@ const NetworkLogos = ({ chains }: { chains: string[] }) => (
 
 const Empty = () => <span className="text-muted-foreground">—</span>
 
-const PositionCell = ({ holding, operation }: { holding?: Holding; operation?: Operation }) => {
+const PositionCell = ({ holding }: { holding?: Holding }) => {
   if (!holding) return <Empty />
   return (
-    <span className="flex min-w-0 flex-col">
+    <span className="flex min-w-0 flex-col gap-0.5 tabular-nums">
       {holding.invested > 0 && (
-        <span className="flex flex-wrap items-center gap-x-2 tabular-nums">
+        <span className="flex items-center gap-2">
           <span className="font-semibold">{formatCompactUsd(holding.invested)}</span>
-          <span className="text-xs text-badge-dot-success">+{formatCompactUsd(holding.earned)}</span>
-          {operation?.recurring && (
+          {holding.earned > 0 && (
             <Tooltip delay={150}>
-              <TooltipTrigger render={<span className="flex text-muted-foreground" />}>
-                <Repeat className="size-3.5" aria-label={OPS.recurringLabel} />
+              <TooltipTrigger render={<span className="flex" />}>
+                <Badge variant="brand">+{formatCompactUsd(holding.earned)}</Badge>
               </TooltipTrigger>
               <TooltipContent>
-                {OPS.recurring(
-                  formatCompactUsd(operation.recurring.amount),
-                  OPS.frequencies[operation.recurring.frequency],
-                )}
+                {DEFI_V1_COPY.positions.earnedReturn(formatApy(holding.earned / Math.max(holding.invested, 1)))}
               </TooltipContent>
             </Tooltip>
           )}
         </span>
       )}
       {holding.pending > 0 && (
-        <span className="truncate text-xs text-muted-foreground tabular-nums">
+        <span className="truncate text-xs text-muted-foreground">
           {DEFI_V1_COPY.positions.pendingAmount(formatCompactUsd(holding.pending))}
         </span>
       )}
@@ -256,6 +322,7 @@ const OpportunityRow = ({
   onInvest,
   holding,
   heldIn,
+  selection,
 }: {
   opportunity: Opportunity
   isLocked: (item: Opportunity) => boolean
@@ -263,17 +330,18 @@ const OpportunityRow = ({
   onInvest?: (item: Opportunity) => void
   holding?: Holding
   heldIn?: Operation
+  selection: Selection
 }) => {
   const locked = isLocked(opportunity)
   const type = DEFI_V1_COPY.assetType[opportunity.type]
   return (
     <TableRow
-      className={cn('cursor-pointer', locked && 'opacity-70')}
+      className={cn('group/row cursor-pointer', locked && 'opacity-70')}
       onClick={() => onSelect(opportunity)}
       data-testid={`opportunity-${opportunity.id}`}
     >
       <TableCell>
-        <NameCell opportunity={opportunity} operation={heldIn} invested={Boolean(holding)} />
+        <NameCell opportunity={opportunity} operation={heldIn} holding={holding} selection={selection} />
       </TableCell>
       <TableCell className="font-semibold tabular-nums">{formatApy(opportunity.apy)}</TableCell>
       <TableCell>
@@ -291,7 +359,7 @@ const OpportunityRow = ({
         <NetworkLogos chains={opportunity.chains} />
       </TableCell>
       <TableCell>
-        <PositionCell holding={holding} operation={heldIn} />
+        <PositionCell holding={holding} />
       </TableCell>
       <TableCell className="text-right">
         {locked ? (
@@ -352,6 +420,7 @@ export const OpportunitiesTable = ({
   onSort,
   holdingOf,
   heldInOf,
+  selection,
 }: {
   label: string
   groups: OpportunityGroup[]
@@ -362,6 +431,7 @@ export const OpportunitiesTable = ({
   onSort: (key: SortKey) => void
   holdingOf: (item: Opportunity) => Holding | undefined
   heldInOf: (item: Opportunity) => Operation | undefined
+  selection: Selection
 }) => {
   const isEmpty = groups.every((group) => group.items.length === 0)
   return (
@@ -394,6 +464,7 @@ export const OpportunitiesTable = ({
                 onInvest={onInvest}
                 holding={holdingOf(item)}
                 heldIn={heldInOf(item)}
+                selection={selection}
               />
             ))}
           </Fragment>

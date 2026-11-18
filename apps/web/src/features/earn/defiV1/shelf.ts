@@ -116,14 +116,22 @@ export const filterOpportunities = (
   )
 
 /** Keeps the input order inside each group. Investments come first, assets in order of first appearance. */
+/** Network groups repeat an opportunity under each chain it runs on. */
+const GROUP_KEYS: Record<Exclude<GroupBy, 'none'>, (item: Opportunity) => string[]> = {
+  asset: (item) => [item.asset],
+  type: (item) => [item.type],
+  network: (item) => item.chains,
+}
+
 export const groupOpportunities = (
   opportunities: Opportunity[],
   groupBy: GroupBy,
 ): { key: string; items: Opportunity[] }[] => {
   if (groupBy === 'none') return [{ key: 'all', items: opportunities }]
-  return [...new Set(opportunities.map((item) => item.asset))].map((key) => ({
+  const keysOf = GROUP_KEYS[groupBy]
+  return [...new Set(opportunities.flatMap(keysOf))].map((key) => ({
     key,
-    items: opportunities.filter((item) => item.asset === key),
+    items: opportunities.filter((item) => keysOf(item).includes(key)),
   }))
 }
 

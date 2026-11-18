@@ -240,6 +240,28 @@ describe('groupOpportunities', () => {
   })
 })
 
+describe('groupOpportunities by type and network', () => {
+  it('groups by asset type', () => {
+    const lending = opportunity({ type: 'lending' })
+    const staking = opportunity({ type: 'staking' })
+
+    expect(groupOpportunities([lending, staking], 'type')).toEqual([
+      { key: 'lending', items: [lending] },
+      { key: 'staking', items: [staking] },
+    ])
+  })
+
+  it('lists a multi-network opportunity under each network', () => {
+    const both = opportunity({ chains: ['Ethereum', 'Base'] })
+    const base = opportunity({ chains: ['Base'] })
+
+    expect(groupOpportunities([both, base], 'network')).toEqual([
+      { key: 'Ethereum', items: [both] },
+      { key: 'Base', items: [both, base] },
+    ])
+  })
+})
+
 describe('investedFirst', () => {
   it('moves investments to the top and keeps the rest in order', () => {
     const [first, second, held] = [opportunity(), opportunity(), opportunity()]
