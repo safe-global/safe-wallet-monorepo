@@ -3,18 +3,12 @@ import { Drawer } from './Drawer'
 import { DrawerBody } from '@safe-global/views/components/common/Drawer/components/DrawerBody'
 import { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'
 import { DrawerHeader } from '@safe-global/views/components/common/Drawer/components/DrawerHeader'
-import { DrawerSubtitle } from '@safe-global/views/components/common/Drawer/components/DrawerSubtitle'
-import { DrawerTitle } from '@safe-global/views/components/common/Drawer/components/DrawerTitle'
 
 describe('Drawer', () => {
   it('renders the composed header, body and footer', () => {
     render(
       <Drawer open onClose={jest.fn()} ariaLabel="Test drawer">
-        <DrawerHeader>
-          <span>ICON</span>
-          <DrawerTitle>Drawer title</DrawerTitle>
-          <DrawerSubtitle>Drawer subtitle</DrawerSubtitle>
-        </DrawerHeader>
+        <DrawerHeader media={<span>ICON</span>} title="Drawer title" subtitle="Drawer subtitle" />
         <DrawerBody>Body content</DrawerBody>
         <DrawerFooter>
           <button>Footer action</button>
