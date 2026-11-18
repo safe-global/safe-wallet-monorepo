@@ -4,6 +4,7 @@ import {
   ArrowDown,
   Check,
   CheckCircle2,
+  ChevronDown,
   Circle,
   Coins,
   Info,
@@ -32,10 +33,13 @@ import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/ta
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { cn } from '@safe-global/views/utils/cn'
 import { TERMS_URL } from '@safe-global/utils/config/constants'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { LOCAL_STORAGE_CONSENT_KEY } from '@/features/bridge'
 import { SWAPS_CONSENT_STORAGE_KEY } from '@/features/swap'
+import useAddressBook from '@/hooks/useAddressBook'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { DEFI_V1_COPY, formatAmount, formatUsd } from '../copy'
@@ -58,6 +62,7 @@ const SLIPPAGES = ['auto', '0.1', '1']
 const PRICES: Record<string, number> = { USDC: 1, USDT: 1, ETH: 3_200 }
 const DEPLOYED_ON = ['Base', 'Ethereum']
 const ROUTE_FEES: Record<Route, number> = { best: 12, fast: 25 }
+const NETWORK_FEES: Record<MoveMode, number> = { swap: 4, bridge: 3 }
 const ORDER_ID = '0x8f3c…d21a'
 
 const parseAmount = (value: string) => Number(value.replace(/[^0-9.]/g, '')) || 0
@@ -127,17 +132,24 @@ const Leg = ({
   </div>
 )
 
-const Rows = ({ children }: { children: ReactNode }) => (
+const Rows = ({ children, head, open = true }: { children: ReactNode; head?: ReactNode; open?: boolean }) => (
   <div className="flex shrink-0 flex-col overflow-hidden rounded-lg border border-border">
-    {Children.toArray(children)
-      .filter(Boolean)
-      .map((row, index) => (
-        <Fragment key={index}>
-          {index > 0 && <Separator />}
-          {row}
-        </Fragment>
-      ))}
+    {[head, ...(open ? Children.toArray(children) : [])].filter(Boolean).map((row, index) => (
+      <Fragment key={index}>
+        {index > 0 && <Separator />}
+        {row}
+      </Fragment>
+    ))}
   </div>
+)
+
+const SafeChip = ({ address, name, chain }: { address: string; name?: string; chain?: string }) => (
+  <span className="flex min-w-0 items-center gap-1.5">
+    <Identicon address={address} size={16} />
+    <span className="truncate font-medium text-foreground">{name ?? shortenAddress(address)}</span>
+    {name && <span>{shortenAddress(address)}</span>}
+    {chain && <span className="shrink-0">{COPY.onNetwork(chain)}</span>}
+  </span>
 )
 
 const Row = ({ label, value, hint }: { label: string; value: ReactNode; hint?: string }) => (
@@ -231,6 +243,8 @@ export const MoveFundsFlow = ({
   onClose: () => void
 }) => {
   const { safe } = useSafeInfo()
+  const safeAddress = safe.address.value
+  const safeName = useAddressBook()[safeAddress]
   const assets = balances.map((balance) => balance.label)
   const [step, setStep] = useState<Step>('details')
   const [from, setFrom] = useState(assets[0] ?? IDLE_CASH.asset)
@@ -241,6 +255,7 @@ export const MoveFundsFlow = ({
   const [expiry, setExpiry] = useState<Expiry>('30m')
   const [route, setRoute] = useState<Route>('best')
   const [agreedTo, setAgreedTo] = useState<MoveMode[]>([])
+  const [showDetails, setShowDetails] = useState(false)
   const [swapConsent = false, setSwapConsent] = useLocalStorage<boolean>(SWAPS_CONSENT_STORAGE_KEY)
   const [bridgeConsent = false, setBridgeConsent] = useLocalStorage<boolean>(LOCAL_STORAGE_CONSENT_KEY)
 
@@ -264,6 +279,7 @@ export const MoveFundsFlow = ({
   const needsApproval = from !== 'ETH'
   const sent = `${formatToken(amount)} ${from}`
   const got = `${formatToken(minReceived)} ${receiveAsset}`
+  const fees = (isSwap ? usd * feeRate : ROUTE_FEES[route]) + NETWORK_FEES[mode]
 
   const goToReview = () => {
     if (!consented) (isSwap ? setSwapConsent : setBridgeConsent)(true)
@@ -276,23 +292,20 @@ export const MoveFundsFlow = ({
     onClose()
   }
 
-  const recipient = isSwap ? (
-    <Row label={COPY.recipient} value={COPY.thisSafe} />
-  ) : (
-    <Row
-      label={COPY.recipient}
-      value={
-        <span className="flex flex-col items-end">
-          {COPY.thisSafeOn(toChain)}
-          {deployed && (
-            <span className="flex items-center gap-1 text-xs text-badge-dot-success">
-              <CheckCircle2 className="size-3" aria-hidden />
-              {COPY.sameSetup}
-            </span>
-          )}
-        </span>
-      }
-    />
+  const sameSetup = !isSwap && deployed && (
+    <Tooltip delay={150}>
+      <TooltipTrigger render={<span className="flex" />}>
+        <CheckCircle2 className="size-3.5 text-badge-dot-success" aria-label={COPY.sameSetup} />
+      </TooltipTrigger>
+      <TooltipContent>{COPY.sameSetup}</TooltipContent>
+    </Tooltip>
+  )
+
+  const recipientChip = (
+    <span className="flex min-w-0 items-center gap-1.5">
+      <SafeChip address={safeAddress} name={safeName} chain={isSwap ? undefined : toChain} />
+      {sameSetup}
+    </span>
   )
 
   const slippageRow = (
@@ -312,40 +325,58 @@ export const MoveFundsFlow = ({
     />
   )
 
-  const quoteRows = isSwap ? (
-    <Rows>
-      <Row label={COPY.minReceived} value={got} />
-      <Row label={COPY.rate} value={COPY.rateValue(from, formatToken(priceOf(from) / priceOf(to)), to)} />
-      <Row label={COPY.priceImpact} value={`< ${percent(impact)}`} />
-      {slippageRow}
-      <Row
-        label={COPY.expiry}
-        value={
-          <InlineSelect
-            label={COPY.expiry}
-            value={expiry}
-            onChange={setExpiry}
-            options={(Object.keys(COPY.expiries) as Expiry[]).map((option) => ({
-              value: option,
-              label: COPY.expiries[option],
-            }))}
-          />
-        }
-      />
-      <Row label={COPY.safeFee} hint={COPY.safeFeeHint} value={`${percent(feeRate)} · ${formatUsd(usd * feeRate)}`} />
-      <Row label={COPY.networkFee} value={formatUsd(4)} />
-      {recipient}
-      {step === 'review' && <Row label={COPY.orderId} value={ORDER_ID} />}
-    </Rows>
-  ) : (
-    <Rows>
-      <Row label={COPY.minReceived} value={got} />
-      {slippageRow}
-      <Row label={COPY.bridgeFee} value={formatUsd(ROUTE_FEES[route])} />
-      <Row label={COPY.networkFee} value={formatUsd(3)} />
-      <Row label={COPY.arrives} value={COPY.routes[route].time} />
-      {recipient}
-    </Rows>
+  const quoteRows = (head?: ReactNode) =>
+    isSwap ? (
+      <Rows head={head} open={!head || showDetails}>
+        {!head && <Row label={COPY.minReceived} value={got} />}
+        <Row label={COPY.rate} value={COPY.rateValue(from, formatToken(priceOf(from) / priceOf(to)), to)} />
+        <Row label={COPY.priceImpact} value={`< ${percent(impact)}`} />
+        {slippageRow}
+        <Row
+          label={COPY.expiry}
+          value={
+            <InlineSelect
+              label={COPY.expiry}
+              value={expiry}
+              onChange={setExpiry}
+              options={(Object.keys(COPY.expiries) as Expiry[]).map((option) => ({
+                value: option,
+                label: COPY.expiries[option],
+              }))}
+            />
+          }
+        />
+        <Row label={COPY.safeFee} hint={COPY.safeFeeHint} value={`${percent(feeRate)} · ${formatUsd(usd * feeRate)}`} />
+        <Row label={COPY.networkFee} value={formatUsd(NETWORK_FEES.swap)} />
+        {!head && <Row label={COPY.recipient} value={recipientChip} />}
+        {step === 'review' && <Row label={COPY.orderId} value={ORDER_ID} />}
+      </Rows>
+    ) : (
+      <Rows head={head} open={!head || showDetails}>
+        {!head && <Row label={COPY.minReceived} value={got} />}
+        {slippageRow}
+        <Row label={COPY.bridgeFee} value={formatUsd(ROUTE_FEES[route])} />
+        <Row label={COPY.networkFee} value={formatUsd(NETWORK_FEES.bridge)} />
+        <Row label={COPY.arrives} value={COPY.routes[route].time} />
+        {!head && <Row label={COPY.recipient} value={recipientChip} />}
+      </Rows>
+    )
+
+  const summary = (
+    <button
+      type="button"
+      aria-expanded={showDetails}
+      onClick={() => setShowDetails((open) => !open)}
+      className="flex min-h-10 w-full items-center justify-between gap-3 px-3 py-2 text-sm hover:bg-muted/50"
+    >
+      <span className="text-muted-foreground">
+        {COPY.minReceived} <span className="font-medium text-foreground tabular-nums">{got}</span>
+      </span>
+      <span className="flex items-center gap-1 text-muted-foreground tabular-nums">
+        {COPY.fees(formatUsd(fees))}
+        <ChevronDown className={cn('size-4 transition-transform', showDetails && 'rotate-180')} aria-hidden />
+      </span>
+    </button>
   )
 
   const termsLink = (
@@ -434,10 +465,14 @@ export const MoveFundsFlow = ({
             )
           }
           hint={
-            <span>
-              {COPY.onChain(receiveAsset, isSwap ? IDLE_CASH.chain : toChain)}
-              {amount > 0 && ` · ≈ ${formatUsd(received * priceOf(receiveAsset))}`}
-            </span>
+            <>
+              <span className="shrink-0">
+                {amount > 0
+                  ? `≈ ${formatUsd(received * priceOf(receiveAsset))}`
+                  : COPY.onChain(receiveAsset, isSwap ? IDLE_CASH.chain : toChain)}
+              </span>
+              {recipientChip}
+            </>
           }
         />
       </div>
@@ -472,7 +507,7 @@ export const MoveFundsFlow = ({
         </RadioGroup>
       )}
 
-      {amount > 0 && quoteRows}
+      {amount > 0 && quoteRows(summary)}
     </div>
   )
 
@@ -486,7 +521,7 @@ export const MoveFundsFlow = ({
           {COPY.summary(formatToken(amount), from, formatToken(received), receiveAsset)}
         </Typography>
       </div>
-      {quoteRows}
+      {quoteRows()}
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium">{COPY.reviewTitle}</span>
         <div className="flex flex-col rounded-lg bg-card">

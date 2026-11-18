@@ -215,8 +215,8 @@ export const DEFI_V1_COPY = {
     bridgeFee: 'Bridge fee',
     arrives: 'Arrives in',
     recipient: 'Recipient',
-    thisSafe: 'This Safe',
-    thisSafeOn: (chain: string) => `This Safe on ${chain}`,
+    onNetwork: (chain: string) => `on ${chain}`,
+    fees: (amount: string) => `Fees ${amount}`,
     sameSetup: 'Same address and signers',
     notDeployed: (chain: string) =>
       `This Safe isn't set up on ${chain} yet. Set it up first, or the funds can't be moved out.`,
