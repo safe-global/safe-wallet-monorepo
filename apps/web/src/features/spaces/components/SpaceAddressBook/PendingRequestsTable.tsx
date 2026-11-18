@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Tooltip, TooltipTrigger, TooltipContent } from '@safe-global/views/components/ui/tooltip'
@@ -10,29 +10,17 @@ import NetworkLogosPill from '@/components/common/NetworkLogosPill'
 import NetworkLogosTooltip from '@/components/common/NetworkLogosTooltip'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import {
-  useAddressBookRequestsApproveRequestV1Mutation,
-  useAddressBookRequestsRejectRequestV1Mutation,
-} from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
 import useGetSpaceAddressBook from '../../public/hooks/useGetSpaceAddressBook'
 import { useIsAdmin } from '../../public/hooks/useSpaceMembers'
-import { showNotification } from '@/store/notificationsSlice'
-import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'
 import { Check, X } from 'lucide-react'
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
 import { cn } from '@safe-global/views/utils/cn'
 import AddressCell from './AddressCell'
-import { isElevationRequiredError } from '@/features/oidc-auth/public/utils/elevation'
+import { useAddressBookRequestActions } from '../../hooks/useAddressBookRequestActions'
 
 type PendingRequestsTableProps = {
   requests: AddressBookRequestItemDto[]
-}
-
-const getApproveErrorMessage = (error: unknown): string => {
-  const err = error as { data?: { message?: string } }
-  return typeof err?.data?.message === 'string' ? err.data.message : 'Failed to approve request'
 }
 
 function RequestedBy({ requestedBy }: { requestedBy: string }) {
@@ -72,12 +60,8 @@ function RequestedBy({ requestedBy }: { requestedBy: string }) {
 function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
   const chains = useChains()
   const isAdmin = useIsAdmin()
-  const spaceId = useCurrentSpaceId()
-  const dispatch = useAppDispatch()
   const spaceAddressBook = useGetSpaceAddressBook()
-  const [approveRequest] = useAddressBookRequestsApproveRequestV1Mutation()
-  const [rejectRequest] = useAddressBookRequestsRejectRequestV1Mutation()
-  const [loadingId, setLoadingId] = useState<number | null>(null)
+  const { approve, reject, reviewingId } = useAddressBookRequestActions()
 
   // Approving a request for an address that is already in the workspace book
   // overwrites the existing entry, so admins get a warning badge.
@@ -85,53 +69,6 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
     () => new Set(spaceAddressBook.map((item) => item.address.toLowerCase())),
     [spaceAddressBook],
   )
-
-  const handleApprove = async (requestId: number) => {
-    if (!spaceId) return
-    setLoadingId(requestId)
-    try {
-      const result = await approveRequest({ spaceId: spaceId ?? '', requestId })
-      if (isElevationRequiredError(result.error)) return
-      if (result.error) {
-        dispatch(
-          showNotification({
-            message: getApproveErrorMessage(result.error),
-            variant: 'error',
-            groupKey: 'approve-error',
-          }),
-        )
-        return
-      }
-      dispatch(
-        showNotification({
-          message: 'Contact added to Workspace address book',
-          variant: 'success',
-          groupKey: 'approve-success',
-        }),
-      )
-    } catch {
-      dispatch(showNotification({ message: 'Something went wrong', variant: 'error', groupKey: 'approve-error' }))
-    } finally {
-      setLoadingId(null)
-    }
-  }
-
-  const handleReject = async (requestId: number) => {
-    if (!spaceId) return
-    setLoadingId(requestId)
-    try {
-      const result = await rejectRequest({ spaceId: spaceId ?? '', requestId })
-      if (result.error) {
-        dispatch(showNotification({ message: 'Failed to reject request', variant: 'error', groupKey: 'reject-error' }))
-        return
-      }
-      dispatch(showNotification({ message: 'Request rejected', variant: 'success', groupKey: 'reject-success' }))
-    } catch {
-      dispatch(showNotification({ message: 'Something went wrong', variant: 'error', groupKey: 'reject-error' }))
-    } finally {
-      setLoadingId(null)
-    }
-  }
 
   // The "All" badge stands on its own; logo stacks get the standard grey pill.
   const renderChains = (req: AddressBookRequestItemDto) =>
@@ -202,7 +139,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
       cell: (req) =>
         isAdmin ? (
           <span className="inline-flex items-center justify-end gap-1">
-            {loadingId === req.id ? (
+            {reviewingId === req.id ? (
               <Spinner className="size-5" />
             ) : (
               <>
@@ -212,7 +149,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
                       variant="outline"
                       size="icon-sm"
                       data-testid="approve-request-btn"
-                      onClick={() => handleApprove(req.id)}
+                      onClick={() => approve(req.id)}
                     >
                       <Check className="size-4" />
                     </Button>
@@ -225,7 +162,7 @@ function PendingRequestsTable({ requests }: PendingRequestsTableProps) {
                       variant="outline"
                       size="icon-sm"
                       data-testid="reject-request-btn"
-                      onClick={() => handleReject(req.id)}
+                      onClick={() => reject(req.id)}
                     >
                       <X className="size-4" />
                     </Button>

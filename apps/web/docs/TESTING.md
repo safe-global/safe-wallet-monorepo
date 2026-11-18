@@ -112,7 +112,7 @@ Available builders:
 
 - `@/tests/builders/safe` — `safeInfoBuilder`, `extendedSafeInfoBuilder`, `addressExBuilder`
 - `@/tests/builders/chains` — `chainBuilder`
-- `@/tests/builders/wallet` — `connectedWalletBuilder`
+- `@/tests/builders/wallet` — `connectedWalletBuilder`, `walletContextBuilder`
 - `@/tests/builders/safeTx` — Safe transaction builders
 - `@/tests/builders/balances` — `tokenInfoBuilder`, `balanceBuilder`, `balancesBuilder`
 - `@/tests/builders/transactionDetails` — `transactionDetailsBuilder`, `multisigExecutionDetailsBuilder`
