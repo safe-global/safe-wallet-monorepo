@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { PenLine, Plus, Sparkles } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@safe-global/views/components/ui/empty'
@@ -100,13 +100,17 @@ const SuggestedContacts = ({
   const [selected, setSelected] = useState<Set<string>>(() => new Set())
   const selectedSuggestions = suggestions.filter((item) => selected.has(item.address))
 
-  // Rows that leave the list (e.g. once added) drop out of the selection
-  useEffect(() => {
-    setSelected((current) => {
-      const kept = new Set([...current].filter((key) => suggestions.some((item) => item.address === key)))
-      return kept.size === current.size ? current : kept
-    })
-  }, [suggestions])
+  const suggestionsKey = suggestions.map((item) => item.address).join('\u0000')
+  const [prevSuggestionsKey, setPrevSuggestionsKey] = useState(suggestionsKey)
+
+  // Rows that leave the list (e.g. once added) drop out of the selection. Adjusted during render,
+  // so a stale key is never committed.
+  if (suggestionsKey !== prevSuggestionsKey) {
+    setPrevSuggestionsKey(suggestionsKey)
+    if (selectedSuggestions.length !== selected.size) {
+      setSelected(new Set(selectedSuggestions.map((item) => item.address)))
+    }
+  }
 
   if (suggestions.length === 0) {
     return (

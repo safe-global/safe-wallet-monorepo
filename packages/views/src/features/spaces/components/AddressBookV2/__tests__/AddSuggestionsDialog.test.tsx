@@ -30,6 +30,8 @@ const renderDialog = (
   return { onAdd }
 }
 
+const chainIdsOf = (suggestion: SuggestedContact) => suggestion.chains.map((chain) => chain.chainId)
+
 const nameField = (suggestion: SuggestedContact) =>
   screen.getByRole('textbox', { name: `Name for ${suggestion.suggestedName}` })
 
@@ -43,8 +45,8 @@ describe('AddSuggestionsDialog', () => {
     await userEvent.click(screen.getByTestId('add-suggestions-btn'))
 
     expect(onAdd).toHaveBeenCalledWith([
-      { address: a.address, name: a.suggestedName, chainIds: ['1', '8453'] },
-      { address: b.address, name: typed, chainIds: ['1', '8453'] },
+      { address: a.address, name: a.suggestedName, chainIds: chainIdsOf(a) },
+      { address: b.address, name: typed, chainIds: chainIdsOf(b) },
     ])
   })
 
@@ -56,7 +58,7 @@ describe('AddSuggestionsDialog', () => {
     await userEvent.type(nameField(suggestion), `  ${typed}  `)
     await userEvent.click(screen.getByTestId('add-suggestions-btn'))
 
-    expect(onAdd).toHaveBeenCalledWith([{ address: suggestion.address, name: typed, chainIds: ['1', '8453'] }])
+    expect(onAdd).toHaveBeenCalledWith([{ address: suggestion.address, name: typed, chainIds: chainIdsOf(suggestion) }])
   })
 
   it('blocks a name over 50 characters with the validation message', async () => {
@@ -91,23 +93,16 @@ describe('AddSuggestionsDialog', () => {
 
     await userEvent.type(nameField(suggestion), `${typed}{Enter}`)
 
-    expect(onAdd).toHaveBeenCalledWith([{ address: suggestion.address, name: typed, chainIds: ['1', '8453'] }])
+    expect(onAdd).toHaveBeenCalledWith([{ address: suggestion.address, name: typed, chainIds: chainIdsOf(suggestion) }])
   })
 
-  it('labels the button with the contact count', () => {
-    const { unmount } = render(
-      <AddSuggestionsDialog
-        suggestions={[buildSuggestion(), buildSuggestion()]}
-        validateName={validateContactName}
-        onAdd={jest.fn()}
-        onClose={jest.fn()}
-      />,
-    )
-    expect(screen.getByRole('button', { name: 'Add 2 contacts' })).toBeInTheDocument()
-    unmount()
+  it.each([
+    { count: 1, label: 'Add 1 contact' },
+    { count: 2, label: 'Add 2 contacts' },
+  ])('labels the button "$label" for $count suggestions', ({ count, label }) => {
+    renderDialog(Array.from({ length: count }, buildSuggestion))
 
-    renderDialog([buildSuggestion()])
-    expect(screen.getByRole('button', { name: 'Add 1 contact' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: label })).toBeInTheDocument()
   })
 
   it('shows the save error', () => {

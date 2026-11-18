@@ -460,6 +460,31 @@ describe('PaginatedDataTable', () => {
       expect(onSelectionChange).toHaveBeenCalledWith(new Set())
     })
 
+    it('keeps the selection on other pages when the current page is cleared', () => {
+      const rows = makeKeys(30)
+      const onOtherPage = rows[27]
+      const onSelectionChange = jest.fn()
+
+      render(
+        selectableTable(rows, {
+          pageSize: 25,
+          selectedKeys: new Set([...rows.slice(0, 25), onOtherPage]),
+          onSelectionChange,
+        }),
+      )
+      fireEvent.click(screen.getByRole('checkbox', { name: 'Deselect all rows on this page' }))
+
+      expect(onSelectionChange).toHaveBeenCalledWith(new Set([onOtherPage]))
+    })
+
+    it('shows the header checkbox as mixed when only some rows on the page are selected', () => {
+      const rows = makeKeys(3)
+
+      render(selectableTable(rows, { selectedKeys: new Set([rows[0]]), onSelectionChange: jest.fn() }))
+
+      expect(screen.getByRole('checkbox', { name: 'Select all rows on this page' })).toBePartiallyChecked()
+    })
+
     it('does not fire onRowClick when a checkbox is clicked', () => {
       const rows = makeKeys(2)
       const onRowClick = jest.fn()
