@@ -1,4 +1,5 @@
 import { IS_PRODUCTION } from './constants'
+import { TURNSTILE_SITE_KEY } from '@safe-global/utils/config/constants'
 
 /**
  * CSP Header notes:
@@ -14,7 +15,7 @@ import { IS_PRODUCTION } from './constants'
 export const ContentSecurityPolicy = `
  default-src 'self';
  connect-src 'self' *;
- script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://assets.calendly.com https://challenges.cloudflare.com https://*.hsforms.com https://*.hsforms.net https://*.hubspot.com https://*.hs-scripts.com ${
+ script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://assets.calendly.com ${TURNSTILE_SITE_KEY ? 'https://challenges.cloudflare.com' : ''} https://*.hsforms.com https://*.hsforms.net https://*.hubspot.com https://*.hs-scripts.com ${
    !IS_PRODUCTION
      ? "'unsafe-eval'" // The dev server needs unsafe-eval
      : "'wasm-unsafe-eval'"
