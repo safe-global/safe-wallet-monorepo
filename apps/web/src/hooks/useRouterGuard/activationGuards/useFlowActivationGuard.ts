@@ -10,6 +10,7 @@ import type { GuardRule } from '../types'
 import { allow, evaluateGuard, redirect } from '../utils'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useIsWorkspaceWizardEnabled } from '@/hooks/useIsWorkspaceWizardEnabled'
+import { useSafeProFlag } from '@/hooks/useIsSafeProEnabled'
 import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
 
 // ---------------------------------------------------------------------------
@@ -35,8 +36,8 @@ const guardRules: GuardRule[] = [
 
   // The plan step exists only in the onboarding wizard
   {
-    match: ({ pathname, isWorkspaceWizardEnabled }) =>
-      isWorkspaceWizardEnabled === false && pathname.startsWith(AppRoutes.welcome.plan),
+    match: ({ pathname, isPlanStepEnabled }) =>
+      isPlanStepEnabled === false && pathname.startsWith(AppRoutes.welcome.plan),
     action: () => redirect(AppRoutes.welcome.createSpace),
   },
 
@@ -100,6 +101,11 @@ export const useFlowActivationGuard: UseGuard = () => {
   const isSiweAuthenticated = useAppSelector(isAuthenticated)
   const isSpaceRoute = useIsSpaceRoute()
   const isWorkspaceWizardEnabled = useIsWorkspaceWizardEnabled()
+  const isSafePro = useSafeProFlag()
+  const isPlanStepEnabled =
+    isWorkspaceWizardEnabled === undefined || isSafePro === undefined
+      ? undefined
+      : isWorkspaceWizardEnabled && isSafePro
 
   const [fetchSpaces] = useLazySpacesGetV1Query()
 
@@ -148,12 +154,12 @@ export const useFlowActivationGuard: UseGuard = () => {
         isSiweAuthenticated,
         hasSpaces,
         isPartOfSpaceUrl,
-        isWorkspaceWizardEnabled,
+        isPlanStepEnabled,
       },
       guardRules,
     )
   }, [
-    isWorkspaceWizardEnabled,
+    isPlanStepEnabled,
     pathname,
     guardQuery,
     spaceId,

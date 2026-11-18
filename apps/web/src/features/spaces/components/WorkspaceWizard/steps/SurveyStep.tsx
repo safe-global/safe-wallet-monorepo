@@ -21,6 +21,8 @@ const SurveyStep = (): ReactElement => {
   const page = survey?.surveyContent.pages[0]
   // Without an active survey there is nothing to answer, and the step only confirms the trial.
   const hasNoSurvey = isSurveyNotFound(error)
+  // A survey that fails to load must not block creating the Workspace; the answers are optional then.
+  const canSkipAnswers = error !== undefined
   const [picked, setPicked] = useState<string[]>()
   const selected = new Set(picked ?? (page ? (draft.surveySelections[page.id] ?? []) : []))
 
@@ -47,7 +49,7 @@ const SurveyStep = (): ReactElement => {
           backDisabled={isSubmitting}
           continueLabel={continueLabel}
           onContinue={() => advance(answers())}
-          continueDisabled={isSubmitting || (!hasNoSurvey && selected.size === 0)}
+          continueDisabled={isSubmitting || (!canSkipAnswers && selected.size === 0)}
           continueLoading={isSubmitting}
           continueTestId="survey-finish-button"
         />

@@ -25,7 +25,11 @@ const CheckoutReturnScreen = ({ sessionId, spaceId }: { sessionId: string; space
   const [isSlow, setIsSlow] = useState(false)
   const hasOpened = useRef(false)
   // Once applied the screen opens the Workspace and unmounts, which ends the polling.
-  const { data: setup } = useSpacesGetSetupV1Query(isComplete && spaceId ? { id: spaceId } : skipToken, {
+  const {
+    data: setup,
+    isError: isSetupError,
+    refetch: refetchSetup,
+  } = useSpacesGetSetupV1Query(isComplete && spaceId ? { id: spaceId } : skipToken, {
     pollingInterval: isSlow ? 0 : POLL_INTERVAL,
   })
   const isApplied = setup?.status === 'applied'
@@ -58,6 +62,18 @@ const CheckoutReturnScreen = ({ sessionId, spaceId }: { sessionId: string; space
         body="Open your Workspaces to continue."
         actionLabel="Go to Workspaces"
         onAction={() => void router.replace(AppRoutes.welcome.spaces)}
+      />
+    )
+  }
+
+  if (isSetupError && !setup) {
+    return (
+      <SetupProgress
+        isWorking={false}
+        title="We couldn't load your Workspace setup"
+        body="Check your connection and try again."
+        actionLabel="Try again"
+        onAction={() => void refetchSetup()}
       />
     )
   }

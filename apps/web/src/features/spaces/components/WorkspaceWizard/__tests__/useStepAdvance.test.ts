@@ -5,12 +5,15 @@ import { server } from '@/tests/server'
 import { signedInAuthState } from '@/tests/builders/authState'
 import { safeItemBuilder } from '@/tests/builders/safeItem'
 import { fakeUserId, fakeWorkspaceName, workspaceDraftBuilder } from '@/tests/builders/workspaceDraft'
-import { createSetupHandler, userHandler, workspacesHandler } from '@/tests/msw/workspaceWizard'
+import { trialPaymentLinkBuilder } from '@/tests/builders/trialPaymentLink'
+import { createSetupHandler, trialPlansHandler, userHandler, workspacesHandler } from '@/tests/msw/workspaceWizard'
 import { act, fakerChecksummedAddress, renderHook, waitFor } from '@/tests/test-utils'
 import { navigateTo } from '@/utils/navigation'
 import { MemberRole } from '../../../memberRole'
+import type { WorkspaceDraft } from '../../../public/store/workspaceDraftSlice'
 import type { WizardStepId } from '../steps'
 import { useStepAdvance } from '../hooks/useStepAdvance'
+import { useTrialSizes } from '../hooks/useTrialSizes'
 import { useWorkspaceDraft } from '../hooks/useWorkspaceDraft'
 
 jest.mock('@/utils/navigation')
@@ -23,15 +26,20 @@ jest.mock('@/hooks/useIsSafeProEnabled', () => ({
 }))
 jest.mock('@/hooks/useIsSurveyEnabled', () => ({ __esModule: true, default: () => mockIsSurveyEnabled }))
 
-const renderStep = async (step: WizardStepId) => {
+const renderStep = async (step: WizardStepId, changes: Partial<WorkspaceDraft> = {}) => {
   const ownerId = fakeUserId()
   server.use(userHandler(ownerId), workspacesHandler())
-  const draft = workspaceDraftBuilder().with({ ownerId, name: fakeWorkspaceName() }).build()
+  const draft = workspaceDraftBuilder()
+    .with({ ownerId, name: fakeWorkspaceName(), ...changes })
+    .build()
   const push = jest.fn(() => Promise.resolve(true))
-  const view = renderHook(() => ({ step: useStepAdvance(step), workspace: useWorkspaceDraft() }), {
-    routerProps: { push },
-    initialReduxState: { auth: signedInAuthState(), workspaceDraft: draft },
-  })
+  const view = renderHook(
+    () => ({ step: useStepAdvance(step), workspace: useWorkspaceDraft(), trial: useTrialSizes() }),
+    {
+      routerProps: { push },
+      initialReduxState: { auth: signedInAuthState(), workspaceDraft: draft },
+    },
+  )
   await waitFor(() => expect(view.result.current.workspace.isReady).toBe(true))
   return { ...view, push }
 }
@@ -59,13 +67,62 @@ describe('useStepAdvance', () => {
     mockIsSurveyEnabled = true
     const bodies: CreateSpaceSetupDto[] = []
     const checkoutUrl = faker.internet.url()
-    server.use(createSetupHandler(bodies, { spaceId: faker.string.uuid(), checkoutUrl }))
-    const { result } = await renderStep('survey')
+    const link = trialPaymentLinkBuilder({ seats: 5 }).build()
+    server.use(trialPlansHandler([link]), createSetupHandler(bodies, { spaceId: faker.string.uuid(), checkoutUrl }))
+    const { result } = await renderStep('survey', { paymentLinkId: link.id })
+    await waitFor(() => expect(result.current.trial.sizes).toHaveLength(1))
 
     act(() => result.current.step.advance({ surveySelections: { page1: ['earn_yield'] } }))
 
     await waitFor(() => expect(navigateTo).toHaveBeenCalledWith(checkoutUrl))
     expect(bodies[0].survey).toEqual({ slug: 'onboarding', selections: { page1: ['earn_yield'] } })
+  })
+
+  it('opens the first step that is no longer valid instead of creating the Workspace', async () => {
+    mockIsSafePro = true
+    mockIsSurveyEnabled = true
+    const bodies: CreateSpaceSetupDto[] = []
+    const link = trialPaymentLinkBuilder({ seats: 1 }).build()
+    const safes = [safeItemBuilder().build(), safeItemBuilder().build()].map(({ chainId, address }) => ({
+      chainId,
+      address,
+    }))
+    server.use(
+      trialPlansHandler([link]),
+      createSetupHandler(bodies, { spaceId: faker.string.uuid(), checkoutUrl: null }),
+    )
+    const { result, push } = await renderStep('survey', { paymentLinkId: link.id, safes })
+    await waitFor(() => expect(result.current.trial.sizes).toHaveLength(1))
+
+    act(() => result.current.step.advance({ surveySelections: {} }))
+
+    expect(push).toHaveBeenCalledWith({ pathname: AppRoutes.welcome.selectSafes, query: {} })
+    expect(result.current.step.isSubmitting).toBe(false)
+  })
+
+  it('leaves the last step to check its own answers, so an optional survey can be skipped', async () => {
+    mockIsSafePro = false
+    mockIsSurveyEnabled = true
+    const bodies: CreateSpaceSetupDto[] = []
+    server.use(createSetupHandler(bodies, { spaceId: faker.string.uuid(), checkoutUrl: null }))
+    const { result } = await renderStep('survey')
+
+    act(() => result.current.step.advance({ surveySelections: {} }))
+
+    await waitFor(() => expect(bodies).toHaveLength(1))
+  })
+
+  it('creates nothing while the trial sizes that cap the Safes are still loading', async () => {
+    mockIsSafePro = true
+    mockIsSurveyEnabled = true
+    const bodies: CreateSpaceSetupDto[] = []
+    server.use(createSetupHandler(bodies, { spaceId: faker.string.uuid(), checkoutUrl: null }))
+    const { result, push } = await renderStep('survey', { paymentLinkId: `plink_${faker.string.alphanumeric(10)}` })
+
+    act(() => result.current.step.advance({ surveySelections: {} }))
+
+    expect(push).not.toHaveBeenCalled()
+    expect(result.current.step.isSubmitting).toBe(false)
   })
 
   it('saves the changes of a step and goes back', async () => {
