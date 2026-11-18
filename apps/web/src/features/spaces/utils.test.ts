@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker'
-import { formatDate, getInvitedByName, getChainIdsParam } from './utils'
+import { formatDate, getInvitedByName, getChainIdsParam, toChainInfos } from './utils'
+import { chainBuilder } from '@/tests/builders/chains'
 import { spaceBuilder, spaceMemberBuilder } from '@/tests/builders/space'
 
 const CURRENT_USER_ID = 1
@@ -77,5 +78,28 @@ describe('getChainIdsParam', () => {
 
   it('returns an empty string when nothing is selected', () => {
     expect(getChainIdsParam([])).toBe('')
+  })
+})
+
+describe('toChainInfos', () => {
+  it('reads the name, logo and short name of each chain from the configs', () => {
+    const chain = chainBuilder().build()
+
+    expect(toChainInfos([chain.chainId], [chain])).toEqual([
+      {
+        chainId: chain.chainId,
+        chainName: chain.chainName,
+        chainLogoUri: chain.chainLogoUri ?? null,
+        shortName: chain.shortName,
+      },
+    ])
+  })
+
+  it('falls back to the chain id for a chain without a config', () => {
+    const chainId = faker.string.numeric(5)
+
+    expect(toChainInfos([chainId], [])).toEqual([
+      { chainId, chainName: chainId, chainLogoUri: null, shortName: chainId },
+    ])
   })
 })

@@ -1,6 +1,6 @@
 import type { RequestHandler } from 'msw'
 import type { Decorator } from '@storybook/react'
-import type { WalletContextType } from '@/components/common/WalletProvider'
+import type { WalletContextType } from '@/components/common/WalletProvider/WalletContext'
 import type { FixtureScenario } from '../../../../../config/test/msw/fixtures'
 
 /**

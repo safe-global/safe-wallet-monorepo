@@ -13,17 +13,20 @@ const spaceId = faker.string.uuid()
 
 jest.mock('next/router', () => ({ useRouter: () => ({ push: mockPush, query: {} }) }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/public/hooks/useAddNewSafeToUrlSpace', () => ({
   useAddNewSafeToUrlSpace: () => mockAddNewSafeToUrlSpace,
 }))
 
-jest.mock('@/features/counterfactual', () => ({
+jest.mock('@/features/counterfactual/public/utils/safeCreationPendingStatuses', () => ({
   safeCreationPendingStatuses: { SUCCESS: null },
 }))
 
-jest.mock('@/features/counterfactual/services', () => ({
-  ...jest.requireActual('@/features/counterfactual/services/safeCreationEvents'),
+jest.mock('@/features/counterfactual/public/utils/typeGuards', () => ({
+  ...jest.requireActual('@/features/counterfactual/public/utils/typeGuards'),
   isPredictedSafeProps: () => false,
+}))
+jest.mock('@/features/counterfactual/public/services/safeCreationEvents', () => ({
+  ...jest.requireActual('@/features/counterfactual/public/services/safeCreationEvents'),
   safeCreationSubscribe: (event: string, listener: () => void) => {
     listeners.set(event, listener)
     return () => listeners.delete(event)

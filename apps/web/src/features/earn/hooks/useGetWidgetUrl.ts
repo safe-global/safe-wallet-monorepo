@@ -1,5 +1,5 @@
 import { useDarkMode } from '@/hooks/useDarkMode'
-import { WIDGET_TESTNET_URL, WIDGET_PRODUCTION_URL } from '../constants'
+import { WIDGET_TESTNET_URL, WIDGET_PRODUCTION_URL } from '../public/constants'
 import useChains from '@/hooks/useChains'
 import { useMemo } from 'react'
 import useChainId from '@/hooks/useChainId'

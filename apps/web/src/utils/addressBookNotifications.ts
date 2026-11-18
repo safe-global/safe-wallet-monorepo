@@ -2,6 +2,9 @@
 
 export const getContactAddedMessage = (bookLabel: string): string => `Contact added to ${bookLabel}`
 
+export const getContactsAddedMessage = (count: number, bookLabel: string): string =>
+  count === 1 ? getContactAddedMessage(bookLabel) : `${count} contacts added to ${bookLabel}`
+
 export const getContactUpdatedMessage = (bookLabel: string): string => `Contact updated in ${bookLabel}`
 
 export const getContactRemovedMessage = (bookLabel: string): string => `Contact removed from ${bookLabel}`

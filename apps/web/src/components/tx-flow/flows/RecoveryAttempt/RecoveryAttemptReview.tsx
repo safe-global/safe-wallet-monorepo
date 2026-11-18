@@ -1,20 +1,20 @@
 import { type SyntheticEvent, useContext, useCallback, useEffect } from 'react'
 import CheckWallet from '@/components/common/CheckWallet'
 import { Errors, trackError } from '@/services/exceptions'
-import { dispatchRecoveryExecution } from '@/features/recovery/services'
+import { dispatchRecoveryExecution } from '@/features/recovery/public/services/recovery-sender'
 import useWallet from '@/hooks/wallets/useWallet'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import TxSubmitError from '@/components/tx/TxSubmitError'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { TxModalContext } from '@/components/tx-flow'
 import NetworkWarning from '@/components/new-safe/create/NetworkWarning'
-import { RecoveryFeature } from '@/features/recovery'
-import type { RecoveryQueueItem } from '@/features/recovery'
-import { useLoadFeature } from '@/features/__core__'
+import RecoveryDescription from '@/features/recovery/public/components/RecoveryDescription'
+import RecoveryValidationErrors from '@/features/recovery/public/components/RecoveryValidationErrors'
+import type { RecoveryQueueItem } from '@/features/recovery/public/types'
 import { useAsyncCallback } from '@safe-global/utils/hooks/useAsync'
 import FieldsGrid from '@safe-global/views/components/tx/FieldsGrid'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { SafeTxContext } from '../../SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import useGasPrice from '@/hooks/useGasPrice'
 import { useCurrentChain } from '@/hooks/useChains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
@@ -28,7 +28,6 @@ type RecoveryAttemptReviewProps = {
 }
 
 const RecoveryAttemptReview = ({ item }: RecoveryAttemptReviewProps) => {
-  const { RecoveryDescription, RecoveryValidationErrors } = useLoadFeature(RecoveryFeature)
   const { asyncCallback, isLoading, error } = useAsyncCallback(dispatchRecoveryExecution)
   const wallet = useWallet()
   const { safe } = useSafeInfo()

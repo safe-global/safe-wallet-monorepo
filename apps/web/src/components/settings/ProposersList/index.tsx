@@ -3,22 +3,21 @@ import tableCss from '@safe-global/views/components/common/EnhancedTable/styles.
 import CheckWallet from '@/components/common/CheckWallet'
 import SafeProLock from '@/components/common/SafeProLock'
 import Track from '@/components/common/Track'
-import {
-  AddProposer,
-  DeleteProposerDialog,
-  EditProposerDialog,
-  PendingDelegationsList,
-  useMigrateProposerLabels,
-  useParentSafeThreshold,
-} from '@/features/proposers'
-import { usePlanGate } from '@/features/spaces'
+import AddProposer from '@/features/proposers/public/components/AddProposer'
+import DeleteProposerDialog from '@/features/proposers/public/components/DeleteProposerDialog'
+import EditProposerDialog from '@/features/proposers/public/components/EditProposerDialog'
+import PendingDelegationsList from '@/features/proposers/public/components/PendingDelegationsList'
+import { useMigrateProposerLabels } from '@/features/proposers/public/hooks/useMigrateProposerLabels'
+import { useParentSafeThreshold } from '@/features/proposers/public/hooks/useParentSafeThreshold'
+import { usePlanGate } from '@/features/spaces/public/hooks/usePlanGate'
 import { useHasFeature } from '@/hooks/useChains'
 import useProposers from '@/hooks/useProposers'
 import { useIsNestedSafeOwner } from '@/hooks/useIsNestedSafeOwner'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import AddIcon from '@/public/images/common/add.svg'
 import ProChip from '@/public/images/safe-pro/pro-chip.svg'
-import { SETTINGS_EVENTS, UpgradeFeature } from '@/services/analytics'
+import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
+import { UpgradeFeature } from '@/services/analytics/mixpanel-events'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'

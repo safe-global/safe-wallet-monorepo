@@ -4,7 +4,7 @@ import { AnalysisIssuesDisplay } from '../AnalysisIssuesDisplay'
 import { ThreatAnalysisResultBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis-result.builder'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import { faker } from '@faker-js/faker'
-import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
+import { SEVERITY_COLORS } from '../../../constants'
 
 describe('AnalysisIssuesDisplay', () => {
   beforeEach(() => {

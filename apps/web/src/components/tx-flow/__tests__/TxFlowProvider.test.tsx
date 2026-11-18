@@ -3,7 +3,8 @@ import { act, renderHook, waitFor } from '@/tests/test-utils'
 import TxFlowProvider, { TxFlowContext } from '../TxFlowProvider'
 import { faker } from '@faker-js/faker'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { SafeTxContext, type SafeTxContextParams } from '../SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
@@ -30,10 +31,13 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   useSigner: jest.fn(() => undefined),
 }))
 
-jest.mock('@/features/counterfactual', () => ({ useIsCounterfactualSafe: jest.fn(() => false) }))
-
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
+jest.mock('@/features/counterfactual/public/hooks/useIsCounterfactualSafe', () => ({
   __esModule: true,
+  default: jest.fn(() => false),
+}))
+
+jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/hooks/useSafeShield'),
   useSafeShield: jest.fn(() => ({ needsRiskConfirmation: false, isRiskConfirmed: false })),
 }))
 

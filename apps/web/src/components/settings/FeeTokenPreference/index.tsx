@@ -7,7 +7,7 @@ import { Alert, AlertAction, AlertDescription, AlertSeverityIcon } from '@safe-g
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
 import { XIcon } from 'lucide-react'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { ERC20__factory } from '@safe-global/utils/types/contracts'
 import { multicall } from '@safe-global/utils/utils/multicall'
 import { getERC20TokenInfoOnChain } from '@/utils/tokens'

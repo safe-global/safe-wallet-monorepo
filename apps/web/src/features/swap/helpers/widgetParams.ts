@@ -2,7 +2,7 @@ import { TradeType, type CowSwapWidgetParams } from '@cowprotocol/widget-lib'
 import lightPalette from '@safe-global/theme/palettes/light'
 import darkPalette from '@safe-global/theme/palettes/dark'
 import { BRAND_NAME } from '@/config/constants'
-import { SWAP_FEE_RECIPIENT } from '../constants'
+import { SWAP_FEE_RECIPIENT } from '../public/constants'
 
 const BASE_URL = typeof window !== 'undefined' && window.location.origin ? window.location.origin : ''
 const SWAP_FEE_BPS = 35

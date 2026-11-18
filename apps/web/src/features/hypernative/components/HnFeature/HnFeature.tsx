@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
-import { useIsHypernativeFeature } from '../../hooks/useIsHypernativeFeature'
-import { useBannerVisibility } from '../../hooks/useBannerVisibility'
-import type { BannerType } from '../../hooks/useBannerStorage'
+import { useIsHypernativeFeature } from '../../public/hooks/useIsHypernativeFeature'
+import { useBannerVisibility } from '../../public/hooks/useBannerVisibility'
+import type { BannerType } from '../../public/hooks/useBannerStorage'
 
 export interface HnFeatureProps {
   children: ReactElement
