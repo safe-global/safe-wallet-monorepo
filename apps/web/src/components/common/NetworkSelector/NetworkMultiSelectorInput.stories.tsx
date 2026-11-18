@@ -3,7 +3,7 @@ import type { ReactElement, ReactNode } from 'react'
 import { mswLoader } from 'msw-storybook-addon'
 import { FormProvider, useForm } from 'react-hook-form'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import NetworkMultiSelectorInput from './NetworkMultiSelectorInput'
 
 const defaultSetup = createMockStory({

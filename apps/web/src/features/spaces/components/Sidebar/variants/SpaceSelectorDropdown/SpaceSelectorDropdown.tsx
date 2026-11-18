@@ -18,14 +18,14 @@ import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { WorkspaceCreateEntryPoint } from '@/services/analytics/mixpanel-events'
 import { cn } from '@safe-global/views/utils/cn'
 import { SPACE_SELECTOR_NAME_MAX_LENGTH } from '@safe-global/views/features/spaces/components/Sidebar/constants'
-import { SPACES_LIMIT } from '@/features/spaces/constants'
+import { SPACES_LIMIT } from '../../../../constants'
 import css from '../../styles.module.css'
 import type { SpaceItem } from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { getAddToSpaceStatus, truncateSpaceName, type AddToSpaceStatus } from '../../utils'
 import { useAddSafeToSpace } from '../../hooks/useAddSafeToSpace'
 import { useSafeAddressFromUrl, useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import useChainId from '@/hooks/useChainId'
-import { isUserActiveAdmin } from '@/features/spaces/utils'
+import { isUserActiveAdmin } from '../../../../utils'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
@@ -110,7 +110,7 @@ export const SpaceSelectorDropdown = ({
 
   const handleCreateSpace = () => {
     // eslint-disable-next-line no-restricted-syntax -- The Workspace to create does not exist yet
-    router.push(safe ? { pathname: AppRoutes.spaces.createSpace, query: { safe } } : AppRoutes.spaces.createSpace)
+    router.push(safe ? { pathname: AppRoutes.welcome.createSpace, query: { safe } } : AppRoutes.welcome.createSpace)
   }
 
   const isAdminOfSpace = (space: SpaceItem) => isUserActiveAdmin(space.members ?? [], currentUser?.id)

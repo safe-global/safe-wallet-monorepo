@@ -65,18 +65,6 @@ const darkPalette: ColorPalette = {
     background: '#2F2A18',
   },
   // Tag colours (Figma Mint Refresh, dark mode, node 5-274).
-  tag: {
-    default: { background: '#303033', text: '#DCDEE0' },
-    slate: { background: '#292E34', text: '#CDD5DE' },
-    clay: { background: '#392A21', text: '#E7CFBF' },
-    rose: { background: '#422232', text: '#F9C2DB' },
-    orchid: { background: '#3D233C', text: '#EEC5EC' },
-    lilac: { background: '#352644', text: '#DFC9F9' },
-    iris: { background: '#262950', text: '#CAD1FF' },
-    cobalt: { background: '#1A2D4E', text: '#BDD6FE' },
-    sky: { background: '#0F3243', text: '#AEDCF6' },
-    lagoon: { background: '#0D3530', text: '#A8E2D9' },
-  },
   background: {
     default: '#121312',
     main: '#121312',
@@ -101,6 +89,16 @@ const darkPalette: ColorPalette = {
     primary: '#FFFFFF',
     textSecondary: '#A1A3A7',
     textBrand: '#12FF80',
+  },
+  tag: {
+    slate: { fg: '#CDD5DE', bg: '#292E34', dot: '#9EADBD' },
+    clay: { fg: '#E7CFBF', bg: '#392A21', dot: '#CCA184' },
+    rose: { fg: '#F9C2DB', bg: '#422232', dot: '#E887B6' },
+    lilac: { fg: '#DFC9F9', bg: '#352644', dot: '#CAA3F4' },
+    iris: { fg: '#CAD1FF', bg: '#262950', dot: '#828AFE' },
+    cobalt: { fg: '#BDD6FE', bg: '#1A2D4E', dot: '#629DFE' },
+    sky: { fg: '#AEDCF6', bg: '#0F3243', dot: '#70C9FA' },
+    lagoon: { fg: '#A8E2D9', bg: '#0D3530', dot: '#5CC6B8' },
   },
 }
 

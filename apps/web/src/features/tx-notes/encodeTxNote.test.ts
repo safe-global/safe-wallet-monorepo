@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { encodeTxNote } from './services/encodeTxNote'
+import { encodeTxNote } from './public/utils/encodeTxNote'
 
 describe('encodeTxNote', () => {
   it('should encode tx note with an existing origin', () => {

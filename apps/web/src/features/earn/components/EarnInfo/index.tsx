@@ -1,9 +1,7 @@
-import Image from 'next/image'
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import EarnIllustrationLight from '@/public/images/common/earn-illustration-light.png'
 
 import CheckIcon from '@safe-global/views/assets/images/common/check.svg'
 import StarIcon from '@/public/images/common/star.svg'
@@ -11,8 +9,8 @@ import EyeIcon from '@/public/images/common/eye.svg'
 import FiatIcon from '@/public/images/common/fiat.svg'
 import Track from '@/components/common/Track'
 import useBalances from '@/hooks/useBalances'
-import { VaultAPYs } from '../../constants'
-import { isEligibleEarnToken } from '../../services/utils'
+import { VaultAPYs } from '../../public/constants'
+import { isEligibleEarnToken } from '../../public/utils'
 import useChainId from '@/hooks/useChainId'
 import TokenIcon from '@/components/common/TokenIcon'
 import TokenAmount from '@/components/common/TokenAmount'
@@ -29,7 +27,7 @@ import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { EARN_EVENTS, EARN_LABELS } from '@/services/analytics/events/earn'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
-import { APYDisclaimer, EARN_HELP_ARTICLE, ApproximateAPY } from '../../constants'
+import { APYDisclaimer, EARN_HELP_ARTICLE, ApproximateAPY } from '../../public/constants'
 
 export const EarnPoweredBy = () => {
   const isDarkMode = useDarkMode()
@@ -98,7 +96,7 @@ const EarnInfo = ({ onGetStarted }: { onGetStarted: () => void }) => {
             </div>
 
             <div className="relative hidden items-center justify-center bg-[var(--color-background-main)] sm:flex md:w-5/12">
-              <Image src={EarnIllustrationLight} alt="Earn illustration" width={239} height={239} />
+              <img src="/images/common/earn-illustration-light.png" alt="Earn illustration" width={239} height={239} />
             </div>
           </div>
         </CardContent>

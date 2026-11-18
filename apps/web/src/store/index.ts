@@ -9,33 +9,30 @@ import {
 import { useDispatch, useSelector, type TypedUseSelectorHook } from 'react-redux'
 import { useEffect } from 'react'
 import merge from 'lodash/merge'
-import { IS_PRODUCTION, CONFIG_SERVICE_KEY } from '@/config/constants'
+import { APP_ENV, IS_PRODUCTION, CONFIG_SERVICE_KEY } from '@/config/constants'
 import { getPreloadedState, persistState } from './persistStore'
 import { broadcastState, listenToBroadcast } from './broadcast'
-import {
-  cookiesAndTermsSlice,
-  cookiesAndTermsInitialState,
-  safeMessagesListener,
-  safeInfoListener,
-  swapOrderListener,
-  swapOrderStatusListener,
-  txHistoryListener,
-  txQueueListener,
-  authListener,
-  counterfactualSyncListener,
-  addressBookListener,
-  elevationListener,
-  spaceSafesEntitlementsListener,
-  planChangeSyncListener,
-  checkoutTrackingListener,
-  workspaceTrackingListener,
-  spaceSafesCacheListener,
-  trialReminderListener,
-} from './slices'
+import { cookiesAndTermsSlice, cookiesAndTermsInitialState } from '@/store/cookiesAndTermsSlice'
+import { safeMessagesListener } from '@/store/safeMessagesSlice'
+import { safeInfoListener } from '@/store/safeInfoSlice'
+import { swapOrderListener, swapOrderStatusListener } from '@/store/swapOrderSlice'
+import { txHistoryListener } from '@/store/txHistorySlice'
+import { txQueueListener } from '@/store/txQueueSlice'
+import { authListener } from '@/store/authSlice'
+import { counterfactualSyncListener } from '@/features/counterfactual/public/store/counterfactualSyncListener'
+import { addressBookListener } from '@/store/addressBookSlice'
+import { spaceSafesEntitlementsListener } from '@/features/spaces/public/store/spaceSafesEntitlementsListener'
+import { planChangeSyncListener } from '@/features/spaces/public/store/planChangeSyncListener'
+import { checkoutTrackingListener } from '@/features/spaces/public/store/checkoutTrackingListener'
+import { workspaceTrackingListener } from '@/features/spaces/public/store/workspaceTrackingListener'
+import { spaceSafesCacheListener } from '@/features/spaces/public/store/spaceSafesCacheListener'
+import { addressBookTagsCacheListener } from '@/features/spaces/public/store/addressBookTagsCacheListener'
+import { trialReminderListener } from '@/features/spaces/public/store/trialReminder'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
 import { ofacApi } from '@/store/api/ofac'
 import { safePassApi } from './api/safePass'
+import { beamerApi } from './api/beamer'
 import { hypernativeApi } from '@safe-global/store/hypernative/hypernativeApi'
 import { safenetCheckApi } from '@safe-global/store/safenet/safenetCheckApi'
 import { safenetCheckSlice } from '@safe-global/store/safenet/safenetCheckSlice'
@@ -47,6 +44,7 @@ import { migrateBatchTxs } from '@/services/ls-migration/batch'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway'
 import { cgwErrorAlert } from './middleware/cgwErrorAlert'
 import { forbiddenSessionListener } from '@/services/sessionExpiry/forbiddenSessionListener'
+import { spaceQueueReconciliationListener } from '@/features/spaces/public/store/spaceQueueReconciliationListener'
 
 const rootReducer = combineReducers({
   [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
@@ -76,13 +74,14 @@ const rootReducer = combineReducers({
   [slices.globalSearchSlice.name]: slices.globalSearchSlice.reducer,
   [slices.safeActionsModalSlice.name]: slices.safeActionsModalSlice.reducer,
   [slices.spaceNavigationSlice.name]: slices.spaceNavigationSlice.reducer,
-  [slices.gtfPaymentSourcePreferenceSlice.name]: slices.gtfPaymentSourcePreferenceSlice.reducer,
+  [slices.spaceQueueViewSlice.name]: slices.spaceQueueViewSlice.reducer,
+  [slices.feePaymentSourcePreferenceSlice.name]: slices.feePaymentSourcePreferenceSlice.reducer,
   [slices.featureFlagOverridesSlice.name]: slices.featureFlagOverridesSlice.reducer,
-  // Deliberately absent from `persistedSlices`: a phase restored from a previous
-  // page load would leave the user on a splash screen with nothing in flight.
+  // Deliberately absent from `persistedSlices`: a restored dialog would wait for a request that is gone.
   [slices.stepUpSlice.name]: slices.stepUpSlice.reducer,
   [ofacApi.reducerPath]: ofacApi.reducer,
   [safePassApi.reducerPath]: safePassApi.reducer,
+  [beamerApi.reducerPath]: beamerApi.reducer,
   [hypernativeApi.reducerPath]: hypernativeApi.reducer,
   [safenetCheckSlice.name]: safenetCheckSlice.reducer,
   [safenetCheckApi.reducerPath]: safenetCheckApi.reducer,
@@ -109,7 +108,7 @@ const persistedSlices: (keyof Partial<RootState>)[] = [
   slices.orderByPreferenceSlice.name,
   slices.authSlice.name,
   slices.hnStateSlice.name,
-  slices.gtfPaymentSourcePreferenceSlice.name,
+  slices.feePaymentSourcePreferenceSlice.name,
   slices.featureFlagOverridesSlice.name,
 ]
 
@@ -126,6 +125,7 @@ const middleware: Middleware<{}, RootState>[] = [
   listenerMiddlewareInstance.middleware,
   ofacApi.middleware,
   safePassApi.middleware,
+  beamerApi.middleware,
   hypernativeApi.middleware,
   safenetCheckApi.middleware,
   slices.gatewayApi.middleware,
@@ -141,14 +141,15 @@ const listeners = [
   authListener,
   counterfactualSyncListener,
   addressBookListener,
-  elevationListener,
   spaceSafesEntitlementsListener,
   planChangeSyncListener,
   checkoutTrackingListener,
   workspaceTrackingListener,
   spaceSafesCacheListener,
+  addressBookTagsCacheListener,
   trialReminderListener,
   forbiddenSessionListener,
+  spaceQueueReconciliationListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {
@@ -211,7 +212,11 @@ export const makeStore = (initialState?: Partial<RootState>) => {
     reducer: _hydrationReducer,
     middleware: (getDefaultMiddleware) => {
       listeners.forEach((listener) => listener(listenerMiddlewareInstance))
-      return getDefaultMiddleware({ serializableCheck: false }).concat(cgwClient.middleware).concat(middleware)
+      // Parallel Jest workers push the check past its 32 ms timing warning; the mutation check itself stays on
+      const immutableCheck = APP_ENV === 'test' ? { warnAfter: 1000 } : true
+      return getDefaultMiddleware({ serializableCheck: false, immutableCheck })
+        .concat(cgwClient.middleware)
+        .concat(middleware)
     },
     devTools: !IS_PRODUCTION,
     preloadedState: initialState,

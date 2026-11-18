@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMinimalDecorator } from '@/stories/mocks'
+import { createMinimalDecorator } from '@/stories/mocks/createMockStory'
+import { createHandlers } from '@/stories/mocks/handlers'
 import { ContractVersion } from './index'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 
@@ -25,7 +26,7 @@ const decorator = createMinimalDecorator({
 const meta: Meta<typeof ContractVersion> = {
   title: 'Components/Settings/ContractVersion',
   component: ContractVersion,
-  parameters: { layout: 'padded' },
+  parameters: { layout: 'padded', msw: { handlers: createHandlers() } },
   decorators: [decorator],
   tags: ['autodocs'],
 }

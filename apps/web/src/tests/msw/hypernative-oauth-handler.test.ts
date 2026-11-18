@@ -1,15 +1,4 @@
-import { setupServer } from 'msw/node'
-import { handlers } from '@safe-global/test/msw/handlers'
-import { GATEWAY_URL } from '@/config/gateway'
-
-// Create a test server with our handlers
-const server = setupServer(...handlers(GATEWAY_URL))
-
 describe('Hypernative OAuth Token Exchange Handler', () => {
-  beforeAll(() => server.listen())
-  afterEach(() => server.resetHandlers())
-  afterAll(() => server.close())
-
   const tokenUrl = 'https://mock-hn-auth.example.com/oauth/token'
 
   const validTokenRequest = {

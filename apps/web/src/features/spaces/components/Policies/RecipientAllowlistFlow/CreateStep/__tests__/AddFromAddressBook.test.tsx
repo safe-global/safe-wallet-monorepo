@@ -21,6 +21,7 @@ const contact = (name: string, source: ContactSource, chainIds = [CHAIN_ID]): Ex
   name,
   address: checksumAddress(faker.finance.ethereumAddress()),
   chainIds,
+  tagIds: [],
   source,
   createdBy: '',
   createdByUserId: 0,

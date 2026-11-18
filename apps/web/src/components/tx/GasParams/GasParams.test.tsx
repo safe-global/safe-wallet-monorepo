@@ -1,7 +1,7 @@
 import { render } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { _GasParams as GasParams } from '@/components/tx/GasParams/index'
-import type { AdvancedParameters } from '@/components/tx/AdvancedParams'
+import type { AdvancedParameters } from '@safe-global/views/components/tx/AdvancedParams/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 describe('GasParams', () => {
@@ -139,6 +139,25 @@ describe('GasParams', () => {
 
     expect(await findByText('Gas limit')).toBeInTheDocument()
     expect(getByText('30000')).toBeInTheDocument()
+  })
+
+  it('Shows the wallet nonce on execution', async () => {
+    const params: AdvancedParameters = {
+      nonce: 123,
+      userNonce: 7,
+      gasLimit: BigInt('30000'),
+      maxFeePerGas: BigInt('10000'),
+      maxPriorityFeePerGas: BigInt('10000'),
+    }
+
+    const { getByText, findByText } = render(
+      <GasParams params={params} isExecution={true} isEIP1559={true} onEdit={jest.fn} />,
+    )
+
+    await userEvent.click(getByText('Estimated fee'))
+
+    expect(await findByText('Wallet nonce')).toBeInTheDocument()
+    expect(getByText('7')).toBeInTheDocument()
   })
 
   it('Shows a cannot estimate message if there is no gasLimit', () => {

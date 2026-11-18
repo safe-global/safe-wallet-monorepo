@@ -1,6 +1,4 @@
-import { removeUndeployedSafe, selectUndeployedSafe } from '@/features/counterfactual/store'
-import { CounterfactualFeature } from '@/features/counterfactual'
-import { useLoadFeature } from '@/features/__core__'
+import { removeUndeployedSafe, selectUndeployedSafe } from '@/features/counterfactual/public/store/undeployedSafesSlice'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { useEffect, useMemo } from 'react'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
@@ -9,7 +7,8 @@ import useAsync, { type AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import useChainId from '../useChainId'
 import useSafeInfo from '../useSafeInfo'
 import { POLLING_INTERVAL } from '@/config/constants'
-import { useCurrentChain } from '../useChains'
+import { useCurrentChain, useHasFeature } from '../useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSafeAddressFromUrl } from '../useSafeAddressFromUrl'
 import { isAuthenticated, selectCfSafeSynced, selectIsStoreHydrated } from '@/store/authSlice'
 
@@ -26,20 +25,21 @@ const useLoadSafeInfo = (): AsyncResult<ExtendedSafeInfo> => {
   const isUserAuthenticated = useAppSelector(isAuthenticated)
   const isHydrated = useAppSelector(selectIsStoreHydrated)
   const cfSynced = useAppSelector(selectCfSafeSynced)
-  const { getUndeployedSafeInfo, $isReady } = useLoadFeature(CounterfactualFeature)
+  const isCounterfactualEnabled = useHasFeature(FEATURES.COUNTERFACTUAL)
 
   // Wait for CF sync before reporting errors for safes not found on-chain.
   // Also wait while store is hydrating — we don't yet know if user is authenticated.
   const awaitingCfSync = !isHydrated || (isUserAuthenticated && !cfSynced)
 
   const [undeployedData, undeployedError] = useAsync<ExtendedSafeInfo | undefined>(async () => {
-    if (!undeployedSafe || !chain || !$isReady) return
+    if (!undeployedSafe || !chain || !isCounterfactualEnabled) return
     /**
      * This is the one place where we can't check for `safe.deployed` as we want to update that value
      * when the local storage is cleared, so we have to check undeployedSafe
      */
+    const { getUndeployedSafeInfo } = await import('@/features/counterfactual/public/services/safeDeployment')
     return getUndeployedSafeInfo(undeployedSafe, address, chain)
-  }, [undeployedSafe, address, chain, $isReady, getUndeployedSafeInfo])
+  }, [undeployedSafe, address, chain, isCounterfactualEnabled])
 
   const {
     currentData: cgwData,

@@ -4,7 +4,6 @@
  */
 
 import '@mui/material/styles'
-import type { TagColor } from '../palettes/types'
 
 declare module '@mui/material/styles' {
   // Custom color palettes
@@ -14,7 +13,6 @@ declare module '@mui/material/styles' {
     backdrop: Palette['primary']
     static: Palette['primary']
     review: { main: string; background: string }
-    tag: Record<TagColor, { background: string; text: string }>
   }
 
   interface PaletteOptions {
@@ -23,7 +21,6 @@ declare module '@mui/material/styles' {
     backdrop: PaletteOptions['primary']
     static: PaletteOptions['primary']
     review?: { main: string; background: string }
-    tag?: Record<TagColor, { background: string; text: string }>
   }
 
   interface TypeBackground {

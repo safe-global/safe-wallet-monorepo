@@ -53,6 +53,16 @@ describe('GasLimitInput', () => {
     expect(input).toHaveFocus()
   })
 
+  it('shows the minimum gas limit error below 21000', async () => {
+    render(<TestForm />)
+
+    const input = screen.getByLabelText<HTMLInputElement>('Gas limit')
+    await userEvent.clear(input)
+    await userEvent.type(input, '100')
+
+    expect(await screen.findByText('Gas limit must be at least 21000')).toBeInTheDocument()
+  })
+
   it('never shows the reset button without a recommended gas limit', async () => {
     render(<TestForm />)
 

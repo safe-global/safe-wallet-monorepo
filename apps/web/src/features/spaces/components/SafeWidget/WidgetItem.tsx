@@ -15,7 +15,7 @@ interface WidgetItemProps {
   actionNode?: ReactNode
   highlighted?: boolean
   className?: string
-  /** Cypress: indexed rows in Space dashboard Accounts widget (`space-dashboard-accounts-row-${n}`). */
+  /** Tests: indexed rows in Space dashboard Accounts widget (`space-dashboard-accounts-row-${n}`). */
   testId?: string
   fixedActionWidth?: boolean
 }

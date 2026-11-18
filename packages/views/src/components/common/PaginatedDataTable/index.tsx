@@ -10,6 +10,7 @@ import {
   TableSortIcon,
 } from '@safe-global/views/components/ui/table'
 import { Button } from '@safe-global/views/components/ui/button'
+import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import { useIsMobile } from '@safe-global/views/hooks/use-mobile'
 import { ChevronDown, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { cn } from '@safe-global/views/utils/cn'
@@ -78,11 +79,19 @@ type SortDirection = 'asc' | 'desc'
 type SortState = { id: string; direction: SortDirection }
 
 const DEFAULT_PAGE_SIZE = 25
+// The checkbox column's `w-10`
+const SELECTION_COLUMN_WIDTH = 40
 
-const NESTED_CONTROLS = 'a, button, [role="button"], input, [role="menuitem"]'
+const NESTED_CONTROLS = 'a, button, [role="button"], [role="checkbox"], input, [role="menuitem"]'
 
 type PaginatedDataTableProps<T> = {
   columns: DataTableColumn<T>[]
+  /** Adds a leading checkbox column; selection is controlled through `selectedKeys` and `onSelectionChange`. */
+  selectable?: boolean
+  selectedKeys?: ReadonlySet<string>
+  onSelectionChange?: (next: Set<string>) => void
+  /** Accessible name for a row's checkbox, defaulting to "Select <row key>". */
+  getSelectionLabel?: (row: T) => string
   /**
    * Makes the whole row a pointer target. The row stays a plain table row for assistive tech, so
    * a caller that sets this also renders a focusable control with an accessible name in one of
@@ -133,6 +142,10 @@ function PaginatedDataTable<T>({
   getRowClassName,
   pageSize = DEFAULT_PAGE_SIZE,
   onRowClick,
+  selectable = false,
+  selectedKeys,
+  onSelectionChange,
+  getSelectionLabel,
 }: PaginatedDataTableProps<T>) {
   const isMobile = useIsMobile()
   const [page, setPage] = useState(0)
@@ -188,7 +201,8 @@ function PaginatedDataTable<T>({
 
   // Fixed table layout ignores `min-width` on cells, so below this floor the full column set
   // cannot render without columns overlapping.
-  const tableMinWidth = columns.reduce((total, column) => total + (column.minWidth ?? 0), 0)
+  const tableMinWidth =
+    columns.reduce((total, column) => total + (column.minWidth ?? 0), 0) + (selectable ? SELECTION_COLUMN_WIDTH : 0)
 
   // Compact = the full column set doesn't fit: render the mobile presentation
   // — secondary columns fold into the row detail.
@@ -196,7 +210,30 @@ function PaginatedDataTable<T>({
   const visibleColumns = isCompact ? columns.filter((column) => column.priority !== 'secondary') : columns
 
   const showDetailToggle = isCompact && Boolean(renderRowDetail)
-  const totalColumns = visibleColumns.length + (showDetailToggle ? 1 : 0)
+  const totalColumns = visibleColumns.length + (showDetailToggle ? 1 : 0) + (selectable ? 1 : 0)
+
+  const pageKeys = selectable ? paginatedRows.map(getRowKey) : []
+  const selectedOnPage = pageKeys.filter((key) => selectedKeys?.has(key) ?? false).length
+  const allPageSelected = pageKeys.length > 0 && selectedOnPage === pageKeys.length
+  const somePageSelected = selectedOnPage > 0 && !allPageSelected
+
+  const updateSelection = (mutate: (next: Set<string>) => void) => {
+    const next = new Set(selectedKeys ?? [])
+    mutate(next)
+    onSelectionChange?.(next)
+  }
+
+  const togglePage = () =>
+    updateSelection((next) => {
+      if (allPageSelected) pageKeys.forEach((key) => next.delete(key))
+      else pageKeys.forEach((key) => next.add(key))
+    })
+
+  const toggleRow = (key: string) =>
+    updateSelection((next) => {
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+    })
 
   const toggleExpanded = (key: string) =>
     setExpanded((current) => {
@@ -213,6 +250,18 @@ function PaginatedDataTable<T>({
       <Table variant="panel" className={cn(!isCompact && 'md:table-fixed')}>
         <TableHeader>
           <TableRow>
+            {selectable && (
+              <TableHead className="w-10">
+                <Checkbox
+                  aria-label={allPageSelected ? 'Deselect all rows on this page' : 'Select all rows on this page'}
+                  checked={allPageSelected}
+                  indeterminate={somePageSelected}
+                  disabled={pageKeys.length === 0}
+                  onCheckedChange={togglePage}
+                  data-testid="select-all-checkbox"
+                />
+              </TableHead>
+            )}
             {visibleColumns.map((column) => {
               const direction = sort?.id === column.id ? sort.direction : undefined
 
@@ -272,6 +321,16 @@ function PaginatedDataTable<T>({
                       : undefined
                   }
                 >
+                  {selectable && (
+                    <TableCell className="w-10">
+                      <Checkbox
+                        aria-label={getSelectionLabel?.(row) ?? `Select ${key}`}
+                        checked={selectedKeys?.has(key) ?? false}
+                        onCheckedChange={() => toggleRow(key)}
+                        data-testid="row-checkbox"
+                      />
+                    </TableCell>
+                  )}
                   {visibleColumns.map((column) => (
                     <TableCell
                       key={column.id}

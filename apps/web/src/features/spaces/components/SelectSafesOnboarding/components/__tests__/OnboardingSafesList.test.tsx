@@ -1,13 +1,14 @@
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { render } from '@/tests/test-utils'
 
 import OnboardingSafesList from '../OnboardingSafesList'
+import type { SimilarWarning } from '@/features/address-poisoning/public/utils/crossListClusters'
 
 // Stub the (MUI) accounts table so these tests stay focused on section/flag wiring.
 // The barrel is replaced wholesale (not spread) to avoid a circular-init crash when required.
-jest.mock('@/features/myAccounts', () => ({
+jest.mock('@/features/myAccounts/public/components/SafeAccountsTable', () => ({
   __esModule: true,
-  SafeAccountsTable: ({
+  default: ({
     items,
     similarWarnings,
     similarityGroups,
@@ -47,7 +48,7 @@ const baseProps = {
   flaggedAddresses: new Set<string>(),
   trustedSimilarityGroups: new Map<string, string>(),
   ownedSimilarityGroups: new Map<string, string>(),
-  similarWarnings: new Map<string, { trusted: string[]; owned: string[] }>(),
+  similarWarnings: new Map<string, SimilarWarning>(),
   selectedKeys: new Set<string>(),
   onToggle: noop,
   isAtLimit: false,
@@ -85,8 +86,8 @@ describe('OnboardingSafesList', () => {
 
   it('passes the cross-list warnings to both the trusted and owned tables', () => {
     const warnings = new Map([
-      ['0xtrusted', { trusted: [], owned: ['0xowned'] }],
-      ['0xowned', { trusted: ['0xtrusted'], owned: [] }],
+      ['0xtrusted', { trusted: [], owned: [{ address: '0xowned', chainIds: ['1'] }] }],
+      ['0xowned', { trusted: [{ address: '0xtrusted', chainIds: ['1'] }], owned: [] }],
     ])
     const { getByTestId } = render(
       <OnboardingSafesList

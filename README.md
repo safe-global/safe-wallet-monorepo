@@ -88,7 +88,7 @@ yarn workspace @safe-global/web storybook
 >
 > For comprehensive setup instructions, environment variables, testing, and platform-specific workflows, see:
 >
-> - **[Web App README](/apps/web/README.md)** - Environment setup, Cypress E2E tests, Storybook, and more
+> - **[Web App README](/apps/web/README.md)** - Environment setup, E2E tests, Storybook, and more
 > - **[Mobile App README](/apps/mobile/README.md)** - iOS/Android setup, Maestro E2E tests, Expo configuration, and more
 
 ## Monorepo commands
@@ -128,13 +128,13 @@ yarn workspace <workspace-name> remove <package-name>
 > you can run the command without specifying the workspace name. For example:
 >
 > ```bash
-> yarn cypress:open
+> yarn test:storybook
 > ```
 >
 > is equivalent to:
 >
 > ```bash
-> yarn workspace @safe-global/web cypress:open
+> yarn workspace @safe-global/web test:storybook
 > ```
 
 ### Linting, formatting, and type-checking
@@ -169,8 +169,7 @@ yarn test
 - **Run E2E tests (web only):**
 
 ```bash
-yarn workspace @safe-global/web cypress:open  # Interactive mode
-yarn workspace @safe-global/web cypress:run   # Headless mode
+yarn workspace @safe-global/web e2e:env playwright  # Playwright on the isolated stack
 ```
 
 ## Contributing
@@ -197,7 +196,7 @@ yarn install
 - **Husky**: Pre-commit hooks for linting, formatting, and type-checking.
 - **ESLint & Prettier**: Enforce coding standards and formatting.
 - **Jest**: Unit testing framework.
-- **Cypress**: E2E testing for the web app.
+- **Playwright**: E2E testing for the web app.
 - **Storybook**: Component documentation and development for the web app.
 - **Expo**: Mobile app framework for the `mobile` workspace.
 - **Next.js**: React framework for the `web` workspace.
@@ -234,7 +233,7 @@ Returning with the fetched gold beneath the evening star.
 Chain by chain the watchers set their vigil wide,
 Across th' EVM kingdoms, ever at the Safe's own side.
 Storybook doth chronicle each component's tale,
-And Cypress walks the paths where lesser tests would fail.
+And Playwright walks the paths where lesser tests would fail.
 
 No `any` types shall darken these well-guarded lands —
 That ancient law doth hold by Prettier's own hands.

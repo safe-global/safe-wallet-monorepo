@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { ImplementationVersionState } from '@safe-global/store/gateway/types'
 import { MastercopyWarning } from './MastercopyWarning'
 

@@ -7,9 +7,6 @@ type PermissionsDisplayType = {
   description: string
 }
 
-export * from './useBrowserPermissions'
-export * from './useSafePermissions'
-
 const SAFE_PERMISSIONS_TEXTS: Record<string, PermissionsDisplayType> = {
   [RestrictedMethods.requestAddressBook]: {
     displayName: 'Address Book',

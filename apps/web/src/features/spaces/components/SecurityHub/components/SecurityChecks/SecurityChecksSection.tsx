@@ -1,5 +1,5 @@
 import { type ReactElement } from 'react'
-import type { SafeGrade, ScanContext, ScanResult } from '@/features/security/types'
+import type { SafeGrade, ScanContext, ScanResult } from '@/features/security/public/types'
 import SectionPanel from './SectionPanel'
 import SafeGradeChip, {
   SAFE_GRADE_LABEL,

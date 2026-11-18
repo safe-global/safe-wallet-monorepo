@@ -1,4 +1,4 @@
-export { default as SpendingLimitDrawer, type SpendingLimitDrawerProps } from './SpendingLimitDrawer'
+export { type SpendingLimitDrawerProps } from './SpendingLimitDrawer'
 export type {
   ActiveDrawerPolicy,
   PendingTxOutcome,

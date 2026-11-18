@@ -51,12 +51,6 @@ describe('useIsSpaceRoute', () => {
     expect(result.current).toBe(false)
   })
 
-  it('returns false on /spaces/create-space', () => {
-    mockUsePathname.mockReturnValue('/spaces/create-space')
-    const { result } = renderHook(() => useIsSpaceRoute())
-    expect(result.current).toBe(false)
-  })
-
   it('returns true on /spaces/transactions', () => {
     mockUsePathname.mockReturnValue('/spaces/transactions')
     const { result } = renderHook(() => useIsSpaceRoute())

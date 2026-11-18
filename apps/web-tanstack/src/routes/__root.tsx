@@ -16,34 +16,30 @@ import { makeStore, setStoreInstance, useHydrateStore, useInitChains } from '@/s
 import MetaTags from '@/components/common/MetaTags'
 import PageLayout from '@/components/common/PageLayout'
 import PwaReloadPrompt from '../components/PwaReloadPrompt'
-import Notifications from '@/components/common/Notifications'
-import CookieAndTermBanner from '@/components/common/CookieAndTermBanner'
-import { CaptchaProvider } from '@/components/common/Captcha'
+import AppChrome from '@/components/common/AppChrome'
+import { CaptchaProvider } from '@/components/common/Captcha/CaptchaProvider'
 import useChangedValue from '@/hooks/useChangedValue'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
 import useGtm from '@/services/analytics/useGtm'
 import useMixpanel from '@/services/analytics/useMixpanel'
-import useBeamer from '@/hooks/Beamer/useBeamer'
 import useLoadableStores from '@/hooks/useLoadableStores'
 import useUnlockBodyScroll from '@/hooks/useUnlockBodyScroll'
 import { useRememberSpace } from '@/hooks/useRememberSpace'
 import { useInitSession } from '@/hooks/useInitSession'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
-import { useVisitedSafes } from '@/features/myAccounts'
-import LaunchScreen from '@/components/common/LaunchScreen'
-import { useOidcLoginCallback, useStepUpCallback, useStepUpSplash } from '@/features/oidc-auth'
+import { useVisitedSafes } from '@/features/myAccounts/public/hooks/useVisitedSafes'
+import { useOidcLoginCallback } from '@/features/oidc-auth/public/hooks/useOidcLoginCallback'
+import { useStepUpRecovery } from '@/features/oidc-auth/public/hooks/useStepUpRecovery'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
+import { useHypernativeTokenRefresh } from '@/features/hypernative/public/hooks/useHypernativeTokenRefresh'
 import { initObservability } from '@/services/observability'
 import Analytics from '@/services/analytics/Analytics'
-import PkModulePopup from '@/services/private-key-module/PkModulePopup'
-import { useLoadFeature } from '@/features/__core__'
-import { RecoveryFeature } from '@/features/recovery'
-import { CounterfactualFeature } from '@/features/counterfactual'
-import { SpendingLimitsFeature } from '@/features/spending-limits'
-import { TargetedOutreachFeature } from '@/features/targeted-outreach'
+import Recovery from '@/features/recovery/public/components/Recovery'
+import CounterfactualHooks from '@/features/counterfactual/public/components/CounterfactualHooks'
 import { useLocation, useSearch } from '@tanstack/react-router'
+import SpendingLimitsLoader from '@/features/spending-limits/public/components/SpendingLimitsLoader'
 
 import '@/styles/globals.css'
 import '@/styles/shadcn.css'
@@ -60,29 +56,6 @@ setStoreInstance(reduxStore)
 // the SPA, so a plain React.lazy is equivalent.
 const LazyWeb3Init = lazy(() => import('@/components/common/LazyWeb3Init'))
 
-const RecoveryLoader = () => {
-  const { Recovery } = useLoadFeature(RecoveryFeature)
-  return <Recovery />
-}
-const CounterfactualHooksLoader = () => {
-  const { CounterfactualHooks } = useLoadFeature(CounterfactualFeature)
-  return <CounterfactualHooks />
-}
-const SpendingLimitsLoaderWrapper = () => {
-  const { SpendingLimitsLoader } = useLoadFeature(SpendingLimitsFeature)
-  return <SpendingLimitsLoader />
-}
-const TargetedOutreachPopupLoader = () => {
-  const { OutreachPopup } = useLoadFeature(TargetedOutreachFeature)
-  return <OutreachPopup />
-}
-
-const StepUpSplash = (): ReactElement | null => {
-  const stepUpCaption = useStepUpSplash()
-
-  return stepUpCaption ? <LaunchScreen stepUpCaption={stepUpCaption} /> : null
-}
-
 const InitApp = (): ReactElement => {
   useHydrateStore(reduxStore)
   useInitChains()
@@ -93,12 +66,12 @@ const InitApp = (): ReactElement => {
   useInitSession()
   useLoadableStores()
   useInitWeb3()
-  useBeamer()
   useVisitedSafes()
   useOidcLoginCallback()
-  useStepUpCallback()
+  useStepUpRecovery()
   useLogoutCallback()
   useSessionExpiryGuard()
+  useHypernativeTokenRefresh()
   useUnlockBodyScroll()
   useRememberSpace()
 
@@ -114,13 +87,10 @@ const MemoizedTree = memo(function MemoizedTree({ pathname, outlet }: { pathname
   return (
     <>
       <PageLayout pathname={pathname}>{outlet}</PageLayout>
-      <CookieAndTermBanner />
-      <TargetedOutreachPopupLoader />
-      <Notifications />
-      <RecoveryLoader />
-      <CounterfactualHooksLoader />
-      <SpendingLimitsLoaderWrapper />
-      <PkModulePopup />
+      <AppChrome />
+      <Recovery />
+      <CounterfactualHooks />
+      <SpendingLimitsLoader />
     </>
   )
 })
@@ -145,7 +115,6 @@ function RootShell() {
             {/* Before InitApp and the page, so GA exists before their mount effects send events */}
             <Analytics />
             <InitApp />
-            <StepUpSplash />
             <PwaReloadPrompt />
             <Suspense fallback={null}>
               <LazyWeb3Init />

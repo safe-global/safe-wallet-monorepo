@@ -2,8 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { faker } from '@faker-js/faker'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import MembersList from './index'
+
+faker.seed(1)
 
 const PAST = faker.date.past().toISOString()
 const FUTURE = faker.date.future().toISOString()
@@ -24,7 +26,8 @@ const member = (overrides: Omit<Partial<MemberDto>, 'user'> & { user?: Partial<M
 const defaultSetup = createMockStory({
   scenario: 'efSafe',
   wallet: 'owner',
-  features: { spaces: true, switchAuthenticator: true },
+  authenticated: true,
+  features: { switchAuthenticator: true },
   pathname: '/spaces/members',
   query: { spaceId: '1' },
   shadcn: true,

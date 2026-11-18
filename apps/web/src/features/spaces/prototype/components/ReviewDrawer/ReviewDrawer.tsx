@@ -3,8 +3,6 @@ import type { MenuAction } from '../../services/actions'
 import type { Persona, Proposal } from '../../types'
 import type { Hypernative } from '../ScenarioBar'
 
-export { StepsReviewDrawer as ReviewDrawer } from './steps/StepsReviewDrawer'
-
 export type Replacement = { recipient: string; amount: string }
 
 // Layout state lives with the page so stepping with J/K can keep it while opening a new row resets it.
@@ -12,7 +10,6 @@ export type ReviewLayout = {
   sections: string[]
   setSections: (sections: string[]) => void
   signersOpen: boolean
-  setSignersOpen: (open: boolean) => void
   reject: boolean
   setReject: (reject: boolean) => void
   pendingAction: PreviewAction | null

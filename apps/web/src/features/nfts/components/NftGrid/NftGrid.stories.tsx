@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import type { Collectible } from '@safe-global/store/gateway/AUTO_GENERATED/collectibles'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import NftGrid from './index'
 
 const setup = createMockStory({
@@ -22,7 +22,7 @@ const nfts: Collectible[] = [
     uri: null,
     name: 'Bored Ape #1234',
     description: 'A bored ape',
-    imageUri: 'https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png',
+    imageUri: 'mock-assets/safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.webp',
     metadata: null,
   },
   {

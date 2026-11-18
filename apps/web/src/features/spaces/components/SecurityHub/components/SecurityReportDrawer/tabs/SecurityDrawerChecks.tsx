@@ -3,9 +3,8 @@ import { maybePlural } from '@safe-global/utils/utils/formatters'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import type { ScanContext, ScanResult } from '@/features/security/types'
-import { SecurityFeature } from '@/features/security'
-import { useLoadFeature } from '@/features/__core__'
+import type { ScanContext, ScanResult } from '@/features/security/public/types'
+import { useSecurityServices } from '@/features/security/public/hooks/useSecurityServices'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import { usePanelHeader } from '../../SecurityChecks/hooks/usePanelHeader'
 import { CtaLink, makeBuildCta } from '../../SecurityChecks/primitives'
@@ -34,12 +33,12 @@ const SecurityDrawerChecks = ({
   safeQueryParam,
   onHnSignupClick,
 }: SecurityDrawerChecksProps): ReactElement => {
-  const security = useLoadFeature(SecurityFeature)
+  const security = useSecurityServices()
   const header = usePanelHeader(results, isComplete)
   const spaceId = useUrlSpaceId()
   const hasResults = Object.keys(results).length > 0
 
-  if (!scanContext || !security.$isReady || header.status === 'loading' || (!hasResults && !isComplete)) {
+  if (!scanContext || !security || header.status === 'loading' || (!hasResults && !isComplete)) {
     return (
       <div className="flex flex-col gap-3">
         <Skeleton className="h-[120px] w-full rounded-xl" />

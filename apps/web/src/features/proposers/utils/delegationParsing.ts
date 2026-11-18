@@ -1,9 +1,9 @@
 import type { MessageItem } from '@safe-global/store/gateway/AUTO_GENERATED/messages'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { isAddress } from 'ethers'
-import { isTotpValid } from '@/features/proposers/utils/totp'
+import { isTotpValid } from './totp'
 import { isQueueServiceDelegateMessage } from '@safe-global/utils/services/delegates'
-import type { DelegationOrigin, PendingDelegation } from '@/features/proposers/types'
+import type { DelegationOrigin, PendingDelegation } from '../types'
 
 export type DelegationWithTimestamp = PendingDelegation & { _timestamp: number }
 

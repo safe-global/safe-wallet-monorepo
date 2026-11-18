@@ -9,8 +9,9 @@ import {
   AccordionContent,
 } from '@safe-global/views/components/ui/accordion'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@safe-global/views/components/ui/tabs'
-import { DrawerList } from '@/components/common/Drawer'
-import { formatAuditDateTime, useCopyToClipboard } from '@/components/common/AuditLog'
+import { DrawerList } from '@safe-global/views/components/common/Drawer/components/DrawerList'
+import useCopyToClipboard from '@/hooks/useCopyToClipboard'
+import { COPIED_TOOLTIP_MS, formatAuditDateTime } from '@/components/common/AuditLog'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
@@ -34,9 +35,14 @@ import type { BatchAction, Persona, Proposal } from '../types'
 const INITIAL_ACTIONS = 10
 
 function CopyValue({ value, label }: { value: string; label: string }) {
-  const [copied, copy] = useCopyToClipboard(value)
+  const { copied, copy } = useCopyToClipboard(COPIED_TOOLTIP_MS)
   return (
-    <Button variant="ghost" size="icon-xs" aria-label={copied ? `${label} copied` : `Copy ${label}`} onClick={copy}>
+    <Button
+      variant="ghost"
+      size="icon-xs"
+      aria-label={copied ? `${label} copied` : `Copy ${label}`}
+      onClick={() => copy(value)}
+    >
       <Copy />
     </Button>
   )
@@ -361,11 +367,17 @@ const getSigners = (proposal: Proposal, persona: Persona) => {
 
 function SignerIdentity({ id, persona }: { id: string; persona: Persona }) {
   const { name, address } = getSignerIdentity(id)
-  const [copied, copy] = useCopyToClipboard(address)
+  const { copied, copy } = useCopyToClipboard(COPIED_TOOLTIP_MS)
   return (
     <Tooltip delay={150}>
       <TooltipTrigger
-        render={<button type="button" className="flex min-w-0 flex-1 items-center gap-2 text-left" onClick={copy} />}
+        render={
+          <button
+            type="button"
+            className="flex min-w-0 flex-1 items-center gap-2 text-left"
+            onClick={() => copy(address)}
+          />
+        }
       >
         <Identicon address={address} size={24} />
         <span className="min-w-0">
@@ -428,7 +440,7 @@ export function SignerList({ proposal, persona }: { proposal: Proposal; persona:
 export function CopyTransactionLink({ proposal }: { proposal: Proposal }) {
   const href =
     typeof window === 'undefined' ? '' : `${window.location.origin}${window.location.pathname}?tx=${proposal.id}`
-  const [copied, copy] = useCopyToClipboard(href)
+  const { copied, copy } = useCopyToClipboard(COPIED_TOOLTIP_MS)
   return (
     <Tooltip delay={150}>
       <TooltipTrigger
@@ -437,7 +449,7 @@ export function CopyTransactionLink({ proposal }: { proposal: Proposal }) {
             variant="ghost-muted"
             size="icon-sm"
             aria-label={copied ? 'Transaction link copied' : 'Copy transaction link'}
-            onClick={copy}
+            onClick={() => copy(href)}
           />
         }
       >

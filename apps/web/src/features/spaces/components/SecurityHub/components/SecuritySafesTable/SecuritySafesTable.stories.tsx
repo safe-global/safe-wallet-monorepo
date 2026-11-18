@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import SecuritySafesTable from './SecuritySafesTable'
-import { createMockStory } from '@/stories/mocks'
-import type { ScanResult } from '@/features/security/types'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import type { ScanResult } from '@/features/security/public/types'
 import type { SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 const mkResult = (overrides: Partial<ScanResult> = {}): ScanResult => ({
@@ -83,7 +83,7 @@ const atRiskWithUpdate = {
   pending_tx: mkResult({ status: 'issue', severity: 'High' }),
 }
 
-const setup = createMockStory({ features: { spaces: true }, layout: 'paper' })
+const setup = createMockStory({ authenticated: true, layout: 'paper' })
 
 const meta = {
   title: 'Features/SecurityHub/SecuritySafesTable',

@@ -65,18 +65,6 @@ const lightPalette: ColorPalette = {
     background: '#FFF8CC',
   },
   // Tag colours (Figma Mint Refresh, Tag node 5-118). Categories only: never status colours.
-  tag: {
-    default: { background: '#F4F4F4', text: '#121312' },
-    slate: { background: '#F0F4F7', text: '#4F5C6B' },
-    clay: { background: '#FBF1EB', text: '#775136' },
-    rose: { background: '#FFEEF5', text: '#8E3665' },
-    orchid: { background: '#FEECFD', text: '#80357F' },
-    lilac: { background: '#F7F2FE', text: '#6F4198' },
-    iris: { background: '#EBEEFE', text: '#403CAA' },
-    cobalt: { background: '#E9F1FE', text: '#184DA3' },
-    sky: { background: '#EDF8FE', text: '#086990' },
-    lagoon: { background: '#DFFBF6', text: '#05665D' },
-  },
   background: {
     default: '#FFFFFF',
     main: '#F4F4F4',
@@ -101,6 +89,16 @@ const lightPalette: ColorPalette = {
     primary: '#FFFFFF',
     textSecondary: '#A1A3A7',
     textBrand: '#12FF80',
+  },
+  tag: {
+    slate: { fg: '#4F5C6B', bg: '#F0F4F7', dot: '#7D8EA0' },
+    clay: { fg: '#775136', bg: '#FBF1EB', dot: '#B08060' },
+    rose: { fg: '#8E3665', bg: '#FFEEF5', dot: '#CD6199' },
+    lilac: { fg: '#6F4198', bg: '#F7F2FE', dot: '#AF7DE1' },
+    iris: { fg: '#403CAA', bg: '#EBEEFE', dot: '#5551D8' },
+    cobalt: { fg: '#184DA3', bg: '#E9F1FE', dot: '#276EE1' },
+    sky: { fg: '#086990', bg: '#EDF8FE', dot: '#3CB1E9' },
+    lagoon: { fg: '#05665D', bg: '#DFFBF6', dot: '#199A8D' },
   },
 }
 

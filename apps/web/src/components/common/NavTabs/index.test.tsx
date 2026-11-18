@@ -25,6 +25,12 @@ describe('NavTabs', () => {
     expect(screen.getByRole('tab', { name: 'Tokens' })).toHaveAttribute('aria-selected', 'false')
   })
 
+  it('renders text-width brand tabs', () => {
+    render(<NavTabs tabs={tabs} />, { routerProps: { pathname: AppRoutes.balances.index } })
+
+    expect(screen.getByRole('tablist')).toHaveAttribute('data-variant', 'nav-lg')
+  })
+
   it('falls back to the first tab when the route matches no tab', () => {
     render(<NavTabs tabs={tabs} />, { routerProps: { pathname: '/unknown' } })
 

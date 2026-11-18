@@ -1,7 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { StoreDecorator } from '@/stories/storeDecorator'
-import VaultDepositConfirmation from './index'
-import { mockVaultDepositTxInfo, mockVaultDepositTxInfoWithoutAdditionalRewards } from './mockData'
+import VaultDepositConfirmation from '../../public/components/VaultDepositConfirmation'
+import {
+  mockVaultDepositTxInfo,
+  mockVaultDepositTxInfoWithoutAdditionalRewards,
+} from './VaultDepositConfirmation.storyData'
 
 const meta = {
   title: 'Features/Earn/VaultDepositConfirmation',

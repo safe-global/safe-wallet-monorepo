@@ -7,20 +7,16 @@ import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 import { formatDateTime } from '@safe-global/utils/utils/date'
-import {
-  Drawer,
-  DrawerBody,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerList,
-  DrawerSection,
-  DrawerSubtitle,
-  DrawerTitle,
-} from '@/components/common/Drawer'
+import { Drawer } from '@safe-global/views/components/common/Drawer/Drawer'
+import { DrawerActions } from '@safe-global/views/components/common/Drawer/components/DrawerActions'
+import { DrawerBody } from '@safe-global/views/components/common/Drawer/components/DrawerBody'
+import { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'
+import { DrawerHeader } from '@safe-global/views/components/common/Drawer/components/DrawerHeader'
+import { DrawerList } from '@safe-global/views/components/common/Drawer/components/DrawerList'
+import { DrawerSection } from '@safe-global/views/components/common/Drawer/components/DrawerSection'
 import { knownAccounts } from '../../services/model'
 import { HINT_CLASS, StatusChip } from '../shared'
 import { IdentityRow } from '../ReviewDrawer/steps/IdentityRow'
-import { RecoveryMark } from './RecoveryMark'
 import { formatDuration, getRecoveryHeadline, getRecoveryStatus, shortHex, type Recovery } from './recoveryData'
 
 const Mono = ({ value }: { value: string }) => (
@@ -73,36 +69,31 @@ export function RecoveryDrawer({
   const account = recovery ? knownAccounts.find((candidate) => candidate.id === recovery.accountId) : undefined
   const status = recovery ? getRecoveryStatus(recovery) : undefined
   return (
-    <Drawer resizable mobileFullScreen open={!!recovery} onClose={onClose} ariaLabel="Account recovery">
-      <DrawerHeader>
-        {recovery && (
-          <div className="flex min-w-0 flex-1 items-center gap-3 pr-18">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-md border border-border bg-card">
-              <LifeBuoy className="size-5" strokeWidth={ICON_STROKE} aria-hidden="true" />
+    <Drawer resizable open={!!recovery} onClose={onClose} ariaLabel="Account recovery">
+      {recovery && account && (
+        <DrawerHeader
+          media={
+            <span className="flex size-9 items-center justify-center rounded-md border border-border bg-card">
+              <LifeBuoy className="size-4" strokeWidth={ICON_STROKE} aria-hidden="true" />
             </span>
-            <DrawerTitle size="lg">{getRecoveryHeadline(recovery)}</DrawerTitle>
-          </div>
-        )}
-      </DrawerHeader>
+          }
+          title={getRecoveryHeadline(recovery)}
+          subtitle={
+            <span className="min-w-0 truncate">
+              {account.name} · {account.network} · Account recovery
+            </span>
+          }
+        />
+      )}
       <DrawerBody>
         {recovery && account && status && (
           <div className="flex flex-col gap-6">
-            <div className="flex min-w-0 items-center gap-2">
-              <div className="min-w-0 flex-1 overflow-hidden">
-                <DrawerSubtitle>
-                  <RecoveryMark />
-                  <span className="min-w-0 truncate">
-                    {account.name} · {account.network} · Account recovery
-                  </span>
-                </DrawerSubtitle>
-              </div>
-              <Tooltip delay={150}>
-                <TooltipTrigger render={<span className="ml-auto shrink-0" />} aria-label={status.hint}>
-                  <StatusChip tone={status.tone}>{status.label}</StatusChip>
-                </TooltipTrigger>
-                <TooltipContent className={HINT_CLASS}>{status.hint}</TooltipContent>
-              </Tooltip>
-            </div>
+            <Tooltip delay={150}>
+              <TooltipTrigger render={<span className="self-start" />} aria-label={status.hint}>
+                <StatusChip tone={status.tone}>{status.label}</StatusChip>
+              </TooltipTrigger>
+              <TooltipContent className={HINT_CLASS}>{status.hint}</TooltipContent>
+            </Tooltip>
 
             {recovery.malicious ? (
               <Alert variant="destructive" outlined={false}>
@@ -202,38 +193,38 @@ export function RecoveryDrawer({
           </div>
         )}
       </DrawerBody>
-      <div className="shrink-0 border-t border-border bg-background">
-        <DrawerFooter safeArea>
-          {recovery && (
-            <div className="flex flex-col gap-2 pt-4">
-              {recovery.state === 'cancelling' && (
-                <p className="text-center text-xs text-muted-foreground">
-                  The cancellation is in the queue and needs signatures and execution.
-                </p>
-              )}
-              {primary && (
+      {recovery && (
+        <DrawerFooter
+          hint={
+            recovery.state === 'cancelling'
+              ? 'The cancellation is in the queue and needs signatures and execution.'
+              : !primary
+                ? `Only signers of ${account?.name} can cancel it. Anyone can execute it once the review window ends.`
+                : undefined
+          }
+        >
+          {primary && (
+            <DrawerActions
+              primary={
                 <Button
-                  className="w-full"
                   variant={primary.label === 'Cancel' && recovery.malicious ? 'destructive' : 'default'}
                   onClick={primary.run}
                 >
                   {primary.label === 'Cancel' ? 'Cancel recovery' : 'Execute recovery'}
                 </Button>
-              )}
-              {primary?.label === 'Execute' && canCancel && (
-                <Button className="w-full" variant="ghost" onClick={onCancel}>
-                  Cancel recovery
-                </Button>
-              )}
-              {!primary && recovery.state !== 'cancelling' && (
-                <p className="text-center text-xs text-muted-foreground">
-                  Only signers of {account?.name} can cancel it. Anyone can execute it once the review window ends.
-                </p>
-              )}
-            </div>
+              }
+              secondary={
+                primary.label === 'Execute' &&
+                canCancel && (
+                  <Button variant="ghost" onClick={onCancel}>
+                    Cancel recovery
+                  </Button>
+                )
+              }
+            />
           )}
         </DrawerFooter>
-      </div>
+      )}
     </Drawer>
   )
 }

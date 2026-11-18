@@ -1,7 +1,7 @@
 // Ported from #9133 Policies/prototype/sharedDrawer; keep names and props in sync.
 import { Children, createContext, Fragment, useContext, useState, type ReactElement, type ReactNode } from 'react'
 import { ChevronDown, ChevronRight } from 'lucide-react'
-import { DrawerSection } from '@/components/common/Drawer'
+import { DrawerSection } from '@safe-global/views/components/common/Drawer/components/DrawerSection'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { Typography } from '@safe-global/views/components/ui/typography'

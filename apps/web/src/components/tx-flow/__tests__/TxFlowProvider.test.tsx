@@ -3,7 +3,8 @@ import { act, renderHook, waitFor } from '@/tests/test-utils'
 import TxFlowProvider, { TxFlowContext } from '../TxFlowProvider'
 import { faker } from '@faker-js/faker'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { SafeTxContext, type SafeTxContextParams } from '../SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
@@ -11,6 +12,11 @@ import { safeSignatureBuilder, safeTxBuilder } from '@/tests/builders/safeTx'
 import { useAlreadySigned } from '@/components/tx/shared/hooks'
 import * as walletUtils from '@/utils/wallets'
 import { trackTxEvents } from '@/components/tx/shared/tracking'
+
+jest.mock('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks', () => ({
+  ...jest.requireActual('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'),
+  useRoles: jest.fn(() => []),
+}))
 
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
@@ -25,10 +31,13 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   useSigner: jest.fn(() => undefined),
 }))
 
-jest.mock('@/features/counterfactual', () => ({ useIsCounterfactualSafe: jest.fn(() => false) }))
-
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
+jest.mock('@/features/counterfactual/public/hooks/useIsCounterfactualSafe', () => ({
   __esModule: true,
+  default: jest.fn(() => false),
+}))
+
+jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/hooks/useSafeShield'),
   useSafeShield: jest.fn(() => ({ needsRiskConfirmation: false, isRiskConfirmed: false })),
 }))
 
@@ -58,6 +67,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/transactions', () => ({
 
 jest.mock('@/components/tx/shared/tracking', () => ({
   __esModule: true,
+  ...jest.requireActual('@/components/tx/shared/tracking'),
   trackTxEvents: jest.fn(),
 }))
 
@@ -73,11 +83,13 @@ describe('TxFlowProvider', () => {
     txId,
     onContinueToExecute,
     isExecutable,
+    isBatchable,
     safeTx,
   }: {
     txId?: string
     onContinueToExecute?: (txId: string) => void
     isExecutable?: boolean
+    isBatchable?: boolean
     safeTx?: SafeTransaction
   }) => {
     const Wrapper = ({ children }: PropsWithChildren) => (
@@ -90,6 +102,7 @@ describe('TxFlowProvider', () => {
           txId={txId}
           onContinueToExecute={onContinueToExecute}
           isExecutable={isExecutable}
+          isBatchable={isBatchable}
         >
           {children}
         </TxFlowProvider>
@@ -112,6 +125,12 @@ describe('TxFlowProvider', () => {
     expect(result.current.txId).toBe(signedTxId)
     expect(result.current.isCreation).toBe(true)
     expect(result.current.canExecute).toBe(true)
+  })
+
+  it.each([true, false])('exposes isBatchable=%s from the flow to the context', (isBatchable) => {
+    const { result } = renderContext({ isBatchable })
+
+    expect(result.current.isBatchable).toBe(isBatchable)
   })
 
   it('keeps the id of an existing transaction when continuing to execute', () => {
@@ -164,6 +183,18 @@ describe('TxFlowProvider', () => {
       })
 
       await waitFor(() => expect(isCreationArg()).toBe(false))
+    })
+
+    it('reports a sponsored execution as sponsored, from the payer the user picked', async () => {
+      const gasPaymentSourceArg = () => jest.mocked(trackTxEvents).mock.calls[0][9]
+      const { result } = renderContext({})
+
+      act(() => result.current.setGasPaymentOption('FREE_DAILY_LIMIT'))
+      act(() => {
+        result.current.trackTxEvent(buildTxId(), true)
+      })
+
+      await waitFor(() => expect(gasPaymentSourceArg()).toBe('sponsored'))
     })
   })
 

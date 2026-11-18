@@ -10,9 +10,8 @@ import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import SafenetLogo from '@/public/images/safenet/safenet-logo.svg'
 import { SAFENET_ICONS, SAFENET_TONES } from '../../SafenetMark'
-import { DrawerList } from '@/components/common/Drawer'
+import { DrawerList } from '@safe-global/views/components/common/Drawer/components/DrawerList'
 import { PanelAlert } from '../../Panel/PanelAlert'
-import { TOOLTIP_TIMING } from '../../Panel/SharedDrawerHeader'
 import { PanelLinkRow, PanelRow, PanelSection } from '../../Panel/PanelBody'
 import { formatDateTime } from '@safe-global/utils/utils/date'
 import { getActionBreakdown, getHeadline } from '../../../services/columns'
@@ -436,7 +435,7 @@ export function SecuritySection({ tx, hypernative }: { tx: Proposal; hypernative
           label: (
             <span className="flex items-center gap-1.5">
               <SafenetLogo role="img" aria-label="Safenet" className="h-2.5 w-auto text-foreground" />
-              <Tooltip {...TOOLTIP_TIMING}>
+              <Tooltip delay={0} closeDelay={150}>
                 <TooltipTrigger
                   aria-label="About Safenet"
                   className="flex cursor-default text-muted-foreground hover:text-foreground"

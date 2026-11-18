@@ -1,4 +1,3 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -13,12 +12,12 @@ import { AppRoutes } from '@/config/routes'
 import useSafeAppsFilters from '@/hooks/safe-apps/useSafeAppsFilters'
 import SafeAppsFilters from '@/components/safe-apps/SafeAppsFilters'
 import { useHasFeature } from '@/hooks/useChains'
-import { SAFE_APPS_LABELS } from '@/services/analytics'
+import { SAFE_APPS_LABELS } from '@/services/analytics/events/safeApps'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
-const SafeApps: NextPage = () => {
+const SafeApps = () => {
   const router = useRouter()
   const safeLinkQuery = useSafeLinkQuery()
   const { remoteSafeApps, remoteSafeAppsLoading, pinnedSafeApps, pinnedSafeAppIds } = useSafeApps()

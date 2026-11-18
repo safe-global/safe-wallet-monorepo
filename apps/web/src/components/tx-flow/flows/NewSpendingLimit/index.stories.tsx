@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { userEvent, within } from 'storybook/test'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import NewSpendingLimitFlow from './index'
 
 const setup = createMockStory({ scenario: 'efSafe', wallet: 'owner', shadcn: true })
@@ -19,7 +19,10 @@ export const Default: Story = {}
 
 export const ZeroAmountError: Story = {
   play: async ({ canvasElement }) => {
-    await userEvent.type(await within(canvasElement).findByTestId('token-amount-field'), '0')
+    const canvas = within(canvasElement)
+    await userEvent.type(await canvas.findByTestId('token-amount-field'), '0')
+    // Validation runs after the keystroke
+    await canvas.findByText('The value must be greater than 0')
   },
 }
 

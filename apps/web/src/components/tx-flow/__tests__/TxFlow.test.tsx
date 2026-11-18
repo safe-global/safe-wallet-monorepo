@@ -2,19 +2,23 @@ import type { PropsWithChildren } from 'react'
 import { render, screen } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import { TxFlow } from '../TxFlow'
+import TxFlowProvider from '../TxFlowProvider'
 
 jest.mock('../SafeTxProvider', () => ({
   __esModule: true,
   default: ({ children }: PropsWithChildren) => <>{children}</>,
 }))
 jest.mock('../TxInfoProvider', () => ({ TxInfoProvider: ({ children }: PropsWithChildren) => <>{children}</> }))
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
+jest.mock('@/features/safe-shield/public/components/SafeShieldProvider', () => ({
   SafeShieldProvider: ({ children }: PropsWithChildren) => <>{children}</>,
 }))
-jest.mock('../slots', () => ({ SlotProvider: ({ children }: PropsWithChildren) => <>{children}</> }))
+jest.mock('@safe-global/views/components/tx-flow/slots/SlotProvider', () => ({
+  ...jest.requireActual('@safe-global/views/components/tx-flow/slots/SlotProvider'),
+  SlotProvider: ({ children }: PropsWithChildren) => <>{children}</>,
+}))
 jest.mock('../TxFlowProvider', () => ({
   __esModule: true,
-  default: ({ children }: PropsWithChildren) => <>{children}</>,
+  default: jest.fn(({ children }: PropsWithChildren) => <>{children}</>),
 }))
 jest.mock('../common/TxFlowContent', () => ({
   TxFlowContent: ({ children }: PropsWithChildren) => <>{children}</>,
@@ -24,23 +28,62 @@ jest.mock('../useTxStepper', () => ({
   default: () => ({ step: 0, data: undefined, nextStep: jest.fn(), prevStep: jest.fn() }),
 }))
 jest.mock('@/components/tx/shared/tracking', () => ({ useTrackTimeSpent: () => jest.fn() }))
-jest.mock('@/features/__core__', () => ({ useLoadFeature: () => ({ LedgerHashComparison: () => null }) }))
-jest.mock('../features', () => ({
-  TxNote: () => null,
-  SignerSelect: () => null,
-  BalanceChanges: () => null,
-  FeeInfoBanner: () => null,
-  FeesPreview: () => null,
-  RiskConfirmation: () => null,
+jest.mock('@/components/tx-flow/features/TxNote', () => ({
+  __esModule: true,
+  default: () => null,
 }))
-jest.mock('../actions', () => ({
-  Batching: () => null,
-  ComboSubmit: () => null,
-  Counterfactual: () => null,
-  Execute: () => null,
-  ExecuteThroughRole: () => null,
-  Propose: () => null,
-  Sign: () => null,
+jest.mock('@/components/tx-flow/features/SignerSelect', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/features/BalanceChanges', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/features/FeeInfoBanner', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/features/FeesPreview', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/features/RiskConfirmation', () => ({
+  ...jest.requireActual('@/components/tx-flow/features/RiskConfirmation'),
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/actions/Batching', () => ({
+  ...jest.requireActual('@/components/tx-flow/actions/Batching'),
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/actions/ComboSubmit', () => ({
+  ...jest.requireActual('@/components/tx-flow/actions/ComboSubmit'),
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/actions/Counterfactual', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/actions/Execute', () => ({
+  ...jest.requireActual('@/components/tx-flow/actions/Execute'),
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/actions/ExecuteThroughRole', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/actions/Propose', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/components/tx-flow/actions/Sign', () => ({
+  ...jest.requireActual('@/components/tx-flow/actions/Sign'),
+  __esModule: true,
+  default: () => null,
 }))
 jest.mock('@/components/tx/ReviewTransactionV2', () => ({
   __esModule: true,
@@ -57,6 +100,12 @@ jest.mock('@/components/tx/ExecuteTxStep', () => ({
 
 describe('TxFlow', () => {
   const txId = `multisig_${faker.finance.ethereumAddress()}_${faker.string.hexadecimal({ length: 64 })}`
+
+  it.each([true, false])('passes isBatchable=%s to the flow provider', (isBatchable) => {
+    render(<TxFlow isBatchable={isBatchable} />)
+
+    expect(jest.mocked(TxFlowProvider).mock.lastCall?.[0]).toMatchObject({ isBatchable })
+  })
 
   it('renders the signing receipt for a new transaction', () => {
     render(<TxFlow />)

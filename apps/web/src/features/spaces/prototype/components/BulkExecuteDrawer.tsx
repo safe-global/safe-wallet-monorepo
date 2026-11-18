@@ -4,7 +4,11 @@ import { Badge } from '@safe-global/views/components/ui/badge'
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
-import { Drawer, DrawerHeader, DrawerTitle, DrawerBody, DrawerFooter } from '@/components/common/Drawer'
+import { Drawer } from '@safe-global/views/components/common/Drawer/Drawer'
+import { DrawerActions } from '@safe-global/views/components/common/Drawer/components/DrawerActions'
+import { DrawerBody } from '@safe-global/views/components/common/Drawer/components/DrawerBody'
+import { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'
+import { DrawerHeader } from '@safe-global/views/components/common/Drawer/components/DrawerHeader'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import { getTransactionLabel } from '../services/model'
 import type { BulkBatch } from '../services/queue'
@@ -26,13 +30,15 @@ export function BulkExecuteDrawer({
 }) {
   const executableCount = batches.reduce((total, batch) => total + batch.proposals.length, 0)
   return (
-    <Drawer mobileFullScreen open={open} onClose={onClose} ariaLabel="Bulk execute">
-      <DrawerHeader className="pr-20">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
-          <Layers className="size-4" strokeWidth={ICON_STROKE} />
-        </span>
-        <DrawerTitle>Bulk execute</DrawerTitle>
-      </DrawerHeader>
+    <Drawer open={open} onClose={onClose} ariaLabel="Bulk execute">
+      <DrawerHeader
+        media={
+          <span className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
+            <Layers className="size-4" strokeWidth={ICON_STROKE} />
+          </span>
+        }
+        title="Bulk execute"
+      />
       <DrawerBody>
         <p className="text-sm text-muted-foreground">
           Only fully signed transactions with consecutive nonces are included. Each Safe executes its batch as a
@@ -88,10 +94,14 @@ export function BulkExecuteDrawer({
           ))}
         </div>
       </DrawerBody>
-      <DrawerFooter safeArea>
-        <Button size={isMobile ? 'xl' : 'default'} className="w-full" disabled={!executableCount} onClick={onExecute}>
-          Execute {executableCount} {plural(executableCount)} in preview
-        </Button>
+      <DrawerFooter>
+        <DrawerActions
+          primary={
+            <Button size={isMobile ? 'xl' : 'default'} disabled={!executableCount} onClick={onExecute}>
+              Execute {executableCount} {plural(executableCount)} in preview
+            </Button>
+          }
+        />
       </DrawerFooter>
     </Drawer>
   )

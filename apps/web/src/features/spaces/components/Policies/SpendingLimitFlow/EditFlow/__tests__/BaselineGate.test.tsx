@@ -1,6 +1,6 @@
 import { render, screen } from '@/tests/test-utils'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
-import type { SpendingLimitState } from '@/features/spending-limits'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 import BaselineGate, { BASELINE_LOAD_ERROR } from '../BaselineGate'
 
 const limits: SpendingLimitState[] = [spendingLimitStateBuilder().build()]

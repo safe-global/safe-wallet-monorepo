@@ -1,9 +1,10 @@
 import { type PropsWithChildren, type ReactElement } from 'react'
 import { fireEvent, render, renderHook, waitFor } from '@/tests/test-utils'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
-import { SlotProvider, SlotName } from '@/components/tx-flow/slots'
-import { useSlotIds } from '@/components/tx-flow/slots/hooks'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { SlotProvider, SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { useSlotIds } from '@/components/tx-flow/slots/hooks/useSlotIds'
 import ProposeSlot from '../Propose'
 import ProposerForm from '../Propose/ProposerForm'
 import SignSlot from '../Sign'
@@ -16,6 +17,11 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import { useTxActions } from '@/components/tx/shared/hooks'
 import { getTxOrigin } from '@/utils/transactions'
+
+jest.mock('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks', () => ({
+  ...jest.requireActual('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'),
+  useRoles: jest.fn(() => []),
+}))
 
 jest.mock('@/hooks/useChains', () => ({
   __esModule: true,
@@ -30,10 +36,13 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   useSigner: jest.fn(() => ({ address: '0x1234567890000000000000000000000000000009' })),
 }))
 
-jest.mock('@/features/counterfactual', () => ({ useIsCounterfactualSafe: jest.fn(() => false) }))
-
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
+jest.mock('@/features/counterfactual/public/hooks/useIsCounterfactualSafe', () => ({
   __esModule: true,
+  default: jest.fn(() => false),
+}))
+
+jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/hooks/useSafeShield'),
   useSafeShield: jest.fn(() => ({ needsRiskConfirmation: false, isRiskConfirmed: false })),
 }))
 
@@ -83,9 +92,9 @@ const safeTxContext: SafeTxContextParams = {
   txOrigin: TX_ORIGIN,
   setTxOrigin: jest.fn(),
   isReadOnly: false,
-  gtfPaymentMode: 'safe',
-  setGtfPaymentMode: jest.fn(),
-  setGtfSelectedGasToken: jest.fn(),
+  feePaymentMode: 'safe',
+  setFeePaymentMode: jest.fn(),
+  setFeeGasToken: jest.fn(),
 }
 
 describe('Propose slot', () => {

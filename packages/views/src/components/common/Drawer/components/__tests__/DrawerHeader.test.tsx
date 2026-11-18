@@ -1,38 +1,84 @@
-import { render, screen } from '@/tests/test-utils'
+import { Copy } from 'lucide-react'
+import { render, screen, fireEvent } from '@/tests/test-utils'
+import { Drawer } from '../../Drawer'
 import { DrawerHeader } from '../DrawerHeader'
 
 describe('DrawerHeader', () => {
-  it('renders its children', () => {
-    render(
-      <DrawerHeader>
-        <span>Header content</span>
-      </DrawerHeader>,
-    )
+  it('renders the media, title and subtitle', () => {
+    render(<DrawerHeader media={<span>ICON</span>} title="Operations Vault" subtitle="Nonce #42" />)
 
-    expect(screen.getByText('Header content')).toBeInTheDocument()
+    expect(screen.getByText('ICON')).toBeInTheDocument()
+    expect(screen.getByText('Operations Vault')).toBeInTheDocument()
+    expect(screen.getByText('Nonce #42')).toBeInTheDocument()
   })
 
-  it('reserves room on the right for the Drawer close button', () => {
-    render(
-      <DrawerHeader>
-        <span>Header content</span>
-      </DrawerHeader>,
-    )
+  it('shows the status in place of the subtitle', () => {
+    render(<DrawerHeader title="Allowlist" subtitle="Nonce #42" status={<span>Pending</span>} />)
 
-    expect(screen.getByText('Header content').parentElement).toHaveClass('pr-18')
+    expect(screen.getByText('Pending')).toBeInTheDocument()
+    expect(screen.queryByText('Nonce #42')).not.toBeInTheDocument()
   })
 
-  it('merges a caller className with its own classes', () => {
+  it('has no buttons outside a Drawer when none are passed', () => {
+    render(<DrawerHeader title="Allowlist" />)
+
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+  })
+
+  it('closes the enclosing Drawer from its own close button, replacing the Drawer fallback', () => {
+    const onClose = jest.fn()
     render(
-      <DrawerHeader className="items-start">
-        <span>Header content</span>
-      </DrawerHeader>,
+      <Drawer open onClose={onClose} ariaLabel="Allowlist">
+        <DrawerHeader title="Allowlist" />
+      </Drawer>,
     )
 
-    const header = screen.getByText('Header content').parentElement
+    const close = screen.getByRole('button', { name: 'Close' })
 
-    expect(header).toHaveClass('items-start')
-    expect(header).toHaveClass('px-6', 'pt-6', 'pr-18')
-    expect(header).not.toHaveClass('items-center')
+    expect(close.closest('[data-slot=drawer-header]')).not.toBeNull()
+
+    fireEvent.click(close)
+
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('steps through items and disables the ends', () => {
+    const onPrevious = jest.fn()
+    const onNext = jest.fn()
+    render(<DrawerHeader title="Transaction" navigation={{ onPrevious, onNext, hasPrevious: false, hasNext: true }} />)
+
+    expect(screen.getByRole('button', { name: 'Previous' })).toBeDisabled()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next' }))
+
+    expect(onNext).toHaveBeenCalledTimes(1)
+    expect(onPrevious).not.toHaveBeenCalled()
+  })
+
+  it('announces the position in the list', () => {
+    render(<DrawerHeader title="Transaction" navigation={{ onNext: jest.fn(), hasNext: true, position: '3 of 12' }} />)
+
+    expect(screen.getByText('3 of 12')).toHaveAttribute('aria-live', 'polite')
+  })
+
+  it('renders back and extra actions in the button group', () => {
+    const onBack = jest.fn()
+    const onCopy = jest.fn()
+    render(
+      <DrawerHeader
+        title="Spending limit"
+        onBack={onBack}
+        actions={[{ label: 'Copy link', icon: <Copy />, onClick: onCopy }]}
+      />,
+    )
+
+    const group = screen.getByRole('group', { name: 'Drawer actions' })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Back' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Copy link' }))
+
+    expect(group).toContainElement(screen.getByRole('button', { name: 'Back' }))
+    expect(onBack).toHaveBeenCalledTimes(1)
+    expect(onCopy).toHaveBeenCalledTimes(1)
   })
 })

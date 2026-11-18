@@ -1,28 +1,18 @@
-import { render, renderWithUserEvent, screen, fireEvent, waitFor } from '@/tests/test-utils'
+import { userEvent } from '@testing-library/user-event'
+import { render, screen, fireEvent } from '@/tests/test-utils'
 import { Drawer } from './Drawer'
-import { useState } from 'react'
+import { DrawerBody } from '@safe-global/views/components/common/Drawer/components/DrawerBody'
+import { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'
+import { DrawerHeader } from '@safe-global/views/components/common/Drawer/components/DrawerHeader'
 import { useIsMobile } from '@safe-global/views/hooks/use-mobile'
 
 jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: jest.fn(() => false) }))
-
-beforeEach(() => jest.mocked(useIsMobile).mockReturnValue(false))
-import {
-  DrawerBody,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerSubtitle,
-  DrawerTitle,
-} from '@/components/common/Drawer/components'
 
 describe('Drawer', () => {
   it('renders the composed header, body and footer', () => {
     render(
       <Drawer open onClose={jest.fn()} ariaLabel="Test drawer">
-        <DrawerHeader>
-          <span>ICON</span>
-          <DrawerTitle>Drawer title</DrawerTitle>
-          <DrawerSubtitle>Drawer subtitle</DrawerSubtitle>
-        </DrawerHeader>
+        <DrawerHeader media={<span>ICON</span>} title="Drawer title" subtitle="Drawer subtitle" />
         <DrawerBody>Body content</DrawerBody>
         <DrawerFooter>
           <button>Footer action</button>
@@ -56,6 +46,18 @@ describe('Drawer', () => {
     )
 
     expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
+  })
+
+  it('drops the fallback close while closing, so it never flashes as a header unmounts', () => {
+    const { rerender } = render(
+      <Drawer open onClose={jest.fn()}>
+        <DrawerHeader title="Allowlist" />
+      </Drawer>,
+    )
+
+    rerender(<Drawer open={false} onClose={jest.fn()} />)
+
+    expect(screen.queryByRole('button', { name: 'Close', hidden: true })).not.toBeInTheDocument()
   })
 
   it('calls onClose when the close button is clicked', () => {
@@ -133,182 +135,163 @@ describe('Drawer', () => {
 
     expect(screen.getByLabelText('Test drawer')).toHaveClass('data-[side=right]:w-[700px]')
   })
-  it('does not show resize controls unless opted in', () => {
-    render(
-      <Drawer open onClose={jest.fn()}>
-        <DrawerBody>Body</DrawerBody>
-      </Drawer>,
-    )
-    expect(screen.queryByRole('separator', { name: 'Resize panel' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Expand to full screen' })).not.toBeInTheDocument()
-  })
-  it('resizes with arrow keys and restores the chosen width after full screen and close', () => {
-    const onClose = jest.fn()
-    render(
-      <Drawer open resizable onClose={onClose} ariaLabel="Resize drawer">
-        <DrawerBody>Body</DrawerBody>
-      </Drawer>,
-    )
-    const handle = screen.getByRole('separator', { name: 'Resize panel' })
-    fireEvent.keyDown(handle, { key: 'ArrowLeft' })
-    expect(handle).toHaveAttribute('aria-valuenow', '480')
-    fireEvent.click(screen.getByRole('button', { name: 'Expand to full screen' }))
-    expect(screen.queryByRole('separator')).not.toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Restore panel' }))
-    expect(screen.getByRole('separator')).toHaveAttribute('aria-valuenow', '480')
-    fireEvent.click(screen.getByRole('button', { name: 'Expand to full screen' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
-    expect(onClose).toHaveBeenCalledTimes(1)
-    expect(screen.getByRole('button', { name: 'Expand to full screen' })).toBeInTheDocument()
-    expect(screen.getByRole('separator')).toHaveAttribute('aria-valuenow', '480')
-  })
-  it('renders header actions with the current full-screen state', () => {
-    render(
-      <Drawer
-        open
-        resizable
-        onClose={jest.fn()}
-        ariaLabel="Actions drawer"
-        headerActions={({ fullScreen }) => <span>{fullScreen ? 'Full screen' : 'Panel'}</span>}
-      >
-        <DrawerBody>Body</DrawerBody>
-      </Drawer>,
-    )
-    expect(screen.getByText('Panel')).toBeVisible()
-    fireEvent.click(screen.getByRole('button', { name: 'Expand to full screen' }))
-    expect(screen.getByText('Full screen')).toBeVisible()
-  })
-  it('lets a custom header replace the built-in buttons and still expand and close', () => {
-    const onClose = jest.fn()
-    render(
-      <Drawer
-        open
-        resizable
-        onClose={onClose}
-        headerActions={() => <span>Unused</span>}
-        header={({ fullScreen, toggleFullScreen, close }) => (
-          <header>
-            <button onClick={toggleFullScreen}>{fullScreen ? 'Restore' : 'Expand'}</button>
-            <button onClick={close}>Dismiss</button>
-          </header>
-        )}
-      >
-        <DrawerBody>Body</DrawerBody>
-      </Drawer>,
-    )
-    expect(screen.queryByRole('button', { name: 'Close' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Expand to full screen' })).not.toBeInTheDocument()
-    expect(screen.queryByText('Unused')).not.toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Expand' }))
-    expect(screen.getByRole('button', { name: 'Restore' })).toBeVisible()
-    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }))
-    expect(onClose).toHaveBeenCalledTimes(1)
-  })
-  it('clamps dragged width to the viewport and minimum and stops resizing on pointer up', () => {
-    render(
-      <Drawer open resizable onClose={jest.fn()}>
-        <DrawerBody>Body</DrawerBody>
-      </Drawer>,
-    )
-    const handle = screen.getByRole('separator', { name: 'Resize panel' })
-    const capture = jest.fn()
-    Object.defineProperty(handle, 'setPointerCapture', { configurable: true, value: capture })
-    const pointer = (type: string, x: number) => {
-      const event = new Event(type, { bubbles: true })
-      Object.defineProperties(event, { button: { value: 0 }, clientX: { value: x }, pointerId: { value: 1 } })
-      fireEvent(handle, event)
-    }
-    pointer('pointerdown', 500)
-    pointer('pointermove', -2000)
-    expect(handle).toHaveAttribute('aria-valuenow', String(window.innerWidth - 24))
-    pointer('pointermove', 3000)
-    expect(handle).toHaveAttribute('aria-valuenow', '360')
-    pointer('pointerup', 3000)
-    pointer('pointermove', 0)
-    expect(handle).toHaveAttribute('aria-valuenow', '360')
-    expect(capture).toHaveBeenCalledWith(1)
-  })
-  it('switches opted-in panels to mobile full screen and restores the desktop width', () => {
-    const content = (
-      <Drawer open resizable mobileFullScreen onClose={jest.fn()} ariaLabel="Responsive drawer">
-        <DrawerBody>Body</DrawerBody>
-      </Drawer>
-    )
-    const { rerender } = render(content)
-    fireEvent.keyDown(screen.getByRole('separator', { name: 'Resize panel' }), { key: 'ArrowLeft' })
-    expect(screen.getByRole('separator')).toHaveAttribute('aria-valuenow', '480')
-    jest.mocked(useIsMobile).mockReturnValue(true)
-    rerender(
-      <Drawer open resizable mobileFullScreen onClose={jest.fn()} ariaLabel="Responsive drawer">
-        <DrawerBody>Body</DrawerBody>
-      </Drawer>,
-    )
-    expect(screen.getByRole('dialog')).toHaveAttribute('data-mobile-full-screen', 'true')
-    expect(screen.queryByRole('separator', { name: 'Resize panel' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Expand to full screen' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Close' })).toBeVisible()
-    jest.mocked(useIsMobile).mockReturnValue(false)
-    rerender(
-      <Drawer open resizable mobileFullScreen onClose={jest.fn()} ariaLabel="Responsive drawer">
-        <DrawerBody>Body</DrawerBody>
-      </Drawer>,
-    )
-    expect(screen.getByRole('separator')).toHaveAttribute('aria-valuenow', '480')
-    expect(screen.getByRole('button', { name: 'Expand to full screen' })).toBeVisible()
-  })
 
-  it('preserves existing floating panels on mobile unless opted in', () => {
-    jest.mocked(useIsMobile).mockReturnValue(true)
-    render(
-      <Drawer open onClose={jest.fn()} ariaLabel="Existing drawer">
-        <DrawerBody>Body</DrawerBody>
-      </Drawer>,
-    )
-    expect(screen.getByRole('dialog')).not.toHaveAttribute('data-mobile-full-screen')
-    expect(screen.getByRole('dialog')).toHaveClass('rounded-3xl')
-  })
-
-  it('closes with Escape and restores focus to the opener', async () => {
-    function Example() {
-      const [open, setOpen] = useState(false)
-      return (
-        <>
-          <button onClick={() => setOpen(true)}>Open details</button>
-          <Drawer open={open} mobileFullScreen onClose={() => setOpen(false)} ariaLabel="Details">
-            <DrawerBody>Body</DrawerBody>
-          </Drawer>
-        </>
+  describe('full screen', () => {
+    const renderExpandable = (props: { open?: boolean; onClose?: () => void; expandable?: boolean } = {}) => {
+      const { open = true, onClose = jest.fn(), expandable = true } = props
+      return render(
+        <Drawer open={open} onClose={onClose} expandable={expandable} ariaLabel="Transaction">
+          <DrawerHeader
+            title="Send 1,250 USDC"
+            navigation={{ onNext: jest.fn(), hasNext: true, position: '3 of 12' }}
+          />
+        </Drawer>,
       )
     }
-    jest.mocked(useIsMobile).mockReturnValue(true)
-    const { user } = renderWithUserEvent(<Example />)
-    const opener = screen.getByRole('button', { name: 'Open details' })
-    await user.click(opener)
-    expect(screen.getByRole('dialog')).toBeVisible()
-    await user.keyboard('{Escape}')
-    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
-    expect(opener).toHaveFocus()
+
+    beforeEach(() => {
+      jest.mocked(useIsMobile).mockReturnValue(false)
+    })
+
+    it('has no expand button unless the drawer is expandable', () => {
+      renderExpandable({ expandable: false })
+
+      expect(screen.queryByRole('button', { name: 'Expand to full screen' })).not.toBeInTheDocument()
+    })
+
+    it('fills the screen and shows the position when expanded, keeping the same button', () => {
+      renderExpandable()
+
+      const expand = screen.getByRole('button', { name: 'Expand to full screen' })
+      fireEvent.click(expand)
+
+      expect(screen.getByLabelText('Transaction')).toHaveAttribute('data-full-screen', 'true')
+      expect(screen.getByLabelText('Transaction')).toHaveClass('data-[side=right]:w-screen')
+      expect(screen.getByRole('button', { name: 'Exit full screen' })).toBe(expand)
+      expect(screen.getByText('3 of 12')).not.toHaveClass('sr-only')
+    })
+
+    it('leaves full screen on Escape before closing on the next one', async () => {
+      const onClose = jest.fn()
+      const user = userEvent.setup()
+      renderExpandable({ onClose })
+
+      await user.click(screen.getByRole('button', { name: 'Expand to full screen' }))
+      await user.keyboard('{Escape}')
+
+      expect(onClose).not.toHaveBeenCalled()
+      expect(screen.getByLabelText('Transaction')).not.toHaveAttribute('data-full-screen')
+
+      await user.keyboard('{Escape}')
+
+      expect(onClose).toHaveBeenCalledTimes(1)
+    })
+
+    it('opens at its normal width again after closing', () => {
+      const { rerender } = renderExpandable()
+
+      fireEvent.click(screen.getByRole('button', { name: 'Expand to full screen' }))
+
+      rerender(
+        <Drawer open={false} onClose={jest.fn()} expandable ariaLabel="Transaction">
+          <DrawerHeader title="Send 1,250 USDC" />
+        </Drawer>,
+      )
+      rerender(
+        <Drawer open onClose={jest.fn()} expandable ariaLabel="Transaction">
+          <DrawerHeader title="Send 1,250 USDC" />
+        </Drawer>,
+      )
+
+      expect(screen.getByLabelText('Transaction')).not.toHaveAttribute('data-full-screen')
+    })
+
+    it('is always full screen on phones, with no expand button', () => {
+      jest.mocked(useIsMobile).mockReturnValue(true)
+      renderExpandable()
+
+      expect(screen.getByLabelText('Transaction')).toHaveAttribute('data-full-screen', 'true')
+      expect(screen.queryByRole('button', { name: 'Expand to full screen' })).not.toBeInTheDocument()
+    })
   })
-  it('restores the chosen width after the parent closes a full-screen panel', () => {
-    const onClose = jest.fn()
-    const { rerender } = render(
-      <Drawer open resizable onClose={onClose} ariaLabel="Externally controlled">
-        <DrawerBody>Body</DrawerBody>
-      </Drawer>,
-    )
-    fireEvent.keyDown(screen.getByRole('separator', { name: 'Resize panel' }), { key: 'ArrowLeft' })
-    fireEvent.click(screen.getByRole('button', { name: 'Expand to full screen' }))
-    rerender(
-      <Drawer open={false} resizable onClose={onClose} ariaLabel="Externally controlled">
-        <DrawerBody>Body</DrawerBody>
-      </Drawer>,
-    )
-    rerender(
-      <Drawer open resizable onClose={onClose} ariaLabel="Externally controlled">
-        <DrawerBody>Body</DrawerBody>
-      </Drawer>,
-    )
-    expect(screen.getByRole('button', { name: 'Expand to full screen' })).toBeVisible()
-    expect(screen.getByRole('separator')).toHaveAttribute('aria-valuenow', '480')
+
+  describe('resize', () => {
+    const renderResizable = (props: { open?: boolean; resizable?: boolean; expandable?: boolean } = {}) => {
+      const { open = true, resizable = true, expandable = false } = props
+      return (
+        <Drawer open={open} onClose={jest.fn()} resizable={resizable} expandable={expandable} ariaLabel="Transaction">
+          <DrawerHeader title="Send 1,250 USDC" />
+        </Drawer>
+      )
+    }
+
+    beforeEach(() => {
+      jest.mocked(useIsMobile).mockReturnValue(false)
+    })
+
+    it('has no handle unless the drawer is resizable', () => {
+      render(renderResizable({ resizable: false }))
+
+      expect(screen.queryByRole('separator', { name: 'Resize panel' })).not.toBeInTheDocument()
+    })
+
+    it('widens and narrows with the arrow keys, never below the minimum', () => {
+      render(renderResizable())
+
+      const handle = screen.getByRole('separator', { name: 'Resize panel' })
+
+      expect(handle).toHaveAttribute('aria-valuenow', '440')
+
+      fireEvent.keyDown(handle, { key: 'ArrowLeft' })
+
+      expect(handle).toHaveAttribute('aria-valuenow', '480')
+      expect(screen.getByLabelText('Transaction')).toHaveStyle({ width: '480px' })
+
+      fireEvent.keyDown(handle, { key: 'ArrowRight' })
+      fireEvent.keyDown(handle, { key: 'ArrowRight' })
+      fireEvent.keyDown(handle, { key: 'ArrowRight' })
+      fireEvent.keyDown(handle, { key: 'ArrowRight' })
+
+      expect(handle).toHaveAttribute('aria-valuenow', '360')
+    })
+
+    it('follows a drag of its left edge', () => {
+      render(renderResizable())
+
+      const handle = screen.getByRole('separator', { name: 'Resize panel' })
+
+      fireEvent.pointerDown(handle, { button: 0, clientX: 600, pointerId: 1 })
+      fireEvent.pointerMove(handle, { clientX: 500, pointerId: 1 })
+      fireEvent.pointerUp(handle, { pointerId: 1 })
+      fireEvent.pointerMove(handle, { clientX: 300, pointerId: 1 })
+
+      expect(handle).toHaveAttribute('aria-valuenow', '540')
+    })
+
+    it('opens at its normal width again after closing', () => {
+      const { rerender } = render(renderResizable())
+
+      fireEvent.keyDown(screen.getByRole('separator', { name: 'Resize panel' }), { key: 'ArrowLeft' })
+
+      rerender(renderResizable({ open: false }))
+      rerender(renderResizable())
+
+      expect(screen.getByRole('separator', { name: 'Resize panel' })).toHaveAttribute('aria-valuenow', '440')
+      expect(screen.getByLabelText('Transaction').style.width).toBe('')
+    })
+
+    it('hides the handle while full screen and on phones', () => {
+      const { unmount } = render(renderResizable({ expandable: true }))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Expand to full screen' }))
+
+      expect(screen.queryByRole('separator', { name: 'Resize panel' })).not.toBeInTheDocument()
+
+      unmount()
+      jest.mocked(useIsMobile).mockReturnValue(true)
+      render(renderResizable())
+
+      expect(screen.queryByRole('separator', { name: 'Resize panel' })).not.toBeInTheDocument()
+    })
   })
 })

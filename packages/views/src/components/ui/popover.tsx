@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { Popover as PopoverPrimitive } from '@base-ui/react/popover'
+import { usePopupInitialFocus } from '@safe-global/views/hooks/use-popup-initial-focus'
 
 import { cn } from '@safe-global/views/utils/cn'
 import { usePortalContainer } from '@safe-global/views/components/ui/ShadcnProvider'
@@ -45,6 +46,8 @@ function PopoverContent({
   anchor,
   collisionAvoidance,
   showBackdrop = false,
+  ref,
+  initialFocus,
   ...props
 }: PopoverPrimitive.Popup.Props &
   Pick<
@@ -67,6 +70,7 @@ function PopoverContent({
     showBackdrop?: boolean
   }) {
   const portalContainer = usePortalContainer()
+  const popupFocus = usePopupInitialFocus(ref, initialFocus)
   return (
     <PopoverPrimitive.Portal container={portalContainer}>
       {showBackdrop && <PopoverPrimitive.Backdrop data-slot="popover-backdrop" className={overlayVariants()} />}
@@ -86,6 +90,8 @@ function PopoverContent({
             className,
           )}
           {...props}
+          ref={popupFocus.ref}
+          initialFocus={popupFocus.initialFocus}
         />
       </PopoverPrimitive.Positioner>
     </PopoverPrimitive.Portal>

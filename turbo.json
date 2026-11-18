@@ -17,7 +17,13 @@
       "outputLogs": "new-only"
     },
     "lint": {
-      "inputs": ["src/**/*.{ts,tsx,js,jsx}", "eslint.config.{js,mjs,cjs,ts}", ".eslintrc*", "package.json"],
+      "inputs": [
+        "src/**/*.{ts,tsx,js,jsx}",
+        "eslint.config.{js,mjs,cjs,ts}",
+        "eslint-suppressions.json",
+        ".eslintrc*",
+        "package.json"
+      ],
       "outputs": [],
       "outputLogs": "new-only"
     },

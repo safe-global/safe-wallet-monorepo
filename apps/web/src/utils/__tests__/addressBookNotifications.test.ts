@@ -1,5 +1,6 @@
 import {
   getContactAddedMessage,
+  getContactsAddedMessage,
   getContactRemovedMessage,
   getContactUpdatedMessage,
   getImportSuccessMessage,
@@ -34,5 +35,22 @@ describe('addressBookNotifications', () => {
     ).toBe(
       '10 contacts imported to Acme address book across 5 networks. Only contacts on the current network are shown here',
     )
+  })
+
+  it('leaves out the current-network hint for a book that shows every network', () => {
+    expect(
+      getImportSuccessMessage({
+        count: 10,
+        networkCount: 5,
+        bookLabel: getWorkspaceAddressBookLabel('Acme'),
+        showsEveryNetwork: true,
+      }),
+    ).toBe('10 contacts imported to Acme address book across 5 networks')
+  })
+
+  it('counts the contacts added at once', () => {
+    const label = getWorkspaceAddressBookLabel('Acme')
+    expect(getContactsAddedMessage(1, label)).toBe('Contact added to Acme address book')
+    expect(getContactsAddedMessage(3, label)).toBe('3 contacts added to Acme address book')
   })
 })

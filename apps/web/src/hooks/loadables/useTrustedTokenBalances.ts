@@ -4,9 +4,11 @@ import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import useSafeInfo from '../useSafeInfo'
 import { POLLING_INTERVAL } from '@/config/constants'
-import { useCounterfactualBalances } from '@/features/counterfactual'
+import { useCounterfactualBalances } from '@/features/counterfactual/public/hooks/useCounterfactualBalances'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { type PortfolioBalances, createPortfolioBalances, useTokenListSetting } from './useLoadBalances'
+import type { PortfolioBalances } from '@safe-global/utils/hooks/portfolioBalances'
+import { createPortfolioBalances } from '@safe-global/utils/hooks/portfolioBalances'
+import { useTokenListSetting } from './useLoadBalances'
 
 /**
  * Hook to load balances using the Transaction Service endpoint with trusted tokenlist.

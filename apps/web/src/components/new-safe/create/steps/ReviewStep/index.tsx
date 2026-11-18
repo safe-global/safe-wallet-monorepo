@@ -1,14 +1,15 @@
 import type { NamedAddress } from '@/components/new-safe/create/types'
 import EthHashInfo from '@/components/common/EthHashInfo'
+import { safeCreationDispatch, SafeCreationEvent } from '@/features/counterfactual/public/services/safeCreationEvents'
 import {
-  safeCreationDispatch,
-  SafeCreationEvent,
   replayCounterfactualSafeDeployment,
   activateReplayedSafe,
-  persistCounterfactualSafe,
-} from '@/features/counterfactual/services'
-import { CF_TX_GROUP_KEY, PayNowPayLater } from '@/features/counterfactual'
-import { NetworkLogosList, predictAddressBasedOnReplayData } from '@/features/multichain'
+} from '@/features/counterfactual/public/services/safeDeployment'
+import { persistCounterfactualSafe } from '@/features/counterfactual/public/services/persistCounterfactualSafe'
+import { CF_TX_GROUP_KEY } from '@/features/counterfactual/public/constants'
+import PayNowPayLater from '@/features/counterfactual/public/components/PayNowPayLater'
+import NetworkLogosList from '@/components/common/NetworkLogosList'
+import { predictAddressBasedOnReplayData } from '@/features/multichain/public/utils/utils'
 
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NewSafeFormData } from '@/components/new-safe/create'
@@ -42,13 +43,10 @@ import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useLeastRemainingRelays } from '@/hooks/useRemainingRelays'
 import useWalletCanPay from '@/hooks/useWalletCanPay'
 import useWallet from '@/hooks/wallets/useWallet'
-import {
-  CREATE_SAFE_CATEGORY,
-  CREATE_SAFE_EVENTS,
-  OVERVIEW_EVENTS,
-  trackEvent,
-  MixpanelEventParams,
-} from '@/services/analytics'
+import { CREATE_SAFE_CATEGORY, CREATE_SAFE_EVENTS } from '@/services/analytics/events/createLoadSafe'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
+import { trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { gtmSetChainId, gtmSetSafeAddress } from '@/services/analytics/gtm'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { useAppDispatch, useAppSelector } from '@/store'
@@ -66,13 +64,14 @@ import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import NetworkWarning from '../../NetworkWarning'
-import { useAllSafes } from '@/hooks/safes'
+import useAllSafes from '@/hooks/safes/useAllSafes'
 import uniq from 'lodash/uniq'
 import { selectRpc } from '@/store/settingsSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { isAuthenticated } from '@/store/authSlice'
-import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
-import { stepUpReturnUrlCleared, stepUpReturnUrlSet } from '@/features/oidc-auth/store'
+import { useIsAdmin } from '@/features/spaces/public/hooks/useSpaceMembers'
+import { useSpaceSafeCount } from '@/features/spaces/public/hooks/useIsCurrentSpaceAtSafeLimit'
+import { useSpaceSafeLimit } from '@/features/spaces/public/hooks/useSpaceSafeLimit'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
 import { isSpaceAtSafeLimit } from '@/utils/spaces'
 import type { CreateSafeResult, ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
@@ -267,9 +266,6 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
   }
 
   const handleCreateSafeClick = async () => {
-    let stepUpReturnUrl: string | undefined
-    let isStepUpPending = false
-
     try {
       if (!wallet || !chain || !newSafeProps) return
 
@@ -289,15 +285,9 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
       const safeAddress = await predictAddressBasedOnReplayData(replayedSafeWithNonce, provider)
 
-      // Pay later adds the Safe to the Workspace now, so a step-up there must return to the Safe, not this form.
-      if (spaceId && isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater) {
-        stepUpReturnUrl = getNewSafeHomeUrl(data.networks[0].shortName, safeAddress, spaceId)
-        dispatch(stepUpReturnUrlSet(stepUpReturnUrl))
-      }
-
       const createSafeResults: CreateSafeResult[] = []
       for (const [index, network] of data.networks.entries()) {
-        // The step-up replays one request, so the last network adds the Safe to the space for every created network at once.
+        // The last network adds the Safe to the space for every created network in one request.
         const isLastNetwork = index === data.networks.length - 1
         const chainIdsToAddToSpace = isLastNetwork
           ? [
@@ -305,13 +295,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
               network.chainId,
             ]
           : []
-        const { stepUpPending, ...result } = await createSafe(
-          network,
-          replayedSafeWithNonce,
-          safeAddress,
-          chainIdsToAddToSpace,
-        )
-        if (stepUpPending) isStepUpPending = true
+        const result = await createSafe(network, replayedSafeWithNonce, safeAddress, chainIdsToAddToSpace)
         createSafeResults.push(result)
       }
 
@@ -332,7 +316,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
       gtmSetChainId(chain.chainId)
 
       if (isCounterfactualEnabled && effectivePayMethod === PayMethod.PayLater) {
-        if (successfulChains.length === 0 || isStepUpPending) return
+        if (successfulChains.length === 0) return
 
         await router?.push(getNewSafeHomeUrl(successfulChains[0].chain.shortName, safeAddress, spaceId))
 
@@ -363,7 +347,6 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
       console.error(err)
       setSubmitError('Error creating the Safe account. Please try again later.')
     } finally {
-      if (stepUpReturnUrl && !isStepUpPending) dispatch(stepUpReturnUrlCleared(stepUpReturnUrl))
       setIsCreating(false)
     }
   }
@@ -373,7 +356,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
     props: ReplayedSafeProps,
     safeAddress: string,
     chainIdsToAddToSpace: string[],
-  ): Promise<CreateSafeResult & { stepUpPending?: true }> => {
+  ): Promise<CreateSafeResult> => {
     if (!wallet) return { chain, safeAddress, success: false }
 
     gtmSetChainId(chain.chainId)
@@ -419,8 +402,6 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
         if (!result.ok) {
           // Surface the backend's message (e.g. conflict guidance) instead of the
           // generic wallet-error fallback in the catch below.
-          // Saved for the user; the replay adds it to the space, so it still gets its name.
-          if (result.stepUpPending) return { chain, safeAddress, success: true, stepUpPending: true }
           setSubmitError(result.error.message)
           return { chain, safeAddress, success: false }
         }
@@ -563,7 +544,7 @@ const ReviewStep = ({ data, onSubmit, onBack, setStep }: StepRenderProps<NewSafe
 
             {effectivePayMethod === PayMethod.PayNow && (
               <div className="mt-4">
-                <Typography>
+                <Typography as="div">
                   {!showFeeInConfirmationText ? (
                     'You will have to confirm a transaction with your connected wallet'
                   ) : (

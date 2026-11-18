@@ -2,11 +2,11 @@ import Link from 'next/link'
 import { useRouter } from 'next/router'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
 
-import { Drawer, DrawerContent, DrawerTitle } from '@safe-global/views/components/ui/drawer'
+import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from '@safe-global/views/components/ui/drawer'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { NetworkLogosTooltip } from '@/features/multichain'
+import NetworkLogosTooltip from '@/components/common/NetworkLogosTooltip'
 import { getSafeAppUrl } from '@/components/safe-apps/SafeAppCard'
 import SafeAppIconCard from '@safe-global/views/components/safe-apps/SafeAppIconCard'
 import SafeAppActionButtons from '@/components/safe-apps/SafeAppActionButtons'
@@ -17,7 +17,9 @@ import useChains from '@/hooks/useChains'
 import { useOpenedSafeApps } from '@/hooks/safe-apps/useOpenedSafeApps'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 import css from './styles.module.css'
-import { SAFE_APPS_EVENTS, SAFE_APPS_LABELS, trackSafeAppEvent, SafeAppLaunchLocation } from '@/services/analytics'
+import { SAFE_APPS_EVENTS, SAFE_APPS_LABELS } from '@/services/analytics/events/safeApps'
+import { trackSafeAppEvent } from '@/services/analytics'
+import { SafeAppLaunchLocation } from '@/services/analytics/mixpanel-events'
 
 type SafeAppPreviewDrawerProps = {
   safeApp?: SafeAppData
@@ -49,6 +51,7 @@ const SafeAppPreviewDrawer = ({ isOpen, safeApp, isBookmarked, onClose, onBookma
       {/* eslint-disable-next-line no-restricted-syntax -- rounded-l-xl/rounded-tr-none: bespoke preview drawer radius, no drawer radius token; 450px: legacy preview drawer width, wider than the drawer's max-w-sm default */}
       <DrawerContent className="rounded-l-xl rounded-tr-none data-[vaul-drawer-direction=right]:w-full data-[vaul-drawer-direction=right]:sm:max-w-[450px]">
         <DrawerTitle className="sr-only">{safeApp?.name} preview</DrawerTitle>
+        <DrawerDescription className="sr-only">{safeApp?.description}</DrawerDescription>
         <div className={`${css.drawerContainer} !pt-5`}>
           {/* Toolbar */}
 

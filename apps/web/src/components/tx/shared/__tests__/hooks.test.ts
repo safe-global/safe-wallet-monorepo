@@ -25,11 +25,11 @@ import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { chainBuilder } from '@/tests/builders/chains'
 import * as useChains from '@/hooks/useChains'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
-import { type SignerWallet } from '@/components/common/WalletProvider'
+import { type SignerWallet } from '@/components/common/WalletProvider/WalletContext'
 import { type NestedWallet } from '@/utils/nested-safe-wallet'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import * as loadFeature from '@/features/__core__/useLoadFeature'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
 
@@ -41,6 +41,11 @@ const chainInfo = chainBuilder().with({ chainId: '1' }).build()
 jest.mock('@/services/tx/executionPreChecks', () => ({
   ...jest.requireActual('@/services/tx/executionPreChecks'),
   runExecutionPreChecks: jest.fn(() => Promise.resolve()),
+}))
+
+const mockResolveFeeParams = jest.fn()
+jest.mock('@/features/fee-payment/services/resolveFeeParams', () => ({
+  resolveFeeParams: (...args: unknown[]) => mockResolveFeeParams(...args),
 }))
 
 describe('SignOrExecute hooks', () => {
@@ -1439,10 +1444,10 @@ describe('SignOrExecute hooks', () => {
         setSafeTxGas: jest.fn(),
         setTxOrigin: jest.fn(),
         isReadOnly: false,
-        gtfPaymentMode: 'safe',
-        setGtfPaymentMode: jest.fn(),
-        gtfSelectedGasToken: GAS_TOKEN,
-        setGtfSelectedGasToken: jest.fn(),
+        feePaymentMode: 'safe',
+        setFeePaymentMode: jest.fn(),
+        feeGasToken: GAS_TOKEN,
+        setFeeGasToken: jest.fn(),
         ...overrides,
       }
       const Harness = () => {
@@ -1453,9 +1458,9 @@ describe('SignOrExecute hooks', () => {
       return ref
     }
 
-    const setupGtfChain = () => {
+    const setupPayFromSafeChain = () => {
       // Safe-pays requires both the GTF flag and a RELAY_FEE relayer on the chain.
-      const gtfChain = chainBuilder()
+      const payFromSafeChain = chainBuilder()
         .with({
           chainId: '1',
           features: [FEATURES.GTF],
@@ -1468,7 +1473,7 @@ describe('SignOrExecute hooks', () => {
           },
         })
         .build()
-      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(gtfChain)
+      jest.spyOn(useChains, 'useCurrentChain').mockReturnValue(payFromSafeChain)
       jest.spyOn(useSafeInfoHook, 'default').mockImplementation(() => ({
         safe: {
           ...extendedSafeInfo,
@@ -1486,22 +1491,20 @@ describe('SignOrExecute hooks', () => {
       }))
     }
 
-    const mockFeatureResolve = (resolveFeeParams: jest.Mock) => {
-      jest.spyOn(loadFeature, 'useLoadFeature').mockReturnValue({
-        $isReady: true,
-        $isDisabled: false,
-        $error: undefined,
-        resolveFeeParams,
-      } as unknown as ReturnType<typeof loadFeature.useLoadFeature>)
-    }
+    beforeEach(() => {
+      jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => feature === FEATURES.GTF)
+    })
+
+    afterEach(() => {
+      jest.mocked(useChains.useHasFeature).mockRestore()
+    })
 
     it('invokes resolveFeeParams on first-signer sign when GTF + Safe-pays guards pass', async () => {
-      setupGtfChain()
+      setupPayFromSafeChain()
       jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
 
       const mergedTx = createSafeTx()
-      const resolveFeeParams = jest.fn().mockResolvedValue(mergedTx)
-      mockFeatureResolve(resolveFeeParams)
+      mockResolveFeeParams.mockResolvedValue(mergedTx)
 
       const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockResolvedValue(mergedTx)
       jest
@@ -1511,18 +1514,15 @@ describe('SignOrExecute hooks', () => {
       const ref = captureActions()
       await ref.current!.signTx(createSafeTx())
 
-      expect(resolveFeeParams).toHaveBeenCalledWith(
+      expect(mockResolveFeeParams).toHaveBeenCalledWith(
         expect.objectContaining({ gasToken: GAS_TOKEN, numberSignatures: 2 }),
       )
       expect(signSpy).toHaveBeenCalledWith(mergedTx, expect.anything(), undefined, undefined)
     })
 
     it('skips the merge for confirmers (safeTx already has a signature)', async () => {
-      setupGtfChain()
+      setupPayFromSafeChain()
       jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
-
-      const resolveFeeParams = jest.fn()
-      mockFeatureResolve(resolveFeeParams)
 
       jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation((tx) => Promise.resolve(tx))
       jest
@@ -1541,25 +1541,22 @@ describe('SignOrExecute hooks', () => {
       const ref = captureActions()
       await ref.current!.signTx(signedTx)
 
-      expect(resolveFeeParams).not.toHaveBeenCalled()
+      expect(mockResolveFeeParams).not.toHaveBeenCalled()
     })
 
     it('skips the merge in signer-pays mode', async () => {
-      setupGtfChain()
+      setupPayFromSafeChain()
       jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
-
-      const resolveFeeParams = jest.fn()
-      mockFeatureResolve(resolveFeeParams)
 
       jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation((tx) => Promise.resolve(tx))
       jest
         .spyOn(txSender, 'dispatchTxProposal')
         .mockImplementation((() => Promise.resolve({ txId: '123' })) as unknown as typeof txSender.dispatchTxProposal)
 
-      const ref = captureActions({ gtfPaymentMode: 'signer', gtfSelectedGasToken: undefined })
+      const ref = captureActions({ feePaymentMode: 'signer', feeGasToken: undefined })
       await ref.current!.signTx(createSafeTx())
 
-      expect(resolveFeeParams).not.toHaveBeenCalled()
+      expect(mockResolveFeeParams).not.toHaveBeenCalled()
     })
   })
 })

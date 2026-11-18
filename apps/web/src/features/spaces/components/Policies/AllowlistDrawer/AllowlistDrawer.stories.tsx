@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { fn } from 'storybook/test'
-import { MOCK_ADDRESSES, MOCK_SAFE_NAME, MOCK_SAFES, MOCK_VIEWERS } from '../mocks/policies'
+import { MOCK_ADDRESSES, MOCK_SAFE_NAME, MOCK_SAFES, MOCK_VIEWERS } from '../../../public/utils/policies'
 import {
   mockActivatingAllowlist,
   mockAllowlistChangePending,
@@ -13,8 +13,8 @@ import {
   mockPendingAllowlist,
   mockPendingAllowlistRemoval,
   mockPendingAllowlistUpdate,
-} from '../mocks/allowlistPolicies'
-import { createMockStory } from '@/stories/mocks'
+} from '../../../public/utils/allowlistPolicies'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import AllowlistDrawer from './AllowlistDrawer'
 
 const PENDING_ARGS = {

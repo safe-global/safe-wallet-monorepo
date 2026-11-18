@@ -3,7 +3,8 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { getConflicts, getState, getWarnings } from '../../services/model'
 import { createPreviewQueue, type PreviewAction } from '../../services/queue'
 import type { Persona, Proposal, Scenario } from '../../types'
-import { ReviewDrawer, type Replacement } from './ReviewDrawer'
+import type { Replacement } from './ReviewDrawer'
+import { StepsReviewDrawer as ReviewDrawer } from './steps/StepsReviewDrawer'
 
 type Selector = (tx: Proposal, items: Proposal[], persona: Persona) => boolean
 
@@ -20,7 +21,6 @@ function ReviewDrawerPreview({
   const order = items.filter((tx) => pick(tx, items, persona))
   const [index, setIndex] = useState(0)
   const [openSections, setSections] = useState<string[]>([])
-  const [signersOpen, setSignersOpen] = useState(true)
   const [reject, setReject] = useState(false)
   const [pendingAction, setPendingAction] = useState<PreviewAction | null>(null)
   const [replacement, setReplacement] = useState<Replacement | null>(null)
@@ -35,8 +35,7 @@ function ReviewDrawerPreview({
       layout={{
         sections: openSections,
         setSections,
-        signersOpen,
-        setSignersOpen,
+        signersOpen: true,
         reject,
         setReject,
         pendingAction,

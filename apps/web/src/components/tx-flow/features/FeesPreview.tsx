@@ -1,17 +1,18 @@
 import { useContext, useEffect, type ReactElement } from 'react'
-import { useLoadFeature } from '@/features/__core__'
-import { GTFFeature, useFeesPreview, useIsGtfSlotVisible } from '@/features/gtf'
-import { useSafeShieldForTxData } from '@/features/safe-shield/SafeShieldContext'
+import { useFeesPreview } from '@/features/fee-payment/public/hooks/useFeesPreview'
+import { useIsFeeCardSlotVisible } from '@/features/fee-payment/public/hooks/useIsFeeCardSlotVisible'
+import { useSafeShieldForTxData } from '@/features/safe-shield/public/hooks/useSafeShield'
 import { TxFlowContext } from '../TxFlowProvider'
-import { SlotName, withSlot } from '../slots'
+import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { withSlot } from '@/components/tx-flow/slots/withSlot'
+import FeesPreviewComponent from '@/features/fee-payment/public/components/FeesPreview'
 
 const FeesPreview = (): ReactElement => {
-  const { FeesPreview: FeesPreviewComponent } = useLoadFeature(GTFFeature)
   const feesData = useFeesPreview()
   const { setIsSubmitDisabled } = useContext(TxFlowContext)
 
   // Block submit while the CGW fee preview is resolving. Otherwise a fast click on Continue/Execute
-  // signs before `gtfSelectedGasToken` is set, silently downgrading a Safe-pays tx to signer-pays.
+  // signs before `feeGasToken` is set, silently downgrading a Safe-pays tx to signer-pays.
   useEffect(() => {
     setIsSubmitDisabled(!!feesData.loading)
     return () => setIsSubmitDisabled(false)
@@ -30,7 +31,7 @@ const FeesPreviewSlot = withSlot({
   Component: FeesPreview,
   slotName: SlotName.Main,
   id: 'feesPreview',
-  useSlotCondition: useIsGtfSlotVisible,
+  useSlotCondition: useIsFeeCardSlotVisible,
 })
 
 export default FeesPreviewSlot

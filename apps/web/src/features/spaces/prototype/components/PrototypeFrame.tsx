@@ -18,7 +18,7 @@ import { Field, FieldLabel } from '@safe-global/views/components/ui/field'
 import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
 import SafeLogo from '@/components/common/SafeLogo'
 import { Button } from '@safe-global/views/components/ui/button'
-import { usePrototypeDarkMode } from '../hooks/usePrototypeDarkMode'
+import { usePrototypeDarkMode } from '../../public/hooks/usePrototypeDarkMode'
 import { spacesMainNavigation, spacesSetupGroup } from '../../components/Sidebar/config'
 
 export function PrototypeFrame({ children }: { children: ReactNode }) {

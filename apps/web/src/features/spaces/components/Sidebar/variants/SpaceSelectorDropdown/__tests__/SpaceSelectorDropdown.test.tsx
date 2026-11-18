@@ -5,7 +5,7 @@ import { AppRoutes } from '@/config/routes'
 import { trackEvent } from '@/services/analytics'
 import { getDeterministicColor } from '@/utils/colors'
 import { SPACE_SELECTOR_NAME_MAX_LENGTH } from '@safe-global/views/features/spaces/components/Sidebar/constants'
-import { SPACES_LIMIT } from '@/features/spaces/constants'
+import { SPACES_LIMIT } from '../../../../../constants'
 import { truncateSpaceName } from '../../../utils'
 import { SpaceSelectorDropdown } from '../SpaceSelectorDropdown'
 
@@ -317,7 +317,7 @@ describe('SpaceSelectorDropdown', () => {
       expect.objectContaining({ action: 'Workspace create started' }),
       expect.objectContaining({ entry_point: 'sidebar' }),
     )
-    expect(mockPush).toHaveBeenCalledWith(AppRoutes.spaces.createSpace)
+    expect(mockPush).toHaveBeenCalledWith(AppRoutes.welcome.createSpace)
   })
 
   it('includes safe query param in create space navigation when safe is in the URL', () => {
@@ -329,7 +329,7 @@ describe('SpaceSelectorDropdown', () => {
     fireEvent.click(screen.getByText('Add new Workspace'))
 
     expect(mockPush).toHaveBeenCalledWith({
-      pathname: AppRoutes.spaces.createSpace,
+      pathname: AppRoutes.welcome.createSpace,
       query: { safe: '1:0xdeadbeef' },
     })
   })

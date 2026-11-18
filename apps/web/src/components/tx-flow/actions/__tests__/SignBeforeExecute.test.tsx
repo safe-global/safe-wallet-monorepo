@@ -3,9 +3,10 @@ import { act, render, screen } from '@/tests/test-utils'
 import { faker } from '@faker-js/faker'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import TxFlowProvider from '@/components/tx-flow/TxFlowProvider'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
-import { SlotProvider } from '@/components/tx-flow/slots'
-import type { SignerWallet } from '@/components/common/WalletProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { SlotProvider } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import type { SignerWallet } from '@/components/common/WalletProvider/WalletContext'
 import { ComboSubmit } from '../ComboSubmit'
 import SignSlot from '../Sign'
 import ExecuteSlot from '../Execute'
@@ -29,10 +30,13 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   useSigner: jest.fn(),
 }))
 
-jest.mock('@/features/counterfactual', () => ({ useIsCounterfactualSafe: jest.fn(() => false) }))
-
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
+jest.mock('@/features/counterfactual/public/hooks/useIsCounterfactualSafe', () => ({
   __esModule: true,
+  default: jest.fn(() => false),
+}))
+
+jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/hooks/useSafeShield'),
   useSafeShield: jest.fn(() => ({ needsRiskConfirmation: false, isRiskConfirmed: false })),
 }))
 
@@ -109,9 +113,9 @@ const buildSafeTxContext = (safeTx: SafeTransaction): SafeTxContextParams => ({
   setSafeTxGas: jest.fn(),
   setTxOrigin: jest.fn(),
   isReadOnly: false,
-  gtfPaymentMode: 'signer',
-  setGtfPaymentMode: jest.fn(),
-  setGtfSelectedGasToken: jest.fn(),
+  feePaymentMode: 'signer',
+  setFeePaymentMode: jest.fn(),
+  setFeeGasToken: jest.fn(),
 })
 
 const mockSafe = (threshold: number) => {

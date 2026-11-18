@@ -20,7 +20,7 @@ import { cn } from '@safe-global/views/utils/cn'
  *
  * @remarks
  * Key Props:
- * - `color` ('default' | 'slate' | 'clay' | 'rose' | 'orchid' | 'lilac' | 'iris' | 'cobalt' | 'sky' | 'lagoon')
+ * - `color` ('default' | 'slate' | 'clay' | 'rose' | 'lilac' | 'iris' | 'cobalt' | 'sky' | 'lagoon')
  * - `className` (layout only)
  *
  * The colours are the `tag` palette in @safe-global/theme.
@@ -34,7 +34,6 @@ const tagVariants = cva(
         slate: 'bg-tag-slate text-tag-slate-foreground',
         clay: 'bg-tag-clay text-tag-clay-foreground',
         rose: 'bg-tag-rose text-tag-rose-foreground',
-        orchid: 'bg-tag-orchid text-tag-orchid-foreground',
         lilac: 'bg-tag-lilac text-tag-lilac-foreground',
         iris: 'bg-tag-iris text-tag-iris-foreground',
         cobalt: 'bg-tag-cobalt text-tag-cobalt-foreground',

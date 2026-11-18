@@ -1,8 +1,9 @@
-import { render } from '@/tests/test-utils'
+import { fakerChecksummedAddress, render, within } from '@/tests/test-utils'
 import ProposersList from '.'
 import { faker } from '@faker-js/faker'
 import useProposers from '@/hooks/useProposers'
-import { useHasFeature } from '@/hooks/useChains'
+import { useChain, useHasFeature } from '@/hooks/useChains'
+import { chainBuilder } from '@/tests/builders/chains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
@@ -20,9 +21,10 @@ jest.mock('@/hooks/useProposers')
 jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
 
-jest.mock('@/features/spending-limits', () => ({
+jest.mock('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
+  ...jest.requireActual('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary'),
   __esModule: true,
-  useIsOnlySpendingLimitBeneficiary: jest.fn(),
+  default: jest.fn(),
 }))
 
 jest.mock('@/hooks/useChains', () => ({
@@ -34,7 +36,7 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 
 const mockUsePlanGate = jest.fn()
-jest.mock('@/features/spaces/hooks/usePlanGate', () => ({
+jest.mock('@/features/spaces/public/hooks/usePlanGate', () => ({
   usePlanGate: (...args: unknown[]) => mockUsePlanGate(...args),
 }))
 
@@ -64,6 +66,9 @@ describe('ProposersList', () => {
     jest.clearAllMocks()
     mockRole('owner')
     mockUseNestedSafeOwners.mockReturnValue([])
+    ;(useChain as jest.MockedFunction<typeof useChain>).mockReturnValue(
+      chainBuilder().with({ chainId: '1', features: [] }).build(),
+    )
     mockUsePlanGate.mockReturnValue({ mustUpgradeToSafePro: false, isLoading: false, upgradeHref: '/spaces/plans' })
     ;(useHasFeature as jest.MockedFunction<typeof useHasFeature>).mockReturnValue(true)
     ;(useSafeInfo as jest.MockedFunction<typeof useSafeInfo>).mockReturnValue({
@@ -174,6 +179,23 @@ describe('ProposersList', () => {
 
       expect(await findAllByTestId('edit-proposer-btn')).toHaveLength(2)
       expect(getAllByTestId('delete-proposer-btn')).toHaveLength(2)
+    })
+
+    it('shows the address book names of each proposer and of its creator', async () => {
+      const delegate = fakerChecksummedAddress()
+      const creator = fakerChecksummedAddress()
+      ;(useProposers as jest.MockedFunction<typeof useProposers>).mockReturnValue({
+        data: { results: [{ delegate, delegator: creator, label: 'Proposer', safe: null }] },
+      } as unknown as ReturnType<typeof useProposers>)
+
+      const { findAllByRole } = render(<ProposersList />, {
+        initialReduxState: { addressBook: { '1': { [delegate]: 'AD Proposer1', [creator]: 'Creator' } } },
+      })
+
+      const [, firstProposer] = await findAllByRole('row')
+      const [proposerCell, creatorCell] = within(firstProposer).getAllByRole('cell')
+      expect(proposerCell).toHaveTextContent('AD Proposer1')
+      expect(creatorCell).toHaveTextContent('Creator')
     })
 
     it('keeps listing the proposers but hides adding, editing and deleting while the feature is off', async () => {

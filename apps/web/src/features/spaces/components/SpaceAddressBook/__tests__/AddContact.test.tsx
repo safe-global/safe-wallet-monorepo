@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import AddContact from '../AddContact'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
+import { spaceAddressBookTagBuilder } from '@/tests/builders/space'
 const MOCK_SPACE_UUID = '11111111-1111-1111-1111-111111111111'
 
 const mockUpsertAddressBook = jest.fn()
@@ -21,9 +22,15 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useAddressBooksUpsertAddressBookItemsV1Mutation: () => [mockUpsertAddressBook],
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '11111111-1111-1111-1111-111111111111',
-  useGetSpaceAddressBook: () => [{ id: 1 }, { id: 2 }],
+}))
+jest.mock('../../../public/hooks/useGetSpaceAddressBook', () => ({
+  ...jest.requireActual('../../../public/hooks/useGetSpaceAddressBook'),
+  __esModule: true,
+  default: () => [{ id: 1 }, { id: 2 }],
+}))
+jest.mock('../../../public/hooks/useWorkspaceAddressBookLabel', () => ({
   useWorkspaceAddressBookLabel: () => 'Acme address book',
 }))
 
@@ -35,6 +42,8 @@ type CapturedProps = {
   submit: (item: unknown, sid: string) => Promise<unknown>
   onSubmitStart?: () => void
   onSuccess?: () => void
+  workspaceTags?: unknown[]
+  onTagLimitReached?: () => void
 }
 
 let lastProps: CapturedProps | undefined
@@ -61,6 +70,27 @@ describe('AddContact', () => {
     expect(lastProps?.successMessage).toBe('Contact added to Acme address book')
     expect(lastProps?.successGroupKey).toBe('add-contact-success')
     expect(screen.getByTestId('dialog-stub')).toHaveTextContent('Add shared contact')
+  })
+
+  it('hands the workspace tags to the dialog, so it shows the Tags field', () => {
+    const workspaceTags = [spaceAddressBookTagBuilder().build()]
+    const onTagLimitReached = jest.fn()
+    render(<AddContact workspaceTags={workspaceTags} onTagLimitReached={onTagLimitReached} />)
+
+    expect(lastProps?.workspaceTags).toBe(workspaceTags)
+    expect(lastProps?.onTagLimitReached).toBe(onTagLimitReached)
+  })
+
+  it('sends the tags picked for a new contact', async () => {
+    mockUpsertAddressBook.mockResolvedValue({})
+    render(<AddContact />)
+
+    await lastProps!.submit({ name: 'Alice', address: '0xabc', chainIds: ['1'], tags: ['Vendor'] }, MOCK_SPACE_UUID)
+
+    expect(mockUpsertAddressBook).toHaveBeenCalledWith({
+      spaceId: MOCK_SPACE_UUID,
+      upsertAddressBookItemsDto: { items: [{ name: 'Alice', address: '0xabc', chainIds: ['1'], tags: ['Vendor'] }] },
+    })
   })
 
   it('defaults the trigger label to "Add contact"', () => {

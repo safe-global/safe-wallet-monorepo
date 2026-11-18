@@ -1,13 +1,15 @@
 import { ChevronsDownUp, ChevronsUpDown } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { Drawer, DrawerBody } from '@/components/common/Drawer'
+import Identicon from '@safe-global/views/components/common/Identicon'
+import { Drawer } from '@safe-global/views/components/common/Drawer/Drawer'
+import { DrawerBody } from '@safe-global/views/components/common/Drawer/components/DrawerBody'
+import { DrawerHeader } from '@safe-global/views/components/common/Drawer/components/DrawerHeader'
 import { getStatusHint } from '../../../services/actions'
 import { getAccount, getConflicts, getState, getTransactionLabel } from '../../../services/model'
 import { getOwnerWallet } from '../../../services/nextSteps'
 import { isSignerOf } from '../../../services/personas'
 import { StatusChip, StepsStatusChip } from '../../shared'
 import type { ReviewDrawerProps } from '../ReviewDrawer'
-import { SharedDrawerHeader } from '../../Panel/SharedDrawerHeader'
 import {
   ChangeSection,
   ConflictsSection,
@@ -43,49 +45,37 @@ export function StepsReviewDrawer({
 }: ReviewDrawerProps) {
   const account = review ? getAccount(review) : undefined
   const competing = review ? getConflicts(review, items).length : 0
+  // `key` keeps focus on the button when its label flips
+  const sectionsAction = layout.toggleAllSections && {
+    key: 'sections',
+    label: layout.sectionsMode === 'expanded' ? 'Collapse all sections' : 'Expand all sections',
+    icon: layout.sectionsMode === 'expanded' ? <ChevronsDownUp /> : <ChevronsUpDown />,
+    onClick: layout.toggleAllSections,
+    shortcut: 'E',
+  }
   return (
     <Drawer
       resizable
-      mobileFullScreen
+      expandable
       open={!!review}
       onClose={onClose}
       ariaLabel={review ? getTransactionLabel(review) : undefined}
-      header={({ fullScreen, toggleFullScreen, close }) =>
-        review &&
-        account && (
-          <SharedDrawerHeader
-            media={{
-              kind: 'safe',
-              address: account.iconAddress,
-              title: account.name,
-              subtitle: `Nonce #${review.nonce} · ${account.network}`,
-            }}
-            onPrevious={() => onStep(-1)}
-            onNext={() => onStep(1)}
-            hasPrevious={position.index > 0}
-            hasNext={position.index >= 0 && position.index < position.count - 1}
-            position={position}
-            fullScreen={fullScreen}
-            onToggleFullScreen={toggleFullScreen}
-            onClose={close}
-            padding={24}
-            extraActions={
-              layout.toggleAllSections
-                ? [
-                    {
-                      id: 'sections',
-                      label: layout.sectionsMode === 'expanded' ? 'Collapse all sections' : 'Expand all sections',
-                      icon: layout.sectionsMode === 'expanded' ? <ChevronsDownUp /> : <ChevronsUpDown />,
-                      onClick: layout.toggleAllSections,
-                      shortcut: 'E',
-                    },
-                  ]
-                : undefined
-            }
-          />
-        )
-      }
     >
+      {review && account && (
+        <DrawerHeader
+          media={<Identicon address={account.iconAddress} size={36} />}
+          title={account.name}
+          subtitle={`Nonce #${review.nonce} · ${account.network}`}
+          navigation={{
+            onPrevious: () => onStep(-1),
+            onNext: () => onStep(1),
+            hasPrevious: position.index > 0,
+            hasNext: position.index >= 0 && position.index < position.count - 1,
+            position: position.index >= 0 ? `${position.index + 1} of ${position.count}` : undefined,
+          }}
+          actions={sectionsAction ? [sectionsAction] : undefined}
+        />
+      )}
       <DrawerBody>
         {review && (
           // Keyed so each transaction starts from the defaults, or from "Expand all" while stepping.

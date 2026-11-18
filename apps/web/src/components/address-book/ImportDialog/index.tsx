@@ -5,20 +5,39 @@ import { type ReactElement, useState, type MouseEvent, useMemo } from 'react'
 
 import ModalDialog from '@/components/common/ModalDialog'
 import DialogActions from '@/components/common/DialogActions'
+import { SimilarAddressNotice } from '@/components/common/SimilarAddressNotice/SimilarAddressNotice'
+import SelectAllConfirmDialog from '@/components/common/TrustedSafesModal/SelectAllConfirmDialog'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { useAppDispatch } from '@/store'
 
 import css from './styles.module.css'
-import { trackEvent, ADDRESS_BOOK_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { ADDRESS_BOOK_EVENTS } from '@/services/analytics/events/addressBook'
+import { ADDRESS_POISONING_EVENTS } from '@/services/analytics/events/addressPoisoning'
+import { DismissAction, LookalikeWarningLocation, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { useTrackOnce } from '@/services/analytics/useTrackOnce'
+import useAddressPoisoningBatchCheck from '@/features/address-poisoning/public/hooks/useAddressPoisoningBatchCheck'
 import { abCsvReaderValidator, abOnUploadValidator } from './validation'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { Errors, logError } from '@/services/exceptions'
+import { RTK_QUERY_ERROR_MESSAGES } from '@/utils/rtkQuery'
 import FileUpload, { FileTypes, type FileInfo } from '@safe-global/views/components/common/FileUpload'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { BRAND_NAME } from '@/config/constants'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
-type AddressBookCSVRow = ['address', 'name', 'chainId']
+export type AddressBookCSVRow = [address: string, name: string, chainId: string, ...tags: string[]]
+
+/** `done` closes the dialog. Otherwise it stays open, showing `error` if there is one. */
+export type ImportOutcome = { done: boolean; error?: string }
+
+type ImportDialogProps = {
+  handleClose: () => void
+  /** Returns the reason the rows can't be imported, for checks beyond the file format. */
+  validateRows?: (rows: AddressBookCSVRow[]) => string | undefined
+  /** Imports somewhere other than the local address book. */
+  onImport?: (rows: AddressBookCSVRow[]) => Promise<ImportOutcome>
+}
 
 // https://react-papaparse.js.org/docs#errors
 type PapaparseErrorType = {
@@ -30,13 +49,18 @@ type PapaparseErrorType = {
 }
 
 const hasEntry = (entry: string[]) => {
-  return entry.length === 3 && entry[0] && entry[1] && entry[2]
+  return entry.length >= 3 && entry[0] && entry[1] && entry[2]
 }
 
-const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElement => {
+const pluralize = (count: number, singular: string, plural: string) => (count === 1 ? singular : plural)
+
+const ImportDialog = ({ handleClose, validateRows, onImport }: ImportDialogProps): ReactElement => {
   const [zoneHover, setZoneHover] = useState<boolean>(false)
   const [csvData, setCsvData] = useState<ParseResult<AddressBookCSVRow>>()
   const [error, setError] = useState<string>()
+  const [importError, setImportError] = useState<string>()
+  const [isImporting, setIsImporting] = useState(false)
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
 
   // Count how many entries are in the CSV file
   const [entryCount, chainCount] = useMemo(() => {
@@ -47,27 +71,98 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
     return [entryLen, chainLen]
   }, [csvData])
 
+  const entries = useMemo(() => csvData?.data.slice(1) ?? [], [csvData])
+  const addresses = useMemo(() => entries.map(([address]) => address.trim()), [entries])
+  const flagged = useAddressPoisoningBatchCheck(addresses)
+  const isFlagged = ([address]: AddressBookCSVRow) => flagged.has(address.trim().toLowerCase())
+
+  // One row per flagged address, even when the file lists it on several chains.
+  const flaggedEntries = useMemo(() => {
+    const byAddress = new Map<string, { address: string; name: string }>()
+    for (const [address, name] of entries) {
+      const key = address.trim().toLowerCase()
+      if (flagged.has(key) && !byAddress.has(key)) byAddress.set(key, { address: address.trim(), name })
+    }
+    return Array.from(byAddress.values())
+  }, [entries, flagged])
+
+  const lookalikeTracking = { [MixpanelEventParams.LOCATION]: LookalikeWarningLocation.ADDRESS_BOOK_IMPORT }
+  useTrackOnce(ADDRESS_POISONING_EVENTS.WARNING_SHOWN, lookalikeTracking, flaggedEntries.length > 0)
+
   const dispatch = useAppDispatch()
   const { CSVReader } = useCSVReader()
+
+  const importElsewhere = async (rows: AddressBookCSVRow[], importRows: NonNullable<ImportDialogProps['onImport']>) => {
+    setIsConfirmOpen(false)
+    setImportError(undefined)
+    setIsImporting(true)
+    try {
+      const { done, error } = await importRows(rows)
+      if (done) {
+        handleClose()
+      } else {
+        setImportError(error)
+      }
+    } catch (thrown) {
+      logError(Errors._703, thrown)
+      setImportError(RTK_QUERY_ERROR_MESSAGES.generic)
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
+  const importEntries = (rows: AddressBookCSVRow[]) => {
+    if (onImport) {
+      void importElsewhere(rows, onImport)
+      return
+    }
+
+    // One id shared by all rows so the listener collapses them into a single toast.
+    const notifyBatchId = crypto.randomUUID()
+
+    for (const entry of rows) {
+      const [address, name, chainId] = entry
+      dispatch(upsertAddressBookEntries({ address, name, chainIds: [chainId.trim()], notify: true, notifyBatchId }))
+    }
+
+    trackEvent({ ...ADDRESS_BOOK_EVENTS.IMPORT, label: rows.length })
+
+    handleClose()
+  }
 
   const handleImport = () => {
     if (!csvData) {
       return
     }
 
-    const [, ...entries] = csvData.data
-
-    // One id shared by all rows so the listener collapses them into a single toast.
-    const notifyBatchId = crypto.randomUUID()
-
-    for (const entry of entries) {
-      const [address, name, chainId] = entry
-      dispatch(upsertAddressBookEntries({ address, name, chainIds: [chainId.trim()], notify: true, notifyBatchId }))
+    if (flaggedEntries.length > 0) {
+      setIsConfirmOpen(true)
+      return
     }
 
-    trackEvent({ ...ADDRESS_BOOK_EVENTS.IMPORT, label: entries.length })
+    importEntries(entries)
+  }
 
-    handleClose()
+  const onImportLookalikes = () => {
+    trackEvent(ADDRESS_POISONING_EVENTS.WARNING_CONTINUED, lookalikeTracking)
+    importEntries(entries)
+  }
+
+  const trackDismissLookalikes = (action: DismissAction) =>
+    trackEvent(ADDRESS_POISONING_EVENTS.WARNING_DISMISSED, {
+      ...lookalikeTracking,
+      [MixpanelEventParams.DISMISS_ACTION]: action,
+    })
+
+  const onSkipLookalikes = () => {
+    trackDismissLookalikes(DismissAction.SKIP)
+    importEntries(entries.filter((entry) => !isFlagged(entry)))
+  }
+
+  const onCancelLookalikes = () => {
+    if (!isConfirmOpen) return
+    trackDismissLookalikes(DismissAction.CANCEL)
+    setIsConfirmOpen(false)
   }
 
   return (
@@ -96,9 +191,10 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
               logError(Errors._703, errorDescription)
             }
           }}
-          onUploadAccepted={(result: ParseResult<['address', 'name', 'chainId']>) => {
+          onUploadAccepted={(result: ParseResult<AddressBookCSVRow>) => {
             setZoneHover(false)
             setError(undefined)
+            setImportError(undefined)
 
             // Remove empty rows
             const cleanResult = {
@@ -106,7 +202,7 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
               data: result.data.filter(hasEntry),
             }
 
-            const message = abOnUploadValidator(cleanResult)
+            const message = abOnUploadValidator(cleanResult) ?? validateRows?.(cleanResult.data.slice(1))
 
             if (message) {
               setError(message)
@@ -122,6 +218,7 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
             const onRemove = (e: MouseEvent<HTMLSpanElement>) => {
               setCsvData(undefined)
               setError(undefined)
+              setImportError(undefined)
               onClick(e)
             }
 
@@ -130,7 +227,7 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
                   name: acceptedFile.name,
                   additionalInfo: formatFileSize(acceptedFile.size),
                   summary: [
-                    <Typography data-testid="summary-message" key="abSummary">
+                    <Typography as="span" data-testid="summary-message" key="abSummary">
                       {`Found ${entryCount} entries on ${chainCount} ${chainCount > 1 ? 'chains' : 'chain'}`}
                     </Typography>,
                   ],
@@ -149,9 +246,18 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
           }}
         </CSVReader>
 
+        {flaggedEntries.length > 0 && (
+          <div className="mt-4">
+            <SimilarAddressNotice>
+              {flaggedEntries.length} {pluralize(flaggedEntries.length, 'address', 'addresses')} in this file{' '}
+              {pluralize(flaggedEntries.length, 'looks', 'look')} similar to other addresses.
+            </SimilarAddressNotice>
+          </div>
+        )}
+
         <div className={css.horizontalDivider} />
 
-        {error && <ErrorMessage>{error}</ErrorMessage>}
+        {(error ?? importError) && <ErrorMessage>{error ?? importError}</ErrorMessage>}
 
         <Typography>
           Only CSV files exported from a {BRAND_NAME} can be imported.
@@ -168,10 +274,22 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
         className="p-6 pt-2"
         onCancel={handleClose}
         cancelTestId="cancel-btn"
-        confirmLabel="Import"
+        confirmLabel={flaggedEntries.length > 0 ? 'Verify' : 'Import'}
         onConfirm={handleImport}
-        confirmDisabled={!csvData || !!error}
+        confirmDisabled={!csvData || !!error || isImporting}
+        confirmLoading={isImporting}
         confirmTestId="import-btn"
+      />
+
+      <SelectAllConfirmDialog
+        open={isConfirmOpen}
+        similarAddresses={flaggedEntries}
+        description={`${flaggedEntries.length} ${pluralize(flaggedEntries.length, 'address', 'addresses')} in this file closely ${pluralize(flaggedEntries.length, 'resembles', 'resemble')} other addresses. Review them carefully before continuing.`}
+        question="Do you want to import these addresses?"
+        confirmLabel="Yes, import them anyway"
+        onConfirm={onImportLookalikes}
+        onSkip={onSkipLookalikes}
+        onCancel={onCancelLookalikes}
       />
     </ModalDialog>
   )

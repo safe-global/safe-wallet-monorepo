@@ -60,7 +60,8 @@ import { CompactQueueList } from './QueueTable/CompactQueueList'
 import { DisplayMenu } from './QueueTable/DisplayMenu'
 import { GROUP_SORT, groupQueue, loadDisplay, orderQueue, saveDisplay, type QueueDisplay } from '../services/order'
 import { buildSections, rankAccounts } from './QueueTable/sections'
-import { ReviewDrawer, type Replacement, type SectionsMode } from './ReviewDrawer/ReviewDrawer'
+import type { Replacement, SectionsMode } from './ReviewDrawer/ReviewDrawer'
+import { StepsReviewDrawer as ReviewDrawer } from './ReviewDrawer/steps/StepsReviewDrawer'
 import { BulkExecuteDrawer } from './BulkExecuteDrawer'
 import { parseScenario, ScenarioBar, type Hypernative, type LoadReason } from './ScenarioBar'
 import { useRecoveries } from './Recovery/RecoveryPanel'
@@ -793,7 +794,6 @@ function PendingQueueView() {
             sections: reviewSections,
             setSections: setReviewSections,
             signersOpen,
-            setSignersOpen,
             reject,
             setReject,
             pendingAction,

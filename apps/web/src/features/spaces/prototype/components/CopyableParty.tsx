@@ -6,7 +6,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import { Tag } from '@safe-global/views/components/ui/tag'
-import { useCopyToClipboard } from '@/components/common/AuditLog'
+import useCopyToClipboard from '@/hooks/useCopyToClipboard'
+import { COPIED_TOOLTIP_MS } from '@/components/common/AuditLog'
 import { ROW_TAG_FILL, chainLogoUrl } from './shared'
 import { EXPLORERS } from './ReviewDrawer/steps/IdentityRow'
 
@@ -43,7 +44,7 @@ export function CopyableParty({
   network?: { chainId: string; name: string }
   chainId?: string
 }) {
-  const [copied, copy] = useCopyToClipboard(address)
+  const { copied, copy } = useCopyToClipboard(COPIED_TOOLTIP_MS)
   // Stands in for the address book dialog the transaction flow already has.
   const [added, setAdded] = useState(false)
   const explorer =
@@ -105,7 +106,7 @@ export function CopyableParty({
             </span>
           </span>
           <span className="-mx-2 flex items-center gap-1 border-t border-background/15 pt-1.5">
-            <Button variant="ghost" size="2xs" className={ACTION_CLASS} onClick={copy}>
+            <Button variant="ghost" size="2xs" className={ACTION_CLASS} onClick={() => copy(address)}>
               {copied ? <Check strokeWidth={ICON_STROKE} /> : <Copy strokeWidth={ICON_STROKE} />}
               {copied ? 'Copied' : 'Copy'}
             </Button>

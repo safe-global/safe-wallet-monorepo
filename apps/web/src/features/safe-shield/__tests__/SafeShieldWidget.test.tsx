@@ -1,5 +1,5 @@
 import { render, screen } from '@/tests/test-utils'
-import SafeShieldWidget from '../index'
+import SafeShieldWidget from '../components/SafeShieldWidget'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type {
   ContractAnalysisResults,
@@ -7,38 +7,41 @@ import type {
   RecipientAnalysisResults,
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
-import { useSafeShield } from '../SafeShieldContext'
-import {
-  useHypernativeOAuth,
-  useIsHypernativeEligible,
-  type HypernativeAuthStatus,
-  type HypernativeEligibility,
-} from '@/features/hypernative'
+import { useSafeShield } from '../public/hooks/useSafeShield'
+import { useHypernativeOAuth } from '@/features/hypernative/public/hooks/useHypernativeOAuth'
+import { useIsHypernativeEligible } from '@/features/hypernative/public/hooks/useIsHypernativeEligible'
+import type { HypernativeAuthStatus } from '@/features/hypernative/public/hooks/useHypernativeOAuth'
+import type { HypernativeEligibility } from '@/features/hypernative/public/hooks/useIsHypernativeEligible'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 import { useCheckSimulation } from '../hooks/useCheckSimulation'
 
-jest.mock('../SafeShieldContext')
-jest.mock('@/features/hypernative', () => ({
-  ...jest.requireActual('@/features/hypernative'),
+jest.mock('../public/hooks/useSafeShield')
+jest.mock('@/features/hypernative/public/hooks/useHypernativeOAuth', () => ({
+  ...jest.requireActual('@/features/hypernative/public/hooks/useHypernativeOAuth'),
   useHypernativeOAuth: jest.fn(),
+}))
+jest.mock('@/features/hypernative/public/hooks/useIsHypernativeEligible', () => ({
+  ...jest.requireActual('@/features/hypernative/public/hooks/useIsHypernativeEligible'),
   useIsHypernativeEligible: jest.fn(),
 }))
 jest.mock('../hooks/useCheckSimulation')
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
-  useLoadFeature: jest.fn(() => ({
-    $isReady: true,
-    $isDisabled: false,
-    HnInfoCard: ({
-      hypernativeAuth,
-      showActiveStatus = true,
-    }: {
-      hypernativeAuth?: HypernativeAuthStatus
-      showActiveStatus?: boolean
-    }) => (hypernativeAuth && showActiveStatus ? <span>Hypernative Guardian is active</span> : null),
-    HnCustomChecksCard: () => null,
-    SafenetChecksSection: () => null,
-  })),
+jest.mock('@/features/hypernative/public/components/HnInfoCard', () => ({
+  __esModule: true,
+  default: ({
+    hypernativeAuth,
+    showActiveStatus = true,
+  }: {
+    hypernativeAuth?: HypernativeAuthStatus
+    showActiveStatus?: boolean
+  }) => (hypernativeAuth && showActiveStatus ? <span>Hypernative Guardian is active</span> : null),
+}))
+jest.mock('@/features/hypernative/public/components/HnCustomChecksCard', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/features/safenet-checks/public/components/SafenetChecksSection', () => ({
+  __esModule: true,
+  default: () => null,
 }))
 
 const mockUseSafeShield = useSafeShield as jest.MockedFunction<typeof useSafeShield>

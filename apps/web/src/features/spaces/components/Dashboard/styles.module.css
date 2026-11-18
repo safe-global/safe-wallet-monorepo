@@ -29,18 +29,18 @@
   justify-content: center;
 }
 
-.widgetItem {
-  iframe {
-    display: none !important;
-  }
-}
-
 .widgetItemLabel {
   @apply flex items-center truncate;
   font-weight: 600;
 
   & > div {
     font-weight: 600;
+  }
+
+  /* Hides the token logos; !important beats IframeIcon's inline display: block */
+  iframe,
+  img {
+    display: none !important;
   }
 }
 

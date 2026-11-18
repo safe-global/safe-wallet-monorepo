@@ -10,14 +10,14 @@ test.describe('Connected wallet that is not a signer', { tag: '@e2e' }, () => {
     safePage,
     journey,
   }) => {
-    const safe = await seedSafe(journey, { owners: ['owner4', 'owner1'], threshold: 1 })
+    const safe = await seedSafe(journey, { owners: ['alice', 'bob'], threshold: 1 })
     await waitForNativeBalance(safe)
 
     const assets = new AssetsPage(safePage)
     await assets.goto(safe.prefixedAddress)
     await expect(assets.firstTokenSendButton).toBeEnabled()
 
-    await journey.connectAs('owner3')
+    await journey.connectAs('dave')
     await assets.firstTokenWalletCheck.hover()
 
     await expect(assets.firstTokenSendButton).toBeDisabled()

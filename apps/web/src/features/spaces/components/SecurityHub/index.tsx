@@ -5,7 +5,7 @@ import SafeShieldLogoFullDark from '@/public/images/safe-shield/safe-shield-logo
 import { useDarkMode } from '@/hooks/useDarkMode'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
 import SecurityHubContent from './SecurityHubContent'
 
 export type {

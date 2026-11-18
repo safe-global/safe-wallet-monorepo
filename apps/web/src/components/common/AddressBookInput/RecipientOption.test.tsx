@@ -23,6 +23,7 @@ const contact = (overrides: Partial<ExtendedContact> = {}): ExtendedContact => (
   name: 'Alice signer',
   address: checksumAddress('0x1234567890123456789012345678901234567890'),
   chainIds: ['1'],
+  tagIds: [],
   createdBy: '',
   createdByUserId: 0,
   lastUpdatedBy: '',

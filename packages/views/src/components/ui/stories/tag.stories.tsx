@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { ArrowUpRight, Settings } from 'lucide-react'
 import { Tag } from '../tag'
 
-const COLORS = ['default', 'slate', 'clay', 'rose', 'orchid', 'lilac', 'iris', 'cobalt', 'sky', 'lagoon'] as const
+const COLORS = ['default', 'slate', 'clay', 'rose', 'lilac', 'iris', 'cobalt', 'sky', 'lagoon'] as const
 
 /**
  * Tag Component Stories

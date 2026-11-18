@@ -1,8 +1,8 @@
 import type { ReactElement } from 'react'
 import { Sidebar, SidebarHeader } from '@safe-global/views/components/ui/sidebar'
-import { SidebarTopBar } from './SidebarTopBar'
+import { SidebarTopBar } from './SidebarTopBar/SidebarTopBar'
 import { getSidebarVariant } from './variants'
-import { SidebarCommonFooter } from './SidebarCommonFooter'
+import { SidebarCommonFooter } from './SidebarCommonFooter/SidebarCommonFooter'
 import type { SpaceSelectorProps } from '@safe-global/views/features/spaces/components/Sidebar/types'
 import type { SidebarVariantType } from './variants'
 

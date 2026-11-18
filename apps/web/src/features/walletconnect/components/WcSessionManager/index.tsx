@@ -4,19 +4,17 @@ import WcConnectionForm from '../WcConnectionForm'
 import WcErrorMessage from '../WcErrorMessage'
 import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS } from '@/services/analytics/events/walletconnect'
-import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { splitError } from '../../services/utils'
-import WcProposalForm from '../WcProposalForm'
 import WcChainSwitchModal from '../WcChainSwitchModal'
 import { wcChainSwitchStore } from '../../store/wcChainSwitchSlice'
+import WcProposalStep from './WcProposalStep'
 
 type WcSessionManagerProps = {
   uri: string
 }
 
 const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
-  const { sessions, sessionProposal, error, setError, open, approveSession, rejectSession } =
-    useContext(WalletConnectContext)
+  const { sessions, sessionProposal, error, setError, open } = useContext(WalletConnectContext)
   const chainSwitchRequest = wcChainSwitchStore.useStore()
 
   useEffect(() => {
@@ -24,42 +22,6 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
       chainSwitchRequest.onCancel()
     }
   }, [open, chainSwitchRequest])
-
-  // On session approve
-  const onApprove = useCallback(async () => {
-    if (!sessionProposal) return
-
-    const label = sessionProposal.params.proposer.metadata.url
-    trackEvent({ ...WALLETCONNECT_EVENTS.APPROVE_CLICK, label })
-
-    try {
-      await approveSession()
-    } catch (e) {
-      setError(e as Error)
-      return
-    }
-
-    trackEvent(
-      { ...WALLETCONNECT_EVENTS.CONNECTED, label },
-      {
-        [MixpanelEventParams.APP_URL]: sessionProposal.params.proposer.metadata.url,
-      },
-    )
-  }, [sessionProposal, approveSession, setError])
-
-  // On session reject
-  const onReject = useCallback(async () => {
-    if (!sessionProposal) return
-
-    const label = sessionProposal.params.proposer.metadata.url
-    trackEvent({ ...WALLETCONNECT_EVENTS.REJECT_CLICK, label })
-
-    try {
-      await rejectSession()
-    } catch (e) {
-      setError(e as Error)
-    }
-  }, [sessionProposal, rejectSession, setError])
 
   // Reset error
   const onErrorReset = useCallback(() => {
@@ -97,7 +59,7 @@ const WcSessionManager = ({ uri }: WcSessionManagerProps) => {
 
   // Session proposal
   if (sessionProposal) {
-    return <WcProposalForm proposal={sessionProposal} onApprove={onApprove} onReject={onReject} />
+    return <WcProposalStep proposal={sessionProposal} />
   }
 
   // Connection form (initial state)

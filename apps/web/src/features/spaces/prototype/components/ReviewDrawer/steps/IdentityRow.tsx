@@ -3,7 +3,8 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import Identicon from '@safe-global/views/components/common/Identicon'
-import { useCopyToClipboard } from '@/components/common/AuditLog'
+import useCopyToClipboard from '@/hooks/useCopyToClipboard'
+import { COPIED_TOOLTIP_MS } from '@/components/common/AuditLog'
 
 export const EXPLORERS: Record<string, string> = {
   '1': 'https://etherscan.io/address/',
@@ -42,7 +43,7 @@ export function IdentityRow({
   network?: { name: string; logo: string }
 }) {
   const full = address && !address.includes('…') ? address : undefined
-  const [copied, copy] = useCopyToClipboard(full ?? '')
+  const { copied, copy } = useCopyToClipboard(COPIED_TOOLTIP_MS)
   const secondary = detail ?? (address ? short(address) : undefined)
   const toneClass =
     tone === 'warning' ? 'text-warning-strong' : tone === 'success' ? 'text-success-strong' : 'text-muted-foreground'
@@ -93,7 +94,7 @@ export function IdentityRow({
             className="shrink-0 text-background hover:bg-background/10 hover:text-background"
             onClick={(event) => {
               event.stopPropagation()
-              copy()
+              if (full) copy(full)
             }}
           >
             {copied ? <Check strokeWidth={ICON_STROKE} /> : <Copy strokeWidth={ICON_STROKE} />}
@@ -117,7 +118,7 @@ export function IdentityRow({
 }
 
 export function AddressActions({ address, chainId = '1' }: { address: string; chainId?: string }) {
-  const [copied, copy] = useCopyToClipboard(address)
+  const { copied, copy } = useCopyToClipboard(COPIED_TOOLTIP_MS)
   return (
     <span className="flex items-center gap-0.5">
       <Button
@@ -125,7 +126,7 @@ export function AddressActions({ address, chainId = '1' }: { address: string; ch
         size="icon-xs"
         aria-label={copied ? 'Address copied' : 'Copy address'}
         className="text-muted-foreground"
-        onClick={copy}
+        onClick={() => copy(address)}
       >
         {copied ? <Check strokeWidth={ICON_STROKE} /> : <Copy strokeWidth={ICON_STROKE} />}
       </Button>

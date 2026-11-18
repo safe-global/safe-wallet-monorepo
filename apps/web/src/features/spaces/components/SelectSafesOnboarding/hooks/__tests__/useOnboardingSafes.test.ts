@@ -1,7 +1,7 @@
 import * as allOwnedSafes from '@/hooks/safes/useAllOwnedSafes'
 import * as useChains from '@/hooks/useChains'
 import * as useWallet from '@/hooks/wallets/useWallet'
-import * as useGetSpaceAddressBook from '../../../../hooks/useGetSpaceAddressBook'
+import * as useGetSpaceAddressBook from '../../../../public/hooks/useGetSpaceAddressBook'
 import { renderHook } from '@/tests/test-utils'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import type { UndeployedSafe } from '@safe-global/utils/features/counterfactual/store/types'
@@ -250,8 +250,14 @@ describe('useOnboardingSafes', () => {
       expect(result.current.ownedSimilarityGroups.get(owned.toLowerCase())).toBeDefined()
 
       const { similarWarnings } = result.current
-      expect(similarWarnings.get(trusted.toLowerCase())).toEqual({ trusted: [], owned: [owned.toLowerCase()] })
-      expect(similarWarnings.get(owned.toLowerCase())).toEqual({ trusted: [trusted.toLowerCase()], owned: [] })
+      expect(similarWarnings.get(trusted.toLowerCase())).toEqual({
+        trusted: [],
+        owned: [{ address: owned.toLowerCase(), chainIds: ['1'] }],
+      })
+      expect(similarWarnings.get(owned.toLowerCase())).toEqual({
+        trusted: [{ address: trusted.toLowerCase(), chainIds: ['1'] }],
+        owned: [],
+      })
     })
 
     it('leaves same-list clusters out of similarWarnings (no cross-list ⚠️)', () => {

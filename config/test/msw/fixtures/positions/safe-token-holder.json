@@ -4,7 +4,7 @@
     "protocol_metadata": {
       "name": "Safe Factory",
       "icon": {
-        "url": "https://protocol-icons.s3.amazonaws.com/icons/gnosis-safe-factory.jpg"
+        "url": "mock-assets/protocol-icons.s3.amazonaws.com/icons/gnosis-safe-factory.webp"
       },
       "url": "https://gnosis.io/"
     },
@@ -21,7 +21,7 @@
               "decimals": 18,
               "symbol": "SAFE",
               "name": "Safe Token",
-              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp"
             },
             "balance": "2034160974499438657536",
             "fiatBalance": "280.5895071911394",
@@ -36,7 +36,7 @@
               "decimals": 18,
               "symbol": "SAFE",
               "name": "Safe Token",
-              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp"
             },
             "balance": "1237784404310331228160",
             "fiatBalance": "170.73836356524285",
@@ -51,7 +51,7 @@
               "decimals": 18,
               "symbol": "SAFE",
               "name": "Safe Token",
-              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp"
             },
             "balance": "514950925272454042464",
             "fiatBalance": "71.03165784869843",
@@ -66,7 +66,7 @@
               "decimals": 18,
               "symbol": "SAFE",
               "name": "Safe Token",
-              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp"
             },
             "balance": "416000000000000000000",
             "fiatBalance": "57.382496495999995",
@@ -81,7 +81,7 @@
               "decimals": 18,
               "symbol": "SAFE",
               "name": "Safe Token",
-              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp"
             },
             "balance": "313030769561242271840",
             "fiatBalance": "43.17905537857733",
@@ -96,7 +96,7 @@
               "decimals": 18,
               "symbol": "SAFE",
               "name": "Safe Token",
-              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp"
             },
             "balance": "20000000000000000000",
             "fiatBalance": "2.7587738699999997",
@@ -116,7 +116,7 @@
               "decimals": 18,
               "symbol": "SAFE",
               "name": "Safe Token",
-              "logoUri": "https://cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x5afe3855358e112b5647b952709e6165e1c1eeee.webp"
             },
             "balance": "190000000000000000000",
             "fiatBalance": "26.208351764999996",
@@ -132,7 +132,7 @@
     "protocol_metadata": {
       "name": "Compound V2",
       "icon": {
-        "url": "https://protocol-icons.s3.amazonaws.com/icons/compound-v2.jpg"
+        "url": "mock-assets/protocol-icons.s3.amazonaws.com/icons/compound-v2.webp"
       },
       "url": "https://app.compound.finance"
     },
@@ -149,7 +149,7 @@
               "decimals": 18,
               "symbol": "DAI",
               "name": "Dai Stablecoin",
-              "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.webp"
             },
             "balance": "8229100571563343000",
             "fiatBalance": "8.22359117227248",
@@ -164,7 +164,7 @@
               "decimals": 18,
               "symbol": "ETH",
               "name": "Ether",
-              "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png"
+              "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.webp"
             },
             "balance": "2009365657245872",
             "fiatBalance": "5.65767041282434",
@@ -179,7 +179,7 @@
               "decimals": 6,
               "symbol": "USDC",
               "name": "USDC",
-              "logoUri": "https://cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.webp"
             },
             "balance": "10781",
             "fiatBalance": "0.0107779471992131",
@@ -195,7 +195,7 @@
     "protocol_metadata": {
       "name": "StakeWise",
       "icon": {
-        "url": "https://protocol-icons.s3.amazonaws.com/icons/stakewise.jpg"
+        "url": "mock-assets/protocol-icons.s3.amazonaws.com/icons/stakewise.webp"
       },
       "url": "https://app.stakewise.io/"
     },
@@ -212,7 +212,7 @@
               "decimals": 18,
               "symbol": "ETH",
               "name": "Ether",
-              "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png"
+              "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.webp"
             },
             "balance": "2571851529594016",
             "fiatBalance": "7.241433759301392",
@@ -227,7 +227,7 @@
               "decimals": 18,
               "symbol": "osETH",
               "name": "Staked ETH",
-              "logoUri": "https://cdn.zerion.io/98831c9d-1f69-4602-9d5e-40847f7cd83e.png"
+              "logoUri": "mock-assets/cdn.zerion.io/98831c9d-1f69-4602-9d5e-40847f7cd83e.webp"
             },
             "balance": "1001592079261204",
             "fiatBalance": "-3.0012924247936423",
@@ -243,7 +243,7 @@
     "protocol_metadata": {
       "name": "Yearn V2",
       "icon": {
-        "url": "https://protocol-icons.s3.amazonaws.com/icons/yearn-v2.jpg"
+        "url": "mock-assets/protocol-icons.s3.amazonaws.com/icons/yearn-v2.webp"
       },
       "url": "https://yearn.fi/"
     },
@@ -260,7 +260,7 @@
               "decimals": 6,
               "symbol": "USDT",
               "name": "Tether USD",
-              "logoUri": "https://cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.webp"
             },
             "balance": "5506754",
             "fiatBalance": "5.49810558777546",
@@ -276,7 +276,7 @@
     "protocol_metadata": {
       "name": "Maple",
       "icon": {
-        "url": "https://protocol-icons.s3.amazonaws.com/icons/maple.jpg"
+        "url": "mock-assets/protocol-icons.s3.amazonaws.com/icons/maple.webp"
       },
       "url": "https://app.maple.finance"
     },
@@ -293,7 +293,7 @@
               "decimals": 6,
               "symbol": "USDT",
               "name": "Tether USD",
-              "logoUri": "https://cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.webp"
             },
             "balance": "4901318",
             "fiatBalance": "4.89362043106782",
@@ -309,7 +309,7 @@
     "protocol_metadata": {
       "name": "AAVE V3",
       "icon": {
-        "url": "https://protocol-icons.s3.amazonaws.com/icons/aave-pool-v3.jpg"
+        "url": "mock-assets/protocol-icons.s3.amazonaws.com/icons/aave-pool-v3.webp"
       },
       "url": "https://app.aave.com"
     },
@@ -326,7 +326,7 @@
               "decimals": 18,
               "symbol": "UNI",
               "name": "Uniswap",
-              "logoUri": "https://cdn.zerion.io/0x1f9840a85d5af5bf1d1762f925bdaddc4201f984.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x1f9840a85d5af5bf1d1762f925bdaddc4201f984.webp"
             },
             "balance": "1000842063112026500",
             "fiatBalance": "4.3842666396729255",
@@ -341,7 +341,7 @@
               "decimals": 6,
               "symbol": "USDT",
               "name": "Tether USD",
-              "logoUri": "https://cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.webp"
             },
             "balance": "3555724",
             "fiatBalance": "3.55013969990076",
@@ -357,7 +357,7 @@
     "protocol_metadata": {
       "name": "Swell",
       "icon": {
-        "url": "https://protocol-icons.s3.amazonaws.com/icons/swell.jpg"
+        "url": "mock-assets/protocol-icons.s3.amazonaws.com/icons/swell.webp"
       },
       "url": "https://app.swellnetwork.io/"
     },
@@ -374,7 +374,7 @@
               "decimals": 18,
               "symbol": "ETH",
               "name": "Ether",
-              "logoUri": "https://safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.png"
+              "logoUri": "mock-assets/safe-transaction-assets.staging.5afe.dev/chains/1/currency_logo.webp"
             },
             "balance": "1542537279073326",
             "fiatBalance": "4.34324508982281",
@@ -410,7 +410,7 @@
     "protocol_metadata": {
       "name": "Gearbox",
       "icon": {
-        "url": "https://protocol-icons.s3.amazonaws.com/icons/gearbox.jpg"
+        "url": "mock-assets/protocol-icons.s3.amazonaws.com/icons/gearbox.webp"
       },
       "url": "https://app.gearbox.finance/"
     },
@@ -427,7 +427,7 @@
               "decimals": 6,
               "symbol": "USDC",
               "name": "USDC",
-              "logoUri": "https://cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.webp"
             },
             "balance": "4153755",
             "fiatBalance": "4.152578802380801",
@@ -443,7 +443,7 @@
     "protocol_metadata": {
       "name": "Kiln",
       "icon": {
-        "url": "https://protocol-icons.s3.amazonaws.com/icons/kiln.jpg"
+        "url": "mock-assets/protocol-icons.s3.amazonaws.com/icons/kiln.webp"
       },
       "url": "https://www.kiln.fi/"
     },
@@ -460,7 +460,7 @@
               "decimals": 6,
               "symbol": "USDT",
               "name": "Tether USD",
-              "logoUri": "https://cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0xdac17f958d2ee523a2206206994597c13d831ec7.webp"
             },
             "balance": "2533913",
             "fiatBalance": "2.5299334642943703",
@@ -480,7 +480,7 @@
               "decimals": 8,
               "symbol": "WBTC",
               "name": "Wrapped BTC",
-              "logoUri": "https://cdn.zerion.io/0x2260fac5e5542a773aa44fbcfedf7c193bc2c599.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x2260fac5e5542a773aa44fbcfedf7c193bc2c599.webp"
             },
             "balance": "1884",
             "fiatBalance": "1.58635372885542",
@@ -496,7 +496,7 @@
     "protocol_metadata": {
       "name": "Balancer",
       "icon": {
-        "url": "https://protocol-icons.s3.amazonaws.com/icons/balancer.jpg"
+        "url": "mock-assets/protocol-icons.s3.amazonaws.com/icons/balancer.webp"
       },
       "url": "https://balancer.fi/"
     },
@@ -513,7 +513,7 @@
               "decimals": 8,
               "symbol": "WBTC",
               "name": "Wrapped BTC",
-              "logoUri": "https://cdn.zerion.io/0x2260fac5e5542a773aa44fbcfedf7c193bc2c599.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x2260fac5e5542a773aa44fbcfedf7c193bc2c599.webp"
             },
             "balance": "1919",
             "fiatBalance": "1.615824206833095",
@@ -528,7 +528,7 @@
               "decimals": 18,
               "symbol": "WETH",
               "name": "Wrapped Ether",
-              "logoUri": "https://cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.webp"
             },
             "balance": "569331040818327",
             "fiatBalance": "1.6026102719971291",
@@ -548,7 +548,7 @@
               "decimals": 18,
               "symbol": "MKR",
               "name": "Maker",
-              "logoUri": "https://cdn.zerion.io/0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2.webp"
             },
             "balance": "170808987057640",
             "fiatBalance": "0.26169267703800564",
@@ -563,7 +563,7 @@
               "decimals": 18,
               "symbol": "WETH",
               "name": "Wrapped Ether",
-              "logoUri": "https://cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.webp"
             },
             "balance": "51992828725847",
             "fiatBalance": "0.14635464327830056",
@@ -583,7 +583,7 @@
               "decimals": 18,
               "symbol": "WETH",
               "name": "Wrapped Ether",
-              "logoUri": "https://cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.webp"
             },
             "balance": "56574150236362",
             "fiatBalance": "0.1592506078150657",
@@ -598,7 +598,7 @@
               "decimals": 18,
               "symbol": "DAI",
               "name": "Dai Stablecoin",
-              "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.webp"
             },
             "balance": "41847782593966430",
             "fiatBalance": "0.041819765419824205",
@@ -618,7 +618,7 @@
               "decimals": 18,
               "symbol": "mUSD",
               "name": "mStable USD",
-              "logoUri": "https://cdn.zerion.io/0xe2f2a5c287993345a840db3b0845fbc70f5935a5.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0xe2f2a5c287993345a840db3b0845fbc70f5935a5.webp"
             },
             "balance": "25373995230740503",
             "fiatBalance": "0.02533700288907753",
@@ -633,7 +633,7 @@
               "decimals": 6,
               "symbol": "USDC",
               "name": "USDC",
-              "logoUri": "https://cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.webp"
             },
             "balance": "24973",
             "fiatBalance": "0.024965928522952298",
@@ -649,7 +649,7 @@
     "protocol_metadata": {
       "name": "Balancer V2",
       "icon": {
-        "url": "https://protocol-icons.s3.amazonaws.com/icons/balancer-v2.jpg"
+        "url": "mock-assets/protocol-icons.s3.amazonaws.com/icons/balancer-v2.webp"
       },
       "url": "https://balancer.fi/"
     },
@@ -666,7 +666,7 @@
               "decimals": 18,
               "symbol": "STG",
               "name": "StargateToken",
-              "logoUri": "https://cdn.zerion.io/0xaf5191b0de278c7286d6c7cc6ab6bb8a73ba2cd6.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0xaf5191b0de278c7286d6c7cc6ab6bb8a73ba2cd6.webp"
             },
             "balance": "2447537381801323000",
             "fiatBalance": "0.44208386355476964",
@@ -681,7 +681,7 @@
               "decimals": 6,
               "symbol": "USDC",
               "name": "USDC",
-              "logoUri": "https://cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48.webp"
             },
             "balance": "412756",
             "fiatBalance": "0.4126391219885356",
@@ -697,7 +697,7 @@
     "protocol_metadata": {
       "name": "YEarn",
       "icon": {
-        "url": "https://protocol-icons.s3.amazonaws.com/icons/yearn.jpg"
+        "url": "mock-assets/protocol-icons.s3.amazonaws.com/icons/yearn.webp"
       },
       "url": "https://yearn.fi/"
     },
@@ -714,7 +714,7 @@
               "decimals": 18,
               "symbol": "DAI",
               "name": "Dai Stablecoin",
-              "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.webp"
             },
             "balance": "157744114741288130",
             "fiatBalance": "0.1576385047409806",
@@ -730,7 +730,7 @@
     "protocol_metadata": {
       "name": "Aave V2",
       "icon": {
-        "url": "https://protocol-icons.s3.amazonaws.com/icons/aave-v2.jpg"
+        "url": "mock-assets/protocol-icons.s3.amazonaws.com/icons/aave-v2.webp"
       },
       "url": "https://app.aave.com/?marketName=proto_mainnet"
     },
@@ -747,7 +747,7 @@
               "decimals": 18,
               "symbol": "AAVE",
               "name": "Aave",
-              "logoUri": "https://cdn.zerion.io/0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9.webp"
             },
             "balance": "1000000000000000",
             "fiatBalance": "0.1466370824529",
@@ -762,7 +762,7 @@
               "decimals": 18,
               "symbol": "AAVE",
               "name": "Aave",
-              "logoUri": "https://cdn.zerion.io/0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9.webp"
             },
             "balance": "300204032325536",
             "fiatBalance": "0.044021043440812674",
@@ -782,7 +782,7 @@
               "decimals": 18,
               "symbol": "DAI",
               "name": "Dai Stablecoin",
-              "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.webp"
             },
             "balance": "115368742729242200",
             "fiatBalance": "0.11529150312524748",
@@ -798,7 +798,7 @@
     "protocol_metadata": {
       "name": "Aave V1",
       "icon": {
-        "url": "https://protocol-icons.s3.amazonaws.com/icons/aave-v1.jpg"
+        "url": "mock-assets/protocol-icons.s3.amazonaws.com/icons/aave-v1.webp"
       },
       "url": "https://app.aave.com"
     },
@@ -815,7 +815,7 @@
               "decimals": 18,
               "symbol": "DAI",
               "name": "Dai Stablecoin",
-              "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.webp"
             },
             "balance": "122854113301521030",
             "fiatBalance": "0.12277186222695742",
@@ -830,7 +830,7 @@
               "decimals": 18,
               "symbol": "DAI",
               "name": "Dai Stablecoin",
-              "logoUri": "https://cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.png"
+              "logoUri": "mock-assets/cdn.zerion.io/0x6b175474e89094c44da98b954eedeac495271d0f.webp"
             },
             "balance": "12626398442357157",
             "fiatBalance": "-0.012617945043347201",

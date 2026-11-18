@@ -2,14 +2,14 @@ import { getModuleInstance, KnownContracts } from '@gnosis.pm/zodiac'
 import type { SafeTransaction } from '@safe-global/types-kit'
 
 import useWallet from '../../../hooks/wallets/useWallet'
-import { useWeb3ReadOnly } from '../../../hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import useSafeInfo from '../../../hooks/useSafeInfo'
 import { getPatchedSignerProvider } from '../../../hooks/useIsValidExecution'
 import { useRecoveryTxState } from './useRecoveryTxState'
-import { useIsRecoverer } from './useIsRecoverer'
+import { useIsRecoverer } from '../public/hooks/useIsRecoverer'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import type { RecoveryQueueItem } from '../services/recovery-state'
+import type { RecoveryQueueItem } from '../public/types'
 
 export function useIsValidRecoveryExecTransactionFromModule(
   delayModifierAddress?: string,
