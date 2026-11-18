@@ -5,23 +5,33 @@ import FilterChips, {
 import FilterMenu, {
   type FilterMenuProps,
 } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/FilterMenu'
-import SafeFilter from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/SafeFilter'
-import StatusFilter from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/StatusFilter'
+import QueueGroupByMenu, {
+  type QueueGroupByMenuProps,
+} from '@safe-global/views/features/spaces/components/SpaceQueue/QueueGroupByMenu'
 
 export type QueueToolbarProps = FilterMenuProps & {
   chips: FilterChipsProps
-  /** Rendered before the filters */
+  groupBy: QueueGroupByMenuProps
+  /** Rendered before the Group by menu */
   search?: ReactNode
   /** Rendered after the filters */
   action?: ReactNode
 }
 
-const QueueToolbar = ({ status, safe, network, signer, chips, search, action }: QueueToolbarProps): ReactElement => (
+const QueueToolbar = ({
+  status,
+  safe,
+  network,
+  signer,
+  chips,
+  groupBy,
+  search,
+  action,
+}: QueueToolbarProps): ReactElement => (
   <div className="flex flex-col gap-3">
     <div className="flex flex-wrap items-center gap-2">
       {search}
-      <StatusFilter {...status} />
-      <SafeFilter {...safe} />
+      <QueueGroupByMenu {...groupBy} />
       <FilterMenu status={status} safe={safe} network={network} signer={signer} />
       {action}
     </div>
