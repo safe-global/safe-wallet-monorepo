@@ -72,8 +72,14 @@ export const Drawer = ({
   const toggleFullScreen = useCallback(() => setExpanded((value) => !value), [])
 
   const context = useMemo(
-    () => ({ onClose, registerHeader, fullScreen, toggleFullScreen: canExpand ? toggleFullScreen : undefined }),
-    [onClose, registerHeader, fullScreen, canExpand, toggleFullScreen],
+    () => ({
+      onClose,
+      registerHeader,
+      fullScreen,
+      toggleFullScreen: canExpand ? toggleFullScreen : undefined,
+      titleNamesDialog: !ariaLabel,
+    }),
+    [onClose, registerHeader, fullScreen, canExpand, toggleFullScreen, ariaLabel],
   )
 
   return (

@@ -158,7 +158,11 @@ export const DrawerHeader = ({
       {media && <div className="flex shrink-0 items-center">{media}</div>}
 
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <Typography as={drawer ? DialogHeading : 'h2'} variant="paragraph-bold" className="min-w-0 leading-tight">
+        <Typography
+          as={drawer?.titleNamesDialog ? DialogHeading : 'h2'}
+          variant="paragraph-bold"
+          className="min-w-0 leading-tight"
+        >
           <FittedTitle>{title}</FittedTitle>
         </Typography>
         {secondLine && (

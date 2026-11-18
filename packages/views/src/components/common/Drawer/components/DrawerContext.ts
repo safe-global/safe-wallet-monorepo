@@ -8,6 +8,8 @@ export type DrawerContextValue = {
   fullScreen: boolean
   /** Present only when the Drawer can be expanded, which it can't on phones. */
   toggleFullScreen?: () => void
+  /** False when the page names the drawer with `ariaLabel`, so the header title doesn't override it. */
+  titleNamesDialog: boolean
 }
 
 export const DrawerContext = createContext<DrawerContextValue | null>(null)
