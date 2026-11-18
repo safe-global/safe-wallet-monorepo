@@ -1,0 +1,41 @@
+---
+title: Theming
+description: The CSS variables behind every Safe UI colour, size and surface, and how to override them.
+---
+
+Every colour and size in Safe UI is a CSS variable. Components use Tailwind utilities such as `bg-primary`, and the `@theme inline` block maps each utility to its variable (`--color-primary: var(--primary)`), so changing a variable restyles every component that uses it.
+
+## Where the values come from
+
+The token values are generated from `@safe-global/theme`, the palette package that the mobile app also uses. Never edit them by hand: change `packages/theme`, then run `yarn workspace @safe-global/theme generate:ui-tokens`. A test fails when the generated files are stale.
+
+| Entry                        | What it holds                                                                                               |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `@safe-global/ui/styles.css` | The default entry: the Tailwind theme mapping, the tokens on `:root` / `.dark` and the shadcn base styles   |
+| `@safe-global/ui/scoped.css` | For apps that mix Safe UI with another style system: tokens and preflight apply only inside `.shadcn-scope` |
+| `@safe-global/ui/tokens.css` | The variables only, without Tailwind                                                                        |
+
+The scoped variant is what the Safe\{Wallet\} app uses next to MUI. It needs `ShadcnProvider` so portalled content stays inside the scope; see [`ShadcnProvider`](/docs/utilities/provider/). New apps should use `styles.css`.
+
+## Overriding a variable
+
+Declare the variable again after the Safe UI import. Override both modes when the value differs in dark mode:
+
+```css
+@import 'tailwindcss';
+@import '@safe-global/ui/styles.css';
+
+:root {
+  --radius: 0.75rem;
+}
+
+.dark {
+  --ring: var(--color-secondary-main);
+}
+```
+
+With the registry, `npx shadcn add @safe/theme` writes the same variables into your CSS file, where you can edit them directly.
+
+## All variables
+
+<TokenTable />

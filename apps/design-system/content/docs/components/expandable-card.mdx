@@ -1,0 +1,35 @@
+---
+title: Expandable Card
+description: 'A muted summary card that toggles a list of details below it.'
+component: expandable-card
+---
+
+<ComponentPreview component="expandable-card" />
+
+## Installation
+
+<ComponentInstall component="expandable-card" />
+
+## Usage
+
+<ComponentUsage component="expandable-card" />
+
+Pass a `summary` (for example stacked avatars and a count) and the details as `children`. It is uncontrolled by default; use `defaultOpen` to start open, or `open` with `onOpenChange` to control it. The details render below the card, not inside it, so each detail can be its own card.
+
+## Examples
+
+<ComponentExamples component="expandable-card" />
+
+## Props
+
+<ComponentProps component="expandable-card" />
+
+## Accessibility
+
+<BaseUiReference component="expandable-card" />
+
+The whole card is the collapsible trigger: a button with `aria-expanded` that Enter and Space toggle. `detailsLabel` names it for screen readers ("Show recipient details", "Hide recipient details"), so make it describe the details, not the action.
+
+## Do / Don't
+
+<ComponentRules component="expandable-card" />
