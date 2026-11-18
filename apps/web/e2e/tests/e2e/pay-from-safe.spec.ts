@@ -6,6 +6,7 @@ import { refundPaidIn } from '../../src/chain/refund'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { HomePage } from '../../src/pages/home.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
+import { TxHistoryPage } from '../../src/pages/tx-history.page'
 import { TxQueuePage } from '../../src/pages/tx-queue.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
 import { seedProposer } from '../../src/seed/proposers'
@@ -133,5 +134,27 @@ test.describe('Pay from Safe', { tag: '@e2e' }, () => {
     expect(refund).toBeGreaterThan(0n)
     expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
     expect(await balanceOf(journey.env, safe.address)).toBe(safeBalance - parseEther(AMOUNT) - refund)
+  })
+
+  test('should show the fees as paid from the Safe account in the history of a transfer that the Safe paid for', async ({
+    safePage,
+    safeApiClient,
+    journey,
+  }) => {
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+
+    const review = await createTransfer(safePage, safe, Wallet.createRandom().address)
+    await review.payFeesFromSafe()
+    await review.sign()
+    await review.executeButton.click()
+    await review.waitForExecution()
+    await expect
+      .poll(() => safeApiClient.findExecutedTransaction(safe.address, 0))
+      .toMatchObject(SIGNED_WITH_QUOTED_FEES)
+    const history = new TxHistoryPage(safePage)
+    await history.goto(safe.prefixedAddress)
+    await history.expand(history.transactionsLabelled('Sent'))
+
+    await expect(history.feesPayer).toHaveText('Paid from Safe account')
   })
 })

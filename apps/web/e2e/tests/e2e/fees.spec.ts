@@ -2,7 +2,7 @@ import { Wallet, parseEther, parseUnits } from 'ethers'
 import type { Page } from '@playwright/test'
 import { offerGasPaymentOptions } from '../../src/api/chain-config'
 import { balanceOf, emptyBalance } from '../../src/chain/balances'
-import { maxFeePerGasOf } from '../../src/chain/transactions'
+import { gasFeesOf } from '../../src/chain/transactions'
 import { test, expect } from '../../src/fixtures/journey.fixture'
 import { HomePage } from '../../src/pages/home.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
@@ -11,6 +11,7 @@ import { TxReviewPage } from '../../src/pages/tx-review.page'
 import { seedExecutedTransfer, seedSafe, type SeededSafe } from '../../src/seed/safe'
 
 const AMOUNT = '0.001'
+const MAX_PRIORITY_FEE_GWEI = '2'
 const MAX_FEE_GWEI = '3'
 
 async function reviewTransfer(page: Page, safe: SeededSafe, recipient: string): Promise<TxReviewPage> {
@@ -23,7 +24,7 @@ async function reviewTransfer(page: Page, safe: SeededSafe, recipient: string): 
 }
 
 test.describe('Fees of a transaction', { tag: '@e2e' }, () => {
-  test('should send the execution with the max fee that the owner sets in the fee card', async ({
+  test('should send the execution with the max fee and the max priority fee that the owner sets in the fee card', async ({
     safePage,
     safeApiClient,
     journey,
@@ -33,7 +34,7 @@ test.describe('Fees of a transaction', { tag: '@e2e' }, () => {
     const review = await reviewTransfer(safePage, safe, Wallet.createRandom().address)
     await review.sign()
     await review.payFeesFromSignerWallet()
-    await review.setMaxFee(MAX_FEE_GWEI)
+    await review.setGasFees({ maxPriorityFee: MAX_PRIORITY_FEE_GWEI, maxFee: MAX_FEE_GWEI })
     await review.executeButton.click()
     await review.waitForExecution()
 
@@ -41,7 +42,10 @@ test.describe('Fees of a transaction', { tag: '@e2e' }, () => {
       .poll(() => safeApiClient.findExecutedTransaction(safe.address, 0))
       .toMatchObject({ txStatus: 'SUCCESS' })
     const execution = await safeApiClient.getExecutionTxHash(safe.address, 0)
-    expect(await maxFeePerGasOf(journey.env, execution)).toBe(parseUnits(MAX_FEE_GWEI, 'gwei'))
+    expect(await gasFeesOf(journey.env, execution)).toEqual({
+      maxPriorityFeePerGas: parseUnits(MAX_PRIORITY_FEE_GWEI, 'gwei'),
+      maxFeePerGas: parseUnits(MAX_FEE_GWEI, 'gwei'),
+    })
   })
 
   test('should show the fees as paid from the signer wallet in the history of a transfer that an owner executed', async ({

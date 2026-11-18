@@ -25,6 +25,7 @@ export class TxReviewPage {
   readonly gasFeeRow: Locator
   /** Opens the gas settings in the fee card: editable while the connected wallet pays, read-only otherwise */
   readonly gasSettingsToggle: Locator
+  readonly maxPriorityFeeInput: Locator
   readonly maxFeeInput: Locator
   readonly saveGasSettingsButton: Locator
   /** "<n> free transactions left today" in the fee card */
@@ -75,6 +76,7 @@ export class TxReviewPage {
     this.lockedFeePayer = page.getByTestId('fee-payer-locked')
     this.gasFeeRow = page.getByTestId('gas-fee-row')
     this.gasSettingsToggle = page.getByTestId('gas-fee-details-toggle')
+    this.maxPriorityFeeInput = page.getByTestId('gas-param-maxPriorityFeePerGas')
     this.maxFeeInput = page.getByTestId('gas-param-maxFeePerGas')
     this.saveGasSettingsButton = page.getByTestId('gas-params-save')
     this.remainingRelays = page.getByText(/free transactions? left today/)
@@ -185,13 +187,14 @@ export class TxReviewPage {
   }
 
   /**
-   * Set the max fee per gas of the execution, in Gwei, in the gas settings of the fee card. The settings open with
-   * the estimate they have at that moment, so this waits until the card shows the estimated fee.
+   * Set the max priority fee and the max fee per gas of the execution, in Gwei, in the gas settings of the fee card.
+   * The settings open with the estimate they have at that moment, so this waits until the card shows the estimated fee.
    */
-  async setMaxFee(gwei: string): Promise<void> {
+  async setGasFees({ maxPriorityFee, maxFee }: { maxPriorityFee: string; maxFee: string }): Promise<void> {
     await this.gasFeeRow.filter({ hasText: /\d/ }).waitFor()
     await this.gasSettingsToggle.click()
-    await this.maxFeeInput.fill(gwei)
+    await this.maxPriorityFeeInput.fill(maxPriorityFee)
+    await this.maxFeeInput.fill(maxFee)
     await this.saveGasSettingsButton.click()
   }
 
