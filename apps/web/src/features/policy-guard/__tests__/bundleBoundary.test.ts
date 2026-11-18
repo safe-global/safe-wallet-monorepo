@@ -6,10 +6,18 @@ jest.mock('@/utils/transaction-errors', () => {
 })
 
 describe('policy-guard bundle boundary', () => {
-  it('keeps the RPC error helpers and their contract ABIs out of the always-loaded barrel', () => {
+  it.each([
+    'services/allowlistAvailability',
+    'constants',
+    'services/policyEngineDeployments',
+    'types',
+    'hooks/useAllowlistAvailability',
+    'hooks/useIsAllowlistActiveInSpace',
+    'hooks/usePolicyGuard',
+  ])('keeps the RPC error helpers and their contract ABIs out of public/%s', (file) => {
     mockHeavyModulesLoaded = []
     jest.isolateModules(() => {
-      require('../index')
+      require(`../public/${file}`)
     })
     expect(mockHeavyModulesLoaded).toEqual([])
   })

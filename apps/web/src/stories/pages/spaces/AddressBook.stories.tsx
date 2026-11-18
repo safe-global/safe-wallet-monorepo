@@ -3,7 +3,7 @@ import { mswLoader } from 'msw-storybook-addon'
 import { http, HttpResponse } from 'msw'
 import { within } from 'storybook/test'
 import type { SpaceAddressBookDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
 import SpaceAddressBook from '@/pages/spaces/address-book'
 
@@ -41,6 +41,7 @@ const contact = (name: string, address: string, chainIds: string[]) => ({
   name,
   address,
   chainIds,
+  tagIds: [],
   createdBy: 'alice@example.com',
   createdByUserId: 1,
   lastUpdatedBy: 'alice@example.com',
@@ -56,6 +57,7 @@ const addressBook: SpaceAddressBookDto = {
     contact('Payroll', '0xB63F3D0a4a7eFd1d0c08A9ef17C5e5d3DbBDE867', ['1']),
     contact('Exchange deposit', '0x5eD8Cee6b63b1c6AFce3AD7c92f4fD7E1B8fAd9F', ['1']),
   ],
+  tags: [],
 }
 
 const spaceAddressBookHandler = http.get(/\/v1\/spaces\/[^/]+\/address-book$/, () => HttpResponse.json(addressBook))

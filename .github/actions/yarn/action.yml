@@ -28,7 +28,7 @@ runs:
     - uses: actions/setup-node@v6.4.0
       id: node
       with:
-        node-version: '24.22.1'
+        node-version: '24.22.3'
 
     - name: Export Turbo remote cache env
       if: inputs.turbo-token != ''

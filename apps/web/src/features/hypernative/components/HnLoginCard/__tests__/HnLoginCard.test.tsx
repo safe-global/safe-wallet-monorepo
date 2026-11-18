@@ -1,7 +1,8 @@
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { HnLoginCard } from '../HnLoginCard'
-import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 
@@ -12,7 +13,7 @@ jest.mock('@/hooks/useIsSafeOwner', () => ({
   default: () => true,
 }))
 
-jest.mock('../../../hooks/useHypernativeOAuth', () => ({
+jest.mock('../../../public/hooks/useHypernativeOAuth', () => ({
   useHypernativeOAuth: () => ({
     isAuthenticated: false,
     isTokenExpired: false,
@@ -23,7 +24,10 @@ jest.mock('../../../hooks/useHypernativeOAuth', () => ({
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
-  HYPERNATIVE_EVENTS: jest.requireActual('@/services/analytics').HYPERNATIVE_EVENTS,
+}))
+jest.mock('@/services/analytics/events/hypernative', () => ({
+  ...jest.requireActual('@/services/analytics/events/hypernative'),
+  HYPERNATIVE_EVENTS: jest.requireActual('@/services/analytics/events/hypernative').HYPERNATIVE_EVENTS,
 }))
 
 describe('HnLoginCard', () => {

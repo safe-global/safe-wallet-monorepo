@@ -16,7 +16,7 @@ import type {
   SpacesGetV1ApiResponse,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { UsersGetWithWalletsV1ApiResponse } from '@safe-global/store/gateway/AUTO_GENERATED/users'
-import { ELEVATION_REQUIRED_ERROR } from '@/features/oidc-auth/utils/elevation'
+import { ELEVATION_REQUIRED_ERROR } from '@/features/oidc-auth/public/utils/elevation'
 import { test, expect } from '../../src/fixtures/test.fixture'
 import { clickVerify, expectActionCompleted, stepUpDialog } from '../../src/fixtures/step-up'
 import { LS_NAMESPACE } from '../../src/data/constants'
@@ -102,7 +102,7 @@ const ENTITLEMENTS = {
   entitlements: [],
 } satisfies EntitlementsGetEntitlementsV1ApiResponse
 
-const ADDRESS_BOOK = { spaceUuid: SPACE_ID, data: [] } satisfies AddressBooksGetAddressBookItemsV1ApiResponse
+const ADDRESS_BOOK = { spaceUuid: SPACE_ID, data: [], tags: [] } satisfies AddressBooksGetAddressBookItemsV1ApiResponse
 
 const PAYMENT_LINKS = [] satisfies BillingGetSpacePaymentLinksV1ApiResponse
 

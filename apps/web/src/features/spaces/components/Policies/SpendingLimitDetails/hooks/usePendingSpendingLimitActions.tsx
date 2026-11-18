@@ -4,7 +4,7 @@ import { AppRoutes } from '@/config/routes'
 import { useChain } from '@/hooks/useChains'
 import useOrigin from '@/hooks/useOrigin'
 import { useUrlSpaceId, withSpaceIdInUrl } from '@/hooks/useUrlSpaceId'
-import type { PendingTxOutcome } from '../../SpendingLimitDrawer'
+import type { PendingTxOutcome } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import type { Viewer } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
 import type {
   PendingSpendingLimitPolicy,

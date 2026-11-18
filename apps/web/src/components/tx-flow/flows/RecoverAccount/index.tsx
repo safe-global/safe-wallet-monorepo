@@ -5,7 +5,7 @@ import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import useTxStepper from '../../useTxStepper'
 import { RecoverAccountFlowReview } from './RecoverAccountFlowReview'
 import { RecoverAccountFlowSetup } from './RecoverAccountFlowSetup'
-import { TxFlowType } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics/types'
 
 export enum RecoverAccountFlowFields {
   owners = 'owners',

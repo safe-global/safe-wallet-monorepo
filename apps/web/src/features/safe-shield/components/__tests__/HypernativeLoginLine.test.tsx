@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
-import { HYPERNATIVE_EVENTS } from '@/services/analytics'
+import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 import { HypernativeLoginLine } from '../HypernativeLoginLine'

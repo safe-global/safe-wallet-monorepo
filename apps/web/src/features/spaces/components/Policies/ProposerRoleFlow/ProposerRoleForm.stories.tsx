@@ -4,7 +4,7 @@ import { http, HttpResponse } from 'msw'
 import { fn } from 'storybook/test'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { buildSafeAccountId, groupSafeAccounts } from '../SafeAccountSelector/utils'
 import {
@@ -12,7 +12,7 @@ import {
   type SafeAccountEntry,
   type SafeAccountOption,
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
-import type { ChainInfo } from '@/features/spaces/types'
+import type { ChainInfo } from '../../../public/types'
 import ProposerRoleForm from './ProposerRoleForm'
 import { mockNow } from '@/stories/mocks/now'
 
@@ -78,6 +78,7 @@ const spaceContact = (address: string, name: string): SpaceAddressBookItemDto =>
   name,
   address,
   chainIds: [ETHEREUM],
+  tagIds: [],
   createdBy: '',
   createdByUserId: 0,
   lastUpdatedBy: '',

@@ -7,7 +7,7 @@ import { act, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { AppRoutes } from '@/config/routes'
-import { WalletContext } from '@/components/common/WalletProvider'
+import { WalletContext } from '@/components/common/WalletProvider/WalletContext'
 import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 import CreateSpaceOnboarding from './index'
@@ -64,7 +64,14 @@ const App = ({ initialPath }: { initialPath: string }): ReactElement => {
   }, [location])
 
   const wallet = useMemo(
-    () => ({ connectedWallet: null, signer: null, setSignerAddress: jest.fn(), isReady: isWalletReady }),
+    () => ({
+      connectedWallet: null,
+      signer: null,
+      setSignerAddress: jest.fn(),
+      setParentSafeNonce: jest.fn(),
+      clearParentSafeNonce: jest.fn(),
+      isReady: isWalletReady,
+    }),
     [isWalletReady],
   )
 

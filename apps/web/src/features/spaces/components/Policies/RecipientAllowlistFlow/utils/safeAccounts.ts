@@ -1,6 +1,6 @@
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import { isSafeEligibleForAllowlist } from '@/features/policy-guard/services'
-import type { AllowlistIneligibilityReason } from '@/features/policy-guard/types'
+import { isSafeEligibleForAllowlist } from '@/features/policy-guard/public/services/allowlistAvailability'
+import type { AllowlistIneligibilityReason } from '@/features/policy-guard/public/types'
 import { flattenSafeAccounts, groupSafeAccounts } from '../../SafeAccountSelector/utils'
 import type {
   SafeAccountEntry,

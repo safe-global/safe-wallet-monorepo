@@ -15,9 +15,9 @@ import {
   useSpacePoliciesGetPendingPoliciesV1Query,
 } from '@/store/api/gateway/spacePolicies'
 import useChains from '@/hooks/useChains'
-import { isAllowlistEnabled } from '@/features/policy-guard/services'
+import { isAllowlistEnabled } from '@/features/policy-guard/public/services/allowlistAvailability'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '../../../public/hooks/useCurrentSpaceId'
 import { SPACE_REFRESH_OPTIONS } from '../../../hooks/refreshOptions'
 import { mapActivePolicies, type Erc20TokenResolver, type NativeTokenResolver } from '../utils/mapActivePolicies'
 import { mapPendingPolicies } from '../utils/mapPendingPolicies'

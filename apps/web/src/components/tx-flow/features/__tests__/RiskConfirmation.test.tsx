@@ -1,10 +1,10 @@
 import { render, renderHook, screen } from '@/tests/test-utils'
 import { type PropsWithChildren } from 'react'
-import { SlotProvider, SlotName } from '@/components/tx-flow/slots'
-import { useSlotIds } from '@/components/tx-flow/slots/hooks'
+import { SlotProvider, SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { useSlotIds } from '@/components/tx-flow/slots/hooks/useSlotIds'
 import RiskConfirmationSlot, { RiskConfirmation } from '../RiskConfirmation'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { useSafeShield } from '@/features/safe-shield/public/hooks/useSafeShield'
 import { useHasFeature } from '@/hooks/useChains'
 
 jest.mock('@/hooks/useChains', () => ({
@@ -13,8 +13,8 @@ jest.mock('@/hooks/useChains', () => ({
   useHasFeature: jest.fn(() => false),
 }))
 
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
-  __esModule: true,
+jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/hooks/useSafeShield'),
   useSafeShield: jest.fn(),
 }))
 

@@ -1,3 +1,4 @@
+import { FEATURES } from '@safe-global/utils/utils/chains'
 /**
  * Shared transaction hooks for the tx-flow system
  *
@@ -25,20 +26,18 @@ import {
   dispatchTxProposal,
   dispatchTxRelay,
   dispatchTxSigning,
-} from '@/services/tx/tx-sender'
+} from '@/services/tx/tx-sender/dispatch'
 import { useHasPendingTxs } from '@/hooks/usePendingTxs'
 import { runExecutionPreChecks } from '@/services/tx/executionPreChecks'
 import { getSafeTxGas, getNonces } from '@/services/tx/tx-sender/recommendedNonce'
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { useCurrentChain } from '@/hooks/useChains'
-import { useLoadFeature } from '@/features/__core__'
-import { FeePaymentFeature } from '@/features/fee-payment'
-import { mergePayFromSafeFeeParams } from '@/features/fee-payment/services'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
+import { mergePayFromSafeFeeParams } from '@/features/fee-payment/public/services/mergePayFromSafeFeeParams'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
-import type { SignerWallet } from '@/components/common/WalletProvider'
+import type { SignerWallet } from '@/components/common/WalletProvider/WalletContext'
 import { supportsNestedTxEnvelope, type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
 
 // The in-app nested signer only ever proposes in its parent
@@ -78,7 +77,7 @@ export const useTxActions = (): TxActions => {
   const wallet = useWallet()
   const chain = useCurrentChain()
   const dispatch = useAppDispatch()
-  const feePaymentFeature = useLoadFeature(FeePaymentFeature)
+  const isFeePaymentEnabled = useHasFeature(FEATURES.GTF) === true
   const { feePaymentMode, feeGasToken } = useContext(SafeTxContext)
   const currency = useAppSelector(selectCurrency)
   const { data: flowData } = useContext(TxFlowContext) as TxFlowContextType<{ nestedChildTx?: NestedTxEnvelope }>
@@ -96,7 +95,7 @@ export const useTxActions = (): TxActions => {
         chain,
         feePaymentMode,
         feeGasToken,
-        feePaymentFeature,
+        isFeePaymentEnabled,
         chainId,
         safeAddress,
         numberSignatures: safe.threshold,
@@ -292,7 +291,7 @@ export const useTxActions = (): TxActions => {
     onboard,
     chain,
     dispatch,
-    feePaymentFeature,
+    isFeePaymentEnabled,
     feePaymentMode,
     feeGasToken,
     currency,

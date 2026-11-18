@@ -4,7 +4,7 @@ import PortfolioRefreshHint from './index'
 import { toBeHex } from 'ethers'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
-import { createHandlers } from '@/stories/mocks'
+import { createHandlers } from '@/stories/mocks/handlers'
 
 const SAFE_ADDRESS = toBeHex('0x1234', 20)
 

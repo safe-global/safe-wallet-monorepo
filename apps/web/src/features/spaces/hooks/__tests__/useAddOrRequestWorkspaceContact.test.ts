@@ -6,21 +6,27 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { getStoreInstance } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
 import { useAddOrRequestWorkspaceContact } from '../useAddOrRequestWorkspaceContact'
-import { useCurrentSpaceId } from '../useCurrentSpaceId'
-import { useSpaceAddressBookState } from '../useGetSpaceAddressBook'
-import { useIsAdmin, useIsInvited } from '../useSpaceMembers'
-import { useUpsertWorkspaceSafeNames } from '../useUpsertWorkspaceSafeName'
+import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
+import { useSpaceAddressBookState } from '../../public/hooks/useGetSpaceAddressBook'
+import { useIsAdmin, useIsInvited } from '../../public/hooks/useSpaceMembers'
+import { useUpsertWorkspaceSafeNames } from '../../public/hooks/useUpsertWorkspaceSafeName'
 
 const mockCreateRequest = jest.fn()
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useAddressBookRequestsCreateRequestV1Mutation: () => [mockCreateRequest],
 }))
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
-jest.mock('../useCurrentSpaceId', () => ({ useCurrentSpaceId: jest.fn() }))
-jest.mock('../useGetSpaceAddressBook', () => ({ __esModule: true, useSpaceAddressBookState: jest.fn() }))
-jest.mock('../useSpaceMembers', () => ({ useIsAdmin: jest.fn(), useIsInvited: jest.fn() }))
-jest.mock('../useUpsertWorkspaceSafeName', () => ({ useUpsertWorkspaceSafeNames: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
+jest.mock('../../public/hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: jest.fn() }))
+jest.mock('../../public/hooks/useGetSpaceAddressBook', () => ({
+  __esModule: true,
+  useSpaceAddressBookState: jest.fn(),
+}))
+jest.mock('../../public/hooks/useSpaceMembers', () => ({ useIsAdmin: jest.fn(), useIsInvited: jest.fn() }))
+jest.mock('../../public/hooks/useUpsertWorkspaceSafeName', () => ({ useUpsertWorkspaceSafeNames: jest.fn() }))
 
 const SPACE_ID = 'space-uuid'
 const SOURCE = SPACE_LABELS.proposer_role_flow
@@ -30,6 +36,7 @@ const CONTACT = { address: ADDRESS, name: 'Nicole', chainIds: ['137'] }
 const workspaceContact = (chainIds: string[]): SpaceAddressBookItemDto => ({
   ...CONTACT,
   chainIds,
+  tagIds: [],
   createdBy: '',
   createdByUserId: 0,
   lastUpdatedBy: '',
@@ -61,6 +68,7 @@ const setup = ({
   jest.mocked(useUpsertWorkspaceSafeNames).mockReturnValue(upsert)
   jest.mocked(useSpaceAddressBookState).mockReturnValue({
     items: addressBook,
+    tags: [],
     isLoading: false,
     isError: false,
     refetch: jest.fn(),

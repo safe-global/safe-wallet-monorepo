@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { OperationType } from '@safe-global/types-kit'
-import { createMockStory } from '@/stories/mocks'
-import type { DraftBatchItem } from '../../store/batchSlice'
-import BatchTxList from './BatchTxList'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import type { DraftBatchItem } from '../../public/store/batchSlice'
+import BatchTxList from '../../public/components/BatchTxList'
 import { mockNow } from '@/stories/mocks/now'
 
 /**

@@ -4,13 +4,10 @@ import type {
   UnavailableReason,
 } from '@safe-global/utils/features/safenet-checks'
 import { checkKey, type CheckIdentity } from '@safe-global/store/safenet/safenetCheckSlice'
-import {
-  MixpanelEventParams,
-  SAFENET_EVENTS,
-  SafenetCheckResult,
-  type SafenetSignerRole,
-  trackEvent,
-} from '@/services/analytics'
+import { MixpanelEventParams, SafenetCheckResult } from '@/services/analytics/mixpanel-events'
+import { SAFENET_EVENTS } from '@/services/analytics/events/safenet'
+import type { SafenetSignerRole } from '@/services/analytics/mixpanel-events'
+import { trackEvent } from '@/services/analytics'
 import { toSafenetCheckResult } from './safenetCheckResult'
 import { summariseRejection } from './summariseRejection'
 

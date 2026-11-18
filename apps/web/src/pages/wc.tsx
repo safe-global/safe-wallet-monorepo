@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import useLastSafe from '@/hooks/useLastSafe'
 import { AppRoutes } from '@/config/routes'
 import { getWelcomeRoute } from '@/utils/getWelcomeRoute'
-import { WC_URI_SEARCH_PARAM } from '@/features/walletconnect'
+import { WC_URI_SEARCH_PARAM } from '@/features/walletconnect/public/constants'
 
 const WcPage = () => {
   const router = useRouter()

@@ -1,6 +1,6 @@
 import { renderHook } from '@/tests/test-utils'
 import useWallet, { useSigner, useWalletContext } from '@/hooks/wallets/useWallet'
-import { WalletContext } from '@/components/common/WalletProvider'
+import { WalletContext } from '@/components/common/WalletProvider/WalletContext'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import type { Eip1193Provider } from 'ethers'
@@ -21,7 +21,14 @@ describe('useWallet hook', () => {
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <WalletContext.Provider
-        value={{ connectedWallet: mockWallet, signer: null, setSignerAddress: jest.fn(), isReady: true }}
+        value={{
+          connectedWallet: mockWallet,
+          signer: null,
+          setSignerAddress: jest.fn(),
+          setParentSafeNonce: jest.fn(),
+          clearParentSafeNonce: jest.fn(),
+          isReady: true,
+        }}
       >
         {children}
       </WalletContext.Provider>
@@ -42,7 +49,14 @@ describe('useWallet hook', () => {
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <WalletContext.Provider
-        value={{ connectedWallet: mockWallet, signer: null, setSignerAddress: jest.fn(), isReady: true }}
+        value={{
+          connectedWallet: mockWallet,
+          signer: null,
+          setSignerAddress: jest.fn(),
+          setParentSafeNonce: jest.fn(),
+          clearParentSafeNonce: jest.fn(),
+          isReady: true,
+        }}
       >
         {children}
       </WalletContext.Provider>
@@ -85,7 +99,14 @@ describe('useSigner hook', () => {
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <WalletContext.Provider
-        value={{ connectedWallet: null, signer: mockSigner as any, setSignerAddress: jest.fn(), isReady: true }}
+        value={{
+          connectedWallet: null,
+          signer: mockSigner as any,
+          setSignerAddress: jest.fn(),
+          setParentSafeNonce: jest.fn(),
+          clearParentSafeNonce: jest.fn(),
+          isReady: true,
+        }}
       >
         {children}
       </WalletContext.Provider>
@@ -111,7 +132,14 @@ describe('useSigner hook', () => {
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <WalletContext.Provider
-        value={{ connectedWallet: mockWallet, signer: null, setSignerAddress: jest.fn(), isReady: true }}
+        value={{
+          connectedWallet: mockWallet,
+          signer: null,
+          setSignerAddress: jest.fn(),
+          setParentSafeNonce: jest.fn(),
+          clearParentSafeNonce: jest.fn(),
+          isReady: true,
+        }}
       >
         {children}
       </WalletContext.Provider>
@@ -144,6 +172,8 @@ describe('useWalletContext hook', () => {
       connectedWallet: mockWallet,
       signer: mockSigner as any,
       setSignerAddress: jest.fn(),
+      setParentSafeNonce: jest.fn(),
+      clearParentSafeNonce: jest.fn(),
       isReady: true,
     }
 
@@ -164,6 +194,8 @@ describe('useWalletContext hook', () => {
       connectedWallet: mockWallet,
       signer: null,
       setSignerAddress: jest.fn(),
+      setParentSafeNonce: jest.fn(),
+      clearParentSafeNonce: jest.fn(),
       isReady: true,
     }
 

@@ -1,3 +1,5 @@
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
 import { useMemo, type ReactElement } from 'react'
 import {
   type ThreatAnalysisResults,
@@ -6,15 +8,15 @@ import {
   StatusGroup,
 } from '@safe-global/utils/features/safe-shield/types'
 import { sliceTopBySeverity } from '@safe-global/utils/features/safe-shield/utils'
-import { AnalysisGroupCard } from '../AnalysisGroupCard'
+import { AnalysisGroupCard } from '../AnalysisGroupCard/AnalysisGroupCard'
 import { hasThreatCardResults } from '../../utils/hasThreatCardResults'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
-import { HypernativeFeature, type HypernativeAuthStatus, HnViewMoreOnHypernativeRow } from '@/features/hypernative'
-import { useLoadFeature } from '@/features/__core__'
+import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
+import type { HypernativeAuthStatus } from '@/features/hypernative/public/hooks/useHypernativeOAuth'
+import { HnViewMoreOnHypernativeRow } from '@/features/hypernative/public/components/HnViewMoreOnHypernativeRow'
 import { AnalysisGroupCardDisabled } from '@safe-global/views/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled'
-// eslint-disable-next-line no-restricted-imports -- re-exporting this hook from the hypernative barrel closes a hypernative<->safe-shield<->tx-flow module-init cycle (TDZ)
-import { useSafeShieldAssessmentUrl } from '@/features/hypernative/hooks/useSafeShieldAssessmentUrl'
+import { useSafeShieldAssessmentUrl } from '@/features/hypernative/public/hooks/useSafeShieldAssessmentUrl'
+import HnAnalysisGroupCard from '@/features/hypernative/public/components/HnAnalysisGroupCard'
 
 const VISIBLE_CAP = 3
 
@@ -36,7 +38,7 @@ export const ThreatAnalysis = ({
   highlightedSeverity,
   hypernativeAuth,
 }: ThreatAnalysisProps): ReactElement | null => {
-  const hn = useLoadFeature(HypernativeFeature)
+  const isHypernativeEnabled = useHasFeature(FEATURES.HYPERNATIVE) === true
   const assessmentUrl = useSafeShieldAssessmentUrl()
   const requiresHypernativeLogin =
     hypernativeAuth !== undefined && (!hypernativeAuth.isAuthenticated || hypernativeAuth.isTokenExpired)
@@ -62,14 +64,14 @@ export const ThreatAnalysis = ({
     return null
   }
 
-  const isHnPath = Boolean(hypernativeAuth && hn.$isReady)
+  const isHnPath = Boolean(hypernativeAuth && isHypernativeEnabled)
 
   if (isHnPath) {
     const overflowRow =
       overflow > 0 ? <HnViewMoreOnHypernativeRow overflowCount={overflow} assessmentUrl={assessmentUrl} /> : undefined
 
     return (
-      <hn.HnAnalysisGroupCard
+      <HnAnalysisGroupCard
         data-testid="threat-analysis-group-card"
         data={threatData}
         delay={delay}

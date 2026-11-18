@@ -99,7 +99,7 @@ graph TB
     SC -->|RTK Query| API
     SC -->|useSafeCardData| SCD
     SC -->|Renders child| STB
-    SC -->|useLoadFeature| CM
+    SC -->|dynamic| CM
 
     SCD -->|useSafeItemData| BUI
     SCD -->|useMultiAccountItemData| BUI
@@ -248,7 +248,7 @@ SafeCardReadOnly
   │  ├─ isLoading: isLoadingOverview // Loading state → shows skeleton
   │  └─ isError: isOverviewError // Error state → shows error icon + tooltip
   ├─ hasQueuedItems // Protected: !isLoadingOverview && !isOverviewError && safeOverview
-  └─ useLoadFeature(SpacesFeature) // Lazy-loaded context menu
+  └─ SpaceSafeContextMenu // Lazy-loaded context menu (dynamic)
 ```
 
 **Error States:**
@@ -548,7 +548,7 @@ const handleSearch = useCallback(debounce(setSearchQuery, 300), [])
 
 ### 5. Lazy Loading of Context Menu
 
-**Decision:** `SpaceSafeContextMenu` loaded via `useLoadFeature(SpacesFeature)`
+**Decision:** `SpaceSafeContextMenu` loaded through a `dynamic()` wrapper in `public/`
 **Rationale:**
 
 - Reduces bundle size of accounts page (context menu is secondary)

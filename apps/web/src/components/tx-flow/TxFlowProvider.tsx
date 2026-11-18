@@ -21,15 +21,15 @@ import {
   type Role,
   useRoles,
 } from '@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleForm/hooks'
-import { SafeTxContext } from '../tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useLazyTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { trackTxEvents } from '@/components/tx/shared/tracking'
+import { getGasPaymentSource, trackTxEvents } from '@/components/tx/shared/tracking'
 import { useSigner } from '@/hooks/wallets/useWallet'
 import useChainId from '@/hooks/useChainId'
-import { useIsCounterfactualSafe } from '@/features/counterfactual'
+import useIsCounterfactualSafe from '@/features/counterfactual/public/hooks/useIsCounterfactualSafe'
 import useTxDetails from '@/hooks/useTxDetails'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { useSafeShield } from '@/features/safe-shield/public/hooks/useSafeShield'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { isPaidFromSafe } from '@safe-global/utils/utils/isPaidFromSafe'
@@ -267,16 +267,18 @@ const TxFlowProvider = <T extends unknown>({
         details && isMultisigDetailedExecutionInfo(details.detailedExecutionInfo)
           ? details.detailedExecutionInfo
           : undefined
-      const gasPaymentSource = !isPayFromSafeChain
-        ? undefined
-        : exec &&
-            isPaidFromSafe({
-              gasPrice: exec.gasPrice,
-              baseGas: exec.baseGas,
-              refundReceiver: exec.refundReceiver?.value,
-            })
-          ? 'safe'
-          : 'signing_wallet'
+      const gasPaymentSource = getGasPaymentSource({
+        isSafePaid:
+          !!exec &&
+          isPaidFromSafe({
+            gasPrice: exec.gasPrice,
+            baseGas: exec.baseGas,
+            refundReceiver: exec.refundReceiver?.value,
+          }),
+        isExecuted,
+        gasPaymentOption,
+        isPayFromSafeChain,
+      })
       // Compute isMassPayout from data (recipients.length > 1)
       const recipients = (data as { recipients?: unknown[] } | undefined)?.recipients
       const isMassPayout = Array.isArray(recipients) && recipients.length > 1

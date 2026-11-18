@@ -68,15 +68,43 @@ jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' })
 
 jest.mock('@/hooks/useSafeAddress', () => ({ __esModule: true, default: () => '' }))
 
-jest.mock('@/hooks/safes', () => ({ useAllSafesGrouped: () => ({ allMultiChainSafes: [], allSingleSafes: [] }) }))
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
+  ...jest.requireActual('@/hooks/safes/useAllSafesGrouped'),
+  useAllSafesGrouped: () => ({ allMultiChainSafes: [], allSingleSafes: [] }),
+}))
 
 jest.mock('@/hooks/useAddressBook', () => ({ __esModule: true, default: () => ({}) }))
 
-jest.mock('@/features/multichain', () => ({
-  __esModule: true,
+jest.mock('@/features/multichain/public/utils/utils', () => ({
+  get isMultiChainSafeItem() {
+    return jest.requireActual('@/features/multichain/public/utils/utils').isMultiChainSafeItem
+  },
+  get getSafeSetups() {
+    return jest.requireActual('@/features/multichain/public/utils/utils').getSafeSetups
+  },
+  get getSharedSetup() {
+    return jest.requireActual('@/features/multichain/public/utils/utils').getSharedSetup
+  },
+  get getDeviatingSetups() {
+    return jest.requireActual('@/features/multichain/public/utils/utils').getDeviatingSetups
+  },
+  get predictSafeAddress() {
+    return jest.requireActual('@/features/multichain/public/utils/utils').predictSafeAddress
+  },
+  get predictAddressBasedOnReplayData() {
+    return jest.requireActual('@/features/multichain/public/utils/utils').predictAddressBasedOnReplayData
+  },
+  get hasMultiChainCreationFeatures() {
+    return jest.requireActual('@/features/multichain/public/utils/utils').hasMultiChainCreationFeatures
+  },
   hasMultiChainAddNetworkFeature: () => false,
+}))
+jest.mock('@/features/multichain/public/hooks/useSafeCreationData', () => ({
   useSafeCreationData: () => [undefined, undefined, false],
-  CreateSafeOnSpecificChain: () => null,
+}))
+jest.mock('@/features/multichain/public/components/CreateSafeOnSpecificChain', () => ({
+  __esModule: true,
+  default: () => null,
 }))
 
 describe('NetworkSelector', () => {
