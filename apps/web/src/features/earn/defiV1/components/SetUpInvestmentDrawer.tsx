@@ -54,7 +54,6 @@ export const SetUpInvestmentDrawer = ({
   onClose: () => void
   onCreate: (created: CreatedInvestment) => void
   onView: (opportunity: Opportunity) => void
-  tabs?: ReactNode
 }) => {
   const form = useInvestmentForm(opportunity, options)
   const [current, setCurrent] = useState(0)

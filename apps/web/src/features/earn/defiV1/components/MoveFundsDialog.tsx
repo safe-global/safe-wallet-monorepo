@@ -217,15 +217,13 @@ export const HubTabs = ({ value, onChange }: { value: HubTab; onChange: (value: 
 )
 
 /** Swap or bridge idle cash in three steps: details, what signers approve, then proposed. */
-export const MoveFundsDialog = ({
-  open,
+export const MoveFundsFlow = ({
   mode,
   onModeChange,
   onInvest,
   balances,
   onClose,
 }: {
-  open: boolean
   mode: MoveMode
   onModeChange: (mode: MoveMode) => void
   onInvest: () => void
@@ -580,61 +578,92 @@ export const MoveFundsDialog = ({
   )
 
   return (
-    <Dialog open={open} onOpenChange={(next) => !next && close()}>
-      <DialogContent size="sm" data-testid="move-funds-dialog">
-        {step === 'proposed' ? (
-          <DialogTitle className="sr-only">{COPY.proposed[mode]}</DialogTitle>
-        ) : (
-          <DialogHeader divided="subtle">
-            <div className="flex items-center gap-3">
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-                <Icon className="size-4" aria-hidden />
-              </span>
-              <div className="flex min-w-0 flex-col">
-                <div className="flex items-center gap-2">
-                  <DialogTitle>{COPY.title[mode]}</DialogTitle>
-                  {amount > 0 && step === 'review' && (
-                    <Badge variant="brand" className="tabular-nums">
-                      {sent}
-                    </Badge>
-                  )}
-                </div>
-                <DialogDescription>{COPY.lead[mode]}</DialogDescription>
+    <>
+      {step === 'proposed' ? (
+        <DialogTitle className="sr-only">{COPY.proposed[mode]}</DialogTitle>
+      ) : (
+        <DialogHeader divided="subtle">
+          <div className="flex items-center gap-3">
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+              <Icon className="size-4" aria-hidden />
+            </span>
+            <div className="flex min-w-0 flex-col">
+              <div className="flex items-center gap-2">
+                <DialogTitle>{COPY.title[mode]}</DialogTitle>
+                {amount > 0 && step === 'review' && (
+                  <Badge variant="brand" className="tabular-nums">
+                    {sent}
+                  </Badge>
+                )}
               </div>
+              <DialogDescription>{COPY.lead[mode]}</DialogDescription>
             </div>
-          </DialogHeader>
+          </div>
+        </DialogHeader>
+      )}
+
+      {{ details, review, proposed }[step]}
+
+      <DialogFooter divided="subtle">
+        {step === 'details' && (
+          <Button size="lg" className="w-full" disabled={!canReview} onClick={goToReview}>
+            {tooMuch ? COPY.notEnough(from) : COPY.review[mode]}
+          </Button>
         )}
-
-        {{ details, review, proposed }[step]}
-
-        <DialogFooter divided="subtle">
-          {step === 'details' && (
-            <Button size="lg" className="w-full" disabled={!canReview} onClick={goToReview}>
-              {tooMuch ? COPY.notEnough(from) : COPY.review[mode]}
+        {step === 'review' && (
+          <div className="flex w-full gap-2">
+            <Button variant="outline" size="lg" className="flex-1" onClick={() => setStep('details')}>
+              {COPY.back}
             </Button>
-          )}
-          {step === 'review' && (
-            <div className="flex w-full gap-2">
-              <Button variant="outline" size="lg" className="flex-1" onClick={() => setStep('details')}>
-                {COPY.back}
-              </Button>
-              <Button size="lg" className="flex-1" onClick={() => setStep('proposed')}>
-                {COPY.submit[mode]}
-              </Button>
-            </div>
-          )}
-          {step === 'proposed' && (
-            <div className="flex w-full gap-2">
-              <Button variant="outline" size="lg" className="flex-1" onClick={close}>
-                {DEFI_V1_COPY.operations.close}
-              </Button>
-              <Button size="lg" className="flex-1" onClick={close}>
-                {COPY.track}
-              </Button>
-            </div>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            <Button size="lg" className="flex-1" onClick={() => setStep('proposed')}>
+              {COPY.submit[mode]}
+            </Button>
+          </div>
+        )}
+        {step === 'proposed' && (
+          <div className="flex w-full gap-2">
+            <Button variant="outline" size="lg" className="flex-1" onClick={close}>
+              {DEFI_V1_COPY.operations.close}
+            </Button>
+            <Button size="lg" className="flex-1" onClick={close}>
+              {COPY.track}
+            </Button>
+          </div>
+        )}
+      </DialogFooter>
+    </>
   )
 }
+
+/** Invest, swap and bridge in one dialog, so switching tabs only swaps the content. */
+export const MoveFundsDialog = ({
+  open,
+  tab,
+  onTabChange,
+  balances,
+  invest,
+  onClose,
+}: {
+  open: boolean
+  tab: HubTab
+  onTabChange: (tab: HubTab) => void
+  balances: Slice[]
+  invest: (tabs: ReactNode) => ReactNode
+  onClose: () => void
+}) => (
+  <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
+    <DialogContent size="sm" data-testid="move-funds-dialog">
+      {tab === 'invest' ? (
+        invest(<HubTabs value="invest" onChange={onTabChange} />)
+      ) : (
+        <MoveFundsFlow
+          mode={tab}
+          onModeChange={onTabChange}
+          onInvest={() => onTabChange('invest')}
+          balances={balances}
+          onClose={onClose}
+        />
+      )}
+    </DialogContent>
+  </Dialog>
+)

@@ -1,4 +1,4 @@
-import { Fragment, useState, type ReactNode } from 'react'
+import { Fragment, useState, type ComponentProps, type ReactNode } from 'react'
 import { Check } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -98,9 +98,8 @@ const Stepper = ({
   </ol>
 )
 
-/** Set up investment in a centred dialog: one clear step at a time, with a stepper that summarises each answer. */
-export const SetUpInvestmentStepper = ({
-  open,
+/** Set up investment one clear step at a time, with a stepper that summarises each answer. */
+export const SetUpInvestmentFlow = ({
   opportunity,
   options,
   onClose,
@@ -108,7 +107,6 @@ export const SetUpInvestmentStepper = ({
   onView,
   tabs,
 }: {
-  open: boolean
   opportunity: Opportunity | null
   options: Opportunity[]
   onClose: () => void
@@ -171,75 +169,85 @@ export const SetUpInvestmentStepper = ({
   }
 
   return (
-    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && close()}>
-      <DialogContent size="sm" data-testid="set-up-investment-stepper">
-        {proposed ? (
-          <DialogTitle className="sr-only">{COPY.proposed}</DialogTitle>
-        ) : (
-          <DialogHeader divided="subtle">
-            <div className="flex items-center gap-3">
-              <OpportunityMark />
-              <div className="flex min-w-0 flex-col">
-                <div className="flex items-center gap-2">
-                  <DialogTitle>{COPY.newSafe}</DialogTitle>
-                  {form.amount > 0 && (
-                    <Badge variant="brand" className="tabular-nums">
-                      {`${compact(form.amount)} ${investment.asset}`}
-                    </Badge>
-                  )}
-                </div>
-                <DialogDescription>
-                  {COPY.flowLead(investment.name, investment.chains[0], formatApy(investment.apy))}
-                </DialogDescription>
+    <>
+      {proposed ? (
+        <DialogTitle className="sr-only">{COPY.proposed}</DialogTitle>
+      ) : (
+        <DialogHeader divided="subtle">
+          <div className="flex items-center gap-3">
+            <OpportunityMark />
+            <div className="flex min-w-0 flex-col">
+              <div className="flex items-center gap-2">
+                <DialogTitle>{COPY.newSafe}</DialogTitle>
+                {form.amount > 0 && (
+                  <Badge variant="brand" className="tabular-nums">
+                    {`${compact(form.amount)} ${investment.asset}`}
+                  </Badge>
+                )}
               </div>
+              <DialogDescription>
+                {COPY.flowLead(investment.name, investment.chains[0], formatApy(investment.apy))}
+              </DialogDescription>
             </div>
-          </DialogHeader>
-        )}
-
-        {proposed ? (
-          <div className={cn(PROPOSED_HEIGHT, 'overflow-y-auto px-4 py-4')}>
-            <ProposedView form={form} />
           </div>
+        </DialogHeader>
+      )}
+
+      {proposed ? (
+        <div className={cn(PROPOSED_HEIGHT, 'overflow-y-auto px-4 py-4')}>
+          <ProposedView form={form} />
+        </div>
+      ) : (
+        <>
+          <div className={cn(BODY_HEIGHT, 'flex flex-col gap-4 px-4 pt-4')}>
+            {tabs && current === 0 && tabs}
+            {view.heading && (
+              <Typography variant="paragraph-bold" className="shrink-0">
+                {view.heading}
+              </Typography>
+            )}
+            <div className="-mx-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">{view.content}</div>
+          </div>
+        </>
+      )}
+
+      <DialogFooter divided="subtle">
+        {proposed ? (
+          <ProposedActions
+            onClose={close}
+            onView={() => {
+              close()
+              onView(investment)
+            }}
+          />
         ) : (
           <>
-            <div className={cn(BODY_HEIGHT, 'flex flex-col gap-4 px-4 pt-4')}>
-              {tabs && current === 0 && tabs}
-              {view.heading && (
-                <Typography variant="paragraph-bold" className="shrink-0">
-                  {view.heading}
-                </Typography>
+            <Stepper current={current} reached={reached} labels={summaries(form)} onJump={setCurrent} />
+            <div className="flex gap-2">
+              {current > 0 && (
+                <Button variant="outline" size="lg" className="flex-1" onClick={() => setCurrent(current - 1)}>
+                  {COPY.back}
+                </Button>
               )}
-              <div className="-mx-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">{view.content}</div>
+              <Button size="lg" className="flex-1" disabled={!view.valid} onClick={next}>
+                {isLast ? COPY.submit : COPY.next}
+              </Button>
             </div>
           </>
         )}
-
-        <DialogFooter divided="subtle">
-          {proposed ? (
-            <ProposedActions
-              onClose={close}
-              onView={() => {
-                close()
-                onView(investment)
-              }}
-            />
-          ) : (
-            <>
-              <Stepper current={current} reached={reached} labels={summaries(form)} onJump={setCurrent} />
-              <div className="flex gap-2">
-                {current > 0 && (
-                  <Button variant="outline" size="lg" className="flex-1" onClick={() => setCurrent(current - 1)}>
-                    {COPY.back}
-                  </Button>
-                )}
-                <Button size="lg" className="flex-1" disabled={!view.valid} onClick={next}>
-                  {isLast ? COPY.submit : COPY.next}
-                </Button>
-              </div>
-            </>
-          )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </DialogFooter>
+    </>
   )
 }
+
+export const SetUpInvestmentStepper = ({
+  open,
+  onClose,
+  ...props
+}: ComponentProps<typeof SetUpInvestmentFlow> & { open: boolean }) => (
+  <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
+    <DialogContent size="sm" data-testid="set-up-investment-stepper">
+      <SetUpInvestmentFlow onClose={onClose} {...props} />
+    </DialogContent>
+  </Dialog>
+)

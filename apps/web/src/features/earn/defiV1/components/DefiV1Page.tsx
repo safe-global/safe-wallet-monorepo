@@ -23,12 +23,13 @@ import {
 import type { AssetType, DefiV1Config, GroupBy, Operation, Opportunity, Position, Sort, SortKey } from '../types'
 import type { ActionResult } from './ActionPanel'
 import { CompareDialog } from './CompareDialog'
-import { HubTabs, MoveFundsDialog, type MoveMode } from './MoveFundsDialog'
+import { MoveFundsDialog, type HubTab } from './MoveFundsDialog'
 import { OpportunityDrawer } from './OpportunityDrawer'
 import { OpportunityToolbar } from './OpportunityToolbar'
 import { SetUpInvestmentDialog } from './SetUpInvestmentDialog'
 import { SetUpInvestmentDrawer } from './SetUpInvestmentDrawer'
-import { SetUpInvestmentStepper } from './SetUpInvestmentStepper'
+import type { CreatedInvestment } from './InvestmentForm'
+import { SetUpInvestmentFlow, SetUpInvestmentStepper } from './SetUpInvestmentStepper'
 import { InvestButton } from './InvestButton'
 import { TreasurySummary } from './TreasurySummary'
 import { OpportunitiesTable, type OpportunityGroup } from './TreasuryTables'
@@ -72,9 +73,8 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const [showAll, setShowAll] = useState(false)
   const [compareIds, setCompareIds] = useState<string[]>([])
   const [isComparing, setIsComparing] = useState(false)
-  const [moveMode, setMoveMode] = useState<MoveMode>('swap')
+  const [hubTab, setHubTab] = useState<HubTab>('swap')
   const [isMoving, setIsMoving] = useState(false)
-  const [hub, setHub] = useState(false)
   const [operations, setOperations] = useState<Operation[]>(OPERATIONS)
   const [isCreating, setIsCreating] = useState(false)
   const [setupFor, setSetupFor] = useState<Opportunity | null>(null)
@@ -118,8 +118,12 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const SetUp = { dialog: SetUpInvestmentDialog, drawer: SetUpInvestmentDrawer, stepper: SetUpInvestmentStepper }[
     config.setup
   ]
-  const openSetup = (item: Opportunity | null, fromHub = false) => {
-    setHub(fromHub)
+  const setupOptions = RANKED.filter((item) => !locked(item))
+  const createInvestment = ({ operation, opportunity, amount }: CreatedInvestment) => {
+    if (operation) setOperations((current) => [...current, operation])
+    setPositions((current) => [{ opportunity, principal: amount, earned: 0, pending: true }, ...current])
+  }
+  const openSetup = (item: Opportunity | null) => {
     if (config.setup === 'drawer') setSelected(null)
     setSetupFor(item)
     setIsCreating(true)
@@ -170,7 +174,7 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
             <Button
               variant="outline"
               onClick={() => {
-                setMoveMode('swap')
+                setHubTab('swap')
                 setIsMoving(true)
               }}
             >
@@ -180,7 +184,7 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
             <Button
               variant="outline"
               onClick={() => {
-                setMoveMode('bridge')
+                setHubTab('bridge')
                 setIsMoving(true)
               }}
             >
@@ -228,13 +232,22 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
 
       <MoveFundsDialog
         open={isMoving}
-        mode={moveMode}
-        onModeChange={setMoveMode}
-        onInvest={() => {
-          setIsMoving(false)
-          openSetup(null, true)
-        }}
+        tab={hubTab}
+        onTabChange={setHubTab}
         balances={idleByAsset(summary.idle, IDLE_MIX)}
+        invest={(tabs) => (
+          <SetUpInvestmentFlow
+            tabs={tabs}
+            opportunity={null}
+            options={setupOptions}
+            onClose={() => setIsMoving(false)}
+            onCreate={createInvestment}
+            onView={(item) => {
+              setIsMoving(false)
+              setSelected(item)
+            }}
+          />
+        )}
         onClose={() => setIsMoving(false)}
       />
 
@@ -259,28 +272,12 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
       />
 
       <SetUp
-        key={`${setupFor?.id ?? 'any'}-${hub}`}
-        tabs={
-          hub ? (
-            <HubTabs
-              value="invest"
-              onChange={(next) => {
-                if (next === 'invest') return
-                setIsCreating(false)
-                setMoveMode(next)
-                setIsMoving(true)
-              }}
-            />
-          ) : undefined
-        }
+        key={setupFor?.id ?? 'any'}
         open={isCreating}
         opportunity={setupFor}
-        options={RANKED.filter((item) => !locked(item))}
+        options={setupOptions}
         onClose={() => setIsCreating(false)}
-        onCreate={({ operation, opportunity, amount }) => {
-          if (operation) setOperations((current) => [...current, operation])
-          setPositions((current) => [{ opportunity, principal: amount, earned: 0, pending: true }, ...current])
-        }}
+        onCreate={createInvestment}
         onView={(item) => {
           setIsCreating(false)
           setSelected(item)
