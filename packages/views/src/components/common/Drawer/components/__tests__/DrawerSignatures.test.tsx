@@ -59,4 +59,36 @@ describe('DrawerSignatures', () => {
     expect(visible('Your signature required')).toHaveLength(1)
     expect(screen.getByText('(you)')).toBeInTheDocument()
   })
+
+  it('opens and folds from the page when controlled', () => {
+    const onOpenChange = jest.fn()
+    const { rerender } = render(
+      <DrawerSignatures signed={1} required={2} rows={rows} open={false} onOpenChange={onOpenChange} />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Show signatures' }))
+
+    expect(onOpenChange).toHaveBeenCalledWith(true)
+    expect(screen.getByRole('button', { name: 'Show signatures' })).toHaveAttribute('aria-expanded', 'false')
+
+    rerender(<DrawerSignatures signed={1} required={2} rows={rows} open onOpenChange={onOpenChange} />)
+
+    expect(screen.getByRole('button', { name: 'Hide signatures' })).toHaveAttribute('aria-expanded', 'true')
+  })
+
+  it('shows the page status in place of the count badge, with a note under it', () => {
+    render(
+      <DrawerSignatures
+        signed={1}
+        required={2}
+        rows={rows}
+        status={<span>1/2 gauge</span>}
+        note="You aren't a signer of this Safe"
+      />,
+    )
+
+    expect(screen.getByText('1/2 gauge')).toBeInTheDocument()
+    expect(screen.queryByText('1 of 2 required')).not.toBeInTheDocument()
+    expect(screen.getByText("You aren't a signer of this Safe")).toBeInTheDocument()
+  })
 })
