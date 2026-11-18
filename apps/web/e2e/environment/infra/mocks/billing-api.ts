@@ -7,8 +7,8 @@
  * Like the real service, the mock announces each subscription to the gateway with a signed webhook, which is
  * what writes the Workspace's entitlements. A checkout opens a local page in place of Stripe's: its Start trial button
  * stores the trial of the link's plan and returns to the caller's URL, and its Back link returns with the session
- * still open, as Stripe's Back does. PUT /__test/default-trial (body: "enabled") stops giving every unknown
- * Workspace the Business trial, as the onboarding wizard needs.
+ * still open, as Stripe's Back does. A Workspace that started a checkout gets no default trial, so its own checkout
+ * decides its plan, as the onboarding wizard needs; every other Workspace keeps the default.
  */
 import { createECDH, createPrivateKey, sign } from 'node:crypto'
 import { escapeHtml, html, isMain, json, postJson, requiredEnv, serve } from './http.ts'
@@ -86,7 +86,6 @@ const CHECKOUT_PATH = /^\/api\/v1\/payment-links\/([^/]+)\/checkout$/
 const CHECKOUT_PAGE_PATH = /^\/checkout\/([^/]+)$/
 const CHECKOUT_COMPLETE_PATH = /^\/checkout\/([^/]+)\/complete$/
 const SESSION_PATH = /^\/api\/v1\/sessions\/([^/]+)$/
-const TEST_DEFAULT_TRIAL_PATH = /^\/__test\/default-trial$/
 const SESSION_ID_PLACEHOLDER = '{CHECKOUT_SESSION_ID}'
 
 export type Subscription = {
@@ -269,7 +268,7 @@ export class Billing {
   private readonly sessions = new Map<string, CheckoutSession>()
   private readonly announce: Announce
   private readonly publicUrl: string
-  private hasDefaultTrial = true
+  private readonly checkoutCustomers = new Set<string>()
 
   constructor(announce: Announce, publicUrl = 'http://localhost:8000/billing') {
     this.announce = announce
@@ -279,7 +278,7 @@ export class Billing {
   listSubscriptions(customer: string): Subscription[] {
     const stored = this.subscriptions.get(customer)
     if (stored) return [...stored]
-    if (!this.hasDefaultTrial) return []
+    if (this.checkoutCustomers.has(customer)) return []
     const subscription = defaultSubscription(customer)
     this.subscriptions.set(customer, [subscription])
     this.announce(subscription, 'customer.subscription.created').catch((error: unknown) => console.error(error))
@@ -311,12 +310,9 @@ export class Billing {
     return changed
   }
 
-  setDefaultTrial(enabled: boolean): void {
-    this.hasDefaultTrial = enabled
-  }
-
   checkout(paymentLinkId: string, customer: string, returnUrl: string): { sessionId: string; url: string } {
     const sessionId = `cs_e2e_${this.sessions.size + 1}`
+    this.checkoutCustomers.add(customer)
     this.sessions.set(sessionId, {
       id: sessionId,
       paymentLinkId,
@@ -331,14 +327,17 @@ export class Billing {
     return this.sessions.get(sessionId)
   }
 
-  /** Starts the link's trial for the session's Workspace and announces it, as a completed Stripe checkout does. */
+  /** Starts the link's plan for the session's Workspace and announces it, as a completed Stripe checkout does. */
   async completeCheckout(sessionId: string): Promise<CheckoutSession | undefined> {
     const session = this.sessions.get(sessionId)
     const link = PAYMENT_LINKS.find((candidate) => candidate.id === session?.paymentLinkId)
     const plan = link && planOfPrice(String(link.lineItems[0].price.id))
     if (!session || !link || !plan) return undefined
+    // A resubmitted form must not store the plan or announce it twice.
+    if (session.status === 'complete') return session
     await this.store(session.upstreamCustomerId, {
       plan,
+      status: link.trialPeriodDays === null ? 'active' : 'trialing',
       metadata: { gracePeriod: link.metadata.gracePeriod ?? 'false' },
     })
     session.status = 'complete'
@@ -435,7 +434,7 @@ function sessionObject(session: CheckoutSession): Record<string, unknown> {
     expires_at: PERIOD_END,
     metadata: { customerGroup: CUSTOMER_GROUP, paymentLinkId: session.paymentLinkId },
     mode: 'subscription',
-    payment_status: isComplete ? 'no_payment_required' : 'unpaid',
+    payment_status: !isComplete ? 'unpaid' : isPaidLink(session.paymentLinkId) ? 'paid' : 'no_payment_required',
     status: session.status,
     success_url: session.returnUrl,
     url: null,
@@ -443,6 +442,9 @@ function sessionObject(session: CheckoutSession): Record<string, unknown> {
     invoice: null,
   }
 }
+
+const isPaidLink = (linkId: string): boolean =>
+  PAYMENT_LINKS.find((link) => link.id === linkId)?.trialPeriodDays === null
 
 function checkoutSession([sessionId]: string[], _request: BillingRequest, billing: Billing): Reply {
   const session = billing.checkoutSession(sessionId)
@@ -453,13 +455,6 @@ async function completeCheckout([sessionId]: string[], _request: BillingRequest,
   const session = await billing.completeCheckout(sessionId)
   if (!session) return json(404, { message: 'Unknown checkout session' })
   return { status: 303, headers: { Location: returnTo(session) }, body: '' }
-}
-
-function setDefaultTrial(_params: string[], { body }: BillingRequest, billing: Billing): Reply {
-  const { enabled } = parseBody<{ enabled: boolean }>(body)
-  if (typeof enabled !== 'boolean') return json(400, { message: 'Send { "enabled": true | false }' })
-  billing.setDefaultTrial(enabled)
-  return json(200, { enabled })
 }
 
 function previewPlanChange([customer, subscriptionId]: string[], { query }: BillingRequest, billing: Billing): Reply {
@@ -494,7 +489,6 @@ const ROUTES: Route[] = [
   { method: 'GET', path: CHECKOUT_PAGE_PATH, handle: checkoutPage },
   { method: 'POST', path: CHECKOUT_COMPLETE_PATH, handle: completeCheckout },
   { method: 'GET', path: SESSION_PATH, handle: checkoutSession },
-  { method: 'PUT', path: TEST_DEFAULT_TRIAL_PATH, handle: setDefaultTrial },
   { method: 'GET', path: PREVIEW_PATH, handle: previewPlanChange },
   { method: 'PATCH', path: SUBSCRIPTION_PATH, handle: changePlan },
   { method: 'GET', path: PLAN_PATH, handle: plan },
