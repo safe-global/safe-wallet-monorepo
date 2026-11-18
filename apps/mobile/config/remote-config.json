@@ -28,6 +28,7 @@
       "scope": "PER_CHAIN",
       "defaultChains": []
     },
-    { "key": "SEND_FLOW", "description": "New token send flow.", "scope": "PER_CHAIN", "defaultChains": [] }
+    { "key": "SEND_FLOW", "description": "New token send flow.", "scope": "PER_CHAIN", "defaultChains": [] },
+    { "key": "GTF", "description": "GTF relayer strategy support.", "scope": "PER_CHAIN", "defaultChains": [] }
   ]
 }

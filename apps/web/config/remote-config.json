@@ -162,12 +162,6 @@
     },
     { "key": "MASS_PAYOUTS", "description": "Batch / mass payout flow.", "scope": "PER_CHAIN", "defaultChains": [] },
     {
-      "key": "SPACES",
-      "description": "Organisation Spaces (shared address book, members).",
-      "scope": "PER_CHAIN",
-      "defaultChains": []
-    },
-    {
       "key": "PRIVATE_ADDRESS_BOOK",
       "description": "Client-side encrypted private address book.",
       "scope": "PER_CHAIN",
@@ -226,15 +220,15 @@
       "scope": "PER_CHAIN",
       "defaultChains": []
     },
-    {
-      "key": "MY_ACCOUNTS",
-      "description": "Redesigned 'My accounts' list.",
-      "scope": "PER_CHAIN",
-      "defaultChains": []
-    },
     { "key": "SEND_FLOW", "description": "New token send flow.", "scope": "PER_CHAIN", "defaultChains": [] },
     { "key": "BATCHING", "description": "Transaction batching.", "scope": "PER_CHAIN", "defaultChains": [] },
     { "key": "OIDC_AUTH", "description": "OIDC-based social login.", "scope": "PER_CHAIN", "defaultChains": [] },
+    {
+      "key": "SWITCH_AUTHENTICATOR",
+      "description": "Switch the 2FA authenticator app for an OIDC login.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
     {
       "key": "HIDE_NATIVE_TOKEN",
       "description": "Hide the native token from balances (stablecoin-fee chains).",
@@ -246,29 +240,91 @@
     { "key": "GTF", "description": "GTF relayer strategy support.", "scope": "PER_CHAIN", "defaultChains": [] },
     { "key": "SAFE_STAKING", "description": "Safe-token staking.", "scope": "PER_CHAIN", "defaultChains": [] },
     {
-      "key": "WELCOME_ACCOUNTS_REDESIGN",
-      "description": "Redesigned welcome / accounts screen.",
-      "scope": "PER_CHAIN",
-      "defaultChains": []
-    },
-    {
-      "key": "REQUIRE_LOGIN",
-      "description": "Require login (gated access).",
-      "scope": "PER_CHAIN",
-      "defaultChains": []
-    },
-    {
-      "key": "CLASSIC_VIEW",
-      "description": "Classic (legacy) UI view toggle.",
-      "scope": "PER_CHAIN",
-      "defaultChains": []
-    },
-    {
       "key": "SPACE_ONBOARDING_SURVEY",
       "description": "Onboarding survey for Spaces.",
       "scope": "PER_CHAIN",
       "defaultChains": []
     },
-    { "key": "SPACE_AUDIT_LOG", "description": "Audit log for Spaces.", "scope": "PER_CHAIN", "defaultChains": [] }
+    { "key": "SPACE_AUDIT_LOG", "description": "Audit log for Spaces.", "scope": "PER_CHAIN", "defaultChains": [] },
+    {
+      "key": "SPACE_TRANSACTIONS",
+      "description": "Pending transactions across all Safes in a Workspace.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "WORKSPACES_EXPERIMENTAL_FEATURES",
+      "description": "Experimental settings page for Workspaces.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "WORKSPACES_ADDRESS_BOOK_V2",
+      "description": "Version 2 of the Workspace address book.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "ADDRESS_POISONING_PROTECTION",
+      "description": "Detect look-alike (address poisoning) recipients.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "SAFENET_CHECKS",
+      "description": "Safenet transaction checks and risk warnings.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "SAFE_PRO_ANNOUNCEMENT",
+      "description": "Safe Pro announcement modal and banners.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    { "key": "SAFE_PRO", "description": "Safe Pro paid plan.", "scope": "PER_CHAIN", "defaultChains": [] },
+    { "key": "POLICIES", "description": "Workspace policies page.", "scope": "PER_CHAIN", "defaultChains": [] },
+    {
+      "key": "PROPOSER_GATING",
+      "description": "Gate proposers behind the Safe Pro plan.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "SPENDING_LIMIT_GATING",
+      "description": "Gate spending limits behind the Safe Pro plan.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "POLICY_INDEXER_SPENDING_LIMIT",
+      "description": "Spending-limit policies indexed by the policy indexer.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "WC_SAFE_APP_SUGGESTION",
+      "description": "Suggest a matching Safe App for a WalletConnect connection.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "TWO_FACTOR_AWARENESS_BANNER",
+      "description": "2FA awareness card in the Workspace sidebar.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "QUEUE_SERVICE",
+      "description": "Use the Safe Queue Service instead of the Transaction Service.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    },
+    {
+      "key": "POLICY_RECIPIENT_ALLOWLIST",
+      "description": "Recipient allowlist policy for Workspaces.",
+      "scope": "PER_CHAIN",
+      "defaultChains": []
+    }
   ]
 }
