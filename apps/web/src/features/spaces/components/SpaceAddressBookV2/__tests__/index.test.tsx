@@ -943,6 +943,29 @@ describe('SpaceAddressBookV2', () => {
       expect(within(rowOf(request.name)).getByText('Already in Workspace')).toBeInTheDocument()
     })
 
+    it('holds Accept until the Workspace address book has loaded', async () => {
+      mockRequests({ items: [spaceAddressBookRequestBuilder().build()] })
+      mockWorkspaceBook({ isLoading: true })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Pending (1)' }))
+
+      expect(screen.getByTestId('pending-requests-loading')).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'Accept' })).not.toBeInTheDocument()
+    })
+
+    it('reloads the Workspace address book when it failed, before offering Accept', async () => {
+      mockRequests({ items: [spaceAddressBookRequestBuilder().build()] })
+      const refetchBook = mockWorkspaceBook({ isError: true })
+
+      renderAddressBook()
+      await userEvent.click(screen.getByRole('tab', { name: 'Pending (1)' }))
+      await userEvent.click(within(screen.getByTestId('pending-requests-error')).getByRole('button'))
+
+      expect(screen.queryByRole('button', { name: 'Accept' })).not.toBeInTheDocument()
+      expect(refetchBook).toHaveBeenCalled()
+    })
+
     it('reloads the requests from the error state', async () => {
       const refetch = jest.fn()
       mockRequests({ isError: true, refetch })

@@ -136,14 +136,7 @@ const SpaceAddressBookV2 = () => {
               </TabsContent>
 
               <TabsContent value="pending">
-                <PendingTab
-                  requests={requests.items}
-                  workspaceItems={workspaceBook.items}
-                  isLoading={requests.isLoading}
-                  isError={requests.isError}
-                  onReload={requests.refetch}
-                  isAdmin={isAdmin}
-                />
+                <PendingTab requests={requests} workspaceBook={workspaceBook} isAdmin={isAdmin} />
               </TabsContent>
             </>
           )}

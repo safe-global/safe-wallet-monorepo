@@ -12,32 +12,37 @@ import { useMemberNameResolver } from '../../public/hooks/useMemberNameResolver'
 import useAddressCellProps from './useAddressCellProps'
 import { toPendingRequests } from './utils'
 
+type LoadState<T> = { items: T[]; isLoading: boolean; isError: boolean; refetch: () => void }
+
 type PendingTabProps = {
-  requests: AddressBookRequestItemDto[]
-  workspaceItems: SpaceAddressBookItemDto[]
-  isLoading: boolean
-  isError: boolean
-  onReload: () => void
+  requests: LoadState<AddressBookRequestItemDto>
+  /** Read before Accept is offered, so "Already in Workspace" can warn about an overwrite. */
+  workspaceBook: LoadState<SpaceAddressBookItemDto>
   isAdmin: boolean
 }
 
-const PendingTab = ({ requests, workspaceItems, isLoading, isError, onReload, isAdmin }: PendingTabProps) => {
+const PendingTab = ({ requests, workspaceBook, isAdmin }: PendingTabProps) => {
   const { configs } = useChains()
   const resolveMemberName = useMemberNameResolver()
   const addressCellProps = useAddressCellProps()
   const { approve, reject, reviewingId } = useAddressBookRequestActions()
 
   const rows = useMemo(
-    () => toPendingRequests(requests, workspaceItems, configs, resolveMemberName),
-    [requests, workspaceItems, configs, resolveMemberName],
+    () => toPendingRequests(requests.items, workspaceBook.items, configs, resolveMemberName),
+    [requests.items, workspaceBook.items, configs, resolveMemberName],
   )
+
+  const reload = () => {
+    if (requests.isError) requests.refetch()
+    if (workspaceBook.isError) workspaceBook.refetch()
+  }
 
   return (
     <TableCard>
-      {isLoading ? (
+      {requests.isLoading || workspaceBook.isLoading ? (
         <SpaceLoading subject="pending requests" testId="pending-requests-loading" />
-      ) : isError ? (
-        <SpaceLoadError onReload={onReload} testId="pending-requests-error" />
+      ) : requests.isError || workspaceBook.isError ? (
+        <SpaceLoadError onReload={reload} testId="pending-requests-error" />
       ) : (
         <PendingRequests
           requests={rows}
