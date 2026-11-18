@@ -9,7 +9,7 @@ import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import useSetScopedTxFlow from '@/components/tx-flow/safe-scope/useSetScopedTxFlow'
-import { ReplaceTxFlow } from '@/components/tx-flow/flows'
+import { ReplaceTxFlow } from '@/components/tx-flow/flows/ReplaceTxFlow'
 
 const RejectTxButton = ({
   txSummary,

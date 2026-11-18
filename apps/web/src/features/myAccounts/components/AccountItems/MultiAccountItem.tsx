@@ -1,22 +1,22 @@
 import type { SafeListProps } from '../SafesList'
-import { AccountItem } from '../AccountItem'
-import { useSafeItemData } from '../../hooks/useSafeItemData'
-import { useMultiAccountItemData } from '../../hooks/useMultiAccountItemData'
-import { SpacesFeature } from '@/features/spaces'
-import { useLoadFeature } from '@/features/__core__'
+import { AccountItem } from '../../public/components/AccountItem'
+import { useSafeItemData } from '../../public/hooks/useSafeItemData'
+import { useMultiAccountItemData } from '../../public/hooks/useMultiAccountItemData'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useState } from 'react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
 import { Separator } from '@safe-global/views/components/ui/separator'
-import { OVERVIEW_EVENTS, OVERVIEW_LABELS, trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
+import { trackEvent } from '@/services/analytics'
 import css from '@safe-global/views/features/myAccounts/components/AccountItems/styles.module.css'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import classnames from 'classnames'
-import { type MultiChainSafeItem, type SafeItem } from '@/hooks/safes'
+import type { MultiChainSafeItem, SafeItem } from '@safe-global/views/hooks/safes/types'
 import { AddNetworkButton } from '../AddNetworkButton'
 import MultiAccountContextMenu from '@/components/common/SafeListContextMenu/MultiAccountContextMenu'
 import { ContactSource } from '@/hooks/useAllAddressBooks'
 import { getOwnerAwaitingConfirmations } from '@/utils/transaction-guards'
+import SpaceSafeContextMenu from '@/features/spaces/public/components/SpaceSafeContextMenu'
 
 function MultiChainSubItem({
   safeItem,
@@ -90,7 +90,6 @@ type MultiAccountItemProps = {
 }
 
 const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = false }: MultiAccountItemProps) => {
-  const spaces = useLoadFeature(SpacesFeature)
   const {
     address,
     name,
@@ -163,7 +162,7 @@ const MultiAccountItem = ({ onLinkClick, multiSafeAccountItem, isSpaceSafe = fal
                 {isSpaceSafe ? (
                   <>
                     <div className="w-10" />
-                    <spaces.SpaceSafeContextMenu safeItem={multiSafeAccountItem} />
+                    <SpaceSafeContextMenu safeItem={multiSafeAccountItem} />
                   </>
                 ) : (
                   <MultiAccountContextMenu

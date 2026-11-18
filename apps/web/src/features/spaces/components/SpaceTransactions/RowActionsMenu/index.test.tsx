@@ -31,7 +31,7 @@ jest.mock('@/components/common/CheckWallet', () => ({
   default: ({ children }: { children: (ok: boolean) => ReactElement }) => children(mockIsOk.current),
 }))
 
-jest.mock('@/components/tx-flow/flows', () => ({
+jest.mock('@/components/tx-flow/flows/TokenTransferFlow', () => ({
   TokenTransferFlow: (props: { txNonce: number }) => <div>transfer flow {props.txNonce}</div>,
 }))
 jest.mock('@/components/tx-flow/flows/RejectTx', () => ({

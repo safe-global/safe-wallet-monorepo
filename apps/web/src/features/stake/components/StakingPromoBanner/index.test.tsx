@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import StakingPromoBanner from './index'
-import { OVERVIEW_EVENTS } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),

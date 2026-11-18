@@ -1,11 +1,10 @@
 import React, { type ReactElement } from 'react'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
 import SendButton from './SendButton'
-import { SwapFeature } from '@/features/swap'
-import { useLoadFeature } from '@/features/__core__'
 import { SWAP_LABELS } from '@/services/analytics/events/swaps'
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import css from './styles.module.css'
+import SwapButton from '@/features/swap/public/components/SwapButton'
 
 interface ActionButtonsProps {
   tokenInfo: Balance['tokenInfo']
@@ -26,8 +25,6 @@ export const ActionButtons = ({
   isSelected = false,
   onToggleAsset,
 }: ActionButtonsProps): ReactElement => {
-  const { SwapButton } = useLoadFeature(SwapFeature)
-
   if (mobile) {
     return (
       <div className={`flex flex-row ${css.mobileButtons}`}>

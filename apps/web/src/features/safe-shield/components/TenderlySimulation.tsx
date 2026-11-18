@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { Typography } from '@safe-global/views/components/ui/typography'
 import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
 import UpdateIcon from '@/public/images/safe-shield/update.svg'
-import { SeverityIcon } from './SeverityIcon'
+import { SeverityIcon } from '../public/components/SeverityIcon'
 import { TxInfoContext } from '@/components/tx-flow/TxInfoProvider'
 import { useCurrentChain } from '@/hooks/useChains'
 import {
@@ -20,10 +20,12 @@ import { useSigner } from '@/hooks/wallets/useWallet'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import { SEVERITY_COLORS } from '@/features/safe-shield/constants'
+import { SEVERITY_COLORS } from '../constants'
 import { useNestedTransaction } from './useNestedTransaction'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import { trackEvent, SAFE_SHIELD_EVENTS, MixpanelEventParams } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import css from './reveal.module.css'
 
 interface TenderlySimulationProps {

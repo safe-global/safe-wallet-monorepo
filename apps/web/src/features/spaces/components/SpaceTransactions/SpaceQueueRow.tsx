@@ -8,13 +8,14 @@ import { FEATURES } from '@safe-global/utils/utils/chains'
 import { formatDateTime, formatTimeInWords } from '@safe-global/utils/utils/date'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import QueueActions from '@/components/transactions/TxSummary/QueueActions'
-import { SwapFeature, useIsExpiredSwap } from '@/features/swap'
-import { useLoadFeature } from '@/features/__core__'
+import StatusLabel from '@/features/swap/public/components/StatusLabel'
+import useIsExpiredSwap from '@/features/swap/public/hooks/useIsExpiredSwap'
 import { useHasFeature } from '@/hooks/useChains'
 import useIsPending from '@/hooks/useIsPending'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
+import QueueRowSafeTag from './QueueRowSafeTag'
 import QueueTxDetails from './QueueTxDetails'
 import ConflictBracket from '@safe-global/views/features/spaces/components/SpaceQueue/ConflictBracket'
 import SignatureGauge from '@safe-global/views/features/spaces/components/SpaceQueue/SignatureGauge'
@@ -64,6 +65,8 @@ type SpaceQueueRowProps = {
   conflict?: ConflictOption
   /** False when a rejection already holds this nonce */
   canReject?: boolean
+  /** Set where rows of several Safes share a list, to name the row's Safe */
+  safeAddress?: string
   rowProps?: ComponentProps<'tr'>
 }
 
@@ -74,9 +77,9 @@ const SpaceQueueRow = ({
   nextNonce,
   conflict,
   canReject = true,
+  safeAddress,
   rowProps,
 }: SpaceQueueRowProps): ReactElement => {
-  const { StatusLabel } = useLoadFeature(SwapFeature)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const tx = item.transaction
   const isPending = useIsPending(tx.id)
@@ -94,6 +97,7 @@ const SpaceQueueRow = ({
 
       <TableCell className="py-2">
         <div className="flex min-h-10 min-w-0 items-center gap-2">
+          {safeAddress && <QueueRowSafeTag safeAddress={safeAddress} chainId={chainId} />}
           {showWarning && <MaliciousTxWarning withTooltip={!isImitation(tx)} />}
           <span className="flex shrink-0 items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-sm group-hover/transaction:bg-card">
             <QueueTxDetails.Type tx={tx} />

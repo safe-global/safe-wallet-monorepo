@@ -1,5 +1,5 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useIsExpiredSwap } from '@/features/swap'
+import useIsExpiredSwap from '@/features/swap/public/hooks/useIsExpiredSwap'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import type { SyntheticEvent } from 'react'
 import { type ReactElement } from 'react'
@@ -13,7 +13,7 @@ import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import useSetScopedTxFlow from '@/components/tx-flow/safe-scope/useSetScopedTxFlow'
-import { ConfirmTxFlow } from '@/components/tx-flow/flows'
+import { ConfirmTxFlow } from '@/components/tx-flow/flows/ConfirmTxFlow'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 
 const SignTxButton = ({

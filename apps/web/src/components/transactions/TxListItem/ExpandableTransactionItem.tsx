@@ -17,7 +17,8 @@ import { useContext, useState } from 'react'
 import { BatchExecuteHoverContext } from '@safe-global/views/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
 import css from '@safe-global/views/components/transactions/TxListItem/styles.module.css'
 import classNames from 'classnames'
-import { trackEvent, TX_LIST_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 
 type ExpandableTransactionItemProps = {
   isConflictGroup?: boolean

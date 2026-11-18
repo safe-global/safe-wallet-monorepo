@@ -12,7 +12,6 @@ import { TxFlowContext, initialContext, type TxFlowContextType } from '@/compone
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
-import { useLoadFeature } from '@/features/__core__'
 import { trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -28,7 +27,6 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { UNKNOWN_TOKEN_IN_POLICY_ERROR } from '../buildDesiredAllowances'
-import { buildSpendingLimitEdit } from '@/features/spending-limits/services'
 import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import ReviewSpendingLimitPolicy from '..'
 
@@ -61,9 +59,9 @@ jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),
 }))
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
-  useLoadFeature: jest.fn(),
+jest.mock('@/features/spending-limits/public/services/spendingLimitExecution', () => ({
+  createSpendingLimitsTx: (...args: unknown[]) => mockCreate(...args),
+  createSpendingLimitEditTx: (...args: unknown[]) => mockCreateEdit(...args),
 }))
 jest.mock('@/hooks/useAddressBook', () => ({ __esModule: true, default: () => ({}) }))
 jest.mock('../../hooks/useSpendingLimitSafeAccounts', () => ({
@@ -117,7 +115,6 @@ const builtTx = { data: { to: ZERO_ADDRESS } } as unknown as SafeTransaction
 
 const mockUseSafeScope = useSafeScope as jest.MockedFunction<typeof useSafeScope>
 const mockUseSafeInfo = useSafeInfo as jest.MockedFunction<typeof useSafeInfo>
-const mockUseLoadFeature = useLoadFeature as jest.Mock
 const mockUseOptions = useSpendingLimitTokenOptions as jest.MockedFunction<typeof useSpendingLimitTokenOptions>
 const mockUseExisting = useExistingSpendingLimits as jest.MockedFunction<typeof useExistingSpendingLimits>
 const mockReviewTransaction = ReviewTransaction as jest.Mock
@@ -179,13 +176,7 @@ describe('ReviewSpendingLimitPolicy', () => {
     jest.spyOn(useChainsModule, 'useCurrentChain').mockReturnValue(mockChain)
     mockUseSafeScope.mockReturnValue(scope)
     mockUseSafeInfo.mockReturnValue({ safe, safeAddress: SAFE_A, safeLoaded: true, safeLoading: false })
-    mockUseLoadFeature.mockReturnValue({
-      $isReady: true,
-      $isDisabled: false,
-      createSpendingLimitsTx: mockCreate,
-      createSpendingLimitEditTx: mockCreateEdit,
-      buildSpendingLimitEdit,
-    })
+    jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(true)
     mockCreateEdit.mockResolvedValue(builtTx)
     mockUseOptions.mockReturnValue(optionsResult([eth, usdc]))
     mockUseExisting.mockReturnValue({ limits: [], loading: false })
@@ -260,6 +251,16 @@ describe('ReviewSpendingLimitPolicy', () => {
     expectWaiting()
   })
 
+  it('does not build while spending limits are disabled on the chain', async () => {
+    jest.spyOn(useChainsModule, 'useHasFeature').mockReturnValue(false)
+
+    renderReview({ safeTx: builtTx })
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(setSafeTx).toHaveBeenLastCalledWith(undefined)
+    expect(mockCreate).not.toHaveBeenCalled()
+  })
+
   it('reports a token it cannot resolve instead of building', async () => {
     mockUseOptions.mockReturnValue(optionsResult([eth]))
 
@@ -324,13 +325,13 @@ describe('ReviewSpendingLimitPolicy', () => {
     expect(mockCreate).not.toHaveBeenCalled()
   })
 
-  it('clears a stale transaction before rebuilding, so it cannot stay signable under a new summary', () => {
+  it('clears a stale transaction before rebuilding, so it cannot stay signable under a new summary', async () => {
     mockCreate.mockReturnValue(new Promise(() => {}))
 
     renderReview({ safeTx: builtTx })
 
     expect(setSafeTx).toHaveBeenCalledWith(undefined)
-    expect(mockCreate).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(mockCreate).toHaveBeenCalledTimes(1))
   })
 
   it('ignores a build that resolves after the step has unmounted', async () => {
@@ -341,6 +342,7 @@ describe('ReviewSpendingLimitPolicy', () => {
     mockCreate.mockReturnValue(pending)
 
     const { unmount } = renderReview()
+    await waitFor(() => expect(mockCreate).toHaveBeenCalled())
     unmount()
 
     resolve(builtTx)

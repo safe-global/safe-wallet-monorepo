@@ -6,7 +6,9 @@ import {
   QueueNoMatches,
   QueueTruncatedNotice,
 } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueStates'
+import type { QueueGroupBy } from '@safe-global/views/features/spaces/components/SpaceQueue/types'
 import { POLLING_INTERVAL } from '@/config/constants'
+import { useAppDispatch, useAppSelector } from '@/store'
 import {
   hasSpaceQueueFilters,
   NO_SPACE_QUEUE_FILTERS,
@@ -14,13 +16,15 @@ import {
   type SpaceQueue,
   type SpaceQueueFilters,
 } from '../../hooks/useSpaceQueue'
+import { selectQueueGroupBy, setQueueGroupBy } from '../../public/store/spaceQueueViewSlice'
 import SpaceQueueTable from './SpaceQueueTable'
-import TransactionsToolbar from './TransactionsToolbar'
+import TransactionsToolbar from './TransactionsToolbar/TransactionsToolbar'
 import UnavailableSafesAlert from './UnavailableSafesAlert'
 
 const QueueBody = memo(function QueueBody({
   spaceId,
   queue,
+  groupBy,
   isFiltered,
   isSearching,
   isFetching,
@@ -29,6 +33,7 @@ const QueueBody = memo(function QueueBody({
 }: {
   spaceId: string
   queue: SpaceQueue
+  groupBy: QueueGroupBy
   isFiltered: boolean
   isSearching: boolean
   isFetching: boolean
@@ -46,7 +51,7 @@ const QueueBody = memo(function QueueBody({
       {!queue.isComplete && <QueueTruncatedNotice shown={queue.shownCount} total={queue.totalCount} />}
 
       {sections.length > 0 ? (
-        <SpaceQueueTable sections={sections} />
+        <SpaceQueueTable sections={sections} groupBy={groupBy} />
       ) : isFiltered || isSearching ? (
         <QueueNoMatches hasFilters={isFiltered} isSearching={isSearching} onClear={onClearFilters} />
       ) : (
@@ -61,6 +66,10 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
   const [search, setSearch] = useState('')
   // Remounts the toolbar so the search box, which holds its own text, empties too
   const [toolbarKey, setToolbarKey] = useState(0)
+  const dispatch = useAppDispatch()
+  const groupBy = useAppSelector(selectQueueGroupBy)
+  const tableGroupBy = useDeferredValue(groupBy)
+  const changeGroupBy = useCallback((next: QueueGroupBy) => dispatch(setQueueGroupBy(next)), [dispatch])
   // The toolbar shows a click at once; the table follows in a render that doesn't block it
   const queryFilters = useDeferredValue(filters)
   const querySearch = useDeferredValue(search)
@@ -86,12 +95,15 @@ const SpaceTransactionQueue = ({ spaceId }: { spaceId: string }): ReactElement =
         filters={filters}
         onFiltersChange={setFilters}
         onSearchChange={setSearch}
+        groupBy={groupBy}
+        onGroupByChange={changeGroupBy}
       />
 
       {queue ? (
         <QueueBody
           spaceId={spaceId}
           queue={queue}
+          groupBy={tableGroupBy}
           isFetching={isFetching}
           isFiltered={hasSpaceQueueFilters(queryFilters)}
           isSearching={querySearch !== ''}

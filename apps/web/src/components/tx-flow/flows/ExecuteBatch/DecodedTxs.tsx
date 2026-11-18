@@ -15,22 +15,20 @@ import SingleTxDecoded from '@/components/transactions/TxDetails/TxData/DecodedD
 import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { useState } from 'react'
 import { MultisendActionsHeader } from '@/components/transactions/TxDetails/TxData/DecodedData/Multisend'
-import { SafenetChecksFeature } from '@/features/safenet-checks'
-import { useLoadFeature } from '@/features/__core__'
+import SafenetRiskChip from '@/features/safenet-checks/public/components/SafenetRiskChip'
+import SafenetBatchWarning from '@/features/safenet-checks/public/components/SafenetBatchWarning'
 
 const BatchTxRiskChip = ({ details }: { details: TransactionDetails }) => {
-  const safenet = useLoadFeature(SafenetChecksFeature)
   const execution = details.detailedExecutionInfo
   if (!isMultisigDetailedExecutionInfo(execution)) return null
 
-  return <safenet.SafenetRiskChip safeTxHash={execution.safeTxHash} timestampMs={execution.submittedAt} />
+  return <SafenetRiskChip safeTxHash={execution.safeTxHash} timestampMs={execution.submittedAt} />
 }
 
 type DecodableTx = TransactionDetails & { txData: NonNullable<TransactionDetails['txData']> }
 
 const DecodedTxs = ({ txs }: { txs: TransactionDetails[] | undefined }) => {
   const [openMap, setOpenMap] = useState<Record<number, boolean>>()
-  const safenet = useLoadFeature(SafenetChecksFeature)
 
   if (!txs) return null
 
@@ -38,7 +36,7 @@ const DecodedTxs = ({ txs }: { txs: TransactionDetails[] | undefined }) => {
 
   return (
     <>
-      <safenet.SafenetBatchWarning txs={txs} />
+      <SafenetBatchWarning txs={txs} />
       <MultisendActionsHeader title="Batched transactions" setOpen={setOpenMap} amount={decodableTxs.length} compact />
 
       <Card variant="muted" size="none" className="mt-2">

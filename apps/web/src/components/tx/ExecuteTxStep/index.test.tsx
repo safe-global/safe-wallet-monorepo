@@ -2,9 +2,10 @@ import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { type ReactNode, useState } from 'react'
 import { ExecuteTxStep } from '.'
 import { TxModalContext } from '@/components/tx-flow'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { initialContext, TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import { createExistingTx } from '@/services/tx/tx-sender'
+import { createExistingTx } from '@/services/tx/tx-sender/create'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { faker } from '@faker-js/faker'
 import { AppRoutes } from '@/config/routes'
@@ -15,7 +16,10 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { mapLedgerError } from '@/services/onboard/ledger-errors'
 import { useHasFeature } from '@/hooks/useChains'
 
-jest.mock('@/services/tx/tx-sender', () => ({ createExistingTx: jest.fn() }))
+jest.mock('@/services/tx/tx-sender/create', () => ({
+  ...jest.requireActual('@/services/tx/tx-sender/create'),
+  createExistingTx: jest.fn(),
+}))
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: jest.fn(() => '1') }))
 jest.mock('@/hooks/useChains', () => ({ ...jest.requireActual('@/hooks/useChains'), useHasFeature: jest.fn() }))
 jest.mock('@/components/tx/confirmation-views/useTxPreview', () => ({

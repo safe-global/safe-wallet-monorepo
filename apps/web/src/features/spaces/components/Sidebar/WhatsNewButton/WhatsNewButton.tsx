@@ -8,11 +8,12 @@ import css from '../styles.module.css'
 import Track from '@/components/common/Track'
 import { BEAMER_ID } from '@/config/constants'
 import { useWhatsNewUpdates } from '@/hooks/useWhatsNewUpdates'
-import { OVERVIEW_EVENTS, MixpanelEventParams } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useAppSelector } from '@/store'
 import { CookieAndTermType, hasConsentFor } from '@/store/cookiesAndTermsSlice'
-import { WhatsNewDrawer } from '../WhatsNewDrawer'
-import { WhatsNewCornerCard } from '../WhatsNewCornerCard'
+import { WhatsNewDrawer } from '../WhatsNewDrawer/WhatsNewDrawer'
+import { WhatsNewCornerCard } from '../WhatsNewCornerCard/WhatsNewCornerCard'
 
 export const WhatsNewButton = (): ReactElement | null => {
   const hasUpdatesConsent = useAppSelector((state) => hasConsentFor(state, CookieAndTermType.UPDATES))

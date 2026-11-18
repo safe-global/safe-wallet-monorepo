@@ -7,7 +7,7 @@ import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-sco
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { AppRoutes } from '@/config/routes'
-import { CopyDeeplinkLabels } from '@/services/analytics'
+import { CopyDeeplinkLabels } from '@/services/analytics/events/txList'
 import TxShareLink from './TxShareLink'
 
 jest.mock('@/components/common/CopyTooltip', () => ({

@@ -7,7 +7,7 @@ import { type JsonRpcResponse } from '@walletconnect/jsonrpc-utils'
 import uniq from 'lodash/uniq'
 
 import { IS_PRODUCTION, LS_NAMESPACE, WC_PROJECT_ID } from '@/config/constants'
-import { EIP155, SAFE_COMPATIBLE_EVENTS, SAFE_COMPATIBLE_METHODS, SAFE_WALLET_METADATA } from '../constants'
+import { EIP155, SAFE_COMPATIBLE_EVENTS, SAFE_COMPATIBLE_METHODS, SAFE_WALLET_METADATA } from '../public/constants'
 import { getEip155ChainId, stripEip155Prefix } from './utils'
 import { invariant } from '@safe-global/utils/utils/helpers'
 

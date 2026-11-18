@@ -67,7 +67,7 @@ Stable architectural landmarks for fast orientation:
 | Web app entry  | `apps/web/src/pages/_app.tsx`                | Next.js app bootstrap, providers, `InitApp`          |
 | Redux store    | `apps/web/src/store/index.ts`                | `makeStore()`, middleware, RTK Query APIs            |
 | RTK Query APIs | `apps/web/src/store/api/gateway/`            | CGW API endpoints (balances, transactions, etc.)     |
-| Feature system | `apps/web/src/features/__core__/`            | `createFeatureHandle`, `useLoadFeature`, proxy stubs |
+| Feature gating | `apps/web/src/utils/gatedDynamic.tsx`        | Gated lazy wrapper for a feature's public components |
 | Page layout    | `apps/web/src/components/common/PageLayout/` | Main app layout, sidebar, header                     |
 | Safe info hook | `apps/web/src/hooks/useSafeInfo.ts`          | Current Safe address, owners, threshold              |
 | Chain config   | `packages/store/src/gateway/chains/`         | RTK Query chains endpoint with retry logic           |
