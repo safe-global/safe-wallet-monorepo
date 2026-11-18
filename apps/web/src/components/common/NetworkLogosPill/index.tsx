@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { cn } from '@safe-global/views/utils/cn'
-import NetworkLogosTooltip from '../NetworkLogosTooltip'
+import NetworkLogosTooltip from '@/components/common/NetworkLogosTooltip'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 /** Logo size inside the pill — matches the safe-selector dropdown's SafeRowStats stack. */

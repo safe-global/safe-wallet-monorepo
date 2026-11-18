@@ -12,27 +12,27 @@ jest.mock('@safe-global/utils/features/multichain/hooks/useCompatibleNetworks', 
 jest.mock('../useSafeCreationData', () => ({
   useSafeCreationData: jest.fn(),
 }))
-jest.mock('@/features/multichain/utils/utils', () => ({
+jest.mock('../utils', () => ({
   get isMultiChainSafeItem() {
-    return jest.requireActual('@/features/multichain/utils/utils').isMultiChainSafeItem
+    return jest.requireActual('../utils').isMultiChainSafeItem
   },
   get getSafeSetups() {
-    return jest.requireActual('@/features/multichain/utils/utils').getSafeSetups
+    return jest.requireActual('../utils').getSafeSetups
   },
   get getSharedSetup() {
-    return jest.requireActual('@/features/multichain/utils/utils').getSharedSetup
+    return jest.requireActual('../utils').getSharedSetup
   },
   get getDeviatingSetups() {
-    return jest.requireActual('@/features/multichain/utils/utils').getDeviatingSetups
+    return jest.requireActual('../utils').getDeviatingSetups
   },
   get predictSafeAddress() {
-    return jest.requireActual('@/features/multichain/utils/utils').predictSafeAddress
+    return jest.requireActual('../utils').predictSafeAddress
   },
   get predictAddressBasedOnReplayData() {
-    return jest.requireActual('@/features/multichain/utils/utils').predictAddressBasedOnReplayData
+    return jest.requireActual('../utils').predictAddressBasedOnReplayData
   },
   get hasMultiChainCreationFeatures() {
-    return jest.requireActual('@/features/multichain/utils/utils').hasMultiChainCreationFeatures
+    return jest.requireActual('../utils').hasMultiChainCreationFeatures
   },
   hasMultiChainAddNetworkFeature: jest.fn(),
 }))
@@ -40,7 +40,7 @@ jest.mock('@/features/multichain/utils/utils', () => ({
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
 import { useSafeCreationData } from '../useSafeCreationData'
-import { hasMultiChainAddNetworkFeature } from '@/features/multichain/utils/utils'
+import { hasMultiChainAddNetworkFeature } from '../utils'
 import { useAddNetworkState } from '../useAddNetworkState'
 
 const asChain = (chainId: string, overrides: Partial<Chain> = {}): Chain =>

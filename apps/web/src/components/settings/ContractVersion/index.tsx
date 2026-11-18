@@ -3,8 +3,8 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { CircleCheckIcon } from 'lucide-react'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
-import { MastercopyWarning } from '@/features/multichain'
-import { useMastercopyMigration } from '@/features/multichain/hooks/useMastercopyMigration'
+import MastercopyWarning from '@/features/multichain/public/MastercopyWarning'
+import { useMastercopyMigration } from '@/features/multichain/public/useMastercopyMigration'
 
 /**
  * Generates a GitHub release URL for a specific Safe contract version.

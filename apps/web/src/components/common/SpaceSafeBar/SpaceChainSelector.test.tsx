@@ -46,8 +46,9 @@ jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   ),
   TooltipContent: ({ children }: { children: ReactNode }) => <div data-testid="tooltip-content">{children}</div>,
 }))
-jest.mock('@/features/multichain', () => ({
-  CreateSafeOnNewChain: () => <div data-testid="create-safe-on-new-chain" />,
+jest.mock('@/features/multichain/public/CreateSafeOnNewChain', () => ({
+  __esModule: true,
+  default: () => <div data-testid="create-safe-on-new-chain" />,
 }))
 
 const renderWithTxFlow = (txFlow: TxModalContextType['txFlow']) => {

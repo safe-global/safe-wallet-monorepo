@@ -1,7 +1,7 @@
 import ModalDialog from '@/components/common/ModalDialog'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
-import { ChainIndicatorList } from '@/features/multichain'
+import ChainIndicatorList from '@/features/multichain/public/ChainIndicatorList'
 import { useAddressBooksDeleteByAddressV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
 import { useWorkspaceAddressBookLabel } from '@/features/spaces/hooks/useWorkspaceAddressBookLabel'

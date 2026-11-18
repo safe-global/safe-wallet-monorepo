@@ -1,7 +1,7 @@
 import type { ReactElement, ReactNode } from 'react'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import NetworkLogosList from '../NetworkLogosList'
+import NetworkLogosList from '@/components/common/NetworkLogosList'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 
 export type NetworkLogosTooltipProps = {

@@ -8,8 +8,8 @@ import {
 import { persistCounterfactualSafe } from '@/features/counterfactual/services/persistCounterfactualSafe'
 import { CF_TX_GROUP_KEY } from '@/features/counterfactual/constants'
 import PayNowPayLater from '@/features/counterfactual/components/PayNowPayLater'
-import { NetworkLogosList } from '@/features/multichain'
-import { predictAddressBasedOnReplayData } from '@/features/multichain/utils/utils'
+import NetworkLogosList from '@/components/common/NetworkLogosList'
+import { predictAddressBasedOnReplayData } from '@/features/multichain/public/utils'
 
 import type { StepRenderProps } from '@/components/new-safe/CardStepper/useCardStepper'
 import type { NewSafeFormData } from '@/components/new-safe/create'

@@ -4,7 +4,7 @@ import semverSatisfies from 'semver/functions/satisfies'
 import memoize from 'lodash/memoize'
 import { keccak256, ethers, solidityPacked, getCreate2Address, getAddress, zeroPadValue, type Provider } from 'ethers'
 import { getProxyFactoryDeployments } from '@safe-global/safe-deployments'
-import type { SafeSetup } from '../types'
+import type { SafeSetup } from './types'
 
 import {
   type UndeployedSafesState,

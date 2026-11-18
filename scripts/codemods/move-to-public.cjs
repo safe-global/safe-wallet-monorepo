@@ -63,7 +63,8 @@ function specifierFor(target, importer, originalSpec) {
   const keepExtension = /\.(json|css|scss|svg|png)$/.test(originalSpec)
   const stripped = keepExtension ? target : target.replace(/\.(d\.)?tsx?$/, '').replace(/\/index$/, '')
   const sameFeature = featureOf(target) !== undefined && featureOf(target) === featureOf(importer)
-  if (sameFeature || !target.startsWith(SRC + path.sep)) {
+  const inImporterFolder = target.startsWith(path.dirname(importer) + path.sep)
+  if (sameFeature || inImporterFolder || !target.startsWith(SRC + path.sep)) {
     const rel = path.relative(path.dirname(importer), stripped)
     return rel.startsWith('.') ? rel : `./${rel}`
   }

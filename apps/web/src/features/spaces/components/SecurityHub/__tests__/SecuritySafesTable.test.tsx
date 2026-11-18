@@ -27,8 +27,9 @@ jest.mock('@/components/common/ChainIndicator', () => {
   return { __esModule: true, default: MockCI }
 })
 
-jest.mock('@/features/multichain', () => ({
-  NetworkLogosList: ({ networks }: { networks: { chainId: string }[] }) => (
+jest.mock('@/components/common/NetworkLogosList', () => ({
+  __esModule: true,
+  default: ({ networks }: { networks: { chainId: string }[] }) => (
     <span data-testid="network-logos">{networks.length}</span>
   ),
 }))

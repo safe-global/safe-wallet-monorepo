@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { Paper } from '@mui/material'
-import NetworkLogosPill from './index'
+import NetworkLogosPill from './'
 import { StoreDecorator } from '@/stories/storeDecorator'
 
 const meta = {

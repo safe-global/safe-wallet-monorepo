@@ -6,7 +6,7 @@ import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from '@safe-glo
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { NetworkLogosTooltip } from '@/features/multichain'
+import NetworkLogosTooltip from '@/components/common/NetworkLogosTooltip'
 import { getSafeAppUrl } from '@/components/safe-apps/SafeAppCard'
 import SafeAppIconCard from '@safe-global/views/components/safe-apps/SafeAppIconCard'
 import SafeAppActionButtons from '@/components/safe-apps/SafeAppActionButtons'
