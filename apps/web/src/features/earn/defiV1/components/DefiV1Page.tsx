@@ -23,6 +23,7 @@ import {
 import type { AssetType, DefiV1Config, GroupBy, Operation, Opportunity, Position, Sort, SortKey } from '../types'
 import type { ActionResult } from './ActionPanel'
 import { CompareDialog } from './CompareDialog'
+import { MoveFundsDialog, type MoveMode } from './MoveFundsDialog'
 import { OpportunityDrawer } from './OpportunityDrawer'
 import { OpportunityToolbar } from './OpportunityToolbar'
 import { SetUpInvestmentDialog } from './SetUpInvestmentDialog'
@@ -71,6 +72,8 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const [showAll, setShowAll] = useState(false)
   const [compareIds, setCompareIds] = useState<string[]>([])
   const [isComparing, setIsComparing] = useState(false)
+  const [moveMode, setMoveMode] = useState<MoveMode>('swap')
+  const [isMoving, setIsMoving] = useState(false)
   const [operations, setOperations] = useState<Operation[]>(OPERATIONS)
   const [isCreating, setIsCreating] = useState(false)
   const [setupFor, setSetupFor] = useState<Opportunity | null>(null)
@@ -162,11 +165,23 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
             {DEFI_V1_COPY.tabName[config.framing]}
           </Typography>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => goTo(AppRoutes.swap)}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setMoveMode('swap')
+                setIsMoving(true)
+              }}
+            >
               <Repeat2 />
               {DEFI_V1_COPY.swap}
             </Button>
-            <Button variant="outline" onClick={() => goTo(AppRoutes.bridge)}>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setMoveMode('bridge')
+                setIsMoving(true)
+              }}
+            >
               <Orbit />
               {DEFI_V1_COPY.bridge}
             </Button>
@@ -208,6 +223,18 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
           </Button>
         </div>
       </section>
+
+      <MoveFundsDialog
+        open={isMoving}
+        mode={moveMode}
+        onModeChange={setMoveMode}
+        onInvest={() => {
+          setIsMoving(false)
+          openSetup(null)
+        }}
+        balances={idleByAsset(summary.idle, IDLE_MIX)}
+        onClose={() => setIsMoving(false)}
+      />
 
       <CompareDialog
         items={compareItems}
