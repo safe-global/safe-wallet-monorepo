@@ -95,6 +95,9 @@ export const playwrightSpecs = {
   'regression/auth0/step-up-workspace-rename.spec.ts': {},
   'regression/auth0/workspace-invite.spec.ts': {},
   'regression/auth0/workspace-trial-checkout.spec.ts': {},
+  'regression/workspace-address-book.spec.ts': {
+    scenarios: ['prepareBasicScenario'],
+  },
   'regression/step-up-auth.spec.ts': {},
   'smoke/balances.spec.ts': {
     scenarios: ['prepareAssetsScenario'],

@@ -183,6 +183,26 @@ export async function addWorkspaceSafes(
   })
 }
 
+/** Invites the user with `email` to the Workspace as a member. */
+export async function inviteMember(
+  admin: EmailSession,
+  workspaceId: string,
+  { email, name }: { email: string; name: string },
+): Promise<void> {
+  await gatewayRequest(admin, 'POST', `/v1/spaces/${workspaceId}/members/invite`, {
+    users: [{ type: 'email', email, role: 'MEMBER', name }],
+  })
+}
+
+/** Accepts the invite of the signed-in member, and waits until the gateway lists the Workspace for them. */
+export async function acceptInvite(member: EmailSession, workspaceId: string, name: string): Promise<void> {
+  await gatewayRequest(member, 'POST', `/v1/spaces/${workspaceId}/members/accept`, { name })
+  // The router guard sends a Workspace URL away until the gateway's (cached) Workspace list contains it.
+  await expect
+    .poll(async () => JSON.stringify(await gatewayRequest(member, 'GET', '/v1/spaces')), { timeout: 30_000 })
+    .toContain(workspaceId)
+}
+
 const billingSubscriptionsUrl = (uuid: string): string =>
   `${new URL(cgwBaseUrl()).origin}/billing/__test/customers/${uuid}/subscriptions`
 
