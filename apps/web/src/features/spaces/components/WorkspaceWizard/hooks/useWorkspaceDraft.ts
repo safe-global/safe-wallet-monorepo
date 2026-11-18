@@ -7,7 +7,7 @@ import {
   updateWorkspaceDraft,
   usableDraft,
   type WorkspaceDraftFields,
-} from '@/features/spaces/store'
+} from '../../../public/store/workspaceDraftSlice'
 
 /** The signed-in user's onboarding draft; `isReady` is false until we know who the user is. */
 export const useWorkspaceDraft = () => {

@@ -4,8 +4,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-globa
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import InfoIcon from '@safe-global/views/assets/images/notifications/info.svg'
-// eslint-disable-next-line no-restricted-imports -- deep import keeps this lazy chunk from pulling the whole safe-shield barrel (same as HnQueueAssessment)
-import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
+import { SeverityIcon } from '@/features/safe-shield/public/components/SeverityIcon'
 import { LockedCheckRow } from '@safe-global/views/features/safe-shield/components/LockedCheckRow'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
 import type { SafenetCheckView } from '@safe-global/utils/features/safenet-checks/hooks'

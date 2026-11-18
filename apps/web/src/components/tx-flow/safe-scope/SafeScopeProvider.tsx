@@ -24,6 +24,8 @@ import { buildSafeScopeKey } from '@safe-global/views/components/tx-flow/safe-sc
 type SafeScopeProviderProps = {
   /** Start with a Safe already selected (e.g. signing an existing transaction). Omit when the flow's first step picks it. */
   initial?: SafeScopeTarget
+  /** Keep the Safe info fresh while the scope is mounted. Off where many scopes render at once, e.g. a Space queue. */
+  pollSafeInfo?: boolean
   children: ReactNode
 }
 
@@ -34,7 +36,7 @@ type SafeScopeProviderProps = {
  * for different Safes in one session. Every effect below is keyed on the target, so switching Safe
  * mid-flow discards the previous SafeState, provider and SDK before the new ones resolve.
  */
-export const SafeScopeProvider = ({ initial, children }: SafeScopeProviderProps): ReactElement => {
+export const SafeScopeProvider = ({ initial, pollSafeInfo = true, children }: SafeScopeProviderProps): ReactElement => {
   const [target, setTarget] = useState<SafeScopeTarget | undefined>(initial)
   const scopeKey = target ? buildSafeScopeKey(target.chainId, target.safeAddress) : undefined
 
@@ -47,7 +49,7 @@ export const SafeScopeProvider = ({ initial, children }: SafeScopeProviderProps)
   // while B is still in flight.
   const { currentData, error, isLoading, isFetching } = useSafesGetSafeV1Query(
     target ? { chainId: target.chainId, safeAddress: target.safeAddress } : skipToken,
-    { pollingInterval: POLLING_INTERVAL },
+    { pollingInterval: pollSafeInfo ? POLLING_INTERVAL : 0 },
   )
   // CGW only serves deployed Safes, so a 200 here IS the deployment proof — same as `useLoadSafeInfo`.
   // Counterfactual (undeployed) Safes are local-only and out of scope for Space flows (see WA-3147).

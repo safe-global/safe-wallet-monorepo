@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { fn } from 'storybook/test'
 import { useState } from 'react'
 
 const action = (name: string) => fn().mockName(name)
-import SafeSelectorDropdown from './index'
+import SafeSelectorDropdown from '../../public/components/SafeSelectorDropdown'
 import type { SafeItemData } from '@safe-global/views/features/spaces/components/SafeSelectorDropdown/types'
 
 const defaultSetup = createMockStory({

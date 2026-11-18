@@ -1,12 +1,15 @@
 import { fireEvent, render, screen } from '@/tests/test-utils'
-import { CONTACT_SALES_URL } from '@/features/spaces/constants'
+import { CONTACT_SALES_URL } from '../../../constants'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import SeatLimitBanner from '../SeatLimitBanner'
 
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 const mockTrackPlanSelectionStarted = jest.fn()
-jest.mock('../../Plans/planSelection', () => ({
+jest.mock('../../../public/services/planSelection', () => ({
   trackPlanSelectionStarted: (p: unknown) => mockTrackPlanSelectionStarted(p),
 }))
 

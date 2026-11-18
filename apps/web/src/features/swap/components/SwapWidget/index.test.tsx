@@ -20,7 +20,7 @@ jest.mock('@cowprotocol/widget-react', () => ({
   CowSwapWidget: jest.fn(() => <div data-testid="cow-swap-widget" />),
 }))
 jest.mock('@/hooks/safe-apps/useCustomAppCommunicator')
-jest.mock('@/features/swap/useSwapConsent')
+jest.mock('../../useSwapConsent')
 jest.mock('@/hooks/useSafeInfo')
 jest.mock('@/hooks/useChainId')
 jest.mock('@/hooks/wallets/useWallet')
@@ -36,7 +36,7 @@ jest.mock('@/store/api/ofac', () => ({
 
 const mockCowSwapWidget = jest.requireMock('@cowprotocol/widget-react').CowSwapWidget as jest.Mock
 const mockUseGetIsSanctionedQuery = jest.requireMock('@/store/api/ofac').useGetIsSanctionedQuery as jest.Mock
-const mockUseSwapConsent = jest.requireMock('@/features/swap/useSwapConsent').default as jest.Mock
+const mockUseSwapConsent = jest.requireMock('../../useSwapConsent').default as jest.Mock
 const acceptConsent = jest.fn()
 
 type WidgetProps = { params: CowSwapWidgetParams; listeners: CowWidgetEventListeners }

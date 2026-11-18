@@ -1,5 +1,5 @@
 import { getMultiChainSafeId } from '@safe-global/views/features/spaces/components/SelectSafesOnboarding/utils/safeIds'
-import type { WorkspaceDraft } from '@/features/spaces/store'
+import type { WorkspaceDraft } from '../../../public/store/workspaceDraftSlice'
 import type { AllSafeItems, MultiChainSafeItem, SafeItem } from '@/hooks/safes'
 import { server } from '@/tests/server'
 import { signedInAuthState } from '@/tests/builders/authState'

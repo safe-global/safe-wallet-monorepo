@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker'
 import type { TrialSize } from '@safe-global/views/features/spaces/components/Plans/types'
 import { DISALLOWED_CHARACTER_MESSAGE } from '@safe-global/utils/validation/names'
-import type { DraftInvite, DraftSafe } from '@/features/spaces/store'
+import type { DraftInvite, DraftSafe } from '../../../public/store/workspaceDraftSlice'
 import { fakerChecksummedAddress } from '@/tests/test-utils'
 import { fakeWorkspaceName, workspaceDraftBuilder } from '@/tests/builders/workspaceDraft'
 import { MemberRole } from '../../../memberRole'

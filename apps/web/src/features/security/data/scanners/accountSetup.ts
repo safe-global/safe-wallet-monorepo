@@ -1,5 +1,5 @@
 import type { SecurityScanner } from './types'
-import { getSeverityFromScore } from './constants'
+import { getSeverityFromScore } from '../../public/constants'
 import { hasRecoverySetup } from './recoveryDetection'
 
 export const accountSetupScanner: SecurityScanner = {

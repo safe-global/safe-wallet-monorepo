@@ -1,6 +1,6 @@
 import type { CreateSpaceSetupDto, SpaceSetupDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { sanitizeName } from '@safe-global/utils/validation/names'
-import type { WorkspaceDraft, WorkspaceDraftFields } from '@/features/spaces/store'
+import type { WorkspaceDraft, WorkspaceDraftFields } from '../../public/store/workspaceDraftSlice'
 import { toMemberRole } from '../../memberRole'
 import { buildInviteUserPayload } from '../AddMemberModal/utils'
 import { toInviteName } from '../InviteMembersOnboarding/hooks/useInviteForm'

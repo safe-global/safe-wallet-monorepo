@@ -11,7 +11,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@safe-global/views/components/ui/alert-dialog'
-import { SuccessScreenFlow, NestedTxSuccessScreenFlow } from './flows'
+import { SuccessScreenFlow } from '@/components/tx-flow/flows/SuccessScreenFlow'
+import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows/NestedTxSuccessScreenFlow'
 import { useWalletContext } from '@/hooks/wallets/useWallet'
 import { usePreventNavigation } from '@/hooks/usePreventNavigation'
 import { useTopbarElevation } from '@/hooks/useTopbarElevation'

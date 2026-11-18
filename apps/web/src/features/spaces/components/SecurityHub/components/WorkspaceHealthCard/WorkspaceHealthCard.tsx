@@ -5,9 +5,8 @@ import { Card } from '@safe-global/views/components/ui/card'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
-import type { ScanResult, SafeGrade, ScoreBandDef } from '@/features/security/types'
-import { SecurityFeature } from '@/features/security'
-import { useLoadFeature } from '@/features/__core__'
+import type { ScanResult, SafeGrade, ScoreBandDef } from '@/features/security/public/types'
+import { useSecurityServices } from '@/features/security/public/hooks/useSecurityServices'
 import SafeGradeChip, {
   SAFE_GRADE_LABEL,
 } from '@safe-global/views/features/spaces/components/SecurityHub/components/SafeGradeChip/SafeGradeChip'
@@ -43,7 +42,7 @@ type Aggregate = AggregateCounts & {
 }
 
 // Pure reducer — no feature-service calls. The score band (label/colour) is derived
-// inside the component where useLoadFeature gives access to the scoring utils.
+// inside the component, where useSecurityServices gives access to the scoring utils.
 const computeCounts = (scanResults: Record<string, Record<string, ScanResult>>): AggregateCounts | null => {
   let passing = 0
   let applicableCount = 0
@@ -83,16 +82,16 @@ const WorkspaceHealthCard = ({
   onRescan,
   scanIncomplete = false,
 }: WorkspaceHealthCardProps): ReactElement => {
-  const security = useLoadFeature(SecurityFeature)
+  const security = useSecurityServices()
 
   const aggregate = useMemo<Aggregate | null>(() => {
     const counts = computeCounts(scanResults)
-    if (!counts || !security.$isReady) return null
+    if (!counts || !security) return null
     const clearRatio = counts.applicableCount > 0 ? counts.passing / counts.applicableCount : 0
     const scorePct = Math.round(clearRatio * 100)
     const band = security.getScoreBand(scorePct, counts.hasCriticalIssue)
     return { ...counts, band, scorePct }
-  }, [scanResults, security.$isReady, security.getScoreBand])
+  }, [scanResults, security])
 
   // Per-Safe grade counts for the filter chips.
   // Iterate over `safes` (not scanResults) so multichain safes are counted once per
@@ -100,7 +99,7 @@ const WorkspaceHealthCard = ({
   // the table's filter semantics ("show safes where ANY chain matches this grade").
   const gradeCounts = useMemo(() => {
     const counts: Record<SafeGrade, number> = { critical: 0, at_risk: 0, needs_attention: 0, passing: 0 }
-    if (!security.$isReady) return counts
+    if (!security) return counts
     for (const safe of safes) {
       const gradesFound = new Set<SafeGrade>()
       for (const chain of safe.chainEntries) {
@@ -112,7 +111,7 @@ const WorkspaceHealthCard = ({
       for (const grade of gradesFound) counts[grade]++
     }
     return counts
-  }, [safes, scanResults, security.$isReady, security.scanKey, security.getSafeGrade])
+  }, [safes, scanResults, security])
 
   // Show skeleton only when we have no data at all. Once any Safe has completed, render the
   // aggregate incrementally — it updates as more results arrive. The re-scan row below
@@ -180,7 +179,7 @@ const WorkspaceHealthCard = ({
               </Button>
 
               <Typography variant="paragraph-mini" color="muted">
-                Last scanned: {security.$isReady ? security.formatTimestamp(lastScannedAt) : ''}
+                Last scanned: {security ? security.formatTimestamp(lastScannedAt) : ''}
               </Typography>
             </div>
           )}

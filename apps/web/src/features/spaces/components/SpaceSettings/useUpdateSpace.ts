@@ -9,7 +9,7 @@ import { sanitizeName } from '@safe-global/utils/validation/names'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/utils/elevation'
 
 export type UpdateSpaceFormData = {
   name: string

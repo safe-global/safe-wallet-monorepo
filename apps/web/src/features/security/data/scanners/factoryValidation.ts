@@ -1,7 +1,7 @@
 import { getProxyFactoryDeployments } from '@safe-global/safe-deployments'
 import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
 import type { SecurityScanner } from './types'
-import { KNOWN_SAFE_VERSIONS, getSeverityFromScore } from './constants'
+import { KNOWN_SAFE_VERSIONS, getSeverityFromScore } from '../../public/constants'
 
 const isKnownFactory = (address: string, chainId: string): boolean =>
   hasMatchingDeployment(getProxyFactoryDeployments, address, chainId, KNOWN_SAFE_VERSIONS)

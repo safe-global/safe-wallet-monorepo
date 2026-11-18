@@ -25,15 +25,16 @@ import type {
 } from '@safe-global/store/gateway/AUTO_GENERATED/safe-shield'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
-import { useSafenetShieldState, type SafenetShieldState } from '@/features/safenet-checks'
+import { useSafenetShieldState } from '@/features/safenet-checks/public/hooks/useSafenetShieldState'
+import type { SafenetShieldState } from '@/features/safenet-checks/public/hooks/useSafenetShieldState'
 import { Severity, StatusGroup } from '@safe-global/utils/features/safe-shield/types'
 import { ErrorType, getErrorInfo } from '@safe-global/utils/features/safe-shield/utils/errors'
 import { BASE_DELAY, STAGGER_STEP } from '../../utils/revealDelays'
 
 // Mock hooks
 jest.mock('../../hooks/useCheckSimulation')
-jest.mock('@/features/safenet-checks', () => ({
-  ...jest.requireActual('@/features/safenet-checks'),
+jest.mock('@/features/safenet-checks/public/hooks/useSafenetShieldState', () => ({
+  ...jest.requireActual('@/features/safenet-checks/public/hooks/useSafenetShieldState'),
   useSafenetShieldState: jest.fn(),
 }))
 

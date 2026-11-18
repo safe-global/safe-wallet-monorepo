@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import type { SafeApp as SafeAppData } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'
-import type { BrowserPermission } from '@/hooks/safe-apps/permissions'
+import type { BrowserPermission } from '@/hooks/safe-apps/permissions/useBrowserPermissions'
 import useChainId from '@/hooks/useChainId'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import type { AllowedFeatures } from '@safe-global/views/components/safe-apps/types'

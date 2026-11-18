@@ -6,7 +6,7 @@ import { generateDataRowValue, TxDataRow } from '@/components/transactions/TxDet
 import ColorCodedTxAccordion from '@/components/tx/ColorCodedTxAccordion'
 import RecoverySigners from '../RecoverySigners'
 import RecoveryDescription from '../RecoveryDescription'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import type { RecoveryQueueItem } from '../../public/types'
 import { formatRecoveryTime } from '../../services/formatRecoveryTime'
 import classNames from 'classnames'
 

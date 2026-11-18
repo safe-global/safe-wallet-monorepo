@@ -7,9 +7,8 @@ import { NESTED_SAFE_EVENTS, NESTED_SAFE_LABELS } from '@/services/analytics/eve
 import { useState, useMemo, type ReactElement } from 'react'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { useCurrentChain } from '@/hooks/useChains'
-import { useLoadFeature } from '@/features/__core__'
-import { type SafeItem } from '@/hooks/safes'
-import { MyAccountsFeature, useSafeItemData } from '@/features/myAccounts'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
+import { useSafeItemData } from '@/features/myAccounts/public/hooks/useSafeItemData'
 import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
@@ -19,6 +18,13 @@ import type { NestedSafeWithStatus } from '@/hooks/useNestedSafesVisibility'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import WarningIcon from '@safe-global/views/assets/images/notifications/warning.svg'
 import { SimilarityGroupContainer } from '@safe-global/views/components/nested-safes/NestedSafesList/SimilarityGroupContainer'
+import AccountItemButton from '@/features/myAccounts/public/components/AccountItemButton'
+import AccountItemLink from '@/features/myAccounts/public/components/AccountItemLink'
+import AccountItemCheckbox from '@safe-global/views/features/myAccounts/components/AccountItem/AccountItemCheckbox'
+import AccountItemIcon from '@/features/myAccounts/public/components/AccountItemIcon'
+import AccountItemInfo from '@/features/myAccounts/public/components/AccountItemInfo'
+import AccountItemGroup from '@safe-global/views/features/myAccounts/components/AccountItem/AccountItemGroup'
+import AccountItemBalance from '@/features/myAccounts/public/components/AccountItemBalance'
 
 const MAX_NESTED_SAFES = 5
 
@@ -43,19 +49,7 @@ function NestedSafeItem({
   showWarning: boolean
   showSimilarityWarning: boolean
 }) {
-  const {
-    AccountItemButton,
-    AccountItemLink,
-    AccountItemCheckbox,
-    AccountItemIcon,
-    AccountItemInfo,
-    AccountItemGroup,
-    AccountItemBalance,
-    $isReady,
-  } = useLoadFeature(MyAccountsFeature)
   const { href, name, threshold, owners, elementRef, trackingLabel } = useSafeItemData(safeItem, { safeOverview })
-
-  if (!$isReady) return null
 
   const warningIcon = showWarning ? (
     <Tooltip>

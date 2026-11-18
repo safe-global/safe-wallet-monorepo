@@ -5,7 +5,7 @@ import RecoveryInfo from '@safe-global/views/features/recovery/components/Recove
 import RecoveryStatus from '../RecoveryStatus'
 import ExecuteRecoveryButton from '../ExecuteRecoveryButton'
 import useWallet from '@/hooks/wallets/useWallet'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import type { RecoveryQueueItem } from '../../public/types'
 import classNames from 'classnames'
 import css from '@/components/transactions/TxSummary/styles.module.css'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'

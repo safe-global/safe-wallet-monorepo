@@ -1,13 +1,17 @@
 import { AppRoutes } from '@/config/routes'
-import { useIsRecoverySupported, useRecovery } from '@/features/recovery'
+import { useIsRecoverySupported } from '@/features/recovery/public/hooks/useIsRecoverySupported'
+import useRecovery from '@/features/recovery/public/hooks/useRecovery'
 import dynamic from '@/utils/dynamic'
-import { OVERVIEW_EVENTS, trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
+import { trackEvent } from '@/services/analytics'
 import { useRouter } from 'next/router'
 import { useContext } from 'react'
 import ModalDialog from '@/components/common/ModalDialog'
 import ChoiceButton from '@safe-global/views/components/common/ChoiceButton'
 import { TxModalContext } from '@/components/tx-flow'
-import { AddOwnerFlow, TokenTransferFlow, UpsertRecoveryFlow } from '@/components/tx-flow/flows'
+import { AddOwnerFlow } from '@/components/tx-flow/flows/AddOwnerFlow'
+import { TokenTransferFlow } from '@/components/tx-flow/flows/TokenTransferFlow'
+import { UpsertRecoveryFlow } from '@/components/tx-flow/flows/UpsertRecoveryFlow'
 const ActivateAccountFlow = dynamic(() => import('../ActivateAccountFlow'))
 import { useTxBuilderApp } from '@/hooks/safe-apps/useTxBuilderApp'
 import AssetsIcon from '@safe-global/views/assets/images/sidebar/assets.svg'
@@ -16,7 +20,7 @@ import RecoveryPlus from '@safe-global/views/assets/images/common/recovery-plus.
 import SwapIcon from '@/public/images/common/swap.svg'
 import SafeLogo from '@safe-global/views/assets/images/logo-no-text.svg'
 import { Wrench } from 'lucide-react'
-import { useIsSwapFeatureEnabled } from '@/features/swap'
+import useIsSwapFeatureEnabled from '@/features/swap/public/hooks/useIsSwapFeatureEnabled'
 
 const FirstTxFlow = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const txBuilder = useTxBuilderApp()

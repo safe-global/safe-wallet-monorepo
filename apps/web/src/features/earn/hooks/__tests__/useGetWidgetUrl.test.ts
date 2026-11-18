@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import useGetWidgetUrl from '../useGetWidgetUrl'
-import { WIDGET_TESTNET_URL, WIDGET_PRODUCTION_URL } from '../../constants'
+import { WIDGET_TESTNET_URL, WIDGET_PRODUCTION_URL } from '../../public/constants'
 
 const mockUseDarkMode = jest.fn()
 const mockUseChainId = jest.fn()

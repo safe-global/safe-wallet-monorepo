@@ -8,29 +8,11 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { isMultiSendCalldata } from '@/utils/transaction-calldata'
 import { decodeMultiSendData } from '@safe-global/protocol-kit'
 import { multicall } from '@safe-global/utils/utils/multicall'
+import type { RecoveryQueueItem, RecoveryState, RecoveryStateItem } from '../public/types'
 
 export const MAX_RECOVERER_PAGE_SIZE = 100
 
 type AddedEvent = TransactionAddedEvent.Log
-export type RecoveryQueueItem = AddedEvent & {
-  timestamp: bigint
-  validFrom: bigint
-  expiresAt: bigint | null
-  isMalicious: boolean
-  executor: string
-}
-
-export type RecoveryStateItem = {
-  address: string
-  recoverers: Array<string>
-  expiry: bigint
-  delay: bigint
-  txNonce: bigint
-  queueNonce: bigint
-  queue: Array<RecoveryQueueItem>
-}
-
-export type RecoveryState = Array<RecoveryStateItem>
 
 export function _isMaliciousRecovery({
   chainId,

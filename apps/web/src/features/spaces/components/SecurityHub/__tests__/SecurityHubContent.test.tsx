@@ -9,14 +9,12 @@ jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
 
-jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({
-    $isReady: true,
+jest.mock('@/features/security/public/hooks/useSecurityServices', () => ({
+  useSecurityServices: () => ({
     scanKey: (address: string, chainId: string) => `${chainId}:${address}`,
     getSafeGrade: (results: { grade: string }) => results.grade,
   }),
 }))
-jest.mock('@/features/security', () => ({ SecurityFeature: 'security' }))
 
 const reconciledSafes = { isLoadingSpacesSafes: false, isLoadingOverviews: false, safes: [] as SpaceSafeEntry[] }
 jest.mock('../hooks/useReconciledSpaceSafes', () => ({

@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import Link, { type LinkProps } from 'next/link'
-import { DrawerFooter } from '@/components/common/Drawer'
+import { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import { Typography } from '@safe-global/views/components/ui/typography'

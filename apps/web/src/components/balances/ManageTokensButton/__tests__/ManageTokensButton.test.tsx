@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
 import ManageTokensButton from '../index'
 import * as analytics from '@/services/analytics'
+import * as analyticsAssets from '@/services/analytics/events/assets'
 import * as store from '@/store'
 import * as useChains from '@/hooks/useChains'
 import * as useChainId from '@/hooks/useChainId'
@@ -8,16 +9,18 @@ import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { TOKEN_LISTS } from '@/store/settingsSlice'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 
-jest.mock('@/services/analytics', () => ({
-  ...(
-    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
-  ).createAnalyticsMock(),
+jest.mock('@/services/analytics/events/assets', () => ({
   ASSETS_EVENTS: {
     OPEN_TOKEN_LIST_MENU: { action: 'Open token list menu', category: 'assets' },
     SHOW_ALL_TOKENS: { action: 'Show all tokens', category: 'assets' },
     SHOW_DEFAULT_TOKENS: { action: 'Show default tokens', category: 'assets' },
     SHOW_HIDDEN_ASSETS: { action: 'Show hidden assets', category: 'assets' },
   },
+}))
+jest.mock('@/services/analytics', () => ({
+  ...(
+    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
+  ).createAnalyticsMock(),
 }))
 
 describe('ManageTokensButton', () => {
@@ -84,7 +87,7 @@ describe('ManageTokensButton', () => {
     const button = screen.getByTestId('manage-tokens-button')
     fireEvent.click(button)
 
-    expect(analytics.trackEvent).toHaveBeenCalledWith(analytics.ASSETS_EVENTS.OPEN_TOKEN_LIST_MENU)
+    expect(analytics.trackEvent).toHaveBeenCalledWith(analyticsAssets.ASSETS_EVENTS.OPEN_TOKEN_LIST_MENU)
   })
 
   it('should show "Hide tokens" option in menu', async () => {

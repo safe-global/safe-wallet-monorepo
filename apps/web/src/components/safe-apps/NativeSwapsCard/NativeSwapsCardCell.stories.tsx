@@ -1,6 +1,6 @@
 import type { Decorator, Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import listCss from '@/components/safe-apps/SafeAppList/styles.module.css'
 import NativeSwapsCardCell from './NativeSwapsCardCell'
 
