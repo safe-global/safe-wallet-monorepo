@@ -1,7 +1,6 @@
 import FirstSteps from '@/components/dashboard/FirstSteps'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { type ReactElement, useMemo } from 'react'
-import dynamic from '@/utils/dynamic'
 import PendingTxsList from '@/components/dashboard/PendingTxs/PendingTxsList'
 import AssetsWidget from '@/components/dashboard/Assets'
 import Overview from '@/components/dashboard/Overview/Overview'
@@ -28,8 +27,7 @@ import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import HnPendingBanner from '@/features/hypernative/public/components/HnPendingBanner'
 import StakingPromoBanner from '@/features/stake/public/components/StakingPromoBanner'
 import NonPinnedWarning from '@/features/myAccounts/public/components/NonPinnedWarning'
-
-const PositionsWidget = dynamic(() => import('@/features/positions/public/components/PositionsWidget'))
+import PositionsWidget from '@/features/positions/public/components/PositionsWidget'
 
 const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()

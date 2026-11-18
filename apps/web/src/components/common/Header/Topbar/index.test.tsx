@@ -232,6 +232,7 @@ describe('Topbar', () => {
         WalletPopover: () => null,
         GlobalSearchModal: () => null,
         GlobalSearchInput: () => null,
+        // The real UI, not the gated lazy wrapper: it must render on the first pass, without NATIVE_WALLETCONNECT
         WalletConnectWidget: jest.requireActual('@/features/walletconnect/components/WalletConnectUi').default,
       })
     })

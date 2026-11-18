@@ -47,7 +47,7 @@ export default RecoveryList
 
 A public component that must render while the current chain has the flag off uses `dynamic` from `@/utils/dynamic` instead, with a one-line comment that gives the reason. Examples are in `features/multichain/public/components/`: those components check the flags of each target chain, or warn about the Safe itself.
 
-A small component that other code renders inline or in a fixed slot, such as an icon (`features/safe-shield/public/components/SeverityIcon.tsx`), a list-row part (`features/myAccounts/public/components/AccountItemInfo.tsx`) or a sidebar banner, may live in `public/` without a lazy wrapper: a lazy one would flicker or leave an empty slot. Its consumer checks the flag. A context provider, such as `features/safe-shield/public/components/SafeShieldProvider.tsx`, is static for the same reason: a lazy provider would hold back the children it wraps.
+A small component that other code renders inline or in a fixed slot, such as an icon (`features/safe-shield/public/components/SeverityIcon.tsx`), a list-row part (`features/myAccounts/public/components/AccountItemInfo.tsx`) or a sidebar banner, may live in `public/` without a lazy wrapper: a lazy one would flicker or leave an empty slot. Its consumer checks the flag. A context provider, such as `features/safe-shield/public/components/SafeShieldProvider.tsx`, is static for the same reason: a lazy provider would hold back the children it wraps. A component whose failed chunk would hide risk information before signing, such as `SafeShieldWidget` and `HnAnalysisGroupCard`, is static too.
 
 ## Public hooks are the exception
 

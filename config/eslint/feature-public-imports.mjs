@@ -25,3 +25,11 @@ export const featurePublicImportExpressionRules = [
     message: MESSAGE,
   },
 ]
+
+// The import() form of crossFeatureRelativeImportPatterns, for files inside src/features.
+export const crossFeatureImportExpressionRules = [
+  {
+    selector: `ImportExpression[source.value=/^(\\.\\.\\x2F)+(${FEATURE_NAMES.join('|')})\\x2F(?!public\\x2F)/]`,
+    message: MESSAGE,
+  },
+]
