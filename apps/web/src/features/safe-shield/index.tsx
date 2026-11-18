@@ -48,8 +48,4 @@ const SafeShieldWidget = (): ReactElement => {
 
 export default SafeShieldWidget
 
-// Recipient analysis hook (used by tx-flow)
-
-// Analysis card components (used by hypernative)
-export { AnalysisGroupCard } from '@/features/safe-shield/components/AnalysisGroupCard/AnalysisGroupCard'
 export type { AnalysisGroupCardProps } from '@/features/safe-shield/components/AnalysisGroupCard/AnalysisGroupCard'

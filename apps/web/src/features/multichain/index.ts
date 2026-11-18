@@ -2,29 +2,12 @@ import dynamic from '@/utils/dynamic'
 
 export type { SafeSetup, SafeOrMultichainSafe, CreateSafeOnNewChainForm } from './types'
 
-export { useIsMultichainSafe } from '@/features/multichain/hooks/useIsMultichainSafe'
-export { useSafeCreationData } from '@/features/multichain/hooks/useSafeCreationData'
-export { useAddNetworkState } from '@/features/multichain/hooks/useAddNetworkState'
-export { useMastercopyMigration } from '@/features/multichain/hooks/useMastercopyMigration'
 export type {
   AddNetworkState,
   AddNetworkUnavailableReason,
   AvailableNetwork,
 } from '@/features/multichain/hooks/useAddNetworkState'
 export type { MastercopyMigration } from '@/features/multichain/hooks/useMastercopyMigration'
-
-export { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
-export {
-  getSafeSetups,
-  getSharedSetup,
-  getDeviatingSetups,
-  predictSafeAddress,
-  predictAddressBasedOnReplayData,
-  hasMultiChainCreationFeatures,
-  hasMultiChainAddNetworkFeature,
-} from '@/features/multichain/utils/utils'
-
-// Static export — the pill is tiny and always visible in its consumers' first paint
 
 const CreateSafeOnNewChain = dynamic(() =>
   import('./components/CreateSafeOnNewChain').then((mod) => ({ default: mod.CreateSafeOnNewChain })),

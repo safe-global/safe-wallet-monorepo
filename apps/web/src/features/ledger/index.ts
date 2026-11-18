@@ -11,6 +11,3 @@ export const LedgerFeature: FeatureHandle<LedgerContract> = {
 
 // Type exports
 export type { TransactionHash, LedgerHashState, ShowHashFunction, HideHashFunction } from './types'
-
-// Store function exports (not lazy-loaded)
-export { showLedgerHashComparison, hideLedgerHashComparison } from '@/features/ledger/store/ledgerHashStore'

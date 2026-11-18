@@ -1,6 +1,7 @@
 import type { DataDecoded, TransactionDetails } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { renderHook } from '@testing-library/react'
 
+import { predictSafeAddress } from '@/features/multichain/utils/utils'
 import { _getSetupFromDataDecoded, usePredictSafeAddressFromTxDetails } from '../usePredictSafeAddressFromTxDetails'
 
 // @see https://safe-client.safe.global/v1/chains/11155111/transactions/multisig_0x57c26D4d117c926A872814fa46C179691f580e84_0xd0d519d3ebd6efac7a9d7c591c0a311193b6acbbf5db970fab6a51e1d3509e72
@@ -279,9 +280,13 @@ jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
 }))
 
 describe('usePredictSafeAddressFromTxDetails', () => {
-  it('should pass the correct arguments to predictSafeAddress from a createProxyWithNonce call', () => {
-    const mockPredictSafeAddress = jest.spyOn(require('@/features/multichain'), 'predictSafeAddress')
+  const mockPredictSafeAddress = jest.mocked(predictSafeAddress)
 
+  beforeEach(() => {
+    mockPredictSafeAddress.mockClear()
+  })
+
+  it('should pass the correct arguments to predictSafeAddress from a createProxyWithNonce call', () => {
     renderHook(() => usePredictSafeAddressFromTxDetails(createProxyWithNonce as unknown as TransactionDetails))
 
     expect(mockPredictSafeAddress).toHaveBeenCalledWith(
@@ -297,8 +302,6 @@ describe('usePredictSafeAddressFromTxDetails', () => {
   })
 
   it('should pass the correct arguments to predictSafeAddress from a multiSend, containing a createProxyWithNonce call', () => {
-    const mockPredictSafeAddress = jest.spyOn(require('@/features/multichain'), 'predictSafeAddress')
-
     renderHook(() => usePredictSafeAddressFromTxDetails(createProxyWithNonceThenFund as unknown as TransactionDetails))
 
     expect(mockPredictSafeAddress).toHaveBeenCalledWith(

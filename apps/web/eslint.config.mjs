@@ -207,28 +207,10 @@ const config = [
       ],
     },
   },
-  // No new barrels in features: a re-export makes every importer depend on every re-exported file, which ties
+  // No barrels in features: a re-export makes every importer depend on every re-exported file, which ties
   // features into one import cycle and makes `jest --findRelatedTests` select most of the suite.
-  // The ignored files still re-export; remove them from this list as they go.
   {
     files: ['src/features/**/*.{ts,tsx}'],
-    ignores: [
-      'src/features/actions-tray/index.ts',
-      'src/features/address-poisoning/index.ts',
-      'src/features/earn/index.ts',
-      'src/features/fee-payment/index.ts',
-      'src/features/hypernative/index.ts',
-      'src/features/hypernative/services/index.ts',
-      'src/features/ledger/index.ts',
-      'src/features/multichain/index.ts',
-      'src/features/multichain/utils/index.ts',
-      'src/features/positions/index.tsx',
-      'src/features/safe-shield/index.tsx',
-      'src/features/spaces/components/OnboardingLayout/index.tsx',
-      'src/features/spaces/components/Policies/components/SafeIdentity/index.ts',
-      'src/features/spaces/index.ts',
-      'src/features/spending-limits/services/index.ts',
-    ],
     rules: {
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules, ...noReexportRules],
     },
@@ -249,19 +231,25 @@ const config = [
   {
     files: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**', '**/*.stories.tsx', 'src/tests/**', 'src/stories/**'],
     rules: {
-      'no-restricted-syntax': ['error', ...designSystemSyntaxRules],
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...noReexportRules],
     },
   },
   {
     files: ['**/*.stories.tsx', '**/*.stories.ts', 'src/stories/**'],
     rules: {
-      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...storyDataRules],
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...storyDataRules, ...noReexportRules],
     },
   },
   {
     files: ['**/*.storyData.ts'],
     rules: {
-      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules, ...storyDataRules],
+      'no-restricted-syntax': [
+        'error',
+        ...designSystemSyntaxRules,
+        ...safeLinkWithoutSpaceIdRules,
+        ...storyDataRules,
+        ...noReexportRules,
+      ],
     },
   },
   // Override for story files: allow type-only imports from @storybook/react

@@ -6,7 +6,8 @@
  * ## Usage
  *
  * ```typescript
- * import { SpacesFeature, useCurrentSpaceId } from '@/features/spaces'
+ * import { SpacesFeature } from '@/features/spaces/SpacesFeature'
+ * import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
  * import { useLoadFeature } from '@/features/__core__'
  *
  * function MyComponent() {
@@ -37,44 +38,9 @@
  * - camelCase → service (undefined when not ready)
  */
 
-// Feature handle - uses semantic mapping
-
-// Contract type (for type annotations if needed)
 export type { SpacesContract } from './contract'
-
-// Domain constants (max accounts/workspaces, shared limit copy)
-export { SAFE_ACCOUNTS_LIMIT, SPACES_LIMIT, safeAccountsLimitReachedText } from './constants'
-
-// Hooks exported directly (always loaded, not in contract)
-// Keep hooks lightweight - minimal imports, heavy logic in services if needed
-
-export { type SafeSponsoredTxs } from './hooks/useSafeSponsoredTxs'
-
-export { type AddressBookWriteScope } from './hooks/useAddressBookWriteScope'
-
-// Hooks from useSpaceMembers.tsx
-
-// Hooks from useSpaceSafes.tsx
-
-// Hooks from useSpacePendingTransactions.ts
-
-// Store exports (actions, selectors, types)
-export {
-  ESafeAction,
-  openSafeActionsModal,
-  closeSafeActionsModal,
-  selectSafeActionsModal,
-  selectSafeActionsModalOpen,
-  selectSafeActionsModalType,
-} from '@/features/spaces/store/safeActionsModalSlice'
-
-// Public types (compile-time only, no runtime cost)
-
-// Components consumed from outside the feature
-export { HeaderNavigation } from '@/features/spaces/components/HeaderNavigation/HeaderNavigation'
-
-export { SpacesEnhancedSidebar } from '@/features/spaces/components/Sidebar/SpacesEnhancedSidebar/SpacesEnhancedSidebar'
-
+export type { SafeSponsoredTxs } from './hooks/useSafeSponsoredTxs'
+export type { AddressBookWriteScope } from './hooks/useAddressBookWriteScope'
 export type { ChainSelectorBlockProps } from './components/SafeSelectorDropdown/components/ChainSelectorBlock'
 export type {
   SafeItemData,

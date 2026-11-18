@@ -14,10 +14,6 @@ jest.mock('@/services/analytics/mixpanel-events', () => ({
   },
 }))
 
-jest.mock('@/features/earn', () => ({
-  __esModule: true,
-  default: jest.fn(),
-}))
 jest.mock('@/features/earn/hooks/useIsEarnFeatureEnabled', () => ({
   ...jest.requireActual('@/features/earn/hooks/useIsEarnFeatureEnabled'),
   useIsEarnPromoEnabled: jest.fn(() => true),
