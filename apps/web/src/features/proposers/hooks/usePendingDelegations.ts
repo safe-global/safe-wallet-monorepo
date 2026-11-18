@@ -5,10 +5,10 @@ import useChainId from '@/hooks/useChainId'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import { useNestedSafeOwners } from '@/hooks/useNestedSafeOwners'
 import useProposers from '@/hooks/useProposers'
-import { parseMessageToDelegation, type DelegationWithTimestamp } from '@/features/proposers/utils/delegationParsing'
-import { keepLatestPerDelegate, filterActedUponDelegations } from '@/features/proposers/utils/delegationFilters'
-import type { PendingDelegation } from '@/features/proposers/types'
-import { DELEGATION_POLLING_INTERVAL_MS } from '@/features/proposers/constants'
+import { parseMessageToDelegation, type DelegationWithTimestamp } from '../utils/delegationParsing'
+import { keepLatestPerDelegate, filterActedUponDelegations } from '../utils/delegationFilters'
+import type { PendingDelegation } from '../types'
+import { DELEGATION_POLLING_INTERVAL_MS } from '../public/constants'
 
 type UsePendingDelegationsResult = {
   pendingDelegations: PendingDelegation[]

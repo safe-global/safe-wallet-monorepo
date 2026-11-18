@@ -3,7 +3,7 @@ import { FeatureWrapper } from '@/components/wrappers/FeatureWrapper'
 import { SanctionWrapper } from '@/components/wrappers/SanctionWrapper'
 import { DisclaimerWrapper } from '@/components/wrappers/DisclaimerWrapper'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { LOCAL_STORAGE_CONSENT_KEY } from '../../constants'
+import { LOCAL_STORAGE_CONSENT_KEY } from '../../public/constants'
 import { BridgeWidget } from '../BridgeWidget'
 
 export function Bridge() {

@@ -48,6 +48,7 @@ describe('GA to Mixpanel Mapping', () => {
       [SPACE_EVENTS.LOCAL_CONTACT_ADDED.action, MixpanelEvent.WORKSPACE_LOCAL_CONTACT_ADDED],
       [SAFENET_EVENTS.SUBMITTED.action, MixpanelEvent.TRANSACTION_SAFENET_SUBMITTED],
       [SAFENET_EVENTS.CHECKED.action, MixpanelEvent.TRANSACTION_SAFENET_CHECKED],
+      [SPACE_EVENTS.SUGGESTED_CONTACTS_ADDED.action, MixpanelEvent.WORKSPACE_SUGGESTED_CONTACTS_ADDED],
     ])('should map "%s" to "%s"', (action, mixpanelEvent) => {
       expect(GA_TO_MIXPANEL_MAPPING[action]).toBe(mixpanelEvent)
     })

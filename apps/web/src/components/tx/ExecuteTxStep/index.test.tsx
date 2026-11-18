@@ -2,9 +2,10 @@ import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import { type ReactNode, useState } from 'react'
 import { ExecuteTxStep } from '.'
 import { TxModalContext } from '@/components/tx-flow'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { initialContext, TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import { createExistingTx } from '@/services/tx/tx-sender'
+import { createExistingTx } from '@/services/tx/tx-sender/create'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { faker } from '@faker-js/faker'
 import { AppRoutes } from '@/config/routes'
@@ -13,9 +14,14 @@ import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-sco
 import type { SafeScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import { chainBuilder } from '@/tests/builders/chains'
 import { mapLedgerError } from '@/services/onboard/ledger-errors'
+import { useHasFeature } from '@/hooks/useChains'
 
-jest.mock('@/services/tx/tx-sender', () => ({ createExistingTx: jest.fn() }))
+jest.mock('@/services/tx/tx-sender/create', () => ({
+  ...jest.requireActual('@/services/tx/tx-sender/create'),
+  createExistingTx: jest.fn(),
+}))
 jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: jest.fn(() => '1') }))
+jest.mock('@/hooks/useChains', () => ({ ...jest.requireActual('@/hooks/useChains'), useHasFeature: jest.fn() }))
 jest.mock('@/components/tx/confirmation-views/useTxPreview', () => ({
   __esModule: true,
   default: jest.fn(() => [undefined, undefined, false]),
@@ -32,6 +38,7 @@ jest.mock('@/components/tx-flow/actions/Execute', () => ({
 }))
 
 const mockCreateExistingTx = createExistingTx as jest.MockedFunction<typeof createExistingTx>
+const mockUseHasFeature = useHasFeature as jest.MockedFunction<typeof useHasFeature>
 
 const SafeTxState = ({
   safeTx,
@@ -71,11 +78,13 @@ describe('ExecuteTxStep', () => {
     spaceId,
     scope,
     txFlowContext,
+    pathname,
   }: {
     afterSigning?: boolean
     spaceId?: string
     scope?: SafeScope
     txFlowContext?: Partial<TxFlowContextType>
+    pathname?: string
   } = {}) => {
     const setSafeTx = jest.fn()
     const setTxFlow = jest.fn()
@@ -96,7 +105,7 @@ describe('ExecuteTxStep', () => {
           </SafeTxState>
         </TxModalContext.Provider>
       </SafeScopeContext.Provider>,
-      { routerProps: { push, query } },
+      { routerProps: { push, query, ...(pathname && { pathname }) } },
     )
 
     return { setSafeTx, setTxFlow, onPrev, push, safeQuery, updateTxLayoutProps }
@@ -257,7 +266,8 @@ describe('ExecuteTxStep', () => {
     expect(mockCreateExistingTx).not.toHaveBeenCalled()
   })
 
-  it('opens the queue of the selected Safe when executing later from a Workspace-level flow', async () => {
+  it('opens the queue of the selected Safe when executing later from a Workspace-level flow without the Workspace queue', async () => {
+    mockUseHasFeature.mockReturnValue(false)
     mockCreateExistingTx.mockResolvedValue(reloadedTx)
     const spaceId = faker.string.uuid()
     const scope = buildScope({} as Safe)
@@ -270,5 +280,35 @@ describe('ExecuteTxStep', () => {
       pathname: AppRoutes.transactions.queue,
       query: { safe: `${scope.chain?.shortName}:${scope.safeAddress}`, spaceId },
     })
+  })
+
+  it('returns to the Workspace Pending list when executing later from a Workspace-level flow', async () => {
+    mockUseHasFeature.mockReturnValue(true)
+    mockCreateExistingTx.mockResolvedValue(reloadedTx)
+    const spaceId = faker.string.uuid()
+
+    const { setTxFlow, push } = renderStep({ afterSigning: true, spaceId, scope: buildScope({} as Safe) })
+
+    fireEvent.click(await screen.findByTestId('execute-later-btn'))
+
+    expect(setTxFlow).toHaveBeenCalledWith(undefined)
+    expect(push).toHaveBeenCalledWith({ pathname: AppRoutes.spaces.transactions, query: { spaceId } })
+  })
+
+  it('only closes the flow when executing later from the Workspace Pending list itself', async () => {
+    mockUseHasFeature.mockReturnValue(true)
+    mockCreateExistingTx.mockResolvedValue(reloadedTx)
+
+    const { setTxFlow, push } = renderStep({
+      afterSigning: true,
+      spaceId: faker.string.uuid(),
+      scope: buildScope({} as Safe),
+      pathname: AppRoutes.spaces.transactions,
+    })
+
+    fireEvent.click(await screen.findByTestId('execute-later-btn'))
+
+    expect(setTxFlow).toHaveBeenCalledWith(undefined)
+    expect(push).not.toHaveBeenCalled()
   })
 })

@@ -2,7 +2,7 @@ import type React from 'react'
 import { renderHook, act } from '@/tests/test-utils'
 import { useCalendly } from '../useCalendly'
 import type { RootState } from '@/store'
-import type { CalendlyState } from '../../store/calendlySlice'
+import type { CalendlyState } from '../../public/store/calendlySlice'
 import { setStoreInstance, makeStore } from '@/store'
 
 describe('useCalendly', () => {

@@ -5,7 +5,7 @@ import useChainId from './useChainId'
 import { type FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
-import { useChainsWithOverrides } from '@/features/feature-flag-overrides'
+import { useChainsWithOverrides } from '@/features/feature-flag-overrides/public/hooks/useChainOverrides'
 
 const useChains = (): { configs: Chain[]; error?: string; loading?: boolean } => {
   const { data, error, isLoading } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { useForm } from 'react-hook-form'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import AddMemberInput from './AddMemberInput'
 
 type FormValues = {

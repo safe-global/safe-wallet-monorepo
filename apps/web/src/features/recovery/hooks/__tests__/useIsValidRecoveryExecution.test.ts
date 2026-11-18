@@ -5,7 +5,7 @@ import { safeInfoBuilder } from '@/tests/builders/safe'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import { renderHook, waitFor } from '@/tests/test-utils'
-import { useIsRecoverer } from '../useIsRecoverer'
+import { useIsRecoverer } from '../../public/hooks/useIsRecoverer'
 import { getPatchedSignerProvider } from '../../../../hooks/useIsValidExecution'
 import {
   useIsValidRecoveryExecTransactionFromModule,
@@ -15,7 +15,7 @@ import {
 import { useRecoveryTxState } from '../useRecoveryTxState'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 
 jest.mock('@gnosis.pm/zodiac')
 
@@ -23,9 +23,9 @@ const mockGetModuleInstance = getModuleInstance as jest.MockedFunction<typeof ge
 
 jest.mock('@/hooks/wallets/useWallet')
 jest.mock('@/hooks/useSafeInfo')
-jest.mock('@/hooks/wallets/web3')
-jest.mock('@/features/recovery/hooks/useIsRecoverer')
-jest.mock('@/features/recovery/hooks/useRecoveryTxState')
+jest.mock('@/hooks/wallets/web3ReadOnly')
+jest.mock('../../public/hooks/useIsRecoverer')
+jest.mock('../useRecoveryTxState')
 jest.mock('@/hooks/useIsValidExecution')
 
 const mockUseWallet = useWallet as jest.MockedFunction<typeof useWallet>

@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import { render, screen, within } from '@testing-library/react'
 import { AppRoutes } from '@/config/routes'
-import { createMockContext } from '@/features/security/testing'
-import type { ScanResult } from '@/features/security/types'
+import { createMockContext } from '@/features/security/public/utils/test-helpers'
+import type { ScanResult } from '@/features/security/public/types'
 import SecurityDrawerChecks from './SecurityDrawerChecks'
 
 jest.mock('next/link', () => {
@@ -15,18 +15,10 @@ jest.mock('next/link', () => {
   return { __esModule: true, default: MockLink }
 })
 
-jest.mock('@/features/__core__', () => {
-  const securityFeatureImpl = require('@/features/security/feature').default
-  return {
-    ...jest.requireActual('@/features/__core__'),
-    useLoadFeature: () => ({
-      ...securityFeatureImpl,
-      $isReady: true,
-      $isDisabled: false,
-      $error: undefined,
-    }),
-  }
-})
+jest.mock('@/features/security/public/hooks/useSecurityServices', () => ({
+  useSecurityServices: () =>
+    jest.requireActual('@/features/security/public/services/securityServices').securityServices,
+}))
 
 const mkResult = (status: ScanResult['status'], severity: ScanResult['severity'] = 'Low'): ScanResult => ({
   status,

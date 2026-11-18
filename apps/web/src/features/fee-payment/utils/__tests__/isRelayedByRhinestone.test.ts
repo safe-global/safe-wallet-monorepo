@@ -1,5 +1,5 @@
 import { id } from 'ethers'
-import { RHINESTONE_INTENT_EXECUTOR } from '../../constants'
+import { RHINESTONE_INTENT_EXECUTOR } from '../../public/constants'
 import { isRelayedByRhinestone } from '../isRelayedByRhinestone'
 
 const INTENT_EXECUTED = id('IntentExecuted(uint256,bytes32)')

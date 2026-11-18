@@ -2,13 +2,13 @@ import { render, screen } from '@/tests/test-utils'
 import { fireEvent } from '@testing-library/react'
 import SecurityEmptyState from '../components/SecurityEmptyState/SecurityEmptyState'
 
-jest.mock('@/features/hypernative/components/HnSignupFlow', () => ({
+jest.mock('@/features/hypernative/public/components/HnSignupFlow', () => ({
   __esModule: true,
-  HnSignupFlow: ({ open }: { open: boolean }) =>
+  default: ({ open }: { open: boolean }) =>
     open ? <div data-testid="mock-hn-signup-flow">Hypernative signup</div> : null,
 }))
 
-jest.mock('@/features/spaces/components/AddAccounts', () => {
+jest.mock('../../AddAccounts', () => {
   const MockAddAccounts = ({ buttonLabel }: { buttonLabel?: string }) => (
     <button data-testid="mock-add-accounts">{buttonLabel ?? 'Add Accounts'}</button>
   )

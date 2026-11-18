@@ -1,4 +1,4 @@
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { validateTxSignatures } from '@/services/tx/executionPreChecks'

@@ -1,4 +1,4 @@
-import { type ReactNode, useContext, useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import { type NextRouter, useRouter } from 'next/router'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -10,7 +10,7 @@ import { useQueuedTxByNonce } from '@/hooks/useTxQueue'
 import { isCustomTxInfo } from '@/utils/transaction-guards'
 
 import css from './styles.module.css'
-import { TxModalContext } from '../..'
+import useSetScopedTxFlow from '@/components/tx-flow/safe-scope/useSetScopedTxFlow'
 import TokenTransferFlow from '../TokenTransfer'
 import RejectTx from '../RejectTx'
 import TxLayout from '@/components/tx-flow/common/TxLayout'
@@ -54,7 +54,7 @@ const goToQueue = (router: NextRouter) => {
  * To avoid nonce gaps in the queue, we allow deleting the last transaction in the queue or duplicates.
  * The recommended nonce is used to calculate the last transaction in the queue.
  */
-const useIsNonceDeletable = (txNonce: number) => {
+export const useIsNonceDeletable = (txNonce: number) => {
   const queuedTxsByNonce = useQueuedTxByNonce(txNonce)
   const recommendedNonce = useRecommendedNonce() || 0
   const duplicateCount = queuedTxsByNonce?.length || 0
@@ -123,7 +123,7 @@ const ReplaceTxMenu = ({
   proposer?: string
 }) => {
   const wallet = useWallet()
-  const { setTxFlow } = useContext(TxModalContext)
+  const setTxFlow = useSetScopedTxFlow()
   const queuedTxsByNonce = useQueuedTxByNonce(txNonce)
   const canCancel = !queuedTxsByNonce?.some(
     (item) => isCustomTxInfo(item.transaction.txInfo) && item.transaction.txInfo.isCancellation,

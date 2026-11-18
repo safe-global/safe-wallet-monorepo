@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import SafeWorkspaceChooserDialog from './index'
 
 const SAFE_ADDRESS = '0x9fC3dc011b461664c835F2527fffb1169b3C213e'

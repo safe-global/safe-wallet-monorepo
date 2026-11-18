@@ -3,7 +3,7 @@ import {
   isSafeAccountGroup,
   type SafeAccountOption,
 } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/types'
-import type { ChainInfo } from '@/features/spaces/types'
+import type { ChainInfo } from '../../../public/types'
 
 const SAFE_A = '0xAAAAaaaaAAaaaaAAAaAAaaaAaAaaaaaAAAaaAAaA'
 const SAFE_B = '0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB'

@@ -1,12 +1,12 @@
 import { act, renderHook } from '@testing-library/react'
 import useReportDrawer from '../useReportDrawer'
-import type { ScanContext } from '@/features/security/types'
+import type { ScanContext } from '@/features/security/public/types'
 import type { OverviewMap, SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 let mockScanContext: ScanContext | null = null
 const safeScanContextMock = jest.fn()
 
-jest.mock('@/features/spaces/hooks/useSafeScanContext', () => ({
+jest.mock('../../../../hooks/useSafeScanContext', () => ({
   __esModule: true,
   default: (...args: unknown[]) => {
     safeScanContextMock(...args)
@@ -27,10 +27,11 @@ const mkSafe = (address: string): SpaceSafeEntry => ({
 })
 
 const mkSecurity = (isReady = true) =>
-  ({
-    $isReady: isReady,
-    scanKey: (address: string, chainId: string) => `${address}:${chainId}`,
-  }) as unknown as Parameters<typeof useReportDrawer>[0]['security']
+  isReady
+    ? ({
+        scanKey: (address: string, chainId: string) => `${address}:${chainId}`,
+      } as unknown as Parameters<typeof useReportDrawer>[0]['security'])
+    : undefined
 
 describe('useReportDrawer', () => {
   beforeEach(() => {

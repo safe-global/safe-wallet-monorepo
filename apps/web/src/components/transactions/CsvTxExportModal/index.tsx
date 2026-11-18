@@ -16,7 +16,8 @@ import useChainId from '@/hooks/useChainId'
 import type { JobStatusDto } from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
 import { useCsvExportLaunchExportV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
 import { showNotification } from '@/store/notificationsSlice'
-import { trackEvent, MixpanelEventParams } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { TX_LIST_EVENTS } from '@/services/analytics/events/txList'
 
 enum DateRangeOption {

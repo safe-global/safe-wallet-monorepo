@@ -1,4 +1,4 @@
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { Builder, type IBuilder } from '@/tests/Builder'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { faker } from '@faker-js/faker'

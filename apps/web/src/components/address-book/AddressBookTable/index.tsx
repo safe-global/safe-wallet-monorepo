@@ -25,7 +25,7 @@ import { cn } from '@safe-global/views/utils/cn'
 import TableCard from '@safe-global/views/components/common/TableCard'
 import tableCss from '@safe-global/views/components/common/EnhancedTable/styles.module.css'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
-import { TokenTransferFlow } from '@/components/tx-flow/flows'
+import { TokenTransferFlow } from '@/components/tx-flow/flows/TokenTransferFlow'
 import CheckWallet from '@/components/common/CheckWallet'
 import madProps from '@/utils/mad-props'
 

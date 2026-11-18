@@ -136,22 +136,6 @@ export default defineConfig(({ mode }) => {
         // standard browser polyfill webpack/Next uses internally, already in the lockfile.
         { find: /^querystring$/, replacement: 'querystring-es3' },
 
-        // Vite-native fork of the features/__core__ barrel. The original
-        // uses template-literal dynamic imports that Vite cannot analyze;
-        // this fork swaps in a Vite-native createFeatureHandle backed by
-        // import.meta.glob. Must appear BEFORE the broader `@/...` alias
-        // below so it takes precedence. Match the barrel exactly (no
-        // trailing segment) and also the direct module path for callers
-        // that bypass the barrel.
-        {
-          find: /^@\/features\/__core__$/,
-          replacement: path.resolve(__dirname, 'src/compat/features-core.ts'),
-        },
-        {
-          find: /^@\/features\/__core__\/createFeatureHandle$/,
-          replacement: path.resolve(__dirname, 'src/compat/createFeatureHandle.ts'),
-        },
-
         // Cross-workspace source aliases — reuse apps/web/src verbatim during cutover.
         { find: /^@\/public\/(.*)$/, replacement: path.resolve(webRoot, 'public/$1') },
         { find: /^@\/(.*)$/, replacement: path.resolve(webRoot, 'src/$1') },
