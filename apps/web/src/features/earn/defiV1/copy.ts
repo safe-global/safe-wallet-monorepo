@@ -228,7 +228,11 @@ export const DEFI_V1_COPY = {
     time: { swap: 'About 1 min after execution', bridge: '2 to 15 min' },
     approval: 'Approval',
     signers: (threshold: number, owners: number) => `${threshold} of ${owners} signers`,
-    terms: 'Swaps and bridges run through third-party protocols. I agree to the terms.',
+    disclaimer:
+      "Swaps and bridges run through third-party protocols. Safe doesn't own, control or audit them, and isn't liable for losses when you use them. Their own terms apply too.",
+    agree: 'I agree to the',
+    terms: 'terms',
+    agreed: 'Runs on third-party protocols. You agreed to the',
     review: { swap: 'Review swap', bridge: 'Review bridge' },
     reviewTitle: 'What signers approve',
     steps: {
@@ -238,7 +242,17 @@ export const DEFI_V1_COPY = {
     },
     afterSwap: (expiry: string) => `If the order doesn't fill, it expires ${expiry}. Nothing leaves the Safe.`,
     afterBridge: 'If the bridge fails, funds return to this Safe on the starting network.',
-    checks: 'Transaction simulated, no issues found',
+    checks: {
+      simulated: 'Simulation passed',
+      threats: 'No known threats on the contracts involved',
+      screened: 'Addresses screened, none flagged',
+      recipient: 'Funds stay in this Safe',
+      recipientOn: (chain: string) => `Funds go to this Safe on ${chain}, with the same signers`,
+    },
+    orderId: 'Order ID',
+    orderStates:
+      'Track it in transactions as it goes from open to filled. Signers can cancel it any time before it fills.',
+    bridgeTracking: 'Once executed, a link to follow the bridge on its explorer shows in transactions.',
     back: 'Back',
     submit: { swap: 'Propose swap', bridge: 'Propose bridge' },
     notEnough: (asset: string) => `Not enough ${asset}`,

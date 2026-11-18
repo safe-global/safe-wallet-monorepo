@@ -31,8 +31,13 @@ import { Separator } from '@safe-global/views/components/ui/separator'
 import { Tabs, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
+import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { cn } from '@safe-global/views/utils/cn'
+import { TERMS_URL } from '@safe-global/utils/config/constants'
+import { LOCAL_STORAGE_CONSENT_KEY } from '@/features/bridge'
+import { SWAPS_CONSENT_STORAGE_KEY } from '@/features/swap'
 import useSafeInfo from '@/hooks/useSafeInfo'
+import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { DEFI_V1_COPY, formatAmount, formatUsd } from '../copy'
 import { CHAIN_IDS, IDLE_CASH } from '../opportunities'
 import type { Slice } from '../shelf'
@@ -53,6 +58,7 @@ const SLIPPAGES = ['auto', '0.1', '1']
 const PRICES: Record<string, number> = { USDC: 1, USDT: 1, ETH: 3_200 }
 const DEPLOYED_ON = ['Base', 'Ethereum']
 const ROUTE_FEES: Record<Route, number> = { best: 12, fast: 25 }
+const ORDER_ID = '0x8f3c…d21a'
 
 const parseAmount = (value: string) => Number(value.replace(/[^0-9.]/g, '')) || 0
 const priceOf = (asset: string) => PRICES[asset] ?? 1
@@ -236,9 +242,13 @@ export const MoveFundsDialog = ({
   const [slippage, setSlippage] = useState('auto')
   const [expiry, setExpiry] = useState<Expiry>('30m')
   const [route, setRoute] = useState<Route>('best')
-  const [agreed, setAgreed] = useState(false)
+  const [agreedTo, setAgreedTo] = useState<MoveMode[]>([])
+  const [swapConsent = false, setSwapConsent] = useLocalStorage<boolean>(SWAPS_CONSENT_STORAGE_KEY)
+  const [bridgeConsent = false, setBridgeConsent] = useLocalStorage<boolean>(LOCAL_STORAGE_CONSENT_KEY)
 
   const isSwap = mode === 'swap'
+  const consented = isSwap ? swapConsent : bridgeConsent
+  const agreed = consented || agreedTo.includes(mode)
   const Icon = ICONS[mode]
   const available = (balances.find((balance) => balance.label === from)?.value ?? 0) / priceOf(from)
   const amount = parseAmount(value)
@@ -248,14 +258,19 @@ export const MoveFundsDialog = ({
   const feeRate = safeFeeRate(usd, STABLES.includes(from) && STABLES.includes(to))
   const quoted = isSwap ? (usd * (1 - feeRate)) / priceOf(to) : amount - ROUTE_FEES[route] / priceOf(from)
   const received = Math.max(quoted, 0)
-  const minReceived = isSwap ? received * (1 - slip) : received
+  const minReceived = received * (1 - slip)
   const impact = usd >= 1_000_000 ? 0.0012 : usd >= 100_000 ? 0.0004 : 0.0001
   const deployed = DEPLOYED_ON.includes(toChain)
   const tooMuch = amount > available
   const canReview = amount > 0 && !tooMuch && agreed && (isSwap ? from !== to : deployed) && received > 0
   const needsApproval = from !== 'ETH'
   const sent = `${formatToken(amount)} ${from}`
-  const got = `${formatToken(isSwap ? minReceived : received)} ${receiveAsset}`
+  const got = `${formatToken(minReceived)} ${receiveAsset}`
+
+  const goToReview = () => {
+    if (!consented) (isSwap ? setSwapConsent : setBridgeConsent)(true)
+    setStep('review')
+  }
 
   const close = () => {
     setStep('details')
@@ -282,25 +297,29 @@ export const MoveFundsDialog = ({
     />
   )
 
+  const slippageRow = (
+    <Row
+      label={COPY.slippage}
+      value={
+        <InlineSelect
+          label={COPY.slippage}
+          value={slippage}
+          onChange={setSlippage}
+          options={SLIPPAGES.map((option) => ({
+            value: option,
+            label: option === 'auto' ? COPY.slippageAuto('0.5%') : `${option}%`,
+          }))}
+        />
+      }
+    />
+  )
+
   const quoteRows = isSwap ? (
     <Rows>
       <Row label={COPY.minReceived} value={got} />
       <Row label={COPY.rate} value={COPY.rateValue(from, formatToken(priceOf(from) / priceOf(to)), to)} />
       <Row label={COPY.priceImpact} value={`< ${percent(impact)}`} />
-      <Row
-        label={COPY.slippage}
-        value={
-          <InlineSelect
-            label={COPY.slippage}
-            value={slippage}
-            onChange={setSlippage}
-            options={SLIPPAGES.map((option) => ({
-              value: option,
-              label: option === 'auto' ? COPY.slippageAuto('0.5%') : `${option}%`,
-            }))}
-          />
-        }
-      />
+      {slippageRow}
       <Row
         label={COPY.expiry}
         value={
@@ -318,15 +337,31 @@ export const MoveFundsDialog = ({
       <Row label={COPY.safeFee} hint={COPY.safeFeeHint} value={`${percent(feeRate)} · ${formatUsd(usd * feeRate)}`} />
       <Row label={COPY.networkFee} value={formatUsd(4)} />
       {recipient}
+      {step === 'review' && <Row label={COPY.orderId} value={ORDER_ID} />}
     </Rows>
   ) : (
     <Rows>
-      {recipient}
+      <Row label={COPY.minReceived} value={got} />
+      {slippageRow}
       <Row label={COPY.bridgeFee} value={formatUsd(ROUTE_FEES[route])} />
       <Row label={COPY.networkFee} value={formatUsd(3)} />
       <Row label={COPY.arrives} value={COPY.routes[route].time} />
+      {recipient}
     </Rows>
   )
+
+  const termsLink = (
+    <ExternalLink href={TERMS_URL} noIcon className="text-xs">
+      {COPY.terms}
+    </ExternalLink>
+  )
+
+  const checks = [
+    COPY.checks.simulated,
+    COPY.checks.threats,
+    COPY.checks.screened,
+    isSwap ? COPY.checks.recipient : COPY.checks.recipientOn(toChain),
+  ]
 
   const details = (
     <div className={cn(BODY_HEIGHT, 'flex flex-col gap-3 overflow-y-auto px-4 py-4')}>
@@ -441,10 +476,26 @@ export const MoveFundsDialog = ({
 
       {amount > 0 && quoteRows}
 
-      <label className="flex items-start gap-2 px-1 text-xs text-muted-foreground">
-        <Checkbox checked={agreed} onCheckedChange={(next) => setAgreed(Boolean(next))} />
-        {COPY.terms}
-      </label>
+      {consented ? (
+        <p className="px-1 text-xs text-muted-foreground">
+          {COPY.agreed} {termsLink}
+        </p>
+      ) : (
+        <div className="flex flex-col gap-2 rounded-lg border border-border px-3 py-3 text-xs text-muted-foreground">
+          <p>{COPY.disclaimer}</p>
+          <label className="flex items-center gap-2 font-medium text-foreground">
+            <Checkbox
+              checked={agreed}
+              onCheckedChange={(next) =>
+                setAgreedTo((modes) => (next ? [...modes, mode] : modes.filter((item) => item !== mode)))
+              }
+            />
+            <span>
+              {COPY.agree} {termsLink}
+            </span>
+          </label>
+        </div>
+      )}
     </div>
   )
 
@@ -473,10 +524,12 @@ export const MoveFundsDialog = ({
             />
           </div>
           <div className="flex flex-col gap-2 border-t border-border/60 px-3 py-3 text-xs text-muted-foreground">
-            <p className="flex items-start gap-2">
-              <ShieldCheck className="size-3.5 shrink-0 translate-y-px text-badge-dot-success" aria-hidden />
-              {COPY.checks}
-            </p>
+            {checks.map((check) => (
+              <p key={check} className="flex items-start gap-2">
+                <ShieldCheck className="size-3.5 shrink-0 translate-y-px text-badge-dot-success" aria-hidden />
+                {check}
+              </p>
+            ))}
             <p className="flex items-start gap-2">
               <Info className="size-3.5 shrink-0 translate-y-px" aria-hidden />
               {isSwap ? COPY.afterSwap(COPY.expiries[expiry]) : COPY.afterBridge}
@@ -518,6 +571,10 @@ export const MoveFundsDialog = ({
               : { icon: Orbit, text: COPY.timeline.arrives(toChain) },
           ]}
         />
+        <p className="flex items-start gap-2 border-t border-border/60 py-3 text-xs text-muted-foreground">
+          <Info className="size-3.5 shrink-0 translate-y-px" aria-hidden />
+          {isSwap ? COPY.orderStates : COPY.bridgeTracking}
+        </p>
       </div>
     </div>
   )
@@ -552,7 +609,7 @@ export const MoveFundsDialog = ({
 
         <DialogFooter divided="subtle">
           {step === 'details' && (
-            <Button size="lg" className="w-full" disabled={!canReview} onClick={() => setStep('review')}>
+            <Button size="lg" className="w-full" disabled={!canReview} onClick={goToReview}>
               {tooMuch ? COPY.notEnough(from) : COPY.review[mode]}
             </Button>
           )}
