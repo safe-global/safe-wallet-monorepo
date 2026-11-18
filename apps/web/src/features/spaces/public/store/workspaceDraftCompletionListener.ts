@@ -20,8 +20,12 @@ export const workspaceDraftCompletionListener = (listenerMiddleware: typeof list
     },
   })
 
+  const spacesLoaded = spacesApi?.endpoints?.spacesGetV1?.matchFulfilled
+  // Like the other spaces listeners: many tests mock the whole spaces module and leave no endpoint to watch.
+  if (!spacesLoaded) return
+
   listenerMiddleware.startListening({
-    matcher: spacesApi.endpoints.spacesGetV1.matchFulfilled,
+    matcher: spacesLoaded,
     effect: (action, listenerApi) => {
       const { createdSpaceId } = selectStoredWorkspaceDraft(listenerApi.getState())
       const created = action.payload.find((space) => space.uuid === createdSpaceId)
