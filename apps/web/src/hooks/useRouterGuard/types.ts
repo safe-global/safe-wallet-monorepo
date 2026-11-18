@@ -24,8 +24,8 @@ export interface GuardContext {
   isSiweAuthenticated: boolean
   hasSpaces: boolean
   isPartOfSpaceUrl: boolean
-  /** The Workspace onboarding wizard's flag; undefined while the chain config loads. */
-  isWorkspaceWizardEnabled: boolean | undefined
+  /** The wizard's plan step needs the wizard flag and Safe Pro; undefined while either loads. */
+  isPlanStepEnabled: boolean | undefined
 }
 
 // ---------------------------------------------------------------------------

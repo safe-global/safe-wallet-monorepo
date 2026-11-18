@@ -27,6 +27,8 @@ jest.mock('@/hooks/useIsSpaceRoute', () => ({
   useIsSpaceRoute: jest.fn(() => false),
 }))
 
+let mockSafeProFlag: boolean | undefined = true
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useSafeProFlag: () => mockSafeProFlag }))
 jest.mock('@/hooks/useIsWorkspaceWizardEnabled', () => ({
   useIsWorkspaceWizardEnabled: jest.fn(() => undefined),
 }))
@@ -47,6 +49,7 @@ interface SetupOptions {
   spaces?: Array<{ id: number; uuid: string; name: string }> | undefined
   isSpaceRoute?: boolean
   isWorkspaceWizardEnabled?: boolean
+  isSafePro?: boolean
 }
 
 const defaultSpaces = [
@@ -64,7 +67,9 @@ const setupMocks = ({
   spaces = defaultSpaces,
   isSpaceRoute = false,
   isWorkspaceWizardEnabled,
+  isSafePro = true,
 }: SetupOptions = {}) => {
+  mockSafeProFlag = isSafePro
   ;(router.useRouter as jest.Mock).mockReturnValue({ pathname, query, isReady: true })
   ;(useIsSpaceRouteModule.useIsSpaceRoute as jest.Mock).mockReturnValue(isSpaceRoute)
   ;(wizardFlag.useIsWorkspaceWizardEnabled as jest.Mock).mockReturnValue(isWorkspaceWizardEnabled)
@@ -461,6 +466,15 @@ describe('useFlowActivationGuard', () => {
   describe('plan step of the onboarding wizard', () => {
     it('should redirect to create space when the wizard is off', async () => {
       setupMocks({ pathname: AppRoutes.welcome.plan, isWorkspaceWizardEnabled: false })
+
+      const { result } = renderHook(() => useFlowActivationGuard())
+      const guardResult = await result.current.activationGuard()
+
+      expect(guardResult).toEqual({ success: false, redirectTo: AppRoutes.welcome.createSpace })
+    })
+
+    it('should redirect to create space when Safe Pro is off, as the wizard then has no plan step', async () => {
+      setupMocks({ pathname: AppRoutes.welcome.plan, isWorkspaceWizardEnabled: true, isSafePro: false })
 
       const { result } = renderHook(() => useFlowActivationGuard())
       const guardResult = await result.current.activationGuard()

@@ -71,6 +71,7 @@ const PlanStep = (): ReactElement => {
   const wantedLinkId = pickedLinkId ?? draft.paymentLinkId
   const size = sizes?.find((candidate) => candidate.paymentLinkId === wantedLinkId) ?? sizes?.[0]
   const freeDays = trialPeriodDays === null ? 'Free to start' : `Free for ${trialPeriodDays} days`
+  const largestSeats = sizes?.at(-1)?.seats
 
   const onNext = () => {
     if (size) advance({ paymentLinkId: size.paymentLinkId })
@@ -106,7 +107,8 @@ const PlanStep = (): ReactElement => {
       />
 
       <Typography variant="paragraph-small" color="muted">
-        No card needed, and you won&apos;t be charged after the trial. More than 20 Safes?{' '}
+        No card needed, and you won&apos;t be charged after the trial.{' '}
+        {largestSeats ? `More than ${largestSeats} Safes?` : 'Need more Safes?'}{' '}
         <Link href={CONTACT_SALES_URL} target="_blank" rel="noopener noreferrer">
           Talk to sales
         </Link>
