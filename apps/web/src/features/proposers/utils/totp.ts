@@ -1,4 +1,4 @@
-import { TOTP_INTERVAL_SECONDS } from '@/features/proposers/constants'
+import { TOTP_INTERVAL_SECONDS } from '../public/constants'
 
 /**
  * Returns the current TOTP value (hour-based).

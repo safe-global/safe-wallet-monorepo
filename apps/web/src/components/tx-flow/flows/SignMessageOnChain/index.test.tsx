@@ -7,7 +7,10 @@ import { render, screen } from '@/tests/test-utils'
 import SignMessageOnChainFlow from '.'
 
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
-jest.mock('@/services/tx/tx-sender', () => ({ createTx: jest.fn(() => new Promise(() => {})) }))
+jest.mock('@/services/tx/tx-sender/create', () => ({
+  ...jest.requireActual('@/services/tx/tx-sender/create'),
+  createTx: jest.fn(() => new Promise(() => {})),
+}))
 jest.mock('@/hooks/useHighlightHiddenTab', () => ({ __esModule: true, default: jest.fn() }))
 jest.mock('@/components/tx/ReviewTransactionV2', () => ({
   __esModule: true,

@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { within } from 'storybook/test'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import SwapOrder from './index'
-import { mockSwapOrderTxInfo, mockTwapOrderTxInfo, mockSwapOrderTxData } from './mockData'
+import { mockSwapOrderTxInfo, mockTwapOrderTxInfo, mockSwapOrderTxData } from './SwapOrder.storyData'
 
 const meta = {
   title: 'Components/TxFlow/ConfirmationViews/SwapOrder',

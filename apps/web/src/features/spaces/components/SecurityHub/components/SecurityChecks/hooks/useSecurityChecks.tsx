@@ -1,9 +1,8 @@
 import { type ReactNode, useMemo, useState } from 'react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import type { EvidenceItem, SafeGrade, ScanContext, ScanResult, SecurityGrade } from '@/features/security/types'
-import { SecurityFeature } from '@/features/security'
-import { useLoadFeature } from '@/features/__core__'
+import type { EvidenceItem, SafeGrade, ScanContext, ScanResult, SecurityGrade } from '@/features/security/public/types'
+import { useSecurityServices } from '@/features/security/public/hooks/useSecurityServices'
 import {
   EvidenceList,
   Row,
@@ -79,17 +78,14 @@ export const useSecurityChecks = (
   /** Opens the Hypernative signup flow for a partner-tagged guard nudge (drawer-provided). */
   onHnSignupClick?: () => void,
 ): UseSecurityChecksResult => {
-  const security = useLoadFeature(SecurityFeature)
+  const security = useSecurityServices()
   const [modulesExpanded, setModulesExpanded] = useState(false)
   const spaceId = useUrlSpaceId()
 
-  const buildCta = useMemo(
-    () => (security.$isReady ? makeBuildCta(security.checkDefs, spaceId) : null),
-    [security.$isReady, security.checkDefs, spaceId],
-  )
+  const buildCta = useMemo(() => (security ? makeBuildCta(security.checkDefs, spaceId) : null), [security, spaceId])
 
-  const isKnownModuleByName = security.$isReady ? security.isKnownModuleByName : null
-  const zeroAddress = security.$isReady ? security.zeroAddress : null
+  const isKnownModuleByName = security ? security.isKnownModuleByName : null
+  const zeroAddress = security ? security.zeroAddress : null
 
   const { failingRows, passingRows } = useMemo(() => {
     if (!buildCta || !isKnownModuleByName || !zeroAddress) {
@@ -476,7 +472,7 @@ export const useSecurityChecks = (
     onHnSignupClick,
   ])
 
-  if (!security.$isReady || !buildCta) {
+  if (!security || !buildCta) {
     return { isReady: false, failingRows: [], passingRows: [] }
   }
 

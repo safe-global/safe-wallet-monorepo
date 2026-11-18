@@ -6,13 +6,16 @@ import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import CsvTxExportModal from './index'
 import * as csvExportQueries from '@safe-global/store/gateway/AUTO_GENERATED/csv-export'
 
+jest.mock('@/services/analytics/mixpanel-events', () => ({
+  ...jest.requireActual('@/services/analytics/mixpanel-events'),
+  MixpanelEventParams: {
+    DATE_RANGE: 'Date Range',
+  },
+}))
 jest.mock('@/services/analytics', () => ({
   ...(
     jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
   ).createAnalyticsMock(),
-  MixpanelEventParams: {
-    DATE_RANGE: 'Date Range',
-  },
 }))
 
 jest.mock('@/hooks/useDarkMode', () => ({ useDarkMode: () => false }))

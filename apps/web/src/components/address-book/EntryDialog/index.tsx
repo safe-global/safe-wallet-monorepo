@@ -12,16 +12,14 @@ import { useAppDispatch } from '@/store'
 import { upsertAddressBookEntries } from '@/store/addressBookSlice'
 import { useChain } from '@/hooks/useChains'
 import { sanitizeName } from '@safe-global/utils/validation/names'
-import { useUpsertWorkspaceSafeName, useWorkspaceAddressBookLabel, type AddressBookWriteScope } from '@/features/spaces'
-import { useAddressPoisoningCheck } from '@/features/address-poisoning'
-import { SimilarSavedAddressNotice } from '@/components/common/SimilarAddressNotice'
-import {
-  ADDRESS_POISONING_EVENTS,
-  DismissAction,
-  LookalikeWarningLocation,
-  MixpanelEventParams,
-  trackEvent,
-} from '@/services/analytics'
+import { useUpsertWorkspaceSafeName } from '@/features/spaces/public/hooks/useUpsertWorkspaceSafeName'
+import { useWorkspaceAddressBookLabel } from '@/features/spaces/public/hooks/useWorkspaceAddressBookLabel'
+import type { AddressBookWriteScope } from '@/features/spaces/public/hooks/useAddressBookWriteScope'
+import useAddressPoisoningCheck from '@/features/address-poisoning/public/hooks/useAddressPoisoningCheck'
+import { SimilarSavedAddressNotice } from '@/components/common/SimilarAddressNotice/SimilarSavedAddressNotice'
+import { ADDRESS_POISONING_EVENTS } from '@/services/analytics/events/addressPoisoning'
+import { DismissAction, LookalikeWarningLocation, MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { trackEvent } from '@/services/analytics'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 
 export type AddressEntry = {

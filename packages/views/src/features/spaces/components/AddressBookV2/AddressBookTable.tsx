@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { isAddress } from 'ethers'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
@@ -8,7 +8,11 @@ import { getInitials } from '@safe-global/views/components/common/AccountRow/uti
 import ChainLogos from './ChainLogos'
 import ContactCell from './ContactCell'
 import ContactRowActions from './ContactRowActions'
+import RowDetail from './RowDetail'
+import { TagChips } from './tags/TagChip'
 import type { AddressBookContact } from './types'
+
+const EmptyCell = () => <span className="text-muted-foreground text-xs">&mdash;</span>
 
 const AddedBy = ({ name }: { name?: string }) =>
   name ? (
@@ -24,7 +28,7 @@ const AddedBy = ({ name }: { name?: string }) =>
       />
     </span>
   ) : (
-    <span className="text-muted-foreground text-xs">&mdash;</span>
+    <EmptyCell />
   )
 
 export type AddressBookTableProps = {
@@ -35,9 +39,11 @@ export type AddressBookTableProps = {
   renderAvatar?: (address: string) => ReactNode
   /** The block explorer page of an address. Without it the row has no explorer link. */
   getExplorerLink?: (address: string) => { href: string; title: string } | undefined
-  /** Each callback adds its item to the row menu; with neither there is no menu. */
+  /** Each callback adds its item to the row menu; with none there is no menu. */
   onEdit?: (contact: AddressBookContact) => void
   onDelete?: (contact: AddressBookContact) => void
+  /** Adds "Edit tags" to the row menu; members get only this. */
+  onEditTags?: (contact: AddressBookContact) => void
   /** A control before the row menu, such as "Add to Workspace" on a local contact. */
   renderRowAction?: (contact: AddressBookContact, context: { isCompact: boolean }) => ReactNode
   pageSize?: number
@@ -50,40 +56,51 @@ const AddressBookTable = ({
   getExplorerLink,
   onEdit,
   onDelete,
+  onEditTags,
   renderRowAction,
   pageSize,
 }: AddressBookTableProps) => {
   const chainsColumn: DataTableColumn<AddressBookContact> = {
     id: 'chains',
     header: 'Chains',
-    width: '20%',
+    // The workspace book's Tags column takes the spare width; the local book has no Tags
+    width: book === 'workspace' ? 'fit' : undefined,
     priority: 'secondary',
     minWidth: 90,
     sortValue: (contact) => contact.chains.length,
     cell: (contact) => <ChainLogos chains={contact.chains} />,
   }
 
+  const tagsColumn: DataTableColumn<AddressBookContact> = {
+    id: 'tags',
+    header: 'Tags',
+    priority: 'secondary',
+    minWidth: 140,
+    sortValue: (contact) => contact.tags?.map((tag) => tag.name.toLowerCase()).sort()[0] ?? null,
+    cell: (contact) => (contact.tags?.length ? <TagChips tags={contact.tags} /> : <EmptyCell />),
+  }
+
   const addedByColumn: DataTableColumn<AddressBookContact> = {
     id: 'added-by',
     header: 'Added by',
-    width: '20%',
+    width: 'fit',
     priority: 'secondary',
-    minWidth: 120,
+    minWidth: 130,
     sortValue: (contact) => contact.addedBy?.toLowerCase() ?? null,
     cell: (contact) => <AddedBy name={contact.addedBy} />,
   }
 
-  const secondaryColumns = book === 'workspace' ? [chainsColumn, addedByColumn] : [chainsColumn]
+  const secondaryColumns = book === 'workspace' ? [chainsColumn, tagsColumn, addedByColumn] : [chainsColumn]
 
   const columns: DataTableColumn<AddressBookContact>[] = [
     {
       id: 'contact',
       header: 'Contact',
       cellTestId: 'table-cell-contact',
-      width: '40%',
+      width: 'fit',
       sticky: true,
-      // The full address in monospace needs this much; below it the table goes compact.
-      minWidth: 360,
+      // Avatar, full address in monospace, copy and explorer buttons; below the summed widths the table goes compact
+      minWidth: 445,
       sortValue: (contact) => contact.name.toLowerCase(),
       cell: (contact, { isCompact }) => (
         <ContactCell
@@ -110,22 +127,12 @@ const AddressBookTable = ({
             name={contact.name}
             onEdit={onEdit && (() => onEdit(contact))}
             onDelete={onDelete && (() => onDelete(contact))}
+            onEditTags={onEditTags && (() => onEditTags(contact))}
           />
         </span>
       ),
     },
   ]
-
-  const renderRowDetail = (contact: AddressBookContact) => (
-    <dl className="grid grid-cols-[5rem_1fr] items-center gap-x-2 gap-y-2 text-sm">
-      {secondaryColumns.map((column) => (
-        <Fragment key={column.id}>
-          <dt className="text-muted-foreground">{column.header}</dt>
-          <dd>{column.cell(contact, { isCompact: true })}</dd>
-        </Fragment>
-      ))}
-    </dl>
-  )
 
   return (
     <PaginatedDataTable
@@ -133,7 +140,7 @@ const AddressBookTable = ({
       rows={contacts}
       getRowKey={(contact) => contact.address}
       getRowClassName={(contact) => (contact.isShared ? 'opacity-50' : '')}
-      renderRowDetail={renderRowDetail}
+      renderRowDetail={(contact) => <RowDetail row={contact} columns={secondaryColumns} />}
       pageSize={pageSize}
     />
   )

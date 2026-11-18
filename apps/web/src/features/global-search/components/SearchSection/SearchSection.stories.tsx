@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import SearchSection from './SearchSection'
 
 // SearchSection reads the connected Safe, Redux store, chain features and the

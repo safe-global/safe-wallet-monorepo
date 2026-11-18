@@ -1,11 +1,12 @@
 import { render, screen } from '@/tests/test-utils'
 import { HnAnalysisGroupCard } from './index'
-import type { AnalysisGroupCardProps } from '@/features/safe-shield'
-import { AnalysisGroupCard } from '@/features/safe-shield'
+import type { AnalysisGroupCardProps } from '@/features/safe-shield/public/components/AnalysisGroupCard'
+import AnalysisGroupCard from '@/features/safe-shield/public/components/AnalysisGroupCard'
 import React from 'react'
 
-jest.mock('@/features/safe-shield/components/AnalysisGroupCard', () => ({
-  AnalysisGroupCard: jest.fn(({ footer }: AnalysisGroupCardProps) => (
+jest.mock('@/features/safe-shield/public/components/AnalysisGroupCard', () => ({
+  __esModule: true,
+  default: jest.fn(({ footer }: AnalysisGroupCardProps) => (
     <div data-testid="analysis-group-card">
       <div data-testid="footer-slot">{footer}</div>
     </div>
@@ -17,7 +18,7 @@ jest.mock('@safe-global/views/features/hypernative/components/HypernativeLogo', 
   default: () => <div data-testid="hn-logo">HypernativeLogo</div>,
 }))
 
-const mockAnalysisGroupCard = AnalysisGroupCard as jest.MockedFunction<typeof AnalysisGroupCard>
+const mockAnalysisGroupCard = AnalysisGroupCard as unknown as jest.Mock
 
 describe('HnAnalysisGroupCard', () => {
   beforeEach(() => {

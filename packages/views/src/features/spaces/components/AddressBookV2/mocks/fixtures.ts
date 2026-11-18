@@ -3,7 +3,7 @@
  * Contract addresses are the real mainnet deployments; every person, vendor and Safe is made up.
  */
 import type { ChainInfo } from '@safe-global/views/features/spaces/types'
-import type { AddressBookContact } from '../types'
+import type { AddressBookContact, ContactTag, SuggestedContact, WorkspaceTag } from '../types'
 
 const logo = (chainId: string) => `mock-assets/safe-transaction-assets.safe.global/chains/${chainId}/chain_logo.webp`
 
@@ -42,20 +42,42 @@ export const ADDRESSES = {
   usdc: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
 }
 
+export const WORKSPACE_TAGS: WorkspaceTag[] = [
+  { id: 1, name: 'Internal', color: 'lilac', contactCount: 3 },
+  { id: 2, name: 'Vendor', color: 'cobalt', contactCount: 2 },
+  { id: 3, name: 'Payroll', color: 'lagoon', contactCount: 1 },
+  { id: 4, name: 'Exchange', color: 'clay', contactCount: 0 },
+]
+
+const tags = (...names: string[]): ContactTag[] =>
+  WORKSPACE_TAGS.filter((tag) => names.includes(tag.name)).map(({ id, name, color }) => ({ id, name, color }))
+
 const contact = (fields: Partial<AddressBookContact> & Pick<AddressBookContact, 'address' | 'name'>) => ({
   chains: [ethereum],
   addedBy: MEMBERS.maya,
+  tags: [],
   ...fields,
 })
 
 export const WORKSPACE_CONTACTS: AddressBookContact[] = [
-  contact({ address: ADDRESSES.treasury, name: 'Treasury', chains: [ethereum, arbitrum, optimism] }),
-  contact({ address: ADDRESSES.payroll, name: 'Payroll', chains: [base, ethereum] }),
-  contact({ address: ADDRESSES.ops, name: 'Ops multisig', chains: [gnosis], addedBy: MEMBERS.jonas }),
+  contact({
+    address: ADDRESSES.treasury,
+    name: 'Treasury',
+    chains: [ethereum, arbitrum, optimism],
+    tags: tags('Internal'),
+  }),
+  contact({ address: ADDRESSES.payroll, name: 'Payroll', chains: [base, ethereum], tags: tags('Internal', 'Payroll') }),
+  contact({
+    address: ADDRESSES.ops,
+    name: 'Ops multisig',
+    chains: [gnosis],
+    addedBy: MEMBERS.jonas,
+    tags: tags('Internal'),
+  }),
   contact({ address: ADDRESSES.maya, name: 'Maya Chen (CFO)', chains: [ethereum, arbitrum, optimism, base] }),
   contact({ address: ADDRESSES.jonas, name: 'Jonas Weber', chains: [ethereum, gnosis], addedBy: MEMBERS.lena }),
-  contact({ address: ADDRESSES.northwind, name: 'Northwind Logistics', addedBy: MEMBERS.jonas }),
-  contact({ address: ADDRESSES.atlas, name: 'Atlas Audits', addedBy: undefined }),
+  contact({ address: ADDRESSES.northwind, name: 'Northwind Logistics', addedBy: MEMBERS.jonas, tags: tags('Vendor') }),
+  contact({ address: ADDRESSES.atlas, name: 'Atlas Audits', addedBy: undefined, tags: tags('Vendor') }),
   contact({
     address: ADDRESSES.lighthouse,
     name: 'Lighthouse Ventures Fund II strategic multisig (Series A lead)',
@@ -69,4 +91,31 @@ export const LOCAL_CONTACTS: AddressBookContact[] = [
   { address: ADDRESSES.hardwareWallet, name: 'My hardware wallet', chains: [ethereum, base] },
   { address: ADDRESSES.treasuryLookAlike, name: 'Old treasury', chains: [ethereum] },
   { address: ADDRESSES.treasury, name: 'Treasury', chains: [ethereum], isShared: true },
+]
+
+export const SUGGESTED_SIGNERS: SuggestedContact[] = [
+  {
+    address: '0x60E543e244f513795d6a7fbCf0479A4DBA950a9A',
+    chains: [ethereum, arbitrum, optimism],
+    suggestedName: 'Treasury signer 4',
+    reason: { kind: 'signer', safes: ['Treasury'] },
+  },
+  {
+    address: '0xFf23675C1fc258d5DB60fd1A6259d2209255221D',
+    chains: [base, ethereum],
+    suggestedName: 'Payroll signer 3',
+    reason: { kind: 'signer', safes: ['Payroll'] },
+  },
+  {
+    address: '0x834984C04f21A982f8BfC1f18157087E5B52B21C',
+    chains: [gnosis, optimism, arbitrum],
+    suggestedName: 'Ops multisig signer 2',
+    reason: { kind: 'signer', safes: ['Ops multisig', 'Grants program'] },
+  },
+  {
+    address: '0x19cc57aF6C4bcd078b72522c3ef6B6705c6d1d22',
+    chains: [optimism, arbitrum],
+    suggestedName: 'Grants program signer 3',
+    reason: { kind: 'signer', safes: ['Grants program'] },
+  },
 ]

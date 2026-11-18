@@ -6,18 +6,20 @@ import PositionsEmpty from '../index'
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
+}))
+jest.mock('@/services/analytics/mixpanel-events', () => ({
+  ...jest.requireActual('@/services/analytics/mixpanel-events'),
   MixpanelEventParams: {
     ENTRY_POINT: 'Entry Point',
   },
 }))
 
-jest.mock('@/features/earn', () => ({
-  __esModule: true,
-  default: jest.fn(),
+jest.mock('@/features/earn/public/hooks/useIsEarnFeatureEnabled', () => ({
+  ...jest.requireActual('@/features/earn/public/hooks/useIsEarnFeatureEnabled'),
   useIsEarnPromoEnabled: jest.fn(() => true),
 }))
 
-import { useIsEarnPromoEnabled } from '@/features/earn'
+import { useIsEarnPromoEnabled } from '@/features/earn/public/hooks/useIsEarnFeatureEnabled'
 
 const mockTrackEvent = trackEvent as jest.MockedFunction<typeof trackEvent>
 const mockUseIsEarnFeatureEnabled = useIsEarnPromoEnabled as jest.MockedFunction<typeof useIsEarnPromoEnabled>

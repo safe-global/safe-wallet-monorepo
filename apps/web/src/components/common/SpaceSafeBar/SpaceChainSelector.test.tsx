@@ -6,7 +6,7 @@ import SpaceChainSelector from './SpaceChainSelector'
 import { useSpaceChainSelector } from './hooks/useSpaceChainSelector'
 import { useSafeAppUrl } from '@/hooks/safe-apps/useSafeAppUrl'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
-import type { ChainSelectorBlockProps } from '@/features/spaces'
+import type { ChainSelectorBlockProps } from '@/features/spaces/public/components/ChainSelectorBlock'
 
 jest.mock('next/router', () => ({
   useRouter: jest.fn(),
@@ -16,7 +16,7 @@ jest.mock('@/hooks/safe-apps/useSafeAppUrl', () => ({
 }))
 jest.mock('./hooks/useSpaceChainSelector')
 jest.mock(
-  '@/features/spaces/components/SafeSelectorDropdown/components/ChainSelectorBlock',
+  '@/features/spaces/public/components/ChainSelectorBlock',
   () =>
     function ChainSelectorBlock({
       deployedChains,
@@ -46,8 +46,9 @@ jest.mock('@safe-global/views/components/ui/tooltip', () => ({
   ),
   TooltipContent: ({ children }: { children: ReactNode }) => <div data-testid="tooltip-content">{children}</div>,
 }))
-jest.mock('@/features/multichain', () => ({
-  CreateSafeOnNewChain: () => <div data-testid="create-safe-on-new-chain" />,
+jest.mock('@/features/multichain/public/components/CreateSafeOnNewChain', () => ({
+  __esModule: true,
+  default: () => <div data-testid="create-safe-on-new-chain" />,
 }))
 
 const renderWithTxFlow = (txFlow: TxModalContextType['txFlow']) => {

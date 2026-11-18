@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { isAddress } from 'ethers'
 import { type InviteUsersDto, useMembersInviteUserV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { MemberRole } from '../../../hooks/useSpaceMembers'
+import { MemberRole } from '../../../public/hooks/useSpaceMembers'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { buildInviteUserPayload, isEmailAddress } from '../../AddMemberModal/utils'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/utils/elevation'
 
 interface MemberInvite {
   // Can be a wallet address, ENS name, or email.
