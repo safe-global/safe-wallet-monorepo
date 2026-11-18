@@ -1,6 +1,7 @@
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
+import { useIsWorkspaceWizardEnabled } from '@/hooks/useIsWorkspaceWizardEnabled'
 import { useIsInvited } from '../public/hooks/useSpaceMembers'
 import { useSpaceSubscription } from './billing/useSpaceSubscription'
 import { useSpaceOffers } from './billing/useSpaceOffers'
@@ -31,13 +32,17 @@ export const useWorkspaceLock = (spaceId?: string | null) => {
   const subscription = useSpaceSubscription(spaceId)
   const offers = useSpaceOffers(spaceId)
   const applies = isSafePro && !isInvited
-  const space = useSpacesGetOneV1Query(applies && spaceId ? { id: spaceId } : skipToken)
+  // Only the wizard resumes a pending setup; without it the legacy onboarding would send the admin back here.
+  const isWizard = useIsWorkspaceWizardEnabled()
+  const readsSetup = applies && isWizard === true && Boolean(spaceId)
+  const space = useSpacesGetOneV1Query(readsSetup && spaceId ? { id: spaceId } : skipToken)
   // An uninitialized query reads as "no plan, no offers"; resolving keeps the lock from firing on stale emptiness.
   const isResolving =
     applies &&
     (subscription.isLoading ||
       offers.isLoading ||
-      space.isLoading ||
+      isWizard === undefined ||
+      (space.isFetching && space.currentData === undefined) ||
       Boolean(subscription.isUninitialized) ||
       Boolean(offers.isUninitialized))
   const isLive = subscription.status === 'trialing' || subscription.status === 'active'
@@ -45,9 +50,13 @@ export const useWorkspaceLock = (spaceId?: string | null) => {
   const isError =
     applies &&
     !isResolving &&
-    Boolean((subscription.isError && !subscription.hasData) || (!isLive && offers.isError && !offers.hasData))
+    Boolean(
+      (subscription.isError && !subscription.hasData) ||
+      (!isLive && offers.isError && !offers.hasData) ||
+      (readsSetup && space.isError && space.currentData === undefined),
+    )
   const reason = lockReason({
-    isSetupPending: space.currentData?.setupStatus === 'pending',
+    isSetupPending: readsSetup && space.currentData?.setupStatus === 'pending',
     isTrialOffered: offers.trialPeriodDays !== null,
     hasPaymentFailed: subscription.status === 'payment_failed',
   })
@@ -59,6 +68,7 @@ export const useWorkspaceLock = (spaceId?: string | null) => {
     retry: () => {
       void subscription.refetch()
       void offers.refetch()
+      if (readsSetup) void space.refetch()
     },
     trialPeriodDays: offers.trialPeriodDays,
     reason,
