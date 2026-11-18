@@ -16,13 +16,31 @@ import { SAFE_APPS_LABELS } from '@/services/analytics'
 import { BRAND_NAME } from '@/config/constants'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
+import { useAppsV1 } from '@/features/earn/defiV1/apps/context'
+import { AppsV1View } from '@/features/earn/defiV1/apps/components/AppsV1View'
 
 const SafeApps = () => {
   const router = useRouter()
   const safeLinkQuery = useSafeLinkQuery()
-  const { remoteSafeApps, remoteSafeAppsLoading, pinnedSafeApps, pinnedSafeAppIds } = useSafeApps()
-  const { filteredApps, query, setQuery, setSelectedCategories, setOptimizedWithBatchFilter, selectedCategories } =
-    useSafeAppsFilters(remoteSafeApps)
+  const appsV1 = useAppsV1()
+  const {
+    remoteSafeApps,
+    remoteSafeAppsLoading,
+    pinnedSafeApps,
+    pinnedSafeAppIds,
+    customSafeApps,
+    togglePin,
+    removeCustomApp,
+  } = useSafeApps()
+  const {
+    filteredApps,
+    query,
+    setQuery,
+    setSelectedCategories,
+    setOptimizedWithBatchFilter,
+    optimizedWithBatchFilter,
+    selectedCategories,
+  } = useSafeAppsFilters(remoteSafeApps)
   const isFiltered = filteredApps.length !== remoteSafeApps.length
   const isSafeAppsEnabled = useHasFeature(FEATURES.SAFE_APPS)
 
@@ -71,37 +89,54 @@ const SafeApps = () => {
               safeAppsList={remoteSafeApps}
             />
 
-            {/* Pinned apps */}
-            {!isFiltered && pinnedSafeApps.length > 0 && (
-              <SafeAppList
-                title="My pinned apps"
-                safeAppsList={pinnedSafeApps}
-                bookmarkedSafeAppsId={pinnedSafeAppIds}
-                eventLabel={SAFE_APPS_LABELS.apps_pinned}
+            {appsV1 ? (
+              <AppsV1View
+                key={appsV1.view}
+                config={appsV1}
+                filteredApps={filteredApps}
+                customApps={[...customSafeApps, ...(appsV1.customApps ?? [])]}
+                query={query}
+                selectedCategories={selectedCategories}
+                batchOnly={optimizedWithBatchFilter}
+                pinnedIds={pinnedSafeAppIds}
+                onTogglePin={(appId) => togglePin(appId, SAFE_APPS_LABELS.apps_all)}
+                onRemoveCustom={(app) => removeCustomApp(app.id)}
               />
-            )}
+            ) : (
+              <>
+                {/* Pinned apps */}
+                {!isFiltered && pinnedSafeApps.length > 0 && (
+                  <SafeAppList
+                    title="My pinned apps"
+                    safeAppsList={pinnedSafeApps}
+                    bookmarkedSafeAppsId={pinnedSafeAppIds}
+                    eventLabel={SAFE_APPS_LABELS.apps_pinned}
+                  />
+                )}
 
-            {/* Featured apps */}
-            {!isFiltered && featuredSafeApps.length > 0 && (
-              <SafeAppList
-                title="Featured apps"
-                safeAppsList={featuredSafeApps}
-                bookmarkedSafeAppsId={pinnedSafeAppIds}
-                eventLabel={SAFE_APPS_LABELS.apps_featured}
-              />
-            )}
+                {/* Featured apps */}
+                {!isFiltered && featuredSafeApps.length > 0 && (
+                  <SafeAppList
+                    title="Featured apps"
+                    safeAppsList={featuredSafeApps}
+                    bookmarkedSafeAppsId={pinnedSafeAppIds}
+                    eventLabel={SAFE_APPS_LABELS.apps_featured}
+                  />
+                )}
 
-            {/* All apps */}
-            <SafeAppList
-              title="All apps"
-              isFiltered={isFiltered}
-              safeAppsList={isFiltered ? filteredApps : nonPinnedApps}
-              safeAppsListLoading={remoteSafeAppsLoading}
-              bookmarkedSafeAppsId={pinnedSafeAppIds}
-              eventLabel={SAFE_APPS_LABELS.apps_all}
-              query={query}
-              showNativeSwapsCard
-            />
+                {/* All apps */}
+                <SafeAppList
+                  title="All apps"
+                  isFiltered={isFiltered}
+                  safeAppsList={isFiltered ? filteredApps : nonPinnedApps}
+                  safeAppsListLoading={remoteSafeAppsLoading}
+                  bookmarkedSafeAppsId={pinnedSafeAppIds}
+                  eventLabel={SAFE_APPS_LABELS.apps_all}
+                  query={query}
+                  showNativeSwapsCard
+                />
+              </>
+            )}
           </main>
         </>
       )}
