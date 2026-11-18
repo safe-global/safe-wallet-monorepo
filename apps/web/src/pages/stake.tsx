@@ -1,11 +1,12 @@
 import Head from 'next/head'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { BRAND_NAME } from '@/config/constants'
-import { StakeFeature } from '@/features/stake'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
+import StakeContent from '@/features/stake/public/StakePage'
 
 const StakePage = () => {
-  const stake = useLoadFeature(StakeFeature)
+  const isStakingEnabled = useHasFeature(FEATURES.STAKING)
 
   return (
     <>
@@ -13,9 +14,9 @@ const StakePage = () => {
         <title>{`${BRAND_NAME} – Stake`}</title>
       </Head>
 
-      {stake.$isReady ? (
-        <stake.StakePage />
-      ) : stake.$isDisabled ? (
+      {isStakingEnabled ? (
+        <StakeContent />
+      ) : isStakingEnabled === false ? (
         <main>
           <Typography align="center" className="my-6">
             Staking is not available on this network.

@@ -1,4 +1,4 @@
-import type { BatchTxsState } from '@/features/batching/store/batchSlice'
+import type { BatchTxsState } from '@/features/batching/public/batchSlice'
 import { OperationType } from '@safe-global/types-kit'
 
 export const migrateBatchTxs = (batchSliceState: BatchTxsState) => {

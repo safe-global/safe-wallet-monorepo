@@ -1,7 +1,6 @@
 import type { ModuleTransaction, MultisigTransaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import TxProposalChip from '@safe-global/views/features/proposers/components/TxProposalChip'
-import { SwapFeature } from '@/features/swap'
-import useIsExpiredSwap from '@/features/swap/hooks/useIsExpiredSwap'
+import useIsExpiredSwap from '@/features/swap/public/useIsExpiredSwap'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import type { ReactElement } from 'react'
 
@@ -24,8 +23,8 @@ import { useHnQueueAssessmentResult } from '@/features/hypernative/public/useHnQ
 import { useShowHypernativeAssessment } from '@/features/hypernative/public/useShowHypernativeAssessment'
 import { useHypernativeOAuth } from '@/features/hypernative/public/useHypernativeOAuth'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import HnQueueAssessment from '@/features/hypernative/public/HnQueueAssessment'
+import StatusLabel from '@/features/swap/public/StatusLabel'
 
 type TxSummaryProps = {
   isConflictGroup?: boolean
@@ -34,7 +33,6 @@ type TxSummaryProps = {
 }
 
 const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): ReactElement => {
-  const { StatusLabel } = useLoadFeature(SwapFeature)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const tx = item.transaction
   const isQueue = isTxQueued(tx.txStatus)

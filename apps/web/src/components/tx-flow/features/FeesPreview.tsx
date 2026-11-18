@@ -1,15 +1,13 @@
 import { useContext, useEffect, type ReactElement } from 'react'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { FeePaymentFeature } from '@/features/fee-payment'
-import { useFeesPreview } from '@/features/fee-payment/hooks/useFeesPreview'
-import { useIsFeeCardSlotVisible } from '@/features/fee-payment/hooks/useIsFeeCardSlotVisible'
+import { useFeesPreview } from '@/features/fee-payment/public/useFeesPreview'
+import { useIsFeeCardSlotVisible } from '@/features/fee-payment/public/useIsFeeCardSlotVisible'
 import { useSafeShieldForTxData } from '@/features/safe-shield/public/useSafeShield'
 import { TxFlowContext } from '../TxFlowProvider'
 import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { withSlot } from '@/components/tx-flow/slots/withSlot'
+import FeesPreviewComponent from '@/features/fee-payment/public/FeesPreview'
 
 const FeesPreview = (): ReactElement => {
-  const { FeesPreview: FeesPreviewComponent } = useLoadFeature(FeePaymentFeature)
   const feesData = useFeesPreview()
   const { setIsSubmitDisabled } = useContext(TxFlowContext)
 

@@ -41,14 +41,11 @@ import { useInviteNotification } from '@/features/spaces/hooks/useInviteNotifica
 import { useSafeWorkspaceAttach } from '@/features/spaces/hooks/useSafeWorkspaceAttach'
 import { useSafeWorkspaceCheck } from '@/features/spaces/hooks/useSafeWorkspaceCheck'
 import Recovery from '@/features/recovery/public/Recovery'
-import { SpendingLimitsFeature } from '@/features/spending-limits'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 /**
  * Wrapper that lazy-loads SpendingLimitsLoader via the feature system.
  */
 const SpendingLimitsLoaderWrapper = () => {
-  const { SpendingLimitsLoader } = useLoadFeature(SpendingLimitsFeature)
   return <SpendingLimitsLoader />
 }
 
@@ -72,6 +69,7 @@ import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiry
 import ObservabilityErrorBoundary from '@/components/common/ObservabilityErrorBoundary'
 import RenderAfterMount from '@/components/common/RenderAfterMount'
 import { ShadcnProvider } from '@safe-global/views/components/ui/ShadcnProvider'
+import SpendingLimitsLoader from '@/features/spending-limits/public/SpendingLimitsLoader'
 
 // Initialize observability before React rendering starts
 // This ensures we capture early page metrics (FCP, LCP, TTI) and errors during hydration

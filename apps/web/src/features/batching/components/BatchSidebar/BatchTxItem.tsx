@@ -4,7 +4,7 @@ import { ListItem } from '@safe-global/views/components/ui/list'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import css from './styles.module.css'
 
-import { type DraftBatchItem } from '../../store/batchSlice'
+import { type DraftBatchItem } from '../../public/batchSlice'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import { BATCH_EVENTS } from '@/services/analytics/events/batching'
 import { trackEvent } from '@/services/analytics'

@@ -1,5 +1,5 @@
-import { getResetTimeOptions } from '@/features/spending-limits/constants'
-import type { ResetTimeOption } from '@/features/spending-limits/constants'
+import { getResetTimeOptions } from '@/features/spending-limits/public/constants'
+import type { ResetTimeOption } from '@/features/spending-limits/public/constants'
 import { ONE_TIME_HELPER_TEXT } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 
 /** The helper line under Frequency: `1 day` → "Limit resets every day". */

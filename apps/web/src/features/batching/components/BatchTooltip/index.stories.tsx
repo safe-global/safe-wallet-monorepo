@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
-import BatchTooltip from './index'
+import BatchTooltip from '../../public/BatchTooltip'
 import { TxEvent, txDispatch } from '@/services/tx/txEvents'
 
 /**

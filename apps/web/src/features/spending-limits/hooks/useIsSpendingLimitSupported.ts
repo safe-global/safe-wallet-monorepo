@@ -3,7 +3,7 @@ import useSafeInfo from '@/hooks/useSafeInfo'
 import {
   getDeployedSpendingLimitModuleAddress,
   getLatestSpendingLimitAddress,
-} from '../services/spendingLimitDeployments'
+} from '../public/spendingLimitDeployments'
 
 /**
  * Whether a new spending limit can be created on the current chain.

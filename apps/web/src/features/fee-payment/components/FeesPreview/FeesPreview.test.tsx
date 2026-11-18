@@ -2,7 +2,7 @@ import { screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { render } from '@/tests/test-utils'
 import FeesPreview from './index'
-import type { FeesPreviewData } from '../../hooks/useFeesPreview'
+import type { FeesPreviewData } from '../../public/useFeesPreview'
 
 jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: () => ({ nativeCurrency: { symbol: 'ETH', logoUri: 'https://example/eth.svg' } }),
@@ -10,8 +10,8 @@ jest.mock('@/hooks/useChains', () => ({
 
 // Keeps the Safe-pays suite below as live-relaying coverage; the last describe flips it off.
 let mockRelayingLive = true
-jest.mock('../../constants', () => ({
-  ...jest.requireActual('../../constants'),
+jest.mock('../../public/constants', () => ({
+  ...jest.requireActual('../../public/constants'),
   get IS_RELAYING_LIVE() {
     return mockRelayingLive
   },

@@ -34,7 +34,7 @@ jest.mock('@/hooks/useBalances', () => ({
 }))
 
 const mockUsePayFromSafeFeePreview = jest.fn()
-jest.mock('@/features/fee-payment/hooks/usePayFromSafeFeePreview', () => ({
+jest.mock('@/features/fee-payment/public/usePayFromSafeFeePreview', () => ({
   usePayFromSafeFeePreview: () => mockUsePayFromSafeFeePreview(),
 }))
 

@@ -14,7 +14,7 @@ import { SafeShieldProvider } from '@/features/safe-shield/public/SafeShieldProv
 import * as useBalances from '@/hooks/useBalances'
 import * as useTrustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
 import * as chainHooks from '@/hooks/useChains'
-import * as payFromSafeHooks from '@/features/fee-payment/hooks/useResolvedGasToken'
+import * as payFromSafeHooks from '@/features/fee-payment/public/useResolvedGasToken'
 import * as sharedTxHooks from '@/components/tx/shared/hooks'
 import * as remoteSafeAppsHooks from '@/hooks/safe-apps/useRemoteSafeApps'
 import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-apps'

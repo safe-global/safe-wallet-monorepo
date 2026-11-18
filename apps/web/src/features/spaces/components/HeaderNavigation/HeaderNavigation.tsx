@@ -10,7 +10,7 @@ import Identicon from '@safe-global/views/components/common/Identicon'
 import Track from '@/components/common/Track'
 import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
 import { BATCH_EVENTS } from '@/services/analytics/events/batching'
-import BatchTooltip from '@/features/batching/components/BatchTooltip'
+import BatchTooltip from '@/features/batching/public/BatchTooltip'
 
 export interface HeaderNavigationProps {
   /**

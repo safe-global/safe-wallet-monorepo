@@ -1,6 +1,6 @@
 import { SettingsInfoType, TransactionInfoType } from '@safe-global/store/gateway/types'
 import type { AddressInfo, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { getOrderClass } from '@/features/swap/helpers/utils'
+import { getOrderClass } from '@/features/swap/public/utils'
 import type { ReactElement } from 'react'
 import { useMemo } from 'react'
 
@@ -14,7 +14,7 @@ import {
 } from '@/utils/transaction-guards'
 import useAddressBook from './useAddressBook'
 import type { AddressBook } from '@/store/addressBookSlice'
-import { TWAP_ORDER_TITLE } from '@/features/swap/constants'
+import { TWAP_ORDER_TITLE } from '@/features/swap/public/constants'
 import { ICON_STROKE } from '@safe-global/views/components/common/iconStroke'
 import { cn } from '@safe-global/views/utils/cn'
 import {

@@ -3,7 +3,7 @@ import { mswLoader } from 'msw-storybook-addon'
 import type { MultiSend, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { OperationType } from '@safe-global/types-kit'
 import { createMockStory } from '@/stories/mocks/createMockStory'
-import type { CallOnlyTxData } from '../../store/batchSlice'
+import type { CallOnlyTxData } from '../../public/batchSlice'
 import BatchTxItem from './BatchTxItem'
 import { mockNow } from '@/stories/mocks/now'
 

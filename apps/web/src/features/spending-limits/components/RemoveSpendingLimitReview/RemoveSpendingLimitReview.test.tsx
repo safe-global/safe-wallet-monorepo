@@ -9,7 +9,7 @@ import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
 import { safeTxContextBuilder } from '@/tests/builders/safeTxContext'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
-import { getLatestSpendingLimitAddress } from '../../services/spendingLimitDeployments'
+import { getLatestSpendingLimitAddress } from '../../public/spendingLimitDeployments'
 import { getSpendingLimitInterface } from '../../services/spendingLimitContracts'
 import RemoveSpendingLimitReview from '.'
 

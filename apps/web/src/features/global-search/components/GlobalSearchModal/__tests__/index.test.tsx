@@ -7,7 +7,7 @@ import { mockWallet } from '@/tests/mocks/hooks'
 jest.mock('@/hooks/wallets/useWallet')
 
 const mockUseIsSwapFeatureEnabled = jest.fn().mockReturnValue(true)
-jest.mock('@/features/swap/hooks/useIsSwapFeatureEnabled', () => ({
+jest.mock('@/features/swap/public/useIsSwapFeatureEnabled', () => ({
   __esModule: true,
   default: () => mockUseIsSwapFeatureEnabled(),
 }))

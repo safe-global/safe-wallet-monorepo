@@ -8,16 +8,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import AddressBookInput from '@/components/common/AddressBookInput'
 import { useSafeShieldForAddressPoisoning } from '@/features/safe-shield/public/useSafeShield'
 import useChainId from '@/hooks/useChainId'
-import { getResetTimeOptions } from '../../constants'
+import { getResetTimeOptions } from '../../public/constants'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import TokenAmountInput from '@/components/common/TokenAmountInput'
 import { validateAmount, validateDecimalLength } from '@safe-global/utils/utils/validation'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../types'
+import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../public/types'
 import useIsSpendingLimitSupported from '../../hooks/useIsSpendingLimitSupported'
 import SpendingLimitNotSupported from './SpendingLimitNotSupported'
-import { validateSpendingLimitAmount } from '../../services/spendingLimitValidation'
+import { validateSpendingLimitAmount } from '../../public/spendingLimitValidation'
 
 const CreateSpendingLimit = () => {
   const chainId = useChainId()

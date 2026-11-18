@@ -5,7 +5,7 @@ import { isDelegateCall as checkIsDelegateCall } from '@/services/tx/tx-sender/s
 import { TxModalContext } from '@/components/tx-flow'
 import { TxFlowContext } from '../../TxFlowProvider'
 import useIsCounterfactualSafe from '@/features/counterfactual/public/useIsCounterfactualSafe'
-import { useUpdateBatch } from '@/features/batching/hooks/useDraftBatch'
+import { useUpdateBatch } from '@/features/batching/public/useDraftBatch'
 import type { SlotComponentProps } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { withSlot } from '@/components/tx-flow/slots/withSlot'

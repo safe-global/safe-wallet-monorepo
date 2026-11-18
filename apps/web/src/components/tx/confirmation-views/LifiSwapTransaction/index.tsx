@@ -1,8 +1,6 @@
 import { DataTable } from '@safe-global/views/components/common/Table/DataTable'
 import { type SwapTransactionInfo } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { formatUnits } from 'ethers'
-import { SwapFeature } from '@/features/swap'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import NamedAddressInfo from '@/components/common/NamedAddressInfo'
 import { DataRow } from '@safe-global/views/components/common/Table/DataRow'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
@@ -10,10 +8,9 @@ import { getTotalBridgeFee } from '@safe-global/utils/components/confirmation-vi
 import TokenAmount from '@/components/common/TokenAmount'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import css from './styles.module.css'
+import SwapTokens from '@/features/swap/public/SwapTokens'
 
 const PreviewSwapAmount = ({ txInfo }: { txInfo: SwapTransactionInfo }) => {
-  const { SwapTokens } = useLoadFeature(SwapFeature)
-
   return (
     <div key="amount">
       <SwapTokens

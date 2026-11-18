@@ -13,17 +13,15 @@ import ManageTokensButton from '@/components/balances/ManageTokensButton'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { BRAND_NAME } from '@/config/constants'
 import { useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign/public/useIsNoFeeCampaignEnabled'
-import { StakeFeature } from '@/features/stake'
 import useIsStakingPromoBannerVisible, {
   STAKING_PROMO_BANNER_HIDE_KEY,
-} from '@/features/stake/hooks/useIsStakingPromoBannerVisible'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+} from '@/features/stake/public/useIsStakingPromoBannerVisible'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
 import PortfolioRefreshHint from '@/features/portfolio/public/PortfolioRefreshHint'
 import NoFeeCampaignBanner from '@/features/no-fee-campaign/public/NoFeeCampaignBanner'
+import StakingPromoBanner from '@/features/stake/public/StakingPromoBanner'
 
 const Balances = () => {
-  const { StakingPromoBanner } = useLoadFeature(StakeFeature)
   const { balances, error } = useVisibleBalances()
   const [showHiddenAssets, setShowHiddenAssets] = useState(false)
   const toggleShowHiddenAssets = () => setShowHiddenAssets((prev) => !prev)

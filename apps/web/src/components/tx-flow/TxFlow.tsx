@@ -1,10 +1,10 @@
-import React, { useCallback, useMemo, useState, type ReactNode } from 'react'
+import React, { useCallback, useMemo, useState, type ComponentType, type ReactNode } from 'react'
 import useTxStepper from './useTxStepper'
 import SafeTxProvider from './SafeTxProvider'
 import { TxInfoProvider } from './TxInfoProvider'
 import TxFlowProvider, { type TxFlowProviderProps, type TxFlowContextType } from './TxFlowProvider'
 import { TxFlowContent } from './common/TxFlowContent'
-import ReviewTransaction from '../tx/ReviewTransactionV2'
+import ReviewTransaction, { type ReviewTransactionProps } from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
 import { ExecuteTxStep } from '../tx/ExecuteTxStep'
 import TxNote from '@/components/tx-flow/features/TxNote'
@@ -40,7 +40,7 @@ type TxFlowProps<T extends unknown> = {
   isRejection?: TxFlowProviderProps<T>['isRejection']
   isBatch?: TxFlowProviderProps<T>['isBatch']
   isBatchable?: TxFlowProviderProps<T>['isBatchable']
-  ReviewTransactionComponent?: typeof ReviewTransaction
+  ReviewTransactionComponent?: ComponentType<ReviewTransactionProps>
   eventCategory?: string
 } & TxFlowContextType['txLayoutProps']
 

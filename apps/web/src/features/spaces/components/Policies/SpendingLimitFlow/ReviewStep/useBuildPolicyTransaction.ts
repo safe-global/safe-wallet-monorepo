@@ -1,11 +1,10 @@
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useContext, useEffect, useMemo } from 'react'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { SpendingLimitsFeature } from '@/features/spending-limits'
-import type { DesiredAllowance } from '@/features/spending-limits/services/spendingLimitExecution'
+import type { DesiredAllowance } from '@/features/spending-limits/public/spendingLimitExecution'
 import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
-import { useCurrentChain } from '@/hooks/useChains'
+import { useCurrentChain, useHasFeature } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
@@ -57,8 +56,7 @@ export const useBuildPolicyTransaction = (formValues: SpendingLimitPolicyFormVal
   const extraTokens = useExistingLimitTokens()
   const { options: tokens, isLoading: tokensLoading, isPopularLoading } = useSpendingLimitTokenOptions(extraTokens)
   const { limits: existingLimits, error: existingLimitsError } = useExistingSpendingLimits()
-  const { createSpendingLimitsTx, createSpendingLimitEditTx, buildSpendingLimitEdit, $isReady } =
-    useLoadFeature(SpendingLimitsFeature)
+  const isSpendingLimitEnabled = useHasFeature(FEATURES.SPENDING_LIMIT) === true
   const isEditMode = useIsEditMode()
 
   const tokensReady = !tokensLoading && !isPopularLoading
@@ -87,20 +85,28 @@ export const useBuildPolicyTransaction = (formValues: SpendingLimitPolicyFormVal
     // dropped here and only a finished build puts one back. Otherwise a stale one stays signable under a new summary.
     setSafeTx(undefined)
     setSafeTxError(blocker)
-    if (blocker || !desired || !existingLimits || !sdk || !chainId || !chain || !$isReady || !safeLoaded) return
+    if (blocker || !desired || !existingLimits || !sdk || !chainId || !chain || !isSpendingLimitEnabled || !safeLoaded)
+      return
 
     // A build that finishes after the inputs changed must not overwrite the newer one.
     let isStale = false
     const build = isEditMode
-      ? createSpendingLimitEditTx(
-          buildSpendingLimitEdit(desired, existingLimits),
-          existingLimits,
-          chainId,
-          safe.modules,
-          safe.deployed,
-          scope,
+      ? Promise.all([
+          import('@/features/spending-limits/public/spendingLimitExecution'),
+          import('@/features/spending-limits/public/spendingLimitEdit'),
+        ]).then(([{ createSpendingLimitEditTx }, { buildSpendingLimitEdit }]) =>
+          createSpendingLimitEditTx(
+            buildSpendingLimitEdit(desired, existingLimits),
+            existingLimits,
+            chainId,
+            safe.modules,
+            safe.deployed,
+            scope,
+          ),
         )
-      : createSpendingLimitsTx(desired, existingLimits, chainId, chain, safe.modules, safe.deployed, scope)
+      : import('@/features/spending-limits/public/spendingLimitExecution').then(({ createSpendingLimitsTx }) =>
+          createSpendingLimitsTx(desired, existingLimits, chainId, chain, safe.modules, safe.deployed, scope),
+        )
 
     build
       .then((tx) => {
@@ -122,14 +128,11 @@ export const useBuildPolicyTransaction = (formValues: SpendingLimitPolicyFormVal
     sdk,
     chainId,
     chain,
-    $isReady,
+    isSpendingLimitEnabled,
     safeLoaded,
     moduleCount,
     safe.deployed,
     isEditMode,
-    createSpendingLimitsTx,
-    createSpendingLimitEditTx,
-    buildSpendingLimitEdit,
     setSafeTx,
     setSafeTxError,
   ])

@@ -1,11 +1,11 @@
 import { renderHook } from '@testing-library/react'
 import useIsStakingBannerVisible from './useIsStakingBannerVisible'
 
-jest.mock('@/features/stake/hooks/useIsStakingBannerEnabled', () => ({
+jest.mock('@/features/stake/public/useIsStakingBannerEnabled', () => ({
   __esModule: true,
   default: jest.fn(),
 }))
-import useIsStakingBannerEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
+import useIsStakingBannerEnabled from '@/features/stake/public/useIsStakingBannerEnabled'
 
 jest.mock('@/hooks/useBalances', () => ({
   __esModule: true,

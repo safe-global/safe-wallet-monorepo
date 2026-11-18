@@ -13,8 +13,8 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
 import { safeTxContextBuilder } from '@/tests/builders/safeTxContext'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
-import { createNewSpendingLimitTx } from '../../services/spendingLimitExecution'
-import type { NewSpendingLimitFlowProps, SpendingLimitState } from '../../types'
+import { createNewSpendingLimitTx } from '../../public/spendingLimitExecution'
+import type { NewSpendingLimitFlowProps, SpendingLimitState } from '../../public/types'
 import ReviewSpendingLimit from '.'
 
 const MAINNET = '1'
@@ -23,7 +23,7 @@ const ONE_WEEK_IN_MINUTES = '10080'
 const ONE_USDC = '1000000'
 const ONE_THOUSAND_USDC = '1000000000'
 
-jest.mock('../../services/spendingLimitExecution', () => ({ createNewSpendingLimitTx: jest.fn() }))
+jest.mock('../../public/spendingLimitExecution', () => ({ createNewSpendingLimitTx: jest.fn() }))
 jest.mock('@/components/tx/ReviewTransactionV2', () => ({
   __esModule: true,
   default: ({ children }: { children: ReactNode }) => <>{children}</>,

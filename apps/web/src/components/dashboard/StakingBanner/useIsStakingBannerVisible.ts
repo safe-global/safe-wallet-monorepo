@@ -1,5 +1,5 @@
 import useBalances from '@/hooks/useBalances'
-import useIsStakingPromoEnabled from '@/features/stake/hooks/useIsStakingBannerEnabled'
+import useIsStakingPromoEnabled from '@/features/stake/public/useIsStakingBannerEnabled'
 import { useSanctionedAddress } from '@/hooks/useSanctionedAddress'
 import { useMemo } from 'react'
 import { formatUnits } from 'ethers'

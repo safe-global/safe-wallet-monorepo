@@ -13,7 +13,7 @@ import { useContext } from 'react'
 import { TxModalContext } from '..'
 import SwapIcon from '@/public/images/common/swap.svg'
 import AssetsIcon from '@safe-global/views/assets/images/sidebar/assets.svg'
-import useIsSwapFeatureEnabled from '@/features/swap/hooks/useIsSwapFeatureEnabled'
+import useIsSwapFeatureEnabled from '@/features/swap/public/useIsSwapFeatureEnabled'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 
 const buttonClasses = 'h-[58px] w-full px-6 text-base [&_svg_path]:fill-current'

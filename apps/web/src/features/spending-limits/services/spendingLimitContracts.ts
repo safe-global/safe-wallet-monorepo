@@ -6,7 +6,7 @@ import {
   getDeployment,
   getLatestSpendingLimitAddress,
   getDeployedSpendingLimitModuleAddress,
-} from './spendingLimitDeployments'
+} from '../public/spendingLimitDeployments'
 
 // Re-export for convenience (used by other services in this feature)
 export { getLatestSpendingLimitAddress, getDeployedSpendingLimitModuleAddress }

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import type { JsonRpcProvider } from 'ethers'
 import { faker } from '@faker-js/faker'
 import { renderHook, waitFor } from '@/tests/test-utils'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import * as useChains from '@/hooks/useChains'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import type { SafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { Errors, logError } from '@/services/exceptions'
@@ -16,9 +16,8 @@ jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
   ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
   useSafeScope: jest.fn(),
 }))
-jest.mock('@/features/__core__/useLoadFeature', () => ({
-  ...jest.requireActual('@/features/__core__/useLoadFeature'),
-  useLoadFeature: jest.fn(),
+jest.mock('@/features/spending-limits/public/spendingLimitLoader', () => ({
+  loadSpendingLimits: (...args: unknown[]) => mockLoad(...args),
 }))
 jest.mock('@/services/exceptions', () => ({
   ...jest.requireActual('@/services/exceptions'),
@@ -27,7 +26,6 @@ jest.mock('@/services/exceptions', () => ({
 jest.mock('../hooks/useSpendingLimitTokenOptions', () => ({ __esModule: true, default: jest.fn() }))
 
 const mockUseSafeScope = useSafeScope as jest.MockedFunction<typeof useSafeScope>
-const mockUseLoadFeature = useLoadFeature as jest.Mock
 const mockUseOptions = useSpendingLimitTokenOptions as jest.MockedFunction<typeof useSpendingLimitTokenOptions>
 const mockLoad = jest.fn()
 
@@ -51,7 +49,7 @@ const wrapper = ({ children }: { children: ReactNode }) => (
 describe('ExistingSpendingLimitsProvider', () => {
   beforeEach(() => {
     jest.clearAllMocks()
-    mockUseLoadFeature.mockReturnValue({ $isReady: true, $isDisabled: false, loadSpendingLimits: mockLoad })
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
     mockUseOptions.mockReturnValue({
       options: [usdc],
       isLoading: false,
@@ -77,6 +75,19 @@ describe('ExistingSpendingLimitsProvider', () => {
 
     expect(result.current.limits).toBeUndefined()
     expect(result.current.loading).toBe(false)
+    expect(mockLoad).not.toHaveBeenCalled()
+  })
+
+  it('loads nothing while spending limits are disabled on the chain', async () => {
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
+    mockUseSafeScope.mockReturnValue(scopeFor(faker.finance.ethereumAddress()))
+
+    const { result } = renderHook(() => useExistingSpendingLimits(), { wrapper })
+
+    await new Promise((resolve) => setTimeout(resolve, 0))
+
+    expect(result.current.loading).toBe(false)
+    expect(result.current.limits).toBeUndefined()
     expect(mockLoad).not.toHaveBeenCalled()
   })
 

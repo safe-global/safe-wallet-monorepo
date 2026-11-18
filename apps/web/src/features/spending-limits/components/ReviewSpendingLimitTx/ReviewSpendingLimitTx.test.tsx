@@ -11,12 +11,12 @@ import { balanceBuilder, erc20TokenBuilder } from '@/tests/builders/balances'
 import { chainBuilder } from '@/tests/builders/chains'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
-import { dispatchSpendingLimitTxExecution } from '../../services/spendingLimitExecution'
+import { dispatchSpendingLimitTxExecution } from '../../public/spendingLimitExecution'
 import ReviewSpendingLimitTx, { type TokenTransferParams } from '.'
 
 const MAINNET = '1'
 
-jest.mock('../../services/spendingLimitExecution', () => ({ dispatchSpendingLimitTxExecution: jest.fn() }))
+jest.mock('../../public/spendingLimitExecution', () => ({ dispatchSpendingLimitTxExecution: jest.fn() }))
 jest.mock('../../hooks/useSpendingLimitGas', () => ({
   __esModule: true,
   default: () => ({ gasLimit: BigInt(100_000), gasLimitLoading: false }),

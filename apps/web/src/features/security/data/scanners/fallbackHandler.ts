@@ -3,10 +3,7 @@ import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { SecurityScanner } from './types'
 import { getSeverityFromScore } from '../../public/constants'
-// Import directly from helpers/utils (not from '@/features/swap') to avoid pulling
-// the swap feature handle (via createFeatureHandle) into the scanner module graph —
-// that creates a circular dependency with @/features/__core__ in test environments.
-import { TWAP_FALLBACK_HANDLER, TWAP_FALLBACK_HANDLER_NETWORKS } from '@/features/swap/helpers/utils'
+import { TWAP_FALLBACK_HANDLER, TWAP_FALLBACK_HANDLER_NETWORKS } from '@/features/swap/public/utils'
 
 type HandlerMatch = 'compatibility' | 'extensible' | 'twap' | null
 

@@ -97,16 +97,13 @@ jest.mock('@/hooks/useIsSignedIn', () => ({
 jest.mock('@/features/__core__/useLoadFeature', () => ({
   ...jest.requireActual('@/features/__core__/useLoadFeature'),
   useLoadFeature: jest.fn(() => ({
-    BatchSidebar: () => null,
     SelectSafeModal: () => null,
     SafeWorkspaceSignInDialog: () => null,
     SafeWorkspaceChooserDialog: () => null,
   })),
 }))
 
-jest.mock('@/features/batching', () => ({
-  BatchingFeature: {},
-}))
+jest.mock('@/features/batching/public/BatchSidebar', () => ({ __esModule: true, default: () => null }))
 jest.mock('@/features/spaces/SpacesFeature', () => ({
   SpacesFeature: {},
 }))
