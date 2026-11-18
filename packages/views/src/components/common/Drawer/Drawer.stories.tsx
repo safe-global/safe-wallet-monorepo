@@ -380,3 +380,11 @@ export const FooterSingleAction: Story = {
     ),
   },
 }
+
+/** Drag the left edge, or focus it and use the arrow keys. The width resets when the drawer closes. */
+export const Resizable: Story = {
+  args: {
+    ...Expandable.args,
+    resizable: true,
+  },
+}
