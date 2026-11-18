@@ -78,7 +78,11 @@ const NameStepNotices = ({ onStartOver }: { onStartOver: () => void }): ReactEle
     />
   )
 
-  if (draft.createdSpaceId !== null) return unfinishedSetupNotice(draft.createdSpaceId, draft.name)
+  if (draft.createdSpaceId !== null) {
+    // Only the gateway knows whether the trial started after the user left Stripe.
+    const created = spaces?.find((space) => space.uuid === draft.createdSpaceId)
+    return created?.setupStatus === 'pending' ? unfinishedSetupNotice(draft.createdSpaceId, draft.name) : null
+  }
 
   if (hasContent(draft)) {
     return (

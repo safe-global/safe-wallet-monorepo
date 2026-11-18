@@ -58,19 +58,32 @@ describe('useSafesStepForm', () => {
     await waitFor(() => expect(result.current.pickedSafes).toEqual([safe]))
   })
 
-  it('preselects the Safe of the link into the onboarding when the draft has none', async () => {
-    const safe = draftSafe()
+  it('preselects the Safe of the link into the onboarding once the picker lists it', async () => {
+    const listed = safeItemBuilder().build()
+    const { result, rerender } = renderSafesForm(signedInDraft(), { safe: `${listed.chainId}:${listed.address}` })
 
-    const { result } = renderSafesForm(signedInDraft(), { safe: `${safe.chainId}:${safe.address}` })
+    rerender({ allSafes: [listed] })
 
-    await waitFor(() => expect(result.current.pickedSafes).toEqual([safe]))
+    await waitFor(() =>
+      expect(result.current.pickedSafes).toEqual([{ chainId: listed.chainId, address: listed.address }]),
+    )
+  })
+
+  it('gives no seat to a linked Safe that the picker does not list', async () => {
+    const viewedOnly = draftSafe()
+    const { result, rerender } = renderSafesForm(signedInDraft(), {
+      safe: `${viewedOnly.chainId}:${viewedOnly.address}`,
+    })
+
+    rerender({ allSafes: [safeItemBuilder().build()] })
+
+    expect(result.current.pickedSafes).toEqual([])
   })
 
   it('selects every chain of the linked Safe once its multichain group loads', async () => {
     const mainnet = safeItemBuilder().with({ chainId: '1' }).build()
     const gnosis = { ...mainnet, chainId: '100' }
     const { result, rerender } = renderSafesForm(signedInDraft(), { safe: `1:${mainnet.address}` })
-    await waitFor(() => expect(result.current.pickedSafes).toHaveLength(1))
 
     rerender({ allSafes: [multiChainGroup([mainnet, gnosis])] })
 

@@ -6,7 +6,7 @@ import { formatDate } from '@safe-global/utils/utils/date'
 import { highlightSafePro } from '@safe-global/views/components/common/ProHighlight'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
-import { SafeProNoticeModal } from '@safe-global/views/features/spaces/components/SafeProModals'
+import { SafeProNoticeModal, SafeProPendingModal } from '@safe-global/views/features/spaces/components/SafeProModals'
 import { useCheckoutReturn, type CheckoutReturnStatus } from '../../hooks/billing/useCheckoutReturn'
 import { useCurrentMembership, useIsAdmin } from '../../public/hooks/useSpaceMembers'
 import { useWorkspaceLock, type WorkspaceLockReason } from '../../hooks/useWorkspaceLock'
@@ -84,7 +84,8 @@ const FinishSetupRedirect = ({ spaceId }: { spaceId: string }) => {
     if (steps) void router.replace(finishSetupRoute(steps, spaceId))
   }, [steps, router, spaceId])
 
-  return null
+  // Covers the Workspace pages, as every other lock reason does, until the redirect lands.
+  return <SafeProPendingModal title="Opening your Workspace setup" body="This usually takes a few seconds." />
 }
 
 /** Mounted on every Workspace page; none of the modals it shows can be dismissed. */

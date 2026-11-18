@@ -12,7 +12,7 @@ import { useRouterGuard } from '@/hooks/useRouterGuard'
 import { useFlowActivationGuard } from '@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard'
 import CreateSpaceOnboarding from './index'
 
-jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => true }))
+jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => true, useSafeProFlag: () => true }))
 
 type Location = { pathname: string; query: Record<string, string> }
 type Url = string | { pathname?: string; query?: Record<string, string> }

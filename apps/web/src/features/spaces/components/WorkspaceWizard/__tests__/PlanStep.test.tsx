@@ -47,6 +47,14 @@ const savedPlan = () => getStoreInstance().getState().workspaceDraft.paymentLink
 describe('PlanStep', () => {
   beforeEach(() => localStorage.clear())
 
+  it('names the largest size on offer next to the sales link', async () => {
+    server.use(trialPlansHandler([SMALL, trialPaymentLinkBuilder({ seats: 10 }).build()]))
+
+    renderPlanStep()
+
+    expect(await screen.findByText(/More than 10 Safes\?/)).toBeInTheDocument()
+  })
+
   it('shows the smallest size when the draft has no plan', async () => {
     server.use(trialPlansHandler([LARGE, SMALL]))
 

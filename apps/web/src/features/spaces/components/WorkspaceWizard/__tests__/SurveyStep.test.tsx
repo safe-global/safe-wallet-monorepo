@@ -87,4 +87,20 @@ describe('SurveyStep', () => {
 
     await waitFor(() => expect(bodies).toEqual([expect.objectContaining({ survey: null })]))
   })
+
+  it('lets the user finish without answers when the survey fails to load', async () => {
+    const bodies: CreateSpaceSetupDto[] = []
+    server.use(
+      http.get(`${GATEWAY_URL}/v1/surveys/onboarding`, () => new HttpResponse(null, { status: 500 })),
+      createSetupHandler(bodies, { spaceId: faker.string.uuid(), checkoutUrl: null }),
+    )
+    const { user } = renderSurveyStep()
+    expect(await screen.findByText('Failed to load survey. Please refresh.')).toBeInTheDocument()
+    const finish = screen.getByRole('button', { name: 'Create Workspace' })
+    await waitFor(() => expect(finish).toBeEnabled())
+
+    await user.click(finish)
+
+    await waitFor(() => expect(bodies).toEqual([expect.objectContaining({ survey: null })]))
+  })
 })

@@ -120,6 +120,27 @@ describe('useSubmitWorkspace', () => {
     expect(replaced.map(({ id }) => id)).toEqual([spaceId])
   })
 
+  it('forgets a Workspace that no longer exists, so the next submit creates a new one', async () => {
+    const goneId = faker.string.uuid()
+    server.use(http.put(`${GATEWAY_URL}/v1/spaces/:id/setup`, () => HttpResponse.json({}, { status: 404 })))
+    const { result } = await renderSubmit(draftWith({ createdSpaceId: goneId }))
+
+    await act(() => result.current.submit.submit())
+
+    expect(result.current.submit.error).toBe('This Workspace no longer exists. Submit again to create a new one.')
+    expect(result.current.workspace.draft.createdSpaceId).toBeNull()
+  })
+
+  it('creates one Workspace when submit is called twice before the first answer', async () => {
+    const bodies: CreateSpaceSetupDto[] = []
+    server.use(createSetupHandler(bodies, { spaceId: faker.string.uuid(), checkoutUrl: faker.internet.url() }))
+    const { result } = await renderSubmit(draftWith())
+
+    await act(() => Promise.all([result.current.submit.submit(), result.current.submit.submit()]))
+
+    expect(bodies).toHaveLength(1)
+  })
+
   it('opens the Workspace at once when no checkout is needed', async () => {
     const spaceId = faker.string.uuid()
     server.use(createSetupHandler([], { spaceId, checkoutUrl: null }))

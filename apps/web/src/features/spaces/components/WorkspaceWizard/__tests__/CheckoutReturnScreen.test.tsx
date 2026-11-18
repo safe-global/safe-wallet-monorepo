@@ -75,6 +75,26 @@ describe('CheckoutReturnScreen', () => {
     expect(replace).toHaveBeenCalledWith({ pathname: AppRoutes.spaces.index, query: { spaceId, sessionId: id } })
   })
 
+  it('says when the setup cannot be loaded and loads it again on retry', async () => {
+    server.use(
+      sessionHandler('complete'),
+      http.get(`${GATEWAY_URL}/v1/spaces/:id/setup`, () => new HttpResponse(null, { status: 500 })),
+    )
+    const replace = jest.fn(() => Promise.resolve(true))
+    const spaceId = faker.string.uuid()
+    const { user } = renderWithUserEvent(<CheckoutReturnScreen sessionId={sessionId()} spaceId={spaceId} />, {
+      routerProps: { replace },
+    })
+    expect(await screen.findByText("We couldn't load your Workspace setup")).toBeInTheDocument()
+
+    server.use(setupHandler('applied'))
+    await user.click(screen.getByRole('button', { name: 'Try again' }))
+
+    await waitFor(() =>
+      expect(replace).toHaveBeenCalledWith(expect.objectContaining({ pathname: AppRoutes.spaces.index })),
+    )
+  })
+
   it('confirms the checkout again when the user retries after a failure', async () => {
     let attempts = 0
     const setupPolled = jest.fn()

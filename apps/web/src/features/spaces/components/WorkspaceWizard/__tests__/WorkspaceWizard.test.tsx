@@ -97,6 +97,27 @@ describe('WorkspaceWizard', () => {
     await waitFor(() => expect(replace).toHaveBeenCalledWith({ pathname: AppRoutes.spaces.index, query: { spaceId } }))
   })
 
+  it('waits for the draft before it looks for the Workspace of a first checkout', async () => {
+    const spaceId = faker.string.uuid()
+    server.use(
+      sessionHandler('complete'),
+      ...workspaceHandlers(spaceId, fakeWorkspaceName(), pendingSetup({ status: 'applied' })),
+    )
+
+    const { replace } = renderWizard(
+      'survey',
+      { sessionId: `cs_${faker.string.alphanumeric(24)}` },
+      { createdSpaceId: spaceId },
+    )
+
+    expect(screen.queryByText("We couldn't find your new Workspace")).not.toBeInTheDocument()
+    await waitFor(() =>
+      expect(replace).toHaveBeenCalledWith(
+        expect.objectContaining({ pathname: AppRoutes.spaces.index, query: expect.objectContaining({ spaceId }) }),
+      ),
+    )
+  })
+
   it('waits for the setup after a completed checkout', async () => {
     const spaceId = faker.string.uuid()
     server.use(sessionHandler('complete'), ...workspaceHandlers(spaceId, fakeWorkspaceName(), pendingSetup()))

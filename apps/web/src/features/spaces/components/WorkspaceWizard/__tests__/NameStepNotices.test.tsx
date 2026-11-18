@@ -7,7 +7,7 @@ import { signedInAuthState } from '@/tests/builders/authState'
 import { spaceBuilder } from '@/tests/builders/space'
 import { fakeUserId, fakeWorkspaceName, workspaceDraftBuilder } from '@/tests/builders/workspaceDraft'
 import { userHandler, workspacesHandler } from '@/tests/msw/workspaceWizard'
-import { renderWithUserEvent, screen, waitForElementToBeRemoved } from '@/tests/test-utils'
+import { renderWithUserEvent, screen, waitFor, waitForElementToBeRemoved } from '@/tests/test-utils'
 import { MemberRole } from '../../../memberRole'
 import NameStepNotices from '../NameStepNotices'
 import WizardReady from '../WizardReady'
@@ -87,9 +87,10 @@ describe('NameStepNotices', () => {
   })
 
   it('finishes the setup of the Workspace a draft already created, on the last step', async () => {
-    const spaceId = faker.string.uuid()
+    const created = spaceBuilder().with({ setupStatus: 'pending' }).build()
+    const spaceId = created.uuid
     const name = fakeWorkspaceName()
-    const { user, push } = renderNotices(ownDraft({ name, createdSpaceId: spaceId }), 'offer')
+    const { user, push } = renderNotices(ownDraft({ name, createdSpaceId: spaceId }, [created]), 'offer')
     await screen.findByText(`You have not finished setting up ${name}`)
 
     await user.click(screen.getByRole('button', { name: 'Finish setup' }))
@@ -99,13 +100,22 @@ describe('NameStepNotices', () => {
 
   it('starts a new Workspace from an empty draft instead of editing the one already created', async () => {
     const onStartOver = jest.fn()
-    const draft = ownDraft({ name: fakeWorkspaceName(), createdSpaceId: faker.string.uuid() })
+    const created = spaceBuilder().with({ setupStatus: 'pending' }).build()
+    const draft = ownDraft({ name: fakeWorkspaceName(), createdSpaceId: created.uuid }, [created])
     const { user } = renderNotices(draft, 'offer', onStartOver)
 
     await user.click(await screen.findByRole('button', { name: 'Create a new Workspace' }))
 
     expect(onStartOver).toHaveBeenCalled()
     expect(getStoreInstance().getState().workspaceDraft).toEqual(EMPTY_WORKSPACE_DRAFT)
+  })
+
+  it('forgets a draft whose Workspace setup the gateway already applied', async () => {
+    const applied = spaceBuilder().with({ setupStatus: 'applied' }).build()
+    renderNotices(ownDraft({ name: applied.name, createdSpaceId: applied.uuid }, [applied]), 'offer')
+
+    await waitFor(() => expect(getStoreInstance().getState().workspaceDraft).toEqual(EMPTY_WORKSPACE_DRAFT))
+    expect(screen.queryByText(`You have not finished setting up ${applied.name}`)).not.toBeInTheDocument()
   })
 
   it('points to another Workspace whose trial never started, next to the empty form', async () => {

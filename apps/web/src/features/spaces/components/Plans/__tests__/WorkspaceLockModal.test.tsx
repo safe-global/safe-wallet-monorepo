@@ -39,6 +39,7 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/spaces', () => ({
   useSpacesGetOneV1Query: () => ({ currentData: { name: 'Acme Inc' } }),
 }))
 jest.mock('@safe-global/views/features/spaces/components/SafeProModals', () => ({
+  SafeProPendingModal: ({ title }: { title: string }) => <div data-testid="lock-pending-modal">{title}</div>,
   SafeProNoticeModal: ({
     title,
     body,
@@ -114,10 +115,21 @@ describe('WorkspaceLockModal', () => {
   it('sends the admin of a Workspace whose onboarding stopped at the checkout back to its last step', () => {
     mockUseWorkspaceLock.mockReturnValue(lock({ reason: 'setup-pending' }))
 
-    const { container } = render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
 
-    expect(container).toBeEmptyDOMElement()
+    expect(screen.getByTestId('lock-pending-modal')).toHaveTextContent('Opening your Workspace setup')
     expect(mockReplace).toHaveBeenCalledWith({ pathname: '/welcome/survey', query: { spaceId: SPACE_ID } })
+  })
+
+  it('explains an unfinished onboarding to a member, who cannot finish it, without counting a plan lock', () => {
+    mockUseIsAdmin.mockReturnValue(false)
+    mockUseWorkspaceLock.mockReturnValue(lock({ reason: 'setup-pending' }))
+
+    render(<WorkspaceLockModal spaceId={SPACE_ID} />)
+
+    expect(screen.getByTestId('locked-member-modal')).toHaveTextContent('locked until an admin claims free access')
+    expect(mockReplace).not.toHaveBeenCalled()
+    expect(trackEvent).not.toHaveBeenCalled()
   })
 
   it('waits for the flags before it picks the last step of an unfinished onboarding', () => {
