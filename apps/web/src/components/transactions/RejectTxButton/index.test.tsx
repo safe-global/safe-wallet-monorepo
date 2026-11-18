@@ -4,7 +4,7 @@ import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { mockSafeInfo } from '@/tests/mocks/hooks'
 import { mockRole } from '@/tests/mocks/roles'
 import { mockSetTxFlow, safeScopeContextFor, TxModalWithScope, unwrapScopedFlow } from '@/tests/mocks/safeScope'
-import { ReplaceTxFlow } from '@/components/tx-flow/flows'
+import { ReplaceTxFlow } from '@/components/tx-flow/flows/ReplaceTxFlow'
 import { PendingStatus } from '@/store/pendingTxsSlice'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import RejectTxButton from '.'
@@ -17,9 +17,10 @@ jest.mock('@/hooks/useIsNestedSafeOwner')
 jest.mock('@/hooks/coreSDK/safeCoreSDK')
 jest.mock('@/hooks/useSafeInfo')
 
-jest.mock('@/features/spending-limits', () => ({
-  ...jest.requireActual('@/features/spending-limits'),
-  useIsOnlySpendingLimitBeneficiary: jest.fn(),
+jest.mock('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary', () => ({
+  ...jest.requireActual('@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary'),
+  __esModule: true,
+  default: jest.fn(),
 }))
 
 const NOT_CONNECTED = 'Please connect your wallet'

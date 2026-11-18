@@ -5,7 +5,7 @@ import { isAuthenticated } from '@/store/authSlice'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { getLatestTransactions } from '@/utils/tx-list'
-import { useCurrentSpaceId } from './useCurrentSpaceId'
+import { useCurrentSpaceId } from '../public/hooks/useCurrentSpaceId'
 import { usePerSafePendingTransactions, type SpacePendingTxItem } from './usePerSafePendingTransactions'
 import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 

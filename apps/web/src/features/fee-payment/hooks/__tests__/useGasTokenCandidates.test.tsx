@@ -2,7 +2,7 @@ import { OperationType } from '@safe-global/types-kit'
 
 import { renderHook } from '@/tests/test-utils'
 import { useGasTokenCandidates } from '../useGasTokenCandidates'
-import type { FeePreviewTx } from '../useResolvedGasToken'
+import type { FeePreviewTx } from '../../public/hooks/useResolvedGasToken'
 import * as useChainsModule from '@/hooks/useChains'
 import * as useSafeInfoModule from '@/hooks/useSafeInfo'
 import * as useTrustedTokenBalancesModule from '@/hooks/loadables/useTrustedTokenBalances'
@@ -10,8 +10,8 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 
 // The allowlist cases below describe phase 2; phase 1 (native only) has its own case at the end.
-jest.mock('../../constants', () => ({
-  ...jest.requireActual('../../constants'),
+jest.mock('../../public/constants', () => ({
+  ...jest.requireActual('../../public/constants'),
   NATIVE_GAS_TOKEN_ONLY: false,
 }))
 

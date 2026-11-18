@@ -14,12 +14,17 @@ import SponsoredTxsCounter, { formatResetsAt } from '@/components/tx/SponsoredTx
 import Track from '@/components/common/Track'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
-import { MixpanelEventParams, PlanSelectionEntryPoint, UpgradeFeature, UpgradeLocation } from '@/services/analytics'
+import {
+  MixpanelEventParams,
+  PlanSelectionEntryPoint,
+  UpgradeFeature,
+  UpgradeLocation,
+} from '@/services/analytics/mixpanel-events'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import type { GasFeeDetails } from '@safe-global/views/features/fee-payment/types'
-import type { FeePayerFooter } from '../../types'
-import type { GasPayerSelection } from '../../hooks/useGasPayerSelection'
+import type { FeePayerFooter } from '../../public/types'
+import type { GasPayerSelection } from '../../public/hooks/useGasPayerSelection'
 
 const UPGRADE_PROMPT = {
   [MixpanelEventParams.FEATURE]: UpgradeFeature.SPONSORED_TX,

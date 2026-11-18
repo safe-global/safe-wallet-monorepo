@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 import { render, waitFor } from '@/tests/test-utils'
 import ReviewTokenTransfer from '../ReviewTokenTransfer'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import * as useTrustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
-import * as txSender from '@/services/tx/tx-sender'
+import * as txSender from '@/services/tx/tx-sender/create'
 import { TokenType } from '@safe-global/store/gateway/types'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import {

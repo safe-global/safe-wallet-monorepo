@@ -1,6 +1,7 @@
 import { useContext, type ReactElement, type ReactNode } from 'react'
-import { useGasPayerSelection, useIsFeeCardSlotVisible } from '@/features/fee-payment'
-import { SafeTxContext } from './SafeTxProvider'
+import { useGasPayerSelection } from '@/features/fee-payment/public/hooks/useGasPayerSelection'
+import { useIsFeeCardSlotVisible } from '@/features/fee-payment/public/hooks/useIsFeeCardSlotVisible'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { FeePayerContext } from './FeePayerContext'
 
 /** Computes the sign step's fee payer once per flow and shares it through `FeePayerContext`. */

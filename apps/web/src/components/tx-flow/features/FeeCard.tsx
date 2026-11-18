@@ -1,14 +1,14 @@
 import { useContext, type ReactElement } from 'react'
-import { useLoadFeature } from '@/features/__core__'
-import { FeePaymentFeature, useIsFeeCardSlotVisible } from '@/features/fee-payment'
+import { useIsFeeCardSlotVisible } from '@/features/fee-payment/public/hooks/useIsFeeCardSlotVisible'
+import GasPayerSelector from '@/features/fee-payment/public/components/GasPayerSelector'
 import { FeePayerContext } from '../FeePayerContext'
-import { SlotName, withSlot } from '../slots'
+import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { withSlot } from '@/components/tx-flow/slots/withSlot'
 
 const FeeCard = (): ReactElement | null => {
-  const { GasPayerSelector, $isReady } = useLoadFeature(FeePaymentFeature)
   const selection = useContext(FeePayerContext)
 
-  if (!$isReady || !selection) return null
+  if (!selection) return null
   return <GasPayerSelector selection={selection} />
 }
 

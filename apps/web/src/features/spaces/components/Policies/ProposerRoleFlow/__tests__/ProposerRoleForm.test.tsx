@@ -12,8 +12,8 @@ import * as useIsWrongChainHook from '@/hooks/useIsWrongChain'
 import * as useChainsHook from '@/hooks/useChains'
 import * as useChainIdHook from '@/hooks/useChainId'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import useGetSpaceAddressBook from '../../../../hooks/useGetSpaceAddressBook'
-import { useIsAdmin } from '../../../../hooks/useSpaceMembers'
+import useGetSpaceAddressBook from '../../../../public/hooks/useGetSpaceAddressBook'
+import { useIsAdmin } from '../../../../public/hooks/useSpaceMembers'
 import { chainBuilder } from '@/tests/builders/chains'
 import { getNestedSafesNoticeText } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
 import { buildSafeAccountId } from '../../SafeAccountSelector/utils'
@@ -36,14 +36,14 @@ jest.mock('@/components/common/CheckWallet', () => ({
 
 const NO_WORKSPACE_CONTACTS: SpaceAddressBookItemDto[] = []
 
-jest.mock('../../../../hooks/useGetSpaceAddressBook', () => ({
-  ...jest.requireActual('../../../../hooks/useGetSpaceAddressBook'),
+jest.mock('../../../../public/hooks/useGetSpaceAddressBook', () => ({
+  ...jest.requireActual('../../../../public/hooks/useGetSpaceAddressBook'),
   __esModule: true,
   default: jest.fn(() => NO_WORKSPACE_CONTACTS),
 }))
 
-jest.mock('../../../../hooks/useSpaceMembers', () => ({
-  ...jest.requireActual('../../../../hooks/useSpaceMembers'),
+jest.mock('../../../../public/hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('../../../../public/hooks/useSpaceMembers'),
   useIsAdmin: jest.fn(() => false),
 }))
 

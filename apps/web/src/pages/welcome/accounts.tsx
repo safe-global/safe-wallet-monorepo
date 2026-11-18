@@ -1,11 +1,8 @@
 import Head from 'next/head'
-import { useLoadFeature } from '@/features/__core__'
-import { MyAccountsFeature } from '@/features/myAccounts'
 import { BRAND_NAME } from '@/config/constants'
+import MyAccountsV2 from '@/features/myAccounts/public/components/MyAccountsV2'
 
 const Accounts = () => {
-  const { MyAccountsV2 } = useLoadFeature(MyAccountsFeature)
-
   return (
     <>
       <Head>

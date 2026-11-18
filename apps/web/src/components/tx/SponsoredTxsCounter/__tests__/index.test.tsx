@@ -3,7 +3,10 @@ import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import SponsoredTxsCounter, { formatResetsAt } from '../index'
 
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 describe('SponsoredTxsCounter', () => {
   it('tracks the upgrade prompt and its click only without Pro', () => {

@@ -10,8 +10,8 @@ import { isAuthenticated } from '@/store/authSlice'
 import { showNotification } from '@/store/notificationsSlice'
 import { selectPendingTxs, type PendingTxsState } from '@/store/pendingTxsSlice'
 import { isSignableBy, isTransactionQueuedItem } from '@/utils/transaction-guards'
-import { useCurrentSpaceId } from './useCurrentSpaceId'
-import { useIsActiveMember } from './useSpaceMembers'
+import { useCurrentSpaceId } from '../public/hooks/useCurrentSpaceId'
+import { useIsActiveMember } from '../public/hooks/useSpaceMembers'
 import { useSpaceQueue, type SpaceQueue } from './useSpaceQueue'
 
 // Module scope: Space pages each mount their own AuthState, and a page change must not toast again

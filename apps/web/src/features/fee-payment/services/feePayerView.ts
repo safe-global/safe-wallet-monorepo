@@ -1,5 +1,5 @@
 import type { SponsoredOffer } from '@/utils/gasPayment'
-import type { FeePayerControl, FeePayerFooter, FeePayerPlanState, GasPayerChoice } from '../types'
+import type { FeePayerControl, FeePayerFooter, FeePayerPlanState, GasPayerChoice } from '../public/types'
 
 type Step = 'sign' | 'execute'
 type SponsoredTxsMeter = Extract<SponsoredOffer, { option: 'SUBSCRIPTION' }>['meter']

@@ -2,14 +2,15 @@ import { useContext, useEffect, type ReactNode } from 'react'
 import type Safe from '@safe-global/protocol-kit'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { act, render, screen, waitFor } from '@/tests/test-utils'
-import SafeTxProvider, { SafeTxContext } from '../SafeTxProvider'
+import SafeTxProvider from '../SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { getTxOrigin } from '@/utils/transactions'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { Errors, logError } from '@/services/exceptions'
 import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import type { SafeScope } from '@safe-global/views/components/tx-flow/safe-scope/types'
 import { createMockSafeTransaction } from '@/tests/transactions'
-import { createTx } from '@/services/tx/tx-sender'
+import { createTx } from '@/services/tx/tx-sender/create'
 
 jest.mock('@/services/exceptions', () => ({
   ...jest.requireActual('@/services/exceptions'),
@@ -18,8 +19,8 @@ jest.mock('@/services/exceptions', () => ({
 
 const mockedLogError = logError as jest.MockedFunction<typeof logError>
 
-jest.mock('@/services/tx/tx-sender', () => {
-  const actual = jest.requireActual('@/services/tx/tx-sender')
+jest.mock('@/services/tx/tx-sender/create', () => {
+  const actual = jest.requireActual('@/services/tx/tx-sender/create')
   return { ...actual, createTx: jest.fn(actual.createTx) }
 })
 

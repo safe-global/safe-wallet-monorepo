@@ -5,11 +5,11 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useRecoveryTxState } from '../../hooks/useRecoveryTxState'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import type { RecoveryQueueItem } from '../../public/types'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useCurrentChain } from '@/hooks/useChains'
 import { TxModalContext } from '@/components/tx-flow'
-import { RecoveryAttemptFlow } from '@/components/tx-flow/flows'
+import { RecoveryAttemptFlow } from '@/components/tx-flow/flows/RecoveryAttemptFlow'
 
 export default function ExecuteRecoveryButton({
   recovery,

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import CreateSpaceOnboarding from './index'
 import { DISALLOWED_CHARACTER_MESSAGE } from '@safe-global/utils/validation/names'
-import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
+import { SPACE_NAME_MAX_LENGTH } from '@safe-global/utils/validation/names'
 
 let mockIsCheckingAccess: boolean | undefined = false
 let mockExistingSpace: {
@@ -64,7 +64,7 @@ jest.mock('../Plans/ClaimTrialModal', () => ({
   ),
 }))
 
-jest.mock('../../hooks/useSpaceSafes', () => ({
+jest.mock('../../public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => ({ allSafes: [] }),
 }))
 
@@ -72,20 +72,32 @@ jest.mock('../../hooks/useOnboardingStepCount', () => ({
   useOnboardingStepCount: () => 2,
 }))
 
-jest.mock('../OnboardingLayout', () => ({
-  OnboardingLayout: ({ main, footer }: { main: React.ReactNode; footer: React.ReactNode }) => (
+jest.mock('../OnboardingLayout/OnboardingLayout', () => ({
+  __esModule: true,
+  default: ({ main, footer }: { main: React.ReactNode; footer: React.ReactNode }) => (
     <div>
       {main}
       {footer}
     </div>
   ),
-  StepCounter: () => null,
-  SafeAppMockup: () => null,
+}))
+jest.mock('../OnboardingLayout/StepCounter', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('../OnboardingLayout/mockup/SafeAppMockup', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('../OnboardingLayout/mockup/deriveSidePanelAccountsFromSpace', () => ({
   deriveSidePanelAccountsFromSpace: () => [],
+}))
+jest.mock('../OnboardingLayout/mockup/useSafeNameLookup', () => ({
   useSafeNameLookup: () => ({}),
 }))
 
-jest.mock('@/hooks/safes', () => ({
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
+  ...jest.requireActual('@/hooks/safes/useAllSafesGrouped'),
   flattenSafeItems: () => [],
 }))
 

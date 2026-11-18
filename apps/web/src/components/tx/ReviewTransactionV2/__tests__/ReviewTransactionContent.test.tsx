@@ -1,25 +1,32 @@
 import type { ReactElement } from 'react'
 import { renderWithUserEvent, screen, within } from '@/tests/test-utils'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
-import { SlotProvider } from '@/components/tx-flow/slots'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { SlotProvider } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import RiskConfirmationSlot from '@/components/tx-flow/features/RiskConfirmation'
-import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import { SafeShieldProvider } from '@/features/safe-shield/public/components/SafeShieldProvider'
 import { ThreatAnalysisBuilder } from '@safe-global/utils/features/safe-shield/builders/threat-analysis.builder'
 import { createSafeTx } from '@/tests/builders/safeTx'
 import ReviewTransactionContent from '../ReviewTransactionContent'
 import { FeePayerContext } from '@/components/tx-flow/FeePayerContext'
-import type { GasPayerSelection } from '@/features/fee-payment'
+import type { GasPayerSelection } from '@/features/fee-payment/public/hooks/useGasPayerSelection'
 
 const mockUseThreatAnalysis = jest.fn()
 
-jest.mock('@/features/safe-shield/hooks', () => ({
+jest.mock('@/features/safe-shield/hooks/useRecipientAnalysis', () => ({
   useRecipientAnalysis: jest.fn(() => undefined),
+}))
+jest.mock('@/features/safe-shield/hooks/useCounterpartyAnalysis', () => ({
   useCounterpartyAnalysis: jest.fn(() => ({
     recipient: [undefined, undefined, false],
     contract: [undefined, undefined, false],
     deadlock: [undefined, undefined, false],
   })),
+}))
+jest.mock('@/features/safe-shield/hooks/useThreatAnalysis', () => ({
   useThreatAnalysis: () => mockUseThreatAnalysis(),
+}))
+jest.mock('@/features/safe-shield/hooks/useRecipientAnalysisWithPoisoning', () => ({
   useRecipientAnalysisWithPoisoning: jest.fn(() => [undefined, undefined, false]),
 }))
 
@@ -28,7 +35,7 @@ jest.mock('@/features/safe-shield/hooks/useUntrustedSafeAnalysis', () => ({
   default: () => ({ safeAnalysis: null, addToTrustedList: jest.fn() }),
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/public/hooks/useSafeProAccess', () => ({
   useSafeProAccess: () => ({ hasProFeatures: true, isSafePro: true, isLoading: false }),
 }))
 

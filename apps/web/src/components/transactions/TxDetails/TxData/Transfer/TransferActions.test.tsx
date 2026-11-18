@@ -9,7 +9,7 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { mockChainId } from '@/tests/mocks/hooks'
 import { mockSetTxFlow, safeScopeContextFor, TxModalWithScope, unwrapScopedFlow } from '@/tests/mocks/safeScope'
 import { getStoreInstance } from '@/store'
-import { TokenTransferFlow } from '@/components/tx-flow/flows'
+import { TokenTransferFlow } from '@/components/tx-flow/flows/TokenTransferFlow'
 import TransferActions from './TransferActions'
 
 jest.mock('@/components/common/CheckWallet', () => ({
@@ -30,11 +30,11 @@ jest.mock('@/hooks/useChains', () => ({
   default: () => ({ loading: false, loaded: true, error: undefined, configs: [mockChain] }),
 }))
 
-jest.mock('@/features/spaces/hooks/useUpsertWorkspaceSafeName', () => ({
+jest.mock('@/features/spaces/public/hooks/useUpsertWorkspaceSafeName', () => ({
   useUpsertWorkspaceSafeName: jest.fn(),
 }))
 
-jest.mock('@/features/spaces/hooks/useWorkspaceAddressBookLabel', () => ({
+jest.mock('@/features/spaces/public/hooks/useWorkspaceAddressBookLabel', () => ({
   useWorkspaceAddressBookLabel: () => 'Acme address book',
 }))
 

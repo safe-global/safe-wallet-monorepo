@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react'
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { useParentSafeWallet } from '../useParentSafeWallet'
 
 const mockIsSmartContractWallet = jest.fn()
@@ -25,7 +25,7 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   default: () => mockUseWallet(),
 }))
 
-jest.mock('../../../../hooks/useSpaceSafes', () => ({
+jest.mock('../../../../public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => mockUseSpaceSafes(),
 }))
 

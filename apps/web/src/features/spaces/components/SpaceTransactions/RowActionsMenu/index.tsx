@@ -13,7 +13,7 @@ import RowActionsMenuView, {
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
-import { TokenTransferFlow } from '@/components/tx-flow/flows'
+import { TokenTransferFlow } from '@/components/tx-flow/flows/TokenTransferFlow'
 import RejectTxFlow from '@/components/tx-flow/flows/RejectTx'
 import { useIsNonceDeletable } from '@/components/tx-flow/flows/ReplaceTx'
 import useSetScopedTxFlow from '@/components/tx-flow/safe-scope/useSetScopedTxFlow'

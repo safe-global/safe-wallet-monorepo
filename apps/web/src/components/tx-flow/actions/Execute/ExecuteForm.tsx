@@ -18,10 +18,12 @@ import type { GasPayer } from '@/utils/gasPayment'
 import { getGasPaymentRefusal } from '@/components/tx/gasPaymentRefusal'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { TxModalContext } from '@/components/tx-flow'
-import { SuccessScreenFlow, NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows'
+import { SuccessScreenFlow } from '@/components/tx-flow/flows/SuccessScreenFlow'
+import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows/NestedTxSuccessScreenFlow'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import useGasLimit from '@/hooks/useGasLimit'
-import AdvancedParams, { useAdvancedParams } from '@/components/tx/AdvancedParams'
+import AdvancedParams from '@/components/tx/AdvancedParams'
+import { useAdvancedParams } from '@/components/tx/AdvancedParams/useAdvancedParams'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { isWalletRejection } from '@/utils/wallets'
 import commonCss from '@safe-global/views/components/tx-flow/common/styles.module.css'
@@ -29,13 +31,14 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import NonOwnerError from '@/components/tx/shared/errors/NonOwnerError'
 import SplitMenuButton from '@safe-global/views/components/common/SplitMenuButton'
 import { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
-import type { SlotComponentProps, SlotName } from '../../slots'
+import type { SlotComponentProps, SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { TxFlowContext } from '../../TxFlowProvider'
-import { useSafeShield } from '@/features/safe-shield/SafeShieldContext'
+import { useSafeShield } from '@/features/safe-shield/public/hooks/useSafeShield'
 import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
-import { useLoadFeature } from '@/features/__core__'
-import { FeePaymentFeature, useGasFeeDetails, useGasPayerSelection } from '@/features/fee-payment'
-import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'
+import GasPayerSelector from '@/features/fee-payment/public/components/GasPayerSelector'
+import { useGasFeeDetails } from '@/features/fee-payment/public/hooks/useGasFeeDetails'
+import { useGasPayerSelection } from '@/features/fee-payment/public/hooks/useGasPayerSelection'
+import GasTooHighBanner from '@/features/no-fee-campaign/public/components/GasTooHighBanner'
 
 export const ExecuteForm = ({
   safeTx,
@@ -85,8 +88,6 @@ export const ExecuteForm = ({
 
   const { offer, exclude } = useGasPaymentOptions({ safeTx })
 
-  const { GasPayerSelector, $isReady: isPayFromSafeReady } = useLoadFeature(FeePaymentFeature)
-  const { GasTooHighBanner } = useLoadFeature(NoFeeCampaignFeature)
   const selection = useGasPayerSelection({ safeTx, offer, step: 'execute' })
   const isPayFromSafe = selection.isPayFromSafe
   const isSponsored = selection.choice === 'SPONSORED' && !!offer && !offer.disabledReason
@@ -103,7 +104,7 @@ export const ExecuteForm = ({
   const { gasLimit, gasLimitError } = useGasLimit(safeTx)
   const [advancedParams, setAdvancedParams, gasEstimate] = useAdvancedParams(gasLimit)
 
-  const isFeeCardShown = isPayFromSafeReady && !!selection.view
+  const isFeeCardShown = !!selection.view
   const { selection: feeCardSelection, gasFeeDetails } = useGasFeeDetails({
     selection,
     safeTx,

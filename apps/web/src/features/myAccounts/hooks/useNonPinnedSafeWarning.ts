@@ -5,9 +5,10 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import useIsTrustedSafe from '@/hooks/useIsTrustedSafe'
 import { useIsWalletProposer } from '@/hooks/useProposers'
 import { selectAddressBookByChain } from '@/store/addressBookSlice'
-import { OVERVIEW_EVENTS, TRUSTED_SAFE_LABELS, trackEvent } from '@/services/analytics'
-import { useTrustSafe } from './useTrustSafe'
-import useSimilarAddressDetection from './useSimilarAddressDetection'
+import { OVERVIEW_EVENTS, TRUSTED_SAFE_LABELS } from '@/services/analytics/events/overview'
+import { trackEvent } from '@/services/analytics'
+import { useTrustSafe } from '../public/hooks/useTrustSafe'
+import useSimilarAddressDetection from '../public/hooks/useSimilarAddressDetection'
 import type { SafeUserRole, NonPinnedWarningState } from './useNonPinnedSafeWarning.types'
 
 /**

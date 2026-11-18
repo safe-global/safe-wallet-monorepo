@@ -4,7 +4,7 @@ import { type SafeState, useSafesGetSafeV1Query } from '@safe-global/store/gatew
 import { POLLING_INTERVAL } from '@/config/constants'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
-import type { PolicyGuardTarget } from '../types'
+import type { PolicyGuardTarget } from '../public/types'
 
 type GuardedSafe = Pick<SafeState, 'chainId' | 'version' | 'guard' | 'txHistoryTag'> & { deployed?: boolean }
 

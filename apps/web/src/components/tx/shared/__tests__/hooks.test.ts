@@ -25,15 +25,15 @@ import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { chainBuilder } from '@/tests/builders/chains'
 import * as useChains from '@/hooks/useChains'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
-import { type SignerWallet } from '@/components/common/WalletProvider'
+import { type SignerWallet } from '@/components/common/WalletProvider/WalletContext'
 import { type NestedWallet } from '@/utils/nested-safe-wallet'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import * as loadFeature from '@/features/__core__/useLoadFeature'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import { type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
 import { FeePayerContext } from '@/components/tx-flow/FeePayerContext'
-import type { GasPayerSelection } from '@/features/fee-payment'
+import type { GasPayerSelection } from '@/features/fee-payment/public/hooks/useGasPayerSelection'
 
 const chainInfo = chainBuilder().with({ chainId: '1' }).build()
 
@@ -44,6 +44,12 @@ jest.mock('@/services/tx/executionPreChecks', () => ({
   ...jest.requireActual('@/services/tx/executionPreChecks'),
   runExecutionPreChecks: jest.fn(() => Promise.resolve()),
 }))
+
+const mockResolveFeeParams = jest.fn()
+jest.mock('@/features/fee-payment/services/resolveFeeParams', () => ({
+  resolveFeeParams: (...args: unknown[]) => mockResolveFeeParams(...args),
+}))
+const mockFeatureResolve = (resolve: jest.Mock) => mockResolveFeeParams.mockImplementation(resolve)
 
 describe('SignOrExecute hooks', () => {
   const extendedSafeInfo = extendedSafeInfoBuilder().build()
@@ -1493,22 +1499,20 @@ describe('SignOrExecute hooks', () => {
       }))
     }
 
-    const mockFeatureResolve = (resolveFeeParams: jest.Mock) => {
-      jest.spyOn(loadFeature, 'useLoadFeature').mockReturnValue({
-        $isReady: true,
-        $isDisabled: false,
-        $error: undefined,
-        resolveFeeParams,
-      } as unknown as ReturnType<typeof loadFeature.useLoadFeature>)
-    }
+    beforeEach(() => {
+      jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => feature === FEATURES.GTF)
+    })
+
+    afterEach(() => {
+      jest.mocked(useChains.useHasFeature).mockRestore()
+    })
 
     it('invokes resolveFeeParams on first-signer sign when the Safe-pays guards pass', async () => {
       setupPayFromSafeChain()
       jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
 
       const mergedTx = createSafeTx()
-      const resolveFeeParams = jest.fn().mockResolvedValue(mergedTx)
-      mockFeatureResolve(resolveFeeParams)
+      mockResolveFeeParams.mockResolvedValue(mergedTx)
 
       const signSpy = jest.spyOn(txSender, 'dispatchTxSigning').mockResolvedValue(mergedTx)
       jest
@@ -1518,7 +1522,7 @@ describe('SignOrExecute hooks', () => {
       const ref = captureActions()
       await ref.current!.signTx(createSafeTx())
 
-      expect(resolveFeeParams).toHaveBeenCalledWith(
+      expect(mockResolveFeeParams).toHaveBeenCalledWith(
         expect.objectContaining({ gasToken: GAS_TOKEN, numberSignatures: 2 }),
       )
       expect(signSpy).toHaveBeenCalledWith(mergedTx, expect.anything(), undefined, undefined)
@@ -1602,9 +1606,6 @@ describe('SignOrExecute hooks', () => {
       setupPayFromSafeChain()
       jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
 
-      const resolveFeeParams = jest.fn()
-      mockFeatureResolve(resolveFeeParams)
-
       jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation((tx) => Promise.resolve(tx))
       jest
         .spyOn(txSender, 'dispatchTxProposal')
@@ -1622,15 +1623,12 @@ describe('SignOrExecute hooks', () => {
       const ref = captureActions()
       await ref.current!.signTx(signedTx)
 
-      expect(resolveFeeParams).not.toHaveBeenCalled()
+      expect(mockResolveFeeParams).not.toHaveBeenCalled()
     })
 
     it('skips the merge in signer-pays mode', async () => {
       setupPayFromSafeChain()
       jest.spyOn(walletHooks, 'isSmartContractWallet').mockReturnValue(Promise.resolve(false))
-
-      const resolveFeeParams = jest.fn()
-      mockFeatureResolve(resolveFeeParams)
 
       jest.spyOn(txSender, 'dispatchTxSigning').mockImplementation((tx) => Promise.resolve(tx))
       jest
@@ -1640,7 +1638,7 @@ describe('SignOrExecute hooks', () => {
       const ref = captureActions({ feeGasToken: undefined }, false)
       await ref.current!.signTx(createSafeTx())
 
-      expect(resolveFeeParams).not.toHaveBeenCalled()
+      expect(mockResolveFeeParams).not.toHaveBeenCalled()
     })
   })
 })

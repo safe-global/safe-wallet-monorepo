@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import type { GasPayerSelection } from '@/features/fee-payment'
+import type { GasPayerSelection } from '@/features/fee-payment/public/hooks/useGasPayerSelection'
 
 /**
  * Who pays the fee at the sign step, computed once per flow by `FeePayerProvider`: the fee card shows it

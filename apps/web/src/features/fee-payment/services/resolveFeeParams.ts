@@ -1,10 +1,10 @@
 import type { SafeTransaction } from '@safe-global/types-kit'
 
-import { createTx } from '@/services/tx/tx-sender'
+import { createTx } from '@/services/tx/tx-sender/create'
 import { gatewayApi } from '@/store/api/gateway'
 import { toSupportedFiatCode } from '@/store/api/gateway/payFromSafeFeePreview'
 import type { AppDispatch } from '@/store'
-import { isFeeCollector } from '../constants'
+import { isFeeCollector } from '../public/constants'
 import { trackError, Errors } from '@/services/exceptions'
 
 export type ResolveFeeParamsArgs = {

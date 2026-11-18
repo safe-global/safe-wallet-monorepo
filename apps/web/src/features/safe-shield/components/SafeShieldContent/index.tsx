@@ -9,13 +9,13 @@ import type {
 } from '@safe-global/utils/features/safe-shield/types'
 import { SafeShieldAnalysisLoading } from './SafeShieldAnalysisLoading'
 import { SafeShieldAnalysisEmpty } from '@safe-global/views/features/safe-shield/components/SafeShieldContent/SafeShieldAnalysisEmpty'
-import { AnalysisGroupCard } from '../AnalysisGroupCard'
+import { AnalysisGroupCard } from '../AnalysisGroupCard/AnalysisGroupCard'
 import { TenderlySimulation } from '../TenderlySimulation'
 import { TenderlySimulationLocked } from '../TenderlySimulationLocked'
 import { useHasOwnTenderly } from '../../hooks/useHasOwnTenderly'
 import { ProChecksRow } from '../ProChecksRow'
 import { LockedCheckRow } from '@safe-global/views/features/safe-shield/components/LockedCheckRow'
-import { isContractCall } from '@/features/safe-shield/utils/isContractCall'
+import { isContractCall } from '../../utils/isContractCall'
 import { HypernativeLoginLine } from '../HypernativeLoginLine'
 import UntrustedSafeWarning from '../UntrustedSafeWarning'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
@@ -23,11 +23,13 @@ import isEmpty from 'lodash/isEmpty'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { CARD_ORDER, PRO_CARD_ORDER, getRevealDelays } from '../../utils/revealDelays'
 import { hasThreatCardResults } from '../../utils/hasThreatCardResults'
-import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
-import { HypernativeFeature, type HypernativeAuthStatus } from '@/features/hypernative'
-import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
-import { useLoadFeature } from '@/features/__core__'
-import { ThreatAnalysis } from '../ThreatAnalysis'
+import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
+import type { HypernativeAuthStatus } from '@/features/hypernative/public/hooks/useHypernativeOAuth'
+import { useIsSafenetChecksEnabled } from '@/features/safenet-checks/public/hooks/useIsSafenetChecksEnabled'
+import { ThreatAnalysis } from '../ThreatAnalysis/ThreatAnalysis'
+import SafenetChecksSection from '@/features/safenet-checks/public/components/SafenetChecksSection'
+import HnInfoCard from '@/features/hypernative/public/components/HnInfoCard'
+import HnCustomChecksCard from '@/features/hypernative/public/components/HnCustomChecksCard'
 
 export const SafeShieldContent = ({
   recipient,
@@ -62,8 +64,6 @@ export const SafeShieldContent = ({
   isSafePro?: boolean
   isOffchainMessage?: boolean
 }): ReactElement => {
-  const hn = useLoadFeature(HypernativeFeature)
-  const safenet = useLoadFeature(SafenetChecksFeature)
   const isSafenetEnabled = useIsSafenetChecksEnabled()
   const hasOwnTenderly = useHasOwnTenderly()
   const [recipientResults = {}, _recipientError, recipientLoading = false] = recipient
@@ -124,7 +124,7 @@ export const SafeShieldContent = ({
           keeps this curve concentric with the outer one. */}
       <div className="relative overflow-hidden rounded-b-md">
         {showHypernativeInfo && (
-          <hn.HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
+          <HnInfoCard hypernativeAuth={hypernativeAuth} showActiveStatus={showHypernativeActiveStatus} />
         )}
 
         {loading && <SafeShieldAnalysisLoading analysesEmpty={analysesEmpty} loading={loading} />}
@@ -158,7 +158,7 @@ export const SafeShieldContent = ({
             hypernativeAuth={hypernativeAuth}
           />
 
-          <hn.HnCustomChecksCard
+          <HnCustomChecksCard
             threat={threat}
             delay={revealDelays.customChecks}
             highlightedSeverity={highlightedSeverity}
@@ -174,7 +174,7 @@ export const SafeShieldContent = ({
           )}
 
           {/* Safenet is the final check, including when the Pro rollout is off. */}
-          {!isSafePro && shouldShowContent && <safenet.SafenetChecksSection />}
+          {!isSafePro && shouldShowContent && <SafenetChecksSection />}
         </div>
 
         {showProSection && (
@@ -210,8 +210,7 @@ export const SafeShieldContent = ({
               )}
               {!hasProFeatures && !hasOwnTenderly && <TenderlySimulationLocked />}
 
-              {isSafenetEnabled &&
-                (hasProFeatures ? <safenet.SafenetChecksSection /> : <safenet.SafenetChecksSection locked />)}
+              {isSafenetEnabled && (hasProFeatures ? <SafenetChecksSection /> : <SafenetChecksSection locked />)}
             </div>
           </div>
         )}

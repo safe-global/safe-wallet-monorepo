@@ -1,10 +1,8 @@
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import { SpacesFeature } from '@/features/spaces'
-import { useLoadFeature } from '@/features/__core__'
+import SelectSafesOnboarding from '@/features/spaces/public/components/SelectSafesOnboarding'
 
 const SelectSafesPage = () => {
-  const { SelectSafesOnboarding } = useLoadFeature(SpacesFeature)
   return (
     <>
       <Head>

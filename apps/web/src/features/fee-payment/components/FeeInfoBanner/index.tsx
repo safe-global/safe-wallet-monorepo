@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import FeeInfoBannerView from '@safe-global/views/features/fee-payment/components/FeeInfoBanner'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import useChainId from '@/hooks/useChainId'
-import { PAY_FROM_SAFE_FEES_BANNER_DISMISSED_KEY } from '../../constants'
+import { PAY_FROM_SAFE_FEES_BANNER_DISMISSED_KEY } from '../../public/constants'
 
 const FeeInfoBanner = (): ReactElement | null => {
   const chainId = useChainId()

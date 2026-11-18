@@ -3,15 +3,15 @@ import { useLoadSpendingLimits } from '../useSpendingLimits'
 import * as useSafeInfo from '@/hooks/useSafeInfo'
 import * as useChainId from '@/hooks/useChainId'
 import * as useBalances from '@/hooks/useBalances'
-import * as web3 from '@/hooks/wallets/web3'
+import * as web3 from '@/hooks/wallets/web3ReadOnly'
 import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
-import * as spendingLimitLoader from '../../services/spendingLimitLoader'
+import * as spendingLimitLoader from '../../public/services/spendingLimitLoader'
 import { faker } from '@faker-js/faker'
 import { TokenType } from '@safe-global/store/gateway/types'
-import type { SpendingLimitState } from '../../types'
+import type { SpendingLimitState } from '../../public/types'
 import { Errors, logError } from '@/services/exceptions'
 
-jest.mock('../../services/spendingLimitLoader')
+jest.mock('../../public/services/spendingLimitLoader')
 
 jest.mock('@/services/exceptions', () => ({
   ...jest.requireActual('@/services/exceptions'),

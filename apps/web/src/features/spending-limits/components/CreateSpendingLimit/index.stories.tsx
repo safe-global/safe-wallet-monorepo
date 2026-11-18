@@ -1,11 +1,11 @@
 import type { Meta, StoryObj, Decorator } from '@storybook/react'
 import type { ReactElement } from 'react'
 import { mswLoader } from 'msw-storybook-addon'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import SafeTxProvider from '@/components/tx-flow/SafeTxProvider'
-import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
-import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../types'
+import { SafeShieldProvider } from '@/features/safe-shield/public/components/SafeShieldProvider'
+import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../public/types'
 import CreateSpendingLimit from './index'
 
 // The component reads the current Safe, chain, and token balances from app

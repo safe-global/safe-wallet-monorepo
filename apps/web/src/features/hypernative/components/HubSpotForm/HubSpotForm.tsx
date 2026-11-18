@@ -1,7 +1,8 @@
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { useEffect, useRef, useState } from 'react'
-import { trackEvent, HYPERNATIVE_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 
 type HubSpotFormProps = {
   portalId: string

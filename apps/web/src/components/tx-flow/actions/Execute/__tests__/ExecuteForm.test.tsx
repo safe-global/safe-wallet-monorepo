@@ -9,7 +9,7 @@ import { RelaySimulationError } from '@safe-global/utils/services/relayErrors'
 import { QuotaExceededError } from '@safe-global/utils/services/quotaErrors'
 import type { GasPaymentOptions } from '@/hooks/useGasPaymentOptions'
 import type { SponsoredOffer } from '@/utils/gasPayment'
-import type { FeePayerView } from '@/features/fee-payment'
+import type { FeePayerView } from '@/features/fee-payment/public/types'
 import * as useGasLimit from '@/hooks/useGasLimit'
 import * as useIsValidExecution from '@/hooks/useIsValidExecution'
 import * as walletCanPay from '@/hooks/useWalletCanPay'
@@ -23,7 +23,8 @@ import type {
   ThreatAnalysisResults,
 } from '@safe-global/utils/features/safe-shield/types'
 import { TxModalContext } from '@/components/tx-flow'
-import { NestedTxSuccessScreenFlow, SuccessScreenFlow } from '@/components/tx-flow/flows'
+import { NestedTxSuccessScreenFlow } from '@/components/tx-flow/flows/NestedTxSuccessScreenFlow'
+import { SuccessScreenFlow } from '@/components/tx-flow/flows/SuccessScreenFlow'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
 
@@ -43,8 +44,8 @@ jest.mock('@/hooks/useIsValidExecution', () => ({
 
 const mockUseGasPaymentOptions = jest.fn<GasPaymentOptions, []>()
 // The fee card feeds Safe Shield the payload it simulates; the form is tested without the provider.
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
-  ...jest.requireActual('@/features/safe-shield/SafeShieldContext'),
+jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/hooks/useSafeShield'),
   useSafeShieldForTxData: jest.fn(),
 }))
 
@@ -53,28 +54,40 @@ jest.mock('@/hooks/useGasPaymentOptions', () => ({
 }))
 
 // The fee card stub exposes the view it was given, so tests can read who the form decided pays.
-const mockIsFeatureReady = jest.fn(() => true)
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
-  useLoadFeature: () => ({
-    $isReady: mockIsFeatureReady(),
-    GasPayerSelector: ({
-      selection,
-      gasFeeDetails,
-    }: {
-      selection: { view: FeePayerView | null }
-      gasFeeDetails?: { mode: string }
-    }) =>
-      selection.view && (
-        <div
-          data-testid="gas-payer-selector"
-          data-payer={JSON.stringify(selection.view.payer)}
-          data-gas-details={gasFeeDetails?.mode}
-        />
-      ),
-    GasTooHighBanner: () => <div data-testid="gas-too-high-banner" />,
-  }),
+jest.mock('@/features/fee-payment/public/components/GasPayerSelector', () => ({
+  __esModule: true,
+  default: ({
+    selection,
+    gasFeeDetails,
+  }: {
+    selection: { view: FeePayerView | null }
+    gasFeeDetails?: { mode: string }
+  }) =>
+    selection.view && (
+      <div
+        data-testid="gas-payer-selector"
+        data-payer={JSON.stringify(selection.view.payer)}
+        data-gas-details={gasFeeDetails?.mode}
+      />
+    ),
 }))
+jest.mock('@/features/no-fee-campaign/public/components/GasTooHighBanner', () => ({
+  __esModule: true,
+  default: () => <div data-testid="gas-too-high-banner" />,
+}))
+
+// Lets a test take the view away, which is how the form sees an unavailable Fees card.
+const mockFeeCardUnavailable = { current: false }
+jest.mock('@/features/fee-payment/public/hooks/useGasPayerSelection', () => {
+  const actual = jest.requireActual('@/features/fee-payment/public/hooks/useGasPayerSelection')
+  return {
+    ...actual,
+    useGasPayerSelection: (...args: Parameters<typeof actual.useGasPayerSelection>) => {
+      const selection = actual.useGasPayerSelection(...args)
+      return mockFeeCardUnavailable.current ? { ...selection, view: null } : selection
+    },
+  }
+})
 
 const SPACE_ID = faker.string.uuid()
 const dailyOffer: SponsoredOffer = {
@@ -182,13 +195,13 @@ describe('ExecuteForm', () => {
   })
 
   it('keeps the Estimated fee block when the Fees card is not available', () => {
-    mockIsFeatureReady.mockReturnValue(false)
+    mockFeeCardUnavailable.current = true
 
     const { getByText, queryByTestId } = render(<ExecuteForm {...defaultProps} />)
 
     expect(getByText('Estimated fee')).toBeInTheDocument()
     expect(queryByTestId('gas-payer-selector')).not.toBeInTheDocument()
-    mockIsFeatureReady.mockReturnValue(true)
+    mockFeeCardUnavailable.current = false
   })
 
   it('renders a secondary action before the submit button when one is passed', () => {

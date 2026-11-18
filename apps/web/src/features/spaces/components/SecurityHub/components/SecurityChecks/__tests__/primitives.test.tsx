@@ -1,7 +1,7 @@
 import { render, screen } from '@/tests/test-utils'
 import { AppRoutes } from '@/config/routes'
-import type { SecurityContract } from '@/features/security'
-import type { ScanResult } from '@/features/security/types'
+import type { SecurityServices } from '@/features/security/public/services/securityServices'
+import type { ScanResult } from '@/features/security/public/types'
 import { EvidenceList, makeBuildCta } from '../primitives'
 
 const ADDRESS = '0x1234567890AbcdEF1234567890aBcdef12345678'
@@ -43,7 +43,7 @@ describe('EvidenceList', () => {
 })
 
 describe('makeBuildCta', () => {
-  const checkDefs: SecurityContract['checkDefs'] = {
+  const checkDefs: SecurityServices['checkDefs'] = {
     contract_version: {
       id: 'contract_version',
       title: 'Contract version',

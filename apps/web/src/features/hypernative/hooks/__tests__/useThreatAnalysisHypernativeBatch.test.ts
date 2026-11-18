@@ -4,13 +4,13 @@ import { useThreatAnalysisHypernativeBatch } from '../useThreatAnalysisHypernati
 import type { QueuedItemPage } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { ConflictType } from '@safe-global/store/gateway/types'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
-import * as useAuthTokenHook from '../useAuthToken'
+import * as useAuthTokenHook from '../../public/hooks/useAuthToken'
 import * as useThreatAnalysisHypernativeBatchHook from '@safe-global/utils/features/safe-shield/hooks/useThreatAnalysisHypernativeBatch'
-import { hnQueueAssessmentsSlice } from '../../store/hnQueueAssessmentsSlice'
+import { hnQueueAssessmentsSlice } from '../../public/store/hnQueueAssessmentsSlice'
 import type { RootState } from '@/store'
 
 jest.mock('@/hooks/useSafeInfo')
-jest.mock('../useAuthToken')
+jest.mock('../../public/hooks/useAuthToken')
 jest.mock('@safe-global/utils/features/safe-shield/hooks/useThreatAnalysisHypernativeBatch')
 
 const mockUseSafeInfo = useSafeInfoHook.default as jest.MockedFunction<typeof useSafeInfoHook.default>

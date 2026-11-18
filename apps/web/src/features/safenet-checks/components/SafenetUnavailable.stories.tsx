@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { AuditLog, AuditLogHeader, AuditRow } from '@/components/common/AuditLog'
 import { SafenetUnavailableAuditRowView } from './SafenetAuditRow'
 import { SafenetUnavailableCardView } from './SafenetDetailsCard'
