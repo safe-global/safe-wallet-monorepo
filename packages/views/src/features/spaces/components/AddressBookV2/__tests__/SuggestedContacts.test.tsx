@@ -6,7 +6,7 @@ import { CHAINS } from '../mocks/fixtures'
 import type { SuggestedContact } from '../types'
 
 let mockIsMobile = false
-jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockIsMobile }))
+jest.mock('@safe-global/ui/hooks/use-mobile', () => ({ useIsMobile: () => mockIsMobile }))
 
 const buildSuggestion = (safes: string[] = [faker.company.name()]): SuggestedContact => ({
   address: faker.finance.ethereumAddress(),

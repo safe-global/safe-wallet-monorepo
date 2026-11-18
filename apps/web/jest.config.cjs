@@ -20,7 +20,7 @@ const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   // CI runners are several times slower than a laptop; the 5 s default fails tests that pass locally
   testTimeout: process.env.CI ? 15_000 : 5_000,
-  roots: ['<rootDir>', '<rootDir>/../../packages/views/src'],
+  roots: ['<rootDir>', '<rootDir>/../../packages/views/src', '<rootDir>/../../packages/ui/src'],
 
   moduleNameMapper: {
     // Handle module aliases (this will be automatically configured for you soon)

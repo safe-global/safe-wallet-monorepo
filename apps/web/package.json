@@ -70,6 +70,7 @@
     "@safe-global/safe-modules-deployments": "^3.0.13",
     "@safe-global/store": "workspace:^",
     "@safe-global/theme": "workspace:^",
+    "@safe-global/ui": "workspace:^",
     "@safe-global/utils": "workspace:^",
     "@safe-global/views": "workspace:^",
     "@tailwindcss/postcss": "^4.1.18",

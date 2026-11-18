@@ -17,7 +17,7 @@ jest.mock('@/hooks/useIsSafeOwner')
 
 jest.mock('@/hooks/useIsMac')
 
-jest.mock('@safe-global/views/hooks/use-mobile')
+jest.mock('@safe-global/ui/hooks/use-mobile')
 
 jest.mock('./hooks/useNotificationPreferences')
 

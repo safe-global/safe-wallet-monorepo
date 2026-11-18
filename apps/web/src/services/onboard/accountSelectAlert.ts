@@ -13,7 +13,7 @@
 const STYLE_ID = 'safe-account-select-alert'
 
 /**
- * `Alert` variant=destructive, outlined=false, as shadcn.css resolves it.
+ * `Alert` variant=destructive, outlined=false, as @safe-global/ui/scoped.css resolves it.
  * Hardcoded because those tokens are defined on `.shadcn-scope`, which is
  * applied to wrappers inside the React tree — the picker is appended to
  * `<body>`, outside every one of them, so it inherits none of them. Text colour

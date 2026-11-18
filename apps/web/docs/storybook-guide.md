@@ -6,15 +6,16 @@ Canonical reference for writing Storybook stories in `apps/web`. The quick decis
 
 Every story file MUST set an explicit `meta.title` — untitled stories get auto-titled from their lowercase file path and pollute the sidebar with stray `features/…`/`components/…` groups.
 
-Five top-level groups (the first is curated in `preview.tsx` storySort — don't add to it from feature work):
+Six top-level groups (the first is curated in `preview.tsx` storySort — don't add to it from feature work):
 
-| Group            | What belongs there                             | Example                                                                          |
-| ---------------- | ---------------------------------------------- | -------------------------------------------------------------------------------- |
-| `Design System/` | Curated design-system overview pages           | `Design System` (see `components/ui/stories/design-system.stories.tsx`)          |
-| `UI/`            | Design-system atoms (`components/ui/*`)        | `UI/Button`                                                                      |
-| `Components/`    | Shared, cross-feature components               | `Components/Common/EthHashInfo`, `Components/TxFlow/ConfirmationViews/SwapOrder` |
-| `Features/`      | Feature-scoped components, grouped by feature  | `Features/Spaces/SafeWidget`                                                     |
-| `Pages/`         | Full-route page stories (`src/stories/pages/`) | `Pages/Core/Home`                                                                |
+| Group            | What belongs there                                   | Example                                                                                    |
+| ---------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `Design System/` | Curated design-system overview pages                 | `Design System` (see `packages/views/src/components/ui/stories/design-system.stories.tsx`) |
+| `UI/`            | Design-system atoms (`packages/ui/src/primitives/*`) | `UI/Button`                                                                                |
+| `Safe UI/`       | Safe components (`packages/ui/src/components/*`)     | `Safe UI/DataTable`                                                                        |
+| `Components/`    | Shared, cross-feature components                     | `Components/Common/EthHashInfo`, `Components/TxFlow/ConfirmationViews/SwapOrder`           |
+| `Features/`      | Feature-scoped components, grouped by feature        | `Features/Spaces/SafeWidget`                                                               |
+| `Pages/`         | Full-route page stories (`src/stories/pages/`)       | `Pages/Core/Home`                                                                          |
 
 Rules:
 

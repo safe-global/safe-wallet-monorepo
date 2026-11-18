@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker'
 import PaginatedDataTable, { type DataTableColumn } from './index'
 
 const mockUseIsMobile = jest.fn(() => false)
-jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
+jest.mock('@safe-global/ui/hooks/use-mobile', () => ({ useIsMobile: () => mockUseIsMobile() }))
 
 const columns: DataTableColumn<string>[] = [{ id: 'value', header: 'Value', cell: (row) => row }]
 

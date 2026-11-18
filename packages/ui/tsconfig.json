@@ -1,0 +1,11 @@
+{
+  "extends": "../../config/tsconfig/confs/base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "types": ["node", "jest", "@testing-library/jest-dom"],
+    "paths": {}
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", ".storybook/*.ts", ".storybook/*.tsx", "types/*.d.ts"],
+  "exclude": ["src/**/*.stories.test.tsx"]
+}

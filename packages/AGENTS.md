@@ -1,6 +1,6 @@
 # Shared Packages AI Contributor Guidelines
 
-Guidance for shared libraries under `packages/` (`store`, `theme`, `utils`) consumed by both `apps/web/` and `apps/mobile/`. `views` is web only and has its own guide: [views/AGENTS.md](views/AGENTS.md). For monorepo-wide rules, see the root [AGENTS.md](../AGENTS.md).
+Guidance for shared libraries under `packages/` (`store`, `theme`, `utils`) consumed by both `apps/web/` and `apps/mobile/`. `views` and `ui` are web only and have their own guides: [views/AGENTS.md](views/AGENTS.md), [ui/AGENTS.md](ui/AGENTS.md). For monorepo-wide rules, see the root [AGENTS.md](../AGENTS.md).
 
 ## Verifying packages/ changes
 
@@ -39,7 +39,10 @@ Single source of truth for design tokens on both platforms. Edit `src/palettes/`
 ```bash
 yarn workspace @safe-global/theme type-check
 yarn workspace @safe-global/web css-vars   # regenerates apps/web/src/styles/vars.css — never hand-edit that file
+yarn workspace @safe-global/theme generate:ui-tokens   # regenerates packages/ui/src/styles/tokens.css and tokens.scoped.css
 ```
+
+The shadcn-named tokens of `@safe-global/ui` (`--background`, `--primary`, `--z-overlay`, …) live in `src/tokens/ui.ts`, outside `ColorPalette`, so mobile never sees them. Edit them there and run `generate:ui-tokens`. `apps/web/src/styles/generatedCss.test.ts` (in CI) fails if `vars.css` or either generated token file is stale.
 
 No barrel export — import from sub-paths (`@safe-global/theme/palettes`, `/tokens/spacing`, `/tokens/typography`, `/generators/tamagui`).
 

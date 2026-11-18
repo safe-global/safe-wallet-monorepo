@@ -29,7 +29,7 @@ import SpaceAddressBookV2 from '../index'
 const SPACE_ID = '7'
 
 const mockIsMobile = jest.fn(() => false)
-jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => mockIsMobile() }))
+jest.mock('@safe-global/ui/hooks/use-mobile', () => ({ useIsMobile: () => mockIsMobile() }))
 jest.mock('../../../public/hooks/useSpaceMembers', () => ({
   get MemberStatus() {
     return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberStatus

@@ -51,6 +51,7 @@ const SOURCES = [
   ...sourceFiles(path.join(REPO_ROOT, 'config/test'), (file) => /\.(json|ts)$/.test(file)),
   ...sourceFiles(path.join(REPO_ROOT, 'apps/web/src'), isStoryData),
   ...sourceFiles(path.join(REPO_ROOT, 'packages/views/src'), isStoryData),
+  ...sourceFiles(path.join(REPO_ROOT, 'packages/ui/src'), isStoryData),
 ].map((file) => ({ file: path.relative(REPO_ROOT, file), text: fs.readFileSync(file, 'utf8') }))
 
 describe('Storybook images', () => {

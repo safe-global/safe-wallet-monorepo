@@ -28,7 +28,7 @@ jest.mock('@/config/constants', () => ({
   BEAMER_ID: 'beamer-product-id',
 }))
 
-jest.mock('@safe-global/views/components/ui/sidebar', () => ({
+jest.mock('@safe-global/ui/primitives/sidebar', () => ({
   SidebarMenuButton: ({
     children,
     className,
@@ -50,7 +50,7 @@ jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   ),
 }))
 
-jest.mock('@safe-global/views/components/ui/tooltip', () => ({
+jest.mock('@safe-global/ui/primitives/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({
     children,

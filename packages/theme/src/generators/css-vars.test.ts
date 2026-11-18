@@ -1,4 +1,4 @@
-import { generateCSSVars } from './css-vars'
+import { generateCSSVars, generateWebVarDeclarations } from './css-vars'
 
 describe('generateCSSVars', () => {
   let cssOutput: string
@@ -51,5 +51,15 @@ describe('generateCSSVars', () => {
     // contrastText should become contrast-text
     expect(cssOutput).toContain('--color-error1-contrast-text:')
     expect(cssOutput).not.toContain('--color-error1-contrastText')
+  })
+})
+
+describe('generateWebVarDeclarations', () => {
+  it('is the source of every declaration in generateCSSVars', () => {
+    const { light, dark } = generateWebVarDeclarations()
+    const css = generateCSSVars()
+
+    expect(css).toContain(`:root {\n${light.map((v) => `  ${v}`).join('\n')}\n}`)
+    expect(css).toContain(`[data-theme="dark"] {\n${dark.map((v) => `  ${v}`).join('\n')}\n}`)
   })
 })

@@ -94,7 +94,7 @@ jest.mock('../../NavItem/NavItem', () => ({
     ) : null,
 }))
 
-jest.mock('@safe-global/views/components/ui/sidebar', () => ({
+jest.mock('@safe-global/ui/primitives/sidebar', () => ({
   SidebarContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroup: ({ children }: { children: ReactNode }) => <div>{children}</div>,
   SidebarGroupLabel: ({ children }: { children: ReactNode }) => <div>{children}</div>,
@@ -132,13 +132,13 @@ jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   ),
 }))
 
-jest.mock('@safe-global/views/components/ui/tooltip', () => ({
+jest.mock('@safe-global/ui/primitives/tooltip', () => ({
   Tooltip: ({ children }: { children: ReactNode }) => <>{children}</>,
   TooltipTrigger: ({ children }: { children: ReactNode }) => <span>{children}</span>,
   TooltipContent: () => null,
 }))
 
-jest.mock('@safe-global/views/components/ui/avatar', () => ({
+jest.mock('@safe-global/ui/primitives/avatar', () => ({
   Avatar: ({ children, className }: { children: ReactNode; className?: string }) => (
     <div className={className}>{children}</div>
   ),

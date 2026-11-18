@@ -14,7 +14,7 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { render, screen, waitFor, within } from '@/tests/test-utils'
 import SuggestedTab from '../SuggestedTab'
 
-jest.mock('@safe-global/views/hooks/use-mobile', () => ({ useIsMobile: () => false }))
+jest.mock('@safe-global/ui/hooks/use-mobile', () => ({ useIsMobile: () => false }))
 jest.mock('../../../public/hooks/useUpsertWorkspaceSafeName', () => ({
   ...jest.requireActual('../../../public/hooks/useUpsertWorkspaceSafeName'),
   useUpsertWorkspaceSafeNames: jest.fn(),

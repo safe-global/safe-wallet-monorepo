@@ -1,0 +1,12 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "type-check": {
+      "inputs": ["$TURBO_EXTENDS$", "$TURBO_ROOT$/packages/ui/src/**"]
+    },
+    "lint": {
+      "inputs": ["$TURBO_EXTENDS$", "eslint-design-system.mjs", "$TURBO_ROOT$/packages/ui/eslint/**"]
+    }
+  }
+}

@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs'
-import { join } from 'path'
+import { dirname, join } from 'path'
 
 /**
  * Guards the legibility of the semantic tint surfaces (Alert, Badge, Chip `warning`/`info`/`success`)
@@ -13,9 +13,10 @@ import { join } from 'path'
  */
 
 const STYLES = join(__dirname)
+const UI_STYLES = join(dirname(require.resolve('@safe-global/ui/package.json')), 'src', 'styles')
 
-const readBlock = (file: string, selector: string): string => {
-  const css = readFileSync(join(STYLES, file), 'utf8')
+const readBlock = (file: string, selector: string, dir = STYLES): string => {
+  const css = readFileSync(join(dir, file), 'utf8')
   const start = css.indexOf(selector)
   if (start === -1) throw new Error(`selector ${selector} not found in ${file}`)
   const open = css.indexOf('{', start)
@@ -53,7 +54,7 @@ const TINTS = ['warning', 'info', 'success'] as const
 describe('semantic tint contrast', () => {
   THEMES.forEach(({ name, vars, shadcn }) => {
     const varsBlock = readBlock('vars.css', vars)
-    const foreground = readVar(readBlock('shadcn.css', shadcn), '--foreground')
+    const foreground = readVar(readBlock('tokens.scoped.css', shadcn, UI_STYLES), '--foreground')
 
     TINTS.forEach((tint) => {
       it(`${name}: default foreground on --color-${tint}-background clears AA`, () => {

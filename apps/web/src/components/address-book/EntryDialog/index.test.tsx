@@ -55,7 +55,7 @@ jest.mock('@/features/spaces/public/hooks/useWorkspaceAddressBookLabel', () => (
   useWorkspaceAddressBookLabel: () => 'Acme address book',
 }))
 
-jest.mock('@safe-global/views/hooks/use-mobile', () => ({
+jest.mock('@safe-global/ui/hooks/use-mobile', () => ({
   useIsMobile: jest.fn(() => false),
 }))
 

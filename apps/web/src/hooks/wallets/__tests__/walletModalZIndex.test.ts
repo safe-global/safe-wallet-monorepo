@@ -1,12 +1,12 @@
 import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 
 /**
  * Connecting a wallet stacks three overlays that live in three different styling systems:
  *
  *   onboard's connect modal   `--onboard-modal-z-index`  (onboard.css)
  *   the WalletConnect QR modal `--wcm-z-index`           (wallets.ts, a JS theme variable)
- *   the private key prompt     `--z-above-onboard`       (shadcn.css)
+ *   the private key prompt     `--z-above-onboard`       (@safe-global/ui tokens.scoped.css)
  *
  * The last two are opened from inside the first, so both have to beat it. Nothing in the type
  * system or the CSS connects them, and getting it wrong is not a cosmetic bug: onboard's
@@ -22,7 +22,8 @@ const numberFrom = (source: string, pattern: RegExp, label: string): number => {
 }
 
 const ONBOARD_CSS = readFileSync(join(WEB_SRC, 'styles', 'onboard.css'), 'utf8')
-const SHADCN_CSS = readFileSync(join(WEB_SRC, 'styles', 'shadcn.css'), 'utf8')
+const UI_STYLES = join(dirname(require.resolve('@safe-global/ui/package.json')), 'src', 'styles')
+const SHADCN_CSS = readFileSync(join(UI_STYLES, 'tokens.scoped.css'), 'utf8')
 const WALLETS_TS = readFileSync(join(WEB_SRC, 'hooks', 'wallets', 'wallets.ts'), 'utf8')
 
 const onboardModal = numberFrom(ONBOARD_CSS, /--onboard-modal-z-index:\s*(\d+)/, '--onboard-modal-z-index')

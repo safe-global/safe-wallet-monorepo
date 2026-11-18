@@ -159,7 +159,7 @@ const config = [
       // (w-full, margins, grid placement). Height/padding/font-size/radius/background
       // are owned by the `size`/`variant` props — overriding them via className is what
       // makes buttons drift out of sync. If no size/variant fits a recurring need, add one
-      // to components/ui/button.tsx. See the UI/Button story + apps/web/AGENTS.md
+      // to packages/ui/src/primitives/button/button.tsx. See the UI/Button story + apps/web/AGENTS.md
       // ("Component variants over custom styling").
       'no-restricted-syntax': [
         'error',

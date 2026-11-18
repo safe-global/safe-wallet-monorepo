@@ -37,6 +37,9 @@ apps/web-tanstack/dist
 # Utils package
 packages/utils/src/types/contracts/**/*
 
+# UI package
+packages/ui/storybook-static
+
 # Store package (auto-generated from CGW API)
 packages/store/scripts/api-schema/schema.json
 packages/store/src/gateway/AUTO_GENERATED/

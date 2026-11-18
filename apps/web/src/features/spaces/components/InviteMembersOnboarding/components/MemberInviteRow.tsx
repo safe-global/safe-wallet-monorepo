@@ -11,7 +11,7 @@ import useChains from '@/hooks/useChains'
 import { DEFAULT_MAINNET_CHAIN_ID } from '@/config/constants'
 import { cn } from '@safe-global/views/utils/cn'
 import { Button } from '@safe-global/views/components/ui/button'
-import { Input } from '@safe-global/views/components/ui/input'
+import AddressPasteInput from '@safe-global/views/components/common/AddressPasteInput'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@safe-global/views/components/ui/select'
 import { Controller } from 'react-hook-form'
 import type { InviteMembersFormValues } from '../hooks/useInviteForm'
@@ -104,8 +104,7 @@ const MemberInviteRow = ({
     <div className="flex items-start gap-2">
       <div className="flex flex-1 flex-col gap-1">
         <div className="relative">
-          <Input
-            address
+          <AddressPasteInput
             autoComplete="off"
             {...register(`members.${index}.identifier`, {
               required: index === 0,
