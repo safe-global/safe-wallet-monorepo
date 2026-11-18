@@ -1,8 +1,10 @@
 import { faker } from '@faker-js/faker'
-import { render, screen } from '@/tests/test-utils'
+import { fireEvent, render, screen } from '@/tests/test-utils'
 import { safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import { mockSafeInfo } from '@/tests/mocks/hooks'
 import { mockRole } from '@/tests/mocks/roles'
+import { mockSetTxFlow, safeScopeContextFor, TxModalWithScope, unwrapScopedFlow } from '@/tests/mocks/safeScope'
+import { ReplaceTxFlow } from '@/components/tx-flow/flows'
 import { PendingStatus } from '@/store/pendingTxsSlice'
 import type { ExtendedSafeInfo } from '@safe-global/store/slices/SafeInfo/types'
 import RejectTxButton from '.'
@@ -74,5 +76,38 @@ describe('RejectTxButton', () => {
     render(<RejectTxButton txSummary={txSummary} />, { initialReduxState: { pendingTxs } })
 
     expect(getRejectButton()).toBeDisabled()
+  })
+
+  describe('opening the replacement flow', () => {
+    const clickReject = (scope?: ReturnType<typeof safeScopeContextFor>) => {
+      mockRole('owner')
+      const setTxFlow = mockSetTxFlow()
+      render(
+        <TxModalWithScope setTxFlow={setTxFlow} scope={scope}>
+          <RejectTxButton txSummary={txSummary} />
+        </TxModalWithScope>,
+      )
+      fireEvent.click(getRejectButton())
+      expect(setTxFlow).toHaveBeenCalledTimes(1)
+      return setTxFlow.mock.calls[0]
+    }
+
+    it('opens it unwrapped on a Safe-level page', () => {
+      const [txFlow, onClose, shouldWarn] = clickReject()
+
+      expect(txFlow?.type).toBe(ReplaceTxFlow)
+      expect(onClose).toBeUndefined()
+      expect(shouldWarn).toBe(false)
+    })
+
+    it("opens it inside the row's SafeScope", () => {
+      const target = { chainId: faker.string.numeric(5), safeAddress: faker.finance.ethereumAddress() }
+
+      const [txFlow] = clickReject(safeScopeContextFor(target))
+
+      const { flow, target: flowTarget } = unwrapScopedFlow(txFlow)
+      expect(flow?.type).toBe(ReplaceTxFlow)
+      expect(flowTarget).toEqual(target)
+    })
   })
 })
