@@ -38,9 +38,21 @@ type Args = {
   retreat: (changes: DraftChanges) => void
 }
 
-const toForm = (draft: WorkspaceDraft, safeFromUrl: string | undefined): AddAccountsFormValues => {
-  const keys = draft.safes.length > 0 ? draft.safes.map(toSafeKey) : safeFromUrl ? [safeFromUrl] : []
-  return { selectedSafes: Object.fromEntries(keys.map((key) => [key, true])), names: draft.safeNames }
+const toForm = (draft: WorkspaceDraft): AddAccountsFormValues => ({
+  selectedSafes: Object.fromEntries(draft.safes.map((safe) => [toSafeKey(safe), true])),
+  names: draft.safeNames,
+})
+
+/** The picker keys of the linked Safe: its whole multichain group, the single Safe, or none when it is not listed. */
+const linkedSafeKeys = (allSafes: AllSafeItems, safeFromUrl: string): string[] => {
+  const linked = fromSafeKey(safeFromUrl)
+  const group = allSafes.filter(isMultiChainSafeItem).find((item) => sameAddress(item.address, linked.address))
+  if (group) return [getMultiChainSafeId(group), ...group.safes.map(getSafeId)]
+  const single = allSafes.find(
+    (item) =>
+      !isMultiChainSafeItem(item) && item.chainId === linked.chainId && sameAddress(item.address, linked.address),
+  )
+  return single && !isMultiChainSafeItem(single) ? [getSafeId(single)] : []
 }
 
 /** The Safes step: pick Safes up to the plan's seats, then name the new ones, then save both to the draft. */
@@ -50,21 +62,19 @@ export const useSafesStepForm = ({ draft, allSafes, flaggedAddresses, limit, adv
   const [safesToName, setSafesToName] = useState<AllSafeItems>([])
   const formMethods = useForm<AddAccountsFormValues>({
     mode: 'onChange',
-    defaultValues: toForm(draft, safeFromUrl),
+    defaultValues: toForm(draft),
   })
   const { control, setValue, getValues, handleSubmit } = formMethods
 
-  // The linked Safe's multichain group arrives with the owned Safes, after mount; select the whole group once.
-  const isGroupPreselected = useRef(false)
+  // The picker list arrives with the owned Safes, after mount; a linked Safe outside it takes no seat.
+  const isLinkPreselected = useRef(false)
   useEffect(() => {
-    if (isGroupPreselected.current || draft.safes.length > 0 || !safeFromUrl) return
-    const { address } = fromSafeKey(safeFromUrl)
-    const group = allSafes.filter(isMultiChainSafeItem).find((item) => sameAddress(item.address, address))
-    if (!group) return
-    isGroupPreselected.current = true
-    const groupKeys = [getMultiChainSafeId(group), ...group.safes.map(getSafeId)]
-    const groupSelection = Object.fromEntries(groupKeys.map((key) => [key, true]))
-    setValue('selectedSafes', { ...getValues('selectedSafes'), ...groupSelection })
+    if (isLinkPreselected.current || draft.safes.length > 0 || !safeFromUrl) return
+    const keys = linkedSafeKeys(allSafes, safeFromUrl)
+    if (keys.length === 0) return
+    isLinkPreselected.current = true
+    const linkedSelection = Object.fromEntries(keys.map((key) => [key, true]))
+    setValue('selectedSafes', { ...getValues('selectedSafes'), ...linkedSelection })
   }, [allSafes, draft.safes.length, safeFromUrl, getValues, setValue])
 
   const selection = useOnboardingSelection({ items: allSafes, control, setValue, flaggedAddresses, limit })
