@@ -49,7 +49,7 @@ type Route = 'best' | 'fast'
 type Expiry = keyof typeof COPY.expiries
 
 const COPY = DEFI_V1_COPY.move
-const BODY_HEIGHT = 'h-[min(30rem,65vh)]'
+export const FLOW_DIALOG = 'flex h-[min(41rem,88vh)] flex-col'
 const ICONS: Record<MoveMode, LucideIcon> = { swap: Repeat2, bridge: Orbit }
 const CHAINS = Object.keys(CHAIN_IDS)
 const STABLES = ['USDC', 'USDT']
@@ -362,7 +362,7 @@ export const MoveFundsFlow = ({
   ]
 
   const details = (
-    <div className={cn(BODY_HEIGHT, 'flex flex-col gap-3 overflow-y-auto px-4 py-4')}>
+    <div className="min-h-0 flex-1 flex flex-col gap-3 overflow-y-auto px-4 py-4">
       <HubTabs value={mode} onChange={(next) => (next === 'invest' ? onInvest() : onModeChange(next))} />
 
       <div className="relative flex flex-col gap-1">
@@ -477,7 +477,7 @@ export const MoveFundsFlow = ({
   )
 
   const review = (
-    <div className={cn(BODY_HEIGHT, 'flex flex-col gap-4 overflow-y-auto px-4 py-4')}>
+    <div className="min-h-0 flex-1 flex flex-col gap-4 overflow-y-auto px-4 py-4">
       <div className="flex flex-col gap-1">
         <Typography variant="paragraph-small-medium" color="muted">
           {COPY.title[mode]}
@@ -518,7 +518,7 @@ export const MoveFundsFlow = ({
   )
 
   const proposed = (
-    <div className={cn(BODY_HEIGHT, 'flex flex-col items-center gap-6 overflow-y-auto px-4 pt-8 pb-4')}>
+    <div className="min-h-0 flex-1 flex flex-col items-center gap-6 overflow-y-auto px-4 pt-8 pb-4">
       <div className="flex flex-col items-center gap-4 text-center">
         <span className="flex size-16 items-center justify-center rounded-full bg-badge-dot-success/10">
           <span className="flex size-11 items-center justify-center rounded-full bg-success-tint text-badge-dot-success">
@@ -650,7 +650,7 @@ export const MoveFundsDialog = ({
   onClose: () => void
 }) => (
   <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-    <DialogContent size="sm" data-testid="move-funds-dialog">
+    <DialogContent size="sm" className={FLOW_DIALOG} data-testid="move-funds-dialog">
       {tab === 'invest' ? (
         invest(<HubTabs value="invest" onChange={onTabChange} />)
       ) : (

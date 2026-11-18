@@ -27,13 +27,11 @@ import {
   type CreatedInvestment,
   type InvestmentForm,
 } from './InvestmentForm'
+import { FLOW_DIALOG } from './MoveFundsDialog'
 import { OpportunityMark } from './TreasuryTables'
 
 const COPY = DEFI_V1_COPY.operations
 const STEPS = COPY.stepperSteps
-/** Fixed so the dialog never changes size between steps; long lists scroll inside it. */
-const BODY_HEIGHT = 'h-[min(26rem,60vh)]'
-const PROPOSED_HEIGHT = 'h-[min(34rem,78vh)]'
 
 type StepState = 'done' | 'current' | 'upcoming'
 
@@ -194,12 +192,12 @@ export const SetUpInvestmentFlow = ({
       )}
 
       {proposed ? (
-        <div className={cn(PROPOSED_HEIGHT, 'overflow-y-auto px-4 py-4')}>
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4">
           <ProposedView form={form} />
         </div>
       ) : (
         <>
-          <div className={cn(BODY_HEIGHT, 'flex flex-col gap-4 px-4 pt-4')}>
+          <div className="min-h-0 flex-1 flex flex-col gap-4 px-4 pt-4">
             {tabs && current === 0 && tabs}
             {view.heading && (
               <Typography variant="paragraph-bold" className="shrink-0">
@@ -246,7 +244,7 @@ export const SetUpInvestmentStepper = ({
   ...props
 }: ComponentProps<typeof SetUpInvestmentFlow> & { open: boolean }) => (
   <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
-    <DialogContent size="sm" data-testid="set-up-investment-stepper">
+    <DialogContent size="sm" className={FLOW_DIALOG} data-testid="set-up-investment-stepper">
       <SetUpInvestmentFlow onClose={onClose} {...props} />
     </DialogContent>
   </Dialog>
