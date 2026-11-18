@@ -3,7 +3,8 @@ import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { TxModalContext, TxModalProvider } from '..'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
-import { WalletContext, type WalletContextType } from '@/components/common/WalletProvider/WalletContext'
+import { WalletContext } from '@/components/common/WalletProvider/WalletContext'
+import { walletContextBuilder } from '@/tests/builders/wallet'
 
 jest.mock('@/hooks/useTopbarElevation', () => ({
   useTopbarElevation: jest.fn(),
@@ -248,15 +249,16 @@ describe('TxModalProvider parent Safe nonce', () => {
   it('drops the chosen parent Safe nonce when a flow ends without creating the parent tx', async () => {
     const user = userEvent.setup()
     let nonce: number | undefined
-    const walletContext = {
-      setSignerAddress: jest.fn(),
-      setParentSafeNonce: (chosen: number) => {
-        nonce = chosen
-      },
-      clearParentSafeNonce: () => {
-        nonce = undefined
-      },
-    } as unknown as WalletContextType
+    const walletContext = walletContextBuilder()
+      .with({
+        setParentSafeNonce: (chosen) => {
+          nonce = chosen
+        },
+        clearParentSafeNonce: () => {
+          nonce = undefined
+        },
+      })
+      .build()
     render(
       <WalletContext.Provider value={walletContext}>
         <TxModalProvider>

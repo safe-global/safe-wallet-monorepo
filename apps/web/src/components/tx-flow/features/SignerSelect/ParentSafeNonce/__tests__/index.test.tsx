@@ -12,7 +12,8 @@ import {
   multisigTransactionBuilder,
   queuedTransactionItem,
 } from '@/tests/builders/queuedTransaction'
-import { WalletContext, type WalletContextType } from '@/components/common/WalletProvider/WalletContext'
+import { walletContextBuilder } from '@/tests/builders/wallet'
+import { WalletContext } from '@/components/common/WalletProvider/WalletContext'
 import ParentSafeNonce from '..'
 
 jest.mock('@/hooks/useSafeInfo')
@@ -54,15 +55,17 @@ const mockParentSafeApi = (parentSafeAddress: string, { noncesFail = false, queu
 
 const renderParentSafeNonce = (parentSafeAddress: string, { signerNonce }: { signerNonce?: number } = {}) => {
   let nonce = signerNonce
-  const walletContext = {
-    getParentSafeNonce: () => nonce,
-    setParentSafeNonce: (chosen: number) => {
-      nonce = chosen
-    },
-    clearParentSafeNonce: () => {
-      nonce = undefined
-    },
-  } as unknown as WalletContextType
+  const walletContext = walletContextBuilder()
+    .with({
+      getParentSafeNonce: () => nonce,
+      setParentSafeNonce: (chosen) => {
+        nonce = chosen
+      },
+      clearParentSafeNonce: () => {
+        nonce = undefined
+      },
+    })
+    .build()
   const view = render(
     <WalletContext.Provider value={walletContext}>
       <ParentSafeNonce parentSafeAddress={parentSafeAddress} />
