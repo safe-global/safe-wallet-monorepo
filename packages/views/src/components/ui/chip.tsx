@@ -19,8 +19,9 @@ import { cn } from '@safe-global/views/utils/cn'
  *
  * @remarks
  * Key Props:
- * - `variant` ('default' | 'outline' | 'primary' | 'warning' | 'success' | 'destructive' | 'info' | 'positive' | 'negative')
- * - `size` ('sm' | 'default' | 'lg' | 'auto') — `default` is content-height (no fixed height)
+ * - `variant` ('default' | 'outline' | 'filter' | 'primary' | 'warning' | 'success' | 'destructive' | 'info' | 'positive' | 'negative')
+ *   — `filter` is an applied-filter chip: an outline on the card surface that lifts on hover
+ * - `size` ('sm' | 'default' | 'lg' | 'xl' | 'auto') — `default` is content-height (no fixed height)
  * - `shape` ('pill' | 'tag')
  * - `onDelete` (renders a remove button when provided)
  * - `className`
@@ -32,6 +33,7 @@ const chipVariants = cva(
       variant: {
         default: 'bg-secondary text-secondary-foreground',
         outline: 'border border-border text-foreground',
+        filter: 'border border-border bg-card text-foreground shadow-xs transition-colors hover:bg-muted',
         // Solid fill: the tinted `bg-primary/10 text-primary` version was indistinguishable
         // from `default` in light mode (10% black on near-black text).
         primary: 'bg-primary text-primary-foreground',
@@ -53,6 +55,7 @@ const chipVariants = cva(
         sm: 'h-5 px-1.5 py-0 text-[10px] leading-none',
         default: 'px-2.5 py-0.5 text-xs',
         lg: 'h-6 px-2.5 py-0 text-sm',
+        xl: 'h-7 pr-2.5 pl-3 py-0 text-sm',
         auto: 'h-auto px-2.5 py-1 text-xs',
       },
       shape: {

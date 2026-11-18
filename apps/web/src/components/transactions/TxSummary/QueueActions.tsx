@@ -7,16 +7,16 @@ import { PendingStatus, selectPendingTxById } from '@/store/pendingTxsSlice'
 import { useLoadFeature } from '@/features/__core__'
 import { SpeedupFeature } from '@/features/speedup'
 
-const QueueActions = ({ tx }: { tx: Transaction }) => {
+const QueueActions = ({ tx, dense = false }: { tx: Transaction; dense?: boolean }) => {
   const awaitingExecution = isAwaitingExecution(tx.txStatus)
   const pendingTx = useAppSelector((state) => selectPendingTxById(state, tx.id))
   const { SpeedUpMonitor } = useLoadFeature(SpeedupFeature)
 
   let ExecutionComponent = null
   if (!pendingTx) {
-    ExecutionComponent = <SignTxButton txSummary={tx} compact />
+    ExecutionComponent = <SignTxButton txSummary={tx} compact dense={dense} />
     if (awaitingExecution) {
-      ExecutionComponent = <ExecuteTxButton txSummary={tx} compact />
+      ExecutionComponent = <ExecuteTxButton txSummary={tx} compact dense={dense} />
     }
   }
 

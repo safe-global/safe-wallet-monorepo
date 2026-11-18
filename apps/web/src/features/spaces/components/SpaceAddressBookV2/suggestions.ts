@@ -5,7 +5,7 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { ADDRESS_BOOK_NAME_MAX_LENGTH } from '@safe-global/utils/validation/names'
 import type { SuggestedContact } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import type { SignedSafe, WorkspaceSigner } from '../../hooks/useWorkspaceSigners'
-import { toChainInfos } from './utils'
+import { toChainInfos } from '../../utils'
 
 export const safeLabel = ({ name, address }: SignedSafe): string => name || `Safe ${shortenAddress(address)}`
 
