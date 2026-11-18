@@ -387,10 +387,10 @@ describe('proposeTx', () => {
   })
 
   it('should send the declared attribution on the parent proposal only', async () => {
-    let capturedRequest: any
+    let capturedRequest: Record<string, unknown> | undefined
     server.use(
       http.post(`${GATEWAY_URL}/v1/chains/${CHAIN_ID}/transactions/${SAFE_ADDRESS}/propose`, async ({ request }) => {
-        capturedRequest = await request.json()
+        capturedRequest = (await request.json()) as Record<string, unknown>
         return HttpResponse.json({ txId: '123', safeAddress: SAFE_ADDRESS, txStatus: 'AWAITING_CONFIRMATIONS' })
       }),
     )
@@ -416,15 +416,15 @@ describe('proposeTx', () => {
       declared,
     })
 
-    expect(capturedRequest.declared).toEqual(declared)
-    expect(capturedRequest.nestedTransaction).not.toHaveProperty('declared')
+    expect(capturedRequest?.declared).toEqual(declared)
+    expect(capturedRequest?.nestedTransaction).not.toHaveProperty('declared')
   })
 
   it('should omit the declared field when nothing is declared', async () => {
-    let capturedRequest: any
+    let capturedRequest: Record<string, unknown> | undefined
     server.use(
       http.post(`${GATEWAY_URL}/v1/chains/${CHAIN_ID}/transactions/${SAFE_ADDRESS}/propose`, async ({ request }) => {
-        capturedRequest = await request.json()
+        capturedRequest = (await request.json()) as Record<string, unknown>
         return HttpResponse.json({ txId: '123', safeAddress: SAFE_ADDRESS, txStatus: 'AWAITING_CONFIRMATIONS' })
       }),
     )
