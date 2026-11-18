@@ -54,31 +54,6 @@ const nextImportRestrictions = [
   { name: 'next/image', message: 'Use a plain <img>. Images are served unoptimized, so next/image adds nothing.' },
 ]
 
-// Files outside src/features that imported a feature's components before this rule existed.
-const featureComponentImportAllowList = [
-  'src/components/balances/AssetsTable/PromoButtons.tsx',
-  'src/components/common/AppChrome/index.tsx',
-  'src/components/common/Header/Topbar/index.tsx',
-  'src/components/common/PageLayout/SideDrawer.tsx',
-  'src/components/common/SafeProLock/index.tsx',
-  'src/components/common/SpaceSafeBar/SpaceChainSelector.tsx',
-  'src/components/common/SpaceSafeBar/index.tsx',
-  'src/components/common/TrustedSafesModal/ManageTrustedSafesContent.tsx',
-  'src/components/dashboard/Assets/index.tsx',
-  'src/components/dashboard/FirstSteps/index.tsx',
-  'src/components/dashboard/index.tsx',
-  'src/components/new-safe/create/steps/ReviewStep/index.tsx',
-  'src/components/settings/ProposersList/index.tsx',
-  'src/components/settings/SecurityLogin/index.tsx',
-  'src/components/transactions/TxDetails/TxData/index.tsx',
-  'src/components/transactions/TxInfo/index.tsx',
-  'src/components/tx/confirmation-views/BatchTransactions/index.tsx',
-  'src/components/tx/confirmation-views/index.tsx',
-  'src/pages/_app.tsx',
-  'src/pages/balances/nfts.tsx',
-  'src/pages/welcome/spaces.tsx',
-]
-
 const config = [
   {
     ignores: [
@@ -182,32 +157,6 @@ const config = [
       // to components/ui/button.tsx. See the UI/Button story + apps/web/AGENTS.md
       // ("Component variants over custom styling").
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules],
-    },
-  },
-  // Feature components are private: code outside src/features reaches them through the feature's public entry point.
-  {
-    files: ['src/**/*.{ts,tsx}'],
-    ignores: [
-      'src/features/**',
-      '**/*.test.{ts,tsx}',
-      '**/__tests__/**',
-      '**/*.stories.{ts,tsx}',
-      ...featureComponentImportAllowList,
-    ],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          paths: nextImportRestrictions,
-          patterns: [
-            ...featurePublicImportPatterns,
-            {
-              group: ['@/features/*/components', '@/features/*/components/**'],
-              message: "Do not import a feature's components from outside the feature. Use its public entry point.",
-            },
-          ],
-        },
-      ],
     },
   },
   // No barrels in features: a re-export makes every importer depend on every re-exported file, which ties

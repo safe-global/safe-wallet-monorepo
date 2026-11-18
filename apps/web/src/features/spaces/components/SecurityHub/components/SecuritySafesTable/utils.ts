@@ -13,7 +13,7 @@ const SEVERITY_BY_RANK = (Object.entries(SEVERITY_RANK) as Array<[SecurityGrade,
   .map(([grade]) => grade)
 
 /**
- * The subset of the security feature handle that the table's pure helpers need.
+ * The subset of the security services that the table's pure helpers need.
  * Threaded in via params instead of imported so the helpers stay testable and
  * don't reach into the feature directly — callers obtain these from useSecurityServices.
  */

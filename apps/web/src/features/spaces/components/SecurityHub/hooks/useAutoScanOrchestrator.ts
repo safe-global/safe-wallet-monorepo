@@ -22,7 +22,7 @@ export type UseAutoScanOrchestratorParams = {
 
 /**
  * Wraps `useAutoScan` with two responsibilities pulled out of the host component:
- * - Builds the `AutoScanServices` bundle from the loaded feature handle.
+ * - Builds the `AutoScanServices` bundle from the security services.
  * - Triggers `startScan()` whenever the queue identity changes (Safes added,
  *   reconciled, or removed). Identity is compared via a sorted, joined key
  *   string so reference churn from other re-renders doesn't re-trigger.

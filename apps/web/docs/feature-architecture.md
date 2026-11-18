@@ -2,7 +2,7 @@
 
 Each feature lives in its own folder in `src/features/`. The feature's `public/` folder is its only entry point: other code imports a feature's files from `public/` and nowhere else. Everything outside `public/` is private to the feature.
 
-Features move to this convention one at a time. A feature that is listed in [`config/eslint/feature-public-imports.mjs`](../../../config/eslint/feature-public-imports.mjs) follows it, and ESLint enforces it. The other features still use feature handles (`createFeatureHandle`, `useLoadFeature`); for those, see [feature-architecture-legacy.md](feature-architecture-legacy.md) until they move.
+ESLint enforces this for every feature ([`config/eslint/feature-public-imports.mjs`](../../../config/eslint/feature-public-imports.mjs)).
 
 ## Folder layout
 
@@ -41,8 +41,6 @@ export default RecoveryList
 
 A public component that must render while the current chain has the flag off uses `dynamic` from `@/utils/dynamic` instead, with a one-line comment that gives the reason. Examples are in `features/multichain/public/`: those components check the flags of each target chain, or warn about the Safe itself.
 
-When a feature moves to `public/`, a component that its consumers imported statically moves unchanged; making it lazy is a separate change with its own tests.
-
 A small component that other code renders inline or in a fixed slot, such as an icon (`features/safe-shield/public/SeverityIcon.tsx`), a list-row part (`features/myAccounts/public/AccountItemInfo.tsx`) or a sidebar banner, may live in `public/` without a lazy wrapper: a lazy one would flicker or leave an empty slot. Its consumer checks the flag.
 
 ## Public hooks are the exception
@@ -61,11 +59,8 @@ A hook cannot be lazy or gated: it runs in its caller on every chain. Across fea
 
 Ask whether the code still makes sense if the feature is deleted. If not, it belongs to that feature. If yes, it goes to `src/hooks`, `src/utils` or `src/components`. When two features need each other, the shared part belongs to neither: generic code goes to the global folders, and shared data goes to Redux.
 
-## Moving a feature to `public/`
+## Adding a feature
 
-1. Move the files that other code uses into `public/` with the codemod. It rewrites every import, `import()` and `jest.mock` path:
-   `node scripts/codemods/move-to-public.cjs <feature> hooks/useX.ts=public/useX.ts ...`
-2. Add a gated public component for each component that the feature handle exposed, and replace the `useLoadFeature` calls.
-3. Delete the feature's `index.ts`, `contract.ts` and `feature.ts`.
-4. Add the feature to `config/eslint/feature-public-imports.mjs`.
-5. Add the flag-off tests for the public hooks that read a flag.
+1. Create `src/features/<feature>/` with a `public/` folder for what other code uses.
+2. Give each public component a `gatedDynamic` wrapper, unless one of the exceptions above applies.
+3. Add the flag-off tests for the public hooks that read a flag.
