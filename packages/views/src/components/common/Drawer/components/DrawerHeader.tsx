@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState, type ReactElement, type ReactNode } from 'react'
-import { ArrowLeft, ChevronDown, ChevronUp, X } from 'lucide-react'
+import { ArrowLeft, ChevronDown, ChevronUp, Maximize2, Minimize2, X } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { ButtonGroup } from '@safe-global/views/components/ui/button-group'
 import { Kbd } from '@safe-global/views/components/ui/kbd'
@@ -112,7 +112,8 @@ export const DrawerHeader = ({
   const secondLine = status ?? subtitle
   const hasNavigation = Boolean(navigation?.onPrevious || navigation?.onNext)
 
-  const buttons: DrawerHeaderAction[] = [
+  // A stable key per button, so the expand button keeps focus when its label flips
+  const buttons: (DrawerHeaderAction & { key?: string })[] = [
     ...(onBack ? [{ label: 'Back', icon: <ArrowLeft />, onClick: onBack }] : []),
     ...(hasNavigation
       ? [
@@ -133,6 +134,18 @@ export const DrawerHeader = ({
         ]
       : []),
     ...actions,
+    ...(drawer?.toggleFullScreen
+      ? [
+          drawer.fullScreen
+            ? { key: 'full-screen', label: 'Exit full screen', icon: <Minimize2 />, onClick: drawer.toggleFullScreen }
+            : {
+                key: 'full-screen',
+                label: 'Expand to full screen',
+                icon: <Maximize2 />,
+                onClick: drawer.toggleFullScreen,
+              },
+        ]
+      : []),
     ...(drawer ? [{ label: 'Close', icon: <X />, onClick: drawer.onClose }] : []),
   ]
 
@@ -150,15 +163,18 @@ export const DrawerHeader = ({
       </div>
 
       {navigation?.position && (
-        <span className="sr-only" aria-live="polite">
+        <span
+          className={drawer?.fullScreen ? 'shrink-0 text-xs text-muted-foreground tabular-nums' : 'sr-only'}
+          aria-live="polite"
+        >
           {navigation.position}
         </span>
       )}
 
       {buttons.length > 0 && (
         <ButtonGroup aria-label="Drawer actions" className="shrink-0">
-          {buttons.map((button) => (
-            <HeaderButton key={button.label} {...button} />
+          {buttons.map(({ key, ...button }) => (
+            <HeaderButton key={key ?? button.label} {...button} />
           ))}
         </ButtonGroup>
       )}
