@@ -30,17 +30,23 @@ const tabbableOptions = (): CheckOptions & TabbableOptions => ({
 })
 
 /** Focus target for a popup on open: the first control by keyboard or in a text field, otherwise the popup itself. */
-export function usePopupInitialFocus<Element extends HTMLElement, InitialFocus>(
-  ref: React.Ref<Element> | undefined,
+export function usePopupInitialFocus<PopupElement extends HTMLElement, InitialFocus>(
+  ref: React.Ref<PopupElement> | undefined,
   initialFocus: InitialFocus | undefined,
 ) {
-  const popupRef = React.useRef<Element | null>(null)
+  const popupRef = React.useRef<PopupElement | null>(null)
 
   const mergedRef = React.useCallback(
-    (node: Element | null) => {
+    (node: PopupElement | null) => {
       popupRef.current = node
-      if (typeof ref === 'function') ref(node)
-      else if (ref) ref.current = node
+      const callerCleanup = typeof ref === 'function' ? ref(node) : undefined
+      if (ref && typeof ref !== 'function') ref.current = node
+      return () => {
+        popupRef.current = null
+        if (typeof callerCleanup === 'function') callerCleanup()
+        else if (typeof ref === 'function') ref(null)
+        else if (ref) ref.current = null
+      }
     },
     [ref],
   )

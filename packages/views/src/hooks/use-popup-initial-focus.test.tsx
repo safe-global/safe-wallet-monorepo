@@ -1,9 +1,9 @@
-import { createRef, useRef, useState, type ReactNode, type RefObject } from 'react'
+import { createRef, useRef, useState, type ReactNode, type Ref, type RefObject } from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '../dialog'
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../sheet'
-import { Popover, PopoverContent, PopoverTrigger } from '../popover'
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '../components/ui/dialog'
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '../components/ui/sheet'
+import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover'
 
 const CopyButton = () => <button type="button">Copy to clipboard</button>
 
@@ -216,5 +216,49 @@ describe('popup initial focus', () => {
 
     await waitFor(() => expect(screen.getByRole('dialog')).toHaveFocus())
     expect(screen.getByRole('textbox', { name: 'Search' })).not.toHaveFocus()
+  })
+
+  describe("the caller's ref", () => {
+    const renderPopover = (ref: Ref<HTMLDivElement>) =>
+      render(
+        <Popover open>
+          <PopoverTrigger>Open</PopoverTrigger>
+          <PopoverContent ref={ref}>
+            <CopyButton />
+          </PopoverContent>
+        </Popover>,
+      )
+
+    it('runs the cleanup that a callback ref returns, instead of calling it with null', async () => {
+      const cleanup = jest.fn()
+      const ref = jest.fn(() => cleanup)
+      const { unmount } = renderPopover(ref)
+      await waitFor(() => expect(ref).toHaveBeenCalledWith(screen.getByRole('dialog')))
+
+      unmount()
+
+      expect(cleanup).toHaveBeenCalledTimes(1)
+      expect(ref).not.toHaveBeenCalledWith(null)
+    })
+
+    it('calls a callback ref without a cleanup with null on unmount', async () => {
+      const ref = jest.fn()
+      const { unmount } = renderPopover(ref)
+      await waitFor(() => expect(ref).toHaveBeenCalledWith(screen.getByRole('dialog')))
+
+      unmount()
+
+      expect(ref).toHaveBeenLastCalledWith(null)
+    })
+
+    it('clears an object ref on unmount', async () => {
+      const ref = createRef<HTMLDivElement>()
+      const { unmount } = renderPopover(ref)
+      await waitFor(() => expect(ref.current).toBe(screen.getByRole('dialog')))
+
+      unmount()
+
+      expect(ref.current).toBeNull()
+    })
   })
 })
