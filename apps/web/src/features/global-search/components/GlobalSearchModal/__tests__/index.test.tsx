@@ -1,6 +1,6 @@
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
-import GlobalSearchModal from '@/features/global-search/components/GlobalSearchModal/GlobalSearchModal'
+import GlobalSearchModal from '../GlobalSearchModal'
 import type { RootState } from '@/store'
 import { mockWallet } from '@/tests/mocks/hooks'
 

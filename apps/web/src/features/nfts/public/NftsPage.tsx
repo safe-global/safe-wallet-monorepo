@@ -4,7 +4,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import SafeAppCard from '@/components/safe-apps/SafeAppCard'
 import { SafeAppsTag } from '@/config/constants'
 import { useRemoteSafeApps } from '@/hooks/safe-apps/useRemoteSafeApps'
-import NftCollections from '../NftCollections'
+import NftCollections from '../components/NftCollections'
 
 const NftApps = memo(function NftApps(): ReactElement | null {
   const [nftApps] = useRemoteSafeApps({ tag: SafeAppsTag.NFT })

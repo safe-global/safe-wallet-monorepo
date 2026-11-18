@@ -4,7 +4,7 @@ import AssetsHeader from '@/components/balances/AssetsHeader'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 // Direct import — Next.js already code-splits per page, so useLoadFeature lazy-loading is redundant
-import NftsPage from '@/features/nfts/components/NftsPage'
+import NftsPage from '@/features/nfts/public/NftsPage'
 import { BRAND_NAME } from '@/config/constants'
 
 const NFTs = () => {

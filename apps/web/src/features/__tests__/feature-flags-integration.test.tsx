@@ -30,14 +30,6 @@ const FEATURE_FLAG_MATRIX: Array<{
   getHandle: () => FeatureHandle<FeatureImplementation>
 }> = [
   {
-    label: 'walletconnect',
-    featureFlag: FEATURES.NATIVE_WALLETCONNECT,
-    getHandle: () => {
-      const { WalletConnectFeature } = jest.requireActual('@/features/walletconnect')
-      return WalletConnectFeature
-    },
-  },
-  {
     label: 'swap',
     featureFlag: FEATURES.NATIVE_SWAPS,
     getHandle: () => {
@@ -54,14 +46,6 @@ const FEATURE_FLAG_MATRIX: Array<{
     },
   },
   {
-    label: 'nfts',
-    featureFlag: FEATURES.ERC721,
-    getHandle: () => {
-      const { NftsFeature } = jest.requireActual('@/features/nfts')
-      return NftsFeature
-    },
-  },
-  {
     label: 'spending-limits',
     featureFlag: FEATURES.SPENDING_LIMIT,
     getHandle: () => {
@@ -75,14 +59,6 @@ const FEATURE_FLAG_MATRIX: Array<{
     getHandle: () => {
       const { HypernativeFeature } = jest.requireActual('@/features/hypernative')
       return HypernativeFeature
-    },
-  },
-  {
-    label: 'tx-notes',
-    featureFlag: FEATURES.TX_NOTES,
-    getHandle: () => {
-      const { TxNotesFeature } = jest.requireActual('@/features/tx-notes')
-      return TxNotesFeature
     },
   },
   {
@@ -107,14 +83,6 @@ const FEATURE_FLAG_MATRIX: Array<{
     getHandle: () => {
       const { SpeedupFeature } = jest.requireActual('@/features/speedup')
       return SpeedupFeature
-    },
-  },
-  {
-    label: 'targeted-outreach',
-    featureFlag: FEATURES.TARGETED_SURVEY,
-    getHandle: () => {
-      const { TargetedOutreachFeature } = jest.requireActual('@/features/targeted-outreach')
-      return TargetedOutreachFeature
     },
   },
 ]
@@ -215,7 +183,6 @@ const ALWAYS_ENABLED_FEATURES: Array<{ label: string; getHandle: () => FeatureHa
   { label: 'batching', getHandle: () => jest.requireActual('@/features/batching').BatchingFeature },
   { label: 'spaces', getHandle: () => jest.requireActual('@/features/spaces/SpacesFeature').SpacesFeature },
   { label: 'myAccounts', getHandle: () => jest.requireActual('@/features/myAccounts').MyAccountsFeature },
-  { label: 'global-search', getHandle: () => jest.requireActual('@/features/global-search').GlobalSearchFeature },
 ]
 
 describe('always-enabled features', () => {

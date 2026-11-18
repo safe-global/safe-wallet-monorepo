@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { createMockStory } from '@/stories/mocks/createMockStory'
-import SafeOverview from './index'
+import SafeOverview from './public/SafeOverview'
 
 // Populated Safe: balances + queued transactions render the full overview grid.
 const populatedSetup = createMockStory({

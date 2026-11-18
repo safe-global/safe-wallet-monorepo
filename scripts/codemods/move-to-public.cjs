@@ -1,12 +1,12 @@
 // One-off migration: move files of one feature (usually into its public/ folder) and rewrite every module path
 // that points at them: imports, export-from, import(), require and jest.mock-style calls.
 // Inside the feature, paths become relative; everywhere else they use the `@/` alias.
-// Usage (repo root): node scripts/codemods/move-to-public.cjs <feature> <old>=<new>... [--dry]
+// Usage (repo root): node scripts/codemods/move-to-public.cjs <feature> [<old>=<new>...] [--dry]
 //   Paths are relative to apps/web/src/features/<feature>; a directory moves with everything in it.
+//   Without pairs, it only makes the feature's own `@/` paths relative.
 //   Example: node scripts/codemods/move-to-public.cjs recovery hooks/useRecovery.ts=public/useRecovery.ts
 const path = require('node:path')
 const fs = require('node:fs')
-const { execFileSync } = require('node:child_process')
 
 const ROOT = path.resolve(__dirname, '../..')
 const SRC = path.join(ROOT, 'apps/web/src')
@@ -20,8 +20,8 @@ const ts = require(path.join(ROOT, 'node_modules/typescript'))
 const [feature, ...rest] = process.argv.slice(2)
 const DRY = rest.includes('--dry')
 const pairs = rest.filter((a) => a.includes('='))
-if (!feature || pairs.length === 0) {
-  console.error('Usage: node scripts/codemods/move-to-public.cjs <feature> <old>=<new>... [--dry]')
+if (!feature) {
+  console.error('Usage: node scripts/codemods/move-to-public.cjs <feature> [<old>=<new>...] [--dry]')
   process.exit(1)
 }
 const FEATURE_DIR = path.join(SRC, 'features', feature)
@@ -145,7 +145,7 @@ function renameSuppressions() {
 if (!DRY) {
   for (const [from, to] of moves) {
     fs.mkdirSync(path.dirname(to), { recursive: true })
-    execFileSync('git', ['mv', from, to], { cwd: ROOT })
+    fs.renameSync(from, to)
   }
   renameSuppressions()
 }

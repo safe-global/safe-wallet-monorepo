@@ -1,5 +1,5 @@
 import type { AppDispatch } from '@/store'
-import { toggleGlobalSearch } from '@/features/global-search/store/globalSearchSlice'
+import { toggleGlobalSearch } from '@/features/global-search/public/globalSearchSlice'
 import { KeyboardAction } from './keyboardListeners'
 
 type ActionHandler = (dispatch: AppDispatch) => void

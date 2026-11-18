@@ -41,6 +41,8 @@ export default RecoveryList
 
 A public component that must render while the current chain has the flag off uses `dynamic` from `@/utils/dynamic` instead, with a one-line comment that gives the reason. Examples are in `features/multichain/public/`: those components check the flags of each target chain, or warn about the Safe itself.
 
+When a feature moves to `public/`, a component that its consumers imported statically moves unchanged; making it lazy is a separate change with its own tests.
+
 A small presentational component that other features render inline, such as `features/safe-shield/public/SeverityIcon.tsx`, may live in `public/` without a wrapper: a lazy icon would flicker.
 
 ## Public hooks are the exception

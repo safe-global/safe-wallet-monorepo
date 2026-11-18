@@ -5,11 +5,9 @@ import WhatsNewUpdatesFrame from '@/components/common/WhatsNewUpdatesFrame'
 import Notifications from '@/components/common/Notifications'
 import StepUpDialog from '@/features/oidc-auth/components/StepUpDialog'
 import PkModulePopup from '@/services/private-key-module/PkModulePopup'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { TargetedOutreachFeature } from '@/features/targeted-outreach'
+import OutreachPopup from '@/features/targeted-outreach/public/OutreachPopup'
 
 const TargetedOutreachPopupLoader = () => {
-  const { OutreachPopup } = useLoadFeature(TargetedOutreachFeature)
   return <OutreachPopup />
 }
 

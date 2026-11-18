@@ -18,7 +18,8 @@ import { getTransactionDetails } from '@/utils/transactions'
 import { Interface, getAddress } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { AppRoutes } from '@/config/routes'
-import useChains, { useCurrentChain } from '@/hooks/useChains'
+import useChains, { useCurrentChain, useHasFeature } from '@/hooks/useChains'
+import { FEATURES } from '@safe-global/utils/utils/chains'
 import { NotificationMessages, showNotification } from './notifications'
 import { SignMessageOnChainFlow } from '@/components/tx-flow/flows/SignMessageOnChainFlow'
 import { useAppSelector } from '@/store'
@@ -28,8 +29,7 @@ import { getCreateCallContractDeployment } from '@safe-global/utils/services/con
 import useAllSafes from '@/hooks/safes/useAllSafes'
 import { useGetHref } from '@/hooks/safes/useGetHref'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { WalletConnectFeature } from '@/features/walletconnect'
+import { walletConnectServices } from '@/features/walletconnect/public/walletConnectServices'
 import { withSpaceId } from '@/hooks/useUrlSpaceId'
 import { verifyAndStripNestedTxCalldata, type NestedTxEnvelope } from '@/services/tx/nestedTxEnvelope'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
@@ -45,7 +45,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSaf
   const allSafes = useAllSafes(fetchOwnedSafes)
   const getHref = useGetHref(router)
   const pendingTxs = useRef<Record<string, string>>({})
-  const walletConnect = useLoadFeature(WalletConnectFeature)
+  const walletConnect = useHasFeature(FEATURES.NATIVE_WALLETCONNECT) ? walletConnectServices : undefined
 
   const onChainSigning = useAppSelector(selectOnChainSigning)
   const [settings, setSettings] = useState<SafeSettings>({
@@ -206,7 +206,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSaf
           : undefined
 
         if (matchingSafe) {
-          await walletConnect?.walletConnectInstance.updateSessions(targetChain.chainId, matchingSafe.address)
+          await walletConnect?.updateSessions(targetChain.chainId, matchingSafe.address)
           await router.push(getHref(targetChain, matchingSafe.address))
           return null
         }
@@ -236,7 +236,7 @@ export const useTxFlowApi = (chainId: string, safeAddress: string, fetchOwnedSaf
             if (settled) return
 
             try {
-              await walletConnect?.walletConnectInstance.updateSessions(targetChain.chainId, safeItem.address)
+              await walletConnect?.updateSessions(targetChain.chainId, safeItem.address)
             } catch (error) {
               closeRequestIfActive()
               reject(error as Error)
