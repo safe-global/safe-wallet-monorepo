@@ -1,0 +1,63 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+@import '@safe-global/ui/styles.css';
+@import '../fonts/fonts.css';
+
+@source '../../../../../node_modules/@safe-global/ui/src';
+@source '../../';
+
+@theme inline {
+  --color-fd-primary: var(--primary);
+  --color-fd-primary-foreground: var(--primary-foreground);
+  --color-fd-background: var(--background);
+  --color-fd-foreground: var(--foreground);
+  --color-fd-card: var(--card);
+  --color-fd-popover: var(--popover);
+  --color-fd-muted-foreground: var(--muted-foreground);
+  --color-fd-border: var(--border);
+  --color-brand: var(--color-static-text-brand);
+  --color-brand-foreground: var(--color-static-main);
+}
+
+:root {
+  --site-header-height: 3.5rem;
+  --site-max-width: 1440px;
+  --fd-banner-height: var(--site-header-height);
+}
+
+/* Safe green from the static palette, the same in both themes */
+.brand {
+  --primary: var(--color-static-text-brand);
+  --primary-foreground: var(--color-static-main);
+  --ring: var(--color-static-text-brand);
+}
+
+.brand-mark {
+  background: var(--color-static-text-brand);
+  color: var(--color-static-main);
+}
+
+.dark .site-glow {
+  background: radial-gradient(
+    60% 50% at 50% 0%,
+    color-mix(in srgb, var(--color-static-text-brand) 14%, transparent),
+    transparent 70%
+  );
+}
+
+.site-glow {
+  background: radial-gradient(
+    60% 50% at 50% 0%,
+    color-mix(in srgb, var(--color-static-text-brand) 16%, transparent),
+    transparent 70%
+  );
+}
+
+.site-grid {
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black 30%, transparent 75%);
+}

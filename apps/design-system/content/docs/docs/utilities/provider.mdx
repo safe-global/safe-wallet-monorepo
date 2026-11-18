@@ -1,0 +1,34 @@
+---
+title: ShadcnProvider
+description: The scope and portal container for apps that use the scoped stylesheet.
+---
+
+```tsx
+import { ShadcnProvider } from '@safe-global/ui/provider'
+```
+
+You only need `ShadcnProvider` with `@safe-global/ui/scoped.css`, the opt-in stylesheet for apps that mix Safe UI with another style system (the Safe\{Wallet\} app uses it next to MUI). With the default `styles.css`, skip it.
+
+The scoped tokens and preflight apply only inside `.shadcn-scope`. `ShadcnProvider` renders that element and gives the components a portal container inside it, so dialogs, popovers, menus and drawers that render into a portal still get the scoped styles.
+
+```tsx
+<ShadcnProvider dark={isDarkMode}>
+  <App />
+</ShadcnProvider>
+```
+
+<TypeTable
+  type={{
+    children: { type: 'ReactNode', required: true },
+    dark: { type: 'boolean', description: 'Adds the dark class to the scope.' },
+    className: { type: 'string', description: 'Extra classes on the scope element.' },
+  }}
+/>
+
+Components read the container with `usePortalContainer()` (a ref, for Base UI portals) and `usePortalContainerElement()` (the element, for Vaul). Outside a provider, both return nothing and portals render into `document.body`.
+
+## Registry
+
+```bash
+npx shadcn@latest add @safe/provider
+```

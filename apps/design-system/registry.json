@@ -1,0 +1,1455 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "safe",
+  "homepage": "https://github.com/safe-global/safe-wallet-monorepo/tree/dev/apps/design-system",
+  "items": [
+    {
+      "name": "accordion",
+      "type": "registry:ui",
+      "title": "Accordion",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/accordion.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "alert",
+      "type": "registry:ui",
+      "title": "Alert",
+      "dependencies": [
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/alert.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "alert-dialog",
+      "type": "registry:ui",
+      "title": "Alert Dialog",
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/overlay",
+        "@safe/provider",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/alert-dialog.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "aspect-ratio",
+      "type": "registry:ui",
+      "title": "Aspect Ratio",
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/aspect-ratio.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "avatar",
+      "type": "registry:ui",
+      "title": "Avatar",
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/avatar.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "badge",
+      "type": "registry:ui",
+      "title": "Badge",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/badge.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "breadcrumb",
+      "type": "registry:ui",
+      "title": "Breadcrumb",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/breadcrumb.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "button",
+      "type": "registry:ui",
+      "title": "Button",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/button.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "calendar",
+      "type": "registry:ui",
+      "title": "Calendar",
+      "dependencies": [
+        "lucide-react@^0.563.0",
+        "react-day-picker@^9.13.0"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/calendar.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "card",
+      "type": "registry:ui",
+      "title": "Card",
+      "dependencies": [
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/card.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "checkbox",
+      "type": "registry:ui",
+      "title": "Checkbox",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/checkbox.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "chip",
+      "type": "registry:ui",
+      "title": "Chip",
+      "dependencies": [
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/chip.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "collapsible",
+      "type": "registry:ui",
+      "title": "Collapsible",
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/collapsible.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "combobox",
+      "type": "registry:ui",
+      "title": "Combobox",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/input-group",
+        "@safe/provider",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/combobox.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "context-menu",
+      "type": "registry:ui",
+      "title": "Context Menu",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/provider",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/context-menu.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "data-table",
+      "type": "registry:component",
+      "title": "Data Table",
+      "dependencies": [
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/table",
+        "@safe/use-mobile",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/components/data-table.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "dialog",
+      "type": "registry:ui",
+      "title": "Dialog",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/overlay",
+        "@safe/provider",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/dialog.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "drawer",
+      "type": "registry:ui",
+      "title": "Drawer",
+      "dependencies": [
+        "vaul@^1.1.2"
+      ],
+      "registryDependencies": [
+        "@safe/overlay",
+        "@safe/provider",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/drawer.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "dropdown-menu",
+      "type": "registry:ui",
+      "title": "Dropdown Menu",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/provider",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/dropdown-menu.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "empty",
+      "type": "registry:ui",
+      "title": "Empty",
+      "dependencies": [
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/empty.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "expandable-card",
+      "type": "registry:component",
+      "title": "Expandable Card",
+      "dependencies": [
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/card",
+        "@safe/collapsible"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/components/expandable-card.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "expandable-list",
+      "type": "registry:component",
+      "title": "Expandable List",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/typography",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/components/expandable-list.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "field",
+      "type": "registry:ui",
+      "title": "Field",
+      "dependencies": [
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/label",
+        "@safe/separator",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/field.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "hover-card",
+      "type": "registry:ui",
+      "title": "Hover Card",
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "registryDependencies": [
+        "@safe/provider",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/hover-card.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "input",
+      "type": "registry:ui",
+      "title": "Input",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/input.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "input-group",
+      "type": "registry:ui",
+      "title": "Input Group",
+      "dependencies": [
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/input",
+        "@safe/textarea",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/input-group.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "input-otp",
+      "type": "registry:ui",
+      "title": "Input Otp",
+      "dependencies": [
+        "input-otp@^1.4.2",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/input-otp.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "kbd",
+      "type": "registry:ui",
+      "title": "Kbd",
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/kbd.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "label",
+      "type": "registry:ui",
+      "title": "Label",
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/label.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "link",
+      "type": "registry:ui",
+      "title": "Link",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/link.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "list",
+      "type": "registry:ui",
+      "title": "List",
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/list.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "navigation-menu",
+      "type": "registry:ui",
+      "title": "Navigation Menu",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/provider",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/navigation-menu.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "overlay",
+      "type": "registry:ui",
+      "title": "Overlay",
+      "dependencies": [
+        "class-variance-authority@^0.7.1"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/overlay.ts",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "pagination",
+      "type": "registry:ui",
+      "title": "Pagination",
+      "dependencies": [
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/pagination.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "peek-collapsible",
+      "type": "registry:component",
+      "title": "Peek Collapsible",
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/components/peek-collapsible.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "popover",
+      "type": "registry:ui",
+      "title": "Popover",
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "registryDependencies": [
+        "@safe/overlay",
+        "@safe/provider",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/popover.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "progress",
+      "type": "registry:ui",
+      "title": "Progress",
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/progress.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "provider",
+      "type": "registry:ui",
+      "title": "Provider",
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/provider.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "radio-group",
+      "type": "registry:ui",
+      "title": "Radio Group",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/radio-group.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "resizable",
+      "type": "registry:ui",
+      "title": "Resizable",
+      "dependencies": [
+        "react-resizable-panels@^4.5.3"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/resizable.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "scroll-area",
+      "type": "registry:ui",
+      "title": "Scroll Area",
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/scroll-area.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "search-input",
+      "type": "registry:ui",
+      "title": "Search Input",
+      "dependencies": [
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/input-group",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/search-input.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "select",
+      "type": "registry:ui",
+      "title": "Select",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/overlay",
+        "@safe/provider",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/select.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "separator",
+      "type": "registry:ui",
+      "title": "Separator",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/separator.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "sheet",
+      "type": "registry:ui",
+      "title": "Sheet",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/overlay",
+        "@safe/provider",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/sheet.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "sidebar",
+      "type": "registry:ui",
+      "title": "Sidebar",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/input",
+        "@safe/separator",
+        "@safe/sheet",
+        "@safe/skeleton",
+        "@safe/tooltip",
+        "@safe/use-mobile",
+        "@safe/use-tablet",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/sidebar.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "skeleton",
+      "type": "registry:ui",
+      "title": "Skeleton",
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/skeleton.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "slider",
+      "type": "registry:ui",
+      "title": "Slider",
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/slider.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "sonner",
+      "type": "registry:ui",
+      "title": "Sonner",
+      "dependencies": [
+        "lucide-react@^0.563.0",
+        "sonner@^2.0.7"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/sonner.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "spinner",
+      "type": "registry:ui",
+      "title": "Spinner",
+      "dependencies": [
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/spinner.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "stat",
+      "type": "registry:component",
+      "title": "Stat",
+      "registryDependencies": [
+        "@safe/skeleton",
+        "@safe/typography",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/components/stat.tsx",
+          "type": "registry:component"
+        }
+      ]
+    },
+    {
+      "name": "switch",
+      "type": "registry:ui",
+      "title": "Switch",
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/switch.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "table",
+      "type": "registry:ui",
+      "title": "Table",
+      "dependencies": [
+        "class-variance-authority@^0.7.1",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/table.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "registry/safe/ui/table.module.css",
+          "type": "registry:file",
+          "target": "components/ui/table.module.css"
+        }
+      ]
+    },
+    {
+      "name": "tabs",
+      "type": "registry:ui",
+      "title": "Tabs",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/tabs.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "textarea",
+      "type": "registry:ui",
+      "title": "Textarea",
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/textarea.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "theme",
+      "type": "registry:theme",
+      "title": "Theme",
+      "description": "Safe UI design tokens: light and dark variables, the Tailwind theme mapping and base styles.",
+      "dependencies": [
+        "shadcn@^3.7.0",
+        "tw-animate-css@^1.4.0"
+      ],
+      "cssVars": {
+        "theme": {
+          "font-sans": "'DM Sans', sans-serif",
+          "color-background": "var(--background)",
+          "color-foreground": "var(--foreground)",
+          "color-card": "var(--card)",
+          "color-card-foreground": "var(--card-foreground)",
+          "color-popover": "var(--popover)",
+          "color-popover-foreground": "var(--popover-foreground)",
+          "color-dialog": "var(--dialog)",
+          "color-backdrop": "var(--backdrop)",
+          "color-primary": "var(--primary)",
+          "color-primary-foreground": "var(--primary-foreground)",
+          "color-secondary": "var(--secondary)",
+          "color-secondary-foreground": "var(--secondary-foreground)",
+          "color-secondary-hover": "var(--secondary-hover)",
+          "color-muted": "var(--muted)",
+          "color-muted-foreground": "var(--muted-foreground)",
+          "color-surface-sunken": "var(--surface-sunken)",
+          "color-accent": "var(--accent)",
+          "color-accent-foreground": "var(--accent-foreground)",
+          "color-destructive": "var(--destructive)",
+          "color-border": "var(--border)",
+          "color-input": "var(--input)",
+          "color-ring": "var(--ring)",
+          "color-chart-1": "var(--chart-1)",
+          "color-chart-2": "var(--chart-2)",
+          "color-chart-3": "var(--chart-3)",
+          "color-chart-4": "var(--chart-4)",
+          "color-chart-5": "var(--chart-5)",
+          "color-sidebar": "var(--sidebar)",
+          "color-sidebar-foreground": "var(--sidebar-foreground)",
+          "color-sidebar-primary": "var(--sidebar-primary)",
+          "color-sidebar-primary-foreground": "var(--sidebar-primary-foreground)",
+          "color-sidebar-accent": "var(--sidebar-accent)",
+          "color-sidebar-accent-foreground": "var(--sidebar-accent-foreground)",
+          "color-sidebar-border": "var(--sidebar-border)",
+          "color-sidebar-ring": "var(--sidebar-ring)",
+          "color-accent-secondary": "var(--accent-secondary)",
+          "color-accent-secondary-foreground": "var(--accent-secondary-foreground)",
+          "color-mint": "var(--mint)",
+          "color-accent-success": "var(--accent-success)",
+          "color-success-subtle": "var(--color-success-background)",
+          "color-success-muted": "var(--color-success-light)",
+          "color-success-strong": "var(--color-success-dark)",
+          "color-success-tint": "var(--color-background-light)",
+          "color-muted-secondary": "var(--muted-secondary)",
+          "color-error-strong": "var(--color-error-dark)",
+          "color-error-subtle": "var(--error-subtle)",
+          "color-warning-subtle": "var(--warning-subtle)",
+          "color-warning-muted": "var(--color-warning-light)",
+          "color-warning-strong": "var(--warning-strong)",
+          "color-warning-accent": "var(--warning-accent)",
+          "color-warning-outline": "var(--warning-outline)",
+          "color-badge-warning-subtle": "var(--badge-warning-subtle)",
+          "color-badge-warning-strong": "var(--badge-warning-strong)",
+          "color-badge-dot-success": "var(--badge-dot-success)",
+          "color-badge-dot-warning": "var(--badge-dot-warning)",
+          "color-icon-brand": "var(--icon-brand)",
+          "color-icon-hover": "var(--icon-hover)",
+          "color-info-subtle": "var(--color-info-background)",
+          "color-info-muted": "var(--color-info-light)",
+          "color-info-strong": "var(--color-info-dark)",
+          "color-tone-critical": "var(--tone-critical)",
+          "color-tone-warning": "var(--tone-warning)",
+          "color-tone-attention": "var(--tone-attention)",
+          "color-tone-success": "var(--tone-success)",
+          "color-tone-neutral": "var(--tone-neutral)",
+          "color-tone-muted": "var(--tone-muted)",
+          "color-widget-count": "var(--widget-count)",
+          "color-widget-count-foreground": "var(--widget-count-foreground)",
+          "color-widget-icon-halo": "var(--widget-icon-halo)",
+          "ease-soft": "cubic-bezier(0.22, 1, 0.36, 1)",
+          "radius-2xs": "0.25rem",
+          "radius-xs": "0.5rem",
+          "radius-sm": "0.5rem",
+          "radius-md": "0.75rem",
+          "radius-lg": "1rem",
+          "radius-lg-xl": "1.25rem",
+          "radius-xl": "1.5rem",
+          "radius-2xl": "1.5rem",
+          "radius-infinite": "9999px"
+        },
+        "light": {
+          "color-text-primary": "#121312",
+          "color-text-secondary": "#a1a3a7",
+          "color-text-disabled": "#dddee0",
+          "color-text-contrast": "#ffffff",
+          "color-primary-dark": "#3c3c3c",
+          "color-primary-main": "#121312",
+          "color-primary-light": "#636669",
+          "color-secondary-dark": "#0fda6d",
+          "color-secondary-main": "#12ff80",
+          "color-secondary-light": "#b0ffc9",
+          "color-secondary-background": "#effff4",
+          "color-border-main": "#a1a3a7",
+          "color-border-light": "#dcdee0",
+          "color-border-background": "#f4f4f4",
+          "color-error-dark": "#ac2c3b",
+          "color-error-main": "#ff5f72",
+          "color-error-light": "#ffb4bd",
+          "color-error-background": "#ffe6ea",
+          "color-error1-main": "#ffe0e6",
+          "color-error1-contrast-text": "#8a1c27",
+          "color-success-dark": "#028d4c",
+          "color-success-main": "#00b460",
+          "color-success-light": "#d3f2e4",
+          "color-success-background": "#effaf1",
+          "color-info-dark": "#52bfdc",
+          "color-info-main": "#5fddff",
+          "color-info-light": "#d7f6ff",
+          "color-info-background": "#effcff",
+          "color-warning-dark": "#c04c32",
+          "color-warning-main": "#ff8061",
+          "color-warning-light": "#ffbc9f",
+          "color-warning-background": "#fff1e0",
+          "color-warning1-main": "#ffecc2",
+          "color-warning1-text": "#6c2d19",
+          "color-warning1-contrast-text": "#ff8c00",
+          "color-review-main": "#d6a100",
+          "color-review-background": "#fff8cc",
+          "color-background-default": "#f4f4f4",
+          "color-background-main": "#f4f4f4",
+          "color-background-sheet": "#f4f4f4",
+          "color-background-paper": "#ffffff",
+          "color-background-light": "#effff4",
+          "color-background-light-hover": "#e7fff2",
+          "color-background-secondary": "#dddee0",
+          "color-background-skeleton": "rgba(0, 0, 0, 0.04)",
+          "color-background-disabled": "#7878801f",
+          "color-backdrop-main": "#636669",
+          "color-logo-main": "#121312",
+          "color-logo-background": "#eeeff0",
+          "color-static-main": "#121312",
+          "color-static-light": "#636669",
+          "color-static-primary": "#ffffff",
+          "color-static-text-secondary": "#a1a3a7",
+          "color-static-text-brand": "#12ff80",
+          "space-1": "8px",
+          "space-2": "16px",
+          "space-3": "24px",
+          "space-4": "32px",
+          "space-5": "40px",
+          "space-6": "48px",
+          "space-7": "56px",
+          "space-8": "64px",
+          "space-9": "72px",
+          "space-10": "80px",
+          "space-11": "88px",
+          "space-12": "96px",
+          "background": "#ffffff",
+          "foreground": "#0a0a0a",
+          "card": "#ffffff",
+          "card-foreground": "#0a0a0a",
+          "popover": "#ffffff",
+          "popover-foreground": "#0a0a0a",
+          "dialog": "#ffffff",
+          "backdrop": "rgba(0, 0, 0, 0.1)",
+          "primary": "#171717",
+          "primary-foreground": "#fafafa",
+          "secondary": "#f5f5f5",
+          "secondary-foreground": "#171717",
+          "secondary-hover": "var(--border)",
+          "muted": "#f5f5f5",
+          "muted-secondary": "#fafafa",
+          "muted-foreground": "#737373",
+          "surface-sunken": "var(--color-background-main)",
+          "accent": "#f0fdf4",
+          "accent-foreground": "#171717",
+          "destructive": "#dc2626",
+          "border": "#e5e5e5",
+          "input": "#ffffff",
+          "ring": "#d4d4d4",
+          "chart-1": "oklch(0.809 0.105 251.813)",
+          "chart-2": "oklch(0.623 0.214 259.815)",
+          "chart-3": "oklch(0.546 0.245 262.881)",
+          "chart-4": "oklch(0.488 0.243 264.376)",
+          "chart-5": "oklch(0.424 0.199 265.638)",
+          "radius": "1rem",
+          "sidebar": "var(--color-background-paper)",
+          "sidebar-foreground": "#404040",
+          "sidebar-primary": "#171717",
+          "sidebar-primary-foreground": "#fafafa",
+          "sidebar-accent": "#f0fdf4",
+          "sidebar-accent-foreground": "#171717",
+          "sidebar-border": "#e5e5e5",
+          "sidebar-ring": "#d4d4d4",
+          "accent-secondary": "#c4fddd",
+          "accent-secondary-foreground": "#121312",
+          "mint": "#7ffab7",
+          "accent-success": "#16a34a",
+          "warning-subtle": "#fefce8",
+          "warning-strong": "#a16207",
+          "warning-accent": "#eab308",
+          "warning-outline": "var(--warning-accent)",
+          "error-subtle": "#fff4f6",
+          "badge-warning-subtle": "var(--warning-subtle)",
+          "badge-warning-strong": "var(--warning-strong)",
+          "badge-dot-success": "#22c55e",
+          "badge-dot-warning": "#eab308",
+          "icon-brand": "oklch(79.2% 0.209 151.711)",
+          "icon-hover": "oklch(72.3% 0.219 149.579)",
+          "z-sidebar": "1300",
+          "z-overlay": "1400",
+          "z-nested-overlay": "1450",
+          "z-above-onboard": "1451",
+          "z-picker": "1500",
+          "tone-critical": "var(--color-error-main)",
+          "tone-warning": "var(--color-warning-main)",
+          "tone-attention": "var(--color-review-main)",
+          "tone-success": "var(--color-success-main)",
+          "tone-neutral": "var(--color-text-secondary)",
+          "tone-muted": "var(--color-text-disabled)",
+          "widget-count": "#f0fdf4",
+          "widget-count-foreground": "#166534",
+          "widget-icon-halo": "oklch(96.2% 0.044 156.743)"
+        },
+        "dark": {
+          "color-text-primary": "#ffffff",
+          "color-text-secondary": "#636669",
+          "color-text-disabled": "rgba(255, 255, 255, 0.3)",
+          "color-text-contrast": "#000000",
+          "color-primary-dark": "#0cb259",
+          "color-primary-main": "#12ff80",
+          "color-primary-light": "#a1a3a7",
+          "color-secondary-dark": "#636669",
+          "color-secondary-main": "#ffffff",
+          "color-secondary-light": "#b0ffc9",
+          "color-secondary-background": "#1b2a22",
+          "color-border-main": "#636669",
+          "color-border-light": "#303033",
+          "color-border-background": "#121312",
+          "color-error-dark": "#ac2c3b",
+          "color-error-main": "#ff5f72",
+          "color-error-light": "#ffb4bd",
+          "color-error-background": "#2f2527",
+          "color-error1-main": "#4a2125",
+          "color-error1-contrast-text": "#ffe0e6",
+          "color-success-dark": "#388e3c",
+          "color-success-main": "#00b460",
+          "color-success-light": "#81c784",
+          "color-success-background": "#1f2920",
+          "color-info-dark": "#52bfdc",
+          "color-info-main": "#5fddff",
+          "color-info-light": "#b7f0ff",
+          "color-info-background": "#19252c",
+          "color-warning-dark": "#c04c32",
+          "color-warning-main": "#ff8061",
+          "color-warning-light": "#ffbc9f",
+          "color-warning-background": "#2f2318",
+          "color-warning1-main": "#4a3621",
+          "color-warning1-text": "#ffe4cb",
+          "color-warning1-contrast-text": "#ff8c00",
+          "color-review-main": "#d6a100",
+          "color-review-background": "#2f2a18",
+          "color-background-default": "#121312",
+          "color-background-main": "#121312",
+          "color-background-sheet": "#121312",
+          "color-background-paper": "#1c1c1c",
+          "color-background-light": "#1b2a22",
+          "color-background-light-hover": "#12ff801a",
+          "color-background-secondary": "#303033",
+          "color-background-skeleton": "rgba(255, 255, 255, 0.04)",
+          "color-background-disabled": "#7878801f",
+          "color-backdrop-main": "#636669",
+          "color-logo-main": "#ffffff",
+          "color-logo-background": "#303033",
+          "color-static-main": "#121312",
+          "color-static-light": "#636669",
+          "color-static-primary": "#ffffff",
+          "color-static-text-secondary": "#a1a3a7",
+          "color-static-text-brand": "#12ff80",
+          "background": "#000000",
+          "foreground": "#f5f5f5",
+          "card": "#171717",
+          "card-foreground": "#f5f5f5",
+          "popover": "#171717",
+          "popover-foreground": "#f5f5f5",
+          "dialog": "#1c1c1c",
+          "backdrop": "rgba(0, 0, 0, 0.1)",
+          "primary": "#12ff80",
+          "primary-foreground": "#0a0a0a",
+          "secondary": "#262626",
+          "secondary-foreground": "#f5f5f5",
+          "secondary-hover": "rgba(255, 255, 255, 0.12)",
+          "muted": "#262626",
+          "muted-secondary": "var(--color-background-paper)",
+          "muted-foreground": "#a3a3a3",
+          "surface-sunken": "var(--color-background-main)",
+          "accent": "#052e16",
+          "accent-foreground": "#f5f5f5",
+          "destructive": "#ff5f72",
+          "destructive-foreground": "#ffffff",
+          "border": "#404040",
+          "input": "#ffffff0d",
+          "ring": "#404040",
+          "chart-1": "oklch(0.809 0.105 251.813)",
+          "chart-2": "oklch(0.623 0.214 259.815)",
+          "chart-3": "oklch(0.546 0.245 262.881)",
+          "chart-4": "oklch(0.488 0.243 264.376)",
+          "chart-5": "oklch(0.424 0.199 265.638)",
+          "sidebar": "var(--color-background-main)",
+          "sidebar-foreground": "#d4d4d4",
+          "sidebar-primary": "#fafafa",
+          "sidebar-primary-foreground": "#171717",
+          "sidebar-accent": "#052e16",
+          "sidebar-accent-foreground": "#f5f5f5",
+          "sidebar-border": "#262626",
+          "sidebar-ring": "#404040",
+          "accent-secondary": "#c4fddd",
+          "accent-secondary-foreground": "#121312",
+          "mint": "#7ffab7",
+          "accent-success": "#00b460",
+          "warning-subtle": "var(--color-warning-background)",
+          "warning-strong": "var(--color-warning1-text)",
+          "warning-accent": "var(--color-warning-main)",
+          "warning-outline": "var(--warning-strong)",
+          "error-subtle": "var(--color-error-background)",
+          "badge-warning-subtle": "#301d02",
+          "badge-warning-strong": "#eab308",
+          "badge-dot-warning": "#facc15",
+          "tone-critical": "var(--color-error-main)",
+          "tone-warning": "var(--color-warning-main)",
+          "tone-attention": "var(--color-review-main)",
+          "tone-success": "var(--color-success-main)",
+          "tone-neutral": "var(--color-text-secondary)",
+          "tone-muted": "var(--color-text-disabled)",
+          "widget-count": "#f0fdf4",
+          "widget-count-foreground": "#166534",
+          "widget-icon-halo": "oklch(96.2% 0.044 156.743)"
+        }
+      },
+      "css": {
+        "@import 'tw-animate-css'": {},
+        "@import 'shadcn/tailwind.css'": {},
+        "@custom-variant dark (&:is(.dark *))": {},
+        "@layer base": {
+          "*": {
+            "@apply border-border outline-ring/50": {}
+          },
+          "body": {
+            "@apply bg-background text-foreground": {}
+          }
+        }
+      }
+    },
+    {
+      "name": "toggle",
+      "type": "registry:ui",
+      "title": "Toggle",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/toggle.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "tooltip",
+      "type": "registry:ui",
+      "title": "Tooltip",
+      "dependencies": [
+        "@base-ui/react@^1.1.0"
+      ],
+      "registryDependencies": [
+        "@safe/provider",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/tooltip.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "typography",
+      "type": "registry:ui",
+      "title": "Typography",
+      "dependencies": [
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/ui/typography.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    },
+    {
+      "name": "use-mobile",
+      "type": "registry:hook",
+      "title": "Use Mobile",
+      "files": [
+        {
+          "path": "registry/safe/hooks/use-mobile.ts",
+          "type": "registry:hook"
+        }
+      ]
+    },
+    {
+      "name": "use-tablet",
+      "type": "registry:hook",
+      "title": "Use Tablet",
+      "files": [
+        {
+          "path": "registry/safe/hooks/use-tablet.ts",
+          "type": "registry:hook"
+        }
+      ]
+    },
+    {
+      "name": "utils",
+      "type": "registry:lib",
+      "title": "Utils",
+      "dependencies": [
+        "clsx@^2.1.1",
+        "tailwind-merge@^3.4.0"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/lib/utils.ts",
+          "type": "registry:lib"
+        }
+      ]
+    },
+    {
+      "name": "widget",
+      "type": "registry:component",
+      "title": "Widget",
+      "dependencies": [
+        "@base-ui/react@^1.1.0",
+        "lucide-react@^0.563.0"
+      ],
+      "registryDependencies": [
+        "@safe/button",
+        "@safe/skeleton",
+        "@safe/typography",
+        "@safe/utils"
+      ],
+      "files": [
+        {
+          "path": "registry/safe/components/widget.tsx",
+          "type": "registry:component"
+        }
+      ]
+    }
+  ]
+}

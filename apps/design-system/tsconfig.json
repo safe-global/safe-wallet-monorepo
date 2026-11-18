@@ -1,0 +1,18 @@
+{
+  "extends": "../../config/tsconfig/confs/base.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "@ui-src/*": ["../../packages/ui/src/*"]
+    },
+    "jsx": "preserve",
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "types": ["node", "react", "react-dom", "mdx"],
+    "plugins": [{ "name": "next" }]
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", ".source/**/*.ts"],
+  "exclude": ["node_modules", "out", ".next/dev", "registry", "public"]
+}
