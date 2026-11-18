@@ -1,4 +1,4 @@
-import { Fragment, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { isAddress } from 'ethers'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { Avatar, AvatarFallback } from '@safe-global/views/components/ui/avatar'
@@ -8,6 +8,7 @@ import { getInitials } from '@safe-global/views/components/common/AccountRow/uti
 import ChainLogos from './ChainLogos'
 import ContactCell from './ContactCell'
 import ContactRowActions from './ContactRowActions'
+import RowDetail from './RowDetail'
 import { TagChips } from './tags/TagChip'
 import type { AddressBookContact } from './types'
 
@@ -133,24 +134,13 @@ const AddressBookTable = ({
     },
   ]
 
-  const renderRowDetail = (contact: AddressBookContact) => (
-    <dl className="grid grid-cols-[5rem_1fr] items-center gap-x-2 gap-y-2 text-sm">
-      {secondaryColumns.map((column) => (
-        <Fragment key={column.id}>
-          <dt className="text-muted-foreground">{column.header}</dt>
-          <dd>{column.cell(contact, { isCompact: true })}</dd>
-        </Fragment>
-      ))}
-    </dl>
-  )
-
   return (
     <PaginatedDataTable
       columns={columns}
       rows={contacts}
       getRowKey={(contact) => contact.address}
       getRowClassName={(contact) => (contact.isShared ? 'opacity-50' : '')}
-      renderRowDetail={renderRowDetail}
+      renderRowDetail={(contact) => <RowDetail row={contact} columns={secondaryColumns} />}
       pageSize={pageSize}
     />
   )

@@ -20,12 +20,24 @@ import useAddressPoisoningBatchCheck from '@/features/address-poisoning/public/h
 import { abCsvReaderValidator, abOnUploadValidator } from './validation'
 import ErrorMessage from '@/components/tx/ErrorMessage'
 import { Errors, logError } from '@/services/exceptions'
+import { RTK_QUERY_ERROR_MESSAGES } from '@/utils/rtkQuery'
 import FileUpload, { FileTypes, type FileInfo } from '@safe-global/views/components/common/FileUpload'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { BRAND_NAME } from '@/config/constants'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
 
-type AddressBookCSVRow = ['address', 'name', 'chainId']
+export type AddressBookCSVRow = [address: string, name: string, chainId: string, ...tags: string[]]
+
+/** `done` closes the dialog. Otherwise it stays open, showing `error` if there is one. */
+export type ImportOutcome = { done: boolean; error?: string }
+
+type ImportDialogProps = {
+  handleClose: () => void
+  /** Returns the reason the rows can't be imported, for checks beyond the file format. */
+  validateRows?: (rows: AddressBookCSVRow[]) => string | undefined
+  /** Imports somewhere other than the local address book. */
+  onImport?: (rows: AddressBookCSVRow[]) => Promise<ImportOutcome>
+}
 
 // https://react-papaparse.js.org/docs#errors
 type PapaparseErrorType = {
@@ -37,15 +49,17 @@ type PapaparseErrorType = {
 }
 
 const hasEntry = (entry: string[]) => {
-  return entry.length === 3 && entry[0] && entry[1] && entry[2]
+  return entry.length >= 3 && entry[0] && entry[1] && entry[2]
 }
 
 const pluralize = (count: number, singular: string, plural: string) => (count === 1 ? singular : plural)
 
-const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElement => {
+const ImportDialog = ({ handleClose, validateRows, onImport }: ImportDialogProps): ReactElement => {
   const [zoneHover, setZoneHover] = useState<boolean>(false)
   const [csvData, setCsvData] = useState<ParseResult<AddressBookCSVRow>>()
   const [error, setError] = useState<string>()
+  const [importError, setImportError] = useState<string>()
+  const [isImporting, setIsImporting] = useState(false)
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
 
   // Count how many entries are in the CSV file
@@ -78,7 +92,31 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
   const dispatch = useAppDispatch()
   const { CSVReader } = useCSVReader()
 
+  const importElsewhere = async (rows: AddressBookCSVRow[], importRows: NonNullable<ImportDialogProps['onImport']>) => {
+    setIsConfirmOpen(false)
+    setImportError(undefined)
+    setIsImporting(true)
+    try {
+      const { done, error } = await importRows(rows)
+      if (done) {
+        handleClose()
+      } else {
+        setImportError(error)
+      }
+    } catch (thrown) {
+      logError(Errors._703, thrown)
+      setImportError(RTK_QUERY_ERROR_MESSAGES.generic)
+    } finally {
+      setIsImporting(false)
+    }
+  }
+
   const importEntries = (rows: AddressBookCSVRow[]) => {
+    if (onImport) {
+      void importElsewhere(rows, onImport)
+      return
+    }
+
     // One id shared by all rows so the listener collapses them into a single toast.
     const notifyBatchId = crypto.randomUUID()
 
@@ -153,9 +191,10 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
               logError(Errors._703, errorDescription)
             }
           }}
-          onUploadAccepted={(result: ParseResult<['address', 'name', 'chainId']>) => {
+          onUploadAccepted={(result: ParseResult<AddressBookCSVRow>) => {
             setZoneHover(false)
             setError(undefined)
+            setImportError(undefined)
 
             // Remove empty rows
             const cleanResult = {
@@ -163,7 +202,7 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
               data: result.data.filter(hasEntry),
             }
 
-            const message = abOnUploadValidator(cleanResult)
+            const message = abOnUploadValidator(cleanResult) ?? validateRows?.(cleanResult.data.slice(1))
 
             if (message) {
               setError(message)
@@ -179,6 +218,7 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
             const onRemove = (e: MouseEvent<HTMLSpanElement>) => {
               setCsvData(undefined)
               setError(undefined)
+              setImportError(undefined)
               onClick(e)
             }
 
@@ -217,7 +257,7 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
 
         <div className={css.horizontalDivider} />
 
-        {error && <ErrorMessage>{error}</ErrorMessage>}
+        {(error ?? importError) && <ErrorMessage>{error ?? importError}</ErrorMessage>}
 
         <Typography>
           Only CSV files exported from a {BRAND_NAME} can be imported.
@@ -236,7 +276,8 @@ const ImportDialog = ({ handleClose }: { handleClose: () => void }): ReactElemen
         cancelTestId="cancel-btn"
         confirmLabel={flaggedEntries.length > 0 ? 'Verify' : 'Import'}
         onConfirm={handleImport}
-        confirmDisabled={!csvData || !!error}
+        confirmDisabled={!csvData || !!error || isImporting}
+        confirmLoading={isImporting}
         confirmTestId="import-btn"
       />
 

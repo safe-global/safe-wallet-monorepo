@@ -15,6 +15,7 @@ import { useAppDispatch, type AppThunk } from '@/store'
 import { removeAddressBookEntry, selectAllAddressBooks, type AddressBookState } from '@/store/addressBookSlice'
 import AddLocalContact from '../SpaceAddressBook/AddLocalContact'
 import AddToWorkspaceButton from '../SpaceAddressBook/AddToWorkspaceButton'
+import LocalContactsCsvActions from '../SpaceAddressBook/LocalContactsCsvActions'
 import RequestToAddButton from '../SpaceAddressBook/RequestToAddButton'
 import DeleteLocalContactDialog from './DeleteLocalContactDialog'
 import useAddressCellProps from './useAddressCellProps'
@@ -102,14 +103,32 @@ const LocalContacts = ({
   if (contacts.length === 0) {
     return (
       <TableCard>
-        <AddressBookEmptyState kind="empty" book="local" actions={<AddLocalContact />} />
+        <AddressBookEmptyState
+          kind="empty"
+          book="local"
+          actions={
+            <>
+              <LocalContactsCsvActions hasContacts={false} />
+              <AddLocalContact />
+            </>
+          }
+        />
       </TableCard>
     )
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <AddressBookToolbar query={query} onQueryChange={setQuery} actions={<AddLocalContact />} />
+      <AddressBookToolbar
+        query={query}
+        onQueryChange={setQuery}
+        actions={
+          <>
+            <LocalContactsCsvActions hasContacts />
+            <AddLocalContact />
+          </>
+        }
+      />
 
       <TableCard>
         {visibleContacts.length === 0 ? (
