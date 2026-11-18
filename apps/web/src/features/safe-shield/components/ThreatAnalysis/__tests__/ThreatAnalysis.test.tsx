@@ -1,4 +1,5 @@
 import { render, screen } from '@/tests/test-utils'
+import * as useChains from '@/hooks/useChains'
 import { ThreatAnalysis } from '../ThreatAnalysis'
 import type { ThreatAnalysisResults, ThreatAnalysisResult } from '@safe-global/utils/features/safe-shield/types'
 import { Severity, ThreatStatus, CommonSharedStatus } from '@safe-global/utils/features/safe-shield/types'
@@ -6,7 +7,7 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { hypernativeAuthStatusBuilder } from '@/tests/builders/hypernativeAuthStatus'
 
 // Mock AnalysisGroupCard — forward expandedGroups to a data attribute for assertions
-jest.mock('../../AnalysisGroupCard', () => ({
+jest.mock('../../AnalysisGroupCard/AnalysisGroupCard', () => ({
   AnalysisGroupCard: jest.fn(
     ({ children, delay, highlightedSeverity, analyticsEvent, requestId, expandedGroups, 'data-testid': testId }) => (
       <div
@@ -32,57 +33,54 @@ jest.mock('@safe-global/views/features/safe-shield/components/ThreatAnalysis/Ana
 }))
 
 // Mock analytics
-jest.mock('@/services/analytics', () => ({
-  ...(
-    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
-  ).createAnalyticsMock(),
+jest.mock('@/services/analytics/events/safe-shield', () => ({
   SAFE_SHIELD_EVENTS: {
     THREAT_ANALYZED: { action: 'Threat analyzed', category: 'safe-shield' },
   },
 }))
+jest.mock('@/services/analytics', () => ({
+  ...(
+    jest.requireActual('@safe-global/test/mocks/analytics') as { createAnalyticsMock: () => object }
+  ).createAnalyticsMock(),
+}))
 
-// Mock useLoadFeature to provide HnAnalysisGroupCard
 // Forward expandedGroups + overflowRow to data attributes / children for assertions
-jest.mock('@/features/__core__', () => ({
-  createFeatureHandle: jest.fn((name) => ({ name, __type: 'FeatureHandle' })),
-  useLoadFeature: jest.fn(() => ({
-    $isReady: true,
-    $isDisabled: false,
-    HnAnalysisGroupCard: jest.fn(
-      ({
-        children,
-        delay,
-        highlightedSeverity,
-        analyticsEvent,
-        requestId,
-        expandedGroups,
-        overflowRow,
-        'data-testid': testId,
-      }) => (
-        <div
-          data-testid={testId}
-          data-delay={delay}
-          data-severity={highlightedSeverity}
-          data-analytics={analyticsEvent}
-          data-request-id={requestId}
-          data-expanded-groups={expandedGroups ? JSON.stringify(expandedGroups) : undefined}
-        >
-          HnAnalysisGroupCard
-          {overflowRow}
-          {children}
-        </div>
-      ),
+jest.mock('@/features/hypernative/public/components/HnAnalysisGroupCard', () => ({
+  __esModule: true,
+  default: jest.fn(
+    ({
+      children,
+      delay,
+      highlightedSeverity,
+      analyticsEvent,
+      requestId,
+      expandedGroups,
+      overflowRow,
+      'data-testid': testId,
+    }) => (
+      <div
+        data-testid={testId}
+        data-delay={delay}
+        data-severity={highlightedSeverity}
+        data-analytics={analyticsEvent}
+        data-request-id={requestId}
+        data-expanded-groups={expandedGroups ? JSON.stringify(expandedGroups) : undefined}
+      >
+        HnAnalysisGroupCard
+        {overflowRow}
+        {children}
+      </div>
     ),
-  })),
+  ),
 }))
 
 // Mock useSafeShieldAssessmentUrl
-jest.mock('@/features/hypernative/hooks/useSafeShieldAssessmentUrl', () => ({
+jest.mock('@/features/hypernative/public/hooks/useSafeShieldAssessmentUrl', () => ({
   useSafeShieldAssessmentUrl: jest.fn(() => 'https://hn.example/report'),
 }))
 
 // Mock HnViewMoreOnHypernativeRow so we can assert its presence and props
-jest.mock('@/features/hypernative/components/HnViewMoreOnHypernativeRow', () => ({
+jest.mock('@/features/hypernative/public/components/HnViewMoreOnHypernativeRow', () => ({
   HnViewMoreOnHypernativeRow: jest.fn(({ overflowCount, assessmentUrl }) => (
     <div data-testid="overflow-row" data-overflow-count={overflowCount} data-assessment-url={assessmentUrl ?? ''}>
       +{overflowCount}
@@ -91,6 +89,10 @@ jest.mock('@/features/hypernative/components/HnViewMoreOnHypernativeRow', () => 
 }))
 
 describe('ThreatAnalysis', () => {
+  beforeEach(() => {
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
+  })
+
   const createThreatResult = (overrides?: Partial<ThreatAnalysisResult>): ThreatAnalysisResult =>
     ({
       severity: Severity.WARN,
@@ -240,6 +242,19 @@ describe('ThreatAnalysis', () => {
       expect(screen.getByTestId('threat-analysis-group-card')).toBeInTheDocument()
       expect(screen.getByText('HnAnalysisGroupCard')).toBeInTheDocument()
       expect(screen.queryByText('AnalysisGroupCardDisabled')).not.toBeInTheDocument()
+    })
+
+    it('should render AnalysisGroupCard, not HnAnalysisGroupCard, when hypernativeAuth is set but the flag is off', () => {
+      jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
+      const threat: AsyncResult<ThreatAnalysisResults> = [createThreatResults(), undefined, false]
+      const hypernativeAuth = hypernativeAuthStatusBuilder()
+        .with({ isAuthenticated: true, isTokenExpired: false })
+        .build()
+
+      render(<ThreatAnalysis threat={threat} hypernativeAuth={hypernativeAuth} />)
+
+      expect(screen.getByText('AnalysisGroupCard')).toBeInTheDocument()
+      expect(screen.queryByText('HnAnalysisGroupCard')).not.toBeInTheDocument()
     })
 
     it('should filter out BALANCE_CHANGE and CUSTOM_CHECKS from threatData', () => {
@@ -425,7 +440,7 @@ describe('ThreatAnalysis', () => {
     const createThreats = (count: number): ThreatAnalysisResult[] =>
       Array.from({ length: count }, (_, i) => createThreatResult({ title: `Threat ${i + 1}`, severity: Severity.WARN }))
 
-    describe('HN path (hypernativeAuth + hn.$isReady)', () => {
+    describe('HN path (hypernativeAuth + Hypernative flag)', () => {
       it('renders HnAnalysisGroupCard with expandedGroups=[THREAT] and overflow row when 5 threats', () => {
         const threat: AsyncResult<ThreatAnalysisResults> = [{ THREAT: createThreats(5) }, undefined, false]
         const hypernativeAuth = hypernativeAuthStatusBuilder().with({ isAuthenticated: true }).build()
@@ -466,7 +481,7 @@ describe('ThreatAnalysis', () => {
       it('renders HnViewMoreOnHypernativeRow with assessmentUrl=null when URL is null and 5 threats', () => {
         // Override the mock to return null for this test
         const { useSafeShieldAssessmentUrl } = jest.requireMock(
-          '@/features/hypernative/hooks/useSafeShieldAssessmentUrl',
+          '@/features/hypernative/public/hooks/useSafeShieldAssessmentUrl',
         ) as { useSafeShieldAssessmentUrl: jest.Mock }
         useSafeShieldAssessmentUrl.mockReturnValueOnce(null)
 

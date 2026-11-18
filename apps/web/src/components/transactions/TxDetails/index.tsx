@@ -1,5 +1,5 @@
 import type { TransactionDetails, Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useIsExpiredSwap } from '@/features/swap'
+import useIsExpiredSwap from '@/features/swap/public/hooks/useIsExpiredSwap'
 import React, { type ReactElement, useEffect, useRef, useState, useMemo } from 'react'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
 
@@ -41,14 +41,14 @@ import { useHasFeature } from '@/hooks/useChains'
 import { useTransactionsGetTransactionByIdV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
 import { POLLING_INTERVAL } from '@/config/constants'
-import { TxNotesFeature } from '@/features/tx-notes'
-import { useLoadFeature } from '@/features/__core__'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import DecodedData from './TxData/DecodedData'
 import { QueuedTxSimulation } from '../QueuedTxSimulation'
-import { HypernativeFeature } from '@/features/hypernative'
-import { SafenetChecksFeature, useIsSafenetChecksEnabled } from '@/features/safenet-checks'
+import { useIsSafenetChecksEnabled } from '@/features/safenet-checks/public/hooks/useIsSafenetChecksEnabled'
+import TxNote from '@/features/tx-notes/public/components/TxNote'
+import SafenetDetailsCard from '@/features/safenet-checks/public/components/SafenetDetailsCard'
+import HnSecuritySection from '@/features/hypernative/public/components/HnSecuritySection'
 
 export const NOT_AVAILABLE = 'n/a'
 
@@ -58,8 +58,6 @@ type TxDetailsProps = {
 }
 
 const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement => {
-  const txNotes = useLoadFeature(TxNotesFeature)
-  const hn = useLoadFeature(HypernativeFeature)
   const isPending = useIsPending(txSummary.id)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
   const isQueue = isTxQueued(txSummary.txStatus)
@@ -112,7 +110,6 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
   const { safe } = useSafeInfo()
 
   const isModuleExecution = isModuleDetailedExecutionInfo(txDetails.detailedExecutionInfo)
-  const safenet = useLoadFeature(SafenetChecksFeature)
   const isSafenetEnabled = useIsSafenetChecksEnabled()
   const safenetInfo =
     isSafenetEnabled && isMultisigDetailedExecutionInfo(txDetails.detailedExecutionInfo)
@@ -128,7 +125,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
       {/* /Details */}
       <div className={`${css.details} ${isUnsigned ? css.noSigners : ''}`}>
         <div className={css.txNote}>
-          <txNotes.TxNote txDetails={txDetails} />
+          <TxNote txDetails={txDetails} />
         </div>
 
         <div className={css.detailsWrapper}>
@@ -178,7 +175,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
         <div className={css.txSummary}>
           {isUntrusted && !isPending && <UnsignedWarning />}
           {safenetInfo && (
-            <safenet.SafenetDetailsCard
+            <SafenetDetailsCard
               safeTxHash={safenetInfo.safeTxHash}
               chainId={safe.chainId}
               timestampMs={safenetInfo.submittedAt}
@@ -220,7 +217,7 @@ const TxDetailsBlock = ({ txSummary, txDetails }: TxDetailsProps): ReactElement 
             isExpired={expiredSwap}
           />
 
-          {isQueue && <hn.HnSecuritySection txDetails={txDetails} safeTxHash={safeTxHash} chainId={safe.chainId} />}
+          {isQueue && <HnSecuritySection txDetails={txDetails} safeTxHash={safeTxHash} chainId={safe.chainId} />}
 
           {isQueue && (
             <div className={css.buttons}>

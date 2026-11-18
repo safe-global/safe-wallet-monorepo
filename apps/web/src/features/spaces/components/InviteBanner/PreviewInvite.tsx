@@ -3,7 +3,7 @@ import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_G
 import InitialsAvatar from '@/components/common/InitialsAvatar'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
 import { isAuthenticated } from '@/store/authSlice'
 import { useAppSelector } from '@/store'
 import AcceptButton from './AcceptButton'
@@ -13,7 +13,7 @@ import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import DeclineButton from './DeclineButton'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import Inviter from './Inviter'
-import { getInvitedByName } from '@/features/spaces/utils'
+import { getInvitedByName } from '../../utils'
 
 const PreviewInvite = () => {
   const isDarkMode = useDarkMode()

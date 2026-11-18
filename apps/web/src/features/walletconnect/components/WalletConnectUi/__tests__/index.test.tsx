@@ -6,14 +6,14 @@ import { addressExBuilder, extendedSafeInfoBuilder } from '@/tests/builders/safe
 import WalletConnectUi from '../index'
 import { WalletConnectContext } from '../../WalletConnectContext'
 import WalletConnectWallet from '../../../services/WalletConnectWallet'
-import { wcPopupStore } from '../../../store/wcPopupStore'
+import { wcPopupStore } from '../../../public/store/wcPopupStore'
 import * as useLocalStorageHook from '@/services/local-storage/useLocalStorage'
 import { trackEvent } from '@/services/analytics'
 import { WALLETCONNECT_EVENTS, WcSafeAppSuggestionResult } from '@/services/analytics/events/walletconnect'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { safeAppBuilder } from '@/tests/builders/walletConnect'
 import * as useSafeAppSuggestionHook from '../../../hooks/useSafeAppSuggestion'
-import { safeAppSuggestionBuilder } from '../../../hooks/safeAppSuggestion.fixtures'
+import { safeAppSuggestionBuilder } from '../../../hooks/safeAppSuggestion.testData'
 
 jest.mock('@reown/walletkit', () => jest.fn())
 jest.mock('@/services/analytics', () => ({
@@ -22,7 +22,7 @@ jest.mock('@/services/analytics', () => ({
 }))
 jest.mock('@/services/safe-wallet-provider/useSafeWalletProvider')
 
-jest.mock('../../../store/wcPopupStore', () => ({
+jest.mock('../../../public/store/wcPopupStore', () => ({
   wcPopupStore: { useStore: jest.fn(), setStore: jest.fn() },
   openWalletConnect: jest.fn(),
 }))

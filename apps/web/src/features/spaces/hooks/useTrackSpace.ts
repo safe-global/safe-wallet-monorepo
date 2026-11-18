@@ -1,4 +1,4 @@
-import type { AllSafeItems } from '@/hooks/safes'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'

@@ -4,7 +4,7 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'
 import { logError } from '@/services/exceptions'
 import { isRateLimitError } from '@/utils/transaction-errors'
-import { MODULE_GUARD_STORAGE_SLOT } from '../constants'
+import { MODULE_GUARD_STORAGE_SLOT } from '../public/constants'
 
 export const readModuleGuard = async (provider: JsonRpcProvider, safeAddress: string): Promise<string> => {
   try {

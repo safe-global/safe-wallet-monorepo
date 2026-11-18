@@ -25,7 +25,7 @@ import {
   getPartiallyFilledSurplus,
   getSurplusPrice,
   isOrderPartiallyFilled,
-} from '../../helpers/utils'
+} from '../../public/utils'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import TokenAmount from '@/components/common/TokenAmount'
 import useSafeInfo from '@/hooks/useSafeInfo'

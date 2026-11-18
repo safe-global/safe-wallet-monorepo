@@ -3,20 +3,40 @@ import { getStoreInstance } from '@/store'
 import * as useChains from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
 import { CreateSafeOnSpecificChain } from './index'
-import { persistCounterfactualSafe } from '@/features/counterfactual/services'
-import { useIsAdmin, useSpaceSafeCount, useSpaceSafeLimit } from '@/features/spaces'
+import { persistCounterfactualSafe } from '@/features/counterfactual/public/services/persistCounterfactualSafe'
+import { useIsAdmin } from '@/features/spaces/public/hooks/useSpaceMembers'
+import { useSpaceSafeCount } from '@/features/spaces/public/hooks/useIsCurrentSpaceAtSafeLimit'
+import { useSpaceSafeLimit } from '@/features/spaces/public/hooks/useSpaceSafeLimit'
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { predictAddressBasedOnReplayData } from '../../utils'
+import { predictAddressBasedOnReplayData } from '../../public/utils/utils'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'
 import type { ReplayedSafeProps } from '@safe-global/utils/features/counterfactual/store/types'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import type { NextRouter } from 'next/router'
 
-jest.mock('@/features/counterfactual/services', () => ({
+jest.mock('@/features/counterfactual/public/services/persistCounterfactualSafe', () => ({
   persistCounterfactualSafe: jest.fn(),
 }))
 
-jest.mock('../../utils', () => ({
+jest.mock('../../public/utils/utils', () => ({
+  get isMultiChainSafeItem() {
+    return jest.requireActual('../../public/utils/utils').isMultiChainSafeItem
+  },
+  get getSafeSetups() {
+    return jest.requireActual('../../public/utils/utils').getSafeSetups
+  },
+  get getSharedSetup() {
+    return jest.requireActual('../../public/utils/utils').getSharedSetup
+  },
+  get getDeviatingSetups() {
+    return jest.requireActual('../../public/utils/utils').getDeviatingSetups
+  },
+  get predictSafeAddress() {
+    return jest.requireActual('../../public/utils/utils').predictSafeAddress
+  },
+  get hasMultiChainCreationFeatures() {
+    return jest.requireActual('../../public/utils/utils').hasMultiChainCreationFeatures
+  },
   predictAddressBasedOnReplayData: jest.fn(),
   hasMultiChainAddNetworkFeature: jest.fn(() => true),
 }))
@@ -26,15 +46,15 @@ jest.mock('@/hooks/wallets/web3', () => ({
 }))
 
 // The feature barrel cannot be spread (circular import at init), so the source hook modules are mocked instead.
-jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
-  ...jest.requireActual('@/features/spaces/hooks/useSpaceMembers'),
+jest.mock('@/features/spaces/public/hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('@/features/spaces/public/hooks/useSpaceMembers'),
   useIsAdmin: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit', () => ({
-  ...jest.requireActual('@/features/spaces/hooks/useIsCurrentSpaceAtSafeLimit'),
+jest.mock('@/features/spaces/public/hooks/useIsCurrentSpaceAtSafeLimit', () => ({
+  ...jest.requireActual('@/features/spaces/public/hooks/useIsCurrentSpaceAtSafeLimit'),
   useSpaceSafeCount: jest.fn(),
 }))
-jest.mock('@/features/spaces/hooks/useSpaceSafeLimit', () => ({
+jest.mock('@/features/spaces/public/hooks/useSpaceSafeLimit', () => ({
   useSpaceSafeLimit: jest.fn(),
 }))
 

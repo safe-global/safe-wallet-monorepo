@@ -1,13 +1,6 @@
 import React from 'react'
-import {
-  advanceClock,
-  render,
-  renderOnFakeClock,
-  type renderWithUserEvent,
-  screen,
-  waitFor,
-  within,
-} from '@/tests/test-utils'
+import { advanceClock, render, renderOnFakeClock, screen, waitFor, within } from '@/tests/test-utils'
+import type { renderWithUserEvent } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import { FormProvider, useForm, useFieldArray, useWatch } from 'react-hook-form'
 import TokenAmountInput, { AMOUNT_ERROR_DEBOUNCE_MS } from './index'

@@ -1,14 +1,13 @@
 import type { ReactElement } from 'react'
 import { useCallback, useContext } from 'react'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext } from '@/components/tx-flow/TxFlowProvider'
-import { TxNotesFeature } from '@/features/tx-notes'
-import { useLoadFeature } from '@/features/__core__'
-import { SlotName, withSlot } from '../slots'
+import TxNoteForm from '@/features/tx-notes/public/components/TxNoteForm'
+import { encodeTxNote } from '@/features/tx-notes/public/utils/encodeTxNote'
+import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { withSlot } from '@/components/tx-flow/slots/withSlot'
 
 const TxNote = (): ReactElement => {
-  const txNotes = useLoadFeature(TxNotesFeature)
-  const { encodeTxNote, TxNoteForm } = txNotes
   const { txOrigin, setTxOrigin } = useContext(SafeTxContext)
   const { txDetails, isCreation } = useContext(TxFlowContext)
 
@@ -16,7 +15,7 @@ const TxNote = (): ReactElement => {
     (note: string) => {
       setTxOrigin(encodeTxNote(note, txOrigin))
     },
-    [setTxOrigin, txOrigin, encodeTxNote],
+    [setTxOrigin, txOrigin],
   )
 
   return <TxNoteForm isCreation={isCreation} onChange={onNoteChange} txDetails={txDetails} />

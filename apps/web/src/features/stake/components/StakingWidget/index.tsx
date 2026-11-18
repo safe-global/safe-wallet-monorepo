@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import AppFrame from '@/components/safe-apps/AppFrame'
 import { getEmptySafeApp } from '@/components/safe-apps/utils'
 import { useGetStakeWidgetUrl } from '../../hooks/useGetStakeWidgetUrl'
-import { widgetAppData } from '../../constants'
+import { widgetAppData } from '../../public/constants'
 
 const StakingWidget = ({ asset }: { asset?: string }) => {
   const url = useGetStakeWidgetUrl(asset)
