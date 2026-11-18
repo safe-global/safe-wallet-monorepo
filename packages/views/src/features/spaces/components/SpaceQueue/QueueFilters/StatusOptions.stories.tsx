@@ -1,16 +1,13 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { expect, fn, screen, userEvent, within } from 'storybook/test'
-import StatusFilter from './StatusFilter'
-
-const openMenu = async (canvasElement: HTMLElement) => {
-  await userEvent.click(within(canvasElement).getByRole('button', { name: 'Status' }))
-  return screen.findAllByRole('menuitemcheckbox')
-}
+import { expect, fn, screen } from 'storybook/test'
+import StatusOptions from './StatusOptions'
+import { InOpenMenu } from './storyDecorators'
 
 const meta = {
-  title: 'Features/Spaces/Transactions/QueueFilters/StatusFilter',
-  component: StatusFilter,
+  title: 'Features/Spaces/Transactions/QueueFilters/StatusOptions',
+  component: StatusOptions,
   parameters: { layout: 'centered' },
+  decorators: [InOpenMenu],
   args: {
     statuses: ['execute', 'sign', 'blocked', 'waiting'],
     flags: ['conflicting', 'stale'],
@@ -18,18 +15,15 @@ const meta = {
     selected: [],
     onToggle: fn(),
   },
-  play: async ({ canvasElement }) => {
-    await openMenu(canvasElement)
-  },
-} satisfies Meta<typeof StatusFilter>
+} satisfies Meta<typeof StatusOptions>
 
 export default meta
 type Story = StoryObj<typeof meta>
 
 /** Statuses sit on a tinted tile, flags get a muted icon. */
 export const Default: Story = {
-  play: async ({ canvasElement }) => {
-    const options = await openMenu(canvasElement)
+  play: async () => {
+    const options = await screen.findAllByRole('menuitemcheckbox')
     const icons = options.map((option) => option.querySelector('svg.lucide'))
     await expect(icons[0]?.parentElement).toHaveClass('bg-success-subtle', 'text-success-strong')
     await expect(icons[1]?.parentElement).toHaveClass('bg-success-subtle', 'text-success-strong')

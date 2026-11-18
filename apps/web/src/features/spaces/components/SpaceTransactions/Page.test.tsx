@@ -43,7 +43,8 @@ describe('SpaceTransactionsPage', () => {
 
   it('resets the queue filters when switching to another Workspace', () => {
     const { rerender } = render(<SpaceTransactionsPage spaceId={faker.string.uuid()} />)
-    fireEvent.click(screen.getByRole('button', { name: 'Status' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Filter' }))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Status' }))
     fireEvent.click(screen.getByRole('menuitemcheckbox', { name: /Sign/ }))
     expect(screen.getByText('Status:')).toBeInTheDocument()
 

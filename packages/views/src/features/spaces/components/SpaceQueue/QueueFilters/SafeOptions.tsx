@@ -3,7 +3,6 @@ import { Info } from 'lucide-react'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import { DropdownMenuSeparator } from '@safe-global/views/components/ui/dropdown-menu'
-import FilterDropdown from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/FilterDropdown'
 import FilterOptionItem, {
   NoFilterOptions,
 } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/FilterOptionItem'
@@ -21,8 +20,8 @@ export type SafeOptionsProps = {
   onToggle: (safeAddress: string) => void
 }
 
-/** The Safe filter's checkboxes, shared by its own menu and the Filter menu */
-export const SafeOptions = ({ options, onToggle }: SafeOptionsProps): ReactElement => {
+/** The Safe filter's checkboxes in the Filter menu */
+const SafeOptions = ({ options, onToggle }: SafeOptionsProps): ReactElement => {
   if (options.length === 0) return <NoFilterOptions>No Safe accounts</NoFilterOptions>
 
   return (
@@ -46,10 +45,4 @@ export const SafeOptions = ({ options, onToggle }: SafeOptionsProps): ReactEleme
   )
 }
 
-const SafeFilter = (props: SafeOptionsProps): ReactElement => (
-  <FilterDropdown label="Safe" contentClassName="min-w-64">
-    <SafeOptions {...props} />
-  </FilterDropdown>
-)
-
-export default SafeFilter
+export default SafeOptions
