@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { maybePlural } from '@safe-global/utils/utils/formatters'
 import TokenIcon from '@/components/common/TokenIcon'
-import { DrawerSection } from '@/components/common/Drawer'
+import { DrawerSection } from '@safe-global/views/components/common/Drawer/components/DrawerSection'
 import { Card } from '@safe-global/views/components/ui/card'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import type { PolicyTokenInfo } from '@safe-global/views/features/spaces/components/Policies/types'

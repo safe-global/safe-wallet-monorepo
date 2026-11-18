@@ -1,17 +1,17 @@
 import { positionsFixtures } from '@safe-global/test/msw/fixtures'
 import { render, screen } from '@/tests/test-utils'
-import Positions from '../index'
+import * as useChains from '@/hooks/useChains'
+import Positions from '../public/components/Positions'
 
 jest.mock('../hooks/usePositions')
 jest.mock('../hooks/usePositionsFiatTotal')
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
-  useLoadFeature: jest.fn(),
+jest.mock('@/features/portfolio/public/components/PortfolioRefreshHint', () => ({
+  __esModule: true,
+  default: () => null,
 }))
 
 const mockUsePositions = jest.requireMock('../hooks/usePositions').default as jest.Mock
 const mockUsePositionsFiatTotal = jest.requireMock('../hooks/usePositionsFiatTotal').default as jest.Mock
-const mockUseLoadFeature = jest.requireMock('@/features/__core__').useLoadFeature as jest.Mock
 
 const protocols = positionsFixtures.efSafe
 const NOT_IN_TOTAL = 'Position balances are not included in the total asset value.'
@@ -25,7 +25,7 @@ describe('Positions page', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockUsePositionsFiatTotal.mockReturnValue(1000)
-    mockUseLoadFeature.mockReturnValue({ PortfolioRefreshHint: () => null, $isDisabled: false })
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(true)
   })
 
   it('shows placeholders while the positions load', () => {
@@ -64,7 +64,7 @@ describe('Positions page', () => {
     renderPage({ data: protocols })
     expect(screen.queryByText(NOT_IN_TOTAL)).not.toBeInTheDocument()
 
-    mockUseLoadFeature.mockReturnValue({ PortfolioRefreshHint: () => null, $isDisabled: true })
+    jest.spyOn(useChains, 'useHasFeature').mockReturnValue(false)
     renderPage({ data: protocols })
     expect(screen.getByText(NOT_IN_TOTAL)).toBeInTheDocument()
   })

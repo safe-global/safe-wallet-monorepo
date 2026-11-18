@@ -5,7 +5,7 @@ import type {
   SettingsChangeTransaction,
   TransactionDetails,
 } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { ConfirmBatchFlow } from '@/components/tx-flow/flows'
+import { ConfirmBatchFlow } from '@/components/tx-flow/flows/ConfirmBatchFlow'
 import { isMultiSendTxInfo } from '@/utils/transaction-guards'
 import {
   isAddOwnerWithThresholdCalldata,

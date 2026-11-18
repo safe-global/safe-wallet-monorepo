@@ -7,13 +7,19 @@ let mockIsQualifiedSafe = false
 
 jest.mock('@/hooks/wallets/useWallet')
 
-jest.mock('@/features/swap', () => ({
-  useIsSwapFeatureEnabled: () => true,
+jest.mock('@/features/swap/public/hooks/useIsSwapFeatureEnabled', () => ({
+  __esModule: true,
+  default: () => true,
 }))
 
-jest.mock('@/features/spaces', () => ({
-  useIsQualifiedSafe: () => mockIsQualifiedSafe,
+jest.mock('@/features/spaces/public/hooks/useIsQualifiedSafe', () => ({
+  __esModule: true,
+  default: () => mockIsQualifiedSafe,
+}))
+jest.mock('@/features/spaces/public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => null,
+}))
+jest.mock('@/features/spaces/public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => ({
     allSafes: [
       {
@@ -27,10 +33,14 @@ jest.mock('@/features/spaces', () => ({
     ],
     isLoading: false,
   }),
-  SafeCardReadOnly: () => null,
+}))
+jest.mock('@/features/spaces/public/components/SafeCardReadOnly', () => ({
+  __esModule: true,
+  default: () => null,
 }))
 
-jest.mock('@/hooks/safes', () => ({
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
+  ...jest.requireActual('@/hooks/safes/useAllSafesGrouped'),
   useAllSafesGrouped: () => ({
     allMultiChainSafes: [],
     allSingleSafes: [
@@ -44,8 +54,10 @@ jest.mock('@/hooks/safes', () => ({
       },
     ],
   }),
-  isMultiChainSafeItem: () => false,
   flattenSafeItems: (items: unknown[]) => items,
+}))
+jest.mock('@/hooks/safes/isMultiChainSafeItem', () => ({
+  isMultiChainSafeItem: () => false,
 }))
 
 describe('SearchSection', () => {

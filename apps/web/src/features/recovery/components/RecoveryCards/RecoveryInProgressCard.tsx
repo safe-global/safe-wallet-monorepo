@@ -13,7 +13,7 @@ import RecoveryPending from '@/public/images/common/recovery-pending.svg'
 import { ActionCard } from '@/components/common/ActionCard'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { AppRoutes } from '@/config/routes'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import type { RecoveryQueueItem } from '../../public/types'
 
 import css from './styles.module.css'
 import { HelpCenterArticle, HelperCenterArticleTitles } from '@safe-global/utils/config/constants'

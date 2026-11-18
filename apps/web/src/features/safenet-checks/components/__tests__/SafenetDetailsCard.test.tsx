@@ -27,13 +27,9 @@ import useWallet from '@/hooks/wallets/useWallet'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
 import SafenetChecksSection from '../SafenetChecksSection'
-import {
-  MixpanelEventParams,
-  SAFENET_EVENTS,
-  SafenetCheckResult,
-  SafenetSignerRole,
-  trackEvent,
-} from '@/services/analytics'
+import { MixpanelEventParams, SafenetCheckResult, SafenetSignerRole } from '@/services/analytics/mixpanel-events'
+import { SAFENET_EVENTS } from '@/services/analytics/events/safenet'
+import { trackEvent } from '@/services/analytics'
 
 jest.mock('@/hooks/useChains', () => ({ useChain: jest.fn() }))
 jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
@@ -41,7 +37,10 @@ jest.mock('@safe-global/utils/features/safenet-checks/hooks', () => ({
   useSafenetCheck: jest.fn(),
 }))
 jest.mock('@/hooks/wallets/useWallet', () => ({ __esModule: true, default: jest.fn() }))
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 const safeTxHash = faker.string.hexadecimal({ length: 64, prefix: '0x', casing: 'lower' }) as Hex
 const chainId = faker.string.numeric(3)

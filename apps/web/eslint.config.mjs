@@ -7,6 +7,7 @@ import prettier from 'eslint-config-prettier'
 import storybook from 'eslint-plugin-storybook'
 import { designSystemSyntaxRules } from '../../packages/views/eslint-design-system.mjs'
 import noExplicitAny from '../../config/eslint/no-explicit-any.mjs'
+import { featurePublicImportPatterns } from '../../config/eslint/feature-public-imports.mjs'
 
 // A Safe link without `spaceId` opens the Safe outside the Workspace of the current page. Matches a
 // `query` property or variable that holds such an object, directly or in a conditional.
@@ -36,6 +37,22 @@ const noTestDataInStories = {
 }
 
 const storyDataRules = [seedFakerInStoryData, noTestDataInStories]
+
+// Type-only re-exports are erased at build time, so only value re-exports count.
+const noReexportRules = [
+  "ExportAllDeclaration[exportKind='value']",
+  "ExportNamedDeclaration[source][exportKind='value']:has(ExportSpecifier[exportKind='value'])",
+].map((selector) => ({
+  selector,
+  message: 'Do not re-export from another module. Import the name from the file that declares it.',
+}))
+
+const nextImportRestrictions = [
+  { name: 'next', importNames: ['NextPage'], message: 'Type a page as a plain function component.' },
+  { name: 'next/dynamic', message: 'Import dynamic from @/utils/dynamic, which does not depend on Next.' },
+  { name: 'next/app', message: 'Type the app props yourself, as pages/_app.tsx does.' },
+  { name: 'next/image', message: 'Use a plain <img>. Images are served unoptimized, so next/image adds nothing.' },
+]
 
 const config = [
   {
@@ -125,72 +142,11 @@ const config = [
         },
       ],
 
-      // Feature architecture: Prevent importing feature internals from outside the feature
-      // This enforces that features expose a clean public API through their index.ts barrel file
-      //
-      // ALLOWED imports:
-      //   @/features/myfeature              - main barrel (components via useLoadFeature, types, lightweight hooks)
-      //   @/features/myfeature/store        - Redux store (slice, selectors, actions) - needed at store init
-      //   @/features/myfeature/services     - services barrel (lightweight utilities only)
-      //
-      // FORBIDDEN imports (will cause bundle bloat):
-      //   @/features/myfeature/components/* - use useLoadFeature() instead
-      //   @/features/myfeature/hooks/*      - export through feature barrel if lightweight
-      //   @/features/myfeature/services/*   - heavy services should be in contract, accessed via useLoadFeature()
-      //
-      // See apps/web/docs/feature-architecture.md for details
       'no-restricted-imports': [
         'error',
         {
-          paths: [
-            { name: 'next', importNames: ['NextPage'], message: 'Type a page as a plain function component.' },
-            { name: 'next/dynamic', message: 'Import dynamic from @/utils/dynamic, which does not depend on Next.' },
-            { name: 'next/app', message: 'Type the app props yourself, as pages/_app.tsx does.' },
-            {
-              name: 'next/image',
-              message: 'Use a plain <img>. Images are served unoptimized, so next/image adds nothing.',
-            },
-          ],
-          patterns: [
-            // Block deep imports into feature components (defeats lazy loading)
-            {
-              group: ['@/features/*/components', '@/features/*/components/**'],
-              message:
-                'Do not import components directly. Use useLoadFeature() to access lazy-loaded components. See docs/feature-architecture.md',
-            },
-            // Block deep imports into feature hooks (should go through barrel)
-            {
-              group: ['@/features/*/hooks', '@/features/*/hooks/**'],
-              message: 'Import hooks from the feature barrel (@/features/myfeature) not from hooks folder directly.',
-            },
-            // Block deep imports into services internal files (barrel is OK for lightweight utils)
-            {
-              group: ['@/features/*/services/*', '!@/features/*/services/index'],
-              message:
-                'Import from @/features/myfeature/services (barrel) for lightweight utils, or use useLoadFeature() for heavy services.',
-            },
-            // Block deep imports into store internal files (barrel is OK)
-            {
-              group: ['@/features/*/store/*', '!@/features/*/store/index'],
-              message: 'Import from @/features/myfeature/store (barrel) not from internal store files.',
-            },
-            // Block internal file imports (handle.ts is internal, only index.ts is public)
-            {
-              group: ['@/features/*/handle'],
-              message: 'Import from feature index file only. The handle is internal - use @/features/{name} instead.',
-            },
-            // Same patterns for relative imports
-            {
-              // Same for relative imports
-              group: [
-                '../features/*/components',
-                '../features/*/components/**',
-                '../../features/*/components',
-                '../../features/*/components/**',
-              ],
-              message: 'Do not import components directly. Use useLoadFeature() instead.',
-            },
-          ],
+          paths: nextImportRestrictions,
+          patterns: featurePublicImportPatterns,
         },
       ],
 
@@ -201,6 +157,41 @@ const config = [
       // to components/ui/button.tsx. See the UI/Button story + apps/web/AGENTS.md
       // ("Component variants over custom styling").
       'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules],
+    },
+  },
+  // No barrels in features: a re-export makes every importer depend on every re-exported file, which ties
+  // features into one import cycle and makes `jest --findRelatedTests` select most of the suite.
+  {
+    files: ['src/features/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules, ...noReexportRules],
+    },
+  },
+  {
+    files: ['src/features/*/public/**/index.{ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        { selector: 'Program', message: 'No index files in public/: name the file after what it exports.' },
+      ],
+    },
+  },
+  // public/ mirrors the private layout: only the feature-root files sit at its top level.
+  {
+    files: ['src/features/*/public/*.{ts,tsx}', 'src/features/*/public/*/**/*.{ts,tsx}'],
+    ignores: [
+      'src/features/*/public/{types,constants,utils}.ts',
+      'src/features/*/public/{components,hooks,store,services,utils,__tests__}/**',
+    ],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'Program',
+          message:
+            'Put public files in components/, hooks/, store/, services/ or utils/. Only types.ts, constants.ts and utils.ts sit at the top of public/.',
+        },
+      ],
     },
   },
   // The isolated-stack mocks run in Node with their own compiler settings, which the main tsconfig excludes.
@@ -219,19 +210,25 @@ const config = [
   {
     files: ['**/*.test.ts', '**/*.test.tsx', '**/__tests__/**', '**/*.stories.tsx', 'src/tests/**', 'src/stories/**'],
     rules: {
-      'no-restricted-syntax': ['error', ...designSystemSyntaxRules],
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...noReexportRules],
     },
   },
   {
     files: ['**/*.stories.tsx', '**/*.stories.ts', 'src/stories/**'],
     rules: {
-      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...storyDataRules],
+      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...storyDataRules, ...noReexportRules],
     },
   },
   {
     files: ['**/*.storyData.ts'],
     rules: {
-      'no-restricted-syntax': ['error', ...designSystemSyntaxRules, ...safeLinkWithoutSpaceIdRules, ...storyDataRules],
+      'no-restricted-syntax': [
+        'error',
+        ...designSystemSyntaxRules,
+        ...safeLinkWithoutSpaceIdRules,
+        ...storyDataRules,
+        ...noReexportRules,
+      ],
     },
   },
   // Override for story files: allow type-only imports from @storybook/react

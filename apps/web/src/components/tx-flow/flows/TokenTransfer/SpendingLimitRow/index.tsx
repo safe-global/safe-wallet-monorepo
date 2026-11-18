@@ -1,6 +1,5 @@
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { useLoadFeature } from '@/features/__core__'
-import { SpendingLimitsFeature } from '@/features/spending-limits'
+import SpendingLimitRow from '@/features/spending-limits/public/components/SpendingLimitRow'
 
 type SpendingLimitRowWrapperProps = {
   availableAmount: bigint
@@ -13,8 +12,6 @@ type SpendingLimitRowWrapperProps = {
  * to avoid unnecessary feature loading and render cycles for non-SL Safes.
  */
 const SpendingLimitRowWrapper = ({ availableAmount, selectedToken }: SpendingLimitRowWrapperProps) => {
-  const { SpendingLimitRow } = useLoadFeature(SpendingLimitsFeature)
-
   return <SpendingLimitRow availableAmount={availableAmount} selectedToken={selectedToken} />
 }
 

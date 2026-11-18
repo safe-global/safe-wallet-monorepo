@@ -17,7 +17,7 @@ import MetaTags from '@/components/common/MetaTags'
 import PageLayout from '@/components/common/PageLayout'
 import PwaReloadPrompt from '../components/PwaReloadPrompt'
 import AppChrome from '@/components/common/AppChrome'
-import { CaptchaProvider } from '@/components/common/Captcha'
+import { CaptchaProvider } from '@/components/common/Captcha/CaptchaProvider'
 import useChangedValue from '@/hooks/useChangedValue'
 import useAdjustUrl from '@/hooks/useAdjustUrl'
 import useGtm from '@/services/analytics/useGtm'
@@ -28,18 +28,18 @@ import { useRememberSpace } from '@/hooks/useRememberSpace'
 import { useInitSession } from '@/hooks/useInitSession'
 import { useInitWeb3 } from '@/hooks/wallets/useInitWeb3'
 import { useNotificationTracking } from '@/components/settings/PushNotifications/hooks/useNotificationTracking'
-import { useVisitedSafes } from '@/features/myAccounts'
-import { useOidcLoginCallback, useStepUpRecovery } from '@/features/oidc-auth'
+import { useVisitedSafes } from '@/features/myAccounts/public/hooks/useVisitedSafes'
+import { useOidcLoginCallback } from '@/features/oidc-auth/public/hooks/useOidcLoginCallback'
+import { useStepUpRecovery } from '@/features/oidc-auth/public/hooks/useStepUpRecovery'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
-import { useHypernativeTokenRefresh } from '@/features/hypernative'
+import { useHypernativeTokenRefresh } from '@/features/hypernative/public/hooks/useHypernativeTokenRefresh'
 import { initObservability } from '@/services/observability'
 import Analytics from '@/services/analytics/Analytics'
-import { useLoadFeature } from '@/features/__core__'
-import { RecoveryFeature } from '@/features/recovery'
-import { CounterfactualFeature } from '@/features/counterfactual'
-import { SpendingLimitsFeature } from '@/features/spending-limits'
+import Recovery from '@/features/recovery/public/components/Recovery'
+import CounterfactualHooks from '@/features/counterfactual/public/components/CounterfactualHooks'
 import { useLocation, useSearch } from '@tanstack/react-router'
+import SpendingLimitsLoader from '@/features/spending-limits/public/components/SpendingLimitsLoader'
 
 import '@/styles/globals.css'
 import '@/styles/shadcn.css'
@@ -56,16 +56,7 @@ setStoreInstance(reduxStore)
 // the SPA, so a plain React.lazy is equivalent.
 const LazyWeb3Init = lazy(() => import('@/components/common/LazyWeb3Init'))
 
-const RecoveryLoader = () => {
-  const { Recovery } = useLoadFeature(RecoveryFeature)
-  return <Recovery />
-}
-const CounterfactualHooksLoader = () => {
-  const { CounterfactualHooks } = useLoadFeature(CounterfactualFeature)
-  return <CounterfactualHooks />
-}
 const SpendingLimitsLoaderWrapper = () => {
-  const { SpendingLimitsLoader } = useLoadFeature(SpendingLimitsFeature)
   return <SpendingLimitsLoader />
 }
 
@@ -101,8 +92,8 @@ const MemoizedTree = memo(function MemoizedTree({ pathname, outlet }: { pathname
     <>
       <PageLayout pathname={pathname}>{outlet}</PageLayout>
       <AppChrome />
-      <RecoveryLoader />
-      <CounterfactualHooksLoader />
+      <Recovery />
+      <CounterfactualHooks />
       <SpendingLimitsLoaderWrapper />
     </>
   )

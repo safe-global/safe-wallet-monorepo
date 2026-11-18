@@ -23,13 +23,14 @@ import useTransactionStatus from '@/hooks/useTransactionStatus'
 import useAddressBook from '@/hooks/useAddressBook'
 import { useCurrentChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import { CopyDeeplinkLabels } from '@/services/analytics'
+import { CopyDeeplinkLabels } from '@/services/analytics/events/txList'
 import TxShareLinkWrapper from '@/components/transactions/TxShareLink/TxShareLink'
-import { useLoadFeature } from '@/features/__core__'
-import { SafenetChecksFeature, useIsSafenetChecksEnabled, useSafenetDisplayStatus } from '@/features/safenet-checks'
+import { useIsSafenetChecksEnabled } from '@/features/safenet-checks/public/hooks/useIsSafenetChecksEnabled'
+import { useSafenetDisplayStatus } from '@/features/safenet-checks/public/hooks/useSafenetDisplayStatus'
 import ExplorerButton from '@safe-global/views/components/common/ExplorerButton'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import useAsync from '@safe-global/utils/hooks/useAsync'
+import SafenetAuditRow from '@/features/safenet-checks/public/components/SafenetAuditRow'
 
 const WAITING_STATUSES = new Set([
   'Awaiting confirmations',
@@ -156,7 +157,6 @@ const TxSigners = ({
   const { safe } = useSafeInfo()
   const addressBook = useAddressBook()
   const chain = useCurrentChain()
-  const safenet = useLoadFeature(SafenetChecksFeature)
   const isSafenetEnabled = useIsSafenetChecksEnabled()
 
   const isMultisig = isMultisigDetailedExecutionInfo(detailedExecutionInfo)
@@ -289,7 +289,7 @@ const TxSigners = ({
       {/* Safenet check step (PRD: between the signatures and execution). The
           feature registry stubs this to null while the flag is off; the row
           itself renders nothing unless a check was observed for this hash. */}
-      <safenet.SafenetAuditRow
+      <SafenetAuditRow
         safeTxHash={multisigInfo.safeTxHash}
         chainId={safe.chainId}
         timestampMs={submittedAt}

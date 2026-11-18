@@ -2,7 +2,7 @@ import { type ReactNode } from 'react'
 import type * as ReactModule from 'react'
 import type * as SafeScopeModule from '@safe-global/views/components/tx-flow/safe-scope'
 import { TxModalContext } from '@/components/tx-flow'
-import { SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
+import { SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/public/constants'
 import { render, renderWithUserEvent, screen, waitFor } from '@/tests/test-utils'
 import { useEligibleSafeAccounts } from '../../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { SIGNERS_ONLY_COPY } from '@safe-global/views/features/spaces/components/Policies/SafeAccountSelector/constants'
@@ -16,7 +16,7 @@ jest.mock('../../SafeAccountSelector/hooks/useEligibleSafeAccounts')
 jest.mock('../hooks/useProposerValidation', () => ({ useProposerValidation: () => async () => undefined }))
 jest.mock('../hooks/useGrantProposer', () => ({ useGrantProposer: jest.fn() }))
 jest.mock('../../hooks/useParentSafeWallet', () => ({ useParentSafeWallet: jest.fn() }))
-jest.mock('@/features/safe-shield', () => ({
+jest.mock('@/features/safe-shield/components/SafeShieldWidget', () => ({
   __esModule: true,
   default: () => <div data-testid="safe-shield-widget" />,
 }))

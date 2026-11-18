@@ -1,5 +1,5 @@
 import type { SecurityScanner } from './types'
-import { getSeverityFromScore } from './constants'
+import { getSeverityFromScore } from '../../public/constants'
 
 export const transactionScanningScanner: SecurityScanner = {
   id: 'transaction_scanning',

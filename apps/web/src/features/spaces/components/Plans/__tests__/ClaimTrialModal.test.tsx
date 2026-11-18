@@ -11,7 +11,10 @@ const mockSpaceSafes = jest.fn()
 let mockCheckoutState: Record<string, unknown> = {}
 let mockRemoveState: Record<string, unknown> = {}
 
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 jest.mock('../../../hooks/billing/useSpaceOffers', () => ({
   useSpaceOffers: (spaceId?: string) => mockUseSpaceOffers(spaceId),
 }))

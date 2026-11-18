@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
-import { NewTxFlow } from '@/components/tx-flow/flows'
+import { NewTxFlow } from '@/components/tx-flow/flows/NewTxFlow'
 import PromoBanner from '@/components/common/PromoBanner/PromoBanner'
 import useWallet from '@/hooks/wallets/useWallet'
 import useIsSafeOwner from '@/hooks/useIsSafeOwner'

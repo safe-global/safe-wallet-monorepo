@@ -1,10 +1,15 @@
 import { render, screen } from '@/tests/test-utils'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import * as useChains from '@/hooks/useChains'
 import SignInOptions from '../index'
 
 const mockAfterSignIn = jest.fn()
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
+}))
+jest.mock('@/services/analytics/types', () => ({
+  ...jest.requireActual('@/services/analytics/types'),
   EventType: { META: 'meta' },
 }))
 
@@ -12,35 +17,31 @@ jest.mock('@/services/siwe/useSiwe', () => ({
   useSiwe: () => ({ signIn: jest.fn(), loading: false }),
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => null,
 }))
 
-const MockEmailSignInButton = () => <button data-testid="email-login-btn">Continue with email</button>
-const MockGoogleSignInButton = () => <button data-testid="google-login-btn">Continue with Google</button>
-
-const mockUseLoadFeature = jest.fn()
-
-jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => mockUseLoadFeature(),
-  createFeatureHandle: () => ({}),
+jest.mock('@/features/oidc-auth/public/components/EmailSignInButton', () => ({
+  __esModule: true,
+  default: () => <button data-testid="email-login-btn">Continue with email</button>,
+}))
+jest.mock('@/features/oidc-auth/public/components/GoogleSignInButton', () => ({
+  __esModule: true,
+  default: () => <button data-testid="google-login-btn">Continue with Google</button>,
 }))
 
-const mockOidcAuthFeature = (isDisabled: boolean, isReady = !isDisabled) =>
-  mockUseLoadFeature.mockReturnValue({
-    EmailSignInButton: isDisabled ? () => null : MockEmailSignInButton,
-    GoogleSignInButton: isDisabled ? () => null : MockGoogleSignInButton,
-    $isDisabled: isDisabled,
-    $isReady: isReady,
-  })
+const mockOidcAuthFlag = (enabled: boolean | undefined) =>
+  jest
+    .spyOn(useChains, 'useHasFeature')
+    .mockImplementation((feature) => (feature === FEATURES.OIDC_AUTH ? enabled : false))
 
 describe('SignInOptions', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
+    jest.restoreAllMocks()
   })
 
   it('should render wallet, divider, Google, and email buttons when OIDC auth is enabled', () => {
-    mockOidcAuthFeature(false)
+    mockOidcAuthFlag(true)
 
     render(<SignInOptions afterSignIn={mockAfterSignIn} />)
 
@@ -51,7 +52,7 @@ describe('SignInOptions', () => {
   })
 
   it('should render the wallet button first, above the divider and OIDC options', () => {
-    mockOidcAuthFeature(false)
+    mockOidcAuthFlag(true)
 
     render(<SignInOptions afterSignIn={mockAfterSignIn} />)
 
@@ -66,7 +67,7 @@ describe('SignInOptions', () => {
   })
 
   it('should render only wallet button when OIDC auth is disabled', () => {
-    mockOidcAuthFeature(true)
+    mockOidcAuthFlag(false)
 
     render(<SignInOptions afterSignIn={mockAfterSignIn} />)
 
@@ -76,8 +77,8 @@ describe('SignInOptions', () => {
     expect(screen.getByTestId('connect-wallet-btn')).toBeInTheDocument()
   })
 
-  it('should render only wallet button while feature is loading', () => {
-    mockOidcAuthFeature(false, false)
+  it('should render only wallet button while the chain feature flags are loading', () => {
+    mockOidcAuthFlag(undefined)
 
     render(<SignInOptions afterSignIn={mockAfterSignIn} />)
 
@@ -88,7 +89,7 @@ describe('SignInOptions', () => {
   })
 
   it('should show "Connect wallet" text on the wallet button', () => {
-    mockOidcAuthFeature(false)
+    mockOidcAuthFlag(true)
 
     render(<SignInOptions afterSignIn={mockAfterSignIn} />)
 

@@ -4,20 +4,18 @@ import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATE
 import OnboardingFooter from '@safe-global/views/components/common/OnboardingFooter'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { Alert, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
-import {
-  OnboardingLayout,
-  StepCounter,
-  SafeAppMockup,
-  deriveSidePanelAccountsFromSpace,
-  useSafeNameLookup,
-} from '../OnboardingLayout'
-import { useSpaceSafes } from '../../hooks/useSpaceSafes'
+import OnboardingLayout from '../OnboardingLayout/OnboardingLayout'
+import StepCounter from '../OnboardingLayout/StepCounter'
+import SafeAppMockup from '../OnboardingLayout/mockup/SafeAppMockup'
+import { deriveSidePanelAccountsFromSpace } from '../OnboardingLayout/mockup/deriveSidePanelAccountsFromSpace'
+import { useSafeNameLookup } from '../OnboardingLayout/mockup/useSafeNameLookup'
+import { useSpaceSafes } from '../../public/hooks/useSpaceSafes'
 import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
-import { flattenSafeItems } from '@/hooks/safes'
+import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import MemberInviteRow from './components/MemberInviteRow'
 import useInviteNavigation from './hooks/useInviteNavigation'
 import useInviteForm from './hooks/useInviteForm'
-import { MemberRole } from '../../hooks/useSpaceMembers'
+import { MemberRole } from '../../public/hooks/useSpaceMembers'
 
 const ONBOARDING_STEP = 3
 const FORM_ID = 'invite-members-form'
