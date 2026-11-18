@@ -38,10 +38,15 @@ const SpaceRow = ({
   const isAdmin = isUserActiveAdmin(space.members, currentUserId)
   const billingSpaceId = useBillingSpaceId(space.uuid)
   // All rows share the one cached request of all Workspaces' entitlements
-  const { plan } = useEntitlementsGetAllEntitlementsV1Query(billingSpaceId ? undefined : skipToken, {
+  const { plan, hasEntitlements } = useEntitlementsGetAllEntitlementsV1Query(billingSpaceId ? undefined : skipToken, {
     ...SPACE_REFRESH_OPTIONS,
-    selectFromResult: ({ currentData }) => ({ plan: currentData?.[space.uuid]?.plan }),
+    selectFromResult: ({ currentData }) => ({
+      plan: currentData?.[space.uuid]?.plan,
+      hasEntitlements: currentData !== undefined,
+    }),
   })
+  // Without Safe Pro, or until the plans load, "no plan" is unknown rather than an unfinished setup.
+  const isSetupPending = hasEntitlements && !plan && space.setupStatus === 'pending'
   const badgeLabel = plan?.status === 'trialing' ? 'Free access' : (plan?.name ?? undefined)
 
   return (
@@ -81,7 +86,7 @@ const SpaceRow = ({
                 {badgeLabel && `· ${badgeLabel}`}
               </Badge>
             )}
-            {!plan && space.setupStatus === 'pending' && (
+            {isSetupPending && (
               <Badge variant="subtle" size="status" shape="status" data-testid="space-row-setup-badge">
                 Setup not finished
               </Badge>
