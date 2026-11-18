@@ -4,7 +4,9 @@ import { useRouter } from 'next/router'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { parsePrefixedAddress, sameAddress } from '@safe-global/utils/utils/addresses'
 import { isValidAddress } from '@safe-global/utils/utils/validation'
-import { type AllSafeItems, flattenSafeItems, isMultiChainSafeItem } from '@/hooks/safes'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 import type { AddAccountsFormValues } from '../../../hooks/addAccounts.types'
 import {
   type AddressBookItem,

@@ -1,6 +1,6 @@
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
 import { SwapFeature } from '@/features/swap'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import type { NarrowConfirmationViewProps } from '../types'
 
 interface SwapOrderProps extends NarrowConfirmationViewProps {

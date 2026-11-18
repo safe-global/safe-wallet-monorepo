@@ -29,7 +29,7 @@ jest.mock('../../hooks/useSpaceMembers', () => ({
 }))
 jest.mock('@/hooks/wallets/useWallet', () => ({ __esModule: true, default: () => null }))
 jest.mock('@/store/authSlice', () => ({ ...jest.requireActual('@/store/authSlice'), isAuthenticated: () => true }))
-jest.mock('./TransactionsToolbar', () => ({ __esModule: true, default: () => null }))
+jest.mock('./TransactionsToolbar/TransactionsToolbar', () => ({ __esModule: true, default: () => null }))
 jest.mock('./SpaceQueueTable', () => ({
   __esModule: true,
   default: ({ sections }: { sections: SpaceQueueSection[] }) => (

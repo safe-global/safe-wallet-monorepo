@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react'
-import { ProposerOverview } from '../../components/ProposerOverview'
+import ProposerOverview from '@/features/spaces/components/Policies/ProposerDrawer/components/ProposerOverview/ProposerOverview'
 import type { ActiveProposerProps } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/variants/types'
 
 export type { ActiveProposerProps } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/variants/types'

@@ -1,6 +1,6 @@
 import SignInButton from '../SignInButton'
 import { OidcAuthFeature } from '@/features/oidc-auth'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 interface SignInOptionsProps {
   afterSignIn: () => void

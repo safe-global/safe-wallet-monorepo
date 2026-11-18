@@ -12,14 +12,35 @@ jest.mock('@safe-global/utils/features/multichain/hooks/useCompatibleNetworks', 
 jest.mock('../useSafeCreationData', () => ({
   useSafeCreationData: jest.fn(),
 }))
-jest.mock('../../utils', () => ({
+jest.mock('@/features/multichain/utils/utils', () => ({
+  get isMultiChainSafeItem() {
+    return jest.requireActual('@/features/multichain/utils/utils').isMultiChainSafeItem
+  },
+  get getSafeSetups() {
+    return jest.requireActual('@/features/multichain/utils/utils').getSafeSetups
+  },
+  get getSharedSetup() {
+    return jest.requireActual('@/features/multichain/utils/utils').getSharedSetup
+  },
+  get getDeviatingSetups() {
+    return jest.requireActual('@/features/multichain/utils/utils').getDeviatingSetups
+  },
+  get predictSafeAddress() {
+    return jest.requireActual('@/features/multichain/utils/utils').predictSafeAddress
+  },
+  get predictAddressBasedOnReplayData() {
+    return jest.requireActual('@/features/multichain/utils/utils').predictAddressBasedOnReplayData
+  },
+  get hasMultiChainCreationFeatures() {
+    return jest.requireActual('@/features/multichain/utils/utils').hasMultiChainCreationFeatures
+  },
   hasMultiChainAddNetworkFeature: jest.fn(),
 }))
 
 import useChains, { useCurrentChain } from '@/hooks/useChains'
 import { useCompatibleNetworks } from '@safe-global/utils/features/multichain/hooks/useCompatibleNetworks'
 import { useSafeCreationData } from '../useSafeCreationData'
-import { hasMultiChainAddNetworkFeature } from '../../utils'
+import { hasMultiChainAddNetworkFeature } from '@/features/multichain/utils/utils'
 import { useAddNetworkState } from '../useAddNetworkState'
 
 const asChain = (chainId: string, overrides: Partial<Chain> = {}): Chain =>

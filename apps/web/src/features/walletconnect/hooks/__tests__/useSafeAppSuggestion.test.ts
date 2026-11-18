@@ -30,8 +30,9 @@ jest.mock('@/hooks/useSanctionedAddress', () => ({
 }))
 
 const mockCounterfactual = jest.fn()
-jest.mock('@/features/counterfactual', () => ({
-  useIsCounterfactualSafe: () => mockCounterfactual(),
+jest.mock('@/features/counterfactual/hooks/useIsCounterfactualSafe', () => ({
+  __esModule: true,
+  default: () => mockCounterfactual(),
 }))
 
 describe('useSafeAppSuggestion', () => {

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import type { JsonRpcProvider } from 'ethers'
 import { faker } from '@faker-js/faker'
 import { renderHook, waitFor } from '@/tests/test-utils'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import type { SafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import { Errors, logError } from '@/services/exceptions'
@@ -16,8 +16,8 @@ jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
   ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope'),
   useSafeScope: jest.fn(),
 }))
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
+jest.mock('@/features/__core__/useLoadFeature', () => ({
+  ...jest.requireActual('@/features/__core__/useLoadFeature'),
   useLoadFeature: jest.fn(),
 }))
 jest.mock('@/services/exceptions', () => ({

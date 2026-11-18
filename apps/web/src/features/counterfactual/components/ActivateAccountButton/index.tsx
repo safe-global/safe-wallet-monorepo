@@ -1,4 +1,4 @@
-import { OVERVIEW_EVENTS } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import Track from '@/components/common/Track'
 import dynamic from '@/utils/dynamic'
 import React, { useContext } from 'react'

@@ -1,7 +1,7 @@
 import type { PropsWithChildren, ReactElement } from 'react'
 import { RecoveryFeature } from '@/features/recovery'
-import type { RecoveryQueueItem } from '@/features/recovery'
-import { useLoadFeature } from '@/features/__core__'
+import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 export function CancelRecoveryFlowReview({
   recovery,

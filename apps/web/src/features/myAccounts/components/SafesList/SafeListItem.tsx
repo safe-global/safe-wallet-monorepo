@@ -2,9 +2,9 @@ import { useIsBelowSm } from '@/hooks/useMediaQuery'
 import { AccountItem } from '../AccountItem'
 import { useSafeItemData } from '../../hooks/useSafeItemData'
 import css from '@safe-global/views/features/myAccounts/components/AccountItems/styles.module.css'
-import type { SafeItem } from '@/hooks/safes'
-import { SpacesFeature } from '@/features/spaces'
-import { useLoadFeature } from '@/features/__core__'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
+import { SpacesFeature } from '@/features/spaces/SpacesFeature'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { getOwnerAwaitingConfirmations } from '@/utils/transaction-guards'
 
 export interface SafeListItemProps {

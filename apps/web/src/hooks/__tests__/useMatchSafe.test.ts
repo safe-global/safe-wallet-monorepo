@@ -2,7 +2,7 @@ import { renderHook } from '@/tests/test-utils'
 import useMatchSafe from '../useMatchSafe'
 import * as useChains from '@/hooks/useChains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 
 const mockChains = [
   { chainId: '1', chainName: 'Ethereum', shortName: 'eth' },

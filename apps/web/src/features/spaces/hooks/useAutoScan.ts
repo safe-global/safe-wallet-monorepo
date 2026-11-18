@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ScanResult, SecurityScanner } from '@/features/security/types'
-import type { SecurityContract } from '@/features/security'
+import type { SecurityContract } from '@/features/security/contract'
 import useSafeScanContext, { type OverviewData } from './useSafeScanContext'
 import type { SpaceSafeEntry, SelectedSafe } from '../components/SecurityHub'
 import { scheduleWhileVisible } from '@/utils/visibility'

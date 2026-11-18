@@ -7,7 +7,7 @@ import { Safe__factory } from '@safe-global/utils/types/contracts'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import useSafeAddress from '@/hooks/useSafeAddress'
 import useChainId from '@/hooks/useChainId'
-import { getLatestSpendingLimitAddress } from '@/features/spending-limits/services'
+import { getLatestSpendingLimitAddress } from '@/features/spending-limits/services/spendingLimitDeployments'
 import * as wallets from '@/utils/wallets'
 
 jest.mock('@/hooks/useSafeAddress')

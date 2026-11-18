@@ -1,8 +1,8 @@
 import { act, mockClipboard, render, screen, waitFor, within } from '@/tests/test-utils'
-import { CopyTransactionLink } from '../CopyTransactionLink'
+import CopyTransactionLink from '@/features/spaces/components/Policies/SpendingLimitDrawer/components/CopyTransactionLink/CopyTransactionLink'
 import { PendingBanner } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/components/PendingBanner'
-import { PendingSignatures } from '../PendingSignatures'
-import { PolicyOverview } from '../PolicyOverview'
+import PendingSignatures from '@/features/spaces/components/Policies/SpendingLimitDrawer/components/PendingSignatures/PendingSignatures'
+import PolicyOverview from '@/features/spaces/components/Policies/SpendingLimitDrawer/components/PolicyOverview/PolicyOverview'
 
 jest.mock('@/components/common/ChainIndicator', () => {
   const Mock = ({ chainId }: { chainId: string }) => <img data-testid="chain-logo-img" alt={`chain-${chainId}`} />

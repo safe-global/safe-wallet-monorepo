@@ -13,8 +13,9 @@ import { PaperViewToggle } from '@safe-global/views/components/common/PaperViewT
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { Operation } from '@safe-global/store/gateway/types'
 import { HexEncodedData } from '@/components/transactions/HexEncodedData'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { isPayFromSafeAvailable, usePayFromSafeFeePreview } from '@/features/fee-payment'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import { isPayFromSafeAvailable } from '@/features/fee-payment/utils/isPayFromSafeAvailable'
+import { usePayFromSafeFeePreview } from '@/features/fee-payment/hooks/usePayFromSafeFeePreview'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useCurrentChain } from '@/hooks/useChains'
 import {

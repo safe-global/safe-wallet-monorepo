@@ -1,6 +1,7 @@
 import { getIdenticonSrc } from '@safe-global/views/components/common/Identicon'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
-import { TruncatedText, getInitials, getSafeDisplayInfo } from '@/components/common/AccountRow'
+import TruncatedText from '@safe-global/views/components/common/AccountRow/TruncatedText'
+import { getInitials, getSafeDisplayInfo } from '@safe-global/views/components/common/AccountRow/utils'
 
 /**
  * Identity block shared by the rows, the group header and the trigger. Renders two siblings for its

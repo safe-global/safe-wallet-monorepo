@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { renderHook } from '@/tests/test-utils'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
-import { useIsHypernativeEligible } from '@/features/hypernative'
+import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHypernativeEligible'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import type { RootState } from '@/store'
 import useSafeInfo from '../useSafeInfo'

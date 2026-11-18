@@ -10,7 +10,7 @@ import type { SafeAccountColumn } from '@safe-global/views/features/myAccounts/c
 import type { AccountGroup, AccountLine } from './useSafeAccountRows'
 import SafeAccountTableRow, { type RowCheckbox } from './SafeAccountTableRow'
 import { bandHeaderAt } from './SimilarityBand'
-import type { SimilarWarning } from '@/features/address-poisoning'
+import type { SimilarWarning } from '@/features/address-poisoning/utils/crossListClusters'
 
 type ReorderableBodyProps = {
   /** Top-level accounts in their current display order — each renders as one draggable row. */

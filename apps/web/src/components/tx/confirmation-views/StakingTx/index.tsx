@@ -1,6 +1,6 @@
 import type { StakingTxInfo } from '@safe-global/store/gateway/types'
 import { StakeFeature } from '@/features/stake'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import type { NarrowConfirmationViewProps } from '../types'
 
 export interface StakingTxProps extends NarrowConfirmationViewProps {

@@ -8,7 +8,7 @@ import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
-import { createAddOwnerTx } from '@/services/tx/tx-sender'
+import { createAddOwnerTx } from '@/services/tx/tx-sender/create'
 import AddOwnerFlow from '..'
 
 const SAFE_ADDRESS = fakerChecksummedAddress()
@@ -28,14 +28,20 @@ jest.mock('@/hooks/useChains', () => ({
   useHasFeature: (feature: FEATURES) => mockChain.features.includes(feature),
 }))
 
-jest.mock('@/features/safe-shield/hooks', () => ({
-  ...jest.requireActual('@/features/safe-shield/hooks'),
+jest.mock('@/features/safe-shield/hooks/useRecipientAnalysis', () => ({
+  ...jest.requireActual('@/features/safe-shield/hooks/useRecipientAnalysis'),
   useRecipientAnalysis: () => undefined,
+}))
+jest.mock('@/features/safe-shield/hooks/useCounterpartyAnalysis', () => ({
+  ...jest.requireActual('@/features/safe-shield/hooks/useCounterpartyAnalysis'),
   useCounterpartyAnalysis: () => ({
     recipient: [undefined, undefined, false],
     contract: [undefined, undefined, false],
     deadlock: [undefined, undefined, false],
   }),
+}))
+jest.mock('@/features/safe-shield/hooks/useThreatAnalysis', () => ({
+  ...jest.requireActual('@/features/safe-shield/hooks/useThreatAnalysis'),
   useThreatAnalysis: () => [undefined, undefined, false],
 }))
 
@@ -58,8 +64,8 @@ jest.mock('@/features/spaces/hooks/useSafeProAccess', () => ({
   useSafeProAccess: () => ({ hasProFeatures: true, isSafePro: true, isLoading: false, spaceId: null }),
 }))
 
-jest.mock('@/services/tx/tx-sender', () => ({
-  ...jest.requireActual('@/services/tx/tx-sender'),
+jest.mock('@/services/tx/tx-sender/create', () => ({
+  ...jest.requireActual('@/services/tx/tx-sender/create'),
   createAddOwnerTx: jest.fn(),
 }))
 

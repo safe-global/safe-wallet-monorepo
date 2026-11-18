@@ -1,5 +1,6 @@
-import type { DesiredAllowance, SpendingLimitState } from '@/features/spending-limits'
-import { isSpendingLimitFor } from '@/features/spending-limits/services'
+import type { DesiredAllowance } from '@/features/spending-limits/services/spendingLimitExecution'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
+import { isSpendingLimitFor } from '@/features/spending-limits/services/spendingLimitMatching'
 import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { findTokenOption, type TokenOption } from '../utils/tokenOptions'
 

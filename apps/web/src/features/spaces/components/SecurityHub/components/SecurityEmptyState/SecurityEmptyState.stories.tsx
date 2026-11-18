@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import SecurityEmptyState from './SecurityEmptyState'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 
 const setup = createMockStory({ authenticated: true, layout: 'paper', shadcn: true })
 

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { userEvent, within } from 'storybook/test'
 import { safeFixtures } from '@safe-global/test/msw/fixtures'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import DeleteProposerDialog from './DeleteProposerDialog'
 
 const efSafe = safeFixtures.efSafe

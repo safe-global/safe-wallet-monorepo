@@ -11,11 +11,16 @@ import { getStoreInstance, makeStore, setStoreInstance } from '@/store'
 import { setAuthenticated } from '@/store/authSlice'
 import { chainBuilder } from '@/tests/builders/chains'
 import { server } from '@/tests/server'
-import { MixpanelEventParams, SAFENET_EVENTS, trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { SAFENET_EVENTS } from '@/services/analytics/events/safenet'
+import { trackEvent } from '@/services/analytics'
 import { requestSafenetCheck as requestCheck } from '../requestSafenetCheck'
 
 jest.mock('@/services/exceptions', () => ({ ...jest.requireActual('@/services/exceptions'), logError: jest.fn() }))
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 jest.mock('@safe-global/utils/utils/helpers', () => {
   const actual = jest.requireActual('@safe-global/utils/utils/helpers')
   return { ...actual, delay: jest.fn(actual.delay) }

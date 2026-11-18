@@ -9,8 +9,8 @@ import { http, HttpResponse } from 'msw'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 
-jest.mock('@/features/hypernative', () => ({
-  ...jest.requireActual('@/features/hypernative'),
+jest.mock('@/features/hypernative/hooks/useHnQueueAssessment', () => ({
+  ...jest.requireActual('@/features/hypernative/hooks/useHnQueueAssessment'),
   useHnQueueAssessment: () => ({
     assessments: {},
     isLoading: false,

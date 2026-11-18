@@ -33,7 +33,17 @@ jest.mock('@/store', () => ({
     selector({ featureFlagOverrides: {}, auth: {} }),
 }))
 
-jest.mock('../../SpaceSelectorDropdown', () => ({
+jest.mock('@/features/spaces/components/Sidebar/variants/SpaceSelectorDropdown/SpaceSelectorDropdown', () => ({
+  get SAFE_ALREADY_IN_WORKSPACE_TOOLTIP() {
+    return jest.requireActual(
+      '@/features/spaces/components/Sidebar/variants/SpaceSelectorDropdown/SpaceSelectorDropdown',
+    ).SAFE_ALREADY_IN_WORKSPACE_TOOLTIP
+  },
+  get NO_PLAN_TOOLTIP() {
+    return jest.requireActual(
+      '@/features/spaces/components/Sidebar/variants/SpaceSelectorDropdown/SpaceSelectorDropdown',
+    ).NO_PLAN_TOOLTIP
+  },
   SpaceSelectorDropdown: () => null,
 }))
 
@@ -41,7 +51,16 @@ const mockTrackEvent = jest.fn()
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
-  OVERVIEW_EVENTS: { SIDEBAR_CLICKED: { action: 'Sidebar clicked' } },
+}))
+jest.mock('@/services/analytics/events/overview', () => ({
+  ...jest.requireActual('@/services/analytics/events/overview'),
+  OVERVIEW_EVENTS: {
+    ...jest.requireActual('@/services/analytics/events/overview').OVERVIEW_EVENTS,
+    SIDEBAR_CLICKED: { action: 'Sidebar clicked' },
+  },
+}))
+jest.mock('@/services/analytics/mixpanel-events', () => ({
+  ...jest.requireActual('@/services/analytics/mixpanel-events'),
   MixpanelEventParams: { SIDEBAR_ELEMENT: 'sidebarElement', ENTRY_POINT: 'entryPoint' },
 }))
 

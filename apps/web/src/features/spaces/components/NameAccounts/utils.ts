@@ -1,14 +1,10 @@
 import type { UseFormGetValues, UseFormSetValue } from 'react-hook-form'
 import type { SpaceAddressBookItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import {
-  _getMultiChainAccounts,
-  _getSingleChainAccounts,
-  flattenSafeItems,
-  isMultiChainSafeItem,
-  type AllSafeItems,
-  type SafeItem,
-} from '@/hooks/safes'
+import { _getMultiChainAccounts, _getSingleChainAccounts, flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
 import type { WorkspaceSafeName } from '../../hooks/useUpsertWorkspaceSafeName'
 import { validateContactName } from '../SpaceAddressBook/utils'

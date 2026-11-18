@@ -49,27 +49,40 @@ jest.mock('@/store', () => ({
     selector({ featureFlagOverrides: {}, auth: {} }),
 }))
 
-jest.mock('@/features/counterfactual', () => ({
-  useIsCounterfactualSafe: () => false,
+jest.mock('@/features/counterfactual/hooks/useIsCounterfactualSafe', () => ({
+  __esModule: true,
+  default: () => false,
 }))
 
 jest.mock('@/hooks/useIsHydrated', () => ({
   useIsHydrated: () => true,
 }))
 
-jest.mock('../../../NewTransactionButton', () => ({
+jest.mock('@/features/spaces/components/Sidebar/NewTransactionButton/SidebarActionButton', () => ({
   SidebarActionButton: () => <button type="button">New transaction</button>,
 }))
 
-jest.mock('../../SafeSidebarWorkspaceHeader', () => ({
-  SafeSidebarWorkspaceHeader: () => null,
-}))
+jest.mock(
+  '@/features/spaces/components/Sidebar/variants/SafeSidebarWorkspaceHeader/SafeSidebarWorkspaceHeader',
+  () => ({
+    SafeSidebarWorkspaceHeader: () => null,
+  }),
+)
 
 const mockTrackEvent = jest.fn()
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
-  OVERVIEW_EVENTS: { SIDEBAR_CLICKED: { action: 'Sidebar clicked' } },
+}))
+jest.mock('@/services/analytics/events/overview', () => ({
+  ...jest.requireActual('@/services/analytics/events/overview'),
+  OVERVIEW_EVENTS: {
+    ...jest.requireActual('@/services/analytics/events/overview').OVERVIEW_EVENTS,
+    SIDEBAR_CLICKED: { action: 'Sidebar clicked' },
+  },
+}))
+jest.mock('@/services/analytics/mixpanel-events', () => ({
+  ...jest.requireActual('@/services/analytics/mixpanel-events'),
   MixpanelEventParams: { SIDEBAR_ELEMENT: 'sidebarElement', ENTRY_POINT: 'entryPoint' },
 }))
 

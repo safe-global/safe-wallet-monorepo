@@ -1,4 +1,4 @@
-import { usePolicyGuard } from '@/features/policy-guard'
+import { usePolicyGuard } from '@/features/policy-guard/hooks/usePolicyGuard'
 import type { PolicyGuardTarget } from '@/features/policy-guard/types'
 import type { GuardStatus } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
 

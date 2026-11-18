@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useAppSelector } from '@/store'
 import useAllSafes from '@/hooks/safes/useAllSafes'
 import { selectAllAddressBooks } from '@/store/addressBookSlice'
-import { selectAnchorIndex } from '@/features/address-poisoning/store'
+import { selectAnchorIndex } from '@/features/address-poisoning/store/anchorIndex'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SimilarAddressInfo } from './useNonPinnedSafeWarning.types'
 

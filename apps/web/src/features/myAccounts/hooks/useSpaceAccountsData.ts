@@ -4,7 +4,8 @@ import { useGetMultipleSafeOverviewsQuery } from '@/store/api/gateway'
 import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
-import { flattenSafeItems, type AllSafeItems } from '@/hooks/safes'
+import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 
 /**

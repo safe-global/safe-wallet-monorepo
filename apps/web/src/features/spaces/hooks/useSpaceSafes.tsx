@@ -1,11 +1,7 @@
 import { useSpaceSafesGetV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import {
-  _buildSafeItems,
-  type AllSafeItems,
-  _getMultiChainAccounts,
-  _getSingleChainAccounts,
-  useSafeOrderComparator,
-} from '@/hooks/safes'
+import { _buildSafeItems, _getMultiChainAccounts, _getSingleChainAccounts } from '@/hooks/safes/useAllSafesGrouped'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { useSafeOrderComparator } from '@/hooks/safes/useSafeOrderComparator'
 import { useCurrentSpaceId } from './useCurrentSpaceId'
 import { useSpaceSafeOverviews } from './useSpaceSafeOverviews'
 import useGetSpaceAddressBook from './useGetSpaceAddressBook'
@@ -13,7 +9,8 @@ import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
 import { mapSpaceContactsToAddressBookState } from '../utils'
 import { useAppSelector } from '@/store'
 import { getSpaceOrderScope } from '@/store/orderByPreferenceSlice'
-import { selectAllAddressBooks, selectAllVisitedSafes } from '@/store/slices'
+import { selectAllAddressBooks } from '@/store/addressBookSlice'
+import { selectAllVisitedSafes } from '@/store/visitedSafesSlice'
 import merge from 'lodash/merge'
 import { useMemo } from 'react'
 import { isAuthenticated } from '@/store/authSlice'

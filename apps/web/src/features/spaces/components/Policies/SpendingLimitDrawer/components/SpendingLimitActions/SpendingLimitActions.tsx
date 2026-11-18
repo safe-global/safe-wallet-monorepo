@@ -1,13 +1,13 @@
 import type { ReactElement } from 'react'
 import type { LinkProps } from 'next/link'
-import { PolicyDrawerActions } from '../../../components/PolicyDrawerActions'
+import PolicyDrawerActions from '@/features/spaces/components/Policies/components/PolicyDrawerActions/PolicyDrawerActions'
 import {
   EDIT_LOCKED_HELPER,
   ENABLE_LOCKED_HELPER,
   TX_LOAD_FAILED_HELPER,
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/messages'
 import type { SpendingLimitDrawerState } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitDrawer/resolveState'
-import { CopyTransactionLink } from '../CopyTransactionLink'
+import CopyTransactionLink from '@/features/spaces/components/Policies/SpendingLimitDrawer/components/CopyTransactionLink/CopyTransactionLink'
 
 type PendingSpendingLimitActions = {
   transactionLink?: string

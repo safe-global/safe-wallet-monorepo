@@ -1,4 +1,4 @@
-import type { FeatureHandle } from '@/features/__core__'
+import type { FeatureHandle } from '@/features/__core__/types'
 import type { SpacesContract } from './contract'
 
 // Core feature: always enabled, not gated by a CGW feature flag.

@@ -3,15 +3,52 @@ import AccountPage from '../AccountPage'
 
 const mockUseCurrentMemberProfile = jest.fn()
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+  get MemberRole() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MemberRole
+  },
+  get MEMBER_ALIAS_MAX_LENGTH() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+  },
+  get sanitizeMemberAlias() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').sanitizeMemberAlias
+  },
+  get isAdmin() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isAdmin
+  },
+  get isActiveAdmin() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isActiveAdmin
+  },
+  get isInviteExpired() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').isInviteExpired
+  },
+  get useSpaceMembersByStatus() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useSpaceMembersByStatus
+  },
+  get useCurrentMembership() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useCurrentMembership
+  },
+  get useIsActiveMember() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useIsActiveMember
+  },
+  get useIsAdmin() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useIsAdmin
+  },
+  get useIsInvited() {
+    return jest.requireActual('@/features/spaces/hooks/useSpaceMembers').useIsInvited
+  },
   useCurrentMemberProfile: () => mockUseCurrentMemberProfile(),
   MemberStatus: { INVITED: 'INVITED', ACTIVE: 'ACTIVE', DECLINED: 'DECLINED' },
   getMemberDisplayName: (member: { alias?: string | null; name: string }) => member.alias || member.name,
 }))
 
-jest.mock('@/features/oidc-auth', () => ({
-  SwitchAuthenticatorSection: () => <div data-testid="switch-authenticator-section" />,
-  WalletTwoFactorSection: () => <div data-testid="wallet-2fa-section" />,
+jest.mock('@/features/oidc-auth/components/SwitchAuthenticatorSection', () => ({
+  __esModule: true,
+  default: () => <div data-testid="switch-authenticator-section" />,
+}))
+jest.mock('@/features/oidc-auth/components/WalletTwoFactorSection', () => ({
+  __esModule: true,
+  default: () => <div data-testid="wallet-2fa-section" />,
 }))
 
 jest.mock('@/hooks/useLogout', () => ({

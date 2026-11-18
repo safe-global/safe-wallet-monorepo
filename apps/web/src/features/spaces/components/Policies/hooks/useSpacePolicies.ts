@@ -15,7 +15,7 @@ import {
   useSpacePoliciesGetPendingPoliciesV1Query,
 } from '@/store/api/gateway/spacePolicies'
 import useChains from '@/hooks/useChains'
-import { isAllowlistEnabled } from '@/features/policy-guard/services'
+import { isAllowlistEnabled } from '@/features/policy-guard/services/allowlistAvailability'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { useCurrentSpaceId } from '../../../hooks/useCurrentSpaceId'
 import { SPACE_REFRESH_OPTIONS } from '../../../hooks/refreshOptions'

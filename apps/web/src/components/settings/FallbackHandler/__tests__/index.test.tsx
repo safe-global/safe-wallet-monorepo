@@ -1,4 +1,4 @@
-import { TWAP_FALLBACK_HANDLER } from '@/features/swap'
+import { TWAP_FALLBACK_HANDLER } from '@/features/swap/helpers/utils'
 import { chainBuilder } from '@/tests/builders/chains'
 import { render, waitFor, createAppNameRegex } from '@/tests/test-utils'
 

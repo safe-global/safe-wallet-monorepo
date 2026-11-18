@@ -3,7 +3,10 @@ import ChangePlanDialog from '../ChangePlanDialog'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 import type { PlanPick } from '@safe-global/views/features/spaces/components/Plans/types'
 
 const mockPreviewChange = jest.fn()

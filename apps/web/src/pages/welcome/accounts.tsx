@@ -1,5 +1,5 @@
 import Head from 'next/head'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { MyAccountsFeature } from '@/features/myAccounts'
 import { BRAND_NAME } from '@/config/constants'
 

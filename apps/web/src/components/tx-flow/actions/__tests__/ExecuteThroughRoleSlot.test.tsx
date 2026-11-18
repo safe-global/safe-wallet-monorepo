@@ -1,12 +1,12 @@
 import { renderHook } from '@/tests/test-utils'
 import { type PropsWithChildren } from 'react'
 import { initialContext, TxFlowContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import { SlotProvider, SlotName } from '@/components/tx-flow/slots'
-import { useSlotIds } from '@/components/tx-flow/slots/hooks'
+import { SlotProvider, SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { useSlotIds } from '@/components/tx-flow/slots/hooks/useSlotIds'
 import ExecuteThroughRoleSlot from '../ExecuteThroughRole'
 import SignSlot from '../Sign'
 import ExecuteSlot from '../Execute'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { OperationType } from '@safe-global/types-kit'
 import useSafeInfo from '@/hooks/useSafeInfo'
@@ -25,8 +25,9 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   useSigner: jest.fn(() => null),
 }))
 
-jest.mock('@/features/counterfactual', () => ({
-  useIsCounterfactualSafe: jest.fn(() => false),
+jest.mock('@/features/counterfactual/hooks/useIsCounterfactualSafe', () => ({
+  __esModule: true,
+  default: jest.fn(() => false),
 }))
 
 jest.mock('@/hooks/useIsSafeOwner', () => ({

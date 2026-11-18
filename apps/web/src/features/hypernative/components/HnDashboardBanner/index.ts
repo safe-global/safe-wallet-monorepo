@@ -6,7 +6,7 @@ import { BannerType } from '../../hooks/useBannerStorage'
 import { HnDashboardBanner } from './HnDashboardBanner'
 
 // Export the original component for tests and stories
-export { HnDashboardBanner } from './HnDashboardBanner'
+
 export type { HnDashboardBannerProps } from './HnDashboardBanner'
 
 // Export the composed HOC as default for use in Dashboard FirstSteps

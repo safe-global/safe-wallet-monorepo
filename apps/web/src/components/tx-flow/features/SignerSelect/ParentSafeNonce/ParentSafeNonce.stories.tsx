@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
 import { safeFixtures } from '@safe-global/test/msw/fixtures'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import {
   multisigExecutionInfoBuilder,
   multisigTransactionBuilder,

@@ -12,7 +12,7 @@ import { TxFlowContext, initialContext, type TxFlowContextType } from '@/compone
 import { TxFlowStep } from '@/components/tx-flow/TxFlowStep'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
@@ -28,7 +28,7 @@ import {
 } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/constants'
 import type { SpendingLimitPolicyFormValues } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/types'
 import { UNKNOWN_TOKEN_IN_POLICY_ERROR } from '../buildDesiredAllowances'
-import { buildSpendingLimitEdit } from '@/features/spending-limits/services'
+import { buildSpendingLimitEdit } from '@/features/spending-limits/services/spendingLimitEdit'
 import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import ReviewSpendingLimitPolicy from '..'
 
@@ -61,8 +61,8 @@ jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),
 }))
-jest.mock('@/features/__core__', () => ({
-  ...jest.requireActual('@/features/__core__'),
+jest.mock('@/features/__core__/useLoadFeature', () => ({
+  ...jest.requireActual('@/features/__core__/useLoadFeature'),
   useLoadFeature: jest.fn(),
 }))
 jest.mock('@/hooks/useAddressBook', () => ({ __esModule: true, default: () => ({}) }))

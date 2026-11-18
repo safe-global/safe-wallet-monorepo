@@ -8,7 +8,8 @@ import { cn } from '@safe-global/views/utils/cn'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import CopyButton from '@/components/common/CopyButton'
 import type { EvidenceItem, ScanResult, SecurityGrade } from '@/features/security/types'
-import { SEVERITY_RANK, type SecurityContract } from '@/features/security'
+import { SEVERITY_RANK } from '@/features/security/data/scanners/constants'
+import type { SecurityContract } from '@/features/security/contract'
 import {
   resolveStatusTone,
   SeverityIcon,

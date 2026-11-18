@@ -8,7 +8,9 @@ import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { Errors, logError } from '@/services/exceptions'
 import { getLocationSpaceId, isLegacySpaceId, parseSpaceId } from '@/hooks/useUrlSpaceId'
 import { getStoreInstance, type RootState } from '@/store'
-import { MixpanelEventParams, SAFENET_EVENTS, trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { SAFENET_EVENTS } from '@/services/analytics/events/safenet'
+import { trackEvent } from '@/services/analytics'
 import { isAuthenticated } from '@/store/authSlice'
 
 // The request is idempotent: CGW answers 202 for a check that is already queued

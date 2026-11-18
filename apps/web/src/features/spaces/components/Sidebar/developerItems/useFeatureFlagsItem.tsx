@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useAppSelector } from '@/store'
-import { selectOverrideCount } from '@/features/feature-flag-overrides/store'
+import { selectOverrideCount } from '@/features/feature-flag-overrides/store/featureFlagOverridesSlice'
 import { FeatureFlagEditorDialogLoader } from '@/features/feature-flag-overrides/FeatureFlagEditorDialogLoader'
 import type { SidebarDeveloperItemState } from '@safe-global/views/features/spaces/components/Sidebar/types'
 

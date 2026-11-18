@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import type { SimilarSavedAddress } from '@/features/address-poisoning'
+import type { SimilarSavedAddress } from '@/features/address-poisoning/hooks/useAddressPoisoningCheck'
 import { SimilarAddressNotice } from './SimilarAddressNotice'
 import { SimilarAddressTooltip } from './SimilarAddressTooltip'
 

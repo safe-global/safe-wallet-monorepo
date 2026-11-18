@@ -247,12 +247,32 @@ describe('getSetupFromDataDecoded', () => {
   })
 })
 
-jest.mock('@/features/multichain', () => ({
-  __esModule: true,
+jest.mock('@/features/multichain/utils/utils', () => ({
+  get isMultiChainSafeItem() {
+    return jest.requireActual('@/features/multichain/utils/utils').isMultiChainSafeItem
+  },
+  get getSafeSetups() {
+    return jest.requireActual('@/features/multichain/utils/utils').getSafeSetups
+  },
+  get getSharedSetup() {
+    return jest.requireActual('@/features/multichain/utils/utils').getSharedSetup
+  },
+  get getDeviatingSetups() {
+    return jest.requireActual('@/features/multichain/utils/utils').getDeviatingSetups
+  },
+  get predictAddressBasedOnReplayData() {
+    return jest.requireActual('@/features/multichain/utils/utils').predictAddressBasedOnReplayData
+  },
+  get hasMultiChainCreationFeatures() {
+    return jest.requireActual('@/features/multichain/utils/utils').hasMultiChainCreationFeatures
+  },
+  get hasMultiChainAddNetworkFeature() {
+    return jest.requireActual('@/features/multichain/utils/utils').hasMultiChainAddNetworkFeature
+  },
   predictSafeAddress: jest.fn(),
 }))
-jest.mock('@/hooks/wallets/web3', () => ({
-  __esModule: true,
+jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
+  ...jest.requireActual('@/hooks/wallets/web3ReadOnly'),
   useWeb3ReadOnly: () => {
     return 'Mock provider'
   },

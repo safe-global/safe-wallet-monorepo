@@ -3,7 +3,7 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import type { ReactElement } from 'react'
 
 import useAsync from '@safe-global/utils/hooks/useAsync'
-import { predictSafeAddress } from '@/features/multichain'
+import { predictSafeAddress } from '@/features/multichain/utils/utils'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import useAddressBook from '@/hooks/useAddressBook'

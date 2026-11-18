@@ -13,7 +13,7 @@ import type {
 } from '@safe-global/views/features/spaces/components/Policies/types'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { getPolicyGuardAddress } from '@/features/policy-guard/services'
+import { getPolicyGuardAddress } from '@/features/policy-guard/services/policyEngineDeployments'
 import { toPolicyToken } from './toPolicyToken'
 
 export type NativeTokenResolver = (chainId: string) => PolicyTokenInfo | undefined

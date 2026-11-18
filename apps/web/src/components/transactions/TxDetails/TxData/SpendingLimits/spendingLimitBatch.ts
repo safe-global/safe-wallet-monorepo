@@ -1,6 +1,6 @@
 import type { BaseDataDecoded, TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { getDeployedSpendingLimitModuleAddress } from '@/features/spending-limits/services'
+import { getDeployedSpendingLimitModuleAddress } from '@/features/spending-limits/services/spendingLimitDeployments'
 import { isSpendingLimitMethod, type SpendingLimitMethods } from '@/utils/transaction-guards'
 
 const ALLOWANCE_MODULE_METHODS = ['addDelegate', 'removeDelegate', 'setAllowance', 'resetAllowance', 'deleteAllowance']

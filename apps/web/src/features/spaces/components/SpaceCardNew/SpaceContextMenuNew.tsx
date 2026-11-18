@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@safe-global/views/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
-import { useSpaceDeletionGuard } from '@/features/spaces'
+import { useSpaceDeletionGuard } from '@/features/spaces/hooks/billing/useSpaceDeletionGuard'
 
 enum ModalType {
   RENAME = 'rename',

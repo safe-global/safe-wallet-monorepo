@@ -14,7 +14,7 @@ import {
   mockPendingAllowlistRemoval,
   mockPendingAllowlistUpdate,
 } from '../mocks/allowlistPolicies'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import AllowlistDrawer from './AllowlistDrawer'
 
 const PENDING_ARGS = {

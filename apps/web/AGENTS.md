@@ -30,18 +30,15 @@ add a variant or a preset instead of pasting the classes again. The **`UI/Button
 
 ## Feature Architecture Import Rules
 
-Features are lazy-loaded to keep the bundle small. ESLint enforces the import boundaries as **errors** (CI-failing):
+Import every name from the file that declares it. A feature folder has no barrels: ESLint fails on a value re-export (`export … from`) in `src/features` (type-only re-exports are fine). A re-export makes every importer depend on every re-exported file, which ties features into one import cycle and makes `jest --findRelatedTests` select most of the suite.
 
 ```typescript
-// ✅ Allowed
-import { MyFeature, useMyHook } from '@/features/myfeature' // barrel: handle + hooks
-import { someSlice, selectSomething } from '@/features/myfeature/store' // Redux store
-import type { MyType } from '@/features/myfeature/types' // public types
-import { lightUtil } from '@/features/myfeature/services' // services barrel only — lightweight utils
-
-// ❌ Forbidden: any deep import (components, hooks/*, services/* files) — it defeats
-// lazy loading. Components and heavy services are reached via useLoadFeature() instead.
+import { MyFeature } from '@/features/myfeature' // the feature handle, declared in index.ts
+import { useMyHook } from '@/features/myfeature/hooks/useMyHook'
+import { someSlice } from '@/features/myfeature/store/someSlice'
 ```
+
+Components and heavy services are still reached through `useLoadFeature()`, so they stay lazy. ESLint blocks imports of `@/features/*/components` from outside `src/features` (except tests and stories); files that imported them before the rule are on an allow list in `eslint.config.mjs`.
 
 **Using a feature:**
 
@@ -59,10 +56,9 @@ const { MyComponent, myService, $isReady, $isDisabled } = useLoadFeature(MyFeatu
 // No lazy()/dynamic(), no nested categories, no hooks here (Rules of Hooks).
 export default { MyComponent, myService }
 
-// index.ts — hooks are exported directly (always loaded — keep them lightweight,
-// heavy logic goes in services):
+// index.ts — the feature handle only. Hooks stay in their own files and are always
+// loaded, so keep them lightweight; heavy logic goes in services:
 export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
-export { useMyHook } from './hooks/useMyHook'
 ```
 
 Full guide (folder structure, proxy stubs, `$error`, feature flags): [docs/feature-architecture.md](docs/feature-architecture.md).

@@ -1,6 +1,6 @@
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
-import type { SafeItem } from '@/hooks/safes'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import AccountsWidget from '../AccountsWidget'
 
 // The widget delegates row rendering to the shared SafeAccountsTable (covered by its own tests).

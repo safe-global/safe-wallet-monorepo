@@ -16,7 +16,7 @@ import { Card, CardContent } from '@safe-global/views/components/ui/card'
 import { useState } from 'react'
 import { MultisendActionsHeader } from '@/components/transactions/TxDetails/TxData/DecodedData/Multisend'
 import { SafenetChecksFeature } from '@/features/safenet-checks'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 const BatchTxRiskChip = ({ details }: { details: TransactionDetails }) => {
   const safenet = useLoadFeature(SafenetChecksFeature)

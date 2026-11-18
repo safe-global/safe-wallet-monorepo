@@ -8,7 +8,7 @@ import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
 import PeerAddress from '@/components/common/PeerAddress'
 import PeerAddressPopover from '@/components/common/PeerAddress/PeerAddressPopover'
 import useChains from '@/hooks/useChains'
-import type { SimilarPeer, SimilarWarning } from '@/features/address-poisoning'
+import type { SimilarPeer, SimilarWarning } from '@/features/address-poisoning/utils/crossListClusters'
 
 /** Inline ⚠️ after a name, listing cross-list look-alike peers in its tooltip (same-list = band only). */
 export const SimilarityWarningIcon = ({

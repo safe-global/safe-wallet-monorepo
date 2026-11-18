@@ -1,5 +1,5 @@
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/services'
+import { NO_TOKEN_SELECTED_ERROR } from '@/features/spending-limits/services/spendingLimitValidation'
 import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import {
   DUPLICATE_SPENDER_ERROR,

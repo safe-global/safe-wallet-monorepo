@@ -40,7 +40,7 @@
  * - camelCase → service (undefined when not ready)
  */
 
-import { createFeatureHandle } from '@/features/__core__'
+import { createFeatureHandle } from '@/features/__core__/createFeatureHandle'
 import type { PortfolioContract } from './contract'
 
 /**
@@ -55,4 +55,3 @@ export const PortfolioFeature = createFeatureHandle<PortfolioContract>('portfoli
 export type { PortfolioContract } from './contract'
 
 // Hooks exported directly (always loaded, not lazy) to avoid Rules of Hooks violations
-export { default as usePortfolioRefetchOnTxHistory } from './hooks/usePortfolioRefetchOnTxHistory'

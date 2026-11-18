@@ -35,8 +35,8 @@ import type {
   getUndeployedSafeInfo,
   replayCounterfactualSafeDeployment,
   activateReplayedSafe,
-  getCounterfactualBalance,
 } from './services/safeDeployment'
+import type { getCounterfactualBalance } from '@/features/counterfactual/services/getCounterfactualBalance'
 
 // Component prop types (for components with external props)
 export interface PayNowPayLaterProps {

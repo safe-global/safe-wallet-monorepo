@@ -28,7 +28,7 @@ import { Multi_send__factory } from '@safe-global/utils/types/contracts/factorie
 import { TransactionTokenType, TransferDirection } from '@safe-global/store/gateway/types'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { safeTxSummaryBuilder, txDataBuilder, txInfoBuilder } from '@/tests/builders/safeTx'
-import { getLatestSpendingLimitAddress } from '@/features/spending-limits/services'
+import { getLatestSpendingLimitAddress } from '@/features/spending-limits/services/spendingLimitDeployments'
 import type { TransactionQueuedItem } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
 import {
   getMultiSendDeployment,

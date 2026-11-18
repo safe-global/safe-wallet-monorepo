@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import type { LinkProps } from 'next/link'
-import { Drawer, DrawerBody } from '@/components/common/Drawer'
+import { Drawer } from '@safe-global/views/components/common/Drawer/Drawer'
+import { DrawerBody } from '@/components/common/Drawer/components/DrawerBody'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@/utils/chains'
 import { AppRoutes } from '@/config/routes'
@@ -25,9 +26,9 @@ import {
   activatedBannerLine,
   type AllowlistTxOutcome,
 } from '@safe-global/views/features/spaces/components/Policies/AllowlistDrawer/messages'
-import { PolicyDrawerHeader } from '../components/PolicyDrawerHeader'
-import { PendingSignatures } from '../SpendingLimitDrawer/components/PendingSignatures'
-import { PolicyOverview } from '../SpendingLimitDrawer/components/PolicyOverview'
+import PolicyDrawerHeader from '@/features/spaces/components/Policies/components/PolicyDrawerHeader/PolicyDrawerHeader'
+import PendingSignatures from '@/features/spaces/components/Policies/SpendingLimitDrawer/components/PendingSignatures/PendingSignatures'
+import PolicyOverview from '@/features/spaces/components/Policies/SpendingLimitDrawer/components/PolicyOverview/PolicyOverview'
 import { inferAllowlistOutcome, resolveAllowlistDrawerState, type ActiveAllowlistPolicy } from './resolveState'
 import AllowlistActions from './components/AllowlistActions'
 import AllowlistRecipients from './components/AllowlistRecipients'

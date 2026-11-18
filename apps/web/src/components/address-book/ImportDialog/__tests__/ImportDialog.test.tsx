@@ -2,10 +2,14 @@ import { faker } from '@faker-js/faker'
 import userEvent from '@testing-library/user-event'
 import { fakerChecksummedAddress, fakerLookalikeAddress, render, screen, waitFor, within } from '@/tests/test-utils'
 import * as useChains from '@/hooks/useChains'
-import { ADDRESS_POISONING_EVENTS, MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { ADDRESS_POISONING_EVENTS } from '@/services/analytics/events/addressPoisoning'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { trackEvent } from '@/services/analytics'
 import { getStoreInstance } from '@/store'
 import ImportDialog from '..'
 
+jest.mock('@/services/analytics/events/addressPoisoning')
+jest.mock('@/services/analytics/mixpanel-events')
 jest.mock('@/services/analytics')
 
 const CHAIN_ID = '11155111'

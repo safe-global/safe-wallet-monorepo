@@ -1,9 +1,11 @@
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { type ReactNode, useCallback, useContext, useEffect } from 'react'
 import { TxFlowContext } from '../../TxFlowProvider'
 import ExecuteForm from './ExecuteForm'
-import { useIsCounterfactualSafe } from '@/features/counterfactual'
-import { type SlotComponentProps, SlotName, withSlot } from '../../slots'
+import useIsCounterfactualSafe from '@/features/counterfactual/hooks/useIsCounterfactualSafe'
+import type { SlotComponentProps } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { SlotName } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
+import { withSlot } from '@/components/tx-flow/slots/withSlot'
 import type { SubmitCallback } from '../../TxFlow'
 
 export const Execute = ({

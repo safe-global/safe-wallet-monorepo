@@ -17,13 +17,14 @@ jest.mock('@/hooks/useChains', () => ({
 }))
 
 jest.mock('@/features/hypernative', () => ({
-  __esModule: true,
   HypernativeFeature: {},
+}))
+jest.mock('@/features/hypernative/hooks/useIsHypernativeGuard', () => ({
   useIsHypernativeGuard: (...args: unknown[]) => mockUseIsHypernativeGuard(...args),
 }))
 
-jest.mock('@/features/__core__', () => ({
-  __esModule: true,
+jest.mock('@/features/__core__/useLoadFeature', () => ({
+  ...jest.requireActual('@/features/__core__/useLoadFeature'),
   useLoadFeature: () => ({ SafeHeaderHnTooltip: () => null }),
 }))
 

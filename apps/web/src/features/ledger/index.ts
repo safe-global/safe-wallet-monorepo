@@ -1,4 +1,4 @@
-import type { FeatureHandle } from '@/features/__core__'
+import type { FeatureHandle } from '@/features/__core__/types'
 import type { LedgerContract } from './contract'
 
 // Ledger is a core feature - always enabled, not gated by a CGW feature flag.
@@ -13,4 +13,4 @@ export const LedgerFeature: FeatureHandle<LedgerContract> = {
 export type { TransactionHash, LedgerHashState, ShowHashFunction, HideHashFunction } from './types'
 
 // Store function exports (not lazy-loaded)
-export { showLedgerHashComparison, hideLedgerHashComparison } from './store'
+export { showLedgerHashComparison, hideLedgerHashComparison } from '@/features/ledger/store/ledgerHashStore'

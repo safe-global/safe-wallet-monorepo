@@ -68,14 +68,41 @@ jest.mock('@/hooks/useChainId', () => ({ __esModule: true, default: () => '1' })
 
 jest.mock('@/hooks/useSafeAddress', () => ({ __esModule: true, default: () => '' }))
 
-jest.mock('@/hooks/safes', () => ({ useAllSafesGrouped: () => ({ allMultiChainSafes: [], allSingleSafes: [] }) }))
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
+  ...jest.requireActual('@/hooks/safes/useAllSafesGrouped'),
+  useAllSafesGrouped: () => ({ allMultiChainSafes: [], allSingleSafes: [] }),
+}))
 
 jest.mock('@/hooks/useAddressBook', () => ({ __esModule: true, default: () => ({}) }))
 
-jest.mock('@/features/multichain', () => ({
-  __esModule: true,
+jest.mock('@/features/multichain/utils/utils', () => ({
+  get isMultiChainSafeItem() {
+    return jest.requireActual('@/features/multichain/utils/utils').isMultiChainSafeItem
+  },
+  get getSafeSetups() {
+    return jest.requireActual('@/features/multichain/utils/utils').getSafeSetups
+  },
+  get getSharedSetup() {
+    return jest.requireActual('@/features/multichain/utils/utils').getSharedSetup
+  },
+  get getDeviatingSetups() {
+    return jest.requireActual('@/features/multichain/utils/utils').getDeviatingSetups
+  },
+  get predictSafeAddress() {
+    return jest.requireActual('@/features/multichain/utils/utils').predictSafeAddress
+  },
+  get predictAddressBasedOnReplayData() {
+    return jest.requireActual('@/features/multichain/utils/utils').predictAddressBasedOnReplayData
+  },
+  get hasMultiChainCreationFeatures() {
+    return jest.requireActual('@/features/multichain/utils/utils').hasMultiChainCreationFeatures
+  },
   hasMultiChainAddNetworkFeature: () => false,
+}))
+jest.mock('@/features/multichain/hooks/useSafeCreationData', () => ({
   useSafeCreationData: () => [undefined, undefined, false],
+}))
+jest.mock('@/features/multichain', () => ({
   CreateSafeOnSpecificChain: () => null,
 }))
 

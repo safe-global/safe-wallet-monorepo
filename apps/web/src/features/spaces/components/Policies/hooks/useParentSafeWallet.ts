@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { flattenSafeItems } from '@/hooks/safes'
+import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import { useChain } from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
 import { createWeb3ReadOnly } from '@/hooks/wallets/web3'

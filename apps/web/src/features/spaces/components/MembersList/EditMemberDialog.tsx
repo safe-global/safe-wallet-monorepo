@@ -9,15 +9,15 @@ import {
   useMembersUpdateRoleV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
+import { useCurrentSpaceId } from '@/features/spaces/hooks/useCurrentSpaceId'
+import { useAdminCount } from '@/features/spaces/hooks/useIsLastActiveAdmin'
 import {
-  useCurrentSpaceId,
-  useAdminCount,
   useIsAdmin,
   isActiveAdmin,
   getMemberDisplayName,
   sanitizeMemberAlias,
   MEMBER_ALIAS_MAX_LENGTH,
-} from '@/features/spaces'
+} from '@/features/spaces/hooks/useSpaceMembers'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import ErrorMessage from '@/components/tx/ErrorMessage'

@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import ProposerDrawer from '../ProposerDrawer'
+import ProposerDrawer from '@/features/spaces/components/Policies/ProposerDrawer/ProposerDrawer'
 import RemoveProposerModal from '../RemoveProposerModal'
 import { useProposerDetails } from './hooks/useProposerDetails'
 import { useRemoveProposer } from './hooks/useRemoveProposer'

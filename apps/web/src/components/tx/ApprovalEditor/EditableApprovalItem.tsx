@@ -4,7 +4,7 @@ import type { ApprovalInfo } from './hooks/useApprovalInfos'
 
 import { ApprovalValueField } from './ApprovalValueField'
 import Track from '@/components/common/Track'
-import { MODALS_EVENTS } from '@/services/analytics'
+import { MODALS_EVENTS } from '@/services/analytics/events/modals'
 import { useFormContext } from 'react-hook-form'
 import get from 'lodash/get'
 import { SquarePen } from 'lucide-react'

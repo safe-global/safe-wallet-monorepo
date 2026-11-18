@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import type { SpendingLimitState } from '@/features/spending-limits'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 import { useIsEditMode } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import { useExistingSpendingLimits } from '../ExistingSpendingLimitsProvider'
 import type { TokenOption } from '../utils/tokenOptions'

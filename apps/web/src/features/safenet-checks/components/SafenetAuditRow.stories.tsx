@@ -5,7 +5,7 @@ import {
   type PublicCheckStatus,
   type SafenetCheckSnapshot,
 } from '@safe-global/utils/features/safenet-checks'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { AuditLog, AuditLogHeader, AuditRow } from '@/components/common/AuditLog'
 import { SafenetAuditRowView } from './SafenetAuditRow'
 import {

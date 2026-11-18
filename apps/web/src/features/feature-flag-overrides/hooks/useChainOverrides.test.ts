@@ -6,7 +6,7 @@ import { faker } from '@faker-js/faker'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { setIsProduction } from '@/tests/env'
-import type { FeatureFlagOverridesState } from '@/features/feature-flag-overrides/store'
+import type { FeatureFlagOverridesState } from '@/features/feature-flag-overrides/store/featureFlagOverridesSlice'
 import { applyFeatureOverrides, useChainsWithOverrides } from './useChainOverrides'
 import type * as ChainOverridesModule from './useChainOverrides'
 

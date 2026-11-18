@@ -1,11 +1,12 @@
 import { useRouter } from 'next/router'
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import { SpacesFeature, useRedirectWhenOff } from '@/features/spaces'
-import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement'
+import { SpacesFeature } from '@/features/spaces/SpacesFeature'
+import { useRedirectWhenOff } from '@/features/spaces/hooks/useFeatureRedirect'
+import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/hooks/useIsSafeProAnnouncementEnabled'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { useCurrentChain } from '@/hooks/useChains'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { AppRoutes } from '@/config/routes'
 
 export default function SpacePlansPage() {

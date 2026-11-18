@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState, type ReactElement } from 'react'
 import { ArrowUpRight, ShieldCheck } from 'lucide-react'
 import AddAccounts from '../../../AddAccounts'
-import { HnSignupFlow } from '@/features/hypernative'
+import HnSignupFlow from '@/features/hypernative/components/HnSignupFlow/HnSignupFlow'
 import Track from '@/components/common/Track'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { WidgetEmptyState } from '../../../SafeWidget'

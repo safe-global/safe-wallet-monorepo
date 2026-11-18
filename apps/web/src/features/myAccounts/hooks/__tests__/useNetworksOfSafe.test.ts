@@ -3,7 +3,8 @@ import { useNetworksOfSafe } from '../useNetworksOfSafe'
 
 const mockUseAllSafesGrouped = jest.fn()
 
-jest.mock('@/hooks/safes', () => ({
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
+  ...jest.requireActual('@/hooks/safes/useAllSafesGrouped'),
   useAllSafesGrouped: (...args: unknown[]) => mockUseAllSafesGrouped(...args),
 }))
 

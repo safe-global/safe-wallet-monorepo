@@ -13,6 +13,9 @@ const mockGetWalletConnectLabel = jest.fn<string | undefined, [unknown]>()
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
+}))
+jest.mock('@/services/analytics/events/overview', () => ({
+  ...jest.requireActual('@/services/analytics/events/overview'),
   OVERVIEW_EVENTS: { OPEN_ONBOARD: {} },
 }))
 
@@ -52,7 +55,7 @@ jest.mock('@safe-global/utils/services/exceptions/ErrorCodes', () => ({
   default: { _640: '_640' },
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '42',
 }))
 

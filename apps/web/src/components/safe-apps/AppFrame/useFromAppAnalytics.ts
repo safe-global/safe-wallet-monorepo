@@ -1,8 +1,9 @@
 import type { RefObject } from 'react'
 import { useCallback, useEffect } from 'react'
 
-import type { AnalyticsEvent } from '@/services/analytics'
-import { EventType, trackSafeAppEvent } from '@/services/analytics'
+import type { AnalyticsEvent } from '@/services/analytics/types'
+import { EventType } from '@/services/analytics/types'
+import { trackSafeAppEvent } from '@/services/analytics'
 import { SAFE_APPS_ANALYTICS_CATEGORY } from '@/services/analytics/events/safeApps'
 
 //TODO: Remove Safe Apps old domain when all migrated to the new one

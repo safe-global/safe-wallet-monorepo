@@ -3,8 +3,8 @@ import { type Balance, type Balances } from '@safe-global/store/gateway/AUTO_GEN
 import { TokenType } from '@safe-global/store/gateway/types'
 import { useTokenAmount, useVisibleTokens } from '@/components/tx-flow/flows/TokenTransfer/utils'
 import { renderHook } from '@/tests/test-utils'
-import * as spendingLimit from '@/features/spending-limits'
-import * as spendingLimitBeneficiary from '@/features/spending-limits'
+import * as spendingLimit from '@/features/spending-limits/hooks/useSpendingLimit'
+import * as spendingLimitBeneficiary from '@/features/spending-limits/hooks/useIsOnlySpendingLimitBeneficiary'
 import * as trustedTokenBalances from '@/hooks/loadables/useTrustedTokenBalances'
 import * as hiddenTokens from '@/hooks/useHiddenTokens'
 import * as wallet from '@/hooks/wallets/useWallet'
@@ -39,7 +39,7 @@ describe('TokenTransfer utils', () => {
     })
 
     it('should return a spendingLimitAmount of 0 if there is no spending limit token', () => {
-      jest.spyOn(spendingLimit, 'useSpendingLimit').mockReturnValue(undefined)
+      jest.spyOn(spendingLimit, 'default').mockReturnValue(undefined)
 
       const { result } = renderHook(() => useTokenAmount(undefined))
 
@@ -57,7 +57,7 @@ describe('TokenTransfer utils', () => {
         spent: '30',
       }
 
-      jest.spyOn(spendingLimit, 'useSpendingLimit').mockReturnValue(mockSpendingLimitToken)
+      jest.spyOn(spendingLimit, 'default').mockReturnValue(mockSpendingLimitToken)
 
       const { result } = renderHook(() => useTokenAmount(undefined))
 
@@ -104,7 +104,7 @@ describe('TokenTransfer utils', () => {
         items: [mockToken, mockToken1],
       }
 
-      jest.spyOn(spendingLimitBeneficiary, 'useIsOnlySpendingLimitBeneficiary').mockReturnValue(false)
+      jest.spyOn(spendingLimitBeneficiary, 'default').mockReturnValue(false)
       jest.spyOn(trustedTokenBalances, 'useTrustedTokenBalances').mockReturnValue([balance, undefined, false])
 
       const { result } = renderHook(() => useVisibleTokens(), {
@@ -157,7 +157,7 @@ describe('TokenTransfer utils', () => {
         items: [mockToken, mockToken1],
       }
 
-      jest.spyOn(spendingLimitBeneficiary, 'useIsOnlySpendingLimitBeneficiary').mockReturnValue(true)
+      jest.spyOn(spendingLimitBeneficiary, 'default').mockReturnValue(true)
       jest.spyOn(trustedTokenBalances, 'useTrustedTokenBalances').mockReturnValue([balance, undefined, false])
 
       jest.spyOn(wallet, 'default').mockReturnValue(connectedWalletBuilder().with({ address: '0x3' }).build())
@@ -210,7 +210,7 @@ describe('TokenTransfer utils', () => {
         spent: '30',
       }
 
-      jest.spyOn(spendingLimitBeneficiary, 'useIsOnlySpendingLimitBeneficiary').mockReturnValue(true)
+      jest.spyOn(spendingLimitBeneficiary, 'default').mockReturnValue(true)
       jest.spyOn(trustedTokenBalances, 'useTrustedTokenBalances').mockReturnValue([balance, undefined, false])
       jest.spyOn(wallet, 'default').mockReturnValue(connectedWalletBuilder().with({ address: '0x3' }).build())
       const scope = safeScopeContextFor({ chainId: '11155111', safeAddress: faker.finance.ethereumAddress() })

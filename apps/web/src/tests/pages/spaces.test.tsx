@@ -2,7 +2,7 @@ import { render, waitFor } from '@testing-library/react'
 import SpacePage from '../../pages/spaces/index'
 import { AppRoutes } from '@/config/routes'
 import * as router from 'next/router'
-import * as featureModule from '@/features/__core__'
+import * as featureModule from '@/features/__core__/useLoadFeature'
 
 const mockReplace = jest.fn()
 
@@ -10,13 +10,16 @@ jest.mock('next/router', () => ({
   useRouter: jest.fn(),
 }))
 
-jest.mock('@/features/__core__', () => ({
+jest.mock('@/features/__core__/useLoadFeature', () => ({
+  ...jest.requireActual('@/features/__core__/useLoadFeature'),
   useLoadFeature: jest.fn(),
 }))
 
 let mockLanding: { spaceId: string | null; isLoading: boolean } = { spaceId: null, isLoading: false }
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/SpacesFeature', () => ({
   SpacesFeature: 'SpacesFeature',
+}))
+jest.mock('@/features/spaces/hooks/useLandingSpaceId', () => ({
   useLandingSpaceId: () => mockLanding,
 }))
 

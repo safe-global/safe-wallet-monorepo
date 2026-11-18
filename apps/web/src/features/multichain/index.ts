@@ -2,13 +2,19 @@ import dynamic from '@/utils/dynamic'
 
 export type { SafeSetup, SafeOrMultichainSafe, CreateSafeOnNewChainForm } from './types'
 
-export { MIN_SAFE_VERSION_FOR_MULTICHAIN } from './constants'
+export { useIsMultichainSafe } from '@/features/multichain/hooks/useIsMultichainSafe'
+export { useSafeCreationData } from '@/features/multichain/hooks/useSafeCreationData'
+export { useAddNetworkState } from '@/features/multichain/hooks/useAddNetworkState'
+export { useMastercopyMigration } from '@/features/multichain/hooks/useMastercopyMigration'
+export type {
+  AddNetworkState,
+  AddNetworkUnavailableReason,
+  AvailableNetwork,
+} from '@/features/multichain/hooks/useAddNetworkState'
+export type { MastercopyMigration } from '@/features/multichain/hooks/useMastercopyMigration'
 
-export { useIsMultichainSafe, useSafeCreationData, useAddNetworkState, useMastercopyMigration } from './hooks'
-export type { AddNetworkState, AddNetworkUnavailableReason, AvailableNetwork, MastercopyMigration } from './hooks'
-
+export { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
 export {
-  isMultiChainSafeItem,
   getSafeSetups,
   getSharedSetup,
   getDeviatingSetups,
@@ -16,10 +22,9 @@ export {
   predictAddressBasedOnReplayData,
   hasMultiChainCreationFeatures,
   hasMultiChainAddNetworkFeature,
-} from './utils'
+} from '@/features/multichain/utils/utils'
 
 // Static export — the pill is tiny and always visible in its consumers' first paint
-export { default as NetworkLogosPill } from './components/NetworkLogosPill'
 
 const CreateSafeOnNewChain = dynamic(() =>
   import('./components/CreateSafeOnNewChain').then((mod) => ({ default: mod.CreateSafeOnNewChain })),

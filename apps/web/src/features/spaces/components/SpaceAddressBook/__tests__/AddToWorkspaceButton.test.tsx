@@ -31,10 +31,6 @@ jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
 }))
 
-jest.mock('@/features/spaces', () => ({
-  useCurrentSpaceId: () => MOCK_SPACE_UUID,
-}))
-
 describe('AddToWorkspaceButton', () => {
   const address = checksumAddress(faker.finance.ethereumAddress())
 

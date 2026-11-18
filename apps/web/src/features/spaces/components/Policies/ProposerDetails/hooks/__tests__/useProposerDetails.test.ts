@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react'
 import { asActivePolicy, mockProposerPolicy } from '../../../mocks/policies'
-import { ProposerStatus } from '../../../ProposerDrawer'
+import { ProposerStatus } from '@safe-global/views/features/spaces/components/Policies/ProposerDrawer/variants/types'
 import { getProposerStatus, useProposerDetails } from '../useProposerDetails'
 
 jest.mock('../useActiveProposer', () => ({ useActiveProposer: () => ({ source: 'active' }) }))

@@ -1,4 +1,5 @@
-import { getCounterfactualBalance, getUndeployedSafeInfo } from '../safeDeployment'
+import { getCounterfactualBalance } from '@/features/counterfactual/services/getCounterfactualBalance'
+import { getUndeployedSafeInfo } from '../safeDeployment'
 import * as web3ReadOnly from '@/hooks/wallets/web3ReadOnly'
 import { chainBuilder } from '@/tests/builders/chains'
 import { faker } from '@faker-js/faker'

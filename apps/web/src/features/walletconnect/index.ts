@@ -38,7 +38,7 @@
  * this file (always loaded, not lazy) to avoid Rules of Hooks violations.
  */
 
-import { createFeatureHandle } from '@/features/__core__'
+import { createFeatureHandle } from '@/features/__core__/createFeatureHandle'
 import type { WalletConnectImplementation } from './contract'
 
 // Feature handle - uses semantic mapping (walletconnect → FEATURES.NATIVE_WALLETCONNECT)
@@ -46,7 +46,5 @@ export const WalletConnectFeature = createFeatureHandle<WalletConnectImplementat
 
 // Public types (compile-time only, no runtime cost)
 export type { WalletConnectContextType, WcChainSwitchRequest, WcAutoApproveProps } from './types'
-export { WCLoadingState } from './types'
 
 // Lightweight constant for wc.tsx page (no heavy imports)
-export { WC_URI_SEARCH_PARAM } from './constants'

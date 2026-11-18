@@ -1,5 +1,5 @@
 import { type Balance } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import { useLoadFeature } from '@/features/__core__'
+import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 
 type SpendingLimitRowWrapperProps = {

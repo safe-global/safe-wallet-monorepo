@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { isAllowlistEnabled } from '@/features/policy-guard/services'
+import { isAllowlistEnabled } from '@/features/policy-guard/services/allowlistAvailability'
 import useChains from '@/hooks/useChains'
 import { useEligibleSafeAccounts } from '../../SafeAccountSelector/hooks/useEligibleSafeAccounts'
 import { flattenSafeAccounts } from '../../SafeAccountSelector/utils'

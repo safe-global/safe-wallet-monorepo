@@ -1,7 +1,7 @@
 import CheckWallet from '@/components/common/CheckWallet'
 import Track from '@/components/common/Track'
 import { AppRoutes } from '@/config/routes'
-import { useSpendingLimit } from '@/features/spending-limits'
+import useSpendingLimit from '@/features/spending-limits/hooks/useSpendingLimit'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 
