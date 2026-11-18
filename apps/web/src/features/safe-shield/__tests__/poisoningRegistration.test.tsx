@@ -34,7 +34,7 @@ jest.mock('@/features/spaces/hooks/useSafeProAccess', () => ({
 jest.mock('@/features/myAccounts/hooks/useTrustSafe', () => ({
   useTrustSafe: jest.fn(() => ({ trustSafe: jest.fn() })),
 }))
-jest.mock('@/features/hypernative/hooks/useAuthToken', () => ({
+jest.mock('@/features/hypernative/public/useAuthToken', () => ({
   useAuthToken: jest.fn(() => [{ token: undefined }]),
 }))
 

@@ -1,5 +1,5 @@
 import { transactionScanningScanner } from '../transactionScanning'
-import { createMockContext } from '../test-helpers'
+import { createMockContext } from '../../../public/test-helpers'
 
 describe('transactionScanningScanner', () => {
   it('returns clear when chain supports transaction scanning', async () => {

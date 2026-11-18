@@ -12,7 +12,7 @@ import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
 import { createChainData, createChainsPageData } from '@/stories/mocks/chains'
 import { createMockStory } from '@/stories/mocks/createMockStory'
 import { createChainsPageDataV2 } from '@/stories/mocks/chains'
-import { MODULE_GUARD_STORAGE_SLOT } from '@/features/policy-guard/constants'
+import { MODULE_GUARD_STORAGE_SLOT } from '@/features/policy-guard/public/constants'
 import {
   ADDRESS_BOOK_TRIGGER_LABEL,
   RECIPIENT_NAME_LABEL,

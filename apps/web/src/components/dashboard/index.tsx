@@ -14,27 +14,26 @@ import MastercopyWarning from '@/features/multichain/public/MastercopyWarning'
 import { MyAccountsFeature } from '@/features/myAccounts'
 import { ActionRequiredPanel } from '@/components/dashboard/ActionRequiredPanel/ActionRequiredPanel'
 import { VulnerableModuleWarning } from './ActionRequiredPanel/VulnerableModuleWarning'
-import { useVulnerableSafe } from '@/features/security/hooks/useVulnerableModules'
+import { useVulnerableSafe } from '@/features/security/public/useVulnerableModules'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
 import useIsPositionsFeatureEnabled from '@/features/positions/public/useIsPositionsFeatureEnabled'
-import { useBannerVisibility } from '@/features/hypernative/hooks/useBannerVisibility'
-import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
-import { HnBannerForCarousel } from '@/features/hypernative/components/HnBanner/HnBannerForCarousel'
-import { HypernativeFeature } from '@/features/hypernative'
+import { useBannerVisibility } from '@/features/hypernative/public/useBannerVisibility'
+import { BannerType } from '@/features/hypernative/public/useBannerStorage'
+import { HnBannerForCarousel } from '@/features/hypernative/public/HnBannerForCarousel'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { StakeFeature } from '@/features/stake'
 import useIsStakingPromoBannerVisible, {
   STAKING_PROMO_BANNER_HIDE_KEY,
 } from '@/features/stake/hooks/useIsStakingPromoBannerVisible'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
+import HnPendingBanner from '@/features/hypernative/public/HnPendingBanner'
 
 const PositionsWidget = dynamic(() => import('@/features/positions/public/PositionsWidget'))
 
 const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()
-  const hn = useLoadFeature(HypernativeFeature)
   const { NonPinnedWarning } = useLoadFeature(MyAccountsFeature)
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
   const isVulnerableSafe = useVulnerableSafe()
@@ -97,7 +96,7 @@ const Dashboard = (): ReactElement => {
 
           {safe.deployed && <PendingTxsList />}
 
-          <hn.HnPendingBanner />
+          <HnPendingBanner />
         </div>
       </div>
     </>

@@ -6,7 +6,7 @@ import { hnSecurityReportBtnConfig } from '@safe-global/views/features/hypernati
 import type { ReactElement } from 'react'
 import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 import { trackEvent } from '@/services/analytics'
-import { buildSecurityReportUrl } from '@/features/hypernative/utils/buildSecurityReportUrl'
+import { buildSecurityReportUrl } from '../../utils/buildSecurityReportUrl'
 
 import css from './styles.module.css'
 

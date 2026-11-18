@@ -7,16 +7,14 @@ import BatchExecuteButton from '@/components/transactions/BatchExecuteButton'
 import { BatchExecuteHoverProvider } from '@safe-global/views/components/transactions/BatchExecuteButton/BatchExecuteHoverProvider'
 import { usePendingTxsQueue, useShowUnsignedQueue } from '@/hooks/usePendingTxs'
 import RecoveryList from '@/features/recovery/public/RecoveryList'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { BRAND_NAME } from '@/config/constants'
-import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHypernativeEligible'
-import { useIsHypernativeQueueScanFeature } from '@/features/hypernative/hooks/useIsHypernativeQueueScanFeature'
-import { HypernativeFeature } from '@/features/hypernative'
-import { useHnQueueAssessment } from '@/features/hypernative/hooks/useHnQueueAssessment'
+import { useIsHypernativeEligible } from '@/features/hypernative/public/useIsHypernativeEligible'
+import { useIsHypernativeQueueScanFeature } from '@/features/hypernative/public/useIsHypernativeQueueScanFeature'
+import { useHnQueueAssessment } from '@/features/hypernative/public/useHnQueueAssessment'
+import HnLoginCard from '@/features/hypernative/public/HnLoginCard'
 
 const Queue = () => {
   const showPending = useShowUnsignedQueue()
-  const hn = useLoadFeature(HypernativeFeature)
   const { isHypernativeEligible, loading: eligibilityLoading } = useIsHypernativeEligible()
   const isHypernativeQueueScanEnabled = useIsHypernativeQueueScanFeature()
   const { setPages: setQueuePages } = useHnQueueAssessment()
@@ -34,7 +32,7 @@ const Queue = () => {
 
       <BatchExecuteHoverProvider>
         <TxHeader>
-          {showHnLoginCard && <hn.HnLoginCard />}
+          {showHnLoginCard && <HnLoginCard />}
           <BatchExecuteButton />
         </TxHeader>
 

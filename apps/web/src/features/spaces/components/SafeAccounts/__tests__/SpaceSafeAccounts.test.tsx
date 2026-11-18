@@ -5,7 +5,7 @@ import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 const mockUseSpaceSafes = jest.fn()
 const mockUseIsAdmin = jest.fn()
 
-jest.mock('@/features/address-poisoning/hooks/useSimilarityClusters', () => ({
+jest.mock('@/features/address-poisoning/public/useSimilarityClusters', () => ({
   __esModule: true,
   default: () => ({ flagged: new Set<string>(), groupIdByAddress: new Map<string, string>() }),
 }))

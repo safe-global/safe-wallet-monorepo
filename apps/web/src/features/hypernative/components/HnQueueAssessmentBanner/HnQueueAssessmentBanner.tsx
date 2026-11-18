@@ -5,7 +5,7 @@ import type { ThreatAnalysisResults } from '@safe-global/utils/features/safe-shi
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
-import { useHypernativeOAuth } from '../../hooks/useHypernativeOAuth'
+import { useHypernativeOAuth } from '../../public/useHypernativeOAuth'
 import { useAssessmentUrl } from '../../hooks/useAssessmentUrl'
 import { useHnAssessmentSeverity } from '../../hooks/useHnAssessmentSeverity'
 import LockIcon from '@safe-global/views/assets/images/common/lock-small.svg'

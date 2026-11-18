@@ -2,7 +2,7 @@ import { identifyOfficialFallbackHandler } from '@safe-global/utils/services/con
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import type { SecurityScanner } from './types'
-import { getSeverityFromScore } from './constants'
+import { getSeverityFromScore } from '../../public/constants'
 // Import directly from helpers/utils (not from '@/features/swap') to avoid pulling
 // the swap feature handle (via createFeatureHandle) into the scanner module graph —
 // that creates a circular dependency with @/features/__core__ in test environments.

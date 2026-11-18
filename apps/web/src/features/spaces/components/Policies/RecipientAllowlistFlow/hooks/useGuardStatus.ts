@@ -1,5 +1,5 @@
-import { usePolicyGuard } from '@/features/policy-guard/hooks/usePolicyGuard'
-import type { PolicyGuardTarget } from '@/features/policy-guard/types'
+import { usePolicyGuard } from '@/features/policy-guard/public/usePolicyGuard'
+import type { PolicyGuardTarget } from '@/features/policy-guard/public/types'
 import type { GuardStatus } from '@safe-global/views/features/spaces/components/Policies/RecipientAllowlistFlow/GuardStatusBanner'
 
 /** The policy guard read of the picked Safe as one banner state; none until a Safe is picked. */

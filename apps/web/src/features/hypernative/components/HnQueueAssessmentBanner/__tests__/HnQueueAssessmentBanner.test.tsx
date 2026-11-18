@@ -9,7 +9,7 @@ import { Severity } from '@safe-global/utils/features/safe-shield/types'
 
 const mockInitiateLogin = jest.fn()
 
-jest.mock('../../../hooks/useHypernativeOAuth', () => ({
+jest.mock('../../../public/useHypernativeOAuth', () => ({
   useHypernativeOAuth: () => ({
     initiateLogin: mockInitiateLogin,
   }),

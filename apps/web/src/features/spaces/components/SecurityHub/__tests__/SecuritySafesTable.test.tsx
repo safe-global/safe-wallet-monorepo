@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import SecuritySafesTable from '../components/SecuritySafesTable/SecuritySafesTable'
 import type { SpaceSafeEntry, SelectedSafe } from '@safe-global/views/features/spaces/components/SecurityHub/types'
-import type { ScanResult } from '@/features/security/types'
+import type { ScanResult } from '@/features/security/public/types'
 import { AppRoutes } from '@/config/routes'
 // Helper: mirrors security.scanKey exactly (address.toLowerCase() + chainId). Inlined to
 // avoid a feature-handle mock setup in tests that don't exercise the security feature directly.
@@ -62,19 +62,9 @@ jest.mock('@/store', () => ({
   useAppSelector: () => 'usd',
 }))
 
-// useLoadFeature needs Redux/chain context; return the resolved feature synchronously.
-jest.mock('@/features/__core__/useLoadFeature', () => {
-  const securityFeatureImpl = require('@/features/security/feature').default
-  return {
-    ...jest.requireActual('@/features/__core__/useLoadFeature'),
-    useLoadFeature: () => ({
-      ...securityFeatureImpl,
-      $isReady: true,
-      $isDisabled: false,
-      $error: undefined,
-    }),
-  }
-})
+jest.mock('@/features/security/public/useSecurityServices', () => ({
+  useSecurityServices: () => jest.requireActual('@/features/security/public/securityServices').securityServices,
+}))
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 

@@ -11,7 +11,7 @@ import { useAppSelector } from '@/store'
 import { selectCurrency } from '@/store/settingsSlice'
 import { selectUndeployedSafes } from '@/features/counterfactual/public/undeployedSafesSlice'
 import { getSafeSetups, getSharedSetup, getDeviatingSetups } from '@/features/multichain/public/utils'
-import type { ScanContext } from '@/features/security/types'
+import type { ScanContext } from '@/features/security/public/types'
 import type { SpaceSafeEntry, SelectedSafe } from '../components/SecurityHub'
 import type { OverviewData } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 

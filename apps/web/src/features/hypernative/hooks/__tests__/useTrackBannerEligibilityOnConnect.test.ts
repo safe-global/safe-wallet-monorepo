@@ -1,14 +1,14 @@
 import { renderHook, waitFor } from '@/tests/test-utils'
 import { useTrackBannerEligibilityOnConnect, activeTrackingSafes } from '../useTrackBannerEligibilityOnConnect'
-import type { BannerVisibilityResult } from '../useBannerVisibility'
-import { BannerType } from '../useBannerStorage'
+import type { BannerVisibilityResult } from '../../public/useBannerVisibility'
+import { BannerType } from '../../public/useBannerStorage'
 import * as useChainIdHook from '@/hooks/useChainId'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
 import { trackEvent } from '@/services/analytics'
 import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import type { RootState } from '@/store'
-import type { HnState } from '../../store/hnStateSlice'
+import type { HnState } from '../../public/hnStateSlice'
 
 // Mock analytics
 jest.mock('@/services/analytics', () => ({

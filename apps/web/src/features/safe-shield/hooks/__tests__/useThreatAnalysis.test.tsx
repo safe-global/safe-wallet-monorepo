@@ -3,7 +3,7 @@ import { useThreatAnalysis } from '../useThreatAnalysis'
 import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import type { SafeTransaction } from '@safe-global/types-kit'
 import { Safe__factory } from '@safe-global/utils/types/contracts'
-import type { HypernativeEligibility } from '@/features/hypernative/hooks/useIsHypernativeEligible'
+import type { HypernativeEligibility } from '@/features/hypernative/public/useIsHypernativeEligible'
 
 jest.mock('@safe-global/utils/features/safe-shield/hooks', () => ({
   useThreatAnalysis: jest.fn(),
@@ -56,10 +56,10 @@ const buildEligibility = (overrides: Partial<HypernativeEligibility> = {}): Hype
 const mockUseIsHypernativeEligible = jest.fn(() => buildEligibility())
 const mockUseIsHypernativeFeatureEnabled = jest.fn(() => true)
 
-jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible', () => ({
+jest.mock('@/features/hypernative/public/useIsHypernativeEligible', () => ({
   useIsHypernativeEligible: () => mockUseIsHypernativeEligible(),
 }))
-jest.mock('@/features/hypernative/hooks/useIsHypernativeFeature', () => ({
+jest.mock('@/features/hypernative/public/useIsHypernativeFeature', () => ({
   useIsHypernativeFeature: () => mockUseIsHypernativeFeatureEnabled(),
 }))
 

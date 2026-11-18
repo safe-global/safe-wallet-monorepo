@@ -52,11 +52,11 @@ jest.mock('@/features/myAccounts/hooks/useTrustSafe', () => ({
   useTrustSafe: () => ({ trustSafe: jest.fn() }),
 }))
 
-jest.mock('@/features/hypernative/hooks/useAuthToken', () => ({
+jest.mock('@/features/hypernative/public/useAuthToken', () => ({
   useAuthToken: () => [{ token: undefined }],
 }))
 
-jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible', () => ({
+jest.mock('@/features/hypernative/public/useIsHypernativeEligible', () => ({
   useIsHypernativeEligible: () => ({ isHypernativeEligible: false, isHypernativeGuard: false, loading: false }),
 }))
 

@@ -62,8 +62,8 @@ jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => SPACE_ID,
 }))
 
-jest.mock('@/features/policy-guard/hooks/useAllowlistAvailability', () => ({
-  ...jest.requireActual('@/features/policy-guard/hooks/useAllowlistAvailability'),
+jest.mock('@/features/policy-guard/public/useAllowlistAvailability', () => ({
+  ...jest.requireActual('@/features/policy-guard/public/useAllowlistAvailability'),
   useIsAllowlistAvailableInSpace: () => mockUseIsAllowlistAvailableInSpace(),
 }))
 

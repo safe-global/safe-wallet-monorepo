@@ -1,8 +1,7 @@
 import { type ReactElement, useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import type { ScanResult, SafeGrade } from '@/features/security/types'
-import { SecurityFeature } from '@/features/security'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import type { ScanResult, SafeGrade } from '@/features/security/public/types'
+import { useSecurityServices } from '@/features/security/public/useSecurityServices'
 import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { cn } from '@safe-global/views/utils/cn'
@@ -45,7 +44,7 @@ const SecuritySafesTable = ({
   balanceMap,
   isLoading = false,
 }: SecuritySafesTableProps): ReactElement => {
-  const security = useLoadFeature(SecurityFeature)
+  const security = useSecurityServices()
   const { data: chainsData } = useGetChainsConfigV2Query(CONFIG_SERVICE_KEY)
   const spaceId = useUrlSpaceId()
   const chainShortNames = useMemo(() => {
@@ -90,7 +89,7 @@ const SecuritySafesTable = ({
   // Filter safes by grade when a chip filter is active
   const filteredSafes = useMemo(() => {
     if (!gradeFilter) return safes
-    if (!security.$isReady) return safes
+    if (!security) return safes
     return safes.filter((safe) => {
       // For multichain Safes, match if ANY chain matches the grade
       for (const chain of safe.chainEntries) {
@@ -100,11 +99,10 @@ const SecuritySafesTable = ({
       }
       return false
     })
-  }, [safes, scanResults, gradeFilter, security.$isReady, security.scanKey, security.getSafeGrade])
+  }, [safes, scanResults, gradeFilter, security])
 
-  // Gate remaining render on feature load. Utilities are synchronous call-site primitives —
-  // pulling them via useLoadFeature means we must wait for the module to resolve.
-  if (!security.$isReady) return <></>
+  // The services are undefined while the chain has the Security Hub flag off.
+  if (!security) return <></>
 
   return (
     <div className="mb-10 w-full overflow-x-auto">

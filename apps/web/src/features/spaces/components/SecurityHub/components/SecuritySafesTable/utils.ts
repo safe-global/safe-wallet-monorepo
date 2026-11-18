@@ -1,7 +1,7 @@
-import type { GradeSummary, SafeGrade, ScanResult } from '@/features/security/types'
-import type { SecurityGrade } from '@/features/security/types'
-import { SAFE_GRADE_RANK, SEVERITY_RANK } from '@/features/security/data/scanners/constants'
-import type { SecurityContract } from '@/features/security/contract'
+import type { GradeSummary, SafeGrade, ScanResult } from '@/features/security/public/types'
+import type { SecurityGrade } from '@/features/security/public/types'
+import { SAFE_GRADE_RANK, SEVERITY_RANK } from '@/features/security/public/constants'
+import type { SecurityServices } from '@/features/security/public/securityServices'
 import { AppRoutes } from '@/config/routes'
 import { buildSafeHref, type SafeHref } from '@/features/spaces/utils/safeHref'
 import { DASH } from '@safe-global/views/features/spaces/components/SecurityHub/components/SecuritySafesTable/constants'
@@ -15,12 +15,12 @@ const SEVERITY_BY_RANK = (Object.entries(SEVERITY_RANK) as Array<[SecurityGrade,
 /**
  * The subset of the security feature handle that the table's pure helpers need.
  * Threaded in via params instead of imported so the helpers stay testable and
- * don't reach into the feature directly — callers obtain these from useLoadFeature.
+ * don't reach into the feature directly — callers obtain these from useSecurityServices.
  */
-export type SecurityUtils = Pick<SecurityContract, 'scanKey' | 'computeSummary' | 'severityRank'>
+export type SecurityUtils = Pick<SecurityServices, 'scanKey' | 'computeSummary' | 'severityRank'>
 
 /** Superset used by row components: SecurityUtils + the formatters/grade helpers they render. */
-export type RowSecurity = SecurityUtils & Pick<SecurityContract, 'formatTimestamp' | 'getSafeGrade'>
+export type RowSecurity = SecurityUtils & Pick<SecurityServices, 'formatTimestamp' | 'getSafeGrade'>
 
 /** Builder returning a link to one of a Safe's pages for a given (address, chainId), or undefined if the chain has no short name. */
 export type GetSafeHref = (address: string, chainId: string) => SafeHref | undefined
@@ -68,7 +68,7 @@ export const getNonPassingCount = (results: Record<string, ScanResult> | undefin
 export const getAggregateNonPassingCount = (
   safe: SpaceSafeEntry,
   scanResults: Record<string, Record<string, ScanResult>>,
-  scanKey: SecurityContract['scanKey'],
+  scanKey: SecurityServices['scanKey'],
 ): number => {
   let total = 0
   for (const chain of safe.chainEntries) {
@@ -139,8 +139,8 @@ export const getAggregateSummary = (
 export const getAggregateSafeGrade = (
   safe: SpaceSafeEntry,
   scanResults: Record<string, Record<string, ScanResult>>,
-  scanKey: SecurityContract['scanKey'],
-  getSafeGrade: SecurityContract['getSafeGrade'],
+  scanKey: SecurityServices['scanKey'],
+  getSafeGrade: SecurityServices['getSafeGrade'],
 ): SafeGrade | null => {
   let worstRank = SAFE_GRADE_RANK.passing + 1
   let worstGrade: SafeGrade | null = null
@@ -165,7 +165,7 @@ export const getAggregateSafeGrade = (
 export const hasMultichainWarning = (
   safe: SpaceSafeEntry,
   scanResults: Record<string, Record<string, ScanResult>>,
-  scanKey: SecurityContract['scanKey'],
+  scanKey: SecurityServices['scanKey'],
 ): boolean => {
   for (const chain of safe.chainEntries) {
     const key = scanKey(safe.address, chain.chainId)
@@ -183,7 +183,7 @@ export const hasMultichainWarning = (
 export const isAnyChainScanning = (
   safe: SpaceSafeEntry,
   scanningKeys: Set<string> | undefined,
-  scanKey: SecurityContract['scanKey'],
+  scanKey: SecurityServices['scanKey'],
 ): boolean => {
   if (!scanningKeys) return false
   return safe.chainEntries.some((c) => scanningKeys.has(scanKey(safe.address, c.chainId)))

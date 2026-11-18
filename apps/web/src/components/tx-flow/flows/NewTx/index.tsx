@@ -7,15 +7,13 @@ import { ProgressBar } from '@safe-global/views/components/common/ProgressBar'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import { useDarkMode } from '@/hooks/useDarkMode'
 import NewTxIcon from '@/public/images/transactions/new-tx.svg'
-import { HypernativeFeature } from '@/features/hypernative'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 
 import css from './styles.module.css'
+import HnMiniTxBanner from '@/features/hypernative/public/HnMiniTxBanner'
 
 const NewTxFlow = () => {
   // Opened from a Space, the flow is scoped to the picked Safe: the next step must stay in that scope
   const setTxFlow = useSetScopedTxFlow()
-  const hn = useLoadFeature(HypernativeFeature)
   const isDarkMode = useDarkMode()
 
   const onTokensClick = useCallback(() => {
@@ -54,7 +52,7 @@ const NewTxFlow = () => {
                 Manage assets
               </Typography>
 
-              <hn.HnMiniTxBanner />
+              <HnMiniTxBanner />
 
               <SendTokensButton onClick={onTokensClick} />
               <MakeASwapButton />

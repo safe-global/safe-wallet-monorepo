@@ -53,14 +53,6 @@ const FEATURE_FLAG_MATRIX: Array<{
       return SpendingLimitsFeature
     },
   },
-  {
-    label: 'hypernative',
-    featureFlag: FEATURES.HYPERNATIVE,
-    getHandle: () => {
-      const { HypernativeFeature } = jest.requireActual('@/features/hypernative')
-      return HypernativeFeature
-    },
-  },
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────

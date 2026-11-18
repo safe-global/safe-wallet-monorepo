@@ -10,7 +10,7 @@ import useAllSafes from '@/hooks/safes/useAllSafes'
 import { useSafesSearch } from '@/hooks/safes/useSafesSearch'
 import { useSafeOrderComparator } from '@/hooks/safes/useSafeOrderComparator'
 import { TRUSTED_ORDER_SCOPE } from '@/store/orderByPreferenceSlice'
-import useSimilarityClusters from '@/features/address-poisoning/hooks/useSimilarityClusters'
+import useSimilarityClusters from '@/features/address-poisoning/public/useSimilarityClusters'
 import type { SelectableSafe, SelectableMultiChainSafe, SelectableItem } from './useTrustedSafesModal.types'
 import { isSelectableMultiChainSafe } from './useTrustedSafesModal.types'
 

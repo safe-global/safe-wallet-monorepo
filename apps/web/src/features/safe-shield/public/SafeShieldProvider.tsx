@@ -15,7 +15,7 @@ import {
   StatusGroup,
 } from '@safe-global/utils/features/safe-shield/types'
 import { getPrimaryResult, isSeverityHigherOrEqual } from '@safe-global/utils/features/safe-shield/utils'
-import { useAuthToken } from '@/features/hypernative/hooks/useAuthToken'
+import { useAuthToken } from '@/features/hypernative/public/useAuthToken'
 import { useSafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import { useSafeProAccess } from '@/features/spaces/hooks/useSafeProAccess'
 

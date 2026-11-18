@@ -11,7 +11,7 @@ import {
   RECIPIENT_ALLOWLIST_POLICY_OPTION,
   type AddPolicyId,
 } from '@safe-global/views/features/spaces/components/Policies/AddPolicyDialog/options'
-import { useIsAllowlistActiveInSpace } from '@/features/policy-guard/hooks/useIsAllowlistActiveInSpace'
+import { useIsAllowlistActiveInSpace } from '@/features/policy-guard/public/useIsAllowlistActiveInSpace'
 import PoliciesList from './PoliciesList'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 import PolicyCatalogue from './PolicyCatalogue'

@@ -30,7 +30,7 @@ import ReorderableBody, { toggleExpanded } from './ReorderableBody'
 import { bandHeaderAt } from './SimilarityBand'
 import { orderGroupsBySimilarity } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/orderGroupsBySimilarity'
 import { weaveReorderedKeys } from '@/utils/reorder'
-import type { SimilarWarning } from '@/features/address-poisoning/utils/crossListClusters'
+import type { SimilarWarning } from '@/features/address-poisoning/public/crossListClusters'
 import EntryDialog from '@/components/address-book/EntryDialog'
 import { useAddressBookWriteScope } from '@/features/spaces/hooks/useAddressBookWriteScope'
 

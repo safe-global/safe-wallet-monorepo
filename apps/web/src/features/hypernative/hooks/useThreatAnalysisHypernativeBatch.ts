@@ -5,10 +5,10 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { useThreatAnalysisHypernativeBatch as useThreatAnalysisHypernativeBatchUtils } from '@safe-global/utils/features/safe-shield/hooks/useThreatAnalysisHypernativeBatch'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
 import { isTransactionQueuedItem } from '@/utils/transaction-guards'
-import { useAuthToken } from './useAuthToken'
+import { useAuthToken } from '../public/useAuthToken'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useAppSelector, useAppDispatch } from '@/store'
-import { selectAssessmentsByHashes, setBatchAssessments } from '../store/hnQueueAssessmentsSlice'
+import { selectAssessmentsByHashes, setBatchAssessments } from '../public/hnQueueAssessmentsSlice'
 
 type UseThreatAnalysisHypernativeBatchProps = {
   pages: (QueuedItemPage | undefined)[]

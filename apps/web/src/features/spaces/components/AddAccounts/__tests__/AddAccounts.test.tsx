@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import AddAccounts from '../index'
 
-jest.mock('@/features/address-poisoning/hooks/useSimilarityClusters', () => ({
+jest.mock('@/features/address-poisoning/public/useSimilarityClusters', () => ({
   __esModule: true,
   default: () => ({ flagged: new Set<string>(), groupIdByAddress: new Map<string, string>() }),
 }))

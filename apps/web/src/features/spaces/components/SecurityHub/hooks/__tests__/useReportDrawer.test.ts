@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react'
 import useReportDrawer from '../useReportDrawer'
-import type { ScanContext } from '@/features/security/types'
+import type { ScanContext } from '@/features/security/public/types'
 import type { OverviewMap, SpaceSafeEntry } from '@safe-global/views/features/spaces/components/SecurityHub/types'
 
 let mockScanContext: ScanContext | null = null
@@ -27,10 +27,11 @@ const mkSafe = (address: string): SpaceSafeEntry => ({
 })
 
 const mkSecurity = (isReady = true) =>
-  ({
-    $isReady: isReady,
-    scanKey: (address: string, chainId: string) => `${address}:${chainId}`,
-  }) as unknown as Parameters<typeof useReportDrawer>[0]['security']
+  isReady
+    ? ({
+        scanKey: (address: string, chainId: string) => `${address}:${chainId}`,
+      } as unknown as Parameters<typeof useReportDrawer>[0]['security'])
+    : undefined
 
 describe('useReportDrawer', () => {
   beforeEach(() => {

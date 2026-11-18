@@ -20,12 +20,12 @@ import { useHasFeature } from '@/hooks/useChains'
 import TxStatusLabel from '@/components/transactions/TxStatusLabel'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { ellipsis } from '@safe-global/utils/utils/formatters'
-import { useHnQueueAssessmentResult } from '@/features/hypernative/hooks/useHnQueueAssessmentResult'
-import { useShowHypernativeAssessment } from '@/features/hypernative/hooks/useShowHypernativeAssessment'
-import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
-import { HypernativeFeature } from '@/features/hypernative'
+import { useHnQueueAssessmentResult } from '@/features/hypernative/public/useHnQueueAssessmentResult'
+import { useShowHypernativeAssessment } from '@/features/hypernative/public/useShowHypernativeAssessment'
+import { useHypernativeOAuth } from '@/features/hypernative/public/useHypernativeOAuth'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import HnQueueAssessment from '@/features/hypernative/public/HnQueueAssessment'
 
 type TxSummaryProps = {
   isConflictGroup?: boolean
@@ -36,8 +36,6 @@ type TxSummaryProps = {
 const TxSummary = ({ item, isConflictGroup, isBulkGroup }: TxSummaryProps): ReactElement => {
   const { StatusLabel } = useLoadFeature(SwapFeature)
   const hasDefaultTokenlist = useHasFeature(FEATURES.DEFAULT_TOKENLIST)
-  const { HnQueueAssessment } = useLoadFeature(HypernativeFeature)
-
   const tx = item.transaction
   const isQueue = isTxQueued(tx.txStatus)
   const nonce = isMultisigExecutionInfo(tx.executionInfo) ? tx.executionInfo.nonce : undefined

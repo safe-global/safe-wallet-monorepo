@@ -16,17 +16,11 @@ jest.mock('@/hooks/useChains', () => ({
   useHasFeature: () => false,
 }))
 
-jest.mock('@/features/hypernative', () => ({
-  HypernativeFeature: {},
-}))
-jest.mock('@/features/hypernative/hooks/useIsHypernativeGuard', () => ({
+jest.mock('@/features/hypernative/public/useIsHypernativeGuard', () => ({
   useIsHypernativeGuard: (...args: unknown[]) => mockUseIsHypernativeGuard(...args),
 }))
 
-jest.mock('@/features/__core__/useLoadFeature', () => ({
-  ...jest.requireActual('@/features/__core__/useLoadFeature'),
-  useLoadFeature: () => ({ SafeHeaderHnTooltip: () => null }),
-}))
+jest.mock('@/features/hypernative/public/SafeHeaderHnTooltip', () => ({ __esModule: true, default: () => null }))
 
 jest.mock('../SafeBalanceBlock', () => {
   const Mock = () => <div data-testid="safe-balance-block" />

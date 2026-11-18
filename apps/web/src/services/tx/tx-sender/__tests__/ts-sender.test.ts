@@ -35,7 +35,7 @@ import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { createMockSafeTransaction } from '@/tests/transactions'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
 import { SimpleTxWatcher } from '@safe-global/utils/services/SimpleTxWatcher'
-import { requestSafenetCheck } from '@/features/safenet-checks/services/requestSafenetCheck'
+import { requestSafenetCheck } from '@/features/safenet-checks/public/requestSafenetCheck'
 
 const SIGNER_ADDRESS = '0x1234567890123456789012345678901234567890'
 const TX_HASH = '0x1234567890'
@@ -48,7 +48,7 @@ jest.mock('../../extractTxInfo', () => ({
     signatures: [],
   })),
 }))
-jest.mock('@/features/safenet-checks/services/requestSafenetCheck', () => ({
+jest.mock('@/features/safenet-checks/public/requestSafenetCheck', () => ({
   requestSafenetCheck: jest.fn(),
 }))
 

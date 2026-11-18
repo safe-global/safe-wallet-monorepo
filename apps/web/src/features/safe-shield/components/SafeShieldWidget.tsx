@@ -3,8 +3,8 @@ import { SafeShieldDisplay } from './SafeShieldDisplay'
 import { useSafeShield } from '../public/useSafeShield'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
-import { useHypernativeOAuth } from '@/features/hypernative/hooks/useHypernativeOAuth'
-import { useIsHypernativeEligible } from '@/features/hypernative/hooks/useIsHypernativeEligible'
+import { useHypernativeOAuth } from '@/features/hypernative/public/useHypernativeOAuth'
+import { useIsHypernativeEligible } from '@/features/hypernative/public/useIsHypernativeEligible'
 
 const SafeShieldWidget = (): ReactElement => {
   const {

@@ -54,7 +54,7 @@ jest.mock('@/components/tx-flow/actions/ExecuteThroughRole/ExecuteThroughRoleFor
   useRoles: jest.fn(() => []),
 }))
 
-jest.mock('@/features/hypernative/hooks/useIsHypernativeEligible', () => ({
+jest.mock('@/features/hypernative/public/useIsHypernativeEligible', () => ({
   useIsHypernativeEligible: jest.fn(() => ({
     isHypernativeEligible: false,
     isHypernativeGuard: false,

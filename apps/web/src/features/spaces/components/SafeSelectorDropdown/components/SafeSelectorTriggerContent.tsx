@@ -14,9 +14,8 @@ import type { SafeItemData } from '@safe-global/views/features/spaces/components
 import EnvHintButton from '@/components/settings/EnvironmentVariables/EnvHintButton'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@safe-global/utils/utils/chains'
-import { HypernativeFeature } from '@/features/hypernative'
-import { useIsHypernativeGuard } from '@/features/hypernative/hooks/useIsHypernativeGuard'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import { useIsHypernativeGuard } from '@/features/hypernative/public/useIsHypernativeGuard'
+import SafeHeaderHnTooltip from '@/features/hypernative/public/SafeHeaderHnTooltip'
 
 export interface SafeSelectorTriggerContentProps {
   selectedItem: SafeItemData
@@ -34,7 +33,6 @@ function SafeSelectorTriggerContent({ selectedItem, selectedChainId }: SafeSelec
   const chainConfig = useChain(selectedChain?.chainId ?? '')
   const blockExplorerLink = chainConfig ? getBlockExplorerLink(chainConfig, selectedItem.address) : undefined
 
-  const { SafeHeaderHnTooltip } = useLoadFeature(HypernativeFeature)
   const { isHypernativeGuard } = useIsHypernativeGuard()
 
   return (

@@ -5,9 +5,9 @@ import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
 import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
 import { AnalysisGroupCardDisabled } from '@safe-global/views/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled'
 import { HnAnalysisGroupCard } from '../HnAnalysisGroupCard'
-import { HnViewMoreOnHypernativeRow } from '../HnViewMoreOnHypernativeRow'
-import { useSafeShieldAssessmentUrl } from '../../hooks/useSafeShieldAssessmentUrl'
-import type { HypernativeAuthStatus } from '../../hooks/useHypernativeOAuth'
+import { HnViewMoreOnHypernativeRow } from '../../public/HnViewMoreOnHypernativeRow'
+import { useSafeShieldAssessmentUrl } from '../../public/useSafeShieldAssessmentUrl'
+import type { HypernativeAuthStatus } from '../../public/useHypernativeOAuth'
 
 const VISIBLE_CAP = 3
 

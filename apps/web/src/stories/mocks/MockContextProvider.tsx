@@ -12,7 +12,7 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import {
   QueueAssessmentContext,
   type QueueAssessmentContextValue,
-} from '@/features/hypernative/contexts/QueueAssessmentContext'
+} from '@/features/hypernative/public/QueueAssessmentContext'
 
 /**
  * Mock TxModal context - provides no-op implementations

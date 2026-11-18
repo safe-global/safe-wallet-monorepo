@@ -3,7 +3,7 @@ import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import SafeAccountsTable from '@/features/myAccounts/components/SafeAccountsTable'
 import type { AccountLine } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/types'
 import type { SafeAccountColumnId } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
-import type { SimilarWarning } from '@/features/address-poisoning/utils/crossListClusters'
+import type { SimilarWarning } from '@/features/address-poisoning/public/crossListClusters'
 import SecurityBanner from '@/components/common/TrustedSafesModal/SecurityBanner'
 
 const COLUMNS: SafeAccountColumnId[] = ['name', 'threshold', 'networks', 'balance']

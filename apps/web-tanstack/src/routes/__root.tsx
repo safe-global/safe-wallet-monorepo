@@ -33,7 +33,7 @@ import { useOidcLoginCallback } from '@/features/oidc-auth/hooks/useOidcLoginCal
 import { useStepUpRecovery } from '@/features/oidc-auth/hooks/useStepUpRecovery'
 import { useLogoutCallback } from '@/hooks/useLogoutCallback'
 import { useSessionExpiryGuard } from '@/services/sessionExpiry/useSessionExpiryGuard'
-import { useHypernativeTokenRefresh } from '@/features/hypernative/hooks/useHypernativeTokenRefresh'
+import { useHypernativeTokenRefresh } from '@/features/hypernative/public/useHypernativeTokenRefresh'
 import { initObservability } from '@/services/observability'
 import Analytics from '@/services/analytics/Analytics'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'

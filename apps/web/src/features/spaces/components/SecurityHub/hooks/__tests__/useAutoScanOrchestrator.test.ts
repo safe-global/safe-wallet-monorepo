@@ -45,13 +45,14 @@ const mkSelected = (address: string): SelectedSafe => ({ address, chainId: CHAIN
 const startScanFn = jest.fn()
 
 const mkSecurity = (isReady = true) =>
-  ({
-    $isReady: isReady,
-    scanners: [{ id: 'account_setup', scan: jest.fn() }],
-    scanKey: (address: string, chainId: string) => `${address}:${chainId}`,
-    setCachedScan: jest.fn(),
-    withScannerTimeout: jest.fn(),
-  }) as unknown as Parameters<typeof useAutoScanOrchestrator>[0]['security']
+  isReady
+    ? ({
+        scanners: [{ id: 'account_setup', scan: jest.fn() }],
+        scanKey: (address: string, chainId: string) => `${address}:${chainId}`,
+        setCachedScan: jest.fn(),
+        withScannerTimeout: jest.fn(),
+      } as unknown as Parameters<typeof useAutoScanOrchestrator>[0]['security'])
+    : undefined
 
 describe('useAutoScanOrchestrator', () => {
   beforeEach(() => {
@@ -83,10 +84,10 @@ describe('useAutoScanOrchestrator', () => {
     )
 
     expect(lastServices).toMatchObject({
-      scanners: security.scanners,
-      scanKey: security.scanKey,
-      setCachedScan: security.setCachedScan,
-      withScannerTimeout: security.withScannerTimeout,
+      scanners: security?.scanners,
+      scanKey: security?.scanKey,
+      setCachedScan: security?.setCachedScan,
+      withScannerTimeout: security?.withScannerTimeout,
     })
   })
 

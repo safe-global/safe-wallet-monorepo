@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import { render, screen, fireEvent, within } from '@testing-library/react'
 import { AppRoutes } from '@/config/routes'
-import { createMockContext } from '@/features/security/data/scanners/test-helpers'
-import type { ScanResult } from '@/features/security/types'
+import { createMockContext } from '@/features/security/public/test-helpers'
+import type { ScanResult } from '@/features/security/public/types'
 import SecurityChecksSection from '../components/SecurityChecks/SecurityChecksSection'
 
 // next/link isn't meaningful in a jsdom render; pass through to a plain anchor.
@@ -16,21 +16,10 @@ jest.mock('next/link', () => {
   return { __esModule: true, default: MockLink }
 })
 
-// useLoadFeature depends on Redux/chain context which isn't wired in this unit test.
-// Return the resolved feature synchronously so components see $isReady=true.
 // require() inside the factory since jest.mock is hoisted above ES imports.
-jest.mock('@/features/__core__/useLoadFeature', () => {
-  const securityFeatureImpl = require('@/features/security/feature').default
-  return {
-    ...jest.requireActual('@/features/__core__/useLoadFeature'),
-    useLoadFeature: () => ({
-      ...securityFeatureImpl,
-      $isReady: true,
-      $isDisabled: false,
-      $error: undefined,
-    }),
-  }
-})
+jest.mock('@/features/security/public/useSecurityServices', () => ({
+  useSecurityServices: () => jest.requireActual('@/features/security/public/securityServices').securityServices,
+}))
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
