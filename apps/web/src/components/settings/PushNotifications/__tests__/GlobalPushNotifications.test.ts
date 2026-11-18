@@ -25,7 +25,7 @@ import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
 import type { PushNotificationPreferences } from '@/services/push-notifications/preferences'
 import useChains from '@/hooks/useChains'
 import useWallet from '@/hooks/wallets/useWallet'
-import { useAllOwnedSafes } from '@/hooks/safes'
+import useAllOwnedSafes from '@/hooks/safes/useAllOwnedSafes'
 import { useNotificationPreferences } from '../hooks/useNotificationPreferences'
 import { useNotificationRegistrations } from '../hooks/useNotificationRegistrations'
 import { useNotificationsRenewal } from '../hooks/useNotificationsRenewal'
@@ -34,7 +34,7 @@ jest.mock('@/hooks/useChains')
 
 jest.mock('@/hooks/wallets/useWallet')
 
-jest.mock('@/hooks/safes')
+jest.mock('@/hooks/safes/useAllOwnedSafes')
 
 jest.mock('../hooks/useNotificationPreferences')
 

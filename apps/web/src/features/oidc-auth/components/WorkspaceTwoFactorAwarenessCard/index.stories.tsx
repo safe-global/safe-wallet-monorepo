@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMockStory } from '@/stories/mocks'
-import WorkspaceTwoFactorAwarenessCard from './index'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import WorkspaceTwoFactorAwarenessCard from '../../public/components/WorkspaceTwoFactorAwarenessCard'
 
 const defaultSetup = createMockStory({
   authenticated: true,

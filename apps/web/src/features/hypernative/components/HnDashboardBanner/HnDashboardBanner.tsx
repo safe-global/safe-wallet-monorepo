@@ -3,7 +3,9 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import type { WithHnSignupFlowProps } from '../withHnSignupFlow'
 import css from './styles.module.css'
 import { dashboardBannerConfig } from '@safe-global/views/features/hypernative/components/HnDashboardBanner/config'
-import { HYPERNATIVE_EVENTS, HYPERNATIVE_SOURCE, trackEvent, MixpanelEventParams } from '@/services/analytics'
+import { HYPERNATIVE_EVENTS, HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
+import { trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 
 export interface HnDashboardBannerProps extends WithHnSignupFlowProps {}
 

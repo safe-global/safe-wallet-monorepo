@@ -2,12 +2,12 @@ import { useMemo, type ReactElement } from 'react'
 import { StatusGroup, type ThreatAnalysisResults, type Severity } from '@safe-global/utils/features/safe-shield/types'
 import { sliceTopBySeverity } from '@safe-global/utils/features/safe-shield/utils'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { SAFE_SHIELD_EVENTS } from '@/services/analytics'
-import { AnalysisGroupCardDisabled } from '@/features/safe-shield'
+import { SAFE_SHIELD_EVENTS } from '@/services/analytics/events/safe-shield'
+import { AnalysisGroupCardDisabled } from '@safe-global/views/features/safe-shield/components/ThreatAnalysis/AnalysisGroupCardDisabled'
 import { HnAnalysisGroupCard } from '../HnAnalysisGroupCard'
-import { HnViewMoreOnHypernativeRow } from '../HnViewMoreOnHypernativeRow'
-import { useSafeShieldAssessmentUrl } from '../../hooks/useSafeShieldAssessmentUrl'
-import type { HypernativeAuthStatus } from '../../hooks/useHypernativeOAuth'
+import { HnViewMoreOnHypernativeRow } from '../../public/components/HnViewMoreOnHypernativeRow'
+import { useSafeShieldAssessmentUrl } from '../../public/hooks/useSafeShieldAssessmentUrl'
+import type { HypernativeAuthStatus } from '../../public/hooks/useHypernativeOAuth'
 
 const VISIBLE_CAP = 3
 

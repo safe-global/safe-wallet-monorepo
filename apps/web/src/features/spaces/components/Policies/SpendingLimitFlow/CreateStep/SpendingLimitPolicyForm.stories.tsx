@@ -1,10 +1,11 @@
+import { faker } from '@faker-js/faker'
 import { useState } from 'react'
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import { fn } from 'storybook/test'
 import type { Erc20TokenMetadata } from '@safe-global/store/gateway/AUTO_GENERATED/tokens'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { SafeScopeProvider } from '@/components/tx-flow/safe-scope/SafeScopeProvider'
 import { useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope'
 import type { SafeScopeTarget } from '@safe-global/views/components/tx-flow/safe-scope'
@@ -21,6 +22,8 @@ import { spendingLimitStateBuilder } from '@/tests/builders/spendingLimits'
 import { ExistingSpendingLimitsContext } from '../ExistingSpendingLimitsProvider'
 import { EditModeProvider } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/EditFlow/EditModeContext'
 import SpendingLimitPolicyForm, { type SpendingLimitPolicyFormProps } from './SpendingLimitPolicyForm'
+
+faker.seed(1)
 
 /** `SAFE_ADDRESSES.efSafe` in config/test/msw/fixtures. */
 const EF_SAFE = '0x9fC3dc011b461664c835F2527fffb1169b3C213e'

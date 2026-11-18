@@ -8,7 +8,7 @@ import { useDarkMode } from '@/hooks/useDarkMode'
 import type { SafeAppDataWithPermissions } from '@safe-global/views/components/safe-apps/types'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
-import { BRIDGE_WIDGET_URL } from '../../constants'
+import { BRIDGE_WIDGET_URL } from '../../public/constants'
 
 export function BridgeWidget(): ReactElement | null {
   const isDarkMode = useDarkMode()

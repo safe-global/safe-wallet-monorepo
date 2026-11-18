@@ -4,14 +4,14 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
-import { RemoveModuleFlow } from '@/components/tx-flow/flows'
+import { RemoveModuleFlow } from '@/components/tx-flow/flows/RemoveModuleFlow'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import CheckWallet from '@/components/common/CheckWallet'
 import { useContext } from 'react'
 import { TxModalContext } from '@/components/tx-flow'
-import { RemoveRecoveryFlow } from '@/components/tx-flow/flows'
-import { RecoveryFeature, useRecovery } from '@/features/recovery'
-import { useLoadFeature } from '@/features/__core__'
+import { RemoveRecoveryFlow } from '@/components/tx-flow/flows/RemoveRecoveryFlow'
+import useRecovery from '@/features/recovery/public/hooks/useRecovery'
+import { selectDelayModifierByAddress } from '@/features/recovery/public/store/selectors'
 import SettingsCard from '@safe-global/views/components/settings/SettingsCard'
 
 import css from '../TransactionGuards/styles.module.css'
@@ -23,8 +23,7 @@ const NoModules = () => {
 const ModuleDisplay = ({ moduleAddress, chainId, name }: { moduleAddress: string; chainId: string; name?: string }) => {
   const { setTxFlow } = useContext(TxModalContext)
   const [recovery] = useRecovery()
-  const { selectDelayModifierByAddress, $isReady } = useLoadFeature(RecoveryFeature)
-  const delayModifier = recovery && selectDelayModifierByAddress?.(recovery, moduleAddress)
+  const delayModifier = recovery && selectDelayModifierByAddress(recovery, moduleAddress)
 
   const onRemove = () => {
     if (delayModifier) {
@@ -51,7 +50,7 @@ const ModuleDisplay = ({ moduleAddress, chainId, name }: { moduleAddress: string
             variant="ghost"
             size="icon-sm"
             onClick={onRemove}
-            disabled={!isOk || !$isReady}
+            disabled={!isOk}
             title="Remove module"
           >
             <DeleteIcon className="size-4 text-destructive" />

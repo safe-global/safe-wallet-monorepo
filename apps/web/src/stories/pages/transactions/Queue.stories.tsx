@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
 import { mswLoader } from 'msw-storybook-addon'
 import { userEvent, within } from 'storybook/test'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import Queue from '@/pages/transactions/queue'
 import { queueFixtures } from '@safe-global/test/msw/fixtures'
 

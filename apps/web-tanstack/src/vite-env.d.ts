@@ -7,8 +7,6 @@
 // module declarations below stay global; `React` comes from the global
 // namespace (`export as namespace React`) rather than an import.
 
-declare module 'remark-heading-id'
-
 // @mdx-js/rollup compiles `*.md`/`*.mdx` imports to a React component (default
 // export). Used by the cookie page.
 declare module '*.md' {

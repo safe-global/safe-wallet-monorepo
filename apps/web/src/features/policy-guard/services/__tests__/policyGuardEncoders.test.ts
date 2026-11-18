@@ -1,7 +1,7 @@
 import { getAddress, id, Interface, keccak256 } from 'ethers'
 import { faker } from '@faker-js/faker'
 import { OperationType } from '@safe-global/types-kit'
-import type { PolicyConfiguration } from '../../types'
+import type { PolicyConfiguration } from '../../public/types'
 import {
   createApplyConfigurationTx,
   createFirstSetupTxs,

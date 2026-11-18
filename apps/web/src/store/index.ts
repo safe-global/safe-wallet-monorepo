@@ -12,25 +12,22 @@ import merge from 'lodash/merge'
 import { APP_ENV, IS_PRODUCTION, CONFIG_SERVICE_KEY } from '@/config/constants'
 import { getPreloadedState, persistState } from './persistStore'
 import { broadcastState, listenToBroadcast } from './broadcast'
-import {
-  cookiesAndTermsSlice,
-  cookiesAndTermsInitialState,
-  safeMessagesListener,
-  safeInfoListener,
-  swapOrderListener,
-  swapOrderStatusListener,
-  txHistoryListener,
-  txQueueListener,
-  authListener,
-  counterfactualSyncListener,
-  addressBookListener,
-  spaceSafesEntitlementsListener,
-  planChangeSyncListener,
-  checkoutTrackingListener,
-  workspaceTrackingListener,
-  spaceSafesCacheListener,
-  trialReminderListener,
-} from './slices'
+import { cookiesAndTermsSlice, cookiesAndTermsInitialState } from '@/store/cookiesAndTermsSlice'
+import { safeMessagesListener } from '@/store/safeMessagesSlice'
+import { safeInfoListener } from '@/store/safeInfoSlice'
+import { swapOrderListener, swapOrderStatusListener } from '@/store/swapOrderSlice'
+import { txHistoryListener } from '@/store/txHistorySlice'
+import { txQueueListener } from '@/store/txQueueSlice'
+import { authListener } from '@/store/authSlice'
+import { counterfactualSyncListener } from '@/features/counterfactual/public/store/counterfactualSyncListener'
+import { addressBookListener } from '@/store/addressBookSlice'
+import { spaceSafesEntitlementsListener } from '@/features/spaces/public/store/spaceSafesEntitlementsListener'
+import { planChangeSyncListener } from '@/features/spaces/public/store/planChangeSyncListener'
+import { checkoutTrackingListener } from '@/features/spaces/public/store/checkoutTrackingListener'
+import { workspaceTrackingListener } from '@/features/spaces/public/store/workspaceTrackingListener'
+import { spaceSafesCacheListener } from '@/features/spaces/public/store/spaceSafesCacheListener'
+import { addressBookTagsCacheListener } from '@/features/spaces/public/store/addressBookTagsCacheListener'
+import { trialReminderListener } from '@/features/spaces/public/store/trialReminder'
 import * as slices from './slices'
 import * as hydrate from './useHydrateStore'
 import { ofacApi } from '@/store/api/ofac'
@@ -47,6 +44,7 @@ import { migrateBatchTxs } from '@/services/ls-migration/batch'
 import { apiSliceWithChainsConfig } from '@safe-global/store/gateway'
 import { cgwErrorAlert } from './middleware/cgwErrorAlert'
 import { forbiddenSessionListener } from '@/services/sessionExpiry/forbiddenSessionListener'
+import { spaceQueueReconciliationListener } from '@/features/spaces/public/store/spaceQueueReconciliationListener'
 
 const rootReducer = combineReducers({
   [slices.safeInfoSlice.name]: slices.safeInfoSlice.reducer,
@@ -147,8 +145,10 @@ const listeners = [
   checkoutTrackingListener,
   workspaceTrackingListener,
   spaceSafesCacheListener,
+  addressBookTagsCacheListener,
   trialReminderListener,
   forbiddenSessionListener,
+  spaceQueueReconciliationListener,
 ]
 
 export const _hydrationReducer: typeof rootReducer = (state, action) => {

@@ -1,44 +1,12 @@
-import {
-  createContext,
-  type ReactElement,
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { type ReactElement, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import useOnboard, { type ConnectedWallet, getConnectedWallet, useIsWalletReady } from '@/hooks/wallets/useOnboard'
 import { useSafesGetSafeV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { useCurrentChain } from '@/hooks/useChains'
 import { useRouter } from 'next/router'
-import { type Eip1193Provider } from 'ethers'
 import { getNestedWallet } from '@/utils/nested-safe-wallet'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-
-export type SignerWallet = {
-  provider: Eip1193Provider | null
-  address: string
-  chainId: string
-  // In-app nested signer: only proposes in the parent, never executes
-  isSafe?: boolean
-  // The connected wallet is itself a Safe, e.g. via WalletConnect
-  isConnectedSafe?: boolean
-  threshold?: number
-}
-
-export type WalletContextType = {
-  connectedWallet: ConnectedWallet | null
-  signer: SignerWallet | null
-  setSignerAddress: (address: string | undefined) => void
-  // Nonce of the tx the in-app parent Safe signer creates; without one it uses the recommended nonce
-  setParentSafeNonce: (nonce: number) => void
-  clearParentSafeNonce: () => void
-  isReady: boolean
-}
-
-export const WalletContext = createContext<WalletContextType | null>(null)
+import { WalletContext } from './WalletContext'
 
 const WalletProvider = ({ children }: { children: ReactNode }): ReactElement => {
   const onboard = useOnboard()

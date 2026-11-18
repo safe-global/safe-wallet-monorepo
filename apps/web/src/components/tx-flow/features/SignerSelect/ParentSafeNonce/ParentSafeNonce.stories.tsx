@@ -1,13 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react'
+import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
 import { safeFixtures } from '@safe-global/test/msw/fixtures'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import {
   multisigExecutionInfoBuilder,
   multisigTransactionBuilder,
   queuedTransactionItem,
 } from '@/tests/builders/queuedTransaction'
 import ParentSafeNonce from './index'
+
+faker.seed(1)
 
 const parentSafeAddress = safeFixtures.efSafe.owners[1].value
 

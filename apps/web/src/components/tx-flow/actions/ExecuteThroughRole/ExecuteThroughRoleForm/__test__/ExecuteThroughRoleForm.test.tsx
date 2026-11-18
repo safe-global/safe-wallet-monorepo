@@ -3,7 +3,7 @@ import { OperationType } from '@safe-global/types-kit'
 import { type ReactElement } from 'react'
 import * as zodiacRoles from 'zodiac-roles-deployments'
 import { fireEvent, render, waitFor, mockWeb3Provider } from '@/tests/test-utils'
-import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import { SafeShieldProvider } from '@/features/safe-shield/public/components/SafeShieldProvider'
 
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import * as useSafeInfoHook from '@/hooks/useSafeInfo'
@@ -20,7 +20,7 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxModalContext } from '@/components/tx-flow'
-import { SuccessScreenFlow } from '@/components/tx-flow/flows'
+import { SuccessScreenFlow } from '@/components/tx-flow/flows/SuccessScreenFlow'
 import { useSafeScope } from '@safe-global/views/components/tx-flow/safe-scope'
 
 jest.mock('@safe-global/views/components/tx-flow/safe-scope', () => ({
