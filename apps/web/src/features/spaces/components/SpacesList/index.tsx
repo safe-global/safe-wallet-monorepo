@@ -1,7 +1,4 @@
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { MyAccountsFeature } from '@/features/myAccounts'
-import { SafeProFeature } from '@/features/safe-pro-announcement'
-import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/hooks/useIsSafeProAnnouncementEnabled'
+import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled'
 import SpaceRow from './SpaceRow'
 import SignInOptions from '../SignInOptions'
 import WorkspaceBanner from '../WorkspaceBanner'
@@ -40,6 +37,9 @@ import { SPACES_LIMIT } from '@/features/spaces/constants'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import WelcomeContentCard from '@/components/common/WelcomeContentCard'
 import { useUrlSpaceId } from '@/hooks/useUrlSpaceId'
+import AccountsNavigation from '@/features/myAccounts/public/AccountsNavigation'
+import SafeProWorkspacesBanner from '@/features/safe-pro-announcement/public/SafeProWorkspacesBanner'
+import SafeProBanner from '@/features/safe-pro-announcement/public/SafeProBanner'
 
 const AddSpaceButton = ({
   onClick,
@@ -102,8 +102,6 @@ const SignedOutState = ({ afterSignIn, redirectLoading }: { afterSignIn: () => v
   const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
   // The Safe Pro terms only apply once Safe Pro is live.
   const isSafePro = useIsSafeProEnabled()
-  const { SafeProBanner } = useLoadFeature(SafeProFeature)
-
   return (
     <div className={cn('shadcn-scope', isDarkMode && 'dark')}>
       {/* The page keeps its Topbar + Accounts/Workspaces tabs, so the sign-in
@@ -265,8 +263,6 @@ const NoSpacesState = ({ isAtLimit }: { isAtLimit: boolean }) => {
 }
 
 const SpacesList = () => {
-  const { AccountsNavigation } = useLoadFeature(MyAccountsFeature)
-  const { SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
   const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
   // The pre-launch heads-up only makes sense to a user without a Workspace while Safe Pro is not live yet.
   const isUserSignedIn = useAppSelector(isAuthenticated)

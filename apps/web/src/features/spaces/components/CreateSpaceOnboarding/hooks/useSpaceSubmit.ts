@@ -8,7 +8,7 @@ import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { sanitizeNextUrl } from '@/utils/nextUrl'
 import { sanitizeName } from '@safe-global/utils/validation/names'
 import type { UseFormHandleSubmit } from 'react-hook-form'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/elevation'
 
 const useSpaceSubmit = (
   handleSubmit: UseFormHandleSubmit<{ name: string }>,

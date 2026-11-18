@@ -10,9 +10,14 @@ const fs = require('node:fs')
 
 const ROOT = path.resolve(__dirname, '../..')
 const SRC = path.join(ROOT, 'apps/web/src')
-const SCANNED = ['apps/web/src', 'apps/web-tanstack/src', 'packages/views/src', 'config/test'].map((d) =>
-  path.join(ROOT, d),
-)
+const SCANNED = [
+  'apps/web/src',
+  'apps/web/e2e',
+  'apps/web/cypress',
+  'apps/web-tanstack/src',
+  'packages/views/src',
+  'config/test',
+].map((d) => path.join(ROOT, d))
 const EXTENSIONS = ['.ts', '.tsx', '.d.ts', '/index.ts', '/index.tsx']
 const MOCK_CALLS = new Set(['mock', 'doMock', 'unmock', 'requireActual', 'requireMock', 'createMockFromModule'])
 const ts = require(path.join(ROOT, 'node_modules/typescript'))

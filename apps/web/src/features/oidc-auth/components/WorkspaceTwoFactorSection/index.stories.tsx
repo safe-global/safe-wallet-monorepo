@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { createMockStory } from '@/stories/mocks/createMockStory'
-import WorkspaceTwoFactorSection from './index'
+import WorkspaceTwoFactorSection from '../../public/WorkspaceTwoFactorSection'
 
 const member = (id: number, email: string | null): MemberDto => ({
   id,

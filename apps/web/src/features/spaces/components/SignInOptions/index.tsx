@@ -1,6 +1,8 @@
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import { useHasFeature } from '@/hooks/useChains'
 import SignInButton from '../SignInButton'
-import { OidcAuthFeature } from '@/features/oidc-auth'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
+import EmailSignInButton from '@/features/oidc-auth/public/EmailSignInButton'
+import GoogleSignInButton from '@/features/oidc-auth/public/GoogleSignInButton'
 
 interface SignInOptionsProps {
   afterSignIn: () => void
@@ -8,8 +10,7 @@ interface SignInOptionsProps {
 }
 
 const SignInOptions = ({ afterSignIn, redirectLoading = false }: SignInOptionsProps) => {
-  const { EmailSignInButton, GoogleSignInButton, $isDisabled, $isReady } = useLoadFeature(OidcAuthFeature)
-  const showOidc = !$isDisabled && $isReady
+  const showOidc = useHasFeature(FEATURES.OIDC_AUTH) === true
 
   return (
     <div className="flex w-full flex-col gap-2.5">

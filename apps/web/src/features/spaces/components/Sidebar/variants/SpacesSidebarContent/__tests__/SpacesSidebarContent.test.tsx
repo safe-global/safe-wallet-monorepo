@@ -27,7 +27,7 @@ jest.mock('@/hooks/useChains', () => ({
   useHasFeature: jest.fn((feature) => mockUseHasFeature(feature)),
 }))
 
-jest.mock('@/features/safe-pro-announcement/hooks/useIsSafeProAnnouncementEnabled', () => ({
+jest.mock('@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled', () => ({
   useIsSafeProAnnouncementEnabled: () => mockUseIsSafeProAnnouncementEnabled(),
 }))
 

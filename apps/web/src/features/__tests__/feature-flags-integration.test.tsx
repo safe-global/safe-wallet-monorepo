@@ -3,7 +3,6 @@ import type { FeatureHandle, FeatureImplementation } from '@/features/__core__/t
 
 const ALWAYS_ENABLED_FEATURES: Array<{ label: string; getHandle: () => FeatureHandle<FeatureImplementation> }> = [
   { label: 'spaces', getHandle: () => jest.requireActual('@/features/spaces/SpacesFeature').SpacesFeature },
-  { label: 'myAccounts', getHandle: () => jest.requireActual('@/features/myAccounts').MyAccountsFeature },
 ]
 
 describe('always-enabled features', () => {

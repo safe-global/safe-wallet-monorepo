@@ -6,7 +6,7 @@ import type { SimilarWarning } from '@/features/address-poisoning/public/crossLi
 
 // Stub the (MUI) accounts table so these tests stay focused on section/flag wiring.
 // The barrel is replaced wholesale (not spread) to avoid a circular-init crash when required.
-jest.mock('@/features/myAccounts/components/SafeAccountsTable', () => ({
+jest.mock('@/features/myAccounts/public/SafeAccountsTable', () => ({
   __esModule: true,
   default: ({
     items,

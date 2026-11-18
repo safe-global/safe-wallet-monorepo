@@ -38,29 +38,23 @@ jest.mock('@/hooks/useDarkMode', () => ({
   useDarkMode: jest.fn(() => false),
 }))
 
-jest.mock('@/features/__core__/useLoadFeature', () => ({
-  ...jest.requireActual('@/features/__core__/useLoadFeature'),
-  useLoadFeature: () => ({
-    AccountsNavigation: () => <nav data-testid="accounts-nav" />,
-    SafeProBanner: () => <div data-testid="safe-pro-banner" />,
-    SafeProWorkspacesBanner: () => <div data-testid="safe-pro-workspaces-banner" />,
-  }),
+jest.mock('@/features/myAccounts/public/AccountsNavigation', () => ({
+  __esModule: true,
+  default: () => <nav data-testid="accounts-nav" />,
 }))
-jest.mock('@/features/__core__/createFeatureHandle', () => ({
-  createFeatureHandle: () => ({}),
+jest.mock('@/features/safe-pro-announcement/public/SafeProBanner', () => ({
+  __esModule: true,
+  default: () => <div data-testid="safe-pro-banner" />,
 }))
-
-jest.mock('@/features/myAccounts', () => ({
-  MyAccountsFeature: { name: 'MyAccountsFeature' },
+jest.mock('@/features/safe-pro-announcement/public/SafeProWorkspacesBanner', () => ({
+  __esModule: true,
+  default: () => <div data-testid="safe-pro-workspaces-banner" />,
 }))
 
 const mockUseIsSafeProAnnouncementEnabled = jest.fn()
 const mockUseIsSafeProEnabled = jest.fn()
 
-jest.mock('@/features/safe-pro-announcement', () => ({
-  SafeProFeature: { name: 'SafeProFeature' },
-}))
-jest.mock('@/features/safe-pro-announcement/hooks/useIsSafeProAnnouncementEnabled', () => ({
+jest.mock('@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled', () => ({
   useIsSafeProAnnouncementEnabled: () => mockUseIsSafeProAnnouncementEnabled(),
 }))
 

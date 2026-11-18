@@ -4,10 +4,12 @@ import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AppInfo } from '@/services/safe-wallet-provider'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import type { SafeItem } from '@safe-global/views/hooks/safes/types'
-import { MyAccountsFeature } from '@/features/myAccounts'
-import { useSafeItemData } from '@/features/myAccounts/hooks/useSafeItemData'
+import { useSafeItemData } from '@/features/myAccounts/public/useSafeItemData'
+import AccountItemButton from '@/features/myAccounts/public/AccountItemButton'
+import AccountItemIcon from '@/features/myAccounts/public/AccountItemIcon'
+import AccountItemInfo from '@/features/myAccounts/public/AccountItemInfo'
+import AccountItemBalance from '@/features/myAccounts/public/AccountItemBalance'
 
 type WcChainSwitchModalProps = {
   appInfo: AppInfo
@@ -18,7 +20,6 @@ type WcChainSwitchModalProps = {
 }
 
 function WcSafeItem({ safeItem, onSelect }: { safeItem: SafeItem; onSelect: () => void }) {
-  const { AccountItemButton, AccountItemIcon, AccountItemInfo, AccountItemBalance } = useLoadFeature(MyAccountsFeature)
   const { name, safeOverview, threshold, owners, undeployedSafe, elementRef } = useSafeItemData(safeItem)
 
   return (

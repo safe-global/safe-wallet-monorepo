@@ -23,7 +23,7 @@ jest.mock('@/store', () => ({ useAppDispatch: () => mockDispatch }))
 jest.mock('@/store/notificationsSlice', () => ({
   showNotification: (payload: unknown) => ({ type: 'notifications/show', payload }),
 }))
-jest.mock('@/features/oidc-auth/utils/elevation', () => ({
+jest.mock('@/features/oidc-auth/public/elevation', () => ({
   isElevationRequiredError: (error: unknown) => error === elevationRequired,
 }))
 jest.mock('@/utils/rtkQuery', () => ({

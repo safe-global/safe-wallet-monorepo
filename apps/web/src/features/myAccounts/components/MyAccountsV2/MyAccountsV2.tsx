@@ -19,9 +19,9 @@ import useTrustedSafesModal from '@/components/common/TrustedSafesModal/useTrust
 import TrustedSafesModal from '@/components/common/TrustedSafesModal'
 import WelcomeContentCard from '@/components/common/WelcomeContentCard'
 import { DataWidget } from '../DataWidget'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { SafeProFeature } from '@/features/safe-pro-announcement'
-import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/hooks/useIsSafeProAnnouncementEnabled'
+import { useIsSafeProAnnouncementEnabled } from '@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled'
+import SafeProBanner from '@/features/safe-pro-announcement/public/SafeProBanner'
+import SafeProWorkspacesBanner from '@/features/safe-pro-announcement/public/SafeProWorkspacesBanner'
 
 type MyAccountsProps = {
   safes: AllSafeItemsGrouped
@@ -31,7 +31,6 @@ type MyAccountsProps = {
 const MyAccountsV2 = ({ safes, onLinkClick }: MyAccountsProps) => {
   const wallet = useWallet()
   const isDarkMode = useDarkMode()
-  const { SafeProBanner, SafeProWorkspacesBanner } = useLoadFeature(SafeProFeature)
   const isSafeProAnnouncementEnabled = useIsSafeProAnnouncementEnabled()
   const [searchQuery, setSearchQuery] = useState('')
   const modal = useTrustedSafesModal()

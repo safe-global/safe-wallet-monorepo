@@ -28,7 +28,7 @@ jest.mock('@/features/spaces/hooks/useFeatureRedirect', () => ({
   useRedirectWhenOff: jest.fn(),
 }))
 
-jest.mock('@/features/safe-pro-announcement/hooks/useIsSafeProAnnouncementEnabled', () => ({
+jest.mock('@/features/safe-pro-announcement/public/useIsSafeProAnnouncementEnabled', () => ({
   useIsSafeProAnnouncementEnabled: () => mockUseIsSafeProAnnouncementEnabled(),
 }))
 

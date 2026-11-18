@@ -43,7 +43,7 @@ A public component that must render while the current chain has the flag off use
 
 When a feature moves to `public/`, a component that its consumers imported statically moves unchanged; making it lazy is a separate change with its own tests.
 
-A small presentational component that other features render inline, such as `features/safe-shield/public/SeverityIcon.tsx`, may live in `public/` without a wrapper: a lazy icon would flicker.
+A small component that other code renders inline or in a fixed slot, such as an icon (`features/safe-shield/public/SeverityIcon.tsx`), a list-row part (`features/myAccounts/public/AccountItemInfo.tsx`) or a sidebar banner, may live in `public/` without a lazy wrapper: a lazy one would flicker or leave an empty slot. Its consumer checks the flag.
 
 ## Public hooks are the exception
 

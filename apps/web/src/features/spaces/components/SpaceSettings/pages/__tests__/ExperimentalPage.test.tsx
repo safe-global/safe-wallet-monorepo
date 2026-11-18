@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
 import type { GetSpaceResponse } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { spaceBuilder } from '@/tests/builders/space'
-import { ELEVATION_REQUIRED_ERROR } from '@/features/oidc-auth/utils/elevation'
+import { ELEVATION_REQUIRED_ERROR } from '@/features/oidc-auth/public/elevation'
 import ExperimentalPage from '../ExperimentalPage'
 
 const SPACE_ID = 'space-uuid-1'

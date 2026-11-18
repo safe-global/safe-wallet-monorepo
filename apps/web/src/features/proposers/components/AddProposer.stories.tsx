@@ -4,7 +4,7 @@ import { fn } from 'storybook/test'
 import { safeFixtures } from '@safe-global/test/msw/fixtures'
 import { createMockStory } from '@/stories/mocks/createMockStory'
 import { createNonOwnerWallet } from '@/stories/mocks/wallets'
-import AddProposer from './AddProposer'
+import AddProposer from '../public/AddProposer'
 
 const efSafe = safeFixtures.efSafe
 const parentSafeAddress = efSafe.owners[1].value

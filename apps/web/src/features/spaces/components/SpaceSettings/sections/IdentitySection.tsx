@@ -15,7 +15,7 @@ import { SPACE_NAME_MAX_LENGTH } from '@safe-global/utils/validation/names'
 import SpaceSettingsSection, {
   SpaceSettingsSectionTitle,
 } from '@safe-global/views/features/spaces/components/SpaceSettings/SpaceSettingsSection'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/elevation'
 
 const IdentitySection = ({ space }: { space: GetSpaceResponse | undefined }) => {
   const dispatch = useAppDispatch()

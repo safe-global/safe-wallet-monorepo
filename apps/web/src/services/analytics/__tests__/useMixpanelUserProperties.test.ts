@@ -46,7 +46,7 @@ jest.mock('@/utils/transaction-guards', () => ({
   isTransactionListItem: jest.fn((item) => item.type === 'TRANSACTION'),
 }))
 
-jest.mock('@/features/myAccounts/hooks/useNetworksOfSafe', () => ({
+jest.mock('@/features/myAccounts/public/useNetworksOfSafe', () => ({
   useNetworksOfSafe: jest.fn(() => ['ethereum', 'polygon']),
 }))
 
@@ -154,7 +154,7 @@ describe('useMixpanelUserProperties', () => {
   })
 
   it('should fallback to current chain when useNetworksOfSafe returns empty array', () => {
-    const { useNetworksOfSafe } = require('@/features/myAccounts/hooks/useNetworksOfSafe')
+    const { useNetworksOfSafe } = require('@/features/myAccounts/public/useNetworksOfSafe')
     useNetworksOfSafe.mockReturnValueOnce([])
 
     const { result } = renderHook(() => useMixpanelUserProperties())

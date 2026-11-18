@@ -6,7 +6,7 @@ import { createMockStory } from '@/stories/mocks/createMockStory'
 import { createNonOwnerWallet } from '@/stories/mocks/wallets'
 import { buildDelegationOrigin } from '../services/delegationMessages'
 import { getCurrentTotp } from '../utils/totp'
-import PendingDelegationsList from './PendingDelegationsList'
+import PendingDelegationsList from '../public/PendingDelegationsList'
 import { mockNow } from '@/stories/mocks/now'
 
 const efSafe = safeFixtures.efSafe

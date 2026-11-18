@@ -116,15 +116,6 @@ jest.mock('./SpaceNestedSafesButton', () => {
   return { __esModule: true, default: MockSpaceNestedSafesButton }
 })
 
-jest.mock('@/features/myAccounts', () => ({
-  MyAccountsFeature: {},
-}))
-
-jest.mock('@/features/__core__/useLoadFeature', () => ({
-  ...jest.requireActual('@/features/__core__/useLoadFeature'),
-  useLoadFeature: () => ({}),
-}))
-
 jest.mock('@/components/common/TrustedSafesModal', () => ({
   __esModule: true,
   default: () => null,
