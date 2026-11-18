@@ -44,6 +44,14 @@ describe('AuditRow', () => {
     expect(await screen.findByText('Copied')).toBeInTheDocument()
   })
 
+  it('keeps "Copied" open after a mouse click, without the pointer leaving the address', async () => {
+    const { user } = renderSignedRow()
+
+    await user.click(copyControl())
+
+    expect(await screen.findByText('Copied')).toBeInTheDocument()
+  })
+
   it('shows the copy hint again once the copied feedback has expired', async () => {
     const { user } = renderSignedRow()
     await user.tab()
