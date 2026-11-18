@@ -1,15 +1,16 @@
 import { type ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { isUnauthorized } from '@/features/spaces/utils'
+import { isUnauthorized } from '../../utils'
 import UnauthorizedState from '../UnauthorizedState'
 import LoadingState from '../LoadingState'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated, selectIsOidcLoginPending, selectIsSessionCheckPending } from '@/store/authSlice'
-import { setLastUsedSpaceOrigin } from '@/features/spaces/store'
+import { setLastUsedSpaceOrigin } from '../../public/store/spaceNavigationSlice'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { SPACE_REFRESH_OPTIONS } from '../../hooks/refreshOptions'
-import { MemberStatus } from '@/features/spaces'
+import { useSpaceQueuePolling } from '../../hooks/useSpaceQueuePolling'
+import { MemberStatus } from '../../public/hooks/useSpaceMembers'
 import { AppRoutes } from '@/config/routes'
 import TrialEndingModal from '../Plans/TrialEndingModal'
 import WorkspaceLockModal from '../Plans/WorkspaceLockModal'
@@ -25,6 +26,7 @@ const AuthState = ({ spaceId, children }: { spaceId: string; children: ReactNode
   )
   const isOidcLoginPending = useAppSelector(selectIsOidcLoginPending)
   const isSessionCheckPending = useAppSelector(selectIsSessionCheckPending)
+  useSpaceQueuePolling()
 
   const currentMembership = currentData?.members.find((member) => member.user.id === currentUser?.id)
   const hasMembershipLoaded = !!currentData && !!currentUser

@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker'
-import { EMPTY_WORKSPACE_DRAFT, type WorkspaceDraft } from '@/features/spaces/store'
+import { EMPTY_WORKSPACE_DRAFT, type WorkspaceDraft } from '@/features/spaces/public/store/workspaceDraftSlice'
 import { Builder, type IBuilder } from '../Builder'
 
 /** A name the Workspace name rules accept (3–30 letters). */

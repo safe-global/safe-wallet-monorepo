@@ -5,15 +5,16 @@ import type { JsonRpcProvider, JsonRpcSigner } from 'ethers'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
-import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/constants'
-import * as proposerUtils from '@/features/proposers/utils/utils'
+import { PROPOSER_LABEL_PLACEHOLDER, SMART_CONTRACT_PROPOSER_ERROR } from '@/features/proposers/public/constants'
+import * as proposerUtils from '@/features/proposers/public/utils/utils'
 import * as useChainIdModule from '@/hooks/useChainId'
 import * as useChainsModule from '@/hooks/useChains'
 import * as useSafeAddressModule from '@/hooks/useSafeAddress'
 import * as useOnboardModule from '@/hooks/wallets/useOnboard'
 import * as useWalletModule from '@/hooks/wallets/useWallet'
 import * as web3ReadOnlyModule from '@/hooks/wallets/web3ReadOnly'
-import { MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
+import { trackEvent } from '@/services/analytics'
 import { POLICY_EVENTS } from '@/services/analytics/events/policies'
 import * as sdk from '@/services/tx/tx-sender/sdk'
 import { getStoreInstance } from '@/store'
@@ -22,10 +23,10 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { connectedWalletBuilder } from '@/tests/builders/wallet'
 import { useGrantProposer } from '../useGrantProposer'
 import * as addOrRequestContactModule from '../../../../../hooks/useAddOrRequestWorkspaceContact'
-import { useIsAdmin } from '../../../../../hooks/useSpaceMembers'
+import { useIsAdmin } from '../../../../../public/hooks/useSpaceMembers'
 
-jest.mock('../../../../../hooks/useSpaceMembers', () => ({
-  ...jest.requireActual('../../../../../hooks/useSpaceMembers'),
+jest.mock('../../../../../public/hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('../../../../../public/hooks/useSpaceMembers'),
   useIsAdmin: jest.fn(() => true),
 }))
 

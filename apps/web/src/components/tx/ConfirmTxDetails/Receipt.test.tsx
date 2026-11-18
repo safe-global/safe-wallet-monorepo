@@ -1,6 +1,7 @@
 import { render } from '@/tests/test-utils'
 import { Receipt } from './Receipt'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import type { SafeTransaction } from '@safe-global/types-kit'
 
 const REFUND_RECEIVER = '0x0C51b4d70492D81f9f96B1EB1a826FBfb3fd27d8'
@@ -33,7 +34,7 @@ jest.mock('@/hooks/useBalances', () => ({
 }))
 
 const mockUsePayFromSafeFeePreview = jest.fn()
-jest.mock('@/features/fee-payment/hooks/usePayFromSafeFeePreview', () => ({
+jest.mock('@/features/fee-payment/public/hooks/usePayFromSafeFeePreview', () => ({
   usePayFromSafeFeePreview: () => mockUsePayFromSafeFeePreview(),
 }))
 

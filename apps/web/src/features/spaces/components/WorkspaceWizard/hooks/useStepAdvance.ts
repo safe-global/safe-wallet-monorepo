@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
-import type { WorkspaceDraftFields } from '@/features/spaces/store'
+import type { WorkspaceDraftFields } from '../../../public/store/workspaceDraftSlice'
 import type { WizardStepId } from '../steps'
 import { useSubmitWorkspace } from './useSubmitWorkspace'
 import { useWizardNavigation } from './useWizardNavigation'

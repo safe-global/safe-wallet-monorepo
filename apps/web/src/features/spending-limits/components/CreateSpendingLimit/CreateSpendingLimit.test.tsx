@@ -4,15 +4,16 @@ import { useFormContext } from 'react-hook-form'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { TokenType } from '@safe-global/store/gateway/types'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
-import type { PortfolioBalances } from '@/hooks/loadables/useLoadBalances'
+import type { PortfolioBalances } from '@safe-global/utils/hooks/portfolioBalances'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
-import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../types'
+import { SpendingLimitFields, type NewSpendingLimitFlowProps } from '../../public/types'
 import CreateSpendingLimit from './index'
-import { NO_TOKEN_SELECTED_ERROR } from '../../services/spendingLimitValidation'
+import { NO_TOKEN_SELECTED_ERROR } from '../../public/services/spendingLimitValidation'
 import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
 import * as useIsSpendingLimitSupportedHook from '../../hooks/useIsSpendingLimitSupported'
 
-jest.mock('@/features/safe-shield/SafeShieldContext', () => ({
+jest.mock('@/features/safe-shield/public/hooks/useSafeShield', () => ({
+  ...jest.requireActual('@/features/safe-shield/public/hooks/useSafeShield'),
   useSafeShieldForAddressPoisoning: jest.fn(),
 }))
 

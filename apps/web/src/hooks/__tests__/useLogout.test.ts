@@ -4,7 +4,7 @@
 import { act } from '@testing-library/react'
 import { renderHook } from '@/tests/test-utils'
 import local from '@/services/local-storage/local'
-import { EMPTY_WORKSPACE_DRAFT } from '@/features/spaces/store'
+import { EMPTY_WORKSPACE_DRAFT } from '@/features/spaces/public/store/workspaceDraftSlice'
 import useLogout from '@/hooks/useLogout'
 import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
 import useOnboard from '@/hooks/wallets/useOnboard'

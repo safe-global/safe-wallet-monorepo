@@ -3,10 +3,10 @@ import ReviewSignMessageOnChain, {
   type SignMessageOnChainProps,
 } from '@/components/tx-flow/flows/SignMessageOnChain/ReviewSignMessageOnChain'
 import { useCallback } from 'react'
-import { TxFlowType } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics/types'
 import { type ReviewTransactionProps } from '@/components/tx/ReviewTransactionV2'
 import { type SubmitCallback, TxFlow } from '../../TxFlow'
-import { dispatchSafeAppsTx } from '@/services/tx/tx-sender'
+import { dispatchSafeAppsTx } from '@/services/tx/tx-sender/dispatch'
 import { getSafeTxHashFromTxId } from '@/utils/transactions'
 
 const SignMessageOnChainFlow = ({ props }: { props: Omit<SignMessageOnChainProps, 'onSubmit'> }) => {

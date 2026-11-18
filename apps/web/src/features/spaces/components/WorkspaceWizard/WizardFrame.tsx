@@ -1,7 +1,10 @@
 import { useMemo, type ReactElement, type ReactNode } from 'react'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import type { WorkspaceDraft } from '@/features/spaces/store'
-import { OnboardingLayout, SafeAppMockup, StepCounter, type SafeAppMockupAccount } from '../OnboardingLayout'
+import type { WorkspaceDraft } from '../../public/store/workspaceDraftSlice'
+import type { SafeAppMockupAccount } from '@safe-global/views/features/spaces/components/OnboardingLayout/mockup/types'
+import OnboardingLayout from '../OnboardingLayout/OnboardingLayout'
+import StepCounter from '../OnboardingLayout/StepCounter'
+import SafeAppMockup from '../OnboardingLayout/mockup/SafeAppMockup'
 
 /** One row per Safe address in the preview, named as the user named it in the draft. */
 const toMockupAccounts = (draft: WorkspaceDraft): SafeAppMockupAccount[] => {

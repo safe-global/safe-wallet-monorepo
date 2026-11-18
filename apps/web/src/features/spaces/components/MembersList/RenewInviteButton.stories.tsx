@@ -2,8 +2,10 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { faker } from '@faker-js/faker'
 import type { MemberDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import RenewInviteButton from './RenewInviteButton'
+
+faker.seed(1)
 
 const baseMember: MemberDto = {
   id: 1,

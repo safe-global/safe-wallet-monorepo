@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import type { ReactElement, ReactNode } from 'react'
 import { mswLoader } from 'msw-storybook-addon'
 import { FormProvider, useForm } from 'react-hook-form'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import OwnerRow from './index'
 
 const defaultSetup = createMockStory({

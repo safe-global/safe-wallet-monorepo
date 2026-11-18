@@ -177,6 +177,27 @@ const config: StorybookConfig = {
       ],
     })
 
+    // Without fixed shared chunks, webpack copies a module that many stories import into each story's chunk,
+    // and the copies run the CI build out of memory. Modules used by 10+ stories go into one shared chunk instead.
+    const sharedChunk = (name: string, test: RegExp, priority: number) => ({
+      name,
+      test,
+      priority,
+      chunks: 'all' as const,
+      minChunks: 10,
+    })
+    config.optimization = {
+      ...config.optimization,
+      splitChunks: {
+        ...config.optimization?.splitChunks,
+        cacheGroups: {
+          vendors: sharedChunk('vendors', /[\\/]node_modules[\\/]/, -10),
+          packages: sharedChunk('packages', /[\\/]packages[\\/](views|utils|store|theme)[\\/]/, -15),
+          app: sharedChunk('app', /[\\/]apps[\\/]web[\\/]src[\\/]/, -20),
+        },
+      },
+    }
+
     return config
   },
 
@@ -190,6 +211,8 @@ const config: StorybookConfig = {
     NEXT_PUBLIC_APP_HOMEPAGE: process.env.NEXT_PUBLIC_APP_HOMEPAGE || packageJson.homepage,
     // Enable official host features (logo, branding) in Storybook
     NEXT_PUBLIC_IS_OFFICIAL_HOST: 'true',
+    // Generated Safe names ("Ecstatic Ethereum Safe") take the first adjective instead of a random one
+    VISUAL_REGRESSION_BUILD: 'true',
     // Any non-empty ID mounts the What's new frame; the sweep blocks the Beamer host
     NEXT_PUBLIC_BEAMER_ID: 'storybook',
   }),

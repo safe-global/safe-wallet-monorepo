@@ -1,26 +1,35 @@
 import { render, screen } from '@/tests/test-utils'
 import userEvent from '@testing-library/user-event'
-import { GlobalSearchModal } from '../index'
+import GlobalSearchModal from '../GlobalSearchModal'
 import type { RootState } from '@/store'
 import { mockWallet } from '@/tests/mocks/hooks'
 
 jest.mock('@/hooks/wallets/useWallet')
 
 const mockUseIsSwapFeatureEnabled = jest.fn().mockReturnValue(true)
-jest.mock('@/features/swap', () => ({
-  useIsSwapFeatureEnabled: () => mockUseIsSwapFeatureEnabled(),
+jest.mock('@/features/swap/public/hooks/useIsSwapFeatureEnabled', () => ({
+  __esModule: true,
+  default: () => mockUseIsSwapFeatureEnabled(),
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('@/features/spaces/public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => ({ allSafes: [], isLoading: false }),
+}))
+jest.mock('@/features/spaces/public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => null,
-  useIsQualifiedSafe: () => false,
+}))
+jest.mock('@/features/spaces/public/hooks/useIsQualifiedSafe', () => ({
+  __esModule: true,
+  default: () => false,
 }))
 
-jest.mock('@/hooks/safes', () => ({
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
+  ...jest.requireActual('@/hooks/safes/useAllSafesGrouped'),
   useAllSafesGrouped: () => ({ allMultiChainSafes: [], allSingleSafes: [] }),
-  isMultiChainSafeItem: () => false,
   flattenSafeItems: (items: unknown[]) => items,
+}))
+jest.mock('@/hooks/safes/isMultiChainSafeItem', () => ({
+  isMultiChainSafeItem: () => false,
 }))
 
 const renderWithOpenSearch = () => {

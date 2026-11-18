@@ -7,7 +7,7 @@ import SetupProgress from '@safe-global/views/features/spaces/components/Workspa
 import { AppRoutes } from '@/config/routes'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
 import { useAppDispatch } from '@/store'
-import { wizardLeft, wizardStepOpened } from '@/features/spaces/store'
+import { wizardLeft, wizardStepOpened } from '../../public/store/workspaceWizardSlice'
 import { CHECKOUT_SESSION_QUERY_PARAM } from '../../hooks/billing/returnUrl'
 import CheckoutReturnScreen from './CheckoutReturnScreen'
 import WizardReady from './WizardReady'

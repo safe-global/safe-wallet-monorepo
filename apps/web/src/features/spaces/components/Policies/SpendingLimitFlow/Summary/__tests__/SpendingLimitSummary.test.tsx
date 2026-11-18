@@ -7,7 +7,7 @@ import {
   spendingLimitSummaryBuilder,
   safeAccountOptionBuilder,
   spenderSummaryBuilder,
-} from '../SpendingLimitSummary.fixtures'
+} from '../SpendingLimitSummary.testData'
 
 jest.mock('@/components/common/ChainIndicator', () => {
   const Mock = ({ chainId }: { chainId: string }) => <img data-testid="chain-logo-img" alt={`chain-${chainId}`} />

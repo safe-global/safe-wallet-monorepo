@@ -27,14 +27,9 @@ jest.mock('@/config/routes', () => ({
   },
 }))
 
-jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({
-    WorkspaceOnboardingStep: ({ step }: { step: string }) => <div data-testid={`onboarding-step-${step}`} />,
-  }),
-}))
-
-jest.mock('@/features/spaces', () => ({
-  SpacesFeature: { name: 'spaces' },
+jest.mock('../../public/components/WorkspaceOnboardingStep', () => ({
+  __esModule: true,
+  default: ({ step }: { step: string }) => <div data-testid={`onboarding-step-${step}`} />,
 }))
 
 describe('SurveyPage (chains-config flag gate)', () => {

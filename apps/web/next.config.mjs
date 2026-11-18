@@ -2,10 +2,7 @@ import path from 'path'
 import withBundleAnalyzer from '@next/bundle-analyzer'
 import withPWAInit from '@ducanh2912/next-pwa'
 import remarkGfm from 'remark-gfm'
-import remarkHeadingId from 'remark-heading-id'
 import createMDX from '@next/mdx'
-import remarkFrontmatter from 'remark-frontmatter'
-import remarkMdxFrontmatter from 'remark-mdx-frontmatter'
 import { readFile } from 'fs/promises'
 import { fileURLToPath } from 'url'
 import { execSync } from 'child_process'
@@ -186,19 +183,15 @@ const nextConfig = {
   },
 }
 
-const isRspack = process.env.USE_RSPACK === '1'
 const enablePWA = process.env.ENABLE_PWA === '1'
 
-const withMDX = isRspack
-  ? createMDX({ extension: /\.(md|mdx)?$/, jsx: true, options: {} })
-  : createMDX({
-      extension: /\.(md|mdx)?$/,
-      jsx: true,
-      options: {
-        remarkPlugins: [remarkFrontmatter, [remarkMdxFrontmatter, { name: 'metadata' }], remarkHeadingId, remarkGfm],
-        rehypePlugins: [],
-      },
-    })
+const withMDX = createMDX({
+  extension: /\.(md|mdx)?$/,
+  jsx: true,
+  options: {
+    remarkPlugins: [remarkGfm],
+  },
+})
 
 const shouldEnablePWA = isProd || enablePWA
 let config = shouldEnablePWA ? withPWA(withMDX(nextConfig)) : withMDX(nextConfig)

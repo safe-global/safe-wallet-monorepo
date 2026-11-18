@@ -46,7 +46,31 @@ jest.mock('@/components/common/Track', () => ({
   default: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('../../public/hooks/useSpaceMembers', () => ({
+  get MemberRole() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').MemberRole
+  },
+  get MEMBER_ALIAS_MAX_LENGTH() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+  },
+  get sanitizeMemberAlias() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').sanitizeMemberAlias
+  },
+  get useSpaceMembersByStatus() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').useSpaceMembersByStatus
+  },
+  get useCurrentMembership() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').useCurrentMembership
+  },
+  get useCurrentMemberProfile() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').useCurrentMemberProfile
+  },
+  get useIsActiveMember() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').useIsActiveMember
+  },
+  get useIsInvited() {
+    return jest.requireActual('../../public/hooks/useSpaceMembers').useIsInvited
+  },
   useIsAdmin: () => true,
   getMemberDisplayName: (member: { alias?: string | null; name: string }) => member.alias || member.name,
   isAdmin: (member: { role: string }) => member.role === 'ADMIN',
@@ -60,6 +84,9 @@ jest.mock('@/features/spaces', () => ({
     ACTIVE: 'ACTIVE',
     DECLINED: 'DECLINED',
   },
+}))
+jest.mock('../../hooks/useIsLastActiveAdmin', () => ({
+  ...jest.requireActual('../../hooks/useIsLastActiveAdmin'),
   useAdminCount: () => 2,
 }))
 

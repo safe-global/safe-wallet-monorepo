@@ -8,7 +8,7 @@ import { MixpanelEventParams, SafeAppLaunchLocation } from '@/services/analytics
 import { AppRoutes } from '@/config/routes'
 import { safeAppBuilder } from '@/tests/builders/walletConnect'
 import type { SafeAppSuggestion } from '../../../hooks/useSafeAppSuggestion'
-import { safeAppSuggestionBuilder } from '../../../hooks/safeAppSuggestion.fixtures'
+import { safeAppSuggestionBuilder } from '../../../hooks/safeAppSuggestion.testData'
 import type { WalletKitTypes } from '@reown/walletkit'
 
 const mockRouterPush = jest.fn<Promise<boolean>, unknown[]>(() => Promise.resolve(true))

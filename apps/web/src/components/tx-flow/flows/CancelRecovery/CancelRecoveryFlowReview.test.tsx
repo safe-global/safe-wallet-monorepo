@@ -5,13 +5,13 @@ import { renderWithUserEvent, waitFor } from '@/tests/test-utils'
 import { mockHasFeature } from '@/tests/mocks/hooks'
 import { safeTxBuilder } from '@/tests/builders/safeTx'
 import { safeTxContextBuilder } from '@/tests/builders/safeTxContext'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
-import { RecoveryFeature, type RecoveryQueueItem } from '@/features/recovery'
-import { seedRecoveryScenario } from '@/features/recovery/test-helpers'
-import { createTx } from '@/services/tx/tx-sender'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { RecoveryQueueItem } from '@/features/recovery/public/types'
+import { seedRecoveryScenario } from '@/features/recovery/public/utils/test-helpers'
+import { createTx } from '@/services/tx/tx-sender/create'
 import { trackEvent } from '@/services/analytics'
 import { RECOVERY_EVENTS } from '@/services/analytics/events/recovery'
-import { useWeb3ReadOnly } from '@/hooks/wallets/web3'
+import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import { CancelRecoveryFlowReview } from './CancelRecoveryFlowReview'
 
 jest.mock('@/hooks/useChains')
@@ -19,7 +19,10 @@ jest.mock('@/hooks/wallets/web3ReadOnly', () => ({
   ...jest.requireActual('@/hooks/wallets/web3ReadOnly'),
   useWeb3ReadOnly: jest.fn(),
 }))
-jest.mock('@/services/tx/tx-sender', () => ({ createTx: jest.fn() }))
+jest.mock('@/services/tx/tx-sender/create', () => ({
+  ...jest.requireActual('@/services/tx/tx-sender/create'),
+  createTx: jest.fn(),
+}))
 jest.mock('@/services/analytics', () => ({
   ...jest.requireActual('@/services/analytics'),
   trackEvent: jest.fn(),
@@ -51,11 +54,12 @@ const renderReview = (recovery: RecoveryQueueItem) => {
   return { ...result, context, onSubmit }
 }
 
-describe('CancelRecoveryFlowReview', () => {
-  beforeAll(async () => {
-    await RecoveryFeature.load()
-  })
+// Render the component itself, not the lazy wrapper, so every test sees it on the first render
+jest.mock('@/features/recovery/public/components/CancelRecoveryReview', () =>
+  jest.requireActual('@/features/recovery/components/CancelRecoveryReview'),
+)
 
+describe('CancelRecoveryFlowReview', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockHasFeature({ [FEATURES.RECOVERY]: true })

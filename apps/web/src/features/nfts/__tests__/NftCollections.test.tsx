@@ -8,7 +8,7 @@ import * as useChains from '@/hooks/useChains'
 import { chainBuilder } from '@/tests/builders/chains'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { TxModalContext } from '@/components/tx-flow'
-import { NftTransferFlow } from '@/components/tx-flow/flows'
+import { NftTransferFlow } from '@/components/tx-flow/flows/NftTransferFlow'
 
 jest.mock('@/services/observability', () => ({
   logger: {
