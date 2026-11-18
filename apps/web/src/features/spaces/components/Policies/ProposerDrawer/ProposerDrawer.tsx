@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import { UserRoundPen } from 'lucide-react'
 import { Drawer } from '@safe-global/views/components/common/Drawer/Drawer'
-import { DrawerBody } from '@/components/common/Drawer/components/DrawerBody'
+import { DrawerBody } from '@safe-global/views/components/common/Drawer/components/DrawerBody'
 import PolicyDrawerActions, { PolicyDrawerActionsSkeleton } from '../components/PolicyDrawerActions/PolicyDrawerActions'
 import PolicyDrawerHeader from '../components/PolicyDrawerHeader/PolicyDrawerHeader'
 import {
