@@ -36,6 +36,7 @@ function ReviewDrawerPreview({
         sections: openSections,
         setSections,
         signersOpen: true,
+        setSignersOpen: () => {},
         reject,
         setReject,
         pendingAction,

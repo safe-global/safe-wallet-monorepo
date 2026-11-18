@@ -25,8 +25,15 @@ export type DrawerSignaturesProps = {
   meta?: ReactNode
   /** Icon buttons after the badge, such as copy link. */
   actions?: ReactNode
+  /** Replaces the count badge, such as a signature gauge. */
+  status?: ReactNode
+  /** A line under the title row, such as "You aren't a signer of this Safe". */
+  note?: ReactNode
   /** Folded by default so the body keeps most of the height. */
   defaultOpen?: boolean
+  /** Pass with `onOpenChange` to control it, for "expand all" or to open it from a link. */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 const YOUR_SIGNATURE = 'Your signature required'
@@ -104,9 +111,18 @@ export const DrawerSignatures = ({
   rows,
   meta,
   actions,
+  status,
+  note,
   defaultOpen = false,
+  open: controlledOpen,
+  onOpenChange,
 }: DrawerSignaturesProps): ReactElement => {
-  const [open, setOpen] = useState(defaultOpen)
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen)
+  const open = controlledOpen ?? uncontrolledOpen
+  const toggle = () => {
+    setUncontrolledOpen(!open)
+    onOpenChange?.(!open)
+  }
   const listId = useId()
   const complete = signed >= required
   const yourTurn = rows.some((row) => row.status === 'needed' && row.you)
@@ -122,11 +138,12 @@ export const DrawerSignatures = ({
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium">Signatures</span>
         {/* Your own row says it once the list is open */}
-        {!(yourTurn && open) && (
-          <Badge variant={complete ? 'success' : 'warning'} size="status" shape="status">
-            {badgeLabel}
-          </Badge>
-        )}
+        {status ??
+          (!(yourTurn && open) && (
+            <Badge variant={complete ? 'success' : 'warning'} size="status" shape="status">
+              {badgeLabel}
+            </Badge>
+          ))}
         {actions}
         <span className="flex-1" />
         {meta && <span className="text-xs text-muted-foreground">{meta}</span>}
@@ -135,12 +152,14 @@ export const DrawerSignatures = ({
           aria-label={open ? 'Hide signatures' : 'Show signatures'}
           aria-expanded={open}
           aria-controls={listId}
-          onClick={() => setOpen(!open)}
+          onClick={toggle}
           className="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
           {open ? <ChevronDown className="size-4" /> : <ChevronUp className="size-4" />}
         </button>
       </div>
+
+      {note && <p className="text-xs text-muted-foreground">{note}</p>}
 
       <div id={listId} hidden={!open} className={cn(SCROLL_AREA, 'max-h-[28vh] flex-none overscroll-contain pt-3')}>
         <ul className="flex flex-col gap-3">

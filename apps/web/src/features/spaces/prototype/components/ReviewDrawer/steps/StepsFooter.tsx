@@ -14,12 +14,13 @@ import {
   type DrawerSignatureRow,
 } from '@safe-global/views/components/common/Drawer/components/DrawerSignatures'
 import { getMenuActions, getPrimaryAction, MENU_LABELS, type MenuAction } from '../../../services/actions'
-import { getAccount } from '../../../services/model'
+import { getAccount, getGaugeTone } from '../../../services/model'
 import { getNotSignerNote, getSignatureSummary, toSignatureRows } from '../../../services/signers'
 import type { PreviewAction } from '../../../services/queue'
 import type { Wallet } from '../../../services/nextSteps'
 import type { Persona, Proposal } from '../../../types'
 import { CopyTransactionLink } from '../../ProposalDetails'
+import { SignatureGauge } from '../../QueueTable/SignatureGauge'
 import type { ReviewLayout } from '../ReviewDrawer'
 import { IdentityRow } from './IdentityRow'
 
@@ -166,17 +167,23 @@ export function StepsFooter({
     <DrawerFooter
       summary={
         <DrawerSignatures
-          // Remounts on "Expand all" or "Collapse all"; stepping keeps the list as you left it
-          key={layout.sectionsVersion ?? 0}
-          defaultOpen={layout.signersOpen}
+          open={layout.signersOpen}
+          onOpenChange={layout.setSignersOpen}
           signed={signed}
           required={account.threshold}
           rows={rows}
+          status={
+            <span className="flex items-center gap-1.5 text-xs font-medium tabular-nums">
+              <SignatureGauge count={signed} threshold={account.threshold} tone={getGaugeTone(tx, persona)} />
+              {signed}/{account.threshold}
+            </span>
+          }
+          note={getNotSignerNote(tx, persona)}
           meta={signed < account.threshold ? getSignatureSummary(tx).split(' · ')[1] : undefined}
           actions={<CopyTransactionLink proposal={tx} />}
         />
       }
-      hint={children ? undefined : ('hint' in primary && primary.hint) || getNotSignerNote(tx, persona)}
+      hint={children ? undefined : 'hint' in primary ? primary.hint : undefined}
     >
       {feedback && (
         <p role="status" className="text-center text-xs text-muted-foreground">

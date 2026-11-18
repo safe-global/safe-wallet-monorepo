@@ -794,6 +794,7 @@ function PendingQueueView() {
             sections: reviewSections,
             setSections: setReviewSections,
             signersOpen,
+            setSignersOpen,
             reject,
             setReject,
             pendingAction,

@@ -10,6 +10,7 @@ export type ReviewLayout = {
   sections: string[]
   setSections: (sections: string[]) => void
   signersOpen: boolean
+  setSignersOpen: (open: boolean) => void
   reject: boolean
   setReject: (reject: boolean) => void
   pendingAction: PreviewAction | null

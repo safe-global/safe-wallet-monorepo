@@ -72,6 +72,7 @@ export function StepsReviewDrawer({
             hasPrevious: position.index > 0,
             hasNext: position.index >= 0 && position.index < position.count - 1,
             position: position.index >= 0 ? `${position.index + 1} of ${position.count}` : undefined,
+            shortcuts: { previous: 'K', next: 'J' },
           }}
           actions={sectionsAction ? [sectionsAction] : undefined}
         />
