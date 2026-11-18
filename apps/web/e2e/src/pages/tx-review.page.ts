@@ -23,6 +23,10 @@ export class TxReviewPage {
   /** The payer that the fee card shows without a choice, e.g. "Safe account" once the signed payload carries the fees */
   readonly lockedFeePayer: Locator
   readonly gasFeeRow: Locator
+  /** Opens the gas settings in the fee card: editable while the connected wallet pays, read-only otherwise */
+  readonly gasSettingsToggle: Locator
+  readonly maxFeeInput: Locator
+  readonly saveGasSettingsButton: Locator
   /** "<n> free transactions left today" in the fee card */
   readonly remainingRelays: Locator
   /** The sponsored transactions left: the free daily ones, or "<left>/<quota>" of a Workspace plan */
@@ -70,6 +74,9 @@ export class TxReviewPage {
     this.safeAccountOption = page.getByTestId('fee-payer-safe')
     this.lockedFeePayer = page.getByTestId('fee-payer-locked')
     this.gasFeeRow = page.getByTestId('gas-fee-row')
+    this.gasSettingsToggle = page.getByTestId('gas-fee-details-toggle')
+    this.maxFeeInput = page.getByTestId('gas-param-maxFeePerGas')
+    this.saveGasSettingsButton = page.getByTestId('gas-params-save')
     this.remainingRelays = page.getByText(/free transactions? left today/)
     this.sponsoredTxsCounter = page.getByTestId('sponsored-txs-counter').or(page.getByTestId('sponsored-quota'))
     this.executeButton = page.getByTestId('combo-submit-execute')
@@ -167,9 +174,25 @@ export class TxReviewPage {
    * and makes itself the payer, so this waits for its selector; `execute` reads the card once and can miss it.
    */
   async executeDecliningSponsor(): Promise<void> {
+    await this.payFeesFromSignerWallet()
+    await this.executeButton.click()
+  }
+
+  /** Pick the connected wallet as the payer of the gas in the fee card of the execute step */
+  async payFeesFromSignerWallet(): Promise<void> {
     await this.feePayerSelector.click()
     await this.signerWalletOption.click()
-    await this.executeButton.click()
+  }
+
+  /**
+   * Set the max fee per gas of the execution, in Gwei, in the gas settings of the fee card. The settings open with
+   * the estimate they have at that moment, so this waits until the card shows the estimated fee.
+   */
+  async setMaxFee(gwei: string): Promise<void> {
+    await this.gasFeeRow.filter({ hasText: /\d/ }).waitFor()
+    await this.gasSettingsToggle.click()
+    await this.maxFeeInput.fill(gwei)
+    await this.saveGasSettingsButton.click()
   }
 
   /** Continue from the review and add the transaction to the batch instead of signing it */

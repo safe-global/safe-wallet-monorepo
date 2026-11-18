@@ -1,8 +1,6 @@
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import { gatedDynamic } from '@/utils/gatedDynamic'
+import dynamic from '@/utils/dynamic'
 
-const HistoryFeesAccordion = gatedDynamic(
-  FEATURES.GTF,
+const HistoryFeesAccordion = dynamic(
   () => import('@safe-global/views/features/fee-payment/components/HistoryFeesAccordion'),
 )
 

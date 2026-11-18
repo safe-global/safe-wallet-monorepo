@@ -19,7 +19,7 @@ jest.mock('@/hooks/useChains', () => ({
   useCurrentChain: () => ({
     chainId: '137',
     nativeCurrency: { symbol: 'POL', decimals: 18, logoUri: NATIVE_LOGO },
-    features: ['GTF'],
+    features: [],
     relayer: mockRelayer,
   }),
   useHasFeature: () => true,

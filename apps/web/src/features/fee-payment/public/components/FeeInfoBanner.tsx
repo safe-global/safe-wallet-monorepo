@@ -1,6 +1,5 @@
-import { FEATURES } from '@safe-global/utils/utils/chains'
-import { gatedDynamic } from '@/utils/gatedDynamic'
+import dynamic from '@/utils/dynamic'
 
-const FeeInfoBanner = gatedDynamic(FEATURES.GTF, () => import('../../components/FeeInfoBanner'))
+const FeeInfoBanner = dynamic(() => import('../../components/FeeInfoBanner'))
 
 export default FeeInfoBanner

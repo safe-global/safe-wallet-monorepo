@@ -128,6 +128,13 @@ export class SafeApiClient {
     return executed ? this.findTransaction(executed.id) : null
   }
 
+  /** Get the hash of the chain transaction that executed the multisig transaction at `nonce` */
+  async getExecutionTxHash(safeAddress: string, nonce: number): Promise<string> {
+    const txHash = (await this.findExecutedTransaction(safeAddress, nonce))?.txHash
+    if (!txHash) throw new Error(`CGW has no execution hash for nonce ${nonce} of ${safeAddress}`)
+    return txHash
+  }
+
   /** Get an off-chain message by its Safe message hash */
   async getMessage(messageHash: string): Promise<Message> {
     return this.get<Message>(`/v1/chains/${this.chainId}/messages/${messageHash}`)

@@ -14,7 +14,6 @@ import * as useGasTokenCandidatesModule from '../../../hooks/useGasTokenCandidat
 import * as gatewayApi from '@/store/api/gateway'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { SafeTransaction, SafeTransactionData } from '@safe-global/types-kit'
 
 // Safe-pays requires the chain's relayer to list PAY_FROM_SAFE.
@@ -22,7 +21,7 @@ const mockChain = chainBuilder()
   .with({
     chainId: '1',
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: 'https://eth.logo' },
-    features: [FEATURES.GTF],
+    features: [],
     relayer: {
       type: 'RELAY_FEE',
       safeCreationSponsored: false,
