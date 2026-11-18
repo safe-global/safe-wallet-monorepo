@@ -1,5 +1,5 @@
 import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import { useIsExpiredSwap } from '@/features/swap'
+import useIsExpiredSwap from '@/features/swap/public/hooks/useIsExpiredSwap'
 import useIsPending from '@/hooks/useIsPending'
 import type { SyntheticEvent } from 'react'
 import { type ReactElement, useContext } from 'react'
@@ -14,7 +14,7 @@ import { ReplaceTxHoverContext } from '../GroupedTxListItems/ReplaceTxHoverProvi
 import CheckWallet from '@/components/common/CheckWallet'
 import { useSafeSDK } from '@/hooks/coreSDK/safeCoreSDK'
 import useSetScopedTxFlow from '@/components/tx-flow/safe-scope/useSetScopedTxFlow'
-import { ConfirmTxFlow } from '@/components/tx-flow/flows'
+import { ConfirmTxFlow } from '@/components/tx-flow/flows/ConfirmTxFlow'
 
 const ExecuteTxButton = ({
   txSummary,

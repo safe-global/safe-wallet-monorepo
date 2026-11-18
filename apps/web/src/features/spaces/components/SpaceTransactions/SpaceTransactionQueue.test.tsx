@@ -14,7 +14,7 @@ import { NO_SPACE_QUEUE_FILTERS, type SpaceQueueFilters, type SpaceQueueSection 
 import SpaceTransactionQueue from './SpaceTransactionQueue'
 
 const mockToolbarProps = jest.fn()
-jest.mock('./TransactionsToolbar', () => ({
+jest.mock('./TransactionsToolbar/TransactionsToolbar', () => ({
   __esModule: true,
   default: (props: {
     filters: SpaceQueueFilters

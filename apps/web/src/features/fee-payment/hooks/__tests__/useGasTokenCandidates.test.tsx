@@ -2,7 +2,7 @@ import { OperationType } from '@safe-global/types-kit'
 
 import { renderHook } from '@/tests/test-utils'
 import { useGasTokenCandidates } from '../useGasTokenCandidates'
-import type { FeePreviewTx } from '../useResolvedGasToken'
+import type { FeePreviewTx } from '../../public/hooks/useResolvedGasToken'
 import * as useChainsModule from '@/hooks/useChains'
 import * as useSafeInfoModule from '@/hooks/useSafeInfo'
 import * as useTrustedTokenBalancesModule from '@/hooks/loadables/useTrustedTokenBalances'

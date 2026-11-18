@@ -5,8 +5,8 @@ import { useGetChainsConfigV2Query } from '@safe-global/store/gateway'
 import { type FEATURES, hasFeature } from '@safe-global/utils/utils/chains'
 import { CONFIG_SERVICE_KEY } from '@/config/constants'
 import { useAppSelector } from '@/store'
-import { selectFeatureFlagOverrides } from '@/features/feature-flag-overrides/store'
-import { SORTED_FEATURES } from '@/features/feature-flag-overrides/knownFeatures'
+import { selectFeatureFlagOverrides } from '../public/store/featureFlagOverridesSlice'
+import { SORTED_FEATURES } from '../knownFeatures'
 import useChainId from '@/hooks/useChainId'
 
 export type FeatureFlagRowData = {

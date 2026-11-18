@@ -1,5 +1,5 @@
 import { accountSetupScanner } from '../accountSetup'
-import { createMockContext } from '../test-helpers'
+import { createMockContext } from '../../../public/utils/test-helpers'
 
 const DELAY_MODULE = { value: '0xabcdef1234567890abcdef1234567890abcdef12', name: 'Delay Modifier' }
 

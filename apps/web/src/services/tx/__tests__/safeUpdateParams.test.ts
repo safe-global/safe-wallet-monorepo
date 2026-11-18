@@ -10,7 +10,7 @@ import { type SafeState } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import { Interface, JsonRpcProvider } from 'ethers'
 import { createUpdateSafeTxs, extractTargetVersionFromUpdateSafeTx } from '../safeUpdateParams'
 import type { TransactionData } from '@safe-global/store/gateway/AUTO_GENERATED/transactions'
-import * as web3 from '@/hooks/wallets/web3'
+import * as web3 from '@/hooks/wallets/web3ReadOnly'
 import { chainBuilder } from '@/tests/builders/chains'
 import { getLatestSafeVersion } from '@safe-global/utils/utils/chains'
 

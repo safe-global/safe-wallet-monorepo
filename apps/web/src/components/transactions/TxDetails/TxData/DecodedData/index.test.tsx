@@ -7,7 +7,7 @@ import { basicTypesActions, multiSendTxDataBuilder, setFallbackHandlerAction } f
 import type { Operation } from '@safe-global/store/gateway/types'
 import { transactionDataBuilder } from '@/tests/builders/transactionDetails'
 // Imported directly from helpers to avoid circular deps in tests
-import { TWAP_FALLBACK_HANDLER } from '@/features/swap/helpers/utils'
+import { TWAP_FALLBACK_HANDLER } from '@/features/swap/public/utils'
 
 jest.mock('@/hooks/useSafeInfo')
 

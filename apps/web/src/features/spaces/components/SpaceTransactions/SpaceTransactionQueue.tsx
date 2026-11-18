@@ -15,7 +15,7 @@ import {
   type SpaceQueueFilters,
 } from '../../hooks/useSpaceQueue'
 import SpaceQueueTable from './SpaceQueueTable'
-import TransactionsToolbar from './TransactionsToolbar'
+import TransactionsToolbar from './TransactionsToolbar/TransactionsToolbar'
 import UnavailableSafesAlert from './UnavailableSafesAlert'
 
 const QueueBody = memo(function QueueBody({

@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import ReviewTransactionSkeleton from './ReviewTransactionSkeleton'
 import useTxPreview from '../confirmation-views/useTxPreview'
 import type { ReviewTransactionContentProps } from './ReviewTransactionContent'

@@ -1,5 +1,5 @@
 import type { JsonRpcProvider } from 'ethers'
-import { MODULE_GUARD_STORAGE_SLOT } from '../../constants'
+import { MODULE_GUARD_STORAGE_SLOT } from '../../public/constants'
 import ErrorCodes from '@safe-global/utils/services/exceptions/ErrorCodes'
 import { logError } from '@/services/exceptions'
 import { getRpcErrorContext } from '@/hooks/wallets/rpcEndpointInfo'

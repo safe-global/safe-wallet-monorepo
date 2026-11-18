@@ -19,7 +19,7 @@ jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => moc
 const mockPlans: { plan: { status: string } | null } = { plan: null }
 jest.mock('../../../../hooks/useSpacePlan', () => ({ useSpacePlan: () => mockPlans }))
 const mockSponsored = { isPro: false }
-jest.mock('../../../../hooks/useSafeSponsoredTxs', () => ({ useSafeSponsoredTxs: () => mockSponsored }))
+jest.mock('../../../../public/hooks/useSafeSponsoredTxs', () => ({ useSafeSponsoredTxs: () => mockSponsored }))
 
 jest.mock('@/hooks/useIsSpaceRoute', () => ({
   useIsSpaceRoute: () => mockUseIsSpaceRoute(),

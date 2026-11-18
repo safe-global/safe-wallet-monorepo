@@ -28,7 +28,7 @@ import {
 import TxCard, { TxCardActions } from '@safe-global/views/components/tx-flow/common/TxCard'
 import { formatVisualAmount } from '@safe-global/utils/utils/formatters'
 import commonCss from '@safe-global/views/components/tx-flow/common/styles.module.css'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
@@ -39,17 +39,14 @@ import CSVAirdropAppModal from './CSVAirdropAppModal'
 import { InsufficientFundsValidationError } from '@/components/common/TokenAmountInput'
 import { useHasFeature } from '@/hooks/useChains'
 import Track from '@/components/common/Track'
-import { MODALS_EVENTS } from '@/services/analytics'
+import { MODALS_EVENTS } from '@/services/analytics/events/modals'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { TxFlowContext, type TxFlowContextType } from '../../TxFlowProvider'
-import {
-  NoFeeCampaignFeature,
-  useNoFeeCampaignEligibility,
-  useIsNoFeeCampaignEnabled,
-} from '@/features/no-fee-campaign'
-import { useLoadFeature } from '@/features/__core__'
-import { useSafeShieldForRecipients } from '@/features/safe-shield/SafeShieldContext'
+import { useNoFeeCampaignEligibility } from '@/features/no-fee-campaign/public/hooks/useNoFeeCampaignEligibility'
+import { useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign/public/hooks/useIsNoFeeCampaignEnabled'
+import { useSafeShieldForRecipients } from '@/features/safe-shield/public/hooks/useSafeShield'
 import uniq from 'lodash/uniq'
+import NoFeeCampaignTransactionCard from '@/features/no-fee-campaign/public/components/NoFeeCampaignTransactionCard'
 
 export const AutocompleteItem = (item: { tokenInfo: Balance['tokenInfo']; balance: string }): ReactElement => (
   <div className="flex items-center gap-2">
@@ -74,7 +71,6 @@ export type CreateTokenTransferProps = {
 }
 
 const CreateTokenTransfer = ({ txNonce }: CreateTokenTransferProps): ReactElement => {
-  const { NoFeeCampaignTransactionCard } = useLoadFeature(NoFeeCampaignFeature)
   const scope = useSafeScope()
   // Spending limits are loaded for the Safe in the URL, not for a scoped one
   const disableSpendingLimit = txNonce !== undefined || !!scope

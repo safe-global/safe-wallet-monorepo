@@ -4,9 +4,8 @@ import { trackEvent } from '@/services/analytics'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import type { SafeGrade } from '@/features/security/types'
-import { SecurityFeature } from '@/features/security'
-import { useLoadFeature } from '@/features/__core__'
+import type { SafeGrade } from '@/features/security/public/types'
+import { useSecurityServices } from '@/features/security/public/hooks/useSecurityServices'
 import SecuritySafesTable from './components/SecuritySafesTable/SecuritySafesTable'
 import SecurityReportDrawer from './components/SecurityReportDrawer/SecurityReportDrawer'
 import SecurityEmptyState from './components/SecurityEmptyState/SecurityEmptyState'
@@ -25,7 +24,7 @@ import { isSameSelection } from './utils'
  * newly selected space's aggregated score or table.
  */
 const SecurityHubContent = (): ReactElement => {
-  const security = useLoadFeature(SecurityFeature)
+  const security = useSecurityServices()
   const { isLoadingSpacesSafes, isLoadingOverviews, safes, deployedEntries, balanceMap, overviewMap } =
     useReconciledSpaceSafes(security)
   const { allScanResults, scanTimestamps, lastScannedAt, handleScanComplete } = useScanResultsState(security)
@@ -52,12 +51,12 @@ const SecurityHubContent = (): ReactElement => {
 
   const handleViewReport = (address: string, chainId: string) => {
     if (!isSameSelection(selectedSafe, address, chainId)) {
-      const scanResults = security.$isReady ? allScanResults[security.scanKey(address, chainId)] : undefined
+      const scanResults = security ? allScanResults[security.scanKey(address, chainId)] : undefined
 
       trackEvent(SPACE_EVENTS.SECURITY_REPORT_OPENED, {
         [MixpanelEventParams.CHAIN_ID]: chainId,
         [MixpanelEventParams.SAFE_ADDRESS]: address,
-        [MixpanelEventParams.RESULT]: scanResults ? security.getSafeGrade(scanResults) : undefined,
+        [MixpanelEventParams.RESULT]: scanResults && security ? security.getSafeGrade(scanResults) : undefined,
       })
     }
 

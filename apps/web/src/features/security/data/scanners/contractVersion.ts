@@ -7,7 +7,7 @@ import {
 import { getSafeSingletonDeployments, getSafeL2SingletonDeployments } from '@safe-global/safe-deployments'
 import { hasMatchingDeployment } from '@safe-global/utils/services/contracts/deployments'
 import type { EvidenceItem, ScanResult, SecurityScanner } from './types'
-import { KNOWN_SAFE_VERSIONS, getSeverityFromScore } from './constants'
+import { KNOWN_SAFE_VERSIONS, getSeverityFromScore } from '../../public/constants'
 
 const REMEDIATION = {
   migrate: 'This version may miss security fixes and improvements. You can migrate it to a compatible version.',

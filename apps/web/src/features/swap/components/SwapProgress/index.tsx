@@ -1,5 +1,5 @@
 import type { OrderTransactionInfo } from '@safe-global/store/gateway/types'
-import { getFilledAmount, getFilledPercentage } from '@/features/swap/helpers/utils'
+import { getFilledAmount, getFilledPercentage } from '../../public/utils'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
 import { Progress } from '@safe-global/views/components/ui/progress'
 import { Typography } from '@safe-global/views/components/ui/typography'

@@ -1,10 +1,10 @@
 import type { ReactElement } from 'react'
 import type { LinkProps } from 'next/link'
-import { DrawerFooter } from '@/components/common/Drawer'
+import { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'
 import { Button } from '@safe-global/views/components/ui/button'
 import type { AllowlistDrawerState } from '../resolveState'
-import { PolicyDrawerActions } from '../../components/PolicyDrawerActions'
-import { CopyTransactionLink } from '../../SpendingLimitDrawer/components/CopyTransactionLink'
+import PolicyDrawerActions from '../../components/PolicyDrawerActions/PolicyDrawerActions'
+import CopyTransactionLink from '../../SpendingLimitDrawer/components/CopyTransactionLink/CopyTransactionLink'
 
 export type AllowlistActionsProps = {
   state: AllowlistDrawerState
