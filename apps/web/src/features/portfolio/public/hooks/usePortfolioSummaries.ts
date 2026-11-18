@@ -55,13 +55,28 @@ const isSameCache = (a: CachedSummaries[], b: CachedSummaries[]) =>
   a.length === b.length &&
   a.every((entry, i) => entry.summaries === b[i].summaries && entry.fetchedAt === b[i].fetchedAt)
 
+type CachedSummary = { summary: PortfolioSummary; fetchedAt: number }
+
+const snapshotTime = ({ summary }: CachedSummary) => (summary.snapshot ? Date.parse(summary.snapshot.updatedAt) : NaN)
+
+// CGW's snapshot time orders totals even when a slow request lands last; the fetch time only breaks ties or covers tx_service rows
+const isNewer = (candidate: CachedSummary, current: CachedSummary) => {
+  const candidateTime = snapshotTime(candidate)
+  const currentTime = snapshotTime(current)
+  if (!Number.isNaN(candidateTime) && !Number.isNaN(currentTime) && candidateTime !== currentTime) {
+    return candidateTime > currentTime
+  }
+  return candidate.fetchedAt > current.fetchedAt
+}
+
 const pickNewest = (cached: CachedSummaries[]) => {
-  const newest = new Map<string, { summary: PortfolioSummary; fetchedAt: number }>()
+  const newest = new Map<string, CachedSummary>()
   for (const { trusted, summaries, fetchedAt } of cached) {
     for (const summary of summaries) {
       const key = summaryKey(trusted, summary.chainId, summary.address)
       const current = newest.get(key)
-      if (!current || current.fetchedAt < fetchedAt) newest.set(key, { summary, fetchedAt })
+      const candidate = { summary, fetchedAt }
+      if (!current || isNewer(candidate, current)) newest.set(key, candidate)
     }
   }
   return newest

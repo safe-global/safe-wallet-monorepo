@@ -1,12 +1,12 @@
 import { faker } from '@faker-js/faker'
-import { http, HttpResponse } from 'msw'
+import { delay, http, HttpResponse } from 'msw'
 import { act, fakerChecksummedAddress, renderHook, waitFor } from '@/tests/test-utils'
 import { server } from '@/tests/server'
 import { GATEWAY_URL } from '@/config/gateway'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { refreshPortfolioSummary } from '@safe-global/store/gateway/portfolioSummaries'
 import { chainBuilder } from '@/tests/builders/chains'
-import { portfolioSummaryBuilder } from '@/tests/builders/portfolioSummary'
+import { portfolioSnapshotBuilder, portfolioSummaryBuilder } from '@/tests/builders/portfolioSummary'
 import useChains from '@/hooks/useChains'
 import { getStoreInstance } from '@/store'
 import { initialState as initialSettings, setCurrency, setTokenList, TOKEN_LISTS } from '@/store/settingsSlice'
@@ -215,5 +215,42 @@ describe('usePortfolioSummaries', () => {
     const refreshedTotal = expectedTotal(true, 'usd', 1)
     await waitFor(() => expect(result.current.home.getSummary(SUMMARIES_CHAIN, safe)?.fiatTotal).toBe(refreshedTotal))
     expect(result.current.selector.getSummary(SUMMARIES_CHAIN, safe)?.fiatTotal).toBe(refreshedTotal)
+  })
+
+  it('keeps the total with the newer snapshot when an older one arrives later', async () => {
+    const safe = fakerChecksummedAddress()
+    const otherSafe = fakerChecksummedAddress()
+    const olderAt = faker.date.recent()
+    const newerAt = new Date(olderAt.getTime() + 60_000)
+    const newerTotal = faker.finance.amount()
+    const olderTotal = faker.finance.amount()
+    server.use(
+      http.get(`${GATEWAY_URL}/v2/portfolio/summaries`, async ({ request }) => {
+        const safes = (new URL(request.url).searchParams.get('safes') ?? '').split(',')
+        const isSlowList = safes.length === 1
+        if (isSlowList) await delay(100)
+        const updatedAt = (isSlowList ? olderAt : newerAt).toISOString()
+        return HttpResponse.json(
+          safes.map((safeId) => {
+            const [chainId, address] = safeId.split(':')
+            const snapshot = portfolioSnapshotBuilder().with({ updatedAt }).build()
+            const fiatTotal = isSlowList ? olderTotal : newerTotal
+            return portfolioSummaryBuilder().with({ chainId, address, fiatTotal, snapshot }).build()
+          }),
+        )
+      }),
+    )
+
+    const { result } = renderHook(() => ({
+      selector: usePortfolioSummaries([
+        { chainId: SUMMARIES_CHAIN, address: safe },
+        { chainId: SUMMARIES_CHAIN, address: otherSafe },
+      ]),
+      home: usePortfolioSummaries([{ chainId: SUMMARIES_CHAIN, address: safe }]),
+    }))
+
+    await waitFor(() => expect(result.current.selector.isLoading || result.current.home.isLoading).toBe(false))
+    expect(result.current.home.getSummary(SUMMARIES_CHAIN, safe)?.fiatTotal).toBe(newerTotal)
+    expect(result.current.selector.getSummary(SUMMARIES_CHAIN, safe)?.fiatTotal).toBe(newerTotal)
   })
 })
