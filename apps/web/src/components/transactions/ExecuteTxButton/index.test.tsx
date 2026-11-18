@@ -4,7 +4,7 @@ import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/saf
 import { mockSafeInfo } from '@/tests/mocks/hooks'
 import { mockRole } from '@/tests/mocks/roles'
 import { mockSetTxFlow, safeScopeContextFor, TxModalWithScope, unwrapScopedFlow } from '@/tests/mocks/safeScope'
-import { ConfirmTxFlow } from '@/components/tx-flow/flows'
+import { ConfirmTxFlow } from '@/components/tx-flow/flows/ConfirmTxFlow'
 import ExecuteTxButton from '.'
 
 jest.mock('@/hooks/wallets/useWallet')

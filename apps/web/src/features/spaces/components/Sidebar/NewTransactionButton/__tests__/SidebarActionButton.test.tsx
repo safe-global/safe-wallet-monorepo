@@ -49,7 +49,7 @@ jest.mock('@/features/spending-limits/hooks/useIsOnlySpendingLimitBeneficiary', 
   default: jest.fn(),
 }))
 
-jest.mock('@/components/tx-flow/flows', () => ({
+jest.mock('@/components/tx-flow/flows/NewTxFlow', () => ({
   NewTxFlow: () => <div>NewTxFlow</div>,
 }))
 

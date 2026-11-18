@@ -9,7 +9,7 @@ import type { RecoveryQueueItem } from '../../public/types'
 import useIsWrongChain from '@/hooks/useIsWrongChain'
 import { useCurrentChain } from '@/hooks/useChains'
 import { TxModalContext } from '@/components/tx-flow'
-import { RecoveryAttemptFlow } from '@/components/tx-flow/flows'
+import { RecoveryAttemptFlow } from '@/components/tx-flow/flows/RecoveryAttemptFlow'
 
 export default function ExecuteRecoveryButton({
   recovery,

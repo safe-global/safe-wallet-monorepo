@@ -6,7 +6,7 @@ import { faker } from '@faker-js/faker'
 import { mockSafeInfo } from '@/tests/mocks/hooks'
 import { mockRole } from '@/tests/mocks/roles'
 import { mockSetTxFlow, safeScopeContextFor, TxModalWithScope, unwrapScopedFlow } from '@/tests/mocks/safeScope'
-import { ConfirmTxFlow } from '@/components/tx-flow/flows'
+import { ConfirmTxFlow } from '@/components/tx-flow/flows/ConfirmTxFlow'
 
 jest.mock('@/hooks/wallets/useWallet')
 jest.mock('@/hooks/useIsSafeOwner')

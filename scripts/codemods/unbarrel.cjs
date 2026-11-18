@@ -1,6 +1,6 @@
 // One-off migration: point every import of a re-exported name in apps/web and apps/web-tanstack at the
 // file that declares it, split jest.mock/spyOn calls the same way, then delete re-exports nothing uses.
-// Usage (repo root): node --max-old-space-size=8192 scripts/codemods/unbarrel.cjs [--dry] [--features-only]
+// Usage (repo root): node --max-old-space-size=8192 scripts/codemods/unbarrel.cjs [--dry] [--features-only] [--only <file>]
 const path = require('node:path')
 const fs = require('node:fs')
 
@@ -11,6 +11,10 @@ const TANSTACK_SRC = path.join(ROOT, 'apps/web-tanstack/src') + path.sep
 const DRY = process.argv.includes('--dry')
 // Only barrels under src/features: other re-exporting files such as store/slices.ts are deliberate entry points.
 const FEATURES_ONLY = process.argv.includes('--features-only')
+// One barrel only, as a path relative to the repo root.
+const ONLY = process.argv.includes('--only')
+  ? path.join(ROOT, process.argv[process.argv.indexOf('--only') + 1])
+  : undefined
 // Mocked files whose real module cannot load while a mock factory runs: an import cycle reads their exports
 // before they are initialized, or a test's other mocks break their imports. Their real exports are read lazily.
 const LAZY_MOCK_FILES = new Set([
@@ -52,6 +56,7 @@ const targets = new Set(
   program
     .getSourceFiles()
     .filter((sf) => sf.fileName.startsWith(FEATURES_ONLY ? path.join(SRC, 'features') + path.sep : SRC))
+    .filter((sf) => !ONLY || sf.fileName === ONLY)
     .filter((sf) => !sf.isDeclarationFile && hasValueReexport(sf))
     .map((sf) => sf.fileName),
 )

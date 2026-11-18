@@ -9,7 +9,7 @@ import { chainBuilder } from '@/tests/builders/chains'
 import { mockChainId } from '@/tests/mocks/hooks'
 import { mockSetTxFlow, safeScopeContextFor, TxModalWithScope, unwrapScopedFlow } from '@/tests/mocks/safeScope'
 import { getStoreInstance } from '@/store'
-import { TokenTransferFlow } from '@/components/tx-flow/flows'
+import { TokenTransferFlow } from '@/components/tx-flow/flows/TokenTransferFlow'
 import TransferActions from './TransferActions'
 
 jest.mock('@/components/common/CheckWallet', () => ({
