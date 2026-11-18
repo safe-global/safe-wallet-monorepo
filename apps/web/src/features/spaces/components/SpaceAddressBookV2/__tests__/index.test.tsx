@@ -931,6 +931,13 @@ describe('SpaceAddressBookV2', () => {
       })
       expect(within(csvGroup).getByRole('button', { name: 'Import' })).toBeEnabled()
       expect(within(csvGroup).getByRole('button', { name: 'Export' })).toBeEnabled()
+      // Same lucide icons as the Workspace contacts tab
+      expect(
+        within(csvGroup).getByRole('button', { name: 'Import' }).querySelector('.lucide-file-up'),
+      ).toBeInTheDocument()
+      expect(
+        within(csvGroup).getByRole('button', { name: 'Export' }).querySelector('.lucide-download'),
+      ).toBeInTheDocument()
       const toolbar = screen.getByTestId('address-book-toolbar')
       expect(within(toolbar).getByRole('button', { name: 'Add local contact' })).toBeInTheDocument()
     })
@@ -942,6 +949,9 @@ describe('SpaceAddressBookV2', () => {
       const emptyState = screen.getByTestId('address-book-empty')
       expect(within(emptyState).getByRole('button', { name: 'Import' })).toBeEnabled()
       expect(within(emptyState).getByRole('button', { name: 'Export' })).toBeDisabled()
+      expect(
+        within(emptyState).getByRole('button', { name: 'Import' }).querySelector('.lucide-file-up'),
+      ).toBeInTheDocument()
     })
 
     it('merges a local contact saved on several chains into one row', async () => {

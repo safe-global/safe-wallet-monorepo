@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { Download, FileUp } from 'lucide-react'
+import { useState, type ReactNode } from 'react'
 import { Button } from '@safe-global/views/components/ui/button'
 import ExportDialog from '@/components/address-book/ExportDialog'
 import ImportDialog from '@/components/address-book/ImportDialog'
@@ -12,18 +11,25 @@ import type { TriggerSize } from './AddContactDialog'
 // Tells these clicks apart from the Safe-level address book toolbar
 const TRACK_LABEL = 'workspace_local_contacts'
 
+export type CsvActionIcons = { import: ReactNode; export: ReactNode }
+
+const SVG_ICONS: CsvActionIcons = {
+  import: <ImportIcon className="size-4" />,
+  export: <ExportIcon className="size-4" />,
+}
+
 type LocalContactsCsvActionsProps = {
   hasContacts: boolean
   size?: TriggerSize
+  /** The v2 address book passes lucide icons; the v1 page keeps the SVGs. */
+  icons?: CsvActionIcons
 }
 
 // Same CSV import/export as the Safe-level address book: both dialogs cover every chain's local book.
 // Tracked on click, not with <Track>: its wrapper would break the ButtonGroup corners
-const LocalContactsCsvActions = ({ hasContacts, size = 'action' }: LocalContactsCsvActionsProps) => {
+const LocalContactsCsvActions = ({ hasContacts, size = 'action', icons = SVG_ICONS }: LocalContactsCsvActionsProps) => {
   const [openDialog, setOpenDialog] = useState<'import' | 'export'>()
   const handleClose = () => setOpenDialog(undefined)
-  // The v2 toolbar (`lg`) uses lucide icons, like the Workspace contacts tab; the v1 page keeps its SVGs
-  const isV2 = size === 'lg'
 
   return (
     <>
@@ -35,7 +41,7 @@ const LocalContactsCsvActions = ({ hasContacts, size = 'action' }: LocalContacts
           setOpenDialog('import')
         }}
       >
-        {isV2 ? <FileUp aria-hidden="true" data-icon="inline-start" /> : <ImportIcon className="size-4" />}
+        {icons.import}
         Import
       </Button>
 
@@ -48,7 +54,7 @@ const LocalContactsCsvActions = ({ hasContacts, size = 'action' }: LocalContacts
         }}
         disabled={!hasContacts}
       >
-        {isV2 ? <Download aria-hidden="true" data-icon="inline-start" /> : <ExportIcon className="size-4" />}
+        {icons.export}
         Export
       </Button>
 

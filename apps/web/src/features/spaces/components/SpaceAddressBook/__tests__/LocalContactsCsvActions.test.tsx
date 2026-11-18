@@ -1,5 +1,5 @@
 import userEvent from '@testing-library/user-event'
-import { render, screen, waitFor } from '@/tests/test-utils'
+import { render, screen, waitFor, within } from '@/tests/test-utils'
 import { trackEvent } from '@/services/analytics'
 import { ADDRESS_BOOK_EVENTS } from '@/services/analytics/events/addressBook'
 import LocalContactsCsvActions from '../LocalContactsCsvActions'
@@ -37,15 +37,16 @@ describe('LocalContactsCsvActions', () => {
     expect(screen.getByRole('button', { name: 'Export' })).toBeDisabled()
   })
 
-  it('uses the lucide icons in the v2 toolbar and keeps the SVGs on the v1 page', () => {
-    const { unmount } = render(<LocalContactsCsvActions hasContacts size="lg" />)
-    expect(screen.getByRole('button', { name: 'Import' }).querySelector('.lucide-file-up')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Export' }).querySelector('.lucide-download')).toBeInTheDocument()
+  it('shows the icons it is given, and the SVGs by default', () => {
+    const icons = { import: <svg data-testid="import-icon" />, export: <svg data-testid="export-icon" /> }
+    const { unmount } = render(<LocalContactsCsvActions hasContacts icons={icons} />)
+    expect(within(screen.getByRole('button', { name: 'Import' })).getByTestId('import-icon')).toBeInTheDocument()
+    expect(within(screen.getByRole('button', { name: 'Export' })).getByTestId('export-icon')).toBeInTheDocument()
     unmount()
 
     render(<LocalContactsCsvActions hasContacts />)
+    expect(screen.queryByTestId('import-icon')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Import' }).querySelector('.lucide')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Export' }).querySelector('.lucide')).not.toBeInTheDocument()
   })
 
   it('labels the button clicks as coming from the Workspace local contacts', async () => {
