@@ -1,4 +1,4 @@
-import ActionsTray from '@/features/actions-tray/components/ActionsTray/ActionsTray'
+import ActionsTray from '@/features/actions-tray/public/ActionsTray'
 import { TotalValueElement } from '@safe-global/views/features/spaces/components/TotalValueElement'
 
 /**

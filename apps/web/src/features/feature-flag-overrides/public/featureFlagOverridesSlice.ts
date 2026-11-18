@@ -1,7 +1,7 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSelector, createSlice } from '@reduxjs/toolkit'
 import type { FEATURES } from '@safe-global/utils/utils/chains'
-import { isKnownFeature } from '@/features/feature-flag-overrides/knownFeatures'
+import { isKnownFeature } from '../knownFeatures'
 import type { RootState } from '@/store'
 
 export type FeatureFlagOverridesState = Partial<Record<FEATURES, boolean>>

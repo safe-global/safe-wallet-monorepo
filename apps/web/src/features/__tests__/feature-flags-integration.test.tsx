@@ -61,30 +61,6 @@ const FEATURE_FLAG_MATRIX: Array<{
       return HypernativeFeature
     },
   },
-  {
-    label: 'no-fee-campaign',
-    featureFlag: FEATURES.NO_FEE_NOVEMBER,
-    getHandle: () => {
-      const { NoFeeCampaignFeature } = jest.requireActual('@/features/no-fee-campaign')
-      return NoFeeCampaignFeature
-    },
-  },
-  {
-    label: 'portfolio',
-    featureFlag: FEATURES.PORTFOLIO_ENDPOINT,
-    getHandle: () => {
-      const { PortfolioFeature } = jest.requireActual('@/features/portfolio')
-      return PortfolioFeature
-    },
-  },
-  {
-    label: 'speedup',
-    featureFlag: FEATURES.SPEED_UP_TX,
-    getHandle: () => {
-      const { SpeedupFeature } = jest.requireActual('@/features/speedup')
-      return SpeedupFeature
-    },
-  },
 ]
 
 // ── Helpers ───────────────────────────────────────────────────────

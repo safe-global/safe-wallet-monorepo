@@ -12,18 +12,17 @@ import CurrencySelect from '@/components/balances/CurrencySelect'
 import ManageTokensButton from '@/components/balances/ManageTokensButton'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import { BRAND_NAME } from '@/config/constants'
-import { NoFeeCampaignFeature } from '@/features/no-fee-campaign'
-import { useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled'
-import { PortfolioFeature } from '@/features/portfolio'
+import { useIsNoFeeCampaignEnabled } from '@/features/no-fee-campaign/public/useIsNoFeeCampaignEnabled'
 import { StakeFeature } from '@/features/stake'
 import useIsStakingPromoBannerVisible, {
   STAKING_PROMO_BANNER_HIDE_KEY,
 } from '@/features/stake/hooks/useIsStakingPromoBannerVisible'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import TotalAssetValue from '@/components/balances/TotalAssetValue'
+import PortfolioRefreshHint from '@/features/portfolio/public/PortfolioRefreshHint'
+import NoFeeCampaignBanner from '@/features/no-fee-campaign/public/NoFeeCampaignBanner'
 
 const Balances = () => {
-  const { NoFeeCampaignBanner } = useLoadFeature(NoFeeCampaignFeature)
   const { StakingPromoBanner } = useLoadFeature(StakeFeature)
   const { balances, error } = useVisibleBalances()
   const [showHiddenAssets, setShowHiddenAssets] = useState(false)
@@ -35,7 +34,6 @@ const Balances = () => {
   )
   const isStakingPromoBannerVisible = useIsStakingPromoBannerVisible()
   const [, setHideStakingPromoBanner] = useLocalStorage<boolean>(STAKING_PROMO_BANNER_HIDE_KEY)
-  const portfolio = useLoadFeature(PortfolioFeature)
 
   const tokensFiatTotal = balances.tokensFiatTotal ? Number(balances.tokensFiatTotal) : undefined
 
@@ -73,7 +71,7 @@ const Balances = () => {
             />
 
             <div className="flex flex-col items-end gap-1">
-              <portfolio.PortfolioRefreshHint entryPoint="Assets" />
+              <PortfolioRefreshHint entryPoint="Assets" />
               <div className="flex flex-row items-center gap-2">
                 <ManageTokensButton ref={manageTokensButtonRef} onHideTokens={toggleShowHiddenAssets} />
                 <CurrencySelect />

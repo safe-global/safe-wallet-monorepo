@@ -1,9 +1,9 @@
 import { useMemo } from 'react'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { useAppSelector } from '@/store'
-import { selectFeatureFlagOverrides } from '@/features/feature-flag-overrides/store/featureFlagOverridesSlice'
-import type { FeatureFlagOverridesState } from '@/features/feature-flag-overrides/store/featureFlagOverridesSlice'
-import { isKnownFeature } from '@/features/feature-flag-overrides/knownFeatures'
+import { selectFeatureFlagOverrides } from './featureFlagOverridesSlice'
+import type { FeatureFlagOverridesState } from './featureFlagOverridesSlice'
+import { isKnownFeature } from '../knownFeatures'
 
 /**
  * The single production check governing override behaviour — overrides are dev-only.

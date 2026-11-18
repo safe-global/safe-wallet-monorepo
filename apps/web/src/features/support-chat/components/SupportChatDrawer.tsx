@@ -51,7 +51,7 @@ function sanitizeError(error: string): string {
   return 'Support chat unavailable. Please try again later.'
 }
 
-import type { SupportChatConfig, UserIdentity } from '../hooks/useSupportChat'
+import type { SupportChatConfig, UserIdentity } from '../public/useSupportChat'
 
 export interface SupportChatDrawerProps {
   open: boolean

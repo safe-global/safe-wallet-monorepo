@@ -37,15 +37,17 @@ jest.mock('@/services/local-storage/useLocalStorage', () => ({
   default: () => [false, jest.fn()],
 }))
 
-jest.mock('@/features/no-fee-campaign', () => ({
-  NoFeeCampaignFeature: {},
+jest.mock('@/features/no-fee-campaign/public/NoFeeCampaignBanner', () => ({
+  __esModule: true,
+  default: () => <div data-testid="no-fee-campaign-banner" />,
 }))
-jest.mock('@/features/no-fee-campaign/hooks/useIsNoFeeCampaignEnabled', () => ({
+jest.mock('@/features/no-fee-campaign/public/useIsNoFeeCampaignEnabled', () => ({
   useIsNoFeeCampaignEnabled: () => false,
 }))
 
-jest.mock('@/features/portfolio', () => ({
-  PortfolioFeature: {},
+jest.mock('@/features/portfolio/public/PortfolioRefreshHint', () => ({
+  __esModule: true,
+  default: () => <div data-testid="portfolio-refresh-hint" />,
 }))
 
 jest.mock('@/features/stake', () => ({
@@ -60,9 +62,7 @@ jest.mock('@/features/stake/hooks/useIsStakingPromoBannerVisible', () => ({
 jest.mock('@/features/__core__/useLoadFeature', () => ({
   ...jest.requireActual('@/features/__core__/useLoadFeature'),
   useLoadFeature: () => ({
-    NoFeeCampaignBanner: () => <div data-testid="no-fee-campaign-banner" />,
     StakingPromoBanner: () => <div data-testid="staking-promo-banner" />,
-    PortfolioRefreshHint: () => <div data-testid="portfolio-refresh-hint" />,
   }),
 }))
 

@@ -6,9 +6,9 @@ import { faker } from '@faker-js/faker'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { setIsProduction } from '@/tests/env'
-import type { FeatureFlagOverridesState } from '@/features/feature-flag-overrides/store/featureFlagOverridesSlice'
-import { applyFeatureOverrides, useChainsWithOverrides } from './useChainOverrides'
-import type * as ChainOverridesModule from './useChainOverrides'
+import type { FeatureFlagOverridesState } from '../featureFlagOverridesSlice'
+import { applyFeatureOverrides, useChainsWithOverrides } from '../useChainOverrides'
+import type * as ChainOverridesModule from '../useChainOverrides'
 
 const mockOverrides = jest.fn<FeatureFlagOverridesState, []>()
 
@@ -41,7 +41,7 @@ const loadInProduction = (): typeof ChainOverridesModule => {
       // The isolated registry would otherwise instantiate a second copy of React, whose hook
       // dispatcher is null during the outer render. Pin it to the instance renderHook renders with.
       jest.doMock('react', () => React)
-      loaded = require('./useChainOverrides')
+      loaded = require('../useChainOverrides')
     })
   } finally {
     setIsProduction(original)
@@ -193,7 +193,7 @@ describe('useChainsWithOverrides with a single chain', () => {
  * inlined one folds away and drops the override path from production builds.
  */
 describe('production guard form', () => {
-  const source = readFileSync(path.join(__dirname, 'useChainOverrides.ts'), 'utf8')
+  const source = readFileSync(path.join(__dirname, '../useChainOverrides.ts'), 'utf8')
   const CHECK = "process.env.NEXT_PUBLIC_IS_PRODUCTION === 'true'"
 
   it('guards on the inlined env check the bundler can fold', () => {

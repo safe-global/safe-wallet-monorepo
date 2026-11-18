@@ -18,7 +18,7 @@ import { useVulnerableSafe } from '@/features/security/hooks/useVulnerableModule
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useVisibleBalances } from '@/hooks/useVisibleBalances'
 import AddFundsToGetStarted from '@/components/dashboard/AddFundsBanner'
-import useIsPositionsFeatureEnabled from '@/features/positions/hooks/useIsPositionsFeatureEnabled'
+import useIsPositionsFeatureEnabled from '@/features/positions/public/useIsPositionsFeatureEnabled'
 import { useBannerVisibility } from '@/features/hypernative/hooks/useBannerVisibility'
 import { BannerType } from '@/features/hypernative/hooks/useBannerStorage'
 import { HnBannerForCarousel } from '@/features/hypernative/components/HnBanner/HnBannerForCarousel'
@@ -30,7 +30,7 @@ import useIsStakingPromoBannerVisible, {
 } from '@/features/stake/hooks/useIsStakingPromoBannerVisible'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
-const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
+const PositionsWidget = dynamic(() => import('@/features/positions/public/PositionsWidget'))
 
 const Dashboard = (): ReactElement => {
   const { safe } = useSafeInfo()

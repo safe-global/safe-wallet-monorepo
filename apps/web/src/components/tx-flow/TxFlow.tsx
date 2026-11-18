@@ -22,10 +22,9 @@ import Propose from '@/components/tx-flow/actions/Propose'
 import Sign from '@/components/tx-flow/actions/Sign'
 import { SlotProvider } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { useTrackTimeSpent } from '@/components/tx/shared/tracking'
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { LedgerFeature } from '@/features/ledger'
 import { SafeShieldProvider } from '@/features/safe-shield/public/SafeShieldProvider'
 import type { SubmitCallback, SubmitCallbackProps } from '@safe-global/views/components/tx-flow/types'
+import LedgerHashComparison from '@/features/ledger/public/LedgerHashComparison'
 
 export type { SubmitCallback } from '@safe-global/views/components/tx-flow/types'
 export type SubmitCallbackWithData<T> = (args: SubmitCallbackProps & { data?: T }) => void
@@ -66,7 +65,6 @@ export const TxFlow = <T extends unknown>({
   eventCategory,
   ...txLayoutProps
 }: TxFlowProps<T>) => {
-  const { LedgerHashComparison } = useLoadFeature(LedgerFeature)
   const { step, data, nextStep, prevStep } = useTxStepper(initialData, eventCategory)
 
   const childrenArray = Array.isArray(children) ? children : [children]

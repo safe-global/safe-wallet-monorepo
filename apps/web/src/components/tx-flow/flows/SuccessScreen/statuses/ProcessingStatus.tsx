@@ -1,8 +1,7 @@
 // Extract status handling into separate components
-import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { SpeedupFeature } from '@/features/speedup'
 import { PendingStatus, type PendingTx } from '@/store/pendingTxsSlice'
 import { Typography } from '@safe-global/views/components/ui/typography'
+import SpeedUpMonitor from '@/features/speedup/public/SpeedUpMonitor'
 
 type Props = {
   txId: string
@@ -10,8 +9,6 @@ type Props = {
   willDeploySafe: boolean
 }
 export const ProcessingStatus = ({ txId, pendingTx, willDeploySafe: isCreatingSafe }: Props) => {
-  const { SpeedUpMonitor } = useLoadFeature(SpeedupFeature)
-
   return (
     <div className="mt-6 px-6">
       <Typography data-testid="transaction-status" variant="h4" className="mt-4">

@@ -7,7 +7,7 @@ jest.mock('@/store', () => ({
   useAppSelector: (...args: unknown[]) => mockUseAppSelector(...args),
 }))
 
-jest.mock('@/features/feature-flag-overrides/FeatureFlagEditorDialogLoader', () => ({
+jest.mock('@/features/feature-flag-overrides/public/FeatureFlagEditorDialogLoader', () => ({
   FeatureFlagEditorDialogLoader: ({ open, onOpenChange }: { open: boolean; onOpenChange: (o: boolean) => void }) =>
     open ? (
       <div data-testid="feature-flag-editor-dialog">
