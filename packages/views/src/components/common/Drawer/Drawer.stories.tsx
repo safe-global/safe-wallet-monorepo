@@ -5,6 +5,8 @@ import { DrawerBody } from '@safe-global/views/components/common/Drawer/componen
 import { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'
 import { DrawerHeader } from '@safe-global/views/components/common/Drawer/components/DrawerHeader'
 import { DrawerActions } from '@safe-global/views/components/common/Drawer/components/DrawerActions'
+import { DrawerSignatures } from '@safe-global/views/components/common/Drawer/components/DrawerSignatures'
+import Identicon from '@safe-global/views/components/common/Identicon'
 import { DrawerList } from '@safe-global/views/components/common/Drawer/components/DrawerList'
 import { DrawerSection } from '@safe-global/views/components/common/Drawer/components/DrawerSection'
 import { Button } from '@safe-global/views/components/ui/button'
@@ -386,5 +388,72 @@ export const Resizable: Story = {
   args: {
     ...Expandable.args,
     resizable: true,
+  },
+}
+
+const signer = (name: string, address: string) => (
+  <span className="flex min-w-0 items-center gap-2">
+    <Identicon address={address} size={24} />
+    <span className="truncate text-sm">{name}</span>
+  </span>
+)
+
+/** Who has signed, folded above the actions. Open it to see the timeline; Notify is the app's own button. */
+export const SignaturesFooter: Story = {
+  args: {
+    ariaLabel: 'Transaction',
+    children: (
+      <>
+        <DrawerHeader media={iconTile} title="Send 1,250 USDC" subtitle="Nonce #42 · Ethereum" />
+        <DrawerBody>
+          <DrawerList items={summaryRows} />
+        </DrawerBody>
+        <DrawerFooter
+          summary={
+            <DrawerSignatures
+              signed={1}
+              required={3}
+              meta="6 days left"
+              defaultOpen
+              actions={
+                <Button variant="ghost-muted" size="icon-sm" aria-label="Copy link">
+                  <Copy />
+                </Button>
+              }
+              rows={[
+                { id: 'created', status: 'created', signer: 'Ops lead', time: 'Nov 12, 10:02' },
+                {
+                  id: 'a',
+                  status: 'signed',
+                  signer: signer('Ops lead', '0x1000000000000000000000000000000000000001'),
+                  time: 'Nov 12, 10:04',
+                },
+                {
+                  id: 'b',
+                  status: 'needed',
+                  signer: signer('Finance', '0x2000000000000000000000000000000000000002'),
+                  you: true,
+                },
+                {
+                  id: 'c',
+                  status: 'needed',
+                  signer: signer('Treasury', '0x3000000000000000000000000000000000000003'),
+                  action: (
+                    <Button variant="outline" size="xs">
+                      Notify
+                    </Button>
+                  ),
+                },
+              ]}
+            />
+          }
+        >
+          <DrawerActions
+            secondary={<Button variant="secondary">Reject</Button>}
+            primary={<Button>Review and sign</Button>}
+          />
+        </DrawerFooter>
+      </>
+    ),
   },
 }
