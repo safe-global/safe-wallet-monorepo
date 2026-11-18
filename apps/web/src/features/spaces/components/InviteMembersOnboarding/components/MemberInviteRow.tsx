@@ -169,13 +169,13 @@ const MemberInviteRow = ({
         {resolverError && <p className="text-xs text-destructive">Failed to resolve ENS name</p>}
       </div>
 
-      <div className="flex h-11 items-center gap-2">
+      <div className="flex h-10 items-center gap-2">
         <Controller
           control={control}
           name={`members.${index}.role`}
           render={({ field }) => (
             <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger className="min-w-[120px] cursor-pointer data-[size=default]:h-11">
+              <SelectTrigger size="lg" className="min-w-[120px] cursor-pointer">
                 <SelectValue placeholder="Role">{ROLE_LABELS[field.value]}</SelectValue>
               </SelectTrigger>
               <SelectContent alignItemWithTrigger={false} align="start">
