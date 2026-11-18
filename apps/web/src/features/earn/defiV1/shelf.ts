@@ -119,17 +119,12 @@ export const filterOpportunities = (
 export const groupOpportunities = (
   opportunities: Opportunity[],
   groupBy: GroupBy,
-  investedIds: string[] = [],
 ): { key: string; items: Opportunity[] }[] => {
   if (groupBy === 'none') return [{ key: 'all', items: opportunities }]
-  const keyOf =
-    groupBy === 'investments'
-      ? (item: Opportunity) => (investedIds.includes(item.id) ? 'invested' : 'opportunities')
-      : (item: Opportunity) => item.asset
-  const keys = groupBy === 'investments' ? ['invested', 'opportunities'] : [...new Set(opportunities.map(keyOf))]
-  return keys
-    .map((key) => ({ key, items: opportunities.filter((item) => keyOf(item) === key) }))
-    .filter((group) => group.items.length > 0)
+  return [...new Set(opportunities.map((item) => item.asset))].map((key) => ({
+    key,
+    items: opportunities.filter((item) => item.asset === key),
+  }))
 }
 
 /** Moves investments to the top and keeps the input order otherwise. */

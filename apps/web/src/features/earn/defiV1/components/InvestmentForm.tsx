@@ -1,5 +1,16 @@
 import { useState, type ReactNode } from 'react'
-import { Check, CheckCircle2, Info } from 'lucide-react'
+import {
+  ArrowRightLeft,
+  CheckCircle2,
+  Coins,
+  Info,
+  type LucideIcon,
+  Repeat,
+  ShieldCheck,
+  ShieldPlus,
+  UserCheck,
+  Zap,
+} from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Checkbox } from '@safe-global/views/components/ui/checkbox'
@@ -195,42 +206,77 @@ export const Section = ({
 
 const optionLabel = (option: Opportunity) => `${option.name} · ${formatApy(option.apy)} · ${option.exitShort}`
 
-export const AmountFields = ({ form }: { form: InvestmentForm }) => (
-  <>
-    {!form.opportunity && (
-      <Section label={COPY.investment}>
-        <Select
-          items={form.options.map((option) => ({ value: option.id, label: optionLabel(option) }))}
-          value={form.pickedId}
-          onValueChange={(next) => next && form.setPickedId(String(next))}
-        >
-          <SelectTrigger aria-label={COPY.investment} className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {form.options.map((option) => (
-              <SelectItem key={option.id} value={option.id}>
-                {optionLabel(option)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </Section>
-    )}
-    <Section
-      label={COPY.firstDeposit}
-      htmlFor="investment-amount"
-      hint={DEFI_V1_COPY.deposit.fromValue(IDLE_CASH.asset, IDLE_CASH.chain, formatAmount(IDLE_CASH.amount))}
-    >
-      <Input
-        id="investment-amount"
-        inputMode="decimal"
-        value={form.first}
-        onChange={(event) => form.setFirst(event.target.value)}
-      />
-    </Section>
-  </>
+const AmountInput = ({ form }: { form: InvestmentForm }) => (
+  <Section
+    label={COPY.firstDeposit}
+    htmlFor="investment-amount"
+    hint={DEFI_V1_COPY.deposit.fromValue(IDLE_CASH.asset, IDLE_CASH.chain, formatAmount(IDLE_CASH.amount))}
+  >
+    <Input
+      id="investment-amount"
+      inputMode="decimal"
+      value={form.first}
+      onChange={(event) => form.setFirst(event.target.value)}
+    />
+  </Section>
 )
+
+const InvestmentCards = ({ form }: { form: InvestmentForm }) => (
+  <Section label={COPY.investment}>
+    <RadioGroup
+      aria-label={COPY.investment}
+      value={form.pickedId}
+      onValueChange={(next) => form.setPickedId(String(next))}
+      className="gap-2"
+    >
+      {form.options.map((option) => (
+        <ChoiceCard
+          key={option.id}
+          value={option.id}
+          title={option.name}
+          badge={<span className="ml-auto tabular-nums">{formatApy(option.apy)}</span>}
+          description={`${option.asset} · ${option.runBy} · ${option.exitShort}`}
+        />
+      ))}
+    </RadioGroup>
+  </Section>
+)
+
+/** `cards` puts the amount first and lists the investments as radio cards. */
+export const AmountFields = ({ form, cards }: { form: InvestmentForm; cards?: boolean }) => {
+  if (cards)
+    return (
+      <>
+        <AmountInput form={form} />
+        {!form.opportunity && <InvestmentCards form={form} />}
+      </>
+    )
+  return (
+    <>
+      {!form.opportunity && (
+        <Section label={COPY.investment}>
+          <Select
+            items={form.options.map((option) => ({ value: option.id, label: optionLabel(option) }))}
+            value={form.pickedId}
+            onValueChange={(next) => next && form.setPickedId(String(next))}
+          >
+            <SelectTrigger aria-label={COPY.investment} className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {form.options.map((option) => (
+                <SelectItem key={option.id} value={option.id}>
+                  {optionLabel(option)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </Section>
+      )}
+      <AmountInput form={form} />
+    </>
+  )
+}
 
 export const WhereFields = ({ form, labelled = true }: { form: InvestmentForm; labelled?: boolean }) => (
   <>
@@ -454,12 +500,19 @@ export const ReviewSummary = ({ form, onEdit }: { form: InvestmentForm; onEdit?:
   const budget = formatAmount(form.budgetAmount)
   const count = form.executors.length
   const isNested = form.where === 'nested'
-  const outcomes = [
-    isNested ? SUMMARY.create(form.safeName, count) : SUMMARY.allow(count, budget, asset),
-    ...(isNested ? [SUMMARY.move(amount, asset)] : []),
-    SUMMARY.deposit(amount, asset, investment.name),
+  const outcomes: { icon: LucideIcon; text: string }[] = [
+    isNested
+      ? { icon: ShieldPlus, text: SUMMARY.create(form.safeName, count) }
+      : { icon: UserCheck, text: SUMMARY.allow(count, budget, asset) },
+    ...(isNested ? [{ icon: ArrowRightLeft, text: SUMMARY.move(amount, asset) }] : []),
+    { icon: Coins, text: SUMMARY.deposit(amount, asset, investment.name) },
     ...(form.schedule === 'recurring'
-      ? [SUMMARY.repeat(formatAmount(parseAmount(form.each)), asset, COPY.frequencies[form.frequency])]
+      ? [
+          {
+            icon: Repeat,
+            text: SUMMARY.repeat(formatAmount(parseAmount(form.each)), asset, COPY.frequencies[form.frequency]),
+          },
+        ]
       : []),
   ]
 
@@ -474,25 +527,32 @@ export const ReviewSummary = ({ form, onEdit }: { form: InvestmentForm; onEdit?:
 
       <div className="flex flex-col gap-2">
         <span className="text-sm font-medium">{SUMMARY.onApprove(form.safe.threshold, form.owners.length)}</span>
-        <ol className="flex flex-col gap-2.5 rounded-lg bg-card px-3 py-3">
-          {outcomes.map((step, index) => (
-            <li key={step} className="flex items-center gap-3 text-sm">
-              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-background text-xs font-medium">
-                {index + 1}
-              </span>
-              {step}
-            </li>
-          ))}
-        </ol>
-        <p className="text-sm text-muted-foreground">
-          {SUMMARY.after(form.who === 'any' ? SUMMARY.anyoneWho : SUMMARY.someWho(count), budget, asset)}
-        </p>
+        <div className="flex flex-col rounded-lg bg-card">
+          <ol className="flex flex-col px-3 pt-3">
+            {outcomes.map(({ icon: Icon, text }, index) => (
+              <li key={text} className="flex gap-3">
+                <div className="flex flex-col items-center">
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-background">
+                    <Icon className="size-3.5" aria-hidden />
+                  </span>
+                  {index < outcomes.length - 1 && <span aria-hidden className="w-px flex-1 bg-border" />}
+                </div>
+                <span className="pt-0.5 pb-3 text-sm">{text}</span>
+              </li>
+            ))}
+          </ol>
+          <div className="flex flex-col gap-2 border-t border-border/60 px-3 py-3 text-xs text-muted-foreground">
+            <p className="flex items-start gap-2">
+              <Zap className="size-3.5 shrink-0 translate-y-px text-badge-dot-success" aria-hidden />
+              {SUMMARY.after(form.who === 'any' ? SUMMARY.anyoneWho : SUMMARY.someWho(count), budget, asset)}
+            </p>
+            <p className="flex items-start gap-2">
+              <ShieldCheck className="size-3.5 shrink-0 translate-y-px" aria-hidden />
+              {isNested ? SUMMARY.nestedRisk(form.safeName) : SUMMARY.thisRisk}
+            </p>
+          </div>
+        </div>
       </div>
-
-      <p className="flex items-start gap-2 text-sm text-muted-foreground">
-        <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
-        {isNested ? SUMMARY.nestedRisk(form.safeName) : SUMMARY.thisRisk}
-      </p>
     </div>
   )
 }
@@ -504,23 +564,25 @@ export const ProposedView = ({ form }: { form: InvestmentForm }) => {
   const threshold = form.safe.threshold
   return (
     <div className="flex flex-col gap-5" data-testid="investment-proposed">
-      <div className="flex flex-col items-center gap-3 pt-2 text-center">
-        <span className="flex size-12 items-center justify-center rounded-full bg-badge-dot-success/15">
-          <Check className="size-6 text-badge-dot-success" aria-hidden />
+      <div className="relative -mx-4 -mt-4 flex flex-col items-center gap-4 overflow-hidden px-4 pt-6 pb-6 text-center">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--color-badge-dot-success)_0%,transparent_70%)] opacity-15"
+        />
+        <span className="relative flex size-16 items-center justify-center rounded-full bg-badge-dot-success/10">
+          <span className="flex size-11 items-center justify-center rounded-full bg-success-tint text-badge-dot-success">
+            <Coins className="size-6" aria-hidden />
+          </span>
         </span>
-        <div className="flex flex-col gap-1">
-          <Typography variant="h4">{COPY.proposed}</Typography>
+        <div className="relative flex flex-col items-center gap-1">
+          <Typography variant="paragraph-small-medium" color="success">
+            {COPY.proposed}
+          </Typography>
+          <Typography variant="h2" className="tabular-nums">
+            {formatAmount(form.amount)} {investment.asset}
+          </Typography>
           <Typography variant="paragraph-small" color="muted">
-            {SUMMARY.investment(formatAmount(form.amount), investment.asset, investment.name)} ·{' '}
-            {COPY.variableApy(formatApy(investment.apy))}
-          </Typography>
-        </div>
-        <div className="flex flex-col gap-0.5">
-          <Typography variant="paragraph-small-medium">
-            {COPY.projected(formatAmount(form.amount * investment.apy), investment.asset, formatApy(investment.apy))}
-          </Typography>
-          <Typography variant="paragraph-mini" color="muted">
-            {COPY.notGuaranteed}
+            {investment.name} · {COPY.variableApy(formatApy(investment.apy))}
           </Typography>
         </div>
       </div>

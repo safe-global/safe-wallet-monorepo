@@ -26,28 +26,59 @@ const HEADERS: { label: string; sortKey?: SortKey }[] = [
   { label: COLUMNS.position, sortKey: 'position' },
 ]
 
-export type OpportunityGroup = { key: string; title?: string; items: Opportunity[] }
+export type OpportunityGroup = { key: string; title?: string; showColumns?: boolean; items: Opportunity[] }
 
-const GroupBand = ({ title, count }: { title: string; count: number }) => (
-  <TableRow data-no-hover data-no-divider>
-    <TableCell colSpan={COLUMN_COUNT} className={`rounded-lg ${BAND_CELL}`}>
-      <div className="flex min-h-10 items-center gap-2">
-        <span className="text-sm font-medium text-foreground">{title}</span>
-        <Badge variant="subtle">{count}</Badge>
-      </div>
-    </TableCell>
-  </TableRow>
-)
+const BAND_COLUMNS = HEADERS.slice(1, -1).map(({ label }) => label)
+const BAND_LABEL = 'text-xs font-semibold uppercase text-muted-foreground'
+
+const GroupBand = ({ title, count, showColumns }: { title: string; count: number; showColumns?: boolean }) => {
+  const label = (
+    <div className="flex min-h-10 items-center gap-2">
+      <span className={showColumns ? BAND_LABEL : 'text-sm font-medium text-foreground'}>{title}</span>
+      <Badge variant="subtle">{count}</Badge>
+    </div>
+  )
+  if (!showColumns)
+    return (
+      <TableRow data-no-hover data-no-divider>
+        <TableCell colSpan={COLUMN_COUNT} className={`rounded-lg ${BAND_CELL}`}>
+          {label}
+        </TableCell>
+      </TableRow>
+    )
+  return (
+    <TableRow data-no-hover data-no-divider>
+      <TableCell className={`rounded-l-lg ${BAND_CELL}`}>{label}</TableCell>
+      {BAND_COLUMNS.map((column) => (
+        <TableCell key={column} className={cn(BAND_LABEL, BAND_CELL)}>
+          {column}
+        </TableCell>
+      ))}
+      <TableCell colSpan={COLUMN_COUNT - BAND_COLUMNS.length - 1} className={`rounded-r-lg ${BAND_CELL}`} />
+    </TableRow>
+  )
+}
 
 const SortIcon = ({ direction }: { direction?: Sort['direction'] }) => {
   const Icon = direction === 'asc' ? ArrowUp : direction === 'desc' ? ArrowDown : ArrowUpDown
   return <Icon className={cn('size-3.5', !direction && 'opacity-0 group-hover:opacity-100')} aria-hidden />
 }
 
-const ColumnHeaders = ({ sort, onSort }: { sort: Sort | null; onSort: (key: SortKey) => void }) => (
+const ColumnHeaders = ({
+  title,
+  count,
+  sort,
+  onSort,
+}: {
+  title: string
+  count?: number
+  sort: Sort | null
+  onSort: (key: SortKey) => void
+}) => (
   <TableHeader>
     <TableRow data-no-hover>
-      {HEADERS.map(({ label, sortKey }) => {
+      {HEADERS.map(({ label: column, sortKey }, index) => {
+        const label = index === 0 ? title : column
         const direction = sortKey && sort?.key === sortKey ? sort.direction : undefined
         return (
           <TableHead
@@ -70,6 +101,11 @@ const ColumnHeaders = ({ sort, onSort }: { sort: Sort | null; onSort: (key: Sort
               </button>
             ) : (
               label
+            )}
+            {index === 0 && count !== undefined && (
+              <Badge variant="subtle" className="ml-2">
+                {count}
+              </Badge>
             )}
           </TableHead>
         )
@@ -99,7 +135,7 @@ export const OpportunityMark = ({ invested = false }: { invested?: boolean }) =>
     <span
       className={cn(
         'flex size-8 shrink-0 items-center justify-center rounded-md',
-        invested ? 'bg-badge-dot-success/15 text-badge-dot-success' : 'bg-muted text-muted-foreground',
+        invested ? 'bg-success-tint text-badge-dot-success' : 'bg-muted text-muted-foreground',
       )}
       aria-hidden
     >
@@ -307,6 +343,7 @@ const TableCard = ({ label, children }: { label: string; children: ReactNode }) 
 )
 
 export const OpportunitiesTable = ({
+  label,
   groups,
   isLocked,
   onSelect,
@@ -316,6 +353,7 @@ export const OpportunitiesTable = ({
   holdingOf,
   heldInOf,
 }: {
+  label: string
   groups: OpportunityGroup[]
   isLocked: (item: Opportunity) => boolean
   onSelect: (item: Opportunity) => void
@@ -327,8 +365,13 @@ export const OpportunitiesTable = ({
 }) => {
   const isEmpty = groups.every((group) => group.items.length === 0)
   return (
-    <TableCard label="Opportunities">
-      <ColumnHeaders sort={sort} onSort={onSort} />
+    <TableCard label={label}>
+      <ColumnHeaders
+        title={label}
+        count={groups.length > 1 && !groups[0].title ? groups[0].items.length : undefined}
+        sort={sort}
+        onSort={onSort}
+      />
       <TableBody data-testid="defi-opportunities">
         {isEmpty && (
           <TableRow data-no-hover>
@@ -339,7 +382,9 @@ export const OpportunitiesTable = ({
         )}
         {groups.map((group) => (
           <Fragment key={group.key}>
-            {group.title && <GroupBand title={group.title} count={group.items.length} />}
+            {group.title && (
+              <GroupBand title={group.title} count={group.items.length} showColumns={group.showColumns} />
+            )}
             {group.items.map((item) => (
               <OpportunityRow
                 key={item.id}

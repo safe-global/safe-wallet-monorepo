@@ -1,5 +1,6 @@
 import { Fragment, useState, type ReactNode } from 'react'
 import { Check } from 'lucide-react'
+import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
   Dialog,
@@ -32,6 +33,7 @@ const COPY = DEFI_V1_COPY.operations
 const STEPS = COPY.stepperSteps
 /** Fixed so the dialog never changes size between steps; long lists scroll inside it. */
 const BODY_HEIGHT = 'h-[min(26rem,60vh)]'
+const PROPOSED_HEIGHT = 'h-[min(34rem,78vh)]'
 
 type StepState = 'done' | 'current' | 'upcoming'
 
@@ -120,16 +122,16 @@ export const SetUpInvestmentStepper = ({
 
   if (!investment) return null
 
-  const views: { heading: string; content: ReactNode; valid: boolean }[] = [
-    { heading: COPY.stepHeadings[0], content: <AmountFields form={form} />, valid: form.amount > 0 },
-    { heading: COPY.stepHeadings[1], content: <WhereFields form={form} labelled={false} />, valid: true },
+  const views: { heading?: string; content: ReactNode; valid: boolean }[] = [
+    { content: <AmountFields form={form} cards />, valid: form.amount > 0 },
+    { heading: COPY.stepHeadings[0], content: <WhereFields form={form} labelled={false} />, valid: true },
     {
-      heading: COPY.stepHeadings[2],
+      heading: COPY.stepHeadings[1],
       content: <WhoFields form={form} labelled={false} />,
       valid: form.executors.length > 0,
     },
     {
-      heading: COPY.stepHeadings[3],
+      heading: COPY.stepHeadings[2],
       content: (
         <>
           <BudgetFields form={form} />
@@ -139,7 +141,7 @@ export const SetUpInvestmentStepper = ({
       valid: form.budgetAmount >= form.amount,
     },
     {
-      heading: COPY.stepHeadings[4],
+      heading: COPY.stepHeadings[3],
       content: <ReviewSummary form={form} onEdit={setCurrent} />,
       valid: form.isValid,
     },
@@ -169,28 +171,41 @@ export const SetUpInvestmentStepper = ({
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && close()}>
       <DialogContent size="sm" data-testid="set-up-investment-stepper">
-        <DialogHeader divided="subtle">
-          <div className="flex items-center gap-3">
-            <OpportunityMark />
-            <div className="flex min-w-0 flex-col">
-              <DialogTitle>{COPY.newSafe}</DialogTitle>
-              <DialogDescription>
-                {COPY.flowLead(investment.name, investment.chains[0], formatApy(investment.apy))}
-              </DialogDescription>
+        {proposed ? (
+          <DialogTitle className="sr-only">{COPY.proposed}</DialogTitle>
+        ) : (
+          <DialogHeader divided="subtle">
+            <div className="flex items-center gap-3">
+              <OpportunityMark />
+              <div className="flex min-w-0 flex-col">
+                <div className="flex items-center gap-2">
+                  <DialogTitle>{COPY.newSafe}</DialogTitle>
+                  {form.amount > 0 && (
+                    <Badge variant="brand" className="tabular-nums">
+                      {`${compact(form.amount)} ${investment.asset}`}
+                    </Badge>
+                  )}
+                </div>
+                <DialogDescription>
+                  {COPY.flowLead(investment.name, investment.chains[0], formatApy(investment.apy))}
+                </DialogDescription>
+              </div>
             </div>
-          </div>
-        </DialogHeader>
+          </DialogHeader>
+        )}
 
         {proposed ? (
-          <div className={cn(BODY_HEIGHT, 'overflow-y-auto px-4 py-4')}>
+          <div className={cn(PROPOSED_HEIGHT, 'overflow-y-auto px-4 py-4')}>
             <ProposedView form={form} />
           </div>
         ) : (
           <>
             <div className={cn(BODY_HEIGHT, 'flex flex-col gap-4 px-4 pt-4')}>
-              <Typography variant="paragraph-bold" className="shrink-0">
-                {view.heading}
-              </Typography>
+              {view.heading && (
+                <Typography variant="paragraph-bold" className="shrink-0">
+                  {view.heading}
+                </Typography>
+              )}
               <div className="-mx-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">{view.content}</div>
             </div>
           </>

@@ -111,14 +111,12 @@ const TopList = ({ slices, format }: { slices: ChartSlice[]; format: (value: num
 const StatCard = ({
   title,
   stat,
-  statClassName,
   slices,
   chartLabel,
   format = formatCompactUsd,
 }: {
   title: string
   stat: string
-  statClassName?: string
   slices: ChartSlice[]
   chartLabel: string
   format?: (value: number) => string
@@ -126,7 +124,7 @@ const StatCard = ({
   <div className="flex items-center justify-between gap-4 rounded-xl bg-card px-4 py-3">
     <div className="flex min-w-0 max-w-56 flex-1 flex-col items-start gap-1">
       <span className="text-sm font-medium">{title}</span>
-      <span className={cn('text-2xl font-semibold tabular-nums', statClassName)}>{stat}</span>
+      <span className="text-2xl font-semibold tabular-nums">{stat}</span>
       <TopList slices={slices} format={format} />
     </div>
     <Donut slices={slices} label={chartLabel} format={format} />
@@ -167,7 +165,6 @@ export const TreasurySummary = ({
       <StatCard
         title={COPY.earned}
         stat={`+${formatUsd(summary.earned)}`}
-        statClassName="text-badge-dot-success"
         slices={shade(earnedBy, EARNED_SHADES)}
         chartLabel={describe(COPY.earnedBreakdown, earnedBy, formatUsd)}
         format={formatUsd}

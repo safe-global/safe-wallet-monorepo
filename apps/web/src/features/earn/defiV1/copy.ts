@@ -118,7 +118,6 @@ export const DEFI_V1_COPY = {
     searchPlaceholder: 'Search opportunities, assets, and providers…',
     groupBy: 'Group',
     groupByOption: {
-      investments: 'Investments',
       asset: 'Asset',
     } satisfies Record<Exclude<GroupBy, 'none'>, string>,
   },
@@ -181,7 +180,7 @@ export const DEFI_V1_COPY = {
     lockedNote: 'Upgrade to Safe Pro to deposit into this option.',
   },
   sections: {
-    investments: 'Your investments',
+    investments: 'Investments',
     opportunities: 'Opportunities',
   },
   summary: {
@@ -211,7 +210,7 @@ export const DEFI_V1_COPY = {
     whereItRuns: 'Where it runs',
     dedicated: 'A new nested Safe for this investment',
     recommended: 'Recommended',
-    dedicatedHint: (name: string) => `Only the budget moves into ${name}. Everything else stays in this Safe.`,
+    dedicatedHint: (name: string) => `Only the budget moves into ${name}. The rest stays in this Safe.`,
     thisSafe: 'This Safe',
     thisSafeHint: (threshold: number, owners: number) => `Every deposit needs ${threshold} of ${owners} signers`,
     left: (amount: string) => `${amount} left`,
@@ -244,7 +243,7 @@ export const DEFI_V1_COPY = {
       `Moves ${amount} ${asset} in every ${frequency.toLowerCase()}, as long as the balance covers it. Stop it any time.`,
     allowedActions: 'Allowed actions',
     allowedValue: (name: string) => `Deposit into ${name} · Withdraw to this Safe`,
-    firstDeposit: 'First deposit',
+    firstDeposit: 'Amount',
     schedule: 'Schedule',
     proposed: 'Investment proposed',
     pending: 'Pending',
@@ -290,25 +289,21 @@ export const DEFI_V1_COPY = {
       repeat: (amount: string, asset: string, frequency: string) =>
         `Add ${amount} ${asset} every ${frequency.toLowerCase()}`,
       after: (who: string, amount: string, asset: string) =>
-        `After that, ${who} can invest up to ${amount} ${asset} without waiting on everyone.`,
+        `Then ${who} can invest up to ${amount} ${asset} without waiting on everyone.`,
       anyoneWho: 'any signer',
       someWho: (count: number) => (count === 1 ? 'the signer you picked' : `any of the ${count} signers you picked`),
       nestedRisk: (name: string) => `Only the funds in ${name} are exposed. Everything else stays in this Safe.`,
       thisRisk: 'Signers you pick can move up to the budget out of this Safe.',
     },
     signatures: (signed: number, threshold: number) => `${signed} of ${threshold} signatures`,
-    projected: (amount: string, asset: string, apy: string) =>
-      `Estimated ${amount} ${asset} a year at today's ${apy} rate`,
-    notGuaranteed: "Rates change and returns aren't guaranteed.",
     variableApy: (apy: string) => `${apy} variable net APY`,
     moreToApprove: (count: number) => `${count} more signer${count === 1 ? '' : 's'} need to approve`,
     youSignedShort: 'You signed',
     viewInvestment: 'View investment',
     close: 'Close',
     back: 'Back',
-    stepperSteps: ['Amount', 'Safe', 'Signers', 'Budget', 'Review'],
+    stepperSteps: ['Investment', 'Safe', 'Signers', 'Budget', 'Review'],
     stepHeadings: [
-      'How much do you want to invest?',
       'Where should it run?',
       'Who can invest day to day?',
       'Set a budget and schedule',

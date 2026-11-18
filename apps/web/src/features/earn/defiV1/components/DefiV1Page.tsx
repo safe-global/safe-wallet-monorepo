@@ -60,13 +60,6 @@ const RANKED = [...SHELF_GROUPS.flatMap((group) => group.items), ...MORE].sort(b
 const matches = (item: Opportunity, search: string) =>
   !search || `${item.name} ${item.runBy} ${item.asset}`.toLowerCase().includes(search.toLowerCase())
 
-const groupTitle = (groupBy: GroupBy, key: string): string | undefined => {
-  if (groupBy === 'investments')
-    return key === 'invested' ? DEFI_V1_COPY.sections.investments : DEFI_V1_COPY.sections.opportunities
-  if (groupBy === 'asset') return key
-  return undefined
-}
-
 export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const [selected, setSelected] = useState<Opportunity | null>(null)
   const [positions, setPositions] = useState<Position[]>(initialPositions)
@@ -99,14 +92,16 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
     [isBrowsing, visible, investedIds],
   )
   const hiddenCount = visible.length - listed.length
-  const groups = useMemo<OpportunityGroup[]>(
-    () =>
-      groupOpportunities(listed, groupBy, investedIds).map((group) => ({
-        ...group,
-        title: groupTitle(groupBy, group.key),
-      })),
-    [listed, groupBy, investedIds],
-  )
+  const hasInvestments = groupBy === 'none' && listed.some((item) => investedIds.includes(item.id))
+  const groups = useMemo<OpportunityGroup[]>(() => {
+    if (groupBy === 'asset') return groupOpportunities(listed, groupBy).map((group) => ({ ...group, title: group.key }))
+    const others = listed.filter((item) => !investedIds.includes(item.id))
+    if (!hasInvestments) return [{ key: 'opportunities', items: others }]
+    return [
+      { key: 'invested', items: listed.filter((item) => investedIds.includes(item.id)) },
+      { key: 'opportunities', title: DEFI_V1_COPY.sections.opportunities, showColumns: true, items: others },
+    ]
+  }, [listed, groupBy, investedIds, hasInvestments])
   const heldInOf = (item: Opportunity) => (config.plan === 'pro' ? heldIn(operations, item.id) : undefined)
   const SetUp = { dialog: SetUpInvestmentDialog, drawer: SetUpInvestmentDrawer, stepper: SetUpInvestmentStepper }[
     config.setup
@@ -115,6 +110,16 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
     if (config.setup === 'drawer') setSelected(null)
     setSetupFor(item)
     setIsCreating(true)
+  }
+
+  const tableProps = {
+    isLocked: locked,
+    onSelect: setSelected,
+    onInvest: config.plan === 'pro' ? openSetup : undefined,
+    sort,
+    onSort: (key: SortKey) => setSort((current) => nextSort(current, key)),
+    holdingOf,
+    heldInOf,
   }
 
   const onDeposited = ({ opportunity, amount, pending, operationId, created }: ActionResult) => {
@@ -171,14 +176,9 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
           invest={<InvestButton plan={config.plan} onInvest={() => openSetup(null)} />}
         />
         <OpportunitiesTable
+          label={hasInvestments ? DEFI_V1_COPY.sections.investments : DEFI_V1_COPY.sections.opportunities}
           groups={groups}
-          isLocked={locked}
-          onSelect={setSelected}
-          onInvest={config.plan === 'pro' ? openSetup : undefined}
-          sort={sort}
-          onSort={(key) => setSort((current) => nextSort(current, key))}
-          holdingOf={holdingOf}
-          heldInOf={heldInOf}
+          {...tableProps}
         />
         <div className="flex flex-wrap items-center justify-between gap-2">
           {hiddenCount > 0 ? (

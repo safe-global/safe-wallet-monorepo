@@ -56,7 +56,7 @@ export type DefiV1Setup = 'dialog' | 'drawer' | 'stepper'
 export type SortKey = 'name' | 'apy' | 'type' | 'exit' | 'position'
 export type Sort = { key: SortKey; direction: 'asc' | 'desc' }
 
-export type GroupBy = 'none' | 'investments' | 'asset'
+export type GroupBy = 'none' | 'asset'
 
 export type Position = { opportunity: Opportunity; principal: number; earned: number; pending: boolean }
 
