@@ -51,4 +51,14 @@ describe('DrawerList', () => {
 
     expect(container.querySelector('dl')).toBeEmptyDOMElement()
   })
+
+  it('stacks label above value on phones only when asked', () => {
+    const { rerender } = render(<DrawerList items={[{ label: 'Recipient', content: 'A long address' }]} />)
+
+    expect(screen.getByText('Recipient').closest('div')).not.toHaveClass('max-md:flex-col')
+
+    rerender(<DrawerList mobileStack items={[{ label: 'Recipient', content: 'A long address' }]} />)
+
+    expect(screen.getByText('Recipient').closest('dt')?.parentElement).toHaveClass('max-md:flex-col')
+  })
 })
