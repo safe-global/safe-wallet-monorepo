@@ -167,7 +167,7 @@ describe('Balances page', () => {
       expect(screen.getByTestId('total-asset-value-amount')).toHaveTextContent(String(Number(tokensFiatTotal)))
     })
 
-    it('shows the same total as Home, positions included, when the chain has the summaries flag on', () => {
+    it('shows the same total as Home, positions and hidden tokens included, when the chain has the summaries flag on', () => {
       jest
         .mocked(useSafeTotalBalance)
         .mockReturnValue({ fiatTotal: summaryTotal, noAssets: false, isSummaryEnabled: true })
@@ -176,7 +176,7 @@ describe('Balances page', () => {
 
       expect(screen.getByTestId('total-asset-value-amount')).toHaveTextContent(summaryTotal)
       expect(screen.getByTestId('total-asset-value')).toHaveTextContent(
-        'Includes positions, the same total as on Home.',
+        "Includes positions and tokens you've hidden. Same total as on Home.",
       )
     })
   })

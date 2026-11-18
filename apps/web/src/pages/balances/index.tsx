@@ -21,7 +21,7 @@ import useSafeTotalBalance from '@/hooks/useSafeTotalBalance'
 
 const TOKENS_ONLY_TOOLTIP =
   'Total from this list only. Portfolio total includes positions and may use other token data.'
-const SUMMARY_TOOLTIP = 'Includes positions, the same total as on Home.'
+const SUMMARY_TOOLTIP = "Includes positions and tokens you've hidden. Same total as on Home."
 
 const Balances = () => {
   const { NoFeeCampaignBanner } = useLoadFeature(NoFeeCampaignFeature)
