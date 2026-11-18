@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import { addressExBuilder, safeInfoBuilder } from '@/tests/builders/safe'
 import { chainBuilder } from '@/tests/builders/chains'
 import { SafeScopeProvider } from '../SafeScopeProvider'
+import { POLLING_INTERVAL } from '@/config/constants'
 import { useSafeScope, useSafeScopeControls } from '@safe-global/views/components/tx-flow/safe-scope/context'
 import { hasActiveScope } from '@safe-global/views/components/tx-flow/safe-scope/activeScope'
 import * as safesApi from '@safe-global/store/gateway/AUTO_GENERATED/safes'
@@ -15,7 +16,9 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/safes', () => ({
   ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/safes'),
   useSafesGetSafeV1Query: jest.fn(),
 }))
-jest.mock('@/hooks/wallets/web3', () => ({ createWeb3ReadOnly: jest.fn() }))
+jest.mock('@/hooks/wallets/web3', () => ({
+  createWeb3ReadOnly: jest.fn(),
+}))
 
 // `trackError` is exported as a live binding, which `jest.spyOn` can't redefine on the required
 // module object — mock it at module scope the same way `useInitSafeCoreSDK.test.ts` does.
@@ -75,6 +78,35 @@ describe('SafeScopeProvider', () => {
     const { result } = renderHook(useProbe, { wrapper: wrapperWith() })
     expect(result.current.scope).toBeUndefined()
     expect(mockQuery).toHaveBeenLastCalledWith(expect.any(Symbol), expect.anything())
+  })
+
+  it('polls the Safe info by default', () => {
+    renderHook(useProbe, {
+      wrapper: wrapperWith({ chainId: safeA.chainId, safeAddress: safeA.address.value }),
+    })
+    expect(mockQuery).toHaveBeenLastCalledWith(
+      { chainId: safeA.chainId, safeAddress: safeA.address.value },
+      { pollingInterval: POLLING_INTERVAL },
+    )
+  })
+
+  it('fetches the Safe info once when polling is turned off', () => {
+    renderHook(useProbe, {
+      wrapper: function Wrapper({ children }: { children: ReactNode }) {
+        return (
+          <SafeScopeProvider
+            initial={{ chainId: safeA.chainId, safeAddress: safeA.address.value }}
+            pollSafeInfo={false}
+          >
+            {children}
+          </SafeScopeProvider>
+        )
+      },
+    })
+    expect(mockQuery).toHaveBeenLastCalledWith(
+      { chainId: safeA.chainId, safeAddress: safeA.address.value },
+      { pollingInterval: 0 },
+    )
   })
 
   it('resolves SafeState, provider and SDK for the initial target', async () => {

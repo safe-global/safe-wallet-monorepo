@@ -1,7 +1,7 @@
 import { skipToken } from '@reduxjs/toolkit/query'
 import { useSpacesGetOneV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { useIsSafeProEnabled } from '@/hooks/useIsSafeProEnabled'
-import { useIsInvited } from './useSpaceMembers'
+import { useIsInvited } from '../public/hooks/useSpaceMembers'
 import { useSpaceSubscription } from './billing/useSpaceSubscription'
 import { useSpaceOffers } from './billing/useSpaceOffers'
 import { getSubscriptionEndedAt } from './billing/subscription'

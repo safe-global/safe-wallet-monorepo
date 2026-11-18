@@ -134,4 +134,5 @@ export const LS_KEYS = {
   cookiesTerms: `${LS_NAMESPACE}cookies_terms`,
   safeLabsTerms: `${LS_NAMESPACE}safeLabsTerms`,
   tokenList: `${LS_NAMESPACE}tokenList`,
+  stakingPromoBannerHidden: `${LS_NAMESPACE}hideStakingPromoBanner_v2`,
 } as const

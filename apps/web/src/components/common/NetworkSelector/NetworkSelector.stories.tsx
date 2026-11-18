@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import NetworkSelector from './index'
 
 // No Safe loaded, which is how the live consumer (the "Add existing Safe" step) renders it — and the

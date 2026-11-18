@@ -17,9 +17,9 @@ import {
   isActiveAdmin,
   isInviteExpired,
   MemberStatus,
-  useAdminCount,
   getMemberDisplayName,
-} from '@/features/spaces'
+} from '../../public/hooks/useSpaceMembers'
+import { useAdminCount } from '../../hooks/useIsLastActiveAdmin'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
@@ -27,7 +27,8 @@ import EditMemberDialog from './EditMemberDialog'
 import { SPACE_EVENTS, SPACE_LABELS } from '@/services/analytics/events/spaces'
 import Track from '@/components/common/Track'
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
-import { getMemberTwoFactorStatus, MemberTwoFactorBadge } from '@/features/oidc-auth'
+import { getMemberTwoFactorStatus } from '@/features/oidc-auth/public/utils/twoFactor'
+import MemberTwoFactorBadge from '@/features/oidc-auth/public/components/MemberTwoFactorBadge'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { useHasFeature } from '@/hooks/useChains'
 

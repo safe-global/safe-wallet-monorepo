@@ -1,13 +1,11 @@
 import Head from 'next/head'
 import { BRAND_NAME } from '@/config/constants'
-import { SpacesFeature } from '@/features/spaces'
 import { useIsWorkspaceWizardEnabled } from '@/hooks/useIsWorkspaceWizardEnabled'
-import { useLoadFeature } from '@/features/__core__'
+import WorkspaceWizard from '@/features/spaces/public/components/WorkspaceWizard'
 
 /** Only in the onboarding wizard; the route guard sends the user to the first step when the wizard is off. */
 const PlanPage = () => {
   const isWizard = useIsWorkspaceWizardEnabled()
-  const { WorkspaceWizard } = useLoadFeature(SpacesFeature)
 
   if (!isWizard) return null
 

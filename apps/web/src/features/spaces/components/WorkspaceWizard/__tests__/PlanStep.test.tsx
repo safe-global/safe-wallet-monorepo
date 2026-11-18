@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/config/gateway'
 import { AppRoutes } from '@/config/routes'
-import type { WorkspaceDraft } from '@/features/spaces/store'
+import type { WorkspaceDraft } from '../../../public/store/workspaceDraftSlice'
 import { getStoreInstance } from '@/store'
 import { server } from '@/tests/server'
 import { signedInAuthState } from '@/tests/builders/authState'

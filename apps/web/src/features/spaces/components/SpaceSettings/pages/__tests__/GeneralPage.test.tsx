@@ -4,8 +4,46 @@ import GeneralPage from '../GeneralPage'
 const mockUseSpaceMembersByStatus = jest.fn()
 const mockUseIsAdmin = jest.fn()
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('../../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => 'space-uuid',
+}))
+jest.mock('../../../../public/hooks/useSpaceMembers', () => ({
+  get MemberStatus() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').MemberStatus
+  },
+  get MemberRole() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').MemberRole
+  },
+  get MEMBER_ALIAS_MAX_LENGTH() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+  },
+  get getMemberDisplayName() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').getMemberDisplayName
+  },
+  get sanitizeMemberAlias() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').sanitizeMemberAlias
+  },
+  get isAdmin() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').isAdmin
+  },
+  get isActiveAdmin() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').isActiveAdmin
+  },
+  get isInviteExpired() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').isInviteExpired
+  },
+  get useCurrentMembership() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').useCurrentMembership
+  },
+  get useCurrentMemberProfile() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').useCurrentMemberProfile
+  },
+  get useIsActiveMember() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').useIsActiveMember
+  },
+  get useIsInvited() {
+    return jest.requireActual('../../../../public/hooks/useSpaceMembers').useIsInvited
+  },
   useSpaceMembersByStatus: () => mockUseSpaceMembersByStatus(),
   useIsAdmin: () => mockUseIsAdmin(),
 }))
@@ -29,16 +67,11 @@ jest.mock('../../sections/DangerZoneSection', () => ({
   default: () => <div data-testid="danger-zone-section" />,
 }))
 
-jest.mock('@/features/oidc-auth', () => ({
-  WorkspaceTwoFactorSection: ({
-    members,
-    spaceId,
-    isAdmin,
-  }: {
-    members: { id: number }[]
-    spaceId?: string
-    isAdmin?: boolean
-  }) => <div data-testid="workspace-2fa-section">{`${members.length}:${spaceId}:${isAdmin}`}</div>,
+jest.mock('@/features/oidc-auth/public/components/WorkspaceTwoFactorSection', () => ({
+  __esModule: true,
+  default: ({ members, spaceId, isAdmin }: { members: { id: number }[]; spaceId?: string; isAdmin?: boolean }) => (
+    <div data-testid="workspace-2fa-section">{`${members.length}:${spaceId}:${isAdmin}`}</div>
+  ),
 }))
 
 describe('GeneralPage', () => {

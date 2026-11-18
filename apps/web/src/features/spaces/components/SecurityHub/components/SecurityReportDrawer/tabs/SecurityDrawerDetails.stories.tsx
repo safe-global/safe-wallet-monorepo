@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import SecurityDrawerDetails from './SecurityDrawerDetails'
-import { createMockStory } from '@/stories/mocks'
-import { createMockContext } from '@/features/security/testing'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import { createMockContext } from '@/features/security/public/utils/test-helpers'
 
 const setup = createMockStory({ authenticated: true, layout: 'paper' })
 

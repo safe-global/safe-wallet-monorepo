@@ -8,7 +8,7 @@ import { toBeHex } from 'ethers'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
 import { BrowserProvider, type JsonRpcProvider, type TransactionReceipt } from 'ethers'
 import { faker } from '@faker-js/faker'
-import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
+import { SimpleTxWatcher } from '@safe-global/utils/services/SimpleTxWatcher'
 import type { RelayTaskStatus } from '@safe-global/utils/services/RelayTxWatcher'
 import * as RelayTxWatcherModule from '@safe-global/utils/services/RelayTxWatcher'
 

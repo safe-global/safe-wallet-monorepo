@@ -5,7 +5,7 @@ import { LOGGING_OUT_KEY } from '@/hooks/useLogoutCallback'
 import useOnboard from '@/hooks/wallets/useOnboard'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useAppDispatch } from '@/store'
-import { clearWorkspaceDraft } from '@/features/spaces/store'
+import { clearWorkspaceDraft } from '@/features/spaces/public/store/workspaceDraftSlice'
 
 const LOGOUT_REDIRECT_PATH = '/v1/auth/logout/redirect'
 

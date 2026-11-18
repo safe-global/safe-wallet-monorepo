@@ -7,13 +7,8 @@ import WizardNotice from '@safe-global/views/features/spaces/components/Workspac
 import type { TrialSize } from '@safe-global/views/features/spaces/components/Plans/types'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
-import {
-  clearWorkspaceDraft,
-  EMPTY_WORKSPACE_DRAFT,
-  resumeOfferAnswered,
-  selectIsResumeOffered,
-  type WorkspaceDraft,
-} from '@/features/spaces/store'
+import { clearWorkspaceDraft, EMPTY_WORKSPACE_DRAFT, type WorkspaceDraft } from '../../public/store/workspaceDraftSlice'
+import { resumeOfferAnswered, selectIsResumeOffered } from '../../public/store/workspaceWizardSlice'
 import { countSeats } from '@/utils/spaces'
 import { useTrialSizes } from './hooks/useTrialSizes'
 import { useWizardNavigation } from './hooks/useWizardNavigation'

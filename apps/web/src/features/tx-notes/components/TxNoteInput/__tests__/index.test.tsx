@@ -6,6 +6,9 @@ import * as analytics from '@/services/analytics'
 // Mock analytics
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
+}))
+jest.mock('@/services/analytics/events/modals', () => ({
+  ...jest.requireActual('@/services/analytics/events/modals'),
   MODALS_EVENTS: {
     SUBMIT_TX_NOTE: { category: 'modals', action: 'submit_tx_note' },
   },

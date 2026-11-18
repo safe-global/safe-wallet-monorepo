@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react'
 import type { LucideIcon } from 'lucide-react'
-import { DrawerHeader, DrawerTitle } from '@/components/common/Drawer'
+import { DrawerHeader } from '@safe-global/views/components/common/Drawer/components/DrawerHeader'
+import { DrawerTitle } from '@safe-global/views/components/common/Drawer/components/DrawerTitle'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
 import PolicyStatusChip from '@safe-global/views/features/spaces/components/Policies/components/PolicyStatusChip'
 import type { PolicyStatus } from '@safe-global/views/features/spaces/components/Policies/types'

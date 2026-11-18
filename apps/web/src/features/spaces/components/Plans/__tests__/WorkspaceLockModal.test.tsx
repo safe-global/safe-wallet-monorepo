@@ -3,7 +3,10 @@ import WorkspaceLockModal, { _memberCopy, _PLAN_ERROR_COPY } from '../WorkspaceL
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 
 const mockUseWorkspaceLock = jest.fn()
 const mockUseCheckoutReturn = jest.fn()
@@ -28,7 +31,7 @@ jest.mock('@/hooks/useIsSurveyEnabled', () => ({ __esModule: true, default: () =
 jest.mock('../../../hooks/useWorkspaceLock', () => ({
   useWorkspaceLock: (spaceId?: string) => mockUseWorkspaceLock(spaceId),
 }))
-jest.mock('../../../hooks/useSpaceMembers', () => ({
+jest.mock('../../../public/hooks/useSpaceMembers', () => ({
   useCurrentMembership: (spaceId?: string) => mockUseCurrentMembership(spaceId),
   useIsAdmin: (spaceId?: string) => mockUseIsAdmin(spaceId),
 }))

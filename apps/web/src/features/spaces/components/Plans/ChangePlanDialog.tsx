@@ -13,9 +13,9 @@ import { formatDate } from '@safe-global/utils/utils/date'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { flattenSafeItems } from '@/hooks/safes'
+import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
 import { useChangePlan } from '../../hooks/billing/useChangePlan'
-import { useSpaceSafes } from '../../hooks/useSpaceSafes'
+import { useSpaceSafes } from '../../public/hooks/useSpaceSafes'
 import {
   removedSafesNote,
   summarizeRemovedSafes,

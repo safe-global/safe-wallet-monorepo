@@ -5,7 +5,7 @@ import type {
   UnavailableReason,
 } from '@safe-global/utils/features/safenet-checks'
 import type { CheckIdentity } from '@safe-global/store/safenet/safenetCheckSlice'
-import type { SafenetSignerRole } from '@/services/analytics'
+import type { SafenetSignerRole } from '@/services/analytics/mixpanel-events'
 import { trackSafenetChecked } from './trackSafenetChecked'
 
 type TrackSafenetCheckedInput = {

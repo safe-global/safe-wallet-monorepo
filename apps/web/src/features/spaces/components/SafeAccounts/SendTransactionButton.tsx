@@ -5,7 +5,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { useRouter } from 'next/router'
 import ArrowOutwardIcon from '@/public/images/transactions/outgoing.svg'
 import { TxModalContext } from '@/components/tx-flow'
-import { TokenTransferFlow } from '@/components/tx-flow/flows'
+import { TokenTransferFlow } from '@/components/tx-flow/flows/TokenTransferFlow'
 import { getEip3770ShortName } from '@safe-global/utils/utils/chains'
 import type { SafeOverview } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import useWallet from '@/hooks/wallets/useWallet'

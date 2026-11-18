@@ -23,7 +23,9 @@ const mockSetTxFlow = jest.fn()
 jest.mock('@/components/tx-flow', () => ({
   TxModalContext: createContext({ setTxFlow: (flow: ReactNode) => mockSetTxFlow(flow) }),
 }))
-jest.mock('@/components/tx-flow/flows', () => ({ TokenTransferFlow: () => null }))
+jest.mock('@/components/tx-flow/flows/TokenTransferFlow', () => ({
+  TokenTransferFlow: () => null,
+}))
 
 jest.mock('@/components/common/Track', () => ({
   __esModule: true,

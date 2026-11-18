@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { StoreDecorator } from '@/stories/storeDecorator'
 import { _UpdateSafe } from './index'
-import { MOCK_SAFE_ADDRESS, mockUpdateSafeTxData, mockUnknownContractTxData } from './mockData'
+import { MOCK_SAFE_ADDRESS, mockUpdateSafeTxData, mockUnknownContractTxData } from './UpdateSafe.storyData'
 import { faker } from '@faker-js/faker'
 
 // Seed faker for deterministic visual regression tests
@@ -10,11 +10,7 @@ faker.seed(123)
 const meta = {
   title: 'Components/TxFlow/ConfirmationViews/UpdateSafe',
   component: _UpdateSafe,
-  tags: ['autodocs', 'skip-visual-test'],
-  parameters: {
-    // Stories use faker for addresses which causes non-deterministic visual tests
-    visualTest: { disable: true },
-  },
+  tags: ['autodocs'],
   decorators: [
     (Story) => {
       return (
