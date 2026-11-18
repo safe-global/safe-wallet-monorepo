@@ -15,12 +15,15 @@ Account recovery uses a [Zodiac Delay Modifier](https://github.com/gnosis/zodiac
 
 ## Architecture
 
-This feature follows the Feature-Sliced Architecture pattern with lazy loading:
+Other code imports this feature only from `public/` (see [Feature architecture](../../../docs/feature-architecture.md)):
 
-- **Components**: Lazy-loaded via `useLoadFeature(RecoveryFeature)`
-- **Hooks**: Direct exports (always loaded, not lazy)
-- **Services**: Lazy-loaded with components
-- **Store**: Uses React context (`RecoveryContext`) for state management
+- **Components**: `Recovery` (loads the recovery state, mounted once in the app root), `RecoveryList`, `RecoveryHeader`, `RecoverySettings`, `RecoveryStatus`, `RecoveryDescription`, `RecoveryValidationErrors`, `CancelRecoveryReview`, `RecoverAccountReview`. Each renders nothing while the chain has recovery off.
+- **Hooks**: `useIsRecoverySupported`, `useRecovery`, `useRecoveryQueue`, `useIsRecoverer`. Each returns a neutral value while the chain has recovery off.
+- **Functions**: `selectors.ts`, `transaction.ts` (transaction builders), `setup.ts` (setup and edit transactions), `recovery-sender.ts` (dispatchers).
+- **Types**: `types.ts` (`RecoveryQueueItem`, `RecoveryStateItem`, `RecoveryState`).
+- **Tests**: `test-helpers.ts` seeds recovery scenarios for tests outside the feature.
+
+State lives in a React context store (`components/RecoveryContext`).
 
 ## User Flows
 
@@ -202,36 +205,7 @@ Malicious proposals are flagged with a warning icon and message.
 - **RecoveryContext**: Provides recovery state to all components
 - **RecoveryContextHooks**: Manages recovery state and events
 
-## Hooks
-
-### Public Hooks (Exported from `index.ts`)
-
-```typescript
-import {
-  useIsRecoverer,
-  useIsRecoverySupported,
-  useIsValidRecoveryExecTransactionFromModule,
-  useRecovery,
-  useRecoveryQueue,
-} from '@/features/recovery'
-
-// Check if current wallet is a recoverer
-const isRecoverer = useIsRecoverer()
-
-// Check if recovery is supported for current Safe
-const isSupported = useIsRecoverySupported()
-
-// Validate recovery execution
-const [isValid, error] = useIsValidRecoveryExecTransactionFromModule(item)
-
-// Get full recovery state [recoveryState, isRecoveryEnabled, isWrongChain]
-const [state, enabled, wrongChain] = useRecovery()
-
-// Get recovery queue for current Safe
-const queue = useRecoveryQueue()
-```
-
-### Internal Hooks
+## Internal hooks and services
 
 - `useRecoveryDelayModifiers`: Fetches delay modifiers for current Safe
 - `useRecoveryPendingTxs`: Tracks pending recovery transactions
@@ -239,44 +213,11 @@ const queue = useRecoveryQueue()
 - `useRecoveryTxState`: Computes recovery transaction state
 - `useRecoveryTxNotifications`: Shows toast notifications for recovery events
 - `useClock`: Provides current time for countdown calculations
-
-## Services
-
-### Core Services (Exported from feature)
-
-```typescript
-import { RecoveryFeature } from '@/features/recovery'
-import { useLoadFeature } from '@/features/__core__'
-
-const recovery = useLoadFeature(RecoveryFeature)
-
-// Check if ready
-if (recovery.$isReady) {
-  // Selectors
-  const delayModifier = recovery.selectDelayModifierByRecoverer(state, recovererAddress)
-  const queues = recovery.selectRecoveryQueues(state)
-
-  // Transaction builders
-  const skipTx = await recovery.getRecoverySkipTransaction(...)
-  const proposalTxs = await recovery.getRecoveryProposalTransactions(...)
-  const upsertTxs = await recovery.getRecoveryUpsertTransactions(...)
-
-  // Dispatchers
-  await recovery.dispatchRecoveryProposal(...)
-  await recovery.dispatchRecoveryExecution(...)
-}
-```
-
-### Service Files
-
-- **recovery-state.ts**: State management, queue fetching
-- **selectors.ts**: Redux-style selectors for recovery state
-- **transaction.ts**: Transaction builders for recovery operations
-- **recovery-sender.ts**: Dispatchers for sending recovery transactions
-- **setup.ts**: Setup and edit recovery configuration
-- **delay-modifier.ts**: Delay Modifier contract interactions
-- **proxies.ts**: Proxy contract detection utilities
-- **recoveryEvents.ts**: Event system for recovery transactions
+- `useIsValidRecoveryExecTransactionFromModule`: Validates a recovery execution (imports zodiac, so it stays private)
+- **services/recovery-state.ts**: State management, queue fetching
+- **services/delay-modifier.ts**: Delay Modifier contract interactions
+- **services/proxies.ts**: Proxy contract detection utilities
+- **services/recoveryEvents.ts**: Event system for recovery transactions
 
 ## State Management
 
@@ -303,9 +244,7 @@ type RecoveryContextType = {
 ## Types
 
 ```typescript
-// Core types
-export type { RecoveryQueueItem, RecoveryStateItem, RecoveryState } from './services/recovery-state'
-
+// public/types.ts
 // Queue item
 interface RecoveryQueueItem {
   transactionHash: string
@@ -335,79 +274,16 @@ interface RecoveryStateItem {
 }
 ```
 
-## Usage Examples
-
-### Display Recovery Status
+## Usage example
 
 ```typescript
-import { RecoveryFeature, useRecoveryQueue } from '@/features/recovery'
-import { useLoadFeature } from '@/features/__core__'
+import RecoveryStatus from '@/features/recovery/public/RecoveryStatus'
+import { useRecoveryQueue } from '@/features/recovery/public/useRecoveryQueue'
 
-function RecoveryStatus() {
-  const recovery = useLoadFeature(RecoveryFeature)
-  const queue = useRecoveryQueue()
+function RecoveryProposals() {
+  const queue = useRecoveryQueue() // [] while the chain has recovery off
 
-  if (queue.length === 0) return null
-
-  return (
-    <div>
-      <h3>Recovery Proposals</h3>
-      {queue.map(item => (
-        <div key={item.transactionHash}>
-          <recovery.RecoveryType
-            isMalicious={item.isMalicious}
-            date={item.timestamp}
-          />
-          <recovery.RecoveryInfo isMalicious={item.isMalicious} />
-          <recovery.RecoveryStatus recovery={item} />
-        </div>
-      ))}
-    </div>
-  )
-}
-```
-
-### Setup Recovery
-
-```typescript
-import { RecoveryFeature } from '@/features/recovery'
-import { useLoadFeature } from '@/features/__core__'
-
-function SetupRecovery() {
-  const recovery = useLoadFeature(RecoveryFeature)
-
-  const handleSetup = async () => {
-    if (!recovery.$isReady) return
-
-    const transactions = await recovery.getRecoveryUpsertTransactions({
-      delay: '604800',      // 7 days in seconds
-      expiry: '0',          // Never expires
-      recoverer: '0x...',   // Recoverer address
-      provider,
-      chainId,
-      safeAddress,
-    })
-
-    // Submit transactions to Safe
-  }
-
-  return <button onClick={handleSetup}>Setup Recovery</button>
-}
-```
-
-### Check if Recoverer
-
-```typescript
-import { useIsRecoverer, useIsRecoverySupported } from '@/features/recovery'
-
-function RecoveryActions() {
-  const isRecoverer = useIsRecoverer()
-  const isSupported = useIsRecoverySupported()
-
-  if (!isSupported) return null
-  if (!isRecoverer) return <div>Not a recoverer</div>
-
-  return <div>You can propose recovery for this Safe</div>
+  return queue.map((item) => <RecoveryStatus key={item.transactionHash} recovery={item} />)
 }
 ```
 
@@ -441,4 +317,4 @@ function RecoveryActions() {
 
 - [Zodiac Delay Modifier](https://github.com/gnosis/zodiac-modifier-delay)
 - [Safe Modules Documentation](https://docs.safe.global/safe-smart-account/modules)
-- [Feature Architecture Guide](../../docs/feature-architecture.md)
+- [Feature architecture](../../../docs/feature-architecture.md)

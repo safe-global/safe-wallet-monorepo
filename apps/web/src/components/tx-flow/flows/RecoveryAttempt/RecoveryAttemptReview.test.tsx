@@ -11,16 +11,15 @@ import { safeTxContextBuilder } from '@/tests/builders/safeTxContext'
 import { COULD_NOT_SUBMIT_RETRY_MESSAGE } from '@/components/tx/TxSubmitError'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
-import { dispatchRecoveryExecution } from '@/features/recovery/services/recovery-sender'
-import { seedRecoveryScenario } from '@/features/recovery/test-helpers'
-import { RecoveryFeature } from '@/features/recovery'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import { dispatchRecoveryExecution } from '@/features/recovery/public/recovery-sender'
+import { seedRecoveryScenario } from '@/features/recovery/public/test-helpers'
+import type { RecoveryQueueItem } from '@/features/recovery/public/types'
 import useGasPrice from '@/hooks/useGasPrice'
 import useChains from '@/hooks/useChains'
 import RecoveryAttemptReview from './RecoveryAttemptReview'
 
-jest.mock('@/features/recovery/services/recovery-sender', () => ({
-  ...jest.requireActual('@/features/recovery/services/recovery-sender'),
+jest.mock('@/features/recovery/public/recovery-sender', () => ({
+  ...jest.requireActual('@/features/recovery/public/recovery-sender'),
   dispatchRecoveryExecution: jest.fn(),
 }))
 jest.mock('@/features/recovery/hooks/useIsValidRecoveryExecution', () => ({
@@ -75,9 +74,13 @@ describe('RecoveryAttemptReview', () => {
   const newOwner = ownerAddress()
   let chainId: string
 
-  beforeAll(async () => {
-    await RecoveryFeature.load()
-  })
+  // Warm the lazy chunks so the first findBy does not time out on their import
+  beforeAll(() =>
+    Promise.all([
+      import('@/features/recovery/components/RecoveryDescription'),
+      import('@/features/recovery/components/RecoveryValidationErrors'),
+    ]),
+  )
 
   beforeEach(() => {
     jest.clearAllMocks()

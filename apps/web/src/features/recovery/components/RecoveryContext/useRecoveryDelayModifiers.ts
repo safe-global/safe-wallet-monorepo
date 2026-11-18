@@ -8,7 +8,7 @@ import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 // NOTE: Import directly from deployments file (not barrel) to avoid circular dependency
 import { getDeployedSpendingLimitModuleAddress } from '@/features/spending-limits/services/spendingLimitDeployments'
 import type { AsyncResult } from '@safe-global/utils/hooks/useAsync'
-import { useIsRecoverySupported } from '../../hooks/useIsRecoverySupported'
+import { useIsRecoverySupported } from '../../public/useIsRecoverySupported'
 
 function isOnlySpendingLimitEnabled(chainId: string, modules: SafeState['modules']) {
   if (modules && modules.length > 1) return false

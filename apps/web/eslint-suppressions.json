@@ -229,7 +229,7 @@
       "count": 18
     }
   },
-  "src/features/recovery/services/__tests__/setup.test.ts": {
+  "src/features/recovery/public/__tests__/setup.test.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 7
     }

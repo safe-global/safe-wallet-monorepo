@@ -40,17 +40,9 @@ import useCounterfactualSafeSync from '@/features/counterfactual/hooks/useCounte
 import { useInviteNotification } from '@/features/spaces/hooks/useInviteNotification'
 import { useSafeWorkspaceAttach } from '@/features/spaces/hooks/useSafeWorkspaceAttach'
 import { useSafeWorkspaceCheck } from '@/features/spaces/hooks/useSafeWorkspaceCheck'
-import { RecoveryFeature } from '@/features/recovery'
+import Recovery from '@/features/recovery/public/Recovery'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-
-/**
- * Wrapper that lazy-loads Recovery via the feature system.
- */
-const RecoveryLoader = () => {
-  const { Recovery } = useLoadFeature(RecoveryFeature)
-  return <Recovery />
-}
 
 /**
  * Wrapper that lazy-loads CounterfactualHooks via the feature system.
@@ -199,7 +191,7 @@ const SafeWalletApp = ({ Component, pageProps, router }: AppProps): ReactElement
 
           <AppChrome />
 
-          <RecoveryLoader />
+          <Recovery />
 
           <CounterfactualHooksLoader />
 

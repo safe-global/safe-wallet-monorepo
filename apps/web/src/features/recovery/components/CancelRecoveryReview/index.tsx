@@ -6,10 +6,10 @@ import type { PropsWithChildren, ReactElement } from 'react'
 
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
-import { getRecoverySkipTransaction } from '../../services/transaction'
+import { getRecoverySkipTransaction } from '../../public/transaction'
 import { createTx } from '@/services/tx/tx-sender/create'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import type { RecoveryQueueItem } from '../../public/types'
 import useAsync from '@safe-global/utils/hooks/useAsync'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 

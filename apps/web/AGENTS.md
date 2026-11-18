@@ -5,7 +5,7 @@ Web-specific guidance for the Next.js app under `apps/web/`. For monorepo-wide r
 ## Web-specific principles
 
 - New features must be created in a separate folder inside `src/features/` – only components, hooks, and services used globally across many features belong in top-level folders inside `src/`
-- **All features must follow the standard feature architecture pattern** – See [docs/feature-architecture.md](docs/feature-architecture.md) for the complete guide including folder structure, feature flags, lazy loading, and public API patterns
+- **All features must follow the feature architecture** – a feature's `public/` folder is its only entry point; see [docs/feature-architecture.md](docs/feature-architecture.md)
 - Each new feature must be behind a feature flag (stored on the CGW API in chains configs); read it in code with `useHasFeature` from `src/hooks/useChains.ts`, passing a flag from `FEATURES` (imported from `@safe-global/utils/utils/chains`)
 - A new Redux slice must be exported from `src/store/slices.ts` and registered in the `rootReducer` in `src/store/index.ts`; adding it to `persistedSlices` there both persists it to localStorage **and** syncs it across tabs (`persistStore.ts` and `broadcast.ts` share that list)
 - Use theme variables from vars.css instead of hard-coded CSS values
@@ -30,38 +30,12 @@ add a variant or a preset instead of pasting the classes again. The **`UI/Button
 
 ## Feature Architecture Import Rules
 
-Import every name from the file that declares it. A feature folder has no barrels: ESLint fails on a value re-export (`export … from`) in `src/features` (type-only re-exports are fine). A re-export makes every importer depend on every re-exported file, which ties features into one import cycle and makes `jest --findRelatedTests` select most of the suite.
+Each feature's `public/` folder is its only entry point. Import the one file you need, for example `@/features/recovery/public/RecoveryList`; inside a feature, use relative imports. No `index.ts` under `public/`, and no value re-exports (`export … from`) in `src/features`: a re-export makes every importer depend on every re-exported file, which ties features into one import cycle and makes `jest --findRelatedTests` select most of the suite.
 
-```typescript
-import { MyFeature } from '@/features/myfeature' // the feature handle, declared in index.ts
-import { useMyHook } from '@/features/myfeature/hooks/useMyHook'
-import { someSlice } from '@/features/myfeature/store/someSlice'
-```
+- **Public components** are gated and lazy: `gatedDynamic(FEATURES.X, () => import('../components/Y'))` from `@/utils/gatedDynamic`. Consumers do not check the flag.
+- **Public hooks** run on every chain, so make one public only for a cheap value. It returns a neutral value (`false`, `[]`, `undefined`) when its flag is off, loads heavy libraries inside its async step, and has a flag-off test.
 
-Components and heavy services are still reached through `useLoadFeature()`, so they stay lazy. ESLint blocks imports of `@/features/*/components` from outside `src/features` (except tests and stories); files that imported them before the rule are on an allow list in `eslint.config.mjs`.
-
-**Using a feature:**
-
-```typescript
-const { MyComponent, myService, $isReady, $isDisabled } = useLoadFeature(MyFeature) // from '@/features/__core__'
-// Always returns an object: components render null until ready (proxy stub);
-// services are undefined until ready — check $isReady before calling.
-```
-
-**Defining a feature:**
-
-```typescript
-// feature.ts — already lazy via createFeatureHandle: a flat object of direct imports only.
-// Naming determines stub behavior: PascalCase → component, camelCase → service.
-// No lazy()/dynamic(), no nested categories, no hooks here (Rules of Hooks).
-export default { MyComponent, myService }
-
-// index.ts — the feature handle only. Hooks stay in their own files and are always
-// loaded, so keep them lightweight; heavy logic goes in services:
-export const MyFeature = createFeatureHandle<MyFeatureContract>('my-feature')
-```
-
-Full guide (folder structure, proxy stubs, `$error`, feature flags): [docs/feature-architecture.md](docs/feature-architecture.md).
+ESLint enforces the `public/` boundary for the features listed in `config/eslint/feature-public-imports.mjs`, and blocks imports of any feature's `components/` from outside `src/features` (tests and stories excepted; older importers are on an allow list in `eslint.config.mjs`). The other features still use feature handles (`useLoadFeature`, see [docs/feature-architecture-legacy.md](docs/feature-architecture-legacy.md)); do not add new handles. Full guide, including how to move a feature: [docs/feature-architecture.md](docs/feature-architecture.md).
 
 ## Error logging
 
@@ -97,7 +71,7 @@ Don't add `loaders: [mswLoader]` — it is global in `preview.tsx`. Don't overri
 
 ## Web-specific common pitfalls
 
-1. **Never use `lazy()`/`dynamic()` anywhere inside a feature** – the whole feature is already lazy via `createFeatureHandle` (see [Feature Architecture Import Rules](#feature-architecture-import-rules) above).
+1. **Use `dynamic()` inside a feature only in its public components** – private code loads with the public component that wraps it (see [Feature Architecture Import Rules](#feature-architecture-import-rules) above).
 2. **CSS-module padding silently beaten by variant utilities** – shadcn primitives ship group-data variant utilities (e.g. Card's `group-data-[size=none]/card:px-0`) whose two-class selectors outrank a single CSS-module class. If a module style "mysteriously doesn't apply", check for a competing variant utility before adding more CSS (see ISSUE-050: every tx-flow card lost its horizontal padding this way). Prefer utility classes at the call site; when a module must win, document the `!important`.
 3. **`<img height={24}>` doesn't size images** – Tailwind's preflight sets `img { height: auto }`, which overrides the HTML `height` attribute. Always size raster images with classes (`className="h-6 w-auto"`), never attributes.
 4. **Unit tests don't see layout** – 6,600 green tests said nothing while the send-tokens form rendered with zero padding (ISSUE-050). Any UI-affecting change must be verified visually: check the component's story (or the live page) yourself, and review its Argos diff on the PR (see [Storybook](#storybook) above). Never ship a story that permanently renders skeletons/blank without a doc comment saying so — a broken story that "passes" is worse than no story.

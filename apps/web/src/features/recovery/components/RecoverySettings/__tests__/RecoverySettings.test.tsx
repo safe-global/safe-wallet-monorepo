@@ -1,6 +1,7 @@
 import { render, screen, within, fakerChecksummedAddress } from '@/tests/test-utils'
 import { mockSafeInfo } from '@/tests/mocks/hooks'
-import type { RecoveryStateItem } from '@/features/recovery/services/recovery-state'
+import * as useChainsHooks from '@/hooks/useChains'
+import type { RecoveryStateItem } from '../../../public/types'
 import { DAY_IN_SECONDS } from '@/components/tx-flow/flows/UpsertRecovery/useRecoveryPeriods'
 import recoveryStore from '../../RecoveryContext'
 import RecoverySettings from '..'
@@ -43,6 +44,7 @@ const setRecovery = (delayModifiers: RecoveryStateItem[]) => {
 
 describe('RecoverySettings', () => {
   beforeEach(() => {
+    jest.spyOn(useChainsHooks, 'useHasFeature').mockReturnValue(true)
     jest.clearAllMocks()
     mockSafeInfo({ deployed: true })
   })

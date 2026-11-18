@@ -5,9 +5,9 @@ import type { TransactionAddedEvent } from '@gnosis.pm/zodiac/dist/cjs/types/Del
 import type { Eip1193Provider, Overrides, TransactionResponse } from 'ethers'
 
 import { didReprice, didRevert } from '@/utils/ethers-utils'
-import { recoveryDispatch, RecoveryEvent, RecoveryTxType } from './recoveryEvents'
+import { recoveryDispatch, RecoveryEvent, RecoveryTxType } from '../services/recoveryEvents'
 import { asError } from '@safe-global/utils/services/exceptions/utils'
-import { getUncheckedSigner } from '../../../services/tx/tx-sender/sdk'
+import { getUncheckedSigner } from '@/services/tx/tx-sender/sdk'
 import { isSmartContractWallet } from '@/utils/wallets'
 
 async function getDelayModifierContract({

@@ -5,10 +5,10 @@ import type { ReactElement } from 'react'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { InfoDetails } from '@safe-global/views/components/transactions/InfoDetails'
 import ErrorMessage from '@/components/tx/ErrorMessage'
-import { useIsRecoverer } from '../../hooks/useIsRecoverer'
+import { useIsRecoverer } from '../../public/useIsRecoverer'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { getRecoveredSafeInfo } from '../../services/transaction-list'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import type { RecoveryQueueItem } from '../../public/types'
 
 export default function RecoveryDescription({ item }: { item: RecoveryQueueItem }): ReactElement {
   const { args, isMalicious } = item

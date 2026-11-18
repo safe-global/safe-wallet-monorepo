@@ -1,7 +1,7 @@
 import { useMemo, type ReactElement } from 'react'
 import { CancelRecoveryFlowReview } from './CancelRecoveryFlowReview'
 import { CancelRecoveryOverview } from './CancelRecoveryOverview'
-import type { RecoveryQueueItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryQueueItem } from '@/features/recovery/public/types'
 import { TxFlowType } from '@/services/analytics/types'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'

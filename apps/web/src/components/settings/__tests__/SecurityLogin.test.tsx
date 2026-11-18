@@ -1,7 +1,8 @@
 import { faker } from '@faker-js/faker'
 import { render, screen } from '@/tests/test-utils'
 import SecurityLogin from '../SecurityLogin'
-import * as useIsRecoverySupportedHook from '@/features/recovery/hooks/useIsRecoverySupported'
+import { FEATURES } from '@safe-global/utils/utils/chains'
+import * as useChainsHooks from '@/hooks/useChains'
 import * as useIsSafeOwnerHook from '@/hooks/useIsSafeOwner'
 import * as useVisibleBalancesHook from '@/hooks/useVisibleBalances'
 import * as useIsOutreachSafeHook from '@/features/targeted-features/hooks/useIsOutreachSafe'
@@ -90,7 +91,7 @@ describe('SecurityLogin', () => {
     })
 
     // Default mocks - feature enabled, wallet connected, owner, sufficient balance, not targeted
-    jest.spyOn(useIsRecoverySupportedHook, 'useIsRecoverySupported').mockReturnValue(false)
+    jest.spyOn(useChainsHooks, 'useHasFeature').mockReturnValue(false)
     mockUseIsHypernativeFeature.mockReturnValue(true)
     jest.spyOn(useWalletHook, 'default').mockReturnValue(mockWallet)
     jest.spyOn(useIsSafeOwnerHook, 'default').mockReturnValue(true)
@@ -238,7 +239,7 @@ describe('SecurityLogin', () => {
     })
 
     it('shows the recovery settings on a chain that supports recovery', async () => {
-      jest.spyOn(useIsRecoverySupportedHook, 'useIsRecoverySupported').mockReturnValue(true)
+      jest.spyOn(useChainsHooks, 'useHasFeature').mockImplementation((feature) => feature === FEATURES.RECOVERY)
 
       render(<SecurityLogin />, { routerProps: safeQuery })
 

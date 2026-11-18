@@ -5,7 +5,7 @@ import * as useWallet from '@/hooks/wallets/useWallet'
 import * as useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import * as useIsNestedSafeOwner from '@/hooks/useIsNestedSafeOwner'
 import * as useIsWalletProposer from '@/hooks/useProposers'
-import * as useIsRecoverer from '@/features/recovery/hooks/useIsRecoverer'
+import * as useIsRecoverer from '@/features/recovery/public/useIsRecoverer'
 import * as useIsSpendingLimitBeneficiary from '@/features/spending-limits/hooks/useIsOnlySpendingLimitBeneficiary'
 import type { ConnectedWallet } from '@/hooks/wallets/useOnboard'
 

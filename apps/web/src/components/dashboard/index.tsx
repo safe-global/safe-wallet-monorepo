@@ -6,7 +6,7 @@ import PendingTxsList from '@/components/dashboard/PendingTxs/PendingTxsList'
 import AssetsWidget from '@/components/dashboard/Assets'
 import Overview from '@/components/dashboard/Overview/Overview'
 import ExplorePossibleWidget from '@/components/dashboard/ExplorePossibleWidget'
-import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
+import RecoveryHeader from '@/features/recovery/public/RecoveryHeader'
 import { useHasFeature } from '@/hooks/useChains'
 import css from './styles.module.css'
 import { InconsistentSignerSetupWarning, MastercopyWarning } from '@/features/multichain'
@@ -29,7 +29,6 @@ import useIsStakingPromoBannerVisible, {
 } from '@/features/stake/hooks/useIsStakingPromoBannerVisible'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 
-const RecoveryHeader = dynamic(() => import('@/features/recovery/components/RecoveryHeader'))
 const PositionsWidget = dynamic(() => import('@/features/positions/components/PositionsWidget'))
 
 const Dashboard = (): ReactElement => {
@@ -37,7 +36,6 @@ const Dashboard = (): ReactElement => {
   const hn = useLoadFeature(HypernativeFeature)
   const { NonPinnedWarning } = useLoadFeature(MyAccountsFeature)
   const showSafeApps = useHasFeature(FEATURES.SAFE_APPS)
-  const supportsRecovery = useIsRecoverySupported()
   const isVulnerableSafe = useVulnerableSafe()
 
   const { balances, loaded: balancesLoaded } = useVisibleBalances()
@@ -90,7 +88,7 @@ const Dashboard = (): ReactElement => {
         <div className={css.rightCol}>
           <ActionRequiredPanel defaultExpanded={isVulnerableSafe}>
             <VulnerableModuleWarning isVulnerable={isVulnerableSafe} />
-            {supportsRecovery && <RecoveryHeader />}
+            <RecoveryHeader />
             <InconsistentSignerSetupWarning />
             <MastercopyWarning />
             <NonPinnedWarning />

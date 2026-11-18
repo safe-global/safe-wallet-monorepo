@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
 
-import recoveryStore from './components/RecoveryContext'
-import { RecoveryEvent, RecoveryTxType } from './services/recoveryEvents'
-import type { RecoveryQueueItem, RecoveryStateItem } from './services/recovery-state'
+import recoveryStore from '../components/RecoveryContext'
+import { RecoveryEvent, RecoveryTxType } from '../services/recoveryEvents'
+import type { RecoveryQueueItem, RecoveryStateItem } from './types'
 
 const DAY_IN_MS = 24 * 60 * 60 * 1_000
 

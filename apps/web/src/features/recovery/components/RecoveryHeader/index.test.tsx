@@ -4,9 +4,9 @@ import { InternalRecoveryHeader, useIsProposalInProgress } from '.'
 import { render, renderHook, waitFor } from '@/tests/test-utils'
 import store from '../RecoveryContext'
 import { RecoveryEvent, recoveryDispatch, RecoveryTxType } from '../../services/recoveryEvents'
-import { useRecoveryQueue } from '../../hooks/useRecoveryQueue'
+import { useRecoveryQueue } from '../../public/useRecoveryQueue'
 
-jest.mock('../../hooks/useRecoveryQueue')
+jest.mock('../../public/useRecoveryQueue')
 
 const mockUseRecoveryQueue = useRecoveryQueue as jest.MockedFunction<typeof useRecoveryQueue>
 

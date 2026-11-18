@@ -1,5 +1,4 @@
-import dynamic from '@/utils/dynamic'
-import { useIsRecoverySupported } from '@/features/recovery/hooks/useIsRecoverySupported'
+import RecoverySettings from '@/features/recovery/public/RecoverySettings'
 import SecuritySettings from '../SecuritySettings'
 import { useRouter } from 'next/router'
 import { HnBannerForSettings } from '@/features/hypernative/components/HnBanner'
@@ -7,10 +6,7 @@ import { HypernativeFeature } from '@/features/hypernative'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
 import { HYPERNATIVE_SOURCE } from '@/services/analytics/events/hypernative'
 
-const RecoverySettings = dynamic(() => import('@/features/recovery/components/RecoverySettings'))
-
 const SecurityLogin = () => {
-  const isRecoverySupported = useIsRecoverySupported()
   const router = useRouter()
   const hn = useLoadFeature(HypernativeFeature)
 
@@ -22,7 +18,7 @@ const SecurityLogin = () => {
       <hn.HnActivatedSettingsBanner />
       <HnBannerForSettings isDismissable={false} label={HYPERNATIVE_SOURCE.Settings} />
 
-      {isRecoverySupported && router.query.safe ? <RecoverySettings /> : null}
+      {router.query.safe ? <RecoverySettings /> : null}
 
       <SecuritySettings />
     </div>

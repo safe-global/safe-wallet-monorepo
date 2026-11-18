@@ -11,7 +11,7 @@ import { useSafeScopeContext } from '@safe-global/views/components/tx-flow/safe-
 import { selectTxQueue, selectQueuedTransactionsByNonce, filterQueuedTransactionsByNonce } from '@/store/txQueueSlice'
 import useSafeInfo from './useSafeInfo'
 import { isTransactionQueuedItem } from '@/utils/transaction-guards'
-import { useRecoveryQueue } from '../features/recovery/hooks/useRecoveryQueue'
+import { useRecoveryQueue } from '@/features/recovery/public/useRecoveryQueue'
 import { getTransactionQueue } from '@/services/transactions'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 

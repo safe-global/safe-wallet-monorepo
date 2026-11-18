@@ -1,8 +1,8 @@
 import { useClock } from './useClock'
-import { selectDelayModifierByTxHash } from '../services/selectors'
+import { selectDelayModifierByTxHash } from '../public/selectors'
 import recoveryStore from '../components/RecoveryContext'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import type { RecoveryQueueItem } from '../services/recovery-state'
+import type { RecoveryQueueItem } from '../public/types'
 
 export function useRecoveryTxState({ validFrom, expiresAt, transactionHash, args, address }: RecoveryQueueItem): {
   isNext: boolean

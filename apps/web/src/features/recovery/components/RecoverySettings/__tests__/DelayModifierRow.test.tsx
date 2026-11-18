@@ -1,7 +1,7 @@
 import { render, screen, fakerChecksummedAddress } from '@/tests/test-utils'
 import { mockSafeInfo } from '@/tests/mocks/hooks'
 import { mockRole, type TestRole } from '@/tests/mocks/roles'
-import type { RecoveryStateItem } from '@/features/recovery/services/recovery-state'
+import type { RecoveryStateItem } from '../../../public/types'
 import { DelayModifierRow } from '../DelayModifierRow'
 
 jest.mock('@/hooks/wallets/useWallet')

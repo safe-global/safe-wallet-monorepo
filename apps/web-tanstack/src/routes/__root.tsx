@@ -37,7 +37,7 @@ import { useHypernativeTokenRefresh } from '@/features/hypernative/hooks/useHype
 import { initObservability } from '@/services/observability'
 import Analytics from '@/services/analytics/Analytics'
 import { useLoadFeature } from '@/features/__core__/useLoadFeature'
-import { RecoveryFeature } from '@/features/recovery'
+import Recovery from '@/features/recovery/public/Recovery'
 import { CounterfactualFeature } from '@/features/counterfactual'
 import { SpendingLimitsFeature } from '@/features/spending-limits'
 import { useLocation, useSearch } from '@tanstack/react-router'
@@ -57,10 +57,6 @@ setStoreInstance(reduxStore)
 // the SPA, so a plain React.lazy is equivalent.
 const LazyWeb3Init = lazy(() => import('@/components/common/LazyWeb3Init'))
 
-const RecoveryLoader = () => {
-  const { Recovery } = useLoadFeature(RecoveryFeature)
-  return <Recovery />
-}
 const CounterfactualHooksLoader = () => {
   const { CounterfactualHooks } = useLoadFeature(CounterfactualFeature)
   return <CounterfactualHooks />
@@ -102,7 +98,7 @@ const MemoizedTree = memo(function MemoizedTree({ pathname, outlet }: { pathname
     <>
       <PageLayout pathname={pathname}>{outlet}</PageLayout>
       <AppChrome />
-      <RecoveryLoader />
+      <Recovery />
       <CounterfactualHooksLoader />
       <SpendingLimitsLoaderWrapper />
     </>
