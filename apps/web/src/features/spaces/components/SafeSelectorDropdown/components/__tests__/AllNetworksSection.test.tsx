@@ -1,10 +1,13 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 
-jest.mock('@/features/multichain', () => ({
+jest.mock('@/features/multichain/public/hooks/useAddNetworkState', () => ({
   useAddNetworkState: jest.fn(),
 }))
 jest.mock('@/services/analytics', () => ({
   trackEvent: jest.fn(),
+}))
+jest.mock('@/services/analytics/events/overview', () => ({
+  ...jest.requireActual('@/services/analytics/events/overview'),
   OVERVIEW_EVENTS: {
     ADD_NEW_NETWORK: { action: 'Add new network', category: 'overview' },
     SHOW_ALL_NETWORKS: { action: 'Show all networks', category: 'overview' },
@@ -16,8 +19,9 @@ jest.mock('../ChainLogo', () => ({
   default: ({ chainId }: { chainId: string }) => <span data-testid="chain-logo" data-chain-id={chainId} />,
 }))
 
-import { useAddNetworkState } from '@/features/multichain'
-import { trackEvent, OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics'
+import { useAddNetworkState } from '@/features/multichain/public/hooks/useAddNetworkState'
+import { trackEvent } from '@/services/analytics'
+import { OVERVIEW_EVENTS, OVERVIEW_LABELS } from '@/services/analytics/events/overview'
 import AllNetworksSection from '../AllNetworksSection'
 
 const mockHook = useAddNetworkState as jest.Mock

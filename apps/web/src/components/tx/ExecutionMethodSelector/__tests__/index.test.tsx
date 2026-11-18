@@ -7,10 +7,10 @@ const mockUseIsSafeProEnabled = jest.fn()
 jest.mock('@/hooks/useIsSafeProEnabled', () => ({ useIsSafeProEnabled: () => mockUseIsSafeProEnabled() }))
 jest.mock('@/hooks/wallets/useWallet', () => ({ __esModule: true, default: () => ({ label: 'MetaMask' }) }))
 jest.mock('@/hooks/useChains', () => ({ useCurrentChain: () => ({ chainId: '1' }) }))
-jest.mock('@/features/__core__', () => ({
-  useLoadFeature: () => ({ GasTooHighBanner: () => <div data-testid="gas-too-high-banner" /> }),
+jest.mock('@/features/no-fee-campaign/public/components/GasTooHighBanner', () => ({
+  __esModule: true,
+  default: () => <div data-testid="gas-too-high-banner" />,
 }))
-jest.mock('@/features/no-fee-campaign', () => ({ NoFeeCampaignFeature: {} }))
 jest.mock('../../SponsoredBy', () => ({
   __esModule: true,
   default: (props: { option: string; chainId: string }) => (

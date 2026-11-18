@@ -96,13 +96,13 @@ describe('useSpacePendingTransactions', () => {
     })
   })
 
-  it('requests the Space queue without a limit query parameter', async () => {
+  it('requests as many transactions from the Space queue as it shows', async () => {
     const requests = respondWithQueue(createPage({}))
 
     renderInSpace(4)
 
     await waitFor(() => expect(requests).toHaveLength(1))
-    expect(requests[0].searchParams.has('limit')).toBe(false)
+    expect(requests[0].searchParams.get('limit')).toBe('4')
   })
 
   it('returns the oldest transactions across Safes and chains, up to the limit', async () => {
@@ -125,37 +125,24 @@ describe('useSpacePendingTransactions', () => {
     expect(result.current.isLoading).toBe(false)
   })
 
-  it('orders the latest transaction of each conflict group by age, not by nonce', async () => {
-    const latestOfLowerNonce = queuedItemAt(5000, 'HasNext')
-    const higherNonce = queuedItemAt(1000)
+  it('returns every transaction of a conflict group, oldest first', async () => {
+    const newer = queuedItemAt(2000, 'HasNext')
+    const older = queuedItemAt(1000, 'End')
     respondWithQueue(
       createPage({
         [SAFE_1]: {
-          [CHAIN_1]: [{ type: 'CONFLICT_HEADER', nonce: 1 }, latestOfLowerNonce, queuedItemAt(500, 'End'), higherNonce],
-        },
-      }),
-    )
-
-    const { result } = renderInSpace(1)
-
-    await waitFor(() => expect(result.current.transactions).toHaveLength(1))
-    expect(result.current.transactions[0].transaction.id).toBe(higherNonce.transaction.id)
-  })
-
-  it('keeps only the latest transaction of a conflict group', async () => {
-    const latest = queuedItemAt(2000, 'HasNext')
-    respondWithQueue(
-      createPage({
-        [SAFE_1]: {
-          [CHAIN_1]: [{ type: 'CONFLICT_HEADER', nonce: 1 }, latest, queuedItemAt(1000, 'End')],
+          [CHAIN_1]: [{ type: 'CONFLICT_HEADER', nonce: 1 }, newer, older],
         },
       }),
     )
 
     const { result } = renderInSpace()
 
-    await waitFor(() => expect(result.current.transactions).toHaveLength(1))
-    expect(result.current.transactions[0].transaction.id).toBe(latest.transaction.id)
+    await waitFor(() => expect(result.current.transactions).toHaveLength(2))
+    expect(result.current.transactions.map((tx) => tx.transaction.id)).toEqual([
+      older.transaction.id,
+      newer.transaction.id,
+    ])
   })
 
   it('returns an error when the Space queue fails to load', async () => {

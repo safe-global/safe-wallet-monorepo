@@ -1,11 +1,60 @@
 import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
-import type * as SpacesModule from '@/features/spaces'
+import { useSpaceSafes } from '../../../public/hooks/useSpaceSafes'
+import { useSpaceMembersByStatus } from '../../../public/hooks/useSpaceMembers'
+import useGetSpaceAddressBook from '../../../public/hooks/useGetSpaceAddressBook'
 import SetupWidget from '../index'
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('../../../public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: jest.fn(() => ({ allSafes: [] })),
+}))
+jest.mock('../../../public/hooks/useSpaceMembers', () => ({
+  get MemberStatus() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberStatus
+  },
+  get MemberRole() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberRole
+  },
+  get MEMBER_ALIAS_MAX_LENGTH() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+  },
+  get getMemberDisplayName() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').getMemberDisplayName
+  },
+  get sanitizeMemberAlias() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').sanitizeMemberAlias
+  },
+  get isAdmin() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isAdmin
+  },
+  get isActiveAdmin() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isActiveAdmin
+  },
+  get isInviteExpired() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isInviteExpired
+  },
+  get useCurrentMembership() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useCurrentMembership
+  },
+  get useCurrentMemberProfile() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useCurrentMemberProfile
+  },
+  get useIsActiveMember() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useIsActiveMember
+  },
+  get useIsAdmin() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useIsAdmin
+  },
+  get useIsInvited() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useIsInvited
+  },
   useSpaceMembersByStatus: jest.fn(() => ({ activeMembers: [], invitedMembers: [] })),
-  useGetSpaceAddressBook: jest.fn(() => []),
+}))
+jest.mock('../../../public/hooks/useGetSpaceAddressBook', () => ({
+  ...jest.requireActual('../../../public/hooks/useGetSpaceAddressBook'),
+  __esModule: true,
+  default: jest.fn(() => []),
+}))
+jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(() => '1'),
 }))
 
@@ -16,8 +65,11 @@ jest.mock('../../../hooks/useSetupWidgetDismissal', () => ({
   useSetupWidgetDismissal: () => mockUseSetupWidgetDismissal(),
 }))
 
-jest.mock('@/hooks/safes', () => ({
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
+  ...jest.requireActual('@/hooks/safes/useAllSafesGrouped'),
   flattenSafeItems: jest.fn((items: unknown[]) => items),
+}))
+jest.mock('@/hooks/safes/isMultiChainSafeItem', () => ({
   isMultiChainSafeItem: jest.fn(() => false),
 }))
 
@@ -51,17 +103,15 @@ jest.mock(
     },
 )
 
-const mockSpaces = jest.requireMock<typeof SpacesModule>('@/features/spaces')
-
 const setStepData = ({
   addressBook = [] as unknown[],
   safes = [] as unknown[],
   activeMembers = [] as unknown[],
   invitedMembers = [] as unknown[],
 }) => {
-  ;(mockSpaces.useGetSpaceAddressBook as jest.Mock).mockReturnValue(addressBook)
-  ;(mockSpaces.useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: safes })
-  ;(mockSpaces.useSpaceMembersByStatus as jest.Mock).mockReturnValue({ activeMembers, invitedMembers })
+  ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue(addressBook)
+  ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: safes })
+  ;(useSpaceMembersByStatus as jest.Mock).mockReturnValue({ activeMembers, invitedMembers })
 }
 
 describe('SetupWidget', () => {

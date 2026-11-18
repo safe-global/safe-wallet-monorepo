@@ -6,8 +6,7 @@
     "expo-plugins/*",
     "apps/*",
     "config/*",
-    "packages/*",
-    "tools/codemods/*"
+    "packages/*"
   ],
   "scripts": {
     "lint": "turbo run lint --",

@@ -12,17 +12,15 @@ import {
 import NetworkOptions, {
   type NetworkOptionsProps,
 } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/NetworkOptions'
-import {
-  SafeOptions,
+import SafeOptions, {
   type SafeOptionsProps,
-} from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/SafeFilter'
+} from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/SafeOptions'
 import SignerOptions, {
   type SignerOptionsProps,
 } from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/SignerOptions'
-import {
-  StatusOptions,
+import StatusOptions, {
   type StatusOptionsProps,
-} from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/StatusFilter'
+} from '@safe-global/views/features/spaces/components/SpaceQueue/QueueFilters/StatusOptions'
 
 export type FilterMenuProps = {
   status: StatusOptionsProps

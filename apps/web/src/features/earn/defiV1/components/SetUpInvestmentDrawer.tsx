@@ -1,9 +1,11 @@
 import { useState, type ReactNode } from 'react'
-import { Check, X } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
-import { Typography } from '@safe-global/views/components/ui/typography'
 import { cn } from '@safe-global/views/utils/cn'
-import { Drawer, DrawerBody, DrawerFooter } from '@/components/common/Drawer'
+import { Drawer } from '@safe-global/views/components/common/Drawer/Drawer'
+import { DrawerBody } from '@safe-global/views/components/common/Drawer/components/DrawerBody'
+import { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'
+import { DrawerHeader } from '@safe-global/views/components/common/Drawer/components/DrawerHeader'
 import { DEFI_V1_COPY, formatAmount, formatApy } from '../copy'
 import type { Opportunity } from '../types'
 import {
@@ -122,28 +124,12 @@ export const SetUpInvestmentDrawer = ({
   }
 
   return (
-    <Drawer
-      open={open}
-      onClose={close}
-      ariaLabel={COPY.newSafe}
-      mobileFullScreen
-      header={() => (
-        <header className="flex items-center gap-3 px-6 pt-6">
-          <OpportunityMark />
-          <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <Typography as="h2" variant="paragraph-bold" className="truncate leading-tight">
-              {COPY.newSafe}
-            </Typography>
-            <span className="truncate text-xs text-muted-foreground">
-              {COPY.flowLead(investment.name, investment.chains[0], formatApy(investment.apy))}
-            </span>
-          </div>
-          <Button variant="ghost" size="icon-sm" aria-label={DEFI_V1_COPY.drawer.close} onClick={close}>
-            <X />
-          </Button>
-        </header>
-      )}
-    >
+    <Drawer open={open} onClose={close} ariaLabel={COPY.newSafe}>
+      <DrawerHeader
+        media={<OpportunityMark />}
+        title={COPY.newSafe}
+        subtitle={COPY.flowLead(investment.name, investment.chains[0], formatApy(investment.apy))}
+      />
       <DrawerBody>
         {proposed ? (
           <ProposedView form={form} />
@@ -197,7 +183,7 @@ export const SetUpInvestmentDrawer = ({
           </ol>
         )}
       </DrawerBody>
-      <DrawerFooter>
+      <DrawerFooter hint={proposed ? undefined : COPY.approveOnce(form.safe.threshold, form.owners.length)}>
         {proposed ? (
           <ProposedActions
             onClose={close}
@@ -207,14 +193,9 @@ export const SetUpInvestmentDrawer = ({
             }}
           />
         ) : (
-          <div className="flex flex-col gap-2 border-t border-border pt-4">
-            <Typography variant="paragraph-small" color="muted" align="center">
-              {COPY.approveOnce(form.safe.threshold, form.owners.length)}
-            </Typography>
-            <Button size="lg" className="w-full" disabled={!isLast || !form.isValid} onClick={next}>
-              {COPY.submit}
-            </Button>
-          </div>
+          <Button size="lg" className="w-full" disabled={!isLast || !form.isValid} onClick={next}>
+            {COPY.submit}
+          </Button>
         )}
       </DrawerFooter>
     </Drawer>

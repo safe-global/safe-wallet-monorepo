@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@/tests/test-utils'
+import { render, screen, fireEvent } from '@/tests/test-utils'
 import { DrawerSection } from '../DrawerSection'
 
 describe('DrawerSection', () => {
@@ -45,53 +45,63 @@ describe('DrawerSection', () => {
   })
 
   describe('collapsible', () => {
-    it('starts open and toggles from the title', () => {
+    it('starts open and hides its content when the title is pressed', () => {
       render(
-        <DrawerSection collapsible title="Summary">
+        <DrawerSection title="Summary" collapsible>
           Section content
         </DrawerSection>,
       )
 
-      const toggle = screen.getByRole('button', { name: /Summary/ })
+      const toggle = screen.getByRole('button', { name: 'Summary' })
+
       expect(toggle).toHaveAttribute('aria-expanded', 'true')
-      expect(screen.getByText('Section content')).toBeVisible()
 
       fireEvent.click(toggle)
+
       expect(toggle).toHaveAttribute('aria-expanded', 'false')
       expect(screen.queryByText('Section content')).not.toBeInTheDocument()
     })
 
-    it('can start collapsed', () => {
+    it('can start closed', () => {
       render(
-        <DrawerSection collapsible defaultOpen={false} title="Transaction data">
+        <DrawerSection title="Transaction data" collapsible defaultOpen={false}>
           Section content
         </DrawerSection>,
       )
 
-      expect(screen.getByRole('button', { name: /Transaction data/ })).toHaveAttribute('aria-expanded', 'false')
-      expect(screen.queryByText('Section content')).not.toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Transaction data' })).toHaveAttribute('aria-expanded', 'false')
     })
 
-    it('reports changes when controlled', () => {
+    it('follows a controlled open state and reports toggles', () => {
       const onOpenChange = jest.fn()
-      render(
-        <DrawerSection collapsible open={false} onOpenChange={onOpenChange} title="Security">
+      const { rerender } = render(
+        <DrawerSection title="Summary" collapsible open={false} onOpenChange={onOpenChange}>
           Section content
         </DrawerSection>,
       )
 
-      fireEvent.click(screen.getByRole('button', { name: /Security/ }))
+      fireEvent.click(screen.getByRole('button', { name: 'Summary' }))
+
       expect(onOpenChange).toHaveBeenCalledWith(true, expect.anything())
+      expect(screen.queryByText('Section content')).not.toBeInTheDocument()
+
+      rerender(
+        <DrawerSection title="Summary" collapsible open onOpenChange={onOpenChange}>
+          Section content
+        </DrawerSection>,
+      )
+
+      expect(screen.getByText('Section content')).toBeInTheDocument()
     })
 
     it('keeps the trailing node outside the toggle', () => {
       render(
-        <DrawerSection collapsible title="Runs after" rightNode="1 earlier">
+        <DrawerSection title="Summary" rightNode="2 of 3" collapsible>
           Section content
         </DrawerSection>,
       )
 
-      expect(screen.getByRole('button', { name: /Runs after/ })).not.toContainElement(screen.getByText('1 earlier'))
+      expect(screen.getByRole('button', { name: 'Summary' })).not.toContainElement(screen.getByText('2 of 3'))
     })
   })
 })

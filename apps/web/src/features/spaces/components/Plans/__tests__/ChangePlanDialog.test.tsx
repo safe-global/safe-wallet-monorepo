@@ -3,7 +3,10 @@ import ChangePlanDialog from '../ChangePlanDialog'
 import { trackEvent } from '@/services/analytics'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
 
-jest.mock('@/services/analytics', () => ({ ...jest.requireActual('@/services/analytics'), trackEvent: jest.fn() }))
+jest.mock('@/services/analytics', () => ({
+  ...jest.requireActual('@/services/analytics'),
+  trackEvent: jest.fn(),
+}))
 import type { PlanPick } from '@safe-global/views/features/spaces/components/Plans/types'
 
 const mockPreviewChange = jest.fn()
@@ -35,7 +38,7 @@ let mockAllSafes: unknown[] = [
   { address: '0xB', name: 'Payroll', isPinned: false, lastVisited: 0, safes: [leaf('1', '0xB'), leaf('10', '0xB')] },
   leaf('1', '0xC'),
 ]
-jest.mock('../../../hooks/useSpaceSafes', () => ({
+jest.mock('../../../public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => ({ allSafes: mockAllSafes, isLoading: false }),
 }))
 

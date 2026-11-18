@@ -1,20 +1,30 @@
-import React, { useCallback, useMemo, useState, type ReactNode } from 'react'
+import React, { useCallback, useMemo, useState, type ComponentType, type ReactNode } from 'react'
 import useTxStepper from './useTxStepper'
 import SafeTxProvider from './SafeTxProvider'
 import { TxInfoProvider } from './TxInfoProvider'
 import TxFlowProvider, { type TxFlowProviderProps, type TxFlowContextType } from './TxFlowProvider'
 import { TxFlowContent } from './common/TxFlowContent'
-import ReviewTransaction from '../tx/ReviewTransactionV2'
+import ReviewTransaction, { type ReviewTransactionProps } from '../tx/ReviewTransactionV2'
 import { ConfirmTxReceipt } from '../tx/ConfirmTxReceipt'
 import { ExecuteTxStep } from '../tx/ExecuteTxStep'
-import { TxNote, SignerSelect, BalanceChanges, FeeInfoBanner, FeesPreview, RiskConfirmation } from './features'
-import { Batching, ComboSubmit, Counterfactual, Execute, ExecuteThroughRole, Propose, Sign } from './actions'
-import { SlotProvider } from './slots'
+import TxNote from '@/components/tx-flow/features/TxNote'
+import SignerSelect from '@/components/tx-flow/features/SignerSelect'
+import BalanceChanges from '@/components/tx-flow/features/BalanceChanges'
+import FeeInfoBanner from '@/components/tx-flow/features/FeeInfoBanner'
+import FeesPreview from '@/components/tx-flow/features/FeesPreview'
+import RiskConfirmation from '@/components/tx-flow/features/RiskConfirmation'
+import Batching from '@/components/tx-flow/actions/Batching'
+import ComboSubmit from '@/components/tx-flow/actions/ComboSubmit'
+import Counterfactual from '@/components/tx-flow/actions/Counterfactual'
+import Execute from '@/components/tx-flow/actions/Execute'
+import ExecuteThroughRole from '@/components/tx-flow/actions/ExecuteThroughRole'
+import Propose from '@/components/tx-flow/actions/Propose'
+import Sign from '@/components/tx-flow/actions/Sign'
+import { SlotProvider } from '@safe-global/views/components/tx-flow/slots/SlotProvider'
 import { useTrackTimeSpent } from '@/components/tx/shared/tracking'
-import { useLoadFeature } from '@/features/__core__'
-import { LedgerFeature } from '@/features/ledger'
-import { SafeShieldProvider } from '@/features/safe-shield/SafeShieldContext'
+import { SafeShieldProvider } from '@/features/safe-shield/public/components/SafeShieldProvider'
 import type { SubmitCallback, SubmitCallbackProps } from '@safe-global/views/components/tx-flow/types'
+import LedgerHashComparison from '@/features/ledger/public/components/LedgerHashComparison'
 
 export type { SubmitCallback } from '@safe-global/views/components/tx-flow/types'
 export type SubmitCallbackWithData<T> = (args: SubmitCallbackProps & { data?: T }) => void
@@ -30,7 +40,7 @@ type TxFlowProps<T extends unknown> = {
   isRejection?: TxFlowProviderProps<T>['isRejection']
   isBatch?: TxFlowProviderProps<T>['isBatch']
   isBatchable?: TxFlowProviderProps<T>['isBatchable']
-  ReviewTransactionComponent?: typeof ReviewTransaction
+  ReviewTransactionComponent?: ComponentType<ReviewTransactionProps>
   eventCategory?: string
 } & TxFlowContextType['txLayoutProps']
 
@@ -55,7 +65,6 @@ export const TxFlow = <T extends unknown>({
   eventCategory,
   ...txLayoutProps
 }: TxFlowProps<T>) => {
-  const { LedgerHashComparison } = useLoadFeature(LedgerFeature)
   const { step, data, nextStep, prevStep } = useTxStepper(initialData, eventCategory)
 
   const childrenArray = Array.isArray(children) ? children : [children]

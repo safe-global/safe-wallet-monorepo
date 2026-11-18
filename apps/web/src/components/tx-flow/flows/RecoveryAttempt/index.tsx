@@ -1,7 +1,7 @@
 import TxLayout from '@/components/tx-flow/common/TxLayout'
 import SaveAddressIcon from '@/public/images/common/save-address.svg'
 import RecoveryAttemptReview from './RecoveryAttemptReview'
-import type { RecoveryQueueItem } from '@/features/recovery'
+import type { RecoveryQueueItem } from '@/features/recovery/public/types'
 
 const RecoveryAttemptFlow = ({ item }: { item: RecoveryQueueItem }) => {
   return (

@@ -3,8 +3,8 @@ import { renderHook, act } from '@testing-library/react'
 import useSafeActionMapper from '../useSafeActionMapper'
 import { TxModalContext, type TxModalContextType } from '@/components/tx-flow'
 import { AppRoutes } from '@/config/routes'
-import { ESafeAction } from '@/features/spaces/store'
-import type { SafeItem } from '@/hooks/safes'
+import { ESafeAction } from '../../../public/store/safeActionsModalSlice'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { unwrapScopedFlow } from '@/tests/mocks/safeScope'
 
 const mockReplace = jest.fn()
@@ -39,8 +39,10 @@ jest.mock('@/hooks/safe-apps/useTxBuilderApp', () => ({
   }),
 }))
 
-jest.mock('@/components/tx-flow/flows', () => ({
+jest.mock('@/components/tx-flow/flows/TokenTransferFlow', () => ({
   TokenTransferFlow: () => null,
+}))
+jest.mock('@/components/tx-flow/flows/NewTxFlow', () => ({
   NewTxFlow: () => null,
 }))
 
@@ -221,7 +223,7 @@ describe('useSafeActionMapper', () => {
       expect(setTxFlow).toHaveBeenCalledTimes(1)
       const [txFlow, onClose, shouldWarn] = setTxFlow.mock.calls[0] as [React.ReactElement, unknown, boolean]
       const { flow, target } = unwrapScopedFlow(txFlow)
-      expect(flow?.type).toBe(jest.requireMock('@/components/tx-flow/flows').NewTxFlow)
+      expect(flow?.type).toBe(jest.requireMock('@/components/tx-flow/flows/NewTxFlow').NewTxFlow)
       expect(target).toEqual({ chainId: '137', safeAddress: mockSafe.address })
       expect(onClose).toBeUndefined()
       expect(shouldWarn).toBe(false)

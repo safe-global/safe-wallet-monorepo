@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react'
 import { withMockProvider } from '@/storybook/decorators'
 import TrustedSafesModal from './index'
 import type { UseTrustedSafesModalReturn } from './useTrustedSafesModal'
-import { createHandlers } from '@/stories/mocks'
+import { createHandlers } from '@/stories/mocks/handlers'
 
 const baseMockModal: UseTrustedSafesModalReturn = {
   isOpen: true,

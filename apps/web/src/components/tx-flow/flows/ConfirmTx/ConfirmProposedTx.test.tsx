@@ -1,7 +1,8 @@
 import { faker } from '@faker-js/faker'
 import { render } from '@/tests/test-utils'
-import { createExistingTx } from '@/services/tx/tx-sender'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { createExistingTx } from '@/services/tx/tx-sender/create'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, initialContext } from '@/components/tx-flow/TxFlowProvider'
 import ConfirmProposedTx from './ConfirmProposedTx'
 import { SafeScopeContext } from '@safe-global/views/components/tx-flow/safe-scope/context'
@@ -9,7 +10,8 @@ import type { SafeScopeContextValue } from '@safe-global/views/components/tx-flo
 import type Safe from '@safe-global/protocol-kit'
 import { safeScopeContextFor } from '@/tests/mocks/safeScope'
 
-jest.mock('@/services/tx/tx-sender', () => ({
+jest.mock('@/services/tx/tx-sender/create', () => ({
+  ...jest.requireActual('@/services/tx/tx-sender/create'),
   createExistingTx: jest.fn(() => Promise.resolve({})),
 }))
 

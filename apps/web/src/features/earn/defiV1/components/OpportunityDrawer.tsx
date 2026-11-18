@@ -1,11 +1,12 @@
 import { Children, Fragment, type ReactNode } from 'react'
-import { ChevronDown, ChevronUp, FileText, Info, Maximize2, Minimize2, ShieldCheck, X } from 'lucide-react'
+import { FileText, Info, ShieldCheck } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
-import { Button } from '@safe-global/views/components/ui/button'
 import { Separator } from '@safe-global/views/components/ui/separator'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { Drawer, DrawerBody, DrawerSection } from '@/components/common/Drawer'
+import { Drawer } from '@safe-global/views/components/common/Drawer/Drawer'
+import { DrawerBody } from '@safe-global/views/components/common/Drawer/components/DrawerBody'
+import { DrawerHeader } from '@safe-global/views/components/common/Drawer/components/DrawerHeader'
+import { DrawerSection } from '@safe-global/views/components/common/Drawer/components/DrawerSection'
 import { DEFI_V1_COPY, formatApy, formatCompactUsd, formatLiveFor, formatUsd } from '../copy'
 import type { Holding, Operation, Opportunity } from '../types'
 import { ActionPanel, type ActionResult } from './ActionPanel'
@@ -13,42 +14,6 @@ import { SigningBlock } from './SigningBlock'
 import { OpportunityMark, Tag } from './TreasuryTables'
 
 const COPY = DEFI_V1_COPY.drawer
-
-// Mock Safe fee for the Free vs Pro comparison; real fees are not set yet.
-
-type HeaderAction = { id: string; label: string; icon: ReactNode; onClick?: () => void; disabled?: boolean }
-
-// Same joined button group as the pending queue drawer header.
-const HeaderActions = ({ actions }: { actions: HeaderAction[] }) => (
-  <div
-    data-slot="button-group"
-    role="group"
-    aria-label="Panel actions"
-    className="flex shrink-0 items-stretch overflow-hidden rounded-md border border-border bg-card shadow-xs"
-  >
-    {actions.map((action, index) => (
-      <span key={action.id} className="flex items-stretch">
-        {index > 0 && <span aria-hidden className="w-px bg-border" />}
-        <Tooltip delay={0} closeDelay={150}>
-          <TooltipTrigger
-            render={
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label={action.label}
-                disabled={action.disabled}
-                onClick={action.onClick}
-              />
-            }
-          >
-            {action.icon}
-          </TooltipTrigger>
-          <TooltipContent>{action.label}</TooltipContent>
-        </Tooltip>
-      </span>
-    ))}
-  </div>
-)
 
 const Frame = ({ children }: { children: ReactNode }) => (
   <div className="flex w-full flex-col overflow-hidden rounded-lg bg-card">
@@ -118,71 +83,28 @@ export const OpportunityDrawer = ({
   const index = opportunity ? list.findIndex((item) => item.id === opportunity.id) : -1
 
   return (
-    <Drawer
-      open={opportunity !== null}
-      onClose={onClose}
-      ariaLabel={opportunity?.name}
-      resizable
-      mobileFullScreen
-      header={({ fullScreen, toggleFullScreen, close }) =>
-        opportunity && (
-          <header className="flex items-center gap-3 px-6 pt-6">
-            <OpportunityMark invested={Boolean(holding)} />
-            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <Typography as="h2" variant="paragraph-bold" className="truncate leading-tight">
-                {opportunity.name}
-              </Typography>
-              <div className="flex min-w-0 items-center gap-2">
-                <span className="truncate text-xs text-muted-foreground">
-                  {opportunity.runBy} · {DEFI_V1_COPY.assetType[opportunity.type].label}
-                </span>
-                {holding && (
-                  <Badge variant="mint" size="status" shape="status">
-                    {DEFI_V1_COPY.invested}
-                  </Badge>
-                )}
-              </div>
-            </div>
-            {index >= 0 && (
-              <span className={fullScreen ? 'shrink-0 text-xs tabular-nums text-muted-foreground' : 'sr-only'}>
-                {index + 1} of {list.length}
-              </span>
-            )}
-            <HeaderActions
-              actions={[
-                {
-                  id: 'previous',
-                  label: COPY.previous,
-                  icon: <ChevronUp />,
-                  disabled: index <= 0,
-                  onClick: () => onNavigate(list[index - 1]),
-                },
-                {
-                  id: 'next',
-                  label: COPY.next,
-                  icon: <ChevronDown />,
-                  disabled: index < 0 || index >= list.length - 1,
-                  onClick: () => onNavigate(list[index + 1]),
-                },
-                ...(toggleFullScreen
-                  ? [
-                      {
-                        id: 'expand',
-                        label: fullScreen ? COPY.restore : COPY.fullScreen,
-                        icon: fullScreen ? <Minimize2 /> : <Maximize2 />,
-                        onClick: toggleFullScreen,
-                      },
-                    ]
-                  : []),
-                { id: 'close', label: COPY.close, icon: <X />, onClick: close },
-              ]}
-            />
-          </header>
-        )
-      }
-    >
+    <Drawer open={opportunity !== null} onClose={onClose} ariaLabel={opportunity?.name} resizable expandable>
       {opportunity && (
         <>
+          <DrawerHeader
+            media={<OpportunityMark invested={Boolean(holding)} />}
+            title={opportunity.name}
+            subtitle={`${opportunity.runBy} · ${DEFI_V1_COPY.assetType[opportunity.type].label}`}
+            status={
+              holding && (
+                <Badge variant="mint" size="status" shape="status">
+                  {DEFI_V1_COPY.invested}
+                </Badge>
+              )
+            }
+            navigation={{
+              onPrevious: () => onNavigate(list[index - 1]),
+              onNext: () => onNavigate(list[index + 1]),
+              hasPrevious: index > 0,
+              hasNext: index >= 0 && index < list.length - 1,
+              position: index >= 0 ? `${index + 1} of ${list.length}` : undefined,
+            }}
+          />
           <DrawerBody>
             <div className="flex flex-col gap-6 pb-6" data-testid="fact-sheet">
               <div className="flex flex-wrap gap-1.5">

@@ -9,7 +9,7 @@ import Track from '@/components/common/Track'
 import { MESSAGE_EVENTS } from '@/services/analytics/events/txList'
 import useIsSafeMessageSignableBy from '@/hooks/messages/useIsSafeMessageSignableBy'
 import { TxModalContext } from '@/components/tx-flow'
-import { SignMessageFlow } from '@/components/tx-flow/flows'
+import { SignMessageFlow } from '@/components/tx-flow/flows/SignMessageFlow'
 import CheckWallet from '@/components/common/CheckWallet'
 
 const SignMsgButton = ({ msg, compact = false }: { msg: MessageItem; compact?: boolean }): ReactElement => {

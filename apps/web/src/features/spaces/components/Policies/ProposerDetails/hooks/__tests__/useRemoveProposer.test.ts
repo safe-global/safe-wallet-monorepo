@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import { chainBuilder } from '@/tests/builders/chains'
-import { asActivePolicy, MOCK_ADDRESSES, MOCK_SAFES, mockProposerPolicy } from '../../../mocks/policies'
+import { asActivePolicy, MOCK_ADDRESSES, MOCK_SAFES, mockProposerPolicy } from '../../../../../public/utils/policies'
 import { useRemoveProposer } from '../useRemoveProposer'
 
 const mockDeleteV1 = jest.fn()
@@ -39,8 +39,8 @@ jest.mock('@/services/tx/tx-sender/sdk', () => ({
   getAssertedChainSigner: async () => SIGNER,
 }))
 
-jest.mock('@/features/proposers/utils/utils', () => ({
-  ...jest.requireActual('@/features/proposers/utils/utils'),
+jest.mock('@/features/proposers/public/utils/utils', () => ({
+  ...jest.requireActual('@/features/proposers/public/utils/utils'),
   signProposerDelegation: (...args: unknown[]) => mockSignDelegation(...args),
 }))
 

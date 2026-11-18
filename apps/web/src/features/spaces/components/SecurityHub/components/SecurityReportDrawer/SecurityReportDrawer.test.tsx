@@ -3,9 +3,9 @@ import { composeStories } from '@storybook/react'
 import { render, screen } from '@testing-library/react'
 
 import * as stories from './SecurityReportDrawer.stories'
-import type { useSecurityScan } from '@/features/security'
+import type useSecurityScan from '@/features/security/public/hooks/useSecurityScan'
 
-jest.mock('@/features/security/hooks/useSecurityScan', () => ({
+jest.mock('@/features/security/public/hooks/useSecurityScan', () => ({
   __esModule: true,
   default: jest.fn((): ReturnType<typeof useSecurityScan> => ({
     results: {},
@@ -21,13 +21,12 @@ jest.mock('@/features/security/hooks/useSecurityScan', () => ({
 const { OpenWithContext } = composeStories(stories)
 
 describe('SecurityReportDrawer surface', () => {
-  it('renders the drawer on a recessed surface, not bg-card, so inner cards stay visible in both themes', () => {
+  it('renders the drawer on a raised surface that steps inner cards up in dark mode, so they stay visible in both themes', () => {
     render(<OpenWithContext />)
 
     const content = screen.getByLabelText('Security report')
 
-    expect(content).toHaveClass('bg-muted-secondary')
-    expect(content).toHaveClass('dark:bg-[var(--color-background-main)]')
+    expect(content).toHaveClass('bg-muted-secondary', 'dark:bg-dialog', 'dark:[--card:var(--muted)]')
     expect(content).not.toHaveClass('bg-card')
   })
 
