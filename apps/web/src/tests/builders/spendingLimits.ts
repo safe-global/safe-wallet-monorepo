@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { checksumAddress } from '@safe-global/utils/utils/addresses'
-import type { SpendingLimitState } from '@/features/spending-limits'
+import type { SpendingLimitState } from '@safe-global/views/features/spending-limits/types'
 import { Builder, type IBuilder } from '@/tests/Builder'
 
 const PRODUCTION_PERIODS = ['0', '1440', '10080', '43200']

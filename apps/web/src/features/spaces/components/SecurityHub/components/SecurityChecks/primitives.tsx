@@ -7,8 +7,9 @@ import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import { cn } from '@safe-global/views/utils/cn'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import CopyButton from '@/components/common/CopyButton'
-import type { EvidenceItem, ScanResult, SecurityGrade } from '@/features/security/types'
-import { SEVERITY_RANK, type SecurityContract } from '@/features/security'
+import type { EvidenceItem, ScanResult, SecurityGrade } from '@/features/security/public/types'
+import { SEVERITY_RANK } from '@/features/security/public/constants'
+import type { SecurityServices } from '@/features/security/public/services/securityServices'
 import {
   resolveStatusTone,
   SeverityIcon,
@@ -130,7 +131,7 @@ export const Row = ({ leadIcon, title, subtitle, accentTone, trailing, expandedC
 
 /**
  * Factory that binds `checkDefs` to a CTA builder. Consumers obtain `checkDefs`
- * via useLoadFeature and pass it once; the returned function is then used at
+ * from useSecurityServices and pass it once; the returned function is then used at
  * each render site.
  *
  * The returned CTA builder returns null when:
@@ -140,7 +141,7 @@ export const Row = ({ leadIcon, title, subtitle, accentTone, trailing, expandedC
  * Label precedence: `ScanResult.ctaLabelOverride` → `checkDefs[id].ctaLabel`.
  */
 export const makeBuildCta =
-  (checkDefs: SecurityContract['checkDefs'], spaceId: string | null) =>
+  (checkDefs: SecurityServices['checkDefs'], spaceId: string | null) =>
   (checkId: string, result: ScanResult | undefined, safeQueryParam: string | undefined): Cta | null => {
     if (!safeQueryParam) return null
     const def = checkDefs[checkId]

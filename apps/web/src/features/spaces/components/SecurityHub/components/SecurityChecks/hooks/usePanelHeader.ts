@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
-import type { ScanResult, ScoreBandDef } from '@/features/security/types'
-import { SecurityFeature } from '@/features/security'
-import { useLoadFeature } from '@/features/__core__'
+import type { ScanResult, ScoreBandDef } from '@/features/security/public/types'
+import { useSecurityServices } from '@/features/security/public/hooks/useSecurityServices'
 
 /**
  * Three states the header can be in:
@@ -24,14 +23,10 @@ export type PanelHeaderState =
  * card is a pure render of the viewmodel.
  */
 export const usePanelHeader = (results: Record<string, ScanResult>, isComplete: boolean): PanelHeaderState => {
-  const security = useLoadFeature(SecurityFeature)
-  const summary = useMemo(
-    () => (security.$isReady ? security.computeSummary(results) : null),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [results, security.$isReady, security.computeSummary],
-  )
+  const security = useSecurityServices()
+  const summary = useMemo(() => (security ? security.computeSummary(results) : null), [results, security])
 
-  if (!security.$isReady || (!isComplete && !summary)) return { status: 'loading' }
+  if (!security || (!isComplete && !summary)) return { status: 'loading' }
   if (!summary) return { status: 'empty' }
 
   const clearRatio = summary.applicableCount > 0 ? summary.passing / summary.applicableCount : 0

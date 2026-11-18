@@ -7,9 +7,8 @@ import CopyTooltip from '@/components/common/CopyTooltip'
 import { Separator } from '@safe-global/views/components/ui/separator'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { useChain } from '@/hooks/useChains'
-import { useLoadFeature } from '@/features/__core__'
-import { SecurityFeature } from '@/features/security'
-import type { ScanContext } from '@/features/security/types'
+import { useSecurityServices } from '@/features/security/public/hooks/useSecurityServices'
+import type { ScanContext } from '@/features/security/public/types'
 import { cn } from '@safe-global/views/utils/cn'
 
 type SecurityDrawerDetailsProps = {
@@ -35,7 +34,7 @@ const DetailRow = ({ label, value }: { label: string; value: ReactNode }): React
 
 /** "Details" tab — the Safe's signers and high-level account facts. */
 const SecurityDrawerDetails = ({ scanContext, lastScannedAt }: SecurityDrawerDetailsProps): ReactElement | null => {
-  const security = useLoadFeature(SecurityFeature)
+  const security = useSecurityServices()
   const chain = useChain(scanContext?.chainId ?? '')
 
   if (!scanContext) return null
@@ -48,7 +47,7 @@ const SecurityDrawerDetails = ({ scanContext, lastScannedAt }: SecurityDrawerDet
     { label: 'Balance', value: formatCurrencyPrecise(balanceUsd, 'USD') },
     {
       label: 'Last scanned',
-      value: security.$isReady ? security.formatTimestamp(lastScannedAt ?? undefined) : '—',
+      value: security ? security.formatTimestamp(lastScannedAt ?? undefined) : '—',
     },
   ]
 

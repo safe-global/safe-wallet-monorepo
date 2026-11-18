@@ -10,8 +10,9 @@ import useIsSafeOwner from '@/hooks/useIsSafeOwner'
 import DeleteIcon from '@/public/images/common/delete.svg'
 import EditIcon from '@safe-global/views/assets/images/common/edit.svg'
 import CheckWallet from '@/components/common/CheckWallet'
-import { RemoveRecoveryFlow, UpsertRecoveryFlow } from '@/components/tx-flow/flows'
-import type { RecoveryStateItem } from '../../services/recovery-state'
+import { RemoveRecoveryFlow } from '@/components/tx-flow/flows/RemoveRecoveryFlow'
+import { UpsertRecoveryFlow } from '@/components/tx-flow/flows/UpsertRecoveryFlow'
+import type { RecoveryStateItem } from '../../public/types'
 
 export function DelayModifierRow({ delayModifier }: { delayModifier: RecoveryStateItem }): ReactElement | null {
   const { setTxFlow } = useContext(TxModalContext)

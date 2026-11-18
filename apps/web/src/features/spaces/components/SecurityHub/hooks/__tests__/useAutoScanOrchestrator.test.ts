@@ -9,7 +9,7 @@ import type {
 const autoScanMock = jest.fn()
 let lastServices: unknown = null
 
-jest.mock('@/features/spaces/hooks/useAutoScan', () => ({
+jest.mock('../../../../hooks/useAutoScan', () => ({
   __esModule: true,
   default: (
     queue: SelectedSafe[],
@@ -24,7 +24,7 @@ jest.mock('@/features/spaces/hooks/useAutoScan', () => ({
 }))
 
 const useCurrentSpaceIdMock = jest.fn<string | null, []>()
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('../../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => useCurrentSpaceIdMock(),
 }))
 
@@ -45,13 +45,14 @@ const mkSelected = (address: string): SelectedSafe => ({ address, chainId: CHAIN
 const startScanFn = jest.fn()
 
 const mkSecurity = (isReady = true) =>
-  ({
-    $isReady: isReady,
-    scanners: [{ id: 'account_setup', scan: jest.fn() }],
-    scanKey: (address: string, chainId: string) => `${address}:${chainId}`,
-    setCachedScan: jest.fn(),
-    withScannerTimeout: jest.fn(),
-  }) as unknown as Parameters<typeof useAutoScanOrchestrator>[0]['security']
+  isReady
+    ? ({
+        scanners: [{ id: 'account_setup', scan: jest.fn() }],
+        scanKey: (address: string, chainId: string) => `${address}:${chainId}`,
+        setCachedScan: jest.fn(),
+        withScannerTimeout: jest.fn(),
+      } as unknown as Parameters<typeof useAutoScanOrchestrator>[0]['security'])
+    : undefined
 
 describe('useAutoScanOrchestrator', () => {
   beforeEach(() => {
@@ -83,10 +84,10 @@ describe('useAutoScanOrchestrator', () => {
     )
 
     expect(lastServices).toMatchObject({
-      scanners: security.scanners,
-      scanKey: security.scanKey,
-      setCachedScan: security.setCachedScan,
-      withScannerTimeout: security.withScannerTimeout,
+      scanners: security?.scanners,
+      scanKey: security?.scanKey,
+      setCachedScan: security?.setCachedScan,
+      withScannerTimeout: security?.withScannerTimeout,
     })
   })
 

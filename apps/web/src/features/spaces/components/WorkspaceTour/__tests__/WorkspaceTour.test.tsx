@@ -27,10 +27,12 @@ jest.mock('@/hooks/useIsSpaceRoute', () => ({ useIsSpaceRoute: () => mockIsSpace
 const mockUserId = faker.number.int({ min: 1, max: 1000 })
 const mockSpaceId = faker.string.numeric(3)
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('../../../public/hooks/useSpaceMembers', () => ({
+  ...jest.requireActual('../../../public/hooks/useSpaceMembers'),
   useIsActiveMember: () => mockIsActiveMember(),
-  useCurrentSpaceId: () => mockSpaceId,
 }))
+
+jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => mockSpaceId }))
 
 jest.mock('@safe-global/store/gateway/AUTO_GENERATED/users', () => ({
   ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/users'),

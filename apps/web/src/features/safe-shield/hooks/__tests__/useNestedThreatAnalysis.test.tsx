@@ -2,7 +2,7 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { useNestedThreatAnalysis } from '../useNestedThreatAnalysis'
 import { Severity, StatusGroup, ThreatStatus } from '@safe-global/utils/features/safe-shield/types'
 import type { SafeTransaction } from '@safe-global/types-kit'
-import type { HypernativeEligibility } from '@/features/hypernative'
+import type { HypernativeEligibility } from '@/features/hypernative/public/hooks/useIsHypernativeEligible'
 
 jest.mock('@safe-global/utils/features/safe-shield/hooks', () => ({
   useThreatAnalysis: jest.fn(),
@@ -29,7 +29,7 @@ jest.mock('@/hooks/wallets/useWallet', () => ({
   useSigner: jest.fn(() => ({ address: '0xWallet' })),
 }))
 
-jest.mock('@/components/tx-flow/SafeTxProvider', () => ({
+jest.mock('@safe-global/views/components/tx-flow/SafeTxContext', () => ({
   SafeTxContext: {
     _currentValue: {
       safeTx: undefined,
@@ -50,9 +50,11 @@ const buildEligibility = (overrides: Partial<HypernativeEligibility> = {}): Hype
 const mockUseIsHypernativeEligible = jest.fn(() => buildEligibility())
 const mockUseIsHypernativeFeatureEnabled = jest.fn(() => true)
 
-jest.mock('@/features/hypernative', () => ({
+jest.mock('@/features/hypernative/public/hooks/useIsHypernativeEligible', () => ({
   useIsHypernativeEligible: () => mockUseIsHypernativeEligible(),
-  useIsHypernativeFeatureEnabled: () => mockUseIsHypernativeFeatureEnabled(),
+}))
+jest.mock('@/features/hypernative/public/hooks/useIsHypernativeFeature', () => ({
+  useIsHypernativeFeature: () => mockUseIsHypernativeFeatureEnabled(),
 }))
 
 const mockUseThreatAnalysisUtils = jest.requireMock('@safe-global/utils/features/safe-shield/hooks').useThreatAnalysis

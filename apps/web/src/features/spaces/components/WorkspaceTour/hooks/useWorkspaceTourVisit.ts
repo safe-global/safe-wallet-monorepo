@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useUsersGetWithWalletsV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/users'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '../../../public/hooks/useCurrentSpaceId'
 import { localItem } from '@/services/local-storage/local'
 import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'

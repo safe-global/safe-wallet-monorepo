@@ -1,6 +1,6 @@
 import { JsonRpcProvider, toBeHex } from 'ethers'
 import { EMPTY_DATA, ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import * as web3 from '@/hooks/wallets/web3'
+import * as web3 from '@/hooks/wallets/web3ReadOnly'
 import {
   relaySafeCreation,
   getRedirect,

@@ -11,7 +11,7 @@ import TourStop from '../TourStop'
 const WORKSPACE_CONTACTS_STEP = TOUR_STEPS.find(({ id }) => id === 'workspace-contacts')!
 const SLOWER_THAN_ANCHOR_WAIT_MS = ANCHOR_TIMEOUT_MS + 2000
 
-jest.mock('@/features/spaces', () => ({ useCurrentSpaceId: () => '1' }))
+jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => '1' }))
 
 const AddressBookPage = () => (
   <main>

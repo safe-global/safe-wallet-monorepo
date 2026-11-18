@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router'
 import TourDoneDialog from '@safe-global/views/features/spaces/components/WorkspaceTour/TourDoneDialog'
 import TourWelcomeDialog from '@safe-global/views/features/spaces/components/WorkspaceTour/TourWelcomeDialog'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
 import { TOUR_NEXT_ACTIONS, TOUR_STEPS } from './constants'
 import { useArrowKeyNavigation } from './hooks/useArrowKeyNavigation'
 import { useTourNavigation } from './hooks/useTourNavigation'

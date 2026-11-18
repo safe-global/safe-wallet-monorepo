@@ -1,5 +1,5 @@
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { useIsActiveMember } from '@/features/spaces'
+import { useIsActiveMember } from '../../../public/hooks/useSpaceMembers'
 import { useHasFeature } from '@/hooks/useChains'
 import { useIsSpaceRoute } from '@/hooks/useIsSpaceRoute'
 import { useIsBelowMd } from '@/hooks/useMediaQuery'

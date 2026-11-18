@@ -32,18 +32,20 @@ import RejectionTxInfo from '@/components/transactions/TxDetails/TxData/Rejectio
 import TransferTxInfo from '@/components/transactions/TxDetails/TxData/Transfer'
 import useChainId from '@/hooks/useChainId'
 import { MigrationToL2TxData } from './MigrationToL2TxData'
-import { StakingTxDepositDetails, StakingTxExitDetails, StakingTxWithdrawDetails } from './Staking'
-import { SwapFeature } from '@/features/swap'
-import { useLoadFeature } from '@/features/__core__'
+import StakingTxDepositDetails from '@/components/transactions/TxDetails/TxData/Staking/StakingTxDepositDetails'
+import StakingTxExitDetails from '@/components/transactions/TxDetails/TxData/Staking/StakingTxExitDetails'
+import StakingTxWithdrawDetails from '@/components/transactions/TxDetails/TxData/Staking/StakingTxWithdrawDetails'
 import { OnChainConfirmation } from './NestedTransaction/OnChainConfirmation'
 import { ExecTransaction } from './NestedTransaction/ExecTransaction'
 import SafeUpdate from './SafeUpdate'
-import { VaultDepositTxDetails, VaultRedeemTxDetails } from '@/features/earn'
+import VaultDepositTxDetails from '@/features/earn/public/components/VaultDepositTxDetails'
+import VaultRedeemTxDetails from '@/features/earn/public/components/VaultRedeemTxDetails'
 import DecodedData from './DecodedData'
 import ParsingErrorBoundary from '@/components/common/ObservabilityErrorBoundary/ParsingErrorBoundary'
 import Multisend from './DecodedData/Multisend'
 import BridgeTransaction from '@/components/tx/confirmation-views/BridgeTransaction'
 import { LifiSwapTransaction } from '@/components/tx/confirmation-views/LifiSwapTransaction'
+import SwapOrder from '@/features/swap/public/components/SwapOrder'
 
 const TxData = ({
   txInfo,
@@ -64,8 +66,6 @@ const TxData = ({
   executingSafeAddress?: string
 }>): ReactElement => {
   const chainId = useChainId()
-  const { SwapOrder } = useLoadFeature(SwapFeature)
-
   if (isOrderTxInfo(txInfo)) {
     return <SwapOrder txData={txData} txInfo={txInfo} />
   }

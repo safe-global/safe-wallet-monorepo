@@ -13,11 +13,11 @@ const meta = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['default', 'secondary', 'outline', 'ghost', 'destructive', 'surface'],
+      options: ['default', 'secondary', 'outline', 'ghost', 'destructive', 'surface', 'row-hover-primary'],
     },
     size: {
       control: 'select',
-      options: ['default', 'xs', 'sm', 'lg', 'action', 'submit', 'xl', 'icon', 'icon-sm', 'icon-xs'],
+      options: ['default', '2xs', 'xs', 'sm', 'lg', 'action', 'submit', 'xl', 'icon', 'icon-sm', 'icon-xs'],
     },
     disabled: {
       control: 'boolean',
@@ -43,6 +43,16 @@ export const AllVariants: Story = {
           <Button variant="outline">Outline</Button>
           <Button variant="ghost">Ghost</Button>
           <Button variant="destructive">Destructive</Button>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="mb-4 text-lg font-semibold">Row hover primary</h3>
+        <div className="group/transaction flex w-fit items-center gap-4 rounded-md p-4 hover:bg-muted">
+          <span className="text-sm">Hover this row</span>
+          <Button variant="row-hover-primary" size="2xs" className="w-20">
+            Sign
+          </Button>
         </div>
       </div>
 

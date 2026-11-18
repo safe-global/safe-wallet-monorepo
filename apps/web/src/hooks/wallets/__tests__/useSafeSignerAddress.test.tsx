@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { faker } from '@faker-js/faker'
 import { renderHook } from '@/tests/test-utils'
-import { WalletContext, type SignerWallet } from '@/components/common/WalletProvider'
+import { WalletContext, type SignerWallet } from '@/components/common/WalletProvider/WalletContext'
 import useSafeSignerAddress from '@/hooks/wallets/useSafeSignerAddress'
 
 const renderWithSigner = (signer: SignerWallet | null) => {

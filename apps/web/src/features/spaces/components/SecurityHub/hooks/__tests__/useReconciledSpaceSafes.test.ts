@@ -5,7 +5,7 @@ const useSpaceSafesMock = jest.fn()
 const useGetMultipleSafeOverviewsQueryMock = jest.fn()
 const useAppSelectorMock = jest.fn()
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('../../../../public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: () => useSpaceSafesMock(),
 }))
 
@@ -13,8 +13,12 @@ jest.mock('@/store', () => ({
   useAppSelector: (selector: unknown) => useAppSelectorMock(selector),
 }))
 
-jest.mock('@/store/slices', () => ({
+jest.mock('@/features/counterfactual/public/store/undeployedSafesSlice', () => ({
+  ...jest.requireActual('@/features/counterfactual/public/store/undeployedSafesSlice'),
   selectUndeployedSafes: 'selectUndeployedSafes',
+}))
+jest.mock('@/store/settingsSlice', () => ({
+  ...jest.requireActual('@/store/settingsSlice'),
   selectCurrency: 'selectCurrency',
 }))
 
@@ -28,10 +32,11 @@ const MAINNET = '1'
 const POLYGON = '137'
 
 const mkSecurity = (isReady = true) =>
-  ({
-    $isReady: isReady,
-    scanKey: (address: string, chainId: string) => `${address}:${chainId}`,
-  }) as unknown as Parameters<typeof useReconciledSpaceSafes>[0]
+  isReady
+    ? ({
+        scanKey: (address: string, chainId: string) => `${address}:${chainId}`,
+      } as unknown as Parameters<typeof useReconciledSpaceSafes>[0])
+    : undefined
 
 const mkOverview = (address: string, chainId: string, fiatTotal = '1000', queued = 0) => ({
   address: { value: address },

@@ -1,11 +1,15 @@
 import { useCallback, useMemo, useState } from 'react'
 import debounce from 'lodash/debounce'
-import { type AllSafeItems, _groupAndSort, getComparator, useSafesSearch } from '@/hooks/safes'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { _groupAndSort } from '@/hooks/safes/useAllSafesGrouped'
+import { getComparator } from '@/hooks/safes/comparators'
+import { useSafesSearch } from '@/hooks/safes/useSafesSearch'
 import useAllSafes, { type SafeItem } from '@/hooks/safes/useAllSafes'
 import { useAppSelector } from '@/store'
 import { selectOrderByPreference } from '@/store/orderByPreferenceSlice'
-import { useSimilarityClusters, bandGroupsForList, buildSimilarWarnings } from '@/features/address-poisoning'
-import useGetSpaceAddressBook from '../../../hooks/useGetSpaceAddressBook'
+import useSimilarityClusters from '@/features/address-poisoning/public/hooks/useSimilarityClusters'
+import { bandGroupsForList, buildSimilarWarnings } from '@/features/address-poisoning/public/utils/crossListClusters'
+import useGetSpaceAddressBook from '../../../public/hooks/useGetSpaceAddressBook'
 import { withWorkspaceNames } from '../../NameAccounts/utils'
 
 const useOnboardingSafes = () => {

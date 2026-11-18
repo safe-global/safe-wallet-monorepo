@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
-import useLoadBalances, { type PortfolioBalances, initialBalancesState } from './loadables/useLoadBalances'
+import useLoadBalances from './loadables/useLoadBalances'
+import type { PortfolioBalances } from '@safe-global/utils/hooks/portfolioBalances'
+import { initialBalancesState } from '@safe-global/utils/hooks/portfolioBalances'
 
 export type UseBalancesResult = {
   balances: PortfolioBalances

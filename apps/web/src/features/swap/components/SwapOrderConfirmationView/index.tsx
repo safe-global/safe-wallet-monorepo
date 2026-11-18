@@ -15,7 +15,7 @@ import { compareAsc } from 'date-fns'
 import { Alert, AlertDescription } from '@safe-global/views/components/ui/alert'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { formatAmount } from '@safe-global/utils/utils/formatNumber'
-import { getLimitPrice, getOrderClass, getSlippageInPercent } from '../../helpers/utils'
+import { getLimitPrice, getOrderClass, getSlippageInPercent } from '../../public/utils'
 import SwapTokens from '../SwapTokens'
 import AlertIcon from '@/public/images/common/alert.svg'
 import EthHashInfo from '@/components/common/EthHashInfo'
@@ -25,7 +25,7 @@ import { PartDuration } from '@safe-global/views/features/swap/components/SwapOr
 import { PartSellAmount } from '@safe-global/views/features/swap/components/SwapOrder/rows/PartSellAmount'
 import { PartBuyAmount } from '@safe-global/views/features/swap/components/SwapOrder/rows/PartBuyAmount'
 import { OrderFeeConfirmationView } from './OrderFeeConfirmationView'
-import { isSettingTwapFallbackHandler } from '../../helpers/utils'
+import { isSettingTwapFallbackHandler } from '../../public/utils'
 import { TwapFallbackHandlerWarning } from '@safe-global/views/features/swap/components/TwapFallbackHandlerWarning'
 
 type SwapOrderProps = {

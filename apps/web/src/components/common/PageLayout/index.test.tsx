@@ -74,8 +74,9 @@ jest.mock('@/hooks/useRouterGuard/activationGuards/useFlowActivationGuard', () =
   }
 })
 
-jest.mock('@/hooks/useKeyboardObserver', () => ({
-  useKeyboardObserver: jest.fn(),
+jest.mock('@/hooks/useKeyboardObserver/useKeyboardObserver', () => ({
+  __esModule: true,
+  default: jest.fn(),
 }))
 
 jest.mock('@/hooks/useTopbarElevation', () => ({
@@ -93,18 +94,17 @@ jest.mock('@/hooks/useIsSignedIn', () => ({
   useIsSignedIn: () => mockUseIsSignedIn(),
 }))
 
-jest.mock('@/features/__core__', () => ({
-  useLoadFeature: jest.fn(() => ({
-    BatchSidebar: () => null,
-    SelectSafeModal: () => null,
-    SafeWorkspaceSignInDialog: () => null,
-    SafeWorkspaceChooserDialog: () => null,
-    WorkspaceTour: () => null,
-  })),
+jest.mock('@/features/batching/public/components/BatchSidebar', () => ({ __esModule: true, default: () => null }))
+jest.mock('@/features/spaces/public/components/SelectSafeModal', () => ({ __esModule: true, default: () => null }))
+jest.mock('@/features/spaces/public/components/SafeWorkspaceSignInDialog', () => ({
+  __esModule: true,
+  default: () => null,
 }))
-
-jest.mock('@/features/batching', () => ({ BatchingFeature: {} }))
-jest.mock('@/features/spaces', () => ({ SpacesFeature: {} }))
+jest.mock('@/features/spaces/public/components/SafeWorkspaceChooserDialog', () => ({
+  __esModule: true,
+  default: () => null,
+}))
+jest.mock('@/features/spaces/public/components/WorkspaceTour', () => ({ __esModule: true, default: () => null }))
 
 const STATIC_ROUTES = [AppRoutes.licenses, AppRoutes.imprint, AppRoutes.cookie]
 

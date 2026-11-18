@@ -5,7 +5,7 @@ import {
   type AllowlistRecipient,
   type PolicyTokenInfo,
 } from '@safe-global/views/features/spaces/components/Policies/types'
-import { getPolicyGuardAddress } from '@/features/policy-guard/services'
+import { getPolicyGuardAddress } from '@/features/policy-guard/public/services/policyEngineDeployments'
 import {
   mockErc20TransferDto,
   mockNativeTransferDto,
@@ -13,7 +13,7 @@ import {
   mockSpendingLimitDto,
   mockTreasuryAllowlistDtos,
 } from '../../mocks/activePolicies'
-import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS } from '../../mocks/policies'
+import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS } from '../../../../public/utils/policies'
 import { mapActivePolicies, type Erc20TokenResolver, type NativeTokenResolver } from '../mapActivePolicies'
 
 describe('mapActivePolicies', () => {

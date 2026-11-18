@@ -7,7 +7,7 @@ import {
   mockPendingPolicy,
   mockPendingRemoval,
   mockUnenforcedPolicy,
-} from '@/features/spaces/components/Policies/mocks/policies'
+} from '@/features/spaces/public/utils/policies'
 import { resolveSpendingLimitDrawerState } from './resolveState'
 
 const resolve = (

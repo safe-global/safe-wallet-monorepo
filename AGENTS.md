@@ -4,7 +4,7 @@ This repository is the Safe{Wallet} monorepo, containing both web and mobile app
 
 ## Nested guidance
 
-This monorepo uses nested AGENTS.md files. Agents working in a subtree automatically load the nearest one — for Claude Code this works via a one-line pointer `CLAUDE.md` next to each AGENTS.md, so every new AGENTS.md needs one. Start at root for cross-cutting rules, then drop into the relevant subtree (`expo-plugins/*` and `tools/codemods/*` are tooling workspaces without one):
+This monorepo uses nested AGENTS.md files. Agents working in a subtree automatically load the nearest one — for Claude Code this works via a one-line pointer `CLAUDE.md` next to each AGENTS.md, so every new AGENTS.md needs one. Start at root for cross-cutting rules, then drop into the relevant subtree (`expo-plugins/*` are tooling workspaces without one):
 
 | Subtree                | File                                                           | Covers                                                                                                                         |
 | ---------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |

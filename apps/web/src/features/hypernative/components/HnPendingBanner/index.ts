@@ -2,11 +2,11 @@ import type { ComponentType } from 'react'
 import { withHnFeature } from '../withHnFeature'
 import { withHnBannerConditions, type WithHnBannerConditionsProps } from '../withHnBannerConditions'
 import { withHnSignupFlow } from '../withHnSignupFlow'
-import { BannerType } from '../../hooks/useBannerStorage'
+import { BannerType } from '../../public/hooks/useBannerStorage'
 import { HnPendingBannerWithDismissal } from './HnPendingBannerWithDismissal'
 
 // Export the original pure component for tests and stories
-export { HnPendingBanner } from '@safe-global/views/features/hypernative/components/HnPendingBanner/HnPendingBanner'
+
 export type { HnPendingBannerProps } from '@safe-global/views/features/hypernative/components/HnPendingBanner/HnPendingBanner'
 
 // Export the composed HOC as default

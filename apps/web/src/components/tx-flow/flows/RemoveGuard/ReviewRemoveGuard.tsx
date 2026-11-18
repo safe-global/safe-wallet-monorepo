@@ -1,10 +1,11 @@
 import { useCallback, useContext, useEffect, type PropsWithChildren } from 'react'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import EthHashInfo from '@/components/common/EthHashInfo'
-import { trackEvent, SETTINGS_EVENTS } from '@/services/analytics'
-import { createRemoveGuardTx } from '@/services/tx/tx-sender'
+import { trackEvent } from '@/services/analytics'
+import { SETTINGS_EVENTS } from '@/services/analytics/events/settings'
+import { createRemoveGuardTx } from '@/services/tx/tx-sender/create'
 import { type RemoveGuardFlowProps } from '.'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import ReviewTransaction from '@/components/tx/ReviewTransactionV2'
 
 export const ReviewRemoveGuard = ({

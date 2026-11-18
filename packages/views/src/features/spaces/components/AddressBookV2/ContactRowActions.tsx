@@ -1,4 +1,4 @@
-import { EllipsisVertical, Pencil, Trash2 } from 'lucide-react'
+import { EllipsisVertical, Pencil, Tag, Trash2 } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
   DropdownMenu,
@@ -11,10 +11,11 @@ type ContactRowActionsProps = {
   name: string
   onEdit?: () => void
   onDelete?: () => void
+  onEditTags?: () => void
 }
 
-const ContactRowActions = ({ name, onEdit, onDelete }: ContactRowActionsProps) => {
-  if (!onEdit && !onDelete) return null
+const ContactRowActions = ({ name, onEdit, onDelete, onEditTags }: ContactRowActionsProps) => {
+  if (!onEdit && !onDelete && !onEditTags) return null
 
   return (
     <DropdownMenu>
@@ -30,6 +31,12 @@ const ContactRowActions = ({ name, onEdit, onDelete }: ContactRowActionsProps) =
           <DropdownMenuItem onClick={onEdit}>
             <Pencil />
             Edit contact
+          </DropdownMenuItem>
+        )}
+        {onEditTags && (
+          <DropdownMenuItem onClick={onEditTags}>
+            <Tag />
+            Edit tags
           </DropdownMenuItem>
         )}
         {onDelete && (

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/router'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '../../../public/hooks/useCurrentSpaceId'
 import type { TourStep } from '../types'
 
 export const useRouteToStep = ({ route }: TourStep): boolean => {

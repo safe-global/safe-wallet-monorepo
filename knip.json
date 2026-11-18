@@ -2,7 +2,7 @@
   "$schema": "https://unpkg.com/knip@latest/schema.json",
   "workspaces": {
     "apps/web": {
-      "entry": ["src/pages/**/*.tsx", "src/features/**/feature.ts", "src/service-workers/index.ts"],
+      "entry": ["src/pages/**/*.tsx", "src/service-workers/index.ts"],
       "project": ["src/**/*.{ts,tsx}"],
       "ignore": [
         "**/*.test.{ts,tsx}",
@@ -11,9 +11,8 @@
         "src/types/contracts/**",
         "src/components/common/Mui/index.tsx",
         "src/services/contracts/ContractErrorCodes.ts",
-        "src/features/counterfactual/contract.ts",
         "src/features/ledger/types.ts",
-        "src/features/multichain/types.ts",
+        "src/features/multichain/public/types.ts",
         "src/store/**/*Slice.ts",
         "src/components/ui/**",
         ".storybook/mocks/querystring.ts"
