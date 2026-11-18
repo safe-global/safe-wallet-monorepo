@@ -197,6 +197,19 @@ const Timeline = ({ items }: { items: { icon: LucideIcon; text: string; done?: b
   </ol>
 )
 
+export type HubTab = 'invest' | MoveMode
+
+/** Invest, swap and bridge as one set of tabs, shown when the user starts from swap or bridge. */
+export const HubTabs = ({ value, onChange }: { value: HubTab; onChange: (value: HubTab) => void }) => (
+  <Tabs value={value} onValueChange={(next) => onChange(next as HubTab)}>
+    <TabsList className="w-full">
+      <TabsTrigger value="invest">{DEFI_V1_COPY.operations.invest}</TabsTrigger>
+      <TabsTrigger value="swap">{DEFI_V1_COPY.swap}</TabsTrigger>
+      <TabsTrigger value="bridge">{DEFI_V1_COPY.bridge}</TabsTrigger>
+    </TabsList>
+  </Tabs>
+)
+
 /** Swap or bridge idle cash in three steps: details, what signers approve, then proposed. */
 export const MoveFundsDialog = ({
   open,
@@ -317,13 +330,7 @@ export const MoveFundsDialog = ({
 
   const details = (
     <div className={cn(BODY_HEIGHT, 'flex flex-col gap-3 overflow-y-auto px-4 py-4')}>
-      <Tabs value={mode} onValueChange={(next) => (next === 'invest' ? onInvest() : onModeChange(next as MoveMode))}>
-        <TabsList className="w-full">
-          <TabsTrigger value="invest">{DEFI_V1_COPY.operations.invest}</TabsTrigger>
-          <TabsTrigger value="swap">{DEFI_V1_COPY.swap}</TabsTrigger>
-          <TabsTrigger value="bridge">{DEFI_V1_COPY.bridge}</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <HubTabs value={mode} onChange={(next) => (next === 'invest' ? onInvest() : onModeChange(next))} />
 
       <div className="relative flex flex-col gap-1">
         <Leg

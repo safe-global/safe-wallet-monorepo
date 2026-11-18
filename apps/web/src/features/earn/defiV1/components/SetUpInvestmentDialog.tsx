@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Button } from '@safe-global/views/components/ui/button'
 import {
   Dialog,
@@ -42,6 +42,7 @@ export const SetUpInvestmentDialog = ({
   onClose: () => void
   onCreate: (created: CreatedInvestment) => void
   onView: (opportunity: Opportunity) => void
+  tabs?: ReactNode
 }) => {
   const form = useInvestmentForm(opportunity, options)
   const [proposed, setProposed] = useState(false)

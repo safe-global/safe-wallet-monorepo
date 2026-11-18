@@ -106,6 +106,7 @@ export const SetUpInvestmentStepper = ({
   onClose,
   onCreate,
   onView,
+  tabs,
 }: {
   open: boolean
   opportunity: Opportunity | null
@@ -113,6 +114,7 @@ export const SetUpInvestmentStepper = ({
   onClose: () => void
   onCreate: (created: CreatedInvestment) => void
   onView: (opportunity: Opportunity) => void
+  tabs?: ReactNode
 }) => {
   const form = useInvestmentForm(opportunity, options)
   const [current, setCurrent] = useState(0)
@@ -201,6 +203,7 @@ export const SetUpInvestmentStepper = ({
         ) : (
           <>
             <div className={cn(BODY_HEIGHT, 'flex flex-col gap-4 px-4 pt-4')}>
+              {tabs && current === 0 && tabs}
               {view.heading && (
                 <Typography variant="paragraph-bold" className="shrink-0">
                   {view.heading}

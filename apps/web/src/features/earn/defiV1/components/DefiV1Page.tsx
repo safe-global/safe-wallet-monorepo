@@ -23,7 +23,7 @@ import {
 import type { AssetType, DefiV1Config, GroupBy, Operation, Opportunity, Position, Sort, SortKey } from '../types'
 import type { ActionResult } from './ActionPanel'
 import { CompareDialog } from './CompareDialog'
-import { MoveFundsDialog, type MoveMode } from './MoveFundsDialog'
+import { HubTabs, MoveFundsDialog, type MoveMode } from './MoveFundsDialog'
 import { OpportunityDrawer } from './OpportunityDrawer'
 import { OpportunityToolbar } from './OpportunityToolbar'
 import { SetUpInvestmentDialog } from './SetUpInvestmentDialog'
@@ -74,6 +74,7 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const [isComparing, setIsComparing] = useState(false)
   const [moveMode, setMoveMode] = useState<MoveMode>('swap')
   const [isMoving, setIsMoving] = useState(false)
+  const [hub, setHub] = useState(false)
   const [operations, setOperations] = useState<Operation[]>(OPERATIONS)
   const [isCreating, setIsCreating] = useState(false)
   const [setupFor, setSetupFor] = useState<Opportunity | null>(null)
@@ -117,7 +118,8 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
   const SetUp = { dialog: SetUpInvestmentDialog, drawer: SetUpInvestmentDrawer, stepper: SetUpInvestmentStepper }[
     config.setup
   ]
-  const openSetup = (item: Opportunity | null) => {
+  const openSetup = (item: Opportunity | null, fromHub = false) => {
+    setHub(fromHub)
     if (config.setup === 'drawer') setSelected(null)
     setSetupFor(item)
     setIsCreating(true)
@@ -230,7 +232,7 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
         onModeChange={setMoveMode}
         onInvest={() => {
           setIsMoving(false)
-          openSetup(null)
+          openSetup(null, true)
         }}
         balances={idleByAsset(summary.idle, IDLE_MIX)}
         onClose={() => setIsMoving(false)}
@@ -257,7 +259,20 @@ export const DefiV1Page = ({ config }: { config: DefiV1Config }) => {
       />
 
       <SetUp
-        key={setupFor?.id ?? 'any'}
+        key={`${setupFor?.id ?? 'any'}-${hub}`}
+        tabs={
+          hub ? (
+            <HubTabs
+              value="invest"
+              onChange={(next) => {
+                if (next === 'invest') return
+                setIsCreating(false)
+                setMoveMode(next)
+                setIsMoving(true)
+              }}
+            />
+          ) : undefined
+        }
         open={isCreating}
         opportunity={setupFor}
         options={RANKED.filter((item) => !locked(item))}
