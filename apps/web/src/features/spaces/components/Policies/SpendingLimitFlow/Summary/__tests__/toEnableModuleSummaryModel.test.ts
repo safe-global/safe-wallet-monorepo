@@ -1,4 +1,4 @@
-import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS, mockSpendingLimitPolicy } from '../../../mocks/policies'
+import { MOCK_ADDRESSES, MOCK_SAFES, MOCK_TOKENS, mockSpendingLimitPolicy } from '../../../../../public/utils/policies'
 import { groupSafeAccounts } from '../../../SafeAccountSelector/utils'
 import { safeAccountOptionBuilder } from '../SpendingLimitSummary.testData'
 import { toEnableModuleSummaryModel } from '../toEnableModuleSummaryModel'

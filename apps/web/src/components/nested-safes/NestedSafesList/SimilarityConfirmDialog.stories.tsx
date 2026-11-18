@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { fn } from 'storybook/test'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { SimilarityConfirmDialog } from './SimilarityConfirmDialog'
 
 // A "poisoning" set: the selected address and look-alikes that share the

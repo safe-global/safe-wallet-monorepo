@@ -3,7 +3,7 @@ import { mswLoader } from 'msw-storybook-addon'
 import { http, HttpResponse } from 'msw'
 import { within } from 'storybook/test'
 import type { SpaceAddressBookDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
 import SpaceAddressBook from '@/pages/spaces/address-book'
 

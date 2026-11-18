@@ -1,7 +1,7 @@
 import { id } from 'ethers'
 import type { TransactionReceipt } from 'ethers'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
-import { RHINESTONE_INTENT_EXECUTOR } from '../constants'
+import { RHINESTONE_INTENT_EXECUTOR } from '../public/constants'
 
 const INTENT_EXECUTED_TOPIC = id('IntentExecuted(uint256,bytes32)')
 

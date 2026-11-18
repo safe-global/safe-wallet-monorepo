@@ -8,8 +8,12 @@ import { highlightSafePro } from '@safe-global/views/components/common/ProHighli
 import { ScrollArea } from '@safe-global/views/components/ui/scroll-area'
 import { SearchInput } from '@safe-global/views/components/ui/search-input'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { SafeAccountsTable, type SafeAccountColumnId } from '@/features/myAccounts'
-import { isMultiChainSafeItem, useSafesSearch, type AllSafeItems, type SafeItem } from '@/hooks/safes'
+import SafeAccountsTable from '@/features/myAccounts/public/components/SafeAccountsTable'
+import type { SafeAccountColumnId } from '@safe-global/views/features/myAccounts/components/SafeAccountsTable/columns'
+import { isMultiChainSafeItem } from '@/hooks/safes/isMultiChainSafeItem'
+import { useSafesSearch } from '@/hooks/safes/useSafesSearch'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import Track from '@/components/common/Track'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
@@ -20,7 +24,7 @@ import {
   summarizeRemovedSafes,
 } from '@safe-global/views/features/spaces/components/Plans/removedSafes'
 import type { AddAccountsFormValues } from '../../hooks/addAccounts.types'
-import { useSpaceSafes } from '../../hooks/useSpaceSafes'
+import { useSpaceSafes } from '../../public/hooks/useSpaceSafes'
 import SelectedCounter from '@safe-global/views/features/spaces/components/SelectedCounter'
 import useOnboardingSelection from '../SelectSafesOnboarding/hooks/useOnboardingSelection'
 import {

@@ -5,7 +5,8 @@ import { fn, userEvent, within } from 'storybook/test'
 import type { Balances } from '@safe-global/store/gateway/AUTO_GENERATED/balances'
 import type { Erc20TokenMetadata } from '@safe-global/store/gateway/AUTO_GENERATED/tokens'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
-import { createMockStory, balanceHandlers } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import { balanceHandlers } from '@/stories/mocks/handlers'
 import TokenSelector from './index'
 
 // Only used for handlers that need behaviour `balanceHandlers` doesn't support (an infinite delay,

@@ -1,7 +1,7 @@
 import { act, fakerChecksummedAddress, fireEvent, render, screen, waitFor, within } from '@/tests/test-utils'
 import { chainBuilder } from '@/tests/builders/chains'
-import { CF_TX_GROUP_KEY } from '../../constants'
-import { SafeCreationEvent, safeCreationDispatch } from '../../services/safeCreationEvents'
+import { CF_TX_GROUP_KEY } from '../../public/constants'
+import { SafeCreationEvent, safeCreationDispatch } from '../../public/services/safeCreationEvents'
 import CounterfactualSuccessScreen from './index'
 
 jest.mock('@/components/common/ChainIndicator', () => {

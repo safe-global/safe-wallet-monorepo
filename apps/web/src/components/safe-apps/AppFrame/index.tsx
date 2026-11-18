@@ -12,7 +12,7 @@ import { trackSafeAppOpenCount } from '@/services/safe-apps/track-app-usage-coun
 import { isSafePassApp } from '@/services/safe-apps/utils'
 import useSafeInfo from '@/hooks/useSafeInfo'
 import { useSafeAppFromBackend } from '@/hooks/safe-apps/useSafeAppFromBackend'
-import { useSafePermissions } from '@/hooks/safe-apps/permissions'
+import { useSafePermissions } from '@/hooks/safe-apps/permissions/useSafePermissions'
 import { useCurrentChain } from '@/hooks/useChains'
 import { isSameUrl } from '@/utils/url'
 import useTransactionQueueBarState from '@/components/safe-apps/AppFrame/useTransactionQueueBarState'

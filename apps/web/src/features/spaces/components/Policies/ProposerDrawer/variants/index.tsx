@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
-import { ActiveProposer } from './ActiveProposer'
-import { NotActivatedProposer } from './NotActivatedProposer'
-import { PendingProposer } from './PendingProposer'
+import { ActiveProposer } from './ActiveProposer/ActiveProposer'
+import { NotActivatedProposer } from './NotActivatedProposer/NotActivatedProposer'
+import { PendingProposer } from './PendingProposer/PendingProposer'
 import {
   ProposerStatus,
   type ProposerVariantContentProps,

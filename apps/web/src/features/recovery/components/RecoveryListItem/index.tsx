@@ -10,7 +10,7 @@ import {
   RecoveryListItemContext,
   RecoveryListItemProvider,
 } from '@safe-global/views/features/recovery/components/RecoveryListItem/RecoveryListItemContext'
-import type { RecoveryQueueItem } from '../../services/recovery-state'
+import type { RecoveryQueueItem } from '../../public/types'
 
 function ProvidedRecoveryListItem({ item, isNested }: { item: RecoveryQueueItem; isNested?: boolean }): ReactElement {
   const { submitError, setSubmitError } = useContext(RecoveryListItemContext)

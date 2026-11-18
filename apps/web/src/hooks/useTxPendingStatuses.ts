@@ -16,7 +16,7 @@ import { useWeb3ReadOnly } from '@/hooks/wallets/web3ReadOnly'
 import useTxHistory from './useTxHistory'
 import { isTransactionListItem } from '@/utils/transaction-guards'
 import useSafeInfo from './useSafeInfo'
-import { SimpleTxWatcher } from '@/utils/SimpleTxWatcher'
+import { SimpleTxWatcher } from '@safe-global/utils/services/SimpleTxWatcher'
 
 const FINAL_PENDING_STATUSES = [TxEvent.SIGNATURE_INDEXED, TxEvent.SUCCESS, TxEvent.REVERTED, TxEvent.FAILED]
 

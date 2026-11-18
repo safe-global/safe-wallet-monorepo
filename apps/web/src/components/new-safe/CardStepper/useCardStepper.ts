@@ -1,6 +1,7 @@
 import type { Dispatch, ReactElement, SetStateAction } from 'react'
 import { useState } from 'react'
-import { trackEvent, MODALS_CATEGORY } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { MODALS_CATEGORY } from '@/services/analytics/events/modals'
 
 export type StepRenderProps<TData> = {
   data: TData

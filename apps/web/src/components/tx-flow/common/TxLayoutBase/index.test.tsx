@@ -1,9 +1,12 @@
 import { render, renderWithUserEvent, screen } from '@/tests/test-utils'
+import { faker } from '@faker-js/faker'
+import { checksumAddress } from '@safe-global/utils/utils/addresses'
+import { shortenAddress } from '@safe-global/utils/utils/formatters'
 import TxLayoutBase from '.'
 
 // The Safe Shield widget and the status rail pull in network/analytics-heavy hooks; stub them so
 // this test focuses on the shared layout logic (what renders, when) rather than their internals.
-jest.mock('@/features/safe-shield', () => ({
+jest.mock('@/features/safe-shield/public/components/SafeShieldWidget', () => ({
   __esModule: true,
   default: () => <div data-testid="safe-shield-widget">SafeShield</div>,
 }))
@@ -13,9 +16,49 @@ jest.mock('@/components/tx-flow/common/TxStatusWidget', () => ({
   default: () => <div data-testid="tx-status-widget">StatusRail</div>,
 }))
 
+const mockScope: { current: { chainId: string; safeAddress: string } | undefined } = { current: undefined }
+jest.mock('@safe-global/views/components/tx-flow/safe-scope/context', () => ({
+  ...jest.requireActual('@safe-global/views/components/tx-flow/safe-scope/context'),
+  useSafeScope: () => mockScope.current,
+}))
+
+jest.mock('@/components/common/ChainIndicator', () => ({
+  __esModule: true,
+  default: ({ chainId }: { chainId: string }) => <span>chain {chainId}</span>,
+}))
+
 const Step = () => <div data-testid="step-content">Step content</div>
 
 describe('TxLayoutBase', () => {
+  beforeEach(() => {
+    mockScope.current = undefined
+  })
+
+  it('names the Safe and network of a flow opened from a Workspace', () => {
+    const safeAddress = checksumAddress(faker.finance.ethereumAddress())
+    mockScope.current = { chainId: '137', safeAddress }
+
+    render(
+      <TxLayoutBase title="Confirm transaction" step={0} stepCount={1} progress={100}>
+        <Step />
+      </TxLayoutBase>,
+    )
+
+    const scopedSafe = screen.getByTestId('tx-flow-scoped-safe')
+    expect(scopedSafe).toHaveTextContent(shortenAddress(safeAddress))
+    expect(scopedSafe).toHaveTextContent('chain 137')
+  })
+
+  it('does not name a Safe in a flow opened from the Safe itself', () => {
+    render(
+      <TxLayoutBase title="Confirm transaction" step={0} stepCount={1} progress={100}>
+        <Step />
+      </TxLayoutBase>,
+    )
+
+    expect(screen.queryByTestId('tx-flow-scoped-safe')).not.toBeInTheDocument()
+  })
+
   it('renders the title and the current step content', () => {
     render(
       <TxLayoutBase title="Review details" step={0} stepCount={1} progress={100}>

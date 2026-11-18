@@ -4,8 +4,9 @@ import { checksumAddress } from '@safe-global/utils/utils/addresses'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import * as spacesRTK from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import type { SpaceAddressBookItemDto, SpaceAddressBookTagDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { ELEVATION_REQUIRED_ERROR } from '@/features/oidc-auth/utils/elevation'
-import { MixpanelEventParams, trackEvent } from '@/services/analytics'
+import { ELEVATION_REQUIRED_ERROR } from '@/features/oidc-auth/public/utils/elevation'
+import { trackEvent } from '@/services/analytics'
+import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { getStoreInstance } from '@/store'
 import { selectNotifications } from '@/store/notificationsSlice'
@@ -16,8 +17,8 @@ import ImportWorkspaceCsv from '../ImportWorkspaceCsv'
 
 const SPACE_ID = '7'
 
-jest.mock('@/features/spaces', () => ({
-  useCurrentSpaceId: () => SPACE_ID,
+jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({ useCurrentSpaceId: () => SPACE_ID }))
+jest.mock('../../../public/hooks/useWorkspaceAddressBookLabel', () => ({
   useWorkspaceAddressBookLabel: () => 'the Workspace address book',
 }))
 jest.mock('@/hooks/useChains', () => ({

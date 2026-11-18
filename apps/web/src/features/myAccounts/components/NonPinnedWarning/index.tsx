@@ -1,11 +1,11 @@
 import { Alert, AlertTitle, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
-import { OVERVIEW_EVENTS } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import Track from '@/components/common/Track'
 import { ATTENTION_PANEL_EVENTS } from '@/services/analytics/events/attention-panel'
 import useNonPinnedSafeWarning from '../../hooks/useNonPinnedSafeWarning'
-import AddTrustedSafeDialog from './AddTrustedSafeDialog'
+import AddTrustedSafeDialog from '../../public/components/AddTrustedSafeDialog'
 
 /**
  * Warning card displayed when user is viewing a non-pinned safe they own

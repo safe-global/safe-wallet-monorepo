@@ -1,29 +1,75 @@
 import { render, screen, fireEvent, waitFor } from '@/tests/test-utils'
-import type * as SpacesModule from '@/features/spaces'
+import { useSpaceSafes } from '../../../public/hooks/useSpaceSafes'
+import { useSpaceMembersByStatus } from '../../../public/hooks/useSpaceMembers'
+import useGetSpaceAddressBook from '../../../public/hooks/useGetSpaceAddressBook'
 import SetupWidget from '../index'
 
-jest.mock('@/features/spaces', () => ({
+jest.mock('../../../public/hooks/useSpaceSafes', () => ({
   useSpaceSafes: jest.fn(() => ({ allSafes: [] })),
+}))
+jest.mock('../../../public/hooks/useSpaceMembers', () => ({
+  get MemberStatus() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberStatus
+  },
+  get MemberRole() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MemberRole
+  },
+  get MEMBER_ALIAS_MAX_LENGTH() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').MEMBER_ALIAS_MAX_LENGTH
+  },
+  get getMemberDisplayName() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').getMemberDisplayName
+  },
+  get sanitizeMemberAlias() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').sanitizeMemberAlias
+  },
+  get isAdmin() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isAdmin
+  },
+  get isActiveAdmin() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isActiveAdmin
+  },
+  get isInviteExpired() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').isInviteExpired
+  },
+  get useCurrentMembership() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useCurrentMembership
+  },
+  get useCurrentMemberProfile() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useCurrentMemberProfile
+  },
+  get useIsActiveMember() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useIsActiveMember
+  },
+  get useIsAdmin() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useIsAdmin
+  },
+  get useIsInvited() {
+    return jest.requireActual('../../../public/hooks/useSpaceMembers').useIsInvited
+  },
   useSpaceMembersByStatus: jest.fn(() => ({ activeMembers: [], invitedMembers: [] })),
-  useGetSpaceAddressBook: jest.fn(() => []),
+}))
+jest.mock('../../../public/hooks/useGetSpaceAddressBook', () => ({
+  ...jest.requireActual('../../../public/hooks/useGetSpaceAddressBook'),
+  __esModule: true,
+  default: jest.fn(() => []),
+}))
+jest.mock('../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: jest.fn(() => '1'),
 }))
 
-const mockSetDismissedSpaces = jest.fn()
-const mockSetCompletedSpaces = jest.fn()
+const mockDismiss = jest.fn()
+const mockUseSetupWidgetDismissal = jest.fn(() => ({ isHidden: false, dismiss: mockDismiss }))
 
-jest.mock('@/services/local-storage/useLocalStorage', () => ({
-  __esModule: true,
-  default: jest.fn((key: string) => {
-    if (key === 'setupWidgetCompleted') {
-      return [{}, mockSetCompletedSpaces]
-    }
-    return [{}, mockSetDismissedSpaces]
-  }),
+jest.mock('../../../hooks/useSetupWidgetDismissal', () => ({
+  useSetupWidgetDismissal: () => mockUseSetupWidgetDismissal(),
 }))
 
-jest.mock('@/hooks/safes', () => ({
+jest.mock('@/hooks/safes/useAllSafesGrouped', () => ({
+  ...jest.requireActual('@/hooks/safes/useAllSafesGrouped'),
   flattenSafeItems: jest.fn((items: unknown[]) => items),
+}))
+jest.mock('@/hooks/safes/isMultiChainSafeItem', () => ({
   isMultiChainSafeItem: jest.fn(() => false),
 }))
 
@@ -57,25 +103,23 @@ jest.mock(
     },
 )
 
+const setStepData = ({
+  addressBook = [] as unknown[],
+  safes = [] as unknown[],
+  activeMembers = [] as unknown[],
+  invitedMembers = [] as unknown[],
+}) => {
+  ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue(addressBook)
+  ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: safes })
+  ;(useSpaceMembersByStatus as jest.Mock).mockReturnValue({ activeMembers, invitedMembers })
+}
+
 describe('SetupWidget', () => {
   beforeEach(() => {
-    mockSetDismissedSpaces.mockClear()
-    mockSetCompletedSpaces.mockClear()
+    mockDismiss.mockClear()
+    mockUseSetupWidgetDismissal.mockReturnValue({ isHidden: false, dismiss: mockDismiss })
 
-    const useLocalStorage = jest.requireMock<{ default: jest.Mock }>('@/services/local-storage/useLocalStorage')
-    useLocalStorage.default.mockImplementation((key: string) => {
-      if (key === 'setupWidgetCompleted') {
-        return [{}, mockSetCompletedSpaces]
-      }
-      return [{}, mockSetDismissedSpaces]
-    })
-
-    const { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook } =
-      jest.requireMock<typeof SpacesModule>('@/features/spaces')
-
-    ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([])
-    ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [] })
-    ;(useSpaceMembersByStatus as jest.Mock).mockReturnValue({ activeMembers: [], invitedMembers: [] })
+    setStepData({})
   })
 
   it('renders the widget title', () => {
@@ -104,12 +148,27 @@ describe('SetupWidget', () => {
 
     fireEvent.click(screen.getByText('Dismiss'))
 
-    await waitFor(
-      () => {
-        expect(screen.queryByText('Set up your Workspace')).not.toBeInTheDocument()
-      },
-      { timeout: 3000 },
-    )
+    await waitFor(() => expect(screen.queryByText('Set up your Workspace')).not.toBeInTheDocument(), {
+      timeout: 3000,
+    })
+  })
+
+  it('records the dismissal once the widget has faded out', async () => {
+    const onDismiss = jest.fn()
+    render(<SetupWidget onDismiss={onDismiss} />)
+
+    fireEvent.click(screen.getByText('Dismiss'))
+
+    await waitFor(() => expect(mockDismiss).toHaveBeenCalledTimes(1), { timeout: 3000 })
+    expect(onDismiss).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not render when dismissed for the space', () => {
+    mockUseSetupWidgetDismissal.mockReturnValue({ isHidden: true, dismiss: mockDismiss })
+
+    render(<SetupWidget />)
+
+    expect(screen.queryByText('Set up your Workspace')).not.toBeInTheDocument()
   })
 
   it('opens the import address book dialog when step is clicked', () => {
@@ -127,12 +186,7 @@ describe('SetupWidget', () => {
   })
 
   it('sorts completed steps before incomplete ones', () => {
-    const { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook } =
-      jest.requireMock<typeof SpacesModule>('@/features/spaces')
-
-    ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([{ name: 'Alice', address: '0x1' }])
-    ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [{ address: '0x2', chainId: '1' }] })
-    ;(useSpaceMembersByStatus as jest.Mock).mockReturnValue({ activeMembers: [], invitedMembers: [] })
+    setStepData({ addressBook: [{ name: 'Alice', address: '0x1' }], safes: [{ address: '0x2', chainId: '1' }] })
 
     render(<SetupWidget />)
 
@@ -146,7 +200,6 @@ describe('SetupWidget', () => {
       .getAllByRole('button')
       .filter((el) => allStepLabels.some((label) => el.textContent?.includes(label)))
 
-    // Completed steps should appear before incomplete ones
     expect(steps[0]).toHaveTextContent('Import your address book')
     expect(steps[1]).toHaveTextContent('Add your Safe accounts')
     expect(steps[2]).toHaveTextContent('Invite team members')
@@ -161,50 +214,12 @@ describe('SetupWidget', () => {
     expect(screen.getByTestId('space-info-modal')).toBeInTheDocument()
   })
 
-  it('marks the space as completed when Explore Spaces modal is closed and all steps are done', () => {
-    const { useSpaceSafes, useSpaceMembersByStatus, useGetSpaceAddressBook } =
-      jest.requireMock<typeof SpacesModule>('@/features/spaces')
-
-    ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([{ name: 'Alice', address: '0x1' }])
-    ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [{ address: '0x2', chainId: '1' }] })
-    ;(useSpaceMembersByStatus as jest.Mock).mockReturnValue({
-      activeMembers: [{ id: '1' }, { id: '2' }],
-      invitedMembers: [],
-    })
-
-    render(<SetupWidget />)
-
-    fireEvent.click(screen.getByText('Explore Workspaces'))
-    expect(screen.getByTestId('space-info-modal')).toBeInTheDocument()
-
-    fireEvent.click(screen.getByTestId('close-space-info-modal'))
-
-    expect(mockSetCompletedSpaces).toHaveBeenCalledWith(expect.any(Function))
-
-    const updaterFn = mockSetCompletedSpaces.mock.calls[0][0]
-    const result = updaterFn({})
-    expect(result).toEqual({ '1': true })
-  })
-
-  it('does not mark the space as completed when Explore Spaces modal is closed but steps are incomplete', () => {
-    render(<SetupWidget />)
-
-    fireEvent.click(screen.getByText('Explore Workspaces'))
-    expect(screen.getByTestId('space-info-modal')).toBeInTheDocument()
-
-    fireEvent.click(screen.getByTestId('close-space-info-modal'))
-
-    expect(mockSetCompletedSpaces).not.toHaveBeenCalled()
-  })
-
-  it('does not render when the space setup is completed', () => {
-    const useLocalStorage = jest.requireMock<{ default: jest.Mock }>('@/services/local-storage/useLocalStorage')
-
-    useLocalStorage.default.mockImplementation((key: string) => {
-      if (key === 'setupWidgetCompleted') {
-        return [{ '1': true }, mockSetCompletedSpaces]
-      }
-      return [{}, mockSetDismissedSpaces]
+  it('does not render once the three setup steps are completed', () => {
+    setStepData({
+      addressBook: [{ name: 'Alice', address: '0x1' }],
+      safes: [{ address: '0x2', chainId: '1' }],
+      activeMembers: [{ id: '1' }],
+      invitedMembers: [{ id: '2' }],
     })
 
     render(<SetupWidget />)
@@ -212,18 +227,21 @@ describe('SetupWidget', () => {
     expect(screen.queryByText('Set up your Workspace')).not.toBeInTheDocument()
   })
 
-  it('disables click on completed steps', () => {
-    const { useSpaceSafes, useGetSpaceAddressBook } = jest.requireMock<typeof SpacesModule>('@/features/spaces')
-
-    ;(useGetSpaceAddressBook as jest.Mock).mockReturnValue([{ name: 'Alice', address: '0x1' }])
-    ;(useSpaceSafes as jest.Mock).mockReturnValue({ allSafes: [{ address: '0x2', chainId: '1' }] })
+  it('still renders when only some setup steps are completed', () => {
+    setStepData({ addressBook: [{ name: 'Alice', address: '0x1' }], safes: [{ address: '0x2', chainId: '1' }] })
 
     render(<SetupWidget />)
 
-    // Click the completed "Import your address book" step
+    expect(screen.getByText('Set up your Workspace')).toBeInTheDocument()
+  })
+
+  it('disables click on completed steps', () => {
+    setStepData({ addressBook: [{ name: 'Alice', address: '0x1' }], safes: [{ address: '0x2', chainId: '1' }] })
+
+    render(<SetupWidget />)
+
     fireEvent.click(screen.getByText('Import your address book'))
 
-    // Dialog should NOT open since the step is completed
     expect(screen.queryByTestId('import-address-book-dialog')).not.toBeInTheDocument()
   })
 })

@@ -3,7 +3,7 @@ import ReviewTokenTx from '@/components/tx-flow/flows/TokenTransfer/ReviewTokenT
 import AssetsIcon from '@safe-global/views/assets/images/sidebar/assets.svg'
 import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { useMemo } from 'react'
-import { TxFlowType } from '@/services/analytics'
+import { TxFlowType } from '@/services/analytics/types'
 import { TxFlow } from '../../TxFlow'
 import { TxFlowStep } from '../../TxFlowStep'
 import {

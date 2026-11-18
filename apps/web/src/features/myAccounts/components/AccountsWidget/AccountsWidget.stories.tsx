@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import type { AllSafeItems, SafeItem } from '@/hooks/safes'
+import type { AllSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import type { SafeItem } from '@safe-global/views/hooks/safes/types'
 import { StoreDecorator } from '@/stories/storeDecorator'
-import { AccountsWidget } from './AccountsWidget'
-import { createHandlers } from '@/stories/mocks'
+import { AccountsWidget } from '../../public/components/AccountsWidget'
+import { createHandlers } from '@/stories/mocks/handlers'
 
 const mockSafeItem = (chainId: string, address: string, name?: string): SafeItem => ({
   chainId,

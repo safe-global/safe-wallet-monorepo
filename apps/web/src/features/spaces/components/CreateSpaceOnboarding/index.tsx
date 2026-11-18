@@ -6,16 +6,14 @@ import { Typography } from '@safe-global/views/components/ui/typography'
 import { Alert, AlertAction, AlertDescription, AlertSeverityIcon } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Spinner } from '@safe-global/views/components/ui/spinner'
-import {
-  OnboardingLayout,
-  StepCounter,
-  SafeAppMockup,
-  deriveSidePanelAccountsFromSpace,
-  useSafeNameLookup,
-} from '../OnboardingLayout'
+import OnboardingLayout from '../OnboardingLayout/OnboardingLayout'
+import StepCounter from '../OnboardingLayout/StepCounter'
+import SafeAppMockup from '../OnboardingLayout/mockup/SafeAppMockup'
+import { deriveSidePanelAccountsFromSpace } from '../OnboardingLayout/mockup/deriveSidePanelAccountsFromSpace'
+import { useSafeNameLookup } from '../OnboardingLayout/mockup/useSafeNameLookup'
 import { useIsCheckingAccess } from '@/hooks/useRouterGuard'
-import { flattenSafeItems } from '@/hooks/safes'
-import { useSpaceSafes } from '../../hooks/useSpaceSafes'
+import { flattenSafeItems } from '@/hooks/safes/useAllSafesGrouped'
+import { useSpaceSafes } from '../../public/hooks/useSpaceSafes'
 import { useOnboardingStepCount } from '../../hooks/useOnboardingStepCount'
 import useExistingSpace from './hooks/useExistingSpace'
 import useSpaceSubmit from './hooks/useSpaceSubmit'
@@ -24,7 +22,7 @@ import ClaimTrialModal from '../Plans/ClaimTrialModal'
 import { useWorkspaceLock } from '../../hooks/useWorkspaceLock'
 import { AppRoutes } from '@/config/routes'
 import { useRouter } from 'next/router'
-import { SPACE_NAME_MAX_LENGTH } from '@/features/spaces/constants'
+import { SPACE_NAME_MAX_LENGTH } from '@safe-global/utils/validation/names'
 import { NAME_MIN_LENGTH, sanitizeName, validateName } from '@safe-global/utils/validation/names'
 
 const ONBOARDING_STEP = 1
