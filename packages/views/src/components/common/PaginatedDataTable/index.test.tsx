@@ -106,6 +106,8 @@ describe('PaginatedDataTable', () => {
 
       try {
         render(<PaginatedDataTable columns={sharedColumns} rows={['a']} getRowKey={(row) => row} />)
+        expect(screen.getByRole('columnheader', { name: 'First' }).style.width).toBe('')
+
         container.setWidth(860)
 
         // 860 − (300 + 100 + 100 + 60) leaves 300 spare, 100 per share column

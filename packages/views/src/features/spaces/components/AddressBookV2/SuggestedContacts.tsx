@@ -6,37 +6,37 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import { Typography } from '@safe-global/views/components/ui/typography'
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
 import TruncatedText from '@safe-global/views/components/common/AccountRow/TruncatedText'
-import { cn } from '@safe-global/views/utils/cn'
 import ChainLogos from './ChainLogos'
-import ContactCell from './ContactCell'
+import ContactCell, { CONTACT_CELL_MIN_WIDTH } from './ContactCell'
 import RowDetail from './RowDetail'
 import { describeSuggestion, type SuggestedContact, type SuggestionReason } from './types'
 
 export type SuggestionAddLocation = 'row' | 'bulk'
 
-const ReasonIcon = () => <PenLine aria-hidden="true" className="text-muted-foreground size-3.5 shrink-0" />
-
-const ReasonText = ({ reason, truncate = false }: { reason: SuggestionReason; truncate?: boolean }) => (
+const ReasonText = ({ children }: { children: ReactNode }) => (
   <span className="flex min-w-0 items-center gap-1.5 text-sm" data-testid="suggestion-reason">
-    <ReasonIcon />
-    <span className={cn('min-w-0', truncate && 'truncate')}>{describeSuggestion(reason)}</span>
+    <PenLine aria-hidden="true" className="text-muted-foreground size-3.5 shrink-0" />
+    {children}
   </span>
 )
 
 const Reason = ({ reason }: { reason: SuggestionReason }) => {
+  const text = describeSuggestion(reason)
+
   if (reason.safes.length === 1) {
     return (
-      <span className="flex min-w-0 items-center gap-1.5" data-testid="suggestion-reason">
-        <ReasonIcon />
-        <TruncatedText variant="paragraph-small" className="min-w-0" text={describeSuggestion(reason)} />
-      </span>
+      <ReasonText>
+        <TruncatedText variant="paragraph-small" className="min-w-0" text={text} />
+      </ReasonText>
     )
   }
 
   return (
     <Tooltip>
       <TooltipTrigger render={<span className="flex min-w-0" tabIndex={0} />}>
-        <ReasonText reason={reason} truncate />
+        <ReasonText>
+          <span className="min-w-0 truncate">{text}</span>
+        </ReasonText>
       </TooltipTrigger>
       <TooltipContent data-testid="suggestion-reason-safes">{reason.safes.join(', ')}</TooltipContent>
     </Tooltip>
@@ -46,7 +46,9 @@ const Reason = ({ reason }: { reason: SuggestionReason }) => {
 /** Phones have no hover, so the expanded row spells out every Safe. */
 const CompactReason = ({ reason }: { reason: SuggestionReason }) => (
   <div className="flex min-w-0 flex-col gap-1">
-    <ReasonText reason={reason} />
+    <ReasonText>
+      <span className="min-w-0">{describeSuggestion(reason)}</span>
+    </ReasonText>
     {reason.safes.length > 1 && (
       <Typography
         variant="paragraph-small"
@@ -184,7 +186,7 @@ const SuggestedContacts = ({
       id: 'contact',
       header: 'Contact',
       width: 'share',
-      minWidth: 445,
+      minWidth: CONTACT_CELL_MIN_WIDTH,
       sortValue: (item) => item.suggestedName.toLowerCase(),
       cell: (item, { isCompact }) => (
         <ContactCell

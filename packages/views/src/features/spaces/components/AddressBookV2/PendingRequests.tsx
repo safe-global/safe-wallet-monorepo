@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/comp
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
 import AddedBy from './AddedBy'
 import ChainLogos from './ChainLogos'
-import ContactCell from './ContactCell'
+import ContactCell, { CONTACT_CELL_MIN_WIDTH } from './ContactCell'
 import RowDetail from './RowDetail'
 import type { PendingRequest } from './types'
 
@@ -127,7 +127,7 @@ const PendingRequests = ({
       id: 'contact',
       header: 'Contact',
       width: 'share',
-      minWidth: 445,
+      minWidth: CONTACT_CELL_MIN_WIDTH,
       sortValue: (request) => request.name.toLowerCase(),
       cell: (request, { isCompact }) => (
         <ContactCell

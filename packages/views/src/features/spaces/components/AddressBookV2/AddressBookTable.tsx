@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
 import AddedBy, { EmptyCell } from './AddedBy'
 import ChainLogos from './ChainLogos'
-import ContactCell from './ContactCell'
+import ContactCell, { CONTACT_CELL_MIN_WIDTH } from './ContactCell'
 import ContactRowActions from './ContactRowActions'
 import RowDetail from './RowDetail'
 import { TagChips } from './tags/TagChip'
@@ -52,8 +52,8 @@ const AddressBookTable = ({
     header: 'Tags',
     width: 'share',
     priority: 'secondary',
-    // Three ten-character tags on one line
-    minWidth: 264,
+    // Three short tags on one line
+    minWidth: 240,
     sortValue: (contact) => contact.tags?.map((tag) => tag.name.toLowerCase()).sort()[0] ?? null,
     cell: (contact) => (contact.tags?.length ? <TagChips tags={contact.tags} /> : <EmptyCell />),
   }
@@ -77,8 +77,7 @@ const AddressBookTable = ({
       cellTestId: 'table-cell-contact',
       width: 'share',
       sticky: true,
-      // Avatar, full address in monospace, copy and explorer buttons; below the summed widths the table goes compact
-      minWidth: 445,
+      minWidth: CONTACT_CELL_MIN_WIDTH,
       sortValue: (contact) => contact.name.toLowerCase(),
       cell: (contact, { isCompact }) => (
         <ContactCell

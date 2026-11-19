@@ -215,7 +215,7 @@ function PaginatedDataTable<T>({
   const visibleColumns = isCompact ? columns.filter((column) => column.priority !== 'secondary') : columns
 
   // The last share column stays unsized, so borders and rounding never push the table past its container
-  const shareColumns = isCompact ? [] : visibleColumns.filter((column) => column.width === 'share')
+  const shareColumns = visibleColumns.filter((column) => column.width === 'share')
   const spareShare =
     containerWidth !== null && shareColumns.length > 0 ? (containerWidth - tableMinWidth) / shareColumns.length : null
   const headStyle = (column: DataTableColumn<T>): Record<string, string> | undefined => {
