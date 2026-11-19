@@ -1,12 +1,5 @@
-/**
- * The v2 address book of a Workspace, against the gateway of the isolated stack.
- *
- * Every user signs in by email with a second factor, so no action asks for a step-up: step-up-workspace-actions.spec.ts
- * covers that. Each test gets its own Workspace; `safes.basic` (owner Alice, threshold 1) is only added to it.
- *
- * Run: SAFE_E2E_SPECS=workspace-address-book yarn workspace @safe-global/web e2e:env playwright
- */
 import { Wallet } from 'ethers'
+import type { SpaceAddressBookDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { test, expect } from '../../src/fixtures/test.fixture'
 import { CHAIN_IDS, safeAddress } from '../../src/data/constants'
 import {
@@ -38,14 +31,17 @@ const toCsv = (contacts: CsvContact[]): string =>
 
 test.describe('Workspace address book', { tag: '@regression' }, () => {
   let workspaceId: string
-  /** The admin who created the Workspace, for test data and for reading the gateway */
   let admin: EmailSession
 
-  /** The gateway's Workspace address book, or another resource under it, lowercased to compare addresses */
   const addressBook = async (resource = 'address-book') =>
     (await workspaceResource(admin, workspaceId, resource)).toLowerCase()
 
-  /** Adds the Safe to the Workspace, and names it in the Workspace address book */
+  const contactTags = async (address: string): Promise<Set<string> | undefined> => {
+    const book = (await gatewayRequest(admin, 'GET', `/v1/spaces/${workspaceId}/address-book`)) as SpaceAddressBookDto
+    const contact = book.data.find((item) => item.address.toLowerCase() === address.toLowerCase())
+    return contact && new Set(book.tags.filter(({ id }) => contact.tagIds.includes(id)).map(({ name }) => name))
+  }
+
   const addWorkspaceSafe = (address: string) =>
     gatewayRequest(admin, 'POST', `/v1/spaces/${workspaceId}/safes`, {
       safes: [{ chainId: SEPOLIA, address }],
@@ -90,10 +86,8 @@ test.describe('Workspace address book', { tag: '@regression' }, () => {
       await expect(page.row(vendor.name)).toContainText('Vendor')
       await expect(page.row(vendor.name)).toContainText('Monthly')
       await expect(page.row(auditor.name)).toBeVisible()
-      const saved = await addressBook()
-      for (const text of [vendor.address, auditor.address, 'Vendor', 'Monthly']) {
-        expect(saved).toContain(text.toLowerCase())
-      }
+      expect(await contactTags(vendor.address)).toEqual(new Set(vendor.tags))
+      expect(await contactTags(auditor.address)).toEqual(new Set())
     })
 
     test('should add a local contact to the Workspace address book', async ({ safePage }) => {
@@ -122,7 +116,7 @@ test.describe('Workspace address book', { tag: '@regression' }, () => {
       await acceptInvite(member, workspaceId, MEMBER_NAME)
     })
 
-    test('should let a member request a suggestion and edit tags, but not add, import, edit or delete contacts', async ({
+    test('should let a member request a suggestion, and show only Export and Edit tags', async ({
       safePage,
       safes,
       owners,
@@ -145,6 +139,19 @@ test.describe('Workspace address book', { tag: '@regression' }, () => {
       await expect(page.menuItem('Edit tags')).toBeVisible()
       await expect(page.menuItem('Edit contact')).toBeHidden()
       await expect(page.menuItem('Delete contact')).toBeHidden()
+    })
+
+    test('should save the tags a member sets on a Workspace contact', async ({ safePage }) => {
+      const payroll = { name: 'Payroll', address: Wallet.createRandom().address, chainIds: [SEPOLIA], tags: ['Vendor'] }
+      const supplier = { name: 'Supplier', address: Wallet.createRandom().address, chainIds: [SEPOLIA] }
+      await gatewayRequest(admin, 'PUT', `/v1/spaces/${workspaceId}/address-book`, { items: [payroll, supplier] })
+      const page = new WorkspaceAddressBookPage(safePage)
+      await page.goto(workspaceId)
+
+      await page.editTags(supplier.name, 'Vendor')
+
+      await expect(page.row(supplier.name)).toContainText('Vendor')
+      await expect.poll(() => contactTags(supplier.address)).toEqual(new Set(['Vendor']))
     })
   })
 })

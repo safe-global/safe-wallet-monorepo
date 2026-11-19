@@ -1,9 +1,3 @@
-/**
- * Workspace Address Book Page Object — the v2 address book of a Workspace: its tabs, the contact rows and their
- * menu, the CSV import, and the actions of the Suggested and Local contacts tabs.
- *
- * Rule: Page Objects hold locators and actions only. Assertions belong in the test file.
- */
 import { type Locator, type Page } from '@playwright/test'
 
 export class WorkspaceAddressBookPage {
@@ -21,17 +15,14 @@ export class WorkspaceAddressBookPage {
     await this.page.goto(`/spaces/address-book?spaceId=${workspaceId}`)
   }
 
-  /** The tab whose label starts with `label`; the label ends with a count once its data has loaded */
   tab(label: string): Locator {
     return this.page.getByRole('tab', { name: new RegExp(`^${label}`) })
   }
 
-  /** The table row that shows `text`, such as a contact name */
   row(text: string): Locator {
     return this.page.getByRole('row').filter({ hasText: text })
   }
 
-  /** The menu of a Workspace contact: Edit contact, Edit tags and Delete contact, as the role allows */
   rowMenuButton(name: string): Locator {
     return this.page.getByRole('button', { name: `Actions for ${name}` })
   }
@@ -40,7 +31,6 @@ export class WorkspaceAddressBookPage {
     return this.page.getByRole('menuitem', { name })
   }
 
-  /** Imports a CSV file (`address,name,chainId,tags`) from the Import button of the Workspace contacts */
   async importCsv(csv: string): Promise<void> {
     await this.importButton.click()
     const dialog = this.page.getByRole('dialog').filter({ hasText: 'Import address book' })
@@ -50,20 +40,27 @@ export class WorkspaceAddressBookPage {
     await dialog.getByRole('button', { name: 'Import', exact: true }).click()
   }
 
-  /** Suggested tab, admin: adds the suggestion shown as `suggestedName` under that name */
   async addSuggestion(suggestedName: string): Promise<void> {
     await this.row(suggestedName).getByRole('button', { name: 'Add to Workspace' }).click()
     await this.page.getByRole('dialog').getByRole('button', { name: 'Add 1 contact' }).click()
   }
 
-  /** Suggested or Local contacts tab, member: asks an admin to add the contact shown as `name` */
   async requestToAdd(name: string): Promise<void> {
     await this.row(name).getByRole('button', { name: 'Request to add' }).click()
     await this.page.getByRole('dialog').getByRole('button', { name: 'Request to add' }).click()
   }
 
-  /** Local contacts tab, admin: adds the local contact `name` to the Workspace address book */
   async addLocalContactToWorkspace(name: string): Promise<void> {
     await this.row(name).getByRole('button', { name: 'Add to Workspace' }).click()
+  }
+
+  async editTags(contactName: string, tagName: string): Promise<void> {
+    await this.rowMenuButton(contactName).click()
+    await this.menuItem('Edit tags').click()
+    const dialog = this.page.getByRole('dialog').filter({ hasText: 'Edit tags' })
+    await dialog.getByRole('button', { name: /Tags/ }).click()
+    await this.page.getByRole('listbox', { name: 'Tags' }).getByRole('option', { name: tagName }).click()
+    await this.page.keyboard.press('Escape')
+    await dialog.getByTestId('save-tags-btn').click()
   }
 }

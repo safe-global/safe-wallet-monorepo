@@ -183,7 +183,6 @@ export async function addWorkspaceSafes(
   })
 }
 
-/** Invites the user with `email` to the Workspace as a member. */
 export async function inviteMember(
   admin: EmailSession,
   workspaceId: string,
@@ -194,7 +193,6 @@ export async function inviteMember(
   })
 }
 
-/** Accepts the invite of the signed-in member, and waits until the gateway lists the Workspace for them. */
 export async function acceptInvite(member: EmailSession, workspaceId: string, name: string): Promise<void> {
   await gatewayRequest(member, 'POST', `/v1/spaces/${workspaceId}/members/accept`, { name })
   // The router guard sends a Workspace URL away until the gateway's (cached) Workspace list contains it.
