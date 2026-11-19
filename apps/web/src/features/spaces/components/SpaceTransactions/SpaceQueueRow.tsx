@@ -15,6 +15,7 @@ import useIsPending from '@/hooks/useIsPending'
 import { isMultisigExecutionInfo } from '@/utils/transaction-guards'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import { isImitation, isTrustedTx } from '@/utils/transactions'
+import AddToAddressBookButton from './AddToAddressBook'
 import QueueRowSafeTag from './QueueRowSafeTag'
 import QueueTxDetails from './QueueTxDetails'
 import ConflictBracket from '@safe-global/views/features/spaces/components/SpaceQueue/ConflictBracket'
@@ -53,6 +54,9 @@ const Counterparty = ({ txInfo, chainId }: { txInfo: TransactionInfo; chainId: s
           />
         )}
       </span>
+      {'party' in counterparty && !counterparty.party.name && (
+        <AddToAddressBookButton address={counterparty.party.value} chainId={chainId} />
+      )}
     </span>
   )
 }

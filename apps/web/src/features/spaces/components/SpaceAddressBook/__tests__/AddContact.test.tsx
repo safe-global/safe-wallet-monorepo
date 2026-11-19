@@ -44,6 +44,8 @@ type CapturedProps = {
   onSuccess?: () => void
   workspaceTags?: unknown[]
   onTagLimitReached?: () => void
+  prefill?: { address: string; chainIds: string[] }
+  onClose?: () => void
 }
 
 let lastProps: CapturedProps | undefined
@@ -79,6 +81,15 @@ describe('AddContact', () => {
 
     expect(lastProps?.workspaceTags).toBe(workspaceTags)
     expect(lastProps?.onTagLimitReached).toBe(onTagLimitReached)
+  })
+
+  it('hands the prefilled contact and the close callback to the dialog', () => {
+    const prefill = { address: '0xabc', chainIds: ['137'] }
+    const onClose = jest.fn()
+    render(<AddContact prefill={prefill} onClose={onClose} />)
+
+    expect(lastProps?.prefill).toBe(prefill)
+    expect(lastProps?.onClose).toBe(onClose)
   })
 
   it('sends the tags picked for a new contact', async () => {

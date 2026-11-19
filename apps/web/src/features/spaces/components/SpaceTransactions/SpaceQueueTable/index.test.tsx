@@ -15,6 +15,7 @@ import type { Transaction } from '@safe-global/store/gateway/AUTO_GENERATED/tran
 import { executionInfoBuilder, safeTxSummaryBuilder } from '@/tests/builders/safeTx'
 import type { SpaceQueueChain, SpaceQueueSection } from '../../../hooks/useSpaceQueue'
 import SpaceQueueTable from '.'
+import { AddToAddressBookProvider } from '../AddToAddressBook'
 import { DeleteTxDialogProvider } from '../RowActionsMenu/DeleteTxDialog'
 import { Table, TableBody } from '@safe-global/views/components/ui/table'
 import type SpaceQueueRowType from '../SpaceQueueRow'
@@ -410,13 +411,15 @@ describe('SpaceQueueTable', () => {
 
     it('are not expandable', () => {
       render(
-        <DeleteTxDialogProvider>
-          <Table>
-            <TableBody>
-              <SpaceQueueRow item={next} chainId={chainId} status="execute" />
-            </TableBody>
-          </Table>
-        </DeleteTxDialogProvider>,
+        <AddToAddressBookProvider>
+          <DeleteTxDialogProvider>
+            <Table>
+              <TableBody>
+                <SpaceQueueRow item={next} chainId={chainId} status="execute" />
+              </TableBody>
+            </Table>
+          </DeleteTxDialogProvider>
+        </AddToAddressBookProvider>,
       )
       const row = screen.getByTestId('space-queue-row')
 
