@@ -11,10 +11,10 @@ describe('QueueGroupByMenu', () => {
   it('offers every grouping with its hint', () => {
     render(<QueueGroupByMenu value="status" onChange={jest.fn()} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Group by Status' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Group by Urgency' }))
 
     expect(screen.getAllByRole('menuitemradio').map((option) => option.textContent)).toEqual([
-      'StatusTransactions listed by order of urgency',
+      'UrgencyTransactions listed by order of urgency',
       'Up nextNext transaction on each Safe',
       'SafeGrouped by Safe, network and nonce order',
       'NetworkGrouped by network',
@@ -25,7 +25,7 @@ describe('QueueGroupByMenu', () => {
     const onChange = jest.fn()
     render(<QueueGroupByMenu value="status" onChange={onChange} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'Group by Status' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Group by Urgency' }))
     fireEvent.click(screen.getByRole('menuitemradio', { name: /Network/ }))
 
     expect(onChange).toHaveBeenCalledWith('network')

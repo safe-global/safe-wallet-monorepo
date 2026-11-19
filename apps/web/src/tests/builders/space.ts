@@ -36,6 +36,7 @@ export function spaceBuilder(): IBuilder<GetSpaceResponse> {
     memberCount: 1,
     members: [spaceMemberBuilder().build()],
     experimentalFeatures: [],
+    setupStatus: null,
   })
 }
 

@@ -269,6 +269,13 @@
       "defaultChains": []
     },
     {
+      "key": "PORTFOLIO_SUMMARIES",
+      "description": "Portfolio summary of each Safe, shown as its total balance on every screen.",
+      "scope": "PER_CHAIN",
+      "enabled": false,
+      "defaultChains": []
+    },
+    {
       "key": "NATIVE_COW_SWAP_FEE_V2",
       "description": "Version 2 of the CoW native-swap fee handling.",
       "scope": "PER_CHAIN",
