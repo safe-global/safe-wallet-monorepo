@@ -19,5 +19,5 @@
 /.husky/            @safe-global/infrasec @compojoom @PooyaRaki
 
 # E2E suite and the test that requires an E2E decision for each web flag
-/apps/web/e2e/                          @safe-global/safe-qa @compojoom @PooyaRaki
-/apps/web/config/remote-config.test.ts  @safe-global/safe-qa @compojoom @PooyaRaki
+/apps/web/e2e/                          @safe-global/safe-qa @safe-global/safe-web
+/apps/web/config/remote-config.test.ts  @safe-global/safe-qa @safe-global/safe-web
