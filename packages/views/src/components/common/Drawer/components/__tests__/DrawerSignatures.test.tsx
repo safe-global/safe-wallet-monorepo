@@ -1,3 +1,4 @@
+import { userEvent } from '@testing-library/user-event'
 import { render, screen, fireEvent } from '@/tests/test-utils'
 import { DrawerSignatures, DrawerSignaturesBadge, type DrawerSignatureRow } from '../DrawerSignatures'
 
@@ -84,5 +85,27 @@ describe('DrawerSignatures', () => {
     expect(screen.queryByRole('button', { name: 'Notify' })).not.toBeInTheDocument()
     expect(screen.getByText('(you)')).toBeInTheDocument()
     expect(screen.getAllByRole('listitem')[2].querySelector('[aria-hidden].border-l')).toHaveClass('border-dashed')
+  })
+
+  it('shows when each signer signed', async () => {
+    render(<DrawerSignatures status={required} rows={rows} defaultOpen />)
+
+    expect(screen.getByText('Nov 12, 10:02')).toBeInTheDocument()
+
+    await userEvent.hover(screen.getByText('Signed'))
+
+    expect(await screen.findByText('Signed on Nov 12, 10:04')).toBeInTheDocument()
+  })
+
+  it('tells screen readers a signer is no longer needed', () => {
+    render(
+      <DrawerSignatures
+        status={required}
+        rows={[...rows.slice(0, 2), { id: 'carol', status: 'not-needed', signer: 'Carol' }]}
+        defaultOpen
+      />,
+    )
+
+    expect(screen.getAllByRole('listitem')[2]).toHaveTextContent('CarolNot needed')
   })
 })

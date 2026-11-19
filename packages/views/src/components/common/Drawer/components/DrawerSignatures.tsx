@@ -1,6 +1,8 @@
-import { useId, useState, type ReactElement, type ReactNode } from 'react'
+import { useState, type ReactElement, type ReactNode } from 'react'
 import { Check, ChevronDown, ChevronUp, Plus } from 'lucide-react'
 import { Badge } from '@safe-global/views/components/ui/badge'
+import { Button } from '@safe-global/views/components/ui/button'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@safe-global/views/components/ui/collapsible'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { SCROLL_AREA } from '@safe-global/views/utils/styles'
 import { cn } from '@safe-global/views/utils/cn'
@@ -96,7 +98,14 @@ const RowContent = ({ row }: { row: DrawerSignatureRow }): ReactElement => {
     )
   }
 
-  if (row.status === 'not-needed') return signer
+  if (row.status === 'not-needed') {
+    return (
+      <>
+        {signer}
+        <span className="sr-only">Not needed</span>
+      </>
+    )
+  }
 
   return (
     <>
@@ -119,28 +128,28 @@ export const DrawerSignatures = ({
   defaultOpen = false,
 }: DrawerSignaturesProps): ReactElement => {
   const [open, setOpen] = useState(defaultOpen)
-  const listId = useId()
   return (
-    <section aria-label="Signatures" className="flex flex-col">
+    <Collapsible
+      render={<section aria-label="Signatures" />}
+      className="flex flex-col"
+      open={open}
+      onOpenChange={setOpen}
+    >
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium">Signatures</span>
         {status}
         {actions}
         <span className="flex-1" />
         {meta && <span className="text-xs text-muted-foreground">{meta}</span>}
-        <button
-          type="button"
+        <CollapsibleTrigger
+          render={<Button variant="ghost-muted" size="icon-sm" />}
           aria-label={open ? 'Hide signatures' : 'Show signatures'}
-          aria-expanded={open}
-          aria-controls={listId}
-          onClick={() => setOpen(!open)}
-          className="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
-          {open ? <ChevronDown className="size-4" /> : <ChevronUp className="size-4" />}
-        </button>
+          {open ? <ChevronDown /> : <ChevronUp />}
+        </CollapsibleTrigger>
       </div>
 
-      <div id={listId} hidden={!open} className={cn(SCROLL_AREA, 'max-h-[28vh] flex-none overscroll-contain pt-3')}>
+      <CollapsibleContent keepMounted className={cn(SCROLL_AREA, 'max-h-[28vh] flex-none overscroll-contain pt-3')}>
         <ul className="flex flex-col gap-3">
           {rows.map((row, index) => {
             const line = lineFor(rows[index + 1])
@@ -160,7 +169,7 @@ export const DrawerSignatures = ({
             )
           })}
         </ul>
-      </div>
-    </section>
+      </CollapsibleContent>
+    </Collapsible>
   )
 }
