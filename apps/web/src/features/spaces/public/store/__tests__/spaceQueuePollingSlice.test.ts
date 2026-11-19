@@ -70,6 +70,24 @@ describe('spaceQueuePollingSlice', () => {
     expect(failuresOf(store, unfiltered)).toBe(3)
   })
 
+  it('does not count a rejection that is not the service being busy', async () => {
+    answerWith([401, 403, 404])
+    const store = makeStore()
+
+    for (let i = 0; i < 3; i++) await request(store, unfiltered)
+
+    expect(failuresOf(store, unfiltered)).toBe(0)
+  })
+
+  it('counts a request that never reached the service', async () => {
+    server.use(http.get(`${GATEWAY_URL}/v1/spaces/${spaceId}/transactions/queued`, () => HttpResponse.error()))
+    const store = makeStore()
+
+    await request(store, unfiltered)
+
+    expect(failuresOf(store, unfiltered)).toBe(1)
+  })
+
   it('resets the count once a request of the queue succeeds', async () => {
     answerWith([503, 503, 200])
     const store = makeStore()
