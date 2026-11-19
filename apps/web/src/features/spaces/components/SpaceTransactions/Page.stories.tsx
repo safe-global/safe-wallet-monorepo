@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { http, HttpResponse } from 'msw'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import SpaceTransactionsPage from './Page'
 import { QUEUE_SECTIONS, SPACE_QUEUE_URL, toQueuePage } from './SpaceTransactionQueue.storyData'
 

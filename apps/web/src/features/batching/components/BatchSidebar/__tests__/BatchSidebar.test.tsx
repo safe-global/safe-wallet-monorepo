@@ -3,14 +3,15 @@ import { faker } from '@faker-js/faker'
 import { OperationType } from '@safe-global/types-kit'
 import { fireEvent, render, screen } from '@/tests/test-utils'
 import { TxModalContext } from '@/components/tx-flow'
-import { ConfirmBatchFlow, NewTxFlow } from '@/components/tx-flow/flows'
-import { useDraftBatch } from '@/features/batching'
-import type { DraftBatchItem } from '@/features/batching/store'
+import { ConfirmBatchFlow } from '@/components/tx-flow/flows/ConfirmBatchFlow'
+import { NewTxFlow } from '@/components/tx-flow/flows/NewTxFlow'
+import { useDraftBatch } from '../../../public/hooks/useDraftBatch'
+import type { DraftBatchItem } from '../../../public/store/batchSlice'
 import BatchSidebar from '..'
 
 const mockDeleteTx = jest.fn()
 
-jest.mock('@/features/batching', () => ({
+jest.mock('../../../public/hooks/useDraftBatch', () => ({
   useDraftBatch: jest.fn(),
   useUpdateBatch: () => [jest.fn(), mockDeleteTx],
 }))
@@ -22,7 +23,7 @@ jest.mock('@/components/common/CheckWallet', () => ({
   },
 }))
 
-jest.mock('../BatchTxList', () => ({
+jest.mock('../../../public/components/BatchTxList', () => ({
   __esModule: true,
   default({ txItems, onDelete }: { txItems: DraftBatchItem[]; onDelete: (id: string) => void }) {
     return txItems.map((item) => (

@@ -2,7 +2,7 @@ import EarnInfo from '../EarnInfo'
 import EarnWidget from '../EarnWidget'
 import { useRouter } from 'next/router'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
-import { hideEarnInfoStorageKey } from '../../constants'
+import { hideEarnInfoStorageKey } from '../../public/constants'
 import { useDefiV1 } from '../../defiV1/context'
 import { DefiV1Page } from '../../defiV1/components/DefiV1Page'
 

@@ -149,11 +149,6 @@ export const DEFI_V1_COPY = {
     doneTitle: { deposit: 'Deposited', withdraw: 'Withdrawn' },
   },
   drawer: {
-    previous: 'Previous',
-    next: 'Next',
-    fullScreen: 'Expand to full screen',
-    restore: 'Restore panel',
-    close: 'Close',
     overview: 'Overview',
     netApy: 'Net APY',
     exit: 'Exit time',

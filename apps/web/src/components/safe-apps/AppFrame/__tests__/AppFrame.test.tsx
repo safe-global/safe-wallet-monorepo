@@ -13,7 +13,7 @@ import { act, render, renderHook, screen, fireEvent, waitFor } from '@/tests/tes
 import AppFrame from '@/components/safe-apps/AppFrame'
 import { defaultSafeInfo } from '@safe-global/store/slices/SafeInfo/utils'
 import { getEmptySafeApp } from '@/components/safe-apps/utils'
-import type { SafePermissions } from '@/hooks/safe-apps/permissions'
+import type { SafePermissions } from '@/hooks/safe-apps/permissions/useSafePermissions'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import type { AddressBookState } from '@/store/addressBookSlice'
 import useChainId from '@/hooks/useChainId'

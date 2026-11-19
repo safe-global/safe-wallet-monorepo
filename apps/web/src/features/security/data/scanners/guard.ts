@@ -2,7 +2,7 @@ import { ZERO_ADDRESS } from '@safe-global/utils/utils/constants'
 import { ContractVersions, KnownContracts, type SupportedNetworks } from '@gnosis.pm/zodiac'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import type { SecurityScanner } from './types'
-import { HIGH_VALUE_THRESHOLD_USD, getSeverityFromScore } from './constants'
+import { HIGH_VALUE_THRESHOLD_USD, getSeverityFromScore } from '../../public/constants'
 
 /** Canonical (case-insensitive) guard names tagged as trusted. */
 const HYPERNATIVE_GUARD_NAME = 'hypernative'

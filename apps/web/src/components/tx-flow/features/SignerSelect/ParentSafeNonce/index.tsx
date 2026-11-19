@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useSafesGetNoncesV1Query } from '@safe-global/store/gateway/AUTO_GENERATED/safes'
 import {
   useTransactionsGetTransactionQueueV1Query,
@@ -21,14 +21,13 @@ const QueuedNonceOption = ({ nonce, queue }: { nonce: string; queue?: QueuedItem
 
 export const ParentSafeNonce = ({ parentSafeAddress }: { parentSafeAddress: string }) => {
   const { safe } = useSafeInfo()
-  const { setParentSafeNonce, clearParentSafeNonce } = useWalletContext() ?? {}
+  const { getParentSafeNonce, setParentSafeNonce, clearParentSafeNonce } = useWalletContext() ?? {}
   const parentSafe = { chainId: safe.chainId, safeAddress: parentSafeAddress }
   const { currentData: nonces, isError } = useSafesGetNoncesV1Query(parentSafe, POLLING_OPTIONS)
   const { currentData: queue } = useTransactionsGetTransactionQueueV1Query(parentSafe, POLLING_OPTIONS)
-  const [chosenNonce, setChosenNonce] = useState<number>()
+  // The review step unmounts before signing, so the choice is kept by the signer, not by this field
+  const [chosenNonce, setChosenNonce] = useState(() => getParentSafeNonce?.())
   const queuedNonces = useMemo(() => getQueuedNonces(queue), [queue])
-
-  useEffect(() => clearParentSafeNonce, [clearParentSafeNonce])
 
   if (nonces === undefined) {
     return isError ? (

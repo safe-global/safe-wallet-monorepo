@@ -4,14 +4,14 @@ import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import ModalDialog from '@/components/common/ModalDialog'
 import QRCode from '@/components/common/QRCode'
 import Track from '@/components/common/Track'
-import { CounterfactualFeature } from '@/features/counterfactual'
-import { useLoadFeature } from '@/features/__core__'
-import { selectUndeployedSafe } from '@/features/counterfactual/store'
-import { isReplayedSafeProps } from '@/features/counterfactual/services'
+import ActivateAccountButton from '@/features/counterfactual/public/components/ActivateAccountButton'
+import FirstTxFlow from '@/features/counterfactual/public/components/FirstTxFlow'
+import { selectUndeployedSafe } from '@/features/counterfactual/public/store/undeployedSafesSlice'
+import { isReplayedSafeProps } from '@/features/counterfactual/public/utils/typeGuards'
 import useBalances from '@/hooks/useBalances'
 import { useCurrentChain } from '@/hooks/useChains'
 import useSafeInfo from '@/hooks/useSafeInfo'
-import { OVERVIEW_EVENTS } from '@/services/analytics'
+import { OVERVIEW_EVENTS } from '@/services/analytics/events/overview'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { selectSettings, setQrShortName } from '@/store/settingsSlice'
 import { selectOutgoingTransactions } from '@/store/txHistorySlice'
@@ -27,7 +27,9 @@ import { Circle, CircleCheck, CircleCheckBig, Lightbulb, Plus } from 'lucide-rea
 import css from '@safe-global/views/components/dashboard/FirstSteps/styles.module.css'
 import { ProgressRing } from '@safe-global/views/components/dashboard/FirstSteps/ProgressRing'
 import { getExplorerLink } from '@safe-global/utils/utils/gateway'
-import { BannerType, useBannerVisibility, HnDashboardBannerWithNoBalanceCheck } from '@/features/hypernative'
+import { BannerType } from '@/features/hypernative/public/hooks/useBannerStorage'
+import { useBannerVisibility } from '@/features/hypernative/public/hooks/useBannerVisibility'
+import { HnDashboardBannerWithNoBalanceCheck } from '@/features/hypernative/public/components/HnDashboardBanner'
 import { calculateProgress } from '@safe-global/views/components/dashboard/FirstSteps/utils'
 
 const StatusCard = ({
@@ -287,7 +289,6 @@ const FirstSteps = () => {
   const outgoingTransactions = useAppSelector(selectOutgoingTransactions)
   const chain = useCurrentChain()
   const undeployedSafe = useAppSelector((state) => selectUndeployedSafe(state, safe.chainId, safeAddress))
-  const { ActivateAccountButton, FirstTxFlow } = useLoadFeature(CounterfactualFeature)
 
   // Check if banner should show (for conditional rendering of AccountReadyWidget)
   // Use NoBalanceCheck for undeployed safes as the banner should be shown for all non-active safes as well

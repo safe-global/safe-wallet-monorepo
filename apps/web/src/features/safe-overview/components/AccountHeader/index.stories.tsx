@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
-import { createMockStory } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import AccountHeader from './index'
 
 // Populated Safe: balances resolve to a non-zero fiat total, so the header shows

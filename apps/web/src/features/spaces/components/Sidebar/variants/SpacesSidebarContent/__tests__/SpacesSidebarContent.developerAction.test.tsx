@@ -14,11 +14,11 @@ jest.mock('next/router', () => ({
   useRouter: () => ({ query: { spaceId: '1' }, pathname: '/spaces', push: mockPush }),
 }))
 
-jest.mock('@/features/spaces/hooks/useCurrentSpaceId', () => ({
+jest.mock('../../../../../public/hooks/useCurrentSpaceId', () => ({
   useCurrentSpaceId: () => '1',
 }))
 
-jest.mock('@/features/spaces/hooks/useSpaceMembers', () => ({
+jest.mock('../../../../../public/hooks/useSpaceMembers', () => ({
   useIsActiveMember: () => true,
 }))
 
@@ -33,7 +33,13 @@ jest.mock('@/store', () => ({
     selector({ featureFlagOverrides: {}, auth: {} }),
 }))
 
-jest.mock('../../SpaceSelectorDropdown', () => ({
+jest.mock('../../SpaceSelectorDropdown/SpaceSelectorDropdown', () => ({
+  get SAFE_ALREADY_IN_WORKSPACE_TOOLTIP() {
+    return jest.requireActual('../../SpaceSelectorDropdown/SpaceSelectorDropdown').SAFE_ALREADY_IN_WORKSPACE_TOOLTIP
+  },
+  get NO_PLAN_TOOLTIP() {
+    return jest.requireActual('../../SpaceSelectorDropdown/SpaceSelectorDropdown').NO_PLAN_TOOLTIP
+  },
   SpaceSelectorDropdown: () => null,
 }))
 
@@ -41,7 +47,16 @@ const mockTrackEvent = jest.fn()
 
 jest.mock('@/services/analytics', () => ({
   trackEvent: (...args: unknown[]) => mockTrackEvent(...args),
-  OVERVIEW_EVENTS: { SIDEBAR_CLICKED: { action: 'Sidebar clicked' } },
+}))
+jest.mock('@/services/analytics/events/overview', () => ({
+  ...jest.requireActual('@/services/analytics/events/overview'),
+  OVERVIEW_EVENTS: {
+    ...jest.requireActual('@/services/analytics/events/overview').OVERVIEW_EVENTS,
+    SIDEBAR_CLICKED: { action: 'Sidebar clicked' },
+  },
+}))
+jest.mock('@/services/analytics/mixpanel-events', () => ({
+  ...jest.requireActual('@/services/analytics/mixpanel-events'),
   MixpanelEventParams: { SIDEBAR_ELEMENT: 'sidebarElement', ENTRY_POINT: 'entryPoint' },
 }))
 
@@ -88,7 +103,7 @@ jest.mock('@safe-global/views/components/ui/sidebar', () => ({
   },
 }))
 
-jest.mock('@/features/feature-flag-overrides/FeatureFlagEditorDialogLoader', () => ({
+jest.mock('@/features/feature-flag-overrides/public/components/FeatureFlagEditorDialogLoader', () => ({
   FeatureFlagEditorDialogLoader: ({ open }: { open: boolean }) =>
     open ? <div data-testid="feature-flag-editor-dialog" /> : null,
 }))

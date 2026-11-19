@@ -1,8 +1,8 @@
 import type { ComponentType } from 'react'
-import { SafeSidebarVariant } from './SafeSidebarVariant'
-import { SafeSidebarContent } from './SafeSidebarContent'
-import { SpacesSidebarVariant } from './SpacesSidebarVariant'
-import { SpacesSidebarContent } from './SpacesSidebarContent'
+import { SafeSidebarVariant } from './SafeSidebarVariant/SafeSidebarVariant'
+import { SafeSidebarContent } from './SafeSidebarContent/SafeSidebarContent'
+import { SpacesSidebarVariant } from './SpacesSidebarVariant/SpacesSidebarVariant'
+import { SpacesSidebarContent } from './SpacesSidebarContent/SpacesSidebarContent'
 import type { SidebarVariantContentProps } from '@safe-global/views/features/spaces/components/Sidebar/types'
 
 export type { SidebarVariantContentProps }

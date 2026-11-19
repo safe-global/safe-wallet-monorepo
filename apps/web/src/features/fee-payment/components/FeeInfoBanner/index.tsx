@@ -8,7 +8,7 @@ import TokenIcon from '@/public/images/common/token.svg'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import useLocalStorage from '@/services/local-storage/useLocalStorage'
 import useChainId from '@/hooks/useChainId'
-import { PAY_FROM_SAFE_FEES_BANNER_DISMISSED_KEY } from '../../constants'
+import { PAY_FROM_SAFE_FEES_BANNER_DISMISSED_KEY } from '../../public/constants'
 import css from './styles.module.css'
 
 const LEARN_MORE_URL = 'https://help.safe.global/articles/9993850744-safewallet-gas-fees-faq'

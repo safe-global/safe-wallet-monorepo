@@ -3,6 +3,7 @@ import { Download } from 'lucide-react'
 import type { SpaceAddressBookItemDto, SpaceAddressBookTagDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import TableCard from '@safe-global/views/components/common/TableCard'
 import { Button } from '@safe-global/views/components/ui/button'
+import { ButtonGroup } from '@safe-global/views/components/ui/button-group'
 import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 import AddressBookEmptyState from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookEmptyState'
 import AddressBookTable from '@safe-global/views/features/spaces/components/AddressBookV2/AddressBookTable'
@@ -12,17 +13,20 @@ import EditTagsDialog from '@safe-global/views/features/spaces/components/Addres
 import { existingTagIds } from '@safe-global/views/features/spaces/components/AddressBookV2/tags/TagMenu'
 import { filterByTags, searchContacts } from '@safe-global/views/features/spaces/components/AddressBookV2/search'
 import type { AddressBookContact } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
+import { CsvExportDialog } from '@/components/address-book/ExportDialog'
 import Track from '@/components/common/Track'
-import { useCurrentSpaceId, useMemberNameResolver } from '@/features/spaces'
+import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
+import { useMemberNameResolver } from '../../public/hooks/useMemberNameResolver'
 import useChains from '@/hooks/useChains'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
-import { downloadCsv, spaceAddressBookToCsv } from '../../utils/addressBookCsv'
+import { spaceAddressBookToCsvRows } from '../../utils/addressBookCsv'
 import AddContact from '../SpaceAddressBook/AddContact'
+import type { TriggerSize } from '../SpaceAddressBook/AddContactDialog'
 import DeleteContactDialog from '../SpaceAddressBook/DeleteContactDialog'
 import EditContactDialog from '../SpaceAddressBook/EditContactDialog'
-import ImportAddressBook from '../SpaceAddressBook/Import'
+import ImportWorkspaceCsv from './ImportWorkspaceCsv'
 import useAddressCellProps from './useAddressCellProps'
 import useTagActions from './useTagActions'
 import { tagNamesOf, toWorkspaceContacts } from './utils'
@@ -55,6 +59,7 @@ const WorkspaceContacts = ({
   const [query, setQuery] = useState('')
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>([])
   const [dialog, setDialog] = useState<OpenDialog>()
+  const [isExportOpen, setIsExportOpen] = useState(false)
   const [tagsError, setTagsError] = useState<string>()
   const { saveContactTags, isSavingContactTags, tagActions } = useTagActions()
   const { configs } = useChains()
@@ -106,8 +111,6 @@ const WorkspaceContacts = ({
 
   const memberTagActions = isInvited ? undefined : tagActions
 
-  const handleExport = () => downloadCsv(`workspace-${spaceId}-address-book.csv`, spaceAddressBookToCsv(items))
-
   if (isLoading) {
     return (
       <TableCard>
@@ -124,10 +127,12 @@ const WorkspaceContacts = ({
     )
   }
 
-  const addContact = (
+  // `lg` in the toolbar; the empty state keeps the smaller size
+  const renderAddContact = (size: TriggerSize) => (
     <Track {...SPACE_EVENTS.ADD_ADDRESS}>
       <AddContact
         label="Add contact"
+        size={size}
         workspaceTags={tags}
         onTagLimitReached={() => trackTagLimitReached('add_contact')}
       />
@@ -135,12 +140,10 @@ const WorkspaceContacts = ({
   )
 
   const exportButton = (
-    <Track {...SPACE_EVENTS.EXPORT_ADDRESS_BOOK}>
-      <Button variant="outline" size="action" onClick={handleExport}>
-        <Download aria-hidden="true" data-icon="inline-start" />
-        Export
-      </Button>
-    </Track>
+    <Button variant="outline" size="lg" onClick={() => setIsExportOpen(true)}>
+      <Download aria-hidden="true" data-icon="inline-start" />
+      Export
+    </Button>
   )
 
   if (items.length === 0) {
@@ -152,8 +155,8 @@ const WorkspaceContacts = ({
           actions={
             isAdmin ? (
               <>
-                <ImportAddressBook />
-                {addContact}
+                <ImportWorkspaceCsv items={items} tags={tags} />
+                {renderAddContact('action')}
               </>
             ) : undefined
           }
@@ -162,11 +165,17 @@ const WorkspaceContacts = ({
     )
   }
 
+  const clearFilters = () => {
+    setQuery('')
+    setSelectedTagIds([])
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <AddressBookToolbar
         query={query}
         onQueryChange={setQuery}
+        searchScope="name, address or tag"
         filters={
           <TagFilterDropdown
             tags={tags}
@@ -182,9 +191,11 @@ const WorkspaceContacts = ({
         actions={
           isAdmin ? (
             <>
-              <ImportAddressBook />
-              {exportButton}
-              {addContact}
+              <ButtonGroup aria-label="Import and export">
+                <ImportWorkspaceCsv items={items} tags={tags} size="lg" />
+                {exportButton}
+              </ButtonGroup>
+              {renderAddContact('lg')}
             </>
           ) : isInvited ? undefined : (
             exportButton
@@ -194,13 +205,7 @@ const WorkspaceContacts = ({
 
       <TableCard>
         {visibleContacts.length === 0 ? (
-          <AddressBookEmptyState
-            kind="no-results"
-            onClearSearch={() => {
-              setQuery('')
-              setSelectedTagIds([])
-            }}
-          />
+          <AddressBookEmptyState kind="no-results" book="workspace" onClear={clearFilters} />
         ) : (
           <AddressBookTable
             contacts={visibleContacts}
@@ -212,6 +217,14 @@ const WorkspaceContacts = ({
         )}
       </TableCard>
 
+      {isExportOpen && (
+        <CsvExportDialog
+          csvData={spaceAddressBookToCsvRows(items, tags)}
+          filename={`workspace-${spaceId}-address-book`}
+          onExport={() => trackEvent(SPACE_EVENTS.EXPORT_ADDRESS_BOOK)}
+          handleClose={() => setIsExportOpen(false)}
+        />
+      )}
       {dialog?.type === 'edit' && dialogEntry && (
         <EditContactDialog
           entry={dialogEntry}

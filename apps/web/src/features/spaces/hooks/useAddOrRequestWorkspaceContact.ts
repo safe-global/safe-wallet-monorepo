@@ -2,17 +2,18 @@ import { useCallback } from 'react'
 import { useAddressBookRequestsCreateRequestV1Mutation } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import { sameAddress } from '@safe-global/utils/utils/addresses'
 import { sanitizeName } from '@safe-global/utils/validation/names'
-import { type AnalyticsEvent, trackEvent } from '@/services/analytics'
+import type { AnalyticsEvent } from '@/services/analytics/types'
+import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS, type SPACE_LABELS } from '@/services/analytics/events/spaces'
 import { MixpanelEventParams } from '@/services/analytics/mixpanel-events'
 import { useAppDispatch } from '@/store'
 import { type AlertColor, showNotification } from '@/store/notificationsSlice'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import { WORKSPACE_CONFIRMATION_HIDE_MS } from '../constants'
-import { useCurrentSpaceId } from './useCurrentSpaceId'
-import { useSpaceAddressBookState } from './useGetSpaceAddressBook'
-import { useIsAdmin, useIsInvited } from './useSpaceMembers'
-import { useUpsertWorkspaceSafeNames, type WorkspaceSafeName } from './useUpsertWorkspaceSafeName'
+import { useCurrentSpaceId } from '../public/hooks/useCurrentSpaceId'
+import { useSpaceAddressBookState } from '../public/hooks/useGetSpaceAddressBook'
+import { useIsAdmin, useIsInvited } from '../public/hooks/useSpaceMembers'
+import { useUpsertWorkspaceSafeNames, type WorkspaceSafeName } from '../public/hooks/useUpsertWorkspaceSafeName'
 
 /** `pending`: the member already has an open request for this address, so nothing new was sent. */
 export type WorkspaceContactResult = 'added' | 'requested' | 'pending' | 'skipped' | 'failed'
@@ -41,12 +42,17 @@ const CONFIRMATIONS: Partial<Record<WorkspaceContactResult, Confirmation>> = {
   },
 }
 
+/** Where in the app a member sent the request from. */
+export type WorkspaceContactLocation = 'suggested'
+
+type TrackingOptions = { source?: SPACE_LABELS; location?: WorkspaceContactLocation }
+
 /**
  * Adds a contact to the Workspace address book for admins and requests it for members.
  */
-export const useAddOrRequestWorkspaceContact = (
-  source?: SPACE_LABELS,
-): ((contact: WorkspaceSafeName) => Promise<WorkspaceContactResult>) => {
+export const useAddOrRequestWorkspaceContact = ({ source, location }: TrackingOptions = {}): ((
+  contact: WorkspaceSafeName,
+) => Promise<WorkspaceContactResult>) => {
   const spaceId = useCurrentSpaceId()
   const isAdmin = useIsAdmin()
   const isInvited = useIsInvited()
@@ -81,14 +87,20 @@ export const useAddOrRequestWorkspaceContact = (
       const confirmation = CONFIRMATIONS[result]
       if (confirmation) {
         const { event, ...notification } = confirmation
-        if (event && source) trackEvent(event, { [MixpanelEventParams.SOURCE]: source })
-        else if (event) trackEvent(event)
+        if (event) {
+          const params = {
+            ...(source && { [MixpanelEventParams.SOURCE]: source }),
+            ...(location && { [MixpanelEventParams.LOCATION]: location }),
+          }
+          if (Object.keys(params).length) trackEvent(event, params)
+          else trackEvent(event)
+        }
         dispatch(showNotification({ ...notification, autoHideDuration: WORKSPACE_CONFIRMATION_HIDE_MS }))
       }
       if (error) dispatch(showNotification({ variant: 'error', groupKey: 'workspace-contact-error', message: error }))
 
       return result
     },
-    [items, spaceId, isInvited, submit, source, dispatch],
+    [items, spaceId, isInvited, submit, source, location, dispatch],
   )
 }

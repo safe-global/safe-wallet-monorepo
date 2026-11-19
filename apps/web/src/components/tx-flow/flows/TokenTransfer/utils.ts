@@ -1,4 +1,6 @@
-import { useIsOnlySpendingLimitBeneficiary, useSpendingLimit, selectSpendingLimits } from '@/features/spending-limits'
+import useIsOnlySpendingLimitBeneficiary from '@/features/spending-limits/public/hooks/useIsOnlySpendingLimitBeneficiary'
+import useSpendingLimit from '@/features/spending-limits/public/hooks/useSpendingLimit'
+import { selectSpendingLimits } from '@/features/spending-limits/public/store/spendingLimitsSlice'
 import useWallet from '@/hooks/wallets/useWallet'
 import { useAppSelector } from '@/store'
 import { sameAddress } from '@safe-global/utils/utils/addresses'

@@ -4,8 +4,9 @@ import HypernativeIcon from '@/public/images/hypernative/hypernative-icon.svg'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import { hnSecurityReportBtnConfig } from '@safe-global/views/features/hypernative/components/HnSecurityReportBtn/config'
 import type { ReactElement } from 'react'
-import { HYPERNATIVE_EVENTS, trackEvent } from '@/services/analytics'
-import { buildSecurityReportUrl } from '@/features/hypernative/utils/buildSecurityReportUrl'
+import { HYPERNATIVE_EVENTS } from '@/services/analytics/events/hypernative'
+import { trackEvent } from '@/services/analytics'
+import { buildSecurityReportUrl } from '../../utils/buildSecurityReportUrl'
 
 import css from './styles.module.css'
 

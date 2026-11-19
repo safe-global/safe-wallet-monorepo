@@ -16,7 +16,9 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/safes', () => ({
   ...jest.requireActual('@safe-global/store/gateway/AUTO_GENERATED/safes'),
   useSafesGetSafeV1Query: jest.fn(),
 }))
-jest.mock('@/hooks/wallets/web3', () => ({ createWeb3ReadOnly: jest.fn() }))
+jest.mock('@/hooks/wallets/web3', () => ({
+  createWeb3ReadOnly: jest.fn(),
+}))
 
 // `trackError` is exported as a live binding, which `jest.spyOn` can't redefine on the required
 // module object — mock it at module scope the same way `useInitSafeCoreSDK.test.ts` does.

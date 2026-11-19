@@ -1,9 +1,8 @@
 import type { ReactElement } from 'react'
 import Link, { type LinkProps } from 'next/link'
-import { DrawerFooter } from '@/components/common/Drawer'
+import { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Skeleton } from '@safe-global/views/components/ui/skeleton'
-import { Typography } from '@safe-global/views/components/ui/typography'
 
 export type PolicyDrawerActionsProps = {
   actionLabel: string
@@ -23,24 +22,16 @@ const PolicyDrawerActions = ({
   variant = 'default',
   disabled = false,
 }: PolicyDrawerActionsProps): ReactElement => (
-  <DrawerFooter>
-    <div className="flex flex-col gap-2">
-      {hint && (
-        <Typography variant="paragraph-mini" color="muted" align="center">
-          {hint}
-        </Typography>
-      )}
-
-      <Button
-        variant={variant}
-        className="w-full"
-        onClick={onClick}
-        disabled={disabled}
-        render={href && !disabled ? <Link href={href} /> : undefined}
-      >
-        {actionLabel}
-      </Button>
-    </div>
+  <DrawerFooter hint={hint}>
+    <Button
+      variant={variant}
+      className="w-full"
+      onClick={onClick}
+      disabled={disabled}
+      render={href && !disabled ? <Link href={href} /> : undefined}
+    >
+      {actionLabel}
+    </Button>
   </DrawerFooter>
 )
 

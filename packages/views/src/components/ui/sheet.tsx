@@ -1,5 +1,6 @@
 import * as React from 'react'
 import { Dialog as SheetPrimitive } from '@base-ui/react/dialog'
+import { usePopupInitialFocus } from '@safe-global/views/hooks/use-popup-initial-focus'
 import { cva, type VariantProps } from 'class-variance-authority'
 
 import { cn } from '@safe-global/views/utils/cn'
@@ -35,7 +36,7 @@ import { XIcon } from 'lucide-react'
  * @remarks
  * Key Props:
  * - SheetContent: `side` ('top' | 'right' | 'bottom' | 'left'), `variant` ('default' | 'floating'),
- *   `size` ('sm' | 'md' | 'lg' | 'auto'), `surface` ('card' | 'paper' | 'muted'), `padding` ('none' | 'md'), `showCloseButton`
+ *   `size` ('sm' | 'md' | 'lg' | 'auto' | 'full'), `surface` ('card' | 'paper' | 'muted' | 'raised'), `padding` ('none' | 'md'), `showCloseButton`
  * - SheetHeader / SheetFooter: `divided` (true = full border, 'subtle' = border-border/50)
  * - Root / Trigger / Close: see Base UI dialog
  *
@@ -48,7 +49,7 @@ import { XIcon } from 'lucide-react'
 const sheetContentVariants = cva(
   // `data-closed:pointer-events-none` mirrors the guard on SheetOverlay — a closed panel that is
   // still mounted (stuck exit animation) must not intercept clicks either. See SheetOverlay.
-  'bg-background data-closed:pointer-events-none data-open:animate-in data-closed:animate-out data-[side=right]:data-closed:slide-out-to-right-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=top]:data-closed:slide-out-to-top-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:fade-out-0 data-open:fade-in-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=bottom]:data-open:slide-in-from-bottom-10 fixed z-[var(--z-overlay)] flex flex-col gap-4 bg-clip-padding text-sm shadow-lg transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b',
+  'outline-none bg-background data-closed:pointer-events-none data-open:animate-in data-closed:animate-out data-[side=right]:data-closed:slide-out-to-right-10 data-[side=right]:data-open:slide-in-from-right-10 data-[side=left]:data-closed:slide-out-to-left-10 data-[side=left]:data-open:slide-in-from-left-10 data-[side=top]:data-closed:slide-out-to-top-10 data-[side=top]:data-open:slide-in-from-top-10 data-closed:fade-out-0 data-open:fade-in-0 data-[side=bottom]:data-closed:slide-out-to-bottom-10 data-[side=bottom]:data-open:slide-in-from-bottom-10 fixed z-[var(--z-overlay)] flex flex-col gap-4 bg-clip-padding text-sm shadow-lg transition duration-200 ease-in-out data-[side=bottom]:inset-x-0 data-[side=bottom]:bottom-0 data-[side=bottom]:h-auto data-[side=bottom]:border-t data-[side=left]:inset-y-0 data-[side=left]:left-0 data-[side=left]:h-full data-[side=left]:border-r data-[side=right]:inset-y-0 data-[side=right]:right-0 data-[side=right]:h-full data-[side=right]:border-l data-[side=top]:inset-x-0 data-[side=top]:top-0 data-[side=top]:h-auto data-[side=top]:border-b',
   {
     variants: {
       variant: {
@@ -64,12 +65,16 @@ const sheetContentVariants = cva(
         md: 'data-[side=left]:w-[440px] data-[side=right]:w-[440px] data-[side=left]:max-w-[calc(100vw-24px)] data-[side=right]:max-w-[calc(100vw-24px)]',
         lg: 'data-[side=left]:w-[700px] data-[side=right]:w-[700px] data-[side=left]:max-w-[100vw] data-[side=right]:max-w-[100vw]',
         auto: 'data-[side=left]:w-auto data-[side=right]:w-auto data-[side=left]:max-w-none data-[side=right]:max-w-none',
+        full: 'data-[side=left]:w-screen data-[side=right]:w-screen data-[side=left]:max-w-none data-[side=right]:max-w-none',
       },
       surface: {
         card: 'bg-card',
         paper: 'bg-[var(--color-background-paper)]',
         // Recessed surface, a step darker than `bg-card` in both themes so the cards inside stand out.
         muted: 'bg-muted-secondary dark:bg-[var(--color-background-main)]',
+        // Dark mode can't lean on a shadow, so it lifts the fill, adds an edge and steps inner cards up
+        raised:
+          'bg-muted-secondary dark:bg-dialog dark:[--card:var(--muted)] dark:shadow-[inset_0_0_0_1px_var(--color-border-light),inset_0_1px_0_rgb(255_255_255/0.04),0_24px_64px_rgb(0_0_0/0.6)]',
       },
       padding: {
         none: 'p-0',
@@ -132,12 +137,15 @@ function SheetContent({
   size,
   surface,
   padding,
+  ref,
+  initialFocus,
   ...props
 }: SheetPrimitive.Popup.Props & {
   side?: 'top' | 'right' | 'bottom' | 'left'
   showCloseButton?: boolean
   overlayClassName?: string
 } & VariantProps<typeof sheetContentVariants>) {
+  const popupFocus = usePopupInitialFocus(ref, initialFocus)
   return (
     <SheetPortal>
       <SheetOverlay className={overlayClassName} />
@@ -146,6 +154,8 @@ function SheetContent({
         data-side={side}
         className={cn(sheetContentVariants({ variant, size, surface, padding }), className)}
         {...props}
+        ref={popupFocus.ref}
+        initialFocus={popupFocus.initialFocus}
       >
         {children}
         {showCloseButton && (

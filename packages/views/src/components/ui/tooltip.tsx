@@ -34,12 +34,28 @@ type TooltipDelayProps = {
   delay?: number
   /** Close delay in ms (forwarded to the provider). */
   closeDelay?: number
+  /** Whether a click on the trigger closes the tooltip; `false` keeps feedback such as "Copied" in view. */
+  closeOnClick?: boolean
 }
 
-function Tooltip({ delay, closeDelay, ...props }: TooltipPrimitive.Root.Props & TooltipDelayProps) {
+function Tooltip({
+  delay,
+  closeDelay,
+  closeOnClick = true,
+  onOpenChange,
+  ...props
+}: TooltipPrimitive.Root.Props & TooltipDelayProps) {
+  const handleOpenChange: TooltipPrimitive.Root.Props['onOpenChange'] = (open, eventDetails) => {
+    if (!closeOnClick && !open && eventDetails.reason === 'trigger-press') {
+      eventDetails.cancel()
+      return
+    }
+    onOpenChange?.(open, eventDetails)
+  }
+
   return (
     <TooltipProvider delay={delay} closeDelay={closeDelay}>
-      <TooltipPrimitive.Root data-slot="tooltip" {...props} />
+      <TooltipPrimitive.Root data-slot="tooltip" onOpenChange={handleOpenChange} {...props} />
     </TooltipProvider>
   )
 }

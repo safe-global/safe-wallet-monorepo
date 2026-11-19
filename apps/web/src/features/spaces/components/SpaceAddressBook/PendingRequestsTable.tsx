@@ -6,14 +6,17 @@ import { Spinner } from '@safe-global/views/components/ui/spinner'
 import { isAddress } from 'ethers'
 import EthHashInfo from '@/components/common/EthHashInfo'
 import Identicon from '@safe-global/views/components/common/Identicon'
-import { NetworkLogosPill, NetworkLogosTooltip } from '@/features/multichain'
+import NetworkLogosPill from '@/components/common/NetworkLogosPill'
+import NetworkLogosTooltip from '@/components/common/NetworkLogosTooltip'
 import ChainIndicator from '@/components/common/ChainIndicator'
 import type { AddressBookRequestItemDto } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
 import {
   useAddressBookRequestsApproveRequestV1Mutation,
   useAddressBookRequestsRejectRequestV1Mutation,
 } from '@safe-global/store/gateway/AUTO_GENERATED/spaces'
-import { useCurrentSpaceId, useGetSpaceAddressBook, useIsAdmin } from '@/features/spaces'
+import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
+import useGetSpaceAddressBook from '../../public/hooks/useGetSpaceAddressBook'
+import { useIsAdmin } from '../../public/hooks/useSpaceMembers'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import useChains from '@/hooks/useChains'
@@ -21,7 +24,7 @@ import { Check, X } from 'lucide-react'
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
 import { cn } from '@safe-global/views/utils/cn'
 import AddressCell from './AddressCell'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/utils/elevation'
 
 type PendingRequestsTableProps = {
   requests: AddressBookRequestItemDto[]
