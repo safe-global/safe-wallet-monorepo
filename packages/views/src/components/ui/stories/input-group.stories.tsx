@@ -8,7 +8,7 @@ import {
   InputGroupTextarea,
 } from '../input-group'
 import { Search, Mail, Send } from 'lucide-react'
-import { userEvent, within } from 'storybook/test'
+import { expect, userEvent, within } from 'storybook/test'
 import { SearchInput } from '../search-input'
 
 /**
@@ -312,7 +312,6 @@ export const AllVariants: Story = {
 }
 
 export const ScriptGuardError: Story = {
-  tags: ['skip-visual-test'],
   render: () => (
     <div style={{ display: 'grid', gap: '2rem', width: '300px' }}>
       <div>
@@ -332,7 +331,21 @@ export const ScriptGuardError: Story = {
   ),
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement)
-    await userEvent.type(canvas.getByRole('textbox', { name: 'Email' }), '<script>')
-    await userEvent.type(canvas.getByRole('searchbox'), '<script>')
+    const email = canvas.getByRole('textbox', { name: 'Email' })
+    const search = canvas.getByRole('searchbox')
+    await userEvent.type(email, '<script>')
+    await userEvent.type(search, '<script>')
+    search.blur()
+
+    const group = email.closest('[data-slot=input-group]')
+    if (!group) throw new Error('Email input is not inside an input group')
+    const box = group.getBoundingClientRect()
+    const field = email.getBoundingClientRect()
+    const messages = canvas.getAllByRole('alert')
+
+    await expect(messages).toHaveLength(1)
+    await expect(messages[0].getBoundingClientRect().top).toBeGreaterThanOrEqual(box.bottom)
+    await expect(field.top).toBeGreaterThanOrEqual(box.top)
+    await expect(field.bottom).toBeLessThanOrEqual(box.bottom)
   },
 }

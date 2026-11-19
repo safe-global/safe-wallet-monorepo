@@ -59,8 +59,7 @@ const inputGroupVariants = cva(
         // `Button variant="outline"`. Pair the two when they share a row.
         outline: 'bg-transparent',
       },
-      // Where a nested Input's error goes. `below` hangs it under the border in reserved space so the
-      // control keeps its place; `hidden` is for search boxes, whose query is never saved.
+      // `below` hangs a nested error under the border, `hidden` suits search boxes
       fieldError: {
         below:
           '[&_[data-slot=field-error]]:absolute [&_[data-slot=field-error]]:inset-x-0 [&_[data-slot=field-error]]:top-full [&_[data-slot=field-error]]:truncate has-[[data-slot=field-error]]:mb-6',
