@@ -22,7 +22,7 @@ const BuiltInCard = ({ row, onOpen }: { row: AppRow; onOpen: (row: AppRow) => vo
           <span className="text-sm text-muted-foreground">{row.does}</span>
         </div>
         <Button variant="outline" size="sm" onClick={() => onOpen(row)} className="w-fit">
-          {APPS_V1_COPY.open}
+          {row.builtIn && APPS_V1_COPY.builtIn.cta[row.builtIn]}
         </Button>
       </div>
     </CardContent>

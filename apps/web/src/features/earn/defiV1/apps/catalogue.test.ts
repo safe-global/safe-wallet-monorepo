@@ -39,7 +39,7 @@ const group = (list: AppRow[], groupBy: AppsGroupBy, pinned: number[] = []) =>
     jobTitle: (job) => job,
     chainName: (id) => `chain ${id}`,
     currentChainId: '1',
-    titles: { pinned: 'Pinned', others: 'All apps', custom: 'Custom apps' },
+    titles: { safe: 'Built into Safe', pinned: 'Pinned', others: 'All apps', custom: 'Custom apps' },
   })
 
 const names = (list: AppRow[]) => list.map((row) => row.name)
@@ -55,7 +55,7 @@ describe('jobOf', () => {
 describe('buildRows', () => {
   it('adds built-in features and custom apps', () => {
     expect(names(rows())).toEqual([
-      'Treasury',
+      'Invest',
       'Swap',
       'Bridge',
       'Aave v3',
@@ -78,11 +78,23 @@ describe('buildRows', () => {
 })
 
 describe('groupApps', () => {
-  it('groups by job with built-ins first and custom apps last', () => {
+  it('puts built-ins in their own group first and custom apps last', () => {
     const groups = group(rows(), 'job')
-    expect(groups.map((item) => item.key)).toEqual(['grow', 'trade', 'build', 'more', 'custom'])
-    expect(names(groups[0].rows)).toEqual(['Treasury', 'Aave v3'])
-    expect(names(groups[1].rows)).toEqual(['Swap', 'Bridge', 'CowSwap'])
+    expect(groups.map((item) => item.key)).toEqual(['safe', 'grow', 'trade', 'build', 'more', 'custom'])
+    expect(names(groups[0].rows)).toEqual(['Invest', 'Swap', 'Bridge'])
+    expect(names(groups[1].rows)).toEqual(['Aave v3'])
+    expect(names(groups[2].rows)).toEqual(['CowSwap'])
+  })
+
+  it.each<AppsGroupBy>(['network', 'pinned'])('keeps built-ins on top when grouped by %s', (groupBy) => {
+    const groups = group(rows(), groupBy)
+    expect(groups[0].key).toBe('safe')
+    expect(
+      groups
+        .slice(1)
+        .flatMap((item) => item.rows)
+        .some((row) => row.builtIn),
+    ).toBe(false)
   })
 
   it('orders apps by users within a group', () => {
@@ -92,18 +104,13 @@ describe('groupApps', () => {
 
   it('lists an app under every network it runs on, current network first', () => {
     const groups = group(rows({ customApps: [] }), 'network')
-    expect(groups[0].key).toBe('chain-1')
-    expect(names(groups.find((item) => item.key === 'chain-137')!.rows)).toEqual([
-      'Treasury',
-      'Swap',
-      'Bridge',
-      'Aave v3',
-    ])
+    expect(groups[1].key).toBe('chain-1')
+    expect(names(groups.find((item) => item.key === 'chain-137')!.rows)).toEqual(['Aave v3'])
   })
 
   it('puts pinned apps in their own group', () => {
     const groups = group(rows(), 'pinned', [58])
-    expect(groups.map((item) => item.key)).toEqual(['pinned', 'others', 'custom'])
-    expect(names(groups[0].rows)).toEqual(['CowSwap'])
+    expect(groups.map((item) => item.key)).toEqual(['safe', 'pinned', 'others', 'custom'])
+    expect(names(groups[1].rows)).toEqual(['CowSwap'])
   })
 })

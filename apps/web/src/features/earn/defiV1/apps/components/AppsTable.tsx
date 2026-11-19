@@ -1,8 +1,9 @@
 import { Fragment, type MouseEvent } from 'react'
-import { ArrowUpRight, Info } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, Info } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '@safe-global/views/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
+import { cn } from '@safe-global/views/utils/cn'
 import BatchIcon from '@/public/images/apps/batch-icon.svg'
 import { isOptimizedForBatchTransactions } from '@/components/safe-apps/utils'
 import { GroupBand, TableCard } from '../../components/GroupedTable'
@@ -13,7 +14,7 @@ import { AppBadge, AppIcon, NetworkLogos, PinButton } from './AppParts'
 const COPY = APPS_V1_COPY
 const WIDE_CELL = 'hidden md:table-cell'
 // Phones hide the middle cells, so the Open cell moves into the second column
-const COLUMN_WIDTHS = ['', 'w-24 md:w-[32%]', 'w-0 md:w-28', 'w-0 md:w-24', 'w-0 md:w-48']
+const COLUMN_WIDTHS = ['', 'w-24 md:w-[28%]', 'w-0 md:w-28', 'w-0 md:w-24', 'w-0 md:w-48']
 const users = new Intl.NumberFormat('en-US')
 
 const ColumnHeaders = () => (
@@ -59,8 +60,10 @@ const AppRowView = ({
         <AppIcon row={row} />
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-3">
-            <span className="truncate font-medium text-foreground">{row.name}</span>
-            <AppBadge row={row} />
+            <span className={cn('truncate font-medium text-foreground', row.builtIn && 'shrink-0')}>{row.name}</span>
+            <span className="flex max-md:hidden">
+              <AppBadge row={row} />
+            </span>
             {row.app && isOptimizedForBatchTransactions(row.app) && (
               <Tooltip delay={150}>
                 <TooltipTrigger render={<span className="flex shrink-0" />}>
@@ -99,7 +102,12 @@ const AppRowView = ({
               <ArrowUpRight />
             </>
           ) : (
-            COPY.open
+            row.builtIn && (
+              <>
+                <span className="max-md:sr-only">{COPY.builtIn.cta[row.builtIn]}</span>
+                <ArrowRight className="md:hidden" />
+              </>
+            )
           )}
         </Button>
       </div>

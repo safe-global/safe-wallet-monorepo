@@ -1,4 +1,4 @@
-import type { AppsGroupBy, Job } from './catalogue'
+import type { AppsGroupBy, BuiltIn, Job } from './catalogue'
 import type { AppsView } from './context'
 
 export const APPS_V1_COPY = {
@@ -20,15 +20,32 @@ export const APPS_V1_COPY = {
     build: 'Build transactions',
     more: 'More apps',
   } satisfies Record<Job, string>,
-  groups: { pinned: 'Pinned', others: 'All apps', custom: 'Custom apps' },
+  groups: { safe: 'Built into Safe', pinned: 'Pinned', others: 'All apps', custom: 'Custom apps' },
   groupBy: 'Group by',
   groupByOption: { job: 'Job', network: 'Network', pinned: 'Pinned' } satisfies Record<AppsGroupBy, string>,
   view: { table: 'Table', grid: 'Grid' } satisfies Record<AppsView, string>,
   columns: { app: 'App', does: 'What it does', networks: 'Networks', users: 'Users' },
   usersHint: 'Relative use in the last 90 days',
-  badges: { 'built-in': 'Built in', safe: 'Safe' },
-  open: 'Open',
+  badges: { safe: 'Safe' },
+  builtIn: {
+    badge: { treasury: 'Stake and earn on Safe', swap: 'Swap on Safe', bridge: 'Bridge on Safe' },
+    cta: { treasury: 'Treasury and opportunities', swap: 'Swap', bridge: 'Bridge' },
+  } satisfies Record<'badge' | 'cta', Record<BuiltIn, string>>,
   openApp: 'Open Safe App',
+  preview: {
+    details: 'Details',
+    links: 'Links',
+    networks: 'Networks',
+    users: 'Users, last 90 days',
+    batch: 'Batch transactions',
+    supported: 'Supported',
+    notSupported: 'Not supported',
+    website: 'Website',
+    custom: 'Custom app',
+    share: 'Copy share link',
+    copied: 'Link copied',
+    openHint: 'Runs inside your Safe. You review every transaction before it’s signed.',
+  },
   pin: (name: string) => `Pin ${name}`,
   unpin: (name: string) => `Unpin ${name}`,
   noMatches: 'No apps match these filters',

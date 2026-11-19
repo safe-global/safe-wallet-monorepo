@@ -3,7 +3,7 @@ import { isOptimizedForBatchTransactions } from '@/components/safe-apps/utils'
 
 export type Job = 'grow' | 'trade' | 'pay' | 'govern' | 'build' | 'more'
 export type BuiltIn = 'treasury' | 'swap' | 'bridge'
-export type AppBadge = 'built-in' | 'safe'
+export type AppBadge = 'safe'
 export type AppsGroupBy = 'job' | 'network' | 'pinned'
 
 export type AppRow = {
@@ -89,11 +89,10 @@ export const BUILT_INS: AppRow[] = [
   {
     id: 'built-in-treasury',
     builtIn: 'treasury',
-    name: 'Treasury',
+    name: 'Invest',
     does: 'Put idle funds to work in vetted yield',
     job: 'grow',
     chainIds: BUILT_IN_CHAINS,
-    badge: 'built-in',
   },
   {
     id: 'built-in-swap',
@@ -102,7 +101,6 @@ export const BUILT_INS: AppRow[] = [
     does: 'Swap tokens at the best route',
     job: 'trade',
     chainIds: BUILT_IN_CHAINS,
-    badge: 'built-in',
   },
   {
     id: 'built-in-bridge',
@@ -111,7 +109,6 @@ export const BUILT_INS: AppRow[] = [
     does: 'Move funds to this Safe on another network',
     job: 'trade',
     chainIds: BUILT_IN_CHAINS,
-    badge: 'built-in',
   },
 ]
 
@@ -194,10 +191,10 @@ export const groupApps = (
     jobTitle: (job: Job) => string
     chainName: (chainId: string) => string
     currentChainId: string
-    titles: { pinned: string; others: string; custom: string }
+    titles: { safe: string; pinned: string; others: string; custom: string }
   },
 ): AppGroup[] => {
-  const listed = rows.filter((row) => !row.custom)
+  const listed = rows.filter((row) => !row.custom && !row.builtIn)
   const isPinned = (row: AppRow) => Boolean(row.app && pinnedIds.has(row.app.id))
   const groups: AppGroup[] =
     groupBy === 'job'
@@ -208,8 +205,9 @@ export const groupApps = (
             { key: 'pinned', title: titles.pinned, rows: listed.filter(isPinned) },
             { key: 'others', title: titles.others, rows: listed.filter((row) => !isPinned(row)) },
           ]
+  const safe = { key: 'safe', title: titles.safe, rows: rows.filter((row) => row.builtIn) }
   const custom = { key: 'custom', title: titles.custom, rows: rows.filter((row) => row.custom) }
-  return [...groups, custom]
+  return [safe, ...groups, custom]
     .filter((group) => group.rows.length > 0)
     .map((group) => ({ ...group, rows: [...group.rows].sort(byRank) }))
 }

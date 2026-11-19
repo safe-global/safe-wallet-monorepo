@@ -5,7 +5,6 @@ import type { SafeApp } from '@safe-global/store/gateway/AUTO_GENERATED/safe-app
 import { Button } from '@safe-global/views/components/ui/button'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { AddCustomAppModal } from '@/components/safe-apps/AddCustomAppModal'
-import SafeAppPreviewDrawer from '@/components/safe-apps/SafeAppPreviewDrawer'
 import SafeAppsZeroResultsPlaceholder from '@/components/safe-apps/SafeAppsZeroResultsPlaceholder'
 import { getSafeAppUrl } from '@/components/safe-apps/SafeAppCard'
 import { getUniqueTags } from '@/components/safe-apps/utils'
@@ -13,7 +12,6 @@ import { AppRoutes } from '@/config/routes'
 import useChainId from '@/hooks/useChainId'
 import useChains from '@/hooks/useChains'
 import { useOpenedSafeApps } from '@/hooks/safe-apps/useOpenedSafeApps'
-import useSafeAppPreviewDrawer from '@/hooks/safe-apps/useSafeAppPreviewDrawer'
 import { useSafeLinkQuery } from '@/hooks/useSafeLinkQuery'
 import { trackSafeAppEvent } from '@/services/analytics'
 import { SAFE_APPS_EVENTS, SAFE_APPS_LABELS } from '@/services/analytics/events/safeApps'
@@ -26,6 +24,7 @@ import { SetUpInvestmentFlow } from '../../components/SetUpInvestmentStepper'
 import { buildRows, groupApps, type AppRow, type AppsGroupBy } from '../catalogue'
 import type { AppsV1Config, AppsView } from '../context'
 import { APPS_V1_COPY } from '../copy'
+import { AppPreviewDrawer } from './AppPreviewDrawer'
 import { AppsGrid } from './AppsGrid'
 import { AppsTable } from './AppsTable'
 import { AppsToolbar } from './AppsToolbar'
@@ -71,7 +70,7 @@ export const AppsV1View = ({
   const chainId = useChainId()
   const { configs } = useChains()
   const { openedSafeAppIds } = useOpenedSafeApps()
-  const { isPreviewDrawerOpen, previewDrawerApp, openPreviewDrawer, closePreviewDrawer } = useSafeAppPreviewDrawer()
+  const [previewRow, setPreviewRow] = useState<AppRow | null>(null)
   const [groupBy, setGroupBy] = useState<AppsGroupBy>('job')
   const [view, setView] = useState<AppsView>(config.view)
   const [hubTab, setHubTab] = useState<HubTab>('swap')
@@ -103,12 +102,15 @@ export const AppsV1View = ({
     })
   }
 
+  const previewList = useMemo(() => groups.flatMap((group) => group.rows).filter((row) => row.app), [groups])
+  const openPreview = (app: SafeApp) => setPreviewRow(previewList.find((row) => row.app?.id === app.id) ?? null)
+
   const isKnown = (app: SafeApp) => app.id < 1 || openedSafeAppIds.includes(app.id)
 
   const onClickApp = (event: SyntheticEvent, app: SafeApp) => {
     if (isKnown(app)) return launch(app)
     event.preventDefault()
-    openPreviewDrawer(app)
+    openPreview(app)
   }
 
   const openBuiltIn = (row: AppRow) => {
@@ -122,7 +124,7 @@ export const AppsV1View = ({
     }
   }
 
-  const onSelect = (row: AppRow) => (row.app ? openPreviewDrawer(row.app) : openBuiltIn(row))
+  const onSelect = (row: AppRow) => (row.app ? setPreviewRow(row) : openBuiltIn(row))
 
   const onOpen = (row: AppRow) => {
     if (!row.app) return openBuiltIn(row)
@@ -173,19 +175,22 @@ export const AppsV1View = ({
           onOpen={onOpen}
           onTogglePin={togglePin}
           onClickApp={onClickApp}
-          onPreview={openPreviewDrawer}
+          onPreview={openPreview}
           onRemoveCustom={onRemoveCustom}
         />
       )}
 
       {query && groups.length === 0 && <SafeAppsZeroResultsPlaceholder searchQuery={query} />}
 
-      <SafeAppPreviewDrawer
-        isOpen={isPreviewDrawerOpen}
-        safeApp={previewDrawerApp}
-        isBookmarked={previewDrawerApp && pinnedIds.has(previewDrawerApp.id)}
-        onClose={closePreviewDrawer}
-        onBookmark={onTogglePin}
+      <AppPreviewDrawer
+        row={previewRow}
+        list={previewList}
+        isPinned={isPinned}
+        onTogglePin={togglePin}
+        onNavigate={setPreviewRow}
+        onOpen={onOpen}
+        onClose={() => setPreviewRow(null)}
+        chainName={chainName}
       />
 
       <AddCustomAppModal

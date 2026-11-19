@@ -28,10 +28,10 @@ export const AppIcon = ({ row, size = 32 }: { row: AppRow; size?: number }) => {
   )
 }
 
-export const AppBadge = ({ row }: { row: AppRow }) =>
-  row.badge ? (
-    <Badge variant={row.badge === 'built-in' ? 'brand' : 'subtle'}>{APPS_V1_COPY.badges[row.badge]}</Badge>
-  ) : null
+export const AppBadge = ({ row }: { row: AppRow }) => {
+  if (row.builtIn) return <Badge variant="brand">{APPS_V1_COPY.builtIn.badge[row.builtIn]}</Badge>
+  return row.badge === 'safe' ? <Badge variant="subtle">{APPS_V1_COPY.badges.safe}</Badge> : null
+}
 
 export const NetworkLogos = ({ chainIds, chainName }: { chainIds: string[]; chainName: (id: string) => string }) => {
   const extra = chainIds.length - MAX_LOGOS
