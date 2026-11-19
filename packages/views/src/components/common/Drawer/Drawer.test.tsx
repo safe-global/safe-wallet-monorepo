@@ -235,10 +235,19 @@ describe('Drawer', () => {
   })
 
   describe('resize', () => {
-    const renderResizable = (props: { open?: boolean; resizable?: boolean; expandable?: boolean } = {}) => {
-      const { open = true, resizable = true, expandable = false } = props
+    const renderResizable = (
+      props: { open?: boolean; resizable?: boolean; expandable?: boolean; size?: 'md' | 'lg' } = {},
+    ) => {
+      const { open = true, resizable = true, expandable = false, size } = props
       return (
-        <Drawer open={open} onClose={jest.fn()} resizable={resizable} expandable={expandable} ariaLabel="Transaction">
+        <Drawer
+          open={open}
+          onClose={jest.fn()}
+          resizable={resizable}
+          expandable={expandable}
+          size={size}
+          ariaLabel="Transaction"
+        >
           <DrawerHeader title="Send 1,250 USDC" />
         </Drawer>
       )
@@ -285,6 +294,43 @@ describe('Drawer', () => {
       fireEvent.pointerMove(handle, { clientX: 300, pointerId: 1 })
 
       expect(handle).toHaveAttribute('aria-valuenow', '540')
+    })
+
+    it('ignores a drag that starts with any button but the main one, and stops on a cancelled pointer', () => {
+      render(renderResizable())
+
+      const handle = screen.getByRole('separator', { name: 'Resize panel' })
+
+      fireEvent.pointerDown(handle, { button: 2, clientX: 600, pointerId: 1 })
+      fireEvent.pointerMove(handle, { clientX: 500, pointerId: 1 })
+
+      expect(handle).toHaveAttribute('aria-valuenow', '440')
+
+      fireEvent.pointerDown(handle, { button: 0, clientX: 600, pointerId: 1 })
+      fireEvent.pointerCancel(handle, { pointerId: 1 })
+      fireEvent.pointerMove(handle, { clientX: 500, pointerId: 1 })
+
+      expect(handle).toHaveAttribute('aria-valuenow', '440')
+    })
+
+    it.each([
+      ['md', 440],
+      ['lg', 700],
+    ] as const)('starts the %s handle at the width the panel renders at', (size, width) => {
+      render(renderResizable({ size }))
+
+      expect(screen.getByLabelText('Transaction')).toHaveClass(`data-[side=right]:w-[${width}px]`)
+      expect(screen.getByRole('separator', { name: 'Resize panel' })).toHaveAttribute('aria-valuenow', String(width))
+    })
+
+    it('keeps the same gutter to the window as the floating panel', () => {
+      render(renderResizable())
+
+      expect(screen.getByLabelText('Transaction')).toHaveClass('max-w-[calc(100vw-24px)]!')
+      expect(screen.getByRole('separator', { name: 'Resize panel' })).toHaveAttribute(
+        'aria-valuemax',
+        String(window.innerWidth - 24),
+      )
     })
 
     describe('when the window changes size', () => {
