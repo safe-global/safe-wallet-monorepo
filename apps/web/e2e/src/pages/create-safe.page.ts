@@ -23,6 +23,8 @@ export class CreateSafePage {
   readonly activateButton: Locator
   readonly confirmActivationButton: Locator
   readonly relayMethod: Locator
+  readonly payNowOption: Locator
+  readonly walletMethod: Locator
   readonly activationSection: Locator
   readonly removeNetworkIcon: Locator
   readonly networkInput: Locator
@@ -37,6 +39,9 @@ export class CreateSafePage {
     this.activateButton = page.getByTestId('activate-account-btn-cf').first()
     this.confirmActivationButton = page.getByTestId('activate-account-flow-btn')
     this.relayMethod = page.getByTestId('relay-execution-method').first()
+    this.payNowOption = page.getByTestId('pay-now-execution-method')
+    // The "Pay later" option shares this test ID
+    this.walletMethod = page.getByTestId('connected-wallet-execution-method').filter({ hasText: 'Connected wallet' })
     this.activationSection = page.getByTestId('activation-section')
     this.removeNetworkIcon = page.getByTestId('CancelIcon')
     this.networkInput = page.getByRole('combobox').first()
@@ -59,6 +64,25 @@ export class CreateSafePage {
     // A pay-later Safe needs a Workspace session
     await this.signInToWorkspaceButton.click()
     await this.signInToWorkspaceButton.waitFor({ state: 'hidden' })
+    return this.submitCreation()
+  }
+
+  /**
+   * Create a 1/1 Safe of the connected wallet on Sepolia that is deployed at once, with the gas paid by `payer`.
+   * Returns the address of the new Safe once the app reports it as indexed.
+   */
+  async createPayNowSafe(payer: 'relay' | 'wallet'): Promise<string> {
+    await this.page.goto('/new-safe/create?chain=sep')
+    await this.nextButton.click()
+    await this.nextButton.click()
+    await this.payNowOption.click()
+    // Both options show only once the owners' relays have loaded; before that, the wallet pays
+    await (payer === 'relay' ? this.relayMethod : this.walletMethod).click()
+    return this.submitCreation()
+  }
+
+  /** Click "Create account" on the review step and wait for the dashboard of the new Safe */
+  private async submitCreation(): Promise<string> {
     await this.reviewNextButton.click()
     await this.letsGoButton.click({ timeout: LETS_GO_TIMEOUT_MS })
     await this.page.waitForURL(/[?&]safe=sep:0x[0-9a-fA-F]{40}/)
