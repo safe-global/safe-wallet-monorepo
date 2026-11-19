@@ -279,3 +279,33 @@ export const LongTitle: Story = {
     ),
   },
 }
+
+/** The expand button fills the screen; Escape steps back out before it closes. The position shows while full screen. */
+export const Expandable: Story = {
+  args: {
+    ariaLabel: 'Transaction 3 of 12',
+    expandable: true,
+    children: (
+      <>
+        <DrawerHeader
+          media={iconTile}
+          title="Send 1,250 USDC"
+          subtitle="Nonce #42 · Ethereum"
+          navigation={{ onPrevious: () => {}, onNext: () => {}, hasPrevious: true, hasNext: true, position: '3 of 12' }}
+        />
+        <DrawerBody>
+          <Paragraphs count={12} />
+        </DrawerBody>
+        <DrawerFooter>
+          <Button className="w-full">Sign</Button>
+        </DrawerFooter>
+      </>
+    ),
+  },
+}
+
+/** Phones always get the full screen, so there is no expand button. */
+export const Phone: Story = {
+  ...Expandable,
+  parameters: { viewport: { defaultViewport: 'mobile' } },
+}
