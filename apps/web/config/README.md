@@ -46,6 +46,10 @@ give the reason in
 [`released-without-e2e.json`](../e2e/environment/released-without-e2e.json), which QA or
 the web team must approve.
 
+On the PR that releases a flag, the isolated E2E workflow runs the covering specs 5
+times (the `playwright burnin` job). A failure fails `Isolated E2E result`. The workflow
+also posts a "Flag release checklist" comment for the reviewer.
+
 After the release that contains the change, reconcile shows an `ADD`. For a
 `PER_CHAIN` flag, choose the chains in the admin or seed them with `defaultChains`.
 Changing `enabled` back to `false` makes reconcile offer to remove the row.
