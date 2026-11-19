@@ -314,12 +314,25 @@ export const AllVariants: Story = {
 export const ScriptGuardError: Story = {
   tags: ['skip-visual-test'],
   render: () => (
-    <div style={{ width: '300px' }}>
-      <SearchInput placeholder="Search or create a tag" />
-      <p className="text-muted-foreground mt-2 text-sm">The error sits below the box; the input stays in place.</p>
+    <div style={{ display: 'grid', gap: '2rem', width: '300px' }}>
+      <div>
+        <InputGroup>
+          <InputGroupAddon align="inline-start">
+            <Mail />
+          </InputGroupAddon>
+          <InputGroupInput placeholder="Email" aria-label="Email" />
+        </InputGroup>
+        <p className="text-muted-foreground mt-2 text-sm">Input group: the message sits below the box.</p>
+      </div>
+      <div>
+        <SearchInput placeholder="Search or create a tag" />
+        <p className="text-muted-foreground mt-2 text-sm">Search: only the red border, nothing moves.</p>
+      </div>
     </div>
   ),
   play: async ({ canvasElement }) => {
-    await userEvent.type(within(canvasElement).getByRole('searchbox'), '<script>')
+    const canvas = within(canvasElement)
+    await userEvent.type(canvas.getByRole('textbox', { name: 'Email' }), '<script>')
+    await userEvent.type(canvas.getByRole('searchbox'), '<script>')
   },
 }

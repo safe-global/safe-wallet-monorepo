@@ -30,15 +30,8 @@ import { Textarea } from '@safe-global/views/components/ui/textarea'
  * - InputGroupInput / InputGroupButton: see docs
  */
 
-// The nested Input's error sits below the border in reserved space, so the fixed-height row keeps the control in place
-const CONTROL_ERROR_BELOW =
-  '[&_[data-slot=field-error]]:absolute [&_[data-slot=field-error]]:inset-x-0 [&_[data-slot=field-error]]:top-full [&_[data-slot=field-error]]:truncate has-[[data-slot=field-error]]:mb-6'
-
 const inputGroupVariants = cva(
-  [
-    'border-border has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-ring/50 has-[[data-slot][aria-invalid=true]]:ring-destructive/20 has-[[data-slot][aria-invalid=true]]:border-destructive dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40 rounded-md border shadow-xs transition-[color,box-shadow] has-[[data-slot=input-group-control]:focus-visible]:ring-[3px] has-[[data-slot][aria-invalid=true]]:ring-[3px] has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3 has-[>[data-align=inline-end]]:[&>input]:pr-2 has-[>[data-align=inline-start]]:[&>input]:pl-2 [[data-slot=combobox-content]_&]:focus-within:border-inherit [[data-slot=combobox-content]_&]:focus-within:ring-0 group/input-group relative flex w-full min-w-0 items-center outline-none has-[>textarea]:h-auto',
-    CONTROL_ERROR_BELOW,
-  ],
+  'border-border has-[[data-slot=input-group-control]:focus-visible]:border-ring has-[[data-slot=input-group-control]:focus-visible]:ring-ring/50 has-[[data-slot][aria-invalid=true]]:ring-destructive/20 has-[[data-slot][aria-invalid=true]]:border-destructive dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40 rounded-md border shadow-xs transition-[color,box-shadow] has-[[data-slot=input-group-control]:focus-visible]:ring-[3px] has-[[data-slot][aria-invalid=true]]:ring-[3px] has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>[data-align=block-end]]:[&>input]:pt-3 has-[>[data-align=block-start]]:[&>input]:pb-3 has-[>[data-align=inline-end]]:[&>input]:pr-2 has-[>[data-align=inline-start]]:[&>input]:pl-2 [[data-slot=combobox-content]_&]:focus-within:border-inherit [[data-slot=combobox-content]_&]:focus-within:ring-0 group/input-group relative flex w-full min-w-0 items-center outline-none has-[>textarea]:h-auto',
   {
     variants: {
       inputSize: {
@@ -66,10 +59,18 @@ const inputGroupVariants = cva(
         // `Button variant="outline"`. Pair the two when they share a row.
         outline: 'bg-transparent',
       },
+      // Where a nested Input's error goes. `below` hangs it under the border in reserved space so the
+      // control keeps its place; `hidden` is for search boxes, whose query is never saved.
+      fieldError: {
+        below:
+          '[&_[data-slot=field-error]]:absolute [&_[data-slot=field-error]]:inset-x-0 [&_[data-slot=field-error]]:top-full [&_[data-slot=field-error]]:truncate has-[[data-slot=field-error]]:mb-6',
+        hidden: '[&_[data-slot=field-error]]:hidden',
+      },
     },
     defaultVariants: {
       inputSize: 'default',
       variant: 'default',
+      fieldError: 'below',
     },
   },
 )
@@ -78,6 +79,7 @@ function InputGroup({
   className,
   inputSize,
   variant,
+  fieldError,
   ...props
 }: React.ComponentProps<'div'> & VariantProps<typeof inputGroupVariants>) {
   return (
@@ -86,7 +88,7 @@ function InputGroup({
       data-input-size={inputSize ?? 'default'}
       data-variant={variant ?? 'default'}
       role="group"
-      className={cn(inputGroupVariants({ inputSize, variant }), className)}
+      className={cn(inputGroupVariants({ inputSize, variant, fieldError }), className)}
       {...props}
     />
   )
