@@ -25,7 +25,7 @@ const SIGNED_WITH_QUOTED_FEES = {
 }
 
 test.describe('Pay from Safe', { tag: '@e2e' }, () => {
-  test('should execute a transfer of a 1/1 Safe whose owner has no ETH, with the gas refunded from the Safe', async ({
+  test('should execute a transfer of a 1/1 Safe whose owner has no ETH, with the gas refunded from the Safe, and show it as paid from the Safe account in the history', async ({
     safePage,
     safeApiClient,
     journey,
@@ -54,6 +54,10 @@ test.describe('Pay from Safe', { tag: '@e2e' }, () => {
     expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
     expect(await balanceOf(journey.env, safe.address)).toBe(safeBalance - parseEther(AMOUNT) - refund)
     expect(await balanceOf(journey.env, owner)).toBe(0n)
+    const history = new TxHistoryPage(safePage)
+    await history.goto(safe.prefixedAddress)
+    await history.expand(history.transactionsLabelled('Sent'))
+    await expect(history.feesPayer).toHaveText('Paid from Safe account')
   })
 
   test('should keep the Safe as the payer for the owner who confirms and executes a 2/2 transfer without ETH', async ({
@@ -126,31 +130,5 @@ test.describe('Pay from Safe', { tag: '@e2e' }, () => {
     expect(refund).toBeGreaterThan(0n)
     expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
     expect(await balanceOf(journey.env, safe.address)).toBe(safeBalance - parseEther(AMOUNT) - refund)
-  })
-
-  test('should show the fees as paid from the Safe account in the history of a transfer that the Safe paid for', async ({
-    safePage,
-    safeApiClient,
-    journey,
-  }) => {
-    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
-
-    const review = new TxReviewPage(safePage)
-    await new SendTokensPage(safePage).reviewTransfer(safe, {
-      recipient: Wallet.createRandom().address,
-      amount: AMOUNT,
-    })
-    await review.payFeesFromSafe()
-    await review.sign()
-    await review.executeButton.click()
-    await review.waitForExecution()
-    await expect
-      .poll(() => safeApiClient.findExecutedTransaction(safe.address, 0))
-      .toMatchObject(SIGNED_WITH_QUOTED_FEES)
-    const history = new TxHistoryPage(safePage)
-    await history.goto(safe.prefixedAddress)
-    await history.expand(history.transactionsLabelled('Sent'))
-
-    await expect(history.feesPayer).toHaveText('Paid from Safe account')
   })
 })
