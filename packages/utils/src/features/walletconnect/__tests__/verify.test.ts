@@ -26,6 +26,10 @@ describe('getAttestedOrigin', () => {
     expect(getAttestedOrigin({ validation: 'VALID', origin })).toBe(origin)
   })
 
+  it('returns the origin of a validated dApp flagged as a scam', () => {
+    expect(getAttestedOrigin({ validation: 'VALID', isScam: true, origin })).toBe(origin)
+  })
+
   it('returns nothing when the origin does not match the dApp', () => {
     expect(getAttestedOrigin({ validation: 'INVALID', origin })).toBeUndefined()
   })
