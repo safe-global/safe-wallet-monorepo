@@ -8,6 +8,7 @@ import {
   InputGroupTextarea,
 } from '../input-group'
 import { Search, Mail, Send } from 'lucide-react'
+import { expect, userEvent, within } from 'storybook/test'
 import { SearchInput } from '../search-input'
 
 /**
@@ -308,4 +309,43 @@ export const AllVariants: Story = {
       </div>
     </div>
   ),
+}
+
+export const ScriptGuardError: Story = {
+  render: () => (
+    <div style={{ display: 'grid', gap: '2rem', width: '300px' }}>
+      <div>
+        <InputGroup>
+          <InputGroupAddon align="inline-start">
+            <Mail />
+          </InputGroupAddon>
+          <InputGroupInput placeholder="Email" aria-label="Email" />
+        </InputGroup>
+        <p className="text-muted-foreground mt-2 text-sm">Input group: the message sits below the box.</p>
+      </div>
+      <div>
+        <SearchInput placeholder="Search or create a tag" />
+        <p className="text-muted-foreground mt-2 text-sm">Search: only the red border, nothing moves.</p>
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement)
+    const email = canvas.getByRole('textbox', { name: 'Email' })
+    const search = canvas.getByRole('searchbox')
+    await userEvent.type(email, '<script>')
+    await userEvent.type(search, '<script>')
+    search.blur()
+
+    const group = email.closest('[data-slot=input-group]')
+    if (!group) throw new Error('Email input is not inside an input group')
+    const box = group.getBoundingClientRect()
+    const field = email.getBoundingClientRect()
+    const messages = canvas.getAllByRole('alert')
+
+    await expect(messages).toHaveLength(1)
+    await expect(messages[0].getBoundingClientRect().top).toBeGreaterThanOrEqual(box.bottom)
+    await expect(field.top).toBeGreaterThanOrEqual(box.top)
+    await expect(field.bottom).toBeLessThanOrEqual(box.bottom)
+  },
 }

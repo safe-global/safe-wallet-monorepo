@@ -1,0 +1,204 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.paymentRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.paymentRowGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.paymentSourceSelector {
+  display: inline-flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 32px;
+  width: 87px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  border: 1px solid var(--color-border-light);
+  background-color: var(--color-background-paper);
+  cursor: pointer;
+}
+
+.gasTokenSelector {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 2px 6px 2px 4px;
+  border-radius: 16px;
+  border: 1px solid var(--color-border-light);
+  background-color: var(--color-background-paper);
+  cursor: pointer;
+}
+
+.gasTokenSelectorLocked {
+  cursor: default;
+  padding-right: var(--space-1);
+}
+
+.tokenLockIcon {
+  width: 14px;
+  height: 14px;
+  margin-left: 2px;
+  color: var(--color-text-secondary);
+}
+
+.selectorPopoverPaperGasToken {
+  width: 102px;
+}
+
+.selectorMenuItem {
+  border-radius: 14px;
+  min-height: 28px;
+  padding: 0 12px;
+}
+
+.gasTokenMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 40px;
+  padding: 2px 4px;
+}
+
+.gasTokenMenuItemText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.selectorCaret {
+  width: 16px;
+  height: 16px;
+  color: var(--color-text-secondary);
+  transition: transform 120ms ease;
+}
+
+.tooltipIcon {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+.totalOutgoing {
+  background-color: var(--color-background-skeleton);
+  border-radius: 8px;
+  padding: var(--space-1) var(--space-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.totalOutgoingValue {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.card {
+  overflow: hidden;
+  border: 1px solid var(--color-border-light);
+  border-radius: 8px;
+}
+
+/* Design: 56px top and bottom bands (32px control + 12px), 8px inside the middle. */
+.payerRow {
+  min-height: 56px;
+  padding: 12px var(--space-2);
+  gap: var(--space-1);
+  flex-wrap: wrap;
+}
+
+.payerPill {
+  width: auto;
+  gap: var(--space-1);
+  white-space: nowrap;
+}
+
+.lockIcon {
+  width: 14px;
+  height: 14px;
+  color: var(--color-text-secondary);
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+}
+
+.feeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 40px;
+}
+
+.feeLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.feeValue {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.feeAmount {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.totalOutgoingWrap {
+  margin: 0 calc(-1 * var(--space-1));
+}
+
+.totalOutgoingWrap > div {
+  padding: var(--space-1);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  border-top: 1px solid var(--color-border-light);
+}
+
+.footer > * {
+  width: 100%;
+}
+
+.footer [data-testid='sponsored-txs-counter'] {
+  background: transparent;
+}
+
+.upsell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px var(--space-2);
+}

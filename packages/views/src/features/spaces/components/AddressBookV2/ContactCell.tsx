@@ -9,6 +9,9 @@ import GroupedAddress from './GroupedAddress'
 
 const COPIED_MS = 1500
 
+// Avatar, full address in monospace, copy and explorer buttons
+export const CONTACT_CELL_MIN_WIDTH = 445
+
 /** A neutral stand-in for the identicon, derived from the address so rows stay distinguishable. */
 export const AddressAvatar = ({ address, size = 24 }: { address: string; size?: number }) => {
   const hue = parseInt(address.slice(2, 6), 16) % 360
