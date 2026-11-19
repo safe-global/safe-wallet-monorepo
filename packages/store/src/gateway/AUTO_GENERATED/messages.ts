@@ -162,8 +162,8 @@ export type MessagePage = {
   previous?: string | null
   results: (MessageItem | DateLabel)[]
 }
-export type MessageDeclaredAttributionDto = {
-  /** Known values: NATIVE_TRANSFER, NATIVE_BATCH, SAFE_APP, WALLET_CONNECT, WIDGET, DIRECT, CLI, MCP. Truncated to 64 characters. */
+export type DeclaredAttributionDto = {
+  /** Where the user started the request. Known values: NATIVE_TRANSFER, NATIVE_BATCH, SAFE_APP, WALLET_CONNECT, WIDGET, DIRECT, MCP, CLI. Truncated to 64 characters. */
   channel?: string | null
   /** App name. Truncated to 256 characters. */
   appName?: string | null
@@ -177,8 +177,8 @@ export type CreateMessageDto = {
   safeAppId?: number | null
   signature: string
   origin?: string | null
-  /** Client-declared attribution. */
-  declared?: MessageDeclaredAttributionDto | null
+  /** Where the request came from, as reported by the client. */
+  declared?: DeclaredAttributionDto | null
 }
 export type UpdateMessageSignatureDto = {
   signature: string

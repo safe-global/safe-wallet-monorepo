@@ -11687,13 +11687,13 @@
           "results"
         ]
       },
-      "MessageDeclaredAttributionDto": {
+      "DeclaredAttributionDto": {
         "type": "object",
         "properties": {
           "channel": {
             "type": "string",
             "nullable": true,
-            "description": "Known values: NATIVE_TRANSFER, NATIVE_BATCH, SAFE_APP, WALLET_CONNECT, WIDGET, DIRECT, CLI, MCP. Truncated to 64 characters."
+            "description": "Where the user started the request. Known values: NATIVE_TRANSFER, NATIVE_BATCH, SAFE_APP, WALLET_CONNECT, WIDGET, DIRECT, MCP, CLI. Truncated to 64 characters."
           },
           "appName": {
             "type": "string",
@@ -11739,11 +11739,11 @@
           },
           "declared": {
             "nullable": true,
-            "description": "Client-declared attribution.",
+            "description": "Where the request came from, as reported by the client.",
             "type": "object",
             "allOf": [
               {
-                "$ref": "#/components/schemas/MessageDeclaredAttributionDto"
+                "$ref": "#/components/schemas/DeclaredAttributionDto"
               }
             ]
           }
@@ -19380,31 +19380,6 @@
           "nonce"
         ]
       },
-      "DeclaredAttributionDto": {
-        "type": "object",
-        "properties": {
-          "channel": {
-            "type": "string",
-            "nullable": true,
-            "description": "Known values: NATIVE_TRANSFER, NATIVE_BATCH, SAFE_APP, WALLET_CONNECT, WIDGET, DIRECT, CLI, MCP. Truncated to 64 characters."
-          },
-          "appName": {
-            "type": "string",
-            "nullable": true,
-            "description": "App name. Truncated to 256 characters."
-          },
-          "appUrl": {
-            "type": "string",
-            "nullable": true,
-            "description": "App origin and path. Truncated to 2048 characters."
-          },
-          "appId": {
-            "type": "number",
-            "nullable": true,
-            "description": "ID of a listed Safe App."
-          }
-        }
-      },
       "ProposeTransactionDto": {
         "type": "object",
         "properties": {
@@ -19471,7 +19446,7 @@
           },
           "declared": {
             "nullable": true,
-            "description": "Client-declared attribution.",
+            "description": "Where the request came from, as reported by the client.",
             "type": "object",
             "allOf": [
               {
