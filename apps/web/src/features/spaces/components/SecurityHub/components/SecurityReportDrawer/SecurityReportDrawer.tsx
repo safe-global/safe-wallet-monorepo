@@ -3,10 +3,8 @@ import type { ScanContext, ScanResult } from '@/features/security/public/types'
 import useSecurityScan from '@/features/security/public/hooks/useSecurityScan'
 import { useChain } from '@/hooks/useChains'
 import { Drawer } from '@safe-global/views/components/common/Drawer/Drawer'
-import { DrawerBody } from '@/components/common/Drawer/components/DrawerBody'
+import { DrawerBody } from '@safe-global/views/components/common/Drawer/components/DrawerBody'
 import { DrawerHeader } from '@safe-global/views/components/common/Drawer/components/DrawerHeader'
-import { DrawerSubtitle } from '@safe-global/views/components/common/Drawer/components/DrawerSubtitle'
-import { DrawerTitle } from '@safe-global/views/components/common/Drawer/components/DrawerTitle'
 import Identicon from '@safe-global/views/components/common/Identicon'
 import CopyButton from '@/components/common/CopyButton'
 import { Typography } from '@safe-global/views/components/ui/typography'
@@ -61,22 +59,18 @@ const SecurityReportDrawer = ({
       >
         {selectedSafe && (
           <>
-            <DrawerHeader>
-              <Identicon address={selectedSafe.address} size={28} />
-              <div className="min-w-0">
-                <DrawerTitle>
-                  <span title={selectedEntry?.name || selectedSafe.address}>
-                    {selectedEntry?.name || shortenAddress(selectedSafe.address)}
-                  </span>
-                </DrawerTitle>
-                <DrawerSubtitle>
-                  <Typography variant="paragraph-mini" className="text-[10px] text-muted-foreground">
+            <DrawerHeader
+              media={<Identicon address={selectedSafe.address} size={36} />}
+              title={selectedEntry?.name || shortenAddress(selectedSafe.address)}
+              subtitle={
+                <>
+                  <Typography variant="paragraph-mini" className="font-mono text-muted-foreground">
                     {shortenAddress(selectedSafe.address)}
                   </Typography>
                   <CopyButton text={selectedSafe.address} className="!p-0.5 text-muted-foreground [&_svg]:!size-3" />
-                </DrawerSubtitle>
-              </div>
-            </DrawerHeader>
+                </>
+              }
+            />
 
             <DrawerBody>
               <SecurityDrawerContent

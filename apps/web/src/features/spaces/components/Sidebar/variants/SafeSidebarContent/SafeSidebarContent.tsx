@@ -17,6 +17,7 @@ import type {
 } from '@safe-global/views/features/spaces/components/Sidebar/types'
 import { useSafeQueryParam } from '@/hooks/useSafeAddressFromUrl'
 import { useUrlSpaceId, withSpaceId } from '@/hooks/useUrlSpaceId'
+import { useDefiV1 } from '@/features/earn/defiV1/context'
 
 const geoBlockedRoutes = [AppRoutes.bridge, AppRoutes.swap, AppRoutes.stake, AppRoutes.earn]
 
@@ -54,13 +55,18 @@ export const SafeSidebarContent = ({
     [spaceId, safeAddress, queueSize],
   )
 
+  const defiV1 = useDefiV1()
+  const earnLabel = defiV1 ? (defiV1.framing === 'treasury' ? 'Treasury' : 'DeFi') : undefined
+
   const isItemDisabled = useCallback(
     (item: SidebarItemConfig) => {
       if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) return true
       if (!safe.deployed && UNDEPLOYED_SAFE_BLOCKED_ROUTES.includes(item.href)) return true
+      if (earnLabel && item.href === AppRoutes.earn)
+        return !isRouteEnabled(AppRoutes.stake, chain) && !isRouteEnabled(item.href, chain)
       return !isRouteEnabled(item.href, chain)
     },
-    [isBlockedCountry, safe.deployed, chain],
+    [isBlockedCountry, safe.deployed, chain, earnLabel],
   )
 
   const isItemActive = useCallback((item: SidebarItemConfig, pathname: string) => {
@@ -78,19 +84,25 @@ export const SafeSidebarContent = ({
 
   // Filter visible items by geoblocking and chain features
   const visibleMainNavigation = useMemo(() => {
-    return safeMainNavigation.filter((item) => {
+    const items = safeMainNavigation.filter((item) => {
       if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) return false
       return isRouteEnabled(item.href, chain)
     })
-  }, [chain, isBlockedCountry])
+    const earn = safeDefiGroup.items.find((item) => item.href === AppRoutes.earn)
+    const hasYield = isRouteEnabled(AppRoutes.earn, chain) || isRouteEnabled(AppRoutes.stake, chain)
+    if (!earnLabel || !earn || !hasYield || isBlockedCountry) return items
+    const after = items.findIndex((item) => item.href === AppRoutes.transactions.history) + 1
+    return [...items.slice(0, after), { ...earn, label: earnLabel }, ...items.slice(after)]
+  }, [chain, isBlockedCountry, earnLabel])
 
   const visibleDefiGroup = useMemo(() => {
     const filteredItems = safeDefiGroup.items.filter((item) => {
+      if (earnLabel && (item.href === AppRoutes.earn || item.href === AppRoutes.stake)) return false
       if (isBlockedCountry && geoBlockedRoutes.includes(item.href)) return false
       return isRouteEnabled(item.href, chain)
     })
-    return { ...safeDefiGroup, items: filteredItems }
-  }, [chain, isBlockedCountry])
+    return { ...safeDefiGroup, label: earnLabel ? 'Trade' : safeDefiGroup.label, items: filteredItems }
+  }, [chain, isBlockedCountry, earnLabel])
   // tx queue badge
 
   const mainNavWithBadges = useMemo(() => {

@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 import type { LinkProps } from 'next/link'
 import { Drawer } from '@safe-global/views/components/common/Drawer/Drawer'
-import { DrawerBody } from '@/components/common/Drawer/components/DrawerBody'
+import { DrawerBody } from '@safe-global/views/components/common/Drawer/components/DrawerBody'
 import { useChain } from '@/hooks/useChains'
 import { getBlockExplorerLink } from '@/utils/chains'
 import { getPolicyIcon } from '@safe-global/views/features/spaces/components/Policies/utils/policyIcon'

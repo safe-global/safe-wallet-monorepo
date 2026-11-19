@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react'
 import { cn } from '@safe-global/views/utils/cn'
-import { SCROLL_AREA } from '@/utils/styles'
+import { SCROLL_AREA } from '@safe-global/views/utils/styles'
 import css from './DrawerBody.module.css'
 
 export const DrawerBody = ({ children }: { children?: ReactNode }): ReactElement => (
