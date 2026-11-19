@@ -7,7 +7,6 @@ export type DrawerSectionProps = {
   title: ReactNode
   rightNode?: ReactNode
   children?: ReactNode
-  /** Makes the title a toggle that shows and hides the content. */
   collapsible?: boolean
   /** Starting state when collapsible and uncontrolled. */
   defaultOpen?: boolean
