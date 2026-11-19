@@ -87,7 +87,7 @@ exports[`./SecurityReportDrawer.stories OpenWithContext 1`] = `
             <div
               class="flex min-w-0 flex-1 flex-col gap-0.5"
             >
-              <div
+              <h2
                 class="m-0 text-base font-semibold min-w-0 leading-tight"
                 data-slot="typography"
                 data-variant="paragraph-bold"
@@ -97,7 +97,7 @@ exports[`./SecurityReportDrawer.stories OpenWithContext 1`] = `
                 >
                   Operations Vault
                 </span>
-              </div>
+              </h2>
               <div
                 class="flex min-w-0 items-center gap-1 text-xs text-muted-foreground tabular-nums"
               >

@@ -162,28 +162,52 @@ export const OnlyTitle: Story = {
   },
 }
 
-export const NoHeader: Story = {
-  args: {
-    ariaLabel: 'Headerless drawer',
-    children: (
-      <DrawerBody>
-        <Paragraphs count={3} />
-      </DrawerBody>
-    ),
-  },
-}
+const payments: [string, number][] = [
+  ['Engineering payroll', 18400],
+  ['Design payroll', 6200],
+  ['Operations payroll', 4800],
+  ['Audit retainer', 5000],
+  ['Legal retainer', 2500],
+  ['Cloud hosting', 1350],
+  ['Data provider', 900],
+  ['Grants: tooling', 3000],
+  ['Grants: research', 2000],
+  ['Office rent', 2100],
+  ['Recruiting', 750],
+  ['Community events', 600],
+  ['Bug bounty', 500],
+  ['Insurance', 500],
+]
+const usdc = (amount: number) => `${amount.toLocaleString('en-US')} USDC`
 
+/** A batch long enough to scroll: the body scrolls while the header and footer stay put. */
 export const LongContent: Story = {
   args: {
-    ariaLabel: 'Scrolling drawer',
+    ariaLabel: 'Batch transaction',
     children: (
       <>
-        <DrawerHeader title="Scrolling body" />
+        <DrawerHeader title={`Batch of ${payments.length} payments`} subtitle="Nonce #43 · Ethereum" />
         <DrawerBody>
-          <Paragraphs count={30} />
+          <div className="flex flex-col gap-6">
+            <DrawerSection title="Summary">
+              <DrawerList
+                items={[
+                  { label: 'Total', content: usdc(payments.reduce((sum, [, amount]) => sum + amount, 0)) },
+                  { label: 'Payments', content: payments.length },
+                  { label: 'Network', content: 'Ethereum' },
+                ]}
+              />
+            </DrawerSection>
+            <DrawerSection title="Payments">
+              <DrawerList items={payments.map(([label, amount]) => ({ label, content: usdc(amount) }))} />
+            </DrawerSection>
+          </div>
         </DrawerBody>
         <DrawerFooter>
-          <Button className="w-full">Submit delegation</Button>
+          <DrawerActions
+            secondary={<Button variant="secondary">Reject</Button>}
+            primary={<Button>Review and sign</Button>}
+          />
         </DrawerFooter>
       </>
     ),
