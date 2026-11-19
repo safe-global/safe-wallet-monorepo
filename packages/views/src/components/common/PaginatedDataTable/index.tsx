@@ -44,6 +44,8 @@ const COLUMN_WIDTHS = {
   '35%': 'md:w-[35%]',
   '40%': 'md:w-[40%]',
   fit: 'md:w-[var(--col-min-w)]',
+  // Sized from the measured container below; until then it shares the leftover width like an unsized column
+  share: '',
 } as const
 
 export type ColumnWidth = keyof typeof COLUMN_WIDTHS
@@ -63,7 +65,10 @@ export type DataTableColumn<T> = {
   align?: 'start' | 'center' | 'end'
   /** Visual emphasis of the cell content */
   emphasis?: 'default' | 'strong'
-  /** Desktop column width, bounded to the shared scale (mobile auto-sizes); `fit` requires `minWidth` */
+  /**
+   * Desktop column width, bounded to the shared scale (mobile auto-sizes). `fit` pins the column to `minWidth`;
+   * `share` gives it `minWidth` plus an even share of the width left over. Both require `minWidth`.
+   */
   width?: ColumnWidth
   /** `secondary` columns are dropped in the compact layout (mobile viewport or too-narrow container) */
   priority?: 'essential' | 'secondary'
@@ -209,6 +214,17 @@ function PaginatedDataTable<T>({
   const isCompact = isMobile || (containerWidth !== null && containerWidth < tableMinWidth)
   const visibleColumns = isCompact ? columns.filter((column) => column.priority !== 'secondary') : columns
 
+  // The last share column stays unsized, so borders and rounding never push the table past its container
+  const shareColumns = isCompact ? [] : visibleColumns.filter((column) => column.width === 'share')
+  const spareShare =
+    containerWidth !== null && shareColumns.length > 0 ? (containerWidth - tableMinWidth) / shareColumns.length : null
+  const headStyle = (column: DataTableColumn<T>): Record<string, string> | undefined => {
+    if (isCompact) return undefined
+    const style = minWidthStyle(column)
+    if (spareShare === null || column.width !== 'share' || column === shareColumns.at(-1)) return style
+    return { ...style, width: `${(column.minWidth ?? 0) + spareShare}px` }
+  }
+
   const showDetailToggle = isCompact && Boolean(renderRowDetail)
   const totalColumns = visibleColumns.length + (showDetailToggle ? 1 : 0) + (selectable ? 1 : 0)
 
@@ -270,7 +286,7 @@ function PaginatedDataTable<T>({
                   key={column.id}
                   data-sticky={column.sticky ? '' : undefined}
                   aria-sort={column.sortValue ? ariaSortValue(direction) : undefined}
-                  style={isCompact ? undefined : minWidthStyle(column)}
+                  style={headStyle(column)}
                   className={cn(
                     tableHeadVariants({ align: column.align }),
                     hideClass(column),

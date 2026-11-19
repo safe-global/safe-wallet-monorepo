@@ -5,6 +5,8 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@s
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import PaginatedDataTable, { type DataTableColumn } from '@safe-global/views/components/common/PaginatedDataTable'
+import TruncatedText from '@safe-global/views/components/common/AccountRow/TruncatedText'
+import { cn } from '@safe-global/views/utils/cn'
 import ChainLogos from './ChainLogos'
 import ContactCell from './ContactCell'
 import RowDetail from './RowDetail'
@@ -12,20 +14,29 @@ import { describeSuggestion, type SuggestedContact, type SuggestionReason } from
 
 export type SuggestionAddLocation = 'row' | 'bulk'
 
-const ReasonText = ({ reason }: { reason: SuggestionReason }) => (
-  <span className="inline-flex min-w-0 items-center gap-1.5 text-sm" data-testid="suggestion-reason">
-    <PenLine aria-hidden="true" className="text-muted-foreground size-3.5 shrink-0" />
-    <span className="min-w-0">{describeSuggestion(reason)}</span>
+const ReasonIcon = () => <PenLine aria-hidden="true" className="text-muted-foreground size-3.5 shrink-0" />
+
+const ReasonText = ({ reason, truncate = false }: { reason: SuggestionReason; truncate?: boolean }) => (
+  <span className="flex min-w-0 items-center gap-1.5 text-sm" data-testid="suggestion-reason">
+    <ReasonIcon />
+    <span className={cn('min-w-0', truncate && 'truncate')}>{describeSuggestion(reason)}</span>
   </span>
 )
 
 const Reason = ({ reason }: { reason: SuggestionReason }) => {
-  if (reason.safes.length === 1) return <ReasonText reason={reason} />
+  if (reason.safes.length === 1) {
+    return (
+      <span className="flex min-w-0 items-center gap-1.5" data-testid="suggestion-reason">
+        <ReasonIcon />
+        <TruncatedText variant="paragraph-small" className="min-w-0" text={describeSuggestion(reason)} />
+      </span>
+    )
+  }
 
   return (
     <Tooltip>
-      <TooltipTrigger render={<span className="inline-flex min-w-0" tabIndex={0} />}>
-        <ReasonText reason={reason} />
+      <TooltipTrigger render={<span className="flex min-w-0" tabIndex={0} />}>
+        <ReasonText reason={reason} truncate />
       </TooltipTrigger>
       <TooltipContent data-testid="suggestion-reason-safes">{reason.safes.join(', ')}</TooltipContent>
     </Tooltip>
@@ -131,7 +142,7 @@ const SuggestedContacts = ({
   const actionColumn: DataTableColumn<SuggestedContact> | undefined = canAdd
     ? {
         id: 'add',
-        width: '20%',
+        width: 'fit',
         align: 'end',
         minWidth: 180,
         cell: (item, { isCompact }) => <AddButton isCompact={isCompact} onClick={() => onAdd?.([item], 'row')} />,
@@ -139,7 +150,7 @@ const SuggestedContacts = ({
     : renderRowAction
       ? {
           id: 'action',
-          width: '20%',
+          width: 'fit',
           align: 'end',
           minWidth: 180,
           cell: (item, { isCompact }) => renderRowAction(item, { isCompact }),
@@ -150,7 +161,7 @@ const SuggestedContacts = ({
     {
       id: 'chains',
       header: 'Chains',
-      width: '10%',
+      width: 'share',
       priority: 'secondary',
       minWidth: 90,
       sortValue: (item) => item.chains.length,
@@ -159,6 +170,7 @@ const SuggestedContacts = ({
     {
       id: 'reason',
       header: 'Why suggested',
+      width: 'share',
       priority: 'secondary',
       minWidth: 200,
       sortValue: (item) => describeSuggestion(item.reason).toLowerCase(),
@@ -171,8 +183,8 @@ const SuggestedContacts = ({
     {
       id: 'contact',
       header: 'Contact',
-      width: '40%',
-      minWidth: 360,
+      width: 'share',
+      minWidth: 445,
       sortValue: (item) => item.suggestedName.toLowerCase(),
       cell: (item, { isCompact }) => (
         <ContactCell

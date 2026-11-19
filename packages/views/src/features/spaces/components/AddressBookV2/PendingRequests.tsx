@@ -83,7 +83,7 @@ const PendingRequests = ({
     {
       id: 'chains',
       header: 'Chains',
-      width: '10%',
+      width: 'share',
       priority: 'secondary',
       minWidth: 90,
       sortValue: (request) => request.chains.length,
@@ -92,6 +92,7 @@ const PendingRequests = ({
     {
       id: 'requested-by',
       header: 'Requested by',
+      width: 'share',
       priority: 'secondary',
       minWidth: 140,
       sortValue: (request) => request.requestedBy?.toLowerCase() ?? null,
@@ -125,8 +126,8 @@ const PendingRequests = ({
     {
       id: 'contact',
       header: 'Contact',
-      width: '40%',
-      minWidth: 360,
+      width: 'share',
+      minWidth: 445,
       sortValue: (request) => request.name.toLowerCase(),
       cell: (request, { isCompact }) => (
         <ContactCell

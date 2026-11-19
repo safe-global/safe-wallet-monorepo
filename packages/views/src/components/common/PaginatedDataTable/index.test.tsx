@@ -94,6 +94,32 @@ describe('PaginatedDataTable', () => {
         container.restore()
       }
     })
+
+    it('gives share columns their minWidth plus an even part of the spare width', () => {
+      const container = mockContainerWidth()
+      const sharedColumns: DataTableColumn<string>[] = [
+        { id: 'first', header: 'First', width: 'share', minWidth: 300, cell: (row) => row },
+        { id: 'second', header: 'Second', width: 'share', minWidth: 100, cell: (row) => row },
+        { id: 'last', header: 'Last', width: 'share', minWidth: 100, priority: 'secondary', cell: (row) => row },
+        { id: 'fit', header: 'Fit', width: 'fit', minWidth: 60, cell: (row) => row },
+      ]
+
+      try {
+        render(<PaginatedDataTable columns={sharedColumns} rows={['a']} getRowKey={(row) => row} />)
+        container.setWidth(860)
+
+        // 860 − (300 + 100 + 100 + 60) leaves 300 spare, 100 per share column
+        expect(screen.getByRole('columnheader', { name: 'First' }).style.width).toBe('400px')
+        expect(screen.getByRole('columnheader', { name: 'Second' }).style.width).toBe('200px')
+        expect(screen.getByRole('columnheader', { name: 'Last' }).style.width).toBe('')
+        expect(screen.getByRole('columnheader', { name: 'Fit' }).style.width).toBe('')
+
+        container.setWidth(500)
+        expect(screen.getByRole('columnheader', { name: 'First' }).style.width).toBe('')
+      } finally {
+        container.restore()
+      }
+    })
   })
 
   it('pins a fit column to its minWidth and leaves unsized columns to share the rest', () => {
