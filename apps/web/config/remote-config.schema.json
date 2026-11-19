@@ -17,7 +17,7 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["key", "description", "scope"],
+        "required": ["key", "description", "scope", "enabled"],
         "additionalProperties": false,
         "properties": {
           "key": {
@@ -34,6 +34,10 @@
           "scope": {
             "enum": ["GLOBAL", "PER_CHAIN"],
             "description": "GLOBAL applies to all chains; PER_CHAIN limits to selected chains."
+          },
+          "enabled": {
+            "type": "boolean",
+            "description": "false: the code reads the flag, but reconcile does not create it. Set to true in a reviewed PR to release the flag."
           },
           "defaultChains": {
             "type": "array",
