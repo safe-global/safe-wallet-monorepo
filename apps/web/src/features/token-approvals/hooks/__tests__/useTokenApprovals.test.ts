@@ -1,8 +1,11 @@
 import { faker } from '@faker-js/faker'
+import type { JsonRpcProvider } from 'ethers'
 import { act, renderHook, waitFor } from '@/tests/test-utils'
 import { readTokenApprovals, type TokenApproval } from '@safe-global/utils/features/token-approvals/allowances'
 import { chainBuilder } from '@/tests/builders/chains'
 import { logError } from '@/services/exceptions'
+import { _clearSharedReadOnlyProviders } from '@/hooks/wallets/sharedReadOnlyProvider'
+import { initialState as settingsState } from '@/store/settingsSlice'
 import { scanApprovalHistory, type ScanOptions } from '../../services/approvalHistoryScan'
 import useTokenApprovals from '../useTokenApprovals'
 
@@ -25,6 +28,7 @@ const buildApproval = (): TokenApproval => ({
 describe('useTokenApprovals', () => {
   beforeEach(() => {
     jest.resetAllMocks()
+    _clearSharedReadOnlyProviders()
   })
 
   it('reports scanning progress, then the live approvals', async () => {
@@ -45,6 +49,22 @@ describe('useTokenApprovals', () => {
 
     expect(result.current.state).toMatchObject({ status: 'ready', approvals: [approval] })
     expect(scanApprovalHistory).toHaveBeenCalledWith(expect.objectContaining({ safeAddress: SAFE, batchSize: 10 }))
+  })
+
+  it('reads allowances through the custom RPC the user set for the chain', async () => {
+    const customRpcUrl = faker.internet.url()
+    jest.mocked(scanApprovalHistory).mockResolvedValue([])
+    jest.mocked(readTokenApprovals).mockResolvedValue([])
+
+    renderHook(() => useTokenApprovals(chain, SAFE, true), {
+      initialReduxState: {
+        settings: { ...settingsState, env: { ...settingsState.env, rpc: { [chain.chainId]: customRpcUrl } } },
+      },
+    })
+
+    await waitFor(() => expect(readTokenApprovals).toHaveBeenCalled())
+    const [provider] = jest.mocked(readTokenApprovals).mock.calls[0]
+    expect((provider as JsonRpcProvider)._getConnection().url).toBe(customRpcUrl)
   })
 
   it('does not scan while disabled', async () => {

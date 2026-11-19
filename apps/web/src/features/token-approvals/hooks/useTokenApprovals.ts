@@ -3,6 +3,9 @@ import type { TokenApproval } from '@safe-global/utils/features/token-approvals/
 import type { RawLog } from '@safe-global/utils/features/token-approvals/approvalHistory'
 import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import { logError, Errors } from '@/services/exceptions'
+import { getReadOnlyProvider } from '@/hooks/wallets/getReadOnlyProvider'
+import { useAppSelector } from '@/store'
+import { selectRpc } from '@/store/settingsSlice'
 import { APPROVALS_SCAN_BATCH_SIZE } from '../constants'
 
 type TokenApprovalsState =
@@ -19,6 +22,8 @@ const useTokenApprovals = (
 ): { state: TokenApprovalsState; rescan: () => void } => {
   const [state, setState] = useState<TokenApprovalsState>({ status: 'scanning', scannedCount: 0 })
   const [scanId, setScanId] = useState(0)
+  const customRpc = useAppSelector(selectRpc)
+  const customRpcUrl = chain ? customRpc[chain.chainId] : undefined
 
   useEffect(() => {
     if (!isEnabled || !chain) return
@@ -28,12 +33,9 @@ const useTokenApprovals = (
 
     const run = async () => {
       try {
-        const [{ scanApprovalHistory }, { readTokenApprovals }, { createWeb3ReadOnly }] = await Promise.all([
-          import('../services/approvalHistoryScan'),
-          import('@safe-global/utils/features/token-approvals/allowances'),
-          import('@/hooks/wallets/web3'),
-        ])
-        const provider = createWeb3ReadOnly(chain)
+        const { scanApprovalHistory } = await import('../services/approvalHistoryScan')
+        const { readTokenApprovals } = await import('@safe-global/utils/features/token-approvals/allowances')
+        const provider = await getReadOnlyProvider(chain, customRpcUrl)
         if (!provider) throw new Error(`No RPC for chain ${chain.chainId}`)
 
         const records = await scanApprovalHistory({
@@ -60,7 +62,7 @@ const useTokenApprovals = (
     run()
 
     return () => controller.abort()
-  }, [chain, safeAddress, batchSize, isEnabled, scanId])
+  }, [chain, customRpcUrl, safeAddress, batchSize, isEnabled, scanId])
 
   const rescan = useCallback(() => setScanId((id) => id + 1), [])
 
