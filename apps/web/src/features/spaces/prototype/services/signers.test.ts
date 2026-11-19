@@ -1,4 +1,4 @@
-import { getScenario } from './model'
+import { getAccount, getScenario } from './model'
 import { toSignatureRows } from './signers'
 
 const items = getScenario('everyday')
@@ -21,5 +21,17 @@ describe('signature rows for the shared footer', () => {
   it('marks your own row', () => {
     const rows = toSignatureRows(proposal('treasury-42'), 'owner')
     expect(rows.filter((row) => row.kind !== 'created' && row.you)).toHaveLength(1)
+  })
+
+  it('marks the signers left once the threshold is met as no longer needed', () => {
+    const tx = items.find((item) => {
+      const { threshold, owners } = getAccount(item)
+      const signed = item.signers.filter((owner) => owners.includes(owner)).length
+      return signed >= threshold && signed < owners.length
+    })!
+    const kinds = toSignatureRows(tx, 'owner').map((row) => row.kind)
+
+    expect(kinds).toContain('not-needed')
+    expect(kinds).not.toContain('needed')
   })
 })

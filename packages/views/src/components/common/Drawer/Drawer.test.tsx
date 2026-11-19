@@ -1,5 +1,5 @@
 import { userEvent } from '@testing-library/user-event'
-import { render, screen, fireEvent } from '@/tests/test-utils'
+import { act, render, screen, fireEvent } from '@/tests/test-utils'
 import { Drawer } from './Drawer'
 import { DrawerBody } from '@safe-global/views/components/common/Drawer/components/DrawerBody'
 import { DrawerFooter } from '@safe-global/views/components/common/Drawer/components/DrawerFooter'
@@ -266,6 +266,53 @@ describe('Drawer', () => {
       fireEvent.pointerMove(handle, { clientX: 300, pointerId: 1 })
 
       expect(handle).toHaveAttribute('aria-valuenow', '540')
+    })
+
+    describe('when the window changes size', () => {
+      const initialWidth = window.innerWidth
+
+      const resizeWindow = (width: number) =>
+        act(() => {
+          window.innerWidth = width
+          window.dispatchEvent(new Event('resize'))
+        })
+
+      beforeEach(() => resizeWindow(1024))
+      afterAll(() => resizeWindow(initialWidth))
+
+      it('can grow again after the window widens while it is at its widest', () => {
+        render(renderResizable())
+
+        const handle = screen.getByRole('separator', { name: 'Resize panel' })
+        for (let i = 0; i < 20; i++) fireEvent.keyDown(handle, { key: 'ArrowLeft' })
+
+        expect(handle).toHaveAttribute('aria-valuenow', '1000')
+        expect(handle).toHaveAttribute('aria-valuemax', '1000')
+
+        resizeWindow(1400)
+        fireEvent.keyDown(handle, { key: 'ArrowLeft' })
+
+        expect(handle).toHaveAttribute('aria-valuemax', '1376')
+        expect(handle).toHaveAttribute('aria-valuenow', '1040')
+        expect(screen.getByLabelText('Transaction')).toHaveStyle({ width: '1040px' })
+      })
+
+      it('keeps the panel and handle at the same width when the window narrows', () => {
+        render(renderResizable())
+
+        const handle = screen.getByRole('separator', { name: 'Resize panel' })
+        for (let i = 0; i < 20; i++) fireEvent.keyDown(handle, { key: 'ArrowLeft' })
+
+        resizeWindow(800)
+
+        expect(handle).toHaveAttribute('aria-valuemax', '776')
+        expect(handle).toHaveAttribute('aria-valuenow', '776')
+        expect(screen.getByLabelText('Transaction')).toHaveStyle({ width: '776px' })
+
+        fireEvent.keyDown(handle, { key: 'ArrowRight' })
+
+        expect(handle).toHaveAttribute('aria-valuenow', '736')
+      })
     })
 
     it('opens at its normal width again after closing', () => {

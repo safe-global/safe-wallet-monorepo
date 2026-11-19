@@ -169,8 +169,6 @@ export function StepsFooter({
         <DrawerSignatures
           open={layout.signersOpen}
           onOpenChange={layout.setSignersOpen}
-          signed={signed}
-          required={account.threshold}
           rows={rows}
           status={
             <span className="flex items-center gap-1.5 text-xs font-medium tabular-nums">

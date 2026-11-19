@@ -6,7 +6,7 @@ import { isSignerOf, isYou } from './personas'
 export type SignatureRow =
   | { kind: 'created'; name: string; time: string }
   | { kind: 'signed'; name: string; address: string; time: string; you?: boolean }
-  | { kind: 'needed'; name: string; address: string; you?: boolean }
+  | { kind: 'needed' | 'not-needed'; name: string; address: string; you?: boolean }
 
 export type SignerRow = {
   id: string
@@ -52,14 +52,18 @@ export const getNotSignerNote = (tx: Proposal, persona: Persona) => {
   return isSignerOf(account, persona) ? undefined : `You aren't a signer of ${account.name}.`
 }
 
-// Rows for the drawer's signatures: created, signed in order, then still needed.
-export const toSignatureRows = (tx: Proposal, persona: Persona): SignatureRow[] => [
-  { kind: 'created', name: getCreator(tx) ?? 'Unknown', time: formatDateTime(getCreatedAt(tx)) },
-  ...getSignerRows(tx, persona).map((row): SignatureRow => {
-    const name = row.name ?? shortAddress(row.address)
-    const you = isYou(row.id, persona)
-    return row.signed
-      ? { kind: 'signed', name, address: row.address, time: formatDateTime(row.signedAt ?? 0), you }
-      : { kind: 'needed', name, address: row.address, you }
-  }),
-]
+// Rows for the drawer's signatures: created, signed in order, then the rest, needed until the threshold is met.
+export const toSignatureRows = (tx: Proposal, persona: Persona): SignatureRow[] => {
+  const { threshold, owners } = getAccount(tx)
+  const thresholdMet = tx.signers.filter((owner) => owners.includes(owner)).length >= threshold
+  return [
+    { kind: 'created', name: getCreator(tx) ?? 'Unknown', time: formatDateTime(getCreatedAt(tx)) },
+    ...getSignerRows(tx, persona).map((row): SignatureRow => {
+      const name = row.name ?? shortAddress(row.address)
+      const you = isYou(row.id, persona)
+      return row.signed
+        ? { kind: 'signed', name, address: row.address, time: formatDateTime(row.signedAt ?? 0), you }
+        : { kind: thresholdMet ? 'not-needed' : 'needed', name, address: row.address, you }
+    }),
+  ]
+}
