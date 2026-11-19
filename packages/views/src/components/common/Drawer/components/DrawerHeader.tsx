@@ -31,13 +31,11 @@ export type DrawerHeaderProps = {
   title: ReactNode
   /** Leading visual: an icon tile, an identicon or a token mark. */
   media?: ReactNode
-  /** Second line under the title. */
   subtitle?: ReactNode
   /** Takes the second line in place of the subtitle, so the drawer never says two things there. */
   status?: ReactNode
   onBack?: () => void
   navigation?: DrawerHeaderNavigation
-  /** Extra icon buttons, placed in the button group before close. */
   actions?: DrawerHeaderAction[]
 }
 

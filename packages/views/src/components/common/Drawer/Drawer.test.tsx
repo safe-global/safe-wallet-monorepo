@@ -44,6 +44,25 @@ describe('Drawer', () => {
     expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
   })
 
+  it('brings the close button back when the header goes away while open', () => {
+    const { rerender } = render(
+      <Drawer open onClose={jest.fn()} ariaLabel="Test drawer">
+        <DrawerHeader title="Drawer title" />
+      </Drawer>,
+    )
+
+    expect(screen.getAllByRole('button', { name: 'Close' })).toHaveLength(1)
+
+    rerender(
+      <Drawer open onClose={jest.fn()} ariaLabel="Test drawer">
+        <DrawerBody>Body content</DrawerBody>
+      </Drawer>,
+    )
+
+    expect(screen.getByRole('button', { name: 'Close' })).toBeInTheDocument()
+    expect(screen.queryByText('Drawer title')).not.toBeInTheDocument()
+  })
+
   it('calls onClose when the close button is clicked', () => {
     const onClose = jest.fn()
     render(

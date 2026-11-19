@@ -61,7 +61,9 @@ const SecurityReportDrawer = ({
           <>
             <DrawerHeader
               media={<Identicon address={selectedSafe.address} size={36} />}
-              title={selectedEntry?.name || shortenAddress(selectedSafe.address)}
+              title={
+                selectedEntry?.name || <span title={selectedSafe.address}>{shortenAddress(selectedSafe.address)}</span>
+              }
               subtitle={
                 <>
                   <Typography variant="paragraph-mini" className="font-mono text-muted-foreground">

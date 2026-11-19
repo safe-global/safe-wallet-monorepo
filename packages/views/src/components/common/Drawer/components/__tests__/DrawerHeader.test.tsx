@@ -68,7 +68,7 @@ describe('DrawerHeader', () => {
       <DrawerHeader
         title="Spending limit"
         onBack={onBack}
-        actions={[{ label: 'Copy link', icon: <Copy />, onClick: onCopy }]}
+        actions={[{ label: 'Copy link', icon: <Copy />, onClick: onCopy, pressed: true }]}
       />,
     )
 
@@ -80,5 +80,35 @@ describe('DrawerHeader', () => {
     expect(group).toContainElement(screen.getByRole('button', { name: 'Back' }))
     expect(onBack).toHaveBeenCalledTimes(1)
     expect(onCopy).toHaveBeenCalledTimes(1)
+    expect(screen.getByRole('button', { name: 'Copy link' })).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  describe('long titles', () => {
+    const fakeWidths = (scrollWidth: number, clientWidth: number) => {
+      jest.spyOn(HTMLElement.prototype, 'scrollWidth', 'get').mockReturnValue(scrollWidth)
+      jest.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(clientWidth)
+    }
+
+    afterEach(() => jest.restoreAllMocks())
+
+    it('fades a title that does not fit and shows it in full on hover', () => {
+      fakeWidths(400, 200)
+      render(<DrawerHeader title="Quarterly operations and treasury rebalancing account" />)
+
+      const title = screen.getByText('Quarterly operations and treasury rebalancing account')
+
+      expect(title).toHaveAttribute('title', 'Quarterly operations and treasury rebalancing account')
+      expect(title.style.maskImage).toContain('linear-gradient')
+    })
+
+    it('leaves a title that fits as it is', () => {
+      fakeWidths(200, 200)
+      render(<DrawerHeader title="Allowlist" />)
+
+      const title = screen.getByText('Allowlist')
+
+      expect(title).not.toHaveAttribute('title')
+      expect(title.style.maskImage).toBe('')
+    })
   })
 })
