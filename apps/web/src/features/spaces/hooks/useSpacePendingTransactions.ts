@@ -4,7 +4,7 @@ import { useAppSelector } from '@/store'
 import { isAuthenticated } from '@/store/authSlice'
 import { useHasFeature } from '@/hooks/useChains'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import { getLatestTransactions } from '@/utils/tx-list'
+import { isTransactionQueuedItem } from '@/utils/transaction-guards'
 import { useCurrentSpaceId } from '../public/hooks/useCurrentSpaceId'
 import { usePerSafePendingTransactions, type SpacePendingTxItem } from './usePerSafePendingTransactions'
 import { SPACE_REFRESH_OPTIONS } from './refreshOptions'
@@ -32,7 +32,7 @@ export const useSpacePendingTransactions = (limit = 3) => {
     return Object.entries(page.results)
       .flatMap(([safeAddress, chainItems]) =>
         Object.entries(chainItems).flatMap(([chainId, items]) =>
-          getLatestTransactions(items).map((tx) => ({ ...tx, safeAddress, chainId })),
+          items.filter(isTransactionQueuedItem).map((tx) => ({ ...tx, safeAddress, chainId })),
         ),
       )
       .sort((a, b) => a.transaction.timestamp - b.transaction.timestamp)

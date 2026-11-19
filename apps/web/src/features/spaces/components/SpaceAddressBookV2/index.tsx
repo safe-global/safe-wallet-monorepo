@@ -1,10 +1,8 @@
 import { useMemo } from 'react'
 import { FEATURES } from '@safe-global/utils/utils/chains'
-import TableCard from '@safe-global/views/components/common/TableCard'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@safe-global/views/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
-import { SpaceLoadError, SpaceLoading } from '@safe-global/views/features/spaces/components/LoadState'
 import { useAddressBookRequestsState } from '../../hooks/useGetAddressBookRequests'
 import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
 import { useIsAdmin, useIsInvited } from '../../public/hooks/useSpaceMembers'
@@ -12,8 +10,8 @@ import { useSpaceAddressBookState } from '../../public/hooks/useGetSpaceAddressB
 import useAllAddressBooks from '@/hooks/useAllAddressBooks'
 import useChains, { useHasFeature } from '@/hooks/useChains'
 import PreviewInvite from '../InviteBanner/PreviewInvite'
-import PendingRequestsTable from '../SpaceAddressBook/PendingRequestsTable'
 import LocalContacts from './LocalContacts'
+import PendingTab from './PendingTab'
 import SuggestedTab from './SuggestedTab'
 import { useSuggestedContacts } from './useSuggestedContacts'
 import WorkspaceContacts from './WorkspaceContacts'
@@ -138,15 +136,7 @@ const SpaceAddressBookV2 = () => {
               </TabsContent>
 
               <TabsContent value="pending">
-                <TableCard>
-                  {requests.isLoading ? (
-                    <SpaceLoading subject="pending requests" testId="pending-requests-loading" />
-                  ) : requests.isError ? (
-                    <SpaceLoadError onReload={requests.refetch} testId="pending-requests-error" />
-                  ) : (
-                    <PendingRequestsTable requests={requests.items} />
-                  )}
-                </TableCard>
+                <PendingTab requests={requests} workspaceBook={workspaceBook} isAdmin={isAdmin} />
               </TabsContent>
             </>
           )}
