@@ -1,8 +1,9 @@
-import { useLayoutEffect, useRef, useState, type ReactElement, type ReactNode } from 'react'
+import { useLayoutEffect, useRef, useState, type ComponentProps, type ReactElement, type ReactNode } from 'react'
 import { ArrowLeft, ChevronDown, ChevronUp, Maximize2, Minimize2, X } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { ButtonGroup } from '@safe-global/views/components/ui/button-group'
 import { Kbd } from '@safe-global/views/components/ui/kbd'
+import { SheetTitle } from '@safe-global/views/components/ui/sheet'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { Typography } from '@safe-global/views/components/ui/typography'
 import { useDrawerContext } from '@safe-global/views/components/common/Drawer/components/DrawerContext'
@@ -25,6 +26,8 @@ export type DrawerHeaderNavigation = {
   hasNext?: boolean
   /** Where the open item sits in its list, such as "3 of 12". Announced when it changes. */
   position?: string
+  /** Key hints for the tooltips, such as `{ previous: 'K', next: 'J' }`. Pass only when the page handles those keys. */
+  shortcuts?: { previous: string; next: string }
 }
 
 export type DrawerHeaderProps = {
@@ -67,6 +70,9 @@ const FittedTitle = ({ children }: { children: ReactNode }): ReactElement => {
     </span>
   )
 }
+
+/** Names the dialog, so screen readers announce the title when the drawer opens. */
+const DialogHeading = (props: ComponentProps<'h2'>): ReactElement => <SheetTitle render={<h2 />} {...props} />
 
 const HeaderButton = ({ label, icon, onClick, disabled, pressed, shortcut }: DrawerHeaderAction): ReactElement => (
   <Tooltip>
@@ -120,14 +126,14 @@ export const DrawerHeader = ({
             icon: <ChevronUp />,
             onClick: navigation?.onPrevious,
             disabled: !navigation?.hasPrevious,
-            shortcut: 'K',
+            shortcut: navigation?.shortcuts?.previous,
           },
           {
             label: 'Next',
             icon: <ChevronDown />,
             onClick: navigation?.onNext,
             disabled: !navigation?.hasNext,
-            shortcut: 'J',
+            shortcut: navigation?.shortcuts?.next,
           },
         ]
       : []),
@@ -152,7 +158,7 @@ export const DrawerHeader = ({
       {media && <div className="flex shrink-0 items-center">{media}</div>}
 
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <Typography as="div" variant="paragraph-bold" className="min-w-0 leading-tight">
+        <Typography as={drawer ? DialogHeading : 'h2'} variant="paragraph-bold" className="min-w-0 leading-tight">
           <FittedTitle>{title}</FittedTitle>
         </Typography>
         {secondLine && (

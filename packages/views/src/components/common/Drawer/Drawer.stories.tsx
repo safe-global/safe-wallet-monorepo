@@ -227,6 +227,7 @@ export const Navigation: Story = {
             hasPrevious: true,
             hasNext: false,
             position: '12 of 12',
+            shortcuts: { previous: 'K', next: 'J' },
           }}
         />
         <DrawerBody>
@@ -500,6 +501,43 @@ export const SignaturesThresholdMet: Story = {
           }
         >
           <DrawerActions primary={<Button>Execute</Button>} />
+        </DrawerFooter>
+      </>
+    ),
+  },
+}
+
+/** A page can pass its own status, such as a gauge, and add a note under it. */
+export const SignaturesNotSigner: Story = {
+  args: {
+    ariaLabel: 'Transaction',
+    children: (
+      <>
+        <DrawerHeader media={iconTile} title="Send 1,250 USDC" subtitle="Nonce #42 · Ethereum" />
+        <DrawerBody>
+          <DrawerList items={summaryRows} />
+        </DrawerBody>
+        <DrawerFooter
+          summary={
+            <DrawerSignatures
+              status={<span className="text-xs font-medium tabular-nums">1/3</span>}
+              note="You aren't a signer of this Safe"
+              rows={[
+                {
+                  id: 'a',
+                  status: 'signed',
+                  signer: signer('Ops lead', '0x1000000000000000000000000000000000000001'),
+                },
+                {
+                  id: 'b',
+                  status: 'needed',
+                  signer: signer('Finance', '0x2000000000000000000000000000000000000002'),
+                },
+              ]}
+            />
+          }
+        >
+          <DrawerActions primary={<Button disabled>Sign</Button>} />
         </DrawerFooter>
       </>
     ),

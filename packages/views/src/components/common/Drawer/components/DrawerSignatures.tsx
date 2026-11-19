@@ -28,8 +28,13 @@ export type DrawerSignaturesProps = {
   meta?: ReactNode
   /** Icon buttons after the status, such as copy link. */
   actions?: ReactNode
+  /** A line under the title row, such as "You aren't a signer of this Safe". */
+  note?: ReactNode
   /** Folded by default so the body keeps most of the height. */
   defaultOpen?: boolean
+  /** Pass with `onOpenChange` to control it, for "expand all" or to open it from a link. */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 /** The count or "Your signature required" next to the title. The app decides the text and tone. */
@@ -125,9 +130,17 @@ export const DrawerSignatures = ({
   rows,
   meta,
   actions,
+  note,
   defaultOpen = false,
+  open: controlledOpen,
+  onOpenChange,
 }: DrawerSignaturesProps): ReactElement => {
-  const [open, setOpen] = useState(defaultOpen)
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen)
+  const open = controlledOpen ?? uncontrolledOpen
+  const setOpen = (next: boolean) => {
+    setUncontrolledOpen(next)
+    onOpenChange?.(next)
+  }
   return (
     <Collapsible
       render={<section aria-label="Signatures" />}
@@ -148,6 +161,8 @@ export const DrawerSignatures = ({
           {open ? <ChevronDown /> : <ChevronUp />}
         </CollapsibleTrigger>
       </div>
+
+      {note && <p className="text-xs text-muted-foreground">{note}</p>}
 
       <CollapsibleContent keepMounted className={cn(SCROLL_AREA, 'max-h-[28vh] flex-none overscroll-contain pt-3')}>
         <ul className="flex flex-col gap-3">
