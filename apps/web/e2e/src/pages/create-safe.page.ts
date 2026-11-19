@@ -39,8 +39,8 @@ export class CreateSafePage {
     this.activateButton = page.getByTestId('activate-account-btn-cf').first()
     this.confirmActivationButton = page.getByTestId('activate-account-flow-btn')
     this.relayMethod = page.getByTestId('relay-execution-method').first()
-    this.payNowOption = page.getByTestId('pay-now-execution-method')
-    // The "Pay later" option shares this test ID
+    this.payNowOption = page.getByRole('radio', { name: 'Pay now' })
+    // The "Pay later" option shares this test ID, and the radio has no accessible name
     this.walletMethod = page.getByTestId('connected-wallet-execution-method').filter({ hasText: 'Connected wallet' })
     this.activationSection = page.getByTestId('activation-section')
     this.removeNetworkIcon = page.getByTestId('CancelIcon')
@@ -68,17 +68,31 @@ export class CreateSafePage {
   }
 
   /**
-   * Create a 1/1 Safe of the connected wallet on Sepolia that is deployed at once, with the gas paid by `payer`.
-   * Returns the address of the new Safe once the app reports it as indexed.
+   * Create a 1/1 Safe of the connected wallet on Sepolia that the relay deploys at once.
+   * Returns the address of the new Safe from the URL of its dashboard.
    */
-  async createPayNowSafe(payer: 'relay' | 'wallet'): Promise<string> {
+  async createPayNowSafeWithRelay(): Promise<string> {
+    await this.openPayNow()
+    await this.relayMethod.click()
+    return this.submitCreation()
+  }
+
+  /**
+   * Create a 1/1 Safe of the connected wallet on Sepolia that the wallet deploys at once.
+   * Returns the address of the new Safe from the URL of its dashboard.
+   */
+  async createPayNowSafeWithWallet(): Promise<string> {
+    await this.openPayNow()
+    await this.walletMethod.click()
+    return this.submitCreation()
+  }
+
+  /** Open the creation flow with the defaults and pick "Pay now" on the review step */
+  private async openPayNow(): Promise<void> {
     await this.page.goto('/new-safe/create?chain=sep')
     await this.nextButton.click()
     await this.nextButton.click()
     await this.payNowOption.click()
-    // Both options show only once the owners' relays have loaded; before that, the wallet pays
-    await (payer === 'relay' ? this.relayMethod : this.walletMethod).click()
-    return this.submitCreation()
   }
 
   /** Click "Create account" on the review step and wait for the dashboard of the new Safe */
