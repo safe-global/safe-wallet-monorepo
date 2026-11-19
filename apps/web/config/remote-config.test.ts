@@ -4,6 +4,7 @@ import Ajv2020 from 'ajv/dist/2020'
 import { FEATURES } from '@safe-global/utils/utils/chains'
 import decl from './remote-config.json'
 import schema from './remote-config.schema.json'
+import mobileDecl from '../../mobile/config/remote-config.json'
 import testChainFeatures from '../e2e/environment/infra/scripts/cfg_management/test-chain-features.json'
 
 const enumKeys = new Set<string>(Object.values(FEATURES))
@@ -80,6 +81,19 @@ describe('WALLET_WEB remote-config declaration', () => {
   it('every declared key is actually used in web source (no dead declarations)', () => {
     const unused = declaredKeys.filter((k) => !usedKeys.has(k))
     expect(unused).toEqual([])
+  })
+
+  // A key shared with mobile is one Feature row in the Config Service, so both files must agree.
+  it('declares a key shared with mobile with the same description and scope', () => {
+    const mobileByKey = new Map(mobileDecl.features.map((f) => [f.key, f]))
+    const mismatched = decl.features
+      .filter((f) => mobileByKey.has(f.key))
+      .filter((f) => {
+        const mobile = mobileByKey.get(f.key)
+        return mobile?.description !== f.description || mobile?.scope !== f.scope
+      })
+      .map((f) => f.key)
+    expect(mismatched).toEqual([])
   })
 })
 
