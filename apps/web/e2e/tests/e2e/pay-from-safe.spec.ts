@@ -1,16 +1,14 @@
 import { Wallet, parseEther } from 'ethers'
-import type { Page } from '@playwright/test'
 import { confirmationsOf } from '../../src/api/transaction-items'
 import { balanceOf, emptyBalance } from '../../src/chain/balances'
 import { refundPaidIn } from '../../src/chain/refund'
 import { test, expect } from '../../src/fixtures/journey.fixture'
-import { HomePage } from '../../src/pages/home.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
 import { TxHistoryPage } from '../../src/pages/tx-history.page'
 import { TxQueuePage } from '../../src/pages/tx-queue.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
 import { seedProposer } from '../../src/seed/proposers'
-import { seedSafe, type SeededSafe } from '../../src/seed/safe'
+import { seedSafe } from '../../src/seed/safe'
 import { waitForNativeBalance } from '../../src/seed/tokens'
 
 const AMOUNT = '0.001'
@@ -26,15 +24,6 @@ const SIGNED_WITH_QUOTED_FEES = {
   },
 }
 
-async function createTransfer(page: Page, safe: SeededSafe, recipient: string): Promise<TxReviewPage> {
-  const sendTokens = new SendTokensPage(page)
-  await new HomePage(page).goto(safe.prefixedAddress)
-  await sendTokens.open()
-  await sendTokens.fillTransfer({ recipient, amount: AMOUNT })
-  await sendTokens.nextButton.click()
-  return new TxReviewPage(page)
-}
-
 test.describe('Pay from Safe', { tag: '@e2e' }, () => {
   test('should execute a transfer of a 1/1 Safe whose owner has no ETH, with the gas refunded from the Safe', async ({
     safePage,
@@ -48,7 +37,8 @@ test.describe('Pay from Safe', { tag: '@e2e' }, () => {
     const safeBalance = await balanceOf(journey.env, safe.address)
     await journey.connectAs('alice')
 
-    const review = await createTransfer(safePage, safe, recipient)
+    const review = new TxReviewPage(safePage)
+    await new SendTokensPage(safePage).reviewTransfer(safe, { recipient, amount: AMOUNT })
     await review.payFeesFromSafe()
     await expect(review.gasFeeRow).toContainText(FEE_SERVICE_MOCK_QUOTE.fiatFee)
     await review.sign()
@@ -77,7 +67,8 @@ test.describe('Pay from Safe', { tag: '@e2e' }, () => {
     await emptyBalance(journey.env, executor)
     await journey.connectAs('alice')
 
-    const review = await createTransfer(safePage, safe, recipient)
+    const review = new TxReviewPage(safePage)
+    await new SendTokensPage(safePage).reviewTransfer(safe, { recipient, amount: AMOUNT })
     await review.payFeesFromSafe()
     await expect(review.gasFeeRow).toContainText(FEE_SERVICE_MOCK_QUOTE.fiatFee)
     await review.sign()
@@ -113,7 +104,8 @@ test.describe('Pay from Safe', { tag: '@e2e' }, () => {
     const safeBalance = await balanceOf(journey.env, safe.address)
     await journey.connectAs('dave')
 
-    const review = await createTransfer(safePage, safe, recipient)
+    const review = new TxReviewPage(safePage)
+    await new SendTokensPage(safePage).reviewTransfer(safe, { recipient, amount: AMOUNT })
     await review.payFeesFromSafe()
     await review.propose()
     await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(confirmationsOf)).toEqual([0])
@@ -143,7 +135,11 @@ test.describe('Pay from Safe', { tag: '@e2e' }, () => {
   }) => {
     const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
 
-    const review = await createTransfer(safePage, safe, Wallet.createRandom().address)
+    const review = new TxReviewPage(safePage)
+    await new SendTokensPage(safePage).reviewTransfer(safe, {
+      recipient: Wallet.createRandom().address,
+      amount: AMOUNT,
+    })
     await review.payFeesFromSafe()
     await review.sign()
     await review.executeButton.click()

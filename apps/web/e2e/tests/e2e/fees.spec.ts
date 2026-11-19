@@ -1,27 +1,16 @@
 import { Wallet, parseEther, parseUnits } from 'ethers'
-import type { Page } from '@playwright/test'
 import { offerGasPaymentOptions } from '../../src/api/chain-config'
 import { balanceOf, emptyBalance } from '../../src/chain/balances'
 import { gasFeesOf } from '../../src/chain/transactions'
 import { test, expect } from '../../src/fixtures/journey.fixture'
-import { HomePage } from '../../src/pages/home.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
 import { TxHistoryPage } from '../../src/pages/tx-history.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
-import { seedExecutedTransfer, seedSafe, type SeededSafe } from '../../src/seed/safe'
+import { seedExecutedTransfer, seedSafe } from '../../src/seed/safe'
 
 const AMOUNT = '0.001'
 const MAX_PRIORITY_FEE_GWEI = '2'
 const MAX_FEE_GWEI = '3'
-
-async function reviewTransfer(page: Page, safe: SeededSafe, recipient: string): Promise<TxReviewPage> {
-  const sendTokens = new SendTokensPage(page)
-  await new HomePage(page).goto(safe.prefixedAddress)
-  await sendTokens.open()
-  await sendTokens.fillTransfer({ recipient, amount: AMOUNT })
-  await sendTokens.nextButton.click()
-  return new TxReviewPage(page)
-}
 
 test.describe('Fees of a transaction', { tag: '@e2e' }, () => {
   test('should send the execution with the max fee and the max priority fee that the owner sets in the fee card', async ({
@@ -31,7 +20,11 @@ test.describe('Fees of a transaction', { tag: '@e2e' }, () => {
   }) => {
     const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
 
-    const review = await reviewTransfer(safePage, safe, Wallet.createRandom().address)
+    const review = new TxReviewPage(safePage)
+    await new SendTokensPage(safePage).reviewTransfer(safe, {
+      recipient: Wallet.createRandom().address,
+      amount: AMOUNT,
+    })
     await review.sign()
     await review.payFeesFromSignerWallet()
     await review.setGasFees({ maxPriorityFee: MAX_PRIORITY_FEE_GWEI, maxFee: MAX_FEE_GWEI })
@@ -74,7 +67,8 @@ test.describe('Fees where the relayer does not offer Pay from Safe', { tag: '@e2
     const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
     await offerGasPaymentOptions(safePage, [])
 
-    const review = await reviewTransfer(safePage, safe, recipient)
+    const review = new TxReviewPage(safePage)
+    await new SendTokensPage(safePage).reviewTransfer(safe, { recipient, amount: AMOUNT })
     await review.sign()
     await expect(review.lockedFeePayer).toHaveText('Signer wallet')
     await review.executeButton.click()
@@ -97,7 +91,8 @@ test.describe('Fees where the relayer does not offer Pay from Safe', { tag: '@e2
     await emptyBalance(journey.env, owner)
     await offerGasPaymentOptions(safePage, ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'])
 
-    const review = await reviewTransfer(safePage, safe, recipient)
+    const review = new TxReviewPage(safePage)
+    await new SendTokensPage(safePage).reviewTransfer(safe, { recipient, amount: AMOUNT })
     await review.sign()
     await review.executeWithRelay()
     await review.waitForExecution()
@@ -117,7 +112,8 @@ test.describe('Fees where the relayer does not offer Pay from Safe', { tag: '@e2
     const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
     await offerGasPaymentOptions(safePage, ['FREE_DAILY_LIMIT', 'SUBSCRIPTION'])
 
-    const review = await reviewTransfer(safePage, safe, recipient)
+    const review = new TxReviewPage(safePage)
+    await new SendTokensPage(safePage).reviewTransfer(safe, { recipient, amount: AMOUNT })
     await review.sign()
     await review.executeDecliningSponsor()
     await review.waitForExecution()
