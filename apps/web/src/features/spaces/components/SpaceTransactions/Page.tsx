@@ -33,7 +33,7 @@ export default function SpaceTransactionsPage({ spaceId }: { spaceId: string }) 
           </TabsContent>
 
           <TabsContent value="history">
-            <SpaceTransactionHistory />
+            <SpaceTransactionHistory spaceId={spaceId} />
           </TabsContent>
         </Tabs>
       </div>

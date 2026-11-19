@@ -3,8 +3,8 @@ import { HistoryComingSoon } from '@safe-global/views/features/spaces/components
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 
-const SpaceTransactionHistory = (): ReactElement => {
-  useTrackOnce(SPACE_EVENTS.TRANSACTIONS_HISTORY_TAB_OPENED)
+const SpaceTransactionHistory = ({ spaceId }: { spaceId: string }): ReactElement => {
+  useTrackOnce(SPACE_EVENTS.TRANSACTIONS_HISTORY_TAB_OPENED, { workspace_id: spaceId })
 
   return <HistoryComingSoon />
 }

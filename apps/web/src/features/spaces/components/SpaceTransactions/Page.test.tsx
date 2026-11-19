@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker'
 import { http, HttpResponse } from 'msw'
 import { GATEWAY_URL } from '@/config/gateway'
 import { server } from '@/tests/server'
-import { fireEvent, render, screen, waitFor } from '@/tests/test-utils'
+import { act, fireEvent, render, screen } from '@/tests/test-utils'
 import { trackEvent } from '@/services/analytics'
 import { SPACE_EVENTS } from '@/services/analytics/events/spaces'
 import { setBaseUrl } from '@safe-global/store/gateway/cgwClient'
@@ -74,7 +74,11 @@ describe('SpaceTransactionsPage', () => {
   })
 
   describe('History tab', () => {
-    const openHistory = () => fireEvent.click(screen.getByRole('tab', { name: 'History' }))
+    const openTab = (name: string) =>
+      act(async () => {
+        fireEvent.click(screen.getByRole('tab', { name }))
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+      })
 
     it('comes after Pending, which is selected by default', () => {
       render(<SpaceTransactionsPage spaceId={faker.string.uuid()} />)
@@ -86,10 +90,10 @@ describe('SpaceTransactionsPage', () => {
       expect(mockTrackEvent).not.toHaveBeenCalled()
     })
 
-    it('says where the history is, without a search field, filters or list', () => {
+    it('says where the history is, without a search field, filters or list', async () => {
       render(<SpaceTransactionsPage spaceId={faker.string.uuid()} />)
 
-      openHistory()
+      await openTab('History')
 
       expect(screen.getByRole('heading', { name: HISTORY_TITLE })).toBeInTheDocument()
       expect(screen.getByText('Until then, you can find the transaction history inside each Safe.')).toBeInTheDocument()
@@ -105,28 +109,30 @@ describe('SpaceTransactionsPage', () => {
       const onRequest = ({ request }: { request: Request }) => requests.push(request.url)
       server.events.on('request:start', onRequest)
 
-      openHistory()
-      await screen.findByRole('heading', { name: HISTORY_TITLE })
-      await new Promise((resolve) => setTimeout(resolve, 50))
+      await openTab('History')
 
       server.events.removeListener('request:start', onRequest)
+      expect(screen.getByRole('heading', { name: HISTORY_TITLE })).toBeInTheDocument()
       expect(requests).toEqual([])
     })
 
-    it('tracks once each time it is opened', async () => {
-      render(<SpaceTransactionsPage spaceId={faker.string.uuid()} />)
+    it('tracks once each time it is opened, with the Workspace', async () => {
+      const spaceId = faker.string.uuid()
+      render(<SpaceTransactionsPage spaceId={spaceId} />)
 
-      openHistory()
-
-      expect(mockTrackEvent).toHaveBeenCalledTimes(1)
-      expect(mockTrackEvent).toHaveBeenCalledWith(SPACE_EVENTS.TRANSACTIONS_HISTORY_TAB_OPENED, undefined)
-
-      fireEvent.click(screen.getByRole('tab', { name: 'Pending' }))
-      await waitFor(() => expect(screen.queryByText(HISTORY_TITLE)).not.toBeInTheDocument())
+      await openTab('History')
 
       expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+      expect(mockTrackEvent).toHaveBeenCalledWith(SPACE_EVENTS.TRANSACTIONS_HISTORY_TAB_OPENED, {
+        workspace_id: spaceId,
+      })
 
-      openHistory()
+      await openTab('Pending')
+
+      expect(screen.queryByText(HISTORY_TITLE)).not.toBeInTheDocument()
+      expect(mockTrackEvent).toHaveBeenCalledTimes(1)
+
+      await openTab('History')
 
       expect(mockTrackEvent).toHaveBeenCalledTimes(2)
     })
@@ -134,10 +140,10 @@ describe('SpaceTransactionsPage', () => {
     it('gives the queue back when returning to Pending', async () => {
       render(<SpaceTransactionsPage spaceId={faker.string.uuid()} />)
 
-      openHistory()
-      fireEvent.click(screen.getByRole('tab', { name: 'Pending' }))
+      await openTab('History')
+      await openTab('Pending')
 
-      await waitFor(() => expect(screen.getByRole('searchbox', { name: 'Search transactions' })).toBeInTheDocument())
+      expect(screen.getByRole('searchbox', { name: 'Search transactions' })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'Filter' })).toBeInTheDocument()
       expect(screen.queryByText(HISTORY_TITLE)).not.toBeInTheDocument()
     })
