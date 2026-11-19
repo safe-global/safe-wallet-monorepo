@@ -9,7 +9,6 @@ import { getNonces } from '@/services/tx/tx-sender/recommendedNonce'
 import * as gatewayApi from '@/store/api/gateway'
 import { chainBuilder } from '@/tests/builders/chains'
 import { extendedSafeInfoBuilder } from '@/tests/builders/safe'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 
 jest.mock('@/services/tx/tx-sender/recommendedNonce', () => ({
   getNonces: jest.fn(),
@@ -24,7 +23,7 @@ const mockChain = chainBuilder()
   .with({
     chainId: '1',
     nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18, logoUri: '' },
-    features: [FEATURES.GTF],
+    features: [],
     relayer: {
       type: 'RELAY_FEE',
       safeCreationSponsored: false,

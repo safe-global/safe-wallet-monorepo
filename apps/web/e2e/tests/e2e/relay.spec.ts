@@ -1,14 +1,12 @@
 import { Wallet, parseEther } from 'ethers'
-import type { Page } from '@playwright/test'
 import type { SafeApiClient } from '../../src/api/safe-api-client'
-import { balanceOf } from '../../src/chain/balances'
+import { balanceOf, emptyBalance } from '../../src/chain/balances'
 import { sponsoredTransactionsUsed } from '../../src/fixtures/email-session'
 import { test, expect } from '../../src/fixtures/journey.fixture'
-import { HomePage } from '../../src/pages/home.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
 import { TxQueuePage } from '../../src/pages/tx-queue.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
-import { seedQueuedTransfer, seedSafe, type SeededSafe } from '../../src/seed/safe'
+import { seedQueuedTransfer, seedSafe } from '../../src/seed/safe'
 import { seedBusinessWorkspace } from '../../src/seed/workspace'
 
 const AMOUNT = '0.001'
@@ -27,28 +25,20 @@ async function executorOfNonce(
   return execution?.type === 'MULTISIG' ? execution.executor?.value.toLowerCase() : undefined
 }
 
-/** Open the Safe, in a Workspace when `spaceId` is given, and sign a transfer up to the choice of who pays the gas */
-async function signTransfer(page: Page, safe: SeededSafe, recipient: string, spaceId?: string): Promise<TxReviewPage> {
-  const sendTokens = new SendTokensPage(page)
-  const review = new TxReviewPage(page)
-  await new HomePage(page).goto(safe.prefixedAddress, spaceId)
-  await sendTokens.open()
-  await sendTokens.fillTransfer({ recipient, amount: AMOUNT })
-  await sendTokens.nextButton.click()
-  await review.sign()
-  return review
-}
-
 test.describe('Execute with the relay', { tag: '@e2e' }, () => {
-  test('should execute a transfer from the relayer account when an owner signs and picks the relay', async ({
+  test('should execute a transfer from the relayer account when an owner without ETH signs and picks the relay', async ({
     safePage,
     safeApiClient,
     journey,
   }) => {
     const recipient = Wallet.createRandom().address
+    const owner = journey.owners.alice.address
     const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+    await emptyBalance(journey.env, owner)
 
-    const review = await signTransfer(safePage, safe, recipient)
+    const review = new TxReviewPage(safePage)
+    await new SendTokensPage(safePage).reviewTransfer(safe, { recipient, amount: AMOUNT })
+    await review.sign()
     await expect(review.remainingRelays).toBeVisible()
     await review.executeWithRelay()
     await review.waitForExecution()
@@ -56,6 +46,7 @@ test.describe('Execute with the relay', { tag: '@e2e' }, () => {
     await expect.poll(() => safeApiClient.getNonce(safe.address)).toBe(1)
     expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
     await expect.poll(() => executorOfNonce(safeApiClient, safe.address, 0)).toBe(RELAYER)
+    expect(await balanceOf(journey.env, owner)).toBe(0n)
   })
 
   test("should spend one of the Workspace plan's sponsored transactions when a Safe in a Business Workspace relays", async ({
@@ -67,7 +58,9 @@ test.describe('Execute with the relay', { tag: '@e2e' }, () => {
     const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
     const workspace = await seedBusinessWorkspace(safePage, { Treasury: safe })
 
-    const review = await signTransfer(safePage, safe, recipient, workspace.id)
+    const review = new TxReviewPage(safePage)
+    await new SendTokensPage(safePage).reviewTransfer(safe, { recipient, amount: AMOUNT }, workspace.id)
+    await review.sign()
     await expect(review.sponsoredTxsCounter).toContainText(
       `${BUSINESS_PLAN_RELAYS}/${BUSINESS_PLAN_RELAYS} sponsored transactions left`,
     )

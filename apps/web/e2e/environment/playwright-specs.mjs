@@ -21,6 +21,7 @@ export const playwrightSpecs = {
   'e2e/delete.spec.ts': {},
   'e2e/ens.spec.ts': {},
   'e2e/erc20-transfer.spec.ts': {},
+  'e2e/fees.spec.ts': {},
   'e2e/load-safe.spec.ts': {},
   'e2e/mass-payout.spec.ts': {},
   'e2e/multichain-add-network.spec.ts': { chains: [1] },

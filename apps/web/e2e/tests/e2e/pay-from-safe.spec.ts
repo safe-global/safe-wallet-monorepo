@@ -1,15 +1,15 @@
 import { Wallet, parseEther } from 'ethers'
-import type { Page } from '@playwright/test'
-import type { SafeApiClient } from '../../src/api/safe-api-client'
 import { confirmationsOf } from '../../src/api/transaction-items'
 import { balanceOf, emptyBalance } from '../../src/chain/balances'
 import { refundPaidIn } from '../../src/chain/refund'
 import { test, expect } from '../../src/fixtures/journey.fixture'
-import { HomePage } from '../../src/pages/home.page'
 import { SendTokensPage } from '../../src/pages/send-tokens.page'
+import { TxHistoryPage } from '../../src/pages/tx-history.page'
 import { TxQueuePage } from '../../src/pages/tx-queue.page'
 import { TxReviewPage } from '../../src/pages/tx-review.page'
-import { seedSafe, type SeededSafe } from '../../src/seed/safe'
+import { seedProposer } from '../../src/seed/proposers'
+import { seedSafe } from '../../src/seed/safe'
+import { waitForNativeBalance } from '../../src/seed/tokens'
 
 const AMOUNT = '0.001'
 const FEE_SERVICE_MOCK_QUOTE = {
@@ -24,23 +24,8 @@ const SIGNED_WITH_QUOTED_FEES = {
   },
 }
 
-async function createTransfer(page: Page, safe: SeededSafe, recipient: string): Promise<TxReviewPage> {
-  const sendTokens = new SendTokensPage(page)
-  await new HomePage(page).goto(safe.prefixedAddress)
-  await sendTokens.open()
-  await sendTokens.fillTransfer({ recipient, amount: AMOUNT })
-  await sendTokens.nextButton.click()
-  return new TxReviewPage(page)
-}
-
-async function executionTxHash(safeApiClient: SafeApiClient, safeAddress: string, nonce: number): Promise<string> {
-  const txHash = (await safeApiClient.findExecutedTransaction(safeAddress, nonce))?.txHash
-  if (!txHash) throw new Error(`CGW has no execution hash for nonce ${nonce} of ${safeAddress}`)
-  return txHash
-}
-
 test.describe('Pay from Safe', { tag: '@e2e' }, () => {
-  test('should execute a transfer of a 1/1 Safe whose owner has no ETH, with the gas refunded from the Safe', async ({
+  test('should execute a transfer of a 1/1 Safe whose owner has no ETH, with the gas refunded from the Safe, and show it as paid from the Safe account in the history', async ({
     safePage,
     safeApiClient,
     journey,
@@ -52,7 +37,8 @@ test.describe('Pay from Safe', { tag: '@e2e' }, () => {
     const safeBalance = await balanceOf(journey.env, safe.address)
     await journey.connectAs('alice')
 
-    const review = await createTransfer(safePage, safe, recipient)
+    const review = new TxReviewPage(safePage)
+    await new SendTokensPage(safePage).reviewTransfer(safe, { recipient, amount: AMOUNT })
     await review.payFeesFromSafe()
     await expect(review.gasFeeRow).toContainText(FEE_SERVICE_MOCK_QUOTE.fiatFee)
     await review.sign()
@@ -63,11 +49,15 @@ test.describe('Pay from Safe', { tag: '@e2e' }, () => {
     await expect
       .poll(() => safeApiClient.findExecutedTransaction(safe.address, 0))
       .toMatchObject(SIGNED_WITH_QUOTED_FEES)
-    const refund = await refundPaidIn(journey.env, await executionTxHash(safeApiClient, safe.address, 0))
+    const refund = await refundPaidIn(journey.env, await safeApiClient.getExecutionTxHash(safe.address, 0))
     expect(refund).toBeGreaterThan(0n)
     expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
     expect(await balanceOf(journey.env, safe.address)).toBe(safeBalance - parseEther(AMOUNT) - refund)
     expect(await balanceOf(journey.env, owner)).toBe(0n)
+    const history = new TxHistoryPage(safePage)
+    await history.goto(safe.prefixedAddress)
+    await history.expand(history.transactionsLabelled('Sent'))
+    await expect(history.feesPayer).toHaveText('Paid from Safe account')
   })
 
   test('should keep the Safe as the payer for the owner who confirms and executes a 2/2 transfer without ETH', async ({
@@ -81,7 +71,8 @@ test.describe('Pay from Safe', { tag: '@e2e' }, () => {
     await emptyBalance(journey.env, executor)
     await journey.connectAs('alice')
 
-    const review = await createTransfer(safePage, safe, recipient)
+    const review = new TxReviewPage(safePage)
+    await new SendTokensPage(safePage).reviewTransfer(safe, { recipient, amount: AMOUNT })
     await review.payFeesFromSafe()
     await expect(review.gasFeeRow).toContainText(FEE_SERVICE_MOCK_QUOTE.fiatFee)
     await review.sign()
@@ -100,8 +91,44 @@ test.describe('Pay from Safe', { tag: '@e2e' }, () => {
     await expect
       .poll(() => safeApiClient.findExecutedTransaction(safe.address, 0))
       .toMatchObject(SIGNED_WITH_QUOTED_FEES)
-    expect(await refundPaidIn(journey.env, await executionTxHash(safeApiClient, safe.address, 0))).toBeGreaterThan(0n)
+    expect(await refundPaidIn(journey.env, await safeApiClient.getExecutionTxHash(safe.address, 0))).toBeGreaterThan(0n)
     expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
     expect(await balanceOf(journey.env, executor)).toBe(0n)
+  })
+
+  test('should lock the Safe account as the payer for the owner who signs and executes a transfer that a proposer proposed with the fees paid from the Safe', async ({
+    safePage,
+    safeApiClient,
+    journey,
+  }) => {
+    const recipient = Wallet.createRandom().address
+    const safe = await seedSafe(journey, { owners: ['alice'], threshold: 1 })
+    await seedProposer(safe, { delegate: journey.owners.dave, delegator: journey.owners.alice })
+    await waitForNativeBalance(safe)
+    const safeBalance = await balanceOf(journey.env, safe.address)
+    await journey.connectAs('dave')
+
+    const review = new TxReviewPage(safePage)
+    await new SendTokensPage(safePage).reviewTransfer(safe, { recipient, amount: AMOUNT })
+    await review.payFeesFromSafe()
+    await review.propose()
+    await expect.poll(async () => (await safeApiClient.getQueued(safe.address)).map(confirmationsOf)).toEqual([0])
+
+    await journey.connectAs('alice')
+    const queue = new TxQueuePage(safePage)
+    await queue.goto(safe.prefixedAddress)
+    await queue.confirm(0)
+    await expect(review.lockedFeePayer).toHaveText('Safe account')
+    await review.sign()
+    await review.executeButton.click()
+    await review.waitForExecution()
+
+    await expect
+      .poll(() => safeApiClient.findExecutedTransaction(safe.address, 0))
+      .toMatchObject(SIGNED_WITH_QUOTED_FEES)
+    const refund = await refundPaidIn(journey.env, await safeApiClient.getExecutionTxHash(safe.address, 0))
+    expect(refund).toBeGreaterThan(0n)
+    expect(await balanceOf(journey.env, recipient)).toBe(parseEther(AMOUNT))
+    expect(await balanceOf(journey.env, safe.address)).toBe(safeBalance - parseEther(AMOUNT) - refund)
   })
 })

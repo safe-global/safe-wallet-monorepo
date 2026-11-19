@@ -27,7 +27,6 @@ import * as useChains from '@/hooks/useChains'
 import { MockEip1193Provider } from '@/tests/mocks/providers'
 import { type SignerWallet } from '@/components/common/WalletProvider/WalletContext'
 import { type NestedWallet } from '@/utils/nested-safe-wallet'
-import { FEATURES } from '@safe-global/utils/utils/chains'
 import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { TxFlowContext, initialContext, type TxFlowContextType } from '@/components/tx-flow/TxFlowProvider'
@@ -1471,7 +1470,6 @@ describe('SignOrExecute hooks', () => {
       const payFromSafeChain = chainBuilder()
         .with({
           chainId: '1',
-          features: [FEATURES.GTF],
           relayer: {
             type: 'RELAY_FEE',
             safeCreationSponsored: false,
@@ -1498,14 +1496,6 @@ describe('SignOrExecute hooks', () => {
         safeLoaded: true,
       }))
     }
-
-    beforeEach(() => {
-      jest.spyOn(useChains, 'useHasFeature').mockImplementation((feature) => feature === FEATURES.GTF)
-    })
-
-    afterEach(() => {
-      jest.mocked(useChains.useHasFeature).mockRestore()
-    })
 
     it('invokes resolveFeeParams on first-signer sign when the Safe-pays guards pass', async () => {
       setupPayFromSafeChain()
