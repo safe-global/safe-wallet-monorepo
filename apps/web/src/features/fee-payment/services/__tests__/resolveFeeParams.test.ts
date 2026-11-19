@@ -170,6 +170,26 @@ describe('resolveFeeParams', () => {
     )
   })
 
+  it('throws when CGW quotes the fee in another gas token than the one picked', async () => {
+    mockInitiate.mockReturnValue({})
+    const otherToken = '0xdac17f958d2ee523a2206206994597c13d831ec7'
+    const dispatch = buildDispatch(
+      buildThunk(Promise.resolve({ ...previewResponse, txData: { ...previewResponse.txData, gasToken: otherToken } })),
+    )
+
+    const resolve = resolveFeeParams({
+      chainId: '1',
+      safeAddress: '0xsafe',
+      safeTx,
+      gasToken: previewResponse.txData.gasToken,
+      numberSignatures: 3,
+      dispatch,
+    })
+
+    await expect(resolve).rejects.toThrow('not in the gas token picked')
+    expect(mockCreateTx).not.toHaveBeenCalled()
+  })
+
   it('propagates errors from the preview dispatch', async () => {
     mockInitiate.mockReturnValue({ kind: 'thunk' })
     const dispatch = buildDispatch(buildThunk(Promise.reject(new Error('CGW 403'))))

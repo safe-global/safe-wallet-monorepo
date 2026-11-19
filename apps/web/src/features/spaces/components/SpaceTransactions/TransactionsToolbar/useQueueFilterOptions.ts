@@ -25,7 +25,7 @@ export const useQueueFilterOptions = (
   counts: SpaceQueueCounts | undefined,
   filters: SpaceQueueFilters,
   onFiltersChange: (filters: SpaceQueueFilters) => void,
-): Omit<QueueToolbarProps, 'action'> => {
+): Omit<QueueToolbarProps, 'action' | 'search' | 'groupBy'> => {
   const { configs } = useChains()
   const resolveSafeName = useSafeNameResolver()
   const chainIds = (counts?.chains ?? []).map(({ chainId }) => chainId)
