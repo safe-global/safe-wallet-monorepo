@@ -6,6 +6,8 @@ import decl from './remote-config.json'
 import schema from './remote-config.schema.json'
 import mobileDecl from '../../mobile/config/remote-config.json'
 import testChainFeatures from '../e2e/environment/infra/scripts/cfg_management/test-chain-features.json'
+import releasedWithoutE2e from '../e2e/environment/released-without-e2e.json'
+import { playwrightSpecs } from '../e2e/environment/playwright-specs.mjs'
 
 const enumKeys = new Set<string>(Object.values(FEATURES))
 const declaredKeys = decl.features.map((f) => f.key)
@@ -125,5 +127,39 @@ describe('E2E test-chain flags (test-chain-features.json)', () => {
   it('lists only declared or backend-only flags as on', () => {
     const unknown = onKeys.filter((k) => !declaredKeys.includes(k) && !BACKEND_ONLY_ON_KEYS.includes(k))
     expect(unknown).toEqual([])
+  })
+})
+
+describe('E2E coverage of released flags', () => {
+  const enabledKeys = decl.features.filter((f) => f.enabled).map((f) => f.key)
+  const specFlags: Record<string, string[]> = Object.fromEntries(
+    Object.entries(playwrightSpecs as Record<string, { flags?: string[] }>).map(([spec, entry]) => [
+      spec,
+      entry.flags ?? [],
+    ]),
+  )
+  const coveredKeys = new Set(Object.values(specFlags).flat())
+  const reasons: Record<string, string> = releasedWithoutE2e
+  const reasonKeys = Object.keys(reasons)
+
+  it('names only declared flags in the Playwright spec registry', () => {
+    const unknown = Object.entries(specFlags).flatMap(([spec, keys]) =>
+      keys.filter((k) => !declaredKeys.includes(k)).map((k) => `${spec}: ${k}`),
+    )
+    expect(unknown).toEqual([])
+  })
+
+  it('covers every released flag with a spec or gives a reason in released-without-e2e.json', () => {
+    const uncovered = enabledKeys.filter((k) => !coveredKeys.has(k) && !reasonKeys.includes(k))
+    expect(uncovered).toEqual([])
+  })
+
+  it('gives reasons only for released flags that no spec covers', () => {
+    const stale = reasonKeys.filter((k) => !enabledKeys.includes(k) || coveredKeys.has(k))
+    expect(stale).toEqual([])
+  })
+
+  it('gives a non-empty reason for every flag released without a spec', () => {
+    expect(reasonKeys.filter((k) => reasons[k].trim() === '')).toEqual([])
   })
 })

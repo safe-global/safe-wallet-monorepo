@@ -43,6 +43,13 @@ A flag with `"enabled": false` is off everywhere: reconcile does not create its
 is the place to confirm the definition of done, for example the E2E coverage. A flag
 shared with mobile must have the same `enabled` value in both files.
 
+The sync test requires E2E coverage for a released flag. Add the key to `flags` of the
+specs that cover the feature in
+[`playwright-specs.mjs`](../e2e/environment/playwright-specs.mjs). If no spec covers it,
+give the reason in
+[`released-without-e2e.json`](../e2e/environment/released-without-e2e.json), which QA or
+the web team must approve.
+
 After the release that contains the change, reconcile shows an `ADD`. For a
 `PER_CHAIN` flag, choose the chains in the admin or seed them with `defaultChains`.
 Changing `enabled` back to `false` makes reconcile offer to remove the row.
