@@ -1,16 +1,7 @@
 import { cgwClient } from '../cgwClient'
 import { SafesGetSafeOverviewV2ApiArg, SafesGetSafeOverviewV2ApiResponse } from '../AUTO_GENERATED/safes'
 import { addTagTypes } from '../AUTO_GENERATED/safes'
-
-function chunkArray<T>(array: T[], size: number): T[][] {
-  const chunks: T[][] = []
-  for (let i = 0; i < array.length; i += size) {
-    chunks.push(array.slice(i, i + size))
-  }
-  return chunks
-}
-
-const MAX_SAFES_PER_REQUEST = 10
+import { chunkArray, MAX_SAFES_PER_REQUEST } from '../chunkArray'
 
 export const additionalSafesRtkApi = cgwClient
   .enhanceEndpoints({

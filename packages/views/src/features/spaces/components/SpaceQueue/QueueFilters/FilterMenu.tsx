@@ -37,7 +37,7 @@ const FilterMenu = ({ status, safe, network, signer }: FilterMenuProps): ReactEl
     </DropdownMenuTrigger>
     <DropdownMenuContent align="start" className="min-w-44">
       <DropdownMenuSub>
-        <DropdownMenuSubTrigger>Status</DropdownMenuSubTrigger>
+        <DropdownMenuSubTrigger>Urgency</DropdownMenuSubTrigger>
         <DropdownMenuSubContent className="min-w-56">
           <StatusOptions {...status} />
         </DropdownMenuSubContent>
