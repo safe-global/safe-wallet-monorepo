@@ -13,9 +13,9 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/v2/chains/${queryArg.chainId}/safes/${queryArg.safeAddress}/collectibles`,
           params: {
+            cursor: queryArg.cursor,
             trusted: queryArg.trusted,
             exclude_spam: queryArg.excludeSpam,
-            cursor: queryArg.cursor,
           },
         }),
         providesTags: ['collectibles'],
@@ -28,9 +28,9 @@ export type CollectiblesGetCollectiblesV2ApiResponse = /** status 200  */ Collec
 export type CollectiblesGetCollectiblesV2ApiArg = {
   chainId: string
   safeAddress: string
+  cursor?: string
   trusted?: boolean
   excludeSpam?: boolean
-  cursor?: string
 }
 export type Collectible = {
   address: string

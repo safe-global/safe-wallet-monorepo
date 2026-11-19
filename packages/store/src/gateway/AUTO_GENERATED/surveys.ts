@@ -6,6 +6,10 @@ const injectedRtkApi = api
   })
   .injectEndpoints({
     endpoints: (build) => ({
+      surveysGetActiveSurveyV1: build.query<SurveysGetActiveSurveyV1ApiResponse, SurveysGetActiveSurveyV1ApiArg>({
+        query: (queryArg) => ({ url: `/v1/surveys/${queryArg.slug}` }),
+        providesTags: ['surveys'],
+      }),
       surveysGetStateV1: build.query<SurveysGetStateV1ApiResponse, SurveysGetStateV1ApiArg>({
         query: (queryArg) => ({ url: `/v1/spaces/${queryArg.spaceId}/surveys/${queryArg.slug}/state` }),
         providesTags: ['surveys'],
@@ -22,6 +26,10 @@ const injectedRtkApi = api
     overrideExisting: false,
   })
 export { injectedRtkApi as cgwApi }
+export type SurveysGetActiveSurveyV1ApiResponse = /** status 200  */ SurveyDto
+export type SurveysGetActiveSurveyV1ApiArg = {
+  slug: string
+}
 export type SurveysGetStateV1ApiResponse = /** status 200  */ SurveyStateDto
 export type SurveysGetStateV1ApiArg = {
   /** Space UUID to get survey state for */
@@ -92,5 +100,10 @@ export type SubmitSurveyResponseDto = {
     [key: string]: string[]
   }
 }
-export const { useSurveysGetStateV1Query, useLazySurveysGetStateV1Query, useSurveysSubmitResponseV1Mutation } =
-  injectedRtkApi
+export const {
+  useSurveysGetActiveSurveyV1Query,
+  useLazySurveysGetActiveSurveyV1Query,
+  useSurveysGetStateV1Query,
+  useLazySurveysGetStateV1Query,
+  useSurveysSubmitResponseV1Mutation,
+} = injectedRtkApi
