@@ -8,8 +8,9 @@ import { generateRandomArray } from '@/tests/builders/utils'
 import { type Eip1193Provider } from 'ethers'
 import { type ConnectedWallet } from '@/hooks/wallets/useOnboard'
 import { type ReactElement, useState } from 'react'
-import { WalletContext } from '@/components/common/WalletProvider'
-import { SafeTxContext, type SafeTxContextParams } from '@/components/tx-flow/SafeTxProvider'
+import { WalletContext } from '@/components/common/WalletProvider/WalletContext'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
+import type { SafeTxContextParams } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { type SafeSignature, type SafeTransaction } from '@safe-global/types-kit'
 import { safeSignatureBuilder, safeTxBuilder } from '@/tests/builders/safeTx'
 import { shortenAddress } from '@safe-global/utils/utils/formatters'
@@ -58,6 +59,7 @@ const TestWalletContextProvider = ({
           ? {
               connectedWallet,
               setSignerAddress,
+              getParentSafeNonce: () => undefined,
               setParentSafeNonce: jest.fn(),
               clearParentSafeNonce: jest.fn(),
               signer: {

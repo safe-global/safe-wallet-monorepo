@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react'
-import { createMockStory, getFixtureData } from '@/stories/mocks'
+import { createMockStory } from '@/stories/mocks/createMockStory'
+import { getFixtureData } from '@/stories/mocks/handlers'
 import ReplaceOwnerFlow from './index'
 
 const setup = createMockStory({ scenario: 'efSafe', wallet: 'owner', shadcn: true })

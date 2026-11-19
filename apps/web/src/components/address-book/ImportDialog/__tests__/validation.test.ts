@@ -43,6 +43,15 @@ describe('Address book import validation', () => {
       expect(hasValidAbHeader(header3)).toBe(false)
       expect(hasValidAbHeader(header4)).toBe(false)
     })
+
+    it('accepts a tags column after chainId', () => {
+      expect(hasValidAbHeader(['address', 'name', 'chainId', 'tags'])).toBe(true)
+    })
+
+    it('rejects any other extra column, or tags followed by more', () => {
+      expect(hasValidAbHeader(['address', 'name', 'chainId', 'note'])).toBe(false)
+      expect(hasValidAbHeader(['address', 'name', 'chainId', 'tags', 'note'])).toBe(false)
+    })
   })
 
   describe('hasValidAbEntryAddresses', () => {

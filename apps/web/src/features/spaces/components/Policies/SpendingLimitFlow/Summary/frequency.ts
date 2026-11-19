@@ -1,4 +1,4 @@
-import { getResetTimeOptions } from '@/features/spending-limits/constants'
+import { getResetTimeOptions } from '@/features/spending-limits/public/constants'
 import { CANONICAL_FREQUENCIES } from '@safe-global/views/features/spaces/components/Policies/SpendingLimitFlow/Summary/constants'
 
 type FrequencyDescription = {

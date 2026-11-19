@@ -7,7 +7,8 @@ import { useMemo, type ReactElement } from 'react'
 import ModalDialog from '@/components/common/ModalDialog'
 import { type AddressBookState, selectAllAddressBooks } from '@/store/addressBookSlice'
 import { useAppSelector } from '@/store'
-import { trackEvent, ADDRESS_BOOK_EVENTS } from '@/services/analytics'
+import { trackEvent } from '@/services/analytics'
+import { ADDRESS_BOOK_EVENTS } from '@/services/analytics/events/addressBook'
 import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import madProps from '@/utils/mad-props'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
@@ -34,24 +35,23 @@ export const _getCsvData = (addressBooks: AddressBookState): CsvData => {
   return csvData
 }
 
-function ExportDialog({
-  allAddressBooks,
-  handleClose,
-}: {
-  allAddressBooks: AddressBookState
+type CsvExportDialogProps = {
+  /** One object per CSV row; its keys are the columns. */
+  csvData: Record<string, string>[]
+  /** Without the `.csv` extension. */
+  filename: string
+  onExport?: () => void
   handleClose: () => void
-}): ReactElement {
-  const length = Object.values(allAddressBooks).reduce<number>((acc, entries) => acc + Object.keys(entries).length, 0)
-  const { CSVDownloader } = useCSVDownloader()
-  // safe-address-book-1970-01-01
-  const filename = `safe-address-book-${new Date().toISOString().slice(0, 10)}`
+}
 
-  const csvData = useMemo(() => _getCsvData(allAddressBooks), [allAddressBooks])
+export function CsvExportDialog({ csvData, filename, onExport, handleClose }: CsvExportDialogProps): ReactElement {
+  const length = csvData.length
+  const { CSVDownloader } = useCSVDownloader()
 
   const onSubmit = (e: SyntheticEvent) => {
     e.preventDefault()
 
-    trackEvent(ADDRESS_BOOK_EVENTS.EXPORT)
+    onExport?.()
 
     setTimeout(() => {
       handleClose()
@@ -90,6 +90,27 @@ function ExportDialog({
         </CSVDownloader>
       </div>
     </ModalDialog>
+  )
+}
+
+function ExportDialog({
+  allAddressBooks,
+  handleClose,
+}: {
+  allAddressBooks: AddressBookState
+  handleClose: () => void
+}): ReactElement {
+  const csvData = useMemo(() => _getCsvData(allAddressBooks), [allAddressBooks])
+  // safe-address-book-1970-01-01
+  const filename = `safe-address-book-${new Date().toISOString().slice(0, 10)}`
+
+  return (
+    <CsvExportDialog
+      csvData={csvData}
+      filename={filename}
+      onExport={() => trackEvent(ADDRESS_BOOK_EVENTS.EXPORT)}
+      handleClose={handleClose}
+    />
   )
 }
 

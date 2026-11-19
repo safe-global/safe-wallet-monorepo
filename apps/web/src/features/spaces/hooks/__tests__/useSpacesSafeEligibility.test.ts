@@ -14,7 +14,9 @@ jest.mock('@safe-global/store/gateway/AUTO_GENERATED/entitlements', () => ({
   useEntitlementsGetAllEntitlementsV1Query: (...args: unknown[]) =>
     mockUseEntitlementsGetAllEntitlementsV1Query(...args),
 }))
-jest.mock('../../constants', () => ({ SAFE_ACCOUNTS_LIMIT: 40 }))
+jest.mock('../../constants', () => ({
+  SAFE_ACCOUNTS_LIMIT: 40,
+}))
 
 const spaceId = faker.string.uuid()
 const otherSpaceId = faker.string.uuid()

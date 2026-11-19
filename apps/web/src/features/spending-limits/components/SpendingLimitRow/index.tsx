@@ -13,11 +13,14 @@ import ExternalLink from '@safe-global/views/components/common/ExternalLink'
 import css from './styles.module.css'
 import { TokenAmountFields } from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
 import { useContext, useEffect } from 'react'
-import { SafeTxContext } from '@/components/tx-flow/SafeTxProvider'
+import { SafeTxContext } from '@safe-global/views/components/tx-flow/SafeTxContext'
 import { useHasPermission } from '@/permissions/hooks/useHasPermission'
 import { Permission } from '@/permissions/config'
 import { HelpCenterArticle } from '@safe-global/utils/config/constants'
-import { TokenTransferType, MultiTransfersFields } from '@/components/tx-flow/flows/TokenTransfer'
+import {
+  TokenTransferType,
+  MultiTransfersFields,
+} from '@safe-global/views/components/tx-flow/flows/TokenTransfer/types'
 
 const SpendingLimitRow = ({
   availableAmount,

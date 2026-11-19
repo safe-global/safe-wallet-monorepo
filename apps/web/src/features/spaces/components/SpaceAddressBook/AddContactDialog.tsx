@@ -14,13 +14,13 @@ import type { Chain } from '@safe-global/store/gateway/AUTO_GENERATED/chains'
 import NetworkMultiSelectorInput from '@/components/common/NetworkSelector/NetworkMultiSelectorInput'
 import useChains from '@/hooks/useChains'
 import { DEFAULT_MAINNET_CHAIN_ID } from '@/config/constants'
-import { useCurrentSpaceId } from '@/features/spaces'
+import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
 import { showNotification } from '@/store/notificationsSlice'
 import { useAppDispatch } from '@/store'
 import { getRtkQueryErrorMessage } from '@/utils/rtkQuery'
 import type { FetchBaseQueryError } from '@reduxjs/toolkit/query'
 import type { SerializedError } from '@reduxjs/toolkit'
-import { isElevationRequiredError } from '@/features/oidc-auth/utils/elevation'
+import { isElevationRequiredError } from '@/features/oidc-auth/public/utils/elevation'
 import type { WorkspaceTag } from '@safe-global/views/features/spaces/components/AddressBookV2/types'
 import { tagNamesOf } from '../SpaceAddressBookV2/utils'
 import TagsField from './TagsField'
@@ -40,8 +40,12 @@ export type AddContactItem = {
   tags?: string[]
 }
 
+/** `lg` in the v2 address book toolbar; the v1 page keeps `action`. */
+export type TriggerSize = 'action' | 'lg'
+
 type AddContactDialogProps = {
   triggerLabel: string
+  triggerSize?: TriggerSize
   dialogTitle: string
   submitLabel?: string
   intro?: ReactNode
@@ -58,6 +62,7 @@ type AddContactDialogProps = {
 
 const AddContactDialog = ({
   triggerLabel,
+  triggerSize = 'action',
   dialogTitle,
   submitLabel = 'Add contact',
   intro,
@@ -154,7 +159,7 @@ const AddContactDialog = ({
 
   return (
     <>
-      <Button size="action" onClick={handleOpen}>
+      <Button size={triggerSize} onClick={handleOpen}>
         <Plus className="size-4 mr-1 text-green-500" />
         {triggerLabel}
       </Button>

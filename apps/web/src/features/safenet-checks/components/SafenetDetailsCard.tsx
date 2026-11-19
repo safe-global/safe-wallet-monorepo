@@ -10,8 +10,7 @@ import { Card } from '@safe-global/views/components/ui/card'
 import { Chip } from '@safe-global/views/components/ui/chip'
 import DateTime from '@/components/common/DateTime'
 import { cn } from '@safe-global/views/utils/cn'
-// eslint-disable-next-line no-restricted-imports -- deep import keeps this lazy chunk from pulling the whole safe-shield barrel
-import { SeverityIcon } from '@/features/safe-shield/components/SeverityIcon'
+import { SeverityIcon } from '@/features/safe-shield/public/components/SeverityIcon'
 import { Severity } from '@safe-global/utils/features/safe-shield/types'
 import {
   CheckStatus,

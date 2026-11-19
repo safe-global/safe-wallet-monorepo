@@ -5,9 +5,9 @@ import { Alert, AlertDescription } from '@safe-global/views/components/ui/alert'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Link } from '@safe-global/views/components/ui/link'
 import { sessionItem } from '@/services/local-storage/session'
-import { useCurrentSpaceId } from '../../hooks/useCurrentSpaceId'
+import { useCurrentSpaceId } from '../../public/hooks/useCurrentSpaceId'
 import { useSeatUpsell } from '../../hooks/useSeatUpsell'
-import { CONTACT_SALES_URL } from '@/features/spaces/constants'
+import { CONTACT_SALES_URL } from '../../constants'
 import {
   MixpanelEventParams,
   PlanSelectionEntryPoint,
@@ -16,7 +16,7 @@ import {
 } from '@/services/analytics/mixpanel-events'
 import { useTrackOnce } from '@/services/analytics/useTrackOnce'
 import { SAFE_PRO_EVENTS } from '@/services/analytics/events/safe-pro'
-import { trackPlanSelectionStarted } from '../Plans/planSelection'
+import { trackPlanSelectionStarted } from '../../public/services/planSelection'
 
 const PROMPT = {
   [MixpanelEventParams.FEATURE]: UpgradeFeature.SAFE_ACCOUNTS_LIMIT,

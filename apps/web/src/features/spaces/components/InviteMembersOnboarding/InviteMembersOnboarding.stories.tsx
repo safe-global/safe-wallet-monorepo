@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react'
 import { mswLoader } from 'msw-storybook-addon'
 import { userEvent, within } from 'storybook/test'
-import { MOCK_SPACE_ID, createMockStory } from '@/stories/mocks'
+import { MOCK_SPACE_ID } from '@/stories/mocks/ids'
+import { createMockStory } from '@/stories/mocks/createMockStory'
 import { INVALID_IDENTIFIER_ERROR } from '../AddMemberModal/utils'
 import InviteMembersOnboarding from '.'
 
