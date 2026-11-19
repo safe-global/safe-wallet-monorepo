@@ -44,6 +44,9 @@ export const NETWORK_PREFIXES = {
 /** The address of a prefixed Safe such as `sep:0x…` */
 export const safeAddress = (prefixedSafe: string): string => prefixedSafe.split(':')[1]
 
+/** The account that the stack's relay mock (environment/infra/mocks/relay-api.ts) sends every relayed transaction from */
+export const RELAYER = '0x5afe00000000000000000000000000000000beef'
+
 /** Fiat value below which "Hide small balances" hides a token — mirrors DUST_THRESHOLD in src/config/constants.ts */
 export const DUST_THRESHOLD_USD = 0.01
 
