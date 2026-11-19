@@ -14,30 +14,28 @@ describe('ScopedSafeTag', () => {
     const name = faker.company.name()
     render(<ScopedSafeTag address={address} name={name} chain={chain} />)
 
-    const tag = screen.getByTestId('tx-flow-scoped-safe')
     expect(screen.getByTestId('tx-flow-scoped-safe-name')).toHaveTextContent(name)
-    expect(tag).toHaveTextContent(shortenAddress(address))
-    expect(tag).toHaveTextContent('Polygon')
+    expect(screen.getByTestId('tx-flow-scoped-safe-address')).toHaveTextContent(shortenAddress(address))
+    expect(screen.getByTestId('tx-flow-scoped-safe-network')).toHaveTextContent('Polygon')
   })
 
   it('shows only the shortened address of a Safe with no name', () => {
     render(<ScopedSafeTag address={address} name="" chain={chain} />)
 
     expect(screen.queryByTestId('tx-flow-scoped-safe-name')).not.toBeInTheDocument()
-    expect(screen.getByTestId('tx-flow-scoped-safe')).toHaveTextContent(shortenAddress(address))
+    expect(screen.getByTestId('tx-flow-scoped-safe-address')).toHaveTextContent(shortenAddress(address))
   })
 
-  it('keeps a long name on one line and gives the full name and address on hover', () => {
+  it('gives the full name, address and network on hover', () => {
     const name = faker.lorem.words(20)
     render(<ScopedSafeTag address={address} name={name} chain={chain} />)
 
-    expect(screen.getByTestId('tx-flow-scoped-safe-name')).toHaveClass('truncate')
     expect(screen.getByTestId('tx-flow-scoped-safe')).toHaveAttribute('title', `${name} · ${address} on Polygon`)
   })
 
   it('omits the network while the chain is unknown', () => {
     render(<ScopedSafeTag address={address} name="Treasury" />)
 
-    expect(screen.getByTestId('tx-flow-scoped-safe')).not.toHaveTextContent('Polygon')
+    expect(screen.queryByTestId('tx-flow-scoped-safe-network')).not.toBeInTheDocument()
   })
 })

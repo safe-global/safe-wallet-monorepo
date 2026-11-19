@@ -72,18 +72,6 @@ describe('TxLayoutBase', () => {
     expect(screen.queryByTestId('tx-flow-scoped-safe-name')).not.toBeInTheDocument()
   })
 
-  it('keeps the title on one line beside the Safe of a Workspace flow', () => {
-    mockScope.current = { chainId: '137', safeAddress: checksumAddress(faker.finance.ethereumAddress()) }
-
-    render(
-      <TxLayoutBase title="Confirm transaction" step={0} stepCount={1} progress={100}>
-        <Step />
-      </TxLayoutBase>,
-    )
-
-    expect(screen.getByTestId('modal-title')).toHaveClass('shrink-0')
-  })
-
   it('does not name a Safe in a flow opened from the Safe itself', () => {
     render(
       <TxLayoutBase title="Confirm transaction" step={0} stepCount={1} progress={100}>
@@ -92,7 +80,6 @@ describe('TxLayoutBase', () => {
     )
 
     expect(screen.queryByTestId('tx-flow-scoped-safe')).not.toBeInTheDocument()
-    expect(screen.getByTestId('modal-title')).not.toHaveClass('shrink-0')
   })
 
   it('renders the title and the current step content', () => {

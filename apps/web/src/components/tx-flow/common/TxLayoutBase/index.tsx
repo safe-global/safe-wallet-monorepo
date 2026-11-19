@@ -153,11 +153,7 @@ const TxLayoutBase = ({
             {/* Main content */}
             <div className="min-w-0 flex-grow min-[900px]:max-w-[672px]">
               <div className={css.titleWrapper}>
-                <Typography
-                  data-testid="modal-title"
-                  variant="h3"
-                  className={classnames('font-bold', css.title, scope && 'shrink-0')}
-                >
+                <Typography data-testid="modal-title" variant="h3" className={classnames('font-bold', css.title)}>
                   {title}
                 </Typography>
                 {scope && <ScopedSafe safeAddress={scope.safeAddress} chainId={scope.chainId} />}
