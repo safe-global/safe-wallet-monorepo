@@ -261,6 +261,10 @@ export const SPACE_EVENTS = {
     action: 'Pending TX widget clicked',
     category: SPACE_CATEGORY,
   },
+  PENDING_TX_WIDGET_VIEW_ALL_CLICKED: {
+    action: 'Pending TX widget view all clicked',
+    category: SPACE_CATEGORY,
+  },
   TRANSACTION_INITIATED: {
     action: 'Transaction initiated',
     category: SPACE_CATEGORY,

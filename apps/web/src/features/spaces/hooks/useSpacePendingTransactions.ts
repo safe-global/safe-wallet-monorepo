@@ -39,11 +39,12 @@ export const useSpacePendingTransactions = (limit = 3) => {
       .slice(0, limit)
   }, [page, limit])
 
-  if (hasSpaceQueue === false) return perSafe
+  if (hasSpaceQueue === false) return { ...perSafe, totalCount: undefined }
 
   return {
     transactions,
     count: transactions.length,
+    totalCount: page ? Math.max(page.count ?? transactions.length, transactions.length) : undefined,
     isLoading: hasSpaceQueue === undefined || !spaceId || (spaceQueue.isFetching && !page),
     error: spaceQueue.isError ? 'Failed to load pending transactions' : undefined,
     refetch: () => {
