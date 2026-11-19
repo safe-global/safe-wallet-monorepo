@@ -111,7 +111,7 @@ export const AppsV1View = ({
     openPreviewDrawer(app)
   }
 
-  const onOpen = (row: AppRow) => {
+  const openBuiltIn = (row: AppRow) => {
     if (row.builtIn === 'treasury') {
       router.push({ pathname: AppRoutes.earn, query: router.query })
       return
@@ -119,10 +119,13 @@ export const AppsV1View = ({
     if (row.builtIn) {
       setHubTab(row.builtIn)
       setIsMoving(true)
-      return
     }
-    if (!row.app) return
-    if (!isKnown(row.app)) return openPreviewDrawer(row.app)
+  }
+
+  const onSelect = (row: AppRow) => (row.app ? openPreviewDrawer(row.app) : openBuiltIn(row))
+
+  const onOpen = (row: AppRow) => {
+    if (!row.app) return openBuiltIn(row)
     launch(row.app)
     router.push(getSafeAppUrl(router, safeLinkQuery, row.app.url))
   }
@@ -155,7 +158,14 @@ export const AppsV1View = ({
       />
 
       {view === 'table' ? (
-        <AppsTable groups={groups} isPinned={isPinned} onOpen={onOpen} onTogglePin={togglePin} chainName={chainName} />
+        <AppsTable
+          groups={groups}
+          isPinned={isPinned}
+          onSelect={onSelect}
+          onOpen={onOpen}
+          onTogglePin={togglePin}
+          chainName={chainName}
+        />
       ) : (
         <AppsGrid
           groups={groups}

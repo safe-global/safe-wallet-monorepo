@@ -1,5 +1,5 @@
 import { Fragment, type MouseEvent } from 'react'
-import { Info } from 'lucide-react'
+import { ArrowUpRight, Info } from 'lucide-react'
 import { Button } from '@safe-global/views/components/ui/button'
 import { TableBody, TableCell, TableHead, TableHeader, TableRow } from '@safe-global/views/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
@@ -13,7 +13,7 @@ import { AppBadge, AppIcon, NetworkLogos, PinButton } from './AppParts'
 const COPY = APPS_V1_COPY
 const WIDE_CELL = 'hidden md:table-cell'
 // Phones hide the middle cells, so the Open cell moves into the second column
-const COLUMN_WIDTHS = ['', 'w-28 md:w-[36%]', 'w-0 md:w-28', 'w-0 md:w-24', 'w-0 md:w-28']
+const COLUMN_WIDTHS = ['', 'w-24 md:w-[32%]', 'w-0 md:w-28', 'w-0 md:w-24', 'w-0 md:w-48']
 const users = new Intl.NumberFormat('en-US')
 
 const ColumnHeaders = () => (
@@ -41,17 +41,19 @@ const ColumnHeaders = () => (
 const AppRowView = ({
   row,
   pinned,
+  onSelect,
   onOpen,
   onTogglePin,
   chainName,
 }: {
   row: AppRow
   pinned: boolean
+  onSelect: (row: AppRow) => void
   onOpen: (row: AppRow) => void
   onTogglePin?: () => void
   chainName: (chainId: string) => string
 }) => (
-  <TableRow className="group/row cursor-pointer" onClick={() => onOpen(row)} data-testid={`app-row-${row.id}`}>
+  <TableRow className="group/row cursor-pointer" onClick={() => onSelect(row)} data-testid={`app-row-${row.id}`}>
     <TableCell>
       <div className="flex min-w-0 items-center gap-3">
         <AppIcon row={row} />
@@ -91,7 +93,14 @@ const AppRowView = ({
           }}
           data-testid={`open-${row.id}`}
         >
-          {COPY.open}
+          {row.app ? (
+            <>
+              <span className="max-md:sr-only">{COPY.openApp}</span>
+              <ArrowUpRight />
+            </>
+          ) : (
+            COPY.open
+          )}
         </Button>
       </div>
     </TableCell>
@@ -101,17 +110,19 @@ const AppRowView = ({
 export const AppsTable = ({
   groups,
   isPinned,
+  onSelect,
   onOpen,
   onTogglePin,
   chainName,
 }: {
   groups: AppGroup[]
   isPinned: (row: AppRow) => boolean
+  onSelect: (row: AppRow) => void
   onOpen: (row: AppRow) => void
   onTogglePin: (row: AppRow) => void
   chainName: (chainId: string) => string
 }) => (
-  <TableCard label={COPY.tableLabel} widths={COLUMN_WIDTHS} className="md:min-w-[880px]">
+  <TableCard label={COPY.tableLabel} widths={COLUMN_WIDTHS} className="md:min-w-[920px]">
     <ColumnHeaders />
     <TableBody data-testid="apps-table">
       {groups.length === 0 && (
@@ -129,6 +140,7 @@ export const AppsTable = ({
               key={row.id}
               row={row}
               pinned={isPinned(row)}
+              onSelect={onSelect}
               onOpen={onOpen}
               onTogglePin={row.app && !row.custom ? () => onTogglePin(row) : undefined}
               chainName={chainName}

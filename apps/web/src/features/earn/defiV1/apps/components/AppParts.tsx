@@ -1,11 +1,13 @@
 import type { MouseEvent } from 'react'
-import { Orbit, Pin, Repeat2, Sprout, type LucideIcon } from 'lucide-react'
+import { Orbit, Repeat2, Sprout, type LucideIcon } from 'lucide-react'
 import SafeAppIconCard from '@safe-global/views/components/safe-apps/SafeAppIconCard'
 import { Avatar, AvatarFallback, AvatarImage } from '@safe-global/views/components/ui/avatar'
 import { Badge } from '@safe-global/views/components/ui/badge'
 import { Button } from '@safe-global/views/components/ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@safe-global/views/components/ui/tooltip'
 import { cn } from '@safe-global/views/utils/cn'
+import BookmarkIcon from '@/public/images/apps/bookmark.svg'
+import BookmarkedIcon from '@/public/images/apps/bookmarked.svg'
 import type { AppRow, BuiltIn } from '../catalogue'
 import { APPS_V1_COPY } from '../copy'
 
@@ -72,7 +74,11 @@ export const PinButton = ({ row, pinned, onToggle }: { row: AppRow; pinned: bool
         onToggle()
       }}
     >
-      <Pin className={cn(pinned && 'fill-current')} />
+      {pinned ? (
+        <BookmarkedIcon className="size-4 fill-current text-foreground" />
+      ) : (
+        <BookmarkIcon className="size-4 text-[var(--color-border-main)]" />
+      )}
     </Button>
   </span>
 )

@@ -28,6 +28,7 @@ export const APPS_V1_COPY = {
   usersHint: 'Relative use in the last 90 days',
   badges: { 'built-in': 'Built in', safe: 'Safe' },
   open: 'Open',
+  openApp: 'Open Safe App',
   pin: (name: string) => `Pin ${name}`,
   unpin: (name: string) => `Unpin ${name}`,
   noMatches: 'No apps match these filters',
