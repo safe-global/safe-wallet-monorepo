@@ -4755,6 +4755,8 @@ exports[`./Drawer.stories SignaturesFooter 1`] = `
               <section
                 aria-label="Signatures"
                 class="flex flex-col"
+                data-open=""
+                data-slot="collapsible"
               >
                 <div
                   class="flex items-center gap-2"
@@ -4813,15 +4815,19 @@ exports[`./Drawer.stories SignaturesFooter 1`] = `
                     6 days left
                   </span>
                   <button
-                    aria-controls="_r_3e_"
+                    aria-controls="base-ui-_r_3e_"
+                    aria-disabled="false"
                     aria-expanded="true"
                     aria-label="Hide signatures"
-                    class="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none text-muted-foreground hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm"
+                    data-panel-open=""
+                    data-slot="collapsible-trigger"
+                    tabindex="0"
                     type="button"
                   >
                     <svg
                       aria-hidden="true"
-                      class="lucide lucide-chevron-down size-4"
+                      class="lucide lucide-chevron-down"
                       fill="none"
                       height="24"
                       stroke="currentColor"
@@ -4840,7 +4846,10 @@ exports[`./Drawer.stories SignaturesFooter 1`] = `
                 </div>
                 <div
                   class="min-h-0 overflow-y-auto pr-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border max-h-[28vh] flex-none overscroll-contain pt-3"
-                  id="_r_3e_"
+                  data-open=""
+                  data-slot="collapsible-content"
+                  id="base-ui-_r_3e_"
+                  style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                 >
                   <ul
                     class="flex flex-col gap-3"
@@ -5306,6 +5315,8 @@ exports[`./Drawer.stories SignaturesNotSigner 1`] = `
               <section
                 aria-label="Signatures"
                 class="flex flex-col"
+                data-closed=""
+                data-slot="collapsible"
               >
                 <div
                   class="flex items-center gap-2"
@@ -5324,15 +5335,17 @@ exports[`./Drawer.stories SignaturesNotSigner 1`] = `
                     class="flex-1"
                   />
                   <button
-                    aria-controls="_r_3m_"
+                    aria-disabled="false"
                     aria-expanded="false"
                     aria-label="Show signatures"
-                    class="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none text-muted-foreground hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm"
+                    data-slot="collapsible-trigger"
+                    tabindex="0"
                     type="button"
                   >
                     <svg
                       aria-hidden="true"
-                      class="lucide lucide-chevron-up size-4"
+                      class="lucide lucide-chevron-up"
                       fill="none"
                       height="24"
                       stroke="currentColor"
@@ -5356,8 +5369,11 @@ exports[`./Drawer.stories SignaturesNotSigner 1`] = `
                 </p>
                 <div
                   class="min-h-0 overflow-y-auto pr-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border max-h-[28vh] flex-none overscroll-contain pt-3"
+                  data-closed=""
+                  data-slot="collapsible-content"
                   hidden=""
-                  id="_r_3m_"
+                  id="base-ui-_r_3m_"
+                  style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                 >
                   <ul
                     class="flex flex-col gap-3"
@@ -5722,6 +5738,8 @@ exports[`./Drawer.stories SignaturesThresholdMet 1`] = `
               <section
                 aria-label="Signatures"
                 class="flex flex-col"
+                data-open=""
+                data-slot="collapsible"
               >
                 <div
                   class="flex items-center gap-2"
@@ -5742,15 +5760,19 @@ exports[`./Drawer.stories SignaturesThresholdMet 1`] = `
                     class="flex-1"
                   />
                   <button
-                    aria-controls="_r_3s_"
+                    aria-controls="base-ui-_r_3s_"
+                    aria-disabled="false"
                     aria-expanded="true"
                     aria-label="Hide signatures"
-                    class="flex size-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+                    class="focus-visible:border-ring cursor-pointer focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:cursor-not-allowed disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none text-muted-foreground hover:bg-muted hover:text-foreground dark:hover:bg-muted/50 aria-expanded:bg-muted aria-expanded:text-foreground size-8 in-data-[slot=button-group]:rounded-sm"
+                    data-panel-open=""
+                    data-slot="collapsible-trigger"
+                    tabindex="0"
                     type="button"
                   >
                     <svg
                       aria-hidden="true"
-                      class="lucide lucide-chevron-down size-4"
+                      class="lucide lucide-chevron-down"
                       fill="none"
                       height="24"
                       stroke="currentColor"
@@ -5769,7 +5791,10 @@ exports[`./Drawer.stories SignaturesThresholdMet 1`] = `
                 </div>
                 <div
                   class="min-h-0 overflow-y-auto pr-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border max-h-[28vh] flex-none overscroll-contain pt-3"
-                  id="_r_3s_"
+                  data-open=""
+                  data-slot="collapsible-content"
+                  id="base-ui-_r_3s_"
+                  style="--collapsible-panel-height: auto; --collapsible-panel-width: auto;"
                 >
                   <ul
                     class="flex flex-col gap-3"
@@ -5948,6 +5973,11 @@ exports[`./Drawer.stories SignaturesThresholdMet 1`] = `
                         >
                           (you)
                         </span>
+                      </span>
+                      <span
+                        class="sr-only"
+                      >
+                        Not needed
                       </span>
                     </li>
                   </ul>
