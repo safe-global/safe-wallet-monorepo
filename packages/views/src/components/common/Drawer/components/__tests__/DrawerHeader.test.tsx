@@ -81,4 +81,30 @@ describe('DrawerHeader', () => {
     expect(onBack).toHaveBeenCalledTimes(1)
     expect(onCopy).toHaveBeenCalledTimes(1)
   })
+
+  it('names the drawer with its title as a heading', () => {
+    render(
+      <Drawer open onClose={jest.fn()}>
+        <DrawerHeader title="Allowlist" />
+      </Drawer>,
+    )
+
+    expect(screen.getByRole('heading', { level: 2, name: 'Allowlist' })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Allowlist' })).toBeInTheDocument()
+  })
+
+  it('shows key hints for previous and next only when the page passes them', () => {
+    const navigation = { onPrevious: jest.fn(), onNext: jest.fn(), hasPrevious: true, hasNext: true }
+    const { rerender } = render(<DrawerHeader title="Transaction" navigation={navigation} />)
+
+    fireEvent.focus(screen.getByRole('button', { name: 'Next' }))
+
+    expect(document.querySelector('[data-slot=tooltip-content]')).toHaveTextContent(/^Next$/)
+
+    rerender(
+      <DrawerHeader title="Transaction" navigation={{ ...navigation, shortcuts: { previous: 'K', next: 'J' } }} />,
+    )
+
+    expect(document.querySelector('[data-slot=tooltip-content]')).toHaveTextContent('NextJ')
+  })
 })
